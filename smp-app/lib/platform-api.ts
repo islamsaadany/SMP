@@ -216,7 +216,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
           company: g.units[k].company && g.companies[g.units[k].company]
             ? g.companies[g.units[k].company].name : "" })),
         functions: (g.functionKeys || []).map((k: string) => ({
-          name: g.functions[k].name, format: g.functions[k].format === "pillars" ? "pillars" : "projects" })),
+          /* §338: and the third form, or a client shaped that way reads back
+             as a projects function and the next save writes that answer over
+             the one somebody chose. */
+          name: g.functions[k].name,
+          format: g.functions[k].format === "pillars" ? "pillars"
+                : g.functions[k].format === "objectives" ? "objectives" : "projects" })),
         words: (g.labels || []).reduce((o: Record<string, string>, e: { key: string; bu: string }) => {
           o[e.key] = e.bu; return o; }, {})
       };

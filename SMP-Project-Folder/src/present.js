@@ -734,6 +734,12 @@ function deckSlidesFn(subject){
   var f = isCap ? cap : FUNCTIONS[fk];
   var caps = capsShown(target);
   var realCaps = isCap ? [] : capsOfFunction(fk);
+  /* §338: a function that plans in objectives and actions. The deck is the
+     same deck — one builder, because a second one is what §296 and §305 each
+     measured the cost of and refused — and what changes is the ONE slide that
+     lists the work: Actions where a projects holder lists Projects, with no
+     per-project sections behind it because there are none. */
+  var objMode = plansInObjectives(target);
   var S = [];
 
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
@@ -750,8 +756,14 @@ function deckSlidesFn(subject){
       ? 'Capability review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
-        plural(caps.reduce(function(n, c){
-          return n + ((c.projects || []).length); }, 0), "project")) + '</p></section>');
+        (objMode
+          /* §338: the cover says what the deck holds, which is the whole of
+             §326's argument one format along — "0 projects" over a plan made
+             of objectives and actions names a thing that does not exist. */
+          ? plural(SMPRules.shown(caps.reduce(function(a2, c){
+              return a2.concat(c.actions || []); }, [])).length, "action")
+          : plural(caps.reduce(function(n, c){
+              return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -798,6 +810,34 @@ function deckSlidesFn(subject){
         '<th class="num">Weight</th><th class="num">Annual target</th>' +
         '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
         '<tbody>' + kRows + '</tbody></table></section>');
+    }
+
+    if (objMode) {
+      var acts = SMPRules.shown(c.actions);
+      var aRows = acts.map(function(a3, i){
+        var v = msReads(a3);
+        return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+          '<b>' + esc(a3.name) + '</b>' +
+          (a3.owner ? '<span class="dsub">' + esc(a3.owner) + '</span>' : '') + '</td>' +
+          '<td class="num">' + esc(a3.due || "\u2014") + '</td>' +
+          '<td class="num">' + esc(msStatusWord(a3.status) || "\u2014") + '</td>' +
+          '<td class="num final ' + dBand(v) + '">' +
+            (statusPending(a3) ? '<span class="missing">Needs a %</span>' : dPct(v)) +
+          '</td>' +
+          (a3.note ? '<td class="dnote">' + esc(a3.note) + '</td>'
+                   : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      var tal = fnActionsTally(c.fn);
+      S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 actions") +
+        '><h2>Actions<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Action</th>' +
+        '<th class="num">Due</th><th class="num">Status</th>' +
+        '<th class="num">Progress</th><th>Note</th></tr></thead>' +
+        '<tbody>' + (aRows || '<tr><td colspan="6">No actions yet.</td></tr>') + '</tbody></table>' +
+        '<p class="headfoot">' + tal.done + ' of ' + tal.total + ' done' +
+          (tal.pending ? ' &middot; ' + tal.pending + ' said In progress with no per-cent' : '') +
+          '. Actions are counted, never scored into the objectives.</p></section>');
+      return;
     }
 
     var pRows = c.projects.map(function(p, i){

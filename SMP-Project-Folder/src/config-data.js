@@ -4039,6 +4039,52 @@ function capExec(c){
            pending: total - scored,
            pct: scored ? Math.round(sum / scored) : null };
 }
+/* ── THE TWO NUMBERS AN OBJECTIVES FUNCTION READS (§338) ───────────────────
+   From the mockup Islam signed off, and it is a decision rather than an
+   implementation detail: *"Actions are counted, not scored into the
+   objectives. The two cards read separately, as they do on every other page:
+   what was committed to, and whether the work happened."*
+
+   SO NEITHER IS NEW ARITHMETIC. The objectives half is `capKOScore` — the
+   function's own key objectives, weighted, through `measureScore` — asked of
+   the holder rather than reimplemented, so a change to how an objective
+   scores reaches this card the day it is made (§53.5). The actions half is
+   `projMilestones` + `capExec`'s own pair of walks with one list in place of
+   many: an action halfway through a sentence with no per-cent LEAVES the
+   average rather than being read as nought (§104.10), and is COUNTED as
+   outstanding so the card can say why the figure rose (§106). */
+function fnActionsTally(fk){
+  var list = SMPRules.shown(fnActions(fk));
+  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  list.forEach(function(a){
+    if (a.status === "done") done++;
+    else if (a.status === "wip") wip++;
+    else todo++;
+    if (statusPending(a)) return;
+    scored++; sum += msReads(a) || 0;
+  });
+  return { done: done, wip: wip, todo: todo, total: list.length,
+           pending: list.length - scored,
+           pct: scored ? Math.round(sum / scored) : null };
+}
+function fnObjScore(fk){
+  var h = fnOwnHolder(fk);
+  return h ? capKOScore(h) : null;
+}
+/* What an objectives function is asked for this cycle: every objective, and
+   every action whose time has come — the same test a milestone's date gets
+   (§104.8: not due is a LABEL, so a row reported early still counts). */
+function fnObjReported(fk){
+  var h = fnOwnHolder(fk), done = 0, total = 0;
+  SMPRules.shown(h ? h.keyObjectives : []).forEach(function(m){
+    total++; if (m.actual != null && m.actual !== "") done++;
+  });
+  SMPRules.shown(fnActions(fk)).forEach(function(a){
+    if (!dueThisCycle(a.due) && !a.status) return;
+    total++; if (a.status && !statusPending(a)) done++;
+  });
+  return { done: done, total: total };
+}
 function capDeliverySide(c){ return sideAvg((c.projects || []).map(projDeliverySide)); }
 function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSide)); }
 
@@ -4510,9 +4556,14 @@ function clearCapability(cap, what, why){
        capability's identity, not its plan. */
     if (cap.keyObjectives) cap.keyObjectives.length = 0;
     if (cap.projects) cap.projects.length = 0;
+    if (cap.actions) cap.actions.length = 0;          /* §338 */
     return archived;
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
+  /* §338: an action's figures clear with everything else's — the cycle asks
+     every subject again (§49.1), and a format whose rows survived it would
+     open a new cycle already reporting. */
+  (cap.actions || []).forEach(function(a){ a.status = null; a.pct = null; a.note = ""; });
   (cap.projects || []).forEach(function(p){
     (p.deliverables || []).forEach(function(d){ d.status = null; d.pct = null; d.note = ""; });
     (p.outcomes || []).forEach(function(o){ o.actual = null; o.progress = null; o.note = ""; });
@@ -5077,6 +5128,16 @@ function fnReportItems(subject){
     SMPRules.shown(c.keyObjectives).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
                  place:koPlace });
+    });
+    /* §338: AND ITS ACTIONS. One walk, so the reporting count, the note rule,
+       the In-progress rule, Submit's refusal and §279's bar all learn the new
+       row at once — building a second list for them is how the two halves of
+       one page come to disagree about what is owed (§53.5, §105.4). Asked
+       exactly as a milestone is, by its date (§104.8: not due is a LABEL, so
+       a row answered early still counts). */
+    SMPRules.shown(c.actions).forEach(function(a){
+      out.push({ id:a.id, obj:a, kind:"action", group:c.name, sub:"",
+                 asked:dueThisCycle(a.due), owner:a.owner, place:koPlace });
     });
     (c.projects || []).forEach(function(p){
       var head = c.name + " \u00b7 " + (p.code || p.name);
@@ -6817,6 +6878,17 @@ function gapMap(target, all, fillable){
       (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
     });
     entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
+    /* §338: THE ACTIONS ARE ONE PLACE AND ONE CHIP, on the Plan section where
+       they are drawn and filled. Without this the page prints the red word on
+       a row nobody owns and the band above it counts nought, which is §223's
+       fault exactly — a mark with no count behind it, and no door to the
+       control that clears it. */
+    var acts = 0;
+    list.forEach(function(c){
+      (c.actions || []).forEach(function(a){
+        acts += G("k_proj", { row: a }, "action", a); });
+    });
+    if (acts) entry("act", "Actions", acts, { sec: "proj", page: "plan" });
     list.forEach(function(c){
       (c.projects || []).forEach(function(p){
         /* The projects rail is per HOLDER (railKeyFor), and it selects by
@@ -7088,9 +7160,75 @@ function projCode(owner, p){
    count as Units"). So a pillars function carries `items[]` of exactly the
    shape a unit's pillars have and is drawn by the unit's own pages — two
    screens doing the same job are one screen with different content (A13). */
-function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projects"; }
+/* ── A THIRD WAY A FUNCTION PLANS (§338, spec 049) ─────────────────────────
+   Islam: *"each function has objectives like the measures we have and actions
+   like tactics they work on that has due dates"* — and then, of the three
+   shapes drawn for him in the platform's own pages, *"we need to build the
+   objectives and actions."*
+
+   `format` HELD TWO VALUES BY CONSTRUCTION, which is why a third could not
+   simply be stored: this was a ternary collapsing anything that is not
+   "pillars" into "projects", and so was `capFormat` beside it and the minter
+   in builder.js. So a function whose plan is a list of numbers it owes and a
+   list of things it is doing had to be forced into one of the two, and both
+   cost it something — pillars invents a layer of grouping nobody agreed,
+   projects invents deliverables and milestones under work that has neither.
+
+   `projects` REMAINS THE FALLBACK for an absent or unrecognised value, which
+   is what every function stored before today reads as (§96.2), and the two
+   existing keys do not move (§30.2 — renaming a stored key is a migration for
+   a word nobody reads). */
+/* THE THREE WAYS A SUPPORTING FUNCTION PLANS, NAMED ONCE (§338, spec 049).
+   A list rather than a chain of `||`, because a fourth form is then added in
+   ONE place and every reader follows — which is the fault §276's four compile
+   rules and §168's scoring bands each record from the other side. `projects`
+   is IN it, so a stored "projects" reads as itself; anything absent or
+   unrecognised falls through to it, which is what keeps a value written by a
+   later build (§96.2) and a tenant that never chose one (§30.2) reading
+   exactly as they did before this existed. */
+var FN_FORMATS = ["pillars", "projects", "objectives"];
+function fnFormatOr(v){
+  return FN_FORMATS.indexOf(String(v)) > -1 ? String(v) : "projects";
+}
+function fnFormat(f){ return fnFormatOr(f && f.format); }
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
+function fnPlansInObjectives(f){ return fnFormat(f) === "objectives"; }
+/* THE ONE TEST FOR "DRAWN AS A HOLDER OF PROJECTS", because every site that
+   meant it spelled it `!fnPlansInPillars(f)` — true of the new format too, so
+   an objectives function would have been offered a project rail, a place to
+   put its first project and a promote control, all for work it does not have
+   (§61 from the other side: a control with nothing behind it). */
+function fnPlansInProjects(f){ return fnFormat(f) === "projects"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
+/* ── AN ACTION (§338) ──────────────────────────────────────────────────────
+   A milestone row with a DATE where a tactic has quarters:
+
+       { id, name, owner, due, status, pct, note }
+
+   Answered in the product's own three words — Not started · In progress with a
+   per-cent · Done (§300, §104.10) — and the date is PICKED, a month and a
+   year, never typed (§177: `24/07/2026` reads as null in every comparison the
+   platform makes). Nothing here is a new kind of row; what is new is a
+   function holding one directly, with no pillar and no project in between.
+
+   IT RIDES `functions.extra`, the road `projects`, `items`, `swot` and `def`
+   already travel (§118, §213, §326) — so no schema change and no migration,
+   asserted rather than claimed (§172, which this project has got wrong once
+   before). A reader hands out a shared frozen empty and the writer mints the
+   container (§50.6): a reader must never create the field it was looking for,
+   or every save carries a phantom change. */
+function fnActions(fk){
+  var f = FUNCTIONS[fk];
+  return (f && fnPlansInObjectives(f) && Array.isArray(f.actions))
+    ? f.actions : FN_NO_ROWS;
+}
+function fnActionsWritable(fk){
+  var f = FUNCTIONS[fk];
+  if (!f || !fnPlansInObjectives(f)) return null;
+  if (!Array.isArray(f.actions)) f.actions = [];
+  if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
+  return f.actions;
+}
 
 /* A STORED LIST NEVER HOLDS A HOLE (§118). A pillars function's plan rides in
    one JSON blob (functions.extra), and JSON writes an array hole or an
@@ -7228,6 +7366,17 @@ function plansInPillars(target){
   if (t.indexOf("cap:") === 0) return capPlansInPillars(capOfTarget(t));
   if (t.indexOf("fn:") !== 0) return !!UNITS[t];
   return fnPlansInPillars(FUNCTIONS[t.slice(3)]);
+}
+/* And whether it is drawn by the objectives-and-actions pages (§338). A
+   capability is deliberately NOT offered this format: Islam's word was about a
+   FUNCTION ("three ways a function plans"), and a capability that is planned
+   as a pillar already holds measures and tactics directly — so this answers
+   false for one rather than reading `capFormat`, which would silently accept a
+   stored value nothing can set. */
+function plansInObjectives(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") !== 0) return false;
+  return fnPlansInObjectives(FUNCTIONS[t.slice(3)]);
 }
 
 function pillarCarrier(p){
@@ -7571,6 +7720,20 @@ function dxSwitchKind(p, id, want){
   src.splice(i, 1);
   return made;
 }
+/* §338: AN ACTION, minted on the FUNCTION rather than on a project — the
+   container is minted first (§129's audit: a reading view hands out a frozen
+   empty, so a first add is accepted on screen and written nowhere). The id is
+   minted from the MAXIMUM, never from the count (§96.2): remove the middle of
+   three and add, and a count-derived id collides with a row still on screen —
+   and an id is what every reported figure is keyed on (§48). */
+function addAction(fk){
+  var list = fnActionsWritable(fk);
+  if (!list) return null;
+  var a = { id: mintRowId(list, "fn:" + fk + "-A"), name: "", owner: "",
+            due: "", status: "" };
+  list.push(a);
+  return a;
+}
 function addMilestone(p){
   if (!p) return null;
   var m = { id: mintRowId(p.milestones, p.id + "-M"), name: "", covers: "",
@@ -7662,6 +7825,10 @@ function listById(kind, id){
     });
     return out;
   }
+  /* §338: an action belongs to a HOLDER, not to a project — so the walk below
+     would look at every project's `actions`, find none, and answer null, and
+     `removeRowById(null, id)` is a press that does nothing (§96's family). */
+  if (kind === "actions") { eachHolder(function(h){ look(h.actions); }); return out; }
   eachProject(function(p){ look(p[kind]); });
   return out;
 }
@@ -7728,7 +7895,12 @@ function unitPlanSnapshot(u){
            keyObjectives:clone(u.keyObjectives), swot:clone(u.swot), items:clone(u.items) };
 }
 function capPlanSnapshot(c){
+  /* §338: AND ITS ACTIONS, or a function that plans in objectives archives a
+     plan with the half that is its plan missing — and `planIsEmpty` below
+     would then refuse to take the archive at all, so the switch that ARCHIVES
+     the standing plan (§318 §6.2) would quietly destroy it. */
   return { def:c.def, keyObjectives:clone(c.keyObjectives || []),
+           actions:clone(c.actions || []),
            projects:clone(c.projects || []) };
 }
 
@@ -7756,8 +7928,10 @@ function capSnapshotCounts(s){
     (p.deliverables || []).forEach(function(x){ if (x.actual != null) rep++; });
   });
   (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
+  (s.actions || []).forEach(function(x){ if (x.status) rep++; });
   return { projects:(s.projects || []).length, deliverables:d, outcomes:o,
-           milestones:ms, objectives:(s.keyObjectives || []).length, reported:rep };
+           milestones:ms, actions:(s.actions || []).length,
+           objectives:(s.keyObjectives || []).length, reported:rep };
 }
 
 /* ── A CYCLE'S FIGURES ARE ARCHIVED BEFORE THEY ARE CLEARED (§49.1) ──
@@ -8066,7 +8240,7 @@ function horizonBy(){ return horizonSet() ? " by " + esc(GROUP.horizon) : ""; }
 function horizonLabel(){ return horizonSet() ? esc(GROUP.horizon) : "not set"; }
 
 function planIsEmpty(counts){
-  return !counts.pillars && !counts.objectives && !counts.projects;
+  return !counts.pillars && !counts.objectives && !counts.projects && !counts.actions;
 }
 
 var ARCH_N = 0;
@@ -8138,6 +8312,7 @@ function restoreArchive(id){
     archiveCapPlan(c, "replaced by restoring the " + a.at + " archive");
     c.def = a.plan.def;
     c.keyObjectives = clone(a.plan.keyObjectives);
+    c.actions = clone(a.plan.actions || []);   /* §338 */
     c.projects = clone(a.plan.projects);
     /* THE VIEW'S ARRAYS ARE ASSIGNED, so a function's holder is a WRAPPER and
        what was just written is thrown away one line later without this —
@@ -8480,7 +8655,7 @@ var DEMO_CAPABILITY = "Product Mindset";
 GROUP.capabilities = GROUP.capabilities.filter(function(c){
   if (c && String(c.name) === DEMO_CAPABILITY) return true;
   var f = c && c.fn ? FUNCTIONS[c.fn] : null;
-  if (!f || fnPlansInPillars(f)) return true;
+  if (!f || !fnPlansInProjects(f)) return true;
   if (!Array.isArray(f.projects)) f.projects = [];
   if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
   var mv = SMPRules.dissolvePlan(c, f);
@@ -8563,7 +8738,7 @@ function addCapability(fnKey){
    returning a wrapper, one property along. */
 function promoteToCapability(fnKey, ids, name){
   var f = FUNCTIONS[fnKey];
-  if (!f || fnPlansInPillars(f)) return null;
+  if (!f || !fnPlansInProjects(f)) return null;
   var mv = SMPRules.promotePlan(f, ids);
   if (!mv) return null;
   var own = fnOwnHolder(fnKey);
@@ -8726,7 +8901,12 @@ function fnOwnHolder(fk){
   if (!f || fnPlansInPillars(f)) return null;
   return { id: "fn:" + fk, fn: fk, own: true, name: f.name, def: f.def || "",
            keyObjectives: Array.isArray(f.keyObjectives) ? f.keyObjectives : FN_NO_ROWS,
-           projects: Array.isArray(f.projects) ? f.projects : FN_NO_ROWS };
+           /* §338: and its actions, where it plans that way. The holder is
+              what `holderItemById` and the server's own index are built from,
+              so a row that is not on it is a row no handler can address and
+              every figure entered against it is refused (§334.18). */
+           actions: fnActions(fk),
+           projects: fnOwnProjects(fk) };
 }
 /* A function's own projects, READ — the array or a shared frozen empty. The
    raw list, where `fnOwnsProjects` answers whether the page draws a place to
@@ -8734,12 +8914,15 @@ function fnOwnHolder(fk){
    nothing at all read as a function with work (§61 from the other side). */
 function fnOwnProjects(fk){
   var f = FUNCTIONS[fk];
-  return (f && !fnPlansInPillars(f) && Array.isArray(f.projects)) ? f.projects : FN_NO_ROWS;
+  /* §338: `fnPlansInProjects`, never `!fnPlansInPillars` — an objectives
+     function is neither, and the old spelling handed it a project list. */
+  return (f && fnPlansInProjects(f) && Array.isArray(f.projects)) ? f.projects : FN_NO_ROWS;
 }
 function fnOwnHolderWritable(fk){
   var f = FUNCTIONS[fk];
   if (!f || fnPlansInPillars(f)) return null;
-  if (!Array.isArray(f.projects)) f.projects = [];
+  if (fnPlansInObjectives(f)) { if (!Array.isArray(f.actions)) f.actions = []; }
+  else if (!Array.isArray(f.projects)) f.projects = [];
   if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
   return fnOwnHolder(fk);
 }
@@ -8754,7 +8937,10 @@ function fnOwnHolderWritable(fk){
    unstartable, which is §61's trap and what §129's audit found five times. */
 function fnOwnsProjects(fk){
   var f = FUNCTIONS[fk];
-  if (!f || fnPlansInPillars(f)) return false;
+  /* §338: and an objectives function owns none — the page would otherwise
+     offer it somewhere to put its first project, which is a control with
+     nothing behind it (§61). */
+  if (!f || !fnPlansInProjects(f)) return false;
   if (Array.isArray(f.projects) && f.projects.length) return true;
   return capsOfFunction(fk).length === 0;
 }
@@ -8774,6 +8960,13 @@ function fnOwnsProjects(fk){
    value because every caller maps over it and a projects function with nothing
    at all legitimately has none (§61). */
 function fnHolders(fk){
+  /* §338: AND A FUNCTION THAT PLANS IN OBJECTIVES IS A HOLDER, of its own key
+     objectives and its own actions. `fnOwnsProjects` is about PROJECTS and
+     rightly answers false for it — so without this line its rows are drawn,
+     reported into and addressed by nothing, which is the exact fault §334.18
+     found one format over and fixed here. */
+  var f = FUNCTIONS[fk];
+  if (f && fnPlansInObjectives(f)) return [fnOwnHolder(fk)];
   return fnOwnsProjects(fk) ? [fnOwnHolder(fk)] : [];
 }
 
@@ -8903,7 +9096,11 @@ function holderWriteBack(id, h){
   if (!h || s.indexOf("fn:") !== 0) return;
   var f = FUNCTIONS[s.slice(3)];
   if (!f) return;
-  f.projects = h.projects;
+  /* §338: the holder is a WRAPPER, so every array a restore assigned has to
+     be written back or it is thrown away one line later — the trap §326
+     records, and `actions` is the third array on it now. */
+  if (fnPlansInObjectives(f)) f.actions = h.actions;
+  else f.projects = h.projects;
   f.keyObjectives = h.keyObjectives;
 }
 
@@ -8934,7 +9131,7 @@ function dissolveCapability(id){
   var c = capById(id);
   if (!c || !c.fn) return false;
   var f = FUNCTIONS[c.fn];
-  if (!f || fnPlansInPillars(f)) return false;
+  if (!f || !fnPlansInProjects(f)) return false;
   return removeCapability(id, "fn:" + c.fn);
 }
 /* EVERY BOX A TENANT IS HOLDING, DISSOLVED — the one-off that moves a client
@@ -8996,6 +9193,9 @@ function holderItemById(id){
   var hit = null;
   eachHolder(function(c){
     (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"ko", obj:m, holder:c }; });
+    /* §338: an action is a row of the holder's, addressed exactly as a
+       milestone is — the reporting handlers go through this one resolver. */
+    (c.actions || []).forEach(function(a){ if (a.id === id) hit = { kind:"action", obj:a, holder:c }; });
     (c.projects || []).forEach(function(p){
       (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"deliverable", obj:d, holder:c, proj:p }; });
       (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"outcome", obj:o, holder:c, proj:p }; });

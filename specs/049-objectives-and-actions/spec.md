@@ -1,6 +1,7 @@
 # Spec 049 · Objectives and actions — the third way a function plans
 
-**Status:** in build · branch `claude/inspiring-lamport-pm0ki2`
+**Status:** BUILT · branch `claude/inspiring-lamport-pm0ki2` · §338 in
+`DECISIONS-AND-LOGIC-v3.22.md`
 **Asked for:** Islam, 2026-09-13 — *"we need to build the objectives and
 actions"*, and the same day *"yes we need to fix that"* for the reporting
 column (§337, built first and separately).
@@ -164,3 +165,30 @@ reads).
 - **Requirements**, per §4.1 — the model is in §318 §5 and waits for its own
   round.
 - **A business unit planning this way.** The model admits it; no control does.
+- **The dialog's undo and a real act** — §338.1 closes the row dialog on the
+  switch. What it does NOT do is give `rowEditCancel` a way to undo an archive;
+  no dialog can, and any other destructive act that later moves into a row
+  dialog inherits the same rule: close it, or the snapshot is a revert waiting
+  for somebody to navigate.
+
+---
+
+## 7 · Proved
+
+- `checks/objectives-actions.py` — **47 passed, 0 failed**, ten sections, both
+  ends throughout, with the progress workbook driven end to end (§294.4).
+  Proved able to fail eight ways from the SOURCES (§276): the format layer
+  **16 red**, the archive **1**, the three page branches **6**, §338.1's own
+  line **15**, §338.2's two halves **1** each, and the progress route's two
+  **1** each.
+- `scripts/test-roundtrip.js` — a third format and a list of actions written to
+  a real Postgres 16 and read back, with the table asserted to have **gained no
+  column** and both keys DELETED on leaving the form. Proved able to fail by
+  dropping `actions` from the extra blob.
+- `test-authorize.js` **633/0** · `test-graph-diff.js` **140/0** ·
+  clean parity, two tabs **21/0**, functional projects **18/0**, capability
+  move, the incremental writer — all green on virgin databases.
+- Neighbours: `fn-pillars`, `functional-projects` **45/0**, `capability-entry`
+  **43/0**, `capability-remove`, `setup-arrange`, `fn-perf-controls`,
+  `fn-ko-edit`, `import-page`, `template-round-trip` — all green; full `qa.py`
+  ERRORS none; `tsc` clean with the cache removed first.

@@ -965,7 +965,19 @@
        A deliverable is NOT here -- its direction and target are written FOR
        it ("=" and "Y/N", §104) and there is nothing to fill. */
     outcome:   ["target"],
-    milestone: ["owner", "finish"]
+    milestone: ["owner", "finish"],
+    /* §338: AN ACTION OWES WHAT A MILESTONE OWES, and for the same two
+       reasons rather than by analogy — a line nobody owns is a line nobody
+       can report (§177), and the date is what decides whether this cycle asks
+       for it at all (`dueThisCycle`), so a blank one is a row the reporting
+       page can neither ask for nor excuse.
+
+       ITS OBJECTIVES ARE NOT COUNTED, and that is §214.2 standing rather than
+       an omission here: a function's key objectives are an optional line at
+       Islam's own word, and holding them as the plan does not change whose
+       objectives they are. Stated because it is the half somebody would
+       expect to have moved. */
+    action:  ["owner", "due"]
   };
   /* ── FILLABLE IS NOT THE SAME LIST AS COUNTED (§205) ────────────────
      From the deployment: a BU owner filling gaps had *"Enable a seamless
@@ -3065,8 +3077,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      who holds it today, and whose call that is is Islam's, not a repair's. */
   function capsOfFn(w, fnKey) {
     var own = ((w || {}).functions || {})[fnKey] || {};
-    var mine = (String(own.format) !== "pillars" && Array.isArray(own.projects))
+    var fmt = String(own.format || "");
+    /* §338: A FUNCTION THAT PLANS IN OBJECTIVES IS A HOLDER TOO — of its own
+       key objectives and its own ACTIONS. Without it every action figure is
+       refused, because the caller's index is built from this walk and an id
+       that is not in it is refused whoever the person is (§334.18). */
+    var mine = (fmt === "objectives")
+      ? [{ id: "fn:" + fnKey, fn: fnKey, own: true, projects: [],
+           actions: Array.isArray(own.actions) ? own.actions : [],
+           keyObjectives: own.keyObjectives || [] }]
+      : (fmt !== "pillars" && Array.isArray(own.projects))
       ? [{ id: "fn:" + fnKey, fn: fnKey, own: true, projects: own.projects,
+           actions: [],
            keyObjectives: own.keyObjectives || [] }]
       : [];
     return mine.concat(

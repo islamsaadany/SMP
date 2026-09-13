@@ -45739,3 +45739,198 @@ learn either action — it has been unreachable since the cutover put Next in
 front of it (§317.8), which is §322's own precedent.
 
 ---
+## §337 — A capability's reporting page asks the column that judges it
+
+Islam, of the fault §336 measured and deliberately left: *"yes we need to fix
+that."*
+
+**§336 FOUND IT AND PUT IT TO HIM RATHER THAN WRITING IT**, because it is a
+change to who may report and that is rule 1b. This is the one line, with his
+word on it.
+
+**THE FAULT, MEASURED ON THE SHIPPED WORKED EXAMPLE WITH NO CELL TIGHTENED.**
+`canReport()` picked its access key by looking for the `fn:` prefix and falling
+back to the unit's, and **a `cap:` target is neither** — so a capability's
+Reporting page was judged by the BUSINESS-UNIT column. Yara Kamal heads
+Marketing, which holds Product Mindset: `u_report` **none** against `k_report`
+**edit**, **1** enabled control against **17**, and a live *Submit to the SMO*
+over a report whose boxes she cannot fill in. §104.8's family — a page promising
+what the rule beneath it refuses — with §94.3's drift in the direction that
+wastes somebody's afternoon.
+
+**§330.5 NAMED THIS EXACT QUESTION AND REACHED ONE OF ITS TWO CALLERS.**
+`areaOfTarget()` was written in that section so *which column judges this
+target* has ONE answer, and `mayMarkDoneOn` was taught to ask it while
+`canReport` was not. So this is not a new rule: it is the seventh copy of one
+walk, one function short (§53.5, and §334.16's six copies of *walk the
+capabilities* one layer up).
+
+**THE ANSWER IS THE SHARED READER, NOT A THIRD BRANCH.**
+`SMPRules.reportPageOf(target)` has answered `cap:` correctly since it was
+written and had exactly one caller; `canReport()` and `canEnterNote()` ask it
+now, and `canReportRow()` takes its area from `areaOfTarget()`. Nothing new is
+decided and no cell moves: what changes is that the browser asks the question
+the server has been asking all along (§42).
+
+**THREE LINES, AND EACH ONE IS LOAD-BEARING** — falsified separately from the
+SOURCES (§276, because §238's hashed CSP silences an edited built file):
+`canReport` reverted **5 red**, `canReportRow` **3 red**, `canEnterNote`
+**1 red**. `checks/capability-report-column.py` is **16/0**.
+
+**AND TWO OF THAT CHECK'S OWN ASSERTIONS PASSED ON THE BROKEN BUILD** (§113.8):
+*"she has controls"* was true of the one leftover control the head still had,
+and the note gate asked of an ordinary row merely re-measured `canReportRow`.
+Tightened, the falsification went 3 red → 5.
+
+---
+
+## §338 — Objectives and actions, the third way a function plans (spec 049)
+
+Islam: *"we need to build the objectives and actions"* — the third panel of the
+mockup he signed off (`design-mockups/function-plan-types/`), and of the model
+itself, *"each function has objectives like the measures we have and actions
+like tactics they work on that has due dates."*
+
+**ALMOST NOTHING HERE IS A NEW KIND OF ROW, AND SAYING SO FIRST IS WHAT KEPT IT
+SMALL.** An objective is the function's own key objective — the list a
+supporting function has held since §213, scored by the reader every other
+subject is scored by — and an action is **a milestone with a DATE where a tactic
+has quarters**: `{ id, name, owner, due, status, pct, note }`, the three words
+*Not started · In progress with a %* · *Done* the product has used since §300,
+and the date PICKED rather than typed (§177). What is new is a function holding
+them **directly**, with no pillar and no project in between.
+
+**IT IS NOT A SECOND LIST OF OBJECTIVES.** Minting one would put two things in
+the product answering *what is this function judged on* (§87's twins, §53.5), so
+the Overview is untouched and is asserted to be the SAME page a projects
+function draws, key for key (§213, §94.8) rather than against a list of headings
+a wording change would falsify.
+
+**NO SCHEMA CHANGE, MEASURED RATHER THAN CLAIMED (§172).** `actions` rides
+`functions.extra`, the road `projects`, `items`, `swot`, `def` and `format`
+already travel (§118, §213, §326) — and this project has made that claim wrongly
+before, so `test-roundtrip.js` writes a third format and a list of actions to a
+real Postgres 16, reads them back, and asserts the table **gained no column**;
+leaving the form again DELETES both keys (§50.6). **The seed holds no such
+function**, so nothing else in that file proves any of it — §172's own blind
+spot, where four layers agreed about a value the database had never been
+offered. Proved able to fail by dropping `actions` from the extra blob.
+**AND THE FIRST RUN OF THAT ASSERTION CALLED A PERFECT ROUND TRIP A
+DIFFERENCE** — jsonb hands an object back with its keys in its own order, so the
+compare is canonical (§145, §249.3, walked into while citing it).
+
+**THE FORMAT IS A THIRD VALUE AND `projects` IS THE FALLBACK.** `fnFormat()` was
+a two-valued ternary; it is a named list now, and anything absent or unknown
+reads as `projects` exactly as before, so no stored function moves and a value
+from a later build is kept rather than guessed at (§96.2, §30.2).
+
+**THE THREE PAGES ARE THREE ONE-LINE BRANCHES.** Plan, Performance and Reporting
+each ask `plansInObjectives(target)` first and otherwise draw what they drew;
+the holder walk (`fnHolders` / `eachHolder` / `holderItemById`) carries the
+actions, so the gap count, the reporting index, the workbook, the deck and the
+server all reach them through the one list §334.18 exists to keep single.
+
+**THE SWITCH ARCHIVES WHAT STOOD, WHICH IS ISLAM'S OWN ANSWER** — *"archvied
+when type changes and create the new apprach"* — and it **REPLACES §59's refusal
+for this one transition**, recorded as a reversal rather than overwritten
+(Principle II): that section refused a switch while the other side held
+anything, which was right while the switch destroyed silently and is answered
+better by filing the plan first. It takes the path the import's replace and
+Clear plan already take (§49.2, §22), so the way back is Setup › Import &
+storage and no second archiving rule is written. **A capability is the one thing
+it refuses to carry** — that is somebody else's strategic entry (§334) and
+archiving it as a side effect of a dropdown is exactly the destruction the
+confirmation exists to stop. **The select is put back on Cancel**, or a select
+still showing the refused value fires no `change` and the same choice cannot be
+made twice (§110).
+
+### §338.1 — And the dialog the switch is made in had to go with it
+
+**THE SWITCH IS MADE INSIDE THE SETUP ROW DIALOG, AND THAT DIALOG'S CANCEL IS AN
+UNDO OF THE WHOLE ROW.** `rowEditOpen` takes a deep copy of the function
+(§110, §261), `rowEditCancel` puts every key back and deletes the ones the copy
+lacked — **and `leaveModes()` runs that same undo on every destination change**.
+So with the dialog left standing, walking to the function **PUT THE OLD PLAN
+BACK on top of an archive already filed**, deleted the new form's rows with it,
+and did it silently, with nothing pressed.
+
+**HARMLESS BEFORE TODAY, WHICH IS WHY NOBODY HAD MET IT**: §59 refused this
+switch whenever there was anything to lose, so the undo could only ever put back
+a format on an empty function. §338 makes it a real act — a confirmation, an
+archive, a clear — and a snapshot that outlives a real act is a revert waiting
+for somebody to navigate.
+
+**CLOSED, NEVER CANCELLED.** `closeRowDialog(false)` drops the snapshot and
+keeps every field already written, which is what Save does and what the platform
+already means by leaving a field (§35: a field is committed when the cursor
+leaves it). Re-snapshotting instead would have kept the dialog open and made
+Cancel quietly stop undoing a name typed before the switch — a smaller lie, and
+still a lie. **The cost is stated rather than discovered**: you come back to the
+page rather than staying in the dialog.
+
+**FOUND BY THE CHECK'S FIXTURE FALLING OVER, NOT BY READING**, and the first
+reading was that the check was wrong: §1 and §2 passed, the format read back as
+`objectives`, and fifteen assertions later the page was drawing projects again.
+Bisecting the navigation — set the format directly and the click is harmless;
+set it through the dialog and the same click reverts it — is what named
+`leaveModes`. *A fixture that will not hold is a measurement, and the first
+question is whose fault it is.*
+
+### §338.2 — And the one thing the switch refuses says what it does
+
+**A CAPABILITY IS WHAT THE SWITCH CANNOT CARRY** (§334: it is somebody else's
+strategic entry, and archiving it as a side effect of a dropdown is exactly the
+destruction the confirmation exists to stop) — and the first build refused it
+**silently**, with a fact beside the control reading *"holds 1 capability"*.
+That is §62's rule with its second half missing: naming what is in the way and
+not saying what it stops. It reads *"holds 1 capability — the form cannot change
+while it does"* now, said BEFORE the press (§221), with the select left LIVE
+rather than disabled so the reason stays reachable from the control it is about
+(§163, §221). **Measured rather than judged**: one line in an 810px cell at
+1500, 1280 and 1100, nothing over, the row the same 73px (§158). Asserted at
+both ends and falsified both ways — the sentence removed **1 red**, the refusal
+removed **1 red**.
+
+### The checks, and what they were wrong about first
+
+`checks/objectives-actions.py` is **47/0**, proved able to fail eight ways
+from the SOURCES (§276): the format layer **16 red**, the archive **1**, the
+page branches **6**, §338.1's own line **15** — that one printing the reported
+symptom, a function drawing `Projects` over a plan it no longer has — §338.2's
+two halves **1** each, and the progress route's two **1** each.
+
+**AND THE PROGRESS ROUTE IS DRIVEN END TO END RATHER THAN READ**, because
+§294.4 is exactly this shape one row kind along: a capability's progress upload
+read two fields §104 had removed, so a deliverable reported by file said *Not
+started* on every screen while the upload looked accepted — and the milestone
+beside it dropped the per-cent §104.10 requires. So the file goes out, a status
+and a per-cent are typed into it, and it comes back through the real reader,
+the real differ and the real apply with the ROW read.
+
+
+**FOUR OF ITS OWN FIRST FAILURES WERE THE CHECK**, each an old rule in a new
+place. It asked for `"Actions"` in `innerText`, which is the RENDERED text and
+is uppercased by CSS, so the assertion was about the stylesheet (§301.6). It
+pressed a section button that lives on the Strategy tab while standing on
+Reporting, so every assertion after it measured the page before (§215, §50.6) —
+the press is asserted now. It asked for `.rrow`, which is the UNIT rail's
+spelling: **nought on both formats, so the *"no project rail"* assertion passed
+on the very build it exists to catch** (§113.8) — `.ritem` now, at both ends,
+with the control function asserted to still HAVE one. And it asserted the
+workbook round trip over every row, where `child()` has dropped a nameless row
+since the reader was written — a row nobody has named cannot be addressed in a
+file — so it is a fixed point **over the rows the file carries**, with the
+nameless action asserted to be dropped exactly as a nameless milestone is, or
+an action quietly acquiring a rule of its own would read as a pass.
+
+### Recorded, not done
+
+- **Requirements** — the third object in §318 §5's model — are not built; an
+  action is a row of work, and what a requirement is owed by whom is its own
+  decision.
+- **A business unit cannot plan this way.** The form is a supporting function's
+  alone, which is what the mockup drew and what the model says.
+- The demo ships no function planning this way, so every check here MAKES its
+  state (§255).
+
+---

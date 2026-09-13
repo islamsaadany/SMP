@@ -865,6 +865,10 @@ function capFindById(c, id){
   if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
   var hit = null;
   (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"CAPOBJECTIVE", obj:m }; });
+  /* §338: an action belongs to the holder, so it sits beside the objectives
+     rather than under a project — and without it every action reported by
+     file came back "unknown" and was set aside (§303's own finding). */
+  (c.actions || []).forEach(function(a){ if (a.id === id) hit = { kind:"ACTION", obj:a }; });
   (c.projects || []).forEach(function(p){
     if (p.id === id) hit = { kind:"PROJECT", obj:p };
     (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"DELIVERABLE", obj:d, proj:p }; });
@@ -1238,7 +1242,8 @@ function diffCapPlan(c, rows){
    children arrive with nothing reported, never at zero. */
 function createFromCapPlan(c, d){
   var news = d.rows.filter(function(r){ return r.status === "new"; });
-  var order = { CAPOBJECTIVE:0, PROJECT:0, DELIVERABLE:1, OUTCOME:1, MILESTONE:1, PLAN:9 };
+  var order = { CAPOBJECTIVE:0, ACTION:0, PROJECT:0,
+                DELIVERABLE:1, OUTCOME:1, MILESTONE:1, PLAN:9 };
   news.sort(function(a, b){ return (order[a.type] == null ? 5 : order[a.type]) -
                                    (order[b.type] == null ? 5 : order[b.type]); });
   var made = 0;
@@ -1267,6 +1272,16 @@ function createFromCapPlan(c, d){
         weight:isNaN(w) ? null : w, actual:null, progress:null };
       if (+x.hidden) cko.hide = true;
       c.keyObjectives.push(cko);
+      made++;
+    } else if (x.type === "ACTION") {
+      /* §338: the container is minted here rather than assumed — a function
+         given its first plan by file has never held the array (§50.6, §129's
+         audit: the first row is accepted on screen and written nowhere). */
+      if (!Array.isArray(c.actions)) c.actions = [];
+      var act = { id:x.id, name:x.name, owner:x.owner || "",
+                  due:x.finish || "", status:null };
+      if (+x.hidden) act.hide = true;
+      c.actions.push(act);
       made++;
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
@@ -1344,7 +1359,10 @@ function diffCapProgress(c, rows){
     var hit = capFindById(c, r.id);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
     var was, now = String(r.new_value == null ? "" : r.new_value).trim();
-    var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE";
+    /* §338: an ACTION is a status row too — the same three words a milestone
+       answers in, and the same required per-cent (§300, §104.10). */
+    var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE" ||
+                      hit.kind === "ACTION";
     if (isStatusRow) {
       /* §303: A DELIVERABLE IS A STATUS, exactly as a milestone is. It read
          `hit.obj.actual` and `hit.obj.kind` — both removed by §104/§53.4 —
@@ -1384,7 +1402,8 @@ function applyCapProgress(c, d){
   d.rows.forEach(function(r){
     if (!r.hit || r.status !== "changed") return;
     var o = r.hit.obj;
-    if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE") {
+    if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE" ||
+        r.hit.kind === "ACTION") {          /* §338 */
       /* §303: BOTH WRITE `status` AND `pct`, through the same pair the
          screen's own handlers now ask (§53.5) — so a file that says In
          progress leaves the row In progress with its per-cent set, which is

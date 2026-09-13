@@ -7885,6 +7885,47 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/objectives-actions.py # the third way a function plans
+                                # (§338, spec 049): the format is a THIRD value
+                                # read back off the stored function and never off
+                                # the select (§96, §219); the switch ARCHIVES what
+                                # stood and starts the new form empty, both ends
+                                # (§318 §6.2, reversing §59 for this transition);
+                                # the three pages draw the new work beside a
+                                # PROJECTS function measured unchanged, or a build
+                                # drawing actions everywhere passes every presence
+                                # assertion (§113.8); the Overview asserted as an
+                                # AGREEMENT key for key with the one a projects
+                                # function draws (§213, §94.8); every press read
+                                # back off the STORED graph (§96); the two numbers
+                                # as AGREEMENT with fnObjScore and fnActionsTally,
+                                # with the mockup's own decision asserted as an
+                                # absence — moving an action must not move the
+                                # objectives figure; an action owing its owner and
+                                # its date COUNTED and said (§223); and the
+                                # workbook a FIXED POINT over the rows the file can
+                                # address, with a nameless action asserted to be
+                                # dropped exactly as a nameless milestone is. It
+                                # a capability REFUSED with the sentence saying so
+                                # and the select left live (§62, §221, §163); and the
+                                # progress workbook driven end to end — the file out,
+                                # a figure typed in, and back through the real reader,
+                                # differ and apply (§294.4).
+                                # It MAKES its state (§255). 47/0, red eight ways from
+                                # the SOURCES (§276): 16 / 1 / 6 / 15 / 1 / 1 / 1 / 1
+                                # — and four of
+                                # its own first failures were the CHECK (§301.6's
+                                # rendered case, §215's unlanded press, a `.rrow`
+                                # that is nought on both formats, and a fixed point
+                                # asked over a row no file can carry)
+python3 checks/capability-report-column.py # a capability's reporting page asks
+                                # the column that judges it (§337): measured on the
+                                # SHIPPED demo with no cell tightened — the rule,
+                                # the screen and canSpeakFor asked of one person,
+                                # the boxes counted, and the Submit bar read. Both
+                                # ends (§94.2): the same person on the function
+                                # itself, and somebody the column refuses. 16/0,
+                                # red 5 / 3 / 1 — one falsification per line
 python3 checks/functional-projects.py # a function's projects are its own
                                 # (§326, spec 048 stage 1). Islam: "the problem
                                 # with having the capability hidden in the
@@ -8934,7 +8975,102 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;336: a capability is owned like a
+*Last Updated: 2026-09-13 &mdash; **&sect;338: objectives and actions, the
+third way a function plans (spec 049).** Islam: *"we need to build the
+objectives and actions"* &mdash; the third panel of the mockup he signed off,
+and of the model, *"each function has objectives like the measures we have and
+actions like tactics they work on that has due dates."* **ALMOST NOTHING HERE IS
+A NEW KIND OF ROW, AND SAYING SO FIRST IS WHAT KEPT IT SMALL**: an objective is
+the function's own key objective, the list a supporting function has held since
+&sect;213 and scored by the reader every other subject is scored by; an action
+is **a milestone with a DATE where a tactic has quarters**, with the three words
+the product has used since &sect;300 and the date PICKED rather than typed
+(&sect;177). What is new is a function holding them DIRECTLY, with no pillar and
+no project in between. **IT IS NOT A SECOND LIST OF OBJECTIVES** (&sect;87's
+twins), so the Overview is untouched and asserted to be the SAME page a projects
+function draws, key for key (&sect;213, &sect;94.8). **NO SCHEMA CHANGE,
+MEASURED RATHER THAN CLAIMED** (&sect;172, wrongly claimed here before):
+`actions` rides `functions.extra`, the road `projects`, `items`, `swot`, `def`
+and `format` already travel &mdash; written to a real Postgres 16, read back,
+and the table asserted to have **gained no column**, with both keys DELETED on
+leaving the form (&sect;50.6); the seed holds no such function, so nothing else
+in that file proves any of it. **AND THE FIRST RUN OF THAT ASSERTION CALLED A
+PERFECT ROUND TRIP A DIFFERENCE** &mdash; jsonb reorders keys, so the compare is
+canonical (&sect;145, &sect;249.3, walked into while citing it). **THE FORMAT IS
+A THIRD VALUE AND `projects` IS THE FALLBACK**, so no stored function moves and
+an unknown value is kept rather than guessed at (&sect;96.2, &sect;30.2). **THE
+THREE PAGES ARE THREE ONE-LINE BRANCHES** over the holder walk &sect;334.18
+exists to keep single. **THE SWITCH ARCHIVES WHAT STOOD**, his own answer
+(*"archvied when type changes and create the new apprach"*), **REVERSING
+&sect;59's refusal for this one transition** and taking the path the import's
+replace and Clear plan already take (&sect;49.2, &sect;22) &mdash; **a
+capability is the one thing it refuses to carry** (&sect;334), and the select is
+put back on Cancel or the same choice cannot be made twice (&sect;110).
+**&sect;338.1 &mdash; AND THE DIALOG THE SWITCH IS MADE IN HAD TO GO WITH IT**:
+`rowEditOpen` takes a deep copy of the whole row so Cancel can undo a field
+edit, and **`leaveModes()` runs that same undo on every destination change** —
+so with the dialog left standing, walking to the function **PUT THE OLD PLAN
+BACK on top of an archive already filed**, deleted the new form's rows with it,
+and did it silently with nothing pressed. Harmless before today, because
+&sect;59 refused the switch whenever there was anything to lose; it is a real
+act now, so the snapshot must not outlive it. **CLOSED, NEVER CANCELLED** —
+`rowEditClose()` drops the snapshot and keeps every field already written, which
+is what Save does (&sect;35); re-snapshotting would have kept the dialog open
+and made Cancel quietly stop undoing a name typed before the switch, a smaller
+lie and still a lie. Cost stated: you come back to the page rather than staying
+in the dialog. **FOUND BY THE CHECK'S FIXTURE FALLING OVER AND NOT BY READING**,
+and the first reading was that the check was wrong &mdash; bisecting the
+navigation (set the format directly and the click is harmless; set it through
+the dialog and the same click reverts it) is what named `leaveModes`. *A fixture
+that will not hold is a measurement, and the first question is whose fault it
+is.* **&sect;338.2 &mdash; AND THE ONE THING THE SWITCH REFUSES SAYS WHAT IT DOES**:
+a capability cannot be carried across (&sect;334), and the first build refused it
+SILENTLY with a fact beside the control reading *"holds 1 capability"* &mdash;
+&sect;62's rule with its second half missing. It names what it stops now, said
+before the press (&sect;221), with the select left LIVE rather than disabled so
+the reason stays reachable (&sect;163); measured rather than judged, one line in
+an 810px cell at 1500/1280/1100 and the row the same 73px (&sect;158).
+**AND THE PROGRESS ROUTE IS DRIVEN END TO END RATHER THAN READ**, because
+&sect;294.4 is that shape one row kind along &mdash; a capability's progress
+upload read two removed fields, so a deliverable reported by file said *Not
+started* on every screen while the upload looked accepted:
+`checks/objectives-actions.py` **47/0**, red eight ways from the SOURCES
+(&sect;276): **16 / 1 / 6 / 15 / 1 / 1 / 1 / 1**, the fourth printing the
+reported symptom.
+**FOUR OF ITS OWN FIRST FAILURES WERE THE CHECK**: `innerText` is the RENDERED
+text and the band is uppercased by CSS (&sect;301.6); a section press made from
+the wrong tab left every later assertion measuring the page before (&sect;215,
+&sect;50.6); `.rrow` is the UNIT rail's spelling and is **nought on both
+formats, so the *no project rail* assertion passed on the very build it exists
+to catch** (&sect;113.8); and the workbook fixed point was asked over a nameless
+row, which `child()` has dropped since the reader was written &mdash; it is a
+fixed point over the rows the file can address now, with the nameless action
+asserted to be dropped exactly as a nameless milestone is. **RECORDED, NOT
+DONE**: requirements (&sect;318 &sect;5's third object) are not built, and a
+business unit cannot plan this way.*
+
+*Earlier the same day: **&sect;337: a capability's reporting page asks the
+column that judges it.** Islam, of the fault &sect;336 measured and deliberately
+left: *"yes we need to fix that."* **MEASURED ON THE SHIPPED WORKED EXAMPLE WITH
+NO CELL TIGHTENED**: `canReport()` picked its access key by looking for the
+`fn:` prefix and falling back to the unit's, and **a `cap:` target is neither**
+&mdash; so Yara Kamal, head of Marketing, which holds Product Mindset, read
+`u_report` **none** against `k_report` **edit**, **1** enabled control against
+**17**, and a live *Submit to the SMO* over a report whose boxes she cannot fill
+in (&sect;104.8's family). **&sect;330.5 NAMED THIS EXACT QUESTION AND REACHED
+ONE OF ITS TWO CALLERS** &mdash; `areaOfTarget()` was written there so *which
+column judges this target* has ONE answer, and `mayMarkDoneOn` was taught to ask
+it while `canReport` was not: the seventh copy of one walk, one function short
+(&sect;53.5). **THE ANSWER IS THE SHARED READER, NOT A THIRD BRANCH**:
+`SMPRules.reportPageOf()` has answered `cap:` correctly since it was written and
+had exactly one caller. Nothing new is decided and no cell moves &mdash; what
+changes is that the browser asks the question the server has been asking all
+along (&sect;42). Three lines, each falsified separately from the SOURCES
+(&sect;276): **5 / 3 / 1 red**; `checks/capability-report-column.py` 16/0
+&mdash; **and two of its own assertions passed on the broken build**
+(&sect;113.8), tightened until the falsification went 3 red &rarr; 5.*
+
+*Earlier: 2026-09-13 &mdash; **&sect;336: a capability is owned like a
 unit &mdash; and it already is.** Islam, of what &sect;334 built: *"The
 capability is owned like a unit it has an owner and custodian."* Drawn first
 (rule 1c) as seats on the capability's own row with two new Setup columns

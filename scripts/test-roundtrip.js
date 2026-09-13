@@ -464,6 +464,69 @@ const CLIENT_ARG = (function () {
     nckOk ? "" : JSON.stringify(ncKept.review.endsQuarter));
   if (!nckOk) process.exitCode = 1;
 
+  /* ── spec 049: A FUNCTION'S ACTIONS (§338) ────────────────────────────
+     §172's rule, paid rather than recited: the claim is that a function
+     planning in objectives and actions needs NO SCHEMA CHANGE, because
+     `functions` maps six columns and files every other key into `extra` —
+     the road `projects`, `items`, `swot`, `def` and `format` already travel
+     (§118, §213, §326). This project has made that claim wrongly before, so
+     it is MEASURED: a third format and a list of actions are written and
+     read back, and the table is asserted to have gained no column.
+
+     THE SEED HOLDS NO SUCH FUNCTION, so nothing above proves any of it —
+     the same blind spot §172 records, where four layers agreed about a value
+     the database had never been offered. */
+  const aState = await io.readState(client);
+  const aKey = Object.keys(aState.functions)[0];
+  const aFn = aState.functions[aKey];
+  const aCols = (await spot(
+    "SELECT column_name FROM information_schema.columns WHERE table_name='functions'"
+  )).map(function (r) { return r.column_name; }).sort();
+  aFn.format = "objectives";
+  aFn.projects = [];
+  aFn.actions = [
+    { id: "fn:" + aKey + "-A1", name: "Retail academy", owner: "Amr Hassan",
+      due: "Mar 26", status: "wip", pct: 70, note: "Two cohorts held" },
+    /* The blanks are the point: an action owed its owner and its date is a
+       real state the page counts (§223), and it must come back as blanks
+       rather than as nulls the reader then has to guess about. */
+    { id: "fn:" + aKey + "-A2", name: "In-house training", owner: "", due: "", status: "" }
+  ];
+  await io.writeState(client, aState);
+  const aBack = await io.readState(client);
+  const aGot = aBack.functions[aKey];
+  const aCols2 = (await spot(
+    "SELECT column_name FROM information_schema.columns WHERE table_name='functions'"
+  )).map(function (r) { return r.column_name; }).sort();
+  /* CANONICAL, NEVER `JSON.stringify` (§145, §249.3): jsonb hands an object
+     back with its keys in its OWN order, so a stringify compare calls a
+     perfect round trip a difference — which is exactly what it did here on
+     the first run of this assertion. */
+  const canon = function (v) {
+    if (Array.isArray(v)) return v.map(canon);
+    if (v && typeof v === "object") {
+      return Object.keys(v).sort().reduce(function (o, k) { o[k] = canon(v[k]); return o; }, {});
+    }
+    return v;
+  };
+  const aOk = aGot && aGot.format === "objectives" &&
+    JSON.stringify(canon(aGot.actions)) === JSON.stringify(canon(aFn.actions)) &&
+    JSON.stringify(aCols) === JSON.stringify(aCols2);
+  console.log("a function's actions round trip:", aOk ? "PASS" : "FAIL",
+    aOk ? "[no migration — functions.extra, and the table gained no column]"
+        : JSON.stringify({ fmt: aGot && aGot.format, acts: aGot && aGot.actions,
+                           cols: aCols2.filter(function (c) { return aCols.indexOf(c) < 0; }) }));
+  if (!aOk) process.exitCode = 1;
+  /* AND THE FORM CAN BE LEFT AGAIN (§50.6): back on the default, both keys
+     DELETED, or every save after a switch carries a change nobody made. */
+  delete aGot.format; delete aGot.actions; aGot.projects = [];
+  await io.writeState(client, aGot && aBack);
+  const aClean = (await io.readState(client)).functions[aKey];
+  const acOk = aClean && !("format" in aClean) && !("actions" in aClean);
+  console.log("  ...and leaving it deletes both keys:", acOk ? "PASS" : "FAIL",
+    acOk ? "" : JSON.stringify({ fmt: aClean && aClean.format, acts: aClean && aClean.actions }));
+  if (!acOk) process.exitCode = 1;
+
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 

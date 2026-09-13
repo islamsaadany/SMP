@@ -6081,6 +6081,7 @@ function renderFnPerformance(fnKey){
      below it changes — the alternative was four more renderers that would have
      to be kept in step with the unit's for ever. */
   if (plansInPillars(target)) return renderUnitPerformance(unitLike(target));
+  if (plansInObjectives(target)) return fnObjPerformance(fk);
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment.
@@ -6497,6 +6498,187 @@ function projPlanBody(p, subject){
 
    RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
    function's pages now says its strategy is the parent unit's. */
+/* ── OBJECTIVES AND ACTIONS: A FUNCTION'S THREE PAGES (§338, spec 049) ─────
+   Islam: *"each function has objectives like the measures we have and actions
+   like tactics they work on that has due dates"*, and then *"we need to build
+   the objectives and actions."*
+
+   ALMOST NOTHING HERE IS A NEW KIND OF ROW, which is the whole argument for
+   the shape: an objective is the function's own key objective — a measured
+   row the platform has scored since it had scores — and an action is a
+   milestone with a DATE where a tactic has quarters. What is new is a
+   function holding them directly, with no pillar and no project between.
+
+   WHERE EACH IS DRAWN, and it follows the two formats that exist rather than
+   inventing a third arrangement: the OVERVIEW draws what it is and its key
+   objectives, exactly as it does for a projects function (§213 — one page, and
+   a page that asks two questions per format is the drift §211 cost a day to
+   undo); the PLAN draws the actions, where a projects function draws its
+   projects; and PERFORMANCE draws the two numbers with the tables behind
+   them, which is the picture Islam signed off.
+
+   THE TWO NUMBERS READ SEPARATELY, his own words from that mockup: *"Actions
+   are counted, not scored into the objectives."* So no score anywhere in the
+   product moves, and the cards are `fnObjScore` and `fnActionsTally`, neither
+   of which computes anything the platform did not already compute. */
+function objXb(ed, id){
+  return ed ? '<button class="xbtn" data-rowoff="actions|' + esc(id) +
+    '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
+}
+/* THE PLAN: the actions, as they were agreed. Nothing here has been reported
+   — no status, no per-cent — exactly as a project's plan pane holds none
+   (§104). The owner and the date are both FILLABLE and both counted, which is
+   a milestone's own pair and for its own two reasons: a line nobody owns is a
+   line nobody can report, and the date is what decides whether this cycle
+   asks for it (§177, §338 in lib/rules.js). */
+function fnObjPlanBody(fk, ed){
+  var list = fnActions(fk);
+  var rows = list.map(function(a, i){
+    return '<tr data-oi="' + i + '"' + hidCls(a) + '>' +
+      '<td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + (ed ? textOr("plan", a.name, "", function(v){ a.name = v; }) : esc(a.name)) +
+        (ed ? eyeBtn(a, "plan", "k_proj") : hidChip(a)) + objXb(ed, a.id) + '</td>' +
+      '<td class="cc">' + gapCell("plan", "k_proj", a, "owner", {
+          ctx: { row: a },
+          control: function(set, pendCls){
+            return selectOr("plan", a.owner == null ? "" : a.owner,
+              ownerChoices(a.owner, true), "ownersel " + (pendCls || ""), set);
+          } }) + '</td>' +
+      '<td class="cc mp-host">' + gapCell("plan", "k_proj", a, "due", {
+          ctx: { row: a },
+          control: function(set, pendCls){
+            return monthPickOr("plan", a.due, pendCls || "", set);
+          } }) + '</td></tr>';
+  }).join("") +
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="3">' +
+      '<button class="linkbu" data-rowadd="action|' + esc(fk) + '">Add an action</button>' +
+    '</td></tr>' : '');
+  return '<h4 class="mini">Actions <em>— the work, and when it is due</em></h4>' +
+    miniTable(["#","Action","Owner","Due"], rows);
+}
+function fnObjPlan(fk){
+  var ed = projEditing(), list = fnActions(fk);
+  /* §61: a function with no action yet is where the first one goes. The empty
+     state has to say so and the pen has to be reachable, or the page is
+     readable and unstartable — §129's audit found that five times. */
+  var owed = list.reduce(function(n, a){
+    return n + SMPRules.gapMissing("action", a).length; }, 0);
+  return fillBarOr("plan", "k_proj", owed, "the actions") +
+    '<div class="capbody">' + paneActs("plan", "u_plan") +
+    (!list.length && !ed
+      ? '<div class="note"><b>No actions yet.</b> The SMO adds them from the ' +
+        'pen on this page, or they arrive with an upload.</div>'
+      : fnObjPlanBody(fk, ed)) + '</div>';
+}
+/* PERFORMANCE: the picture that was signed off — two cards that do not feed
+   each other, and the two tables they are made of. */
+function fnObjCards(fk){
+  var ko = fnObjScore(fk), ac = fnActionsTally(fk);
+  var objs = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
+  return '<div class="scores">' +
+    '<div class="card tight primary-card">' +
+      '<div class="score-h"><h4>Objectives performance <span class="rank">primary</span></h4>' +
+        '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span></div>' +
+      '<div class="minirow"><div><em>Objectives</em><b>' + objs.length + '</b></div>' +
+        '<div><em>Highest</em><b>' + objSpread(objs).hi + '</b></div>' +
+        '<div><em>Lowest</em><b>' + objSpread(objs).lo + '</b></div></div></div>' +
+    '<div class="card tight">' +
+      '<div class="score-h"><h4>Actions</h4>' +
+        '<span class="pill ' + band(ac.pct) + '">' + bandWord(ac.pct) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(ac.pct) + '">' + pctBig(ac.pct) + '</span>' +
+        '<span class="ofplan">' + ac.done + ' of ' + ac.total + ' done' +
+          (ac.pending ? ' &middot; <span class="missing">' + ac.pending +
+            ' not counted yet</span>' : '') + '</span></div>' +
+      '<div class="minirow"><div><em>Actions</em><b>' + ac.total + '</b></div>' +
+        '<div><em>Done</em><b>' + ac.done + '</b></div>' +
+        '<div><em>In progress</em><b>' + ac.wip + '</b></div></div></div></div>';
+}
+/* §264: HIGHEST AND LOWEST ARE MADE OF THE NUMBER THEY SUMMARISE — the same
+   `measureScore` the card above averages, over the same list, or a breakdown
+   disagrees with its own headline. `scoreSpread` is the shared reader. */
+function objSpread(list){
+  var s = scoreSpread(scorableKOs(list));
+  return { hi: s.hi == null ? "&mdash;" : pct(s.hi),
+           lo: s.lo == null ? "&mdash;" : pct(s.lo) };
+}
+function fnObjPerfTables(fk){
+  var h = fnOwnHolder(fk) || { keyObjectives: [] };
+  var aRows = fnActions(fk).map(function(a, i){
+    var v = msReads(a), quiet = !dueThisCycle(a.due) && !a.status;
+    return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
+      '<td class="idx">' + (i+1) + '</td>' +
+      '<td>' + esc(a.name) + noteRead(a.note) + '</td>' +
+      '<td class="cc">' + esc(a.owner || "—") + '</td>' +
+      '<td class="cc">' + dxDate(a.due, a.status === "done") + '</td>' +
+      '<td class="cc">' + (quiet ? notDueCell() : msPill(a)) + '</td>' +
+      '<td class="num final">' + (statusPending(a) ? needsPct()
+        : quiet ? notDueCell() : (v == null ? "&mdash;" : v + "%")) + '</td></tr>';
+  }).join("");
+  return capKOTable(h) +
+    '<h4 class="mini">Actions</h4>' +
+    miniTable(["#","Action","Owner","Due",  "Status", MS_PCT], aRows);
+}
+function fnObjPerformance(fk){
+  return perfActs(presentMenu("fn", fk)) +
+    '<div class="capbody">' + fnObjCards(fk) + fnObjPerfTables(fk) + '</div>';
+}
+/* REPORTING: the figures, and nothing about the plan. The objectives are
+   entered the way a function's key objectives already are, and the actions the
+   way a milestone already is — the same three controls, so one row shape and
+   one set of handlers (§53.5, §104.10). */
+function fnObjReportBody(fk){
+  var target = "fn:" + fk;
+  var h = fnOwnHolder(fk) || { keyObjectives: [] };
+  var mayRow = function(o){ return canReportFnRow(target, null, o); };
+  var kRows = SMPRules.shown(h.keyObjectives).map(function(m, i){
+    var mayR = mayRow(m), has = m.actual != null && m.actual !== "";
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + dirCell(m.dir) + '</td>' +
+      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, mayR, m.name) + '</td>' +
+      '<td class="cc">' + (has ? '<span class="fixedval">' + pct(measureScore(m)) + '</span>'
+                               : '<span class="fixedval">&mdash;</span>') + '</td>' +
+      '<td class="notecol">' + capNoteBox(m, mayR) + '</td></tr>';
+  }).join("");
+  var aRows = SMPRules.shown(fnActions(fk)).map(function(a, i){
+    var notDue = !dueThisCycle(a.due), quiet = notDue && !a.status;
+    var mayA = mayRow(a);
+    return '<tr' + (quiet ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
+      '<td>' + esc(a.name) + '</td>' +
+      '<td class="cc">' + dxDate(a.due, a.status === "done") + '</td>' +
+      '<td class="cc">' + capPickBox(a, mayA, MS_WORDS, a.status) + '</td>' +
+      '<td class="cc">' + (a.status === "wip"
+        ? capPctBox(a, mayA, a.name) + (statusPending(a) ? needsPct() : "")
+        : (a.status ? '<b>' + msReads(a) + '%</b>'
+                    : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
+      '<td class="notecol">' + capNoteBox(a, mayA) + '</td></tr>';
+  }).join("");
+  return (kRows ? '<h4 class="mini">Objectives</h4>' +
+      miniTable(["#","Objective","Dir.","Target","Reported","Progress","Note"], kRows) : "") +
+    (aRows ? '<h4 class="mini">Actions</h4>' +
+      miniTable(["#","Action","Due","Status",MS_PCT,"Note"], aRows) : "");
+}
+
+function renderFnObjReport(fk){
+  var target = "fn:" + fk;
+  if (REVIEW.state !== "open") {
+    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
+      'Its figures are a record now.</div>';
+  }
+  var c = fnObjReported(fk);
+  var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
+  var mayAll = canSpeakFor(target);
+  var subd = !!REVIEW.submitted[target], parked = !!(REVIEW.parked || {})[target];
+  /* THE SAME BAR EVERY OTHER SUBJECT CARRIES (§105, §263), built once and
+     handed the same gate — a second copy of this is how a build comes to
+     offer an ungated Submit on one format while the others are correctly
+     shut. */
+  REPORT_CHROME = repChrome(target, c.done, c.total, pctDone, mayAll, subd, parked,
+                            submitWhyShort(target), ownStateChip(target));
+  return '<div class="capbody">' + fnObjReportBody(fk) + '</div>';
+}
+
 function renderFnProjects(fnKey){
   /* §334: the argument the pillars branch below already makes, one kind of
      thing further out — this page draws a HOLDER's projects, and a capability
@@ -6504,6 +6686,8 @@ function renderFnProjects(fnKey){
      so the branch is unchanged in shape. */
   var target = holderTarget(fnKey), caps = capsShown(target);
   if (plansInPillars(target)) return renderUnitPlan(unitLike(target));
+  /* §338: and the third way — its actions, where this page draws projects. */
+  if (plansInObjectives(target)) return fnObjPlan(fnKeyOf(target));
   if (!caps.length) return fnNothingBehind(target);
   var ed = projEditing(), on = projArranging(target);
   /* Gone here for the same reason and in the same breath (§94.15, §53.5):
@@ -6785,6 +6969,7 @@ function capReportBody(c){
 function renderFnReport(fnKey){
   var target = holderTarget(fnKey), fk = fnKeyOf(fnKey), caps = capsShown(target);
   if (plansInPillars(target)) return renderReport(unitLike(target));
+  if (plansInObjectives(target)) return renderFnObjReport(fk);
   if (!caps.length) return fnNothingBehind(target);
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +

@@ -1209,7 +1209,13 @@ function projectSubjectNames(){
   var out = [];
   FUNCTION_KEYS.forEach(function(k){
     var f = FUNCTIONS[k];
-    if (f && f.active !== false && !fnPlansInPillars(f) && fnOwnsProjects(k)) out.push(f.name);
+    /* §338: AND A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS. Its plan is
+       this template's subject too — the Objectives and Actions sheets — and
+       `fnOwnsProjects` rightly answers false for it, so without this clause
+       its plan downloads for nobody and cannot come back (§22, §61, and
+       §334.15's own finding one format along). */
+    if (f && f.active !== false && (fnPlansInObjectives(f) ||
+        (!fnPlansInPillars(f) && fnOwnsProjects(k)))) out.push(f.name);
   });
   return out.concat(GROUP.capabilities.map(function(x){ return x.name; }));
 }
@@ -1295,6 +1301,23 @@ function capPlanWorkbook(c){
         return acc;
       }, []) },
 
+    /* ── §338: ACTIONS ────────────────────────────────────────────────────
+       A function that plans in objectives and actions holds them directly, so
+       the sheet hangs off nothing — no Project column, and no validation
+       against one. It is written for EVERY holder rather than only for that
+       format, because an empty sheet costs a reader nothing and a sheet that
+       appears and disappears is a template somebody cannot learn (§45.2); what
+       it must never do is go missing where there ARE actions, since an upload
+       AUTHORS and a column the file does not carry is a column the plan loses
+       (§22). */
+    { name:"Actions", widths:[44, 26, 14, 9],
+      head:["Action", "Owner", "Due", "Hidden"],
+      validations:[{ range:"D2:D400", list:YESNO, soft:true }],
+      rows:(c.actions || []).map(function(a){
+        return [a.name, a.owner || "", a.due || "",
+                SMPRules.isHidden(a) ? "Yes" : ""];
+      }) },
+
     /* §227: Collaborators beside the Owner, the tactics sheet's own column —
        comma-separated names, and the export carries them or a download-and-
        re-upload would silently drop every one (§22: an upload AUTHORS). */
@@ -1361,6 +1384,17 @@ function capProgressWorkbook(c){
         return acc;
       }, []) },
 
+    /* §338: the same pair a milestone reports, with no Project column — an
+       action hangs off the function itself. */
+    { name:"Actions", widths:[44, 14, 16, 12, 18, 12, 44, 16], lockedCols:[7],
+      head:["Action", "Due", "Current status", "Current %",
+            "New status", "New %", "Note", "ID"],
+      validations:[{ range:"E2:E400", list:MS_STATUSES }],
+      rows:(c.actions || []).map(function(a){
+        return [a.name, a.due || "", msStatusWord(a.status),
+                a.pct == null ? "" : String(a.pct), "", "", a.note || "", a.id];
+      }) },
+
     /* §303: THE PER-CENT WAS IN THE WRONG COLUMN. `m.pct` — what is RECORDED
        — was written under "New %", the box the reporter is meant to fill, so
        the sheet handed back the stored figure as though somebody had just
@@ -1415,6 +1449,17 @@ function capPlanFromWorkbook(c, sheets){
     rows.push({ id:c.id + "-KO" + (++kN), type:"CAPOBJECTIVE",
       name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
       weight:r["Weight"], compile:r["Compile"],
+      hidden:yes(r["Hidden"]) ? "1" : "" });
+  });
+
+  /* §338: the actions, addressed to the HOLDER rather than to a project —
+     the same id shape `addAction` mints, so a row that arrives by file and one
+     added on the screen are indistinguishable afterwards. */
+  var aN = 0;
+  sheetObjects(sheets["Actions"]).forEach(function(r){
+    if (!r["Action"]) return;
+    rows.push({ id:c.id + "-A" + (++aN), type:"ACTION", name:r["Action"],
+      owner:r["Owner"], finish:r["Due"] != null ? r["Due"] : r["Due date"],
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
@@ -1473,6 +1518,7 @@ function capPlanFromWorkbook(c, sheets){
 function capProgressFromWorkbook(c, sheets){
   var out = [];
   [["Objectives","CAPOBJECTIVE","Objective"],
+   ["Actions","ACTION","Action"],          /* §338 */
    ["Deliverables","DELIVERABLE","Deliverable"],
    ["Outcomes","OUTCOME","Outcome"],
    ["Milestones","MILESTONE","Milestone"]].forEach(function(def){

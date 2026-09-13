@@ -8964,7 +8964,79 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;339: the setting that could not open,
+*Last Updated: 2026-09-13 &mdash; **&sect;340: the demo owes nothing.** Islam:
+*"make the demo client not missing anything"*, then *"I mean fill the missing
+areas"*, then *"do it all."* **MEASURED FIRST, AND IT WAS ONE THING REPEATED
+EIGHTY-THREE TIMES**: asked of the platform's own `gapMap`/`gapMissing`,
+**166 counted gaps and every one a tactic's `outcome` and its `outTarget`**
+&mdash; nothing else in the tenant, not an owner, not a date, not a measure's
+target. &sect;248's two fields arriving after the demo data was authored, never
+written, and &sect;249 then making them counted. **AND FILLING THEM WOULD HAVE
+TRADED ONE KIND OF MISSING FOR ANOTHER**, which is why the cost was measured
+before a line was written: &sect;254.2 settled that **the target alone** decides
+how a tactic is read, so writing the plan's two fields and stopping takes all 83
+from *reported* to *not reported* and shuts Submit everywhere. Each row wants
+three values, and that was said to him rather than discovered. **WHAT AN OUTCOME
+IS WAS AGREED FROM FIVE WORKED EXAMPLES** (his own ask), and the rule is that
+**the tactic is the work and the outcome is the thing that moved because of it**
+&mdash; never the pillar's key measure written again, or the plan counts one
+thing twice. **AND THE TWO UNITS THAT LOOK UNFINISHED ARE NOT, WHICH REVERSES
+WHAT I OFFERED HIM**: reading the code before writing it found
+`seedPartialReporting()` wiping Nigeria and Consumer Electronics **on purpose**,
+its reason in its own comment &mdash; *"Two units are genuinely mid-report &hellip;
+without this every row on the SMO's board reads 100%"* &mdash; so they are left
+exactly as they are and the offer is withdrawn rather than quietly carried out.
+**&sect;340.1 &mdash; AND THAT WIPE KNEW ONE OF A TACTIC'S TWO FIGURES**: it
+clears `actual`, &sect;248 added `outActual`, and `tacticAnswered` reads the
+second in preference &mdash; so the moment the plan gained outcomes Nigeria read
+**6 of 16 reported where it should be 0 of 16**, measured, and 0 again once both
+go (&sect;51.10 from the other end). The outcome's TARGET deliberately stays:
+the plan is complete there too; it is the figure nobody has entered.
+**&sect;340.2 &mdash; AND A FIGURE AT RISK CARRIES AN EXPLANATION**: &sect;105
+held Submit on **56** unexplained rows before any of this &mdash; pre-existing,
+invisible because nobody had tried to submit every unit &mdash; and the outcomes
+took it to **112**. All 112 written. Every subject now reads **0 gaps, 0
+explanations owed, 0 figures owed**, those two units excepted.
+**&sect;340.3** &mdash; Finance's two owed figures were ordinary incompleteness,
+established rather than assumed (no seed wipes it), and are answered.
+**&sect;340.4 &mdash; THE PATCH REFUSED ITSELF THREE TIMES AND EVERY REFUSAL WAS
+RIGHT**: 83 rows written by NAME with the expected match count declared and
+nothing written unless every name matches exactly (&sect;48) &mdash; it refused
+because Merchandising's five live in `config-data.js`, then because the two files
+spell a row differently (`name: "x"` on one line, `name:"x"` across two), so a
+row is found by MATCHING BRACES rather than by assuming it is a line; then the
+notes patch refused on five names, four of them one figure seen twice and the
+fifth a **third** match that is a different healthy figure in Care.
+**&sect;340.5 &mdash; AND THE ONE FAULT THAT GOT PAST IT WAS THAT SAME
+ASSUMPTION**: walking back to the nearest `{` lands inside
+`src: { set: "financialfigures" }`, so seven explanations were written **into
+the figure set rather than onto the row** &mdash; valid syntax, clean build,
+perfect render, and found only by the measurement that asks what the PLATFORM
+says rather than what the file contains (seven rows still owed a note after 115
+were written). **TWO CHECKS WERE RED AND BOTH WERE &sect;214.3**, each holding a
+literal this deliberate change moves, each **REWRITTEN, NEVER LOOSENED**
+(&sect;218) to MAKE the state it needs rather than borrow the demo's:
+`submit-gate` &sect;2 asserted Submit is held with a reason, which was true only
+because Mobile owed notes &mdash; and the file's own docstring already promised
+every state in it is made (&sect;104.8); `empty-not-missing` &sect;0 asserted the
+shipped plan owes something, which is the control that proves the missing
+register still exists (&sect;113.8) and now proves it over a gap it creates.
+**VERIFIED**: full `qa.py` sweep **ERRORS none**; authoriser 633/0; differ
+140/0; platform rules 69/0; session-state and db-url-choice clear; round trip,
+clean parity, two tabs 21/0, incremental write byte-identical, cx-refusal,
+one-line heal, capability move and functional projects 18/0 all green on virgin
+Postgres 16 databases &mdash; **and two of those first read as failures until
+each was given its OWN fresh database**, my harness reusing a populated one
+(&sect;105.6's family), with `clean-parity` proved by running it on a worktree of
+`main` where it passes (&sect;303). `sw.js` SHELL bumped, because the built
+file's bytes changed (&sect;91) &mdash; the served worker is unaffected, since
+&sect;316.10's generator drops the half that carries the name; the seed, the
+served shell and the shipped build all regenerated and `generated-in-step`
+clear. **Nothing about how a gap is counted, how an outcome is scored or who
+may report anything has moved**: the diff is the two demo data files, one line
+in `seedPartialReporting`, and the two rewritten checks.*
+
+*Earlier the same day: **&sect;339: the setting that could not open,
 and the creator who was nowhere in the data.** The two things &sect;337 and
 &sect;338 wrote down and deliberately left, both put to Islam in plain words
 with their costs and both answered in one message: *"1. no need a client they

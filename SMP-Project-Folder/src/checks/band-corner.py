@@ -237,7 +237,20 @@ with sync_playwright() as p:
         # long as the tab was open. Driven by RESIZING rather than by opening a
         # second page, because the answer is re-asked on resize and that path
         # is worth exercising too.
+        # §340: THE WINDOW IS MEASURED, NEVER ASSUMED. 900 was the height at
+        # which this page happened to have nothing to scroll the day §327 was
+        # written; the demo's plan has since been completed — every tactic
+        # gained an outcome and a column of prose — so the page grew past it
+        # and a literal height turned this section red on a build whose corners
+        # are drawn perfectly (§122.5: a guessed constant goes stale in
+        # silence). REWRITTEN, NEVER LOOSENED (§218): the property is word for
+        # word what it was, and the state it needs is now MADE by asking the
+        # page how tall it is rather than by hoping one number still fits it.
         pg.set_viewport_size({"width": 1440, "height": 900})
+        pg.wait_for_timeout(400)
+        tall = pg.evaluate("()=>document.documentElement.scrollHeight")
+        pg.set_viewport_size({"width": 1440,
+                              "height": max(900, min(int(tall) + 40, 3600))})
         pg.wait_for_timeout(500)
         room = pg.evaluate("""()=>{const b=document.querySelector('.pane > .pband');
           return {can: document.documentElement.scrollHeight - innerHeight,

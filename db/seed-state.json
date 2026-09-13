@@ -674,6 +674,7 @@
        "compile": "Latest",
        "actual": "22%",
        "progress": 44,
+       "note": "Merchant rollout is paused while the ERP cutover lands; coverage resumes from Q3.",
        "id": "mobile-P1-M3"
       },
       {
@@ -697,6 +698,10 @@
        "q4": 0,
        "status": "WIP",
        "actual": 45,
+       "outcome": "Duplicate customer and SKU records removed",
+       "outTarget": "12,000 #",
+       "outCompile": "Sum",
+       "outActual": "5,400",
        "id": "mobile-P1-T1"
       },
       {
@@ -708,6 +713,12 @@
        "q4": 0,
        "status": "WIP",
        "actual": 35,
+       "outcome": "Order-to-cash cycle time",
+       "outDir": "≤",
+       "outTarget": "5 d",
+       "outCompile": "Latest",
+       "outActual": "8 d",
+       "note": "Cycle time still carries the manual credit check; the automated check goes live with the Q3 cutover.",
        "id": "mobile-P1-T2"
       },
       {
@@ -719,6 +730,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Management reports live on Power BI",
+       "outTarget": "18 #",
+       "outCompile": "Count",
+       "outActual": "4",
+       "note": "Sales and stock reports are live; the finance reports wait on the group data warehouse.",
        "id": "mobile-P1-T3"
       },
       {
@@ -730,6 +746,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 30,
+       "outcome": "Merchants ordering through the app",
+       "outTarget": "1,500 #",
+       "outCompile": "Latest",
+       "outActual": "430",
+       "note": "Onboarding is running at about 90 merchants a month against the 180 needed; two field agents join in Q3.",
        "id": "mobile-P1-T4"
       },
       {
@@ -741,6 +762,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 22,
+       "outcome": "Business units on the shared data model",
+       "outTarget": "5 #",
+       "outCompile": "Latest",
+       "outActual": "1",
        "id": "mobile-P1-T5"
       }
      ],
@@ -806,6 +831,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 60,
+       "outcome": "Retailers scored on the preference index",
+       "outTarget": "120 #",
+       "outCompile": "Sum",
+       "outActual": "36",
+       "note": "Two of the five planned workshops ran late in Q2; the remaining three are booked for July and August.",
        "id": "mobile-P2-T1"
       },
       {
@@ -817,6 +847,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 45,
+       "outcome": "Key retailers on a signed joint plan",
+       "outTarget": "24 #",
+       "outCompile": "Count",
+       "outActual": "4",
+       "note": "Four plans signed with the largest accounts; the next twelve sit around the Q3 range review.",
        "id": "mobile-P2-T2"
       },
       {
@@ -828,6 +863,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 35,
+       "outcome": "Tier 2 merchants trading monthly",
+       "outTarget": "150 #",
+       "outCompile": "Latest",
+       "outActual": "52",
+       "note": "Enrolment slowed by the tighter credit check introduced in Q2; the revised policy should release the backlog in Q3.",
        "id": "mobile-P2-T3"
       },
       {
@@ -839,6 +879,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Channel data sources feeding the engine",
+       "outTarget": "10 #",
+       "outCompile": "Latest",
+       "outActual": "4",
+       "note": "Four internal sources are connected; the six external feeds depend on the data warehouse landing.",
        "id": "mobile-P2-T4"
       }
      ],
@@ -895,6 +940,7 @@
        "compile": "Sum",
        "actual": "96M",
        "progress": 32,
+       "note": "Accessory supply was constrained by the principal's H1 allocation; a second supplier is being qualified for Q3.",
        "id": "mobile-P3-M4"
       },
       {
@@ -904,6 +950,7 @@
        "compile": "Latest",
        "actual": "310",
        "progress": 39,
+       "note": "Acquisition has been concentrated on Cairo and Giza; the delta and canal regions open in Q3.",
        "id": "mobile-P3-M5"
       },
       {
@@ -916,6 +963,7 @@
        "compile": "Sum",
        "actual": "42M",
        "progress": 28,
+       "note": "Revenue tracks merchant numbers, so it follows the acquisition plan above rather than lagging it.",
        "id": "mobile-P3-M6"
       },
       {
@@ -934,6 +982,7 @@
        "compile": "Latest",
        "actual": "18.4K",
        "progress": 46,
+       "note": "Downloads follow merchant onboarding; the consumer campaign is deliberately held until the assortment is deeper.",
        "id": "mobile-P3-M8"
       }
      ],
@@ -947,6 +996,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Revenue from existing brand lines",
+       "outTarget": "6.4B EGP",
+       "outCompile": "Sum",
+       "outActual": "1.76B",
+       "note": "First-half volumes held despite the March price rise; the second half carries the seasonal peak.",
        "id": "mobile-P3-T1"
       },
       {
@@ -958,6 +1012,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Accessories and wearables revenue",
+       "outTarget": "180M EGP",
+       "outCompile": "Sum",
+       "outActual": "74M",
        "id": "mobile-P3-T2"
       },
       {
@@ -969,6 +1027,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 30,
+       "outcome": "Entry-to-mid devices sold through Sary",
+       "outTarget": "300K #",
+       "outCompile": "Sum",
+       "outActual": "30K",
+       "note": "The entry-to-mid range was only fully listed from May; volumes build through the second half.",
        "id": "mobile-P3-T3"
       },
       {
@@ -980,6 +1043,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 25,
+       "outcome": "B2B bundles live on Sary",
+       "outTarget": "12 #",
+       "outCompile": "Count",
+       "outActual": "1",
+       "note": "One bundle is live as a pilot; the remaining eleven follow once its margin is confirmed in Q3.",
        "id": "mobile-P3-T4"
       },
       {
@@ -991,6 +1059,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 50,
+       "outcome": "Tier-1 brands assessed and shortlisted",
+       "outTarget": "8 #",
+       "outCompile": "Count",
+       "outActual": "2",
+       "note": "Two brands assessed and both declined on exclusivity terms; four more are in the pipeline for H2.",
        "id": "mobile-P3-T5"
       },
       {
@@ -1002,6 +1075,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 28,
+       "outcome": "Ecosystem SKUs live",
+       "outTarget": "25 #",
+       "outCompile": "Latest",
+       "outActual": "7",
        "id": "mobile-P3-T6"
       },
       {
@@ -1013,6 +1090,9 @@
        "q4": 1,
        "status": "WIP",
        "actual": 35,
+       "outcome": "Market intelligence partner appointed",
+       "outTarget": "Y/N",
+       "outActual": "In progress 35",
        "id": "mobile-P3-T7"
       }
      ],
@@ -1056,6 +1136,7 @@
        "compile": "Latest",
        "actual": "1",
        "progress": 50,
+       "note": "One agreement signed; the second is held pending the Nigeria regulatory decision.",
        "id": "mobile-P4-M3"
       }
      ],
@@ -1069,6 +1150,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 60,
+       "outcome": "Export brand lines confirmed for the hub",
+       "outTarget": "5 #",
+       "outCompile": "Count",
+       "outActual": "2",
+       "note": "Two brand lines are confirmed for the hub; three more depend on the export licence expected in Q3.",
        "id": "mobile-P4-T1"
       },
       {
@@ -1080,6 +1166,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Tier 2 brand agreements signed",
+       "outTarget": "3 #",
+       "outCompile": "Count",
+       "outActual": "1",
+       "note": "One agreement signed in Q2; the other two are in commercial negotiation.",
        "id": "mobile-P4-T2"
       },
       {
@@ -1091,6 +1182,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 50,
+       "outcome": "Validation studies completed",
+       "outTarget": "4 #",
+       "outCompile": "Latest",
+       "outActual": "2",
+       "note": "The Nigeria and Libya studies are complete; Kenya and Ghana are scheduled for Q3.",
        "id": "mobile-P4-T3"
       },
       {
@@ -1102,6 +1198,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Markets with a cleared regulatory path",
+       "outTarget": "4 #",
+       "outCompile": "Latest",
+       "outActual": "2",
+       "note": "Two markets are cleared; Nigeria and Libya remain in regulatory review.",
        "id": "mobile-P4-T4"
       },
       {
@@ -1113,6 +1214,9 @@
        "q4": 1,
        "status": "WIP",
        "actual": 18,
+       "outcome": "Entry model signed off and storefront live",
+       "outTarget": "Y/N",
+       "outActual": "In progress 18",
        "id": "mobile-P4-T5"
       },
       {
@@ -1124,6 +1228,9 @@
        "q4": 0,
        "status": "Done",
        "actual": 100,
+       "outcome": "Regional entry decision taken and signed off",
+       "outTarget": "Y/N",
+       "outActual": "Done",
        "id": "mobile-P4-T6"
       }
      ],
@@ -1301,6 +1408,10 @@
        "q4": 0,
        "status": "WIP",
        "actual": 70,
+       "outcome": "Sites scored with the catchment model",
+       "outTarget": "30 #",
+       "outCompile": "Sum",
+       "outActual": "14",
        "id": "retailstores-P1-T1"
       },
       {
@@ -1315,6 +1426,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 65,
+       "outcome": "Stores fitted to the new standard",
+       "outTarget": "12 #",
+       "outCompile": "Count",
+       "outActual": "4",
+       "note": "Four stores fitted; the programme is paced to the store opening schedule, which is weighted to H2.",
        "id": "retailstores-P1-T2"
       },
       {
@@ -1326,6 +1442,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Landlord frameworks signed",
+       "outTarget": "12 #",
+       "outCompile": "Count",
+       "outActual": "2",
+       "note": "Two frameworks signed; negotiations slowed after the revised rent index published in April.",
        "id": "retailstores-P1-T3"
       }
      ],
@@ -1387,6 +1508,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 60,
+       "outcome": "Stores on the single stock view",
+       "outTarget": "40 #",
+       "outCompile": "Sum",
+       "outActual": "24",
+       "note": "Twenty-four stores are on the single view; the remainder follow the till replacement in Q3.",
        "id": "retailstores-P2-T1"
       },
       {
@@ -1398,6 +1524,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Stores offering click-and-collect",
+       "outTarget": "36 #",
+       "outCompile": "Count",
+       "outActual": "13",
+       "note": "The rollout follows the single stock view store by store and cannot run ahead of it.",
        "id": "retailstores-P2-T2"
       },
       {
@@ -1412,6 +1543,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 50,
+       "outcome": "Loyalty members active across both channels",
+       "outTarget": "180K #",
+       "outCompile": "Latest",
+       "outActual": "90K",
+       "note": "Members migrate as they transact; the campaign to move the remainder starts with the autumn season.",
        "id": "retailstores-P2-T3"
       }
      ],
@@ -1444,6 +1580,7 @@
        "compile": "Latest",
        "actual": "0.6%",
        "progress": 67,
+       "note": "Shrinkage is concentrated in four stores, all now on the weekly audit cycle; the group figure should fall through H2.",
        "id": "retailstores-P3-M2"
       }
      ],
@@ -1461,6 +1598,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 60,
+       "outcome": "Stores audited against the standard",
+       "outTarget": "48 #",
+       "outCompile": "Sum",
+       "outActual": "15",
+       "note": "Fifteen audits complete against twenty-four planned by June; two auditors joined in May and the backlog clears in Q3.",
        "id": "retailstores-P3-T1"
       },
       {
@@ -1472,6 +1614,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 50,
+       "outcome": "Store lines replenished automatically",
+       "outTarget": "80%",
+       "outCompile": "Latest",
+       "outActual": "40%",
+       "note": "Automation is live for the fast-moving lines; the long tail waits on the demand forecast rebuild.",
        "id": "retailstores-P3-T2"
       }
      ],
@@ -1550,6 +1697,7 @@
      "compile": "Sum",
      "actual": "310M",
      "progress": 34,
+     "note": "GMV tracks merchant numbers; the financing line is what unlocks basket size in the second half.",
      "id": "b2becomm-KO1"
     },
     {
@@ -1560,6 +1708,7 @@
      "compile": "Latest",
      "actual": "980",
      "progress": 45,
+     "note": "Acquisition is running to plan; activation is the gap, and the field programme is being resourced for it.",
      "id": "b2becomm-KO2"
     },
     {
@@ -1570,6 +1719,7 @@
      "compile": "Latest",
      "actual": "31%",
      "progress": 48,
+     "note": "The repeat rate is held back by fulfilment reliability; the logistics SLA is the fix.",
      "id": "b2becomm-KO3"
     },
     {
@@ -1580,6 +1730,7 @@
      "compile": "Latest",
      "actual": "3.1%",
      "progress": 65,
+     "note": "Defaults are concentrated in the first cohort onboarded without trading history; the new scoring model applies from Q3.",
      "id": "b2becomm-KO4"
     }
    ],
@@ -1624,6 +1775,7 @@
        "compile": "Latest",
        "actual": "980",
        "progress": 45,
+       "note": "Onboarding is running to plan; the shortfall is in activating merchants after they sign up.",
        "id": "b2becomm-P1-M1"
       },
       {
@@ -1634,6 +1786,7 @@
        "compile": "Sum",
        "actual": "310M",
        "progress": 34,
+       "note": "GMV tracks merchant numbers; the financing line is what unlocks basket size in the second half.",
        "id": "b2becomm-P1-M2"
       },
       {
@@ -1643,6 +1796,7 @@
        "compile": "Latest",
        "actual": "2.8",
        "progress": 35,
+       "note": "Basket frequency is the weakest figure in the plan and is the focus of the Q3 activation programme.",
        "id": "b2becomm-P1-M3"
       }
      ],
@@ -1656,6 +1810,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 35,
+       "outcome": "Merchants onboarded without a field visit",
+       "outTarget": "1,200 #",
+       "outCompile": "Sum",
+       "outActual": "215",
+       "note": "Self-serve sign-up went live in May; the run rate is building but will not recover the first-quarter shortfall.",
        "id": "b2becomm-P1-T1"
       },
       {
@@ -1667,6 +1826,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 25,
+       "outcome": "Merchants activated by the field team",
+       "outTarget": "800 #",
+       "outCompile": "Sum",
+       "outActual": "100",
+       "note": "The field team was two of five heads short until June; recruitment is now complete.",
        "id": "b2becomm-P1-T2"
       }
      ],
@@ -1693,6 +1857,7 @@
        "compile": "Latest",
        "actual": "74M",
        "progress": 41,
+       "note": "Lending is held back deliberately while the scoring model is validated; the book grows from Q3.",
        "id": "b2becomm-P2-M1"
       },
       {
@@ -1702,6 +1867,7 @@
        "compile": "Latest",
        "actual": "285",
        "progress": 48,
+       "note": "Approvals are paced to the credit book above rather than to demand.",
        "id": "b2becomm-P2-M2"
       }
      ],
@@ -1715,6 +1881,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 45,
+       "outcome": "Merchants scored from trading history",
+       "outTarget": "1,500 #",
+       "outCompile": "Sum",
+       "outActual": "225",
+       "note": "Scoring only reaches merchants with six months of history; the eligible population grows through H2.",
        "id": "b2becomm-P2-T1"
       },
       {
@@ -1726,6 +1897,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Lender agreements signed",
+       "outTarget": "6 #",
+       "outCompile": "Count",
+       "outActual": "1",
+       "note": "One lender signed; three more are in due diligence and expected to close in Q3.",
        "id": "b2becomm-P2-T2"
       }
      ],
@@ -1771,6 +1947,12 @@
        "q4": 0,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Orders missing the delivery SLA",
+       "outDir": "≤",
+       "outTarget": "5%",
+       "outCompile": "Latest",
+       "outActual": "13%",
+       "note": "Misses are concentrated on the delta routes; the new logistics hub plan addresses them from Q3.",
        "id": "b2becomm-P3-T1"
       },
       {
@@ -1782,6 +1964,12 @@
        "q4": 1,
        "status": "WIP",
        "actual": 32,
+       "outcome": "Unplanned platform downtime",
+       "outDir": "≤",
+       "outTarget": "4 h",
+       "outCompile": "Latest",
+       "outActual": "12 h",
+       "note": "Most of the downtime came from one storage failure in April; the redundancy work completes in Q3.",
        "id": "b2becomm-P3-T2"
       }
      ],
@@ -1864,6 +2052,7 @@
      "compile": "Latest",
      "actual": "19%",
      "progress": 68,
+     "note": "The repeat rate follows assortment breadth and should move as the group catalogue is onboarded.",
      "id": "onlineshop-KO3"
     },
     {
@@ -1874,6 +2063,7 @@
      "compile": "Latest",
      "actual": "9,400",
      "progress": 67,
+     "note": "Onboarding runs category by category; the remaining categories are scheduled through H2.",
      "id": "onlineshop-KO4"
     }
    ],
@@ -1911,6 +2101,7 @@
        "compile": "Latest",
        "actual": "9,400",
        "progress": 67,
+       "note": "Onboarding runs category by category and is on the published schedule.",
        "id": "onlineshop-P1-M1"
       },
       {
@@ -1920,6 +2111,7 @@
        "compile": "Latest",
        "actual": "7%",
        "progress": 57,
+       "note": "Availability is held back by manual stock updates; the automated sync is the fix.",
        "id": "onlineshop-P1-M2"
       },
       {
@@ -1942,6 +2134,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Group SKUs live on the storefront",
+       "outTarget": "9,000 #",
+       "outCompile": "Sum",
+       "outActual": "3,300",
+       "note": "Three categories are onboarded; the remaining five are scheduled through Q3 and Q4.",
        "id": "onlineshop-P1-T1"
       },
       {
@@ -1953,6 +2150,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Warehouses syncing stock automatically",
+       "outTarget": "5 #",
+       "outCompile": "Latest",
+       "outActual": "2",
+       "note": "Two warehouses are syncing; the other three wait on the warehouse system upgrade.",
        "id": "onlineshop-P1-T2"
       },
       {
@@ -1964,6 +2166,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 25,
+       "outcome": "Third-party sellers trading",
+       "outTarget": "20 #",
+       "outCompile": "Latest",
+       "outActual": "5",
        "id": "onlineshop-P1-T3"
       }
      ],
@@ -2002,6 +2208,7 @@
        "compile": "Latest",
        "actual": "540,000",
        "progress": 60,
+       "note": "Installs track the marketing calendar, which is weighted to the fourth quarter.",
        "id": "onlineshop-P2-M3"
       }
      ],
@@ -2015,6 +2222,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 80,
+       "outcome": "Checkout abandonment rate",
+       "outDir": "≤",
+       "outTarget": "45%",
+       "outCompile": "Latest",
+       "outActual": "56%",
        "id": "onlineshop-P2-T1"
       },
       {
@@ -2026,6 +2238,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 45,
+       "outcome": "Loyalty members enrolled",
+       "outTarget": "300K #",
+       "outCompile": "Sum",
+       "outActual": "45K",
+       "note": "The programme launched in May; enrolment builds with the autumn campaign.",
        "id": "onlineshop-P2-T2"
       },
       {
@@ -2037,6 +2254,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 30,
+       "outcome": "Orders including a recommended item",
+       "outTarget": "25%",
+       "outCompile": "Latest",
+       "outActual": "8%",
        "id": "onlineshop-P2-T3"
       }
      ],
@@ -2200,6 +2421,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 50,
+       "outcome": "New principal lines signed",
+       "outTarget": "2 #",
+       "outCompile": "Latest",
+       "outActual": "1",
+       "note": "One principal signed; the second is in final commercial negotiation.",
        "id": "consumerelectronics-P1-T1"
       },
       {
@@ -2211,6 +2437,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 35,
+       "outcome": "Own-label SKUs on sale",
+       "outTarget": "60 #",
+       "outCompile": "Sum",
+       "outActual": "7",
+       "note": "Seven SKUs are on sale as a first wave; the main range lands with the Q3 container.",
        "id": "consumerelectronics-P1-T2"
       },
       {
@@ -2222,6 +2453,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 45,
+       "outcome": "Premium range revenue",
+       "outTarget": "90M EGP",
+       "outCompile": "Sum",
+       "outActual": "13.5M",
+       "note": "The premium range was only listed from May; the first full quarter of trading is Q3.",
        "id": "consumerelectronics-P1-T3"
       }
      ],
@@ -2273,6 +2509,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 60,
+       "outcome": "Dealers on a tier with an active rebate",
+       "outTarget": "250 #",
+       "outCompile": "Latest",
+       "outActual": "150",
+       "note": "The larger dealers are on a tier; the smaller ones move across as their contracts renew.",
        "id": "consumerelectronics-P2-T1"
       },
       {
@@ -2284,6 +2525,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 38,
+       "outcome": "Regional service hubs open",
+       "outTarget": "9 #",
+       "outCompile": "Count",
+       "outActual": "1",
+       "note": "One hub is open in Cairo; site selection for the next three is complete and fit-out starts in Q3.",
        "id": "consumerelectronics-P2-T2"
       },
       {
@@ -2295,6 +2541,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 28,
+       "outcome": "Dealers ordering through the portal",
+       "outTarget": "180 #",
+       "outCompile": "Latest",
+       "outActual": "50",
        "id": "consumerelectronics-P2-T3"
       }
      ],
@@ -2427,6 +2677,7 @@
        "compile": "Latest",
        "actual": "11",
        "progress": 61,
+       "note": "Eleven are certified; the remaining seven sit the assessment in Q3.",
        "id": "corporate-P1-M1"
       },
       {
@@ -2436,6 +2687,7 @@
        "compile": "Latest",
        "actual": "29%",
        "progress": 64,
+       "note": "Share moves with certified engineers, so it follows the academy rather than leading it.",
        "id": "corporate-P1-M2"
       },
       {
@@ -2448,6 +2700,7 @@
        "compile": "Latest",
        "actual": "2.1M",
        "progress": 66,
+       "note": "Deal size rises with solution-led selling; the mix shifts as certifications complete.",
        "id": "corporate-P1-M3"
       }
      ],
@@ -2461,6 +2714,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Engineers through the academy",
+       "outTarget": "24 #",
+       "outCompile": "Sum",
+       "outActual": "7",
+       "note": "Seven engineers are through the first two cohorts; four more cohorts are scheduled for H2.",
        "id": "corporate-P1-T1"
       },
       {
@@ -2472,6 +2730,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 60,
+       "outcome": "Reference architectures published",
+       "outTarget": "10 #",
+       "outCompile": "Count",
+       "outActual": "3",
+       "note": "Three architectures are published; the rest follow as the vendor partnerships are signed.",
        "id": "corporate-P1-T2"
       },
       {
@@ -2483,6 +2746,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 42,
+       "outcome": "Vendor partnerships at solution tier",
+       "outTarget": "5 #",
+       "outCompile": "Latest",
+       "outActual": "2",
+       "note": "Two partnerships are at solution tier; the remaining three need the certified headcount above.",
        "id": "corporate-P1-T3"
       }
      ],
@@ -2503,6 +2771,7 @@
        "compile": "Latest",
        "actual": "16",
        "progress": 67,
+       "note": "Sixteen contracts are active; the framework registrations are what open the rest.",
        "id": "corporate-P2-M1"
       },
       {
@@ -2537,6 +2806,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 70,
+       "outcome": "Public frameworks registered on",
+       "outTarget": "9 #",
+       "outCompile": "Count",
+       "outActual": "4",
+       "note": "Four registrations are complete; the rest wait on the compliance certifications in CO02.",
        "id": "corporate-P2-T1"
       },
       {
@@ -2548,6 +2822,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 45,
+       "outcome": "Bids submitted through the desk",
+       "outTarget": "36 #",
+       "outCompile": "Sum",
+       "outActual": "5",
+       "note": "The desk was staffed from May; bid volume builds from Q3 as the frameworks open.",
        "id": "corporate-P2-T2"
       },
       {
@@ -2559,6 +2838,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 30,
+       "outcome": "Certifications held for public tenders",
+       "outTarget": "10 #",
+       "outCompile": "Latest",
+       "outActual": "3",
        "id": "corporate-P2-T3"
       }
      ],
@@ -2641,6 +2924,7 @@
      "compile": "Latest",
      "actual": "6 d",
      "progress": 67,
+     "note": "Turnaround is held by parts availability; the parts programme is the fix.",
      "id": "care-KO3"
     },
     {
@@ -2651,6 +2935,7 @@
      "compile": "Latest",
      "actual": "9%",
      "progress": 60,
+     "note": "Attach rate depends on point-of-sale training, which completes in Q3.",
      "id": "care-KO4"
     }
    ],
@@ -2697,6 +2982,7 @@
        "compile": "Latest",
        "actual": "6 d",
        "progress": 67,
+       "note": "Turnaround is held by parts availability; the parts programme is the fix.",
        "id": "care-P1-M2"
       },
       {
@@ -2719,6 +3005,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 65,
+       "outcome": "Repairs completed without a parts wait",
+       "outTarget": "80%",
+       "outCompile": "Latest",
+       "outActual": "52%",
+       "note": "Fast-moving parts are stocked; the long tail waits on the revised supplier agreement.",
        "id": "care-P1-T1"
       },
       {
@@ -2730,6 +3021,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 50,
+       "outcome": "Technicians certified to the new ladder",
+       "outTarget": "120 #",
+       "outCompile": "Sum",
+       "outActual": "30",
+       "note": "Thirty technicians are certified; the ladder runs monthly cohorts and is on schedule for the year.",
        "id": "care-P1-T2"
       },
       {
@@ -2741,6 +3037,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Repairs trackable by the customer",
+       "outTarget": "90%",
+       "outCompile": "Latest",
+       "outActual": "36%",
+       "note": "Tracking is live for in-warranty repairs; out-of-warranty jobs follow the Q3 system release.",
        "id": "care-P1-T3"
       }
      ],
@@ -2761,6 +3062,7 @@
        "compile": "Latest",
        "actual": "9%",
        "progress": 60,
+       "note": "Attach rate depends on point-of-sale training, which completes in Q3.",
        "id": "care-P2-M1"
       },
       {
@@ -2773,6 +3075,7 @@
        "compile": "Sum",
        "actual": "62M",
        "progress": 34,
+       "note": "Revenue follows the retailer contracts, and those are weighted to the second half.",
        "id": "care-P2-M2"
       },
       {
@@ -2798,6 +3101,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 48,
+       "outcome": "Extended plans sold at point of sale",
+       "outTarget": "24,000 #",
+       "outCompile": "Sum",
+       "outActual": "5,800",
+       "note": "Sales follow staff training, which reaches the remaining stores in Q3.",
        "id": "care-P2-T1"
       },
       {
@@ -2809,6 +3117,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 35,
+       "outcome": "Third-party retailer contracts signed",
+       "outTarget": "18 #",
+       "outCompile": "Count",
+       "outActual": "2",
+       "note": "Two contracts are signed; a further six are in negotiation for the second half.",
        "id": "care-P2-T2"
       },
       {
@@ -2820,6 +3133,10 @@
        "q4": 0,
        "status": "WIP",
        "actual": 70,
+       "outcome": "Service lines repriced",
+       "outTarget": "40 #",
+       "outCompile": "Sum",
+       "outActual": "14",
        "id": "care-P2-T3"
       }
      ],
@@ -2892,6 +3209,7 @@
      "compile": "Latest",
      "actual": "11%",
      "progress": 61,
+     "note": "Attach rate follows engineer certification, and that programme completes in Q3.",
      "id": "it-KO2"
     },
     {
@@ -2961,6 +3279,7 @@
        "compile": "Latest",
        "actual": "2.1M",
        "progress": 62,
+       "note": "Revenue per reseller rises with portal adoption, and adoption is the constraint below.",
        "id": "it-P1-M2"
       },
       {
@@ -2970,6 +3289,7 @@
        "compile": "Latest",
        "actual": "44%",
        "progress": 63,
+       "note": "The larger resellers are on the portal; the smaller ones move across at contract renewal.",
        "id": "it-P1-M3"
       }
      ],
@@ -2983,6 +3303,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 58,
+       "outcome": "Resellers placed on a tier",
+       "outTarget": "300 #",
+       "outCompile": "Latest",
+       "outActual": "174",
+       "note": "Tiering is complete for the top two bands; the long tail follows at contract renewal.",
        "id": "it-P1-T1"
       },
       {
@@ -2994,6 +3319,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 42,
+       "outcome": "Orders placed through the portal",
+       "outTarget": "60%",
+       "outCompile": "Latest",
+       "outActual": "25%",
+       "note": "Adoption is behind because the credit-limit view only shipped in May.",
        "id": "it-P1-T2"
       },
       {
@@ -3005,6 +3335,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 65,
+       "outcome": "Regional events delivered",
+       "outTarget": "6 #",
+       "outCompile": "Count",
+       "outActual": "2",
+       "note": "Two events delivered; four more are scheduled for the second half.",
        "id": "it-P1-T3"
       }
      ],
@@ -3037,6 +3372,7 @@
        "compile": "Latest",
        "actual": "11%",
        "progress": 61,
+       "note": "Attach rate follows engineer certification, and that programme completes in Q3.",
        "id": "it-P2-M2"
       },
       {
@@ -3046,6 +3382,7 @@
        "compile": "Latest",
        "actual": "15",
        "progress": 63,
+       "note": "Fifteen are certified; the remaining nine are booked onto the Q3 cohorts.",
        "id": "it-P2-M3"
       }
      ],
@@ -3059,6 +3396,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 45,
+       "outcome": "Managed service contracts live",
+       "outTarget": "40 #",
+       "outCompile": "Sum",
+       "outActual": "9",
+       "note": "Nine contracts are live; the pipeline supports the year-end figure once certification completes.",
        "id": "it-P2-T1"
       },
       {
@@ -3070,6 +3412,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 62,
+       "outcome": "Engineers certified on the new stack",
+       "outTarget": "36 #",
+       "outCompile": "Sum",
+       "outActual": "15",
+       "note": "Fifteen engineers certified against twenty-four planned by June; two cohorts slipped to Q3.",
        "id": "it-P2-T2"
       },
       {
@@ -3081,6 +3428,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 28,
+       "outcome": "Cloud accreditations achieved",
+       "outTarget": "4 #",
+       "outCompile": "Latest",
+       "outActual": "1",
        "id": "it-P2-T3"
       }
      ],
@@ -3153,6 +3504,7 @@
      "compile": "Latest",
      "actual": "18%",
      "progress": 60,
+     "note": "Third-party growth depends on the onboarding framework, which starts landing clients in Q3.",
      "id": "logistics-KO2"
     },
     {
@@ -3247,6 +3599,10 @@
        "q4": 0,
        "status": "WIP",
        "actual": 72,
+       "outcome": "Routes planned by the optimiser",
+       "outTarget": "85%",
+       "outCompile": "Latest",
+       "outActual": "61%",
        "id": "logistics-P1-T1"
       },
       {
@@ -3258,6 +3614,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 44,
+       "outcome": "Hubs rebalanced to the new plan",
+       "outTarget": "9 #",
+       "outCompile": "Latest",
+       "outActual": "4",
+       "note": "Four hubs are rebalanced; the remaining five are sequenced around the peak season.",
        "id": "logistics-P1-T2"
       },
       {
@@ -3269,6 +3630,12 @@
        "q4": 1,
        "status": "WIP",
        "actual": 38,
+       "outcome": "Returns cycle time",
+       "outDir": "≤",
+       "outTarget": "5 d",
+       "outCompile": "Latest",
+       "outActual": "13 d",
+       "note": "Returns still route through the central hub; the regional handling model goes live in Q3.",
        "id": "logistics-P1-T3"
       }
      ],
@@ -3301,6 +3668,7 @@
        "compile": "Latest",
        "actual": "23",
        "progress": 58,
+       "note": "Twenty-three clients are named; the pipeline supports the target once the SLA framework is signed off.",
        "id": "logistics-P2-M2"
       },
       {
@@ -3323,6 +3691,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 68,
+       "outcome": "Priced 3PL propositions in market",
+       "outTarget": "6 #",
+       "outCompile": "Latest",
+       "outActual": "4",
+       "note": "Four propositions are priced and in market; two specialist ones follow in Q3.",
        "id": "logistics-P2-T1"
       },
       {
@@ -3334,6 +3707,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 40,
+       "outcome": "New 3PL clients onboarded to the SLA",
+       "outTarget": "15 #",
+       "outCompile": "Sum",
+       "outActual": "2",
+       "note": "The framework was only agreed in May, so onboarding runs from Q3.",
        "id": "logistics-P2-T2"
       },
       {
@@ -3345,6 +3723,10 @@
        "q4": 1,
        "status": "WIP",
        "actual": 26,
+       "outcome": "Pilot clients on fulfilment-as-a-service",
+       "outTarget": "4 #",
+       "outCompile": "Latest",
+       "outActual": "1",
        "id": "logistics-P2-T3"
       }
      ],
@@ -3505,6 +3887,10 @@
        "q4": 0,
        "status": "Not started",
        "actual": null,
+       "outcome": "Warehouse bays commissioned",
+       "outTarget": "24 #",
+       "outCompile": "Sum",
+       "outActual": "",
        "id": "nigeria-P1-T1"
       },
       {
@@ -3516,6 +3902,10 @@
        "q4": 1,
        "status": "Not started",
        "actual": null,
+       "outcome": "Dealers recruited and trading",
+       "outTarget": "240 #",
+       "outCompile": "Latest",
+       "outActual": "",
        "id": "nigeria-P1-T2"
       },
       {
@@ -3527,6 +3917,10 @@
        "q4": 1,
        "status": "Not started",
        "actual": null,
+       "outcome": "Local brand agreements signed",
+       "outTarget": "5 #",
+       "outCompile": "Latest",
+       "outActual": "",
        "id": "nigeria-P1-T3"
       }
      ],
@@ -3578,6 +3972,10 @@
        "q4": 0,
        "status": "Not started",
        "actual": null,
+       "outcome": "Dealer accounts on the new credit terms",
+       "outTarget": "180 #",
+       "outCompile": "Latest",
+       "outActual": "",
        "id": "nigeria-P2-T1"
       },
       {
@@ -3589,6 +3987,10 @@
        "q4": 1,
        "status": "Not started",
        "actual": null,
+       "outcome": "Annualised cost taken out",
+       "outTarget": "60M EGP",
+       "outCompile": "Sum",
+       "outActual": "",
        "id": "nigeria-P2-T2"
       },
       {
@@ -3600,6 +4002,9 @@
        "q4": 1,
        "status": "Not started",
        "actual": null,
+       "outcome": "Hedging policy agreed with the group",
+       "outTarget": "Y/N",
+       "outActual": "",
        "id": "nigeria-P2-T3"
       }
      ],
@@ -3730,6 +4135,7 @@
        "finish": "May 2026",
        "status": "wip",
        "pct": 40,
+       "note": "Waiting on the group data warehouse; the reporting build starts once it is loading nightly.",
        "id": "cap7-P1-M5"
       }
      ],
@@ -3751,7 +4157,9 @@
       {
        "name": "Facility term sheet agreed with lead bank",
        "due": "Feb 26",
-       "status": null,
+       "status": "wip",
+       "pct": 50,
+       "note": "Terms are back from two of the three lenders; the third is expected in July and the sheet is signed once all three are in.",
        "id": "cap7-P2-D1"
       },
       {
@@ -3763,7 +4171,8 @@
       {
        "name": "Legacy facilities closed",
        "due": "Jun 26",
-       "status": null,
+       "status": "todo",
+       "note": "Cannot start until the new facility is drawn down; that follows the term sheet above.",
        "id": "cap7-P2-D3"
       }
      ],
@@ -3794,6 +4203,7 @@
        "finish": "June 2026",
        "status": "wip",
        "pct": 50,
+       "note": "Two of the three lenders have returned terms; the third is expected in July.",
        "id": "cap7-P2-M2"
       },
       {
@@ -4089,6 +4499,7 @@
        "due": "Mar 26",
        "status": "wip",
        "pct": 44,
+       "note": "Half the calendar is delivered; the rest is scheduled around the peak trading period.",
        "id": "cap2-P3-D2"
       }
      ],
@@ -4128,6 +4539,7 @@
        "finish": "June 2026",
        "status": "wip",
        "pct": 40,
+       "note": "Two sessions moved to July at the units' request; the year-end total is unchanged.",
        "id": "cap2-P3-M3"
       },
       {
@@ -4152,6 +4564,7 @@
      "actual": "62%",
      "progress": 69,
      "weight": 50,
+     "note": "Coverage improved with three senior hires; four key roles remain open and are being searched.",
      "id": "cap2-KO1"
     },
     {
@@ -4162,6 +4575,7 @@
      "actual": "19%",
      "progress": 63,
      "weight": 50,
+     "note": "Attrition is concentrated in field sales; the revised incentive scheme applies from Q3.",
      "id": "cap2-KO2"
     }
    ],
@@ -4355,6 +4769,7 @@
        "due": "May 26",
        "status": "wip",
        "pct": 40,
+       "note": "Drafted for the two largest warehouses; the rest follow the Q3 process review.",
        "id": "cap1-P3-D2"
       }
      ],
@@ -4604,6 +5019,7 @@
        "measureAt": "Q4 2026",
        "actual": "2",
        "progress": 33,
+       "note": "Two systems are retired; the next four depend on the data warehouse going live.",
        "id": "cap3-P1-O1"
       },
       {
@@ -4670,6 +5086,7 @@
        "name": "Warehouse built and loading nightly",
        "due": "Apr 26",
        "status": "todo",
+       "note": "Not started — the hardware order slipped and the build begins in July.",
        "id": "cap3-P2-D1"
       },
       {
@@ -4677,6 +5094,7 @@
        "due": "Mar 26",
        "status": "wip",
        "pct": 36,
+       "note": "Sales reporting is live; finance waits on the warehouse above.",
        "id": "cap3-P2-D2"
       }
      ],
@@ -4744,6 +5162,7 @@
        "due": "Feb 26",
        "status": "wip",
        "pct": 52,
+       "note": "Just over half the backlog is delivered; the remainder is sequenced behind the warehouse.",
        "id": "cap3-P3-D2"
       }
      ],
@@ -4798,6 +5217,7 @@
      "actual": "2",
      "progress": 33,
      "weight": 100,
+     "note": "Two systems are retired; the next four depend on the data warehouse going live.",
      "id": "cap3-KO1"
     }
    ],
@@ -4845,6 +5265,7 @@
        "measureAt": "Q4 2026",
        "actual": "26",
        "progress": 65,
+       "note": "The score tracks repair turnaround, so it follows the parts programme in Care rather than leading it.",
        "id": "cap5-P1-O1"
       },
       {
@@ -4902,6 +5323,7 @@
        "name": "Recovery standard published",
        "due": "Feb 26",
        "status": "todo",
+       "note": "Not started — the draft is with legal and publishes in Q3.",
        "id": "cap5-P2-D1"
       },
       {
@@ -4955,6 +5377,7 @@
      "actual": "26",
      "progress": 65,
      "weight": 100,
+     "note": "The score tracks repair turnaround, so it follows the parts programme in Care rather than leading it.",
      "id": "cap5-KO1"
     }
    ],
@@ -5058,6 +5481,7 @@
        "due": "Jun 26",
        "status": "wip",
        "pct": 40,
+       "note": "Eight of the ten units report through the platform; the last two join at the next cycle.",
        "id": "cap8-P2-D2"
       }
      ],
@@ -5069,6 +5493,7 @@
        "measureAt": "Q4 2026",
        "actual": "51%",
        "progress": 64,
+       "note": "Adherence improves as units move onto the platform; two are still reporting by spreadsheet.",
        "id": "cap8-P2-O1"
       }
      ],
@@ -5114,6 +5539,7 @@
      "actual": "51%",
      "progress": 64,
      "weight": 50,
+     "note": "Adherence improves as units move onto the platform; two are still reporting by spreadsheet.",
      "id": "cap8-KO2"
     }
    ],
@@ -5153,6 +5579,7 @@
        "compile": "Latest",
        "actual": "18%",
        "progress": 67,
+       "note": "Slow movers are concentrated in two categories, both now under range review.",
        "id": "fn:merchandising-P1-M2"
       }
      ],
@@ -5169,6 +5596,10 @@
        "q4": 0,
        "status": "WIP",
        "actual": 75,
+       "outcome": "Categories with a defined role",
+       "outTarget": "24 #",
+       "outCompile": "Sum",
+       "outActual": "18",
        "id": "fn:merchandising-P1-T1"
       },
       {
@@ -5180,6 +5611,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 60,
+       "outcome": "Categories reviewed this year",
+       "outTarget": "24 #",
+       "outCompile": "Sum",
+       "outActual": "7",
+       "note": "Seven categories are reviewed; the review runs quarterly and the remainder fall in H2.",
        "id": "fn:merchandising-P1-T2"
       }
      ],
@@ -5213,6 +5649,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 55,
+       "outcome": "Categories with a published planogram",
+       "outTarget": "5 #",
+       "outCompile": "Count",
+       "outActual": "1",
+       "note": "One planogram is published; the other four wait on the fixture survey completing in July.",
        "id": "fn:merchandising-P2-T1"
       },
       {
@@ -5227,6 +5668,11 @@
        "q4": 1,
        "status": "WIP",
        "actual": 40,
+       "outcome": "Stores refitted with the new fixtures",
+       "outTarget": "10 #",
+       "outCompile": "Latest",
+       "outActual": "4",
+       "note": "Four stores are refitted; the rest are scheduled around the trading calendar.",
        "id": "fn:merchandising-P2-T2"
       }
      ],
@@ -5273,6 +5719,11 @@
        "q4": 0,
        "status": "WIP",
        "actual": 65,
+       "outcome": "Supplier agreements renegotiated",
+       "outTarget": "20 #",
+       "outCompile": "Count",
+       "outActual": "8",
+       "note": "Eight agreements are renegotiated; the remaining twelve renew in the second half.",
        "id": "fn:merchandising-P3-T1"
       }
      ],

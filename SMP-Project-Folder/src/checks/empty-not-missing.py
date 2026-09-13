@@ -103,11 +103,23 @@ with sync_playwright() as p:
     })""")
     print("unit %(unit)s · smo %(smo)s · custodian %(cust)s" % who)
 
-    # ── 0 · THE LOUD REGISTER FIRST, ON THE SHIPPED PLAN ───────────────
-    # Asserted BEFORE anything is made, or a build that had lost the missing
-    # bar entirely would satisfy every quiet assertion below (§113.8).
-    print("\n0 · the missing register, untouched")
+    # ── 0 · THE LOUD REGISTER FIRST, OVER A GAP THIS CHECK MAKES ───────
+    # Asserted BEFORE the quiet state below, or a build that had lost the
+    # missing bar entirely would satisfy every quiet assertion there (§113.8).
+    # §340: THE GAP IS MADE NOW RATHER THAN BORROWED. This leaned on the
+    # shipped plan owing 44 on Mobile, and the demo's plan was completed — so
+    # the control went red on a build whose missing register is perfectly
+    # intact (§214.3). REWRITTEN, NEVER LOOSENED (§218): the property is word
+    # for word what it was, and what changed is that this section now creates
+    # the one thing it needs instead of relying on the demo staying unfinished.
+    # Section 1 fills both fields back, so the state below is unaffected.
+    print("\n0 · the missing register, over a gap made here")
     be(pg, who["smo"], who["unit"], "strategy", "plan")
+    pg.evaluate("""(u) => {
+      const t = UNITS[u].items[0].tactics[0];
+      delete t.outcome; delete t.outTarget; paint();
+    }""", who["unit"])
+    pg.wait_for_timeout(300)
     loud = pg.evaluate("""() => {
       const band = document.querySelector('[data-gapband]');
       if (!band) return { drawn:false };

@@ -133,6 +133,22 @@ with sync_playwright() as p:
 
     # 2 - SUBMIT IS DIMMED, AND SAYS WHY BEFORE IT IS PRESSED
     print("\n2 · not ready: dimmed, with the reason on hover (§221)")
+    # §340: THE STATE IS MADE HERE NOW, NOT BORROWED FROM THE DEMO. This read
+    # Mobile as it stood, which owed six explanations and 44 plan gaps — so the
+    # assertion was true by accident of the data rather than because anything
+    # here made it true, and the day the demo's plan was completed it went red
+    # on a build behaving exactly as decided (§214.3, and §280.1's rule: a
+    # check that can no longer pass is a red line people learn to scroll past).
+    # REWRITTEN, NEVER LOOSENED (§218) — the property is unchanged and is now
+    # asserted against a report this section itself makes incomplete. Taking a
+    # figure away is the smallest thing that does it, and the fill below puts
+    # the unit back. The file's own docstring already promised every state in
+    # it is made; this section was the one that was not (§104.8).
+    pg.evaluate("""() => {
+      const m = (UNITS[current].items[0].measures || [])[0];
+      m.actual = ""; m.progress = null; paint();
+    }""")
+    pg.wait_for_timeout(300)
     r = bar_state(pg)
     ck("Submit is drawn", r["submit"] is True, r)
     ck("...and marked not-ready", r["dim"] == "true", r)

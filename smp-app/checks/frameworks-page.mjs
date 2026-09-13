@@ -1,5 +1,5 @@
 /* The Frameworks tab, driven in a real browser against the built app
- * (spec 050, phases A and B).
+ * (spec 050, phases A, B and C).
  *
  * WHAT IT IS FOR, beyond "the page renders": a page wired to nothing looks
  * identical to one that works (§96). And the fault this file found on its
@@ -198,6 +198,107 @@ try {
     await page.click(".cback");
     await page.waitForSelector(".fwlist .fwrow", { timeout: 20000 });
     check(await visible() === 80, "the way back returns to all eighty");
+  });
+
+  /* ── Phase C: asking it ────────────────────────────────────────── */
+
+  await section("asking it, in the search's own box", async () => {
+    const ways = await page.$$eval(".fwbox .cell button", (bs) => bs.map((b) => b.textContent.trim()));
+    check(ways.join(" | ") === "Search | Ask it",
+      "one field under a segmented pair — decision 2, and never two boxes stacked", ways.join(" | "));
+    check(await page.$eval('.fwbox .cell button:has-text("Search")', (b) => b.getAttribute("aria-pressed")) === "true",
+      "and it opens on searching, which is what the page is for");
+
+    answers({ answered: true, reply: "Two of these bear on it.", source: "" });
+    await page.click('.fwbox .cell button:has-text("Ask it")');
+    await page.waitForSelector(".fwask button.solid", { timeout: 20000 });
+    check(!(await page.$(".fwchips")), "the section chips go — they narrow a list that is not on screen");
+    check(!(await page.$(".fwlist")), "and so does the list");
+    check((await page.innerText(".note")).indexOf("only from the library") >= 0,
+      "with the one thing worth saying before somebody types", await page.innerText(".note"));
+  });
+
+  await section("an answer names its sources, and each is a door", async () => {
+    /* The stub cites two REAL ids, read out of the page's own rows — an
+       answer citing something nobody has is its own assertion below. */
+    const two = (await db.query("SELECT id, name FROM frameworks ORDER BY idx LIMIT 2")).rows;
+    answers({ answered: true, reply: "Three bear on this, in this order.",
+              source: "[" + two[0].id + "], " + two[1].id + ", 00000000-0000-0000-0000-0000000000ff" });
+    await page.fill(".fwask input", "We are losing share to a cheaper entrant.");
+    await page.click(".fwask button.solid");
+    await page.waitForSelector(".fwans", { timeout: 20000 });
+    check((await page.innerText(".fwans > p")).indexOf("Three bear on this") >= 0,
+      "the answer is drawn", await page.innerText(".fwans > p"));
+    const cites = await page.$$eval(".fwcite .nm", (ns) => ns.map((n) => n.textContent.trim()));
+    check(cites.length === 2,
+      "two sources, and the id nobody has was dropped rather than drawn as a door to a 404 (§96.2)",
+      cites.length + ": " + cites.join(" | "));
+    check(cites[0] === two[0].name, "each named", cites[0]);
+    check((await page.$$(".fwcite .wy")).length === 2, "each saying what it is for before it is opened");
+
+    await page.click(".fwcite");
+    await page.waitForSelector(".band .fwsec", { timeout: 20000 });
+    check((await page.innerText(".ptitle h1")).indexOf(two[0].name) >= 0,
+      "and pressing one opens that framework — the next step is to go and read it",
+      await page.innerText(".ptitle h1"));
+    await page.click(".cback");
+    await page.waitForSelector(".fwans", { timeout: 20000 });
+    /* THE ANSWER SURVIVES THE ROUND TRIP. Losing it on the way back would
+       mean reading one of three sources costs the other two. */
+    check((await page.innerText(".fwans > p")).indexOf("Three bear on this") >= 0,
+      "the way back finds the answer still there, with its other sources");
+  });
+
+  await section("when the library has nothing", async () => {
+    answers({ answered: false, reply: "I have nothing on pre-mortems.", source: "" });
+    await page.fill(".fwask input", "How do we run a pre-mortem before sign-off?");
+    await page.click(".fwask button.solid");
+    await page.waitForTimeout(400);
+    await page.waitForSelector(".fwans", { timeout: 20000 });
+    const said = await page.innerText(".fwans > p");
+    check(said.indexOf("Nothing in the library covers") >= 0,
+      "it says so, in the product's words and not the model's (§125)", said);
+    check(said.indexOf("pre-mortems") < 0, "the model's own sentence is not what is shown");
+    check((await page.$$(".fwcite")).length === 0, "a decline draws no sources");
+    /* THE THIRD WAY IN, and it is the whole reason the page has two add
+       buttons rather than three. */
+    const door = await page.$('.fwans button.amber');
+    check(!!door, "an admin is offered the door to add it");
+    await door.click();
+    await page.waitForSelector(".band input.fld", { timeout: 20000 });
+    check((await page.innerText(".ptitle h1")).trim() === "Add a framework", "which opens the add screen");
+    check((await page.inputValue(".band input.fld")) === "",
+      "with the name box EMPTY — a question is not what the framework is called (§96.2)",
+      await page.inputValue(".band input.fld"));
+    await page.click('.row button:has-text("Cancel")');
+    await page.waitForSelector(".fwbox", { timeout: 20000 });
+
+    /* BOTH ENDS (§94.2): the sentence differs for somebody who cannot act on
+       it, and a build that drew the door for everybody would pass above. */
+    const p3 = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    try {
+      answers({ answered: false, reply: "x", source: "" });
+      await p3.goto(BASE + "/", { waitUntil: "networkidle" });
+      await p3.fill("#user", PLAIN);
+      await p3.fill("#password", DEV_PASSWORD);
+      await p3.click("button[type=submit]");
+      await p3.waitForSelector("body.ready", { timeout: 20000 });
+      await p3.click('.nav button[data-tab="frameworks"]');
+      await p3.waitForSelector(".fwbox .cell button", { timeout: 20000 });
+      await p3.click('.fwbox .cell button:has-text("Ask it")');
+      await p3.fill(".fwask input", "How do we run a pre-mortem?");
+      await p3.click(".fwask button.solid");
+      await p3.waitForSelector(".fwans", { timeout: 20000 });
+      const theirs = await p3.innerText(".fwans > p");
+      check(theirs.indexOf("asking the office") >= 0,
+        "a consultant is told to ask the office rather than offered a door they cannot open", theirs);
+      check(!(await p3.$(".fwans button.amber")), "and is offered no door (§61)");
+    } finally { await p3.close().catch(() => {}); }
+
+    /* Back to searching, for the sections after this one. */
+    await page.click('.fwbox .cell button:has-text("Search")');
+    await page.waitForSelector(".fwlist .fwrow", { timeout: 20000 });
+    check(await visible() === 80, "the switch goes back to searching, whole");
   });
 
   /* ── Phase B: adding one ───────────────────────────────────────── */

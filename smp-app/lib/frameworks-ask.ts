@@ -1,4 +1,9 @@
-/* Drafting a framework, and asking the library (spec 050).
+/* Asking the library, and drafting a framework (spec 050).
+ *
+ * TWO CALLS THAT LOOK ALIKE AND ARE OPPOSITE, which is why they sit in one
+ * file: asking is a LOOKUP over eighty frameworks and keeps every default
+ * `assistant.cjs` has; drafting composes, and is the one call in this
+ * platform that is not retrieval. The header below is about the second.
  *
  * THIS IS THE ONE CALL IN THIS PLATFORM THAT IS NOT A LOOKUP, and the whole
  * file turns on saying so. Everywhere else the assistant answers FROM a corpus
@@ -108,6 +113,119 @@ function instructionFor(sections: string[], source: string | null): string {
     VOICE, "", secs, "", "The fields:", fieldList(),
   ].join("\n");
 }
+
+/* ════════════════════════════════════════════════════════════════
+   ASKING IT — `memory-ask.ts`'s shape, and deliberately its shape rather
+   than a second one (§53.5). It is NOT a second assistant: `assistant.cjs`
+   already answers from a corpus, declines rather than inventing and caps its
+   own thinking; this points it at a different corpus under the same two
+   rules, and keeps every default.
+   ════════════════════════════════════════════════════════════════ */
+
+/* THE DECLINE IS OURS, NEVER THE MODEL'S (§125), and it says the useful
+   thing. `assistant.cjs` BLANKS the reply when it hands over, because on the
+   product's own manual a decline means a person is coming and the model's
+   sentence would read as the answer. Nobody is coming here — "nothing in the
+   library covers that" IS the answer, and for an admin the next step is to
+   add it, which is what `NOTHING_FITS_ADMIN` says and why there are two. */
+export const NOTHING_FITS =
+  "Nothing in the library covers that one. It may be worth asking the office to add it.";
+export const NOTHING_FITS_ADMIN =
+  "Nothing in the library covers that one — if you know the framework, you can add it.";
+
+export type Cited = { id: string; name: string; section: string; purpose: string };
+
+const ASK_INSTRUCTION = [
+  "You are answering a consultant at Forefront from the firm's own strategy frameworks",
+  "library: eighty published tools, each with what it is for, the questions it answers",
+  "and when it is the right one to reach for.",
+  "",
+  "Answer ONLY from the frameworks below. Never invent a tool, an author or a method,",
+  "and never describe a framework the list does not carry.",
+  "",
+  "The question is almost always some form of \"which of these should I use, and why\".",
+  "Say which, in a sentence or two, and say what makes it the right one for what they",
+  "described. Where two genuinely fit, say both and say what separates them.",
+  "",
+  "ALWAYS name your sources. `source` must be the bracketed id of every framework you",
+  "drew on, comma separated — the consultant's next step is to open it and read it, and",
+  "they cannot do that if you do not say which one.",
+  "",
+  "If nothing in the library fits, set answered to false. That is a useful answer: it",
+  "means the firm has not written that tool up. A confident answer from nothing is not.",
+  "",
+  "Reply in plain prose, a few sentences, in British English. No markdown.",
+].join("\n");
+
+/* THE FIVE THAT DECIDE WHICH TOOL THIS IS, and no more: the whole library
+   travels in one prompt, and at eighty frameworks the nine fields would be
+   some 140 KB where these five are about 32 (plan.md). The failure a bigger
+   corpus buys is the bad kind — a prompt cut in half answers confidently
+   from the frameworks that survived the cut. They are the same five the LIST
+   carries, which is not a coincidence to repeat in two places: they are what
+   answers "is this the right tool". */
+type AskRow = { id: string; name: string; section: string; purpose: string; key_questions: string; when_to_use: string };
+
+export function corpusOf(rows: AskRow[]): string {
+  return rows.map((r) => [
+    "## [" + r.id + "] " + r.name,
+    "Section: " + r.section,
+    "What it is for: " + r.purpose,
+    "Questions it answers: " + r.key_questions,
+    "When to use it: " + r.when_to_use,
+  ].join("\n")).join("\n\n");
+}
+
+export async function askLibrary(pool: Q, question: unknown, canAdd: boolean) {
+  const q = String(question || "").trim();
+  if (!q) return { ok: false as const, why: "there is no question" };
+  const rows: AskRow[] = (await pool.query(
+    "SELECT id, name, section, purpose, key_questions, when_to_use FROM frameworks ORDER BY idx")).rows;
+  /* AN EMPTY LIBRARY IS SAID RATHER THAN ANSWERED FROM (§45.2). It cannot
+     happen on a deployed database — migration 009 loads eighty — which is
+     exactly why it is guarded: the state that cannot happen is the one
+     nothing would have caught. */
+  if (!rows.length) return { ok: false as const, why: "the library is empty" };
+
+  const r = await A.ask({
+    question: q,
+    /* `assistant.cjs` refuses an empty corpus by COUNTING sections and
+       recipes, so the rows ride in as `sections`; the count is all it reads
+       them for once corpusText is supplied. memory-ask.ts's own note. */
+    kb: { sections: rows.map((x) => ({ id: x.id })), recipes: [] },
+    corpusName: "THE STRATEGY FRAMEWORKS LIBRARY",
+    /* RED: the frameworks are not sent. `assistant.cjs` falls back to building
+       a corpus out of `kb` when corpusText is empty, and `kb` here is nothing
+       but the ids — so what it would answer from is EIGHTY BARE IDS, which is
+       measured rather than described as "nothing at all": a confident answer
+       naming tools it was never shown is precisely what this must not do, and
+       that is what the break produces. */
+    corpusText: process.env.SMP_BREAK === "no-corpus" ? "" : corpusOf(rows),
+    instruction: ASK_INSTRUCTION,
+    emptyWhy: "the library is empty",
+  });
+  if (!r || !r.ok) return { ok: false as const, why: (r && r.why) || "the assistant could not be reached" };
+
+  /* THE SOURCES ARE RESOLVED AGAINST WHAT WAS SENT, never trusted as written
+     (§96.2): a cited id nobody has is citing nothing, and the page draws each
+     source as a door — so an unresolved one would send somebody to a 404.
+     memory-ask.ts's rule, copied rather than re-invented. */
+  const byId = new Map(rows.map((x) => [String(x.id), x]));
+  const cited: Cited[] = String(r.source || "")
+    .split(/[,\s]+/).map((x) => x.replace(/[[\]]/g, "").trim()).filter(Boolean)
+    .filter((id, i, all) => all.indexOf(id) === i)
+    .map((id) => byId.get(id)).filter(Boolean)
+    .map((x) => ({ id: String(x!.id), name: x!.name, section: x!.section, purpose: x!.purpose }));
+
+  if (!r.answered) {
+    return { ok: true as const, answered: false, reply: canAdd ? NOTHING_FITS_ADMIN : NOTHING_FITS, sources: [] as Cited[] };
+  }
+  return { ok: true as const, answered: true, reply: String(r.reply || ""), sources: cited };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   DRAFTING ONE — the half that composes.
+   ════════════════════════════════════════════════════════════════ */
 
 export type Draft = Record<string, string>;
 export type DraftResult =

@@ -18,6 +18,7 @@
  *   … --break=short-library   (RED: one framework is missing)
  *   … --break=no-admin-gate   (RED: anybody adds to the firm's library)
  *   … --break=think-capped    (RED: the by-name draft is capped like a lookup)
+ *   … --break=no-corpus       (RED: the ask answers from nothing at all)
  *
  * THE MODEL IS STOOD IN FRONT OF, never branched around (§100.3, §142.6): a
  * local stub answers on GEMINI_ENDPOINT, which is the environment variable
@@ -301,6 +302,71 @@ try {
     answers(drafted({ name: "" }));
     const d = await frameworksAction(c, ADMIN, { action: "draft", name: "The Typed Name" });
     check(d.body.draft.name === "The Typed Name", "a nameless draft takes the name that was typed", d.body.draft.name);
+  });
+
+  await section("asking it", async () => {
+    const first = (await c.query("SELECT id, name FROM frameworks ORDER BY idx LIMIT 2")).rows;
+    answers({ answered: true, reply: "Two bear on this.", source: "[" + first[0].id + "], " + first[1].id });
+    const a = await frameworksAction(c, CONSULTANT, { action: "ask", question: "Which tool for a price war?" });
+    check(a.code === 200 && a.body.answered === true, "an ordinary consultant asks and is answered", a.code);
+    check(a.body.reply === "Two bear on this.", "in the assistant's words", a.body.reply);
+    const src = a.body.sources || [];
+    check(src.length === 2, "with both sources named", src.length);
+    check(src[0].id === first[0].id && src[0].name === first[0].name,
+      "each resolved to a real framework, name and all", JSON.stringify(src[0]).slice(0, 80));
+    check(!!src[0].purpose, "carrying what it is for, so the row says why before it is opened");
+
+    /* THE WHOLE LIBRARY IS THE CORPUS, and only the five that decide which
+       tool this is — the other four would be some 140 KB in one prompt, and
+       a prompt cut in half answers confidently from what survived the cut. */
+    const sent = prompt();
+    /* THE NAME, not the id (§113.8): `assistant.cjs` falls back to a corpus
+       built from `kb` when corpusText is empty, and `kb` here carries the ids
+       — so an id-shaped assertion is TRUE of a build that sent eighty bare
+       ids and no frameworks at all, which is exactly what must fail. */
+    check(sent.indexOf(first[0].name) >= 0, "every framework is in the prompt, by name", first[0].name);
+    check(sent.indexOf("[" + first[0].id + "]") >= 0, "with its id, which is what a citation resolves against");
+    check(sent.indexOf("When to use it:") >= 0, "and the five that decide which tool it is");
+    check(sent.indexOf("Facilitation tips") < 0 && sent.indexOf("facilitation_tips") < 0,
+      "and NOT the other four — the corpus is the deciding fields, not the whole entry");
+    check(cfg().thinkingConfig && cfg().thinkingConfig.thinkingBudget === 0,
+      "asking is a LOOKUP and keeps every default the platform has — the cap included",
+      JSON.stringify(cfg().thinkingConfig));
+    check(cfg().maxOutputTokens === 2048, "including the output budget", cfg().maxOutputTokens);
+
+    /* A CITED ID NOBODY HAS IS DROPPED, never drawn (§96.2): the page makes
+       every source a door, so an unresolved one sends somebody to a 404. */
+    answers({ answered: true, reply: "Here.", source: "00000000-0000-0000-0000-0000000000ff, " + first[0].id });
+    const b = await frameworksAction(c, CONSULTANT, { action: "ask", question: "x" });
+    check((b.body.sources || []).length === 1,
+      "an id nobody has is dropped rather than drawn", (b.body.sources || []).length);
+    check((b.body.sources || [])[0].id === first[0].id, "and the real one survives beside it");
+  });
+
+  await section("when the library has nothing", async () => {
+    answers({ answered: false, reply: "I have nothing on pre-mortems.", source: "" });
+    const con = await frameworksAction(c, CONSULTANT, { action: "ask", question: "How do we run a pre-mortem?" });
+    check(con.body.answered === false, "it declines rather than reaching for something close", con.body.answered);
+    /* THE SENTENCE IS THE PRODUCT'S, NEVER THE MODEL'S (§125) — and it is
+       different for the one person who can do something about it, which is
+       the third way in to adding. */
+    check(String(con.body.reply).indexOf("asking the office") >= 0,
+      "and says the useful thing, in the product's own words", con.body.reply);
+    check(String(con.body.reply).indexOf("I have nothing on pre-mortems") < 0,
+      "the model's own sentence is not what is shown");
+    const adm = await frameworksAction(c, ADMIN, { action: "ask", question: "How do we run a pre-mortem?" });
+    check(String(adm.body.reply).indexOf("you can add it") >= 0,
+      "an admin is told they can add it — the same answer, the door on it", adm.body.reply);
+    check(con.body.reply !== adm.body.reply, "and the two genuinely differ", con.body.reply === adm.body.reply);
+    check((adm.body.sources || []).length === 0, "a decline names no sources");
+    /* NOTHING IS STORED, which is the memory's own decision holding here for
+       a second reason: the library records what the firm PUBLISHED, not what
+       somebody went looking for. */
+    const n = (await c.query("SELECT count(*)::int AS n FROM frameworks")).rows[0].n;
+    check(n === 80, "and asking wrote nothing", n);
+
+    const empty = await frameworksAction(c, CONSULTANT, { action: "ask", question: "   " });
+    check(empty.body.why === "there is no question", "an empty question is refused before the model is reached", empty.body.why);
   });
 
   await section("saving one", async () => {

@@ -20,7 +20,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import type { SessionUser } from "./auth.ts";
-import { DRAFT_FIELDS, draftFramework } from "./frameworks-ask.ts";
+import { DRAFT_FIELDS, askLibrary, draftFramework } from "./frameworks-ask.ts";
 
 type Q = Pool | PoolClient;
 export type Answer = { code: number; body: Record<string, unknown> };
@@ -139,6 +139,18 @@ export async function frameworksAction(pool: Q, me: SessionUser, body: any): Pro
       [str(body.id)]);
     if (!r.rowCount) return no(404, "That framework is no longer here.");
     return ok({ framework: shapeOne(r.rows[0]) });
+  }
+
+  /* ASKING IT. Nothing is stored — what was asked and what came back are
+     written nowhere, which is the memory's own decision holding here for a
+     second reason: the library records what the firm has PUBLISHED, not what
+     somebody went looking for. Every consultant may ask (decision 1); what
+     the answer says when nothing fits depends on whether this person can do
+     anything about it, which is why `canAdd` is handed in. */
+  if (action === "ask") {
+    const r = await askLibrary(pool, body?.question, mayAdd(me));
+    if (!r.ok) return ok({ answered: false, reply: "", sources: [], why: r.why });
+    return ok({ answered: r.answered, reply: r.reply, sources: r.sources });
   }
 
   /* DRAFTING ONE. It writes NOTHING — the whole point of decision 3 is that a

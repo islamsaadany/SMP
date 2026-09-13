@@ -41,7 +41,7 @@
     "check:demo": "node checks/demo-seed.mjs",
     "check:demo:red": "for b in raw-names keep-marks; do node checks/demo-seed.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:frameworks": "node --experimental-strip-types checks/frameworks.mjs",
-    "check:frameworks:red": "for b in client-reads alphabetical short-library no-admin-gate think-capped; do node --experimental-strip-types checks/frameworks.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:frameworks:red": "for b in client-reads alphabetical short-library no-admin-gate think-capped no-corpus; do node --experimental-strip-types checks/frameworks.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:frameworks:page": "node --experimental-strip-types checks/frameworks-page.mjs",
     "check:frameworks:page:red": "for b in no-hidden-rule no-admin-gate; do node --experimental-strip-types checks/frameworks-page.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:assistant": "node checks/assistant-defaults.mjs",

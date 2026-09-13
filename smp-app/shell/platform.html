@@ -600,6 +600,23 @@
   .fwsec p{ margin:0; font-size:14px; color:var(--ink-2); white-space:pre-line }
   .fwgrid{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
   @media (max-width:820px){ .fwgrid{ grid-template-columns:1fr } }
+  /* ASKING IT: one field under the switch, and the answer in place under the
+     box rather than on a page of its own — the question and what it produced
+     read together, and the way back to searching is the switch you came in
+     by. */
+  .fwask{ display:flex; gap:9px; margin-top:11px; align-items:flex-start }
+  .fwask .fld{ flex:1 1 220px; min-width:0 }
+  .fwans{ background:var(--surface-2); border:1px solid var(--line); border-radius:11px;
+    padding:15px; margin-top:13px }
+  .fwans > p{ margin:0 0 4px; font-size:14px; color:var(--ink-2); white-space:pre-line }
+  /* EVERY SOURCE IS A DOOR, which is the memory's own rule for the memory's
+     own reason: the next step is to go and read it. */
+  .fwcite{ display:block; width:100%; text-align:left; margin-top:9px; border:1px solid var(--line);
+    border-radius:9px; background:var(--surface); padding:11px 13px; cursor:pointer;
+    font:inherit; color:var(--ink) }
+  .fwcite:hover, .fwcite:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .fwcite .nm{ font-weight:600; font-size:14px }
+  .fwcite .wy{ margin:4px 0 0; font-size:13px; color:var(--ink-3) }
   /* THE DRAFT SAYS IT IS ONE, in the amber this page already uses for a thing
      that is not settled yet — and it is the whole of decision 3 made visible:
      what is on screen is not in the library. */

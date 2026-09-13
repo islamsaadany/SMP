@@ -1,6 +1,6 @@
 # 050 — Tasks
 
-Written 2026-09-13 from `plan.md`. **Phases A and B are built, 2026-09-13** — Islam: *"BUILD IT"*, then *"keep going until you need something from me"*. C is not. Paths are from the
+Written 2026-09-13 from `plan.md`. **Phases A, B and C are built, 2026-09-13** — Islam: *"BUILD IT"*, then *"keep going until you need something from me"*. Paths are from the
 repository root.
 
 **Every check is written red first** — run it against the build before the
@@ -114,6 +114,11 @@ Useful on its own: eighty frameworks, searchable, for the whole firm. Ends at
   instead (§276): an INSERT put into `draft`, run, **1 red** printing
   `81 → 82`, reverted, green.
 
+*Phase C built 2026-09-13, straight through stop point 2 rather than at it —
+Islam: "keep going until you need something from me". Both stop points are
+still owed, and they are the two things no check here can stand in for: what a
+real provider drafts, and whether the answer is any good.*
+
 > **Stop point 2 — Islam adds one by name, one by pasted source, and sees a
 > decline.** *Built 2026-09-13. Not run against a real provider from here —
 > every drafting assertion is made against a stub, which is what makes the
@@ -126,18 +131,37 @@ Useful on its own: eighty frameworks, searchable, for the whole firm. Ends at
 Built last: it puts the one change to `assistant.cjs` after the read path is
 proved, so a regression there cannot be confused with a new feature's noise.
 
-- [ ] **C1 · `frameworks-ask.ts`, the ask half** — `memory-ask.ts`'s shape, the
+- [x] **C1 · `frameworks-ask.ts`, the ask half** — `memory-ask.ts`'s shape, the
   corpus the **five deciding fields** (name, section, purpose, key questions,
   when to use it), for `plan.md`'s reason.
-- [ ] **C2 · The sources resolved against what was sent**, never trusted as
+- [x] **C2 · The sources resolved against what was sent**, never trusted as
   written (§96.2). Copied from `memory-ask.ts`, not re-invented.
-- [ ] **C3 · The decline in the product's words** (§125), carrying the door to
+- [x] **C3 · The decline in the product's words** (§125), carrying the door to
   adding it **for an admin only**.
-- [ ] **C4 · The screens** — the answer, a row per framework drawn on, each a
-  door in.
-- [ ] **C5 · Regenerate** `public/`, and `generated-in-step` clear.
-- [ ] **C6 · The checks.** It names its sources; it declines when nothing fits;
-  a cited id nobody has is dropped rather than drawn. Switch: `no-corpus`.
+- [x] **C4 · The screens** — the switch in the search's own box, the answer, a
+  row per framework drawn on, each a door in, and the decline's own door for
+  an admin. **ONE THING THE MOCKUP DREW IS NOT BUILT, recorded rather than
+  glossed**: screen C gave each source a sentence written about THAT question
+  (*"if price is third on that list, cutting it gives away margin"*), and the
+  build draws the framework's own **Purpose** there instead. `plan.md` says
+  this ask is `memory-ask.ts`'s shape 1:1 and lists its three differences —
+  a per-source sentence is a fourth field in the answer's shape and is not
+  among them, so the plan had already chosen. One line of `spec` to reverse:
+  its own schema through `askJson`, which spec 050 added for exactly that.
+- [x] **C5 · Regenerate** `public/`, and `generated-in-step` clear.
+- [x] **C6 · The checks.** `frameworks` 69 → **90**, `frameworks-page` 44 →
+  **64**, both green and both proved able to fail. It names its sources, a
+  cited id nobody has is dropped rather than drawn (§96.2), the decline is
+  the PRODUCT'S sentence and differs for the one person who can act on it,
+  asking writes nothing (counted), and the corpus is the five deciding fields
+  and **not** the other four.
+  **AND THE `no-corpus` SWITCH WAS WEAKER THAN ITS OWN COMMENT SAID**:
+  `assistant.cjs` falls back to building a corpus out of `kb` when
+  `corpusText` is empty, and `kb` here is nothing but the ids — so the break
+  sends **eighty bare ids**, not nothing at all. That made *"every framework
+  is in the prompt, by id"* TRUE of the broken build (§113.8), so it asks for
+  the NAME now and the break goes 1 red → 2. The comment is corrected to say
+  what the code does rather than what it was meant to (§104.8).
 
 ---
 

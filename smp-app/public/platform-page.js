@@ -2708,7 +2708,12 @@
      (§61). ADDING one is here, and it is an admin's: `canAdd` comes from the
      server with the list and is never worked out on this page (§42). */
   var FW = { view: "list", one: null, q: "", section: "", rows: null, sections: null,
-             canAdd: false, add: null, said: "" };
+             canAdd: false, add: null, said: "",
+             /* Asking rides in the SAME box as searching, switched — decision
+                2, and one field rather than a box with a quieter line under
+                it. The answer lives on FW, so opening a framework it named
+                and pressing back finds it still there. */
+             mode: "search", question: "", answer: null, asking: false };
 
   /* THE DRAFT'S OWN STATE, minted fresh on every press of Add rather than
      kept between visits: a half-typed name from last week reappearing under
@@ -2776,20 +2781,98 @@
     title("Frameworks", right);
 
     var box = el("div", "fwbox");
+
+    /* ONE BOX, TWO QUESTIONS, SWITCHED (decision 2). Searching narrows what is
+       already on the page; asking sends the library to the assistant. They are
+       different enough that one field answering both by guessing would be a
+       control nobody can predict — and near enough that two boxes stacked would
+       be two things to read before typing. */
+    var cell = el("div", "cell");
+    [["search", "Search"], ["ask", "Ask it"]].forEach(function (w) {
+      var t = el("button", FW.mode === w[0] ? "on" : null, w[1]);
+      t.type = "button";
+      t.setAttribute("aria-pressed", FW.mode === w[0] ? "true" : "false");
+      t.addEventListener("click", function () {
+        if (FW.mode === w[0]) return;
+        FW.mode = w[0];
+        fwRepaint();
+      });
+      cell.appendChild(t);
+    });
+    box.appendChild(cell);
+
+    var asking = FW.mode === "ask";
+    var field = el("div", "fwask");
     var search = el("input", "fld");
-    search.type = "search";
-    search.placeholder = "Search " + FW.rows.length + " frameworks — by name, purpose or when to use it";
-    search.value = FW.q;
-    box.appendChild(search);
+    search.type = asking ? "text" : "search";
+    search.placeholder = asking
+      ? "What are you trying to work out?"
+      : "Search " + FW.rows.length + " frameworks — by name, purpose or when to use it";
+    search.value = asking ? FW.question : FW.q;
+    field.appendChild(search);
+    box.appendChild(field);
 
     var chips = el("div", "fwchips");
-    box.appendChild(chips);
+    if (!asking) box.appendChild(chips);
     page.appendChild(box);
 
     var count = el("p", "fwcount");
-    page.appendChild(count);
-
     var list = el("div", "fwlist");
+
+    if (asking) {
+      var go = el("button", "btn solid", FW.asking ? "Asking…" : "Ask");
+      go.type = "button";
+      if (FW.asking) go.disabled = true;
+      field.appendChild(go);
+      go.addEventListener("click", function () { fwAsk(search.value); });
+      /* Enter asks, because a single field with a button beside it is a form
+         in every way but the tag, and pressing Enter in one is what people do. */
+      search.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); fwAsk(search.value); }
+      });
+
+      if (FW.answer) {
+        var ans = el("div", "fwans");
+        ans.appendChild(el("p", null, FW.answer.reply));
+        (FW.answer.sources || []).forEach(function (sc2) {
+          var cite = el("button", "fwcite");
+          cite.type = "button";
+          cite.appendChild(el("span", "nm", sc2.name));
+          /* THE FRAMEWORK'S OWN WORDS FOR WHAT IT IS FOR. The mockup drew a
+             sentence written about THIS question instead, which is a second
+             field in the answer's shape and is recorded as not built rather
+             than quietly dropped (tasks.md C4). */
+          if (sc2.purpose) cite.appendChild(el("p", "wy", sc2.purpose));
+          cite.addEventListener("click", function () { fwGo("one", { one: sc2.id }); });
+          ans.appendChild(cite);
+        });
+        /* THE DOOR IS ON THE DECLINE AND ONLY ON IT, and only for somebody who
+           can walk through it — which is the third way in, and why the page
+           carries two add buttons rather than three. */
+        if (!FW.answer.answered && FW.canAdd) {
+          var row2 = el("div", "row");
+          row2.style.marginTop = "13px";
+          var addit = el("button", "btn amber", "Add it to the library →");
+          addit.type = "button";
+          addit.addEventListener("click", function () {
+            var a = fwAddState();
+            /* WHAT THEY ASKED IS NOT WHAT THE FRAMEWORK IS CALLED, so it does
+               not become the name: a question typed into a name box would be
+               drafted as though it were a title (§96.2). */
+            fwGo("add", { add: a });
+          });
+          row2.appendChild(addit);
+          ans.appendChild(row2);
+        }
+        page.appendChild(ans);
+      }
+      page.appendChild(el("p", "note",
+        "Answers come only from the library. It will not reach for something that is not in it."));
+      search.addEventListener("change", function () { FW.question = search.value; });
+      return;
+    }
+
+    page.appendChild(count);
     page.appendChild(list);
 
     /* Every row carries what it is searched on, lowercased once here rather
@@ -2855,6 +2938,36 @@
 
     search.addEventListener("input", function () { FW.q = search.value; apply(); });
     apply();
+  }
+
+  /* The rows are already here, so a redraw of the list is a redraw and never
+     a second read of the library (§98). */
+  function fwRepaint() { settle(function () { fwPaint(); }); }
+
+  function fwAsk(q) {
+    q = String(q || "").trim();
+    FW.question = q;
+    if (!q) { say("Ask it something first.", true); return; }
+    if (FW.asking) return;
+    FW.asking = true;
+    /* THE OLD ANSWER GOES WITH THE OLD QUESTION. Leaving it standing under a
+       box being asked something else is an answer to a question nobody can
+       see (§45.2, reversed). */
+    FW.answer = null;
+    fwRepaint();
+    fpost({ action: "ask", question: q }).then(function (j) {
+      FW.asking = false;
+      if (!j || !j.ok) { fwRepaint(); say((j && j.error) || "Could not ask it.", true); return; }
+      /* `why` is the plumbing failing rather than the library not covering it
+         — two different errands, said differently (§123). */
+      if (j.why) { fwRepaint(); say(j.why, true); return; }
+      FW.answer = { answered: !!j.answered, reply: String(j.reply || ""), sources: j.sources || [] };
+      fwRepaint();
+    }).catch(function (e) {
+      FW.asking = false;
+      if (String(e.message) === "sign in") return;
+      fwRepaint(); say("Could not reach the server.", true);
+    });
   }
 
   /* ── One framework ─────────────────────────────────────────────────

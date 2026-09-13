@@ -41,6 +41,13 @@ export type Answer = { code: number; body: Record<string, unknown> };
    resolves at the door and never reaches this again. */
 export class NoPerson extends Error { status = 404; code = "NO_PERSON"; }
 
+/* THE CHECK'S BREAK (constitution XVI, lib/landing.ts's own note): a build
+   that stopped lifting the retirement must turn checks/office-standing.mjs
+   red before its green run is believed. Read at CALL time, never hoisted
+   into a constant, so a check can set it after this module is imported.
+   Never set on a deployment. */
+function noHeal(): boolean { return process.env.SMP_BREAK === "no-heal"; }
+
 function mintKey(email: string): string {
   const local = String(email || "").split("@")[0].toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   return "ff_" + (local || "office");
@@ -87,8 +94,15 @@ export async function officeRow(c: PoolClient, user: SessionUser, tenant: Tenant
     if (found.rowCount) {
       if (!found.rows[0].mine) {
         await c.query("UPDATE people SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{forefront}', 'true'::jsonb) WHERE key = $1 AND COALESCE(extra->>'forefront','') <> 'true'", [personKey]);
-      } else if (found.rows[0].role !== role) {
-        await c.query("UPDATE people SET role = $2 WHERE key = $1", [personKey, role]);
+      } else if (noHeal()) {
+        if (found.rows[0].role !== role) await c.query("UPDATE people SET role = $2 WHERE key = $1", [personKey, role]);
+      } else {
+        /* PLACING SOMEBODY LIFTS THE RETIREMENT (§338). This branch set the
+           role and nothing else, so a platform-minted row marked retired
+           stayed retired however many times its holder was placed again —
+           which is what made the fault below permanent rather than a
+           flicker. Reaching here at all means they hold a seat NOW. */
+        await c.query("UPDATE people SET role = $2, extra = COALESCE(extra,'{}'::jsonb) - 'active' WHERE key = $1 AND (role <> $2 OR extra ? 'active')", [personKey, role]);
       }
       return personKey;
     }
@@ -101,7 +115,22 @@ export async function officeRow(c: PoolClient, user: SessionUser, tenant: Tenant
   const key = personKey || mintKey(user.email);
   const rowRole = role;
   const idx = (await c.query("SELECT COALESCE(MAX(idx),0) + 1 AS n FROM people")).rows[0].n;
-  await c.query("INSERT INTO people (key, idx, name, role, extra) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (tenant_id, key) DO NOTHING",
+  /* AND SO DOES ARRIVING WITH NO MEMBERSHIP AT ALL (§338) — which is the
+     case the reported fault actually walks, and the reason `DO NOTHING` was
+     not enough. A Forefront admin opens a client they created BY RULE
+     (door.ts's seatFor) and holds no `tenant_users` row, so the moment they
+     add the FIRST colleague, setTeam's sweep — *"a row the platform minted
+     and nobody is any more is retired"* — reads them as nobody and retires
+     their own row. `byEmailRows` then skips it for being retired, so the
+     walk falls through to here, the key collides, and `DO NOTHING` returned
+     it untouched: no role on the screen, no pages, for ever.
+
+     Reaching this line means the platform is PLACING them, so the row comes
+     back — which heals a tenant already in that state on the next request
+     nobody has to make on purpose. */
+  await c.query("INSERT INTO people (key, idx, name, role, extra) VALUES ($1,$2,$3,$4,$5) " +
+    (noHeal() ? "ON CONFLICT (tenant_id, key) DO NOTHING"
+              : "ON CONFLICT (tenant_id, key) DO UPDATE SET role = EXCLUDED.role, extra = COALESCE(people.extra,'{}'::jsonb) - 'active'"),
     [key, idx, user.name || user.email, rowRole, JSON.stringify({ forefront: true, ffrow: true, email: user.email })]);
   return key;
 }

@@ -7176,6 +7176,73 @@ th .subhd { font-weight:400; }
    than pushing the quarter marks off the end — and `min-width:0` on the select
    or a flex item refuses to shrink below its own content and does the pushing
    anyway (§100.5's rule, one box in). */
+/* ── A BREAKDOWN'S COLUMN HEAD IS THREE CONTROLS IN ONE CELL (§343.10) ──
+   Islam, of the pen: *"the table is messed up not fitting in the box."*
+
+   MEASURED BEFORE ANYTHING WAS CHANGED, and it is worse than it looks: with
+   one column the table wants **1851px in a 1285px box** at a 1600 window —
+   **566px past its own edge** (§158, *fit, never "and it scrolls"*). The
+   column's head is 660px holding a 633px name box, a 633px direction picker
+   and a 20px ×, which is 1286px of controls in a 660px cell; so the picker
+   starts beyond the table's right edge and the × ends 566px past it. The
+   sliver of `≥` and the jammed `+` in his screenshot are those two controls
+   being CLIPPED, not two controls drawn small.
+
+   THE CAUSE IS ONE DECLARATION MEETING THREE CONTROLS. `.fld` is
+   `width:100%` (§110.8, and rightly — it is what stops an open row growing
+   the register's table), so EACH of the two boxes claims the whole cell and
+   a table with no width hints sizes itself to the sum.
+
+   AND IT IS WORST WITH ONE COLUMN, which reads backwards until the cause is
+   the one above: a single column's head gets the whole free width, so both
+   boxes claim 633px each — three columns share it and each pair claims 293,
+   so the SAME table is **566px over at one column and 264 at three**. The
+   check's fixture builds three, so its falsification prints the smaller
+   number; the screenshot was the larger one.
+
+   A FLEX ROW, WITH ONLY THE NAME GROWING. The name is the elastic thing —
+   it is prose somebody types — and the direction picker and the × are the
+   size they are. `min-width:0` on the row's children or a flex item refuses
+   to shrink below its own content and does the pushing anyway (§100.5's
+   rule, the same one `.tacfold` two blocks down already pays).
+
+   AND THE PICKER IS THE TACTIC TABLE'S OWN WIDTH (`--tw`, §248): a select
+   showing `≥`, `≤` or `—` needs no more room here than one showing a target's
+   unit does two tables up, and a second number for the same job is how two
+   controls come to be almost the same width for no reason (§53.5). */
+.bdhead { display:flex; align-items:center; gap:6px; min-width:0; }
+.bdhead > * { min-width:0; }
+.bdhead > input.fld { flex:1 1 auto; }
+.bdhead > select.fld { flex:0 0 auto; width:var(--tw); }
+.bdhead > .xbtn { flex:0 0 auto; color:var(--panel-quiet); }  /* ink: §343.11 below */
+/* The table's own name, in the head of the column it belongs to — it grows
+   with the cell rather than claiming it, for the same reason. */
+.bdname { width:100%; min-width:0; }
+/* The `+` is a control and not a heading, so it takes the width of one
+   rather than a share of the table (§37: a fixed-layout table reads every
+   width off its first row, and an auto one reads it off the widest cell). */
+.bdadd { width:1%; white-space:nowrap; text-align:center; }
+/* §343.11: A CONTROL ON THE BAND TAKES THE BAND'S OWN INK, and this one did
+   not. `.linkbu` is `--stone`, which in the house light palette is `#16325C`
+   — BYTE-IDENTICAL to `--panel`, the navy this head is painted in — so the
+   ONE control that adds a column was drawn at 1.00:1 against its own ground
+   and could not be seen at all, with the × beside it at 2.41. §61's trap by
+   way of §38.4 (eighth time), and §259's own case exactly: that section
+   measured *Opportunities* drawn in `--panel` on `--panel` and recorded the
+   same 1.00.
+
+   NO NEW COLOUR (§25). The three inks for this ground already exist and are
+   §259's: `--panel-accent` for the control that ACTS, `--panel-quiet` for the
+   one that removes — 7.66 and 7.24 measured light, against 1.00 and 2.41.
+
+   SCOPED TO THE BAND, or it reaches the wrong thing: the body's own
+   `Add a row` sits on a PALE ground where `--stone` reads 12.77 and is right
+   where it is. And dark was already clear (7.37 / 6.44), which is half of why
+   nothing saw this — the other half being that no pillar in the worked example
+   carries a breakdown, so no sweep has ever walked this band (§255). */
+.bdadd > .linkbu { color:var(--panel-accent); font-weight:700; }
+.bdadd > .linkbu:hover, .bdhead > .xbtn:hover { color:var(--panel-ink); }
+
 .tacfold { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 16px;
            margin-top:10px; }
 .tacfold > * { min-width:0; }
@@ -7586,6 +7653,62 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .dslide.tight .aimtop { padding-bottom:24px; }
   .dslide.tight .aimbottom { margin-top:24px; }
   .dslide.tight .dnotebox { font-size:28px; padding:26px 30px; }
+
+  /* ── THE CLOCK ON THE REVIEW (§340) ───────────────────────────────
+     A CHILD OF `.deck`, so it scales with the slide and holds the corner it
+     was drawn in — and bottom-RIGHT, because the footer mark is bottom-left
+     on every slide (§52) and a pillar's two headline figures are top-right,
+     so this is the corner that is empty on every slide kind rather than on
+     the one that was looked at.
+
+     TOKENS, NEVER LITERALS. The mockup was drawn over a screenshot of a LIGHT
+     slide and it would have been easy to copy its hexes across — and
+     `.dslide` paints `var(--surface)`, so the on-screen deck follows the
+     viewer's theme and a fixed grey would have been unreadable in dark
+     (§38.5's family, caught by reading the slide's own rule rather than the
+     picture of it). Every pair below is MEASURED in both palettes with the
+     sweep's own arithmetic (§95): calm 4.73 / 5.33, near 5.48 / 7.22, over
+     5.64 / 5.03, held 7.97 / 7.63.
+
+     THE INK ON THE RED IS `--surface` AND NOT `--ink` — §38.4 cuts both ways
+     and this is the direction that bites: the page's own near-black on
+     `--bad` measures 3.06 light and 2.75 dark, so the obvious choice is the
+     one that fails. §145.14's own pairing, and the reason it exists. */
+  .dclock {
+    position:absolute; right:48px; bottom:29px; z-index:2;
+    display:flex; align-items:baseline; gap:.45em;
+    font-family:var(--mono); font-variant-numeric:tabular-nums;
+    font-size:34px; font-weight:600; line-height:1; letter-spacing:.01em;
+    padding:.55em .7em; border:0; border-radius:.3em; cursor:pointer;
+    color:var(--ink-3); background:var(--surface-2);
+  }
+  .dclock .dcw {
+    font-family:var(--sans); font-size:.42em; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+  }
+  /* TWO DRAWN BOXES, NEVER A KEYBOARD CHARACTER. A glyph a font MAPS and
+     cannot DRAW ships as a blank rectangle (§52, §120.2) — and this one would
+     do it on a projector, in front of the room. */
+  .dclock .pausemark { display:inline-flex; gap:.14em; align-self:center; }
+  .dclock .pausemark::before, .dclock .pausemark::after {
+    content:""; width:.17em; height:.6em; background:currentColor;
+    border-radius:.04em;
+  }
+  /* THE COLOUR SAYS WHERE YOU ARE; THE MARK SAYS IT IS HELD — two facts, two
+     devices, so a clock paused while OVER stays red rather than going quiet
+     about the one thing the room needs to know. */
+  .dclock.near { color:var(--attn-tx); }
+  .dclock.near .dcw { color:var(--attn-tx); }
+  .dclock.over { color:var(--surface); background:var(--bad); }
+  .dclock.over .dcw { color:var(--surface); }
+  .dclock.paused:not(.near):not(.over) { color:var(--ink-2); }
+  .dclock:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+  /* NO TRANSITION ON THE STATE CHANGE, deliberately. A fade was written here
+     and removed on looking at it: turning amber is INFORMATION a presenter is
+     meant to catch, and easing it in is the one thing that makes it easier to
+     miss. It also made a colour sampled right after the change read a
+     mid-flight value (§68.10's flake, on a surface that has no need of the
+     motion). */
 
   .deckbar { position:absolute; left:0; right:0; bottom:0; height:62px; display:flex;
              align-items:center; gap:18px; padding:0 26px; background:rgba(11,26,51,.94);
@@ -8283,6 +8406,35 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   /* 40px, not 36: the cell's own padding is 16 and the button is 22, so a
      narrower column overflowed the list by exactly 2px at every width —
      measured, and §158's rule is fit, never "and it scrolls". */
+  /* ── HOW LONG EACH SUBJECT HAS (§340) ────────────────────────────
+     112px, measured rather than guessed (§122.5): three buttons at the size
+     Islam signed off come to 96 and the cell's own padding is 16. The name
+     column still clears the longest name on the list — `Strategy Management
+     Office`, 195px against 213 left to it — which is what makes the new
+     column affordable at all (§158: fit, never "and it scrolls"). */
+  .mflow .mftbl .c-m { width:112px; }
+  .mflow .minset { display:flex; gap:3px; }
+  /* The tick's own metrics one column over, so the row stays 32px and
+     `masterFix()`'s measured height does not move (§266.11). */
+  .mflow .minbtn {
+    flex:1 1 0; min-width:0; padding:3px 0; line-height:1.35; cursor:pointer;
+    border:1px solid var(--line); border-radius:5px; background:var(--surface);
+    color:var(--ink-3); font:inherit; font-size:11.5px;
+    font-variant-numeric:tabular-nums; text-align:center;
+  }
+  .mflow .minbtn:hover { background:var(--surface-2); color:var(--ink); }
+  /* LIT IS A FILL, NEVER COLOURED TYPE (§38.4): the tenant's own navigation
+     navy with the ink that belongs to it, so a light bar does not leave the
+     number invisible on its own ground. */
+  .mflow .minbtn.on {
+    background:var(--panel); border-color:var(--panel); color:var(--panel-ink);
+    font-weight:600;
+  }
+  .mflow .minbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* The review's own length, on the line that already counts its slides. */
+  .mflow .mftime { color:var(--ink); font-weight:600; }
+  .mflow .mfnone { color:var(--attn-tx); }
+
   .mflow .mftbl .c-t { width:40px; }
   .mflow .mftbl .c-x { width:40px; text-align:right; }
   /* THE WIDTH IS SET ON THE HEADER CELL, because `table-layout:fixed` takes
@@ -8426,6 +8578,9 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      rather than as printed. */
   @media print {
     @page { size: 1600px 900px; margin: 0; }
+    /* §340: a clock on a printed slide is a number from a moment that has
+       passed. The contingency pack is a record, not a rehearsal (§305). */
+    #dclock { display:none !important; }
     html, body { background:#fff; }
     /* Only the deck prints. Everything else at body level is the platform. */
     body.presenting > *:not(#deckroot) { display:none !important; }

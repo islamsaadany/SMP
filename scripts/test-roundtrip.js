@@ -464,6 +464,126 @@ const CLIENT_ARG = (function () {
     nckOk ? "" : JSON.stringify(ncKept.review.endsQuarter));
   if (!nckOk) process.exitCode = 1;
 
+  /* ── spec 049: A FUNCTION'S ACTIONS (§342) ────────────────────────────
+     §172's rule, paid rather than recited: the claim is that a function
+     planning in objectives and actions needs NO SCHEMA CHANGE, because
+     `functions` maps six columns and files every other key into `extra` —
+     the road `projects`, `items`, `swot`, `def` and `format` already travel
+     (§118, §213, §326). This project has made that claim wrongly before, so
+     it is MEASURED: a third format and a list of actions are written and
+     read back, and the table is asserted to have gained no column.
+
+     THE SEED HOLDS NO SUCH FUNCTION, so nothing above proves any of it —
+     the same blind spot §172 records, where four layers agreed about a value
+     the database had never been offered. */
+  const aState = await io.readState(client);
+  const aKey = Object.keys(aState.functions)[0];
+  const aFn = aState.functions[aKey];
+  const aCols = (await spot(
+    "SELECT column_name FROM information_schema.columns WHERE table_name='functions'"
+  )).map(function (r) { return r.column_name; }).sort();
+  aFn.format = "objectives";
+  aFn.projects = [];
+  aFn.actions = [
+    { id: "fn:" + aKey + "-A1", name: "Retail academy", owner: "Amr Hassan",
+      due: "Mar 26", status: "wip", pct: 70, note: "Two cohorts held" },
+    /* The blanks are the point: an action owed its owner and its date is a
+       real state the page counts (§223), and it must come back as blanks
+       rather than as nulls the reader then has to guess about. */
+    { id: "fn:" + aKey + "-A2", name: "In-house training", owner: "", due: "", status: "" }
+  ];
+  await io.writeState(client, aState);
+  const aBack = await io.readState(client);
+  const aGot = aBack.functions[aKey];
+  const aCols2 = (await spot(
+    "SELECT column_name FROM information_schema.columns WHERE table_name='functions'"
+  )).map(function (r) { return r.column_name; }).sort();
+  /* CANONICAL, NEVER `JSON.stringify` (§145, §249.3): jsonb hands an object
+     back with its keys in its OWN order, so a stringify compare calls a
+     perfect round trip a difference — which is exactly what it did here on
+     the first run of this assertion. */
+  const canon = function (v) {
+    if (Array.isArray(v)) return v.map(canon);
+    if (v && typeof v === "object") {
+      return Object.keys(v).sort().reduce(function (o, k) { o[k] = canon(v[k]); return o; }, {});
+    }
+    return v;
+  };
+  const aOk = aGot && aGot.format === "objectives" &&
+    JSON.stringify(canon(aGot.actions)) === JSON.stringify(canon(aFn.actions)) &&
+    JSON.stringify(aCols) === JSON.stringify(aCols2);
+  console.log("a function's actions round trip:", aOk ? "PASS" : "FAIL",
+    aOk ? "[no migration — functions.extra, and the table gained no column]"
+        : JSON.stringify({ fmt: aGot && aGot.format, acts: aGot && aGot.actions,
+                           cols: aCols2.filter(function (c) { return aCols.indexOf(c) < 0; }) }));
+  if (!aOk) process.exitCode = 1;
+  /* AND THE FORM CAN BE LEFT AGAIN (§50.6): back on the default, both keys
+     DELETED, or every save after a switch carries a change nobody made. */
+  delete aGot.format; delete aGot.actions; aGot.projects = [];
+  await io.writeState(client, aGot && aBack);
+  const aClean = (await io.readState(client)).functions[aKey];
+  const acOk = aClean && !("format" in aClean) && !("actions" in aClean);
+  console.log("  ...and leaving it deletes both keys:", acOk ? "PASS" : "FAIL",
+    acOk ? "" : JSON.stringify({ fmt: aClean && aClean.format, acts: aClean && aClean.actions }));
+  if (!acOk) process.exitCode = 1;
+
+  /* ── spec 050: A PILLAR'S BREAKDOWN (§343) ───────────────────────────
+     The same claim, one table over, and made the same way: a breakdown of a
+     pillar's targets rides `pillars.extra` and needs NO SCHEMA CHANGE. It is
+     MEASURED rather than read off the column list — this project has claimed
+     it wrongly before (§172) — and the seed carries no breakdown at all, so
+     nothing else in this file proves any of it (§255).
+
+     THE FIELDS ARE FLAT ON PURPOSE (`t_c1`, `a_c1`), which is what this round
+     trip has to keep true: the authoriser tells a plan change from a reported
+     one by field NAME, so a cell that came back nested inside an object
+     would classify every reported figure as authoring the plan. */
+  const bState = await io.readState(client);
+  const bKey = Object.keys(bState.units)[0];
+  const bPil = bState.units[bKey].items[0];
+  const bCols = (await spot(
+    "SELECT column_name FROM information_schema.columns WHERE table_name='pillars'"
+  )).map(function (r) { return r.column_name; }).sort();
+  bPil.breakdown = {
+    name: "Categories",
+    cols: [{ id: "c1", name: "Growth", dir: "≥" },
+           { id: "c2", name: "CM", dir: "≥" },
+           /* The INDICATOR: a column with no direction, which is what says it
+              is watched and never scored. It must come back with the empty
+              string intact — a `null` here would read as a scored column
+              nobody gave a direction to. */
+           { id: "c3", name: "Mix", dir: "" }],
+    rows: [{ id: bPil.id + "-B1", name: "Bakery",
+             t_c1: "7%", a_c1: "4%", t_c2: "69%", a_c2: "66%", t_c3: "13%", a_c3: "9%",
+             note: "Ramadan shifted the bread mix." },
+           /* A row with targets and no figures yet — the ordinary state of a
+              breakdown between cycles, and the one a reader has to tell from
+              "reported nought". */
+           { id: bPil.id + "-B2", name: "Barista", t_c1: "22%", t_c2: "59%", t_c3: "5%" }] };
+  await io.writeState(client, bState);
+  const bBack = await io.readState(client);
+  const bGot = bBack.units[bKey].items[0];
+  const bCols2 = (await spot(
+    "SELECT column_name FROM information_schema.columns WHERE table_name='pillars'"
+  )).map(function (r) { return r.column_name; }).sort();
+  const bOk = bGot && bGot.breakdown &&
+    JSON.stringify(canon(bGot.breakdown)) === JSON.stringify(canon(bPil.breakdown)) &&
+    JSON.stringify(bCols) === JSON.stringify(bCols2);
+  console.log("a pillar's breakdown round trip:", bOk ? "PASS" : "FAIL",
+    bOk ? "[no migration — pillars.extra, and the table gained no column]"
+        : JSON.stringify({ got: bGot && bGot.breakdown,
+                           cols: bCols2.filter(function (c) { return bCols.indexOf(c) < 0; }) }));
+  if (!bOk) process.exitCode = 1;
+  /* AND A PILLAR THAT LOSES ITS BREAKDOWN IS BYTE-IDENTICAL TO ONE THAT NEVER
+     HAD ONE (§50.6), or every save afterwards carries a change nobody made. */
+  delete bGot.breakdown;
+  await io.writeState(client, bBack);
+  const bClean = (await io.readState(client)).units[bKey].items[0];
+  const bcOk = bClean && !("breakdown" in bClean);
+  console.log("  ...and removing it deletes the key:", bcOk ? "PASS" : "FAIL",
+    bcOk ? "" : JSON.stringify(bClean && bClean.breakdown));
+  if (!bcOk) process.exitCode = 1;
+
   console.log("sample:", (await spot(
     "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
 

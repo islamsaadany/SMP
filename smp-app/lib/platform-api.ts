@@ -140,8 +140,49 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       "  COALESCE((SELECT json_agg(json_build_object('client', t.name, 'key', t.key, 'seat', m.seat) ORDER BY t.name) " +
       "            FROM tenant_users m JOIN tenants t ON t.id = m.tenant_id WHERE m.user_id = u.id), '[]'::json) AS seats " +
       "FROM users u WHERE u.kind = 'office' ORDER BY u.name")).rows;
-    return ok({ people: rows.map((r: any) => ({ email: r.email, name: r.name, isAdmin: !!r.is_admin, status: r.status, seats: r.seats, password: r.must_change ? "temporary" : "set" })),
+    return ok({ people: rows.map((r: any) => ({ email: r.email, name: r.name, isAdmin: !!r.is_admin, status: r.status, seats: r.seats, password: r.must_change ? "temporary" : "set",
+      /* WHAT THE CARDS DRAW IS WHAT THE ENDPOINT WILL ACCEPT (§42), asked
+         once here rather than re-derived on the page — a row that offers
+         Delete and is then refused is the drift §337 has just been fixed. */
+      canRetire: FF.mayRetireConsultant(world, account, r),
+      canDelete: FF.mayDeleteConsultant(world, account, r) })),
       canEdit: FF.mayManageConsultants(world, account), canSetAdmin: FF.isAdmin(account), me: account.email });
+  }
+
+  /* ── TAKING SOMEBODY OFF THE LIST (§338) ─────────────────────────────
+     Retiring is `saveConsultant`'s own `status`, which has been accepted
+     since that action was written and had no control (§61); what is new
+     here is the DELETE, and the two things the rules deliberately do not
+     answer because the database owns them: a seat still held, and the
+     sessions that have to end.
+
+     THE SEATS ARE THE REFUSAL, AND IT NAMES THEM (§62, §16.7): deleting
+     somebody who still runs a client would take their seat and their
+     register rows with it by cascade, so it stops and says which clients to
+     take them off first. A refusal that sends somebody to a screen is worth
+     more than one that says no. */
+  if (action === "deleteConsultant") {
+    const target = await accountByEmail(pool, body.email);
+    if (!target || target.kind !== "office") return no(400, "No such account.");
+    if (!FF.mayDeleteConsultant(world, account, target)) {
+      return no(403,
+        target.email === account.email ? "You cannot delete your own account." :
+        target.is_admin ? "That is an admin's account — take the admin flag off first." :
+        target.status !== "retired" ? "Retire " + (target.name || target.email) + " first. Deleting is only offered on an account that is already retired." :
+        "Deleting a consultant is the platform admin's.");
+    }
+    const seats = (await pool.query(
+      "SELECT t.name FROM tenant_users m JOIN tenants t ON t.id = m.tenant_id WHERE m.user_id = $1 ORDER BY t.name", [target.id])).rows.map((x: any) => x.name);
+    if (seats.length) {
+      return no(409, (target.name || target.email) + " still holds a seat on " +
+        (seats.length === 1 ? seats[0] : seats.slice(0, -1).join(", ") + " and " + seats[seats.length - 1]) +
+        ". Take them off " + (seats.length === 1 ? "that client" : "those clients") + " first.");
+    }
+    /* sessions go with the account (they cascade, and saying so is cheaper
+       than somebody wondering whether a signed-in tab survives) */
+    await pool.query("DELETE FROM users WHERE id = $1", [target.id]);
+    console.log("[platform] " + account.email + " deleted consultant " + target.email);
+    return ok({ deleted: target.email });
   }
 
   if (action === "saveConsultant") {
@@ -153,8 +194,26 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       if (!FF.maySetAdmin(world, account, existing)) return no(403, existing.email === account.email ? "You cannot change your own admin rights." : "Only the platform admin sets that.");
       await pool.query("UPDATE users SET is_admin = $2, updated_at = now() WHERE id = $1", [existing.id, !!body.isAdmin]);
     }
+    /* RETIRING IS ITS OWN ACT, ASKED OF THE TARGET (§338). It used to ride
+       the blanket UPDATE below with no test at all, so whoever manages
+       consultants could retire an ADMIN — or themselves, and sign nobody
+       back in. §89's rule (the test is the target) applied to the one field
+       on this action that closes a door. The sessions end with it, or
+       somebody keeps a signed-in tab for thirty days after being retired
+       (§43's rule for a password change, and the same argument). */
+    const want = String(body.status || "");
+    if (want && existing) {
+      if (want !== "active" && want !== "retired") return no(400, "That is not a standing.");
+      if (!FF.mayRetireConsultant(world, account, existing)) {
+        return no(403, existing.email === account.email ? "You cannot retire your own account." :
+          existing.is_admin ? "That is an admin's account — take the admin flag off first." :
+          "Retiring a consultant is the platform admin's.");
+      }
+      await pool.query("UPDATE users SET status = $2, updated_at = now() WHERE id = $1", [existing.id, want]);
+      if (want === "retired") await pool.query("DELETE FROM sessions WHERE user_id = $1", [existing.id]);
+    }
     if (existing) {
-      await pool.query("UPDATE users SET name = COALESCE($2, name), status = COALESCE($3, status), updated_at = now() WHERE id = $1", [existing.id, body.name || null, body.status || null]);
+      await pool.query("UPDATE users SET name = COALESCE($2, name), updated_at = now() WHERE id = $1", [existing.id, body.name || null]);
       /* THE ADDRESS ITSELF CAN CHANGE (§313.27). Keyed by id here, so a rename
          is one UPDATE; the sessions still end (§43's rule for a password
          change) and the address on each client's register follows, best
@@ -216,7 +275,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
           company: g.units[k].company && g.companies[g.units[k].company]
             ? g.companies[g.units[k].company].name : "" })),
         functions: (g.functionKeys || []).map((k: string) => ({
-          name: g.functions[k].name, format: g.functions[k].format === "pillars" ? "pillars" : "projects" })),
+          /* §342: and the third form, or a client shaped that way reads back
+             as a projects function and the next save writes that answer over
+             the one somebody chose. */
+          name: g.functions[k].name,
+          format: g.functions[k].format === "pillars" ? "pillars"
+                : g.functions[k].format === "objectives" ? "objectives" : "projects" })),
         words: (g.labels || []).reduce((o: Record<string, string>, e: { key: string; bu: string }) => {
           o[e.key] = e.bu; return o; }, {})
       };
@@ -467,13 +531,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const seed = JSON.parse(readFileSync(SEED, "utf8"));
     const t = (await pool.query("INSERT INTO tenants (key, name, industry, notes, size, made_here) VALUES ($1,$2,$3,$4,$5,true) RETURNING id",
       [key, name, String(body.industry || ""), String(body.notes || ""), String(body.size || "")])).rows[0];
-    /* THE CLIENT'S OWN NAME, AND NOBODY ON ITS REGISTER. §67's cleared
-       graph keeps the bootstrap SMO because a deployment with no way in is
-       not a deployment (§21); on the shared schema the platform's admin
-       opens a client by rule (door.ts seatFor) and the team is added on the
-       card (setTeam) — so the register starts EMPTY, and the org is the
-       client's. The unit and function names stay, as §67 left them, for
-       Setup to rename. */
+    /* THE CLIENT'S OWN NAME, AND NOBODY ON ITS REGISTER BUT WHOEVER MADE IT.
+       §67's cleared graph keeps the bootstrap SMO because a deployment with
+       no way in is not a deployment (§21); on the shared schema the graph
+       carries no people at all and the team is added on the card (setTeam).
+       The unit and function names stay, as §67 left them, for Setup to
+       rename. The creator is written below (§339). */
     const g: any = frozen.bare(seed);
     g.group.org = name;
     g.people = [];
@@ -485,6 +548,35 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       await pool.query("DELETE FROM tenants WHERE id = $1", [t.id]).catch(() => {});
       throw e;
     }
+    /* AND WHOEVER MADE IT IS ON ITS TEAM FROM THE START (§339). Islam, after
+       §338: *"yes the one who create the client should appear from the
+       start."* Until now they were on it by RULE and nowhere in the data —
+       door.ts's seatFor gives a platform admin the Super user seat with no
+       `tenant_users` row — and that absence is what §338 had to heal: the
+       moment they added the first colleague, setTeam's sweep read the creator
+       as nobody and retired the register row `officeRow` had minted for them.
+       §338's heal stays and is what rescues a client already in that state;
+       this stops the state arising for a client made from today.
+
+       IT REVERSES "THE REGISTER STARTS EMPTY" (§313.31, §322) for exactly one
+       row, and the FK is why the two writes cannot be one: `tenant_users`
+       points at `people` by (tenant, key), so the register row is written
+       FIRST — setTeam's own order, and its own comment says why (the
+       constraint is deferred, not absent).
+
+       A FAILURE HERE DOES NOT UNDO THE CLIENT, unlike the graph above: a
+       client with no graph cannot be opened at all, while one whose creator's
+       row did not land opens perfectly by rule and heals on the next request
+       (§338). Destroying a made client over it would be the larger fault. */
+    const personKey = officePersonKey(me.email);
+    try {
+      if (process.env.SMP_BREAK === "no-creator") throw new Error("no-creator");
+      const T = { id: t.id, key, name, kind: "client" as const, status: "active", made_here: true, mark: null };
+      await withTenant(t.id, (c) => officeRow(c, me, T, "super", personKey));
+      await pool.query(
+        "INSERT INTO tenant_users (tenant_id, user_id, person_key, seat) VALUES ($1,$2,$3,'super') ON CONFLICT (tenant_id, user_id) DO NOTHING",
+        [t.id, me.id, personKey]);
+    } catch (e) { console.error("placing the creator on " + key + ":", (e as Error).message); }
     return ok({ key });
   }
 

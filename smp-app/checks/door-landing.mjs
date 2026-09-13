@@ -17,6 +17,9 @@
      DATABASE_URL_UNPOOLED=postgres://…/smp_dev node checks/door-landing.mjs
      … --break=no-rows        (RED: the landing draws no rows)
      … --break=first-person   (RED: the landing is somebody else's — viewer() falls to PEOPLE[0])
+     … --break=demo-role-key  (RED: the door reads §313.4's retired key — the demo 404s for the team, §337)
+     … --break=other-role-key (RED: the same, one column over — the office's `open` never opens, §339)
+     … --break=no-creator     (RED: making a client leaves its creator off its own team, §339)
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
    Needs `next build` first and the chromium this image carries. */
@@ -67,6 +70,7 @@ await owner.query("DELETE FROM login_attempts");
 /* the frozen readers' own answer, read off the same graph the page reads */
 const { createRequire } = await import("node:module");
 const frozen = createRequire(import.meta.url)("../lib/frozen.cjs");
+const FFR = createRequire(import.meta.url)("../lib/platform-rules.cjs");
 const { withTenant } = await import("../lib/tenant.ts");
 const { readState } = await import("../lib/state-io.ts");
 const graph = await withTenant(tenant.id, (c) => readState(c));
@@ -262,13 +266,90 @@ await section("5 · the office", async () => {
   const s1 = r404.status(), t1 = (await page.locator(".holder h1").textContent()).trim();
   /* a client that exists and is not theirs: make one */
   await owner.query("INSERT INTO tenants (key, name) VALUES ('other-co', 'Other Co') ON CONFLICT (key) DO NOTHING");
-  await owner.query("UPDATE platform_access SET grant_ = 'none' WHERE role_key = 'consultant' AND area_key = 'other_clients'");
+  /* REWRITTEN, NOT LOOSENED (§218): this wrote the RETIRED `consultant` key
+     (§313.4), which 001-seats deletes — an UPDATE matching no row, so the
+     refusal below was the shipped default's and never the office's setting.
+     It writes `everyone` now, so what is asserted is a choice somebody made. */
+  await owner.query("INSERT INTO platform_access (role_key, area_key, grant_) VALUES ($1,'other_clients','hidden') ON CONFLICT (role_key, area_key) DO UPDATE SET grant_ = EXCLUDED.grant_", [FFR.EVERYONE]);
   await owner.query("UPDATE users SET is_admin = false WHERE email = 'office@forefront.example'");
   const r2 = await page.goto(BASE + "/other-co", { waitUntil: "networkidle" });
   const s2 = r2.status(), t2 = (await page.locator(".holder h1").textContent()).trim();
   check(s1 === 404 && s1 === s2 && t1 === t2 && t1 === "That client is not available.", "refused and non-existent answer identically (§313)", s1 + " " + t1 + " / " + s2 + " " + t2);
   await owner.query("UPDATE users SET is_admin = true WHERE email = 'office@forefront.example'");
   await owner.query("DELETE FROM tenants WHERE key = 'other-co'");
+});
+await section("5b · the office's two columns answer for a consultant who holds no seat (§337, §339)", async () => {
+  /* THE FAULT THIS EXISTS FOR: the door asked the office's matrix under a
+     role key §313.4 retired (`consultant`) and read the miss as a refusal, so
+     `/demo` answered 404 *"That client is not available."* for every
+     consultant holding no seat — in EVERY state of the table, `edit`
+     included, so no setting opened it. The cards are drawn from the frozen
+     rules, which said `open`: the screen offered what the door refused.
+
+     ASSERTED AS AGREEMENT WITH lib/platform-rules.cjs, NEVER AS A LITERAL
+     (§94.8, §53.5). Two independent implementations of one question have to
+     give one answer — which is the property that broke — and a build that
+     dropped the demo column entirely cannot satisfy it, because the frozen
+     side still answers `open`.
+
+     BOTH ENDS (§94.2): `none` must still REFUSE, or a door flung open for
+     everybody passes every assertion about the demo being reachable and
+     takes the office's off switch with it.
+
+     NO BROWSER AND NO TENANT ROW HERE, deliberately (§113.8): a demo tenant
+     INSERTed for a check holds no graph, and a tenant with no graph answers
+     404 at the state API for a reason of its own (§316.9) — so a page-level
+     probe would go green on the broken build for the wrong reason. */
+  const { clientState, mayOpen } = await import("../lib/door.ts");
+  const FF = (await import("node:module")).createRequire(import.meta.url)("../lib/platform-rules.cjs");
+  /* AND THE BREAK HAD TO BE MADE TO REACH THIS SECTION (§339). It runs
+     IN-PROCESS — the tenant is a literal, deliberately (§113.8) — while
+     `--break=` was only ever put in the SERVER's env, so `ffGrant` here read
+     an unset variable and these lines have never once been falsifiable: a
+     check written to prove it can fail, that could not. Set for this section
+     ONLY and restored, because this file also imports `lib/landing.ts`,
+     `lib/modules.ts` and `lib/state-io.ts`, which read the same variable for
+     their own breaks — leaving it set would break the check's own helpers and
+     report a correct build broken (§100.3). */
+  const wasBreak = process.env.SMP_BREAK;
+  if (brk) process.env.SMP_BREAK = brk;   /* read at call time, so this lands */
+  try {
+  const demo = { id: "t-demo", key: "demo", name: "Demo", kind: "demo", status: "active", made_here: true, mark: null };
+  const other = { id: "t-other", key: "other-co", name: "Other Co", kind: "client", status: "active", made_here: true, mark: null };
+  const consultant = { id: "u-x", kind: "office", isAdmin: false, mustChange: false };
+  const account = { email: "c@forefront.example", is_admin: false, kind: "office", status: "active" };
+  const states = [
+    [demo, "nothing stored — the shipped default answers (§30.2)", {}, true],
+    [demo, "the office saved demo = edit", { [FF.EVERYONE]: { demo: "edit" } }, true],
+    [demo, "the office saved demo = view", { [FF.EVERYONE]: { demo: "view" } }, true],
+    [demo, "the office saved demo = none", { [FF.EVERYONE]: { demo: "none" } }, false],
+    /* §339 — THE SAME COLUMN ONE AREA OVER, and the both-ends half is the
+       point: `open` has to OPEN, or the office's setting is still decoration;
+       `listed` and `hidden` have to REFUSE, or a door flung open for
+       everybody passes the first line and hands out every client's data. */
+    [other, "nothing stored — a client they are not on ships LISTED, so refused", {}, false],
+    [other, "the office saved other_clients = open", { [FF.EVERYONE]: { other_clients: "open" } }, true],
+    [other, "the office saved other_clients = listed (a name, nothing behind it)", { [FF.EVERYONE]: { other_clients: "listed" } }, false],
+    [other, "the office saved other_clients = hidden", { [FF.EVERYONE]: { other_clients: "hidden" } }, false],
+  ];
+  for (const [tenant, what, access, want] of states) {
+    const door = mayOpen(consultant, [], access, tenant);
+    const cards = FF.mayOpenClient({ mine: [], access }, account, tenant);
+    check(door === want, "the door: " + what + " → " + (want ? "opens" : "refused"), "door=" + door);
+    check(door === cards, "…and the cards say the same thing (§42)", "door=" + door + " cards=" + cards);
+  }
+  /* AND THE DEFAULT IS ASSERTED TO BE THE FROZEN MODULE'S, never a literal
+     here: this file must not become the second place that decides what a
+     client somebody holds no seat on ships at (§94.8). */
+  check(FF.ACCESS_DEFAULTS[FF.EVERYONE].other_clients === "listed",
+    "…and the shipped default is still `listed` — nobody's access moved today", FF.ACCESS_DEFAULTS[FF.EVERYONE].other_clients);
+  } finally { if (wasBreak === undefined) delete process.env.SMP_BREAK; else process.env.SMP_BREAK = wasBreak; }
+  /* NO SOURCE-TEXT ASSERTION HERE, and the first draft's is why: it searched
+     door.ts for the retired key and went RED on the fixed build, because
+     `--break=demo-role-key` spells that very call to restore the fault. A
+     check that cannot tell the defect from the switch that reproduces it
+     reports a correct build broken (§100.3, §296.1). The behaviour above is
+     the assertion; the break is what proves it can fail. */
 });
 await section("6 · a client made here, opened by rule", async () => {
   /* THE LANDING ASKS THE REGISTER, NOT THE MEMBERSHIP. A Forefront admin
@@ -284,9 +365,17 @@ await section("6 · a client made here, opened by rule", async () => {
      and cannot be opened at all (`createClient` says so in its own comment
      and deletes the row if the load fails).
 
-     BOTH ENDS (§94.2): before it is opened nobody IS on the register and the
-     sentence is TRUE, and a check asserting only the second half would pass
-     on a build that never draws it. */
+     BOTH ENDS (§94.2): the empty register IS a real state and the sentence
+     is TRUE there, and a check asserting only the second half would pass on
+     a build that never draws it.
+
+     REWRITTEN, NOT LOOSENED (§218), FOR §339: the empty state used to be how
+     every client started, and the creator is now written onto the register
+     and the team as the client is made — so what is asserted first is the
+     NEW property, and the empty state is then MADE (the creator's row and
+     membership removed) rather than waited for, because it is still reachable
+     on a client made before today or one whose creator was taken off the
+     team. Deleting that half would have left §313.32's finding unguarded. */
   ({ ctx, page } = await fresh());
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await signIn(page, "office@forefront.example", "Raya-2026!");
@@ -295,12 +384,40 @@ await section("6 · a client made here, opened by rule", async () => {
   const mk = await page.request.post(BASE + "/api/platform", { data: { action: "createClient", name: "Phase I " + key } });
   const made = (await mk.json()).key;
   check(mk.status() === 200 && made, "a client is made through Forefront's own page", mk.status());
-  await page.goto(BASE + "/" + made, { waitUntil: "networkidle" });
-  const first = await text(page, ".wact.wempty b");
-  check(first.some((s) => /not on/.test(s)), "nobody on its register yet, and the landing says so", first);
+  const tid = (await owner.query("SELECT id FROM tenants WHERE key = $1", [made])).rows[0].id;
+
+  /* §339 — WITHOUT OPENING IT: the row and the seat are written by the act of
+     making the client, not by the first page load, which is the whole of what
+     §338's heal was compensating for. Read from the DATA, never the screen. */
+  const seat = (await owner.query(
+    "SELECT u.email, m.seat, m.person_key FROM tenant_users m JOIN users u ON u.id = m.user_id WHERE m.tenant_id = $1", [tid])).rows;
+  check(seat.length === 1 && seat[0].email === "office@forefront.example" && seat[0].seat === "super",
+    "whoever made it is on its team as Super user from the start (§339)", JSON.stringify(seat));
+  const born = await withTenant(tid, async (c) => (await c.query("SELECT key, role, extra->>'ffrow' AS ff FROM people")).rows);
+  check(born.length === 1 && born[0].key === (seat[0] || {}).person_key && born[0].role === "super" && born[0].ff === "true",
+    "…with exactly that one row on its register, and nobody invented beside them", JSON.stringify(born));
   const r = await page.request.get(BASE + "/api/" + made + "/state");
   check(r.status() === 200, "…and it OPENS, because a made client starts on the cleared graph (§67)", r.status());
-  const tid = (await owner.query("SELECT id FROM tenants WHERE key = $1", [made])).rows[0].id;
+  await page.goto(BASE + "/" + made, { waitUntil: "networkidle" });
+  const now = await text(page, ".wact.wempty b");
+  check(!now.some((s) => /not on/.test(s)), "…and the landing never says they are not on its register", now);
+
+  /* THE OTHER END, MADE: an admin opening a client they did NOT make — or one
+     made before today — still holds no seat, and that is the state §313.32 is
+     about. Take both away and open it again. */
+  await owner.query("DELETE FROM tenant_users WHERE tenant_id = $1", [tid]);
+  await withTenant(tid, (c) => c.query("DELETE FROM people"));
+  ({ ctx, page } = await fresh());
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  await signIn(page, "office@forefront.example", "Raya-2026!");
+  await page.waitForURL(BASE + "/platform");
+  await page.goto(BASE + "/" + made, { waitUntil: "networkidle" });
+  const first = await text(page, ".wact.wempty b");
+  check(first.some((s) => /not on/.test(s)), "nobody on its register, and the landing says so", first);
+  /* the LANDING only reads (registerKeyFor — a reader that creates what it
+     looked for is how a phantom change reaches every save, §316.9); the state
+     API is what PLACES them, so it is the request that heals this */
+  await page.request.get(BASE + "/api/" + made + "/state");
   const who = await withTenant(tid, async (c) => (await c.query("SELECT key FROM people")).rows.map((x) => x.key));
   check(who.length === 1, "…placing the office as exactly one row on the register (§313.32)", who);
   await page.goto(BASE + "/" + made, { waitUntil: "networkidle" });

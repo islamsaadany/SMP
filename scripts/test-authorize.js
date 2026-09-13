@@ -4013,5 +4013,148 @@ console.log("\n38 · a capability is a subject of its own (§334)");
   check("§334 REFUSED: a unit head does not submit it", !submit(headKey).ok, "was ALLOWED");
 })();
 
+console.log("\n39 \u00b7 how long each subject has to present (\u00a7340)");
+(function () {
+  /* The file's own convention: each section declares its own, because they
+     differ in which seed they authorise against. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const MINS = R.PRESENT_MINS;
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  check("\u00a7340: the seed holds a unit and a custodian to test with",
+        !!(UK && CUST), [UK, CUST].join(" / "));
+  if (!(UK && CUST)) return;
+  const SET = function (i) { i.group[MINS] = { [UK]: 15 }; };
+
+  let r = fromStored(SEED, "smo", SET);
+  check("\u00a7340: the office sets a subject's minutes", r.ok,
+        (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, SET);
+  check("\u00a7340 REFUSED: a unit's own custodian cannot set their own slot",
+        !r.ok, "was ALLOWED");
+  check("\u00a7340: and the refusal names the Presentation menu, never Setup",
+        !r.ok && /Presentation menu/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* THE TWO EDITS THAT MUST GO TOGETHER, asserted from both sides (\u00a7259.2,
+     \u00a7308). Classified but absent from `gExtra`, the unknown sweep adds a
+     SECOND entry and this count goes to 2. Swept but not classified, there is
+     no entry at all \u2014 the change is INVISIBLE, which does not refuse the
+     save, it ALLOWS it, to everybody. One assertion catches each. */
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("\u00a7340: a change to it is classified `presentMins` and nothing else",
+        kinds.length === 1 && kinds[0] === "presentMins",
+        kinds.join(",") || "(nothing \u2014 the change was invisible)");
+
+  /* CLEARING IS THE SAME ACT (\u00a750.6: the writer deletes a key put back to
+     none), so a build that classified the write and not the removal would let
+     anybody throw away a slot only the office could set. */
+  const set = clone(SEED); set.group[MINS] = { [UK]: 15 };
+  r = fromStored(set, CUST, function (i) { delete i.group[MINS]; });
+  check("\u00a7340 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group[MINS]; });
+  check("\u00a7340: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* Changing ONE subject's minutes is still one sentence \u2014 the map travels
+     whole, so a build that classified the key only when it appeared would
+     miss every edit after the first. */
+  r = fromStored(set, CUST, function (i) { i.group[MINS] = { [UK]: 20 }; });
+  check("\u00a7340 REFUSED: nor change a slot that is already set", !r.ok, "was ALLOWED");
+
+  /* A LOCKED CYCLE STILL TAKES IT, for the running order's own reason: the
+     flow is arranged the morning of the meeting, after the lock. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", SET);
+  check("\u00a7340: a locked cycle does not stop the office setting the times",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
+/* ── 40 · a pillar's breakdown is two halves at once (§343) ────────────
+   ITS TARGETS ARE THE PLAN AND ITS FIGURES ARE THE REPORT, in one object on
+   one row — so the danger is not that the rule is wrong but that the split
+   is missed, and every custodian entering a category figure is refused for
+   authoring the plan (§147's own fault on a milestone's `pct`, §42's drift
+   in the direction that costs somebody's work).
+
+   THE STATE IS MADE (§255): no pillar in the worked example carries a
+   breakdown, so every assertion here would pass on a build that lost the
+   feature entirely unless the fixture builds one first.
+
+   BOTH ENDS EVERY TIME (§94.2) — a figure allowed to a reporter beside a
+   target refused to them. */
+console.log("\n40 · a pillar's breakdown (§343)");
+(function () {
+  const UK = Object.keys(SEED.units)[0];
+  const base = clone(SEED);
+  const bp = base.units[UK].items[0];
+  bp.breakdown = { name: "Categories",
+    cols: [{ id: "c1", name: "Growth", dir: "≥" },
+           { id: "c2", name: "Mix", dir: "" }],
+    rows: [{ id: bp.id + "-B1", name: "Bakery", t_c1: "7%", a_c1: "4%", t_c2: "13%" },
+           { id: bp.id + "-B2", name: "Barista", t_c1: "22%", t_c2: "5%" }] };
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  function kinds(mutate) {
+    const inc = clone(base);
+    mutate(inc.units[UK].items[0].breakdown);
+    return (A.collect(base, inc, W(base)) || []);
+  }
+  const fig = kinds(function (b) { b.rows[1].a_c1 = "27%"; });
+  check("§343: a category's FIGURE is reporting",
+        fig.length > 0 && fig.every(function (c) { return c.kind === "unitReporting"; }),
+        fig.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  const nte = kinds(function (b) { b.rows[0].note = "Ramadan shifted the bread mix."; });
+  check("§343: ...and so is the row's note",
+        nte.length > 0 && nte.every(function (c) { return c.kind === "unitReporting"; }),
+        nte.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  const tgt = kinds(function (b) { b.rows[0].t_c1 = "9%"; });
+  check("§343: a category's TARGET is the plan",
+        tgt.some(function (c) { return c.kind === "unitPlan"; }),
+        tgt.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  const col = kinds(function (b) { b.cols[1].dir = "≥"; });
+  check("§343: and so is a column's direction",
+        col.some(function (c) { return c.kind === "unitPlan"; }),
+        col.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  const nm = kinds(function (b) { b.name = "Regions"; });
+  check("§343: and so is the table's own name",
+        nm.some(function (c) { return c.kind === "unitPlan"; }),
+        nm.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  const gone = (function () {
+    const inc = clone(base); delete inc.units[UK].items[0].breakdown;
+    return (A.collect(base, inc, W(base)) || []);
+  })();
+  check("§343: taking the whole breakdown away is the plan",
+        gone.some(function (c) { return c.kind === "unitPlan"; }),
+        gone.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  check("§343: and NOTHING about it reaches the unknown sweep (§191)",
+        !fig.concat(nte, tgt, col, nm, gone)
+          .some(function (c) { return c.kind === "unknown"; }),
+        "ok");
+
+  /* The pair that matters: a reporter may enter a figure and may NOT move a
+     target — asserted together, or a build refusing both passes half. */
+  function from(who, mutate) {
+    const inc = clone(base);
+    mutate(inc.units[UK].items[0].breakdown);
+    return A.authorize(base, inc, personOf(base, who));
+  }
+  const REP = (base.units[UK].head || base.units[UK].custodian);
+  if (REP) {
+    check("§343: the unit's own head enters a category figure",
+          from(REP, function (b) { b.rows[1].a_c1 = "27%"; }).ok,
+          (from(REP, function (b) { b.rows[1].a_c1 = "27%"; }).refusals || []).join(" / "));
+    check("§343 REFUSED: ...and may not move its target",
+          !from(REP, function (b) { b.rows[0].t_c1 = "9%"; }).ok, "was ALLOWED");
+    check("§343 REFUSED: ...nor rename a column",
+          !from(REP, function (b) { b.cols[0].name = "Uplift"; }).ok, "was ALLOWED");
+  }
+  check("§343: the office moves the target",
+        from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).ok,
+        (from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).refusals || []).join(" / "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

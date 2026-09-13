@@ -14,8 +14,17 @@
       clients one slug at a time);
    5. only then is app.tenant_id set, from the row's id — the slug text never
       reaches SQL, and there is no default tenant. */
+import { createRequire } from "node:module";
 import type { Pool, PoolClient } from "pg";
 import type { SessionUser } from "./auth.ts";
+
+const require = createRequire(import.meta.url);
+/* the platform's own rules, the frozen module byte for byte — the key and the
+   shipped defaults are read from it rather than spelt again here (§53.5) */
+const FF = require("./platform-rules.cjs") as {
+  EVERYONE: string;
+  ACCESS_DEFAULTS: Record<string, Record<string, string>>;
+};
 
 type Q = Pool | PoolClient;
 
@@ -39,13 +48,54 @@ function atLeast(state: string, want: string): boolean { return (RANK[state] ?? 
 function grantIn(access: Record<string, Record<string, string>>, roleKey: string, area: string): string {
   return (access[roleKey] && access[roleKey][area]) || "none";
 }
+
+/* THE OFFICE'S OWN COLUMNS, ASKED THE WAY THE REST OF THE PLATFORM ASKS THEM
+   (§337 for the demo, §339 for the clients somebody holds no seat on). Both
+   branches read a role key §313.4 RETIRED — `consultant`, one of the four
+   platform roles that section reversed into the single `everyone` row — and
+   platform-migration 001-seats DELETES every row whose key is not `everyone`,
+   so the lookup could never match anything. Then `|| "none"` read that miss
+   as a REFUSAL, where §30.2's rule is that an absent row means *nobody has
+   answered yet* and falls to the shipped default.
+
+   EITHER FAULT ALONE CLOSED THE DEMO, and together they closed it in EVERY
+   state of the table — `edit` included, which is the default — so **there was
+   no setting anybody could choose that opened it**, which is why it could not
+   be worked around from the console. Meanwhile the cards are drawn from
+   FF.mayOpenClient, which answers `open`: the screen offered a client the
+   next request refused with 404 *"That client is not available."* — the drift
+   a shared rules module exists to make impossible (§42), reintroduced by
+   keeping a second copy of it here (§53.5). Measured on origin/main's own
+   copy before anything here was blamed (§303): byte-identical, so live.
+
+   `other_clients` HAD THE SAME FAULT AND §337 LEFT IT, because correcting it
+   OPENS client data to somebody holding no seat and that is Islam's word
+   rather than a tidy-up ridden in beside a defect fix (rule 1b). He gave it:
+   *"no need a client they are on they should be able to open."* So the two
+   columns are ONE READER now, or the next one written here drifts the same
+   way again — and **nobody's access moves today**: that column ships at
+   `listed`, which `mayOpen` refuses, so what changes is that the office's
+   `open` works when they choose it. Whether the SHIPPED DEFAULT should be
+   `open` is a different question and has not been asked.
+
+   THE STATE IS FF's OWN, never a literal — `view` and `edit` both open the
+   demo; `hidden`/`listed`/`open` are returned as they stand and `mayOpen`
+   ranks them, so `listed` (a name on the cards, nothing behind it) refuses. */
+const BREAK_KEY: Record<string, string> = { demo: "demo-role-key", other_clients: "other-role-key" };
+function ffGrant(access: Record<string, Record<string, string>>, area: string): string {
+  if (process.env.SMP_BREAK === BREAK_KEY[area]) return grantIn(access, "consultant", area);
+  const stored = access[FF.EVERYONE];
+  return stored && Object.prototype.hasOwnProperty.call(stored, area)
+    ? stored[area]
+    : FF.ACCESS_DEFAULTS[FF.EVERYONE][area] || "none";
+}
 export function clientState(user: SessionUser, mine: Membership[], access: Record<string, Record<string, string>>, tenant: Tenant | null): string {
   if (!tenant) return "hidden";
   if (user.kind === "client") return mine.some((m) => m.tenant_id === tenant.id) ? "open" : "hidden";
   if (user.isAdmin) return "open";
   if (mine.some((m) => m.tenant_id === tenant.id)) return "open";
-  if (tenant.kind === "demo") return grantIn(access, "consultant", "demo") === "none" ? "hidden" : "open";
-  return grantIn(access, "consultant", "other_clients");
+  if (tenant.kind === "demo") return ffGrant(access, "demo") === "none" ? "hidden" : "open";
+  return ffGrant(access, "other_clients");
 }
 export function mayOpen(user: SessionUser, mine: Membership[], access: Record<string, Record<string, string>>, tenant: Tenant | null): boolean {
   return atLeast(clientState(user, mine, access, tenant), "open");

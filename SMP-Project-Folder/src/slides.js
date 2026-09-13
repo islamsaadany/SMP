@@ -659,8 +659,23 @@ function slidesOpen(kind, key){
   SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
   var root = document.getElementById("slideroot");
   root.querySelector(".sl-title").textContent = "Manage slides";
+  /* §340: HOW LONG THIS SUBJECT HAS, where the person building the deck can
+     see it. Islam's own reason for asking: somebody who knows they have
+     fifteen minutes builds a shorter deck.
+
+     READ-ONLY HERE AND SET NOWHERE BUT THE MASTER PRESENTATION. This screen
+     is `canSpeakFor` — the unit's own head or custodian — and the minutes are
+     the office's, so a control here would be one the server refuses (§61,
+     §42). It is the same shape §256 already gives this bar: the custodian
+     SEES what the office decided and gets no pen for it.
+
+     NEUTRAL WORDING, because the office opens this screen too: "You have 15
+     minutes" is wrong said to the person who set it. And nothing at all when
+     no time is set — silence rather than a nought nobody chose (§35). */
+  var mins = SMPRules.presentMins(GROUP, target);
   root.querySelector(".sl-sub").textContent =
-    picTargetName(kind, key) + " · " + (REVIEW.name || "");
+    picTargetName(kind, key) + " · " + (REVIEW.name || "") +
+    (mins ? " · " + mins + " minutes to present" : "");
   root.classList.add("on");
   document.body.classList.add("presenting");
   var wrap = document.querySelector(".wrap");

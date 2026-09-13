@@ -909,7 +909,7 @@ function pillarRow(it, i, u){
    spread is taken over the very list the average was taken over — a pillar's
    `scorableMeasures()`, a list of objectives' `scorableKOs()` — rather than
    over a second filter written beside it (§53.5). */
-/* ── A PILLAR'S BREAKDOWN, DRAWN (§343) ────────────────────────────
+/* ── A PILLAR'S BREAKDOWN, DRAWN (§339) ────────────────────────────
    ONE BUILDER FOR THE TWO READING SURFACES, because the plan shows a target
    and Performance shows a figure against it and everything else about the
    table is identical — two builders is how the two come to disagree about
@@ -919,7 +919,7 @@ function pillarRow(it, i, u){
    indicator. That is the whole signal: with no total row under the table,
    the direction in the heading and the scoring colour in the cells are what
    say which columns count (mockup, signed off). */
-/* ── SETTING ONE UP, WITH THE PEN OPEN (§343) ──────────────────────
+/* ── SETTING ONE UP, WITH THE PEN OPEN (§339) ──────────────────────
    Everything on a row already exists elsewhere in the platform — the growing
    name box, the ×, the Add row. ONE CONTROL IS NEW: naming a table's
    columns, because no table here has ever let anybody do that, and it is
@@ -957,21 +957,16 @@ function bdPlanSection(it, u, pi, ed){
     { h: inputOr("plan", SMPRules.bdName(it), "bdname",
         function(v){ b.name = v; }), cls:"" }]
     .concat(cols.map(function(c){
-      /* §343.10: THE THREE SHARE THE CELL, or each claims all of it —
-         `.fld` is width:100% and the table then sizes itself to the sum
-         (measured: 1286px of controls in a 660px cell, 566px past the
-         table's edge). The wrapper is what lays them out. */
-      return { cls:"cc", h: '<span class="bdhead">' +
+      return { cls:"cc", h:
         inputOr("plan", c.name || "", "bdcol", function(v){ c.name = v; }) +
         selectOr("plan", SMPRules.bdScored(c) ? c.dir : SMPRules.BD_IND,
           ["≥", "≤", SMPRules.BD_IND], "bddirsel",
           function(v){ c.dir = (v === SMPRules.BD_IND ? "" : v); paint(); }) +
         '<button class="xbtn" data-bdcoloff="' + at + '|' + esc(c.id) +
-          '" title="Remove this column" aria-label="Remove this column">&times;</button>' +
-        '</span>' };
+          '" title="Remove this column" aria-label="Remove this column">&times;</button>' };
     }))
-    .concat([{ cls:"bdadd", h:'<button class="linkbu" data-rowadd="bdcol|' + at +
-      '" title="Add a column" aria-label="Add a column">+</button>' }]);
+    .concat([{ cls:"cc", h:'<button class="linkbu" data-rowadd="bdcol|' + at +
+      '" title="Add a column">+</button>' }]);
   var rows = SMPRules.bdRows(it).map(function(r, i){
     return '<tr>' +
       '<td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
@@ -1010,7 +1005,7 @@ function bdReadTable(p, mode){
           return '<td class="num">' + (String(t).trim() ? tgtShown(t)
             : '<span class="nobody">&mdash;</span>') + '</td>';
         }
-        /* §343: A FIGURE READS AGAINST ITS OWN TARGET, exactly as every
+        /* §339: A FIGURE READS AGAINST ITS OWN TARGET, exactly as every
            reported figure on these pages already does (§254) — and the
            SCORING COLOUR is what marks the columns that count. An indicator
            is drawn plain with its target behind it, which is the rule two
@@ -1028,7 +1023,7 @@ function bdReadTable(p, mode){
       .concat(cols.map(function(c){ return { h:bdColHead(p, c), cls:"cc" }; })),
     rows);
 }
-/* §343: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
+/* §339: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
    already scores rather than rows. It is here for §264's own reason: the
    extremes must be the extremes of exactly the list the headline beside them
    averaged, or a card names a Highest the number above it left out. A pillar
@@ -1079,7 +1074,7 @@ function pillarBody(it, u){
   var sp = scoreSpread(scorableMeasures(it), bdsc);
   var uk = u && u.ukey;
   return '<div class="pbody" hidden>' +
-    /* §343: a scored breakdown column is one of the numbers this pillar is
+    /* §339: a scored breakdown column is one of the numbers this pillar is
        judged on, so it is counted here too — "Measures 4" over an average of
        five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
@@ -1088,7 +1083,7 @@ function pillarBody(it, u){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    /* §343: and the breakdown, where there is one — between the measures it
+    /* §339: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
     (SMPRules.bdHas(it)
@@ -5126,7 +5121,7 @@ function renderReport(u){
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
-  /* §343: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
+  /* §339: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
      than `entry` itself, because every branch in that function is about a
      field on the row (`actual` / `outActual`, the yes/no pair, a sourced
      figure) and a cell is addressed by its COLUMN — `data-bdcol` beside
@@ -5167,13 +5162,13 @@ function renderReport(u){
   /* ── Key Objectives, in their own section \u2014 they are the unit's headline
      and should not be a block among blocks. */
   var objs = reportItems(u).filter(function(x){ return x.kind === "objective"; });
-  var objTable = miniTable(["#", L("keyobj","bu"), "Dir.", REP_TGT_HEAD, "Reported", "Note"],
+  var objTable = miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "Reported", "Note"],
     objs.map(function(x, i){
       return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
         '<td class="idx">' + (i+1) + '</td>' +
         '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
         '<td class="num">' + esc(x.obj.dir) + '</td>' +
-        '<td class="num">' + repTargetCell(x.obj) + '</td>' +
+        '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="cc">' + entry(x) + '</td>' +
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
@@ -5222,7 +5217,7 @@ function renderReport(u){
                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                 cid:p.id });
     });
-    /* §343: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
+    /* §339: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
        cell, which is what makes the pane's tally read "20/20" over three
        measures, fifteen category figures and two tactics — the count Islam
        signed off. The ROW carries the note, so every cell in a row points at
@@ -5241,13 +5236,13 @@ function renderReport(u){
 
     var mTable = ms.length
       ? '<h4 class="mini">' + L("measure","bu") + '</h4>' +
-        miniTable(["#", "Measure", "Dir.", REP_TGT_HEAD, "Reported", "Note"],
+        miniTable(["#", "Measure", "Dir.", "Target", "Reported", "Note"],
           ms.map(function(x, i){
             return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
               '<td class="idx">' + (i+1) + '</td>' +
               '<td>' + esc(x.obj.name) + fmark(x.id) + '</td>' +
               '<td class="num">' + esc(x.obj.dir) + '</td>' +
-              '<td class="num">' + repTargetCell(x.obj) + '</td>' +
+              '<td class="num">' + (x.obj.target ? tgtShown(x.obj.target) : '<span class="missing">Missing</span>') + '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
               '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
@@ -5260,7 +5255,7 @@ function renderReport(u){
            the page. It is a PLAN fact, so a row outside this cycle still shows
            its outcome — the cycle decides what is asked for, not what the plan
            says. */
-        miniTable(["#", "Tactic", "Outcome", "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
+        miniTable(["#", "Tactic", "Outcome", "Owner", "Quarters", "YTD Target", "Reported", "Note"],
           ts.map(function(x, i){
             var nameCell = '<td><b class="tacname">' + esc(x.obj.name) + '</b>' +
               (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
@@ -5296,7 +5291,7 @@ function renderReport(u){
           }).join(""))
       : "";
 
-    /* §343: the breakdown, between the measures it is part of and the
+    /* §339: the breakdown, between the measures it is part of and the
        tactics it is not — the same place it sits on the other two panes, or
        somebody entering figures meets the table in a different order from
        the one they planned it in. The target sits BEHIND each box so nobody
@@ -5359,7 +5354,7 @@ function renderReport(u){
       total++;
       if (tacticAnswered(t)) done++;   /* §252 */
     });
-    /* §343: and every cell the breakdown asks for — the rail's tally and the
+    /* §339: and every cell the breakdown asks for — the rail's tally and the
        pane's pill read this one function, so they cannot disagree about how
        much of a pillar is still to enter (§116.2). */
     bdCells(p).forEach(function(c){
@@ -6709,7 +6704,7 @@ function projPlanBody(p, subject){
 
    RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
    function's pages now says its strategy is the parent unit's. */
-/* ── OBJECTIVES AND ACTIONS: A FUNCTION'S THREE PAGES (§342, spec 049) ─────
+/* ── OBJECTIVES AND ACTIONS: A FUNCTION'S THREE PAGES (§338, spec 049) ─────
    Islam: *"each function has objectives like the measures we have and actions
    like tactics they work on that has due dates"*, and then *"we need to build
    the objectives and actions."*
@@ -6741,7 +6736,7 @@ function objXb(ed, id){
    (§104). The owner and the date are both FILLABLE and both counted, which is
    a milestone's own pair and for its own two reasons: a line nobody owns is a
    line nobody can report, and the date is what decides whether this cycle
-   asks for it (§177, §342 in lib/rules.js). */
+   asks for it (§177, §338 in lib/rules.js). */
 function fnObjPlanBody(fk, ed){
   var list = fnActions(fk);
   var rows = list.map(function(a, i){
@@ -6897,7 +6892,7 @@ function renderFnProjects(fnKey){
      so the branch is unchanged in shape. */
   var target = holderTarget(fnKey), caps = capsShown(target);
   if (plansInPillars(target)) return renderUnitPlan(unitLike(target));
-  /* §342: and the third way — its actions, where this page draws projects. */
+  /* §338: and the third way — its actions, where this page draws projects. */
   if (plansInObjectives(target)) return fnObjPlan(fnKeyOf(target));
   if (!caps.length) return fnNothingBehind(target);
   var ed = projEditing(), on = projArranging(target);
@@ -7141,14 +7136,14 @@ function capReportBody(c){
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
-      '<td class="num">' + repTargetCell(m) + '</td>' +
+      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
       '<td class="cc">' + capEntryBox(m, splitTarget(String(m.target)).unit, may, m.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
   var sel = railPick(c);
   var koBlock = c.keyObjectives.length
     ? '<h4 class="mini">Key objectives</h4>' +
-      miniTable(["#","Objective","Dir.",REP_TGT_HEAD,"Reported","Note"], kRows)
+      miniTable(["#","Objective","Dir.","Target","Reported","Note"], kRows)
     : '';
   if (!sel) return koBlock + '<div class="note">No projects to report on.</div>';
   /* §279: the same mark the unit's rail carries, off the same map — this
@@ -8356,73 +8351,6 @@ function tgtShown(v){
   return SMPRules.isYesNo(v) ? "Yes / No" : esc(unitTight(v));
 }
 
-/* ── WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§344) ──
-   Islam: *"when I set a target like a % for the annual view and I build it on
-   monthly level and set it to latest if I go to the reporting the target
-   required should read from the latest month we are measured against."*
-
-   IT DID, EVERYWHERE EXCEPT HERE. Measured on his own case — a 30% annual
-   target, twelve months typed in, `Latest`, reported as of Jun 2026 —
-   `measureDue` answers 29 and Performance draws `31% / 29%`, while the
-   Reporting column headed *Target* drew `30%`, the year. Nothing new is
-   computed here: this is the number `measureDueLabel` has answered since
-   §239 and the deck has printed since §254, in the one place a reporter
-   actually needs it — the column beside the box they are filling in.
-
-   AND IT IS OLDER THAN THE MONTHLY PLAN, established on a SHIPPED row before
-   anything was blamed on §278 (§303): Accessory revenue, 300M EGP, `Sum`, no
-   monthly plan at all — this column drew 300M while the platform measured it
-   against 150M. Every prorating row has read this way since §239 made the
-   score derived and put the benchmark on Performance and the deck alone.
-   §278's own *"(c) reporting is unchanged"* was about MONTHLY ACTUALS, which
-   Islam turned down; it was never a decision about what this column prints.
-
-   THE TREATMENT IS THE TACTICS TABLE'S OWN, class for class — the benchmark
-   with what it is a part of under it in `.subhd` — because that table is on
-   this same screen, three inches down, and has been headed *YTD Target* and
-   drawn exactly this since §248. So the page stops contradicting itself and
-   the product gains no new vocabulary (§53.5); there is no new CSS.
-
-   A ROW WHOSE BENCHMARK **IS** ITS ANNUAL TARGET IS BYTE-IDENTICAL TO WHAT IT
-   WAS, and the test is the VALUE and never the string: `measureDueLabel`
-   rebuilds the number through `joinTarget`, which drops a thousands separator
-   — so comparing the two as text drew `4500` over `of 4,500` on a row that
-   does not prorate at all, a second line saying nothing above a figure
-   re-spelt on the way (§254.1's family, caught in the mockup before it
-   reached the sources).
-
-   §276: A COUNT WITH NOTHING OWED YET IS NOT A ROW OWING NOUGHT — it has not
-   been asked. Under a heading that now says YTD, printing its annual figure
-   would claim the whole year falls due today, so the benchmark half is the
-   em-dash this column already draws for a row it cannot measure and the
-   annual stays underneath. That case is a CONSEQUENCE of the rename rather
-   than scope: nothing in the worked example carries `Count`, so the check
-   makes one (§255).
-
-   PERFORMANCE IS NOT TOUCHED, and neither is the Temple: `capKOTable` and the
-   capability card's own table carry a *Target* column too and belong to
-   `renderFnPerformance`, where the benchmark already rides beside the figure
-   (§239.2). Three sites share this expression and only the Reporting one is
-   this decision's — checked rather than swept (§2b). */
-function repTargetCell(m){
-  if (!m || !m.target) return '<span class="missing">Missing</span>';
-  var whole = tgtShown(m.target);
-  if (nothingDueYet(m))
-    return '<span class="nobody">&mdash;</span><span class="subhd">of ' + whole + '</span>';
-  var bench = measureDueLabel(m), due = measureDue(m);
-  var num = parseFloat(String(splitTarget(String(m.target)).value).replace(/,/g, ""));
-  /* Nothing to say that the target does not already say: a yes/no row, a
-     target holding only its unit (§251), and every compile rule that does not
-     prorate all land here and are drawn exactly as they were. */
-  if (bench == null || due == null || !isFinite(num) || Math.abs(due - num) < 1e-9)
-    return whole;
-  return esc(bench) + '<span class="subhd">of ' + whole + '</span>';
-}
-/* ONE NAME FOR THE COLUMN, read by all four tables that carry it — a literal
-   typed at four call sites is how two of them come to say different things
-   about one number (§53.5). The tactics table already said this. */
-var REP_TGT_HEAD = "YTD Target";
-
 /* ── WHAT A FIGURE IS MEASURED AGAINST, BESIDE IT (§254) ───────────────
    Islam, of the deck's key measures: *"the actual should show the proration
    like the performance"*, and of the objectives: *"key objectives actual
@@ -8624,7 +8552,7 @@ function unitPerfPane(it, u, railed){
     '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
-    /* §343: a scored breakdown column is one of the numbers this pillar is
+    /* §339: a scored breakdown column is one of the numbers this pillar is
        judged on, so it is counted here too — "Measures 4" over an average of
        five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
@@ -8633,7 +8561,7 @@ function unitPerfPane(it, u, railed){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    /* §343: and the breakdown, where there is one — between the measures it
+    /* §339: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
     (SMPRules.bdHas(it)

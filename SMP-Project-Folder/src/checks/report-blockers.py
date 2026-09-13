@@ -298,9 +298,9 @@ with sync_playwright() as p:
 
     # 8 ── A PROJECTS SUBJECT GETS THE SAME BAR (it had NONE)
     #
-    # §330.18: AND THERE ARE TWO OF THEM NOW. This asked for a function
+    # §334.18: AND THERE ARE TWO OF THEM NOW. This asked for a function
     # CARRYING a capability, which was how §279 said "a function that plans in
-    # projects" before §322 moved those projects onto the function and §330
+    # projects" before §326 moved those projects onto the function and §334
     # gave a capability pages of its own. On the demo that picks Marketing and
     # then measures Marketing's OWN work, which is not what the section is
     # about — and the guard below said so honestly, three times, rather than

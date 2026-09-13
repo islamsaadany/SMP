@@ -13,7 +13,7 @@ register twice, and a message aimed at a role reached the copy with no address.
 from playwright.sync_api import sync_playwright
 
 import os as _os
-# THE BUILD, BY ITS OWN PATH (§330.13). This read
+# THE BUILD, BY ITS OWN PATH (§334.13). This read
 # `file:///home/user/SMP/…` — an ABSOLUTE path — so it could not be pointed
 # at any other build: a falsification made from the sources (§276) and a
 # baseline run against `origin/main` (§303) both went on measuring the

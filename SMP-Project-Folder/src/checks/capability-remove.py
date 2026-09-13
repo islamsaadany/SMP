@@ -1,4 +1,4 @@
-"""REMOVING A CAPABILITY: two answers, not one (§321).
+"""REMOVING A CAPABILITY: two answers, not one (§325).
 
 Islam, trying to take a wrapper off one of his own functions: "when I try to
 remove the capability it will remove the projects with it." It did — a splice
@@ -50,7 +50,7 @@ def ev(pg, js, dflt=None):
     except Exception as e: return dflt if dflt is not None else {"err": str(e)[:90]}
 
 BOXES = """() => {
-  /* THE CHECK MAKES ITS OWN BOXES (§255, §329). The worked example shipped
+  /* THE CHECK MAKES ITS OWN BOXES (§255, §333). The worked example shipped
      eight until the demo was finished, and this file leaned on four of them by
      id — so it went thirty red the day the demo stopped carrying one, on a
      build behaving exactly as decided (§214.3, seventh time). It rebuilds the
@@ -64,7 +64,7 @@ BOXES = """() => {
      Remove does with them. Re-made after every reload, or the sections that
      put the state back measure a page holding nothing. */
   /* THE POOL IS EVERY PROJECT THE FUNCTION HOLDS, not the array on the
-     function (§330). Stage 2 took capabilities off `fnHolders`, so a function
+     function (§334). Stage 2 took capabilities off `fnHolders`, so a function
      that holds one has projects in two places and `f.projects` stopped being
      the whole of what it owns — the fixture drew from that array alone, and on
      the finished demo Marketing owns two of its three, so it built one box of
@@ -134,7 +134,7 @@ with sync_playwright() as p:
     ck("Marketing carries two — the pair this file needs, made rather than waited for",
        isinstance(start, dict) and start.get("mkt") == ["cap4", "cap6"], start)
 
-    # THE CODES BEFORE, READ PER HOLDER (§330). `fnProjects(fk)` is the
+    # THE CODES BEFORE, READ PER HOLDER (§334). `fnProjects(fk)` is the
     # FUNCTION's own list now — a capability is a destination with a code
     # sequence of its own — so reading marketing's three through it answered
     # an empty map, and the "every code is what it was" assertion below then
@@ -186,13 +186,13 @@ with sync_playwright() as p:
        dlg.get("safe") == 1, dlg)
     # REWRITTEN, NOT LOOSENED (§218). This asserted that ONE sibling is NAMED
     # rather than offered in a picker — true while a sibling was the only place
-    # projects could go. §322 makes the FUNCTION ITSELF a destination and the
+    # projects could go. §326 makes the FUNCTION ITSELF a destination and the
     # one that is always there, so a capability with one sibling now has two
     # places to go and a picker is correct. What is asserted instead is the
     # claim that survives: whatever the shape, the function is offered, and it
     # is offered FIRST — a function's own work is where a dissolved box's
     # projects belong; a sibling is the narrower answer.
-    ck("...the destination offers the FUNCTION ITSELF, first (§322)",
+    ck("...the destination offers the FUNCTION ITSELF, first (§326)",
        dlg.get("sel") is True and (dlg.get("dests") or [""])[0].endswith(" itself"), dlg)
     ck("...and the sibling capability beside it",
        "Product Mindset" in (dlg.get("dests") or []), dlg)
@@ -218,7 +218,7 @@ with sync_playwright() as p:
     moved_ids = before.get("ids") or []
     try:
         pg.click('[data-caprm="cap4"]', timeout=3000); pg.wait_for_timeout(350)
-        # §322: THE DESTINATION IS CHOSEN, not taken as the default. The
+        # §326: THE DESTINATION IS CHOSEN, not taken as the default. The
         # function is first now, so a fixture that just presses Keep measures
         # the dissolve while claiming to measure the move — and §3's whole
         # subject is the move to a SIBLING.
@@ -252,9 +252,9 @@ with sync_playwright() as p:
     ck("...each moved project now names its new holder",
        kept.get("capIds") is not None and len(set(kept["capIds"])) == 1
        and kept["capIds"][0] == "cap6", kept)
-    # REWRITTEN, NEVER LOOSENED (§218). §321 asserted *every code is what it
+    # REWRITTEN, NEVER LOOSENED (§218). §325 asserted *every code is what it
     # was*, which was true while a code was a position across the whole
-    # FUNCTION — and §330 made a capability a holder with a sequence of its
+    # FUNCTION — and §334 made a capability a holder with a sequence of its
     # own, so a project that changes holder changes code, deliberately: that
     # section's own words are "a code says WHERE a project lives, so FIN02
     # becoming PM01 is the code telling the truth rather than a cost to hide",
@@ -269,7 +269,7 @@ with sync_playwright() as p:
     ck("...and the codes are the destination's own run, 01 upwards, one prefix",
        bool(pre) and seq == [pre + ("%02d" % (i + 1)) for i in range(len(seq))],
        {"seq": seq, "prefix": pre})
-    ck("...so a project that changed holder reads a new code (§330), ids unmoved",
+    ck("...so a project that changed holder reads a new code (§334), ids unmoved",
        bool(before.get("ids")) and all(
          kept.get("codes", {}).get(i) not in (None, codes0.get(i))
          for i in (before.get("ids") or [])),
@@ -303,14 +303,14 @@ with sync_playwright() as p:
     # REVERSED AND REWRITTEN, NEVER DELETED (§218). This section asserted the
     # HELD state: a capability that is the only one its function has had
     # nowhere to move its projects, so Keep was drawn, greyed, and said so.
-    # §322 gives the projects somewhere to go — the function itself — so that
+    # §326 gives the projects somewhere to go — the function itself — so that
     # state CANNOT OCCUR, and the branch that drew it is deleted (§24). The
     # assertion is inverted rather than removed, because the case it guarded is
-    # exactly the case §322 has to get right: what used to be a dead end is now
+    # exactly the case §326 has to get right: what used to be a dead end is now
     # the ordinary answer, and a build that brought the held state back would
     # pass a file with these lines simply taken out.
     ck("the row is DRAWN rather than hidden", lone.get("drawn") is True, lone)
-    ck("...and is LIVE now: the function is somewhere for them to go (§322)",
+    ck("...and is LIVE now: the function is somewhere for them to go (§326)",
        lone.get("held") is None and lone.get("hard") is False, lone)
     ck("...it names the function as the destination",
        "Finance itself" in (lone.get("why") or ""), lone)
@@ -372,7 +372,7 @@ with sync_playwright() as p:
       arch: ARCHIVES.length })""")
     ck("the capability is gone", gone.get("cap") is False, gone)
     ck("...and its projects with it", gone.get("pr") == 0, gone)
-    ck("...not quietly given to the function instead (§322's other answer)",
+    ck("...not quietly given to the function instead (§326's other answer)",
        gone.get("own") == 0, gone)
     ck("...archived first, so it can be restored",
        (gone.get("arch") or 0) > (before2.get("arch") or 0), gone)

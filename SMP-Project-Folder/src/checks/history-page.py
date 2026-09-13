@@ -44,7 +44,7 @@ PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 GATE = b"<!doctype html><title>Sign in</title><h1 id='gate'>Sign in</h1>"
 
 # Rows in the exact shape the real save path writes (see scripts/test-history-read.js).
-# ── THE FIXTURE IS DATED TODAY, AND IT WAS NOT (§324) ────────────────────
+# ── THE FIXTURE IS DATED TODAY, AND IT WAS NOT (§328) ────────────────────
 # Written 2026-09-03 with its seven entries stamped that morning and the stub
 # emptying anything asked for after 06:00 that day. The page's DEFAULT window
 # is TODAY — so from 2026-09-04 onwards the first ask came back empty, the
@@ -78,8 +78,8 @@ LOG = [
    "rows_": {"count": 1, "moved": [{"id": "retailstores-P2-M1", "to": "Latest", "had": True, "from": "Sum", "name": "E-store revenue", "field": "compile"}]}},
   {"id": 4, "at": _at(6), "person_key": "fn_mkt", "person_name": "Yara Kamal", "kind": "capReporting", "target": "fn:marketing", "what": "project milestones",
    "rows_": {"count": 1, "moved": [{"id": "cap4-P1-M1", "to": 100, "had": False, "from": None, "name": "Perception study fielded", "field": "pct"}]}},
-  # §330.18: A FUNCTION'S OWN PROJECT — the row `locate()` could not find.
-  # Since §322 a supporting function's projects are the FUNCTION's, and that
+  # §334.18: A FUNCTION'S OWN PROJECT — the row `locate()` could not find.
+  # Since §326 a supporting function's projects are the FUNCTION's, and that
   # resolver asked `unitLikeWritable` (the PILLARS view, null on this format)
   # and then walked `GROUP.capabilities`: neither route reaches the page where
   # most of a tenant's projects now live, so Restore put nothing back and did
@@ -223,7 +223,7 @@ with sync_playwright() as p:
     ck("the page asked the server", len(asks) >= 1, SEEN["asks"])
     ck("...for today, with a cap, never the graph", asks and asks[-1].get("from") and asks[-1].get("limit"), asks[-1] if asks else None)
     r = rows(pg)
-    # §330.18: REWRITTEN, NEVER LOOSENED (§218). This held the literal pair
+    # §334.18: REWRITTEN, NEVER LOOSENED (§218). This held the literal pair
     # "8 lines from 7 entries", so adding an entry to the fixture reads as a
     # regression in the product. It asserts the RELATIONSHIP the section is
     # named after — one line per changed FIELD — worked out from the fixture
@@ -315,7 +315,7 @@ with sync_playwright() as p:
     press(pg, "[data-hist-ok]"); pg.wait_for_timeout(1200)
     ck("a field that was absent before goes back to absent", pg.evaluate("()=>!('quarters' in UNITS.mobile.items[0].tactics[1])"), pg.evaluate("()=>JSON.stringify(UNITS.mobile.items[0].tactics[1].quarters)"))
 
-    # §330.18: AND A SUPPORTING FUNCTION'S OWN PROJECT GOES BACK TOO. Every
+    # §334.18: AND A SUPPORTING FUNCTION'S OWN PROJECT GOES BACK TOO. Every
     # restore above is a UNIT's, which is why the seventh copy of "walk the
     # capabilities" sat in `locate()` unmeasured — the page where most of a
     # tenant's projects now live could put nothing back at all. Both ends: the

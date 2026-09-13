@@ -26,7 +26,7 @@ That last one is the reason this file exists rather than a screenshot. The
 whole change was sold on "nobody's score moves", and a claim like that is
 either measured or it is a hope.
 
-   WHAT IT WALKS, AND WHY IT CHANGED (§329, §214.3). Every project in the
+   WHAT IT WALKS, AND WHY IT CHANGED (§333, §214.3). Every project in the
    worked example used to sit inside a capability, so this file reached them
    through `GROUP.capabilities` and `capsOfFunction("finance")[0]`. Since the
    demo was finished it holds no box at all, and both spellings answered with
@@ -71,7 +71,7 @@ def goto(pg, key, tab, sec, report):
     """Open a destination, its tab and its section — and CHECK IT LANDED."""
     want = ("caps" if key.startswith("cap:")
             else "fns" if key.startswith("fn:") else "units")
-    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
+    # §334.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
     # which with three sides is a DIV of buttons rather than a button — so
     # the press did nothing, the loop gave up, and the destination was
     # never drawn. `[data-fold]` is absent exactly when that side is lit.

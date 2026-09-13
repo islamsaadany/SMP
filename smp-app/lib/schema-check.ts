@@ -10,7 +10,7 @@
    4. every FK between two tenant tables carries tenant_id on both sides. */
 import type { Pool, PoolClient } from "pg";
 
-/* THE SECOND COPY OF ONE FACT, AND IT DRIFTED (§327). `db/schema.sql` ends in
+/* THE SECOND COPY OF ONE FACT, AND IT DRIFTED (§331). `db/schema.sql` ends in
    a loop that gives every table RLS and the `tenant_rows` policy BY EXCLUSION,
    and its `NOT IN (…)` names these same tables — so this list and that one must
    hold exactly the same names or the two disagree about what a tenant owns.

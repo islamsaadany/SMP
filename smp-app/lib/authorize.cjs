@@ -943,7 +943,7 @@ const FN_SETUP = ["name", "navName", "codePrefix", "active", "head", "custodian"
    fall-through §42 exists for. */
 const FN_KNOWN = FN_SETUP.concat(UNIT_FOUNDATION,
   ["key", "items", "keyObjectives", "swot", "perf", "exec", "pend",
-   /* §322: a supporting function holds its own projects now. It is in the
+   /* §326: a supporting function holds its own projects now. It is in the
       list so a change to them is not swept up as "a supporting function" —
       Setup, the office's — the way any unnamed field is; what they ARE is
       classified below by exactly the rules a capability's projects get. */
@@ -956,7 +956,7 @@ const FN_KNOWN = FN_SETUP.concat(UNIT_FOUNDATION,
    for one press, or one that names the wrong screen. */
 const FN_SEEN = FN_KNOWN.concat(HIDE_SLIDES);
 
-/* ── A FUNCTION'S OWN PLAN (§322) ─────────────────────────────────────────
+/* ── A FUNCTION'S OWN PLAN (§326) ─────────────────────────────────────────
    Its projects and its key objectives, judged by the SAME rules a
    capability's are — one page since §213, and now one plan model too, so a
    project owner reporting a figure, a custodian filling a gap and the office
@@ -1022,7 +1022,7 @@ function collectFunction(key, sf, iff, add, w) {
   if (String(sf.format) === "pillars") {
     collectUnit(target, asUnit(sf2, target), asUnit(iff, target), add, w);
   } else if (fnOwnWork(sf2, iff, target, add)) {
-    /* §322 classified the function's own plan; anything else FN_KNOWN speaks
+    /* §326 classified the function's own plan; anything else FN_KNOWN speaks
        for is still the office's, below. */
   } else if (!same(pick(sf2, FN_KNOWN), pick(iff, FN_KNOWN))) {
     /* Pillars on a projects function are not its plan — nothing renders them —
@@ -1055,7 +1055,7 @@ function asUnit(f, ukey) {
 const CAP_SETUP = ["id", "name", "fn"];
 const CAP_KNOWN = CAP_SETUP.concat(["def", "keyObjectives", "projects", "perf", "exec"]);
 
-/* ── A LIST OF PROJECTS, CLASSIFIED (§322) ────────────────────────────────
+/* ── A LIST OF PROJECTS, CLASSIFIED (§326) ────────────────────────────────
    Lifted out of collectCapabilities unchanged, because a supporting function
    holds projects of its own now and the two lists must be judged by exactly
    the same rules — a fill, a figure, a reorder and an authoring edit mean the
@@ -1119,7 +1119,7 @@ function collectProjects(aP, bP, target, add) {
   }
 }
 
-/* §330: WHAT A REFUSAL CALLS THE THING. Four sentences stripped `fn:` and
+/* §334: WHAT A REFUSAL CALLS THE THING. Four sentences stripped `fn:` and
    printed the key, which for a capability would print a bare `cap:cap6` — a
    refusal that names something nobody has seen on a screen sends them nowhere
    (§16.7, §123). It is the stored NAME where there is one, because the world a
@@ -1144,12 +1144,12 @@ function collectCapabilities(sList, iList, add) {
     const b = im[id];
     if (same(a, b)) return;
     if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name or function");
-    /* §330: THE CAPABILITY'S OWN TARGET. It is a destination now, with its own
+    /* §334: THE CAPABILITY'S OWN TARGET. It is a destination now, with its own
        pages, its own submission and its own row on the cycle board — so a fill
        inside it is judged against the capability rather than against the
        function that holds it, and the refusal names the thing somebody was
        actually looking at (§16.7). The ACCESS behind it is the holding
-       function's, resolved once in lib/rules.js (§330), so nobody's grant
+       function's, resolved once in lib/rules.js (§334), so nobody's grant
        moves: the head's own column answers for their capability exactly as it
        answers for their function. */
     const target = "cap:" + id;
@@ -1225,7 +1225,7 @@ function ctxOfUnit(u) {
 }
 /* The same map for a function's capabilities: each reporting row with the
    project it sits inside. */
-/* §330: BY FUNCTION, OR BY THE CAPABILITY ITSELF. A capability is a subject
+/* §334: BY FUNCTION, OR BY THE CAPABILITY ITSELF. A capability is a subject
    of its own now, so a change inside one is classified against `cap:<id>` and
    the rows have to be found the same way — asking by function would collect
    every capability that function holds, which is a wider answer than the
@@ -1235,11 +1235,11 @@ function ctxOfFn(w, subject) {
   const s = String(subject || "");
   const capId = s.indexOf("cap:") === 0 ? s.slice(4) : null;
   const fnKey = capId ? null : s.replace(/^fn:/, "");
-  /* §330.18: THE HOLDERS THIS SUBJECT DRAWS, asked of the shared rule. This
-     walked `w.capabilities` alone, so since §322 not one row of a supporting
+  /* §334.18: THE HOLDERS THIS SUBJECT DRAWS, asked of the shared rule. This
+     walked `w.capabilities` alone, so since §326 not one row of a supporting
      function's OWN projects was in the index — and every id missing from the
      index is refused by the caller below, whoever the person is. Measured:
-     the owner of a function's own project, whose role §330 had just carried
+     the owner of a function's own project, whose role §334 had just carried
      across, was refused every figure they entered. The third copy of that
      walk this round (§53.5), and the last one. */
   const holders = capId
@@ -1289,7 +1289,7 @@ function containerIndex(stored) {
   Object.keys(stored.functions || {}).forEach(function (fk) {
     take((stored.functions[fk] || {}).items, "fn:" + fk);
   });
-  /* §330: a capability's projects are reported on the CAPABILITY's page, so
+  /* §334: a capability's projects are reported on the CAPABILITY's page, so
      that is the target a bounded role's reach is judged against. */
   ((stored.group || {}).capabilities || []).forEach(function (c) {
     if (c && c.id) take(c.projects, "cap:" + c.id);
@@ -1528,7 +1528,7 @@ function authorize(stored, incoming, person) {
       case "unitReporting":
       case "reportState": {
         const t = String(ch.target || "");
-        /* §330: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
+        /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
            reporting their own capability would be refused. */
@@ -1560,7 +1560,7 @@ function authorize(stored, incoming, person) {
            the old `isFn` skip existed because no bounded role could reach an
            fn: target, and a pillar owner can. */
         if (!R.onlyOwnLines(w, person, isFn ? "fn" : "unit", t)) return;
-        /* §330: a CAPABILITY's rows are found through the capabilities, not
+        /* §334: a CAPABILITY's rows are found through the capabilities, not
            through `stored.functions` — `t.slice(3)` on a `cap:` target is
            nonsense and would have handed every row "not yours". */
         const ctxs = t.indexOf("cap:") === 0
@@ -1587,7 +1587,7 @@ function authorize(stored, incoming, person) {
          untouched and stay `reportState` above. */
       case "reportUnpark": {
         const t = String(ch.target || "");
-        /* §330: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
+        /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
            reporting their own capability would be refused. */
@@ -1615,7 +1615,7 @@ function authorize(stored, incoming, person) {
           return;
         }
         const t = String(c.target || "");
-        /* §330: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
+        /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
            reporting their own capability would be refused. */

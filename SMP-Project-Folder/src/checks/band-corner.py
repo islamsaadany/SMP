@@ -18,7 +18,7 @@ cannot ask whether a sticky element is pinned, and Islam looked at the result:
 *"the corner still has this squared corner."* So the rest assertion is written
 POSITIVELY, as the thing that has to be there, and it fails on that build.
 
-AND "AT ITS OFFSET" IS NOT "PINNED" (§323). The band's sticky offset and its
+AND "AT ITS OFFSET" IS NOT "PINNED" (§327). The band's sticky offset and its
 flow position are the same pixel, and a unit's Plan page does not scroll at all
 in a tall window — so the observer that used to answer this said "pinned" from
 the first frame and never said anything else, the fill painted at rest, and the
@@ -161,7 +161,7 @@ with sync_playwright() as p:
         pg.select_option("#asWho", "smo"); pg.wait_for_timeout(400)
         el = pg.query_selector('#units [data-u="mobile"]')
         if not (el and el.is_visible()):
-            # §330.17: press the SIDE, never "the other one" — three sides once
+            # §334.17: press the SIDE, never "the other one" — three sides once
             # a capability exists, and `.nsw:not(.on)` then matches two.
             sw = pg.query_selector('#units [data-fold="units"]')
             if sw:
@@ -190,7 +190,7 @@ with sync_playwright() as p:
             ck("[%s] %s: the band says where it is" % (theme, state),
                where["says"] == where["slid"], where)
             # AND THE SCROLL HAS TO HAVE HAPPENED (§113.8). Three of the six
-            # assertions below passed on the build §323 corrected, and they
+            # assertions below passed on the build §327 corrected, and they
             # passed for the wrong reason: the band was wrongly pinned at rest,
             # so a window where the page never scrolls measured "pinned" while
             # nothing had moved. A layout change that takes the scroll away
@@ -225,7 +225,7 @@ with sync_playwright() as p:
                        "%d of %d notch pixels are something other than the page"
                        % (len(ink), len(px)))
 
-        # ── AND A WINDOW WHERE THE PAGE DOES NOT SCROLL AT ALL (§323) ────
+        # ── AND A WINDOW WHERE THE PAGE DOES NOT SCROLL AT ALL (§327) ────
         # The case the fix exists for, and the one no viewport here reached.
         # A unit's Plan at 1440×900 has nothing to scroll — measured,
         # `scrollHeight - innerHeight` is 0 — and the band's flow position and

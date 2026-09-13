@@ -394,7 +394,7 @@ def main():
             x = pg.query_selector("#modal-x")
             if x: x.click(); pg.wait_for_timeout(300)
 
-        # §330: THE STATE IS MADE, not waited for (§255). §329 left the worked
+        # §334: THE STATE IS MADE, not waited for (§255). §333 left the worked
         # example with ONE capability and its objectives do not happen to hold
         # a row whose score differs from its stored ratio — so this section
         # reported "no such capability" and stopped, on a build drawing the
@@ -423,7 +423,7 @@ def main():
         ck("a capability holds an objective whose two figures differ",
            not err(cap) and cap is not None, cap)
         if cap and not err(cap):
-            # §330: ITS OWN DESTINATION, not the function that holds it — a
+            # §334: ITS OWN DESTINATION, not the function that holds it — a
             # capability is a page of its own now and its objectives are drawn
             # there rather than on the function's Performance page.
             ck("the capability opens as a destination of its own",

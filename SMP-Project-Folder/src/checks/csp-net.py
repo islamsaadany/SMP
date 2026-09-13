@@ -10,7 +10,7 @@ HTTP where it is actually enforced the way production serves it:
 Served over http://127.0.0.1 because a meta CSP is enforced there the same way
 Vercel serves it.
 
-AND IT HAD STOPPED MEASURING THE PLATFORM AT ALL (§324.5). The line above used
+AND IT HAD STOPPED MEASURING THE PLATFORM AT ALL (§328.5). The line above used
 to read *"the app falls back to its baked data when /api/* 404s, which is all
 this needs"*, and that was true until §313 made every request name a CLIENT: a
 404 from the state API now sends the page to `/platform`, which this stub also
@@ -89,7 +89,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(1200)
 
     # 1) the app's own scripts ran → the hash allow-list is correct
-    # THE PAGE WE OPENED IS THE PAGE WE ARE ON (§324.5). Asserted FIRST and by
+    # THE PAGE WE OPENED IS THE PAGE WE ARE ON (§328.5). Asserted FIRST and by
     # name, because everything below it is true of a 404 page: no meta, no app,
     # and an injected handler that runs because nothing is policing it.
     here = pg.evaluate("() => ({url: location.pathname, metas: document.querySelectorAll('meta[http-equiv]').length})")

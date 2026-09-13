@@ -470,7 +470,7 @@
       if (!c || !c.fn) return;
       if ((c.projects || []).some(owns)) once("powner", "fn:" + c.fn);
     });
-    /* AND A FUNCTION'S OWN PROJECTS (§330, closing §322). That section gave a
+    /* AND A FUNCTION'S OWN PROJECTS (§334, closing §326). That section gave a
        supporting function projects of its own and this walk went on reading
        the capabilities alone — so the owner of a project on the page where
        most of a tenant's projects now live derived NO ROLE AT ALL: they
@@ -557,7 +557,7 @@
   var OWNS_EVERY_PLACE = ["super", "gceo", "smoteam"];
   function ownsEveryPlace(roleKey) { return OWNS_EVERY_PLACE.indexOf(roleKey) > -1; }
 
-  /* ── A CAPABILITY'S ACCESS IS ITS HOLDER'S (§330) ────────────────────
+  /* ── A CAPABILITY'S ACCESS IS ITS HOLDER'S (§334) ────────────────────
      A capability is a destination of its own — `cap:<id>` — and it is NOT a
      column on the access matrix. It could have been, and it would have been
      wrong twice over: §37 settled that matrix at seven roles by five areas on
@@ -1779,7 +1779,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      A NO-OP FOR EVERY EXISTING CALLER — all four pass a key that is in the
      table — and the server's own tests hold it to that. */
   function strategyPageOf(target, unitPage) {
-    /* §330: A CAPABILITY TAKES THE FUNCTION'S PAGES, because it IS drawn by
+    /* §334: A CAPABILITY TAKES THE FUNCTION'S PAGES, because it IS drawn by
        them — same three tabs, same access keys, same Overview. Asked as a
        unit it would consult `u_plan` and `u_found`, which are a business
        unit's columns, and a function head filling a gap on their own
@@ -3050,18 +3050,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      what "a custodian per project" means. Capability projects only: a pillars
      function's plan is classified with the units and has no per-project
      owner; its floor is deliberately not derived here (flagged in §147.5). */
-  /* §330.18: AND THE FUNCTION'S OWN WORK IS ONE OF THEM. This read the
-     capabilities alone, and §322 had just moved most of a tenant's projects
+  /* §334.18: AND THE FUNCTION'S OWN WORK IS ONE OF THEM. This read the
+     capabilities alone, and §326 had just moved most of a tenant's projects
      onto the functions themselves — so both callers answered about an empty
      list: nobody named on a function's own project derived the Contributor
      floor (a milestone's owner, a stakeholder, a collaborator — §147.8's
-     whole feature, dead since §322), and `capProjectOf` could not say which
+     whole feature, dead since §326), and `capProjectOf` could not say which
      project a reporting row belonged to, which is what `boundedReach` asks
      before letting a bounded role write it. The derivation forty lines above
-     was carried across at §330 and this was not; it is the same sentence, so
+     was carried across at §334 and this was not; it is the same sentence, so
      it carries the same correction.
 
-     WIDENED, NEVER NARROWED. A capability is its own destination since §330,
+     WIDENED, NEVER NARROWED. A capability is its own destination since §334,
      so a case could be made that being named on one should grant at `cap:<id>`
      rather than at the function — that would TAKE a role away from somebody
      who holds it today, and whose call that is is Islam's, not a repair's. */
@@ -3259,7 +3259,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      employee file and the People page, which must never GRANT either. */
   function isOwnLinesRole(roleKey) { return OWN_LINES_ONLY.indexOf(roleKey) > -1; }
 
-  /* ── WHAT DISSOLVING A BOX MOVES (§322) ─────────────────────────────────
+  /* ── WHAT DISSOLVING A BOX MOVES (§326) ─────────────────────────────────
      Islam: *"they caapbilities in raya trade are not capabilities they are
      just projecst under functions"*, and *"the ability to turn functional
      projects to a capability and vice versa."*
@@ -3290,7 +3290,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return out;
   }
 
-  /* ── AND THE OTHER DIRECTION (§330, spec 046 §6) ────────────────────────
+  /* ── AND THE OTHER DIRECTION (§334, spec 048 §6) ────────────────────────
      Islam: *"one more thing is the ability to turn functional projects to a
      capability and vice versa."* `dissolvePlan` above is the vice versa; this
      is the way in. A function starts three projects and a year later two of
@@ -3304,7 +3304,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
      THE DEFINITION AND THE KEY OBJECTIVES STAY WITH THE FUNCTION. They
      describe the function — its definition is what the function IS — and a
-     capability starts with none, written on it afterwards (spec 046 §6). That
+     capability starts with none, written on it afterwards (spec 048 §6). That
      is not symmetry with `dissolvePlan`, which hands them over only where the
      function has none: a box being dissolved has nowhere to put them, and a
      function being promoted FROM still needs its own.
@@ -3371,7 +3371,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     gapEmptyFields: gapEmptyFields,
     namedOn: namedOn, namedInUnit: namedInUnit,
     namedInFn: namedInFn, capProjectOf: capProjectOf,
-    /* §330.18: WHICH HOLDERS A SUBJECT DRAWS, exported because the authoriser
+    /* §334.18: WHICH HOLDERS A SUBJECT DRAWS, exported because the authoriser
        was keeping a third copy of the same walk (`ctxOfFn`) and it had the
        same gap — a function's own projects were in none of them. */
     holdersOfFn: capsOfFn,
@@ -3728,7 +3728,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* The tree a given part is walked with. A keyed map's entries are plans; a
      flat part is the group, whose addressable half is its capabilities. */
   function treeFor(part) {
-    /* §322: A SUPPORTING FUNCTION'S OWN PROJECTS TRAVEL ROW BY ROW. Its plan
+    /* §326: A SUPPORTING FUNCTION'S OWN PROJECTS TRAVEL ROW BY ROW. Its plan
        is one JSON blob (§118), so without this the whole function is sent on
        every figure — which is §216's fault reborn one model later, and worst
        in exactly the live case: a function head and a project owner reporting
@@ -5828,7 +5828,7 @@ function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
    if it has one, the group's otherwise — so a tenant that uploads one
    mark has a marked deck everywhere, and a supporting function, which
    can never have a mark of its own, has one for the first time. */
-/* §330: A CAPABILITY WEARS THE GROUP'S MARK. A unit may carry its own
+/* §334: A CAPABILITY WEARS THE GROUP'S MARK. A unit may carry its own
    (§52.9) and a supporting function never could, so nothing here changes for
    either — and a capability is not a unit, so `unitLogo` answers nothing for
    one and the group's is the honest fallback (§259.2's own reader). */
@@ -6864,7 +6864,7 @@ function roleWhereLabel(at){
        rule: disambiguate the pair that clashes, leave everybody else alone. */
 function placeLabel(at){
   if (!at || at === "group") return "the group";
-  /* §330: a capability is a place now — it has an entry, pages and a row on
+  /* §334: a capability is a place now — it has an entry, pages and a row on
      the cycle board, and `placeLabel` is what every one of those names it by.
      Its own name, with no suffix: a capability and a unit sharing a name is
      not the clash §65 guards (a unit and a FUNCTION of one name are two
@@ -8808,9 +8808,9 @@ function unitBands(u){
 }
 function focusBands(key){
   if (!key) return [];
-  /* §330: A CAPABILITY IS A SUBJECT OF ITS OWN, so its key objectives are
+  /* §334: A CAPABILITY IS A SUBJECT OF ITS OWN, so its key objectives are
      markable where they are — they left the function's bands with the box
-     (§322, §330), and a mark stored where nobody can see it is §61's trap
+     (§326, §334), and a mark stored where nobody can see it is §61's trap
      (§130.5's own reason for reaching supporting functions in the first
      place). Both forms: pillars through the unit-shaped view, an overview and
      projects as one band of its own objectives. */
@@ -8841,7 +8841,7 @@ function focusBands(key){
 function focusSubjects(){
   return { units: activeKeys().map(function(k){
              return { key:k, name:UNITS[k].name }; }),
-           /* §330: beside the units and the functions, in the order the
+           /* §334: beside the units and the functions, in the order the
               navigation switch reads (§53.5). */
            caps: GROUP.capabilities.map(function(c){
              return { key:"cap:" + c.id, name:c.name }; }),
@@ -9115,7 +9115,7 @@ function foundKeyFor(target){
 function koHolderById(id){
   var s = String(id || "");
   if (s.indexOf("fn:") === 0) {
-    /* §322: through fnKoHolderWritable, not unitLikeWritable — the latter
+    /* §326: through fnKoHolderWritable, not unitLikeWritable — the latter
        answers only for a function that plans in PILLARS, so on the other
        format an added objective was pushed nowhere and a removed one found
        nothing. The Overview is one page (§213) and its holder is one answer. */
@@ -9131,7 +9131,7 @@ function capById(id){
   return GROUP.capabilities.filter(function(c){ return c.id === id; })[0] || null;
 }
 /* A HOLDER of projects, READ: a capability, or a supporting function holding
-   its own (§322). Deliberately NOT folded into capById(), which means "a
+   its own (§326). Deliberately NOT folded into capById(), which means "a
    capability" in twenty places and would start answering with something that
    is not one. */
 function holderById(id){
@@ -9560,7 +9560,7 @@ function reachesFn(key){ return grantAt("k_perf", "fn:" + key) !== "none"; }
 function fnHasWork(k){
   var f = FUNCTIONS[k];
   if (!f) return false;
-  /* §322: its own projects count as work. A function whose projects are its
+  /* §326: its own projects count as work. A function whose projects are its
      own carried no capability at all, so asking only about boxes made it
      invisible in the navigation — §61's trap, the fault fnHasWork itself was
      written to fix, one model later. */
@@ -9628,9 +9628,9 @@ function fnDeleteBlockers(fk){
     " improved here (" + caps.map(function(c){ return c.name; }).join(", ") +
     ") \u2014 reallocate them on Setup \u2192 Capabilities"));
 
-  /* §330, CLOSING §322: ITS OWN PROJECTS ARE ITS OWN WORK. A capability held
+  /* §334, CLOSING §326: ITS OWN PROJECTS ARE ITS OWN WORK. A capability held
      here has always blocked the delete, for the reason §62 gives — a function
-     key is written into things that would be orphaned by it — and since §322 a
+     key is written into things that would be orphaned by it — and since §326 a
      supporting function holds projects DIRECTLY, which are not merely pointed
      at but stored on the function itself. So deleting it takes the plan with
      it and no archive is filed, because a delete files none. Measured before
@@ -9791,7 +9791,7 @@ function clearCapability(cap, what, why){
 /* One function may carry several capabilities \u2014 Marketing carries two \u2014 so
    clearing at the function level names how many it will take with it. */
 /* CLEARING REACHES FURTHER THAN DRAWING, and it is written out here rather
-   than folded into `fnHolders` (§330): that list is what a function's PAGES
+   than folded into `fnHolders` (§334): that list is what a function's PAGES
    draw, and since stage 2 it stops at the function's own work — while "Clear
    all plans" on Setup › Supporting functions means everything this function is
    responsible for, which still includes a capability it holds. Two questions,
@@ -9867,7 +9867,7 @@ function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null
    no unit-shaped thing there to return. */
 function unitLike(target){
   var t = String(target || "");
-  /* §330: a capability planned in pillars is drawn by the unit's own pages,
+  /* §334: a capability planned in pillars is drawn by the unit's own pages,
      for the reason a pillars function already is (§59) — a pillar is a pillar
      whoever holds it. Asked FIRST, because `cap:` is not `fn:` and the bare
      fallback below would hand back UNITS["cap:x"], which is undefined and
@@ -9949,13 +9949,13 @@ function canReportRow(unitKey, x){
    row of their project; a CONTRIBUTOR (a milestone's owner, a stakeholder)
    reaches the rows that name them; the custodian and the head reach it
    all. */
-/* §330: THESE THREE TAKE A TARGET, NOT A FUNCTION KEY. A capability reports on
+/* §334: THESE THREE TAKE A TARGET, NOT A FUNCTION KEY. A capability reports on
    its own — Islam's *"yes for all"* to the cycle-board question — and it is the
    same three gates over the same three questions, so they are widened rather
    than copied (§53.5). `holderTarget()` accepts what every caller already has:
    a bare function key from the old signature, `fn:<key>`, or `cap:<id>`; the
    access behind it resolves in lib/rules.js, where a capability answers as the
-   function that holds it (§330). */
+   function that holds it (§334). */
 function holderTarget(x){
   var t = String(x || "");
   return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? t : "fn:" + t;
@@ -10046,7 +10046,7 @@ function reportPending(target){
      resolved in ONE place. A function that plans in projects still submits —
      it is `unitLike()` that has nothing unit-shaped to return for it, not the
      cycle — so this checks the thing EXISTS rather than what shape it has. */
-  /* §330: AND A CAPABILITY IS A SUBJECT. It has a row on the cycle board
+  /* §334: AND A CAPABILITY IS A SUBJECT. It has a row on the cycle board
      (§244), `canSpeakFor` answers for it and its report is filed under its own
      key — and this line answered "not a real subject", so its Reporting tab
      never said *not submitted yet* and its Performance tab never wore the dot
@@ -10303,7 +10303,7 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
    ASKED is per row and per cycle, exactly as `tacticDue()` is for a unit: a
    milestone due in December is not an empty box somebody forgot in June. */
-/* §330: A TARGET, NOT A FUNCTION KEY — a capability reports on its own, so
+/* §334: A TARGET, NOT A FUNCTION KEY — a capability reports on its own, so
    these five answer for one exactly as they answer for a function. Widened
    rather than copied: two sets of counters over one question is how a board
    comes to say something a Reporting page does not (§53.5). Every caller that
@@ -10455,7 +10455,7 @@ function ownDraftShut(target, id){
    the server accepts (§42). `owner` is the container's Owner as STORED. */
 /* WHICH ACCESS COLUMN A TARGET IS JUDGED IN. Named once, because the two
    questions below must never answer it differently (§53.5) — and they did:
-   §330 taught `boundedHere` that a capability is judged in the FUNCTION area
+   §334 taught `boundedHere` that a capability is judged in the FUNCTION area
    and left this line reading `"unit"` one function above it. Measured: a
    project owner on their own capability came out with no reach at all, so
    `railMine` could not find their project, `capForBounded` never opened their
@@ -10478,7 +10478,7 @@ function mayMarkDoneOn(target, owner){
    thing (§53.5). */
 function boundedHere(target){
   var t = String(target || "");
-  /* §330: a capability is judged in the FUNCTION area, because that is where
+  /* §334: a capability is judged in the FUNCTION area, because that is where
      its access comes from — the function that holds it (lib/rules.js). Asked
      as "unit" it would read the wrong column and a bounded project owner
      would come out unbounded on the one page their own project is on. */
@@ -10523,11 +10523,11 @@ function boundedReporter(target){
    A pillars function is never ALSO asked for capabilities: the format cannot
    be switched while the other side holds anything (§59), so the two lists are
    exclusive by construction rather than by a rule here. */
-/* §330.18: A SUBJECT DRAWN AS A HOLDER — a supporting function or, since
-   §330, a CAPABILITY. These two turned the target into a FUNCTION KEY before
+/* §334.18: A SUBJECT DRAWN AS A HOLDER — a supporting function or, since
+   §334, a CAPABILITY. These two turned the target into a FUNCTION KEY before
    asking, so `cap:<id>` fell straight through to the empty answer: a
    capability's Submit was held by nothing at all, however much of its report
-   was unanswered, which is §221's whole rule inert on the destination §330
+   was unanswered, which is §221's whole rule inert on the destination §334
    had just created. Everything below them already spoke the target vocabulary
    — `fnReportItems` walks `capsShown(subject)`, which resolves `cap:` — so
    what was wrong was one translation on the way in (§172's lesson: a layer
@@ -10733,7 +10733,7 @@ function boardUnitTargets(){
 function boardFunctionTargets(){
   return boardFunctionKeys().map(function(fk){ return "fn:" + fk; });
 }
-/* ── EVERY SUBJECT THAT REPORTS HAS A ROW (§244's rule, §330) ──────────────
+/* ── EVERY SUBJECT THAT REPORTS HAS A ROW (§244's rule, §334) ──────────────
    Islam's *"yes for all"* to the question the mockup asked: a capability has
    its own score and its own submission, so it is a subject, and the board is
    where the office sees at a glance whether the strategic work has reported.
@@ -10751,7 +10751,7 @@ function boardCapTargets(){
 /* Who the board names against a subject: the custodian, then the head — the
    same order and the same two roles on a unit and on a function (§53.5). */
 function boardWho(target){
-  /* §330: a capability is run by the function that holds it, so the board
+  /* §334: a capability is run by the function that holds it, so the board
      names the same person its Overview does — one fact, one answer. */
   var fk = isCapTarget(target)
     ? ((capOfTarget(target) || {}).fn || null) : fnKeyOfTarget(target);
@@ -10771,7 +10771,7 @@ function boardFunctionKeys(){
    place the shape matters -- the list above and the band below know nothing
    about it, which is what lets the two formats sit in one list (§245). */
 function boardPlansLikeUnit(target){
-  /* §330: a CAPABILITY carries its own form, so it is asked the same question
+  /* §334: a CAPABILITY carries its own form, so it is asked the same question
      — and asked FIRST, because `fnKeyOfTarget` answers null for one and the
      `!fk` fallback would have read every capability as a business unit. */
   if (isCapTarget(target)) return capPlansInPillars(capOfTarget(target));
@@ -10857,7 +10857,7 @@ function cycleTotals(){
       var u = unitLike(target);
       if (u) add(reportedCount(u), unitState(u));
     } else {
-      /* §330: the TARGET, so a capability is counted with the same counters
+      /* §334: the TARGET, so a capability is counted with the same counters
          its own Reporting page draws from — `fnKeyOfTarget` answers null for
          one, which would have left it silently out of the totals while its
          row was plainly on the board (§108.1's miscount by another road). */
@@ -12046,7 +12046,7 @@ function gapMap(target, all, fillable){
             { sec: w.sec, page: "plan", rail: unitRailKey(u), code: p.code });
     });
   };
-  /* ONE HOLDER'S GAPS, WHOEVER HOLDS IT (§330.13). A function's own work and
+  /* ONE HOLDER'S GAPS, WHOEVER HOLDS IT (§334.13). A function's own work and
      a capability's are the same shape — a definition, key objectives, and
      projects with their outcomes and milestones — so they are counted by one
      body over a list, and the code and the rail are asked of the holder
@@ -12090,7 +12090,7 @@ function gapMap(target, all, fillable){
       unitHalf(unitLike(t), FN_WORDS); return out; }
     holderHalf(fnHolders(fk));
   } else if (t.indexOf("cap:") === 0) {
-    /* §330.13: A CAPABILITY COUNTS ITS OWN GAPS. Stage 2 gave it a page, a
+    /* §334.13: A CAPABILITY COUNTS ITS OWN GAPS. Stage 2 gave it a page, a
        band and a rail of its own, and this had a `fn:` branch and a unit
        branch and nothing else — so `cap:<id>` fell through to `UNITS[t]`,
        which is undefined, and the count came back 0 while the page beside it
@@ -12273,14 +12273,14 @@ function pillarCode(u, i){
    owns the prefix and a person saying "FIN02" should not have to say which
    capability first. */
 function fnProjects(fk){
-  /* §322: the function's OWN projects first, then any capability's — the same
+  /* §326: the function's OWN projects first, then any capability's — the same
      order `fnHolders` draws them in, so a code and the rail it is read off
      cannot disagree (§48, §310). */
   return fnHolders(fk).reduce(function(acc, c){
     return acc.concat(c.projects || []);
   }, []);
 }
-/* §330: IT IS THE HOLDER'S POSITION, AND THE HOLDER MAY BE A CAPABILITY. The
+/* §334: IT IS THE HOLDER'S POSITION, AND THE HOLDER MAY BE A CAPABILITY. The
    argument above is unchanged and is exactly why this had to move: a code says
    WHERE a project lives, so the day a project stops being Finance's second one
    and becomes a capability's first, `FIN02` becoming `PM01` is the code telling
@@ -12291,7 +12291,7 @@ function fnProjects(fk){
    It takes a function key OR a `cap:` target, because thirteen call sites hand
    it whichever holder they are drawing and a second function for the second
    kind is how the two would drift (§53.5). */
-/* WHAT A HOLDER'S PROJECTS ARE CODED AGAINST (§330). A caller holding the
+/* WHAT A HOLDER'S PROJECTS ARE CODED AGAINST (§334). A caller holding the
    holder rather than its key asks this: a function's own work is coded off the
    function, a capability's off the capability. `c.own` is the mark
    `fnOwnHolder` sets, so nothing has to guess from the shape of an id. */
@@ -12828,7 +12828,7 @@ function addMilestone(p){
 function eachProject(fn){ eachHolder(function(h){
   (h.projects || []).forEach(function(p){ fn(p, h); });
 }); }
-/* EVERY HOLDER OF PROJECTS IN THE TENANT (§322) — each supporting function's
+/* EVERY HOLDER OF PROJECTS IN THE TENANT (§326) — each supporting function's
    own first, then the capabilities. ONE walk, because the snapshot, the
    restore, the new cycle and the id scanner each had their own copy of "walk
    the capabilities" and a function's own projects would have had to be added
@@ -12838,7 +12838,7 @@ function eachProject(fn){ eachHolder(function(h){
    rows that exist, and `fnOwnsProjects` answers the different question of
    whether the PAGE draws a place to add the first one (§61). */
 function eachHolder(fn){
-  /* §330.18: WHICH HOLDERS EXIST IS ONE QUESTION, AND `fnHolders` IS ITS
+  /* §334.18: WHICH HOLDERS EXIST IS ONE QUESTION, AND `fnHolders` IS ITS
      ANSWER. This kept a membership test of its own — a function counted only
      while `projects` held a row — and the PAGES ask `fnHolders`, which also
      draws a function whose projects are still to come (§61: a function with
@@ -12877,7 +12877,7 @@ function hideableById(id){
     (list || []).forEach(function(x){ if (!hit && x && x.id === id) hit = x; });
   };
   scan(GROUP.keyObjectives);
-  /* §322: a holder's, so a function's OWN key objectives are addressable too
+  /* §326: a holder's, so a function's OWN key objectives are addressable too
      — a row that cannot be found by id is a figure typed and silently lost,
      which is the fault this scanner exists to prevent. */
   eachHolder(function(h){ scan(h.keyObjectives); });
@@ -13051,7 +13051,7 @@ function figuresSnapshot(){
      one pass rather than in two that could disagree. */
   eachHolder(function(c){
     var m = {};
-    /* §322: the group's headline pair is a CAPABILITY's — a function's own
+    /* §326: the group's headline pair is a CAPABILITY's — a function's own
        work is not on the group's Capabilities page and has no such pair, so
        it is skipped rather than stored as two nulls nothing reads. */
     if (!c.own) snap.groupCaps[c.id] = { perf:c.perf, exec:c.exec };
@@ -13356,8 +13356,8 @@ function restoreArchive(id){
     var restFk = fnKeyOfTarget(a.key);
     if (restFk) fnWriteBack(restFk, u);
   } else {
-    /* holderByIdWritable, never capById (§330, and §232's own note one branch
-       up wearing a different hat): since §322 a supporting function holds its
+    /* holderByIdWritable, never capById (§334, and §232's own note one branch
+       up wearing a different hat): since §326 a supporting function holds its
        projects itself and archives them under `kind:"cap"` keyed `fn:<key>`,
        which capById cannot resolve — so every archive a projects function has
        ever taken said "cannot be restored" for a function still on the
@@ -13370,7 +13370,7 @@ function restoreArchive(id){
     c.projects = clone(a.plan.projects);
     /* THE VIEW'S ARRAYS ARE ASSIGNED, so a function's holder is a WRAPPER and
        what was just written is thrown away one line later without this —
-       exactly the pair the unit branch above carries, and the trap §322
+       exactly the pair the unit branch above carries, and the trap §326
        recorded when `moveCapProjects` assigned rather than mutated. */
     holderWriteBack(a.key, c);
     /* AND NEVER RENUMBER A FUNCTION'S OWN WORK: `renumberCapability` mints
@@ -13545,12 +13545,12 @@ function clearedGraph(g){
   /* §44's sets, §54's BU list — the two that 004 had to be amended for. */
   delete G.sets; delete G.claims; delete G.naming; delete G.mainbus;
 
-  /* ── Capabilities (§322: NONE, where the shells used to stay) ─────────
+  /* ── Capabilities (§326: NONE, where the shells used to stay) ─────────
      This emptied the eight boxes and kept their names, which was right while
      a capability was where a supporting function's projects had to live — the
      shell was part of the SHAPE, like a unit or a company.
 
-     Since §322 the box is a thing a function CARRIES, and the eight the
+     Since §326 the box is a thing a function CARRIES, and the eight the
      worked example ships are containers rather than capabilities (Islam:
      *"they caapbilities in raya trade are not capabilities they are just
      projecst under functions"*). So a client starting on day one has none,
@@ -13627,14 +13627,14 @@ GROUP.capabilities.forEach(function(c, ci){
   renumberCapability(c);
 });
 
-/* ── THE WORKED EXAMPLE HOLDS NO CAPABILITIES (§329, spec 046 §5) ───────
+/* ── THE WORKED EXAMPLE HOLDS NO CAPABILITIES (§333, spec 048 §5) ───────
    Islam, of what his own tenant holds: *"they caapbilities in raya trade are
    not capabilities they are just projecst under functions"*, and then, of the
    demo itself: *"finish the demo data yes."*
 
    THE LIST ABOVE IS THE WORKED EXAMPLE'S RAW CONTENT AND IT IS NOT WHAT THE
    PRODUCT SHOWS. Each of the eight is a set of one function's own projects
-   wearing a container's name, so each one dissolves — and §322 built every
+   wearing a container's name, so each one dissolves — and §326 built every
    half of that except this, so until today stage 1 was live and INVISIBLE on
    the one tenant everybody looks at: Finance's Projects page went on drawing
    a navy CAPABILITY band over projects already coded FIN01, FIN02, FIN03.
@@ -13677,8 +13677,8 @@ GROUP.capabilities.forEach(function(c, ci){
    A FUNCTION THAT PLANS IN PILLARS IS LEFT ALONE, exactly as the one-off
    leaves it (Merchandising holds none), and so is a box whose function is
    missing: dissolving it would be dissolving it into nothing (§96.2). */
-/* ── AND ONE OF THE EIGHT IS A REAL CAPABILITY (§330, spec 046 §10.4) ──────
-   §329 named the candidate and left it for stage 2, which is where it has a
+/* ── AND ONE OF THE EIGHT IS A REAL CAPABILITY (§334, spec 048 §10.4) ──────
+   §333 named the candidate and left it for stage 2, which is where it has a
    home; this is stage 2 taking it. Islam's own answer was *"for the demo do
    what you want"* — Raya's Marketing plans in pillars now and holds none, so
    the recommendation was only ever about the worked example.
@@ -13717,7 +13717,7 @@ GROUP.capabilities = GROUP.capabilities.filter(function(c){
   if (mv.keyObjectives) f.keyObjectives = mv.keyObjectives;
   /* `capId` FOLLOWS THE ROW, because the builders address a project's holder
      by it and the holder is the function now — `moveCapProjects` does exactly
-     this on the control's side (§322). The stored column is derived from the
+     this on the control's side (§326). The stored column is derived from the
      parent on the way back, so this is the browser's own copy being told the
      truth rather than a second store. */
   mv.projects.forEach(function(p){ if (p) p.capId = "fn:" + c.fn; });
@@ -13766,10 +13766,10 @@ function addCapability(fnKey){
   return made;
 }
 
-/* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§330, spec 046 §6) ─────────
+/* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§334, spec 048 §6) ─────────
    Islam: *"the ability to turn functional projects to a capability and vice
    versa."* `removeCapability` with the function as the destination is the vice
-   versa and has been since §322; this is the way in, and it is deliberately
+   versa and has been since §326; this is the way in, and it is deliberately
    the same shape: ask the SHARED rule what moves, archive first, then move.
 
    THE IDS NEVER TRAVEL (§232, §316). `renumberCapability()` would re-address
@@ -13783,12 +13783,12 @@ function addCapability(fnKey){
    so `MKT01` becomes the capability's `PM01` the moment it stops being
    Marketing's first project. Nothing keys on a code — it is derived at every
    call site — but it is on every screen, in the deck and in the workbook, so
-   the control names the change before the press (spec 046 §6, and Islam took
+   the control names the change before the press (spec 048 §6, and Islam took
    it with that panel in front of him: *"ok with the promirting mockup"*).
 
    SPLICED, NEVER REASSIGNED. `f.projects` is handed out by reference to every
    holder view, and assigning a filtered copy leaves any view taken a moment
-   earlier pointing at the old array — §322's own lesson about `fnAsUnit`
+   earlier pointing at the old array — §326's own lesson about `fnAsUnit`
    returning a wrapper, one property along. */
 function promoteToCapability(fnKey, ids, name){
   var f = FUNCTIONS[fnKey];
@@ -13808,7 +13808,7 @@ function promoteToCapability(fnKey, ids, name){
   GROUP.capabilities.push(made);
   return made;
 }
-/* ── REMOVING A CAPABILITY: the box, or the box and its work (§321) ──────
+/* ── REMOVING A CAPABILITY: the box, or the box and its work (§325) ──────
    Islam, trying to take a wrapper off one of his own functions: "when I try
    to remove the capability it will remove the projects with it." It did, and
    the database agreed — `projects.cap_id` is NOT NULL and CASCADEs, so a
@@ -13869,7 +13869,7 @@ function moveCapProjects(from, to){
   if (!Array.isArray(to.projects)) to.projects = [];
   list.forEach(function(p){ if (p) p.capId = to.id; });
   var fi = GROUP.capabilities.indexOf(from), ti = GROUP.capabilities.indexOf(to);
-  /* MUTATED IN PLACE, NEVER REASSIGNED (§322). The destination may be the
+  /* MUTATED IN PLACE, NEVER REASSIGNED (§326). The destination may be the
      FUNCTION ITSELF, handed over as a holder whose `projects` is the
      function's own array — assign a new array onto that wrapper and the move
      lands on an object thrown away one line later, which is fnAsUnit's own
@@ -13892,14 +13892,14 @@ function removeCapability(id, moveToId){
   GROUP.capabilities.forEach(function(c, ci){ if (c && c.id === id) i = ci; });
   if (i < 0) return false;
   var c = GROUP.capabilities[i];
-  /* §322: the destination may be a sibling capability OR the function itself,
+  /* §326: the destination may be a sibling capability OR the function itself,
      so it is resolved as a HOLDER and through the WRITING half — a reader
      hands out a frozen empty and the move would push into it. */
   var to = moveToId ? holderByIdWritable(moveToId) : null;
   if (to && (to.id === c.id || to.fn !== c.fn)) return false;
   archiveCapPlan(c, "before \u201c" + (c.name || "a capability") +
     "\u201d was removed");
-  /* §322: GIVING THE WORK BACK TO THE FUNCTION carries the definition and the
+  /* §326: GIVING THE WORK BACK TO THE FUNCTION carries the definition and the
      key objectives too, and ONLY where the function has none of its own — a
      function that has already written either keeps what it wrote and the
      box's copy stays in the archive (§96.2: the platform never rewrites what
@@ -13923,7 +13923,7 @@ function removeCapability(id, moveToId){
   return true;
 }
 
-/* ── A FUNCTION'S PROJECTS ARE ITS OWN (§322, spec 046 stage 1) ────────────
+/* ── A FUNCTION'S PROJECTS ARE ITS OWN (§326, spec 048 stage 1) ────────────
    Islam: *"capability is something Strategic ... the problem with having the
    capability hidden in the functional plans is confusing for the whole
    structure."* And, of what his own tenant holds: *"they caapbilities in raya
@@ -13992,7 +13992,7 @@ function fnOwnsProjects(fk){
    Reporting pages cannot disagree about what is on the function (§53.5) — they
    each walked `capsOfFunction` separately before, which is how the two halves
    of the switch drifted twice already (§211, §213). */
-/* §330: AND A CAPABILITY IS NO LONGER ONE OF THEM. Stage 1 left the box drawn
+/* §334: AND A CAPABILITY IS NO LONGER ONE OF THEM. Stage 1 left the box drawn
    inside the function's four pages as the transitional state, and stage 2 gives
    it pages of its own — so this is the function's OWN work and nothing else.
    That is what stops either page doing two jobs: one person may hold a
@@ -14006,7 +14006,7 @@ function fnHolders(fk){
   return fnOwnsProjects(fk) ? [fnOwnHolder(fk)] : [];
 }
 
-/* ── A CAPABILITY IS A DESTINATION OF ITS OWN (§330, spec 046 stage 2) ─────
+/* ── A CAPABILITY IS A DESTINATION OF ITS OWN (§334, spec 048 stage 2) ─────
    Islam: *"capability is something Strategic … the capability is either
    planned in the form of a pillar or in the form of an overview and projects
    … the problem with having the capability hidden in the functional plans is
@@ -14053,7 +14053,7 @@ function capPrefix(c){
 
 /* WHICH CAPABILITIES THIS VIEWER REACHES, and it is asked of the RULE rather
    than of a list of people (§42, §48.2): `grantAt` resolves a `cap:` target to
-   the function that holds it (§330 in lib/rules.js), so the office and the CEO
+   the function that holds it (§334 in lib/rules.js), so the office and the CEO
    see every one, a function head sees theirs, and everybody else sees them
    through the other-function column exactly as they see that function. */
 function capsReachable(){
@@ -14104,7 +14104,7 @@ function capWriteBack(id, u){
    (§129's audit: the reading view handed a virgin function frozen empties and
    the first add was accepted on screen and written nowhere). */
 /* WHERE A SUPPORTING FUNCTION'S OWN KEY OBJECTIVES LIVE, whichever way it
-   plans (§322). A pillars function reaches them through the unit-shaped view;
+   plans (§326). A pillars function reaches them through the unit-shaped view;
    a projects function holds them directly. One resolver, because the Overview
    is one page since §213 and a page that asks two different questions is how
    the two formats drifted twice already. */
@@ -14136,14 +14136,14 @@ function holderWriteBack(id, h){
   f.keyObjectives = h.keyObjectives;
 }
 
-/* ── DISSOLVING A BOX (§322) ───────────────────────────────────────────────
+/* ── DISSOLVING A BOX (§326) ───────────────────────────────────────────────
    The other half of Islam's *"and vice versa"*, and the migration that puts a
    tenant on the new model — ONE piece of machinery for both (§53.5), because
    two answers to *what does dissolving a box mean* is how they drift the first
    time either is corrected.
 
    It is `removeCapability(id, moveToId)` with the FUNCTION as the destination,
-   so the archive, the refusal and the order of the two acts are §321's and are
+   so the archive, the refusal and the order of the two acts are §325's and are
    not written a second time.
 
    WHAT TRAVELS, AND WHAT DOES NOT. The projects, with their ids, their rows
@@ -14206,9 +14206,9 @@ function reportSectionState(){
 }
 var CURRENT_REPORT_KEY = null;
 
-/* WHICH ROW A REPORTING BOX IS ABOUT (§330.18, correcting §322).
+/* WHICH ROW A REPORTING BOX IS ABOUT (§334.18, correcting §326).
    IT WALKED THE CAPABILITIES AND NOTHING ELSE — the sixth copy of that walk,
-   found one section after §330 named `holderOfProjectId` as the fifth and said
+   found one section after §334 named `holderOfProjectId` as the fifth and said
    in its own comment that a copy nobody carried across is what `eachProject`
    exists to stop. All four of a supporting function's reporting handlers open
    `var hit = …; if (!hit) return;`, so on the page where most of the tenant's
@@ -14233,8 +14233,8 @@ function holderItemById(id){
   });
   return hit;
 }
-/* WHICH HOLDER A PROJECT BELONGS TO (§330, correcting §322).
-   IT WALKED THE CAPABILITIES AND NOTHING ELSE, and §322 had just given a
+/* WHICH HOLDER A PROJECT BELONGS TO (§334, correcting §326).
+   IT WALKED THE CAPABILITIES AND NOTHING ELSE, and §326 had just given a
    supporting function projects of its own — so on the page where most of the
    tenant's projects now live this answered null, and BOTH its callers open
    `if (!it) return;`. Measured on the build before this: Finance holds three
@@ -14244,7 +14244,7 @@ function holderItemById(id){
    perfectly and done nothing (§123.4).
 
    `eachProject` HANDS THE HOLDER OVER, which is the whole repair: that walk
-   was built by §322 precisely because four copies of *walk the capabilities*
+   was built by §326 precisely because four copies of *walk the capabilities*
    would drift the day a function became a holder, and this was the fifth copy
    nobody carried across (§53.5). Renamed with it, because all three call
    sites mean *the holder* — the band's own comment already said so — and a
@@ -18405,7 +18405,7 @@ function readmePickFn(){ return ""; }
    reader that writes what it reads is §42's phantom change. Rows added since
    the cycle closed simply carry nothing, which is the truth about them. */
 function impPlanWorkbookFor(v){
-  /* §322: a holder — a capability, or a supporting function holding its own
+  /* §326: a holder — a capability, or a supporting function holding its own
      projects. `capPlanWorkbook` reads `{name, id, keyObjectives, projects}`
      and a function's holder is exactly that shape, so the projects template is
      built for both from one builder (§53.5). */
@@ -18479,8 +18479,8 @@ function archiveWorkbook(a){
   return planWorkbook(snap);
 }
 
-/* WHO A PROJECTS WORKBOOK CAN BE FOR (§322). Every capability, and every
-   supporting function that holds its own projects — because since §322 a
+/* WHO A PROJECTS WORKBOOK CAN BE FOR (§326). Every capability, and every
+   supporting function that holds its own projects — because since §326 a
    function's plan IS the projects template's subject, and a dropdown that
    still listed only capabilities would offer a tenant that has none nothing
    at all: a plan that downloads and cannot come back (§22, §61).
@@ -21800,7 +21800,7 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, ow
    (§47.2). "Present" starts the deck; "Manage slides" is the editor, and it
    keeps the name §51.8 settled on rather than gaining a second one. */
 function presentMenu(kind, key){
-  /* §330: three kinds now — a unit, a supporting function, and a capability,
+  /* §334: three kinds now — a unit, a supporting function, and a capability,
      which presents its own review exactly as they do. */
   var target = kind === "fn" ? "fn:" + key : kind === "cap" ? "cap:" + key : key;
   var slides = canSpeakFor(target)
@@ -21966,13 +21966,13 @@ function capsTable(){
    means the direction of travel - whether higher is better - and has nothing
    to do with this. Same word, different thing. */
 
-/* ── AND "LATER" IS NOW (§320) ──────────────────────────────────────────
+/* ── AND "LATER" IS NOW (§324) ──────────────────────────────────────────
    Islam, of a client whose supporting functions plan the way a unit does:
    *"a capability might have targets and tactics like the pillar but it's
    mostly an internal thing as well"*, and of three of his own functions,
    *"they are planning somehow in a capability format"*.
 
-   THAT IS THIS MARK, and the whole of §320's first piece is the one line
+   THAT IS THIS MARK, and the whole of §324's first piece is the one line
    below going true. §29 wrote the flag rather than deleting five call sites
    precisely so the distinction could come back without being reconstructed
    from a git log, and it has. Recorded as a reversal rather than overwritten
@@ -25394,7 +25394,7 @@ function renderFocusBoard(){
      group's score and never has (§59), so the cell says the name alone rather
      than inventing a number to keep the column tidy. */
   var subs = focusSubjects();
-  /* §330: the capabilities between them, in the navigation's own order — a
+  /* §334: the capabilities between them, in the navigation's own order — a
      board that lists what is marked and leaves out a whole kind of subject is
      a board nobody can trust (§130.5). */
   var all = subs.units.concat(subs.caps).concat(subs.fns);
@@ -25910,12 +25910,12 @@ function capHead(c){
    a line nobody needed.
 
    The capability's own band stayed, on the reason below — and that reason
-   expired twice over (§322, §330), which the next block records. */
+   expired twice over (§326, §334), which the next block records. */
 
-/* ── THE BAND IS GONE (§330; §322 took half of it, this takes the rest) ────
+/* ── THE BAND IS GONE (§334; §326 took half of it, this takes the rest) ────
    `capBand()` drew a navy CAPABILITY strip over a section, and its own reason
    — written when it was right — was that *"a function may carry several, and
-   that band is what says which one a section belongs to."* §322 stopped
+   that band is what says which one a section belongs to."* §326 stopped
    drawing it over a function's OWN projects, because those are not one of
    several. Stage 2 finishes the argument from the other end: a capability is
    a destination now, so its pages draw exactly one holder and the navigation
@@ -25997,7 +25997,7 @@ function railPick(c){
   for (var i = 0; i < list.length; i++)
     if (list[i].id === want) { railShow(k, list[i].id); return list[i]; }
   /* §301.4: theirs opens, not the first one. */
-  /* §330: the HOLDER's own target — a capability answers for itself, and a
+  /* §334: the HOLDER's own target — a capability answers for itself, and a
      function's own work for the function. `"fn:" + c.fn` was right while every
      project sat in a box a function carried. */
   var mine = railMine(holderTarget(holderCodeOwner(c)), list, function(p){ return p.owner; });
@@ -26031,7 +26031,7 @@ function railPick(c){
    which is §301.4's own gate and the same `railMine()` test the rail asks, so
    the page and the rail cannot disagree about whose it is (§53.5). */
 function capsShown(subject) {
-  /* §322: what the function's pages draw — its own projects. §330: or a
+  /* §326: what the function's pages draw — its own projects. §334: or a
      CAPABILITY'S, because a capability is a destination of its own now and is
      drawn by these same four renderers rather than by a second set of them
      that would have to be kept in step for ever (§53.5, the argument spec 010
@@ -26045,9 +26045,9 @@ function capsShown(subject) {
     var one = capById(capKeyOf(target));
     return one ? [one] : [];
   }
-  /* §330: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
-     list so a project owner met their own capability first; since §322 a
-     function's pages draw its own work alone and since §330 a capability is a
+  /* §334: ONE HOLDER, SO THERE IS NOTHING LEFT TO ORDER. §310 sorted this
+     list so a project owner met their own capability first; since §326 a
+     function's pages draw its own work alone and since §334 a capability is a
      page of its own, so the list is one long on both sides of the switch and
      the sort is dead code (§24). What §310 was for is answered where the
      answer now belongs — in `entryDest`, which opens the capability holding
@@ -26204,7 +26204,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
     railHead("Projects", list.length) + body +
     (opts.add ? '<div class="railadd"><button class="linkbu" data-rowadd="project|' +
       esc(opts.capId) + '">+ Add a project</button>' +
-      /* §330: AND THE SECOND DOOR TO A CAPABILITY, where the projects are.
+      /* §334: AND THE SECOND DOOR TO A CAPABILITY, where the projects are.
          Islam: *"the ability to turn functional projects to a capability."*
          Setup › Capabilities is the home he chose; this is the door beside the
          work, *"because that is where somebody realises it"* (the mockup's own
@@ -26643,7 +26643,7 @@ function projPerformanceBody(p, fk){
    Named once, because it is the same sentence three times and the third copy
    is the one that gets left behind (§59). */
 function fnNothingBehind(subject){
-  /* §330: A CAPABILITY CAN BE EMPTY TOO, and what it needs said is not what a
+  /* §334: A CAPABILITY CAN BE EMPTY TOO, and what it needs said is not what a
      function needs said — the way to fill a capability is to add its first
      project or to promote one into it, never to "allocate a capability". */
   var t = holderTarget(subject);
@@ -26657,10 +26657,10 @@ function fnNothingBehind(subject){
         : '') + '</div>';
   }
   var fk = t.slice(3), f = FUNCTIONS[fk];
-  /* §330: WHAT THIS STATE MEANS CHANGED, SO THE SENTENCE DID. It used to be
+  /* §334: WHAT THIS STATE MEANS CHANGED, SO THE SENTENCE DID. It used to be
      "this function improves no capability yet", which was the only way a
      projects function could be empty while every project had to sit in a box.
-     Since §322 a function owns its projects, so the only way to reach this
+     Since §326 a function owns its projects, so the only way to reach this
      note is a function with none of its own that DOES hold a capability — and
      the honest thing to say is where that work went, not to offer to create
      another box (§124: a note that names the wrong absence sends somebody to
@@ -26904,7 +26904,7 @@ function projFrontMatter(p, ed){
 }
 
 function projPlanBody(p, subject){
-  /* §330: a TARGET, not a function key — this body draws a project belonging
+  /* §334: a TARGET, not a function key — this body draws a project belonging
      to whichever holder is open, and a capability is one. */
   var fk = holderTarget(subject);
   /* NO DUE AND NO OWNER (§53.4). Islam: a deliverable is delivered when the
@@ -27110,7 +27110,7 @@ function projPlanBody(p, subject){
    RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
    function's pages now says its strategy is the parent unit's. */
 function renderFnProjects(fnKey){
-  /* §330: the argument the pillars branch below already makes, one kind of
+  /* §334: the argument the pillars branch below already makes, one kind of
      thing further out — this page draws a HOLDER's projects, and a capability
      is one. `plansInPillars()` answers for a function and a capability alike,
      so the branch is unchanged in shape. */
@@ -27153,7 +27153,7 @@ function renderFnProjects(fnKey){
       null, null,
       function(p){ return projCode(holderCodeOwner(c), p); },
       { arranging: on, add: ed, capId: c.id,
-        /* The office's, and only on the function's own projects (§330). */
+        /* The office's, and only on the function's own projects (§334). */
         promote: (ed && c.own && !isCapTarget(target) && (c.projects || []).length
                     && mayAuthor("k_found", target)) ? c.fn : null,
         /* Appended to the SUB line, never passed as `numOf`: that argument
@@ -27418,7 +27418,7 @@ function renderFnReport(fnKey){
      The target is the `fn:<key>` string and not the bare key: it is what every
      one of those five already expects, and a second key shape would mean a
      second answer everywhere. */
-  /* §330: THE TARGET, NOT A KEY REBUILT FROM ONE. `holderTarget()` above has
+  /* §334: THE TARGET, NOT A KEY REBUILT FROM ONE. `holderTarget()` above has
      already normalised this to `fn:<key>` or `cap:<id>`, and re-prefixing it
      produced `fn:cap:cap6` on a capability — measured on the button's own
      attribute. Everything else this subject is addressed by uses the plain
@@ -27440,7 +27440,7 @@ function renderFnReport(fnKey){
   caps.forEach(function(c){
     (c.projects || []).forEach(function(p){
       var r = projReported(p);
-      /* §330: THE HOLDER'S OWN OWNER, never the page's key. `fk` is right
+      /* §334: THE HOLDER'S OWN OWNER, never the page's key. `fk` is right
          while a page draws one holder and is an assumption rather than an
          answer — `holderCodeOwner()` is what every other code on the
          product's screens is derived from (§48, §310). */
@@ -27548,7 +27548,7 @@ function unitRailFor(u, sel){
            the right - two numbers, one of them unlabelled, and nothing saying
            which was which. The bare number went with the footer that tried to
            explain it (§29.6). */
-        /* §320: the kind leads, as it does on the performance rail one
+        /* §324: the kind leads, as it does on the performance rail one
            function along — the two rails are onto the same list and a mark on
            one of them only is how a unit comes to be fine differently on two
            of its own pages (§53.5). Guarded on the VALUE: a pillar nobody has
@@ -27759,7 +27759,7 @@ function ownStateChip(target, list, word){
     ' · ' + n + ' of ' + mine.length + ' done</span>';
 }
 
-/* ── AND THE BAND SAYS WHICH KIND OF PILLAR IT IS (§320) ────────────────
+/* ── AND THE BAND SAYS WHICH KIND OF PILLAR IT IS (§324) ────────────────
    `kind` is an OPTIONAL fourth argument because three of this function's six
    callers draw a PROJECT, which has no kind and never will — passing the
    pillar object instead would put a field on the signature that half the
@@ -28134,10 +28134,10 @@ function unitPlanBody(it, u, railed){
        component: a project's Owner row and a pillar's are the same fact in
        the same place on the same kind of pane, and drawing them two ways is
        how a unit and a function come to be fine differently (§53.5). */
-    /* ── AND THE KIND, SETTABLE AT LAST (§320) ───────────────────────────
+    /* ── AND THE KIND, SETTABLE AT LAST (§324) ───────────────────────────
        The mark has been stored on every pillar since the model existed, has
        ridden in the upload template's Pillars sheet the whole time, and was
-       WRITABLE ON NO SCREEN AT ALL — so bringing it back into view (§320's
+       WRITABLE ON NO SCREEN AT ALL — so bringing it back into view (§324's
        first half) without this would have been §61's trap exactly: a word a
        reader meets on every surface a pillar is read on and can change nowhere
        but by re-uploading the subject's whole plan.
@@ -28348,9 +28348,9 @@ function renderUnitPlan(u){
 
    The third column is WEIGHT rather than a three-year target: a capability's
    objectives carry the optional weighting and have never had a horizon. */
-/* ── A SUPPORTING FUNCTION'S OWN OVERVIEW (§213, renamed §322) ───
+/* ── A SUPPORTING FUNCTION'S OWN OVERVIEW (§213, renamed §326) ───
    It was `fnPillarsOverview` while only one of the two formats could reach
-   it. Since §322 a function that plans in PROJECTS draws it too — its
+   it. Since §326 a function that plans in PROJECTS draws it too — its
    projects are its own, so there is no capability left to be described
    instead — which is §213's own decision finally true of both sides: the two
    formats draw ONE page, and nothing about this builder had to change for it.
@@ -28364,9 +28364,9 @@ function renderUnitPlan(u){
    `extra` (verified, the same route `format`, `under` and `items` already
    take). A capability has carried one since the model existed; this is the
    function finally being asked the same question. */
-/* ── ONE OVERVIEW, FOR A FUNCTION OR A CAPABILITY (§213, §322, §330) ──────
+/* ── ONE OVERVIEW, FOR A FUNCTION OR A CAPABILITY (§213, §326, §334) ──────
    §213 decided the two function formats draw ONE page — *What it is* beside
-   its key objectives — and §322 finished the job by taking the box off a
+   its key objectives — and §326 finished the job by taking the box off a
    function's own work. Stage 2 hands the same page to a CAPABILITY, which is
    the one thing that page was ever really describing: a name, who runs it, a
    definition, and what it is judged by.
@@ -28412,7 +28412,7 @@ function holderOverview(subject){
       ((ed || fl)
         ? capKoEdit({ id:(isCap ? c.id : "fn:" + fk), keyObjectives:list })
         : koReadBlock(list,
-            /* §322, §330: the sentence names what this thing IS judged by —
+            /* §326, §334: the sentence names what this thing IS judged by —
                its pillars on one format and its projects on the other, and a
                capability rather than a function where it is one. One page,
                true sentences, never one that is wrong on half of it
@@ -28464,7 +28464,7 @@ function holderOverview(subject){
     '</div>' +
     ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '');
 }
-/* §330: AND THE TRANSITIONAL BRANCH IS GONE. §322's own comment named it —
+/* §334: AND THE TRANSITIONAL BRANCH IS GONE. §326's own comment named it —
    *"a function still CARRYING a capability keeps today's rendering underneath,
    which is the transitional state stage 2 removes when a capability becomes an
    entry of its own"* — and this is that removal: a capability is a destination
@@ -28725,7 +28725,7 @@ function unitPerfRail(u){
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
-      /* §320: guarded on the VALUE and not only on the flag. A pillar added
+      /* §324: guarded on the VALUE and not only on the flag. A pillar added
          on the platform has no kind until somebody picks one, and the bare
          flag test printed " &middot; execution 45%" — a separator pointing at
          nothing, which is the fault `pillarMeta` was already written to avoid
@@ -33399,7 +33399,7 @@ function focusSwitch(){
    learn. `FSET.side` is screen state and is corrected rather than trusted: a
    side with nothing reachable behind it must not leave the page blank. */
 function focusNav(){
-  /* §330: THREE SIDES, AND THE NAVIGATION'S OWN WORDS AGAIN — a capability is
+  /* §334: THREE SIDES, AND THE NAVIGATION'S OWN WORDS AGAIN — a capability is
      a subject that carries key objectives, so it is markable, and a mark
      stored where nobody can see it is §61's trap (§130.5's own reason for
      reaching supporting functions at all). Built from whichever sides have
@@ -34002,7 +34002,7 @@ function renderUnitNaming(u){
    arrive the way a unit's plan does — same page, same three steps, same
    review — with their own sheets, because the thing being planned is a
    project with deliverables, outcomes and milestones. */
-/* §322: A SUPPORTING FUNCTION'S OWN PLAN HAS THE CAPABILITY SHAPE — key
+/* §326: A SUPPORTING FUNCTION'S OWN PLAN HAS THE CAPABILITY SHAPE — key
    objectives and projects — so it goes down the same half of the import, and
    the subject that names it is `fn:<key>`. "isCap" is now "is a holder of
    projects", which is what every caller actually asks; the name is left alone
@@ -34079,15 +34079,15 @@ function impPlanSubjects(){
     if (UNITS[k].active === false) return;
     out.push({ v:k, label:UNITS[k].name, grp:"Business units" });
   });
-  /* §330.15: EVERY ACTIVE FUNCTION, IN ITS OWN FORMAT. This listed the
+  /* §334.15: EVERY ACTIVE FUNCTION, IN ITS OWN FORMAT. This listed the
      PILLARS ones alone, which was the whole truth while a projects function's
      work lived in capabilities and the capabilities are listed below — and
-     stopped being it the day §322 gave such a function projects of its own:
+     stopped being it the day §326 gave such a function projects of its own:
      measured on this branch, seven functions owned eighteen projects between
      them and not one of them could be downloaded, so their plans could not
      leave and therefore could not come back (§22 — an upload AUTHORS; §61 —
      built and unreachable). `impHolderFor()` has resolved `fn:<key>` to the
-     function's own holder since §322 and says so in its own comment, so the
+     function's own holder since §326 and says so in its own comment, so the
      builder was there the whole time and only the list was not (§96). */
   FUNCTION_KEYS.forEach(function(k){
     var f = FUNCTIONS[k];
@@ -34989,7 +34989,7 @@ function renderCycle(){
      under it, and a sentence that is true of some of the rows beneath it is
      worse than none (§35). What it names is the count -- and the mapped
      columns keep the per-cell hovers that already explained them (§124). */
-  /* §330: ONE ROW BUILDER, FOR A FUNCTION OR A CAPABILITY. A capability
+  /* §334: ONE ROW BUILDER, FOR A FUNCTION OR A CAPABILITY. A capability
      reports on its own — Islam's *"yes for all"* — and it is read with exactly
      the counters a projects function is read with, so the row is widened to
      take a TARGET rather than copied. Two builders over one question is how a
@@ -35070,7 +35070,7 @@ function renderCycle(){
     fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
         '<em>' + plural(fnKeys.length, "function") + ' reporting</em></th></tr>' + fnRows;
   }
-  /* §330: A GROUP OF ITS OWN, BESIDE THE UNITS AND THE FUNCTIONS — Islam's
+  /* §334: A GROUP OF ITS OWN, BESIDE THE UNITS AND THE FUNCTIONS — Islam's
      own words for what he wanted to see at a glance. Above the functions
      because a capability is strategic and a function's own plan is the work
      that supports it, which is the order the navigation switch reads in too
@@ -35432,7 +35432,7 @@ function planFormatCell(fk, f, editable){
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
-/* ── AND A CAPABILITY CARRIES ITS OWN FORM (§330, spec 046 §3) ─────────────
+/* ── AND A CAPABILITY CARRIES ITS OWN FORM (§334, spec 048 §3) ─────────────
    Islam: *"yes the capability can be built in pillars."* So the form belongs
    to the THING rather than to the subject: a function that plans in projects
    may hold a capability planned in pillars, and neither page does two jobs.
@@ -37707,7 +37707,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "capko") {
-    /* §330.18: A HOLDER, which since §322 is a capability OR a supporting
+    /* §334.18: A HOLDER, which since §326 is a capability OR a supporting
        function's own work — `capById` answered null for the second and the
        form quietly wrote nothing. */
     var c = holderByIdWritable(ctx.capId); if (!c) return false;
@@ -37738,7 +37738,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "project") {
-    var cc = holderByIdWritable(ctx.capId); if (!cc) return false;   /* §330.18 */
+    var cc = holderByIdWritable(ctx.capId); if (!cc) return false;   /* §334.18 */
     var pr = addProject(cc); if (!pr) return false;
     pr.name = v("name"); pr.owner = v("owner"); pr.start = v("start"); pr.end = v("end"); pr.brief = v("brief");
     if (typeof RAIL !== "undefined" && typeof railKeyFor === "function") RAIL[railKeyFor(cc)] = pr.id;
@@ -38462,7 +38462,7 @@ function anch(key, label, where){
 function deckHtmlFor(target){
   var t = String(target || "");
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
-     button, the slide editor and the anchors alike. §330: and the FORM
+     button, the slide editor and the anchors alike. §334: and the FORM
      decides, never the prefix — `plansInPillars` answers for a unit, a
      function and a capability, which is the fault §253.3 fixed on one surface
      of three arriving as a third kind of subject. */
@@ -39054,10 +39054,10 @@ function deckPillarHead(u, p, pi, which){
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
 function deckSlidesFn(subject){
-  /* §322: the function's OWN work — the same list its four pages draw, so the
+  /* §326: the function's OWN work — the same list its four pages draw, so the
      projector cannot show a deck the screen does not (§53.5).
 
-     §330: OR A CAPABILITY'S, because a capability presents its own review and
+     §334: OR A CAPABILITY'S, because a capability presents its own review and
      it is planned exactly the same way. The builder takes a TARGET and reads
      the holder from it; a second deck builder for the second kind is what
      §296 and §305 each measured the cost of and refused. */
@@ -39075,7 +39075,7 @@ function deckSlidesFn(subject){
         ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
-    /* §322: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
+    /* §326: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
        are its own is not presenting a capability review, and saying so on the
        first slide in front of a room is Islam's complaint at its loudest. The
        capability wording survives for a function that really carries one. */
@@ -39094,7 +39094,7 @@ function deckSlidesFn(subject){
     /* §236.3's anchors, mirrored on the function's deck (§53.5): keyed on the
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
-    /* §322: NO SECOND COVER FOR THE FUNCTION'S OWN WORK. The deck has just
+    /* §326: NO SECOND COVER FOR THE FUNCTION'S OWN WORK. The deck has just
        opened on the function's own name; a slide headed "Capability · Finance"
        over the word "Finance" names a thing that does not exist and says the
        name twice (§87's twins, on a projector). A capability it CARRIES still
@@ -39153,7 +39153,7 @@ function deckSlidesFn(subject){
 
     c.projects.forEach(function(p){
       var mst = projMilestones(p);
-      /* §330: A PROJECT IS A SECTION OF THIS DECK. §322 stopped drawing the
+      /* §334: A PROJECT IS A SECTION OF THIS DECK. §326 stopped drawing the
          holder's cover for a function's OWN work — rightly, a slide headed
          "Capability · Finance" over the word Finance says the name twice
          (§87) — and the `sec()` stamp rode on that slide, so a projects
@@ -39468,7 +39468,7 @@ function openDeck(u, from){
   openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
 }
 function openDeckFn(subject, from){
-  /* §330: a TARGET, so a capability opens its own review with its own name on
+  /* §334: a TARGET, so a capability opens its own review with its own name on
      the bar. `holderTarget` takes the bare function key every existing caller
      hands it. */
   var t = holderTarget(subject);
@@ -39489,7 +39489,7 @@ function openDeckFn(subject, from){
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
   var t = String(target);
-  /* §330: a capability joins the same branch — the FORM decides, so one
+  /* §334: a capability joins the same branch — the FORM decides, so one
      planned in pillars takes the unit deck exactly as a pillars function
      does, and one planned in projects takes the holder deck. */
   if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
@@ -39610,7 +39610,7 @@ function flowToPdf(){
    the SAME pair of lists the cycle board is built from (§245), so the picker
    and the page the office watches can never disagree about who reports. */
 function masterSubjects(){
-  /* §330: the capabilities between them, in the board's own order — the flow
+  /* §334: the capabilities between them, in the board's own order — the flow
      and the board must never disagree about who presents (§245). */
   return boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
 }
@@ -41084,7 +41084,7 @@ function slidesMineWord(sl){
 }
 
 function slidesOpen(kind, key){
-  /* §330: three kinds — a unit, a supporting function and a capability, which
+  /* §334: three kinds — a unit, a supporting function and a capability, which
      carries its own picture slides for its own review. */
   var target = kind === "fn" ? "fn:" + key
              : kind === "cap" ? "cap:" + key : key;
@@ -46096,8 +46096,8 @@ var TOUR = (function(){
      control changes shape, this is the file to grep, and checks/tour.py
      fails the build rather than the tour quietly lighting nothing. */
   function destBtn(k){ return document.querySelector('#units [data-u="' + k + '"]'); }
-  /* §330.18: AND A DESTINATION MAY BE BEHIND A FOLD. The navigation shows one
-     side at a time, and §330 gave a third side — so somebody who reaches a
+  /* §334.18: AND A DESTINATION MAY BE BEHIND A FOLD. The navigation shows one
+     side at a time, and §334 gave a third side — so somebody who reaches a
      capability AND their own function now meets a switch where before they
      met a plain row. `destBtn()` then answers null for the person's own
      subject, `start()` reads that as "a place that is not on the row" and
@@ -46107,7 +46107,7 @@ var TOUR = (function(){
 
      It presses the fold, which is what a person does — `[data-fold="<side>"]`
      is absent exactly when that side is already lit, so this is a no-op on the
-     one-sided navigation every viewer had before §330. The side is read from
+     one-sided navigation every viewer had before §334. The side is read from
      `navSides()` rather than guessed from the key's prefix, because which
      sides exist at all is that function's answer and a second copy would drift
      (§53.5). */
@@ -46362,7 +46362,7 @@ var TOUR = (function(){
             (isFnPlace(at) ? "function" : "unit") + "."; } },
 
         { dest:"$own", tab:"performance",
-          /* THE CONTROL MOVED AND THE STEP DID NOT (§324). §275 took the
+          /* THE CONTROL MOVED AND THE STEP DID NOT (§328). §275 took the
              Performance page's controls out of the page body and hung them on
              the TAB ROW through `perfActs()` → `REPORT_CHROME` → `.tabacts`,
              so this step lit NOTHING for five of the stories'
@@ -46477,7 +46477,7 @@ var TOUR = (function(){
                "sits with you and your custodian." },
 
         { dest:"$own", tab:"performance",
-          /* THE CONTROL MOVED AND THE STEP DID NOT (§324). §275 took the
+          /* THE CONTROL MOVED AND THE STEP DID NOT (§328). §275 took the
              Performance page's controls out of the page body and hung them on
              the TAB ROW through `perfActs()` → `REPORT_CHROME` → `.tabacts`,
              so this step lit NOTHING for five of the stories'
@@ -46592,7 +46592,7 @@ var TOUR = (function(){
     navigating = true;
     try {
       if (s.dest) {
-        var d = revealDest(s.dest === "$own" ? own : s.dest);   /* §330.18 */
+        var d = revealDest(s.dest === "$own" ? own : s.dest);   /* §334.18 */
         if (d && d.getAttribute("aria-selected") !== "true") d.click();
       }
       if (s.tab) {
@@ -46801,7 +46801,7 @@ var TOUR = (function(){
        on the row is a place nothing can press, and a tour pressing nothing
        is the fault above wearing a different hat — so it falls back to the
        first real destination rather than touring a key that is not there. */
-    if (!revealDest(own)) own = firstDest();   /* §330.18: behind a fold is still on the row */
+    if (!revealDest(own)) own = firstDest();   /* §334.18: behind a fold is still on the row */
     steps = resolve(STORIES[key].steps, own);
     dock.hidden = false;
     go(0);
@@ -47991,9 +47991,9 @@ var TRAIL = (function(){
         if (f && f.swot) return { __swot: f.swot };
         if (f && f.obj) return f.obj;
       }
-      /* §330.18: THE SUBJECT'S OWN HOLDERS, asked of the product rather than
+      /* §334.18: THE SUBJECT'S OWN HOLDERS, asked of the product rather than
          walked here — the SEVENTH copy of "walk the capabilities", and the
-         only one left outside the shared readers. Since §322 a supporting
+         only one left outside the shared readers. Since §326 a supporting
          function's projects are the FUNCTION's, so neither route above found
          them (`unitLikeWritable` answers the PILLARS view and is null on this
          format) and neither did this walk: measured, `cap7-P1-M1` on
@@ -48002,8 +48002,8 @@ var TRAIL = (function(){
          back, and it fails the way every one of these fails — quietly, in the
          direction that looks like the button doing nothing (§96).
 
-         WIDENED, NEVER NARROWED (§330.18's own rule one file over): a log row
-         written before §330 names the FUNCTION for a capability's project, so
+         WIDENED, NEVER NARROWED (§334.18's own rule one file over): a log row
+         written before §334 names the FUNCTION for a capability's project, so
          that function's capabilities are still walked beside its own work or
          a restore that used to work stops. */
       var holders = (typeof capsShown === "function" ? capsShown(t) : []).slice();
@@ -50987,7 +50987,7 @@ var SYNC = (function () {
 
      It starts on Units, because a business unit is what the platform is mostly
      about and every viewer who holds any unit holds one here. */
-  /* §330: THREE SIDES, AND THE FUNCTIONS SIDE IS SPELT `fns` AT LAST. It was
+  /* §334: THREE SIDES, AND THE FUNCTIONS SIDE IS SPELT `fns` AT LAST. It was
      `caps` — a name left over from when a capability WAS the functions side —
      and this is the round that makes the word mean one thing, so a key reading
      `caps` beside a real capabilities side would be a trap for whoever reads
@@ -51016,7 +51016,7 @@ var SYNC = (function () {
   /* The folds appear only for someone who reaches more than one unit AND more
      than one capability — today the SMO and the CEO. Everyone else sees the row
      exactly as it has always been, and never meets the concept. */
-  /* §330: EACH SIDE THAT HAS SOMETHING BEHIND IT, in the order a page is read
+  /* §334: EACH SIDE THAT HAS SOMETHING BEHIND IT, in the order a page is read
      — what the business runs, what it is building, what supports both. The
      list is built once and the switch, the destinations and the reset below
      all read it, so the control and the row it governs cannot disagree about
@@ -51048,7 +51048,7 @@ var SYNC = (function () {
     return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
   }
 
-  /* ONE LABEL FUNCTION FOR THE THREE KINDS (§330, §51.7's own lesson): a
+  /* ONE LABEL FUNCTION FOR THE THREE KINDS (§334, §51.7's own lesson): a
      unit's and a function's navName are read through `navName()`, and a
      capability's through the same one, so a short name given to a capability
      in Setup shows in the navigation the day it is set rather than being
@@ -51107,7 +51107,7 @@ var SYNC = (function () {
          the same kind of thing. The opened list follows BOTH of them. */
       /* A switch cannot rest on a side that has nothing behind it: a viewer who
          holds functions but no units would otherwise land on an empty Units
-         list with no way to see that Functions has anything. §330: asked of
+         list with no way to see that Functions has anything. §334: asked of
          the sides that exist rather than of two named lists, so a capability
          created this morning is a side the switch can rest on by tonight. */
       var sides = navSides();
@@ -51133,7 +51133,7 @@ var SYNC = (function () {
     } else {
       /* NO SWITCH: every side's destinations, in the same order, on one line.
          A viewer who reaches one unit and two functions has always seen them
-         like this and still does (§330: nothing moves until a capability
+         like this and still does (§334: nothing moves until a capability
          exists). */
       navSides().forEach(function(x){
         x.keys.forEach(function(k){ out.push({ k:k, label:navLabelFor(k) }); });
@@ -51511,7 +51511,7 @@ var SYNC = (function () {
      built of every destination this viewer can actually open; somebody
      attached to a unit their roles no longer reach falls back to the first
      door in the navigation, which is what happened before this existed. */
-  /* ── §310's RULE, WHERE IT LIVES NOW (§330) ───────────────────────────
+  /* ── §310's RULE, WHERE IT LIVES NOW (§334) ───────────────────────────
      Islam, of a project owner: *"the porject owner should open the capability
      by defaut on his project."* §310 answered it by ordering the list of
      capabilities a function's page drew; stage 2 makes a capability a place
@@ -51545,9 +51545,9 @@ var SYNC = (function () {
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
-  /* §330: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
+  /* §334: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
      tabs, because it is planned the same two ways and the pages are the same
-     pages (spec 046 §4). Drawing a second tab list for it would be the drift
+     pages (spec 048 §4). Drawing a second tab list for it would be the drift
      §211 and §213 each cost a day to undo. */
   function isCapDest(k){
     return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
@@ -51617,7 +51617,7 @@ var SYNC = (function () {
            is neither: it is two named sides. The label says what pressing it
            will DO, because the visible words already say where you are. */
         var lit = t.folds.filter(function(f){ return f.open; })[0] || t.folds[0];
-        /* ── TWO SIDES PRESS TO SWITCH; THREE PRESS THE ONE YOU WANT (§330) ──
+        /* ── TWO SIDES PRESS TO SWITCH; THREE PRESS THE ONE YOU WANT (§334) ──
            §41.8 is Islam's own instruction — *"I want it a switching button
            where the 2 words stay on 1 button but on clicking the selection
            switches"* — and it is a complete instruction for TWO sides and not
@@ -52202,7 +52202,7 @@ var SYNC = (function () {
        every group and setup tab still does. */
     var arg = (current === "group" || current === "setup" || current === "manage") ? null
             : isFn(current) || isCapDest(current) ? current : UNITS[current];
-    /* Submission is per unit, per function, and — since §330 — per capability:
+    /* Submission is per unit, per function, and — since §334 — per capability:
        Islam's *"yes for all"* to the cycle-board question makes a capability a
        subject that reports, so it submits on its own rather than through the
        function that holds it. */
@@ -52336,7 +52336,7 @@ var SYNC = (function () {
            UNITS[...] to hand it and inventing a unit-shaped object for something
            that carries no plan would be a lie about what it is (§68). */
         : isCo(current) ? def.render(current)
-        /* §330: a capability is passed its target for the same reason a
+        /* §334: a capability is passed its target for the same reason a
            function is — there is no UNITS[...] to hand it, and the four
            renderers behind SUBS.fn take a holder target. */
         : isFn(current) || isCapDest(current) ? def.render(current)
@@ -52614,7 +52614,7 @@ var SYNC = (function () {
        IT IS RE-READ AFTER EVERY PAINT, like the three above it: the bands it
        was holding have just been replaced. The answer itself is worked out in
        `pinWatch()` below, from where the band is against where it would be
-       anyway — §323 says why that is the only question that can be asked
+       anyway — §327 says why that is the only question that can be asked
        here, and why the observer this used to be could not answer it. */
     pinWatch();
     watchTailFold();
@@ -52670,7 +52670,7 @@ var SYNC = (function () {
      you are pointing at. And never over a title somebody else set — the
      register's name cell carries the full name and the sign-in key on its own
      hover (§81.1), which says more than this would. */
-  /* ── AND "AT ITS OFFSET" IS NOT "PINNED" (§323, correcting the above) ─
+  /* ── AND "AT ITS OFFSET" IS NOT "PINNED" (§327, correcting the above) ─
      THE OBSERVER COULD NOT ANSWER THE QUESTION IT WAS ASKED, and the page it
      failed on is the ordinary one. Measured on a unit's Plan at 1440×900:
      `--chrome-h` 168 + `--rail-gap` 22 puts the pane's border box at 190, the
@@ -53801,7 +53801,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* §330: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
+    /* §334: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
        — Islam's *"yes the capability can be built in pillars."* Addressed by
        ID rather than by position, because this control can change which side
        of the navigation the row belongs to and a repaint sits between the
@@ -54461,7 +54461,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-caprm]").forEach(function(b){
       b.addEventListener("click", function(){
         if (grant("c_caps") !== "edit") return;
-        /* §321: the button carries the capability's ID, never its position —
+        /* §325: the button carries the capability's ID, never its position —
            the row being removed and the row the button was drawn for are a
            dialog apart (§48, §48.2). */
         capRemoveOpen(b.dataset.caprm);
@@ -54548,7 +54548,7 @@ var SYNC = (function () {
            `measures.length` on an object that has not carried `measures` since
            §15, so it threw before it could confirm anything and the removal
            never ran (§51.11). */
-        /* §321: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
+        /* §325: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
            second door onto it — the Temple's own table. Reaching only the
            Setup page would leave a way to destroy three projects with a
            browser dialog and no archive, which is §272.7's fault exactly:
@@ -57485,7 +57485,7 @@ var SYNC = (function () {
           if (what === "measure") addMeasure(it); else addTactic(it);
         }
         else if (what === "project") {
-          /* §322: holderByIdWritable, not capById — a project may be added to
+          /* §326: holderByIdWritable, not capById — a project may be added to
              a CAPABILITY or straight to the function, and the writing half is
              what mints the container. A reader hands out a shared frozen
              empty, so the first project on a function would have been accepted
@@ -57726,8 +57726,8 @@ var SYNC = (function () {
         if (!h || !h.list) return;
         var t = h.target;
         if (!mayAuthor("k_found", t)) return;
-        /* §330.18: THE BUILDER'S FORM OPENS FOR A HOLDER, NOT ONLY FOR A
-           CAPABILITY. This asked for `h.cap`, and since §322 the Overview's
+        /* §334.18: THE BUILDER'S FORM OPENS FOR A HOLDER, NOT ONLY FOR A
+           CAPABILITY. This asked for `h.cap`, and since §326 the Overview's
            Add on a projects function carries the FUNCTION's own id — so in
            the builder the press fell through to the plain path below and
            pushed a NAMELESS row, where §129's whole rule is that a row is
@@ -57773,7 +57773,7 @@ var SYNC = (function () {
         fieldSaved(); paint();
       });
     });
-    /* §330: the second door to a capability, beside the projects. */
+    /* §334: the second door to a capability, beside the projects. */
     document.querySelectorAll("[data-cappromo]").forEach(function(b){
       b.addEventListener("click", function(){
         var fk = b.dataset.cappromo;
@@ -58277,7 +58277,7 @@ var SYNC = (function () {
                  functions, rather than resolved by whichever came first in the
                  array. That was the silent wrong-plan §51.2 feared, and it is
                  now caught at the one moment somebody can still act on it. */
-              /* §322: A SUPPORTING FUNCTION THAT HOLDS ITS OWN PROJECTS IS A
+              /* §326: A SUPPORTING FUNCTION THAT HOLDS ITS OWN PROJECTS IS A
                  SUBJECT, listed in the file's own dropdown by projectSubjectNames()
                  — so the upload has to resolve the name it just offered, the same
                  rule §61 already wrote for a pillars function one branch up. It is
@@ -58379,7 +58379,7 @@ var SYNC = (function () {
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;
         if (impIsCap()) {
-          /* §322: WRITABLE, for the reason the unit branch below already
+          /* §326: WRITABLE, for the reason the unit branch below already
              states — a plan applied to a reading view is reported as written
              and is not (§61). */
           var cc = impCapWritable();
@@ -58972,7 +58972,7 @@ var SYNC = (function () {
      with its pen on. leaveModes() first — it clears EDIT_PAGE, so the pen is
      switched on AFTER it, never before. */
   function builderStart(target){
-    /* §330.18: NO CAPABILITY IS MINTED ANY MORE. §322 gave a supporting
+    /* §334.18: NO CAPABILITY IS MINTED ANY MORE. §326 gave a supporting
        function projects of its own and this went on creating a box to hang
        them off — which after stage 2 is worse than pointless: every add in
        this route now writes to the function's own holder, so the box stayed
@@ -59213,7 +59213,7 @@ var SYNC = (function () {
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
   }
-  /* ── REMOVING A CAPABILITY: two answers, not one (§321) ───────────────
+  /* ── REMOVING A CAPABILITY: two answers, not one (§325) ───────────────
      The mockup Islam signed off (design-mockups/capability-remove/) draws the
      two acts as two rows, each saying what it does, rather than as two
      buttons on one line — because they are not two flavours of one act. One
@@ -59233,7 +59233,7 @@ var SYNC = (function () {
     var c = capById(id);
     if (!c) return;
     var f = functionOf(c.fn), fname = f ? f.name : "the function";
-    /* §322: THE FUNCTION ITSELF IS A DESTINATION, and it is the one that is
+    /* §326: THE FUNCTION ITSELF IS A DESTINATION, and it is the one that is
        always there. Islam: *"one more thing is the ability to turn functional
        projects to a capability and vice versa"* — this is the vice versa, and
        it is one more entry in a list the dialog already had rather than a
@@ -59260,7 +59260,7 @@ var SYNC = (function () {
           dests.map(function(x){
             return '<option value="' + esc(x.id) + '">' + esc(x.label) + '</option>';
           }).join("") + '</select>';
-    /* §322: WHERE THE OBJECTIVES END UP DEPENDS ON WHERE THE PROJECTS GO, so
+    /* §326: WHERE THE OBJECTIVES END UP DEPENDS ON WHERE THE PROJECTS GO, so
        the note says which rather than one sentence that is false on half the
        destinations (§104.8). They come across to the FUNCTION and only where
        it has none of its own; a sibling capability takes the projects alone,
@@ -59328,7 +59328,7 @@ var SYNC = (function () {
     var all = box.querySelector("[data-caprmall]");
     if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
   }
-  /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§330, spec 046 §6) ───────
+  /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§334, spec 048 §6) ───────
      Islam signed off the drawing with the cost on it: *"ok with the promirting
      mockup."* The mockup showed it as two steps; it is ONE dialog carrying
      both, because the cost line depends on which projects are ticked and a
@@ -59343,7 +59343,7 @@ var SYNC = (function () {
      convenience: a function whose five projects contain one capability cannot
      say so if the control takes the lot, and promoting everything is still
      allowed because a function may turn out to be doing one strategic thing.
-     What is refused is promoting NOTHING (spec 046 §6's own edge). */
+     What is refused is promoting NOTHING (spec 048 §6's own edge). */
   var PROMO = null;
   function promoOpen(fk){
     var f = FUNCTIONS[fk];
@@ -59357,7 +59357,7 @@ var SYNC = (function () {
     var f = FUNCTIONS[PROMO.fk], ps = f.projects || [];
     var picked = ps.filter(function(p){ return PROMO.pick[p.id]; });
     var name = String(PROMO.name || "").trim();
-    /* THE COST, IN THE CODES THEMSELVES (§310, §321's habit of naming what a
+    /* THE COST, IN THE CODES THEMSELVES (§310, §325's habit of naming what a
        press will change before the press). A project's code is its position
        in the thing that HOLDS it, so the ones that move take the capability's
        letters and the ones left behind close up — and both halves are shown,
@@ -59403,7 +59403,7 @@ var SYNC = (function () {
     return !!(PROMO && Object.keys(PROMO.pick).length &&
               String(PROMO.name || "").trim());
   }
-  /* THE COST, IN THE CODES THEMSELVES (§310, and §321's habit of naming what a
+  /* THE COST, IN THE CODES THEMSELVES (§310, and §325's habit of naming what a
      press will change before the press). A project's code is its position in
      the thing that HOLDS it, so the ones that move take the capability's own
      letters and the ones left behind close up — and BOTH halves are shown,

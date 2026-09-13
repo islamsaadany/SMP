@@ -54,7 +54,7 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§330 — a capability is a strategic entry of its own.
+**Latest version:** **§334 — a capability is a strategic entry of its own.
 Built on the branch, not merged.**
 
 You answered the four questions on the mockup and said *"shall we proceed?"*,
@@ -113,7 +113,7 @@ would show it, and nobody asked for one.
 
 ---
 
-### Earlier: §329 — the demo no longer shows a capability that is not one
+### Earlier: §333 — the demo no longer shows a capability that is not one
 
 Islam: *"finish the demo data yes."*
 
@@ -156,7 +156,7 @@ somewhere to live.
 
 ---
 
-**Before that:** **§326 / §327 — two checks and one list, found by running
+**Before that:** **§330 / §331 — two checks and one list, found by running
 the app's own suite.**
 
 Everything before this was proved on the frozen build. But **production is the
@@ -204,14 +204,14 @@ app with no errors · typecheck clean.
 
 ---
 
-**Before it:** **§325 — the served copies are in step with the frozen
+**Before it:** **§329 — the served copies are in step with the frozen
 sources — built on the branch, not merged.**
 
 `smp-app/public/` is not written by hand. Four scripts read the frozen product
 and produce what the Next app serves — the shell, the stylesheets, the manifest,
 the service worker — and every one of those files is committed. So a change to a
 frozen source that stops there leaves production serving the old bytes, with
-nothing to say so. §319 wrote that down in its own words, and §324 walked into it
+nothing to say so. §319 wrote that down in its own words, and §328 walked into it
 one section later: deleting a dead CSS rule left the served stylesheet still
 carrying it. Harmless that time, because nothing used the rule — which is why it
 was deleted. It need not be harmless next time, and **production is the new stack
@@ -229,7 +229,7 @@ falsifications red and the tree restored after each.
 
 ---
 
-**Before it:** **§324 — ten checks that had stopped checking — built on
+**Before it:** **§328 — ten checks that had stopped checking — built on
 the branch, not merged.**
 
 Running the neighbours after the merge turned up two reds and seven harnesses
@@ -291,7 +291,7 @@ none.
 
 ---
 
-**Before it:** **§323 — at its offset is not pinned — built on the branch,
+**Before it:** **§327 — at its offset is not pinned — built on the branch,
 not merged.**
 
 Found by running the suite after the merge, and live for as long as the fill has
@@ -323,10 +323,10 @@ moved.
 
 ---
 
-**Before it:** **§322 — a function's projects are its own — built on the
-branch, not merged (spec 046, stage 1).**
+**Before it:** **§326 — a function's projects are its own — built on the
+branch, not merged (spec 048, stage 1).**
 
-Islam, correcting §321.9's proposal outright: *"capability is something
+Islam, correcting §325.9's proposal outright: *"capability is something
 Strategic ... the problem with having the capability hidden in the functional
 plans is confusing for the whole structure aligned with me what you're
 understanding to fix this once and for old."*
@@ -335,7 +335,7 @@ understanding to fix this once and for old."*
 screen — it is that the only container the platform owned for a supporting
 function's projects was called a capability, so every function that plans in
 projects looked as though it held a strategic capability whether it did or not,
-and a real capability had nowhere of its own to live. §321.9's mockup is
+and a real capability had nowhere of its own to live. §325.9's mockup is
 recorded as withdrawn, not overwritten; its measurement is still the evidence.
 
 **Measured before anything was written:** six of the seven projects-format
@@ -348,7 +348,7 @@ function CARRIES. The band is gone from a function's own work; its Overview is
 the one a pillars function already draws (§213's decision finally true of both
 sides); the deck stops calling it a capability review; the workbook still
 addresses the function by name. Removing a box offers **the function itself**
-as a destination — Islam's *"and vice versa"*, one more entry in a list §321's
+as a destination — Islam's *"and vice versa"*, one more entry in a list §325's
 dialog already had — and the held state he photographed cannot occur any more,
 so its branch is deleted. A one-off moves every stored tenant onto the model
 through **the same rule the dialog presses**.
@@ -366,13 +366,13 @@ never loosened · eleven neighbouring checks green.
 
 **Merged `main` in, and the number moved.** `main` took §319 and spec 045 for
 the consulting memory while this was in flight, so this branch's three sections
-shift by one (§319–§321 → §320–§322, spec 045 → 046) — the precedent §287,
+shift by one (§319–§325 → §324–§326, spec 045 → 046) — the precedent §287,
 §301, §310, §318 and main's own §319.1 all set. The renumber ran BEFORE the
 merge, which is what makes it provably scoped to this branch's own lines
 (§264.3). Main changed **nothing** in the frozen product, measured rather than
 assumed; the built file, `shell.js`, `sw.js`, `platform.css` and the static
 carry were regenerated rather than trusted, and that was not ceremony — main's
-committed `platform.css` predated §321's dialog rules and had merged cleanly
+committed `platform.css` predated §325's dialog rules and had merged cleanly
 while stale.
 
 **And the sweep line first written here was measured on the wrong bytes.** It
@@ -393,13 +393,13 @@ sticky offset, so `pinWatch()` cannot tell *satisfied its offset* from
 passing — it is a visual behaviour with its own signed-off answer.
 
 **Waiting on Islam:** whether the worked example should dissolve its eight
-containers or keep one real capability so §321's feature renders something;
+containers or keep one real capability so §325's feature renders something;
 stage 2 — a capability as a strategic entry beside the business units; and the
 merge itself, which is his word on that merge.
 
 ---
 
-**Before it:** **§321 — removing a capability: the box, or the box and
+**Before it:** **§325 — removing a capability: the box, or the box and
 its work — built on `claude/inspiring-lamport-pm0ki2`.** Islam, with the
 browser's own dialog open in front of him: *"when I try to remove the
 capability it will remove the projects with it."* **It did** — a project lives
@@ -448,7 +448,7 @@ either direction (this builds the hard half); the screen half of "the box goes";
 and whether a capability can be built on the pillars or the projects method —
 Islam's own question, which belongs with *Objectives & actions*.
 
-**And before that:** **§320 — a pillar says which kind of thing it is — built
+**And before that:** **§324 — a pillar says which kind of thing it is — built
 on `claude/inspiring-lamport-pm0ki2`.** Islam, of a client whose supporting
 functions plan the way a business unit does: *"the capability is a strategic
 concept and we need to differentiate between having a capbility as a strategic

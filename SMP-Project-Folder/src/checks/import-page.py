@@ -277,10 +277,10 @@ with sync_playwright() as p:
            pg.eval_on_selector_all("[data-dl], [data-showcsv]", "e => e.length") == 0)
     ck("…and the reader is untouched", pg.evaluate("typeof loadCSV === 'function'"))
 
-    print("\n§8b every subject the page offers can actually be built (§330.15)")
+    print("\n§8b every subject the page offers can actually be built (§334.15)")
     setup(pg, "dl")
     offered = pg.evaluate("() => impPlanSubjects().map(o => o.v)")
-    # THE LIST AND THE BUILDER MUST AGREE. §322 taught `impHolderFor()` to
+    # THE LIST AND THE BUILDER MUST AGREE. §326 taught `impHolderFor()` to
     # resolve `fn:<key>` to a projects function's own holder and taught the
     # upload to offer that function BY NAME — and left this list offering the
     # PILLARS functions alone, so seven functions owning eighteen projects

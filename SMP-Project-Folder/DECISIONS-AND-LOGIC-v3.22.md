@@ -4953,7 +4953,7 @@ and never sees the set-up door on its Overview.
 ---
 
 
-## 320 · A pillar says which kind of thing it is
+## 324 · A pillar says which kind of thing it is
 
 Islam, of a client whose supporting functions plan the way a business unit
 does: *"the capability is a strategic concept and we need to differentiate
@@ -4966,7 +4966,7 @@ That is one of five things the round found, and it is the smallest of them —
 which is why it was built first and on its own (rule 2b). The other four are
 recorded at the end of this section, three of them not built.
 
-### 320.1 · The mark was already there, and Islam himself had put it away
+### 324.1 · The mark was already there, and Islam himself had put it away
 
 **NOTHING IS INVENTED HERE.** A pillar has carried `kind` since the model was
 written, the upload template's Pillars sheet has had a validated column for it
@@ -4981,7 +4981,7 @@ was right for the eighteen versions in between — nobody was using the
 distinction and a pill saying *Direction* on every row is furniture — and what
 changed is not the argument but the client.
 
-### 320.2 · Turning the flag on restored almost nothing, and that is the finding
+### 324.2 · Turning the flag on restored almost nothing, and that is the finding
 
 The one-character change was expected to be the whole piece. It was not.
 **Measured on a build with the flag flipped and nothing else changed**, the
@@ -5006,7 +5006,7 @@ had that guard from the day it was written and the other two (`kindPill` and the
 Performance rail) did not: **§15.1, and the fault was latent in the flag rather
 than introduced by turning it on.**
 
-### 320.3 · The half that makes showing it safe
+### 324.3 · The half that makes showing it safe
 
 **THE FIELD WAS WRITABLE ON NO SCREEN AT ALL.** It is stored, it rides in the
 workbook, every surface a pillar is read on now says it — and until today the
@@ -5047,7 +5047,7 @@ component nobody needed.
   moves both ends together.
 - **The office's, and asserted as such** — see 319.5.
 
-### 320.4 · The band takes an argument, not an object
+### 324.4 · The band takes an argument, not an object
 
 `pillarBand(code, name, right, kind)`: an **optional fourth argument**, because
 three of that function's six callers draw a **project**, which has no kind and
@@ -5065,7 +5065,7 @@ assumed** (§158): the table lives inside the objectives-breakdown dialog and
 comes out at **888px in an 890px box at 1920, 1440, 1280 and 1100, and 877 in
 879 at 1000** — nothing over, at any width.
 
-### 320.5 · The server needed nothing, and it is asserted anyway
+### 324.5 · The server needed nothing, and it is asserted anyway
 
 `kind` rides inside `items`, which the classifier compares with
 `omit(a, ["measures", "tactics"])` — so a pillar's kind has always been the
@@ -5084,7 +5084,7 @@ field that lives on the plan (§16.7). **3 red** with `kind` added to the omit
 list — and the three are the REFUSALS, which is the dangerous direction: a
 custodian silently re-labelling somebody else's pillar. 595/0.
 
-### 320.6 · The check, and its own two faults
+### 324.6 · The check, and its own two faults
 
 `checks/pillar-kind.py`, **0 failures**, proved able to fail **five ways** from
 the SOURCES (§276, because §238's hashed policy silences an edited built file):
@@ -5109,7 +5109,7 @@ back and went green on exactly the build it exists to catch. The value written
 is derived from what is stored, and the fixture asserts the two differ before
 the pick is made.
 
-### 320.7 · Verified
+### 324.7 · Verified
 
 - `checks/pillar-kind.py` **0 failures** (five sections, 18 assertions),
   falsified five ways from the sources: **6 / 3 / 3 / 1 / 1 red**.
@@ -5145,7 +5145,7 @@ the pick is made.
   working as designed: the `SHELL` name lives in the CACHING half, and that
   half is the one the generator drops. `tsc --noEmit` clean.
 
-### 320.8 · Recorded, not done
+### 324.8 · Recorded, not done
 
 The round settled five things and this builds one. The other four, with their
 decisions as Islam gave them:
@@ -5167,7 +5167,7 @@ decisions as Islam gave them:
 
 ---
 
-## 321 · Removing a capability: the box, or the box and its work
+## 325 · Removing a capability: the box, or the box and its work
 
 Islam, trying to take a wrapper off one of his own functions, with the
 browser's dialog open in front of him:
@@ -5176,7 +5176,7 @@ browser's dialog open in front of him:
 
 It did.
 
-### 321.1 · The press destroyed three projects and nothing said so
+### 325.1 · The press destroyed three projects and nothing said so
 
 `Remove` on Setup › Capabilities spliced the capability out of the list —
 whole. A project is not a row pointed at by a capability; it lives INSIDE one,
@@ -5198,7 +5198,7 @@ still behind a **browser** `confirm()`, which §95 argued against for exactly
 this class and §273.3 removed from the cycle panel. *The most destructive of
 the three ended up the least guarded.*
 
-### 321.2 · One word was doing two jobs
+### 325.2 · One word was doing two jobs
 
 - *"This box is in my way"* — a **move**.
 - *"This work is finished"* — a **delete**.
@@ -5206,7 +5206,7 @@ the three ended up the least guarded.*
 The button only ever did the second. Separating them is the whole change, and
 it is why the answer is two rows rather than a better sentence on one button.
 
-### 321.3 · The box stops being drawn; it is not taken out of the data
+### 325.3 · The box stops being drawn; it is not taken out of the data
 
 Two ways to make a project belong to the function were put to Islam with the
 cost of each, and he took **A**:
@@ -5233,7 +5233,7 @@ Giving a named grouping back later is re-drawing a strip, not a migration.
 What is genuinely lost is the specific box removed — its name, and which
 projects sat together under it — and that is what the archive is for.
 
-### 321.4 · The codes must not move, and the first build moved them
+### 325.4 · The codes must not move, and the first build moved them
 
 A project's code is its **position across the whole function** (§310), and
 `capsOfFunction()` hands them over in `GROUP.capabilities` order — so
@@ -5253,7 +5253,7 @@ and cycle snapshot is keyed on. A moved project keeps `cap1-P1` inside `cap2`,
 and no collision is possible because `mintRowId` mints from the list's own
 prefix.
 
-### 321.5 · Two answers, and the row that cannot be taken
+### 325.5 · Two answers, and the row that cannot be taken
 
 The mockup was signed off first (`design-mockups/capability-remove/`), drawn
 in the platform's own dialog, and Islam picked **B** of two treatments: the
@@ -5273,7 +5273,7 @@ weight is how the destructive one gets pressed for the tidy one.
 - **The destination is read BEFORE the dialog closes**, since `closeModal()`
   empties the overlay's body (§116.6).
 
-### 321.6 · The second door
+### 325.6 · The second door
 
 `data-trm="cap|<i>"` on the Temple's own table removes a capability too, with
 the same browser dialog and the same splice. **Reaching only the Setup page
@@ -5287,7 +5287,7 @@ and the button are a dialog apart (§48, §48.2).
 `capabilityHolds()` lost its last caller and is **deleted by name, never by
 line range** (§24, §214).
 
-### 321.7 · Verified
+### 325.7 · Verified
 
 - `checks/capability-remove.py` **0 failures over 30 assertions**, proved able
   to fail **five ways from the SOURCES** (§276): **21** with the old behaviour
@@ -5308,7 +5308,7 @@ line range** (§24, §214).
   green, including `pillar-project-remove`, whose dialog shares the styling
   this broadened.
 
-### 321.8 · Recorded, not done
+### 325.8 · Recorded, not done
 
 - **Moving a project INTO a capability** has no control, in either direction —
   a project is born inside one and removed from it. The machinery this builds
@@ -5324,7 +5324,7 @@ line range** (§24, §214).
 
 ---
 
-## 322 · A function's projects are its own
+## 326 · A function's projects are its own
 
 **Islam, 2026-09-12**, correcting a proposal of mine that would have hidden the
 problem rather than fixed it:
@@ -5340,16 +5340,16 @@ problem rather than fixed it:
 Spec 045 §8, **stage 1**. Stage 2 — a capability as a strategic entry beside
 the business units — is not built here.
 
-### 322.1 · The fault, and why hiding the box was the wrong answer
+### 326.1 · The fault, and why hiding the box was the wrong answer
 
-**§321.9 PROPOSED NOT DRAWING THE BAND where a function carries one box, and
+**§325.9 PROPOSED NOT DRAWING THE BAND where a function carries one box, and
 that is treating the symptom.** Islam's correction is the whole of this
 section: the problem is not that the word is on the screen, it is that **the
 only container the platform owned for a supporting function's projects was
 called a capability** — so every function that plans in projects appeared to
 hold a strategic capability whether it held one or not, and a real capability
 had nowhere of its own to live. Recorded as withdrawn rather than overwritten
-(Principle II); the measurement in §321.9 is still the evidence for this.
+(Principle II); the measurement in §325.9 is still the evidence for this.
 
 **MEASURED ON THE DEMO BEFORE ANYTHING WAS WRITTEN**: of the seven functions
 that plan in projects, **six carry exactly one capability** (only Marketing
@@ -5361,9 +5361,9 @@ Finance*; and **no project code mentions it at all** — they already read
 were already the function's everywhere the arithmetic touches them; the box was
 a layer of vocabulary over them.*
 
-### 322.2 · Two pieces already existed, which is what made it tractable
+### 326.2 · Two pieces already existed, which is what made it tractable
 
-- **A capability planned as a pillar is already there.** §320 shipped a
+- **A capability planned as a pillar is already there.** §324 shipped a
   pillar's `kind` — *Direction* or *Capability* — drawn and settable, one day
   earlier. That is Islam's first form, live.
 - **A function already holds everything a container holds.** §213 gave a
@@ -5371,7 +5371,7 @@ a layer of vocabulary over them.*
   resolved to the function's own key objectives. So a dissolved box has a home
   for its definition and its objectives without inventing a field.
 
-### 322.3 · No schema change, and no migration in SQL
+### 326.3 · No schema change, and no migration in SQL
 
 `functions` maps six columns in `lib/state-io.js` and files every other key
 into `extra`, so **`projects` on a function travels the road `items`,
@@ -5387,7 +5387,7 @@ of a function head and a project owner reporting in the same minutes (§147.7,
 §301). `treeFor("functions")` gains `projects`, **the same subtree a
 capability's projects are walked with** and never a second copy (§53.5).
 
-### 322.4 · The shape: a holder, in two halves
+### 326.4 · The shape: a holder, in two halves
 
 `fnOwnHolder(fk)` / `fnOwnHolderWritable(fk)` are `fnAsUnit` / `fnWritable` one
 format over, and follow them exactly — **the reading half hands out a shared
@@ -5402,13 +5402,13 @@ reporting walk and the codes all read — where each had its own
 twice already (§211, §213). And `eachHolder` is the one walk the snapshot, the
 restore, the new cycle and the id scanner share.
 
-**THE MOVE MUTATES IN PLACE AND NEVER REASSIGNS.** §321's `moveCapProjects`
+**THE MOVE MUTATES IN PLACE AND NEVER REASSIGNS.** §325's `moveCapProjects`
 wrote `to.projects = …`, which lands on a holder WRAPPER and is thrown away one
 line later — `fnAsUnit`'s own recorded trap wearing a different hat. Splicing
-writes through either destination and keeps §321's ordering rule, which is what
+writes through either destination and keeps §325's ordering rule, which is what
 keeps the codes stable.
 
-### 322.5 · The screens
+### 326.5 · The screens
 
 - **The band is not drawn over a function's own work.** `capBand`'s own comment
   states the rule it was failing: *"a function may carry several, and that band
@@ -5428,11 +5428,11 @@ keeps the codes stable.
   offers a function by name in the Read me's dropdown, the upload resolves the
   name it just offered, and the apply takes the **writing** holder.
 
-### 322.6 · The dissolve is one act, and the migration presses it
+### 326.6 · The dissolve is one act, and the migration presses it
 
 Islam: *"one more thing is the ability to turn functional projects to a
 capability and vice versa."* **This is the vice versa, and it was one more
-entry in a list §321's dialog already had** — the function itself is a
+entry in a list §325's dialog already had** — the function itself is a
 destination, and the one that is always there.
 
 **SO THE HELD STATE IS GONE.** The dialog Islam photographed on 11 September
@@ -5460,7 +5460,7 @@ every one of them — a brand-new client would have opened on eight archives of
 containers it never had. `archiveCapPlan` already refuses an empty plan on the
 other side, so the heal follows it (§53.5) rather than deciding it again.
 
-### 322.7 · Two things the checks found, both mine
+### 326.7 · Two things the checks found, both mine
 
 - **THE CLEAN SLATE AND THE DEMO'S "CLEAR PROJECT" MUST STILL AGREE (§67).**
   `clearedGraph()` emptied the eight boxes and kept their names — right while a
@@ -5473,7 +5473,7 @@ other side, so the heal follows it (§53.5) rather than deciding it again.
   assertion that reads the deck's cover. §266.9's rule — *a command that prints
   something is not a command that did the thing* — in a different tool.
 
-### 322.8 · Verified
+### 326.8 · Verified
 
 `checks/functional-projects.py` **34/0**, both ends of every claim, proved able
 to fail **four ways from the SOURCES** (§276): **3 / 4 / 2 / 6 red**. Its
@@ -5504,36 +5504,36 @@ this has to get right · eleven neighbouring checks green.
 **AND THE SWEEP LINE THAT FIRST STOOD HERE WAS MEASURED ON THE WRONG BYTES.**
 It read *"full `qa.py` ERRORS none"*, and it was true of the build the sweep
 ran against and not of the build this section shipped: the sweep went first,
-`clearedGraph()` was corrected afterwards (§322.7, the clean-parity failure),
+`clearedGraph()` was corrected afterwards (§326.7, the clean-parity failure),
 and nothing re-ran it. **§105.6 exactly** — *a fix tested against the wrong
 bytes looks exactly like a fix that does not work*, and here it looked exactly
 like a fix that does. Re-run against the merged build the sweep reports **one**
 error, and it is this decision arriving at a check that had not been told:
-`CLEAR PROJECT: caps went from 8 to 0 — the setup must stay`. See §322.10.
+`CLEAR PROJECT: caps went from 8 to 0 — the setup must stay`. See §326.10.
 
-### 322.9 · Recorded, not done
+### 326.9 · Recorded, not done
 
 - **The worked example still ships its eight containers**, so the offline
   `file://` build draws them and a deployment does not. That is the
   transitional state this stage describes, and which the demo should show —
-  containers dissolved, or one real capability kept so §321's feature renders
-  something (§45.2) — is **Islam's**, and is spec 046 §10.4.
+  containers dissolved, or one real capability kept so §325's feature renders
+  something (§45.2) — is **Islam's**, and is spec 048 §10.4.
 - **Making projects a capability** is stage 2: it needs somewhere to promote
   into.
 - **A project's code changes when it is promoted**, which is the honest answer
-  and is recorded in spec 046 §10.5 as his to accept.
+  and is recorded in spec 048 §10.5 as his to accept.
 
-### 322.10 · The merge, the renumber, and the check the decision had not reached
+### 326.10 · The merge, the renumber, and the check the decision had not reached
 
 **`main` took §319 and spec 045 while this was in flight** — the consulting
 memory, merged 2026-09-11 from another session — so this branch's three
-sections shift by one: §319→§320, §320→§321, §321→§322, and spec 045→046. That
+sections shift by one: §319→§324, §324→§325, §325→§326, and spec 045→046. That
 is the precedent §287, §301, §310, §318 and main's own §319.1 all set: **the
 number that merged first stands, and a gap is harmless where a collision is
 not.** The sweep is scoped to the lines this branch wrote (§264.3), and it is
 provably so because it ran BEFORE the merge — main's eight §319 citations were
 not in the tree yet, so a blanket replace could not have reached them. Counts
-before and after agree exactly (§322: 70, §321: 29, §320: 23, §319: 0).
+before and after agree exactly (§326: 70, §325: 29, §324: 23, §319: 0).
 
 **THE HEAL KEEPS ITS `045-` NAME.** `045-a-functions-projects-are-its-own.js`
 is written into `_sql_migrations` the first time it runs, so it is a KEY and
@@ -5554,16 +5554,16 @@ newest first, rather than by picking (§147.4: read a merge before believing it)
 `node --check sw.js` passes; the built file, `public/shell.js`, `public/sw.js`,
 `platform.css` and the static carry were all REGENERATED rather than trusted
 (§91) — and that was not ceremony, because main's committed `platform.css`
-predated §321's dialog rules and the merge had spliced a stale copy through
+predated §325's dialog rules and the merge had spliced a stale copy through
 cleanly.
 
 **THE ONE RED WAS `qa.py`, AND IT IS §214.3 FOR THE SIXTH TIME**: that check
 holds two lists — what a *Clear project* must KEEP and what it must EMPTY — and
 `caps` was in the first, because a capability shell was part of the org's shape
-while it was the only container a supporting function's projects had. §322 made
+while it was the only container a supporting function's projects had. §326 made
 it a thing a function CARRIES, so a client on day one has none. **The entry is
 INVERTED rather than deleted** (§218): `caps` moves to the second list, so the
-check still fails on the build before §322 rather than quietly passing on both.
+check still fails on the build before §326 rather than quietly passing on both.
 **And the assertion beside it now passes for the wrong reason** (§113.8):
 `capContent` counts the work inside the capabilities, which with none left is
 trivially nought — it is KEPT as the control, and named as one in the check's
@@ -5583,17 +5583,17 @@ the card's rounded corners read square, which is §130.6's complaint alive
 again. Recorded here rather than fixed in passing, because it is a visual
 behaviour with its own signed-off answer and belongs in its own round.
 
-## 323 · At its offset is not pinned
+## 327 · At its offset is not pinned
 
 Found by running the suite after the merge, and it is a defect that has been
 live for as long as the fill has existed. `checks/band-corner.py` is **six red**
 on `origin/main`'s own build — reproduced there in a worktree before anything
 here was blamed (§303) — and §316.5 recorded it during the rebuild's Phase E
 and left it, because the frozen file was taking no new work then and it blocks
-no client. The freeze has since been reversed in practice (§318–§322 are all
+no client. The freeze has since been reversed in practice (§318–§326 are all
 new work on this file), so the reason to leave it has expired.
 
-### 323.1 · The two numbers are the same pixel, and the page does not scroll
+### 327.1 · The two numbers are the same pixel, and the page does not scroll
 
 **MEASURED BEFORE ANYTHING WAS TOUCHED.** On a unit's Plan at 1440×900:
 
@@ -5612,7 +5612,7 @@ rule (*one number, not two that happen to agree*) is kept rather than broken.
 What follows from it is that the band sits **exactly at** its own offset, and
 on that page it sits there for ever, because there is nothing to scroll.
 
-### 323.2 · An observer cannot tell "at its offset" from "pushed to it"
+### 327.2 · An observer cannot tell "at its offset" from "pushed to it"
 
 `pinWatch()` shrank the root by the sticky offset plus a pixel and watched for
 the band to stop being wholly inside it. That is a good instrument for the
@@ -5633,7 +5633,7 @@ and it never goes above it. At the instant the old margin does fire, the band's
 flow position is within a pixel of the offset either way — *the information is
 not in the ratio*, whatever number is put in front of it.
 
-### 323.3 · The test is whether it has left its own flow position
+### 327.3 · The test is whether it has left its own flow position
 
 That is what "pinned" means, it needs no threshold to be guessed, and it is the
 same question `band-corner.py` asks from the outside (*the band's top against
@@ -5661,7 +5661,7 @@ It is kept for the case the check cannot reach — `--chrome-h` changes when the
 chrome row wraps, which moves the offset AND the pane under a scroll position
 that does not move — and its own comment says it is not proved.
 
-### 323.4 · Three assertions were passing for the wrong reason
+### 327.4 · Three assertions were passing for the wrong reason
 
 §316.5 said so and this is what it meant. The check's *pinned* block scrolls to
 420 and measures; at a window where the page does not scroll, nothing moves and
@@ -5679,7 +5679,7 @@ Two things close it, and both are rewrites rather than loosenings (§218):
   fact the whole section turns on), that nothing is pinned, and that both
   corners still draw the card's.
 
-### 323.5 · Verified
+### 327.5 · Verified
 
 `checks/band-corner.py` **all passed**, and **proved able to fail from the
 SOURCES** (§276, since §238's hashed CSP silences an edited built file):
@@ -5692,7 +5692,7 @@ Screen only: no `api/`, `lib/` or `db/` file touched, read off the diff; nothing
 stored, nothing migrated, no rule moved. `qa.py` ERRORS none; `no-jump`,
 `plan-edit-head`, `plan-edit-line`, `table-fit` and `setup-sticky` green.
 
-## 324 · Ten checks that had stopped checking
+## 328 · Ten checks that had stopped checking
 
 Running the **neighbours** after the merge rather than only the files that were
 edited (§214's rule) turned up two reds and seven harnesses that cannot run at
@@ -5709,14 +5709,14 @@ request started naming a client. **Three were failing in the safe-looking
 direction and one was passing for the wrong reason**, which is why a sweep of
 everything found what a sweep of the neighbours could not.
 
-**Eight are repaired here** (§324.1, .2, .5, .7 twice, .9, .10, .11) and **two
-needed only a package installing** (§324.6). Beside them: one file that is a
-camera rather than a check (§324.12), and **two findings diagnosed and
+**Eight are repaired here** (§328.1, .2, .5, .7 twice, .9, .10, .11) and **two
+needed only a package installing** (§328.6). Beside them: one file that is a
+camera rather than a check (§328.12), and **two findings diagnosed and
 deliberately NOT fixed, each with its reason** — seven server harnesses that
-have not been runnable since §313 (§324.3), and twenty-two checks that can
-never tell a runner they failed (§324.8).
+have not been runnable since §313 (§328.3), and twenty-two checks that can
+never tell a runner they failed (§328.8).
 
-### 324.1 · The tour pointed at a control that had moved
+### 328.1 · The tour pointed at a control that had moved
 
 `checks/tour.py` was **15 red**, and it is one step: the slides step in both
 stories, across five viewer-and-place pairs. Its targets were
@@ -5738,7 +5738,7 @@ Re-pointed at `#subtabs .tabacts .dlmenu:not(.bandsmenu)` — the row carries tw
 dropdowns and this step is about the Presentation one (§65.9). 15 red on
 `origin/main`'s own build, 0 here.
 
-### 324.2 · The history check had one good day in it
+### 328.2 · The history check had one good day in it
 
 `checks/history-page.py` was **10 red**, all in its §2 and §3, and the first
 failure printed no value at all — because `ck()` prints its detail only when it
@@ -5759,7 +5759,7 @@ cut-off after them — rather than two literals that agreed once. The cut-off is
 KEPT rather than dropped: it is what would fail loudly if the page ever asked
 for a window later than the rows it is drawing.
 
-### 324.3 · Seven server harnesses have not been runnable since §313
+### 328.3 · Seven server harnesses have not been runnable since §313
 
 Diagnosed, **not fixed**, and the diagnosis is worth more than a partial fix
 would have been. `scripts/test-history-read.js`, `test-safety-peek.js`,
@@ -5798,7 +5798,7 @@ once for one script.
 about: `api/state.js` refusing a request that names no client and carries no
 seat is the boundary working. What stopped was the harnesses' ability to ask.
 
-### 324.4 · And the heal's own log line had stopped being true
+### 328.4 · And the heal's own log line had stopped being true
 
 Found reading the branch's diff back rather than by a check. `ensureReadyOnce`
 runs the one-off heals inside one `try`, and its `catch` said
@@ -5813,7 +5813,7 @@ tried again on the next boot (§289's reason for keeping them outside the
 bootstrap's transaction). Making them independent would be a second decision
 riding a message fix.
 
-### 324.5 · The CSP check had been measuring a 404 page
+### 328.5 · The CSP check had been measuring a 404 page
 
 Found by running every check in the tree rather than the ones a change
 touched. `checks/csp-net.py` failed both its assertions — *the app's own
@@ -5827,7 +5827,7 @@ API sends the platform to `/platform` — which the stub 404s too. So the
 document under measurement was the **404 page**: no meta element, no app, and
 an injected handler running because nothing was policing it. *A check that
 navigates away measures whatever it lands on, and reports it under the name of
-the page it meant to open.* §324.3's shape again, in a check rather than a
+the page it meant to open.* §328.3's shape again, in a check rather than a
 harness, and it had been true since the multi-client split.
 
 **THE POLICY ITSELF WAS NEVER IN DOUBT, AND IT WAS PROVED SEPARATELY** before
@@ -5844,7 +5844,7 @@ document, and it carries a policy* — because everything below it is true of a
 404 page (§113.8). Green, and **2 red with the policy stripped from the served
 bytes**, the new assertion among them.
 
-### 324.6 · Two checks need Pillow, and one deliberately does not
+### 328.6 · Two checks need Pillow, and one deliberately does not
 
 `home-mark.py` and `chat-settings-scroll.py` read painted pixels through PIL
 and die with `ModuleNotFoundError` where it is absent — which reads exactly
@@ -5858,7 +5858,7 @@ these checks to install Pillow"* — and it is right, and two files went the
 other way anyway. Not reconciled here: rewriting two working checks to drop a
 dependency is a tidy-up, and they are the two that read the most pixels.
 
-### 324.7 · A worker served as a page is a console error that looks like the product
+### 328.7 · A worker served as a page is a console error that looks like the product
 
 `checks/refusal-keeps-work.py` failed on **"nothing threw"**, and what it had
 caught was *"The script has an unsupported MIME type ('text/html')"* — its stub
@@ -5874,7 +5874,7 @@ the day one of them gains a "nothing threw" assertion, not a fault today.
 Blanket-editing thirty-one working checks to close a hazard is the churn §2b
 warns about; naming it is what makes the next one a minute's work.
 
-### 324.8 · Twenty-two checks can never fail an automated run
+### 328.8 · Twenty-two checks can never fail an automated run
 
 Found by asking a different question of the tree — *which of these can tell a
 runner that they failed?* — after §298.3 recorded my own runner reading a count
@@ -5896,7 +5896,7 @@ for whoever automates, not a failure hiding behind a green tick. Twenty-two
 files, each with its own name for the count it keeps (`bad`, `fails`, `fail`),
 is a round of its own and a poor passenger on a branch going to a merge.
 
-### 324.9 · A stub that models a server we no longer have
+### 328.9 · A stub that models a server we no longer have
 
 `checks/reply-said.py` failed on *"upgrades to the emailed sentence when the
 server answers"* — the word stayed at **Sent.** The product is right and the
@@ -5913,7 +5913,7 @@ nothing in it asserts that sentence — which is exactly how a stub comes to
 model a server that no longer exists. Aligned too, and its own run is
 unchanged (ALL CLEAR both before and after).
 
-### 324.10 · A banner check that outlived demo mode
+### 328.10 · A banner check that outlived demo mode
 
 `checks/squeezed-rail.py` asserted §162's removal at BOTH ENDS — one sentence
 gone from the demo banner, the other still there — which was right, and then
@@ -5930,7 +5930,7 @@ twice in the built file and both are COMMENTS recording that it was deleted, so
 a bare-name search fails on a build that is right — *a phrase in prose is not
 the thing the prose is about* (§93's family).
 
-### 324.11 · The check that named its own trap and then fell into it
+### 328.11 · The check that named its own trap and then fell into it
 
 `checks/row-edit.py` asked all six Setup tables for a pen on the row, found
 **nought of ten** on the first, and then **died on the empty list** rather than
@@ -5956,7 +5956,7 @@ answer to what it does (§53.5). `open_row`'s kebab branch is DELETED with it
 (§24): nothing reaches it now, and a branch nothing reaches is the next
 reader's idea of how menus work. Six tables measured, ALL GREEN.
 
-### 324.12 · And one "check" is a camera
+### 328.12 · And one "check" is a camera
 
 `checks/sendsaid-fullshot.py` takes a platform file and a tag on the command
 line and shoots a before-and-after pair (§143). Run with no arguments by a
@@ -5967,14 +5967,14 @@ nothing tells a runner what it is. Recorded rather than renamed: the name is in
 the decisions record and in commit messages, and moving it to fix a runner
 nobody has written yet is the wrong way round.
 
-## 325 · The served copies are in step with the frozen sources
+## 329 · The served copies are in step with the frozen sources
 
-**§319 wrote this trap down in its own words and §324 fell into it one section
+**§319 wrote this trap down in its own words and §328 fell into it one section
 later.** That section's note reads: *"`smp-app/public/shell.js` is TRACKED and
 is `build-shell.mjs`'s assembly of build.py's own script list, so a change to a
 frozen source that stops there leaves the Next app serving the old shell —
 §91's failure by a different road, and silent, because nothing on either stack
-compares the two."* §324.1 deleted the dead `.bands-act` rules from
+compares the two."* §328.1 deleted the dead `.bands-act` rules from
 `arrange.css`, ran the frozen build, and did not run `sync-css.mjs` — so
 `smp-app/public/platform.css` went on carrying them and the two stacks'
 stylesheets disagreed by three lines.
@@ -6006,7 +6006,7 @@ on the afternoon it matters. So `checks/generated-in-step.mjs`:
   because *the copies are stale* and *you have edits in flight* are two
   different answers and a check that merges them sends somebody to the wrong
   place (§123).
-- **It exits non-zero**, which §324.8 is about: twenty-two checks in the frozen
+- **It exits non-zero**, which §328.8 is about: twenty-two checks in the frozen
   suite cannot tell a runner they failed, and a new one joining them would be a
   poor answer to a section complaining about it.
 
@@ -6023,7 +6023,7 @@ frozen name reaches no client's browser. §319.1 said the bump is hygiene
 rather than a fix; this is the measurement behind that sentence. It is kept,
 because the frozen file is still what an offline handover runs on.
 
-## 326 · The demo's name scan was looking in the room the tables had left
+## 330 · The demo's name scan was looking in the room the tables had left
 
 `checks/demo-seed.mjs` is the one file standing between a real client's names
 and a demo shown to other clients. Running the app's own suite after building it
@@ -6055,7 +6055,7 @@ One line — `n.nspname = $1, [SCHEMA]`, the shape `schema-room.mjs` already use
 7/7 green, and RED both ways (`--break=raw-names`, `--break=keep-marks`), so the
 scan is genuinely looking rather than passing for a newer wrong reason.
 
-## 327 · Which tables are the platform's own was written three times
+## 331 · Which tables are the platform's own was written three times
 
 Found by running the nine spike proofs after building the app: **S5 and S4 both
 red, and neither this branch's** — it touches no schema, no spike and no `lib`
@@ -6104,9 +6104,9 @@ not call it. So the promise that a table added next month is *"named the day it
 is added"* is true of a spike run and not of a deploy. Whether the deploy should
 call it is a decision about what a deploy may refuse, which is main's to take.
 
-## 328 · And the walk was run on the stack that actually serves it
+## 332 · And the walk was run on the stack that actually serves it
 
-Every section above §326 was verified on the **frozen build over `file://`**,
+Every section above §330 was verified on the **frozen build over `file://`**,
 which is the right subject for the frozen product and is no longer the whole of
 it: reading `/sw.js` off the live site returns `build-sw.mjs`'s GENERATED
 worker, byte-identical to `smp-app/public/sw.js` — **production is the new
@@ -6129,13 +6129,13 @@ the extra one is the fixture.
 a sentence, and the cheap deterministic comparison is usually the one that
 settles it.*
 
-## 329 · The worked example holds no capabilities
+## 333 · The worked example holds no capabilities
 
-Islam, of the one thing §322 built and could not show: **"finish the demo data
+Islam, of the one thing §326 built and could not show: **"finish the demo data
 yes."**
 
 **STAGE 1 WAS LIVE AND INVISIBLE, AND THAT IS THE FINDING RATHER THAN THE
-TIDY-UP.** §322 gave a supporting function its own projects, took the band off
+TIDY-UP.** §326 gave a supporting function its own projects, took the band off
 all four of its pages, converged the Overview, carried the workbook and the
 deck, and left the worked example shipping its eight containers — so on the
 build that shipped it, Finance's Projects page still drew a navy
@@ -6159,8 +6159,8 @@ the whole of why the big literal in `group-data.js` was not rewritten by hand:
   dissolve may not do. Measured after: `cap7-P1 · cap7-P2 · cap7-P3` on
   Finance, `cap4-P1 · cap4-P2 · cap6-P1` on Marketing — the two boxes' rows in
   the order the codes already read them (§310) — and `FIN01/02/03` unchanged.
-- **IT IS THE PRODUCT'S OWN RULE.** `dissolvePlan` is what §321's Remove dialog
-  presses and what `045-a-functions-projects-are-its-own.js` presses; spec 046
+- **IT IS THE PRODUCT'S OWN RULE.** `dissolvePlan` is what §325's Remove dialog
+  presses and what `045-a-functions-projects-are-its-own.js` presses; spec 048
   §6 argues exactly this for the migration in the same words. A third answer to
   *what does giving the work back to the function mean* is how all three drift
   the first time one is corrected (§42, §53.5).
@@ -6178,7 +6178,7 @@ rather than a loss, because a container's definition describes the container
 and nobody wrote it about Marketing (§96.2). The sentence it drops is *"Treat
 what we sell as a portfolio to be shaped, not a catalogue to be carried"*,
 which is the strongest candidate in the tenant for the one REAL capability
-stage 2 creates: **spec 046 §10.4 answered by the data rather than by taste.**
+stage 2 creates: **spec 048 §10.4 answered by the data rather than by taste.**
 
 **Measured after:** 0 capabilities, seven functions owning their own projects,
 `capId` following each row to `fn:<key>` (which is what `moveCapProjects` does
@@ -6207,7 +6207,7 @@ assertions, 0 failures.
 
 **THE FIRST THING THAT WAS NOT A FIXTURE: THE ONE-LINE HEAL HAD STOPPED
 REACHING A FUNCTION'S PROJECTS.** `cleanOneLine` (§260) walks the units, the
-functions' pillars, the group and `g.capabilities` — and §322 moved every
+functions' pillars, the group and `g.capabilities` — and §326 moved every
 tenant's projects onto the FUNCTION, so from that version until this one a
 project's name, a deliverable's, an outcome's and a milestone's were no longer
 cleaned of the blank lines a paste leaves behind. Silent, because the value
@@ -6239,7 +6239,7 @@ harness, having run a first-deploy assertion twice against the same database
   capability gets a home of its own; the product holds none until then, which
   is §8 of the spec exactly — *"the truth of his tenant"*.
 - **A capability is unreachable from any screen in the meantime.** Nothing in
-  the product creates one (stage 2's job), so §321's Remove dialog and the band
+  the product creates one (stage 2's job), so §325's Remove dialog and the band
   are both correct and both currently unexercised outside a check.
 - **AND A FULL SWEEP REWRITES THE RECORD OF A PAST SIGN-OFF.** Found by the
   tree going dirty during this round's sweep with nothing of mine in it:
@@ -6253,9 +6253,9 @@ harness, having run a first-deploy assertion twice against the same database
   should not ride on a round about the demo (§2b); what it wants is either a
   refusal to overwrite, or a home outside `checks/` so a sweep cannot reach it.
 
-## 330 · A capability is a strategic entry of its own
+## 334 · A capability is a strategic entry of its own
 
-Islam, of what §322 left: **"capability is something Strategic"** — and, on the
+Islam, of what §326 left: **"capability is something Strategic"** — and, on the
 mockup drawn for stage 2, four answers and a go-ahead:
 
 > 1. for the marketing - the marketing now is a normal funcitonal plan with
@@ -6280,8 +6280,8 @@ mockup drawn for stage 2, four answers and a go-ahead:
 - **It can be planned in PILLARS** — so the FORM belongs to the thing and not
   to the subject, which is §213's decision one kind of container further out.
 - **His own tenant needs nothing**: Raya's Marketing plans in pillars and holds
-  no capabilities, so the recommendation in §329 was only ever about the worked
-  example, and *"for the demo do what you want"* is what let §330 keep exactly
+  no capabilities, so the recommendation in §333 was only ever about the worked
+  example, and *"for the demo do what you want"* is what let §334 keep exactly
   one (Product Mindset) rather than argue about it.
 
 ### The model, and the one line the whole boundary rests on
@@ -6299,15 +6299,15 @@ is judged in the FUNCTION area, and nobody's rights move.
 ### The four things that were live and silent, all found by driving it
 
 None of these threw, none reached a console, and every one of them rendered
-perfectly (§96's family). `origin/main` carries neither §322 nor §330, so none
+perfectly (§96's family). `origin/main` carries neither §326 nor §334, so none
 has ever been in front of a client — which is what this sweep is for.
 
-- **§330.4 · The resolver that answers *whose project is this* was blind to a
-  function's own.** `capOfProjectId` walked `GROUP.capabilities` and §322 had
+- **§334.4 · The resolver that answers *whose project is this* was blind to a
+  function's own.** `capOfProjectId` walked `GROUP.capabilities` and §326 had
   just given a supporting function projects of its own; both its callers open
   `if (!it) return;`. Measured: Finance holds three projects, pressing the
   second in the rail moved nothing, and *Remove this project* opened no dialog
-  at all. `eachProject` hands the holder over — §322 built that walk precisely
+  at all. `eachProject` hands the holder over — §326 built that walk precisely
   because four copies of *walk the capabilities* would drift the day a function
   became a holder, and this was the fifth copy nobody carried across.
   **AND THE WAY BACK WAS SHUT WITH IT**: `restoreArchive` resolved a `kind:"cap"`
@@ -6317,7 +6317,7 @@ has ever been in front of a client — which is what this sweep is for.
   branch. A function's holder is a WRAPPER, so the restore writes back, and
   `renumberCapability` is never run on one: a restore that re-addresses every
   project, deliverable, outcome and milestone is the one thing it may not do.
-- **§330.5 · A project owner could not be recognised as one, twice over.**
+- **§334.5 · A project owner could not be recognised as one, twice over.**
   `boundedHere` had been taught that a capability is judged in the FUNCTION
   column — its own comment says why — and `mayMarkDoneOn` one function above it
   still read `"unit"`, so `railMine` answered false for a capability whose
@@ -6328,7 +6328,7 @@ has ever been in front of a client — which is what this sweep is for.
   capabilities alone — so they reached nothing, the function was not in their
   navigation, and the server refused them, because it is the shared rule both
   sides ask (§42).
-- **§330.6 · The tab said nothing while the board asked for the report.**
+- **§334.6 · The tab said nothing while the board asked for the report.**
   `reportPending` decided *is this a real subject* by asking for a unit key or
   an `fn:` one, so a capability answered false: its Reporting tab never said
   *not submitted yet* and its Performance tab never wore the dot (§69), while
@@ -6340,8 +6340,8 @@ has ever been in front of a client — which is what this sweep is for.
   to end after the fix, and **the server needed nothing and it is asserted
   rather than assumed** (§172): the office and the function's head are allowed,
   somebody else is refused **by the capability's name**.
-- **§330.7 · The strip named nothing for the whole middle of a function's
-  deck.** §322 stopped drawing the holder's cover for a function's OWN work —
+- **§334.7 · The strip named nothing for the whole middle of a function's
+  deck.** §326 stopped drawing the holder's cover for a function's OWN work —
   rightly, a slide headed *Capability · Finance* over the word Finance says the
   name twice (§87, on a projector) — and the section stamp rode on that slide.
   Measured: thirteen slides under a navigation bar reading **COVER · END**. It
@@ -6351,8 +6351,8 @@ has ever been in front of a client — which is what this sweep is for.
   byte-identical, and a capability keeps §266.9's two-letter fallback for its
   own divider.
 
-- **§330.8 · A function could be deleted out from under its own projects.**
-  §322 gave a function projects of its own and `fnDeleteBlockers()` went on
+- **§334.8 · A function could be deleted out from under its own projects.**
+  §326 gave a function projects of its own and `fnDeleteBlockers()` went on
   listing only what a CAPABILITY holds, so a function carrying three projects
   and no capability answered *nothing is in the way* — and `functions` is
   keyed, so the row went and the plan went with it, silently and with no
@@ -6360,9 +6360,9 @@ has ever been in front of a client — which is what this sweep is for.
   project (§62: the refusal is the feature, and a refusal that does not say
   what is in the way sends somebody to look at everything).
 
-- **§330.9 · A generator's size is the artefact's, never the string's.** The
-  four generators had not been re-run since §330 moved the frozen sources, so
-  `smp-app/public/` — which is what production SERVES (§325) — was a build
+- **§334.9 · A generator's size is the artefact's, never the string's.** The
+  four generators had not been re-run since §334 moved the frozen sources, so
+  `smp-app/public/` — which is what production SERVES (§329) — was a build
   behind; that section's own guard caught it, which is the whole of why it was
   written. **AND RUNNING IT FOUND THE GENERATORS MIS-REPORTING THEIR OWN
   OUTPUT**: five *"bytes"* figures across three scripts were `String.length`,
@@ -6379,13 +6379,13 @@ has ever been in front of a client — which is what this sweep is for.
   minutes and nearly put the wrong figure into this record. Measured off the
   file that was just written, so it cannot drift from it again.
 
-- **§330.10 · Two checks were reading the previous release.** 165 of the 167
+- **§334.10 · Two checks were reading the previous release.** 165 of the 167
   read `src/strategy-management-platform.html`, the build; `deck-dividers.py`
   and `slide-move.py` named `strategy-management-platform-v3.22.html`, the
   SHIPPED copy — which the merge copies over and which therefore sits a whole
   round behind for the entire time a round is being built. Measured on this
   branch: **55,020 bytes behind**, with §238's CSP hash differing, so those two
-  were measuring §329's product while the other 165 measured §330's, and a
+  were measuring §333's product while the other 165 measured §334's, and a
   regression in anything they cover would have been invisible to them and
   reported green (§105.6 — the wrong bytes look exactly like a fix that does
   not work; §51.11 — a check pointed at something that moved fails silently and
@@ -6394,12 +6394,12 @@ has ever been in front of a client — which is what this sweep is for.
   copy is brought up to the build on the BRANCH rather than at the merge, since
   that is the rule the repository already states.
 
-- **§330.11 · A code follows its holder, and §321's check was agreeing with
+- **§334.11 · A code follows its holder, and §325's check was agreeing with
   itself about it.** Found by the full sweep, not by reading:
   `capability-remove.py` went **1 red** on *"Marketing's project codes read
   before the move"*, answering `{}`. Two causes, and the second is the one
   worth the space. **Its fixture drew from `FUNCTIONS[fk].projects`**, which
-  stopped being the whole of what a function holds the moment §330 took
+  stopped being the whole of what a function holds the moment §334 took
   capabilities off `fnHolders()` — so on the finished demo, where Marketing
   owns two of its three projects and a capability holds the third, it built one
   box of two and one of NOTHING and then measured a capability with no work in
@@ -6407,38 +6407,38 @@ has ever been in front of a client — which is what this sweep is for.
   the line that empties the list). **And both sides of its central assertion
   read `fnProjects()`**, which for a capability's rows answers an empty map —
   so *"AND EVERY CODE IS WHAT IT WAS"* was comparing `{}` with `{}` and passing
-  for the wrong reason (§113.8), on the one claim §330 deliberately REVERSES:
+  for the wrong reason (§113.8), on the one claim §334 deliberately REVERSES:
   a code is a position in its HOLDER now, so a project that changes holder
   changes code, which is this section's own *"FIN02 becoming PM01 is the code
   telling the truth"* and is what Islam took with the promote control in front
   of him. **REWRITTEN, NEVER LOOSENED** (§218) into the pair that is true and
   falsifiable: the destination's codes are its own run, 01 upwards under one
   prefix derived from the product rather than typed, and a moved project reads
-  a NEW code while its id is unmoved (§232). **2 red** with the pre-§330 rule
+  a NEW code while its id is unmoved (§232). **2 red** with the pre-§334 rule
   put back from the SOURCES (§276), printing three empty codes and a moved
   project reading what it read before.
 
-- **§330.12 · A check that would not parse, and the sweep that rewrites a
+- **§334.12 · A check that would not parse, and the sweep that rewrites a
   sign-off.** `checks/objectives-table-mockup.py` died on a **SyntaxError**:
-  a §330 edit of mine put `[data-fold="fns"]` inside a double-quoted Python
+  a §334 edit of mine put `[data-fold="fns"]` inside a double-quoted Python
   string, so the file could not be READ, let alone run — and `qa-run.py` reports
   that as one more red line among 167, which is how a file that never executed
   looks exactly like a file that failed (§54.5: *a check that did not run is not
   a check that passed*, and this one could not even pretend). Established as
   this branch's by parsing main's copy, which is clean. **AND FIXING IT RE-ARMED
-  THE FAULT §329 RECORDED AND LEFT**: it is a mockup GENERATOR living in
+  THE FAULT §333 RECORDED AND LEFT**: it is a mockup GENERATOR living in
   `checks/`, so a full sweep ran it and it replaced §278.3's signed-off shots
   with today's build — silently, against Principle II, which says a mockup is
   the record of what was AGREED and not of what was built. It had been harmless
   only because it was broken. Both it and its sibling
   `objectives-table-doc.py` now **refuse to write unless asked by name**
-  (`SMP_WRITE_MOCKUPS=1`), which is one of the two remedies §329 named and the
+  (`SMP_WRITE_MOCKUPS=1`), which is one of the two remedies §333 named and the
   smaller of them; **both ends proved** (§94.2) — the guard declines and writes
   nothing, and lifted, the document regenerates **byte-identical**, so the
   shots it assembles are still the signed-off ones and a guard that had quietly
   deleted the generator would have been caught.
 
-- **§330.13 · A capability counted none of its own gaps, and twenty-one checks
+- **§334.13 · A capability counted none of its own gaps, and twenty-one checks
   could not be pointed anywhere else.** The fifth product fault of the round,
   and it was reachable only because the check that finds it was reachable
   again. `gapMap()` had a `fn:` branch and a unit branch and nothing between
@@ -6475,14 +6475,14 @@ has ever been in front of a client — which is what this sweep is for.
   an index (§215) where a supporting function has owned its projects directly
   since stage 1.
 
-- **§330.14 · Thirteen, not two — and the sweep is what is refused.** §329
+- **§334.14 · Thirteen, not two — and the sweep is what is refused.** §333
   found that two mockup GENERATORS live in `checks/` and rewrite signed-off
-  pictures on every full sweep, named them, and left it; §330.12 gave those two
+  pictures on every full sweep, named them, and left it; §334.12 gave those two
   a guard each. **Running the whole suite found ELEVEN more** — thirteen files
   that drive the product and write PNGs and documents into `design-mockups/`,
   which is where the record of what Islam AGREED lives. Three of them were only
   harmless because they were stale and failed early (§268 moved the pen they
-  press), which is the same accident §330.12 records: *it had been harmless
+  press), which is the same accident §334.12 records: *it had been harmless
   only because it was broken.* So the answer moves to `qa-run.py`, ONE place
   (§53.5), where the two per-file guards are DELETED (§24) — **and what is
   refused is the SWEEP, never the file**: every one of these says in its own
@@ -6496,8 +6496,8 @@ has ever been in front of a client — which is what this sweep is for.
   still the signed-off ones. It also takes three permanent false reds out of
   every future sweep.
 
-- **§330.15 · Seven functions could not download their own plan.** The sixth
-  product fault, and the oldest — §322's, inherited. Measured on this branch:
+- **§334.15 · Seven functions could not download their own plan.** The sixth
+  product fault, and the oldest — §326's, inherited. Measured on this branch:
   **seven supporting functions own eighteen projects between them and not one
   of them appeared on Import & storage's Download list**, which offered the
   PILLARS functions and the capabilities alone. That was the whole truth while
@@ -6506,7 +6506,7 @@ has ever been in front of a client — which is what this sweep is for.
   own. **§22 is why it matters**: an upload AUTHORS, so a plan that cannot
   leave cannot come back, and this is the ordinary way a client edits one.
   **AND THE BUILDER WAS THERE THE WHOLE TIME** — `impHolderFor()` has resolved
-  `fn:<key>` to the function's own holder since §322 and says so in its own
+  `fn:<key>` to the function's own holder since §326 and says so in its own
   comment, and `projectSubjectNames()` already offers that function BY NAME on
   the upload — so the two ends were built and the list between them was not
   (§96, §61: built and unreachable). One clause, and every active function is
@@ -6517,8 +6517,8 @@ has ever been in front of a client — which is what this sweep is for.
   empty sheet fails. **1 red** falsified from the SOURCES — *and the first
   falsification went GREEN*, because `import-page.py` did not honour
   `SMP_BUILT` and ran against the very build it was falsifying (§54.5, and
-  §330.13's lesson within the hour). It honours it now.
-- **AND THE POINTING IS A CLASS, NOT TWO FILES.** §330.13 fixed the
+  §334.13's lesson within the hour). It honours it now.
+- **AND THE POINTING IS A CLASS, NOT TWO FILES.** §334.13 fixed the
   twenty-one checks that named an ABSOLUTE path, which is the worst spelling
   because a worktree's own copy cannot even be run. **116 more resolve their
   build relative to `__file__` and ignore `SMP_BUILT`** — which is enough for
@@ -6526,7 +6526,7 @@ has ever been in front of a client — which is what this sweep is for.
   falsification quietly measures the file it was falsifying and reports the
   reassuring answer. Recorded rather than swept: 116 mechanical edits in
   varied spellings do not belong in a round about capabilities (§2b), and it
-  is exactly the shape §324 was as a round of its own.
+  is exactly the shape §328 was as a round of its own.
 
 ### What the checks found, and what had to be rewritten rather than loosened
 
@@ -6552,13 +6552,13 @@ dependent assertion guarded behind *did the step work* has stopped being an
 assertion at all (§298.3 from the other side — there the count disagreed with
 the tail, here it agreed with a tail that was missing seven lines).
 
-Four neighbours were REWRITTEN, never loosened (§218), because §330 moves what
+Four neighbours were REWRITTEN, never loosened (§218), because §334 moves what
 they are about rather than what they assert:
 
 - **`capability-first.py`** — §310 answered *whose capability leads* by SORTING
   the list a function's pages drew; a capability is a destination now, so the
   sort is dead code and the answer lives in `entryDest`. Every claim is
-  asserted where §330 keeps it. **AND IT PASSED FOR THE WRONG REASON UNTIL THE
+  asserted where §334 keeps it. **AND IT PASSED FOR THE WRONG REASON UNTIL THE
   LANDING WAS MADE FRESH** (§113.8): `current` survives a viewer switch whenever
   the new viewer can reach where the old one stood, so reading it after the
   office had navigated to his capability answered *his capability* on a build
@@ -6568,13 +6568,13 @@ they are about rather than what they assert:
   is that those pages carry no band AND still hold the function's own work,
   asserted on the PAGE and not only in the list.
 - **`cycle-board.py`** — §245's rule is Islam's own and is about the two
-  FORMATS of a function; §330 adds a band for a different KIND of subject, so
+  FORMATS of a function; §334 adds a band for a different KIND of subject, so
   the rule is asserted as what it says. Its probe split the board at the FIRST
   band, sweeping a capability's row into the function list.
 - **`deck-strip.py`** — §266.12 asserted a function's pills were its
   capabilities and wrote down that they ought to be its projects.
 
-Three more had fixtures that asked the worked example for a capability §329
+Three more had fixtures that asked the worked example for a capability §333
 removed and were made to MAKE their state (§255): `measure-score-spread.py`,
 `fn-report-gate.py` and `master-presentation.py`.
 
@@ -6585,31 +6585,31 @@ the cause, the restore blind **1 red** printing `ok: False`, the area reverted
 `powner` derivation removed **1 red** on the server.
 
 **AND THE SEED WAS STALE, FOR THE THIRD TIME IN THIS REPOSITORY** (§259, and
-§325's rule one artefact over): `db/seed-state.json` is generated by
-`scripts/extract-state.js` and is TRACKED, and §329 regenerated it before
-§330's keep-one line existed — so it carried NO capability while the sources
+§329's rule one artefact over): `db/seed-state.json` is generated by
+`scripts/extract-state.js` and is TRACKED, and §333 regenerated it before
+§334's keep-one line existed — so it carried NO capability while the sources
 carried one, and `test-authorize.js` §38 short-circuits on a seed with none.
 Its 620/0 had been measured against a seed that could not exercise it.
 
-### §330.16–.18 — running the whole suite, and the six faults under it
+### §334.16–.18 — running the whole suite, and the six faults under it
 
 The sweep that follows a round is not a formality here: **six more product
 faults came out of it, and every one of them is the same sentence — *walk the
-capabilities* — written before §322 moved a supporting function's projects
-onto the function itself.** §330 had already corrected two copies of it
+capabilities* — written before §326 moved a supporting function's projects
+onto the function itself.** §334 had already corrected two copies of it
 (`holderOfProjectId`, the `powner` derivation) and said in its own comment
 that `eachProject` exists so that nobody keeps a private one. There were four
 more in the product and one in each of two other layers.
 
-- **§330.16 · The workbook round trip declined its own subject.**
+- **§334.16 · The workbook round trip declined its own subject.**
   `template-round-trip.py` printed a sentence saying it had no capability to
   measure, which was honest and left §22's contract — an upload AUTHORS, so a
   column the file does not carry is a column the plan loses — unexercised on
-  the one kind of subject §330 had just created. It MINTS the two objectives
+  the one kind of subject §334 had just created. It MINTS the two objectives
   it needs on a capability that already holds a full project; the second row
   is that section's own control (§113.8).
 
-- **§330.17 · Press the side you want, never "the other one".** The navigation
+- **§334.17 · Press the side you want, never "the other one".** The navigation
   switch is TWO segments on a tenant with no capability and THREE once there
   is one, and with three it is a row of buttons rather than one wrapping
   control — so `.nsw:not(.on)` stopped meaning *the way across* and started
@@ -6625,7 +6625,7 @@ more in the product and one in each of two other layers.
   and `project-dates` would not parse at all, the second nested-quote error of
   the round.
 
-- **§330.18 · Three copies of one walk, and a function's own projects were in
+- **§334.18 · Three copies of one walk, and a function's own projects were in
   none of them.** Found by running the check that was red rather than by
   reading: on a supporting function's Reporting page a project owner's picker
   was DRAWN, PRESSED, and wrote nothing.
@@ -6641,14 +6641,14 @@ more in the product and one in each of two other layers.
   - **`capsOfFn()`** in the SHARED rules backed `namedInFn()` and
     `capProjectOf()` — so nobody named on a function's own project derived the
     Contributor floor (a milestone's owner, a stakeholder, a collaborator:
-    §147.8's whole feature, dead since §322), and the rule could not say which
+    §147.8's whole feature, dead since §326), and the rule could not say which
     project a reporting row belonged to. **WIDENED, NEVER NARROWED**: a case
     could be made that being named on a capability should now grant at
     `cap:<id>` rather than at the function, and that TAKES a role away from
     somebody who holds it today, which is Islam's call and not a repair's.
   - **`ctxOfFn()`** in the authoriser kept a third copy, and every id missing
     from the index it builds is refused whoever the person is — so **the owner
-    of a function's own project, whose role §330 had just carried across, was
+    of a function's own project, whose role §334 had just carried across, was
     refused every figure they entered.** It asks the shared rule now, exported
     as `holdersOfFn`.
   - **`eachHolder()` kept a membership test of its own**, where the PAGES ask
@@ -6661,7 +6661,7 @@ more in the product and one in each of two other layers.
     `subjectReported` turned the target into a FUNCTION KEY before asking, so
     `cap:<id>` fell through to the empty answer and §221's rule — a report
     with an unanswered row is not ready to send — was inert on the destination
-    §330 had just created. Everything below them already spoke the target
+    §334 had just created. Everything below them already spoke the target
     vocabulary (`fnReportItems` walks `capsShown(subject)`, which resolves
     `cap:`); what was wrong was one translation on the way in, which is §172's
     lesson: *the layer that has never been offered the new value is the layer
@@ -6669,7 +6669,7 @@ more in the product and one in each of two other layers.
   - **The builder's titled form did not open, and the box it minted was worse
     than pointless.** §129's rule is that a row is added WHOLE through a form
     that asks its fields in the outcome's order, and the branch that opens it
-    required `h.cap`, which since §322 the Overview's Add on a projects
+    required `h.cap`, which since §326 the Overview's Add on a projects
     function does not carry: press Add and one NAMELESS objective appears with
     no form ever drawn. Beneath it, `builderEnsureCapability` created a
     capability for every new projects function so the plan had somewhere to
@@ -6683,7 +6683,7 @@ more in the product and one in each of two other layers.
   **AND THE TOUR WALKED SOMEBODY ELSE'S PAGE.** A step says `{dest,tab,sec}`
   and `start()` falls back to the first destination when the person's own is
   *not on the row* — its own comment explains that as *a place nothing can
-  press*. §330 gave the navigation a third side, so a viewer who reaches a
+  press*. §334 gave the navigation a third side, so a viewer who reaches a
   capability AND their own function now meets a SWITCH where they used to meet
   a plain row, and a folded destination has no button: measured, **Marketing's
   own strategy custodian was toured round the GROUP**. It presses the fold
@@ -6712,7 +6712,7 @@ function for a CAPABILITY — one function in eight has one — and reported the
 own subject missing rather than measuring it (§54.5); `report-note-wrap` held
 the old spelling of `holderItemById` (§51.11 from the check's side);
 `setup-header` held the literal pair `["fns","units"]` and `setup-overview`
-added the board's halves up by name, both of which §330 gave a capabilities
+added the board's halves up by name, both of which §334 gave a capabilities
 side — Islam's *"yes for all"* — and both REWRITTEN as agreements with the
 product's own lists (§218, §94.8), `setup-overview`'s for the THIRD time that
 line has carried a stale copy of the board's membership; `refusal-keeps-work`
@@ -6732,7 +6732,7 @@ fixture never named is absent from every list (§113.8).
   nowhere in the worked example and is exercised by the checks alone. A second
   demo capability would show it and nobody asked for one (§2b).
 - **The two mockup generators still live in `checks/` and no longer WRITE from
-  a sweep** (§330.12 closing §329's own finding): both refuse unless asked by
+  a sweep** (§334.12 closing §333's own finding): both refuse unless asked by
   name with `SMP_WRITE_MOCKUPS=1`, which is the smaller of the two remedies
   that section named. Moving them out of `checks/` altogether is still the
   tidier answer and is still not done.
@@ -6740,27 +6740,27 @@ fixture never named is absent from every list (§113.8).
   describes** — seed a tenant in `public`, run `migrate-to-multi-client.js`,
   then `fixture-platform.js` — which this session did not stand up, so it is
   unrun rather than failing. (`gap-walk.py` and `milestone-fill.py` were
-  recorded here as pre-existing and were not: see §330.13 — the baseline they
+  recorded here as pre-existing and were not: see §334.13 — the baseline they
   were measured against was this branch's own build, and both are green on
   main. Both are fixed.)
 - **The builder no longer mints a capability, and nothing offers to make one
-  there.** §330.18 deleted `builderEnsureCapability` because the box it made
+  there.** §334.18 deleted `builderEnsureCapability` because the box it made
   stayed empty and stopped the function's own Projects page drawing anywhere to
   put a first project. A capability is created from the Temple, which is where
   it was created before the builder existed, and the guided build does not
   offer one — said here rather than discovered: whether the builder should ask
   *is any of this a capability?* is a question about what the flow is for, and
-  it belongs with **Objectives & actions** (§320's own recorded round) rather
+  it belongs with **Objectives & actions** (§324's own recorded round) rather
   than inside a repair.
 - **Being named on a CAPABILITY's project still grants the Contributor floor
-  at the FUNCTION.** §330.18 widened `capsOfFn()` rather than narrowing it, on
+  at the FUNCTION.** §334.18 widened `capsOfFn()` rather than narrowing it, on
   purpose: narrowing would take a role away from somebody who holds it today.
-  Since §330 a capability is a destination of its own, so the case can be made
+  Since §334 a capability is a destination of its own, so the case can be made
   that the grant belongs at `cap:<id>` — and that is Islam's to decide, with
   the cost being that a `cap:` place has to be taught to `roleWheres`, the
   areas and the register's own vocabulary.
 - **`SMPRules.unitLikeOf()` does not know a capability, and today nothing asks
-  it to.** It is the one resolver in the shared rules §330 did not teach —
+  it to.** It is the one resolver in the shared rules §334 did not teach —
   measured, `unitLikeOf(w, "cap:cap6")` answers null — and its only caller is
   `tourReady()`, whose place comes from `ownPlace()`, which reads a ROLE's `at`
   and can therefore only ever be a unit, a function, a company or the group
@@ -6772,7 +6772,7 @@ fixture never named is absent from every list (§113.8).
   planned in pillars that genuinely has a plan to walk. Stated here rather than
   guessed at later.
 
-## 331 · The rules the new stack runs are a COPY, and nobody was comparing them
+## 335 · The rules the new stack runs are a COPY, and nobody was comparing them
 
 Islam, with a screenshot of Next's own error page — *"on checking the branch I
 got this message when I tried to open a client noting that on another branch
@@ -6781,7 +6781,7 @@ on different modules that was my only change check if that was the [cause]"*.
 
 **IT WAS NOT THE MODULE WORK, AND ESTABLISHING THAT FIRST WAS MOST OF THE
 ANSWER.** `origin/main` had moved ten commits under this branch and every one
-of them is that work (§318.1–.3, §320.4–.6), so his reading was the obvious
+of them is that work (§318.1–.3, §324.4–.6), so his reading was the obvious
 one; the only new failure surface it puts on `/<client>` is `tenantByKey`
 gaining `, modules`, and the console's own client list selects that same column
 — so a missing column would have emptied the cards he was clicking on rather
@@ -6789,12 +6789,12 @@ than letting him click one. **The fault is this branch's, and it is mine.**
 
 **RUN, NEVER READ.** `frozen.landing()` asked for all 33 people of the worked
 example: **33 threw, `SMPRules.dissolvePlan is not a function`** — his page,
-exactly, for every person in every client. §322 put `dissolvePlan` in the
-SHARED rules module and §330 put `capHolderTarget` beside it, and the new
+exactly, for every person in every client. §326 put `dissolvePlan` in the
+SHARED rules module and §334 put `capHolderTarget` beside it, and the new
 stack does not run `lib/rules.js`: it runs **`smp-app/lib/rules.cjs`, a
 CARRIED COPY**, which was 151 lines behind.
 
-**THE SAME TRAP §325 CLOSED, ONE DIRECTORY OVER, AND THAT IS THE FINDING.**
+**THE SAME TRAP §329 CLOSED, ONE DIRECTORY OVER, AND THAT IS THE FINDING.**
 That section built `generated-in-step.mjs` because `smp-app/public/` is
 generated from the frozen product and TRACKED, so a frozen source edited
 without re-running a generator leaves the Next app — which is PRODUCTION —
@@ -6802,13 +6802,13 @@ serving the old bytes. `smp-app/lib/*.cjs` are the same relationship with no
 generator at all: `lib/frozen.cjs` runs the four frozen SOURCE files straight
 out of `SMP-Project-Folder/src`, so those are always fresh, and the rule
 modules beside them are copies. **That asymmetry is exactly how this hid** —
-every §330 check walks the frozen product and is green, because the frozen
+every §334 check walks the frozen product and is green, because the frozen
 product is right.
 
 **THREE WERE STALE AND ALL THREE MATTER.** `rules.cjs` (the landing, and every
-authorisation the new stack makes); `authorize.cjs` (§330.18's `ctxOfFn`, so a
+authorisation the new stack makes); `authorize.cjs` (§334.18's `ctxOfFn`, so a
 function's project owner would have been refused every figure they entered);
-and `graph-diff.cjs`, missing §322's one line teaching `treeFor("functions")`
+and `graph-diff.cjs`, missing §326's one line teaching `treeFor("functions")`
 about `projects` — **which is §216's fault reborn, predicted by name in that
 line's own comment**: without it a supporting function's whole plan travels on
 every figure, worst in the live case of a function head and a project owner
@@ -6829,28 +6829,28 @@ over (§54.5). Proved able to fail both ways: the three stale copies put back,
 his sentence again in the same run; and `assistant.cjs` made a plain carry,
 **1 FAILED** on the exception half.
 
-**§331.1 — AND THREE OF THE FOUR FIRST FAILURES WERE A STALE BUILD, WHICH
+**§335.1 — AND THREE OF THE FOUR FIRST FAILURES WERE A STALE BUILD, WHICH
 NEARLY COST A SECOND WRONG DIAGNOSIS.** `checks/state-api.mjs` runs `next
 start` against `.next`, and `next build` bundles the `.cjs` — so the first run
 after the re-carry was measuring the copies I had just replaced, and reported a
 400 (*"a row edit path this server does not apply: projects/cap7-P1/milestones"*)
-that looked like a real gap between §322's differ and §314.2's row-addressed
+that looked like a real gap between §326's differ and §314.2's row-addressed
 writer. **§105.6 exactly**, and the tell was that the same change list applied
 cleanly in a bare `node -e`. Rebuilt: 4 red → 1.
 
-**§331.2 — AND THE ONE THAT SURVIVED WAS THE CHECK.** §216's *"her change list
+**§335.2 — AND THE ONE THAT SURVIVED WAS THE CHECK.** §216's *"her change list
 names her function and no other"* tested `/"care"/` against the stringified
-list, and §322 moved her report from a capability under the group to the
+list, and §326 moved her report from a capability under the group to the
 FUNCTION, where the address reads `functions.care` — **so the quote before the
 word is not there and that assertion could never match on any build**. It was
-rewritten here for §322/§329 and the spelling was not, and the file was failing
+rewritten here for §326/§333 and the spelling was not, and the file was failing
 for the stale-copy reasons above, so it was never seen alone. **REWRITTEN,
 never loosened** (§218, §94.8): it asks the ADDRESSES now — every row at
 `functions.care`, and no whole-part `set` or `del` at all, which is what §216
 is actually about. Separated against all four shapes it must tell apart,
 including the empty list and the whole-part send that is §216 itself.
 
-**§331.3 — AND ONE RED WAS THE ENVIRONMENT.** `memory-boundary.mjs` builds its
+**§335.3 — AND ONE RED WAS THE ENVIRONMENT.** `memory-boundary.mjs` builds its
 second pool from `u.hostname`/`u.port`, so a socket-in-the-query-string
 connection string resolved to `127.0.0.1:5432` and section 4 died rather than
 reporting (§215). Given a TCP URL it is **14/0**. Nothing in the product, and
@@ -6859,7 +6859,7 @@ recorded rather than left to be rediscovered.
 **VERIFIED on a virgin Postgres 16 over TCP, the whole app suite**: state 91/0,
 door 49/0, shell 61/0, blob 23/23, comms 47/47, upload 9/9, demo 7/7, room
 10/0, deploy 5/0, memory 21/0 · 14/0 · 16/0, generated-in-step all clear, `tsc`
-clean with the cache removed first (§320.5a) — and **every one of the nine red
+clean with the cache removed first (§324.5a) — and **every one of the nine red
 variants still red** (`check:state:red` six, `check:door:red` three), which is
 what says the rewritten assertion did not weaken the file it lives in.
 

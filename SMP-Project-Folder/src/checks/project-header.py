@@ -21,7 +21,7 @@ pill, or the header says the same fact twice.
 """
 import os, sys
 
-# §330: THE HOLDER OF A FUNCTION'S OWN WORK. `capsOfFunction(fk)[0]` was
+# §334: THE HOLDER OF A FUNCTION'S OWN WORK. `capsOfFunction(fk)[0]` was
 # that while a projects function's projects lived in a capability drawn on
 # its pages; since stage 1 they are the FUNCTION's, and since stage 2 a
 # capability is a page of its own — so this read a holder the page under
@@ -43,7 +43,7 @@ def ck(what, ok, x=""):
 def open_project(pg, theme, w):
     pg.evaluate("t=>document.documentElement.setAttribute('data-theme',t)", theme)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(220)
-    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`
+    # §334.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`
     # until the lit segment said Functions — and with three sides that
     # element is a DIV of buttons rather than a button, so the press did
     # nothing, the loop gave up, and the destination was never drawn.

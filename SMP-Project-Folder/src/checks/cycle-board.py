@@ -94,7 +94,7 @@ BOARD = """() => {
     lines: r.getBoundingClientRect().height
   });
   const body = rows.filter(r => r.children.length > 3);
-  /* §330: SPLIT BY EVERY BAND, not at the first one. §245's board had one —
+  /* §334: SPLIT BY EVERY BAND, not at the first one. §245's board had one —
      the functions — and stage 2 adds a Capabilities band beside it, so
      "everything after the first band" swept a capability's row into the
      function list and the assertions about that list read a correct board as
@@ -164,7 +164,7 @@ with sync_playwright() as p:
     if board.get("err") or board.get("threw"):
         ok("the board renders at all", False, board); b.close(); sys.exit(1)
     unit_names = [r["name"] for r in board["unitHalf"]]
-    # §330: the FUNCTIONS' own group, named by its band — `fnHalf` is
+    # §334: the FUNCTIONS' own group, named by its band — `fnHalf` is
     # everything after the first band and now sweeps the capabilities in.
     fn_names = board.get("fnRows") or []
     cap_names = board.get("capRows") or []
@@ -195,14 +195,14 @@ with sync_playwright() as p:
     # §218: REWRITTEN, NEVER LOOSENED. §245's rule is Islam's own — *"don't
     # split functions planning in pillars from functions planning in projects
     # they are functions reporting"* — and it is about the two FORMATS of a
-    # function. §330 adds a band for a different KIND of subject, so the rule
+    # function. §334 adds a band for a different KIND of subject, so the rule
     # survives whole and is asserted as what it actually says: the functions
     # are ONE group whatever shape their plan is.
     ok("the functions are ONE group, so the formats are not split (§245)",
        len([g for g in (board.get("groups") or [])
             if (g.get("band") or "").startswith("Supporting functions")]) == 1,
        [g.get("band") for g in (board.get("groups") or [])])
-    ok("...and a capability is its own group beside them (§330)",
+    ok("...and a capability is its own group beside them (§334)",
        len(cap_names) > 0 and not set(cap_names) & set(fn_names),
        {"caps": cap_names, "fns": fn_names})
     both = js(pg, """(l)=>{
@@ -234,7 +234,7 @@ with sync_playwright() as p:
 
     # ── 4 · counted once in the headline ────────────────────────────────────
     print("\n── 4 · the headline counts it exactly once")
-    # §330: EVERY ROW, the capabilities included — §108.1's rule is that the
+    # §334: EVERY ROW, the capabilities included — §108.1's rule is that the
     # parts and the divisor agree, and a capability is a row on this board now.
     n_rows = len(unit_names) + len(fn_names) + len(cap_names)
     ok("`units` in the totals is the number of rows on the board",
@@ -246,7 +246,7 @@ with sync_playwright() as p:
 
     # ── 5 · the band claims only what is true of every row under it ─────────
     print("\n── 5 · the band says how many, not what one of the two shapes counts")
-    # §330: the FUNCTIONS' band alone. Joining every band's words made the
+    # §334: the FUNCTIONS' band alone. Joining every band's words made the
     # Capabilities band's own name trip the vocabulary assertion below, which
     # is that band saying exactly what it holds.
     bt = board.get("fnBand") or ""

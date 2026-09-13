@@ -67,8 +67,8 @@ STORED["functions"][FN]["custodian"] = FILLER["key"]
 STORED["people"].append({"key": FILLER["key"], "name": FILLER["name"], "active": True})
 STORED["access"]["custodian"] = dict(STORED["access"].get("custodian") or {},
                                      a_fn_own_strat="fill")
-# §330.18: THE FUNCTION'S OWN WORK. This asked the seed for a capability of
-# `it`, which since §322 holds the function's projects itself and since §329
+# §334.18: THE FUNCTION'S OWN WORK. This asked the seed for a capability of
+# `it`, which since §326 holds the function's projects itself and since §333
 # ships with none at all — so the file died on an empty list before it had
 # made anything (§215).
 CAP = {"id": "fn:" + FN, "projects": STORED["functions"][FN]["projects"]}
@@ -149,7 +149,7 @@ class H(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/api/auth"):
             self._s(json.dumps({"ok": True, "person": FILLER}).encode()); return
         # A WORKER IS SERVED AS JAVASCRIPT OR THE REGISTRATION REJECTS (§231.5,
-        # §324.7). Without this the stub answered `/sw.js` with the gate page,
+        # §328.7). Without this the stub answered `/sw.js` with the gate page,
         # Chromium refused it — *"The script has an unsupported MIME type
         # ('text/html')"* — and the refusal reached this check's own page-error
         # listener, so a clean run failed on "nothing threw". §250.2 recorded
@@ -182,7 +182,7 @@ URL = "http://127.0.0.1:%d/raya-trade" % srv.server_address[1]
 # product becomes a save (§170) — so this is the real save path, not a fetch
 # aimed at the endpoint.
 MUTATE = """(f) => {
-  const cap = holderById(f.cap);   /* §330.18 */
+  const cap = holderById(f.cap);   /* §334.18 */
   const p = cap.projects.filter(x => x.id === f.proj)[0];
   const by = (id) => p.milestones.filter(m => m.id === id)[0];
   const mark = { by: "t184_fill", at: "2026-08-30T09:00:00Z" };
@@ -194,7 +194,7 @@ MUTATE = """(f) => {
   SYNC.afterPaint();
 }"""
 READ = """(f) => {
-  const cap = holderById(f.cap);   /* §330.18 */
+  const cap = holderById(f.cap);   /* §334.18 */
   const p = cap.projects.filter(x => x.id === f.proj)[0];
   const by = (id) => p.milestones.filter(m => m.id === id)[0];
   const one = (id) => ({ finish: by(id).finish,
@@ -286,14 +286,14 @@ with sync_playwright() as pw:
     print("\n── a refusal nothing can put back")
     errs.clear()
     POSTS.clear()
-    # §330.18: SPLICED, NEVER REASSIGNED. A function's holder is a fresh
+    # §334.18: SPLICED, NEVER REASSIGNED. A function's holder is a fresh
     # wrapper on every call and its `projects` is the function's own array —
     # so assigning a filtered copy writes to the wrapper and is thrown away,
     # the removal never happens, and the save this section exists to see
     # refused is ACCEPTED. `fnOwnHolder`'s own comment names the trap; the
     # product's Remove splices, so this does too.
     pg.evaluate("""(f)=>{
-      const cap = holderById(f.cap);   /* §330.18 */
+      const cap = holderById(f.cap);   /* §334.18 */
       const i = cap.projects.findIndex(x => x.id === f.proj);
       if (i > -1) cap.projects.splice(i, 1);
       SYNC.afterPaint();}""", FIX)

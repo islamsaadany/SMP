@@ -1,6 +1,6 @@
 """EDITING A ROW, WHEREVER THE TABLE KEEPS THE WAY IN (spec 012 §2.1, §85).
 
-THREE OF THE SIX MOVED AND THIS DID NOT (§324.11). Business units, Companies
+THREE OF THE SIX MOVED AND THIS DID NOT (§328.11). Business units, Companies
 and Functions edit from a kebab that opens `ROWDLG` — the register's own
 dialog (§261) — so they carry no pen on the row, no `tk-open` row and no
 in-row Save. This file asked all six for a pen, found nought on the first,
@@ -16,7 +16,7 @@ behaviour is NOT re-asserted here: people-dialog.py drives it end to end
 """
 from playwright.sync_api import sync_playwright
 import os as _os
-# THE BUILD, BY ITS OWN PATH (§330.13). This read
+# THE BUILD, BY ITS OWN PATH (§334.13). This read
 # `file:///home/user/SMP/…` — an ABSOLUTE path — so it could not be pointed
 # at any other build: a falsification made from the sources (§276) and a
 # baseline run against `origin/main` (§303) both went on measuring the
@@ -29,7 +29,7 @@ URL = "file://" + _os.path.abspath(_os.environ.get("SMP_BUILT") or
 # the row (§93.14). The register settled that shape and Functions took it: a
 # closed row carries no `data-rowedit` at all, so the menu is opened first.
 #
-# AND THE ONE WORD THIS FILE PROMISED WAS NEVER CHANGED (§324.11). It said so
+# AND THE ONE WORD THIS FILE PROMISED WAS NEVER CHANGED (§328.11). It said so
 # itself — *"written as a property of the table rather than a special case
 # inside the loop, so the next table to move its actions into a menu is one
 # word here"* — and §261 moved Business units AND Companies into kebabs of
@@ -52,7 +52,7 @@ def ck(w, ok, x=""):
 def open_row(pg, target):
     """Press the row's pen.
 
-    ITS KEBAB BRANCH IS DELETED (§324.11, §24). It existed because Functions
+    ITS KEBAB BRANCH IS DELETED (§328.11, §24). It existed because Functions
     kept its pen inside the menu, and §261 moved the three menu tables on to a
     DIALOG instead — they never reach this helper now, so the branch was a
     shape nothing in the product has, sitting where the next reader would take
@@ -78,7 +78,7 @@ with sync_playwright() as p:
            pg.evaluate("""(k)=>document.querySelectorAll('[data-tktable="'+k+'"] tbody tr:not(.newrow) input').length""", key)==0)
 
         if menu:
-            # ── §261 MOVED THESE THREE INTO A DIALOG (§324.11) ───────────
+            # ── §261 MOVED THESE THREE INTO A DIALOG (§328.11) ───────────
             # Business units, Companies and Functions edit from a kebab that
             # opens `ROWDLG` — the register's own dialog — so there is no pen
             # on the row, no `tk-open` row and no in-row Save. Everything

@@ -1,8 +1,8 @@
-/* ── §322 · A FUNCTION'S PROJECTS ARE ITS OWN, AT THE STORAGE LAYER ────────
+/* ── §326 · A FUNCTION'S PROJECTS ARE ITS OWN, AT THE STORAGE LAYER ────────
    The half the browser cannot see, and the half where being wrong is
    expensive: `projects.cap_id` is NOT NULL and CASCADEs, so a dissolve that
    does not land lets Postgres delete every project under the box while the
-   save reports success (§321's own proof, one model on).
+   save reports success (§325's own proof, one model on).
 
    THREE CLAIMS, each asserted at BOTH ENDS (§94.2):
 
@@ -46,7 +46,7 @@ const eq = (a, b, m) => ok(J(a) === J(b),
    here (§100.3, §255): a hand-built state models what I think the shape is,
    and the one thing this file exists to prove is what the shape really does. */
 const SEED = require("../db/seed-state.json");
-/* THE FIXTURE MAKES ITS OWN BOXES (§255, §329). The seed carried eight until
+/* THE FIXTURE MAKES ITS OWN BOXES (§255, §333). The seed carried eight until
    the worked example was finished, and this file's whole subject is what the
    one-off does to one — so with none it did not go red, it THREW on the first
    `undefined` and left every later section unmade (§215). Each function's own

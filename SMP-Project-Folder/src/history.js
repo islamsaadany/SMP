@@ -349,9 +349,9 @@ var TRAIL = (function(){
         if (f && f.swot) return { __swot: f.swot };
         if (f && f.obj) return f.obj;
       }
-      /* §330.18: THE SUBJECT'S OWN HOLDERS, asked of the product rather than
+      /* §334.18: THE SUBJECT'S OWN HOLDERS, asked of the product rather than
          walked here — the SEVENTH copy of "walk the capabilities", and the
-         only one left outside the shared readers. Since §322 a supporting
+         only one left outside the shared readers. Since §326 a supporting
          function's projects are the FUNCTION's, so neither route above found
          them (`unitLikeWritable` answers the PILLARS view and is null on this
          format) and neither did this walk: measured, `cap7-P1-M1` on
@@ -360,8 +360,8 @@ var TRAIL = (function(){
          back, and it fails the way every one of these fails — quietly, in the
          direction that looks like the button doing nothing (§96).
 
-         WIDENED, NEVER NARROWED (§330.18's own rule one file over): a log row
-         written before §330 names the FUNCTION for a capability's project, so
+         WIDENED, NEVER NARROWED (§334.18's own rule one file over): a log row
+         written before §334 names the FUNCTION for a capability's project, so
          that function's capabilities are still walked beside its own work or
          a restore that used to work stops. */
       var holders = (typeof capsShown === "function" ? capsShown(t) : []).slice();

@@ -18,7 +18,7 @@ fields migration 024 renamed (§51.10 found them stale in the snapshot).
 """
 import os
 
-# §330: THE HOLDER OF A FUNCTION'S OWN WORK. `capsOfFunction(fk)[0]` was
+# §334: THE HOLDER OF A FUNCTION'S OWN WORK. `capsOfFunction(fk)[0]` was
 # that while a projects function's projects lived in a capability drawn on
 # its pages; since stage 1 they are the FUNCTION's, and since stage 2 a
 # capability is a page of its own — so this read a holder the page under
@@ -75,7 +75,7 @@ with sync_playwright() as p:
 
     # ── the mark, through the real control (§96: it must WRITE) ─────────
     print("── the mark, set from the pen")
-    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
+    # §334.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
     # which with three sides is a DIV of buttons rather than a button — so the
     # press did nothing, the loop gave up, and the destination was never drawn.
     sw = pg.query_selector('#units [data-fold="fns"]')

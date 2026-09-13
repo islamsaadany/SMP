@@ -26,7 +26,7 @@ const A = require("/home/user/SMP/lib/authorize.js");
 const SEED = JSON.parse(fs.readFileSync("/home/user/SMP/db/seed-state.json", "utf8"));
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
-/* THE FIXTURE MAKES ITS OWN BOXES (§255, §329). Hala's report is about a
+/* THE FIXTURE MAKES ITS OWN BOXES (§255, §333). Hala's report is about a
    CAPABILITY travelling as one part, and the seed carried eight until the
    worked example was finished — so with none this threw rather than reporting
    (§215). The subject stands: a capability is an array inside a part, which is

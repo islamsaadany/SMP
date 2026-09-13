@@ -43,7 +43,7 @@ FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 CHROME = "/opt/pw-browsers/chromium"
 
 ok = bad = 0
-# §330: EVERY SUBJECT THAT REPORTS, and a CAPABILITY is one since stage 2 —
+# §334: EVERY SUBJECT THAT REPORTS, and a CAPABILITY is one since stage 2 —
 # its own row on the cycle board (§244) and its own place in the flow. The
 # three groups are composed here in the board's own order rather than asked
 # of `masterSubjects()`, which is the thing under test (§94.8).
@@ -125,7 +125,7 @@ def go(pg, dest, sub):
     screen means the other side is open — press the switch and look again,
     rather than assigning `current` and testing a page nobody navigated to."""
     if not pg.query_selector('[data-u="%s"]' % dest):
-        # §330: THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+        # §334: THE SIDE, NEVER THE CONTROL. With a capability in the tenant
         # the switch has three sides and pressing it no longer means "go to
         # the other one" — so the side is named. A destination that is still
         # not there after this is genuinely out of reach, which is what the
@@ -173,7 +173,7 @@ with sync_playwright() as p:
     # check that proves the page can be assigned to, not that it can be
     # reached (§70).
     onfn = ev(pg, """() => {
-      /* §330: the Functions side by name — absent exactly when it is already
+      /* §334: the Functions side by name — absent exactly when it is already
          lit, which is why this reports true either way. */
       const b = document.querySelector('#units [data-fold="fns"]');
       if (b) b.click();

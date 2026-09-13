@@ -474,7 +474,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "capko") {
-    /* §330.18: A HOLDER, which since §322 is a capability OR a supporting
+    /* §334.18: A HOLDER, which since §326 is a capability OR a supporting
        function's own work — `capById` answered null for the second and the
        form quietly wrote nothing. */
     var c = holderByIdWritable(ctx.capId); if (!c) return false;
@@ -505,7 +505,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "project") {
-    var cc = holderByIdWritable(ctx.capId); if (!cc) return false;   /* §330.18 */
+    var cc = holderByIdWritable(ctx.capId); if (!cc) return false;   /* §334.18 */
     var pr = addProject(cc); if (!pr) return false;
     pr.name = v("name"); pr.owner = v("owner"); pr.start = v("start"); pr.end = v("end"); pr.brief = v("brief");
     if (typeof RAIL !== "undefined" && typeof railKeyFor === "function") RAIL[railKeyFor(cc)] = pr.id;

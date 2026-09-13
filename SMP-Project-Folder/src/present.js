@@ -129,7 +129,7 @@ function anch(key, label, where){
 function deckHtmlFor(target){
   var t = String(target || "");
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
-     button, the slide editor and the anchors alike. §330: and the FORM
+     button, the slide editor and the anchors alike. §334: and the FORM
      decides, never the prefix — `plansInPillars` answers for a unit, a
      function and a capability, which is the fault §253.3 fixed on one surface
      of three arriving as a third kind of subject. */
@@ -721,10 +721,10 @@ function deckPillarHead(u, p, pi, which){
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
 function deckSlidesFn(subject){
-  /* §322: the function's OWN work — the same list its four pages draw, so the
+  /* §326: the function's OWN work — the same list its four pages draw, so the
      projector cannot show a deck the screen does not (§53.5).
 
-     §330: OR A CAPABILITY'S, because a capability presents its own review and
+     §334: OR A CAPABILITY'S, because a capability presents its own review and
      it is planned exactly the same way. The builder takes a TARGET and reads
      the holder from it; a second deck builder for the second kind is what
      §296 and §305 each measured the cost of and refused. */
@@ -742,7 +742,7 @@ function deckSlidesFn(subject){
         ? '<img class="dcovermark" src="' + esc(groupLogo()) + '" alt="' + esc(GROUP.org) + '">'
         : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
-    /* §322: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
+    /* §326: THE COVER NAMES WHAT THE DECK HOLDS. A function whose projects
        are its own is not presenting a capability review, and saying so on the
        first slide in front of a room is Islam's complaint at its loudest. The
        capability wording survives for a function that really carries one. */
@@ -761,7 +761,7 @@ function deckSlidesFn(subject){
     /* §236.3's anchors, mirrored on the function's deck (§53.5): keyed on the
        capability's and the project's ids, the same stability class as the
        "cap"+id and "dx"+id anchors beside them. */
-    /* §322: NO SECOND COVER FOR THE FUNCTION'S OWN WORK. The deck has just
+    /* §326: NO SECOND COVER FOR THE FUNCTION'S OWN WORK. The deck has just
        opened on the function's own name; a slide headed "Capability · Finance"
        over the word "Finance" names a thing that does not exist and says the
        name twice (§87's twins, on a projector). A capability it CARRIES still
@@ -820,7 +820,7 @@ function deckSlidesFn(subject){
 
     c.projects.forEach(function(p){
       var mst = projMilestones(p);
-      /* §330: A PROJECT IS A SECTION OF THIS DECK. §322 stopped drawing the
+      /* §334: A PROJECT IS A SECTION OF THIS DECK. §326 stopped drawing the
          holder's cover for a function's OWN work — rightly, a slide headed
          "Capability · Finance" over the word Finance says the name twice
          (§87) — and the `sec()` stamp rode on that slide, so a projects
@@ -1135,7 +1135,7 @@ function openDeck(u, from){
   openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), [u.ukey], from);
 }
 function openDeckFn(subject, from){
-  /* §330: a TARGET, so a capability opens its own review with its own name on
+  /* §334: a TARGET, so a capability opens its own review with its own name on
      the bar. `holderTarget` takes the bare function key every existing caller
      hands it. */
   var t = holderTarget(subject);
@@ -1156,7 +1156,7 @@ function openDeckFn(subject, from){
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
   var t = String(target);
-  /* §330: a capability joins the same branch — the FORM decides, so one
+  /* §334: a capability joins the same branch — the FORM decides, so one
      planned in pillars takes the unit deck exactly as a pillars function
      does, and one planned in projects takes the holder deck. */
   if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
@@ -1277,7 +1277,7 @@ function flowToPdf(){
    the SAME pair of lists the cycle board is built from (§245), so the picker
    and the page the office watches can never disagree about who reports. */
 function masterSubjects(){
-  /* §330: the capabilities between them, in the board's own order — the flow
+  /* §334: the capabilities between them, in the board's own order — the flow
      and the board must never disagree about who presents (§245). */
   return boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
 }

@@ -99,8 +99,8 @@ with sync_playwright() as p:
     # membership (the comment above records the first). It asks the PRODUCT
     # which subjects are on the board now, rather than rebuilding the answer
     # from a list of parts that keeps changing.
-    # §330.18: THE THIRD TIME THIS LINE HAS HELD A STALE COPY OF THE BOARD'S
-    # MEMBERSHIP (the two comments above record the first two), and §330 gave
+    # §334.18: THE THIRD TIME THIS LINE HAS HELD A STALE COPY OF THE BOARD'S
+    # MEMBERSHIP (the two comments above record the first two), and §334 gave
     # the board a CAPABILITY half — Islam's *"yes for all"*: a capability has
     # its own score and its own submission, so it is a subject. It asks the
     # board for the WHOLE list now rather than adding up the halves it happens

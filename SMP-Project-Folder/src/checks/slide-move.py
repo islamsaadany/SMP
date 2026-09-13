@@ -20,7 +20,7 @@
 import os, sys
 from playwright.sync_api import sync_playwright
 
-# THE BUILD, NEVER THE SHIPPED COPY (§330.10). This file named
+# THE BUILD, NEVER THE SHIPPED COPY (§334.10). This file named
 # `strategy-management-platform-v3.22.html` where all 165 of its neighbours
 # read `src/strategy-management-platform.html`, so on any branch whose build
 # has moved and whose shipped copy has not — which is every branch until the

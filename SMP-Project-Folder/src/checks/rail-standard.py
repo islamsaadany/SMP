@@ -40,7 +40,7 @@ def ck(name, ok, extra=""):
         fails.append(name)
 
 
-# PRESS THE SIDE YOU WANT, NEVER "the other one" (§330.17). The
+# PRESS THE SIDE YOU WANT, NEVER "the other one" (§334.17). The
 # navigation switch is two sides on a tenant with no capability and THREE
 # once there is one, and `.nsw:not(.on)` then matches two buttons — so
 # this pressed whichever unlit side came first, which is Capabilities, and
@@ -92,7 +92,7 @@ with sync_playwright() as p:
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(400)
 
     # ── 1 · two HOLDERS, one project and several ────────────────────────
-    # §330: they are two PAGES now, not two panes on one page — a capability is
+    # §334: they are two PAGES now, not two panes on one page — a capability is
     # a destination of its own and a function's pages draw only the function's
     # own work. §130.2's rule is untouched, and it is the rule this file is
     # about: ONE item still gets the rail. What moved is where the one-item
@@ -169,7 +169,7 @@ with sync_playwright() as p:
     print("\n4 · the two sides agree")
     go(pg, "nigeria", "plan")
     unit = panes(pg)[0]
-    # §330: the one-item holder is the CAPABILITY's own page now, not a second
+    # §334: the one-item holder is the CAPABILITY's own page now, not a second
     # pane on the function's (§218 — the comparison is the point and it follows
     # the subject).
     go(pg, "cap:" + CAP, "proj")

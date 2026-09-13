@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* §325 — THE SERVED COPIES ARE IN STEP WITH THE FROZEN SOURCES.
+/* §329 — THE SERVED COPIES ARE IN STEP WITH THE FROZEN SOURCES.
  *
  * `smp-app/public/` and `smp-app/shell/` are not written by hand. Four
  * generators read the frozen product and produce what the Next app SERVES:
@@ -11,7 +11,7 @@
  * WHICH MEANS A CHANGE TO A FROZEN SOURCE THAT STOPS THERE LEAVES THE NEW
  * STACK SERVING THE OLD BYTES — §91's failure by a different road, and silent,
  * because until this file nothing on either stack compared the two. §319
- * recorded the trap in its own words; §324 fell into it one section later,
+ * recorded the trap in its own words; §328 fell into it one section later,
  * deleting a dead CSS rule from `arrange.css` and leaving `platform.css`
  * carrying it. Behaviour-neutral that time. The next one need not be.
  *
@@ -29,13 +29,13 @@
  * check that leaves the thing it measures rewritten has fixed the tree and
  * told nobody.
  *
- * ══ AND THE CARRIED RULE MODULES, WHICH HAVE NO GENERATOR (§326) ═══════
+ * ══ AND THE CARRIED RULE MODULES, WHICH HAVE NO GENERATOR (§330) ═══════
  * `smp-app/lib/*.cjs` are the frozen product's own pure modules carried across
  * for Node, and the carry is MECHANICAL: byte for byte, with one declared
  * transform — a `require("./x.js")` between two carried siblings becomes
  * `require("./x.cjs")`. Nothing generates them, so nothing compared them, and
- * that is the same trap one directory over from the four above: §322 and
- * §330 changed `lib/rules.js`, `lib/authorize.js` and `lib/graph-diff.js`
+ * that is the same trap one directory over from the four above: §326 and
+ * §334 changed `lib/rules.js`, `lib/authorize.js` and `lib/graph-diff.js`
  * and the carried copies stayed where they were — so the new stack's landing
  * page threw `SMPRules.dissolvePlan is not a function` for every person in
  * every client, and its change list sent a supporting function's whole plan on
@@ -124,7 +124,7 @@ try {
 /* ══ THE CARRIED MODULES ════════════════════════════════════════════════
    Deliberately AFTER the restore above: this section reads files and writes
    none, so it can never leave the tree rewritten. */
-console.log("\n── the carried rule modules (§326)");
+console.log("\n── the carried rule modules (§330)");
 
 /* Rewritten for this stack rather than carried — §316.7. Named here so the
    cost is visible on every run, never a silent skip. */

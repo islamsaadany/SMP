@@ -4613,7 +4613,7 @@ function focusSwitch(){
    learn. `FSET.side` is screen state and is corrected rather than trusted: a
    side with nothing reachable behind it must not leave the page blank. */
 function focusNav(){
-  /* §330: THREE SIDES, AND THE NAVIGATION'S OWN WORDS AGAIN — a capability is
+  /* §334: THREE SIDES, AND THE NAVIGATION'S OWN WORDS AGAIN — a capability is
      a subject that carries key objectives, so it is markable, and a mark
      stored where nobody can see it is §61's trap (§130.5's own reason for
      reaching supporting functions at all). Built from whichever sides have
@@ -5216,7 +5216,7 @@ function renderUnitNaming(u){
    arrive the way a unit's plan does — same page, same three steps, same
    review — with their own sheets, because the thing being planned is a
    project with deliverables, outcomes and milestones. */
-/* §322: A SUPPORTING FUNCTION'S OWN PLAN HAS THE CAPABILITY SHAPE — key
+/* §326: A SUPPORTING FUNCTION'S OWN PLAN HAS THE CAPABILITY SHAPE — key
    objectives and projects — so it goes down the same half of the import, and
    the subject that names it is `fn:<key>`. "isCap" is now "is a holder of
    projects", which is what every caller actually asks; the name is left alone
@@ -5293,15 +5293,15 @@ function impPlanSubjects(){
     if (UNITS[k].active === false) return;
     out.push({ v:k, label:UNITS[k].name, grp:"Business units" });
   });
-  /* §330.15: EVERY ACTIVE FUNCTION, IN ITS OWN FORMAT. This listed the
+  /* §334.15: EVERY ACTIVE FUNCTION, IN ITS OWN FORMAT. This listed the
      PILLARS ones alone, which was the whole truth while a projects function's
      work lived in capabilities and the capabilities are listed below — and
-     stopped being it the day §322 gave such a function projects of its own:
+     stopped being it the day §326 gave such a function projects of its own:
      measured on this branch, seven functions owned eighteen projects between
      them and not one of them could be downloaded, so their plans could not
      leave and therefore could not come back (§22 — an upload AUTHORS; §61 —
      built and unreachable). `impHolderFor()` has resolved `fn:<key>` to the
-     function's own holder since §322 and says so in its own comment, so the
+     function's own holder since §326 and says so in its own comment, so the
      builder was there the whole time and only the list was not (§96). */
   FUNCTION_KEYS.forEach(function(k){
     var f = FUNCTIONS[k];
@@ -6203,7 +6203,7 @@ function renderCycle(){
      under it, and a sentence that is true of some of the rows beneath it is
      worse than none (§35). What it names is the count -- and the mapped
      columns keep the per-cell hovers that already explained them (§124). */
-  /* §330: ONE ROW BUILDER, FOR A FUNCTION OR A CAPABILITY. A capability
+  /* §334: ONE ROW BUILDER, FOR A FUNCTION OR A CAPABILITY. A capability
      reports on its own — Islam's *"yes for all"* — and it is read with exactly
      the counters a projects function is read with, so the row is widened to
      take a TARGET rather than copied. Two builders over one question is how a
@@ -6284,7 +6284,7 @@ function renderCycle(){
     fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
         '<em>' + plural(fnKeys.length, "function") + ' reporting</em></th></tr>' + fnRows;
   }
-  /* §330: A GROUP OF ITS OWN, BESIDE THE UNITS AND THE FUNCTIONS — Islam's
+  /* §334: A GROUP OF ITS OWN, BESIDE THE UNITS AND THE FUNCTIONS — Islam's
      own words for what he wanted to see at a glance. Above the functions
      because a capability is strategic and a function's own plan is the work
      that supports it, which is the order the navigation switch reads in too
@@ -6646,7 +6646,7 @@ function planFormatCell(fk, f, editable){
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
-/* ── AND A CAPABILITY CARRIES ITS OWN FORM (§330, spec 046 §3) ─────────────
+/* ── AND A CAPABILITY CARRIES ITS OWN FORM (§334, spec 048 §3) ─────────────
    Islam: *"yes the capability can be built in pillars."* So the form belongs
    to the THING rather than to the subject: a function that plans in projects
    may hold a capability planned in pillars, and neither page does two jobs.

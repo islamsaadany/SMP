@@ -22,7 +22,7 @@ AND ABOVE 1200 NOTHING MOVES (§94.2): the two-column rail is a vertical list an
 must stay one, or a fix for a squeezed window would have rewritten the page
 everybody actually uses.
 
-THE BANNER OUTLIVED ITS SUBJECT (§324.10). §162 took one sentence out of the
+THE BANNER OUTLIVED ITS SUBJECT (§328.10). §162 took one sentence out of the
 demo banner and this asserted BOTH ENDS of that — the sentence gone, and the
 one saying nothing is saved still there — which was right, and then §313.8
 deleted DEMO MODE ENTIRELY. So there is no banner: the removal assertion
@@ -74,7 +74,7 @@ def open_unit(pg):
 
 
 def open_fn(pg):
-    # §330.17: press the SIDE, never "the other one" (three sides once a
+    # §334.17: press the SIDE, never "the other one" (three sides once a
     # capability exists, and `.nsw:not(.on)` then matches two).
     sw = pg.query_selector('#units [data-fold="fns"]')
     if sw and sw.is_visible():

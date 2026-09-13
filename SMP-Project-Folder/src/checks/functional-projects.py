@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""§322 · A FUNCTION'S PROJECTS ARE ITS OWN (spec 046, stage 1)
+"""§326 · A FUNCTION'S PROJECTS ARE ITS OWN (spec 048, stage 1)
 
 Islam: *"capability is something Strategic ... the problem with having the
 capability hidden in the functional plans is confusing for the whole
 structure"*, and of his own tenant, *"they caapbilities in raya trade are not
 capabilities they are just projecst under functions."*
 
-BOTH ENDS, EVERY TIME (§94.2) — and §330 MOVED WHICH TWO ENDS THEY ARE.
+BOTH ENDS, EVERY TIME (§94.2) — and §334 MOVED WHICH TWO ENDS THEY ARE.
 Stage 1 measured the function with a box and again after the dissolve, and a
 box then drew a navy band over the function's own four pages. Stage 2 made a
 capability a DESTINATION of its own, so those pages draw the function's work
@@ -55,7 +55,7 @@ def ev(pg, js, arg=None):
         return {"__err": str(e)[:160]}
 
 def go_fn(pg, key):
-    """§330: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+    """§334: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
        the switch has three sides and is a group of buttons rather than one
        button that toggles — so cycling it does nothing at all and this check
        hung for thirty seconds on a build behaving exactly as decided (§214.3).
@@ -93,7 +93,7 @@ def main():
         pg.goto("file://" + str(BUILT)); pg.wait_for_timeout(900)
 
         # ── 1 · the state this file measures, and that it is worth measuring ──
-        # THE CHECK MAKES ITS OWN BOXES (§255, §329). Until the worked example
+        # THE CHECK MAKES ITS OWN BOXES (§255, §333). Until the worked example
         # was finished it shipped eight, and this file leaned on them — so it
         # went seven red the day the demo stopped carrying one, on a build
         # behaving exactly as decided (§214.3, for the seventh time). What it
@@ -122,7 +122,7 @@ def main():
           (FUNCTIONS.finance.projects||[]).forEach(p=>{(p.milestones||[]).forEach(m=>{
             o[m.id]=(m.status||'')+'|'+(m.pct==null?'':m.pct);});});
           return o;}""")
-        # §330: A PARTIAL WRAP, AND FROM THE END. Stage 1 took every project
+        # §334: A PARTIAL WRAP, AND FROM THE END. Stage 1 took every project
         # into the box, which left the function with nothing — so "the pages are
         # untouched" would have been asserted over an empty page and passed on a
         # build drawing nothing at all (§113.8). Taking ONE leaves the function
@@ -163,7 +163,7 @@ def main():
            "Finance carries ONE box and still owns the rest of its projects — "
            "a function and a capability side by side, which is the shape", st)
         ok(st.get("pillars") is True, "and Merchandising plans in pillars, as the control", st)
-        # AND THE DEMO ITSELF HOLDS ONE (§329, §330). Stage 1 dissolved all
+        # AND THE DEMO ITSELF HOLDS ONE (§333, §334). Stage 1 dissolved all
         # eight; stage 2 kept exactly one as the real capability, so this is the
         # number and not "none" — asserted here rather than left as an absence,
         # because a build that started shipping boxes again would satisfy every
@@ -173,7 +173,7 @@ def main():
            "functions owned their projects outright", start)
 
         # ── 2 · WITH a box beside it, the FUNCTION's pages are its own ────────
-        # §330 INVERTS STAGE 1'S ASSERTION RATHER THAN DROPPING IT (§218). A box
+        # §334 INVERTS STAGE 1'S ASSERTION RATHER THAN DROPPING IT (§218). A box
         # under Finance used to paint a navy band across these four pages and
         # put its projects on them; it is a destination of its own now, so what
         # must be true here is that the function's pages carry no band at all
@@ -224,7 +224,7 @@ def main():
                "and its rail lists exactly the function's own projects",
                [rail, ids_now])
 
-        # AND THE BOX HOLDS WHAT LEFT, on its own destination (§330). Without
+        # AND THE BOX HOLDS WHAT LEFT, on its own destination (§334). Without
         # this the projects could have gone nowhere and every assertion above
         # would still pass.
         box = ev(pg, "(id)=>{const c = capById(id); return c ? "
@@ -258,7 +258,7 @@ def main():
 
         # ── 4 · the dissolve, through the product's own control ───────────────
         print("\n4 · the dissolve — the product's own, never a hand-moved graph")
-        # ONLY WHAT THIS FILE MADE (§330). `dissolveAllCapabilities()` is the
+        # ONLY WHAT THIS FILE MADE (§334). `dissolveAllCapabilities()` is the
         # one-off that moves a whole tenant, and running it here would take the
         # demo's own capability with it — so section 9's round trip would report
         # a box the worked example ships as a project the function gained.
@@ -352,10 +352,10 @@ def main():
         ev(pg, "()=>{FUNCTIONS.finance.keyObjectives = (FUNCTIONS.finance.keyObjectives||[])"
                ".filter(m=>m.id!=='probe-KO'); FUNCTIONS.finance.projects.pop(); paint();}")
 
-        # ── 6b · and deleting the function would take them (§62, §330) ────────
+        # ── 6b · and deleting the function would take them (§62, §334) ────────
         # §62 refuses a delete while anything still points at the function, and
         # a capability held here has always been one of those things. Since
-        # §322 the projects are stored ON the function, so they are not pointed
+        # §326 the projects are stored ON the function, so they are not pointed
         # at but CARRIED — and a delete files no archive. Measured before the
         # blocker existed: `qa.py` reported IT, Care and the SMO as deletable
         # with three projects apiece.
@@ -410,7 +410,7 @@ def main():
         ok(isinstance(wb, list) and "Projects" in wb,
            "and a projects workbook is built for it", wb)
 
-        # ── 9 · the round trip closes (§329) ─────────────────────────────────
+        # ── 9 · the round trip closes (§333) ─────────────────────────────────
         # Section 1 wrapped the functions' own projects in boxes and section 4
         # dissolved them again, so the end state must be the state the worked
         # example ships. Asserted as the ids, the definition and the objective

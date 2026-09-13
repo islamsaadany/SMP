@@ -1,4 +1,4 @@
-"""THEIRS IS THE CAPABILITY THEY OPEN ON (§310, rewritten at §330).
+"""THEIRS IS THE CAPABILITY THEY OPEN ON (§310, rewritten at §334).
 
 qa-run: own-server — this check BUILDS the state it measures and serves it
 from a stub of its own: people the register does not hold, and a function
@@ -16,7 +16,7 @@ somebody ELSE'S capability, where he correctly has 0 controls (§147.7), with
 his own starting 705px down and his twelve boxes below the fold on a 900px
 window.
 
-§330 MOVED THE ANSWER RATHER THAN RETIRING THE QUESTION, and this file moves
+§334 MOVED THE ANSWER RATHER THAN RETIRING THE QUESTION, and this file moves
 with it (§274: switch the subject rather than wait for it, and say so out
 loud). §310 answered it by SORTING the capabilities a function's pages drew,
 so his came first; stage 2 made a capability a DESTINATION of its own, so a
@@ -24,7 +24,7 @@ function's pages draw the function's own work and there is no list left to
 sort — `capsShown()`'s sort is deleted as dead code (§24) and the answer now
 lives in `entryDest`/`capForBounded`, which OPENS the capability holding his
 project rather than a function page with nothing of his on it. Every claim
-below is §310's, asserted where §330 keeps it.
+below is §310's, asserted where §334 keeps it.
 
 WHAT THIS ASSERTS, both ends each time (§94.2):
 
@@ -36,7 +36,7 @@ WHAT THIS ASSERTS, both ends each time (§94.2):
   * NOTHING IS HIDDEN: every capability he may reach is still a destination in
     the navigation, the other one included;
   * THE CODES DO NOT MOVE. A project's code is its POSITION in the thing that
-    HOLDS it (§310, §330), so the code he reads is asserted to equal the code
+    HOLDS it (§310, §334), so the code he reads is asserted to equal the code
     the OFFICE reads;
   * the OFFICE is untouched: it lands where a person with no bounded role
     lands, or a build that opened everybody on a capability would pass every
@@ -49,7 +49,7 @@ WHAT THIS ASSERTS, both ends each time (§94.2):
     are one press from.
 
 THE STATE IS MADE, not found (§255): the worked example holds ONE capability
-since §329, and no demo person is named as a project's Owner while attached to
+since §333, and no demo person is named as a project's Owner while attached to
 nothing else. The fixture deliberately gives the function a capability that is
 NOT his beside the one that is — if his were the only one every assertion here
 would pass on a build that opens the first box it finds (§113.8).
@@ -68,7 +68,7 @@ SW = (ROOT / "sw.js").read_bytes()
 BASE = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 
-# Marketing is the function the worked example leaves a capability on (§330),
+# Marketing is the function the worked example leaves a capability on (§334),
 # so the fixture adds ONE beside it rather than inventing both — the shape
 # under test is a box that is his next to a box that is not.
 FN, FDEST = "marketing", "fn:marketing"
@@ -181,7 +181,7 @@ DREW = """()=>({
 
 
 def side(pg, name):
-    """§330: PRESS THE SIDE, NEVER THE CONTROL. The switch has three sides once
+    """§334: PRESS THE SIDE, NEVER THE CONTROL. The switch has three sides once
     a capability exists, so cycling it no longer toggles and a check that does
     hangs for thirty seconds on a build behaving exactly as decided (§214.3).
     `data-fold` names the side in BOTH shapes and is absent exactly when that
@@ -332,7 +332,7 @@ with sync_playwright() as pw:
           return live; }""", want_b["code"])
         ck("and its controls are his to use", live > 0, live)
 
-    print("\n§5 the codes do not move (§48, §330: a code is a POSITION)")
+    print("\n§5 the codes do not move (§48, §334: a code is a POSITION)")
     for key in ("projects", "report", "perf"):
         if key not in his or key not in office:
             ck("%s: both sides were read" % key, False); continue

@@ -604,7 +604,7 @@ sits exactly at its own sticky offset (`bandTop 191 == top 191`) and
 `pinWatch()` cannot tell *satisfied its offset* from *pinned*, so the corner
 fill paints at rest and the card's rounded corners read square, which is
 §130.6's complaint live, **and three of that file's six passing assertions pass
-for the wrong reason with it** (FIXED at §323) (§94.5); and `table-scroll`'s **4px** squeeze of
+for the wrong reason with it** (FIXED at §327) (§94.5); and `table-scroll`'s **4px** squeeze of
 the viewer label at 1100px, measured on both stacks — `brand 301 · clientback 0
 · viewer 608` over `file://` against `brand 184 · clientback 122 · viewer 523`
 served — so it is the CLIENT-BACK control a served deployment draws for a
@@ -7851,7 +7851,7 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
 python3 checks/functional-projects.py # a function's projects are its own
-                                # (§322, spec 046 stage 1). Islam: "the problem
+                                # (§326, spec 048 stage 1). Islam: "the problem
                                 # with having the capability hidden in the
                                 # functional plans is confusing for the whole
                                 # structure." BOTH ENDS of every claim (§94.2):
@@ -7878,7 +7878,7 @@ python3 checks/functional-projects.py # a function's projects are its own
                                 # 3 / 4 / 2 / 6 red. SMP_BUILT points it at
                                 # another build
 python3 checks/capability-remove.py # removing a capability: two answers,
-                                # not one (§321). Islam: "when I try to remove
+                                # not one (§325). Islam: "when I try to remove
                                 # the capability it will remove the projects
                                 # with it" — it did, behind the BROWSER's own
                                 # dialog and with no archive, while a pillar
@@ -7906,7 +7906,7 @@ python3 checks/capability-remove.py # removing a capability: two answers,
                                 # 21 / 1 / 2 / 4 / 2. SMP_BUILT points it at
                                 # another build
 python3 checks/pillar-kind.py     # a pillar says which kind of thing it is
-                                # (§320): the mark DRAWN on the Plan rail and
+                                # (§324): the mark DRAWN on the Plan rail and
                                 # band, the Performance pane, the Reporting band
                                 # and both sides of the navigation switch — and
                                 # SETTABLE, read back off the stored plan rather
@@ -8261,14 +8261,14 @@ python3 checks/owner-picker.py  # an owner is picked from the register, not type
                                 # graph read back, both ends each time (§130.1)
 python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a function —
                                 # it MAKES the one-pillar unit, the demo has none (§130.2)
-# TWO CHECKS NEED PILLOW (§324.6): home-mark.py and chat-settings-scroll.py read
+# TWO CHECKS NEED PILLOW (§328.6): home-mark.py and chat-settings-scroll.py read
 # painted pixels through PIL and die with ModuleNotFoundError where it is absent,
 # which reads like a failure in a summary and is not one — `pip install pillow`.
 # band-corner.py argues the other way in its own docstring and unfilters the PNG
 # by hand; not reconciled, and said rather than left to be rediscovered.
 python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS because a
                                 # DOM probe calls the broken build clean (§130.3, §53.7)
-                                # — and since §323 the case the fill exists for: a
+                                # — and since §327 the case the fill exists for: a
                                 # window where the page does NOT scroll, reached by
                                 # RESIZING so the answer's own resize path is
                                 # exercised, asserting there is nothing to scroll,
@@ -8318,7 +8318,7 @@ python3 checks/history-page.py  # History (§262): the page in the rail for the 
                                 # group's fields and a capability's definition carry
                                 # before and after and go back
 node scripts/test-history-read.js # ...and the server half on a real Postgres: real saves
-                                # NEEDS A REHEARSAL DATABASE (§324.3), and so do
+                                # NEEDS A REHEARSAL DATABASE (§328.3), and so do
                                 # test-safety-peek, test-ask, test-chat-chase,
                                 # test-concurrent-saves, test-mail-send and
                                 # test-video-endpoint: since §313 a session is an
@@ -8700,7 +8700,7 @@ unexercised):
 `DATABASE_URL=… node scripts/test-video-endpoint.js` (§261.5 — the file that found
 the truthy `"none"`)
 
-A project changing hands survives a save (§321) — the half the browser check
+A project changing hands survives a save (§325) — the half the browser check
 cannot see, because `projects.cap_id` is NOT NULL and CASCADEs, so a move that
 did not land lets the database delete three projects while the save reports
 success. The move is READ OUT of `config-data.js` rather than copied (§283),
@@ -8708,7 +8708,7 @@ and both ends are asserted: a removal WITHOUT the move still takes its
 projects. Needs a throwaway Postgres; 12/12, proved able to fail twice (5 red
 with the move a no-op, 1 red with the append):
 `DATABASE_URL=… A function's projects need no column, and the one-off moves a tenant onto the
-model (§322) — the half the browser cannot see, and the half where being wrong
+model (§326) — the half the browser cannot see, and the half where being wrong
 is expensive: `projects.cap_id` is NOT NULL and CASCADEs. It asserts the round
 trip through `functions.extra` with NO schema change (§118, §213 — claimed
 wrongly once before in this file, §172), then every box dissolved with every
@@ -8747,7 +8747,7 @@ DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-l
                                 # and no sideways scroll at four widths — neither of
                                 # the two product sweeps ever reaches them (§313.11)
 node smp-app/checks/memory-boundary.mjs
-                                # …and since §327 it also asserts that the two
+                                # …and since §331 it also asserts that the two
                                 # copies of WHICH TABLES ARE THE PLATFORM'S OWN
                                 # agree: `db/schema.sql`'s RLS exclusion loop
                                 # and `lib/schema-check.ts`'s PLATFORM_TABLES.
@@ -8761,12 +8761,12 @@ node smp-app/checks/memory-boundary.mjs
                                 # DELETED and imported (§24)
 node smp-app/checks/generated-in-step.mjs
                                 # the served copies are in step with the frozen
-                                # sources (§325): `smp-app/public/` is generated
+                                # sources (§329): `smp-app/public/` is generated
                                 # by four scripts and TRACKED, so a frozen source
                                 # edited without re-running one leaves the Next
                                 # app — which is PRODUCTION — serving the old
                                 # bytes, silently. §319 wrote the trap down and
-                                # §324 fell into it one section later. It runs
+                                # §328 fell into it one section later. It runs
                                 # the REAL generators and compares (§53.5, never
                                 # a second assembly), derives its subject from
                                 # `git ls-files` rather than a typed list (which
@@ -8775,14 +8775,14 @@ node smp-app/checks/generated-in-step.mjs
                                 # (§94.2 — a check that silently fixes what it
                                 # measures has told nobody), keeps "stale" and
                                 # "you have edits in flight" as two different
-                                # answers (§123), and EXITS NON-ZERO (§324.8).
+                                # answers (§123), and EXITS NON-ZERO (§328.8).
                                 # Proved able to fail twice, one per generator
                                 # family (§276). Run it from `smp-app/`.
-                                # AND SINCE §331 IT COVERS THE CARRIED RULE
+                                # AND SINCE §335 IT COVERS THE CARRIED RULE
                                 # MODULES, which have no generator at all:
                                 # `smp-app/lib/*.cjs` are the frozen product's
                                 # own pure modules copied across for Node, and
-                                # §322/§330 changed `lib/rules.js`,
+                                # §326/§334 changed `lib/rules.js`,
                                 # `lib/authorize.js` and `lib/graph-diff.js`
                                 # while the copies stayed put — so the new
                                 # stack's landing threw `SMPRules.dissolvePlan
@@ -8960,7 +8960,7 @@ under the check &mdash; in step today, measured, and putting it under the rule
 means declaring those four as a transform.*
 
 *Earlier the same day: **&sect;330: a capability is a strategic
-entry of its own (spec 046, stage 2).** Islam, on the mockup drawn for it, four
+entry of its own (spec 048, stage 2).** Islam, on the mockup drawn for it, four
 answers and a go-ahead: *"yes for all"* (the office creates it, a function head
 HOLDS it; Setup &rsaquo; Capabilities is its home with the promote control on
 the function's Projects page as the second door; it gets its own row on the
@@ -9170,7 +9170,7 @@ carrying two, so the first box's definition becomes Marketing's and the second's
 has nowhere to go, which is &sect;96.2 working rather than a loss; the sentence
 it drops is *"Treat what we sell as a portfolio to be shaped, not a catalogue to
 be carried"*, and **Product Mindset is now the recommendation for the one REAL
-capability stage 2 creates** (spec 046 &sect;10.4, answered by the data rather
+capability stage 2 creates** (spec 048 &sect;10.4, answered by the data rather
 than by taste). Measured after: **0 capabilities, seven functions owning their
 projects, `FIN01/02/03` unchanged, `capId` following each row to `fn:<key>`,
 Merchandising untouched, the band gone.** **ELEVEN FIXTURES LEANED ON THE DEMO
@@ -9381,7 +9381,7 @@ ERRORS none; `no-jump`, `plan-edit-head`, `plan-edit-line`, `table-fit` and
 `setup-sticky` green.*
 
 *Earlier the same day: **&sect;322: a function's projects are its
-own (spec 046, stage 1).** Islam, correcting &sect;321.9's proposal outright:
+own (spec 048, stage 1).** Islam, correcting &sect;321.9's proposal outright:
 *"capability is something Strategic ... the problem with having the capability
 hidden in the functional plans is confusing for the whole structure aligned
 with me what you're understanding to fix this once and for old."* **HIDING THE
@@ -9491,7 +9491,7 @@ changed **nothing** in the frozen product, measured rather than assumed, so
 `platform.css` predated &sect;321's dialog rules and merged cleanly while
 stale. **RECORDED, NOT DONE**: the worked
 example still ships its eight containers, so which the demo should show is
-Islam's (spec 046 §10.4); making projects a capability is stage 2; a
+Islam's (spec 048 §10.4); making projects a capability is stage 2; a
 promoted project's code changing is his to accept (§10.5). **`band-corner` was
 6 red and was NOT this branch's** &mdash; reproduced identically on a build from
 `origin/main`'s own sources (&sect;303) &mdash; and is FIXED as &sect;323

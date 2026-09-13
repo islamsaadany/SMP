@@ -343,7 +343,7 @@ console.log("\n§215 · row-level changes");
 console.log("\n§216 · a capability travels on its own");
 (function () {
   const seed = JSON.parse(fs.readFileSync("/home/user/SMP/db/seed-state.json", "utf8"));
-  /* THE FIXTURE MAKES ITS OWN BOXES (§255, §329). The seed carried eight until
+  /* THE FIXTURE MAKES ITS OWN BOXES (§255, §333). The seed carried eight until
      the worked example was finished and this block reached into them by index,
      so it went twenty red the day the demo stopped shipping one — on a build
      behaving exactly as decided (§214.3). The SUBJECT has not changed: a
@@ -373,7 +373,7 @@ console.log("\n§216 · a capability travels on its own");
   const world = () => withBoxes({ group: clone(seed.group), units: clone(seed.units),
                          functions: clone(seed.functions), people: clone(seed.people) });
   /* AND WHAT EVERY TENANT ACTUALLY HOLDS, measured beside it (§94.2): a
-     function's own projects, addressed through the subtree §322 added to
+     function's own projects, addressed through the subtree §326 added to
      `treeFor("functions")`. If that addressing broke, nothing else in this
      file would notice — every other section reads a capability. */
   const bare = () => ({ group: clone(seed.group), units: clone(seed.units),
@@ -387,17 +387,17 @@ console.log("\n§216 · a capability travels on its own");
       const f = seed.functions[k];
       return f && String(f.format) !== "pillars" && (f.projects || []).length;
     })[0];
-    check("§329: the seed's own functions hold their projects outright", !!fk, fk);
+    check("§333: the seed's own functions hold their projects outright", !!fk, fk);
     if (!fk) return;
     const b = bare(), n = bare();
     n.functions[fk].projects[0].milestones[0].owner = "Hala";
     const ch = D.graphChanges(b, n);
-    check("§329: a milestone inside a FUNCTION'S own project travels as ONE row",
+    check("§333: a milestone inside a FUNCTION'S own project travels as ONE row",
           (ch.rows || []).length === 1, JSON.stringify(ch).slice(0, 140));
-    check("§329: ...and the whole function does NOT",
+    check("§333: ...and the whole function does NOT",
           !Object.keys(ch.set || {}).length, Object.keys(ch.set || {}).join(","));
     const r = D.applyChanges(bare(), ch);
-    check("§329: ...and it lands exactly", r.ok && D.sameValue(r.state, n),
+    check("§333: ...and it lands exactly", r.ok && D.sameValue(r.state, n),
           r.error || "the graph differs");
   })();
 

@@ -1001,7 +1001,7 @@
 
      It starts on Units, because a business unit is what the platform is mostly
      about and every viewer who holds any unit holds one here. */
-  /* §330: THREE SIDES, AND THE FUNCTIONS SIDE IS SPELT `fns` AT LAST. It was
+  /* §334: THREE SIDES, AND THE FUNCTIONS SIDE IS SPELT `fns` AT LAST. It was
      `caps` — a name left over from when a capability WAS the functions side —
      and this is the round that makes the word mean one thing, so a key reading
      `caps` beside a real capabilities side would be a trap for whoever reads
@@ -1030,7 +1030,7 @@
   /* The folds appear only for someone who reaches more than one unit AND more
      than one capability — today the SMO and the CEO. Everyone else sees the row
      exactly as it has always been, and never meets the concept. */
-  /* §330: EACH SIDE THAT HAS SOMETHING BEHIND IT, in the order a page is read
+  /* §334: EACH SIDE THAT HAS SOMETHING BEHIND IT, in the order a page is read
      — what the business runs, what it is building, what supports both. The
      list is built once and the switch, the destinations and the reset below
      all read it, so the control and the row it governs cannot disagree about
@@ -1062,7 +1062,7 @@
     return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
   }
 
-  /* ONE LABEL FUNCTION FOR THE THREE KINDS (§330, §51.7's own lesson): a
+  /* ONE LABEL FUNCTION FOR THE THREE KINDS (§334, §51.7's own lesson): a
      unit's and a function's navName are read through `navName()`, and a
      capability's through the same one, so a short name given to a capability
      in Setup shows in the navigation the day it is set rather than being
@@ -1121,7 +1121,7 @@
          the same kind of thing. The opened list follows BOTH of them. */
       /* A switch cannot rest on a side that has nothing behind it: a viewer who
          holds functions but no units would otherwise land on an empty Units
-         list with no way to see that Functions has anything. §330: asked of
+         list with no way to see that Functions has anything. §334: asked of
          the sides that exist rather than of two named lists, so a capability
          created this morning is a side the switch can rest on by tonight. */
       var sides = navSides();
@@ -1147,7 +1147,7 @@
     } else {
       /* NO SWITCH: every side's destinations, in the same order, on one line.
          A viewer who reaches one unit and two functions has always seen them
-         like this and still does (§330: nothing moves until a capability
+         like this and still does (§334: nothing moves until a capability
          exists). */
       navSides().forEach(function(x){
         x.keys.forEach(function(k){ out.push({ k:k, label:navLabelFor(k) }); });
@@ -1525,7 +1525,7 @@
      built of every destination this viewer can actually open; somebody
      attached to a unit their roles no longer reach falls back to the first
      door in the navigation, which is what happened before this existed. */
-  /* ── §310's RULE, WHERE IT LIVES NOW (§330) ───────────────────────────
+  /* ── §310's RULE, WHERE IT LIVES NOW (§334) ───────────────────────────
      Islam, of a project owner: *"the porject owner should open the capability
      by defaut on his project."* §310 answered it by ordering the list of
      capabilities a function's page drew; stage 2 makes a capability a place
@@ -1559,9 +1559,9 @@
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
-  /* §330: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
+  /* §334: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
      tabs, because it is planned the same two ways and the pages are the same
-     pages (spec 046 §4). Drawing a second tab list for it would be the drift
+     pages (spec 048 §4). Drawing a second tab list for it would be the drift
      §211 and §213 each cost a day to undo. */
   function isCapDest(k){
     return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
@@ -1631,7 +1631,7 @@
            is neither: it is two named sides. The label says what pressing it
            will DO, because the visible words already say where you are. */
         var lit = t.folds.filter(function(f){ return f.open; })[0] || t.folds[0];
-        /* ── TWO SIDES PRESS TO SWITCH; THREE PRESS THE ONE YOU WANT (§330) ──
+        /* ── TWO SIDES PRESS TO SWITCH; THREE PRESS THE ONE YOU WANT (§334) ──
            §41.8 is Islam's own instruction — *"I want it a switching button
            where the 2 words stay on 1 button but on clicking the selection
            switches"* — and it is a complete instruction for TWO sides and not
@@ -2216,7 +2216,7 @@
        every group and setup tab still does. */
     var arg = (current === "group" || current === "setup" || current === "manage") ? null
             : isFn(current) || isCapDest(current) ? current : UNITS[current];
-    /* Submission is per unit, per function, and — since §330 — per capability:
+    /* Submission is per unit, per function, and — since §334 — per capability:
        Islam's *"yes for all"* to the cycle-board question makes a capability a
        subject that reports, so it submits on its own rather than through the
        function that holds it. */
@@ -2350,7 +2350,7 @@
            UNITS[...] to hand it and inventing a unit-shaped object for something
            that carries no plan would be a lie about what it is (§68). */
         : isCo(current) ? def.render(current)
-        /* §330: a capability is passed its target for the same reason a
+        /* §334: a capability is passed its target for the same reason a
            function is — there is no UNITS[...] to hand it, and the four
            renderers behind SUBS.fn take a holder target. */
         : isFn(current) || isCapDest(current) ? def.render(current)
@@ -2628,7 +2628,7 @@
        IT IS RE-READ AFTER EVERY PAINT, like the three above it: the bands it
        was holding have just been replaced. The answer itself is worked out in
        `pinWatch()` below, from where the band is against where it would be
-       anyway — §323 says why that is the only question that can be asked
+       anyway — §327 says why that is the only question that can be asked
        here, and why the observer this used to be could not answer it. */
     pinWatch();
     watchTailFold();
@@ -2684,7 +2684,7 @@
      you are pointing at. And never over a title somebody else set — the
      register's name cell carries the full name and the sign-in key on its own
      hover (§81.1), which says more than this would. */
-  /* ── AND "AT ITS OFFSET" IS NOT "PINNED" (§323, correcting the above) ─
+  /* ── AND "AT ITS OFFSET" IS NOT "PINNED" (§327, correcting the above) ─
      THE OBSERVER COULD NOT ANSWER THE QUESTION IT WAS ASKED, and the page it
      failed on is the ordinary one. Measured on a unit's Plan at 1440×900:
      `--chrome-h` 168 + `--rail-gap` 22 puts the pane's border box at 190, the
@@ -3815,7 +3815,7 @@
         paint();
       });
     });
-    /* §330: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
+    /* §334: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
        — Islam's *"yes the capability can be built in pillars."* Addressed by
        ID rather than by position, because this control can change which side
        of the navigation the row belongs to and a repaint sits between the
@@ -4475,7 +4475,7 @@
     document.querySelectorAll("[data-caprm]").forEach(function(b){
       b.addEventListener("click", function(){
         if (grant("c_caps") !== "edit") return;
-        /* §321: the button carries the capability's ID, never its position —
+        /* §325: the button carries the capability's ID, never its position —
            the row being removed and the row the button was drawn for are a
            dialog apart (§48, §48.2). */
         capRemoveOpen(b.dataset.caprm);
@@ -4562,7 +4562,7 @@
            `measures.length` on an object that has not carried `measures` since
            §15, so it threw before it could confirm anything and the removal
            never ran (§51.11). */
-        /* §321: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
+        /* §325: A CAPABILITY IS REMOVED IN ONE PLACE, and this is the
            second door onto it — the Temple's own table. Reaching only the
            Setup page would leave a way to destroy three projects with a
            browser dialog and no archive, which is §272.7's fault exactly:
@@ -7499,7 +7499,7 @@
           if (what === "measure") addMeasure(it); else addTactic(it);
         }
         else if (what === "project") {
-          /* §322: holderByIdWritable, not capById — a project may be added to
+          /* §326: holderByIdWritable, not capById — a project may be added to
              a CAPABILITY or straight to the function, and the writing half is
              what mints the container. A reader hands out a shared frozen
              empty, so the first project on a function would have been accepted
@@ -7740,8 +7740,8 @@
         if (!h || !h.list) return;
         var t = h.target;
         if (!mayAuthor("k_found", t)) return;
-        /* §330.18: THE BUILDER'S FORM OPENS FOR A HOLDER, NOT ONLY FOR A
-           CAPABILITY. This asked for `h.cap`, and since §322 the Overview's
+        /* §334.18: THE BUILDER'S FORM OPENS FOR A HOLDER, NOT ONLY FOR A
+           CAPABILITY. This asked for `h.cap`, and since §326 the Overview's
            Add on a projects function carries the FUNCTION's own id — so in
            the builder the press fell through to the plain path below and
            pushed a NAMELESS row, where §129's whole rule is that a row is
@@ -7787,7 +7787,7 @@
         fieldSaved(); paint();
       });
     });
-    /* §330: the second door to a capability, beside the projects. */
+    /* §334: the second door to a capability, beside the projects. */
     document.querySelectorAll("[data-cappromo]").forEach(function(b){
       b.addEventListener("click", function(){
         var fk = b.dataset.cappromo;
@@ -8291,7 +8291,7 @@
                  functions, rather than resolved by whichever came first in the
                  array. That was the silent wrong-plan §51.2 feared, and it is
                  now caught at the one moment somebody can still act on it. */
-              /* §322: A SUPPORTING FUNCTION THAT HOLDS ITS OWN PROJECTS IS A
+              /* §326: A SUPPORTING FUNCTION THAT HOLDS ITS OWN PROJECTS IS A
                  SUBJECT, listed in the file's own dropdown by projectSubjectNames()
                  — so the upload has to resolve the name it just offered, the same
                  rule §61 already wrote for a pillars function one branch up. It is
@@ -8393,7 +8393,7 @@
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;
         if (impIsCap()) {
-          /* §322: WRITABLE, for the reason the unit branch below already
+          /* §326: WRITABLE, for the reason the unit branch below already
              states — a plan applied to a reading view is reported as written
              and is not (§61). */
           var cc = impCapWritable();
@@ -8986,7 +8986,7 @@
      with its pen on. leaveModes() first — it clears EDIT_PAGE, so the pen is
      switched on AFTER it, never before. */
   function builderStart(target){
-    /* §330.18: NO CAPABILITY IS MINTED ANY MORE. §322 gave a supporting
+    /* §334.18: NO CAPABILITY IS MINTED ANY MORE. §326 gave a supporting
        function projects of its own and this went on creating a box to hang
        them off — which after stage 2 is worse than pointless: every add in
        this route now writes to the function's own holder, so the box stayed
@@ -9227,7 +9227,7 @@
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
   }
-  /* ── REMOVING A CAPABILITY: two answers, not one (§321) ───────────────
+  /* ── REMOVING A CAPABILITY: two answers, not one (§325) ───────────────
      The mockup Islam signed off (design-mockups/capability-remove/) draws the
      two acts as two rows, each saying what it does, rather than as two
      buttons on one line — because they are not two flavours of one act. One
@@ -9247,7 +9247,7 @@
     var c = capById(id);
     if (!c) return;
     var f = functionOf(c.fn), fname = f ? f.name : "the function";
-    /* §322: THE FUNCTION ITSELF IS A DESTINATION, and it is the one that is
+    /* §326: THE FUNCTION ITSELF IS A DESTINATION, and it is the one that is
        always there. Islam: *"one more thing is the ability to turn functional
        projects to a capability and vice versa"* — this is the vice versa, and
        it is one more entry in a list the dialog already had rather than a
@@ -9274,7 +9274,7 @@
           dests.map(function(x){
             return '<option value="' + esc(x.id) + '">' + esc(x.label) + '</option>';
           }).join("") + '</select>';
-    /* §322: WHERE THE OBJECTIVES END UP DEPENDS ON WHERE THE PROJECTS GO, so
+    /* §326: WHERE THE OBJECTIVES END UP DEPENDS ON WHERE THE PROJECTS GO, so
        the note says which rather than one sentence that is false on half the
        destinations (§104.8). They come across to the FUNCTION and only where
        it has none of its own; a sibling capability takes the projects alone,
@@ -9342,7 +9342,7 @@
     var all = box.querySelector("[data-caprmall]");
     if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
   }
-  /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§330, spec 046 §6) ───────
+  /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§334, spec 048 §6) ───────
      Islam signed off the drawing with the cost on it: *"ok with the promirting
      mockup."* The mockup showed it as two steps; it is ONE dialog carrying
      both, because the cost line depends on which projects are ticked and a
@@ -9357,7 +9357,7 @@
      convenience: a function whose five projects contain one capability cannot
      say so if the control takes the lot, and promoting everything is still
      allowed because a function may turn out to be doing one strategic thing.
-     What is refused is promoting NOTHING (spec 046 §6's own edge). */
+     What is refused is promoting NOTHING (spec 048 §6's own edge). */
   var PROMO = null;
   function promoOpen(fk){
     var f = FUNCTIONS[fk];
@@ -9371,7 +9371,7 @@
     var f = FUNCTIONS[PROMO.fk], ps = f.projects || [];
     var picked = ps.filter(function(p){ return PROMO.pick[p.id]; });
     var name = String(PROMO.name || "").trim();
-    /* THE COST, IN THE CODES THEMSELVES (§310, §321's habit of naming what a
+    /* THE COST, IN THE CODES THEMSELVES (§310, §325's habit of naming what a
        press will change before the press). A project's code is its position
        in the thing that HOLDS it, so the ones that move take the capability's
        letters and the ones left behind close up — and both halves are shown,
@@ -9417,7 +9417,7 @@
     return !!(PROMO && Object.keys(PROMO.pick).length &&
               String(PROMO.name || "").trim());
   }
-  /* THE COST, IN THE CODES THEMSELVES (§310, and §321's habit of naming what a
+  /* THE COST, IN THE CODES THEMSELVES (§310, and §325's habit of naming what a
      press will change before the press). A project's code is its position in
      the thing that HOLDS it, so the ones that move take the capability's own
      letters and the ones left behind close up — and BOTH halves are shown,

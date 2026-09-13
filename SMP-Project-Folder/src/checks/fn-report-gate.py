@@ -187,8 +187,8 @@ with sync_playwright() as p:
     print("\n── 4 · an objective added on the Overview can be reported against")
     pg.goto("file://" + FILE); pg.wait_for_timeout(900)
     for label, t in (("the pillars function", T), ("the projects function", TC)):
-        # §330: THE FUNCTION'S OWN HOLDER, both ways. Since §322 a projects
-        # function holds its key objectives itself and §329 left the worked
+        # §334: THE FUNCTION'S OWN HOLDER, both ways. Since §326 a projects
+        # function holds its key objectives itself and §333 left the worked
         # example with no box under one, so reaching for
         # `capsOfFunction(...)[0].id` threw and the probe reported a working
         # Add control as adding nothing (§214.3, §215). `koHolderById` answers

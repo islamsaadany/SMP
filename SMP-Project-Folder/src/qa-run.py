@@ -204,13 +204,13 @@ if os.environ.get("SMP_BASE"):
 
 target = sys.argv[1] if len(sys.argv) > 1 else "qa.py"
 
-# ── A SWEEP MAY NOT REWRITE THE RECORD OF A SIGN-OFF (§330.12, §330.14) ──────
+# ── A SWEEP MAY NOT REWRITE THE RECORD OF A SIGN-OFF (§334.12, §334.14) ──────
 # THIRTEEN files under `checks/` are mockup GENERATORS: they drive the product
 # and write PNGs and documents into `design-mockups/`, which is where a
 # signed-off picture LIVES. `python3 qa-run.py checks/*.py` therefore replaced
 # the record of what Islam AGREED with a rendering of today's build — silently,
 # and against Principle II, which is the rule that keeps a mockup evidence
-# rather than a screenshot. §329 found it by the tree going dirty with nothing
+# rather than a screenshot. §333 found it by the tree going dirty with nothing
 # of that round's in it, named two files and left it; the full sweep found
 # eleven more, so this is answered ONCE here rather than thirteen times in
 # thirteen files (§53.5) and cannot be forgotten by a fourteenth.

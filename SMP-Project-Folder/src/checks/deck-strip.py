@@ -226,13 +226,13 @@ with sync_playwright() as p:
     check("...and its groups are its own dividers, of which it has fewer",
           get(m, "groups") == get(m, "heads") and
           (get(m, "groups") or 0) < (get(u, "groups") or 0), m)
-    # §330: A PROJECTS FUNCTION NAMES ITS PROJECTS. §218 rewrites this rather
+    # §334: A PROJECTS FUNCTION NAMES ITS PROJECTS. §218 rewrites this rather
     # than loosening it: §266.12 asserted a function's pills were its
     # CAPABILITIES and recorded in its own words that they ought to be its
-    # projects — §322 gave the function the projects and §322 also stopped
+    # projects — §326 gave the function the projects and §326 also stopped
     # drawing the holder's cover for its own work, which is where the only
     # section stamp sat, so the strip came out COVER · END over thirteen
-    # slides until §330 stamped them. The codes are the page's own (§48,
+    # slides until §334 stamped them. The codes are the page's own (§48,
     # §310), so this is agreement with `projCode` and not a list of literals.
     k = open_deck(pg, "fn:marketing")
     check("a projects function is drawn the same way",
@@ -245,7 +245,7 @@ with sync_playwright() as p:
     check("...and the full name is on the hover",
           all(len(h) > 3 for h in (get(k, "hovers") or [])), get(k, "hovers"))
 
-    # A CAPABILITY IS A DECK OF ITS OWN (§330), and it is where §266.9's
+    # A CAPABILITY IS A DECK OF ITS OWN (§334), and it is where §266.9's
     # two-letter fallback still lives: a capability carries no code, so its
     # own divider is named from its words while the projects under it keep
     # theirs.

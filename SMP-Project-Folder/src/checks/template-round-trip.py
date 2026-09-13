@@ -118,7 +118,7 @@ async () => {
   R.cap = await guard("cap", async () => {
     /* MAKE THE STATE (§255). The worked example shipped eight capabilities
        until the demo was finished and now holds ONE, whose key objectives went
-       to its function with the dissolve (§329) — so this found nothing to
+       to its function with the dissolve (§333) — so this found nothing to
        measure and said so honestly while proving nothing (§214.3). It mints
        the two rows it needs on a capability that already has a full project:
        the second is this section's own CONTROL, the row the file does not

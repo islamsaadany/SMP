@@ -306,7 +306,7 @@ with sync_playwright() as pw:
 
     print("\n── 8 · both sides of the switch")
     c6 = ev(pg, """() => {
-      /* §330.18: THE HOLDER, which since §322 is a function's OWN work and
+      /* §334.18: THE HOLDER, which since §326 is a function's OWN work and
          only sometimes a capability — this asked for a capability outright
          and the worked example has one, on one function, so on every other
          it reported the check's own subject as missing (§215). */

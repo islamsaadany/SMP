@@ -46,7 +46,7 @@ try {
 
   /* EVERY TENANT-OWNED TABLE, asked of the catalogue rather than listed here —
      a list in a check is a list somebody forgets to add to (§104.7).
-     AND ASKED OF `SCHEMA`, NEVER `public` (§326): the catalogue is asked by
+     AND ASKED OF `SCHEMA`, NEVER `public` (§330): the catalogue is asked by
      NAME, which is the one kind of query a `search_path` cannot help — so
      §317.4 correctly moved this pool's path at line 37 and left this query
      naming the room the tables had just left. It then found nought tables and

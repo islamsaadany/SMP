@@ -237,15 +237,15 @@ with sync_playwright() as p:
     FK = "qualityassuran"
     ck("the function exists, planning in projects",
        pg.evaluate("FUNCTIONS['%s'] && FUNCTIONS['%s'].format === 'projects'" % (FK, FK)))
-    # §330.18: REWRITTEN, NEVER LOOSENED (§218). This asserted that the
+    # §334.18: REWRITTEN, NEVER LOOSENED (§218). This asserted that the
     # builder MINTS A CAPABILITY for a brand-new projects function, which was
-    # true and is exactly the thing spec 046 removes — and after stage 2 that
+    # true and is exactly the thing spec 048 removes — and after stage 2 that
     # box is worse than pointless: every add in this route writes to the
     # function's OWN holder, so the capability stayed empty, and a function
     # carrying one draws nowhere to put its first project (§61). The claim is
     # inverted, with the function's own holder asserted in the same breath, or
     # a build that created neither would satisfy the absence half (§94.2).
-    ck("no capability is minted for it — a function owns its own work (§322)",
+    ck("no capability is minted for it — a function owns its own work (§326)",
        pg.evaluate("capsOfFunction('%s').length === 0" % FK),
        pg.evaluate("capsOfFunction('%s').map(c=>c.id)" % FK))
     ck("...and the function itself is the holder the route writes to",
@@ -264,7 +264,7 @@ with sync_playwright() as p:
     # asserts this one line up (§6) and the holder's never did, which is how
     # the builder came to mint an id-less row that renders perfectly and cannot
     # be written row by row. Asked of the HOLDER's own spelling, never the
-    # unit's — and since §330.18 that holder is the function itself.
+    # unit's — and since §334.18 that holder is the function itself.
     ck("…and it landed with a minted id, in the holder's own spelling",
        pg.evaluate("fnOwnHolder('%s').keyObjectives[0].id === fnOwnHolder('%s').id + '-KO1'" % (FK, FK)),
        pg.evaluate("fnOwnHolder('%s').keyObjectives[0].id" % FK))

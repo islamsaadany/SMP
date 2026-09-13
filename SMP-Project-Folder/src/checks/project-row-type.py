@@ -62,7 +62,7 @@ def open_pane(pg, edit=True):
     pg.goto(URL)
     pg.wait_for_timeout(800)
     pg.evaluate("()=>{var w=document.querySelector('.welcomeover'); if(w) w.remove();}")
-    # §330.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
+    # §334.17: PRESS THE SIDE YOU WANT. This looped on `#units .navswitch`,
     # which with three sides is a DIV of buttons rather than a button — so
     # the press did nothing, the loop gave up, and the destination was
     # never drawn. `[data-fold]` is absent exactly when that side is lit.
@@ -86,7 +86,7 @@ def open_pane(pg, edit=True):
 # The project the rail is standing on, read off the stored graph — never off
 # the screen, because a screen that draws nothing answers every question about
 # what it drew (§96).
-# §330.18: WALKED THROUGH THE PRODUCT'S OWN `eachProject`, which §322 built
+# §334.18: WALKED THROUGH THE PRODUCT'S OWN `eachProject`, which §326 built
 # so that nobody would keep a private copy of "walk the capabilities" — and
 # this was one, so on the page it drives (a function's own projects) it found
 # nothing and the section died on a null rather than reporting (§215).

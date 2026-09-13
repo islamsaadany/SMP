@@ -182,7 +182,7 @@ def land(pg, where):
     pg.goto("file://" + str(FILE)); pg.wait_for_timeout(1400)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
     if where == "fn":
-        # §330: the navigation switch has a THIRD side once a capability
+        # §334: the navigation switch has a THIRD side once a capability
         # exists, so pressing the control no longer means "go to the other
         # one" — press the side you want. `[data-fold]` is absent exactly when
         # that side is already lit, which is why the press is guarded rather

@@ -289,7 +289,7 @@
      slot on a unit's Performance page, so it needs a gap of its own — without
      one they touch, and a solid button touching an outlined one reads as a
      single split control. */
-  /* `.bands-act` DELETED (§324, §24). §275 moved the Performance page's
+  /* `.bands-act` DELETED (§328, §24). §275 moved the Performance page's
      controls onto the tab row and nothing has worn this class since; it was
      still here, which is how the onboarding tour came to be pointing at it. */
 
@@ -1095,7 +1095,7 @@
      unreadable exactly when somebody was looking at it. */
   .units .navswitch:hover{background:rgba(255,255,255,.15)}
   .units .navswitch:hover .nsw:not(.on){color:rgba(255,255,255,.8)}
-  /* ── THREE SIDES (§330) ────────────────────────────────────────────────
+  /* ── THREE SIDES (§334) ────────────────────────────────────────────────
      A segmented control of real buttons rather than one button of words, for
      the reason the shell states: with three sides "press to switch" has no
      answer, so each segment is its own target. The container stops being the

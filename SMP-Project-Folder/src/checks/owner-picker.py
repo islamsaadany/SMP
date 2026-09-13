@@ -38,7 +38,7 @@ def ck(name, ok, extra=""):
         fails.append(name)
 
 
-# PRESS THE SIDE YOU WANT, NEVER "the other one" (§330.17). The
+# PRESS THE SIDE YOU WANT, NEVER "the other one" (§334.17). The
 # navigation switch is two sides on a tenant with no capability and THREE
 # once there is one, and `.nsw:not(.on)` then matches two buttons — so
 # this pressed whichever unlit side came first, which is Capabilities, and
@@ -296,7 +296,7 @@ with sync_playwright() as p:
         pass
 
     # ── 8 · the function's side: a project and its milestones ───────────
-    # THE PAGE IT OPENS IS THE FUNCTION'S OWN (§322, §330). This navigated to
+    # THE PAGE IT OPENS IS THE FUNCTION'S OWN (§326, §334). This navigated to
     # `fn:marketing` and then read `GROUP.capabilities`, which was the same
     # rows while a capability was drawn INSIDE the function's pages and stopped
     # being them the day stage 2 gave it a page of its own — so the picker was

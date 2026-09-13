@@ -177,7 +177,7 @@ class H(http.server.BaseHTTPRequestHandler):
         if body.get("action") == "reply":
             CHAT["said"].append(body)
             self._send(200, json.dumps({"ok": True, "here": False,
-                # §293's SHAPE (§324.9): a reply is COLLECTED and emailed a few
+                # §293's SHAPE (§328.9): a reply is COLLECTED and emailed a few
                 # minutes later, so the endpoint answers {pending, mins, to}
                 # and not the {sent, to} it answered while the request itself
                 # did the emailing. Nothing here asserts the sentence, so this

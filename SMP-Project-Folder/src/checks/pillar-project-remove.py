@@ -42,7 +42,7 @@ def press(pg, sel):
     ck("press " + sel, False, "not drawn"); return False
 
 def to_functions(pg):
-    # §330: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+    # §334: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
     # the switch has three sides and pressing it no longer toggles, so cycling
     # it hangs for thirty seconds on a build behaving exactly as decided
     # (§214.3). `data-fold` names the side in BOTH shapes and is absent
@@ -177,7 +177,7 @@ with sync_playwright() as p:
       const r = btn.getBoundingClientRect();
       const hit = document.elementFromPoint(r.left + r.width/2, r.top + r.height/2);
       const id = btn.dataset.rmrow.split('|')[1];
-      /* §330: THE HOLDER, and on Finance that is the FUNCTION ITSELF (§322).
+      /* §334: THE HOLDER, and on Finance that is the FUNCTION ITSELF (§326).
          This read is the check's own resolver and it is deliberately the
          product's — the reader it names was blind to a function's own
          projects, so both of the control's callers opened `if (!it) return`
@@ -198,7 +198,7 @@ with sync_playwright() as p:
     ck("the project band carries its own worded control, hittable",
        not pb.get("none") and pb["word"] == "Remove this project"
        and pb["hittable"], pb)
-    # §330: AND THE PRODUCT CAN SAY WHOSE PROJECT IT IS. The control addresses
+    # §334: AND THE PRODUCT CAN SAY WHOSE PROJECT IT IS. The control addresses
     # the row by id alone and resolves the holder at press time, so a resolver
     # blind to a function's own projects makes every one of the presses below
     # a no-op with nothing on the screen and nothing on the console.
@@ -228,12 +228,12 @@ with sync_playwright() as p:
        and pafter["arch"] == pb["arch"] + 1 and pafter["top"]["kind"] == "cap", (pb, pafter))
     ck("...and the rail is not holding the removed project",
        pafter["rail"] != pb["id"], pafter)
-    # §330: AND THE WAY BACK, which is what the archive is FOR (§232). On a
+    # §334: AND THE WAY BACK, which is what the archive is FOR (§232). On a
     # projects FUNCTION the archive is keyed `fn:<key>` under kind "cap", and
     # the restore resolved it with capById — so every archive such a function
     # ever took answered "cannot be restored" for a function still on the
     # platform, which is the fault §232 fixed one branch up, arriving on the
-    # other branch by way of §322. The ids are asserted BACK UNCHANGED,
+    # other branch by way of §326. The ids are asserted BACK UNCHANGED,
     # because a restore that renumbers is the one thing it may never do
     # (§316): every figure and focus mark is keyed on them.
     prest = pg.evaluate("""(spec) => {

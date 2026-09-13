@@ -105,7 +105,7 @@ export function poolerModel(url) {
 }
 
 /* Every tenant-owned table, from the catalogue and never a literal — and the
-   EXCLUSION list is imported rather than typed (§327). It was a literal here,
+   EXCLUSION list is imported rather than typed (§331). It was a literal here,
    which is the third copy of one fact: `db/schema.sql`'s RLS loop, this, and
    `lib/schema-check.ts`. Two of the three had not been told about
    `memory_entries`, so this harness tried to SEED a platform table and S4 died

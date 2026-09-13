@@ -65,7 +65,7 @@ def go_project(pg):
 
 
 def side(pg, s):
-    """§330.17: press the SIDE you want. The switch is two segments on a
+    """§334.17: press the SIDE you want. The switch is two segments on a
        tenant with no capability and THREE once there is one, and
        `[data-fold]` is absent exactly when that side is already lit."""
     b = pg.query_selector('#units [data-fold="%s"]' % s)

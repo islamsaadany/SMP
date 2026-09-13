@@ -1,9 +1,9 @@
-"""A CAPABILITY IS A STRATEGIC ENTRY (§330, spec 046 stage 2).
+"""A CAPABILITY IS A STRATEGIC ENTRY (§334, spec 048 stage 2).
 
 Islam, correcting a proposal of mine that would have hidden the problem:
 "capability is something Strategic ... the problem with having the capability
 hidden in the functional plans is confusing for the whole structure." Stage 1
-(§322) gave a function its own projects and left the box drawn INSIDE the
+(§326) gave a function its own projects and left the box drawn INSIDE the
 function's four pages. This is the round that gives it pages of its own, and
 his four answers to the signed-off mockup are what it asserts.
 
@@ -39,7 +39,7 @@ What is asserted, and why each end matters (§94.2):
     mockup"), so a build that stopped saying it has broken the promise the
     press rests on;
 
-  - AND THE ROUND TRIP CLOSES: promoted and given back through §321's own
+  - AND THE ROUND TRIP CLOSES: promoted and given back through §325's own
     dialog, every id identical at the end and every code back where it
     started (§232, §316 — an id that moves re-addresses every figure keyed
     on it).
@@ -69,7 +69,7 @@ def ev(pg, js, dflt=None, arg=None):
         return dflt if dflt is not None else {"err": str(e)[:110]}
 
 def side(pg, s):
-    """Press the side, never the control (§330): with three sides the switch is
+    """Press the side, never the control (§334): with three sides the switch is
        a group of buttons, and `data-fold` is absent exactly when that side is
        already lit."""
     ev(pg, "(s)=>{const b=document.querySelector('#units [data-fold=\"'+s+'\"]');"
@@ -88,7 +88,7 @@ def tabs(pg):
     status (§69: *Reporting — not submitted yet*), which is a fact about the
     SUBJECT and not about which tabs it has — so comparing the words made a
     capability and a function differ for the one reason they must (a capability
-    reports, and §330 had to teach `reportPending` so, which is the fault this
+    reports, and §334 had to teach `reportPending` so, which is the fault this
     assertion found). `data-s` is the key both sides are built from."""
     return ev(pg, "()=>[...document.querySelectorAll('#subtabs button')]"
                   ".map(x=>x.dataset.s || x.textContent.trim().split('\\n')[0])", [])
@@ -147,7 +147,7 @@ def main():
         ck("the switch has three sides while a capability exists",
            words == ["Units", "Capabilities", "Functions"], words)
         ck("...and each is its own button, because 'press to switch' has no "
-           "answer with three (§330)",
+           "answer with three (§334)",
            ev(pg, "()=>document.querySelectorAll('#units .navswitch.multi .nsw[data-fold]')"
                   ".length", 0) == 3, words)
         gone = ev(pg, "()=>{const k=GROUP.capabilities.map(c=>c.id);"

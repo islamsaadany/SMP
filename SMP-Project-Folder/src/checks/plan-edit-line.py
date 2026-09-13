@@ -110,7 +110,7 @@ def side(pg, want):
     lit = pg.query_selector("#units .navswitch .nsw.on")
     if lit and want.lower() in (lit.text_content() or "").lower():
         return
-    # §330.17: press the SIDE by name. With a capability in the tenant the
+    # §334.17: press the SIDE by name. With a capability in the tenant the
     # switch has THREE and "the unlit one" is whichever comes first, which is
     # Capabilities — so both destinations this walks went missing.
     w = want.lower()
@@ -403,7 +403,7 @@ with sync_playwright() as pw:
     press(pg)
 
     # ── 2 · IT IS THE ONLY ONE, where there used to be several ────────
-    # §330: THE COUNT OF PANES IS NO LONGER THE POINT, because a capability is
+    # §334: THE COUNT OF PANES IS NO LONGER THE POINT, because a capability is
     # a page of its own and a function's Projects page draws one holder — so
     # `panes >= 2`, which is how this file used to reach the "one control, not
     # one per pane" case, describes a screen the product no longer draws

@@ -55,8 +55,8 @@ var TOUR = (function(){
      control changes shape, this is the file to grep, and checks/tour.py
      fails the build rather than the tour quietly lighting nothing. */
   function destBtn(k){ return document.querySelector('#units [data-u="' + k + '"]'); }
-  /* §330.18: AND A DESTINATION MAY BE BEHIND A FOLD. The navigation shows one
-     side at a time, and §330 gave a third side — so somebody who reaches a
+  /* §334.18: AND A DESTINATION MAY BE BEHIND A FOLD. The navigation shows one
+     side at a time, and §334 gave a third side — so somebody who reaches a
      capability AND their own function now meets a switch where before they
      met a plain row. `destBtn()` then answers null for the person's own
      subject, `start()` reads that as "a place that is not on the row" and
@@ -66,7 +66,7 @@ var TOUR = (function(){
 
      It presses the fold, which is what a person does — `[data-fold="<side>"]`
      is absent exactly when that side is already lit, so this is a no-op on the
-     one-sided navigation every viewer had before §330. The side is read from
+     one-sided navigation every viewer had before §334. The side is read from
      `navSides()` rather than guessed from the key's prefix, because which
      sides exist at all is that function's answer and a second copy would drift
      (§53.5). */
@@ -321,7 +321,7 @@ var TOUR = (function(){
             (isFnPlace(at) ? "function" : "unit") + "."; } },
 
         { dest:"$own", tab:"performance",
-          /* THE CONTROL MOVED AND THE STEP DID NOT (§324). §275 took the
+          /* THE CONTROL MOVED AND THE STEP DID NOT (§328). §275 took the
              Performance page's controls out of the page body and hung them on
              the TAB ROW through `perfActs()` → `REPORT_CHROME` → `.tabacts`,
              so this step lit NOTHING for five of the stories'
@@ -436,7 +436,7 @@ var TOUR = (function(){
                "sits with you and your custodian." },
 
         { dest:"$own", tab:"performance",
-          /* THE CONTROL MOVED AND THE STEP DID NOT (§324). §275 took the
+          /* THE CONTROL MOVED AND THE STEP DID NOT (§328). §275 took the
              Performance page's controls out of the page body and hung them on
              the TAB ROW through `perfActs()` → `REPORT_CHROME` → `.tabacts`,
              so this step lit NOTHING for five of the stories'
@@ -551,7 +551,7 @@ var TOUR = (function(){
     navigating = true;
     try {
       if (s.dest) {
-        var d = revealDest(s.dest === "$own" ? own : s.dest);   /* §330.18 */
+        var d = revealDest(s.dest === "$own" ? own : s.dest);   /* §334.18 */
         if (d && d.getAttribute("aria-selected") !== "true") d.click();
       }
       if (s.tab) {
@@ -760,7 +760,7 @@ var TOUR = (function(){
        on the row is a place nothing can press, and a tour pressing nothing
        is the fault above wearing a different hat — so it falls back to the
        first real destination rather than touring a key that is not there. */
-    if (!revealDest(own)) own = firstDest();   /* §330.18: behind a fold is still on the row */
+    if (!revealDest(own)) own = firstDest();   /* §334.18: behind a fold is still on the row */
     steps = resolve(STORIES[key].steps, own);
     dock.hidden = false;
     go(0);

@@ -197,11 +197,11 @@ await section("2 · two tabs, one database (§210 · §215 · §216 · §234)", 
   check(r1.status === 200 && r2.status === 200, "§215: both saves on the SAME unit were accepted", r1.status + "/" + r2.status);
   after = await graph(smo);
   check(after.units.mobile.items[0].measures[0].target === "2%" && after.units.mobile.items[0].measures[1].target === "91%", "§215: the first fill SURVIVES the second's save, and the second landed too");
-  /* §216, ADDRESSED WHERE THE PROJECTS NOW ARE (§322, §329): a milestone
+  /* §216, ADDRESSED WHERE THE PROJECTS NOW ARE (§326, §333): a milestone
      reported on CARE's own project from a stale tab, while FINANCE's
      definition is edited in between. This named `cap5` and `cap7` — every
-     project in the tenant sat inside a capability until §322 gave them to the
-     function, and the worked example ships none since §329, so both lookups
+     project in the tenant sat inside a capability until §326 gave them to the
+     function, and the worked example ships none since §333, so both lookups
      answered `undefined`. The claim has not changed and is the stronger one
      for being asked of the shape every client is actually in. */
   const hers = await graph(smo);
@@ -211,7 +211,7 @@ await section("2 · two tabs, one database (§210 · §215 · §216 · §234)", 
   check(r.status === 200, "§216: the office edits another function's definition", r.status);
   e = changed(hers, (m) => { m.functions.care.projects[0].milestones[0].status = "wip"; m.functions.care.projects[0].milestones[0].pct = 40; });
   /* THE ADDRESSES, NOT A QUOTED SPELLING (§94.8). This asked `/"care"/` of the
-     stringified list, and §322 moved her report from a capability under the
+     stringified list, and §326 moved her report from a capability under the
      group to the FUNCTION — where the address reads `functions.care`, so the
      quote before the word is not there and the assertion could never match.
      The claim is unchanged and is now asked of the thing it is about: every

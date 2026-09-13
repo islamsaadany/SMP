@@ -33,7 +33,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-# THE BUILD, NEVER THE SHIPPED COPY (§330.10). This file named
+# THE BUILD, NEVER THE SHIPPED COPY (§334.10). This file named
 # `strategy-management-platform-v3.22.html` where all 165 of its neighbours
 # read `src/strategy-management-platform.html`, so on any branch whose build
 # has moved and whose shipped copy has not — which is every branch until the

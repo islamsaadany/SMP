@@ -79,7 +79,7 @@ def show_units(pg):
     show_side(pg, "units")
 
 def nav_sides(pg):
-    """§330: WHICH SIDES THE SWITCH HAS. Two until a capability exists, three
+    """§334: WHICH SIDES THE SWITCH HAS. Two until a capability exists, three
        after — so nothing may assume two, and the sweep that walked "both" has
        to walk however many there are or it reports ok having missed a third
        of the destinations (the fault §51.7 records, with a new cause)."""
@@ -87,7 +87,7 @@ def nav_sides(pg):
         "e=>e.map(x=>x.dataset.fold)") or []
 
 def show_side(pg, side):
-    """§330: PRESS THE SIDE, NEVER THE CONTROL. With three sides the switch is
+    """§334: PRESS THE SIDE, NEVER THE CONTROL. With three sides the switch is
        a group of buttons and pressing it no longer toggles — and `data-fold`
        is absent exactly when that side is already lit, which is why this is
        guarded rather than asserted."""
@@ -172,7 +172,7 @@ with sync_playwright() as p:
         # failed: `.navfold` simply stops matching, the loop iterates nothing,
         # and the sweep reports "ok" having walked half the product. Third time
         # in one session that a check quietly measured less than it claimed.
-        # §330: EVERY SIDE, not two. `nav_sides()` reports what is actually
+        # §334: EVERY SIDE, not two. `nav_sides()` reports what is actually
         # there, so a capability created tomorrow is swept the day it exists.
         sides = nav_sides(pg)
         if sides:
@@ -1346,7 +1346,7 @@ with sync_playwright() as p:
           n + ((x.functions[k] || {}).items || []).length, 0),
         capContent: ((x.group || {}).capabilities || []).reduce((n, c2) =>
           n + (c2.projects || []).length + (c2.keyObjectives || []).length, 0),
-        /* §322: a function's projects are the function's, so they are what a
+        /* §326: a function's projects are the function's, so they are what a
            clear has to empty now. capContent stays as the CONTROL — with no
            capabilities left it is trivially 0 (§113.8), and it is the
            assertion that catches a build where they come back holding work. */
@@ -1360,13 +1360,13 @@ with sync_playwright() as p:
       const before = count(g), after = count(clearedGraph(g)), live = count(g);
       return { full: before, clear: after, unharmed: JSON.stringify(before) === JSON.stringify(live) };
     }""")
-    # §322 MOVED `caps` FROM ONE LIST TO THE OTHER, and it is an inversion
+    # §326 MOVED `caps` FROM ONE LIST TO THE OTHER, and it is an inversion
     # rather than a deletion (§218): a capability was the only container a
     # supporting function's projects had, so the cleared graph carried eight
     # empty shells as though they were part of the org's shape. They are not —
     # a capability is a strategic entry somebody creates, and a client on day
     # one has none. So it must GO, and this still fails on the build before
-    # §322 rather than quietly passing on both.
+    # §326 rather than quietly passing on both.
     keep = ["units", "fns", "cos", "themes", "bands", "labels"]
     for k in keep:
         if cp["clear"][k] != cp["full"][k]:

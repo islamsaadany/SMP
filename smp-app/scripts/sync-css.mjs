@@ -25,7 +25,7 @@ const ORDER = ["_shared.css", "group-extra.css", "config.css", "arrange.css", "p
    stick. Served, it is a file beside the stylesheet (public/fonts, copied by
    scripts/build-shell.mjs) — the same bytes, font-display:swap for the same
    reason. */
-/* AND A SIZE IS THE ARTEFACT'S, NEVER THE STRING'S (§330.9). These lines
+/* AND A SIZE IS THE ARTEFACT'S, NEVER THE STRING'S (§334.9). These lines
    said "bytes" and printed `String.length`, which is UTF-16 code units — and
    the product's stylesheets are full of §, em dashes and arrows, so
    platform.css reported 621947 for a file of 641249. It also left out the

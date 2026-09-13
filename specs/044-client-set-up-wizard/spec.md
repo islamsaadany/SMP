@@ -185,14 +185,14 @@ model. `format` would gain a third value beside `pillars` and `projects`:
 
 ### 6.1 · The extras are optional (Islam, 2026-09-12)
 
-Of §320.8's remaining four: *"for the extras like the targets broken down,
+Of §324.8's remaining four: *"for the extras like the targets broken down,
 that should be optional and same for the pillar description and committee and
 the next cycle focus box."*
 
 So **targets broken down by category**, the **pillar's description**, the
 **pillar committee** and the **next-cycle focus box** are all optional — not
 counted as missing, and none of them holds Submit. Same shape as point 1 above,
-and it narrows what §320.8 recorded: that section has the category breakdown
+and it narrows what §324.8 recorded: that section has the category breakdown
 scoring and Submit waiting for it, which is now **reversed for the waiting
 half** — it still scores where it is used, and a pillar that never uses one
 owes nothing and says nothing.

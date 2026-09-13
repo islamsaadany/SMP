@@ -32,7 +32,7 @@ import sys
 from playwright.sync_api import sync_playwright
 
 import os as _os
-# THE BUILD, BY ITS OWN PATH (§330.13). This read
+# THE BUILD, BY ITS OWN PATH (§334.13). This read
 # `file:///home/user/SMP/…` — an ABSOLUTE path — so it could not be pointed
 # at any other build: a falsification made from the sources (§276) and a
 # baseline run against `origin/main` (§303) both went on measuring the
@@ -64,14 +64,14 @@ UNIT_STATE = """(g) => {
            filler: UNIT_ROLES[uk].custodian };
 }"""
 FN_STATE = """(g) => {
-  /* A FUNCTION'S OWN WORK, NOT ITS CAPABILITY'S (§330). This made its gaps
+  /* A FUNCTION'S OWN WORK, NOT ITS CAPABILITY'S (§334). This made its gaps
      inside `capsOfFunction(fk)` and then asked the FUNCTION's band to count
      them — right while a capability was drawn on the function's own pages, and
      wrong the moment stage 2 gave it a page, a band and a gap count of its
      own: the check was measuring a subject it had never touched, and
      `gapTotal("fn:marketing")` answered 0 (§214.3, ninth time). It blanks
      milestone dates in the function's OWN projects, which is what its own band
-     counts (§322). A capability's walk is its own subject and is asserted in
+     counts (§326). A capability's walk is its own subject and is asserted in
      `capability-entry.py`. */
   const fk = FUNCTION_KEYS.filter(k => (FUNCTIONS[k]||{}).custodian &&
                                        fnOwnProjects(k).length)[0];

@@ -97,7 +97,7 @@ await section("2 · the column is named so that forgetting the list is LOUD", as
   const loop = schema.slice(schema.indexOf("c.relname NOT IN ("));
   check(/'memory_entries'/.test(loop.slice(0, 400)), "…and the table is named in schema.sql's exclusion list", loop.slice(0, 200));
 
-  /* AND THE OTHER COPY OF THAT LIST AGREES (§327). Which tables are the
+  /* AND THE OTHER COPY OF THAT LIST AGREES (§331). Which tables are the
      platform's own is written TWICE — in the SQL loop above, which cannot
      import anything, and in `lib/schema-check.ts`, which runs in the app — and
      they cannot share a constant. So the guard is that they name the same set.

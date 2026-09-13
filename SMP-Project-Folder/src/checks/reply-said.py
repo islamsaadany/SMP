@@ -92,7 +92,7 @@ class H(http.server.BaseHTTPRequestHandler):
             THREAD["waiting"] = False
             import time
             time.sleep(20 if HANG["on"] else SLOW)
-            # §293's SHAPE, AND IT HAD BEEN THE ONE BEFORE IT (§324.9). This
+            # §293's SHAPE, AND IT HAD BEEN THE ONE BEFORE IT (§328.9). This
             # stub answered `{sent, to}`, which is what the endpoint returned
             # while a reply was emailed by the request that carried it. §293
             # made the platform COLLECT for a few minutes and send one email,

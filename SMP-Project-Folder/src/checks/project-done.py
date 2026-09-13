@@ -89,7 +89,7 @@ BASE["people"] += [
     {"key": "t287l", "name": "Pillar Owner 287", "active": True},
     {"key": "t287r", "name": "Plain Reader 287", "active": True, "unit": UNIT},
 ]
-# THE FUNCTION'S OWN PROJECT (§322, §330). Every `capsOfFunction(FN)[0]`
+# THE FUNCTION'S OWN PROJECT (§326, §334). Every `capsOfFunction(FN)[0]`
 # below is `fnOwnHolder(FN)` for the same reason: it is the holder of the work
 # this file is about, and it is the one a projects function has had since
 # stage 1 (§53.5 — one reader, not a second answer to *whose project is this*). This reached into

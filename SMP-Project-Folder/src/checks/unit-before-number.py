@@ -348,8 +348,8 @@ with sync_playwright() as pw:
             if (!list.length) list.push({ id: "fn-" + fk + "-KO1",
               name: "Made for the check \u00b7 " + fk, dir: "\u2265", compile: "Latest" });
           } else {
-            /* §330.18: THE FUNCTION'S OWN, which is where a projects
-               function's objectives live since §322 — and the page this
+            /* §334.18: THE FUNCTION'S OWN, which is where a projects
+               function's objectives live since §326 — and the page this
                drives (`fn:<k>`) draws exactly those. Asking for a capability
                found one function in eight, so this surface reported itself
                unmeasurable while asserting nothing (§54.5, the fault the
@@ -380,7 +380,7 @@ with sync_playwright() as pw:
           const f = FUNCTIONS[fk];
           const list = f.format === "pillars"
             ? unitLikeWritable("fn:" + fk).keyObjectives
-            : (fnOwnHolderWritable(fk) || {}).keyObjectives;   /* §330.18 */
+            : (fnOwnHolderWritable(fk) || {}).keyObjectives;   /* §334.18 */
           return { t: list[0].target, has3: ('target3y' in list[0]) };
         }""", fk)
         ck("...held alone on the %s format too" % shape, fs["t"] == "#", fs)

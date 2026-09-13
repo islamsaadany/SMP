@@ -80,7 +80,7 @@ def go_unit(pg, key):
 
 
 def go_fn(pg, key):
-    # §330.17: PRESS THE SIDE YOU WANT. The switch is two segments on a
+    # §334.17: PRESS THE SIDE YOU WANT. The switch is two segments on a
     # tenant with no capability and THREE once there is one, so "its unlit
     # half" stopped being a way across and became whichever unlit side comes
     # first — Capabilities. `[data-fold]` is absent exactly when that side is

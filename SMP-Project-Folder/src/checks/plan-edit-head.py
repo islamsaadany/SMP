@@ -164,7 +164,7 @@ def run(pg):
     # the project BAND kept the fault — Islam's FIN01 screenshot, a title on
     # three lines in a shrunk box beside an empty band. Same assertion shape:
     # a RATIO of the band, never a pixel count (§94.8), and ONE line.
-    # §330.17: press the SIDE, never "the other one" — three sides once a
+    # §334.17: press the SIDE, never "the other one" — three sides once a
     # capability exists, and `.nsw:not(.on)` then matches two, so this landed
     # on Capabilities and `fn:finance` was never drawn.
     pg.evaluate("()=>{const s=document.querySelector('#units [data-fold=\"fns\"]');"

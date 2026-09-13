@@ -1,4 +1,4 @@
-/* A PROJECT CHANGING HANDS SURVIVES A SAVE (§321).
+/* A PROJECT CHANGING HANDS SURVIVES A SAVE (§325).
 
    Removing a capability can now keep its projects: they move to another
    capability of the same function and the wrapper goes. The browser half is
@@ -62,7 +62,7 @@ function rowsOf(p) {
        written explicitly — this is about the writer, not about the seed. */
     const seed = JSON.parse(fs.readFileSync(
       path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
-    /* THE FIXTURE MAKES ITS OWN PAIR (§255, §329). The seed carried eight
+    /* THE FIXTURE MAKES ITS OWN PAIR (§255, §333). The seed carried eight
        capabilities until the worked example was finished, and this file needs
        a function holding TWO — a move between siblings is its whole subject,
        and stage 2 gives the product real ones again. So one function's own

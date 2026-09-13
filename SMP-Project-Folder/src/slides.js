@@ -651,7 +651,7 @@ function slidesMineWord(sl){
 }
 
 function slidesOpen(kind, key){
-  /* §330: three kinds — a unit, a supporting function and a capability, which
+  /* §334: three kinds — a unit, a supporting function and a capability, which
      carries its own picture slides for its own review. */
   var target = kind === "fn" ? "fn:" + key
              : kind === "cap" ? "cap:" + key : key;

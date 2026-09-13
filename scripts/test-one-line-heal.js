@@ -74,8 +74,8 @@ const words = (s) => String(s || "").split(/\s+/).filter(Boolean).join(" ");
     fn.items[0].tactics[0].name = "A function tactic\n\n";
     fn.keyObjectives = [{ id: "fnko-oneline", name: "A function objective\n\n", dir: "\u2265" }];
 
-    /* A PROJECT, WHEREVER IT IS HELD (§329). This read `group.capabilities`
-       and nothing else — every project in the tenant until §322 gave them to
+    /* A PROJECT, WHEREVER IT IS HELD (§333). This read `group.capabilities`
+       and nothing else — every project in the tenant until §326 gave them to
        the function, and NONE of them once the worked example was finished, so
        it threw on the first `undefined` rather than reporting (§215). It takes
        a capability if the tenant has one and the FUNCTION'S own otherwise,

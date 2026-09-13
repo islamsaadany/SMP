@@ -121,7 +121,7 @@ const CLIENT_ARG = (function () {
   const seeded = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
     /* REWRITTEN, NOT LOOSENED (§218). This read `capabilities === 8`: the
        clean slate kept the SHELLS and cleared their content, which was right
-       while a capability was where a function's projects had to live. §322
+       while a capability was where a function's projects had to live. §326
        makes the box a thing a function CARRIES, and the eight the worked
        example ships are containers — Islam: "they caapbilities in raya trade
        are not capabilities they are just projecst under functions" — so a
@@ -250,7 +250,7 @@ const CLIENT_ARG = (function () {
      Written on the FIRST project that has both kinds of row, so this says
      nothing about which project it is. */
   const R = require("../lib/rules.js");
-  /* IT LOOKS WHEREVER THE PROJECTS ARE (§329). This asked `group.capabilities`
+  /* IT LOOKS WHEREVER THE PROJECTS ARE (§333). This asked `group.capabilities`
      and nothing else, which was every project in the tenant until the worked
      example was finished — and then it printed SKIPPED, which is a green run
      that measured nothing (§54.5, and §215's shape: a check that cannot reach

@@ -169,7 +169,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
 
     # ── 6 · a milestone on a function, and the project band has no eye ──
-    # §330: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
+    # §334: PRESS THE SIDE, NEVER THE CONTROL. With a capability in the tenant
     # the switch has three sides and pressing it no longer toggles, so cycling
     # it hangs for thirty seconds on a build behaving exactly as decided
     # (§214.3). `data-fold` names the side in BOTH shapes and is absent
@@ -182,8 +182,8 @@ with sync_playwright() as p:
     pg.wait_for_timeout(500)
     fn = pg.evaluate("""() => {
       const onBand = document.querySelectorAll('.pband.edband .eyebtn').length;
-      /* §330: A HOLDER, NOT A CAPABILITY. §322 gave a supporting function its
-         own projects and §329 dissolved the demo's boxes, so asking the
+      /* §334: A HOLDER, NOT A CAPABILITY. §326 gave a supporting function its
+         own projects and §333 dissolved the demo's boxes, so asking the
          tenant for a capability under Finance answers `undefined` and the
          probe dies rather than reporting (§215, §214.3). `holderById` is
          the product's own reader and answers for either kind, which is
@@ -199,8 +199,8 @@ with sync_playwright() as p:
     ck("a milestone row carries one", fn["there"], fn)
     press(pg, '.eyebtn[data-hiderow="%s"]' % fn["id"]); pg.wait_for_timeout(400)
     fna = pg.evaluate("""(spec) => {
-      /* §330: A HOLDER, NOT A CAPABILITY. §322 gave a supporting function its
-         own projects and §329 dissolved the demo's boxes, so asking the
+      /* §334: A HOLDER, NOT A CAPABILITY. §326 gave a supporting function its
+         own projects and §333 dissolved the demo's boxes, so asking the
          tenant for a capability under Finance answers `undefined` and the
          probe dies rather than reporting (§215, §214.3). `holderById` is
          the product's own reader and answers for either kind, which is
@@ -219,8 +219,8 @@ with sync_playwright() as p:
     press(pg, '.eyebtn[data-hiderow="%s"]' % fn["id"]); pg.wait_for_timeout(400)
     ck("...and shows again clean",
        pg.evaluate("""(id) => {
-         /* §330: A HOLDER, NOT A CAPABILITY. §322 gave a supporting function its
-         own projects and §329 dissolved the demo's boxes, so asking the
+         /* §334: A HOLDER, NOT A CAPABILITY. §326 gave a supporting function its
+         own projects and §333 dissolved the demo's boxes, so asking the
          tenant for a capability under Finance answers `undefined` and the
          probe dies rather than reporting (§215, §214.3). `holderById` is
          the product's own reader and answers for either kind, which is

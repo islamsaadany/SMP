@@ -46,7 +46,7 @@ def goto_reporting(pg):
     # A viewer who reaches one function has no Units | Functions switch at
     # all (navFolds), and their entry already stands on the function (§94.6)
     # — so both steps are taken only where the control exists.
-    # PRESS THE SIDE YOU WANT, NEVER "the other one" (§330.17). The switch is
+    # PRESS THE SIDE YOU WANT, NEVER "the other one" (§334.17). The switch is
     # two sides on a tenant with no capability and THREE once there is one, and
     # with three it is a row of buttons — so clicking the wrapper lands on
     # whichever one sits under its centre, which is Capabilities. `[data-fold]`
@@ -99,9 +99,9 @@ with sync_playwright() as pw:
     pg.goto(URL); pg.wait_for_timeout(1300)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
 
-    # §330: THE HOLDER IS THE FUNCTION'S OWN. This asked
-    # `capsOfFunction(fk)[0]`, which since §322 is not where a function's
-    # own projects live and since §329 answers with nothing at all on the
+    # §334: THE HOLDER IS THE FUNCTION'S OWN. This asked
+    # `capsOfFunction(fk)[0]`, which since §326 is not where a function's
+    # own projects live and since §333 answers with nothing at all on the
     # worked example — so the fixture threw before it had made anything.
     # `fnOwnHolder(fk)` is the product's own reader for it (§53.5).
     # THE AHMED SHAPE (§147.7): named as a project's Owner, the Project

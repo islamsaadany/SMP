@@ -47,7 +47,7 @@ import sys
 from playwright.sync_api import sync_playwright
 
 import os as _os
-# THE BUILD, BY ITS OWN PATH (§330.13). This read
+# THE BUILD, BY ITS OWN PATH (§334.13). This read
 # `file:///home/user/SMP/…` — an ABSOLUTE path — so it could not be pointed
 # at any other build: a falsification made from the sources (§276) and a
 # baseline run against `origin/main` (§303) both went on measuring the
@@ -115,7 +115,7 @@ with sync_playwright() as p:
       });
       const cap = (GROUP.capabilities || []).filter(c => c.fn && (c.projects||[]).length >= 2)[0];
       if (!cap) return null;
-      /* TWO STRINGS WHERE THERE WAS ONE (§330). The PAGE is the capability's
+      /* TWO STRINGS WHERE THERE WAS ONE (§334). The PAGE is the capability's
          own destination now, and the role's PLACE is still the function that
          holds it — `personRoles` derives `powner` at `fn:<key>` either way,
          because that is where a capability's access comes from. Collapsing

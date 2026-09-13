@@ -12,7 +12,7 @@ const R = require("../lib/rules.js");
 
 const SEED = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
 
-/* ── THE FIXTURE MAKES ITS OWN BOXES (§255, §329) ────────────────────────
+/* ── THE FIXTURE MAKES ITS OWN BOXES (§255, §333) ────────────────────────
    The seed carried eight capabilities until the worked example was finished,
    and some thirty assertions in this file reach into them by `fn` — so the
    day the demo stopped shipping one, the file did not go red, it THREW on the
@@ -3542,8 +3542,8 @@ console.log("\n35 · the planning period (§308)");
   check("§308 REFUSED: moving the end alone is judged too", !r.ok, "was ALLOWED");
 })();
 
-/* ══ 36 · A PILLAR'S KIND IS PART OF ITS PLAN (§320) ════════════════════
-   §320 brings back the Direction / Capability mark §29 hid, and gives it the
+/* ══ 36 · A PILLAR'S KIND IS PART OF ITS PLAN (§324) ════════════════════
+   §324 brings back the Direction / Capability mark §29 hid, and gives it the
    first control it has ever had — a picker in the pillar's own pen. The claim
    made in that section is that the SERVER needed nothing: `kind` has been
    stored on every pillar since the model existed and rides inside `items`,
@@ -3561,11 +3561,11 @@ console.log("\n35 · the planning period (§308)");
    view-only head re-label somebody else's pillar, and a build that split it
    off as its own kind would refuse with a sentence naming Setup for a field
    that lives on the plan (§16.7). */
-console.log("\n36 · a pillar's kind is part of its plan (§320)");
+console.log("\n36 · a pillar's kind is part of its plan (§324)");
 (function () {
   const UK = Object.keys(SEED.units)[0];
   const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
-  check("§320: the seed holds a unit with a pillar and a custodian",
+  check("§324: the seed holds a unit with a pillar and a custodian",
         !!(UK && SEED.units[UK].items && SEED.units[UK].items[0] && CUST), UK + " / " + CUST);
   if (!UK || !CUST || !SEED.units[UK].items || !SEED.units[UK].items[0]) return;
 
@@ -3580,34 +3580,34 @@ console.log("\n36 · a pillar's kind is part of its plan (§320)");
      nothing (§94.5, its own recorded example). */
   const had = SEED.units[UK].items[0].kind || "";
   const want = had === "Direction" ? "Capability" : "Direction";
-  check("§320: and the fixture moves it, rather than re-writing what is there",
+  check("§324: and the fixture moves it, rather than re-writing what is there",
         had !== want, JSON.stringify([had, want]));
 
   let r = fromStored(SEED, "smo", function (i) { i.units[UK].items[0].kind = want; });
-  check("§320: the office marks a pillar a Direction or a Capability", r.ok,
+  check("§324: the office marks a pillar a Direction or a Capability", r.ok,
         (r.refusals || []).join(" / "));
 
   r = fromStored(SEED, CUST, function (i) { i.units[UK].items[0].kind = want; });
-  check("§320 REFUSED: the unit's own custodian cannot re-label its pillars",
+  check("§324 REFUSED: the unit's own custodian cannot re-label its pillars",
         !r.ok, "was ALLOWED");
 
   /* CLEARING IT IS THE SAME ACT, and the blank is a real option in the picker
      (§35: `addPillar` mints none, and inventing one would have the platform
      decide whether somebody's pillar is a direction or a capability). */
   r = fromStored(SEED, CUST, function (i) { i.units[UK].items[0].kind = ""; });
-  check("§320 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  check("§324 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
   r = fromStored(SEED, "smo", function (i) { i.units[UK].items[0].kind = ""; });
-  check("§320: the office clears one", r.ok, (r.refusals || []).join(" / "));
+  check("§324: the office clears one", r.ok, (r.refusals || []).join(" / "));
 
   /* ONE SENTENCE, and it is the plan's. */
   const inc = clone(SEED); inc.units[UK].items[0].kind = want;
   const kinds = A.collect(SEED, inc, A.worldOf ? A.worldOf(SEED) : SEED)
                  .map(function (c) { return c.kind; });
-  check("§320: it classifies as the unit's PLAN and nothing else",
+  check("§324: it classifies as the unit's PLAN and nothing else",
         kinds.length === 1 && kinds[0] === "unitPlan", kinds.join(",") || "(nothing)");
 })();
 
-/* ── 37 · A FUNCTION'S OWN PROJECTS ARE JUDGED AS A CAPABILITY'S ARE (§322) ──
+/* ── 37 · A FUNCTION'S OWN PROJECTS ARE JUDGED AS A CAPABILITY'S ARE (§326) ──
    Spec 045 stage 1: a supporting function holds its projects directly, so the
    box is what a function CARRIES rather than where its work is kept.
 
@@ -3625,14 +3625,14 @@ console.log("\n36 · a pillar's kind is part of its plan (§320)");
    verdicts must match. A later decision that changes how a project's brief is
    classified then moves both sides and this stays green, while a build that
    moved one of them goes red — which is what the file is for. */
-console.log("\n37 · a function's own projects are judged as a capability's are (§322)");
+console.log("\n37 · a function's own projects are judged as a capability's are (§326)");
 (function () {
   const R = require("../lib/rules.js");
   const FK = Object.keys(SEED.functions || {}).filter(function (k) {
     return String(SEED.functions[k].format) !== "pillars";
   })[0];
   const CAP = (SEED.group.capabilities || []).filter(function (c) { return c.fn === FK; })[0];
-  check("§322: the seed holds a projects function carrying a capability",
+  check("§326: the seed holds a projects function carrying a capability",
         !!(FK && CAP && (CAP.projects || []).length), FK + " / " + (CAP && CAP.id));
   if (!FK || !CAP || !(CAP.projects || []).length) return;
 
@@ -3651,7 +3651,7 @@ console.log("\n37 · a function's own projects are judged as a capability's are 
     });
   after.group.capabilities = (after.group.capabilities || [])
     .filter(function (c) { return c.fn !== FK; });
-  check("§322: and the fixture is the product's own dissolve, not a hand-moved graph",
+  check("§326: and the fixture is the product's own dissolve, not a hand-moved graph",
         f.projects.length >= (CAP.projects || []).length, f.projects.length + " projects");
 
   /* THE ROW IS PICKED BY WHAT IT DOES NOT ALREADY HOLD (§94.5, its own
@@ -3664,12 +3664,12 @@ console.log("\n37 · a function's own projects are judged as a capability's are 
       if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; }
     });
   });
-  check("§322: and a milestone whose status the fixture actually moves",
+  check("§326: and a milestone whose status the fixture actually moves",
         PI > -1, PI + "/" + MI);
   if (PI < 0) return;
   const capPI = PI, ownPI = f.projects.map(function (p) { return p.id; })
     .indexOf(CAP.projects[PI].id);
-  check("§322: the same project is findable on both sides", ownPI > -1, String(ownPI));
+  check("§326: the same project is findable on both sides", ownPI > -1, String(ownPI));
   if (ownPI < 0) return;
 
   const W = A.worldOf ? A.worldOf : function (x) { return x; };
@@ -3685,23 +3685,23 @@ console.log("\n37 · a function's own projects are judged as a capability's are 
   }
   function agree(what, mutate) {
     const a = kindsCap(mutate), b = kindsOwn(mutate);
-    check("§322: " + what + " means the same on both", a.length > 0 && JSON.stringify(a) === JSON.stringify(b),
+    check("§326: " + what + " means the same on both", a.length > 0 && JSON.stringify(a) === JSON.stringify(b),
           "capability " + a.join(",") + "  /  function " + b.join(","));
     return b;
   }
 
   const figure = agree("a reported figure", function (pr) { pr.milestones[MI].status = "todo"; });
-  check("§322: and that figure is REPORTING, so a reporter may make it",
+  check("§326: and that figure is REPORTING, so a reporter may make it",
         figure.indexOf("capReporting") > -1, figure.join(","));
   const brief = agree("a rewritten brief", function (pr) { pr.brief = "rewritten by the fixture"; });
-  check("§322: and a brief is the PLAN, so a reporter may not",
+  check("§326: and a brief is the PLAN, so a reporter may not",
         brief.indexOf("capPlan") > -1, brief.join(","));
   agree("a changed owner", function (pr) { pr.owner = "Somebody Else"; });
 
   /* NOTHING FALLS TO THE UNKNOWN SWEEP — the failure this section exists for,
      and the silent one: `unknown` is the office's, so the page would offer and
      the save would refuse (§191). */
-  check("§322: and NOTHING about a function's own plan reaches the unknown sweep",
+  check("§326: and NOTHING about a function's own plan reaches the unknown sweep",
         figure.indexOf("unknown") === -1 && brief.indexOf("unknown") === -1,
         figure.concat(brief).join(","));
 
@@ -3712,19 +3712,19 @@ console.log("\n37 · a function's own projects are judged as a capability's are 
     return A.authorize(after, inc, personOf(after, who));
   }
   let r = from("smo", function (pr) { pr.brief = "the office wrote this"; });
-  check("§322: the office authors a function's own project", r.ok, (r.refusals || []).join(" / "));
+  check("§326: the office authors a function's own project", r.ok, (r.refusals || []).join(" / "));
   const CUST = SEED.functions[FK].custodian || SEED.functions[FK].head;
   if (CUST) {
     r = from(CUST, function (pr) { pr.milestones[MI].status = "todo"; });
-    check("§322: the function's own custodian reports on it", r.ok, (r.refusals || []).join(" / "));
+    check("§326: the function's own custodian reports on it", r.ok, (r.refusals || []).join(" / "));
     r = from(CUST, function (pr) { pr.brief = "the custodian rewrote this"; });
-    check("§322 REFUSED: and cannot rewrite its brief", !r.ok, "was ALLOWED");
+    check("§326 REFUSED: and cannot rewrite its brief", !r.ok, "was ALLOWED");
   }
 })();
 
-/* ── 37b · AND ITS OWNER IS A PROJECT OWNER (§330, closing §322) ─────────
+/* ── 37b · AND ITS OWNER IS A PROJECT OWNER (§334, closing §326) ─────────
    The role is DERIVED off the plan's own Owner rows (§147.7) and the walk read
-   the capabilities alone — so once §322 gave a supporting function projects of
+   the capabilities alone — so once §326 gave a supporting function projects of
    its own, the owner of a project on the page where most of a tenant's
    projects now live derived NO ROLE AT ALL. It is the SHARED rule, so both
    ends failed together: the function never appeared in their navigation and
@@ -3733,7 +3733,7 @@ console.log("\n37 · a function's own projects are judged as a capability's are 
    BOTH ENDS (§94.2): the owner of a project the FUNCTION holds derives it, and
    somebody the plan does not name does not — or a build that handed the role
    to everybody attached would pass the first assertion perfectly. */
-console.log("\n37b · a function's own project owner is a Project owner (§330)");
+console.log("\n37b · a function's own project owner is a Project owner (§334)");
 (function () {
   const R = require("../lib/rules.js");
   /* THE FIXTURE UNDOES THE HARNESS'S OWN WRAP, through the product's own
@@ -3747,7 +3747,7 @@ console.log("\n37b · a function's own project owner is a Project owner (§330)"
       (SEED.group.capabilities || []).some(function (c) {
         return c && c.fn === k && (c.projects || []).length; });
   })[0];
-  check("§330: the seed holds a projects function with work under it", !!FK, FK);
+  check("§334: the seed holds a projects function with work under it", !!FK, FK);
   if (!FK) return;
   const w = clone(SEED);
   const f = w.functions[FK];
@@ -3761,7 +3761,7 @@ console.log("\n37b · a function's own project owner is a Project owner (§330)"
     });
   w.group.capabilities = (w.group.capabilities || [])
     .filter(function (c) { return c.fn !== FK; });
-  check("§330: and the function now owns them outright",
+  check("§334: and the function now owns them outright",
         (f.projects || []).length > 0, (f.projects || []).length + " projects");
   if (!(f.projects || []).length) return;
   const OWNER = "Probe Project Owner 330";
@@ -3775,14 +3775,14 @@ console.log("\n37b · a function's own project owner is a Project owner (§330)"
     const p = (w.people || []).filter(function (x) { return x.key === key; })[0];
     return R.personRoles(world, p).map(function (r) { return r.role + "@" + r.at; });
   };
-  check("§330: the owner of a function's own project derives Project owner "
+  check("§334: the owner of a function's own project derives Project owner "
         + "at the FUNCTION",
         rolesOf("probe330own").indexOf("powner@fn:" + FK) > -1,
         rolesOf("probe330own").join(", "));
-  check("§330: and somebody the plan does not name does not",
+  check("§334: and somebody the plan does not name does not",
         rolesOf("probe330not").indexOf("powner@fn:" + FK) === -1,
         rolesOf("probe330not").join(", "));
-  /* §330.18: AND THE DERIVATION IS NOT THE FEATURE — THE SAVE IS. This
+  /* §334.18: AND THE DERIVATION IS NOT THE FEATURE — THE SAVE IS. This
      section proved the role and stopped, and the row index the authoriser
      builds (`ctxOfFn`) walked the capabilities alone, so every figure this
      owner entered was refused with their role plainly derived. A role that
@@ -3794,7 +3794,7 @@ console.log("\n37b · a function's own project owner is a Project owner (§330)"
                                        { a_fn_own: "edit" });
   const first = (stored.functions[FK].projects || [])[0] || {};
   const ms = (first.milestones || [])[0];
-  check("§330.18: the fixture's project has a milestone to report",
+  check("§334.18: the fixture's project has a milestone to report",
         !!(ms && ms.id), JSON.stringify({ ms: !!ms }));
   if (ms && ms.id) {
     const want = ms.status === "done" ? "wip" : "done";
@@ -3804,21 +3804,21 @@ console.log("\n37b · a function's own project owner is a Project owner (§330)"
       m.status = want; m.pct = want === "wip" ? 20 : null;
       return A.authorize(stored, inc, personOf(stored, key));
     };
-    check("§330.18: the owner of a function's own project reports it",
+    check("§334.18: the owner of a function's own project reports it",
           send("probe330own").ok, (send("probe330own").refusals || []).join(" / "));
-    check("§330.18 REFUSED: and somebody the plan does not name does not",
+    check("§334.18 REFUSED: and somebody the plan does not name does not",
           !send("probe330not").ok, "was ALLOWED");
   }
 })();
 
-/* ── 37c · THE CONTRIBUTOR FLOOR ON A FUNCTION'S OWN PROJECT (§330.18) ──
-   §330 carried the OWNER derivation across to a function's own projects and
+/* ── 37c · THE CONTRIBUTOR FLOOR ON A FUNCTION'S OWN PROJECT (§334.18) ──
+   §334 carried the OWNER derivation across to a function's own projects and
    left the floor behind: `capsOfFn()` read the capabilities alone, so nobody
    named on a function's own project — a milestone's owner, a stakeholder, a
    collaborator — derived anything at all, and `capProjectOf()` could not say
    which project a reporting row belonged to, which is what `boundedReach()`
    asks before letting a bounded role write it. §147.8's whole feature, dead
-   for every supporting function since §322.
+   for every supporting function since §326.
 
    AND THE SUITE STAYED GREEN OVER IT, which is the finding worth keeping:
    §17 is written against the capability shape and this file WRAPS every
@@ -3830,7 +3830,7 @@ console.log("\n37b · a function's own project owner is a Project owner (§330)"
    BOTH ENDS (§94.2): the row that names them is allowed AND the row beside it
    is refused, or a build that opened the whole function passes the half that
    matters least. */
-console.log("\n37c · the contributor floor on a function's own project (§330.18)");
+console.log("\n37c · the contributor floor on a function's own project (§334.18)");
 (function () {
   const R = require("../lib/rules.js");
   const FK = Object.keys(SEED.functions || {}).filter(function (k) {
@@ -3838,7 +3838,7 @@ console.log("\n37c · the contributor floor on a function's own project (§330.1
       (SEED.group.capabilities || []).some(function (c) {
         return c && c.fn === k && (c.projects || []).length; });
   })[0];
-  if (!FK) { check("§330.18: the seed holds a projects function", false, FK); return; }
+  if (!FK) { check("§334.18: the seed holds a projects function", false, FK); return; }
   const stored = clone(SEED);
   const f = stored.functions[FK];
   f.projects = []; f.keyObjectives = f.keyObjectives || [];
@@ -3857,7 +3857,7 @@ console.log("\n37c · the contributor floor on a function's own project (§330.1
   const P0 = f.projects[0] || {};
   const mile = (P0.milestones || [])[0];
   const deliv = (P0.deliverables || [])[0];
-  check("§330.18: the fixture has a milestone and a deliverable to tell apart",
+  check("§334.18: the fixture has a milestone and a deliverable to tell apart",
         !!(mile && mile.id && deliv && deliv.id),
         JSON.stringify({ ms: !!mile, d: !!deliv }));
   if (!(mile && deliv)) return;
@@ -3876,10 +3876,10 @@ console.log("\n37c · the contributor floor on a function's own project (§330.1
     return x.key === "probe330mile"; })[0];
   const roles = R.personRoles(world, who).map(function (r) {
     return r.role + "@" + r.at; });
-  check("§330.18: a milestone's owner on a function's own project derives "
+  check("§334.18: a milestone's owner on a function's own project derives "
         + "CONTRIBUTOR at the function",
         roles.indexOf("contrib@fn:" + FK) > -1, roles.join(", "));
-  check("§330.18: the rule reads them as bounded",
+  check("§334.18: the rule reads them as bounded",
         R.onlyOwnLines(world, who, "fn", "fn:" + FK) === true);
   /* AND THE REACH IS PER ROW (§147.7), asked END TO END through the
      authoriser the endpoint calls rather than of `boundedReach` directly —
@@ -3898,18 +3898,18 @@ console.log("\n37c · the contributor floor on a function's own project (§330.1
      all, and an empty change list is ALLOWED however the rule behaves. */
   const notNow = function (row) { return row.status === "done" ? "wip" : "done"; };
   const msWant = notNow(mile), dWant = notNow(deliv);
-  check("§330.18: the fixture's two mutations are real changes",
+  check("§334.18: the fixture's two mutations are real changes",
         msWant !== mile.status && dWant !== deliv.status,
         JSON.stringify({ ms: mile.status, d: deliv.status }));
   const rMine = post(function (st) {
     const m = at(st).m; m.status = msWant; m.pct = msWant === "wip" ? 10 : null; });
-  check("§330.18: they report their own milestone",
+  check("§334.18: they report their own milestone",
         rMine.ok, (rMine.refusals || []).join(" / "));
-  check("§330.18 REFUSED: and not the deliverable beside it",
+  check("§334.18 REFUSED: and not the deliverable beside it",
         !post(function (st) { at(st).d.status = dWant; }).ok, "was ALLOWED");
 })();
 
-/* ── 38 · A CAPABILITY IS A SUBJECT OF ITS OWN (§330, spec 046 stage 2) ──
+/* ── 38 · A CAPABILITY IS A SUBJECT OF ITS OWN (§334, spec 048 stage 2) ──
    The server had never been asked about a `cap:` target, because until today
    nothing in the product could send one — which is §172's own lesson and why
    this section exists at all: four layers once agreed about a value the
@@ -3917,11 +3917,11 @@ console.log("\n37c · the contributor floor on a function's own project (§330.1
 
    BOTH ENDS EVERY TIME (§94.2). A section that only checks the head CAN
    report their capability passes on a build that allows everybody. */
-console.log("\n38 · a capability is a subject of its own (§330)");
+console.log("\n38 · a capability is a subject of its own (§334)");
 (function () {
   const CAP = (SEED.group.capabilities || []).filter(function (c) {
     return c && c.fn && (c.projects || []).length; })[0];
-  check("§330: the seed holds a capability with projects", !!CAP,
+  check("§334: the seed holds a capability with projects", !!CAP,
         CAP && CAP.id + " / " + CAP.fn);
   if (!CAP) return;
   const T = "cap:" + CAP.id, FK = CAP.fn;
@@ -3935,7 +3935,7 @@ console.log("\n38 · a capability is a subject of its own (§330)");
       if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; }
     });
   });
-  check("§330: and a milestone whose status the fixture moves", PI > -1, PI + "/" + MI);
+  check("§334: and a milestone whose status the fixture moves", PI > -1, PI + "/" + MI);
   if (PI < 0) return;
 
   const W = A.worldOf ? A.worldOf : function (x) { return x; };
@@ -3945,18 +3945,18 @@ console.log("\n38 · a capability is a subject of its own (§330)");
     return (A.collect(SEED, inc, W(SEED)) || []);
   }
   const fig = kinds(function (c) { c.projects[PI].milestones[MI].status = "todo"; });
-  check("§330: a figure inside a capability is classified against the CAPABILITY",
+  check("§334: a figure inside a capability is classified against the CAPABILITY",
         fig.length > 0 && fig.every(function (c) { return c.target === T; }),
         fig.map(function (c) { return c.kind + "@" + c.target; }).join(","));
-  check("§330: ...and it is REPORTING, so a reporter may make it",
+  check("§334: ...and it is REPORTING, so a reporter may make it",
         fig.some(function (c) { return c.kind === "capReporting"; }),
         fig.map(function (c) { return c.kind; }).join(","));
   const brief = kinds(function (c) { c.projects[PI].brief = "rewritten by the fixture"; });
-  check("§330: a brief is the PLAN, and still the capability's target",
+  check("§334: a brief is the PLAN, and still the capability's target",
         brief.some(function (c) { return c.kind === "capPlan"; }) &&
         brief.every(function (c) { return c.target === T; }),
         brief.map(function (c) { return c.kind + "@" + c.target; }).join(","));
-  check("§330: and NOTHING about a capability reaches the unknown sweep (§191)",
+  check("§334: and NOTHING about a capability reaches the unknown sweep (§191)",
         !fig.concat(brief).some(function (c) { return c.kind === "unknown"; }),
         fig.concat(brief).map(function (c) { return c.kind; }).join(","));
 
@@ -3966,19 +3966,19 @@ console.log("\n38 · a capability is a subject of its own (§330)");
     return A.authorize(SEED, inc, personOf(SEED, who));
   }
   /* THE HOLDING FUNCTION'S PEOPLE REACH IT, because a capability's access IS
-     that function's (§330 in lib/rules.js) — the whole reason the matrix
+     that function's (§334 in lib/rules.js) — the whole reason the matrix
      needed no new column. */
   if (HEAD) {
     let r = from(HEAD, function (c) { c.projects[PI].milestones[MI].status = "todo"; });
-    check("§330: the holding function's head reports on their capability",
+    check("§334: the holding function's head reports on their capability",
           r.ok, (r.refusals || []).join(" / "));
     r = from(HEAD, function (c) { c.projects[PI].brief = "the head rewrote this"; });
-    check("§330 REFUSED: and cannot rewrite its brief (§94)",
+    check("§334 REFUSED: and cannot rewrite its brief (§94)",
           !r.ok, "was ALLOWED");
   }
   if (CUST) {
     const r = from(CUST, function (c) { c.projects[PI].milestones[MI].status = "todo"; });
-    check("§330: the function's custodian reports on it too", r.ok,
+    check("§334: the function's custodian reports on it too", r.ok,
           (r.refusals || []).join(" / "));
   }
   /* AND SOMEBODY ELSE'S FUNCTION HEAD DOES NOT — the end that can fail
@@ -3989,15 +3989,15 @@ console.log("\n38 · a capability is a subject of its own (§330)");
   if (OTHERFK) {
     const r = from(SEED.functions[OTHERFK].head, function (c) {
       c.projects[PI].milestones[MI].status = "todo"; });
-    check("§330 REFUSED: another function's head does not report this capability",
+    check("§334 REFUSED: another function's head does not report this capability",
           !r.ok, "was ALLOWED");
   }
   /* A UNIT HEAD NEVER, whatever the function columns say. */
-  check("§330 REFUSED: a unit head does not report a capability",
+  check("§334 REFUSED: a unit head does not report a capability",
         !from(headKey, function (c) {
           c.projects[PI].milestones[MI].status = "todo"; }).ok, "was ALLOWED");
 
-  /* SUBMITTING IS THE SUBJECT'S OWN (§330: its own row on the board), so the
+  /* SUBMITTING IS THE SUBJECT'S OWN (§334: its own row on the board), so the
      key is the capability's and the head may write it while a bounded role
      may not — asserted as a PAIR, or a build that refused everybody passes
      the refusal half (§94.2). */
@@ -4008,9 +4008,9 @@ console.log("\n38 · a capability is a subject of its own (§330)");
     inc.review.submitted[T] = { at: "now", by: who };
     return A.authorize(SEED, inc, personOf(SEED, who));
   }
-  if (HEAD) check("§330: the head submits the capability's own report",
+  if (HEAD) check("§334: the head submits the capability's own report",
                   submit(HEAD).ok, (submit(HEAD).refusals || []).join(" / "));
-  check("§330 REFUSED: a unit head does not submit it", !submit(headKey).ok, "was ALLOWED");
+  check("§334 REFUSED: a unit head does not submit it", !submit(headKey).ok, "was ALLOWED");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

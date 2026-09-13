@@ -209,6 +209,37 @@ input.mins{text-align:right;width:52px}
      border:1px solid currentColor;border-radius:.25em;padding:.1em .35em;
      opacity:.7;align-self:center}
 
+/* THE PAUSE MARK IS DRAWN, NEVER A FONT CHARACTER. A glyph can be MAPPED by a
+   font and not DRAWN by it, and ships as a blank box (§52, §120.2) — on a
+   projector, in front of the room. Two boxes cannot fail that way. */
+.pausemark{display:inline-flex;gap:.14em;align-self:center}
+.pausemark::before,.pausemark::after{content:"";width:.17em;height:.6em;
+   background:currentColor;border-radius:.04em}
+.clock.paused{color:#414A58;background:rgba(22,50,92,.09)}
+.clock.paused .w{color:#636C79}
+
+/* The deck's own bottom bar, on its real rules — navy at .94, hairline
+   buttons, the two new ones beside Fit and Fullscreen. */
+.barmock{background:#0B1A33F0;padding:0 20px;height:58px;display:flex;
+   align-items:center;gap:14px;border-radius:4px;overflow-x:auto}
+.barmock .t{color:#fff;font-size:13.5px;margin-right:auto;white-space:nowrap}
+.barmock .t b{color:#C9A24D}
+.barmock .c{color:#8FA3C0;font-family:var(--mono);font-size:13px;
+   font-variant-numeric:tabular-nums;white-space:nowrap}
+.barmock button{background:none;border:1px solid rgba(255,255,255,.25);
+   color:#C3CEE0;font:inherit;font-size:14px;line-height:1;padding:7px 12px;
+   border-radius:20px;cursor:pointer;white-space:nowrap}
+.barmock button.txt{font-size:11.5px;letter-spacing:.06em}
+.barmock button.fresh{border-color:#C9A24D;color:#E6C65C}
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+@media (max-width:760px){.ways{grid-template-columns:1fr}}
+.way{border:1px solid var(--line);border-radius:4px;background:var(--surface);
+     padding:13px 14px}
+.way h4{margin:0 0 3px;font-size:13.5px;font-weight:700}
+.way p{margin:0;font-size:12.5px;color:var(--ink-3)}
+.way .who{display:block;font-size:var(--fs-micro);letter-spacing:.1em;
+   text-transform:uppercase;color:var(--gold-deep);font-weight:600;margin-bottom:5px}
+
 /* ── the decisions ────────────────────────────────────────────── */
 .asks{border-top:1px solid var(--line);margin-top:8px}
 .ask{display:grid;grid-template-columns:150px 1fr;gap:20px;
@@ -452,36 +483,107 @@ input.mins{text-align:right;width:52px}
 
 <!-- ─────────────────────────────────────────────────────────── -->
 <section>
-  <h2><span class="n">04</span>The rest, with my recommendation</h2>
-  <p class="lede">Each of these changes what gets built. Say
-  <em>yes</em> to the ones you agree with and name the ones you want different.</p>
+  <h2><span class="n">04</span>Pausing it</h2>
+  <p class="lede">You asked for pause in the bottom bar beside reset. Both are
+  built &mdash; but <strong>the bar is not on the screen in fullscreen</strong>,
+  which is the same obstacle that put the clock on the slide. So the bar is
+  where you pause while rehearsing, and there are two ways that reach you while
+  actually presenting.</p>
+
+  <p class="cap">The bar, windowed</p>
+  <div class="barmock">
+    <span class="t"><b>Mobile</b> &middot; 1 of 9 &middot; Q3 2026 Review</span>
+    <span class="c">13 / 28</span>
+    <button type="button" class="fresh">Pause</button>
+    <button type="button" class="fresh txt">Reset</button>
+    <button type="button">&#8592;</button>
+    <button type="button">&#8594;</button>
+    <button type="button" class="txt">Fit</button>
+    <button type="button" class="txt">Fullscreen</button>
+    <button type="button" class="txt">Exit</button>
+  </div>
+
+  <div class="ways">
+    <div class="way">
+      <h4><span class="who">Laptop, fullscreen</span>The <code>P</code> key</h4>
+      <p>The deck already answers <code>F</code> for fullscreen and
+      <code>W</code> for fit, so a letter is the existing idiom rather than a
+      new one. <code>P</code> is free &mdash; measured.</p>
+    </div>
+    <div class="way">
+      <h4><span class="who">Tablet, fullscreen</span>Tap the clock</h4>
+      <p>A tablet has no <code>P</code> key, and you present from one. The deck
+      already knows not to advance a slide when a button is pressed, so the
+      clock can be that button.</p>
+    </div>
+    <div class="way">
+      <h4><span class="who">Deliberately bar-only</span>Reset is not either</h4>
+      <p>Pause is reversible; reset throws the elapsed time away. A stray tap
+      that pauses costs a press. A stray tap that resets cannot be undone.</p>
+    </div>
+  </div>
+
+  <p class="cap" style="margin-top:26px">And the clock has to say it is paused</p>
+  <div class="tile">
+    <div class="tile-h">
+      <b>Frozen, and marked</b>
+      <span>Or the presenter cannot tell paused from broken &mdash; and neither
+      can the room</span>
+    </div>
+    <div class="stage"><div class="clock paused"><span class="pausemark"></span>12:30<span class="w">Paused</span></div></div>
+    <div class="dets">
+      <div class="det">
+        <p class="lab">Running</p>
+        <div class="crop"><div class="clock calm">12:30</div></div>
+      </div>
+      <div class="det">
+        <p class="lab">Paused &mdash; <i>the same minute, held</i></p>
+        <div class="crop"><div class="clock paused"><span class="pausemark"></span>12:30<span class="w">Paused</span></div></div>
+      </div>
+      <div class="det">
+        <p class="lab">Running again</p>
+        <div class="crop"><div class="clock calm">12:28</div></div>
+      </div>
+    </div>
+    <p class="note" style="padding:12px 14px 14px;margin:0">The mark is two
+    drawn boxes, never a keyboard character &mdash; a glyph a font maps but
+    cannot draw ships as a blank rectangle, and this one would do it on a
+    projector.</p>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section>
+  <h2><span class="n">05</span>The rest, with my recommendation</h2>
+  <p class="lede">All five agreed, 13 Sep. Kept here as the record of what
+  is being built.</p>
 
   <dl class="asks">
     <div class="ask">
       <dt>Down, not up</dt>
-      <dd><span class="rec">Rec</span>It reads <b>12:30</b> left, not 2:30
+      <dd><span class="rec">Agreed</span>It reads <b>12:30</b> left, not 2:30
       elapsed against a target you do the arithmetic on.</dd>
     </div>
     <div class="ask">
       <dt>It keeps going</dt>
-      <dd><span class="rec">Rec</span>At zero it carries on in red as
+      <dd><span class="rec">Agreed</span>At zero it carries on in red as
       <b>+2:30</b>. A timer that stops has stopped being useful.</dd>
     </div>
     <div class="ask">
       <dt>It starts itself</dt>
-      <dd><span class="rec">Rec</span>In a flow, each unit's clock starts when
+      <dd><span class="rec">Agreed</span>In a flow, each unit's clock starts when
       you reach their first slide &mdash; the platform already knows where each
       one begins. On a single deck, when the deck opens.</dd>
     </div>
     <div class="ask">
       <dt>A reset in the bar</dt>
-      <dd><span class="rec">Rec</span>Open the deck twenty minutes before the
+      <dd><span class="rec">Agreed</span>Open the deck twenty minutes before the
       room settles and the clock has eaten the slot. One small reset, in the
       bottom bar where it does not clutter the slide.</dd>
     </div>
     <div class="ask">
       <dt>No minutes, no clock</dt>
-      <dd><span class="rec">Rec</span>A unit you left blank shows nothing at
+      <dd><span class="rec">Agreed</span>A unit you left blank shows nothing at
       all. Better silence than a number nobody chose.</dd>
     </div>
     <div class="ask">

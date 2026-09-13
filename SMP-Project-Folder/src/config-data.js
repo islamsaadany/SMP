@@ -4655,9 +4655,20 @@ function canReport(unitKey){
      has always judged the same save against the own-FUNCTION one (`edits(…,
      "fn", t)`). Invisible for as long as custodian and head shipped with
      both cells at edit; visible the day one is tightened, and the exact
-     screen-says-yes / server-says-no drift §42 exists to prevent. */
-  var page = String(unitKey).indexOf("fn:") === 0 ? "k_report" : "u_report";
-  return grantAt(page, unitKey) === "edit";
+     screen-says-yes / server-says-no drift §42 exists to prevent.
+
+     §337: AND IT IS `SMPRules.reportPageOf()`, NEVER THE PREFIX TEST AGAIN.
+     That rule has answered for `cap:` since §334 and this line had not been
+     told, so a capability drawn by the unit's pages (one that plans in
+     PILLARS, §334) was judged in the BUSINESS-UNIT column — which a function
+     head owns none of. Measured on the shipped demo with no cell tightened at
+     all: `u_report` none, `k_report` edit, so every figure box was read-only
+     under a live *Submit to the SMO*, because `canSpeakFor` one screen over
+     already asked the right column (§104.8's family). The server has been
+     right throughout (§334.6), so this is the screen refusing what the save
+     accepts — §61's trap, and the one direction a check that only drives the
+     office can never see. */
+  return grantAt(SMPRules.reportPageOf(unitKey), unitKey) === "edit";
 }
 
 /* ONE ROW, for the roles that are limited to their own. Everybody else whose
@@ -4676,8 +4687,11 @@ function canReportRow(unitKey, x){
      unit's key objectives carry none, deliberately: they are the unit's
      headline and belong to no pillar, so nobody's draft can close them. */
   if (ownDraftShut(unitKey, x && x.cid)) return false;
-  var area = String(unitKey).indexOf("fn:") === 0 ? "fn" : "unit";
-  return SMPRules.mayReportRow(world(), viewer(), area, unitKey,
+  /* §337: `areaOfTarget()`, for the reason it was named once (§330.5) — this
+     ternary is the same question one function below, and it answered "unit"
+     for a capability while `boundedHere` two hundred lines down answered
+     "fn". */
+  return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
       pillarOwner: x.pown });
 }
@@ -4842,8 +4856,11 @@ function canEnterFigure(unitKey, x){
 /* The note stays with the unit whatever the figure does. */
 function canEnterNote(unitKey, x){
   var who = figureAssignee(x);
+  /* §337: the column this target is judged in, never `u_report` outright —
+     the third spelling of one question inside 190 lines, and on a function or
+     a capability it refused the note to somebody the right column allows. */
   if (who && !inOffice() && who === viewer().key &&
-      grantAt("u_report", unitKey) !== "edit") return false;
+      grantAt(SMPRules.reportPageOf(unitKey), unitKey) !== "edit") return false;
   return canReportRow(unitKey, x);
 }
 /* Every figure this person enters, across every unit — resolved through the

@@ -1555,7 +1555,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   (§214.3; the third time on `fn-pillars`' one line) and were **REWRITTEN, never
   loosened** (§218) — one to the property §65 actually guarantees, the other to
   the two sheets' DIFFERENCE rather than two literals agreeing by accident.
-- **WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§340):**
+- **WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§344):**
   Islam — *"when I set a target like a % for the annual view and I build it on
   monthly level and set it to latest if I go to the reporting the target
   required should read from the latest month we are measured against. verify
@@ -1606,7 +1606,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   **made the awkward rows on purpose** (§245, §273.3). **Proved able to fail four
   ways from the SOURCES** (§276): **6 / 5 / 1 / 1 red**, the last printing
   `4500 of 4,500` verbatim.
-  **§340.1 — AND TWO FALSIFICATIONS DID NOT FALSIFY**: a shell quoting slip meant
+  **§344.1 — AND TWO FALSIFICATIONS DID NOT FALSIFY**: a shell quoting slip meant
   two breaks never applied and each reported **0 red**, which is
   indistinguishable from a guard that works (§54.5) — redone they are 5 and 1,
   and what separates the two is asserting the break MATCHED before writing it.
@@ -1619,7 +1619,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   failures**. §320.6b by a third road, and in a batch it reads as a pass until
   the tails are read one at a time (§298.3). One line: a falsy `executable_path`
   is treated as absent, so the wrapper holds whether or not the variable is
-  exported. **§340.2 — RECORDED, NOT DONE**: a *needs a note* row is unreadable
+  exported. **§344.2 — RECORDED, NOT DONE**: a *needs a note* row is unreadable
   in DARK — `tr.wantnote:nth-child(even) > td` is a hardcoded `#FBF1EF` with no
   dark twin under `#E9ECF1` text, about **1.05:1**, three of four such rows on
   one pillar (§25's own fault, the zebra stripe's) — **reproduced on the
@@ -8136,7 +8136,7 @@ python3 checks/measure-score-spread.py # a summary is made of the number it summ
                                 # first red run printed five and reached no cell at all,
                                 # having leaned on the new reader to measure with (§215)
 python3 checks/reporting-ytd-target.py # what a row is measured against, in the
-                                # column beside the box it is typed into (§340): the
+                                # column beside the box it is typed into (§344): the
                                 # benchmark asserted as AGREEMENT with measureDueLabel and
                                 # never as a literal, because the review point is the one
                                 # thing about this that moves; BOTH ENDS every time, since
@@ -9027,7 +9027,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;340: what a row is measured against,
+*Last Updated: 2026-09-13 &mdash; **&sect;344: what a row is measured against,
 beside the box it is typed into.** Islam &mdash; *"when I set a target like a %
 for the annual view and I build it on monthly level and set it to latest if I go
 to the reporting the target required should read from the latest month we are
@@ -9059,13 +9059,13 @@ and refused when three sites shared the expression (&sect;2b). Server asserted
 rather than claimed (&sect;172): 633/0, 140/0. Signed off from a mockup made of
 the REAL pane that **made the awkward rows on purpose** (&sect;245); proved able
 to fail four ways from the SOURCES (&sect;276) &mdash; **6 / 5 / 1 / 1 red**.
-**&sect;340.1 &mdash; TWO FALSIFICATIONS DID NOT FALSIFY** (a quoting slip; each
+**&sect;344.1 &mdash; TWO FALSIFICATIONS DID NOT FALSIFY** (a quoting slip; each
 reported 0 red, indistinguishable from a guard that works &mdash; &sect;54.5),
 **and three neighbours reported "0 red" having never launched a browser**:
 `qa-run.py`'s `setdefault` cannot override the explicit `None` that nineteen of
 172 checks pass as `executable_path`, so they died at launch printing no failures
 (&sect;320.6b by a third road) &mdash; one line, a falsy path is treated as
-absent. **&sect;340.2 &mdash; RECORDED, NOT DONE**: a *needs a note* row is
+absent. **&sect;344.2 &mdash; RECORDED, NOT DONE**: a *needs a note* row is
 unreadable in DARK (`#FBF1EF` with no dark twin under `#E9ECF1`, about 1.05:1),
 **reproduced on the UNTOUCHED build** (&sect;303), so it is a decision of its own
 rather than something to ride along here (rule 1b).*

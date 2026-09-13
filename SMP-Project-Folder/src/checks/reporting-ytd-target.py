@@ -1,4 +1,4 @@
-"""WHAT A ROW IS MEASURED AGAINST, IN THE COLUMN BESIDE THE BOX (§340).
+"""WHAT A ROW IS MEASURED AGAINST, IN THE COLUMN BESIDE THE BOX (§344).
 
 Islam: *"when I set a target like a % for the annual view and I build it on
 monthly level and set it to latest if I go to the reporting the target required

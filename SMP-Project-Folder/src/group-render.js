@@ -7959,7 +7959,7 @@ function tgtShown(v){
   return SMPRules.isYesNo(v) ? "Yes / No" : esc(unitTight(v));
 }
 
-/* ── WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§340) ──
+/* ── WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§344) ──
    Islam: *"when I set a target like a % for the annual view and I build it on
    monthly level and set it to latest if I go to the reporting the target
    required should read from the latest month we are measured against."*

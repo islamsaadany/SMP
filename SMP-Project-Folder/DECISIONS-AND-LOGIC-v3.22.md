@@ -45734,7 +45734,7 @@ learn either action — it has been unreachable since the cutover put Next in
 front of it (§317.8), which is §322's own precedent.
 
 ---
-## §340 — WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (2026-09-13)
+## §344 — WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (2026-09-13)
 
 Islam: *"when I set a target like a % for the annual view and I build it on
 monthly level and set it to latest if I go to the reporting the target required
@@ -45832,7 +45832,7 @@ is silenced by §238's hashed CSP): **6 red** with the old behaviour put back,
 branch removed, **1 red** with the guard comparing strings, that last one
 printing `4500 of 4,500` verbatim.
 
-### §340.1 — AND TWO FALSIFICATIONS DID NOT FALSIFY, WHICH IS THE SAME FAULT TWICE
+### §344.1 — AND TWO FALSIFICATIONS DID NOT FALSIFY, WHICH IS THE SAME FAULT TWICE
 
 Two of the four breaks **never applied** — a shell quoting slip — and each
 reported **0 red**, which is indistinguishable from a guard that works
@@ -45853,7 +45853,7 @@ of neighbours it reads as a pass until the tails are read one at a time (§298.3
 is treated as absent, so the wrapper now holds whether or not the variable is
 exported. All three are green once they actually run.
 
-### §340.2 — RECORDED, NOT DONE
+### §344.2 — RECORDED, NOT DONE
 
 - **A "needs a note" row is unreadable in DARK.** `arrange.css` paints
   `tbody tr.wantnote:nth-child(even) > td` a hardcoded **`#FBF1EF`** with no

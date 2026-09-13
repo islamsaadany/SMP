@@ -4,6 +4,10 @@
 and who publishes are settled below; what the module actually holds waits on a
 reading of the SMS repository (§2).
 
+**Not spec 050.** That one is Forefront's own strategy frameworks library,
+which lives outside every client and is nobody's module. The two share only
+the word *library*.
+
 Read with **spec 046 (Modules)**, whose §4.2 contract is the test this passes,
 whose §4.4 already decides access per module, and whose §4.8 describes the
 library machine this is an instance of.

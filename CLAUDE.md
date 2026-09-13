@@ -7710,6 +7710,26 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
+- **ONE REPOSITORY, AND A MODULE IS A FOLDER (§345, spec 046
+  `repo-boundary.md`):** anything that runs inside the client platform lives
+  here. A module shares `withTenant()`, the door, the session, one route handler
+  that resolves its address, `lib/modules.ts` (read by **seven** hand-written
+  places plus two generated copies) and `scripts/deploy.mjs`'s schema apply —
+  so a second repository is a second copy of each, drifting **with nothing able
+  to go red**, since a check cannot assert across a boundary it cannot see
+  (§329, §335's shape; §289's with the schema applied twice). **Four tests, any
+  one enough to split:** sold to somebody who is not an SMP client; built by
+  people who must not hold push rights; holding data the platform's own code
+  must not read; or a **service** rather than a module — answers over HTTP,
+  holds no client rows, swappable for a third party (`lib/mailer.cjs` and the
+  clip store already are, and are correctly outside). None of Strategy,
+  Portfolio, Insights or Processes passes any. **Isolation is bought a folder
+  and then a package boundary before it is bought a repository.** **STILL OPEN
+  AND IT IS THE ONE THAT MATTERS:** where the spine/module line runs in the
+  code — today Strategy **is** the shell, and the route handler branches
+  between `lib/shell.ts` and `lib/trial.ts` *because there are two of them*,
+  which is right at two and wrong at three. Settle it with two modules, not
+  four.
 - **WHEN A FIELD IS RENAMED, FIND THE CODE THAT CREATES IT** — not only the
   code that reads it (§51.10). §15 renamed a capability's `measures`/`tactics`
   to `keyObjectives`/`projects`; the ADD button kept minting the old shape for
@@ -9258,7 +9278,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;344: what a row is measured against,
+*Last Updated: 2026-09-13 &mdash; **&sect;345: one repository, and the line that
+is not drawn yet.** Islam, of the modules &sect;320 named: *"I have various
+modules that can join this repo. when would I keep them on different repos and
+when should I bring them into 1 repo, given that I want them integrated on the
+client platform"*. **A QUESTION RATHER THAN A FAULT, SO NOTHING IS BUILT**: no
+source, no built file, no generated copy, no schema and no check is touched, and
+the built file is asserted byte-identical to the shipped one. **THE ANSWER
+FOLLOWS FROM WHAT A MODULE ALREADY SHARES, MEASURED RATHER THAN ARGUED** &mdash;
+spec 046 &sect;4.2 names the five things a module BRINGS, and read the other way
+that list states what it does not, which is the expensive half: `withTenant()`
+is the one way tenant data is reached and an unset tenant reads **empty** rather
+than everybody's; the door, the session and the seat are one; one route handler
+resolves the module and must know which ones the client holds; `lib/modules.ts`
+is read by **seven** hand-written places plus two generated copies, which is the
+drift its own header exists to prevent (&sect;53.5); and `scripts/deploy.mjs`
+applies the schema on EVERY build, so two repositories means two pipelines
+applying two copies of it to one database (&sect;289's shape, longer fuse).
+**AND IT WOULD DRIFT WITH NOTHING ABLE TO GO RED**, which is what makes it
+expensive rather than annoying: &sect;329 and &sect;335 are that same gap at a
+much shorter distance, and `checks/modules.mjs` asserts facts ACROSS modules
+that no check can assert about code it cannot see. **FOUR TESTS, ANY ONE ENOUGH
+TO SPLIT** &mdash; sold outside SMP's clients, built by people who must not hold
+push rights, holding data the platform's own code must not read, or a SERVICE
+rather than a module &mdash; and the fourth already has instances, which is what
+keeps it honest (`lib/mailer.cjs` and the clip store, correctly outside, in no
+switcher). **None of the four named modules passes any of them.** Isolation is
+bought a folder and then a package boundary before it is bought a repository.
+**THE OPEN ITEM IS THE ONE THAT MATTERS AND IS DELIBERATELY NOT ANSWERED**:
+where the spine/module line runs in the code &mdash; Strategy **is** the shell
+today, and the route handler's own comment says it branches between two servers
+*because there are two of them*, which is right at two and wrong at three.
+Settling it with two modules is far cheaper than discovering it with four. The
+page is `specs/046-modules/repo-boundary.md`; **what would reverse it is written
+down**, so a change of mind is a decision rather than a drift.*
+
+*Earlier the same day: **&sect;344: what a row is measured against,
 beside the box it is typed into.** Islam &mdash; *"when I set a target like a %
 for the annual view and I build it on monthly level and set it to latest if I go
 to the reporting the target required should read from the latest month we are

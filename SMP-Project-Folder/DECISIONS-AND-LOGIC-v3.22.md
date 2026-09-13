@@ -46995,3 +46995,88 @@ exported. All three are green once they actually run.
   and it is not written here: it changes a section Islam has not seen, inside a
   merge commit, which is what rule 1b forbids and what §316 costs. Named in the
   merge's what-to-check, with the measurement.
+
+---
+
+## §345 — ONE REPOSITORY, AND THE LINE THAT IS NOT DRAWN YET (2026-09-13)
+
+Islam, of the modules §320 named and §344's neighbours have begun building
+around: *"I have various modules that can join this repo. when would I keep them
+on different repos and when should I bring them into 1 repo, given that I want
+them integrated on the client platform"*. A question rather than a fault, so
+what is written here is the reasoning and not a change: **no source, no built
+file, no generated copy, no schema and no check is touched by it.** The page is
+`specs/046-modules/repo-boundary.md` and this section is its record.
+
+**THE ANSWER FOLLOWS FROM WHAT A MODULE ALREADY SHARES, WHICH IS WHY IT COULD BE
+MEASURED RATHER THAN ARGUED.** §320's own contract (spec 046 §4.2) names the
+five things a module must bring — its navigation, its roles and areas, its Setup
+group, its rhythm, a landing — and read the other way that list also states what
+it does **not** bring, which is the expensive half. Measured on the tree as it
+stands: `withTenant()` is the ONE way tenant data is reached, and with no
+setting every tenant table reads **empty** rather than everybody's (§314, §289);
+the door, the session and the seat on the client are one (§313); one route
+handler resolves the module and has to know which ones the client holds; and
+`lib/modules.ts` is read by **seven hand-written places plus two generated
+copies** — the route, the landing, the platform console's API, the trial module,
+the shell's own browser file and two checks. That file's own header says why the
+list is declared once: so a fifth module is an entry there rather than an edit
+in the console, the switcher and Setup, **which is how two screens come to spell
+one module differently** (§53.5). *A second repository re-creates by hand
+exactly the drift the file exists to prevent.*
+
+**AND IT WOULD DRIFT WITHOUT ANYTHING GOING RED, WHICH IS WHAT MAKES IT
+EXPENSIVE RATHER THAN ANNOYING.** §329 exists because `smp-app/public/` is
+generated from the frozen sources and TRACKED, so a source edited without
+re-running a generator left production serving the old bytes with nothing
+comparing the two — and §335 is the same fault one directory over, in modules
+carried rather than generated. A repository boundary is that gap made wider, and
+**no check can span it**: `checks/modules.mjs` asserts facts that are true
+ACROSS modules (a module the client does not hold falling through to the legacy
+branch; the switcher listing exactly what they hold), and a check cannot assert
+that about code it cannot see. **The practical one is the schema**:
+`scripts/deploy.mjs` applies it on every build under a transaction-scoped lock,
+so two repositories means two pipelines applying two COPIES of it to one
+database — the lock stops them corrupting each other and does nothing about them
+disagreeing, which is §289's shape with a much longer fuse.
+
+**FOUR TESTS, ANY ONE OF THEM ENOUGH**: it is sold to somebody who is not an SMP
+client; it is built by people who must not hold push rights; it holds data the
+platform's own code must not be able to read; or it is a service rather than a
+module — it answers over HTTP, holds no client rows, and could be swapped for a
+third party tomorrow. **The fourth already has instances and naming them is what
+keeps the test honest**: `lib/mailer.cjs` and the clip store are exactly that
+shape (§72, §261), correctly outside the tree, and neither ever appears in the
+switcher. **None of Strategy, Portfolio, Insights or Processes passes any of the
+four** — all four are the client's own data, in the client's own tenant, behind
+the client's own door, written by Forefront or by the client through the matrix
+(spec 046 §4.3).
+
+**ISOLATION IS BOUGHT MORE CHEAPLY THAN WITH A REPOSITORY, AND THAT IS THE HALF
+WORTH KEEPING**: a folder per module, then a package boundary naming what a
+module may reach on the spine and what it may never touch, and only then a
+repository. The first two give almost all of the isolation; only the third also
+gives up shared checks, one deployment, one migration path and a change that can
+cross the seam atomically.
+
+**THE OPEN ITEM IS THE ONE THAT MATTERS AND IS DELIBERATELY NOT ANSWERED**:
+where the line between spine and module runs IN THE CODE. Today it is implicit —
+Strategy **is** the shell — and the route handler's own comment says it chooses
+between `lib/shell.ts` and `lib/trial.ts` with a branch rather than a table
+**because there are two of them**, a table for two being a place to look things
+up that says less than the two lines it replaces (§2b). That is right at two and
+wrong at three. Four things want naming before Portfolio rather than
+discovering during it: what a module may reach on the spine, as a declared list
+and not as whatever it happens to import; what it may never touch; how a module
+declares itself, since `MODULE_DEF` carries the part every surface needs today
+and the contract asks for five; and who serves a module's document once the
+branch stops holding. **Doing it with two modules is far cheaper than doing it
+with four**, and it is what makes the second module cheap rather than the second
+module being the thing that teaches us where the line was.
+
+**AND WHAT WOULD CHANGE THE ANSWER IS WRITTEN DOWN**, so reversing it is a
+decision rather than a drift: a module gaining customers outside SMP's clients,
+a team who must not hold push rights, material under a different
+confidentiality regime — where *the platform's own code should not read it* is
+the requirement rather than *this client's staff should not* — or a module that
+stops holding client rows and becomes something we call over HTTP.

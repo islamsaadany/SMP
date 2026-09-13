@@ -7017,6 +7017,41 @@ section instead of this branch's own mockup. One line, and it would have been
 invisible for ever.
 
 
+### §336.2 — Two of `main`'s checks assert a screen that is not on the stack they measure
+
+Both went red in this round's sweep and **both fail identically on
+`origin/main`**, on files byte-identical between the two (§303 — established by
+reproducing, never by reading the diff):
+
+- **`checks/multi-client.py`** serves the FROZEN files over HTTP and waits for
+  `.ccard[data-client='raya-trade'] .mrow[data-module='strategy']`.
+- **`smp-app/checks/modules.mjs`** slices `platform.html` from
+  `function drawClient(` and compares two `page.appendChild` calls inside it.
+
+**NONE OF THOSE FIVE STRINGS IS IN THE FILE.** `platform.html` holds
+`drawClients(`, and `modulesBlock()` builds each module as a `teamrow` with no
+`data-module` on it and appends the block to the set-up flow's client step
+rather than to a drawer. The assertions ABOVE each of them pass, so the band IS
+drawn and the served copy IS regenerated — **what has gone in both cases is the
+check's SUBJECT**, not the feature.
+
+One cause, worth naming once: §320's round wrote its screen on the new stack
+and updated two checks that point at the frozen one. **Left as `main`'s**, and
+said rather than guessed at: repairing either means deciding markup and a
+placement on a screen this branch did not design, and a fix that reaches
+further than the fault is a second fault with a green check over it (§316).
+
+**AND THE REST OF THE SWEEP IS GREEN**: 171 checks walked, zero failures; the
+thirteen mockup GENERATORS refuse the sweep exactly as §330.14 built them to;
+`multi-client` and `platform-look` decline with no database and **were then run
+against a rehearsal one** built the way §313.37 describes (seed a tenant in
+`public`, `migrate-to-multi-client.js`, then the fixture) — `platform-look`
+**27/0**, `multi-client` the one failure above. **AND FOUR "EMPTY" TAILS WERE MY
+OWN RUNNER**, not the checks: `kb-file`, `measure-score-spread` and those two
+end their output with a blank line, so a `tail -1` reported nothing where the
+verdict is one line up — §298.3's rule (*the tail is the verdict*) failing on
+the harness that quotes it. Each was re-run and read: ALL CLEAR, all green.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

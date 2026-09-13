@@ -9010,17 +9010,26 @@ units, functions or capabilities to inherit &mdash; with the name and the
 register standing beside the three absences as the control (&sect;113.8), or a
 build serving no graph would pass. Falsified from the SOURCES (&sect;276): with
 `__smpBare`'s four lines removed the one assertion goes red printing
-`RHI,10,8,0,1`, the old behaviour verbatim. **AND ONE RED IS MAIN'S AND IS LEFT
-AS MAIN'S**, established by reproducing it on `origin/main`'s own build first
-(&sect;303): `checks/modules.mjs` slices the platform page from `function
-drawClient(` and compares two `page.appendChild` calls, and **none of those
-three strings is in the file** &mdash; it holds `drawClients(` and appends the
-band inside `modulesBlock()` under the set-up flow's client step; the two
-assertions above it pass, so the band is drawn and what has gone is the check's
-SUBJECT. Repairing it means deciding what *placement B* now means on a screen
-this branch did not design, and a fix that reaches further than the fault is a
-second fault with a green check over it. **&sect;336.1 &mdash; AND THE RENUMBER KNEW ONE SPELLING OF A CITATION.** It ran across 114 files and moved every `&sect;NNN` written as `§NNN`, and **none written as an HTML entity** &mdash; which `CLAUDE.md` uses throughout &mdash; so **83 citations across two files went on naming the old numbers**, and the merge then gave those numbers to `main`'s own sections. *A citation that survives a renumber is not a stale reference; after a merge it is a reference to somebody else's section*, which reads perfectly and sends the next person to the wrong page (&sect;264.3's fault by the opposite road &mdash; that one took lines it did not own, this one took none of the lines it did). **Separated by MATCHED TEXT, never by number**: every line of the branch's own pre-merge file carrying one is a line the branch wrote, so those exact lines are bumped and the 17 that do not match are checked one by one as `main`'s. **And the baseline has to be the commit AFTER the renumber** &mdash; matching the pre-renumber text missed exactly one line, whose *spec 046* the renumber had already made *spec 048*, so it no longer matched itself: `&sect;321.9` &rarr; `&sect;325.9`, by then naming `main`'s horizon section instead of this branch's own mockup. **VERIFIED**: full `qa.py` **33 viewers,
-229 destinations, ERRORS none**; authoriser 633/0; differ 140/0; round trip,
+`RHI,10,8,0,1`, the old behaviour verbatim. **&sect;336.2 &mdash; AND TWO REDS ARE MAIN'S AND ARE LEFT AS MAIN'S**, both
+established by reproducing them on `origin/main`'s own build, on files
+byte-identical between the two (&sect;303): `checks/multi-client.py` waits for a
+`.mrow[data-module=]` on a client card, and `smp-app/checks/modules.mjs` slices
+`platform.html` from `function drawClient(` to compare two `page.appendChild`
+calls &mdash; and **none of those five strings is in the file**, which holds
+`drawClients(` and builds each module as a `teamrow` with no attribute, inside
+the set-up flow's client step rather than a drawer. The assertions ABOVE each of
+them pass, so the band is drawn and the served copy is regenerated: **what has
+gone in both cases is the check's SUBJECT**. One cause &mdash; &sect;320's round
+wrote its screen on the new stack and updated two checks that point at the
+frozen one &mdash; and repairing either means deciding markup and a placement on
+a screen this branch did not design, which is a fix reaching further than the
+fault (&sect;316). **AND FOUR 'EMPTY' TAILS IN THE SWEEP WERE MY OWN RUNNER**:
+four checks end their output with a blank line, so a `tail -1` reported nothing
+where the verdict is one line up &mdash; &sect;298.3's rule failing on the
+harness that quotes it; each re-run and read, all green. **&sect;336.1 &mdash; AND THE RENUMBER KNEW ONE SPELLING OF A CITATION.** It ran across 114 files and moved every `&sect;NNN` written as `§NNN`, and **none written as an HTML entity** &mdash; which `CLAUDE.md` uses throughout &mdash; so **83 citations across two files went on naming the old numbers**, and the merge then gave those numbers to `main`'s own sections. *A citation that survives a renumber is not a stale reference; after a merge it is a reference to somebody else's section*, which reads perfectly and sends the next person to the wrong page (&sect;264.3's fault by the opposite road &mdash; that one took lines it did not own, this one took none of the lines it did). **Separated by MATCHED TEXT, never by number**: every line of the branch's own pre-merge file carrying one is a line the branch wrote, so those exact lines are bumped and the 17 that do not match are checked one by one as `main`'s. **And the baseline has to be the commit AFTER the renumber** &mdash; matching the pre-renumber text missed exactly one line, whose *spec 046* the renumber had already made *spec 048*, so it no longer matched itself: `&sect;321.9` &rarr; `&sect;325.9`, by then naming `main`'s horizon section instead of this branch's own mockup. **VERIFIED**: the full frozen sweep **171 checks, 0 failures** (the two
+above excepted and established as `main`'s); full `qa.py` **33 viewers,
+229 destinations, ERRORS none**; `platform-look` 27/0 on a rehearsal database;
+authoriser 633/0; differ 140/0; round trip,
 clean parity, two tabs, functional projects 18/0, capability move and the
 incremental writer all green on virgin databases; state 91/0, door 50/0, shell
 **72/0**, blob 23/23, comms 47/47, upload 9/9, demo 7/7, room 10/0, deploy 5/0,

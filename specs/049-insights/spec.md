@@ -1,8 +1,8 @@
 # 049 · Insights — the library, published by Forefront
 
-**Status:** two decisions taken 2026-09-13; the rest specified. **Nothing is
-drawn and nothing is built** — the two screens want a mockup before a line of
-them is written (rule 1c).
+**Status:** every decision taken 2026-09-13 (two on the name and the publisher,
+then the four of §7). **Nothing is built** — the two screens want a mockup
+before a line of them is written (rule 1c).
 
 **Decisions section:** to be taken on the build. Not claimed here, because a
 number claimed in advance is one another session takes while this is in flight
@@ -191,10 +191,9 @@ reasonable start and are not adopted unread — they are Forefront's to set.
 way in so the order somebody clicked in cannot change what is stored. An unknown
 word is dropped rather than refused (the file gets this right).
 
-**NEEDS ISLAM'S WORD, and it is in §7:** whether one client's categories are
-another's. A market-research vocabulary for a retail group is not one for a
-bank, and the Official BU list (§54) is the precedent for *the client's own
-words, stored per client, set by us*.
+**ANSWERED — one list for every client, for now** (§7.1). The Official BU list
+(§54) is the precedent for the other answer the day it is wanted, and storing
+the words is what keeps that day cheap.
 
 ### 4.5 · Who may open it
 
@@ -218,10 +217,10 @@ everything in it* — and the per-item visibility it defers.
 
 **No role in the module, no module in the switcher** (spec 046 §4.4, §61).
 
-**THE SHIPPED DEFAULT NEEDS HIS WORD** and is in §7. The argument each way: a
-library Forefront chose to publish to a client is *for* that client, which says
-`view` for everyone; and this project's own instinct is that defaults ship at
-the narrow answer and the client's Super user opens them (§37, §42).
+**THE SHIPPED DEFAULT IS `view` FOR EVERY ROLE** (§7.2) — a library Forefront
+chose to publish to a client is for that client. A default and not a floor: the
+client's Super user narrows it on the table, and an absent key falls back here
+because absent means *not answered yet* (§30.2).
 
 ### 4.6 · Versions — replace in place, and say which edition
 
@@ -320,20 +319,37 @@ Tailwind classes are another product's. Nothing of that layer ports.
 
 ---
 
-## 7 · Not decided — Islam's, before the mockups are drawn
+## 7 · The four that were open — answered 2026-09-13
 
-1. **Are the categories the same for every client, or the client's own?**
-   Recommendation: **one fixed list now**, stored as words so per-client later
-   costs no migration (§4.4). Against it: a research vocabulary is exactly the
-   kind of thing that differs per client, and the Official BU list (§54) is the
-   precedent for us setting a client's own words.
-2. **What does the module default to on the access table — `view` for
-   everybody, or `none` until the client's Super user opens it?** (§4.5.)
-3. **Does Processes come with it, or after it?** Spec 046 says *nearly free
-   once Insights exists*; free is not nothing, and the answer changes what the
-   first mockup draws.
-4. **The blob store** — the package and the key (§3). Not a design decision, but
-   uploads cannot be proved without it.
+All four put to Islam with the cost of each stated, and all four taken as
+recommended. Recorded as his, with what each one closes.
+
+**7.1 · The categories are ONE LIST FOR EVERY CLIENT, for now.** About six
+words we agree, the same everywhere. **What makes it safe to start fixed is
+that the item stores the WORDS** (§4.4), so giving one client their own later
+reads the same stored rows, moves no data and needs no migration — an addition
+rather than a rebuild. The cost is stated rather than discovered: a research
+vocabulary is exactly the kind of thing that differs between a bank and a
+retailer, and the day it does, §4.7's Setup group is where it lands.
+
+**7.2 · Everybody in the client can open it, to begin with.** A library
+Forefront chose to publish to a client is *for* that client, and their Super
+user can still narrow it. **This is a shipped DEFAULT and not a floor** (§117's
+own shape, and §30.2: an absent key means *not answered yet* and falls back
+here). The cost: the narrow direction is the safe one elsewhere in this product
+(§42), and this is the one place a module ships open.
+
+**7.3 · Processes comes AFTER**, which is spec 046 §5's own order held. Once
+Insights exists it is a small job; building both at once doubles what is
+reviewed before anything reaches a client, and puts any mistake in the shared
+half into two modules rather than one.
+
+**7.4 · The file store is switched on FIRST**, before the build starts — the
+package installed and `BLOB_READ_WRITE_TOKEN` set on the deployment (§3). So
+uploading and downloading a real PDF is **proved as it is built** rather than
+reasoned about and tested at the end, on the half most likely to surprise us.
+*This is the one of the four that is an action rather than a decision, and it
+is Islam's: the key is set in Vercel's own settings and never pasted here.*
 
 ---
 

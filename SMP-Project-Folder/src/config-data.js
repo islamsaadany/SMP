@@ -31,7 +31,7 @@ var LABELS = {
       note:"The measures under a single pillar." },
     { key:"tactic",      internal:"Tactic",             group:"Tactics",           bu:"Tactics",
       note:"The work under a pillar. Spans quarters, has an owner." },
-    /* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL NOW (§344). The set-up
+    /* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL NOW (§346). The set-up
        flow has asked for it since §322 and wrote it NOWHERE — there was no
        such entry, so the minter walked this list, found no match and dropped
        the answer: accepted, saved and never used, which is the quietest kind

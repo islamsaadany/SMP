@@ -1,4 +1,4 @@
-/* WHAT THE SET-UP FLOW WRITES, AND WHAT IT MUST NOT TOUCH (§344)
+/* WHAT THE SET-UP FLOW WRITES, AND WHAT IT MUST NOT TOUCH (§346)
 
    Four faults in one line of frozen.cjs, and none of them was visible to any
    check that existed: the flow's own file asserts the way in, the client, the

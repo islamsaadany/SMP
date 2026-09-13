@@ -1642,6 +1642,79 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   (§214.3; the third time on `fn-pillars`' one line) and were **REWRITTEN, never
   loosened** (§218) — one to the property §65 actually guarantees, the other to
   the two sheets' DIFFERENCE rather than two literals agreeing by accident.
+- **WHAT A ROW IS MEASURED AGAINST, BESIDE THE BOX IT IS TYPED INTO (§344):**
+  Islam — *"when I set a target like a % for the annual view and I build it on
+  monthly level and set it to latest if I go to the reporting the target
+  required should read from the latest month we are measured against. verify
+  this."* **VERIFIED, AND IT SPLIT IN TWO**: the arithmetic was right and the
+  screen he was looking at did not show it. His case MADE on a real row and
+  measured first (§3a) — 30% for the year, twelve months typed in, `Latest`,
+  reported as of Jun 2026, with the plan shaped so the three candidate answers
+  differ (**latest month 29, year 30, flat half 15**): `monthlyDue`,
+  `measureDue` and `measureDueLabel` all answer **29**, Performance draws
+  `31% / 29%`, and the Reporting column headed *Target* drew **30%**.
+  **AND IT IS OLDER THAN THE MONTHLY PLAN AND NOT ONLY ABOUT `Latest`**,
+  established on a SHIPPED row before the newest feature was blamed (§303):
+  Accessory revenue, 300M EGP, `Sum`, no monthly plan **reads 300M against a
+  platform measuring it at 150M** — every prorating row has read this way since
+  §239 put the benchmark on Performance and the deck and nowhere else.
+  **§278's own *"(c) reporting is unchanged"* was about MONTHLY ACTUALS**, which
+  Islam declined; reading it rather than quoting it is what made this buildable,
+  and its other half — *compared against a benchmark that is finally accurate* —
+  is what this does. **THE PAGE WAS ALREADY CONTRADICTING ITSELF**, which is why
+  the treatment is a copy and not a design decision: three tables on one screen
+  and the tactics one has been headed **YTD Target** with the benchmark over
+  `.subhd`'s *of …* since §248, so the two above it are brought to the one below
+  — **no new CSS, no new vocabulary** (§53.5). **ONE BUILDER, FOUR CALL SITES**
+  (`repTargetCell`, `REP_TGT_HEAD`): a unit's key objectives, a pillar's key
+  measures (a **pillars function** draws the same, §59), a capability's, and the
+  tactics heading whose literal it replaces. **A ROW WHOSE BENCHMARK IS ITS
+  ANNUAL TARGET IS BYTE-IDENTICAL** — yes/no (§257), a target holding only its
+  unit (§251), `Latest`, `Average` and a blank target all untouched; six rows
+  change on the demo's own pillar and seven do not. **AND THE TEST IS THE VALUE,
+  NEVER THE STRING, CAUGHT IN THE MOCKUP**: `measureDueLabel` rebuilds its number
+  through `joinTarget`, which drops a thousands separator, so a text compare drew
+  **`4500` over `of 4,500`** on a row that does not prorate at all — a second
+  line saying nothing above a figure re-spelt on the way (§254.1).
+  **§276: A COUNT WITH NOTHING OWED YET IS NOT A ROW OWING NOUGHT** — a
+  CONSEQUENCE of the rename rather than scope, since the annual under a YTD
+  heading claims the year falls due today; the em-dash this column already draws
+  for a row it cannot measure, with the annual underneath, and the check makes a
+  `Count` row owing nought **and one owing some beside it** (§113.8).
+  **PERFORMANCE AND THE TEMPLE ARE NOT TOUCHED AND IT WAS CHECKED RATHER THAN
+  SWEPT**: three sites share the expression this replaces and the other two are
+  `renderFnPerformance`'s, where the benchmark already rides beside the figure —
+  **the patch asserted its match count and refused when it found three**, which
+  is what stopped a one-line change reaching two pages nobody asked about (§2b).
+  **The server needed nothing and it is asserted** (§172): 633/0, 140/0, nothing
+  stored, nothing migrated. **Measured** (§158): tallest row 55 → 56.5px, the
+  column 154 → 180px out of the name column's slack, fitting its pane at
+  1600/1440/1280/1100/1000. Signed off from a mockup made of the REAL pane which
+  **made the awkward rows on purpose** (§245, §273.3). **Proved able to fail four
+  ways from the SOURCES** (§276): **6 / 5 / 1 / 1 red**, the last printing
+  `4500 of 4,500` verbatim.
+  **§344.1 — AND TWO FALSIFICATIONS DID NOT FALSIFY**: a shell quoting slip meant
+  two breaks never applied and each reported **0 red**, which is
+  indistinguishable from a guard that works (§54.5) — redone they are 5 and 1,
+  and what separates the two is asserting the break MATCHED before writing it.
+  **AND THREE NEIGHBOURS REPORTED "0 red" HAVING NEVER LAUNCHED A BROWSER**:
+  `qa-run.py` patched the launch with `kw.setdefault("executable_path", CHROME)`
+  and **nineteen of 172 checks pass
+  `executable_path=os.environ.get("SMP_CHROME")`**, which unset is an explicit
+  `None` — the key is PRESENT, so setdefault left it, Playwright fell back to its
+  own build number, and the check died at launch printing a stack trace and **no
+  failures**. §320.6b by a third road, and in a batch it reads as a pass until
+  the tails are read one at a time (§298.3). One line: a falsy `executable_path`
+  is treated as absent, so the wrapper holds whether or not the variable is
+  exported. **§344.2 — RECORDED, NOT DONE**: a *needs a note* row is unreadable
+  in DARK — `tr.wantnote:nth-child(even) > td` is a hardcoded `#FBF1EF` with no
+  dark twin under `#E9ECF1` text, about **1.05:1**, three of four such rows on
+  one pillar (§25's own fault, the zebra stripe's) — **reproduced on the
+  UNTOUCHED build with nothing made and nothing rewritten** (§303), so it is one
+  line of CSS reaching every table that marks a row and is a decision of its own
+  rather than something to ride along here (rule 1b); and Performance still
+  prints the annual with no benchmark on an unreported row, which is a question
+  about what that page shows.
 - **A REPORTED FIGURE FOLLOWS THE TARGET'S UNIT (§277):** Islam — *"the YTD
   is showing 2% from 2# I don't know where this error is happening."* Not the
   arithmetic (2 of 2 due IS 100%): the reporting box stamps a typed number
@@ -7637,6 +7710,26 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
+- **ONE REPOSITORY, AND A MODULE IS A FOLDER (§345, spec 046
+  `repo-boundary.md`):** anything that runs inside the client platform lives
+  here. A module shares `withTenant()`, the door, the session, one route handler
+  that resolves its address, `lib/modules.ts` (read by **seven** hand-written
+  places plus two generated copies) and `scripts/deploy.mjs`'s schema apply —
+  so a second repository is a second copy of each, drifting **with nothing able
+  to go red**, since a check cannot assert across a boundary it cannot see
+  (§329, §335's shape; §289's with the schema applied twice). **Four tests, any
+  one enough to split:** sold to somebody who is not an SMP client; built by
+  people who must not hold push rights; holding data the platform's own code
+  must not read; or a **service** rather than a module — answers over HTTP,
+  holds no client rows, swappable for a third party (`lib/mailer.cjs` and the
+  clip store already are, and are correctly outside). None of Strategy,
+  Portfolio, Insights or Processes passes any. **Isolation is bought a folder
+  and then a package boundary before it is bought a repository.** **STILL OPEN
+  AND IT IS THE ONE THAT MATTERS:** where the spine/module line runs in the
+  code — today Strategy **is** the shell, and the route handler branches
+  between `lib/shell.ts` and `lib/trial.ts` *because there are two of them*,
+  which is right at two and wrong at three. Settle it with two modules, not
+  four.
 - **WHEN A FIELD IS RENAMED, FIND THE CODE THAT CREATES IT** — not only the
   code that reads it (§51.10). §15 renamed a capability's `measures`/`tactics`
   to `keyObjectives`/`projects`; the ADD button kept minting the old shape for
@@ -8263,6 +8356,26 @@ python3 checks/measure-score-spread.py # a summary is made of the number it summ
                                 # reward on it. 11 red on the build before — and its own
                                 # first red run printed five and reached no cell at all,
                                 # having leaned on the new reader to measure with (§215)
+python3 checks/reporting-ytd-target.py # what a row is measured against, in the
+                                # column beside the box it is typed into (§344): the
+                                # benchmark asserted as AGREEMENT with measureDueLabel and
+                                # never as a literal, because the review point is the one
+                                # thing about this that moves; BOTH ENDS every time, since
+                                # four of the five row shapes must come out of it COMPLETELY
+                                # unchanged (a row that does not prorate, a yes/no row, a
+                                # target holding only its unit, a row with no target) and a
+                                # file that only looked at the case being fixed would pass
+                                # on a build that rewrote every cell in the product; a row
+                                # whose target carries a thousands separator, which is the
+                                # whole reason the guard is on the VALUE (§254.1) and
+                                # without which the string-compare build passes everything
+                                # else; a `Count` owing nought AND one owing some (§113.8);
+                                # all THREE sides of the navigation switch (§334) with the
+                                # capability's own destination and its key objectives MADE,
+                                # because §333 left the demo one capability holding none;
+                                # and PERFORMANCE asserted untouched. It MAKES every row it
+                                # measures (§255). Proved able to fail four ways from the
+                                # SOURCES (§276): 6 / 5 / 1 / 1 red
 python3 checks/ytd-proration.py # YTD is measured against the part of the year that has
                                 # PASSED (§239): the review point is a month and the
                                 # office picks it; Sum prorates and Latest must not; the
@@ -9165,8 +9278,93 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;345: a capability is a step, and
-the middle option takes the platform's own word.** Islam, of &sect;344's
+*Last Updated: 2026-09-13 &mdash; **&sect;345: one repository, and the line that
+is not drawn yet.** Islam, of the modules &sect;320 named: *"I have various
+modules that can join this repo. when would I keep them on different repos and
+when should I bring them into 1 repo, given that I want them integrated on the
+client platform"*. **A QUESTION RATHER THAN A FAULT, SO NOTHING IS BUILT**: no
+source, no built file, no generated copy, no schema and no check is touched, and
+the built file is asserted byte-identical to the shipped one. **THE ANSWER
+FOLLOWS FROM WHAT A MODULE ALREADY SHARES, MEASURED RATHER THAN ARGUED** &mdash;
+spec 046 &sect;4.2 names the five things a module BRINGS, and read the other way
+that list states what it does not, which is the expensive half: `withTenant()`
+is the one way tenant data is reached and an unset tenant reads **empty** rather
+than everybody's; the door, the session and the seat are one; one route handler
+resolves the module and must know which ones the client holds; `lib/modules.ts`
+is read by **seven** hand-written places plus two generated copies, which is the
+drift its own header exists to prevent (&sect;53.5); and `scripts/deploy.mjs`
+applies the schema on EVERY build, so two repositories means two pipelines
+applying two copies of it to one database (&sect;289's shape, longer fuse).
+**AND IT WOULD DRIFT WITH NOTHING ABLE TO GO RED**, which is what makes it
+expensive rather than annoying: &sect;329 and &sect;335 are that same gap at a
+much shorter distance, and `checks/modules.mjs` asserts facts ACROSS modules
+that no check can assert about code it cannot see. **FOUR TESTS, ANY ONE ENOUGH
+TO SPLIT** &mdash; sold outside SMP's clients, built by people who must not hold
+push rights, holding data the platform's own code must not read, or a SERVICE
+rather than a module &mdash; and the fourth already has instances, which is what
+keeps it honest (`lib/mailer.cjs` and the clip store, correctly outside, in no
+switcher). **None of the four named modules passes any of them.** Isolation is
+bought a folder and then a package boundary before it is bought a repository.
+**THE OPEN ITEM IS THE ONE THAT MATTERS AND IS DELIBERATELY NOT ANSWERED**:
+where the spine/module line runs in the code &mdash; Strategy **is** the shell
+today, and the route handler's own comment says it branches between two servers
+*because there are two of them*, which is right at two and wrong at three.
+Settling it with two modules is far cheaper than discovering it with four. The
+page is `specs/046-modules/repo-boundary.md`; **what would reverse it is written
+down**, so a change of mind is a decision rather than a drift.*
+
+*Earlier the same day: **&sect;344: what a row is measured against,
+beside the box it is typed into.** Islam &mdash; *"when I set a target like a %
+for the annual view and I build it on monthly level and set it to latest if I go
+to the reporting the target required should read from the latest month we are
+measured against. verify this."* **VERIFIED, AND IT SPLIT IN TWO**: the
+arithmetic was right and the screen he was looking at did not show it. Made on a
+real row and measured before anything was proposed (&sect;3a), with the monthly
+plan shaped so the three candidate answers differ &mdash; **latest month 29, year
+30, flat half 15**: `monthlyDue`, `measureDue` and `measureDueLabel` all answer
+29, Performance draws `31% / 29%`, and the Reporting column headed *Target* drew
+**30%**. **AND IT IS OLDER THAN THE MONTHLY PLAN**, established on a SHIPPED row
+before the newest feature was blamed (&sect;303): Accessory revenue, 300M EGP,
+`Sum`, no monthly plan reads 300M against a platform measuring it at 150M
+&mdash; every prorating row since &sect;239. **&sect;278's own *"(c) reporting is
+unchanged"* was about MONTHLY ACTUALS**, which Islam declined; its other half
+&mdash; *compared against a benchmark that is finally accurate* &mdash; is what
+this does. **THE PAGE WAS ALREADY CONTRADICTING ITSELF**, so the treatment is a
+copy rather than a design decision: the tactics table three inches down the same
+screen has been headed **YTD Target** with `.subhd`'s *of &hellip;* since
+&sect;248 &mdash; **no new CSS, no new vocabulary** (&sect;53.5). **ONE BUILDER,
+FOUR CALL SITES**; a row whose benchmark IS its annual target is
+**byte-identical**, so yes/no, a unit-only target, `Latest`, `Average` and a
+blank target are untouched (six rows change on the demo's own pillar, seven do
+not). **THE TEST IS THE VALUE, NEVER THE STRING, CAUGHT IN THE MOCKUP**: a text
+compare drew `4500` over `of 4,500` on a row that does not prorate at all
+(&sect;254.1). **&sect;276's count owing nought** gets the em-dash rather than a
+claim that the year falls due today. **Performance and the Temple are untouched
+and it was CHECKED rather than swept** &mdash; the patch asserted its match count
+and refused when three sites shared the expression (&sect;2b). Server asserted
+rather than claimed (&sect;172): 633/0, 140/0. Signed off from a mockup made of
+the REAL pane that **made the awkward rows on purpose** (&sect;245); proved able
+to fail four ways from the SOURCES (&sect;276) &mdash; **6 / 5 / 1 / 1 red**.
+**&sect;344.1 &mdash; TWO FALSIFICATIONS DID NOT FALSIFY** (a quoting slip; each
+reported 0 red, indistinguishable from a guard that works &mdash; &sect;54.5),
+**and three neighbours reported "0 red" having never launched a browser**:
+`qa-run.py`'s `setdefault` cannot override the explicit `None` that nineteen of
+172 checks pass as `executable_path`, so they died at launch printing no failures
+(&sect;320.6b by a third road) &mdash; one line, a falsy path is treated as
+absent. **&sect;344.2 &mdash; RECORDED, NOT DONE**: a *needs a note* row is
+unreadable in DARK (`#FBF1EF` with no dark twin under `#E9ECF1`, about 1.05:1),
+**reproduced on the UNTOUCHED build** (&sect;303), so it is a decision of its own
+rather than something to ride along here (rule 1b); **and the MERGE leaves a
+fifth reporting table behind** &mdash; `fnObjReportBody`, main's &sect;342,
+written the same day against the world before this rename and carrying the
+expression this replaced byte for byte, so neither branch was inconsistent alone
+and the merged product draws both (&sect;274's own shape). **Measured, it is on
+no screen today**: no function in the demo carries that format. One line,
+deliberately not written inside a merge commit, and named in the
+what-to-check.*
+
+*Earlier: 2026-09-13 &mdash; **&sect;347: a capability is a step, and
+the middle option takes the platform's own word.** Islam, of &sect;346's
 mockup: *"ok for the capability"* &mdash; then the question that dated half the
 same finding: *"but the functions plan in 3 ways, pillars, projects and
 objectives did you find this on main?"* **THE ANSWER WAS NO WHEN I GAVE IT AND
@@ -9175,7 +9373,7 @@ written, so the wizard's dulled option went live under me and my written answer
 was stale before he read it. **What the question was pointing at survives the
 correction** &mdash; the Functions step was two builds behind the platform, and
 the half that stayed behind is the WORD.
-**&sect;345.1 &mdash; THE CAPABILITIES STEP WRITES ONE**: it was dulled and
+**&sect;347.1 &mdash; THE CAPABILITIES STEP WRITES ONE**: it was dulled and
 said the thing it asks for does not exist, which spec 049 built (&sect;341,
 &sect;343). **Three questions per row and they are SETUP'S OWN THREE** &mdash;
 a name, which function carries it, how it is planned &mdash; because
@@ -9189,7 +9387,7 @@ three** &mdash; `capFormat()` reads anything that is not "pillars" as projects,
 so offering the third would be a control whose answer the graph silently turns
 into something else (&sect;61, &sect;96.2), narrowed on the screen AND
 validated by the minter or the rule is the page's alone (&sect;42).
-**&sect;345.2 &mdash; AND `holds` HAD TO STOP COUNTING THE BOX**: it counted
+**&sect;347.2 &mdash; AND `holds` HAD TO STOP COUNTING THE BOX**: it counted
 capabilities AT ALL, which was right while nothing out here could make one
 &mdash; one existing meant somebody had made it inside the platform. The moment
 this step can, adding one refuses the very next press and locks the consultant
@@ -9197,11 +9395,11 @@ out of their own set-up (&sect;61). It counts one that HOLDS something &mdash;
 objectives, projects or pillars, **all three, because counting only projects is
 the same fault one field along** &mdash; asserted at both ends with the worked
 example's own capability still counting.
-**&sect;345.3** the middle option becomes *Projects*: a function holds its own
+**&sect;347.3** the middle option becomes *Projects*: a function holds its own
 directly since &sect;343, so the old label named the arrangement that was
 replaced and was a THIRD spelling of a word `planFormatCell` and
 `capFormatCell` both already write (&sect;53.5). Only the word changes.
-**&sect;345.4 &mdash; AND `client-setup-outside.py` WAS RED ON `main`'s OWN
+**&sect;347.4 &mdash; AND `client-setup-outside.py` WAS RED ON `main`'s OWN
 BUILD**, established as not this branch's before anything was blamed
 (&sect;303): &sect;342 made all three formats live and left the check asserting
 *"two are live and the third is INERT"*, and this branch never touched
@@ -9212,9 +9410,9 @@ reddens it until the wizard offers it; and **&sect;8d asserted a landing by
 name** &mdash; Back reaching Companies past the dulled step &mdash; which with
 that step open would pass over nothing (&sect;113.8), so it walks the whole
 rail forward with Next and back with Back and asserts the two orders are each
-other reversed. That would have caught &sect;344.6 and holds whether or not
+other reversed. That would have caught &sect;346.6 and holds whether or not
 anything is ever dulled again; `stepFrom()`'s loop is KEPT for the same reason,
-since removing it puts &sect;344.6 back the day a step is dulled.
+since removing it puts &sect;346.6 back the day a step is dulled.
 `setup-shape.mjs` is 33/0 RED six ways; `client-setup-outside.py` gains
 &sect;6b, asserting what the step POSTS and never what it draws (&sect;96), at
 both ends. **AND &sect;6b's FIRST RUN DIED RATHER THAN REPORTING**
@@ -9226,14 +9424,14 @@ landed on the plans-in picker. **The mockup is NOT updated to match the build**
 &mdash; it is the record of what was signed off, not of what was built
 (Principle II).*
 
-*Earlier: 2026-09-13 &mdash; **&sect;344: what the set-up flow never
+*Earlier: 2026-09-13 &mdash; **&sect;346: what the set-up flow never
 asked about is not the flow's to reset.** Islam: *"can you check the current
 main and see what we should enhance in the wizard?"* &mdash; an assessment
 first, then his word on each of seven findings one at a time. **TWO OF MY OWN
 ESTIMATES IN THAT WRITE-UP WERE WRONG AND BOTH ARE CORRECTED RATHER THAN
 QUIETLY WIDENED**: item 3 was called *"one line"* and is a label sweep, item 1
 was called *"who runs what"* and is five kinds of data on one line.
-**&sect;344.1 &mdash; A SECOND PASS THROUGH THE FLOW PUT BACK AN EMPTY ROW**:
+**&sect;346.1 &mdash; A SECOND PASS THROUGH THE FLOW PUT BACK AN EMPTY ROW**:
 `__smpShape` empties four lists and re-mints every row, so fixing a spelling or
 changing one word returned a unit with no head, no custodian, no weight, no
 mark, no aspiration and no Who we are answers, and a function with no head and
@@ -9251,7 +9449,7 @@ and nothing is written**: the flow's rows carry no id, so out here a rename is
 indistinguishable from a removal, and the act somebody wants is a rename, which
 keeps the row on the client's own Setup page (&sect;16.7). A company is matched
 by NAME, because `addCompany` mints positionally.
-**&sect;344.2 &mdash; THE STEP THAT DESCRIBES A PLATFORM TWO BUILDS AGO** is
+**&sect;346.2 &mdash; THE STEP THAT DESCRIBES A PLATFORM TWO BUILDS AGO** is
 DRAWN, not built (rule 1c): the Capabilities step is dulled and says the thing
 it asks for does not exist, which spec 048 built (&sect;326, &sect;334, live in
 the sources), and *"Capabilities &amp; projects"* on the Functions step is a
@@ -9260,7 +9458,7 @@ mockup is in the console's own stylesheet lifted verbatim (&sect;41.9) and
 carries the one decision that is Islam's: `holds` counts a capability AT ALL,
 right while nothing out here could make one and a lock-out the moment this step
 can.
-**&sect;344.3 &mdash; THE FIRST WORD THE FLOW ASKS FOR WAS WRITTEN NOWHERE**:
+**&sect;346.3 &mdash; THE FIRST WORD THE FLOW ASKS FOR WAS WRITTEN NOWHERE**:
 `unitword` is not a key in the label registry, so the minter dropped it &mdash;
 accepted, saved, and the platform went on saying its own word (&sect;294.2's
 write-only column). **And adding it to the source reaches a NEW client and
@@ -9277,16 +9475,16 @@ knowledge base, every `plural()`, the workbook's headers (&sect;22, &sect;65)
 and the role-key map left alone and SAID. **And the rail's own entry resolves at
 render time, not in `SUBS`**, which is evaluated before the tenant's graph
 arrives (&sect;64).
-**&sect;344.4** a row left unnamed is refused rather than dropped, asked of the
+**&sect;346.4** a row left unnamed is refused rather than dropped, asked of the
 SHAPE and in `commitSetup()` as well as `goStep()` (three doors do not go
-through the latter). **&sect;344.5** a client with a plan in it says so and its
+through the latter). **&sect;346.5** a client with a plan in it says so and its
 four shape steps are read-only &mdash; its own flag, never `canEdit`, because
 the name, the mark, the modules and the team are still the consultant's; the
-archived band's own shape and never drawn beside it (&sect;87). **&sect;344.6**
+archived band's own shape and never drawn beside it (&sect;87). **&sect;346.6**
 Back walked into the dulled step and returned, an enabled button that did
 nothing (&sect;96); `stepFrom()` is one answer in both directions and walks past
 a RUN of them.
-**&sect;344.7 &mdash; AND THE CHECKS THAT WOULD HAVE SEEN ANY OF IT**: the
+**&sect;346.7 &mdash; AND THE CHECKS THAT WOULD HAVE SEEN ANY OF IT**: the
 flow's own file had no section for the words step, the companies step, the
 office step or a SECOND pass, which is why four of these were invisible.
 `smp-app/checks/setup-shape.mjs` needs no database and no browser, because
@@ -9301,8 +9499,9 @@ assertions after it down. `check:modules` 61/1 reproduces **identically with
 this work stashed** (&sect;303) &mdash; it is &sect;336.2's. **The built file
 changes**, so a merge owes the `sw.js` SHELL bump confirmed against
 `origin/main` immediately before the push (&sect;91, &sect;94.16). **RECORDED,
-NOT DONE**: the knowledge base keeps the platform's own word, and &sect;344.2 is
+NOT DONE**: the knowledge base keeps the platform's own word, and &sect;346.2 is
 drawn and awaiting Islam.*
+
 
 
 *Earlier: 2026-09-13 &mdash; **&sect;343: a breakdown of a pillar's

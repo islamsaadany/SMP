@@ -1,4 +1,4 @@
-/* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL (§344)
+/* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL (§346)
 
    The set-up flow has asked every consultant what their client calls a
    business unit since §322, and wrote the answer NOWHERE: there was no such

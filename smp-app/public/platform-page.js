@@ -1235,7 +1235,7 @@
      open an empty page (§61). *For now* has run out: objectives and actions
      is built, so the dull flag goes and the sentence that explained it goes
      with it rather than being left to mislead (§104.8). */
-  /* §345: THE MIDDLE OPTION IS "Projects", WHICH IS WHAT IT NOW MEANS. A
+  /* §347: THE MIDDLE OPTION IS "Projects", WHICH IS WHAT IT NOW MEANS. A
      supporting function needed a capability to hold any project until §334;
      since then it holds its own directly, so "Capabilities & projects" named
      the old arrangement — and it was a THIRD spelling of a word planFormatCell
@@ -1293,7 +1293,7 @@
       S.shape.functions = S.shape.functions || [];
       S.shape.capabilities = S.shape.capabilities || [];
       S.shape.words = S.shape.words || {};
-      /* ── AND THE SHAPE STOPS BEING EDITABLE ONCE THERE IS A PLAN (§344) ──
+      /* ── AND THE SHAPE STOPS BEING EDITABLE ONCE THERE IS A PLAN (§346) ──
          shapeClient has refused a re-shape since §322 — rightly, because the
          answers ARE the list and replacing them on a client with authored
          work is how real work is lost — and the flow was TOLD so, storing
@@ -1362,7 +1362,7 @@
     n.hidden = !msg;
   }
 
-  /* ONE ANSWER TO WHICH STEP IS NEXT, IN EITHER DIRECTION (§344, §53.5).
+  /* ONE ANSWER TO WHICH STEP IS NEXT, IN EITHER DIRECTION (§346, §53.5).
      Next stepped over the dulled Capabilities step and Back did not, so Back
      from Functions called goStep on a step goStep refuses to open and simply
      returned — an enabled, pressable button that did nothing (§96). The rail
@@ -1375,7 +1375,7 @@
     return (n < 0 || n > STEPS.length - 1) ? -1 : n;
   }
 
-  /* AND A ROW LEFT UNNAMED IS REFUSED RATHER THAN DROPPED (§344). The minter
+  /* AND A ROW LEFT UNNAMED IS REFUSED RATHER THAN DROPPED (§346). The minter
      skips a blank name, so the row was posted, silently thrown away, and left
      drawn on screen until the client was reopened — §96 with the sign
      reversed. Islam: "refuse to move on without naming or remove." Asked of
@@ -1454,7 +1454,7 @@
     }
 
     /* ── AND A CLIENT WITH A PLAN IN IT SAYS SO, ON THE STEPS IT AFFECTS
-       (§344). The same shape as the archived band above and the same reason
+       (§346). The same shape as the archived band above and the same reason
        (§45.2, §53.5) — the fields below are read-only and a form refusing
        every keystroke with nothing saying why reads as broken. Drawn on the
        four SHAPE steps alone, because the client's name, its mark, its
@@ -1560,7 +1560,7 @@
     sw.appendChild(s1); sw.appendChild(s2);
     a.appendChild(sw);
     a.appendChild(chipBlock("Business units", S.shape.units, "unit", "None — this client can open blank."));
-    /* §345: beside the units on the strategic side, which is where they sit in
+    /* §347: beside the units on the strategic side, which is where they sit in
        the navigation — so the panel reads as the thing being built rather than
        as a list of answers (§322's own argument for the switch above it). */
     if (S.at >= stepIdx("caps") && S.shape.capabilities.length) {
@@ -2255,7 +2255,7 @@
     return box;
   }
 
-  /* ── A CAPABILITY IS A ROW YOU ADD, LIKE THE OTHERS (§345) ───────────
+  /* ── A CAPABILITY IS A ROW YOU ADD, LIKE THE OTHERS (§347) ───────────
      This step was dulled and said the thing it asks for does not exist.
      It does: spec 049 built a capability as its own entry on the strategic
      side of the navigation, beside the business units, carried by a

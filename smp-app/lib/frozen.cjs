@@ -213,7 +213,7 @@ function __smpHydrateAnd(state) { __smpHydrate(state); return state; }
    be refused. */
 function __smpHolds(state) {
   __smpHydrate(state);
-  /* A CAPABILITY THAT HOLDS NOTHING IS NOT AUTHORED WORK (§345). This counted
+  /* A CAPABILITY THAT HOLDS NOTHING IS NOT AUTHORED WORK (§347). This counted
      capabilities AT ALL, which was right for as long as nothing out here could
      make one: the flow could not create a capability, so one existing meant
      somebody had made it inside the platform. The set-up step makes them now,
@@ -239,7 +239,7 @@ function __smpHolds(state) {
            units: (UNIT_KEYS || []).length, functions: (FUNCTION_KEYS || []).length };
 }
 
-/* WHAT THE FLOW NEVER ASKED ABOUT IS NOT THE FLOW'S TO RESET (§344).
+/* WHAT THE FLOW NEVER ASKED ABOUT IS NOT THE FLOW'S TO RESET (§346).
    The rewrite below empties four lists and re-mints every row, which is
    right for the shape and wrong for everything hanging off it: a second
    pass through the flow — fixing a spelling, adding a unit, changing one
@@ -273,7 +273,7 @@ function __smpShape(state, a) {
      why this empties four lists rather than starting from a bare graph. */
   var wasUnits = state.units || {}, wasFns = state.functions || {};
   var wasCos = state.companies || {}, wasRoles = state.unitRoles || {};
-  /* A CAPABILITY IS A ROW THE FLOW OWNS NOW (§345), so it is replaced with the
+  /* A CAPABILITY IS A ROW THE FLOW OWNS NOW (§347), so it is replaced with the
      rest of the shape — and matched by NAME on the way back, because its id is
      minted fresh by addCapability and the flow's rows carry none. Safe only
      because the caller refuses the whole re-shape once any capability HOLDS
@@ -351,7 +351,7 @@ function __smpShape(state, a) {
        pass through the flow resetting a function's head and its definition. */
     if (k && wasFns[k]) FUNCTIONS[k] = __smpCarry(wasFns[k], FUNCTIONS[k], ["name", "format"]);
   });
-  /* ── AND THE CAPABILITIES, AFTER THE FUNCTIONS THAT CARRY THEM (§345) ──
+  /* ── AND THE CAPABILITIES, AFTER THE FUNCTIONS THAT CARRY THEM (§347) ──
      addCapability takes the function's KEY, so the functions have to exist
      first; the flow names its holder, because a name is the only thing about
      a function its own rows carry. A name that matches nothing leaves the
@@ -456,7 +456,7 @@ function holds(graph) {
 /* The set-up flow's answers written in by the product's own minters (§322).
    Answers { state, dropped }: `dropped` names the units and functions that
    had somebody in charge and are not in the answers, so the caller can write
-   nothing rather than lose them (§344). */
+   nothing rather than lose them (§346). */
 function shape(graph, answers) {
   const c = context();
   return detach(c.__smpShape(graph, answers));

@@ -45825,3 +45825,125 @@ to that client's own register first. The demo is `made_here = true` and is not
 affected.
 
 ---
+
+## §338 — THE OFFICE'S OWN ROW KEEPS ITS STANDING, AND THE CONSULTANTS LIST STOPS BEING ADD-ONLY (2026-09-13)
+
+Islam, setting a client up through the flow: ***"a strange error it worked
+with the team but for me it's not working"*** — inside **Meridian Group**, the
+client he had just created, he read **NO ROLE** and *"No pages granted. The
+roles this person holds reach nothing."* while every colleague he added
+worked.
+
+**IT ONLY EVER HITS THE PERSON WHO CREATED THE CLIENT, AND THAT IS THE WHOLE
+DIAGNOSIS.** A Forefront admin opens a client they made **by rule**
+(`door.ts`'s `seatFor` — §313's own design, because somebody has to open a
+client nobody is on yet), so they hold a minted register row and **no
+`tenant_users` membership**. The moment they add the FIRST colleague,
+`setTeam`'s sweep — *"a row the platform minted and nobody is any more is
+retired"* — computes "nobody" as *not in `tenant_users`*, reads the creator as
+a stranger, and **retires their own row**. Everybody they add is in that list,
+so the sweep leaves them alone: exactly his sentence.
+
+**AND IT NEVER CAME BACK, WHICH IS WHAT MADE IT A LOCK-OUT RATHER THAN A
+FLICKER.** `officeRow`'s adoption branch set the `role` and never the
+standing; and the walk does not even reach that branch for him, because
+`byEmailRows` skips a retired row — so it falls through to the mint, where
+`ON CONFLICT (tenant_id, key) DO NOTHING` handed the retired row straight back
+untouched. Adding himself to the team afterwards changed nothing.
+
+**REPRODUCED BEFORE ANYTHING WAS PROPOSED** (§3a), on a real Postgres through
+the product's own `frozen.bare` + `loadGraph` + `officeRow` + `registerKeyFor`:
+
+```
+after he opens the client he just made:  ff_islam_saadany  role="super"  active=(unset)
+after he adds ONE colleague:             ff_islam_saadany  role="super"  active=false
+after he adds HIMSELF as Super user:     ff_islam_saadany  role="super"  active=false
+  Islam Saadany   pages=0  chips=[]            ← his screen
+  Ahmed Galal     pages=2  chips=[SMO team]    ← the colleague's
+```
+
+**PLACING SOMEBODY LIFTS THE RETIREMENT**, in both places that place them —
+the adoption branch and the mint's `ON CONFLICT`, which is the one his case
+actually walks. Reaching either line means they hold a seat NOW, so the row
+comes back; and because `personFor` calls `officeRow` on **every** request,
+a tenant already in that state heals on the next page load nobody has to make
+on purpose. Measured: `pages=0` → `pages=2, chips=[Super user]`.
+
+**THE SWEEP IS NOT WEAKENED AND BOTH ENDS ARE ASSERTED**: a colleague taken
+OFF a team is still retired and still reads nothing, or a build that simply
+stopped retiring anybody would pass every assertion above while quietly
+leaving every departed consultant on a client's register.
+
+**AND THE PREVENTION HALF IS RECORDED, NOT DONE.** Writing the creator a
+`tenant_users` row at `createClient` would stop the sweep ever seeing them as
+a stranger — and `tenant_users.person_key` carries a DEFERRABLE FK to
+`people`, so it would also have to write the register row, reversing
+§313.31/§322's deliberate *"the register starts EMPTY"* (and §336's check
+reads `PEOPLE.length === 1` after the first opening). With the heal in place
+the fault is one request wide and self-clearing, so the reversal is not worth
+its risk today — flagged rather than ridden in beside a defect fix (rule 1b).
+
+**§338.1 — AND THE CONSULTANTS LIST WAS ADD-ONLY.** Islam, with **Noran
+Essam on it twice** (`noran.esam@` and `noran.essam@`, one letter apart):
+*"allow me to delete a consultants from a user so I can remove noran."* The
+page names, renames, re-addresses, hands out passwords and sets the admin
+flag, and had **no way to take anybody off it** — while `saveConsultant` has
+accepted a `status` since it was written and **no control ever sent one**:
+§61's trap with half of it already built.
+
+**RETIRE IS THE DEFAULT AND DELETE IS THE EXCEPTION** (§35, §62 one level up):
+a consultant who has left Forefront should stop being able to sign in, and
+which clients they worked on is worth keeping; deleting is for the row that
+should never have existed. **DELETING NEEDS THEM RETIRED FIRST** — §323's rule
+for a client and its reason: the guard rather than a second confirmation, so
+nobody is deleted while they can still sign in, and the two presses are
+separated by a state somebody chose.
+
+**THE TARGET DECIDES, NEVER THE ACTOR ALONE** (§89's shape for issuing a
+password): never yourself, never an admin — that flag comes off on this same
+page first, deliberately, so the two acts stay apart. **Retiring can be handed
+to whoever manages consultants; deleting is the platform admin's alone**,
+which NARROWS that line rather than copying it.
+
+**AND WHAT THE RULES CANNOT SAY, THE SERVER SAYS BY NAME**: whether somebody
+still holds a seat is a question about rows, so it is asked there and the
+refusal NAMES the clients — *"still holds a seat on Meridian Group. Take them
+off that client first."* A rule guessing at it would be a second answer to a
+question the database owns (§53.5), and a delete that went ahead would take
+their seat and register rows with it by cascade.
+
+**AND THE STATUS WAS RIDING IN UNGUARDED**, found while wiring the control:
+it sat in `saveConsultant`'s blanket UPDATE with no target test at all, so
+whoever manages consultants could have retired an **admin** — or themselves,
+and signed nobody back in. Its own act now, asked of the target, **with the
+sessions ended**, or a retired person keeps a signed-in tab for thirty days
+(§43's rule for a password change, same argument).
+
+**ASKED IN PLACE, NEVER A BROWSER DIALOG** (§95, §273.3 took the last one
+out) **and never a modal**: this is one row of a table, so the question
+belongs in the row it is about, naming who — the failure mode is landing on
+the wrong line, which a confirmation naming nobody catches none of. **And a
+retired row SAYS so** (§35, §124): nothing else on the line differs, so
+without the tag the one state that stops somebody signing in is invisible and
+Delete appears beside rows that look identical to the ones it does not.
+
+**THE FROZEN `api/platform.js` LEARNS NEITHER ACTION**, which is §323's own
+precedent: it has been unreachable since the cutover put Next in front of it
+(§317.8).
+
+**CHECKS**: `scripts/test-platform-rules.js` **69/0**, both ends of every
+line, falsified twice — delete not requiring retired goes red on that
+assertion alone, retire with no target test goes red on self and on the admin
+— **and the two-copies assertion (§323's) caught the drift both times**, which
+is what it is for. `smp-app/checks/office-standing.mjs` **7/0** against a real
+Postgres, **RED 3** under `--break=no-heal` with section 4 still green, so the
+break provably touches only the heal. `tsc` clean but for `lib/prisma.ts`'s
+pre-existing PrismaClient error (identical with the change stashed).
+
+**§338.2 — AND MY OWN FIRST DRAFT CARRIED TWO FAULTS, BOTH CAUGHT BEFORE
+RUNNING**: a `const retired` that REDECLARED a fixture ten lines above it
+(§56.7's shape, in a test file), and an access map handed in without the
+`everyone` wrapper the rules read it through — so the "cannot manage the list"
+case would have been testing an empty world rather than a closed column.
+
+---

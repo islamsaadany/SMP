@@ -140,8 +140,49 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       "  COALESCE((SELECT json_agg(json_build_object('client', t.name, 'key', t.key, 'seat', m.seat) ORDER BY t.name) " +
       "            FROM tenant_users m JOIN tenants t ON t.id = m.tenant_id WHERE m.user_id = u.id), '[]'::json) AS seats " +
       "FROM users u WHERE u.kind = 'office' ORDER BY u.name")).rows;
-    return ok({ people: rows.map((r: any) => ({ email: r.email, name: r.name, isAdmin: !!r.is_admin, status: r.status, seats: r.seats, password: r.must_change ? "temporary" : "set" })),
+    return ok({ people: rows.map((r: any) => ({ email: r.email, name: r.name, isAdmin: !!r.is_admin, status: r.status, seats: r.seats, password: r.must_change ? "temporary" : "set",
+      /* WHAT THE CARDS DRAW IS WHAT THE ENDPOINT WILL ACCEPT (§42), asked
+         once here rather than re-derived on the page — a row that offers
+         Delete and is then refused is the drift §337 has just been fixed. */
+      canRetire: FF.mayRetireConsultant(world, account, r),
+      canDelete: FF.mayDeleteConsultant(world, account, r) })),
       canEdit: FF.mayManageConsultants(world, account), canSetAdmin: FF.isAdmin(account), me: account.email });
+  }
+
+  /* ── TAKING SOMEBODY OFF THE LIST (§338) ─────────────────────────────
+     Retiring is `saveConsultant`'s own `status`, which has been accepted
+     since that action was written and had no control (§61); what is new
+     here is the DELETE, and the two things the rules deliberately do not
+     answer because the database owns them: a seat still held, and the
+     sessions that have to end.
+
+     THE SEATS ARE THE REFUSAL, AND IT NAMES THEM (§62, §16.7): deleting
+     somebody who still runs a client would take their seat and their
+     register rows with it by cascade, so it stops and says which clients to
+     take them off first. A refusal that sends somebody to a screen is worth
+     more than one that says no. */
+  if (action === "deleteConsultant") {
+    const target = await accountByEmail(pool, body.email);
+    if (!target || target.kind !== "office") return no(400, "No such account.");
+    if (!FF.mayDeleteConsultant(world, account, target)) {
+      return no(403,
+        target.email === account.email ? "You cannot delete your own account." :
+        target.is_admin ? "That is an admin's account — take the admin flag off first." :
+        target.status !== "retired" ? "Retire " + (target.name || target.email) + " first. Deleting is only offered on an account that is already retired." :
+        "Deleting a consultant is the platform admin's.");
+    }
+    const seats = (await pool.query(
+      "SELECT t.name FROM tenant_users m JOIN tenants t ON t.id = m.tenant_id WHERE m.user_id = $1 ORDER BY t.name", [target.id])).rows.map((x: any) => x.name);
+    if (seats.length) {
+      return no(409, (target.name || target.email) + " still holds a seat on " +
+        (seats.length === 1 ? seats[0] : seats.slice(0, -1).join(", ") + " and " + seats[seats.length - 1]) +
+        ". Take them off " + (seats.length === 1 ? "that client" : "those clients") + " first.");
+    }
+    /* sessions go with the account (they cascade, and saying so is cheaper
+       than somebody wondering whether a signed-in tab survives) */
+    await pool.query("DELETE FROM users WHERE id = $1", [target.id]);
+    console.log("[platform] " + account.email + " deleted consultant " + target.email);
+    return ok({ deleted: target.email });
   }
 
   if (action === "saveConsultant") {
@@ -153,8 +194,26 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       if (!FF.maySetAdmin(world, account, existing)) return no(403, existing.email === account.email ? "You cannot change your own admin rights." : "Only the platform admin sets that.");
       await pool.query("UPDATE users SET is_admin = $2, updated_at = now() WHERE id = $1", [existing.id, !!body.isAdmin]);
     }
+    /* RETIRING IS ITS OWN ACT, ASKED OF THE TARGET (§338). It used to ride
+       the blanket UPDATE below with no test at all, so whoever manages
+       consultants could retire an ADMIN — or themselves, and sign nobody
+       back in. §89's rule (the test is the target) applied to the one field
+       on this action that closes a door. The sessions end with it, or
+       somebody keeps a signed-in tab for thirty days after being retired
+       (§43's rule for a password change, and the same argument). */
+    const want = String(body.status || "");
+    if (want && existing) {
+      if (want !== "active" && want !== "retired") return no(400, "That is not a standing.");
+      if (!FF.mayRetireConsultant(world, account, existing)) {
+        return no(403, existing.email === account.email ? "You cannot retire your own account." :
+          existing.is_admin ? "That is an admin's account — take the admin flag off first." :
+          "Retiring a consultant is the platform admin's.");
+      }
+      await pool.query("UPDATE users SET status = $2, updated_at = now() WHERE id = $1", [existing.id, want]);
+      if (want === "retired") await pool.query("DELETE FROM sessions WHERE user_id = $1", [existing.id]);
+    }
     if (existing) {
-      await pool.query("UPDATE users SET name = COALESCE($2, name), status = COALESCE($3, status), updated_at = now() WHERE id = $1", [existing.id, body.name || null, body.status || null]);
+      await pool.query("UPDATE users SET name = COALESCE($2, name), updated_at = now() WHERE id = $1", [existing.id, body.name || null]);
       /* THE ADDRESS ITSELF CAN CHANGE (§313.27). Keyed by id here, so a rename
          is one UPDATE; the sessions still end (§43's rule for a password
          change) and the address on each client's register follows, best

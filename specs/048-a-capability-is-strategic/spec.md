@@ -363,3 +363,83 @@ that is what would have found all six in an afternoon.
   today. Since a capability is a destination now the case can be made — and it
   means teaching `roleWheres`, the areas and the register's own vocabulary a
   `cap:` place.
+
+---
+
+## 12 · Who owns a capability — asked, measured, and already answered (§336)
+
+Islam, of what stage 2 built: **"The capability is owned like a unit it has an
+owner and custodian."** Drawn first (rule 1c) as an Owner and a Custodian on the
+capability's own row, with two new columns on Setup › Capabilities — and then
+his correction, which withdrew the whole proposal:
+
+> let met fix something small. the capability is normally owned by a function
+> and the function can have an owner and a custoidna. and the function owner
+> and custodian can handle the capability and ofcourse can handle the function
+> plans as well. would that be easier to build?
+
+### It is easier because it is already built
+
+Measured seat by seat rather than argued — one person, one seat at a time, the
+shared rule asked before and after each move:
+
+| the person holds | the capability is in their list | its two pages |
+|---|---|---|
+| nothing | **no** | — |
+| the function's **Head** | **yes** | view |
+| the function's **Custodian** | **yes** | view |
+
+…and opening that role's own-function **Strategy** cell to `edit` takes the
+function's plan **and its capabilities' plans** together. That is §334's one
+line working exactly as written: `capHolderTarget()` maps `cap:<id>` to
+`fn:<key>` at the top of `roleOwns` and `companyAllows`, so a capability is
+judged in the FUNCTION area and the seats that reach a function reach what it
+holds.
+
+### So nothing is built for it, and that is the answer
+
+Two new columns would be a **second place to say who owns a capability**, which
+is the drift §33 settled by putting a responsibility role on the THING
+(`FUNCTIONS[k].head` / `.custodian`) rather than on the person: one fact, one
+door, and two surfaces that cannot disagree because only one copy exists. The
+read-only **Head** column the Capabilities page already borrows from the
+function, and the page note and knowledge-base answer saying a custodian is
+*"named after the function and never after a capability"*, all become plainly
+true rather than an apology.
+
+### The one thing the measuring found that IS a fault
+
+**A capability's Reporting page asks the BUSINESS-UNIT column.** `canReport()`
+chooses its access key by looking for the `fn:` prefix and falling back to the
+unit's, and a `cap:` target is neither. Measured on the demo, on the build this
+round ships:
+
+| person | seat on Marketing | function column | unit column | `canReport` | `canSpeakFor` |
+|---|---|---|---|---|---|
+| Yara Kamal | head | **edit** | none | **false** | **true** |
+| Tarek Nour | custodian | edit | edit | true | true |
+
+So the head is offered *Submit to the SMO* on a report whose boxes she cannot
+fill in (§104.8's family), and **the custodian works for the wrong reason**
+(§94.5) — tighten the business-unit column for custodians and he breaks too.
+
+**§330.5 NAMED THIS EXACT QUESTION AND REACHED ONE OF ITS TWO CALLERS.**
+`areaOfTarget()` was written there so *which column judges this target* has one
+answer, and `mayMarkDoneOn` and `boundedHere` were taught to ask it while
+`canReport` — one function above them — was left deriving its own answer from a
+page key. The seventh copy of one walk, one function short.
+
+**IT IS THIS ROUND'S OWN AND IT IS NOT ON `main`**: no `cap:` target exists
+before §334, so `canReport` has never been handed one on the live platform.
+
+**NOT FIXED, AND THAT IS RULE 1b**: it is one line, and it changes who may
+report — so it is put to Islam before it is written rather than slipped into a
+round about ownership.
+
+### Still paused, at his word
+
+- **"pause the plan builder for now"** — the guided build still mints no
+  capability, so one is created on Setup › Capabilities or through the promote
+  control, and nowhere else.
+- **"no function head is fine for now"** — a function's seat is still called
+  **Head** where his sentence says owner, and the two mean the same seat.

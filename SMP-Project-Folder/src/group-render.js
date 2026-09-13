@@ -909,12 +909,131 @@ function pillarRow(it, i, u){
    spread is taken over the very list the average was taken over — a pillar's
    `scorableMeasures()`, a list of objectives' `scorableKOs()` — rather than
    over a second filter written beside it (§53.5). */
-function scoreSpread(rows){
+/* ── A PILLAR'S BREAKDOWN, DRAWN (§339) ────────────────────────────
+   ONE BUILDER FOR THE TWO READING SURFACES, because the plan shows a target
+   and Performance shows a figure against it and everything else about the
+   table is identical — two builders is how the two come to disagree about
+   which column is the indicator (§53.5, and §211/§213 twice over).
+
+   A COLUMN'S HEAD CARRIES ITS DIRECTION, and the column with none is the
+   indicator. That is the whole signal: with no total row under the table,
+   the direction in the heading and the scoring colour in the cells are what
+   say which columns count (mockup, signed off). */
+/* ── SETTING ONE UP, WITH THE PEN OPEN (§339) ──────────────────────
+   Everything on a row already exists elsewhere in the platform — the growing
+   name box, the ×, the Add row. ONE CONTROL IS NEW: naming a table's
+   columns, because no table here has ever let anybody do that, and it is
+   what keeps the feature from being about categories. Another client types
+   Region, or Channel, or Brand (mockup, signed off).
+
+   THE DIRECTION PICKER HAS THREE ANSWERS, NOT TWO PLUS A SWITCH. Higher is
+   better, lower is better, or `—`, which means the column is an indicator
+   and is never scored — one control that cannot contradict itself, where a
+   direction beside a scored/not-scored switch is §110's pair waiting to
+   disagree.
+
+   AND PICKING ONE REPAINTS. A bound field writes without repainting (§71.2),
+   which is right for typing and wrong for a control that changes the table's
+   SHAPE: the head's direction mark and every cell's colour in that column
+   follow the answer, so §257.2a's fault is here exactly. Safe because it is
+   a single select (§30.1). */
+function bdPlanSection(it, u, pi, ed){
+  var b = SMPRules.breakdownOf(it);
+  if (!ed) {
+    if (!SMPRules.bdHas(it)) return "";
+    return '<h4 class="mini">' + esc(SMPRules.bdName(it)) +
+      ' <em>— as planned: this year’s target for each</em></h4>' +
+      bdReadTable(it, "plan");
+  }
+  var at = esc(u.ukey) + '|' + pi;
+  /* THE OFFER, on a pillar that has no breakdown. It is a sentence rather
+     than a control on the section line, because only some pillars ever want
+     one and the page must not carry a button for every pillar that does not
+     (§41's budget, §304.2's own shape for the builder's door). */
+  if (!b) return '<p class="sec-hint">Some targets are broken down. ' +
+    '<button class="linkbu" data-bdadd="' + at + '">Break these targets down</button></p>';
+  var cols = SMPRules.bdCols(it);
+  var head = [{ h:"#", cls:"idx" },
+    { h: inputOr("plan", SMPRules.bdName(it), "bdname",
+        function(v){ b.name = v; }), cls:"" }]
+    .concat(cols.map(function(c){
+      return { cls:"cc", h:
+        inputOr("plan", c.name || "", "bdcol", function(v){ c.name = v; }) +
+        selectOr("plan", SMPRules.bdScored(c) ? c.dir : SMPRules.BD_IND,
+          ["≥", "≤", SMPRules.BD_IND], "bddirsel",
+          function(v){ c.dir = (v === SMPRules.BD_IND ? "" : v); paint(); }) +
+        '<button class="xbtn" data-bdcoloff="' + at + '|' + esc(c.id) +
+          '" title="Remove this column" aria-label="Remove this column">&times;</button>' };
+    }))
+    .concat([{ cls:"cc", h:'<button class="linkbu" data-rowadd="bdcol|' + at +
+      '" title="Add a column">+</button>' }]);
+  var rows = SMPRules.bdRows(it).map(function(r, i){
+    return '<tr>' +
+      '<td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + textOr("plan", r.name, "", function(v){ r.name = v; }) +
+        '<button class="xbtn" data-rowoff="breakdown|' + esc(r.id) +
+          '" title="Remove this row" aria-label="Remove this row">&times;</button></td>' +
+      cols.map(function(c){
+        var k = SMPRules.bdTargetKey(c);
+        return '<td class="cc">' +
+          inputOr("plan", SMPRules.bdTarget(r, c), "mono",
+            function(v){ setOr(r, k, v); }) + '</td>';
+      }).join("") + '<td></td></tr>';
+  }).join("");
+  /* The Add row spans every column but the `#`, exactly as the tables above
+     it do — derived from the column count so a column added tomorrow does not
+     leave it short of the table's end (§53.5). */
+  rows += '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols.length + 1) +
+    '"><button class="linkbu" data-rowadd="bdrow|' + at + '">Add a row</button></td></tr>';
+  return '<h4 class="mini">' + esc(SMPRules.bdName(it)) +
+    ' <em>— name the breakdown, its columns, and its rows</em></h4>' +
+    miniTable(head, rows);
+}
+function bdColHead(p, c){
+  return esc(bdColWord(p, c)) +
+    (SMPRules.bdScored(c) ? ' <i class="bddir">' + esc(c.dir) + '</i>' : '');
+}
+function bdReadTable(p, mode){
+  var cols = SMPRules.bdCols(p);
+  var rows = SMPRules.bdRows(p).map(function(r, i){
+    return '<tr' + (SMPRules.isHidden(r) ? ' class="hiddenrow"' : '') + '>' +
+      '<td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + esc(r.name) + hidChip(r) + '</td>' +
+      cols.map(function(c){
+        var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
+        if (mode !== "figures") {
+          return '<td class="num">' + (String(t).trim() ? tgtShown(t)
+            : '<span class="nobody">&mdash;</span>') + '</td>';
+        }
+        /* §339: A FIGURE READS AGAINST ITS OWN TARGET, exactly as every
+           reported figure on these pages already does (§254) — and the
+           SCORING COLOUR is what marks the columns that count. An indicator
+           is drawn plain with its target behind it, which is the rule two
+           tables up: coloured means a score, plain with a target behind it
+           means a reported fact. */
+        if (!String(a).trim()) return '<td class="num"><span class="nobody">&mdash;</span></td>';
+        var sc = bdCellScore(r, c);
+        return '<td class="num"><span class="pair">' +
+          (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
+                      : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') +
+          (String(t).trim() ? ' <i>/ ' + tgtShown(t) + '</i>' : '') + '</span></td>';
+      }).join("") + '</tr>';
+  }).join("");
+  return miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
+      .concat(cols.map(function(c){ return { h:bdColHead(p, c), cls:"cc" }; })),
+    rows);
+}
+/* §339: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
+   already scores rather than rows. It is here for §264's own reason: the
+   extremes must be the extremes of exactly the list the headline beside them
+   averaged, or a card names a Highest the number above it left out. A pillar
+   with no breakdown passes nothing and is byte-identical. */
+function scoreSpread(rows, extra){
   /* WRAPPED, NEVER PASSED BY NAME (§250.1): `measureScore` takes an optional
      share and `Array.map` hands its callback the INDEX, so a bare
      `.map(measureScore)` would prorate the second row by the whole year and
      the third by twice it. */
-  var v = rows.map(function(m){ return measureScore(m); });
+  var v = rows.map(function(m){ return measureScore(m); }).concat(extra || []);
   return { n: v.length,
            hi: v.length ? Math.max.apply(null, v) : null,
            lo: v.length ? Math.min.apply(null, v) : null };
@@ -951,15 +1070,25 @@ function pillarBody(it, u){
      a lowest of 0% \u2014 exactly the false failure the null rule exists to prevent. */
   /* \u00a7257: and they read the SCORE, which is what the headline beside them and
      the Progress column beneath them are made of. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var bdsc = bdColScores(it);
+  var sp = scoreSpread(scorableMeasures(it), bdsc);
   var uk = u && u.ukey;
   return '<div class="pbody" hidden>' +
+    /* §339: a scored breakdown column is one of the numbers this pillar is
+       judged on, so it is counted here too — "Measures 4" over an average of
+       five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+    /* §339: and the breakdown, where there is one — between the measures it
+       is part of and the tactics it is not. A pillar without one adds nothing
+       at all: no heading, no empty section (Islam, on the mockup). */
+    (SMPRules.bdHas(it)
+      ? '<h5 class="mini">' + esc(SMPRules.bdName(it)) + '</h5>' + bdReadTable(it, "figures")
+      : '') +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
@@ -4992,6 +5121,30 @@ function renderReport(u){
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
+  /* §339: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
+     than `entry` itself, because every branch in that function is about a
+     field on the row (`actual` / `outActual`, the yes/no pair, a sourced
+     figure) and a cell is addressed by its COLUMN — `data-bdcol` beside
+     `data-rep`, so the shell's one handler resolves the row and then the
+     cell. The unit rides with it exactly as it does for a measure, so the
+     figure is stored joined and every screen downstream reads it whole
+     (§199). */
+  var bdEntry = function(x){
+    var t = SMPRules.bdTarget(x.obj, x.col);
+    var unit = splitTarget(t).unit;
+    var cur = SMPRules.bdActual(x.obj, x.col);
+    var has = String(cur).trim() !== "";
+    var shown = has ? (splitTarget(unitTight(cur)).value || String(cur)) : "";
+    if (!canEnterFigure(u.ukey, x)) {
+      return '<span class="mono">' + (has ? esc(unitTight(cur)) : "\u2014") + '</span>';
+    }
+    return '<span class="entry' + (has ? " filled" : "") + '">' +
+      '<input class="field" data-rep="' + esc(x.obj.id) + '" data-bdcol="' + esc(x.col.id) +
+      '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
+      '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + ' ' +
+      esc(String(x.col.name || "").trim() || "figure") + '"></span>' +
+      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '');
+  };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
       ? noteBox("note", x.id, x.obj.note, needsNote(x))
@@ -5064,8 +5217,22 @@ function renderReport(u){
                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                 cid:p.id });
     });
+    /* §339: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
+       cell, which is what makes the pane's tally read "20/20" over three
+       measures, fifteen category figures and two tactics — the count Islam
+       signed off. The ROW carries the note, so every cell in a row points at
+       the same object and one line clears them all. */
+    var bds = bdCells(p).map(function(c){
+      return { id:c.row.id + "|" + c.col.id, obj:c.row, col:c.col, kind:"bdcell",
+               owner:p.owner, pown:p.owner, cid:p.id };
+    });
+    var bdRowItem = function(r){
+      return { id:r.id, obj:r, kind:"bdrow", pillar:p,
+               owner:p.owner, pown:p.owner, cid:p.id };
+    };
     var askedT = ts.filter(function(x){ return x.asked; });
-    var done = doneOf(ms) + doneOf(askedT), total = ms.length + askedT.length;
+    var done = doneOf(ms) + doneOf(askedT) + doneOf(bds),
+        total = ms.length + askedT.length + bds.length;
 
     var mTable = ms.length
       ? '<h4 class="mini">' + L("measure","bu") + '</h4>' +
@@ -5124,6 +5291,36 @@ function renderReport(u){
           }).join(""))
       : "";
 
+    /* §339: the breakdown, between the measures it is part of and the
+       tactics it is not — the same place it sits on the other two panes, or
+       somebody entering figures meets the table in a different order from
+       the one they planned it in. The target sits BEHIND each box so nobody
+       has to remember it, and a row's note is asked once however many of its
+       figures are at risk. */
+    var bdTable = bds.length
+      ? '<h4 class="mini">' + esc(SMPRules.bdName(p)) + '</h4>' +
+        miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
+            .concat(SMPRules.bdCols(p).map(function(c){
+              return { h:bdColHead(p, c), cls:"cc" }; }))
+            .concat([{h:"Note", cls:""}]),
+          SMPRules.bdRows(p).filter(function(r){ return !SMPRules.isHidden(r); })
+            .map(function(r, i){
+            var ri = bdRowItem(r);
+            return '<tr' + (needsNote(ri) ? ' class="wantnote"' : '') + '>' +
+              '<td class="idx">' + (i+1) + '</td>' +
+              '<td>' + esc(r.name) + '</td>' +
+              SMPRules.bdCols(p).map(function(c){
+                if (!SMPRules.bdAsked(r, c))
+                  return '<td class="cc"><span class="nobody">&mdash;</span></td>';
+                var x = { id:r.id, obj:r, col:c, kind:"bdcell",
+                          owner:p.owner, pown:p.owner, cid:p.id };
+                return '<td class="cc">' + bdEntry(x) +
+                  '<span class="subhd">/ ' + tgtShown(SMPRules.bdTarget(r, c)) + '</span></td>';
+              }).join("") +
+              '<td class="notecol">' + noteCell(ri) + '</td></tr>';
+          }).join(""))
+      : "";
+
     /* THE SAME BAND THE PLAN AND PERFORMANCE PANES WEAR (§46.3). This page was
        left behind when they changed: a 19px heading over a meta line, which is
        the shape those two shed. The counts and the tally are real information
@@ -5134,12 +5331,14 @@ function renderReport(u){
        data and was the last place in the product still saying it. */
     return pillarBand(pillarCode(u, pi), p.name,
         '<span class="pband-n">' + ms.length + ' measures &middot; ' +
+        (bds.length ? bds.length + ' ' + esc(SMPRules.bdName(p).toLowerCase()) +
+                      ' figures &middot; ' : '') +
         askedT.length + ' tactics asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
         doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi)), p.kind) +
-      mTable + tTable;
+      mTable + bdTable + tTable;
   };
 
   /* Entries given of asked, per pillar \u2014 what the rail rows and the pane pill
@@ -5154,6 +5353,13 @@ function renderReport(u){
       if (!tacticDue(t)) return;
       total++;
       if (tacticAnswered(t)) done++;   /* §252 */
+    });
+    /* §339: and every cell the breakdown asks for — the rail's tally and the
+       pane's pill read this one function, so they cannot disagree about how
+       much of a pillar is still to enter (§116.2). */
+    bdCells(p).forEach(function(c){
+      total++;
+      if (SMPRules.bdAnswered(c.row, c.col)) done++;
     });
     return { done: done, total: total };
   };
@@ -7792,6 +7998,7 @@ function unitPlanBody(it, u, railed){
     miniTable((ed || unitCol) ? ["#","Measure","Dir.","Unit","Target","Compiled"]
                  : ["#","Measure","Dir.","Target","Compiled"],
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
+    bdPlanSection(it, u, pi, ed) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
@@ -8332,7 +8539,8 @@ function unitPerfPane(it, u, railed){
   /* §264: the score, not the stored raw ratio — this is the pane Islam
      reported, and its Highest and Lowest are the extremes of exactly the
      measures `pillarPerf` averaged two lines below. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var bdsc = bdColScores(it);
+  var sp = scoreSpread(scorableMeasures(it), bdsc);
   var uk = u && u.ukey;
   var meta = pillarMeta(it);
   /* The same band as the Plan page, for the same reason and by the same
@@ -8344,12 +8552,21 @@ function unitPerfPane(it, u, railed){
     '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
+    /* §339: a scored breakdown column is one of the numbers this pillar is
+       judged on, so it is counted here too — "Measures 4" over an average of
+       five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+    /* §339: and the breakdown, where there is one — between the measures it
+       is part of and the tactics it is not. A pillar without one adds nothing
+       at all: no heading, no empty section (Islam, on the mockup). */
+    (SMPRules.bdHas(it)
+      ? '<h5 class="mini">' + esc(SMPRules.bdName(it)) + '</h5>' + bdReadTable(it, "figures")
+      : '') +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +

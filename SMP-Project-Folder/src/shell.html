@@ -3178,7 +3178,10 @@
          unanswered In-progress row is both, and the box to land on is the
          per-cent. */
       var id, kind;
-      if (d.rep != null)        { id = d.rep;   kind = "owed"; }
+      /* §339: a breakdown's box is addressed by its row AND its column — the
+         row is what the write handler resolves, the pair is what the ask list
+         counts. */
+      if (d.rep != null)        { id = d.rep + (d.bdcol ? "|" + d.bdcol : ""); kind = "owed"; }
       else if (d.crep != null)  { id = d.crep;  kind = "owed"; }
       else if (d.cpick != null) { id = d.cpick; kind = "owed"; }
       else if (d.cpct != null)  { id = d.cpct;  kind = "pend"; }
@@ -4120,6 +4123,24 @@
            for a figure against a target and wrong here: an outcome 60% through
            a half-elapsed window scores 120, and reading that as Done would put
            the word on a row whose own answer says In progress. */
+        /* ── §339: A BREAKDOWN'S CELL ─────────────────────────
+           `data-rep` finds the ROW and `data-bdcol` says which of its cells.
+           The field is flat (`a_<col>`) rather than a key inside an object,
+           for the reason that shape exists at all: the authoriser tells a
+           reported figure from a plan one by FIELD NAME, and `same()` is
+           stringify-based while jsonb hands an object's keys back in its own
+           order (§145, §249.3) — one object holding every actual would read
+           as a change nobody made and refuse the save that carried it.
+
+           EMPTIED, THE KEY GOES (§50.6): a cell never reported and one
+           cleared must be byte-identical, or every save carries a phantom
+           change for ever. */
+        if (el.dataset.bdcol) {
+          var bk = "a_" + el.dataset.bdcol;
+          if (v === "") delete hit.obj[bk];
+          else hit.obj[bk] = joinTarget(hit.obj[bk], v, el.dataset.unit || "");
+          paint(); return;
+        }
         if (el.dataset.ynpart) {
           var ynFld = el.dataset.fld === "outActual" ? "outActual" : "actual";
           var was = SMPRules.ynState(hit.obj[ynFld]);
@@ -7489,6 +7510,14 @@
         /* §338: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */
         else if (what === "action") { if (!addAction(a[1])) return; }
+        /* §339: a breakdown's row and its columns. `unitLikeWritable` for
+           §129's audit reason — a virgin pillars function hands out frozen
+           empties, so a first add is accepted on screen and written nowhere. */
+        else if (what === "bdrow" || what === "bdcol") {
+          var bu = unitLikeWritable(a[1]), bit = bu && bu.items[+a[2]];
+          if (!bit) return;
+          if (what === "bdrow") addBdRow(bit); else { addBreakdown(bit); addBdCol(bit); }
+        }
         else if (what === "measure" || what === "tactic") {
           /* unitLikeWritable, not unitLike (§129's audit): the reading view
              hands a VIRGIN pillars function frozen empties, so the first add
@@ -7640,7 +7669,37 @@
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
-        removeRowById(listById(list, id), id);
+        var arr = listById(list, id);
+        removeRowById(arr, id);
+        /* §339: and a breakdown with nothing left in it stops being one
+           (§50.6) — a pillar that never had one and a pillar that had one
+           removed must be byte-identical, or every save carries a change
+           nobody made. */
+        if (list === "breakdown") bdTidyById(id);
+        paint();
+      });
+    });
+    /* §339: REMOVING A COLUMN TAKES ITS CELLS WITH IT — every row's `t_<col>`
+       and `a_<col>` go too, or the table loses a column and every save goes
+       on carrying its figures for ever (§53.4). */
+    document.querySelectorAll("[data-bdcoloff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.bdcoloff.split("|");
+        var u = unitLikeWritable(a[0]), it = u && u.items[+a[1]];
+        if (!it) return;
+        removeBdCol(it, a[2]);
+        bdTidy(it);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-bdadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.bdadd.split("|");
+        var u = unitLikeWritable(a[0]), it = u && u.items[+a[1]];
+        if (!it) return;
+        addBreakdown(it); addBdRow(it);
         paint();
       });
     });

@@ -1281,6 +1281,85 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   function wholeUnits(compile) { return compileKey(compile) === "count"; }
 
+  /* ── A BREAKDOWN OF A PILLAR'S TARGETS (§339) ─────────────────────
+     Islam, of one of his own pillars: *"Maximizing Current Stores has its
+     targets broken down by category."* Five categories, each with a growth
+     target, a contribution-margin target and a share of the mix — fifteen
+     numbers that had nowhere to go. Written as measures they stop being a
+     breakdown: the pillar reads as though it had nineteen headline targets
+     rather than three and a table.
+
+     A COLUMN IS A KEY MEASURE WITH SEVERAL VALUES INSTEAD OF ONE, and that
+     one sentence is the whole model. `Growth` is a single score — every
+     category's figure against its own target, averaged — and it joins the
+     pillar's own measures carrying the same weight as any of them. So the
+     arithmetic is the platform's own, asked once per cell (§53.5): nothing
+     here knows how to score anything.
+
+     THE DIRECTION IS THE COLUMN'S, AND THE COLUMN WITH NONE IS THE
+     INDICATOR. `Mix` is reported and never scored, because the five shares
+     add up to the revenue mix and one category beating its share forces
+     another to miss — a deviation either way is worth knowing and is not a
+     performance measure. There is no second switch beside the direction:
+     the ABSENCE is the signal, which is one control with three answers
+     rather than two controls that can disagree (§110's pair).
+
+     A CELL IS TWO FLAT FIELDS, NEVER AN OBJECT. `t_<col>` is the target and
+     `a_<col>` the reported figure, spelled onto the row itself — because
+     the authoriser tells a plan change from a reported one by FIELD NAME
+     (`splitRows`), and `same()` is stringify-based while Postgres jsonb
+     hands an object's keys back in its own order (§145, §249.3). One object
+     holding every actual would therefore read as a change nobody made, and
+     refuse the save that carried it. Flat fields cannot.
+
+     AND THE COLUMN IDS ARE MINTED FROM THE MAXIMUM (§96.2), never from the
+     count: remove the middle of three and add, and a count-derived id
+     collides with a column still on screen — and a column id is what every
+     target and every reported figure in the table is addressed by (§48). */
+  var BD_NAME = "Categories";
+  var BD_IND = "—";
+  function breakdownOf(p) { return (p && p.breakdown) || null; }
+  function bdCols(p) { var b = breakdownOf(p); return (b && b.cols) || []; }
+  function bdRows(p) { var b = breakdownOf(p); return (b && b.rows) || []; }
+  /* DRAWN ONLY WHERE THERE IS ONE. A pillar that does not need a breakdown
+     shows no table, no empty section and nothing said about it — Islam's own
+     line on the mockup, and §45.2's rule read the right way round: that one
+     is about a FEATURE rendering nothing, and this is about a pillar that
+     committed to no breakdown. Both ends have to be true or the table
+     appears the instant somebody adds a column and before it means
+     anything, so it asks for a column AND a row. */
+  function bdHas(p) { return bdCols(p).length > 0 && bdRows(p).length > 0; }
+  /* The heading, and the fallback is the MINTER'S OWN VALUE rather than a
+     second word (§53.5): a cleared name reads as what a new breakdown is
+     called, never as an empty heading. */
+  function bdName(p) {
+    var b = breakdownOf(p), n = b && b.name != null ? String(b.name).trim() : "";
+    return n || BD_NAME;
+  }
+  function bdScored(col) {
+    var d = String((col && col.dir) || "").trim();
+    return d === "≥" || d === "≤";
+  }
+  function bdTargetKey(col) { return "t_" + (col && col.id); }
+  function bdActualKey(col) { return "a_" + (col && col.id); }
+  function bdTarget(row, col) { var v = row && row[bdTargetKey(col)]; return v == null ? "" : v; }
+  function bdActual(row, col) { var v = row && row[bdActualKey(col)]; return v == null ? "" : v; }
+  /* A CELL IS ASKED FOR ONLY WHERE IT HAS A TARGET. Asking for a figure
+     against nothing is asking for a number that can never be read — and a
+     blank target is the office's own work in progress rather than a gap the
+     count names (§214.4: a red word over a count of nought is worse than
+     silence). */
+  function bdAsked(row, col) { return String(bdTarget(row, col)).trim() !== ""; }
+  function bdAnswered(row, col) { return String(bdActual(row, col)).trim() !== ""; }
+  /* WHICH FIELDS OF A BREAKDOWN ROW ARE REPORTED, for the authoriser. The
+     list is the COLUMNS', so it is worked out from the stored breakdown
+     rather than written down twice — a column added tomorrow is classified
+     the day it is added (§42's fall-through in the safe direction: an
+     unrecognised field is the office's). */
+  function bdReportFields(p) {
+    return bdCols(p).map(bdActualKey).concat(["note"]);
+  }
+
   var YN_UNIT = "Y/N";
   /* ── §251.2: THE UNIT SAYS IT, AND THE VALUE IS SIMPLY NOT COUNTED ──
      The first build read the WHOLE STRING, so a row became yes/no only by
@@ -3377,6 +3456,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     GAP_NUM: GAP_NUM, gapNumField: gapNumField,
     targetHasNumber: targetHasNumber,
     COMPILES: COMPILES, prorates: prorates, wholeUnits: wholeUnits,
+    BD_NAME: BD_NAME, BD_IND: BD_IND,
+    breakdownOf: breakdownOf, bdCols: bdCols, bdRows: bdRows, bdHas: bdHas,
+    bdName: bdName, bdScored: bdScored,
+    bdTargetKey: bdTargetKey, bdActualKey: bdActualKey,
+    bdTarget: bdTarget, bdActual: bdActual,
+    bdAsked: bdAsked, bdAnswered: bdAnswered, bdReportFields: bdReportFields,
     YN_UNIT: YN_UNIT, isYesNo: isYesNo, ynUnitOf: ynUnitOf,
     ynAnswer: ynAnswer, ynScore: ynScore,
     YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_WORDS: YN_WORDS,
@@ -10333,6 +10418,22 @@ function reportItems(u){
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                  cid:p.id, place:place });
     });
+    /* §339: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
+       row — Islam's own count on the mockup is "3 measures · 15 category
+       figures · 2 tactics", and Submit waits for all twenty. A row would
+       have made fifteen figures read as five.
+
+       ONLY WHERE THERE IS A TARGET (`bdAsked`): a cell with none can never
+       be scored, so asking for a figure against it is asking for a number
+       nothing reads (§35). The NOTE is the row's, which is why every cell in
+       a row points at the same object — one explanation covers the row, and
+       `needsNote` reads `x.obj.note` without knowing that. */
+    bdCells(p).forEach(function(c){
+      out.push({ id:c.row.id + "|" + c.col.id, noteId:c.row.id,
+                 obj:c.row, col:c.col, kind:"bdcell",
+                 group:head, sub:bdColWord(p, c.col),
+                 owner:p.owner, pown:p.owner, cid:p.id, place:place });
+    });
   });
   return out;
 }
@@ -10358,6 +10459,8 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
+  /* §339: a breakdown cell is answered by its own column's box. */
+  if (x.kind === "bdcell") return SMPRules.bdAnswered(o, x.col);
   /* §300: a yes/no row is answered by one of the two ends, or by In progress
      WITH its per-cent — `"In progress"` on its own is a non-empty string and
      would otherwise have counted as a figure entered, which is §104.10's
@@ -10383,6 +10486,15 @@ function rowReads(x){
      ever asked to explain it and Submit let it through unexplained. */
   if (x.kind === "tactic") return tacticProgress(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
+  /* §339: and a breakdown cell reads its own score — NULL on an indicator
+     column, which is what makes "a Mix figure can never be at risk" true
+     rather than merely stated: the note rule asks this and nothing else. */
+  if (x.kind === "bdcell") return bdCellScore(x.obj, x.col);
+  /* And a breakdown ROW reads its WORST scored cell, which is what the note
+     rule wants: the row carries one explanation, and any one figure at risk
+     is what makes it owed (mockup — "Bakery's growth is rung in red because
+     it has to be"). An indicator-only row scores nothing and never asks. */
+  if (x.kind === "bdrow") return bdRowLow(x.obj, x.pillar);
   /* §239: the prorated score, so a unit is asked to explain a figure that is
      actually behind rather than one that only looks behind against a whole
      year. The note rule and the Submit gate both hang off this. */
@@ -10766,7 +10878,14 @@ function reportPlaces(target){
     }
     var b = rowBlock(x);
     if (!b) return;
-    e[b]++; e.count++; e.rows.push({ id:x.id, block:b });
+    /* §339: THE BOX THE WALK LANDS ON IS NOT ALWAYS THE ITEM'S OWN. A
+       breakdown cell is one item per FIGURE and the explanation it may owe is
+       the ROW's — one note box for three cells — so an item says where its
+       note lives and the walk marks that control. Without it a row at risk
+       is counted by the bar and reachable by nothing (§16.7: a count that
+       cannot take you to what it counts makes work). */
+    e[b]++; e.count++;
+    e.rows.push({ id:(b === "note" && x.noteId) ? x.noteId : x.id, block:b });
   });
   var gaps = typeof gapTotalAll === "function" ? gapTotalAll(t) : 0;
   if (gaps) out.push({ key:"plan", label:"In the plan", rail:null, code:null,
@@ -12702,6 +12821,73 @@ function viaCarrier(p, own, roll){
    through the one shared predicate (SMPRules.isHidden), or the deck and the
    page would disagree about one number. */
 function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && measureScore(m) != null; }); }
+/* ── WHAT A BREAKDOWN SCORES (§339) ────────────────────────────────
+   A CELL IS SCORED EXACTLY AS A MEASURE IS, through `measureScore` and
+   nothing else. The row is shaped into the object that scorer already takes
+   — direction from the COLUMN, target and figure from the cell — so a yes/no
+   target, the 150 cap, `≤`'s inversion and §239's nought rule all hold here
+   without one line of arithmetic being written twice (§53.5).
+
+   AND THERE IS NO COMPILE RULE, which is a decision rather than an omission.
+   A blank compile compares against the WHOLE target and prorates nothing
+   (§276), which is what a category's share of a year already is: the
+   breakdown carries fifteen annual targets, not fifteen glide paths. Giving
+   each cell its own compile rule would be a fourth control in a table drawn
+   to hold three.
+
+   A COLUMN IS ONE SCORE — every scorable cell averaged, each category
+   counting equally (Islam). A cell with no target or no figure leaves that
+   average the way an unscorable measure leaves the pillar's (§239), so a
+   half-reported breakdown reads on what it has rather than on nought. */
+function bdCellScore(row, col){
+  if (!SMPRules.bdScored(col)) return null;
+  var t = SMPRules.bdTarget(row, col), a = SMPRules.bdActual(row, col);
+  if (String(t).trim() === "" || String(a).trim() === "") return null;
+  return measureScore({ dir: col.dir, target: t, actual: a, compile: "" });
+}
+/* EVERY CELL A BREAKDOWN ASKS FOR, in reading order — row by row, column by
+   column. ONE walk, because the ask list, the pane and the tally each need it
+   and three copies is how a count comes to disagree with the table under it
+   (§116.2, §53.5). Hidden rows leave it, exactly as a hidden measure does. */
+function bdCells(p){
+  var out = [];
+  if (!SMPRules.bdHas(p)) return out;
+  var cols = SMPRules.bdCols(p);
+  SMPRules.bdRows(p).forEach(function(r){
+    if (SMPRules.isHidden(r)) return;
+    cols.forEach(function(c){
+      if (SMPRules.bdAsked(r, c)) out.push({ row:r, col:c });
+    });
+  });
+  return out;
+}
+/* What a column is called when it has to be named in a sentence rather than
+   at the head of its own table — an unnamed one falls back to the table's
+   name, or a refusal reads "  is at risk". */
+/* The lowest scored cell in a row, or null where none of them scores. */
+function bdRowLow(row, p){
+  var v = SMPRules.bdCols(p).map(function(c){ return bdCellScore(row, c); })
+    .filter(function(x){ return x != null; });
+  return v.length ? Math.min.apply(null, v) : null;
+}
+function bdColWord(p, col){
+  var n = col && col.name != null ? String(col.name).trim() : "";
+  return n || SMPRules.bdName(p);
+}
+function bdColScore(p, col){
+  return avg(SMPRules.bdRows(p).filter(function(r){ return !SMPRules.isHidden(r); })
+    .map(function(r){ return bdCellScore(r, col); }));
+}
+/* The scores a breakdown contributes to its pillar: one per SCORED column
+   that has something to say. An indicator column never appears here and a
+   column nobody has reported yet leaves the average rather than dragging it
+   to nought — the same two skips `scorableMeasures` already makes. */
+function bdColScores(p){
+  if (!SMPRules.bdHas(p)) return [];
+  return SMPRules.bdCols(p).filter(SMPRules.bdScored)
+    .map(function(c){ return bdColScore(p, c); })
+    .filter(function(v){ return v != null; });
+}
 function pillarPerf(p){
   return viaCarrier(p,
     /* §250: WRAPPED, NEVER PASSED BY NAME. `measureScore` takes an optional
@@ -12710,7 +12896,12 @@ function pillarPerf(p){
        measure of every pillar by 0 (unscorable), the second by the whole year,
        the third by TWICE the year. Silent, and wrong only for the `Sum` rows,
        which is the half nobody would think to check. */
-    function(){ return avg(scorableMeasures(p).map(function(m){ return measureScore(m); })); },
+    /* §339: AND THE BREAKDOWN'S COLUMNS JOIN THEM, each carrying the weight
+       of a headline measure — Islam's own ruling, and the reason the
+       breakdown is a breakdown rather than a note beside the table. A pillar
+       without one adds an empty list and is byte-identical to what it was. */
+    function(){ return avg(scorableMeasures(p).map(function(m){ return measureScore(m); })
+                             .concat(bdColScores(p))); },
     function(f){ return avg(fnItems(f).map(pillarPerf)); });
 }
 function dueTactics(p){ return SMPRules.shown(p.tactics).filter(tacticDue); }
@@ -12909,6 +13100,81 @@ function addPillar(u){
              kind: "", theme: "", owner: "", measures: [], tactics: [] };
   u.items.push(it);
   return it;
+}
+/* ── SETTING UP A BREAKDOWN (§339) ─────────────────────────────────
+   The container is minted first, exactly as `addAction` mints a function's
+   list before pushing to it (§129's audit: a reading view hands out a frozen
+   empty, so a first add is accepted on screen and written nowhere).
+
+   IT STARTS WITH ONE COLUMN AND NO ROWS, and that pair is deliberate: an
+   empty breakdown is not drawn to a reader (`bdHas` wants a column and a
+   row), so the pen has somewhere to work while the page stays silent until
+   there is something to say. */
+function addBreakdown(p){
+  if (!p) return null;
+  if (!p.breakdown) p.breakdown = { name: SMPRules.BD_NAME, cols: [], rows: [] };
+  if (!Array.isArray(p.breakdown.cols)) p.breakdown.cols = [];
+  if (!Array.isArray(p.breakdown.rows)) p.breakdown.rows = [];
+  if (!p.breakdown.cols.length) addBdCol(p);
+  return p.breakdown;
+}
+/* A COLUMN ID IS MINTED FROM THE MAXIMUM, never from the count (§96.2) — it
+   is what every target and every reported figure in the table is addressed
+   by (§48), so a collision would hand one column's figures to another. The
+   id shape is short on purpose: it is spelled into a field name on every row
+   (`t_c1`, `a_c1`) and travels in every save. */
+function addBdCol(p){
+  var b = p && p.breakdown;
+  if (!b) return null;
+  var taken = {};
+  b.cols.forEach(function(c){ if (c && c.id) taken[c.id] = 1; });
+  var n = b.cols.length + 1;
+  while (taken["c" + n]) n++;
+  var col = { id: "c" + n, name: "", dir: "≥" };
+  b.cols.push(col);
+  return col;
+}
+/* REMOVING A COLUMN TAKES ITS CELLS WITH IT, or every row keeps a `t_c2` and
+   an `a_c2` nothing reads — invisible on every screen and carried in every
+   save for ever (§53.4: a field the platform no longer reads is worse than
+   no field). */
+function removeBdCol(p, colId){
+  var b = p && p.breakdown;
+  if (!b) return;
+  b.cols = b.cols.filter(function(c){ return c.id !== colId; });
+  b.rows.forEach(function(r){ delete r["t_" + colId]; delete r["a_" + colId]; });
+}
+function addBdRow(p){
+  var b = addBreakdown(p);
+  if (!b) return null;
+  var r = { id: mintRowId(b.rows, p.id + "-B"), name: "" };
+  b.rows.push(r);
+  return r;
+}
+/* A BREAKDOWN WITH NOTHING IN IT IS NOT A BREAKDOWN (§50.6). Taking the last
+   row out leaves `{name, cols, rows:[]}` on the pillar, which is a change
+   every save then carries and which no screen can show — so the key goes
+   with its last row, and a pillar that never had one and a pillar that had
+   one removed are byte-identical. */
+/* Tidy the pillar a row belonged to, found by walking rather than passed in:
+   the press carries a row id and nothing else, and an address the caller
+   assembles is a second copy of where the row lives (§48). */
+function bdTidyById(id){
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    ((u && u.items) || []).forEach(function(it){
+      if (String(id).indexOf(it.id + "-B") === 0) bdTidy(it);
+    });
+  });
+}
+function bdTidy(p){
+  var b = p && p.breakdown;
+  if (!b) return;
+  /* STORED EXACTLY WHEN IT IS SHOWN, which is one predicate rather than a
+     second rule that could disagree with it: `bdHas` is what decides whether
+     a reader sees a table, so anything less than that is a key carried in
+     every save with nothing on any screen behind it. */
+  if (!SMPRules.bdHas(p)) delete p.breakdown;
 }
 function addMeasure(it){
   if (!it) return null;
@@ -13127,6 +13393,16 @@ function listById(kind, id){
      would look at every project's `actions`, find none, and answer null, and
      `removeRowById(null, id)` is a press that does nothing (§96's family). */
   if (kind === "actions") { eachHolder(function(h){ look(h.actions); }); return out; }
+  /* §339: a breakdown's rows hang off a PILLAR, so the project walk below
+     would answer null and `removeRowById(null, id)` is a press that does
+     nothing (§96's family, §338's own note one list over). */
+  if (kind === "breakdown") {
+    UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+      var u = unitLike(t);
+      ((u && u.items) || []).forEach(function(it){ look(SMPRules.bdRows(it)); });
+    });
+    return out;
+  }
   eachProject(function(p){ look(p[kind]); });
   return out;
 }
@@ -14544,6 +14820,11 @@ function findById(u, id){
     if (p.id === id) hit = { kind:"PILLAR", obj:p };
     p.measures.forEach(function(m){ if (m.id === id) hit = { kind:"MEASURE", obj:m, pillar:p }; });
     p.tactics.forEach(function(t){ if (t.id === id) hit = { kind:"TACTIC", obj:t, pillar:p }; });
+    /* §339: and a breakdown's own rows, so the reporting box can address a
+       cell by the row it sits in. One resolver, because the shell's `data-rep`
+       handler walks this and nothing else (§53.5). */
+    SMPRules.bdRows(p).forEach(function(r){
+      if (r.id === id) hit = { kind:"BDROW", obj:r, pillar:p }; });
   });
   u.clauses.forEach(function(c){ if (c[2] === id) hit = { kind:"FOUNDATION", obj:c }; });
   return hit;
@@ -16495,6 +16776,10 @@ function mintPlanIds(u, rows){
     map[r.id] = id; r.id = id;
   });
   rows.forEach(function(r){
+    /* §339: a breakdown's cells hang off a pillar exactly as a measure does,
+       and carry no id of their own — the table is assembled from them and its
+       row ids are minted there (§22). */
+    if (r.type === "BDCELL") { r.parent_id = map[r.parent_id] || ""; r.id = ""; }
     if (r.type === "MEASURE" || r.type === "TACTIC") {
       var pid = map[r.parent_id] || "";
       r.parent_id = pid;
@@ -16536,7 +16821,7 @@ function validatePlan(u, rows){
         problems.push({ at:at, msg:'kind "' + k + '" is not Direction or Capability' });
       if (!r.theme) notices.push({ at:at, msg:"no theme \u2014 will read as cross-cutting" });
     }
-    if (r.type === "MEASURE" || r.type === "TACTIC") {
+    if (r.type === "MEASURE" || r.type === "TACTIC" || r.type === "BDCELL") {
       if (!r.parent_id)
         problems.push({ at:at, msg: pillars.length
           ? "its pillar could not be matched \u2014 choose one from the Pillar column"
@@ -16677,8 +16962,32 @@ function diffProgress(u, rows){
        and whose note is owed had nothing for the file to carry. */
     var hasNote = (r.new_note || "") !== "";
     if (!r.id || (!hasVal && !hasNote)) return;
-    var hit = findById(u, r.id);
+    /* §339: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
+       That pair is what identifies a cell (§48) — the row alone is three
+       figures sharing one id, and the reader could not tell which one a
+       number was meant for. Split here rather than inside `findById`, which
+       resolves ROWS and must not learn a second kind of address. */
+    var bdSplit = String(r.id).split("|");
+    var hit = findById(u, bdSplit[0]);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+    if (hit.kind === "BDROW") {
+      var bcol = SMPRules.bdCols(hit.pillar).filter(function(c){
+        return c.id === bdSplit[1]; })[0];
+      /* A column that has GONE since the file was downloaded is named rather
+         than applied to the wrong one (§87's rule: never guess an identity). */
+      if (!bcol) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+      var bWas = SMPRules.bdActual(hit.obj, bcol);
+      var bNow = hasVal ? r.new_value : bWas;
+      var bWasN = hit.obj.note == null ? "" : String(hit.obj.note);
+      var bNowN = hasNote ? String(r.new_note).trim() : bWasN;
+      if (String(bWas) === String(bNow) && bWasN === bNowN) return;
+      out.push({ id:r.id, type:"BDROW", col:bcol,
+                 name:hit.obj.name + " \u2014 " + (bcol.name || ""),
+                 pillar:hit.pillar ? hit.pillar.name : (r.parent_name || ""),
+                 was:bWas, now:bNow,
+                 note:hasNote ? bNowN : null, status:"changed", hit:hit });
+      return;
+    }
     if (["MEASURE","TACTIC","OBJECTIVE"].indexOf(hit.kind) < 0) return;
     /* §303: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
        FIGURE (§248), which the screen has stored in `outActual` since that
@@ -16760,6 +17069,32 @@ function createFromPlan(u, d){
       if (tMon) tRow.outMonthly = tMon;
       if (+x.hidden) tRow.hide = true;
       p2.tactics.push(tRow);
+      made++;
+    } else if (x.type === "BDCELL") {
+      /* ── §339: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
+         The sheet is long form — a line per cell naming its pillar, its
+         column and its category — so the TABLE is assembled here from the
+         order the lines arrive in: first mention of a column makes the
+         column, first mention of a category makes the row. A file edited by
+         hand therefore reads the way it looks, and nothing needs an id typed
+         into a sheet (§22: the platform mints them on arrival).
+
+         AN EMPTY DIRECTION IS THE INDICATOR, kept exactly as the cell said —
+         the absence IS the signal, so defaulting it to `≥` here would make
+         every watched column a scored one on the way through the file. */
+      var p3 = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
+      if (!p3 || !x.name) return;
+      if (!p3.breakdown) p3.breakdown = { name:x.group || "Categories", cols:[], rows:[] };
+      var bd = p3.breakdown;
+      var cn = String(x.outcome || "").trim();
+      var col = bd.cols.filter(function(c){ return (c.name || "") === cn; })[0];
+      if (!col) { col = { id:"c" + (bd.cols.length + 1), name:cn,
+                          dir:x.direction || "" }; bd.cols.push(col); }
+      var bRow = bd.rows.filter(function(y){ return y.name === x.name; })[0];
+      if (!bRow) { bRow = { id:p3.id + "-B" + (bd.rows.length + 1), name:x.name };
+                   if (+x.hidden) bRow.hide = true;
+                   bd.rows.push(bRow); }
+      if (t1) bRow["t_" + col.id] = t1;
       made++;
     } else if (x.type === "NORTHSTAR") {
       /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
@@ -16851,7 +17186,10 @@ function planReplaceSummary(u, rows){
     replace: true,
     incoming: { pillars:countRows(rows, "PILLAR"), measures:countRows(rows, "MEASURE"),
                 tactics:countRows(rows, "TACTIC"), objectives:countRows(rows, "NORTHSTAR"),
-                swot:swot, clauses:countRows(rows, "FOUNDATION") },
+                swot:swot, clauses:countRows(rows, "FOUNDATION"),
+                /* §339: named in the summary the office agrees to BEFORE the
+                   replace happens, or fifteen targets arrive unannounced. */
+                breakdown:countRows(rows, "BDCELL") },
     current: unitSnapshotCounts(unitPlanSnapshot(u)),
     rows: rows
   };
@@ -16922,6 +17260,16 @@ function applyProgress(u, d){
         else if (o.actual > 0 && (o.status === "Not started" || o.status === "Done")) o.status = "WIP";
         else if (o.actual === 0 && o.status === "Done") o.status = "WIP";
       }
+    } else if (r.hit.kind === "BDROW" && r.col) {
+      /* §339: into the cell's own field, rejoined with the target's unit the
+         way every other reported figure is (§199, §243) — and an emptied one
+         DELETES the key (§50.6), or a cleared cell and one never reported
+         stop being the same thing. */
+      var bv = String(r.now == null ? "" : r.now).trim();
+      var bk = "a_" + r.col.id;
+      if (bv === "") delete r.hit.obj[bk];
+      else r.hit.obj[bk] = joinTarget(r.hit.obj[bk] || "", bv,
+        splitTarget(SMPRules.bdTarget(r.hit.obj, r.col)).unit);
     } else if (r.hit.kind === "MEASURE" || r.hit.kind === "OBJECTIVE") {
       r.hit.obj.actual = r.now;
       /* Progress is what the actual implies against the target, so it is
@@ -18255,6 +18603,48 @@ function planWorkbook(u){
             SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly")));
         });
         return acc;
+      }, []) },
+
+    /* ── §339: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
+       §22's contract again: an upload AUTHORS, so a column the file does not
+       carry is a column the plan LOSES on a download-and-re-upload — and a
+       breakdown is fifteen targets somebody set by hand.
+
+       ONE SHEET OF FIXED WIDTH FOR A TABLE OF VARIABLE WIDTH. A breakdown has
+       as many columns as its pillar chose and two pillars need not agree, so
+       a sheet shaped like the screen would need a column per column and a
+       sheet per pillar. Written long — one line per CELL, naming its pillar,
+       its column and its category — the shape is fixed whatever any tenant
+       does with it, which is the same reason the SWOT sheet is a Kind column
+       and four words rather than four columns.
+
+       THE COLUMN'S NAME AND DIRECTION RIDE ON EVERY ONE OF ITS LINES. It is
+       the same fact repeated, and the alternative is a second sheet that can
+       disagree with this one about how many columns a table has. The reader
+       takes the FIRST spelling it meets and the order it meets them in, so a
+       file edited by hand reads the way it looks.
+
+       AN EMPTY DIRECTION IS THE INDICATOR and is not an oversight — the list
+       is soft so a person can clear the cell, which is exactly how a column
+       is marked as watched rather than scored. */
+    { name:"Breakdowns", widths:[30, 22, 24, 22, 11, 14, 12, 9],
+      head:["Pillar", "Table", "Category", "Column", "Direction", "Target",
+            "Unit", "Hidden"],
+      validations:[{ range:"A2:A800", from:PILLAR_RANGE,
+                     error:"Choose a pillar from the Pillars sheet." },
+                   { range:"E2:E800", list:DIRS, soft:true },
+                   { range:"H2:H800", list:YESNO, soft:true }],
+      rows:u.items.reduce(function(acc, p){
+        if (!SMPRules.bdHas(p)) return acc;
+        var nm = SMPRules.bdName(p);
+        SMPRules.bdRows(p).forEach(function(r){
+          SMPRules.bdCols(p).forEach(function(c){
+            var a = splitTarget(SMPRules.bdTarget(r, c));
+            acc.push([p.name, nm, r.name, c.name || "", c.dir || "",
+                      a.value, a.unit, SMPRules.isHidden(r) ? "Yes" : ""]);
+          });
+        });
+        return acc;
       }, []) }
   ]);
 }
@@ -18315,6 +18705,34 @@ function progressWorkbook(u){
             oc ? (t.outActual == null ? "" : String(t.outActual))
                : (t.actual == null ? "" : String(t.actual)),
             "", t.note || "", t.id]);
+        });
+        return acc;
+      }, []) },
+
+    /* §339: AND THE BREAKDOWN'S FIGURES. One line per cell, which is the
+       same long form the plan sheet takes and for the same reason — a table
+       of variable width in a sheet of fixed shape.
+
+       ITS ID IS THE ROW'S AND ITS COLUMN, because that pair is what addresses
+       a figure (§48): the row alone would be three cells sharing one id and
+       the reader could not tell which one a number was meant for.
+
+       AN INDICATOR IS STILL ASKED FOR — it is reported and never scored, and
+       the two are different questions (mockup: "Mix is reported and never
+       scored"). Its direction column is blank here for exactly that reason. */
+    { name:"Breakdowns", widths:[26, 20, 22, 11, 14, 18, 18, 40, 22], lockedCols:[8],
+      head:["Pillar", "Category", "Column", "Direction", "Target",
+            "Currently recorded", "New value", "Note", "ID"],
+      rows:u.items.reduce(function(acc, p){
+        if (!SMPRules.bdHas(p)) return acc;
+        SMPRules.bdRows(p).forEach(function(r){
+          if (SMPRules.isHidden(r)) return;
+          SMPRules.bdCols(p).forEach(function(c){
+            if (!SMPRules.bdAsked(r, c)) return;
+            acc.push([p.name, r.name, c.name || "", c.dir || "",
+                      SMPRules.bdTarget(r, c), SMPRules.bdActual(r, c), "",
+                      r.note || "", r.id + "|" + c.id]);
+          });
         });
         return acc;
       }, []) }
@@ -18589,6 +19007,18 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
+  /* §339: the breakdown's cells, long form — a line per cell, and the table
+     is assembled by `createFromPlan` in the order they arrive. The generic
+     columns carry them: `outcome` is the COLUMN's name and `group` the
+     table's, exactly as the objectives sheet already uses `group`. */
+  sheetObjects(sheets["Breakdowns"]).forEach(function(r){
+    if (!r["Category"]) return;
+    rows.push({ type:"BDCELL", parent_id:pillarId[r["Pillar"]] || "",
+      group:r["Table"] || "", name:r["Category"], outcome:r["Column"] || "",
+      direction:r["Direction"] || "", value:r["Target"], unit:r["Unit"],
+      hidden:yes(r["Hidden"]) ? "1" : "" });
+  });
+
   var out = rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
@@ -18606,7 +19036,11 @@ function planFromWorkbook(u, sheets){
 
 function progressFromWorkbook(u, sheets){
   var out = [];
-  ["Objectives","Measures","Tactics"].forEach(function(name){
+  /* §339: `Breakdowns` joins them, and its ID is a row-and-column pair —
+     `diffProgress` splits it, because a cell is what a figure belongs to
+     (§48). Its `type` is nominal here: the resolver reads the stored graph
+     rather than the word on the sheet. */
+  ["Objectives","Measures","Tactics","Breakdowns"].forEach(function(name){
     sheetObjects(sheets[name]).forEach(function(r){
       /* Either spelling (§58): "New %" is what the Tactics sheet said before
          §303 renamed it, and a workbook downloaded then still uploads. */
@@ -18616,8 +19050,11 @@ function progressFromWorkbook(u, sheets){
       /* §303: A NOTE ALONE IS WORTH READING — the figure may already be right
          and the note is what §105 is holding Submit for. */
       if (!has(v) && !has(note)) return;
-      out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC" : name === "Measures" ? "MEASURE" : "NORTHSTAR",
-                 parent_name:r["Pillar"] || "", name:r["Measure"] || r["Tactic"] || r["Objective"],
+      out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC"
+                   : name === "Measures" ? "MEASURE"
+                   : name === "Breakdowns" ? "BDROW" : "NORTHSTAR",
+                 parent_name:r["Pillar"] || "",
+                 name:r["Measure"] || r["Tactic"] || r["Objective"] || r["Category"],
                  new_value:has(v) ? String(v).trim() : "",
                  new_note:has(note) ? String(note).trim() : "" });
     });
@@ -21872,12 +22309,131 @@ function pillarRow(it, i, u){
    spread is taken over the very list the average was taken over — a pillar's
    `scorableMeasures()`, a list of objectives' `scorableKOs()` — rather than
    over a second filter written beside it (§53.5). */
-function scoreSpread(rows){
+/* ── A PILLAR'S BREAKDOWN, DRAWN (§339) ────────────────────────────
+   ONE BUILDER FOR THE TWO READING SURFACES, because the plan shows a target
+   and Performance shows a figure against it and everything else about the
+   table is identical — two builders is how the two come to disagree about
+   which column is the indicator (§53.5, and §211/§213 twice over).
+
+   A COLUMN'S HEAD CARRIES ITS DIRECTION, and the column with none is the
+   indicator. That is the whole signal: with no total row under the table,
+   the direction in the heading and the scoring colour in the cells are what
+   say which columns count (mockup, signed off). */
+/* ── SETTING ONE UP, WITH THE PEN OPEN (§339) ──────────────────────
+   Everything on a row already exists elsewhere in the platform — the growing
+   name box, the ×, the Add row. ONE CONTROL IS NEW: naming a table's
+   columns, because no table here has ever let anybody do that, and it is
+   what keeps the feature from being about categories. Another client types
+   Region, or Channel, or Brand (mockup, signed off).
+
+   THE DIRECTION PICKER HAS THREE ANSWERS, NOT TWO PLUS A SWITCH. Higher is
+   better, lower is better, or `—`, which means the column is an indicator
+   and is never scored — one control that cannot contradict itself, where a
+   direction beside a scored/not-scored switch is §110's pair waiting to
+   disagree.
+
+   AND PICKING ONE REPAINTS. A bound field writes without repainting (§71.2),
+   which is right for typing and wrong for a control that changes the table's
+   SHAPE: the head's direction mark and every cell's colour in that column
+   follow the answer, so §257.2a's fault is here exactly. Safe because it is
+   a single select (§30.1). */
+function bdPlanSection(it, u, pi, ed){
+  var b = SMPRules.breakdownOf(it);
+  if (!ed) {
+    if (!SMPRules.bdHas(it)) return "";
+    return '<h4 class="mini">' + esc(SMPRules.bdName(it)) +
+      ' <em>— as planned: this year’s target for each</em></h4>' +
+      bdReadTable(it, "plan");
+  }
+  var at = esc(u.ukey) + '|' + pi;
+  /* THE OFFER, on a pillar that has no breakdown. It is a sentence rather
+     than a control on the section line, because only some pillars ever want
+     one and the page must not carry a button for every pillar that does not
+     (§41's budget, §304.2's own shape for the builder's door). */
+  if (!b) return '<p class="sec-hint">Some targets are broken down. ' +
+    '<button class="linkbu" data-bdadd="' + at + '">Break these targets down</button></p>';
+  var cols = SMPRules.bdCols(it);
+  var head = [{ h:"#", cls:"idx" },
+    { h: inputOr("plan", SMPRules.bdName(it), "bdname",
+        function(v){ b.name = v; }), cls:"" }]
+    .concat(cols.map(function(c){
+      return { cls:"cc", h:
+        inputOr("plan", c.name || "", "bdcol", function(v){ c.name = v; }) +
+        selectOr("plan", SMPRules.bdScored(c) ? c.dir : SMPRules.BD_IND,
+          ["≥", "≤", SMPRules.BD_IND], "bddirsel",
+          function(v){ c.dir = (v === SMPRules.BD_IND ? "" : v); paint(); }) +
+        '<button class="xbtn" data-bdcoloff="' + at + '|' + esc(c.id) +
+          '" title="Remove this column" aria-label="Remove this column">&times;</button>' };
+    }))
+    .concat([{ cls:"cc", h:'<button class="linkbu" data-rowadd="bdcol|' + at +
+      '" title="Add a column">+</button>' }]);
+  var rows = SMPRules.bdRows(it).map(function(r, i){
+    return '<tr>' +
+      '<td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + textOr("plan", r.name, "", function(v){ r.name = v; }) +
+        '<button class="xbtn" data-rowoff="breakdown|' + esc(r.id) +
+          '" title="Remove this row" aria-label="Remove this row">&times;</button></td>' +
+      cols.map(function(c){
+        var k = SMPRules.bdTargetKey(c);
+        return '<td class="cc">' +
+          inputOr("plan", SMPRules.bdTarget(r, c), "mono",
+            function(v){ setOr(r, k, v); }) + '</td>';
+      }).join("") + '<td></td></tr>';
+  }).join("");
+  /* The Add row spans every column but the `#`, exactly as the tables above
+     it do — derived from the column count so a column added tomorrow does not
+     leave it short of the table's end (§53.5). */
+  rows += '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols.length + 1) +
+    '"><button class="linkbu" data-rowadd="bdrow|' + at + '">Add a row</button></td></tr>';
+  return '<h4 class="mini">' + esc(SMPRules.bdName(it)) +
+    ' <em>— name the breakdown, its columns, and its rows</em></h4>' +
+    miniTable(head, rows);
+}
+function bdColHead(p, c){
+  return esc(bdColWord(p, c)) +
+    (SMPRules.bdScored(c) ? ' <i class="bddir">' + esc(c.dir) + '</i>' : '');
+}
+function bdReadTable(p, mode){
+  var cols = SMPRules.bdCols(p);
+  var rows = SMPRules.bdRows(p).map(function(r, i){
+    return '<tr' + (SMPRules.isHidden(r) ? ' class="hiddenrow"' : '') + '>' +
+      '<td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + esc(r.name) + hidChip(r) + '</td>' +
+      cols.map(function(c){
+        var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
+        if (mode !== "figures") {
+          return '<td class="num">' + (String(t).trim() ? tgtShown(t)
+            : '<span class="nobody">&mdash;</span>') + '</td>';
+        }
+        /* §339: A FIGURE READS AGAINST ITS OWN TARGET, exactly as every
+           reported figure on these pages already does (§254) — and the
+           SCORING COLOUR is what marks the columns that count. An indicator
+           is drawn plain with its target behind it, which is the rule two
+           tables up: coloured means a score, plain with a target behind it
+           means a reported fact. */
+        if (!String(a).trim()) return '<td class="num"><span class="nobody">&mdash;</span></td>';
+        var sc = bdCellScore(r, c);
+        return '<td class="num"><span class="pair">' +
+          (sc == null ? '<b>' + esc(unitTight(a)) + '</b>'
+                      : '<b style="color:' + bandInk(sc) + '">' + esc(unitTight(a)) + '</b>') +
+          (String(t).trim() ? ' <i>/ ' + tgtShown(t) + '</i>' : '') + '</span></td>';
+      }).join("") + '</tr>';
+  }).join("");
+  return miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
+      .concat(cols.map(function(c){ return { h:bdColHead(p, c), cls:"cc" }; })),
+    rows);
+}
+/* §339: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
+   already scores rather than rows. It is here for §264's own reason: the
+   extremes must be the extremes of exactly the list the headline beside them
+   averaged, or a card names a Highest the number above it left out. A pillar
+   with no breakdown passes nothing and is byte-identical. */
+function scoreSpread(rows, extra){
   /* WRAPPED, NEVER PASSED BY NAME (§250.1): `measureScore` takes an optional
      share and `Array.map` hands its callback the INDEX, so a bare
      `.map(measureScore)` would prorate the second row by the whole year and
      the third by twice it. */
-  var v = rows.map(function(m){ return measureScore(m); });
+  var v = rows.map(function(m){ return measureScore(m); }).concat(extra || []);
   return { n: v.length,
            hi: v.length ? Math.max.apply(null, v) : null,
            lo: v.length ? Math.min.apply(null, v) : null };
@@ -21914,15 +22470,25 @@ function pillarBody(it, u){
      a lowest of 0% \u2014 exactly the false failure the null rule exists to prevent. */
   /* \u00a7257: and they read the SCORE, which is what the headline beside them and
      the Progress column beneath them are made of. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var bdsc = bdColScores(it);
+  var sp = scoreSpread(scorableMeasures(it), bdsc);
   var uk = u && u.ukey;
   return '<div class="pbody" hidden>' +
+    /* §339: a scored breakdown column is one of the numbers this pillar is
+       judged on, so it is counted here too — "Measures 4" over an average of
+       five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+    /* §339: and the breakdown, where there is one — between the measures it
+       is part of and the tactics it is not. A pillar without one adds nothing
+       at all: no heading, no empty section (Islam, on the mockup). */
+    (SMPRules.bdHas(it)
+      ? '<h5 class="mini">' + esc(SMPRules.bdName(it)) + '</h5>' + bdReadTable(it, "figures")
+      : '') +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
@@ -25955,6 +26521,30 @@ function renderReport(u){
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
+  /* §339: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
+     than `entry` itself, because every branch in that function is about a
+     field on the row (`actual` / `outActual`, the yes/no pair, a sourced
+     figure) and a cell is addressed by its COLUMN — `data-bdcol` beside
+     `data-rep`, so the shell's one handler resolves the row and then the
+     cell. The unit rides with it exactly as it does for a measure, so the
+     figure is stored joined and every screen downstream reads it whole
+     (§199). */
+  var bdEntry = function(x){
+    var t = SMPRules.bdTarget(x.obj, x.col);
+    var unit = splitTarget(t).unit;
+    var cur = SMPRules.bdActual(x.obj, x.col);
+    var has = String(cur).trim() !== "";
+    var shown = has ? (splitTarget(unitTight(cur)).value || String(cur)) : "";
+    if (!canEnterFigure(u.ukey, x)) {
+      return '<span class="mono">' + (has ? esc(unitTight(cur)) : "\u2014") + '</span>';
+    }
+    return '<span class="entry' + (has ? " filled" : "") + '">' +
+      '<input class="field" data-rep="' + esc(x.obj.id) + '" data-bdcol="' + esc(x.col.id) +
+      '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
+      '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + ' ' +
+      esc(String(x.col.name || "").trim() || "figure") + '"></span>' +
+      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '');
+  };
   var noteCell = function(x){
     return canEnterNote(u.ukey, x)
       ? noteBox("note", x.id, x.obj.note, needsNote(x))
@@ -26027,8 +26617,22 @@ function renderReport(u){
                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                 cid:p.id });
     });
+    /* §339: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
+       cell, which is what makes the pane's tally read "20/20" over three
+       measures, fifteen category figures and two tactics — the count Islam
+       signed off. The ROW carries the note, so every cell in a row points at
+       the same object and one line clears them all. */
+    var bds = bdCells(p).map(function(c){
+      return { id:c.row.id + "|" + c.col.id, obj:c.row, col:c.col, kind:"bdcell",
+               owner:p.owner, pown:p.owner, cid:p.id };
+    });
+    var bdRowItem = function(r){
+      return { id:r.id, obj:r, kind:"bdrow", pillar:p,
+               owner:p.owner, pown:p.owner, cid:p.id };
+    };
     var askedT = ts.filter(function(x){ return x.asked; });
-    var done = doneOf(ms) + doneOf(askedT), total = ms.length + askedT.length;
+    var done = doneOf(ms) + doneOf(askedT) + doneOf(bds),
+        total = ms.length + askedT.length + bds.length;
 
     var mTable = ms.length
       ? '<h4 class="mini">' + L("measure","bu") + '</h4>' +
@@ -26087,6 +26691,36 @@ function renderReport(u){
           }).join(""))
       : "";
 
+    /* §339: the breakdown, between the measures it is part of and the
+       tactics it is not — the same place it sits on the other two panes, or
+       somebody entering figures meets the table in a different order from
+       the one they planned it in. The target sits BEHIND each box so nobody
+       has to remember it, and a row's note is asked once however many of its
+       figures are at risk. */
+    var bdTable = bds.length
+      ? '<h4 class="mini">' + esc(SMPRules.bdName(p)) + '</h4>' +
+        miniTable([{h:"#", cls:"idx"}, {h:SMPRules.bdName(p), cls:""}]
+            .concat(SMPRules.bdCols(p).map(function(c){
+              return { h:bdColHead(p, c), cls:"cc" }; }))
+            .concat([{h:"Note", cls:""}]),
+          SMPRules.bdRows(p).filter(function(r){ return !SMPRules.isHidden(r); })
+            .map(function(r, i){
+            var ri = bdRowItem(r);
+            return '<tr' + (needsNote(ri) ? ' class="wantnote"' : '') + '>' +
+              '<td class="idx">' + (i+1) + '</td>' +
+              '<td>' + esc(r.name) + '</td>' +
+              SMPRules.bdCols(p).map(function(c){
+                if (!SMPRules.bdAsked(r, c))
+                  return '<td class="cc"><span class="nobody">&mdash;</span></td>';
+                var x = { id:r.id, obj:r, col:c, kind:"bdcell",
+                          owner:p.owner, pown:p.owner, cid:p.id };
+                return '<td class="cc">' + bdEntry(x) +
+                  '<span class="subhd">/ ' + tgtShown(SMPRules.bdTarget(r, c)) + '</span></td>';
+              }).join("") +
+              '<td class="notecol">' + noteCell(ri) + '</td></tr>';
+          }).join(""))
+      : "";
+
     /* THE SAME BAND THE PLAN AND PERFORMANCE PANES WEAR (§46.3). This page was
        left behind when they changed: a 19px heading over a meta line, which is
        the shape those two shed. The counts and the tally are real information
@@ -26097,12 +26731,14 @@ function renderReport(u){
        data and was the last place in the product still saying it. */
     return pillarBand(pillarCode(u, pi), p.name,
         '<span class="pband-n">' + ms.length + ' measures &middot; ' +
+        (bds.length ? bds.length + ' ' + esc(SMPRules.bdName(p).toLowerCase()) +
+                      ' figures &middot; ' : '') +
         askedT.length + ' tactics asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
         doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi)), p.kind) +
-      mTable + tTable;
+      mTable + bdTable + tTable;
   };
 
   /* Entries given of asked, per pillar \u2014 what the rail rows and the pane pill
@@ -26117,6 +26753,13 @@ function renderReport(u){
       if (!tacticDue(t)) return;
       total++;
       if (tacticAnswered(t)) done++;   /* §252 */
+    });
+    /* §339: and every cell the breakdown asks for — the rail's tally and the
+       pane's pill read this one function, so they cannot disagree about how
+       much of a pillar is still to enter (§116.2). */
+    bdCells(p).forEach(function(c){
+      total++;
+      if (SMPRules.bdAnswered(c.row, c.col)) done++;
     });
     return { done: done, total: total };
   };
@@ -28755,6 +29398,7 @@ function unitPlanBody(it, u, railed){
     miniTable((ed || unitCol) ? ["#","Measure","Dir.","Unit","Target","Compiled"]
                  : ["#","Measure","Dir.","Target","Compiled"],
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
+    bdPlanSection(it, u, pi, ed) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
@@ -29295,7 +29939,8 @@ function unitPerfPane(it, u, railed){
   /* §264: the score, not the stored raw ratio — this is the pane Islam
      reported, and its Highest and Lowest are the extremes of exactly the
      measures `pillarPerf` averaged two lines below. */
-  var sp = scoreSpread(scorableMeasures(it));
+  var bdsc = bdColScores(it);
+  var sp = scoreSpread(scorableMeasures(it), bdsc);
   var uk = u && u.ukey;
   var meta = pillarMeta(it);
   /* The same band as the Plan page, for the same reason and by the same
@@ -29307,12 +29952,21 @@ function unitPerfPane(it, u, railed){
     '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
+    /* §339: a scored breakdown column is one of the numbers this pillar is
+       judged on, so it is counted here too — "Measures 4" over an average of
+       five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length, sp.n, sp.hi, sp.lo) +
+              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+    /* §339: and the breakdown, where there is one — between the measures it
+       is part of and the tactics it is not. A pillar without one adds nothing
+       at all: no heading, no empty section (Islam, on the mockup). */
+    (SMPRules.bdHas(it)
+      ? '<h5 class="mini">' + esc(SMPRules.bdName(it)) + '</h5>' + bdReadTable(it, "figures")
+      : '') +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
       '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
@@ -38954,6 +39608,53 @@ function deckSlides(u){
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>' +
       '<th class="num">Annual target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
+
+    /* ── §339: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
+       After that pillar's targets, because the columns ARE two of the numbers
+       the heading above already averages — a room reading "Key measures 95%"
+       needs the five rows that make it, not three of them.
+
+       DRAWN ONLY WHERE THERE IS ONE, exactly as it is on the three screens: a
+       pillar with no breakdown mints no slide and no anchor (§253 — a table
+       with no rows is not a slide).
+
+       A COLUMN'S HEAD CARRIES ITS DIRECTION and a scored figure wears its
+       band, which is what says which columns count with no total row under
+       the table. The INDICATOR is drawn plain — deliberately the same rule as
+       the page, or the projector says something the screen does not (§53.5).
+
+       ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
+       `m` and the tactics slide's bare code, both of which stored picture
+       slides already name (§236.2, §50.3). */
+    var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
+    var bdRows = !bdShow ? "" :
+      SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
+        return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
+          bdCols.map(function(c){
+            var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
+            if (!String(a).trim())
+              return '<td class="num">' + (String(t).trim()
+                ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
+                : '<span class="dmuted">&mdash;</span>') + '</td>';
+            var sc = bdCellScore(r, c);
+            return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
+              esc(a) + (String(t).trim()
+                ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+          }).join("") +
+          (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
+                  : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+    if (bdRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'B"' +
+      anch("p" + pillarCode(u, pi) + "b",
+           "After " + pillarCode(u, pi) + " — " + SMPRules.bdName(p)) + '>' +
+      deckPillarHead(u, p, pi, SMPRules.bdName(p)) +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
+      '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
+      bdCols.map(function(c){
+        return '<th class="num">' + esc(bdColWord(p, c)) +
+          (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+      }).join("") +
+      '<th>Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
 
     /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
        Islam: *"presentations doesn't change when the plan performance is
@@ -53294,7 +53995,10 @@ var SYNC = (function () {
          unanswered In-progress row is both, and the box to land on is the
          per-cent. */
       var id, kind;
-      if (d.rep != null)        { id = d.rep;   kind = "owed"; }
+      /* §339: a breakdown's box is addressed by its row AND its column — the
+         row is what the write handler resolves, the pair is what the ask list
+         counts. */
+      if (d.rep != null)        { id = d.rep + (d.bdcol ? "|" + d.bdcol : ""); kind = "owed"; }
       else if (d.crep != null)  { id = d.crep;  kind = "owed"; }
       else if (d.cpick != null) { id = d.cpick; kind = "owed"; }
       else if (d.cpct != null)  { id = d.cpct;  kind = "pend"; }
@@ -54236,6 +54940,24 @@ var SYNC = (function () {
            for a figure against a target and wrong here: an outcome 60% through
            a half-elapsed window scores 120, and reading that as Done would put
            the word on a row whose own answer says In progress. */
+        /* ── §339: A BREAKDOWN'S CELL ─────────────────────────
+           `data-rep` finds the ROW and `data-bdcol` says which of its cells.
+           The field is flat (`a_<col>`) rather than a key inside an object,
+           for the reason that shape exists at all: the authoriser tells a
+           reported figure from a plan one by FIELD NAME, and `same()` is
+           stringify-based while jsonb hands an object's keys back in its own
+           order (§145, §249.3) — one object holding every actual would read
+           as a change nobody made and refuse the save that carried it.
+
+           EMPTIED, THE KEY GOES (§50.6): a cell never reported and one
+           cleared must be byte-identical, or every save carries a phantom
+           change for ever. */
+        if (el.dataset.bdcol) {
+          var bk = "a_" + el.dataset.bdcol;
+          if (v === "") delete hit.obj[bk];
+          else hit.obj[bk] = joinTarget(hit.obj[bk], v, el.dataset.unit || "");
+          paint(); return;
+        }
         if (el.dataset.ynpart) {
           var ynFld = el.dataset.fld === "outActual" ? "outActual" : "actual";
           var was = SMPRules.ynState(hit.obj[ynFld]);
@@ -57605,6 +58327,14 @@ var SYNC = (function () {
         /* §338: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */
         else if (what === "action") { if (!addAction(a[1])) return; }
+        /* §339: a breakdown's row and its columns. `unitLikeWritable` for
+           §129's audit reason — a virgin pillars function hands out frozen
+           empties, so a first add is accepted on screen and written nowhere. */
+        else if (what === "bdrow" || what === "bdcol") {
+          var bu = unitLikeWritable(a[1]), bit = bu && bu.items[+a[2]];
+          if (!bit) return;
+          if (what === "bdrow") addBdRow(bit); else { addBreakdown(bit); addBdCol(bit); }
+        }
         else if (what === "measure" || what === "tactic") {
           /* unitLikeWritable, not unitLike (§129's audit): the reading view
              hands a VIRGIN pillars function frozen empties, so the first add
@@ -57756,7 +58486,37 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
-        removeRowById(listById(list, id), id);
+        var arr = listById(list, id);
+        removeRowById(arr, id);
+        /* §339: and a breakdown with nothing left in it stops being one
+           (§50.6) — a pillar that never had one and a pillar that had one
+           removed must be byte-identical, or every save carries a change
+           nobody made. */
+        if (list === "breakdown") bdTidyById(id);
+        paint();
+      });
+    });
+    /* §339: REMOVING A COLUMN TAKES ITS CELLS WITH IT — every row's `t_<col>`
+       and `a_<col>` go too, or the table loses a column and every save goes
+       on carrying its figures for ever (§53.4). */
+    document.querySelectorAll("[data-bdcoloff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.bdcoloff.split("|");
+        var u = unitLikeWritable(a[0]), it = u && u.items[+a[1]];
+        if (!it) return;
+        removeBdCol(it, a[2]);
+        bdTidy(it);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-bdadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.bdadd.split("|");
+        var u = unitLikeWritable(a[0]), it = u && u.items[+a[1]];
+        if (!it) return;
+        addBreakdown(it); addBdRow(it);
         paint();
       });
     });

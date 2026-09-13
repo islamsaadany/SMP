@@ -45952,3 +45952,243 @@ the tenant.
   state (§255).
 
 ---
+
+## 339 · A breakdown of a pillar's targets
+
+Islam, of one of his own pillars:
+
+> *"Maximizing Current Stores has its targets broken down by category."*
+
+Five categories, each with a growth target, a contribution-margin target and a
+share of the mix. **Fifteen numbers that had nowhere to go.**
+
+The picture was drawn for him on 2026-09-11 out of the running platform, with
+his own pillar and his own five categories in it, and signed off; §324.8
+recorded it as drawn-and-not-built. On 2026-09-13, of the four extras that
+section left standing, he said *"let's start with what's drawn and signed
+off."*
+
+**ONLY ONE OF THE FOUR WAS EVER DRAWN, and saying so came first.** I had told
+him four things were drawn and signed off; the record says one. The pillar's
+description, the pillar committee and the next-cycle focus box were **named in
+a list** that day and never drawn, so each still wants a picture before
+anything is built (rule 1c). The correction is what decided which piece this
+round is.
+
+### 339.1 · Written as measures they stop being a breakdown
+
+Measured on the mockup's own subject: the pillar carries three key measures
+and a fourth, *Categories mix*, that **nobody could fill** — a single row
+standing in for fifteen numbers, reading `— / —` on every surface. Written out
+as fifteen measures instead, the pillar reads as though it had **nineteen
+headline targets** rather than three and a table, and its Highest and Lowest
+become the extremes of a category rather than of a measure.
+
+So the row goes, and what replaces it is a table with the arithmetic of a
+measure.
+
+### 339.2 · A column is a key measure with several values instead of one
+
+That one sentence is the whole model, and everything else follows from it.
+
+`Growth` is a **single score** — every category's figure against its own
+target, averaged — and it joins the pillar's own measures **carrying the same
+weight as any of them**. **Every category counts equally** (Islam).
+
+**NOTHING HERE KNOWS HOW TO SCORE ANYTHING.** A cell is shaped into the object
+`measureScore` already takes — direction from the COLUMN, target and figure
+from the cell — so a yes/no target, the 150 cap, `≤`'s inversion and §239.4's
+nought rule all hold without one line of arithmetic being written twice
+(§53.5). Measured: 4 against 7 scores **57**, which is the number the mockup
+prints.
+
+**AND THERE IS NO COMPILE RULE**, which is a decision rather than an omission.
+A blank compile compares against the WHOLE target and prorates nothing (§276)
+— which is what a category's annual share already is. Fifteen glide paths
+would be a fourth control in a table drawn to hold three.
+
+**THE SPREAD HAD TO FOLLOW THE HEADLINE OR §264 COMES STRAIGHT BACK.** That
+section's whole finding is that the extremes must be the extremes of exactly
+the list the number above them averaged; `scoreSpread` takes the column scores
+as a second argument, and the card's *Measures* count takes them too —
+otherwise it reads **4** over an average of five, which is the card
+contradicting itself in the space of two inches.
+
+### 339.3 · The column with no direction is the indicator
+
+`Mix` is **reported and never scored**, because the five shares add up to the
+revenue mix and one category beating its share forces another to miss — a
+deviation either way is worth knowing and is not a performance measure.
+
+**THERE IS NO SECOND SWITCH BESIDE THE DIRECTION.** The absence of a direction
+IS the signal: one control with three answers (`≥`, `≤`, `—`) rather than a
+direction and a scored/not-scored switch that can disagree with it, which is
+§110's pair waiting to happen. It is drawn plain while the scored columns wear
+their band, which is the rule two tables up: **coloured means a score, plain
+with a target behind it means a reported fact.**
+
+**AND A FIGURE IN IT CAN NEVER BE AT RISK**, which is that decision made true
+rather than merely stated: `rowReads` answers null for an indicator cell, so
+§105's note rule cannot reach it whatever number is typed — proved by putting
+a Mix figure miles off its target and asserting no note is asked, beside a
+scored cell at 57% that does ask.
+
+### 339.4 · A cell is two flat fields, never an object
+
+The one shape decision everything else rests on.
+
+A breakdown holds the PLAN (its columns and its fifteen targets) and the
+REPORT (the figures typed against them, and the row's note) **in one object on
+one row**. So it cannot be compared whole, or every reported figure classifies
+as authoring the plan and is refused for every custodian in the tenant —
+§147's own fault on a milestone's `pct`, and §42's drift in the direction that
+costs somebody's work.
+
+The authoriser tells the two apart by **field name**, and `same()` is
+stringify-based while Postgres jsonb hands an object's keys back in its own
+order (§145, §249.3). **One object holding every actual would therefore read
+as a change nobody made and refuse the save that carried it.** Flat fields
+cannot: `t_<col>` is the target, `a_<col>` the figure, spelled onto the row.
+
+**THE REPORTED FIELD LIST IS DERIVED FROM THE STORED COLUMNS**, never written
+down in the authoriser: a column added tomorrow is classified the day it is
+added, and a field belonging to a column that has GONE is not in the list and
+therefore falls to the plan — which is the safe direction (§42 fails closed).
+
+**NO SCHEMA CHANGE, AND IT IS MEASURED RATHER THAN CLAIMED** (§172, a claim
+this project has made wrongly before). `pillars` maps nine columns and files
+every other key into `extra`; the round trip writes a breakdown with a scored
+column, an indicator, a note and a row with targets and no figures yet, reads
+it back, and asserts **the table gained no column** — then removes it and
+asserts the key is **deleted** (§50.6).
+
+**STORED EXACTLY WHEN IT IS SHOWN**, which is one predicate rather than a
+second rule that could disagree with it: `bdTidy` deletes the whole key the
+moment `bdHas` goes false, so a pillar that never had a breakdown and one
+whose last row was removed are byte-identical.
+
+### 339.5 · Submit waits for every figure — and that needed his word
+
+The mockup's closing line says *Submit waits for every one of them*. A day
+later Islam ruled the extras **optional**, which §336 recorded as reversing
+exactly that half. **Both cannot be true**, and which one holds changes the
+build — the gate, the count, and whether a blank cell is owed at all. Put to
+him as two readings with the cost of each; he chose **A**: optional to HAVE,
+owed once a pillar has one.
+
+- A cell is asked for **only where it has a target** — asking for a figure
+  against nothing is asking for a number nothing can read (§35), and a blank
+  target is the office's own work in progress rather than a gap the count
+  names (§214.4: a red word over a count of nought is worse than silence).
+- **The ask list counts CELLS, not rows.** Islam's own count on the mockup is
+  *3 measures · 15 category figures · 2 tactics*, and the pane's tally reads
+  20/20. One item per row would have made fifteen figures read as five.
+- **The note is the ROW's**, so every cell in a row points at the same object
+  and one line clears them all — while the refusal still counts figures
+  (*"3 figures are at risk with no note"*), which is the honest sentence.
+- **THE WALK HAD TO BE TOLD WHERE THE NOTE LIVES** (§16.7): an item is
+  addressed by row-and-column and its explanation by row alone, so an item
+  says where its note box is and §279's bar marks that control. Without it a
+  row at risk is counted by the bar and reachable by nothing.
+
+### 339.6 · What it costs, said before it was built
+
+- This pillar is asked for fifteen more figures than it was, and a cycle
+  cannot be submitted with any of them blank.
+- Ten of them can demand an explanation — §105's rule reaching ten more cells.
+- **The breakdown moves the pillar's number**, by the same weight as any
+  headline measure.
+- **One control is new to the platform**: naming a table's columns. No table
+  here has ever let anybody do that, and it is what keeps the feature from
+  being about categories — another client types Region, or Channel, or Brand.
+
+### 339.7 · The workbook, long form
+
+§22's contract again: an upload AUTHORS, so a column the file does not carry
+is a column the plan LOSES — and a breakdown is fifteen targets somebody set
+by hand. Both workbooks gain a **Breakdowns** sheet.
+
+**ONE SHEET OF FIXED WIDTH FOR A TABLE OF VARIABLE WIDTH.** A breakdown has as
+many columns as its pillar chose and two pillars need not agree, so a sheet
+shaped like the screen would need a column per column and a sheet per pillar.
+Written long — one line per CELL, naming its pillar, its column and its
+category — the shape is fixed whatever any tenant does with it, which is the
+same reason the SWOT sheet is a Kind column and four words rather than four
+columns.
+
+The column's name and direction ride on every one of its lines, and the reader
+takes the **first** spelling it meets and the order it meets them in, so a file
+edited by hand reads the way it looks. **An empty direction is the indicator**
+and the list is soft, which is exactly how a column is marked as watched
+rather than scored. The progress sheet's ID is `<row>|<column>`, because that
+pair is what addresses a figure (§48) — the row alone is three figures sharing
+one id, and the reader could not tell which one a number was meant for.
+
+Driven end to end rather than read: the plan file out, back through its own
+reader and the REAL replace path, with the table, its columns, their
+directions and all fifteen targets asserted; then the progress file out, a
+figure typed INTO the sheet, back through `progressFromWorkbook`,
+`diffProgress` and `applyProgress`, and the cell read off the stored plan.
+
+### 339.8 · Verified
+
+- `checks/pillar-breakdown.py` **33 assertions, 0 failures**, with the state
+  MADE and put back (§255, §94.2). Proved able to fail three ways from the
+  SOURCES (§276): **1 / 7 / 2 red**.
+- **AND THE SECOND FALSIFICATION FOUND A WEAKNESS IN THE CHECK ITSELF**
+  (§113.8, §94.5). Its §4 reached for *the column with no direction*, which on
+  a build that scores every column is `undefined` — `bdCellScore(r, undefined)`
+  answers null, and all three assertions went green on exactly the build they
+  exist to catch. The column is asserted to be FOUND first; that falsification
+  then goes **2 red → 7**.
+- `scripts/test-authorize.js` **641 passed, 0 failed** with §39 new (8
+  assertions, both ends every time), proved able to fail twice: comparing the
+  breakdown whole → **2 red** (every figure classifies as authoring the plan);
+  letting a target count as reporting → **1 red**.
+- `scripts/test-roundtrip.js` on a virgin Postgres 16: the breakdown round
+  trips, the table gains no column, the key is deleted on removal.
+- `checks/template-round-trip.py` carries a breakdown through the plan file:
+  all clear.
+- `scripts/test-graph-diff.js` **140 / 0**. A breakdown change travels as ONE
+  field on ONE pillar row rather than the whole unit — measured, not assumed.
+- `qa.py`, every page as every viewer: **ERRORS none**; inline validation
+  lists **36 → 38**, the Breakdowns plan sheet's own two, longest **121 of
+  255**, so §67.5's cap is nowhere near.
+
+### 339.9 · And a falsification undone with `git checkout` threw the work away
+
+Three of the four sources were saved to a scratch copy before being broken and
+restored from it; `lib/rules.js` was restored with `git checkout` instead —
+**which took the whole §339 block with it**, because the file was not
+committed. The break was undone and so was the feature.
+
+**IT WAS CAUGHT BY THE BUILD AND NOT BY A CHECK**: rebuilding after the
+restore produced a file differing from the good one by **exactly one CSP
+hash** (§238 hashes each script block, so a changed block changes one hash and
+nothing else). Comparing the rebuilt file with the saved good build is what
+said something was missing; every check had already run and passed before the
+damage.
+
+*Undo a falsification with the copy you saved, never with `git checkout` on a
+file the work is not committed to — and compare the rebuilt file with the
+build you falsified from, because it is the one thing that notices.*
+
+### Recorded, not done
+
+- **A breakdown travels as one field on one pillar row.** Finer would need
+  `graph-diff`'s walker to descend into an object whose `rows` is an array,
+  which it cannot do — so two people entering different categories of the SAME
+  pillar in the same seconds resolve last-write-wins. Two people on two
+  pillars never collide (§215's residue, one level in).
+- **A category row cannot be hidden from the presentation** (§233 reaches
+  measures, tactics and the rest; a breakdown row is not in `hideableById`).
+- **Fill mode does not reach it.** A blank target is the office's and is not a
+  counted gap, which is why it draws an em-dash rather than the red word —
+  counted-and-not-fillable would be §223's fault exactly.
+- **The plan builder does not offer one**; a breakdown is added from the Plan
+  page's pen.
+- **The three other extras are still not drawn**: the pillar's description,
+  the pillar committee, and the next-cycle focus box with its switch at cycle
+  open.
+
+---

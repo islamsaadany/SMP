@@ -7918,6 +7918,33 @@ python3 checks/objectives-actions.py # the third way a function plans
                                 # rendered case, §215's unlanded press, a `.rrow`
                                 # that is nought on both formats, and a fixed point
                                 # asked over a row no file can carry)
+python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
+                                # (&sect;339, spec 050): the state is MADE and PUT
+                                # BACK (&sect;255, &sect;94.2) — no pillar in the
+                                # worked example carries one, so every assertion
+                                # here would pass on a build that lost the feature.
+                                # A pillar without one draws nothing on any pane,
+                                # with the pillar beside it asserted to draw one in
+                                # the same run (&sect;113.8); every pen control
+                                # PRESSED and the stored plan read back (&sect;96),
+                                # including that removing a column takes its cells
+                                # with it (&sect;53.4); the column scores asserted
+                                # as AGREEMENT with the platform's own scorer and
+                                # the pillar's headline as their average with its
+                                # measures, with the card's own count and
+                                # Highest/Lowest following (&sect;264); the
+                                # INDICATOR asserted to score nothing, join no
+                                # average and never ask for a note at any value —
+                                # with the column asserted FOUND first, or a build
+                                # that scores every column passes all three
+                                # (&sect;94.5, and falsification B did); Submit
+                                # owed exactly one more per blank cell; the
+                                # Reporting pane's box per cell, target behind it
+                                # and ONE note per row, with a typed figure read
+                                # back off the stored cell; and one deck slide with
+                                # the direction on the scored columns only. 33/0,
+                                # red three ways from the SOURCES (&sect;276):
+                                # 1 / 7 / 2
 python3 checks/capability-report-column.py # a capability's reporting page asks
                                 # the column that judges it (§337): measured on the
                                 # SHIPPED demo with no cell tightened — the rule,
@@ -8975,7 +9002,94 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;338: objectives and actions, the
+*Last Updated: 2026-09-13 &mdash; **&sect;339: a breakdown of a pillar's
+targets (spec 050).** Islam, of one of his own pillars: *"Maximizing Current
+Stores has its targets broken down by category"* &mdash; five categories, each
+with a growth target, a contribution-margin target and a share of the mix, and
+**fifteen numbers with nowhere to go**. Then, of the four extras &sect;324.8
+left standing, *"let's start with what's drawn and signed off."* **ONLY ONE OF
+THE FOUR WAS EVER DRAWN AND SAYING SO CAME FIRST** &mdash; I had told him four
+were; the other three were NAMED in a list that day and never drawn, so each
+still wants a picture (rule 1c), and the correction is what decided which piece
+this round is. **MEASURED FIRST**: written as measures the fifteen stop being a
+breakdown (the pillar reads as though it had nineteen headline targets rather
+than three and a table), and written as ONE measure it is the row nobody could
+fill that the worked example already shows. **A COLUMN IS A KEY MEASURE WITH
+SEVERAL VALUES INSTEAD OF ONE**, and that sentence is the whole model: `Growth`
+is a single score &mdash; every category's figure against its own target,
+averaged &mdash; joining the pillar's own measures at the same weight, every
+category counting equally (his). **NOTHING HERE KNOWS HOW TO SCORE ANYTHING**:
+a cell is shaped into the object `measureScore` already takes, so the 150 cap,
+`&le;`'s inversion and &sect;239.4's nought rule hold with no arithmetic
+written twice (&sect;53.5) &mdash; 4 against 7 scores **57**, the mockup's own
+number. **AND NO COMPILE RULE**, which is a decision: a blank compile compares
+against the WHOLE target (&sect;276), which is what a category's annual share
+already is. **THE SPREAD AND THE CARD'S COUNT FOLLOW THE HEADLINE OR &sect;264
+COMES STRAIGHT BACK** &mdash; that section's whole finding is that the extremes
+must be of exactly the list the number above them averaged. **THE COLUMN WITH
+NO DIRECTION IS THE INDICATOR**: `Mix` is reported and never scored, because
+the five shares add up to the revenue mix and one beating its share forces
+another to miss; there is **no second switch**, the absence IS the signal
+(&sect;110's pair), it is drawn plain while the scored columns wear their band,
+and **a figure in it can never be at risk** &mdash; `rowReads` answers null, so
+&sect;105's note rule cannot reach it whatever number is typed. **A CELL IS TWO
+FLAT FIELDS, NEVER AN OBJECT**, and that is the one shape everything rests on:
+a breakdown holds the PLAN and the REPORT on one row, the authoriser tells them
+apart by FIELD NAME, and `same()` is stringify-based while jsonb hands an
+object's keys back in its own order (&sect;145, &sect;249.3) &mdash; one object
+of actuals would read as a change nobody made and refuse the save carrying it.
+**The reported field list is DERIVED from the stored columns**, so a column
+added tomorrow is classified that day and one that has GONE falls to the plan
+(&sect;42 fails closed). **NO SCHEMA CHANGE, MEASURED RATHER THAN CLAIMED**
+(&sect;172, wrongly claimed here before): it rides `pillars.extra`, written to a
+real Postgres 16 and read back with the table asserted to have **gained no
+column**, and the key DELETED on removal (&sect;50.6) &mdash; **stored exactly
+when it is shown**, which is one predicate rather than a second rule that could
+disagree. **SUBMIT WAITS FOR EVERY FIGURE AND THAT NEEDED HIS WORD**: the
+mockup says so and a day later he ruled the extras *optional*, which &sect;336
+recorded as reversing exactly that half &mdash; both cannot be true, so the two
+readings were put to him with their costs and he chose **A** (optional to HAVE,
+owed once a pillar has one). **The ask list counts CELLS, not rows** (his own
+*3 measures &middot; 15 category figures &middot; 2 tactics*, tally 20/20),
+**a cell is asked for only where it has a target** (&sect;35, &sect;214.4: a
+red word over a count of nought is worse than silence), **the note is the
+ROW's** so one line clears every cell in it, and **the walk is told where that
+note lives** or a row at risk is counted by the bar and reachable by nothing
+(&sect;16.7). **ONE CONTROL IS NEW TO THE PLATFORM** &mdash; naming a table's
+columns &mdash; which is what keeps this from being about categories: another
+client types Region, or Channel, or Brand. **THE WORKBOOK IS LONG FORM** (a
+line per CELL naming its pillar, its column and its category), because a table
+of variable width in a sheet of fixed shape is the SWOT sheet's own answer;
+the plan file's reader takes the FIRST spelling of a column it meets and the
+order it meets them in, an empty direction is the indicator, and the progress
+sheet's ID is `<row>|<column>` because that pair is what addresses a figure
+(&sect;48) &mdash; both routes driven end to end rather than read.
+`checks/pillar-breakdown.py` **33/0** with the state MADE and put back
+(&sect;255, &sect;94.2), red three ways from the SOURCES (&sect;276): **1 / 7 /
+2**. **AND THE SECOND FALSIFICATION FOUND A WEAKNESS IN THE CHECK ITSELF**
+(&sect;113.8, &sect;94.5) &mdash; its &sect;4 reached for *the column with no
+direction*, which on a build that scores every column is `undefined`, so
+`bdCellScore(r, undefined)` answers null and all three assertions went green on
+exactly the build they exist to catch; the column is asserted FOUND first and
+that falsification goes **2 red &rarr; 7**. 641/0 authoriser with &sect;39 new
+(both ends, red 2 / 1), 140/0 differ, round trip and template round trip green,
+`qa.py` ERRORS none with inline validation lists 36 &rarr; 38 at a longest of
+121 of 255 (&sect;67.5 nowhere near). **&sect;339.9 &mdash; AND A FALSIFICATION
+UNDONE WITH `git checkout` THREW THE WORK AWAY**: three sources were restored
+from a scratch copy and `lib/rules.js` with `git checkout`, **which took the
+whole &sect;339 block with it** because the file was not committed &mdash; the
+break undone and the feature with it. **Caught by the BUILD and not by a
+check**: rebuilding produced a file differing from the good one by exactly one
+CSP hash (&sect;238 hashes each script block), and every check had already
+passed before the damage. *Undo a falsification with the copy you saved, and
+compare the rebuilt file with the build you falsified from.* **RECORDED, NOT
+DONE**: a breakdown travels as one field on one pillar row, so two people
+entering different categories of the SAME pillar in the same seconds resolve
+last-write-wins; a category row cannot be hidden from the presentation; fill
+mode does not reach it; the plan builder does not offer one; and the three
+other extras are still not drawn.*
+
+*Earlier the same day: **&sect;338: objectives and actions, the
 third way a function plans (spec 049).** Islam: *"we need to build the
 objectives and actions"* &mdash; the third panel of the mockup he signed off,
 and of the model, *"each function has objectives like the measures we have and

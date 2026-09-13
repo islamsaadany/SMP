@@ -1279,6 +1279,85 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   function wholeUnits(compile) { return compileKey(compile) === "count"; }
 
+  /* ── A BREAKDOWN OF A PILLAR'S TARGETS (§339) ─────────────────────
+     Islam, of one of his own pillars: *"Maximizing Current Stores has its
+     targets broken down by category."* Five categories, each with a growth
+     target, a contribution-margin target and a share of the mix — fifteen
+     numbers that had nowhere to go. Written as measures they stop being a
+     breakdown: the pillar reads as though it had nineteen headline targets
+     rather than three and a table.
+
+     A COLUMN IS A KEY MEASURE WITH SEVERAL VALUES INSTEAD OF ONE, and that
+     one sentence is the whole model. `Growth` is a single score — every
+     category's figure against its own target, averaged — and it joins the
+     pillar's own measures carrying the same weight as any of them. So the
+     arithmetic is the platform's own, asked once per cell (§53.5): nothing
+     here knows how to score anything.
+
+     THE DIRECTION IS THE COLUMN'S, AND THE COLUMN WITH NONE IS THE
+     INDICATOR. `Mix` is reported and never scored, because the five shares
+     add up to the revenue mix and one category beating its share forces
+     another to miss — a deviation either way is worth knowing and is not a
+     performance measure. There is no second switch beside the direction:
+     the ABSENCE is the signal, which is one control with three answers
+     rather than two controls that can disagree (§110's pair).
+
+     A CELL IS TWO FLAT FIELDS, NEVER AN OBJECT. `t_<col>` is the target and
+     `a_<col>` the reported figure, spelled onto the row itself — because
+     the authoriser tells a plan change from a reported one by FIELD NAME
+     (`splitRows`), and `same()` is stringify-based while Postgres jsonb
+     hands an object's keys back in its own order (§145, §249.3). One object
+     holding every actual would therefore read as a change nobody made, and
+     refuse the save that carried it. Flat fields cannot.
+
+     AND THE COLUMN IDS ARE MINTED FROM THE MAXIMUM (§96.2), never from the
+     count: remove the middle of three and add, and a count-derived id
+     collides with a column still on screen — and a column id is what every
+     target and every reported figure in the table is addressed by (§48). */
+  var BD_NAME = "Categories";
+  var BD_IND = "—";
+  function breakdownOf(p) { return (p && p.breakdown) || null; }
+  function bdCols(p) { var b = breakdownOf(p); return (b && b.cols) || []; }
+  function bdRows(p) { var b = breakdownOf(p); return (b && b.rows) || []; }
+  /* DRAWN ONLY WHERE THERE IS ONE. A pillar that does not need a breakdown
+     shows no table, no empty section and nothing said about it — Islam's own
+     line on the mockup, and §45.2's rule read the right way round: that one
+     is about a FEATURE rendering nothing, and this is about a pillar that
+     committed to no breakdown. Both ends have to be true or the table
+     appears the instant somebody adds a column and before it means
+     anything, so it asks for a column AND a row. */
+  function bdHas(p) { return bdCols(p).length > 0 && bdRows(p).length > 0; }
+  /* The heading, and the fallback is the MINTER'S OWN VALUE rather than a
+     second word (§53.5): a cleared name reads as what a new breakdown is
+     called, never as an empty heading. */
+  function bdName(p) {
+    var b = breakdownOf(p), n = b && b.name != null ? String(b.name).trim() : "";
+    return n || BD_NAME;
+  }
+  function bdScored(col) {
+    var d = String((col && col.dir) || "").trim();
+    return d === "≥" || d === "≤";
+  }
+  function bdTargetKey(col) { return "t_" + (col && col.id); }
+  function bdActualKey(col) { return "a_" + (col && col.id); }
+  function bdTarget(row, col) { var v = row && row[bdTargetKey(col)]; return v == null ? "" : v; }
+  function bdActual(row, col) { var v = row && row[bdActualKey(col)]; return v == null ? "" : v; }
+  /* A CELL IS ASKED FOR ONLY WHERE IT HAS A TARGET. Asking for a figure
+     against nothing is asking for a number that can never be read — and a
+     blank target is the office's own work in progress rather than a gap the
+     count names (§214.4: a red word over a count of nought is worse than
+     silence). */
+  function bdAsked(row, col) { return String(bdTarget(row, col)).trim() !== ""; }
+  function bdAnswered(row, col) { return String(bdActual(row, col)).trim() !== ""; }
+  /* WHICH FIELDS OF A BREAKDOWN ROW ARE REPORTED, for the authoriser. The
+     list is the COLUMNS', so it is worked out from the stored breakdown
+     rather than written down twice — a column added tomorrow is classified
+     the day it is added (§42's fall-through in the safe direction: an
+     unrecognised field is the office's). */
+  function bdReportFields(p) {
+    return bdCols(p).map(bdActualKey).concat(["note"]);
+  }
+
   var YN_UNIT = "Y/N";
   /* ── §251.2: THE UNIT SAYS IT, AND THE VALUE IS SIMPLY NOT COUNTED ──
      The first build read the WHOLE STRING, so a row became yes/no only by
@@ -3375,6 +3454,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     GAP_NUM: GAP_NUM, gapNumField: gapNumField,
     targetHasNumber: targetHasNumber,
     COMPILES: COMPILES, prorates: prorates, wholeUnits: wholeUnits,
+    BD_NAME: BD_NAME, BD_IND: BD_IND,
+    breakdownOf: breakdownOf, bdCols: bdCols, bdRows: bdRows, bdHas: bdHas,
+    bdName: bdName, bdScored: bdScored,
+    bdTargetKey: bdTargetKey, bdActualKey: bdActualKey,
+    bdTarget: bdTarget, bdActual: bdActual,
+    bdAsked: bdAsked, bdAnswered: bdAnswered, bdReportFields: bdReportFields,
     YN_UNIT: YN_UNIT, isYesNo: isYesNo, ynUnitOf: ynUnitOf,
     ynAnswer: ynAnswer, ynScore: ynScore,
     YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_WORDS: YN_WORDS,

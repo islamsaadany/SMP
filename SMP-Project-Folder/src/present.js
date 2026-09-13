@@ -533,6 +533,53 @@ function deckSlides(u){
       '<th class="num">Annual target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
+    /* ── §339: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
+       After that pillar's targets, because the columns ARE two of the numbers
+       the heading above already averages — a room reading "Key measures 95%"
+       needs the five rows that make it, not three of them.
+
+       DRAWN ONLY WHERE THERE IS ONE, exactly as it is on the three screens: a
+       pillar with no breakdown mints no slide and no anchor (§253 — a table
+       with no rows is not a slide).
+
+       A COLUMN'S HEAD CARRIES ITS DIRECTION and a scored figure wears its
+       band, which is what says which columns count with no total row under
+       the table. The INDICATOR is drawn plain — deliberately the same rule as
+       the page, or the projector says something the screen does not (§53.5).
+
+       ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
+       `m` and the tactics slide's bare code, both of which stored picture
+       slides already name (§236.2, §50.3). */
+    var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
+    var bdRows = !bdShow ? "" :
+      SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
+        return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
+          bdCols.map(function(c){
+            var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
+            if (!String(a).trim())
+              return '<td class="num">' + (String(t).trim()
+                ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
+                : '<span class="dmuted">&mdash;</span>') + '</td>';
+            var sc = bdCellScore(r, c);
+            return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
+              esc(a) + (String(t).trim()
+                ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+          }).join("") +
+          (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
+                  : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+    if (bdRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'B"' +
+      anch("p" + pillarCode(u, pi) + "b",
+           "After " + pillarCode(u, pi) + " — " + SMPRules.bdName(p)) + '>' +
+      deckPillarHead(u, p, pi, SMPRules.bdName(p)) +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
+      '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
+      bdCols.map(function(c){
+        return '<th class="num">' + esc(bdColWord(p, c)) +
+          (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+      }).join("") +
+      '<th>Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
+
     /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
        Islam: *"presentations doesn't change when the plan performance is
        done."* Measured on Mobile before a line was written: a tactic reported

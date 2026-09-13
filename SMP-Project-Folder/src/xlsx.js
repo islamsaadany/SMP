@@ -662,6 +662,48 @@ function planWorkbook(u){
             SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly")));
         });
         return acc;
+      }, []) },
+
+    /* ── §339: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
+       §22's contract again: an upload AUTHORS, so a column the file does not
+       carry is a column the plan LOSES on a download-and-re-upload — and a
+       breakdown is fifteen targets somebody set by hand.
+
+       ONE SHEET OF FIXED WIDTH FOR A TABLE OF VARIABLE WIDTH. A breakdown has
+       as many columns as its pillar chose and two pillars need not agree, so
+       a sheet shaped like the screen would need a column per column and a
+       sheet per pillar. Written long — one line per CELL, naming its pillar,
+       its column and its category — the shape is fixed whatever any tenant
+       does with it, which is the same reason the SWOT sheet is a Kind column
+       and four words rather than four columns.
+
+       THE COLUMN'S NAME AND DIRECTION RIDE ON EVERY ONE OF ITS LINES. It is
+       the same fact repeated, and the alternative is a second sheet that can
+       disagree with this one about how many columns a table has. The reader
+       takes the FIRST spelling it meets and the order it meets them in, so a
+       file edited by hand reads the way it looks.
+
+       AN EMPTY DIRECTION IS THE INDICATOR and is not an oversight — the list
+       is soft so a person can clear the cell, which is exactly how a column
+       is marked as watched rather than scored. */
+    { name:"Breakdowns", widths:[30, 22, 24, 22, 11, 14, 12, 9],
+      head:["Pillar", "Table", "Category", "Column", "Direction", "Target",
+            "Unit", "Hidden"],
+      validations:[{ range:"A2:A800", from:PILLAR_RANGE,
+                     error:"Choose a pillar from the Pillars sheet." },
+                   { range:"E2:E800", list:DIRS, soft:true },
+                   { range:"H2:H800", list:YESNO, soft:true }],
+      rows:u.items.reduce(function(acc, p){
+        if (!SMPRules.bdHas(p)) return acc;
+        var nm = SMPRules.bdName(p);
+        SMPRules.bdRows(p).forEach(function(r){
+          SMPRules.bdCols(p).forEach(function(c){
+            var a = splitTarget(SMPRules.bdTarget(r, c));
+            acc.push([p.name, nm, r.name, c.name || "", c.dir || "",
+                      a.value, a.unit, SMPRules.isHidden(r) ? "Yes" : ""]);
+          });
+        });
+        return acc;
       }, []) }
   ]);
 }
@@ -722,6 +764,34 @@ function progressWorkbook(u){
             oc ? (t.outActual == null ? "" : String(t.outActual))
                : (t.actual == null ? "" : String(t.actual)),
             "", t.note || "", t.id]);
+        });
+        return acc;
+      }, []) },
+
+    /* §339: AND THE BREAKDOWN'S FIGURES. One line per cell, which is the
+       same long form the plan sheet takes and for the same reason — a table
+       of variable width in a sheet of fixed shape.
+
+       ITS ID IS THE ROW'S AND ITS COLUMN, because that pair is what addresses
+       a figure (§48): the row alone would be three cells sharing one id and
+       the reader could not tell which one a number was meant for.
+
+       AN INDICATOR IS STILL ASKED FOR — it is reported and never scored, and
+       the two are different questions (mockup: "Mix is reported and never
+       scored"). Its direction column is blank here for exactly that reason. */
+    { name:"Breakdowns", widths:[26, 20, 22, 11, 14, 18, 18, 40, 22], lockedCols:[8],
+      head:["Pillar", "Category", "Column", "Direction", "Target",
+            "Currently recorded", "New value", "Note", "ID"],
+      rows:u.items.reduce(function(acc, p){
+        if (!SMPRules.bdHas(p)) return acc;
+        SMPRules.bdRows(p).forEach(function(r){
+          if (SMPRules.isHidden(r)) return;
+          SMPRules.bdCols(p).forEach(function(c){
+            if (!SMPRules.bdAsked(r, c)) return;
+            acc.push([p.name, r.name, c.name || "", c.dir || "",
+                      SMPRules.bdTarget(r, c), SMPRules.bdActual(r, c), "",
+                      r.note || "", r.id + "|" + c.id]);
+          });
         });
         return acc;
       }, []) }
@@ -996,6 +1066,18 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
+  /* §339: the breakdown's cells, long form — a line per cell, and the table
+     is assembled by `createFromPlan` in the order they arrive. The generic
+     columns carry them: `outcome` is the COLUMN's name and `group` the
+     table's, exactly as the objectives sheet already uses `group`. */
+  sheetObjects(sheets["Breakdowns"]).forEach(function(r){
+    if (!r["Category"]) return;
+    rows.push({ type:"BDCELL", parent_id:pillarId[r["Pillar"]] || "",
+      group:r["Table"] || "", name:r["Category"], outcome:r["Column"] || "",
+      direction:r["Direction"] || "", value:r["Target"], unit:r["Unit"],
+      hidden:yes(r["Hidden"]) ? "1" : "" });
+  });
+
   var out = rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
@@ -1013,7 +1095,11 @@ function planFromWorkbook(u, sheets){
 
 function progressFromWorkbook(u, sheets){
   var out = [];
-  ["Objectives","Measures","Tactics"].forEach(function(name){
+  /* §339: `Breakdowns` joins them, and its ID is a row-and-column pair —
+     `diffProgress` splits it, because a cell is what a figure belongs to
+     (§48). Its `type` is nominal here: the resolver reads the stored graph
+     rather than the word on the sheet. */
+  ["Objectives","Measures","Tactics","Breakdowns"].forEach(function(name){
     sheetObjects(sheets[name]).forEach(function(r){
       /* Either spelling (§58): "New %" is what the Tactics sheet said before
          §303 renamed it, and a workbook downloaded then still uploads. */
@@ -1023,8 +1109,11 @@ function progressFromWorkbook(u, sheets){
       /* §303: A NOTE ALONE IS WORTH READING — the figure may already be right
          and the note is what §105 is holding Submit for. */
       if (!has(v) && !has(note)) return;
-      out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC" : name === "Measures" ? "MEASURE" : "NORTHSTAR",
-                 parent_name:r["Pillar"] || "", name:r["Measure"] || r["Tactic"] || r["Objective"],
+      out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC"
+                   : name === "Measures" ? "MEASURE"
+                   : name === "Breakdowns" ? "BDROW" : "NORTHSTAR",
+                 parent_name:r["Pillar"] || "",
+                 name:r["Measure"] || r["Tactic"] || r["Objective"] || r["Category"],
                  new_value:has(v) ? String(v).trim() : "",
                  new_note:has(note) ? String(note).trim() : "" });
     });

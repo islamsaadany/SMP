@@ -342,6 +342,10 @@ function mintPlanIds(u, rows){
     map[r.id] = id; r.id = id;
   });
   rows.forEach(function(r){
+    /* §339: a breakdown's cells hang off a pillar exactly as a measure does,
+       and carry no id of their own — the table is assembled from them and its
+       row ids are minted there (§22). */
+    if (r.type === "BDCELL") { r.parent_id = map[r.parent_id] || ""; r.id = ""; }
     if (r.type === "MEASURE" || r.type === "TACTIC") {
       var pid = map[r.parent_id] || "";
       r.parent_id = pid;
@@ -383,7 +387,7 @@ function validatePlan(u, rows){
         problems.push({ at:at, msg:'kind "' + k + '" is not Direction or Capability' });
       if (!r.theme) notices.push({ at:at, msg:"no theme \u2014 will read as cross-cutting" });
     }
-    if (r.type === "MEASURE" || r.type === "TACTIC") {
+    if (r.type === "MEASURE" || r.type === "TACTIC" || r.type === "BDCELL") {
       if (!r.parent_id)
         problems.push({ at:at, msg: pillars.length
           ? "its pillar could not be matched \u2014 choose one from the Pillar column"
@@ -524,8 +528,32 @@ function diffProgress(u, rows){
        and whose note is owed had nothing for the file to carry. */
     var hasNote = (r.new_note || "") !== "";
     if (!r.id || (!hasVal && !hasNote)) return;
-    var hit = findById(u, r.id);
+    /* §339: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
+       That pair is what identifies a cell (§48) — the row alone is three
+       figures sharing one id, and the reader could not tell which one a
+       number was meant for. Split here rather than inside `findById`, which
+       resolves ROWS and must not learn a second kind of address. */
+    var bdSplit = String(r.id).split("|");
+    var hit = findById(u, bdSplit[0]);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+    if (hit.kind === "BDROW") {
+      var bcol = SMPRules.bdCols(hit.pillar).filter(function(c){
+        return c.id === bdSplit[1]; })[0];
+      /* A column that has GONE since the file was downloaded is named rather
+         than applied to the wrong one (§87's rule: never guess an identity). */
+      if (!bcol) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+      var bWas = SMPRules.bdActual(hit.obj, bcol);
+      var bNow = hasVal ? r.new_value : bWas;
+      var bWasN = hit.obj.note == null ? "" : String(hit.obj.note);
+      var bNowN = hasNote ? String(r.new_note).trim() : bWasN;
+      if (String(bWas) === String(bNow) && bWasN === bNowN) return;
+      out.push({ id:r.id, type:"BDROW", col:bcol,
+                 name:hit.obj.name + " \u2014 " + (bcol.name || ""),
+                 pillar:hit.pillar ? hit.pillar.name : (r.parent_name || ""),
+                 was:bWas, now:bNow,
+                 note:hasNote ? bNowN : null, status:"changed", hit:hit });
+      return;
+    }
     if (["MEASURE","TACTIC","OBJECTIVE"].indexOf(hit.kind) < 0) return;
     /* §303: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
        FIGURE (§248), which the screen has stored in `outActual` since that
@@ -607,6 +635,32 @@ function createFromPlan(u, d){
       if (tMon) tRow.outMonthly = tMon;
       if (+x.hidden) tRow.hide = true;
       p2.tactics.push(tRow);
+      made++;
+    } else if (x.type === "BDCELL") {
+      /* ── §339: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
+         The sheet is long form — a line per cell naming its pillar, its
+         column and its category — so the TABLE is assembled here from the
+         order the lines arrive in: first mention of a column makes the
+         column, first mention of a category makes the row. A file edited by
+         hand therefore reads the way it looks, and nothing needs an id typed
+         into a sheet (§22: the platform mints them on arrival).
+
+         AN EMPTY DIRECTION IS THE INDICATOR, kept exactly as the cell said —
+         the absence IS the signal, so defaulting it to `≥` here would make
+         every watched column a scored one on the way through the file. */
+      var p3 = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
+      if (!p3 || !x.name) return;
+      if (!p3.breakdown) p3.breakdown = { name:x.group || "Categories", cols:[], rows:[] };
+      var bd = p3.breakdown;
+      var cn = String(x.outcome || "").trim();
+      var col = bd.cols.filter(function(c){ return (c.name || "") === cn; })[0];
+      if (!col) { col = { id:"c" + (bd.cols.length + 1), name:cn,
+                          dir:x.direction || "" }; bd.cols.push(col); }
+      var bRow = bd.rows.filter(function(y){ return y.name === x.name; })[0];
+      if (!bRow) { bRow = { id:p3.id + "-B" + (bd.rows.length + 1), name:x.name };
+                   if (+x.hidden) bRow.hide = true;
+                   bd.rows.push(bRow); }
+      if (t1) bRow["t_" + col.id] = t1;
       made++;
     } else if (x.type === "NORTHSTAR") {
       /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
@@ -698,7 +752,10 @@ function planReplaceSummary(u, rows){
     replace: true,
     incoming: { pillars:countRows(rows, "PILLAR"), measures:countRows(rows, "MEASURE"),
                 tactics:countRows(rows, "TACTIC"), objectives:countRows(rows, "NORTHSTAR"),
-                swot:swot, clauses:countRows(rows, "FOUNDATION") },
+                swot:swot, clauses:countRows(rows, "FOUNDATION"),
+                /* §339: named in the summary the office agrees to BEFORE the
+                   replace happens, or fifteen targets arrive unannounced. */
+                breakdown:countRows(rows, "BDCELL") },
     current: unitSnapshotCounts(unitPlanSnapshot(u)),
     rows: rows
   };
@@ -769,6 +826,16 @@ function applyProgress(u, d){
         else if (o.actual > 0 && (o.status === "Not started" || o.status === "Done")) o.status = "WIP";
         else if (o.actual === 0 && o.status === "Done") o.status = "WIP";
       }
+    } else if (r.hit.kind === "BDROW" && r.col) {
+      /* §339: into the cell's own field, rejoined with the target's unit the
+         way every other reported figure is (§199, §243) — and an emptied one
+         DELETES the key (§50.6), or a cleared cell and one never reported
+         stop being the same thing. */
+      var bv = String(r.now == null ? "" : r.now).trim();
+      var bk = "a_" + r.col.id;
+      if (bv === "") delete r.hit.obj[bk];
+      else r.hit.obj[bk] = joinTarget(r.hit.obj[bk] || "", bv,
+        splitTarget(SMPRules.bdTarget(r.hit.obj, r.col)).unit);
     } else if (r.hit.kind === "MEASURE" || r.hit.kind === "OBJECTIVE") {
       r.hit.obj.actual = r.now;
       /* Progress is what the actual implies against the target, so it is

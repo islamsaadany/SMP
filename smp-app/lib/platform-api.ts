@@ -19,6 +19,8 @@ import type { Tenant } from "./door.ts";
 import { withTenant } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
+import * as LIB from "./library.ts";
+import { dropBlob } from "./blob-api.ts";
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
 import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
@@ -505,6 +507,85 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const next = on ? modulesFor([...have, key]) : have;
     await pool.query("UPDATE tenants SET modules = $2::jsonb WHERE id = $1", [row.id, JSON.stringify(next)]);
     return ok({ modules: next });
+  }
+
+  /* ── THE DOCUMENT ROOM (spec 049; spec 046 §4.9) ──────────────────────
+     Publishing is Forefront's, so the authoring surface for a client's
+     library is HERE, on their card, and the client's app has none at all.
+     Every action below is the same three guards as setModules, in the same
+     order, for the same reasons:
+
+       · `mayReadConfig` first, and its refusal is the SAME 404 a client that
+         does not exist gets — a consultant who may not open this client is
+         not told it has a library;
+       · `mayConfigureClient` next — whoever may turn the module on is who may
+         publish to it. One rule rather than a second one to keep in step
+         (§53.5), and it is already the narrowest thing on this page: the
+         platform's admin, or that client's own Super user;
+       · AN ARCHIVED CLIENT IS READ, NEVER WRITTEN (§323), which is the third
+         door that rule is kept at rather than the two it started with.
+
+     AND THE ROWS ARE THE CLIENT'S, so every one of them is reached through
+     `withTenant` (§314) — the console reads a client's library exactly the
+     way the client's own app does, through the policy and never around it. */
+  if (action.startsWith("library")) {
+    const row = await clientByKey(pool, body.key);
+    if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
+    const kind = LIB.isKind(body.kind) ? body.kind : "insights";
+
+    /* Reading is the one that stops at mayReadConfig: somebody who may see a
+       client's configuration may see what has been published to them. */
+    if (action === "library") {
+      const rows = await withTenant(row.id, (c) => LIB.listItems(c, {
+        kind, forClient: false, q: String(body.q || ""), category: String(body.category || ""), state: String(body.state || "") }));
+      return ok({ items: rows.map((r) => LIB.shape(r, false)), categories: LIB.CATEGORIES, kind });
+    }
+
+    if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's library is not yours to publish to.");
+    if (row.status === "retired") return no(409, row.name + " is archived. Bring them back before publishing anything.");
+
+    /* Create or amend. WHAT IS ABSENT FROM THE FORM IS LEFT ALONE is the
+       caller's business; what is enforced here is that a title is the one
+       thing an item cannot be without — the database says so too (the
+       library_title CHECK), so this refusal is the readable half of a rule
+       that holds either way (§42). */
+    if (action === "librarySave") {
+      const d = LIB.draftOf(body);
+      if (!d.title) return no(400, "A report needs a title.");
+      const id = String(body.id || "");
+      const saved = await withTenant(row.id, (c) => id ? LIB.updateItem(c, id, d) : LIB.insertItem(c, kind, d));
+      if (!saved) return no(404, "That report is not there any more.");
+      return ok({ item: LIB.shape(saved, false) });
+    }
+
+    /* Publishing and taking back. The state is named by the caller and
+       checked here rather than trusted — an unknown word is a 400 and never
+       a silent draft. */
+    if (action === "libraryState") {
+      const want = String(body.state || "");
+      if (want !== "published" && want !== "draft") return no(400, "A report is published or it is a draft.");
+      const saved = await withTenant(row.id, (c) => LIB.setState(c, String(body.id || ""), want, account.email));
+      if (!saved) return no(404, "That report is not there any more.");
+      return ok({ item: LIB.shape(saved, false) });
+    }
+
+    /* DELETE TAKES THE FILE WITH IT, and it is refused while the report is
+       still in the client's library: withdrawing is what closes the door, so
+       nobody deletes something a client is reading (spec 049 §4.8 — the guard
+       rather than a second confirmation, which is §323's own shape). */
+    if (action === "libraryDelete") {
+      const id = String(body.id || "");
+      const item = await withTenant(row.id, (c) => LIB.oneItem(c, kind, id, false));
+      if (!item) return no(404, "That report is not there any more.");
+      if (item.state === "published") return no(409, "Withdraw it first — it is in " + row.name + "'s library.");
+      const path = await withTenant(row.id, (c) => LIB.deleteItem(c, id));
+      const gone = path ? await dropBlob(path) : true;
+      /* The row goes either way, and the answer SAYS which happened: a file
+         the store no longer holds is not a reason to keep a row nobody can
+         open, and a store that refused is worth knowing about rather than
+         swallowing (§171: a failure nobody is told about is not a fix). */
+      return ok({ removed: true, fileRemoved: gone });
+    }
   }
 
   if (action === "createClient") {

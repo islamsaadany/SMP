@@ -48,7 +48,7 @@ export type ModuleDef = { label: string; note: string; built: boolean };
 export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
   strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true  },
   portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: false },
-  insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: false },
+  insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: true  },
   processes: { label: "Processes", note: "How things are done here",                         built: false },
   /* DELIBERATELY NOT A PRODUCT NAME (Islam, 2026-09-12: "something even for
      the trial"). It exists to prove a module can be turned on for one client

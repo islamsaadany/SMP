@@ -34,7 +34,9 @@
      SMP_BREAK=leak-file-path     node checks/insights.mjs   # must go red
      SMP_BREAK=version-always     node checks/insights.mjs   # must go red   */
 import pg from "pg";
+import { usePools, endPools } from "../lib/db.ts";
 import { SCHEMA } from "../db/schema-name.mjs";
+import { insightsDocument, readableDay } from "../lib/insights.ts";
 import {
   CATEGORIES, KINDS, normalizeCategories, isCategory, isKind, safeFileName, looksLikePdf,
   filePath, sizeLabel, calendarDay, dayOut, oneLine, shape, shelfWhere,
@@ -142,7 +144,20 @@ if (!URL_) {
   console.log("\nNo DATABASE_URL — §3–§9 need one. A check that cannot run is not a check that passed (§54.5).");
   process.exit(1);
 }
-const pool = new pg.Pool({ connectionString: URL_, max: 4 });
+const pool = new pg.Pool({ connectionString: URL_, max: 4, options: "-c search_path=" + SCHEMA });
+
+/* §11 RENDERS THE REAL PAGE, and that page reads its rows through withTenant
+   on the APP pool (lib/tenant.ts) — so both pools are pointed at this
+   throwaway database, the way the spike harness does it. Without this the
+   document falls to its own "could not be read" state and §11 would be
+   measuring the degrade path while claiming to measure the screen (§93: an
+   error counted as absence). The app pool connects as `smp_app`, which is
+   also what makes §11's boundary assertion worth anything. */
+const appUrl = new URL(URL_);
+appUrl.username = "smp_app";
+appUrl.password = process.env.SMP_APP_PASSWORD || "smp_app";
+const appPool = new pg.Pool({ connectionString: appUrl.toString(), max: 4, options: "-c search_path=" + SCHEMA });
+usePools(pool, appPool);
 const owner = async (sql, args) => (await pool.query(sql, args)).rows;
 
 /* Every tenant statement runs as the app role with the tenant set, which is
@@ -357,6 +372,64 @@ try {
     (await asTenant(a.id, (c) => deleteItem(c, bPub.id))) === "" &&
     (await asTenant(b.id, (c) => oneItem(c, "insights", bPub.id, false))) !== null);
 
+  /* ══ §11 · the client's screen ═════════════════════════════════════
+     RENDERED, not read: whether a control is drawn is not a question the
+     source can answer (§96 — a page that renders nothing and one that renders
+     everything read identically in the code). */
+  section("§11 · the screen a client opens");
+
+  const have = ["strategy", "insights"];
+  /* ONE WITH A FILE AND ONE WITHOUT, made on purpose: the first draft of this
+     section asserted a Download on every row and went red on a correct page,
+     because §6 had deleted the only report that had one. A report with nothing
+     attached is a real state — a process has no file at all — so both are
+     asserted rather than the fixture being bent to the happier one (§94.2). */
+  await asTenant(a.id, (c) => setFile(c, draft.id, filePath("insights", a.id, draft.id, "gov.pdf"), "gov.pdf", 921600));
+  const page = await insightsDocument("client-a", a.id, "Client A", have, {});
+  check("the reports are on it",
+    page.includes("Governance Review") && page.includes("Undated"), String(page.length));
+  check("a report with a file has a way to open it",
+    (page.match(/class="dl"/g) || []).length === 1, String((page.match(/class="dl"/g) || []).length));
+  check("...and one with nothing attached SAYS so rather than offering a button that 404s (§61)",
+    page.includes("No file yet"));
+  check("the download address is this client's, this report's, and ours — never the store's",
+    page.includes('href="/client-a/insights/' + draft.id + '/file"'), "the file link is wrong");
+  check("the count says what is there",
+    page.includes("2 reports"));
+  check("the categories are the navigation row",
+    CATEGORIES.every((c) => page.includes(">" + c + "</a>")));
+  check("NOTHING ON IT CAN WRITE — no upload, no publish, no delete, no form but the search",
+    !/type="file"/.test(page) && !/Publish|Withdraw|Delete|Upload/i.test(page) &&
+    (page.match(/<form/g) || []).length === 1);
+  check("the file's path is nowhere in the document, which is §2's absence end to end",
+    !page.includes("insights/" + a.id), "the blob path reached the page");
+  check("no script at all, so the shell's script-src has nothing to admit",
+    !/<script/i.test(page));
+  check("the module switcher is its way back out",
+    page.includes('href="/client-a/strategy"'), "no way back to Strategy");
+  check("a date is written the way the rest of the product writes one",
+    page.includes(readableDay("2026-09-04")) && readableDay("2026-09-04") === "4 Sep 2026",
+    readableDay("2026-09-04"));
+
+  const filtered = await insightsDocument("client-a", a.id, "Client A", have, { q: "nothing like this" });
+  check("a search that matches nothing says so",
+    filtered.includes("No reports match"));
+  check("...and KEEPS the categories, or there is no way back to the reports (§61)",
+    filtered.includes(">Macro</a>"));
+
+  const emptyPage = await insightsDocument("client-b2", b.id, "Client B", have, {});
+  /* B's own report is still published, so the empty state is made rather than
+     waited for — a library emptied by the check is not the library a new
+     client opens. */
+  await asTenant(b.id, (c) => setState(c, bPub.id, "draft", "x@forefront.consulting"));
+  const virgin = await insightsDocument("client-b2", b.id, "Client B", have, {});
+  check("B's page is B's, not A's — the boundary holds through the screen too",
+    emptyPage.includes("RHI Cement Demand Note") && !emptyPage.includes("Governance Review"));
+  check("a client with nothing published is told so, and told who publishes",
+    virgin.includes("Nothing has been published here yet") && virgin.includes("Forefront publishes them"));
+  check("...and is not shown a row of categories that could only return nothing",
+    !virgin.includes(">Macro</a>"));
+
   /* the fixture goes, whatever happened above (§94.2) */
   await owner("DELETE FROM " + SCHEMA + ".tenants WHERE key LIKE $1", [stamp + "%"]);
 } catch (e) {
@@ -364,6 +437,7 @@ try {
   console.log("\n  FAIL the run itself — " + (e && e.message));
 } finally {
   await pool.end();
+  await endPools().catch(() => {});
 }
 
 console.log("\n" + ok + " passed, " + bad.length + " failed");

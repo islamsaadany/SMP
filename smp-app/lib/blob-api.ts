@@ -112,6 +112,38 @@ async function signedRead(path: string): Promise<string> {
                both "you cannot watch this now" */ return ""; }
 }
 
+/* ── A SHORT-LIVED READ ADDRESS (spec 049, reusing §261.10's two steps) ──
+   A private blob has no fetchable address of its own: the store issues a
+   delegation scoped to ONE pathname and ONE operation, and that signs a
+   concrete URL. Exported so the library's download route mints its address
+   the same way a clip does, rather than repeating the two steps §261.10
+   records getting wrong the first time (`getDownloadUrl` is not this: it takes
+   a full blob URL, is synchronous, and handed a pathname it throws). "" means
+   "you cannot fetch this now", and the caller says so in words. */
+export async function signedReadFor(path: string): Promise<string> {
+  return path ? signedRead(path) : "";
+}
+
+/* ── TAKING A FILE OUT OF THE STORE (spec 049) ──────────────────────────
+   Exported from HERE and not written again beside the library, because the
+   loader, the token and the "no store configured" answer are all already in
+   this file and a second copy of them is how one of the two learns about an
+   environment variable and the other does not (§53.5).
+
+   TRUE MEANS THERE IS NOTHING LEFT AT THAT PATH, which is what the caller
+   actually needs to know — so a store that never existed and a file already
+   gone both answer true, and only a store that REFUSED answers false. The
+   caller then says so rather than swallowing it (§171). */
+export async function dropBlob(path: string): Promise<boolean> {
+  const b = blob();
+  if (!b || !token() || !path) return true;
+  try { await b.del(path, { token: token() }); return true; }
+  catch (e) {
+    console.error("blob: deleting " + path + ":", (e as Error).message);
+    return false;
+  }
+}
+
 export type BlobAnswer = { code: number; body?: unknown; redirect?: string };
 
 /* Both halves read the stored graph once and build the world from it, which is

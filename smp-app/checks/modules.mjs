@@ -47,6 +47,11 @@ const read = (p) => readFileSync(join(ROOT, p), "utf8");
    shell itself and has to break with it. */
 const BREAK = process.env.SMP_BREAK || "";
 
+/* Derived, never typed: which words are unbuilt is a fact about MODULE_DEF and
+   it changes as modules land. */
+const UNBUILT = MODULES.filter((k) => !MODULE_DEF[k].built);
+const BUILT_EXTRA = MODULES.filter((k) => MODULE_DEF[k].built && k !== DEFAULT_MODULE);
+
 let ok = 0;
 const bad = [];
 const check = (what, good, detail) => {
@@ -70,8 +75,16 @@ check("the order is the list's, never the order they were turned on",
 check("a word the code does not know is dropped and the rest survives",
   same(modulesFor(["banana", "trial"]), ["strategy", "trial"]), JSON.stringify(modulesFor(["banana", "trial"])));
 check("a module that is NOT BUILT is dropped however it got into the list",
-  same(modulesFor(["portfolio", "insights", "processes"]), [DEFAULT_MODULE]),
-  JSON.stringify(modulesFor(["portfolio", "insights", "processes"])));
+  same(modulesFor(UNBUILT), [DEFAULT_MODULE]), JSON.stringify(modulesFor(UNBUILT)));
+/* THE OTHER END, and it is what stops the assertion above passing because
+   nothing is ever kept (§113.8): a module that IS built and is not the default
+   survives the same call. Both halves read MODULE_DEF rather than naming a
+   module, so the day Portfolio lands neither has to be edited (§218: rewritten
+   when Insights was built, not loosened — the old line named three words and
+   asserted a property of all three). */
+check("...and a built one that is not the default IS kept",
+  BUILT_EXTRA.length === 0 || modulesFor([BUILT_EXTRA[0]]).includes(BUILT_EXTRA[0]),
+  BUILT_EXTRA.join(", "));
 check("the default survives a list that does not name it",
   modulesFor(["trial"]).includes(DEFAULT_MODULE));
 check("and survives a list that names nothing at all", modulesFor([]).includes(DEFAULT_MODULE));

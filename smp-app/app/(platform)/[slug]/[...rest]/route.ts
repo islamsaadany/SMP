@@ -4,6 +4,8 @@ import { requestUser, SLUG } from "../../../../lib/session.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { trialDocument } from "../../../../lib/trial.ts";
+import { insightsDocument } from "../../../../lib/insights.ts";
+import { libraryFile } from "../../../../lib/library-file.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -56,5 +58,22 @@ export async function GET(req: Request, { params }: P) {
     return new Response(await trialDocument(slug, ans.tenant.id, ans.tenant.name, have), { status: 200, headers: shellHeaders() });
   if (w.module === "trial")
     return Response.redirect(new URL(clientHref(slug, "trial", ""), req.url), 302);
+  /* ── INSIGHTS (spec 049) ──────────────────────────────────────────
+     Two addresses and no more: the library, and one report's file. THE
+     FILE IS A ROUTE RATHER THAN A LINK TO THE STORE, because the store's
+     address has to be minted, short-lived and asked for by somebody this
+     client would answer — a bare blob URL would be a permanent way past
+     every rule above (§261.10). */
+  if (w.module === "insights") {
+    const q = new URL(req.url).searchParams;
+    if (!w.rest.length)
+      return new Response(
+        await insightsDocument(slug, ans.tenant.id, ans.tenant.name, have,
+          { q: q.get("q") || "", category: q.get("category") || "" }),
+        { status: 200, headers: shellHeaders() });
+    if (w.rest.length === 2 && w.rest[1] === "file")
+      return libraryFile(ans.tenant.id, "insights", w.rest[0]!, req.url);
+    return Response.redirect(new URL(clientHref(slug, "insights", ""), req.url), 302);
+  }
   return new Response(shellDocument(ans.tenant.name, w.module || DEFAULT_MODULE, moduleMenu(have)), { status: 200, headers: shellHeaders() });
 }

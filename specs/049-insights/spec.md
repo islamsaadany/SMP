@@ -355,6 +355,17 @@ is Islam's: the key is set in Vercel's own settings and never pasted here.*
 
 ## 8 · The order of the work
 
+**Where it stands, 2026-09-13:** 1 and 2 are done and 4 is done bar the
+console's own screen. `library_items` and migration 008 are applied and proved
+on both apply paths; `lib/library.ts` holds the rules and the reads and writes;
+`lib/insights.ts` is the client's screen and `lib/library-file.ts` the one
+address its Download points at; the console's actions are in
+`lib/platform-api.ts`; Insights is `built: true`, so it can be switched on.
+`checks/insights.mjs` is 93/0, red 9 / 5 / 3. **Left: the publishing room's own
+markup on the client's card, the upload's multipart plumbing (which wants
+`videos/…` generalised rather than copied), and 5, the module's roles file.**
+
+
 1. **Two mockups, signed off before a source moves** (rule 1c, non-negotiable):
    the client's library — a search box, the categories as its navigation, a list,
    a download — and the **publishing room** on the client's card in `/platform`.

@@ -1,14 +1,16 @@
 # 050 — Tasks
 
-Written 2026-09-13 from `plan.md`. **Nothing is built.** Paths are from the
+Written 2026-09-13 from `plan.md`. **Phase A is built, 2026-09-13** — Islam: *"BUILD IT"*. B and C are not. Paths are from the
 repository root.
 
 **Every check is written red first** — run it against the build before the
 change and watch it fail, or its green run proves nothing (§94.5).
 
-**Every task that edits `smp-app/shell/platform.html` ends by re-running the
-generators**, because `smp-app/public/` is generated, tracked, and what
-production serves (§329). `node smp-app/checks/generated-in-step.mjs` is the
+**The console's page is `platform.html` AT THE REPOSITORY ROOT.** Both
+`smp-app/shell/platform.html` and `smp-app/public/platform-page.js` are
+generated from it, so an edit to either is an edit the next generator run
+throws away. **Every task that touches it ends by re-running the generators**
+(§329). `node smp-app/checks/generated-in-step.mjs` is the
 one that catches a forgotten run.
 
 ---
@@ -18,47 +20,57 @@ one that catches a forgotten run.
 Useful on its own: eighty frameworks, searchable, for the whole firm. Ends at
 **stop point 1**.
 
-- [ ] **A1 · The table.** `smp-app/db/schema.sql`, above the tenant block
+- [x] **A1 · The table.** `smp-app/db/schema.sql`, above the tenant block
   beside `memory_entries`, exactly as `plan.md` gives it — **no `tenant_id` and
   no reference to `tenants`**.
-- [ ] **A2 · Its exclusion, in the same edit.** Same file, the loop at the end:
+- [x] **A2 · Its exclusion, in the same edit.** Same file, the loop at the end:
   `'frameworks'` into `relname NOT IN (…)`. **A1 without A2 is not a quiet
   bug** — the loop forces row-level security and then creates an index on a
   `tenant_id` this table has not got, so the schema apply fails and a fresh
   deployment gets no database at all. One edit, both halves.
-- [ ] **A3 · Its exclusion, again.** `smp-app/lib/schema-check.ts`
+- [x] **A3 · Its exclusion, again.** `smp-app/lib/schema-check.ts`
   `PLATFORM_TABLES`. These two lists cannot share a constant (one runs inside
   Postgres), which is why §331 wrote a check that they name the same set — this
   is the first table to exercise it since.
-- [ ] **A4 · The migration**, for a database that has already run the schema:
+- [x] **A4 · The migration**, for a database that has already run the schema:
   `smp-app/db/migrations/008-the-frameworks-library.sql`. No RLS statements —
   on an existing database the loop is not re-run, which is the outcome wanted,
   and the migration must not invent a second answer (spec 045's A3).
-- [ ] **A5 · The generator.** `smp-app/scripts/make-frameworks-migration.mjs`
+- [x] **A5 · The generator.** `smp-app/scripts/make-frameworks-migration.mjs`
   reads the dataset and writes the inserts. Run by hand, **its output is the
   artefact**, and the source is named in the migration's own header:
   `islamsaadany/strategic-decision-toolkit` at `12089e9`.
-- [ ] **A6 · The eighty.** `smp-app/db/migrations/009-the-eighty-frameworks.sql`,
+- [x] **A6 · The eighty.** `smp-app/db/migrations/009-the-eighty-frameworks.sql`,
   committed. `added_by` NULL on all eighty.
-- [ ] **A7 · The doc.** `smp-app/db/README.md` — its list of platform tables, or
+- [x] **A7 · The doc.** `smp-app/db/README.md` — its list of platform tables, or
   it drifts the day this lands.
-- [ ] **A8 · `smp-app/lib/frameworks-api.ts`** — `list` and `one`. Session
+- [x] **A8 · `smp-app/lib/frameworks-api.ts`** — `list` and `one`. Session
   required, no gate. `canAdd` computed **on the server** per request and never
   re-derived in the browser.
-- [ ] **A9 · `smp-app/app/api/frameworks/route.ts`** — one route, the action off
+- [x] **A9 · `smp-app/app/api/frameworks/route.ts`** — one route, the action off
   the body, the shape `app/api/memory/route.ts` already uses.
-- [ ] **A10 · The tab.** `smp-app/shell/platform.html` `drawNav()`:
+- [x] **A10 · The tab.** `platform.html` (root) `drawNav()`:
   `["frameworks", "Frameworks", true]` — ungated, as Memory is — and
   `redraw()`'s branch.
-- [ ] **A11 · The list**, from the mockup: the box, the eight chips with counts,
+- [x] **A11 · The list**, from the mockup: the box, the eight chips with counts,
   the count line, a row per framework. Every new class prefixed `fw` (§65.9).
-- [ ] **A12 · One framework**, in place behind a `.cback`, nine headed sections.
-- [ ] **A13 · The search filters in place and never repaints** (§35), and a
+- [x] **A12 · One framework**, in place behind a `.cback`, nine headed sections.
+- [x] **A13 · The search filters in place and never repaints** (§35), and a
   repaint keeps the filter (§108.13). Both are assertions, not intentions.
-- [ ] **A14 · Regenerate** `public/`, and `generated-in-step` clear.
-- [ ] **A15 · `smp-app/checks/frameworks.mjs`** — the eighty land whole
-  (compared against the source dataset, never typed numbers), the list and one
-  read, no client request reaches the route. Red first.
+- [x] **A14 · Regenerate** `public/`, and `generated-in-step` clear.
+- [x] **A15 · `smp-app/checks/frameworks.mjs`** — 28 assertions, driving the
+  REAL handler against a real database, all inside one transaction that rolls
+  back. The eighty are compared against their own INVARIANTS rather than the
+  upstream dataset, and the check says why (once 009 has run this table IS the
+  library). Red three ways: `client-reads` 2, `alphabetical` 1, `short-library` 4.
+- [x] **A16 · `smp-app/checks/frameworks-page.mjs`** — 21 assertions in a real
+  browser against the built app. **Not in the plan, and it earned its place on
+  its first run**: the filter set `row.hidden` and the rows stayed on screen,
+  because `.fwrow{display:block}` beats the browser's own `[hidden]` rule. The
+  count read *"12 of 80"* over eighty visible rows — the worst shape a filter
+  takes, because it looks like it worked. Every assertion asks what is VISIBLE,
+  never what carries the attribute; red 3 under `no-hidden-rule`, which cuts
+  that one rule out of the real served page and puts it back.
 
 > **Stop point 1 — Islam opens Frameworks and reads one.**
 

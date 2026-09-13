@@ -23,6 +23,7 @@
      401-is-the-door rule above is not written twice for it. */
   function post(body) { return send("/api/platform", body); }
   function mpost(body) { return send("/api/memory", body); }
+  function fpost(body) { return send("/api/frameworks", body); }
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
@@ -76,7 +77,12 @@
     var tabs = [["clients", "Clients", true],
                 ["consultants", "Consultants", ME.canConsultants],
                 ["access", "Who sees what", ME.canAccess],
-                ["memory", "Memory", true]];
+                ["memory", "Memory", true],
+                /* FRAMEWORKS IS UNGATED FOR THE MEMORY'S OWN REASON (spec 050,
+                   decision 1): every consultant reads the whole library, and
+                   only an admin adds to it — which is a gate on the ACT, asked
+                   on the server, never a gate on the tab. */
+                ["frameworks", "Frameworks", true]];
     tabs.forEach(function (t) {
       if (!t[2]) return;
       var b = el("button", TAB === t[0] ? "on" : null, t[1]);
@@ -90,6 +96,7 @@
   function go(tab) {
     TAB = tab;
     MEM.view = "list";
+    FW.view = "list";
     drawNav();
     clear();
     return redraw();
@@ -111,6 +118,7 @@
     if (TAB === "consultants") return drawConsultants();
     if (TAB === "access") return drawAccess();
     if (TAB === "memory") return drawMemory();
+    if (TAB === "frameworks") return drawFrameworks();
   }
 
   /* `quiet` is passed by every control that is UPDATING what is already on
@@ -2689,6 +2697,211 @@
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
     });
+  }
+
+  /* ════ The strategy frameworks library (spec 050) ════════════════════
+     Forefront's own, outside every client, beside the memory — and the one
+     table on this platform that names no client at all: a framework is about
+     nobody.
+
+     PHASE A IS READ-ONLY. There is no Ask and no Add here yet, and neither is
+     drawn as a control that does nothing (§61). */
+  var FW = { view: "list", one: null, q: "", section: "", rows: null, sections: null };
+
+  /* The nine, named ONCE, in the order the detail page reads them — the
+     reading view walks this list, so a tenth field is one edit (§104.7). */
+  var FWFIELDS = [["purpose", "Purpose"], ["keyQuestions", "Key questions it answers"],
+                  ["whenToUse", "When to use it"], ["whenNotToUse", "When not to use it"],
+                  ["inputsRequired", "Inputs required"], ["outputs", "Outputs"],
+                  ["executiveExample", "Executive example"],
+                  ["consultantUseCase", "Consultant use case"],
+                  ["facilitationTips", "Facilitation tips"]];
+  /* The two that read side by side, because they are a pair and a reader
+     compares them. */
+  var FWPAIRS = { whenToUse: "whenNotToUse", inputsRequired: "outputs" };
+
+  function fwGo(view, extra) {
+    FW.view = view;
+    if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) FW[k] = extra[k];
+    return drawFrameworks();
+  }
+
+  function drawFrameworks() {
+    if (FW.view === "one") return drawFwOne();
+    return drawFwList();
+  }
+
+  /* ── The list ──────────────────────────────────────────────────────
+     The whole library arrives in one answer and the searching happens here,
+     which is a decision rather than a shortcut: 80 rows is small, they are
+     already on the page, and a round trip per keystroke would be slower AND
+     would replace the box being typed into (constitution XV). */
+  function drawFwList(quiet) {
+    lead(quiet, "Reading…");
+    return fpost({ action: "list" }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the library.", true); return; }
+      FW.rows = j.frameworks || [];
+      FW.sections = j.sections || [];
+      settle(function () { fwPaint(); });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  function fwPaint() {
+    title("Frameworks");
+
+    var box = el("div", "fwbox");
+    var search = el("input", "fld");
+    search.type = "search";
+    search.placeholder = "Search " + FW.rows.length + " frameworks — by name, purpose or when to use it";
+    search.value = FW.q;
+    box.appendChild(search);
+
+    var chips = el("div", "fwchips");
+    box.appendChild(chips);
+    page.appendChild(box);
+
+    var count = el("p", "fwcount");
+    page.appendChild(count);
+
+    var list = el("div", "fwlist");
+    page.appendChild(list);
+
+    /* Every row carries what it is searched on, lowercased once here rather
+       than on every keystroke — the same five fields the server sends and,
+       not by coincidence, the five that decide whether this is the right
+       tool. */
+    FW.rows.forEach(function (f) {
+      var b = el("button", "fwrow");
+      b.type = "button";
+      b.dataset.hay = [f.name, f.section, f.purpose, f.keyQuestions, f.whenToUse]
+        .join(" ").toLowerCase();
+      b.dataset.section = f.section;
+      var hd = el("div", "hd");
+      hd.appendChild(el("span", "nm", f.name));
+      hd.appendChild(el("span", "tag", f.section));
+      b.appendChild(hd);
+      if (f.purpose) b.appendChild(el("p", "pp", f.purpose));
+      b.addEventListener("click", function () { fwGo("one", { one: f.id }); });
+      list.appendChild(b);
+    });
+
+    /* ONE FILTER, asked by the box and by the chips (§53.5) — two that
+       narrowed the same list separately is how they come to disagree. It
+       hides rows in place and writes the count INTO its node; nothing here
+       repaints, so the cursor stays where it is typing (§63, constitution XV). */
+    function apply() {
+      var q = FW.q.trim().toLowerCase();
+      var shown = 0;
+      Array.prototype.forEach.call(list.querySelectorAll(".fwrow"), function (r) {
+        var hide = (!!q && r.dataset.hay.indexOf(q) < 0) ||
+                   (!!FW.section && r.dataset.section !== FW.section);
+        r.hidden = hide;
+        if (!hide) shown++;
+      });
+      Array.prototype.forEach.call(chips.querySelectorAll(".fwchip"), function (c) {
+        c.classList.toggle("on", (c.dataset.section || "") === FW.section);
+        c.setAttribute("aria-pressed", (c.dataset.section || "") === FW.section ? "true" : "false");
+      });
+      /* IT SAYS WHAT IT FOUND, and when it found nothing it says that rather
+         than leaving an empty box to be read as a page that failed (§45.2). */
+      count.textContent = !shown ? "Nothing matches that."
+        : shown === FW.rows.length ? nOf(shown, "framework")
+        : nOf(shown, "framework") + " of " + FW.rows.length;
+    }
+
+    var all = el("button", "fwchip", "All");
+    all.type = "button"; all.dataset.section = "";
+    all.appendChild(el("i", null, String(FW.rows.length)));
+    all.addEventListener("click", function () { FW.section = ""; apply(); });
+    chips.appendChild(all);
+    FW.sections.forEach(function (sc) {
+      var c = el("button", "fwchip", sc.section);
+      c.type = "button"; c.dataset.section = sc.section;
+      c.appendChild(el("i", null, String(sc.n)));
+      /* Pressing the lit one clears it, which is what aria-pressed already
+         means and the only way back to "All" without reaching for it. */
+      c.addEventListener("click", function () {
+        FW.section = FW.section === sc.section ? "" : sc.section;
+        apply();
+      });
+      chips.appendChild(c);
+    });
+
+    search.addEventListener("input", function () { FW.q = search.value; apply(); });
+    apply();
+  }
+
+  /* ── One framework ─────────────────────────────────────────────────
+     In place behind a way back, which is this page's own idiom for going
+     into a thing (the client card does it) — and nine sections of prose is
+     more than a dialog should hold. */
+  function drawFwOne() {
+    clear();
+    page.appendChild(el("p", "muted", "Reading…"));
+    return fpost({ action: "one", id: FW.one }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read that framework.", true); return; }
+      var f = j.framework;
+      settle(function () {
+        var back = el("div");
+        var b = el("button", "cback", "← ALL FRAMEWORKS");
+        b.type = "button";
+        b.addEventListener("click", function () { fwGo("list"); });
+        back.appendChild(b);
+        back.style.marginBottom = "13px";
+        page.appendChild(back);
+
+        var right = el("div");
+        right.appendChild(el("span", "tag", f.section));
+        title(f.name, right);
+
+        var band = el("div", "band");
+        var done = {};
+        FWFIELDS.forEach(function (pair) {
+          var key = pair[0];
+          if (done[key]) return;
+          var mate = FWPAIRS[key];
+          if (mate) {
+            var g = el("div", "fwsec fwgrid");
+            [[key, pair[1]], [mate, fwLabel(mate)]].forEach(function (side) {
+              var d = el("div");
+              d.appendChild(el("h3", null, side[1]));
+              d.appendChild(el("p", null, f[side[0]] || "—"));
+              g.appendChild(d);
+              done[side[0]] = true;
+            });
+            band.appendChild(g);
+            return;
+          }
+          var sec = el("div", "fwsec");
+          sec.appendChild(el("h3", null, pair[1]));
+          sec.appendChild(el("p", null, f[key] || "—"));
+          band.appendChild(sec);
+          done[key] = true;
+        });
+
+        /* WHERE IT CAME FROM, and an absent author is an absence rather than
+           a person invented to fill it (§35). */
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "Where this came from"));
+        apart.appendChild(el("p", "note", f.addedBy
+          ? "Added by " + f.addedBy + (f.when ? " · " + whenWord(f.when) : "")
+          : "Came with the library. Nobody here has edited it."));
+        apart.querySelector(".note").style.margin = "0";
+        band.appendChild(apart);
+        page.appendChild(band);
+      });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  function fwLabel(key) {
+    for (var i = 0; i < FWFIELDS.length; i++) if (FWFIELDS[i][0] === key) return FWFIELDS[i][1];
+    return key;
   }
 
   document.getElementById("signout").addEventListener("click", function () {

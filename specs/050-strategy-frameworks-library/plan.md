@@ -62,11 +62,14 @@ saw coming; nothing is built for it now.
 | Asking and drafting | `smp-app/lib/frameworks-ask.ts` |
 | The route | `smp-app/app/api/frameworks/route.ts` |
 | The three model options | `smp-app/lib/assistant.cjs` |
-| The screens | `smp-app/shell/platform.html` — **the source**; `public/platform-page.js` is generated from it |
+| The screens | **`platform.html` at the repository root — the source.** Both `smp-app/shell/platform.html` and `smp-app/public/platform-page.js` are GENERATED from it by `scripts/build-shell.mjs` |
 | The doc | `smp-app/db/README.md` — its list of platform tables |
 
-**`public/` is generated and tracked, and production serves it** (§329). Every
-task that touches `shell/platform.html` ends by re-running the generators;
+**`public/` is generated and tracked, and production serves it** (§329) — and
+`shell/platform.html` is generated too, which is the correction this plan
+needed after it was first written: editing the copy in `smp-app/` would have
+been edits the next generator run silently threw away. Every task that touches
+the console's page ends by re-running the generators;
 `checks/generated-in-step.mjs` is what catches it if one does not.
 
 ---
@@ -155,7 +158,7 @@ all eighty.
 
 ---
 
-## The page — `shell/platform.html`
+## The page — `platform.html`, at the repository root
 
 A fifth tab, **ungated as Memory is**, and four states inside it:
 

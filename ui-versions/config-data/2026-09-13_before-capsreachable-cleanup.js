@@ -4537,19 +4537,8 @@ function functionCapCount(fnKey){ return capsOfFunction(fnKey).length; }
 function activeFunctionKeys(){
   return FUNCTION_KEYS.filter(function(k){ return FUNCTIONS[k].active !== false; });
 }
-/* §331.4 · `capsReachable` WAS DECLARED TWICE, WITH TWO DIFFERENT BODIES.
-   This one asked whether the HOLDING FUNCTION is reachable; §330's, eight
-   thousand lines down, asks the rule (`grantAt("k_perf", "cap:<id>")`) so a
-   capability answers for itself. The later declaration wins by hoisting, so
-   the product was right — measured, `String(capsReachable)` on the built file
-   names the §330 body — and that is exactly §281's fault: a dead body wearing
-   a live name, where one reorder, or deleting the "wrong" copy, makes every
-   capability unreachable for every viewer in silence.
-
-   DELETED BY NAME AND MATCHED TEXT, NEVER BY LINE RANGE (§214), and
-   `reachesCap` goes with it because this was its only caller — checked, not
-   assumed. Not on `main`: this pair is the branch's own, so it is cleaned
-   before the merge rather than carried into it. */
+function reachesCap(cap){ return !!cap.fn && reachesFn(cap.fn); }
+function capsReachable(){ return GROUP.capabilities.filter(reachesCap); }
 function unitsReachable(){
   return activeKeys().filter(reaches);
 }

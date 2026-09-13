@@ -5,14 +5,20 @@
    just created he read **NO ROLE** and *"No pages granted"*, while every
    colleague he added worked.
 
-   THE FAULT, AND IT ONLY EVER HITS THE PERSON WHO CREATED THE CLIENT. A
-   Forefront admin opens a client they made BY RULE (door.ts's seatFor) and
-   holds no `tenant_users` row, so `officeRow` mints them a register row and
-   nothing else records them. The moment they add the FIRST colleague,
-   setTeam's sweep — *"a row the platform minted and nobody is any more is
-   retired"* — reads them as nobody and retires their own row. It never came
-   back: the adoption branch set the role and never the standing, and the
-   mint path's `ON CONFLICT DO NOTHING` returned the retired row untouched.
+   THE FAULT HITS WHOEVER OPENS A CLIENT HOLDING NO SEAT. A Forefront admin
+   opens one BY RULE (door.ts's seatFor) and holds no `tenant_users` row, so
+   `officeRow` mints them a register row and nothing else records them. The
+   moment they add the FIRST colleague, setTeam's sweep — *"a row the platform
+   minted and nobody is any more is retired"* — reads them as nobody and
+   retires their own row. It never came back: the adoption branch set the role
+   and never the standing, and the mint path's `ON CONFLICT DO NOTHING`
+   returned the retired row untouched.
+
+   §339 STOPS THAT STATE ARISING AT CREATION and does not retire this check:
+   the creator is written onto the team as the client is made, so what is left
+   here is every OTHER way in — an admin opening a client a colleague made, a
+   client made before §339, or one whose creator was taken off the team. The
+   fixture builds that state deliberately rather than by making a client.
 
      DATABASE_URL_UNPOOLED=postgres://…/smp_dev node checks/office-standing.mjs
      … --break=no-heal   (RED: placing somebody no longer lifts the retirement)
@@ -54,7 +60,9 @@ try {
   await owner.query("DELETE FROM tenants WHERE key = $1", [KEY]);
   await owner.query("DELETE FROM users WHERE email IN ($1,$2)", [HIM, HER]);
 
-  /* createClient, verbatim: a bare graph whose register is EMPTY */
+  /* createClient's graph, verbatim — bare, with an EMPTY register. The
+     membership §339 writes beside it is deliberately NOT written here: the
+     subject is an admin who holds no seat, which is what §338 is about. */
   const seed = JSON.parse(readFileSync(join(here, "..", "..", "db", "seed-state.json"), "utf8"));
   const t = (await owner.query(
     "INSERT INTO tenants (key, name, made_here) VALUES ($1,'Check Standing',true) RETURNING id", [KEY])).rows[0];
@@ -93,12 +101,12 @@ try {
   const standing = async (key) => (await withTenant(t.id, (c) => c.query(
     "SELECT COALESCE(extra->>'active','') AS a FROM people WHERE key = $1", [key]))).rows[0];
 
-  /* 1 · he opens the client he just made — admin, no membership */
+  /* 1 · he opens a client holding no membership — admin, by rule */
   const himUser = asUser(await userOf(himId));
   await withTenant(t.id, (c) => officeRow(c, himUser, T, "super", null));
   let mine = await pagesFor(HIM);
   check(mine.pages > 0 && mine.chips.length > 0,
-    "the creator opens the client he made and holds his Super user seat", JSON.stringify(mine));
+    "an admin holding no seat opens the client and wears the Super user seat", JSON.stringify(mine));
 
   /* 2 · he adds the first colleague — the sweep runs */
   await setTeam(herId, HER, "smoteam");

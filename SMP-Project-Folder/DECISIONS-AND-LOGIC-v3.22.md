@@ -45947,3 +45947,105 @@ RUNNING**: a `const retired` that REDECLARED a fixture ten lines above it
 case would have been testing an empty world rather than a closed column.
 
 ---
+
+## §339 — THE SETTING THAT COULD NOT OPEN, AND THE CREATOR WHO WAS NOWHERE IN THE DATA (2026-09-13)
+
+Two things §337 and §338 wrote down and deliberately left, both put to Islam in
+plain words with their costs, and both answered in one message: *"1. no need a
+client they are on they should be able to open"* and *"2. yes the one who
+create the client should appear from the start."*
+
+**§339.1 — THE COLUMN THE OFFICE COULD SET AND NOTHING COULD READ.** *Clients
+they hold no seat on* has three states on Who sees what — hidden, listed, open
+— and `door.ts` asked for it under **`consultant`**, a role key §313.4 RETIRED
+into the single `everyone` row, which platform-migration 001-seats DELETES. So
+the lookup matched nothing and `|| "none"` read the miss as a REFUSAL, where
+§30.2's rule is that an absent row means *nobody has answered yet*. **Exactly
+§337's fault, one column over** — that section fixed the demo and left this
+one standing on purpose, because correcting it OPENS client data to somebody
+holding no seat and a widening on a client-data boundary is Islam's word, not
+a tidy-up ridden in beside a defect fix (rule 1b). **THE TWO COLUMNS ARE ONE
+READER NOW** (`ffGrant`), because the second copy is what produced §337 in the
+first place (§53.5) — and the key and the default are read out of
+`platform-rules.cjs` rather than spelt here again, so neither can drift.
+
+**AND NOBODY'S ACCESS MOVES TODAY, WHICH IS WHAT MAKES IT SAFE TO LAND**:
+that column ships at **`listed`** — a name on the cards with nothing behind it
+— and `mayOpen` ranks `listed` below `open`, so it goes on refusing. What
+changes is that the office's *open* works when they choose it. **Whether the
+SHIPPED DEFAULT should become `open` is a different question and has not been
+asked**; it is stated rather than decided, and the check asserts the default is
+still `listed`, read from the frozen module rather than as a literal (§94.8) —
+so this file cannot become the second place that decides it.
+
+**§339.2 — AND THE PERSON WHO MAKES A CLIENT IS ON ITS TEAM FROM THE START.**
+Until now they were on it BY RULE and nowhere in the data: `door.ts`'s
+`seatFor` gives a platform admin the Super user seat with no `tenant_users`
+row, and that absence is precisely what §338 had to heal — the moment they
+added the first colleague, `setTeam`'s sweep (*"a row the platform minted and
+nobody is any more is retired"*) read the creator as nobody and retired the
+register row `officeRow` had minted for them. **§338's heal stays and is what
+rescues a client already in that state**; this stops the state arising for a
+client made from today.
+
+**IT REVERSES "THE REGISTER STARTS EMPTY" (§313.31, §322) FOR EXACTLY ONE
+ROW**, and the foreign key is why the two writes cannot be one: `tenant_users`
+points at `people` by (tenant, key), so the register row is written FIRST —
+`setTeam`'s own order, and its own comment already says why (the constraint is
+deferred, not absent). **A FAILURE HERE DOES NOT UNDO THE CLIENT**, unlike the
+graph load above it: a client with no graph cannot be opened at all, while one
+whose creator's row did not land opens perfectly by rule and heals on the next
+request — destroying a made client over it would be the larger fault.
+
+**§339.3 — AND §337'S OWN CHECK HAD NEVER ONCE BEEN FALSIFIABLE.** Its section
+runs IN-PROCESS — the tenant is a literal, deliberately, because a demo tenant
+INSERTed for a check holds no graph and answers 404 for a reason of its own
+(§113.8, §316.9) — while `--break=` was only ever put in the SERVER's env, so
+`ffGrant` there read an unset variable. *A check written to prove it can fail,
+that could not.* It was red under `--break=demo-role-key` for something else
+entirely, which is what hid it. The variable is set for that section ONLY and
+restored in a `finally`, because this file also imports `lib/landing.ts`,
+`lib/modules.ts` and `lib/state-io.ts`, which read the same variable for their
+own breaks — leaving it set would break the check's own helpers and report a
+correct build broken (§100.3). Under the fix both columns now go red for their
+own reason, printing the drift verbatim: `door=false cards=true`.
+
+**§339.4 — AND ONE ASSERTION IN §5 HAD BEEN PASSING FOR THE WRONG REASON**:
+it wrote `other_clients = 'none'` under the same retired key — an UPDATE
+matching no row — so *"refused and non-existent answer identically"* was true
+of the shipped default rather than of the office's setting. REWRITTEN, never
+loosened (§218): it writes `everyone` now, so what is asserted is a choice
+somebody made.
+
+**TWO NEIGHBOURING ASSERTIONS MOVED AND BOTH WERE REWRITTEN RATHER THAN
+DELETED** (§218). `checks/shell.mjs` asked for an **EMPTY** register on a made
+client, which was right while the creator was on its team only by rule; what
+that line is FOR — that nobody is invented beside them — is what it asserts
+now: exactly one row, and it is theirs, at the seat they hold. And
+`checks/door-landing.mjs` §6 asserted the landing saying *"you are not on this
+register"* on a freshly made client, which §339.2 makes unreachable there —
+so the NEW property is asserted first, and the empty state is then **MADE**
+(the row and the membership removed) rather than waited for, because it is
+still reachable on a client made before today, one that brought its own
+register, or one whose creator was taken off the team. Deleting that half
+would have left §313.32's finding unguarded. **AND THE SECOND HALF NEEDED THE
+REQUEST THAT ACTUALLY PLACES THEM**: the landing only READS (`registerKeyFor`
+— a reader that creates what it looked for is how a phantom change reaches
+every save, §316.9), and the state API is what places, so a rewrite that kept
+only the page load reported a correct build broken until that line came back.
+
+**VERIFIED**: `check:door` **70/0** and **RED six ways** — `no-rows`,
+`first-person`, `membership-key`, `demo-role-key`, `other-role-key`,
+`no-creator` — with `no-creator` reddening exactly the two §339.2 assertions
+and nothing else; `check:standing` 7/0 and RED under `--break=no-heal`;
+`check:shell` **72/0**; `check:state` 91/0; `test-platform-rules.js` 69/0 with
+§323's two-copies assertion; `generated-in-step` all clear; `next build`
+compiles and `tsc` is clean but for `lib/prisma.ts`'s pre-existing
+PrismaClient error. **`check:modules` is 61/1 and it is NOT this work's** —
+reproduced identically with the change stashed (§303); it is the failure
+§336.2 already records, whose subject moved when the set-up flow landed.
+
+**Nothing in the frozen product is touched**, so no rebuild and no `sw.js`
+bump: `git status` names six files, all under `smp-app/`.
+
+---

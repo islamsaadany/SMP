@@ -219,7 +219,15 @@ await section("4 · Forefront's own pages", async () => {
   check(j.ok && j.people.some((x) => x.email === "office@forefront.example" && x.seats.some((s) => s.key === "raya-trade" && s.seat === "super")), "the consultants list carries the seats", JSON.stringify(j).slice(0, 160));
   j = await post({ action: "access" }); check(j.ok && j.canEdit === true && j.areas.length === 4, "the table is the admin's", JSON.stringify(j).slice(0, 120));
   j = await post({ action: "createClient", name: "RHI", industry: "Manufacturing" }); check(j.ok && j.key === "rhi", "a client is created from the cards", JSON.stringify(j));
-  j = await post({ action: "client", key: "rhi" }); check(j.ok && j.client.made_here === true && j.register.length === 0, "…made here, with an EMPTY register (nobody is invented)", JSON.stringify(j.register));
+  /* REWRITTEN, NOT LOOSENED (§218) FOR §339: this asked for an EMPTY register,
+     which was right while a made client started with nobody on it and its
+     creator was on its team only BY RULE — the absence §338 had to heal. The
+     creator is written now, so what the line is FOR — that nobody is invented
+     beside them — is what is asserted: exactly one row, and it is theirs. */
+  j = await post({ action: "client", key: "rhi" });
+  check(j.ok && j.client.made_here === true && j.register.length === 1 && j.register[0].ff === "true" && j.register[0].role === "super"
+    && j.team.length === 1 && j.team[0].seat === "super",
+    "…made here, holding its creator and nobody invented beside them (§339)", JSON.stringify({ register: j.register, team: j.team }));
   j = await post({ action: "setTeam", key: "rhi", email: "office@forefront.example", seat: "smoteam" }); check(j.ok, "…the admin joins its team", JSON.stringify(j));
   j = await post({ action: "client", key: "rhi" });
   check(j.team.length === 1 && j.team[0].seat === "smoteam" && j.register.length === 1 && j.register[0].role === "smoteam" && j.register[0].ff === "true", "…and the team IS the register on a client made here (§313.31)", JSON.stringify(j.register));

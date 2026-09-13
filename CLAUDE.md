@@ -8797,8 +8797,13 @@ node smp-app/checks/memory-boundary.mjs
 node smp-app/checks/office-standing.mjs
                                 # the office's own row keeps its standing
                                 # (&sect;338) &mdash; `npm run check:standing`, needs a
-                                # database. The creator of a client holds a minted
-                                # register row and NO membership (door.ts's seatFor),
+                                # database. An admin opening a client they hold no seat
+                                # on holds a minted register row and NO membership
+                                # (door.ts's seatFor) &mdash; &sect;339 writes the
+                                # CREATOR a membership as the client is made, so what
+                                # is left here is every other way in: a client a
+                                # colleague made, one made before &sect;339, or one
+                                # whose creator was taken off the team &mdash;
                                 # so `setTeam`'s sweep &mdash; *"a row the platform
                                 # minted and nobody is any more is retired"* &mdash;
                                 # read them as nobody and retired their own row, and
@@ -8959,7 +8964,60 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;337 / &sect;338: the demo's door, the
+*Last Updated: 2026-09-13 &mdash; **&sect;339: the setting that could not open,
+and the creator who was nowhere in the data.** The two things &sect;337 and
+&sect;338 wrote down and deliberately left, both put to Islam in plain words
+with their costs and both answered in one message: *"1. no need a client they
+are on they should be able to open"* and *"2. yes the one who create the
+client should appear from the start."* **&sect;339.1 &mdash; THE COLUMN THE
+OFFICE COULD SET AND NOTHING COULD READ**: *Clients they hold no seat on* was
+asked under `consultant`, the role key &sect;313.4 RETIRED and 001-seats
+DELETES, so the lookup matched nothing and `|| "none"` read the miss as a
+REFUSAL &mdash; &sect;337's fault one column over, left standing on purpose
+because correcting it OPENS client data and that is Islam's word (rule 1b).
+**THE TWO COLUMNS ARE ONE READER NOW**, the key and the default read out of
+`platform-rules.cjs` rather than spelt again (&sect;53.5), **and nobody's
+access moves today**: the column ships at `listed`, which `mayOpen` refuses, so
+what changes is that the office's *open* works when they choose it. Whether the
+SHIPPED DEFAULT should be `open` is a different question and **has not been
+asked** &mdash; stated rather than decided, with the default asserted from the
+frozen module so this file cannot become the second place deciding it
+(&sect;94.8). **&sect;339.2 &mdash; AND WHOEVER MAKES A CLIENT IS ON ITS TEAM
+FROM THE START**: they were on it BY RULE and nowhere in the data
+(`door.ts`'s `seatFor`, no `tenant_users` row), which is exactly the absence
+&sect;338 had to heal &mdash; `setTeam`'s sweep read the creator as nobody and
+retired their own register row. &sect;338's heal STAYS (it rescues a client
+already in that state); this stops the state arising. **It reverses "the
+register starts EMPTY" (&sect;313.31, &sect;322) for exactly one row**, and the
+FK is why the two writes cannot be one: the register row is written FIRST,
+`setTeam`'s own order. **A failure here does not undo the client** &mdash;
+unlike the graph load above it, one whose creator's row did not land opens
+perfectly by rule and heals on the next request. **&sect;339.3 &mdash; AND
+&sect;337'S OWN CHECK HAD NEVER ONCE BEEN FALSIFIABLE**: that section runs
+IN-PROCESS (&sect;113.8) while `--break=` was only ever put in the SERVER's
+env, so it read an unset variable &mdash; *a check written to prove it can
+fail, that could not*, red under its own break for something else entirely,
+which is what hid it. Set for that section ONLY and restored in a `finally`,
+because the file also imports three modules reading the same variable for
+their own breaks (&sect;100.3). **&sect;339.4 &mdash; and one assertion had
+been passing for the wrong reason**, writing the retired key so *"refused and
+non-existent answer identically"* was true of the DEFAULT rather than of the
+office's setting. **TWO NEIGHBOURS REWRITTEN, NEVER DELETED** (&sect;218): the
+shell check's *EMPTY register* becomes what it is FOR (exactly one row, and it
+is the creator's), and the door check's *"you are not on this register"* is
+asserted on a state now **MADE** rather than waited for &mdash; still reachable
+on a client made before today or one whose creator was taken off the team, so
+deleting it would have left &sect;313.32 unguarded; **and the second half
+needed the request that actually PLACES them**, the landing only reading
+(&sect;316.9). **VERIFIED**: door **70/0** and RED six ways (`no-creator`
+reddening exactly its own two), standing 7/0 and RED, shell **72/0**, state
+91/0, rules 69/0, `generated-in-step` all clear, `next build` and `tsc` clean
+but for `lib/prisma.ts`'s pre-existing error. **`check:modules` 61/1 is NOT
+this work's** &mdash; reproduced identically with the change stashed
+(&sect;303), the failure &sect;336.2 records. Nothing in the frozen product is
+touched, so no rebuild and no `sw.js` bump.*
+
+*Earlier the same day: **&sect;337 / &sect;338: the demo's door, the
 office's own standing, and a consultants list that stops being add-only.**
 Three from Islam in one round, and the first two are the same shape: a
 question asked in two places that stopped agreeing. **&sect;337 &mdash; THE

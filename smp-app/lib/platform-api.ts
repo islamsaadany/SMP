@@ -526,13 +526,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const seed = JSON.parse(readFileSync(SEED, "utf8"));
     const t = (await pool.query("INSERT INTO tenants (key, name, industry, notes, size, made_here) VALUES ($1,$2,$3,$4,$5,true) RETURNING id",
       [key, name, String(body.industry || ""), String(body.notes || ""), String(body.size || "")])).rows[0];
-    /* THE CLIENT'S OWN NAME, AND NOBODY ON ITS REGISTER. §67's cleared
-       graph keeps the bootstrap SMO because a deployment with no way in is
-       not a deployment (§21); on the shared schema the platform's admin
-       opens a client by rule (door.ts seatFor) and the team is added on the
-       card (setTeam) — so the register starts EMPTY, and the org is the
-       client's. The unit and function names stay, as §67 left them, for
-       Setup to rename. */
+    /* THE CLIENT'S OWN NAME, AND NOBODY ON ITS REGISTER BUT WHOEVER MADE IT.
+       §67's cleared graph keeps the bootstrap SMO because a deployment with
+       no way in is not a deployment (§21); on the shared schema the graph
+       carries no people at all and the team is added on the card (setTeam).
+       The unit and function names stay, as §67 left them, for Setup to
+       rename. The creator is written below (§339). */
     const g: any = frozen.bare(seed);
     g.group.org = name;
     g.people = [];
@@ -544,6 +543,35 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       await pool.query("DELETE FROM tenants WHERE id = $1", [t.id]).catch(() => {});
       throw e;
     }
+    /* AND WHOEVER MADE IT IS ON ITS TEAM FROM THE START (§339). Islam, after
+       §338: *"yes the one who create the client should appear from the
+       start."* Until now they were on it by RULE and nowhere in the data —
+       door.ts's seatFor gives a platform admin the Super user seat with no
+       `tenant_users` row — and that absence is what §338 had to heal: the
+       moment they added the first colleague, setTeam's sweep read the creator
+       as nobody and retired the register row `officeRow` had minted for them.
+       §338's heal stays and is what rescues a client already in that state;
+       this stops the state arising for a client made from today.
+
+       IT REVERSES "THE REGISTER STARTS EMPTY" (§313.31, §322) for exactly one
+       row, and the FK is why the two writes cannot be one: `tenant_users`
+       points at `people` by (tenant, key), so the register row is written
+       FIRST — setTeam's own order, and its own comment says why (the
+       constraint is deferred, not absent).
+
+       A FAILURE HERE DOES NOT UNDO THE CLIENT, unlike the graph above: a
+       client with no graph cannot be opened at all, while one whose creator's
+       row did not land opens perfectly by rule and heals on the next request
+       (§338). Destroying a made client over it would be the larger fault. */
+    const personKey = officePersonKey(me.email);
+    try {
+      if (process.env.SMP_BREAK === "no-creator") throw new Error("no-creator");
+      const T = { id: t.id, key, name, kind: "client" as const, status: "active", made_here: true, mark: null };
+      await withTenant(t.id, (c) => officeRow(c, me, T, "super", personKey));
+      await pool.query(
+        "INSERT INTO tenant_users (tenant_id, user_id, person_key, seat) VALUES ($1,$2,$3,'super') ON CONFLICT (tenant_id, user_id) DO NOTHING",
+        [t.id, me.id, personKey]);
+    } catch (e) { console.error("placing the creator on " + key + ":", (e as Error).message); }
     return ok({ key });
   }
 

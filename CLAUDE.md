@@ -9113,7 +9113,31 @@ SOURCES**. **VERIFIED**: presentation-timer 55/0, authoriser 642/0, differ
 140/0, `hide-slide` 42/0 and `master-presentation` 44/0 back to the baseline's
 own numbers, `master-picker` 58/0 with two assertions REWRITTEN never loosened
 (&sect;218) and five position-keyed cell reads de-positioned, full `qa.py`
-sweep **ERRORS none**. Still a branch; `main` is Islam's word on that merge.*
+sweep **ERRORS none**.
+**&sect;340.4 &mdash; AND THE MERGE IS PART OF THE RECORD**: `main` took
+&sect;337&ndash;&sect;339 while this was in flight, so it is renumbered
+&sect;337 &rarr; &sect;340 **before** the merge, which is what makes the
+renumber provably scoped (&sect;264.3) &mdash; and it took **three spellings**,
+the third being `test-authorize.js`'s JS escape holding **ten** citations a
+two-spelling sweep would have left naming somebody else's section
+(&sect;336.1). **AND &sect;329'S CHECK CAUGHT WHAT IT WAS BUILT FOR, ONE ROUND
+AFTER IT WAS WRITTEN**: this work changes four frozen sources and the two
+SHARED rule modules, and **production serves the new stack** &mdash; so
+`generated-in-step` went **3 FAILED** here and **all clear** on `origin/main`'s
+own worktree (&sect;303). The served `shell.js`, `platform.css` and `body.html`
+were the old bytes, so the clock would have reached the offline handover and
+**nothing a client's browser receives**; and `rules.cjs`/`authorize.cjs` are
+CARRIED copies with no generator (&sect;335), so the served authoriser would
+have run without `PRESENT_MINS` in `gExtra` &mdash; swept-but-unclassified,
+which is **invisible and therefore allowed to everybody** (&sect;259.2): the
+very failure this section falsified on the frozen side and would have shipped
+on the served one. Re-carried by the RULE, the four generators re-run, all
+clear after. **The `sw.js` bump reaches nobody and it is said rather than left
+as a habit** &mdash; the built file's bytes changed, which is &sect;91's
+trigger, and the served worker holds `SHELL` nought times (&sect;329), so it is
+kept for the offline copy alone. **Two `smp-app` checks are recorded UNRUN
+rather than passing** (&sect;54.5): `modules` and `memory-boundary` need
+`node_modules` this session does not hold, and neither is touched here.*
 
 *Earlier the same day: **&sect;339: the setting that could not open,
 and the creator who was nowhere in the data.** The two things &sect;337 and

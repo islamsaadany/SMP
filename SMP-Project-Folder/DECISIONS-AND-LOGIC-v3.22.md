@@ -7242,6 +7242,56 @@ key **6**, the same-subject guard removed **1**, the mockup's literal colours
 - **Nothing says the times are saved** other than their being saved; the dialog
   has no word for it, exactly as the running order has none.
 
+### §340.4 — And the merge is part of the record
+
+`main` moved four commits under this branch and took **§337, §338 and §339**
+while this was being built, so this work is renumbered §337 → §340 — the fourth
+time a number has collided mid-flight (§264.3, §287, §336.1). **The renumber was
+run BEFORE the merge, which is what makes it provably scoped**: at the merge
+base both `CLAUDE.md` and this document carry **zero** 337 citations, so every
+one then in the tree was this branch's and none of `main`'s could be swept up.
+
+**AND IT TOOK THREE SPELLINGS, NOT ONE.** §336.1 records a renumber that knew
+`§NNN` and missed `&sect;NNN`; this one found a third — `scripts/test-authorize.js`
+writes its citations as the JS escape `\u00a7337`, and **ten of them**, every
+one of which a two-spelling sweep would have left pointing at `main`'s §337
+after the merge: a real section, so nothing parses wrong, no check can see it,
+and the next person is sent to the wrong page. The sweep matches all three.
+
+**AND §329'S CHECK CAUGHT WHAT IT WAS BUILT FOR, ONE ROUND AFTER IT WAS
+WRITTEN.** This work changes four frozen sources (`present.js`, `present.css`,
+`shell.html`, `slides.js`) and the two shared rule modules (`lib/rules.js`,
+`lib/authorize.js`) — and **production serves the new stack** (§332, measured).
+So `generated-in-step` went **3 FAILED** on the merged tree and **all clear** on
+`origin/main`'s own worktree (§303), which is what says the three were mine:
+
+  - `smp-app/public/{platform.css,shell.js}` and `smp-app/shell/body.html` were
+    the OLD bytes, so the clock would have shipped to the offline handover file
+    and to **nothing a client's browser receives** (§319's trap, §329's rule).
+  - `smp-app/lib/{rules,authorize}.cjs` are **carried copies with no generator**
+    (§335), so the new stack's authoriser would have run without `PRESENT_MINS`
+    in `gExtra` — and a field swept-but-unclassified is **INVISIBLE and
+    therefore allowed to everybody** (§259.2), which is the precise failure this
+    section falsified separately on the frozen side and would have shipped on
+    the served one. *The half that is not falsified is the half that is not
+    there.*
+
+Re-carried by the rule rather than by a list of names (§104.7), the four
+generators re-run, and `generated-in-step` **all clear** after.
+
+**`sw.js` IS BUMPED AND IT REACHES NOBODY, WHICH IS WORTH SAYING RATHER THAN
+LEAVING AS A HABIT**: the built file's bytes changed, which is §91's trigger, so
+the name goes to `smp-shell-v4.97-presentation-clock` — confirmed against
+`origin/main` at the start of the merge and again immediately before the push
+(§94.12, §94.16) — and the served worker holds the string `SHELL` **nought**
+times, because `build-sw.mjs` drops the whole caching half. It is kept for the
+offline copy, which is what that file is now for (§329).
+
+**Two of `smp-app`'s checks could not be run and are recorded as unrun rather
+than as passing** (§54.5): `modules.mjs` and `memory-boundary.mjs` both need
+`smp-app/node_modules`, which this session does not hold. Neither is touched by
+this work, and §336.2 already records `check:modules` as `main`'s own red.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

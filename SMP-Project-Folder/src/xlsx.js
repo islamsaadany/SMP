@@ -664,7 +664,7 @@ function planWorkbook(u){
         return acc;
       }, []) },
 
-    /* ── §339: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
+    /* ── §343: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
        §22's contract again: an upload AUTHORS, so a column the file does not
        carry is a column the plan LOSES on a download-and-re-upload — and a
        breakdown is fifteen targets somebody set by hand.
@@ -768,7 +768,7 @@ function progressWorkbook(u){
         return acc;
       }, []) },
 
-    /* §339: AND THE BREAKDOWN'S FIGURES. One line per cell, which is the
+    /* §343: AND THE BREAKDOWN'S FIGURES. One line per cell, which is the
        same long form the plan sheet takes and for the same reason — a table
        of variable width in a sheet of fixed shape.
 
@@ -1066,7 +1066,7 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
-  /* §339: the breakdown's cells, long form — a line per cell, and the table
+  /* §343: the breakdown's cells, long form — a line per cell, and the table
      is assembled by `createFromPlan` in the order they arrive. The generic
      columns carry them: `outcome` is the COLUMN's name and `group` the
      table's, exactly as the objectives sheet already uses `group`. */
@@ -1095,7 +1095,7 @@ function planFromWorkbook(u, sheets){
 
 function progressFromWorkbook(u, sheets){
   var out = [];
-  /* §339: `Breakdowns` joins them, and its ID is a row-and-column pair —
+  /* §343: `Breakdowns` joins them, and its ID is a row-and-column pair —
      `diffProgress` splits it, because a cell is what a figure belongs to
      (§48). Its `type` is nominal here: the resolver reads the stored graph
      rather than the word on the sheet. */
@@ -1298,7 +1298,7 @@ function projectSubjectNames(){
   var out = [];
   FUNCTION_KEYS.forEach(function(k){
     var f = FUNCTIONS[k];
-    /* §338: AND A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS. Its plan is
+    /* §342: AND A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS. Its plan is
        this template's subject too — the Objectives and Actions sheets — and
        `fnOwnsProjects` rightly answers false for it, so without this clause
        its plan downloads for nobody and cannot come back (§22, §61, and
@@ -1390,7 +1390,7 @@ function capPlanWorkbook(c){
         return acc;
       }, []) },
 
-    /* ── §338: ACTIONS ────────────────────────────────────────────────────
+    /* ── §342: ACTIONS ────────────────────────────────────────────────────
        A function that plans in objectives and actions holds them directly, so
        the sheet hangs off nothing — no Project column, and no validation
        against one. It is written for EVERY holder rather than only for that
@@ -1473,7 +1473,7 @@ function capProgressWorkbook(c){
         return acc;
       }, []) },
 
-    /* §338: the same pair a milestone reports, with no Project column — an
+    /* §342: the same pair a milestone reports, with no Project column — an
        action hangs off the function itself. */
     { name:"Actions", widths:[44, 14, 16, 12, 18, 12, 44, 16], lockedCols:[7],
       head:["Action", "Due", "Current status", "Current %",
@@ -1541,7 +1541,7 @@ function capPlanFromWorkbook(c, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
-  /* §338: the actions, addressed to the HOLDER rather than to a project —
+  /* §342: the actions, addressed to the HOLDER rather than to a project —
      the same id shape `addAction` mints, so a row that arrives by file and one
      added on the screen are indistinguishable afterwards. */
   var aN = 0;
@@ -1607,7 +1607,7 @@ function capPlanFromWorkbook(c, sheets){
 function capProgressFromWorkbook(c, sheets){
   var out = [];
   [["Objectives","CAPOBJECTIVE","Objective"],
-   ["Actions","ACTION","Action"],          /* §338 */
+   ["Actions","ACTION","Action"],          /* §342 */
    ["Deliverables","DELIVERABLE","Deliverable"],
    ["Outcomes","OUTCOME","Outcome"],
    ["Milestones","MILESTONE","Milestone"]].forEach(function(def){

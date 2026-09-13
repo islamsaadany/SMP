@@ -45739,7 +45739,7 @@ learn either action — it has been unreachable since the cutover put Next in
 front of it (§317.8), which is §322's own precedent.
 
 ---
-## §337 — A capability's reporting page asks the column that judges it
+## §341 — A capability's reporting page asks the column that judges it
 
 Islam, of the fault §336 measured and deliberately left: *"yes we need to fix
 that."*
@@ -45784,7 +45784,7 @@ Tightened, the falsification went 3 red → 5.
 
 ---
 
-## §338 — Objectives and actions, the third way a function plans (spec 049)
+## §342 — Objectives and actions, the third way a function plans (spec 049)
 
 Islam: *"we need to build the objectives and actions"* — the third panel of the
 mockup he signed off (`design-mockups/function-plan-types/`), and of the model
@@ -45844,7 +45844,7 @@ confirmation exists to stop. **The select is put back on Cancel**, or a select
 still showing the refused value fires no `change` and the same choice cannot be
 made twice (§110).
 
-### §338.1 — And the dialog the switch is made in had to go with it
+### §342.1 — And the dialog the switch is made in had to go with it
 
 **THE SWITCH IS MADE INSIDE THE SETUP ROW DIALOG, AND THAT DIALOG'S CANCEL IS AN
 UNDO OF THE WHOLE ROW.** `rowEditOpen` takes a deep copy of the function
@@ -45856,7 +45856,7 @@ and did it silently, with nothing pressed.
 
 **HARMLESS BEFORE TODAY, WHICH IS WHY NOBODY HAD MET IT**: §59 refused this
 switch whenever there was anything to lose, so the undo could only ever put back
-a format on an empty function. §338 makes it a real act — a confirmation, an
+a format on an empty function. §342 makes it a real act — a confirmation, an
 archive, a clear — and a snapshot that outlives a real act is a revert waiting
 for somebody to navigate.
 
@@ -45876,7 +45876,7 @@ set it through the dialog and the same click reverts it — is what named
 `leaveModes`. *A fixture that will not hold is a measurement, and the first
 question is whose fault it is.*
 
-### §338.2 — And the one thing the switch refuses says what it does
+### §342.2 — And the one thing the switch refuses says what it does
 
 **A CAPABILITY IS WHAT THE SWITCH CANNOT CARRY** (§334: it is somebody else's
 strategic entry, and archiving it as a side effect of a dropdown is exactly the
@@ -45895,8 +45895,8 @@ removed **1 red**.
 
 `checks/objectives-actions.py` is **47/0**, proved able to fail eight ways
 from the SOURCES (§276): the format layer **16 red**, the archive **1**, the
-page branches **6**, §338.1's own line **15** — that one printing the reported
-symptom, a function drawing `Projects` over a plan it no longer has — §338.2's
+page branches **6**, §342.1's own line **15** — that one printing the reported
+symptom, a function drawing `Projects` over a plan it no longer has — §342.2's
 two halves **1** each, and the progress route's two **1** each.
 
 **AND THE PROGRESS ROUTE IS DRIVEN END TO END RATHER THAN READ**, because
@@ -45930,7 +45930,7 @@ deterministic subject — and a figure that differs from the record is owed a
 baseline rather than an explanation (§303). Built from `origin/main`'s own
 sources in a worktree and swept identically: **main 241, this branch 241,
 viewer for viewer**, with main's head at §336.2 and the branch ahead of it by
-§336.3, §337 and §338 alone. So §338 adds no destination, and §332's 228 is
+§336.3, §341 and §342 alone. So §342 adds no destination, and §332's 228 is
 honest about its own build — §334 made a capability a destination of its own
 in between, which is where the thirteen came from.
 
@@ -45953,7 +45953,7 @@ the tenant.
 
 ---
 
-## 339 · A breakdown of a pillar's targets
+## 343 · A breakdown of a pillar's targets
 
 Islam, of one of his own pillars:
 
@@ -45975,7 +45975,7 @@ a list** that day and never drawn, so each still wants a picture before
 anything is built (rule 1c). The correction is what decided which piece this
 round is.
 
-### 339.1 · Written as measures they stop being a breakdown
+### 343.1 · Written as measures they stop being a breakdown
 
 Measured on the mockup's own subject: the pillar carries three key measures
 and a fourth, *Categories mix*, that **nobody could fill** — a single row
@@ -45987,7 +45987,7 @@ become the extremes of a category rather than of a measure.
 So the row goes, and what replaces it is a table with the arithmetic of a
 measure.
 
-### 339.2 · A column is a key measure with several values instead of one
+### 343.2 · A column is a key measure with several values instead of one
 
 That one sentence is the whole model, and everything else follows from it.
 
@@ -46014,7 +46014,7 @@ as a second argument, and the card's *Measures* count takes them too —
 otherwise it reads **4** over an average of five, which is the card
 contradicting itself in the space of two inches.
 
-### 339.3 · The column with no direction is the indicator
+### 343.3 · The column with no direction is the indicator
 
 `Mix` is **reported and never scored**, because the five shares add up to the
 revenue mix and one category beating its share forces another to miss — a
@@ -46033,7 +46033,7 @@ rather than merely stated: `rowReads` answers null for an indicator cell, so
 a Mix figure miles off its target and asserting no note is asked, beside a
 scored cell at 57% that does ask.
 
-### 339.4 · A cell is two flat fields, never an object
+### 343.4 · A cell is two flat fields, never an object
 
 The one shape decision everything else rests on.
 
@@ -46067,7 +46067,7 @@ second rule that could disagree with it: `bdTidy` deletes the whole key the
 moment `bdHas` goes false, so a pillar that never had a breakdown and one
 whose last row was removed are byte-identical.
 
-### 339.5 · Submit waits for every figure — and that needed his word
+### 343.5 · Submit waits for every figure — and that needed his word
 
 The mockup's closing line says *Submit waits for every one of them*. A day
 later Islam ruled the extras **optional**, which §336 recorded as reversing
@@ -46091,7 +46091,7 @@ owed once a pillar has one.
   says where its note box is and §279's bar marks that control. Without it a
   row at risk is counted by the bar and reachable by nothing.
 
-### 339.6 · What it costs, said before it was built
+### 343.6 · What it costs, said before it was built
 
 - This pillar is asked for fifteen more figures than it was, and a cycle
   cannot be submitted with any of them blank.
@@ -46102,7 +46102,7 @@ owed once a pillar has one.
   here has ever let anybody do that, and it is what keeps the feature from
   being about categories — another client types Region, or Channel, or Brand.
 
-### 339.7 · The workbook, long form
+### 343.7 · The workbook, long form
 
 §22's contract again: an upload AUTHORS, so a column the file does not carry
 is a column the plan LOSES — and a breakdown is fifteen targets somebody set
@@ -46130,7 +46130,7 @@ directions and all fifteen targets asserted; then the progress file out, a
 figure typed INTO the sheet, back through `progressFromWorkbook`,
 `diffProgress` and `applyProgress`, and the cell read off the stored plan.
 
-### 339.8 · Verified
+### 343.8 · Verified
 
 - `checks/pillar-breakdown.py` **33 assertions, 0 failures**, with the state
   MADE and put back (§255, §94.2). Proved able to fail three ways from the
@@ -46155,11 +46155,11 @@ figure typed INTO the sheet, back through `progressFromWorkbook`,
   lists **36 → 38**, the Breakdowns plan sheet's own two, longest **121 of
   255**, so §67.5's cap is nowhere near.
 
-### 339.9 · And a falsification undone with `git checkout` threw the work away
+### 343.9 · And a falsification undone with `git checkout` threw the work away
 
 Three of the four sources were saved to a scratch copy before being broken and
 restored from it; `lib/rules.js` was restored with `git checkout` instead —
-**which took the whole §339 block with it**, because the file was not
+**which took the whole §343 block with it**, because the file was not
 committed. The break was undone and so was the feature.
 
 **IT WAS CAUGHT BY THE BUILD AND NOT BY A CHECK**: rebuilding after the
@@ -46173,7 +46173,7 @@ damage.
 file the work is not committed to — and compare the rebuilt file with the
 build you falsified from, because it is the one thing that notices.*
 
-### 339.10 · And the head held three controls in one cell
+### 343.10 · And the head held three controls in one cell
 
 Islam, with a screenshot of the pen open on it: *"the table is messed up not
 fitting in the box."*
@@ -46231,7 +46231,7 @@ green — `table-fit`, `table-standard`, `plan-tail-fold`, `plan-fields`,
 — and the full `qa.py` sweep **ERRORS: none**, with the workbook's inline
 validation lists at 38, longest 121 of 255 (§67.5 nowhere near).
 
-### 339.11 · And the control that adds a column could not be seen
+### 343.11 · And the control that adds a column could not be seen
 
 Islam, of the same table one message later: ***"I don't undertsna how this
 table would satisfy the columns that we need."*** **HE COULD NOT, AND THAT IS
@@ -46260,7 +46260,7 @@ satisfy the half above while making that one unreadable instead.
 **AND DARK WAS ALREADY CLEAR** (7.37 / 6.44), which is half of why nothing
 saw it — a check run in one palette calls this build clean. The other half is
 &sect;255: **no pillar in the worked example carries a breakdown**, so no
-sweep has ever walked this band, and &sect;339.10's own new section asserts
+sweep has ever walked this band, and &sect;343.10's own new section asserts
 the table's width and the picker's size and **never asserted that anything on
 it can be read**. *A check written against the fault you were shown is not a
 check against the next one.*

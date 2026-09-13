@@ -4013,7 +4013,7 @@ console.log("\n38 · a capability is a subject of its own (§334)");
   check("§334 REFUSED: a unit head does not submit it", !submit(headKey).ok, "was ALLOWED");
 })();
 
-/* ── 39 · a pillar's breakdown is two halves at once (§339) ────────────
+/* ── 39 · a pillar's breakdown is two halves at once (§343) ────────────
    ITS TARGETS ARE THE PLAN AND ITS FIGURES ARE THE REPORT, in one object on
    one row — so the danger is not that the rule is wrong but that the split
    is missed, and every custodian entering a category figure is refused for
@@ -4026,7 +4026,7 @@ console.log("\n38 · a capability is a subject of its own (§334)");
 
    BOTH ENDS EVERY TIME (§94.2) — a figure allowed to a reporter beside a
    target refused to them. */
-console.log("\n39 · a pillar's breakdown (§339)");
+console.log("\n39 · a pillar's breakdown (§343)");
 (function () {
   const UK = Object.keys(SEED.units)[0];
   const base = clone(SEED);
@@ -4043,33 +4043,33 @@ console.log("\n39 · a pillar's breakdown (§339)");
     return (A.collect(base, inc, W(base)) || []);
   }
   const fig = kinds(function (b) { b.rows[1].a_c1 = "27%"; });
-  check("§339: a category's FIGURE is reporting",
+  check("§343: a category's FIGURE is reporting",
         fig.length > 0 && fig.every(function (c) { return c.kind === "unitReporting"; }),
         fig.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
   const nte = kinds(function (b) { b.rows[0].note = "Ramadan shifted the bread mix."; });
-  check("§339: ...and so is the row's note",
+  check("§343: ...and so is the row's note",
         nte.length > 0 && nte.every(function (c) { return c.kind === "unitReporting"; }),
         nte.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
   const tgt = kinds(function (b) { b.rows[0].t_c1 = "9%"; });
-  check("§339: a category's TARGET is the plan",
+  check("§343: a category's TARGET is the plan",
         tgt.some(function (c) { return c.kind === "unitPlan"; }),
         tgt.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
   const col = kinds(function (b) { b.cols[1].dir = "≥"; });
-  check("§339: and so is a column's direction",
+  check("§343: and so is a column's direction",
         col.some(function (c) { return c.kind === "unitPlan"; }),
         col.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
   const nm = kinds(function (b) { b.name = "Regions"; });
-  check("§339: and so is the table's own name",
+  check("§343: and so is the table's own name",
         nm.some(function (c) { return c.kind === "unitPlan"; }),
         nm.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
   const gone = (function () {
     const inc = clone(base); delete inc.units[UK].items[0].breakdown;
     return (A.collect(base, inc, W(base)) || []);
   })();
-  check("§339: taking the whole breakdown away is the plan",
+  check("§343: taking the whole breakdown away is the plan",
         gone.some(function (c) { return c.kind === "unitPlan"; }),
         gone.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
-  check("§339: and NOTHING about it reaches the unknown sweep (§191)",
+  check("§343: and NOTHING about it reaches the unknown sweep (§191)",
         !fig.concat(nte, tgt, col, nm, gone)
           .some(function (c) { return c.kind === "unknown"; }),
         "ok");
@@ -4083,15 +4083,15 @@ console.log("\n39 · a pillar's breakdown (§339)");
   }
   const REP = (base.units[UK].head || base.units[UK].custodian);
   if (REP) {
-    check("§339: the unit's own head enters a category figure",
+    check("§343: the unit's own head enters a category figure",
           from(REP, function (b) { b.rows[1].a_c1 = "27%"; }).ok,
           (from(REP, function (b) { b.rows[1].a_c1 = "27%"; }).refusals || []).join(" / "));
-    check("§339 REFUSED: ...and may not move its target",
+    check("§343 REFUSED: ...and may not move its target",
           !from(REP, function (b) { b.rows[0].t_c1 = "9%"; }).ok, "was ALLOWED");
-    check("§339 REFUSED: ...nor rename a column",
+    check("§343 REFUSED: ...nor rename a column",
           !from(REP, function (b) { b.cols[0].name = "Uplift"; }).ok, "was ALLOWED");
   }
-  check("§339: the office moves the target",
+  check("§343: the office moves the target",
         from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).ok,
         (from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).refusals || []).join(" / "));
 })();

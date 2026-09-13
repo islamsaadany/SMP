@@ -1,6 +1,6 @@
 # Spec 050 · A breakdown of a pillar's targets
 
-**Status:** BUILT · branch `claude/inspiring-lamport-pm0ki2` · §339 in
+**Status:** BUILT · branch `claude/inspiring-lamport-pm0ki2` · §343 in
 `DECISIONS-AND-LOGIC-v3.22.md`
 **Asked for:** Islam, 2026-09-13 — *"let's start with what's drawn and signed
 off"*, of the four extras §324.8 recorded. Only one of the four was ever
@@ -173,7 +173,7 @@ Beside it: `test-authorize.js` §39 (8 assertions, both ends, red 2 ways),
 
 ---
 
-## 7b · And the head held three controls in one cell (§339.10)
+## 7b · And the head held three controls in one cell (§343.10)
 
 Islam, with the pen open on it: *"the table is messed up not fitting in the
 box."*
@@ -214,7 +214,7 @@ it fits. 42 now.
 
 ---
 
-## 7c · And the control that adds a column could not be seen (§339.11)
+## 7c · And the control that adds a column could not be seen (§343.11)
 
 Islam, of the same table one message later: ***"I don't undertsna how this
 table would satisfy the columns that we need."***

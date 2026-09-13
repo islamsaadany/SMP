@@ -6631,7 +6631,7 @@ function planFormatWord(f){
 function planFormatCell(fk, f, editable){
   var fmt = fnFormat(f);
   if (!editable) return '<span class="pill kind">' + esc(planFormatWord(f)) + '</span>';
-  /* ── §338, REPLACING §59's REFUSAL FOR THIS ONE TRANSITION ─────────────
+  /* ── §342, REPLACING §59's REFUSAL FOR THIS ONE TRANSITION ─────────────
      Islam: *"archvied when type changes and create the new apprach."*
 
      §59 refused the switch outright while the other side held content, and

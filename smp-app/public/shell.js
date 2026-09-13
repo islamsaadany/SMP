@@ -968,7 +968,7 @@
        it ("=" and "Y/N", §104) and there is nothing to fill. */
     outcome:   ["target"],
     milestone: ["owner", "finish"],
-    /* §338: AN ACTION OWES WHAT A MILESTONE OWES, and for the same two
+    /* §342: AN ACTION OWES WHAT A MILESTONE OWES, and for the same two
        reasons rather than by analogy — a line nobody owns is a line nobody
        can report (§177), and the date is what decides whether this cycle asks
        for it at all (`dueThisCycle`), so a blank one is a row the reporting
@@ -1281,7 +1281,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   function wholeUnits(compile) { return compileKey(compile) === "count"; }
 
-  /* ── A BREAKDOWN OF A PILLAR'S TARGETS (§339) ─────────────────────
+  /* ── A BREAKDOWN OF A PILLAR'S TARGETS (§343) ─────────────────────
      Islam, of one of his own pillars: *"Maximizing Current Stores has its
      targets broken down by category."* Five categories, each with a growth
      target, a contribution-margin target and a share of the mix — fifteen
@@ -3159,7 +3159,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function capsOfFn(w, fnKey) {
     var own = ((w || {}).functions || {})[fnKey] || {};
     var fmt = String(own.format || "");
-    /* §338: A FUNCTION THAT PLANS IN OBJECTIVES IS A HOLDER TOO — of its own
+    /* §342: A FUNCTION THAT PLANS IN OBJECTIVES IS A HOLDER TOO — of its own
        key objectives and its own ACTIONS. Without it every action figure is
        refused, because the caller's index is built from this walk and an id
        that is not in it is refused whoever the person is (§334.18). */
@@ -3663,7 +3663,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   var ROW_TREE = {
     /* a unit, or a function that plans in pillars */
     keyObjectives: {},
-    /* a function that plans in objectives and actions (§338) */
+    /* a function that plans in objectives and actions (§342) */
     actions:       {},
     items:         { measures: {}, tactics: {} },
     /* the group's capabilities, and the projects inside them */
@@ -3843,7 +3843,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        in exactly the live case: a function head and a project owner reporting
        in the same minutes (§147.7, §301). The SAME subtree a capability's
        projects are walked with, never a second copy of it (§53.5). */
-    /* §338: AND ITS ACTIONS, for the same reason and the same cost — a
+    /* §342: AND ITS ACTIONS, for the same reason and the same cost — a
        function that plans in objectives holds them in that one blob, so
        without this line its head and an action's owner reporting in the same
        minutes is §216 again. */
@@ -9422,7 +9422,7 @@ function capExec(c){
            pending: total - scored,
            pct: scored ? Math.round(sum / scored) : null };
 }
-/* ── THE TWO NUMBERS AN OBJECTIVES FUNCTION READS (§338) ───────────────────
+/* ── THE TWO NUMBERS AN OBJECTIVES FUNCTION READS (§342) ───────────────────
    From the mockup Islam signed off, and it is a decision rather than an
    implementation detail: *"Actions are counted, not scored into the
    objectives. The two cards read separately, as they do on every other page:
@@ -9939,11 +9939,11 @@ function clearCapability(cap, what, why){
        capability's identity, not its plan. */
     if (cap.keyObjectives) cap.keyObjectives.length = 0;
     if (cap.projects) cap.projects.length = 0;
-    if (cap.actions) cap.actions.length = 0;          /* §338 */
+    if (cap.actions) cap.actions.length = 0;          /* §342 */
     return archived;
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
-  /* §338: an action's figures clear with everything else's — the cycle asks
+  /* §342: an action's figures clear with everything else's — the cycle asks
      every subject again (§49.1), and a format whose rows survived it would
      open a new cycle already reporting. */
   (cap.actions || []).forEach(function(a){ a.status = null; a.pct = null; a.note = ""; });
@@ -10091,7 +10091,7 @@ function canReport(unitKey){
      both cells at edit; visible the day one is tightened, and the exact
      screen-says-yes / server-says-no drift §42 exists to prevent.
 
-     §337: AND IT IS `SMPRules.reportPageOf()`, NEVER THE PREFIX TEST AGAIN.
+     §341: AND IT IS `SMPRules.reportPageOf()`, NEVER THE PREFIX TEST AGAIN.
      That rule has answered for `cap:` since §334 and this line had not been
      told, so a capability drawn by the unit's pages (one that plans in
      PILLARS, §334) was judged in the BUSINESS-UNIT column — which a function
@@ -10121,7 +10121,7 @@ function canReportRow(unitKey, x){
      unit's key objectives carry none, deliberately: they are the unit's
      headline and belong to no pillar, so nobody's draft can close them. */
   if (ownDraftShut(unitKey, x && x.cid)) return false;
-  /* §337: `areaOfTarget()`, for the reason it was named once (§330.5) — this
+  /* §341: `areaOfTarget()`, for the reason it was named once (§330.5) — this
      ternary is the same question one function below, and it answered "unit"
      for a capability while `boundedHere` two hundred lines down answered
      "fn". */
@@ -10290,7 +10290,7 @@ function canEnterFigure(unitKey, x){
 /* The note stays with the unit whatever the figure does. */
 function canEnterNote(unitKey, x){
   var who = figureAssignee(x);
-  /* §337: the column this target is judged in, never `u_report` outright —
+  /* §341: the column this target is judged in, never `u_report` outright —
      the third spelling of one question inside 190 lines, and on a function or
      a capability it refused the note to somebody the right column allows. */
   if (who && !inOffice() && who === viewer().key &&
@@ -10418,7 +10418,7 @@ function reportItems(u){
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                  cid:p.id, place:place });
     });
-    /* §339: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
+    /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
        row — Islam's own count on the mockup is "3 measures · 15 category
        figures · 2 tactics", and Submit waits for all twenty. A row would
        have made fifteen figures read as five.
@@ -10459,7 +10459,7 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
-  /* §339: a breakdown cell is answered by its own column's box. */
+  /* §343: a breakdown cell is answered by its own column's box. */
   if (x.kind === "bdcell") return SMPRules.bdAnswered(o, x.col);
   /* §300: a yes/no row is answered by one of the two ends, or by In progress
      WITH its per-cent — `"In progress"` on its own is a non-empty string and
@@ -10486,7 +10486,7 @@ function rowReads(x){
      ever asked to explain it and Submit let it through unexplained. */
   if (x.kind === "tactic") return tacticProgress(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
-  /* §339: and a breakdown cell reads its own score — NULL on an indicator
+  /* §343: and a breakdown cell reads its own score — NULL on an indicator
      column, which is what makes "a Mix figure can never be at risk" true
      rather than merely stated: the note rule asks this and nothing else. */
   if (x.kind === "bdcell") return bdCellScore(x.obj, x.col);
@@ -10539,7 +10539,7 @@ function fnReportItems(subject){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
                  place:koPlace });
     });
-    /* §338: AND ITS ACTIONS. One walk, so the reporting count, the note rule,
+    /* §342: AND ITS ACTIONS. One walk, so the reporting count, the note rule,
        the In-progress rule, Submit's refusal and §279's bar all learn the new
        row at once — building a second list for them is how the two halves of
        one page come to disagree about what is owed (§53.5, §105.4). Asked
@@ -10878,7 +10878,7 @@ function reportPlaces(target){
     }
     var b = rowBlock(x);
     if (!b) return;
-    /* §339: THE BOX THE WALK LANDS ON IS NOT ALWAYS THE ITEM'S OWN. A
+    /* §343: THE BOX THE WALK LANDS ON IS NOT ALWAYS THE ITEM'S OWN. A
        breakdown cell is one item per FIGURE and the explanation it may owe is
        the ROW's — one note box for three cells — so an item says where its
        note lives and the walk marks that control. Without it a row at risk
@@ -12295,7 +12295,7 @@ function gapMap(target, all, fillable){
       (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
     });
     entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
-    /* §338: THE ACTIONS ARE ONE PLACE AND ONE CHIP, on the Plan section where
+    /* §342: THE ACTIONS ARE ONE PLACE AND ONE CHIP, on the Plan section where
        they are drawn and filled. Without this the page prints the red word on
        a row nobody owns and the band above it counts nought, which is §223's
        fault exactly — a mark with no count behind it, and no door to the
@@ -12577,7 +12577,7 @@ function projCode(owner, p){
    count as Units"). So a pillars function carries `items[]` of exactly the
    shape a unit's pillars have and is drawn by the unit's own pages — two
    screens doing the same job are one screen with different content (A13). */
-/* ── A THIRD WAY A FUNCTION PLANS (§338, spec 049) ─────────────────────────
+/* ── A THIRD WAY A FUNCTION PLANS (§342, spec 049) ─────────────────────────
    Islam: *"each function has objectives like the measures we have and actions
    like tactics they work on that has due dates"* — and then, of the three
    shapes drawn for him in the platform's own pages, *"we need to build the
@@ -12595,7 +12595,7 @@ function projCode(owner, p){
    is what every function stored before today reads as (§96.2), and the two
    existing keys do not move (§30.2 — renaming a stored key is a migration for
    a word nobody reads). */
-/* THE THREE WAYS A SUPPORTING FUNCTION PLANS, NAMED ONCE (§338, spec 049).
+/* THE THREE WAYS A SUPPORTING FUNCTION PLANS, NAMED ONCE (§342, spec 049).
    A list rather than a chain of `||`, because a fourth form is then added in
    ONE place and every reader follows — which is the fault §276's four compile
    rules and §168's scoring bands each record from the other side. `projects`
@@ -12617,7 +12617,7 @@ function fnPlansInObjectives(f){ return fnFormat(f) === "objectives"; }
    (§61 from the other side: a control with nothing behind it). */
 function fnPlansInProjects(f){ return fnFormat(f) === "projects"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
-/* ── AN ACTION (§338) ──────────────────────────────────────────────────────
+/* ── AN ACTION (§342) ──────────────────────────────────────────────────────
    A milestone row with a DATE where a tactic has quarters:
 
        { id, name, owner, due, status, pct, note }
@@ -12784,7 +12784,7 @@ function plansInPillars(target){
   if (t.indexOf("fn:") !== 0) return !!UNITS[t];
   return fnPlansInPillars(FUNCTIONS[t.slice(3)]);
 }
-/* And whether it is drawn by the objectives-and-actions pages (§338). A
+/* And whether it is drawn by the objectives-and-actions pages (§342). A
    capability is deliberately NOT offered this format: Islam's word was about a
    FUNCTION ("three ways a function plans"), and a capability that is planned
    as a pillar already holds measures and tactics directly — so this answers
@@ -12821,7 +12821,7 @@ function viaCarrier(p, own, roll){
    through the one shared predicate (SMPRules.isHidden), or the deck and the
    page would disagree about one number. */
 function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return !SMPRules.isHidden(m) && m.target && measureScore(m) != null; }); }
-/* ── WHAT A BREAKDOWN SCORES (§339) ────────────────────────────────
+/* ── WHAT A BREAKDOWN SCORES (§343) ────────────────────────────────
    A CELL IS SCORED EXACTLY AS A MEASURE IS, through `measureScore` and
    nothing else. The row is shaped into the object that scorer already takes
    — direction from the COLUMN, target and figure from the cell — so a yes/no
@@ -12896,7 +12896,7 @@ function pillarPerf(p){
        measure of every pillar by 0 (unscorable), the second by the whole year,
        the third by TWICE the year. Silent, and wrong only for the `Sum` rows,
        which is the half nobody would think to check. */
-    /* §339: AND THE BREAKDOWN'S COLUMNS JOIN THEM, each carrying the weight
+    /* §343: AND THE BREAKDOWN'S COLUMNS JOIN THEM, each carrying the weight
        of a headline measure — Islam's own ruling, and the reason the
        breakdown is a breakdown rather than a note beside the table. A pillar
        without one adds an empty list and is byte-identical to what it was. */
@@ -13101,7 +13101,7 @@ function addPillar(u){
   u.items.push(it);
   return it;
 }
-/* ── SETTING UP A BREAKDOWN (§339) ─────────────────────────────────
+/* ── SETTING UP A BREAKDOWN (§343) ─────────────────────────────────
    The container is minted first, exactly as `addAction` mints a function's
    list before pushing to it (§129's audit: a reading view hands out a frozen
    empty, so a first add is accepted on screen and written nowhere).
@@ -13284,7 +13284,7 @@ function dxSwitchKind(p, id, want){
   src.splice(i, 1);
   return made;
 }
-/* §338: AN ACTION, minted on the FUNCTION rather than on a project — the
+/* §342: AN ACTION, minted on the FUNCTION rather than on a project — the
    container is minted first (§129's audit: a reading view hands out a frozen
    empty, so a first add is accepted on screen and written nowhere). The id is
    minted from the MAXIMUM, never from the count (§96.2): remove the middle of
@@ -13389,13 +13389,13 @@ function listById(kind, id){
     });
     return out;
   }
-  /* §338: an action belongs to a HOLDER, not to a project — so the walk below
+  /* §342: an action belongs to a HOLDER, not to a project — so the walk below
      would look at every project's `actions`, find none, and answer null, and
      `removeRowById(null, id)` is a press that does nothing (§96's family). */
   if (kind === "actions") { eachHolder(function(h){ look(h.actions); }); return out; }
-  /* §339: a breakdown's rows hang off a PILLAR, so the project walk below
+  /* §343: a breakdown's rows hang off a PILLAR, so the project walk below
      would answer null and `removeRowById(null, id)` is a press that does
-     nothing (§96's family, §338's own note one list over). */
+     nothing (§96's family, §342's own note one list over). */
   if (kind === "breakdown") {
     UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
       var u = unitLike(t);
@@ -13469,7 +13469,7 @@ function unitPlanSnapshot(u){
            keyObjectives:clone(u.keyObjectives), swot:clone(u.swot), items:clone(u.items) };
 }
 function capPlanSnapshot(c){
-  /* §338: AND ITS ACTIONS, or a function that plans in objectives archives a
+  /* §342: AND ITS ACTIONS, or a function that plans in objectives archives a
      plan with the half that is its plan missing — and `planIsEmpty` below
      would then refuse to take the archive at all, so the switch that ARCHIVES
      the standing plan (§318 §6.2) would quietly destroy it. */
@@ -13886,7 +13886,7 @@ function restoreArchive(id){
     archiveCapPlan(c, "replaced by restoring the " + a.at + " archive");
     c.def = a.plan.def;
     c.keyObjectives = clone(a.plan.keyObjectives);
-    c.actions = clone(a.plan.actions || []);   /* §338 */
+    c.actions = clone(a.plan.actions || []);   /* §342 */
     c.projects = clone(a.plan.projects);
     /* THE VIEW'S ARRAYS ARE ASSIGNED, so a function's holder is a WRAPPER and
        what was just written is thrown away one line later without this —
@@ -14475,7 +14475,7 @@ function fnOwnHolder(fk){
   if (!f || fnPlansInPillars(f)) return null;
   return { id: "fn:" + fk, fn: fk, own: true, name: f.name, def: f.def || "",
            keyObjectives: Array.isArray(f.keyObjectives) ? f.keyObjectives : FN_NO_ROWS,
-           /* §338: and its actions, where it plans that way. The holder is
+           /* §342: and its actions, where it plans that way. The holder is
               what `holderItemById` and the server's own index are built from,
               so a row that is not on it is a row no handler can address and
               every figure entered against it is refused (§334.18). */
@@ -14488,7 +14488,7 @@ function fnOwnHolder(fk){
    nothing at all read as a function with work (§61 from the other side). */
 function fnOwnProjects(fk){
   var f = FUNCTIONS[fk];
-  /* §338: `fnPlansInProjects`, never `!fnPlansInPillars` — an objectives
+  /* §342: `fnPlansInProjects`, never `!fnPlansInPillars` — an objectives
      function is neither, and the old spelling handed it a project list. */
   return (f && fnPlansInProjects(f) && Array.isArray(f.projects)) ? f.projects : FN_NO_ROWS;
 }
@@ -14511,7 +14511,7 @@ function fnOwnHolderWritable(fk){
    unstartable, which is §61's trap and what §129's audit found five times. */
 function fnOwnsProjects(fk){
   var f = FUNCTIONS[fk];
-  /* §338: and an objectives function owns none — the page would otherwise
+  /* §342: and an objectives function owns none — the page would otherwise
      offer it somewhere to put its first project, which is a control with
      nothing behind it (§61). */
   if (!f || !fnPlansInProjects(f)) return false;
@@ -14534,7 +14534,7 @@ function fnOwnsProjects(fk){
    value because every caller maps over it and a projects function with nothing
    at all legitimately has none (§61). */
 function fnHolders(fk){
-  /* §338: AND A FUNCTION THAT PLANS IN OBJECTIVES IS A HOLDER, of its own key
+  /* §342: AND A FUNCTION THAT PLANS IN OBJECTIVES IS A HOLDER, of its own key
      objectives and its own actions. `fnOwnsProjects` is about PROJECTS and
      rightly answers false for it — so without this line its rows are drawn,
      reported into and addressed by nothing, which is the exact fault §334.18
@@ -14670,7 +14670,7 @@ function holderWriteBack(id, h){
   if (!h || s.indexOf("fn:") !== 0) return;
   var f = FUNCTIONS[s.slice(3)];
   if (!f) return;
-  /* §338: the holder is a WRAPPER, so every array a restore assigned has to
+  /* §342: the holder is a WRAPPER, so every array a restore assigned has to
      be written back or it is thrown away one line later — the trap §326
      records, and `actions` is the third array on it now. */
   if (fnPlansInObjectives(f)) f.actions = h.actions;
@@ -14767,7 +14767,7 @@ function holderItemById(id){
   var hit = null;
   eachHolder(function(c){
     (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"ko", obj:m, holder:c }; });
-    /* §338: an action is a row of the holder's, addressed exactly as a
+    /* §342: an action is a row of the holder's, addressed exactly as a
        milestone is — the reporting handlers go through this one resolver. */
     (c.actions || []).forEach(function(a){ if (a.id === id) hit = { kind:"action", obj:a, holder:c }; });
     (c.projects || []).forEach(function(p){
@@ -14820,7 +14820,7 @@ function findById(u, id){
     if (p.id === id) hit = { kind:"PILLAR", obj:p };
     p.measures.forEach(function(m){ if (m.id === id) hit = { kind:"MEASURE", obj:m, pillar:p }; });
     p.tactics.forEach(function(t){ if (t.id === id) hit = { kind:"TACTIC", obj:t, pillar:p }; });
-    /* §339: and a breakdown's own rows, so the reporting box can address a
+    /* §343: and a breakdown's own rows, so the reporting box can address a
        cell by the row it sits in. One resolver, because the shell's `data-rep`
        handler walks this and nothing else (§53.5). */
     SMPRules.bdRows(p).forEach(function(r){
@@ -16776,7 +16776,7 @@ function mintPlanIds(u, rows){
     map[r.id] = id; r.id = id;
   });
   rows.forEach(function(r){
-    /* §339: a breakdown's cells hang off a pillar exactly as a measure does,
+    /* §343: a breakdown's cells hang off a pillar exactly as a measure does,
        and carry no id of their own — the table is assembled from them and its
        row ids are minted there (§22). */
     if (r.type === "BDCELL") { r.parent_id = map[r.parent_id] || ""; r.id = ""; }
@@ -16962,7 +16962,7 @@ function diffProgress(u, rows){
        and whose note is owed had nothing for the file to carry. */
     var hasNote = (r.new_note || "") !== "";
     if (!r.id || (!hasVal && !hasNote)) return;
-    /* §339: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
+    /* §343: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
        That pair is what identifies a cell (§48) — the row alone is three
        figures sharing one id, and the reader could not tell which one a
        number was meant for. Split here rather than inside `findById`, which
@@ -17071,7 +17071,7 @@ function createFromPlan(u, d){
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {
-      /* ── §339: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
+      /* ── §343: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
          The sheet is long form — a line per cell naming its pillar, its
          column and its category — so the TABLE is assembled here from the
          order the lines arrive in: first mention of a column makes the
@@ -17187,7 +17187,7 @@ function planReplaceSummary(u, rows){
     incoming: { pillars:countRows(rows, "PILLAR"), measures:countRows(rows, "MEASURE"),
                 tactics:countRows(rows, "TACTIC"), objectives:countRows(rows, "NORTHSTAR"),
                 swot:swot, clauses:countRows(rows, "FOUNDATION"),
-                /* §339: named in the summary the office agrees to BEFORE the
+                /* §343: named in the summary the office agrees to BEFORE the
                    replace happens, or fifteen targets arrive unannounced. */
                 breakdown:countRows(rows, "BDCELL") },
     current: unitSnapshotCounts(unitPlanSnapshot(u)),
@@ -17261,7 +17261,7 @@ function applyProgress(u, d){
         else if (o.actual === 0 && o.status === "Done") o.status = "WIP";
       }
     } else if (r.hit.kind === "BDROW" && r.col) {
-      /* §339: into the cell's own field, rejoined with the target's unit the
+      /* §343: into the cell's own field, rejoined with the target's unit the
          way every other reported figure is (§199, §243) — and an emptied one
          DELETES the key (§50.6), or a cleared cell and one never reported
          stop being the same thing. */
@@ -17366,7 +17366,7 @@ function capFindById(c, id){
   if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
   var hit = null;
   (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"CAPOBJECTIVE", obj:m }; });
-  /* §338: an action belongs to the holder, so it sits beside the objectives
+  /* §342: an action belongs to the holder, so it sits beside the objectives
      rather than under a project — and without it every action reported by
      file came back "unknown" and was set aside (§303's own finding). */
   (c.actions || []).forEach(function(a){ if (a.id === id) hit = { kind:"ACTION", obj:a }; });
@@ -17775,7 +17775,7 @@ function createFromCapPlan(c, d){
       c.keyObjectives.push(cko);
       made++;
     } else if (x.type === "ACTION") {
-      /* §338: the container is minted here rather than assumed — a function
+      /* §342: the container is minted here rather than assumed — a function
          given its first plan by file has never held the array (§50.6, §129's
          audit: the first row is accepted on screen and written nowhere). */
       if (!Array.isArray(c.actions)) c.actions = [];
@@ -17860,7 +17860,7 @@ function diffCapProgress(c, rows){
     var hit = capFindById(c, r.id);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
     var was, now = String(r.new_value == null ? "" : r.new_value).trim();
-    /* §338: an ACTION is a status row too — the same three words a milestone
+    /* §342: an ACTION is a status row too — the same three words a milestone
        answers in, and the same required per-cent (§300, §104.10). */
     var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE" ||
                       hit.kind === "ACTION";
@@ -17904,7 +17904,7 @@ function applyCapProgress(c, d){
     if (!r.hit || r.status !== "changed") return;
     var o = r.hit.obj;
     if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE" ||
-        r.hit.kind === "ACTION") {          /* §338 */
+        r.hit.kind === "ACTION") {          /* §342 */
       /* §303: BOTH WRITE `status` AND `pct`, through the same pair the
          screen's own handlers now ask (§53.5) — so a file that says In
          progress leaves the row In progress with its per-cent set, which is
@@ -18605,7 +18605,7 @@ function planWorkbook(u){
         return acc;
       }, []) },
 
-    /* ── §339: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
+    /* ── §343: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
        §22's contract again: an upload AUTHORS, so a column the file does not
        carry is a column the plan LOSES on a download-and-re-upload — and a
        breakdown is fifteen targets somebody set by hand.
@@ -18709,7 +18709,7 @@ function progressWorkbook(u){
         return acc;
       }, []) },
 
-    /* §339: AND THE BREAKDOWN'S FIGURES. One line per cell, which is the
+    /* §343: AND THE BREAKDOWN'S FIGURES. One line per cell, which is the
        same long form the plan sheet takes and for the same reason — a table
        of variable width in a sheet of fixed shape.
 
@@ -19007,7 +19007,7 @@ function planFromWorkbook(u, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
-  /* §339: the breakdown's cells, long form — a line per cell, and the table
+  /* §343: the breakdown's cells, long form — a line per cell, and the table
      is assembled by `createFromPlan` in the order they arrive. The generic
      columns carry them: `outcome` is the COLUMN's name and `group` the
      table's, exactly as the objectives sheet already uses `group`. */
@@ -19036,7 +19036,7 @@ function planFromWorkbook(u, sheets){
 
 function progressFromWorkbook(u, sheets){
   var out = [];
-  /* §339: `Breakdowns` joins them, and its ID is a row-and-column pair —
+  /* §343: `Breakdowns` joins them, and its ID is a row-and-column pair —
      `diffProgress` splits it, because a cell is what a figure belongs to
      (§48). Its `type` is nominal here: the resolver reads the stored graph
      rather than the word on the sheet. */
@@ -19239,7 +19239,7 @@ function projectSubjectNames(){
   var out = [];
   FUNCTION_KEYS.forEach(function(k){
     var f = FUNCTIONS[k];
-    /* §338: AND A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS. Its plan is
+    /* §342: AND A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS. Its plan is
        this template's subject too — the Objectives and Actions sheets — and
        `fnOwnsProjects` rightly answers false for it, so without this clause
        its plan downloads for nobody and cannot come back (§22, §61, and
@@ -19331,7 +19331,7 @@ function capPlanWorkbook(c){
         return acc;
       }, []) },
 
-    /* ── §338: ACTIONS ────────────────────────────────────────────────────
+    /* ── §342: ACTIONS ────────────────────────────────────────────────────
        A function that plans in objectives and actions holds them directly, so
        the sheet hangs off nothing — no Project column, and no validation
        against one. It is written for EVERY holder rather than only for that
@@ -19414,7 +19414,7 @@ function capProgressWorkbook(c){
         return acc;
       }, []) },
 
-    /* §338: the same pair a milestone reports, with no Project column — an
+    /* §342: the same pair a milestone reports, with no Project column — an
        action hangs off the function itself. */
     { name:"Actions", widths:[44, 14, 16, 12, 18, 12, 44, 16], lockedCols:[7],
       head:["Action", "Due", "Current status", "Current %",
@@ -19482,7 +19482,7 @@ function capPlanFromWorkbook(c, sheets){
       hidden:yes(r["Hidden"]) ? "1" : "" });
   });
 
-  /* §338: the actions, addressed to the HOLDER rather than to a project —
+  /* §342: the actions, addressed to the HOLDER rather than to a project —
      the same id shape `addAction` mints, so a row that arrives by file and one
      added on the screen are indistinguishable afterwards. */
   var aN = 0;
@@ -19548,7 +19548,7 @@ function capPlanFromWorkbook(c, sheets){
 function capProgressFromWorkbook(c, sheets){
   var out = [];
   [["Objectives","CAPOBJECTIVE","Objective"],
-   ["Actions","ACTION","Action"],          /* §338 */
+   ["Actions","ACTION","Action"],          /* §342 */
    ["Deliverables","DELIVERABLE","Deliverable"],
    ["Outcomes","OUTCOME","Outcome"],
    ["Milestones","MILESTONE","Milestone"]].forEach(function(def){
@@ -22309,7 +22309,7 @@ function pillarRow(it, i, u){
    spread is taken over the very list the average was taken over — a pillar's
    `scorableMeasures()`, a list of objectives' `scorableKOs()` — rather than
    over a second filter written beside it (§53.5). */
-/* ── A PILLAR'S BREAKDOWN, DRAWN (§339) ────────────────────────────
+/* ── A PILLAR'S BREAKDOWN, DRAWN (§343) ────────────────────────────
    ONE BUILDER FOR THE TWO READING SURFACES, because the plan shows a target
    and Performance shows a figure against it and everything else about the
    table is identical — two builders is how the two come to disagree about
@@ -22319,7 +22319,7 @@ function pillarRow(it, i, u){
    indicator. That is the whole signal: with no total row under the table,
    the direction in the heading and the scoring colour in the cells are what
    say which columns count (mockup, signed off). */
-/* ── SETTING ONE UP, WITH THE PEN OPEN (§339) ──────────────────────
+/* ── SETTING ONE UP, WITH THE PEN OPEN (§343) ──────────────────────
    Everything on a row already exists elsewhere in the platform — the growing
    name box, the ×, the Add row. ONE CONTROL IS NEW: naming a table's
    columns, because no table here has ever let anybody do that, and it is
@@ -22357,7 +22357,7 @@ function bdPlanSection(it, u, pi, ed){
     { h: inputOr("plan", SMPRules.bdName(it), "bdname",
         function(v){ b.name = v; }), cls:"" }]
     .concat(cols.map(function(c){
-      /* §339.10: THE THREE SHARE THE CELL, or each claims all of it —
+      /* §343.10: THE THREE SHARE THE CELL, or each claims all of it —
          `.fld` is width:100% and the table then sizes itself to the sum
          (measured: 1286px of controls in a 660px cell, 566px past the
          table's edge). The wrapper is what lays them out. */
@@ -22410,7 +22410,7 @@ function bdReadTable(p, mode){
           return '<td class="num">' + (String(t).trim() ? tgtShown(t)
             : '<span class="nobody">&mdash;</span>') + '</td>';
         }
-        /* §339: A FIGURE READS AGAINST ITS OWN TARGET, exactly as every
+        /* §343: A FIGURE READS AGAINST ITS OWN TARGET, exactly as every
            reported figure on these pages already does (§254) — and the
            SCORING COLOUR is what marks the columns that count. An indicator
            is drawn plain with its target behind it, which is the rule two
@@ -22428,7 +22428,7 @@ function bdReadTable(p, mode){
       .concat(cols.map(function(c){ return { h:bdColHead(p, c), cls:"cc" }; })),
     rows);
 }
-/* §339: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
+/* §343: AND THE SECOND ARGUMENT IS THE BREAKDOWN'S COLUMN SCORES, which are
    already scores rather than rows. It is here for §264's own reason: the
    extremes must be the extremes of exactly the list the headline beside them
    averaged, or a card names a Highest the number above it left out. A pillar
@@ -22479,7 +22479,7 @@ function pillarBody(it, u){
   var sp = scoreSpread(scorableMeasures(it), bdsc);
   var uk = u && u.ukey;
   return '<div class="pbody" hidden>' +
-    /* §339: a scored breakdown column is one of the numbers this pillar is
+    /* §343: a scored breakdown column is one of the numbers this pillar is
        judged on, so it is counted here too — "Measures 4" over an average of
        five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
@@ -22488,7 +22488,7 @@ function pillarBody(it, u){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    /* §339: and the breakdown, where there is one — between the measures it
+    /* §343: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
     (SMPRules.bdHas(it)
@@ -26526,7 +26526,7 @@ function renderReport(u){
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   };
-  /* §339: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
+  /* §343: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
      than `entry` itself, because every branch in that function is about a
      field on the row (`actual` / `outActual`, the yes/no pair, a sourced
      figure) and a cell is addressed by its COLUMN — `data-bdcol` beside
@@ -26622,7 +26622,7 @@ function renderReport(u){
                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                 cid:p.id });
     });
-    /* §339: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
+    /* §343: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
        cell, which is what makes the pane's tally read "20/20" over three
        measures, fifteen category figures and two tactics — the count Islam
        signed off. The ROW carries the note, so every cell in a row points at
@@ -26696,7 +26696,7 @@ function renderReport(u){
           }).join(""))
       : "";
 
-    /* §339: the breakdown, between the measures it is part of and the
+    /* §343: the breakdown, between the measures it is part of and the
        tactics it is not — the same place it sits on the other two panes, or
        somebody entering figures meets the table in a different order from
        the one they planned it in. The target sits BEHIND each box so nobody
@@ -26759,7 +26759,7 @@ function renderReport(u){
       total++;
       if (tacticAnswered(t)) done++;   /* §252 */
     });
-    /* §339: and every cell the breakdown asks for — the rail's tally and the
+    /* §343: and every cell the breakdown asks for — the rail's tally and the
        pane's pill read this one function, so they cannot disagree about how
        much of a pillar is still to enter (§116.2). */
     bdCells(p).forEach(function(c){
@@ -28109,7 +28109,7 @@ function projPlanBody(p, subject){
 
    RECORDED AS OUTSTANDING, not closed: nothing on either of a supporting
    function's pages now says its strategy is the parent unit's. */
-/* ── OBJECTIVES AND ACTIONS: A FUNCTION'S THREE PAGES (§338, spec 049) ─────
+/* ── OBJECTIVES AND ACTIONS: A FUNCTION'S THREE PAGES (§342, spec 049) ─────
    Islam: *"each function has objectives like the measures we have and actions
    like tactics they work on that has due dates"*, and then *"we need to build
    the objectives and actions."*
@@ -28141,7 +28141,7 @@ function objXb(ed, id){
    (§104). The owner and the date are both FILLABLE and both counted, which is
    a milestone's own pair and for its own two reasons: a line nobody owns is a
    line nobody can report, and the date is what decides whether this cycle
-   asks for it (§177, §338 in lib/rules.js). */
+   asks for it (§177, §342 in lib/rules.js). */
 function fnObjPlanBody(fk, ed){
   var list = fnActions(fk);
   var rows = list.map(function(a, i){
@@ -28297,7 +28297,7 @@ function renderFnProjects(fnKey){
      so the branch is unchanged in shape. */
   var target = holderTarget(fnKey), caps = capsShown(target);
   if (plansInPillars(target)) return renderUnitPlan(unitLike(target));
-  /* §338: and the third way — its actions, where this page draws projects. */
+  /* §342: and the third way — its actions, where this page draws projects. */
   if (plansInObjectives(target)) return fnObjPlan(fnKeyOf(target));
   if (!caps.length) return fnNothingBehind(target);
   var ed = projEditing(), on = projArranging(target);
@@ -29957,7 +29957,7 @@ function unitPerfPane(it, u, railed){
     '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
-    /* §339: a scored breakdown column is one of the numbers this pillar is
+    /* §343: a scored breakdown column is one of the numbers this pillar is
        judged on, so it is counted here too — "Measures 4" over an average of
        five is the card disagreeing with itself. */
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
@@ -29966,7 +29966,7 @@ function unitPerfPane(it, u, railed){
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
-    /* §339: and the breakdown, where there is one — between the measures it
+    /* §343: and the breakdown, where there is one — between the measures it
        is part of and the tactics it is not. A pillar without one adds nothing
        at all: no heading, no empty section (Islam, on the mockup). */
     (SMPRules.bdHas(it)
@@ -36612,7 +36612,7 @@ function planFormatWord(f){
 function planFormatCell(fk, f, editable){
   var fmt = fnFormat(f);
   if (!editable) return '<span class="pill kind">' + esc(planFormatWord(f)) + '</span>';
-  /* ── §338, REPLACING §59's REFUSAL FOR THIS ONE TRANSITION ─────────────
+  /* ── §342, REPLACING §59's REFUSAL FOR THIS ONE TRANSITION ─────────────
      Islam: *"archvied when type changes and create the new apprach."*
 
      §59 refused the switch outright while the other side held content, and
@@ -39614,7 +39614,7 @@ function deckSlides(u){
       '<th class="num">Annual target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
-    /* ── §339: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
+    /* ── §343: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
        After that pillar's targets, because the columns ARE two of the numbers
        the heading above already averages — a room reading "Key measures 95%"
        needs the five rows that make it, not three of them.
@@ -39862,7 +39862,7 @@ function deckSlidesFn(subject){
   var f = isCap ? cap : FUNCTIONS[fk];
   var caps = capsShown(target);
   var realCaps = isCap ? [] : capsOfFunction(fk);
-  /* §338: a function that plans in objectives and actions. The deck is the
+  /* §342: a function that plans in objectives and actions. The deck is the
      same deck — one builder, because a second one is what §296 and §305 each
      measured the cost of and refused — and what changes is the ONE slide that
      lists the work: Actions where a projects holder lists Projects, with no
@@ -39885,7 +39885,7 @@ function deckSlidesFn(subject){
         realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         (objMode
-          /* §338: the cover says what the deck holds, which is the whole of
+          /* §342: the cover says what the deck holds, which is the whole of
              §326's argument one format along — "0 projects" over a plan made
              of objectives and actions names a thing that does not exist. */
           ? plural(SMPRules.shown(caps.reduce(function(a2, c){
@@ -51105,7 +51105,7 @@ var SYNC = (function () {
              it moves to the top of the Plan rather than being deleted: where
              the aspiration and the key objectives actually live is a fact
              this page cannot otherwise state. */
-          /* §338: THE SECTION IS NAMED AFTER WHAT IS BEHIND IT, which is
+          /* §342: THE SECTION IS NAMED AFTER WHAT IS BEHIND IT, which is
              why this is a three-way answer rather than a boolean — a function
              that plans in objectives and actions holds no projects, and a
              section called Projects with actions inside it would be the tab
@@ -54000,7 +54000,7 @@ var SYNC = (function () {
          unanswered In-progress row is both, and the box to land on is the
          per-cent. */
       var id, kind;
-      /* §339: a breakdown's box is addressed by its row AND its column — the
+      /* §343: a breakdown's box is addressed by its row AND its column — the
          row is what the write handler resolves, the pair is what the ask list
          counts. */
       if (d.rep != null)        { id = d.rep + (d.bdcol ? "|" + d.bdcol : ""); kind = "owed"; }
@@ -54945,7 +54945,7 @@ var SYNC = (function () {
            for a figure against a target and wrong here: an outcome 60% through
            a half-elapsed window scores 120, and reading that as Done would put
            the word on a row whose own answer says In progress. */
-        /* ── §339: A BREAKDOWN'S CELL ─────────────────────────
+        /* ── §343: A BREAKDOWN'S CELL ─────────────────────────
            `data-rep` finds the ROW and `data-bdcol` says which of its cells.
            The field is flat (`a_<col>`) rather than a key inside an object,
            for the reason that shape exists at all: the authoriser tells a
@@ -58329,10 +58329,10 @@ var SYNC = (function () {
         if (BUILDER && BUILDER.target === current && builderFormFromRowadd(this.dataset.rowadd)) return;
         var a = this.dataset.rowadd.split("|"), what = a[0];
         if (what === "pillar")  { addPillar(unitLikeWritable(a[1])); }
-        /* §338: an action hangs off the FUNCTION, so its address is the
+        /* §342: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */
         else if (what === "action") { if (!addAction(a[1])) return; }
-        /* §339: a breakdown's row and its columns. `unitLikeWritable` for
+        /* §343: a breakdown's row and its columns. `unitLikeWritable` for
            §129's audit reason — a virgin pillars function hands out frozen
            empties, so a first add is accepted on screen and written nowhere. */
         else if (what === "bdrow" || what === "bdcol") {
@@ -58493,7 +58493,7 @@ var SYNC = (function () {
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
         var arr = listById(list, id);
         removeRowById(arr, id);
-        /* §339: and a breakdown with nothing left in it stops being one
+        /* §343: and a breakdown with nothing left in it stops being one
            (§50.6) — a pillar that never had one and a pillar that had one
            removed must be byte-identical, or every save carries a change
            nobody made. */
@@ -58501,7 +58501,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* §339: REMOVING A COLUMN TAKES ITS CELLS WITH IT — every row's `t_<col>`
+    /* §343: REMOVING A COLUMN TAKES ITS CELLS WITH IT — every row's `t_<col>`
        and `a_<col>` go too, or the table loses a column and every save goes
        on carrying its figures for ever (§53.4). */
     document.querySelectorAll("[data-bdcoloff]").forEach(function(b){
@@ -60369,7 +60369,7 @@ var SYNC = (function () {
         paint();
       });
   }
-  /* ── CHANGING HOW A FUNCTION PLANS (§338, spec 049 §4.2) ──────────────
+  /* ── CHANGING HOW A FUNCTION PLANS (§342, spec 049 §4.2) ──────────────
      Islam: *"archvied when type changes and create the new apprach."* So the
      switch is not refused any more (§59) and it is not silent either: it
      ARCHIVES what stands, clears it, and sets the new form — the path the
@@ -60418,7 +60418,7 @@ var SYNC = (function () {
       else f.projects = [];
       fieldSaved();
       /* AND THE DIALOG THE SWITCH WAS MADE IN HAS TO GO, WHICH IS NOT TIDINESS
-         (§338.1). `rowEditOpen` takes a deep copy of the whole row so Cancel
+         (§342.1). `rowEditOpen` takes a deep copy of the whole row so Cancel
          can undo a field edit, and `leaveModes()` runs that same undo on every
          destination change — so with the dialog left standing, walking to the
          function PUT THE OLD PLAN BACK on top of an archive already filed, and

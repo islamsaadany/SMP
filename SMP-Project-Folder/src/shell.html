@@ -283,7 +283,7 @@
              it moves to the top of the Plan rather than being deleted: where
              the aspiration and the key objectives actually live is a fact
              this page cannot otherwise state. */
-          /* §338: THE SECTION IS NAMED AFTER WHAT IS BEHIND IT, which is
+          /* §342: THE SECTION IS NAMED AFTER WHAT IS BEHIND IT, which is
              why this is a three-way answer rather than a boolean — a function
              that plans in objectives and actions holds no projects, and a
              section called Projects with actions inside it would be the tab
@@ -3178,7 +3178,7 @@
          unanswered In-progress row is both, and the box to land on is the
          per-cent. */
       var id, kind;
-      /* §339: a breakdown's box is addressed by its row AND its column — the
+      /* §343: a breakdown's box is addressed by its row AND its column — the
          row is what the write handler resolves, the pair is what the ask list
          counts. */
       if (d.rep != null)        { id = d.rep + (d.bdcol ? "|" + d.bdcol : ""); kind = "owed"; }
@@ -4123,7 +4123,7 @@
            for a figure against a target and wrong here: an outcome 60% through
            a half-elapsed window scores 120, and reading that as Done would put
            the word on a row whose own answer says In progress. */
-        /* ── §339: A BREAKDOWN'S CELL ─────────────────────────
+        /* ── §343: A BREAKDOWN'S CELL ─────────────────────────
            `data-rep` finds the ROW and `data-bdcol` says which of its cells.
            The field is flat (`a_<col>`) rather than a key inside an object,
            for the reason that shape exists at all: the authoriser tells a
@@ -7507,10 +7507,10 @@
         if (BUILDER && BUILDER.target === current && builderFormFromRowadd(this.dataset.rowadd)) return;
         var a = this.dataset.rowadd.split("|"), what = a[0];
         if (what === "pillar")  { addPillar(unitLikeWritable(a[1])); }
-        /* §338: an action hangs off the FUNCTION, so its address is the
+        /* §342: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */
         else if (what === "action") { if (!addAction(a[1])) return; }
-        /* §339: a breakdown's row and its columns. `unitLikeWritable` for
+        /* §343: a breakdown's row and its columns. `unitLikeWritable` for
            §129's audit reason — a virgin pillars function hands out frozen
            empties, so a first add is accepted on screen and written nowhere. */
         else if (what === "bdrow" || what === "bdcol") {
@@ -7671,7 +7671,7 @@
         var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
         var arr = listById(list, id);
         removeRowById(arr, id);
-        /* §339: and a breakdown with nothing left in it stops being one
+        /* §343: and a breakdown with nothing left in it stops being one
            (§50.6) — a pillar that never had one and a pillar that had one
            removed must be byte-identical, or every save carries a change
            nobody made. */
@@ -7679,7 +7679,7 @@
         paint();
       });
     });
-    /* §339: REMOVING A COLUMN TAKES ITS CELLS WITH IT — every row's `t_<col>`
+    /* §343: REMOVING A COLUMN TAKES ITS CELLS WITH IT — every row's `t_<col>`
        and `a_<col>` go too, or the table loses a column and every save goes
        on carrying its figures for ever (§53.4). */
     document.querySelectorAll("[data-bdcoloff]").forEach(function(b){
@@ -9547,7 +9547,7 @@
         paint();
       });
   }
-  /* ── CHANGING HOW A FUNCTION PLANS (§338, spec 049 §4.2) ──────────────
+  /* ── CHANGING HOW A FUNCTION PLANS (§342, spec 049 §4.2) ──────────────
      Islam: *"archvied when type changes and create the new apprach."* So the
      switch is not refused any more (§59) and it is not silent either: it
      ARCHIVES what stands, clears it, and sets the new form — the path the
@@ -9596,7 +9596,7 @@
       else f.projects = [];
       fieldSaved();
       /* AND THE DIALOG THE SWITCH WAS MADE IN HAS TO GO, WHICH IS NOT TIDINESS
-         (§338.1). `rowEditOpen` takes a deep copy of the whole row so Cancel
+         (§342.1). `rowEditOpen` takes a deep copy of the whole row so Cancel
          can undo a field edit, and `leaveModes()` runs that same undo on every
          destination change — so with the dialog left standing, walking to the
          function PUT THE OLD PLAN BACK on top of an archive already filed, and

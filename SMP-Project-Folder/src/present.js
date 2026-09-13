@@ -533,7 +533,7 @@ function deckSlides(u){
       '<th class="num">Annual target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
-    /* ── §339: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
+    /* ── §343: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
        After that pillar's targets, because the columns ARE two of the numbers
        the heading above already averages — a room reading "Key measures 95%"
        needs the five rows that make it, not three of them.
@@ -781,7 +781,7 @@ function deckSlidesFn(subject){
   var f = isCap ? cap : FUNCTIONS[fk];
   var caps = capsShown(target);
   var realCaps = isCap ? [] : capsOfFunction(fk);
-  /* §338: a function that plans in objectives and actions. The deck is the
+  /* §342: a function that plans in objectives and actions. The deck is the
      same deck — one builder, because a second one is what §296 and §305 each
      measured the cost of and refused — and what changes is the ONE slide that
      lists the work: Actions where a projects holder lists Projects, with no
@@ -804,7 +804,7 @@ function deckSlidesFn(subject){
         realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         (objMode
-          /* §338: the cover says what the deck holds, which is the whole of
+          /* §342: the cover says what the deck holds, which is the whole of
              §326's argument one format along — "0 projects" over a plan made
              of objectives and actions names a thing that does not exist. */
           ? plural(SMPRules.shown(caps.reduce(function(a2, c){

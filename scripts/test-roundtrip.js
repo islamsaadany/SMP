@@ -464,7 +464,7 @@ const CLIENT_ARG = (function () {
     nckOk ? "" : JSON.stringify(ncKept.review.endsQuarter));
   if (!nckOk) process.exitCode = 1;
 
-  /* ── spec 049: A FUNCTION'S ACTIONS (§338) ────────────────────────────
+  /* ── spec 049: A FUNCTION'S ACTIONS (§342) ────────────────────────────
      §172's rule, paid rather than recited: the claim is that a function
      planning in objectives and actions needs NO SCHEMA CHANGE, because
      `functions` maps six columns and files every other key into `extra` —
@@ -527,7 +527,7 @@ const CLIENT_ARG = (function () {
     acOk ? "" : JSON.stringify({ fmt: aClean && aClean.format, acts: aClean && aClean.actions }));
   if (!acOk) process.exitCode = 1;
 
-  /* ── spec 050: A PILLAR'S BREAKDOWN (§339) ───────────────────────────
+  /* ── spec 050: A PILLAR'S BREAKDOWN (§343) ───────────────────────────
      The same claim, one table over, and made the same way: a breakdown of a
      pillar's targets rides `pillars.extra` and needs NO SCHEMA CHANGE. It is
      MEASURED rather than read off the column list — this project has claimed

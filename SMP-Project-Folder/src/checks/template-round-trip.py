@@ -93,7 +93,7 @@ async () => {
       const ctl = u.keyObjectives[1]
         ? JSON.parse(JSON.stringify(u.keyObjectives[1])) : null;
 
-      /* §339: A BREAKDOWN, MADE (§255) — no pillar in the worked example
+      /* §343: A BREAKDOWN, MADE (§255) — no pillar in the worked example
          carries one, so without this the Breakdowns sheet is empty and every
          assertion about it passes on a build whose plan file drops the whole
          table. Its INDICATOR column is the one that matters most here: an
@@ -360,7 +360,7 @@ with sync_playwright() as p:
             ck("tactic outcome monthly plan",
                g["t"].get("outMonthly") == w["t"].get("outMonthly"), g["t"].get("outMonthly"))
         ck("the pillar's name survived", g["pillarName"] == w["pillarName"], g["pillarName"])
-        # §339: AND ITS BREAKDOWN — the table's name, its columns in order with
+        # §343: AND ITS BREAKDOWN — the table's name, its columns in order with
         # their directions (the INDICATOR's empty one included), its categories
         # and all its targets. The ids are not compared: the platform mints
         # them on arrival, which is §22's contract and why the template carries

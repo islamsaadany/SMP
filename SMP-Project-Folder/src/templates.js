@@ -342,7 +342,7 @@ function mintPlanIds(u, rows){
     map[r.id] = id; r.id = id;
   });
   rows.forEach(function(r){
-    /* §339: a breakdown's cells hang off a pillar exactly as a measure does,
+    /* §343: a breakdown's cells hang off a pillar exactly as a measure does,
        and carry no id of their own — the table is assembled from them and its
        row ids are minted there (§22). */
     if (r.type === "BDCELL") { r.parent_id = map[r.parent_id] || ""; r.id = ""; }
@@ -528,7 +528,7 @@ function diffProgress(u, rows){
        and whose note is owed had nothing for the file to carry. */
     var hasNote = (r.new_note || "") !== "";
     if (!r.id || (!hasVal && !hasNote)) return;
-    /* §339: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
+    /* §343: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
        That pair is what identifies a cell (§48) — the row alone is three
        figures sharing one id, and the reader could not tell which one a
        number was meant for. Split here rather than inside `findById`, which
@@ -637,7 +637,7 @@ function createFromPlan(u, d){
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {
-      /* ── §339: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
+      /* ── §343: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
          The sheet is long form — a line per cell naming its pillar, its
          column and its category — so the TABLE is assembled here from the
          order the lines arrive in: first mention of a column makes the
@@ -753,7 +753,7 @@ function planReplaceSummary(u, rows){
     incoming: { pillars:countRows(rows, "PILLAR"), measures:countRows(rows, "MEASURE"),
                 tactics:countRows(rows, "TACTIC"), objectives:countRows(rows, "NORTHSTAR"),
                 swot:swot, clauses:countRows(rows, "FOUNDATION"),
-                /* §339: named in the summary the office agrees to BEFORE the
+                /* §343: named in the summary the office agrees to BEFORE the
                    replace happens, or fifteen targets arrive unannounced. */
                 breakdown:countRows(rows, "BDCELL") },
     current: unitSnapshotCounts(unitPlanSnapshot(u)),
@@ -827,7 +827,7 @@ function applyProgress(u, d){
         else if (o.actual === 0 && o.status === "Done") o.status = "WIP";
       }
     } else if (r.hit.kind === "BDROW" && r.col) {
-      /* §339: into the cell's own field, rejoined with the target's unit the
+      /* §343: into the cell's own field, rejoined with the target's unit the
          way every other reported figure is (§199, §243) — and an emptied one
          DELETES the key (§50.6), or a cleared cell and one never reported
          stop being the same thing. */
@@ -932,7 +932,7 @@ function capFindById(c, id){
   if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
   var hit = null;
   (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"CAPOBJECTIVE", obj:m }; });
-  /* §338: an action belongs to the holder, so it sits beside the objectives
+  /* §342: an action belongs to the holder, so it sits beside the objectives
      rather than under a project — and without it every action reported by
      file came back "unknown" and was set aside (§303's own finding). */
   (c.actions || []).forEach(function(a){ if (a.id === id) hit = { kind:"ACTION", obj:a }; });
@@ -1341,7 +1341,7 @@ function createFromCapPlan(c, d){
       c.keyObjectives.push(cko);
       made++;
     } else if (x.type === "ACTION") {
-      /* §338: the container is minted here rather than assumed — a function
+      /* §342: the container is minted here rather than assumed — a function
          given its first plan by file has never held the array (§50.6, §129's
          audit: the first row is accepted on screen and written nowhere). */
       if (!Array.isArray(c.actions)) c.actions = [];
@@ -1426,7 +1426,7 @@ function diffCapProgress(c, rows){
     var hit = capFindById(c, r.id);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
     var was, now = String(r.new_value == null ? "" : r.new_value).trim();
-    /* §338: an ACTION is a status row too — the same three words a milestone
+    /* §342: an ACTION is a status row too — the same three words a milestone
        answers in, and the same required per-cent (§300, §104.10). */
     var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE" ||
                       hit.kind === "ACTION";
@@ -1470,7 +1470,7 @@ function applyCapProgress(c, d){
     if (!r.hit || r.status !== "changed") return;
     var o = r.hit.obj;
     if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE" ||
-        r.hit.kind === "ACTION") {          /* §338 */
+        r.hit.kind === "ACTION") {          /* §342 */
       /* §303: BOTH WRITE `status` AND `pct`, through the same pair the
          screen's own handlers now ask (§53.5) — so a file that says In
          progress leaves the row In progress with its per-cent set, which is

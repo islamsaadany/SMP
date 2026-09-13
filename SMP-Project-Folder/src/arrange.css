@@ -2332,7 +2332,7 @@ th .subhd { font-weight:400; }
    than pushing the quarter marks off the end — and `min-width:0` on the select
    or a flex item refuses to shrink below its own content and does the pushing
    anyway (§100.5's rule, one box in). */
-/* ── A BREAKDOWN'S COLUMN HEAD IS THREE CONTROLS IN ONE CELL (§339.10) ──
+/* ── A BREAKDOWN'S COLUMN HEAD IS THREE CONTROLS IN ONE CELL (§343.10) ──
    Islam, of the pen: *"the table is messed up not fitting in the box."*
 
    MEASURED BEFORE ANYTHING WAS CHANGED, and it is worse than it looks: with
@@ -2370,7 +2370,7 @@ th .subhd { font-weight:400; }
 .bdhead > * { min-width:0; }
 .bdhead > input.fld { flex:1 1 auto; }
 .bdhead > select.fld { flex:0 0 auto; width:var(--tw); }
-.bdhead > .xbtn { flex:0 0 auto; color:var(--panel-quiet); }  /* ink: §339.11 below */
+.bdhead > .xbtn { flex:0 0 auto; color:var(--panel-quiet); }  /* ink: §343.11 below */
 /* The table's own name, in the head of the column it belongs to — it grows
    with the cell rather than claiming it, for the same reason. */
 .bdname { width:100%; min-width:0; }
@@ -2378,7 +2378,7 @@ th .subhd { font-weight:400; }
    rather than a share of the table (§37: a fixed-layout table reads every
    width off its first row, and an auto one reads it off the widest cell). */
 .bdadd { width:1%; white-space:nowrap; text-align:center; }
-/* §339.11: A CONTROL ON THE BAND TAKES THE BAND'S OWN INK, and this one did
+/* §343.11: A CONTROL ON THE BAND TAKES THE BAND'S OWN INK, and this one did
    not. `.linkbu` is `--stone`, which in the house light palette is `#16325C`
    — BYTE-IDENTICAL to `--panel`, the navy this head is painted in — so the
    ONE control that adds a column was drawn at 1.00:1 against its own ground

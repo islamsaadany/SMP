@@ -216,7 +216,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
           company: g.units[k].company && g.companies[g.units[k].company]
             ? g.companies[g.units[k].company].name : "" })),
         functions: (g.functionKeys || []).map((k: string) => ({
-          /* §338: and the third form, or a client shaped that way reads back
+          /* §342: and the third form, or a client shaped that way reads back
              as a projects function and the next save writes that answer over
              the one somebody chose. */
           name: g.functions[k].name,

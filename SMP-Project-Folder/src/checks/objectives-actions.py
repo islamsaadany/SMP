@@ -1,4 +1,4 @@
-"""OBJECTIVES AND ACTIONS — THE THIRD WAY A FUNCTION PLANS (§338, spec 049).
+"""OBJECTIVES AND ACTIONS — THE THIRD WAY A FUNCTION PLANS (§342, spec 049).
 
 Islam: *"we need to build the objectives and actions"*, of the third panel in
 the mockup he signed off (design-mockups/function-plan-types/) — and, of the

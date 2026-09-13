@@ -7886,7 +7886,7 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
 python3 checks/objectives-actions.py # the third way a function plans
-                                # (§338, spec 049): the format is a THIRD value
+                                # (§342, spec 049): the format is a THIRD value
                                 # read back off the stored function and never off
                                 # the select (§96, §219); the switch ARCHIVES what
                                 # stood and starts the new form empty, both ends
@@ -7919,7 +7919,7 @@ python3 checks/objectives-actions.py # the third way a function plans
                                 # that is nought on both formats, and a fixed point
                                 # asked over a row no file can carry)
 python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
-                                # (&sect;339, spec 050): the state is MADE and PUT
+                                # (&sect;343, spec 050): the state is MADE and PUT
                                 # BACK (&sect;255, &sect;94.2) — no pillar in the
                                 # worked example carries one, so every assertion
                                 # here would pass on a build that lost the feature.
@@ -7943,7 +7943,7 @@ python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
                                 # and ONE note per row, with a typed figure read
                                 # back off the stored cell; and one deck slide with
                                 # the direction on the scored columns only.
-                                # AND SINCE &sect;339.10 IT ALSO FITS: with the
+                                # AND SINCE &sect;343.10 IT ALSO FITS: with the
                                 # pen open at 1600/1280/1100 the table's own box
                                 # must not scroll (&sect;158), the direction
                                 # picker must be at the product's own `--tw`
@@ -7955,7 +7955,7 @@ python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
                                 # (&sect;113.8). The file had no width assertion
                                 # at all, which is why the overrun shipped. 42/0,
                                 # red four ways from the SOURCES (&sect;276):
-                                # 1 / 7 / 2 / 9. AND SINCE &sect;339.11 ITS
+                                # 1 / 7 / 2 / 9. AND SINCE &sect;343.11 ITS
                                 # CONTROLS MUST BE READ: the `+` that adds a
                                 # column was `--stone` on `--panel`, the SAME
                                 # navy &mdash; **1.00:1**, invisible &mdash; so
@@ -7969,7 +7969,7 @@ python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
                                 # to the panel's gold passes half. 48/0, red
                                 # 2 more
 python3 checks/capability-report-column.py # a capability's reporting page asks
-                                # the column that judges it (§337): measured on the
+                                # the column that judges it (§341): measured on the
                                 # SHIPPED demo with no cell tightened — the rule,
                                 # the screen and canSpeakFor asked of one person,
                                 # the boxes counted, and the Submit bar read. Both
@@ -9025,7 +9025,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;339: a breakdown of a pillar's
+*Last Updated: 2026-09-13 &mdash; **&sect;343: a breakdown of a pillar's
 targets (spec 050).** Islam, of one of his own pillars: *"Maximizing Current
 Stores has its targets broken down by category"* &mdash; five categories, each
 with a growth target, a contribution-margin target and a share of the mix, and
@@ -9097,16 +9097,16 @@ exactly the build they exist to catch; the column is asserted FOUND first and
 that falsification goes **2 red &rarr; 7**. 641/0 authoriser with &sect;39 new
 (both ends, red 2 / 1), 140/0 differ, round trip and template round trip green,
 `qa.py` ERRORS none with inline validation lists 36 &rarr; 38 at a longest of
-121 of 255 (&sect;67.5 nowhere near). **&sect;339.9 &mdash; AND A FALSIFICATION
+121 of 255 (&sect;67.5 nowhere near). **&sect;343.9 &mdash; AND A FALSIFICATION
 UNDONE WITH `git checkout` THREW THE WORK AWAY**: three sources were restored
 from a scratch copy and `lib/rules.js` with `git checkout`, **which took the
-whole &sect;339 block with it** because the file was not committed &mdash; the
+whole &sect;343 block with it** because the file was not committed &mdash; the
 break undone and the feature with it. **Caught by the BUILD and not by a
 check**: rebuilding produced a file differing from the good one by exactly one
 CSP hash (&sect;238 hashes each script block), and every check had already
 passed before the damage. *Undo a falsification with the copy you saved, and
 compare the rebuilt file with the build you falsified from.*
-**&sect;339.10 &mdash; AND THE HEAD HELD THREE CONTROLS IN ONE CELL**: Islam,
+**&sect;343.10 &mdash; AND THE HEAD HELD THREE CONTROLS IN ONE CELL**: Islam,
 with the pen open on it &mdash; *"the table is messed up not fitting in the
 box."* **Measured first**: the table wanted **1851px in a 1285px box** at 1600,
 its column head cell **660px holding 1286px of controls**, so the `&ge;` and the
@@ -9125,7 +9125,7 @@ FIRST WROTE COULD NOT FAIL** (&sect;113.8, &sect;94.5): *"not a sliver"* passes
 on the broken build because `width:100%` **stretches** the picker to 293px, and
 *"the &times; is inside the box"* measured the SCROLL box's right edge, which
 contains everything by definition. Both REWRITTEN, never loosened (&sect;218),
-and the falsification goes **3 red &rarr; 9**. **&sect;339.11 &mdash; AND THE CONTROL THAT
+and the falsification goes **3 red &rarr; 9**. **&sect;343.11 &mdash; AND THE CONTROL THAT
 ADDS A COLUMN COULD NOT BE SEEN**: Islam, of the same table one message later
 &mdash; *"I don't undertsna how this table would satisfy the columns that we
 need."* **HE COULD NOT, AND IT IS NOT A MISUNDERSTANDING**: the `+` is
@@ -9145,7 +9145,7 @@ it is, so the check asserts BOTH ENDS (&sect;94.2) and a build that swept every
 `.linkbu` to gold would satisfy one half while breaking the other. **AND DARK
 WAS ALREADY CLEAR** (7.37 / 6.44), which is half of why nothing saw it; the
 other half is that **no pillar in the worked example carries a breakdown**
-(&sect;255), so no sweep has ever walked this band &mdash; and &sect;339.10's
+(&sect;255), so no sweep has ever walked this band &mdash; and &sect;343.10's
 own new section asserts the table's width and the picker's size and **never
 asserted that anything on it can be read**. *A check written against the fault
 you were shown is not a check against the next one.* Answered by DRAWING it
@@ -9159,7 +9159,7 @@ last-write-wins; a category row cannot be hidden from the presentation; fill
 mode does not reach it; the plan builder does not offer one; and the three
 other extras are still not drawn.*
 
-*Earlier the same day: **&sect;338: objectives and actions, the
+*Earlier the same day: **&sect;342: objectives and actions, the
 third way a function plans (spec 049).** Islam: *"we need to build the
 objectives and actions"* &mdash; the third panel of the mockup he signed off,
 and of the model, *"each function has objectives like the measures we have and
@@ -9190,7 +9190,7 @@ exists to keep single. **THE SWITCH ARCHIVES WHAT STOOD**, his own answer
 replace and Clear plan already take (&sect;49.2, &sect;22) &mdash; **a
 capability is the one thing it refuses to carry** (&sect;334), and the select is
 put back on Cancel or the same choice cannot be made twice (&sect;110).
-**&sect;338.1 &mdash; AND THE DIALOG THE SWITCH IS MADE IN HAD TO GO WITH IT**:
+**&sect;342.1 &mdash; AND THE DIALOG THE SWITCH IS MADE IN HAD TO GO WITH IT**:
 `rowEditOpen` takes a deep copy of the whole row so Cancel can undo a field
 edit, and **`leaveModes()` runs that same undo on every destination change** —
 so with the dialog left standing, walking to the function **PUT THE OLD PLAN
@@ -9207,7 +9207,7 @@ and the first reading was that the check was wrong &mdash; bisecting the
 navigation (set the format directly and the click is harmless; set it through
 the dialog and the same click reverts it) is what named `leaveModes`. *A fixture
 that will not hold is a measurement, and the first question is whose fault it
-is.* **&sect;338.2 &mdash; AND THE ONE THING THE SWITCH REFUSES SAYS WHAT IT DOES**:
+is.* **&sect;342.2 &mdash; AND THE ONE THING THE SWITCH REFUSES SAYS WHAT IT DOES**:
 a capability cannot be carried across (&sect;334), and the first build refused it
 SILENTLY with a fact beside the control reading *"holds 1 capability"* &mdash;
 &sect;62's rule with its second half missing. It names what it stops now, said
@@ -9236,7 +9236,7 @@ none** where &sect;332 recorded 228 on the same deterministic subject, so it was
 owed a baseline rather than an explanation (&sect;303) &mdash; built from
 `origin/main`'s own sources in a worktree and swept identically, **main 241,
 this branch 241, viewer for viewer**, main's head being &sect;336.2 and the
-branch ahead of it by &sect;336.3, &sect;337 and &sect;338 alone. &sect;338 adds
+branch ahead of it by &sect;336.3, &sect;341 and &sect;342 alone. &sect;342 adds
 no destination; the thirteen are &sect;334 making a capability one of its own.
 The one real difference is the workbook's inline validation lists, **34
 &rarr; 36** &mdash; the two Actions sheets' own, longest 121 of 255, so
@@ -9244,7 +9244,7 @@ The one real difference is the workbook's inline validation lists, **34
 DONE**: requirements (&sect;318 &sect;5's third object) are not built, and a
 business unit cannot plan this way.*
 
-*Earlier the same day: **&sect;337: a capability's reporting page asks the
+*Earlier the same day: **&sect;341: a capability's reporting page asks the
 column that judges it.** Islam, of the fault &sect;336 measured and deliberately
 left: *"yes we need to fix that."* **MEASURED ON THE SHIPPED WORKED EXAMPLE WITH
 NO CELL TIGHTENED**: `canReport()` picked its access key by looking for the

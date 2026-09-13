@@ -1,10 +1,10 @@
 # Spec 049 · Objectives and actions — the third way a function plans
 
-**Status:** BUILT · branch `claude/inspiring-lamport-pm0ki2` · §338 in
+**Status:** BUILT · branch `claude/inspiring-lamport-pm0ki2` · §342 in
 `DECISIONS-AND-LOGIC-v3.22.md`
 **Asked for:** Islam, 2026-09-13 — *"we need to build the objectives and
 actions"*, and the same day *"yes we need to fix that"* for the reporting
-column (§337, built first and separately).
+column (§341, built first and separately).
 
 ---
 
@@ -165,7 +165,7 @@ reads).
 - **Requirements**, per §4.1 — the model is in §318 §5 and waits for its own
   round.
 - **A business unit planning this way.** The model admits it; no control does.
-- **The dialog's undo and a real act** — §338.1 closes the row dialog on the
+- **The dialog's undo and a real act** — §342.1 closes the row dialog on the
   switch. What it does NOT do is give `rowEditCancel` a way to undo an archive;
   no dialog can, and any other destructive act that later moves into a row
   dialog inherits the same rule: close it, or the snapshot is a revert waiting
@@ -178,8 +178,8 @@ reads).
 - `checks/objectives-actions.py` — **47 passed, 0 failed**, ten sections, both
   ends throughout, with the progress workbook driven end to end (§294.4).
   Proved able to fail eight ways from the SOURCES (§276): the format layer
-  **16 red**, the archive **1**, the three page branches **6**, §338.1's own
-  line **15**, §338.2's two halves **1** each, and the progress route's two
+  **16 red**, the archive **1**, the three page branches **6**, §342.1's own
+  line **15**, §342.2's two halves **1** each, and the progress route's two
   **1** each.
 - `scripts/test-roundtrip.js` — a third format and a list of actions written to
   a real Postgres 16 and read back, with the table asserted to have **gained no

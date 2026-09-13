@@ -1,4 +1,4 @@
-"""A BREAKDOWN OF A PILLAR'S TARGETS (§339, spec 050).
+"""A BREAKDOWN OF A PILLAR'S TARGETS (§343, spec 050).
 
 Islam, of one of his own pillars: *"Maximizing Current Stores has its targets
 broken down by category."* Five categories, each with a growth target, a

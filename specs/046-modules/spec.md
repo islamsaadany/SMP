@@ -14,6 +14,11 @@ that change.
 §46 (Setup is a place with a rail), §37 and §117 (the access matrix), and §313
 (the client registry).
 
+**Beside this spec:** [`repo-boundary.md`](repo-boundary.md) — one repository or
+several, answered 2026-09-13, and the open item it leaves: **where the line
+between spine and module runs in the code**, which wants settling with two
+modules rather than four.
+
 ---
 
 ## 1 · What this is

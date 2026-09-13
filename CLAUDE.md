@@ -994,6 +994,93 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A CLOCK ON THE REVIEW (§337):** Islam — *"in the presentation module I need
+  to set as an SMO the time of each presentation so the timer appears for the
+  presenter"*, then *"it needs to be per unit and it can be set in the master
+  presentation sectoin with the flow"*. **THE OBSTACLE DECIDED THE SHAPE AND IT
+  IS §265's**: the obvious home is the bar beside the slide counter, and that
+  bar is translated off the screen in fullscreen at his own report that it
+  flashed on every click — so a clock there is invisible in exactly the state a
+  review is presented in. It goes ON THE SLIDE, which means the room reads it
+  too: stated before he chose, drawn three ways, chosen. **A CHILD OF `.deck`,
+  never of `.deckstage`**, so it scales with the slide rather than floating
+  outside its edge in a letterboxed window; bottom-right, because the mark is
+  bottom-left on every slide (§52) and a pillar's two figures are top-right.
+  **THE MINUTES ARE A MAP ON THE GROUP, REVERSING THE NEARER PRECEDENT**
+  (`hideSlides` rides `units[k].extra`, §256): a CAPABILITY is a subject too, so
+  a per-subject home needs a resolver per kind and a storage answer for the one
+  kind that is not a table of its own; the TOTAL is the whole reason it is set
+  here and is one read of one map rather than a walk of three collections; and a
+  refusal must name the Presentation menu rather than Setup (§16.7). **Per unit
+  is unchanged by that** — the key is the subject, so a unit presenting ALONE
+  reads the same number and leaving the flow does not throw its minutes away.
+  `org.extra`, no migration, stored as an ABSENCE at both levels (§50.6).
+  **THE SERVER'S TWO EDITS GO TOGETHER** (§259.2), falsified separately:
+  swept-but-unclassified is INVISIBLE and therefore **allowed to everybody**
+  (5 red), classified-but-unswept adds a second entry (1 red), the gate opened
+  7 red; 642/0. **THREE BUTTONS ARE HIS, AGAINST THE RECOMMENDATION** —
+  fifty-seven controls on one dialog (§37's own fault) and three numbers that
+  cannot express a slot which is not one of them, both stated before he chose —
+  and **pressing the lit one clears it**, the only way back to none once a
+  dropdown's blank entry became three buttons, which is what `aria-pressed`
+  already means. **THE PRESS DOES NOT REPAINT** (§71.2: a nineteen-row scrolling
+  box would jump to the top on every press), through a listener DELEGATED on the
+  tbody, because the cell's buttons are rewritten in place. **The line says
+  nothing about missing times until something IS set**, or an untouched tenant
+  opens on *"19 with no time"*, which reads as a fault on a healthy review
+  (§45.2). **PAUSE HAS THREE WAYS IN AND RESET HAS ONE**: the bar, the `P` key,
+  and the clock TAPPED — not a nicety, because a tablet has no `P` key and §280
+  exists because he presents from one; it cost no new rule, since
+  `deckOwnControl()` already exempts a `button` from advancing the slide and
+  from the swipe (§297), which is why the clock IS one. **Reset is the bar's
+  alone**: pause is reversible and a stray press costs one press back, where
+  reset throws the elapsed time away. `P` is this deck's own idiom (`f` and `w`
+  have answered since §69.7) and was checked FREE rather than assumed. **The
+  mark is two DRAWN boxes** (§52, §120.2 — a glyph a font maps and cannot draw
+  ships as a blank rectangle, and this one would do it on a projector), and
+  **the colour says where you are while the mark says it is held**, so a clock
+  paused while OVER stays red rather than going quiet about the one thing the
+  room needs to know. **THE MOCKUP'S OWN COLOURS WOULD HAVE SHIPPED
+  UNREADABLE**: it was drawn over a LIGHT screenshot and `.dslide` paints
+  `var(--surface)`, so the on-screen deck follows the viewer's theme — every
+  pair measured in both palettes (calm 4.73/5.33, near 5.48/7.22, over
+  5.64/5.03, held 7.97/7.63), and **the ink on the red is `--surface` and never
+  `--ink`**, which measures 3.06 light and 2.75 dark (§38.4's direction that
+  bites, §145.14's own pairing). **A transition was written and REMOVED on
+  looking at it**: turning amber is information a presenter is meant to catch,
+  and easing it in is the one thing that makes it easier to miss. **It does not
+  print** (§305: a clock on a printed slide is a figure from a moment that has
+  passed). **The unit sees its slot and cannot set it** — one read-only line in
+  Manage slides, which is §256's own shape on that same bar.
+  **§337.1 — AND THE FINDING OF THE ROUND IS §56.7 FOR THE FOURTH TIME**:
+  `clockSubject()` was written as `deckSubject()` and `present.js` **already
+  declares `deckSubject(target)` 250 lines above** — the stored subject a target
+  names, which `deckHidePass()` and the whole of Manage slides ask — so the
+  later won by hoisting, every caller got the argument-ignoring one, and
+  **hiding a slide silently stopped working across the product**: nothing
+  thrown, nothing logged, `node --check` clean. Found by `hide-slide` going
+  **20 red**. **AND THE FIRST ATTEMPT TO CLEAR IT BLAMED SOMEBODY ELSE** —
+  `hide-slide`, `master-presentation` and `master-picker` do not honour
+  `SMP_BUILT`, so a §303 baseline run measured THIS build and reported the
+  failures as pre-existing (§334.13's recorded trap, walked into within the hour
+  of quoting §303); run from the baseline WORKTREE all three are green and the
+  regression was mine. **The scan that missed it compared two FILES and never a
+  file against itself**; it runs over build.py's own concatenation now, and the
+  tree's only duplicates are the six §281.1 deliberately leaves.
+  **§337.2 — three of the check's own first failures were the CHECK**: a press
+  measured against the EMPTY waiting column (§100.3), a fresh clock asserted as
+  `"10:0x"` when that is true for one second of a ten-minute slot, and a reset
+  guard comparing the face's string by PREFIX, so `"10:00"` against `"9:59"`
+  reports a working guard broken at every minute boundary (§122.4's family).
+  **And the falsification DIED rather than reporting** (§215, in the file whose
+  docstring promises it does not), so every probe goes through the degrading
+  wrapper — the ones that only PRESS included. **An empty `SMP_BUILT` is a SET
+  variable**, so the `get` default never fires and a good build reported 43
+  failures (§54.5). Proved able to fail **seven ways from the SOURCES** (§276):
+  22 / 1 / 6 / 1 / 1 / 7 / 1. **RECORDED, NOT DONE**: the three checks that
+  ignore `SMP_BUILT` are a sweep of their own (§334.13 records twenty-one more),
+  `masterFix()` now measures a 36px row where it measured 32, and nothing on the
+  dialog says the times are saved.
 - **THE KEYBOARD BELONGS TO THE PRESENTATION (§297):** Islam, presenting with a
   clip on a slide — *"the right and elft arrows are editing the video forward and
   backward &hellip; we lose the functionality ot the forward and backrward
@@ -7738,6 +7825,29 @@ python3 checks/review-pptx.py   # the review deck as a PowerPoint (§311):
                                 # and the PLAN download is asserted untouched
                                 # (§94.2 — it shares every primitive changed).
                                 # 5 falsifications from the SOURCES, 1/3/4/3/2 red
+python3 checks/presentation-timer.py # a clock on the review (§337): the minutes
+                                # set in the flow and read back off the STORED graph
+                                # (§96); the lit button pressed again CLEARING, and the
+                                # last one leaving deleting the map (§50.6); the total on
+                                # the slide-count line, silent about missing times until
+                                # one IS set (§45.2); the press proved not to repaint by
+                                # SCROLLING first (§71.2); BOTH ENDS of no-minutes-no-
+                                # clock — the clock absent AND the bar's two buttons
+                                # absent, then all three present (§94.2, §61); the clock
+                                # INSIDE the deck so it scales, and a BUTTON, which is
+                                # what lets a tap pause without advancing the slide
+                                # (§297); walking slides not restarting it and a FLOW
+                                # crossing into the next unit starting theirs; pause on
+                                # the key, the tap AND the bar, with reset asserted NOT
+                                # on the first two, because it cannot be undone; every
+                                # colour measured in BOTH palettes with the sweep's own
+                                # arithmetic (§95, §38.4 — the deck follows the theme, so
+                                # the mockup's literals would have been unreadable in
+                                # dark); held-while-over asserted still red; not printed
+                                # (§305); and the unit's read-only line in Manage slides
+                                # at both ends. 55/0, proved able to fail SEVEN ways from
+                                # the SOURCES (§276); every probe degrades (§215).
+                                # SMP_BUILT points it at another build
 python3 checks/contingency.py   # the contingency files (§297): the card, the
                                 # banner and the list drawn for the office and ABSENT for
                                 # somebody the shared rule refuses — switched TO, never a
@@ -8934,7 +9044,48 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;336: a capability is owned like a
+*Last Updated: 2026-09-13 &mdash; **&sect;337: a clock on the review.** Islam:
+*"in the presentation module I need to set as an SMO the time of each
+presentation so the timer appears for the presenter"*, then per unit, set with
+the flow, and &mdash; of the mockup drawn before anything was built &mdash; the
+three buttons, the always-there corner clock, and pause in the bar.
+**THE OBSTACLE DECIDED THE SHAPE AND IT WAS HIS OWN INSTRUCTION**: &sect;265
+takes the deck's bar off the screen in fullscreen, so the obvious home for a
+clock is invisible in exactly the state a review is presented in &mdash; it
+goes on the SLIDE, and the room reads it too, stated before he chose. The same
+wall met his pause button, so pause has three ways in (the bar, the `P` key,
+and the clock TAPPED, which is the only one a tablet can reach) and **reset has
+one, deliberately**, because it cannot be undone. **The minutes are a map on the
+group** rather than on each unit, reversing the nearer precedent for three
+measured reasons &mdash; a capability is a subject too, the TOTAL is the whole
+argument for setting them there, and a refusal must name the Presentation menu
+rather than Setup. No migration; the server's two edits falsified separately,
+because a field swept and not classified is INVISIBLE and therefore allowed to
+everybody. **THE MOCKUP'S OWN COLOURS WOULD HAVE SHIPPED UNREADABLE** &mdash; it
+was drawn over a light screenshot and the on-screen deck follows the viewer's
+theme &mdash; so every pair is measured in both palettes, and the ink on the red
+is `--surface`, the obvious `--ink` measuring 3.06 and 2.75.
+**&sect;337.1 &mdash; AND THE FINDING OF THE ROUND IS A NAME**: `clockSubject()`
+was written as `deckSubject()`, which `present.js` already declares 250 lines
+above, so the later won by hoisting and **hiding a slide silently stopped
+working across the product** &mdash; nothing thrown, nothing logged, `node
+--check` clean, found by `hide-slide` going 20 red. **And the first attempt to
+clear it blamed somebody else**: those neighbours do not honour `SMP_BUILT`, so
+a &sect;303 baseline run measured this build and called the failures
+pre-existing (&sect;334.13's trap, walked into within the hour of quoting
+&sect;303). Run from the baseline worktree they are green and it was mine. The
+duplicate scan that missed it compared two FILES and never a file against
+itself; it runs over build.py's own concatenation now.
+**&sect;337.2 &mdash; three of the check's own first failures were the CHECK**,
+and its falsification DIED rather than reporting (&sect;215, in the file whose
+docstring promises it does not). Proved able to fail **seven ways from the
+SOURCES**. **VERIFIED**: presentation-timer 55/0, authoriser 642/0, differ
+140/0, `hide-slide` 42/0 and `master-presentation` 44/0 back to the baseline's
+own numbers, `master-picker` 58/0 with two assertions REWRITTEN never loosened
+(&sect;218) and five position-keyed cell reads de-positioned, full `qa.py`
+sweep **ERRORS none**. Still a branch; `main` is Islam's word on that merge.*
+
+*Earlier: 2026-09-13 &mdash; **&sect;336: a capability is owned like a
 unit &mdash; and it already is.** Islam, of what &sect;334 built: *"The
 capability is owned like a unit it has an owner and custodian."* Drawn first
 (rule 1c) as seats on the capability's own row with two new Setup columns

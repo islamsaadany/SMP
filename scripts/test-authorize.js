@@ -4013,5 +4013,65 @@ console.log("\n38 · a capability is a subject of its own (§334)");
   check("§334 REFUSED: a unit head does not submit it", !submit(headKey).ok, "was ALLOWED");
 })();
 
+console.log("\n39 \u00b7 how long each subject has to present (\u00a7337)");
+(function () {
+  /* The file's own convention: each section declares its own, because they
+     differ in which seed they authorise against. */
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const MINS = R.PRESENT_MINS;
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  check("\u00a7337: the seed holds a unit and a custodian to test with",
+        !!(UK && CUST), [UK, CUST].join(" / "));
+  if (!(UK && CUST)) return;
+  const SET = function (i) { i.group[MINS] = { [UK]: 15 }; };
+
+  let r = fromStored(SEED, "smo", SET);
+  check("\u00a7337: the office sets a subject's minutes", r.ok,
+        (r.refusals || []).join(" / "));
+
+  r = fromStored(SEED, CUST, SET);
+  check("\u00a7337 REFUSED: a unit's own custodian cannot set their own slot",
+        !r.ok, "was ALLOWED");
+  check("\u00a7337: and the refusal names the Presentation menu, never Setup",
+        !r.ok && /Presentation menu/.test((r.refusals || []).join(" ")),
+        (r.refusals || []).join(" / "));
+
+  /* THE TWO EDITS THAT MUST GO TOGETHER, asserted from both sides (\u00a7259.2,
+     \u00a7308). Classified but absent from `gExtra`, the unknown sweep adds a
+     SECOND entry and this count goes to 2. Swept but not classified, there is
+     no entry at all \u2014 the change is INVISIBLE, which does not refuse the
+     save, it ALLOWS it, to everybody. One assertion catches each. */
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("\u00a7337: a change to it is classified `presentMins` and nothing else",
+        kinds.length === 1 && kinds[0] === "presentMins",
+        kinds.join(",") || "(nothing \u2014 the change was invisible)");
+
+  /* CLEARING IS THE SAME ACT (\u00a750.6: the writer deletes a key put back to
+     none), so a build that classified the write and not the removal would let
+     anybody throw away a slot only the office could set. */
+  const set = clone(SEED); set.group[MINS] = { [UK]: 15 };
+  r = fromStored(set, CUST, function (i) { delete i.group[MINS]; });
+  check("\u00a7337 REFUSED: nor can they clear one", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group[MINS]; });
+  check("\u00a7337: the office clears it", r.ok, (r.refusals || []).join(" / "));
+
+  /* Changing ONE subject's minutes is still one sentence \u2014 the map travels
+     whole, so a build that classified the key only when it appeared would
+     miss every edit after the first. */
+  r = fromStored(set, CUST, function (i) { i.group[MINS] = { [UK]: 20 }; });
+  check("\u00a7337 REFUSED: nor change a slot that is already set", !r.ok, "was ALLOWED");
+
+  /* A LOCKED CYCLE STILL TAKES IT, for the running order's own reason: the
+     flow is arranged the morning of the meeting, after the lock. */
+  const lock = clone(SEED); lock.cycle = Object.assign({}, lock.cycle, { locked: true });
+  r = fromStored(lock, "smo", SET);
+  check("\u00a7337: a locked cycle does not stop the office setting the times",
+        r.ok, (r.refusals || []).join(" / "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

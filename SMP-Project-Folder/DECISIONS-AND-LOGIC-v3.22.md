@@ -7052,6 +7052,196 @@ end their output with a blank line, so a `tail -1` reported nothing where the
 verdict is one line up — §298.3's rule (*the tail is the verdict*) failing on
 the harness that quotes it. Each was re-run and read: ALL CLEAR, all green.
 
+## §337 — A CLOCK ON THE REVIEW (2026-09-13)
+
+Islam: *"in the presentation module I need to set as an SMO the time of each
+presentation so the timer appears for the presenter think with me how can we do
+it?"* — then, of where it is set, *"it needs to be per unit and it can be set in
+the master presentation sectoin with the flow and which button choices to set 10
+or 15 or 20 for each?"* — then, of the mockup, *"for the control I will go for C
+&hellip; for what the presenter see A"*, *"all ok with the recommendations"*, and
+*"for the bottom bar we can have a pause button somehow for the smo while
+presenting to click to pause a clock in addition to reset?"*
+
+**THE OBSTACLE DECIDED THE SHAPE, AND IT IS §265's.** The obvious home for a
+clock is the bar beside the slide counter — and `.deckroot.fs .deckbar` is
+translated off the screen with `pointer-events:none`, at Islam's own report that
+it flashed on every click during a live review. So a clock there is invisible in
+exactly the state a review is presented in. It goes on the slide, which means
+**the room reads it too**: stated before he chose, drawn three ways, and chosen.
+
+**IT IS A CHILD OF `.deck`, NEVER OF `.deckstage`.** The deck is a fixed
+1600&times;900 box that `deckScale()` transforms into whatever room there is, so
+a child scales with the slide and holds the corner it was drawn in; a sibling in
+the stage keeps its own size and, in a letterboxed window, floats outside the
+slide's edge. **Bottom-right, measured rather than picked**: the footer mark is
+bottom-LEFT on every slide (§52) and a pillar's two headline figures are
+top-right, so that is the corner empty on every slide KIND rather than on the
+one that was looked at.
+
+**THE MINUTES ARE A MAP ON THE GROUP, AND THAT REVERSES THE NEARER-LOOKING
+PRECEDENT.** `hideSlides` rides `units[k].extra` (§256) and this deliberately
+does not, for three reasons in the order they decided it. **A capability is a
+subject** — `masterSubjects()` returns units, functions and capabilities
+(`cap:cap6`, measured), so a per-subject home needs a resolver per kind and a
+storage answer for the one kind that is not a table of its own, where a map keyed
+by the target string the flow already holds needs neither. **The total is the
+whole reason it is set here** — the dialog sums an afternoon somebody is
+dividing, and a sum is one read of one map rather than a walk of three
+collections. **And a refusal has to name the right screen** (§16.7): stored on
+the unit it classifies as a unit setting and says *Setup*; stored here it
+classifies beside `masterFlow` and says the Presentation menu, which is where it
+is actually set. **Per unit is unchanged by that choice** and is the half that
+matters: the key is the subject, so a unit presenting ALONE reads the same
+number, and taking somebody out of the flow does not throw their minutes away.
+`org.extra`, so **no migration**; stored as an ABSENCE at both levels (§50.6).
+
+**NOUGHT IS THE ABSENCE, DELIBERATELY.** §35's rule is that absent is not zero
+and it does not bite here, because there is no such thing as a nought-minute
+slot: both mean *no time set*, which means no clock rather than a clock starting
+from nothing. `parseInt` is guarded for §104.10's reason.
+
+**THE SERVER'S TWO EDITS GO TOGETHER** (§259.2, §308) and each was falsified
+separately: swept but not classified, the change is INVISIBLE and therefore
+**allowed to everybody** (5 red); classified but not swept, the unknown pass adds
+a second entry (1 red); the gate opened, 7 red. Nine assertions, 642/0.
+
+**THREE BUTTONS ARE ISLAM'S, AGAINST THE RECOMMENDATION, AND THE COST IS HIS.**
+Put to him as fifty-seven controls on one dialog (§37's own fault) and three
+fixed numbers that cannot express a slot which is not one of them; he took them.
+**Pressing the lit one clears it** — a dropdown had a blank entry and three
+buttons have nowhere to put one, so the way back to no time is the same control
+pressed twice, which is what `aria-pressed` already means and gives the keyboard
+and a screen reader the state for nothing.
+
+**AND THE PRESS DOES NOT REPAINT** (§71.2): `.mflist` is a scrolling box of
+nineteen rows, so a repaint would throw somebody setting the fifteenth subject's
+time back to the top on every press. Three buttons and one line are rewritten,
+through a listener DELEGATED on the tbody — the cell's buttons are rewritten in
+place, so a listener on each would die with the node that carried it (§24).
+
+**THE LINE SAYS NOTHING ABOUT MISSING TIMES UNTIL SOMETHING IS SET.** The first
+build opened *"19 with no time"* on the worked example, which reads as a fault on
+a perfectly healthy review — nagging about a feature nobody has started is
+§45.2's empty state wearing an alarm's clothes.
+
+**PAUSE HAS THREE WAYS IN AND RESET HAS ONE, AND THE ASYMMETRY IS THE
+ARGUMENT.** The bar (windowed), the `P` key, and **the clock itself, tapped** —
+that last is not a nicety: a tablet has no `P` key and §280 exists because he
+presents from one, so without it a tablet has no pause at all. It cost no new
+rule, because `deckOwnControl()` already exempts a `button` from advancing the
+slide and from the swipe (§297, §280), which is the whole of why the clock is a
+`<button>`. **Reset is the bar's alone**: pause is reversible and a stray press
+costs one press back, where reset throws the elapsed time away and cannot be
+undone. `P` is this deck's existing idiom rather than a new one — `f` and `w`
+have answered since §69.7 — and it was **checked free rather than assumed**.
+
+**AND THE CLOCK SAYS IT IS HELD** (§124), with the mark drawn as **two boxes and
+never a keyboard character**: a glyph a font maps and cannot draw ships as a
+blank rectangle (§52, §120.2), and this one would do it on a projector. **The
+colour says where you are and the mark says it is held** — two facts, two devices
+— so a clock paused while OVER stays red rather than going quiet about the one
+thing the room needs to know.
+
+**THE MOCKUP'S OWN COLOURS WOULD HAVE SHIPPED UNREADABLE, AND READING THE
+SLIDE'S RULE IS WHAT CAUGHT IT.** The mockup was drawn over a screenshot of a
+LIGHT slide and its hexes were there to copy — and `.dslide` paints
+`var(--surface)`, so the on-screen deck follows the viewer's theme and a fixed
+grey is invisible in dark. Every pair is measured in both palettes with the
+sweep's own arithmetic (§95): calm 4.73 / 5.33, near 5.48 / 7.22, over 5.64 /
+5.03, held 7.97 / 7.63. **The ink on the red is `--surface` and not `--ink`** —
+§38.4 cuts both ways and this is the direction that bites, the page's own
+near-black on `--bad` measuring **3.06 light and 2.75 dark**, so the obvious
+choice is the one that fails (§145.14's own pairing, and the reason it exists).
+
+**A TRANSITION WAS WRITTEN AND REMOVED ON LOOKING AT IT**: turning amber is
+information a presenter is meant to catch, and easing it in is the one thing that
+makes it easier to miss.
+
+**IT DOES NOT PRINT.** The deck is printed for the contingency pack (§305), where
+`.deck` becomes a tall column and one absolutely-placed clock would land at the
+bottom of all of it — and a clock on a printed slide is a figure from a moment
+that has passed.
+
+**THE UNIT SEES ITS SLOT AND CANNOT SET IT** (Islam's *"yes"*): one read-only
+line in Manage slides, which is `canSpeakFor` while the minutes are the office's,
+so a control there would be one the server refuses (§61, §42). It is §256's own
+shape on that same bar — the custodian SEES what the office decided and gets no
+pen. **Neutral wording**, because the office opens that screen too, and nothing
+at all when no time is set.
+
+### §337.1 — Two declarations of one name, and hiding a slide stopped working
+
+**THE FINDING OF THE ROUND, and it is §56.7 for the fourth time this project has
+recorded it.** `clockSubject()` was written as `deckSubject()` — and `present.js`
+**already declares `deckSubject(target)` 250 lines above**, the stored subject a
+target names, which `deckHidePass()` and the whole of Manage slides ask. The
+later declaration wins by hoisting, so every caller got the new one, which
+ignores its argument: the office pressed the eye, `slidesSetHidden` read `!subj`
+and returned, and **hiding a slide silently stopped working across the product**.
+
+It threw nothing, logged nothing, and `node --check` passes on it. What found it
+was `checks/hide-slide.py` going **20 red** and `master-presentation` **1 red**.
+
+**AND THE FIRST ATTEMPT TO CLEAR IT SAID THE FAULT WAS SOMEBODY ELSE'S.** §303
+says reproduce on the build before blaming this one, so the check was re-run with
+`SMP_BUILT` pointed at a baseline worktree — and it reported the identical
+failures, which read as *not mine*. **`hide-slide`, `master-presentation` and
+`master-picker` do not honour `SMP_BUILT` at all**: they spell their subject as a
+relative path, so both runs measured this build. §334.13's own recorded trap,
+walked into within the hour of quoting §303. Run from the baseline worktree —
+where the relative path resolves to the baseline's own build — all three are
+**green**, and the regression was mine.
+
+**THE SCAN THAT MISSED IT WAS MINE TOO.** A duplicate-declaration scan was run
+before this and compared `slides.js` against `present.js` — never a file against
+ITSELF, which is where both declarations were. The scan is now over build.py's
+own concatenation and reports the tree's only duplicates as the six
+§281.1 already records and deliberately leaves.
+
+### §337.2 — What the check's own first runs got wrong
+
+**THREE OF THE FIRST RUN'S FAILURES WERE THE CHECK**, and none was the product.
+A press was measured against `document.querySelector('.mflow .mflist')`, which is
+the FIRST of two — the WAITING column, empty on this tenant and unable to scroll
+at all, so the no-repaint assertion was measuring a box with nothing in it
+(§100.3). A fresh clock was asserted to read `"10:0x"`, which is true for one
+second of a ten-minute slot and the probe cannot reliably run inside it — it asks
+the arithmetic how much has RUN now (§94.8). And the reset guard compared the
+face's own string by prefix, where `"10:00"` and `"9:59"` differ in their first
+two characters with nothing reset — a working guard reported broken at every
+minute boundary (§122.4's family).
+
+**AND THE FALSIFICATION RUN DIED RATHER THAN REPORTING** (§215, in the file whose
+docstring promises it does not): a build where the clock is never mounted threw
+on the first raw `pg.evaluate`, so the falsification that matters most printed a
+stack trace where the count belongs. Every probe goes through the degrading
+wrapper now, the ones that only PRESS something included.
+
+**AND AN EMPTY `SMP_BUILT` IS A SET VARIABLE**, so `os.environ.get(k, default)`
+never fires its default and the run opened `file://` and reported 43 failures on
+a good build — a broken-build verdict manufactured by the harness (§54.5). It is
+an `or` now.
+
+**PROVED ABLE TO FAIL SEVEN WAYS, from the SOURCES** (§276): the clock never
+mounted **22 red**, a `<div>` in place of the `<button>` **1**, reset put on the
+key **6**, the same-subject guard removed **1**, the mockup's literal colours
+**1**, no minutes column **7**, the interval left running **1**.
+
+### §337.3 — Recorded, not done
+
+- **A check that does not honour `SMP_BUILT` cannot be given a baseline from
+  outside its own directory.** Three were met here (`hide-slide`,
+  `master-presentation`, `master-picker`) and §334.13 records twenty-one more.
+  Not repaired in this round: it is a sweep of its own, and doing it while
+  looking at something else is how a fix reaches further than its fault.
+- **`masterFix()` measures a 36px row where it measured 32**, because the three
+  buttons are taller than the digit they sit beside. It MEASURES rather than
+  holding a constant (§122.5), so it follows — but the dialog is 76px taller
+  before its own cap bites.
+- **Nothing says the times are saved** other than their being saved; the dialog
+  has no word for it, exactly as the running order has none.
+
 ## 36 · Multi-tenant — what to do when the time comes
 
 Islam: *"the platform should handle multi tenants … that's a future thing I will

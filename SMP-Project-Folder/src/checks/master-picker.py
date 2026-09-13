@@ -182,11 +182,21 @@ with sync_playwright() as p:
       };
     }""", None, {})
     check("two tables, one per column", get(shape, "tables") == 2, shape)
-    check("both name their columns the same way",
-          get(shape, "heads") and
-          [c for c in (get(shape, "heads") or [[]])[0] if c] == ["Name", "Kind", "Slides"] and
-          [c for c in (get(shape, "heads") or [[], []])[1] if c] == ["Name", "Kind", "Slides"],
-          get(shape, "heads"))
+    # REWRITTEN, NEVER LOOSENED (§218). §337 gives the FLOW a Minutes column and
+    # deliberately does not give it to the waiting table: a subject nobody has
+    # put in the review has no slot, and offering one there would invite
+    # setting a time for somebody who is not presenting. So the two tables
+    # legitimately differ — what §266.10 was asserting is that they read as one
+    # thing, which survives as: the columns they SHARE are named the same way
+    # and in the same order, and the flow's one extra column is named.
+    heads = [[c for c in row if c] for row in (get(shape, "heads") or [[], []])]
+    check("the columns the two tables share are named the same way",
+          len(heads) == 2 and heads[0] == ["Name", "Kind", "Slides"] and
+          [c for c in heads[1] if c in ("Name", "Kind", "Slides")] == ["Name", "Kind", "Slides"],
+          heads)
+    check("and the flow's own extra column is the one §337 adds",
+          len(heads) == 2 and
+          [c for c in heads[1] if c not in ("Name", "Kind", "Slides")] == ["Minutes"], heads)
     check("one search box, on the waiting column", get(shape, "find") == 1, shape)
     check("the up and down arrows are gone (§266.10)", get(shape, "arrows") == 0, shape)
     check("the dialog is wider than the 940px every other one gets",
@@ -275,9 +285,9 @@ with sync_playwright() as p:
       return {
         kinds: rows.map(r => r.querySelector('.mfkind').textContent.trim()),
         wantKinds: want.map(t => fns.indexOf(t) >= 0 ? 'FUNC' : 'BU'),
-        slides: rows.map(r => +r.cells[3].textContent.trim()),
+        slides: rows.map(r => +r.querySelector('.c-n').textContent.trim()),
         wantSlides: want.map(t => masterCount(t)),
-        names: rows.map(r => r.cells[1].textContent.trim()),
+        names: rows.map(r => r.querySelector('.c-nm').textContent.trim()),
         wantNames: want.map(t => placeLabel(t)),
         anyFn: want.some(t => fns.indexOf(t) >= 0)
       };
@@ -301,7 +311,7 @@ with sync_playwright() as p:
                          if (b) b.click(); });
       const rows = [...document.querySelectorAll('#modal-b tr[data-mfrest]')];
       return { waiting: rows.length,
-               names: rows.map(r => r.cells[1].textContent.trim()),
+               names: rows.map(r => r.querySelector('.c-nm').textContent.trim()),
                codes: out.map(t => deckCode(t, placeLabel(t))) };
     }""", None, {})
     check("five taken out are five waiting", get(made, "waiting") == 5, made)
@@ -313,7 +323,7 @@ with sync_playwright() as p:
     bycode = ev(pg, """(n) => {
       const rows = [...document.querySelectorAll('#modal-b tr[data-mfrest]')];
       return { inDom: rows.length,
-               shown: rows.filter(r => !r.hidden).map(r => r.cells[1].textContent.trim()),
+               shown: rows.filter(r => !r.hidden).map(r => r.querySelector('.c-nm').textContent.trim()),
                same: !!document.querySelector('#modal-b .mftbl tbody').__probe,
                count: (document.querySelector('#modal-b [data-mfrestcount]') || {}).textContent,
                box: (document.querySelector('#modal-b .mffind') || {}).value };
@@ -453,7 +463,7 @@ with sync_playwright() as p:
               const who = [...document.querySelectorAll('#modal-b [data-mfflow] tr[data-oi]')]
                 .filter(r => r !== d)
                 .filter(r => +getComputedStyle(r.querySelector('.grip')).opacity > 0)
-                .map(r => r.cells[1].textContent.trim() + '[' +
+                .map(r => r.querySelector('.c-nm').textContent.trim() + '[' +
                      (r.querySelector('td.mfh').matches(':hover') ? 'hover' : '') +
                      (r.matches(':hover') ? '+rowhover' : '') +
                      (r.querySelector('td.mfh').matches(':focus-within') ? '+focus' : '') + ']');

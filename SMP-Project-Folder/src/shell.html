@@ -124,6 +124,13 @@
     <span class="dtitle"></span>
     <div class="ddots"></div>
     <span class="dcount"><span class="dcount-c">1</span> / <span class="dcount-t">0</span></span>
+    <!-- §337: drawn only while the subject being presented has a time set
+         (`clockPaint()` hides them), because a control with nothing to act on
+         is not a choice (§61). Reset is here and NOWHERE else: it cannot be
+         undone, so it does not go on a key or on the clock, which are the two
+         surfaces a hand can brush past in fullscreen. -->
+    <button data-dpause class="txt" title="Hold the timer (P)" hidden>Pause</button>
+    <button data-dreset class="txt" title="Start this subject's time again" hidden>Reset</button>
     <button data-dprev title="Previous">&#8592;</button>
     <button data-dnext title="Next">&#8594;</button>
     <button data-dfit class="txt" title="Fit to window instead of 16:9">Fit</button>

@@ -256,7 +256,13 @@ function __smpShape(state, a) {
   (a.functions || []).forEach(function (f) {
     var nm = String((f && f.name) || "").trim();
     if (!nm) return;
-    addFunction(nm, (f && f.format) === "pillars" ? "pillars" : "projects");
+    /* §342: THREE FORMATS, so the set-up flow's third choice reaches the
+       graph — without this line the console offers it and the client is
+       shaped as a projects function, which is §96's fault at the one moment
+       nobody is watching (the shape is written before anybody signs in). */
+    var ff = (f && f.format) === "pillars" ? "pillars"
+           : (f && f.format) === "objectives" ? "objectives" : "projects";
+    addFunction(nm, ff);
   });
   /* THE TENANT'S OWN WORDS, through the registry's own entries: the label a
      client uses is the bu column, which is what every heading reads

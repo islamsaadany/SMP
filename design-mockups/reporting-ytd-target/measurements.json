@@ -1,0 +1,239 @@
+{
+ "made": {
+  "month": 6,
+  "asOf": "Jun 2026",
+  "shareDue": "29%",
+  "accDue": "96M EGP",
+  "rows": 10
+ },
+ "rows": [
+  {
+   "row": "Distribution revenue",
+   "today": "6.2B EGP",
+   "moved": true,
+   "proposed": "3.1B EGP \u00b7 of 6.2B EGP"
+  },
+  {
+   "row": "Mobile market share",
+   "today": "32%",
+   "moved": false,
+   "proposed": "32%"
+  },
+  {
+   "row": "Active merchant reach",
+   "today": "4,500",
+   "moved": false,
+   "proposed": "4,500"
+  },
+  {
+   "row": "App coverage rate",
+   "today": "50%",
+   "moved": false,
+   "proposed": "50%"
+  },
+  {
+   "row": "Non-Samsung revenue",
+   "today": "4B EGP",
+   "moved": true,
+   "proposed": "2B EGP \u00b7 of 4B EGP"
+  },
+  {
+   "row": "Samsung market share",
+   "today": "30%",
+   "moved": true,
+   "proposed": "29% \u00b7 of 30%"
+  },
+  {
+   "row": "Vivo market share",
+   "today": "60%",
+   "moved": false,
+   "proposed": "60%"
+  },
+  {
+   "row": "Accessory revenue",
+   "today": "300M EGP",
+   "moved": true,
+   "proposed": "96M EGP \u00b7 of 300M EGP"
+  },
+  {
+   "row": "Active Sary merchants",
+   "today": "800",
+   "moved": false,
+   "proposed": "800"
+  },
+  {
+   "row": "Regional licence secured",
+   "today": "Yes / No",
+   "moved": false,
+   "proposed": "Yes / No"
+  },
+  {
+   "row": "Sary revenue",
+   "today": "150M EGP",
+   "moved": true,
+   "proposed": "75M EGP \u00b7 of 150M EGP"
+  },
+  {
+   "row": "Local production devices",
+   "today": "1M",
+   "moved": true,
+   "proposed": "0.5M \u00b7 of 1M"
+  },
+  {
+   "row": "Sary app downloads",
+   "today": "40K",
+   "moved": false,
+   "proposed": "40K"
+  }
+ ],
+ "before": {
+  "tableW": 1285,
+  "paneW": 1325,
+  "scrollW": 1285,
+  "clientW": 1285,
+  "targetColW": 154,
+  "nameColW": 331,
+  "rowH": [
+   55,
+   55,
+   55,
+   55,
+   55,
+   55,
+   55,
+   55,
+   55,
+   55
+  ],
+  "tallest": 55
+ },
+ "after": {
+  "tableW": 1285,
+  "paneW": 1325,
+  "scrollW": 1285,
+  "clientW": 1285,
+  "targetColW": 180,
+  "nameColW": 319,
+  "rowH": [
+   56,
+   57,
+   55,
+   57,
+   55,
+   55,
+   55,
+   57,
+   57,
+   55
+  ],
+  "tallest": 56.515625
+ },
+ "fits": {
+  "1600": {
+   "tableW": 1285,
+   "paneW": 1325,
+   "scrollW": 1285,
+   "clientW": 1285,
+   "targetColW": 180,
+   "nameColW": 319,
+   "rowH": [
+    56,
+    57,
+    55,
+    57,
+    55,
+    55,
+    55,
+    57,
+    57,
+    55
+   ],
+   "tallest": 56.515625
+  },
+  "1440": {
+   "tableW": 1125,
+   "paneW": 1165,
+   "scrollW": 1125,
+   "clientW": 1125,
+   "targetColW": 157,
+   "nameColW": 277,
+   "rowH": [
+    56,
+    57,
+    55,
+    57,
+    55,
+    55,
+    55,
+    57,
+    57,
+    55
+   ],
+   "tallest": 56.515625
+  },
+  "1280": {
+   "tableW": 965,
+   "paneW": 1005,
+   "scrollW": 965,
+   "clientW": 965,
+   "targetColW": 133,
+   "nameColW": 235,
+   "rowH": [
+    56,
+    57,
+    55,
+    57,
+    55,
+    55,
+    55,
+    57,
+    57,
+    55
+   ],
+   "tallest": 56.515625
+  },
+  "1100": {
+   "tableW": 997,
+   "paneW": 1037,
+   "scrollW": 997,
+   "clientW": 997,
+   "targetColW": 138,
+   "nameColW": 244,
+   "rowH": [
+    56,
+    57,
+    55,
+    57,
+    55,
+    55,
+    55,
+    57,
+    57,
+    55
+   ],
+   "tallest": 56.515625
+  },
+  "1000": {
+   "tableW": 897,
+   "paneW": 937,
+   "scrollW": 897,
+   "clientW": 897,
+   "targetColW": 122,
+   "nameColW": 225,
+   "rowH": [
+    56,
+    57,
+    55,
+    57,
+    55,
+    55,
+    55,
+    57,
+    57,
+    55
+   ],
+   "tallest": 56.515625
+  }
+ },
+ "errors": []
+}

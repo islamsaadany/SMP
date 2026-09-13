@@ -7052,7 +7052,7 @@ end their output with a blank line, so a `tail -1` reported nothing where the
 verdict is one line up — §298.3's rule (*the tail is the verdict*) failing on
 the harness that quotes it. Each was re-run and read: ALL CLEAR, all green.
 
-## §340 — A CLOCK ON THE REVIEW (2026-09-13)
+## 340 · A clock on the review — set in the flow, drawn on the slide
 
 Islam: *"in the presentation module I need to set as an SMO the time of each
 presentation so the timer appears for the presenter think with me how can we do
@@ -45922,5 +45922,320 @@ reason; an archived client's own people are not told anything, because nothing
 in this platform reaches out to them; and the frozen `api/platform.js` does not
 learn either action — it has been unreachable since the cutover put Next in
 front of it (§317.8), which is §322's own precedent.
+
+---
+## §337 — THE DEMO'S DOOR ASKED A QUESTION UNDER A RETIRED NAME (2026-09-13)
+
+Islam: *"let the whole consulting team access the demo with super user
+access"*, then, a minute later, ***"the team opened the demo it showed not
+found"***.
+
+**THE SECOND MESSAGE CHANGED THE JOB AND THE FIRST HALF NEEDED NO CODE AT
+ALL.** The team was not short of a permission: the demo's door was refusing
+them, and the access it would have taken is a seat somebody grants on the
+client's own team page. So what shipped is the defect and nothing beside it —
+*"just fix the door I will add the access from the demo settings"*.
+
+**TWO PARTS OF THE PLATFORM ANSWERED ONE QUESTION AND DISAGREED.** The cards
+are drawn from `FF.mayOpenClient`, which said **open**; the door asked its own
+copy of that rule, which said **hidden**, and answered 404 *"That client is not
+available."* — §42's drift in the one place a shared rules module exists to
+make impossible, reintroduced by `door.ts` keeping a second copy of it
+(§53.5).
+
+**TWO FAULTS IN ONE LINE, EITHER ENOUGH ON ITS OWN.** It asked the office's
+matrix under the role key **`consultant`** — one of the four platform roles
+**§313.4 retired** into the single `everyone` row — and platform-migration
+`001-seats` DELETES every row whose key is not `everyone`, so the lookup could
+never match anything; then `|| "none"` read that miss as a **refusal**, where
+§30.2's rule is that an absent row means *nobody has answered yet* and falls to
+the shipped default (`edit`).
+
+**SO NO SETTING OPENED IT, WHICH IS WHY IT COULD NOT BE WORKED AROUND.**
+Measured on the real functions, for a consultant holding no seat:
+
+| stored | the cards | the door (before) | the door (after) |
+|---|---|---|---|
+| nothing | open | **hidden → 404** | open |
+| `demo = edit` | open | **hidden → 404** | open |
+| `demo = view` | open | **hidden → 404** | open |
+| `demo = none` | hidden | hidden | hidden |
+
+**IT IS LIVE, NOT THIS BRANCH'S** — `origin/main`'s own copy read byte for
+byte before anything here was blamed (§303) — and **the frozen stack was right
+all along**: `lib/auth.js` asks `FFRules`, so only the ported door is wrong,
+which is why this reads as something that recently broke when it is the
+cutover's own age.
+
+**ONE READER, NEVER A SECOND SPELLING**: `demoGrant()` takes the key and the
+default from `platform-rules.cjs` itself, so neither can drift again. `view`
+and `edit` both open, exactly as the frozen rule has always had it — the SEAT
+is a different question, answered on the client's team page, which is where
+Islam is granting it.
+
+**AND `other_clients` IS DELIBERATELY LEFT BROKEN THE SAME WAY.** It reads the
+same retired key, so it answers `none` whatever the office set — which
+REFUSES, and correcting it would OPEN clients somebody holds no seat on the
+moment that column is set to `open`. A widening on a client-data boundary is
+Islam's word, not a tidy-up ridden in beside a defect fix (rule 1b). Flagged
+before it was touched, and **RECORDED, NOT DONE**.
+
+**§337.1 — AND THE CHECK THAT GUARDED THIS WROTE THE SAME RETIRED KEY.**
+`door-landing.mjs` set `role_key = 'consultant'` to model a refusal — an
+UPDATE matching no row, because the migration deletes exactly those — and the
+assertion passed anyway, because the door read the same absent key as `none`.
+**Both sides wrong in the same way is a green run** (§100.3, §113.8), and no
+check anywhere had ever opened the demo as an ordinary consultant.
+
+**THE NEW SECTION ASSERTS AGREEMENT, NEVER A LITERAL** (§94.8, §53.5): the
+door's answer against `platform-rules.cjs`'s, in all four states — two
+independent implementations of one question, which is the property that broke,
+and a build that dropped the demo column entirely cannot satisfy it because
+the frozen side still answers `open`. **BOTH ENDS** (§94.2): `none` must still
+refuse, or a door flung open for everybody passes every assertion about the
+demo being reachable and takes the office's off switch with it. **8 green,
+6 red** under `--break=demo-role-key`, the red detail printing the drift
+verbatim — `door=false cards=true`.
+
+**AND IT IS DELIBERATELY NOT A PAGE-LEVEL PROBE** (§113.8): a demo tenant
+INSERTed by a check holds no graph, and a tenant with no graph answers 404 at
+the state API for a reason of its own (§316.9) — so a browser assertion would
+have gone green on the broken build **for the wrong reason**.
+
+**§337.2 — AND THE FIRST DRAFT OF THE CHECK CALLED A CORRECT BUILD BROKEN.**
+It searched `door.ts` for the retired key, and `--break=demo-role-key` spells
+that very call in order to restore the fault — so the assertion could not tell
+the defect from the switch that reproduces it (§100.3, §296.1). Deleted; the
+behaviour is the assertion and the break is what proves it can fail.
+
+**RECORDED, NOT DONE**: a new Forefront consultant cannot be added to a client
+that brought its own register — `made_here = false`, so the platform refuses
+to invent a person there (§313.30/31) and the only way through is to add them
+to that client's own register first. The demo is `made_here = true` and is not
+affected.
+
+---
+
+## §338 — THE OFFICE'S OWN ROW KEEPS ITS STANDING, AND THE CONSULTANTS LIST STOPS BEING ADD-ONLY (2026-09-13)
+
+Islam, setting a client up through the flow: ***"a strange error it worked
+with the team but for me it's not working"*** — inside **Meridian Group**, the
+client he had just created, he read **NO ROLE** and *"No pages granted. The
+roles this person holds reach nothing."* while every colleague he added
+worked.
+
+**IT ONLY EVER HITS THE PERSON WHO CREATED THE CLIENT, AND THAT IS THE WHOLE
+DIAGNOSIS.** A Forefront admin opens a client they made **by rule**
+(`door.ts`'s `seatFor` — §313's own design, because somebody has to open a
+client nobody is on yet), so they hold a minted register row and **no
+`tenant_users` membership**. The moment they add the FIRST colleague,
+`setTeam`'s sweep — *"a row the platform minted and nobody is any more is
+retired"* — computes "nobody" as *not in `tenant_users`*, reads the creator as
+a stranger, and **retires their own row**. Everybody they add is in that list,
+so the sweep leaves them alone: exactly his sentence.
+
+**AND IT NEVER CAME BACK, WHICH IS WHAT MADE IT A LOCK-OUT RATHER THAN A
+FLICKER.** `officeRow`'s adoption branch set the `role` and never the
+standing; and the walk does not even reach that branch for him, because
+`byEmailRows` skips a retired row — so it falls through to the mint, where
+`ON CONFLICT (tenant_id, key) DO NOTHING` handed the retired row straight back
+untouched. Adding himself to the team afterwards changed nothing.
+
+**REPRODUCED BEFORE ANYTHING WAS PROPOSED** (§3a), on a real Postgres through
+the product's own `frozen.bare` + `loadGraph` + `officeRow` + `registerKeyFor`:
+
+```
+after he opens the client he just made:  ff_islam_saadany  role="super"  active=(unset)
+after he adds ONE colleague:             ff_islam_saadany  role="super"  active=false
+after he adds HIMSELF as Super user:     ff_islam_saadany  role="super"  active=false
+  Islam Saadany   pages=0  chips=[]            ← his screen
+  Ahmed Galal     pages=2  chips=[SMO team]    ← the colleague's
+```
+
+**PLACING SOMEBODY LIFTS THE RETIREMENT**, in both places that place them —
+the adoption branch and the mint's `ON CONFLICT`, which is the one his case
+actually walks. Reaching either line means they hold a seat NOW, so the row
+comes back; and because `personFor` calls `officeRow` on **every** request,
+a tenant already in that state heals on the next page load nobody has to make
+on purpose. Measured: `pages=0` → `pages=2, chips=[Super user]`.
+
+**THE SWEEP IS NOT WEAKENED AND BOTH ENDS ARE ASSERTED**: a colleague taken
+OFF a team is still retired and still reads nothing, or a build that simply
+stopped retiring anybody would pass every assertion above while quietly
+leaving every departed consultant on a client's register.
+
+**AND THE PREVENTION HALF IS RECORDED, NOT DONE.** Writing the creator a
+`tenant_users` row at `createClient` would stop the sweep ever seeing them as
+a stranger — and `tenant_users.person_key` carries a DEFERRABLE FK to
+`people`, so it would also have to write the register row, reversing
+§313.31/§322's deliberate *"the register starts EMPTY"* (and §336's check
+reads `PEOPLE.length === 1` after the first opening). With the heal in place
+the fault is one request wide and self-clearing, so the reversal is not worth
+its risk today — flagged rather than ridden in beside a defect fix (rule 1b).
+
+**§338.1 — AND THE CONSULTANTS LIST WAS ADD-ONLY.** Islam, with **Noran
+Essam on it twice** (`noran.esam@` and `noran.essam@`, one letter apart):
+*"allow me to delete a consultants from a user so I can remove noran."* The
+page names, renames, re-addresses, hands out passwords and sets the admin
+flag, and had **no way to take anybody off it** — while `saveConsultant` has
+accepted a `status` since it was written and **no control ever sent one**:
+§61's trap with half of it already built.
+
+**RETIRE IS THE DEFAULT AND DELETE IS THE EXCEPTION** (§35, §62 one level up):
+a consultant who has left Forefront should stop being able to sign in, and
+which clients they worked on is worth keeping; deleting is for the row that
+should never have existed. **DELETING NEEDS THEM RETIRED FIRST** — §323's rule
+for a client and its reason: the guard rather than a second confirmation, so
+nobody is deleted while they can still sign in, and the two presses are
+separated by a state somebody chose.
+
+**THE TARGET DECIDES, NEVER THE ACTOR ALONE** (§89's shape for issuing a
+password): never yourself, never an admin — that flag comes off on this same
+page first, deliberately, so the two acts stay apart. **Retiring can be handed
+to whoever manages consultants; deleting is the platform admin's alone**,
+which NARROWS that line rather than copying it.
+
+**AND WHAT THE RULES CANNOT SAY, THE SERVER SAYS BY NAME**: whether somebody
+still holds a seat is a question about rows, so it is asked there and the
+refusal NAMES the clients — *"still holds a seat on Meridian Group. Take them
+off that client first."* A rule guessing at it would be a second answer to a
+question the database owns (§53.5), and a delete that went ahead would take
+their seat and register rows with it by cascade.
+
+**AND THE STATUS WAS RIDING IN UNGUARDED**, found while wiring the control:
+it sat in `saveConsultant`'s blanket UPDATE with no target test at all, so
+whoever manages consultants could have retired an **admin** — or themselves,
+and signed nobody back in. Its own act now, asked of the target, **with the
+sessions ended**, or a retired person keeps a signed-in tab for thirty days
+(§43's rule for a password change, same argument).
+
+**ASKED IN PLACE, NEVER A BROWSER DIALOG** (§95, §273.3 took the last one
+out) **and never a modal**: this is one row of a table, so the question
+belongs in the row it is about, naming who — the failure mode is landing on
+the wrong line, which a confirmation naming nobody catches none of. **And a
+retired row SAYS so** (§35, §124): nothing else on the line differs, so
+without the tag the one state that stops somebody signing in is invisible and
+Delete appears beside rows that look identical to the ones it does not.
+
+**THE FROZEN `api/platform.js` LEARNS NEITHER ACTION**, which is §323's own
+precedent: it has been unreachable since the cutover put Next in front of it
+(§317.8).
+
+**CHECKS**: `scripts/test-platform-rules.js` **69/0**, both ends of every
+line, falsified twice — delete not requiring retired goes red on that
+assertion alone, retire with no target test goes red on self and on the admin
+— **and the two-copies assertion (§323's) caught the drift both times**, which
+is what it is for. `smp-app/checks/office-standing.mjs` **7/0** against a real
+Postgres, **RED 3** under `--break=no-heal` with section 4 still green, so the
+break provably touches only the heal. `tsc` clean but for `lib/prisma.ts`'s
+pre-existing PrismaClient error (identical with the change stashed).
+
+**§338.2 — AND MY OWN FIRST DRAFT CARRIED TWO FAULTS, BOTH CAUGHT BEFORE
+RUNNING**: a `const retired` that REDECLARED a fixture ten lines above it
+(§56.7's shape, in a test file), and an access map handed in without the
+`everyone` wrapper the rules read it through — so the "cannot manage the list"
+case would have been testing an empty world rather than a closed column.
+
+---
+
+## §339 — THE SETTING THAT COULD NOT OPEN, AND THE CREATOR WHO WAS NOWHERE IN THE DATA (2026-09-13)
+
+Two things §337 and §338 wrote down and deliberately left, both put to Islam in
+plain words with their costs, and both answered in one message: *"1. no need a
+client they are on they should be able to open"* and *"2. yes the one who
+create the client should appear from the start."*
+
+**§339.1 — THE COLUMN THE OFFICE COULD SET AND NOTHING COULD READ.** *Clients
+they hold no seat on* has three states on Who sees what — hidden, listed, open
+— and `door.ts` asked for it under **`consultant`**, a role key §313.4 RETIRED
+into the single `everyone` row, which platform-migration 001-seats DELETES. So
+the lookup matched nothing and `|| "none"` read the miss as a REFUSAL, where
+§30.2's rule is that an absent row means *nobody has answered yet*. **Exactly
+§337's fault, one column over** — that section fixed the demo and left this
+one standing on purpose, because correcting it OPENS client data to somebody
+holding no seat and a widening on a client-data boundary is Islam's word, not
+a tidy-up ridden in beside a defect fix (rule 1b). **THE TWO COLUMNS ARE ONE
+READER NOW** (`ffGrant`), because the second copy is what produced §337 in the
+first place (§53.5) — and the key and the default are read out of
+`platform-rules.cjs` rather than spelt here again, so neither can drift.
+
+**AND NOBODY'S ACCESS MOVES TODAY, WHICH IS WHAT MAKES IT SAFE TO LAND**:
+that column ships at **`listed`** — a name on the cards with nothing behind it
+— and `mayOpen` ranks `listed` below `open`, so it goes on refusing. What
+changes is that the office's *open* works when they choose it. **Whether the
+SHIPPED DEFAULT should become `open` is a different question and has not been
+asked**; it is stated rather than decided, and the check asserts the default is
+still `listed`, read from the frozen module rather than as a literal (§94.8) —
+so this file cannot become the second place that decides it.
+
+**§339.2 — AND THE PERSON WHO MAKES A CLIENT IS ON ITS TEAM FROM THE START.**
+Until now they were on it BY RULE and nowhere in the data: `door.ts`'s
+`seatFor` gives a platform admin the Super user seat with no `tenant_users`
+row, and that absence is precisely what §338 had to heal — the moment they
+added the first colleague, `setTeam`'s sweep (*"a row the platform minted and
+nobody is any more is retired"*) read the creator as nobody and retired the
+register row `officeRow` had minted for them. **§338's heal stays and is what
+rescues a client already in that state**; this stops the state arising for a
+client made from today.
+
+**IT REVERSES "THE REGISTER STARTS EMPTY" (§313.31, §322) FOR EXACTLY ONE
+ROW**, and the foreign key is why the two writes cannot be one: `tenant_users`
+points at `people` by (tenant, key), so the register row is written FIRST —
+`setTeam`'s own order, and its own comment already says why (the constraint is
+deferred, not absent). **A FAILURE HERE DOES NOT UNDO THE CLIENT**, unlike the
+graph load above it: a client with no graph cannot be opened at all, while one
+whose creator's row did not land opens perfectly by rule and heals on the next
+request — destroying a made client over it would be the larger fault.
+
+**§339.3 — AND §337'S OWN CHECK HAD NEVER ONCE BEEN FALSIFIABLE.** Its section
+runs IN-PROCESS — the tenant is a literal, deliberately, because a demo tenant
+INSERTed for a check holds no graph and answers 404 for a reason of its own
+(§113.8, §316.9) — while `--break=` was only ever put in the SERVER's env, so
+`ffGrant` there read an unset variable. *A check written to prove it can fail,
+that could not.* It was red under `--break=demo-role-key` for something else
+entirely, which is what hid it. The variable is set for that section ONLY and
+restored in a `finally`, because this file also imports `lib/landing.ts`,
+`lib/modules.ts` and `lib/state-io.ts`, which read the same variable for their
+own breaks — leaving it set would break the check's own helpers and report a
+correct build broken (§100.3). Under the fix both columns now go red for their
+own reason, printing the drift verbatim: `door=false cards=true`.
+
+**§339.4 — AND ONE ASSERTION IN §5 HAD BEEN PASSING FOR THE WRONG REASON**:
+it wrote `other_clients = 'none'` under the same retired key — an UPDATE
+matching no row — so *"refused and non-existent answer identically"* was true
+of the shipped default rather than of the office's setting. REWRITTEN, never
+loosened (§218): it writes `everyone` now, so what is asserted is a choice
+somebody made.
+
+**TWO NEIGHBOURING ASSERTIONS MOVED AND BOTH WERE REWRITTEN RATHER THAN
+DELETED** (§218). `checks/shell.mjs` asked for an **EMPTY** register on a made
+client, which was right while the creator was on its team only by rule; what
+that line is FOR — that nobody is invented beside them — is what it asserts
+now: exactly one row, and it is theirs, at the seat they hold. And
+`checks/door-landing.mjs` §6 asserted the landing saying *"you are not on this
+register"* on a freshly made client, which §339.2 makes unreachable there —
+so the NEW property is asserted first, and the empty state is then **MADE**
+(the row and the membership removed) rather than waited for, because it is
+still reachable on a client made before today, one that brought its own
+register, or one whose creator was taken off the team. Deleting that half
+would have left §313.32's finding unguarded. **AND THE SECOND HALF NEEDED THE
+REQUEST THAT ACTUALLY PLACES THEM**: the landing only READS (`registerKeyFor`
+— a reader that creates what it looked for is how a phantom change reaches
+every save, §316.9), and the state API is what places, so a rewrite that kept
+only the page load reported a correct build broken until that line came back.
+
+**VERIFIED**: `check:door` **70/0** and **RED six ways** — `no-rows`,
+`first-person`, `membership-key`, `demo-role-key`, `other-role-key`,
+`no-creator` — with `no-creator` reddening exactly the two §339.2 assertions
+and nothing else; `check:standing` 7/0 and RED under `--break=no-heal`;
+`check:shell` **72/0**; `check:state` 91/0; `test-platform-rules.js` 69/0 with
+§323's two-copies assertion; `generated-in-step` all clear; `next build`
+compiles and `tsc` is clean but for `lib/prisma.ts`'s pre-existing
+PrismaClient error. **`check:modules` is 61/1 and it is NOT this work's** —
+reproduced identically with the change stashed (§303); it is the failure
+§336.2 already records, whose subject moved when the set-up flow landed.
+
+**Nothing in the frozen product is touched**, so no rebuild and no `sw.js`
+bump: `git status` names six files, all under `smp-app/`.
 
 ---

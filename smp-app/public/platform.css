@@ -7587,6 +7587,62 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .dslide.tight .aimbottom { margin-top:24px; }
   .dslide.tight .dnotebox { font-size:28px; padding:26px 30px; }
 
+  /* ── THE CLOCK ON THE REVIEW (§340) ───────────────────────────────
+     A CHILD OF `.deck`, so it scales with the slide and holds the corner it
+     was drawn in — and bottom-RIGHT, because the footer mark is bottom-left
+     on every slide (§52) and a pillar's two headline figures are top-right,
+     so this is the corner that is empty on every slide kind rather than on
+     the one that was looked at.
+
+     TOKENS, NEVER LITERALS. The mockup was drawn over a screenshot of a LIGHT
+     slide and it would have been easy to copy its hexes across — and
+     `.dslide` paints `var(--surface)`, so the on-screen deck follows the
+     viewer's theme and a fixed grey would have been unreadable in dark
+     (§38.5's family, caught by reading the slide's own rule rather than the
+     picture of it). Every pair below is MEASURED in both palettes with the
+     sweep's own arithmetic (§95): calm 4.73 / 5.33, near 5.48 / 7.22, over
+     5.64 / 5.03, held 7.97 / 7.63.
+
+     THE INK ON THE RED IS `--surface` AND NOT `--ink` — §38.4 cuts both ways
+     and this is the direction that bites: the page's own near-black on
+     `--bad` measures 3.06 light and 2.75 dark, so the obvious choice is the
+     one that fails. §145.14's own pairing, and the reason it exists. */
+  .dclock {
+    position:absolute; right:48px; bottom:29px; z-index:2;
+    display:flex; align-items:baseline; gap:.45em;
+    font-family:var(--mono); font-variant-numeric:tabular-nums;
+    font-size:34px; font-weight:600; line-height:1; letter-spacing:.01em;
+    padding:.55em .7em; border:0; border-radius:.3em; cursor:pointer;
+    color:var(--ink-3); background:var(--surface-2);
+  }
+  .dclock .dcw {
+    font-family:var(--sans); font-size:.42em; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+  }
+  /* TWO DRAWN BOXES, NEVER A KEYBOARD CHARACTER. A glyph a font MAPS and
+     cannot DRAW ships as a blank rectangle (§52, §120.2) — and this one would
+     do it on a projector, in front of the room. */
+  .dclock .pausemark { display:inline-flex; gap:.14em; align-self:center; }
+  .dclock .pausemark::before, .dclock .pausemark::after {
+    content:""; width:.17em; height:.6em; background:currentColor;
+    border-radius:.04em;
+  }
+  /* THE COLOUR SAYS WHERE YOU ARE; THE MARK SAYS IT IS HELD — two facts, two
+     devices, so a clock paused while OVER stays red rather than going quiet
+     about the one thing the room needs to know. */
+  .dclock.near { color:var(--attn-tx); }
+  .dclock.near .dcw { color:var(--attn-tx); }
+  .dclock.over { color:var(--surface); background:var(--bad); }
+  .dclock.over .dcw { color:var(--surface); }
+  .dclock.paused:not(.near):not(.over) { color:var(--ink-2); }
+  .dclock:focus-visible { outline:3px solid var(--gold); outline-offset:2px; }
+  /* NO TRANSITION ON THE STATE CHANGE, deliberately. A fade was written here
+     and removed on looking at it: turning amber is INFORMATION a presenter is
+     meant to catch, and easing it in is the one thing that makes it easier to
+     miss. It also made a colour sampled right after the change read a
+     mid-flight value (§68.10's flake, on a surface that has no need of the
+     motion). */
+
   .deckbar { position:absolute; left:0; right:0; bottom:0; height:62px; display:flex;
              align-items:center; gap:18px; padding:0 26px; background:rgba(11,26,51,.94);
              border-top:1px solid rgba(255,255,255,.1);
@@ -8283,6 +8339,35 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   /* 40px, not 36: the cell's own padding is 16 and the button is 22, so a
      narrower column overflowed the list by exactly 2px at every width —
      measured, and §158's rule is fit, never "and it scrolls". */
+  /* ── HOW LONG EACH SUBJECT HAS (§340) ────────────────────────────
+     112px, measured rather than guessed (§122.5): three buttons at the size
+     Islam signed off come to 96 and the cell's own padding is 16. The name
+     column still clears the longest name on the list — `Strategy Management
+     Office`, 195px against 213 left to it — which is what makes the new
+     column affordable at all (§158: fit, never "and it scrolls"). */
+  .mflow .mftbl .c-m { width:112px; }
+  .mflow .minset { display:flex; gap:3px; }
+  /* The tick's own metrics one column over, so the row stays 32px and
+     `masterFix()`'s measured height does not move (§266.11). */
+  .mflow .minbtn {
+    flex:1 1 0; min-width:0; padding:3px 0; line-height:1.35; cursor:pointer;
+    border:1px solid var(--line); border-radius:5px; background:var(--surface);
+    color:var(--ink-3); font:inherit; font-size:11.5px;
+    font-variant-numeric:tabular-nums; text-align:center;
+  }
+  .mflow .minbtn:hover { background:var(--surface-2); color:var(--ink); }
+  /* LIT IS A FILL, NEVER COLOURED TYPE (§38.4): the tenant's own navigation
+     navy with the ink that belongs to it, so a light bar does not leave the
+     number invisible on its own ground. */
+  .mflow .minbtn.on {
+    background:var(--panel); border-color:var(--panel); color:var(--panel-ink);
+    font-weight:600;
+  }
+  .mflow .minbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* The review's own length, on the line that already counts its slides. */
+  .mflow .mftime { color:var(--ink); font-weight:600; }
+  .mflow .mfnone { color:var(--attn-tx); }
+
   .mflow .mftbl .c-t { width:40px; }
   .mflow .mftbl .c-x { width:40px; text-align:right; }
   /* THE WIDTH IS SET ON THE HEADER CELL, because `table-layout:fixed` takes
@@ -8426,6 +8511,9 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      rather than as printed. */
   @media print {
     @page { size: 1600px 900px; margin: 0; }
+    /* §340: a clock on a printed slide is a number from a moment that has
+       passed. The contingency pack is a record, not a rehearsal (§305). */
+    #dclock { display:none !important; }
     html, body { background:#fff; }
     /* Only the deck prints. Everything else at body level is the platform. */
     body.presenting > *:not(#deckroot) { display:none !important; }

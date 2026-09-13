@@ -152,6 +152,36 @@ eq("…and is empty for anybody who cannot bring one back",
 check("nobody is in both lists at once",
   F.visibleClients(wAdmin, admin, ALL).every(c => band.indexOf(c.key) < 0), band.join(","));
 
+console.log("── 12b · retiring and deleting a consultant (§338) ────────");
+/* BOTH ENDS OF EVERY LINE (§94.2), or a rule that answered `false` to
+   everything would satisfy every refusal here and ship a pair of controls
+   nobody can press. The fixtures: `admin` is the platform admin, `lead` is
+   an ordinary consultant who manages the list. */
+const someone = acct("noran@forefront.consulting");
+const goneCons = acct("noran.essam@forefront.consulting", { status: "retired" });
+const otherAdmin = acct("omar@forefront.consulting", { is_admin: true });
+
+check("the admin may retire an ordinary consultant", F.mayRetireConsultant(wAdmin, admin, someone));
+check("…and may not retire themselves — a platform you have shut yourself out of is nobody's to run",
+  !F.mayRetireConsultant(wAdmin, admin, admin));
+check("…nor another admin: that flag comes off first, on this same page",
+  !F.mayRetireConsultant(wAdmin, admin, otherAdmin));
+check("somebody who cannot manage the list retires nobody",
+  !F.mayRetireConsultant(world([], setting({ consultants: "view" })), lead, someone));
+
+check("DELETING NEEDS THEM RETIRED FIRST (§323's rule, one level down)",
+  !F.mayDeleteConsultant(wAdmin, admin, someone) && F.mayDeleteConsultant(wAdmin, admin, goneCons));
+check("…and it is the admin's alone — retiring can be handed over, removing cannot",
+  !F.mayDeleteConsultant(wLead, lead, goneCons));
+check("…never yourself, even retired", !F.mayDeleteConsultant(wAdmin, admin, acct(admin.email, { status: "retired" })));
+check("…never an admin, even retired", !F.mayDeleteConsultant(wAdmin, admin, acct(otherAdmin.email, { is_admin: true, status: "retired" })));
+/* THE SEATS ARE NOT ASKED HERE AND THAT IS DELIBERATE: whether somebody
+   still runs a client is a question about rows, so the server owns it and
+   names the clients in its refusal. A rule guessing at it would be a second
+   answer (§53.5). Asserted so the split stays visible. */
+check("a rule that knew nothing of seats still allows the retired row — the server refuses it by name",
+  F.mayDeleteConsultant(wAdmin, admin, goneCons));
+
 console.log("── 12 · one module, two files ────────────────────────────");
 /* THE NEW STACK RUNS ITS OWN COPY of this file and its header says it is
    "the frozen module byte for byte" — which nothing compared, so a rule added

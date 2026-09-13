@@ -98,6 +98,7 @@ const HIDE_SLIDES     = R.HIDE_SLIDES;
    REFUSAL, which must not send somebody to Setup for a running order that is
    set in the Presentation menu (§16.7). Named from the shared module. */
 const MASTER_FLOW     = R.MASTER_FLOW;
+const PRESENT_MINS    = R.PRESENT_MINS;
 const PLAN_FROM       = R.PLAN_FROM;
 const PLAN_TO         = R.PLAN_TO;
 const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
@@ -448,6 +449,13 @@ function collect(stored, incoming, w) {
      names the control that sets it. */
   if (!same(sg[MASTER_FLOW], ig[MASTER_FLOW]))
     add("masterFlow", null, "the master presentation's running order");
+  /* §340: how long each subject has when it presents. Its own sentence beside
+     the order, for the order's own reason — it scores nothing and hides
+     nothing, and a refusal has to name the Presentation menu rather than
+     Setup, which is where somebody would otherwise be sent to look for a
+     control that is not there (§16.7). */
+  if (!same(sg[PRESENT_MINS], ig[PRESENT_MINS]))
+    add("presentMins", null, "how long each subject has to present");
   /* ── THE PLANNING PERIOD (§308) ─────────────────────────────────
      `cycle`, not `setup`: it is set in the Reporting cycle pen, by the person
      who sets the cycle's own dates, and asking a different grant for the two
@@ -471,7 +479,7 @@ function collect(stored, incoming, w) {
   collectCapabilities(sg.capabilities, ig.capabilities, add);
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "mainbus", "comms", "kb", "logo",
-                                   MASTER_FLOW, PLAN_FROM, PLAN_TO]);
+                                   MASTER_FLOW, PRESENT_MINS, PLAN_FROM, PLAN_TO]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -1438,6 +1446,13 @@ function authorize(stored, incoming, person) {
          has stopped taking figures, and the flow is arranged the morning of
          the meeting, which is after the lock and not before it. */
       case "masterFlow":
+      /* §340 rides the same gate and the same sentence deliberately: the
+         minutes are set in that very dialog, by that very person, so a second
+         rule for one pen is §42's drift with a projector on the end of it.
+         NOT gated on the cycle lock either, for `masterFlow`'s own reason —
+         the flow is arranged the morning of the meeting, which is after the
+         lock and not before it. */
+      case "presentMins":
         if (!R.mayMasterPresent(w, person))
           no("The master presentation is the SMO's — " + ch.what +
              " is set from the Presentation menu.");

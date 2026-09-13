@@ -226,6 +226,31 @@ function __smpHolds(state) {
            units: (UNIT_KEYS || []).length, functions: (FUNCTION_KEYS || []).length };
 }
 
+/* WHAT THE FLOW NEVER ASKED ABOUT IS NOT THE FLOW'S TO RESET (§340).
+   The rewrite below empties four lists and re-mints every row, which is
+   right for the shape and wrong for everything hanging off it: a second
+   pass through the flow — fixing a spelling, adding a unit, changing one
+   word — put back a unit with no head, no custodian, no weight, no mark,
+   no aspiration and no Who we are answers, and a function with no head and
+   no definition. Silently, and on a client the 409 in the caller does not
+   refuse, because that guard counts authored PLAN LINES and a client can
+   hold a full register and not one pillar.
+
+   So a row whose key survives keeps everything except what the flow
+   collects, which is exactly a name, a company and a plan type. Expressed
+   as "start from the old row and let the minter overwrite what it owns",
+   never as a list of fields to carry: a field added to a unit next year is
+   kept by this without anybody remembering to come back (§104.7). */
+function __smpCarry(old, fresh, owned) {
+  var out = {}, k;
+  for (k in old) if (Object.prototype.hasOwnProperty.call(old, k)) out[k] = old[k];
+  for (k in fresh) if (Object.prototype.hasOwnProperty.call(fresh, k)) {
+    if (owned.indexOf(k) > -1 || !Object.prototype.hasOwnProperty.call(out, k)) out[k] = fresh[k];
+  }
+  return out;
+}
+function __smpHeld(r) { return !!(r && (r.head || r.custodian)); }
+
 function __smpShape(state, a) {
   /* THE ANSWERS ARE THE LIST, so the shapes are replaced rather than added
      to: a unit taken off the flow's list has to disappear here, or walking
@@ -233,31 +258,84 @@ function __smpShape(state, a) {
      that is NOT a shape — the register the team has been added to, the
      cycle, the group's own words — is left exactly where it is, which is
      why this empties four lists rather than starting from a bare graph. */
+  var wasUnits = state.units || {}, wasFns = state.functions || {};
+  var wasCos = state.companies || {}, wasRoles = state.unitRoles || {};
+  /* AND THE WEIGHTING ROWS GO WITH THE UNITS, or the flow appends a second
+     row per unit on every pass: addBusinessUnit pushes one, nothing here
+     cleared them, and syncWeights normalises across whatever it finds — so
+     a third pass halved every unit's weight and the composite it feeds.
+     Matched by KEY, which is what that table has been matched by since the
+     rename bug (§ syncWeights' own comment). */
+  var wasW = {};
+  var wlist = (state.group && state.group.weighting && state.group.weighting.units) || [];
+  wlist.forEach(function (row) { if (row && row.key && !wasW[row.key]) wasW[row.key] = row; });
+
   state.unitKeys = []; state.units = {};
   state.functionKeys = []; state.functions = {};
   state.companyKeys = []; state.companies = {};
   state.unitRoles = {};
+  if (state.group && state.group.weighting) state.group.weighting.units = [];
   __smpHydrate(state);
   a = a || {};
-  var byName = {};
+  var byName = {}, coByName = {};
+  Object.keys(wasCos).forEach(function (k) {
+    var nm = String((wasCos[k] && wasCos[k].name) || "").trim().toLowerCase();
+    /* A COMPANY'S KEY IS POSITIONAL (addCompany mints newco1, newco2), so it
+       is the one row that cannot be matched by key across a rewrite — drop
+       the first company and every key after it shifts by one. Matched by
+       NAME here, which is the only thing about a company the flow carries,
+       so its CEO and its two visibility flags survive a re-run. */
+    if (nm && !coByName[nm]) coByName[nm] = wasCos[k];
+  });
   (a.companies || []).forEach(function (c) {
     var nm = String((c && c.name) || "").trim();
     if (!nm) return;
     var k = addCompany();
     COMPANIES[k].name = nm;
+    var had = coByName[nm.toLowerCase()];
+    if (had) COMPANIES[k] = __smpCarry(had, COMPANIES[k], ["name"]);
     byName[nm.toLowerCase()] = k;
   });
   (a.units || []).forEach(function (u) {
     var nm = String((u && u.name) || "").trim();
     if (!nm) return;
     var co = byName[String((u && u.company) || "").trim().toLowerCase()] || null;
-    addBusinessUnit(nm, (u && u.prefix) || "", co);
+    var k = addBusinessUnit(nm, (u && u.prefix) || "", co);
+    if (k && wasUnits[k]) {
+      UNITS[k] = __smpCarry(wasUnits[k], UNITS[k], ["name", "company", "ukey"]);
+      if (wasRoles[k]) UNIT_ROLES[k] = wasRoles[k];
+      if (wasW[k]) {
+        var rows = GROUP.weighting.units;
+        for (var i = 0; i < rows.length; i++) {
+          if (rows[i] && rows[i].key === k) { wasW[k].unit = nm; rows[i] = wasW[k]; break; }
+        }
+      }
+    }
   });
   (a.functions || []).forEach(function (f) {
     var nm = String((f && f.name) || "").trim();
     if (!nm) return;
-    addFunction(nm, (f && f.format) === "pillars" ? "pillars" : "projects");
+    var fmt = (f && f.format) === "pillars" ? "pillars" : "projects";
+    var k = addFunction(nm, fmt);
+    if (k && wasFns[k]) FUNCTIONS[k] = __smpCarry(wasFns[k], FUNCTIONS[k], ["name", "format"]);
   });
+  /* AND A ROW THAT DID NOT SURVIVE IS NOT CARRIED ANYWHERE, so whoever was
+     in charge of it would simply be gone. The caller writes nothing when
+     this list is not empty and says which rows, rather than this deciding
+     on its own: renaming a unit that has a head is a real thing to want,
+     and it is done inside the platform where the rename keeps the row. */
+  var dropped = [];
+  Object.keys(wasRoles).forEach(function (k) {
+    if (__smpHeld(wasRoles[k]) && !UNITS[k]) {
+      dropped.push(String((wasUnits[k] && wasUnits[k].name) || k));
+    }
+  });
+  Object.keys(wasFns).forEach(function (k) {
+    if (__smpHeld(wasFns[k]) && !FUNCTIONS[k]) {
+      dropped.push(String((wasFns[k] && wasFns[k].name) || k));
+    }
+  });
+  syncWeights();
   /* THE TENANT'S OWN WORDS, through the registry's own entries: the label a
      client uses is the bu column, which is what every heading reads
      (L of the key against "bu"). A word left blank leaves the shipped one — a set-up that
@@ -270,7 +348,7 @@ function __smpShape(state, a) {
     if (v) e.bu = v;
   });
   state.labels = LABELS.entries;
-  return state;
+  return { state: state, dropped: dropped };
 }
 `;
 
@@ -316,7 +394,10 @@ function holds(graph) {
   const c = context();
   return detach(c.__smpHolds(graph));
 }
-/* The set-up flow's answers written in by the product's own minters (§322). */
+/* The set-up flow's answers written in by the product's own minters (§322).
+   Answers { state, dropped }: `dropped` names the units and functions that
+   had somebody in charge and are not in the answers, so the caller can write
+   nothing rather than lose them (§340). */
 function shape(graph, answers) {
   const c = context();
   return detach(c.__smpShape(graph, answers));

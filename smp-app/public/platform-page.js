@@ -1194,6 +1194,9 @@
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" },
     { k:"done",   key:"Done",             label:"Summary",        q:"" }
   ];
+  /* The steps the shape guard speaks for, named once rather than tested as
+     four keys at the two places that ask (§104.7). */
+  var SHAPE_STEPS = ["units", "cos", "fns", "words"];
   function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
 
   /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own
@@ -1241,7 +1244,7 @@
 
   function drawSetup(key){
     if (!key) {
-      S = { key:null, at:0, seen:[], canEdit:true, dirty:false, shapeDirty:false,
+      S = { key:null, at:0, seen:[], canEdit:true, canShape:true, dirty:false, shapeDirty:false,
             client:{ name:"", industry:"", size:"", notes:"", mark:null },
             shape:{ companies:[], units:[], functions:[], words:{} },
             team:[], office:[], register:[], seats:null, holds:null,
@@ -1274,6 +1277,19 @@
       S.shape.units = S.shape.units || [];
       S.shape.functions = S.shape.functions || [];
       S.shape.words = S.shape.words || {};
+      /* ── AND THE SHAPE STOPS BEING EDITABLE ONCE THERE IS A PLAN (§340) ──
+         shapeClient has refused a re-shape since §322 — rightly, because the
+         answers ARE the list and replacing them on a client with authored
+         work is how real work is lost — and the flow was TOLD so, storing
+         `holds` from the server and reading it nowhere. So the units, the
+         companies, the functions and the words stayed fully editable and the
+         refusal arrived on Next, which is §42's drift with the screen saying
+         yes and the save saying no.
+
+         Its own flag, never `canEdit`: what is frozen is the SHAPE, and the
+         client's name, its mark, its modules and its team are all still the
+         consultant's to change on a client that is running. */
+      S.canShape = S.canEdit && !((j.holds && j.holds.plans) || (j.holds && j.holds.capabilities));
       paintSetup();
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
@@ -1287,7 +1303,13 @@
      refusal is SAID rather than swallowed — the shape's refusal is the one
      that matters (a client with a plan in it is not re-shaped, §322). */
   function commitSetup(){
-    if (!S || !S.key || !S.canEdit) return Promise.resolve(true);
+    /* The doors — Save and close, and the summary's two — do not go through
+       goStep, so the guard is asked here too rather than at three call sites
+       (§53.5). It refuses BEFORE posting: a blank row is not a server error. */
+    if (!S) return Promise.resolve(true);
+    var blank = unnamed();
+    if (blank) { setupSay(blank, true); return Promise.resolve(false); }
+    if (!S.key || !S.canEdit) return Promise.resolve(true);
     var chain = Promise.resolve(true);
     if (S.dirty) {
       var b = { action:"saveClient", key:S.key, name:S.client.name,
@@ -1324,8 +1346,39 @@
     n.hidden = !msg;
   }
 
+  /* ONE ANSWER TO WHICH STEP IS NEXT, IN EITHER DIRECTION (§340, §53.5).
+     Next stepped over the dulled Capabilities step and Back did not, so Back
+     from Functions called goStep on a step goStep refuses to open and simply
+     returned — an enabled, pressable button that did nothing (§96). The rail
+     still reached Companies, so nothing was unreachable and nothing said so.
+     It walks past a RUN of dulled steps rather than exactly one, because
+     "+1 if the next one is later" is the same fault waiting for a second. */
+  function stepFrom(i, dir){
+    var n = i + dir;
+    while (n >= 0 && n < STEPS.length && STEPS[n].later) n += dir;
+    return (n < 0 || n > STEPS.length - 1) ? -1 : n;
+  }
+
+  /* AND A ROW LEFT UNNAMED IS REFUSED RATHER THAN DROPPED (§340). The minter
+     skips a blank name, so the row was posted, silently thrown away, and left
+     drawn on screen until the client was reopened — §96 with the sign
+     reversed. Islam: "refuse to move on without naming or remove." Asked of
+     the SHAPE and not of the boxes, so it answers the same however the step
+     was left; the × beside each row is the other half of the sentence. */
+  function unnamed(){
+    var bad = [];
+    if (S.shape.units.some(function (u) { return !String(u.name || "").trim(); })) bad.push("a business unit");
+    if (S.shape.companies.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a company");
+    if (S.shape.functions.some(function (f) { return !String(f.name || "").trim(); })) bad.push("a supporting function");
+    if (!bad.length) return null;
+    return "Name " + bad.join(" and ") + ", or remove the empty row with the × beside it. " +
+           "A row with no name is not saved.";
+  }
+
   function goStep(i){
     if (i < 0 || i > STEPS.length - 1 || STEPS[i].later) return;
+    var why = unnamed();
+    if (why) { setupSay(why, true); return; }
     if (S.seen.indexOf(S.at) < 0) S.seen.push(S.at);
     commitSetup().then(function () { S.at = i; paintSetup(); window.scrollTo({ top:0 }); });
   }
@@ -1383,6 +1436,26 @@
       page.appendChild(ab);
     }
 
+    /* ── AND A CLIENT WITH A PLAN IN IT SAYS SO, ON THE STEPS IT AFFECTS
+       (§340). The same shape as the archived band above and the same reason
+       (§45.2, §53.5) — the fields below are read-only and a form refusing
+       every keystroke with nothing saying why reads as broken. Drawn on the
+       four SHAPE steps alone, because the client's name, its mark, its
+       modules and its team are all still editable on the others, and a band
+       claiming otherwise would be a second thing that is not true (§124).
+       Never beside the archived band: that one already says nothing here can
+       be changed, and saying it twice in two voices is §87's twins. */
+    if (!S.archived && S.key && !S.canShape && SHAPE_STEPS.indexOf(s.k) > -1) {
+      var hb = el("div", "wzarched");
+      hb.appendChild(document.createTextNode("This client has a plan in it, so its "));
+      hb.appendChild(el("b", null, "shape is set from here on"));
+      hb.appendChild(document.createTextNode(
+        ". Set-up rewrites these lists, which would lose that work, so they are " +
+        "read-only out here — change them on the client's own Setup pages. " +
+        "Everything else on this flow is still yours to change."));
+      page.appendChild(hb);
+    }
+
     var grid = el("div", "wzgrid");
     var col = el("div");
     col.appendChild(el("span", "lab", s.key));
@@ -1401,15 +1474,15 @@
 
     var foot = el("div", "wzfoot");
     var back = el("button", "btn", "Back");
-    back.type = "button"; back.disabled = S.at === 0;
-    back.addEventListener("click", function () { goStep(S.at - 1); });
+    back.type = "button"; back.disabled = stepFrom(S.at, -1) < 0;
+    back.addEventListener("click", function () { goStep(stepFrom(S.at, -1)); });
     foot.appendChild(back);
     if (S.at < STEPS.length - 1) {
       var next = el("button", "btn amber", "Next");
       next.type = "button";
       next.addEventListener("click", function () {
         if (!S.key) { createThenGo(); return; }
-        goStep(S.at + 1 + (STEPS[S.at + 1] && STEPS[S.at + 1].later ? 1 : 0));
+        goStep(stepFrom(S.at, 1));
       });
       foot.appendChild(next);
     }
@@ -2028,7 +2101,7 @@
         var r = el("div", "wzrow");
         var nm = el("input", "fld");
         nm.type = "text"; nm.value = row.name;
-        if (!S.canEdit) nm.readOnly = true;
+        if (!S.canShape) nm.readOnly = true;
         nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
         r.appendChild(nm);
         if (kind === "fn") {
@@ -2042,12 +2115,12 @@
             if (row.format === f[0]) o.selected = true;
             sel.appendChild(o);
           });
-          if (!S.canEdit) sel.disabled = true;
+          if (!S.canShape) sel.disabled = true;
           sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; paintSetup(); });
           tail.appendChild(sel);
           r.appendChild(tail);
         }
-        if (S.canEdit) {
+        if (S.canShape) {
           var x = el("button", "wzx", "×");
           x.type = "button";
           x.setAttribute("aria-label", "Remove " + row.name);
@@ -2058,7 +2131,7 @@
       });
       box.appendChild(rows);
     }
-    if (S.canEdit) {
+    if (S.canShape) {
       var add = el("button", "wzadd", kind === "unit" ? "+ Add a business unit" : "+ Add a supporting function");
       add.type = "button";
       add.addEventListener("click", function () {
@@ -2086,12 +2159,12 @@
       .forEach(function (c) {
         var b = el("button", "wzchoice");
         b.type = "button";
-        b.disabled = !S.canEdit;            /* as the size band, and for the same reason */
+        b.disabled = !S.canShape;            /* as the size band, and for the same reason */
         b.setAttribute("aria-pressed", c[0] === has ? "true" : "false");
         b.appendChild(el("span", "cname", c[1]));
         b.appendChild(el("span", "cwhy", c[2]));
         b.addEventListener("click", function () {
-          if (!S.canEdit) return;
+          if (!S.canShape) return;
           if (!c[0]) { S.shape.companies = []; S.shape.units.forEach(function (u) { u.company = ""; }); }
           else if (!S.shape.companies.length) S.shape.companies.push({ name:"" });
           S.shapeDirty = true;
@@ -2108,9 +2181,11 @@
       var nm = el("input", "fld");
       nm.type = "text"; nm.value = co.name;
       nm.setAttribute("placeholder", "The company's name");
+      if (!S.canShape) nm.readOnly = true;
       nm.addEventListener("input", function () { co.name = nm.value; S.shapeDirty = true; });
       r.appendChild(nm);
       var x = el("button", "wzx", "×");
+      x.disabled = !S.canShape;
       x.type = "button"; x.setAttribute("aria-label", "Remove");
       x.addEventListener("click", function () {
         var gone = co.name;
@@ -2124,6 +2199,7 @@
     box.appendChild(rows);
     var add = el("button", "wzadd", "+ Add a company");
     add.type = "button";
+    add.disabled = !S.canShape;
     add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); S.shapeDirty = true; paintSetup(); });
     box.appendChild(add);
 
@@ -2145,6 +2221,7 @@
           if (u.company === co.name) o.selected = true;
           sel.appendChild(o);
         });
+        sel.disabled = !S.canShape;
         sel.addEventListener("change", function () { u.company = sel.value; S.shapeDirty = true; });
         tail.appendChild(sel);
         r.appendChild(tail);
@@ -2198,7 +2275,7 @@
       var i = el("input", "fld");
       i.type = "text";
       i.value = S.shape.words[w[0]] != null ? S.shape.words[w[0]] : w[2];
-      if (!S.canEdit) i.readOnly = true;
+      if (!S.canShape) i.readOnly = true;
       i.addEventListener("input", function () { S.shape.words[w[0]] = i.value; S.shapeDirty = true; });
       c2.appendChild(i); tr.appendChild(c2);
       tr.appendChild(el("td", "muted", w[3]));

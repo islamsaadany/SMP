@@ -375,13 +375,33 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       companies: list("companies"), units: list("units"), functions: list("functions"),
       words: (a.words && typeof a.words === "object") ? a.words : {}
     };
+    /* AND IT REFUSES A REWRITE THAT WOULD LOSE WHOEVER IS IN CHARGE (§340).
+       `holds` counts authored plan lines, and a client can hold a full
+       register with a head on every unit and not one pillar — so that guard
+       never fired for the state this one is about. A row whose key survives
+       keeps its head, its custodian and everything else the flow does not
+       collect; a row that is renamed or taken off the list cannot, because
+       the flow's rows carry no id and a rename is indistinguishable from a
+       removal out here. So nothing is written and the refusal NAMES them
+       (§16.7): the act they want is a rename, and a rename keeps the row
+       when it is done on the client's own Setup page. */
     let held: { plans: number; capabilities: number } | null = null;
+    let lost: string[] = [];
     await withTenant(row.id, async (c) => {
       const g = await readState(c);
       held = frozen.holds(g);
       if (held.plans || held.capabilities) return;
-      await loadGraph(c, frozen.shape(g, answers));
+      const res = frozen.shape(g, answers) as { state: unknown; dropped: string[] };
+      lost = res.dropped || [];
+      if (lost.length) return;
+      await loadGraph(c, res.state);
     });
+    if (lost.length) {
+      return no(409, "Somebody is in charge of " + lost.join(", ") +
+        ", and set-up out here cannot carry that across a rename or a removal. " +
+        "Rename or retire " + (lost.length === 1 ? "it" : "them") +
+        " on the client's own Setup pages instead, where the row keeps who runs it.");
+    }
     const h = held as { plans: number; capabilities: number } | null;
     if (h && (h.plans || h.capabilities)) {
       return no(409, "This client already has a plan in it — " +

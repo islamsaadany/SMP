@@ -46049,3 +46049,187 @@ reproduced identically with the change stashed (§303); it is the failure
 bump: `git status` names six files, all under `smp-app/`.
 
 ---
+
+## §340 — WHAT THE SET-UP FLOW NEVER ASKED ABOUT IS NOT THE FLOW'S TO RESET (2026-09-13)
+
+Islam, of the wizard on `main`: *"can you check the current main and see what we
+should enhance in the wizard?"* — an assessment first, then his word on each of
+seven findings, one at a time: *"1. ok 2. go ahead 3. ok and the word is real
+4. reufse to move on without naming or remove 5. ok 6. ok 7. ok."*
+
+**THE ASSESSMENT IS PART OF THE DECISION AND IS RECORDED AS SUCH.** Six of the
+seven are faults; one (§340.2) is a build and has a mockup rather than a commit.
+Two of my own estimates were wrong in the write-up and both are corrected here
+rather than quietly: item 3 was called *"one line"* and is a label sweep, and
+item 1 was called *"who runs what"* and is five kinds of data on one line.
+
+### §340.1 — A SECOND PASS THROUGH THE FLOW PUT BACK AN EMPTY ROW
+
+`__smpShape` empties four lists and re-mints every row, which is right for the
+shape and wrong for everything hanging off it. Measured on a graph built by the
+flow's own minter and then planted the way a real client is planted — a head, a
+custodian, a weight, a mark, an aspiration, a function's definition, all of
+which arrive INSIDE the platform after set-up — a second pass came back with
+every one of them gone.
+
+**AND THE GUARD IN FRONT OF IT NEVER FIRED FOR THIS STATE.** `shapeClient` has
+refused a re-shape since §322, and `holds` counts **authored plan lines and
+capabilities** — a client can hold a full register with somebody in charge of
+every unit and not one pillar, which is exactly the state the flow leaves behind
+and exactly the state this destroyed. *A guard that counts one kind of work is
+not a guard against losing another.*
+
+**THE FIX IS ONE PRINCIPLE, NOT A LIST OF FIELDS**: a row whose key survives
+keeps everything except what the flow collects, which is a name, a company and a
+plan type. Written as *start from the old row and let the minter overwrite what
+it owns* — never as a list of fields to carry, or a field added to a unit next
+year is reset by this with nobody remembering to come back (§104.7).
+
+**AND THE WEIGHTING ROWS WERE MULTIPLYING, WHICH IS ARITHMETIC AND NOT TIDINESS.**
+`addBusinessUnit` pushes a row into `GROUP.weighting.units`, nothing here cleared
+them, and `syncWeights()` normalises the composite across whatever it finds — so
+a third pass through the flow left **9 rows for 2 units**, measured, and every
+unit's weight and the group's composite with it. Cleared and restored by key,
+which is what that table has been matched by since the rename bug.
+
+**A ROW THAT DOES NOT SURVIVE IS REFUSED BY NAME, AND NOTHING IS WRITTEN.** The
+flow's rows carry no id, so out here a rename is indistinguishable from a
+removal — and the act somebody wants is a rename, which keeps the row when it is
+done on the client's own Setup page. So the refusal says that rather than this
+deciding on its own (§16.7).
+
+**A company is matched by NAME and not by key**, because `addCompany` mints
+`newco1`, `newco2` — positional, so dropping the first shifts every key after it.
+Its CEO and its two visibility flags survive a re-run; that is the only thing a
+key match would have bought and the only thing a name match can give.
+
+### §340.2 — THE STEP THAT DESCRIBES A PLATFORM TWO BUILDS AGO
+
+The Capabilities step is dulled and says *"What does not exist is a capability
+standing on its own beside the business units."* Spec 048 built exactly that —
+§326 stage 1, §334 stage 2, both live in the frozen sources. The Functions step
+moved under it too: since §334 a supporting function holds its own projects
+DIRECTLY, so *"Capabilities & projects"* names something that is no longer what
+it does, and it is a **third spelling** of a word `planFormatCell()` already
+writes as *Projects* and `capFormatCell()` writes beside it.
+
+**DRAWN, NOT BUILT** (rule 1c): `design-mockups/capability-step/`, in the
+console's own stylesheet lifted verbatim, so the drawing is the pixels it would
+ship with rather than the pixels it could (§41.9). **And the mockup carries the
+one decision that is Islam's**: `holds` counts a capability AT ALL, which was
+right while nothing out here could make one — the moment this step can, adding
+one locks the consultant out of their own set-up. Counting a capability that
+HOLDS something is the fix and it is a change to a refusal, so it is asked
+rather than assumed.
+
+### §340.3 — THE FIRST WORD THE FLOW ASKS FOR WAS WRITTEN NOWHERE
+
+The words step has asked what a client calls a **business unit** since §322,
+under the key `unitword`, and there is no such entry in the label registry — so
+the minter walked the list, found no match and dropped it. Accepted, saved, and
+the platform went on saying its own word. *A write-only field is the quietest
+fault, because the file looks right* (§294.2). It appears in exactly two files:
+`platform.html` and its generated copy.
+
+**AND ADDING IT TO THE SOURCE REACHES A NEW CLIENT AND NOBODY ELSE**, which is
+the finding under the finding: hydration REPLACES the label list with the
+tenant's stored one rather than merging it over the shipped defaults, so a label
+added to the product is invisible to every client that already exists — §30.2's
+rule, never applied to labels. **Merging at hydrate is not the answer**: a reader
+that creates what it looked for puts a phantom change into every save, and a
+labels change is the SMO's, so the first save by anybody else would be refused
+for ever (§42's own recorded fault). Migration **008** writes the row instead,
+last, matching the shipped order exactly — first in one place and last in the
+other is two answers to one question (§53.5).
+
+**WHERE THE WORD MAY BE READ IS DECIDED BY WHAT KIND OF WORD IT IS.** The
+registry's values are PLURAL, so it is routed at headings and group labels and
+never at an inflected sentence: `plural(n, "business unit")` through this would
+print *"3 Business unitss"*, which is §107.8 twice over. **Thirteen sites**, all
+of them inside a render function — the group's own Performance cards and
+sections, the plan builder's side switch, the Setup page's heading and section,
+and the two places that name that page. **Left alone and said rather than
+skipped**: every `plural()` and every sentence with an article in it; the
+knowledge base, which describes the platform rather than a tenant (§160); the
+workbook's headers, because an upload matches on header name and renaming one
+breaks every file already downloaded (§22, §58, §65); and the role-key map,
+where `"business unit owner"` is a KEY.
+
+**AND THE RAIL'S OWN ENTRY IS RESOLVED AT RENDER TIME, NOT IN `SUBS`** — that is
+an object literal evaluated when the file loads, which is before the tenant's
+graph arrives, so a label written into it would be the shipped word for ever on
+a page whose heading now says the client's (§64).
+
+### §340.4 — A ROW LEFT UNNAMED IS REFUSED, NOT DROPPED
+
+The minter skips a blank name (correctly), so the row was posted, silently
+thrown away, and left drawn on screen until the client was reopened. Islam:
+*"refuse to move on without naming or remove."* Asked of the SHAPE rather than
+of the boxes, so it answers the same however the step was left, and in
+`commitSetup()` as well as `goStep()` — the three doors that save and leave do
+not go through the latter (§53.5). It refuses BEFORE posting: a blank row is not
+a server error.
+
+### §340.5 — A CLIENT WITH A PLAN IN IT NOW SAYS SO
+
+`shapeClient` has refused a re-shape since §322 and the flow was TOLD so — it
+stores `holds` from the server and read it **nowhere**, so the four shape steps
+stayed fully editable and the refusal arrived on Next. §42's drift with the
+screen saying yes and the save saying no, with the answer already in hand.
+
+**ITS OWN FLAG, NEVER `canEdit`**: what is frozen is the SHAPE, and the client's
+name, its mark, its modules and its team are all still the consultant's to
+change on a client that is running. **The band is the archived band's own shape
+and never drawn beside it** — that one already says nothing here can be changed,
+and saying it twice in two voices is §87's twins.
+
+### §340.6 — BACK WALKED INTO A STEP THAT DOES NOT OPEN
+
+Next stepped over the dulled Capabilities step and Back did not, so Back from
+Functions called `goStep` on a step `goStep` refuses to open and simply
+returned — an enabled, pressable button that did nothing (§96). The rail still
+reached Companies, so nothing was unreachable and nothing said so. `stepFrom(i,
+dir)` is one answer in both directions and walks past a RUN of dulled steps,
+because *"+1 if the next one is later"* is the same fault waiting for a second.
+
+### §340.7 — AND THE CHECKS THAT WOULD HAVE SEEN ANY OF IT
+
+`client-setup-outside.py` covers the way in, the client, creating, the units,
+the functions, the summary, reopening and the modules band — and had **no
+section for the words step, the companies step, the office step, or what a
+SECOND pass does**. Which is why §340.1, .3, .4 and .5 were all invisible.
+
+**`smp-app/checks/setup-shape.mjs` is new and needs no database and no browser**,
+because `frozen.shape` is a pure function of a graph and the answers — which is
+also what makes it the right place to assert it (§42: the rule, not the page).
+**19 assertions, RED four ways** (`--break=no-carry` 3, `no-dropped` 2,
+`keep-weights` 1 printing *9 rows for 2 units*, `extra-word` 1), the breaks made
+from the SOURCE and never by bending the fixture (§276). **§1 is an AGREEMENT**:
+every key the flow's words step asks for is a key the registry holds, at both
+ends — asserting that one key exists guards that one key, asserting the
+agreement guards the next one somebody adds (§94.8).
+
+The screen's three go in `client-setup-outside.py` as §8c, §8d and §8e, **RED
+three ways** from the sources (`back-one-step` 1 printing *5Functions*,
+`no-blank-guard` 3, `shape-always-editable` 4). **§8e MAKES its state** — a
+client with a plan is a state the flow cannot reach on its own (§255) — and
+**my first run of it DIED rather than reporting** (§215, in the file whose own
+docstring promises every probe degrades): a `pg.click` on a step that is not
+there waits 30 seconds and took the eight assertions after it down with it.
+
+**Verified:** setup-shape 19/0 red four ways · client-setup-outside 0 failures
+red three ways · setup-arrange, setup-pages, setup-header, setup-rail, row-edit,
+table-standard-all, client-archive, platform-cards 19/0, no-jump, plan-builder,
+knowledge-base, wave3 all green · check:deploy 5/0 · generated-in-step green but
+for its own uncommitted-edits guard · typecheck clean COLD but for
+`lib/prisma.ts`, which §339 records as pre-existing · `check:modules` 61/1
+reproduces **identically with this work stashed** (§303) — it is §336.2's.
+
+**The built file changes**, so a merge owes the `sw.js` SHELL bump, confirmed
+against `origin/main` immediately before the push (§91, §94.12, §94.16).
+
+**RECORDED, NOT DONE**: the knowledge base and the recipes still say the
+platform's own word for a business unit; `plural()` sites keep it by rule rather
+than by omission; and §340.2 is drawn and awaiting Islam.
+
+---

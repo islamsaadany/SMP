@@ -8964,7 +8964,85 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;339: the setting that could not open,
+*Last Updated: 2026-09-13 &mdash; **&sect;340: what the set-up flow never
+asked about is not the flow's to reset.** Islam: *"can you check the current
+main and see what we should enhance in the wizard?"* &mdash; an assessment
+first, then his word on each of seven findings one at a time. **TWO OF MY OWN
+ESTIMATES IN THAT WRITE-UP WERE WRONG AND BOTH ARE CORRECTED RATHER THAN
+QUIETLY WIDENED**: item 3 was called *"one line"* and is a label sweep, item 1
+was called *"who runs what"* and is five kinds of data on one line.
+**&sect;340.1 &mdash; A SECOND PASS THROUGH THE FLOW PUT BACK AN EMPTY ROW**:
+`__smpShape` empties four lists and re-mints every row, so fixing a spelling or
+changing one word returned a unit with no head, no custodian, no weight, no
+mark, no aspiration and no Who we are answers, and a function with no head and
+no definition &mdash; **and the guard in front of it never fired for this
+state**, because `holds` counts authored PLAN LINES and a client can hold a full
+register with somebody in charge of every unit and not one pillar. *A guard that
+counts one kind of work is not a guard against losing another.* The fix is one
+principle expressed as *start from the old row and let the minter overwrite what
+it owns*, never a list of fields to carry (&sect;104.7). **AND THE WEIGHTING
+ROWS WERE MULTIPLYING, WHICH IS ARITHMETIC**: `addBusinessUnit` pushes a row,
+nothing cleared them, and `syncWeights()` normalises across whatever it finds
+&mdash; measured, **9 rows for 2 units** after three passes, and every weight and
+the group composite with them. **A row that does not survive is refused BY NAME
+and nothing is written**: the flow's rows carry no id, so out here a rename is
+indistinguishable from a removal, and the act somebody wants is a rename, which
+keeps the row on the client's own Setup page (&sect;16.7). A company is matched
+by NAME, because `addCompany` mints positionally.
+**&sect;340.2 &mdash; THE STEP THAT DESCRIBES A PLATFORM TWO BUILDS AGO** is
+DRAWN, not built (rule 1c): the Capabilities step is dulled and says the thing
+it asks for does not exist, which spec 048 built (&sect;326, &sect;334, live in
+the sources), and *"Capabilities &amp; projects"* on the Functions step is a
+THIRD spelling of a word `planFormatCell()` already writes as *Projects*. The
+mockup is in the console's own stylesheet lifted verbatim (&sect;41.9) and
+carries the one decision that is Islam's: `holds` counts a capability AT ALL,
+right while nothing out here could make one and a lock-out the moment this step
+can.
+**&sect;340.3 &mdash; THE FIRST WORD THE FLOW ASKS FOR WAS WRITTEN NOWHERE**:
+`unitword` is not a key in the label registry, so the minter dropped it &mdash;
+accepted, saved, and the platform went on saying its own word (&sect;294.2's
+write-only column). **And adding it to the source reaches a NEW client and
+nobody else**, because hydration REPLACES the label list rather than merging it
+over the shipped defaults &mdash; &sect;30.2 never applied to labels &mdash; while
+merging at hydrate would put a phantom change into every save and refuse the
+first one by anybody who is not the SMO (&sect;42's own fault). Migration
+**008** writes the row, LAST, matching the shipped order (&sect;53.5).
+**Where the word may be read is decided by what kind of word it is**: the
+registry's values are plural, so it is routed at headings and group labels and
+never at an inflected sentence (`plural(n, "business unit")` would print *"3
+Business unitss"*, &sect;107.8 twice) &mdash; **thirteen sites**, and the
+knowledge base, every `plural()`, the workbook's headers (&sect;22, &sect;65)
+and the role-key map left alone and SAID. **And the rail's own entry resolves at
+render time, not in `SUBS`**, which is evaluated before the tenant's graph
+arrives (&sect;64).
+**&sect;340.4** a row left unnamed is refused rather than dropped, asked of the
+SHAPE and in `commitSetup()` as well as `goStep()` (three doors do not go
+through the latter). **&sect;340.5** a client with a plan in it says so and its
+four shape steps are read-only &mdash; its own flag, never `canEdit`, because
+the name, the mark, the modules and the team are still the consultant's; the
+archived band's own shape and never drawn beside it (&sect;87). **&sect;340.6**
+Back walked into the dulled step and returned, an enabled button that did
+nothing (&sect;96); `stepFrom()` is one answer in both directions and walks past
+a RUN of them.
+**&sect;340.7 &mdash; AND THE CHECKS THAT WOULD HAVE SEEN ANY OF IT**: the
+flow's own file had no section for the words step, the companies step, the
+office step or a SECOND pass, which is why four of these were invisible.
+`smp-app/checks/setup-shape.mjs` needs no database and no browser, because
+`frozen.shape` is a pure function &mdash; 19 assertions, RED four ways from the
+SOURCE (&sect;276), and **&sect;1 is an AGREEMENT**: every key the words step
+asks for is a key the registry holds, at both ends, so it guards the next one
+somebody adds rather than this one (&sect;94.8). The screen's three are
+&sect;8c/&sect;8d/&sect;8e, RED three ways &mdash; and **&sect;8e's first run
+DIED rather than reporting** (&sect;215, in the file promising every probe
+degrades): a `pg.click` on a step that is not there waits 30s and took the eight
+assertions after it down. `check:modules` 61/1 reproduces **identically with
+this work stashed** (&sect;303) &mdash; it is &sect;336.2's. **The built file
+changes**, so a merge owes the `sw.js` SHELL bump confirmed against
+`origin/main` immediately before the push (&sect;91, &sect;94.16). **RECORDED,
+NOT DONE**: the knowledge base keeps the platform's own word, and &sect;340.2 is
+drawn and awaiting Islam.*
+
+*Earlier: 2026-09-13 &mdash; **&sect;339: the setting that could not open,
 and the creator who was nowhere in the data.** The two things &sect;337 and
 &sect;338 wrote down and deliberately left, both put to Islam in plain words
 with their costs and both answered in one message: *"1. no need a client they

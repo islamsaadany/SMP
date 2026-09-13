@@ -5299,7 +5299,21 @@ var LABELS = {
     { key:"measure",     internal:"Key Measure",        group:"Key measures",      bu:"Key measures",
       note:"The measures under a single pillar." },
     { key:"tactic",      internal:"Tactic",             group:"Tactics",           bu:"Tactics",
-      note:"The work under a pillar. Spans quarters, has an owner." }
+      note:"The work under a pillar. Spans quarters, has an owner." },
+    /* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL NOW (§340). The set-up
+       flow has asked for it since §322 and wrote it NOWHERE — there was no
+       such entry, so the minter walked this list, found no match and dropped
+       the answer: accepted, saved and never used, which is the quietest kind
+       of fault because the file looks right (§294.2). The key is the one the
+       flow already spells, `unitword`; nothing was ever stored under it, so
+       moving it would buy nothing a reader can see (§30.2).
+
+       IT IS THE PLURAL WORD, like every entry beside it, and that is what
+       decides where it may be read: a heading and a group label take it, and
+       an inflected sentence never does — plural() returns a count and a word,
+       so "3 " + this would print "3 Business unitss" (§107.8, twice). */
+    { key:"unitword",    internal:"Business Unit",      group:"Business units",    bu:"Business units",
+      note:"What this client calls a business unit. Headings only \u2014 sentences keep the platform's own word." }
   ]
 };
 
@@ -22381,7 +22395,7 @@ function renderCompanyPerformance(coKey){
   var keys = companyUnitKeys(ck);
   if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
     ' holds no business unit yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 Business units</b>; until one does, there is nothing here to read.</div>';
+    '<b>Setup \u2192 " + L("unitword","bu") + "</b>; until one does, there is nothing here to read.</div>';
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);
@@ -22422,7 +22436,7 @@ function renderCompanyPerformance(coKey){
     'entered.</p>';
 
   var head = '<div class="scores">' +
-    drillCard("Business units &mdash; performance" + tip(TIP_PERF), perf, {
+    drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), perf, {
       primary: true,
       sub: "The " + plural(keys.length, "unit") + " in " + esc(co.name) +
         ", each on its own " + L("keyobj","bu").toLowerCase() + ". " + esc(co.name) +
@@ -22430,7 +22444,7 @@ function renderCompanyPerformance(coKey){
       drill: perfDrill, modalTitle: esc(co.name) + " \u2014 performance",
       modalSub: "Weighted across the units in this company"
     }) +
-    drillCard("Business units &mdash; execution" + tip(TIP_EXEC), r, {
+    drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), r, {
       sub: deliveryLine(ex, pl, "in these units"),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
       modalSub: "Weighted compile of tactic delivery, as a share of plan"
@@ -22447,7 +22461,7 @@ function renderCompanyPerformance(coKey){
   '</div>';
 
   return perfActs("") + head +
-    section("", "Business units", null,
+    section("", L("unitword","bu"), null,
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
       TIP_PERF, viewToggle("units"));
@@ -22661,7 +22675,7 @@ function whereNext(keys){
             "</b> objectives, each scored against its target.",
           drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
-        drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
+        drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
@@ -22670,14 +22684,14 @@ function whereNext(keys){
              calculated →" is two lines below and opens exactly that. */
           primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> business units\u2019 own " +
             L("keyobj","bu").toLowerCase() + ", weighted by size.",
-          drill: perfDrill, modalTitle: "Business units \u2014 performance", modalSub: "Weighted compile across the three units"
+          drill: perfDrill, modalTitle: L("unitword","bu") + " \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
-        drillCard("Business units &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
+        drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
           sub: deliveryLine(groupExec(), groupPlan()),
-          drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
+          drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
       '</div>' + whereNext(UNIT_KEYS)) });
 
@@ -22687,7 +22701,7 @@ function whereNext(keys){
         ' &middot; drag by the handle to reorder</span></div>' : '';
   };
 
-  SECS.push({ t: "Business units", h: section("", "Business units",
+  SECS.push({ t: L("unitword","bu"), h: section("", L("unitword","bu"),
       null,
       GVIEW.units === "table"
         ? unitsTable(keys)
@@ -29786,7 +29800,7 @@ function renderUnits(){
       unitKebab(k, u, mayEdit && !arranging) + '</tr>';
   }).join("");
 
-  return cfgHead("Business units", [], null, mayEdit, "all",
+  return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
@@ -29800,7 +29814,7 @@ function renderUnits(){
        tbody, keep their `data-oi` and sit between the ones you can see — a drop
        between two visible rows would land somewhere else entirely. You cannot
        arrange a filtered list, so while arranging there is no filter to have. */
-    section("", "Business units", null,
+    section("", L("unitword","bu"), null,
       (arranging ? "" : tkBar("units", { placeholder:"Search the units…" })) +
       setArrangeBand("units", UNIT_KEYS.length, "business unit") +
       '<div class="cfg' + (arranging ? ' arranging' : '') + '">' +
@@ -34514,7 +34528,7 @@ function renderArchives(){
   if (!ARCHIVES.length)
     return section("", "Archived plans",
       null,
-      '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>Business units</b>, ' +
+      '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>" + L("unitword","bu") + "</b>, ' +
       'or open a new reporting cycle, and what it displaces will appear here with a way to put ' +
       'it back.</div>');
 
@@ -37478,7 +37492,7 @@ function builderBandHtml(tabKey, secOf){
 function builderChooserHtml(){
   var side = (BCHOOSE && BCHOOSE.side) || "units";
   var seg = '<div class="bseg">' +
-    '<button data-bside="units" aria-pressed="' + (side === "units") + '">Business units</button>' +
+    '<button data-bside="units" aria-pressed="' + (side === "units") + '">' + L("unitword","bu") + '</button>' +
     '<button data-bside="fns" aria-pressed="' + (side === "fns") + '">Supporting functions</button></div>';
 
   var rows = (side === "units"
@@ -50746,7 +50760,17 @@ var SYNC = (function () {
   /* The setup destination IS manage + setup now. One list, built here rather
      than written out twice, so a page cannot be in one and missing from the
      other. */
-  function setupDefs(){ return SUBS.manage.concat(SUBS.setup); }
+  /* AND THE RAIL'S OWN ENTRY TAKES THE TENANT'S WORD HERE, NOT IN `SUBS`
+     (§340, §64). `SUBS` is an object literal evaluated when the file loads,
+     which is before the tenant's graph arrives — a label written into it
+     would be the SHIPPED word for ever, on a page whose heading now says the
+     client's. Resolved at render time instead, in the one function that
+     builds this list, so the rail and the page it opens cannot disagree. */
+  function setupDefs(){
+    return SUBS.manage.concat(SUBS.setup).map(function(d){
+      return d.k === "units" ? Object.assign({}, d, { label:L("unitword","bu") }) : d;
+    });
+  }
 
   /* THE GROUP NAMES ANSWER RATHER THAN ASK (§108.2). §46 named these as the
      QUESTION you came to answer — "Who", "What we run", "How it's measured" —

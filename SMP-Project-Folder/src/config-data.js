@@ -30,7 +30,21 @@ var LABELS = {
     { key:"measure",     internal:"Key Measure",        group:"Key measures",      bu:"Key measures",
       note:"The measures under a single pillar." },
     { key:"tactic",      internal:"Tactic",             group:"Tactics",           bu:"Tactics",
-      note:"The work under a pillar. Spans quarters, has an owner." }
+      note:"The work under a pillar. Spans quarters, has an owner." },
+    /* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL NOW (§340). The set-up
+       flow has asked for it since §322 and wrote it NOWHERE — there was no
+       such entry, so the minter walked this list, found no match and dropped
+       the answer: accepted, saved and never used, which is the quietest kind
+       of fault because the file looks right (§294.2). The key is the one the
+       flow already spells, `unitword`; nothing was ever stored under it, so
+       moving it would buy nothing a reader can see (§30.2).
+
+       IT IS THE PLURAL WORD, like every entry beside it, and that is what
+       decides where it may be read: a heading and a group label take it, and
+       an inflected sentence never does — plural() returns a count and a word,
+       so "3 " + this would print "3 Business unitss" (§107.8, twice). */
+    { key:"unitword",    internal:"Business Unit",      group:"Business units",    bu:"Business units",
+      note:"What this client calls a business unit. Headings only \u2014 sentences keep the platform's own word." }
   ]
 };
 

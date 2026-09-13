@@ -1186,7 +1186,17 @@
   /* The setup destination IS manage + setup now. One list, built here rather
      than written out twice, so a page cannot be in one and missing from the
      other. */
-  function setupDefs(){ return SUBS.manage.concat(SUBS.setup); }
+  /* AND THE RAIL'S OWN ENTRY TAKES THE TENANT'S WORD HERE, NOT IN `SUBS`
+     (§340, §64). `SUBS` is an object literal evaluated when the file loads,
+     which is before the tenant's graph arrives — a label written into it
+     would be the SHIPPED word for ever, on a page whose heading now says the
+     client's. Resolved at render time instead, in the one function that
+     builds this list, so the rail and the page it opens cannot disagree. */
+  function setupDefs(){
+    return SUBS.manage.concat(SUBS.setup).map(function(d){
+      return d.k === "units" ? Object.assign({}, d, { label:L("unitword","bu") }) : d;
+    });
+  }
 
   /* THE GROUP NAMES ANSWER RATHER THAN ASK (§108.2). §46 named these as the
      QUESTION you came to answer — "Who", "What we run", "How it's measured" —

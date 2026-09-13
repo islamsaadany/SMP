@@ -960,7 +960,7 @@ function renderUnits(){
       unitKebab(k, u, mayEdit && !arranging) + '</tr>';
   }).join("");
 
-  return cfgHead("Business units", [], null, mayEdit, "all",
+  return cfgHead(L("unitword","bu"), [], null, mayEdit, "all",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("units", mayEdit)) +
 
     /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
@@ -974,7 +974,7 @@ function renderUnits(){
        tbody, keep their `data-oi` and sit between the ones you can see — a drop
        between two visible rows would land somewhere else entirely. You cannot
        arrange a filtered list, so while arranging there is no filter to have. */
-    section("", "Business units", null,
+    section("", L("unitword","bu"), null,
       (arranging ? "" : tkBar("units", { placeholder:"Search the units…" })) +
       setArrangeBand("units", UNIT_KEYS.length, "business unit") +
       '<div class="cfg' + (arranging ? ' arranging' : '') + '">' +
@@ -5688,7 +5688,7 @@ function renderArchives(){
   if (!ARCHIVES.length)
     return section("", "Archived plans",
       null,
-      '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>Business units</b>, ' +
+      '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>" + L("unitword","bu") + "</b>, ' +
       'or open a new reporting cycle, and what it displaces will appear here with a way to put ' +
       'it back.</div>');
 

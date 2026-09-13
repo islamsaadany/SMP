@@ -1729,7 +1729,7 @@ function renderCompanyPerformance(coKey){
   var keys = companyUnitKeys(ck);
   if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
     ' holds no business unit yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 Business units</b>; until one does, there is nothing here to read.</div>';
+    '<b>Setup \u2192 " + L("unitword","bu") + "</b>; until one does, there is nothing here to read.</div>';
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);
@@ -1770,7 +1770,7 @@ function renderCompanyPerformance(coKey){
     'entered.</p>';
 
   var head = '<div class="scores">' +
-    drillCard("Business units &mdash; performance" + tip(TIP_PERF), perf, {
+    drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), perf, {
       primary: true,
       sub: "The " + plural(keys.length, "unit") + " in " + esc(co.name) +
         ", each on its own " + L("keyobj","bu").toLowerCase() + ". " + esc(co.name) +
@@ -1778,7 +1778,7 @@ function renderCompanyPerformance(coKey){
       drill: perfDrill, modalTitle: esc(co.name) + " \u2014 performance",
       modalSub: "Weighted across the units in this company"
     }) +
-    drillCard("Business units &mdash; execution" + tip(TIP_EXEC), r, {
+    drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), r, {
       sub: deliveryLine(ex, pl, "in these units"),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
       modalSub: "Weighted compile of tactic delivery, as a share of plan"
@@ -1795,7 +1795,7 @@ function renderCompanyPerformance(coKey){
   '</div>';
 
   return perfActs("") + head +
-    section("", "Business units", null,
+    section("", L("unitword","bu"), null,
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
       TIP_PERF, viewToggle("units"));
@@ -2009,7 +2009,7 @@ function whereNext(keys){
             "</b> objectives, each scored against its target.",
           drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
-        drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
+        drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
@@ -2018,14 +2018,14 @@ function whereNext(keys){
              calculated →" is two lines below and opens exactly that. */
           primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> business units\u2019 own " +
             L("keyobj","bu").toLowerCase() + ", weighted by size.",
-          drill: perfDrill, modalTitle: "Business units \u2014 performance", modalSub: "Weighted compile across the three units"
+          drill: perfDrill, modalTitle: L("unitword","bu") + " \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
-        drillCard("Business units &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
+        drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
           sub: deliveryLine(groupExec(), groupPlan()),
-          drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
+          drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
       '</div>' + whereNext(UNIT_KEYS)) });
 
@@ -2035,7 +2035,7 @@ function whereNext(keys){
         ' &middot; drag by the handle to reorder</span></div>' : '';
   };
 
-  SECS.push({ t: "Business units", h: section("", "Business units",
+  SECS.push({ t: L("unitword","bu"), h: section("", L("unitword","bu"),
       null,
       GVIEW.units === "table"
         ? unitsTable(keys)

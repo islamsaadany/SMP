@@ -57,6 +57,9 @@ def ck(what, ok, detail=""):
         fails.append(what)
 
 SENT = []
+# How many authored plan lines the stub's client holds. 0 for every section
+# but §8e, which sets it and puts it back (§94.2).
+PLANNED = [0]
 
 # The client the stub already holds, so "opening it afterwards" can be driven.
 HELD = {
@@ -132,7 +135,10 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                 {"key": "super", "name": "Super user", "note": "holds the access matrix"},
                 {"key": "smoteam", "name": "SMO team", "note": "runs cycles"}],
                 "canEdit": True, "register": [], "office": [], "shape": SHAPE,
-                "holds": {"plans": 0, "capabilities": 0, "units": 2, "functions": 1},
+                # A CLIENT WITH A PLAN IN IT IS A STATE THE FLOW CANNOT REACH
+                # ON ITS OWN — a pillar is authored INSIDE the platform — so the
+                # stub is told to answer one (§255), and §8e asks for it.
+                "holds": {"plans": PLANNED[0], "capabilities": 0, "units": 2, "functions": 1},
                 # §322.1 carries §320.4's band onto this flow's first step, so
                 # the stub answers what that band reads — the whole offer and
                 # what this client holds, both from the server (§53.5).
@@ -377,6 +383,129 @@ with sync_playwright() as p:
     cur = pg.query_selector(".wzstep[aria-current='step']")
     ck("…without repainting the step out from under it (§71.2)",
        cur is not None and "The client" in cur.text_content())
+
+    # ── 8c · A ROW WITH NO NAME IS REFUSED, NOT DROPPED (§340) ───────────
+    # The minter skips a blank name, so the row was posted, thrown away and
+    # left drawn until the client was reopened — accepted on screen, gone in
+    # the database, nothing said (§96 with the sign reversed). Islam: "refuse
+    # to move on without naming or remove."
+    #
+    # ASSERTED AS WHAT THE PAGE POSTS AND WHERE IT STANDS, never as the
+    # notice's wording: a build that said something and moved on anyway would
+    # satisfy a text assertion perfectly (§94.8).
+    print("\n§8c · a row with no name")
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(400)
+    pg.click(".wzadd")
+    pg.wait_for_timeout(250)
+    n_before = len(SENT)
+    pg.click(".wzfoot >> text=Next")
+    pg.wait_for_timeout(450)
+    at = pg.eval_on_selector(".wzstep[aria-current='step']", "e => e.textContent")
+    ck("Next does not leave the step while a row has no name",
+       isinstance(at, str) and "Business units" in at, at)
+    ck("…and nothing is posted, because a blank row is not a server error",
+       not any(b.get("action") == "shapeClient" for b in SENT[n_before:]),
+       [b.get("action") for b in SENT[n_before:]])
+    said = pg.query_selector("#setupsaid")
+    ck("…and it says which kind of row and what to do",
+       bool(said) and not said.is_hidden() and "×" in (said.text_content() or ""),
+       said.text_content() if said else None)
+    # BOTH ENDS (§94.2): a build that simply never moved on would pass all three.
+    rows = pg.query_selector_all(".wzrow .fld")
+    if rows:
+        rows[-1].fill("Sweets 2")
+        rows[-1].evaluate("e => e.blur()")
+    pg.wait_for_timeout(150)
+    pg.click(".wzfoot >> text=Next")
+    pg.wait_for_timeout(500)
+    at2 = pg.eval_on_selector(".wzstep[aria-current='step']", "e => e.textContent")
+    ck("…and naming it lets you move on", isinstance(at2, str) and "Companies" in at2, at2)
+
+    # ── 8d · BACK WALKS PAST THE DULLED STEP (§340) ──────────────────────
+    # Next stepped over Capabilities and Back did not, so Back from Functions
+    # asked goStep for a step goStep refuses to open and simply returned — an
+    # enabled, pressable button that did nothing (§96). The rail still reached
+    # Companies, so nothing was unreachable and nothing said so.
+    print("\n§8d · Back, past a step that does not open")
+    pg.click(".wzstep >> text=Functions")
+    pg.wait_for_timeout(450)
+    back = pg.query_selector(".wzfoot >> text=Back")
+    ck("the Functions step offers Back", bool(back) and not back.is_disabled())
+    if back:
+        back.click(); pg.wait_for_timeout(500)
+    at3 = pg.eval_on_selector(".wzstep[aria-current='step']", "e => e.textContent")
+    ck("…and it lands on Companies, the step before the dulled one",
+       isinstance(at3, str) and "Companies" in at3, at3)
+    # THE OTHER END, or "Back always moves" would be satisfied by a build that
+    # ignored the dulled step's own rule and OPENED it.
+    ck("…never on Capabilities itself",
+       isinstance(at3, str) and "Capabilities" not in at3, at3)
+    pg.click(".wzstep >> text=The client")
+    pg.wait_for_timeout(400)
+    b0 = pg.query_selector(".wzfoot >> text=Back")
+    ck("and on the first step Back is disabled rather than dead",
+       bool(b0) and b0.is_disabled())
+
+    # ── 8e · A CLIENT WITH A PLAN SAYS SO (§340) ─────────────────────────
+    # shapeClient has refused a re-shape since §322 and the flow was TOLD so,
+    # storing `holds` from the server and reading it nowhere — so the four
+    # shape steps stayed editable and the refusal arrived on Next (§42's
+    # drift, screen yes and save no).
+    print("\n§8e · a client that already has a plan")
+    PLANNED[0] = 12
+    pg.goto(BASE + "/platform")
+    pg.wait_for_timeout(600)
+    # The card's own Settings mark, the same door §8 uses — and EVERY PROBE
+    # DEGRADES from here (§215, this file's own promise, which my first run of
+    # this section broke: a pg.click on a step that is not there waits 30s and
+    # took the eight assertions after it down with it).
+    cog = pg.query_selector(".ccfg")
+    if cog:
+        cog.click(); pg.wait_for_timeout(600)
+    opened = bool(pg.query_selector(".wzrail"))
+    ck("the flow opens on a client that has a plan", opened)
+
+    def step(name):
+        if not opened:
+            return False
+        b = pg.query_selector(".wzstep >> text=" + name)
+        if not b:
+            return False
+        b.click(); pg.wait_for_timeout(450)
+        return True
+
+    on_units = step("Business units")
+    ck("…and its business units step can be reached", on_units)
+    band = pg.query_selector(".wzarched") if on_units else None
+    ck("the shape steps say the shape is set from here on",
+       bool(band) and "shape is set" in (band.text_content() or ""),
+       band.text_content() if band else None)
+    ro = pg.eval_on_selector_all(".wzrow .fld",
+        "els => els.map(e => !!e.readOnly || !!e.disabled)") if on_units else []
+    ck("…and every unit's box is read-only",
+       isinstance(ro, list) and len(ro) > 0 and all(ro), ro)
+    ck("…and no unit can be added",
+       on_units and not pg.query_selector(".wzadd:not([disabled])"))
+    on_words = step("The words")
+    wro = pg.eval_on_selector_all(".wztbl input",
+        "els => els.map(e => !!e.readOnly || !!e.disabled)") if on_words else []
+    ck("…and the words are read-only too", isinstance(wro, list) and len(wro) > 0 and all(wro), wro)
+    # BOTH ENDS (§94.2): what is frozen is the SHAPE, and the client's own
+    # record, its mark, its modules and its team are still the consultant's.
+    on_client = step("The client")
+    nm = pg.query_selector(".rowset .fld") if on_client else None
+    ck("…while the client's own name is still editable",
+       bool(nm) and not nm.evaluate("e => !!e.readOnly"))
+    ck("…and the modules band still carries its control",
+       on_client and bool(pg.query_selector(".band .teamrow button:not([disabled])")))
+    # AND THE CLIENT STEP IS NOT A SHAPE STEP, so it carries no band at all —
+    # a band drawn on every step would claim the name cannot be changed either
+    # (§124), and it is the same assertion as "never beside the archived one".
+    ck("…and that step carries no band, because nothing on it is frozen (§94.2)",
+       on_client and len(pg.query_selector_all(".wzarched")) == 0,
+       pg.eval_on_selector_all(".wzarched", "els => els.map(e => e.textContent)"))
+    PLANNED[0] = 0
 
     # ── 9 · nothing thrown ───────────────────────────────────────────────
     print("\n§9 · the console")

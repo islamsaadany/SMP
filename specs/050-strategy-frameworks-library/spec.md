@@ -221,14 +221,28 @@ weighting already says.
 
 ---
 
-## 11 · Open — to settle on the mockup, not here
+## 11 · Settled on the mockup — 2026-09-13
 
-- **Sections: fixed at eight, or can an admin add one?** Offering the eight and
-  allowing a new one follows what this platform already does with a stored value
-  outside a list (§96.2), and its cost is that the list fragments with nothing
-  to merge two sections afterwards. Not decided.
-- **Where the ask sits** — beside the search, or leading it. Islam has already
-  turned down *asking leads*, so this is where on the page rather than whether.
-- **What a declined addition offers.** *Paste the source instead* is the obvious
-  next step and it is a screen decision.
-- **The name on the console.** *Frameworks* is the working word.
+Drawn (`design-mockups/frameworks-library/2026-09-13_library-ask-and-add.html`,
+published for sign-off), put to Islam as four questions, and answered
+**"proceed"** — so each takes the answer the drawing gave. Recorded this way
+because each is one line to reverse, and none of them is expensive to change
+later:
+
+1. **Sections are the eight, fixed.** A new framework fits one of them; there
+   is no control to add a ninth. The safe direction — a list that cannot
+   fragment, with nothing needed to merge two — and it is what the drawing
+   shows, the draft's Section being a picker over what exists. **Reopened by
+   the first framework that genuinely fits none of the eight**, which is the
+   honest trigger rather than a guess now.
+2. **The ask sits in the search's own box, switched** — *Search* | *Ask it*,
+   one field under a segmented pair. The alternative (a search box with a
+   quieter line beneath) was drawn beside it and not taken.
+3. **A declined addition offers the other door**: *paste the source instead*.
+4. **The word on the console is *Frameworks***, a fifth tab beside Memory and
+   ungated, as Memory is.
+
+**And one thing the drawing settled that was not asked:** a framework opens
+**in place with a way back**, rather than in a dialog. It is the console's own
+idiom for going into a thing, and nine sections of prose is more than a dialog
+should hold.

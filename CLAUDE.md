@@ -8964,7 +8964,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;340: the demo owes nothing.** Islam:
+*Last Updated: 2026-09-13 &mdash; **&sect;353: the demo owes nothing.** Islam:
 *"make the demo client not missing anything"*, then *"I mean fill the missing
 areas"*, then *"do it all."* **MEASURED FIRST, AND IT WAS ONE THING REPEATED
 EIGHTY-THREE TIMES**: asked of the platform's own `gapMap`/`gapMissing`,
@@ -8986,20 +8986,20 @@ WHAT I OFFERED HIM**: reading the code before writing it found
 its reason in its own comment &mdash; *"Two units are genuinely mid-report &hellip;
 without this every row on the SMO's board reads 100%"* &mdash; so they are left
 exactly as they are and the offer is withdrawn rather than quietly carried out.
-**&sect;340.1 &mdash; AND THAT WIPE KNEW ONE OF A TACTIC'S TWO FIGURES**: it
+**&sect;353.1 &mdash; AND THAT WIPE KNEW ONE OF A TACTIC'S TWO FIGURES**: it
 clears `actual`, &sect;248 added `outActual`, and `tacticAnswered` reads the
 second in preference &mdash; so the moment the plan gained outcomes Nigeria read
 **6 of 16 reported where it should be 0 of 16**, measured, and 0 again once both
 go (&sect;51.10 from the other end). The outcome's TARGET deliberately stays:
 the plan is complete there too; it is the figure nobody has entered.
-**&sect;340.2 &mdash; AND A FIGURE AT RISK CARRIES AN EXPLANATION**: &sect;105
+**&sect;353.2 &mdash; AND A FIGURE AT RISK CARRIES AN EXPLANATION**: &sect;105
 held Submit on **56** unexplained rows before any of this &mdash; pre-existing,
 invisible because nobody had tried to submit every unit &mdash; and the outcomes
 took it to **112**. All 112 written. Every subject now reads **0 gaps, 0
 explanations owed, 0 figures owed**, those two units excepted.
-**&sect;340.3** &mdash; Finance's two owed figures were ordinary incompleteness,
+**&sect;353.3** &mdash; Finance's two owed figures were ordinary incompleteness,
 established rather than assumed (no seed wipes it), and are answered.
-**&sect;340.4 &mdash; THE PATCH REFUSED ITSELF THREE TIMES AND EVERY REFUSAL WAS
+**&sect;353.4 &mdash; THE PATCH REFUSED ITSELF THREE TIMES AND EVERY REFUSAL WAS
 RIGHT**: 83 rows written by NAME with the expected match count declared and
 nothing written unless every name matches exactly (&sect;48) &mdash; it refused
 because Merchandising's five live in `config-data.js`, then because the two files
@@ -9007,7 +9007,7 @@ spell a row differently (`name: "x"` on one line, `name:"x"` across two), so a
 row is found by MATCHING BRACES rather than by assuming it is a line; then the
 notes patch refused on five names, four of them one figure seen twice and the
 fifth a **third** match that is a different healthy figure in Care.
-**&sect;340.5 &mdash; AND THE ONE FAULT THAT GOT PAST IT WAS THAT SAME
+**&sect;353.5 &mdash; AND THE ONE FAULT THAT GOT PAST IT WAS THAT SAME
 ASSUMPTION**: walking back to the nearest `{` lands inside
 `src: { set: "financialfigures" }`, so seven explanations were written **into
 the figure set rather than onto the row** &mdash; valid syntax, clean build,
@@ -9032,7 +9032,7 @@ because every demo unit was blocked &mdash; *which end has to be made has
 flipped, and the file records both flips rather than replacing one with the
 other* &mdash; made from the DATA and put back (&sect;94.2), never by stubbing
 the gate, so the real rule is what both ends are measured through.
-**&sect;340.7 &mdash; `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
+**&sect;353.7 &mdash; `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
 "NOTHING IS REINTERPRETED"**: it asked that NO row reads as yes/no, right while
 nothing authored one and false the moment four outcomes are genuinely
 done-or-not; &sect;257's rule is opt-in per row, so what must hold is that a
@@ -9044,7 +9044,7 @@ true only of a row holding no value, where &sect;257.2 writes Y/N BESIDE the
 value; and the tally trial picked a Y/N tactic naming quarters this cycle is not
 standing in, so **answering it moved nothing because it was never asked**
 &mdash; 41/41/41 on a correct build, measuring the calendar rather than the
-count. **&sect;340.8 &mdash; AND THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING
+count. **&sect;353.8 &mdash; AND THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING
 AN EVENT THE PRODUCT NEVER RECEIVES**: `report-note-wrap` fired `change` by hand
 on the note box **one line after asserting the cursor was still in it**, and a
 bound field writes on `change`, which for a textarea means when focus LEAVES

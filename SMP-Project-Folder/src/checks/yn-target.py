@@ -236,7 +236,7 @@ with sync_playwright() as pw:
     # rather than one row (§94.8: assert the property, never a literal).
     # REWRITTEN, NEVER LOOSENED (§218, §214.3). This asked for NOUGHT yes/no
     # rows in the whole tenant, which was the shape of the guard while nothing
-    # in the worked example authored one — and §340 filled the demo's gaps,
+    # in the worked example authored one — and §353 filled the demo's gaps,
     # among them four tactic outcomes that are genuinely done-or-not (§300's
     # own three answers). Nought is not the property; the property is that
     # nothing is REINTERPRETED: a target carrying a number must never read as
@@ -287,7 +287,7 @@ with sync_playwright() as pw:
       const before = row.querySelectorAll('.fld:disabled').length;
       /* what every target in this subject says BEFORE the pick, so §257.2's
          rule — the value is KEPT beside the new unit — can be asserted rather
-         than assumed (§340: the row the pen reaches first now carries one). */
+         than assumed (§353: the row the pen reaches first now carries one). */
       const was = {};
       (UNITS[current].items||[]).forEach(p => {
         (p.measures||[]).forEach(m => { was['m:'+m.name] = m.target || ""; });
@@ -327,7 +327,7 @@ with sync_playwright() as pw:
         # REWRITTEN, NEVER LOOSENED (§218, §214.3). `== "Y/N"` was true of a
         # row holding NO value, and §257.2 is explicit that Y/N is written
         # BESIDE the value — `100 B EGP → 100 Y/N → 100 B EGP` round trips —
-        # so once the demo owes nothing (§340) the pen's first Y/N-capable row
+        # so once the demo owes nothing (§353) the pen's first Y/N-capable row
         # carries a figure and the literal is false about a correct build.
         # The property is the rule itself, and it is stricter than the literal.
         sv = (af.get("stored") or {}).get("v")
@@ -474,7 +474,7 @@ with sync_playwright() as pw:
              is not standing in, and a row that is never asked is in neither
              half of the tally — so answering it moves nothing and the trial
              measures the calendar rather than the count. It read 41/41/41 on
-             a correct build the moment §340 gave the demo Y/N outcomes of
+             a correct build the moment §353 gave the demo Y/N outcomes of
              its own. Put it in the cycle's way first. */
           t.q1 = t.q2 = t.q3 = t.q4 = 1;
           /* BOTH FIELDS CLEARED FIRST, or the trial measures nothing: the

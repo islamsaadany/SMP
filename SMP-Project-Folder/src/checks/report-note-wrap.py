@@ -221,7 +221,7 @@ with sync_playwright() as pw:
         # the run went red on a page error the product cannot produce on any
         # path a person can take: on a real blur focus has already gone before
         # `change` fires, which is the browser's own ordering and why §219
-        # rules that way. It survived until §340 only because the repaint's
+        # rules that way. It survived until §353 only because the repaint's
         # scope depended on the data (green on main, red once the demo owed
         # nothing) — WHICH difference widened it is not established here, and
         # does not need to be: `blur()` is what the browser does, and every

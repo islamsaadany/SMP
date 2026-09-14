@@ -133,7 +133,7 @@ with sync_playwright() as p:
 
     # 2 - SUBMIT IS DIMMED, AND SAYS WHY BEFORE IT IS PRESSED
     print("\n2 · not ready: dimmed, with the reason on hover (§221)")
-    # §340: THE STATE IS MADE HERE NOW, NOT BORROWED FROM THE DEMO. This read
+    # §353: THE STATE IS MADE HERE NOW, NOT BORROWED FROM THE DEMO. This read
     # Mobile as it stood, which owed six explanations and 44 plan gaps — so the
     # assertion was true by accident of the data rather than because anything
     # here made it true, and the day the demo's plan was completed it went red

@@ -237,7 +237,7 @@ with sync_playwright() as p:
         # long as the tab was open. Driven by RESIZING rather than by opening a
         # second page, because the answer is re-asked on resize and that path
         # is worth exercising too.
-        # §340: THE WINDOW IS MEASURED, NEVER ASSUMED. 900 was the height at
+        # §353: THE WINDOW IS MEASURED, NEVER ASSUMED. 900 was the height at
         # which this page happened to have nothing to scroll the day §327 was
         # written; the demo's plan has since been completed — every tactic
         # gained an outcome and a column of prose — so the page grew past it

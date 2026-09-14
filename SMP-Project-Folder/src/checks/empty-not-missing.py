@@ -106,7 +106,7 @@ with sync_playwright() as p:
     # ── 0 · THE LOUD REGISTER FIRST, OVER A GAP THIS CHECK MAKES ───────
     # Asserted BEFORE the quiet state below, or a build that had lost the
     # missing bar entirely would satisfy every quiet assertion there (§113.8).
-    # §340: THE GAP IS MADE NOW RATHER THAN BORROWED. This leaned on the
+    # §353: THE GAP IS MADE NOW RATHER THAN BORROWED. This leaned on the
     # shipped plan owing 44 on Mobile, and the demo's plan was completed — so
     # the control went red on a build whose missing register is perfectly
     # intact (§214.3). REWRITTEN, NEVER LOOSENED (§218): the property is word

@@ -46050,7 +46050,7 @@ bump: `git status` names six files, all under `smp-app/`.
 
 ---
 
-## §340 — THE DEMO OWES NOTHING (2026-09-13)
+## §353 — THE DEMO OWES NOTHING (2026-09-13)
 
 Islam: *"make the demo client not missing anything"*, then, when asked what he
 meant by missing, *"I mean fill the missing areas"*, and after the shape was
@@ -46106,7 +46106,7 @@ the screen cannot show what it exists to show."* Filling them would have
 silently broken what the cycle board demonstrates, so they are left exactly as
 they are and the offer is withdrawn rather than quietly carried out.
 
-**§340.1 — AND THE WIPE KNEW ONE OF A TACTIC'S TWO FIGURES.** That function
+**§353.1 — AND THE WIPE KNEW ONE OF A TACTIC'S TWO FIGURES.** That function
 clears `t.actual` and sets the status to *Not started*, which was the whole of a
 tactic's reported figure when it was written. &sect;248 added `outActual` and
 `tacticAnswered` reads **that** in preference wherever the outcome carries a
@@ -46119,7 +46119,7 @@ WRITES the old one. **The outcome's TARGET deliberately stays**: the plan is
 complete in Nigeria as everywhere else; it is the figure that has not been
 entered yet.
 
-**§340.2 — A FIGURE AT RISK CARRIES AN EXPLANATION, AND THE OUTCOMES DOUBLED
+**§353.2 — A FIGURE AT RISK CARRIES AN EXPLANATION, AND THE OUTCOMES DOUBLED
 HOW MANY THERE WERE.** &sect;105 holds Submit until anything in the bad or warn
 band has a written reason, and the demo had **56** such rows with nothing typed
 — a pre-existing state, invisible because nobody had tried to submit every
@@ -46130,13 +46130,13 @@ are one number seen twice) and take the same sentence. Every unit and every
 supporting function now reads **0 gaps, 0 explanations owed, 0 figures owed**,
 the two deliberately mid-report units excepted.
 
-**§340.3 — AND FINANCE'S TWO WERE ORDINARY INCOMPLETENESS, ESTABLISHED RATHER
+**§353.3 — AND FINANCE'S TWO WERE ORDINARY INCOMPLETENESS, ESTABLISHED RATHER
 THAN ASSUMED.** `fn:finance` owed two figures before any of this and no seed
 wipes it, so unlike Nigeria it is not a demonstration of anything: two
 deliverables on *Credit facility consolidation* carried `status: null`, one of
 them due four months before the review point. Both answered, both explained.
 
-**§340.4 — THE PATCH REFUSED ITSELF THREE TIMES AND EVERY REFUSAL WAS RIGHT.**
+**§353.4 — THE PATCH REFUSED ITSELF THREE TIMES AND EVERY REFUSAL WAS RIGHT.**
 83 rows written by matching the tactic's NAME, with the patch declaring how many
 rows each name may hit and writing **nothing at all** unless every name matches
 exactly that many — because a positional patch over 83 rows is how the wrong row
@@ -46150,7 +46150,7 @@ are one figure seen twice, and *Net promoter score* had a **third** match that
 is a different and perfectly healthy figure in Care, which a looser patch would
 have annotated for no reason.
 
-**§340.5 — AND THE ONE FAULT THAT GOT PAST IT WAS THE SAME ASSUMPTION ONE LEVEL
+**§353.5 — AND THE ONE FAULT THAT GOT PAST IT WAS THE SAME ASSUMPTION ONE LEVEL
 DOWN.** Walking back to the nearest `{` before the name lands inside
 `src: { set: "financialfigures" }` on a figure-set row, so seven explanations
 were written **into the figure set rather than onto the row**. The file parsed,
@@ -46162,11 +46162,11 @@ test that only asks whether the file parses.*
 
 **WHAT IS DELIBERATELY NOT CHANGED**: no rule, no renderer, no server file — the
 diff is the two demo data files plus the one line in `seedPartialReporting` that
-&sect;340.1 required. Nothing about how a gap is counted, how an outcome is
+&sect;353.1 required. Nothing about how a gap is counted, how an outcome is
 scored or who may report anything has moved.
 
 
-**§340.6 — SEVEN CHECKS HELD A LITERAL THIS CHANGE MOVES, AND EVERY ONE WAS
+**§353.6 — SEVEN CHECKS HELD A LITERAL THIS CHANGE MOVES, AND EVERY ONE WAS
 REWRITTEN RATHER THAN LOOSENED (&sect;214.3 for the sixth time, &sect;218).**
 The regression sweep put 95 checks through the new build and turned up seven
 reds. **Each was established as this work's by running it against a build made
@@ -46185,7 +46185,7 @@ one with the other.* All four MAKE the state and put it back (&sect;94.2),
 from the DATA rather than by stubbing the gate, so the real rule is what both
 ends are measured through.
 
-**§340.7 — AND `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
+**§353.7 — AND `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
 "NOTHING IS REINTERPRETED".** Its &sect;6 asked that **no** row in the worked
 example reads as yes/no — the right shape while nothing authored one, and false
 the moment four tactic outcomes are genuinely done-or-not (&sect;300's own three
@@ -46202,7 +46202,7 @@ Y/N tactic naming quarters this cycle is not standing in, so **answering it move
 nothing because it was never asked** — 41/41/41 on a correct build, the trial
 measuring the calendar rather than the count.
 
-**§340.8 — THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING AN EVENT THE PRODUCT
+**§353.8 — THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING AN EVENT THE PRODUCT
 NEVER RECEIVES.** `report-note-wrap` went red on a DOMException — *"the node to
 be removed is no longer a child of this node&hellip; moved in a 'blur' event
 handler"* — with all 27 of its behavioural assertions passing. It fired

@@ -433,7 +433,7 @@ with sync_playwright() as pw:
     fns(pg)
     if dest(pg, "fn:merchandising"):
         tab(pg, "fnstrat"); sec(pg, "found")
-        # §340: THE GAP IS MADE HERE NOW. The door into fill mode is drawn from
+        # §353: THE GAP IS MADE HERE NOW. The door into fill mode is drawn from
         # what the subject OWES (§223, §301.3), and this leaned on Merchandising
         # owing ten — which was true until the demo's plan was completed, and
         # then this section went red on a build whose map is exactly right

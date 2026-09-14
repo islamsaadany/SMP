@@ -140,7 +140,7 @@ with sync_playwright() as p:
     #
     # Both ends, or a build that lost the fill entirely still passes the half
     # it can reach (§94.2, §113.8). WHICH of the two states has to be MADE has
-    # now flipped, and that is §340: §280.1 made the OPEN state, because every
+    # now flipped, and that is §353: §280.1 made the OPEN state, because every
     # demo unit was blocked by something; the demo owes nothing now, so it is
     # the HELD state that has no unit to borrow. Made from the DATA — one
     # figure taken back out — never by stubbing `submitBlockers`, so the real

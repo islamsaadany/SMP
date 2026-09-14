@@ -1,5 +1,35 @@
 # 053 · Insights — the library, published by Forefront
 
+**Renumbered from 049 at the merge**, because main took that number for
+objectives-and-actions while this was in flight — and the migration with it,
+008 → 011 (§264.3: renumber on the branch, where the lines are provably yours).
+
+**AND MAIN HOLDS A SECOND SPEC FOR THIS SAME MODULE — `051-resources-library`,
+written the same day in a parallel session from the same conversation.** It has
+no code: one file, and `insights` still `built: false` there. The two agree on
+everything that matters — a library, Forefront publishes and the client reads,
+rebuilt here rather than carried from SMS, the module contract's five parts —
+and **disagree on one thing**, which is recorded here rather than resolved
+quietly:
+
+> 051 §3 says *"It is alongside Insights, not instead of it"*, noting that
+> *Resources is what we called Insights* was offered and not taken.
+
+**This spec says they are one module, and the record is on this side twice**:
+spec 046 decision 4 settled the name as **Insights** on 2026-09-11 with its
+reason (*standing beside a project management module, `Resources` reads as
+people and capacity — the one thing it is not*), and Islam was asked again on
+2026-09-13 in this spec's own alignment and answered *keep Insights*. Two
+sessions asked one question and wrote down opposite answers; this is the one
+that matches the earlier decision and the later confirmation.
+
+**So 051 is superseded by this, and is left standing rather than deleted**
+(Principle II: a reversal is recorded, never overwritten). Its §7 — the ten
+questions for the reading session — was answered by the description Islam
+uploaded here, which is what this was built from. **If Resources is wanted as a
+SEPARATE module as well, that is a build and not a rename**, and it is Islam's
+to say.
+
 **Status:** every decision taken 2026-09-13 (two on the name and the publisher,
 then the four of §7); both screens drawn and signed off that day
 (`design-mockups/insights/2026-09-13_library-and-publishing-room.html`, rule

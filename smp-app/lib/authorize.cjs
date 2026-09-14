@@ -58,7 +58,11 @@ const REPORT = {
      every custodian who reported one. The screen had offered both since §104;
      the server refused both; nothing compared the two (§94.2's class). */
   deliverable: ["status", "pct", "note"],
-  milestone: ["status", "pct", "note"]
+  milestone: ["status", "pct", "note"],
+  /* §342: an action reports exactly as a milestone does — the same three
+     words and the same required per-cent (§300, §104.10). Its `due` is the
+     plan and is deliberately not here. */
+  action:    ["status", "pct", "note"]
 };
 
 /* §16.7 splits a unit's reporting in two. The FIGURE may belong to a source
@@ -98,6 +102,7 @@ const HIDE_SLIDES     = R.HIDE_SLIDES;
    REFUSAL, which must not send somebody to Setup for a running order that is
    set in the Presentation menu (§16.7). Named from the shared module. */
 const MASTER_FLOW     = R.MASTER_FLOW;
+const PRESENT_MINS    = R.PRESENT_MINS;
 const PLAN_FROM       = R.PLAN_FROM;
 const PLAN_TO         = R.PLAN_TO;
 const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
@@ -448,6 +453,13 @@ function collect(stored, incoming, w) {
      names the control that sets it. */
   if (!same(sg[MASTER_FLOW], ig[MASTER_FLOW]))
     add("masterFlow", null, "the master presentation's running order");
+  /* §340: how long each subject has when it presents. Its own sentence beside
+     the order, for the order's own reason — it scores nothing and hides
+     nothing, and a refusal has to name the Presentation menu rather than
+     Setup, which is where somebody would otherwise be sent to look for a
+     control that is not there (§16.7). */
+  if (!same(sg[PRESENT_MINS], ig[PRESENT_MINS]))
+    add("presentMins", null, "how long each subject has to present");
   /* ── THE PLANNING PERIOD (§308) ─────────────────────────────────
      `cycle`, not `setup`: it is set in the Reporting cycle pen, by the person
      who sets the cycle's own dates, and asking a different grant for the two
@@ -471,7 +483,7 @@ function collect(stored, incoming, w) {
   collectCapabilities(sg.capabilities, ig.capabilities, add);
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "mainbus", "comms", "kb", "logo",
-                                   MASTER_FLOW, PLAN_FROM, PLAN_TO]);
+                                   MASTER_FLOW, PRESENT_MINS, PLAN_FROM, PLAN_TO]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -896,7 +908,35 @@ function collectUnit(key, su, iu, add, w) {
     let planMoved = false;
     Object.keys(sm).forEach(function (id) {
       const a = sm[id], b = im[id];
-      if (!same(omit(a, ["measures", "tactics"]), omit(b, ["measures", "tactics"]))) planMoved = true;
+      if (!same(omit(a, ["measures", "tactics", "breakdown"]),
+                omit(b, ["measures", "tactics", "breakdown"]))) planMoved = true;
+      /* ── §343: A PILLAR'S BREAKDOWN IS BOTH HALVES AT ONCE ──────────────
+         Its columns and its fifteen TARGETS are the plan; the figures typed
+         against them and the row's note are the REPORT. One object, two
+         audiences — so it cannot be compared whole, or every reported figure
+         would classify as authoring the plan and be refused for every
+         custodian in the tenant (§147's own fault on a milestone's `pct`,
+         and §42's drift with the sign that costs work).
+
+         THE REPORTED FIELDS ARE DERIVED FROM THE STORED COLUMNS, never
+         written down here: a column added tomorrow is classified the day it
+         is added, and a field belonging to a column that has GONE is not in
+         the list and therefore falls to the plan — which is the safe
+         direction (§42 fails closed).
+
+         `name` AND `cols` ARE COMPARED WHOLE and are plan. Only the ROWS go
+         through `splitRows`, which needs ids and has them (§191). */
+      (function(){
+        const sb = a.breakdown, ib = b.breakdown;
+        if (!sb && !ib) return;
+        if (!sb || !ib) { planMoved = true; return; }
+        if (!same(omit(sb, ["rows"]), omit(ib, ["rows"]))) planMoved = true;
+        const bdFields = (sb.cols || []).map(function (c) { return "a_" + c.id; })
+          .concat(["note"]);
+        splitRows(sb.rows, ib.rows, bdFields,
+          function (rows) { rows.forEach(function (x) { moved.push(x); }); },
+          function (rows) { planMoved = true; keep(planRows, rows); });
+      })();
       splitRows(a.measures, b.measures, FIGURE,
         function (rows) { addFigures(w, key, su, rows, "reported figures", add); },
         function () {});
@@ -947,7 +987,11 @@ const FN_KNOWN = FN_SETUP.concat(UNIT_FOUNDATION,
       list so a change to them is not swept up as "a supporting function" —
       Setup, the office's — the way any unnamed field is; what they ARE is
       classified below by exactly the rules a capability's projects get. */
-   "projects"]);
+   "projects",
+   /* §342: and the actions of a function that plans in objectives — in the
+      list so a change to them is classified by the plan rules below rather
+      than swept up as Setup, exactly as `projects` is. */
+   "actions"]);
 /* §256: everything FN_KNOWN speaks for, plus the field classified on its own.
    It is a SECOND list because the two questions genuinely differ — FN_KNOWN
    decides what the projects-branch compare calls "a supporting function's
@@ -986,6 +1030,20 @@ function fnOwnWork(sf2, iff, target, add) {
       function () { say("arrange", target, "the order of a function's key objectives"); });
   }
   if (!same(spr, ipr)) collectProjects(spr, ipr, target, say);
+  /* §342: AND ITS ACTIONS, judged by the rules a milestone's row already gets
+     — reported figures are the reporter's, the row itself is the plan, and
+     the order is `arrange` (§278.3). Without this the whole list falls to the
+     caller's unknown sweep and every action a reporter touches comes back
+     "a supporting function's settings", which is §326's own lesson one list
+     along. */
+  const sac = sf2.actions || [], iac = iff.actions || [];
+  if (!same(sac, iac)) {
+    gapRows("action", sac, iac, target, say, "an action");
+    splitRows(sac, iac, REPORT.action,
+      function (rows) { say("capReporting", target, "action figures", rows); },
+      function (rows) { say("capPlan", target, "a function's actions", rows); },
+      function () { say("arrange", target, "the order of a function's actions"); });
+  }
   return spoke;
 }
 
@@ -1248,6 +1306,13 @@ function ctxOfFn(w, subject) {
   holders.forEach(function (c) {
     if (!c) return;
     (c.keyObjectives || []).forEach(function (x) { out[x.id] = { row: x }; });
+    /* §342: an action is a row of the holder's, and an id missing from this
+       index is refused whoever the person is — which is how §334.18's own
+       finding reads from the outside: every figure entered, and every one
+       refused. */
+    (c.actions || []).forEach(function (x) {
+      if (x && x.id !== undefined) out[x.id] = { row: x };
+    });
     (c.projects || []).forEach(function (pr) {
       (pr.deliverables || []).concat(pr.outcomes || [], pr.milestones || [])
         .forEach(function (x) { if (x && x.id !== undefined) out[x.id] = { row: x, project: pr }; });
@@ -1438,6 +1503,13 @@ function authorize(stored, incoming, person) {
          has stopped taking figures, and the flow is arranged the morning of
          the meeting, which is after the lock and not before it. */
       case "masterFlow":
+      /* §340 rides the same gate and the same sentence deliberately: the
+         minutes are set in that very dialog, by that very person, so a second
+         rule for one pen is §42's drift with a projector on the end of it.
+         NOT gated on the cycle lock either, for `masterFlow`'s own reason —
+         the flow is arranged the morning of the meeting, which is after the
+         lock and not before it. */
+      case "presentMins":
         if (!R.mayMasterPresent(w, person))
           no("The master presentation is the SMO's — " + ch.what +
              " is set from the Presentation menu.");

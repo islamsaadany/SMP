@@ -93,8 +93,22 @@ async () => {
       const ctl = u.keyObjectives[1]
         ? JSON.parse(JSON.stringify(u.keyObjectives[1])) : null;
 
+      /* §343: A BREAKDOWN, MADE (§255) — no pillar in the worked example
+         carries one, so without this the Breakdowns sheet is empty and every
+         assertion about it passes on a build whose plan file drops the whole
+         table. Its INDICATOR column is the one that matters most here: an
+         empty direction has to survive the file, or every watched column
+         comes home scored. */
+      addBreakdown(p);
+      p.breakdown.cols[0].name = "Growth"; p.breakdown.cols[0].dir = "≥";
+      const bc2 = addBdCol(p); bc2.name = "Mix"; bc2.dir = "";
+      [["Bakery", "7%", "13%"], ["Barista", "22%", "5%"]].forEach(d => {
+        const r = addBdRow(p); r.name = d[0];
+        r["t_" + p.breakdown.cols[0].id] = d[1]; r["t_" + bc2.id] = d[2]; });
+
       const want = { ko: ko ? JSON.parse(JSON.stringify(ko)) : null, m: JSON.parse(JSON.stringify(m)),
                      t: JSON.parse(JSON.stringify(t)),
+                     bd: JSON.parse(JSON.stringify(p.breakdown)),
                      pillarName: p.name, aspiration: u.aspiration };
 
       const bytes = buildXlsx(planWorkbook(u));
@@ -109,6 +123,7 @@ async () => {
         got: { ko: ko2 ? JSON.parse(JSON.stringify(ko2)) : null,
                m: m2 ? JSON.parse(JSON.stringify(m2)) : null,
                t: t2 ? JSON.parse(JSON.stringify(t2)) : null,
+               bd: p2 && p2.breakdown ? JSON.parse(JSON.stringify(p2.breakdown)) : null,
                pillarName: p2 ? p2.name : null, aspiration: u.aspiration },
         ctl: ctl, ctl2: ctl2 };
     });
@@ -345,6 +360,22 @@ with sync_playwright() as p:
             ck("tactic outcome monthly plan",
                g["t"].get("outMonthly") == w["t"].get("outMonthly"), g["t"].get("outMonthly"))
         ck("the pillar's name survived", g["pillarName"] == w["pillarName"], g["pillarName"])
+        # §343: AND ITS BREAKDOWN — the table's name, its columns in order with
+        # their directions (the INDICATOR's empty one included), its categories
+        # and all its targets. The ids are not compared: the platform mints
+        # them on arrival, which is §22's contract and why the template carries
+        # no codes.
+        ck("the breakdown came back", g.get("bd") is not None, g.get("bd"))
+        if g.get("bd") and w.get("bd"):
+            ck("breakdown name", g["bd"].get("name") == w["bd"].get("name"), g["bd"].get("name"))
+            gc = [(c.get("name"), c.get("dir")) for c in g["bd"].get("cols", [])]
+            wc = [(c.get("name"), c.get("dir")) for c in w["bd"].get("cols", [])]
+            ck("breakdown columns, in order, with their directions", gc == wc, gc)
+            gt = [[r.get("name")] + [r.get("t_" + c["id"], "") for c in g["bd"]["cols"]]
+                  for r in g["bd"].get("rows", [])]
+            wt = [[r.get("name")] + [r.get("t_" + c["id"], "") for c in w["bd"]["cols"]]
+                  for r in w["bd"].get("rows", [])]
+            ck("breakdown categories and every target", gt == wt, gt)
         if tag == "unit":
             ck("the aspiration survived", g["aspiration"] == w["aspiration"])
         # both ends

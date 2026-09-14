@@ -6164,6 +6164,13 @@
    "group": "Tactics",
    "bu": "Tactics",
    "note": "The work under a pillar. Spans quarters, has an owner."
+  },
+  {
+   "key": "unitword",
+   "internal": "Business Unit",
+   "group": "Business units",
+   "bu": "Business units",
+   "note": "What this client calls a business unit. Headings only — sentences keep the platform's own word."
   }
  ],
  "bands": [

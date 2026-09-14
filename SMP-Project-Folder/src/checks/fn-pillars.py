@@ -355,7 +355,11 @@ with sync_playwright() as p:
       return {fn:f.map(s=>s.name), unit:u.map(s=>s.name),
               fnObj:(f.filter(s=>s.name==='Objectives')[0]||{}).head,
               unitObj:(u.filter(s=>s.name==='Objectives')[0]||{}).head}; }""", T)
-    for gone in ("Foundation", "Aspiration", "SWOT"):
+    # The three sheets §213 took off a function's file, named ONCE: the loop
+    # below and the difference assertion at the end of this section both read
+    # them, so the two cannot come to disagree about what a function drops.
+    FN_GONE = ("Foundation", "Aspiration", "SWOT")
+    for gone in FN_GONE:
         ok("a function's file has no " + gone + " sheet", gone not in wb["fn"], wb["fn"])
         ok("...and a UNIT's still does", gone in wb["unit"], wb["unit"])
     ok("a function's Objectives sheet asks for a Weight",
@@ -397,9 +401,20 @@ with sync_playwright() as p:
        [h for h in wb["unitObj"] if h not in ("Group", "3-year target")]
          == [h for h in wb["fnObj"]],
        (wb["unitObj"], wb["fnObj"]))
-    ok("...and a unit keeps every sheet it had",
-       wb["unit"] == ["Read me", "Foundation", "Aspiration", "Objectives", "SWOT",
-                      "Pillars", "Measures", "Tactics"], wb["unit"])
+    # AND THE SHEET LIST IS THE SAME ARGUMENT ONE LEVEL UP (§214.3, for the
+    # FOURTH time on this file): it held a typed list of eight and §343's
+    # breakdown legitimately made it nine, so a deliberate decision read as a
+    # regression and the file sat red on `main` until somebody looked. What
+    # §213 actually decided is a DIFFERENCE — a function's workbook loses the
+    # three sheets a function does not author, and keeps every other sheet a
+    # unit has — so that is what is asserted. A sheet added to BOTH halves
+    # (which is what a pillar-level feature does, §59) stays green with no
+    # literal to remember; a sheet that reaches only one half goes red, which
+    # is the fault worth catching. The three are read from the loop above
+    # rather than typed again, or this line and that one can disagree.
+    ok("...and a unit's file is a function's plus the three it does not author",
+       [s for s in wb["unit"] if s not in FN_GONE] == wb["fn"],
+       (wb["unit"], wb["fn"], FN_GONE))
 
     print("\n── 7 · a weight survives the round trip")
     trip = pg.evaluate("""(t)=>{

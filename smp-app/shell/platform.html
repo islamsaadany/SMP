@@ -328,6 +328,15 @@
     background:transparent; font:600 13px/1.5 inherit; text-align:left; cursor:pointer;
     width:100%; margin-top:8px }
   .wzadd:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
+  /* The common-name chips (§351): a SIBLING of .wzadd, dashed and quiet,
+     because clicking one is the same act as pressing the button under it —
+     a shortcut into it rather than a second kind of control. */
+  .wzcommon{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 9px }
+  .wzcm{ border:1px dashed var(--line); border-radius:7px; background:transparent;
+         padding:5px 10px; font:inherit; font-size:13px; color:var(--ink-3);
+         cursor:pointer; white-space:nowrap }
+  .wzcm:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
+  .wzcm .p{ color:var(--ink-3); margin-right:4px }
 
   /* a choice */
   .wzchoices{ display:flex; flex-direction:column; gap:10px }
@@ -557,6 +566,79 @@
   .asksrc button.tag{ cursor:pointer }
   .asksrc button.tag:hover{ border-color:var(--amber-tx) }
   @media (max-width:700px){ .erow{ flex-direction:column; gap:8px } .count{ margin-left:0 } }
+
+  /* ── The strategy frameworks library (spec 052) ───────────────────
+     Every class here is prefixed `fw`, because a class name is one global
+     namespace and this page already holds .tag, .cell, .row and .band
+     (§65.9). Nothing below is a new colour or a new shape: the box and the
+     list are .band's border, radius and shadow; the chips are the only new
+     form, and they are a pill because a filter you turn on and off is not a
+     tag. Phase A draws no Ask and no Add, so there is no CSS here for
+     either — a rule with no markup is one the next reader takes for
+     load-bearing (§24). */
+  .fwbox{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:13px; box-shadow:var(--shadow) }
+  .fwbox .fld{ width:100% }
+  .fwchips{ display:flex; gap:6px; flex-wrap:wrap; margin-top:13px }
+  .fwchip{ font:600 12px/1 inherit; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); border-radius:999px; padding:6px 11px; cursor:pointer; white-space:nowrap }
+  .fwchip:hover{ border-color:var(--amber-tx) }
+  .fwchip.on{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .fwchip i{ font-style:normal; color:var(--ink-3); margin-left:5px; font-size:11px }
+  .fwchip.on i{ color:var(--ff-quiet) }
+  .fwcount{ margin:16px 0 9px; font-size:13px; color:var(--ink-3) }
+  .fwlist{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    overflow:hidden; box-shadow:var(--shadow) }
+  .fwrow{ display:block; width:100%; text-align:left; border:0;
+    border-bottom:1px solid var(--line-soft); background:var(--surface); color:var(--ink);
+    padding:12px 15px; cursor:pointer; font:inherit }
+  .fwrow:last-child{ border-bottom:0 }
+  /* AN AUTHOR `display` BEATS `[hidden]`, MEASURED RATHER THAN REASONED ABOUT
+     (§93.11). The filter sets `row.hidden = true`, and with `display:block`
+     above it the browser goes on drawing the row: the count said "12 of 80"
+     over eighty visible rows, which is the worst shape a filter can take —
+     it looks like it worked. The check found it by asking which rows are
+     VISIBLE rather than which carry the attribute (§94.8). */
+  .fwrow[hidden]{ display:none }
+  .fwrow:hover, .fwrow:focus-visible{ background:var(--surface-2); outline:none }
+  .fwrow .hd{ display:flex; gap:9px; align-items:baseline; flex-wrap:wrap }
+  .fwrow .nm{ font-weight:600; font-size:14.5px }
+  .fwrow .pp{ margin:4px 0 0; font-size:13px; color:var(--ink-3) }
+  .fwsec{ margin-top:18px }
+  .fwsec h3{ margin:0 0 5px; font-size:14px; font-weight:600 }
+  .fwsec p{ margin:0; font-size:14px; color:var(--ink-2); white-space:pre-line }
+  .fwgrid{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
+  @media (max-width:820px){ .fwgrid{ grid-template-columns:1fr } }
+  /* ASKING IT: one field under the switch, and the answer in place under the
+     box rather than on a page of its own — the question and what it produced
+     read together, and the way back to searching is the switch you came in
+     by. */
+  .fwask{ display:flex; gap:9px; margin-top:11px; align-items:flex-start }
+  .fwask .fld{ flex:1 1 220px; min-width:0 }
+  .fwans{ background:var(--surface-2); border:1px solid var(--line); border-radius:11px;
+    padding:15px; margin-top:13px }
+  .fwans > p{ margin:0 0 4px; font-size:14px; color:var(--ink-2); white-space:pre-line }
+  /* EVERY SOURCE IS A DOOR, which is the memory's own rule for the memory's
+     own reason: the next step is to go and read it. */
+  .fwcite{ display:block; width:100%; text-align:left; margin-top:9px; border:1px solid var(--line);
+    border-radius:9px; background:var(--surface); padding:11px 13px; cursor:pointer;
+    font:inherit; color:var(--ink) }
+  .fwcite:hover, .fwcite:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .fwcite .nm{ font-weight:600; font-size:14px }
+  .fwcite .wy{ margin:4px 0 0; font-size:13px; color:var(--ink-3) }
+  /* THE DRAFT SAYS IT IS ONE, in the amber this page already uses for a thing
+     that is not settled yet — and it is the whole of decision 3 made visible:
+     what is on screen is not in the library. */
+  .fwdraft{ background:var(--amber-wash); border:1px solid var(--amber); border-radius:10px;
+    padding:11px 13px; font-size:13.5px; color:var(--amber-tx); font-weight:600; margin-bottom:15px }
+  .fwfields{ display:grid; gap:13px }
+  .fwfields .fld{ width:100% }
+  .fwfields textarea.fld{ resize:vertical; min-height:62px }
+  /* A DECLINE IS NOT AN ERROR (§168, §190): nothing has gone wrong, the
+     assistant has answered honestly, and the next thing to do is on the
+     screen — so it wears the warning ground rather than the alarm one. */
+  .fwdecl{ background:var(--warn-bg); border:1px solid var(--warn); border-radius:10px;
+    padding:13px; font-size:14px; color:var(--warn) }
 </style>
 </head>
 <body>

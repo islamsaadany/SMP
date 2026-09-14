@@ -3,7 +3,7 @@
 One Postgres schema, `public`, every client. Two kinds of table: the
 platform's own (`tenants`, `users`, `tenant_users`, `sessions`,
 `login_attempts`, `platform_access`, `tenant_log`, `push_keys`,
-`memory_entries`, `_migrations`) with no tenant policy, and the 42
+`memory_entries`, `frameworks`, `_migrations`) with no tenant policy, and the 42
 tenant-owned tables, every one carrying `tenant_id` under `FORCE ROW LEVEL
 SECURITY` and the one policy `tenant_rows` — given to them by ONE loop over
 the catalogue at the end of `schema.sql`, so a table added later is covered
@@ -16,6 +16,9 @@ why its client column is `about_tenant_id` rather than `tenant_id`: with that
 name, forgetting the list fails the apply outright at the loop's own
 `CREATE INDEX … (tenant_id)`, instead of silently attaching a policy that
 empties the feature on every fresh deployment while leaving this one working.
+`frameworks` (spec 052) is on the list for the same reason and gets the same
+loud failure for free: it names no client at all, so a forgotten exclusion
+meets the loop's `CREATE INDEX … (tenant_id)` with no such column.
 
 - **`schema.sql`** is the source. Prisma introspects it (`npm run db:pull`
   regenerates `prisma/schema.prisma`) and never migrates it.

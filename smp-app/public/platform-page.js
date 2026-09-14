@@ -1258,7 +1258,7 @@
   var CAP_FORMATS = [["pillars","Pillars"], ["projects","Projects"]];
   function fmtWord(f){ return f === "objectives" ? "obj" : f === "projects" ? "proj" : "pillars"; }
 
-  /* THE NAMES MOST CLIENTS HAVE, one click into the list beside them (§350).
+  /* THE NAMES MOST CLIENTS HAVE, one click into the list beside them (§351).
      What is offered for a UNIT is the usual way a business is CUT — Retail,
      Online, Wholesale — rather than an industry's own vocabulary, because a
      unit is the client's own business and a list of industry names would be
@@ -2158,7 +2158,7 @@
   /* THE NAME BOX, never the last .fld — a function's row ends in a SELECT that
      also wears .fld, so reaching for the last one lands the cursor on the
      plans-in picker rather than on the name you came to type. §347.1 found it
-     in capsStep and fixed it there with a copy of its own; §351 found it still
+     in capsStep and fixed it there with a copy of its own; §352 found it still
      live in listStep's Add button and made the three call sites ask ONE
      function, because three answers to "which box does the cursor go in" is
      how this came to be right in one place and wrong in another (§53.5). */

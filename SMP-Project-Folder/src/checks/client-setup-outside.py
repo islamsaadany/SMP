@@ -393,7 +393,7 @@ with sync_playwright() as p:
     ck("…and removing it posts a list without it", caps2 == [], caps2)
 
     # ── 6c · The common names, one click in ──────────────────────────────
-    # §350. A control wired to nothing renders perfectly (§96), so every
+    # §351. A control wired to nothing renders perfectly (§96), so every
     # assertion here reads the POSTED shape or the live DOM rather than the
     # fact that a chip was drawn. The decision this section exists for is
     # that a chip is held by the ROW it made and never by the spelling, and
@@ -440,7 +440,7 @@ with sync_playwright() as p:
     units = (last("shapeClient") or {}).get("shape", {}).get("units", [])
     got = [u for u in units if u.get("name") == "Wholesale & Trade"]
     ck("…and the renamed row is what reaches the server", len(got) == 1, units)
-    # §349's reason for marking the row NON-ENUMERABLY: the endpoint slices the
+    # §350's reason for marking the row NON-ENUMERABLY: the endpoint slices the
     # row objects through verbatim, so an ordinary key would be stored for ever.
     ck("…carrying no trace of the chip that made it",
        bool(got) and sorted(got[0].keys()) == ["company", "name"], got)
@@ -486,7 +486,7 @@ with sync_playwright() as p:
        bool(made) and sorted(made[0].keys()) == ["format", "name"], made)
 
     # AND THE BUTTON THE CHIP SHORTCUTS LANDS THE CURSOR IN THE SAME PLACE
-    # (§351). Islam: "fix it". A function's row ends in a SELECT that also
+    # (§352). Islam: "fix it". A function's row ends in a SELECT that also
     # wears .fld, so the Add button reached for the last one and landed on the
     # plans-in picker — §347.1 had found exactly this in capsStep and fixed it
     # there with a copy of its own. All three call sites ask one function now,
@@ -750,7 +750,7 @@ with sync_playwright() as p:
        isinstance(ro, list) and len(ro) > 0 and all(ro), ro)
     ck("…and no unit can be added",
        on_units and not pg.query_selector(".wzadd:not([disabled])"))
-    # …and the shortcut into that button goes with it (§350): a chip on a
+    # …and the shortcut into that button goes with it (§351): a chip on a
     # frozen list is a control whose whole act is refused.
     ck("…and no common name is offered either",
        on_units and not pg.query_selector(".wzcommon"),

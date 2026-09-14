@@ -7850,6 +7850,30 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/built-in-step.py # THE SHIPPED FILE IS IN STEP WITH ITS SOURCES
+                                # (&sect;349). CLAUDE.md has required `build.py`'s
+                                # output and `strategy-management-platform-vX.Y.html`
+                                # to be byte-identical since the project folder
+                                # arrived, and NOTHING CHECKED IT &mdash; so it held
+                                # only while everybody remembered the `cp`, and
+                                # &sect;346 edited the sources, regenerated the copies
+                                # the Next app serves and left this one **1,722 bytes
+                                # and 56 lines behind**: a whole round missing from the
+                                # offline file, silent because a stale built file
+                                # RENDERS PERFECTLY. &sect;329's trap on the half that
+                                # had no guard. It runs the REAL builder and compares
+                                # (&sect;53.5), DERIVES its subject from `git ls-files`
+                                # so a version bump needs no edit here and two shipped
+                                # files is its own failure in words (&sect;54.5), puts
+                                # the untracked intermediate back in a `finally`
+                                # (&sect;94.2), exits non-zero (&sect;328.8) and needs
+                                # no browser and no database. **Stale and mid-edit are
+                                # two different errands and it says which** (&sect;123)
+                                # &mdash; and its own first run got that wrong on
+                                # ITSELF, an untracked check making a clean tree report
+                                # *"your edits are not built yet"* (&sect;124), so only
+                                # what `build.py` actually reads counts. Proved able to
+                                # fail both ways, one of them the reported state itself
 node smp-app/checks/modules.mjs # a module per client, and the trial that proves
                                 # one can be added (&sect;320.5) &mdash; `npm run
                                 # check:modules`, no database. The list a client has
@@ -9278,7 +9302,68 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-13 &mdash; **&sect;345: one repository, and the line that
+*Last Updated: 2026-09-14 &mdash; **&sect;349: a sentence that prints its own
+code, and the built file nobody compared.** Three findings from a verification
+pass, and the question in the middle of them changed the answer rather than
+confirming it. **&sect;349.1 &mdash; TWO EMPTY SCREENS PRINTED THEIR OWN CODE, ON
+THE LIVE SITE**: &sect;346 moved thirteen places onto the client's own word for
+a business unit and two were typed with the wrong quote marks, so the
+concatenation fell INSIDE the string and the screen printed
+`" + L("unitword","bu") + "` where it should say *Business units*. **Both are
+empty states, which is the whole of why nothing caught it** &mdash; the sweep
+records what the BROWSER complains about, and this page does not complain: it
+renders perfectly and reads wrong (&sect;96's family, in prose), on the two
+screens a client sees least often. *No check in this product reads the words on
+a screen.* Measured rather than inferred to be live: the same two lines sit in
+`smp-app/public/shell.js`, which is what the new stack serves (&sect;332). Four
+characters &mdash; **and the fix is asserted by READING THE SCREEN**, with the
+label set to a word the platform could never produce by accident, so *"it says
+Business units"* cannot pass for *"the substitution ran"*. **The probe called a
+correct build broken first** (&sect;100.3): `LABELS` is a LIST keyed by `key`,
+not a map, so assigning `LABELS.unitword` set nothing at all. **And the search
+for more of them is the part worth keeping** &mdash; the obvious grep matches
+the ordinary idiom (an HTML attribute quote inside a string) hundreds of times;
+the fault's signature is the whole **sandwich**, and searched that way the tree
+holds exactly two. **&sect;349.2 &mdash; THE SHIPPED FILE WAS A ROUND OF WORK
+BEHIND ITS OWN SOURCES**: **1,722 bytes and 56 lines**, missing &sect;346
+entire, because that round rebuilt the served copies and not this one.
+**CLAUDE.md has required the two to be byte-identical since the project folder
+arrived and nothing ever checked it**, so the rule held for exactly as long as
+everybody remembered the `cp` &mdash; &sect;329's trap on the half that had no
+guard. Nothing was broken by it that day, which is the point: **a stale built
+file renders perfectly.** **&sect;349.3 &mdash; AND THE WORKING COPY IS NOT
+THAT FILE**, which is Islam's own question answered by measuring rather than
+from memory: `buildCopy()` does `fetch(location.pathname, {cache:"no-store"})`,
+so the contingency copy is regenerated at the press from whatever is served,
+and no cached copy can stand in (the carried worker has **no fetch handler at
+all**, &sect;316.10). His instinct is already the product's behaviour; the stale
+file is the repository's own built copy, and saying which of the two was meant
+is most of what made the finding actionable. **&sect;349.4 &mdash; THE CHECK
+THAT CLOSES IT**: `checks/built-in-step.py` runs the REAL builder and compares
+(&sect;53.5), DERIVES its subject from `git ls-files`, puts the untracked
+intermediate back in a `finally` (&sect;94.2), exits non-zero (&sect;328.8) and
+needs no browser or database &mdash; **and stale and mid-edit are two different
+errands, so it says which** (&sect;123). **Its first run got that wrong on
+itself**, an untracked check making a clean tree report *"your edits are not
+built yet"* (&sect;124). Proved able to fail both ways, one of them the reported
+state itself, with the build proved DETERMINISTIC first or the check is
+worthless. **&sect;349.5 &mdash; AND THE RED CHECK WAS THE CHECK**
+(&sect;214.3, fourth time on this file): `fn-pillars` held a typed list of eight
+sheets and &sect;343's breakdown legitimately made it nine. **REWRITTEN, NEVER
+LOOSENED** (&sect;218) and rewritten the way its own neighbour already is
+&mdash; the **DIFFERENCE** &sect;213 decided, so a sheet added to BOTH halves
+stays green with no literal to remember and one reaching a single half goes red
+(falsified, **1 red**). It had been red on `main` since that merge, missed
+because twenty-two checks were run rather than all of them. **&sect;349.6 &mdash;
+AND &sect;329'S CHECK EARNED ITS KEEP AT THE SAME BYTE COUNT**: the fix changes
+no file's LENGTH, so the served shell came back *committed 3627315, generated
+3627315* and red &mdash; a length comparison would have called a stale copy
+clean. **Screen only**, read off the diff; nothing stored, nothing migrated, no
+rule moved. Authoriser 650/0, change list 140/0, platform rules 69/0,
+`video-slides` 73/0, `setup-shape` 33/0, `fn-pillars`, `import-page` and
+`fn-ko-edit` green.*
+
+*Earlier: 2026-09-13 &mdash; **&sect;345: one repository, and the line that
 is not drawn yet.** Islam, of the modules &sect;320 named: *"I have various
 modules that can join this repo. when would I keep them on different repos and
 when should I bring them into 1 repo, given that I want them integrated on the

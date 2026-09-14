@@ -1,4 +1,4 @@
-/* ── THE LIBRARY: one machine, two names (spec 049, spec 046 §4.8) ───────
+/* ── THE LIBRARY: one machine, two names (spec 053, spec 046 §4.8) ───────
    Insights and Processes are the same catalogue with different content — an
    item with a name, a set of categories, its own date, a version and something
    to open. `kind` is which. Built once and instantiated twice, so Processes is
@@ -20,7 +20,7 @@ import type { Pool, PoolClient } from "pg";
 type Q = Pool | PoolClient;
 
 /* ── THE VOCABULARY ─────────────────────────────────────────────────────
-   ONE LIST FOR EVERY CLIENT, for now (spec 049 §7.1, Islam's answer). What
+   ONE LIST FOR EVERY CLIENT, for now (spec 053 §7.1, Islam's answer). What
    makes it safe to start fixed is that an item stores the WORDS: giving one
    client their own later reads these same rows and moves no data.
 
@@ -145,7 +145,7 @@ export function sizeLabel(bytes: unknown): string {
    THE CLIENT'S READ CARRIES `state = 'published'` IN THE **WHERE**, never in
    a filter afterwards and never in the screen: a withdrawn report's id must
    answer "not found" rather than "not allowed", so a reader is never told a
-   record exists (spec 049 §4.8). Every read path — the list, one item, and
+   record exists (spec 053 §4.8). Every read path — the list, one item, and
    the file — goes through this one function, or the three would have to agree
    by being written the same way three times (§53.5). */
 export function shelfWhere(forClient: boolean): string {
@@ -205,7 +205,7 @@ export function shape(r: Record<string, any>, forClient: boolean): Item | Office
 
 export type ListQuery = { kind: Kind; forClient: boolean; q?: string; category?: string; state?: string };
 
-/* ONE ORDER AND NO SORT CONTROL (spec 049): newest report first by the
+/* ONE ORDER AND NO SORT CONTROL (spec 053): newest report first by the
    report's OWN date, with undated items last rather than leading the shelf,
    then by when it arrived, then by id — so the order is total and no page can
    show one row twice. */
@@ -268,7 +268,7 @@ export async function updateItem(c: Q, id: string, d: Draft): Promise<any | null
 
 /* REPLACING THE FILE KEEPS THE ID, THE ADDRESS, THE CATEGORIES AND THE COUNT,
    and moves the version by one — the semantics are "a new edition of the same
-   report" (spec 049 §4.6). The FIRST file is not an edition: an item with no
+   report" (spec 053 §4.6). The FIRST file is not an edition: an item with no
    file yet becomes v1 rather than v2, which is why the CASE reads the stored
    path rather than counting writes. The version moves HERE and nowhere else,
    so the number means one thing. */

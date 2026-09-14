@@ -1,4 +1,4 @@
-/* THE LIBRARY — Insights and Processes, one machine (spec 049).
+/* THE LIBRARY — Insights and Processes, one machine (spec 053).
 
    WHAT THIS FILE IS FOR. Forefront publishes a client's research and the
    client reads it (spec 046 decision #9, confirmed by Islam 2026-09-13), so

@@ -44,7 +44,7 @@ export const SPINE_SEGMENTS = ["setup", "tour"] as const;
    reserved and isModule() must go on knowing them, or a business unit keyed
    `portfolio` would quietly claim the address the day the module lands — and
    nobody is offered them until there is something to open. */
-/* ── A MODULE'S OWN AREAS (spec 046 §4.2, §4.4; spec 049 §4.5) ─────────
+/* ── A MODULE'S OWN AREAS (spec 046 §4.2, §4.4; spec 053 §4.5) ─────────
    The contract's second line — *its own roles and areas* — answered HERE
    rather than in a file of its own, because this is already where a module
    says what it is called and whether it is built: a second place would be
@@ -71,7 +71,7 @@ export const SPINE_SEGMENTS = ["setup", "tour"] as const;
    narrowing is spec 046 §4.4's Access page — one page, a Client tab and a tab
    per module — which is not built; until it is, every role holds the default
    below, which for Insights is `view`, so the module opens for everybody in
-   the client exactly as decided (spec 049 §4.5, §7.2). Declaring it now is
+   the client exactly as decided (spec 053 §4.5, §7.2). Declaring it now is
    what stops the answer being invented a second time when that page lands
    (§42's drift, from in front). */
 export type ModuleArea = { key: string; label: string; note: string; states: string[]; shipped: string };
@@ -195,7 +195,7 @@ export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
    Strategy's is what the card already reads; a module with nothing to say
    draws its name alone, which is `""` and never a placeholder. `have` is the
    client's own list, so the card cannot offer a door the address refuses. */
-/* ── WHICH MODULES FOREFRONT WORKS ON RATHER THAN WALKS INTO (spec 049) ──
+/* ── WHICH MODULES FOREFRONT WORKS ON RATHER THAN WALKS INTO (spec 053) ──
    A library is published BY US and read by the client (spec 046 §4.9), so a
    consultant pressing its row on a client's card belongs in the publishing
    room in this console — not in the client's own read-only page, which is the

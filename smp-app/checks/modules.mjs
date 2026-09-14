@@ -127,7 +127,7 @@ check("an area key is a key and not a sentence, so it can be a column",
 check("no two modules claim the same area key",
   new Set(MODULES.flatMap((k) => MODULE_DEF[k].areas.map((a) => a.key))).size
     === MODULES.flatMap((k) => MODULE_DEF[k].areas).length);
-/* THE CARRIED MATRIX IS NOT WHERE THESE LIVE (§335, spec 049 §4.5), and it is
+/* THE CARRIED MATRIX IS NOT WHERE THESE LIVE (§335, spec 053 §4.5), and it is
    asserted rather than trusted: `lib/rules.cjs` is byte-identical to its
    frozen twin, so a module's area added there turns generated-in-step red —
    and this says WHY before that happens, in the file somebody would be

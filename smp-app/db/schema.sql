@@ -777,7 +777,7 @@ CREATE INDEX assistant_asks_at_idx ON assistant_asks (tenant_id, at DESC);
 CREATE INDEX assistant_asks_qkey_idx ON assistant_asks (tenant_id, qkey);
 CREATE INDEX assistant_asks_asker_idx ON assistant_asks (tenant_id, asker_key, at);
 
--- ── The library: Insights and Processes, one table (spec 049) ──────────
+-- ── The library: Insights and Processes, one table (spec 053) ──────────
 -- ONE MACHINE, INSTANTIATED TWICE (spec 046 §4.8, Islam 2026-09-11). Both
 -- libraries are a catalogue you search and take something from; one has a file
 -- on the end and the other has steps. `kind` is which, and it is the only
@@ -803,7 +803,7 @@ CREATE TABLE library_items (
   summary text NOT NULL DEFAULT '',
   -- A SET OF WORDS, canonically ordered on the way in (lib/library.ts), so the
   -- order somebody clicked cannot change what is stored. The WORDS and not
-  -- keys: one list serves every client today (spec 049 §7.1), and giving a
+  -- keys: one list serves every client today (spec 053 §7.1), and giving a
   -- client their own later reads these same rows and moves no data.
   categories jsonb NOT NULL DEFAULT '[]'::jsonb,
   -- THE REPORT'S OWN DATE, never the upload's — a market report is filed under
@@ -812,12 +812,12 @@ CREATE TABLE library_items (
   report_date date,
   state text NOT NULL DEFAULT 'draft',
   -- Moved by replacing the file and by nothing else, so the number means one
-  -- thing (spec 049 §4.6).
+  -- thing (spec 053 §4.6).
   version integer NOT NULL DEFAULT 1,
   file_path text NOT NULL DEFAULT '',
   file_name text NOT NULL DEFAULT '',
   file_size bigint NOT NULL DEFAULT 0,
-  -- A COUNT AND NEVER A LOG (spec 049 §4.9): what a client's staff each opened
+  -- A COUNT AND NEVER A LOG (spec 053 §4.9): what a client's staff each opened
   -- is a surveillance decision nobody asked for.
   downloads integer NOT NULL DEFAULT 0,
   -- Stamped the FIRST time it goes out and never rewritten, so withdrawing and

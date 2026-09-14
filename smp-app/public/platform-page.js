@@ -1034,7 +1034,7 @@
         r.appendChild(document.createTextNode(m.label));
         if (m.state) r.appendChild(el("i", null, m.state));
         /* A LIBRARY'S ROW OPENS THE ROOM WE PUBLISH FROM, not the client's
-           own page (spec 049; the flag is the server's, lib/modules.ts). The
+           own page (spec 053; the flag is the server's, lib/modules.ts). The
            client's read-only library is one press further in, from there —
            this is the one module whose work is on our side, and landing a
            consultant on the page where they can do nothing would be §61 with
@@ -1248,7 +1248,7 @@
 
   function drawNewClient(){ drawSetup(null); }
 
-  /* ════ THE DOCUMENT ROOM (spec 049) ══════════════════════════════════
+  /* ════ THE DOCUMENT ROOM (spec 053) ══════════════════════════════════
      Where a client's library is published from. Forefront's side of Insights
      and Processes — the client's own page reads, and this is the only place
      anything is written (spec 046 decision #9).
@@ -1429,7 +1429,7 @@
     var sum = el("textarea", "fld"); sum.id = "lib-sum"; sum.rows = 2; sum.value = it.summary || "";
     sb.appendChild(sum); set.appendChild(sb);
 
-    /* THE CATEGORIES ARE THE ONE LIST THE SERVER SENT (spec 049 §4.4: one
+    /* THE CATEGORIES ARE THE ONE LIST THE SERVER SENT (spec 053 §4.4: one
        list for every client, for now), so a category invented here would be
        refused on save — which is why they are chips off that list and not a
        box somebody types into. `aria-pressed` is what a toggle already
@@ -1571,7 +1571,7 @@
       });
     }
 
-    /* ── THE FILE, IN PIECES (spec 049 §4.3) ────────────────────────
+    /* ── THE FILE, IN PIECES (spec 053 §4.3) ────────────────────────
        Begin, one request per piece, finish — every one of them authorised on
        the server, which is why the browser holds no address of its own
        (§261's rule, carried). The word on the button IS the progress: a bar
@@ -1652,7 +1652,7 @@
     return d.getUTCDate() + " " + MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear();
   }
 
-  /* ── TAKING ONE BACK (spec 049 §4.8) ─────────────────────────────────
+  /* ── TAKING ONE BACK (spec 053 §4.8) ─────────────────────────────────
      §323's block, because the decision is the same one: the two acts with no
      way back live under a rule, at the foot, each saying in its own line what
      it does — rather than a dead control somebody presses to find out.

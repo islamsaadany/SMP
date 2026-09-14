@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The room we publish a client's library from (spec 049).
+"""The room we publish a client's library from (spec 053).
 
 Publishing is Forefront's, so this screen is the module's ONLY authoring
 surface — the client's own page reads and cannot write at all, which
@@ -240,7 +240,7 @@ def run():
             }""")
             if not got:
                 check("the client's card carries a row for Insights", False,
-                      "no .mrow[data-module=insights] — is this a build before spec 049?")
+                      "no .mrow[data-module=insights] — is this a build before spec 053?")
                 raise SystemExit(1)
             try:
                 pg.wait_for_selector(".ptitle h1", timeout=9000)

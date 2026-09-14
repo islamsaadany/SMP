@@ -1,4 +1,4 @@
-/* ── INSIGHTS: the client's half (spec 049, drawn 2026-09-13) ───────────
+/* ── INSIGHTS: the client's half (spec 053, drawn 2026-09-13) ───────────
    Search, open, download — and nothing on this screen can write, because
    publishing is Forefront's and happens on the client's card in the console
    (spec 046 decision #9). That is not enforced by leaving the buttons off: it

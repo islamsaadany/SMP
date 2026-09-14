@@ -1,4 +1,4 @@
-# 049 · Insights — the library, published by Forefront
+# 053 · Insights — the library, published by Forefront
 
 **Status:** every decision taken 2026-09-13 (two on the name and the publisher,
 then the four of §7); both screens drawn and signed off that day

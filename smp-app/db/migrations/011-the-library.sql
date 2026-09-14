@@ -1,4 +1,4 @@
-/* The library — Insights and Processes, one table (spec 049)
+/* The library — Insights and Processes, one table (spec 053)
 
    schema.sql runs ONCE and is recorded as `schema` in _migrations, so a
    deployment that has already applied it never sees a table added there

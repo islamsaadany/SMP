@@ -509,7 +509,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return ok({ modules: next });
   }
 
-  /* ── THE DOCUMENT ROOM (spec 049; spec 046 §4.9) ──────────────────────
+  /* ── THE DOCUMENT ROOM (spec 053; spec 046 §4.9) ──────────────────────
      Publishing is Forefront's, so the authoring surface for a client's
      library is HERE, on their card, and the client's app has none at all.
      Every action below is the same three guards as setModules, in the same
@@ -571,9 +571,9 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
 
     /* DELETE TAKES THE FILE WITH IT, and it is refused while the report is
        still in the client's library: withdrawing is what closes the door, so
-       nobody deletes something a client is reading (spec 049 §4.8 — the guard
+       nobody deletes something a client is reading (spec 053 §4.8 — the guard
        rather than a second confirmation, which is §323's own shape). */
-    /* ── THE FILE, IN PIECES (spec 049 §4.3) ─────────────────────────
+    /* ── THE FILE, IN PIECES (spec 053 §4.3) ─────────────────────────
        Three steps, because a serverless function refuses a body over about
        4.5MB and a report is bigger than that: begin, then one request per
        piece (app/api/platform/file), then finish. EVERY PIECE IS AUTHORISED
@@ -787,7 +787,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
   return no(400, "unknown action");
 }
 
-/* ── ONE PIECE OF A REPORT (spec 049) ────────────────────────────────────
+/* ── ONE PIECE OF A REPORT (spec 053) ────────────────────────────────────
    Its own export rather than an `action`, because the body is RAW BYTES and
    every other call to this endpoint is JSON — the same split §261 made for
    the same reason, and the query is where the naming rides.
@@ -822,7 +822,7 @@ export async function libraryPart(pool: Q, me: SessionUser, q: URLSearchParams, 
     return no(400, "That file does not belong to this report.");
 
   /* THE FIRST PIECE IS WHAT SAYS IT IS A PDF, checked by its own first bytes
-     and never by the name it arrived under (spec 049 §5). A later piece
+     and never by the name it arrived under (spec 053 §5). A later piece
      cannot be checked — it is the middle of a file — which is exactly why the
      first one is. */
   if (n === 1 && !LIB.looksLikePdf(bytes))

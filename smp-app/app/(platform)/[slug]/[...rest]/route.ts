@@ -58,7 +58,7 @@ export async function GET(req: Request, { params }: P) {
     return new Response(await trialDocument(slug, ans.tenant.id, ans.tenant.name, have), { status: 200, headers: shellHeaders() });
   if (w.module === "trial")
     return Response.redirect(new URL(clientHref(slug, "trial", ""), req.url), 302);
-  /* ── INSIGHTS (spec 049) ──────────────────────────────────────────
+  /* ── INSIGHTS (spec 053) ──────────────────────────────────────────
      Two addresses and no more: the library, and one report's file. THE
      FILE IS A ROUTE RATHER THAN A LINK TO THE STORE, because the store's
      address has to be minted, short-lived and asked for by somebody this

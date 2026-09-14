@@ -113,7 +113,7 @@ async function signedRead(path: string): Promise<string> {
 }
 
 /* ── THE THREE STEPS OF AN UPLOAD, for a caller that has done its own
-   authorising (spec 049) ──────────────────────────────────────────────────
+   authorising (spec 053) ──────────────────────────────────────────────────
    §261's clips authorise every piece against a REVIEW TARGET, which is the
    right question there and the wrong one for a library: a report is published
    by a consultant in the console and has no target at all. So what is shared
@@ -142,7 +142,7 @@ export async function finishUpload(path: string, key: string, uploadId: string, 
   return true;
 }
 
-/* ── A SHORT-LIVED READ ADDRESS (spec 049, reusing §261.10's two steps) ──
+/* ── A SHORT-LIVED READ ADDRESS (spec 053, reusing §261.10's two steps) ──
    A private blob has no fetchable address of its own: the store issues a
    delegation scoped to ONE pathname and ONE operation, and that signs a
    concrete URL. Exported so the library's download route mints its address
@@ -154,7 +154,7 @@ export async function signedReadFor(path: string): Promise<string> {
   return path ? signedRead(path) : "";
 }
 
-/* ── TAKING A FILE OUT OF THE STORE (spec 049) ──────────────────────────
+/* ── TAKING A FILE OUT OF THE STORE (spec 053) ──────────────────────────
    Exported from HERE and not written again beside the library, because the
    loader, the token and the "no store configured" answer are all already in
    this file and a second copy of them is how one of the two learns about an

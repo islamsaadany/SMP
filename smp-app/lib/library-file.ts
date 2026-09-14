@@ -1,4 +1,4 @@
-/* ── ONE REPORT'S FILE (spec 049) ────────────────────────────────────────
+/* ── ONE REPORT'S FILE (spec 053) ────────────────────────────────────────
    The address a client's Download button points at, and the only way the
    bytes are reached. It is OUR route and not a link to the store, because a
    blob address is permanent and unconditional: handed to a client's browser
@@ -11,7 +11,7 @@
      1 · FIND IT AS THE CLIENT SEES IT — `forClient: true`, so `state =
          'published'` is in the WHERE. A withdrawn report and one that never
          existed answer identically here, and a reader is never told which
-         (spec 049 §4.8);
+         (spec 053 §4.8);
      2 · COUNT IT, once, on the server, in one statement;
      3 · MINT the address and send them to it.
 
@@ -57,7 +57,7 @@ export async function libraryFile(tenantId: string, kind: Kind, id: string, _url
       location: url,
       /* The name the person's browser saves it under is the one we stored,
          scrubbed AGAIN at the moment it goes into a header — the store's
-         address is not ours to trust and this costs nothing (spec 049 §5). */
+         address is not ours to trust and this costs nothing (spec 053 §5). */
       "content-disposition": 'attachment; filename="' + safeFileName(item.file_name) + '"',
       "cache-control": "no-store",
     },

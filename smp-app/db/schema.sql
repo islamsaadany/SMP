@@ -176,6 +176,58 @@ CREATE TABLE memory_entries (
 CREATE INDEX memory_about ON memory_entries (about_tenant_id, created_at DESC);
 CREATE INDEX memory_author ON memory_entries (author_id);
 
+-- ── The strategy frameworks library (spec 052) ──────────────────────────
+-- Forefront's own, and the one platform table that names no client at all:
+-- the memory's entries are ABOUT an engagement, and a framework is about
+-- nobody. So there is no tenant column here of any kind — and forgetting the
+-- exclusion list below still fails the apply outright, at the loop's own
+-- CREATE INDEX … (tenant_id), which is the loud failure `memory_entries`
+-- chose its column name to get. Same property, for free.
+--
+-- `added_by` IS NULL-ABLE AND `ON DELETE SET NULL`, where the memory's author
+-- is NOT NULL … RESTRICT, and the two differences are the same decision read
+-- twice: the eighty that come with the library were written by nobody here,
+-- and an entry outlives whoever typed it. Absent means "came with the
+-- library" and nothing derives a person to fill it (§35). Refusing to remove
+-- a consultant because they once added a framework is the wrong trade — where
+-- refusing to remove one who wrote up an engagement is exactly the right one.
+--
+-- THE NINE CONTENT FIELDS ARE NOT NULL DEFAULT '', so every reader is spared
+-- a null check and an empty field reads as empty everywhere. The name is the
+-- only one that cannot be blank — a framework with no name is not a row.
+CREATE TABLE frameworks (
+  id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  -- the address, and UNIQUE in the database rather than in whatever mints it:
+  -- a one-off script derived these and nothing could collide; with admins
+  -- adding, two frameworks can want one slug, and a collision is refused BY
+  -- NAME rather than resolved silently (§87).
+  slug                 text NOT NULL UNIQUE,
+  -- THE BOOK'S OWN ORDER, and it is why there is no second list of section
+  -- names anywhere: the eight sections are ordered by the smallest `idx` in
+  -- each, and the frameworks inside one by their own. Alphabetical would
+  -- scramble a sequence that teaches — Knowing Your Business comes before
+  -- Addressing Risk because you do it first. A framework an admin adds takes
+  -- max(idx)+1, so it lands at the end and moves no section (§101's `units.idx`,
+  -- the same answer to the same question).
+  idx                  integer NOT NULL DEFAULT 0,
+  name                 text NOT NULL,
+  section              text NOT NULL,
+  purpose              text NOT NULL DEFAULT '',
+  key_questions        text NOT NULL DEFAULT '',
+  when_to_use          text NOT NULL DEFAULT '',
+  when_not_to_use      text NOT NULL DEFAULT '',
+  inputs_required      text NOT NULL DEFAULT '',
+  outputs              text NOT NULL DEFAULT '',
+  executive_example    text NOT NULL DEFAULT '',
+  consultant_use_case  text NOT NULL DEFAULT '',
+  facilitation_tips    text NOT NULL DEFAULT '',
+  added_by             uuid NULL REFERENCES users (id) ON DELETE SET NULL,
+  created_at           timestamptz NOT NULL DEFAULT now(),
+  updated_at           timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT frameworks_name CHECK (btrim(name) <> '')
+);
+CREATE INDEX frameworks_section ON frameworks (idx);
+
 -- ── The tenant-owned tables (42) ────────────────────────────────────────
 -- Every row: tenant_id uuid NOT NULL → tenants ON DELETE CASCADE, and the
 -- key it has today with tenant_id in front of it (data-model.md). The
@@ -876,7 +928,7 @@ BEGIN
     WHERE n.nspname = current_schema() AND c.relkind = 'r'
       AND c.relname NOT IN ('tenants','users','tenant_users','sessions','login_attempts',
                             'platform_access','tenant_log','push_keys','memory_entries',
-                            '_migrations')
+                            'frameworks','_migrations')
   LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
     EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);

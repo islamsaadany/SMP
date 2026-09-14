@@ -255,14 +255,30 @@ const SCHEMA = {
   required: ["answered", "reply", "source"]
 };
 
-/* ── The call ─────────────────────────────────────────────────────────
-   `history` is the conversation so far, oldest first, as
-   `{ from_office, body }` — so a follow-up ("what about the other one?")
-   reads as a follow-up rather than as a question with no subject. */
-async function ask(opts) {
+/* ── ONE CALL TO THE PROVIDER, and everything that is true of every call:
+   the key, the endpoint, the timeout, the thinking-knob retry, and how each
+   way it can fail is reported. `ask()` below shapes its answer into the
+   three-field reply every corpus caller wants; `askJson()` hands the parsed
+   object straight back for the one caller that is not asking a question at
+   all (spec 052 — drafting a framework). SPLIT RATHER THAN COPIED: a second
+   path to the provider would be a second answer to all of the above, and the
+   drifting copy is the one nobody is watching (§53.5, §112.2).
+
+   THREE OPTIONS, EACH DEFAULTING TO EXACTLY WHAT THIS DID BEFORE, so every
+   caller that passes none is byte-for-byte unchanged (§250's shape, asserted
+   in checks/assistant-defaults.mjs):
+
+     · `schema`      — the answer's shape. Default SCHEMA.
+     · `needsCorpus` — refuse when there is nothing to answer FROM. Default
+                       true, because every caller until now answers from one.
+     · `think`       — let the model reason. Default OFF, and §134 gives the
+                       reason in its own words: "answering from a corpus that
+                       is IN THE PROMPT is retrieval, not reasoning". That
+                       reasoning is exactly what does NOT hold for drafting. */
+async function callModel(opts) {
   const kb = opts.kb || {};
   if (!configured()) return { ok: false, why: "no " + KEY_NAME + " is set on this deployment" };
-  if (!(kb.recipes || []).length && !(kb.sections || []).length) {
+  if (opts.needsCorpus !== false && process.env.SMP_BREAK !== "loose-defaults" && !(kb.recipes || []).length && !(kb.sections || []).length) {
     return { ok: false, why: opts.emptyWhy || "the knowledge base is empty" };
   }
 
@@ -288,14 +304,27 @@ async function ask(opts) {
      remembers. */
   const cfg = {
     responseMimeType: "application/json",
-    responseSchema: SCHEMA,
+    responseSchema: opts.schema || SCHEMA,
     temperature: 0,
     /* THINKING COUNTS (§133): reasoning is billed against maxOutputTokens, so
        the headroom stays even with the budget at nought — a dropped knob or a
        model that thinks regardless must not starve the visible answer. */
-    maxOutputTokens: 2048
+    /* AND THE HEADROOM IS THE CALLER'S TOO, for the same reason: thinking is
+       BILLED AGAINST THIS (§133), so a call that is allowed to reason and
+       keeps 2048 has the answer truncated rather than the thinking — and a
+       draft cut off at its eleventh field reads as a short draft, not a
+       broken one. */
+    maxOutputTokens: opts.maxOutput || (process.env.SMP_BREAK === "loose-defaults" ? 8192 : 2048)
   };
-  const sentThink = THINK_CAP_OK !== false;
+  /* The cap is sent unless the caller asked to reason AND the provider has
+     not already refused the knob. */
+  /* RED: the three defaults flipped, which is what a refactor that loses them
+     looks like — and every one of the three is SILENT in production (a corpus
+     guard that stops guarding answers from nothing; thinking on turns every
+     lookup's latency back into weather, §134; a bigger budget hides §133's
+     truncation until the day it does not). */
+  const loose = process.env.SMP_BREAK === "loose-defaults";
+  const sentThink = THINK_CAP_OK !== false && !(loose || opts.think);
   if (sentThink) cfg.thinkingConfig = { thinkingBudget: 0 };
   const body = {
     systemInstruction: { parts: [
@@ -359,7 +388,7 @@ async function ask(opts) {
        for a genuinely malformed ask, once per warm process. */
     if (res.status === 400 && sentThink && THINK_CAP_OK === null) {
       THINK_CAP_OK = false;
-      return ask(opts);
+      return callModel(opts);
     }
     return { ok: false, status: res.status,
              why: "the assistant refused the request (" + res.status +
@@ -383,6 +412,22 @@ async function ask(opts) {
        nothing waiting for a person — the one outcome this must not produce. */
     return { ok: false, why: "the assistant's answer could not be read" };
   }
+  return { ok: true, json: out };
+}
+
+/* THE PARSED OBJECT, for a caller supplying its own schema. Nothing is shaped
+   and nothing is second-guessed: what the model answered under the caller's
+   own schema is what comes back (spec 052). */
+async function askJson(opts) { return callModel(opts); }
+
+/* ── Asking a corpus a question ───────────────────────────────────────
+   `history` is the conversation so far, oldest first, as
+   `{ from_office, body }` — so a follow-up ("what about the other one?")
+   reads as a follow-up rather than as a question with no subject. */
+async function ask(opts) {
+  const r = await callModel(opts);
+  if (!r.ok) return r;
+  const out = r.json;
 
   const answered = out.answered === true;
   const reply = String(out.reply || "").trim();
@@ -394,7 +439,7 @@ async function ask(opts) {
            source: answered ? (String(out.source || "").replace(/[\[\]]/g, "").trim() || null) : null };
 }
 
-module.exports = { ask, configured, model, KEY_NAME, corpusText, instruction, SCHEMA,
+module.exports = { ask, askJson, configured, model, KEY_NAME, corpusText, instruction, SCHEMA,
                    officeOnly, looksLikeBadKey, HANDOFF_LINE, keyShape, KEY_LEN, KEY_HEAD, KEY_HEAD2, withTenant,
                    /* test hook only: the cap's memory is per process, and a test
                       that cannot reset it can only measure the first case (§134). */

@@ -57,6 +57,9 @@ def ck(what, ok, detail=""):
         fails.append(what)
 
 SENT = []
+# How many authored plan lines the stub's client holds. 0 for every section
+# but §8e, which sets it and puts it back (§94.2).
+PLANNED = [0]
 
 # The client the stub already holds, so "opening it afterwards" can be driven.
 HELD = {
@@ -65,7 +68,8 @@ HELD = {
 }
 SHAPE = {
     "companies": [], "units": [{"name": "Bakery", "company": ""}, {"name": "Dairy", "company": ""}],
-    "functions": [{"name": "Finance", "format": "projects"}], "words": {},
+    "functions": [{"name": "Finance", "format": "projects"}],
+    "capabilities": [], "words": {},
 }
 
 
@@ -132,7 +136,10 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                 {"key": "super", "name": "Super user", "note": "holds the access matrix"},
                 {"key": "smoteam", "name": "SMO team", "note": "runs cycles"}],
                 "canEdit": True, "register": [], "office": [], "shape": SHAPE,
-                "holds": {"plans": 0, "capabilities": 0, "units": 2, "functions": 1},
+                # A CLIENT WITH A PLAN IN IT IS A STATE THE FLOW CANNOT REACH
+                # ON ITS OWN — a pillar is authored INSIDE the platform — so the
+                # stub is told to answer one (§255), and §8e asks for it.
+                "holds": {"plans": PLANNED[0], "capabilities": 0, "units": 2, "functions": 1},
                 # §322.1 carries §320.4's band onto this flow's first step, so
                 # the stub answers what that band reads — the whole offer and
                 # what this client holds, both from the server (§53.5).
@@ -162,6 +169,11 @@ def last(action):
         if b.get("action") == action:
             return b
     return None
+
+
+def here_at(pg):
+    e = pg.query_selector(".wzstep[aria-current='step']")
+    return (e.text_content() or "").strip() if e else None
 
 
 def steps(pg):
@@ -284,19 +296,246 @@ with sync_playwright() as p:
     ck("…and keeps the others", any(u.get("name") == "Sweets" for u in u2), u2)
 
     # ── 6 · The functions step, and what is drawn and dulled ─────────────
-    print("\n§6 · the functions, and what is not built")
+    # ── 6 · The functions, and the word the middle option carries ────────
+    #
+    # REWRITTEN, NOT LOOSENED (§218, twice over). This asserted "two are live
+    # and the third is INERT and says later", which was true until §342 built
+    # the third way — and was left standing, so this file was red on main's own
+    # build for main's own decision (§51.11, established by measuring that this
+    # branch never touched FORMATS). And it asserted the capabilities step is
+    # inert, which §347 reverses.
+    #
+    # What replaces them is the claim that survives either decision: the plan
+    # types the step offers are the plan types the PLATFORM has, spelled the
+    # platform's own way. "Capabilities & projects" was a third spelling of a
+    # word planFormatCell and capFormatCell both write as Projects, and it
+    # named the arrangement §343 replaced (a function holds its own projects
+    # now). Asserted as the SET, so a fourth way added tomorrow fails here
+    # until the wizard offers it.
+    print("\n§6 · the functions, and the words the options carry")
     pg.click(".wzstep >> text=Functions")
     pg.wait_for_timeout(450)
     opts = pg.eval_on_selector_all(".wzrow select option",
-        "els => els.map(e => ({ t: e.textContent, off: e.disabled }))")
-    ck("three plan types are offered", isinstance(opts, list) and len(opts) == 3, opts)
-    ck("…two are live", isinstance(opts, list) and sum(1 for o in opts if not o["off"]) == 2, opts)
-    ck("…and the third is INERT and says later",
-       isinstance(opts, list) and any(o["off"] and "later" in o["t"].lower() for o in opts), opts)
-    caps = pg.query_selector(".wzstep.later")
-    ck("the capabilities step is drawn", bool(caps))
-    ck("…and is inert rather than merely grey",
-       bool(caps) and caps.get_attribute("disabled") is not None)
+        "els => els.map(e => ({ t: e.textContent.trim(), off: e.disabled }))")
+    words = [o["t"] for o in opts] if isinstance(opts, list) else []
+    ck("three plan types are offered", len(words) == 3, words)
+    ck("…all three are live, since §342 built the third",
+       bool(opts) and all(not o["off"] for o in opts), opts)
+    ck("…and the middle one is Projects, the platform's own word for it",
+       "Projects" in words and not any("Capabilities &" in w for w in words), words)
+    ck("…with no option still saying 'later'",
+       not any("later" in w.lower() for w in words), words)
+
+    # ── 6b · THE CAPABILITIES STEP WRITES ONE (§347) ─────────────────────
+    #
+    # It was dulled and said "What does not exist is a capability standing on
+    # its own beside the business units" — which spec 049 built (§341, §343).
+    # So the claim is that the step now WRITES, asserted off what the page
+    # POSTS and never off the boxes (§96: a step wired to nothing draws
+    # perfectly).
+    #
+    # THREE QUESTIONS PER ROW, and the holder list is the functions one step
+    # away plus unassigned — the same row Setup › Capabilities draws, which is
+    # what makes this one answer rather than two (§53.5).
+    print("\n§6b · the capabilities step")
+    pg.click(".wzstep >> text=Capabilities")
+    pg.wait_for_timeout(450)
+    ck("the step opens rather than refusing", "Capabilities" in (here_at(pg) or ""), here_at(pg))
+    ck("…and says nothing about being a build of its own",
+       not pg.query_selector(".wzlaterline"))
+    ck("…and offers a capability to be added", bool(pg.query_selector(".wzadd")))
+    add = pg.query_selector(".wzadd")
+    if add:
+        add.click(); pg.wait_for_timeout(300)
+    row = pg.query_selector_all(".wzrow input.fld")
+    ck("…and the cursor lands in the new row's NAME, not one of its pickers",
+       bool(row) and pg.evaluate("document.activeElement && document.activeElement.tagName") == "INPUT")
+    if row:
+        row[-1].fill("Cold chain")
+        row[-1].evaluate("e => e.blur()")
+    pg.wait_for_timeout(150)
+    sels = pg.query_selector_all(".wzrow select")
+    holders = pg.eval_on_selector_all(".wzrow select",
+        "els => els.length ? Array.from(els[0].options).map(o => o.textContent.trim()) : []")
+    ck("the holder list is unassigned plus the functions this client has",
+       isinstance(holders, list) and len(holders) == 2 and "Finance" in holders
+       and any("unassigned" in h for h in holders), holders)
+    forms = pg.eval_on_selector_all(".wzrow select",
+        "els => els.length > 1 ? Array.from(els[1].options).map(o => o.textContent.trim()) : []")
+    # A CAPABILITY HAS TWO FORMS, NOT THE FUNCTION'S THREE (§342): capFormat()
+    # reads anything that is not "pillars" as projects, so offering the third
+    # would be a control whose answer the graph turns into something else.
+    ck("…and it plans two ways, not the function's three", forms == ["Pillars", "Projects"], forms)
+    if len(sels) >= 2:
+        sels[0].select_option(label="Finance")
+        pg.wait_for_timeout(120)
+        sels[1].select_option(label="Pillars")
+        pg.wait_for_timeout(120)
+    n_before = len(SENT)
+    pg.click(".wzstep >> text=Functions")
+    pg.wait_for_timeout(500)
+    shaped = last("shapeClient")
+    caps = (shaped or {}).get("shape", {}).get("capabilities", [])
+    ck("leaving the step posts the capability", len(caps) == 1, caps)
+    ck("…with its name, its holder and how it plans",
+       bool(caps) and caps[0].get("name") == "Cold chain"
+       and caps[0].get("fn") == "Finance" and caps[0].get("format") == "pillars", caps)
+    # THE ANSWERS ARE THE LIST (§322), the other end: removing it posts a list
+    # without it, or "it can be added" is half a control.
+    pg.click(".wzstep >> text=Capabilities")
+    pg.wait_for_timeout(420)
+    xs = pg.query_selector_all(".wzrow .wzx")
+    if xs:
+        xs[0].click(); pg.wait_for_timeout(250)
+    pg.click(".wzstep >> text=Functions")
+    pg.wait_for_timeout(500)
+    caps2 = (last("shapeClient") or {}).get("shape", {}).get("capabilities", [])
+    ck("…and removing it posts a list without it", caps2 == [], caps2)
+
+    # ── 6c · The common names, one click in ──────────────────────────────
+    # §351. A control wired to nothing renders perfectly (§96), so every
+    # assertion here reads the POSTED shape or the live DOM rather than the
+    # fact that a chip was drawn. The decision this section exists for is
+    # that a chip is held by the ROW it made and never by the spelling, and
+    # it is asserted at BOTH ENDS (§94.2): renaming keeps it off the list,
+    # removing the row puts it back. A build that dropped the mark entirely
+    # satisfies the first half perfectly.
+    print("\n§6c · the common names")
+
+    def chips(pg):
+        return [(e.text_content() or "").lstrip("+ ").strip()
+                for e in pg.query_selector_all(".wzcommon .wzcm")]
+
+    def row_with(pg, value):
+        for r in pg.query_selector_all(".wzrow"):
+            f = r.query_selector("input.fld")
+            if f and (f.get_attribute("value") == value or f.input_value() == value):
+                return r
+        return None
+
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(420)
+    u_chips = chips(pg)
+    ck("the units step offers the common ones",
+       u_chips == ["Retail", "Online", "Wholesale", "Distribution",
+                   "Corporate Sales", "Export", "Services"], u_chips)
+
+    pg.click(".wzcommon .wzcm >> text=Wholesale")
+    pg.wait_for_timeout(300)
+    ck("clicking one adds a row holding that name",
+       bool(row_with(pg, "Wholesale")), [f.input_value() for f in pg.query_selector_all(".wzrow input.fld")])
+    # THE CURSOR LANDS ON THE NAME, which is the whole point of a name you are
+    # expected to adjust — never on the row's other field.
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("…with the cursor in its name box", act == ["INPUT", "Wholesale"], act)
+    ck("…and that chip has left the row", "Wholesale" not in chips(pg), chips(pg))
+
+    # THE DECISION: the chip is held by the row, not by the spelling.
+    f = row_with(pg, "Wholesale").query_selector("input.fld")
+    f.fill("Wholesale & Trade")
+    f.evaluate("e => e.blur()")
+    pg.wait_for_timeout(200)
+    pg.click(".wzstep >> text=Companies")
+    pg.wait_for_timeout(500)
+    units = (last("shapeClient") or {}).get("shape", {}).get("units", [])
+    got = [u for u in units if u.get("name") == "Wholesale & Trade"]
+    ck("…and the renamed row is what reaches the server", len(got) == 1, units)
+    # §350's reason for marking the row NON-ENUMERABLY: the endpoint slices the
+    # row objects through verbatim, so an ordinary key would be stored for ever.
+    ck("…carrying no trace of the chip that made it",
+       bool(got) and sorted(got[0].keys()) == ["company", "name"], got)
+
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(420)
+    # THE DECISION, asked after a repaint. In the moment it is true of a build
+    # matching by SPELLING as well, because a bound field writes without
+    # repainting (§71.2) and the chip row is not redrawn until something else
+    # paints — so asking it here is what makes it able to fail (§113.8).
+    ck("…and renaming the row keeps its chip off the list",
+       "Wholesale" not in chips(pg), chips(pg))
+    r = row_with(pg, "Wholesale & Trade")
+    if r:
+        x = r.query_selector(".wzx")
+        if x: x.click()
+    pg.wait_for_timeout(250)
+    ck("…and removing the row puts its chip back", "Wholesale" in chips(pg), chips(pg))
+
+    # THE OTHER STEP: eleven names, and a row that also carries a plans-in
+    # picker — the case that decides whether the cursor lands right.
+    pg.click(".wzstep >> text=Functions")
+    pg.wait_for_timeout(420)
+    f_chips = chips(pg)
+    ck("the functions step offers its own list",
+       "Finance" in f_chips and "Customer Service" in f_chips and "Audit" in f_chips, f_chips)
+    ck("…with the office's own function last",
+       bool(f_chips) and f_chips[-1] == "Strategy Management Office", f_chips)
+
+    pg.click(".wzcommon .wzcm >> text=Audit")
+    pg.wait_for_timeout(300)
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("a function from a chip lands the cursor on the name, not the picker",
+       act == ["INPUT", "Audit"], act)
+    pg.click(".wzstep >> text=Capabilities")
+    pg.wait_for_timeout(500)
+    fns = (last("shapeClient") or {}).get("shape", {}).get("functions", [])
+    made = [f for f in fns if f.get("name") == "Audit"]
+    # A CHIP IS A SHORTCUT INTO THE ADD BUTTON, so it must mint what that mints.
+    ck("…and it plans the way the Add button mints one",
+       bool(made) and made[0].get("format") == "pillars", made)
+    ck("…carrying no trace of the chip either",
+       bool(made) and sorted(made[0].keys()) == ["format", "name"], made)
+
+    # AND THE BUTTON THE CHIP SHORTCUTS LANDS THE CURSOR IN THE SAME PLACE
+    # (§352). Islam: "fix it". A function's row ends in a SELECT that also
+    # wears .fld, so the Add button reached for the last one and landed on the
+    # plans-in picker — §347.1 had found exactly this in capsStep and fixed it
+    # there with a copy of its own. All three call sites ask one function now,
+    # so this is asserted on all three or the next one written drifts again.
+    pg.click(".wzadd")
+    pg.wait_for_timeout(280)
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("the Add button lands the cursor on the name too, not the picker",
+       act == ["INPUT", ""], act)
+    x = pg.query_selector_all(".wzrow .wzx")
+    if x: x[-1].click()
+    pg.wait_for_timeout(200)
+
+    pg.click(".wzstep >> text=Capabilities")
+    pg.wait_for_timeout(420)
+    pg.click(".wzadd")
+    pg.wait_for_timeout(280)
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("…and so does the one on the capabilities step", act == ["INPUT", ""], act)
+    x = pg.query_selector_all(".wzrow .wzx")
+    if x: x[-1].click()
+    pg.wait_for_timeout(200)
+
+    # A NEW CONTROL IS MEASURED, NEVER ARGUED FROM ITS TOKENS (§38.4, §93.11).
+    # The chip borrows .wzadd's own ink and ground, so the reading should be
+    # that control's — but "should" is the word this project has been caught by
+    # seven times, and the ASSERTION is that the two AGREE rather than any
+    # number, so a deliberate change to the pair stays green (§94.8).
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(380)
+    for theme in ("light", "dark"):
+        pg.evaluate("t => document.documentElement.setAttribute('data-theme', t)", theme)
+        pg.wait_for_timeout(180)
+        m = pg.evaluate("""() => {
+          const lum = c => { const [r,g,b] = c.match(/\\d+(\\.\\d+)?/g).slice(0,3).map(Number)
+              .map(v => { v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); });
+            return .2126*r + .7152*g + .0722*b; };
+          const ground = c => { let e = c, bg = 'rgba(0, 0, 0, 0)';
+            while (e && bg.startsWith('rgba(0, 0, 0, 0')) { bg = getComputedStyle(e).backgroundColor; e = e.parentElement; }
+            return bg; };
+          const ratio = el => { const a = lum(getComputedStyle(el).color), b = lum(ground(el));
+            return Math.round(((Math.max(a,b)+.05)/(Math.min(a,b)+.05)) * 100) / 100; };
+          const chip = document.querySelector('.wzcm'), add = document.querySelector('.wzadd');
+          return chip && add ? { chip: ratio(chip), add: ratio(add) } : null;
+        }""")
+        ck("the chip reads as well as the button it shortcuts — " + theme,
+           bool(m) and m["chip"] >= 4.5 and abs(m["chip"] - m["add"]) < 0.01, m)
+    pg.evaluate("() => document.documentElement.removeAttribute('data-theme')")
+    pg.wait_for_timeout(150)
 
     # ── 7 · The summary, and the way out ─────────────────────────────────
     print("\n§7 · the summary")
@@ -377,6 +616,164 @@ with sync_playwright() as p:
     cur = pg.query_selector(".wzstep[aria-current='step']")
     ck("…without repainting the step out from under it (§71.2)",
        cur is not None and "The client" in cur.text_content())
+
+    # ── 8c · A ROW WITH NO NAME IS REFUSED, NOT DROPPED (§346) ───────────
+    # The minter skips a blank name, so the row was posted, thrown away and
+    # left drawn until the client was reopened — accepted on screen, gone in
+    # the database, nothing said (§96 with the sign reversed). Islam: "refuse
+    # to move on without naming or remove."
+    #
+    # ASSERTED AS WHAT THE PAGE POSTS AND WHERE IT STANDS, never as the
+    # notice's wording: a build that said something and moved on anyway would
+    # satisfy a text assertion perfectly (§94.8).
+    print("\n§8c · a row with no name")
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(400)
+    pg.click(".wzadd")
+    pg.wait_for_timeout(250)
+    n_before = len(SENT)
+    pg.click(".wzfoot >> text=Next")
+    pg.wait_for_timeout(450)
+    at = pg.eval_on_selector(".wzstep[aria-current='step']", "e => e.textContent")
+    ck("Next does not leave the step while a row has no name",
+       isinstance(at, str) and "Business units" in at, at)
+    ck("…and nothing is posted, because a blank row is not a server error",
+       not any(b.get("action") == "shapeClient" for b in SENT[n_before:]),
+       [b.get("action") for b in SENT[n_before:]])
+    said = pg.query_selector("#setupsaid")
+    ck("…and it says which kind of row and what to do",
+       bool(said) and not said.is_hidden() and "×" in (said.text_content() or ""),
+       said.text_content() if said else None)
+    # BOTH ENDS (§94.2): a build that simply never moved on would pass all three.
+    rows = pg.query_selector_all(".wzrow .fld")
+    if rows:
+        rows[-1].fill("Sweets 2")
+        rows[-1].evaluate("e => e.blur()")
+    pg.wait_for_timeout(150)
+    pg.click(".wzfoot >> text=Next")
+    pg.wait_for_timeout(500)
+    at2 = pg.eval_on_selector(".wzstep[aria-current='step']", "e => e.textContent")
+    ck("…and naming it lets you move on", isinstance(at2, str) and "Companies" in at2, at2)
+
+    # ── 8d · BACK AND NEXT AGREE ABOUT WHICH STEP IS NEXT (§346, §347) ───
+    #
+    # REWRITTEN, NOT DELETED (§218). §346 found Next stepping over the dulled
+    # Capabilities step while Back walked into it and returned — an enabled,
+    # pressable button that did nothing (§96) — and asserted the landing by
+    # name. §347 opens that step, so there is no dulled step left to walk past
+    # and an assertion about one would pass over nothing (§113.8).
+    #
+    # So the subject becomes the property that would have caught the original
+    # fault whether or not anything is dulled: walk the whole rail forward with
+    # Next, then all the way back with Back, and the two orders must be each
+    # other reversed. A Back that refuses to move shows up as a short list.
+    print("\n§8d · Back and Next, across the whole rail")
+    pg.click(".wzstep >> text=The client")
+    pg.wait_for_timeout(400)
+
+    def here():
+        e = pg.query_selector(".wzstep[aria-current='step']")
+        return (e.text_content() or "").strip() if e else None
+
+    fwd = [here()]
+    for _ in range(len(steps(pg))):
+        n = pg.query_selector(".wzfoot >> text=Next")
+        if not n or n.is_disabled():
+            break
+        n.click(); pg.wait_for_timeout(420)
+        w = here()
+        if w == fwd[-1]:
+            break
+        fwd.append(w)
+    back = [here()]
+    for _ in range(len(steps(pg))):
+        bb = pg.query_selector(".wzfoot >> text=Back")
+        if not bb or bb.is_disabled():
+            break
+        bb.click(); pg.wait_for_timeout(420)
+        w = here()
+        if w == back[-1]:
+            break
+        back.append(w)
+    ck("Next walks the whole rail", len(fwd) == len(steps(pg)), fwd)
+    ck("…and Back walks it back, the same steps in the other order",
+       back == list(reversed(fwd)), {"forward": fwd, "back": back})
+    # BOTH ENDS (§94.2): on the first step Back is disabled rather than dead,
+    # which is the one place it is right for it not to move.
+    b0 = pg.query_selector(".wzfoot >> text=Back")
+    ck("and on the first step Back is disabled rather than dead",
+       bool(b0) and b0.is_disabled(), here())
+    # AND NOTHING IN THE RAIL IS INERT ANY MORE (§347). Said as a measurement
+    # rather than left as an absence: a step that cannot be opened is what §346
+    # had to step over, and there is now none.
+    inert = pg.eval_on_selector_all(".wzstep",
+        "els => els.filter(e => e.disabled).map(e => e.textContent.trim())")
+    ck("no step in the rail refuses to open", inert == [], inert)
+
+    # ── 8e · A CLIENT WITH A PLAN SAYS SO (§346) ─────────────────────────
+    # shapeClient has refused a re-shape since §322 and the flow was TOLD so,
+    # storing `holds` from the server and reading it nowhere — so the four
+    # shape steps stayed editable and the refusal arrived on Next (§42's
+    # drift, screen yes and save no).
+    print("\n§8e · a client that already has a plan")
+    PLANNED[0] = 12
+    pg.goto(BASE + "/platform")
+    pg.wait_for_timeout(600)
+    # The card's own Settings mark, the same door §8 uses — and EVERY PROBE
+    # DEGRADES from here (§215, this file's own promise, which my first run of
+    # this section broke: a pg.click on a step that is not there waits 30s and
+    # took the eight assertions after it down with it).
+    cog = pg.query_selector(".ccfg")
+    if cog:
+        cog.click(); pg.wait_for_timeout(600)
+    opened = bool(pg.query_selector(".wzrail"))
+    ck("the flow opens on a client that has a plan", opened)
+
+    def step(name):
+        if not opened:
+            return False
+        b = pg.query_selector(".wzstep >> text=" + name)
+        if not b:
+            return False
+        b.click(); pg.wait_for_timeout(450)
+        return True
+
+    on_units = step("Business units")
+    ck("…and its business units step can be reached", on_units)
+    band = pg.query_selector(".wzarched") if on_units else None
+    ck("the shape steps say the shape is set from here on",
+       bool(band) and "shape is set" in (band.text_content() or ""),
+       band.text_content() if band else None)
+    ro = pg.eval_on_selector_all(".wzrow .fld",
+        "els => els.map(e => !!e.readOnly || !!e.disabled)") if on_units else []
+    ck("…and every unit's box is read-only",
+       isinstance(ro, list) and len(ro) > 0 and all(ro), ro)
+    ck("…and no unit can be added",
+       on_units and not pg.query_selector(".wzadd:not([disabled])"))
+    # …and the shortcut into that button goes with it (§351): a chip on a
+    # frozen list is a control whose whole act is refused.
+    ck("…and no common name is offered either",
+       on_units and not pg.query_selector(".wzcommon"),
+       len(pg.query_selector_all(".wzcm")))
+    on_words = step("The words")
+    wro = pg.eval_on_selector_all(".wztbl input",
+        "els => els.map(e => !!e.readOnly || !!e.disabled)") if on_words else []
+    ck("…and the words are read-only too", isinstance(wro, list) and len(wro) > 0 and all(wro), wro)
+    # BOTH ENDS (§94.2): what is frozen is the SHAPE, and the client's own
+    # record, its mark, its modules and its team are still the consultant's.
+    on_client = step("The client")
+    nm = pg.query_selector(".rowset .fld") if on_client else None
+    ck("…while the client's own name is still editable",
+       bool(nm) and not nm.evaluate("e => !!e.readOnly"))
+    ck("…and the modules band still carries its control",
+       on_client and bool(pg.query_selector(".band .teamrow button:not([disabled])")))
+    # AND THE CLIENT STEP IS NOT A SHAPE STEP, so it carries no band at all —
+    # a band drawn on every step would claim the name cannot be changed either
+    # (§124), and it is the same assertion as "never beside the archived one".
+    ck("…and that step carries no band, because nothing on it is frozen (§94.2)",
+       on_client and len(pg.query_selector_all(".wzarched")) == 0,
+       pg.eval_on_selector_all(".wzarched", "els => els.map(e => e.textContent)"))
+    PLANNED[0] = 0
 
     # ── 9 · nothing thrown ───────────────────────────────────────────────
     print("\n§9 · the console")

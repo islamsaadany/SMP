@@ -1,0 +1,497 @@
+<title>Frameworks Library</title>
+<style>
+  /* ══ THE CONSOLE'S OWN TOKENS, COPIED VERBATIM from smp-app/shell/platform.html
+     so this drawing cannot promise a colour the product does not have. All
+     three blocks, deliberately — a token defined only in the media query is
+     absent the moment somebody picks a theme explicitly. ══════════════════ */
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased }
+
+  /* ══ the console's own components, copied ═══════════════════════════════ */
+  .top{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 18px }
+  .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.16em; color:var(--ff-tx) }
+  .top .nm{ font-weight:600; font-size:14px }
+  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
+    color:var(--ink-3); font-size:12.5px }
+  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px; flex-wrap:wrap }
+  .nav button{ background:transparent; border:0; color:var(--ff-quiet);
+    font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
+    border-bottom:3px solid transparent }
+  .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 28px }
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
+  .ptitle h1{ font-size:20px; margin:0; font-weight:600 }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
+  .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
+  .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; color:var(--ink-3);
+    background:var(--surface); white-space:nowrap; display:inline-block }
+  .tag.seat{ color:var(--ff-tx); border-color:var(--ff) }
+  .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
+  .band{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:16px; box-shadow:var(--shadow) }
+  .cell{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .cell button{ border:0; border-right:1px solid var(--line); background:var(--surface);
+    color:var(--ink-3); font:600 12px/1 inherit; padding:8px 13px; cursor:pointer }
+  .cell button:last-child{ border-right:0 }
+  .cell button.on{ background:var(--ff); color:var(--ff-ink) }
+  .row{ display:flex; gap:9px; flex-wrap:wrap; align-items:center }
+  .muted{ color:var(--ink-3) }
+  .cback{ font:600 10px/1.6 ui-monospace, SFMono-Regular, monospace; letter-spacing:.06em;
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+    border-radius:7px; padding:4px 9px; cursor:pointer }
+  .apart{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line) }
+  .akey{ display:block; margin-bottom:12px; font:600 10.5px/1 ui-monospace, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+
+  /* ══ NEW, and every one prefixed `fw` — a class name is one global
+     namespace (§65.9), so a drawing proposes names that cannot collide ══ */
+  .fwbox{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:13px; box-shadow:var(--shadow) }
+  .fwask{ display:flex; gap:9px; margin-top:11px; align-items:flex-start }
+  .fwask .fld{ flex:1 1 220px; min-width:0 }
+  .fwchips{ display:flex; gap:6px; flex-wrap:wrap; margin-top:13px }
+  .fwchip{ font:600 12px/1 inherit; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); border-radius:999px; padding:6px 11px; cursor:pointer; white-space:nowrap }
+  .fwchip.on{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .fwchip i{ font-style:normal; color:var(--ink-3); margin-left:5px; font-size:11px }
+  .fwchip.on i{ color:var(--ff-quiet) }
+  .fwcount{ margin:16px 0 9px; font-size:13px; color:var(--ink-3) }
+  .fwlist{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    overflow:hidden; box-shadow:var(--shadow) }
+  .fwrow{ display:block; width:100%; text-align:left; border:0; border-bottom:1px solid var(--line-soft);
+    background:var(--surface); color:var(--ink); padding:12px 15px; cursor:pointer; font:inherit }
+  .fwrow:last-child{ border-bottom:0 }
+  .fwrow:hover{ background:var(--surface-2) }
+  .fwrow .hd{ display:flex; gap:9px; align-items:baseline; flex-wrap:wrap }
+  .fwrow .nm{ font-weight:600; font-size:14.5px }
+  .fwrow .pp{ margin:4px 0 0; font-size:13px; color:var(--ink-3) }
+  .fwsec{ margin-top:18px }
+  .fwsec h3{ margin:0 0 5px; font-size:14px; font-weight:600 }
+  .fwsec p{ margin:0; font-size:14px; color:var(--ink-2) }
+  .fwgrid{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
+  .fwcite{ display:block; width:100%; text-align:left; margin-top:9px; border:1px solid var(--line);
+    border-radius:9px; background:var(--surface); padding:11px 13px; cursor:pointer; font:inherit; color:var(--ink) }
+  .fwcite:hover{ border-color:var(--amber-tx) }
+  .fwcite .nm{ font-weight:600; font-size:14px }
+  .fwcite .wy{ margin:4px 0 0; font-size:13px; color:var(--ink-3) }
+  .fwans{ background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:15px; margin-top:13px }
+  .fwans > p{ margin:0 0 4px; font-size:14px; color:var(--ink-2) }
+  .fwdraft{ background:var(--amber-wash); border:1px solid var(--amber); border-radius:10px;
+    padding:11px 13px; font-size:13.5px; color:var(--amber-tx); font-weight:600; margin-bottom:15px }
+  .fwfields{ display:grid; gap:13px }
+  .fwdecl{ background:var(--warn-bg); border:1px solid var(--warn); border-radius:10px;
+    padding:13px; font-size:14px; color:var(--warn) }
+
+  /* ══ MOCKUP FURNITURE — dashed, so nothing here is mistaken for product ══ */
+  .mkhead{ max-width:1180px; margin:0 auto; padding:26px 18px 4px }
+  .mkhead h1{ font-size:23px; margin:0 0 6px }
+  .mkhead p{ margin:0 0 10px; color:var(--ink-2); font-size:14.5px; max-width:760px }
+  .mkq{ border:2px dashed var(--amber); background:var(--amber-wash); border-radius:12px;
+    padding:15px 17px; margin:16px 0 0; color:var(--amber-ink) }
+  .mkq .akey{ color:var(--amber-tx) }
+  .mkq ol{ margin:0; padding-left:20px }
+  .mkq li{ margin-bottom:9px; font-size:14px; color:var(--ink) }
+  .mkq li:last-child{ margin-bottom:0 }
+  .mkq b{ color:var(--amber-tx) }
+  .mkcap{ max-width:1180px; margin:40px auto 0; padding:0 18px }
+  .mkcap .k{ font:700 11px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--amber-tx) }
+  .mkcap h2{ font-size:18px; margin:7px 0 4px }
+  .mkcap p{ margin:0 0 12px; color:var(--ink-3); font-size:13.5px; max-width:780px }
+  .screen{ border:1px solid var(--line); border-radius:14px; overflow:hidden;
+    box-shadow:var(--shadow); max-width:1180px; margin:0 auto; background:var(--ground) }
+  .screen .wrap{ padding:20px 18px 26px }
+  .mknote{ max-width:1180px; margin:10px auto 0; padding:0 18px; font-size:12.5px;
+    color:var(--ink-3); font-style:italic }
+  .mini{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:11px }
+  .mini .bx{ border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:12px }
+  .mini .bx > .k{ font:700 10px/1 ui-monospace, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); display:block; margin-bottom:9px }
+  @media (max-width:820px){
+    .fwgrid{ grid-template-columns:1fr }
+    .mini{ grid-template-columns:1fr }
+  }
+</style>
+
+<div class="mkhead">
+  <h1>Frameworks — Forefront's own library</h1>
+  <p>Spec 052, drawn before anything is built. It sits on the console beside the Memory,
+     outside every client. Drawn in the console's own tokens and components, with the
+     real 80-framework dataset — including its longest names, so the layout is shown
+     surviving the content it will actually hold.</p>
+
+  <div class="mkq">
+    <span class="akey">Four things to settle by looking</span>
+    <ol>
+      <li><b>Sections — fixed at eight, or can an admin add one?</b> Drawn as the eight
+          with their real counts. If an admin can add one, the list fragments over time
+          and there is nothing that merges two.</li>
+      <li><b>Where the ask sits.</b> Drawn as one box with a switch (<b>A</b>). The
+          alternative — a search box with a quieter line under it — is drawn small
+          at the foot of this panel.</li>
+      <li><b>What a declined addition offers</b> (<b>G</b>): drawn as <i>paste the
+          source instead</i>.</li>
+      <li><b>The word on the console.</b> Drawn as <i>Frameworks</i>.</li>
+    </ol>
+    <div class="mini">
+      <div class="bx">
+        <span class="k">Placement 1 — one box, switched (drawn)</span>
+        <div class="cell"><button class="on" type="button">Search</button><button type="button">Ask it</button></div>
+        <div style="margin-top:9px"><input class="fld" value="pricing" readonly></div>
+      </div>
+      <div class="bx">
+        <span class="k">Placement 2 — search leads, ask underneath</span>
+        <div><input class="fld" value="pricing" readonly></div>
+        <p class="note" style="margin-top:8px">Not sure which one you want?
+          <b style="color:var(--ff-tx)">Describe the situation instead →</b></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ A ════════════════ -->
+<div class="mkcap">
+  <span class="k">A</span>
+  <h2>The library</h2>
+  <p>Every consultant reaches this. <i>Add a framework</i> is drawn only for a platform
+     admin — everybody else sees the same page without it.</p>
+</div>
+<div class="screen">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Strategy Management Platform</span>
+    <span class="right">Islam Saadany <span class="tag seat">ADMIN</span></span></div>
+  <nav class="nav"><button type="button">Clients</button><button type="button">Consultants</button>
+    <button type="button">Who sees what</button><button type="button">Memory</button>
+    <button type="button" class="on">Frameworks</button></nav>
+  <div class="wrap">
+    <div class="ptitle"><h1>Frameworks</h1>
+      <span class="right"><button class="btn amber" type="button">+ Add a framework</button></span></div>
+
+    <div class="fwbox">
+      <div class="cell"><button class="on" type="button">Search</button><button type="button">Ask it</button></div>
+      <div class="fwask"><input class="fld" placeholder="Search 80 frameworks — by name, purpose or when to use it"></div>
+      <div class="fwchips">
+        <button class="fwchip on" type="button">All <i>80</i></button>
+        <button class="fwchip" type="button">Knowing Your Business <i>6</i></button>
+        <button class="fwchip" type="button">Setting Goals and Objectives <i>10</i></button>
+        <button class="fwchip" type="button">Forecasting Market Demand <i>3</i></button>
+        <button class="fwchip" type="button">Gauging Industry Competition <i>7</i></button>
+        <button class="fwchip" type="button">Tracking Competitive Advantage <i>4</i></button>
+        <button class="fwchip" type="button">Bridging the Gap: Business Strategy <i>19</i></button>
+        <button class="fwchip" type="button">Bridging the Gap: Corporate Strategy <i>24</i></button>
+        <button class="fwchip" type="button">Addressing Risk and Opportunity <i>7</i></button>
+      </div>
+    </div>
+
+    <p class="fwcount">80 frameworks</p>
+    <div class="fwlist">
+      <button class="fwrow" type="button"><span class="hd"><span class="nm">Identifying Key Segments</span>
+        <span class="tag">Knowing Your Business</span></span>
+        <p class="pp">To identify and prioritise the product–market segments that materially contribute to sales and operating profit, forming the foundation for strategy analysis.</p></button>
+      <button class="fwrow" type="button"><span class="hd"><span class="nm">The Five Forces (Porter)</span>
+        <span class="tag">Gauging Industry Competition</span></span>
+        <p class="pp">To analyse the structural attractiveness of an industry by examining competitive forces shaping profitability.</p></button>
+      <button class="fwrow" type="button"><span class="hd"><span class="nm">Three Generic Strategies (Porter) and the Fatal Bias (Goddard)</span>
+        <span class="tag">Bridging the Gap: Business Strategy</span></span>
+        <p class="pp">To define competitive positioning through cost leadership, differentiation, or focus, and to warn against being “stuck in the middle.”</p></button>
+      <button class="fwrow" type="button"><span class="hd"><span class="nm">Strategic Due Diligence and the Market Contextual Plan Review (Evans)</span>
+        <span class="tag">Addressing Risk and Opportunity</span></span>
+        <p class="pp">To test whether a plan holds up against the market it assumes, before the money is committed.</p></button>
+      <button class="fwrow" type="button"><span class="hd"><span class="nm">The Resource and Capability Strengths/Importance Matrix (Grant)</span>
+        <span class="tag">Tracking Competitive Advantage</span></span>
+        <p class="pp">To weigh what the firm is good at against what actually matters in its industry.</p></button>
+      <button class="fwrow" type="button"><span class="hd"><span class="nm">Balanced Scorecard and Strategy Map (Kaplan and Norton)</span>
+        <span class="tag">Setting Goals and Objectives</span></span>
+        <p class="pp">To translate strategy into objectives and measures across four linked perspectives.</p></button>
+    </div>
+    <p class="note">The two longest names in the dataset are drawn here on purpose — a layout
+       drawn on comfortable data is a layout proved on nothing.</p>
+  </div>
+</div>
+
+<!-- ════════════════ B ════════════════ -->
+<div class="mkcap">
+  <span class="k">B</span>
+  <h2>A framework, opened</h2>
+  <p>It opens in place with a way back, which is the console's own idiom for going
+     into a thing. <i>Edit</i> is the admin's; everybody else reads the same page.</p>
+</div>
+<div class="screen">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Strategy Management Platform</span>
+    <span class="right">Islam Saadany <span class="tag seat">ADMIN</span></span></div>
+  <nav class="nav"><button type="button">Clients</button><button type="button">Consultants</button>
+    <button type="button">Who sees what</button><button type="button">Memory</button>
+    <button type="button" class="on">Frameworks</button></nav>
+  <div class="wrap">
+    <div style="margin-bottom:13px"><button class="cback" type="button">← ALL FRAMEWORKS</button></div>
+    <div class="ptitle"><h1>Three Generic Strategies (Porter) and the Fatal Bias (Goddard)</h1>
+      <span class="right"><span class="tag">Bridging the Gap: Business Strategy</span>
+        <button class="btn" type="button">Edit</button></span></div>
+
+    <div class="band">
+      <div class="fwsec" style="margin-top:0"><h3>Purpose</h3>
+        <p>To define competitive positioning through cost leadership, differentiation, or focus, and to warn against being “stuck in the middle.”</p></div>
+      <div class="fwsec"><h3>Key questions it answers</h3>
+        <p>How will we compete to achieve competitive advantage?</p></div>
+      <div class="fwgrid fwsec">
+        <div><h3>When to use it</h3><p>When choosing a clear competitive positioning.</p></div>
+        <div><h3>When not to use it</h3><p>Avoid mixing incompatible strategies; avoid unclear positioning.</p></div>
+      </div>
+      <div class="fwgrid fwsec">
+        <div><h3>Inputs required</h3><p>Industry analysis; competitive position assessment.</p></div>
+        <div><h3>Outputs</h3><p>Defined competitive strategy choice.</p></div>
+      </div>
+      <div class="fwsec"><h3>Executive example</h3>
+        <p>Leadership commits to a clear basis of competition.</p></div>
+      <div class="fwsec"><h3>Consultant use case</h3>
+        <p>Positioning diagnosis and strategic choice articulation.</p></div>
+      <div class="fwsec"><h3>Facilitation tips</h3>
+        <p>Force explicit choice and trade-offs.</p></div>
+      <div class="apart"><span class="akey">Where this came from</span>
+        <p class="note" style="margin:0">Came with the library. Nobody here has edited it.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ C ════════════════ -->
+<div class="mkcap">
+  <span class="k">C</span>
+  <h2>Asking it</h2>
+  <p>Every answer names the frameworks it drew on, and each one is a door into it —
+     the memory's own rule, for the same reason: the next step is to go and read them.</p>
+</div>
+<div class="screen">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Strategy Management Platform</span>
+    <span class="right">Nour Adel</span></div>
+  <nav class="nav"><button type="button">Clients</button><button type="button">Consultants</button>
+    <button type="button">Memory</button><button type="button" class="on">Frameworks</button></nav>
+  <div class="wrap">
+    <div class="ptitle"><h1>Frameworks</h1></div>
+    <div class="fwbox">
+      <div class="cell"><button type="button">Search</button><button class="on" type="button">Ask it</button></div>
+      <div class="fwask">
+        <input class="fld" value="We are losing share to a cheaper entrant and the client wants to cut prices. What should I use?" readonly>
+        <button class="btn solid" type="button">Ask</button>
+      </div>
+      <div class="fwans">
+        <p>Three in the library bear on this, and they answer different halves of it.
+           Take them in this order: what the industry allows, what the customer is
+           actually buying, and only then what to do about price.</p>
+        <button class="fwcite" type="button"><span class="nm">The Five Forces (Porter)</span>
+          <p class="wy">Whether price is the real battleground here, or whether the entrant is
+             exploiting something structural you can close instead.</p></button>
+        <button class="fwcite" type="button"><span class="nm">Assessing Customer Purchasing Criteria</span>
+          <p class="wy">Names what customers are choosing on. If price is third on that list,
+             cutting it gives away margin and wins nothing.</p></button>
+        <button class="fwcite" type="button"><span class="nm">Three Generic Strategies (Porter) and the Fatal Bias (Goddard)</span>
+          <p class="wy">The explicit choice — meet them on cost, or differentiate away from
+             them. This is the one that warns against doing half of each.</p></button>
+      </div>
+    </div>
+    <p class="note">Answers come only from the library. It will not reach for something
+       that is not in it.</p>
+  </div>
+</div>
+
+<!-- ════════════════ D ════════════════ -->
+<div class="mkcap">
+  <span class="k">D</span>
+  <h2>Asking it, when the library has nothing</h2>
+  <p>It says so rather than reaching for something close. For an admin that sentence is
+     the way to add the missing one — which is the third way in, and why there are two
+     add buttons and not three.</p>
+</div>
+<div class="screen">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Strategy Management Platform</span>
+    <span class="right">Islam Saadany <span class="tag seat">ADMIN</span></span></div>
+  <nav class="nav"><button type="button">Memory</button><button type="button" class="on">Frameworks</button></nav>
+  <div class="wrap">
+    <div class="ptitle"><h1>Frameworks</h1></div>
+    <div class="fwbox">
+      <div class="cell"><button type="button">Search</button><button class="on" type="button">Ask it</button></div>
+      <div class="fwask">
+        <input class="fld" value="How do we run a pre-mortem on the plan before we sign it off?" readonly>
+        <button class="btn solid" type="button">Ask</button>
+      </div>
+      <div class="fwans">
+        <p style="margin:0">Nobody has written that one up yet. Nothing in the library
+           covers a pre-mortem, and I would rather say so than send you to something close.</p>
+        <div class="row" style="margin-top:13px">
+          <button class="btn amber" type="button">Add it to the library →</button>
+          <span class="muted" style="font-size:12.5px">Admins only. Everybody else sees the sentence and nothing more.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ E ════════════════ -->
+<div class="mkcap">
+  <span class="k">E</span>
+  <h2>Adding one — the two ways in</h2>
+  <p>By name, for a framework the model genuinely knows. By pasted source, for
+     everything else — including Forefront's own, which no model has ever read.</p>
+</div>
+<div class="screen">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Strategy Management Platform</span>
+    <span class="right">Islam Saadany <span class="tag seat">ADMIN</span></span></div>
+  <nav class="nav"><button type="button">Memory</button><button type="button" class="on">Frameworks</button></nav>
+  <div class="wrap">
+    <div style="margin-bottom:13px"><button class="cback" type="button">← ALL FRAMEWORKS</button></div>
+    <div class="ptitle"><h1>Add a framework</h1></div>
+    <div class="band">
+      <div class="cell"><button class="on" type="button">By name</button><button type="button">Paste the source</button></div>
+      <div style="margin-top:15px">
+        <label class="lab" for="fwn">The framework's name</label>
+        <input class="fld" id="fwn" value="Blue Ocean Strategy (Kim and Mauborgne)" readonly>
+      </div>
+      <p class="note">It will draft the eleven fields from what it knows, and you read them
+         before anything is saved. If it does not know the framework well enough it will
+         say so rather than invent one — paste the source instead.</p>
+      <div class="row" style="margin-top:15px">
+        <button class="btn solid" type="button">Draft it</button>
+        <button class="btn" type="button">Cancel</button>
+      </div>
+    </div>
+    <div class="band" style="margin-top:16px">
+      <span class="akey">The other way in</span>
+      <label class="lab" for="fws">Paste a chapter, a page, or your own notes</label>
+      <textarea class="fld" id="fws" rows="3" readonly>A blue ocean strategy creates uncontested market space rather than competing in existing demand. The four actions framework asks which factors to eliminate, reduce, raise and create…</textarea>
+      <p class="note">Works for anything, including a framework of ours that no model has read.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ F ════════════════ -->
+<div class="mkcap">
+  <span class="k">F</span>
+  <h2>The draft comes back</h2>
+  <p>Every field editable, nothing saved until the press. This is the extra step you
+     chose, and it is the whole of what stops a plausible invention sitting among
+     eighty real frameworks under Forefront's name.</p>
+</div>
+<div class="screen">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Strategy Management Platform</span>
+    <span class="right">Islam Saadany <span class="tag seat">ADMIN</span></span></div>
+  <nav class="nav"><button type="button">Memory</button><button type="button" class="on">Frameworks</button></nav>
+  <div class="wrap">
+    <div class="ptitle"><h1>Add a framework</h1></div>
+    <div class="fwdraft">This is a draft. Read it before you save it — nothing is in the library yet.</div>
+    <div class="band">
+      <div class="fwfields">
+        <div><label class="lab">Name</label><input class="fld" value="Blue Ocean Strategy (Kim and Mauborgne)" readonly></div>
+        <div><label class="lab">Section</label>
+          <select class="fld"><option>Bridging the Gap: Business Strategy</option></select></div>
+        <div><label class="lab">Purpose</label>
+          <textarea class="fld" rows="2" readonly>To create uncontested market space by making the competition irrelevant, rather than competing for share in an existing market.</textarea></div>
+        <div><label class="lab">Key questions it answers</label>
+          <textarea class="fld" rows="2" readonly>Which factors that the industry competes on can be eliminated, reduced, raised or created? Where is demand that nobody is serving?</textarea></div>
+        <div class="fwgrid">
+          <div><label class="lab">When to use it</label>
+            <textarea class="fld" rows="2" readonly>When the existing market is crowded and competing on the same factors is eroding margin for everybody.</textarea></div>
+          <div><label class="lab">When not to use it</label>
+            <textarea class="fld" rows="2" readonly>Avoid when the core business is unfixed; avoid treating any new segment as a blue ocean.</textarea></div>
+        </div>
+        <div class="fwgrid">
+          <div><label class="lab">Inputs required</label>
+            <textarea class="fld" rows="2" readonly>Industry competing factors; customer and non-customer research; current cost structure.</textarea></div>
+          <div><label class="lab">Outputs</label>
+            <textarea class="fld" rows="2" readonly>A strategy canvas; a four-actions decision; a defined new value proposition.</textarea></div>
+        </div>
+        <p class="note" style="margin:0">Executive example, consultant use case and facilitation
+           tips continue below.</p>
+      </div>
+      <div class="row" style="margin-top:18px">
+        <button class="btn amber" type="button">Save to the library</button>
+        <button class="btn" type="button">Discard</button>
+        <span class="muted" style="font-size:12.5px">Saved as added by you, today.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ G ════════════════ -->
+<div class="mkcap">
+  <span class="k">G</span>
+  <h2>When it will not draft one</h2>
+  <p>The rule that matters most, drawn so it is agreed rather than discovered: it is
+     allowed to say it does not know. Everywhere else in this platform the assistant
+     declines rather than inventing — adding a framework is the one place we ask it to
+     write, so this is what keeps it honest.</p>
+</div>
+<div class="screen">
+  <div class="top"><span class="mk">FOREFRONT</span><span class="nm">Strategy Management Platform</span>
+    <span class="right">Islam Saadany <span class="tag seat">ADMIN</span></span></div>
+  <nav class="nav"><button type="button">Memory</button><button type="button" class="on">Frameworks</button></nav>
+  <div class="wrap">
+    <div class="ptitle"><h1>Add a framework</h1></div>
+    <div class="band">
+      <div class="cell"><button class="on" type="button">By name</button><button type="button">Paste the source</button></div>
+      <div style="margin-top:15px">
+        <label class="lab">The framework's name</label>
+        <input class="fld" value="The Forefront Endurance Lens" readonly>
+      </div>
+      <div class="fwdecl" style="margin-top:15px">
+        I do not know this one well enough to write it up, and I would rather say so than
+        put something plausible in the library. Paste the source and I will turn that into
+        the fields instead.
+      </div>
+      <div class="row" style="margin-top:15px">
+        <button class="btn solid" type="button">Paste the source instead →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mkcap" style="margin-top:44px">
+  <span class="k">Not drawn</span>
+  <h2>Deliberately left out</h2>
+  <p>The template download (it does not exist and is a later phase), retiring a
+     framework (no control asked for), and any history of what an entry said before it
+     was edited. All three are recorded in the spec as not done rather than forgotten.</p>
+</div>
+<div style="height:40px"></div>

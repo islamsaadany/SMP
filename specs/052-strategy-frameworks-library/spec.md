@@ -8,7 +8,7 @@ Read with **spec 045 (the consulting memory)**, which this follows in almost
 every respect — where it lives, who reaches it, and how an assistant is pointed
 at a corpus of its own. Where it departs from 045 it says so and why.
 
-**It is not spec 049.** That one is *Resources*, a client-facing module whose
+**It is not spec 051.** That one is *Resources*, a client-facing module whose
 content is still unread in the SMS repository. This is Forefront's own library,
 outside every client, and the two share only the word *library*.
 
@@ -211,7 +211,7 @@ weighting already says.
 
 - **Templates.** The toolkit's own next phase is a spreadsheet per framework.
   Nothing here builds it; if it arrives, this library grows a file on the end
-  and becomes much closer to what spec 049 describes.
+  and becomes much closer to what spec 051 describes.
 - **The originator as its own field.** It currently sits inside the name, in
   brackets — *Three Generic Strategies (Porter)*. Worth splitting out the day
   anybody wants to read by author.

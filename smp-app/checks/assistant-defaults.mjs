@@ -1,7 +1,7 @@
-/* The assistant's own defaults, after spec 050 split its provider call in two.
+/* The assistant's own defaults, after spec 052 split its provider call in two.
  *
  * WHY THIS FILE EXISTS AT ALL: `ask()` sits in front of the chat, the
- * knowledge base and the consulting memory, and spec 050 gave it three new
+ * knowledge base and the consulting memory, and spec 052 gave it three new
  * options so ONE caller — drafting a framework, which is not a lookup — can
  * ask for a different schema, no corpus, and room to reason. The change is
  * only safe if every caller that passes none of the three behaves exactly as

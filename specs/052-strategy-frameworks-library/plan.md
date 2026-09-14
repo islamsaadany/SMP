@@ -56,8 +56,8 @@ saw coming; nothing is built for it now.
 | The table | `smp-app/db/schema.sql` — above the tenant block, beside `memory_entries` |
 | Its exclusion | **the same file's** RLS loop, `relname NOT IN (…)` |
 | Its exclusion, again | `smp-app/lib/schema-check.ts` — `PLATFORM_TABLES` |
-| The table, for a database that already ran the schema | `smp-app/db/migrations/008-the-frameworks-library.sql` |
-| The eighty | `smp-app/db/migrations/009-the-eighty-frameworks.sql` |
+| The table, for a database that already ran the schema | `smp-app/db/migrations/009-the-frameworks-library.sql` |
+| The eighty | `smp-app/db/migrations/010-the-eighty-frameworks.sql` |
 | Reading and writing | `smp-app/lib/frameworks-api.ts` |
 | Asking and drafting | `smp-app/lib/frameworks-ask.ts` |
 | The route | `smp-app/app/api/frameworks/route.ts` |
@@ -146,7 +146,7 @@ had a `.js` migration (§260) and this one has no such door. So the eighty ride
 in as a migration of eighty `INSERT`s.
 
 **It is generated, once, and the output is committed.** `scripts/make-frameworks-migration.mjs`
-reads the dataset and writes `009-the-eighty-frameworks.sql`; it is run by hand,
+reads the dataset and writes `010-the-eighty-frameworks.sql`; it is run by hand,
 its output is the artefact, and the source is recorded in the migration's own
 header — `islamsaadany/strategic-decision-toolkit` at `12089e9`. Escaping eighty
 records of prose containing curly quotes and en-dashes by hand is how a dataset

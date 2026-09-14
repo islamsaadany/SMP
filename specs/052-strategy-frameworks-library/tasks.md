@@ -33,14 +33,14 @@ Useful on its own: eighty frameworks, searchable, for the whole firm. Ends at
   Postgres), which is why §331 wrote a check that they name the same set — this
   is the first table to exercise it since.
 - [x] **A4 · The migration**, for a database that has already run the schema:
-  `smp-app/db/migrations/008-the-frameworks-library.sql`. No RLS statements —
+  `smp-app/db/migrations/009-the-frameworks-library.sql`. No RLS statements —
   on an existing database the loop is not re-run, which is the outcome wanted,
   and the migration must not invent a second answer (spec 045's A3).
 - [x] **A5 · The generator.** `smp-app/scripts/make-frameworks-migration.mjs`
   reads the dataset and writes the inserts. Run by hand, **its output is the
   artefact**, and the source is named in the migration's own header:
   `islamsaadany/strategic-decision-toolkit` at `12089e9`.
-- [x] **A6 · The eighty.** `smp-app/db/migrations/009-the-eighty-frameworks.sql`,
+- [x] **A6 · The eighty.** `smp-app/db/migrations/010-the-eighty-frameworks.sql`,
   committed. `added_by` NULL on all eighty.
 - [x] **A7 · The doc.** `smp-app/db/README.md` — its list of platform tables, or
   it drifts the day this lands.
@@ -147,7 +147,7 @@ proved, so a regression there cannot be confused with a new feature's noise.
   this ask is `memory-ask.ts`'s shape 1:1 and lists its three differences —
   a per-source sentence is a fourth field in the answer's shape and is not
   among them, so the plan had already chosen. One line of `spec` to reverse:
-  its own schema through `askJson`, which spec 050 added for exactly that.
+  its own schema through `askJson`, which spec 052 added for exactly that.
 - [x] **C5 · Regenerate** `public/`, and `generated-in-step` clear.
 - [x] **C6 · The checks.** `frameworks` 69 → **90**, `frameworks-page` 44 →
   **64**, both green and both proved able to fail. It names its sources, a

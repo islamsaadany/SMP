@@ -1,4 +1,4 @@
-/* The strategy frameworks library, phase A (spec 050).
+/* The strategy frameworks library, phase A (spec 052).
  *
  * DRIVES THE REAL HANDLER against a real database — `frameworksAction`, the
  * same function the route calls — rather than a stub of it (§100.3). What it
@@ -245,7 +245,7 @@ try {
   await section("what drafting sends the model", async () => {
     answers(drafted());
     await frameworksAction(c, ADMIN, { action: "draft", name: "Blue Ocean Strategy" });
-    /* THE THREE OPTIONS spec 050 added, read off the wire. Each fails
+    /* THE THREE OPTIONS spec 052 added, read off the wire. Each fails
        silently if it is ever lost: a capped lookup cannot compose, 2048
        truncates eleven fields, and the shipped schema is three fields wide. */
     check(!cfg().thinkingConfig,

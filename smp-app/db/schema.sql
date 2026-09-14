@@ -176,7 +176,7 @@ CREATE TABLE memory_entries (
 CREATE INDEX memory_about ON memory_entries (about_tenant_id, created_at DESC);
 CREATE INDEX memory_author ON memory_entries (author_id);
 
--- ── The strategy frameworks library (spec 050) ──────────────────────────
+-- ── The strategy frameworks library (spec 052) ──────────────────────────
 -- Forefront's own, and the one platform table that names no client at all:
 -- the memory's entries are ABOUT an engagement, and a framework is about
 -- nobody. So there is no tenant column here of any kind — and forgetting the

@@ -1,5 +1,5 @@
 /* The Frameworks tab, driven in a real browser against the built app
- * (spec 050, phases A, B and C).
+ * (spec 052, phases A, B and C).
  *
  * WHAT IT IS FOR, beyond "the page renders": a page wired to nothing looks
  * identical to one that works (§96). And the fault this file found on its

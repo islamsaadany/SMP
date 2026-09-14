@@ -16,7 +16,7 @@ why its client column is `about_tenant_id` rather than `tenant_id`: with that
 name, forgetting the list fails the apply outright at the loop's own
 `CREATE INDEX … (tenant_id)`, instead of silently attaching a policy that
 empties the feature on every fresh deployment while leaving this one working.
-`frameworks` (spec 050) is on the list for the same reason and gets the same
+`frameworks` (spec 052) is on the list for the same reason and gets the same
 loud failure for free: it names no client at all, so a forgotten exclusion
 meets the loop's `CREATE INDEX … (tenant_id)` with no such column.
 

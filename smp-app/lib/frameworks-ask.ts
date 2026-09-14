@@ -1,4 +1,4 @@
-/* Asking the library, and drafting a framework (spec 050).
+/* Asking the library, and drafting a framework (spec 052).
  *
  * TWO CALLS THAT LOOK ALIKE AND ARE OPPOSITE, which is why they sit in one
  * file: asking is a LOOKUP over eighty frameworks and keeps every default
@@ -11,7 +11,7 @@
  * asks it for eleven fields of content about a framework somebody published,
  * which is composing — so it gets room to reason (`think`), no corpus to
  * answer from (`needsCorpus: false`) and its own schema, through the three
- * options spec 050 added to `assistant.cjs`. Never a second caller: the key,
+ * options spec 052 added to `assistant.cjs`. Never a second caller: the key,
  * the endpoint, the timeout and every way it degrades live there (§53.5).
  *
  * TWO RULES MAKE THAT SAFE AND NEITHER IS OPTIONAL:
@@ -279,7 +279,7 @@ export async function draftFramework(pool: Q, opts: { name?: unknown; source?: u
      told us what it is called. */
   if (!draft.name) draft.name = name;
   /* A SECTION IT INVENTED IS DROPPED RATHER THAN STORED. The eight are fixed
-     (spec 050 §11), the screen offers them as a picker, and an empty one
+     (spec 052 §11), the screen offers them as a picker, and an empty one
      means the admin picks — which is better than a ninth section arriving
      through a draft nobody read closely. */
   if (draft.section && !sections.includes(draft.section)) draft.section = "";

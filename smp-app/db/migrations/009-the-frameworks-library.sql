@@ -1,4 +1,4 @@
-/* The strategy frameworks library (spec 050)
+/* The strategy frameworks library (spec 052)
 
    schema.sql runs ONCE and is recorded as `schema`, so a deployment already
    up never sees a table added there (§33.5). This is that table for the

@@ -1,4 +1,4 @@
-/* The strategy frameworks library (spec 050) — Forefront's own.
+/* The strategy frameworks library (spec 052) — Forefront's own.
  *
  * A ROUTE OF ITS OWN, for memory-api.ts's reason word for word: platform-api.ts
  * is the frozen endpoint carried across byte for byte, and putting a new

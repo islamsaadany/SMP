@@ -6,7 +6,7 @@ import { frameworksAction } from "../../../lib/frameworks-api.ts";
 export const dynamic = "force-dynamic";
 const json = (code: number, body: unknown) => NextResponse.json(body, { status: code, headers: { "Cache-Control": "no-store" } });
 
-/* /api/frameworks — the strategy frameworks library (spec 050). Its own route
+/* /api/frameworks — the strategy frameworks library (spec 052). Its own route
    rather than a fifth action on /api/platform, which carries the frozen
    endpoint byte for byte (lib/frameworks-api.ts's header). The door in front
    of it is this file's, and it is the memory's: a session, and a password that

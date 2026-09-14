@@ -260,7 +260,7 @@ const SCHEMA = {
    way it can fail is reported. `ask()` below shapes its answer into the
    three-field reply every corpus caller wants; `askJson()` hands the parsed
    object straight back for the one caller that is not asking a question at
-   all (spec 050 — drafting a framework). SPLIT RATHER THAN COPIED: a second
+   all (spec 052 — drafting a framework). SPLIT RATHER THAN COPIED: a second
    path to the provider would be a second answer to all of the above, and the
    drifting copy is the one nobody is watching (§53.5, §112.2).
 
@@ -417,7 +417,7 @@ async function callModel(opts) {
 
 /* THE PARSED OBJECT, for a caller supplying its own schema. Nothing is shaped
    and nothing is second-guessed: what the model answered under the caller's
-   own schema is what comes back (spec 050). */
+   own schema is what comes back (spec 052). */
 async function askJson(opts) { return callModel(opts); }
 
 /* ── Asking a corpus a question ───────────────────────────────────────

@@ -4,7 +4,7 @@
 and who publishes are settled below; what the module actually holds waits on a
 reading of the SMS repository (§2).
 
-**Not spec 050.** That one is Forefront's own strategy frameworks library,
+**Not spec 052.** That one is Forefront's own strategy frameworks library,
 which lives outside every client and is nobody's module. The two share only
 the word *library*.
 

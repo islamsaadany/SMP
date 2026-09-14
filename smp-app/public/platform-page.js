@@ -78,7 +78,7 @@
                 ["consultants", "Consultants", ME.canConsultants],
                 ["access", "Who sees what", ME.canAccess],
                 ["memory", "Memory", true],
-                /* FRAMEWORKS IS UNGATED FOR THE MEMORY'S OWN REASON (spec 050,
+                /* FRAMEWORKS IS UNGATED FOR THE MEMORY'S OWN REASON (spec 052,
                    decision 1): every consultant reads the whole library, and
                    only an admin adds to it — which is a gate on the ACT, asked
                    on the server, never a gate on the tab. */
@@ -2699,7 +2699,7 @@
     });
   }
 
-  /* ════ The strategy frameworks library (spec 050) ════════════════════
+  /* ════ The strategy frameworks library (spec 052) ════════════════════
      Forefront's own, outside every client, beside the memory — and the one
      table on this platform that names no client at all: a framework is about
      nobody.

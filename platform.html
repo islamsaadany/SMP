@@ -2814,12 +2814,11 @@
      only difference is whether the row carries a plan type. */
   /* THE NAME BOX, never the last .fld — a function's row ends in a SELECT that
      also wears .fld, so reaching for the last one lands the cursor on the
-     plans-in picker (§347.1 records the same trap in capsStep). A chip exists
-     to be renamed, so landing on its name is the feature rather than a nicety.
-     The Add button below still reaches for the last .fld and so still lands on
-     the picker: that is the same one-line defect, raised with Islam and not yet
-     answered, so it is left rather than folded into a change about something
-     else (rule 1b). */
+     plans-in picker rather than on the name you came to type. §347.1 found it
+     in capsStep and fixed it there with a copy of its own; §351 found it still
+     live in listStep's Add button and made the three call sites ask ONE
+     function, because three answers to "which box does the cursor go in" is
+     how this came to be right in one place and wrong in another (§53.5). */
   function focusLastName(){
     var boxes = document.querySelectorAll(".wzrow input.fld");
     if (boxes.length) boxes[boxes.length - 1].focus();
@@ -2898,8 +2897,7 @@
         list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:"pillars" });
         S.shapeDirty = true;
         paintSetup();
-        var boxes = document.querySelectorAll(".wzrow .fld");
-        if (boxes.length) boxes[boxes.length - 1].focus();
+        focusLastName();
       });
       box.appendChild(add);
     }
@@ -3075,11 +3073,7 @@
         S.shape.capabilities.push({ name:"", fn:"", format:"projects" });
         S.shapeDirty = true;
         paintSetup();
-        /* THE NAME BOX, not the last .fld: a capability's row ends in two
-           SELECTS, so the pattern copied from listStep — whose rows end in
-           one — landed the cursor on the plans-in picker. */
-        var boxes = document.querySelectorAll(".wzrow input.fld");
-        if (boxes.length) boxes[boxes.length - 1].focus();
+        focusLastName();
       });
       box.appendChild(add);
     }

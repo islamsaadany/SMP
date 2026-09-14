@@ -47640,3 +47640,30 @@ one function away.** The chip path uses `focusLastName()`, which asks for
 Islam and unanswered, so it is not folded into a change about something else
 (rule 1b) — and **break C printed `['SELECT', 'pillars']`**, which is that live
 fault reproduced by a check that does not yet cover it.
+
+## §351 — WHICH BOX THE CURSOR GOES IN, ANSWERED ONCE (2026-09-14)
+
+Islam, told a third time that the Add button on the Functions step lands the
+cursor on the plans-in picker rather than on the name: *"fix it."*
+
+**IT WAS RAISED TOO OFTEN AND THAT IS THE FINDING ABOUT ME, NOT ABOUT THE
+CODE.** §350.2 left it on rule 1b — *flag it and ask first* — which is right for
+a change that reaches further than the fault, and this is a one-line defect
+inside the very function being edited, already fixed one function away. Asking
+three times about where a cursor lands spent more of his attention than the fix
+would have, and he said so: *"I don't understand what is wiating on me."*
+**The rule is about scope, not about size: a one-line correction in the code you
+are already holding is not a second decision to be bought.**
+
+**ONE FUNCTION, THREE CALL SITES.** `focusLastName()` asks for `input.fld`, and
+the chip, `listStep`'s Add button and `capsStep`'s Add button all call it —
+where §347.1 had fixed capsStep with a copy of its own and left its twin. *Three
+answers to "which box does the cursor go in" is exactly how this came to be
+right in one place and wrong in another* (§53.5), so the copy is deleted rather
+than corrected beside the original.
+
+**Proved able to fail from the SOURCES** (§276): with `input.fld` put back to
+`.fld`, **4 red** — every call site, printing `['SELECT', 'pillars']` and
+`['SELECT', 'projects']`, which is the reported fault verbatim. Asserted on all
+three buttons rather than on the one that was reported, or the next one written
+drifts the same way.

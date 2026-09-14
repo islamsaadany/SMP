@@ -485,6 +485,31 @@ with sync_playwright() as p:
     ck("…carrying no trace of the chip either",
        bool(made) and sorted(made[0].keys()) == ["format", "name"], made)
 
+    # AND THE BUTTON THE CHIP SHORTCUTS LANDS THE CURSOR IN THE SAME PLACE
+    # (§351). Islam: "fix it". A function's row ends in a SELECT that also
+    # wears .fld, so the Add button reached for the last one and landed on the
+    # plans-in picker — §347.1 had found exactly this in capsStep and fixed it
+    # there with a copy of its own. All three call sites ask one function now,
+    # so this is asserted on all three or the next one written drifts again.
+    pg.click(".wzadd")
+    pg.wait_for_timeout(280)
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("the Add button lands the cursor on the name too, not the picker",
+       act == ["INPUT", ""], act)
+    x = pg.query_selector_all(".wzrow .wzx")
+    if x: x[-1].click()
+    pg.wait_for_timeout(200)
+
+    pg.click(".wzstep >> text=Capabilities")
+    pg.wait_for_timeout(420)
+    pg.click(".wzadd")
+    pg.wait_for_timeout(280)
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("…and so does the one on the capabilities step", act == ["INPUT", ""], act)
+    x = pg.query_selector_all(".wzrow .wzx")
+    if x: x[-1].click()
+    pg.wait_for_timeout(200)
+
     # A NEW CONTROL IS MEASURED, NEVER ARGUED FROM ITS TOKENS (§38.4, §93.11).
     # The chip borrows .wzadd's own ink and ground, so the reading should be
     # that control's — but "should" is the word this project has been caught by

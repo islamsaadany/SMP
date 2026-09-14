@@ -1196,15 +1196,15 @@
     { k:"client", key:"The client",       label:"The client",     q:"Which client are you setting up?" },
     { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
     { k:"cos",    key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
-    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?" },
     { k:"fns",    key:"Strategy",         label:"Functions",      q:"What supporting functions are there?" },
+    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?" },
     { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" },
     { k:"done",   key:"Done",             label:"Summary",        q:"" }
   ];
   /* The steps the shape guard speaks for, named once rather than tested as
      four keys at the two places that ask (§104.7). */
-  var SHAPE_STEPS = ["units", "cos", "caps", "fns", "words"];
+  var SHAPE_STEPS = ["units", "cos", "fns", "caps", "words"];
   function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
 
   /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own

@@ -392,6 +392,126 @@ with sync_playwright() as p:
     caps2 = (last("shapeClient") or {}).get("shape", {}).get("capabilities", [])
     ck("…and removing it posts a list without it", caps2 == [], caps2)
 
+    # ── 6c · The common names, one click in ──────────────────────────────
+    # §350. A control wired to nothing renders perfectly (§96), so every
+    # assertion here reads the POSTED shape or the live DOM rather than the
+    # fact that a chip was drawn. The decision this section exists for is
+    # that a chip is held by the ROW it made and never by the spelling, and
+    # it is asserted at BOTH ENDS (§94.2): renaming keeps it off the list,
+    # removing the row puts it back. A build that dropped the mark entirely
+    # satisfies the first half perfectly.
+    print("\n§6c · the common names")
+
+    def chips(pg):
+        return [(e.text_content() or "").lstrip("+ ").strip()
+                for e in pg.query_selector_all(".wzcommon .wzcm")]
+
+    def row_with(pg, value):
+        for r in pg.query_selector_all(".wzrow"):
+            f = r.query_selector("input.fld")
+            if f and (f.get_attribute("value") == value or f.input_value() == value):
+                return r
+        return None
+
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(420)
+    u_chips = chips(pg)
+    ck("the units step offers the common ones",
+       u_chips == ["Retail", "Online", "Wholesale", "Distribution",
+                   "Corporate Sales", "Export", "Services"], u_chips)
+
+    pg.click(".wzcommon .wzcm >> text=Wholesale")
+    pg.wait_for_timeout(300)
+    ck("clicking one adds a row holding that name",
+       bool(row_with(pg, "Wholesale")), [f.input_value() for f in pg.query_selector_all(".wzrow input.fld")])
+    # THE CURSOR LANDS ON THE NAME, which is the whole point of a name you are
+    # expected to adjust — never on the row's other field.
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("…with the cursor in its name box", act == ["INPUT", "Wholesale"], act)
+    ck("…and that chip has left the row", "Wholesale" not in chips(pg), chips(pg))
+
+    # THE DECISION: the chip is held by the row, not by the spelling.
+    f = row_with(pg, "Wholesale").query_selector("input.fld")
+    f.fill("Wholesale & Trade")
+    f.evaluate("e => e.blur()")
+    pg.wait_for_timeout(200)
+    pg.click(".wzstep >> text=Companies")
+    pg.wait_for_timeout(500)
+    units = (last("shapeClient") or {}).get("shape", {}).get("units", [])
+    got = [u for u in units if u.get("name") == "Wholesale & Trade"]
+    ck("…and the renamed row is what reaches the server", len(got) == 1, units)
+    # §349's reason for marking the row NON-ENUMERABLY: the endpoint slices the
+    # row objects through verbatim, so an ordinary key would be stored for ever.
+    ck("…carrying no trace of the chip that made it",
+       bool(got) and sorted(got[0].keys()) == ["company", "name"], got)
+
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(420)
+    # THE DECISION, asked after a repaint. In the moment it is true of a build
+    # matching by SPELLING as well, because a bound field writes without
+    # repainting (§71.2) and the chip row is not redrawn until something else
+    # paints — so asking it here is what makes it able to fail (§113.8).
+    ck("…and renaming the row keeps its chip off the list",
+       "Wholesale" not in chips(pg), chips(pg))
+    r = row_with(pg, "Wholesale & Trade")
+    if r:
+        x = r.query_selector(".wzx")
+        if x: x.click()
+    pg.wait_for_timeout(250)
+    ck("…and removing the row puts its chip back", "Wholesale" in chips(pg), chips(pg))
+
+    # THE OTHER STEP: eleven names, and a row that also carries a plans-in
+    # picker — the case that decides whether the cursor lands right.
+    pg.click(".wzstep >> text=Functions")
+    pg.wait_for_timeout(420)
+    f_chips = chips(pg)
+    ck("the functions step offers its own list",
+       "Finance" in f_chips and "Customer Service" in f_chips and "Audit" in f_chips, f_chips)
+    ck("…with the office's own function last",
+       bool(f_chips) and f_chips[-1] == "Strategy Management Office", f_chips)
+
+    pg.click(".wzcommon .wzcm >> text=Audit")
+    pg.wait_for_timeout(300)
+    act = pg.evaluate("() => [document.activeElement.tagName, document.activeElement.value]")
+    ck("a function from a chip lands the cursor on the name, not the picker",
+       act == ["INPUT", "Audit"], act)
+    pg.click(".wzstep >> text=Capabilities")
+    pg.wait_for_timeout(500)
+    fns = (last("shapeClient") or {}).get("shape", {}).get("functions", [])
+    made = [f for f in fns if f.get("name") == "Audit"]
+    # A CHIP IS A SHORTCUT INTO THE ADD BUTTON, so it must mint what that mints.
+    ck("…and it plans the way the Add button mints one",
+       bool(made) and made[0].get("format") == "pillars", made)
+    ck("…carrying no trace of the chip either",
+       bool(made) and sorted(made[0].keys()) == ["format", "name"], made)
+
+    # A NEW CONTROL IS MEASURED, NEVER ARGUED FROM ITS TOKENS (§38.4, §93.11).
+    # The chip borrows .wzadd's own ink and ground, so the reading should be
+    # that control's — but "should" is the word this project has been caught by
+    # seven times, and the ASSERTION is that the two AGREE rather than any
+    # number, so a deliberate change to the pair stays green (§94.8).
+    pg.click(".wzstep >> text=Business units")
+    pg.wait_for_timeout(380)
+    for theme in ("light", "dark"):
+        pg.evaluate("t => document.documentElement.setAttribute('data-theme', t)", theme)
+        pg.wait_for_timeout(180)
+        m = pg.evaluate("""() => {
+          const lum = c => { const [r,g,b] = c.match(/\\d+(\\.\\d+)?/g).slice(0,3).map(Number)
+              .map(v => { v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); });
+            return .2126*r + .7152*g + .0722*b; };
+          const ground = c => { let e = c, bg = 'rgba(0, 0, 0, 0)';
+            while (e && bg.startsWith('rgba(0, 0, 0, 0')) { bg = getComputedStyle(e).backgroundColor; e = e.parentElement; }
+            return bg; };
+          const ratio = el => { const a = lum(getComputedStyle(el).color), b = lum(ground(el));
+            return Math.round(((Math.max(a,b)+.05)/(Math.min(a,b)+.05)) * 100) / 100; };
+          const chip = document.querySelector('.wzcm'), add = document.querySelector('.wzadd');
+          return chip && add ? { chip: ratio(chip), add: ratio(add) } : null;
+        }""")
+        ck("the chip reads as well as the button it shortcuts — " + theme,
+           bool(m) and m["chip"] >= 4.5 and abs(m["chip"] - m["add"]) < 0.01, m)
+    pg.evaluate("() => document.documentElement.removeAttribute('data-theme')")
+    pg.wait_for_timeout(150)
+
     # ── 7 · The summary, and the way out ─────────────────────────────────
     print("\n§7 · the summary")
     pg.click(".wzstep >> text=Summary")
@@ -605,6 +725,11 @@ with sync_playwright() as p:
        isinstance(ro, list) and len(ro) > 0 and all(ro), ro)
     ck("…and no unit can be added",
        on_units and not pg.query_selector(".wzadd:not([disabled])"))
+    # …and the shortcut into that button goes with it (§350): a chip on a
+    # frozen list is a control whose whole act is refused.
+    ck("…and no common name is offered either",
+       on_units and not pg.query_selector(".wzcommon"),
+       len(pg.query_selector_all(".wzcm")))
     on_words = step("The words")
     wro = pg.eval_on_selector_all(".wztbl input",
         "els => els.map(e => !!e.readOnly || !!e.disabled)") if on_words else []

@@ -47509,3 +47509,134 @@ authoriser, no change list and nothing a save writes.
 provider actually drafts, and whether the answers are any good. Every drafting
 and asking assertion is made against a stub, which is what makes the wire
 readable and is exactly what the two stop points exist to cover (§113.8).
+
+## §349 — A CAPABILITY IS PLACED AFTER THE FUNCTIONS THAT CARRY IT (2026-09-14)
+
+Islam, on the live flow: *"we can't create a capability before a function as
+normally the capability will be assigned to a function."*
+
+**MEASURED, AND IT IS SHARPER THAN THE COMPLAINT.** §347.1 gave the Capabilities
+step three questions per row — a name, **which function carries it**, and how it
+plans — and the step sat at position 4 with Functions at 5. So `S.shape.functions`
+is empty when it is drawn, and that middle dropdown holds **exactly one entry:
+*"— unassigned —"***. The step asked a question it could not let you answer, and
+every row made there had to be revisited after the next step.
+
+**And the sentence under it names the navigation and the code and never the
+function at all**, which is likely why the order read as fine when it was
+written: *the prose describing a control is where its missing dependency hides.*
+
+**ONE LINE, BECAUSE EVERYTHING ELSE IS DERIVED** — the order of `STEPS`.
+`stepIdx()` reads that array, so the numbers on the chips, the two points where
+the side panel starts filling in, and the read-only rule on a planned client all
+follow on their own. `SHAPE_STEPS` is read with `indexOf` — membership, never
+order — and is reordered anyway so it reads in the flow's own order for whoever
+reads it next.
+
+**AND THE OTHER DIRECTION WAS CHECKED RATHER THAN ASSUMED**: a function asks
+nothing about capabilities, so there is no reverse dependency and moving
+Functions earlier cannot strand it.
+
+**UNASSIGNED STAYS REACHABLE ON PURPOSE.** Leaving Functions empty and arriving
+at Capabilities with nothing to assign is still allowed — §347.1 records
+unassigned as a state the client's own Setup page already draws, so it is a
+state rather than an error.
+
+**THE CHECKS PASSED THROUGH UNTOUCHED, WHICH IS §94.8 PAYING OFF.** They address
+the steps by NAME (`text=Capabilities`), and §347.4's §8d asserts that walking
+the rail forward with Next and back with Back gives **two orders that are each
+other reversed** — never a literal order. So a deliberate reorder stays green and
+a Back that refuses to move still goes red. `client-setup-outside` 0 failures,
+`setup-shape` 33/0.
+
+## §350 — THE NAMES MOST CLIENTS HAVE, ONE CLICK IN (2026-09-14)
+
+Islam, in the same breath as §349: *"for the business units and functions how
+about we have a list of common units and functions and by clickingon them they
+joing hte list?"*
+
+**I ARGUED AGAINST HALF OF IT AND THE OBJECTION EXPIRED ON HIS NEXT SENTENCE.**
+Measured first: Raya's supporting functions are Finance, HR, Treasury, IT,
+Marketing, Care, Merchandising and the Strategy Management Office, and **five of
+those eight would be on almost any client's list** — so a common core plainly
+exists for functions. For UNITS I said there is none, because his own test client
+holds Retail Shops, External Sales and Online Sales while Raya holds Mobile,
+Retail Stores, B2B Ecomm and Distribution: *the client's own business, not a
+standard set*, so a list of names would be wrong more often than right.
+
+Then: *"for the units we can keep the common as well like Retail, Online,
+Distribution, and on adding them leave the abiilty to adjust a bit in the
+wording."* **That dissolves the objection rather than overruling it** — my
+argument only holds while the name is the FINAL answer. Click *Retail*, land it
+in a box you then edit to *Retail Shops*, and being approximately right stops
+being a fault and becomes the point. **And it needs no new mechanism**: every row
+in that flow is already an editable text box, so *adjust the wording* is what
+happens by default.
+
+**WHAT IS OFFERED FOR A UNIT IS THE USUAL WAY A BUSINESS IS CUT** — Retail,
+Online, Wholesale, Distribution, Corporate Sales, Export, Services — rather than
+an industry's vocabulary. **The office's own function is LAST on the function
+list**, because every client has one by construction and it is the platform's
+rather than the business's. Customer Service and Audit are Islam's additions;
+**Treasury is deliberately absent**, because most clients fold it into Finance
+and a wrong suggestion costs more than a missing one.
+
+**THE CHIP IS HELD BY THE ROW IT MADE, NEVER BY THE SPELLING.** Renaming to
+*Retail Shops* keeps that chip off the list; removing the row with the × puts it
+back. That is what a person means by *"I have used that one"*, and it is the one
+real decision inside a control that otherwise costs nothing. **The mark is
+NON-ENUMERABLE and that is not a flourish**: `S.shape` is posted as JSON and
+`shapeClient` slices the row objects through **verbatim** into what is stored, so
+an ordinary key would travel and sit on the client for ever. Read before it was
+written, not guessed at. **The stated cost**: a name TYPED by hand does not
+remove its chip, because nothing can tell that *Retail Shops* came from *Retail*.
+
+**A CHIP IS A SHORTCUT INTO THE ADD BUTTON, SO IT MINTS WHAT THAT BUTTON MINTS**
+— `pillars` for a function — and is dressed as that button's sibling (`.wzcm`
+beside `.wzadd`: the same dashed border, the same quiet ink, the same amber
+hover), because clicking one is the same act. No new colour, and **measured
+rather than argued** (§38.4, §93.11): **4.80 light and 5.67 dark, identical to
+`.wzadd` to two decimals**, asserted as the two AGREEING rather than as a number
+(§94.8). The row is not drawn once every name on it has been used, and **not
+drawn at all on a client whose shape is frozen** (§346.5) — a chip on a frozen
+list is a control whose whole act is refused.
+
+**A, NOT B, AND DRAWING IT SETTLED IT AGAINST MY OWN CLAIM.** Two treatments went
+to Islam in the console's own stylesheet, both steps and both states
+(`design-mockups/wizard-common-lists/`, rule 1c). I wrote that the quieter
+one-line treatment saved real height; **measured on the real pane the chips cost
+79px and the line costs 60** — nineteen pixels, on the one screen nobody has seen
+before, where a shortcut nobody finds is a shortcut that was not built. The
+mockup also measured **three rows** of chips on the functions step where I had
+guessed two. *The claim was mine, the correction was the drawing's.* Islam:
+*"A is good."*
+
+**NOT YET BY INDUSTRY**, his answer to the fourth question: the client step
+already collects one, so the lists could narrow — and one list we can defend
+beats nine we cannot, revisited once real clients have shown what recurs.
+
+### §350.1 — AND THE FALSIFICATION FOUND THE ASSERTION THE DECISION RESTS ON PASSING FOR THE WRONG REASON
+
+`checks/client-setup-outside.py` §6c drives every chip and reads the POSTED
+shape, because a control wired to nothing renders perfectly (§96). Proved able to
+fail four ways from the SOURCES (§276) — **2 / 2 / 1 / 1 red**, one per decision,
+break A printing `'_chip': 'Wholesale'` inside the posted payload verbatim.
+
+**But the first run of break B went red on a NEIGHBOUR and left the assertion
+written for it green.** *"Renaming the row keeps its chip off the list"* was
+asked in the moment, and a bound field writes **without repainting** (§71.2,
+rightly), so the chip row is not redrawn until something else paints — making it
+trivially true of a build matching by SPELLING as well. §113.8 exactly, found by
+falsifying rather than by reading. It is asked **after a repaint** now, which is
+also the state a person actually reaches, and break B goes 1 red → 2.
+
+### §350.2 — RECORDED, NOT DONE
+
+`listStep`'s Add button focuses the last `.wzrow .fld`, and a FUNCTION row ends
+in **two** of those — the name input and the plans-in select — so the cursor
+lands on the picker. **§347.1 fixed exactly this in `capsStep` and left its twin
+one function away.** The chip path uses `focusLastName()`, which asks for
+`input.fld`; the button beside it is deliberately left as it was, flagged with
+Islam and unanswered, so it is not folded into a change about something else
+(rule 1b) — and **break C printed `['SELECT', 'pillars']`**, which is that live
+fault reproduced by a check that does not yet cover it.

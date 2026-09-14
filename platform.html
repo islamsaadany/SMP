@@ -327,6 +327,15 @@
     background:transparent; font:600 13px/1.5 inherit; text-align:left; cursor:pointer;
     width:100%; margin-top:8px }
   .wzadd:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
+  /* The common-name chips (§350): a SIBLING of .wzadd, dashed and quiet,
+     because clicking one is the same act as pressing the button under it —
+     a shortcut into it rather than a second kind of control. */
+  .wzcommon{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 9px }
+  .wzcm{ border:1px dashed var(--line); border-radius:7px; background:transparent;
+         padding:5px 10px; font:inherit; font-size:13px; color:var(--ink-3);
+         cursor:pointer; white-space:nowrap }
+  .wzcm:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
+  .wzcm .p{ color:var(--ink-3); margin-right:4px }
 
   /* a choice */
   .wzchoices{ display:flex; flex-direction:column; gap:10px }
@@ -1906,6 +1915,39 @@
   var CAP_FORMATS = [["pillars","Pillars"], ["projects","Projects"]];
   function fmtWord(f){ return f === "objectives" ? "obj" : f === "projects" ? "proj" : "pillars"; }
 
+  /* THE NAMES MOST CLIENTS HAVE, one click into the list beside them (§350).
+     What is offered for a UNIT is the usual way a business is CUT — Retail,
+     Online, Wholesale — rather than an industry's own vocabulary, because a
+     unit is the client's own business and a list of industry names would be
+     wrong more often than right; it works at all only because a clicked name
+     lands in an ordinary editable box, so Retail becomes Retail Shops by
+     typing. Islam, asked whether the lists should narrow by the industry the
+     client step already collects: "not yet by industry" — one list we can
+     defend beats nine we cannot, and the answer is easy to revisit once real
+     clients have shown what recurs.
+     The office's own function is last: every client has one by construction,
+     and it is the platform's rather than the business's. */
+  var COMMON_UNITS = ["Retail", "Online", "Wholesale", "Distribution",
+                      "Corporate Sales", "Export", "Services"];
+  var COMMON_FNS   = ["Finance", "HR", "IT", "Marketing", "Legal", "Procurement",
+                      "Operations", "Supply Chain", "Customer Service", "Audit",
+                      "Strategy Management Office"];
+
+  /* A CHIP IS HELD BY THE ROW IT MADE, NEVER BY THE SPELLING: renaming the row
+     to "Retail Shops" keeps its chip off the list, and removing the row with
+     the × puts the chip back — which is what a person means by "I have used
+     that one". The mark is NON-ENUMERABLE on purpose: `S.shape` is posted as
+     JSON and the endpoint slices the row objects through verbatim, so an
+     ordinary key would travel and be stored on the client for ever. */
+  function markFromChip(row, name){
+    Object.defineProperty(row, "_chip", { value:name, enumerable:false });
+    return row;
+  }
+  function chipUsed(list, name){
+    for (var i = 0; i < list.length; i++) if (list[i]._chip === name) return true;
+    return false;
+  }
+
   /* The flow's own state: which client, which step, what has been answered,
      and what is not yet posted. `S.shape` is the server's answer, edited in
      place and posted back whole — the answers ARE the list (§322). */
@@ -2770,6 +2812,19 @@
 
   /* A list you add to — units and functions are the same control, and the
      only difference is whether the row carries a plan type. */
+  /* THE NAME BOX, never the last .fld — a function's row ends in a SELECT that
+     also wears .fld, so reaching for the last one lands the cursor on the
+     plans-in picker (§347.1 records the same trap in capsStep). A chip exists
+     to be renamed, so landing on its name is the feature rather than a nicety.
+     The Add button below still reaches for the last .fld and so still lands on
+     the picker: that is the same one-line defect, raised with Islam and not yet
+     answered, so it is left rather than folded into a change about something
+     else (rule 1b). */
+  function focusLastName(){
+    var boxes = document.querySelectorAll(".wzrow input.fld");
+    if (boxes.length) boxes[boxes.length - 1].focus();
+  }
+
   function listStep(box, list, kind){
     if (!list.length) {
       box.appendChild(el("p", "wzempty",
@@ -2809,6 +2864,32 @@
         rows.appendChild(r);
       });
       box.appendChild(rows);
+    }
+    if (S.canShape) {
+      /* Above the Add button, because for most clients these ARE the answer and
+         the button under them is the way to say something else. The row is not
+         drawn once every name on it has been used. */
+      var common = kind === "unit" ? COMMON_UNITS : COMMON_FNS;
+      var left = common.filter(function (nm) { return !chipUsed(list, nm); });
+      if (left.length) {
+        var crow = el("div", "wzcommon");
+        left.forEach(function (nm) {
+          var c = el("button", "wzcm");
+          c.type = "button";
+          c.setAttribute("aria-label", "Add " + nm);
+          c.appendChild(el("span", "p", "+"));
+          c.appendChild(document.createTextNode(nm));
+          c.addEventListener("click", function () {
+            list.push(markFromChip(kind === "unit"
+              ? { name:nm, company:"" } : { name:nm, format:"pillars" }, nm));
+            S.shapeDirty = true;
+            paintSetup();
+            focusLastName();
+          });
+          crow.appendChild(c);
+        });
+        box.appendChild(crow);
+      }
     }
     if (S.canShape) {
       var add = el("button", "wzadd", kind === "unit" ? "+ Add a business unit" : "+ Add a supporting function");

@@ -9894,8 +9894,113 @@ kept for the offline copy alone. **Two `smp-app` checks are recorded UNRUN
 rather than passing** (&sect;54.5): `modules` and `memory-boundary` need
 `node_modules` this session does not hold, and neither is touched here.*
 
-*Earlier the same day: **&sect;339: the setting that could not open,
+*Earlier: 2026-09-13 &mdash; **&sect;353: the demo owes nothing.** Islam:
+*"make the demo client not missing anything"*, then *"I mean fill the missing
+areas"*, then *"do it all."* **MEASURED FIRST, AND IT WAS ONE THING REPEATED
+EIGHTY-THREE TIMES**: asked of the platform's own `gapMap`/`gapMissing`,
+**166 counted gaps and every one a tactic's `outcome` and its `outTarget`**
+&mdash; nothing else in the tenant, not an owner, not a date, not a measure's
+target. &sect;248's two fields arriving after the demo data was authored, never
+written, and &sect;249 then making them counted. **AND FILLING THEM WOULD HAVE
+TRADED ONE KIND OF MISSING FOR ANOTHER**, which is why the cost was measured
+before a line was written: &sect;254.2 settled that **the target alone** decides
+how a tactic is read, so writing the plan's two fields and stopping takes all 83
+from *reported* to *not reported* and shuts Submit everywhere. Each row wants
+three values, and that was said to him rather than discovered. **WHAT AN OUTCOME
+IS WAS AGREED FROM FIVE WORKED EXAMPLES** (his own ask), and the rule is that
+**the tactic is the work and the outcome is the thing that moved because of it**
+&mdash; never the pillar's key measure written again, or the plan counts one
+thing twice. **AND THE TWO UNITS THAT LOOK UNFINISHED ARE NOT, WHICH REVERSES
+WHAT I OFFERED HIM**: reading the code before writing it found
+`seedPartialReporting()` wiping Nigeria and Consumer Electronics **on purpose**,
+its reason in its own comment &mdash; *"Two units are genuinely mid-report &hellip;
+without this every row on the SMO's board reads 100%"* &mdash; so they are left
+exactly as they are and the offer is withdrawn rather than quietly carried out.
+**&sect;353.1 &mdash; AND THAT WIPE KNEW ONE OF A TACTIC'S TWO FIGURES**: it
+clears `actual`, &sect;248 added `outActual`, and `tacticAnswered` reads the
+second in preference &mdash; so the moment the plan gained outcomes Nigeria read
+**6 of 16 reported where it should be 0 of 16**, measured, and 0 again once both
+go (&sect;51.10 from the other end). The outcome's TARGET deliberately stays:
+the plan is complete there too; it is the figure nobody has entered.
+**&sect;353.2 &mdash; AND A FIGURE AT RISK CARRIES AN EXPLANATION**: &sect;105
+held Submit on **56** unexplained rows before any of this &mdash; pre-existing,
+invisible because nobody had tried to submit every unit &mdash; and the outcomes
+took it to **112**. All 112 written. Every subject now reads **0 gaps, 0
+explanations owed, 0 figures owed**, those two units excepted.
+**&sect;353.3** &mdash; Finance's two owed figures were ordinary incompleteness,
+established rather than assumed (no seed wipes it), and are answered.
+**&sect;353.4 &mdash; THE PATCH REFUSED ITSELF THREE TIMES AND EVERY REFUSAL WAS
+RIGHT**: 83 rows written by NAME with the expected match count declared and
+nothing written unless every name matches exactly (&sect;48) &mdash; it refused
+because Merchandising's five live in `config-data.js`, then because the two files
+spell a row differently (`name: "x"` on one line, `name:"x"` across two), so a
+row is found by MATCHING BRACES rather than by assuming it is a line; then the
+notes patch refused on five names, four of them one figure seen twice and the
+fifth a **third** match that is a different healthy figure in Care.
+**&sect;353.5 &mdash; AND THE ONE FAULT THAT GOT PAST IT WAS THAT SAME
+ASSUMPTION**: walking back to the nearest `{` lands inside
+`src: { set: "financialfigures" }`, so seven explanations were written **into
+the figure set rather than onto the row** &mdash; valid syntax, clean build,
+perfect render, and found only by the measurement that asks what the PLATFORM
+says rather than what the file contains (seven rows still owed a note after 115
+were written). **SEVEN CHECKS WERE RED AND EVERY ONE WAS &sect;214.3** (the
+sixth time), each holding a literal this deliberate change moves, each
+**REWRITTEN, NEVER LOOSENED** (&sect;218) to MAKE the state it needs rather than
+borrow the demo's &mdash; **and each established as this work's by running it
+against a build made from `origin/main`'s own sources first** (&sect;303), which
+is also what separated them from `tactic-outcome.py`, whose four failures
+reproduce identically on main and are left as main's. **They share one shape:
+they borrowed a state the demo no longer holds.** `submit-gate` &sect;2 asked
+for a unit still owing a figure &mdash; and that file's own docstring already
+promised every state in it is made (&sect;104.8); `empty-not-missing` &sect;0
+and `plan-edit-line` &sect;3 each asked for a subject still owing a gap, which
+is the control that proves the missing register still exists (&sect;113.8) and
+now proves it over a gap they create; **`report-chrome` asked for a HELD
+Submit, which is the very assertion &sect;280.1 rewrote in the OPPOSITE
+direction eleven sections ago**, when it was the open state that had to be made
+because every demo unit was blocked &mdash; *which end has to be made has
+flipped, and the file records both flips rather than replacing one with the
+other* &mdash; made from the DATA and put back (&sect;94.2), never by stubbing
+the gate, so the real rule is what both ends are measured through.
+**&sect;353.7 &mdash; `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
+"NOTHING IS REINTERPRETED"**: it asked that NO row reads as yes/no, right while
+nothing authored one and false the moment four outcomes are genuinely
+done-or-not; &sect;257's rule is opt-in per row, so what must hold is that a
+target carrying a NUMBER never reads as yes/no and one spelling `Y/N` always
+does &mdash; asserted as that agreement, **with the demo asserted to hold an
+example of each**, or a build that stopped reading the unit passes over an empty
+list (&sect;113.8). Two more in that file were the same class: `== "Y/N"` was
+true only of a row holding no value, where &sect;257.2 writes Y/N BESIDE the
+value; and the tally trial picked a Y/N tactic naming quarters this cycle is not
+standing in, so **answering it moved nothing because it was never asked**
+&mdash; 41/41/41 on a correct build, measuring the calendar rather than the
+count. **&sect;353.8 &mdash; AND THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING
+AN EVENT THE PRODUCT NEVER RECEIVES**: `report-note-wrap` fired `change` by hand
+on the note box **one line after asserting the cursor was still in it**, and a
+bound field writes on `change`, which for a textarea means when focus LEAVES
+(&sect;35) &mdash; so the commit's repaint replaced the focused node
+mid-`innerHTML` and Chromium raised *"moved in a 'blur' event handler"*. On a
+real blur focus has already gone, which is &sect;219's own rule; driven that way
+it is green with all 27 behavioural assertions unchanged, so **the product
+cannot produce that error on any path a person can take**. Not claimed: it was
+green on main with the same synthetic event, so the repaint's scope depends on
+the data, and which difference widened it is not established.
+**VERIFIED**: full `qa.py` sweep **ERRORS none**; authoriser 633/0; differ
+140/0; platform rules 69/0; session-state and db-url-choice clear; round trip,
+clean parity, two tabs 21/0, incremental write byte-identical, cx-refusal,
+one-line heal, capability move and functional projects 18/0 all green on virgin
+Postgres 16 databases &mdash; **and two of those first read as failures until
+each was given its OWN fresh database**, my harness reusing a populated one
+(&sect;105.6's family), with `clean-parity` proved by running it on a worktree of
+`main` where it passes (&sect;303). `sw.js` SHELL bumped, because the built
+file's bytes changed (&sect;91) &mdash; the served worker is unaffected, since
+&sect;316.10's generator drops the half that carries the name; the seed, the
+served shell and the shipped build all regenerated and `generated-in-step`
+clear. **Nothing about how a gap is counted, how an outcome is scored or who
+may report anything has moved**: the diff is the two demo data files, one line
+in `seedPartialReporting`, and the seven rewritten checks.*
 
+*Earlier the same day: **&sect;339: the setting that could not open,
 and the creator who was nowhere in the data.** The two things &sect;337 and
 &sect;338 wrote down and deliberately left, both put to Islam in plain words
 with their costs and both answered in one message: *"1. no need a client they

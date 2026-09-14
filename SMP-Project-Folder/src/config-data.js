@@ -3679,13 +3679,13 @@ var FUNCTIONS = {
         kind:"Direction", theme:"VC", owner:"Sara Helmy",
         measures:[
           { name:"Range productivity", dir:"\u2265", target:"1.15", compile:"Latest", actual:"1.06", progress:92 },
-          { name:"Slow-moving SKU share", dir:"\u2264", target:"12%", compile:"Latest", actual:"18%", progress:67 }
+          { name:"Slow-moving SKU share", dir:"\u2264", target:"12%", compile:"Latest", actual:"18%", progress:67, note: "Slow movers are concentrated in two categories, both now under range review." }
         ],
         tactics:[
           { name:"Category role definition across the estate", owner:"Sara Helmy",
-            collaborators:["Nour"], q1:1, q2:1, q3:0, q4:0, status:"WIP", actual:75 },
+            collaborators:["Nour"], q1:1, q2:1, q3:0, q4:0, status:"WIP", actual:75, outcome: "Categories with a defined role", outTarget: "24 #", outCompile: "Sum", outActual: "18" },
           { name:"Quarterly range review with the buying team", owner:"Sara Helmy",
-            q1:1, q2:1, q3:1, q4:1, status:"WIP", actual:60 }
+            q1:1, q2:1, q3:1, q4:1, status:"WIP", actual:60, outcome: "Categories reviewed this year", outTarget: "24 #", outCompile: "Sum", outActual: "7", note: "Seven categories are reviewed; the review runs quarterly and the remainder fall in H2." }
         ] },
       { code:"M02", name:"Space and layout", sub:"Where it sits in the store",
         kind:"Direction", theme:"OT", owner:"Tamer Fouad",
@@ -3694,9 +3694,9 @@ var FUNCTIONS = {
         ],
         tactics:[
           { name:"Planogram standard for the top five categories", owner:"Tamer Fouad",
-            q1:0, q2:1, q3:1, q4:0, status:"WIP", actual:55 },
+            q1:0, q2:1, q3:1, q4:0, status:"WIP", actual:55, outcome: "Categories with a published planogram", outTarget: "5 #", outCompile: "Count", outActual: "1", note: "One planogram is published; the other four wait on the fixture survey completing in July." },
           { name:"Fixture refresh in the ten largest stores", owner:"Tamer Fouad",
-            collaborators:["Hossam"], q1:0, q2:1, q3:1, q4:1, status:"WIP", actual:40 }
+            collaborators:["Hossam"], q1:0, q2:1, q3:1, q4:1, status:"WIP", actual:40, outcome: "Stores refitted with the new fixtures", outTarget: "10 #", outCompile: "Latest", outActual: "4", note: "Four stores are refitted; the rest are scheduled around the trading calendar." }
         ] },
       { code:"M03", name:"Supplier terms", sub:"What the range costs us",
         kind:"Capability", theme:"VC", owner:"Sara Helmy",
@@ -3706,7 +3706,7 @@ var FUNCTIONS = {
         ],
         tactics:[
           { name:"Renegotiate the twenty largest supplier agreements", owner:"Sara Helmy",
-            collaborators:["Nour", "Hossam"], q1:1, q2:1, q3:1, q4:0, status:"WIP", actual:65 }
+            collaborators:["Nour", "Hossam"], q1:1, q2:1, q3:1, q4:0, status:"WIP", actual:65, outcome: "Supplier agreements renegotiated", outTarget: "20 #", outCompile: "Count", outActual: "8", note: "Eight agreements are renegotiated; the remaining twelve renew in the second half." }
         ] }
     ] }
 };
@@ -5758,7 +5758,20 @@ function cycleTotals(){
       u.keyObjectives.forEach(function(m){ m.actual = ""; m.progress = null; });
       u.items.forEach(function(p){
         p.measures.forEach(function(m){ m.actual = ""; m.progress = null; });
-        p.tactics.forEach(function(t){ t.actual = null; t.status = "Not started"; });
+        /* A TACTIC NOW HAS TWO FIGURES AND THE WIPE KNEW ONE. §248 moved a
+           tactic's reported number to `outActual` wherever its outcome carries
+           a target, and `tacticAnswered` reads THAT in preference — so
+           clearing `actual` alone left every Nigerian tactic reading as
+           reported and the unit was no longer the mid-report unit this
+           function exists to make. Latent until the demo's plan gained
+           outcomes, and invisible on any screen that only reads one of the
+           two (§51.10: when a field is renamed, find the code that WRITES the
+           old one). Both go, and the outcome's TARGET deliberately stays —
+           the plan is complete here as everywhere; it is the figure that has
+           not been entered yet. */
+        p.tactics.forEach(function(t){
+          t.actual = null; t.status = "Not started"; t.outActual = "";
+        });
       });
     }
   });

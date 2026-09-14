@@ -47807,3 +47807,172 @@ than corrected beside the original.
 `['SELECT', 'projects']`, which is the reported fault verbatim. Asserted on all
 three buttons rather than on the one that was reported, or the next one written
 drifts the same way.
+
+---
+
+## §353 — THE DEMO OWES NOTHING (2026-09-13)
+
+Islam: *"make the demo client not missing anything"*, then, when asked what he
+meant by missing, *"I mean fill the missing areas"*, and after the shape was
+put to him, *"do it all."*
+
+**MEASURED FIRST, AND THE ANSWER WAS ONE THING REPEATED EIGHTY-THREE TIMES.**
+Asked of the platform's own `gapMap`/`gapMissing` rather than read off a
+screen: **166 counted gaps across the demo, and every one of them a tactic's
+`outcome` and its `outTarget`** — 83 tactics, two blanks each, and nothing else
+in the whole tenant. Not an owner, not a date, not a measure's target. That is
+&sect;248's two fields arriving four versions after the demo data was authored
+and never being written, and &sect;249 then making them counted; the eight
+supporting functions owed nothing at all, because a project's rows are a
+different shape.
+
+**AND FILLING THEM WOULD HAVE TRADED ONE KIND OF MISSING FOR ANOTHER, WHICH IS
+WHY THE COST WAS MEASURED BEFORE A LINE WAS WRITTEN.** &sect;254.2 settled that
+**the target alone** decides how a tactic is read: give one an `outTarget` and
+`tacticAnswered` stops looking at `actual` and starts looking at `outActual`,
+so writing the plan's two fields and stopping would have taken all 83 tactics
+from *reported* to *not reported* and shut Submit in every unit. Each row wants
+three values, not two — what it produced, what it was aiming at, and where it
+has got to — and that was stated to him before it was built rather than
+discovered afterwards.
+
+**WHAT AN OUTCOME IS WAS AGREED FROM FIVE WORKED EXAMPLES, NOT FROM A
+DEFINITION.** His own ask: *"share with me a couple of examples to verify that
+we are aligned on what an outcome is and how is it related to the target."* The
+rule that came out of it: **the tactic is the work and the outcome is the thing
+that moved because of it** — a tactic name is a verb, an outcome is a noun with
+a number on it — **and an outcome is never the pillar's key measure written
+again**, or the plan counts one thing twice. *Clean and standardize customer
+and SKU base* produces **duplicate records removed**, where the pillar
+separately measures **the duplicate rate**: one is what this work delivered,
+the other is the health of the data.
+
+**TWO CHOICES WERE PUT TO HIM WITH THE COST OF EACH AND BOTH ARE HIS.** Each
+outcome's figure is kept near where that tactic's own *% delivered* sat, so no
+unit's score lurches for a reason nobody can explain — **with two of the five
+examples deliberately far apart** (45% done and 90% of the way to what it was
+meant to produce), because that divergence is the whole reason to have outcomes
+at all. And the 83 use the full range of target shapes — running totals,
+point-in-time counts, whole units, money, percentages, days and yes/no — so the
+demo teaches the feature rather than showing one shape 83 times.
+
+**AND THE TWO UNITS THAT LOOK UNFINISHED ARE NOT, WHICH REVERSES WHAT I OFFERED
+HIM.** The plan put to him said Nigeria's sixteen unentered figures and
+Consumer Electronics' five would be filled too. Reading the code before writing
+it found `seedPartialReporting()` in `config-data.js` wiping them **on purpose**,
+with its reason in its own comment: *"Two units are genuinely mid-report: some
+figures in, some not. Without this every row on the SMO's board reads 100% and
+the screen cannot show what it exists to show."* Filling them would have
+silently broken what the cycle board demonstrates, so they are left exactly as
+they are and the offer is withdrawn rather than quietly carried out.
+
+**§353.1 — AND THE WIPE KNEW ONE OF A TACTIC'S TWO FIGURES.** That function
+clears `t.actual` and sets the status to *Not started*, which was the whole of a
+tactic's reported figure when it was written. &sect;248 added `outActual` and
+`tacticAnswered` reads **that** in preference wherever the outcome carries a
+target — so the moment the demo's plan gained outcomes, every Nigerian tactic
+read as reported and Nigeria stopped being the mid-report unit the function
+exists to make. Measured, not reasoned: **6 of 16 reported where it should be
+0 of 16**, and 0 again once both fields go. &sect;51.10's rule from the other
+end — when a field is renamed or joined by a second one, find the code that
+WRITES the old one. **The outcome's TARGET deliberately stays**: the plan is
+complete in Nigeria as everywhere else; it is the figure that has not been
+entered yet.
+
+**§353.2 — A FIGURE AT RISK CARRIES AN EXPLANATION, AND THE OUTCOMES DOUBLED
+HOW MANY THERE WERE.** &sect;105 holds Submit until anything in the bad or warn
+band has a written reason, and the demo had **56** such rows with nothing typed
+— a pre-existing state, invisible because nobody had tried to submit every
+unit. The 83 outcomes took it to **112**. All 112 are written, one sentence
+each, saying why the row is where it is and what happens next; four figures
+appear twice by construction (a key objective and the pillar measure under it
+are one number seen twice) and take the same sentence. Every unit and every
+supporting function now reads **0 gaps, 0 explanations owed, 0 figures owed**,
+the two deliberately mid-report units excepted.
+
+**§353.3 — AND FINANCE'S TWO WERE ORDINARY INCOMPLETENESS, ESTABLISHED RATHER
+THAN ASSUMED.** `fn:finance` owed two figures before any of this and no seed
+wipes it, so unlike Nigeria it is not a demonstration of anything: two
+deliverables on *Credit facility consolidation* carried `status: null`, one of
+them due four months before the review point. Both answered, both explained.
+
+**§353.4 — THE PATCH REFUSED ITSELF THREE TIMES AND EVERY REFUSAL WAS RIGHT.**
+83 rows written by matching the tactic's NAME, with the patch declaring how many
+rows each name may hit and writing **nothing at all** unless every name matches
+exactly that many — because a positional patch over 83 rows is how the wrong row
+gets written (&sect;48). It refused first because Merchandising's five tactics
+live in `config-data.js` and not `group-data.js` (a supporting function planning
+in pillars), then because the two files spell a row differently — `name: "x"` on
+one line here, `name:"x"` split across two lines there — so the row is found by
+MATCHING BRACES from the `{` that opens it rather than by assuming a row is a
+line. The notes patch then refused on five names and all five were real: four
+are one figure seen twice, and *Net promoter score* had a **third** match that
+is a different and perfectly healthy figure in Care, which a looser patch would
+have annotated for no reason.
+
+**§353.5 — AND THE ONE FAULT THAT GOT PAST IT WAS THE SAME ASSUMPTION ONE LEVEL
+DOWN.** Walking back to the nearest `{` before the name lands inside
+`src: { set: "financialfigures" }` on a figure-set row, so seven explanations
+were written **into the figure set rather than onto the row**. The file parsed,
+the build succeeded and the platform rendered perfectly — and the check that
+found it is the one that measures what the platform SAYS rather than what the
+source contains: seven rows still owed a note after 115 had been written.
+*A patch that writes valid syntax into the wrong object is invisible to every
+test that only asks whether the file parses.*
+
+**WHAT IS DELIBERATELY NOT CHANGED**: no rule, no renderer, no server file — the
+diff is the two demo data files plus the one line in `seedPartialReporting` that
+&sect;353.1 required. Nothing about how a gap is counted, how an outcome is
+scored or who may report anything has moved.
+
+
+**§353.6 — SEVEN CHECKS HELD A LITERAL THIS CHANGE MOVES, AND EVERY ONE WAS
+REWRITTEN RATHER THAN LOOSENED (&sect;214.3 for the sixth time, &sect;218).**
+The regression sweep put 95 checks through the new build and turned up seven
+reds. **Each was established as this work's by running it against a build made
+from `origin/main`'s own sources first** (&sect;303) — which is also what
+separated the seven from `tactic-outcome.py`, whose four failures reproduce
+identically on main and are therefore left as main's (&sect;300 already records
+that file as red there). The seven share one shape: **they borrowed a state
+from the demo, and the demo no longer holds it.** `submit-gate.py` asked for a
+unit that still owed a figure; `empty-not-missing.py` and `plan-edit-line.py`
+each asked for a subject that still owed a gap; `report-chrome.py` asked for a
+HELD Submit — and that one is the same assertion &sect;280.1 rewrote in the
+opposite direction eleven sections ago, when it was the OPEN state that had to
+be made because every demo unit was blocked. *Which of the two ends has to be
+made has now flipped, and the file records both flips rather than replacing
+one with the other.* All four MAKE the state and put it back (&sect;94.2),
+from the DATA rather than by stubbing the gate, so the real rule is what both
+ends are measured through.
+
+**§353.7 — AND `yn-target` WAS ASSERTING NOUGHT WHERE THE PROPERTY IS
+"NOTHING IS REINTERPRETED".** Its &sect;6 asked that **no** row in the worked
+example reads as yes/no — the right shape while nothing authored one, and false
+the moment four tactic outcomes are genuinely done-or-not (&sect;300's own three
+answers). Nought was never the property: &sect;257's rule is that the feature is
+opt-in per row, so what must hold is that a target carrying a NUMBER never reads
+as yes/no and a target spelling `Y/N` always does. It asserts that agreement now,
+**with the demo asserted to hold an example of each** — or a build that stopped
+reading the unit at all would satisfy every "nothing moved" assertion over an
+empty list (&sect;113.8). Two more in the same file were the same class:
+`== "Y/N"` was true only of a row holding no value, where &sect;257.2 is explicit
+that Y/N is written BESIDE the value (`100 B EGP → 100 Y/N → 100 B EGP` round
+trips), so it asserts the RULE and keeps the figure; and the tally trial picked a
+Y/N tactic naming quarters this cycle is not standing in, so **answering it moved
+nothing because it was never asked** — 41/41/41 on a correct build, the trial
+measuring the calendar rather than the count.
+
+**§353.8 — THE ONE PAGE ERROR WAS THE CHECK SYNTHESISING AN EVENT THE PRODUCT
+NEVER RECEIVES.** `report-note-wrap` went red on a DOMException — *"the node to
+be removed is no longer a child of this node&hellip; moved in a 'blur' event
+handler"* — with all 27 of its behavioural assertions passing. It fired
+`change` by hand on the note box **one line after asserting the cursor was still
+in it**, and a bound field writes on `change`, which for a textarea means when
+focus LEAVES (&sect;35); so the commit's repaint replaced the focused node
+mid-`innerHTML`. On a real blur focus has already gone before `change` fires —
+the browser's own ordering, and exactly why &sect;219 rules *blur, never a
+synthesised change*. Driven that way it is green and every "both lines reach the
+row" assertion is unchanged, so the product cannot produce that error on any
+path a person can take. **What is NOT claimed**: it was green on main with the
+same synthetic event, so the repaint's scope depends on the data — which
+difference widened it is not established, and does not need to be.

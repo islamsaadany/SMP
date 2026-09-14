@@ -49,6 +49,7 @@ before §251 and it goes red from its first section.
 Run:  SMP_CHROME=/opt/pw-browsers/chromium python3 qa-run.py checks/yn-target.py
 """
 import pathlib
+import re
 from playwright.sync_api import sync_playwright
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -233,17 +234,38 @@ with sync_playwright() as pw:
     # The feature is opt-in per row. A build that reinterpreted an existing
     # target would be a silent data fault, so this asks the whole tenant
     # rather than one row (§94.8: assert the property, never a literal).
+    # REWRITTEN, NEVER LOOSENED (§218, §214.3). This asked for NOUGHT yes/no
+    # rows in the whole tenant, which was the shape of the guard while nothing
+    # in the worked example authored one — and §353 filled the demo's gaps,
+    # among them four tactic outcomes that are genuinely done-or-not (§300's
+    # own three answers). Nought is not the property; the property is that
+    # nothing is REINTERPRETED: a target carrying a number must never read as
+    # yes/no, and a target spelling Y/N must. Both ends, and the demo is now
+    # asserted to hold an example of each, or a build that stopped reading the
+    # unit at all would satisfy every "no numeric row moved" assertion on an
+    # empty list (§113.8).
     moved = ev(pg, """() => {
-      const hit = [];
+      const wrong = [], yes = [], nums = [];
+      const look = (name, v) => {
+        if (v == null || v === "") return;
+        const isYN = SMPRules.isYesNo(v);
+        const says = /(^|[\\s\\d])Y\\/N\\s*$/.test(String(v));
+        if (isYN !== says) wrong.push([name, String(v), isYN, says]);
+        if (isYN) yes.push(name); else nums.push(name);
+      };
       Object.keys(UNITS).forEach(k => {
         (UNITS[k].keyObjectives||[]).forEach(m => {
-          if (SMPRules.isYesNo(m.target) || SMPRules.isYesNo(m.target3y)) hit.push(m.name); });
+          look(m.name, m.target); look(m.name, m.target3y); });
         (UNITS[k].items||[]).forEach(p => {
-          (p.measures||[]).forEach(m => { if (SMPRules.isYesNo(m.target)) hit.push(m.name); });
-          (p.tactics||[]).forEach(t => { if (SMPRules.isYesNo(t.outTarget)) hit.push(t.name); });
+          (p.measures||[]).forEach(m => look(m.name, m.target));
+          (p.tactics||[]).forEach(t => look(t.name, t.outTarget));
         }); });
-      return hit; }""")
-    ck("no row in the worked example is silently read as yes/no", not moved, moved)
+      return {wrong: wrong, yes: yes.length, nums: nums.length}; }""")
+    ck("every target reads as yes/no exactly when it says so — nothing is "
+       "reinterpreted", not moved["wrong"], moved["wrong"])
+    ck("...and the worked example holds an example of each",
+       moved["yes"] > 0 and moved["nums"] > 0,
+       {"yes": moved["yes"], "measured": moved["nums"]})
 
     print("\n── 7 · the pen: three boxes die, the picker lives")
     # Drive the REAL page: a unit's Plan, the office's pen, a real measure
@@ -263,8 +285,16 @@ with sync_playwright() as pw:
       }
       if (!sel) return { none: true };
       const before = row.querySelectorAll('.fld:disabled').length;
+      /* what every target in this subject says BEFORE the pick, so §257.2's
+         rule — the value is KEPT beside the new unit — can be asserted rather
+         than assumed (§353: the row the pen reaches first now carries one). */
+      const was = {};
+      (UNITS[current].items||[]).forEach(p => {
+        (p.measures||[]).forEach(m => { was['m:'+m.name] = m.target || ""; });
+        (p.tactics||[]).forEach(t => { was['t:'+t.name] = t.outTarget || ""; });
+      });
       sel.value = 'Y/N'; sel.dispatchEvent(new Event('change', {bubbles:true}));
-      return { before: before, ok: true };
+      return { before: before, was: was, ok: true };
     }""")
     ck("the pen's measures table offers Y/N at all", not st.get("none"), st)
     if not st.get("none"):
@@ -285,15 +315,29 @@ with sync_playwright() as pw:
                          const u = UNITS[current];
                          for (const p of u.items) {
                            for (const m of (p.measures||[]))
-                             if (SMPRules.isYesNo(m.target)) return m.target;
+                             if (SMPRules.isYesNo(m.target))
+                               return {v: m.target, k: 'm:'+m.name};
                            for (const t of (p.tactics||[]))
-                             if (SMPRules.isYesNo(t.outTarget)) return t.outTarget;
+                             if (SMPRules.isYesNo(t.outTarget))
+                               return {v: t.outTarget, k: 't:'+t.name};
                          }
                          return null; })() };
             } }
           return { lost: true }; }""")
+        # REWRITTEN, NEVER LOOSENED (§218, §214.3). `== "Y/N"` was true of a
+        # row holding NO value, and §257.2 is explicit that Y/N is written
+        # BESIDE the value — `100 B EGP → 100 Y/N → 100 B EGP` round trips —
+        # so once the demo owes nothing (§353) the pen's first Y/N-capable row
+        # carries a figure and the literal is false about a correct build.
+        # The property is the rule itself, and it is stricter than the literal.
+        sv = (af.get("stored") or {}).get("v")
+        sk = (af.get("stored") or {}).get("k")
+        kept = ((st.get("was") or {}).get(sk) or "")
+        num = lambda s: re.sub(r"[A-Za-z%#/]+\s*$", "", (s or "")).strip()
         ck("the row's target reached the stored plan as Y/N",
-           af.get("stored") == "Y/N", af)
+           sv is not None and sv.endswith("Y/N"), af)
+        ck("...with whatever the row already held kept beside it (§257.2)",
+           num(sv) == num(kept), {"stored": sv, "was": kept})
         ck("THREE boxes are genuinely disabled, not merely dimmed",
            af.get("off") == 3, af)
         ck("...and the unit picker is NOT among them — it is the way back out",
@@ -425,6 +469,14 @@ with sync_playwright() as pw:
           for (const p of u.items) for (const x of (p.tactics||[]))
             if (SMPRules.isYesNo(x.outTarget)) { t = x; break; }
           if (!t) return { none:true };
+          /* AND THE ROW HAS TO BE ONE THE CYCLE ASKS FOR (§94.2, §113.8).
+             The first Y/N tactic in the subject may name quarters this cycle
+             is not standing in, and a row that is never asked is in neither
+             half of the tally — so answering it moves nothing and the trial
+             measures the calendar rather than the count. It read 41/41/41 on
+             a correct build the moment §353 gave the demo Y/N outcomes of
+             its own. Put it in the cycle's way first. */
+          t.q1 = t.q2 = t.q3 = t.q4 = 1;
           /* BOTH FIELDS CLEARED FIRST, or the trial measures nothing: the
              demo's tactics carry an `actual` from long before outcomes
              existed, and a row answered in EITHER field counts (that is the

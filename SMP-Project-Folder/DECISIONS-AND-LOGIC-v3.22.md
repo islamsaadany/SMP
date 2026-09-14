@@ -47373,3 +47373,139 @@ live between the drawing and the sign-off.
 
 ---
 
+## §348 — THE STRATEGY FRAMEWORKS LIBRARY, ON FOREFRONT'S OWN CONSOLE (2026-09-13, spec 052)
+
+Islam, after the Strategic Decision Toolkit's eighty frameworks arrived as data:
+*"it's a straetgy frameworks library. we can keep it for the consultants outside
+like the memory not a client thing. ask me what you need to build it and have an
+admin for it to add more with a prompt to use through ai and come back woth the
+answer to add a new one"*, then **"go ahead"**, **"proceed"**, **"BUILD IT"**,
+and *"keep going until you need something from me"*.
+
+**IT IS THE MEMORY'S PLACEMENT, AND THAT IS WHAT MADE IT SMALL.** One table on
+the platform's own schema, no `tenant_id` and no reference to `tenants` at all —
+a framework is about nobody, which is the feature rather than an omission, the
+same argument §319 made for an insight. So there is no tenant to resolve, no
+policy to attach, no module to register and no client surface at all: `frameworks`
+joins `memory_entries` above the tenant block, and the ONE boundary it keeps is
+the door in front of the endpoint — a client's own staff never reach it, refused
+in **the same sentence** the memory and the console refuse them (§53.5: two
+surfaces refusing the same person in two different words tell whoever is probing
+which is which).
+
+**A1 WITHOUT A2 IS NOT A QUIET BUG, which is why they are one edit.** The
+schema's last loop FORCES row-level security on every table it does not exclude
+and then indexes a `tenant_id` — so a platform table added without its exclusion
+does not leak, it **fails the schema apply**, and a fresh deployment gets no
+database at all. And the exclusion is written TWICE by construction (the loop
+runs inside Postgres, `lib/schema-check.ts` runs in Node), which is what §331
+wrote a check for; this is the first table to exercise it since.
+
+**THE ORDER IS THE BOOK'S, WHICH IS WHY THERE IS NO LIST OF SECTION NAMES
+ANYWHERE.** `idx` carries the dataset's own 1–80, the eight sections are derived
+by the smallest `idx` in each, and a framework an admin adds takes `max(idx)+1` —
+so it lands at the end and moves no section (§101's `units.idx`, the same answer
+to the same question). Alphabetical would scramble a sequence that teaches:
+*Knowing Your Business* comes before *Addressing Risk* because you do it first.
+**The `idx` is worked out INSIDE the insert** rather than read and then written,
+because two admins saving in the same second would land on one number and `idx`
+is an order rather than a key, so nothing would catch it.
+
+**THE ONE CALL IN THIS PLATFORM THAT IS NOT A LOOKUP.** Everywhere else
+`assistant.cjs` answers FROM a corpus in the prompt and declines rather than
+inventing (§104); drafting a framework asks it for eleven fields of content about
+a tool somebody published, which is composing. So `ask()` gained **three named
+options** — `schema`, `needsCorpus`, `think` — **each defaulting to exactly what
+it does today**, and `checks/assistant-defaults.mjs` reads what goes ON THE WIRE
+for every existing caller, because "exactly as it did" is not something a reading
+can establish. All three fail silently if they are ever lost: a corpus guard that
+stops guarding answers from nothing, thinking left on turns every lookup's
+latency back into weather (§134), and a bigger budget hides §133's truncation
+until the day it does not.
+
+**AND PASTED SOURCE IS RETRIEVAL AGAIN**, so it keeps both defaults: the material
+is in the prompt and the job is to shape it. Asserted off the wire in both
+directions — no thinking cap and 4096 by name, the cap back on from a source —
+because that distinction is the whole of why one file holds two calls.
+
+**IT MAY SAY IT DOES NOT KNOW, AND THE SCHEMA REQUIRES THE FLAG** rather than
+inferring it from empty fields: a library of eighty real frameworks is exactly
+where a plausible invention does the most damage, because it is quoted to a
+client under Forefront's name. **The decline's sentence is the MODEL'S here**,
+and it is the one place in this platform where it is — §125's rule is that a
+decline must not read as an answer, and this decline IS the useful thing: which
+framework it does not know, in its own words, is what tells the admin whether to
+paste the source or check the spelling. **A section it invented is dropped**
+(the eight are fixed, decision 1) and **the name falls back to what was typed**,
+because a draft with no name cannot be saved at all.
+
+**NOTHING IS SAVED UNREVIEWED, and that is decision 3 rather than caution**:
+`draft` writes nothing and `save` is the press, counted before and after in the
+check. Adding is an admin's, asked on the server and asked AGAIN at press time
+(§48.2) — the flag that drew the button was computed when the page was drawn and
+a seat can move in between. The slug is minted from the name by the dataset's own
+rule, UNIQUE in the database, and **a collision is refused BY NAME** (§87): the
+same tool under a second author's name genuinely wants one address, and the
+person needs to know which row is in the way rather than that one is.
+
+**ASKING IS `memory-ask.ts`'s SHAPE, DELIBERATELY** (§53.5), with the corpus the
+**five deciding fields** — at eighty frameworks the nine would be some 140 KB in
+one prompt, and the failure a prompt cut in half produces is the bad kind.
+Sources are resolved against what was SENT and never trusted as written (§96.2),
+because the page makes each one a door and an unresolved id sends somebody to a
+404. **The decline here is the PRODUCT'S words** and differs for the one person
+who can act on it: a consultant is told to ask the office, an admin is told they
+can add it, and only the admin is drawn the door — which is the third way in, and
+why the page carries two add buttons rather than three.
+
+**WHAT THE CHECKS FOUND, and none of it by reading.** The filter set
+`row.hidden = true` and the rows STAYED ON SCREEN, because `.fwrow{display:block}`
+beats the browser's own `[hidden]` rule — the count read *"12 of 80"* over eighty
+visible rows, which is the worst shape a filter takes because it looks like it
+worked; measured rather than reasoned about (§93.11), and every assertion in that
+file now asks what is VISIBLE. **And the `no-corpus` switch was weaker than its
+own comment said**: `assistant.cjs` falls back to building a corpus out of `kb`
+when `corpusText` is empty, and `kb` here is nothing but the ids — so the break
+sends eighty bare ids rather than nothing at all, which made *"every framework is
+in the prompt, by id"* TRUE of the broken build (§113.8). It asks for the NAME
+now, the break goes 1 red → 2, and the comment says what the code does (§104.8).
+
+**`draft-writes` IS NOT SHIPPED AS A SWITCH AND THAT IS THE DECISION.** The other
+six flip one token of a real decision; this one would have meant adding a write
+path to `draft` that the product otherwise has not got — a fake in the product to
+serve a check. Falsified from the SOURCE instead (§276): an INSERT put into
+`draft`, run, **1 red** printing `81 → 82`, reverted, green.
+
+**AND `canAdd` WAS CLAIMED IN THE TASKS FILE AND NEVER BUILT** until the door
+needed it — §104.8 in my own record, corrected there rather than quietly.
+
+**ONE THING THE SIGNED-OFF MOCKUP DREW IS NOT BUILT, recorded rather than
+glossed**: its answer gave each cited framework a sentence written about THAT
+question, and the build draws the framework's own **Purpose** there instead.
+`plan.md` had already chosen — it says this ask is `memory-ask.ts`'s shape 1:1
+and lists its three differences, and a per-source sentence is a fourth field in
+the answer's shape and is not among them. One line to reverse: its own schema
+through `askJson`, which this section added for exactly that.
+
+**RECORDED, NOT DONE**: the SMS repository's Resources module is still unread
+(spec 051 — it is a **client-facing** module and a different piece of work, and
+this session could not reach that repository at all); editing an existing
+framework has a rule but no screen; and nothing keeps what an entry said before
+it was edited.
+
+**Verified**: `checks/frameworks.mjs` 90/0 driving the REAL handler against a
+real Postgres inside one transaction that rolls back, red six ways
+(`client-reads`, `alphabetical`, `short-library`, `no-admin-gate`,
+`think-capped`, `no-corpus`); `checks/frameworks-page.mjs` 64/0 in a real
+browser against the built app, red two ways; `checks/assistant-defaults.mjs`
+10/0, red three; the whole `smp-app` sweep green on the merged result; `next
+build` and a COLD `tsc` clean. **No `sw.js` bump, and the reason is measured
+rather than assumed**: §91's trigger is the frozen built file's bytes changing,
+nothing here touches `SMP-Project-Folder/`, and the merged frozen build is
+byte-identical to main's own. **No forced sign-out** (§316): this changes no
+authoriser, no change list and nothing a save writes.
+
+**STILL OWED, and it is the half no check here can stand in for**: what a real
+provider actually drafts, and whether the answers are any good. Every drafting
+and asking assertion is made against a stub, which is what makes the wire
+readable and is exactly what the two stop points exist to cover (§113.8).

@@ -167,17 +167,24 @@ proved, so a regression there cannot be confused with a new feature's noise.
 
 ## Before the merge
 
-- [ ] `node smp-app/checks/frameworks.mjs` — green, and every `SMP_BREAK`
-  switch proved red.
-- [ ] `node smp-app/checks/memory-boundary.mjs` — the two platform-table lists.
-- [ ] `node smp-app/checks/generated-in-step.mjs` — all clear.
-- [ ] The memory's own checks, the door, state, shell — a new platform table and
-  a changed `assistant.cjs` are exactly what would disturb them.
-- [ ] `npx tsc --noEmit` **with the cache removed first** — `npm run typecheck`,
-  never a cached run (§320.5a).
-- [ ] **No `sw.js` bump.** §91's trigger is the *frozen built file's* bytes
-  changing, and nothing here touches `SMP-Project-Folder/`. Said rather than
-  left as a habit.
-- [ ] The what-to-check note for Islam: one line per screen, in the words of the
-  navigation.
-- [ ] **`main` is his call, on that merge.**
+- [x] `node smp-app/checks/frameworks.mjs` — **90/0**, six switches proved red.
+- [x] `node smp-app/checks/memory-boundary.mjs` — **14/0**, the two lists agree.
+- [x] `node smp-app/checks/generated-in-step.mjs` — all clear, after the merge and a rebuild.
+- [x] The memory's own checks, the door, state, shell — **the whole `smp-app`
+  sweep, green on the merged result**. The one failure, `modules`, fails
+  identically on `origin/main` itself (61 ok, 1 failed, the same sentence), so
+  it arrives with the merge rather than from this work (§303).
+- [x] `npm run typecheck` — clean, cache removed first (§320.5a).
+- [x] **No `sw.js` bump, and it is MEASURED rather than assumed.** §91's trigger
+  is the frozen built file's bytes changing; nothing here touches
+  `SMP-Project-Folder/`, and `build.py` on the merged tree produces a file
+  **byte-identical to `origin/main`'s own build** (4322309 both). The shipped
+  `v3.22` file is 1722 bytes out of step with its own sources — **on main too**,
+  measured in a worktree, so it is main's state and not this merge's to change.
+- [x] The what-to-check note for Islam: one line per screen.
+- [x] **The decisions document** — §348, appended in the merge commit (A7/A8).
+- [x] **Renumbered before the merge**: main took 049, 050 and migration 008 while
+  this was in flight, so the specs became 051 and 052 and the migrations 009 and
+  010 — done on the branch alone, which is what makes the scope provable
+  (§264.3, §336.1).
+- [x] **`main` is his call, on that merge** — given 2026-09-14: *"mrege to main"*.

@@ -7176,6 +7176,73 @@ th .subhd { font-weight:400; }
    than pushing the quarter marks off the end — and `min-width:0` on the select
    or a flex item refuses to shrink below its own content and does the pushing
    anyway (§100.5's rule, one box in). */
+/* ── A BREAKDOWN'S COLUMN HEAD IS THREE CONTROLS IN ONE CELL (§343.10) ──
+   Islam, of the pen: *"the table is messed up not fitting in the box."*
+
+   MEASURED BEFORE ANYTHING WAS CHANGED, and it is worse than it looks: with
+   one column the table wants **1851px in a 1285px box** at a 1600 window —
+   **566px past its own edge** (§158, *fit, never "and it scrolls"*). The
+   column's head is 660px holding a 633px name box, a 633px direction picker
+   and a 20px ×, which is 1286px of controls in a 660px cell; so the picker
+   starts beyond the table's right edge and the × ends 566px past it. The
+   sliver of `≥` and the jammed `+` in his screenshot are those two controls
+   being CLIPPED, not two controls drawn small.
+
+   THE CAUSE IS ONE DECLARATION MEETING THREE CONTROLS. `.fld` is
+   `width:100%` (§110.8, and rightly — it is what stops an open row growing
+   the register's table), so EACH of the two boxes claims the whole cell and
+   a table with no width hints sizes itself to the sum.
+
+   AND IT IS WORST WITH ONE COLUMN, which reads backwards until the cause is
+   the one above: a single column's head gets the whole free width, so both
+   boxes claim 633px each — three columns share it and each pair claims 293,
+   so the SAME table is **566px over at one column and 264 at three**. The
+   check's fixture builds three, so its falsification prints the smaller
+   number; the screenshot was the larger one.
+
+   A FLEX ROW, WITH ONLY THE NAME GROWING. The name is the elastic thing —
+   it is prose somebody types — and the direction picker and the × are the
+   size they are. `min-width:0` on the row's children or a flex item refuses
+   to shrink below its own content and does the pushing anyway (§100.5's
+   rule, the same one `.tacfold` two blocks down already pays).
+
+   AND THE PICKER IS THE TACTIC TABLE'S OWN WIDTH (`--tw`, §248): a select
+   showing `≥`, `≤` or `—` needs no more room here than one showing a target's
+   unit does two tables up, and a second number for the same job is how two
+   controls come to be almost the same width for no reason (§53.5). */
+.bdhead { display:flex; align-items:center; gap:6px; min-width:0; }
+.bdhead > * { min-width:0; }
+.bdhead > input.fld { flex:1 1 auto; }
+.bdhead > select.fld { flex:0 0 auto; width:var(--tw); }
+.bdhead > .xbtn { flex:0 0 auto; color:var(--panel-quiet); }  /* ink: §343.11 below */
+/* The table's own name, in the head of the column it belongs to — it grows
+   with the cell rather than claiming it, for the same reason. */
+.bdname { width:100%; min-width:0; }
+/* The `+` is a control and not a heading, so it takes the width of one
+   rather than a share of the table (§37: a fixed-layout table reads every
+   width off its first row, and an auto one reads it off the widest cell). */
+.bdadd { width:1%; white-space:nowrap; text-align:center; }
+/* §343.11: A CONTROL ON THE BAND TAKES THE BAND'S OWN INK, and this one did
+   not. `.linkbu` is `--stone`, which in the house light palette is `#16325C`
+   — BYTE-IDENTICAL to `--panel`, the navy this head is painted in — so the
+   ONE control that adds a column was drawn at 1.00:1 against its own ground
+   and could not be seen at all, with the × beside it at 2.41. §61's trap by
+   way of §38.4 (eighth time), and §259's own case exactly: that section
+   measured *Opportunities* drawn in `--panel` on `--panel` and recorded the
+   same 1.00.
+
+   NO NEW COLOUR (§25). The three inks for this ground already exist and are
+   §259's: `--panel-accent` for the control that ACTS, `--panel-quiet` for the
+   one that removes — 7.66 and 7.24 measured light, against 1.00 and 2.41.
+
+   SCOPED TO THE BAND, or it reaches the wrong thing: the body's own
+   `Add a row` sits on a PALE ground where `--stone` reads 12.77 and is right
+   where it is. And dark was already clear (7.37 / 6.44), which is half of why
+   nothing saw this — the other half being that no pillar in the worked example
+   carries a breakdown, so no sweep has ever walked this band (§255). */
+.bdadd > .linkbu { color:var(--panel-accent); font-weight:700; }
+.bdadd > .linkbu:hover, .bdhead > .xbtn:hover { color:var(--panel-ink); }
+
 .tacfold { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 16px;
            margin-top:10px; }
 .tacfold > * { min-width:0; }

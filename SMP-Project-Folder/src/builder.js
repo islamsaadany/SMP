@@ -200,7 +200,7 @@ function builderBandHtml(tabKey, secOf){
 function builderChooserHtml(){
   var side = (BCHOOSE && BCHOOSE.side) || "units";
   var seg = '<div class="bseg">' +
-    '<button data-bside="units" aria-pressed="' + (side === "units") + '">Business units</button>' +
+    '<button data-bside="units" aria-pressed="' + (side === "units") + '">' + L("unitword","bu") + '</button>' +
     '<button data-bside="fns" aria-pressed="' + (side === "fns") + '">Supporting functions</button></div>';
 
   var rows = (side === "units"

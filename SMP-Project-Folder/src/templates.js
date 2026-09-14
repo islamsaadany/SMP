@@ -342,6 +342,10 @@ function mintPlanIds(u, rows){
     map[r.id] = id; r.id = id;
   });
   rows.forEach(function(r){
+    /* §343: a breakdown's cells hang off a pillar exactly as a measure does,
+       and carry no id of their own — the table is assembled from them and its
+       row ids are minted there (§22). */
+    if (r.type === "BDCELL") { r.parent_id = map[r.parent_id] || ""; r.id = ""; }
     if (r.type === "MEASURE" || r.type === "TACTIC") {
       var pid = map[r.parent_id] || "";
       r.parent_id = pid;
@@ -383,7 +387,7 @@ function validatePlan(u, rows){
         problems.push({ at:at, msg:'kind "' + k + '" is not Direction or Capability' });
       if (!r.theme) notices.push({ at:at, msg:"no theme \u2014 will read as cross-cutting" });
     }
-    if (r.type === "MEASURE" || r.type === "TACTIC") {
+    if (r.type === "MEASURE" || r.type === "TACTIC" || r.type === "BDCELL") {
       if (!r.parent_id)
         problems.push({ at:at, msg: pillars.length
           ? "its pillar could not be matched \u2014 choose one from the Pillar column"
@@ -524,8 +528,32 @@ function diffProgress(u, rows){
        and whose note is owed had nothing for the file to carry. */
     var hasNote = (r.new_note || "") !== "";
     if (!r.id || (!hasVal && !hasNote)) return;
-    var hit = findById(u, r.id);
+    /* §343: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
+       That pair is what identifies a cell (§48) — the row alone is three
+       figures sharing one id, and the reader could not tell which one a
+       number was meant for. Split here rather than inside `findById`, which
+       resolves ROWS and must not learn a second kind of address. */
+    var bdSplit = String(r.id).split("|");
+    var hit = findById(u, bdSplit[0]);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+    if (hit.kind === "BDROW") {
+      var bcol = SMPRules.bdCols(hit.pillar).filter(function(c){
+        return c.id === bdSplit[1]; })[0];
+      /* A column that has GONE since the file was downloaded is named rather
+         than applied to the wrong one (§87's rule: never guess an identity). */
+      if (!bcol) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+      var bWas = SMPRules.bdActual(hit.obj, bcol);
+      var bNow = hasVal ? r.new_value : bWas;
+      var bWasN = hit.obj.note == null ? "" : String(hit.obj.note);
+      var bNowN = hasNote ? String(r.new_note).trim() : bWasN;
+      if (String(bWas) === String(bNow) && bWasN === bNowN) return;
+      out.push({ id:r.id, type:"BDROW", col:bcol,
+                 name:hit.obj.name + " \u2014 " + (bcol.name || ""),
+                 pillar:hit.pillar ? hit.pillar.name : (r.parent_name || ""),
+                 was:bWas, now:bNow,
+                 note:hasNote ? bNowN : null, status:"changed", hit:hit });
+      return;
+    }
     if (["MEASURE","TACTIC","OBJECTIVE"].indexOf(hit.kind) < 0) return;
     /* §303: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
        FIGURE (§248), which the screen has stored in `outActual` since that
@@ -607,6 +635,32 @@ function createFromPlan(u, d){
       if (tMon) tRow.outMonthly = tMon;
       if (+x.hidden) tRow.hide = true;
       p2.tactics.push(tRow);
+      made++;
+    } else if (x.type === "BDCELL") {
+      /* ── §343: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
+         The sheet is long form — a line per cell naming its pillar, its
+         column and its category — so the TABLE is assembled here from the
+         order the lines arrive in: first mention of a column makes the
+         column, first mention of a category makes the row. A file edited by
+         hand therefore reads the way it looks, and nothing needs an id typed
+         into a sheet (§22: the platform mints them on arrival).
+
+         AN EMPTY DIRECTION IS THE INDICATOR, kept exactly as the cell said —
+         the absence IS the signal, so defaulting it to `≥` here would make
+         every watched column a scored one on the way through the file. */
+      var p3 = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
+      if (!p3 || !x.name) return;
+      if (!p3.breakdown) p3.breakdown = { name:x.group || "Categories", cols:[], rows:[] };
+      var bd = p3.breakdown;
+      var cn = String(x.outcome || "").trim();
+      var col = bd.cols.filter(function(c){ return (c.name || "") === cn; })[0];
+      if (!col) { col = { id:"c" + (bd.cols.length + 1), name:cn,
+                          dir:x.direction || "" }; bd.cols.push(col); }
+      var bRow = bd.rows.filter(function(y){ return y.name === x.name; })[0];
+      if (!bRow) { bRow = { id:p3.id + "-B" + (bd.rows.length + 1), name:x.name };
+                   if (+x.hidden) bRow.hide = true;
+                   bd.rows.push(bRow); }
+      if (t1) bRow["t_" + col.id] = t1;
       made++;
     } else if (x.type === "NORTHSTAR") {
       /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
@@ -698,7 +752,10 @@ function planReplaceSummary(u, rows){
     replace: true,
     incoming: { pillars:countRows(rows, "PILLAR"), measures:countRows(rows, "MEASURE"),
                 tactics:countRows(rows, "TACTIC"), objectives:countRows(rows, "NORTHSTAR"),
-                swot:swot, clauses:countRows(rows, "FOUNDATION") },
+                swot:swot, clauses:countRows(rows, "FOUNDATION"),
+                /* §343: named in the summary the office agrees to BEFORE the
+                   replace happens, or fifteen targets arrive unannounced. */
+                breakdown:countRows(rows, "BDCELL") },
     current: unitSnapshotCounts(unitPlanSnapshot(u)),
     rows: rows
   };
@@ -769,6 +826,16 @@ function applyProgress(u, d){
         else if (o.actual > 0 && (o.status === "Not started" || o.status === "Done")) o.status = "WIP";
         else if (o.actual === 0 && o.status === "Done") o.status = "WIP";
       }
+    } else if (r.hit.kind === "BDROW" && r.col) {
+      /* §343: into the cell's own field, rejoined with the target's unit the
+         way every other reported figure is (§199, §243) — and an emptied one
+         DELETES the key (§50.6), or a cleared cell and one never reported
+         stop being the same thing. */
+      var bv = String(r.now == null ? "" : r.now).trim();
+      var bk = "a_" + r.col.id;
+      if (bv === "") delete r.hit.obj[bk];
+      else r.hit.obj[bk] = joinTarget(r.hit.obj[bk] || "", bv,
+        splitTarget(SMPRules.bdTarget(r.hit.obj, r.col)).unit);
     } else if (r.hit.kind === "MEASURE" || r.hit.kind === "OBJECTIVE") {
       r.hit.obj.actual = r.now;
       /* Progress is what the actual implies against the target, so it is
@@ -865,6 +932,10 @@ function capFindById(c, id){
   if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
   var hit = null;
   (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"CAPOBJECTIVE", obj:m }; });
+  /* §342: an action belongs to the holder, so it sits beside the objectives
+     rather than under a project — and without it every action reported by
+     file came back "unknown" and was set aside (§303's own finding). */
+  (c.actions || []).forEach(function(a){ if (a.id === id) hit = { kind:"ACTION", obj:a }; });
   (c.projects || []).forEach(function(p){
     if (p.id === id) hit = { kind:"PROJECT", obj:p };
     (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"DELIVERABLE", obj:d, proj:p }; });
@@ -1238,7 +1309,8 @@ function diffCapPlan(c, rows){
    children arrive with nothing reported, never at zero. */
 function createFromCapPlan(c, d){
   var news = d.rows.filter(function(r){ return r.status === "new"; });
-  var order = { CAPOBJECTIVE:0, PROJECT:0, DELIVERABLE:1, OUTCOME:1, MILESTONE:1, PLAN:9 };
+  var order = { CAPOBJECTIVE:0, ACTION:0, PROJECT:0,
+                DELIVERABLE:1, OUTCOME:1, MILESTONE:1, PLAN:9 };
   news.sort(function(a, b){ return (order[a.type] == null ? 5 : order[a.type]) -
                                    (order[b.type] == null ? 5 : order[b.type]); });
   var made = 0;
@@ -1267,6 +1339,16 @@ function createFromCapPlan(c, d){
         weight:isNaN(w) ? null : w, actual:null, progress:null };
       if (+x.hidden) cko.hide = true;
       c.keyObjectives.push(cko);
+      made++;
+    } else if (x.type === "ACTION") {
+      /* §342: the container is minted here rather than assumed — a function
+         given its first plan by file has never held the array (§50.6, §129's
+         audit: the first row is accepted on screen and written nowhere). */
+      if (!Array.isArray(c.actions)) c.actions = [];
+      var act = { id:x.id, name:x.name, owner:x.owner || "",
+                  due:x.finish || "", status:null };
+      if (+x.hidden) act.hide = true;
+      c.actions.push(act);
       made++;
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
@@ -1344,7 +1426,10 @@ function diffCapProgress(c, rows){
     var hit = capFindById(c, r.id);
     if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
     var was, now = String(r.new_value == null ? "" : r.new_value).trim();
-    var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE";
+    /* §342: an ACTION is a status row too — the same three words a milestone
+       answers in, and the same required per-cent (§300, §104.10). */
+    var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE" ||
+                      hit.kind === "ACTION";
     if (isStatusRow) {
       /* §303: A DELIVERABLE IS A STATUS, exactly as a milestone is. It read
          `hit.obj.actual` and `hit.obj.kind` — both removed by §104/§53.4 —
@@ -1384,7 +1469,8 @@ function applyCapProgress(c, d){
   d.rows.forEach(function(r){
     if (!r.hit || r.status !== "changed") return;
     var o = r.hit.obj;
-    if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE") {
+    if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE" ||
+        r.hit.kind === "ACTION") {          /* §342 */
       /* §303: BOTH WRITE `status` AND `pct`, through the same pair the
          screen's own handlers now ask (§53.5) — so a file that says In
          progress leaves the row In progress with its per-cent set, which is

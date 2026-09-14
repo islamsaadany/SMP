@@ -1196,12 +1196,15 @@
     { k:"client", key:"The client",       label:"The client",     q:"Which client are you setting up?" },
     { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
     { k:"cos",    key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
-    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?", later:1 },
+    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?" },
     { k:"fns",    key:"Strategy",         label:"Functions",      q:"What supporting functions are there?" },
     { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" },
     { k:"done",   key:"Done",             label:"Summary",        q:"" }
   ];
+  /* The steps the shape guard speaks for, named once rather than tested as
+     four keys at the two places that ask (§104.7). */
+  var SHAPE_STEPS = ["units", "cos", "caps", "fns", "words"];
   function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
 
   /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own
@@ -1233,11 +1236,26 @@
     for (var i = 0; i < SIZES.length; i++) if (SIZES[i][0] === v) return SIZES[i][1] + " · " + SIZES[i][2] + " people";
     return "Not set";
   }
-  /* THE TWO PLAN TYPES THE PLATFORM HAS, and the one it does not — drawn and
-     dulled, Islam's own instruction, so the intended shape stays visible and
-     nothing offers a choice that would open an empty page (§61). */
-  var FORMATS = [["pillars","Pillars",1], ["projects","Capabilities & projects",1],
-                 ["objectives","Objectives & actions",0]];
+  /* THE THREE PLAN TYPES THE PLATFORM HAS (§342). Two of them were live and
+     the third was drawn and DULLED at Islam's own instruction — *"keep the
+     mockup as is but kepe the non existing parts dull for now"* — so the
+     intended shape stayed visible and nothing offered a choice that would
+     open an empty page (§61). *For now* has run out: objectives and actions
+     is built, so the dull flag goes and the sentence that explained it goes
+     with it rather than being left to mislead (§104.8). */
+  /* §347: THE MIDDLE OPTION IS "Projects", WHICH IS WHAT IT NOW MEANS. A
+     supporting function needed a capability to hold any project until §334;
+     since then it holds its own directly, so "Capabilities & projects" named
+     the old arrangement — and it was a THIRD spelling of a word planFormatCell
+     and capFormatCell both already write as Projects (§53.5). Only the word
+     changes: a function set either way draws exactly the pages it did. */
+  var FORMATS = [["pillars","Pillars",1], ["projects","Projects",1],
+                 ["objectives","Objectives & actions",1]];
+  /* A CAPABILITY HAS TWO FORMS, NOT THREE — objectives and actions is a
+     FUNCTION's way of planning (§342), and capFormat() reads a capability as
+     pillars or projects and nothing else. Offering the third here would be a
+     control whose answer the graph turns into something else (§61). */
+  var CAP_FORMATS = [["pillars","Pillars"], ["projects","Projects"]];
   function fmtWord(f){ return f === "objectives" ? "obj" : f === "projects" ? "proj" : "pillars"; }
 
   /* The flow's own state: which client, which step, what has been answered,
@@ -1249,9 +1267,9 @@
 
   function drawSetup(key){
     if (!key) {
-      S = { key:null, at:0, seen:[], canEdit:true, dirty:false, shapeDirty:false,
+      S = { key:null, at:0, seen:[], canEdit:true, canShape:true, dirty:false, shapeDirty:false,
             client:{ name:"", industry:"", size:"", notes:"", mark:null },
-            shape:{ companies:[], units:[], functions:[], words:{} },
+            shape:{ companies:[], units:[], functions:[], capabilities:[], words:{} },
             team:[], office:[], register:[], seats:null, holds:null,
             archived:false, archivedAt:null, archivedBy:null,
             canArchive:false, canDelete:false, goes:null,
@@ -1281,7 +1299,21 @@
       S.shape.companies = S.shape.companies || [];
       S.shape.units = S.shape.units || [];
       S.shape.functions = S.shape.functions || [];
+      S.shape.capabilities = S.shape.capabilities || [];
       S.shape.words = S.shape.words || {};
+      /* ── AND THE SHAPE STOPS BEING EDITABLE ONCE THERE IS A PLAN (§346) ──
+         shapeClient has refused a re-shape since §322 — rightly, because the
+         answers ARE the list and replacing them on a client with authored
+         work is how real work is lost — and the flow was TOLD so, storing
+         `holds` from the server and reading it nowhere. So the units, the
+         companies, the functions and the words stayed fully editable and the
+         refusal arrived on Next, which is §42's drift with the screen saying
+         yes and the save saying no.
+
+         Its own flag, never `canEdit`: what is frozen is the SHAPE, and the
+         client's name, its mark, its modules and its team are all still the
+         consultant's to change on a client that is running. */
+      S.canShape = S.canEdit && !((j.holds && j.holds.plans) || (j.holds && j.holds.capabilities));
       paintSetup();
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
@@ -1295,7 +1327,13 @@
      refusal is SAID rather than swallowed — the shape's refusal is the one
      that matters (a client with a plan in it is not re-shaped, §322). */
   function commitSetup(){
-    if (!S || !S.key || !S.canEdit) return Promise.resolve(true);
+    /* The doors — Save and close, and the summary's two — do not go through
+       goStep, so the guard is asked here too rather than at three call sites
+       (§53.5). It refuses BEFORE posting: a blank row is not a server error. */
+    if (!S) return Promise.resolve(true);
+    var blank = unnamed();
+    if (blank) { setupSay(blank, true); return Promise.resolve(false); }
+    if (!S.key || !S.canEdit) return Promise.resolve(true);
     var chain = Promise.resolve(true);
     if (S.dirty) {
       var b = { action:"saveClient", key:S.key, name:S.client.name,
@@ -1332,8 +1370,40 @@
     n.hidden = !msg;
   }
 
+  /* ONE ANSWER TO WHICH STEP IS NEXT, IN EITHER DIRECTION (§346, §53.5).
+     Next stepped over the dulled Capabilities step and Back did not, so Back
+     from Functions called goStep on a step goStep refuses to open and simply
+     returned — an enabled, pressable button that did nothing (§96). The rail
+     still reached Companies, so nothing was unreachable and nothing said so.
+     It walks past a RUN of dulled steps rather than exactly one, because
+     "+1 if the next one is later" is the same fault waiting for a second. */
+  function stepFrom(i, dir){
+    var n = i + dir;
+    while (n >= 0 && n < STEPS.length && STEPS[n].later) n += dir;
+    return (n < 0 || n > STEPS.length - 1) ? -1 : n;
+  }
+
+  /* AND A ROW LEFT UNNAMED IS REFUSED RATHER THAN DROPPED (§346). The minter
+     skips a blank name, so the row was posted, silently thrown away, and left
+     drawn on screen until the client was reopened — §96 with the sign
+     reversed. Islam: "refuse to move on without naming or remove." Asked of
+     the SHAPE and not of the boxes, so it answers the same however the step
+     was left; the × beside each row is the other half of the sentence. */
+  function unnamed(){
+    var bad = [];
+    if (S.shape.units.some(function (u) { return !String(u.name || "").trim(); })) bad.push("a business unit");
+    if (S.shape.companies.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a company");
+    if (S.shape.functions.some(function (f) { return !String(f.name || "").trim(); })) bad.push("a supporting function");
+    if (S.shape.capabilities.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a capability");
+    if (!bad.length) return null;
+    return "Name " + bad.join(" and ") + ", or remove the empty row with the × beside it. " +
+           "A row with no name is not saved.";
+  }
+
   function goStep(i){
     if (i < 0 || i > STEPS.length - 1 || STEPS[i].later) return;
+    var why = unnamed();
+    if (why) { setupSay(why, true); return; }
     if (S.seen.indexOf(S.at) < 0) S.seen.push(S.at);
     commitSetup().then(function () { S.at = i; paintSetup(); window.scrollTo({ top:0 }); });
   }
@@ -1391,6 +1461,26 @@
       page.appendChild(ab);
     }
 
+    /* ── AND A CLIENT WITH A PLAN IN IT SAYS SO, ON THE STEPS IT AFFECTS
+       (§346). The same shape as the archived band above and the same reason
+       (§45.2, §53.5) — the fields below are read-only and a form refusing
+       every keystroke with nothing saying why reads as broken. Drawn on the
+       four SHAPE steps alone, because the client's name, its mark, its
+       modules and its team are all still editable on the others, and a band
+       claiming otherwise would be a second thing that is not true (§124).
+       Never beside the archived band: that one already says nothing here can
+       be changed, and saying it twice in two voices is §87's twins. */
+    if (!S.archived && S.key && !S.canShape && SHAPE_STEPS.indexOf(s.k) > -1) {
+      var hb = el("div", "wzarched");
+      hb.appendChild(document.createTextNode("This client has a plan in it, so its "));
+      hb.appendChild(el("b", null, "shape is set from here on"));
+      hb.appendChild(document.createTextNode(
+        ". Set-up rewrites these lists, which would lose that work, so they are " +
+        "read-only out here — change them on the client's own Setup pages. " +
+        "Everything else on this flow is still yours to change."));
+      page.appendChild(hb);
+    }
+
     var grid = el("div", "wzgrid");
     var col = el("div");
     col.appendChild(el("span", "lab", s.key));
@@ -1409,15 +1499,15 @@
 
     var foot = el("div", "wzfoot");
     var back = el("button", "btn", "Back");
-    back.type = "button"; back.disabled = S.at === 0;
-    back.addEventListener("click", function () { goStep(S.at - 1); });
+    back.type = "button"; back.disabled = stepFrom(S.at, -1) < 0;
+    back.addEventListener("click", function () { goStep(stepFrom(S.at, -1)); });
     foot.appendChild(back);
     if (S.at < STEPS.length - 1) {
       var next = el("button", "btn amber", "Next");
       next.type = "button";
       next.addEventListener("click", function () {
         if (!S.key) { createThenGo(); return; }
-        goStep(S.at + 1 + (STEPS[S.at + 1] && STEPS[S.at + 1].later ? 1 : 0));
+        goStep(stepFrom(S.at, 1));
       });
       foot.appendChild(next);
     }
@@ -1478,6 +1568,12 @@
     sw.appendChild(s1); sw.appendChild(s2);
     a.appendChild(sw);
     a.appendChild(chipBlock("Business units", S.shape.units, "unit", "None — this client can open blank."));
+    /* §347: beside the units on the strategic side, which is where they sit in
+       the navigation — so the panel reads as the thing being built rather than
+       as a list of answers (§322's own argument for the switch above it). */
+    if (S.at >= stepIdx("caps") && S.shape.capabilities.length) {
+      a.appendChild(chipBlock("Capabilities", S.shape.capabilities, "unit", "None."));
+    }
     if (S.at >= stepIdx("fns")) a.appendChild(chipBlock("Supporting functions", S.shape.functions, "fn", "None."));
     return a;
   }
@@ -1491,7 +1587,7 @@
     var chips = el("div", "wzchips");
     list.forEach(function (x) {
       var c = el("span", "wzchip " + cls, x.name);
-      if (cls === "fn") c.appendChild(el("span", "fmt", fmtWord(x.format)));
+      if (x.format) c.appendChild(el("span", "fmt", fmtWord(x.format)));
       chips.appendChild(c);
     });
     d.appendChild(chips);
@@ -2036,7 +2132,7 @@
         var r = el("div", "wzrow");
         var nm = el("input", "fld");
         nm.type = "text"; nm.value = row.name;
-        if (!S.canEdit) nm.readOnly = true;
+        if (!S.canShape) nm.readOnly = true;
         nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
         r.appendChild(nm);
         if (kind === "fn") {
@@ -2050,12 +2146,12 @@
             if (row.format === f[0]) o.selected = true;
             sel.appendChild(o);
           });
-          if (!S.canEdit) sel.disabled = true;
+          if (!S.canShape) sel.disabled = true;
           sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; paintSetup(); });
           tail.appendChild(sel);
           r.appendChild(tail);
         }
-        if (S.canEdit) {
+        if (S.canShape) {
           var x = el("button", "wzx", "×");
           x.type = "button";
           x.setAttribute("aria-label", "Remove " + row.name);
@@ -2066,7 +2162,7 @@
       });
       box.appendChild(rows);
     }
-    if (S.canEdit) {
+    if (S.canShape) {
       var add = el("button", "wzadd", kind === "unit" ? "+ Add a business unit" : "+ Add a supporting function");
       add.type = "button";
       add.addEventListener("click", function () {
@@ -2094,12 +2190,12 @@
       .forEach(function (c) {
         var b = el("button", "wzchoice");
         b.type = "button";
-        b.disabled = !S.canEdit;            /* as the size band, and for the same reason */
+        b.disabled = !S.canShape;            /* as the size band, and for the same reason */
         b.setAttribute("aria-pressed", c[0] === has ? "true" : "false");
         b.appendChild(el("span", "cname", c[1]));
         b.appendChild(el("span", "cwhy", c[2]));
         b.addEventListener("click", function () {
-          if (!S.canEdit) return;
+          if (!S.canShape) return;
           if (!c[0]) { S.shape.companies = []; S.shape.units.forEach(function (u) { u.company = ""; }); }
           else if (!S.shape.companies.length) S.shape.companies.push({ name:"" });
           S.shapeDirty = true;
@@ -2116,9 +2212,11 @@
       var nm = el("input", "fld");
       nm.type = "text"; nm.value = co.name;
       nm.setAttribute("placeholder", "The company's name");
+      if (!S.canShape) nm.readOnly = true;
       nm.addEventListener("input", function () { co.name = nm.value; S.shapeDirty = true; });
       r.appendChild(nm);
       var x = el("button", "wzx", "×");
+      x.disabled = !S.canShape;
       x.type = "button"; x.setAttribute("aria-label", "Remove");
       x.addEventListener("click", function () {
         var gone = co.name;
@@ -2132,6 +2230,7 @@
     box.appendChild(rows);
     var add = el("button", "wzadd", "+ Add a company");
     add.type = "button";
+    add.disabled = !S.canShape;
     add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); S.shapeDirty = true; paintSetup(); });
     box.appendChild(add);
 
@@ -2153,6 +2252,7 @@
           if (u.company === co.name) o.selected = true;
           sel.appendChild(o);
         });
+        sel.disabled = !S.canShape;
         sel.addEventListener("change", function () { u.company = sel.value; S.shapeDirty = true; });
         tail.appendChild(sel);
         r.appendChild(tail);
@@ -2163,23 +2263,104 @@
     return box;
   }
 
-  /* DRAWN AND DULLED, and it says which half is dulled: capabilities are
-     LIVE in the platform — held by a function that plans in Capabilities &
-     projects, which the Functions step offers — and what does not exist is a
-     capability standing on its own beside the business units. */
+  /* ── A CAPABILITY IS A ROW YOU ADD, LIKE THE OTHERS (§347) ───────────
+     This step was dulled and said the thing it asks for does not exist.
+     It does: spec 049 built a capability as its own entry on the strategic
+     side of the navigation, beside the business units, carried by a
+     supporting function and planning its own way (§341, §343). So the step
+     stops describing a platform two builds ago and starts writing one.
+
+     THREE QUESTIONS PER ROW, AND THEY ARE SETUP'S OWN THREE — a name, which
+     function carries it, and how it is planned. Setup › Capabilities asks
+     exactly those and offers EVERY function as a holder with no filter on
+     how that function itself plans, so this is the same row in a different
+     place rather than a second answer to what a capability is (§53.5).
+
+     THE HOLDER IS A NAME, not a key: the flow's rows carry no keys, and a
+     function one step back is only a name here. Unassigned is a real answer
+     the Setup page already draws, so it leads the list rather than being
+     refused. */
   function capsStep(box){
+    if (!S.shape.capabilities.length) {
+      box.appendChild(el("p", "wzempty", "No capabilities yet."));
+    } else {
+      var rows = el("div", "wzrows");
+      S.shape.capabilities.forEach(function (cp, n) {
+        var r = el("div", "wzrow");
+        var nm = el("input", "fld");
+        nm.type = "text"; nm.value = cp.name;
+        nm.setAttribute("aria-label", "Capability name");
+        if (!S.canShape) nm.readOnly = true;
+        nm.addEventListener("input", function () { cp.name = nm.value; S.shapeDirty = true; });
+        r.appendChild(nm);
+
+        var tail = el("span", "wzrt");
+        tail.appendChild(el("span", "wzsub", "carried by"));
+        var who = el("select", "fld");
+        who.setAttribute("aria-label", "Which function carries " + (cp.name || "this capability"));
+        var none = el("option", null, "\u2014 unassigned \u2014");
+        none.value = "";
+        who.appendChild(none);
+        S.shape.functions.forEach(function (f) {
+          if (!f.name) return;
+          var o = el("option", null, f.name);
+          o.value = f.name;
+          if (cp.fn === f.name) o.selected = true;
+          who.appendChild(o);
+        });
+        who.disabled = !S.canShape;
+        who.addEventListener("change", function () { cp.fn = who.value; S.shapeDirty = true; });
+        tail.appendChild(who);
+
+        tail.appendChild(el("span", "wzsub", "plans in"));
+        var how = el("select", "fld");
+        how.setAttribute("aria-label", "How " + (cp.name || "this capability") + " is planned");
+        CAP_FORMATS.forEach(function (f) {
+          var o = el("option", null, f[1]);
+          o.value = f[0];
+          if (cp.format === f[0]) o.selected = true;
+          how.appendChild(o);
+        });
+        how.disabled = !S.canShape;
+        how.addEventListener("change", function () { cp.format = how.value; S.shapeDirty = true; });
+        tail.appendChild(how);
+        r.appendChild(tail);
+
+        if (S.canShape) {
+          var x = el("button", "wzx", "\u00d7");
+          x.type = "button";
+          x.setAttribute("aria-label", "Remove " + cp.name);
+          x.addEventListener("click", function () {
+            S.shape.capabilities.splice(n, 1); S.shapeDirty = true; paintSetup();
+          });
+          r.appendChild(x);
+        }
+        rows.appendChild(r);
+      });
+      box.appendChild(rows);
+    }
+    if (S.canShape) {
+      var add = el("button", "wzadd", "+ Add a capability");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        S.shape.capabilities.push({ name:"", fn:"", format:"projects" });
+        S.shapeDirty = true;
+        paintSetup();
+        /* THE NAME BOX, not the last .fld: a capability's row ends in two
+           SELECTS, so the pattern copied from listStep — whose rows end in
+           one — landed the cursor on the plans-in picker. */
+        var boxes = document.querySelectorAll(".wzrow input.fld");
+        if (boxes.length) boxes[boxes.length - 1].focus();
+      });
+      box.appendChild(add);
+    }
     box.appendChild(el("p", "wzwhy",
-      "A capability is strategic work sitting beside the business units, planned in pillars and owned by a function head."));
-    var l = el("div", "wzlaterline");
-    l.appendChild(el("b", null, "Not this step — a build of its own. "));
-    l.appendChild(document.createTextNode(
-      "Capabilities are live in the platform, but they are held by a function that plans in " +
-      "Capabilities & projects — set that on the Functions step and they work today. What does not " +
-      "exist is a capability standing on its own beside the business units, which is what this step " +
-      "asks for."));
-    box.appendChild(l);
+      "A capability appears on the strategic side of the navigation, beside the " +
+      "business units, with pages of its own. Its code is made from its name, and " +
+      "how it plans stays changeable until it has a plan in it."));
     return box;
   }
+
 
   /* THE WORDS THE CLIENT USES, and only the ones it has: nothing here asks
      what a client calls a thing the client does not have. */
@@ -2206,7 +2387,7 @@
       var i = el("input", "fld");
       i.type = "text";
       i.value = S.shape.words[w[0]] != null ? S.shape.words[w[0]] : w[2];
-      if (!S.canEdit) i.readOnly = true;
+      if (!S.canShape) i.readOnly = true;
       i.addEventListener("input", function () { S.shape.words[w[0]] = i.value; S.shapeDirty = true; });
       c2.appendChild(i); tr.appendChild(c2);
       tr.appendChild(el("td", "muted", w[3]));
@@ -2301,6 +2482,10 @@
       ["Companies", S.shape.companies.length
         ? S.shape.companies.map(function (c) { return c.name || "(unnamed)"; }).join(" · ")
         : "None — units sit under " + (S.client.name || "the client"), "cos"],
+      ["Capabilities", S.shape.capabilities.length
+        ? S.shape.capabilities.map(function (c) {
+            return (c.name || "(unnamed)") + (c.fn ? " (" + c.fn + ")" : " (unassigned)"); }).join(" · ")
+        : "None", "caps"],
       ["Supporting functions", S.shape.functions.length
         ? S.shape.functions.map(function (f) { return f.name + " (" + fmtWord(f.format) + ")"; }).join(" · ")
         : "None yet", "fns"],

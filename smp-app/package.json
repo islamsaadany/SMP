@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check:setup": "node checks/setup-shape.mjs",
+    "check:setup:red": "for b in no-carry no-dropped keep-weights extra-word no-caps count-any-cap; do node checks/setup-shape.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "dev": "next dev",
     "build": "prisma generate && node scripts/sync-css.mjs && node scripts/sync-static.mjs && node scripts/build-shell.mjs && node scripts/build-sw.mjs && node scripts/deploy.mjs && next build",
     "start": "next start",

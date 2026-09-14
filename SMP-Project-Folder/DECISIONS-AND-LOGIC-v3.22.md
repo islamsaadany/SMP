@@ -47976,3 +47976,197 @@ row" assertion is unchanged, so the product cannot produce that error on any
 path a person can take. **What is NOT claimed**: it was green on main with the
 same synthetic event, so the repaint's scope depends on the data — which
 difference widened it is not established, and does not need to be.
+
+---
+
+## §354 — A MODULE IS A FOLDER THAT SERVES ITSELF (2026-09-14, spec 046)
+
+Islam, with the client's card in front of him showing three rows — Strategy,
+Insights, Trial: *"check as we now have 3 modules"*, then, of the five things
+that turned out not to have kept up, **"let's fix all"**. He took the split
+offered: the four repairs now, and the three missing screens drawn first and
+signed off before they are built (rule 1c). This is those four.
+
+**THE PART THAT WAS MEANT TO MAKE A MODULE CHEAP HELD UP, AND SAYING SO FIRST
+IS MOST OF THE AUDIT.** Insights cost one entry: its word was already reserved
+in `MODULE_DEF`, so `built: false → true` opened the door and no surface had to
+learn the word — the address, the switcher, the card and the console all ask
+that one file, nine hand-written places read it and not one keeps a copy. It
+brought its own area (`a_insights`, view or none, shipped at view) and declared
+it in that same file, and `checks/modules.mjs` had been rewritten rather than
+edited around: it works out which modules are built rather than naming them,
+and it asserts the new area is **not** in the client's carried matrix, which
+would otherwise turn `generated-in-step` red (§335).
+
+### §354.1 — THE BRANCH PASSED THE POINT ITS OWN COMMENT SAID IT WOULD
+
+The route's comment read *"it is a branch rather than a table because there are
+two of them: a third makes the table worth having"* — and there were three, with
+Insights' eight lines bolted on directly underneath that sentence. **The file
+said one thing and did another** (§104.8's family), and §345 had written down
+that this exact moment was coming, three weeks' work earlier.
+
+**THE TABLE IS `modules/registry.ts`**, and what it buys is not tidiness: a chain
+answers *what happens at this address* by being read top to bottom, so every
+module added is another edit to the route's own file — which is how the fourth
+module comes to need the route, the switcher and Setup edited for one thing
+(§53.5). A module now says how it serves itself **in its own folder**, and the
+route asks. What the route keeps is what is the route's — the door, the client,
+and which module the address names; what it stops holding is any knowledge of
+what a module draws. **A fourth module is a folder and an entry, and that file
+is not opened at all**, which the check asserts at BOTH ENDS (§94.2): the route
+dispatches through the table **and** names no module of its own, because a build
+that kept the table and left one `if (w.module === "…")` beside it is exactly the
+drift the table removes.
+
+**WHAT A MODULE IS HANDED, AND NOTHING ELSE** (spec 046 §5's first open point,
+answered as far as this seam reaches): the request, the slug, the tenant id, the
+client's name, the modules it has, and the address INSIDE the module. No pool,
+no session, no registry row — a module reaches client data through `withTenant`
+like everything else, so the tenant boundary stays the one line it has always
+been (§313, §314).
+
+**A SPINE SEGMENT IS SERVED BY THE DEFAULT MODULE** (`setup`, `tour`), which is
+where Setup is drawn today. That is **named rather than hidden**: it is the
+spine/module line still being implicit, and the day Setup is the spine's own
+document it stops arriving there.
+
+### §354.2 — A MODULE IS A FOLDER, AND ONE OF THE THREE FILES WAS NOT ITS OWN
+
+§345 §3 puts *a folder per module* as the first and cheapest isolation step, and
+Insights had arrived as three files dropped into `lib/` beside the door, the
+session and the tenant boundary — nothing in the tree saying which files were
+whose. `modules/<key>/` now holds each module's own page and its server.
+
+**AND READING CORRECTED THE PLAN BEFORE IT MOVED ANYTHING.** The first
+description of this work said *"move the Insights files"*, three of them. Their
+own headers say otherwise: `lib/library.ts` opens **"one machine, two names —
+Insights and Processes are the same catalogue with different content"**, and it
+is written from the CONSOLE as well (`lib/platform-api.ts` imports it for the
+publishing room). `lib/library-file.ts` is the same shape one layer down. So
+**one file moved and two stayed** — moving a shared catalogue into one module's
+folder would have made the folder lie, and made the spine import from inside a
+module, which is the boundary this round exists to make visible.
+
+`lib/shell.ts` stayed for the same kind of reason, stated in
+`modules/strategy/index.ts`: two things live in it and only one is Strategy's —
+`shellDocument` draws the frozen platform, and `shellHeaders` is the policy
+**every** served document wears, this module's and the other two's.
+
+### §354.3 — THE CLIENT'S COLOURS DID NOT REACH A MODULE
+
+Measured: Strategy wore the tenant's bar colour, the trial module read it for
+itself, and Insights carried the shipped navy **as a literal with no reader at
+all** — so a client who had chosen a colour saw it on two screens of three.
+Insights' own comment recorded this and left it (*"it wants one reader both ask,
+which is its own small piece of work"*). Branding is the spine's by decision
+(spec 046 §4.1), and the spine was not handing it over.
+
+**ONE ANSWER, TWO WAYS OF REACHING IT**, and the difference is where the graph
+already is rather than what the rule is: `barFrom(value)` is the rule — what
+counts as a colour and what a client who has chosen none wears — and every
+caller ends there; `barFor(tenantId)` is that rule plus **one column of one
+row**, for a module with no reason to load the whole graph. The trial module
+holds the graph already (it reads it for its count) and makes no second query.
+**A COLOUR MAY NEVER STOP A PAGE DRAWING**: a database that will not answer
+gives the shipped navy and the library still lists (§231.3 one layer in).
+
+**NOTHING VISIBLE CHANGES ON A TENANT THAT HAS CHOSEN NO COLOUR**, which is
+every tenant in the worked example — this shows up only where somebody has
+rebranded, and that is stated rather than discovered.
+
+### §354.4 — THE CHECK COVERED TWO MODULES OF THREE, AND ONE ASSERTION HAD BEEN
+### RED SINCE THE PAGE UNDER IT WAS REPLACED
+
+Baseline before anything was touched: **69 ok, 1 failed**. Three faults, each
+its own shape.
+
+**THE SUBJECT MOVED AND THE CHECK DID NOT** (§51.11). §320.4 drew the modules
+band under the client's name on the settings page and asserted it came before
+that page's two columns; §322 replaced the whole page with the set-up flow and
+CARRIED the band onto its first step (§322.1). The check went on slicing from
+`function drawClient(`, which the console has not held since — `indexOf`
+answered **-1**, `slice(-1)` handed it **the last character of the file**, and
+every assertion under it failed against one byte. It had been red ever since,
+saying *"placement B"* about a page that no longer exists. REWRITTEN to the
+placement that is now the decision, never loosened (§218): the band is on step
+one — the step about the client rather than its organisation — after that step's
+own fields and before the ending block, and **drawn once**, because a band on two
+steps is two places to set one thing.
+
+**THE LITERAL OUTLIVED THE DECISION** (§214.3, sixth time). The address section
+read `["strategy", "trial"]` by hand, so the third module was asserted nowhere
+and the file went on saying four surfaces agreed while three modules had to.
+Both lists are worked out from `MODULE_DEF` now, so the fourth module is covered
+the day it is marked built and this file is not edited.
+
+**AND THE CONTRACT'S FIFTH LINE COULD NOT BE ASKED AT ALL.** *A landing* was a
+chain of ifs in the route, so a module marked `built` with no page behind it read
+exactly like one with a page — right up until somebody opened its address and got
+the Strategy platform wearing another name, which is the whole reason that flag
+exists (§61). Both ends: every built module serves itself, AND no unbuilt word
+does.
+
+### §354.5 — AND THE FIRST VERSION OF THE NEW ASSERTION PASSED FOR THE WRONG
+### REASON, FOUND BY FALSIFYING IT RATHER THAN BY READING IT
+
+The driven half asked whether each module's document carried
+`data-module="<key>"` — **and the shell stamps that from the argument it is
+handed**. So the `wrong-server` break, which points two words at one page, drew
+the Strategy platform wearing the word `insights` and satisfied the assertion
+perfectly: the exact fault, rendering exactly as the assertion demanded (§113.8).
+A **title** is written by a page out of its own vocabulary and cannot be handed
+in, so the assertion compares the three titles as a SET — naming none of them, so
+a fourth module is covered. Under the break it prints the duplicate verbatim.
+
+**AND THE TABLE IS DRIVEN, NEVER ONLY READ** (§96: a server wired to the wrong
+module renders perfectly): each one is CALLED, with no database, and each page
+degrades on its own terms while still having to be its own page.
+
+### §354.6 — AND THE RENUMBER TOOK SOMEBODY ELSE'S CITATION, WHICH IS §264.3
+
+The work was written citing **§347** — and main had taken that number for *a
+capability is a step*. Correcting it with a sweep across `smp-app` renumbered
+`lib/platform-api.ts`'s own §347 as well, **a file this work never touched**:
+§264.3's fault exactly, in the same afternoon it was being quoted. Restored, and
+the other four files were then checked against `origin/main` rather than assumed
+— all four held **zero** §347 references before today, so every one renumbered
+was this work's own.
+
+### §354.7 — WHAT WAS RUN
+
+A throwaway Postgres 16 and a real build, because the route is the riskiest
+change and reading it proves nothing (§94.11). `check:modules` **69/1 → 93/0**,
+proved able to fail **seven ways** (`any-module`, `open-address`,
+`static-hello`, `switch-always`, `no-server`, `wrong-server`,
+`module-own-colour`) — and each of the three new breaks was watched to redden
+**its own assertion and nothing else**, because a break that goes red for an
+unrelated reason proves nothing (§54.5). `check:insights` **93/0** with its three
+breaks red — the full run, which exercises the moved page and the new colour
+reader against a real database. Against the rebuilt app: **door 70/0, shell
+72/0**, both matching the record, and the shell check drives real client pages
+through the rewritten route. room 10/0, blob 23/23, comms 47/47, demo 7/0,
+upload 9/9, deploy 5/0, setup 33/0, `generated-in-step` all clear,
+`declared-deps` all clear, `tsc` clean, `next build` green.
+
+**THE FROZEN PRODUCT IS UNTOUCHED AND IT IS MEASURED, NOT CLAIMED**:
+`python3 build.py` is byte-identical to the shipped file, no generated copy
+moved, and **`sw.js` is NOT bumped** — §91's trigger is the built file's bytes
+changing and they did not.
+
+**`check:state` IS 84 ok / 2 failed AND IT IS NOT THIS WORK'S** — established by
+stashing every change, REBUILDING, and running it again for an identical 84/2
+(§303, and §105.6: the rebuild is the point, since the served app is what the
+check measures). Both failures are about the seeded demo graph and neither
+touches a module, the route or branding.
+
+### §354.8 — RECORDED, NOT DONE
+
+The three the mockup rule holds back, each needing a decision from Islam before
+it can be drawn (his own choice, 2026-09-14): **a tab per module on Roles &
+access** — Insights' area is declared and read by nothing but the check, so the
+module opens for everybody in the client with no way to narrow it; **a Setup
+group per module** — and the honest answer for Insights may be *none*, because
+Forefront publishes it and there may be nothing for a client to set, in which
+case that is written down as a decision rather than built as an empty page; and
+**a line on the welcome screen**, which still reads the default module alone.

@@ -36,7 +36,7 @@
 import pg from "pg";
 import { usePools, endPools } from "../lib/db.ts";
 import { SCHEMA } from "../db/schema-name.mjs";
-import { insightsDocument, readableDay } from "../lib/insights.ts";
+import { insightsDocument, readableDay } from "../modules/insights/page.ts";
 import {
   CATEGORIES, KINDS, normalizeCategories, isCategory, isKind, safeFileName, looksLikePdf,
   filePath, sizeLabel, calendarDay, dayOut, oneLine, shape, shelfWhere,

@@ -183,9 +183,9 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
 
 /* WHAT THE SWITCHER LISTS (spec 046, E1). One answer for both places that
    draw it — the shell's top bar (shell/route.js, through the document's
-   `data-modules`) and the trial module's own bar (lib/trial.ts) — because a
-   label invented at a call site is how two screens come to spell one module
-   differently (§53.5). */
+   `data-modules`) and the trial module's own bar (modules/trial/page.ts) —
+   because a label invented at a call site is how two screens come to spell one
+   module differently (§53.5). */
 export type ModuleMenuItem = { key: ModuleKey; label: string; note: string };
 export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
   return have.map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));

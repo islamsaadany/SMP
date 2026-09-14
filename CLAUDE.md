@@ -7713,8 +7713,8 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
 - **ONE REPOSITORY, AND A MODULE IS A FOLDER (§345, spec 046
   `repo-boundary.md`):** anything that runs inside the client platform lives
   here. A module shares `withTenant()`, the door, the session, one route handler
-  that resolves its address, `lib/modules.ts` (read by **seven** hand-written
-  places plus two generated copies) and `scripts/deploy.mjs`'s schema apply —
+  that resolves its address, `lib/modules.ts` (read by **eleven** hand-written
+  places plus two generated copies, seven of them when §345 was written) and `scripts/deploy.mjs`'s schema apply —
   so a second repository is a second copy of each, drifting **with nothing able
   to go red**, since a check cannot assert across a boundary it cannot see
   (§329, §335's shape; §289's with the schema applied twice). **Four tests, any
@@ -7724,12 +7724,31 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   holds no client rows, swappable for a third party (`lib/mailer.cjs` and the
   clip store already are, and are correctly outside). None of Strategy,
   Portfolio, Insights or Processes passes any. **Isolation is bought a folder
-  and then a package boundary before it is bought a repository.** **STILL OPEN
-  AND IT IS THE ONE THAT MATTERS:** where the spine/module line runs in the
-  code — today Strategy **is** the shell, and the route handler branches
-  between `lib/shell.ts` and `lib/trial.ts` *because there are two of them*,
-  which is right at two and wrong at three. Settle it with two modules, not
-  four.
+  and then a package boundary before it is bought a repository.**
+- **A MODULE IS A FOLDER THAT SERVES ITSELF (§354, spec 046):** the third
+  module arrived and the route's own comment — *a branch rather than a table
+  because there are two of them* — was still there with Insights' eight lines
+  bolted underneath it (§104.8's family, predicted by name at §345).
+  **`modules/<key>/` holds a module's own page and its server, and
+  `modules/registry.ts` is the table the route asks**, so a fourth module is a
+  folder and an entry and the route is not opened at all — asserted at BOTH
+  ENDS, because a build that kept the table and left one `if (w.module === …)`
+  beside it is the drift the table removes. **A module is handed the request,
+  the slug, the tenant id, the client's name, its modules and the address
+  INSIDE the module — no pool and no session**, so the tenant boundary stays
+  the one line it has always been. **WHAT DID NOT MOVE IS THE POINT**:
+  `lib/library.ts` is *one machine, two names* (Insights and Processes) and is
+  written from the CONSOLE, and `shellHeaders` is every served document's — so
+  one file moved and two stayed, because a folder that holds a shared machine
+  lies, and a spine that imports from inside a module is the boundary this
+  exists to show. **BRANDING IS THE SPINE'S AND WAS NOT REACHING A MODULE**:
+  `lib/branding.ts` is the one answer — `barFrom` the rule, `barFor` that rule
+  plus one column of one row — where Insights had carried the shipped navy as
+  a literal, so a rebranded client saw their colour on two screens of three.
+  **STILL OPEN, AND NARROWER:** a module brings five things (spec 046 §4.2) and
+  three of them are built for none — its tab on Roles & access, its Setup group,
+  and its line on the landing. Each needs a decision before a mockup, and for
+  Insights the honest answer to the Setup group may be *none*.
 - **WHEN A FIELD IS RENAMED, FIND THE CODE THAT CREATES IT** — not only the
   code that reads it (§51.10). §15 renamed a capability's `measures`/`tactics`
   to `keyObjectives`/`projects`; the ADD button kept minting the old shape for
@@ -7889,7 +7908,27 @@ node smp-app/checks/modules.mjs # a module per client, and the trial that proves
                                 # Strategy (&sect;61), no row of units, and nothing
                                 # inline needing a script the policy would silence.
                                 # It SAYS which assertions are driven and which are
-                                # read (&sect;100.3). 50/0, red three ways
+                                # read (&sect;100.3). AND SINCE &sect;354 IT COVERS
+                                # ALL THREE BUILT MODULES, not two named by hand
+                                # (&sect;214.3): every built module is asserted to
+                                # SERVE ITSELF &mdash; called, not read, because a
+                                # server wired to the wrong module renders perfectly
+                                # (&sect;96) &mdash; with no two drawing the same
+                                # document, compared as a SET of titles. A title is
+                                # written by a page out of its own vocabulary; the
+                                # first version asked for `data-module`, which the
+                                # shell stamps from the argument it is HANDED, so the
+                                # two-words-one-page break satisfied it perfectly
+                                # (&sect;113.8, found by falsifying rather than
+                                # reading). It also asserts the client's colour
+                                # REACHES a module &mdash; neither module that draws
+                                # its own document may keep a default or a colour test
+                                # of its own (&sect;354.3). And its placement assertion
+                                # was REWRITTEN, never loosened (&sect;218): it sliced
+                                # from `function drawClient(`, which the console has
+                                # not held since &sect;322 carried the band onto the
+                                # set-up flow, so `slice(-1)` handed it ONE CHARACTER
+                                # and it had been red ever since. 93/0, red seven ways
                                 # (`check:modules:red`) &mdash; `static-hello` printing
                                 # `Hello, there.`, the fault the page exists to rule
                                 # out. Its own first run called a correct build broken:
@@ -9302,7 +9341,66 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-14 &mdash; **&sect;349: a sentence that prints its own
+*Last Updated: 2026-09-14 &mdash; **&sect;354: a module is a folder that serves
+itself.** Islam, with the client's card showing three rows: *"check as we now
+have 3 modules"* &mdash; then, of the five things that had not kept up,
+**"let's fix all"**, taking the split offered: the four repairs now, the three
+missing screens drawn and signed off first (rule 1c). **THE PART MEANT TO MAKE
+A MODULE CHEAP HELD UP, AND SAYING SO FIRST IS MOST OF THE AUDIT**: Insights
+cost ONE entry &mdash; its word was already reserved, so `built: false &rarr;
+true` opened the door and no surface had to learn it. **&sect;354.1 &mdash; THE
+BRANCH PASSED THE POINT ITS OWN COMMENT SAID IT WOULD**: the route still read
+*"a branch rather than a table because there are two of them"* with Insights'
+eight lines bolted underneath (&sect;104.8's family, predicted by name at
+&sect;345). A module says how it serves itself IN ITS OWN FOLDER and the route
+asks `modules/registry.ts`, so a fourth module is a folder and an entry and that
+file is not opened &mdash; **both ends**, because a table with one
+`if (w.module === …)` left beside it is the drift the table removes. **&sect;354.2
+&mdash; AND READING CORRECTED THE PLAN BEFORE IT MOVED ANYTHING**: the ask was
+*"move the Insights files"*, three of them, and their own headers say `library.ts`
+is **one machine, two names** (Insights and Processes) written from the CONSOLE
+too &mdash; so ONE moved and two stayed, because a folder holding a shared machine
+lies and a spine importing from inside a module is the boundary this exists to
+show. **&sect;354.3 &mdash; THE CLIENT'S COLOURS DID NOT REACH A MODULE**:
+Strategy wore the tenant's bar, the trial module read it for itself, and Insights
+carried the shipped navy as a LITERAL with no reader at all &mdash; two screens of
+three on a rebranded client, recorded in its own comment and left. `barFrom` is
+the rule and `barFor` is that rule plus one column of one row, and a database that
+will not answer gives the navy rather than no page (&sect;231.3 one layer in).
+**&sect;354.4 &mdash; ONE ASSERTION HAD BEEN RED SINCE THE PAGE UNDER IT WAS
+REPLACED**: the check sliced from `function drawClient(`, which the console has
+not held since &sect;322 carried the band onto the set-up flow &mdash; `indexOf`
+answered **-1**, `slice(-1)` handed it **one character**, and it had been saying
+*"placement B"* about a page that no longer exists. REWRITTEN, never loosened
+(&sect;218). Beside it, the address section named `["strategy","trial"]` BY HAND,
+so the third module was asserted nowhere (&sect;214.3, sixth time). **&sect;354.5
+&mdash; AND THE FIRST VERSION OF THE NEW ASSERTION PASSED FOR THE WRONG REASON**,
+found by falsifying rather than reading: it asked for `data-module="<key>"`, and
+**the shell stamps that from the argument it is handed** &mdash; so the break that
+points two words at one page drew the Strategy platform wearing the word
+`insights` and satisfied it perfectly (&sect;113.8). A TITLE is written by a page
+out of its own vocabulary and cannot be handed in; the three are compared as a
+SET, naming none. **&sect;354.6 &mdash; AND THE RENUMBER TOOK SOMEBODY ELSE'S
+CITATION**: written as &sect;347, which main had taken, and the sweep that
+corrected it renumbered `lib/platform-api.ts`'s own &sect;347 &mdash; a file this
+never touched. &sect;264.3 exactly, in the afternoon it was being quoted;
+restored, and the other four then checked against `origin/main` rather than
+assumed. **RUN, NOT REASONED**: a throwaway Postgres 16 and a real build, because
+the route is the riskiest change. modules **69/1 &rarr; 93/0** proved able to fail
+SEVEN ways, each new break watched to redden its OWN assertion and nothing else
+(&sect;54.5); insights 93/0 with three reds; door 70/0 and shell 72/0 against the
+rebuilt app, which drives real client pages through the rewritten route; room
+10/0, blob 23/23, comms 47/47, demo 7/0, upload 9/9, `generated-in-step` all
+clear, `tsc` clean. **The frozen product is untouched and MEASURED**:
+`build.py` byte-identical, so **`sw.js` is not bumped** &mdash; &sect;91's trigger
+is the built file's bytes changing and they did not. **`check:state` 84/2 is NOT
+this work's**, established by stashing everything, REBUILDING and getting an
+identical 84/2 (&sect;303, &sect;105.6). **RECORDED, NOT DONE**: a module brings
+five things and three are built for none &mdash; its tab on Roles &amp; access,
+its Setup group and its line on the landing &mdash; each wanting a decision before
+a mockup, and for Insights the honest answer to the Setup group may be *none*.*
+
+*Earlier the same day: **&sect;349: a sentence that prints its own
 code, and the built file nobody compared.** Three findings from a verification
 pass, and the question in the middle of them changed the answer rather than
 confirming it. **&sect;349.1 &mdash; TWO EMPTY SCREENS PRINTED THEIR OWN CODE, ON

@@ -35,7 +35,10 @@ import { chromium } from "playwright-core";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, isModule } from "../lib/modules.ts";
-import { trialDocument, registerLine } from "../lib/trial.ts";
+import { trialDocument, registerLine } from "../modules/trial/page.ts";
+import { SERVERS, serverFor } from "../modules/registry.ts";
+import { insightsDocument } from "../modules/insights/page.ts";
+import { barFrom, BAR_DEFAULT } from "../lib/branding.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const APP = join(here, "..");
@@ -43,7 +46,7 @@ const ROOT = join(APP, "..");
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
 
 /* The product reads its breaks from the environment (lib/modules.ts,
-   lib/trial.ts, lib/shell.ts), so this reads the same one — §7 serves the
+   modules/trial/page.ts, lib/shell.ts), so this reads the same one — §7 serves the
    shell itself and has to break with it. */
 const BREAK = process.env.SMP_BREAK || "";
 
@@ -136,13 +139,120 @@ check("a module's area is NOT in the client's carried matrix",
   !read("smp-app/lib/rules.cjs").includes("a_insights")
   && !read("lib/rules.js").includes("a_insights"));
 
+/* ── THE CONTRACT'S FIFTH LINE (spec 046 §4.2) ────────────────────────
+   *A landing* — somewhere a person holding a role in the module opens. Until
+   §354 that was a chain of ifs in the route, so nothing could ask the question
+   at all: a module marked `built` with no page behind it read exactly like one
+   with a page, right up until somebody opened its address and got the Strategy
+   platform wearing another name (§61, which is the whole reason that flag
+   exists).
+
+   BOTH ENDS (§94.2), and the second is the one that matters: every built
+   module serves itself, AND no unbuilt word does — a page behind `portfolio`
+   today would be the door onto the wrong room, arriving quietly. */
+console.log("\n2b · every module serves itself");
+check("every BUILT module has a page of its own to serve",
+  MODULES.filter((k) => MODULE_DEF[k].built).every((k) => typeof serverFor(k) === "function"),
+  MODULES.map((k) => k + ":" + (serverFor(k) ? "serves" : "none")).join(" "));
+check("...and a word that is NOT built serves nothing, or it is a door onto the wrong room",
+  UNBUILT.every((k) => serverFor(k) === null), UNBUILT.join(", "));
+check("the table holds nothing that is not a module",
+  Object.keys(SERVERS).every((k) => isModule(k)), Object.keys(SERVERS).join(", "));
+/* AND THE TABLE IS DRIVEN, never only read (§96: a server wired to the wrong
+   module renders perfectly). Each one is CALLED and what comes back has to be
+   that module's own document — a registry pointing two words at one page
+   would satisfy every assertion above. No database: the tenant cannot be
+   reached, which each page degrades through on its own terms. */
+const argsFor = (module, rest) => ({
+  req: new Request("https://smp.example/raya-trade/" + module + rest.map((r) => "/" + r).join("")),
+  slug: "raya-trade", module, tenantId: "not-a-tenant-id", tenantName: "Raya Trade",
+  have: offerable(), rest,
+});
+const drawnBy = async (k, rest = []) => {
+  const res = await serverFor(k)(argsFor(k, rest));
+  return { status: res.status, html: res.status === 200 ? await res.text() : "", to: res.headers.get("location") || "" };
+};
+const drawn = {};
+for (const k of offerable()) {
+  drawn[k] = await drawnBy(k);
+  check("...and " + k + "'s server answers with a page of its own",
+    drawn[k].status === 200 && /<html/.test(drawn[k].html),
+    drawn[k].status + " " + drawn[k].html.length + " bytes");
+}
+/* THE TITLES, AND THE FIRST VERSION OF THIS ASSERTION PASSED FOR THE WRONG
+   REASON (§113.8, found by falsifying it rather than by reading it). It asked
+   whether each document carried `data-module="<k>"` — and the shell stamps
+   that from the argument it is HANDED, so a table pointing two words at one
+   page drew the Strategy platform wearing the word `insights` and satisfied
+   it perfectly: the exact fault, rendering exactly as the assertion demanded.
+   A title is written by the page out of its own vocabulary and cannot be
+   handed in, so two modules sharing one is two modules sharing a page —
+   compared as a SET, naming nothing, so a fourth module is covered. */
+const titles = offerable().map((k) => (drawn[k].html.match(/<title>([^<]*)<\/title>/) || ["", ""])[1]);
+check("...and no two of them draw the same document — a table cannot point two words at one page",
+  new Set(titles).size === titles.length, titles.join(" | "));
+/* A module's landing is its landing: an address inside one that it does not
+   draw comes BACK to it, which is what every unknown word inside a client
+   already gets (lib/modules.ts whereOf) rather than a second refusal. */
+for (const k of BUILT_EXTRA) {
+  const out = await drawnBy(k, ["nothing-here"]);
+  check("...and a word " + k + " does not draw comes back to its landing",
+    out.status === 302 && out.to.endsWith(clientHref("raya-trade", k, "")),
+    out.status + " " + out.to);
+}
+
+/* ── WHAT A MODULE WEARS (spec 046 §4.1, §354) ────────────────────────
+   Branding is the SPINE's, so a module should get the client's colour for
+   nothing. It was not: Strategy wore it, the trial module read it for itself,
+   and Insights carried the shipped navy as a literal — a client who had
+   chosen a colour saw it on two screens of three. Nothing could see that,
+   because no check ever asked what a module wears.
+
+   BOTH ENDS (§94.2). The rule is worth nothing on its own — a build where
+   every module kept its own copy of it would satisfy it perfectly — so the
+   modules that draw their own document are asserted to hold NO default and NO
+   colour test of their own, which is the drift itself rather than its symptom
+   (§53.5). */
+console.log("\n2c · the client's colour reaches a module");
+check("a colour the client chose is the colour worn", barFrom("#7A1F3D") === "#7A1F3D", barFrom("#7A1F3D"));
+check("...and what is not a colour is the shipped default, never painted as it came (§96.2)",
+  barFrom("javascript:alert(1)") === BAR_DEFAULT && barFrom("#ABC") === BAR_DEFAULT
+  && barFrom(null) === BAR_DEFAULT && barFrom(undefined) === BAR_DEFAULT,
+  [barFrom("javascript:alert(1)"), barFrom("#ABC"), barFrom(null)].join(" "));
+for (const name of ["trial", "insights"]) {
+  const src = read("smp-app/modules/" + name + "/page.ts");
+  check("the " + name + " module asks the spine for the colour rather than deciding it",
+    /lib\/branding\.ts/.test(src));
+  check("...and keeps no default and no colour test of its own — " + name,
+    !/^const BAR\b/m.test(src) && !/#\[0-9a-fA-F\]\{6\}/.test(src),
+    (src.match(/^const BAR\b.*/m) || src.match(/#\[0-9a-fA-F\]\{6\}/) || [""])[0]);
+}
+/* A COLOUR MAY NEVER STOP A PAGE DRAWING (§231.3 one layer in). The tenant
+   cannot be reached here, so this proves the library still draws AND that it
+   falls back to the shipped navy rather than to nothing at all. */
+const noDb = await insightsDocument("raya-trade", "not-a-tenant-id", "Raya Trade", offerable(), { q: "", category: "" });
+check("a client whose database will not answer still gets a page, in the shipped colour",
+  noDb.includes("--bar:" + BAR_DEFAULT) && noDb.includes("<title>"),
+  (noDb.match(/--bar:[^;]*/) || [""])[0]);
+
 console.log("\n3 · the address");
-const HAVE_BOTH = ["strategy", "trial"], HAVE_ONE = ["strategy"];
-check("a module the client HAS is read as that module",
-  same(whereOf(["trial"], HAVE_BOTH), { module: "trial", rest: [], legacy: false }), JSON.stringify(whereOf(["trial"], HAVE_BOTH)));
-check("a module the client does NOT have falls through to the legacy branch, exactly as any other unknown word",
-  same(whereOf(["trial"], HAVE_ONE), whereOf(["banana"], HAVE_ONE).module === "strategy"
-    ? { module: "strategy", rest: ["trial"], legacy: true } : null), JSON.stringify(whereOf(["trial"], HAVE_ONE)));
+/* EVERY BUILT MODULE, NEVER ONE NAMED BY HAND (§218, §354). This read
+   `["strategy", "trial"]` until Insights landed, so the third module was
+   asserted nowhere in this section and the file went on saying two surfaces
+   agreed while three had to — the literal outliving the decision (§214.3).
+   Both lists are worked out from MODULE_DEF, so the fourth module is covered
+   the day it is marked built and this file is not edited. */
+const HAVE_BOTH = offerable(), HAVE_ONE = [DEFAULT_MODULE];
+for (const k of BUILT_EXTRA) {
+  check("a module the client HAS is read as that module — " + k,
+    same(whereOf([k], HAVE_BOTH), { module: k, rest: [], legacy: false }), JSON.stringify(whereOf([k], HAVE_BOTH)));
+  check("...and one the client does NOT have falls through to the legacy branch, exactly as any other unknown word — " + k,
+    same(whereOf([k], HAVE_ONE), whereOf(["banana"], HAVE_ONE).module === DEFAULT_MODULE
+      ? { module: DEFAULT_MODULE, rest: [k], legacy: true } : null), JSON.stringify(whereOf([k], HAVE_ONE)));
+  check("the address it is written at is the address it is read from — " + k,
+    whereOf(clientHref("raya-trade", k, "").split("/").slice(2), HAVE_BOTH).module === k,
+    clientHref("raya-trade", k, ""));
+}
 check("an unbuilt module's word is not an address either",
   whereOf(["portfolio"], modulesFor(["portfolio"])).legacy, JSON.stringify(whereOf(["portfolio"], modulesFor(["portfolio"]))));
 check("Setup is the spine's and carries no module", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
@@ -150,20 +260,21 @@ check("the tour is the spine's too", whereOf(["tour"], HAVE_BOTH).module === nul
 /* A caller that forgets to say which modules the client has gets the NARROW
    answer, never every module — the safe direction (§42). */
 check("asked without a list, only the default is a module", whereOf(["trial"]).legacy && !whereOf(["strategy"]).legacy);
-check("the address a module is written at is the address it is read from",
-  whereOf(clientHref("raya-trade", "trial", "").split("/").slice(2), HAVE_BOTH).module === "trial",
-  clientHref("raya-trade", "trial", ""));
 check("and Setup's address carries none", clientHref("raya-trade", null, "setup/people") === "/raya-trade/setup/people");
 
 console.log("\n4 · the card's rows");
 const facts = { unreadable: false, cycleOpen: true, planned: true };
-const rows = moduleRows(modulesFor(["trial"]), facts);
-check("one row per module the client has, and no more", rows.length === 2 && same(rows.map((r) => r.key), ["strategy", "trial"]),
-  rows.map((r) => r.key).join(", "));
+const rows = moduleRows(modulesFor(BUILT_EXTRA), facts);
+check("one row per module the client has, and no more, in the list's own order",
+  same(rows.map((r) => r.key), HAVE_BOTH), rows.map((r) => r.key).join(", "));
 check("Strategy still says what it said", rows[0].state === "cycle open", rows[0].state);
 /* A module with nothing to say draws its NAME alone — never a placeholder,
-   which would read as a state nobody set (§45.2). */
-check("a module with nothing to say says nothing, rather than a placeholder", rows[1].state === "", JSON.stringify(rows[1].state));
+   which would read as a state nobody set (§45.2). Asked of EVERY other row
+   rather than of the second one, or a third module could say anything at all
+   and this would go on passing (§113.8). */
+check("a module with nothing to say says nothing, rather than a placeholder",
+  rows.slice(1).every((r) => r.state === ""),
+  rows.slice(1).map((r) => r.key + "=" + JSON.stringify(r.state)).join(" "));
 check("every row carries the label the switcher and the drawer use",
   rows.every((r) => r.label === MODULE_DEF[r.key].label));
 check("a client without the trial gets one row", moduleRows(modulesFor([]), facts).length === 1);
@@ -225,15 +336,35 @@ check("and a module that is not built cannot be switched on", /!MODULE_DEF\[key\
 const pf = read("platform.html");
 check("the drawer draws the band under the client's name", pf.includes('el("div", "band")') && pf.includes("Modules this client has"));
 check("its rows are the team list's own, so the section adds no vocabulary", /mods[\s\S]{0,700}el\("div", "teamrow"\)/.test(pf));
-/* SCOPED TO THE DRAWER'S OWN FUNCTION. `page.appendChild(grid)` appears
-   twice in this file — the clients list builds one too — so an unscoped
-   indexOf compared the band against ANOTHER page's grid and called a correct
-   build broken (§100.3, found by this assertion failing first). */
-const drawer = pf.slice(pf.indexOf("function drawClient("));
-check("the band is drawn BEFORE the two columns, which is placement B",
-  drawer.indexOf("page.appendChild(mods)") > 0 &&
-  drawer.indexOf("page.appendChild(mods)") < drawer.indexOf("page.appendChild(grid)"),
-  "mods at " + drawer.indexOf("page.appendChild(mods)") + ", grid at " + drawer.indexOf("page.appendChild(grid)"));
+/* THE SUBJECT MOVED AND THE CHECK DID NOT (§354, §51.11). §320.4 drew this
+   band under the client's name on the settings page and asserted it came
+   before that page's two columns; §322 replaced the whole page with the
+   set-up flow and CARRIED the band onto its first step (§322.1). So this
+   file went on slicing from `function drawClient(`, which the console has not
+   held since — `indexOf` answered -1, `slice(-1)` handed it the last
+   character of the file, and every assertion under it failed against one
+   byte. It had been red ever since, saying "placement B" about a page that no
+   longer exists.
+
+   REWRITTEN TO THE PLACEMENT THAT IS NOW THE DECISION, never loosened
+   (§218): the band is on step ONE, the step about the client itself rather
+   than about its organisation, after that step's own fields and before the
+   ending block — which is what "on screen in one press from the card" means
+   in a file a check can read. Scoped to that step's own text, because the
+   console builds several and an unscoped indexOf would compare it against
+   another step's (§100.3, the trap the old note recorded). */
+const CS = "function clientStep(";
+check("the set-up flow still has a step about the client itself to hang it on", pf.includes(CS));
+const step = pf.slice(pf.indexOf(CS), pf.indexOf("function modulesBlock("));
+check("the modules band is drawn on that step", /box\.appendChild\(modulesBlock\(\)\)/.test(step));
+check("...after the client's own fields and before the ending block",
+  step.indexOf("The client's name") < step.indexOf("modulesBlock()")
+  && step.indexOf("modulesBlock()") < step.indexOf("endBlocks()"),
+  "name at " + step.indexOf("The client's name") + ", band at " + step.indexOf("modulesBlock()")
+  + ", end at " + step.indexOf("endBlocks()"));
+check("and drawn ONCE — a band on two steps is two places to set one thing",
+  (pf.match(/appendChild\(modulesBlock\(\)\)/g) || []).length === 1,
+  String((pf.match(/appendChild\(modulesBlock\(\)\)/g) || []).length));
 /* The console is ONE source for both stacks; the app serves a generated copy,
    so a build that edited platform.html and forgot to regenerate would ship a
    drawer without the section (§53.5). */
@@ -241,8 +372,12 @@ check("and the copy the app serves was regenerated from it",
   read("smp-app/public/platform-page.js").includes("Modules this client has"));
 const route = read("smp-app/app/(platform)/[slug]/[...rest]/route.ts");
 check("the address is gated on the client's own list", /whereOf\(rest \|\| \[\], have\)/.test(route));
-check("and the trial module serves itself rather than the Strategy shell",
-  /w\.module === "trial"[\s\S]{0,200}trialDocument/.test(route));
+/* BOTH ENDS (§94.2): the route asks the table, AND it names no module of its
+   own. A build that kept the table and left one `if (w.module === "…")` beside
+   it would satisfy the first half and be exactly the drift the table removes. */
+check("the route dispatches through the table (§354)", /serverFor\(key\)/.test(route));
+check("...and names no module itself, so a fourth one does not edit this file",
+  !/w\.module === "/.test(route), (route.match(/w\.module === "[a-z]*"/g) || []).join(" "));
 
 console.log("\n7 · the switcher in the platform's top bar (driven)");
 /* THE SHELL'S OWN BODY AND STYLESHEET, served over HTTP — `route.js` returns

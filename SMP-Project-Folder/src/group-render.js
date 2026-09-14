@@ -1863,7 +1863,7 @@ function renderCompanyPerformance(coKey){
   var keys = companyUnitKeys(ck);
   if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
     ' holds no business unit yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 " + L("unitword","bu") + "</b>; until one does, there is nothing here to read.</div>';
+    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>; until one does, there is nothing here to read.</div>';
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);

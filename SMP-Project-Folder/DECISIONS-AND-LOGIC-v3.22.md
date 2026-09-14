@@ -47509,3 +47509,144 @@ authoriser, no change list and nothing a save writes.
 provider actually drafts, and whether the answers are any good. Every drafting
 and asking assertion is made against a stub, which is what makes the wire
 readable and is exactly what the two stop points exist to cover (§113.8).
+
+---
+
+## §349 — A SENTENCE THAT PRINTS ITS OWN CODE, AND THE BUILT FILE NOBODY COMPARED (2026-09-14)
+
+Three findings from a verification pass, put to Islam in plain words and
+answered *"1. ok … 3. ok 4. ok"*, with a question standing in the middle of
+them that turned out to change the answer rather than confirm it.
+
+### §349.1 — TWO EMPTY SCREENS PRINTED THEIR OWN CODE, AND IT WAS LIVE
+
+`main` gained a client's own word for a business unit (§346), and thirteen
+places were moved onto it. **Two were written with the wrong quote marks**, so
+the concatenation fell INSIDE the string and the screen printed the
+instruction instead of obeying it:
+
+> Empty. Upload a plan on **Import**, clear one on **" + L("unitword","bu") + "**, or open a new reporting cycle…
+
+> A unit belongs to a company on **Setup → " + L("unitword","bu") + "**; until one does, there is nothing here to read.
+
+**BOTH ARE EMPTY STATES, WHICH IS THE WHOLE OF WHY NOTHING CAUGHT IT.** The
+sweep records what the BROWSER complains about and this page does not complain
+— it renders perfectly and reads wrong (§96's family, in prose rather than in
+a control). *No check in this product reads the words on a screen*, and the
+two screens that carry these sentences are the two a client sees least often:
+an archive list with nothing archived, and a company before its first unit.
+
+**IT WAS IN WHAT PRODUCTION SERVES**, and that is measured rather than
+inferred: the same two lines are in `smp-app/public/shell.js`, which is the
+file the new stack sends to a browser (§332).
+
+**FOUR CHARACTERS, and the fix is asserted by READING THE SCREEN** — the two
+sentences driven with the label registry set to a word the platform could
+never produce by accident, so *"it says Business units"* cannot pass for
+*"the substitution ran"*. **AND THE PROBE CALLED A CORRECT BUILD BROKEN
+FIRST** (§100.3): `LABELS` is a LIST of entries keyed by `key`, not a map, so
+assigning `LABELS.unitword` set nothing at all and reported a working fix as a
+failure on the one assertion it exists for.
+
+**THE SEARCH FOR MORE OF THEM IS THE PART WORTH KEEPING**: the obvious grep
+(`" + ` inside a string) matches the ordinary idiom — an HTML attribute quote
+inside a single-quoted string — hundreds of times. The fault's real signature
+is the whole **sandwich**, `" + fn(…) + "` enclosed by single quotes, and
+searched that way the tree holds exactly two, both fixed. The two `sample-*`
+files that also match are standalone mockups outside `build.py` and are
+correct in any case.
+
+### §349.2 — THE SHIPPED FILE WAS A ROUND OF WORK BEHIND ITS OWN SOURCES
+
+Rebuilding from `main`'s sources produced a file **1,722 bytes and 56 lines**
+different from the one committed: §346 edited the sources, regenerated the
+copies the Next app serves, and did not rebuild
+`strategy-management-platform-v3.22.html`. Read line by line, what the
+committed file is missing is §346 **entire** — it still holds `"Business
+units"` where every source now holds `L("unitword","bu")`.
+
+**CLAUDE.md HAS REQUIRED THOSE TWO TO BE BYTE-IDENTICAL SINCE THE PROJECT
+FOLDER ARRIVED** — *if it is not, something is out of step* — **and nothing
+ever checked it**, so the rule held for exactly as long as everybody
+remembered the `cp`. §329 built the guard for the SERVED copies and named this
+trap in its own words; this is the same trap one directory over, on the half
+that had no guard.
+
+Nothing was broken by it that day, which is the point: **a stale built file
+renders perfectly.** It is simply the product as it was last week — and the
+two sentences above would have reappeared in it the moment anybody rebuilt.
+
+### §349.3 — AND THE WORKING COPY IS NOT THAT FILE, WHICH ANSWERS ISLAM'S OWN QUESTION
+
+Islam: *"for the offline copy you mean the working copy? if so it needs to
+always regenreate on the the downloading action to be up to date."* **Measured
+rather than answered from memory, and the answer is that it already does**:
+`CONT.buildCopy()` does `fetch(location.pathname, { cache: "no-store" })` — it
+asks the server for the platform again at the moment of the press, which that
+function's own comment explains (`document.documentElement.outerHTML` is the
+page as PAINTED, and a painted page will not boot). So the contingency working
+copy is generated fresh every time, from whatever is being served, and no
+cached copy can stand in for it: the carried worker has **no fetch handler at
+all** (§316.10).
+
+**So his instinct is right and is already the product's behaviour, and the
+stale file is a different artefact** — the repository's own built copy, which
+is what the 177 screen checks read, what `dev-server.js` serves, and what an
+offline handover is made of. Saying which of the two was meant is most of what
+made the finding actionable.
+
+### §349.4 — THE CHECK THAT CLOSES IT, AND THE ERRAND IT MUST NAME
+
+`checks/built-in-step.py`: run the REAL `build.py` and compare, never a second
+assembly (§53.5); the subject **derived** from `git ls-files` so a version bump
+needs no edit here and two shipped files (or none) is its own failure said in
+words (§54.5); the untracked intermediate held and restored in a `finally`,
+because a check that quietly repairs what it measures has told nobody (§94.2,
+§329); **exit non-zero** (§328.8). No browser and no database — it is a
+comparison of bytes.
+
+**STALE AND MID-EDIT ARE TWO DIFFERENT ERRANDS** (§123), so it says which: a
+session that has just edited a source wants *rebuild and copy*, a clean tree
+that is red means somebody left a rebuild behind. **AND ITS FIRST RUN GOT THAT
+WRONG ON ITSELF** — `git status` counts untracked files, so the new check file
+made a clean tree report *"your edits are not built yet"*: the wrong errand,
+told confidently (§124). Only what the build actually READS counts now, and
+`checks/` is not in `build.py` at all.
+
+**PROVED ABLE TO FAIL IN BOTH DIRECTIONS, ONE OF THEM THE REPORTED STATE
+ITSELF**: with the sources restored to `HEAD` and the shipped file with them,
+it prints `built 4322309 bytes, shipped 4320587`, names §346's block as the
+missing work and says a rebuild was missed; with a source edited and not yet
+built, it names the two files and says to rebuild. **And the build was proved
+DETERMINISTIC before the check was trusted** — two runs byte-identical — or
+the whole thing would be worthless.
+
+### §349.5 — AND THE RED CHECK WAS THE CHECK (§214.3, FOURTH TIME ON THIS FILE)
+
+`fn-pillars` failed *"a unit keeps every sheet it had"*, holding a typed list
+of eight sheets while §343's breakdown legitimately made it **nine**. The
+product is right. **REWRITTEN, NEVER LOOSENED** (§218), and rewritten the way
+its own neighbour twelve lines above it already is: what §213 decided is a
+**DIFFERENCE** — a function's workbook loses the three sheets a function does
+not author and keeps every other sheet a unit has — so that is what is
+asserted, with the three read from the loop above rather than typed twice. A
+sheet added to BOTH halves (which is what a pillar-level feature does, §59)
+now stays green with no literal to remember; a sheet reaching only one half
+goes red, which is the fault worth catching. Falsified by making `Breakdowns`
+reach a unit only: **1 red, and only that one.**
+
+**IT HAD BEEN RED ON `main` SINCE THAT MERGE**, missed because twenty-two
+checks were run rather than all of them — and a check that stays red is how
+the next real regression goes unnoticed.
+
+### §349.6 — AND §329'S OWN CHECK EARNED ITS KEEP AT THE SAME BYTE COUNT
+
+The two-character fix changes no file's LENGTH, so `smp-app/public/shell.js`
+came back **committed 3627315 bytes, generated 3627315** — and red, because
+that check compares the bytes rather than the count. A length comparison would
+have called a stale served copy clean. Regenerated with all four generators.
+
+**Screen only** — no `api/`, `lib/` or `db/` file touched, read off the diff —
+nothing stored, nothing migrated, no rule moved. Authoriser **650/0**, change
+list **140/0**, platform rules **69/0**, `fn-pillars`, `import-page`,
+`fn-ko-edit`, `video-slides` (73/0) and `setup-shape` (33/0) green.

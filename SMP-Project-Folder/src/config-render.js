@@ -5688,7 +5688,7 @@ function renderArchives(){
   if (!ARCHIVES.length)
     return section("", "Archived plans",
       null,
-      '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>" + L("unitword","bu") + "</b>, ' +
+      '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>' + L("unitword","bu") + '</b>, ' +
       'or open a new reporting cycle, and what it displaces will appear here with a way to put ' +
       'it back.</div>');
 

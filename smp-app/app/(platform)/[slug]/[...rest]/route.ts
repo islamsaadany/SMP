@@ -60,5 +60,9 @@ export async function GET(req: Request, { params }: P) {
   const key = w.module || DEFAULT_MODULE;
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });
-  return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name, have, rest: w.rest });
+  /* WHO IS LOOKING travels with the address (spec 046 §4.10). The door has
+     already resolved both — a module asking for them again would be a second
+     answer to a question `resolveTenant` exists to settle (§53.5). */
+  return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
+    have, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
 }

@@ -1337,6 +1337,10 @@
       if (!j || !j.ok) { clear(); return say((j && j.error) || "That library could not be read.", true); }
       LIB.items = j.items || [];
       LIB.cats = j.categories || [];
+      /* THIS CLIENT'S OWN UNITS AND FUNCTIONS, for the ticking panel. They
+         ride the list's answer rather than a second request, so the panel
+         never opens onto a list it is still waiting for (§45.2). */
+      LIB.places = j.places || [];
       /* Reading one keeps it open across a refresh, so publishing a report
          does not throw you back to the list you were working in (§71.2). */
       if (LIB.one) {
@@ -1344,6 +1348,18 @@
         LIB.one = still || null;
       }
       settle(LIB.one ? paintOneReport : paintLibrary);
+    });
+  }
+
+  /* THE PLACES A STORED LIST NAMES, in words. A key the client no longer has
+     — a unit retired since the report was narrowed — is drawn as the KEY
+     rather than dropped: it is still doing work in the stored row, and a list
+     that quietly showed two names for three entries would be lying about
+     who can read it (§35, §96.2). */
+  function seenNames(seen) {
+    return (seen || []).map(function (at) {
+      var hit = (LIB.places || []).filter(function (p) { return p.at === at; })[0];
+      return hit ? hit.label : at;
     });
   }
 
@@ -1436,6 +1452,22 @@
          it would spend the page's accent on the state that needs no attention
          (§41's budget, and the mockup's own note). */
       if (it.state !== "published") r.appendChild(el("span", "tag none", "Draft"));
+      /* AND WHO MAY SEE IT, BY THE SAME RULE (spec 046 §4.10): only the
+         exception carries a mark, so a report everybody can see wears
+         nothing. The words are the SERVER's (`seenLabel`), so the list and
+         the card cannot describe one report's reach two ways.
+
+         IT TAKES NO ACCENT, and that was found by drawing it: amber beside
+         the amber Draft tag put two meanings in one colour in one slot
+         (§87's twins, §41's budget). Nobody keeps an alarm, because a
+         published report nobody can open is the one state here that is
+         genuinely wrong-looking. The names go on the hover — the row has no
+         width for three of them without taking a second line (§88). */
+      if (it.seenLabel) {
+        var lim = el("span", it.seen && !it.seen.length ? "tag shut" : "tag", it.seenLabel);
+        if (it.seen && it.seen.length) lim.title = seenNames(it.seen).join(" · ");
+        r.appendChild(lim);
+      }
       r.addEventListener("click", function () { LIB.one = it; settle(paintOneReport); });
       list.appendChild(r);
     });
@@ -1509,6 +1541,160 @@
       crow.appendChild(chip);
     });
     cb.appendChild(crow); set.appendChild(cb);
+
+    /* ── WHO CAN SEE IT (spec 046 §4.10, reversing decision 15) ───────────
+       A field on the report, in the same block as its title, its summary,
+       its categories and its file — because that is where the report is
+       already being described. A visibility PAGE listing every report would
+       be a second copy of this list sitting somewhere else.
+
+       THE ABSENCE OF A LIST IS EVERYONE, so there is no on/off switch beside
+       it: a switch would be a second way to say the same thing and the two
+       could disagree (§110's pair). `seen` is null for everyone, an array
+       for exactly those places, and [] for nobody.
+
+       IT SAVES ON ITS OWN, ON `Done`, and never with the title: narrowing a
+       report is not editing its words, so correcting a typo cannot
+       re-assert who may read it. */
+    var seen = it.seen === null || it.seen === undefined ? null : it.seen.slice();
+    var sb2 = el("div");
+    sb2.appendChild(el("span", "lab", "Who can see it"));
+    var wrap = el("div", "tickwrap");
+    var strip = el("div", "seen");
+    var panel = null;
+
+    function drawStrip() {
+      strip.innerHTML = "";
+      var who = el("span", "who");
+      if (seen === null) who.appendChild(el("span", "all", "Everyone at " + LIB.client));
+      else if (!seen.length) who.appendChild(el("span", "none", "Nobody can open this report"));
+      else seenNames(seen).forEach(function (n) { who.appendChild(el("span", "tag", n)); });
+      strip.appendChild(who);
+      var sp = el("span", "sp");
+      var b = el("button", "btn", panel ? "Done" : (seen === null ? "Narrow it…" : "Change"));
+      b.type = "button";
+      b.addEventListener("click", function () { panel ? closePanel(true) : openPanel(); });
+      sp.appendChild(b); strip.appendChild(sp);
+    }
+
+    /* SAVED WHEN THE PANEL CLOSES AND ONLY IF SOMETHING MOVED, so opening it
+       to look and pressing Done writes nothing (§50.6's habit — a reader that
+       creates what it looked for puts a phantom change into every save). */
+    var wasSeen = JSON.stringify(seen);
+    function closePanel(save) {
+      if (panel) { panel.remove(); panel = null; }
+      drawStrip();
+      if (!save || JSON.stringify(seen) === wasSeen) return;
+      if (!it.id) return;
+      wasSeen = JSON.stringify(seen);
+      lead(true, "Saving…");
+      post({ action: "librarySeen", key: LIB.key, id: it.id, seen: seen }).then(function (j) {
+        if (!j || !j.ok) return say((j && j.error) || "That could not be saved.", true);
+        loadLibrary(true);
+      });
+    }
+
+    function openPanel() {
+      panel = el("div", "tickpanel");
+      var head = el("div", "tickhead");
+      var find = el("input", "fld"); find.type = "search";
+      find.placeholder = "Search departments…";
+      find.setAttribute("aria-label", "Search departments");
+      head.appendChild(find);
+
+      /* ALL HANDS IT BACK TO EVERYONE — it does NOT tick every place. Ticking
+         today's eighteen would EXCLUDE a unit created next month, silently,
+         and nobody would ever connect the missing unit to a tick list filled
+         in a year earlier. The panel says so in its own foot rather than
+         leaving it to be discovered (§35, §124). */
+      var all = el("button", "lnk", "All"); all.type = "button";
+      all.addEventListener("click", function () { seen = null; rows(); drawStrip(); });
+      var none = el("button", "lnk", "None"); none.type = "button";
+      none.addEventListener("click", function () { seen = []; rows(); drawStrip(); });
+      head.appendChild(all); head.appendChild(none);
+      panel.appendChild(head);
+
+      var list = el("div", "ticklist");
+      panel.appendChild(list);
+      var foot = el("div", "tickfoot");
+      foot.appendChild(el("b", null, "All"));
+      foot.appendChild(document.createTextNode(
+        " hands it back to everyone, including a department added later — it does not tick these " +
+        LIB.places.length + "."));
+      panel.appendChild(foot);
+
+      /* THE FILTER HIDES ROWS IN PLACE AND NEVER REPAINTS (§35, §108.13):
+         rebuilding the list would replace the box being typed into. */
+      function rows() {
+        list.innerHTML = "";
+        var kinds = [["unit", "Business units"], ["fn", "Supporting functions"]];
+        kinds.forEach(function (k) {
+          var mine = LIB.places.filter(function (p) { return p.kind === k[0]; });
+          if (!mine.length) return;
+          var gp = el("div", "gp", k[1]);
+          list.appendChild(gp);
+          mine.forEach(function (p) {
+            var on = seen !== null && seen.indexOf(p.at) >= 0;
+            var b = el("button", "tick"); b.type = "button";
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+            /* DRAWN, NEVER A TEXT CHARACTER — the tick mark is outside the
+               latin subsets this platform embeds and would ship as a blank
+               box (§52, §120.2, §130.1). */
+            var bx = el("span", "bx");
+            bx.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            b.appendChild(bx);
+            b.appendChild(document.createTextNode(p.label));
+            b.setAttribute("data-at", p.at);
+            b.addEventListener("click", function () {
+              /* TICKING ONE ON A REPORT EVERYBODY CAN SEE STARTS THE LIST at
+                 that one place, rather than at eighteen minus one: the act is
+                 "only these", not "everyone except". */
+              if (seen === null) seen = [];
+              var at = seen.indexOf(p.at);
+              if (at >= 0) seen.splice(at, 1); else seen.push(p.at);
+              b.setAttribute("aria-pressed", at >= 0 ? "false" : "true");
+              drawStrip();
+            });
+            list.appendChild(b);
+          });
+        });
+      }
+      rows();
+
+      find.addEventListener("input", function () {
+        var q = find.value.trim().toLowerCase();
+        var gp = null, any = false;
+        Array.prototype.forEach.call(list.children, function (n) {
+          if (n.className === "gp") {
+            /* A GROUP WITH NOTHING LEFT IN IT GOES WITH ITS ROWS, or the
+               panel reads as two headings over one name. Settled when the
+               NEXT heading arrives, and again at the end for the last. */
+            if (gp) gp.hidden = !any;
+            gp = n; any = false; return;
+          }
+          var hit = !q || n.textContent.toLowerCase().indexOf(q) >= 0;
+          n.hidden = !hit;
+          if (hit) any = true;
+        });
+        if (gp) gp.hidden = !any;
+      });
+
+      wrap.appendChild(panel);
+      drawStrip();
+      find.focus();
+    }
+
+    drawStrip();
+    wrap.appendChild(strip);
+    sb2.appendChild(wrap);
+    /* A REPORT WITH NO ID YET HAS NOTHING TO NARROW AGAINST, so it says what
+       has to happen first rather than failing at the press — the file strip's
+       own answer one field up (§61, §221). */
+    if (isNew) {
+      var n = el("p", "note", "Save it first, then choose who can see it. New reports start open to everyone.");
+      sb2.appendChild(n);
+    }
+    set.appendChild(sb2);
 
     var pair = el("div", "wpair");
     var db = el("div");

@@ -14,10 +14,20 @@
 
    WHAT A MODULE IS GIVEN, and nothing else (spec 046 §5's first open point,
    answered as far as this seam goes): the request, the client's slug, its
-   tenant id, its name, the modules it has and the address INSIDE the module.
-   It is handed no pool, no session and no registry row — a module reaches the
-   client's data through `withTenant` like everything else, so the tenant
-   boundary stays the one line it has always been (§313, §314).
+   tenant id, its name, the modules it has, the address INSIDE the module, and
+   WHO IS LOOKING — their key on this client's register and the seat they hold
+   on it. It is handed no pool, no session and no registry row — a module
+   reaches the client's data through `withTenant` like everything else, so the
+   tenant boundary stays the one line it has always been (§313, §314).
+
+   THE LIST GREW BY TWO ON PURPOSE (spec 046 §4.10, 2026-09-15) and that is
+   worth saying out loud, because a list that grows without anybody noticing
+   stops being a boundary. A report may be narrowed to one function or three,
+   so Insights has to know who is reading — and it is given the KEY and the
+   SEAT rather than the person's row, because those are the two facts the door
+   has already established and everything else about that person is the
+   register's to answer (lib/place.ts). A module that wanted more would be a
+   module asking the spine to hand over its own subject.
 
    THE LIST IS PARTIAL ON PURPOSE. Only a BUILT module has a server; Portfolio
    and Processes are words the address reserves and nothing more (lib/modules.ts
@@ -43,6 +53,13 @@ export type ServeArgs = {
   have: ModuleKey[];
   /* The path INSIDE the module, the module's word already taken off. */
   rest: string[];
+  /* WHO IS LOOKING, as the door answered it. `personKey` is their row on THIS
+     client's register and is null for somebody the register has not placed —
+     an office login opening a client by rule, before `officeRow` has minted
+     them one (§313.32, §316.9). `seat` is `super`, `smoteam` or `none` on this
+     client, and null where the door resolved no membership at all. */
+  personKey: string | null;
+  seat: "super" | "smoteam" | "none" | null;
 };
 export type ModuleServer = (a: ServeArgs) => Promise<Response>;
 

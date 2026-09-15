@@ -20,6 +20,7 @@ import { withTenant } from "./tenant.ts";
 import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
 import * as LIB from "./library.ts";
+import { placesFor } from "./place.ts";
 import { dropBlob, ready as storeReady, beginUpload, putPart, finishUpload } from "./blob-api.ts";
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
@@ -574,7 +575,14 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     if (action === "library") {
       const rows = await withTenant(row.id, (c) => LIB.listItems(c, {
         kind, forClient: false, q: String(body.q || ""), category: String(body.category || ""), state: String(body.state || "") }));
-      return ok({ items: rows.map((r) => LIB.shape(r, false)), categories: LIB.CATEGORIES, kind });
+      /* THE PLACES TRAVEL WITH THE LIST (spec 046 §4.10). The tick list is
+         this client's own units and functions, which is a spine fact and not
+         a library one, so it is read through lib/place.ts rather than
+         assembled here — and it rides this answer rather than a second
+         request, because a panel that opened and then asked would draw an
+         empty list for as long as the round trip took (§45.2). */
+      const places = await withTenant(row.id, (c) => placesFor(c));
+      return ok({ items: rows.map((r) => LIB.shape(r, false)), categories: LIB.CATEGORIES, kind, places });
     }
 
     if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's library is not yours to publish to.");
@@ -601,6 +609,33 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       const want = String(body.state || "");
       if (want !== "published" && want !== "draft") return no(400, "A report is published or it is a draft.");
       const saved = await withTenant(row.id, (c) => LIB.setState(c, String(body.id || ""), want, account.email));
+      if (!saved) return no(404, "That report is not there any more.");
+      return ok({ item: LIB.shape(saved, false) });
+    }
+
+    /* WHO MAY SEE ONE REPORT (spec 046 §4.10, reversing decision 15).
+
+       IT IS ITS OWN ACTION AND NOT PART OF `librarySave`, because narrowing a
+       report is not editing its words: sent on its own, refused on its own,
+       and a typo corrected in the title cannot re-assert who may read it.
+
+       `null` IS EVERYONE AND `[]` IS NOBODY, and the two arrive differently on
+       purpose — an absent `seen` and an empty array are the two ends of this
+       control and collapsing them would make *All* and *None* the same press.
+
+       THE LIST IS NARROWED TO THIS CLIENT'S OWN PLACES ON THE SERVER, never
+       trusted from the panel (§42): a word for a unit this client does not
+       have is DROPPED rather than refused, because a unit retired later must
+       not make a stored report unsaveable, and there is no way to type one in
+       by hand anyway. */
+    if (action === "librarySeen") {
+      const id = String(body.id || "");
+      let seen: string[] | null = null;
+      if (Array.isArray(body.seen)) {
+        const known = (await withTenant(row.id, (c) => placesFor(c))).map((x) => x.at);
+        seen = LIB.normalizeSeen(body.seen, known);
+      }
+      const saved = await withTenant(row.id, (c) => LIB.setSeen(c, id, seen));
       if (!saved) return no(404, "That report is not there any more.");
       return ok({ item: LIB.shape(saved, false) });
     }

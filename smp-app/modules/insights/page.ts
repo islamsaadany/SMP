@@ -18,7 +18,7 @@
    1c), which is itself the trial module's token block extended with a list. */
 import { createRequire } from "node:module";
 import { withTenant } from "../../lib/tenant.ts";
-import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item } from "../../lib/library.ts";
+import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
 import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { barFor } from "../../lib/branding.ts";
 
@@ -131,7 +131,7 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 export type Ask = { q?: string; category?: string };
 
 export async function insightsDocument(
-  slug: string, tenantId: string, tenantName: string, have: ModuleKey[], ask: Ask,
+  slug: string, tenantId: string, tenantName: string, have: ModuleKey[], ask: Ask, viewer: Viewer,
 ): Promise<string> {
   const q = oneLine(ask.q).slice(0, 120);
   const category = normalizeCategories(ask.category)[0] || "";
@@ -142,7 +142,7 @@ export async function insightsDocument(
      different things, and neither of them says "nothing has been published". */
   let rows: any[] | null = null;
   try {
-    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category }));
+    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category, viewer }));
   } catch (e) {
     console.error("insights: reading " + slug + "'s library:", (e as Error).message);
   }

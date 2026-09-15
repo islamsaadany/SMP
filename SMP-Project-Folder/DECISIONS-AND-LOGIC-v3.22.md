@@ -48170,3 +48170,245 @@ group per module** — and the honest answer for Insights may be *none*, because
 Forefront publishes it and there may be nothing for a client to set, in which
 case that is written down as a decision rather than built as an empty page; and
 **a line on the welcome screen**, which still reads the default module alone.
+
+---
+
+## §355 — WHO CAN SEE ONE REPORT (2026-09-15, spec 046 §4.10)
+
+Islam, of Insights: *"the client sets nothing and normally every one in the
+company can see the reports and forefront can publish but for some certain
+reports it might need to belong to a function or more not the whole company so
+we can thing of a simple visibility per report not an overall visiblity mattrix
+and the visibility is a serarchble tick based with select all and select none
+options and the default is all can see and the smo can make the exceptions."*
+
+### §355.1 — THE QUESTION I ASKED WAS THE WRONG SHAPE, AND HE SAID SO
+
+I had asked *who should be able to open Insights and who shouldn't*. His answer
+was a correction rather than a reply: **"shouldn't that be the access matrix of
+insights?"** — which is right, and is spec 046 §4.4's own contract: who opens a
+module in a given client is a tick on that client's access tab, not a decision
+made here in advance. What I actually needed from him was what the tab OFFERS.
+
+**AND THE SECOND HALF OF HIS MESSAGE THEN DISSOLVED THE FEATURE I WAS ABOUT TO
+DESCRIBE.** A matrix answers *which roles may open this module*. What is wanted
+is the opposite shape — the module is open to everybody and a single report is
+occasionally narrowed — and **a matrix cannot say that at all**: it has no row
+for one report. So this is not a smaller version of the access tab, it is a
+different question, and the two now coexist (the tab is still not built, which
+is said in §355.9 rather than left to be noticed).
+
+**IT REVERSES SPEC 046 DECISION 15**, recorded as a reversal rather than
+overwritten (Principle II) — and the reasoning behind that decision was never
+wrong. It read *whole module, for now*, and the publishing room's own signed-off
+mockup settled it in the same words: *"No per-item permissions… asked and
+answered whole module, for now."* That was an answer to **how much is worth
+building first**, and what changed is that Islam named the case it does not
+cover.
+
+### §355.2 — THE DEFAULT IS AN ABSENCE, NEVER A FULL LIST
+
+A report nobody has narrowed stores **nothing at all** (§50.6). Ticking today's
+eighteen places and calling that *everyone* is the fault that would have bitten
+in six months and never been traced: **a unit created next month would be
+silently excluded**, by a tick list somebody filled in a year earlier, and
+nobody would ever connect the two. So `All` **deletes the key**, and the panel
+**says so in its own foot** rather than leaving it to be discovered (§35,
+§124) — *"All hands it back to everyone, including a department added later — it
+does not tick these four."*
+
+**THREE STATES, AND ONLY THE MIDDLE ONE IS A LIST**: absent is everyone, a list
+is those places, `[]` is nobody. **The third is a real answer and is drawn as
+one** — the alarm ink, in words (*"Nobody can open this report"*) — because a
+report nobody can open reading like every other row on the list is the quietest
+possible way to lose one.
+
+**AND THERE IS NO ON/OFF BESIDE IT** (§110's pair): a switch would be a second
+way to say what the list already says, and the two could then disagree. The
+absence of a list IS everyone, asserted as an absence at both ends.
+
+### §355.3 — A PLACE IS THE PRODUCT'S OWN WORD FOR ONE, AND THE SPINE ANSWERS IT
+
+A place is spelt the way a ROLE's place has been spelt since §54 — a unit's key
+(`mobile`), or `fn:` and a supporting function's (`fn:finance`) — so a list of
+places stored here reads the same as one stored anywhere else in this product
+and nothing is translated on the way in or out.
+
+**A COMPANY IS NOT A PLACE, AND THAT IS A DECISION**: a company is a GROUPING of
+units (§23), so ticking one would be a third thing to keep in step with the
+units under it — and somebody attached to a company rather than to a unit is at
+the group for this purpose, which is what null means.
+
+**WHERE A PERSON SITS IS THE SPINE'S TO ANSWER AND NO MODULE'S** (spec 046
+§4.1). `lib/place.ts` is the one door onto the register; a module that grew its
+own copy would be two answers to *may they read this*, which is the worst shape
+§53.5's drift can take. **A person sits in exactly ONE place by construction**
+(§130.6) — `attachPersonAt()` clears all three pointers before writing one —
+which is what stops that question having two answers at all; where both are
+somehow set the unit wins, one answer chosen on purpose beating two chosen by
+whichever query ran first.
+
+**RETIRED UNITS AND FUNCTIONS ARE NOT OFFERED**: ticking a place nobody sits in
+is an exception that can never let anybody through, which is §61 one step round.
+
+### §355.4 — THE OFFICE READS EVERYTHING, AND IT IS THE SEAT THAT SAYS SO
+
+Islam, the same day, closing two open questions in one sentence: *"there is not
+client smo for the client it's always the smo whihc is us."*
+
+So **there is no client-side strategy office to give a control to** — which
+settles where the narrowing lives (the publishing room in this console, and no
+write surface in the client app at all) AND what the rule is written against.
+It asks this client's **seat** (`super` / `smoteam`), never who employs
+somebody, because the seat is the only one of the two the platform holds:
+`schema.sql` says so in its own note — *a consultant on three clients and a
+client user on one are the same shape*.
+
+**NEITHER BRANCH THAT ALREADY KNOWS THE ANSWER ASKS THE DATABASE.** A seat that
+sees everything is not asked where it sits, so it cannot then disagree with
+itself; and somebody the register has not placed has no place to look up. That
+second one is not an optimisation — it is **the same answer arrived at without
+a connection**, and it is the case §313.32 names: an office login opening a
+client before `officeRow` has minted them a row would otherwise open a tenant
+connection on every request to be told null. **Found by `checks/modules.mjs`
+going red**, which drives each module's server with no database at all.
+
+### §355.5 — THE NARROWING IS IN THE WHERE, NEVER APPLIED AFTERWARDS
+
+The same argument `lib/library.ts` already makes for `state = 'published'`, one
+column along: **a report kept out of somebody's list and still openable by its
+own address is no rule at all.** A narrowed report's id must answer *not found*,
+never *not allowed*.
+
+**AND THE LIBRARY AND THE FILE ARE HANDED ONE RESOLVED VIEWER** rather than each
+working it out (§53.5, `modules/insights/index.ts`) — two addresses narrowing by
+two rules is exactly how a report goes missing from a list and stays
+downloadable.
+
+**THE MODULE SEAM GREW BY EXACTLY TWO FACTS, ON PURPOSE** (spec 046 §5's first
+open point): a module is handed `personKey` and `seat` beside the client it
+serves, and still no pool, no session and no registry row. **A list that grows
+without anybody noticing has stopped being a boundary**, so the growth is
+written into `modules/registry.ts` in its own paragraph rather than left to be
+discovered.
+
+### §355.6 — NO MIGRATION AND NO SCHEMA CHANGE, PROVED RATHER THAN CLAIMED
+
+`library_items` is tenant-owned with RLS and already carries an `extra jsonb`
+column, so the list rides `extra.seen` the road every unrecognised key in this
+product already travels (§118, §213). **The check asserts the table gained no
+column** (§172), because that claim has been made wrongly in this file before.
+
+### §355.7 — THE MOCKUP FOUND TWO FAULTS BEFORE A SOURCE MOVED
+
+Drawn first and published as an artifact (rule 1c), from the signed-off
+publishing-room mockup's own two style blocks verbatim.
+
+**THE MARK COLLIDED WITH `Draft`.** A narrowed report was drawn with an amber
+tag, and rendering it showed `.tag.none` — the Draft mark — is already amber on
+amber-tinted ground: **two meanings in one colour in one slot on one list**
+(§87's twins, §41's accent budget). It takes the plain tag, which is also the
+honest weight: a narrowed report is not in a worse state than any other.
+
+**AND A UNIT WAS MISSING FROM THE TICK LIST** — seventeen where the tenant has
+eighteen — which nothing but drawing it against the real list would have shown.
+
+**I ALSO NEARLY INVENTED A TOKEN THAT EXISTS SOMEWHERE ELSE.** Reaching for a
+`--bad-tx` twin, I cited §62's *"`--bad` on `--bad-bg` is 4.41"* — which is the
+CLIENT platform's `_shared.css` and not this console's. Measured in the
+console's own palette it is **5.51 light / 5.28 dark**, so the plain token is
+right and the twin would have been a second answer to a question already
+answered here. *A number carried from another stylesheet is not a measurement of
+this one* (§303's shape, in colour).
+
+**AND THE PANEL WAS CLIPPED BY THE MOCKUP'S OWN FRAME**, twice — the first fix
+was a guessed constant and was still 223px short (§122.5). It is drawn in flow
+inside the frame with the real behaviour stated in the notes, because a
+constant chosen to make one screenshot fit is a constant that goes stale.
+
+### §355.8 — WHAT THE FALSIFICATIONS TAUGHT, AND TWO OF THEM WERE THE CHECK
+
+**`checks/insights.mjs` 127/0**, proved able to fail four ways — and the fourth
+went **GREEN** at first. Two faults compounding, both worth keeping:
+
+- **The filter's clause and its argument were returned separately**, so a break
+  that short-circuited only the clause left the argument pushed and Postgres
+  answered *bind message supplies 2 parameters, but prepared statement requires
+  1*. Two things that must agree are returned **together** now (`seenSql()`
+  returns `{clause, args}`), which is a real fragility the green run could not
+  have shown.
+- **And the run's own summary lied**: the catch set `failed = true` and never
+  pushed to the failure list, so a run that DIED printed *"0 failed"*. §298.3
+  and §54.5 in the harness — *a green falsification is indistinguishable from a
+  working guard*. With both corrected the break is **6 red**, exactly the six
+  narrowing assertions and nothing else.
+
+**`checks/publishing-room.py` 64/0 on both copies of the console page** —
+the root `platform.html` and the generated `smp-app/shell/platform.html`,
+because a generated copy is where a drift hides (§53.5) — with **section 8
+driving the panel rather than reading it** (§70, §96: a control that renders and
+does nothing looks identical to one that works).
+
+**ITS FIRST RUN DIED ON A REPAINT ITS OWN PRESS HAD CAUSED** (§222): `Done`
+saves, the save reloads the library and REBUILDS the card, so the next press
+landed on a **detached** node whose panel was appended to nothing at all. The
+wait is now for the NEW node — stamp the old one and watch the stamp go — never
+for the panel disappearing, which is true the instant it closes and a whole
+repaint too early.
+
+**SECTION 8 IS FALSIFIED FROM THE SOURCE** (§276), which `SMP_PAGE` makes
+possible on a hand-written page: four doctored copies, each reddening its own
+assertions and nothing else — `All` ticking every place (2 red, printing the
+whole tick list verbatim), a tick starting at everything-minus-one (1), `Done`
+saving whether or not anything moved (2), the panel rebuilt on every keystroke
+(4). **Two of those four taught the check something before they worked:**
+
+- The first **DIED rather than reporting** — `press` throws when the word is not
+  on a button, and the word is exactly what an all-ticks build changes, so the
+  one fault the break stages was the one that killed the run. §215, inside the
+  helper written that hour to stop it; the press is inside the try now.
+- The search break went **green**, because the assertion counted rows and a
+  rebuilt list holds the same four (§113.8). *"In place" is about the nodes
+  being the SAME nodes*, so it is asserted as identity now, with the box being
+  typed into asserted beside them — and the break was rewritten to one that
+  actually tears the panel down.
+
+**AND THE CITATIONS WERE RENUMBERED, SCOPED TO THIS WORK'S OWN LINES** (§264.3):
+spec 046 already had a §4.9 — the console's document room — so this became
+**§4.10** rather than the existing one moving, and the sweep was written to skip
+the two pre-existing lines by their exact text. It caught both, put them back,
+and they were then verified against `HEAD` rather than assumed.
+
+### §355.9 — WHAT IS DELIBERATELY NOT BUILT
+
+- **A report cannot be narrowed to one PERSON.** The register is where a
+  person's place is decided; a per-person list would be a second answer to it.
+- **The client is shown nothing about a report they cannot see.** A row saying
+  *there is something here you may not open* is worse than the absence, and is
+  the whole reason the filter is in the WHERE.
+- **The per-module access tab is still not built**, so *who may open Insights at
+  all* remains nobody's to set and every person in the client can open the
+  module. That is a different question from this one and only this one is
+  answered — said here because "visibility" has now been used for both. It
+  stays on §354.8's list of three, with the Setup group and the landing line.
+
+### §355.10 — WHAT WAS RUN
+
+`check:insights` **127/0** against a real Postgres, red four ways;
+`publishing-room.py` **64/0** on both copies of the console page, red seven ways
+(three existing DOM breaks, four new source breaks); `modules` 93/0; `shell`
+72/0; `door-landing` 70/0; `blob-api` 23/23; `comms-api` 47/47; `upload-seam`
+9/0; `demo-seed` 7/0; `memory-boundary` 14/0; `schema-room` 10/0;
+`deploy-context` 5/0; `office-standing` 7/0; `setup-shape` 33/0; `frameworks`
+90/0; `memory-api` 36/0; `memory-split` 21/0; `assistant-defaults` 10/0;
+`declared-deps` all clear; `generated-in-step` all clear; `tsc` clean;
+`next build` green.
+
+**THE FROZEN PRODUCT IS UNTOUCHED AND IT IS MEASURED**: `built-in-step.py` all
+good, `python3 build.py` byte-identical to the shipped file — so **`sw.js` is
+NOT bumped**, §91's trigger being the built file's bytes changing and they did
+not.
+
+**`check:state` IS 84 ok / 2 failed AND IT IS NOT THIS WORK'S** — the two
+pre-existing seeded-demo-graph failures already on the record (§303, §354.7),
+neither touching a module, the route or a library.

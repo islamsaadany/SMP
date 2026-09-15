@@ -41,7 +41,15 @@ import {
   CATEGORIES, KINDS, normalizeCategories, isCategory, isKind, safeFileName, looksLikePdf,
   filePath, sizeLabel, calendarDay, dayOut, oneLine, shape, shelfWhere,
   listItems, oneItem, draftOf, insertItem, updateItem, setFile, setState, deleteItem, countDownload,
+  normalizeSeen, seenOf, seenLabel, setSeen, SEEN_KEY,
 } from "../lib/library.ts";
+import { placesFor, placeOf, placeLabel } from "../lib/place.ts";
+
+/* Everyone, and nobody — the two ends of the new control, named once so the
+   sections below read as the decision rather than as two object literals. */
+const ALL = { place: null, seesAll: true };
+const NOWHERE = { place: null, seesAll: false };
+const at = (place) => ({ place, seesAll: false });
 
 let ok = 0;
 const bad = [];
@@ -112,6 +120,46 @@ check("a title pasted over three lines comes back as one",
   oneLine("Egypt\n  Consumer\nOutlook") === "Egypt Consumer Outlook");
 
 /* ══ §2 · what a client receives, and what it does not ═════════════════ */
+/* ══ §1b · who may see one report, as a rule ═══════════════════════════ */
+section("§1b · who may see one report (spec 046 §4.10)");
+
+const PLACES = ["mobile", "retail", "fn:finance", "fn:treasury"];
+
+check("absent is EVERYONE, and that is the whole model — null out, never []",
+  normalizeSeen(undefined, PLACES) === null && normalizeSeen(null, PLACES) === null &&
+  normalizeSeen("fn:finance", PLACES) === null);
+/* THE TWO ENDS OF THE CONTROL, and they must not collapse: All hands a report
+   back to everyone INCLUDING a unit made next month, None gives it to nobody
+   at all. A build that read [] as absent would make the two presses one. */
+check("an empty list is NOBODY, which is a different thing from absent",
+  Array.isArray(normalizeSeen([], PLACES)) && normalizeSeen([], PLACES).length === 0);
+check("the stored list is the KNOWN list's own order, never the order somebody ticked",
+  normalizeSeen(["fn:treasury", "mobile"], PLACES).join(",") === "mobile,fn:treasury",
+  normalizeSeen(["fn:treasury", "mobile"], PLACES).join(","));
+check("...so two reports narrowed to the same places are byte-identical",
+  JSON.stringify(normalizeSeen(["fn:finance", "mobile"], PLACES)) ===
+  JSON.stringify(normalizeSeen(["mobile", "fn:finance"], PLACES)));
+check("a place this client does not have is DROPPED, never refused",
+  normalizeSeen(["mobile", "fn:nowhere", "made-up"], PLACES).join(",") === "mobile");
+check("a place ticked twice is one place",
+  normalizeSeen(["mobile", "mobile"], PLACES).join(",") === "mobile");
+check("a row hand-edited into a shape nothing writes reads as EVERYONE, not nobody",
+  seenOf({ seen: "fn:finance" }) === null && seenOf({}) === null && seenOf(null) === null);
+check("...and a real list reads back as itself",
+  (seenOf({ seen: ["mobile"] }) || []).join(",") === "mobile");
+check("the words: everyone says nothing at all, so the row wears no mark",
+  seenLabel(null) === "", seenLabel(null));
+check("...one place is singular, several are plural, and none is Nobody",
+  seenLabel(["mobile"]) === "1 department" && seenLabel(["a", "b", "c"]) === "3 departments" &&
+  seenLabel([]) === "Nobody",
+  [seenLabel(["mobile"]), seenLabel(["a", "b", "c"]), seenLabel([])].join(" | "));
+/* §65's suffix, load-bearing for exactly one row on Raya Trade — a unit called
+   Care and a function called Care — and drawn on every function rather than on
+   the pair, or it reads as a note about two rows instead of a rule. */
+check("a function says it is one, and a unit does not",
+  placeLabel("Care", "fn") === "Care (function)" && placeLabel("Care", "unit") === "Care",
+  placeLabel("Care", "fn"));
+
 section("§2 · what a client receives, and what the console receives");
 
 const row = {
@@ -385,7 +433,7 @@ try {
      attached is a real state — a process has no file at all — so both are
      asserted rather than the fixture being bent to the happier one (§94.2). */
   await asTenant(a.id, (c) => setFile(c, draft.id, filePath("insights", a.id, draft.id, "gov.pdf"), "gov.pdf", 921600));
-  const page = await insightsDocument("client-a", a.id, "Client A", have, {});
+  const page = await insightsDocument("client-a", a.id, "Client A", have, {}, ALL);
   check("the reports are on it",
     page.includes("Governance Review") && page.includes("Undated"), String(page.length));
   check("a report with a file has a way to open it",
@@ -411,18 +459,18 @@ try {
     page.includes(readableDay("2026-09-04")) && readableDay("2026-09-04") === "4 Sep 2026",
     readableDay("2026-09-04"));
 
-  const filtered = await insightsDocument("client-a", a.id, "Client A", have, { q: "nothing like this" });
+  const filtered = await insightsDocument("client-a", a.id, "Client A", have, { q: "nothing like this" }, ALL);
   check("a search that matches nothing says so",
     filtered.includes("No reports match"));
   check("...and KEEPS the categories, or there is no way back to the reports (§61)",
     filtered.includes(">Macro</a>"));
 
-  const emptyPage = await insightsDocument("client-b2", b.id, "Client B", have, {});
+  const emptyPage = await insightsDocument("client-b2", b.id, "Client B", have, {}, ALL);
   /* B's own report is still published, so the empty state is made rather than
      waited for — a library emptied by the check is not the library a new
      client opens. */
   await asTenant(b.id, (c) => setState(c, bPub.id, "draft", "x@forefront.consulting"));
-  const virgin = await insightsDocument("client-b2", b.id, "Client B", have, {});
+  const virgin = await insightsDocument("client-b2", b.id, "Client B", have, {}, ALL);
   check("B's page is B's, not A's — the boundary holds through the screen too",
     emptyPage.includes("RHI Cement Demand Note") && !emptyPage.includes("Governance Review"));
   check("a client with nothing published is told so, and told who publishes",
@@ -430,10 +478,153 @@ try {
   check("...and is not shown a row of categories that could only return nothing",
     !virgin.includes(">Macro</a>"));
 
+  /* ══ §12 · a report narrowed to one function ════════════════════════ */
+  section("§12 · a report narrowed to one function, and one to nobody");
+
+  /* THE STATE IS MADE, because nothing in the fixture above carries it and
+     every assertion here would pass on a build that lost the feature
+     (§255, §94.5). Client A gets an org: two units, two functions — and the
+     `(function)` suffix has a job, because one of each is called Care. */
+  await owner("SET search_path TO " + SCHEMA);
+  for (const [k, n, i] of [["mobile", "Mobile", 0], ["care", "Care", 1]])
+    await owner("INSERT INTO " + SCHEMA + ".units (tenant_id, key, idx, name) VALUES ($1,$2,$3,$4)", [a.id, k, i, n]);
+  for (const [k, n, i] of [["finance", "Finance", 0], ["care", "Care", 1]])
+    await owner("INSERT INTO " + SCHEMA + ".functions (tenant_id, key, idx, name) VALUES ($1,$2,$3,$4)", [a.id, k, i, n]);
+  for (const [k, n, u, f] of [["hoda", "Hoda", null, "finance"], ["karim", "Karim", "mobile", null],
+                              ["nour", "Nour", null, null]])
+    await owner("INSERT INTO " + SCHEMA + ".people (tenant_id, key, idx, name, unit_key, fn_key) VALUES ($1,$2,0,$3,$4,$5)",
+      [a.id, k, n, u, f]);
+
+  const places = await asTenant(a.id, (c) => placesFor(c));
+  check("the tick list is this client's units and then its functions, in the navigation's order",
+    places.map((p) => p.at).join(",") === "mobile,care,fn:finance,fn:care",
+    places.map((p) => p.at).join(","));
+  check("...and a unit called Care and a function called Care are told apart",
+    places.filter((p) => p.label.startsWith("Care")).map((p) => p.label).join(" | ") === "Care | Care (function)",
+    places.filter((p) => p.label.startsWith("Care")).map((p) => p.label).join(" | "));
+  check("where somebody sits is read off the register, unit and function alike",
+    (await asTenant(a.id, (c) => placeOf(c, "karim"))) === "mobile" &&
+    (await asTenant(a.id, (c) => placeOf(c, "hoda"))) === "fn:finance");
+  check("...and somebody the register has not placed is NULL, never a guess (§35)",
+    (await asTenant(a.id, (c) => placeOf(c, "nour"))) === null &&
+    (await asTenant(a.id, (c) => placeOf(c, "nobody-at-all"))) === null);
+
+  /* Two published reports: one everybody can see, one narrowed to Finance and
+     Treasury — which on this client is Finance alone, because there is no
+     Treasury, and a place the client does not have is dropped. */
+  const openOne = await asTenant(a.id, (c) => insertItem(c, "insights",
+    draftOf({ title: "Everyone Outlook", categories: ["Macro"], reportDate: "2026-08-01" })));
+  await asTenant(a.id, (c) => setState(c, openOne.id, "published", "islam@forefront.consulting"));
+  const narrow = await asTenant(a.id, (c) => insertItem(c, "insights",
+    draftOf({ title: "FX Cost Exposure", categories: ["Macro"], reportDate: "2026-08-12" })));
+  await asTenant(a.id, (c) => setState(c, narrow.id, "published", "islam@forefront.consulting"));
+  const known = places.map((p) => p.at);
+  const wrote = await asTenant(a.id, (c) => setSeen(c, narrow.id, normalizeSeen(["fn:finance", "fn:treasury"], known)));
+  check("a place the client does not have is dropped on the way in, and the rest is stored",
+    JSON.stringify(seenOf(wrote.extra)) === '["fn:finance"]', JSON.stringify(seenOf(wrote.extra)));
+
+  const titles = (rows) => rows.map((r) => r.title).sort().join("|");
+  const listFor = (v) => asTenant(a.id, (c) => listItems(c, { kind: "insights", forClient: true, viewer: v }));
+
+  /* BOTH ENDS, EVERY TIME (§94.2): the narrowed report is invisible to Karim
+     AND visible to Hoda in the same run, and the open one is visible to both —
+     or "Karim sees one report" is equally true of a build that lost the
+     library altogether (§113.8). */
+  const hoda = await listFor(at("fn:finance"));
+  const karim = await listFor(at("mobile"));
+  const nour = await listFor(NOWHERE);
+  const office = await listFor(ALL);
+  check("somebody in Finance sees the narrowed report",
+    titles(hoda).includes("FX Cost Exposure"), titles(hoda));
+  check("somebody in Mobile does not",
+    !titles(karim).includes("FX Cost Exposure"), titles(karim));
+  check("...and both of them see the one nobody narrowed, or the rule is hiding everything",
+    titles(hoda).includes("Everyone Outlook") && titles(karim).includes("Everyone Outlook"));
+  /* ASSERTED ABOUT THE NARROWED REPORT AND NOT AS A WHOLE LIST: §11 leaves
+     two more published reports in this library, so the first draft of this
+     compared against "Everyone Outlook" alone and reported a correct build
+     broken (§100.3 — a probe that assumes a state the fixture does not have).
+     The everyone report is asserted beside it as the control, or "they cannot
+     see the narrowed one" is equally true of an empty library (§113.8). */
+  check("somebody the register has not placed sees the everyone reports and no narrowed one",
+    !titles(nour).includes("FX Cost Exposure") && titles(nour).includes("Everyone Outlook"), titles(nour));
+  check("the office reads everything, whatever a list says (the seat, never who employs them)",
+    titles(office).includes("FX Cost Exposure") && titles(office).includes("Everyone Outlook"), titles(office));
+
+  /* THE ID IS THE ADDRESS SOMEBODY WOULD BE SENT, which is the whole reason
+     the rule is in the WHERE: a narrowed report missing from a list and
+     reachable by its own link would be no rule at all (spec 046 §4.10). */
+  check("a narrowed report cannot be reached BY ITS ID by somebody it is not for",
+    (await asTenant(a.id, (c) => oneItem(c, "insights", narrow.id, true, at("mobile")))) === null);
+  check("...and CAN be by somebody it is for, or the refusal above is not about the narrowing",
+    (await asTenant(a.id, (c) => oneItem(c, "insights", narrow.id, true, at("fn:finance")))) !== null);
+  check("...and by the office",
+    (await asTenant(a.id, (c) => oneItem(c, "insights", narrow.id, true, ALL))) !== null);
+
+  /* NOBODY IS A REAL STATE and is not the same row as everyone. */
+  await asTenant(a.id, (c) => setSeen(c, narrow.id, []));
+  const shutHoda = await listFor(at("fn:finance")), shutKarim = await listFor(at("mobile"));
+  check("None takes it from the person it was just narrowed TO, which is the whole of it",
+    !titles(shutHoda).includes("FX Cost Exposure") && !titles(shutKarim).includes("FX Cost Exposure"),
+    titles(shutHoda));
+  check("...and leaves every other report exactly where it was, so None is not a delete",
+    titles(shutHoda).includes("Everyone Outlook") &&
+    titles(await listFor(ALL)).includes("FX Cost Exposure"), titles(await listFor(ALL)));
+  const shut = await asTenant(a.id, (c) => oneItem(c, "insights", narrow.id, false));
+  check("...and it is MARKED rather than looking like any other report",
+    shape(shut, false).seenLabel === "Nobody", shape(shut, false).seenLabel);
+
+  /* ALL DELETES THE KEY. This is the one that would have bitten in six months:
+     a list of today's four places would EXCLUDE a unit made next month, and
+     nobody would ever connect the two. */
+  const back = await asTenant(a.id, (c) => setSeen(c, narrow.id, null));
+  check("All hands it back to everyone by REMOVING the key, never by ticking today's places",
+    !has(back.extra, SEEN_KEY) && seenOf(back.extra) === null, JSON.stringify(back.extra));
+  check("...so a unit created afterwards can read it, which ticking them all would not give",
+    titles(await listFor(at("made-up-later"))).includes("FX Cost Exposure"));
+
+  /* NO MIGRATION, PROVED RATHER THAN CLAIMED (§172: four layers once agreed
+     about a value the database had never been offered). */
+  const cols = await owner(
+    "SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'library_items'",
+    [SCHEMA]);
+  check("it rides `extra`, so the table gained no column",
+    !cols.some((r) => /seen|visib/i.test(r.column_name)) && cols.some((r) => r.column_name === "extra"),
+    cols.map((r) => r.column_name).join(","));
+
+  /* ══ §13 · two people, two libraries ════════════════════════════════ */
+  section("§13 · what two people see");
+
+  await asTenant(a.id, (c) => setSeen(c, narrow.id, ["fn:finance"]));
+  const pgHoda = await insightsDocument("client-a", a.id, "Client A", have, {}, at("fn:finance"));
+  const pgKarim = await insightsDocument("client-a", a.id, "Client A", have, {}, at("mobile"));
+  check("the narrowed report is simply not in the other list — not greyed, not named",
+    pgHoda.includes("FX Cost Exposure") && !pgKarim.includes("FX Cost Exposure"));
+  /* A COUNT THAT DISAGREES WITH ITS OWN LIST IS A BUG REPORT WAITING TO
+     HAPPEN (§108.1's shape), so it is asserted rather than assumed. */
+  const countOn = (p) => (p.match(/>(\d+) reports?</) || [])[1];
+  const rowsOn = (p) => (p.match(/class="item"/g) || []).length;
+  check("the count follows what that person can see, on both pages",
+    Number(countOn(pgHoda)) === rowsOn(pgHoda) && Number(countOn(pgKarim)) === rowsOn(pgKarim) &&
+    Number(countOn(pgHoda)) === Number(countOn(pgKarim)) + 1,
+    countOn(pgHoda) + "/" + rowsOn(pgHoda) + " vs " + countOn(pgKarim) + "/" + rowsOn(pgKarim));
+  check("...and the file's address is not on the page it is not for either",
+    !pgKarim.includes(narrow.id), "the narrowed report's id reached the wrong page");
+  const pgOffice = await insightsDocument("client-a", a.id, "Client A", have, {}, ALL);
+  check("the office's page carries both",
+    pgOffice.includes("FX Cost Exposure") && pgOffice.includes("Everyone Outlook"));
+
   /* the fixture goes, whatever happened above (§94.2) */
   await owner("DELETE FROM " + SCHEMA + ".tenants WHERE key LIKE $1", [stamp + "%"]);
 } catch (e) {
+  /* A RUN THAT DIED SAID "0 failed" (§298.3, §215). The summary counts `bad`
+     and this branch only set a flag, so a falsification that CRASHED the run
+     printed `109 passed, 0 failed` and read, in a batch, exactly like a guard
+     that works (§54.5) — which is how the `everyone-sees-everything` break
+     came back green while proving nothing. The death is a failure now, and it
+     is in the list the tail prints. */
   failed = true;
+  bad.push("the run itself — " + (e && e.message));
   console.log("\n  FAIL the run itself — " + (e && e.message));
 } finally {
   await pool.end();

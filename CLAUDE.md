@@ -7935,6 +7935,65 @@ node smp-app/checks/modules.mjs # a module per client, and the trial that proves
                                 # `page.appendChild(grid)` appears twice in
                                 # platform.html, so an unscoped indexOf compared the
                                 # band against ANOTHER page's grid (&sect;100.3)
+node smp-app/checks/insights.mjs # the library, and who can see one report
+                                # (spec 053, &sect;355) &mdash; `npm run check:insights`,
+                                # needs a database. &sect;1b is the narrowing's PURE
+                                # rules with no database at all (absent is everyone, `[]`
+                                # is nobody, an unknown place dropped, the order the
+                                # client's own); &sect;12 then presses it against a real
+                                # Postgres, BOTH ENDS every time (&sect;94.2) &mdash; a
+                                # narrowed report visible to Finance and gone for
+                                # Mobile, gone BY ITS OWN ADDRESS too (a report kept off
+                                # a list and still downloadable is no rule at all), the
+                                # office reading everything beside them, `[]` shutting it
+                                # to everybody and `All` DELETING the key &mdash; with an
+                                # everyone-report drawn beside it as the control, or a
+                                # build that narrowed nothing passes half (&sect;113.8).
+                                # It asserts the table gained NO COLUMN, because "no
+                                # migration" has been claimed wrongly here before
+                                # (&sect;172). 127/0, red four ways
+                                # (`check:insights:red`) &mdash; and the fourth went
+                                # GREEN at first, twice over: the filter's clause and its
+                                # argument were returned separately, so the break
+                                # desynced them into a bind error, and the run's own
+                                # catch never pushed the death onto the failure list, so
+                                # a run that DIED printed "0 failed" (&sect;298.3,
+                                # &sect;54.5). Both corrected, it is 6 red on exactly the
+                                # six narrowing assertions
+python3 SMP-Project-Folder/src/checks/publishing-room.py # the room Forefront publishes
+                                # from, and who can see one report (spec 053, &sect;355).
+                                # NO DATABASE &mdash; platform.html is served as it is by
+                                # both stacks and every rule it obeys is the server's, so
+                                # a stub answers and records what arrived, which is also
+                                # the only way to MAKE the states that matter: a report
+                                # with no file, a store that is not there (&sect;94.11,
+                                # &sect;255). Run it against BOTH copies of the console
+                                # page &mdash; the root file and
+                                # `SMP_PAGE=smp-app/shell/platform.html` &mdash; because a
+                                # generated copy is where a drift hides (&sect;53.5).
+                                # &sect;8 DRIVES the tick panel rather than reading it
+                                # (&sect;70, &sect;96): the three row states, no on/off
+                                # beside the strip (&sect;110's pair), a unit called Care
+                                # and a function called Care told apart (&sect;65), every
+                                # tick a DRAWN mark (&sect;52), and then the presses
+                                # &mdash; one place posting exactly that place, `All`
+                                # posting null, `None` posting `[]`, and opening the
+                                # panel to look posting NOTHING (&sect;50.6). 64/0, red
+                                # seven ways. Its first run DIED on a repaint its own
+                                # press had caused (&sect;222: the save reloads the
+                                # library and REBUILDS the card, so the next press landed
+                                # on a detached node) &mdash; it waits for the NEW node
+                                # now, never for the panel going, which is true a whole
+                                # repaint too early. Section 8 is falsified FROM THE
+                                # SOURCE via `SMP_PAGE` at a doctored copy (&sect;276),
+                                # and two of those four breaks taught the file something
+                                # before they worked: one DIED rather than reporting
+                                # (&sect;215 &mdash; `press` throws on a missing word and
+                                # the WORD is what an all-ticks build changes), and the
+                                # search break went green because the assertion counted
+                                # ROWS and a rebuilt list holds the same four &mdash;
+                                # "in place" is about the nodes being the SAME nodes, so
+                                # it is asserted as identity (&sect;113.8)
 python3 checks/blob-api.mjs     # (in smp-app: `npm run check:blob`) the clip endpoint
                                 # on the new stack (§316.5): the door in front of it, a
                                 # client that does not exist and a schema NAME refused
@@ -9341,7 +9400,99 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-14 &mdash; **&sect;354: a module is a folder that serves
+*Last Updated: 2026-09-15 &mdash; **&sect;355: who can see one report (spec
+046 &sect;4.10).** Islam, of Insights: *"normally every one in the company can
+see the reports and forefront can publish but for some certain reports it might
+need to belong to a function or more not the whole company &hellip; a simple
+visibility per report not an overall visiblity mattrix &hellip; searchable tick
+based with select all and select none &hellip; the default is all can see and
+the smo can make the exceptions."* **THE QUESTION I ASKED WAS THE WRONG SHAPE
+AND HE SAID SO** &mdash; I had asked who should be able to open Insights, and
+his reply was a correction: *"shouldn't that be the access matrix of insights?"*,
+which is spec 046 &sect;4.4's own contract (who opens a module is a tick on that
+client's access tab, not a decision made here in advance). **AND THE SECOND HALF
+OF HIS MESSAGE DISSOLVED THE FEATURE I WAS ABOUT TO DESCRIBE**: a matrix answers
+*which roles may open this module* and has no row for ONE report, so this is a
+different question rather than a smaller version of one. **IT REVERSES SPEC 046
+DECISION 15**, recorded as a reversal (Principle II) &mdash; that decision read
+*whole module, for now*, and the publishing room's own signed-off mockup settled
+it in the same words; the reasoning was right about *how much is worth building
+first* and what changed is that he named the case it does not cover.
+**THE DEFAULT IS AN ABSENCE, NEVER A FULL LIST** (&sect;50.6): ticking today's
+eighteen places and calling that *everyone* would silently EXCLUDE a unit
+created next month, by a list somebody filled in a year earlier, so `All`
+DELETES the key and the panel says so in its own foot (&sect;35, &sect;124).
+**THREE STATES AND ONLY THE MIDDLE ONE IS A LIST** &mdash; absent is everyone, a
+list is those places, `[]` is nobody &mdash; **and the third is drawn as a real
+answer**, in the alarm ink and in words, because a report nobody can open
+reading like every other row is the quietest way to lose one. **NO ON/OFF BESIDE
+IT** (&sect;110's pair): the absence of a list IS everyone, so a switch would be
+a second way to say it and the two could disagree. **A PLACE IS THE PRODUCT'S
+OWN WORD** (&sect;54: `mobile`, `fn:finance`) and **a company is not one**
+(&sect;23: a grouping, so ticking one would be a third thing to keep in step);
+**where a person sits is the SPINE's to answer** (`lib/place.ts`, spec 046
+&sect;4.1), a module that grew its own copy being two answers to *may they read
+this* &mdash; and they sit in exactly ONE place by construction (&sect;130.6),
+which is what stops the question having two. **THE OFFICE READS EVERYTHING AND
+THE SEAT SAYS SO**, from Islam's own correction the same day &mdash; *"there is
+not client smo for the client it's always the smo whihc is us"* &mdash; which
+settles both that the narrowing lives in the publishing room with no write
+surface in the client app at all, and that the rule asks the **seat** rather than
+who employs somebody, the seat being the only one of the two the platform holds.
+**NEITHER BRANCH THAT ALREADY KNOWS THE ANSWER ASKS THE DATABASE**, which is not
+an optimisation: an office login opening a client before `officeRow` has minted
+them a row (&sect;313.32) would otherwise open a tenant connection on every
+request to be told null &mdash; **found by `checks/modules.mjs` going red**,
+which drives each module's server with no database at all. **THE NARROWING IS IN
+THE WHERE** (`lib/library.ts`'s own argument for `state = 'published'`, one
+column along): a report kept off a list and still openable by its address is no
+rule at all, so the library and the file are handed ONE resolved viewer rather
+than each working it out (&sect;53.5). **THE MODULE SEAM GREW BY EXACTLY TWO
+FACTS, ON PURPOSE** &mdash; `personKey` and `seat`, still no pool, no session and
+no registry row &mdash; written into `modules/registry.ts` because a list that
+grows without anybody noticing has stopped being a boundary. **NO MIGRATION AND
+NO SCHEMA CHANGE, PROVED** (&sect;172): `library_items` carries an `extra jsonb`
+column, and the check asserts the table gained none. **THE MOCKUP FOUND TWO
+FAULTS BEFORE A SOURCE MOVED** (rule 1c): the narrowed mark was drawn amber and
+renders in the SAME amber as `Draft` &mdash; two meanings in one colour in one
+slot on one list (&sect;87's twins) &mdash; and the tick list was missing a unit;
+**and I nearly invented a `--bad-tx` token by citing a contrast figure from the
+CLIENT platform's stylesheet**, where this console's own measures 5.51/5.28
+(&sect;303's shape, in colour). **TWO FALSIFICATIONS WERE THE CHECK** and one
+went GREEN: the filter's clause and its argument were returned SEPARATELY, so a
+break desynced them into a bind error, and the run's own catch never pushed the
+death onto the failure list &mdash; **a run that DIED printed "0 failed"**
+(&sect;298.3, &sect;54.5); corrected, it is 6 red on exactly the six narrowing
+assertions. **AND THE BROWSER CHECK DIED ON A REPAINT ITS OWN PRESS HAD CAUSED**
+(&sect;222): `Done` saves, the save reloads the library and REBUILDS the card, so
+the next press landed on a detached node &mdash; it waits for the NEW node now,
+never for the panel going, which is true a whole repaint too early; its section 8
+is falsified FROM THE SOURCE four ways, **and two of those taught it something
+before they worked** (&sect;215's death on a missing word, and a search break
+going green because the assertion counted rows where "in place" means the same
+NODES, &sect;113.8). **THE CITATIONS WERE RENUMBERED SCOPED TO THIS WORK'S OWN
+LINES** (&sect;264.3): spec 046 already had a &sect;4.9, so this became
+&sect;4.10 rather than the existing one moving, and the sweep skipped the two
+pre-existing lines by their exact text &mdash; verified against `HEAD` rather
+than assumed. **VERIFIED**: insights **127/0** red four ways, publishing-room
+**64/0 on BOTH copies of the console page** red seven ways, modules 93/0, shell
+72/0, door-landing 70/0, blob 23/23, comms 47/47, upload 9/0, demo 7/0, memory
+14/0, room 10/0, deploy 5/0, standing 7/0, setup 33/0, frameworks 90/0, memory-api
+36/0, memory-split 21/0, assistant-defaults 10/0, `declared-deps` and
+`generated-in-step` all clear, `tsc` clean, `next build` green. **The frozen
+product is untouched and measured** &mdash; `built-in-step.py` all good and
+`build.py` byte-identical &mdash; so **`sw.js` is NOT bumped** (&sect;91's
+trigger is the built file's bytes changing and they did not). **`check:state`
+84/2 is NOT this work's** (&sect;303, the two recorded seeded-demo-graph
+failures). **RECORDED, NOT DONE**: a report cannot be narrowed to one PERSON (the
+register decides a person's place, and a per-person list would be a second answer
+to it); the client is shown nothing about a report they cannot see, which is the
+whole reason the filter is in the WHERE; and **the per-module access tab is still
+not built**, so who may open Insights AT ALL is nobody's to set &mdash; a
+different question from this one, said out loud because "visibility" has now been
+used for both.*
+
+*Earlier: 2026-09-14 &mdash; **&sect;354: a module is a folder that serves
 itself.** Islam, with the client's card showing three rows: *"check as we now
 have 3 modules"* &mdash; then, of the five things that had not kept up,
 **"let's fix all"**, taking the split offered: the four repairs now, the three

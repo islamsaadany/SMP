@@ -1,0 +1,309 @@
+<title>Setup per module</title>
+<!-- ══════════════════════════════════════════════════════════════════
+     SETUP PER MODULE — a mockup for sign-off (rule 1c), 2026-09-15.
+
+     Islam, 2026-09-15: "the setup and access page should be per module
+     because each module has its own setup elements including the access and
+     the landing line." This REVERSES spec 046 §4.5, which rejected a Setup
+     page per module. §4.5's reason survives as the one question this drawing
+     answers: the client-wide setup — register, org, seats, branding, email —
+     belongs to no module, so where does it live? Proposed: on the client
+     landing, which is already the spine's own page.
+
+     Four frames: what Setup is today, then the three proposed pages. The gold
+     marks on the "today" rail are the entries that move to the landing; the
+     unmarked ones stay Strategy's. Tokens are the platform's own.
+     ══════════════════════════════════════════════════════════════════ -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#A9BAD8; --panel-accent:#E2B96B;
+    --gold:#C89B3C; --gold-deep:#9C5D08; --gold-wash:#FBF3E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn-tx:#8A6410; --warn-bg:#FBF2DC;
+    --bad-tx:#B23025;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+    --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans:"Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --r:10px; --r-sm:6px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --panel:#0D2350; --panel-ink:#F0F4FB; --panel-quiet:#95A9CC; --panel-accent:#E2B96B;
+      --gold:#D4A855; --gold-deep:#E2B96B; --gold-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn-tx:#D7B04A; --warn-bg:#2A2515;
+      --bad-tx:#E8776B;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --panel:#0D2350; --panel-ink:#F0F4FB; --panel-quiet:#95A9CC; --panel-accent:#E2B96B;
+    --gold:#D4A855; --gold-deep:#E2B96B; --gold-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn-tx:#D7B04A; --warn-bg:#2A2515;
+    --bad-tx:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  body{ margin:0; background:var(--ground); color:var(--ink); font:15px/1.45 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1120px; margin:0 auto; padding-block:32px 72px; padding-inline:20px; display:flex; flex-direction:column; gap:28px; }
+
+  h1{ font:600 30px/1.15 var(--serif); margin:0; letter-spacing:-.01em; text-wrap:balance; }
+  .lede{ display:flex; flex-wrap:wrap; gap:10px 26px; margin:0; padding:0; list-style:none; color:var(--ink-2); font-size:14px; }
+  .lede li::before{ content:"·"; color:var(--gold); font-weight:700; margin-right:8px; }
+  .lede b{ color:var(--ink); font-weight:600; }
+
+  /* ── a frame: a browser window with an address bar ───────────────── */
+  .frame{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden; }
+  .frame > .cap{ display:flex; align-items:baseline; gap:14px; padding:12px 18px; border-bottom:1px solid var(--line); background:var(--surface-2); flex-wrap:wrap; }
+  .frame > .cap h2{ font:600 17px/1.2 var(--serif); margin:0; }
+  .frame > .cap .url{ font:13px/1 var(--mono); color:var(--ink-2); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:5px 12px; }
+  .frame > .cap .url b{ font-weight:500; color:var(--gold-deep); }
+  .frame > .cap .tag{ margin-left:auto; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+
+  /* the platform's own top bar */
+  .bar{ background:var(--panel); color:var(--panel-ink); display:flex; align-items:center; gap:18px; padding:0 18px; height:46px; font-size:13.5px; }
+  .bar .mk{ font-weight:700; letter-spacing:.02em; }
+  .bar .org{ color:var(--panel-quiet); }
+  .bar .org b{ color:var(--panel-ink); font-weight:600; }
+  .bar .sw{ display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.28); border-radius:var(--r-sm); padding:4px 9px; }
+  .bar .sw::before{ content:""; width:10px; height:10px; display:inline-block; background:
+      linear-gradient(currentColor,currentColor) 0 0/4px 4px no-repeat,
+      linear-gradient(currentColor,currentColor) 6px 0/4px 4px no-repeat,
+      linear-gradient(currentColor,currentColor) 0 6px/4px 4px no-repeat,
+      linear-gradient(currentColor,currentColor) 6px 6px/4px 4px no-repeat; }
+  .bar .gear{ margin-left:auto; color:var(--panel-quiet); }
+  .bar .gear.on{ color:var(--panel-accent); }
+
+  /* screen body */
+  .screen{ padding:22px 24px 26px; }
+  .split{ display:grid; grid-template-columns:232px 1fr; gap:22px; align-items:start; }
+  @media (max-width:760px){ .split{ grid-template-columns:1fr; } }
+
+  /* Setup rail, as the product draws it */
+  .rail{ border:1px solid var(--line); border-radius:var(--r); background:var(--surface); overflow:hidden; font-size:13.5px; }
+  .rail .rhead{ background:var(--surface-2); padding:9px 12px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); border-bottom:1px solid var(--line); }
+  .rail .rgroup{ border-top:1px solid var(--line-soft); }
+  .rail .rgroup:first-of-type{ border-top:0; }
+  .rail .gh{ padding:9px 12px 3px; font-weight:700; font-size:12.5px; color:var(--ink-2); }
+  .rail .ritem{ padding:6px 12px 6px 22px; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .rail .ritem.on{ background:var(--gold-wash); color:var(--ink); font-weight:600; box-shadow:inset 3px 0 0 var(--gold); }
+  .rail .ritem.moves{ color:var(--ink-3); }
+  .rail .ritem.moves::after{ content:""; width:7px; height:7px; border-radius:50%; background:var(--gold); margin-left:auto; flex:none; }
+  .rail .ritem.new{ position:relative; }
+  .rail .ritem.new::after{ content:"NEW"; margin-left:auto; font-size:9.5px; letter-spacing:.14em; font-weight:700; color:var(--gold-deep); }
+
+  .pane{ border:1px solid var(--line); border-radius:var(--r); background:var(--surface); overflow:hidden; }
+  .pane .pt{ padding:12px 18px; border-bottom:1px solid var(--line); font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .pane .pt .crumb{ color:var(--ink-3); font-weight:400; }
+  .pane .pb{ padding:18px; }
+
+  /* Roles & access matrix */
+  .ac{ border-collapse:collapse; width:100%; font-size:13px; font-variant-numeric:tabular-nums; }
+  .ac th, .ac td{ border:1px solid var(--line-soft); padding:7px 10px; text-align:left; }
+  .ac thead th{ background:var(--surface-2); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .ac thead th.grp{ text-align:center; }
+  .ac tbody th{ font-weight:600; color:var(--ink); white-space:nowrap; }
+  .ac td{ text-align:center; }
+  .chip{ display:inline-block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--ink-3); }
+  .chip.view{ color:var(--ink-2); }
+  .chip.fill{ background:var(--warn-bg); color:var(--warn-tx); border-color:transparent; }
+  .chip.edit{ background:var(--good-bg); color:var(--good); border-color:transparent; }
+  .chip.none{ color:var(--ink-3); border-style:dashed; }
+  .tblscroll{ overflow-x:auto; }
+
+  /* landing (welcome) screen */
+  .greet{ font:500 24px/1.2 var(--serif); margin:0 0 4px; }
+  .sig{ color:var(--ink-3); font-size:13px; margin:0 0 18px; }
+  .cols{ display:grid; grid-template-columns:1.1fr .9fr; gap:22px; align-items:start; }
+  @media (max-width:760px){ .cols{ grid-template-columns:1fr; } }
+  .blk h3{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700; }
+  .rows{ display:flex; flex-direction:column; gap:6px; }
+  .row{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); font-size:14px; }
+  .row .k{ font-weight:600; min-width:96px; }
+  .row .k.m{ min-width:110px; }
+  .row .v{ color:var(--ink-2); flex:1; }
+  .row .go{ color:var(--gold-deep); font-weight:600; font-size:13px; white-space:nowrap; }
+  .row.cta{ background:var(--gold-wash); border-color:transparent; }
+  .row .count{ background:var(--panel); color:var(--panel-ink); font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px; }
+  .row .ll{ color:var(--ink-3); font-size:13px; }
+  .row .ll b{ color:var(--ink-2); font-weight:600; }
+  .rows.client .row{ background:var(--surface-2); border-color:transparent; }
+  .exit{ margin-top:18px; padding:11px 14px; border:1px solid var(--line); border-radius:var(--r-sm); text-align:center; font-weight:600; color:var(--ink-2); }
+  .only{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-deep); font-weight:700; margin-left:8px; }
+
+  /* landing-line setting */
+  .opts{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm); font-size:14px; }
+  .opt.on{ border-color:var(--gold); background:var(--gold-wash); }
+  .opt .dot{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--ink-3); flex:none; margin-top:3px; }
+  .opt.on .dot{ border-color:var(--gold-deep); box-shadow:inset 0 0 0 3.5px var(--surface), inset 0 0 0 8px var(--gold-deep); }
+  .opt .ex{ color:var(--ink-3); font-size:13px; }
+  .prev{ margin-top:16px; }
+  .prev h4{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700; }
+
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:900px){ .two{ grid-template-columns:1fr; } }
+  .key{ display:flex; gap:22px; font-size:13px; color:var(--ink-2); padding:10px 18px; border-top:1px solid var(--line); background:var(--surface-2); }
+  .key i{ display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--gold); margin-right:7px; vertical-align:middle; font-style:normal; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Setup per module</h1>
+    <ul class="lede" style="margin-top:12px">
+      <li><b>Each module</b> gets its own Setup, with its own Access tab and its own landing line.</li>
+      <li><b>The client's own setup</b> — people, seats, organisation, branding, email — moves to the landing, which belongs to no module.</li>
+      <li><b>Cost</b>: setting three modules up means three pages.</li>
+    </ul>
+  </header>
+
+  <!-- ═══ TODAY ═══ -->
+  <section class="frame">
+    <div class="cap"><h2>Today</h2><span class="url">smp… /raya-trade/<b>strategy</b>/setup</span><span class="tag">one rail, everything in it</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Strategy</b></span><span class="sw">Strategy ▾</span><span class="gear on">⚙ Setup</span></div>
+    <div class="screen">
+      <div class="split">
+        <nav class="rail">
+          <div class="rhead">Setup</div>
+          <div class="rgroup"><div class="gh">Running the cycle</div>
+            <div class="ritem on">Overview</div><div class="ritem">Reporting cycle</div><div class="ritem">Platform Inbox</div><div class="ritem">Send an email</div><div class="ritem">History</div><div class="ritem">Import &amp; storage</div><div class="ritem">Contingency</div></div>
+          <div class="rgroup"><div class="gh">People &amp; access</div>
+            <div class="ritem moves">People register</div><div class="ritem">Roles &amp; access</div><div class="ritem moves">Knowledge base</div></div>
+          <div class="rgroup"><div class="gh">The organisation</div>
+            <div class="ritem moves">Business units</div><div class="ritem moves">Supporting functions</div><div class="ritem moves">Companies</div><div class="ritem moves">Official BU list</div></div>
+          <div class="rgroup"><div class="gh">Measurement</div>
+            <div class="ritem">Scoring bands</div><div class="ritem">Figure sets</div><div class="ritem">Focus measures</div></div>
+          <div class="rgroup"><div class="gh">Branding</div>
+            <div class="ritem moves">Branding</div><div class="ritem moves">Email</div><div class="ritem">Terminology</div></div>
+        </nav>
+        <div class="pane">
+          <div class="pt">Overview</div>
+          <div class="pb rows">
+            <div class="row"><span class="k">Reports</span><span class="v">3 of 10 units still to submit</span><span class="go">Reporting cycle ›</span></div>
+            <div class="row"><span class="k">Register</span><span class="v">2 people with no password</span><span class="go">People register ›</span></div>
+            <div class="row"><span class="k">Inbox</span><span class="v">1 conversation waiting</span><span class="go">Platform Inbox ›</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="key"><span><i></i>Moves to the client landing — it is the client's, not Strategy's</span><span>Unmarked stays in Strategy's own Setup</span></div>
+  </section>
+
+  <!-- ═══ PROPOSED 1: the landing ═══ -->
+  <section class="frame">
+    <div class="cap"><h2>The client landing</h2><span class="url">smp… /<b>raya-trade</b></span><span class="tag">the spine — no module</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· <b>Raya Trade</b></span><span class="gear">⌂</span></div>
+    <div class="screen">
+      <p class="greet">Good morning, Ahmed.</p>
+      <p class="sig">Raya Trade · Strategy office: Forefront</p>
+      <div class="cols">
+        <div class="blk">
+          <h3>Waiting on you</h3>
+          <div class="rows">
+            <div class="row cta"><span class="k">Strategy</span><span class="v">Mobile — 3 figures still to enter</span><span class="go">Report ›</span></div>
+            <div class="row"><span class="k">Office</span><span class="v">1 reply to read</span><span class="go">Open ›</span></div>
+          </div>
+          <h3 style="margin-top:20px">Your modules</h3>
+          <div class="rows">
+            <div class="row"><span class="k m">Strategy</span><span class="ll">Cycle open · <b>reports due 30 Sep</b></span><span class="go">Open ›</span></div>
+            <div class="row"><span class="k m">Insights</span><span class="ll"><b>2 new reports</b> this month</span><span class="go">Open ›</span></div>
+          </div>
+        </div>
+        <div class="blk">
+          <h3>Client setup <span class="only">Super user</span></h3>
+          <div class="rows client">
+            <div class="row"><span class="k m">People</span><span class="v">The register — 33 people</span><span class="go">›</span></div>
+            <div class="row"><span class="k m">Access</span><span class="v">Seats, and where each person sits</span><span class="go">›</span></div>
+            <div class="row"><span class="k m">Organisation</span><span class="v">Companies, units, functions, Official BU list</span><span class="go">›</span></div>
+            <div class="row"><span class="k m">Branding</span><span class="v">Colours and the mark</span><span class="go">›</span></div>
+            <div class="row"><span class="k m">Email</span><span class="v">Sender name, reply-to, footer</span><span class="go">›</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="exit">Continue to Mobile</div>
+    </div>
+    <div class="key"><span>Each module's line under <b>Your modules</b> is what that module set in its own Setup — see below.</span></div>
+  </section>
+
+  <!-- ═══ PROPOSED 2 & 3: a module's own Setup ═══ -->
+  <div class="two">
+    <section class="frame">
+      <div class="cap"><h2>Strategy's Setup</h2><span class="url">…/raya-trade/<b>strategy</b>/setup</span></div>
+      <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Strategy</b></span><span class="sw">Strategy ▾</span><span class="gear on">⚙</span></div>
+      <div class="screen">
+        <div class="split" style="grid-template-columns:1fr">
+          <nav class="rail">
+            <div class="rhead">Strategy · Setup</div>
+            <div class="rgroup"><div class="gh">Running the cycle</div>
+              <div class="ritem">Reporting cycle</div><div class="ritem">Platform Inbox</div><div class="ritem">Send an email</div><div class="ritem">History</div><div class="ritem">Import &amp; storage</div><div class="ritem">Contingency</div></div>
+            <div class="rgroup"><div class="gh">Measurement</div>
+              <div class="ritem">Scoring bands</div><div class="ritem">Figure sets</div><div class="ritem">Focus measures</div><div class="ritem">Terminology</div></div>
+            <div class="rgroup"><div class="gh">Access</div>
+              <div class="ritem on">Roles &amp; access</div></div>
+            <div class="rgroup"><div class="gh">The landing</div>
+              <div class="ritem new">Landing line</div></div>
+          </nav>
+          <div class="pane">
+            <div class="pt"><span class="crumb">Strategy ›</span> Roles &amp; access</div>
+            <div class="pb tblscroll">
+              <table class="ac">
+                <thead>
+                  <tr><th rowspan="2"></th><th colspan="2" class="grp">Own business unit</th><th colspan="2" class="grp">Own supporting function</th><th rowspan="2">Cycle</th></tr>
+                  <tr><th>Strategy</th><th>Reporting</th><th>Strategy</th><th>Reporting</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th>BU owner</th><td><span class="chip view">View</span></td><td><span class="chip edit">Edit</span></td><td><span class="chip none">—</span></td><td><span class="chip none">—</span></td><td><span class="chip view">View</span></td></tr>
+                  <tr><th>Strategy custodian</th><td><span class="chip fill">Fill</span></td><td><span class="chip edit">Edit</span></td><td><span class="chip none">—</span></td><td><span class="chip none">—</span></td><td><span class="chip view">View</span></td></tr>
+                  <tr><th>Function head</th><td><span class="chip none">—</span></td><td><span class="chip none">—</span></td><td><span class="chip view">View</span></td><td><span class="chip edit">Edit</span></td><td><span class="chip view">View</span></td></tr>
+                  <tr><th>Project owner</th><td><span class="chip none">—</span></td><td><span class="chip none">—</span></td><td><span class="chip fill">Fill</span></td><td><span class="chip edit">Edit</span></td><td><span class="chip view">View</span></td></tr>
+                  <tr><th>Contributor</th><td><span class="chip view">View</span></td><td><span class="chip view">View</span></td><td><span class="chip view">View</span></td><td><span class="chip view">View</span></td><td><span class="chip none">—</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="key"><span>The matrix is Strategy's roles against Strategy's areas — the seats and where people sit are on the landing.</span></div>
+    </section>
+
+    <section class="frame">
+      <div class="cap"><h2>Insights' Setup</h2><span class="url">…/raya-trade/<b>insights</b>/setup</span></div>
+      <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Insights</b></span><span class="sw">Insights ▾</span><span class="gear on">⚙</span></div>
+      <div class="screen">
+        <div class="split" style="grid-template-columns:1fr">
+          <nav class="rail">
+            <div class="rhead">Insights · Setup</div>
+            <div class="rgroup"><div class="gh">Access</div>
+              <div class="ritem">Roles &amp; access</div></div>
+            <div class="rgroup"><div class="gh">The landing</div>
+              <div class="ritem on new">Landing line</div></div>
+          </nav>
+          <div class="pane">
+            <div class="pt"><span class="crumb">Insights ›</span> Landing line</div>
+            <div class="pb">
+              <div class="opts">
+                <label class="opt on"><span class="dot"></span><span>New reports this month<br><span class="ex">2 new reports this month</span></span></label>
+                <label class="opt"><span class="dot"></span><span>The latest report, by name<br><span class="ex">Latest: Egypt retail outlook, Q3</span></span></label>
+                <label class="opt"><span class="dot"></span><span>Nothing<br><span class="ex">The module is listed with no line under it</span></span></label>
+              </div>
+              <div class="prev">
+                <h4>On the landing</h4>
+                <div class="row"><span class="k m">Insights</span><span class="ll"><b>2 new reports</b> this month</span><span class="go">Open ›</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="key"><span>Two entries, and that is its honest size: reports are published from the Forefront console, so there is nothing else for the client to set.</span></div>
+    </section>
+  </div>
+</div>

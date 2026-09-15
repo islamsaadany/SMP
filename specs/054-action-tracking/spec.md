@@ -72,6 +72,15 @@ late and never on This week, so it needs a view of its own or it is lost).
 A search box over the title. One summary strip over the whole client: open ·
 late · due this week · done this week.
 
+**IT WORKS LIKE THE SHEET IT REPLACES** (Islam, 2026-09-15: *"we are shifting
+from a simple google sheet to a tool so it needs to be super simple"*). There
+is **no form and no separate page**. The list ends in the next empty line: you
+type an action there and press Enter, it lands under you with no date and Not
+started, and everything else is changed **on the row itself** — the date, the
+owner, who else, the status, the done tick. A row opens in place for its notes
+and its history, and that is where Rename and Delete sit. Every write lands
+when the control is left (§35), so nothing has a Save button.
+
 **Nothing is sent and nothing runs on a schedule.** No reminder, no digest,
 no notification. The late flag and the carried count are computed when the
 page is read, from the due date and the date it was first given — so nothing
@@ -198,6 +207,8 @@ the week stood, and its proposal on the word did not.
 - Nothing reminds anybody. If a weekly digest is ever wanted it is the
   collection mechanism §293 already has, pointed at this list, and its own
   decision.
-- The mockup shows This week with late rows, the edit form, the detail with
-  its history, and an empty client — in the module page's own tokens,
-  extended only where a table of actions needs a rule the library did not.
+- The mockup shows This week with late rows, a line being added in place, a
+  row opened for its notes and history, and an empty client — in the module
+  page's own tokens, extended only where a list of actions needs a rule the
+  library did not. Its first draft had a form and a detail page; both were
+  taken out the same day at Islam's word (§3).

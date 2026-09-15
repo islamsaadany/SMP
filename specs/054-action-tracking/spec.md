@@ -9,6 +9,25 @@ tracker/` over `smp-app/lib/tracker.ts`, two tables in `db/schema.sql` and
 migration 012, proved by `smp-app/checks/tracker.mjs` (124/0, red three ways).
 One rule in §4 was corrected while building and says so.
 
+**A second round is drawn and awaiting sign-off (2026-09-15).** Islam, using
+the built tracker: *"The button with my initials should open the list of the
+taem on the project ot assign an owner and it's better to be first name of the
+owner and have a 3 dots on the right to open that expanded view with notes or
+history and keep the action items editable by a double click on the action
+name and no need for the 'with' part for collaborators it's a simple task
+management thing."* Five changes to the row and nothing else, drawn in
+`design-mockups/internal-tracker/2026-09-15_row-first-name-dots-rename.html`
+(published as an artifact, rule 1c): the owner cell is the owner's first name;
+pressing it opens the office team on this client to hand the action on; a ⋯ at
+the row's right end opens the notes and history, and the title stops being a
+link; a double-click on the name renames it in place, so the opened row keeps
+no Title box; and **collaborators go** — no *With*, no second name on a row,
+which narrows decisions 5 and 6's "collaborators" to nothing and §6's
+*collaborator* clause with it. **Not built until he says so.** The one cost
+stated on the mockup: two office rows sharing a first name are told apart by
+the register's own two-word rule (§81.1), and a double-click has no hover on a
+tablet.
+
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
 the on/off drawer and the door — it inherits without touching.

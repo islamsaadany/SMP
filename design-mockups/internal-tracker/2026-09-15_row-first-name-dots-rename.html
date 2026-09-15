@@ -1,0 +1,341 @@
+<title>Internal Tracker rows</title>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MOCKUP · spec 054 · Internal Tracker — the row's controls, redrawn
+     design-mockups/internal-tracker/2026-09-15_row-first-name-dots-rename.html
+
+     Rule 1c: drawn before a source moves. The stylesheet is the built
+     module's own (smp-app/modules/tracker/page.ts), which is the previous
+     mockup signed off and built; what this round changes is marked CHANGED.
+
+     Islam, 2026-09-15, of the built tracker:
+       "The button with my initials should open the list of the team on the
+        project to assign an owner and it's better to be first name of the
+        owner and have a 3 dots on the right to open that expanded view with
+        notes or history and keep the action items editable by a double click
+        on the action name and no need for the 'with' part for collaborators
+        it's a simple task management thing"
+
+     So, five things on the row and nothing else:
+       1 · the owner cell is the owner's FIRST NAME, not initials;
+       2 · pressing it opens the office team on this client — pick one and
+           the action is theirs (only its owner or the Super user get the
+           press; everybody else reads the name);
+       3 · a ⋯ at the right end of every row opens the row in place for its
+           notes, its history and Delete — the title is no longer a link;
+       4 · double-click on the action's name turns it into a box in place;
+           Enter or leaving the box renames, Escape puts it back — so the
+           opened row carries no Title box any more;
+       5 · collaborators are gone: no "With", no second name on a row, no
+           extra squares. One action, one owner.
+
+     Four frames: This week at rest · the owner list open on a row · a name
+     double-clicked · a row opened from its ⋯.
+
+     People: Islam Saadany and Noran Essam are the office rows the register
+     already holds; "Omar Khalil" is a placeholder name for the third seat.
+     Today is Tuesday 15 September 2026; the week is Sun 13 – Thu 17.
+     ═════════════════════════════════════════════════════════════════ -->
+<style>
+*{box-sizing:border-box}
+:root{--bar:#16325C;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* ── the built module's own chrome (verbatim) ── */
+.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
+.bar h1{margin:0;font-size:14.5px;font-weight:600}
+.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
+.msw{position:relative;flex:none}
+.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
+.msw>summary::-webkit-details-marker{display:none}
+.msw svg{width:17px;height:17px;display:block}
+.pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
+h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
+h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
+.cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px}
+.cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 inherit;padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
+.cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+.tile b{display:block;font-size:22px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{display:block;font:600 10.5px/1.4 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+.tile.late b{color:var(--bad)}
+.grp{display:flex;align-items:center;gap:9px;padding:14px 2px 6px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.grp .cnt{margin-left:0}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer}
+.row.done .tick{background:var(--good);border-color:var(--good)}
+.tick svg{width:11px;height:11px}
+.when{font:400 12.5px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap;text-align:right}
+.when.late{color:var(--bad);font-weight:600}
+.when.pick{cursor:pointer;border-radius:6px;padding:3px 5px;margin:-3px -5px}
+.st{font:600 11px/1 inherit;letter-spacing:.02em;padding:6px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap;min-width:104px;text-align:center}
+.st.pick{cursor:pointer;padding-right:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+.st.prog{border-color:var(--gold);color:var(--gold)}
+.st.done{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.row.done .t{color:var(--ink-3);text-decoration:line-through}
+.addrow .plus{width:18px;height:18px;display:grid;place-items:center;color:var(--ink-3);font:600 15px/1 inherit}
+.addrow input{border:0;background:transparent;color:var(--ink);font:400 15px/1.35 inherit;padding:2px 0;width:100%;min-width:0;outline:none}
+.addrow input::placeholder{color:var(--ink-3)}
+.addrow .when,.addrow .who,.addrow .st{opacity:.55}
+.addhint{font:400 12px/1.5 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);padding:6px 2px 0 34px}
+.open .lab{font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:10px 0 4px}
+.open .lab:first-child{margin-top:0}
+.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit;width:100%;min-height:72px;resize:vertical}
+.open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
+.hist{list-style:none;margin:0;padding:0;font-size:13.5px}
+.hist li{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.hist li:last-child{border-bottom:0}
+.hist time{font:400 12px/1.6 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap}
+.hist b{font-weight:600}
+.open .acts{display:flex;gap:14px;padding-top:10px;font-size:13px;align-items:center}
+.open .acts button{background:none;border:0;padding:0;font:inherit;color:var(--ink-3);cursor:pointer;text-decoration:underline}
+.open .acts button.danger{color:var(--bad)}
+
+/* ── CHANGED: the row gains a sixth column, the ⋯ ── */
+.row{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.addrow{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:9px 2px;border-bottom:1px dashed var(--line)}
+/* CHANGED: the title is plain text; a double-click turns it into a box */
+.row .t{min-width:0;font-size:15px;line-height:1.35;cursor:text}
+.row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 inherit;outline:none}
+/* CHANGED: the owner is a first name, drawn as the fact; a press opens the team */
+.who{font:600 12.5px/1.4 inherit;color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right;background:none;border:0;padding:0;position:relative}
+.who.pick{cursor:pointer;border-radius:6px;padding:3px 7px;margin:-3px -7px}
+.who.pick:hover,.who.pick.on{background:var(--surface-2)}
+.team{position:absolute;top:26px;right:0;z-index:5;min-width:190px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
+.team .tl{font:600 10.5px/1.6 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:5px 9px 3px}
+.team button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 inherit;color:var(--ink);cursor:pointer;text-align:left}
+.team button:hover{background:var(--ground)}
+.team button.on{font-weight:600}
+.team button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+.team button i{font-style:normal;color:var(--ink-3);font-size:12.5px}
+/* CHANGED: the three dots, the one way into a row's notes and history */
+.more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
+.more:hover,.more.on{background:var(--surface-2);color:var(--ink)}
+.more svg{width:16px;height:16px}
+.row.on{background:var(--surface);border-bottom-color:transparent}
+/* CHANGED: the opened row is notes and history only — no Title box, no With */
+.open{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:12px 2px 6px 34px;border-bottom:1px solid var(--line);background:var(--surface)}
+
+/* the mockup's own furniture, not the product's */
+.frame{margin:0 0 42px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground)}
+.cap{font:600 10.5px/1.4 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.intro{max-width:1000px;margin:0 auto;padding:22px 20px 0}
+.intro h1{margin:0 0 6px;font-size:20px;font-weight:600;text-wrap:balance}
+.intro p{margin:0 0 6px;color:var(--ink-2);font-size:14px;max-width:70ch}
+.intro ol{margin:8px 0 0;padding-left:22px;color:var(--ink-2);font-size:14px;max-width:70ch}
+.intro li{margin:0 0 4px}
+.wrapf{max-width:1040px;margin:0 auto;padding:18px 20px 40px}
+.note{max-width:1000px;margin:0 auto;padding:0 20px 30px;color:var(--ink-2);font-size:14px}
+.note b{color:var(--ink)}
+.note p{max-width:70ch;margin:0 0 8px}
+@media (max-width:720px){.strip{grid-template-columns:1fr 1fr}.open{grid-template-columns:1fr;padding-left:2px}.addrow{grid-template-columns:22px 1fr 26px}.addrow .when,.addrow .who,.addrow .st{display:none}
+  .row{grid-template-columns:22px 1fr auto 26px;grid-template-areas:"tick t st more" ". when who more"}.row .tick{grid-area:tick}.row .t{grid-area:t}.row .st{grid-area:st}.row .when{grid-area:when;text-align:left}.row .who{grid-area:who}.row .more{grid-area:more}
+  .team{right:auto;left:0}}
+</style>
+
+<div class="intro">
+  <h1>Internal Tracker — the row's controls, redrawn</h1>
+  <p>Same page as the one built; only the row changes. Five things, all yours:</p>
+  <ol>
+    <li>The owner cell shows the owner's <b>first name</b>, not initials.</li>
+    <li>Pressing it opens <b>the team on this client</b> — pick one and the action is theirs.</li>
+    <li>A <b>⋯</b> at the right end of every row opens it in place for notes, history and Delete. The title no longer opens the row.</li>
+    <li><b>Double-click the action's name</b> to rename it there, on the row.</li>
+    <li><b>No collaborators</b> — no “With”, no second name, no extra squares.</li>
+  </ol>
+</div>
+
+<div class="wrapf">
+
+<!-- ═══ FRAME 1 · This week ═══ -->
+<p class="cap">1 · This week at rest — first names, a ⋯ on every row, nobody named twice</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Internal Tracker</h1><span class="org">· <b>Raya Trade</b></span>
+  </div>
+  <div class="pg">
+    <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <div class="strip">
+      <div class="tile"><b>9</b><span>Open</span></div>
+      <div class="tile late"><b>3</b><span>Late</span></div>
+      <div class="tile"><b>5</b><span>Due this week · 2 not started</span></div>
+      <div class="tile"><b>1</b><span>Done this week</span></div>
+    </div>
+    <div class="tools">
+      <input class="srch" id="q1" placeholder="Search actions" aria-label="Search actions">
+      <span class="cnt">7 on this week</span>
+    </div>
+    <div class="list">
+      <div class="grp">Islam Saadany <span class="cnt">3</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t" title="Double-click to rename">Confirm the Q3 review date with the CEO office</div>
+        <span class="when late pick" title="Change the date">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st prog pick" role="button" title="Change the status">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t" title="Double-click to rename">Send the revised Mobile pillar targets to Ahmed</div>
+        <span class="when pick" title="Change the date">Wed 16 Sep</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st pick" role="button" title="Change the status">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t" title="Double-click to rename">Prepare the cycle board walkthrough for Thursday</div>
+        <span class="when pick" title="Change the date">Thu 17 Sep</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st prog pick" role="button" title="Change the status">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+
+      <div class="grp">Noran Essam <span class="cnt">2</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Chase Finance for the August figures upload</div>
+        <span class="when late">Late · Thu 3 Sep · carried 2 weeks</span><span class="who">Noran</span><span class="st prog">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row done"><span class="tick" role="checkbox" aria-checked="true" aria-label="Mark not done"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div class="t">Check Retail's monthly plan after the twelve-month change</div>
+        <span class="when">Done Tue 15 Sep</span><span class="who">Noran</span><span class="st done">Done</span>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+
+      <div class="grp">Omar Khalil <span class="cnt">2</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Book the projector for the board review</div>
+        <span class="when late">Late · Sun 13 Sep</span><span class="who">Omar</span><span class="st">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Walk Care's custodian through the Reporting tab</div>
+        <span class="when">Thu 17 Sep</span><span class="who">Omar</span><span class="st">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+
+      <div class="addrow"><span class="plus">+</span><input id="add1" placeholder="Type an action and press Enter" aria-label="New action"><span class="when">No date</span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
+    </div>
+    <div class="addhint">Enter adds it under you · then set its date, owner or status on the row · ⋯ for its notes</div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 2 · The team ═══ -->
+<p class="cap">2 · The owner's name pressed — the team on this client, pick one and it is theirs</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Internal Tracker</h1><span class="org">· <b>Raya Trade</b></span>
+  </div>
+  <div class="pg">
+    <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <div class="list">
+      <div class="grp">Islam Saadany <span class="cnt">3</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Confirm the Q3 review date with the CEO office</div>
+        <span class="when late pick">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row" style="background:var(--surface)"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Send the revised Mobile pillar targets to Ahmed</div>
+        <span class="when pick">Wed 16 Sep</span>
+        <span class="who pick on" role="button" aria-expanded="true">Islam
+          <div class="team" role="listbox" aria-label="Owner">
+            <div class="tl">Owner · the team on Raya Trade</div>
+            <button type="button" class="on" role="option" aria-selected="true">Islam <i>Saadany</i></button>
+            <button type="button" role="option">Noran <i>Essam</i></button>
+            <button type="button" role="option">Omar <i>Khalil</i></button>
+          </div>
+        </span>
+        <span class="st pick" role="button">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Prepare the cycle board walkthrough for Thursday</div>
+        <span class="when pick">Thu 17 Sep</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="grp">Noran Essam <span class="cnt">2</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Chase Finance for the August figures upload</div>
+        <span class="when late">Late · Thu 3 Sep · carried 2 weeks</span><span class="who">Noran</span><span class="st prog">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+    </div>
+    <div class="addhint">Picking Noran moves the action under her at once · Escape or a click elsewhere closes the list and changes nothing</div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 3 · Rename ═══ -->
+<p class="cap">3 · The name double-clicked — a box in place; Enter or leaving it renames, Escape puts it back</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Internal Tracker</h1><span class="org">· <b>Raya Trade</b></span>
+  </div>
+  <div class="pg">
+    <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <div class="list">
+      <div class="grp">Islam Saadany <span class="cnt">3</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Confirm the Q3 review date with the CEO office</div>
+        <span class="when late pick">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row" style="background:var(--surface)"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t"><input class="ttl" id="ttl3" value="Send the revised Mobile pillar targets to Ahmed Mostafa" aria-label="Rename the action"></div>
+        <span class="when pick">Wed 16 Sep</span><span class="who pick" role="button">Islam</span><span class="st pick" role="button">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Prepare the cycle board walkthrough for Thursday</div>
+        <span class="when pick">Thu 17 Sep</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+    </div>
+    <div class="addhint">A single click does nothing to the name, so a row can still be read without a box opening under the pointer</div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 4 · Opened from ⋯ ═══ -->
+<p class="cap">4 · A row opened from its ⋯ — notes and history only; no Title box, no With</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Internal Tracker</h1><span class="org">· <b>Raya Trade</b></span>
+  </div>
+  <div class="pg">
+    <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <div class="list">
+      <div class="grp">Noran Essam <span class="cnt">2</span></div>
+      <div class="row on"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t">Chase Finance for the August figures upload</div>
+        <span class="when late pick">Late · Thu 3 Sep · carried 2 weeks</span><span class="who pick" role="button">Noran</span><span class="st prog pick" role="button">In progress</span>
+        <button class="more on" type="button" aria-label="Close" aria-expanded="true"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="open">
+        <div>
+          <p class="lab">Notes</p>
+          <textarea id="n4" aria-label="Notes">The figures set holds 26 EGP rows and Finance has entered 19. Ask Mahmoud for the remaining seven before the cycle closes.</textarea>
+          <div class="hint">Saved when you leave the box.</div>
+          <div class="acts"><button type="button" class="danger">Delete</button></div>
+        </div>
+        <div>
+          <p class="lab">History</p>
+          <ul class="hist">
+            <li><time>Wed 9 Sep 16:05</time><span><b>Noran Essam</b> · Not started → In progress</span></li>
+            <li><time>Tue 1 Sep 09:18</time><span><b>Islam Saadany</b> · created it, owner Noran Essam</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="row done"><span class="tick" role="checkbox" aria-checked="true" aria-label="Mark not done"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div class="t">Check Retail's monthly plan after the twelve-month change</div>
+        <span class="when">Done Tue 15 Sep</span><span class="who">Noran</span><span class="st done">Done</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+      <div class="addrow"><span class="plus">+</span><input id="add4" placeholder="Type an action and press Enter" aria-label="New action"><span class="when">No date</span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
+    </div>
+    <div class="addhint">Pressing the ⋯ again, or Escape, closes it · the name is renamed on the row, so the opened row keeps no Title box</div>
+  </div>
+</div>
+
+</div>
+
+<div class="note">
+  <p><b>What this costs, said before you choose.</b></p>
+  <p><b>Two people with one first name.</b> If two of the office on one client are both called Ahmed, the name alone tells them apart from nobody, so the cell lengthens to two words for exactly that pair — the register's own rule for a clashing short name — and the team list always shows the full name beside the first.</p>
+  <p><b>Who gets the press.</b> The name is a button only for the action's owner and the client's Super user, which is who may hand an action on today; everybody else reads the name. With collaborators gone, changing an action's date, status, notes or name is also the owner's and the Super user's — nobody else was ever on it.</p>
+  <p><b>Double-click on a tablet.</b> A double-tap on the name does the same in Safari and Chrome, but a finger has no hover to say the name can be renamed; the ⋯ row does not carry a second way in, so the rule stays one thing. Say if you want Rename beside Delete there too.</p>
+  <p><b>What is stored.</b> Nothing new. The collaborators field stays in the table holding nothing until a migration drops it in the build; the owner picker writes the same owner the opened row's dropdown wrote.</p>
+</div>

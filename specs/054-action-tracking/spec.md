@@ -28,7 +28,12 @@ no heading and no surnames; the ⋯ is an **arrow** that expands the box and
 folds it; the history is **much smaller, in a box that scrolls**; and
 **adding a line is silent** — no page refresh, the line drawn under you the
 moment Enter lands it, the counts updated in place, the box kept for the
-next one. **Not built until he says so.** The one cost
+next one. And again: **late is one short word** — *Late*, *Late 1 w*,
+*Late 2 w* — with the date after it, never "carried N weeks"; and **how the
+list is grouped is a choice** on the far right of the views row — Owner (the
+default), Status, Due date, or None — remembered per browser, which loosens
+decision 6 from *by owner and nothing else* to *by owner unless you choose
+otherwise*. **Not built until he says so.** The one cost
 stated on the mockup: two office rows sharing a first name are told apart by
 the register's own two-word rule (§81.1), and a double-click has no hover on a
 tablet.

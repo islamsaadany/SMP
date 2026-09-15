@@ -37,6 +37,11 @@
      and the box stays yours for the next one (a behaviour, said in the
      notes rather than drawn).
 
+     AND AGAIN: "carried 1 week" is long — late is one short word with
+     the weeks on it (Late · Late 1 w · Late 2 w), the date after; and the
+     grouping is a CHOICE on the far right of the views row — Owner, Status,
+     Due date, None — frame 3 shows Status.
+
      Four frames: This week at rest · the owner list open on a row · a name
      double-clicked · a row expanded from its arrow.
 
@@ -68,6 +73,9 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px}
 .cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 inherit;padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
 .cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+/* CHANGED: how the list is grouped is a choice, on the far right of the views row */
+.gby{margin-left:auto;align-self:center;display:inline-flex;align-items:center;gap:6px;font:600 12px/1 inherit;color:var(--ink-3);padding-bottom:6px}
+.gby select{font:600 12.5px/1.4 inherit;color:var(--ink);border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:4px 24px 4px 9px;appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
 .srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
 .cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
@@ -163,6 +171,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
     <li><b>Double-click the action's name</b> to rename it there, on the row.</li>
     <li><b>No collaborators</b> — no “With”, no second name, no extra squares.</li>
   </ol>
+  <p>And from the third look: <b>late is one short word</b> — <i>Late</i>, <i>Late 1 w</i>, <i>Late 2 w</i> — with the date after it; and <b>how the list is grouped is a choice</b>, on the far right of the views row: Owner, Status, Due date, or None.</p>
   <p>And two from the second look: the team list is <b>first names only</b>, and the history is <b>much smaller, in a box that scrolls</b>. One more is a behaviour a still cannot show: <b>adding a line is silent</b> — no page refresh; the line appears under you the moment Enter lands it, the counts update in place, and the box stays yours for the next one.</p>
 </div>
 
@@ -177,7 +186,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
   </div>
   <div class="pg">
     <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
-    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a><label class="gby">Group by <select aria-label="Group by"><option selected>Owner</option><option>Status</option><option>Due date</option><option>None</option></select></label></nav>
     <div class="strip">
       <div class="tile"><b>9</b><span>Open</span></div>
       <div class="tile late"><b>3</b><span>Late</span></div>
@@ -192,7 +201,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="grp">Islam Saadany <span class="cnt">3</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t" title="Double-click to rename">Confirm the Q3 review date with the CEO office</div>
-        <span class="when late pick" title="Change the date">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st prog pick" role="button" title="Change the status">In progress</span>
+        <span class="when late pick" title="Change the date">Late 1 w · Mon 14 Sep</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st prog pick" role="button" title="Change the status">In progress</span>
         <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t" title="Double-click to rename">Send the revised Mobile pillar targets to Ahmed</div>
@@ -206,7 +215,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="grp">Noran Essam <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Chase Finance for the August figures upload</div>
-        <span class="when late">Late · Thu 3 Sep · carried 2 weeks</span><span class="who">Noran</span><span class="st prog">In progress</span>
+        <span class="when late">Late 2 w · Thu 3 Sep</span><span class="who">Noran</span><span class="st prog">In progress</span>
         <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row done"><span class="tick" role="checkbox" aria-checked="true" aria-label="Mark not done"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <div class="t">Check Retail's monthly plan after the twelve-month change</div>
@@ -238,12 +247,12 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
   </div>
   <div class="pg">
     <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
-    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a><label class="gby">Group by <select aria-label="Group by"><option selected>Owner</option><option>Status</option><option>Due date</option><option>None</option></select></label></nav>
     <div class="list">
       <div class="grp">Islam Saadany <span class="cnt">3</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Confirm the Q3 review date with the CEO office</div>
-        <span class="when late pick">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
+        <span class="when late pick">Late 1 w · Mon 14 Sep</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row" style="background:var(--surface)"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Send the revised Mobile pillar targets to Ahmed</div>
@@ -264,7 +273,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="grp">Noran Essam <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Chase Finance for the August figures upload</div>
-        <span class="when late">Late · Thu 3 Sep · carried 2 weeks</span><span class="who">Noran</span><span class="st prog">In progress</span>
+        <span class="when late">Late 2 w · Thu 3 Sep</span><span class="who">Noran</span><span class="st prog">In progress</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     </div>
     <div class="addhint">Picking Noran moves the action under her at once · Escape or a click elsewhere closes the list and changes nothing</div>
@@ -272,7 +281,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 </div>
 
 <!-- ═══ FRAME 3 · Rename ═══ -->
-<p class="cap">3 · The name double-clicked — a box in place; Enter or leaving it renames, Escape puts it back</p>
+<p class="cap">3 · The name double-clicked — a box in place; Enter or leaving it renames, Escape puts it back · here the list is grouped by status</p>
 <div class="frame">
   <div class="bar">
     <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
@@ -280,20 +289,22 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
   </div>
   <div class="pg">
     <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
-    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a><label class="gby">Group by <select aria-label="Group by"><option>Owner</option><option selected>Status</option><option>Due date</option><option>None</option></select></label></nav>
     <div class="list">
-      <div class="grp">Islam Saadany <span class="cnt">3</span></div>
+      <div class="grp">In progress <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Confirm the Q3 review date with the CEO office</div>
-        <span class="when late pick">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-      <div class="row" style="background:var(--surface)"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
-        <div class="t"><input class="ttl" id="ttl3" value="Send the revised Mobile pillar targets to Ahmed Mostafa" aria-label="Rename the action"></div>
-        <span class="when pick">Wed 16 Sep</span><span class="who pick" role="button">Islam</span><span class="st pick" role="button">Not started</span>
+        <span class="when late pick">Late 1 w · Mon 14 Sep</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Prepare the cycle board walkthrough for Thursday</div>
         <span class="when pick">Thu 17 Sep</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+
+      <div class="grp">Not started <span class="cnt">1</span></div>
+      <div class="row" style="background:var(--surface)"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
+        <div class="t"><input class="ttl" id="ttl3" value="Send the revised Mobile pillar targets to Ahmed Mostafa" aria-label="Rename the action"></div>
+        <span class="when pick">Wed 16 Sep</span><span class="who pick" role="button">Islam</span><span class="st pick" role="button">Not started</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     </div>
     <div class="addhint">A single click does nothing to the name, so a row can still be read without a box opening under the pointer</div>
@@ -309,12 +320,12 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
   </div>
   <div class="pg">
     <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
-    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a></nav>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a><label class="gby">Group by <select aria-label="Group by"><option selected>Owner</option><option>Status</option><option>Due date</option><option>None</option></select></label></nav>
     <div class="list">
       <div class="grp">Noran Essam <span class="cnt">2</span></div>
       <div class="row on"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Chase Finance for the August figures upload</div>
-        <span class="when late pick">Late · Thu 3 Sep · carried 2 weeks</span><span class="who pick" role="button">Noran</span><span class="st prog pick" role="button">In progress</span>
+        <span class="when late pick">Late 2 w · Thu 3 Sep</span><span class="who pick" role="button">Noran</span><span class="st prog pick" role="button">In progress</span>
         <button class="more on" type="button" aria-label="Close" aria-expanded="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="open">
         <div>
@@ -352,6 +363,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
   <p><b>Two people with one first name.</b> If two of the office on one client are both called Ahmed, the name alone tells them apart from nobody, so the cell lengthens to two words for exactly that pair — the register's own rule for a clashing short name — and the team list always shows the full name beside the first.</p>
   <p><b>Who gets the press.</b> The name is a button only for the action's owner and the client's Super user, which is who may hand an action on today; everybody else reads the name. With collaborators gone, changing an action's date, status, notes or name is also the owner's and the Super user's — nobody else was ever on it.</p>
   <p><b>Double-click on a tablet.</b> A double-tap on the name does the same in Safari and Chrome, but a finger has no hover to say the name can be renamed; the expanded row does not carry a second way in, so the rule stays one thing. Say if you want Rename beside Delete there too.</p>
+  <p><b>Group by.</b> Owner is how the list opens, as today. Status groups into the three words; Due date groups by the day, late first; None is one flat list in the order the rows already have. The choice is remembered on this browser, not stored on the client, so two of the office can read the same list two ways.</p>
   <p><b>Silent adding.</b> Enter posts the line and draws it under you without reloading the page; the strip and the count are updated in place, the box is cleared and keeps the cursor. If the server refuses, the line is not drawn and the reason is said in the red bar, with what you typed still in the box. Every other change on a row can take the same road, and will in the build.</p>
   <p><b>What is stored.</b> Nothing new. The collaborators field stays in the table holding nothing until a migration drops it in the build; the owner picker writes the same owner the opened row's dropdown wrote.</p>
 </div>

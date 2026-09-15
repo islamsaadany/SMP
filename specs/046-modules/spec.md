@@ -159,6 +159,13 @@ switcher into a second tab row.
 
 ### 4.4 Access — one page, a Client tab and a tab per module
 
+> **The "one page" half is REVERSED by spec 054 (2026-09-15, Islam: *"the
+> setup and access page should be per module"*).** Each module's roles and
+> areas are a page inside that module's own Setup; the seats and where people
+> sit stay on the People register, reached from the landing. What follows is
+> kept as the record; the two areas that move, `a_setup` and `a_cycle`, move
+> exactly as written here.
+
 One page. A **Client** tab holding the seats and where each person sits, then
 **one tab per module**, holding that module's roles against that module's areas.
 Nothing is multiplied: a module costs the areas it actually has, not a copy of
@@ -179,6 +186,14 @@ Two areas move:
   cycle it gates.
 
 ### 4.5 Setup — one page, a Client group and a group per module
+
+> **REVERSED by spec 054 (2026-09-15), at Islam's instruction and recorded
+> rather than overwritten.** Each module has its own Setup reached from
+> inside it, and the Client group goes to the client landing, which is the
+> spine's own page. The rejection below was right about its own question —
+> *the spine has to live somewhere that is not inside any module* — and spec
+> 054 answers that question differently. The "switched off removes its group"
+> rule survives whole.
 
 One page, one rail. A **Client** group first — register, access, org, Official
 BU list, branding, email — then one group per module the client has.

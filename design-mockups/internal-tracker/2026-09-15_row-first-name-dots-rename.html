@@ -21,16 +21,24 @@
        2 · pressing it opens the office team on this client — pick one and
            the action is theirs (only its owner or the Super user get the
            press; everybody else reads the name);
-       3 · a ⋯ at the right end of every row opens the row in place for its
-           notes, its history and Delete — the title is no longer a link;
+       3 · an arrow at the right end of every row expands the row in place
+           for its notes, its history and Delete, and folds it again — the
+           title is no longer a link;
        4 · double-click on the action's name turns it into a box in place;
            Enter or leaving the box renames, Escape puts it back — so the
            opened row carries no Title box any more;
        5 · collaborators are gone: no "With", no second name on a row, no
            extra squares. One action, one owner.
 
+     REDRAWN THE SAME HOUR at Islam's word: the team list is first names
+     only, no heading and no surnames; the ⋯ is an ARROW that expands and
+     folds the box; the history is much smaller, in a box that scrolls; and
+     adding a line is SILENT — no page refresh, the line appears under you
+     and the box stays yours for the next one (a behaviour, said in the
+     notes rather than drawn).
+
      Four frames: This week at rest · the owner list open on a row · a name
-     double-clicked · a row opened from its ⋯.
+     double-clicked · a row expanded from its arrow.
 
      People: Islam Saadany and Noran Essam are the office rows the register
      already holds; "Omar Khalil" is a placeholder name for the third seat.
@@ -91,16 +99,19 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .open .lab:first-child{margin-top:0}
 .open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit;width:100%;min-height:72px;resize:vertical}
 .open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
-.hist{list-style:none;margin:0;padding:0;font-size:13.5px}
-.hist li{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+/* CHANGED: the history is small type in a box that scrolls, so a long life
+   never lengthens the row it sits under; the track is shown, since on a
+   Mac a scrollbar is an overlay that appears only once you scroll (§158) */
+.hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
+.hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
 .hist li:last-child{border-bottom:0}
-.hist time{font:400 12px/1.6 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap}
-.hist b{font-weight:600}
+.hist time{font:400 10.5px/1.6 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap}
+.hist b{font-weight:600;color:var(--ink)}
 .open .acts{display:flex;gap:14px;padding-top:10px;font-size:13px;align-items:center}
 .open .acts button{background:none;border:0;padding:0;font:inherit;color:var(--ink-3);cursor:pointer;text-decoration:underline}
 .open .acts button.danger{color:var(--bad)}
 
-/* ── CHANGED: the row gains a sixth column, the ⋯ ── */
+/* ── CHANGED: the row gains a sixth column, the arrow ── */
 .row{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
 .addrow{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:9px 2px;border-bottom:1px dashed var(--line)}
 /* CHANGED: the title is plain text; a double-click turns it into a box */
@@ -110,17 +121,17 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .who{font:600 12.5px/1.4 inherit;color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right;background:none;border:0;padding:0;position:relative}
 .who.pick{cursor:pointer;border-radius:6px;padding:3px 7px;margin:-3px -7px}
 .who.pick:hover,.who.pick.on{background:var(--surface-2)}
-.team{position:absolute;top:26px;right:0;z-index:5;min-width:190px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
-.team .tl{font:600 10.5px/1.6 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:5px 9px 3px}
+.team{position:absolute;top:26px;right:0;z-index:5;min-width:140px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
 .team button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 inherit;color:var(--ink);cursor:pointer;text-align:left}
 .team button:hover{background:var(--ground)}
 .team button.on{font-weight:600}
 .team button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
-.team button i{font-style:normal;color:var(--ink-3);font-size:12.5px}
-/* CHANGED: the three dots, the one way into a row's notes and history */
+/* CHANGED: the arrow that expands a row for its notes and history, and folds it */
 .more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
 .more:hover,.more.on{background:var(--surface-2);color:var(--ink)}
-.more svg{width:16px;height:16px}
+.more svg{width:16px;height:16px;transition:transform .15s}
+.more.on svg{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.more svg{transition:none}}
 .row.on{background:var(--surface);border-bottom-color:transparent}
 /* CHANGED: the opened row is notes and history only — no Title box, no With */
 .open{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:12px 2px 6px 34px;border-bottom:1px solid var(--line);background:var(--surface)}
@@ -148,16 +159,17 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
   <ol>
     <li>The owner cell shows the owner's <b>first name</b>, not initials.</li>
     <li>Pressing it opens <b>the team on this client</b> — pick one and the action is theirs.</li>
-    <li>A <b>⋯</b> at the right end of every row opens it in place for notes, history and Delete. The title no longer opens the row.</li>
+    <li>An <b>arrow</b> at the right end of every row expands it in place for notes, history and Delete, and folds it again. The title no longer opens the row.</li>
     <li><b>Double-click the action's name</b> to rename it there, on the row.</li>
     <li><b>No collaborators</b> — no “With”, no second name, no extra squares.</li>
   </ol>
+  <p>And two from the second look: the team list is <b>first names only</b>, and the history is <b>much smaller, in a box that scrolls</b>. One more is a behaviour a still cannot show: <b>adding a line is silent</b> — no page refresh; the line appears under you the moment Enter lands it, the counts update in place, and the box stays yours for the next one.</p>
 </div>
 
 <div class="wrapf">
 
 <!-- ═══ FRAME 1 · This week ═══ -->
-<p class="cap">1 · This week at rest — first names, a ⋯ on every row, nobody named twice</p>
+<p class="cap">1 · This week at rest — first names, an arrow on every row, nobody named twice</p>
 <div class="frame">
   <div class="bar">
     <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
@@ -181,44 +193,44 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t" title="Double-click to rename">Confirm the Q3 review date with the CEO office</div>
         <span class="when late pick" title="Change the date">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st prog pick" role="button" title="Change the status">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t" title="Double-click to rename">Send the revised Mobile pillar targets to Ahmed</div>
         <span class="when pick" title="Change the date">Wed 16 Sep</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st pick" role="button" title="Change the status">Not started</span>
-        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t" title="Double-click to rename">Prepare the cycle board walkthrough for Thursday</div>
         <span class="when pick" title="Change the date">Thu 17 Sep</span><span class="who pick" role="button" title="Hand it to somebody else">Islam</span><span class="st prog pick" role="button" title="Change the status">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 
       <div class="grp">Noran Essam <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Chase Finance for the August figures upload</div>
         <span class="when late">Late · Thu 3 Sep · carried 2 weeks</span><span class="who">Noran</span><span class="st prog">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row done"><span class="tick" role="checkbox" aria-checked="true" aria-label="Mark not done"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <div class="t">Check Retail's monthly plan after the twelve-month change</div>
         <span class="when">Done Tue 15 Sep</span><span class="who">Noran</span><span class="st done">Done</span>
-        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 
       <div class="grp">Omar Khalil <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Book the projector for the board review</div>
         <span class="when late">Late · Sun 13 Sep</span><span class="who">Omar</span><span class="st">Not started</span>
-        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Walk Care's custodian through the Reporting tab</div>
         <span class="when">Thu 17 Sep</span><span class="who">Omar</span><span class="st">Not started</span>
-        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history" title="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 
       <div class="addrow"><span class="plus">+</span><input id="add1" placeholder="Type an action and press Enter" aria-label="New action"><span class="when">No date</span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
     </div>
-    <div class="addhint">Enter adds it under you · then set its date, owner or status on the row · ⋯ for its notes</div>
+    <div class="addhint">Enter adds it under you · then set its date, owner or status on the row · the arrow for its notes</div>
   </div>
 </div>
 
 <!-- ═══ FRAME 2 · The team ═══ -->
-<p class="cap">2 · The owner's name pressed — the team on this client, pick one and it is theirs</p>
+<p class="cap">2 · The owner's name pressed — the team on this client by first name, pick one and it is theirs</p>
 <div class="frame">
   <div class="bar">
     <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
@@ -232,29 +244,28 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Confirm the Q3 review date with the CEO office</div>
         <span class="when late pick">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row" style="background:var(--surface)"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Send the revised Mobile pillar targets to Ahmed</div>
         <span class="when pick">Wed 16 Sep</span>
         <span class="who pick on" role="button" aria-expanded="true">Islam
           <div class="team" role="listbox" aria-label="Owner">
-            <div class="tl">Owner · the team on Raya Trade</div>
-            <button type="button" class="on" role="option" aria-selected="true">Islam <i>Saadany</i></button>
-            <button type="button" role="option">Noran <i>Essam</i></button>
-            <button type="button" role="option">Omar <i>Khalil</i></button>
+            <button type="button" class="on" role="option" aria-selected="true">Islam</button>
+            <button type="button" role="option">Noran</button>
+            <button type="button" role="option">Omar</button>
           </div>
         </span>
         <span class="st pick" role="button">Not started</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Prepare the cycle board walkthrough for Thursday</div>
         <span class="when pick">Thu 17 Sep</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="grp">Noran Essam <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Chase Finance for the August figures upload</div>
         <span class="when late">Late · Thu 3 Sep · carried 2 weeks</span><span class="who">Noran</span><span class="st prog">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     </div>
     <div class="addhint">Picking Noran moves the action under her at once · Escape or a click elsewhere closes the list and changes nothing</div>
   </div>
@@ -275,22 +286,22 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Confirm the Q3 review date with the CEO office</div>
         <span class="when late pick">Late · Mon 14 Sep · carried 1 week</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row" style="background:var(--surface)"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t"><input class="ttl" id="ttl3" value="Send the revised Mobile pillar targets to Ahmed Mostafa" aria-label="Rename the action"></div>
         <span class="when pick">Wed 16 Sep</span><span class="who pick" role="button">Islam</span><span class="st pick" role="button">Not started</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Prepare the cycle board walkthrough for Thursday</div>
         <span class="when pick">Thu 17 Sep</span><span class="who pick" role="button">Islam</span><span class="st prog pick" role="button">In progress</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     </div>
     <div class="addhint">A single click does nothing to the name, so a row can still be read without a box opening under the pointer</div>
   </div>
 </div>
 
-<!-- ═══ FRAME 4 · Opened from ⋯ ═══ -->
-<p class="cap">4 · A row opened from its ⋯ — notes and history only; no Title box, no With</p>
+<!-- ═══ FRAME 4 · Expanded from the arrow ═══ -->
+<p class="cap">4 · A row expanded from its arrow — notes, and a history that scrolls; no Title box, no With</p>
 <div class="frame">
   <div class="bar">
     <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
@@ -304,7 +315,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="row on"><span class="tick" role="checkbox" aria-checked="false" aria-label="Mark done"></span>
         <div class="t">Chase Finance for the August figures upload</div>
         <span class="when late pick">Late · Thu 3 Sep · carried 2 weeks</span><span class="who pick" role="button">Noran</span><span class="st prog pick" role="button">In progress</span>
-        <button class="more on" type="button" aria-label="Close" aria-expanded="true"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more on" type="button" aria-label="Close" aria-expanded="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="open">
         <div>
           <p class="lab">Notes</p>
@@ -316,6 +327,10 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
           <p class="lab">History</p>
           <ul class="hist">
             <li><time>Wed 9 Sep 16:05</time><span><b>Noran Essam</b> · Not started → In progress</span></li>
+            <li><time>Mon 7 Sep 11:40</time><span><b>Noran Essam</b> · In progress → Not started</span></li>
+            <li><time>Thu 3 Sep 17:22</time><span><b>Islam Saadany</b> · Not started → In progress</span></li>
+            <li><time>Wed 2 Sep 10:02</time><span><b>Islam Saadany</b> · In progress → Not started</span></li>
+            <li><time>Tue 1 Sep 14:30</time><span><b>Noran Essam</b> · Not started → In progress</span></li>
             <li><time>Tue 1 Sep 09:18</time><span><b>Islam Saadany</b> · created it, owner Noran Essam</span></li>
           </ul>
         </div>
@@ -323,10 +338,10 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
       <div class="row done"><span class="tick" role="checkbox" aria-checked="true" aria-label="Mark not done"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <div class="t">Check Retail's monthly plan after the twelve-month change</div>
         <span class="when">Done Tue 15 Sep</span><span class="who">Noran</span><span class="st done">Done</span>
-        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="13" cy="8" r="1.6" fill="currentColor"/></svg></button></div>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="addrow"><span class="plus">+</span><input id="add4" placeholder="Type an action and press Enter" aria-label="New action"><span class="when">No date</span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
     </div>
-    <div class="addhint">Pressing the ⋯ again, or Escape, closes it · the name is renamed on the row, so the opened row keeps no Title box</div>
+    <div class="addhint">Pressing the arrow again folds it · the name is renamed on the row, so the expanded row keeps no Title box · a long history scrolls inside its own box and never lengthens the row</div>
   </div>
 </div>
 
@@ -336,6 +351,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
   <p><b>What this costs, said before you choose.</b></p>
   <p><b>Two people with one first name.</b> If two of the office on one client are both called Ahmed, the name alone tells them apart from nobody, so the cell lengthens to two words for exactly that pair — the register's own rule for a clashing short name — and the team list always shows the full name beside the first.</p>
   <p><b>Who gets the press.</b> The name is a button only for the action's owner and the client's Super user, which is who may hand an action on today; everybody else reads the name. With collaborators gone, changing an action's date, status, notes or name is also the owner's and the Super user's — nobody else was ever on it.</p>
-  <p><b>Double-click on a tablet.</b> A double-tap on the name does the same in Safari and Chrome, but a finger has no hover to say the name can be renamed; the ⋯ row does not carry a second way in, so the rule stays one thing. Say if you want Rename beside Delete there too.</p>
+  <p><b>Double-click on a tablet.</b> A double-tap on the name does the same in Safari and Chrome, but a finger has no hover to say the name can be renamed; the expanded row does not carry a second way in, so the rule stays one thing. Say if you want Rename beside Delete there too.</p>
+  <p><b>Silent adding.</b> Enter posts the line and draws it under you without reloading the page; the strip and the count are updated in place, the box is cleared and keeps the cursor. If the server refuses, the line is not drawn and the reason is said in the red bar, with what you typed still in the box. Every other change on a row can take the same road, and will in the build.</p>
   <p><b>What is stored.</b> Nothing new. The collaborators field stays in the table holding nothing until a migration drops it in the build; the owner picker writes the same owner the opened row's dropdown wrote.</p>
 </div>

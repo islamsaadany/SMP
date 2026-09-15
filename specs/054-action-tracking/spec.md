@@ -23,7 +23,12 @@ the row's right end opens the notes and history, and the title stops being a
 link; a double-click on the name renames it in place, so the opened row keeps
 no Title box; and **collaborators go** — no *With*, no second name on a row,
 which narrows decisions 5 and 6's "collaborators" to nothing and §6's
-*collaborator* clause with it. **Not built until he says so.** The one cost
+*collaborator* clause with it. Redrawn the same hour at his word: the team list is **first names only**,
+no heading and no surnames; the ⋯ is an **arrow** that expands the box and
+folds it; the history is **much smaller, in a box that scrolls**; and
+**adding a line is silent** — no page refresh, the line drawn under you the
+moment Enter lands it, the counts updated in place, the box kept for the
+next one. **Not built until he says so.** The one cost
 stated on the mockup: two office rows sharing a first name are told apart by
 the register's own two-word rule (§81.1), and a double-click has no hover on a
 tablet.

@@ -267,18 +267,20 @@ Each at both ends (§94.2), each falsified from the sources (§276):
 
 ## 7 · Deliberately not decided here
 
-- **Where the landing-line pick is stored, and which door writes it.** A
-  module's server has no pool (§355 kept the seam to two new facts on
-  purpose). The recommendation is that the pick rides `org.extra` under a
-  key per module (no migration, an absence when default), and that **the
-  spine writes it**: the module hands the spine its list of choices, the
-  Setup page is the spine's, and the module only ever READS the pick through
-  the seam. Settled in the plan, because it decides whether the seam grows.
-- **What becomes of the Overview.** It is the page the gear lands on and it
-  counts across the line this spec draws. Either it becomes the landing's
-  own *Waiting on you* (which already reads the same functions, §148) and is
-  deleted, or Strategy keeps a cycle-only Overview. The first is the
-  recommendation and wants its own mockup (rule 1c).
+- ~~Where the landing-line pick is stored, and which door writes it.~~
+  **SETTLED 2026-09-15, Islam: "ok" to the recommendation.** The pick rides
+  `org.extra` under a key per module — no migration, an absence when default
+  (§50.6) — and **the spine writes it**: the module declares its list of
+  choices in `MODULE_DEF`, the Landing line page is the spine's, and the
+  module only ever READS the pick through the seam, which therefore does not
+  grow beyond §355's two facts.
+- **What becomes of the Overview** — drawn 2026-09-15 at Islam's *"ok show
+  me"*: `design-mockups/module-setup/2026-09-15_overview-fate.html`. The
+  drawing rests on a measurement: both halves of the Overview are ALREADY on
+  the landing — the office's *Waiting on you* is `attentionRows()` row for
+  row (§148) and the cycle column joined it at §200 — so the proposal is to
+  DELETE the Overview, land Strategy's gear on Reporting cycle, and let the
+  rail's pills follow their pages to the two rails. Awaiting sign-off.
 - **Terminology.** Spec 046 §4.1 says *business unit*, *function* and
   *company* are the client's words and *pillar*, *aspiration*, *tactic* are
   Strategy's, so the page would split. The drawing keeps all of it in

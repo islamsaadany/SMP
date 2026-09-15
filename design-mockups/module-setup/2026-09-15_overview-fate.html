@@ -1,0 +1,301 @@
+<title>The Overview's fate</title>
+<!-- ══════════════════════════════════════════════════════════════════
+     THE OVERVIEW'S FATE — a mockup for sign-off (rule 1c), 2026-09-15.
+     Spec 054 §7 left one screen undecided: the Setup Overview counts what
+     is waiting across the register, the cycle and the inbox, and spec 054
+     draws a line between the register (the client's) and the cycle
+     (Strategy's). Islam: "ok show me."
+
+     THE FINDING THE DRAWING RESTS ON, measured not remembered: both halves
+     of the Overview are ALREADY on the landing. The office's "Waiting on you"
+     is built from attentionRows() — the Overview's own list, row for row
+     (§148, welcome.js officeActs) — and the cycle summary joined the landing
+     at §200 in the Overview's own shape (welcome.js .wcyc). So the Overview
+     is a second drawing of a page the office already lands on.
+
+     Three frames: the Overview today; the landing today, with the rows that
+     are the SAME rows marked; and the proposal — the Overview deleted, the
+     gear landing Strategy's Setup on Reporting cycle, the rail's pills
+     following their pages to the two rails.
+     ══════════════════════════════════════════════════════════════════ -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#A9BAD8; --panel-accent:#E2B96B;
+    --gold:#C89B3C; --gold-deep:#9C5D08; --gold-wash:#FBF3E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --bad-tx:#B23025;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+    --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans:"Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --r:10px; --r-sm:6px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --panel:#0D2350; --panel-ink:#F0F4FB; --panel-quiet:#95A9CC; --panel-accent:#E2B96B;
+      --gold:#D4A855; --gold-deep:#E2B96B; --gold-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --bad-tx:#E8776B;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --panel:#0D2350; --panel-ink:#F0F4FB; --panel-quiet:#95A9CC; --panel-accent:#E2B96B;
+    --gold:#D4A855; --gold-deep:#E2B96B; --gold-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --bad-tx:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  body{ margin:0; background:var(--ground); color:var(--ink); font:15px/1.45 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1120px; margin:0 auto; padding-block:32px 72px; padding-inline:20px; display:flex; flex-direction:column; gap:28px; }
+  h1{ font:600 30px/1.15 var(--serif); margin:0; letter-spacing:-.01em; text-wrap:balance; }
+  .lede{ display:flex; flex-wrap:wrap; gap:10px 26px; margin:12px 0 0; padding:0; list-style:none; color:var(--ink-2); font-size:14px; }
+  .lede li::before{ content:"·"; color:var(--gold); font-weight:700; margin-right:8px; }
+  .lede b{ color:var(--ink); font-weight:600; }
+
+  .frame{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden; }
+  .frame > .cap{ display:flex; align-items:baseline; gap:14px; padding:12px 18px; border-bottom:1px solid var(--line); background:var(--surface-2); flex-wrap:wrap; }
+  .frame > .cap h2{ font:600 17px/1.2 var(--serif); margin:0; }
+  .frame > .cap .url{ font:13px/1 var(--mono); color:var(--ink-2); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:5px 12px; }
+  .frame > .cap .url b{ font-weight:500; color:var(--gold-deep); }
+  .frame > .cap .tag{ margin-left:auto; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+  .frame.gone{ border-style:dashed; box-shadow:none; }
+
+  .bar{ background:var(--panel); color:var(--panel-ink); display:flex; align-items:center; gap:18px; padding:0 18px; height:46px; font-size:13.5px; }
+  .bar .mk{ font-weight:700; letter-spacing:.02em; }
+  .bar .org{ color:var(--panel-quiet); }
+  .bar .org b{ color:var(--panel-ink); font-weight:600; }
+  .bar .sw{ display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.28); border-radius:var(--r-sm); padding:4px 9px; }
+  .bar .gear{ margin-left:auto; color:var(--panel-quiet); }
+  .bar .gear.on{ color:var(--panel-accent); }
+  .bar .house.gold{ color:var(--panel-accent); }
+
+  .screen{ padding:22px 24px 26px; }
+  .split{ display:grid; grid-template-columns:232px 1fr; gap:22px; align-items:start; }
+  @media (max-width:760px){ .split{ grid-template-columns:1fr; } }
+
+  .rail{ border:1px solid var(--line); border-radius:var(--r); background:var(--surface); overflow:hidden; font-size:13.5px; }
+  .rail .rhead{ background:var(--surface-2); padding:9px 12px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); border-bottom:1px solid var(--line); }
+  .rail .rgroup{ border-top:1px solid var(--line-soft); }
+  .rail .rgroup:first-of-type{ border-top:0; }
+  .rail .gh{ padding:9px 12px 3px; font-weight:700; font-size:12.5px; color:var(--ink-2); }
+  .rail .ritem{ padding:6px 12px 6px 22px; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .rail .ritem.on{ background:var(--gold-wash); font-weight:600; box-shadow:inset 3px 0 0 var(--gold); }
+  .rail .ritem.gone{ color:var(--ink-3); text-decoration:line-through; text-decoration-color:var(--bad-tx); }
+  .pill{ margin-left:auto; background:var(--panel); color:var(--panel-ink); font-size:10.5px; font-weight:700; border-radius:999px; padding:1px 7px; font-variant-numeric:tabular-nums; }
+
+  .pane{ border:1px solid var(--line); border-radius:var(--r); background:var(--surface); overflow:hidden; }
+  .pane .pt{ padding:12px 18px; border-bottom:1px solid var(--line); font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .pane .pt .crumb{ color:var(--ink-3); font-weight:400; }
+  .pane .pb{ padding:18px; }
+  .ovgrid{ display:grid; grid-template-columns:1fr 250px; gap:18px; align-items:start; }
+  @media (max-width:900px){ .ovgrid{ grid-template-columns:1fr; } }
+
+  .rows{ display:flex; flex-direction:column; gap:6px; }
+  .row{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); font-size:14px; }
+  .row .k{ font-weight:600; min-width:96px; }
+  .row .k.m{ min-width:110px; }
+  .row .v{ color:var(--ink-2); flex:1; }
+  .row .go{ color:var(--gold-deep); font-weight:600; font-size:13px; white-space:nowrap; }
+  .row .ll{ color:var(--ink-3); font-size:13px; flex:1; }
+  .row .ll b{ color:var(--ink-2); font-weight:600; }
+  .row.cta{ background:var(--gold-wash); border-color:transparent; }
+  .row.same{ box-shadow:inset 3px 0 0 var(--gold); }
+  .rows.client .row{ background:var(--surface-2); border-color:transparent; }
+  .rows.count{ counter-reset:r; }
+  .row .n{ font:500 11px/1 var(--mono); color:var(--gold-deep); min-width:18px; }
+
+  .side{ border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface-2); padding:12px 14px; font-size:13.5px; }
+  .side h4{ margin:0 0 8px; font:600 15px/1.2 var(--serif); display:flex; align-items:center; gap:8px; }
+  .side .badge{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--good); background:var(--good-bg); border-radius:999px; padding:2px 7px; }
+  .side .sl{ display:flex; justify-content:space-between; padding:4px 0; border-top:1px solid var(--line-soft); font-variant-numeric:tabular-nums; }
+  .side .sl b{ font-weight:600; }
+  .side .meta{ color:var(--ink-3); font-size:12.5px; margin-top:8px; }
+  .side.same{ box-shadow:inset 3px 0 0 var(--gold); }
+
+  .greet{ font:500 24px/1.2 var(--serif); margin:0 0 4px; }
+  .sig{ color:var(--ink-3); font-size:13px; margin:0 0 18px; }
+  .cols{ display:grid; grid-template-columns:1.1fr .9fr; gap:22px; align-items:start; }
+  @media (max-width:760px){ .cols{ grid-template-columns:1fr; } }
+  .blk h3{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700; }
+  .blk h3 + .rows, .blk h3 + .side{ margin-bottom:20px; }
+  .only{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-deep); font-weight:700; margin-left:8px; }
+  .exit{ margin-top:6px; padding:11px 14px; border:1px solid var(--line); border-radius:var(--r-sm); text-align:center; font-weight:600; color:var(--ink-2); }
+
+  .key{ display:flex; flex-wrap:wrap; gap:10px 22px; font-size:13px; color:var(--ink-2); padding:10px 18px; border-top:1px solid var(--line); background:var(--surface-2); }
+  .key i{ display:inline-block; width:3px; height:12px; background:var(--gold); margin-right:8px; vertical-align:-2px; font-style:normal; }
+  .key s{ color:var(--ink-3); text-decoration-color:var(--bad-tx); }
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:900px){ .two{ grid-template-columns:1fr; } }
+  .cost{ margin:0; padding:14px 18px; border:1px solid var(--line); border-radius:var(--r); background:var(--surface); font-size:14px; color:var(--ink-2); display:flex; flex-direction:column; gap:6px; }
+  .cost b{ color:var(--ink); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>The Overview's fate</h1>
+    <ul class="lede">
+      <li><b>The finding</b>: both halves of the Overview are already on the landing, drawn by the same two builders.</li>
+      <li><b>The proposal</b>: the Overview is deleted; Strategy's gear lands on Reporting cycle; the rail's pills follow their pages.</li>
+      <li><b>Cost</b>: the office loses one page that said the same thing twice.</li>
+    </ul>
+  </header>
+
+  <!-- ═══ TODAY 1: the Overview ═══ -->
+  <section class="frame">
+    <div class="cap"><h2>The Overview, today</h2><span class="url">smp… /raya-trade/<b>setup/overview</b></span><span class="tag">where the gear lands</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Strategy</b></span><span class="sw">Strategy ▾</span><span class="gear on">⚙ Setup</span></div>
+    <div class="screen">
+      <div class="split">
+        <nav class="rail">
+          <div class="rhead">Setup</div>
+          <div class="rgroup"><div class="gh">Running the cycle</div>
+            <div class="ritem on">Overview</div><div class="ritem">Reporting cycle <span class="pill">1</span></div><div class="ritem">Platform Inbox <span class="pill">1</span></div><div class="ritem">Send an email</div><div class="ritem">History</div><div class="ritem">Import &amp; storage</div></div>
+          <div class="rgroup"><div class="gh">People &amp; access</div>
+            <div class="ritem">People register <span class="pill">6</span></div><div class="ritem">Roles &amp; access</div><div class="ritem">Knowledge base</div></div>
+          <div class="rgroup"><div class="gh">The organisation</div>
+            <div class="ritem">Business units</div><div class="ritem">Supporting functions</div><div class="ritem">Companies</div><div class="ritem">Official BU list</div></div>
+        </nav>
+        <div class="pane">
+          <div class="pt">Overview</div>
+          <div class="pb ovgrid">
+            <div class="rows">
+              <div class="row same"><span class="n">1</span><span class="v">1 conversation waiting for an answer</span><span class="go">Platform Inbox ›</span></div>
+              <div class="row same"><span class="n">2</span><span class="v">1 claim request to answer</span><span class="go">Reporting cycle ›</span></div>
+              <div class="row same"><span class="n">3</span><span class="v">1 unit with no custodian</span><span class="go">People register ›</span></div>
+              <div class="row same"><span class="n">4</span><span class="v">2 people have never been issued a password</span><span class="go">People register ›</span></div>
+              <div class="row same"><span class="n">5</span><span class="v">3 people said where they work — accept or dismiss</span><span class="go">People register ›</span></div>
+            </div>
+            <aside class="side same">
+              <h4>Annual Plan 2026 <span class="badge">Open</span></h4>
+              <div class="sl"><span>Reported</span><b>222 of 245</b></div>
+              <div class="sl"><span>Submitted</span><b>6</b></div>
+              <div class="sl"><span>In progress</span><b>2</b></div>
+              <div class="sl"><span>Not started</span><b>2</b></div>
+              <div class="meta">Jan – Dec 2026 · reports due 30 Sep</div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="key"><span><i></i>Marked: the two things this page holds — the queue, and the cycle summary. Both appear again below.</span></div>
+  </section>
+
+  <!-- ═══ TODAY 2: the landing, as the office ═══ -->
+  <section class="frame">
+    <div class="cap"><h2>The landing, today, as the office</h2><span class="url">smp… /<b>raya-trade</b></span><span class="tag">the same two things</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· <b>Raya Trade</b></span><span class="gear house gold">⌂</span></div>
+    <div class="screen">
+      <p class="greet">Good morning, Ahmed.</p>
+      <p class="sig">Raya Trade · Strategy office: Forefront</p>
+      <div class="cols">
+        <div class="blk">
+          <h3>Waiting on you</h3>
+          <div class="rows">
+            <div class="row same"><span class="n">1</span><span class="v">1 conversation waiting for an answer</span><span class="go">Open the inbox ›</span></div>
+            <div class="row same"><span class="n">2</span><span class="v">1 claim request to answer</span><span class="go">Open Reporting cycle ›</span></div>
+            <div class="row same"><span class="n">3</span><span class="v">1 unit with no custodian</span><span class="go">Open People register ›</span></div>
+            <div class="row same"><span class="n">4</span><span class="v">2 people have never been issued a password</span><span class="go">Open People register ›</span></div>
+            <div class="row same"><span class="n">5</span><span class="v">3 people said where they work — accept or dismiss</span><span class="go">Open People register ›</span></div>
+          </div>
+        </div>
+        <div class="blk">
+          <h3>The cycle</h3>
+          <aside class="side same">
+            <h4>Annual Plan 2026 <span class="badge">Open</span></h4>
+            <div class="sl"><span>Reported</span><b>222 of 245</b></div>
+            <div class="sl"><span>Submitted</span><b>6</b></div>
+            <div class="sl"><span>In progress</span><b>2</b></div>
+            <div class="sl"><span>Not started</span><b>2</b></div>
+            <div class="meta">Jan – Dec 2026 · reports due 30 Sep</div>
+          </aside>
+        </div>
+      </div>
+      <div class="exit">Continue to the group</div>
+    </div>
+    <div class="key"><span><i></i>Row for row the Overview's list (welcome.js reads <code>attentionRows()</code>, §148) and the Overview's own cycle column (§200). Nothing here is a second count.</span></div>
+  </section>
+
+  <!-- ═══ PROPOSED ═══ -->
+  <div class="two">
+    <section class="frame">
+      <div class="cap"><h2>The landing, proposed</h2><span class="url">…/<b>raya-trade</b></span></div>
+      <div class="bar"><span class="mk">SMP</span><span class="org">· <b>Raya Trade</b></span><span class="gear house gold">⌂</span></div>
+      <div class="screen">
+        <p class="greet">Good morning, Ahmed.</p>
+        <p class="sig">Raya Trade · Strategy office: Forefront</p>
+        <div class="blk">
+          <h3>Waiting on you</h3>
+          <div class="rows">
+            <div class="row same"><span class="v">1 conversation waiting for an answer</span><span class="go">Inbox ›</span></div>
+            <div class="row same"><span class="v">1 claim request to answer</span><span class="go">Reporting cycle ›</span></div>
+            <div class="row same"><span class="v">1 unit with no custodian</span><span class="go">People ›</span></div>
+            <div class="row same"><span class="v">2 people have never been issued a password</span><span class="go">People ›</span></div>
+            <div class="row same"><span class="v">3 people said where they work</span><span class="go">People ›</span></div>
+          </div>
+          <h3>Your modules</h3>
+          <div class="rows">
+            <div class="row"><span class="k m">Strategy</span><span class="ll">Annual Plan 2026 · <b>222 of 245 reported</b> · due 30 Sep</span><span class="go">Open ›</span></div>
+            <div class="row"><span class="k m">Insights</span><span class="ll"><b>2 new reports</b> this month</span><span class="go">Open ›</span></div>
+          </div>
+          <h3>Client setup <span class="only">Super user</span></h3>
+          <div class="rows client">
+            <div class="row"><span class="k m">People</span><span class="v">The register — 33 people</span><span class="go">›</span></div>
+            <div class="row"><span class="k m">Organisation</span><span class="v">Companies, units, functions, Official BU list</span><span class="go">›</span></div>
+          </div>
+        </div>
+        <div class="exit">Continue to the group</div>
+      </div>
+      <div class="key"><span>The cycle column becomes Strategy's <b>landing line</b> (spec 054 §4.5). The list is unchanged: the three register rows now open Client setup pages, the two cycle rows open Strategy's.</span></div>
+    </section>
+
+    <section class="frame">
+      <div class="cap"><h2>Strategy's Setup, proposed</h2><span class="url">…/raya-trade/<b>strategy</b>/setup</span></div>
+      <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Strategy</b></span><span class="sw">Strategy ▾</span><span class="gear on">⚙</span></div>
+      <div class="screen">
+        <div class="split" style="grid-template-columns:1fr">
+          <nav class="rail">
+            <div class="rhead">Strategy · Setup</div>
+            <div class="rgroup"><div class="gh">Running the cycle</div>
+              <div class="ritem gone">Overview</div>
+              <div class="ritem on">Reporting cycle <span class="pill">1</span></div><div class="ritem">Platform Inbox <span class="pill">1</span></div><div class="ritem">Send an email</div><div class="ritem">History</div><div class="ritem">Import &amp; storage</div><div class="ritem">Contingency</div></div>
+            <div class="rgroup"><div class="gh">Measurement</div>
+              <div class="ritem">Scoring bands</div><div class="ritem">Figure sets</div><div class="ritem">Focus measures</div><div class="ritem">Terminology</div></div>
+            <div class="rgroup"><div class="gh">Access</div>
+              <div class="ritem">Roles &amp; access</div></div>
+            <div class="rgroup"><div class="gh">The landing</div>
+              <div class="ritem">Landing line</div></div>
+          </nav>
+          <div class="pane">
+            <div class="pt"><span class="crumb">Strategy ›</span> Reporting cycle</div>
+            <div class="pb">
+              <aside class="side">
+                <h4>Annual Plan 2026 <span class="badge">Open</span></h4>
+                <div class="sl"><span>Reported</span><b>222 of 245</b></div>
+                <div class="sl"><span>Submitted</span><b>6</b></div>
+                <div class="sl"><span>In progress</span><b>2</b></div>
+                <div class="sl"><span>Not started</span><b>2</b></div>
+                <div class="meta">Jan – Dec 2026 · reports due 30 Sep · 1 claim request to answer</div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="key"><span><s>Overview</s> deleted, not hidden. The gear lands on Reporting cycle, the first entry. The People register's pill (6) goes with the register to the Client rail; Strategy keeps the cycle's and the inbox's.</span></div>
+    </section>
+  </div>
+
+  <p class="cost">
+    <b>What the office loses:</b> nothing it cannot see on the landing, which it opens first on every sign-in.
+    <b>What it costs:</b> one press more to reach the queue from inside Setup — the house in the top bar, which already goes gold when anything is waiting (§197.2).
+    <b>Not drawn, deliberately:</b> an Overview kept as a cycle-only page. With the register rows gone it would hold two rows and a column the Reporting cycle page already opens with (§108.9), which is the page it would be one press away from.
+  </p>
+</div>

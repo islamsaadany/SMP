@@ -421,15 +421,6 @@
          complete without the other, which is what a two-line conflict looks
          like when both edits are right. */
       { k:"access", ac:"c_access", grp:"access", mod:"strategy", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
-      /* THE LANDING LINE (§356.4, spec 054 §4.5): which of its declared
-         sentences Strategy says under its row on the client landing. The
-         office's by rule (`c_landing` is `area:"always"`, §356.4 in
-         lib/rules.js) until spec 046 §4.4's per-module Access table lands
-         (step 5). The sentences and their texts arrive on the served
-         document (`data-landing`); over file:// the page says so. */
-      { k:"landing", ac:"c_landing", grp:"landing", mod:"strategy", label:"Landing line", glyph:"▤", find:"landing line welcome screen what the module says row sentence",
-        when: function(){ return inOffice(); },
-        render:renderLandingLine },
       { k:"mainbu", ac:"c_people", grp:"who", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       /* ── SETTING A CLIENT UP (§318, spec 044) ────────────────────────
@@ -1298,10 +1289,6 @@
        People register (spec 054 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
-    /* §356.4 (spec 054 §4.5): a module's own group — what it says about
-       itself on the client landing. Drawn on a module's rail and never the
-       client's, because the def below carries the module. */
-    { k:"landing", label:"The landing",     note:"What this module says on the landing" },
     { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" },
     { k:"help", label:"Help",             note:"How the platform works, in its own words" }
   ];
@@ -6495,17 +6482,6 @@
       b.addEventListener("click", function(){
         delete GROUP.comms;
         paint();
-      });
-    });
-    /* THE LANDING LINE'S PICK (§356.4): a radio is a select-shaped write, so
-       it REPAINTS (§257.2a — the preview under the list must follow the
-       pick), and the default DELETES the key, the last one leaving deleting
-       the map (§50.6). The pick and the module are read off the control the
-       page drew, never re-derived here. */
-    document.querySelectorAll("[data-landpick]").forEach(function(r){
-      r.addEventListener("change", function(){
-        if (!r.checked) return;
-        setLandingPick(r.dataset.landmod, r.dataset.landpick, r.dataset.landdefault);
       });
     });
     /* THE WORD IS WRITTEN INTO THE ELEMENT, not painted (§63.4): a repaint

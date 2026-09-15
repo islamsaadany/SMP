@@ -160,6 +160,29 @@ function __smpLanding(state, personKey) {
            acts: acts, pages: pages, tour: tour, home: home, continueWord: word };
 }
 function __smpPlaceLabel(state, target) { __smpHydrate(state); try { return placeLabel(target); } catch (e) { return String(target); } }
+/* THE FACTS A LANDING LINE IS MADE OF (§356.4): the cycle's state and its
+   due day off REVIEW, and how many subjects have submitted off cycleTotals()
+   — the product's own count, the one the cycle board and the welcome screen
+   read, never a second sum (§53.5). */
+function __smpLandingFacts(state) {
+  __smpHydrate(state);
+  var out = { cycleOpen: null, cycleName: "", due: "", total: null, sub: null };
+  try {
+    if (REVIEW) {
+      out.cycleOpen = REVIEW.state === "open";
+      out.cycleName = String(REVIEW.name || "");
+      out.due = String(REVIEW.due || "").trim();
+    }
+    /* SUBJECTS, never figures: total and done are the FIGURES entered across
+       the tenant and units is the subjects the board has a row for (§244),
+       of which sub have submitted — the first draft read t.total and the
+       line said "249 of 255 still to submit" about a tenant with eighteen
+       subjects (§100.3, measured before it shipped). */
+    var t = cycleTotals();
+    if (t && typeof t.units === "number") { out.total = t.units; out.sub = t.sub; }
+  } catch (e) {}
+  return out;
+}
 /* §67's clearedGraph(), the platform's own mirror of migration 004: what a
    client's deployment holds on day one. Hydrated first so clone() and the
    graph's own invariants are the product's. */
@@ -438,6 +461,12 @@ function placeLabel(graph, target) {
   const c = context();
   return String(c.__smpPlaceLabel(graph, target));
 }
+/* The cycle half of a landing line's facts (§356.4); the library half is
+   the server's own (lib/landing-facts.ts). */
+function landingFacts(graph) {
+  const c = context();
+  return detach(c.__smpLandingFacts(graph));
+}
 /* The graph a NEW client starts with (§67, §313.31): the seed cleared by the
    product's own clearedGraph() — unit and function names kept, every plan
    line, figure, role and person but the bootstrap SMO gone. */
@@ -465,4 +494,4 @@ function shape(graph, answers) {
   const c = context();
   return detach(c.__smpShape(graph, answers));
 }
-module.exports = { landing, placeLabel, cleared, bare, shape, holds, FILES };
+module.exports = { landing, placeLabel, landingFacts, cleared, bare, shape, holds, FILES };

@@ -8,6 +8,7 @@
    (account_clients); a client's own rows are reached through withTenant and
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
+import { landingFactsFor } from "./landing-facts.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -88,10 +89,17 @@ async function factsFor(t: ClientRow) {
       const units = await n("units"), pillars = await n("pillars");
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
       return { units, planned: pillars > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
+    }).then(async (f) => {
+      /* the landing line's facts and the client's picks (§356.4) — read
+         through the ONE reader the client's landing uses, as somebody who
+         sees everything, which the console is */
+      const have = modulesFor(t.modules);
+      const { facts, picks } = await landingFactsFor(t.id, have, { place: null, seesAll: true });
+      return { ...f, landing: facts, picks };
     });
   } catch (e) {
     console.error("card facts for " + t.key + ":", (e as Error).message);
-    return { units: null, planned: null, cycleOpen: null, unreadable: true };
+    return { units: null, planned: null, cycleOpen: null, unreadable: true, landing: null, picks: {} };
   }
 }
 
@@ -116,7 +124,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
            has, each with the one line that module says about it. Worked out
            HERE and never on the page, so the console cannot spell a module
            differently from the switch or from Setup (§53.5). */
-        modules: moduleRows(modulesFor(row.modules), facts) });
+        modules: moduleRows(modulesFor(row.modules), facts, facts.picks) });
     }
     /* ── THE ARCHIVED BAND (§323) ────────────────────────────────────
        Its own list, not a flag on the grid's: `visibleClients` keeps a

@@ -78,10 +78,49 @@ export const SPINE_SEGMENTS = ["setup", "tour"] as const;
    what stops the answer being invented a second time when that page lands
    (§42's drift, from in front). */
 export type ModuleArea = { key: string; label: string; note: string; states: string[]; shipped: string };
-export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[] };
+/* ── THE LANDING LINE (spec 054 §4.5, §356.4) ───────────────────────
+   Each module DECLARES the sentences it can say about itself: a key, the
+   label the module's Landing line page offers, an example for that page, and
+   a reader that makes the sentence out of facts the module already has
+   (lib/landing-facts.ts). The client picks ONE key per module on that page;
+   the pick is stored on the group under SMPRules.LANDING_PICK (shared, so
+   the authoriser and the browser spell it once) and the FIRST declared line
+   is the default, so an unchosen module still says something. NEVER FREE
+   TEXT: a typed line goes stale the day the fact behind it changes, and the
+   whole reason for the line is that it is true today. `none` draws the
+   module's row with no line under it and is declared like the rest, so it is
+   a choice rather than an absence. A facts field the reader cannot see
+   (null) reads as the honest sentence for not knowing, never as nought. */
+export type LandingFacts = {
+  cycleOpen: boolean | null; cycleName: string; due: string;
+  total: number | null; sub: number | null;
+  newReports: number | null; latestReport: string;
+};
+export type LineDef = { key: string; label: string; example: string; read: (f: LandingFacts) => string };
+export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[] };
+const NOTHING: LineDef = { key: "none", label: "Nothing", example: "The module is listed with no line under it", read: () => "" };
+const STRATEGY_LINES: LineDef[] = [
+  { key: "cycle", label: "The cycle\u2019s state", example: "Cycle open \u00b7 reports due 30 Sep",
+    read: (f) => f.cycleOpen === null ? "" : !f.cycleOpen ? "No cycle open"
+      : "Cycle open" + (f.due ? " \u00b7 reports due " + f.due : "") },
+  { key: "waiting", label: "What is waiting", example: "3 of 10 units still to submit",
+    read: (f) => f.cycleOpen === null || f.total === null || f.sub === null ? ""
+      : !f.cycleOpen ? "No cycle open"
+      : f.total - f.sub <= 0 ? "Every unit has submitted"
+      : (f.total - f.sub) + " of " + f.total + " still to submit" },
+  NOTHING,
+];
+const INSIGHTS_LINES: LineDef[] = [
+  { key: "new", label: "New reports this month", example: "2 new reports this month",
+    read: (f) => f.newReports === null ? "" : f.newReports === 0 ? "No new reports this month"
+      : f.newReports + " new report" + (f.newReports === 1 ? "" : "s") + " this month" },
+  { key: "latest", label: "The latest report, by name", example: "Latest: Egypt retail outlook, Q3",
+    read: (f) => f.newReports === null ? "" : f.latestReport ? "Latest: " + f.latestReport : "No reports yet" },
+  NOTHING,
+];
 export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
-  strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true,  areas: [] },
-  portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: false, areas: [] },
+  strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true,  areas: [], lines: STRATEGY_LINES },
+  portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: false, areas: [], lines: [NOTHING] },
   insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: true,
     /* ONE AREA, because there is one thing to be granted: opening the
        library. Per-item visibility is spec 046 decision #15's deferral —
@@ -93,13 +132,14 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
        yet* and never *no* (§30.2). */
     areas: [{ key: "a_insights", label: "Insights",
               note: "Open the library and download what is in it",
-              states: ["view", "none"], shipped: "view" }] },
-  processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [] },
+              states: ["view", "none"], shipped: "view" }],
+    lines: INSIGHTS_LINES },
+  processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [], lines: [NOTHING] },
   /* DELIBERATELY NOT A PRODUCT NAME (Islam, 2026-09-12: "something even for
      the trial"). It exists to prove a module can be turned on for one client
      and opened, and it says so in its own line, so nobody can mistake it for
      something the client bought. */
-  trial:     { label: "Trial",     note: "Says hello and names the client. Proves a module can be turned on.", built: true, areas: [] },
+  trial:     { label: "Trial",     note: "Says hello and names the client. Proves a module can be turned on.", built: true, areas: [], lines: [NOTHING] },
 };
 
 export function isModule(s: unknown): s is ModuleKey {
@@ -213,20 +253,35 @@ export function isLibrary(k: unknown): boolean {
   return typeof k === "string" && (LIBRARY_MODULES as readonly string[]).includes(k);
 }
 
-/* THE LANDING LINE (spec 054 §4.5). Each module will DECLARE the sentences
-   it can say about itself and the client picks one on the module's own
-   Landing line page — that is step 4 of spec 054's plan. Until it lands every
-   module says nothing, which is exactly what an unchosen module says once it
-   has: a row with no line under it. Declared here, beside the label and the
-   areas, so the console's card and the landing read ONE answer (§53.5). */
-export function landingLine(_k: ModuleKey): string { return ""; }
+/* THE LINE A MODULE SAYS, from its declaration, the client's pick and the
+   facts — ONE reader for the console's card and the client's landing
+   (§53.5). An unknown or absent pick is the first declared line, which is
+   the default; a facts object the caller could not read gives every line
+   the empty string, so a module whose facts are unreadable says nothing
+   rather than guessing (§35). */
+export const NO_FACTS: LandingFacts = { cycleOpen: null, cycleName: "", due: "", total: null, sub: null, newReports: null, latestReport: "" };
+export function lineDef(k: ModuleKey, pick: string | null | undefined): LineDef {
+  const lines = MODULE_DEF[k].lines;
+  return lines.find((l) => l.key === pick) || lines[0];
+}
+export function landingLine(k: ModuleKey, pick: string | null | undefined, facts: LandingFacts | null | undefined): string {
+  return lineDef(k, pick).read(facts || NO_FACTS);
+}
 
-export type ModuleRow = { key: ModuleKey; label: string; state: string; room: boolean };
-export function moduleRows(have: ModuleKey[], facts: { unreadable?: boolean; cycleOpen?: boolean | null; planned?: boolean | null }): ModuleRow[] {
+export type ModuleRow = { key: ModuleKey; label: string; state: string; line: string; room: boolean };
+/* `line` IS THE LANDING LINE (§356.4): the same reader the client's landing
+   draws from, given the same facts and the client's own picks, so the
+   console cannot say one thing about a module while the landing says
+   another. `state` stays the card's own health word — *not answering*, *no
+   plan yet* — which is about whether the client can be opened at all and
+   not something the client chose. */
+export function moduleRows(have: ModuleKey[], facts: { unreadable?: boolean; cycleOpen?: boolean | null; planned?: boolean | null; landing?: LandingFacts | null },
+                           picks: Record<string, string> = {}): ModuleRow[] {
   return have.map((k) => ({
     key: k,
     label: MODULE_DEF[k].label,
     room: isLibrary(k),
+    line: facts.unreadable ? "" : landingLine(k, picks[k], facts.landing),
     state: k !== "strategy" ? ""
       : facts.unreadable ? "not answering"
       : facts.cycleOpen ? "cycle open"

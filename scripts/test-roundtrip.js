@@ -429,6 +429,25 @@ const CLIENT_ARG = (function () {
     ppcOk ? "" : JSON.stringify(Object.keys(ppClean.group).filter(k => k.indexOf("plan") === 0)));
   if (!ppcOk) process.exitCode = 1;
 
+  /* ── THE LANDING LINE'S PICK (§356.4) ────────────────────────────
+     A map keyed by module on the GROUP, written, read back, and taken away
+     again — "it rides org.extra" measured rather than claimed (§172). */
+  const lpState = await io.readState(client);
+  lpState.group[R.LANDING_PICK] = { strategy: "waiting", insights: "latest" };
+  await io.writeState(client, lpState);
+  const lpBack = await io.readState(client);
+  const lpOk = lpBack.group[R.LANDING_PICK] && lpBack.group[R.LANDING_PICK].strategy === "waiting" &&
+               lpBack.group[R.LANDING_PICK].insights === "latest";
+  console.log("landing line pick round trip:", lpOk ? "PASS" : "FAIL",
+    lpOk ? "[no migration \u2014 org.extra]" : JSON.stringify(lpBack.group[R.LANDING_PICK]));
+  if (!lpOk) process.exitCode = 1;
+  delete lpBack.group[R.LANDING_PICK];
+  await io.writeState(client, lpBack);
+  const lpClean = await io.readState(client);
+  const lpcOk = !(R.LANDING_PICK in lpClean.group);
+  console.log("  ...and cleared, the key DELETED:", lpcOk ? "PASS" : "FAIL", lpcOk ? "" : JSON.stringify(Object.keys(lpClean.group)));
+  if (!lpcOk) process.exitCode = 1;
+
   /* ── OPENING A NEW CYCLE, WHICH CARRIES NO QUARTER (§316.3) ──────────
      Islam, in his own words: pressing "Open a new cycle" looked like it
      worked and the change never saved. §307 took the review point off that

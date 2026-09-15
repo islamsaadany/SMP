@@ -326,6 +326,13 @@
        on the server (office by rule, §97's shape): who reads every person's
        changes is not a tick somebody could set on a bad afternoon. */
     { key:"c_history", area:"always", scope:"manage", label:"History",          note:"Who changed what, and put a value back" },
+    /* THE LANDING LINE (§356.4). `area:"always"` with the real gate in the
+       page def (the office) and on the server (a `setup` change): what a
+       module says about itself on the client landing is the office's, and
+       spec 046 §4.4's per-module Access table is where it will be granted
+       when that page lands (step 5) — a matrix cell today would be a second
+       answer to that question. */
+    { key:"c_landing", area:"always", scope:"manage", label:"Landing line",     note:"What this module says on the landing" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
@@ -3029,6 +3036,27 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      THE FIELD IS NAMED ONCE and `lib/authorize.js` classifies it by this
      constant, for §234's reason. */
   var PRESENT_MINS = "presentMins";
+  /* ── THE LANDING LINE (§356.4, spec 054 §4.5) ─────────────────────
+     Which of its declared sentences each module says on the client landing,
+     keyed by module — `{ strategy: "waiting" }` — chosen on the module's own
+     Landing line page. The SENTENCES are declared beside the module
+     (smp-app/lib/modules.ts) and never here: nothing frozen can say what a
+     module has to say, and the server is the only reader that holds the
+     facts a line is made of. What is shared is the KEY and the reader, for
+     §234's reason: lib/authorize.js classifies the field by this constant and
+     lists it among the group's known keys, and the browser writes it through
+     this same name. Stored as an ABSENCE (§50.6): a module on its default
+     line holds no entry, and the last entry leaving deletes the map. */
+  var LANDING_PICK = "landing";
+  var NO_PICKS = Object.freeze({});
+  function landingPicks(group) {
+    var v = group && group[LANDING_PICK];
+    return (v && typeof v === "object" && !Array.isArray(v)) ? v : NO_PICKS;
+  }
+  function landingPick(group, module) {
+    var v = landingPicks(group)[module];
+    return (typeof v === "string" && v) ? v : "";
+  }
   /* Frozen and SHARED, for `NO_FLOW`'s reason: every tenant that has set no
      times is handed this same object, so one careless write would give them
      all a slot. */
@@ -3558,6 +3586,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     videoSlides: videoSlides, videoRoom: videoRoom, videoHeld: videoHeld,
     MASTER_FLOW: MASTER_FLOW, masterFlow: masterFlow,
     PRESENT_MINS: PRESENT_MINS, presentMinsMap: presentMinsMap,
+    LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,

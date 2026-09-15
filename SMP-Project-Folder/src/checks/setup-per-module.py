@@ -251,9 +251,29 @@ with sync_playwright() as p:
        ev(pg, "()=>/Knowledge base/.test((document.querySelector('#panel .setupttl')||{}).textContent||'')", False))
 
     print("\n── 7 · the fold keys are the ones a browser already holds (§30.2) ──")
-    ck("the groups are keyed as before, plus access and help",
-       ev(pg, "()=>SETUP_GROUPS.map(g=>g.k).join(',')") == "cycle,who,run,meas,access,look,help",
-       ev(pg, "()=>SETUP_GROUPS.map(g=>g.k).join(',')"))
+    # REWRITTEN, NEVER LOOSENED (§218, §214.3): this held the whole list as a
+    # literal and §356.4 legitimately added `landing`. What §30.2 needs is that
+    # the keys a browser ALREADY HOLDS folds for are still those keys, in
+    # place — asserted as the leading four — and that every def's group is a
+    # key of the list (agreement, §94.8), so a group added tomorrow stays
+    # green and a def pointing at no group goes red.
+    keys = ev(pg, "()=>SETUP_GROUPS.map(g=>g.k)")
+    ck("the four groups a browser already folds are keyed as before, in place",
+       keys[:4] == ["cycle", "who", "run", "meas"], keys)
+    ck("...and access, landing and help are among the groups", all(k in keys for k in ("access", "landing", "help")), keys)
+    ck("...and every def's group is one of them",
+       ev(pg, "()=>setupDefsAll().every(d=>SETUP_GROUPS.some(g=>g.k===d.grp))", False),
+       ev(pg, "()=>setupDefsAll().filter(d=>!SETUP_GROUPS.some(g=>g.k===d.grp)).map(d=>d.k)"))
+
+    print("\n── 7b · the Landing line page, offline, says the served platform sets it (§356.4) ──")
+    # Over file:// there is no landing and no declaration on the document, so
+    # the page must say so rather than draw a list that writes to nothing
+    # (§45.2, §61). The served page is driven by smp-app/checks/door-landing.mjs §8.
+    set_scope(pg, "strategy", "landing")
+    ck("the page is on Strategy's rail", ev(pg, "()=>currentSub", None) == "landing", ev(pg, "()=>currentSub", None))
+    ck("with no declaration it says where the line is set",
+       ev(pg, "()=>!!document.querySelector('#panel .lnone')", False))
+    ck("...and offers nothing to pick", ev(pg, "()=>document.querySelectorAll('[data-landpick]').length", -1) == 0)
     ev(pg, "()=>{localStorage.setItem('smp.setup.groups', JSON.stringify({look:1}));}")
     pg.reload(); pg.wait_for_timeout(800)
     if not BASE:

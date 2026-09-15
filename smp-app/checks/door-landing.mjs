@@ -22,6 +22,7 @@
      … --break=no-creator     (RED: making a client leaves its creator off its own team, §339)
      … --break=setup-any-seat (RED: the Client setup block is drawn for every seat, spec 054 §4.1)
      … --break=modules-unread (RED: Your modules stops reading the client's own list)
+     … --break=no-landing-stamp (RED: the Setup document carries no declaration, so the Landing line page draws nothing to pick, §356.4)
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
    Needs `next build` first and the chromium this image carries. */
@@ -33,6 +34,7 @@ import { chromium } from "playwright-core";
 import pg from "pg";
 import { devTenant } from "../scripts/dev-tenant.mjs";
 import { doorHref, landingShape } from "../lib/landing.ts";
+import { landingLine, MODULE_DEF } from "../lib/modules.ts";
 import { DEFAULT_MODULE } from "../lib/modules.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
@@ -525,6 +527,82 @@ await section("7 · the landing's Client setup block and Your modules (spec 054 
       check(page.url() === BASE + "/raya-trade/trial", "…and its row opens the module", page.url());
     } else fail("…and its row opens the module", "no Trial row to press");
   } finally { await owner.query(`UPDATE tenants SET modules = '[]'::jsonb WHERE id = $1`, [tenant.id]); }
+  await ctx.close();
+});
+
+
+/* ══ THE LANDING LINE (spec 054 §4.5, §356.4) ═══════════════════════════
+   Declared on the module, chosen on its Landing line page, stored on the
+   group, drawn in two places — and the three must AGREE (§53.5): what the
+   page offers is the document's own stamp, what the landing says is the
+   one reader's answer for the pick, and what the console's card says is the
+   same. Driven through the real page, the pick read back off the STORED
+   graph (§96), and put back to the default in a finally (§94.2). */
+await section("8 · the landing line, chosen on Strategy's Setup and read on the landing and the card", async () => {
+  ({ ctx, page } = await fresh());
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  await signIn(page, "office@forefront.example", "Raya-2026!");
+  await page.waitForURL(BASE + "/platform");
+  const booted = () => page.waitForFunction(() => !document.documentElement.classList.contains("booting"));
+  const readPage = () => page.evaluate(() => {
+    const raw = document.documentElement.getAttribute("data-landing");
+    let stamp = null; try { stamp = raw ? JSON.parse(raw) : null; } catch (e) {}
+    return { stamp, sub: currentSub, scope: document.documentElement.getAttribute("data-setup-scope"),
+      radios: [...document.querySelectorAll("[data-landpick]")].map((r) => [r.dataset.landpick, r.checked, r.disabled]),
+      labels: [...document.querySelectorAll(".lopt b")].map((b) => b.textContent),
+      prev: (document.querySelector(".lrow .lll") || {}).textContent, prevKey: (document.querySelector(".lrow") || { dataset: {} }).dataset.landprev,
+      none: !!document.querySelector(".lnone"), stored: (typeof GROUP !== "undefined" && GROUP.landing) || null };
+  });
+  /* the state API answers `{ ok, state }` (sync.js hydrates `data.state`) —
+     the first draft read `st.group` and the default's "key deleted" passed on
+     null either way (§113.8), so the pick is asserted PRESENT first */
+  const stored = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); const g = st.state && st.state.group; return (g && g.landing) || null; };
+  const cardLine = async () => { const j = await (await page.request.post(BASE + "/api/platform", { data: { action: "cards" } })).json();
+    const c = (j.cards || []).find((x) => x.key === "raya-trade"); const m = c && (c.modules || []).find((x) => x.key === "strategy"); return m ? m.line : null; };
+  const landingLineOn = async () => { await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
+    return page.$eval('.wmods a[data-module="strategy"] .wll', (e) => e.textContent).catch(() => null); };
+  await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
+  let r = await readPage();
+  check(r.sub === "landing" && r.scope === "strategy", "the Landing line page is on Strategy's own rail", JSON.stringify([r.sub, r.scope]));
+  check(!!r.stamp && r.stamp.module === "strategy", "the Setup document carries Strategy's declaration", JSON.stringify(r.stamp && r.stamp.module));
+  const decl = MODULE_DEF.strategy.lines.map((l) => l.key);
+  check(!!r.stamp && r.stamp.lines.map((l) => l.key).join(",") === decl.join(","), "…the module's own lines, in its order", JSON.stringify(r.stamp && r.stamp.lines.map((l) => l.key)));
+  check(r.radios.length === decl.length && r.radios.every((x, i) => x[0] === decl[i] && !x[2]), "the page offers exactly those, live for the office", JSON.stringify(r.radios));
+  check(!r.none, "…and never the no-stamp sentence", r.none);
+  check(r.radios[0] && r.radios[0][1] === true && (await stored()) === null, "with nothing stored the FIRST line is lit — the default is an absence (§50.6)", JSON.stringify([r.radios, await stored()]));
+  check(!!r.stamp && r.prev === r.stamp.lines[0].text && !!r.prev, "the preview under the list is the stamp's own text for it", JSON.stringify([r.prev, r.stamp && r.stamp.lines[0].text]));
+  const before = await cardLine();
+  check(!!r.stamp && before === r.stamp.lines[0].text, "the console's card says the same sentence (one reader, §53.5)", JSON.stringify([before, r.stamp && r.stamp.lines[0].text]));
+  /* THE PICK */
+  const want = r.stamp ? r.stamp.lines[1] : null;
+  /* EVERY PRESS IS GUARDED (§215): on the no-stamp build there is nothing to
+     press, and a click that waits thirty seconds on it takes the six
+     assertions after it down without reporting them. */
+  const pick = async (key) => {
+    const row = page.locator('.lopt:has([data-landpick="' + key + '"])');
+    if (!(await row.count())) { fail("pressing the " + key + " line", "no such row to press"); return false; }
+    await row.click(); await page.waitForTimeout(2500); return true;
+  };
+  try {
+    await pick("waiting");
+    r = await readPage();
+    const lit = r.radios.find((x) => x[0] === "waiting");
+    check(!!lit && lit[1] === true && r.prevKey === "waiting" && !!want && r.prev === want.text, "a pick lights its row and moves the preview to that line's text", JSON.stringify([r.radios, r.prev]));
+    const st = await stored();
+    check(!!st && st.strategy === "waiting", "…and is STORED on the group under the module's key (read off the server)", JSON.stringify(st));
+    const onLanding = await landingLineOn();
+    check(want && onLanding === want.text, "the landing's Strategy row now says that line", JSON.stringify([onLanding, want && want.text]));
+    check(want && (await cardLine()) === want.text, "…and so does the console's card", JSON.stringify(await cardLine()));
+    /* THE DEFAULT DELETES THE KEY */
+    await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
+    await pick("cycle");
+    check((await stored()) === null, "picking the default again DELETES the key, so never-set and set-then-cleared are the same bytes (§50.6)", JSON.stringify(await stored()));
+    /* NOTHING is a choice, drawn as a row with no line */
+    await pick("none");
+    check((await landingLineOn()) === "", "Nothing keeps the row and draws no line under it", JSON.stringify(await landingLineOn()));
+  } finally {
+    await owner.query("UPDATE org SET extra = extra - 'landing' WHERE tenant_id = $1", [tenant.id]).catch(() => {});
+  }
   await ctx.close();
 });
 

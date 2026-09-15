@@ -7,7 +7,8 @@ import { createRequire } from "node:module";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { registerKeyFor } from "./state-api.ts";
-import { clientHref, DEFAULT_MODULE, MODULE_DEF, modulesFor, landingLine, type ModuleKey } from "./modules.ts";
+import { clientHref, DEFAULT_MODULE, MODULE_DEF, modulesFor, landingLine, isModule, NO_FACTS, type ModuleKey, type LandingFacts } from "./modules.ts";
+import { landingFactsFor, viewerFor } from "./landing-facts.ts";
 
 const frozen = createRequire(import.meta.url)("./frozen.cjs") as {
   landing: (graph: unknown, personKey: string) => Landing;
@@ -88,7 +89,8 @@ export async function landingFor(tenantId: string, personKey: string | null, ema
 export type SetupDoor = { key: string; label: string; sub: string; href: string };
 export type ModuleLine = { key: ModuleKey; label: string; line: string; href: string };
 export type LandingShape = { clientSetup: SetupDoor[] | null; modules: ModuleLine[] };
-export function landingShape(slug: string, seat: string | null | undefined, stored: unknown): LandingShape {
+export function landingShape(slug: string, seat: string | null | undefined, stored: unknown,
+                             lines: { facts: LandingFacts; picks: Record<string, string> } = { facts: NO_FACTS, picks: {} }): LandingShape {
   const brk = process.env.SMP_BREAK || "";
   const door = (key: string, label: string, sub: string, page: string) =>
     ({ key, label, sub, href: clientHref(slug, null, "setup/" + page) });
@@ -106,9 +108,27 @@ export function landingShape(slug: string, seat: string | null | undefined, stor
   const clientSetup = brk === "setup-any-seat" || seat === "super" ? doors : null;
   const have = brk === "modules-unread" ? [DEFAULT_MODULE] : modulesFor(stored);
   const modules: ModuleLine[] = have.map((k) => ({
-    key: k, label: MODULE_DEF[k].label, line: landingLine(k), href: clientHref(slug, k, ""),
+    key: k, label: MODULE_DEF[k].label, line: landingLine(k, lines.picks[k], lines.facts), href: clientHref(slug, k, ""),
   }));
   return { clientSetup, modules };
+}
+
+/* THE LANDING LINE PAGE'S STAMP (spec 054 §4.5, §356.4): what the module the
+   document is served for can say, each line with its example AND its text
+   right now, and the client's pick — written onto the Setup document as
+   `data-landing` (lib/shell.ts) for the frozen renderLandingLine() to draw
+   from. The frozen shell cannot import a module's declaration, and the
+   sentence's TEXT is computed by the one reader on the server, so the page's
+   preview is that reader's answer and never a second one (§53.5). */
+export type LandingStamp = { module: ModuleKey; pick: string; lines: { key: string; label: string; example: string; text: string }[] };
+export async function landingStampFor(tenantId: string, module: string, seat: string | null | undefined, personKey: string | null | undefined, stored: unknown): Promise<LandingStamp | null> {
+  if (!isModule(module)) return null;
+  const { facts, picks } = await landingFactsFor(tenantId, modulesFor(stored), await viewerFor(tenantId, seat, personKey));
+  return {
+    module,
+    pick: picks[module] || "",
+    lines: MODULE_DEF[module].lines.map((l) => ({ key: l.key, label: l.label, example: l.example, text: l.read(facts) })),
+  };
 }
 
 /* A door's address inside this client: `/<slug>/<module>/<target>/<tab>`, a

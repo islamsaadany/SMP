@@ -4073,6 +4073,46 @@ console.log("\n39 \u00b7 how long each subject has to present (\u00a7340)");
         r.ok, (r.refusals || []).join(" / "));
 })();
 
+/* ── 40a · the landing line is the office's (§356.4, spec 054 §4.5) ──
+   Which sentence a module says on the client landing rides the group under
+   SMPRules.LANDING_PICK and is classified `setup`. BOTH ENDS, and the two
+   edits that must go together falsified separately (§259.2): classified but
+   absent from `gExtra` the unknown sweep adds a SECOND entry; swept but not
+   classified there is no entry at all — the change is INVISIBLE, which does
+   not refuse the save, it ALLOWS it, to everybody. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const PICK = R.LANDING_PICK;
+  check("\u00a7356.4: the key is the shared module's own", PICK === "landing", PICK);
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  if (!(UK && CUST)) { check("\u00a7356.4: the seed holds a custodian to test with", false, ""); return; }
+  const SET = function (i) { i.group[PICK] = { strategy: "waiting" }; };
+  let r = fromStored(SEED, "smo", SET);
+  check("\u00a7356.4: the office picks a module's landing line", r.ok, (r.refusals || []).join(" / "));
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("\u00a7356.4: a change to it is classified `setup` and nothing else",
+        kinds.length === 1 && kinds[0] === "setup",
+        kinds.join(",") || "(nothing \u2014 the change was invisible)");
+  r = fromStored(SEED, CUST, SET);
+  check("\u00a7356.4 REFUSED: a custodian cannot pick it", !r.ok, "was ALLOWED");
+  check("\u00a7356.4: and the refusal names the landing line",
+        !r.ok && /landing line/.test((r.refusals || []).join(" ")), (r.refusals || []).join(" / "));
+  /* CLEARING IS THE SAME ACT (\u00a750.6): the default deletes the key */
+  const set = clone(SEED); set.group[PICK] = { strategy: "waiting" };
+  r = fromStored(set, CUST, function (i) { delete i.group[PICK]; });
+  check("\u00a7356.4 REFUSED: nor put it back to the default", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group[PICK]; });
+  check("\u00a7356.4: the office puts it back to the default", r.ok, (r.refusals || []).join(" / "));
+  /* a second module's pick beside the first is still one sentence */
+  r = fromStored(set, "smo", function (i) { i.group[PICK] = { strategy: "waiting", insights: "latest" }; });
+  check("\u00a7356.4: two modules' picks travel as one change",
+        r.ok && (r.changes || []).length === 1, JSON.stringify((r.changes || []).map(function (c) { return c.kind; })));
+})();
+
 /* ── 40 · a pillar's breakdown is two halves at once (§343) ────────────
    ITS TARGETS ARE THE PLAN AND ITS FIGURES ARE THE REPORT, in one object on
    one row — so the danger is not that the rule is wrong but that the split

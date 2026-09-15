@@ -34,7 +34,7 @@ import { createServer } from "node:http";
 import { chromium } from "playwright-core";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, isModule } from "../lib/modules.ts";
+import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, isModule, landingLine, lineDef, NO_FACTS } from "../lib/modules.ts";
 import { trialDocument, registerLine } from "../modules/trial/page.ts";
 import { SERVERS, serverFor } from "../modules/registry.ts";
 import { insightsDocument } from "../modules/insights/page.ts";
@@ -282,6 +282,50 @@ check("a module with nothing to say says nothing, rather than a placeholder",
   rows.slice(1).map((r) => r.key + "=" + JSON.stringify(r.state)).join(" "));
 check("every row carries the label the switcher and the drawer use",
   rows.every((r) => r.label === MODULE_DEF[r.key].label));
+
+console.log("\n4b · the landing line, declared and read (spec 054 §4.5, §356.4)");
+/* EVERY MODULE DECLARES ITS SENTENCES, the first one the default, `none`
+   among them so saying nothing is a choice — asked of every module rather
+   than the two with sentences, or a third could declare nothing at all
+   (§113.8). */
+check("every module declares at least one line, keys unique, and Nothing among them",
+  MODULES.every((k) => { const ls = MODULE_DEF[k].lines; const keys = ls.map((l) => l.key);
+    return ls.length >= 1 && new Set(keys).size === keys.length && keys.includes("none") && ls.every((l) => l.label && l.example && typeof l.read === "function"); }),
+  MODULES.map((k) => k + ":" + MODULE_DEF[k].lines.map((l) => l.key).join("|")).join(" "));
+check("the two built modules with something to say declare it first, so an unchosen module says something",
+  MODULE_DEF.strategy.lines[0].key !== "none" && MODULE_DEF.insights.lines[0].key !== "none",
+  MODULE_DEF.strategy.lines[0].key + " / " + MODULE_DEF.insights.lines[0].key);
+const F = { cycleOpen: true, cycleName: "H1", due: "30 Sep", total: 10, sub: 7, newReports: 2, latestReport: "Egypt retail outlook, Q3" };
+check("an absent or unknown pick is the FIRST declared line, never nothing",
+  lineDef("strategy", "").key === MODULE_DEF.strategy.lines[0].key && lineDef("strategy", "no-such").key === MODULE_DEF.strategy.lines[0].key);
+check("the cycle's state reads the cycle: open, with the due day",
+  landingLine("strategy", "cycle", F) === "Cycle open \u00b7 reports due 30 Sep", landingLine("strategy", "cycle", F));
+check("…and closed says so rather than guessing", landingLine("strategy", "cycle", { ...F, cycleOpen: false }) === "No cycle open");
+check("what is waiting counts SUBJECTS still to submit",
+  landingLine("strategy", "waiting", F) === "3 of 10 still to submit", landingLine("strategy", "waiting", F));
+check("…and every subject in says so", landingLine("strategy", "waiting", { ...F, sub: 10 }) === "Every unit has submitted");
+check("Insights counts this month's reports and names the latest",
+  landingLine("insights", "new", F) === "2 new reports this month" && landingLine("insights", "latest", F) === "Latest: Egypt retail outlook, Q3",
+  landingLine("insights", "new", F) + " / " + landingLine("insights", "latest", F));
+check("…one report is singular, none is said", landingLine("insights", "new", { ...F, newReports: 1 }) === "1 new report this month" && landingLine("insights", "new", { ...F, newReports: 0 }) === "No new reports this month");
+check("Nothing draws no line, on every module", MODULES.every((k) => landingLine(k, "none", F) === ""));
+/* A FACT THE READER COULD NOT SEE IS NOT NOUGHT (§35): unreadable facts give
+   every line the empty string, never "0 of 0" or "No cycle open". */
+check("unreadable facts say nothing rather than a false figure",
+  MODULES.every((k) => MODULE_DEF[k].lines.every((l) => landingLine(k, l.key, NO_FACTS) === "")),
+  MODULES.map((k) => MODULE_DEF[k].lines.map((l) => JSON.stringify(landingLine(k, l.key, NO_FACTS))).join("|")).join(" "));
+/* THE CARD'S ROW IS THE SAME READER (§53.5): moduleRows' line equals
+   landingLine for the same pick and facts, both ends — a pick moves it, no
+   pick is the default, unreadable is empty. */
+const rowsL = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: F }, { strategy: "waiting" });
+check("the card's row carries the picked line, from the one reader",
+  rowsL[0].line === landingLine("strategy", "waiting", F) && rowsL[0].line === "3 of 10 still to submit", rowsL[0].line);
+check("…and a module with no pick carries its default line",
+  rowsL.filter((r) => r.key === "insights").every((r) => r.line === landingLine("insights", "", F)) &&
+  rowsL.filter((r) => r.key === "trial").every((r) => r.line === ""),
+  rowsL.map((r) => r.key + "=" + JSON.stringify(r.line)).join(" "));
+check("…and an unreadable client says nothing under every module",
+  moduleRows(modulesFor(BUILT_EXTRA), { unreadable: true, landing: null }, { strategy: "waiting" }).every((r) => r.line === ""));
 check("a client without the trial gets one row", moduleRows(modulesFor([]), facts).length === 1);
 
 console.log("\n5 · the trial module's page");
@@ -330,7 +374,7 @@ const mig = read("smp-app/db/migrations/005-a-module-per-client.sql");
 check("and a database already up gets it by migration", /ADD COLUMN IF NOT EXISTS modules jsonb/.test(mig));
 check("the migration can be run twice", /IF NOT EXISTS/.test(mig));
 const api = read("smp-app/lib/platform-api.ts");
-check("the card reads the client's own list rather than a constant", api.includes("moduleRows(modulesFor(row.modules), facts)"));
+check("the card reads the client's own list rather than a constant", api.includes("moduleRows(modulesFor(row.modules), facts, facts.picks)"));
 check("the drawer is told what this client has AND what it could be given", /modules: modulesFor\(row\.modules\)/.test(api) && /offer: offerable\(\)/.test(api));
 check("turning one on is gated on the same rule as the rest of the configuration",
   /if \(action === "setModules"\)[\s\S]{0,900}mayConfigureClient/.test(api));

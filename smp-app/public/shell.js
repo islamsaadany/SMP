@@ -328,6 +328,13 @@
        on the server (office by rule, §97's shape): who reads every person's
        changes is not a tick somebody could set on a bad afternoon. */
     { key:"c_history", area:"always", scope:"manage", label:"History",          note:"Who changed what, and put a value back" },
+    /* THE LANDING LINE (§356.4). `area:"always"` with the real gate in the
+       page def (the office) and on the server (a `setup` change): what a
+       module says about itself on the client landing is the office's, and
+       spec 046 §4.4's per-module Access table is where it will be granted
+       when that page lands (step 5) — a matrix cell today would be a second
+       answer to that question. */
+    { key:"c_landing", area:"always", scope:"manage", label:"Landing line",     note:"What this module says on the landing" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
@@ -3031,6 +3038,27 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      THE FIELD IS NAMED ONCE and `lib/authorize.js` classifies it by this
      constant, for §234's reason. */
   var PRESENT_MINS = "presentMins";
+  /* ── THE LANDING LINE (§356.4, spec 054 §4.5) ─────────────────────
+     Which of its declared sentences each module says on the client landing,
+     keyed by module — `{ strategy: "waiting" }` — chosen on the module's own
+     Landing line page. The SENTENCES are declared beside the module
+     (smp-app/lib/modules.ts) and never here: nothing frozen can say what a
+     module has to say, and the server is the only reader that holds the
+     facts a line is made of. What is shared is the KEY and the reader, for
+     §234's reason: lib/authorize.js classifies the field by this constant and
+     lists it among the group's known keys, and the browser writes it through
+     this same name. Stored as an ABSENCE (§50.6): a module on its default
+     line holds no entry, and the last entry leaving deletes the map. */
+  var LANDING_PICK = "landing";
+  var NO_PICKS = Object.freeze({});
+  function landingPicks(group) {
+    var v = group && group[LANDING_PICK];
+    return (v && typeof v === "object" && !Array.isArray(v)) ? v : NO_PICKS;
+  }
+  function landingPick(group, module) {
+    var v = landingPicks(group)[module];
+    return (typeof v === "string" && v) ? v : "";
+  }
   /* Frozen and SHARED, for `NO_FLOW`'s reason: every tenant that has set no
      times is handed this same object, so one careless write would give them
      all a slot. */
@@ -3560,6 +3588,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     videoSlides: videoSlides, videoRoom: videoRoom, videoHeld: videoHeld,
     MASTER_FLOW: MASTER_FLOW, masterFlow: masterFlow,
     PRESENT_MINS: PRESENT_MINS, presentMinsMap: presentMinsMap,
+    LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,
@@ -37257,6 +37286,78 @@ function commsStatusRows(){
   return out;
 }
 
+/* ══ THE LANDING LINE (§356.4, spec 054 §4.5) ═══════════════════════════
+   Islam: each module has its own setup elements, its access and its landing
+   line. The module DECLARES the sentences it can say about itself
+   (smp-app/lib/modules.ts) and the client picks one here, from a radio list
+   with the sentence previewed under it — as drawn. NEVER FREE TEXT: a typed
+   line goes stale the day the fact behind it changes.
+
+   THE DECLARATION ARRIVES ON THE DOCUMENT. This frozen file cannot import a
+   module's declaration and holds none of the facts a sentence is made of, so
+   the served Setup document is stamped with `data-landing` — the lines, each
+   with its example and its TEXT right now, and the pick — by the one reader
+   the landing itself draws from (lib/landing.ts landingStampFor). The
+   preview is that reader's answer and never a second one (§53.5). Over
+   file:// there is no landing and no stamp, and the page says so rather than
+   drawing a list that writes to nothing (§45.2, §61).
+
+   THE PICK IS STORED ON THE GROUP under SMPRules.LANDING_PICK, keyed by the
+   module the document was served for, as an ABSENCE: the first declared line
+   is the default and choosing it deletes the entry (§50.6). The write is a
+   select-shaped one and repaints (shell.html's [data-landpick] wiring), so
+   the preview follows the pick. */
+function landingStamp(){
+  var raw = document.documentElement.getAttribute("data-landing");
+  if (!raw) return null;
+  try {
+    var d = JSON.parse(raw);
+    return (d && Array.isArray(d.lines) && d.lines.length) ? d : null;
+  } catch (e) { return null; }
+}
+function landingModule(){
+  var st = landingStamp();
+  return (st && st.module) || document.documentElement.getAttribute("data-module") || "strategy";
+}
+function setLandingPick(mod, key, def){
+  var map = {};
+  var cur = SMPRules.landingPicks(GROUP);
+  Object.keys(cur).forEach(function(k){ map[k] = cur[k]; });
+  if (!key || key === def) delete map[mod]; else map[mod] = key;
+  if (Object.keys(map).length) GROUP[SMPRules.LANDING_PICK] = map;
+  else delete GROUP[SMPRules.LANDING_PICK];
+  paint();
+}
+function renderLandingLine(){
+  var st = landingStamp(), mod = landingModule();
+  var mayEdit = inOffice();
+  var head = cfgHead("Landing line", [], null, false, null);
+  if (!st) {
+    /* no declaration: the offline copy, or a document served without one */
+    return head + '<div class="cfg"><p class="why lnone">The line a module says on the landing is set on the ' +
+      'served platform, which knows what each module can say. Nothing is set from this copy.</p></div>';
+  }
+  var def = st.lines[0].key;
+  var pick = SMPRules.landingPick(GROUP, mod) || def;
+  var chosen = st.lines.filter(function(l){ return l.key === pick; })[0] || st.lines[0];
+  var opts = st.lines.map(function(l){
+    var on = l.key === chosen.key;
+    return '<label class="lopt' + (on ? " on" : "") + '">' +
+      '<input type="radio" name="landpick" value="' + esc(l.key) + '" data-landpick="' + esc(l.key) +
+        '" data-landmod="' + esc(mod) + '" data-landdefault="' + esc(def) + '"' +
+        (on ? " checked" : "") + (mayEdit ? "" : " disabled") + '>' +
+      '<span class="ldot" aria-hidden="true"></span>' +
+      '<span class="ltxt"><b>' + esc(l.label) + '</b><span class="lex">' + esc(l.example) + '</span></span></label>';
+  }).join("");
+  var label = document.documentElement.getAttribute("data-module-label") || mod;
+  return head + '<div class="cfg landing">' +
+    '<div class="lopts" role="radiogroup" aria-label="Landing line">' + opts + '</div>' +
+    '<div class="lprev"><h4>On the landing</h4>' +
+      '<div class="lrow" data-landprev="' + esc(chosen.key) + '"><span class="lk">' + esc(label) + '</span>' +
+      '<span class="lll">' + esc(chosen.text || "") + '</span><span class="lgo">Open \u203a</span></div></div>' +
+    '</div>';
+}
+
 function renderComms(){
   /* THE PEN DOES SOMETHING HERE. Branding draws one and gates its fields on
      the grant alone, so its edit icon is decoration — a control that changes
@@ -51642,6 +51743,15 @@ var SYNC = (function () {
          complete without the other, which is what a two-line conflict looks
          like when both edits are right. */
       { k:"access", ac:"c_access", grp:"access", mod:"strategy", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
+      /* THE LANDING LINE (§356.4, spec 054 §4.5): which of its declared
+         sentences Strategy says under its row on the client landing. The
+         office's by rule (`c_landing` is `area:"always"`, §356.4 in
+         lib/rules.js) until spec 046 §4.4's per-module Access table lands
+         (step 5). The sentences and their texts arrive on the served
+         document (`data-landing`); over file:// the page says so. */
+      { k:"landing", ac:"c_landing", grp:"landing", mod:"strategy", label:"Landing line", glyph:"▤", find:"landing line welcome screen what the module says row sentence",
+        when: function(){ return inOffice(); },
+        render:renderLandingLine },
       { k:"mainbu", ac:"c_people", grp:"who", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       /* ── SETTING A CLIENT UP (§318, spec 044) ────────────────────────
@@ -52510,6 +52620,10 @@ var SYNC = (function () {
        People register (spec 054 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
+    /* §356.4 (spec 054 §4.5): a module's own group — what it says about
+       itself on the client landing. Drawn on a module's rail and never the
+       client's, because the def below carries the module. */
+    { k:"landing", label:"The landing",     note:"What this module says on the landing" },
     { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" },
     { k:"help", label:"Help",             note:"How the platform works, in its own words" }
   ];
@@ -57703,6 +57817,17 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         delete GROUP.comms;
         paint();
+      });
+    });
+    /* THE LANDING LINE'S PICK (§356.4): a radio is a select-shaped write, so
+       it REPAINTS (§257.2a — the preview under the list must follow the
+       pick), and the default DELETES the key, the last one leaving deleting
+       the map (§50.6). The pick and the module are read off the control the
+       page drew, never re-derived here. */
+    document.querySelectorAll("[data-landpick]").forEach(function(r){
+      r.addEventListener("change", function(){
+        if (!r.checked) return;
+        setLandingPick(r.dataset.landmod, r.dataset.landpick, r.dataset.landdefault);
       });
     });
     /* THE WORD IS WRITTEN INTO THE ELEMENT, not painted (§63.4): a repaint

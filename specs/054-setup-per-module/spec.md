@@ -219,6 +219,12 @@ whole reason for the line is that it is true today.
 - Every module ships with a default so an unchosen module still says
   something; *Nothing* draws the module's row with no line under it.
 
+> **Built 2026-09-15 (§356.4)** as decided, with one narrowing said out loud:
+> the "units" in *What is waiting* counts every SUBJECT the cycle board has a
+> row for — functions and a capability included — so the sentence says
+> *3 of 18 still to submit* with no noun, because *units* would be untrue of
+> the functions it counts.
+
 **The console's card row and the landing's line are the same reader.**
 `moduleRows()` computes a line per module today for the Forefront card; a
 module's declared readers replace its hand-written cases, so the card and the

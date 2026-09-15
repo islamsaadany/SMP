@@ -48726,3 +48726,97 @@ every one of which keeps its own gate, and nothing new is stored.
 **RECORDED, NOT DONE**: the line under a module is empty until step 4; the
 Email door's home is a question put to Islam (above); and the wrapping
 descriptions at 336px are a width the frozen welcome owns.
+
+### §356.4 — THE LANDING LINE: DECLARED, CHOSEN, STORED, DRAWN IN BOTH PLACES (spec 054 §4.5, §9.4)
+
+Step 4 of six. Under each row of *Your modules* the landing now says one
+sentence about that module, and the sentence is **never free text**: each
+module DECLARES the sentences it can say about itself — a key, a label, an
+example, and a reader that makes the sentence out of facts the module already
+has — and the client picks one on the module's own **Landing line** page, a
+radio list with the live sentence previewed under it, as drawn in the signed-off
+mockup (Insights' Setup frame). A typed line goes stale the day the fact behind
+it changes, and the whole reason for the line is that it is true today.
+
+**THE DECLARATION LIVES BESIDE THE MODULE AND NOWHERE ELSE** —
+`MODULE_DEF[k].lines` in `smp-app/lib/modules.ts`, next to the label and the
+areas, so a fifth module is an entry there and not an edit in the console, the
+landing and Setup (§53.5). Strategy says *The cycle's state* (`Cycle open ·
+reports due 15 Jul 2026`, `No cycle open`), *What is waiting* (`3 of 18 still
+to submit`, `Every unit has submitted`) or *Nothing*; Insights says *New
+reports this month*, *The latest report, by name* or *Nothing*. **The FIRST
+declared line is the default**, so an unchosen module says something, and
+*Nothing* is declared like the rest — saying nothing is a choice rather than an
+absence, and a row with no line under it is what it draws.
+
+**ONE READER FOR THE THREE PLACES.** `landingLine(k, pick, facts)` is asked by
+the client's landing (`landingShape`), by the console's card (`moduleRows`,
+which gains `line` beside its own health word `state`) and by the Landing line
+page's preview — and the page cannot ask it at all, being frozen code that can
+import no module's declaration and holds none of the facts. So the served Setup
+document is STAMPED with `data-landing`: the module's lines, each with its
+example and its TEXT right now, and the pick (`landingStampFor`, on the Setup
+document alone, since that is the one document the page can be drawn in). The
+preview is that reader's answer and never a second one; over file:// there is
+no landing and no stamp, and the page says so rather than drawing a list that
+writes to nothing (§45.2, §61).
+
+**THE FACTS ARE READ ONCE, FOR THE VIEWER** (`lib/landing-facts.ts`): the
+cycle half is the frozen product's own — `REVIEW` and `cycleTotals()`, the
+count the cycle board reads, through `frozen.cjs` — and the library half is the
+library's own `listItems` asked FOR THE VIEWER, because a report narrowed to one
+place (§355) is invisible to everybody else and a count on the landing that
+included it would be that report leaking as a number; the console reads as
+somebody who sees everything, which the console is. **A half that cannot be
+read is null and reads as nothing, never as nought** (§35): unreadable facts
+give every line the empty string rather than *0 of 0*. **AND THE FIRST DRAFT
+COUNTED FIGURES**: `cycleTotals()` answers `total` as the FIGURES entered across
+the tenant and `units` as the subjects the board has a row for (§244), and the
+line said *"249 of 255 still to submit"* about a tenant with eighteen subjects
+— measured before it shipped (§100.3), and the word *units* dropped from the
+sentence because the count includes the functions.
+
+**THE PICK IS STORED AS AN ABSENCE, NAMED ONCE.** `SMPRules.LANDING_PICK` is
+`landing` on the group, a map keyed by module (`{strategy: "waiting"}`), riding
+`org.extra` — **no migration, measured** (§172): written, read back and deleted
+on a virgin Postgres by the round trip. The default deletes the entry and the
+last entry leaving deletes the map (§50.6), so never-set and set-then-cleared
+are the same bytes, asserted by reading the STORED graph after each press. The
+write is a radio's — a select-shaped write, so it repaints and the preview
+follows the pick (§257.2a) — wired beside the comms reset in the shell.
+**The server's two edits go together** (§259.2): classified `setup`, the
+office's, NAMED so a refusal says *the landing line*, AND listed in `gExtra` —
+falsified separately, **5 red** with the classification out (the change is
+INVISIBLE and a custodian's pick is ALLOWED) and **2 red** with the key out of
+the list. `c_landing` joins the shared access list as `area:"always"` with the
+gate in the page def (the office by rule), which is §262's shape for History;
+spec 046 §4.4's per-module Access table is where it will be granted when step 5
+lands, and a matrix cell today would be a second answer to that question.
+
+**THE PAGE**: a new group *The landing* and a def `landing` on Strategy's rail
+(`mod:"strategy"`), the only frozen sources touched being `shell.html`,
+`config-render.js` (`renderLandingLine`, `setLandingPick`) and `config.css`,
+plus the shared rules and the authoriser. The Insights page is step 5's, on its
+own rail; its lines are declared today so the console's card already reads
+them.
+
+**PROVED**: `test-authorize.js` **658/0** with §40a both ends, red **5 / 2**;
+`test-roundtrip.js` on a virgin Postgres 16, the pick round-tripped and the key
+deleted; `checks/modules.mjs` §4b **108/0** — the declarations, every
+sentence, the unreadable case and the card's row as AGREEMENT with the reader;
+`checks/door-landing.mjs` §8 **87 → 101/0** — the page on Strategy's rail offering
+the document's own stamp, the first line lit with nothing stored, the pick read
+back off the STORED graph, the landing's row and the console's card both saying
+that line, the default deleting the key, *Nothing* keeping the row — RED under
+`--break=no-landing-stamp` (**15 red**, every one reported rather than died, after two guards were added to the section's own presses — §215, in this file for the fourth time); `setup-per-module.py` §7 REWRITTEN never
+loosened (it held the group list as a literal, §214.3: the leading four keys and
+agreement with every def's group now) and §7b the offline page saying where the
+line is set; `shell.mjs` 74/0; `built-in-step` and `generated-in-step`
+clear; `tsc` and `next build` clean.
+
+**RECORDED, NOT DONE**: Insights' Landing line page is step 5's; the console's
+card draws the line beside its health word in a row that clips a long one with
+an ellipsis; and the sentences are English literals in a declaration, where the
+frozen product's own words go through `L()` — a module's lines are the module's
+own and not a tenant's label, so nothing is inflected (§107.8), but a tenant
+cannot rename them.

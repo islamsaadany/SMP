@@ -16,7 +16,7 @@
     "test:rules": "node tests/graph-diff.cjs && node tests/authorize.cjs",
     "dev:tenant": "node scripts/dev-tenant.mjs",
     "check:door": "node checks/door-landing.mjs",
-    "check:door:red": "for b in no-rows first-person membership-key demo-role-key other-role-key no-creator setup-any-seat modules-unread; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:door:red": "for b in no-rows first-person membership-key demo-role-key other-role-key no-creator setup-any-seat modules-unread no-landing-stamp; do node checks/door-landing.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "sync:css": "node scripts/sync-css.mjs",
     "sync:static": "node scripts/sync-static.mjs",
     "check:state": "node checks/state-api.mjs",

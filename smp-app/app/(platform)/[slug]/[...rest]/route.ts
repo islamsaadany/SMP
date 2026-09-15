@@ -3,6 +3,7 @@ import { resolveTenant } from "../../../../lib/door.ts";
 import { requestUser, SLUG } from "../../../../lib/session.ts";
 import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { serverFor } from "../../../../modules/registry.ts";
+import { landingStampFor } from "../../../../lib/landing.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 
 export const dynamic = "force-dynamic";
@@ -67,7 +68,10 @@ export async function GET(req: Request, { params }: P) {
      `tour` stays the default module's, being where the intro round is drawn. */
   const key = w.module || DEFAULT_MODULE;
   if (w.rest[0] === "setup") {
-    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(have)), { status: 200, headers: shellHeaders() });
+    /* the module's Landing line page reads its declaration off the document
+       (§356.4) — computed here, on the Setup document alone */
+    const landing = await landingStampFor(ans.tenant.id, key, ans.seat, ans.personKey, ans.tenant.modules);
+    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(have), landing), { status: 200, headers: shellHeaders() });
   }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });

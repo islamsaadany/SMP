@@ -2757,27 +2757,3 @@
 .ffrow{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
 .ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
           color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }
-
-/* ── THE LANDING LINE PAGE (§356.4, spec 054 §4.5) ────────────────────
-   The radio list and the preview are the signed-off mockup's own
-   (design-mockups/module-setup/2026-09-15_setup-per-module.html, Insights'
-   Setup frame) in the platform's tokens; the native radio is kept for the
-   keyboard and the screen reader and drawn as the mockup's dot. */
-.cfg.landing .lopts{ display:flex; flex-direction:column; gap:8px; max-width:640px }
-.cfg.landing .lopt{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line);
-  border-radius:var(--r-sm); font-size:var(--fs-body); cursor:pointer; background:var(--surface) }
-.cfg.landing .lopt.on{ border-color:var(--gold); background:var(--gold-wash) }
-.cfg.landing .lopt input{ position:absolute; opacity:0; width:1px; height:1px; margin:0 }
-.cfg.landing .lopt:has(input:disabled){ cursor:default }
-.cfg.landing .lopt:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:2px }
-.cfg.landing .ldot{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--ink-3); flex:none; margin-top:3px }
-.cfg.landing .lopt.on .ldot{ border-color:var(--gold-deep); box-shadow:inset 0 0 0 3.5px var(--surface), inset 0 0 0 8px var(--gold-deep) }
-.cfg.landing .ltxt{ display:flex; flex-direction:column; gap:2px }
-.cfg.landing .lex{ color:var(--ink-3); font-size:var(--fs-small) }
-.cfg.landing .lprev{ margin-top:16px; max-width:640px }
-.cfg.landing .lprev h4{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700 }
-.cfg.landing .lrow{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line);
-  border-radius:var(--r-sm); background:var(--surface); font-size:var(--fs-body) }
-.cfg.landing .lk{ font-weight:600; min-width:110px }
-.cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
-.cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }

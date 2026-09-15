@@ -9434,7 +9434,30 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356.3: the landing's Client setup
+*Last Updated: 2026-09-15 &mdash; **&sect;356.4: the landing line &mdash;
+declared, chosen, stored, drawn in both places (spec 054 &sect;4.5, &sect;9.4,
+on the branch).** Step 4 of six: each module DECLARES the sentences it can say
+about itself (`MODULE_DEF[k].lines`, key + label + example + a reader over
+facts), the client picks one on the module's own **Landing line** page &mdash;
+a new group *The landing* on Strategy's rail, radios with the live sentence
+previewed under them, as drawn &mdash; and the pick rides the group under
+`SMPRules.LANDING_PICK` as an ABSENCE (the first line is the default, choosing
+it deletes the entry). **ONE READER FOR THREE PLACES**: `landingLine()` serves
+the landing's row, the console's card (`moduleRows` gains `line`) and the
+page's preview &mdash; which the frozen page cannot ask, so the served Setup
+document is stamped with `data-landing` (lines, examples, texts, pick) and over
+file:// the page says the served platform sets it. Facts read once for the
+VIEWER (`lib/landing-facts.ts`: the cycle half through the frozen reader's
+own `cycleTotals()`, the library half through `listItems` so a narrowed report
+never leaks as a count); unreadable is nothing, never nought. **The first draft
+counted figures** (*"249 of 255 still to submit"*; `units` is the subjects,
+measured before it shipped). `test-authorize.js` **658/0**, red 5 / 2 for the
+two edits; round trip on a virgin Postgres; `modules.mjs` **108/0**;
+`door-landing.mjs` **101/0**, red 15 under `no-landing-stamp`;
+`setup-per-module.py` &sect;7 rewritten never loosened (it held the group list
+as a literal), &sect;7b offline; shell 74/0; in-step guards clear.*
+
+*Earlier the same day: **&sect;356.3: the landing's Client setup
 block and Your modules (spec 054 &sect;4.1, &sect;9.3, on the branch).**
 Step 3 of six: `lib/landing.ts`'s `landingShape()` answers both blocks and
 the page draws them &mdash; a Client setup block for the SEAT the door

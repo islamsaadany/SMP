@@ -4976,7 +4976,7 @@ suite per feature.
 
 ## In flight
 
-**Spec 054 — Setup per module (§356), on the branch, steps 1–3 of 6 built.**
+**Spec 054 — Setup per module (§356), on the branch, steps 1–4 of 6 built.**
 Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
 Step 1: the Setup Overview is deleted (§356.1) — both its halves were
 already on the landing — and the gear lands on Reporting cycle;
@@ -4995,8 +4995,15 @@ one row per module in MODULES' order; `door-landing.mjs` 70 → 87/0, red 2 / 2,
 `welcome.py` §11. Measuring it found step 1's carried reader still naming the
 deleted Overview, corrected. Waiting on Islam: whether the email settings
 move to Branding (the spec's table says so, the product holds them on
-Strategy's Send an email). Steps 4–6 (the landing line, Insights' Setup, the
-sweep) are the plan's, in order. `main` untouched.
+Strategy's Send an email). Step 4 (§356.4): each module declares the
+sentences it can say about itself, the client picks one on the module's own
+Landing line page (Strategy's rail, a new group *The landing*), the pick
+rides the group under `SMPRules.LANDING_PICK` as an absence, and the
+landing's row, the console's card and the page's preview all read ONE server
+reader over facts read once for the viewer; `test-authorize.js` §40a red
+5 / 2, the round trip on a virgin Postgres, `modules.mjs` §4b,
+`door-landing.mjs` §8 red under `no-landing-stamp`. Steps 5–6 (Insights'
+Setup, the sweep) are the plan's, in order. `main` untouched.
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
 v2.9 single file as it always has; nothing anyone uses runs on the new stack

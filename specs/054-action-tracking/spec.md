@@ -1,10 +1,13 @@
 # 054 · Internal Tracker — the team's weekly list, per client
 
-**Status:** clarified 2026-09-15, not yet planned. Every decision below is
-Islam's or was put to him with its cost and taken, the word and the week
-included (decisions 7 and 8, answered the same day). **Nothing is built.**
-The mockup is `design-mockups/internal-tracker/2026-09-15_this-week-edit-detail-empty.html`,
-published as an artifact and awaiting sign-off before a source moves (rule 1c).
+**Status:** **built 2026-09-15 (§356), on the branch, not merged.** Every
+decision below is Islam's or was put to him with its cost and taken, the word
+and the week included (decisions 7 and 8, answered the same day). The mockup is
+`design-mockups/internal-tracker/2026-09-15_this-week-edit-detail-empty.html`,
+published as an artifact and signed off (*"build"*). Built as `smp-app/modules/
+tracker/` over `smp-app/lib/tracker.ts`, two tables in `db/schema.sql` and
+migration 012, proved by `smp-app/checks/tracker.mjs` (124/0, red three ways).
+One rule in §4 was corrected while building and says so.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -66,9 +69,14 @@ and the first entry is who made the action.
 Three statuses and the product's own three words (§300): **Not started ·
 In progress · Done**. Done stamps when; reopening clears it.
 
-Four views: **This week** (due by the end of this week, or late), **All**,
-**Mine**, and **Undated** (no due date yet — an action with no date is never
-late and never on This week, so it needs a view of its own or it is lost).
+Four views: **This week** (due by the end of this week, late, or with no date
+yet), **All**, **Mine**, and **Undated** (no due date yet — the narrower list
+of what still needs a date). *Corrected while building*: this first read "an
+action with no date is never on This week", and the browser check found the
+loss that makes — the line somebody has just typed on the landing has no date,
+so on the reload it moved to Undated and vanished from under their hand, which
+the sheet this replaces never did. A line with no date is this week's until
+somebody says otherwise; it is never late.
 A search box over the title. One summary strip over the whole client: open ·
 late · due this week · done this week.
 
@@ -203,7 +211,12 @@ the week stood, and its proposal on the word did not.
 ## 10 · Recorded, not decided
 
 - A per-module access tab (spec 046 §4.4) is still built for no module; this
-  one is office-by-rule and adds nothing to that debt.
+  one is office-by-rule and adds nothing to that debt — **but the switcher
+  still lists the tracker for a client's own person**, who is then refused at
+  the door, because the spine's menu knows modules and not seats. That tab is
+  where it ends.
+- The module is turned on per client from the client's card (§320.5); no
+  client has it until somebody presses it.
 - Nothing reminds anybody. If a weekly digest is ever wanted it is the
   collection mechanism §293 already has, pointed at this list, and its own
   decision.

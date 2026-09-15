@@ -890,6 +890,58 @@ CREATE TABLE library_items (
 -- What a client's library reads, in the order it reads it.
 CREATE INDEX library_items_shelf ON library_items (tenant_id, kind, state, report_date DESC);
 
+-- ── THE INTERNAL TRACKER (spec 054) ──────────────────────────────────────
+-- The office's weekly list about ONE client, kept in the client's own room:
+-- an action, and one row per status change. Both are tenant-owned, so the
+-- loop below fences them on a fresh database and migration 012 fences them on
+-- one already up (the same two paths library_items took, and the same reason).
+CREATE TABLE tracker_actions (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  -- A register KEY, never a name (§48): the register renders the name, so a
+  -- rename reaches every action. It must hold an office seat (spec 054
+  -- decision 5), which is the server's rule (lib/tracker.ts) and not the
+  -- database's, because the seat lives on the platform's own table.
+  owner_key text NOT NULL,
+  collaborators jsonb NOT NULL DEFAULT '[]'::jsonb,
+  -- NULL is "no date yet" and is never late (§35).
+  due date,
+  -- The first due date ever set, kept while the action is open so a
+  -- reschedule cannot reset the carried-weeks count; cleared on Done.
+  first_due date,
+  status text NOT NULL DEFAULT 'not_started',
+  done_at timestamptz,
+  created_by text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  -- Room for what is deliberately not built (spec 054 §7): a late override,
+  -- a reason, a link to a plan item — drawn by nothing.
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT tracker_status CHECK (status IN ('not_started','in_progress','done')),
+  CONSTRAINT tracker_title CHECK (btrim(title) <> '')
+);
+CREATE INDEX tracker_actions_week ON tracker_actions (tenant_id, status, due);
+
+-- One row per status change, plus one on creation. Appended, never edited:
+-- a log a save could rewrite is not a log (§42).
+CREATE TABLE tracker_events (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  action_id uuid NOT NULL,
+  kind text NOT NULL,
+  from_status text,
+  to_status text,
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, action_id) REFERENCES tracker_actions (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT tracker_event_kind CHECK (kind IN ('created','status'))
+);
+CREATE INDEX tracker_events_action ON tracker_events (tenant_id, action_id, at);
+
 -- An office login may be placed on a register that does not exist yet
 -- (§313.32), so the membership's pointer at the person is checked at COMMIT.
 ALTER TABLE tenant_users

@@ -48412,3 +48412,147 @@ not.
 **`check:state` IS 84 ok / 2 failed AND IT IS NOT THIS WORK'S** — the two
 pre-existing seeded-demo-graph failures already on the record (§303, §354.7),
 neither touching a module, the route or a library.
+
+## §356 — THE INTERNAL TRACKER: THE OFFICE'S WEEKLY LIST, PER CLIENT (2026-09-15, spec 054)
+
+Islam, of the `strategy-management-system` repository's Action Tracking:
+*"the tracking tool is for the internal team weekly actions tracking"*, then
+*"no they belong to the client as they are modules for handling this specific
+client"*, *"1. Internal Tracker 2. a week is sunday ti thursday yes"*, *"the
+new action should be in line addition we are shifting from a simple google
+sheet to a tool so it needs to be super simple"*, and *"build and let's me see
+when it's done."* Every decision is spec 054's (1–8) and was taken before a
+source moved; the mockup was published as an artifact and redrawn once at his
+word (a form and a detail page out, the next empty line in).
+
+### §356.1 — A FIFTH MODULE THROUGH THE TABLE, WITH NO NEW SEAM
+
+`tracker` is one folder (`smp-app/modules/tracker/`), one registry entry and
+one word in `lib/modules.ts` — §354's own proof that a module is a folder and
+an entry. **The one thing the spine gained is a verb**: the route handler
+answered GET only, and a module that is WRITTEN to needs a POST, so
+`export const POST = GET` — the table dispatches by module, the module reads
+the method. Nothing else in `app/`, `lib/shell.ts` or the registry moved; the
+`ServeArgs` seam is exactly §355's (`personKey`, `seat`), because the two facts
+this module needs are the two it already carried.
+
+### §356.2 — THE OFFICE BY RULE, ASKED AT THE SERVER
+
+Decision 2: the office's tool, so **who may open it is the SEAT the door
+established** (`super` or `smoteam`), asked in `serve()` on every request —
+never only by leaving the entry off a menu, which is decoration (§42, §44). A
+client's own person is told so in a sentence with the way back (§61) on the
+page and refused at the api alike (§94.2 — both doors, or a build that only
+hid the page passes half). **The switcher still lists the module for a
+client's person**, because the spine's menu knows modules and not seats (spec
+046 §4.4 is unbuilt); recorded in the spec rather than papered over.
+
+### §356.3 — OWNED BY AN OFFICE ROW, AND BY NOTHING ELSE
+
+Decision 5: an action's owner and collaborators are the office's rows on THIS
+client's register (`people` joined to `tenant_users` by `person_key`, seat in
+the two office words), in the register's order. A client's own person is
+refused as an owner by the rule the server asks (`isOfficeRow`), both ends
+asserted; an office login not yet placed on the register is told *"You are not
+on this client's register yet"* and nothing is written (§313.32's shape,
+§316.9's finding). **The name is read from the register, never stored on the
+action** (§130.9): `namesOf(c)` answers at draw time, so a rename reaches every
+row. `mayChange` is owner, collaborator or the Super user; `mayOwn`
+(hand-over, delete) is owner or Super user — a collaborator may NOT hand it on.
+
+### §356.4 — THE FIRST DATE IS WRITTEN ONCE, SO A RESCHEDULE CANNOT RESET THE COUNT
+
+Late is *due before today*; carried is counted in WEEKS from the FIRST date the
+action was ever given (`first_due`, `COALESCE`d and never overwritten by a
+change of date), so moving the date moves DUE and leaves the count where it
+was — "2 weeks back" stays honest through three postponements. Done clears it;
+reopening starts it again from the date the row holds. A week is **Sunday to
+Thursday** (decision 8), worked out in `Africa/Cairo`; a Friday or Saturday
+reads as the following week's. **A date the list cannot read is refused in
+words, never guessed at** (§184).
+
+### §356.5 — EVERY CHANGE ON THE ROW, AND NOTHING WITH A SAVE BUTTON
+
+§3 of the spec, built as it says: Enter on the next empty line adds, owned by
+me, Not started, no date (Escape clears; the line is focused again after the
+reload). The tick is Done and pressed again is Not started; the date becomes a
+date box in place and back again on Escape; the status is a picker on the row;
+the title opens the row in place — notes saved on leaving the box and only when
+changed (§35), the title renamed on Enter, owner and who-else on the opened
+row, Delete asking IN THE ROW and never in a browser dialog (§95, §273.3).
+**The browser holds no copy of the list**: every press POSTs the module's own
+api and the page is read again, so the screen cannot disagree with the server
+(§53.5); a refusal is written into the page in the server's own words (§32,
+§171). No inline script — the shell's policy would silence it — so the module
+serves its one script itself.
+
+### §356.6 — TWO TABLES, FENCED LIKE EVERY OTHER TENANT TABLE
+
+`tracker_actions` (the row: title, notes, owner, who else, due, first due,
+status, done at) and `tracker_events` (append-only: created, and every status
+change with who and when — a date move is deliberately NOT logged, decision in
+the spec's §5, and the mockup's history line that showed one was removed).
+Both in `schema.sql`'s RLS loop, both in migration 012 with the loop's own
+policy text, asserted IDENTICAL to `library_items`' (§94.8) and absent from
+`PLATFORM_TABLES` (§331); events cascade with their action. `extra jsonb` on
+the row, as every tenant table carries (§118).
+
+### §356.7 — THE CHECK FOUND ONE PRODUCT FAULT AND IT WAS THE SPEC'S OWN RULE
+
+`checks/tracker.mjs` §10 serves the module over a real port and PRESSES it in
+Chromium, reading Postgres back after every press (§70, §96) — and its first
+run was **1 red on "the new row is on the page"**: the spec had written *"an
+action with no date is never on This week, so it needs a view of its own or it
+is lost"*, and that rule makes exactly the loss it was written against. The
+landing is This week; the line somebody has just typed has no date; on the
+reload it moved to Undated and **vanished from under their hand** — the sheet
+this replaces never did that. **An open action with no date is on This week
+now**, until somebody says otherwise, never late; Undated stays as the
+narrower list of what still needs a date, INSIDE This week rather than beside
+it. The spec is corrected in place and says it was; the §2 assertion that
+held the two views disjoint is REWRITTEN to *Undated is inside This week*,
+never deleted (§218).
+
+### §356.8 — AND THREE OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK
+
+- `const [A] = await owner("… RETURNING id")` handed the ROW object where a
+  tenant id was wanted, and the run DIED at the first `person()` (§215).
+- The register row is written BEFORE the seat: `tenant_users.person_key`
+  carries an FK to `people` (§339), and the fixture had them the other way.
+- The date probe `fill()`ed the date box and then dispatched a second
+  `change` — `fill` on a date input fires the change itself, the page had
+  already posted and reloaded, and the probe waited 30s on a box that was gone
+  (§100.3).
+
+**And one was a real fault the both-ends rule caught**: *"Delete asks first"*
+passed on a `.sure` that had been drawn OPEN all along — the span's own
+`display:flex` outranks the browser's `[hidden]` rule, so `hidden` hid nothing
+(§298.2 recorded Chromium's rule as `!important` and it is not; asked of the
+page, the box was visible). `[hidden]{display:none!important}` on the page,
+and the question asserted ABSENT before the press (§113.8).
+
+### §356.9 — WHAT WAS RUN
+
+`check:tracker` **124/0** against a real Postgres 16 with the browser section
+driven in Chromium; red three ways under its own breaks (`no-office-gate` 2,
+`reset-carried` 3, `owner-anyone` 2); `modules` **100/0** (the colour loop now
+reaches the tracker's document, and `argsFor` carries a seat); `insights`
+127/0; `memory-boundary` 14/0 once the dev tenant is seeded (its one red
+before that is the fixture's precondition, said in its own words);
+`generated-in-step` all clear; `tsc` clean but for `lib/prisma.ts`'s
+pre-existing PrismaClient error (recorded 2026-09-13), which is also the one
+thing `next build` stops on. **The frozen product is untouched**: no source in
+`SMP-Project-Folder/src/` moved, nothing rebuilt, so `sw.js` is not bumped.
+**On the branch, not merged** — `main` is Islam's word.
+
+### §356.10 — RECORDED, NOT DONE
+
+- The switcher lists the tracker for a client's own person, who is then refused
+  at the door; the per-module access tab (spec 046 §4.4) is where that ends.
+- Nothing reminds anybody (spec 054 §10); a weekly digest is §293's collection
+  pointed at this list and its own decision.
+- Notes (meeting minutes, refined and sent as MOM) is the second module Islam
+  named and is deliberately after this one; it has no spec yet.
+- A migration applied on a deployment writes the two tables; the switch that
+  turns the module ON for a client is the card's own drawer (§320.5), pressed
+  by hand — no client has it until somebody presses it.

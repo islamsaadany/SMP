@@ -54,7 +54,40 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§336 — the capability's owner, and the merge.**
+**Latest version:** **§356 — the Internal Tracker is built (spec 054).**
+
+**It is done and it is on the branch, not on `main`.** The Internal Tracker is
+a module a client can be given, like Insights: the office opens it from the
+switcher, and it is the weekly list you asked for — This week (late lines
+first, carried counts on them), All, Mine and Undated, one strip of counts on
+top, a search box, and the next empty line at the bottom. You type a line and
+press Enter; it lands under you. Every change is on the row: the tick, the
+date, the status, and the title opens the row for its notes, who else is on
+it, the owner, the history and Delete. There is no Save button anywhere.
+
+**Only the office can open it**, checked at the server and not only by hiding
+the entry; a client's own person is told so with the way back. An action can
+be owned only by somebody on the office's seats for that client. The week is
+Sunday to Thursday. Being late and "carried N weeks" count from the first date
+a line was ever given, so postponing does not reset the count.
+
+**One thing the checks found in my own rule, fixed before you saw it**: the
+spec had said a line with no date is never on This week. The line you have just
+typed has no date, so it vanished from the page on the reload — the sheet never
+did that. A line with no date is on This week now until it is given one.
+
+**Checked:** 124 assertions on a real database, the last twenty pressed in a
+real browser and read back from the database after every press; red under all
+three deliberate breaks; the modules and Insights checks green. The offline
+product is untouched. The mockup you signed off is the record of the look.
+
+**Still yours:** the merge; and the module has to be turned on per client from
+the client's card, like Insights. Notes (meeting minutes) is next and has no
+spec yet.
+
+---
+
+### Earlier: **§336 — the capability's owner, and the merge.**
 
 **You were right, and it turned out to be already built.** You asked for a
 capability to have an owner and a custodian like a unit, then corrected it: the

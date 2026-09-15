@@ -7725,6 +7725,31 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   clip store already are, and are correctly outside). None of Strategy,
   Portfolio, Insights or Processes passes any. **Isolation is bought a folder
   and then a package boundary before it is bought a repository.**
+- **THE INTERNAL TRACKER IS THE OFFICE'S WEEKLY LIST, PER CLIENT (§356, spec
+  054):** the fifth module (`smp-app/modules/tracker/`, key `tracker`), Islam's
+  own word and his week — **Sunday to Thursday**, in `Africa/Cairo`. **The office
+  only, asked of the SEAT at the server** on the page AND at the api (§42): a
+  client's own person is told so with the way back. An action is **owned by an
+  office row on that client's register and by nothing else**; the name is read
+  from the register at draw time, never stored (§130.9). **The first date is
+  written once** (`first_due`), so late and *carried N weeks* count from it and
+  a reschedule cannot reset the count; Done clears it, reopening restarts it.
+  **Adding is the next empty line and Enter** (*"we are shifting from a simple
+  google sheet"*) and every change is on the row — the browser holds no copy of
+  the list, every press POSTs the module's own api and the page is read again,
+  so **the route gained POST** (`export const POST = GET`; the table dispatches
+  by module, the module reads the method). Two tables in `schema.sql`'s RLS loop
+  and migration 012, policy asserted IDENTICAL to `library_items`'. **AN OPEN
+  ACTION WITH NO DATE IS ON THIS WEEK** — the spec first said the opposite and
+  the browser check found the loss that makes: the line just typed vanished on
+  the reload; Undated is the narrower list INSIDE This week. **`hidden` on a
+  span with its own `display` hides nothing** (§298.2 had Chromium's rule as
+  `!important`; asked of the page, it is not), so the page declares
+  `[hidden]{display:none!important}`. `checks/tracker.mjs` 124/0, red under
+  three breaks, its §10 pressing the controls in Chromium and reading Postgres
+  back after every press. **Recorded, not done**: the switcher lists it for a
+  client's person (spec 046 §4.4's tab is where that ends); a module is turned
+  ON per client from the card; Notes is next and has no spec.
 - **A MODULE IS A FOLDER THAT SERVES ITSELF (§354, spec 046):** the third
   module arrived and the route's own comment — *a branch rather than a table
   because there are two of them* — was still there with Insights' eight lines
@@ -7935,6 +7960,33 @@ node smp-app/checks/modules.mjs # a module per client, and the trial that proves
                                 # `page.appendChild(grid)` appears twice in
                                 # platform.html, so an unscoped indexOf compared the
                                 # band against ANOTHER page's grid (&sect;100.3)
+node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly list
+                                # per client (spec 054, &sect;356) &mdash; `npm run
+                                # check:tracker`, needs a database and the image's
+                                # Chromium (`SMP_CHROME`). &sect;1&ndash;&sect;2 run the
+                                # pure rules (the Sun&ndash;Thu week, late, carried
+                                # from the FIRST date, the four views, the strip, who
+                                # may change and who may hand over); &sect;3&ndash;&sect;7
+                                # run every statement as `smp_app` with the tenant set
+                                # (the office rows, add and its event, the first date
+                                # surviving a reschedule and a clearing, one client's
+                                # list not another's, delete cascading its history);
+                                # &sect;8 drives `serve()` &mdash; the gate at both
+                                # doors, every act allowed AND refused (&sect;94.2);
+                                # &sect;9 reads the catalogue (RLS forced, the policy
+                                # IDENTICAL to `library_items`', not on
+                                # PLATFORM_TABLES, the exact column list); and
+                                # &sect;10 serves the module over a real port and
+                                # PRESSES it in Chromium, reading Postgres back after
+                                # every press &mdash; Enter adds, the tick, the status,
+                                # the date box and its Escape, notes on leaving the
+                                # box, Enter renames, Delete asks in the row with the
+                                # question asserted ABSENT before the press. 124/0,
+                                # red three ways (`check:tracker:red`). Its first run
+                                # found ONE product fault (an undated line vanishing
+                                # from This week, &sect;356.7), one real page fault
+                                # (`hidden` hiding nothing under an author display,
+                                # &sect;356.8) and three faults of its own
 node smp-app/checks/insights.mjs # the library, and who can see one report
                                 # (spec 053, &sect;355) &mdash; `npm run check:insights`,
                                 # needs a database. &sect;1b is the narrowing's PURE
@@ -9400,7 +9452,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;355: who can see one report (spec
+*Last Updated: 2026-09-15 &mdash; **&sect;356: the Internal Tracker is built
+(spec 054).** Islam, of the `strategy-management-system` repository: *"the
+tracking tool is for the internal team weekly actions tracking"* &mdash;
+*"they belong to the client"* &mdash; *"1. Internal Tracker 2. a week is
+sunday ti thursday"* &mdash; *"the new action should be in line addition we are
+shifting from a simple google sheet to a tool so it needs to be super simple"*
+&mdash; *"build and let's me see when it's done."* **A FIFTH MODULE THROUGH THE
+TABLE**: one folder, one registry entry, one word in `lib/modules.ts`, and the
+one thing the spine gained is a VERB (`POST = GET`, the module reads the
+method). **The office only, by SEAT, at the server** on both doors; **owned by
+an office row and nothing else**; **the first date written once** so a
+reschedule cannot reset *carried N weeks*; **Enter on the next empty line**,
+every change on the row, no Save button, the browser holding no copy of the
+list. **THE CHECK'S FIRST RUN FOUND THE SPEC'S OWN RULE WRONG** (&sect;356.7):
+*an action with no date is never on This week* is exactly the loss it was
+written against &mdash; the line just typed has no date and vanished on the
+reload &mdash; so an undated open action is on This week now and Undated sits
+inside it; the spec is corrected in place and says so. **And `hidden` hid
+nothing** on a span with its own `display:flex` (&sect;356.8 &mdash; &sect;298.2
+recorded Chromium's rule as `!important` and, asked of the page, it is not),
+caught only because the question was asserted ABSENT before the press
+(&sect;113.8). Three of the check's own first failures were the check
+(&sect;215; the FK's order, &sect;339; a `fill()` that fires its own change).
+**VERIFIED**: `check:tracker` **124/0** with &sect;10 driven in Chromium, red
+2 / 3 / 2 under its breaks; `modules` 100/0; `insights` 127/0;
+`memory-boundary` 14/0; `generated-in-step` all clear; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. **The frozen product is untouched**, so
+`sw.js` is not bumped. **On the branch, not merged.** **RECORDED, NOT DONE**:
+the switcher lists it for a client's person until spec 046 &sect;4.4's tab
+exists; a module is turned ON per client from the card; Notes is next.*
+
+*Earlier the same day: **&sect;355: who can see one report (spec
 046 &sect;4.10).** Islam, of Insights: *"normally every one in the company can
 see the reports and forefront can publish but for some certain reports it might
 need to belong to a function or more not the whole company &hellip; a simple

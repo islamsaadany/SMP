@@ -38,6 +38,7 @@
 import type { ModuleKey } from "../lib/modules.ts";
 import { serve as strategy } from "./strategy/index.ts";
 import { serve as insights } from "./insights/index.ts";
+import { serve as tracker } from "./tracker/index.ts";
 import { serve as trial } from "./trial/index.ts";
 
 export type ServeArgs = {
@@ -69,12 +70,12 @@ export type ModuleServer = (a: ServeArgs) => Promise<Response>;
 const BREAK = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
 
 export const SERVERS: Partial<Record<ModuleKey, ModuleServer>> =
-  BREAK === "no-server" ? { strategy, trial }
+  BREAK === "no-server" ? { strategy, trial, tracker }
   /* Two words pointing at one page — the door onto the wrong room, wired
      rather than guessed at. It renders perfectly, which is why the check
      DRIVES each server rather than reading the table (§96). */
-  : BREAK === "wrong-server" ? { strategy, insights: strategy, trial }
-  : { strategy, insights, trial };
+  : BREAK === "wrong-server" ? { strategy, insights: strategy, trial, tracker }
+  : { strategy, insights, tracker, trial };
 
 /* Null is "nothing here draws that", which the route answers as Not found
    rather than falling back to the Strategy shell: a module word that resolved

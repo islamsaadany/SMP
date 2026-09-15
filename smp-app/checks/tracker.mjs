@@ -22,16 +22,27 @@
      DATABASE_URL_UNPOOLED=postgres://owner@… node checks/tracker.mjs
      SMP_BREAK=no-office-gate node checks/tracker.mjs   # must go red
      SMP_BREAK=reset-carried  node checks/tracker.mjs   # must go red
-     SMP_BREAK=owner-anyone   node checks/tracker.mjs   # must go red      */
+     SMP_BREAK=owner-anyone   node checks/tracker.mjs   # must go red
+     SMP_BREAK=who-everyone   node checks/tracker.mjs   # must go red (§356.11)
+     SMP_BREAK=reload-on-add  node checks/tracker.mjs   # must go red (§356.12)
+
+   SINCE §356.11 THE ROW IS THE SECOND MOCKUP'S: one action, one owner (no
+   collaborators anywhere — the act, the column, the rule); the owner cell a
+   FIRST NAME that opens the office to hand the action on, for the owner and
+   the Super user only (both ends); the arrow that opens and folds a row; a
+   double-click that renames in place; late as one short word; the grouping
+   a choice; and every press SILENT — §10 plants a mark on the window before
+   the first press and reads it after the last, because a page that reloaded
+   answers every other assertion here perfectly (§113.8).                   */
 import pg from "pg";
 import { usePools } from "../lib/db.ts";
 import { SCHEMA } from "../db/schema-name.mjs";
 import { PLATFORM_TABLES } from "../lib/schema-check.ts";
 import { serve } from "../modules/tracker/index.ts";
-import { initials, trackerDocument } from "../modules/tracker/page.ts";
+import { trackerDocument, whenText } from "../modules/tracker/page.ts";
 import {
-  STATUSES, STATUS_WORD, VIEWS, isStatus, isView, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
-  readableDay, weekLabel, inView, summary, mayChange, mayOwn, shape, oneLine,
+  STATUSES, STATUS_WORD, VIEWS, GROUPS, GROUP_WORD, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
+  lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn,
   officeRows, listActions, oneAction, addAction, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
 } from "../lib/tracker.ts";
 
@@ -73,18 +84,32 @@ check("the three words are the product's own (§300)",
   STATUSES.join(",") === "not_started,in_progress,done" && Object.values(STATUS_WORD).join("|") === "Not started|In progress|Done");
 check("a near miss is not a status or a view", !isStatus("Done") && !isView("Week") && !isStatus("blocked"));
 check("the office is the two seats and nothing else", isOffice("super") && isOffice("smoteam") && !isOffice("none") && !isOffice(null) && !isOffice(""));
-check("initials are the first two words, and a lone word gives one letter", initials("Islam Saadany") === "IS" && initials("Noran Essam") === "NE" && initials("Madonna") === "M");
 check("a title pasted over lines comes back as one line", oneLine("Chase\n  Finance") === "Chase Finance");
+/* THE SHORT NAME IS THE REGISTER'S OWN FIRST NAME (§356.11, §130.7): a
+   particle is not a name, a clashing pair is lengthened for exactly that
+   pair (§81.1), and a pair still equal at two words gets the whole name. */
+const sn = (people) => Array.from(shortNames(people.map((n, i) => ({ key: "k" + i, name: n }))).values()).join("|");
+check("the owner reads as a first name", sn(["Islam Saadany", "Noran Essam", "Omar Khalil"]) === "Islam|Noran|Omar", sn(["Islam Saadany", "Noran Essam", "Omar Khalil"]));
+check("...a particle is not a name — Abd El Moniem is one word of it", sn(["Abd El Moniem Mohamed", "Hend Adel"]) === "Abd El Moniem|Hend", sn(["Abd El Moniem Mohamed", "Hend Adel"]));
+check("...two Ahmeds are told apart by their second word, and only those two", sn(["Ahmed Mostafa", "Ahmed Ali", "Noran Essam"]) === "Ahmed Mostafa|Ahmed Ali|Noran", sn(["Ahmed Mostafa", "Ahmed Ali", "Noran Essam"]));
+check("...and a pair still equal at two words gets the whole name", sn(["Ahmed Ali Hassan", "Ahmed Ali Youssef"]) === "Ahmed Ali Hassan|Ahmed Ali Youssef", sn(["Ahmed Ali Hassan", "Ahmed Ali Youssef"]));
+check("...a lone word is itself", sn(["Madonna"]) === "Madonna");
+/* LATE IS ONE SHORT WORD, the weeks riding on it (Islam: "carried 1 week is long"). */
+check("late reads Late, Late 1 w, Late 2 w — never 'carried'", lateWord(0) === "Late" && lateWord(1) === "Late 1 w" && lateWord(2) === "Late 2 w" && !/carried/.test(lateWord(3)));
+const lateRow = shape({ id: "l", title: "t", description: "", owner_key: "islam", due: "2026-09-03", first_due: "2026-09-03", status: "in_progress", created_by: "islam" });
+check("...and the row says the word, then the date", whenText(lateRow, TODAY).text === "Late 2 w · Thu 3 Sep" && whenText(lateRow, TODAY).late, whenText(lateRow, TODAY).text);
+check("a row due this week but past says Late alone", whenText(shape({ ...lateRow, due: "2026-09-14", first_due: "2026-09-14" }), TODAY).text === "Late · Mon 14 Sep");
+check("the grouping is four choices, Owner first, and a near miss is not one", GROUPS.join(",") === "owner,status,due,none" && GROUP_WORD.due === "Due date" && !isGroup("Owner") && isGroup("none"));
 
 /* ══ §2 · the views, and who may do what ══════════════════════════════ */
 section("§2 · the four views, the strip, and who may do what");
-const mk = (o) => shape({ id: o.id || "x", title: "t", description: "", owner_key: o.owner || "islam", collaborators: o.with || [],
+const mk = (o) => shape({ id: o.id || "x", title: "t", description: "", owner_key: o.owner || "islam",
   due: o.due || null, first_due: o.first || o.due || null, status: o.status || "not_started", done_day: o.doneDay || null, created_by: "islam" });
 const ME = { personKey: "noran", seat: "smoteam" }, SUPER = { personKey: "islam", seat: "super" }, OTHER = { personKey: "omar", seat: "smoteam" };
 const rows = [
   mk({ id: "a", owner: "islam", due: "2026-09-14" }),                       // late, this week
   mk({ id: "b", owner: "noran", due: "2026-09-03", status: "in_progress" }), // late, carried
-  mk({ id: "c", owner: "islam", due: "2026-09-17", with: ["noran"] }),       // due Thu
+  mk({ id: "c", owner: "islam", due: "2026-09-17" }),                       // due Thu
   mk({ id: "d", owner: "noran", due: "2026-09-24" }),                        // next week
   mk({ id: "e", owner: "omar" }),                                            // undated
   mk({ id: "f", owner: "noran", due: "2026-09-15", status: "done", doneDay: "2026-09-15" }), // done this week
@@ -98,15 +123,13 @@ check("Undated holds the open action with no date and nothing else", ids("undate
    and must not vanish on the reload (§10 found it, lib/tracker.ts says why). */
 check("Undated is inside This week, so a line just typed does not vanish", ids("undated").split("").every((x) => ids("week").includes(x)));
 check("All holds everything", ids("all") === "abcdefg", ids("all"));
-check("Mine is what I own OR am on", ids("mine", ME) === "bcdf", ids("mine", ME));
+check("Mine is what I own — and nothing else, since nobody is 'on' an action any more (§356.11)", ids("mine", ME) === "bdf", ids("mine", ME));
 check("...and a different me reads a different list", ids("mine", OTHER) === "eg", ids("mine", OTHER));
 const s = summary(rows, TODAY);
 check("the strip: 5 open · 2 late · 2 due this week (2 not started — f is done, so it is not owed) · 1 done this week",
   s.open === 5 && s.late === 2 && s.dueWeek === 2 && s.dueWeekNotStarted === 2 && s.doneWeek === 1, JSON.stringify(s));
-check("the owner may change the action; a collaborator may; a stranger may not; the Super user may",
-  mayChange(rows[2], SUPER) && mayChange(rows[2], ME) && !mayChange(rows[2], OTHER) && mayChange(rows[2], { personKey: "hana", seat: "super" }));
-check("only the owner or the Super user may hand it over — a collaborator may NOT",
-  mayOwn(rows[2], { personKey: "islam", seat: "smoteam" }) && !mayOwn(rows[2], ME) && mayOwn(rows[2], { personKey: "hana", seat: "super" }));
+check("ONE RULE: the owner may change the action, the Super user may, and nobody else — being on the same team is not being on it",
+  mayChange(rows[2], SUPER) && mayChange(rows[2], { personKey: "islam", seat: "smoteam" }) && !mayChange(rows[2], ME) && !mayChange(rows[2], OTHER) && mayChange(rows[2], { personKey: "hana", seat: "super" }));
 check("somebody the register has not placed may change nothing but as Super user", !mayChange(rows[2], { personKey: null, seat: "smoteam" }) && mayChange(rows[2], { personKey: null, seat: "super" }));
 
 /* ══ the database ═════════════════════════════════════════════════════ */
@@ -205,8 +228,8 @@ try {
   await asTenant(A, (c) => setFields(c, a1.id, { due: "2026-09-20" }));
   const d5 = await asTenant(A, (c) => setStatus(c, a1.id, "not_started", "noran"));
   check("reopened, the first date starts again from the date it holds", d5.firstDue === "2026-09-20", JSON.stringify(d5));
-  const d6 = await asTenant(A, (c) => setFields(c, a1.id, { title: "Chase Finance", description: "  Nineteen of 26 entered.\n\n ", collaborators: ["islam", "islam", ""] }));
-  check("the title, the notes and who else all write; who else is de-duplicated", d6.title === "Chase Finance" && d6.description === "Nineteen of 26 entered." && d6.collaborators.join() === "islam", JSON.stringify(d6));
+  const d6 = await asTenant(A, (c) => setFields(c, a1.id, { title: "Chase Finance", description: "  Nineteen of 26 entered.\n\n " }));
+  check("the title and the notes write, and the row carries no collaborators at all (§356.11)", d6.title === "Chase Finance" && d6.description === "Nineteen of 26 entered." && !("collaborators" in d6), JSON.stringify(d6));
   check("a name on the row is read from the register, never stored on the action",
     (await asTenant(A, (c) => namesOf(c))).get("noran") === "Noran Essam");
 
@@ -253,21 +276,26 @@ try {
   const ISLAM = { personKey: "islam", seat: "super" }, NORAN = { personKey: "noran", seat: "smoteam" }, HEND = { personKey: "hend", seat: "none" };
   const page = await call(A, NORAN, [], null);
   check("the office opens the list", page.status === 200 && /<title>Raya Trade &mdash; Internal Tracker<\/title>/.test(page.text), page.status + " " + (page.text.match(/<title>[^<]*/) || [""])[0]);
-  check("the page ends in the next empty line, and the line is the person's own", /id="add"/.test(page.text) && /title="Noran Essam">NE</.test(page.text));
-  check("the late word is on the row that is late", /Late · /.test(page.text) || !/class="row/.test(page.text));
+  check("the page ends in the next empty line, and the line wears the person's own first name", /id="add"/.test(page.text) && /<span class="who">Noran<\/span><span class="st">Not started/.test(page.text));
+  check("the views row carries the grouping as a choice, Owner chosen, and the body says which list it is", /<label class="gby">Group by <select data-act="group"/.test(page.text) && /value="owner" selected/.test(page.text) && /data-group="owner"/.test(page.text) && /data-list="[^"]*\/tracker\/list"/.test(page.text));
   check("nothing on it is inline script — the policy would silence it", !/<script>|onclick=/i.test(page.text) && /app\.js"><\/script>/.test(page.text));
   const client = await call(A, HEND, [], null);
   check("the client's own person is turned away with a sentence, not a page", client.status === 403 && /The Internal Tracker is the office/.test(client.text) && !/id="add"/.test(client.text), String(client.status));
   check("...and at the api too, not only on the page (§42)", (await call(A, HEND, ["api"], { act: "add", title: "sneak" })).status === 403);
   check("somebody with no membership at all is turned away", (await call(A, { personKey: null, seat: null }, [], null)).status === 403);
   const js = await call(A, NORAN, ["app.js"], null);
-  check("the script is served by the module itself, as script", js.status === 200 && /fetch\(API/.test(js.text));
+  check("the script is served by the module itself, as script, talking to the two addresses on the body", js.status === 200 && /fetch\(url/.test(js.text) && /data-api/.test(js.text) && /data-list/.test(js.text) && !/location\.reload/.test(js.text));
   const off = await call(A, NORAN, ["nothing-here"], null);
   check("a word the module does not draw comes back to the list", off.status === 302 && off.to.endsWith("/x/tracker"), off.status + " " + off.to);
   check("GET at the api is not a write", (await call(A, NORAN, ["api"], null)).status === 405);
+  const lst = await call(A, NORAN, ["list"], null);
+  check("the list address answers the list drawn again, for the office", lst.status === 200 && lst.j && lst.j.ok === true && typeof lst.j.body === "string" && /class="list"/.test(lst.j.body) && typeof lst.j.count === "string", lst.status + " " + lst.text.slice(0, 80));
+  check("...and not for the client's own person (§42)", (await call(A, HEND, ["list"], null)).status === 403);
 
   const added = await call(A, NORAN, ["api"], { act: "add", title: "Walk Hend through Reporting" });
   check("Enter on the line adds it under me", added.j && added.j.ok === true && !!added.j.id, added.text);
+  check("...and the answer IS the list drawn again, the new row in it, so nothing has to reload (§356.12)",
+    typeof added.j.body === "string" && added.j.body.includes('data-id="' + added.j.id + '"') && /Walk Hend through Reporting/.test(added.j.body) && /^\d+ actions? on this week$/.test(added.j.count), added.j.count);
   const mine = await asTenant(A, (c) => oneAction(c, added.j.id));
   check("...owned by me, Not started, no date", mine.ownerKey === "noran" && mine.status === "not_started" && mine.due === null);
   const forHend = await call(A, NORAN, ["api"], { act: "add", title: "x", ownerKey: "hend" });
@@ -287,23 +315,48 @@ try {
   const OMAR = { personKey: "omarA", seat: "smoteam" };
   check("somebody not on the action may not change it", (await call(A, OMAR, ["api"], { act: "status", id: added.j.id, status: "done" })).status === 403);
   check("...the Super user may — both ends", (await call(A, ISLAM, ["api"], { act: "notes", id: added.j.id, description: "Islam's note" })).j.ok === true);
-  check("the owner puts somebody on it", (await call(A, NORAN, ["api"], { act: "collab", id: added.j.id, collaborators: ["omarA"] })).j.ok === true &&
-    (await asTenant(A, (c) => oneAction(c, added.j.id))).collaborators.join() === "omarA");
-  check("...and now they may change it", (await call(A, OMAR, ["api"], { act: "status", id: added.j.id, status: "done" })).j.ok === true);
-  check("...but may NOT hand it over or delete it", (await call(A, OMAR, ["api"], { act: "owner", id: added.j.id, ownerKey: "omarA" })).status === 403 &&
+  /* ONE ACTION, ONE OWNER (§356.11): there is no longer a way to put
+     somebody 'on' an action, so a tab on the build before asking for one is
+     told it is not something this list does, and writes nothing. */
+  const collab = await call(A, NORAN, ["api"], { act: "collab", id: added.j.id, collaborators: ["omarA"] });
+  check("'with' is gone: putting somebody on an action is not something this list does", collab.status === 400 && /Not something this list does/.test(collab.j.why), collab.text);
+  check("...and they still may not change it, or hand it over, or delete it", (await call(A, OMAR, ["api"], { act: "status", id: added.j.id, status: "done" })).status === 403 &&
+    (await call(A, OMAR, ["api"], { act: "owner", id: added.j.id, ownerKey: "omarA" })).status === 403 &&
     (await call(A, OMAR, ["api"], { act: "delete", id: added.j.id })).status === 403);
-  check("the owner hands it over, and leaves the new owner's name off 'with'", (await call(A, NORAN, ["api"], { act: "owner", id: added.j.id, ownerKey: "omarA" })).j.ok === true &&
-    (await asTenant(A, (c) => oneAction(c, added.j.id))).collaborators.length === 0);
+  check("the owner hands it over", (await call(A, NORAN, ["api"], { act: "owner", id: added.j.id, ownerKey: "omarA" })).j.ok === true &&
+    (await asTenant(A, (c) => oneAction(c, added.j.id))).ownerKey === "omarA");
+  check("...and now the new owner may change it while the old may not — both ends", (await call(A, OMAR, ["api"], { act: "status", id: added.j.id, status: "done" })).j.ok === true &&
+    (await call(A, NORAN, ["api"], { act: "status", id: added.j.id, status: "done" })).status === 403);
   check("an action B's office cannot see cannot be written by B's server either", (await call(B, { personKey: "omar", seat: "super" }, ["api"], { act: "delete", id: added.j.id })).status === 404);
   check("the owner deletes it", (await call(A, OMAR, ["api"], { act: "delete", id: added.j.id })).j.ok === true && (await asTenant(A, (c) => oneAction(c, added.j.id))) === null);
-  const opened = await call(A, NORAN, [], null).then(() => trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: a1.id }, who: NORAN, today: TODAY }));
+  const opened = await call(A, NORAN, [], null).then(() => trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: a1.id, group: "owner" }, who: NORAN, today: TODAY }));
   check("an opened row shows its notes and its history in place", /class="open"/.test(opened) && /Nineteen of 26 entered\./.test(opened) && /created it, owner/.test(opened));
   check("...with Delete behind a question, never a browser dialog", /Delete this action\?/.test(opened) && !/confirm\(/.test(opened));
-  const searched = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "zzz", open: null }, who: NORAN, today: TODAY });
+  check("...and NO Title box and NO With: the name is renamed on the row and one action has one owner", !/class="open"[\s\S]*input class="ttl"/.test(opened) && !/>With</.test(opened) && !/class="ticks"/.test(opened));
+  /* WHO GETS THE PRESS, BOTH ENDS (§61, §94.2): the owner's name is a button
+     for the owner and the Super user, and plain text for everybody else. */
+  const rowOf = (html) => (html.match(new RegExp('<div class="row[^"]*" data-id="' + a1.id + '"[\\s\\S]*?<button class="more')) || [""])[0];
+  const asOmar = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "owner" }, who: OMAR, today: TODAY });
+  check("the owner's name opens the team for the owner", /class="who pick"[^>]*data-act="who"/.test(rowOf(opened)) && /class="team" role="listbox"/.test(rowOf(opened)) && /data-act="pick-owner" data-key="islam"/.test(rowOf(opened)));
+  check("...and is plain text for somebody who is not — with the tick and the name not pressable either", /<span class="who">Noran<\/span>/.test(rowOf(asOmar)) && !/who pick/.test(rowOf(asOmar)) && /<button class="tick"[^>]*disabled/.test(rowOf(asOmar)) && !/data-rename/.test(rowOf(asOmar)), rowOf(asOmar).slice(0, 200));
+  check("...and the team is first names only, no surnames", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).map((x) => x.replace(/^.*>/, "").replace(/<$/, "")).join("|") === "Islam|Noran|Omar", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).join());
+  /* GROUPED THREE OTHER WAYS: the headings are the words, in their order. */
+  const heads = (html) => (html.match(/class="grp" data-key="[^"]*">[^<]*/g) || []).map((x) => x.replace(/^.*">/, "").trim());
+  const byStatus = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "status" }, who: NORAN, today: TODAY });
+  const byDue = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "due" }, who: NORAN, today: TODAY });
+  const byNone = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "none" }, who: NORAN, today: TODAY });
+  check("grouped by Owner the headings are the register's full names, in its order", heads(opened).join("|") === "Islam Saadany|Noran Essam", heads(opened).join("|"));
+  check("...by Status it is the three words' own", heads(byStatus).every((h) => Object.values(STATUS_WORD).includes(h)) && heads(byStatus).length >= 1, heads(byStatus).join("|"));
+  check("...by Due date it is the day, and the undated read 'No date', last", heads(byDue).join("|") === "Sun 20 Sep|No date", heads(byDue).join("|"));
+  check("...and by None there is no heading at all while the rows are all still there", heads(byNone).length === 0 && /class="row/.test(byNone) && /value="none" selected/.test(byNone));
+  const cookied = await serve({ req: new Request("https://smp.example/x/tracker", { headers: { cookie: "a=b; smp.tracker.group=status" } }), slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], rest: [], personKey: "noran", seat: "smoteam" }).then((r) => r.text());
+  check("the grouping this browser last chose is read off its cookie, so the page opens grouped that way", /value="status" selected/.test(cookied) && /data-group="status"/.test(cookied));
+  check("...and a cookie naming no real grouping falls back to Owner", /value="owner" selected/.test(await serve({ req: new Request("https://smp.example/x/tracker", { headers: { cookie: "smp.tracker.group=zzz" } }), slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], rest: [], personKey: "noran", seat: "smoteam" }).then((r) => r.text())));
+  const searched = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "zzz", open: null, group: "owner" }, who: NORAN, today: TODAY });
   check("a search that finds nothing says so and offers the way back", /Nothing matches/.test(searched) && /see all of them/.test(searched));
-  const empty = await trackerDocument({ slug: "x", tenantId: B, tenantName: "RHI", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null }, who: { personKey: "omar", seat: "super" }, today: TODAY });
+  const empty = await trackerDocument({ slug: "x", tenantId: B, tenantName: "RHI", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null, group: "owner" }, who: { personKey: "omar", seat: "super" }, today: TODAY });
   check("an empty client is only the next empty line and one sentence", /Type the first action for RHI/.test(empty) && /Nothing on the list for RHI yet/.test(empty) && !/class="tools"/.test(empty));
-  const noDb = await trackerDocument({ slug: "x", tenantId: "not-a-tenant-id", tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null }, who: NORAN });
+  const noDb = await trackerDocument({ slug: "x", tenantId: "not-a-tenant-id", tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null, group: "owner" }, who: NORAN });
   check("a list that could not be read says so, and is not drawn as empty (§35)", /could not be read/.test(noDb) && !/Nothing on the list/.test(noDb) && !/id="add"/.test(noDb));
 
   /* ══ §9 · the catalogue ══════════════════════════════════════════════ */
@@ -319,8 +372,8 @@ try {
     check(t + " is not on the platform's own list (§331)", !PLATFORM_TABLES.includes(t));
   }
   const cols = await owner("SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'tracker_actions' ORDER BY ordinal_position", [SCHEMA]);
-  check("the action row holds exactly what spec 054 §5 says and no more",
-    cols.map((c) => c.column_name).join(",") === "tenant_id,id,title,description,owner_key,collaborators,due,first_due,status,done_at,created_by,created_at,updated_at,extra",
+  check("the action row holds exactly what spec 054 §5 says and no more — the collaborators column is GONE (migration 013)",
+    cols.map((c) => c.column_name).join(",") === "tenant_id,id,title,description,owner_key,due,first_due,status,done_at,created_by,created_at,updated_at,extra",
     cols.map((c) => c.column_name).join(","));
 
   /* ══ §10 · the script, driven ═══════════════════════════════════════
@@ -329,14 +382,14 @@ try {
      the module is served over a real port — the same serve() the route
      calls, bridged from Node's request to a fetch Request — and Chromium
      presses the controls while the DATABASE is read back (§70, §96). */
-  section("§10 · the next empty line, pressed in a browser");
+  section("§10 · the next empty line, pressed in a browser — and every press silent");
   const { createServer } = await import("node:http");
   const srv = createServer(async (rq, rs) => {
     try {
       const chunks = []; for await (const ch of rq) chunks.push(ch);
       const url = "http://smp.test" + rq.url;
       const rest = String(rq.url).split("?")[0].split("/").filter(Boolean).slice(2);
-      const req = new Request(url, { method: rq.method, headers: { "Content-Type": rq.headers["content-type"] || "" },
+      const req = new Request(url, { method: rq.method, headers: { "Content-Type": rq.headers["content-type"] || "", cookie: rq.headers.cookie || "" },
         body: rq.method === "POST" ? Buffer.concat(chunks) : undefined });
       const res = await serve({ req, slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade",
         have: ["strategy", "tracker"], rest, personKey: "noran", seat: "smoteam" });
@@ -353,52 +406,120 @@ try {
   if (browser) {
     const pg = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     const errs = []; pg.on("pageerror", (e) => errs.push(String(e))); pg.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
-    const settle = () => pg.waitForLoadState("load").then(() => pg.waitForTimeout(150));
+    /* A press is silent when the list is swapped in place: the page is
+       asked to be idle, and a MARK planted on the window before the first
+       press must still be there after the last (§356.12). A reload would
+       satisfy every other assertion here — the check's own break puts one
+       back after an add and must go red on the mark (§94.5, §113.8). */
+    const settle = () => pg.waitForTimeout(350).then(() => pg.waitForLoadState("load"));
+    const stayed = () => pg.evaluate("window.__stay === 1");
     await pg.goto(base); await settle();
+    await pg.evaluate("window.__stay = 1");
+    check("the mark is really planted, or 'it stayed' proves nothing", await stayed());
+    check("the views row opens grouped by Owner", (await pg.locator(".gby select").inputValue()) === "owner");
     /* ENTER ADDS, AND THE LINE IS READ BACK OUT OF POSTGRES (§96). */
     await pg.locator("#add").fill("Book the room for Thursday");
     await pg.locator("#add").press("Enter"); await settle();
     const born = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Book the room for Thursday");
     check("Enter on the line writes the action, owned by me", !!born && born.ownerKey === "noran" && born.status === "not_started", JSON.stringify(born));
-    check("...the page is read again and the line is empty and focused for the next one",
+    check("...SILENTLY: the page did not reload", await stayed());
+    check("...the line is empty and still under the cursor for the next one",
       (await pg.locator("#add").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.id")) === "add");
-    check("...and the new row is on the page", (await pg.locator('.row[data-id="' + born.id + '"]').count()) === 1);
-    const row = '.row[data-id="' + born.id + '"] ';
-    /* THE TICK is Done; pressed again it is Not started — both ends. */
+    const row = '.row[data-id="' + (born && born.id) + '"] ';
+    check("...and the new row is on the page, under my own name, reading my first name", (await pg.locator(row).count()) === 1 &&
+      /^Noran Essam/.test(await pg.locator('.grp[data-key="noran"]').innerText()) && (await pg.locator(row + ".who .wn").innerText()) === "Noran");
+    /* textContent, not innerText: the count is uppercased by CSS (§301.6). */
+    check("...with the count moved in place", /2 actions on this week/.test(await pg.locator("#count").textContent()), await pg.locator("#count").textContent());
+    /* THE TICK is Done; pressed again it is Not started — both ends. And a
+       half-typed line in the add box survives the swap (§35, §71.2). */
+    await pg.locator("#add").fill("half a line");
     await pg.locator(row + "[data-act=tick]").click(); await settle();
     check("the tick marks it Done in the database", (await asTenant(A, (c) => oneAction(c, born.id))).status === "done");
-    check("...and the row wears it", (await pg.locator(row + "[data-act=tick]").getAttribute("aria-checked")) === "true");
+    check("...the row wears it, and the half-typed line survived the swap", (await pg.locator(row + "[data-act=tick]").getAttribute("aria-checked")) === "true" &&
+      (await pg.locator("#add").inputValue()) === "half a line");
+    await pg.locator("#add").fill("");
     await pg.locator(row + "[data-act=tick]").click(); await settle();
     check("the tick again puts it back to Not started", (await asTenant(A, (c) => oneAction(c, born.id))).status === "not_started");
     /* THE STATUS SELECT, on change. */
     await pg.locator(row + "select[data-act=status]").selectOption("in_progress"); await settle();
     check("the status picker writes In progress", (await asTenant(A, (c) => oneAction(c, born.id))).status === "in_progress");
-    /* THE DATE, in place: the word becomes a date box, a change posts. */
+    /* THE DATE, in place: the word becomes a date box, a change posts. A
+       date LAST WEEK reads as the short word with the weeks on it. */
+    const real = todayIn();
+    const lastWeek = addDays(weekOf(real).from, -3);   /* last week's Thursday */
     await pg.locator(row + "[data-act=due]").click();
     check("the date becomes a date box in place", (await pg.locator(row + "input.dt").count()) === 1);
-    /* fill() fires the box's own change, which posts and reloads — a second
-       dispatched change here waited 30s on a box that was already gone. */
-    await pg.locator(row + "input.dt").fill("2026-09-17"); await settle();
+    await pg.locator(row + "input.dt").fill(lastWeek); await settle();
     const dated = await asTenant(A, (c) => oneAction(c, born.id));
-    check("...and the date is written, first date with it", dated.due === "2026-09-17" && dated.firstDue === "2026-09-17", JSON.stringify(dated));
+    check("...and the date is written, first date with it", dated.due === lastWeek && dated.firstDue === lastWeek, JSON.stringify(dated));
+    const when = await pg.locator(row + "[data-act=due]").innerText();
+    check("a date last week reads 'Late 1 w · <day>' and never 'carried'", when === "Late 1 w · " + readableDay(lastWeek, real) && !/carried/.test(when), when);
     await pg.locator(row + "[data-act=due]").click();
     await pg.locator(row + "input.dt").press("Escape");
     check("Escape puts the word back and writes nothing", (await pg.locator(row + "[data-act=due]").count()) === 1 &&
-      (await asTenant(A, (c) => oneAction(c, born.id))).due === "2026-09-17");
-    /* THE OPENED ROW: notes save on leaving the box, and only when changed. */
-    await pg.locator(row + ".t a").click(); await settle();
-    check("the title opens the row in place, on the address", pg.url().includes("open=" + born.id) && (await pg.locator(".open textarea[data-act=notes]").count()) === 1, pg.url());
+      (await asTenant(A, (c) => oneAction(c, born.id))).due === lastWeek);
+    /* RENAME IN PLACE: a double-click on the name, Enter renames; Escape
+       puts the name back and writes nothing; a single click does nothing. */
+    await pg.locator(row + ".t").click();
+    check("a single click on the name opens no box", (await pg.locator(row + "input.ttl").count()) === 0);
+    await pg.locator(row + ".t").dblclick();
+    check("a double-click turns the name into a box in place", (await pg.locator(row + "input.ttl").count()) === 1);
+    await pg.locator(row + "input.ttl").fill("Book the big room for Thursday");
+    await pg.locator(row + "input.ttl").press("Enter"); await settle();
+    check("Enter renames it, in the database and on the row", (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" &&
+      (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday");
+    await pg.locator(row + ".t").dblclick();
+    await pg.locator(row + "input.ttl").fill("zzz");
+    await pg.locator(row + "input.ttl").press("Escape");
+    check("Escape puts the name back and writes nothing", (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday" &&
+      (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday");
+    /* THE ARROW opens the row in place for its notes and history, on the
+       address, and folds it again; no Title box; the history is small type
+       in a box that scrolls — measured as PAINT, not read off a class. */
+    await pg.locator(row + "[data-act=more]").click(); await settle();
+    check("the arrow opens the row in place, on the address, without a reload", pg.url().includes("open=" + born.id) &&
+      (await pg.locator(".open textarea[data-act=notes]").count()) === 1 && (await pg.locator(row + "[data-act=more]").getAttribute("aria-expanded")) === "true" && await stayed(), pg.url());
+    check("...with no Title box and no With", (await pg.locator(".open input.ttl").count()) === 0 && !/With/.test(await pg.locator(".open").innerText()));
+    const histCss = await pg.evaluate("(function(){var h=document.querySelector('.hist');var c=getComputedStyle(h);return c.fontSize+' '+c.overflowY+' '+c.maxHeight})()");
+    check("the history is small type in a box that scrolls", histCss === "11.5px auto 118px", histCss);
     await pg.locator(".open textarea[data-act=notes]").fill("Ask Facilities first.");
-    await pg.locator(".open input[data-act=rename]").focus(); await pg.waitForTimeout(300);
+    await pg.locator("#add").focus(); await settle();
     check("leaving the notes box writes the notes", (await asTenant(A, (c) => oneAction(c, born.id))).description === "Ask Facilities first.");
-    await pg.locator(".open input[data-act=rename]").fill("Book the big room for Thursday");
-    await pg.locator(".open input[data-act=rename]").press("Enter"); await settle();
-    check("Enter on the title renames it", (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday");
+    check("...and the row is still open afterwards, the notes still in the box", (await pg.locator(".open textarea[data-act=notes]").inputValue()) === "Ask Facilities first.");
+    await pg.locator(row + "[data-act=more]").click(); await settle();
+    check("the arrow again folds it, and the address forgets it", (await pg.locator(".open").count()) === 0 && !pg.url().includes("open=") && await stayed(), pg.url());
+    /* GROUP BY: a choice on the views row, drawn again in place, remembered
+       by this browser (a cookie the page reads on the next visit). */
+    await pg.locator(".gby select").selectOption("status"); await settle();
+    const heads = async () => pg.locator(".grp").allInnerTexts().then((a) => a.map((t) => t.replace(/\s*\d+$/, "").trim()));
+    check("grouped by Status the headings are the three words, drawn in place", (await heads()).every((h) => Object.values(STATUS_WORD).includes(h)) && (await heads()).length >= 1 && await stayed(), (await heads()).join("|"));
+    await pg.goto(base); await settle();
+    check("...and the next visit opens grouped the same way (the cookie), the select saying so", (await pg.locator(".gby select").inputValue()) === "status" && (await heads()).every((h) => Object.values(STATUS_WORD).includes(h)));
+    await pg.locator(".gby select").selectOption("owner"); await settle();
+    check("...and back to Owner", /Noran Essam/.test((await heads()).join("|")));
+    await pg.evaluate("window.__stay = 1");
+    /* THE OWNER'S NAME opens the office on this client, first names only;
+       picking one hands the action on — and then the old owner has no
+       control left on that row (both ends, §61). */
+    await pg.locator(row + ".who.pick").click();
+    const team = pg.locator(row + ".team");
+    check("pressing my name opens the team, first names only and no heading", await team.isVisible() &&
+      (await team.locator("button").allInnerTexts()).join("|") === "Islam|Noran|Omar" && (await pg.locator(row + ".who.pick").getAttribute("aria-expanded")) === "true",
+      (await team.locator("button").allInnerTexts()).join("|"));
+    await pg.locator("h2.pt").click();
+    check("a click elsewhere closes it and changes nothing", !(await team.isVisible()) && (await asTenant(A, (c) => oneAction(c, born.id))).ownerKey === "noran");
+    await pg.locator(row + ".who.pick").click();
+    await team.locator('button[data-key="islam"]').click(); await settle();
+    const handed = await asTenant(A, (c) => oneAction(c, born.id));
+    check("picking Islam hands the action to him, silently", handed.ownerKey === "islam" && await stayed(), JSON.stringify(handed));
+    check("...the row moves under Islam and reads his first name", (await pg.locator('.grp[data-key="islam"] ~ ' + row.trim()).count()) === 1 && (await pg.locator(row + ".who").innerText()) === "Islam");
+    check("...and I, no longer its owner, have no control left on it — the name is plain, the tick is off, the name will not rename",
+      (await pg.locator(row + ".who.pick").count()) === 0 && (await pg.locator(row + "[data-act=tick]").count()) === 0 && (await pg.locator(row + ".t[data-rename]").count()) === 0);
+    await asTenant(A, (c) => setFields(c, born.id, { ownerKey: "noran" }));
+    await pg.goto(base); await settle();
+    await pg.evaluate("window.__stay = 1");
     /* DELETE asks in place — No keeps it, Yes removes it (§95, §273.3). */
-    /* BOTH ENDS: the question is NOT on the page until Delete is pressed —
-       a `.sure` drawn open all along passes "it asks first" perfectly. Its
-       first run found exactly that: the span's own display:flex outranked
-       the browser's [hidden]. */
+    await pg.locator(row + "[data-act=more]").click(); await settle();
     check("the question is not drawn until Delete is pressed", !(await pg.locator(".open .sure").isVisible()));
     await pg.locator(".open [data-act=delete-ask]").click();
     check("Delete asks first, in the row, and is not a browser dialog", await pg.locator(".open .sure").isVisible());
@@ -406,7 +527,7 @@ try {
     check("No keeps it", (await asTenant(A, (c) => oneAction(c, born.id))) !== null && !(await pg.locator(".open .sure").isVisible()));
     await pg.locator(".open [data-act=delete-ask]").click();
     await pg.locator(".open [data-act=delete]").click(); await settle();
-    check("Yes deletes it and lands back on the list", (await asTenant(A, (c) => oneAction(c, born.id))) === null && !pg.url().includes("open="), pg.url());
+    check("Yes deletes it and the list is drawn without it, the address forgetting the row", (await asTenant(A, (c) => oneAction(c, born.id))) === null && !pg.url().includes("open=") && (await pg.locator(row).count()) === 0 && await stayed(), pg.url());
     check("no page error from any of it", errs.length === 0, errs.join(" | "));
     await browser.close();
   }

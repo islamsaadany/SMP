@@ -905,7 +905,8 @@ CREATE TABLE tracker_actions (
   -- decision 5), which is the server's rule (lib/tracker.ts) and not the
   -- database's, because the seat lives on the platform's own table.
   owner_key text NOT NULL,
-  collaborators jsonb NOT NULL DEFAULT '[]'::jsonb,
+  -- One action, one owner (§356.11): the collaborators column the first build
+  -- carried is gone, migration 013 on a database already up.
   -- NULL is "no date yet" and is never late (§35).
   due date,
   -- The first due date ever set, kept while the action is open so a

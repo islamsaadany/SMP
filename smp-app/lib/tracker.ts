@@ -18,8 +18,21 @@
    THE OFFICE ROWS are the register's people who hold a seat on this client
    (`tenant_users`, §338, §339) — the consultants, already on every register.
    An action's owner is one of them BY RULE (decision 5), asked of the server
-   and not only of the picker (§42). */
+   and not only of the picker (§42).
+
+   ONE ACTION, ONE OWNER (§356.11). Islam: "no need for the 'with' part for
+   collaborators it's a simple task management thing." So an action names
+   nobody but its owner, migration 013 drops the column, and the two rules
+   spec 054 §6 kept apart — change it, hand it on — collapse into ONE: the
+   owner or the client's Super user. Two functions with one answer would be
+   §94's drift the day one is widened, so there is one (§53.5). */
+import { createRequire } from "node:module";
 import type { PoolClient } from "pg";
+
+/* THE REGISTER'S OWN NAME RULE, never a second one (§53.5, §130.7): a first
+   name is the first NAME, and a particle is not a name — "Abd El Moniem" is
+   one word of somebody's name, not three. */
+const R = createRequire(import.meta.url)("./rules.cjs") as { nameWords: (name: string, n: number) => string };
 
 type Q = { query: PoolClient["query"] };
 const str = (v: unknown) => (v == null ? "" : String(v));
@@ -40,6 +53,19 @@ export const VIEWS = ["week", "all", "mine", "undated"] as const;
 export type View = (typeof VIEWS)[number];
 export const VIEW_WORD: Record<View, string> = { week: "This week", all: "All", mine: "Mine", undated: "Undated" };
 export function isView(s: unknown): s is View { return typeof s === "string" && (VIEWS as readonly string[]).includes(s); }
+
+/* HOW THE LIST IS GROUPED IS A CHOICE (§356.11, loosening decision 6 from
+   "by owner and nothing else" to "by owner unless you choose otherwise"):
+   Owner is how it opens; Status groups into the three words; Due date groups
+   by the day, soonest first and the undated last; None is one flat list in
+   the order the rows already have. Remembered on the BROWSER (a cookie the
+   page reads), never stored on the client, so two of the office read one
+   list two ways. */
+export const GROUPS = ["owner", "status", "due", "none"] as const;
+export type Group = (typeof GROUPS)[number];
+export const GROUP_WORD: Record<Group, string> = { owner: "Owner", status: "Status", due: "Due date", none: "None" };
+export function isGroup(s: unknown): s is Group { return typeof s === "string" && (GROUPS as readonly string[]).includes(s); }
+export const GROUP_COOKIE = "smp.tracker.group";
 
 export const TITLE_MAX = 200;
 export const NOTES_MAX = 5000;
@@ -96,6 +122,12 @@ export function carriedWeeks(firstDue: string | null, today: string): number {
   return Math.max(0, Math.round((b - a) / 86400000 / 7));
 }
 
+/* LATE IS ONE SHORT WORD (Islam: "carried 1 week is long"): the weeks ride on
+   the word — Late, Late 1 w, Late 2 w — and the date comes after it. */
+export function lateWord(carried: number): string {
+  return carried > 0 ? "Late " + carried + " w" : "Late";
+}
+
 const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 /* "Thu 17 Sep", and the year only when it is not this year — the product's
@@ -113,7 +145,7 @@ export function weekLabel(w: Week, today?: string): string {
 /* ══ the action ═══════════════════════════════════════════════════════ */
 export type Action = {
   id: string; title: string; description: string;
-  ownerKey: string; collaborators: string[];
+  ownerKey: string;
   due: string | null; firstDue: string | null;
   status: Status; doneDay: string | null;
   createdBy: string; createdAt: string; updatedAt: string;
@@ -124,7 +156,6 @@ export function shape(r: Record<string, any>): Action {
   return {
     id: str(r.id), title: str(r.title), description: str(r.description),
     ownerKey: str(r.owner_key),
-    collaborators: Array.isArray(r.collaborators) ? r.collaborators.map(str).filter(Boolean) : [],
     due: r.due ? str(r.due) : null, firstDue: r.first_due ? str(r.first_due) : null,
     status: isStatus(r.status) ? r.status : "not_started",
     doneDay: r.done_day ? str(r.done_day) : null,
@@ -133,7 +164,7 @@ export function shape(r: Record<string, any>): Action {
 }
 
 export function isMine(a: Action, who: Who): boolean {
-  return !!who.personKey && (a.ownerKey === who.personKey || a.collaborators.includes(who.personKey));
+  return !!who.personKey && a.ownerKey === who.personKey;
 }
 /* This week: still open and due by Thursday (late included), or finished
    this week. Undated: open with no date — never late, never on This week, so
@@ -168,16 +199,29 @@ export function summary(all: Action[], today: string): Summary {
   };
 }
 
-/* ══ who may do what (spec 054 §6) ════════════════════════════════════
-   Change the title, the notes, the date, the status: the owner, a
-   collaborator, or the client's Super user. Hand it to somebody else, change
-   who else is on it, delete it: the owner or the Super user. Being the
-   creator confers nothing. */
+/* ══ who may do what (spec 054 §6, one rule since §356.11) ════════════
+   Change the title, the notes, the date, the status; hand it to somebody
+   else; delete it: the owner or the client's Super user. Being the creator
+   confers nothing, and with collaborators gone nobody else was ever on it. */
 export function mayChange(a: Action, who: Who): boolean {
   return who.seat === "super" || isMine(a, who);
 }
-export function mayOwn(a: Action, who: Who): boolean {
-  return who.seat === "super" || (!!who.personKey && a.ownerKey === who.personKey);
+
+/* THE SHORT NAME ON A ROW is the register's own first name (§130.7's rule,
+   asked of rules.cjs and never re-spelt), and a clashing pair on one client
+   is lengthened to two words for exactly that pair (§81.1) — two Ahmeds
+   reading as one name would tell them apart from nobody. Still equal at two
+   words, the whole name. Asked once over everybody named on the list, so a
+   former seat's owner is shortened by the same rule as a present one. */
+export function shortNames(people: Person[]): Map<string, string> {
+  const out = new Map<string, string>();
+  const at = (n: number) => people.map((p) => R.nameWords(p.name, n) || p.name);
+  const one = at(1), two = at(2);
+  const dup = (arr: string[], i: number) => arr.some((x, j) => j !== i && x.toLowerCase() === arr[i].toLowerCase());
+  people.forEach((p, i) => {
+    out.set(p.key, !dup(one, i) ? one[i] : !dup(two, i) ? two[i] : p.name);
+  });
+  return out;
 }
 
 /* ══ the rows ═════════════════════════════════════════════════════════ */
@@ -204,7 +248,7 @@ export async function isOfficeRow(c: Q, key: string): Promise<boolean> {
 }
 
 const COLS =
-  "id, title, description, owner_key, collaborators, due::text AS due, first_due::text AS first_due, status, " +
+  "id, title, description, owner_key, due::text AS due, first_due::text AS first_due, status, " +
   "to_char(done_at AT TIME ZONE 'Africa/Cairo', 'YYYY-MM-DD') AS done_day, created_by, created_at, updated_at";
 
 /* Open first, soonest first, no date last; done at the end, latest first. */
@@ -238,7 +282,7 @@ export async function addAction(c: Q, a: { title: string; ownerKey: string; by: 
   return row;
 }
 
-export type Patch = { title?: string; description?: string; due?: string | null; ownerKey?: string; collaborators?: string[] };
+export type Patch = { title?: string; description?: string; due?: string | null; ownerKey?: string };
 /* THE FIRST DUE DATE IS WRITTEN ONCE (spec 054 §5): set the day the action
    first gets a date and never moved by a reschedule, so the carried count
    cannot be reset by giving an action a new date every Sunday. */
@@ -253,7 +297,6 @@ export async function setFields(c: Q, id: string, p: Patch): Promise<Action | nu
     else if (p.due) { args.push(p.due); sets.push("first_due = COALESCE(first_due, $" + args.length + ")"); }
   }
   if (p.ownerKey !== undefined) put("owner_key", p.ownerKey);
-  if (p.collaborators !== undefined) put("collaborators", JSON.stringify(Array.from(new Set(p.collaborators.map(str).filter(Boolean))).sort()));
   if (!sets.length) return oneAction(c, id);
   sets.push("updated_at = now()");
   args.push(id);

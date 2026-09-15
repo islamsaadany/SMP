@@ -9,34 +9,39 @@ tracker/` over `smp-app/lib/tracker.ts`, two tables in `db/schema.sql` and
 migration 012, proved by `smp-app/checks/tracker.mjs` (124/0, red three ways).
 One rule in §4 was corrected while building and says so.
 
-**A second round is drawn and awaiting sign-off (2026-09-15).** Islam, using
-the built tracker: *"The button with my initials should open the list of the
-taem on the project ot assign an owner and it's better to be first name of the
-owner and have a 3 dots on the right to open that expanded view with notes or
-history and keep the action items editable by a double click on the action
-name and no need for the 'with' part for collaborators it's a simple task
-management thing."* Five changes to the row and nothing else, drawn in
-`design-mockups/internal-tracker/2026-09-15_row-first-name-dots-rename.html`
-(published as an artifact, rule 1c): the owner cell is the owner's first name;
-pressing it opens the office team on this client to hand the action on; a ⋯ at
-the row's right end opens the notes and history, and the title stops being a
-link; a double-click on the name renames it in place, so the opened row keeps
-no Title box; and **collaborators go** — no *With*, no second name on a row,
-which narrows decisions 5 and 6's "collaborators" to nothing and §6's
-*collaborator* clause with it. Redrawn the same hour at his word: the team list is **first names only**,
-no heading and no surnames; the ⋯ is an **arrow** that expands the box and
-folds it; the history is **much smaller, in a box that scrolls**; and
-**adding a line is silent** — no page refresh, the line drawn under you the
-moment Enter lands it, the counts updated in place, the box kept for the
-next one. And again: **late is one short word** — *Late*, *Late 1 w*,
-*Late 2 w* — with the date after it, never "carried N weeks"; and **how the
-list is grouped is a choice** on the far right of the views row — Owner (the
-default), Status, Due date, or None — remembered per browser, which loosens
-decision 6 from *by owner and nothing else* to *by owner unless you choose
-otherwise*. **Not built until he says so.** The one cost
-stated on the mockup: two office rows sharing a first name are told apart by
-the register's own two-word rule (§81.1), and a double-click has no hover on a
-tablet.
+**The second round is built (2026-09-15, §356.11–§356.13), on the branch,
+not merged.** Islam, using the built tracker: *"The button with my initials
+should open the list of the taem on the project ot assign an owner and it's
+better to be first name of the owner and have a 3 dots on the right to open
+that expanded view with notes or history and keep the action items editable
+by a double click on the action name and no need for the 'with' part for
+collaborators it's a simple task management thing."* Then, of the drawing:
+first names only in the team list, an **arrow** rather than three dots, the
+history **much smaller, in a box that scrolls**, and **adding a line silent**;
+then *"carried 1 week is long"* — late is **Late · Late 1 w · Late 2 w** with
+the date after — and **the grouping is a choice** on the far right of the
+views row; and the word: *"remvoe collaborators and the rest is ok to build."*
+The mockup is `design-mockups/internal-tracker/2026-09-15_row-first-name-dots-rename.html`,
+published as an artifact and redrawn three times at his word before a source
+moved (rule 1c). What it changes: **one action, one owner** — no *With*, no
+second name on a row, the `collab` act refused, the column dropped by
+migration 013, and §6's two rules now ONE (the owner or the Super user), which
+narrows decisions 5 and 6's "collaborators" to nothing; the owner cell is the
+owner's **first name** (the register's own rule, §130.7, a clashing pair
+lengthened to two words, §81.1), and for the owner and the Super user it opens
+the office on this client to hand the action on; an **arrow** at the row's
+end opens the row in place for its notes, its history and Delete, and folds
+it again — the title stops being a link; a **double-click** on the name
+renames it in place, so the opened row keeps no Title box; the history is
+small type in a box that scrolls; **late is one short word** with the weeks
+riding on it; and **how the list is grouped is a choice** — Owner (the
+default), Status, Due date, None — remembered on the browser as a cookie the
+page reads, which loosens decision 6 from *by owner and nothing else* to *by
+owner unless you choose otherwise*. **And every press is silent (§356.12)**:
+the server answers each one with the list drawn again by the page's own
+renderer and the script swaps it in, so nothing reloads and the browser still
+renders no row of its own. The one cost stated on the mockup and kept: a
+double-click has no hover on a tablet.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -78,8 +83,8 @@ their own weekly alignment about that client. The client's staff never see it.
 | 2 | Who opens it | **The office only, by rule** — whoever holds the client's Super user or SMO team seat. Not a matrix cell: the client's own people have nothing to do in it, and a cell they could tick would be a column nobody should fill (§61). The day a client person needs in is the day the per-module access tab (spec 046 §4.4) is built for it. |
 | 3 | Its join with Notes | **None.** A MOM goes to its attendees by email; the tracker is internal. Nothing flows from one to the other, and the tracker takes no link to a note. Offered as one press per action item and turned down. |
 | 4 | Order of building | **This first, then Notes.** No assistant and no email in it, so it is the smaller piece. |
-| 5 | Who owns an action | **Somebody on the client's register who holds an office seat.** The consultants are already on every client's register as office rows (§338, §339), so the owner is picked from the register like every other name in the product — narrowed to office rows, because the client's people cannot open the list an action lives on. |
-| 6 | Grouping | **By owner, and nothing else.** The client is already the scope; the other system's free "scopes" list is a second thing to maintain for a list that is per client by construction. |
+| 5 | Who owns an action | **Somebody on the client's register who holds an office seat.** The consultants are already on every client's register as office rows (§338, §339), so the owner is picked from the register like every other name in the product — narrowed to office rows, because the client's people cannot open the list an action lives on. **One owner and nobody else** since §356.11 (*"no need for the 'with' part for collaborators"*). |
+| 6 | Grouping | **By owner unless you choose otherwise** (loosened at §356.11 from *by owner, and nothing else*): Owner is how the list opens; Status, Due date or None are a choice on the views row, remembered by the browser and never stored on the client. The other system's free "scopes" list is still not taken — the client is already the scope. |
 | 7 | The word | **Internal Tracker** (Islam, 2026-09-15). Key `tracker`; two words on the switcher, and the second says who it is for, which is the point. *Actions* was proposed and not taken. |
 | 8 | The week | **Sunday to Thursday** (Islam, 2026-09-15). *This week* is the days somebody is at their desk; anything due on a Friday or Saturday reads as the following week's. |
 
@@ -87,13 +92,13 @@ their own weekly alignment about that client. The client's staff never see it.
 
 ## 3 · What it does, in plain words
 
-One list per client, read by the week. An action has a title, an owner, a due
-date, a status, and can name collaborators and carry a description. The week
-runs Sunday to Thursday (decision 8). Anything not done by the
-end of the week is still on next week's list — nothing carries it, it is
-simply still due. Anything past its due date reads **late**, and says how
-many weeks it has been carried. Every status change is kept with who and when,
-and the first entry is who made the action.
+One list per client, read by the week. An action has a title, one owner, a
+due date, a status, and can carry a description. The week runs Sunday to
+Thursday (decision 8). Anything not done by the end of the week is still on
+next week's list — nothing carries it, it is simply still due. Anything past
+its due date reads **Late**, with the weeks it has been carried on the word
+(*Late 1 w*, *Late 2 w*) and the date after it. Every status change is kept
+with who and when, and the first entry is who made the action.
 
 Three statuses and the product's own three words (§300): **Not started ·
 In progress · Done**. Done stamps when; reopening clears it.
@@ -157,7 +162,6 @@ and `lib/schema-check.ts`'s `PLATFORM_TABLES` must **not** gain them (§331).
 | `title` | required; trimmed; the one thing that makes an action |
 | `description` | plain text, optional |
 | `owner_key` | a register key; must hold an office seat at the time it is set |
-| `collaborators jsonb` | register keys, canonically ordered, may be empty |
 | `due date` | optional; NULL is *no date yet* and is never late (§35) |
 | `first_due date` | the first due date ever set; kept while open so a reschedule cannot reset the carried count; cleared on Done |
 | `status` | `not_started` · `in_progress` · `done` |
@@ -169,9 +173,10 @@ and `lib/schema-check.ts`'s `PLATFORM_TABLES` must **not** gain them (§331).
 `action_id`, `from`, `to`, `by_key`, `at`. Appended, never edited; a log a
 save could rewrite is not a log (§42).
 
-**No migration and no schema change beyond the two tables.** Owner and
-collaborators are KEYS and never names: the register renders the name, so a
-rename reaches every action (§48) and somebody retired reads as retired
+**No migration and no schema change beyond the two tables** — and one after
+them: migration 013 drops the `collaborators` column the first build carried
+(§356.11). The owner is a KEY and never a name: the register renders the name,
+so a rename reaches every action (§48) and somebody retired reads as retired
 rather than as a name nobody can find.
 
 ---
@@ -182,10 +187,10 @@ rather than as a name nobody can find.
   else is turned away at the module's own server, not only hidden from the
   switcher — a hidden entry is decoration (§42, §44).
 - **Create:** anybody who can open it, naming any office row as owner.
-- **Change status, date, title, description:** the owner, a collaborator, or
-  the client's Super user.
-- **Reassign the owner, change collaborators, delete:** the owner or the
-  Super user. Being the creator confers nothing.
+- **Change status, date, title, description; hand it to somebody else;
+  delete:** the owner or the client's Super user — ONE rule since §356.11,
+  where the first build kept two (a collaborator could change but not hand
+  on). Being the creator confers nothing.
 - **The rule lives on the server** and the screen asks the same function
   (§42): a control the server refuses is never drawn.
 
@@ -199,10 +204,10 @@ rather than as a name nobody can find.
 | Late computed from the due date; carried-weeks from the first due date | Taken |
 | Status history with who and when, opening with "created" | Taken |
 | Not started · In progress · Done | Taken — the product's own words already |
-| Owner, collaborators, description | Taken; owner and collaborators as register keys, never free text |
+| Owner, collaborators, description | Owner and description taken, the owner a register key and never free text; **collaborators taken and then removed** (§356.11, *"it's a simple task management thing"*) |
 | Views: This week · All · My actions · Undated | Taken; *Mine* rather than *My actions*, one word |
 | Summary strip of four | Taken |
-| Search, owner filter, group by owner | Taken |
+| Search, owner filter, group by owner | Taken; the grouping a choice of four since §356.11 |
 | Free "scopes" list with rename, retire, reorder | **Not taken** (decision 6) |
 | Function/department on an action | **Not taken** — a unit is a place in the Strategy module; if it is wanted here it is one field in `extra` and a decision |
 | Link to a strategy key action | **Not taken** — the two lists are kept apart (spec 046 decision 6's shape); room left in `extra` |
@@ -210,7 +215,7 @@ rather than as a name nobody can find.
 | Force-late / never-late override and a late reason | **Not taken** to start; the reference had the field and no box to type it. Room in `extra` |
 | Stakeholder free-text field | **Not taken** — theirs stored it and no screen showed it |
 | Every member sees every action; any member may own | **Narrowed to the office** (decisions 2, 5) |
-| Their bug: a collaborator cannot save the edit form | Avoided by construction: the server judges the CHANGE, not the whole form |
+| Their bug: a collaborator cannot save the edit form | Avoided by construction: the server judges the CHANGE, not the whole form — and there is no collaborator to be refused any more |
 
 ---
 
@@ -253,4 +258,12 @@ the week stood, and its proposal on the word did not.
   row opened for its notes and history, and an empty client — in the module
   page's own tokens, extended only where a list of actions needs a rule the
   library did not. Its first draft had a form and a detail page; both were
-  taken out the same day at Islam's word (§3).
+  taken out the same day at Islam's word (§3). The second mockup redrew the
+  row's controls (§356.11) and was signed off with one change, no
+  collaborators.
+- A double-click has no hover on a tablet, so a finger is not told the name
+  can be renamed; the expanded row carries no second way in, and Rename beside
+  Delete there is a decision if it is ever wanted.
+- The grouping is remembered per browser (a cookie), so two of the office read
+  one list two ways, and a link somebody sends carries the view and the opened
+  row but not the grouping.

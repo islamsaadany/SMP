@@ -7745,11 +7745,33 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   the reload; Undated is the narrower list INSIDE This week. **`hidden` on a
   span with its own `display` hides nothing** (§298.2 had Chromium's rule as
   `!important`; asked of the page, it is not), so the page declares
-  `[hidden]{display:none!important}`. `checks/tracker.mjs` 124/0, red under
-  three breaks, its §10 pressing the controls in Chromium and reading Postgres
-  back after every press. **Recorded, not done**: the switcher lists it for a
-  client's person (spec 046 §4.4's tab is where that ends); a module is turned
-  ON per client from the card; Notes is next and has no spec.
+  `[hidden]{display:none!important}`. **THE ROW WAS REDRAWN AT ISLAM'S WORD
+  AND BUILT THE SAME DAY (§356.11–§356.13)**: *"no need for the 'with' part
+  for collaborators it's a simple task management thing"* — **one action, one
+  owner**, `mayOwn` DELETED because it had become a second name for
+  `mayChange`'s answer (§53.5), the `collab` act refused, the column dropped by
+  migration 013; the owner a **first name** by the register's own rule
+  (`shortNames()` asks `rules.cjs`'s `nameWords`, a clashing pair lengthened,
+  §130.7, §81.1), pressable ONLY for the owner and the Super user and asserted
+  at both ends (`who-everyone` break); an **arrow** opens and folds the row in
+  place, the title no longer a link, a **double-click** renames on the row so
+  the opened row keeps no Title box; the history 11.5px in a scrolling box,
+  asserted as PAINT; late as `lateWord()` — *Late · Late 1 w · Late 2 w*; and
+  **the grouping a choice** (Owner · Status · Due date · None) on the views
+  row, a COOKIE the page reads, loosening decision 6. **AND EVERY PRESS IS
+  SILENT (§356.12)**: the api answers a write with the list drawn AGAIN by
+  `listBody()` — `trackerDocument()`'s own body — and the script swaps it in;
+  a GET at `/<client>/tracker/list` is the read the arrow and the grouping
+  make; one request at a time in the browser; what a hand is typing survives
+  the swap. `checks/tracker.mjs` **164/0**, red under FIVE breaks, §10 planting
+  `window.__stay` before the first press and reading it after each one because
+  every other assertion passes on a page that reloaded (§113.8) — and four of
+  its own first reds were the check (`fetch(API` spelt as the old script had
+  it, two expectations forgetting §8's second action, a count read through
+  `innerText` and so uppercased, §301.6). **Recorded, not done**: the switcher
+  lists it for a client's person (spec 046 §4.4's tab is where that ends); a
+  module is turned ON per client from the card; a double-tap has no hover on a
+  tablet; Notes is next and has no spec.
 - **A MODULE IS A FOLDER THAT SERVES ITSELF (§354, spec 046):** the third
   module arrived and the route's own comment — *a branch rather than a table
   because there are two of them* — was still there with Insights' eight lines
@@ -9452,7 +9474,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356: the Internal Tracker is built
+*Last Updated: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
+Internal Tracker's row, redrawn at Islam's word and built (spec 054).** Islam,
+using the built tracker: *"The button with my initials should open the list of
+the taem on the project ot assign an owner and it's better to be first name of
+the owner and have a 3 dots on the right to open that expanded view with notes
+or history and keep the action items editable by a double click on the action
+name and no need for the 'with' part for collaborators it's a simple task
+management thing"* &mdash; drawn, redrawn three times at his word (first names
+only; an arrow, not dots; the history small in a scroll box; adding silent;
+*Late 1 w* rather than *carried 1 week*; the grouping a choice on the far
+right of the views row), and signed off: *"remvoe collaborators and the rest
+is ok to build."* **ONE ACTION, ONE OWNER**: `mayOwn` deleted rather than kept
+as a second name for one answer, the `collab` act refused, migration 013
+dropping the column, asserted by the check's exact column list. **THE FIRST
+NAME IS THE REGISTER'S OWN RULE** through `rules.cjs`, never a second one.
+**WHO GETS THE PRESS IS BOTH ENDS** (`who-everyone` 2 red). **SILENT IS ONE
+RENDERER**: every press answered with `listBody()`'s list drawn again and
+swapped in, `window.__stay` planted before the first press because every other
+assertion passes on a page that reloaded (`reload-on-add` 6 red). **VERIFIED**:
+`check:tracker` **164/0** with &sect;10 driven in Chromium, red five ways;
+`modules` 100/0; `generated-in-step` all clear; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. The built page was screenshotted beside
+the mockup at rest, with the team open, renaming, expanded and grouped by
+Status. **The frozen product is untouched**, so `sw.js` is not bumped. **On
+the branch, not merged.***
+
+*Earlier the same day: **&sect;356: the Internal Tracker is built
 (spec 054).** Islam, of the `strategy-management-system` repository: *"the
 tracking tool is for the internal team weekly actions tracking"* &mdash;
 *"they belong to the client"* &mdash; *"1. Internal Tracker 2. a week is

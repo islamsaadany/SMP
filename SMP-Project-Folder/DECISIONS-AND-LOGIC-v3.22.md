@@ -48556,3 +48556,130 @@ thing `next build` stops on. **The frozen product is untouched**: no source in
 - A migration applied on a deployment writes the two tables; the switch that
   turns the module ON for a client is the card's own drawer (§320.5), pressed
   by hand — no client has it until somebody presses it.
+
+### §356.11 — THE ROW REDRAWN AT ISLAM'S WORD: ONE OWNER, A FIRST NAME, AN ARROW, A DOUBLE-CLICK, ONE SHORT WORD, AND A CHOICE (2026-09-15)
+
+Islam, using the built tracker within the hour: *"The button with my
+initials should open the list of the taem on the project ot assign an owner
+and it's better to be first name of the owner and have a 3 dots on the right
+to open that expanded view with notes or history and keep the action items
+editable by a double click on the action name and no need for the 'with'
+part for collaborators it's a simple task management thing."* Drawn before a
+source moved (rule 1c) and redrawn twice at his word — *"for the list of
+names, just make the list with the first names simpler with no title or
+second names"*, *"the 3 dots let's make it an arrow that expand and colppase
+the box and please make the shistory font much smaller in a scroll box"*,
+*"on the creation of te a task as if the whole thing refresh make it silent
+for fast and smooth ceatration of tasks"*, then *"carried 1 week is long we
+can make after late and make it late or late 1 w or late 2 w"* and *"the
+groupingby howner should be an option ... on the far right of the same line
+of the tabs"* — and signed off with one change: *"remvoe collaborators and
+the rest is ok to build."*
+
+**ONE ACTION, ONE OWNER, AND THE RULE COLLAPSES WITH IT.** Spec 054 §6 kept
+two rules — change it (the owner, a collaborator, the Super user) and hand
+it on (the owner, the Super user) — and the only person the two told apart
+was the collaborator. With nobody ever "on" an action there is one rule,
+`mayChange`, and `mayOwn` is DELETED rather than left as a second name for
+the same answer (§24, §53.5): two functions answering one question are
+§94's drift the day somebody widens one. The `collab` act is refused as *not
+something this list does* (a tab on the build before may still send one, and
+it writes nothing), `isMine` is ownership alone, and **migration 013 drops
+the column** — a column the platform no longer reads is worse than no column
+(§53.4). `checks/tracker.mjs` §9 asserts the exact column list, so the drop
+is measured rather than claimed.
+
+**THE OWNER IS A FIRST NAME, BY THE REGISTER'S OWN RULE.** `shortNames()`
+asks `rules.cjs`'s `nameWords` for one name — a particle is not a name, so
+*Abd El Moniem* is one word of somebody's name and not three (§130.7) — and
+a clashing pair on one client is lengthened to two words for exactly that
+pair (§81.1), the whole name if still equal. Asked once over everybody named
+on the list, seat or no seat, so a former owner's row is shortened by the
+same rule as a present one. **Who gets the press is both ends** (§61,
+§94.2): the name is a `role="button"` for the owner and the Super user, who
+are the two who may hand an action on, and plain text for everybody else —
+with the tick off and the name not renameable on that same row, so a build
+that drew the press for everybody (the check's `who-everyone` break) goes red
+on the plain-text half and not only on the pressable one. The office rides
+in the cell hidden, first names only, the present owner marked, and every
+option is a register KEY the server checks again (§42).
+
+**THE ARROW OPENS THE ROW AND FOLDS IT; THE TITLE STOPS BEING A LINK.** The
+opened row is the notes, Delete behind its question, and the history — no
+Title box, because the name is renamed ON THE ROW by a double-click (Enter or
+leaving the box renames, Escape puts it back, a single click does nothing so
+a row can still be read without a box opening under the pointer), and no
+owner control, because the name on the row is it. The history is 11.5px in a
+118px box that scrolls, with the track shown (§158), asserted as PAINT off
+`getComputedStyle` rather than off a class. The opened row still rides on
+the address (`?open=`) through `history.replaceState`, so a link somebody
+sends opens the same row, and nothing reloads to open or fold it.
+
+**LATE IS ONE SHORT WORD.** `lateWord(n)` — *Late*, *Late 1 w*, *Late 2 w*
+— and the date after it, never *carried N weeks*; the arithmetic underneath
+(§356.4, the first date written once) is untouched.
+
+**HOW THE LIST IS GROUPED IS A CHOICE, WHICH LOOSENS DECISION 6.** Owner is
+how it opens; Status groups into the three words in their own order; Due date
+groups by the day, soonest first and *No date* last; None is one flat list in
+the order the rows already have. A group is made from the rows it holds, so a
+heading never stands over nothing. The choice is a COOKIE the page reads
+(`smp.tracker.group`, path the tracker's own), so the next visit opens
+grouped the way this browser last chose — a preference, never the client's
+data (§25, §47.1) — and a cookie naming no real grouping falls back to
+Owner. Asserted at both ends: a page served with the cookie opens grouped by
+it, and a link carries the view and the opened row but not the grouping.
+
+### §356.12 — SILENT: EVERY PRESS IS ANSWERED WITH THE LIST DRAWN AGAIN
+
+*"make it silent for fast and smooth ceatration of tasks."* The first build
+reloaded the page after every press, which is the honest way to hold no copy
+of the list in the browser (§356.5) and the wrong way to add a line — the
+whole page blinked and the cursor was lost. **What keeps silence honest is
+that the browser still renders no row of its own** (§53.5): the api answers
+every write with `{ok, body, count, open}`, the `body` being the list, the
+strip and the count drawn AGAIN by `listBody()` — the same function
+`trackerDocument()` wraps — inside the same tenant read, and the script
+swaps it into `#body`. A read of its own for the arrow and the grouping is a
+GET at `/<client>/tracker/list` (the api's 405 already says a GET there is
+not a write), through the same function. **One request at a time** in the
+browser (§240's shape): a notes box left and a tick pressed in the same
+second post in that order, so the second answer already holds the first
+change. **What a hand is typing survives a swap** (§35, §71.2): the add box
+and the search box are read before the redraw and put back after it, focus
+included — a tick pressed with half a line typed must not throw the line
+away, and the check types one and presses one. **A refusal swaps nothing**:
+the reason is said in the red bar, and what was typed stays in the box.
+
+**THE MARK IS WHAT MAKES "SILENT" AN ASSERTION** (§113.8): every other
+assertion in §10 — the row on the page, the line empty and focused, the
+count moved — passes perfectly on a page that reloaded, so the check plants
+`window.__stay = 1` before the first press and reads it after each one; the
+check's `reload-on-add` break puts one `location.reload()` back and goes 6
+red, all six the presses after it.
+
+### §356.13 — WHAT WAS RUN, AND FOUR OF THE CHECK'S OWN FIRST REDS WERE THE CHECK
+
+`checks/tracker.mjs` **164/0** on a throwaway Postgres 16 with §10 driven in
+Chromium — the add, the tick, the status, the date box, a last-week date
+reading *Late 1 w · <day>*, the double-click rename and its Escape, the arrow
+open and fold, the notes saved on leaving, the history's paint, the grouping
+changed in place and read back off the cookie on the next visit, the team
+opened and closed by a click elsewhere, an action handed to Islam and the
+old owner's controls gone, Delete's question — with the database read back
+after every press and the mark read after every one. **RED FIVE WAYS**:
+`no-office-gate` 3, `reset-carried` 3, `owner-anyone` 4, `who-everyone` 2,
+`reload-on-add` 6, each reddening its own assertions and no other.
+`check:modules` 100/0; `generated-in-step` all clear; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. **Its own first run was red four times
+and every one was the check**: the script assertion spelt `fetch(API` where
+the one script now has one `fetch(url` for both addresses; two expectations
+had forgotten the second action §8 adds under Islam (the Owner heading, the
+*No date* group); and the count was read with `innerText`, which is
+uppercased by CSS (§301.6, again). The built page was screenshotted beside
+the mockup at rest, with the team open, renaming, expanded and grouped by
+Status, and matches it frame for frame. The frozen product is untouched, so
+`sw.js` is not bumped. **Recorded, not done**: a double-tap on a tablet has
+no hover to say the name can be renamed (Rename beside Delete is a decision
+if wanted); the switcher still lists the tracker for a client's own person
+(spec 046 §4.4); Notes is next and has no spec.

@@ -54,7 +54,37 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§356 — the Internal Tracker is built (spec 054).**
+**Latest version:** **§356.11–§356.13 — the Internal Tracker's row, redrawn at your word and built (spec 054).**
+
+**It is built and it is on the branch, not on `main`.** Everything on the
+drawing you signed off is in: the owner is a **first name**, and pressing it
+opens the team on this client to hand the action on (only the owner and the
+Super user get the press, everybody else reads the name); the **arrow** at the
+end of a row opens it for its notes, its history and Delete, and folds it again;
+a **double-click on the name** renames it in place, Enter keeps it and Escape
+puts it back; the history is small type in a box that scrolls; late reads
+**Late**, **Late 1 w**, **Late 2 w** with the date after; and **Group by** sits
+on the far right of the views row — Owner, Status, Due date or None — and your
+browser remembers the last one you chose. **Collaborators are gone** as you
+said: no *With*, no second name on a row, the column dropped, and one rule for
+who may change an action — its owner or the client's Super user.
+
+**And adding is silent.** Enter puts the line under you at once, the counts
+move, the box is empty and still under the cursor; nothing reloads. Every other
+press on a row works the same way. If the server refuses, the reason is in the
+red bar and what you typed is still in the box.
+
+**Checked:** 164 assertions on a real database, the last thirty pressed in a
+real browser and read back from the database after every press, with a mark
+planted on the page to prove nothing reloaded; red under five deliberate
+breaks; the modules check green; the frozen product untouched.
+
+**Still yours:** the merge; the module still has to be turned on per client
+from the client's card. Notes (meeting minutes) is next and has no spec yet.
+
+---
+
+### Earlier the same day: **§356 — the Internal Tracker is built (spec 054).**
 
 **It is done and it is on the branch, not on `main`.** The Internal Tracker is
 a module a client can be given, like Insights: the office opens it from the

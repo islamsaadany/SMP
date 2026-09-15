@@ -5842,6 +5842,59 @@ var ACCESS_DEFAULTS = SMPRules.ACCESS_DEFAULTS;
 var STATE_RANK = SMPRules.STATE_RANK;
 function grantFor(roleKey, areaKey){ return SMPRules.grantFor(world(), roleKey, areaKey); }
 
+/* ── A MODULE'S OWN GRANT (§356.5, spec 054 §4.4; spec 046 §4.4) ─────
+   A module other than Strategy declares its areas beside its label
+   (smp-app/lib/modules.ts MODULE_DEF) and NOT in lib/rules.js — the carried
+   rules copy is asserted identical to the frozen one (§335), and a module's
+   area in the frozen Strategy product is where it does not belong. So the
+   stored map holds a key the shipped AREAS list does not name, the store is
+   blind to which keys it carries (state-io writes and reads whatever the map
+   holds — measured, never assumed, §172), and the DEFAULT for an absent key
+   is the module's own shipped state rather than ACCESS_DEFAULTS', which
+   has never heard of the key and would answer "none" for a module that ships
+   open (§30.2: absent means not answered yet, never denied).
+
+   ONE READER FOR THE SCREEN AND THE ROUTE. The Access page draws this cell
+   from it, and the served route's gate (smp-app/lib/access.ts, through
+   frozen.cjs) asks this same function of the same graph — a second copy of
+   "absent means shipped" is how the page and the door would come to
+   disagree about who may open a module (§42, §53.5). `area` is the module's
+   declaration, { key, shipped }. */
+function moduleGrantFor(roleKey, area){
+  var row = ACCESS && ACCESS[roleKey];
+  if (row && Object.prototype.hasOwnProperty.call(row, area.key)) return row[area.key] || "none";
+  return area.shipped || "none";
+}
+/* THE DEFAULT IS AN ABSENCE (§50.6): setting a cell back to the module's
+   shipped state DELETES the key, so a role never touched and a role set
+   and set back are the same bytes — and a row left holding nothing goes
+   too, or the map carries an empty object for a role nobody answered. */
+function setModuleGrant(roleKey, areaKey, state, shipped){
+  var row = (ACCESS[roleKey] = ACCESS[roleKey] || {});
+  if (!state || state === shipped) delete row[areaKey]; else row[areaKey] = state;
+  if (!Object.keys(row).length) delete ACCESS[roleKey];
+}
+/* MAY THIS PERSON OPEN A MODULE — the most generous answer across the roles
+   they hold, the floor included (rolesOrFloor's own shape, §93: somebody on
+   the register holding nothing is judged on the Everyone-else row). Asked by
+   the served route before a module is drawn (spec 054 research R3); the seat
+   is decided before this is asked and never here. */
+function mayOpenModuleArea(person, area){
+  if (!person) return (area.shipped || "none") !== "none";
+  var rs = personRoles(person);
+  if (!rs.length) {
+    var at = person.fn ? "fn:" + person.fn : person.company ? "co:" + person.company : person.unit;
+    rs = at ? [{ role: SMPRules.NO_ROLE, at: at }] : [];
+  }
+  if (!rs.length) return (area.shipped || "none") !== "none";
+  var best = "none";
+  rs.forEach(function(r){
+    var g = moduleGrantFor(r.role, area);
+    if (STATE_RANK[g] > STATE_RANK[best]) best = g;
+  });
+  return best !== "none";
+}
+
 /* ── OWN, and how it is decided ─────────────────────────────────────
    Islam: *"own is always about what they have a role in … I see this as a
    logic thing not a settings thing."*

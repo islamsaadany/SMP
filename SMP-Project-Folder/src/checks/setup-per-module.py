@@ -42,7 +42,8 @@ WHAT THIS FILE OWNS, and why each half is here:
 Run: SMP_CHROME=... python3 qa-run.py checks/setup-per-module.py
      SMP_BASE=http://localhost:3000 SMP_QA_PASSWORD=... to add the served half
 """
-import os, pathlib, sys
+import os
+import re, pathlib, sys
 from playwright.sync_api import sync_playwright
 
 URL = "file://" + str(pathlib.Path(os.environ.get("SMP_BUILT") or pathlib.Path(
@@ -126,8 +127,14 @@ with sync_playwright() as p:
     print("\n── 1 · every def knows its module ──")
     mods = ev(pg, "()=>setupDefsAll().map(d=>[d.k, d.mod||null])", [])
     ck("every Setup def carries `mod`", mods and all(m for _, m in mods), [k for k, m in mods if not m])
+    # REWRITTEN, NEVER LOOSENED (§218, §214.3): this held the set {client,
+    # strategy} as a literal, and §356.5 legitimately made Insights a third
+    # value. What survives a module being added is the SHAPE — `client` or a
+    # lowercase module word — and that the default module owns pages at all;
+    # which module words the served app declares is the served half's to ask.
+    vals = sorted(set(m for _, m in mods))
     ck("the values are a module word or `client` and nothing else",
-       mods and all(m in ("client", "strategy") for _, m in mods), sorted(set(m for _, m in mods)))
+       mods and all(m == "client" or re.match(r"^[a-z]+$", m or "") for _, m in mods) and "client" in vals and "strategy" in vals, vals)
     ck("Roles & access is Strategy's (spec 054 §4.4) and in the Access group",
        ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='access');return d && d.mod==='strategy' && d.grp==='access';}", False))
     ck("the knowledge base is the client's (spec 054 §2, the sixth door) and in the Help group",
@@ -286,6 +293,22 @@ with sync_playwright() as p:
     ck("a fold stored before this change still folds the same group",
        ev(pg, "()=>{const g=document.querySelector('.rgroup[data-railgrp=\"look\"]');return !!g && g.classList.contains('shut');}", False))
     ev(pg, "()=>localStorage.removeItem('smp.setup.groups')")
+
+    print("\n── 7c · Insights' own two pages exist in the list and are drawn on no other document (§356.5) ──")
+    # A module's Setup defs share Strategy's KEYS (`access`, `landing`) and
+    # are told apart by `mod`; they are drawn only on the module's own
+    # document (`when`), so the offline copy — which has no module at all —
+    # draws ONE Roles & access and ONE Landing line. Both ends (§94.2): the
+    # defs are IN the list, and the rail holds each key once.
+    ins = ev(pg, "()=>setupDefsAll().filter(d=>d.mod==='insights').map(d=>d.k)", [])
+    ck("Insights declares exactly two Setup pages, Access and Landing line", ins == ["access", "landing"], ins)
+    ck("...both gated on the document being Insights' own (when), so they are unreachable here",
+       ev(pg, "()=>setupDefsAll().filter(d=>d.mod==='insights').every(d=>typeof d.when==='function' && !d.when())", False))
+    dup = ev(pg, "()=>{const ks=setupDefs().filter(d=>!d.when||d.when()).map(d=>d.k);return ks.filter((k,i)=>ks.indexOf(k)!==i);}", ["?"])
+    ck("...and the rail this document draws holds each key ONCE", dup == [], dup)
+    # its Access page, drawn offline by hand, says the served platform sets it
+    ck("its Access page offline says the served platform sets it, and draws no cell",
+       ev(pg, "()=>{const h=renderModuleAccess();return h.indexOf('mnone')>-1 && h.indexOf('data-mac')<0;}", False))
 
     if BASE:
         print("\n── 8 · SERVED: two rails, two addresses ──")

@@ -5,6 +5,7 @@ import { resolveTenant, tenantByKey } from "../../../lib/door.ts";
 import { landingFor, landingShape } from "../../../lib/landing.ts";
 import { landingFactsFor, viewerFor } from "../../../lib/landing-facts.ts";
 import { modulesFor } from "../../../lib/modules.ts";
+import { openableModules } from "../../../lib/access.ts";
 import { currentUser, SLUG } from "../../../lib/session.ts";
 import Welcome from "./Welcome.tsx";
 
@@ -37,6 +38,9 @@ export default async function Page({ params }: P) {
   /* the Client setup block and Your modules read the seat THE DOOR resolved
      and the client's own module list (spec 054 §4.1) — never the graph */
   const lines = await landingFactsFor(ans.tenant.id, modulesFor(ans.tenant.modules), await viewerFor(ans.tenant.id, ans.seat, ans.personKey));
-  const shape = landingShape(slug, ans.seat, ans.tenant.modules, lines);
+  /* and Your modules lists only what this person may OPEN (§356.5) — the
+     gate in front of a module's address, read from the same function */
+  const open = await openableModules(ans.tenant.id, ans.seat, ans.personKey, ans.tenant.modules);
+  const shape = landingShape(slug, ans.seat, ans.tenant.modules, lines, open);
   return <Welcome slug={slug} tenant={ans.tenant} user={user} data={data} shape={shape} />;
 }

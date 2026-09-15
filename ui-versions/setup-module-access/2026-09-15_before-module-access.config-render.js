@@ -92,20 +92,13 @@ var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
     'stroke-linecap="round" stroke-dasharray="2 3"/></svg>';
 
 /* ── Roles & access ─────────────────────────────────────────────────── */
-function stateCell(roleKey, areaKey, editable, disabled, opt){
+function stateCell(roleKey, areaKey, editable, disabled){
   /* grantFor(), never ACCESS[role][area]. A tenant carried across from an
      earlier version has an EMPTY access map by design — the rows were rebuilt
      rather than migrated (§33, §37) — so a direct read was undefined[key] and
      the whole page threw. The cell shows what the platform would actually
      answer, which is the shipped default until somebody changes it. */
-  /* §356.5: A MODULE'S CELL IS THE SAME CELL WITH ITS OWN READER. `opt`
-     carries what a module's area declares — its current value (read through
-     moduleGrantFor, whose default is the module's shipped state and never
-     ACCESS_DEFAULTS'), the states it admits, and the attribute the press
-     writes through (`data-mac`, whose handler deletes the key on the default,
-     §50.6). Absent, the cell is Strategy's exactly as it was. */
-  opt = opt || {};
-  var v = opt.value != null ? opt.value : grantFor(roleKey, areaKey);
+  var v = grantFor(roleKey, areaKey);
   /* A cell that cannot come up is drawn as a dash rather than as "none". The
      group CEO owns every unit, so "other business units" is an empty set for
      them: saying "none" there would read as a denial of something, when there
@@ -127,8 +120,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      view and edit. Only those two cells: everywhere else the state would
      grant nothing (`mayFillPage` answers only for the strategy pages), and
      a toggle that does nothing is decoration (§42). */
-  var states = opt.states ? opt.states
-    : (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
+  var states = (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
     ? ["view", "fill", "edit"] : ["view", "edit"];
   var WORD = { view: "May read",
                fill: "May fill what’s empty — Missing values only, and they count straight away",
@@ -143,9 +135,8 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
        button's own rules; it was wearing somebody else's. §56.7 in CSS instead
        of JS: a one-word modifier will eventually collide with a one-word
        component, and the collision is silent because both rules are valid. */
-    return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" ' +
-      (opt.attr || "data-ac") + '="' + roleKey + '|' + areaKey + '|' + (on ? "none" : o) +
-      (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
+    return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" data-ac="' +
+      roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
       (on ? "Turn off — leaves no access" : WORD[o]) +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
       ICON[o] + '</button>';
@@ -155,90 +146,6 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      which is the one thing it must never be mistaken for. */
   return '<td class="ac"><span class="stset' + (v === "none" ? " off" : "") + '">' +
     opts + '</span></td>';
-}
-
-/* THE ROWS EVERY ACCESS TABLE WALKS, NAMED ONCE (§356.5): Strategy's matrix
-   and a module's one-column table are two tables over ONE list of roles, so
-   the list — and the floor row that is not a role (§93) — is built here and
-   asked by both, or the day a role is added the two disagree about who is on
-   the register (§53.5). */
-function matrixRows(){
-  return ROLES.concat([{
-    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
-    note: "Not a role — what somebody on the register who holds no role may " +
-          "open. Most of the register, on a tenant of any size." }]);
-}
-function roleCell(r){
-  var n = r.floor
-    ? PEOPLE.filter(function(p){
-        return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
-    : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
-  /* Two lines, never more. The role's description is a sentence, and a
-     sentence in a 19% column wraps to eight lines and makes every row of a
-     49-cell table a hundred pixels tall — the exact fault this page was
-     rebuilt to remove. It is on hover instead. */
-  return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
-    '<span class="why">' +
-    (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
-    '</span></td>';
-}
-
-/* ── A MODULE'S OWN ACCESS TABLE (§356.5, spec 054 §4.4, spec 046 §4.4) ──
-   The first thing that READS a module's declared areas other than a check,
-   which is what the declaration was written for (spec 053 §4.5). The
-   client's roles down — matrixRows(), the matrix's own list — and the
-   module's areas across, each cell the states that area admits and no
-   others: Insights declares view | none, so the cell is ONE toggle, and an
-   `edit` here would be a grant with nothing behind it (§94.15).
-
-   THE DECLARATION ARRIVES ON THE DOCUMENT (`data-areas`, written by
-   lib/shell.ts onto a module's Setup document from MODULE_DEF and nowhere
-   else), because the frozen shell cannot import a module's declaration and
-   the frozen product must not carry a copy of it (§335). Over file:// there
-   is no module and no stamp, and the page says so rather than drawing a
-   table that writes to nothing (§45.2, §61).
-
-   THE WRITE IS THE MATRIX'S OWN: a cell lands in ACCESS under the module's
-   key, travels in the ordinary save, and is classified `access` by the
-   authoriser — the Super user's alone (§89), which is why the SMO team is
-   shown the table and given no button (mayEditAccess, the same line
-   Strategy's matrix asks). No new save path, no new rule (research R3). */
-function moduleAreas(){
-  var raw = document.documentElement.getAttribute("data-areas");
-  if (!raw) return null;
-  try {
-    var a = JSON.parse(raw);
-    return (Array.isArray(a) && a.length) ? a : null;
-  } catch (e) { return null; }
-}
-function renderModuleAccess(){
-  var areas = moduleAreas();
-  var label = document.documentElement.getAttribute("data-module-label") || "this module";
-  var head = cfgHead("Roles & access", [], null, false, null);
-  if (!areas) {
-    return head + '<div class="cfg"><p class="why mnone">Who may open a module is set on the ' +
-      'served platform, which knows what each module can be opened for. Nothing is set from this copy.</p></div>';
-  }
-  var editable = grant("c_access") === "edit" && mayEditAccess();
-  var th = '<tr><th style="width:17%">Role</th>' + areas.map(function(a){
-    return '<th class="ac" title="' + esc((a.label || a.key) + " \u2014 " + (a.note || "")) + '">' +
-      esc(a.label || a.key) + '</th>';
-  }).join("") + '</tr>';
-  var body = matrixRows().map(function(r){
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + roleCell(r) +
-      areas.map(function(a){
-        return stateCell(r.key, a.key, editable, null, {
-          value: moduleGrantFor(r.key, a),
-          states: (a.states || ["view"]).filter(function(x){ return x !== "none"; }),
-          attr: "data-mac", shipped: a.shipped || "none" });
-      }).join("") + '</tr>';
-  }).join("");
-  return head + '<div class="cfg acgrid macgrid" data-macmod="' + esc(landingModule()) + '"><table><thead>' + th +
-    '</thead><tbody>' + body + '</tbody></table></div>' +
-    '<div class="chart-legend" style="margin-top:12px">' +
-      '<span><i class="st st-view">' + ICON_EYE + '</i> may open ' + esc(label) + '</span>' +
-      '<span><i class="st st-none">neither</i> cannot open it \u2014 no row on the landing, no address</span>' +
-    '</div>';
 }
 
 /* ── Roles &amp; access (§37) ─────────────────────────────────────────
@@ -368,10 +275,25 @@ function renderAccess(){
      It has to stay editable. A client who wants people with no role to see
      nothing sets this row to none and can see that they have; a floor nobody
      can reach is a rule hiding as a default. */
-  var MATRIX_ROWS = matrixRows();
+  var MATRIX_ROWS = ROLES.concat([{
+    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
+    note: "Not a role — what somebody on the register who holds no role may " +
+          "open. Most of the register, on a tenant of any size." }]);
 
   var body = MATRIX_ROWS.map(function(r){
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + roleCell(r) +
+    var n = r.floor
+      ? PEOPLE.filter(function(p){
+          return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
+      : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+    /* Two lines, never more. The role's description is a sentence, and a
+       sentence in a 19% column wraps to eight lines and makes every row of a
+       49-cell table a hundred pixels tall — the exact fault this page was
+       rebuilt to remove. It is on hover instead. */
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' +
+      '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
+        '<span class="why">' +
+        (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
+        '</span></td>' +
       AREAS.map(function(a){
         return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
       }).join("") + '</tr>';

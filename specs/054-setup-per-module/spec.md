@@ -202,6 +202,16 @@ none, by construction.
   the module's own table. **`a_cycle` moves into Strategy's table** in name
   only — it is already only ever Strategy's.
 
+> **Built 2026-09-15 (§356.5)** as decided, with two things said out loud:
+> the eye is drawn on every row `matrixRows()` draws, the Super user's and
+> the SMO team's included, so a client's own Super user who shut their own row
+> is judged by the table while an office login holding the seat is not (the
+> seat opens everything, spec 046 §4.10) — whether the office's rows should be
+> read-only by rule there is a decision not taken here; and `a_setup` and
+> `a_cycle` are not renamed or moved in `lib/rules.js` — nothing there moves
+> for this, as the first bullet says, and the split is expressed by which
+> RAIL the pages sit on.
+
 ### 4.5 The landing line
 
 Each module **declares the sentences it can say about itself**, beside its

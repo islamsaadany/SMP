@@ -30,7 +30,8 @@ function esc(s: string): string { return String(s).replace(/&/g, "&amp;").replac
    (`setup` and `tour` are its own vocabulary in shell/route.js, not a list
    copied from here). */
 export function shellDocument(tenantName: string, module: string | null = null, modules: readonly { key: string; label: string; note: string }[] = [],
-                              landing: { module: string; pick: string; lines: { key: string; label: string; example: string; text: string }[] } | null = null): string {
+                              landing: { module: string; pick: string; lines: { key: string; label: string; example: string; text: string }[] } | null = null,
+                              areas: readonly { key: string; label: string; note: string; states: string[]; shipped: string }[] | null = null): string {
   /* THE CHECK'S BREAKS (constitution XVI, checks/shell.mjs): `no-route`
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
@@ -61,7 +62,13 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        document only, where the page that draws it lives (lib/landing.ts
        landingStampFor). Absent everywhere else, and over file://, where the
        page says the served platform is where the line is set. */
-    (landing && brk !== "no-landing-stamp" ? " data-landing='" + esc(JSON.stringify(landing)) + "'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
+    (landing && brk !== "no-landing-stamp" ? " data-landing='" + esc(JSON.stringify(landing)) + "'" : "") +
+    /* THE MODULE'S DECLARED AREAS (§356.5, spec 054 §4.4): what its Access
+       page has columns for, on the Setup document alone and only for a
+       module that declares any — MODULE_DEF's own list, never a copy
+       (renderModuleAccess in the frozen config-render.js reads it). Absent,
+       the page says the served platform sets it. */
+    (areas && areas.length && brk !== "no-areas-stamp" ? " data-areas='" + esc(JSON.stringify(areas)) + "'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(tenantName) + " — Strategy Management Platform</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">\n' +

@@ -28,7 +28,8 @@
      SMP_BREAK=any-module    node checks/modules.mjs   # must go red
      SMP_BREAK=open-address  node checks/modules.mjs   # must go red
      SMP_BREAK=static-hello  node checks/modules.mjs   # must go red
-     SMP_BREAK=switch-always node checks/modules.mjs   # must go red            */
+     SMP_BREAK=switch-always node checks/modules.mjs   # must go red
+     SMP_BREAK=gate-open     node checks/modules.mjs   # must go red (§4c)      */
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { chromium } from "playwright-core";
@@ -39,6 +40,8 @@ import { trialDocument, registerLine } from "../modules/trial/page.ts";
 import { SERVERS, serverFor } from "../modules/registry.ts";
 import { insightsDocument } from "../modules/insights/page.ts";
 import { barFrom, BAR_DEFAULT } from "../lib/branding.ts";
+import { decideOpen, openingArea } from "../lib/access.ts";
+import { landingShape } from "../lib/landing.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const APP = join(here, "..");
@@ -327,6 +330,64 @@ check("…and a module with no pick carries its default line",
 check("…and an unreadable client says nothing under every module",
   moduleRows(modulesFor(BUILT_EXTRA), { unreadable: true, landing: null }, { strategy: "waiting" }).every((r) => r.line === ""));
 check("a client without the trial gets one row", moduleRows(modulesFor([]), facts).length === 1);
+
+
+/* ── 4c · WHO MAY OPEN A MODULE (§356.5, spec 054 §4.4, research R3) ──────
+   The gate in front of a module's address, driven as the PURE decision it
+   is (decideOpen — the route's mayOpenModule is that with the graph read
+   under the tenant) against the worked example's own graph, with NO
+   database: the seed is what a fresh client holds. BOTH ENDS of every rule
+   (§94.2): a role shut is refused AND the same role opened again is served,
+   the seat is served over a shut role, a module declaring no area is never
+   gated, and the landing's list drops a shut module's row while keeping the
+   rest — or a gate that opened for everybody (`gate-open`) passes the
+   presence half of all of it. */
+console.log("\n4c · who may open a module (§356.5)");
+{
+  const seed = JSON.parse(read("db/seed-state.json"));
+  const graphWith = (mutate) => { const g = JSON.parse(JSON.stringify(seed)); mutate(g); return g; };
+  const UK = Object.keys(seed.units)[0];
+  const head = seed.unitRoles[UK].head, cust = seed.unitRoles[UK].custodian;
+  const area = openingArea("insights");
+  check("Insights is opened by its first declared area, whose shipped state is view",
+    !!area && area.key === "a_insights" && area.shipped === "view", JSON.stringify(area));
+  check("a module declaring no area is opened by nobody's grant (Strategy, the trial)",
+    openingArea("strategy") === null && openingArea("trial") === null);
+  /* absent = shipped, never none (§30.2) */
+  check("with nothing stored a unit head opens Insights — absent is the shipped state, not a refusal",
+    decideOpen("none", "insights", seed, head) === true);
+  const shutOwner = graphWith((g) => { g.access.owner.a_insights = "none"; });
+  check("…and with the owner row shut, the same person is REFUSED by the decision the route asks",
+    decideOpen("none", "insights", shutOwner, head) === false);
+  check("…while the custodian beside them, whose row is untouched, still opens it (the grant is per role)",
+    decideOpen("none", "insights", shutOwner, cust) === true);
+  const openOwner = graphWith((g) => { g.access.owner.a_insights = "view"; });
+  check("…and a stored view opens it", decideOpen("none", "insights", openOwner, head) === true);
+  check("THE SEAT OPENS EVERYTHING: the Super user and the SMO team are served over a shut row (spec 046 §4.10)",
+    decideOpen("super", "insights", shutOwner, head) === true && decideOpen("smoteam", "insights", shutOwner, head) === true);
+  check("a module with no area is never gated, whatever the map says",
+    decideOpen("none", "strategy", shutOwner, head) === true && decideOpen("none", "trial", shutOwner, head) === true);
+  /* the floor: somebody on the register holding no role is judged on the
+     Everyone-else row (§93) */
+  const floor = graphWith((g) => { g.people.push({ key: "nobody_x", name: "Nobody Here", unit: UK, email: "" }); g.access.employee.a_insights = "none"; });
+  check("a person holding no role is judged on the Everyone-else row — shut there, refused", decideOpen("none", "insights", floor, "nobody_x") === false);
+  const floorOpen = graphWith((g) => { g.people.push({ key: "nobody_x", name: "Nobody Here", unit: UK, email: "" }); });
+  check("…and open there by default", decideOpen("none", "insights", floorOpen, "nobody_x") === true);
+  check("a person the register does not hold is judged as holding nothing — the shipped state",
+    decideOpen("none", "insights", seed, "no-such-key") === true && decideOpen("none", "insights", null, head) === true);
+  /* STRATEGY'S MATRIX IS BYTE-IDENTICAL EITHER SIDE OF A MODULE'S GRANT */
+  const strip = (g) => JSON.stringify(Object.fromEntries(Object.entries(g.access).map(([r, row]) => [r, Object.fromEntries(Object.entries(row).filter(([k]) => k !== "a_insights"))])));
+  check("a module's grant touches no cell of Strategy's matrix", strip(shutOwner) === strip(seed) && strip(openOwner) === strip(seed));
+  /* THE LANDING'S LIST READS THE SAME ANSWER */
+  const all = landingShape("raya-trade", "none", ["insights"]).modules.map((m) => m.key);
+  const narrowed = landingShape("raya-trade", "none", ["insights"], undefined, ["strategy"]).modules.map((m) => m.key);
+  check("the landing lists every module the client has when nothing is shut", all.join(",") === "strategy,insights", all.join(","));
+  check("…and drops a shut module's row, keeping the rest (spec 054 §6.4)", narrowed.join(",") === "strategy", narrowed.join(","));
+  /* THE ROUTE ASKS BEFORE THE TABLE, read off the source (§6's method) */
+  const routeSrc = read("smp-app/app/(platform)/[slug]/[...rest]/route.ts");
+  check("the route asks the gate BEFORE serverFor and before the Setup document (research R3)",
+    routeSrc.indexOf("mayOpenModule(") > -1 && routeSrc.indexOf("mayOpenModule(") < routeSrc.indexOf('w.rest[0] === "setup"') && routeSrc.indexOf("mayOpenModule(") < routeSrc.indexOf("serverFor(key)"));
+}
 
 console.log("\n5 · the trial module's page");
 /* NO DATABASE ON PURPOSE. The tenant cannot be reached, which proves the two

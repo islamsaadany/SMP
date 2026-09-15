@@ -4,6 +4,8 @@ import { requestUser, SLUG } from "../../../../lib/session.ts";
 import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { serverFor } from "../../../../modules/registry.ts";
 import { landingStampFor } from "../../../../lib/landing.ts";
+import { mayOpenModule, openableModules } from "../../../../lib/access.ts";
+import { MODULE_DEF } from "../../../../lib/modules.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 
 export const dynamic = "force-dynamic";
@@ -67,11 +69,22 @@ export async function GET(req: Request, { params }: P) {
      spine with the rest of Setup, and the module brings only its defs.
      `tour` stays the default module's, being where the intro round is drawn. */
   const key = w.module || DEFAULT_MODULE;
+  /* WHO MAY OPEN THE MODULE (§356.5, spec 054 §4.4, research R3): asked of
+     the spine BEFORE anything of the module is drawn — its Setup included —
+     and a refusal is the redirect an unknown module word gets above, so a
+     shut module and an absent one answer identically (§320.5). Only an
+     address that LED with a module word is gated: the spine's own pages are
+     the client's. The switcher and the landing read the same answer
+     (openableModules), so a module shut by its address is shut on its row. */
+  if (w.module && !(await mayOpenModule(ans.tenant.id, ans.seat, ans.personKey, w.module)))
+    return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
+  const open = await openableModules(ans.tenant.id, ans.seat, ans.personKey, ans.tenant.modules);
   if (w.rest[0] === "setup") {
     /* the module's Landing line page reads its declaration off the document
-       (§356.4) — computed here, on the Setup document alone */
+       (§356.4) — computed here, on the Setup document alone — and its Access
+       page the module's declared areas (§356.5), the same way */
     const landing = await landingStampFor(ans.tenant.id, key, ans.seat, ans.personKey, ans.tenant.modules);
-    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(have), landing), { status: 200, headers: shellHeaders() });
+    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas), { status: 200, headers: shellHeaders() });
   }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });
@@ -79,5 +92,5 @@ export async function GET(req: Request, { params }: P) {
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
   return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
-    have, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
+    have: open, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
 }

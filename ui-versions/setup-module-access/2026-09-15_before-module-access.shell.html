@@ -430,25 +430,6 @@
       { k:"landing", ac:"c_landing", grp:"landing", mod:"strategy", label:"Landing line", glyph:"▤", find:"landing line welcome screen what the module says row sentence",
         when: function(){ return inOffice(); },
         render:renderLandingLine },
-      /* ── INSIGHTS' OWN SETUP (§356.5, spec 054 §4.2, §4.4): two pages, and
-         that is its honest size — reports are published from the Forefront
-         console, so Access and The landing are all there is for a client to
-         set. THE SAME KEYS AS STRATEGY'S, `access` and `landing`, because a
-         page's key is its word and not its rail: the two are told apart by
-         `mod`, the document's scope filters the rail to one module
-         (setupDefs), and resolveSetupScope prefers the def under the scope
-         on screen. DRAWN ONLY ON INSIGHTS' OWN DOCUMENT (`when`): the served
-         router stamps the module a Setup address leads with (data-module),
-         and over file:// there is no module at all, so the offline copy's
-         single rail never shows a second Roles & access. Access is
-         `c_access` — the same door as Strategy's matrix, readable to the
-         office and written by the Super user alone (§89). */
-      { k:"access", ac:"c_access", grp:"access", mod:"insights", label:"Roles & access", glyph:"⚿", find:"permissions roles who can open insights library grant",
-        when: function(){ return moduleWord() === "insights"; },
-        render:renderModuleAccess },
-      { k:"landing", ac:"c_landing", grp:"landing", mod:"insights", label:"Landing line", glyph:"▤", find:"landing line welcome screen what insights says row sentence",
-        when: function(){ return moduleWord() === "insights" && inOffice(); },
-        render:renderLandingLine },
       { k:"mainbu", ac:"c_people", grp:"who", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       /* ── SETTING A CLIENT UP (§318, spec 044) ────────────────────────
@@ -1284,14 +1265,7 @@
   function resolveSetupScope(){
     var scope = setupScope();
     if (!scope || !currentSub) return;
-    var hits = setupDefsAll().filter(function(d){ return d.k === currentSub; });
-    /* THE SCOPE ON SCREEN WINS WHERE TWO RAILS SHARE A WORD (§356.5): a
-       module's Setup keeps Strategy's page keys — `access`, `landing` — so
-       the first def holding the key is not necessarily the one asked for.
-       A def under the current scope means the page IS this rail's, and the
-       scope stays; only a key no def in this rail holds moves it. */
-    if (hits.some(function(d){ return (d.mod || "client") === scope; })) return;
-    var hit = hits[0];
+    var hit = setupDefsAll().filter(function(d){ return d.k === currentSub; })[0];
     if (hit && (hit.mod || "client") !== scope) setScope(hit.mod || "client");
   }
 
@@ -3680,17 +3654,6 @@
            map and every answer coming from the shipped default. Writing a cell
            is the moment that role gets a row of its own. */
         (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
-        paint();
-      });
-    });
-    /* A MODULE'S OWN CELL (§356.5): the same press through its own writer,
-       because its default is an ABSENCE — the module's shipped state, which
-       rides in the press as the fourth field — and the matrix's writer above
-       would store it as a row (§50.6). */
-    document.querySelectorAll("[data-mac]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.mac.split("|");
-        setModuleGrant(p[0], p[1], p[2], p[3]);
         paint();
       });
     });

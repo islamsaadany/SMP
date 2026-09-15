@@ -50,6 +50,10 @@ export type ServeArgs = {
   module: ModuleKey;
   tenantId: string;
   tenantName: string;
+  /* The modules THIS PERSON may open here (§356.5): the client's own list
+     narrowed by each module's grant (lib/access.ts openableModules), which is
+     what a switcher may list — a module shut to somebody by its address is
+     not offered to them either (spec 054 §6.4). */
   have: ModuleKey[];
   /* The path INSIDE the module, the module's word already taken off. */
   rest: string[];

@@ -448,6 +448,31 @@ const CLIENT_ARG = (function () {
   console.log("  ...and cleared, the key DELETED:", lpcOk ? "PASS" : "FAIL", lpcOk ? "" : JSON.stringify(Object.keys(lpClean.group)));
   if (!lpcOk) process.exitCode = 1;
 
+  /* ── A MODULE'S GRANT UNDER A KEY THE SHIPPED AREAS DO NOT NAME (§356.5,
+     spec 054 research R3) ─────────────────────────────────────────────
+     Insights' `a_insights` is declared in smp-app/lib/modules.ts and NOT in
+     lib/rules.js (§335), so the stored map has to carry a key AREAS has never
+     heard of. The store is blind to which keys it holds — measured here
+     rather than assumed (§172), because "the writer keeps it" was the first
+     thing the plan said to prove before building on it. Written, read back,
+     taken away, and the rest of the row asserted untouched either way. */
+  const mgState = await io.readState(client);
+  const mgWas = JSON.stringify(mgState.access.custodian);
+  mgState.access.custodian.a_insights = "none";
+  await io.writeState(client, mgState);
+  const mgBack = await io.readState(client);
+  const mgOk = mgBack.access.custodian && mgBack.access.custodian.a_insights === "none" &&
+               JSON.stringify(Object.assign({}, mgBack.access.custodian, { a_insights: undefined })) === JSON.stringify(Object.assign({}, JSON.parse(mgWas), { a_insights: undefined }));
+  console.log("a module's grant round trip (key outside AREAS):", mgOk ? "PASS" : "FAIL",
+    mgOk ? "[access_grants carries any page_key]" : JSON.stringify(mgBack.access.custodian));
+  if (!mgOk) process.exitCode = 1;
+  delete mgBack.access.custodian.a_insights;
+  await io.writeState(client, mgBack);
+  const mgClean = await io.readState(client);
+  const mgcOk = !("a_insights" in (mgClean.access.custodian || {})) && JSON.stringify(mgClean.access.custodian) === mgWas;
+  console.log("  ...and taken away, the row exactly what it was:", mgcOk ? "PASS" : "FAIL", mgcOk ? "" : JSON.stringify(mgClean.access.custodian));
+  if (!mgcOk) process.exitCode = 1;
+
   /* ── OPENING A NEW CYCLE, WHICH CARRIES NO QUARTER (§316.3) ──────────
      Islam, in his own words: pressing "Open a new cycle" looked like it
      worked and the change never saved. §307 took the review point off that

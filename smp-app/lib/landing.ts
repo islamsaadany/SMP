@@ -90,7 +90,11 @@ export type SetupDoor = { key: string; label: string; sub: string; href: string 
 export type ModuleLine = { key: ModuleKey; label: string; line: string; href: string };
 export type LandingShape = { clientSetup: SetupDoor[] | null; modules: ModuleLine[] };
 export function landingShape(slug: string, seat: string | null | undefined, stored: unknown,
-                             lines: { facts: LandingFacts; picks: Record<string, string> } = { facts: NO_FACTS, picks: {} }): LandingShape {
+                             lines: { facts: LandingFacts; picks: Record<string, string> } = { facts: NO_FACTS, picks: {} },
+                             /* the modules this person may OPEN (lib/access.ts openableModules,
+                                §356.5) — null means every module the client has, which is the
+                                seat's answer and the checks' pure one */
+                             open: readonly ModuleKey[] | null = null): LandingShape {
   const brk = process.env.SMP_BREAK || "";
   const door = (key: string, label: string, sub: string, page: string) =>
     ({ key, label, sub, href: clientHref(slug, null, "setup/" + page) });
@@ -106,7 +110,8 @@ export function landingShape(slug: string, seat: string | null | undefined, stor
      every seat, or stopped reading the client's own module list, must turn
      checks/door-landing.mjs red before its green run is believed (§94.5). */
   const clientSetup = brk === "setup-any-seat" || seat === "super" ? doors : null;
-  const have = brk === "modules-unread" ? [DEFAULT_MODULE] : modulesFor(stored);
+  const have = (brk === "modules-unread" ? [DEFAULT_MODULE] : modulesFor(stored))
+    .filter((k) => !open || open.includes(k));
   const modules: ModuleLine[] = have.map((k) => ({
     key: k, label: MODULE_DEF[k].label, line: landingLine(k, lines.picks[k], lines.facts), href: clientHref(slug, k, ""),
   }));

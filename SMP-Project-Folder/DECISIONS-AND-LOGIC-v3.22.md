@@ -48820,3 +48820,115 @@ an ellipsis; and the sentences are English literals in a declaration, where the
 frozen product's own words go through `L()` — a module's lines are the module's
 own and not a tenant's label, so nothing is inflected (§107.8), but a tenant
 cannot rename them.
+
+### §356.5 — INSIGHTS' SETUP: ACCESS, AND A DOOR THAT ASKS THE TABLE (spec 054 §4.4, §9.5, research R3)
+
+Step 5 of six. Insights' rail carries its two pages — **Roles & access** and
+**Landing line** — and the first is the first thing in the product that READS
+a module's declared areas other than a check, which is what spec 053 §4.5
+wrote that declaration for. The table is the client's roles down and the
+module's areas across; Insights declares one (`a_insights`, `view | none`,
+shipped `view`), so it is one column. A cell is ONE toggle, the eye, carrying
+the shipped state on its own attribute: pressing a lit eye turns the row off,
+and nothing lit IS the answer (§37's *none is the absence of the other two*,
+one column at a time). There is no `edit` and no `fill` offered, because the
+declaration does not offer them (§94.15: a control with nothing behind it).
+
+**THE STORE WAS PROVED KEY-AGNOSTIC BEFORE ANYTHING WAS BUILT ON IT**, as the
+plan required: `test-roundtrip.js` writes `access.custodian.a_insights =
+"none"`, reads it back, deletes it and asserts the row byte-identical — the
+read (`SELECT * FROM access_grants`), the hydrate (`window.ACCESS =
+state.access`), the differ (`access` travels whole) and the authoriser (any
+`access` change is `access`, the Super user's — §89) none of them name a key.
+So a module's grant needs **no schema change, no migration and no server
+rule**, and the second half of that sentence is asserted rather than claimed
+(§172): `test-authorize.js` §40b, the Super user shutting and opening the
+row and the change classified `access` and nothing else, a custodian and the
+SMO team refused with the refusal naming the matrix — **665/0, red 6** with
+the classification moved to `setup`.
+
+**THE SAME KEYS AS STRATEGY'S, TOLD APART BY THE SCOPE.** Both defs are
+`access` and `landing` with `mod:"insights"`, so the addresses read
+`/insights/setup/access` rather than a second spelling of one word, and a def
+is identified by (mod, key) — `resolveSetupScope()` learned that: it asks
+first whether the current sub exists ON THIS SCOPE before deciding the two
+disagree, or Insights' Access page would have switched the rail back to
+Strategy's on every load. Each carries a `when` on the module the document was
+served for, so over `file://`, which no scope reaches, the page says the
+served platform draws it and draws nothing itself (`.mnone`, asserted in
+`setup-per-module.py` §7c with the rail keys asserted unique across both
+modules).
+
+**ONE READER FOR THE SCREEN AND THE DOOR** (§42, §53.5).
+`moduleGrantFor()` / `mayOpenModuleArea()` live in the frozen
+`config-data.js` beside `grantFor` — absent is the SHIPPED state, never a
+refusal (§30.2: a map written before the key existed has not answered), the
+best grant across the person's roles wins (§33), and somebody with no role
+reads the floor row exactly as `rolesOrFloor` does. `frozen.cjs` runs that
+same function for the server (`mayOpen`), and `smp-app/lib/access.ts`'s
+`decideOpen()` is a pure function over it: a seat opens everything (spec 046
+§4.10's own rule, the office reads everything); a module declaring no areas is
+open to everybody, so Strategy's door does not move; a person the register
+does not hold reads the shipped state. **THE ROUTE ASKS IT BEFORE
+`serverFor`**, and a refusal is the legacy redirect — the same road an unknown
+module word takes (§320.5), so a shut module and a module the client does not
+have are indistinguishable from the address, which is the property the door
+has had since it was built. The landing's *Your modules* is filtered by the
+same answer, so a shut module has no row, no address and no switcher entry for
+that person, and the person whose row is untouched keeps all three (both ends,
+§94.2).
+
+**THE DEFAULT IS AN ABSENCE** (§50.6): `setModuleGrant` DELETES the key when
+the state chosen is the shipped one, so never-set and set-then-cleared are the
+same bytes, asserted with a canonical compare — and **the compare had to be
+canonical**, because the store reads the grants with no `ORDER BY` and a
+rewrite hands the same rows back in another order; the first draft compared
+raw `JSON.stringify` and called Strategy's untouched cells changed (§249.3, in
+a check, walked into while the section above quotes it).
+
+**AND THE CHECK'S FIRST FIXTURE WROTE A STATE THE PRODUCT CANNOT PRODUCE**
+(§100.3): it gave the BU owner the SMO team seat in `tenant_users`, and the
+page rightly drew nothing — a CLIENT login never carries a seat there; that
+column is the consultants' route (`platform-api` `setTeam`), and a client's
+own SMO team member holds the role on the REGISTER ROW, which is what the
+frozen page reads its roles off (`personRoles` reads `p.role`). The fixture
+writes `people.role` now and the assertion says what it measures: over a shut
+owner row the best grant across the person's roles wins, and the office is
+SHOWN the table and given no button (§89: the matrix is the Super user's;
+`mayEditAccess` is the one rule asked). The seat short-circuit itself is
+`modules.mjs` §4c's. **And one probe held a locator across the page it was
+made on** — closed and re-opened between, so `count()` threw rather than
+reported (§215).
+
+**RECORDED, NOT DONE**: the Super user's and the SMO team's own rows are drawn
+with an eye like every other, because `matrixRows()` is the frozen matrix's
+own list — a client's own Super user who shut their own row would be judged by
+the table while an office login with the seat is not, and whether the office's
+rows should be read-only by rule there is a decision; Portfolio's and
+Processes' Setup are not built (spec §7); and the served `shell.mjs` was not
+re-run in this round because its dev server and the door check share a
+database, so it is on step 6's list. **Not the product's, and unexplained**:
+during one run of seven frozen checks in parallel the dev tenant's `users` and
+`tenant_users` tables came back EMPTY and the door check died on sign-in at
+every section; reseeded and run alone, with the rows watched every two seconds,
+the seed held throughout. The likeliest cause is two harnesses sharing one
+database (§105.6's family), and it is written down rather than guessed at.
+
+**PROVED**: `test-roundtrip.js` on a virgin Postgres 16 (the module key round-
+tripped and deleted); `test-authorize.js` **665/0**, §40b red **6**;
+`checks/modules.mjs` §4c **123/0**, red **2** under `gate-open` — the shut
+owner refused, the custodian open, the seat served, a no-area module never
+gated, the floor row, the unknown person, Strategy's map byte-identical, the
+landing's filter, and the route's SOURCE ORDER (the gate before the setup
+branch and before `serverFor`); `checks/door-landing.mjs` §9 **101 → 127/0**,
+red **4 / 12** under `gate-open` and `no-areas-stamp`, every one reported rather than died — Insights' Access page on
+Insights' own rail headed *Insights · Setup*, the stamp agreeing with
+`MODULE_DEF.insights.areas`, the rows agreeing with `matrixRows()`, every eye
+lit with nothing stored, the owner's eye PRESSED and the grant read back off
+the server through the tenant, Strategy's cells and drawn matrix identical
+either side, the BU owner then refused at the module's address, its Setup
+address, the landing row and the switcher while the function head keeps all
+three, the SMO team served and shown the table with no button, and the second
+press deleting the key; `setup-per-module.py` §1 REWRITTEN never loosened
+(it held the mod values as a literal, §214.3) and §7c; `built-in-step` and
+`generated-in-step` clear; `tsc` clean with the cache removed first.

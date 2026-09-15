@@ -9434,7 +9434,34 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356.4: the landing line &mdash;
+*Last Updated: 2026-09-15 &mdash; **&sect;356.5: Insights' Setup &mdash; Access,
+and a door that asks the table (spec 054 &sect;4.4, &sect;9.5, on the
+branch).** Step 5 of six: Insights' rail carries **Roles &amp; access** and
+**Landing line**, the same keys as Strategy's told apart by the scope (a def is
+(mod, key), and `resolveSetupScope()` asks whether the sub exists ON THIS SCOPE
+before deciding the two disagree). The table is the roles down and the module's
+DECLARED areas across &mdash; the first thing in the product that reads
+`MODULE_DEF[k].areas` other than a check &mdash; one eye per cell carrying the
+shipped state, nothing lit being the answer, absent reading as SHIPPED
+(&sect;30.2) and the default stored as an ABSENCE (&sect;50.6). **The store was
+proved key-agnostic on a virgin Postgres before anything was built on it**
+(the plan's own precondition), so no schema change, no migration and no server
+rule &mdash; asserted rather than claimed (&sect;172): `test-authorize.js` &sect;40b
+**665/0, red 6**. **ONE READER FOR THE SCREEN AND THE DOOR**:
+`mayOpenModuleArea()` in the frozen `config-data.js`, run by `frozen.cjs` for
+`smp-app/lib/access.ts`'s pure `decideOpen()` &mdash; a seat opens everything,
+a module with no areas is open to all, the route asks it BEFORE `serverFor`
+and a refusal is the legacy redirect (&sect;320.5), the landing's *Your
+modules* filtered by the same answer. `modules.mjs` &sect;4c **123/0** red 2;
+`door-landing.mjs` &sect;9 **101 &rarr; 127/0** red under `gate-open` and
+`no-areas-stamp`. **Three of the check's own first failures were the CHECK**:
+a fixture giving a CLIENT login a seat in `tenant_users`, which that column
+never holds for one (the register row is where a client's SMO team member
+sits, &sect;100.3); a raw stringify over a table read with no `ORDER BY`
+(&sect;249.3); and a locator held across a closed page (&sect;215).
+`setup-per-module.py` &sect;1 rewritten never loosened, &sect;7c added.*
+
+*Earlier the same day: **&sect;356.4: the landing line &mdash;
 declared, chosen, stored, drawn in both places (spec 054 &sect;4.5, &sect;9.4,
 on the branch).** Step 4 of six: each module DECLARES the sentences it can say
 about itself (`MODULE_DEF[k].lines`, key + label + example + a reader over

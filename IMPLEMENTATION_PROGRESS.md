@@ -4976,7 +4976,7 @@ suite per feature.
 
 ## In flight
 
-**Spec 054 — Setup per module (§356), on the branch, steps 1–4 of 6 built.**
+**Spec 054 — Setup per module (§356), on the branch, steps 1–5 of 6 built.**
 Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
 Step 1: the Setup Overview is deleted (§356.1) — both its halves were
 already on the landing — and the gear lands on Reporting cycle;
@@ -5002,8 +5002,20 @@ rides the group under `SMPRules.LANDING_PICK` as an absence, and the
 landing's row, the console's card and the page's preview all read ONE server
 reader over facts read once for the viewer; `test-authorize.js` §40a red
 5 / 2, the round trip on a virgin Postgres, `modules.mjs` §4b,
-`door-landing.mjs` §8 red under `no-landing-stamp`. Steps 5–6 (Insights'
-Setup, the sweep) are the plan's, in order. `main` untouched.
+`door-landing.mjs` §8 red under `no-landing-stamp`. Step 5 (§356.5):
+Insights' rail carries Roles & access and Landing line — the same keys as
+Strategy's, told apart by the scope — the access table is the roles down and
+the module's declared areas across, one eye per cell carrying the shipped
+state, absent reading as shipped and the default stored as an absence; the
+store was proved key-agnostic on a virgin Postgres before anything was built
+on it, so no schema change and no server rule (`test-authorize.js` §40b
+665/0, red 6); `mayOpenModuleArea()` is the one reader the frozen page and
+`smp-app/lib/access.ts` both ask, the route asks it before `serverFor` and a
+refusal is the legacy redirect (§320.5), the landing's Your modules filtered
+by the same answer; `modules.mjs` §4c 123/0 red 2, `door-landing.mjs` §9
+101 → 127/0 red under `gate-open` and `no-areas-stamp`. The check's first
+fixture wrote a seat a client login cannot hold (§100.3) and is corrected.
+Step 6 (the sweep) is the plan's, next. `main` untouched.
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
 v2.9 single file as it always has; nothing anyone uses runs on the new stack

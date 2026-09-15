@@ -160,6 +160,17 @@ function __smpLanding(state, personKey) {
            acts: acts, pages: pages, tour: tour, home: home, continueWord: word };
 }
 function __smpPlaceLabel(state, target) { __smpHydrate(state); try { return placeLabel(target); } catch (e) { return String(target); } }
+/* MAY THIS PERSON OPEN A MODULE (spec 054 research R3, s356.5): the product's
+   own reader, mayOpenModuleArea in config-data.js -- the one the module's
+   Access page draws its cells from -- asked of the stored graph. A person the
+   register does not hold is judged as holding nothing, which is the shipped
+   state (absent means not answered yet, s30.2). */
+function __smpMayOpen(state, personKey, area) {
+  __smpHydrate(state);
+  var row = null;
+  for (var i = 0; i < PEOPLE.length; i++) if (PEOPLE[i].key === personKey) { row = PEOPLE[i]; break; }
+  try { return !!mayOpenModuleArea(row, area); } catch (e) { return (area.shipped || "none") !== "none"; }
+}
 /* THE FACTS A LANDING LINE IS MADE OF (§356.4): the cycle's state and its
    due day off REVIEW, and how many subjects have submitted off cycleTotals()
    — the product's own count, the one the cycle board and the welcome screen
@@ -494,4 +505,11 @@ function shape(graph, answers) {
   const c = context();
   return detach(c.__smpShape(graph, answers));
 }
-module.exports = { landing, placeLabel, landingFacts, cleared, bare, shape, holds, FILES };
+/* Whether a person may open a module whose grant is `area` (spec 054 §4.4),
+   answered by the frozen product's own reader — the cell on the module's
+   Access page and the door in front of the module cannot then disagree. */
+function mayOpen(graph, personKey, area) {
+  const c = context();
+  return !!c.__smpMayOpen(graph, personKey || "", area);
+}
+module.exports = { landing, placeLabel, landingFacts, mayOpen, cleared, bare, shape, holds, FILES };

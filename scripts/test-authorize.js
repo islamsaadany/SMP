@@ -4113,6 +4113,46 @@ console.log("\n39 \u00b7 how long each subject has to present (\u00a7340)");
         r.ok && (r.changes || []).length === 1, JSON.stringify((r.changes || []).map(function (c) { return c.kind; })));
 })();
 
+/* ── 40b · a module's grant is the matrix's own write (§356.5, spec 054 §4.4) ──
+   Insights' Access page writes ACCESS[role].a_insights — a key lib/rules.js
+   does not name, because the module declares it (smp-app/lib/modules.ts) and
+   the frozen product must not carry a copy (§335). The authoriser sees the
+   `access` part change and classifies it `access`, the Super user's alone
+   (§89): BOTH ENDS, the SMO team refused with the others, because the team
+   holds Setup at edit and this is the one Setup page that is not theirs. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  if (!(UK && CUST)) { check("\u00a7356.5: the seed holds a custodian to test with", false, ""); return; }
+  const SHUT = function (i) { (i.access.owner = i.access.owner || {}).a_insights = "none"; };
+  let r = fromStored(SEED, "smo", SHUT);
+  check("\u00a7356.5: the Super user shuts a module to a role", r.ok, (r.refusals || []).join(" / "));
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("\u00a7356.5: a change to a module's grant is classified `access` and nothing else",
+        kinds.length === 1 && kinds[0] === "access",
+        kinds.join(",") || "(nothing \u2014 the change was invisible)");
+  r = fromStored(SEED, CUST, SHUT);
+  check("\u00a7356.5 REFUSED: a custodian cannot", !r.ok, "was ALLOWED");
+  /* the SMO team: the seed's first person holding it, or one made to */
+  const team = clone(SEED);
+  const tp = team.people.find(function (p) { return p.role === "smoteam"; }) ||
+             (function () { const p = team.people.find(function (x) { return x.key === CUST; }); p.role = "smoteam"; return p; })();
+  r = fromStored(team, tp.key, SHUT);
+  check("\u00a7356.5 REFUSED: nor the SMO team \u2014 the matrix is the Super user's whatever page it is written from (\u00a789)", !r.ok, "was ALLOWED");
+  check("\u00a7356.5: and the refusal says who may do what",
+        !r.ok && /who may do what|access/i.test((r.refusals || []).join(" ")), (r.refusals || []).join(" / "));
+  /* OPENING IT AGAIN DELETES THE KEY (\u00a750.6) and is the same act */
+  const shut = clone(SEED); SHUT(shut);
+  r = fromStored(shut, "smo", function (i) { delete i.access.owner.a_insights; });
+  check("\u00a7356.5: the Super user opens it again (the key deleted)", r.ok && (r.changes || []).length === 1 && r.changes[0].kind === "access", (r.refusals || []).join(" / "));
+  r = fromStored(shut, CUST, function (i) { delete i.access.owner.a_insights; });
+  check("\u00a7356.5 REFUSED: a custodian cannot open it either", !r.ok, "was ALLOWED");
+})();
+
 /* ── 40 · a pillar's breakdown is two halves at once (§343) ────────────
    ITS TARGETS ARE THE PLAN AND ITS FIGURES ARE THE REPORT, in one object on
    one row — so the danger is not that the rule is wrong but that the split

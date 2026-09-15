@@ -11320,6 +11320,59 @@ var ACCESS_DEFAULTS = SMPRules.ACCESS_DEFAULTS;
 var STATE_RANK = SMPRules.STATE_RANK;
 function grantFor(roleKey, areaKey){ return SMPRules.grantFor(world(), roleKey, areaKey); }
 
+/* ── A MODULE'S OWN GRANT (§356.5, spec 054 §4.4; spec 046 §4.4) ─────
+   A module other than Strategy declares its areas beside its label
+   (smp-app/lib/modules.ts MODULE_DEF) and NOT in lib/rules.js — the carried
+   rules copy is asserted identical to the frozen one (§335), and a module's
+   area in the frozen Strategy product is where it does not belong. So the
+   stored map holds a key the shipped AREAS list does not name, the store is
+   blind to which keys it carries (state-io writes and reads whatever the map
+   holds — measured, never assumed, §172), and the DEFAULT for an absent key
+   is the module's own shipped state rather than ACCESS_DEFAULTS', which
+   has never heard of the key and would answer "none" for a module that ships
+   open (§30.2: absent means not answered yet, never denied).
+
+   ONE READER FOR THE SCREEN AND THE ROUTE. The Access page draws this cell
+   from it, and the served route's gate (smp-app/lib/access.ts, through
+   frozen.cjs) asks this same function of the same graph — a second copy of
+   "absent means shipped" is how the page and the door would come to
+   disagree about who may open a module (§42, §53.5). `area` is the module's
+   declaration, { key, shipped }. */
+function moduleGrantFor(roleKey, area){
+  var row = ACCESS && ACCESS[roleKey];
+  if (row && Object.prototype.hasOwnProperty.call(row, area.key)) return row[area.key] || "none";
+  return area.shipped || "none";
+}
+/* THE DEFAULT IS AN ABSENCE (§50.6): setting a cell back to the module's
+   shipped state DELETES the key, so a role never touched and a role set
+   and set back are the same bytes — and a row left holding nothing goes
+   too, or the map carries an empty object for a role nobody answered. */
+function setModuleGrant(roleKey, areaKey, state, shipped){
+  var row = (ACCESS[roleKey] = ACCESS[roleKey] || {});
+  if (!state || state === shipped) delete row[areaKey]; else row[areaKey] = state;
+  if (!Object.keys(row).length) delete ACCESS[roleKey];
+}
+/* MAY THIS PERSON OPEN A MODULE — the most generous answer across the roles
+   they hold, the floor included (rolesOrFloor's own shape, §93: somebody on
+   the register holding nothing is judged on the Everyone-else row). Asked by
+   the served route before a module is drawn (spec 054 research R3); the seat
+   is decided before this is asked and never here. */
+function mayOpenModuleArea(person, area){
+  if (!person) return (area.shipped || "none") !== "none";
+  var rs = personRoles(person);
+  if (!rs.length) {
+    var at = person.fn ? "fn:" + person.fn : person.company ? "co:" + person.company : person.unit;
+    rs = at ? [{ role: SMPRules.NO_ROLE, at: at }] : [];
+  }
+  if (!rs.length) return (area.shipped || "none") !== "none";
+  var best = "none";
+  rs.forEach(function(r){
+    var g = moduleGrantFor(r.role, area);
+    if (STATE_RANK[g] > STATE_RANK[best]) best = g;
+  });
+  return best !== "none";
+}
+
 /* ── OWN, and how it is decided ─────────────────────────────────────
    Islam: *"own is always about what they have a role in … I see this as a
    logic thing not a settings thing."*
@@ -30262,13 +30315,20 @@ var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
     'stroke-linecap="round" stroke-dasharray="2 3"/></svg>';
 
 /* ── Roles & access ─────────────────────────────────────────────────── */
-function stateCell(roleKey, areaKey, editable, disabled){
+function stateCell(roleKey, areaKey, editable, disabled, opt){
   /* grantFor(), never ACCESS[role][area]. A tenant carried across from an
      earlier version has an EMPTY access map by design — the rows were rebuilt
      rather than migrated (§33, §37) — so a direct read was undefined[key] and
      the whole page threw. The cell shows what the platform would actually
      answer, which is the shipped default until somebody changes it. */
-  var v = grantFor(roleKey, areaKey);
+  /* §356.5: A MODULE'S CELL IS THE SAME CELL WITH ITS OWN READER. `opt`
+     carries what a module's area declares — its current value (read through
+     moduleGrantFor, whose default is the module's shipped state and never
+     ACCESS_DEFAULTS'), the states it admits, and the attribute the press
+     writes through (`data-mac`, whose handler deletes the key on the default,
+     §50.6). Absent, the cell is Strategy's exactly as it was. */
+  opt = opt || {};
+  var v = opt.value != null ? opt.value : grantFor(roleKey, areaKey);
   /* A cell that cannot come up is drawn as a dash rather than as "none". The
      group CEO owns every unit, so "other business units" is an empty set for
      them: saying "none" there would read as a denial of something, when there
@@ -30290,7 +30350,8 @@ function stateCell(roleKey, areaKey, editable, disabled){
      view and edit. Only those two cells: everywhere else the state would
      grant nothing (`mayFillPage` answers only for the strategy pages), and
      a toggle that does nothing is decoration (§42). */
-  var states = (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
+  var states = opt.states ? opt.states
+    : (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
     ? ["view", "fill", "edit"] : ["view", "edit"];
   var WORD = { view: "May read",
                fill: "May fill what’s empty — Missing values only, and they count straight away",
@@ -30305,8 +30366,9 @@ function stateCell(roleKey, areaKey, editable, disabled){
        button's own rules; it was wearing somebody else's. §56.7 in CSS instead
        of JS: a one-word modifier will eventually collide with a one-word
        component, and the collision is silent because both rules are valid. */
-    return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" data-ac="' +
-      roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
+    return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" ' +
+      (opt.attr || "data-ac") + '="' + roleKey + '|' + areaKey + '|' + (on ? "none" : o) +
+      (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
       (on ? "Turn off — leaves no access" : WORD[o]) +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
       ICON[o] + '</button>';
@@ -30316,6 +30378,90 @@ function stateCell(roleKey, areaKey, editable, disabled){
      which is the one thing it must never be mistaken for. */
   return '<td class="ac"><span class="stset' + (v === "none" ? " off" : "") + '">' +
     opts + '</span></td>';
+}
+
+/* THE ROWS EVERY ACCESS TABLE WALKS, NAMED ONCE (§356.5): Strategy's matrix
+   and a module's one-column table are two tables over ONE list of roles, so
+   the list — and the floor row that is not a role (§93) — is built here and
+   asked by both, or the day a role is added the two disagree about who is on
+   the register (§53.5). */
+function matrixRows(){
+  return ROLES.concat([{
+    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
+    note: "Not a role — what somebody on the register who holds no role may " +
+          "open. Most of the register, on a tenant of any size." }]);
+}
+function roleCell(r){
+  var n = r.floor
+    ? PEOPLE.filter(function(p){
+        return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
+    : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+  /* Two lines, never more. The role's description is a sentence, and a
+     sentence in a 19% column wraps to eight lines and makes every row of a
+     49-cell table a hundred pixels tall — the exact fault this page was
+     rebuilt to remove. It is on hover instead. */
+  return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
+    '<span class="why">' +
+    (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
+    '</span></td>';
+}
+
+/* ── A MODULE'S OWN ACCESS TABLE (§356.5, spec 054 §4.4, spec 046 §4.4) ──
+   The first thing that READS a module's declared areas other than a check,
+   which is what the declaration was written for (spec 053 §4.5). The
+   client's roles down — matrixRows(), the matrix's own list — and the
+   module's areas across, each cell the states that area admits and no
+   others: Insights declares view | none, so the cell is ONE toggle, and an
+   `edit` here would be a grant with nothing behind it (§94.15).
+
+   THE DECLARATION ARRIVES ON THE DOCUMENT (`data-areas`, written by
+   lib/shell.ts onto a module's Setup document from MODULE_DEF and nowhere
+   else), because the frozen shell cannot import a module's declaration and
+   the frozen product must not carry a copy of it (§335). Over file:// there
+   is no module and no stamp, and the page says so rather than drawing a
+   table that writes to nothing (§45.2, §61).
+
+   THE WRITE IS THE MATRIX'S OWN: a cell lands in ACCESS under the module's
+   key, travels in the ordinary save, and is classified `access` by the
+   authoriser — the Super user's alone (§89), which is why the SMO team is
+   shown the table and given no button (mayEditAccess, the same line
+   Strategy's matrix asks). No new save path, no new rule (research R3). */
+function moduleAreas(){
+  var raw = document.documentElement.getAttribute("data-areas");
+  if (!raw) return null;
+  try {
+    var a = JSON.parse(raw);
+    return (Array.isArray(a) && a.length) ? a : null;
+  } catch (e) { return null; }
+}
+function renderModuleAccess(){
+  var areas = moduleAreas();
+  var label = document.documentElement.getAttribute("data-module-label") || "this module";
+  var head = cfgHead("Roles & access", [], null, false, null);
+  if (!areas) {
+    return head + '<div class="cfg"><p class="why mnone">Who may open a module is set on the ' +
+      'served platform, which knows what each module can be opened for. Nothing is set from this copy.</p></div>';
+  }
+  var editable = grant("c_access") === "edit" && mayEditAccess();
+  var th = '<tr><th style="width:17%">Role</th>' + areas.map(function(a){
+    return '<th class="ac" title="' + esc((a.label || a.key) + " \u2014 " + (a.note || "")) + '">' +
+      esc(a.label || a.key) + '</th>';
+  }).join("") + '</tr>';
+  var body = matrixRows().map(function(r){
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + roleCell(r) +
+      areas.map(function(a){
+        return stateCell(r.key, a.key, editable, null, {
+          value: moduleGrantFor(r.key, a),
+          states: (a.states || ["view"]).filter(function(x){ return x !== "none"; }),
+          attr: "data-mac", shipped: a.shipped || "none" });
+      }).join("") + '</tr>';
+  }).join("");
+  return head + '<div class="cfg acgrid macgrid" data-macmod="' + esc(landingModule()) + '"><table><thead>' + th +
+    '</thead><tbody>' + body + '</tbody></table></div>' +
+    '<div class="chart-legend" style="margin-top:12px">' +
+      '<span><i class="st st-view">' + ICON_EYE + '</i> may open ' + esc(label) + '</span>' +
+      '<span><i class="st st-none">neither</i> cannot open it \u2014 no row on the landing, no address</span>' +
+    '</div>';
 }
 
 /* ── Roles &amp; access (§37) ─────────────────────────────────────────
@@ -30445,25 +30591,10 @@ function renderAccess(){
      It has to stay editable. A client who wants people with no role to see
      nothing sets this row to none and can see that they have; a floor nobody
      can reach is a rule hiding as a default. */
-  var MATRIX_ROWS = ROLES.concat([{
-    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
-    note: "Not a role — what somebody on the register who holds no role may " +
-          "open. Most of the register, on a tenant of any size." }]);
+  var MATRIX_ROWS = matrixRows();
 
   var body = MATRIX_ROWS.map(function(r){
-    var n = r.floor
-      ? PEOPLE.filter(function(p){
-          return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
-      : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
-    /* Two lines, never more. The role's description is a sentence, and a
-       sentence in a 19% column wraps to eight lines and makes every row of a
-       49-cell table a hundred pixels tall — the exact fault this page was
-       rebuilt to remove. It is on hover instead. */
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' +
-      '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
-        '<span class="why">' +
-        (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
-        '</span></td>' +
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + roleCell(r) +
       AREAS.map(function(a){
         return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
       }).join("") + '</tr>';
@@ -51752,6 +51883,25 @@ var SYNC = (function () {
       { k:"landing", ac:"c_landing", grp:"landing", mod:"strategy", label:"Landing line", glyph:"▤", find:"landing line welcome screen what the module says row sentence",
         when: function(){ return inOffice(); },
         render:renderLandingLine },
+      /* ── INSIGHTS' OWN SETUP (§356.5, spec 054 §4.2, §4.4): two pages, and
+         that is its honest size — reports are published from the Forefront
+         console, so Access and The landing are all there is for a client to
+         set. THE SAME KEYS AS STRATEGY'S, `access` and `landing`, because a
+         page's key is its word and not its rail: the two are told apart by
+         `mod`, the document's scope filters the rail to one module
+         (setupDefs), and resolveSetupScope prefers the def under the scope
+         on screen. DRAWN ONLY ON INSIGHTS' OWN DOCUMENT (`when`): the served
+         router stamps the module a Setup address leads with (data-module),
+         and over file:// there is no module at all, so the offline copy's
+         single rail never shows a second Roles & access. Access is
+         `c_access` — the same door as Strategy's matrix, readable to the
+         office and written by the Super user alone (§89). */
+      { k:"access", ac:"c_access", grp:"access", mod:"insights", label:"Roles & access", glyph:"⚿", find:"permissions roles who can open insights library grant",
+        when: function(){ return moduleWord() === "insights"; },
+        render:renderModuleAccess },
+      { k:"landing", ac:"c_landing", grp:"landing", mod:"insights", label:"Landing line", glyph:"▤", find:"landing line welcome screen what insights says row sentence",
+        when: function(){ return moduleWord() === "insights" && inOffice(); },
+        render:renderLandingLine },
       { k:"mainbu", ac:"c_people", grp:"who", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       /* ── SETTING A CLIENT UP (§318, spec 044) ────────────────────────
@@ -52587,7 +52737,14 @@ var SYNC = (function () {
   function resolveSetupScope(){
     var scope = setupScope();
     if (!scope || !currentSub) return;
-    var hit = setupDefsAll().filter(function(d){ return d.k === currentSub; })[0];
+    var hits = setupDefsAll().filter(function(d){ return d.k === currentSub; });
+    /* THE SCOPE ON SCREEN WINS WHERE TWO RAILS SHARE A WORD (§356.5): a
+       module's Setup keeps Strategy's page keys — `access`, `landing` — so
+       the first def holding the key is not necessarily the one asked for.
+       A def under the current scope means the page IS this rail's, and the
+       scope stays; only a key no def in this rail holds moves it. */
+    if (hits.some(function(d){ return (d.mod || "client") === scope; })) return;
+    var hit = hits[0];
     if (hit && (hit.mod || "client") !== scope) setScope(hit.mod || "client");
   }
 
@@ -54976,6 +55133,17 @@ var SYNC = (function () {
            map and every answer coming from the shipped default. Writing a cell
            is the moment that role gets a row of its own. */
         (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
+        paint();
+      });
+    });
+    /* A MODULE'S OWN CELL (§356.5): the same press through its own writer,
+       because its default is an ABSENCE — the module's shipped state, which
+       rides in the press as the fourth field — and the matrix's writer above
+       would store it as a row (§50.6). */
+    document.querySelectorAll("[data-mac]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.mac.split("|");
+        setModuleGrant(p[0], p[1], p[2], p[3]);
         paint();
       });
     });

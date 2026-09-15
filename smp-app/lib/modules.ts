@@ -7,10 +7,13 @@
    Strategy for ever (spec 046 §7, Islam's call on 2026-09-11).
 
    TWO SEGMENTS STAY ON THE SPINE and are not a module's:
-     · `setup`  — one Setup page for the whole client, a Client group and a
-                  group per module (spec 046 §4.5, which REJECTS a Setup page
-                  per module: an administrator sets several up in one sitting,
-                  and the spine has to live somewhere inside no module);
+     · `setup`  — the CLIENT'S Setup: the pages that belong to no module
+                  (people, the organisation, branding, the knowledge base).
+                  A module's own Setup is `/<client>/<module>/setup/…`, which
+                  reads as that module with `setup` inside it (spec 054 §4.2,
+                  REVERSING spec 046 §4.5's one page for the whole client:
+                  Islam, 2026-09-15, each module has its own setup elements,
+                  its access and its landing line);
      · `tour`   — the intro round, offered by the landing, which is spine too.
    `/<client>` itself is the landing and shows what is waiting across every
    module, so it never carries one either.

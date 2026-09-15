@@ -9112,6 +9112,29 @@ python3 checks/attention-rows.py # what is waiting on the office — one list, t
                                 # never zero (§93); the landing's own drawing of the
                                 # list is welcome.py §5. 6 red on the build before,
                                 # exactly the section that exists for the deletion
+python3 checks/setup-per-module.py # a def knows its module, and the rail draws
+                                # by it (§356.2, spec 054 §4.2–§4.3): every def
+                                # carries `mod`, the rail is the defs marked with
+                                # the document's scope — asserted as AGREEMENT, both
+                                # ends (a page absent from the wrong rail AND present
+                                # in the right one, or a build drawing an empty rail
+                                # passes half), unscoped (file://) it is the whole
+                                # list as before, the page decides the rail when the
+                                # two disagree (research R2), the moved pages still
+                                # WRITE (§96), the fold keys survive a reload (§30.2),
+                                # and the way back is drawn on the client's rail alone
+                                # and read at 4.5:1. With SMP_BASE the served half:
+                                # two rails at two addresses, the address each writes,
+                                # a spine-form door ending at the module's own address,
+                                # and the gear from a unit page and from the client's
+                                # rail. Without SMP_BASE it SAYS the served half did
+                                # not run (§54.5). 0/0 both halves; red 4 / 2 / 1 from
+                                # the SOURCES on the file:// half and 1 / 6 on the
+                                # served one (restoreWhere scoped again; the router
+                                # writing no scope) — and the filter break leaves the
+                                # agreement line GREEN (both sides vanish, §113.8),
+                                # which is why the "none of the other rail's" half
+                                # exists
 python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
                                 # the filter, and a match inside a FOLDED group is findable
                                 # (§108.13, §108.14 — all three fail silently)
@@ -9411,7 +9434,27 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;355: who can see one report (spec
+*Last Updated: 2026-09-15 &mdash; **&sect;356.2: a def knows its module, and
+the rail draws by it (spec 054 &sect;4.2&ndash;&sect;4.3, on the branch).**
+Step 2 of six: every Setup def carries `mod`, the served router writes
+`data-setup-scope` from whether the module word LED the address and the gear
+writes the module the document was served for, the rail is that one field
+against that one attribute, and the offline copy &mdash; which nothing scopes
+&mdash; draws everything as before. **The page decides the rail when the two
+disagree** (a landing door in the spine form ends at the module's own
+address), **and `restoreWhere()` had to look in every rail** &mdash; found by
+the served half going red: validated against the scoped list, a spine-form
+door to Reporting cycle read as unreachable and landed the person on the
+group's Performance. Setup is the spine's own document for every module,
+served before the registry is asked; the server stamps the module's label;
+the way back sits in a row of its own because three things in a 168px head
+wrap. `setup-per-module.py` 0/0 on both halves, red 4 / 2 / 1 from the
+sources over file:// and **1 / 6 served** (restoreWhere scoped again is
+exactly the finding; the router writing no scope prints the whole list of
+eighteen six times); `shell.mjs` 74/0, door 70/0, `setup-rail.py` and `setup-search.py`
+rewritten never loosened, `qa.py` walking both rails at Next.*
+
+*Earlier the same day: **&sect;355: who can see one report (spec
 046 &sect;4.10).** Islam, of Insights: *"normally every one in the company can
 see the reports and forefront can publish but for some certain reports it might
 need to belong to a function or more not the whole company &hellip; a simple

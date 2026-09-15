@@ -201,6 +201,29 @@ with sync_playwright() as p:
                                                   "els=>els.map(e=>e.dataset.sub2)"):
                     pg.click('.setuppane .secrow [data-sub2="%s"]'%k2); pg.wait_for_timeout(160)
                 seen+=1
+            # TWO RAILS WHERE THE APP IS SERVED (356.2, spec 054): the gear
+            # opens the module's own Setup, and the CLIENT'S pages — people,
+            # the organisation, branding, the knowledge base — sit on a rail
+            # of their own reached from the landing. Over file:// there is one
+            # rail holding everything and the walk above has already covered
+            # it; served, the client's rail is walked by its own address, or
+            # half of Setup goes unvisited while the sweep prints "ok".
+            if BASE:
+                pg.goto(BASE+"/raya-trade/setup/people")
+                pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
+                pg.wait_for_timeout(400)
+                for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
+                                                 "els=>els.map(e=>e.dataset.railgrp)"):
+                    pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(120)
+                for key in pg.eval_on_selector_all(".setuprail [data-setupgo]",
+                                                   "els=>els.map(e=>e.dataset.setupgo)"):
+                    el=pg.query_selector('.setuprail [data-setupgo="%s"]'%key)
+                    if not el: continue
+                    el.click(); pg.wait_for_timeout(160)
+                    for k2 in pg.eval_on_selector_all(".setuppane .secrow [data-sub2]",
+                                                      "els=>els.map(e=>e.dataset.sub2)"):
+                        pg.click('.setuppane .secrow [data-sub2="%s"]'%k2); pg.wait_for_timeout(160)
+                    seen+=1
         print(v,"ok", seen, "destinations")
 
     # ── THE TEMPLATE MUST SURVIVE A ROUND TRIP (51.14) ───────────────
@@ -341,8 +364,17 @@ with sync_playwright() as p:
     if "reported against" not in dele["blocked"].get("merchandising", []):
         errs.append("DELETE: a function that has been reported against is not "
                     "refused on that ground (%r)" % dele["blocked"].get("merchandising"))
-    # Through the page, in edit mode, the way a person does it.
-    pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
+    # Through the page, in edit mode, the way a person does it. FUNCTIONS IS
+    # THE CLIENT'S PAGE (356.2, spec 054): served, the gear opens the
+    # module's rail and this page is on the other one, reached by its own
+    # address; over file:// the one rail holds everything and the gear is the
+    # way in.
+    if BASE:
+        pg.goto(BASE+"/raya-trade/setup/fns")
+        pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
+        pg.wait_for_timeout(400)
+    else:
+        pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
     for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
                                      "els=>els.map(e=>e.dataset.railgrp)"):
         pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(100)

@@ -10,6 +10,7 @@
    the policy is vercel.json's, word for word. */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { MODULE_DEF, isModule } from "./modules.ts";
 
 let body: string | null = null;
 export function shellBody(): string {
@@ -35,6 +36,12 @@ export function shellDocument(tenantName: string, module: string | null = null, 
   const brk = process.env.SMP_BREAK || "";
   return "<!doctype html>\n<html lang='en'" + (brk === "no-route" ? " data-break='no-route'" : "") +
     (module ? " data-module='" + esc(module) + "'" : "") +
+    /* AND ITS NAME (§356.2): the frozen shell heads a module's own Setup rail
+       with the module's word, and a label capitalised out of the key in the
+       browser is how two screens come to spell one module differently
+       (§53.5) — so the label the console and the switcher read is stamped
+       beside the key, from the one definition. */
+    (module && isModule(module) ? " data-module-label='" + esc(MODULE_DEF[module].label) + "'" : "") +
     /* AND WHICH MODULES THIS CLIENT HAS (spec 046 §4.5). The browser holds no
        list of its own — `data-module` already told it where it IS, and this
        tells it where else it may go, so shell/route.js can draw the switcher

@@ -139,9 +139,13 @@ await section("2b · the module leads the address, and the spine carries none", 
     "…a function's too, its own two segments intact", r.status + " " + r.headers.get("location"));
 
   /* …and the spine is served where it stands rather than being pushed under
-     a module it does not belong to (spec 046 §4.5) */
+     a module it does not belong to — the CLIENT'S Setup, the pages that
+     belong to no module (spec 054 §4.1) — while a module's own Setup is
+     served under its word (spec 054 §4.2), both as the same document */
   r = await hit("/raya-trade/setup/people");
-  check(r.status === 200, "Setup is NOT redirected — it is the client's page, in no module", r.status + " " + (r.headers.get("location") || ""));
+  check(r.status === 200, "the client's Setup is NOT redirected — it is the client's page, in no module", r.status + " " + (r.headers.get("location") || ""));
+  r = await hit("/raya-trade/strategy/setup/cycle");
+  check(r.status === 200 && /data-module='strategy'/.test(await r.text()), "…and Strategy's own Setup is served under its word, as the shell (§356.2)", r.status + " " + (r.headers.get("location") || ""));
   r = await hit("/raya-trade/tour");
   check(r.status === 200, "…nor is the intro round, which the landing offers", r.status + " " + (r.headers.get("location") || ""));
 
@@ -169,11 +173,18 @@ await section("2b · the module leads the address, and the spine carries none", 
   pl = await place();
   check(!!pl[0] && /^\/raya-trade\/strategy\//.test(path()), "the module alone opens where the person works, and says so in the address", JSON.stringify(pl) + " " + path());
 
-  /* the address the SHELL writes, on both sides of the spine line */
+  /* the address the SHELL writes, on both sides of the spine line: the
+     client's rail writes the spine form and Strategy's rail writes the
+     module form (spec 054 §4.2), and the walk between them is the scope
+     moving with the page (checks/setup-per-module.py owns the rest) */
   await open("/raya-trade/setup/people");
-  await page.click('#subtabs button[data-s="access"]').catch(() => {});
+  await page.click('.setuprail [data-setupgo="mainbu"]').catch(() => {});
   await page.waitForTimeout(400);
-  check(/^\/raya-trade\/setup\//.test(path()), "pressing inside Setup writes an address with no module in it", path());
+  check(/^\/raya-trade\/setup\/mainbu$/.test(path()), "pressing inside the client's Setup writes an address with no module in it", path());
+  await open("/raya-trade/strategy/setup/cycle");
+  await page.click('.setuprail [data-setupgo="access"]').catch(() => {});
+  await page.waitForTimeout(400);
+  check(/^\/raya-trade\/strategy\/setup\/access$/.test(path()), "…pressing inside Strategy's Setup writes the module's own form", path());
   await page.evaluate(() => { current = "mobile"; currentSub = "strategy"; paint(); });
   await page.waitForTimeout(400);
   check(/^\/raya-trade\/strategy\/mobile\//.test(path()), "…and walking from Setup to a unit writes the module back", path());

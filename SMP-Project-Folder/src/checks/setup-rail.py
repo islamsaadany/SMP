@@ -254,13 +254,23 @@ with sync_playwright() as p:
         "e=>e.filter(x=>x.scrollWidth>x.clientWidth+1).map(x=>x.textContent.trim())")
     ck("no label is clipped", not clipped, clipped)
 
-    print("\n── 6 · People & access is in the order the mockup drew (§120.3) ──")
+    print("\n── 6 · People & access is in the order the mockup drew (§120.3), less the roles (§356.2) ──")
+    # REWRITTEN, NEVER LOOSENED (§218): §120.3 drew register · roles · BU list,
+    # and spec 054 §4.4 moved Roles & access into a group of its own, the
+    # module's Access — so the People group keeps the mockup's order of what
+    # it still holds, and the roles are asserted at their NEW home rather than
+    # dropped from the assertion (§94.2: a build that lost the page passes
+    # the first half alone).
     order = pg.evaluate("""()=>{
       const h=[...document.querySelectorAll('.setuprail .rgroup')]
                 .find(x=>/People/.test(x.textContent));
       return [...h.nextElementSibling.querySelectorAll('.rilab')].map(x=>x.textContent.trim());}""")
-    ck("register, then roles, then the BU list",
-       order == ["People register", "Roles & access", "Official BU list"], order)
+    ck("register, then the BU list", order == ["People register", "Official BU list"], order)
+    access = pg.evaluate("""()=>{
+      const h=[...document.querySelectorAll('.setuprail .rgroup')]
+                .find(x=>/^\\S*Access/.test(x.textContent.trim().replace(/^[\\u25b8\\u25be]\\s*/,'')));
+      return h ? [...h.nextElementSibling.querySelectorAll('.rilab')].map(x=>x.textContent.trim()) : null;}""")
+    ck("…and Roles & access sits in the Access group", access == ["Roles & access"], access)
 
     b.close()
 

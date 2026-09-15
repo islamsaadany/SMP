@@ -5796,7 +5796,10 @@ function attentionRows(){
    list rather than written out again — rename a page and this follows (§108.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
-  var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
+  /* `setupDefsAll` since §356.2: a destination is named whichever rail holds
+     it — a landing row for the register is drawn beside Strategy's rail. */
+  var d = (typeof setupDefsAll === "function" ? setupDefsAll()
+           : typeof setupDefs === "function" ? setupDefs() : []).filter(
     function(x){ return x.k === k; })[0];
   return d ? d.label : k;
 }

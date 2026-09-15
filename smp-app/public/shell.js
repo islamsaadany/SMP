@@ -35937,7 +35937,10 @@ function attentionRows(){
    list rather than written out again — rename a page and this follows (§108.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
-  var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
+  /* `setupDefsAll` since §356.2: a destination is named whichever rail holds
+     it — a landing row for the register is drawn beside Strategy's rail. */
+  var d = (typeof setupDefsAll === "function" ? setupDefsAll()
+           : typeof setupDefs === "function" ? setupDefs() : []).filter(
     function(x){ return x.k === k; })[0];
   return d ? d.label : k;
 }
@@ -48383,7 +48386,8 @@ var WELCOME = (function(){
      rename a page there and this follows (§108.3). */
   function setupWord(k){
     try {
-      var d = setupDefs().filter(function(x){ return x.k === k; })[0];
+      var all = typeof setupDefsAll === "function" ? setupDefsAll() : setupDefs();
+      var d = all.filter(function(x){ return x.k === k; })[0];
       if (d) return d.label;
     } catch(e){}
     return "Setup";
@@ -51621,7 +51625,7 @@ var SYNC = (function () {
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -51632,8 +51636,8 @@ var SYNC = (function () {
          §120.3 put it above the BU list and gave both a mark. Neither side is
          complete without the other, which is what a two-line conflict looks
          like when both edits are right. */
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
-      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
+      { k:"access", ac:"c_access", grp:"access", mod:"strategy", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
+      { k:"mainbu", ac:"c_people", grp:"who", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       /* ── SETTING A CLIENT UP (§318, spec 044) ────────────────────────
          Islam picked the placement: a rail entry under *The organisation*,
@@ -51648,13 +51652,13 @@ var SYNC = (function () {
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
-      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", grp:"run", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
-      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
-      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
+      { k:"companies", ac:"c_units", grp:"run", mod:"client", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    grp:"run", mod:"client", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
+      { k:"caps",   ac:"c_caps",   grp:"run", mod:"client", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
 
       /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
          FILLING one were two Setup pages; they are one page with two sections
@@ -51667,7 +51671,7 @@ var SYNC = (function () {
          who is not the SMO gets only Fill; anybody else gets no entry at all,
          because paint() drops a def whose every section is refused. Gate the
          parent on c_sets and the owner loses the page they exist for. */
-      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", glyph:"Σ", find:"figure sets owner claim source of figures numbers finance", sections: function(){
+      { k:"sets",   ac:"c_source", grp:"meas", mod:"strategy", label:"Figure sets", glyph:"Σ", find:"figure sets owner claim source of figures numbers finance", sections: function(){
           return [{ k:"cfg",  ac:"c_sets",   label:"Sets configuration", render:renderSetsSetup },
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
@@ -51689,14 +51693,14 @@ var SYNC = (function () {
          glyph, the keywords and the page are untouched — and the group is
          the one place order is decided (SETUP_GROUPS), so nothing else needs
          to know it moved. */
-      { k:"focusset", ac:"c_focus", grp:"meas", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
-      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
+      { k:"focusset", ac:"c_focus", grp:"meas", mod:"strategy", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
+      { k:"bands",  ac:"c_bands",  grp:"meas", mod:"strategy", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
          developer calls that; to everybody else it sounds like stickers on a
          chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
+      { k:"labels", ac:"c_labels", grp:"meas", mod:"strategy", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
@@ -51714,7 +51718,7 @@ var SYNC = (function () {
          moved (§24) — a rail that names something it no longer holds is the
          same fault as a page naming itself something the rail does not
          (§121.1). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent email sender footer kicker",             render:renderBranding }
+      { k:"brand",  ac:"c_brand",  grp:"look", mod:"client", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent email sender footer kicker",             render:renderBranding }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -51737,7 +51741,7 @@ var SYNC = (function () {
          rows themselves stay (`attentionRows()`, config-render.js): the
          landing, the rail's pills (§108.15) and the home mark (§197.2) all
          read them. What went is one page that said the same thing twice. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -51769,13 +51773,13 @@ var SYNC = (function () {
          one is the better one: the qualifier is doing the work either way, and
          a rail entry is scanned rather than read. The KEY stays `chat`, which
          the endpoint, `GROUP.chat` and the checks all name (§65, §108.3). */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
+      { k:"chat",     ac:"c_chat",  grp:"cycle", mod:"strategy",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* HISTORY (§262): who changed what, where, from what to what — and a
          way back. The office's by rule, like the inbox above it; never drawn
          where there is no server to hold a log. */
-      { k:"history",  ac:"c_history", grp:"cycle", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
+      { k:"history",  ac:"c_history", grp:"cycle", mod:"strategy", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
         when: function(){ return inOffice() && TRAIL.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
         render:function(){ return TRAIL.renderPage(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
@@ -51807,7 +51811,7 @@ var SYNC = (function () {
          EACH SECTION KEEPS ITS OWN GATE (§108.4), so somebody holding
          `c_comms` and not `c_send` still reaches the settings half, and
          paint() drops the whole entry for somebody holding neither. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sent record history drafts sender reply-to footer kicker display name outgoing from address",
+      { k:"send",     ac:"c_send", grp:"cycle", mod:"strategy",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sent record history drafts sender reply-to footer kicker display name outgoing from address",
         when: function(){ return inOffice(); },
         sections: function(){
           return [{ k:"over",    ac:"c_send",  label:"Overview",       render:renderMsgOverview },
@@ -51818,7 +51822,7 @@ var SYNC = (function () {
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
-      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", glyph:"№", find:"figures i report my numbers named",
+      { k:"myfig",    ac:"c_myfig", grp:"cycle", mod:"strategy",  label:"Figures I report", glyph:"№", find:"figures i report my numbers named",
         when: ownsAnySource,                                render:renderMySources },
 
       /* ── ONE PAGE, TWO SECTIONS (§108.4) ──────────────────────────────
@@ -51860,7 +51864,7 @@ var SYNC = (function () {
          EACH SECTION KEEPS ITS OWN GATE (§130.4), which is what lets Video
          storage be the office's while the others follow `c_import` — and
          it is why this could not simply inherit the page's key. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Import & storage", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace video clips storage space delete clear mb size presentation",
+      { k:"import",   ac:"c_import", grp:"cycle", mod:"strategy", label:"Import & storage", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace video clips storage space delete clear mb size presentation",
         sections: function(){
           /* FOUR: what leaves, what arrives, the record of what an arrival
              displaced, and what the platform is holding. §304 split the one
@@ -51897,7 +51901,7 @@ var SYNC = (function () {
          a tick somebody could set on a bad afternoon. `c_kb` stays `area:
          "always"` so the grant machinery is untouched; this gate sits in front
          of it, and nothing else reads that key. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",
+      { k:"kb",       ac:"c_kb", grp:"help", mod:"client",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",
         when: function(){ return inOffice(); },                          render:renderKB }
     ]
   };
@@ -51959,7 +51963,14 @@ var SYNC = (function () {
     /* The TAB has to still be one this viewer holds at that destination, or
        the page under it is an empty frame. The section is corrected further
        down by the renderer itself, so it is enough to hand it over. */
-    var defs = reachable(defsFor(w.d), w.d, w.d);
+    /* A SETUP PAGE IS LOOKED FOR IN EVERY RAIL (§356.2): the served router
+       has already scoped the document from the address, and a landing door
+       written in the spine form names a page of ANOTHER rail on purpose —
+       checked against the scoped list alone it would read as unreachable
+       and the person would land where they work instead of where they
+       pressed (§61). paint() then moves the scope to the page's own module
+       (resolveSetupScope). */
+    var defs = reachable(w.d === "setup" ? setupDefsAll() : defsFor(w.d), w.d, w.d);
     if (!w.s || !defs.some(function(d){ return d.k === w.s; })) return null;
     return w;
   }
@@ -52413,10 +52424,56 @@ var SYNC = (function () {
      would be the SHIPPED word for ever, on a page whose heading now says the
      client's. Resolved at render time instead, in the one function that
      builds this list, so the rail and the page it opens cannot disagree. */
-  function setupDefs(){
+  function setupDefsAll(){
     return SUBS.manage.concat(SUBS.setup).map(function(d){
       return d.k === "units" ? Object.assign({}, d, { label:L("unitword","bu") }) : d;
     });
+  }
+  /* ── WHICH RAIL (§356.2, spec 054 §4.2, research R2) ────────────────
+     The document carries a SCOPE: a module word (`strategy`, `insights`) for
+     that module's own Setup, `client` for the pages that belong to no module,
+     or nothing at all. It is written by the served router (shell/route.js)
+     from the address — `/<client>/<module>/setup/…` against
+     `/<client>/setup/…` — and by the gear, which opens the module you are
+     standing in. NOTHING WRITES IT OVER file://, and that is the offline copy
+     (§306) keeping its single rail: an unscoped document draws every page in
+     one list, exactly as before this section, because an absent filter is
+     what "no modules here" means rather than a special case written for it.
+
+     `setupDefs()` is the scoped list every caller of the rail reads;
+     `setupDefsAll()` is for the readers that name a page by its key
+     whichever rail it sits in (a landing row's destination, the welcome's
+     page words) — a label looked up in the wrong rail would fall back to
+     the key, which is §51.11's silent direction. */
+  function setupScope(){
+    return document.documentElement.getAttribute("data-setup-scope") || "";
+  }
+  function setScope(v){
+    if (v) document.documentElement.setAttribute("data-setup-scope", v);
+    else document.documentElement.removeAttribute("data-setup-scope");
+  }
+  /* The module this document was served for — the gear's scope. Absent over
+     file://, where the gear opens everything. */
+  function moduleWord(){ return document.documentElement.getAttribute("data-module") || ""; }
+  function moduleLabel(){ return document.documentElement.getAttribute("data-module-label") || ""; }
+  function setupDefsFor(scope){
+    var all = setupDefsAll();
+    if (!scope) return all;
+    return all.filter(function(d){ return (d.mod || "client") === scope; });
+  }
+  function setupDefs(){ return setupDefsFor(setupScope()); }
+  /* THE PAGE DECIDES THE RAIL WHEN THE TWO DISAGREE. An address is a
+     request — the landing's doors write `/<client>/setup/<page>` for every
+     page and let the shell resolve it (spec 054 plan, research R2) — so a
+     page asked for under the wrong scope moves the scope to the page's own
+     module rather than being corrected to the first page of the wrong rail.
+     Asked only while a scope is set at all: the offline copy resolves
+     nothing, having nothing to resolve between. */
+  function resolveSetupScope(){
+    var scope = setupScope();
+    if (!scope || !currentSub) return;
+    var hit = setupDefsAll().filter(function(d){ return d.k === currentSub; })[0];
+    if (hit && (hit.mod || "client") !== scope) setScope(hit.mod || "client");
   }
 
   /* THE GROUP NAMES ANSWER RATHER THAN ASK (§108.2). §46 named these as the
@@ -52437,7 +52494,19 @@ var SYNC = (function () {
     { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
     { k:"run",  label:"The organisation",  note:"The things being planned" },
     { k:"meas", label:"Measurement",       note:"What the numbers mean" },
-    { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" }
+    /* ── §356.2: A DEF KNOWS ITS MODULE (spec 054 §4.3) ─────────────────
+       Every def above carries `mod` — the module that owns the page, or
+       "client" for the pages that belong to no module (people, the org,
+       branding, the knowledge base). Which rail a page is drawn in is
+       decided by that one field and the document's scope (setupScope below),
+       never by a second list: a page cannot be in two rails or none.
+       `access` is Roles & access, Strategy's own now — the matrix is
+       Strategy's roles against Strategy's areas, and the seats stay on the
+       People register (spec 054 §4.4). `help` holds the knowledge base on
+       the client's rail; Islam took the drawing that marks it as moving. */
+    { k:"access", label:"Access",           note:"Who may do what in this module" },
+    { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" },
+    { k:"help", label:"Help",             note:"How the platform works, in its own words" }
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -52645,10 +52714,27 @@ var SYNC = (function () {
        filters — §108.5 capped that list to the window, and a search box that
        leaves the screen when you scroll to read your own results is a control
        below the fold by another road (§90). */
-    return '<div class="rail setuprail"><div class="rhead">Setup' +
+    /* THE HEAD SAYS WHICH RAIL THIS IS (§356.2): a module's own word before
+       "Setup", or "Client" for the pages that belong to no module — and that
+       one carries the way back to the landing it was opened from, which is
+       the only way in it has (spec 054 §4.1). Unscoped (file://) it says
+       "Setup" and nothing more, exactly as it did. */
+    var scope = setupScope();
+    var headWord = scope === "client" ? "Client \u00b7 Setup"
+                 : scope && moduleLabel() ? moduleLabel() + " \u00b7 Setup"
+                 : "Setup";
+    /* A ROW OF ITS OWN under the head, not a third thing inside it: the head
+       is 168px wide inside its padding and "CLIENT · SETUP" with a toggle
+       already takes most of that, measured, so a link beside it wraps. */
+    var slug = (location.pathname.split("/")[1] || "");
+    var back = scope === "client" && slug
+      ? '<div class="railback-row"><a class="railback" href="/' + esc(slug) + '">' +
+        '\u2039 Back to the landing</a></div>'
+      : "";
+    return '<div class="rail setuprail"><div class="rhead">' + esc(headWord) +
       '<button type="button" class="railtog" data-railtog="0" ' +
         'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
-        'aria-expanded="true">' + ICO_CHEV + '</button></div>' +
+        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + back +
       '<div class="railfind">' +
         '<input type="search" class="railq" data-railq="1" autocomplete="off" ' +
           'placeholder="Find a setting\u2026" aria-label="Find a setting" ' +
@@ -52673,7 +52759,11 @@ var SYNC = (function () {
        is a door behind a door, which §32 removed once already at the gate. The
        gear IS the door now; this function only answers whether there is
        anything behind it, and which page to land on. */
-    var st = reachable(setupDefs(), "group", null);
+    /* THE GEAR'S LIST IS THE MODULE'S (§356.2), whatever rail is on screen:
+       from the client's rail the gear still opens Strategy's Setup, so the
+       landing page is asked of the module's own defs and not of `setupDefs()`,
+       which reads the scope of the moment. */
+    var st = reachable(setupDefsFor(moduleWord()), "group", null);
     /* THE PRIMARY PAGE, falling back to the first the viewer holds. Landing on
        "whatever happens to be first in the array" put the gear on the knowledge
        base — true of the list, wrong for the person pressing it, who is far
@@ -53183,6 +53273,10 @@ var SYNC = (function () {
         if (current !== b.dataset.md) leaveModes();
         current = b.dataset.md;
         currentSub = b.dataset.ms;
+        /* THE GEAR IS THE MODULE'S DOOR (§356.2): pressed inside a module it
+           opens that module's Setup; over file:// there is no module word and
+           the scope is cleared, which draws every page in one rail. */
+        if (b.dataset.md === "setup") setScope(moduleWord());
         paint(); window.scrollTo(0,0);
       });
     });
@@ -53450,6 +53544,7 @@ var SYNC = (function () {
        function that holds it. */
     CURRENT_REPORT_KEY = isFn(current) || isCapDest(current)
       ? current : (UNITS[current] ? UNITS[current].ukey : null);
+    if (current === "setup") resolveSetupScope();
     var defs = reachable(defsFor(current), TARGET, arg);
     /* NO FALLBACK ONTO THE UNFILTERED LIST. It used to re-add every allowed def
        when the reachable set came out empty, which put back exactly the defs
@@ -61172,9 +61267,20 @@ var SYNC = (function () {
    `data-module` by the server, which owns the list (lib/modules.ts), and this
    writes that word back into every address it pushes — so a module added
    tomorrow needs no edit in the browser. What IS this file's own vocabulary
-   is which destinations belong to the SPINE and carry no module: `setup`,
-   one page for the whole client (spec 046 §4.5), and the intro round, both
-   of which kindOf() and placeOf() already had to name.
+   is which destinations belong to the SPINE and carry no module: the intro
+   round, and the CLIENT'S Setup — the pages that belong to no module (spec
+   054 §4.1) — both of which kindOf() and placeOf() already had to name.
+
+   SETUP HAS TWO ADDRESSES AND THE MODULE WORD IS WHAT TELLS THEM APART
+   (§356.2, spec 054 §4.2, research R2). `/<client>/<module>/setup/<page>` is
+   that module's own Setup and `/<client>/setup/<page>` is the client's; the
+   difference is written onto the document as `data-setup-scope` (the module
+   word, or `client`) and the frozen shell draws its rail from that one
+   attribute. The address is a REQUEST rather than the authority: the landing
+   writes every Setup door in the spine form and the shell moves the scope
+   to the page's own module (shell.html resolveSetupScope), after which the
+   place becomes the address again — so a door pressed on the landing ends
+   at the address the product writes, and Back walks through it.
 
    So this does two things and nothing else:
      · on arrival, the address becomes §173's remembered place, so the
@@ -61208,11 +61314,22 @@ var SYNC = (function () {
   function kindOf(d) { return d === "group" ? "group" : d === "setup" ? "setup" : /^fn:/.test(d) ? "fn" : /^co:/.test(d) ? "co" : "unit"; }
   /* The path after the client's slug, whichever address this is asked of. */
   function restOf(path) { return String(path || "").replace(/^\/[^/]+\/?/, ""); }
+  /* The rail the document draws (shell.html setupScope): a module word for
+     that module's own Setup, `client` for the pages that belong to no module,
+     absent everywhere else. The frozen shell reads and writes the same
+     attribute, so the two never hold a second copy of each other. */
+  function setScope(v) {
+    if (v) document.documentElement.setAttribute("data-setup-scope", v);
+    else document.documentElement.removeAttribute("data-setup-scope");
+  }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
-    /* the module leads every address but the spine's; `setup` and `tour` are
-       the spine's own words and are read where they stand */
-    if (MODULE && seg[0] === MODULE) seg = seg.slice(1);
+    /* the module leads every address but the spine's; `tour` and the
+       client's `setup` are the spine's own words and are read where they
+       stand — and whether the module word LED is what says which Setup an
+       address names, so it is remembered before the word is dropped */
+    var led = !!(MODULE && seg[0] === MODULE);
+    if (led) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
@@ -61220,7 +61337,7 @@ var SYNC = (function () {
     else if (seg[0] === "tour") { return { tour: true }; }
     else d = seg[0];
     var kind = kindOf(d), s = null, c = null;
-    if (kind === "setup") { s = seg[i] || null; }
+    if (kind === "setup") { s = seg[i] || null; setScope(led ? MODULE : "client"); }
     else {
       var w = seg[i] ? TAB_IN[seg[i]] : null;
       s = w ? (w[kind] || null) : (seg[i] || null);
@@ -61233,9 +61350,14 @@ var SYNC = (function () {
   function addressOf(d, s, c) {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
-    /* Setup is the client's, not a module's (spec 046 §4.5), so it is the one
-       destination whose address carries no module word. */
-    var out = "/" + SLUG + (MODULE && kind !== "setup" ? "/" + MODULE : "") + "/" + seg;
+    /* A module's Setup carries its module word and the client's carries
+       none (spec 054 §4.2): the scope the shell resolved decides, so a door
+       pressed at `/<client>/setup/cycle` is rewritten to Strategy's own
+       address once the page has said whose it is. Unscoped — which the
+       served shell never is inside Setup — the spine form is written. */
+    var scoped = kind === "setup" ? (document.documentElement.getAttribute("data-setup-scope") || "") : "";
+    var word = kind === "setup" ? (scoped && scoped !== "client" ? scoped : "") : MODULE;
+    var out = "/" + SLUG + (word ? "/" + word : "") + "/" + seg;
     if (s) out += "/" + (kind === "setup" || kind === "group" ? s : (TAB_OUT[s] || s));
     if (c && kind !== "setup") out += "/" + c;
     return out;

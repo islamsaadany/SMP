@@ -264,7 +264,8 @@ var WELCOME = (function(){
      rename a page there and this follows (§108.3). */
   function setupWord(k){
     try {
-      var d = setupDefs().filter(function(x){ return x.k === k; })[0];
+      var all = typeof setupDefsAll === "function" ? setupDefsAll() : setupDefs();
+      var d = all.filter(function(x){ return x.k === k; })[0];
       if (d) return d.label;
     } catch(e){}
     return "Setup";

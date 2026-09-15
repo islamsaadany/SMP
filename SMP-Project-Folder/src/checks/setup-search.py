@@ -176,6 +176,34 @@ with sync_playwright() as p:
        pg.eval_on_selector("[data-railq]", "e=>e.value") == "" and
        len(shown(pg)) == len(everything), (len(shown(pg)), len(everything)))
 
+    print("\n── 10 · the search reaches the rail on screen and nothing else (§356.2) ──")
+    # Served, Setup is two rails — a module's own and the client's — and a
+    # search in one must not find a page that lives in the other, or a match
+    # opens a page the rail is not drawing. The scope is the document's own
+    # attribute (shell.html setupScope), set here the way the served router
+    # sets it, and BOTH ENDS are asserted: the page absent from the wrong
+    # rail AND present in the right one, or a filter that finds nothing
+    # anywhere passes the first half (§94.2).
+    # Standing on a page of the rail being scoped, because the page decides
+    # the rail (research R2): scoped to Strategy while on Branding, the shell
+    # would correctly move the scope straight back.
+    pg.evaluate("()=>{currentSub='cycle'; document.documentElement.setAttribute('data-setup-scope','strategy'); paint();}")
+    pg.wait_for_timeout(400)
+    type_q(pg, "logo")
+    ck("Branding (the client's) is not found from Strategy's rail", "brand" not in shown(pg), shown(pg))
+    type_q(pg, "threshold")
+    ck("…and Scoring bands (Strategy's) is", shown(pg) == ["bands"], shown(pg))
+    pg.evaluate("()=>{currentSub='people'; document.documentElement.setAttribute('data-setup-scope','client'); paint();}")
+    pg.wait_for_timeout(400)
+    type_q(pg, "logo")
+    ck("from the client's rail Branding is found", "brand" in shown(pg), shown(pg))
+    type_q(pg, "threshold")
+    ck("…and Scoring bands is not", "bands" not in shown(pg), shown(pg))
+    type_q(pg, "")
+    pg.evaluate("()=>{document.documentElement.removeAttribute('data-setup-scope'); paint();}")
+    pg.wait_for_timeout(300)
+    ck("unscoped again, the whole list is back (§94.2)", len(shown(pg)) == len(everything), len(shown(pg)))
+
     b.close()
 
 print("\nconsole errors:", errs or "none")

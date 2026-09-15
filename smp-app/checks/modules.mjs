@@ -255,7 +255,12 @@ for (const k of BUILT_EXTRA) {
 }
 check("an unbuilt module's word is not an address either",
   whereOf(["portfolio"], modulesFor(["portfolio"])).legacy, JSON.stringify(whereOf(["portfolio"], modulesFor(["portfolio"]))));
-check("Setup is the spine's and carries no module", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
+check("the client's Setup is the spine's and carries no module (spec 054 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
+/* BOTH ENDS (§94.2, §356.2): a module's own Setup reads as that module with
+   `setup` inside it, so the route can serve it stamped with the module's
+   word — a build that swallowed `setup` after any module word into the spine
+   passes the line above alone. */
+check("…and a module's own Setup is that module's, with `setup` inside it (spec 054 §4.2)", same(whereOf(["strategy", "setup", "cycle"], HAVE_BOTH), { module: "strategy", rest: ["setup", "cycle"], legacy: false }));
 check("the tour is the spine's too", whereOf(["tour"], HAVE_BOTH).module === null);
 /* A caller that forgets to say which modules the client has gets the NARROW
    answer, never every module — the safe direction (§42). */

@@ -13,9 +13,20 @@
    `data-module` by the server, which owns the list (lib/modules.ts), and this
    writes that word back into every address it pushes — so a module added
    tomorrow needs no edit in the browser. What IS this file's own vocabulary
-   is which destinations belong to the SPINE and carry no module: `setup`,
-   one page for the whole client (spec 046 §4.5), and the intro round, both
-   of which kindOf() and placeOf() already had to name.
+   is which destinations belong to the SPINE and carry no module: the intro
+   round, and the CLIENT'S Setup — the pages that belong to no module (spec
+   054 §4.1) — both of which kindOf() and placeOf() already had to name.
+
+   SETUP HAS TWO ADDRESSES AND THE MODULE WORD IS WHAT TELLS THEM APART
+   (§356.2, spec 054 §4.2, research R2). `/<client>/<module>/setup/<page>` is
+   that module's own Setup and `/<client>/setup/<page>` is the client's; the
+   difference is written onto the document as `data-setup-scope` (the module
+   word, or `client`) and the frozen shell draws its rail from that one
+   attribute. The address is a REQUEST rather than the authority: the landing
+   writes every Setup door in the spine form and the shell moves the scope
+   to the page's own module (shell.html resolveSetupScope), after which the
+   place becomes the address again — so a door pressed on the landing ends
+   at the address the product writes, and Back walks through it.
 
    So this does two things and nothing else:
      · on arrival, the address becomes §173's remembered place, so the
@@ -49,11 +60,22 @@
   function kindOf(d) { return d === "group" ? "group" : d === "setup" ? "setup" : /^fn:/.test(d) ? "fn" : /^co:/.test(d) ? "co" : "unit"; }
   /* The path after the client's slug, whichever address this is asked of. */
   function restOf(path) { return String(path || "").replace(/^\/[^/]+\/?/, ""); }
+  /* The rail the document draws (shell.html setupScope): a module word for
+     that module's own Setup, `client` for the pages that belong to no module,
+     absent everywhere else. The frozen shell reads and writes the same
+     attribute, so the two never hold a second copy of each other. */
+  function setScope(v) {
+    if (v) document.documentElement.setAttribute("data-setup-scope", v);
+    else document.documentElement.removeAttribute("data-setup-scope");
+  }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
-    /* the module leads every address but the spine's; `setup` and `tour` are
-       the spine's own words and are read where they stand */
-    if (MODULE && seg[0] === MODULE) seg = seg.slice(1);
+    /* the module leads every address but the spine's; `tour` and the
+       client's `setup` are the spine's own words and are read where they
+       stand — and whether the module word LED is what says which Setup an
+       address names, so it is remembered before the word is dropped */
+    var led = !!(MODULE && seg[0] === MODULE);
+    if (led) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
@@ -61,7 +83,7 @@
     else if (seg[0] === "tour") { return { tour: true }; }
     else d = seg[0];
     var kind = kindOf(d), s = null, c = null;
-    if (kind === "setup") { s = seg[i] || null; }
+    if (kind === "setup") { s = seg[i] || null; setScope(led ? MODULE : "client"); }
     else {
       var w = seg[i] ? TAB_IN[seg[i]] : null;
       s = w ? (w[kind] || null) : (seg[i] || null);
@@ -74,9 +96,14 @@
   function addressOf(d, s, c) {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
-    /* Setup is the client's, not a module's (spec 046 §4.5), so it is the one
-       destination whose address carries no module word. */
-    var out = "/" + SLUG + (MODULE && kind !== "setup" ? "/" + MODULE : "") + "/" + seg;
+    /* A module's Setup carries its module word and the client's carries
+       none (spec 054 §4.2): the scope the shell resolved decides, so a door
+       pressed at `/<client>/setup/cycle` is rewritten to Strategy's own
+       address once the page has said whose it is. Unscoped — which the
+       served shell never is inside Setup — the spine form is written. */
+    var scoped = kind === "setup" ? (document.documentElement.getAttribute("data-setup-scope") || "") : "";
+    var word = kind === "setup" ? (scoped && scoped !== "client" ? scoped : "") : MODULE;
+    var out = "/" + SLUG + (word ? "/" + word : "") + "/" + seg;
     if (s) out += "/" + (kind === "setup" || kind === "group" ? s : (TAB_OUT[s] || s));
     if (c && kind !== "setup") out += "/" + c;
     return out;

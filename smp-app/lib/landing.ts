@@ -58,8 +58,11 @@ export async function landingFor(tenantId: string, personKey: string | null, ema
    why the module is the default one rather than a parameter — when a second
    module puts a row on this screen, that row brings its own (spec 046 §7).
 
-   SETUP CARRIES NO MODULE: it is one page for the whole client, a Client
-   group and a group per module (spec 046 §4.5). */
+   A SETUP DOOR IS WRITTEN IN THE SPINE FORM WHATEVER MODULE OWNS THE PAGE
+   (spec 054 §4.1, research R2): `/<client>/setup/<page>` is a request, and
+   the shell moves it to the page's own module — Strategy's Reporting cycle
+   ends at `/<client>/strategy/setup/cycle` — so this file keeps no copy of
+   which page belongs to which rail (§53.5). */
 export function doorHref(slug: string, go: Door): string {
   if (go.setup) return clientHref(slug, null, "setup/" + go.setup);
   const t = String(go.target || "group");

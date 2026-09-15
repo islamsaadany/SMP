@@ -48492,3 +48492,123 @@ exists for the deletion, every other assertion green on both builds (§94.5).
 `welcome.py`'s office-pages assertion REWRITTEN, never loosened (§218): it
 asks for Reporting cycle by name and asserts the old word absent.
 
+### §356.2 — A DEF KNOWS ITS MODULE, AND THE RAIL DRAWS BY IT (spec 054 §4.2–§4.3, §4.6)
+
+**ONE FIELD, NEVER A SECOND LIST.** Every Setup def carries `mod` — the
+module that owns the page, or `client` for the pages that belong to no module
+(the people, the organisation, branding, the knowledge base) — and which rail
+a page is drawn in is that field against ONE attribute on the document,
+`data-setup-scope`: a module word for that module's own Setup, `client` for
+the client's, absent for the offline copy. A page cannot be in two rails or
+none, because there is nothing to disagree with (§53.5). `SETUP_GROUPS` gains
+two: **Access**, which holds Roles & access alone and is Strategy's (spec 054
+§4.4 — the matrix is Strategy's roles against Strategy's areas, and the seats
+stay on the People register), and **Help**, which holds the knowledge base on
+the client's rail (spec 054 §2: the drawing marks it as moving and lists it
+nowhere, so it is the sixth door). **The fold keys do not move** (§30.2): the
+five groups keep theirs and the two new ones are new, so a fold somebody
+stored still folds the same group, asserted by writing one and reloading.
+**The client rail's groups — who, run, look, help — are named here and were
+not drawn in the mockup**, which drew the client block's six doors and the
+Strategy rail; said rather than left to be discovered.
+
+**THE SCOPE IS WRITTEN BY THE ADDRESS AND BY THE GEAR, AND BY NOTHING OVER
+`file://`.** The served router (`shell/route.js`) reads whether the module
+word LED the address — `/<client>/strategy/setup/cycle` against
+`/<client>/setup/people` — and writes the scope before it drops the word; the
+gear writes the module the document was served for (`data-module`). The
+offline copy (§306) has no server and therefore no module, so nothing
+writes a scope there and the unscoped list is the whole list, exactly as
+before this section: **an absent filter is what "no modules here" means,
+rather than a special case written for it.**
+
+**THE PAGE DECIDES THE RAIL WHEN THE TWO DISAGREE** (research R2). The
+landing writes every Setup door in the spine form and lets the shell resolve
+it (`lib/landing.ts` keeps no copy of which page belongs to which rail), so
+`resolveSetupScope()` runs in `paint()` before the defs are read: a page
+asked for under the wrong scope moves the scope to the page's own module,
+and the router then writes the page's own address — a door pressed at
+`/<client>/setup/cycle` ends at `/<client>/strategy/setup/cycle`, and Back
+walks off it rather than through a shape the product no longer writes. **A
+Setup address carries the SCOPE's word, not the document's**: a page of one
+module reached from another's document is written under its own module, so
+a reload serves the right document.
+
+**AND `restoreWhere()` HAD TO LOOK IN EVERY RAIL**, found by the served half
+of the check going red and not by reading: it validated the remembered tab
+against `defsFor("setup")`, which is the SCOPED list, so a landing door in
+the spine form named a Strategy page while the document was scoped `client`,
+the page read as unreachable, and the person landed where they work
+(§94.6's fallback) with the address rewritten to the group's Performance
+under them — the exact fault §61 names, from a door the landing itself
+drew. It asks `setupDefsAll()` for a Setup destination now, and `paint()`'s
+resolver moves the scope a line later. **The gear's landing page is asked of
+the MODULE's defs, from any rail** (`menuGroups` reads `setupDefsFor(
+moduleWord())`), so from the client's rail the gear still opens Strategy's
+Setup on Reporting cycle rather than the first page of whatever rail is on
+screen.
+
+**SETUP IS THE SPINE'S OWN DOCUMENT FOR EVERY MODULE** (research R1): the
+route serves `shellDocument()` itself for any address whose rest begins
+`setup`, before `modules/registry.ts` is asked, stamped with the module whose
+word led — so a module that draws its own document (Insights) never has to
+know how a Setup page is drawn, and `modules/strategy/index.ts`'s standing
+note that *Setup arrives here* is corrected in the same edit (§104.8). The
+server stamps **`data-module-label`** beside `data-module`, from
+`MODULE_DEF`, because the rail heads a module's Setup with its name and a
+label capitalised out of the key in the browser is how two screens come to
+spell one module differently (§53.5). The head reads *Client · Setup* /
+*Strategy · Setup* / *Setup* by scope.
+
+**THE WAY BACK IS A ROW OF ITS OWN, NOT A THIRD THING IN THE HEAD.** The
+client's rail is reached from the landing's block and from nowhere else (the
+gear opens the module you stand in), so it carries the one door out — and
+the first build put it INSIDE the head, where "CLIENT · SETUP" with the
+toggle already takes most of 168px inside the padding, measured, so a link
+beside it wraps. It sits under the head as `.railback-row`, `flex:none` for
+the reason the head and the search are (§108.5: the list under it is what
+scrolls), in `--ink-2` on the rail's own surface and never the accent, which
+is 4.45:1 on `--surface-2` (§38.5) — asserted at 4.5:1 with the sweep's own
+arithmetic.
+
+**PROVED**: `checks/setup-per-module.py` **0 failures on both halves** —
+the file:// half asserting the rail as AGREEMENT with the defs' own `mod`
+and BOTH ENDS every time (§94.2: a page absent from the wrong rail AND
+present in the right one), the moved pages still writing (§96: Roles &
+access presses the matrix and the data moves; the knowledge base draws its
+page), the fold keys surviving a reload; the served half (`SMP_BASE`) the
+two rails at their two addresses, the address each writes, the spine-form
+door ending at the module's own address, the gear from a unit page and from
+the client's rail. **Falsified three ways from the SOURCES** (§276): the
+filter removed **4 red** — where *"exactly the defs marked strategy"* stays
+GREEN because both sides of that agreement vanish together (§113.8) and it is
+the *"…and none of the client's"* half that catches it, which is why both
+ends are asserted; the resolver removed **2 red**; the gear's scope removed
+**1 red**. **And the served half is falsified from the SOURCES too**, each
+break rebuilt into the app and run against it: `restoreWhere()` put back
+to the scoped list — **1 red**, exactly the spine-form door landing on the
+group's Performance with the scope still reading `client`, which is the
+finding above reproduced; and the router writing NO scope — **6 red**,
+every one printing the unscoped whole list of eighteen where a rail of eight
+or ten should be, with the two presses that read the DOCUMENT's module
+staying green beside them, so the break provably touches the scope alone
+(§54.5). `shell.mjs` 72 → **74/0** with its two Setup assertions
+REWRITTEN, never loosened (§218): the client's rail writes the spine form,
+Strategy's writes the module form. `setup-rail.py` §6 held §120.3's literal
+*register · roles · BU list* and is REWRITTEN at both ends (§214.3): the
+People group keeps its order of what it still holds, and Roles & access is
+asserted at its new home. `setup-search.py` gains §10: a search reaches the
+rail on screen and nothing else, both ends. **`sw.js`'s `SHELL` is bumped** (`v5.06-setup-per-module`, confirmed
+against `origin/main`'s own name first, §94.12) because the built file's
+bytes changed, which is §91's trigger — and it reaches nobody on the served
+stack, whose generated worker drops that half (§329, §316.10); it is kept
+for the offline copy alone. `qa.py` at Next walks BOTH rails
+— the gear's and the client's by its own address — or half of Setup goes
+unvisited while the sweep prints *ok*.
+
+**RECORDED, NOT DONE**: Insights' own rail is empty until step 5 gives it
+defs; the landing's Client setup block (step 3) is what makes the client's
+rail reachable from anywhere but its address; and the rail's inbox pill
+(§108.15) is asked whenever Setup is on screen for the office, on either
+rail, which is one request more than the module's rail needs.
+

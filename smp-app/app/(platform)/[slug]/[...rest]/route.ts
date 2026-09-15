@@ -1,8 +1,9 @@
 import { doorPool } from "../../../../lib/auth.ts";
 import { resolveTenant } from "../../../../lib/door.ts";
 import { requestUser, SLUG } from "../../../../lib/session.ts";
-import { whereOf, clientHref, modulesFor, DEFAULT_MODULE } from "../../../../lib/modules.ts";
+import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { serverFor } from "../../../../modules/registry.ts";
+import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -54,10 +55,20 @@ export async function GET(req: Request, { params }: P) {
      draws — so a fourth module is a folder and an entry, and this file is not
      edited at all.
 
-     A SPINE SEGMENT IS SERVED BY THE DEFAULT MODULE (`setup`, `tour`), which
-     is where Setup is drawn today and is stated rather than implied
-     (modules/strategy/index.ts says why). */
+     SETUP IS THE SPINE'S OWN DOCUMENT, FOR EVERY MODULE (§356.2, spec 054
+     §4.2, research R1). `/<client>/setup/…` is the client's pages and
+     `/<client>/<module>/setup/…` is that module's own — both are the frozen
+     shell served by lib/shell.ts, stamped with the module whose word led (or
+     the default's when none did), and the shell draws the right rail from
+     that stamp (shell/route.js, shell.html setupScope). Served HERE, before
+     the table is asked, so a module that draws its own document (Insights)
+     never has to know how a Setup page is drawn: its Setup arrives on the
+     spine with the rest of Setup, and the module brings only its defs.
+     `tour` stays the default module's, being where the intro round is drawn. */
   const key = w.module || DEFAULT_MODULE;
+  if (w.rest[0] === "setup") {
+    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(have)), { status: 200, headers: shellHeaders() });
+  }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });
   /* WHO IS LOOKING travels with the address (spec 046 §4.10). The door has

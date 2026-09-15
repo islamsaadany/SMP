@@ -2,7 +2,7 @@
    markup class for class, drawn from lib/landing.ts's answer. Every door is
    an address (doorHref), so the whole screen is server-rendered HTML and
    needs no script of its own. */
-import { doorHref, tourHref, type Landing, type Act, type LandingShape } from "../../../lib/landing.ts";
+import { doorHref, tourHref, type Landing, type Act } from "../../../lib/landing.ts";
 import type { SessionUser } from "../../../lib/auth.ts";
 import type { Tenant } from "../../../lib/door.ts";
 
@@ -20,7 +20,7 @@ function Sub({ parts }: { parts: Act["sub"] }) {
   );
 }
 
-export default function Welcome({ slug, tenant, user, data, shape }: { slug: string; tenant: Tenant; user: SessionUser; data: Landing | null; shape: LandingShape }) {
+export default function Welcome({ slug, tenant, user, data }: { slug: string; tenant: Tenant; user: SessionUser; data: Landing | null }) {
   const d: Landing = data || { known: false, org: tenant.name, initials: tenant.name.split(/\s+/).map((w) => w.charAt(0)).join("").slice(0, 2).toUpperCase() };
   const name = d.known ? d.name : (user.name || "").split(/\s+/)[0] || "";
   const acts = d.acts || [];
@@ -67,40 +67,8 @@ export default function Welcome({ slug, tenant, user, data, shape }: { slug: str
                 </div>
               ))}
             </div>
-            {/* YOUR MODULES (spec 054 §4.1) — one row per module the client has,
-                in MODULES' order, the line under it what that module chose in
-                its own Setup (step 4). Drawn with ONE module too: a list that
-                appeared at two would change shape the day a module is added. */}
-            <p className="wseclab wmodslab">Your modules</p>
-            <div className="wrows wmods">
-              {shape.modules.map((m) => (
-                <a className="wrow" key={m.key} href={m.href} data-module={m.key}>
-                  <span className="wk">{m.label}</span>
-                  <span className="wll">{m.line}</span>
-                  <span className="wgo">Open ›</span>
-                </a>
-              ))}
-            </div>
           </div>
           <div className="wside">
-            {shape.clientSetup && (
-              /* THE CLIENT SETUP BLOCK (spec 054 §4.1) — the Super user's and
-                 nobody else's, so it is ABSENT for every other seat rather
-                 than disabled (§61); six doors onto existing pages at their
-                 spine addresses (lib/landing.ts landingShape). */
-              <div className="wsetupbox">
-                <p className="wseclab">Client setup <span className="wonly">Super user</span></p>
-                <div className="wrows wclient wsetup">
-                  {shape.clientSetup.map((d) => (
-                    <a className="wrow" key={d.key} href={d.href} data-door={d.key}>
-                      <span className="wk">{d.label}</span>
-                      <span className="wv">{d.sub}</span>
-                      <span className="wgo">›</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
             {pages.length > 0 && (
               <div className="wpagesbox">
                 <p className="wseclab">Your pages</p>

@@ -3024,7 +3024,7 @@ function renderPeople(){
         /* Roles is a stack of chips and Password is a pill: sorting either
            orders them by the text that happens to be rendered, which is not a
            fact anybody asked about. */
-        (showCol("roles")    ? th("Roles", "roles", false) : '') +
+        (showCol("roles")    ? th("Roles", "roles", false, "seat") : '') +
         (showCol("status")   ? th("Status", "cc") : '') +
         (live && showCol("password") ? th("Password", "cc", false) : '') +
         th("", "cc kebcell") +
@@ -8194,12 +8194,17 @@ function rowActions(table, key, ed, extra){
    turning sorting back on would sort by the wrong one. */
 function tkHead(id, allow){
   var n = 0;
-  return function(label, cls, sortable){
+  return function(label, cls, sortable, id){
     var i = n++;
     if (allow === false) sortable = false;
+    /* `id` names a column an ADDRESS can point at — the landing's Access door
+       opens the register at `#seat`, the Roles column, where the seats and
+       where each person sits already are (spec 054 §4.4; shell/route.js
+       scrolls to it). Only ever a bare word, on the unsortable branch. */
+    var idA = id ? ' id="' + esc(id) + '"' : '';
     if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
     if (sortable === false)
-      return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
+      return '<th' + idA + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
     var st = TKSORT[id];
     var on = st && st.col === i;
     return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +

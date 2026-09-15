@@ -635,6 +635,30 @@ def main():
         ck("...and their welcome screen is otherwise intact", u["screen"], u)
         ctx.close()
 
+        # ── 11 · THE CLIENT SETUP BLOCK AND YOUR MODULES ARE THE SERVED
+        #         LANDING'S, NEVER THIS ONE'S (spec 054 §4.1, §9.3) ─────────
+        # The two blocks are drawn by the Next app's page from the seat the
+        # door resolved and the client's registry row — neither of which the
+        # frozen welcome can know over file://. Asserted as the OFFICE (the
+        # seat that WOULD see the block served), so the absence measured here
+        # is the stack's and not the seat's (§113.8); a later port that drew
+        # them into welcome.js by accident goes red here.
+        print("\n── 11 · the served landing's two blocks are absent over file://")
+        PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
+        STATE = BASE
+        ctx, pg = fresh(browser, port)
+        d = pg.evaluate("""() => ({
+          drawn: !!document.querySelector('.welcomeover'),
+          setup: document.querySelectorAll('.wsetup, .wsetupbox').length,
+          mods: document.querySelectorAll('.wmods, .wmodslab').length,
+          pages: [...document.querySelectorAll('.wpages a')].map(a => a.textContent.trim()) })""")
+        ck("the welcome is drawn for the office", d["drawn"], d)
+        ck("...with no Client setup block", d["setup"] == 0, d)
+        ck("...and no Your modules list", d["mods"] == 0, d)
+        ck("...and its first page is the Reporting cycle (§356)",
+           bool(d["pages"]) and d["pages"][0].startswith("Setup — Reporting cycle"), d["pages"])
+        ctx.close()
+
         browser.close()
     srv.shutdown()
 

@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { registerKeyFor } from "./state-api.ts";
-import { clientHref, DEFAULT_MODULE } from "./modules.ts";
+import { clientHref, DEFAULT_MODULE, MODULE_DEF, modulesFor, landingLine, type ModuleKey } from "./modules.ts";
 
 const frozen = createRequire(import.meta.url)("./frozen.cjs") as {
   landing: (graph: unknown, personKey: string) => Landing;
@@ -50,6 +50,65 @@ export async function landingFor(tenantId: string, personKey: string | null, ema
      which a Forefront admin opening a client by rule does not have */
   if (brk === "membership-key") return frozen.landing(graph, personKey || "");
   return out;
+}
+
+/* ══ THE CLIENT SETUP BLOCK AND YOUR MODULES (spec 054 §4.1, §9.3) ═══════
+   What the landing draws BESIDE the frozen readers' rows, computed here and
+   never in the page, so a check can ask this function and the page the same
+   question (§53.5, §94.8).
+
+   THE BLOCK IS THE SUPER USER'S AND NOBODY ELSE'S — absent, never disabled
+   (§61) — and the seat is THE ONE THE DOOR RESOLVED (door.ts resolveTenant):
+   a Forefront admin opening a client they hold no seat on holds its Super
+   user seat by rule (seatFor, §339), so they see it too, which is right, since
+   they are the one person who can set that client up. It is asked of the
+   SEAT and never of the register's role, because the seat is what the
+   platform holds about who may configure this client (spec 054 §4.4).
+
+   SIX DOORS ONTO EXISTING PAGES, each at its spine address
+   `/<client>/setup/<page>` (research R2: the shell moves a spine-form door to
+   the page's own rail, so this list keeps no copy of which page sits where).
+   Organisation is one door onto four pages — four doors for the shape of the
+   business would make the block longer than the list it sits beside, and the
+   four are one errand (§32 the other way round). Two doors name a PLACE ON a
+   page with a hash the shell honours (shell/route.js): Access opens the
+   register at its seat column (`#seat` — the seats and where each person
+   sits are already set there, §33/§186, and a second surface onto one fact
+   is §110's pair), and Email opens the email settings, which today are the
+   third section of Strategy's Send an email page (`send#comms`, §135) —
+   spec 054's own table calls them "the email half of brand", which the
+   product does not hold; recorded rather than silently realigned (§356.3).
+
+   YOUR MODULES is one row per module the client HAS (modulesFor — the
+   registry's own reader, so a module switched off takes its row with it,
+   spec 054 §4.2), in MODULES' order, each opening the module at its own
+   address and carrying its landing line (landingLine, filled by step 4). A
+   client with one module still sees the row: a list that appeared at two
+   would be a screen that changes shape on the day a module is added. */
+export type SetupDoor = { key: string; label: string; sub: string; href: string };
+export type ModuleLine = { key: ModuleKey; label: string; line: string; href: string };
+export type LandingShape = { clientSetup: SetupDoor[] | null; modules: ModuleLine[] };
+export function landingShape(slug: string, seat: string | null | undefined, stored: unknown): LandingShape {
+  const brk = process.env.SMP_BREAK || "";
+  const door = (key: string, label: string, sub: string, page: string) =>
+    ({ key, label, sub, href: clientHref(slug, null, "setup/" + page) });
+  const doors: SetupDoor[] = [
+    door("people",  "People",         "The register",                                  "people"),
+    door("access",  "Access",         "Seats, and where each person sits",             "people#seat"),
+    door("org",     "Organisation",   "Companies, units, functions, Official BU list", "companies"),
+    door("brand",   "Branding",       "Colours and the mark",                          "brand"),
+    door("email",   "Email",          "Sender name, reply-to, footer",                 "send#comms"),
+    door("kb",      "Knowledge base", "The platform\u2019s own explanations",           "kb"),
+  ];
+  /* THE CHECK'S BREAKS (constitution XVI): a build that drew the block for
+     every seat, or stopped reading the client's own module list, must turn
+     checks/door-landing.mjs red before its green run is believed (§94.5). */
+  const clientSetup = brk === "setup-any-seat" || seat === "super" ? doors : null;
+  const have = brk === "modules-unread" ? [DEFAULT_MODULE] : modulesFor(stored);
+  const modules: ModuleLine[] = have.map((k) => ({
+    key: k, label: MODULE_DEF[k].label, line: landingLine(k), href: clientHref(slug, k, ""),
+  }));
+  return { clientSetup, modules };
 }
 
 /* A door's address inside this client: `/<slug>/<module>/<target>/<tab>`, a

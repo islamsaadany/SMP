@@ -4976,7 +4976,7 @@ suite per feature.
 
 ## In flight
 
-**Spec 054 — Setup per module (§356), on the branch, steps 1–2 of 6 built.**
+**Spec 054 — Setup per module (§356), on the branch, steps 1–3 of 6 built.**
 Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
 Step 1: the Setup Overview is deleted (§356.1) — both its halves were
 already on the landing — and the gear lands on Reporting cycle;
@@ -4987,8 +4987,16 @@ gear from the module the document was served for, nothing over file://), the
 page decides the rail when the two disagree, Setup is the spine's own document
 for every module, and the client's rail carries the way back;
 `checks/setup-per-module.py` 0/0 on both halves, red 4 / 2 / 1 from the
-sources. Steps 3–6 (the landing's Client setup block, the landing line,
-Insights' Setup, the sweep) are the plan's, in order. `main` untouched.
+sources. Step 3 (§356.3): the landing draws a Client setup block for the
+Super user's seat — six doors at their spine addresses, Access opening the
+register at its seat column and Email the email settings by a hash the shell
+now honours — and a Your modules list from the client's own registry row,
+one row per module in MODULES' order; `door-landing.mjs` 70 → 87/0, red 2 / 2,
+`welcome.py` §11. Measuring it found step 1's carried reader still naming the
+deleted Overview, corrected. Waiting on Islam: whether the email settings
+move to Branding (the spec's table says so, the product holds them on
+Strategy's Send an email). Steps 4–6 (the landing line, Insights' Setup, the
+sweep) are the plan's, in order. `main` untouched.
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
 v2.9 single file as it always has; nothing anyone uses runs on the new stack

@@ -9434,7 +9434,26 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356.2: a def knows its module, and
+*Last Updated: 2026-09-15 &mdash; **&sect;356.3: the landing's Client setup
+block and Your modules (spec 054 &sect;4.1, &sect;9.3, on the branch).**
+Step 3 of six: `lib/landing.ts`'s `landingShape()` answers both blocks and
+the page draws them &mdash; a Client setup block for the SEAT the door
+resolved (`super` only, absent for everybody else, &sect;61), six doors at
+their spine addresses with Access opening the register at `#seat` and Email
+opening the email settings by a hash `shell/route.js` now reads as the
+section; and Your modules from the client's own registry row, one row per
+module in MODULES' order, drawn with one module too, its line empty until
+step 4. **Measuring it found step 1's omission**: the carried
+`lib/frozen.cjs` reader still named the deleted Overview and the served check
+agreed with it (&sect;113.8), corrected. **And the spec's table is wrong about
+where the email settings live** (Strategy's Send an email, not Branding) &mdash;
+reported to Islam, not realigned. `door-landing.mjs` 70 &rarr; **87/0**, red
+2 / 2 from the sources; `welcome.py` &sect;11; shell 74/0, modules 94/0,
+`setup-per-module.py` served green; `sw.js` bumped to `v5.07-landing-blocks`.
+The cost: at the frozen welcome's 336px side column three of the six
+descriptions wrap where the mockup drew them on one line.*
+
+*Earlier the same day: **&sect;356.2: a def knows its module, and
 the rail draws by it (spec 054 &sect;4.2&ndash;&sect;4.3, on the branch).**
 Step 2 of six: every Setup def carries `mod`, the served router writes
 `data-setup-scope` from whether the module word LED the address and the gear

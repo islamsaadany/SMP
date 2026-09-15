@@ -213,6 +213,14 @@ export function isLibrary(k: unknown): boolean {
   return typeof k === "string" && (LIBRARY_MODULES as readonly string[]).includes(k);
 }
 
+/* THE LANDING LINE (spec 054 §4.5). Each module will DECLARE the sentences
+   it can say about itself and the client picks one on the module's own
+   Landing line page — that is step 4 of spec 054's plan. Until it lands every
+   module says nothing, which is exactly what an unchosen module says once it
+   has: a row with no line under it. Declared here, beside the label and the
+   areas, so the console's card and the landing read ONE answer (§53.5). */
+export function landingLine(_k: ModuleKey): string { return ""; }
+
 export type ModuleRow = { key: ModuleKey; label: string; state: string; room: boolean };
 export function moduleRows(have: ModuleKey[], facts: { unreadable?: boolean; cycleOpen?: boolean | null; planned?: boolean | null }): ModuleRow[] {
   return have.map((k) => ({

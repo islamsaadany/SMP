@@ -2,7 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { doorPool } from "../../../lib/auth.ts";
 import { resolveTenant, tenantByKey } from "../../../lib/door.ts";
-import { landingFor } from "../../../lib/landing.ts";
+import { landingFor, landingShape } from "../../../lib/landing.ts";
 import { currentUser, SLUG } from "../../../lib/session.ts";
 import Welcome from "./Welcome.tsx";
 
@@ -32,5 +32,8 @@ export default async function Page({ params }: P) {
     notFound();
   }
   const data = await landingFor(ans.tenant.id, ans.personKey, user.email);
-  return <Welcome slug={slug} tenant={ans.tenant} user={user} data={data} />;
+  /* the Client setup block and Your modules read the seat THE DOOR resolved
+     and the client's own module list (spec 054 §4.1) — never the graph */
+  const shape = landingShape(slug, ans.seat, ans.tenant.modules);
+  return <Welcome slug={slug} tenant={ans.tenant} user={user} data={data} shape={shape} />;
 }

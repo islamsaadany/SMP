@@ -20,6 +20,8 @@
      … --break=demo-role-key  (RED: the door reads §313.4's retired key — the demo 404s for the team, §337)
      … --break=other-role-key (RED: the same, one column over — the office's `open` never opens, §339)
      … --break=no-creator     (RED: making a client leaves its creator off its own team, §339)
+     … --break=setup-any-seat (RED: the Client setup block is drawn for every seat, spec 054 §4.1)
+     … --break=modules-unread (RED: Your modules stops reading the client's own list)
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
    Needs `next build` first and the chromium this image carries. */
@@ -30,7 +32,7 @@ import { join } from "node:path";
 import { chromium } from "playwright-core";
 import pg from "pg";
 import { devTenant } from "../scripts/dev-tenant.mjs";
-import { doorHref } from "../lib/landing.ts";
+import { doorHref, landingShape } from "../lib/landing.ts";
 import { DEFAULT_MODULE } from "../lib/modules.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
@@ -424,6 +426,106 @@ await section("6 · a client made here, opened by rule", async () => {
   const again = await text(page, ".wact.wempty b");
   check(!again.some((s) => /not on/.test(s)), "…so the landing stops saying they are not on it", again);
   await owner.query("DELETE FROM tenants WHERE key = $1", [made]);
+});
+
+
+/* ══ THE LANDING'S CLIENT SETUP BLOCK AND YOUR MODULES (spec 054 §4.1, §9.3) ══
+   BOTH ENDS OF EVERY CLAIM (§94.2): the block drawn for the Super user AND
+   absent for the SMO team and a unit head — three seats — or a build that
+   drew it for nobody passes the absence half, and one that drew it for
+   everybody passes the presence half. What is drawn is asserted as
+   AGREEMENT with lib/landing.ts's own landingShape() (§94.8), never as a
+   list of six words typed here, so a door renamed there stays green and a
+   door dropped by the PAGE goes red. Every door is then PRESSED (§70): a
+   control in the document is not a control that opens anything. */
+await section("7 · the landing's Client setup block and Your modules (spec 054 §4.1)", async () => {
+  const shapeFor = (seat, stored) => landingShape("raya-trade", seat, stored);
+  const readBlocks = (page) => page.evaluate(() => ({
+    doors: [...document.querySelectorAll(".wsetup a")].map((a) => [a.dataset.door, a.querySelector(".wk").textContent.trim(), a.getAttribute("href")]),
+    mods: [...document.querySelectorAll(".wmods a")].map((a) => [a.dataset.module, a.querySelector(".wk").textContent.trim(), a.getAttribute("href")]),
+    side: [...document.querySelectorAll(".wside > *")].map((e) => e.className),
+    only: (document.querySelector(".wsetupbox .wonly") || {}).textContent || "",
+  }));
+  /* a unit head: no block, one module row */
+  ({ ctx, page } = await fresh());
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  await signIn(page, "mobhead@raya.example", "Raya-2026!");
+  await page.waitForURL(BASE + "/raya-trade");
+  let b = await readBlocks(page);
+  check(b.doors.length === 0, "a unit head (seat none) is shown NO Client setup block (§61: absent, never disabled)", JSON.stringify(b.doors));
+  const oneRow = shapeFor("none", []).modules;
+  check(b.mods.length === oneRow.length && oneRow.every((m, i) => b.mods[i][0] === m.key && b.mods[i][1] === m.label && b.mods[i][2] === m.href),
+    "…and Your modules is landingShape()'s own row, with ONE module too", JSON.stringify(b.mods));
+  check(b.mods[0] && b.mods[0][2] === "/raya-trade/" + DEFAULT_MODULE, "…opening the module at its own address", b.mods[0] && b.mods[0][2]);
+  await ctx.close();
+  /* the SMO team: a seat, and still no block (the block is the SUPER USER's) */
+  await owner.query("UPDATE tenant_users SET seat = 'smoteam' WHERE tenant_id = $1 AND person_key = 'fn_fin'", [tenant.id]);
+  try {
+    ({ ctx, page } = await fresh());
+    await page.goto(BASE + "/", { waitUntil: "networkidle" });
+    await signIn(page, "fn_fin@raya.example", "Raya-2026!");
+    await page.waitForURL(BASE + "/raya-trade");
+    b = await readBlocks(page);
+    check(b.doors.length === 0, "an SMO team seat is shown no block either — it is the Super user's alone (spec 054 §4.4)", JSON.stringify(b.doors));
+    await ctx.close();
+  } finally { await owner.query("UPDATE tenant_users SET seat = 'none' WHERE tenant_id = $1 AND person_key = 'fn_fin'", [tenant.id]); }
+  /* the Super user: the office holds it by rule on a client they made (§339) */
+  ({ ctx, page } = await fresh());
+  await page.goto(BASE + "/", { waitUntil: "networkidle" });
+  await signIn(page, "office@forefront.example", "Raya-2026!");
+  await page.waitForURL(BASE + "/platform");
+  await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
+  b = await readBlocks(page);
+  const wantDoors = shapeFor("super", []).clientSetup;
+  check(wantDoors && b.doors.length === wantDoors.length && wantDoors.every((d, i) => b.doors[i][0] === d.key && b.doors[i][1] === d.label && b.doors[i][2] === d.href),
+    "the Super user is shown the block — six doors, landingShape()'s own, in its order", JSON.stringify(b.doors));
+  check(b.doors.length === 6 && b.doors.every((d) => d[2].startsWith("/raya-trade/setup/")), "…every door a SPINE Setup address (research R2)", JSON.stringify(b.doors.map((d) => d[2])));
+  check(b.side[0] === "wsetupbox", "…first in the side column, above Your pages", JSON.stringify(b.side));
+  check(/super user/i.test(b.only), "…and it says whose it is", b.only);
+  await shot(page, "landing-super");
+  /* the page list's first door follows §356 (the Overview went in step 1 and
+     the carried reader still named it, §356.3) */
+  const firstPage = await page.locator(".wpages a").first();
+  check((await firstPage.textContent()).trim().startsWith("Setup — Reporting cycle"), "Your pages opens on the Reporting cycle, the Overview being gone (§356)", await firstPage.textContent());
+  /* EVERY DOOR IS PRESSED and lands on the page it names, in the CLIENT's
+     rail (data-setup-scope, §356.2) */
+  const landed = {};
+  for (const [key, , href] of b.doors) {
+    await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
+    await page.click('.wsetup a[data-door="' + key + '"]');
+    await page.waitForLoadState("networkidle");
+    await page.waitForFunction(() => !document.documentElement.classList.contains("booting"));
+    await page.waitForTimeout(400);
+    landed[key] = await page.evaluate(() => ({ path: location.pathname, scope: document.documentElement.getAttribute("data-setup-scope"), d: current, s: currentSub,
+      sec: (typeof CURSEC !== "undefined" && currentSub) ? CURSEC[currentSub] : null,
+      seat: (function () { const el = document.getElementById("seat"); if (!el) return null; const r = el.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight; })() }));
+    void href;
+  }
+  const at = (k) => landed[k] || {};
+  check(at("people").s === "people" && at("people").scope === "client", "People opens the register in the client's rail", JSON.stringify(at("people")));
+  check(at("access").s === "people" && at("access").seat === true, "Access opens the register SCROLLED to the seat column (#seat, spec 054 §4.4)", JSON.stringify(at("access")));
+  check(at("org").s === "companies" && at("org").scope === "client", "Organisation opens Companies, the first of its four pages", JSON.stringify(at("org")));
+  check(at("brand").s === "brand" && at("brand").scope === "client", "Branding opens Branding", JSON.stringify(at("brand")));
+  check(at("email").s === "send" && at("email").sec === "comms" && at("email").scope === "strategy" && at("email").path === "/raya-trade/strategy/setup/send",
+    "Email opens the Email settings section of Strategy's Send an email — a spine door moved to its page's own rail (R2), the hash naming the section", JSON.stringify(at("email")));
+  check(at("kb").s === "kb" && at("kb").scope === "client", "Knowledge base opens the knowledge base", JSON.stringify(at("kb")));
+  /* YOUR MODULES READS THE CLIENT'S OWN LIST: a second module switched on
+     gains a row, in MODULES' order, and its door opens that module — put
+     back in a finally (§94.2) */
+  await owner.query(`UPDATE tenants SET modules = '["trial"]'::jsonb WHERE id = $1`, [tenant.id]);
+  try {
+    await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" });
+    b = await readBlocks(page);
+    const two = shapeFor("super", ["trial"]).modules;
+    check(two.length === 2 && b.mods.length === 2 && two.every((m, i) => b.mods[i][0] === m.key && b.mods[i][2] === m.href),
+      "a second module switched on gains a row, in MODULES' order, agreeing with landingShape()", JSON.stringify(b.mods));
+    /* guarded, or a build with no row DIES here rather than reporting (§215) */
+    if (await page.locator('.wmods a[data-module="trial"]').count()) {
+      await page.click('.wmods a[data-module="trial"]'); await page.waitForLoadState("networkidle");
+      check(page.url() === BASE + "/raya-trade/trial", "…and its row opens the module", page.url());
+    } else fail("…and its row opens the module", "no Trial row to press");
+  } finally { await owner.query(`UPDATE tenants SET modules = '[]'::jsonb WHERE id = $1`, [tenant.id]); }
+  await ctx.close();
 });
 
 

@@ -139,7 +139,11 @@ function __smpLanding(state, personKey) {
   }
   var pages = [];
   if (office) {
-    pages.push({ label: "Setup — Overview", small: "", go: { setup: "overview" } });
+    /* Reporting cycle since §356 — the Overview this once opened is gone
+       (step 1 moved welcome.js and left this carried copy behind, §356.3:
+       the door-landing check compared the page with THIS reader and the two
+       agreed about a page that no longer exists, §113.8) */
+    pages.push({ label: "Setup — Reporting cycle", small: "", go: { setup: "cycle" } });
     pages.push({ label: "The group — Performance", small: "", go: { target: "group", tab: "performance" } });
   } else if (home) {
     var nm = placeLabel(home), isFn = String(home).indexOf("fn:") === 0;

@@ -83,7 +83,21 @@
     else if (seg[0] === "tour") { return { tour: true }; }
     else d = seg[0];
     var kind = kindOf(d), s = null, c = null;
-    if (kind === "setup") { s = seg[i] || null; setScope(led ? MODULE : "client"); }
+    if (kind === "setup") {
+      s = seg[i] || null; setScope(led ? MODULE : "client");
+      /* A HASH ON A SETUP ADDRESS NAMES A PLACE ON THE PAGE (spec 054 §4.1):
+         the landing's Email door opens `setup/send#comms`, the third section
+         of that page, and its Access door opens `setup/people#seat`, a column
+         of the register. It rides as the section (`c`): the shell's own
+         restoreWhere() applies a section key the page holds and the page's
+         renderer falls back to its first section for a word that is not one
+         (config-render.js's CURSEC guard), so `seat` does no harm there and
+         the element it names is scrolled to after the paint (below). Never
+         written back into the address — addressOf keeps a Setup address to
+         its page — so the hash is consumed on arrival and not carried. */
+      var h = String(location.hash || "").replace(/^#/, "");
+      if (h && /^[\w-]+$/.test(h)) c = h;
+    }
     else {
       var w = seg[i] ? TAB_IN[seg[i]] : null;
       s = w ? (w[kind] || null) : (seg[i] || null);
@@ -232,9 +246,19 @@
       else history.replaceState({ d: d, s: s, c: c }, "", a);
     } catch (e) {}
   }
+  /* the element a hash named, scrolled to once it has been drawn — the
+     first paints are the skeleton's, so it is tried on each until found */
+  var wantEl = (here && here.c && String(location.hash || "").replace(/^#/, "") === here.c) ? here.c : null;
+  function scrollToWanted() {
+    if (!wantEl) return;
+    var el = document.getElementById(wantEl);
+    if (!el) return;
+    wantEl = null;
+    try { el.scrollIntoView({ block: "nearest", inline: "center" }); } catch (e) {}
+  }
   if (typeof paint === "function") {
     var painted = paint;
-    paint = function () { var r = painted.apply(this, arguments); try { sync(true); } catch (e) {} return r; };
+    paint = function () { var r = painted.apply(this, arguments); try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));

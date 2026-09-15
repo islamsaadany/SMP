@@ -16,3 +16,26 @@
 .holder ul { padding-left: 18px; }
 .holder form { margin-top: 28px; }
 .holder button { font: inherit; font-size: var(--fs-small); background: none; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 6px 12px; color: var(--ink-2); cursor: pointer; }
+
+/* ── THE CLIENT SETUP BLOCK AND YOUR MODULES (spec 054 §4.1) ──────────────
+   The rows are the signed-off mockup's own (design-mockups/module-setup/
+   2026-09-15_setup-per-module.html, the landing frame) in the platform's
+   tokens: a key, a value or the module's line, and the way in on the right.
+   Scoped to .welcomeover like every rule of the frozen welcome.css, and
+   w-prefixed so nothing here can reach the shell (§65.9). A client door sits
+   on --surface-2 with no border, a module row on --surface with one — the
+   mockup's own distinction between "set this up" and "go and work". */
+.welcomeover .wmodslab { margin-top: 20px; }
+.welcomeover .wrows { display: flex; flex-direction: column; gap: 6px; }
+.welcomeover a.wrow { display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface);
+  font-size: var(--fs-body); color: var(--ink); text-decoration: none; box-sizing: border-box; }
+.welcomeover a.wrow:hover { border-color: var(--gold-deep); }
+.welcomeover .wrow .wk { font-weight: 600; min-width: 110px; }
+.welcomeover .wrow .wv { color: var(--ink-2); flex: 1; }
+.welcomeover .wrow .wll { color: var(--ink-3); font-size: var(--fs-small); flex: 1; }
+.welcomeover .wrow .wll b { color: var(--ink-2); font-weight: 600; }
+.welcomeover .wrow .wgo { color: var(--gold-deep); font-weight: 600; font-size: var(--fs-small); white-space: nowrap; }
+.welcomeover .wrows.wclient a.wrow { background: var(--surface-2); border-color: transparent; }
+.welcomeover .wrows.wclient a.wrow:hover { border-color: var(--gold-deep); }
+.welcomeover .wonly { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; margin-left: 8px; }

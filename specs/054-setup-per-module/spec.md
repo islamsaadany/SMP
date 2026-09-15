@@ -132,6 +132,12 @@ Six doors, each opening an existing page at its spine address
 | Email | sender name, reply-to, footer | the email half of `brand` (§130.4) |
 | Knowledge base | the platform's own explanations | `kb` |
 
+> **Built 2026-09-15 (§356.3), with one drift reported rather than silently
+> realigned:** the email settings are not "the email half of `brand`" — since
+> §135/§137 they are the third section of Strategy's *Send an email* page —
+> so the Email door opens `setup/send#comms`, the one door in the block that
+> lands in Strategy's rail. Whether they should move to Branding is Islam's.
+
 **The pages are the existing pages, moved and not rewritten.** What changes
 is the rail they sit in: opened from the landing they sit in a rail holding
 the Client group alone, under the heading *Client · Setup*, with a way back

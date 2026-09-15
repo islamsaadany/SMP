@@ -48612,3 +48612,117 @@ rail reachable from anywhere but its address; and the rail's inbox pill
 (§108.15) is asked whenever Setup is on screen for the office, on either
 rail, which is one request more than the module's rail needs.
 
+### §356.3 — THE LANDING'S CLIENT SETUP BLOCK AND YOUR MODULES (spec 054 §4.1, §9.3)
+
+Step 3 of six, on the Next app and nowhere else: the landing gains, in its
+right column, a **Client setup** block for the Super user, and in its left
+column under *Waiting on you* a **Your modules** list — both drawn from the
+signed-off landing frame of `design-mockups/module-setup/2026-09-15_setup-per-module.html`
+(rule 1c), in the platform's own tokens.
+
+**THE BLOCK IS THE SUPER USER'S AND NOBODY ELSE'S, AND IT IS ASKED OF THE
+SEAT THE DOOR RESOLVED.** `landingShape()` in `lib/landing.ts` answers it,
+never the page, so `checks/door-landing.mjs` can ask the function and the
+page the same question (§53.5, §94.8). The seat is `resolveTenant`'s — the
+membership row's, or the Super user seat a Forefront admin holds BY RULE on
+a client they hold no seat on (§339) — and never the register's role,
+because the seat is what the platform holds about who may configure a client
+(spec 054 §4.4). Absent, never disabled (§61): a unit head and an SMO team
+seat are shown nothing, asserted at both ends against the Super user shown
+six doors, or a build that drew it for nobody passes half and one that drew
+it for everybody passes the other half (§113.8).
+
+**SIX DOORS ONTO EXISTING PAGES, EVERY ONE A SPINE ADDRESS** —
+`/<client>/setup/<page>`, research R2's shape, so this list keeps no copy of
+which page sits in which rail; the shell moves a spine-form door to the
+page's own rail (§356.2). Organisation is one door onto four pages, the
+spec's own reason (§32 the other way round: four things that are one job go
+behind one door), landing on Companies, the first of them. **TWO DOORS NAME A
+PLACE ON A PAGE WITH A HASH, AND THE SHELL LEARNED TO HONOUR ONE**: Access
+opens the register at `#seat`, the Roles column, where the seats and where
+each person sits already are (§33, §186 — a second surface onto one fact is
+§110's pair), and Email opens the Email settings, the third section of
+Strategy's Send an email page (`send#comms`, §135). `shell/route.js` reads a
+hash on a Setup address as the section (`c`): the frozen `restoreWhere()`
+applies a section key the page holds and the page's own renderer falls back
+to its first section for a word that is not one (config-render.js's CURSEC
+guard), so `seat` does no harm on a page with no sections, and the element it
+names is scrolled into view once it has been drawn — tried on each paint,
+because the first paints are the skeleton's. Never written back into the
+address: `addressOf()` keeps a Setup address to its page, so the hash is
+consumed on arrival. The register's Roles head carries `id="seat"`, through
+one more argument on `tkHead()`'s column builder, which is the only frozen
+source this step touches. Measured: Access lands with the seat column
+inside the window at 1440 (`#seat` at x 979–1188), Email lands at
+`/<client>/strategy/setup/send` with *Email settings* selected and the rail's
+scope reading `strategy`.
+
+**AND THE SPEC'S OWN TABLE IS WRONG ABOUT WHERE THE EMAIL SETTINGS ARE**
+— it says *"the email half of `brand` (§130.4)"*, and the product does not
+hold that: §135 made the email settings the second section of *Send an
+email*, and §137 the third, on STRATEGY's page and not the client's Branding.
+So the Email door is the one door in the block that leaves the client's rail
+for Strategy's, which is the honest address today. **Recorded rather than
+silently realigned** (CLAUDE.md: a drift between specs and code is a
+documentation bug), and put to Islam: whether the sender name, reply-to and
+footer should MOVE to the Branding page — they are the tenant's, like its
+colours — is a decision about where a setting lives, and this step does not
+make it.
+
+**YOUR MODULES IS THE REGISTRY'S OWN LIST** — `modulesFor(tenant.modules)`,
+MODULES' order, a module switched off taking its row with it (spec 054 §4.2)
+— one row per module opening it at its own address, and DRAWN WITH ONE
+MODULE TOO: a list that appeared at two would be a screen that changes shape
+on the day a module is added. The line under each row is `landingLine()`, a
+declared function that answers nothing until step 4 gives each module its
+sentences and the client a pick — so today every row is *Nothing*'s shape, a
+name with no line, which is exactly what an unchosen module says once step 4
+has landed. Asserted by switching Trial ON for the tenant mid-check and
+reading two rows in MODULES' order with the second opening `/<client>/trial`,
+the list put back in a `finally` (§94.2).
+
+**AND MEASURING THE PAGE FOUND STEP 1'S OMISSION**: the office's *Your pages*
+still read **Setup — Overview** with a door to `setup/overview`, a page
+§356.1 deleted. `welcome.js` was moved to *Setup — Reporting cycle* in step 1
+and `lib/frozen.cjs`'s carried `landing()` — the reader the served page
+draws from — still held the old label and the old door; `door-landing.mjs`
+asserts *Your pages are the reader's pages* as AGREEMENT with that same
+carried reader, so the page and the reader agreed about a page that no
+longer exists (§113.8's blind spot: agreement is preserved by both sides
+being wrong the same way). Corrected in the carried copy, asserted by the
+served check as the first page's LABEL and by `welcome.py` §11 over file://
+— and §335's rule reaches one file further than its check does: `frozen.cjs`
+is not a carried copy of one frozen file but a rewrite over four, so
+`generated-in-step` cannot compare it, and a reader in it drifts the day the
+frozen one moves.
+
+**THE COST, MEASURED RATHER THAN GLOSSED**: the frozen welcome's side column
+is 336px (`.wcols`, §148), and the mockup drew the block in a `.9fr` column
+of a wider grid — so at 1440 two of the six descriptions wrap to two lines
+and Organisation's to three, where the drawing had every door on one line.
+The grid is the frozen welcome's own and is not moved for this (rule 1b): a
+wider column is a change to a screen every viewer opens, and wants asking.
+The block sits FIRST in the side column, above Your pages and the cycle
+card, which is the mockup's placement; for the Super user it moves those two
+down by the block's height.
+
+`checks/door-landing.mjs` gains §7, **70 → 87/0**, RED both ways from the
+SOURCES (§276): `--break=setup-any-seat` **2 red** (the two absences — a unit
+head and an SMO team seat shown the block), `--break=modules-unread` **2 red**
+(one row where two are stored, and no Trial row to press) — **and its first
+red run DIED rather than reporting** (§215, in this file for the third time):
+the press on the Trial row waited thirty seconds on a control the broken
+build does not draw; every press is guarded now. `welcome.py` gains §11 —
+neither block over file://, asserted as the OFFICE so the absence is the
+stack's and not the seat's (§113.8), and the first page the Reporting cycle.
+`shell.mjs` 74/0, `modules.mjs` 94/0, `setup-per-module.py` served green,
+`built-in-step` and `generated-in-step` clear, `tsc` clean; `sw.js`'s
+`SHELL` bumped (`v5.07-landing-blocks`, main's own name read first, §94.12)
+because the built file's bytes changed — one attribute on one header cell —
+and it reaches nobody on the served stack (§329). **The server needed no
+rule and it is asserted by construction**: the block draws doors onto pages
+every one of which keeps its own gate, and nothing new is stored.
+
+**RECORDED, NOT DONE**: the line under a module is empty until step 4; the
+Email door's home is a question put to Islam (above); and the wrapping
+descriptions at 336px are a width the frozen welcome owns.

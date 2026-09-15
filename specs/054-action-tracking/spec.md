@@ -1,9 +1,10 @@
-# 054 · Action Tracking — the team's weekly list, per client
+# 054 · Internal Tracker — the team's weekly list, per client
 
 **Status:** clarified 2026-09-15, not yet planned. Every decision below is
-Islam's or was put to him with its cost and taken; the two that are still his
-are in §9. **Nothing is built and no mockup is drawn yet** — the mockup comes
-next and is signed off before a source moves (rule 1c).
+Islam's or was put to him with its cost and taken, the word and the week
+included (decisions 7 and 8, answered the same day). **Nothing is built.**
+The mockup is `design-mockups/internal-tracker/2026-09-15_this-week-edit-detail-empty.html`,
+published as an artifact and awaiting sign-off before a source moves (rule 1c).
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -47,6 +48,8 @@ their own weekly alignment about that client. The client's staff never see it.
 | 4 | Order of building | **This first, then Notes.** No assistant and no email in it, so it is the smaller piece. |
 | 5 | Who owns an action | **Somebody on the client's register who holds an office seat.** The consultants are already on every client's register as office rows (§338, §339), so the owner is picked from the register like every other name in the product — narrowed to office rows, because the client's people cannot open the list an action lives on. |
 | 6 | Grouping | **By owner, and nothing else.** The client is already the scope; the other system's free "scopes" list is a second thing to maintain for a list that is per client by construction. |
+| 7 | The word | **Internal Tracker** (Islam, 2026-09-15). Key `tracker`; two words on the switcher, and the second says who it is for, which is the point. *Actions* was proposed and not taken. |
+| 8 | The week | **Sunday to Thursday** (Islam, 2026-09-15). *This week* is the days somebody is at their desk; anything due on a Friday or Saturday reads as the following week's. |
 
 ---
 
@@ -54,7 +57,7 @@ their own weekly alignment about that client. The client's staff never see it.
 
 One list per client, read by the week. An action has a title, an owner, a due
 date, a status, and can name collaborators and carry a description. The week
-runs from the first working day to the last (§9.2). Anything not done by the
+runs Sunday to Thursday (decision 8). Anything not done by the
 end of the week is still on next week's list — nothing carries it, it is
 simply still due. Anything past its due date reads **late**, and says how
 many weeks it has been carried. Every status change is kept with who and when,
@@ -87,7 +90,7 @@ counter.
 | 4 | Its own rhythm | **Weekly.** The list is read by the week, and it is the first module with a rhythm of its own that is not the reporting cycle. |
 | 5 | A landing | This week |
 
-What the spine gives for nothing: the address `/<client>/<word>/…`, the
+What the spine gives for nothing: the address `/<client>/tracker/…`, the
 switcher entry, the row on the client's card, the on/off drawer, the door,
 `withTenant`, and the register through `lib/place.ts`.
 
@@ -146,7 +149,7 @@ rather than as a name nobody can find.
 
 | Theirs | Here |
 |---|---|
-| Sunday-to-Saturday week, carry-over by still-being-due | Taken; the days are §9.2 |
+| Sunday-to-Saturday week, carry-over by still-being-due | Taken as Sunday to Thursday (decision 8) |
 | Late computed from the due date; carried-weeks from the first due date | Taken |
 | Status history with who and when, opening with "created" | Taken |
 | Not started · In progress · Done | Taken — the product's own words already |
@@ -182,15 +185,11 @@ construction — a fourth built module is asserted to serve itself.
 
 ---
 
-## 9 · Still Islam's
+## 9 · Settled the same day
 
-1. **The word.** `actions` as the key and **Actions** as the label is the
-   proposal; *Action Tracking* is the reference's name and is two words on a
-   switcher whose other entries are one. Islam's to say.
-2. **The week's days.** The reference runs Sunday to Saturday. Egypt's working
-   week is Sunday to Thursday, and *this week* should probably mean the days
-   somebody is at their desk. Sunday to Thursday is the recommendation, with
-   Friday and Saturday work reading as next week's.
+The word and the week were the two things left open in the first draft of
+this file and are decisions 7 and 8 now; the draft's own recommendation on
+the week stood, and its proposal on the word did not.
 
 ## 10 · Recorded, not decided
 
@@ -199,6 +198,6 @@ construction — a fourth built module is asserted to serve itself.
 - Nothing reminds anybody. If a weekly digest is ever wanted it is the
   collection mechanism §293 already has, pointed at this list, and its own
   decision.
-- The mockup: This week with a few late rows, the edit form, the detail with
-  its history, and the empty client — drawn in the platform's own tokens
-  before a source moves.
+- The mockup shows This week with late rows, the edit form, the detail with
+  its history, and an empty client — in the module page's own tokens,
+  extended only where a table of actions needs a rule the library did not.

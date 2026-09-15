@@ -9434,7 +9434,29 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356.5: Insights' Setup &mdash; Access,
+*Last Updated: 2026-09-15 &mdash; **&sect;356.6: the sweep, and the viewer a
+reload put back (spec 054 &sect;9, plan step 6, on the branch).** Step 6 of six,
+and nothing in the product moves for it: `qa.py` at Next **33 viewers / 243
+destinations / ERRORS none**, over `file://` **33 / 241 / ERRORS none**, shell
+74/0, door 127/0, modules 123/0, `built-in-step` all good, `generated-in-step`
+all clear, `sw.js` at `v5.08-module-access` against `origin/main`'s
+`v5.05-demo-complete`, read again at the push (&sect;94.16). **AND THE COUNT
+WAS ACCOUNTED FOR RATHER THAN QUOTED** (&sect;332's habit, third time): the
+first served run read 275, the office +2 and **exactly +8** on every other
+viewer holding a gear. Measured with a probe listing each stack's rail entries
+per viewer &mdash; the +2 is the Platform Inbox and History, drawn only over
+HTTP (&sect;97, &sect;262), and right; **the +8 was the SWEEP**: &sect;356.2's
+client-rail walk reaches the rail with a `goto`, and a reload lands on whoever
+signed in, so it walked the OFFICE's eight client pages under a CEO's name and
+printed *ok* (&sect;50.6, &sect;51.7, in the sweep that quotes both). Re-picked
+on the landed page, a CEO is sent off that rail by the router and counts
+nothing, which is the truth &mdash; **and the first fix broke the office's own
+count**, re-picking the office as the office being a switch to yourself whose
+&sect;237 rebase took the rail off the screen (39 against 47). 275 &rarr; 235
+&rarr; 243 = 241 + 2, exact. The built file is byte-identical. **All six steps
+built; the merge is Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;356.5: Insights' Setup &mdash; Access,
 and a door that asks the table (spec 054 &sect;4.4, &sect;9.5, on the
 branch).** Step 5 of six: Insights' rail carries **Roles &amp; access** and
 **Landing line**, the same keys as Strategy's told apart by the scope (a def is

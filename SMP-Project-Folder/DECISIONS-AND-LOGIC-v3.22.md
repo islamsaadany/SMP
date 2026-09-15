@@ -48932,3 +48932,72 @@ three, the SMO team served and shown the table with no button, and the second
 press deleting the key; `setup-per-module.py` §1 REWRITTEN never loosened
 (it held the mod values as a literal, §214.3) and §7c; `built-in-step` and
 `generated-in-step` clear; `tsc` clean with the cache removed first.
+
+### §356.6 — THE SWEEP, AND THE VIEWER A RELOAD PUT BACK (spec 054 §9, plan step 6)
+
+**Step 6 of six, and nothing in the product moves for it.** The plan's own
+row: full `qa.py` at Next and over `file://`, ERRORS none on both;
+`built-in-step.py` and `generated-in-step.mjs` clear; the `sw.js` name
+confirmed against `origin/main` immediately before the push; the
+what-to-check list in the navigation's words.
+
+**THE SWEEP.** `qa.py` at Next **33 viewers / 243 destinations / ERRORS
+none**, over `file://` **33 viewers / 241 destinations / ERRORS none**;
+`checks/shell.mjs` **74/0**; `door-landing.mjs` 127/0; `modules.mjs` 123/0;
+`built-in-step.py` all good and `generated-in-step.mjs` all clear;
+`sw.js` `SHELL` at `v5.08-module-access` against `origin/main`'s
+`v5.05-demo-complete`, read again at the push (§94.16). The built file is
+byte-identical to the shipped one — step 6 changes one check and no source.
+
+**AND THE COUNT DID NOT MATCH THE FILE SWEEP, SO IT WAS ACCOUNTED FOR RATHER
+THAN QUOTED** (§332's habit, third time): the first served run read **275**
+against 241, and the difference per viewer was not a scatter — the office
+**+2**, and **exactly +8** for the group CEO, the Finance head and both
+company CEOs, everybody else identical. Measured with a probe listing which
+Setup rail entries each stack draws per viewer rather than reasoned about.
+**The +2 is right**: served, the office's gear rail carries `chat` and
+`history` — the Platform Inbox (§97) and History (§262), two pages the
+product draws only over HTTP and never over `file://` — so the served sweep
+legitimately visits two more. **The +8 was the CHECK.** §356.2's client-rail
+walk reaches the client's rail by its own address with a `goto`, and **a
+reload lands on whoever signed in**: `window.VIEWER` read `smo` the line
+after it, whatever the select had said a line before — so for every viewer
+holding a gear the sweep walked the OFFICE's eight client pages *under the
+CEO's name* and printed *ok*. §50.6's fault exactly (a label must say which
+page was actually scanned), and §51.7's (measuring the thing you built
+proves what you built), in the sweep that quotes both. Picked again on the
+landed page, the client's rail draws **nothing** for a CEO — the router sends
+a viewer the rail has no page for off it (§356.2) — so it counts nothing,
+which is the truth. **AND THE FIRST FIX BROKE THE OFFICE'S OWN COUNT**: re-
+picking the viewer unconditionally re-picks the office as the office, which
+is a switch to yourself, and §237's rebase repainted the remembered unit page
+under the rail being walked — the office's client rail read as holding
+nothing, **39 against 47**. Re-picked only when the landing changed them.
+**275 → 235 → 243 = 241 + 2, to the destination.** The comment in `qa.py`
+carries the two numbers so the next person is not sent hunting.
+
+**WHAT TO GO AND CHECK** (A16, in the words of the navigation): open Raya
+Trade — the welcome screen carries *Client setup* (six doors, the Super
+user's alone) and *Your modules* with a line under each; press Strategy's.
+The gear on a unit page opens Setup on **Reporting cycle**, with no Overview
+entry, and the rail is Strategy's own — *Running the cycle · Measurement ·
+Roles & access · The landing*. From the welcome screen press *People* under
+Client setup: the client's own rail — *People register · BU list · Business
+units · Companies · Supporting functions · Capabilities · Branding · Knowledge
+base* — with *Back* in a row of its own. *Setup › The landing › Landing
+line*: pick a sentence, then the welcome screen's Strategy row and the
+console's client card say it. The four-square switcher, top left: Insights,
+then the gear — *Insights · Setup* with *Roles & access* (roles down,
+Insights' areas across) and *Landing line*. Shut the eye for Business unit
+owner there and view as one: Insights leaves *Your modules* and the switcher,
+and typing its address lands on Strategy; reopen the eye. **Not checkable
+from a screen**: the store proved key-agnostic on a virgin Postgres (§356.5),
+and the sweep's own correction above.
+
+**RECORDED, NOT DONE**: the sweep still reaches Insights' rail through no
+address of its own — `qa.py` walks the gear's rail and the client's, and
+Insights' two pages are asserted by `setup-per-module.py` and `modules.mjs`
+rather than swept; a served viewer with no page on the client's rail is
+counted as walking nothing, which is right and is also the only thing
+`qa.py` says about them there. `main` untouched — the merge is Islam's word,
+on that merge.

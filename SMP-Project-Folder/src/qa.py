@@ -208,10 +208,27 @@ with sync_playwright() as p:
             # rail holding everything and the walk above has already covered
             # it; served, the client's rail is walked by its own address, or
             # half of Setup goes unvisited while the sweep prints "ok".
+            # AND A RELOAD LANDS ON WHOEVER SIGNED IN (356.6): the goto is a
+            # fresh page, so VIEWER is the office again whatever the select
+            # said a line ago — and for two rounds the sweep walked the
+            # OFFICE's client rail under a CEO's name and counted eight pages
+            # that CEO cannot open (50.6's fault: the label must say which
+            # page was scanned, and 51.7's, measuring the thing you built).
+            # The viewer is picked again on the landed page; a viewer the
+            # client's rail draws nothing for is sent off it by the router
+            # (356.2), so there is nothing to walk and nothing is counted.
             if BASE:
                 pg.goto(BASE+"/raya-trade/setup/people")
                 pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
                 pg.wait_for_timeout(400)
+                # Picked again ONLY when the landing did not already put them
+                # there: re-picking the office as the office is a switch to
+                # yourself, and 237's rebase repaints the remembered place —
+                # the unit page — under the rail being walked, which read as
+                # the office's client rail holding nothing (measured, 39
+                # against 47 with the pick unconditional).
+                if pg.query_selector("#asWho") and pg.evaluate("window.VIEWER") != v:
+                    pg.select_option("#asWho", v); pg.wait_for_timeout(400)
                 for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
                                                  "els=>els.map(e=>e.dataset.railgrp)"):
                     pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(120)

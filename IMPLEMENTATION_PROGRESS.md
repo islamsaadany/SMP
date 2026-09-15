@@ -4976,7 +4976,7 @@ suite per feature.
 
 ## In flight
 
-**Spec 054 — Setup per module (§356), on the branch, steps 1–5 of 6 built.**
+**Spec 054 — Setup per module (§356), on the branch, all six steps built.**
 Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
 Step 1: the Setup Overview is deleted (§356.1) — both its halves were
 already on the landing — and the gear lands on Reporting cycle;
@@ -5015,7 +5015,18 @@ refusal is the legacy redirect (§320.5), the landing's Your modules filtered
 by the same answer; `modules.mjs` §4c 123/0 red 2, `door-landing.mjs` §9
 101 → 127/0 red under `gate-open` and `no-areas-stamp`. The check's first
 fixture wrote a seat a client login cannot hold (§100.3) and is corrected.
-Step 6 (the sweep) is the plan's, next. `main` untouched.
+Step 6 (§356.6), the sweep: `qa.py` at Next 33 viewers / 243 destinations /
+ERRORS none and over `file://` 33 / 241 / ERRORS none; shell 74/0; door 127/0;
+modules 123/0; `built-in-step` all good, `generated-in-step` all clear; `sw.js`
+at `v5.08-module-access`, unique against `origin/main`. The count was
+accounted for rather than quoted: the office's +2 is the Inbox and History,
+drawn only over HTTP; the +8 on every other viewer with a gear was the SWEEP —
+its client-rail `goto` landed back on the office and walked the office's
+eight pages under a CEO's name (§50.6, §51.7) — corrected in `qa.py`, and its
+first correction re-picked the office as the office, whose §237 rebase took
+the rail off the screen (39 against 47). 275 → 235 → 243 = 241 + 2, exact.
+The built file is byte-identical. **Waiting on Islam: the merge.** `main`
+untouched.
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
 v2.9 single file as it always has; nothing anyone uses runs on the new stack

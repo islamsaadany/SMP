@@ -343,3 +343,12 @@ Each at both ends (§94.2), each falsified from the sources (§276):
 5. Insights' Setup: Access and Landing line, the first page to read a
    module's declared areas.
 6. §356 in the decisions log, in the same commit as step 2.
+
+> **Built 2026-09-15, all six steps (§356.1–§356.6).** The sweep (§356.6):
+> `qa.py` at Next 33 viewers / 243 destinations / ERRORS none, over
+> `file://` 33 / 241 / ERRORS none, the difference accounted for to the
+> destination — two pages drawn only over HTTP, and a fault in the sweep's
+> own client-rail walk (a reload lands on whoever signed in, so it walked
+> the office's rail under a CEO's name), corrected. `built-in-step` and
+> `generated-in-step` clear, `sw.js` unique against `origin/main`. What
+> is still open is §7's, and the merge is Islam's.

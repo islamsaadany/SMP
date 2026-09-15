@@ -3133,8 +3133,9 @@ var CHAT = (function(){
          showing the number it was told when the page loaded. Islam: "all chats
          are answered and still the rail is showing a notification."
 
-         Cleared rather than recounted — the next paint on the Overview asks
-         again, which is the one place that fetch belongs (a second asker
+         Cleared rather than recounted — the next reader that wants it (the
+         rail's pills, the landing's office list; the Overview until §356)
+         asks again, which is the one place that fetch belongs (a second asker
          polling in the background is what §98 was about). §35's shape: the
          status you must remember to refresh is the one nobody refreshes. */
       if (typeof window !== "undefined" && typeof window.OVQUEUE !== "undefined")
@@ -3493,16 +3494,17 @@ var CHAT = (function(){
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
     unread: function(){ return state.unread; },
-    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
+    /* ── HOW MANY ARE WAITING, FOR THE LANDING (§108.10, §148) ─────────
        The same `queue` action the inbox already calls, whose answer already
        carries the two counts — so this is a second READER of one endpoint and
-       not a second endpoint, and the number the Overview prints is by
-       construction the number the Inbox's own tab prints.
+       not a second endpoint, and the number the landing's office list prints
+       (attentionRows()'s chat row) is by construction the number the Inbox's
+       own tab prints. Written for the Setup Overview, which §356 deleted.
 
        IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
        writing box.threads from here would leave a half-built queue behind for
        whenever the inbox is next opened, and `drawQueue()` would be painting
-       into a document that does not have it. The Overview wants two integers.
+       into a document that does not have it. The caller wants two integers.
 
        `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
        caller draws nothing for a null and "nothing is waiting" for a 0, and

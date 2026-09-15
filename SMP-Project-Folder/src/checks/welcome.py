@@ -393,8 +393,12 @@ def main():
             ck("the inbox's waiting count arrives and is drawn", False, "no row in 9s")
         ck("…with its noun", "2 conversations waiting" in pg.inner_text(".wacts"),
            pg.inner_text(".wacts")[:300])
-        ck("the office's pages open Setup",
-           "Overview" in pg.inner_text(".wpages"), pg.inner_text(".wpages"))
+        # §356: the Overview is gone and the link names the page the gear
+        # opens now. REWRITTEN, never loosened (§218) — it still asserts the
+        # office is offered Setup, by the page's own name.
+        ck("the office's pages open Setup, on Reporting cycle",
+           "Reporting cycle" in pg.inner_text(".wpages")
+           and "Overview" not in pg.inner_text(".wpages"), pg.inner_text(".wpages"))
         # A door into Setup: the no-custodian row goes to the People register.
         pg.locator(".wacts .wact", has_text="no custodian").locator("button").click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)

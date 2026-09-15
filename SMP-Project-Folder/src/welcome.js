@@ -537,7 +537,9 @@ var WELCOME = (function(){
       pages.appendChild(a);
     }
     if (office) {
-      pageLink("Setup — Overview", "", function(){ goSetup("overview"); });
+      /* Reporting cycle since §356: the Overview this once opened is gone,
+         and its rows are the list ABOVE this one. */
+      pageLink("Setup — Reporting cycle", "", function(){ goSetup("cycle"); });
       pageLink("The group — Performance", "", function(){ goGroup(); });
     } else {
       var home = targets[0] || null;

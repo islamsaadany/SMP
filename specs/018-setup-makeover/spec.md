@@ -71,6 +71,14 @@ Stored keys never change; every rename is a label (§30.2, §58).
 
 ## 5 · The Overview
 
+> **DELETED at §356 (spec 054 §9.1, signed off 2026-09-15).** Both halves of
+> this page were already on the client landing — the office's *Waiting on
+> you* is `attentionRows()` row for row (§148) and the cycle column joined it
+> at §200 — so the gear opened a second drawing of the page the office lands
+> on. The gear lands on Reporting cycle now. What survives whole is the LIST
+> and its rule (every row names the function it counts) and the rail's pills
+> built from it (§108.15); what went is one page. Kept below as the record.
+
 **One question: *is anything waiting on me?*** Before it existed the answer took
 a walk through five pages, because each outstanding thing lived only on the page
 that fixes it — right for the thing, wrong for the question.

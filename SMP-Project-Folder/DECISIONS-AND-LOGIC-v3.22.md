@@ -48412,3 +48412,83 @@ not.
 **`check:state` IS 84 ok / 2 failed AND IT IS NOT THIS WORK'S** — the two
 pre-existing seeded-demo-graph failures already on the record (§303, §354.7),
 neither touching a module, the route or a library.
+
+## §356 — SETUP PER MODULE, AND THE CLIENT'S OWN SETUP ON THE LANDING (2026-09-15, spec 054)
+
+Islam, 2026-09-15: *"the setup and access page should be per module because
+each module has its own setup elements including the access and the landing
+line."* **THAT REVERSES SPEC 046 §4.5**, which rejected a Setup page per
+module, and it is recorded there as a reversal rather than rewritten
+(Principle II): §4.5's own reason — *the spine has to live somewhere that is
+not inside any module* — was never wrong and is the one question this section
+answers. Drawn first (rule 1c, `design-mockups/module-setup/`), four decisions
+put to him with a recommendation on each, and **all four taken as drawn**:
+the client-wide settings go to the client landing (the spine's own page, not a
+fourth Setup behind the gear); the eight marked entries move, Knowledge base
+included, against the recommendation to keep it in Strategy; an Access page
+per module inside that module's Setup, the seats staying on the People
+register; and a landing line per module picked from a short list, never
+typed. Then two more, each with its own answer: *"ok"* to the spine storing
+and writing the landing-line pick with the module only reading it, and *"ok
+signed off"* to the Overview's fate drawn on its own (§356.1). The spec is
+`specs/054-setup-per-module/spec.md`, the plan and research beside it; built
+in the spec's own order, one commit a step, each red first.
+
+### §356.1 — THE OVERVIEW GOES, BECAUSE IT WAS ALREADY ON THE LANDING (spec 054 §9.1)
+
+**THE FINDING IS A MEASUREMENT AND NOT AN ARGUMENT.** §108.10 put a Setup
+Overview in front of the gear — a list of what is waiting on the office
+beside a column summarising the cycle — and both halves were drawn on the
+landing afterwards by the very functions that drew them there: the office's
+*Waiting on you* is `attentionRows()` row for row (§148, `welcome.js`'s own
+`officeActs`), and the cycle column joined the landing at §200 in the
+Overview's own shape (`.wcyc`, which §200's note says was made to *look like
+itself wherever it appears*). So the page the gear opened was a second
+drawing of the page the office lands on at every sign-in, and spec 054's
+line between the client's settings and Strategy's would have left it
+counting across two rails. Three frames drawn (`2026-09-15_overview-fate.html`)
+— the Overview, the landing with the SAME rows marked, the proposal — and
+Islam: *"ok signed off."*
+
+**DELETED, NOT HIDDEN (§24)**: the def, `renderOverview()`, its CSS block and
+its two checks. **`primary` moves to Reporting cycle for everybody** — which
+is where a non-office viewer's gear already fell through to, so the rule and
+the fallback become one. **THE LIST STAYS WHOLE**: `attentionRows()`,
+`attentionByPage()` and `OVQUEUE` are untouched, because three readers were
+never redundant — the landing, the rail's pills (§108.15) and the home mark's
+gold (§197.2).
+
+**AND DELETING THE PAGE WOULD HAVE SILENCED THE RAIL'S INBOX PILL FOR EVER**,
+found by reading the gate rather than by a check: `OVQUEUE` was asked
+`currentSub === "overview"` and nowhere else, so with the page gone the
+count keyed on it would draw nothing, in the safe-looking direction and with
+nothing thrown (§51.11 exactly — a gate keyed on a page that no longer exists
+does not fail). It is asked whenever the Setup rail is on screen for the
+office now, still once per visit, never polled. The password and declaration
+fetches keep their list shape (`WANTS_PEOPLE_FACTS`) with one name in it, so
+the next page that counts those facts is one key and not a second gate.
+
+**AN OLD ADDRESS IS A DOOR TOO.** `/setup/overview` in somebody's history
+lands on the first reachable page through the shell's own existing rule
+(`paint()` corrects a `currentSub` no def answers to `defs[0]`, shell.html), which is
+Reporting cycle — asserted rather than assumed, so a bookmark never opens a
+blank pane (§61).
+
+**WHAT THE LANDING DOES NOT SHOW, SAID RATHER THAN DISCOVERED**: the three
+server-backed rows. The inbox count reaches the landing's list through
+`CHAT.officeQueue` (§148); the password and declaration counts are fetched
+only while the register is on screen, so on the landing they draw only once
+the register has been visited that session — and on the SERVED landing,
+which `frozen.cjs` builds without a browser, never. That was true before this
+section and is unchanged by it; what answered those two on the Overview is
+the register's own Attention queue (§116.2), one door away, which counts them
+both. **A three-state count (§93) collapses to two on the landing**: zero
+waiting and not-yet-asked both draw no row there, because the landing's empty
+state is about the whole list and not one source.
+
+`checks/attention-rows.py` **owns what `setup-overview.py` owned minus the
+page**, and is **6 red on the build before** — exactly the section that
+exists for the deletion, every other assertion green on both builds (§94.5).
+`welcome.py`'s office-pages assertion REWRITTEN, never loosened (§218): it
+asks for Reporting cycle by name and asserts the old word absent.
+

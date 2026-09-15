@@ -514,22 +514,18 @@
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* ── WHERE THE GEAR LANDS (§108.10, spec 018) ─────────────────────
-         FIRST AND `primary`, taking both from Reporting cycle: the office's
-         first question on opening Setup is not "how is the cycle going" but
-         "is anything waiting on me", and until this page existed the answer
-         took a walk through five pages.
-
-         THE OFFICE'S, BY THE SAME `when` AS Send a message AND Inbox — the
-         page says "waiting on the office", so for anybody else it would be a
-         page about somebody else's work. It is not a matrix cell for the same
-         reason those two are not (§37, §89): reading everything outstanding
-         across the whole tenant is not a tick somebody could set on a bad
-         afternoon. A non-office viewer's gear falls through to `st[0]`, which
-         is Reporting cycle — where it landed before this page existed. */
-      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", glyph:"⌂", find:"waiting attention outstanding needs me summary home todo", primary:true,
-        when: inOffice,                                                 render:renderOverview },
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
+      /* ── WHERE THE GEAR LANDS (§356, spec 054 §9.1) ─────────────────
+         Reporting cycle, `primary`, for everybody — which is where it landed
+         before §108.10 put an Overview in front of it. THE OVERVIEW IS
+         DELETED, NOT HIDDEN (§24), because both halves of it were already on
+         the landing: the office's "Waiting on you" is `attentionRows()` row
+         for row (§148, welcome.js) and the cycle column joined the landing at
+         §200 in the Overview's own shape — so the page the gear opened was a
+         second drawing of the page the office lands on at every sign-in. The
+         rows themselves stay (`attentionRows()`, config-render.js): the
+         landing, the rail's pills (§108.15) and the home mark (§197.2) all
+         read them. What went is one page that said the same thing twice. */
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -7021,9 +7017,11 @@
        and still the same KIND of thing: a class name, which a restyle can
        retire without anything failing. It asks the two pages that want the
        answer by NAME, which is data rather than markup and cannot silently
-       stop matching. The Overview joins the list because it counts these two
-       facts (§108.10) — and gating it on the register's markup would have
-       given it a permanent, silent null, which draws no row: this exact fault
+       stop matching. It is a LIST rather than one name because the Overview
+       once joined it (§108.10); §356 deleted that page, and the shape is kept
+       so the next page that counts these facts is one key here and not a
+       second gate. Gating on the register's markup would have given such a
+       page a permanent, silent null, which draws no row: this exact fault
        twice already, and in the safe-looking direction both times. */
     /* THE FILTER IS RE-APPLIED AFTER EVERY PAINT, or a repaint that arrives
        while somebody is reading their own results would quietly show them the
@@ -7031,7 +7029,7 @@
        the two can never disagree. */
     railFilter();
 
-    var WANTS_PEOPLE_FACTS = { people:1, overview:1 };
+    var WANTS_PEOPLE_FACTS = { people:1 };
     var onRegister = !!WANTS_PEOPLE_FACTS[currentSub];
     if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
@@ -7093,19 +7091,24 @@
            leaves SAIDWHERE as {} — "asked, and nobody declared anything" —
            the exact shape §93 removed from the passwords beside it and did not
            come back for. It costs the register nothing (a note per row, absent
-           either way) and it costs the Overview a false all-clear, which is
-           the one thing that page must never give. */
+           either way) and it would cost the landing's office list a false
+           all-clear, which is the one thing that list must never give. */
         if (err) { SAIDWHERE = { __error: String(err.message || err) }; return; }
         SAIDWHERE = said;
         paint();
       });
     }
-    /* ── AND WHAT THE INBOX IS HOLDING (§108.10) ─────────────────────
-       Asked only on the Overview, because the Inbox counts its own queue when
-       it is open and the corner has its own cadence (§98.1) — a third asker
-       polling in the background is what §98 was about. Once per visit: this is
-       a summary somebody reads and then acts on, not a live board. */
-    if (OVQUEUE === null && currentSub === "overview" &&
+    /* ── AND WHAT THE INBOX IS HOLDING (§108.10, §356) ────────────────
+       Asked once per visit, whenever the Setup rail is on screen for the
+       office: the rail's Inbox pill is drawn from it (§108.15), and until
+       §356 the Overview was the one page that asked, so with that page gone
+       the pill would have read nothing for ever — a count keyed on a page
+       that no longer exists does not fail, it quietly draws nothing (§51.11).
+       Never polled: the Inbox counts its own queue when it is open and the
+       corner has its own cadence (§98.1) — a third asker polling in the
+       background is what §98 was about. Once per visit: this is a summary
+       somebody reads and then acts on, not a live board. */
+    if (OVQUEUE === null && current === "setup" &&
         typeof CHAT !== "undefined" && CHAT.servable && CHAT.servable() && inOffice()) {
       OVQUEUE = {};
       CHAT.officeQueue(function(err, q){

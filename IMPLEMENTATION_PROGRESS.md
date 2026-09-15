@@ -4976,6 +4976,15 @@ suite per feature.
 
 ## In flight
 
+**Spec 054 — Setup per module (§356), on the branch, step 1 of 6 built.**
+Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
+Step 1: the Setup Overview is deleted (§356.1) — both its halves were
+already on the landing — and the gear lands on Reporting cycle;
+`checks/attention-rows.py` replaces the two Overview checks, 6 red on the
+build before. Steps 2–6 (the rail by module, the landing's Client setup
+block, the landing line, Insights' Setup, the sweep) are the plan's, in
+order. `main` untouched.
+
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
 v2.9 single file as it always has; nothing anyone uses runs on the new stack
 yet.

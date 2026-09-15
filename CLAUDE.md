@@ -9097,10 +9097,21 @@ python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and noth
                                 # has gone answers everything after it with None (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
-python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
-                                      # MAKES the state, because the demo tenant is all-clear
-python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
-                                      # they exist at all (§101.12)
+python3 checks/attention-rows.py # what is waiting on the office — one list, three
+                                # readers, and no fourth (§356, spec 054 §9.1): the
+                                # Setup Overview is DELETED, and this file owns what
+                                # `setup-overview.py` owned minus the page. The list
+                                # agrees with its sources, the rail's pills are that
+                                # list summed by destination (§108.15), and the page
+                                # is gone at BOTH ENDS (§94.2) — no def, no rail
+                                # entry, the gear on Reporting cycle for the office
+                                # AND a non-office viewer, and an address still
+                                # naming it landing on the first page rather than a
+                                # blank pane (§61: a bookmark is a door). The three
+                                # server-backed rows asserted ABSENT over file://,
+                                # never zero (§93); the landing's own drawing of the
+                                # list is welcome.py §5. 6 red on the build before,
+                                # exactly the section that exists for the deletion
 python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
                                 # the filter, and a match inside a FOLDED group is findable
                                 # (§108.13, §108.14 — all three fail silently)

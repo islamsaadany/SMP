@@ -5739,33 +5739,31 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
-/* ══ SETUP · OVERVIEW (§108.10, spec 018) ════════════════════════════════
-   Islam, on the makeover: Option A, and the gear lands here.
-
-   THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
-   existed the answer took a walk through five pages, because each outstanding
-   thing lived only on the page that fixes it. That is right for the thing and
-   wrong for the question: nobody opens Setup to read the People register, they
-   open it to find out whether the register needs them.
-
-   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design. A
-   summary page is the one place a disagreement with the page it summarises is
-   guaranteed to be seen and impossible to explain, so no row is allowed to
-   compute anything: each declares a `count` that calls the SAME function the
-   destination page calls, and `checks/setup-overview.py` asserts the two agree
-   rather than asserting the number (§53.5, §94.8). Add a row here with fresh
-   arithmetic in it and the check cannot help you.
+/* ══ WHAT IS WAITING ON THE OFFICE — the one list three surfaces read
+   (§108.10, §116.2, §148, §197.2; the page that first held it went at §356)
+   ════════════════════════════════════════════════════════════════════
+   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design: no
+   row is allowed to compute anything; each declares a `count` that calls the
+   SAME function the destination page calls, so the rows can never disagree
+   with the page they point at (§53.5, §94.8). Add a row here with fresh
+   arithmetic in it and no check can help you.
 
    NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
    fact fetched outside the state graph, so "we have not asked" is a real third
-   state and it is not "nothing is waiting" (§93, §108.10). A row whose count
-   is null is absent — never a 0, and never a spinner, because a page that
-   shows five zeroes while it is thinking has told somebody they are clear when
-   it does not know.
+   state and it is not "nothing is waiting" (§93). A row whose count is null is
+   absent — never a 0.
 
    THE DESTINATION IS THE PAGE THAT FIXES IT, never a page that merely mentions
    it — the row is a door, and §16.7's rule that a refusal must send somebody
-   somewhere applies just as much to a notice. */
+   somewhere applies just as much to a notice.
+
+   WHO READS IT: the landing's "Waiting on you" for the office (welcome.js,
+   and frozen.cjs for the served landing), the Setup rail's pills
+   (attentionByPage below), and the home mark's gold (welcome.js waiting()).
+   The Setup Overview was the fourth reader and the one the others made
+   redundant — it drew this list beside the cycle column, and the landing
+   draws both (§148, §200) — so it is DELETED at §356 (spec 054 §9.1) rather
+   than kept as a second drawing of the page the office lands on. */
 function attentionRows(){
   var rows = [
     { k:"chat",  dest:"chat",   glyph:"✉",
@@ -5829,84 +5827,6 @@ function attentionByPage(){
     by[r.dest] = (by[r.dest] || 0) + (r.n | 0);
   });
   return by;
-}
-
-function renderOverview(){
-  var open = REVIEW.state === "open";
-  var t = cycleTotals();
-  var att = attentionRows();
-
-  /* ── THE WORK FIRST, THE CONTEXT BESIDE IT (§198) ──────────────────────
-     Islam picked Option B from two drawn in the real page. The audit behind
-     it, measured as the office with things actually waiting:
-
-       · 264 pixels of content beside an 870-pixel rail — the page the gear
-         lands on was the shortest in Setup.
-       · The biggest thing on it answered a DIFFERENT question. "222 of 245
-         items reported" is how much the whole business has reported; the
-         office opens Setup to ask *is anything waiting on me*, and that was
-         in 13px grey underneath.
-
-     So the queue leads and the cycle becomes a standing summary in a column
-     beside it. NOTHING NEW IS COUNTED — the rows are `attentionRows()` and
-     the numbers are `cycleTotals()`, exactly as before (§108.9, §108.10);
-     what changes is which one the eye lands on first.
-
-     BELOW 900px IT STACKS, queue first, which is CSS and not a second
-     builder — a summary page whose shape depended on a JS width test would
-     be measuring the window in two places (§27.1). */
-  var side =
-    '<aside class="ovside">' +
-      '<h4>' + esc(REVIEW.name) +
-        ' <span class="badge b-' + (open ? "open" : "none") + '">' +
-        (open ? "Open" : "Closed") + '</span></h4>' +
-      '<div class="ovsline"><span>Reported</span><b>' + t.done + ' of ' + t.total + '</b></div>' +
-      '<div class="ovsline"><span>Submitted</span><b>' + t.sub + '</b></div>' +
-      '<div class="ovsline"><span>In progress</span><b>' + t.progress + '</b></div>' +
-      (t.none ? '<div class="ovsline"><span>Not started</span><b class="ovlate">' +
-        t.none + '</b></div>' : '') +
-      /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant has
-         set no dates, rather than printing the separators alone. */
-      '<div class="ovsmeta">' + esc(cycleMeta()) + '</div>' +
-      '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
-        'Open the cycle page</button>' +
-    '</aside>';
-
-  var body = att.length
-    ? '<div class="ovlist">' + att.map(function(r){
-        return '<button type="button" class="ovrow" data-setupgo="' + esc(r.dest) + '">' +
-          '<span class="ovico" aria-hidden="true">' + r.glyph + '</span>' +
-          '<span class="ovtext">' + esc(r.text) + '</span>' +
-          '<span class="ovto">' + esc(attnDestLabel(r.dest)) + ' ›</span></button>';
-      }).join("") + '</div>'
-    /* NOT AN EMPTY BOX (§45.2 turned round). A page whose one job is to say
-       whether anything is waiting has to be able to say NO — an absent section
-       would read as a section that failed to load. */
-    : '<div class="ovquiet"><b>Nothing is waiting on the office.</b>' +
-      '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
-      'the list on the left.</span></div>';
-
-  /* THE HEADING CARRIES THE TOTAL, because a count belongs on the thing it
-     counts and the rows below it are that thing (§116.2). Never a zero: the
-     empty state says it in words one line down (§108.10). */
-  var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
-
-  /* ── AND THE DOOR WENT WITH IT (§322) ──────────────────────────────
-     §318 put a "Set this client up" door here, drawn only while the client
-     was bare. The flow it opened lives on Forefront's own platform page now
-     (Islam: "the wizard should start on the outside window"), where a client
-     is shaped BEFORE anybody from it signs in — so by the time somebody is
-     reading this Overview there is nothing left for that door to offer, and
-     a door to a page that no longer exists is worse than none (§61). */
-  return cfgHead("Overview", [], null, false, null, null, "") +
-    '<div class="ovcols">' +
-      '<div class="ovmain">' +
-        '<div class="ovh">Waiting on the office' +
-          (n ? ' \u2014 <em>' + plural(n, "thing") + '</em>' : '') + '</div>' +
-        body +
-      '</div>' +
-      side +
-    '</div>';
 }
 
 /* ── A CYCLE FIELD, BOUND LIKE EVERY OTHER FIELD HERE (§273.4) ───────

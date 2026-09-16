@@ -800,6 +800,27 @@
        pressed (§61). paint() then moves the scope to the page's own module
        (resolveSetupScope). */
     var defs = reachable(w.d === "setup" ? setupDefsAll() : defsFor(w.d), w.d, w.d);
+    /* A BARE SETUP ADDRESS LANDS ON THE RAIL'S OWN FIRST PAGE (§357.7).
+       `/<client>/setup` is what the console's Settings and a module rail's
+       *Client settings ›* both open, and the router writes it as a place
+       with a destination and NO page — which this function read as
+       "nothing remembered" and the entry destination won: measured, the
+       office pressing Settings on the card landed on the group's
+       Performance with the rail served and never drawn. The scope the
+       router wrote decides whose rail, and the page is that rail's own
+       first: the set-up strip while it is not done, else the rail's
+       primary, else whatever it holds first — the gear's own pick
+       (menuGroups) made for a scope rather than a module. Nothing reachable
+       in that rail is still null, so somebody the rail holds no page for
+       lands where they work rather than in an empty frame (§61). */
+    if (w.d === "setup" && !w.s) {
+      var own = reachable(setupDefs(), w.d, w.d);
+      var first = own.filter(function(d){ return d.k === "start" && !SMPRules.setupDone(GROUP); })[0]
+               || own.filter(function(d){ return d.primary; })[0] || own[0];
+      if (!first) return null;
+      w.s = first.k;
+      return w;
+    }
     if (!w.s || !defs.some(function(d){ return d.k === w.s; })) return null;
     return w;
   }

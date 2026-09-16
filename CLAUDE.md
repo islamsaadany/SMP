@@ -9490,7 +9490,23 @@ on the body because `paint()` is HELD under a click (&sect;30.1), so it lands
 inside `render()`. *Done with set-up* is ONE key on the group
 (`SMPRules.SETUP_DONE`, an absence until pressed), classified `setup` with the
 two server edits falsified separately (**4 / 3 red**, &sect;259.2),
-`test-authorize.js` §41 673/0. [CHECKS] **`main` untouched &mdash; the merge
+`test-authorize.js` §41 673/0. **THE CHECKS**: `door-landing.mjs` 136/0 (§7 REPLACED by the client rail;
+red 3 under `--break=done-dropped`, red 18 with the strip inverted from the
+sources), `shell.mjs` 75/0, `modules.mjs` 125/0, `generated-in-step` all
+clear; `setup-per-module.py` file:// all passed (red 7 / 2) [SERVED-SPM];
+NEW `client-setup.py` all passed (red 39 / 9 from the sources);
+`client-setup-outside.py` rewritten as the console's three doors, 0 on both
+copies (red 12); `client-archive.py` 0 on both (red 2); `welcome.py` OK;
+`qa.py` over `file://` ERRORS none and at Next [QA-NEXT]; 673/0, 140/0, 69/0,
+`tsc` clean, `built-in-step` all good, `sw.js` `v5.09-client-setup` against
+main's `v5.05`. **AND TWO PRODUCT FAULTS, BOTH FOUND BY THE CHECKS AND BOTH
+IN THE CARRY** (&sect;357.6, &sect;357.7): *Add a client* THREW before it
+posted, because the console's create piece holds no step state and the shared
+`say()` had just learned to hold the sentence in it (8 red, all one fault);
+and the bare `/<client>/setup` &mdash; what the card's Settings and a module
+rail's *Client settings &rsaquo;* both open &mdash; landed on the ENTRY PAGE,
+the rail served and never drawn, because `restoreWhere()` read a place with
+no page as nothing remembered (135/1 &rarr; 136/0). **`main` untouched &mdash; the merge
 is Islam's word, on that merge.***
 
 *Earlier: 2026-09-15 &mdash; **&sect;356.6: the sweep, and the viewer a

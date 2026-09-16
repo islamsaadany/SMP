@@ -49120,7 +49120,72 @@ save carrying the mark unchanged classifies nothing about it.
 
 ### §357.5 — WHAT WAS MEASURED
 
-[CHECKS]
+**THE CHECKS, EACH REWRITTEN TO THE NEW TRUTH AND NEVER LOOSENED (§218),
+EACH RED FIRST.** Served: `door-landing.mjs` **136/0** — §3 waits for the
+redirect INTO `/raya-trade/strategy` and asserts the frozen overlay's
+greeting, chips, rows, alerts, pages and continue word as AGREEMENT with
+`frozen.landing()` (the row is PRESSED rather than its href read, since the
+overlay's rows are buttons); §7 REPLACED by the client rail — Back to the
+console, the strip agreeing with `progress()` (the dev tenant reads
+*7 of 7 done*), the flow at `/setup/start`, step 1's name agreeing with
+`tenants.name` and a typed name posting `saveClient`, the Branding controls
+and the modules band inside the flow, Done carried to the store by the
+autosave and drawn the same on a reload, the def in *The client* as *Client
+set-up*, put back in a finally; a module rail's *Client settings ›*; and a
+client user at the client rail measured rather than invented (the route
+serves the spine to anybody the door let in, the shell lands them where they
+work with no rail drawn). Red **3** under `--break=done-dropped` (a four-line
+hook in `lib/save.ts`: Done applied on screen and never stored) and red
+**18** with the strip's test inverted in the SOURCES (§276). `shell.mjs`
+**75/0** (three of its first failures were the overlay, offered again,
+eating clicks — every context is born having seen it except the one whose
+subject IS the offer); `modules.mjs` **125/0**, seven of its band assertions
+re-pointed at the file the band moved to, red 2 under `static-hello`;
+`generated-in-step` all clear. Frozen: `setup-per-module.py` file:// all
+passed, red **7 / 2** from the sources (kb given back to the client; the
+client group put before help), its served §8 rewritten [SERVED-SPM];
+NEW `client-setup.py` all passed, red **39 / 9** from the sources (the
+strip's `data-setupgo` removed; the put-back removed — printing *the row IS
+back on the step — (10, 11)* with the second Next still refused);
+`client-setup-outside.py` rewritten as the console's three doors, **0
+failures on both copies** of `platform.html`, red **12** on a doctored
+console whose Settings still opened `/platform`; `client-archive.py` 0
+failures on both copies with the archived state MADE through a stub door
+(§255), red 2; `welcome.py` OK; `qa.py` over `file://` 33 viewers, ERRORS
+none, and at Next [QA-NEXT]. Authoriser **673/0** (§41 red 4 / 3), differ
+140/0, platform rules 69/0, session-state clear, `tsc` clean cold,
+`built-in-step` all good; `sw.js` `v5.09-client-setup` against
+`origin/main`'s `v5.05-demo-complete`, read again at the push (§94.16).
+
+### §357.6 — ADD A CLIENT THREW BEFORE IT POSTED
+
+**The first product fault the checks found was in the carry.** The
+console's create piece holds no step state — `S` is minted by `mount()`
+alone — and said *"Creating…"* through the shared `say()`, which since
+§357.3 holds the sentence in `S` across a redraw. So the press threw
+`TypeError: Cannot set properties of null`, wrote no refusal, posted no
+`createClient`, and left the console on `/platform` with nothing said:
+**no client could be made from the console at all.** Found by
+`client-setup-outside.py` asserting what is POSTED (§96) — 8 red, all one
+fault — with the stack captured from the page. The sentence is held only
+where there is state to hold it; 0 after.
+
+### §357.7 — THE BARE ADDRESS LANDED ON THE ENTRY PAGE
+
+**And the second was the door itself.** `/<client>/setup` is what the
+console's Settings and a module rail's *Client settings ›* both open, and
+the router writes it as a place with a destination and NO page; the shell's
+`restoreWhere()` read a place with no page as nothing remembered, and the
+entry destination won — measured in a fresh context as the office: the rail
+served with `data-setup-scope="client"` and the shell landing on the group's
+Performance, the rail never drawn. `/setup/<page>` and `/setup/start` were
+fine, which is why every drive of the flow passed while the button that
+opens it did not. A bare Setup place now lands on the scoped rail's own first
+page — the strip while the set-up is not done, else the rail's primary, else
+its first — the gear's own pick (menuGroups) made for a scope; nothing
+reachable in that rail is still null, so somebody the rail holds no page for
+lands where they work rather than in an empty frame (§61). `door-landing.mjs`
+**135/1 → 136/0**, the one line being exactly this.
 
 **RECORDED, NOT DONE**: Islam has not seen the modules band and the archive
 block on step 1 (they sat on the console's settings page; the mockup drew

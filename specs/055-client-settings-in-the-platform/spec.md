@@ -184,6 +184,19 @@ into `smp-app/public/` and refuses a `platform.html` that does not load it.
 - The sweeps: `qa.py` file:// and at Next; `built-in-step`,
   `generated-in-step`; authoriser 673/0.
 
+## 4.1 · What the checks found in the carry
+
+- **Add a client threw before it posted** (§357.6): the console's create
+  piece holds no step state and the shared `say()` wrote into it; no
+  `createClient` was ever sent. Found by asserting what is POSTED.
+- **The bare `/<client>/setup` landed on the entry page** (§357.7): the
+  router writes it as a place with no page and `restoreWhere()` read that
+  as nothing remembered. It lands on the scoped rail's own first page now —
+  the strip, else the primary, else the first.
+- **A client user at `/<client>/setup`** is served the spine document (the
+  route gates modules, not the spine) and the shell lands them where they
+  work with no rail drawn — measured and stated, not a refusal in words.
+
 ## 5 · Deliberately not decided here
 
 - Where the knowledge base finally lives (*"until we decide later"*).

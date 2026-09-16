@@ -1,5 +1,5 @@
 from playwright.sync_api import sync_playwright
-import pathlib, os
+import pathlib, os, re
 url="file://"+str(pathlib.Path("strategy-management-platform.html").resolve())
 # THE SAME SWEEP, POINTED AT THE NEW APP (spec 043, research §P4): with
 # SMP_BASE set the walk signs in at the client's own door and opens the
@@ -10,12 +10,18 @@ BASE=os.environ.get("SMP_BASE")
 def open_platform(pg):
     if not BASE:
         pg.goto(url); pg.wait_for_timeout(600); return
+    # §357: the welcome is offered again on every deep address, once a
+    # session, and stands the page behind it down — the sweep walks the page,
+    # so it is born having seen it (welcome.py is the overlay's own check)
+    pg.context.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1')}catch(e){}")
     pg.goto(BASE+"/raya-trade/sign-in")
     pg.wait_for_selector(".gate[data-hydrated]", state="attached", timeout=15000)
     pg.fill("#user", os.environ.get("SMP_QA_EMAIL","office@forefront.example"))
     pg.fill("#password", os.environ["SMP_QA_PASSWORD"])
     pg.click("#loginForm button[type=submit]")
-    pg.wait_for_url("**/raya-trade", timeout=15000)
+    # §357: a sign-in lands INSIDE the first module (the bare address is a
+    # redirect), so the wait is for the module's address
+    pg.wait_for_url(re.compile(r"/raya-trade/[a-z]"), timeout=15000)
     pg.goto(BASE+"/raya-trade/mobile/strategy")
     pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
     pg.wait_for_timeout(600)

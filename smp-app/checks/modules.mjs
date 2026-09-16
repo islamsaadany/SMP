@@ -41,7 +41,6 @@ import { SERVERS, serverFor } from "../modules/registry.ts";
 import { insightsDocument } from "../modules/insights/page.ts";
 import { barFrom, BAR_DEFAULT } from "../lib/branding.ts";
 import { decideOpen, openingArea } from "../lib/access.ts";
-import { landingShape } from "../lib/landing.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const APP = join(here, "..");
@@ -378,11 +377,19 @@ console.log("\n4c · who may open a module (§356.5)");
   /* STRATEGY'S MATRIX IS BYTE-IDENTICAL EITHER SIDE OF A MODULE'S GRANT */
   const strip = (g) => JSON.stringify(Object.fromEntries(Object.entries(g.access).map(([r, row]) => [r, Object.fromEntries(Object.entries(row).filter(([k]) => k !== "a_insights"))])));
   check("a module's grant touches no cell of Strategy's matrix", strip(shutOwner) === strip(seed) && strip(openOwner) === strip(seed));
-  /* THE LANDING'S LIST READS THE SAME ANSWER */
-  const all = landingShape("raya-trade", "none", ["insights"]).modules.map((m) => m.key);
-  const narrowed = landingShape("raya-trade", "none", ["insights"], undefined, ["strategy"]).modules.map((m) => m.key);
-  check("the landing lists every module the client has when nothing is shut", all.join(",") === "strategy,insights", all.join(","));
-  check("…and drops a shut module's row, keeping the rest (spec 054 §6.4)", narrowed.join(",") === "strategy", narrowed.join(","));
+  /* THE CLIENT'S ADDRESS READS THE SAME ANSWER (§357, spec 055): there is
+     no landing any more — `/<client>` redirects into the first module the
+     person may OPEN, read from openableModules, the one reader the switcher
+     and the card already read (§356.5). Asserted off the SOURCE (§6's
+     method): a page that only redirects has nothing to render, so the
+     thing that can drift is which list it asks. REWRITTEN, never loosened
+     (§218): this asserted landingShape()'s module rows, which went with
+     the landing. */
+  const pageSrc = read("smp-app/app/(platform)/[slug]/page.tsx");
+  check("a client's address asks openableModules and redirects into the first, never a second list",
+    pageSrc.indexOf("openableModules(") > -1 && /redirect\(clientHref\(slug, open\[0\] \|\| DEFAULT_MODULE/.test(pageSrc) && pageSrc.indexOf("landingShape") < 0);
+  check("…and draws no welcome of its own (the frozen welcome.js greets inside Strategy)",
+    !/welcomeover|Welcome,|<main|<section/.test(pageSrc) && !read("smp-app/lib/landing.ts").includes("landingShape"));
   /* THE ROUTE ASKS BEFORE THE TABLE, read off the source (§6's method) */
   const routeSrc = read("smp-app/app/(platform)/[slug]/[...rest]/route.ts");
   check("the route asks the gate BEFORE serverFor and before the Setup document (research R3)",
@@ -443,43 +450,53 @@ check("turning one on is gated on the same rule as the rest of the configuration
    draws neither control, and the server has to refuse both anyway. */
 check("the default cannot be switched off, however the request is spelt", /key === DEFAULT_MODULE\) return no\(400/.test(api));
 check("and a module that is not built cannot be switched on", /!MODULE_DEF\[key\]\.built\) return no\(400/.test(api));
+/* THE FLOW MOVED OUT OF THE CONSOLE (§357, spec 055): the client's set-up
+   is one module, SMP-Project-Folder/src/client-setup.js, mounted by the
+   frozen shell inside the platform's own Setup rail AND by the console for
+   the two acts that stay there (creating a client; bringing an archived one
+   back). REWRITTEN, never loosened (§218): every assertion below asked
+   platform.html for a band that file no longer draws, and would have gone
+   green on a build that drew the band nowhere had it been loosened to
+   "somewhere". The band is asserted in the ONE file, and both hosts are
+   asserted to LOAD that file — the console by its script tag (which
+   build-shell.mjs refuses to build without) and the shell by the placeholder
+   build-shell.mjs fills (§53.5). */
+const cs = read("SMP-Project-Folder/src/client-setup.js");
 const pf = read("platform.html");
-check("the drawer draws the band under the client's name", pf.includes('el("div", "band")') && pf.includes("Modules this client has"));
-check("its rows are the team list's own, so the section adds no vocabulary", /mods[\s\S]{0,700}el\("div", "teamrow"\)/.test(pf));
-/* THE SUBJECT MOVED AND THE CHECK DID NOT (§354, §51.11). §320.4 drew this
-   band under the client's name on the settings page and asserted it came
-   before that page's two columns; §322 replaced the whole page with the
-   set-up flow and CARRIED the band onto its first step (§322.1). So this
-   file went on slicing from `function drawClient(`, which the console has not
-   held since — `indexOf` answered -1, `slice(-1)` handed it the last
-   character of the file, and every assertion under it failed against one
-   byte. It had been red ever since, saying "placement B" about a page that no
-   longer exists.
-
-   REWRITTEN TO THE PLACEMENT THAT IS NOW THE DECISION, never loosened
-   (§218): the band is on step ONE, the step about the client itself rather
-   than about its organisation, after that step's own fields and before the
-   ending block — which is what "on screen in one press from the card" means
-   in a file a check can read. Scoped to that step's own text, because the
-   console builds several and an unscoped indexOf would compare it against
-   another step's (§100.3, the trap the old note recorded). */
+check("the set-up flow draws the band under the client's name", cs.includes('el("div", "band")') && cs.includes("Modules this client has"));
+check("its rows are the team list's own, so the section adds no vocabulary", /mods[\s\S]{0,700}el\("div", "teamrow"\)/.test(cs));
+/* THE SUBJECT MOVED AND THE CHECK DID NOT (§354, §51.11), TWICE: §320.4
+   drew this band under the client's name on the settings page, §322 carried
+   it onto the set-up flow's first step, and §357 carried the flow itself
+   into the platform. Scoped to that step's own text, because the flow builds
+   several and an unscoped indexOf would compare it against another step's
+   (§100.3, the trap the old note recorded). The band is on step ONE, the
+   step about the client itself rather than about its organisation, after
+   that step's own fields and before the archive block that ends it. */
 const CS = "function clientStep(";
-check("the set-up flow still has a step about the client itself to hang it on", pf.includes(CS));
-const step = pf.slice(pf.indexOf(CS), pf.indexOf("function modulesBlock("));
+check("the set-up flow still has a step about the client itself to hang it on", cs.includes(CS));
+const step = cs.slice(cs.indexOf(CS), cs.indexOf("function modulesBlock("));
 check("the modules band is drawn on that step", /box\.appendChild\(modulesBlock\(\)\)/.test(step));
 check("...after the client's own fields and before the ending block",
   step.indexOf("The client's name") < step.indexOf("modulesBlock()")
-  && step.indexOf("modulesBlock()") < step.indexOf("endBlocks()"),
+  && step.indexOf("modulesBlock()") < step.indexOf("archiveBlock()"),
   "name at " + step.indexOf("The client's name") + ", band at " + step.indexOf("modulesBlock()")
-  + ", end at " + step.indexOf("endBlocks()"));
+  + ", end at " + step.indexOf("archiveBlock()"));
 check("and drawn ONCE — a band on two steps is two places to set one thing",
-  (pf.match(/appendChild\(modulesBlock\(\)\)/g) || []).length === 1,
-  String((pf.match(/appendChild\(modulesBlock\(\)\)/g) || []).length));
-/* The console is ONE source for both stacks; the app serves a generated copy,
-   so a build that edited platform.html and forgot to regenerate would ship a
-   drawer without the section (§53.5). */
+  (cs.match(/appendChild\(modulesBlock\(\)\)/g) || []).length === 1,
+  String((cs.match(/appendChild\(modulesBlock\(\)\)/g) || []).length));
+/* ONE FILE FOR BOTH HOSTS, and each host asserted to load it (§53.5): the
+   console by name, the shell through the placeholder build-shell.mjs fills
+   with the served copy's address. A build that edited client-setup.js and
+   forgot to regenerate would ship the console's copy without the band. */
+check("the console loads that one file rather than carrying a flow of its own",
+  /<script src="\/client-setup\.js"><\/script>/.test(pf) && !pf.includes("Modules this client has"));
+check("…and so does the shell: build.py's own list carries the file, so it is inside the served shell.js",
+  /\("CLIENTSETUP",\s*"client-setup\.js"\)/.test(read("SMP-Project-Folder/src/build.py"))
+  && /<script src="CLIENTSETUP"><\/script>/.test(read("SMP-Project-Folder/src/shell.html"))
+  && read("smp-app/public/shell.js").includes("Modules this client has"));
 check("and the copy the app serves was regenerated from it",
-  read("smp-app/public/platform-page.js").includes("Modules this client has"));
+  read("smp-app/public/client-setup.js").includes("Modules this client has"));
 const route = read("smp-app/app/(platform)/[slug]/[...rest]/route.ts");
 check("the address is gated on the client's own list", /whereOf\(rest \|\| \[\], have\)/.test(route));
 /* BOTH ENDS (§94.2): the route asks the table, AND it names no module of its

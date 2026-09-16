@@ -9,8 +9,9 @@
        the person navigates, Back returns, and a refresh stays put (§173);
      · a change made in the shell reaches the server through the frozen
        client and the frozen spelling of the address (/api/state);
-     · the shell's own welcome overlay is stood down (the landing is the
-       welcome, §315) and the chrome says who is signed in;
+     · the shell's own welcome overlay is offered again on a deep address
+       (§357: Strategy's welcome is the welcome) and the chrome says who is
+       signed in;
      · Forefront's own pages: the cards, the consultants, the table, a
        client's configuration, a client created from the cards and opened —
        and a client's own person refused the outer platform.
@@ -59,8 +60,16 @@ if (!up) { console.log("FAIL  the app did not start"); try { process.kill(-serve
 
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
 let ctx, page, errs = [];
-async function fresh() {
-  ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } }); page = await ctx.newPage(); errs = [];
+/* THE WELCOME IS OFFERED AGAIN ON EVERY DEEP ADDRESS (§357), once a
+   browser session, and it covers the viewport — so a context that presses a
+   control under it waits thirty seconds on a click the overlay takes
+   (§167.2's finding, the reason the Next landing once stood it down). Every
+   context is born having seen it, through welcome.js's own memory, except
+   the one whose subject IS the offer (§2), which asks for it. */
+async function fresh(offerWelcome = false) {
+  ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  if (!offerWelcome) await ctx.addInitScript(() => { try { sessionStorage.setItem("smp.welcome.done", "1"); } catch (e) {} });
+  page = await ctx.newPage(); errs = [];
   page.on("pageerror", (e) => errs.push("PAGEERROR " + e.message));
   page.on("console", (m) => { if (m.type() === "error") errs.push(m.text().slice(0, 160)); });
 }
@@ -95,12 +104,21 @@ await section("1 · the document and its policy", async () => {
 });
 
 await section("2 · the address names the page, and the page names the address", async () => {
-  await fresh(); await signIn("mobhead@raya.example");
+  await fresh(true); await signIn("mobhead@raya.example");
   await open("/raya-trade/strategy/mobile/strategy");
   let p = await place();
   check(p[0] === "mobile" && p[1] === "strategy", "/raya-trade/strategy/mobile/strategy opens Mobile's Strategy", JSON.stringify(p));
   check(/^\/raya-trade\/strategy\/mobile\/strategy\/[a-z]+$/.test(path()), "…and the address gains the section the shell opened (the place is the address)", path());
-  check(await page.evaluate(() => !document.querySelector(".welcomeover")), "the shell's own welcome overlay is stood down — the landing is the welcome (§315)");
+  /* REWRITTEN, never loosened (§218): §315 stood the shell's own welcome
+     down because the Next landing was the welcome; §357 removed that landing
+     (Islam: "I just need a welcome screen for the strategy module for now"),
+     so the frozen welcome.js is offered again on a deep address, once a
+     session — asserted PRESENT here and dismissed through its own control,
+     so the rest of the section measures the page under it (§167.2). */
+  check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered again — Strategy's welcome is the welcome (§357)");
+  await page.evaluate(() => { const b = document.querySelector(".welcomeover .wexit"); if (b) b.click(); });
+  await page.waitForFunction(() => !document.querySelector(".welcomeover")).catch(() => {});
+  check(await page.evaluate(() => !document.querySelector(".welcomeover")), "…and its own way out takes it down");
   check((await page.locator(".viewer-note b").textContent().catch(() => "")) === "Ashraf Laithy", "the chrome says who is signed in (a client's person has no switcher)");
   await open("/raya-trade/strategy/mobile/strategy/plan"); p = await place();
   check(p[2] === "plan", "…/plan opens the Plan section", JSON.stringify(p));

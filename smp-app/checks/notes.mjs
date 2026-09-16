@@ -532,6 +532,22 @@ try {
       (await asTenant(A, (c) => N.oneNote(c, nid2))).metOn === "2026-09-02" && await stayed());
     check("...and the word comes back, saying the new day", /2 Sep 2026/.test((await pgp.locator("button[data-act=date]").innerText()).trim()),
       (await pgp.locator("button[data-act=date]").innerText()).trim());
+    /* THE TITLE READS AS SOMETHING YOU TYPE IN (Islam, of the built page: "I
+       need to set the title manually"). It always was a box — borderless,
+       transparent and 21px bold, so it drew as a heading the platform had
+       written. Measured as PAINT and never as a class (§94.8): a build that
+       renamed the class and kept the look would pass a class assertion and
+       fail the person looking at it. Both ends — the box must read as a box
+       AND still be the one that writes the title, which the section above
+       already proved. */
+    const ttl = await pgp.locator("input[data-act=title]").evaluate((el) => {
+      const c = getComputedStyle(el);
+      return { w: parseFloat(c.borderTopWidth), bg: c.backgroundColor, r: parseFloat(c.borderTopLeftRadius) };
+    });
+    check("the title is drawn as a box, not as a heading", ttl.w >= 1 && ttl.r >= 1 && !/rgba\(0, 0, 0, 0\)/.test(ttl.bg), JSON.stringify(ttl));
+    const keys = (await pgp.locator(".head .lab").allInnerTexts()).map((t) => t.trim());
+    check("...and the title and the date carry the page's own key, as everything else on it does",
+      keys.length === 2 && /title/i.test(keys[0]) && /date/i.test(keys[1]), JSON.stringify(keys));
     /* THE ATTENDEES, PRESSED. */
     await pgp.locator("[data-act=open-att]").click(); await pgp.waitForTimeout(150);
     check("+ Add attendee opens the register", await pgp.locator(".pick .prow").first().isVisible());
@@ -540,7 +556,54 @@ try {
     check("...the search hides rows in place, without a repaint (§35)", visible.length === 1 && /Ramy/.test(visible[0]), JSON.stringify(visible));
     await pgp.locator(".pick .prow:visible").first().click(); await settle();
     check("...picking one puts them on the meeting", (await asTenant(A, (c) => N.oneNote(c, nid2))).attendees.some((x) => x.key === "ramy") && await stayed());
-    await pgp.locator("[data-act=open-att]").click(); await pgp.waitForTimeout(150);
+    /* THE LIST STAYS OPEN WHILE YOU TICK (Islam, of the built page: "don't
+       close the drop down with each add ... let me make the checks for all the
+       attendees"). Every press here is answered by the page drawn again, so
+       this is the list being CARRIED across that redraw, not a press being
+       skipped — which is why what was typed to find somebody is asserted
+       beside it. This block replaces a re-opening press: it was there because
+       a tick used to close the list, and pressing the same button now toggles
+       it shut, so a check written against the old behaviour would go red on a
+       correct build (§214.3, rewritten and never loosened — §218). */
+    check("...and the list STAYS OPEN, so several can be ticked in one go",
+      /* The LIST, never its first row: the search term is carried across too,
+         so the first row is legitimately hidden and asking it would report a
+         working build broken. */
+      await pgp.locator(".pick").isVisible());
+    check("...with the search still holding what was typed",
+      (await pgp.locator("[data-act=find-att]").inputValue()) === "ramy",
+      await pgp.locator("[data-act=find-att]").inputValue());
+    check("...and the row that was ticked is lit",
+      (await pgp.locator(".pick .prow:visible").first().getAttribute("data-on")) === "true");
+    /* AND THE PASS RECOVERS, so a build that shut the list reddens the two
+       assertions above and every one after them still reports (§215, §280):
+       without this the next press waits thirty seconds on a hidden box and
+       takes the rest of the file down with it. */
+    const reopen = async () => { if (!(await pgp.locator(".pick").isVisible())) { await pgp.locator("[data-act=open-att]").click(); await pgp.waitForTimeout(150); } };
+    await reopen();
+    /* A SECOND PERSON WITHOUT RE-OPENING ANYTHING, which is the whole ask: a
+       build that kept the list open and lost the tick would pass everything
+       above (§113.8). */
+    await pgp.locator("[data-act=find-att]").fill(""); await pgp.waitForTimeout(120);
+    const off = pgp.locator('.pick .prow[data-on="false"]').first();
+    const offKey = await off.getAttribute("data-key");
+    await off.click(); await settle();
+    const two = await asTenant(A, (c) => N.oneNote(c, nid2));
+    check("...a second person ticked in the same open list",
+      two.attendees.some((x) => x.key === "ramy") && two.attendees.some((x) => x.key === offKey) && await stayed(),
+      offKey + " / " + JSON.stringify(two.attendees.map((x) => x.key || x.email)));
+    check("...and the list is open still", await pgp.locator(".pick").isVisible());
+    /* AND THE SECOND PERSON COMES BACK OFF, which proves the tick toggles and
+       leaves the meeting exactly as the rest of this file expects to find it
+       (§94.2) — without it, every assertion downstream about who the minutes
+       reach is measuring a fixture this section changed. */
+    await reopen();
+    await pgp.locator('.pick .prow[data-key="' + offKey + '"]').click(); await settle();
+    const back = await asTenant(A, (c) => N.oneNote(c, nid2));
+    check("...and ticking them again takes them off, with the list still open",
+      !back.attendees.some((x) => x.key === offKey) && await pgp.locator(".pick").isVisible(),
+      JSON.stringify(back.attendees.map((x) => x.key || x.email)));
+    await reopen();
     await pgp.locator("[data-att-name]").fill("Karim Fawzy");
     await pgp.locator("[data-att-mail]").fill("karim@partner.test");
     await pgp.locator("[data-act=add-casual]").click(); await settle();
@@ -548,6 +611,16 @@ try {
       (await asTenant(A, (c) => N.oneNote(c, nid2))).attendees.some((x) => x.email === "karim@partner.test") &&
       !(await asTenant(A, (c) => N.registerOf(c))).has("karim-partner-test"));
     check("...drawn as a dashed chip that says so", await pgp.locator(".chip.once").first().isVisible());
+    /* AND THE WAY OUT, which is the other half of keeping it open (§94.2): it
+       is not a confirmation — every tick above is already in the database by
+       the time it is pressed — it is the deliberate way to finish, because a
+       tablet has no Escape key and that was the only one. */
+    await reopen();
+    check("the list says each tick is already saved, rather than offering to save them",
+      /already saved/i.test(await pgp.locator(".pick .done").innerText()),
+      await pgp.locator(".pick .done").innerText());
+    await pgp.locator("[data-act=done-att]").click(); await pgp.waitForTimeout(150);
+    check("...and Done closes it", !(await pgp.locator(".pick").isVisible()));
     /* REFINE, against the stand-in. */
     modelAnswer = { summary: "Preparing the Q3 review.", discussed: ["Mobile's figures are ready by 20 September."], agreed: ["Drafts by 22 September."], actions: [{ what: "Mobile Q3 figures", who: "Ramy", when: "20 Sep" }], open: [], next: "" };
     await pgp.locator("[data-act=refine]").click(); await settle();

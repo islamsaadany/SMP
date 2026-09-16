@@ -37,7 +37,10 @@ const no = (status: number, why: string) => json(status, { ok: false, why });
 export async function serve(a: ServeArgs): Promise<Response> {
   const first = a.rest[0] || "";
   if (first === "app.js" && a.rest.length === 1)
-    return new Response(APP_JS, { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+    /* `close-on-tick` puts back the reported fault: the list is rebuilt hidden
+       by every redraw, so refusing to carry it is exactly what shut it after
+       each tick. Never set on a deployment (constitution XVI). */
+    return new Response(APP_JS.replace("/*%BRK%*/", brk() === "close-on-tick" ? "return false;" : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which
      must turn checks/notes.mjs red (§94.5). Never set on a deployment. */

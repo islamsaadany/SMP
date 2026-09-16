@@ -42,23 +42,86 @@ export const APP_JS = `(function () {
   /* WHERE THE CURSOR IS, so a swap can put it back. A box is named by what
      it is — the act it posts, or the part of the minutes it holds — never by
      its position, because the page is rebuilt and positions move. */
+  /* THE OPEN ATTENDEE LIST IS STATE A SWAP MUST CARRY, exactly as the caret
+     is: every press here is answered by the page drawn again, so a tick
+     rebuilt the list from scratch and it vanished taking the search term with
+     it (Islam: "don't close the drop down with each add"). What is carried is
+     what a person would lose — that it is open, what they typed to find
+     somebody, how far down they had scrolled, and which of its three boxes
+     had the cursor. */
+  function attState() {
+    var box = document.querySelector(".pick:not([hidden])");
+    if (!box) return null;
+    var f = box.querySelector("[data-act=find-att]"), pl = box.querySelector(".pl");
+    var a = document.activeElement, on = "", row = null;
+    if (a && a.closest) {
+      if (a === f) on = "find";
+      else if (a.closest("[data-att-name]")) on = "name";
+      else if (a.closest("[data-att-mail]")) on = "mail";
+      else row = a.closest("[data-act=pick-att]");
+    }
+    /* THE ROW BY ITS KEY, never by its position: a tick redraws the list and
+       the ticked person may sort elsewhere, so putting the cursor back by
+       index lands it on somebody else (§48). */
+    return { q: f ? f.value : "", top: pl ? pl.scrollTop : 0, on: on,
+             key: row ? row.getAttribute("data-key") : "" };
+  }
+  /* ONE FILTER, asked by the box being typed in AND by the put-back, or a
+     carried search term would show a list it does not match (§53.5). */
+  function filterAtt(f) {
+    var q = f.value.toLowerCase(), box = f.closest(".pick");
+    if (!box) return;
+    box.querySelectorAll(".prow").forEach(function (r) {
+      r.hidden = !!q && r.textContent.toLowerCase().indexOf(q) < 0;
+    });
+  }
+  function restoreAtt(a) {
+    /*%BRK%*/
+    if (!a) return false;
+    var b = document.querySelector("[data-act=open-att]");
+    var box = b && b.parentNode ? b.parentNode.querySelector(".pick") : null;
+    if (!box) return false;
+    box.hidden = false;
+    b.setAttribute("aria-expanded", "true");
+    var f = box.querySelector("[data-act=find-att]");
+    if (f && a.q) { f.value = a.q; filterAtt(f); }
+    var pl = box.querySelector(".pl");
+    if (pl) pl.scrollTop = a.top || 0;
+    var to = a.on === "find" ? f
+           : a.on === "name" ? box.querySelector("[data-att-name]")
+           : a.on === "mail" ? box.querySelector("[data-att-mail]") : null;
+    if (!to && a.key) {
+      /* Matched by walking rather than by an attribute selector, because a
+         person key is the register's and is not ours to assume is safe to
+         put inside one. */
+      Array.prototype.slice.call(box.querySelectorAll("[data-act=pick-att]")).forEach(function (r) {
+        if (!to && r.getAttribute("data-key") === a.key) to = r;
+      });
+    }
+    if (to) { to.focus(); if (pl) pl.scrollTop = a.top || 0; return true; }
+    return false;
+  }
   function keep() {
+    var att = attState();
     var a = document.activeElement;
-    if (!a || !a.closest) return null;
-    var f = a.closest("[data-act], [data-part], [data-part] > li, [data-part] td");
-    if (!f) return null;
+    var f = a && a.closest ? a.closest("[data-act], [data-part], [data-part] > li, [data-part] td") : null;
+    if (!f) return att ? { att: att, act: null, part: null, value: null, at: null } : null;
     var part = a.closest("[data-part]"), sel = null;
     if (part) {
       var box = a.closest("li, td, p");
       var kids = Array.prototype.slice.call(part.querySelectorAll("li, td"));
       sel = { part: part.getAttribute("data-part"), i: box ? kids.indexOf(box) : -1 };
     }
-    return { act: f.getAttribute("data-act"), part: sel,
+    return { att: att, act: f.getAttribute("data-act"), part: sel,
              value: a.value !== undefined ? a.value : null,
              at: a.selectionStart !== undefined && a.selectionStart !== null ? a.selectionStart : null };
   }
   function restore(k) {
     if (!k) return;
+    /* The list goes back FIRST: it is rebuilt hidden, and the caret it may be
+       holding does not exist until it is shown again. */
+    if (restoreAtt(k.att)) return;
+    if (!k.act && !k.part) return;
     var el = null;
     if (k.part) {
       var p = document.querySelector('[data-part="' + k.part.part + '"]');
@@ -133,8 +196,12 @@ export const APP_JS = `(function () {
 
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-act]");
-    /* A press anywhere else closes the attendee list. */
-    if (!b || b.getAttribute("data-act").indexOf("att") < 0) closeAtt(null);
+    /* A press anywhere ELSE closes the attendee list — and "elsewhere" is a
+       question about WHERE the press landed, never about how its act is
+       spelt. It was a substring test, which read add-casual as elsewhere and
+       shut the list the moment somebody who is not on the register was added:
+       an attendee act that happens not to contain those three letters. */
+    if (!b || (!b.closest(".pick") && b.getAttribute("data-act") !== "open-att")) closeAtt();
     if (!b) return;
     var act = b.getAttribute("data-act");
     if (act === "new") {
@@ -165,13 +232,19 @@ export const APP_JS = `(function () {
     } else if (act === "open-att") {
       openAtt(b);
     } else if (act === "pick-att") {
-      post({ act: b.getAttribute("data-on") === "true" ? "drop-attendee" : "add-attendee", key: b.getAttribute("data-key") }, { keep: false });
+      post({ act: b.getAttribute("data-on") === "true" ? "drop-attendee" : "add-attendee", key: b.getAttribute("data-key") });
+    } else if (act === "done-att") {
+      closeAtt();
     } else if (act === "drop-att") {
       post({ act: "drop-attendee", at: Number(b.getAttribute("data-i")) }, { keep: false });
     } else if (act === "add-casual") {
       var box = b.closest(".pick");
       var nm = box.querySelector("[data-att-name]"), ml = box.querySelector("[data-att-mail]");
-      post({ act: "add-attendee", name: nm.value, email: ml.value }, { keep: false, then: function (j) { if (j) { nm.value = ""; ml.value = ""; } } });
+      post({ act: "add-attendee", name: nm.value, email: ml.value }, { then: function (j) {
+        /* The pair is redrawn empty by the swap; what this puts back is the
+           cursor, so a second person can be typed without reaching for it. */
+        if (j) { var again = document.querySelector("[data-att-name]"); if (again) again.focus(); }
+      } });
     } else if (act === "delete-ask") {
       b.hidden = true;
       var s2 = b.parentNode.querySelector(".sure"); if (s2) s2.hidden = false;
@@ -200,10 +273,7 @@ export const APP_JS = `(function () {
   document.addEventListener("input", function (e) {
     var f = e.target.closest("[data-act=find-att]");
     if (!f) return;
-    var q = f.value.toLowerCase();
-    f.closest(".pick").querySelectorAll(".prow").forEach(function (r) {
-      r.hidden = !!q && r.textContent.toLowerCase().indexOf(q) < 0;
-    });
+    filterAtt(f);
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { closeAtt(); return; }

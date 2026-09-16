@@ -9597,7 +9597,46 @@ bumped** (&sect;91) &mdash; and it reaches the offline copy alone, the served
 worker holding `SHELL` nought times (&sect;329). **The frozen browser checks
 could not be run in this container and it is said rather than left as an
 absence** (&sect;54.5): no python playwright, so `qa-run.py` cannot launch.
-**Merged to `main` 2026-09-16.***
+**Merged to `main` 2026-09-16.**
+**&sect;357.1 &mdash; THE TITLE WAS ALWAYS A BOX AND DID NOT READ AS ONE**: Islam,
+of the built page &mdash; *"I need to set the title manually"* &mdash; and it
+always could be. Borderless, transparent and 21px bold, so it drew as a heading
+the platform had written; every other thing on that page carries an uppercase
+key and these two were the only ones without, so they take the page's own
+`.lab` and the box takes the border every other field already has &mdash; no new
+device (&sect;53.5).
+**&sect;357.2 &mdash; THE LIST STAYS OPEN WHILE YOU TICK**: *"don't close the
+drop down with each add &hellip; let me make the checks for all the
+attendees."* Every press here is answered by the page drawn again, so a tick
+rebuilt the list from scratch and it vanished with whatever had been typed into
+its search. It is **CARRIED across that redraw** now, the way the caret already
+is &mdash; how far down it was scrolled, which of its three boxes held the
+cursor, and which row was ticked **by KEY and never by position**, because a
+tick redraws the list and the ticked person may sort elsewhere (&sect;48).
+**THERE IS NOTHING TO CONFIRM, AND THAT IS THE ANSWER TO THE QUESTION HE ASKED
+BESIDE IT**: a tick is in the database before its chip finishes drawing, and
+nothing in this product has a Save button &mdash; so what was missing is the
+OTHER half, a deliberate way to FINISH, since a tablet has no Escape key and
+that was the only one. **AND THE GUARD FOR "A PRESS ELSEWHERE" TESTED THE ACT'S
+SPELLING** (`indexOf("att")`), so `add-casual` &mdash; an attendee act that
+happens not to contain those three letters &mdash; shut the list every time
+somebody off the register was added; it asks WHERE the press landed now, which
+is the question it was always meant to be.
+**&sect;357.3 &mdash; AND THE CHECK HELD THE OLD BEHAVIOUR**: it re-opened the
+list after a tick, which now TOGGLES it shut, so a file written against the old
+world goes red on a correct build (&sect;214.3) &mdash; **REWRITTEN, never
+loosened** (&sect;218) to assert the new property, with the second person ticked
+AND untanked so the fixture every assertion downstream measures is left exactly
+as it was found (&sect;94.2). **Two of its own first failures were the CHECK**:
+it asked whether the first ROW was visible, which with a search term carried
+across is legitimately hidden, so it reported a working build broken; and the
+new break's death took nine assertions with it, so the pass recovers
+(&sect;215, &sect;280). 164/0, proved able to fail SEVEN ways. **And a backtick
+in a comment ended the stylesheet's template literal** &mdash; &sect;272.8,
+walked into while the neighbouring file warns about it by name in its own
+header. **The date is drawn and NOT built**: keeping the day where it is and
+opening the calendar on the first press rather than the second, awaiting
+Islam's word on one fork inside it.*
 
 *Earlier: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
 Internal Tracker's row, redrawn at Islam's word and built (spec 054).** Islam,

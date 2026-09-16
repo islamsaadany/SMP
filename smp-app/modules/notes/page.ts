@@ -95,8 +95,14 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
 .back{display:inline-block;font:600 12.5px/1 inherit;color:var(--ink-3);text-decoration:none;margin-bottom:10px}
 .back:hover,.back:focus-visible{color:var(--ink);outline:none}
 .head{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;margin-bottom:8px}
-.ttl{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:600 21px/1.3 inherit;padding:4px 0 8px;outline:none}
-.ttl:focus{border-bottom-color:var(--gold)}
+.ttl{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:600 21px/1.3 inherit;padding:9px 11px;outline:none}
+.ttl:focus{border-color:var(--gold)}
+/* THE KEY ABOVE IT IS WHY THE NUDGE GOES: the date carried margin-top:4px to
+   sit level with a title that had no key over it. Both have one now.
+   NO BACKTICK IN HERE, as the script's own header says one file along: this
+   stylesheet is a template literal, so a name quoted in a comment ends it
+   and every rule after it is read as JavaScript. */
+.head .date{margin-top:0}
 .ttl::placeholder{color:var(--ink-3);font-weight:400}
 .date{font:400 13px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 9px;white-space:nowrap;margin-top:4px;cursor:pointer}
 .date:hover,.date:focus-visible{border-color:var(--gold);color:var(--ink);outline:none}
@@ -122,6 +128,9 @@ input.date{cursor:auto}
 .pick .else{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:grid;grid-template-columns:1fr 1fr auto;gap:6px}
 .pick .else input{margin:0;font-size:12.5px;padding:5px 7px}
 .pick .else .btn{padding:6px 9px;font-size:12px}
+.pick .done{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;align-items:center;gap:8px}
+.pick .done .btn{flex:none;padding:6px 9px;font-size:12px}
+.pick .done span{font-size:12px;color:var(--ink-3)}
 .pick .nobody{padding:8px 7px;color:var(--ink-3);font-size:13px}
 .raw{width:100%;min-height:300px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:14px 16px;font:400 15px/1.6 inherit;resize:vertical;outline:none}
 .raw:focus{border-color:var(--gold)}
@@ -181,7 +190,12 @@ function skeleton(slug: string, tenantName: string, have: ModuleKey[], bar: stri
     "<title>" + esc(tenantName) + " &mdash; " + esc(MODULE_DEF.notes.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    "<style>" + CSS.replace("%BAR%", bar) + "</style>\n</head>\n" +
+    /* `title-as-heading` puts the reported look back — borderless, transparent,
+       no key — which must turn checks/notes.mjs red (§94.5). Never set on a
+       deployment (constitution XVI). */
+    "<style>" + CSS.replace("%BAR%", bar) +
+      (BRK() === "title-as-heading" ? ".ttl{border:0!important;border-radius:0!important;background:transparent!important}.head .lab{display:none}" : "") +
+      "</style>\n</head>\n" +
     "<body" + a + ">\n" +
     '<header class="bar">' + switcher(slug, have, "notes") +
     "<h1>" + esc(MODULE_DEF.notes.label) + "</h1>" +
@@ -218,6 +232,7 @@ export async function load(c: Q, noteId: string | null): Promise<Loaded> {
 
 const TICK = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5.2l2.4 2.3 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const BRK = () => process.env.SMP_BREAK || "";
 const monthLabel = (day: string) => MONTH[Number(day.slice(5, 7)) - 1] + " " + day.slice(0, 4);
 
 /* WHAT WENT OUT, as a word: never sent, sent on a day, or updated on one.
@@ -295,7 +310,15 @@ function attendeeBlock(n: Note, L: Loaded): string {
     '<div class="pl">' + list + "</div>" +
     '<div class="else"><input data-att-name placeholder="Somebody else — name" aria-label="Name" maxlength="120">' +
     '<input data-att-mail type="email" placeholder="their email" aria-label="Email" maxlength="160">' +
-    '<button class="btn" type="button" data-act="add-casual">Add</button></div></div></div>';
+    '<button class="btn" type="button" data-act="add-casual">Add</button></div>' +
+    /* A WAY TO SAY YOU ARE FINISHED, never a way to confirm: a tick is already
+       saved when it is made, and the chip appears above as you go — nothing in
+       this product has a Save button and this is not the first. What was
+       missing is the OTHER half, because the list now stays open while you
+       tick (Islam: "let me make the checks for all the attendees"), and a
+       tablet has no Escape key, which was the only deliberate way out. */
+    '<div class="done"><button class="btn" type="button" data-act="done-att">Done</button>' +
+    "<span>Each tick is already saved.</span></div></div></div>";
 }
 
 const EDITABLE = ' contenteditable="true" spellcheck="false"';
@@ -354,8 +377,17 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
   const noMail = named.filter((a) => !a.email).map((a) => a.name);
   const empty = minutesEmpty(n.minutes);
   const sendable = !empty && withMail > 0;
+  /* A KEY OVER EACH, BECAUSE THE TITLE DID NOT READ AS TYPED (Islam, of the
+     built page: "I need to set the title manually"). It always was a box —
+     borderless, transparent and 21px bold, so it drew as a heading the
+     platform had written. Every other thing on this page carries an
+     uppercase key and these two were the only ones without, so they take
+     the page's own `.lab` rather than a new device (§53.5), and the box
+     takes the border every other field here already has. */
   const head = '<div class="head">' +
-    '<input class="ttl" data-act="title" value="' + esc(n.title) + '" placeholder="What was the meeting about?" aria-label="Meeting title" maxlength="200">' +
+    '<div><p class="lab">Title</p>' +
+    '<input class="ttl" data-act="title" value="' + esc(n.title) + '" placeholder="What was the meeting about?" aria-label="Meeting title" maxlength="200"></div>' +
+    '<div><p class="lab">Date</p>' +
     /* THE DATE IS THE TRACKER'S OWN CONTROL, never a second answer to how a
        date is set (§53.5): a button reading the day in the platform's own
        words, which becomes a date box in place on the press. A raw date input
@@ -363,7 +395,7 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
        this machine — which is a spelling the platform uses nowhere, and the
        signed-off drawing reads "Wed 16 Sep 2026". */
     '<button class="date" type="button" data-act="date" data-day="' + esc(n.metOn) + '" title="Change the date" aria-label="Date of the meeting">' +
-    esc(readableDay(n.metOn) || "No date") + "</button></div>";
+    esc(readableDay(n.metOn) || "No date") + "</button></div></div>";
   const notes = '<p class="lab">Notes</p><textarea class="raw" data-act="raw" aria-label="Notes" maxlength="60000" placeholder="Type as the meeting runs. Saved when you leave the box.">' + esc(n.raw) + "</textarea>";
   const refine = '<button class="btn gold" type="button" data-act="refine">' + (empty ? "Refine into minutes" : "Refine again") + "</button>";
   const sendWord = "Send to " + plural(withMail, "attendee", "attendees") + (n.sends ? " again" : "");

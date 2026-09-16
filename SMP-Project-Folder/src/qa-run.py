@@ -144,7 +144,12 @@ if os.environ.get("SMP_BASE"):
             # open (/raya-trade/strategy/…), never on a landing of its own —
             # the bare address is a redirect now, so the wait is for the
             # module's address, which is what the shell then rewrites.
-            self.wait_for_url(_re.compile(r"/raya-trade/[a-z]"), timeout=20000)
+            self.wait_for_url(_re.compile(r"/raya-trade/(?!sign-in)[a-z]"), timeout=20000)
+            # and let the shell BOOT there before asking for the home address:
+            # the module's address is rewritten once more as the shell lands
+            # (§173), and a goto issued under that navigation is ABORTED
+            try: self.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=25000)
+            except Exception: pass
             _signed.add(id(ctx))
         r = _goto(self, _BASE + _HOME, **kw)
         # The boot is a fetch now, not a parse: wait for the shell to have

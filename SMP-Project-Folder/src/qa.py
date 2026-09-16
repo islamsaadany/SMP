@@ -21,7 +21,8 @@ def open_platform(pg):
     pg.click("#loginForm button[type=submit]")
     # §357: a sign-in lands INSIDE the first module (the bare address is a
     # redirect), so the wait is for the module's address
-    pg.wait_for_url(re.compile(r"/raya-trade/[a-z]"), timeout=15000)
+    pg.wait_for_url(re.compile(r"/raya-trade/(?!sign-in)[a-z]"), timeout=15000)
+    pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
     pg.goto(BASE+"/raya-trade/mobile/strategy")
     pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
     pg.wait_for_timeout(600)

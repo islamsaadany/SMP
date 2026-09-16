@@ -258,12 +258,35 @@ await section("4 · a refusal names its rows, and costs only them (§184)", asyn
   let e = changed(base, (m) => { m.access.custodian.a_unit_own_strat = "fill"; });
   let r = await post(smo, { changes: e.changes });
   check(r.status === 200, "the office grants the custodian Fill gaps", r.status + " " + JSON.stringify(r.j));
+  /* §357 — THE STATE IS MADE, NEVER BORROWED (§255). This asked the SEED for
+     a tactic with no outcome. True when it was written, and §353 then filled
+     all 78 of them — so 0 qualified, this section went red on a build behaving
+     exactly as decided (§214.3), and it DIED rather than reporting (§215).
+     §353 rewrote seven checks for precisely this and could not see this one:
+     those seven are in SMP-Project-Folder/src/checks/ and this is the other
+     stack's directory — a whole tree outside that sweep's eye.
+
+     The office clears one outcome first, which is plainly an authoring act it
+     may make, so the custodian's fill has something to fill. The LAST tactic,
+     and asserted to be a DIFFERENT row from the one whose owner is amended:
+     this section's whole subject is a good fill travelling beside a bad
+     amendment, and one row carrying both proves neither. */
+  let mk = await graph(smo);
+  const mkT = mk.units.mobile.items[0].tactics;
+  const blankId = mkT[mkT.length - 1].id;
+  const mr = await post(smo, { changes: changed(mk, (m) => {
+    const tt = m.units.mobile.items[0].tactics; tt[tt.length - 1].outcome = "";
+  }).changes });
+  check(mr.status === 200, "the office clears one tactic's outcome, so there is a gap to fill",
+    mr.status + " " + JSON.stringify(mr.j).slice(0, 120));
+
   await owner.query("UPDATE users SET must_change = false, password_hash = $1 WHERE email = 'own_mob@raya.example'", [hashPassword(DEV_PASSWORD)]);
   const cust = (await signIn("own_mob@raya.example")).cookie;
   base = await graph(cust);
   const T = base.units.mobile.items[0].tactics;
-  const blank = T.find((t) => !t.outcome), held = T.find((t) => t.owner);
-  check(!!blank && !!held, "the seed holds a tactic with no outcome and one with an owner", JSON.stringify([blank && blank.id, held && held.id]));
+  const blank = T.find((t) => t.id === blankId && !t.outcome);
+  const held = T.find((t) => t.owner && t.id !== blankId);
+  check(!!blank && !!held, "the tenant holds a tactic with no outcome and a DIFFERENT one with an owner", JSON.stringify([blank && blank.id, held && held.id]));
   const stamp = { by: "own_mob", at: new Date().toISOString() };
   e = changed(base, (m) => { const tt = m.units.mobile.items[0].tactics; const b = tt.find((t) => t.id === blank.id); b.outcome = "A FILLED OUTCOME"; b.pend = { outcome: stamp }; tt.find((t) => t.id === held.id).owner = "Somebody Else"; });
   r = await post(cust, { changes: e.changes });

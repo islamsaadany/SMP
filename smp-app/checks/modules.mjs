@@ -225,15 +225,27 @@ check("and a module that is not built cannot be switched on", /!MODULE_DEF\[key\
 const pf = read("platform.html");
 check("the drawer draws the band under the client's name", pf.includes('el("div", "band")') && pf.includes("Modules this client has"));
 check("its rows are the team list's own, so the section adds no vocabulary", /mods[\s\S]{0,700}el\("div", "teamrow"\)/.test(pf));
-/* SCOPED TO THE DRAWER'S OWN FUNCTION. `page.appendChild(grid)` appears
-   twice in this file — the clients list builds one too — so an unscoped
-   indexOf compared the band against ANOTHER page's grid and called a correct
-   build broken (§100.3, found by this assertion failing first). */
-const drawer = pf.slice(pf.indexOf("function drawClient("));
-check("the band is drawn BEFORE the two columns, which is placement B",
-  drawer.indexOf("page.appendChild(mods)") > 0 &&
-  drawer.indexOf("page.appendChild(mods)") < drawer.indexOf("page.appendChild(grid)"),
-  "mods at " + drawer.indexOf("page.appendChild(mods)") + ", grid at " + drawer.indexOf("page.appendChild(grid)"));
+/* §357.6 — REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted the band
+   sat BEFORE the two columns of the client DRAWER — placement B, chosen while
+   the drawer was where a client was configured. §322.1's merge replaced that
+   whole page with the set-up flow and CARRIED the band onto step one, the
+   client's own details; `function drawClient(` stopped existing, so `indexOf`
+   answered -1, `slice(-1)` took the file's LAST CHARACTER, and this went red
+   on a build behaving exactly as that merge decided.
+
+   WHAT IS ASSERTED NOW IS THE ARGUMENT RATHER THAN THE COORDINATE, and it is
+   placement B's own: the band belongs WITH the client's own details and not
+   in a list. Both ends are named in the detail, so a build where neither
+   function exists fails loudly rather than comparing two -1s (§113.8).
+
+   ISLAM HAS NOT SEEN IT IN THIS PLACE (§322.1). If he moves it, this one line
+   moves with it — which is the point of asserting the step rather than an
+   offset into a file. */
+const stepAt = pf.indexOf("function clientStep("), blockAt = pf.indexOf("function modulesBlock(");
+const step = stepAt >= 0 && blockAt > stepAt ? pf.slice(stepAt, blockAt) : "";
+check("the band is on the step that holds the client's own details, never in a list",
+  !!step && step.includes("box.appendChild(modulesBlock())"),
+  "clientStep at " + stepAt + ", modulesBlock at " + blockAt);
 /* The console is ONE source for both stacks; the app serves a generated copy,
    so a build that edited platform.html and forgot to regenerate would ship a
    drawer without the section (§53.5). */

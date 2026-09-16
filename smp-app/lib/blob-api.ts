@@ -18,8 +18,19 @@
    NO STORE, NO CRASH (§231.3). The package is loaded inside a try and
    remembered, and with no store configured this answers "not set up" and the
    platform goes on working — the link half of the feature needs nothing from
-   here. In this repository the package is deliberately NOT a dependency yet,
-   so that degrade path is the one exercised by every check today. */
+   here.
+
+   IT IS A DECLARED DEPENDENCY, AND THIS SENTENCE USED TO SAY IT WAS NOT
+   (§357.7). It said the package was "deliberately NOT a dependency yet, so
+   that degrade path is the one exercised by every check today" — true when it
+   was written and false from the day `@vercel/blob` went into
+   smp-app/package.json, which is the file Vercel installs from. Leaving it
+   was not free: a session read it, concluded the store had never been set up,
+   and told Islam the Blob store was still his to create when it had been
+   connected since 4 September. §104.8 exactly — a comment describing an
+   intention the code no longer carries out, and here one that sent somebody
+   to the wrong answer. The degrade path is still exercised, by
+   checks/store-seam.mjs §1, which stubs the SDK and unsets the token. */
 import { createRequire } from "node:module";
 import type { PoolClient } from "pg";
 import { withTenant } from "./tenant.ts";
@@ -102,7 +113,15 @@ function storedSlides(state: any, target: string): any[] {
 const READ_MINUTES = 60;
 async function signedRead(path: string): Promise<string> {
   const b = blob();
-  if (!b || typeof b.issueSignedToken !== "function" || typeof b.presignUrl !== "function") return "";
+  /* THE TOKEN IS ASKED FOR HERE TOO (§357.5). Its four siblings — beginUpload,
+     putPart, finishUpload and dropBlob — all refuse without one; this was the
+     odd one out, so on a deployment carrying the package and no token every
+     download made two pointless calls to the store's API and relied on the
+     store refusing them to produce the "" the caller already knew it would
+     get. Nobody sees a different sentence (§230.2's words are the caller's);
+     what goes is a round trip on a path that cannot succeed. */
+  if (!b || !token()) return "";
+  if (typeof b.issueSignedToken !== "function" || typeof b.presignUrl !== "function") return "";
   try {
     const until = Date.now() + READ_MINUTES * 60 * 1000;
     const t = await b.issueSignedToken({ pathname: path, operations: ["get"], validUntil: until, token: token() });

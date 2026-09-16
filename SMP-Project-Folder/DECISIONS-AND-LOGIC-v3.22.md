@@ -48081,3 +48081,90 @@ because the console styles no held state — so &sect;221's *"aria-disabled, nev
 disabled, so the reason stays reachable"* is satisfied and invisible until
 somebody hovers. Found by rendering the mockup, named in its last panel, and
 left as its own round on Islam's word rather than folded in here (rule 1b).
+
+**§357.5 — THE SEAM BETWEEN US AND THE STORE, MEASURED AT LAST.** Every check
+of the library stopped at our own door: `insights.mjs` proves the rows and the
+boundary, `publishing-room.py` drives the browser against a stub of OUR server.
+**Nothing had ever looked at the four calls `lib/blob-api.ts` makes INTO
+`@vercel/blob`** — and that is the one place this module has already been wrong
+once, in a way nothing could see: &sect;261.10's `getDownloadUrl` takes a full
+blob URL and is SYNCHRONOUS, so handed a pathname it threw, the catch swallowed
+it, and **nothing would ever have played**. Found then only because a store
+existed. `checks/store-seam.mjs` stubs the SDK in the require cache before the
+module under test loads it (&sect;261.10's own method) and asserts the CONTRACT:
+the upload is three calls carrying the path we built, private, with the store's
+own `key`/`uploadId` and `partNumber` — its words, not ours; the read is **two
+steps in that order**, the second signed with what the first returned and never
+with the store's token, with `getDownloadUrl` asserted ABSENT by name. 31/0,
+proved able to fail three ways from the SOURCES (&sect;276): **6 / 1 / 1 red**,
+the first being &sect;261.10's own fault put back. **AND IT SAYS WHAT IT CANNOT
+PROVE** (&sect;54.5): bytes landing in a real Vercel store is one upload on the
+deployment by somebody who can sign in, and the check prints that rather than
+letting a green run imply it. **AND §1 FOUND A REAL INCONSISTENCY**: with no
+token, `beginUpload`, `putPart`, `finishUpload` and `dropBlob` all refuse early
+and `signedRead` alone did not — so a deployment carrying the package and no
+token made **two pointless calls to the store's API on every download**, relying
+on the store to refuse them to produce the `""` the caller already knew it would
+get. Nobody sees a different sentence; what goes is a round trip on a path that
+cannot succeed.
+
+**§357.6 — THE MODULE BAND'S CHECK ASSERTED A PAGE THAT NO LONGER EXISTS.**
+`modules.mjs` held *"the band is drawn BEFORE the two columns, which is
+placement B"*, sliced from `pf.indexOf("function drawClient(")` — and
+&sect;322.1's merge replaced that whole page with the set-up flow and CARRIED
+the band onto step one, the client's own details. `drawClient(` stopped
+existing, so `indexOf` answered **-1**, `slice(-1)` took the file's LAST
+CHARACTER, and both offsets compared as -1: **69/1 on `main`, on a build
+behaving exactly as that merge decided** (&sect;214.3). REWRITTEN, never
+loosened (&sect;218), and rewritten to the ARGUMENT rather than the coordinate
+— the band belongs WITH the client's own facts and not in a list, which is
+placement B's own reasoning — with both ends named in the detail so a build
+where neither function exists fails loudly rather than comparing two -1s
+(&sect;113.8). 70/0, 1 red falsified. **Islam has still not SEEN it there**, so
+it is drawn for him (`design-mockups/console/2026-09-16_*.html`) rather than
+declared settled.
+
+**§357.7 — AND THE COMMENT THAT SENT A SESSION TO THE WRONG ANSWER.**
+`blob-api.ts` said the package was *"deliberately NOT a dependency yet, so that
+degrade path is the one exercised by every check today"* — true when written and
+false from the day `@vercel/blob` went into `smp-app/package.json`. **Leaving it
+was not free**: a session read it, concluded no Blob store had ever been set up,
+and told Islam it was still his to create — when `smp-blob` had been connected to
+the project since **4 September** and what was actually missing was the package
+declaration, fixed on the 14th. &sect;104.8 exactly, and the expensive kind: a
+comment describing an intention the code no longer carries out, pointing somebody
+at the wrong thing. Corrected, and the degrade path it claimed is now genuinely
+exercised — by `store-seam.mjs` &sect;1, which unsets the token.
+
+**§357.8 — `state-api` WAS 2 RED ON `main`, AND §353 IS WHY.** Its &sect;4 asked
+the SEED for a tactic with no outcome; &sect;353 filled all 78, so **0 of 78
+qualified**, and the section then **DIED rather than reporting** (&sect;215 —
+caught and labelled as such by that file's own harness, which is the design
+working). **&sect;353 rewrote seven checks for precisely this and could not see
+this one**: those seven are in `SMP-Project-Folder/src/checks/` and this is
+`smp-app/checks/` — *a whole directory outside that sweep's eye, which is the
+finding worth more than the fix.* The state is MADE now (&sect;255): the office
+clears one outcome first, plainly an authoring act it may make, and the cleared
+row is asserted to be a DIFFERENT row from the one whose owner is amended —
+this section's subject is a good fill travelling beside a bad amendment, and one
+row carrying both proves neither. 91 &rarr; **92/0**, and all six break variants
+still red, or the fix would have been a loosening.
+
+**§357.9 — AND `tsc`'s "PRE-EXISTING ERROR" IS NOT AN ERROR.** &sect;336 records
+*"`tsc` clean but for `lib/prisma.ts`'s pre-existing PrismaClient error"*, and
+this session repeated it. It is what `tsc` says when **`prisma generate` has not
+been run** — and that is the FIRST step of `npm run build`, so it is true of a
+bare `npx tsc --noEmit` on a fresh clone and of nothing else. Generated, `tsc`
+exits **0**. It also blocks `next build` outright, which is why `check:state`
+cannot run on a fresh clone without it. *A reported failure that is not one
+teaches people to scroll past the ones that are* (&sect;54.5 with the sign
+reversed).
+
+**STILL OPEN AND ISLAM'S**: whether **Resources** (spec 051) is a module of its
+own beside Insights — it is blocked on reading
+`aleymahmoud-ff/strategy-management-system`, and `add_repo` refuses it in this
+session for the reason spec 051 &sect;2 already records (*cross-tier adds are not
+supported: the session already holds `islamsaadany`'s repos*), **retried and
+confirmed unchanged**, so it wants a session of its own; the **held-button
+dimming**, which would sweep every held control in the console and is therefore
+a decision rather than a line; and **where the modules band belongs**.

@@ -119,11 +119,12 @@ if (!up) { console.log("FAIL  the app did not start"); server.kill(); process.ex
 if (shots) mkdirSync(shots, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
-/* THE WELCOME IS OFFERED ON EVERY DEEP ADDRESS (§357), once a browser
-   session, and it covers the viewport — so a context that presses anything
-   under it waits thirty seconds on a click the overlay takes (§167.2's
-   finding). Every context is born having seen it, through welcome.js's own
-   memory, except the two whose subject IS the offer (§3, §5). */
+/* THE WELCOME IS OFFERED AT THE MODULE'S HOME (§357) and NOT over a page
+   the address named (§357.9), once a browser session, and it covers the
+   viewport — so a context that presses anything under it waits thirty
+   seconds on a click the overlay takes (§167.2's finding). Every context is
+   born having seen it, through welcome.js's own memory, except the three
+   whose subject IS the offer (§3, §5, §7). */
 async function fresh(offerWelcome = false) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: "light" });
   if (!offerWelcome) await ctx.addInitScript(() => { try { sessionStorage.setItem("smp.welcome.done", "1"); } catch (e) {} });
@@ -510,7 +511,12 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
     const start = q('.setuprail .rgitems .ritem[data-setupgo="start"]');
     return { path: location.pathname, d: typeof current !== "undefined" ? current : null, s: typeof currentSub !== "undefined" ? currentSub : null,
       scope: document.documentElement.getAttribute("data-setup-scope"), rail: !!q(".setuprail"),
-      back: q(".setuprail .railback") ? { text: t(".setuprail .railback"), href: q(".setuprail .railback").getAttribute("href"), fwd: q(".setuprail .railback").classList.contains("railfwd") } : null,
+      welcome: document.querySelectorAll(".welcomeover").length, deep: document.documentElement.getAttribute("data-deep-address"),
+      back: q(".setuprail .railback") ? { text: t(".setuprail .railback"), href: q(".setuprail .railback").getAttribute("href"), fwd: q(".setuprail .railback").classList.contains("railfwd"),
+        /* AT THE FOOT (§357.9): after the list AND outside it, or it scrolls
+           away with the rows it is meant to outlive (§108.5, §290.1). */
+        foot: (function(){ const l = q(".setuprail .raillist"), a = q(".setuprail .railback");
+          return !!l && !l.contains(a) && !!(l.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING); })() } : null,
       strip: q(".setuprail .railstart") ? { go: q(".setuprail .railstart").dataset.setupgo, lab: t(".setuprail .rslab"), prog: t(".setuprail .rsprog") } : null,
       progress: (typeof CLIENTSETUP !== "undefined" && CLIENTSETUP.progress) ? CLIENTSETUP.progress() : null,
       groups: [...document.querySelectorAll(".setuprail [data-railgrp]")].map((e) => e.dataset.railgrp),
@@ -524,7 +530,13 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
   const storedDone = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); return st.state && st.state.group ? st.state.group.setupDone : null; };
   const regName = async () => (await owner.query("SELECT name FROM tenants WHERE id = $1", [tenant.id])).rows[0].name;
   const nameBefore = await regName();
-  ({ ctx, page } = await fresh());
+  /* A CONTEXT THAT HAS NOT SEEN THE WELCOME (§357.9), which is the whole
+     subject of the first two assertions below: every other section is born
+     having seen it, and over a stamped session "no overlay here" would pass
+     on a build that draws it (§113.8). The office signs in to the CONSOLE,
+     which is Forefront's own page and draws none, so the first client
+     document of this session is the one the press opens. */
+  ({ ctx, page } = await fresh(true));
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await signIn(page, "office@forefront.example", "Raya-2026!");
   await page.waitForURL(BASE + "/platform");
@@ -534,11 +546,19 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
   await goto("/raya-trade/setup");
   let r = await readRail();
   check(r.d === "setup" && r.scope === "client" && r.rail, "the bare address the console's Settings and a module rail's Client settings › both point at opens the client's rail", JSON.stringify([r.path, r.d, r.s, r.scope]));
+  /* ISLAM'S OWN REPORT (§357.9): *"when I press continue it opens the clietn
+     settings!! … the settings should open the settings directly."* The
+     welcome is Strategy's home screen, so it does not stand in front of a
+     page somebody asked for by address. */
+  check(r.welcome === 0 && r.deep === "1", "…and the welcome is not drawn over it: Settings opens the settings directly (§357.9)", JSON.stringify([r.welcome, r.deep]));
   /* THE RAIL, from a page that is the client's */
   await goto("/raya-trade/setup/people");
   r = await readRail();
   check(r.d === "setup" && r.s === "people" && r.scope === "client" && r.rail, "a client page opens in the client's rail (data-setup-scope client)", JSON.stringify([r.d, r.s, r.scope]));
   check(!!r.back && !r.back.fwd && r.back.href === "/platform" && /Back to the console/.test(r.back.text), "…whose way back is the console (§357: there is no landing to go back to)", JSON.stringify(r.back));
+  /* AND IT STAYS AT THE TOP (§357.9): a back link is where this rail was
+     opened from, so it reads first — the other end of the foot row below. */
+  check(!!r.back && r.back.foot === false, "…at the TOP, above the list: it LEAVES, where Client settings › goes ON (§357.9)", JSON.stringify(r.back));
   check(!!r.strip && r.strip.go === "start" && r.strip.lab === "Getting started", "…and Getting started is a STRIP under the head while the set-up is not done", JSON.stringify(r.strip));
   check(!!r.strip && !!r.progress && r.strip.prog.startsWith(r.progress.done + " of " + r.progress.total + " done"), "…counting what the data holds an answer for — AGREEMENT with CLIENTSETUP.progress(), never a number (§94.8, §129)", JSON.stringify([r.strip && r.strip.prog, r.progress]));
   check(!!r.progress && r.progress.total === 7, "…out of the flow's seven steps", JSON.stringify(r.progress));
@@ -587,8 +607,19 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
   await goto("/raya-trade/strategy/setup/cycle");
   r = await readRail();
   check(r.scope === "strategy" && !!r.back && r.back.fwd && r.back.href === "/raya-trade/setup" && /Client settings/.test(r.back.text), "a module's rail carries Client settings › to the client's rail", JSON.stringify([r.scope, r.back]));
+  /* AT THE BOTTOM, HIS WORD (§357.9), and the client's own row is asserted
+     at the TOP above — the two ends are the decision, so asserting one
+     without the other would pass on a build that put both in one place. */
+  check(!!r.back && r.back.foot === true, "…at the FOOT of that rail, after the list and outside it (§357.9)", JSON.stringify(r.back));
   check(r.strip === null && r.startRow === null && !r.groups.includes("client"), "…and neither the strip nor the row — the set-up is the client's, not the module's", JSON.stringify([r.strip, r.startRow, r.groups]));
   check(r.groups.includes("help"), "…while the Knowledge base is back on Strategy's rail (kb is mod strategy)", JSON.stringify(r.groups));
+  /* AND THE OTHER END OF THE STAND-DOWN (§94.2): the same session, never
+     greeted, at the module's HOME — where the greeting belongs and where
+     `/<client>` and the door both land. Without this a build that lost the
+     welcome altogether would pass every assertion above. */
+  await page.goto(BASE + "/raya-trade/strategy", { waitUntil: "load" }); await booted(page); await page.waitForTimeout(900);
+  r = await readRail();
+  check(r.welcome === 1 && r.deep === null, "…and at the module's own home the welcome is offered, in that same session (§357.9)", JSON.stringify([r.welcome, r.deep, r.path]));
   await ctx.close();
   /* A CLIENT'S OWN PERSON asking for the client's rail: MEASURED. The route
      gates a MODULE's address and serves the spine's pages to anybody the

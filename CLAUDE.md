@@ -9506,7 +9506,80 @@ posted, because the console's create piece holds no step state and the shared
 and the bare `/<client>/setup` &mdash; what the card's Settings and a module
 rail's *Client settings &rsaquo;* both open &mdash; landed on the ENTRY PAGE,
 the rail served and never drawn, because `restoreWhere()` read a place with
-no page as nothing remembered (135/1 &rarr; 136/0). **`main` untouched &mdash; the merge
+no page as nothing remembered (135/1 &rarr; 136/0).
+**&sect;357.9 &mdash; AN ADDRESS IS NOT A GREETING, AND THE WAY ACROSS SITS AT
+THE FOOT.** Islam, pressing *Settings* on the console's card: *"when I press
+continue it opens the clietn settings!! what is that?! the home of the strategy
+module belongs to the strategy module the settings should open the settings
+directly &hellip; a perosn can access the client settings from the module
+settings page but it should be at the bottom."* **THE SCREEN HE PRESSED WAS
+RIGHT AND THE WELCOME WAS STANDING IN FRONT OF IT**: &sect;357 gave the frozen
+overlay its job back and removed the line that had been standing it down,
+leaving NO condition in its place &mdash; so it drew over the first client
+document of a session whatever address opened it, and its one control,
+*Continue*, taking it down reads exactly as *the press opened the client
+settings*. **THE ARGUMENT WAS ALREADY WRITTEN ONE PARAGRAPH DOWN, FOR THE
+TOUR** (&sect;315.3: *an address is somebody who has already chosen a page*),
+and the welcome is that shape with a wider box round it &mdash; it covers the
+viewport and there is no way past it but through. So the same rule, one line
+each side: `route.js` writes `data-deep-address` when `placeOf()` answered a
+place, `WELCOME.offer()` declines when it is there. **AND THE MODULE'S HOME IS
+EXACTLY THE ADDRESS THAT NAMES NO PAGE**, which is what makes it one condition
+rather than a list: the `/<client>` redirect and the door both land on a bare
+`/<client>/<module>`, where `placeOf("")` answers null and the greeting stands.
+**A DOCUMENT FACT, NEVER A REMEMBERED ONE** &mdash; the tour's `smp.tour.later`
+is honest because a *Skip for now* means the same thing, where the welcome's
+only memory means SEEN, and stamping it for an address is a lie about a screen
+nobody was shown (&sect;107) &mdash; and read by `offer()` and never `open()`,
+so the house mark still opens it from anywhere (&sect;185). **AND `/&lt;client&gt;/tour` IS AN ADDRESS TOO**, found by reading the
+condition rather than by a check: nothing is remembered for it and the tour's
+own mark must not be set on it, but `land()` offers the intro round only where
+the welcome DECLINED (&sect;148), so with the welcome offered unconditionally
+**the one address that names the tour was the one address that could not start
+it** &mdash; it gets the document fact and nothing else. **THE WAY ACROSS
+MOVES AND THE WAY BACK DOES NOT**: the two rows are not two spellings of one
+thing &mdash; `&lsaquo; Back to the console` LEAVES, so it reads first, and
+`Client settings &rsaquo;` goes ON, so being the first thing read on every
+Setup page in the module is what he objected to; **at the foot of the RAIL,
+never of the LIST**, as a `flex:none` sibling after `.raillist` so it cannot
+scroll away with the rows it outlives (&sect;108.5, &sect;290.1) &mdash; with
+the hairline swapping ends, measured as paint. **Proved able to fail from the
+SOURCES** (&sect;276): the row back at the head **1 red** on exactly the
+placement (the treatment assertion stays green, because the class travels with
+the row, which is why both exist); the rule deleted **1 red**, printing
+`0px / 1px`; `data-deep-address` removed, `door-landing.mjs` **2 red** &mdash;
+the first `[1,null]`, his report reproduced, the second the section DYING on a
+click the overlay held (&sect;167.2, &sect;215) &mdash; and `shell.mjs` **1
+red**. **AND THE CHECK NEEDED A SESSION THAT HAD NOT BEEN GREETED**
+(&sect;113.8): every context there is born having seen the welcome, so *"no
+overlay here"* would pass on a build that draws one; &sect;7 signs in as the
+office, who lands on the CONSOLE and is greeted by nothing, so the first
+client document of that session is the one the press opens &mdash; Islam's own
+path. **TWO NEIGHBOURS WERE RED ON THE BRANCH AND BOTH WERE &sect;357's**,
+established on a worktree built from HEAD before anything here was blamed
+(&sect;303) and REWRITTEN, never loosened (&sect;218, &sect;214.3 for the
+seventh time): `setup-search` folded the `look` group &sect;357 DELETED, so it
+**died on a selector matching nothing** rather than saying a decision had moved
+&mdash; it finds a group at runtime now, skipping the one holding the page you
+are on (&sect;47.7 refuses to fold that one, and the naive pick chose exactly
+it); and `setup-rail` asked every `[data-setupgo]` to be findable INSIDE the
+scrolling list, reporting `start:missing`, **the opposite of the truth**, since
+the strip is outside the list precisely so it cannot scroll away. **AND THAT
+REWRITE FOUND THE BRANDING ERRAND HAD LOST ITS ANSWER**: &sect;108.13's own
+example is *"where do I change the logo"*, and with the page absorbed those
+words live on the `start` def, which while it is a STRIP is not a row and
+cannot be found &mdash; it does not need to be (it is on screen above the box)
+and once it is a row it is, asserted where the done state is already made.
+**AND SIX SECTIONS DIED AT THE SIGN-IN PAGE ON ONE RUN AND IT WAS THE
+HARNESS**: the throwaway Postgres had PANICked on a data directory whose
+permissions were reset under it &mdash; *a section that dies at sign-in is the
+database until the database is proved up* (&sect;100.3, &sect;105.6's family);
+re-run on a fresh one, 76/0. **VERIFIED**: door 140/0, shell 76/0, modules
+125/0, `setup-per-module` file:// and served all passed, `setup-search`,
+`setup-rail`, `setup-pages`, `client-setup`, `client-setup-outside`,
+`client-archive`, `attention-rows`, `setup-sticky`, `setup-squeezed` and
+`welcome` all passed, 673/0, 140/0, `tsc` clean cold, `built-in-step` all good,
+`sw.js` `v5.10-settings-direct` against main's `v5.05`. **`main` untouched &mdash; the merge
 is Islam's word, on that merge.***
 
 *Earlier: 2026-09-15 &mdash; **&sect;356.6: the sweep, and the viewer a

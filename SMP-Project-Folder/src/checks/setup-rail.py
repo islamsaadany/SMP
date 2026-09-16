@@ -132,9 +132,38 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     pg.evaluate("window.scrollTo(0, 200)")
     pg.wait_for_timeout(200)
-    keys = pg.eval_on_selector_all(".setuprail [data-setupgo]",
+    # THE ROWS OF THE LIST, AND THE ENTRIES OUTSIDE IT, ARE TWO CLAIMS
+    # (§214.3, §218). This asked every `[data-setupgo]` in the rail to be
+    # findable INSIDE `.raillist`, which was every one of them until §357 drew
+    # Getting started as a STRIP above the search — so it reported
+    # `start:missing`, which reads as an unreachable entry and is the opposite
+    # of the truth: the strip is outside the list precisely so it cannot
+    # scroll away. Split, and BOTH asserted (§94.2), or an entry that quietly
+    # left the rail altogether would pass as "not a list row".
+    keys = pg.eval_on_selector_all(".setuprail .raillist [data-setupgo]",
                                    "e=>e.map(x=>x.dataset.setupgo)")
+    outside = pg.eval_on_selector_all(".setuprail [data-setupgo]",
+        "e=>e.filter(x=>!x.closest('.raillist')).map(x=>x.dataset.setupgo)")
     ck("the rail has entries at all", len(keys) > 8, len(keys))
+    # …and an entry drawn outside the scrolling list is on screen WITHOUT
+    # scrolling anything: that is the whole reason it is out there (§108.5).
+    if outside:
+        off = pg.evaluate("""(keys)=>{const bad=[];
+          for (const k of keys){
+            const el=document.querySelector('.setuprail [data-setupgo="'+k+'"]');
+            if(!el){ bad.push(k+':missing'); continue; }
+            const b=el.getBoundingClientRect();
+            if (b.height<=0 || b.top<0 || b.bottom>innerHeight+1) bad.push(k+':offscreen');
+          }
+          return bad;}""", outside)
+        ck("an entry drawn outside the list is on screen without scrolling (the strip, §357)",
+           not off, (outside, off))
+    else:
+        # SAID, NEVER SKIPPED IN SILENCE (§54.5): whether there is an entry
+        # outside the list depends on the tenant (the strip is drawn while the
+        # set-up is not done), so this is not a failure here — but a run that
+        # quietly measured nothing must not read as a run that passed.
+        print("      (no entry outside the list on this tenant — nothing to assert)")
     pagescroll_before = pg.evaluate("window.scrollY")
     unreachable = pg.evaluate("""(keys)=>{
       const l=document.querySelector('.setuprail .raillist');

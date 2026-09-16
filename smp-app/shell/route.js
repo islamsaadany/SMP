@@ -44,7 +44,9 @@
    The shell's welcome overlay is THE welcome again (§357, spec 055): the
    landing at /<client> was stood in for it while it existed (§315) and is a
    redirect into the module now, so welcome.js offers itself once a session
-   exactly as it does over file://, and the house mark is its way back. */
+   exactly as it does over file://, and the house mark is its way back — over
+   the module's HOME, and never over a page somebody asked for by address
+   (§357.9: `data-deep-address`, below). */
 (function () {
   "use strict";
   var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,48})(?:\/(.*))?$/);
@@ -223,19 +225,52 @@
       var rem = { d: here.d, s: here.s };
       if (here.c && here.s) rem.c = here.c;
       sessionStorage.setItem("smp.where", JSON.stringify(rem));
+      /* AND AN ADDRESS IS NOT A GREETING EITHER (§357.9). Islam, pressing
+         the console card's *Settings* and meeting the welcome overlay over
+         the client's own Setup rail: *"when I press continue it opens the
+         clietn settings!! … the settings should open the settings
+         directly."* He is right, and it is the argument two paragraphs down
+         with a wider box around it: the welcome fills the viewport and its
+         only way out is Continue, so over a page somebody NAMED it is a wall
+         in front of the thing they asked for, and taking it down reads as
+         the thing behind it having been opened by the press.
+
+         THE HOME OF THE MODULE IS WHERE IT BELONGS (his own words): a bare
+         `/<client>/<module>` names no page — which is exactly what the
+         redirect at `/<client>` and the door's own landing produce — so
+         `placeOf` answers null there and the greeting stands.
+
+         A DOCUMENT FACT, NOT A REMEMBERED ONE, and that is the difference
+         from the tour's mark below. This is true of THIS LOAD, so a person
+         who types the module's home address afterwards is greeted; storing
+         it would stand the welcome down for the session on the strength of
+         one address, and `welcome.js`'s own memory would then be answering
+         two questions instead of one (§107). Written the way the scope is
+         (spec 054 §4.2) because route.js is the only file that knows the
+         address's shape; read by `WELCOME.offer()` alone, never by
+         `WELCOME.open()` — pressing the house mark IS the ask (§185). */
+      document.documentElement.setAttribute("data-deep-address", "1");
       /* AND AN ADDRESS IS NOT A TOUR. The intro round navigates by pressing
          the platform's own controls (§107), so offered over a page somebody
          asked for by address it walks them off it — measured: a unit head
          opening /<client>/mobile/performance landed on Strategy › Plan, the
-         tour's own first stop, with the address rewritten under them. The
-         landing carries the offer (§159's intro-round card, `/<client>/tour`)
-         and Continue is the answer to it, so a deep address is somebody who
-         has already chosen a page. Stood down for THIS SESSION ONLY, through
-         the tour's own "Skip for now" mark rather than a second memory beside
-         it (§53.5): "Don't show again" is untouched, `/<client>/tour` still
-         offers, and the Knowledge base's replay button still starts one. */
+         tour's own first stop, with the address rewritten under them. So a
+         deep address is somebody who has already chosen a page. Stood down
+         for THIS SESSION ONLY, through the tour's own "Skip for now" mark
+         rather than a second memory beside it (§53.5): "Don't show again" is
+         untouched, `/<client>/tour` still offers, and the Knowledge base's
+         replay button still starts one. */
       sessionStorage.setItem("smp.tour.later", "1");
     }
+    /* AND `/<client>/tour` IS AN ADDRESS TOO (§357.9), which is why the
+       welcome's stand-down is asked of it as well and the two lines above are
+       not: nothing is remembered for a tour address (it is not a place) and
+       the tour's own mark must certainly not be set on it — but somebody who
+       typed it asked for the intro round, and `land()` offers the tour only
+       where the welcome DECLINED (§148: two docks over one page fight for
+       every click). Without this, the one address that names the tour is the
+       one address that cannot start it. */
+    if (here && here.tour) document.documentElement.setAttribute("data-deep-address", "1");
   } catch (e) { /* a store that refuses: the shell opens where it would have */ }
   /* ── after every paint: the place is the address ── */
   var last = null;

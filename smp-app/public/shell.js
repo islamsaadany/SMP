@@ -49094,10 +49094,33 @@ var WELCOME = (function(){
      session, a projector, already seen this session. Returns whether it
      took the screen, because land() offers the tour only when it did not —
      two docks drawn over one page would fight for every click (§118). */
+  /* AND AN ADDRESS IS NOT A GREETING (§357.9). Islam, pressing *Settings*
+     on the console's card and landing on the client's Setup rail with this
+     screen over it: *"when I press continue it opens the clietn settings!!
+     … the settings should open the settings directly."* The screen
+     fills the viewport and its only way out is Continue, so over a page
+     somebody NAMED it is a wall in front of what they asked for — and taking
+     it down reads as the press having opened the thing behind it.
+
+     The router writes `data-deep-address` when the address named a page and
+     leaves it off when it named none, which is the module's own home (spec
+     055 §2.1's redirect, and the door's landing). One fact, one reader, and
+     the same argument the tour already makes one file over (§107: an address
+     is somebody who has already chosen a page).
+
+     IN `offer()` AND NEVER IN `open()`: that one is the house mark, and
+     pressing a button IS the ask (§185). Absent over file://, where the two
+     lines above have already answered. */
+  function deepAddress(){
+    try { return document.documentElement.getAttribute("data-deep-address") === "1"; }
+    catch(e){ return false; }
+  }
+
   function offer(person){
     if (!person) return false;
     if (location.protocol === "file:") return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
+    if (deepAddress()) return false;
     if (seenThisSession()) return false;
     try { build(person); } catch(e){ box = null; return false; }
     return true;
@@ -54596,17 +54619,36 @@ var SYNC = (function () {
        already takes most of that, measured, so a link beside it wraps. */
     var slug = (location.pathname.split("/")[1] || "");
     /* THE WAY OUT IS THE CONSOLE (§357, spec 055): the client's rail is
-       opened from the console's card and from the row under a module's
-       Setup head, and there is no landing to go back to any more. A
+       opened from the console's card and from the row at the foot of a
+       module's Setup rail, and there is no landing to go back to any more. A
        MODULE's rail carries the reverse — one row, *Client settings ›*, to
        the client's own rail — so a consultant already inside reaches the
        register without the console. Both only where there is a server to
-       serve the address; the offline copy draws one rail and no rows. */
+       serve the address; the offline copy draws one rail and no rows.
+
+       AND THE TWO ROWS SIT AT OPPOSITE ENDS, WHICH IS THE POINT (§357.9).
+       Islam: *"a perosn can access the client settings from the module
+       settings page but it should be at the bottom."* They are not two
+       spellings of one row: `‹ Back to the console` LEAVES — it is where
+       this rail was opened from, so it reads first, above the list, the
+       way a back link does everywhere — while `Client settings ›` is a
+       place to go ON to from a rail somebody came here to use, so it must
+       not be the first thing read on every Setup page in the module.
+       The asymmetry is in the words already (‹ against ›); this puts it in
+       the layout.
+
+       AT THE FOOT OF THE RAIL, NOT AT THE FOOT OF THE LIST. `.raillist` is
+       the one thing that scrolls (§108.5), so a row inside it is a row that
+       scrolls away — §290.1's own finding about the corner's one permanent
+       way out. As a `flex:none` sibling AFTER the list it is at the bottom
+       of the rail box by construction and needs no `position:sticky` and no
+       measurement to stay there. */
     var back = scope === "client" && slug
       ? '<div class="railback-row"><a class="railback" href="' + esc(OPTS_CONSOLE) + '">' +
         '\u2039 Back to the console</a></div>'
-      : scope && scope !== "client" && slug
-      ? '<div class="railback-row"><a class="railback railfwd" href="/' + esc(slug) + '/setup">' +
+      : "";
+    var across = scope && scope !== "client" && slug
+      ? '<div class="railback-row railfoot"><a class="railback railfwd" href="/' + esc(slug) + '/setup">' +
         'Client settings \u203a</a></div>'
       : "";
     return '<div class="rail setuprail"><div class="rhead">' + esc(headWord) +
@@ -54624,7 +54666,7 @@ var SYNC = (function () {
         /* SAYING NO IS THE LIST'S JOB TOO (§45.2, §108.10): a rail that empties
            itself reads as a rail that broke, so it says what was searched for. */
         '<div class="railnone" data-railnone="1" hidden></div>' +
-      '</div></div>';
+      '</div>' + across + '</div>';
   }
 
   function menuGroups(){
@@ -63212,7 +63254,9 @@ var SYNC = (function () {
    The shell's welcome overlay is THE welcome again (§357, spec 055): the
    landing at /<client> was stood in for it while it existed (§315) and is a
    redirect into the module now, so welcome.js offers itself once a session
-   exactly as it does over file://, and the house mark is its way back. */
+   exactly as it does over file://, and the house mark is its way back — over
+   the module's HOME, and never over a page somebody asked for by address
+   (§357.9: `data-deep-address`, below). */
 (function () {
   "use strict";
   var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,48})(?:\/(.*))?$/);
@@ -63391,19 +63435,52 @@ var SYNC = (function () {
       var rem = { d: here.d, s: here.s };
       if (here.c && here.s) rem.c = here.c;
       sessionStorage.setItem("smp.where", JSON.stringify(rem));
+      /* AND AN ADDRESS IS NOT A GREETING EITHER (§357.9). Islam, pressing
+         the console card's *Settings* and meeting the welcome overlay over
+         the client's own Setup rail: *"when I press continue it opens the
+         clietn settings!! … the settings should open the settings
+         directly."* He is right, and it is the argument two paragraphs down
+         with a wider box around it: the welcome fills the viewport and its
+         only way out is Continue, so over a page somebody NAMED it is a wall
+         in front of the thing they asked for, and taking it down reads as
+         the thing behind it having been opened by the press.
+
+         THE HOME OF THE MODULE IS WHERE IT BELONGS (his own words): a bare
+         `/<client>/<module>` names no page — which is exactly what the
+         redirect at `/<client>` and the door's own landing produce — so
+         `placeOf` answers null there and the greeting stands.
+
+         A DOCUMENT FACT, NOT A REMEMBERED ONE, and that is the difference
+         from the tour's mark below. This is true of THIS LOAD, so a person
+         who types the module's home address afterwards is greeted; storing
+         it would stand the welcome down for the session on the strength of
+         one address, and `welcome.js`'s own memory would then be answering
+         two questions instead of one (§107). Written the way the scope is
+         (spec 054 §4.2) because route.js is the only file that knows the
+         address's shape; read by `WELCOME.offer()` alone, never by
+         `WELCOME.open()` — pressing the house mark IS the ask (§185). */
+      document.documentElement.setAttribute("data-deep-address", "1");
       /* AND AN ADDRESS IS NOT A TOUR. The intro round navigates by pressing
          the platform's own controls (§107), so offered over a page somebody
          asked for by address it walks them off it — measured: a unit head
          opening /<client>/mobile/performance landed on Strategy › Plan, the
-         tour's own first stop, with the address rewritten under them. The
-         landing carries the offer (§159's intro-round card, `/<client>/tour`)
-         and Continue is the answer to it, so a deep address is somebody who
-         has already chosen a page. Stood down for THIS SESSION ONLY, through
-         the tour's own "Skip for now" mark rather than a second memory beside
-         it (§53.5): "Don't show again" is untouched, `/<client>/tour` still
-         offers, and the Knowledge base's replay button still starts one. */
+         tour's own first stop, with the address rewritten under them. So a
+         deep address is somebody who has already chosen a page. Stood down
+         for THIS SESSION ONLY, through the tour's own "Skip for now" mark
+         rather than a second memory beside it (§53.5): "Don't show again" is
+         untouched, `/<client>/tour` still offers, and the Knowledge base's
+         replay button still starts one. */
       sessionStorage.setItem("smp.tour.later", "1");
     }
+    /* AND `/<client>/tour` IS AN ADDRESS TOO (§357.9), which is why the
+       welcome's stand-down is asked of it as well and the two lines above are
+       not: nothing is remembered for a tour address (it is not a place) and
+       the tour's own mark must certainly not be set on it — but somebody who
+       typed it asked for the intro round, and `land()` offers the tour only
+       where the welcome DECLINED (§148: two docks over one page fight for
+       every click). Without this, the one address that names the tour is the
+       one address that cannot start it. */
+    if (here && here.tour) document.documentElement.setAttribute("data-deep-address", "1");
   } catch (e) { /* a store that refuses: the shell opens where it would have */ }
   /* ── after every paint: the place is the address ── */
   var last = null;

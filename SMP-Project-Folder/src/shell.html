@@ -1621,17 +1621,36 @@
        already takes most of that, measured, so a link beside it wraps. */
     var slug = (location.pathname.split("/")[1] || "");
     /* THE WAY OUT IS THE CONSOLE (§357, spec 055): the client's rail is
-       opened from the console's card and from the row under a module's
-       Setup head, and there is no landing to go back to any more. A
+       opened from the console's card and from the row at the foot of a
+       module's Setup rail, and there is no landing to go back to any more. A
        MODULE's rail carries the reverse — one row, *Client settings ›*, to
        the client's own rail — so a consultant already inside reaches the
        register without the console. Both only where there is a server to
-       serve the address; the offline copy draws one rail and no rows. */
+       serve the address; the offline copy draws one rail and no rows.
+
+       AND THE TWO ROWS SIT AT OPPOSITE ENDS, WHICH IS THE POINT (§357.9).
+       Islam: *"a perosn can access the client settings from the module
+       settings page but it should be at the bottom."* They are not two
+       spellings of one row: `‹ Back to the console` LEAVES — it is where
+       this rail was opened from, so it reads first, above the list, the
+       way a back link does everywhere — while `Client settings ›` is a
+       place to go ON to from a rail somebody came here to use, so it must
+       not be the first thing read on every Setup page in the module.
+       The asymmetry is in the words already (‹ against ›); this puts it in
+       the layout.
+
+       AT THE FOOT OF THE RAIL, NOT AT THE FOOT OF THE LIST. `.raillist` is
+       the one thing that scrolls (§108.5), so a row inside it is a row that
+       scrolls away — §290.1's own finding about the corner's one permanent
+       way out. As a `flex:none` sibling AFTER the list it is at the bottom
+       of the rail box by construction and needs no `position:sticky` and no
+       measurement to stay there. */
     var back = scope === "client" && slug
       ? '<div class="railback-row"><a class="railback" href="' + esc(OPTS_CONSOLE) + '">' +
         '\u2039 Back to the console</a></div>'
-      : scope && scope !== "client" && slug
-      ? '<div class="railback-row"><a class="railback railfwd" href="/' + esc(slug) + '/setup">' +
+      : "";
+    var across = scope && scope !== "client" && slug
+      ? '<div class="railback-row railfoot"><a class="railback railfwd" href="/' + esc(slug) + '/setup">' +
         'Client settings \u203a</a></div>'
       : "";
     return '<div class="rail setuprail"><div class="rhead">' + esc(headWord) +
@@ -1649,7 +1668,7 @@
         /* SAYING NO IS THE LIST'S JOB TOO (§45.2, §108.10): a rail that empties
            itself reads as a rail that broke, so it says what was searched for. */
         '<div class="railnone" data-railnone="1" hidden></div>' +
-      '</div></div>';
+      '</div>' + across + '</div>';
   }
 
   function menuGroups(){

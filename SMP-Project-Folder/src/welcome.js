@@ -709,10 +709,33 @@ var WELCOME = (function(){
      session, a projector, already seen this session. Returns whether it
      took the screen, because land() offers the tour only when it did not —
      two docks drawn over one page would fight for every click (§118). */
+  /* AND AN ADDRESS IS NOT A GREETING (§357.9). Islam, pressing *Settings*
+     on the console's card and landing on the client's Setup rail with this
+     screen over it: *"when I press continue it opens the clietn settings!!
+     … the settings should open the settings directly."* The screen
+     fills the viewport and its only way out is Continue, so over a page
+     somebody NAMED it is a wall in front of what they asked for — and taking
+     it down reads as the press having opened the thing behind it.
+
+     The router writes `data-deep-address` when the address named a page and
+     leaves it off when it named none, which is the module's own home (spec
+     055 §2.1's redirect, and the door's landing). One fact, one reader, and
+     the same argument the tour already makes one file over (§107: an address
+     is somebody who has already chosen a page).
+
+     IN `offer()` AND NEVER IN `open()`: that one is the house mark, and
+     pressing a button IS the ask (§185). Absent over file://, where the two
+     lines above have already answered. */
+  function deepAddress(){
+    try { return document.documentElement.getAttribute("data-deep-address") === "1"; }
+    catch(e){ return false; }
+  }
+
   function offer(person){
     if (!person) return false;
     if (location.protocol === "file:") return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
+    if (deepAddress()) return false;
     if (seenThisSession()) return false;
     try { build(person); } catch(e){ box = null; return false; }
     return true;

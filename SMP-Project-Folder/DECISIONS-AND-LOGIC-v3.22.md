@@ -49205,3 +49205,145 @@ block on step 1 (they sat on the console's settings page; the mockup drew
 step 1 with the registry fields and Branding) — on the what-to-check list;
 a module that arrives with a set-up question of its own has no step in this
 flow; and the knowledge base's home is his *"later"*.
+
+### §357.9 — AN ADDRESS IS NOT A GREETING, AND THE WAY ACROSS SITS AT THE FOOT
+
+Islam, pressing *Settings* on the console's card and meeting §357's own
+build: ***"and when I press continue it opens the clietn settings!! what is
+that?! the home of the strategy module belongs to the strategy module the
+settings should open the settings directly. the client settings belong to
+the client card on the outer platform. and it opens the client settings
+right away. the welcome screen (the home screen belongs to the straegy
+module). a perosn can access the client settings from the module settings
+page but it should be at the bottom rethink that flow."***
+
+**NOTHING WAS BROKEN AND THE SCREEN HE PRESSED WAS RIGHT** — *Settings* on
+the card does open `/<client>/setup` and it does draw the client's rail,
+which is §357.7's own fix. What stood in front of it was the WELCOME. §357
+took the landing away and gave the frozen overlay back its job, and removed
+the line that had been standing it down; with no condition left, it offered
+itself on the first client document of the session **whatever address opened
+it** — so the console's Settings landed on the client's Setup rail with a
+full-viewport greeting over it, and the one way out of that greeting is
+*Continue*. Pressing it takes the overlay down and reveals the page
+underneath, which reads exactly as he describes it: *the press opened the
+client settings*.
+
+**THE ARGUMENT WAS ALREADY WRITTEN, ONE PARAGRAPH DOWN, FOR THE TOUR.**
+`shell/route.js` stands the intro round down on a deep address, in its own
+words: *an address is somebody who has already chosen a page* — measured
+there, a unit head opening a Performance address was walked off it to the
+tour's first stop. The welcome is the same shape with a wider box around it:
+it covers the viewport, its only control is *Continue*, and over a page
+somebody NAMED it is a wall in front of the thing they asked for. So the
+same rule, one line each side: `route.js` writes `data-deep-address` when
+`placeOf()` answered a place, and `WELCOME.offer()` declines when it is
+there.
+
+**AND THE MODULE'S HOME IS EXACTLY THE ADDRESS THAT NAMES NO PAGE**, which
+is what makes this one condition and not a list: `/<client>` redirects to
+`clientHref(slug, module, "")` and the door lands on `/<client>`, so both
+arrive at a bare `/<client>/<module>`, where `placeOf("")` answers null and
+the greeting stands. His own sentence, satisfied by the addresses the
+product already writes.
+
+**A DOCUMENT FACT, NOT A REMEMBERED ONE**, and that is the difference from
+the tour's `smp.tour.later`. The tour has a *Skip for now* that means the
+same thing, so a session mark is honest for it; the welcome's only memory is
+`smp.welcome.done`, which means SEEN, and stamping it here would be a lie
+about a screen nobody was shown (§107: a memory that answers one question
+answers only that one). `data-deep-address` is true of THIS LOAD, written
+the way `data-setup-scope` is (spec 054 §4.2) because route.js is the only
+file that knows the address's shape — so somebody who types the module's
+home afterwards is greeted. **Read by `offer()` and never by `open()`**:
+the house mark is the ask (§185), and it still opens the screen from
+anywhere.
+
+**AND `/<client>/tour` IS AN ADDRESS TOO**, found by reading the condition
+rather than by a check. Nothing is remembered for a tour address (it is not a
+place) and the tour's own *Skip for now* mark must certainly not be set on it
+— but `land()` offers the intro round only where the welcome DECLINED
+(§148: two docks over one page fight for every click), so with the welcome
+offered unconditionally **the one address that names the tour was the one
+address that could not start it**. It gets the document fact and nothing else,
+which is why it is asked separately rather than folded into the place block.
+
+**THE WAY ACROSS MOVES TO THE FOOT, AND THE WAY BACK DOES NOT.** His last
+sentence is about one row of two, and they are not two spellings of one
+thing: `‹ Back to the console` LEAVES — it is where the client's rail was
+opened from, so it reads first, above the list, the way a back link does
+everywhere — while `Client settings ›` is a place to go ON to from a rail
+somebody came to use, and being the first thing read on every Setup page in
+the module is what he objected to. The asymmetry was already in the words
+(‹ against ›); this puts it in the layout, and each end is asserted, or a
+build that put both in one slot passes half (§94.2).
+
+**AT THE FOOT OF THE RAIL, NEVER AT THE FOOT OF THE LIST.** `.raillist` is
+the one thing that scrolls (§108.5), so a row inside it is a row that
+scrolls away — §290.1's own finding about the corner's one permanent way
+out. As a `flex:none` sibling AFTER the list it is at the bottom of the rail
+box by construction: no `position:sticky`, no measured offset, and nothing
+scrolls under it because the scroller ends where it begins. The hairline
+swaps ends with it (a row above the list is separated by what is under it),
+measured as PAINT rather than read off the class.
+
+**PROVED ABLE TO FAIL, FROM THE SOURCES** (§276). The row moved back to the
+head: **1 red**, on exactly the placement assertion — the treatment one
+stays green, because the class travels with the row, which is why both are
+asserted. The `railfoot` rule deleted: **1 red**, printing `0px / 1px`, the
+hairline on the wrong end. `data-deep-address` removed from route.js:
+`door-landing.mjs` **2 red**, the first printing `[1,null]` — the welcome
+over the client's Setup, Islam's report reproduced — and the second the
+section DYING on a click the overlay held (§167.2, §215), which is what
+that fault costs a harness; `shell.mjs` **1 red**.
+
+**AND THE CHECK THAT PROVES IT NEEDED A SESSION THAT HAD NOT BEEN GREETED**
+(§113.8): every context in `door-landing.mjs` is born having seen the
+welcome, so *"no overlay here"* would have passed on a build that draws one.
+§7 takes a context that has not, and signs in as the office — who lands on
+the CONSOLE, which draws no welcome — so the first client document of that
+session is the one the press opens, which is Islam's own path.
+
+**TWO NEIGHBOURS WERE RED ON THE BRANCH AND BOTH WERE §357's**, established
+by reproducing them on a worktree built from HEAD before anything here was
+blamed (§303), and REWRITTEN rather than loosened (§218, §214.3 for the
+seventh time). `setup-search` folded the `look` group and searched for
+*"logo"*: §357 deleted that group outright, so it **died on a selector
+matching nothing** rather than saying a decision had moved — it finds a
+group at RUNTIME now, skipping the one holding the page you are on
+(§47.7 refuses to fold that one, and the naive pick chose exactly it), and
+presses whatever the query finds rather than a named page. `setup-rail`
+asked every `[data-setupgo]` in the rail to be findable INSIDE the
+scrolling list, which was true until the strip was drawn above it — it
+reported `start:missing`, *the opposite of the truth*, since the strip is
+outside the list precisely so it cannot scroll away; the two claims are
+split and both asserted.
+
+**AND THE BRANDING ERRAND HAD LOST ITS ANSWER**, found by that rewrite:
+§108.13's own example is *"where do I change the logo"*, and with the page
+absorbed the words live on the `start` def — which, while it is the strip,
+is not a row and cannot be found by the search. It does not need to be (it
+is on screen, above the box), and once it is a row it is findable: asserted
+where the done state is already made, `setup-per-module` §7b.
+
+**VERIFIED**: `setup-per-module` file:// all passed and served all passed;
+`door-landing.mjs` **140/0**, `shell.mjs` **76/0**, `modules.mjs` **125/0**;
+`setup-search`, `setup-rail`, `setup-pages`, `client-setup`,
+`client-setup-outside`, `client-archive`, `attention-rows`, `setup-sticky`,
+`setup-squeezed` and `welcome` all passed; 673/0 authoriser, 140/0 differ,
+`tsc` clean cold, `built-in-step` all good. **Six sections of `shell.mjs`
+died at the sign-in page on one run and it was the HARNESS**: the throwaway
+Postgres had PANICked on a data directory whose permissions were reset under
+it — *a section that dies at sign-in is the database until the database is
+proved up* (§100.3, §105.6's family). Re-run on a fresh one: 76/0.
+
+**RECORDED, NOT DONE**: `lib/landing.ts`'s `tourHref` has had no caller since
+§357 deleted the landing that linked it (§24), and whether the `/tour`
+address stays at all is a question about how the intro round is offered now
+that the welcome's own card is its only door — a decision rather than a
+deletion, so it is written down instead of taken. Islam has not seen the
+modules band and the archive block on step 1 (they sat on the console's
+settings page; the mockup drew step 1 with the registry fields and Branding)
+— on the what-to-check list;
+a module that arrives with a set-up question of its own has no step in this
+flow; and the knowledge base's home is his *"later"*.

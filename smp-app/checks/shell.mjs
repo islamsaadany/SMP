@@ -9,7 +9,8 @@
        the person navigates, Back returns, and a refresh stays put (§173);
      · a change made in the shell reaches the server through the frozen
        client and the frozen spelling of the address (/api/state);
-     · the shell's own welcome overlay is offered again on a deep address
+     · the shell's own welcome overlay is offered at the module's home and
+       not over a page the address named (§357.9)
        (§357: Strategy's welcome is the welcome) and the chrome says who is
        signed in;
      · Forefront's own pages: the cards, the consultants, the table, a
@@ -105,20 +106,25 @@ await section("1 · the document and its policy", async () => {
 
 await section("2 · the address names the page, and the page names the address", async () => {
   await fresh(true); await signIn("mobhead@raya.example");
+  /* REWRITTEN TWICE, NEVER LOOSENED (§218, §214.3). §315 stood the shell's
+     own welcome down because the Next landing was the welcome; §357 removed
+     that landing and this asserted the overlay on a DEEP address; §357.9
+     then stood it down there, on Islam's report that pressing Continue over
+     the client's Setup rail read as the press having opened the settings.
+     So what is asserted is the decision that survived both: the welcome is
+     the MODULE'S HOME SCREEN — offered where the address names no page, and
+     never over one it does. Both ends in one session, or a build that lost
+     the overlay altogether passes the half that matters here (§113.8). */
+  await open("/raya-trade/strategy");
+  check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered at the module's home — Strategy's welcome is the welcome (§357, §357.9)");
+  await page.evaluate(() => { const b = document.querySelector(".welcomeover .wexit"); if (b) b.click(); });
+  await page.waitForFunction(() => !document.querySelector(".welcomeover")).catch(() => {});
+  check(await page.evaluate(() => !document.querySelector(".welcomeover")), "…and its own way out takes it down");
   await open("/raya-trade/strategy/mobile/strategy");
   let p = await place();
   check(p[0] === "mobile" && p[1] === "strategy", "/raya-trade/strategy/mobile/strategy opens Mobile's Strategy", JSON.stringify(p));
   check(/^\/raya-trade\/strategy\/mobile\/strategy\/[a-z]+$/.test(path()), "…and the address gains the section the shell opened (the place is the address)", path());
-  /* REWRITTEN, never loosened (§218): §315 stood the shell's own welcome
-     down because the Next landing was the welcome; §357 removed that landing
-     (Islam: "I just need a welcome screen for the strategy module for now"),
-     so the frozen welcome.js is offered again on a deep address, once a
-     session — asserted PRESENT here and dismissed through its own control,
-     so the rest of the section measures the page under it (§167.2). */
-  check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered again — Strategy's welcome is the welcome (§357)");
-  await page.evaluate(() => { const b = document.querySelector(".welcomeover .wexit"); if (b) b.click(); });
-  await page.waitForFunction(() => !document.querySelector(".welcomeover")).catch(() => {});
-  check(await page.evaluate(() => !document.querySelector(".welcomeover")), "…and its own way out takes it down");
+  check(await page.evaluate(() => !document.querySelector(".welcomeover") && document.documentElement.getAttribute("data-deep-address") === "1"), "…and no welcome over a page the address NAMED (§357.9), so the rest of this section measures the page itself (§167.2)");
   check((await page.locator(".viewer-note b").textContent().catch(() => "")) === "Ashraf Laithy", "the chrome says who is signed in (a client's person has no switcher)");
   await open("/raya-trade/strategy/mobile/strategy/plan"); p = await place();
   check(p[2] === "plan", "…/plan opens the Plan section", JSON.stringify(p));

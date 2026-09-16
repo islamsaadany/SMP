@@ -3721,6 +3721,20 @@
      is 4.45:1 on `--surface-2` (§38.5). */
   .setuprail .railback-row { flex:none; padding:6px 14px 7px; background:var(--surface);
                              border-bottom:1px solid var(--line); }
+  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§357.9) ──────────────────
+     Islam: *"a perosn can access the client settings from the module
+     settings page but it should be at the bottom."* `Client settings ›` is
+     a place to go ON to rather than the way back out, so it stops being the
+     first thing read on every Setup page in the module.
+
+     THE RULE MOVES WITH IT: a row above the list is separated by what is
+     UNDER it and a row below the list by what is OVER it, so the hairline
+     swaps ends. `flex:none` after `.raillist` puts it at the bottom of the
+     rail box by construction — no `position:sticky`, no measured offset,
+     and nothing scrolls under it, because the scroller ends where this
+     begins (§108.5, §290.1's sticky foot arrived at structurally). */
+  .setuprail .railback-row.railfoot { border-bottom:0; border-top:1px solid var(--line);
+                                      padding:7px 14px 8px; }
   .setuprail .railback { font:600 11.5px/1.3 var(--sans); color:var(--ink-2); text-decoration:none;
                          white-space:nowrap; }
   .setuprail .railback:hover { color:var(--ink); text-decoration:underline; }

@@ -209,6 +209,27 @@ with sync_playwright() as p:
     ck("…and the way across to the client's settings is drawn on it (§357)",
        ev(pg, "()=>{const a=document.querySelector('.setuprail .railback.railfwd');return !!a && /Client settings/.test(a.textContent) && /\\/setup$/.test(a.getAttribute('href')||'');}", False),
        ev(pg, "()=>{const a=document.querySelector('.setuprail .railback');return a && a.textContent+' '+a.getAttribute('href');}"))
+    # AND IT IS AT THE FOOT (§357.9), which is the half a selector cannot see:
+    # Islam asked for it at the bottom, so the assertion is that it comes AFTER
+    # the list in the document AND outside it — a row inside `.raillist` would
+    # satisfy "after the rows" and scroll away with them (§108.5, §290.1).
+    ck("…at the FOOT of the rail: after the list, and not inside it (§357.9)",
+       ev(pg, "()=>{const l=document.querySelector('.setuprail .raillist'),"
+              "a=document.querySelector('.setuprail .railback.railfwd');"
+              "if(!l||!a) return false;"
+              "return !l.contains(a) && !!(l.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_FOLLOWING);}", False),
+       ev(pg, "()=>{const l=document.querySelector('.setuprail .raillist'),"
+              "a=document.querySelector('.setuprail .railback.railfwd');"
+              "return !l||!a ? 'missing' : [l.contains(a), l.compareDocumentPosition(a)].join(' ');}"))
+    # …and its hairline moved with it: a row above the list is separated by
+    # what is under it, a row below by what is over it. Measured as PAINT.
+    ck("…and the rule is over it rather than under it",
+       ev(pg, "()=>{const a=document.querySelector('.setuprail .railback.railfwd');"
+              "if(!a) return false; const c=getComputedStyle(a.closest('.railback-row'));"
+              "return parseFloat(c.borderTopWidth)>0 && parseFloat(c.borderBottomWidth)===0;}", False),
+       ev(pg, "()=>{const a=document.querySelector('.setuprail .railback.railfwd');"
+              "if(!a) return 'missing'; const c=getComputedStyle(a.closest('.railback-row'));"
+              "return c.borderTopWidth+' / '+c.borderBottomWidth;}"))
     ck("the head names the module — absent a label over file://, the word Setup",
        head(pg) in ("Setup", "Strategy · Setup"), head(pg))
     set_scope(pg, "client", "people")
@@ -227,6 +248,12 @@ with sync_playwright() as p:
     ck("the way out to the console is drawn on the client's rail (§357)",
        ev(pg, "()=>{const a=document.querySelector('.setuprail .railback');return !!a && !a.classList.contains('railfwd') && /Back to the console/.test(a.textContent) && a.getAttribute('href')==='/platform';}", False),
        ev(pg, "()=>{const a=document.querySelector('.setuprail .railback');return a && a.textContent+' '+a.getAttribute('href');}"))
+    # AND IT IS AT THE TOP, which is the other end of §357.9's decision: this
+    # row LEAVES and *Client settings ›* goes ON, so they sit at opposite ends.
+    ck("…at the TOP, above the list (§357.9)",
+       ev(pg, "()=>{const l=document.querySelector('.setuprail .raillist'),"
+              "a=document.querySelector('.setuprail .railback');"
+              "return !!l && !!a && !l.contains(a) && !!(l.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_PRECEDING);}", False))
     ck("…and read (§38.5): its ink clears 4.5:1 on its own ground",
        ev(pg, """()=>{const a=document.querySelector('.setuprail .railback'); if(!a) return false;
          const cs=getComputedStyle(a); const bg=getComputedStyle(a.parentElement).backgroundColor;
@@ -355,6 +382,21 @@ with sync_playwright() as p:
        ev(pg, "()=>{const g=document.querySelector('.rgroup[data-railgrp=\"client\"]');return !!g && g.classList.contains('shut');}", False))
     ck("…and the strip is gone, with Client set-up a row inside that group (§94.2)",
        ev(pg, "()=>!document.querySelector('.railstart') && !!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && /Client set-up/.test(document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]').textContent)", False))
+    # AND THE BRANDING ERRAND STILL LANDS SOMEWHERE (§108.13, §357): "where do
+    # I change the logo" was the Branding page, which the flow absorbed — so
+    # the words moved onto the `start` def, and once it is a ROW the search
+    # finds it. Before that it is the strip, which is on screen above the
+    # search box and needs no finding; setup-search §2 records the swap.
+    ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='logo';"
+           "q.dispatchEvent(new Event('input',{bubbles:true}));}")
+    pg.wait_for_timeout(300)
+    ck("…and with it a row, the logo errand finds it (the Branding page's own keywords, §108.13)",
+       ev(pg, "()=>[...document.querySelectorAll('.setuprail .ritem')]"
+              ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).indexOf('start')>=0", False),
+       ev(pg, "()=>[...document.querySelectorAll('.setuprail .ritem')]"
+              ".filter(x=>!x.hidden && x.offsetParent!==null).map(x=>x.dataset.setupgo).join(',')"))
+    ev(pg, "()=>{const q=document.querySelector('[data-railq]'); q.value='';"
+           "q.dispatchEvent(new Event('input',{bubbles:true}));}")
     ev(pg, "()=>{delete GROUP[SMPRules.SETUP_DONE]; localStorage.removeItem('smp.setup.groups'); paint();}")
     pg.wait_for_timeout(300)
 
@@ -388,8 +430,11 @@ with sync_playwright() as p:
         # goto is aborted under the redirect (qa-run.py's own wait)
         pg2.wait_for_url(re.compile(r"/raya-trade/(?!sign-in)[a-z]"), timeout=15000)
         pg2.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
-        # the welcome is offered again on every deep address (§357) and stands
-        # the page behind it down: this page has seen it
+        # THE SIGN-IN LANDS AT THE MODULE'S HOME, which is where the welcome
+        # belongs (§357.9) — a deep address stands it down by itself, and this
+        # is the one address in this file that is not one. Stamped seen, so no
+        # overlay is over the pages below it (§167.2: a click it takes waits
+        # thirty seconds). door-landing.mjs §7 is where the offer is asserted.
         pg2.evaluate("()=>{try{sessionStorage.setItem('smp.welcome.done','1')}catch(e){}}")
 
         def served(path):
@@ -416,6 +461,13 @@ with sync_playwright() as p:
         # carries the way ACROSS, *Client settings ›*, to the client's own rail.
         ck("…and the way across to Client settings on it, to the client's own rail",
            ev(pg2, "()=>{const a=document.querySelector('.setuprail .railback.railfwd');return !!a && /Client settings/.test(a.textContent) && a.getAttribute('href')==='/raya-trade/setup';}", False))
+        # …AT THE FOOT (§357.9), and the client rail's own way out asserted at
+        # the TOP above: the two ends together are the decision, so a build
+        # that put both in one slot fails one of them.
+        ck("…at the foot of it: after the list and outside it (§357.9)",
+           ev(pg2, "()=>{const l=document.querySelector('.setuprail .raillist'),"
+                   "a=document.querySelector('.setuprail .railback.railfwd');"
+                   "return !!l && !!a && !l.contains(a) && !!(l.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_FOLLOWING);}", False))
         pg2.click('.setuprail [data-setupgo="bands"]'); pg2.wait_for_timeout(400)
         ck("pressing inside it writes the module's form", ev(pg2, "()=>location.pathname") == "/raya-trade/strategy/setup/bands", ev(pg2, "()=>location.pathname"))
 

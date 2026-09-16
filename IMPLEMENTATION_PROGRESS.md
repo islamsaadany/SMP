@@ -5002,7 +5002,31 @@ console's three doors (red 12), `client-archive.py` (red 2), `welcome.py` OK,
 `qa.py` file:// ERRORS none and at Next 33 / 243 / ERRORS none; `generated-in-step` and
 `built-in-step` clear; `tsc` clean. Two product faults found by the checks
 and fixed (§357.6 Add a client threw before it posted; §357.7 the bare
-`/<client>/setup` landed on the entry page). **Waiting on Islam: the merge; and a look at step 1's modules band
+`/<client>/setup` landed on the entry page).
+
+**And two more from Islam pressing it (§357.9, 2026-09-16):** *"when I press
+continue it opens the clietn settings!! … the settings should open the
+settings directly … a perosn can access the client settings from the module
+settings page but it should be at the bottom."* The screen he pressed was
+right and the WELCOME was standing in front of it: §357 gave the frozen
+overlay its job back and left no condition in its place, so it drew over the
+first client document of a session whatever address opened it, and *Continue*
+taking it down read as the press having opened the settings. It is the
+module's HOME screen now — offered where the address names no page (which is
+what `/<client>`'s redirect and the door both produce) and never over a page
+somebody named, through `data-deep-address` written by `shell/route.js` and
+read by `WELCOME.offer()` alone: the tour's own rule since §315.3, in its own
+words. And `Client settings ›` moved to the FOOT of a module's rail, after
+the list and outside it so it cannot scroll away, while `‹ Back to the
+console` stays at the top — one row LEAVES and the other goes ON. Red from
+the sources 1 / 1 / 2 / 1, the third printing his report verbatim. Two
+neighbours were red on the branch and both were §357's, established on a
+worktree built from HEAD (§303) and rewritten rather than loosened:
+`setup-search` folded the deleted `look` group, `setup-rail` asked the strip
+to be inside the list it is deliberately outside — and that rewrite found the
+Branding errand (*"where do I change the logo"*) had lost its answer while the
+set-up is a strip, asserted now where the done state is made.
+**Waiting on Islam: the merge; and a look at step 1's modules band
 and archive block, which he has not seen there.** `main` untouched.
 
 **Spec 054 — Setup per module (§356), on the branch, all six steps built.**

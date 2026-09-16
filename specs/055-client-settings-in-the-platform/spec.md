@@ -197,6 +197,51 @@ into `smp-app/public/` and refuses a `platform.html` that does not load it.
   route gates modules, not the spine) and the shell lands them where they
   work with no rail drawn — measured and stated, not a refusal in words.
 
+## 4.2 · What Islam found in it, and what changed (§357.9)
+
+He pressed *Settings* on the console's card and met the welcome overlay over
+the client's own Setup rail: *"when I press continue it opens the clietn
+settings!! … the settings should open the settings directly … the welcome
+screen (the home screen belongs to the straegy module) … a perosn can access
+the client settings from the module settings page but it should be at the
+bottom."* Two changes, neither reversing a decision above.
+
+- **The welcome is the module's HOME screen.** §2.1 removed the line that had
+  been standing the frozen overlay down and left no condition in its place, so
+  it offered itself on the first client document of a session whatever address
+  opened it. `shell/route.js` writes `data-deep-address` when `placeOf()`
+  answered a place — which the bare `/<client>/<module>` the redirect and the
+  door both produce does not — and `WELCOME.offer()` declines when it is
+  there. The same rule the tour has had since §315.3, in its own words: *an
+  address is somebody who has already chosen a page*. A document fact rather
+  than a stored one, so the memory `welcome.js` keeps goes on answering one
+  question (§107); read by `offer()` and never by `open()`, so the house mark
+  still opens it from anywhere (§185).
+- **`Client settings ›` sits at the FOOT of a module's rail**, where §2.2 put
+  it under the head. The two rows are not two spellings of one thing: `‹ Back
+  to the console` LEAVES and stays at the top, this one goes ON. After
+  `.raillist` as a `flex:none` sibling, so it is at the bottom of the rail box
+  by construction and does not scroll away with the list (§108.5, §290.1); its
+  hairline swaps ends with it. Both ends asserted, or a build that put the two
+  in one slot passes half.
+
+**And `/<client>/tour` is an address too** (found by reading the condition
+rather than by a check): nothing is remembered for it and the tour's own mark
+must not be set on it, but `land()` offers the intro round only where the
+welcome declined (§148) — so without the stand-down there, the one address
+that names the tour is the one address that cannot start it. It gets the fact
+and nothing else. **RECORDED, NOT DONE**: `lib/landing.ts`'s `tourHref` has
+had no caller since §2.1 deleted the landing that linked it (§24), and
+whether the address itself stays is a question about how the tour is offered
+now that the welcome's own card is the only door to it.
+
+Proved able to fail from the sources (§276): the row back at the head, 1 red;
+the foot rule deleted, 1 red; `data-deep-address` removed, `door-landing.mjs`
+2 red (the first printing `[1,null]`, his report reproduced) and `shell.mjs`
+1 red. Two neighbours were red on the branch, both §357's and both rewritten
+rather than loosened: `setup-search` folded the deleted `look` group, and
+`setup-rail` asked the strip to be inside the list it is deliberately outside.
+
 ## 5 · Deliberately not decided here
 
 - Where the knowledge base finally lives (*"until we decide later"*).

@@ -48683,3 +48683,132 @@ Status, and matches it frame for frame. The frozen product is untouched, so
 no hover to say the name can be renamed (Rename beside Delete is a decision
 if wanted); the switcher still lists the tracker for a client's own person
 (spec 046 §4.4); Notes is next and has no spec.
+
+---
+
+## §357 — MEETING NOTES: ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (2026-09-16, spec 055)
+
+Islam, of the second thing the comparison with the other repository found:
+*"notes are for taking meeting notes and refine it by AI and send it as MOM
+for the attendees of the meeting"*, then seven answers that are the whole
+model — *"1. one meeting one note, title date attendees and text is enough /
+2. the free text box is like a note taking app just writing down the the role
+of the ai assistant needs to refine it and my be compile it to agreements
+points and actions etc. so we need to agre on a format and an AI prompt / 3.
+yes for all what you said it do everything / 4. also the office and maybe we
+can add someone casualy to the meeting / 5. no it's an email with no signing
+in. / 6. still edtiable as if we get a note or something we can add more and
+resend / 7. yes ok"* — then *"ok write the spec and draw it"*, then **"build"**.
+
+**THE SIXTH MODULE, AND WHAT IT COST IS THE ARGUMENT FOR THE FRAME**: one
+folder, one entry in `modules/registry.ts`, one word in `lib/modules.ts`, and
+the route was not opened (§354). Everything else it needs — the door, the
+session, the seat, `withTenant`, the client's own colours, the switcher — is
+the spine's, and what it draws is the tracker's stylesheet verbatim, so the
+two office modules read as one product and nothing here invents a second
+vocabulary for a row, a chip or a box.
+
+**THE OFFICE'S, BY SEAT, AT THE SERVER** (spec 054's own gate, never a second
+one): a client's own person is turned away on the page AND at the api, with
+the way back. **ANY OFFICE PERSON MAY EDIT ANY NOTE** — put to Islam as open
+when the drawing was handed over and taken as settled by *"build"*, with the
+cost stated: nothing on the screen is anybody's in particular, and a
+correction somebody else makes arrives silently.
+
+**A SECOND REFINE ADDS AND NEVER REWRITES, WHICH IS DECISION 6 AND IS WHERE
+THE WORK IS.** *"still edtiable as if we get a note or something we can add
+more and resend"* means the minutes are a thing a person EDITS and the model
+comes back to them afterwards — so `mergeMinutes(have, add)` keeps every line
+the writer wrote, de-duplicates the model's near-repeat of it against a
+normalised form (case, punctuation and a trailing stop), keeps the writer's
+summary against the model's, and fills only a part the writer left EMPTY. The
+model is TOLD this in `PROMPT_AGAIN` and the merge does not trust it to have
+obeyed — asserted at both ends, with a model deliberately answering a whole
+new summary and a rewritten line, and the writer's surviving both. **`SMP_BREAK=rewrite-on-refine` reddens nine assertions**, which is the shape
+of what that decision is holding up.
+
+**A CASUAL ATTENDEE NEVER REACHES THE CLIENT'S REGISTER** (decision 4,
+*"maybe we can add someone casualy to the meeting"*): a register attendee is
+stored as a KEY and rendered from the register at draw time (§48, §130.9), a
+casual one as a name and an address and nothing else, marked on the chip as
+*this meeting only*. **An entry that is neither is dropped, never guessed at**
+(§96.2), and **an address that is not an address is nothing**, because the
+minutes have to reach somebody.
+
+**WHAT WENT OUT IS KEPT AS IT WENT** (decision 6's other half): `note_sends`
+holds the minutes AS SENT, so the note goes on being edited and the record
+does not move — and **the assertion that proves it had to be rewritten**,
+because the first version compared the snapshot with a SECOND READING OF
+ITSELF, which a snapshot storing nothing satisfies perfectly (§113.8): it is
+compared with the minutes as they were at send time now, and
+`SMP_BREAK=snapshot-moves` goes from 0 red to 2.
+
+**THE SENDER'S COPY WAS ASSERTED OVER SOMEBODY WHO WAS ALSO AN ATTENDEE**,
+which is the same fault one row along: `no-copy-to-sender` reddened a COUNT in
+a later section and nothing whose subject was the copy. The first send now
+asserts *nobody but the attendees is written to* (its sender is one) and the
+second, whose sender was not at the meeting, asserts the copy — both ends.
+
+**AND THE CHECK FOUND THREE PRODUCT FAULTS, EVERY ONE OF THEM A SECOND COPY
+OF SOMETHING THE PLATFORM ALREADY ANSWERS.** `readableDay()` carries the year
+whenever it is not the current one and nothing here hands it a today, so the
+subject line, the corpus head and the note's meta appended a year that was
+already there — *"Minutes: Q3 review — Wed 16 Sep 2026 2026"*, three sites,
+one deleted expression. **The attendee chip printed `&middot;` as four
+characters** wherever it had two things to say, because the separator was
+joined INSIDE `esc()` and unescaped afterwards one paren too deep — each part
+is escaped and the separator is not now (§235). **And the meeting's date was
+a raw `<input type="date">`**, which prints whatever format the browser's
+locale chooses (`09/16/2026` on this machine), a spelling the platform uses
+nowhere and not what the signed-off drawing reads — it is the TRACKER's own
+control now, a button reading the day that becomes a date box on the press
+(§53.5: a date is set one way in the office's modules, not two). The first
+two were found by the check; **the third was found by looking at the built
+page beside the mockup**, which is what rule 1c's last step is for.
+
+**AND FIXING IT BROKE THE WHOLE SCRIPT IN A WAY `node --check` COULD NOT
+SEE**: the module's browser script is one TEMPLATE LITERAL, so the backticks
+in the comment explaining the new control ENDED it — §272.8's fault one quote
+mark over, the note explaining a rule eating the rule. The comment says so in
+its own words now.
+
+**ONE OPTION ON THE MAIL BUILDER, AND THE TWINS STAY BYTE-IDENTICAL**:
+`lib/mail-html.js` and its `.cjs` carry `bodyHtml` for a caller that has
+already laid its body out — the minutes are six parts with a table in them and
+`paras()` can only make paragraphs. **The minutes body invents no colour**:
+every literal in it is one the mail builder already paints, asserted as that
+rather than re-measured, so the pairs `test-mail-contrast.js` measures are the
+pairs a reader sees (§25, §53.5) — and email is not the web, so the styles are
+inline, the colours are literals and no custom property is used.
+
+**TWO TABLES, FENCED LIKE EVERY OTHER TENANT TABLE**: `notes` and
+`note_sends` in `db/schema.sql` and in migration 014, which **fences its own
+tables** because schema.sql's RLS loop is not re-run on an existing database —
+asserted as the policy being IDENTICAL to an existing tenant table's (§94.8)
+and neither on the platform's own list (§331), and proved on the path a real
+deployment takes (the migration, against a database that already had the
+schema) rather than the easy one (§33.5).
+
+**VERIFIED**: `check:notes` **154/0** with §9 driven in Chromium and Postgres
+read back after every press, RED under all five named breaks, each reddening
+its own assertions; `check:tracker` 164/0; `check:insights` 127/0;
+`check:modules` 107/0; `generated-in-step` clear once committed;
+`test-mail-contrast` 12 pairs 0 failures; `built-in-step.py` all good after
+the rebuild; `next build` compiles and `tsc` is clean but for `lib/prisma.ts`'s
+pre-existing error. `memory-boundary`'s one failure reproduces identically
+with this work stashed (§303) — it is its fixture's own prerequisite. **The
+frozen `lib/mail-html.js` changed, so the built file's bytes changed, which is
+§91's trigger**: `sw.js` is bumped to `smp-shell-v5.06-meeting-notes`,
+confirmed against `origin/main` first (§94.12) — and it reaches the offline
+copy alone, because `build-sw.mjs` drops the caching half and the served
+worker holds `SHELL` nought times (§316.10, §329). **THE FROZEN BROWSER CHECKS
+COULD NOT BE RUN AND IT IS SAID RATHER THAN LEFT AS AN ABSENCE** (§54.5): this
+container has no python playwright, so `qa-run.py` cannot launch; nothing in
+`src/` changed but the inlined mail builder, whose own check is green.
+
+**Built and screenshotted beside the mockup, frame for frame. On the branch,
+NOT merged.** **RECORDED, NOT DONE**: the actions in the minutes do not reach
+the tracker and are not meant to (spec 054 decision 3); a note cannot be
+started from a calendar; the switcher lists the module for a client's own
+person until spec 046 §4.4's access tab exists; and nothing says which office
+person is looking at a note while somebody else edits it.

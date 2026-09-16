@@ -54,16 +54,36 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§356.11–§356.13 — the Internal Tracker's row, redrawn at your word and built (spec 054).**
+**Latest version:** **§357 — Meeting Notes: one meeting, one note, and the minutes as an email (spec 055).**
 
-**In flight, on `claude/meeting-notes`, drawn and not built: Meeting Notes
-(spec 055).** One meeting, one note; the assistant refines the notes into
-minutes in six parts; the minutes go to the attendees as an email with no
-sign-in; editable after sending and sent again as updated minutes. The spec is
-`specs/055-meeting-notes/spec.md` and the drawing is
-`design-mockups/meeting-notes/2026-09-16_list-note-minutes-email.html`,
-published as an artifact. **Waiting on you**: the drawing, the word (*Meeting
-Notes*), and whether any office person may edit any note.
+**Built, on `claude/meeting-notes`, not on `main`.** The sixth module, and it
+cost one folder and one line in the table the route asks — everything else it
+needs is the platform's already. **The meetings list** is newest first,
+grouped by month, with a search and what went out on every row. **A note** is
+its title, its date, who was there, and the box you type in while the meeting
+runs. **Refine** hands the notes to the assistant and writes the minutes into
+six parts beside them — Summary, Discussed, Agreed, Actions, Open, Next
+meeting — and **every part is a box you can edit**. **Refining again ADDS**:
+whatever you rewrote stays exactly as you left it and the model's new lines
+join it. **Send** emails the minutes to everybody on the meeting who has an
+address, with a copy to you; a second send says *Updated minutes*, and what
+went out the first time is kept as it went. **Somebody who is not on the
+client's register** can be added for that meeting only, by name and address,
+and is never written to the register. **The office's alone**, by seat, refused
+on the page and at the api both.
+
+Checked: 154 assertions, 0 failures, with the last section pressed in a real
+browser and Postgres read back after every press; red under each of five
+deliberate breaks; a stand-in standing in front of both the assistant and the
+mail service, so what was asked and what left are read off the wire rather
+than assumed. Three faults it found are fixed: a year printed twice in the
+subject line, a stray `&middot;` on an attendee's chip, and a date box that
+printed `09/16/2026` — it is the tracker's own date control now, so a date is
+set one way across the office's modules.
+
+**Still yours:** the merge; the module has to be turned on per client from the
+client's card; and the switcher lists it for a client's own person until the
+per-module access tab exists (spec 046 §4.4).
 
 **It is built and it is on the branch, not on `main`.** Everything on the
 drawing you signed off is in: the owner is a **first name**, and pressing it
@@ -89,7 +109,7 @@ planted on the page to prove nothing reloaded; red under five deliberate
 breaks; the modules check green; the frozen product untouched.
 
 **Still yours:** the merge; the module still has to be turned on per client
-from the client's card. Notes (meeting minutes) is spec 055, drawn above.
+from the client's card. Notes (meeting minutes) is spec 055, built above.
 
 ---
 

@@ -1,13 +1,33 @@
 # 055 · Meeting Notes — one meeting, one note, and the minutes as an email
 
-**Status:** **drawn 2026-09-16, awaiting sign-off, not built.** Every decision
-below is Islam's (2026-09-16, the seven answers in §1 and *"ok write the spec
-and draw it"* on the format and the prompt in §3) or is marked as mine with
-its reason. The mockup is
+**Status:** **drawn 2026-09-16, signed off, and BUILT the same day**
+(Islam: *"build"*). Every decision below is Islam's (2026-09-16, the seven
+answers in §1 and *"ok write the spec and draw it"* on the format and the
+prompt in §3) or is marked as mine with its reason. The mockup is
 `design-mockups/meeting-notes/2026-09-16_list-note-minutes-email.html`,
-published as an artifact. Nothing in `smp-app/` exists for it yet; the branch
-is `claude/meeting-notes`, started from the tracker branch's tip so it carries
-the module frame.
+published as an artifact. What was built is
+`smp-app/lib/notes.ts`, `smp-app/modules/notes/`, the two tables in
+`db/schema.sql` and migration `014-meeting-notes.sql`, and
+`smp-app/checks/notes.mjs` (154 assertions, 0 failures, RED under each of the
+five named breaks). The branch is `claude/meeting-notes`, started from the
+tracker branch's tip so it carries the module frame; it is NOT merged.
+
+**What the build changed about this spec**, so the record is the record and
+not the plan (Principle II):
+
+* **The word *Meeting Notes* and "any office person may edit any note" were
+  open when the drawing was handed over** (decisions 11 and 8) and are taken
+  as settled by *"build"*.
+* **The meeting's date is the tracker's own control**, a button reading the
+  day in the platform's words that becomes a date box on the press — not the
+  raw `<input type="date">` the first build shipped, which prints whatever
+  format the browser's locale chooses (`09/16/2026` here), a spelling the
+  platform uses nowhere and not what the drawing reads. §53.5: a date is set
+  one way in the office's modules, not two.
+* **`readableDay()` already carries the year** whenever it is not the current
+  one, so the subject line, the corpus head and the note's meta printed it
+  twice — found by the check, fixed by deleting the second copy rather than
+  by teaching the caller a year of its own.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4, and
 with spec 054 (Internal Tracker), whose chrome, seat gate and shape this

@@ -7771,7 +7771,54 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `innerText` and so uppercased, §301.6). **Recorded, not done**: the switcher
   lists it for a client's person (spec 046 §4.4's tab is where that ends); a
   module is turned ON per client from the card; a double-tap has no hover on a
-  tablet; Notes is next and has no spec.
+  tablet; Notes is spec 055 below.
+- **MEETING NOTES: ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (§357,
+  spec 055):** Islam's seven answers are the model — *"one meeting one note,
+  title date attendees and text is enough"*, the box is *"like a note taking
+  app"* and the assistant's job is to refine it, *"also the office and maybe we
+  can add someone casualy to the meeting"*, *"no it's an email with no signing
+  in"*, and *"still edtiable as if we get a note or something we can add more
+  and resend"*. **THE SIXTH MODULE COST ONE FOLDER AND ONE ENTRY** and the
+  route was not opened (§354); what it draws is the tracker's own stylesheet
+  verbatim, so the two office modules read as one product. **A SECOND REFINE
+  ADDS AND NEVER REWRITES**, which is decision 6 and where the work is:
+  `mergeMinutes` keeps every line the writer edited, de-duplicates the model's
+  near-repeat against a normalised form, keeps the writer's summary, and fills
+  only a part left EMPTY — the model is TOLD so and the merge does not trust
+  it to have obeyed (`rewrite-on-refine` reddens **nine** assertions).
+  **A CASUAL ATTENDEE NEVER REACHES THE CLIENT'S REGISTER** — a register
+  attendee is a KEY rendered at draw time (§48, §130.9), a casual one a name
+  and an address, marked; an entry that is neither is dropped rather than
+  guessed at (§96.2). **WHAT WENT OUT IS KEPT AS IT WENT** (`note_sends` holds
+  the minutes as sent), so the note goes on being edited and the record does
+  not move — **and the assertion proving it had to be REWRITTEN**, because it
+  compared the snapshot with a second reading of ITSELF, which a snapshot
+  storing nothing satisfies perfectly (§113.8); the same fault one row along
+  had the sender's copy asserted over somebody who was also an attendee.
+  **THE OFFICE'S ALONE, BY SEAT, AT BOTH DOORS**, and **any office person may
+  edit any note** — open when the drawing was handed over and settled by
+  *"build"*, with the cost stated. **THREE PRODUCT FAULTS, EVERY ONE A SECOND
+  COPY OF SOMETHING THE PLATFORM ALREADY ANSWERS**: `readableDay()` carries
+  the year already, so three sites printed it twice; the attendee chip's
+  separator was joined INSIDE `esc()` and unescaped one paren too deep, so
+  `&middot;` printed as four characters (§235); and the meeting's date was a
+  raw `<input type="date">` printing the browser's locale format — it is the
+  TRACKER's own control now, a button reading the day that becomes a date box
+  on the press (§53.5: a date is set one way in the office's modules), **found
+  by looking at the built page beside the mockup** rather than by any check.
+  **AND FIXING IT BROKE THE WHOLE SCRIPT IN A WAY `node --check` COULD NOT
+  SEE**: the browser script is one TEMPLATE LITERAL, so the backticks in the
+  comment explaining the new control ENDED it — §272.8's fault one quote mark
+  over. **One option on the mail builder** (`bodyHtml`, for a caller that has
+  laid its body out), the twins byte-identical, and **the minutes body invents
+  no colour** — every literal in it is one the mail builder already paints,
+  asserted as that rather than re-measured (§25, §53.5). **Two tables**, fenced
+  in schema.sql AND in migration 014, because that loop is not re-run on an
+  existing database — proved on the path a real deployment takes (§33.5).
+  `checks/notes.mjs` **154/0**, red five ways. **Recorded, not done**: the
+  actions in the minutes do not reach the tracker and are not meant to (spec
+  054 decision 3); a module is turned ON per client from the card; nothing says
+  which office person is looking at a note while somebody else edits it.
 - **A MODULE IS A FOLDER THAT SERVES ITSELF (§354, spec 046):** the third
   module arrived and the route's own comment — *a branch rather than a table
   because there are two of them* — was still there with Insights' eight lines
@@ -8009,6 +8056,52 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # from This week, &sect;356.7), one real page fault
                                 # (`hidden` hiding nothing under an author display,
                                 # &sect;356.8) and three faults of its own
+node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
+                                # minutes as an email (spec 055, &sect;357) &mdash;
+                                # `npm run check:notes`, needs a database and the
+                                # image's Chromium (`SMP_CHROME`). &sect;1&ndash;&sect;2
+                                # run the pure rules with no database and no network
+                                # (what an attendee is, what the minutes' six parts
+                                # are, and that a SECOND Refine ADDS &mdash; the
+                                # writer's edited line surviving whatever the model
+                                # answers, which is decision 6 and where the work is);
+                                # &sect;3&ndash;&sect;6 run every statement as
+                                # `smp_app` with the tenant set; &sect;5 drives REFINE
+                                # and &sect;6 the SEND against a stand-in model and a
+                                # stand-in mail service, stood in FRONT of the real
+                                # code on `GEMINI_ENDPOINT` and `SMP_RESEND_ENDPOINT`
+                                # (&sect;100.3, &sect;142.6) &mdash; **started and
+                                # named in the environment BEFORE `lib/notes.ts` is
+                                # imported**, because `lib/mailer.cjs` reads its
+                                # endpoint once at load &mdash; so what was asked and
+                                # what left are read off the wire; &sect;7 drives the
+                                # module's own server at both ends of every act;
+                                # &sect;8 reads the catalogue (both tables RLS-forced,
+                                # the policy IDENTICAL to an existing tenant table's,
+                                # neither on PLATFORM_TABLES, the exact columns); and
+                                # &sect;9 PRESSES it in Chromium over a real port with
+                                # Postgres read back after every press. **BOTH ENDS,
+                                # AND TWO OF ITS OWN ASSERTIONS COULD NOT FAIL UNTIL
+                                # THEY WERE REWRITTEN** (&sect;113.8): *what went out
+                                # is kept* compared the snapshot with a SECOND READING
+                                # OF ITSELF, which a snapshot storing nothing
+                                # satisfies perfectly &mdash; it is compared with the
+                                # minutes AS THEY WERE AT SEND TIME now, and the break
+                                # goes 0 red &rarr; 2; and *the sender gets a copy*
+                                # was asserted over a sender who was also an ATTENDEE,
+                                # so it is the second send, whose sender was not at the
+                                # meeting, that carries that claim. 154/0, red five
+                                # ways (`check:notes:red`), each break reddening its
+                                # own assertions. Its first run found THREE product
+                                # faults, every one a second copy of something the
+                                # platform already answers: a year printed twice
+                                # (`readableDay()` carries it already), `&middot;`
+                                # printed as four characters (the separator joined
+                                # INSIDE `esc()` and unescaped one paren too deep,
+                                # &sect;235), and a raw `<input type="date">` printing
+                                # the browser's locale format &mdash; the third found
+                                # by LOOKING at the built page beside the mockup,
+                                # which is what rule 1c's last step is for
 node smp-app/checks/insights.mjs # the library, and who can see one report
                                 # (spec 053, &sect;355) &mdash; `npm run check:insights`,
                                 # needs a database. &sect;1b is the narrowing's PURE
@@ -9474,7 +9567,39 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
+*Last Updated: 2026-09-16 &mdash; **&sect;357: Meeting Notes &mdash; one
+meeting, one note, and the minutes as an email (spec 055).** Islam's seven
+answers, drawn and signed off, then **"build"**. **THE SIXTH MODULE COST ONE
+FOLDER AND ONE ENTRY IN THE TABLE THE ROUTE ASKS** (&sect;354), and it draws
+the tracker's stylesheet verbatim so the two office modules read as one
+product. **A SECOND REFINE ADDS AND NEVER REWRITES** &mdash; decision 6, and
+where the work is: the writer's edited line survives whatever the model
+answers, and the merge does not trust the model to have obeyed being told so.
+**A CASUAL ATTENDEE NEVER REACHES THE CLIENT'S REGISTER**; **what went out is
+kept as it went**, so the note goes on being edited and the record does not
+move. **TWO OF THE CHECK'S OWN ASSERTIONS COULD NOT FAIL UNTIL THEY WERE
+REWRITTEN** (&sect;113.8): the snapshot was compared with a SECOND READING OF
+ITSELF, which a snapshot storing nothing satisfies perfectly, and the sender's
+copy was asserted over somebody who was also an attendee. **THREE PRODUCT
+FAULTS, EVERY ONE A SECOND COPY OF SOMETHING THE PLATFORM ALREADY ANSWERS**:
+a year printed twice, `&middot;` printed as four characters (&sect;235), and a
+raw date box printing the browser's locale format &mdash; the third found by
+LOOKING at the built page beside the mockup, and answered with the TRACKER's
+own date control (&sect;53.5). **AND FIXING IT BROKE THE WHOLE SCRIPT IN A WAY
+`node --check` COULD NOT SEE**, the backticks in its own comment ending the
+template literal the script lives in (&sect;272.8). **VERIFIED**: notes
+**154/0** red five ways, tracker 164/0, insights 127/0, modules 107/0,
+mail-contrast 12 pairs 0 failures, `built-in-step.py` all good after the
+rebuild, `next build` green and `tsc` clean but for `lib/prisma.ts`'s
+pre-existing error; `memory-boundary`'s one failure reproduces with this work
+stashed (&sect;303). **The frozen `lib/mail-html.js` changed, so `sw.js` is
+bumped** (&sect;91) &mdash; and it reaches the offline copy alone, the served
+worker holding `SHELL` nought times (&sect;329). **The frozen browser checks
+could not be run in this container and it is said rather than left as an
+absence** (&sect;54.5): no python playwright, so `qa-run.py` cannot launch.
+**On the branch, not merged.***
+
+*Earlier: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
 Internal Tracker's row, redrawn at Islam's word and built (spec 054).** Islam,
 using the built tracker: *"The button with my initials should open the list of
 the taem on the project ot assign an owner and it's better to be first name of

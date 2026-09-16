@@ -56,6 +56,15 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** **§356.11–§356.13 — the Internal Tracker's row, redrawn at your word and built (spec 054).**
 
+**In flight, on `claude/meeting-notes`, drawn and not built: Meeting Notes
+(spec 055).** One meeting, one note; the assistant refines the notes into
+minutes in six parts; the minutes go to the attendees as an email with no
+sign-in; editable after sending and sent again as updated minutes. The spec is
+`specs/055-meeting-notes/spec.md` and the drawing is
+`design-mockups/meeting-notes/2026-09-16_list-note-minutes-email.html`,
+published as an artifact. **Waiting on you**: the drawing, the word (*Meeting
+Notes*), and whether any office person may edit any note.
+
 **It is built and it is on the branch, not on `main`.** Everything on the
 drawing you signed off is in: the owner is a **first name**, and pressing it
 opens the team on this client to hand the action on (only the owner and the
@@ -80,7 +89,7 @@ planted on the page to prove nothing reloaded; red under five deliberate
 breaks; the modules check green; the frozen product untouched.
 
 **Still yours:** the merge; the module still has to be turned on per client
-from the client's card. Notes (meeting minutes) is next and has no spec yet.
+from the client's card. Notes (meeting minutes) is spec 055, drawn above.
 
 ---
 

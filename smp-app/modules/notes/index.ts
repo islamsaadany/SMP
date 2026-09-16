@@ -40,7 +40,13 @@ export async function serve(a: ServeArgs): Promise<Response> {
     /* `close-on-tick` puts back the reported fault: the list is rebuilt hidden
        by every redraw, so refusing to carry it is exactly what shut it after
        each tick. Never set on a deployment (constitution XVI). */
-    return new Response(APP_JS.replace("/*%BRK%*/", brk() === "close-on-tick" ? "return false;" : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+    /* `date-two-presses` puts back what §357.4 removed: the calendar is not
+       opened for them, so the word is swapped for a box and the calendar is
+       behind the icon inside it — two presses, and the day reformats into
+       whatever spelling the browser's locale chose. */
+    return new Response(APP_JS
+      .replace("/*%BRK%*/", brk() === "close-on-tick" ? "return false;" : "")
+      .replace("/*%DATEBRK%*/", brk() === "date-two-presses" ? "throw 0;" : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which
      must turn checks/notes.mjs red (§94.5). Never set on a deployment. */

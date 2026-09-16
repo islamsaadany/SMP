@@ -316,28 +316,63 @@ export const APP_JS = `(function () {
     f.defaultValue = f.value;
     post({ act: act, value: f.value }, { then: function (j) { if (j) saved(); } });
   });
-  /* THE DATE, the tracker's own control (modules/tracker/script.ts): the word
-     becomes a date box in place, a change posts, and Escape or leaving it puts
-     the word back. It answers on change rather than on blur, because a date
-     picked out of the browser's own calendar may never be left by a person.
+  /* THE DATE, ONE PRESS (§357.4). The word is the control and it STAYS the
+     word: the native box sits beside it hidden in place and is DRIVEN, which
+     is this platform's own idiom for a native control it does not want to
+     draw (§45.5, the searchable select). Two things fall out of that shape
+     rather than being arranged for. The day never reformats under the hand
+     that pressed it, where swapping a box in printed whatever spelling the
+     browser's locale chose over the word the page had just said. And the
+     tracker's own reason for NOT opening the calendar — a popup opened by
+     script takes the next Escape for itself, so the box beneath it needs a
+     second one — does not arise here, because there is no box beneath it:
+     Escape closes the picker and the word was never away.
+
+     A CHANGE POSTS, and the same day picked again fires nothing and posts
+     nothing, which is the browser's own rule rather than a guard of ours.
+     NEVER ON BLUR: the calendar itself takes the focus, so a box dismissed on
+     blur is thrown away the moment it is used (§356.14, this same control one
+     module over, where it was measured).
+
      NO BACKTICK IN HERE: this whole script is one template literal, so a
      quoted name in a comment ends it (§272.8's fault, one quote mark over). */
+  var dateOpen = null;
+  function hideDate() {
+    if (!dateOpen) return;
+    var d = dateOpen; dateOpen = null;
+    d.inp.classList.add("datenative"); d.inp.classList.remove("date");
+    d.inp.setAttribute("aria-hidden", "true"); d.inp.setAttribute("tabindex", "-1");
+    d.btn.hidden = false;
+  }
+  document.addEventListener("pointerdown", function (e) {
+    if (dateOpen && e.target !== dateOpen.inp) hideDate();
+  });
   document.addEventListener("click", function (e) {
     var b = e.target.closest("button[data-act=date]");
     if (!b) return;
-    var inp = document.createElement("input");
-    inp.type = "date"; inp.className = "date"; inp.value = b.getAttribute("data-day") || "";
-    inp.setAttribute("aria-label", "Date of the meeting");
-    var was = inp.value, settled = false;
-    b.replaceWith(inp); inp.focus();
-    var back = function () { if (settled) return; settled = true; inp.replaceWith(b); };
-    inp.addEventListener("change", function () {
-      if (inp.value === was) { back(); return; }
-      settled = true;
-      post({ act: "date", value: inp.value }, { then: function (j) { if (j) saved(); } });
-    });
-    inp.addEventListener("keydown", function (ev) { if (ev.key === "Escape") back(); });
-    inp.addEventListener("blur", function () { setTimeout(back, 150); });
+    var inp = b.parentNode.querySelector("input[data-native-date]");
+    if (!inp) return;
+    if (!inp.getAttribute("data-wired")) {
+      inp.setAttribute("data-wired", "1");
+      inp.addEventListener("change", function () {
+        hideDate();
+        post({ act: "date", value: inp.value }, { then: function (j) { if (j) saved(); } });
+      });
+      inp.addEventListener("keydown", function (ev) { if (ev.key === "Escape") { ev.preventDefault(); hideDate(); } });
+    }
+    /* WHERE THE CALENDAR CANNOT BE OPENED FOR THEM — an older Safari or
+       Firefox — the box is shown in place of the word rather than the press
+       doing nothing (§61). It closes on a change, on Escape, or on a press
+       elsewhere, by the rule above. */
+    try {
+      /*%DATEBRK%*/
+      if (!inp.showPicker) throw 0;
+      inp.showPicker();
+    } catch (err) {
+      inp.classList.remove("datenative"); inp.classList.add("date");
+      inp.removeAttribute("aria-hidden"); inp.removeAttribute("tabindex");
+      b.hidden = true; dateOpen = { inp: inp, btn: b }; inp.focus();
+    }
   });
   markMinutes();
 })();

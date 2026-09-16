@@ -153,11 +153,42 @@ Escape key. **And adding somebody who is not on the register shut the list
 every time**, because the test for "you pressed somewhere else" asked what the
 act was called rather than where the press landed.
 
-**Checked:** 164 assertions now, red under each of seven deliberate breaks.
+**Checked:** 164 assertions then, red under each of seven deliberate breaks.
 
-**Still yours:** the date control is drawn and not built — keeping the day
-where it is and opening the calendar on the first press rather than the second
-— and it waits on your word about one fork inside it.
+**And since then (§357.4), the date — the one thing that was drawn and not
+built:**
+
+You asked for two things: the day to stay where it is, and the calendar to open
+on the first press rather than the second. Both are in. **The day is the
+button, and pressing it no longer takes the day away** — the calendar simply
+opens over it. Until now the press swapped the day for a plain date box, which
+printed the date in whatever style the browser happened to use rather than the
+way the rest of the platform writes it, and the calendar was then behind a
+small icon inside that box.
+
+**The fork was whether the day itself stays something you press.** Both ways
+were drawn for you. I took your go-ahead as going with the recommendation: the
+same pill you have, with a small calendar mark inside it, and one press
+anywhere on it opens the calendar. It keeps the whole pill as the target rather
+than a small icon, and it takes away no press that works today. The other
+reading — the day as plain text with the mark beside it as the only way to
+change it — is a small change away if you would rather it read as a stated fact
+than as something to touch.
+
+**It also quietly fixed something that was going to bite.** This date control
+was copied from the Internal Tracker's before the tracker fixed a fault in it:
+the box was thrown away the moment the calendar opened, because opening the
+calendar moves the cursor out of the box. Notes never got that fix. With the
+day no longer swapped for a box there is nothing left to throw away.
+
+**Checked:** 170 assertions, red under each of eight deliberate breaks — the
+new one puts the two-press behaviour back and fails exactly the two things this
+round is about, and nothing else.
+
+**Still yours:** the Internal Tracker sets its dates with the same control and
+has not been given this. It is the same control and could take it — I have left
+it alone because it is a different module and you did not ask about it. Say the
+word and it goes across.
 
 ---
 

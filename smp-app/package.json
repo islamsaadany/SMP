@@ -44,7 +44,7 @@
     "check:tracker": "node --experimental-strip-types checks/tracker.mjs",
     "check:tracker:red": "for b in no-office-gate reset-carried owner-anyone who-everyone reload-on-add back-on-blur week-numbers note-standing week-of-year card-count card-jumps details-always wide-names; do SMP_BREAK=$b node --experimental-strip-types checks/tracker.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:notes": "node --experimental-strip-types checks/notes.mjs",
-    "check:notes:red": "for b in no-office-gate rewrite-on-refine casual-to-register snapshot-moves no-copy-to-sender close-on-tick title-as-heading; do SMP_BREAK=$b node --experimental-strip-types checks/notes.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:notes:red": "for b in no-office-gate rewrite-on-refine casual-to-register snapshot-moves no-copy-to-sender close-on-tick title-as-heading date-two-presses; do SMP_BREAK=$b node --experimental-strip-types checks/notes.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:standing": "node checks/office-standing.mjs",
     "check:standing:red": "node checks/office-standing.mjs --break=no-heal >/dev/null 2>&1 && { echo \"NOT RED: no-heal\"; exit 1; }; echo \"red: no-heal\"",
     "check:demo": "node checks/demo-seed.mjs",

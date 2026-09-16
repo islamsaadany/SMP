@@ -105,8 +105,16 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
 .head .date{margin-top:0}
 .ttl::placeholder{color:var(--ink-3);font-weight:400}
 .date{font:400 13px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 9px;white-space:nowrap;margin-top:4px;cursor:pointer}
+button.date{display:inline-flex;align-items:center;gap:8px}
+.date svg{width:14px;height:14px;flex:none;color:var(--gold)}
 .date:hover,.date:focus-visible{border-color:var(--gold);color:var(--ink);outline:none}
 input.date{cursor:auto}
+/* THE NATIVE BOX IS HIDDEN IN PLACE AND DRIVEN, never swapped in for the word
+   (the searchable select's own idiom): clipped rather than display:none,
+   because a box that is not rendered cannot be asked to open its calendar.
+   It is shown only where the calendar cannot be opened for them, and there it
+   wears .date like every other field on this page. */
+.datenative{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0;margin:0;clip-path:inset(50%)}
 .att{display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:relative}
 .chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 inherit;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 10px}
 .chip i{font-style:normal;font-weight:400;color:var(--ink-3)}
@@ -390,12 +398,22 @@ export function noteBody(L: Loaded, p: PageArgs, today: string): string {
     '<div><p class="lab">Date</p>' +
     /* THE DATE IS THE TRACKER'S OWN CONTROL, never a second answer to how a
        date is set (§53.5): a button reading the day in the platform's own
-       words, which becomes a date box in place on the press. A raw date input
-       prints whatever format the browser's locale chooses — `09/16/2026` on
-       this machine — which is a spelling the platform uses nowhere, and the
-       signed-off drawing reads "Wed 16 Sep 2026". */
+       words. A raw date input prints whatever format the browser's locale
+       chooses — `09/16/2026` on this machine — which is a spelling the
+       platform uses nowhere, and the signed-off drawing reads "Wed 16 Sep
+       2026". §357.4: THE WORD IS THE CONTROL AND IT STAYS THE WORD — the
+       press opens the calendar rather than swapping the word for a box, so
+       the day never reformats under the hand that pressed it. The native box
+       sits beside it, hidden in place and driven (see the script). The mark
+       is DRAWN and never a font character, which a font may map and fail to
+       draw (§52, §120.2). */
     '<button class="date" type="button" data-act="date" data-day="' + esc(n.metOn) + '" title="Change the date" aria-label="Date of the meeting">' +
-    esc(readableDay(n.metOn) || "No date") + "</button></div></div>";
+    esc(readableDay(n.metOn) || "No date") +
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">' +
+    '<rect x="1.8" y="3" width="12.4" height="11.2" rx="2"/><path d="M1.8 6.4h12.4M5 1.6v2.6M11 1.6v2.6"/></svg>' +
+    "</button>" +
+    '<input class="datenative" type="date" data-native-date value="' + esc(n.metOn) + '" tabindex="-1" aria-hidden="true">' +
+    "</div></div>";
   const notes = '<p class="lab">Notes</p><textarea class="raw" data-act="raw" aria-label="Notes" maxlength="60000" placeholder="Type as the meeting runs. Saved when you leave the box.">' + esc(n.raw) + "</textarea>";
   const refine = '<button class="btn gold" type="button" data-act="refine">' + (empty ? "Refine into minutes" : "Refine again") + "</button>";
   const sendWord = "Send to " + plural(withMail, "attendee", "attendees") + (n.sends ? " again" : "");

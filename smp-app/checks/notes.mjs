@@ -31,7 +31,10 @@
      SMP_BREAK=rewrite-on-refine  node checks/notes.mjs   # must go red
      SMP_BREAK=casual-to-register node checks/notes.mjs   # must go red
      SMP_BREAK=snapshot-moves     node checks/notes.mjs   # must go red
-     SMP_BREAK=no-copy-to-sender  node checks/notes.mjs   # must go red      */
+     SMP_BREAK=no-copy-to-sender  node checks/notes.mjs   # must go red
+     SMP_BREAK=close-on-tick      node checks/notes.mjs   # must go red
+     SMP_BREAK=title-as-heading   node checks/notes.mjs   # must go red
+     SMP_BREAK=date-two-presses   node checks/notes.mjs   # must go red      */
 import pg from "pg";
 import { createServer } from "node:http";
 
@@ -518,20 +521,54 @@ try {
     await pgp.locator("[data-act=title]").click(); await settle();
     check("...and so are the notes", (await asTenant(A, (c) => N.oneNote(c, nid2))).raw.startsWith("ramy: figures"));
     check("...and the page says so", /Saved just now/.test(await pgp.locator("[data-saved]").innerText()));
-    /* THE DATE IS A WORD UNTIL IT IS PRESSED (§53.5, the tracker's control):
-       a raw date box prints whatever the browser's locale chooses, which is a
-       spelling the platform uses nowhere — so the word is asserted, and then
-       the box it becomes. */
+    /* THE DATE IS A WORD, AND THE PRESS DOES NOT TAKE THE WORD AWAY (§357.4).
+       A raw date box prints whatever spelling the browser's locale chose,
+       which the platform uses nowhere — so what is asserted is that the word
+       is still the word AFTER the press, which is the whole of what changed.
+       The calendar cannot be seen from here (headless draws no native
+       picker), so what is measured is that it was ASKED FOR: showPicker is
+       recorded on the prototype, which also makes the run deterministic. A
+       picker's only observable effect is the value it sets and the change it
+       fires, so that is what stands in for a person choosing a day. */
+    const dayWord = async () => (await pgp.locator("button[data-act=date]").innerText()).trim();
     check("the date reads in the platform's own words, not the browser's locale",
-      /^\w{3} \d{1,2} \w{3} \d{4}$/.test((await pgp.locator("button[data-act=date]").innerText()).trim()),
-      (await pgp.locator("button[data-act=date]").innerText()).trim());
+      /^\w{3} \d{1,2} \w{3} \d{4}$/.test(await dayWord()), await dayWord());
+    check("...and the mark beside it is DRAWN, never a character a font may fail to draw (§52)",
+      await pgp.locator("button[data-act=date] svg[stroke]").count() === 1);
+    /* Hidden IN PLACE, never display:none: a box that is not rendered cannot
+       be asked to open its calendar (§45.5's idiom, and its constraint). */
+    const box = pgp.locator("input[data-native-date]");
+    check("...and the native box is beside it, holding the same day and still rendered",
+      await box.count() === 1 && (await box.getAttribute("value")) === (await asTenant(A, (c) => N.oneNote(c, nid2))).metOn &&
+      (await box.evaluate((el) => getComputedStyle(el).display)) !== "none",
+      await box.evaluate((el) => getComputedStyle(el).display));
+    await pgp.evaluate(() => { window.__pick = 0; HTMLInputElement.prototype.showPicker = function () { window.__pick++; }; });
+    const wordWas = await dayWord();
     await pgp.locator("button[data-act=date]").click(); await pgp.waitForTimeout(120);
-    check("...pressing it opens a date box in place", await pgp.locator("input[data-act=date], input.date").first().isVisible());
-    await pgp.locator("input.date").first().fill("2026-09-02"); await settle();
-    check("...and a date picked there is written, with no reload",
+    check("ONE PRESS OPENS THE CALENDAR", await pgp.evaluate(() => window.__pick) === 1);
+    check("...and the word is still the word — the day does not reformat under the hand that pressed it",
+      await pgp.locator("button[data-act=date]").isVisible() && (await dayWord()) === wordWas &&
+      await pgp.locator("input.date").count() === 0, await dayWord());
+    await box.evaluate((el) => { el.value = "2026-09-02"; el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await settle();
+    check("...and the day chosen there is written, with no reload",
       (await asTenant(A, (c) => N.oneNote(c, nid2))).metOn === "2026-09-02" && await stayed());
-    check("...and the word comes back, saying the new day", /2 Sep 2026/.test((await pgp.locator("button[data-act=date]").innerText()).trim()),
-      (await pgp.locator("button[data-act=date]").innerText()).trim());
+    check("...and the word says the new day", /2 Sep 2026/.test(await dayWord()), await dayWord());
+    /* AND WHERE THE CALENDAR CANNOT BE OPENED FOR THEM — an older Safari or
+       Firefox — the press still does something (§61): the box is shown in
+       place of the word. It is NOT thrown away on blur, which is the fault
+       this same control was measured making one module over (§356.14): the
+       calendar takes the focus, so a box dismissed on blur dies the moment it
+       is used. */
+    await pgp.evaluate(() => { delete HTMLInputElement.prototype.showPicker; });
+    await pgp.locator("button[data-act=date]").click(); await pgp.waitForTimeout(120);
+    check("with no calendar to open, the press shows the box in place rather than doing nothing",
+      await pgp.locator("input[data-native-date]").isVisible() && !(await pgp.locator("button[data-act=date]").isVisible()));
+    await pgp.evaluate(() => document.querySelector("input[data-native-date]").blur());
+    await pgp.waitForTimeout(250);
+    check("...and a blur does not throw it away", await pgp.locator("input[data-native-date]").isVisible());
+    await pgp.locator("[data-act=title]").click(); await pgp.waitForTimeout(120);
+    check("...and a press elsewhere puts the word back", await pgp.locator("button[data-act=date]").isVisible());
     /* THE TITLE READS AS SOMETHING YOU TYPE IN (Islam, of the built page: "I
        need to set the title manually"). It always was a box — borderless,
        transparent and 21px bold, so it drew as a heading the platform had

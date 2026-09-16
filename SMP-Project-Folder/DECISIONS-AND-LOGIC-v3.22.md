@@ -48543,7 +48543,9 @@ before that is the fixture's precondition, said in its own words);
 pre-existing PrismaClient error (recorded 2026-09-13), which is also the one
 thing `next build` stops on. **The frozen product is untouched**: no source in
 `SMP-Project-Folder/src/` moved, nothing rebuilt, so `sw.js` is not bumped.
-**On the branch, not merged** — `main` is Islam's word.
+**Merged to `main` 2026-09-16** (this line read *"on the branch, not
+merged"* until §357.4 corrected it — §356.17's own finding, on the two blocks
+that section missed).
 
 ### §356.10 — RECORDED, NOT DONE
 
@@ -49254,12 +49256,133 @@ COULD NOT BE RUN AND IT IS SAID RATHER THAN LEFT AS AN ABSENCE** (§54.5): this
 container has no python playwright, so `qa-run.py` cannot launch; nothing in
 `src/` changed but the inlined mail builder, whose own check is green.
 
-**Built and screenshotted beside the mockup, frame for frame. On the branch,
-NOT merged.** **RECORDED, NOT DONE**: the actions in the minutes do not reach
+**Built and screenshotted beside the mockup, frame for frame. Merged to `main`
+2026-09-16** (this line read *"on the branch, NOT merged"* until §357.4
+corrected it).** **RECORDED, NOT DONE**: the actions in the minutes do not reach
 the tracker and are not meant to (spec 054 decision 3); a note cannot be
 started from a calendar; the switcher lists the module for a client's own
 person until spec 046 §4.4's access tab exists; and nothing says which office
 person is looking at a note while somebody else edits it.
+
+### §357.1 — THE TITLE WAS ALWAYS A BOX AND DID NOT READ AS ONE
+
+Islam, of the built page: *"I need to set the title manually"* — and he always
+could. The title and the attendees box were borderless, transparent and set in
+heading-sized bold, so they drew as something the platform had written rather
+than as something to type in. **Nothing new was invented to answer it**: every
+other field on that page already carries a small uppercase key and a border, so
+both take the page's own `.lab` and the same border (§53.5). The two were the
+only things on the page without one, which is why they read as prose.
+
+### §357.2 — THE LIST STAYS OPEN WHILE YOU TICK
+
+*"don't close the drop down with each add … let me make the checks for all the
+attendees."* **EVERY PRESS HERE IS ANSWERED BY THE PAGE BEING DRAWN AGAIN**
+(§356.12's shape), so a tick rebuilt the list from nothing and it vanished,
+taking whatever had been typed into its search with it. What is CARRIED across
+that redraw is how far it was scrolled, which of its boxes held the cursor, and
+which row was ticked — **by KEY and never by position** (§48), because a tick
+redraws the list and the person ticked may sort elsewhere in it.
+
+**THERE IS NOTHING TO CONFIRM, which is the answer to the question he asked
+beside it**: a tick is in the database before its chip finishes drawing, and
+nothing in this product has a Save button. So what was missing was not a
+confirmation but a deliberate way to FINISH, since Escape was the only one and
+a tablet has no Escape key.
+
+**AND THE GUARD FOR "A PRESS ELSEWHERE" TESTED THE ACT'S SPELLING**
+(`indexOf("att")`), so `add-casual` — an attendee act that happens not to
+contain those three letters — shut the list every time somebody off the
+register was added. It asks WHERE the press landed now, which is the question
+it was always meant to be.
+
+### §357.3 — AND THE CHECK HELD THE OLD BEHAVIOUR
+
+It re-opened the list after a tick, which now TOGGLES it shut, so a file
+written against the old world goes red on a correct build (§214.3) —
+**REWRITTEN, never loosened** (§218) to assert the new property, with the
+second person ticked AND unticked so the fixture every assertion downstream
+measures is left exactly as it was found (§94.2). **Two of its own first
+failures were the CHECK**: it asked whether the first ROW was visible, which
+with a search term carried across is legitimately hidden, so it reported a
+working build broken; and the new break's death took nine assertions with it,
+so the pass recovers (§215, §280). **And a backtick in a comment ended the
+stylesheet's template literal** — §272.8, walked into while the neighbouring
+file warns about it by name in its own header.
+
+### §357.4 — THE DATE IS ONE PRESS, AND THE WORD STAYS THE WORD (2026-09-16)
+
+The last thing §357 left drawn and not built, and the fork inside it was
+Islam's: whether the day itself stays something you press. Two readings were
+drawn in the platform's own pixels (`design-mockups/meeting-notes/
+2026-09-16_date-calendar-icon.html`, rule 1c) — **A**, the same pill with the
+calendar mark in it, one press anywhere on it; and **B**, the day as plain text
+with the mark as a separate control beside it. **A shipped**: it is the control
+that already exists, it keeps the whole pill as the target rather than a 27px
+icon, and it takes away no press that works today.
+
+**THE MECHANISM IS THE PLATFORM'S OWN AND IT IS WHAT MAKES BOTH HALVES FALL
+OUT** (§45.5, the searchable select): the native date box sits beside the word,
+**hidden in place and DRIVEN**, rather than being swapped in for it. Two things
+then come free rather than being arranged for.
+
+- **The day never reformats under the hand that pressed it.** Swapping a box in
+  printed whatever spelling the browser's locale chose — `09/16/2026` here —
+  over the word the page had just said, which is a spelling this platform uses
+  nowhere (§357's own reason for making the word a button in the first place).
+- **The tracker's stated reason for NOT opening the calendar does not arise.**
+  That control's own comment says *a popup opened by script takes the next
+  Escape for itself, so the box would need two to close* — true of a box
+  underneath a picker, and there is no box underneath this one. Escape closes
+  the picker and the word was never away. *An objection can be right about the
+  shape it was written for and say nothing about a different shape.*
+
+**HIDDEN IN PLACE MEANS CLIPPED, NEVER `display:none`**: a box that is not
+rendered cannot be asked to open its calendar, so it takes the clipped-1px
+treatment `searchsel` already uses, and the check asserts the computed
+`display` rather than the class (§94.8).
+
+**NEVER ON BLUR** (§356.14, this same control one module over, where it was
+measured): the calendar itself takes the focus, so a box dismissed on blur is
+thrown away the moment it is used. The notes module had copied the control
+BEFORE that fix and never inherited it — §53.5's drift, one module wide — and
+with the box no longer swapped in, the primary path has no blur rule to get
+wrong at all. The one path that still shows a box is the fallback, and it
+closes on a change, on Escape, or on a press elsewhere.
+
+**AND THE PRESS STILL DOES SOMETHING WHERE THE CALENDAR CANNOT BE OPENED FOR
+THEM** (§61) — an older Safari or Firefox, which is a real device class here
+(§280 exists because he presents from a tablet): the box is shown in place of
+the word rather than the press doing nothing.
+
+**WHAT THE CHECK CAN AND CANNOT SEE, SAID RATHER THAN GLOSSED** (§124):
+headless draws no native picker, so what is measured is that the calendar was
+**ASKED FOR** — `showPicker` recorded on the prototype, which also makes the
+run deterministic — and that the word is still the word AFTER the press, which
+is the whole of what changed. A picker's only observable effect is the value it
+sets and the change it fires, so that is what stands in for a person choosing a
+day. The mark is asserted **DRAWN** and never a character a font may map and
+fail to draw (§52, §120.2). `checks/notes.mjs` **170/0**, red under all EIGHT
+breaks, the new one (`date-two-presses`) putting the reported state back and
+reddening **exactly its own two assertions and nothing else**.
+
+**The mark's colour was measured rather than assumed** (§38.5): `--gold` on
+`--surface` is **5.27:1** light and **8.15:1** dark, against a 3:1 bar for a
+graphic — and the day beside it carries the meaning either way, so the mark is
+`aria-hidden`.
+
+**Screen only**: `smp-app/modules/notes/` and its check, read off the diff.
+Nothing stored moves, nothing is migrated, no rule about who may save what
+changes, and **the frozen product is untouched** — `build.py` byte-identical
+and `built-in-step.py` all good — so `sw.js` is NOT bumped (§91's trigger is
+the built file's bytes changing, and they did not).
+
+**AND THE LOG OWED MORE THAN THIS ROUND**: §357.1–§357.3 were never written
+into this file at all, and two blocks still read *"on the branch, not merged"*
+over work `main` demonstrably holds. Both corrected above and NAMED rather than
+quietly realigned (§356.17's own rule, whose finding this is for the second
+time). *A merge can drop a whole block of the record with nothing able to go
+red — there is no `generated-in-step` for prose.*
 
 ---
 

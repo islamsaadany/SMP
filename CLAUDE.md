@@ -9775,9 +9775,57 @@ new break's death took nine assertions with it, so the pass recovers
 (&sect;215, &sect;280). 164/0, proved able to fail SEVEN ways. **And a backtick
 in a comment ended the stylesheet's template literal** &mdash; &sect;272.8,
 walked into while the neighbouring file warns about it by name in its own
-header. **The date is drawn and NOT built**: keeping the day where it is and
-opening the calendar on the first press rather than the second, awaiting
-Islam's word on one fork inside it.*
+header.
+**&sect;357.4 &mdash; THE DATE IS ONE PRESS, AND THE WORD STAYS THE WORD**: the
+last thing &sect;357 left drawn and not built, with the fork inside it Islam's
+&mdash; whether the day itself stays something you press. Drawn both ways in
+the platform's own pixels (rule 1c) and **A shipped**, the recommendation: the
+same pill with the calendar mark in it, one press anywhere on it, keeping the
+whole pill as the target rather than a 27px icon and taking away no press that
+works today. **THE MECHANISM IS THE PLATFORM'S OWN AND IT IS WHAT MAKES BOTH
+HALVES FALL OUT** (&sect;45.5, the searchable select): the native box sits
+beside the word, **hidden in place and DRIVEN**, never swapped in for it
+&mdash; so the day never reformats under the hand that pressed it (a swapped
+box printed whatever spelling the browser's locale chose, which is the fault
+&sect;357 made the word a button to remove), and the tracker's stated reason
+for NOT opening the calendar &mdash; *a popup opened by script takes the next
+Escape for itself, so the box would need two to close* &mdash; **does not
+arise, because there is no box underneath it**: Escape closes the picker and
+the word was never away. *An objection can be right about the shape it was
+written for and say nothing about a different shape.* **CLIPPED, NEVER
+`display:none`**: a box that is not rendered cannot be asked to open its
+calendar, so the check asserts the computed `display` rather than the class
+(&sect;94.8). **NEVER ON BLUR** (&sect;356.14, this same control one module
+over, where it was measured): the calendar takes the focus, so a box dismissed
+on blur dies the moment it is used &mdash; the notes module had copied the
+control BEFORE that fix and never inherited it (&sect;53.5's drift, one module
+wide), and with nothing swapped in the primary path has no blur rule to get
+wrong at all. **AND THE PRESS STILL DOES SOMETHING WHERE THE CALENDAR CANNOT BE
+OPENED FOR THEM** (&sect;61) &mdash; an older Safari or Firefox, a real device
+class here (&sect;280) &mdash; the box being shown in place of the word.
+**WHAT THE CHECK CANNOT SEE IS SAID** (&sect;124): headless draws no native
+picker, so what is measured is that the calendar was ASKED FOR (`showPicker`
+recorded on the prototype, which also makes the run deterministic) and that the
+word is still the word AFTER the press, which is the whole of what changed; a
+picker's only observable effect is the value it sets and the change it fires,
+so that stands in for a person choosing a day. The mark is asserted **DRAWN**,
+never a character a font may map and fail to draw (&sect;52, &sect;120.2), and
+its colour measured rather than assumed &mdash; `--gold` on `--surface`
+**5.27:1** light, **8.15:1** dark, against a 3:1 bar. **170/0, red under all
+EIGHT breaks**, the new one putting the reported state back and reddening
+**exactly its own two assertions and nothing else**. **Screen only**, read off
+the diff: nothing stored moves, nothing is migrated, no rule about who may save
+what changes, and the frozen product is untouched (`built-in-step.py` all
+good), so `sw.js` is NOT bumped. **AND THE LOG OWED MORE THAN THIS ROUND**:
+&sect;357.1&ndash;&sect;357.3 were never written into the decisions document at
+all, and two blocks there still read *"on the branch, not merged"* over work
+`main` demonstrably holds &mdash; both corrected and NAMED rather than quietly
+realigned, which is &sect;356.17's own finding for the second time. *A merge can
+drop a whole block of the record with nothing able to go red; there is no
+`generated-in-step` for prose.*
+**RECORDED, NOT DONE**: the tracker's own date control is untouched &mdash; it
+is the same control and could take this, and it is a module this round was not
+asked about (rule 1b), so it is flagged rather than swept.*
 *Earlier the same day: **&sect;356.15: the note is asked for, and
 the week is in words (spec 054).** Islam, of the built tracker: *"1. a note
 should be an option not a common thing in the actions tell me my options to add

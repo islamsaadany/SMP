@@ -1,11 +1,8 @@
 import { doorPool } from "../../../../lib/auth.ts";
 import { resolveTenant } from "../../../../lib/door.ts";
 import { requestUser, SLUG } from "../../../../lib/session.ts";
-import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
-import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
-import { trialDocument } from "../../../../lib/trial.ts";
-import { insightsDocument } from "../../../../lib/insights.ts";
-import { libraryFile } from "../../../../lib/library-file.ts";
+import { whereOf, clientHref, modulesFor, DEFAULT_MODULE } from "../../../../lib/modules.ts";
+import { serverFor } from "../../../../modules/registry.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -48,32 +45,32 @@ export async function GET(req: Request, { params }: P) {
   const have = modulesFor(ans.tenant.modules);
   const w = whereOf(rest || [], have);
   if (w.legacy) return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
-  /* A MODULE SERVES ITSELF. Strategy is the frozen shell; the trial module is
-     its own small document (lib/trial.ts). This branch is the whole of what
-     "a module has a landing" costs today (spec 046 §4.2) — and it is a
-     branch rather than a table because there are two of them: a third makes
-     the table worth having, a table for two is a place to look things up
-     that says less than the two lines it replaces (§2b). */
-  if (w.module === "trial" && !w.rest.length)
-    return new Response(await trialDocument(slug, ans.tenant.id, ans.tenant.name, have), { status: 200, headers: shellHeaders() });
-  if (w.module === "trial")
-    return Response.redirect(new URL(clientHref(slug, "trial", ""), req.url), 302);
-  /* ── INSIGHTS (spec 053) ──────────────────────────────────────────
-     Two addresses and no more: the library, and one report's file. THE
-     FILE IS A ROUTE RATHER THAN A LINK TO THE STORE, because the store's
-     address has to be minted, short-lived and asked for by somebody this
-     client would answer — a bare blob URL would be a permanent way past
-     every rule above (§261.10). */
-  if (w.module === "insights") {
-    const q = new URL(req.url).searchParams;
-    if (!w.rest.length)
-      return new Response(
-        await insightsDocument(slug, ans.tenant.id, ans.tenant.name, have,
-          { q: q.get("q") || "", category: q.get("category") || "" }),
-        { status: 200, headers: shellHeaders() });
-    if (w.rest.length === 2 && w.rest[1] === "file")
-      return libraryFile(ans.tenant.id, "insights", w.rest[0]!, req.url);
-    return Response.redirect(new URL(clientHref(slug, "insights", ""), req.url), 302);
-  }
-  return new Response(shellDocument(ans.tenant.name, w.module || DEFAULT_MODULE, moduleMenu(have)), { status: 200, headers: shellHeaders() });
+  /* A MODULE SERVES ITSELF, AND WHICH ONE DRAWS WHAT IS A TABLE (§354,
+     modules/registry.ts). This was a chain of ifs under a comment saying it
+     would become a table at the third module; Insights was the third, and
+     grew an eighth line under that sentence instead. What the route keeps is
+     the part that is the route's: the door, the client, and which module the
+     address names. What it stops holding is any knowledge of what a module
+     draws — so a fourth module is a folder and an entry, and this file is not
+     edited at all.
+
+     A SPINE SEGMENT IS SERVED BY THE DEFAULT MODULE (`setup`, `tour`), which
+     is where Setup is drawn today and is stated rather than implied
+     (modules/strategy/index.ts says why). */
+  const key = w.module || DEFAULT_MODULE;
+  const serve = serverFor(key);
+  if (!serve) return new Response("Not found", { status: 404 });
+  /* WHO IS LOOKING travels with the address (spec 046 §4.10). The door has
+     already resolved both — a module asking for them again would be a second
+     answer to a question `resolveTenant` exists to settle (§53.5). */
+  return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
+    have, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
 }
+
+/* A MODULE MAY BE WRITTEN TO (spec 054): the Internal Tracker's rows are
+   changed on the row, so its server takes a POST at an address inside the
+   module. The door, the client and the module are resolved exactly as for a
+   GET — the same function, so a write cannot reach a module a GET would not
+   — and what to do with the body is the module's own. The frozen shell's
+   writes still go to /api/*; this is only for a module that serves itself. */
+export const POST = GET;

@@ -16,6 +16,7 @@
    body over about 4.5MB and a 20MB report cannot arrive in one piece. This
    module holds where it is and never what it says. */
 import type { Pool, PoolClient } from "pg";
+import type { Place } from "./place.ts";
 
 type Q = Pool | PoolClient;
 
@@ -43,6 +44,65 @@ export const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
 export const CATEGORIES = ["Analysis", "Macro", "Market", "Sector", "Governance"] as const;
 export type Category = (typeof CATEGORIES)[number];
+
+/* ── WHO MAY SEE ONE REPORT (spec 046 §4.10, reversing decision 15) ──────
+   Decision 15 settled that visibility inside a library is WHOLE MODULE for
+   now, and the mockup signed off on 13 September carries that ruling in its
+   own notes. Islam, 2026-09-15: *"for some certain reports it might need to
+   belong to a function or more not the whole company … the default is all can
+   see and the smo can make the exceptions."* Recorded as a reversal rather
+   than overwritten (Principle II): whole-module was right for a library with
+   one shelf and stopped being right at three sensitive reports in forty.
+
+   ABSENCE IS EVERYONE, AND THAT IS THE WHOLE MODEL (§50.6). A report with no
+   list is readable by everybody in the client — including a business unit
+   created next month, which is precisely what a list of today's eighteen
+   departments with all of them ticked would NOT do. So *All* DELETES the key
+   rather than writing every place into it: ticking everything today and
+   meaning everyone-for-ever are two different facts, they differ only in the
+   future, and nobody would ever connect the missing unit to the tick list
+   somebody filled in a year earlier.
+
+   AN EMPTY LIST IS NOBODY, AND IT IS A REAL STATE. `[]` is not the same as
+   absent: it is a published report in nobody's library, which is a thing to
+   want for an hour while something is staged. Allowed, and MARKED — refusing
+   it would be the platform deciding somebody's staging for them, and drawing
+   it like any other report would be worse (the console says so on the row and
+   on the card).
+
+   IT RIDES `extra`, SO THERE IS NO MIGRATION, and that is claimed nowhere —
+   checks/insights.mjs writes one, reads it back, and asserts the table gained
+   no column (§172's lesson: four layers once agreed about a value the database
+   had never been offered). What it costs is that the filter below is a jsonb
+   test rather than an indexed one; at a client's library — tens of reports,
+   low hundreds — that is nothing, and the number to revisit it at is written
+   beside the query rather than left to be discovered. */
+export const SEEN_KEY = "seen";
+
+/* THE STORED LIST IS VALIDATED, DE-DUPLICATED AND SORTED, for `categories`'
+   own reasons one field over: the order somebody ticked in must not change
+   what is stored, and two reports narrowed to the same three places must be
+   byte-identical. `known` is the client's own places (lib/place.ts) — a word
+   outside it is DROPPED rather than refused, because a unit retired later
+   must not make a report unreadable or a stored row unsaveable, and there is
+   no way to type one in by hand.
+
+   NULL OUT MEANS EVERYONE. Undefined in, null in, or a non-array all answer
+   null; an array answers an array, empty included. */
+export function normalizeSeen(v: unknown, known: readonly string[]): string[] | null {
+  if (!Array.isArray(v)) return null;
+  const want = new Set(v.filter((x) => typeof x === "string") as string[]);
+  return known.filter((k) => want.has(k));
+}
+
+/* WHAT THE STORED ROW SAYS, read back. Absent, null, or anything that is not
+   an array is everyone — a row hand-edited into a shape nothing writes must
+   read as the DEFAULT rather than as nobody (§42 fails closed, and closed
+   here is the state that loses nothing). */
+export function seenOf(extra: unknown): string[] | null {
+  const v = extra && typeof extra === "object" ? (extra as any)[SEEN_KEY] : null;
+  return Array.isArray(v) ? v.filter((x) => typeof x === "string") as string[] : null;
+}
 
 export const KINDS = ["insights", "processes"] as const;
 export type Kind = (typeof KINDS)[number];
@@ -155,11 +215,71 @@ export function shelfWhere(forClient: boolean): string {
   if (brk() === "client-sees-drafts") return "";
   return forClient ? " AND state = 'published'" : "";
 }
+
+/* WHO IS READING, AND IT GOES IN THE **WHERE** FOR `shelfWhere`'s OWN REASON
+   (spec 046 §4.10): a narrowed report's id must answer *not found* rather than
+   *not allowed*, so a reader is never told a record exists that they may not
+   open. Filtering afterwards, or on the screen, would give the two states two
+   different answers and one of them would be a disclosure.
+
+   THE OFFICE READS EVERYTHING. Whoever holds this client's **Super user** or
+   **SMO team** seat sees every report whatever its list says — written against
+   the SEAT, because the seat is what the platform holds and who employs
+   somebody is not a thing it knows (`tenant_users.seat`; schema.sql's own
+   note: a consultant on three clients and a client user on one are the same
+   shape). Islam, 2026-09-15: *"there is no client smo for the client it's
+   always the smo which is us"* — so the office reading everything is us
+   reading what we published.
+
+   SOMEBODY WITH NO PLACE SEES THE EVERYONE REPORTS AND NO NARROWED ONE, and
+   that is the honest answer rather than a generous one: the register has not
+   said where they work, so there is nothing to match, and a null that matched
+   everything would make an unplaced row the widest grant in the product.
+
+   THE PARAMETER IS THE VIEWER'S ONE PLACE (lib/place.ts — a person sits in
+   exactly one, §130.6), so this takes one value and never a list.
+
+   THE CLAUSE AND ITS ARGUMENT ARE ONE ANSWER, and that is not tidiness. The
+   first build had the caller push the value and this decide the clause, with
+   a comment telling the next person to keep the placeholder number in step —
+   and the `everyone-sees-everything` break promptly desynchronised them, so
+   the falsification came back **0 red** with a parameter-count error swallowed
+   by the run's own catch (§54.5: a green falsification is indistinguishable
+   from a working guard, and §215: it died rather than reporting). Two things
+   that must agree, returned together, cannot.
+
+   SCALE, SAID RATHER THAN DISCOVERED: `extra` is jsonb and this test is not
+   covered by `library_items_shelf`, so it is a filter over the rows the index
+   already narrowed to one kind and one state. At a client's library that is
+   tens of rows. The number to revisit it at is a client whose shelf passes a
+   few thousand reports, and the answer then is a column and an index, which
+   `normalizeSeen`'s canonical shape is what makes cheap. */
+export function seenSql(forClient: boolean, viewer: Viewer | undefined, nextArg: number): { clause: string; args: unknown[] } {
+  const none = { clause: "", args: [] as unknown[] };
+  const v = viewer || NOBODY_SEES_ALL;
+  if (!forClient || v.seesAll) return none;
+  /* The break for this half: a build that stopped narrowing at all. It renders
+     perfectly and every other assertion about the library passes with it
+     (§96), which is why the check DRIVES two viewers rather than reading one. */
+  if (brk() === "everyone-sees-everything") return none;
+  if (!v.place) return { clause: " AND NOT (extra ? '" + SEEN_KEY + "')", args: [] };
+  return {
+    clause: " AND (NOT (extra ? '" + SEEN_KEY + "') OR extra->'" + SEEN_KEY + "' @> $" + nextArg + "::jsonb)",
+    args: [JSON.stringify([v.place])],
+  };
+}
+
+/* WHO IS ASKING, AS ONE VALUE, so the three read paths cannot be handed
+   different halves of it (§53.5). `seesAll` is the seat and is decided by the
+   caller, never here — this module knows about a library and nothing about
+   doors. */
+export type Viewer = { place: Place | null; seesAll: boolean };
+export const NOBODY_SEES_ALL: Viewer = { place: null, seesAll: false };
 const brk = (): string => (typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "");
 
 const COLS =
   "id, kind, title, summary, categories, report_date, state, version, " +
-  "file_path, file_name, file_size, downloads, published_at, published_by, created_at, updated_at";
+  "file_path, file_name, file_size, downloads, published_at, published_by, created_at, updated_at, extra";
 
 export type Item = {
   id: string; kind: Kind; title: string; summary: string; categories: Category[];
@@ -168,6 +288,13 @@ export type Item = {
 };
 export type OfficeItem = Item & {
   state: string; downloads: number; publishedAt: string; publishedBy: string; filePath: string;
+  /* null is everyone; an array is exactly those places; [] is nobody. */
+  seen: string[] | null;
+  /* The WORDS for that list, built here so the console's list and its card
+     cannot describe one report's reach two ways (§53.5) and the browser has
+     no second spelling of "3 departments" to keep in step. Empty string is
+     everyone, which is what draws no mark at all. */
+  seenLabel: string;
 };
 
 /* WHAT A CLIENT RECEIVES AND WHAT THE CONSOLE RECEIVES DIFFER BY WHOLE KEYS,
@@ -200,10 +327,22 @@ export function shape(r: Record<string, any>, forClient: boolean): Item | Office
     publishedAt: r.published_at ? new Date(r.published_at).toISOString() : "",
     publishedBy: str(r.published_by),
     filePath: str(r.file_path),
+    /* WHO MAY SEE IT IS THE CONSOLE'S TOO, for the same reason the file's path
+       is: a client has already been filtered by it (seenWhere), so handing
+       them the list would say which OTHER departments exist on a report they
+       can read, and nobody there can act on it. */
+    seen: seenOf(r.extra),
+    seenLabel: seenLabel(seenOf(r.extra)),
   };
 }
 
-export type ListQuery = { kind: Kind; forClient: boolean; q?: string; category?: string; state?: string };
+export type ListQuery = {
+  kind: Kind; forClient: boolean; q?: string; category?: string; state?: string;
+  /* Omitted on the console's read, where `forClient` is false and seenWhere
+     answers nothing. A client's read that forgot it would be the whole shelf,
+     so the three call sites are asserted rather than trusted. */
+  viewer?: Viewer;
+};
 
 /* ONE ORDER AND NO SORT CONTROL (spec 053): newest report first by the
    report's OWN date, with undated items last rather than leading the shelf,
@@ -214,6 +353,10 @@ const ORDER = " ORDER BY report_date DESC NULLS LAST, created_at DESC, id DESC";
 export async function listItems(c: Q, qy: ListQuery): Promise<any[]> {
   const args: unknown[] = [qy.kind];
   let sql = "SELECT " + COLS + " FROM library_items WHERE kind = $1" + shelfWhere(qy.forClient);
+  /* BEFORE THE SEARCH AND THE CATEGORY, which append their own after it. */
+  const seen = seenSql(qy.forClient, qy.viewer, args.length + 1);
+  args.push(...seen.args);
+  sql += seen.clause;
   const cat = normalizeCategories(qy.category)[0];
   if (cat) { args.push(JSON.stringify([cat])); sql += " AND categories @> $" + args.length + "::jsonb"; }
   const q = oneLine(qy.q);
@@ -230,9 +373,13 @@ export async function listItems(c: Q, qy: ListQuery): Promise<any[]> {
   return (await c.query(sql + ORDER, args)).rows;
 }
 
-export async function oneItem(c: Q, kind: Kind, id: string, forClient: boolean): Promise<any | null> {
+export async function oneItem(c: Q, kind: Kind, id: string, forClient: boolean, viewer?: Viewer): Promise<any | null> {
+  const args: unknown[] = [kind, id];
+  const seen = seenSql(forClient, viewer, args.length + 1);
+  args.push(...seen.args);
   const r = await c.query(
-    "SELECT " + COLS + " FROM library_items WHERE kind = $1 AND id = $2" + shelfWhere(forClient), [kind, id]);
+    "SELECT " + COLS + " FROM library_items WHERE kind = $1 AND id = $2" +
+    shelfWhere(forClient) + seen.clause, args);
   return r.rows[0] || null;
 }
 
@@ -283,6 +430,29 @@ export async function setFile(c: Q, id: string, path: string, name: string, size
   return r.rows[0] || null;
 }
 
+/* WHO MAY SEE IT, WRITTEN. `null` DELETES the key rather than storing it, so
+   everyone-for-ever and a list of today's places are two different rows and
+   not one row spelt two ways (§50.6) — which is also what makes *All* honest:
+   pressing it hands the report back to a department created next month.
+
+   AN EMPTY ARRAY IS STORED. `[]` is nobody, deliberately, and is the one case
+   where absent and empty must not collapse.
+
+   IT IS ITS OWN STATEMENT AND NOT PART OF `updateItem`, because narrowing a
+   report is not editing its words: the console sends it on its own, the
+   authoriser can name it on its own, and a card that saved the title and the
+   visibility together would make correcting a typo re-assert who may read it. */
+export async function setSeen(c: Q, id: string, seen: string[] | null): Promise<any | null> {
+  const r = await c.query(
+    seen === null
+      ? "UPDATE library_items SET extra = COALESCE(extra,'{}'::jsonb) - '" + SEEN_KEY + "', " +
+        "updated_at = now() WHERE id = $1 RETURNING " + COLS
+      : "UPDATE library_items SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{" + SEEN_KEY + "}', $2::jsonb), " +
+        "updated_at = now() WHERE id = $1 RETURNING " + COLS,
+    seen === null ? [id] : [id, JSON.stringify(seen)]);
+  return r.rows[0] || null;
+}
+
 /* `published_at` IS STAMPED ONCE AND NEVER REWRITTEN, so withdrawing and
    republishing does not move a report's place in history — COALESCE in the
    statement rather than a read-then-write two presses could race. */
@@ -311,4 +481,15 @@ export async function deleteItem(c: Q, id: string): Promise<string> {
    withdrawn report cannot be counted even if something above reached it. */
 export async function countDownload(c: Q, id: string): Promise<void> {
   await c.query("UPDATE library_items SET downloads = downloads + 1 WHERE id = $1 AND state = 'published'", [id]);
+}
+
+/* WHAT THE CONSOLE PRINTS ON A ROW, in one place, so the list and the card
+   cannot describe one report's reach two ways (§53.5). Never the names —
+   the row has no width for three of them without wrapping onto a second line,
+   which is the one thing a list like this may not do (§88) — so it says how
+   many and the card says which. */
+export function seenLabel(seen: string[] | null): string {
+  if (seen === null) return "";
+  if (!seen.length) return "Nobody";
+  return seen.length + (seen.length === 1 ? " department" : " departments");
 }

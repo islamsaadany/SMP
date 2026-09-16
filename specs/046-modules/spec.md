@@ -65,7 +65,7 @@ the words decide something.
 | 12 | Rhythm | **Per module.** *"they don't have the same cycle the reporting as an example it's happens in the any time the process is a continuous work and the project management is maybe a weekly or a monthly checkpoints."* |
 | 13 | Two modules at once | **Never on screen together.** *"it's good to be able to navigate between the modules, but no, I don't think they need to screen at the same time."* |
 | 14 | The administrator | **Client-wide Super user, plus a per-module admin.** Lets a module be handed to its own owner without handing over the client. |
-| 15 | Visibility inside a library | **Whole module, for now.** If you can open Insights you can see everything in it; who may open it is the role. |
+| 15 | Visibility inside a library | **Whole module, for now.** If you can open Insights you can see everything in it; who may open it is the role. **REVERSED 2026-09-15 — see §4.10.** The reasoning stands (it answered *how much is worth building first*); what changed is that Islam named the case it does not cover — a report belonging to one function rather than to the company. |
 
 ### 2.1 The finding underneath the answers
 
@@ -286,6 +286,92 @@ libraries.
 
 **That is where the real build for these two modules is.** The client side is
 thin by design.
+
+### 4.10 Who can see one report — REVERSING decision 15 (2026-09-15)
+
+Decision 15 above reads **whole module, for now**, and the publishing room's
+own mockup notes settled it in the same words: *"No per-item permissions… asked
+and answered whole module, for now."* That is reversed here rather than
+overwritten (Principle II), because the reasoning behind it was never wrong —
+it was an answer to *how much is worth building first*, and Islam has now said
+what the client actually needs:
+
+> *"normally every one in the company can see the reports and forefront can
+> publish but for some certain reports it might need to belong to a function or
+> more not the whole company so we can thing of a simple visibility per report
+> not an overall visiblity mattrix and the visibility is a serarchble tick based
+> with select all and select none options and the default is all can see and the
+> smo can make the exceptions."*
+
+**IT IS PER REPORT AND IT IS NOT A MATRIX, AND THAT IS THE DECISION RATHER THAN
+A SIMPLER VERSION OF ONE.** A visibility matrix answers *which roles may open
+this module* — a question the access tab would carry, on a tab the client's SMO
+would set. What is wanted is the opposite shape: the module is open to
+everybody, and a single report is occasionally narrowed. A matrix cannot say
+that, and a tab per module would be five screens of ticks answering a question
+nobody has.
+
+**THE DEFAULT IS AN ABSENCE, NEVER A FULL LIST (§50.6).** A report nobody has
+narrowed stores nothing at all. Ticking today's eighteen places and calling that
+*everyone* would silently EXCLUDE a unit created next month, and nobody would
+ever connect the missing unit to a tick list filled in a year earlier — so the
+panel's `All` **deletes the key** and its own foot says so out loud (§35, §124).
+
+**THREE STATES, AND THE MIDDLE ONE IS THE ONLY ONE THAT IS A LIST**: absent is
+everyone, a list is those places, and `[]` is nobody. The third is a real answer
+and is drawn as one — the alarm ink, in words — rather than reading as any other
+report on the list.
+
+**A PLACE IS THE PRODUCT'S OWN WORD FOR ONE (§54)**: a unit's key (`mobile`) or
+`fn:` and a supporting function's (`fn:finance`) — the same strings
+`roleWheres()` and every `r.at` have used since the BU list was built. Not a new
+vocabulary, so a list of places stored here reads the same as one stored
+anywhere else. **A company is not a place**: it is a GROUPING of units (§23), so
+ticking one would be a third thing to keep in step with the units under it.
+
+**WHERE A PERSON SITS IS THE SPINE'S TO ANSWER, NEVER A MODULE'S** (§4.1). The
+register, the org structure and the attachment are the client's; `lib/place.ts`
+is the one door onto them, and a module that grew its own copy would be two
+answers to *may they read this* (§53.5). A person sits in exactly ONE place by
+construction (§130.6), which is what stops that question having two answers at
+all. **Null is a real and common answer** — somebody at the group, somebody
+attached to a company, somebody the register has not placed — and for a narrowed
+report it means they see the everyone reports and no narrowed one.
+
+**THE OFFICE READS EVERYTHING, AND IT IS THE SEAT THAT SAYS SO.** Islam, the
+same day: *"there is not client smo for the client it's always the smo whihc is
+us."* So there is no client-side strategy office to give a control to, which
+settles two things at once — the narrowing lives in the publishing room in this
+console and needs no write surface in the client app at all, and the rule is
+written against this client's **seat** (`super` / `smoteam`) rather than against
+who employs somebody, since the seat is the only one of the two the platform
+holds (`schema.sql`: *a consultant on three clients and a client user on one are
+the same shape*).
+
+**THE NARROWING IS IN THE WHERE, NEVER APPLIED AFTERWARDS** — the argument
+`lib/library.ts` already makes for `state = 'published'`, one column along. A
+report kept out of somebody's list and still openable by its own address is no
+rule at all, so the library and the file are handed ONE resolved viewer rather
+than each working it out (§53.5, `modules/insights/index.ts`).
+
+**THE MODULE SEAM GREW BY EXACTLY TWO FACTS, ON PURPOSE** (§5's first open
+point): a module is now handed `personKey` and `seat` beside the client it is
+serving. It is still handed no pool, no session and no registry row — and a list
+that grows without anybody noticing has stopped being a boundary, so the growth
+is written down in `modules/registry.ts` rather than left to be discovered.
+
+**NO MIGRATION AND NO SCHEMA CHANGE, PROVED RATHER THAN CLAIMED (§172).**
+`library_items` is tenant-owned with RLS and carries an `extra jsonb` column, so
+the list rides `extra.seen` the way every other unrecognised key in this product
+travels — and the check asserts the table gained no column, because that claim
+has been made wrongly here before.
+
+**WHAT IS DELIBERATELY NOT BUILT, said rather than left as a gap**: a report
+cannot be narrowed to one PERSON (the register is where a person's place is
+decided, and a per-person list would be a second answer to it), and the client
+is shown nothing about a report they cannot see — a row saying *there is
+something here you may not open* is worse than the absence, and is the whole
+reason the filter is in the WHERE.
 
 ---
 

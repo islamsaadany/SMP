@@ -247,6 +247,14 @@ so an `edit` would be a grant with nothing behind it (§94.15). This is spec 046
 decision #15 — *whole module, for now: if you can open Insights you can see
 everything in it* — and the per-item visibility it defers.
 
+**THAT SECOND HALF IS REVERSED (2026-09-15, spec 046 §4.10) AND THE FIRST HALF
+STANDS.** A report may now be narrowed to one or more places, set in the
+publishing room and stored on the report itself; what has NOT arrived is a
+per-module access tab, so *who may open Insights at all* is still nobody's to
+set and every person in the client can open the module. The two are different
+questions and only one is answered — which is worth saying here, because
+"visibility" has now been used for both. The tab is still §8's last item.
+
 **No role in the module, no module in the switcher** (spec 046 §4.4, §61).
 
 **THE SHIPPED DEFAULT IS `view` FOR EVERY ROLE** (§7.2) — a library Forefront

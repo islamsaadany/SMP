@@ -1,0 +1,1280 @@
+<title>Report visibility</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MOCKUP · spec 046 / spec 053 · Insights
+     design-mockups/insights/2026-09-15_report-visibility.html
+
+     Rule 1c: drawn before a source moves.
+
+     IT REVERSES A DECISION AND SAYS SO. Spec 046 decision 15 settled that
+     visibility inside a library is WHOLE MODULE for now, and the mockup
+     signed off on 13 September carries that ruling in its own words:
+     "No per-item permissions and no scheduled publishing. Both were asked
+     and answered whole module, for now." Islam, 2026-09-15: "for some
+     certain reports it might need to belong to a function or more not the
+     whole company … the default is all can see and the smo can make the
+     exceptions." Recorded as a reversal rather than overwritten
+     (Principle II): that ruling was right for a library with one shelf and
+     stopped being right the moment three reports in forty are sensitive.
+
+     THE TWO STYLE BLOCKS BELOW ARE THE SIGNED-OFF MOCKUP'S, VERBATIM —
+     which are themselves smp-app/shell/platform.html's and the client
+     module document's. Everything drawn here is built from components
+     that already exist except the few marked NEW.
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    /* --ink-3 IS SET AGAINST THE QUIETEST GROUND IT SITS ON, not the whitest
+       (§38.5, and _shared.css records the same lesson): #6E7A90 cleared
+       nothing — 4.33 on white, 4.01 on the page's own ground and 3.79 on
+       --surface-2 — and it is the colour of the card's industry line, the
+       name in the top row, every note and every unlit chip. #5E6E85 is the
+       client platform's own value, so this is one vocabulary rather than two
+       greys a shade apart (§53.5): 5.19 / 4.80 / 4.54. */
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    /* Forefront's own, measured before use (constitution XIII):
+       #0F2C69 carries white at 13.25:1 · #F5A623 carries #231500 at 9.04:1
+       and is 2.03:1 as TYPE on white, so words take #9C5D08 (5.27:1). */
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  /* THE SAME BLOCK AGAIN, DELIBERATELY, AND IT IS WHY --ff-tx WAS ADDED
+     TWICE AND STILL DID NOTHING HERE: a token defined only in the media query
+     is absent the moment somebody chooses a theme explicitly, which is exactly
+     what this check does. Complete blocks, never a base plus overrides —
+     _shared.css records the same rule, and v3.0's zebra stripe is what
+     happens without it. */
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased }
+  /* NOTHING IS DRAWN UNTIL THE SERVER HAS ANSWERED (§94.10's rule): a platform
+     that paints a page and then corrects it has shown somebody a screen that
+     was not theirs. */
+  body:not(.ready) .wrap{ visibility:hidden }
+
+  /* ── the chrome: two lines, as a client's platform has (§2.9) ── */
+  .top{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 18px }
+  /* THE MARK IS TYPE, AND --ff IS A FILL (§38.4, the seventh time). It was
+     `color:var(--ff)`, which is right in light — #0F2C69 on white is 13.25 —
+     and in dark that token becomes the navy the NAVIGATION BAR is painted in:
+     #0D2350 on #1A1F29 is 1.08, so Forefront's own name was invisible on
+     Forefront's own platform. A fill and a word need two tokens, declared
+     together (§94.8's --cta/--cta-ink). --ff-tx is 6.94 dark. */
+  .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.16em; color:var(--ff-tx) }
+  .top .nm{ font-weight:600; font-size:14px }
+  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
+    color:var(--ink-3); font-size:12.5px }
+  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
+  .nav button{ background:transparent; border:0; color:var(--ff-quiet);
+    font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
+    border-bottom:3px solid transparent }
+  .nav button:hover{ color:var(--ff-ink) }
+  .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 70px }
+
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
+  .ptitle h1{ font-size:20px; margin:0; font-weight:600 }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
+  .btn:hover:not(:disabled){ border-color:var(--amber-tx) }
+  .btn:disabled{ opacity:.45; cursor:default }
+  .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
+  .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px }
+
+  /* ── client cards ─────────────────────────────────────────── */
+  .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  /* ── ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a) ──────────────────
+     Islam, of two behaviours drawn side by side: "2". The card's name is
+     not pressable; every way into a client names a module, so nothing has
+     to decide which one the top would open. The card stopped being a
+     <button> for it — a button cannot hold buttons — so the identity block
+     and the rows are its two children and the padding moved onto them. */
+  .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
+    background:var(--surface); display:flex; flex-direction:column;
+    min-height:152px; font:inherit; color:inherit; box-shadow:var(--shadow) }
+  .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard.listed{ opacity:.72 }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:7px; padding:15px }
+  .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:9px 15px;
+    font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
+    border:0; border-bottom:1px solid var(--line); cursor:pointer }
+  .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto }
+  .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
+  .ccard.add{ cursor:pointer }
+  .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
+    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  /* A client that has a mark wears it on its card — the same picture its
+     door wears (§313.36), so the two cannot disagree; a light plate under it
+     because a PNG cannot be recoloured (§52). Initials until then. */
+  .ccard img.cmark{ width:auto; max-width:120px; height:36px; object-fit:contain; background:#fff; padding:4px 8px; box-sizing:content-box }
+  .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+  .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
+  .markrow .none{ font-size:13px; color:var(--ink-3) }
+  .ccard h2{ margin:0; font-size:17px; font-weight:600 }
+  .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
+  .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
+  .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
+  .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
+    padding:15px; color:var(--ink-3) }
+  /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
+     Islam: "the demo should be a separate client on the platform outside
+     beside the clients." It was IN the grid — third across, with the way to
+     add a client after it — so the page counted it as one, and two things
+     followed that nobody chose: the empty-state line reads a count that
+     included it, and the box saying "Search clients" found it.
+
+     THE DEVICE IS THE PAGE'S OWN and nothing here is new: a hairline with an
+     uppercase key on it, which is how every other surface separates one kind
+     of thing from another (§53.5). The card keeps the amber wash and the Demo
+     tag it already wore — what changed is where it is drawn. AND IT KEEPS THE
+     GRID'S OWN TRACK WIDTH: a card grown to the full page would read as more
+     important than the clients above it, which is the opposite of what
+     setting it apart says. */
+  .apart{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line) }
+  .apart > .akey{ display:block; margin-bottom:12px;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface) }
+  .ccfg:hover, .ccfg:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2) }
+  .tag.open{ color:var(--good); background:var(--good-bg); border-color:var(--good) }
+  .tag.none{ color:var(--warn); background:var(--warn-bg); border-color:var(--warn) }
+  .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
+  .tag.seat{ color:var(--ff); border-color:var(--ff) }
+
+  /* ── AN ARCHIVED CLIENT'S CARD (§323) ──────────────────────────────
+     The card it always was, quieter, and with no door. A dashed edge says
+     "set aside" the way the Add card's dashed edge already says "not yet a
+     client", so the page keeps one vocabulary rather than gaining a second
+     (§53.5). It is never `disabled` in the markup for the LOOK — it is
+     disabled because there is genuinely nothing behind it: their address is
+     closed, and a card that still opened would promise something that does
+     not work (§61, §96). */
+  .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
+  .ccard.arch:hover{ border-color:var(--line) }
+  /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
+     (§88's own answer, on a card rather than a table row): one line, clipped
+     where it does not fit, the whole of it one hover away. Measured — 
+     `islam.saadany@forefront.consulting` runs 4px past a 232px card, and this
+     is a `ui-monospace` string with no space in it, so it cannot wrap its way
+     out (§158: fit, never "and it overflows"). */
+  .tag.arch{ color:var(--ink-3); border-color:var(--line); background:var(--surface);
+    max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  /* BRING BACK TAKES THE CORNER SETTINGS HOLDS on a live card, because on an
+     archived client it is what Settings was: the one thing you came to the
+     card to do. */
+  .cback{ font:600 10px/1.6 ui-monospace, SFMono-Regular, monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-2); background:var(--surface);
+    border:1px solid var(--line); border-radius:7px; padding:2px 8px; cursor:pointer }
+  .cback:hover, .cback:focus-visible{ border-color:var(--amber-tx); outline:none }
+  /* TWO CONTROLS, SO THEY NEED A ROW: `.ccfg` is absolute and a second
+     absolute chip would sit on top of it. The wrapper is what is positioned
+     and the chips sit in it, so a third one later costs no arithmetic. */
+  .cacts{ position:absolute; top:11px; right:11px; display:flex; gap:5px; align-items:center }
+  .cacts .ccfg{ position:static; top:auto; right:auto }
+  :root[data-theme="dark"] .tag.seat, :root:not([data-theme="light"]) .tag.seat{ color:var(--ff-quiet) }
+
+  /* ── tables ───────────────────────────────────────────────── */
+  table{ border-collapse:collapse; width:100%; font-size:14px }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap }
+  thead th{ background:var(--ff); color:var(--ff-ink);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.09em;
+    text-transform:uppercase; border-bottom:0 }
+  thead th:first-child{ border-top-left-radius:8px } thead th:last-child{ border-top-right-radius:8px }
+  tbody tr:nth-child(even) td{ background:var(--surface-2) }
+  .tscroll{ overflow-x:auto }
+  /* The seats cell is the one that wraps: it holds a list that grows with the
+     clients somebody is on, and clipping it hides the fact the column is for. */
+  td.seats{ white-space:normal; min-width:250px }
+  /* A FIELD IN A TABLE CELL NEEDS A DEFINITE WIDTH AND min-width:0 (§110.8).
+     `max-width:100%` resolves against a containing block an auto-layout table
+     has not settled, so the browser treats it as none and the box grows the
+     column; a px cap does nothing either. These two are what stop the row
+     widening the moment the page is drawn. */
+  table .fld{ width:100%; min-width:0; padding:5px 7px; font-size:13px }
+  table td:first-child .fld{ min-width:120px }
+  table .fld.mono{ font-family:ui-monospace, SFMono-Regular, monospace; font-size:12.5px;
+    min-width:210px }
+  td.seats .tag{ display:inline-block; margin:2px 3px 2px 0 }
+  .mono{ font:400 13px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2) }
+  .muted{ color:var(--ink-3) }
+
+  /* a cell of two or three states, as §37's matrix has */
+  .cell{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .cell button{ border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; padding:5px 9px; cursor:pointer }
+  .cell button:last-child{ border-right:0 }
+  .cell button.on{ background:var(--ff); color:var(--ff-ink) }
+  .cell button.on.hi{ background:var(--amber); color:var(--amber-ink) }
+  .cell.locked button{ cursor:default }
+
+  .row{ display:flex; gap:9px; margin-top:14px; flex-wrap:wrap; align-items:center }
+  .row .fld{ flex:1 1 170px; min-width:0 }
+  /* ── WHICH MODULES A CLIENT HAS (spec 046 §4.5) ────────────────────
+     The ROWS are the team list's own — .teamrow, .who .nm/.em, .sp, .tag,
+     .btn, .note — so this section adds no vocabulary to the drawer (§53.5).
+     All that is here is what puts them in a band of their own, which is the
+     only thing about it that is new. */
+  .band{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:14px 16px 4px; margin:0 0 20px }
+  .band .teamrow:last-of-type{ border-bottom:0 }
+  .cfg{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px }
+  .rowset{ display:grid; gap:13px }
+  .teamrow{ display:flex; align-items:center; gap:10px; padding:9px 0;
+    border-bottom:1px solid var(--line-soft) }
+  .teamrow .who .nm{ font-weight:600; font-size:14px }
+  .teamrow .who .em{ color:var(--ink-3); font-size:12.5px }
+  .teamrow .sp{ flex-wrap:wrap; justify-content:flex-end }
+  .asrow{ display:inline-flex; align-items:center; gap:6px }
+  .asrow .aslab{ font:600 9.5px/1.4 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap }
+  .asrow .fld{ width:auto; max-width:230px; padding:4px 6px; font-size:12px }
+  .teamrow .sp{ margin-left:auto; display:flex; gap:7px; align-items:center }
+  .said{ margin:12px 0 0; font-size:13.5px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:9px 11px }
+  .said b{ font-family:ui-monospace, SFMono-Regular, monospace }
+  .err{ margin:12px 0 0; font-size:13.5px; color:var(--bad); background:var(--bad-bg);
+    border:1px solid var(--bad); border-radius:8px; padding:9px 11px }
+  .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
+  @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
+
+  /* ── SETTING A CLIENT UP (§322) ───────────────────────────────────
+     The flow's own dress, in this page's tokens and nothing else — it is
+     the same chrome, the same buttons and the same fields the rest of the
+     platform page uses, with a step rail and a panel beside it. */
+  .wzrail{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px }
+  .wzstep{ display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
+    border:1px solid var(--line); border-radius:999px; background:var(--surface);
+    color:var(--ink-2); font:600 12.5px/1.5 inherit; cursor:pointer }
+  .wzstep:hover:not(:disabled){ border-color:var(--amber-tx) }
+  .wzstep .n{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
+    background:var(--surface-2); color:var(--ink-3);
+    font:600 11px/1 ui-monospace, SFMono-Regular, monospace; flex:none;
+    font-variant-numeric:tabular-nums }
+  .wzstep[aria-current="step"]{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .wzstep[aria-current="step"] .n{ background:var(--amber); color:var(--amber-ink) }
+  .wzstep.done{ color:var(--ink-3) }
+  .wzstep.done .n{ background:var(--good-bg); color:var(--good) }
+  /* DULLED MEANS INERT AND SAYING SO — never merely grey (§61). */
+  .wzstep.later{ border-style:dashed; opacity:.55; cursor:not-allowed }
+
+  .wzgrid{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px; align-items:start }
+  @media (max-width:900px){ .wzgrid{ grid-template-columns:1fr } }
+  .wzq{ font-size:20px; font-weight:600; margin:7px 0 4px; text-wrap:balance }
+  .wzwhy{ color:var(--ink-3); font-size:13.5px; margin:14px 0 0; max-width:62ch }
+  .wzempty{ color:var(--ink-3); font-size:13.5px; font-style:italic; margin:0 }
+  .wzfoot{ display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
+    border-top:1px solid var(--line); flex-wrap:wrap }
+  .wzfnote{ margin-left:auto; color:var(--ink-3); font-size:12.5px }
+
+  /* lists you add to */
+  .wzrows{ display:flex; flex-direction:column; gap:6px }
+  .wzrow{ display:flex; align-items:center; gap:9px }
+  .wzrow .fld{ flex:1 1 160px; min-width:0 }
+  .wzrow .wzname{ flex:1 1 160px; font-weight:600; font-size:14px }
+  .wzrt{ display:flex; align-items:center; gap:7px; flex:none }
+  .wzrt .fld{ width:auto }
+  .wzsub{ font-size:12px; color:var(--ink-3); white-space:nowrap }
+  .wzx{ border:0; background:transparent; color:var(--ink-3); cursor:pointer;
+    font-size:17px; line-height:1; padding:2px 5px; flex:none }
+  .wzx:hover{ color:var(--bad) }
+  .wzadd{ border:1px dashed var(--line); border-radius:8px; padding:8px 11px; color:var(--ink-3);
+    background:transparent; font:600 13px/1.5 inherit; text-align:left; cursor:pointer;
+    width:100%; margin-top:8px }
+  .wzadd:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
+
+  /* a choice */
+  .wzchoices{ display:flex; flex-direction:column; gap:10px }
+  .wzchoice{ display:block; width:100%; text-align:left; padding:12px 13px; border-radius:9px;
+    border:1px solid var(--line); background:var(--surface); color:inherit; font:inherit;
+    cursor:pointer }
+  .wzchoice:hover{ border-color:var(--amber-tx) }
+  .wzchoice[aria-pressed="true"]{ border-color:var(--amber); box-shadow:inset 0 0 0 1px var(--amber) }
+  .wzchoice .cname{ display:block; font-weight:600; font-size:14.5px }
+  .wzchoice .cwhy{ display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px }
+  .wzlaterline{ margin-top:12px; font-size:13px; color:var(--ink-3);
+    border-left:2px solid var(--line); padding-left:11px }
+
+  /* ── ENDING A CLIENT (§323) ─────────────────────────────────────────
+     §273.4's shape, which Islam chose for the reporting cycle: the
+     destructive act in its own block, behind a rule, under a heading, so
+     nobody arrives at it by tabbing down the form. Settings is already the
+     door — a door is only a guard if the dangerous thing is behind it. */
+  .wzend{ margin-top:26px; padding-top:16px; border-top:1px solid var(--line); max-width:560px }
+  .wzendkey{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px }
+  .wzendwhy{ margin:0 0 12px; font-size:13px; color:var(--ink-3); max-width:62ch }
+  .wzendrow{ display:flex; align-items:center; gap:9px; flex-wrap:wrap }
+
+  /* THE WORD IS RED AND THE BUTTON IS NOT (§41's budget): --bad as a fill
+     would be the loudest thing on a page whose one accent is the amber. The
+     FILL is kept for the confirmation, where the volume belongs — and a fill
+     and a word are TWO tokens, declared together (§38.4, §94.8's
+     --cta/--cta-ink), because the first build of this wrote `color:#fff` and
+     measured 2.90:1. 6.28 light, 6.35 dark. */
+  .btn.risk{ color:var(--bad); border-color:var(--bad) }
+  .btn.risk:hover:not(:disabled){ background:var(--bad-bg); border-color:var(--bad) }
+  .btn.risksolid{ background:var(--bad); border-color:var(--bad); color:var(--bad-ink) }
+
+  /* The question is asked IN the block rather than over the page: there is no
+     dialog anywhere on this page, and one act does not earn the first (§2b). */
+  .wzask{ border:1px solid var(--bad); background:var(--bad-bg); border-radius:9px;
+    padding:13px 14px }
+  .wzask p{ margin:0 0 11px; font-size:13.5px; color:var(--ink) }
+  .wzask .goes{ margin:0 0 11px; font:400 12.5px/1.7 ui-monospace, SFMono-Regular, monospace;
+    color:var(--ink-2) }
+  .wzask label{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px }
+  .wzask .fld{ background:var(--surface) }
+  .wzask .row{ display:flex; align-items:center; gap:9px; margin-top:12px; flex-wrap:wrap }
+
+  /* An archived client's flow says so BEFORE anything else: the fields below
+     are read-only, and a page that did not say why would read as broken
+     (§45.2). */
+  .wzarched{ border:1px solid var(--line); background:var(--surface-2); border-radius:9px;
+    padding:11px 13px; margin-bottom:18px; font-size:13.5px; color:var(--ink-2) }
+  .wzarched b{ color:var(--ink) }
+
+  /* the searchable standard list */
+  .wzpick{ position:relative }
+  .wzpanel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    box-shadow:var(--shadow); max-height:270px; overflow-y:auto; padding:5px }
+  .wzpanel .gp{ font:600 10px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); padding:9px 9px 5px }
+  .wzpanel .opt{ display:block; width:100%; text-align:left; border:0; background:transparent;
+    color:var(--ink); font:inherit; font-size:13.5px; padding:6px 9px; border-radius:6px;
+    cursor:pointer }
+  .wzpanel .opt:hover, .wzpanel .opt:focus-visible{ background:var(--surface-2); outline:none }
+  .wzpanel .opt[aria-selected="true"]{ background:var(--amber-wash); color:var(--amber-tx);
+    font-weight:600 }
+  .wzpanel .nohit{ padding:10px 9px; color:var(--ink-3); font-size:13px; font-style:italic }
+
+  /* the size band */
+  .wzband{ display:flex; flex-wrap:wrap; gap:6px }
+  .wzband button{ border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; padding:6px 11px; font:600 12.5px/1.5 inherit; cursor:pointer;
+    display:flex; flex-direction:column; gap:1px; align-items:flex-start }
+  .wzband button:hover{ border-color:var(--amber-tx) }
+  .wzband button[aria-pressed="true"]{ border-color:var(--amber); background:var(--amber-wash);
+    color:var(--ink) }
+  .wzband .ppl{ font:400 11px/1.3 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3);
+    font-variant-numeric:tabular-nums }
+  .wzband button[aria-pressed="true"] .ppl{ color:var(--amber-tx) }
+
+  /* the words table */
+  .wztbl{ overflow-x:auto; border:1px solid var(--line); border-radius:9px; background:var(--surface) }
+  .wztbl table{ min-width:520px }
+  .wztbl td{ white-space:normal }
+
+  /* what you are building */
+  .wzshape{ position:sticky; top:14px; background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:15px; box-shadow:var(--shadow) }
+  .wzshape h2{ font-size:13.5px; margin:0 0 2px; font-weight:600 }
+  .wzshape .cap{ color:var(--ink-3); font-size:12.5px; margin:0 0 14px }
+  .wzorg{ border:1px solid var(--amber); border-radius:9px; padding:9px 11px;
+    background:var(--amber-wash); display:flex; align-items:center; gap:9px }
+  .wzorg .nm{ font-weight:700; font-size:14.5px; color:var(--ink) }
+  .wzwho{ margin:6px 0 0; font-size:12px; color:var(--ink-3) }
+  .wzswitch{ display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden;
+    font-size:12px; margin-top:13px }
+  .wzswitch span{ flex:1; text-align:center; padding:5px 6px; color:var(--ink-3) }
+  .wzswitch span.on{ background:var(--ff); color:var(--ff-ink); font-weight:600 }
+  .wzside{ margin-top:13px }
+  .wzsidekey{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--ink-3); margin-bottom:7px; display:flex;
+    align-items:center; gap:7px }
+  .wzsidekey .ct{ background:var(--surface-2); border-radius:999px; padding:1px 7px;
+    font-size:10.5px; letter-spacing:0; font-variant-numeric:tabular-nums }
+  .wzchips{ display:flex; flex-wrap:wrap; gap:6px }
+  .wzchip{ border:1px solid var(--line); border-radius:6px; padding:4px 9px; font-size:12.5px;
+    background:var(--surface-2); display:flex; align-items:center; gap:7px }
+  .wzchip.unit{ border-left:3px solid var(--ff) }
+  .wzchip.fn{ border-left:3px solid var(--good) }
+  .wzchip .fmt{ font:600 10px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.04em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .wznone{ color:var(--ink-3); font-size:12.5px; font-style:italic; padding:3px 0 }
+
+  /* the summary */
+  .wzsumm{ display:flex; flex-direction:column; gap:7px; margin-bottom:18px }
+  .wzline{ display:flex; gap:10px; align-items:baseline; font-size:14px; padding:7px 11px;
+    border:1px solid var(--line-soft); border-radius:8px; background:var(--surface); flex-wrap:wrap }
+  .wzline .sk{ color:var(--ink-3); font-size:12.5px; min-width:136px }
+  .wzline .sv{ font-weight:600 }
+  .wzed{ margin-left:auto; color:var(--amber-tx); font-size:12.5px; border:0;
+    background:transparent; cursor:pointer; font-weight:600 }
+  .wzdoors{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:9px }
+  @media (max-width:620px){ .wzdoors{ grid-template-columns:1fr } }
+  .wzdoor{ border:1px solid var(--line); border-radius:10px; padding:14px; background:var(--surface);
+    display:flex; flex-direction:column; gap:5px; cursor:pointer; text-align:left; font:inherit;
+    color:inherit }
+  .wzdoor:hover{ border-color:var(--amber-tx) }
+  .wzdoor.go{ border-color:var(--amber); background:var(--amber-wash) }
+  .wzdoor .dn{ font-weight:700; font-size:14.5px }
+  .wzdoor .dw{ color:var(--ink-3); font-size:12.5px }
+  /* ── The consulting memory (spec 045) ────────────────────────────
+     FOUR SHAPES, and each is an existing one put to a new use rather than a
+     new look: the filter row is .ptitle's own flex row, an entry row is
+     .teamrow one level richer, the reading view is the card border and radius
+     the client cards already wear, and the form is .lab over .fld like every
+     other form on this platform. Nothing here introduces a colour. */
+  .filters{ display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-bottom:16px }
+  .filters .fld{ width:auto; flex:0 1 230px; min-width:0 }
+  .filters .fld.search{ flex:1 1 280px }
+  .count{ margin-left:auto; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3) }
+
+  .elist{ display:flex; flex-direction:column; border-top:1px solid var(--line) }
+  .erow{ display:flex; gap:14px; align-items:flex-start; width:100%; text-align:left;
+    padding:13px 10px; border:0; border-bottom:1px solid var(--line-soft);
+    background:transparent; color:inherit; font:inherit; cursor:pointer }
+  .erow:hover, .erow:focus-visible{ background:var(--surface-2); outline:none }
+  .erow .body{ min-width:0; flex:1 1 auto; display:flex; flex-direction:column; gap:3px }
+  .erow h3{ margin:0; font-size:15px; font-weight:600; line-height:1.35 }
+  .erow .snip{ margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }
+  /* THE FACT LINE IS ONE LINE OF KEYS — client · industry · author · when.
+     It is what a reader runs an eye down, so it is one size and one colour,
+     or the eye has to decide which half matters on every row (§88). */
+  .erow .facts{ font:400 12px/1.5 ui-monospace, SFMono-Regular, monospace;
+    color:var(--ink-3); overflow-wrap:anywhere }
+  .erow .facts b{ font-weight:600; color:var(--ink-2) }
+
+  .ecard{ border:1px solid var(--line); border-radius:12px; background:var(--surface);
+    box-shadow:var(--shadow); padding:20px 22px; max-width:760px }
+  .ecard h2{ margin:0 0 4px; font-size:21px; font-weight:600; line-height:1.3 }
+  .ecard .facts{ font:400 12.5px/1.6 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
+  .ecard .facts b{ font-weight:600; color:var(--ink-2) }
+  .etags{ display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:11px }
+  .qa{ margin-top:22px; display:flex; flex-direction:column; gap:18px }
+  .qa h3{ margin:0 0 5px; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  .qa p{ margin:0; font-size:14.5px; line-height:1.62; color:var(--ink); max-width:62ch;
+    white-space:pre-line }
+  /* THE AUTHOR IS THE POINT OF THE PAGE (decision 3), so it is a block and not
+     a byline: what a reader does with an insight is go and ask the person who
+     wrote it. */
+  .byline{ margin-top:24px; padding-top:15px; border-top:1px solid var(--line);
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+  .byline .who{ display:flex; flex-direction:column; gap:1px; min-width:0 }
+  .byline .who .nm{ font-weight:600; font-size:14.5px }
+  .byline .who .em{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
+  .byline .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
+
+  .wiz{ max-width:720px }
+  .wq{ margin-bottom:17px }
+  .wq textarea.fld{ min-height:74px; resize:vertical; font-size:14px }
+  .wpair{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:17px }
+  .wpair > div{ flex:1 1 220px; min-width:0 }
+  .prompt{ margin:0; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:13px 15px; overflow-x:auto;
+    font:400 12.5px/1.65 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2);
+    white-space:pre-wrap }
+  .wacts{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px }
+  .pastebox{ min-height:150px; resize:vertical;
+    font:400 13px/1.6 ui-monospace, SFMono-Regular, monospace }
+
+  .found{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    background:var(--good-bg); border:1px solid var(--good); border-radius:8px;
+    padding:10px 13px; margin-bottom:18px; font-size:13.5px; color:var(--ink-2) }
+  .found b{ color:var(--good) }
+  .found .sp{ margin-left:auto; display:flex; gap:8px }
+  .drafts{ display:flex; flex-direction:column; gap:14px; max-width:760px }
+  .dcard{ border:1px solid var(--line); border-radius:12px; background:var(--surface);
+    box-shadow:var(--shadow); padding:15px 17px }
+  .dhead{ display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:11px }
+  .dhead .fld{ flex:1 1 240px; min-width:0; font-weight:600 }
+  .dhead select.fld{ flex:0 0 auto; width:auto; font-weight:400 }
+  .dhead .drop{ margin-left:auto; color:var(--ink-3) }
+  .dhead .drop:hover{ border-color:var(--bad); color:var(--bad) }
+  .dq{ margin-bottom:11px }
+  .dq:last-child{ margin-bottom:0 }
+  .dq textarea.fld{ min-height:56px; resize:vertical; font-size:13.5px }
+  /* A BLOCK THAT COULD NOT BE READ IS SHOWN, NEVER DROPPED (§184): what came
+     back is somebody's own words, so the one thing the platform may not do
+     with it is lose it quietly. */
+  .dcard.raw{ border-color:var(--warn); background:var(--warn-bg) }
+  .dcard.raw .rawnote{ font-size:13px; color:var(--warn); margin:0 0 10px }
+
+  .empty{ border:1px dashed var(--line); border-radius:12px; padding:34px 24px;
+    text-align:center; color:var(--ink-3); background:var(--surface) }
+  .empty b{ display:block; color:var(--ink); font-size:16px; margin-bottom:6px }
+  .empty .btn{ margin-top:16px }
+  .askbox{ margin-bottom:16px }
+  .askrow{ display:flex; gap:9px; flex-wrap:wrap }
+  .askrow .fld{ flex:1 1 380px; min-width:0 }
+  .askout{ margin-top:11px; background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:13px 15px }
+  .askreply{ margin:0; font-size:14.5px; line-height:1.62; max-width:62ch; white-space:pre-line }
+  .asksrc{ margin-top:12px; display:flex; gap:7px; align-items:center; flex-wrap:wrap }
+  .asksrc .lab{ margin:0 }
+  .asksrc button.tag{ cursor:pointer }
+  .asksrc button.tag:hover{ border-color:var(--amber-tx) }
+  @media (max-width:700px){ .erow{ flex-direction:column; gap:8px } .count{ margin-left:0 } }
+</style>
+<style>
+  /* ══ THE MOCKUP'S OWN CHROME — namespaced .mk-, never the product's ══
+     Nothing here is proposed for the product. It is the paper the frames
+     are pinned to. */
+  .wrap{ visibility:visible !important }
+  body{ padding:0 }
+  .mk-page{ max-width:1120px; margin:0 auto; padding-block:34px 80px; padding-left:20px; padding-right:20px }
+  .mk-head{ border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:8px }
+  .mk-head .mk-key{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3) }
+  .mk-head h1{ font-size:27px; margin:9px 0 6px; font-weight:600; letter-spacing:-.015em;
+    text-wrap:balance }
+  .mk-head p{ margin:0; color:var(--ink-2); font-size:14.5px; max-width:66ch; line-height:1.6 }
+  .mk-meta{ display:flex; gap:8px; flex-wrap:wrap; margin-top:13px }
+
+  .mk-frame{ margin-top:44px }
+  .mk-fh{ display:flex; align-items:baseline; gap:11px; flex-wrap:wrap; margin-bottom:5px }
+  .mk-fh .n{ font:600 11px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    color:var(--amber-tx) }
+  .mk-fh h2{ margin:0; font-size:18.5px; font-weight:600 }
+  .mk-fh .where{ font:400 12px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3);
+    margin-left:auto }
+  .mk-why{ margin:0 0 14px; color:var(--ink-2); font-size:13.5px; max-width:76ch; line-height:1.6 }
+  /* The screen sits on the page's own ground inside a plain bezel, so nothing
+     about the mockup's paper can be mistaken for the design. */
+  .mk-screen{ border:1px solid var(--line); border-radius:12px; background:var(--ground);
+    padding:22px 24px 26px; box-shadow:var(--shadow); overflow-x:auto }
+  .mk-screen > .inner{ min-width:600px }
+
+  .mk-notes{ margin-top:16px; display:grid; gap:9px }
+  .mk-note{ display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.6;
+    color:var(--ink-2) }
+  .mk-note .b{ flex:none; font:600 10.5px/1.7 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); width:74px }
+  .mk-note b{ color:var(--ink) }
+  .mk-ask{ margin-top:46px; border:1px solid var(--amber); background:var(--amber-wash);
+    border-radius:12px; padding:20px 22px }
+  .mk-ask h2{ margin:0 0 10px; font-size:16px; font-weight:600 }
+  .mk-ask ul{ margin:0; padding-left:19px; display:grid; gap:7px; font-size:13.5px;
+    color:var(--ink-2); line-height:1.6 }
+  .mk-ask li b{ color:var(--ink) }
+
+  /* ══ NEW — the only rules the CONSOLE side gains ═══════════════════
+     Everything else in frames 1 and 2 is .ptitle, .filters, .count,
+     .elist, .erow, .ecard, .band, .apart, .tag, .btn, .lab and .fld as
+     the page already declares them (§53.5: the memory's list, spec 045,
+     is this shape already). */
+  /* A category is picked by pressing its own name: .tag, with a lit state.
+     No new colour — the accent it lights with is the one the page's own
+     chips already use. */
+  .catpick{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:3px 8px;
+    color:var(--ink-2); background:var(--surface-2); cursor:pointer }
+  .catpick[aria-pressed="true"]{ color:var(--amber-tx); border-color:var(--amber);
+    background:var(--surface) }
+  .catrow{ display:flex; gap:7px; flex-wrap:wrap }
+  /* The file row. A bordered strip rather than a card: it is one field among
+     the others, and a card would rank it above the title (§99's "not
+     everything is a card"). */
+  .drop{ display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    border:1px dashed var(--line); border-radius:9px; padding:12px 14px; background:var(--surface) }
+  .drop .fname{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2);
+    min-width:0; overflow-wrap:anywhere }
+  .drop .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
+
+  /* ══ FRAME 3 & 4 — THE CLIENT'S APP ════════════════════════════════
+     A module serves its own document (lib/trial.ts), so this is the trial
+     module's own token block and bar, verbatim, extended with what a list
+     needs. Scoped to .cl so it cannot reach the console frames above. */
+  .cl{ --bar:#16325C; --c-ink:#141C2B; --c-ink-3:#5E6E85; --c-line:#D8DEE8;
+    --c-ground:#F5F6F9; --c-surface:#FFFFFF; --c-surface-2:#EDF0F5; --c-gold:#9C5D08;
+    background:var(--c-ground); color:var(--c-ink); border-radius:9px; overflow:hidden;
+    font:400 15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif }
+  /* THE DARK BLOCK MUST BE INSIDE THE MEDIA QUERY, and the first build of this
+     mockup left it outside — so `:root:not([data-theme="light"]) .cl` matched
+     every time, beat the base rule on specificity, and drew both client frames
+     dark on a light page. Found by looking at the render, not by reading it
+     (§96's family: it renders perfectly, in the wrong palette). */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .cl{
+      --c-ink:#E7EBF2; --c-ink-3:#8590A3; --c-line:#333B4A; --c-ground:#12151C;
+      --c-surface:#1A1F29; --c-surface-2:#222834; --c-gold:#F5A623 }
+  }
+  :root[data-theme="dark"] .cl{
+    --c-ink:#E7EBF2; --c-ink-3:#8590A3; --c-line:#333B4A; --c-ground:#12151C;
+    --c-surface:#1A1F29; --c-surface-2:#222834; --c-gold:#F5A623 }
+  .cl .bar{ background:var(--bar); color:#EAF0FA; display:flex; align-items:center; gap:10px;
+    padding:11px 16px; flex-wrap:wrap }
+  .cl .bar h1{ margin:0; font-size:14.5px; font-weight:600 }
+  .cl .bar .org{ color:#A9BBD8; font-size:13px }
+  .cl .bar .org b{ color:#EAF0FA; font-weight:600 }
+  .cl .msw{ width:26px; height:26px; border-radius:7px; display:grid; place-items:center;
+    border:1px solid rgba(234,240,250,.28); color:#EAF0FA; flex:none }
+  .cl .msw svg{ width:17px; height:17px; display:block }
+  .cl .pg{ padding:20px 20px 26px }
+  /* NO DESCRIPTION UNDER THE HEADING (rule 1b-ii). The attached file prints
+     "Analysis, macro and market reports published to your organization"
+     here; a heading names the thing and a grey paragraph repeating it is
+     furniture that pushes the list down the page. */
+  .cl h2.pt{ margin:0 0 14px; font-size:21px; font-weight:600 }
+  /* THE CATEGORIES ARE THE NAVIGATION (spec 046 §4.6), so they are the
+     product's own tab row and not a filter bar: one line, the selected one
+     carrying the underline every tab row in this product uses. */
+  .cl .cats{ display:flex; gap:3px; flex-wrap:wrap; border-bottom:1px solid var(--c-line);
+    margin-bottom:15px }
+  .cl .cats button{ border:0; background:transparent; color:var(--c-ink-3); cursor:pointer;
+    font:600 13.5px/1 inherit; padding:9px 11px; border-bottom:2px solid transparent;
+    margin-bottom:-1px }
+  .cl .cats button[aria-selected="true"]{ color:var(--c-ink); border-bottom-color:var(--c-gold) }
+  .cl .tools{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:4px }
+  .cl .srch{ flex:1 1 260px; min-width:0; border:1px solid var(--c-line); border-radius:8px;
+    background:var(--c-surface); color:var(--c-ink); padding:8px 11px; font:400 14px/1.5 inherit }
+  .cl .cnt{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--c-ink-3); margin-left:auto }
+  .cl .list{ display:flex; flex-direction:column; border-top:1px solid var(--c-line);
+    margin-top:12px }
+  .cl .item{ display:flex; gap:16px; align-items:flex-start; padding:14px 2px;
+    border-bottom:1px solid var(--c-line) }
+  .cl .item .body{ min-width:0; flex:1 1 auto; display:flex; flex-direction:column; gap:4px }
+  .cl .item h3{ margin:0; font-size:15.5px; font-weight:600; line-height:1.35 }
+  .cl .item p{ margin:0; font-size:13.5px; line-height:1.5; color:var(--c-ink-3);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }
+  .cl .item .facts{ font:400 12px/1.5 ui-monospace, SFMono-Regular, monospace;
+    color:var(--c-ink-3); overflow-wrap:anywhere }
+  .cl .item .facts b{ font-weight:600; color:var(--c-ink) }
+  .cl .dl{ flex:none; border:1px solid var(--c-line); background:var(--c-surface);
+    color:var(--c-ink); border-radius:8px; padding:7px 13px; font:600 13px/1.5 inherit;
+    cursor:pointer; text-decoration:none; display:inline-block }
+  .cl .none{ padding:40px 4px 10px; color:var(--c-ink-3); font-size:14px; max-width:60ch }
+  .cl .none b{ color:var(--c-ink); font-weight:600; display:block; font-size:15.5px;
+    margin-bottom:6px }
+  @media (max-width:560px){
+    .cl .item{ flex-direction:column; gap:9px }
+    .mk-page{ padding-block:22px 60px }
+  }
+</style>
+
+<style>
+  /* ══ NEW — FOUR RULE FAMILIES, AND NOTHING ELSE ═══════════════════
+     Everything else on these frames is .elist/.erow/.tag/.ecard/.lab/
+     .fld/.wpair/.rowset/.byline/.apart/.teamrow/.btn/.wzpanel/.catrow —
+     the console's own, already declared above. */
+
+  /* 1 · THE MARK ON A ROW. It follows the Draft tag's own rule, which this
+     mockup's frame 01 already states: only the exception carries a mark,
+     because Everyone is the normal case and marking it would spend the
+     accent on the state that needs no attention (§41's budget). So a
+     report everyone can see wears NOTHING here.
+
+     AND THE NARROWED ONE TAKES NO ACCENT EITHER — it is the PLAIN .tag, so
+     this family adds ONE rule rather than two. Drawn amber first, and the
+     render caught it: `.tag.none` (Draft) is already --warn on --warn-bg, so
+     `3 departments` and `Draft` came out the same colour in the same slot on
+     the same list — two meanings, one hue (§87's twins, §41's budget). It is
+     also the honest weight on its own terms: narrowing a report is a normal
+     act somebody chose, not something outstanding. It scans by BEING THERE
+     at all, on rows that carry no mark.
+
+     `shut` keeps an alarm, because a published report nobody can open is the
+     one state here that is genuinely wrong-looking.
+
+     AND IT NEEDS NO NEW INK, MEASURED RATHER THAN ASSUMED. §62 records --bad
+     on --bad-bg at 4.41 and a `--bad-tx` twin was nearly invented here on the
+     strength of it — that figure is the CLIENT platform's palette (_shared.css)
+     and this is the console's, where the same pair reads 5.51 light and 5.28
+     dark. A number carried across from another stylesheet is not a measurement
+     of this one (§303's shape). */
+  .tag.shut{ color:var(--bad); background:var(--bad-bg); border-color:var(--bad) }
+
+  /* 2 · THE STRIP ON THE CARD. .drop's shape with a solid border — it is a
+     field among the others, and the dashed edge is the file row's way of
+     saying something can be dragged onto it. */
+  .seen{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    border:1px solid var(--line); border-radius:9px; padding:10px 12px; background:var(--surface) }
+  .seen .who{ min-width:0; display:flex; gap:6px; flex-wrap:wrap; align-items:center }
+  .seen .all{ font-size:13.5px; color:var(--ink-2) }
+  .seen .none{ font-size:13.5px; color:var(--bad); font-weight:600 }
+  .seen .sp{ margin-left:auto; display:flex; gap:8px }
+
+  /* 3 · THE TICKING PANEL. .wzpanel's box, .gp's group headings and .opt's
+     rows — the set-up flow's picker, which is itself the client platform's
+     searchable select one surface over (§130.1, §295.1). What is new is the
+     head (a search and the two words) and the tick. */
+  .tickwrap{ position:relative }
+  .tickpanel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    box-shadow:var(--shadow); overflow:hidden }
+  .tickhead{ display:flex; gap:8px; align-items:center; padding:9px 9px 8px;
+    border-bottom:1px solid var(--line-soft); flex-wrap:wrap }
+  .tickhead .fld{ flex:1 1 180px; min-width:0; padding:6px 9px; font-size:13.5px }
+  .tickhead .lnk{ border:0; background:transparent; padding:2px 4px; cursor:pointer;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ff-tx); text-decoration:underline;
+    text-underline-offset:3px }
+  .tickhead .lnk:hover, .tickhead .lnk:focus-visible{ color:var(--ink); outline:none }
+  .ticklist{ max-height:236px; overflow-y:auto; padding:5px }
+  .ticklist .gp{ font:600 10px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); padding:9px 9px 5px }
+  .tick{ display:flex; gap:9px; align-items:center; width:100%; text-align:left; border:0;
+    background:transparent; color:var(--ink); font:inherit; font-size:13.5px;
+    padding:6px 9px; border-radius:6px; cursor:pointer }
+  .tick:hover, .tick:focus-visible{ background:var(--surface-2); outline:none }
+  .tick .bx{ flex:none; width:15px; height:15px; border-radius:4px; border:1.5px solid var(--line);
+    display:grid; place-items:center; background:var(--surface) }
+  .tick .bx svg{ width:11px; height:11px; display:none }
+  .tick[aria-pressed="true"] .bx{ border-color:var(--amber); background:var(--amber) }
+  .tick[aria-pressed="true"] .bx svg{ display:block; color:var(--amber-ink) }
+  .tick[aria-pressed="true"]{ font-weight:600 }
+  /* Care and IT are a UNIT and a FUNCTION on this tenant, so the list has to
+     tell them apart — §65's suffix, load-bearing for exactly one row and
+     therefore drawn for every row in its group rather than for the pair. */
+  .tick .sub{ color:var(--ink-3); font-weight:400; font-size:12.5px }
+  .tickfoot{ border-top:1px solid var(--line-soft); padding:8px 11px 9px;
+    font-size:12.5px; color:var(--ink-3) }
+  .tickfoot b{ color:var(--ink); font-weight:600 }
+
+  /* 4 · TWO CLIENT LISTS SIDE BY SIDE, so one person's library can be read
+     against another's. The lists themselves are .cl, declared above. */
+  .twoup{ display:grid; grid-template-columns:1fr 1fr; gap:16px }
+  .twoup .cap{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--ink-3); margin-bottom:9px; display:block }
+  @media (max-width:820px){ .twoup{ grid-template-columns:1fr } }
+
+  /* MOCKUP CHROME, NOT PROPOSED: the panel is absolutely positioned, which is
+     right in the product (it overlays the page below it) and clips inside the
+     drawn screen box. Frame 03 reserves its height so the thing the frame is
+     about is actually visible. */
+  /* In the product the panel is ABSOLUTE — it overlays the page below it, the
+     way every dropdown here does — and caps at 236px and scrolls. Frame 03
+     draws it in the flow and at full height so both groups and the suffix can
+     be read in one look. Laid out in flow rather than given a reserved height,
+     because a number guessed against the panel's content goes stale the day a
+     department is added (§122.5). Both facts are in the frame's notes. */
+  .mk-screen.open .tickpanel{ position:static; margin-top:4px; box-shadow:none }
+  .mk-screen.open .ticklist{ max-height:none }
+</style>
+
+<div class="mk-page">
+
+  <header class="mk-head">
+    <div class="mk-key">Mockup &middot; spec 046 &middot; 15 September 2026</div>
+    <h1>Report visibility — everyone, unless somebody says otherwise</h1>
+    <p>Every report published to a client is readable by everybody in that
+      client, and that does not change. What this adds is the exception: a
+      report that belongs to one function, or to three, and not to the whole
+      company. It is set on the report, where the report is already being
+      described — there is no visibility page and no second list.</p>
+    <p><b>It reverses a decision, and the reversal is recorded rather than
+      quietly made.</b> The mockup signed off on 13 September says in its own
+      notes: <em>&ldquo;No per-item permissions&hellip; asked and answered whole
+      module, for now.&rdquo;</em> That was right for a library with one shelf.
+      Three sensitive reports in forty is what changes it.</p>
+    <p><b>Forefront sets it, and the client sets nothing.</b> There is no
+      client-side strategy office — the Super user and SMO team seats on a
+      client are ours — so this lives in the publishing room beside the
+      categories, and Insights keeps having no write control on the client's
+      side whatsoever.</p>
+    <p><b>Measured, in both palettes, with the sweep's own arithmetic.</b>
+      Every ink this adds, light / dark: the <em>Nobody</em> tag 5.51 / 5.28,
+      the strip's <em>Nobody</em> 6.28 / 5.73, <em>Everyone</em> 7.87 / 7.90,
+      the All and None links 13.25 / 6.94, the panel's foot and the
+      <em>(function)</em> suffix 5.19 / 5.12, a ticked row 17.06 / 13.81, the
+      narrowed tag 6.89 / 7.07. The lowest figure on the page is 4.80 and it is
+      the caption over the two client lists, which is the console's own quiet
+      grey on its own ground.</p>
+    <div class="mk-meta">
+      <span class="tag">Nothing built</span>
+      <span class="tag seat">Raya Trade</span>
+      <span class="tag">Rule 1c</span>
+      <span class="tag">Reverses decision 15</span>
+    </div>
+  </header>
+
+  <!-- ═══ FRAME 1 ═══════════════════════════════════════════════════ -->
+  <section class="mk-frame">
+    <div class="mk-fh">
+      <span class="n">01</span>
+      <h2>The list says which reports are narrowed</h2>
+      <span class="where">/platform &rsaquo; Raya Trade &rsaquo; Insights</span>
+    </div>
+    <p class="mk-why">No new column. The mark rides the slot the
+      <em>Draft</em> tag already uses, and it follows that tag's own rule —
+      <b>only the exception carries one</b>. A report everybody can see wears
+      nothing, because that is the normal case and marking it would spend the
+      accent on the state that needs no attention.</p>
+
+    <div class="mk-screen"><div class="inner">
+      <div class="ptitle">
+        <h1>Insights</h1>
+        <span class="tag">Raya Trade</span>
+        <span class="right"><button class="btn solid" type="button">Publish a report</button></span>
+      </div>
+
+      <div class="filters">
+        <input class="fld search" type="search" placeholder="Search reports&hellip;" value="">
+        <select class="fld" aria-label="Category">
+          <option>Every category</option><option>Analysis</option><option>Macro</option>
+          <option>Market</option><option>Sector</option><option>Governance</option>
+        </select>
+        <select class="fld" aria-label="State">
+          <option>Published and drafts</option><option>Published</option><option>Drafts</option>
+        </select>
+        <span class="count">5 reports</span>
+      </div>
+
+      <div class="elist">
+        <button class="erow" type="button">
+          <span class="body">
+            <h3>Egypt Consumer Spending Outlook — H2 2026</h3>
+            <p class="snip">Household spending, inflation pass-through and what it
+              means for basket size across modern and traditional trade.</p>
+            <span class="facts"><b>Macro</b> &middot; 1 Aug 2026 &middot; v2 &middot; 2.4 MB &middot; 31 downloads</span>
+          </span>
+        </button>
+        <button class="erow" type="button">
+          <span class="body">
+            <h3>Mobile Retail: Price Competition and Margin Pressure</h3>
+            <p class="snip">Handset pricing across the top six retailers, and where
+              margin is being given away to hold share.</p>
+            <span class="facts"><b>Market &middot; Sector</b> &middot; 24 Jul 2026 &middot; v1 &middot; 5.1 MB &middot; 44 downloads</span>
+          </span>
+        </button>
+        <button class="erow" type="button">
+          <span class="body">
+            <h3>FX and Import Cost Exposure — August update</h3>
+            <p class="snip">Landed-cost sensitivity by category at three exchange-rate
+              assumptions.</p>
+            <span class="facts"><b>Macro</b> &middot; 12 Aug 2026 &middot; v1 &middot; 1.2 MB &middot; 6 downloads</span>
+          </span>
+          <span class="tag" title="Finance &middot; Treasury &middot; Corporate">3 departments</span>
+        </button>
+        <button class="erow" type="button">
+          <span class="body">
+            <h3>Modern Trade Channel Share, Q2 2026</h3>
+            <p class="snip">Channel share by governorate, with the two quarters before
+              it for comparison.</p>
+            <span class="facts"><b>Market</b> &middot; 30 Jun 2026 &middot; v3 &middot; 3.8 MB &middot; 52 downloads</span>
+          </span>
+        </button>
+        <button class="erow" type="button">
+          <span class="body">
+            <h3>Governance Review: Board Reporting Practice</h3>
+            <p class="snip">How the quarterly pack is assembled today, and what a
+              board elsewhere would expect to see in it.</p>
+            <span class="facts"><b>Governance</b> &middot; 4 Sep 2026 &middot; v1 &middot; 0.9 MB &middot; not published</span>
+          </span>
+          <span class="tag none">Draft</span>
+        </button>
+      </div>
+    </div></div>
+
+    <div class="mk-notes">
+      <div class="mk-note"><span class="b">The mark</span><span>A quiet
+        <b>3 departments</b> where it is narrowed, a red <b>Nobody</b> where the
+        list is empty, and <b>nothing at all</b> where everyone can see it. Four
+        of the five rows here are unchanged.</span></div>
+      <div class="mk-note"><span class="b">Found by drawing it</span><span>It was
+        amber in the first draft, and the render showed it sitting beside
+        <b>Draft</b>, which is already amber — two meanings in one colour in one
+        slot. Quiet is also the honest weight: narrowing a report is a normal act
+        somebody chose, not something outstanding.</span></div>
+      <div class="mk-note"><span class="b">How many, not which</span><span>The
+        column is too narrow to name three departments without wrapping the row
+        onto a second line, which is the one thing a list like this may never do.
+        The names are on the hover and on the card.</span></div>
+      <div class="mk-note"><span class="b">Reused</span><span>Everything. The
+        narrowed mark is <b>.tag</b> exactly as it already is; the only new pair
+        in this family is the red one for <em>Nobody</em>. No new column, no
+        width spent.</span></div>
+      <div class="mk-note"><span class="b">Cost</span><span>Two marks can now land
+        on one row — a withdrawn draft that is <em>also</em> narrowed. They sit
+        side by side and the row still holds one line.</span></div>
+    </div>
+  </section>
+
+  <!-- ═══ FRAME 2 ═══════════════════════════════════════════════════ -->
+  <section class="mk-frame">
+    <div class="mk-fh">
+      <span class="n">02</span>
+      <h2>On the card, beside the categories</h2>
+      <span class="where">the same page, one report open</span>
+    </div>
+    <p class="mk-why">It is a field on the report, in the same block as the
+      title, the summary, the categories and the file — because that is where
+      the report is already being described. A visibility page listing every
+      report would be a second copy of this list sitting somewhere else.</p>
+
+    <div class="mk-screen"><div class="inner">
+      <div class="ecard">
+        <div class="etags">
+          <span class="tag open">Published</span>
+          <span class="tag">v2</span>
+        </div>
+        <h2>Egypt Consumer Spending Outlook — H2 2026</h2>
+
+        <div class="rowset" style="margin-top:18px">
+          <div>
+            <span class="lab">Categories</span>
+            <div class="catrow">
+              <button class="catpick" type="button" aria-pressed="false">Analysis</button>
+              <button class="catpick" type="button" aria-pressed="true">Macro</button>
+              <button class="catpick" type="button" aria-pressed="false">Market</button>
+              <button class="catpick" type="button" aria-pressed="false">Sector</button>
+              <button class="catpick" type="button" aria-pressed="false">Governance</button>
+            </div>
+          </div>
+          <div>
+            <span class="lab">Who can see it</span>
+            <div class="seen">
+              <span class="who"><span class="all">Everyone at Raya Trade</span></span>
+              <span class="sp"><button class="btn" type="button">Narrow it&hellip;</button></span>
+            </div>
+          </div>
+          <div class="wpair">
+            <div>
+              <label class="lab" for="v-date">Report date</label>
+              <input class="fld" id="v-date" type="date" value="2026-08-01">
+            </div>
+            <div>
+              <span class="lab">The file</span>
+              <div class="drop">
+                <span class="fname">raya-consumer-outlook-h2-26.pdf &middot; 2.4 MB</span>
+                <span class="sp"><button class="btn" type="button">Replace</button></span>
+              </div>
+            </div>
+          </div>
+          <p class="note"><b>Everyone</b> means everyone — including a business
+            unit or a supporting function added to Raya Trade next month. It is
+            not a list of today's eighteen departments with all of them
+            ticked.</p>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="mk-notes">
+      <div class="mk-note"><span class="b">New</span><span>One rule — the strip.
+        It is the file row's shape with a solid border rather than a dashed one,
+        because dashed is how the file row says something can be dragged onto
+        it.</span></div>
+      <div class="mk-note"><span class="b">The word</span><span><em>Narrow it</em>
+        rather than <em>Choose</em> or <em>Edit</em>, because it only ever takes
+        people away. The button on a narrowed report reads
+        <em>Change</em>.</span></div>
+      <div class="mk-note"><span class="b">Not a switch</span><span>There is no
+        on/off beside it. The absence of a list <b>is</b> everyone, so a switch
+        would be a second way to say the same thing and the two could
+        disagree.</span></div>
+      <div class="mk-note"><span class="b">Where it sits</span><span>Above the
+        date and the file, under the categories — the two fields that say what
+        this report <em>is</em>, then who it is <em>for</em>, then the
+        housekeeping.</span></div>
+    </div>
+  </section>
+
+  <!-- ═══ FRAME 3 ═══════════════════════════════════════════════════ -->
+  <section class="mk-frame">
+    <div class="mk-fh">
+      <span class="n">03</span>
+      <h2>Narrowing it</h2>
+      <span class="where">the panel open, three of eighteen ticked</span>
+    </div>
+    <p class="mk-why">Searchable and ticked, with <em>All</em> and
+      <em>None</em>. It is the set-up flow's picker panel — which is itself the
+      client platform's own searchable list one surface over — so the shape is
+      already in the product twice.</p>
+
+    <div class="mk-screen open"><div class="inner">
+      <div class="ecard">
+        <div class="etags">
+          <span class="tag open">Published</span>
+          <span class="tag">v1</span>
+        </div>
+        <h2>FX and Import Cost Exposure — August update</h2>
+
+        <div class="rowset" style="margin-top:18px">
+          <div>
+            <span class="lab">Who can see it</span>
+            <div class="tickwrap">
+              <div class="seen">
+                <span class="who">
+                  <span class="tag">Finance</span>
+                  <span class="tag">Treasury</span>
+                  <span class="tag">Corporate</span>
+                </span>
+                <span class="sp"><button class="btn" type="button">Done</button></span>
+              </div>
+
+              <div class="tickpanel">
+                <div class="tickhead">
+                  <input class="fld" type="search" placeholder="Search departments&hellip;" value="">
+                  <button class="lnk" type="button">All</button>
+                  <button class="lnk" type="button">None</button>
+                </div>
+                <div class="ticklist">
+                  <div class="gp">Business units</div>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Mobile</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Retail Stores</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Consumer Electronics</button>
+                  <button class="tick" type="button" aria-pressed="true"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Corporate</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>B2B Ecomm</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Online Shop</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Care</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>IT Dist.</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Logistics</button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Nigeria</button>
+                  <div class="gp">Supporting functions</div>
+                  <button class="tick" type="button" aria-pressed="true"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Finance&nbsp;<span class="sub">(function)</span></button>
+                  <button class="tick" type="button" aria-pressed="true"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Treasury&nbsp;<span class="sub">(function)</span></button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Marketing&nbsp;<span class="sub">(function)</span></button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Merchandising&nbsp;<span class="sub">(function)</span></button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Care&nbsp;<span class="sub">(function)</span></button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>IT&nbsp;<span class="sub">(function)</span></button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>HR&nbsp;<span class="sub">(function)</span></button>
+                  <button class="tick" type="button" aria-pressed="false"><span class="bx"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Strategy Management Office</button>
+                </div>
+                <div class="tickfoot"><b>All</b> hands it back to everyone,
+                  including a department added later — it does not tick these
+                  eighteen.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="mk-notes">
+      <div class="mk-note"><span class="b">All is not eighteen ticks</span><span>This
+        is the one thing that would have bitten in six months. Ticking every
+        department today <em>excludes</em> a unit created next month, silently,
+        and nobody would connect the two. <b>All</b> clears the list back to
+        everyone-and-whoever-arrives.</span></div>
+      <div class="mk-note"><span class="b">Care, and Care</span><span>Raya Trade
+        has a business unit called Care and a supporting function called Care,
+        and the same is true of IT. The suffix is load-bearing for exactly those
+        two — drawn on every function so it reads as a rule rather than as a
+        note about two rows.</span></div>
+      <div class="mk-note"><span class="b">The tick is drawn</span><span>An SVG,
+        never a text character. The tick mark is outside the latin subsets this
+        platform embeds and would ship as a blank box.</span></div>
+      <div class="mk-note"><span class="b">Drawn full</span><span>The real panel
+        <b>overlays</b> the card below it and caps at about <b>240px</b>, the
+        same cap the set-up flow's picker uses. It is drawn in the flow and at
+        full height here so both groups can be read in one look.</span></div>
+      <div class="mk-note"><span class="b">People are not in it</span><span>Units
+        and functions only. A report is for Finance, not for one named person. If
+        a named person is ever needed that is a different control and I would
+        rather not build it before you have hit the case.</span></div>
+    </div>
+  </section>
+
+  <!-- ═══ FRAME 4 ═══════════════════════════════════════════════════ -->
+  <section class="mk-frame">
+    <div class="mk-fh">
+      <span class="n">04</span>
+      <h2>What two people see</h2>
+      <span class="where">/raya-trade/insights, the same afternoon</span>
+    </div>
+    <p class="mk-why">The narrowed report is simply <b>not in the list</b> — not
+      greyed, not locked, not named. And the count says four on the left and
+      three on the right, because a library that says four and shows three is a
+      bug report waiting to happen.</p>
+
+    <div class="mk-screen"><div class="inner">
+      <div class="twoup">
+        <div>
+          <span class="cap">Hoda &mdash; Finance</span>
+          <div class="cl">
+            <div class="tools">
+              <input class="srch" type="search" placeholder="Search reports&hellip;" value="">
+              <span class="cnt">4 reports</span>
+            </div>
+            <div class="list">
+              <div class="item"><span class="body">
+                <h3>FX and Import Cost Exposure — August update</h3>
+                <span class="facts"><b>Macro</b> &middot; 12 Aug 2026 &middot; v1 &middot; 1.2 MB</span>
+              </span><span class="dl">Download</span></div>
+              <div class="item"><span class="body">
+                <h3>Egypt Consumer Spending Outlook — H2 2026</h3>
+                <span class="facts"><b>Macro</b> &middot; 1 Aug 2026 &middot; v2 &middot; 2.4 MB</span>
+              </span><span class="dl">Download</span></div>
+              <div class="item"><span class="body">
+                <h3>Mobile Retail: Price Competition and Margin Pressure</h3>
+                <span class="facts"><b>Market &middot; Sector</b> &middot; 24 Jul 2026 &middot; v1 &middot; 5.1 MB</span>
+              </span><span class="dl">Download</span></div>
+              <div class="item"><span class="body">
+                <h3>Modern Trade Channel Share, Q2 2026</h3>
+                <span class="facts"><b>Market</b> &middot; 30 Jun 2026 &middot; v3 &middot; 3.8 MB</span>
+              </span><span class="dl">Download</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="cap">Karim &mdash; Mobile</span>
+          <div class="cl">
+            <div class="tools">
+              <input class="srch" type="search" placeholder="Search reports&hellip;" value="">
+              <span class="cnt">3 reports</span>
+            </div>
+            <div class="list">
+              <div class="item"><span class="body">
+                <h3>Egypt Consumer Spending Outlook — H2 2026</h3>
+                <span class="facts"><b>Macro</b> &middot; 1 Aug 2026 &middot; v2 &middot; 2.4 MB</span>
+              </span><span class="dl">Download</span></div>
+              <div class="item"><span class="body">
+                <h3>Mobile Retail: Price Competition and Margin Pressure</h3>
+                <span class="facts"><b>Market &middot; Sector</b> &middot; 24 Jul 2026 &middot; v1 &middot; 5.1 MB</span>
+              </span><span class="dl">Download</span></div>
+              <div class="item"><span class="body">
+                <h3>Modern Trade Channel Share, Q2 2026</h3>
+                <span class="facts"><b>Market</b> &middot; 30 Jun 2026 &middot; v3 &middot; 3.8 MB</span>
+              </span><span class="dl">Download</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="mk-notes">
+      <div class="mk-note"><span class="b">Not found, never
+        refused</span><span>Karim opening the FX report's address is told
+        <b>not found</b>, the same answer a withdrawn report gives. Nobody is
+        told a report exists that they may not read.</span></div>
+      <div class="mk-note"><span class="b">Nothing else
+        changes</span><span>Search, categories and the count all work on what
+        that person can see. There is no second filter and no second
+        list.</span></div>
+      <div class="mk-note"><span class="b">Where they sit</span><span>Read from
+        the register — the one place that already answers where somebody works.
+        Somebody the register has not placed anywhere sees the everyone reports
+        and no narrowed one.</span></div>
+      <div class="mk-note"><span class="b">The office sees
+        everything</span><span>Anybody holding the <b>Super user</b> or <b>SMO
+        team</b> seat reads every report whatever its list says — and that is us,
+        because there is no client-side strategy office. The rule is written
+        against the <em>seat</em> and not against who employs somebody, since the
+        seat is the only one of the two the platform knows.</span></div>
+    </div>
+  </section>
+
+  <!-- ═══ FRAME 5 ═══════════════════════════════════════════════════ -->
+  <section class="mk-frame">
+    <div class="mk-fh">
+      <span class="n">05</span>
+      <h2>Nobody, and it says so</h2>
+      <span class="where">the state None leaves behind</span>
+    </div>
+    <p class="mk-why">Pressing <em>None</em> makes a published report that no
+      one can open. It is a real thing to want for an hour — a report staged
+      before its window — and it looks completely normal from the list unless
+      something says otherwise.</p>
+
+    <div class="mk-screen"><div class="inner">
+      <div class="ecard">
+        <div class="etags">
+          <span class="tag open">Published</span>
+          <span class="tag">v1</span>
+          <span class="tag shut">Nobody</span>
+        </div>
+        <h2>Governance Review: Board Reporting Practice</h2>
+        <div class="rowset" style="margin-top:18px">
+          <div>
+            <span class="lab">Who can see it</span>
+            <div class="seen">
+              <span class="who"><span class="none">Nobody can open this report</span></span>
+              <span class="sp"><button class="btn" type="button">Change</button></span>
+            </div>
+            <p class="note">It is published and its list is empty, so it is in
+              nobody's library. <b>Withdraw</b> is the honest way to take a report
+              back; this is the way to stage one.</p>
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="mk-notes">
+      <div class="mk-note"><span class="b">Allowed, and
+        said</span><span>Refusing <em>None</em> outright would be the platform
+        deciding somebody's staging for them. Drawing it normally would be worse.
+        So it is allowed and it is marked, in the list and on the
+        card.</span></div>
+      <div class="mk-note"><span class="b">Two ways to hide
+        one</span><span>Withdrawn and Nobody end up looking the same to a client,
+        and they mean different things to us. The card names the difference
+        rather than leaving somebody to work out which they
+        want.</span></div>
+      <div class="mk-note"><span class="b">The count</span><span>A client whose
+        every report is narrowed away sees the library's own empty state —
+        <em>Nothing has been published here yet</em> — which is a small lie and
+        the only one I can find. Stated rather than hidden.</span></div>
+      <div class="mk-note"><span class="b">Not drawn</span><span>Scheduled
+        publishing. Still answered <b>no</b>, and this is the control somebody
+        would reach for instead.</span></div>
+    </div>
+  </section>
+
+  <!-- ═══ THE ASK ══════════════════════════════════════════════════ -->
+  <section class="mk-ask">
+    <h2>Settled</h2>
+    <ul>
+      <li><b>Set in the publishing room, by us.</b> Islam, 15 September:
+        <em>&ldquo;there is no client smo for the client it's always the smo which is
+        us.&rdquo;</em> So this is settled rather than open — and it settles the
+        larger thing with it: <b>Insights needs no write control on the client's
+        side at all</b>, which keeps the property that module's own code leans on,
+        that there is no write endpoint a client's session can reach.</li>
+      <li><b>The Super user and SMO team seats read everything</b>, whatever a
+        report's list says. Written against the <em>seat</em>, because the seat is
+        what the platform holds — who employs somebody is not a thing it
+        knows.</li>
+    </ul>
+    <h2 style="margin-top:16px">What I still need your word on</h2>
+    <ul>
+      <li><b>All means everyone-and-whoever-arrives</b>, not eighteen ticks.</li>
+      <li><b>Units and functions only</b> — no named people, and no companies
+        (a company is a grouping of units and ticking one would be a third
+        thing to keep in step).</li>
+      <li><b>None is allowed and marked</b> rather than refused.</li>
+    </ul>
+  </section>
+
+</div>

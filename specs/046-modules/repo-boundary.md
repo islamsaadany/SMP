@@ -41,7 +41,7 @@ Measured on the tree as it stands:
 | **The tenant boundary** | `lib/tenant.ts` — `withTenant()` is the one way tenant data is reached: `BEGIN · SET LOCAL app.tenant_id · COMMIT`, on the app pool as `smp_app`, with row-level security forced. With no setting every tenant table reads **empty** rather than everybody's. | Hold a second copy of the one line the whole client boundary rests on, or open the database another way. Two answers to *which client is this* (§53.5), on the question where being wrong is worst. |
 | **The door and the session** | `lib/door.ts`, `lib/session.ts`, `lib/auth.ts` — the httpOnly cookie, the seat on the client, the refusals. | Share a cookie across origins, or sign in twice. |
 | **The address** | One route handler — `app/(platform)/[slug]/[...rest]/route.ts` — reads which modules the client has and only then decides what the address names. | A proxy in front choosing which deployment answers, and two deployments that must agree about the client list and the module list. |
-| **Which modules a client has** | `lib/modules.ts`, read by **seven hand-written places** (the route, the landing, the platform console's API, the trial module, the shell's own browser file, and two checks) plus two generated copies under `public/`. | Publish that list across a repo boundary, or keep a second copy of it. |
+| **Which modules a client has** | `lib/modules.ts`, read by **eleven hand-written places** (the route, the module registry, each module's own server and page, the landing, the platform console's API, and two checks) plus two generated copies under `public/`. It was seven when this page was written; §354's folders added four, which is the measurement moving rather than the argument. | Publish that list across a repo boundary, or keep a second copy of it. |
 | **Roles & access** | One page, a Client tab and a tab per module (§4.4). The page has to know every module by definition. | — |
 | **Setup, branding, the register, the people** | Spine, all of it. | — |
 | **The schema and the migrations** | `scripts/deploy.mjs` applies `db/schema.sql` plus every migration on **every build**, in one transaction under a transaction-scoped lock; a failure fails the build. | Two builds, each applying its own copy of the schema to one database. |
@@ -128,34 +128,66 @@ the client through the matrix.
 
 ---
 
-## 5 · The open item, and it is the one that matters
+## 5 · The open item — half answered (§354), half still open
 
-This decision is the cheap half. The expensive half is still unwritten:
+This decision was the cheap half. The expensive half:
 
 > **Where does the line between spine and module run in the code?**
 
-Today it is implicit — Strategy **is** the shell. `lib/shell.ts` serves the
-frozen platform; `lib/trial.ts` serves a small document of its own; and the
-route handler chooses between them with a branch that says, in its own comment,
-that it is a branch rather than a table *because there are two of them*.
+When this page was written it was implicit — Strategy **is** the shell — and the
+route chose between two servers with a branch saying, in its own comment, that
+it was a branch *because there are two of them*. That branch is correct at two
+and stops being correct at three, and **Insights made three the next day**, with
+eight more lines added underneath that sentence rather than the table it
+promised.
 
-That branch is correct at two and stops being correct at three. Before Portfolio
-is built, the following need naming rather than discovering:
+### 5.1 · Answered on 2026-09-14 (§354)
 
-- **What a module may reach on the spine.** The tenant, the session, the
-  register, branding, the save path — as a declared list, not as whatever it
-  happens to import.
-- **What a module may never touch.** Another module's rows, the client registry,
-  the access matrix's other tabs.
-- **How a module declares itself.** `MODULE_DEF` already holds the label, the
-  note and `built`. The contract asks for five things (§4.2) and the file
-  carries the part every surface needs *today*; the other four are
-  `lib/shell.ts`-shaped and unwritten.
-- **Who serves a module's document**, once "a branch for two" no longer holds.
+- **Who serves a module's document.** `modules/registry.ts` is the table; each
+  module's own folder holds its page and its server. The route resolves the
+  door, the client and which module the address names, and asks. A fourth
+  module is a folder and an entry, and the route file is not edited at all —
+  asserted at both ends, because a table with one surviving
+  `if (w.module === "…")` beside it is the drift the table removes.
+- **What a module is handed.** The request, the client's slug, its tenant id,
+  its name, the modules it has, and the address *inside* the module. No pool,
+  no session, no registry row: a module reaches client data through
+  `withTenant` like everything else.
+- **A module is a folder.** `modules/<key>/`. And reading corrected the move
+  before it happened: `lib/library.ts` is *one machine, two names* (Insights and
+  Processes) and is written from the console, so it and `lib/library-file.ts`
+  stayed on the spine — a folder holding a shared machine lies, and a spine
+  importing from inside a module is the boundary the folders exist to show.
+  `lib/shell.ts` stayed for the same reason: `shellHeaders` is every served
+  document's, not Strategy's.
+- **Branding is the spine's, and now reaches a module.** `lib/branding.ts`:
+  `barFrom` is the rule, `barFor` is that rule plus one small read. Insights had
+  carried the shipped navy as a literal with no reader at all.
 
-Doing this with **two** modules is far cheaper than doing it with four, and it
-is what makes the second module cheap rather than the second module being the
-thing that teaches us where the line was.
+### 5.2 · Still open
+
+- **What a module may reach on the spine**, as a *declared* list rather than
+  whatever it happens to import. §354 declared it for the serving seam only;
+  the tenant, the register, branding and the save path are still reached by
+  importing them.
+- **What a module may never touch** — another module's rows, the client
+  registry, the access matrix's other tabs. Nothing enforces this; today it is
+  a convention held up by the folders being obvious.
+- **How a module declares the rest of itself.** `MODULE_DEF` holds the label,
+  the note, `built` and (since spec 053) its areas. Three of the contract's five
+  things are built for no module at all: its tab on Roles & access, its Setup
+  group, and its line on the landing. Each needs a product decision before it
+  can be drawn (§4.4, §4.5), and for Insights the honest answer to the Setup
+  group may be **none** — Forefront publishes it, so there may be nothing for a
+  client to set, and that is a decision to write down rather than an empty page
+  to build.
+- **Where Setup lives.** A spine segment (`setup`, `tour`) is served by the
+  default module's server, because the frozen platform is where Setup is drawn
+  today. Named in `modules/strategy/index.ts` rather than hidden; it stops
+  being true the day Setup is the spine's own document.
+
+Doing the rest with **three** modules is still far cheaper than doing it with
+five.
 
 ---
 

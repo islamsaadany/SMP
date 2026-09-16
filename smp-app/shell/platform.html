@@ -551,6 +551,63 @@
      the one thing saying it is pressed. */
   .catpick:hover, .catpick:focus-visible{ border-color:var(--amber-tx); outline:none }
   .catrow{ display:flex; gap:7px; flex-wrap:wrap }
+
+  /* ── WHO CAN SEE ONE REPORT (spec 046 §4.10) ─────────────────────────
+     Four rule families, verbatim from the mockup signed off on 15 September
+     (design-mockups/insights/2026-09-15_report-visibility.html), which is
+     itself built out of the rules above.
+
+     THE STRIP is .filestrip's shape with a SOLID border rather than a dashed
+     one: it is a field among the others, and dashed is how the file row says
+     something can be dragged onto it.
+
+     THE PANEL is .wzpanel's box with .gp's headings and .opt's rows — the
+     set-up flow's picker, which is itself the client platform's own
+     searchable list one surface over (§130.1, §295.1). What is new is the
+     head (a search and the two words) and the tick.
+
+     THE MARK ON A ROW NEEDS NO RULE AT ALL: a narrowed report wears the
+     plain .tag, and only `Nobody` takes an alarm. Drawn amber first and the
+     render caught it — .tag.none (Draft) is already amber, so two meanings
+     landed in one colour in one slot (§87's twins, §41's budget).
+     --bad on --bad-bg measures 5.51 light and 5.28 dark in THIS palette;
+     §62's 4.41 is the client platform's and is not a measurement of this one
+     (§303's shape). */
+  .tag.shut{ color:var(--bad); background:var(--bad-bg); border-color:var(--bad) }
+  .seen{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    border:1px solid var(--line); border-radius:9px; padding:10px 12px; background:var(--surface) }
+  .seen .who{ min-width:0; display:flex; gap:6px; flex-wrap:wrap; align-items:center }
+  .seen .all{ font-size:13.5px; color:var(--ink-2) }
+  .seen .none{ font-size:13.5px; color:var(--bad); font-weight:600 }
+  .seen .sp{ margin-left:auto; display:flex; gap:8px }
+  .tickwrap{ position:relative }
+  .tickpanel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    box-shadow:var(--shadow); overflow:hidden }
+  .tickhead{ display:flex; gap:8px; align-items:center; padding:9px 9px 8px;
+    border-bottom:1px solid var(--line-soft); flex-wrap:wrap }
+  .tickhead .fld{ flex:1 1 180px; min-width:0; padding:6px 9px; font-size:13.5px }
+  .tickhead .lnk{ border:0; background:transparent; padding:2px 4px; cursor:pointer;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ff-tx); text-decoration:underline;
+    text-underline-offset:3px }
+  .tickhead .lnk:hover, .tickhead .lnk:focus-visible{ color:var(--ink); outline:none }
+  .ticklist{ max-height:236px; overflow-y:auto; padding:5px }
+  .ticklist .gp{ font:600 10px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); padding:9px 9px 5px }
+  .tick{ display:flex; gap:9px; align-items:center; width:100%; text-align:left; border:0;
+    background:transparent; color:var(--ink); font:inherit; font-size:13.5px;
+    padding:6px 9px; border-radius:6px; cursor:pointer }
+  .tick:hover, .tick:focus-visible{ background:var(--surface-2); outline:none }
+  .tick .bx{ flex:none; width:15px; height:15px; border-radius:4px; border:1.5px solid var(--line);
+    display:grid; place-items:center; background:var(--surface) }
+  .tick .bx svg{ width:11px; height:11px; display:none }
+  .tick[aria-pressed="true"] .bx{ border-color:var(--amber); background:var(--amber) }
+  .tick[aria-pressed="true"] .bx svg{ display:block; color:var(--amber-ink) }
+  .tick[aria-pressed="true"]{ font-weight:600 }
+  .tickfoot{ border-top:1px solid var(--line-soft); padding:8px 11px 9px;
+    font-size:12.5px; color:var(--ink-3) }
+  .tickfoot b{ color:var(--ink); font-weight:600 }
   /* A bordered strip and not a card: the file is one field among the others,
      and a card would rank it above the title. Dashed, because until something
      is dropped on it there is nothing there — the same thing the Add card's

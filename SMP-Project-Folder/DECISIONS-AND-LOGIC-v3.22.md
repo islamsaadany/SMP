@@ -47979,6 +47979,842 @@ difference widened it is not established, and does not need to be.
 
 ---
 
+## §354 — A MODULE IS A FOLDER THAT SERVES ITSELF (2026-09-14, spec 046)
+
+Islam, with the client's card in front of him showing three rows — Strategy,
+Insights, Trial: *"check as we now have 3 modules"*, then, of the five things
+that turned out not to have kept up, **"let's fix all"**. He took the split
+offered: the four repairs now, and the three missing screens drawn first and
+signed off before they are built (rule 1c). This is those four.
+
+**THE PART THAT WAS MEANT TO MAKE A MODULE CHEAP HELD UP, AND SAYING SO FIRST
+IS MOST OF THE AUDIT.** Insights cost one entry: its word was already reserved
+in `MODULE_DEF`, so `built: false → true` opened the door and no surface had to
+learn the word — the address, the switcher, the card and the console all ask
+that one file, nine hand-written places read it and not one keeps a copy. It
+brought its own area (`a_insights`, view or none, shipped at view) and declared
+it in that same file, and `checks/modules.mjs` had been rewritten rather than
+edited around: it works out which modules are built rather than naming them,
+and it asserts the new area is **not** in the client's carried matrix, which
+would otherwise turn `generated-in-step` red (§335).
+
+### §354.1 — THE BRANCH PASSED THE POINT ITS OWN COMMENT SAID IT WOULD
+
+The route's comment read *"it is a branch rather than a table because there are
+two of them: a third makes the table worth having"* — and there were three, with
+Insights' eight lines bolted on directly underneath that sentence. **The file
+said one thing and did another** (§104.8's family), and §345 had written down
+that this exact moment was coming, three weeks' work earlier.
+
+**THE TABLE IS `modules/registry.ts`**, and what it buys is not tidiness: a chain
+answers *what happens at this address* by being read top to bottom, so every
+module added is another edit to the route's own file — which is how the fourth
+module comes to need the route, the switcher and Setup edited for one thing
+(§53.5). A module now says how it serves itself **in its own folder**, and the
+route asks. What the route keeps is what is the route's — the door, the client,
+and which module the address names; what it stops holding is any knowledge of
+what a module draws. **A fourth module is a folder and an entry, and that file
+is not opened at all**, which the check asserts at BOTH ENDS (§94.2): the route
+dispatches through the table **and** names no module of its own, because a build
+that kept the table and left one `if (w.module === "…")` beside it is exactly the
+drift the table removes.
+
+**WHAT A MODULE IS HANDED, AND NOTHING ELSE** (spec 046 §5's first open point,
+answered as far as this seam reaches): the request, the slug, the tenant id, the
+client's name, the modules it has, and the address INSIDE the module. No pool,
+no session, no registry row — a module reaches client data through `withTenant`
+like everything else, so the tenant boundary stays the one line it has always
+been (§313, §314).
+
+**A SPINE SEGMENT IS SERVED BY THE DEFAULT MODULE** (`setup`, `tour`), which is
+where Setup is drawn today. That is **named rather than hidden**: it is the
+spine/module line still being implicit, and the day Setup is the spine's own
+document it stops arriving there.
+
+### §354.2 — A MODULE IS A FOLDER, AND ONE OF THE THREE FILES WAS NOT ITS OWN
+
+§345 §3 puts *a folder per module* as the first and cheapest isolation step, and
+Insights had arrived as three files dropped into `lib/` beside the door, the
+session and the tenant boundary — nothing in the tree saying which files were
+whose. `modules/<key>/` now holds each module's own page and its server.
+
+**AND READING CORRECTED THE PLAN BEFORE IT MOVED ANYTHING.** The first
+description of this work said *"move the Insights files"*, three of them. Their
+own headers say otherwise: `lib/library.ts` opens **"one machine, two names —
+Insights and Processes are the same catalogue with different content"**, and it
+is written from the CONSOLE as well (`lib/platform-api.ts` imports it for the
+publishing room). `lib/library-file.ts` is the same shape one layer down. So
+**one file moved and two stayed** — moving a shared catalogue into one module's
+folder would have made the folder lie, and made the spine import from inside a
+module, which is the boundary this round exists to make visible.
+
+`lib/shell.ts` stayed for the same kind of reason, stated in
+`modules/strategy/index.ts`: two things live in it and only one is Strategy's —
+`shellDocument` draws the frozen platform, and `shellHeaders` is the policy
+**every** served document wears, this module's and the other two's.
+
+### §354.3 — THE CLIENT'S COLOURS DID NOT REACH A MODULE
+
+Measured: Strategy wore the tenant's bar colour, the trial module read it for
+itself, and Insights carried the shipped navy **as a literal with no reader at
+all** — so a client who had chosen a colour saw it on two screens of three.
+Insights' own comment recorded this and left it (*"it wants one reader both ask,
+which is its own small piece of work"*). Branding is the spine's by decision
+(spec 046 §4.1), and the spine was not handing it over.
+
+**ONE ANSWER, TWO WAYS OF REACHING IT**, and the difference is where the graph
+already is rather than what the rule is: `barFrom(value)` is the rule — what
+counts as a colour and what a client who has chosen none wears — and every
+caller ends there; `barFor(tenantId)` is that rule plus **one column of one
+row**, for a module with no reason to load the whole graph. The trial module
+holds the graph already (it reads it for its count) and makes no second query.
+**A COLOUR MAY NEVER STOP A PAGE DRAWING**: a database that will not answer
+gives the shipped navy and the library still lists (§231.3 one layer in).
+
+**NOTHING VISIBLE CHANGES ON A TENANT THAT HAS CHOSEN NO COLOUR**, which is
+every tenant in the worked example — this shows up only where somebody has
+rebranded, and that is stated rather than discovered.
+
+### §354.4 — THE CHECK COVERED TWO MODULES OF THREE, AND ONE ASSERTION HAD BEEN
+### RED SINCE THE PAGE UNDER IT WAS REPLACED
+
+Baseline before anything was touched: **69 ok, 1 failed**. Three faults, each
+its own shape.
+
+**THE SUBJECT MOVED AND THE CHECK DID NOT** (§51.11). §320.4 drew the modules
+band under the client's name on the settings page and asserted it came before
+that page's two columns; §322 replaced the whole page with the set-up flow and
+CARRIED the band onto its first step (§322.1). The check went on slicing from
+`function drawClient(`, which the console has not held since — `indexOf`
+answered **-1**, `slice(-1)` handed it **the last character of the file**, and
+every assertion under it failed against one byte. It had been red ever since,
+saying *"placement B"* about a page that no longer exists. REWRITTEN to the
+placement that is now the decision, never loosened (§218): the band is on step
+one — the step about the client rather than its organisation — after that step's
+own fields and before the ending block, and **drawn once**, because a band on two
+steps is two places to set one thing.
+
+**THE LITERAL OUTLIVED THE DECISION** (§214.3, sixth time). The address section
+read `["strategy", "trial"]` by hand, so the third module was asserted nowhere
+and the file went on saying four surfaces agreed while three modules had to.
+Both lists are worked out from `MODULE_DEF` now, so the fourth module is covered
+the day it is marked built and this file is not edited.
+
+**AND THE CONTRACT'S FIFTH LINE COULD NOT BE ASKED AT ALL.** *A landing* was a
+chain of ifs in the route, so a module marked `built` with no page behind it read
+exactly like one with a page — right up until somebody opened its address and got
+the Strategy platform wearing another name, which is the whole reason that flag
+exists (§61). Both ends: every built module serves itself, AND no unbuilt word
+does.
+
+### §354.5 — AND THE FIRST VERSION OF THE NEW ASSERTION PASSED FOR THE WRONG
+### REASON, FOUND BY FALSIFYING IT RATHER THAN BY READING IT
+
+The driven half asked whether each module's document carried
+`data-module="<key>"` — **and the shell stamps that from the argument it is
+handed**. So the `wrong-server` break, which points two words at one page, drew
+the Strategy platform wearing the word `insights` and satisfied the assertion
+perfectly: the exact fault, rendering exactly as the assertion demanded (§113.8).
+A **title** is written by a page out of its own vocabulary and cannot be handed
+in, so the assertion compares the three titles as a SET — naming none of them, so
+a fourth module is covered. Under the break it prints the duplicate verbatim.
+
+**AND THE TABLE IS DRIVEN, NEVER ONLY READ** (§96: a server wired to the wrong
+module renders perfectly): each one is CALLED, with no database, and each page
+degrades on its own terms while still having to be its own page.
+
+### §354.6 — AND THE RENUMBER TOOK SOMEBODY ELSE'S CITATION, WHICH IS §264.3
+
+The work was written citing **§347** — and main had taken that number for *a
+capability is a step*. Correcting it with a sweep across `smp-app` renumbered
+`lib/platform-api.ts`'s own §347 as well, **a file this work never touched**:
+§264.3's fault exactly, in the same afternoon it was being quoted. Restored, and
+the other four files were then checked against `origin/main` rather than assumed
+— all four held **zero** §347 references before today, so every one renumbered
+was this work's own.
+
+### §354.7 — WHAT WAS RUN
+
+A throwaway Postgres 16 and a real build, because the route is the riskiest
+change and reading it proves nothing (§94.11). `check:modules` **69/1 → 93/0**,
+proved able to fail **seven ways** (`any-module`, `open-address`,
+`static-hello`, `switch-always`, `no-server`, `wrong-server`,
+`module-own-colour`) — and each of the three new breaks was watched to redden
+**its own assertion and nothing else**, because a break that goes red for an
+unrelated reason proves nothing (§54.5). `check:insights` **93/0** with its three
+breaks red — the full run, which exercises the moved page and the new colour
+reader against a real database. Against the rebuilt app: **door 70/0, shell
+72/0**, both matching the record, and the shell check drives real client pages
+through the rewritten route. room 10/0, blob 23/23, comms 47/47, demo 7/0,
+upload 9/9, deploy 5/0, setup 33/0, `generated-in-step` all clear,
+`declared-deps` all clear, `tsc` clean, `next build` green.
+
+**THE FROZEN PRODUCT IS UNTOUCHED AND IT IS MEASURED, NOT CLAIMED**:
+`python3 build.py` is byte-identical to the shipped file, no generated copy
+moved, and **`sw.js` is NOT bumped** — §91's trigger is the built file's bytes
+changing and they did not.
+
+**`check:state` IS 84 ok / 2 failed AND IT IS NOT THIS WORK'S** — established by
+stashing every change, REBUILDING, and running it again for an identical 84/2
+(§303, and §105.6: the rebuild is the point, since the served app is what the
+check measures). Both failures are about the seeded demo graph and neither
+touches a module, the route or branding.
+
+### §354.8 — RECORDED, NOT DONE
+
+The three the mockup rule holds back, each needing a decision from Islam before
+it can be drawn (his own choice, 2026-09-14): **a tab per module on Roles &
+access** — Insights' area is declared and read by nothing but the check, so the
+module opens for everybody in the client with no way to narrow it; **a Setup
+group per module** — and the honest answer for Insights may be *none*, because
+Forefront publishes it and there may be nothing for a client to set, in which
+case that is written down as a decision rather than built as an empty page; and
+**a line on the welcome screen**, which still reads the default module alone.
+
+---
+
+## §355 — WHO CAN SEE ONE REPORT (2026-09-15, spec 046 §4.10)
+
+Islam, of Insights: *"the client sets nothing and normally every one in the
+company can see the reports and forefront can publish but for some certain
+reports it might need to belong to a function or more not the whole company so
+we can thing of a simple visibility per report not an overall visiblity mattrix
+and the visibility is a serarchble tick based with select all and select none
+options and the default is all can see and the smo can make the exceptions."*
+
+### §355.1 — THE QUESTION I ASKED WAS THE WRONG SHAPE, AND HE SAID SO
+
+I had asked *who should be able to open Insights and who shouldn't*. His answer
+was a correction rather than a reply: **"shouldn't that be the access matrix of
+insights?"** — which is right, and is spec 046 §4.4's own contract: who opens a
+module in a given client is a tick on that client's access tab, not a decision
+made here in advance. What I actually needed from him was what the tab OFFERS.
+
+**AND THE SECOND HALF OF HIS MESSAGE THEN DISSOLVED THE FEATURE I WAS ABOUT TO
+DESCRIBE.** A matrix answers *which roles may open this module*. What is wanted
+is the opposite shape — the module is open to everybody and a single report is
+occasionally narrowed — and **a matrix cannot say that at all**: it has no row
+for one report. So this is not a smaller version of the access tab, it is a
+different question, and the two now coexist (the tab is still not built, which
+is said in §355.9 rather than left to be noticed).
+
+**IT REVERSES SPEC 046 DECISION 15**, recorded as a reversal rather than
+overwritten (Principle II) — and the reasoning behind that decision was never
+wrong. It read *whole module, for now*, and the publishing room's own signed-off
+mockup settled it in the same words: *"No per-item permissions… asked and
+answered whole module, for now."* That was an answer to **how much is worth
+building first**, and what changed is that Islam named the case it does not
+cover.
+
+### §355.2 — THE DEFAULT IS AN ABSENCE, NEVER A FULL LIST
+
+A report nobody has narrowed stores **nothing at all** (§50.6). Ticking today's
+eighteen places and calling that *everyone* is the fault that would have bitten
+in six months and never been traced: **a unit created next month would be
+silently excluded**, by a tick list somebody filled in a year earlier, and
+nobody would ever connect the two. So `All` **deletes the key**, and the panel
+**says so in its own foot** rather than leaving it to be discovered (§35,
+§124) — *"All hands it back to everyone, including a department added later — it
+does not tick these four."*
+
+**THREE STATES, AND ONLY THE MIDDLE ONE IS A LIST**: absent is everyone, a list
+is those places, `[]` is nobody. **The third is a real answer and is drawn as
+one** — the alarm ink, in words (*"Nobody can open this report"*) — because a
+report nobody can open reading like every other row on the list is the quietest
+possible way to lose one.
+
+**AND THERE IS NO ON/OFF BESIDE IT** (§110's pair): a switch would be a second
+way to say what the list already says, and the two could then disagree. The
+absence of a list IS everyone, asserted as an absence at both ends.
+
+### §355.3 — A PLACE IS THE PRODUCT'S OWN WORD FOR ONE, AND THE SPINE ANSWERS IT
+
+A place is spelt the way a ROLE's place has been spelt since §54 — a unit's key
+(`mobile`), or `fn:` and a supporting function's (`fn:finance`) — so a list of
+places stored here reads the same as one stored anywhere else in this product
+and nothing is translated on the way in or out.
+
+**A COMPANY IS NOT A PLACE, AND THAT IS A DECISION**: a company is a GROUPING of
+units (§23), so ticking one would be a third thing to keep in step with the
+units under it — and somebody attached to a company rather than to a unit is at
+the group for this purpose, which is what null means.
+
+**WHERE A PERSON SITS IS THE SPINE'S TO ANSWER AND NO MODULE'S** (spec 046
+§4.1). `lib/place.ts` is the one door onto the register; a module that grew its
+own copy would be two answers to *may they read this*, which is the worst shape
+§53.5's drift can take. **A person sits in exactly ONE place by construction**
+(§130.6) — `attachPersonAt()` clears all three pointers before writing one —
+which is what stops that question having two answers at all; where both are
+somehow set the unit wins, one answer chosen on purpose beating two chosen by
+whichever query ran first.
+
+**RETIRED UNITS AND FUNCTIONS ARE NOT OFFERED**: ticking a place nobody sits in
+is an exception that can never let anybody through, which is §61 one step round.
+
+### §355.4 — THE OFFICE READS EVERYTHING, AND IT IS THE SEAT THAT SAYS SO
+
+Islam, the same day, closing two open questions in one sentence: *"there is not
+client smo for the client it's always the smo whihc is us."*
+
+So **there is no client-side strategy office to give a control to** — which
+settles where the narrowing lives (the publishing room in this console, and no
+write surface in the client app at all) AND what the rule is written against.
+It asks this client's **seat** (`super` / `smoteam`), never who employs
+somebody, because the seat is the only one of the two the platform holds:
+`schema.sql` says so in its own note — *a consultant on three clients and a
+client user on one are the same shape*.
+
+**NEITHER BRANCH THAT ALREADY KNOWS THE ANSWER ASKS THE DATABASE.** A seat that
+sees everything is not asked where it sits, so it cannot then disagree with
+itself; and somebody the register has not placed has no place to look up. That
+second one is not an optimisation — it is **the same answer arrived at without
+a connection**, and it is the case §313.32 names: an office login opening a
+client before `officeRow` has minted them a row would otherwise open a tenant
+connection on every request to be told null. **Found by `checks/modules.mjs`
+going red**, which drives each module's server with no database at all.
+
+### §355.5 — THE NARROWING IS IN THE WHERE, NEVER APPLIED AFTERWARDS
+
+The same argument `lib/library.ts` already makes for `state = 'published'`, one
+column along: **a report kept out of somebody's list and still openable by its
+own address is no rule at all.** A narrowed report's id must answer *not found*,
+never *not allowed*.
+
+**AND THE LIBRARY AND THE FILE ARE HANDED ONE RESOLVED VIEWER** rather than each
+working it out (§53.5, `modules/insights/index.ts`) — two addresses narrowing by
+two rules is exactly how a report goes missing from a list and stays
+downloadable.
+
+**THE MODULE SEAM GREW BY EXACTLY TWO FACTS, ON PURPOSE** (spec 046 §5's first
+open point): a module is handed `personKey` and `seat` beside the client it
+serves, and still no pool, no session and no registry row. **A list that grows
+without anybody noticing has stopped being a boundary**, so the growth is
+written into `modules/registry.ts` in its own paragraph rather than left to be
+discovered.
+
+### §355.6 — NO MIGRATION AND NO SCHEMA CHANGE, PROVED RATHER THAN CLAIMED
+
+`library_items` is tenant-owned with RLS and already carries an `extra jsonb`
+column, so the list rides `extra.seen` the road every unrecognised key in this
+product already travels (§118, §213). **The check asserts the table gained no
+column** (§172), because that claim has been made wrongly in this file before.
+
+### §355.7 — THE MOCKUP FOUND TWO FAULTS BEFORE A SOURCE MOVED
+
+Drawn first and published as an artifact (rule 1c), from the signed-off
+publishing-room mockup's own two style blocks verbatim.
+
+**THE MARK COLLIDED WITH `Draft`.** A narrowed report was drawn with an amber
+tag, and rendering it showed `.tag.none` — the Draft mark — is already amber on
+amber-tinted ground: **two meanings in one colour in one slot on one list**
+(§87's twins, §41's accent budget). It takes the plain tag, which is also the
+honest weight: a narrowed report is not in a worse state than any other.
+
+**AND A UNIT WAS MISSING FROM THE TICK LIST** — seventeen where the tenant has
+eighteen — which nothing but drawing it against the real list would have shown.
+
+**I ALSO NEARLY INVENTED A TOKEN THAT EXISTS SOMEWHERE ELSE.** Reaching for a
+`--bad-tx` twin, I cited §62's *"`--bad` on `--bad-bg` is 4.41"* — which is the
+CLIENT platform's `_shared.css` and not this console's. Measured in the
+console's own palette it is **5.51 light / 5.28 dark**, so the plain token is
+right and the twin would have been a second answer to a question already
+answered here. *A number carried from another stylesheet is not a measurement of
+this one* (§303's shape, in colour).
+
+**AND THE PANEL WAS CLIPPED BY THE MOCKUP'S OWN FRAME**, twice — the first fix
+was a guessed constant and was still 223px short (§122.5). It is drawn in flow
+inside the frame with the real behaviour stated in the notes, because a
+constant chosen to make one screenshot fit is a constant that goes stale.
+
+### §355.8 — WHAT THE FALSIFICATIONS TAUGHT, AND TWO OF THEM WERE THE CHECK
+
+**`checks/insights.mjs` 127/0**, proved able to fail four ways — and the fourth
+went **GREEN** at first. Two faults compounding, both worth keeping:
+
+- **The filter's clause and its argument were returned separately**, so a break
+  that short-circuited only the clause left the argument pushed and Postgres
+  answered *bind message supplies 2 parameters, but prepared statement requires
+  1*. Two things that must agree are returned **together** now (`seenSql()`
+  returns `{clause, args}`), which is a real fragility the green run could not
+  have shown.
+- **And the run's own summary lied**: the catch set `failed = true` and never
+  pushed to the failure list, so a run that DIED printed *"0 failed"*. §298.3
+  and §54.5 in the harness — *a green falsification is indistinguishable from a
+  working guard*. With both corrected the break is **6 red**, exactly the six
+  narrowing assertions and nothing else.
+
+**`checks/publishing-room.py` 64/0 on both copies of the console page** —
+the root `platform.html` and the generated `smp-app/shell/platform.html`,
+because a generated copy is where a drift hides (§53.5) — with **section 8
+driving the panel rather than reading it** (§70, §96: a control that renders and
+does nothing looks identical to one that works).
+
+**ITS FIRST RUN DIED ON A REPAINT ITS OWN PRESS HAD CAUSED** (§222): `Done`
+saves, the save reloads the library and REBUILDS the card, so the next press
+landed on a **detached** node whose panel was appended to nothing at all. The
+wait is now for the NEW node — stamp the old one and watch the stamp go — never
+for the panel disappearing, which is true the instant it closes and a whole
+repaint too early.
+
+**SECTION 8 IS FALSIFIED FROM THE SOURCE** (§276), which `SMP_PAGE` makes
+possible on a hand-written page: four doctored copies, each reddening its own
+assertions and nothing else — `All` ticking every place (2 red, printing the
+whole tick list verbatim), a tick starting at everything-minus-one (1), `Done`
+saving whether or not anything moved (2), the panel rebuilt on every keystroke
+(4). **Two of those four taught the check something before they worked:**
+
+- The first **DIED rather than reporting** — `press` throws when the word is not
+  on a button, and the word is exactly what an all-ticks build changes, so the
+  one fault the break stages was the one that killed the run. §215, inside the
+  helper written that hour to stop it; the press is inside the try now.
+- The search break went **green**, because the assertion counted rows and a
+  rebuilt list holds the same four (§113.8). *"In place" is about the nodes
+  being the SAME nodes*, so it is asserted as identity now, with the box being
+  typed into asserted beside them — and the break was rewritten to one that
+  actually tears the panel down.
+
+**AND THE CITATIONS WERE RENUMBERED, SCOPED TO THIS WORK'S OWN LINES** (§264.3):
+spec 046 already had a §4.9 — the console's document room — so this became
+**§4.10** rather than the existing one moving, and the sweep was written to skip
+the two pre-existing lines by their exact text. It caught both, put them back,
+and they were then verified against `HEAD` rather than assumed.
+
+### §355.9 — WHAT IS DELIBERATELY NOT BUILT
+
+- **A report cannot be narrowed to one PERSON.** The register is where a
+  person's place is decided; a per-person list would be a second answer to it.
+- **The client is shown nothing about a report they cannot see.** A row saying
+  *there is something here you may not open* is worse than the absence, and is
+  the whole reason the filter is in the WHERE.
+- **The per-module access tab is still not built**, so *who may open Insights at
+  all* remains nobody's to set and every person in the client can open the
+  module. That is a different question from this one and only this one is
+  answered — said here because "visibility" has now been used for both. It
+  stays on §354.8's list of three, with the Setup group and the landing line.
+
+### §355.10 — WHAT WAS RUN
+
+`check:insights` **127/0** against a real Postgres, red four ways;
+`publishing-room.py` **64/0** on both copies of the console page, red seven ways
+(three existing DOM breaks, four new source breaks); `modules` 93/0; `shell`
+72/0; `door-landing` 70/0; `blob-api` 23/23; `comms-api` 47/47; `upload-seam`
+9/0; `demo-seed` 7/0; `memory-boundary` 14/0; `schema-room` 10/0;
+`deploy-context` 5/0; `office-standing` 7/0; `setup-shape` 33/0; `frameworks`
+90/0; `memory-api` 36/0; `memory-split` 21/0; `assistant-defaults` 10/0;
+`declared-deps` all clear; `generated-in-step` all clear; `tsc` clean;
+`next build` green.
+
+**THE FROZEN PRODUCT IS UNTOUCHED AND IT IS MEASURED**: `built-in-step.py` all
+good, `python3 build.py` byte-identical to the shipped file — so **`sw.js` is
+NOT bumped**, §91's trigger being the built file's bytes changing and they did
+not.
+
+**`check:state` IS 84 ok / 2 failed AND IT IS NOT THIS WORK'S** — the two
+pre-existing seeded-demo-graph failures already on the record (§303, §354.7),
+neither touching a module, the route or a library.
+
+## §356 — THE INTERNAL TRACKER: THE OFFICE'S WEEKLY LIST, PER CLIENT (2026-09-15, spec 054)
+
+Islam, of the `strategy-management-system` repository's Action Tracking:
+*"the tracking tool is for the internal team weekly actions tracking"*, then
+*"no they belong to the client as they are modules for handling this specific
+client"*, *"1. Internal Tracker 2. a week is sunday ti thursday yes"*, *"the
+new action should be in line addition we are shifting from a simple google
+sheet to a tool so it needs to be super simple"*, and *"build and let's me see
+when it's done."* Every decision is spec 054's (1–8) and was taken before a
+source moved; the mockup was published as an artifact and redrawn once at his
+word (a form and a detail page out, the next empty line in).
+
+### §356.1 — A FIFTH MODULE THROUGH THE TABLE, WITH NO NEW SEAM
+
+`tracker` is one folder (`smp-app/modules/tracker/`), one registry entry and
+one word in `lib/modules.ts` — §354's own proof that a module is a folder and
+an entry. **The one thing the spine gained is a verb**: the route handler
+answered GET only, and a module that is WRITTEN to needs a POST, so
+`export const POST = GET` — the table dispatches by module, the module reads
+the method. Nothing else in `app/`, `lib/shell.ts` or the registry moved; the
+`ServeArgs` seam is exactly §355's (`personKey`, `seat`), because the two facts
+this module needs are the two it already carried.
+
+### §356.2 — THE OFFICE BY RULE, ASKED AT THE SERVER
+
+Decision 2: the office's tool, so **who may open it is the SEAT the door
+established** (`super` or `smoteam`), asked in `serve()` on every request —
+never only by leaving the entry off a menu, which is decoration (§42, §44). A
+client's own person is told so in a sentence with the way back (§61) on the
+page and refused at the api alike (§94.2 — both doors, or a build that only
+hid the page passes half). **The switcher still lists the module for a
+client's person**, because the spine's menu knows modules and not seats (spec
+046 §4.4 is unbuilt); recorded in the spec rather than papered over.
+
+### §356.3 — OWNED BY AN OFFICE ROW, AND BY NOTHING ELSE
+
+Decision 5: an action's owner and collaborators are the office's rows on THIS
+client's register (`people` joined to `tenant_users` by `person_key`, seat in
+the two office words), in the register's order. A client's own person is
+refused as an owner by the rule the server asks (`isOfficeRow`), both ends
+asserted; an office login not yet placed on the register is told *"You are not
+on this client's register yet"* and nothing is written (§313.32's shape,
+§316.9's finding). **The name is read from the register, never stored on the
+action** (§130.9): `namesOf(c)` answers at draw time, so a rename reaches every
+row. `mayChange` is owner, collaborator or the Super user; `mayOwn`
+(hand-over, delete) is owner or Super user — a collaborator may NOT hand it on.
+
+### §356.4 — THE FIRST DATE IS WRITTEN ONCE, SO A RESCHEDULE CANNOT RESET THE COUNT
+
+Late is *due before today*; carried is counted in WEEKS from the FIRST date the
+action was ever given (`first_due`, `COALESCE`d and never overwritten by a
+change of date), so moving the date moves DUE and leaves the count where it
+was — "2 weeks back" stays honest through three postponements. Done clears it;
+reopening starts it again from the date the row holds. A week is **Sunday to
+Thursday** (decision 8), worked out in `Africa/Cairo`; a Friday or Saturday
+reads as the following week's. **A date the list cannot read is refused in
+words, never guessed at** (§184).
+
+### §356.5 — EVERY CHANGE ON THE ROW, AND NOTHING WITH A SAVE BUTTON
+
+§3 of the spec, built as it says: Enter on the next empty line adds, owned by
+me, Not started, no date (Escape clears; the line is focused again after the
+reload). The tick is Done and pressed again is Not started; the date becomes a
+date box in place and back again on Escape; the status is a picker on the row;
+the title opens the row in place — notes saved on leaving the box and only when
+changed (§35), the title renamed on Enter, owner and who-else on the opened
+row, Delete asking IN THE ROW and never in a browser dialog (§95, §273.3).
+**The browser holds no copy of the list**: every press POSTs the module's own
+api and the page is read again, so the screen cannot disagree with the server
+(§53.5); a refusal is written into the page in the server's own words (§32,
+§171). No inline script — the shell's policy would silence it — so the module
+serves its one script itself.
+
+### §356.6 — TWO TABLES, FENCED LIKE EVERY OTHER TENANT TABLE
+
+`tracker_actions` (the row: title, notes, owner, who else, due, first due,
+status, done at) and `tracker_events` (append-only: created, and every status
+change with who and when — a date move is deliberately NOT logged, decision in
+the spec's §5, and the mockup's history line that showed one was removed).
+Both in `schema.sql`'s RLS loop, both in migration 012 with the loop's own
+policy text, asserted IDENTICAL to `library_items`' (§94.8) and absent from
+`PLATFORM_TABLES` (§331); events cascade with their action. `extra jsonb` on
+the row, as every tenant table carries (§118).
+
+### §356.7 — THE CHECK FOUND ONE PRODUCT FAULT AND IT WAS THE SPEC'S OWN RULE
+
+`checks/tracker.mjs` §10 serves the module over a real port and PRESSES it in
+Chromium, reading Postgres back after every press (§70, §96) — and its first
+run was **1 red on "the new row is on the page"**: the spec had written *"an
+action with no date is never on This week, so it needs a view of its own or it
+is lost"*, and that rule makes exactly the loss it was written against. The
+landing is This week; the line somebody has just typed has no date; on the
+reload it moved to Undated and **vanished from under their hand** — the sheet
+this replaces never did that. **An open action with no date is on This week
+now**, until somebody says otherwise, never late; Undated stays as the
+narrower list of what still needs a date, INSIDE This week rather than beside
+it. The spec is corrected in place and says it was; the §2 assertion that
+held the two views disjoint is REWRITTEN to *Undated is inside This week*,
+never deleted (§218).
+
+### §356.8 — AND THREE OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK
+
+- `const [A] = await owner("… RETURNING id")` handed the ROW object where a
+  tenant id was wanted, and the run DIED at the first `person()` (§215).
+- The register row is written BEFORE the seat: `tenant_users.person_key`
+  carries an FK to `people` (§339), and the fixture had them the other way.
+- The date probe `fill()`ed the date box and then dispatched a second
+  `change` — `fill` on a date input fires the change itself, the page had
+  already posted and reloaded, and the probe waited 30s on a box that was gone
+  (§100.3).
+
+**And one was a real fault the both-ends rule caught**: *"Delete asks first"*
+passed on a `.sure` that had been drawn OPEN all along — the span's own
+`display:flex` outranks the browser's `[hidden]` rule, so `hidden` hid nothing
+(§298.2 recorded Chromium's rule as `!important` and it is not; asked of the
+page, the box was visible). `[hidden]{display:none!important}` on the page,
+and the question asserted ABSENT before the press (§113.8).
+
+### §356.9 — WHAT WAS RUN
+
+`check:tracker` **124/0** against a real Postgres 16 with the browser section
+driven in Chromium; red three ways under its own breaks (`no-office-gate` 2,
+`reset-carried` 3, `owner-anyone` 2); `modules` **100/0** (the colour loop now
+reaches the tracker's document, and `argsFor` carries a seat); `insights`
+127/0; `memory-boundary` 14/0 once the dev tenant is seeded (its one red
+before that is the fixture's precondition, said in its own words);
+`generated-in-step` all clear; `tsc` clean but for `lib/prisma.ts`'s
+pre-existing PrismaClient error (recorded 2026-09-13), which is also the one
+thing `next build` stops on. **The frozen product is untouched**: no source in
+`SMP-Project-Folder/src/` moved, nothing rebuilt, so `sw.js` is not bumped.
+**On the branch, not merged** — `main` is Islam's word.
+
+### §356.10 — RECORDED, NOT DONE
+
+- The switcher lists the tracker for a client's own person, who is then refused
+  at the door; the per-module access tab (spec 046 §4.4) is where that ends.
+- Nothing reminds anybody (spec 054 §10); a weekly digest is §293's collection
+  pointed at this list and its own decision.
+- Notes (meeting minutes, refined and sent as MOM) is the second module Islam
+  named and is deliberately after this one; it has no spec yet.
+- A migration applied on a deployment writes the two tables; the switch that
+  turns the module ON for a client is the card's own drawer (§320.5), pressed
+  by hand — no client has it until somebody presses it.
+
+### §356.11 — THE ROW REDRAWN AT ISLAM'S WORD: ONE OWNER, A FIRST NAME, AN ARROW, A DOUBLE-CLICK, ONE SHORT WORD, AND A CHOICE (2026-09-15)
+
+Islam, using the built tracker within the hour: *"The button with my
+initials should open the list of the taem on the project ot assign an owner
+and it's better to be first name of the owner and have a 3 dots on the right
+to open that expanded view with notes or history and keep the action items
+editable by a double click on the action name and no need for the 'with'
+part for collaborators it's a simple task management thing."* Drawn before a
+source moved (rule 1c) and redrawn twice at his word — *"for the list of
+names, just make the list with the first names simpler with no title or
+second names"*, *"the 3 dots let's make it an arrow that expand and colppase
+the box and please make the shistory font much smaller in a scroll box"*,
+*"on the creation of te a task as if the whole thing refresh make it silent
+for fast and smooth ceatration of tasks"*, then *"carried 1 week is long we
+can make after late and make it late or late 1 w or late 2 w"* and *"the
+groupingby howner should be an option ... on the far right of the same line
+of the tabs"* — and signed off with one change: *"remvoe collaborators and
+the rest is ok to build."*
+
+**ONE ACTION, ONE OWNER, AND THE RULE COLLAPSES WITH IT.** Spec 054 §6 kept
+two rules — change it (the owner, a collaborator, the Super user) and hand
+it on (the owner, the Super user) — and the only person the two told apart
+was the collaborator. With nobody ever "on" an action there is one rule,
+`mayChange`, and `mayOwn` is DELETED rather than left as a second name for
+the same answer (§24, §53.5): two functions answering one question are
+§94's drift the day somebody widens one. The `collab` act is refused as *not
+something this list does* (a tab on the build before may still send one, and
+it writes nothing), `isMine` is ownership alone, and **migration 013 drops
+the column** — a column the platform no longer reads is worse than no column
+(§53.4). `checks/tracker.mjs` §9 asserts the exact column list, so the drop
+is measured rather than claimed.
+
+**THE OWNER IS A FIRST NAME, BY THE REGISTER'S OWN RULE.** `shortNames()`
+asks `rules.cjs`'s `nameWords` for one name — a particle is not a name, so
+*Abd El Moniem* is one word of somebody's name and not three (§130.7) — and
+a clashing pair on one client is lengthened to two words for exactly that
+pair (§81.1), the whole name if still equal. Asked once over everybody named
+on the list, seat or no seat, so a former owner's row is shortened by the
+same rule as a present one. **Who gets the press is both ends** (§61,
+§94.2): the name is a `role="button"` for the owner and the Super user, who
+are the two who may hand an action on, and plain text for everybody else —
+with the tick off and the name not renameable on that same row, so a build
+that drew the press for everybody (the check's `who-everyone` break) goes red
+on the plain-text half and not only on the pressable one. The office rides
+in the cell hidden, first names only, the present owner marked, and every
+option is a register KEY the server checks again (§42).
+
+**THE ARROW OPENS THE ROW AND FOLDS IT; THE TITLE STOPS BEING A LINK.** The
+opened row is the notes, Delete behind its question, and the history — no
+Title box, because the name is renamed ON THE ROW by a double-click (Enter or
+leaving the box renames, Escape puts it back, a single click does nothing so
+a row can still be read without a box opening under the pointer), and no
+owner control, because the name on the row is it. The history is 11.5px in a
+118px box that scrolls, with the track shown (§158), asserted as PAINT off
+`getComputedStyle` rather than off a class. The opened row still rides on
+the address (`?open=`) through `history.replaceState`, so a link somebody
+sends opens the same row, and nothing reloads to open or fold it.
+
+**LATE IS ONE SHORT WORD.** `lateWord(n)` — *Late*, *Late 1 w*, *Late 2 w*
+— and the date after it, never *carried N weeks*; the arithmetic underneath
+(§356.4, the first date written once) is untouched.
+
+**HOW THE LIST IS GROUPED IS A CHOICE, WHICH LOOSENS DECISION 6.** Owner is
+how it opens; Status groups into the three words in their own order; Due date
+groups by the day, soonest first and *No date* last; None is one flat list in
+the order the rows already have. A group is made from the rows it holds, so a
+heading never stands over nothing. The choice is a COOKIE the page reads
+(`smp.tracker.group`, path the tracker's own), so the next visit opens
+grouped the way this browser last chose — a preference, never the client's
+data (§25, §47.1) — and a cookie naming no real grouping falls back to
+Owner. Asserted at both ends: a page served with the cookie opens grouped by
+it, and a link carries the view and the opened row but not the grouping.
+
+### §356.12 — SILENT: EVERY PRESS IS ANSWERED WITH THE LIST DRAWN AGAIN
+
+*"make it silent for fast and smooth ceatration of tasks."* The first build
+reloaded the page after every press, which is the honest way to hold no copy
+of the list in the browser (§356.5) and the wrong way to add a line — the
+whole page blinked and the cursor was lost. **What keeps silence honest is
+that the browser still renders no row of its own** (§53.5): the api answers
+every write with `{ok, body, count, open}`, the `body` being the list, the
+strip and the count drawn AGAIN by `listBody()` — the same function
+`trackerDocument()` wraps — inside the same tenant read, and the script
+swaps it into `#body`. A read of its own for the arrow and the grouping is a
+GET at `/<client>/tracker/list` (the api's 405 already says a GET there is
+not a write), through the same function. **One request at a time** in the
+browser (§240's shape): a notes box left and a tick pressed in the same
+second post in that order, so the second answer already holds the first
+change. **What a hand is typing survives a swap** (§35, §71.2): the add box
+and the search box are read before the redraw and put back after it, focus
+included — a tick pressed with half a line typed must not throw the line
+away, and the check types one and presses one. **A refusal swaps nothing**:
+the reason is said in the red bar, and what was typed stays in the box.
+
+**THE MARK IS WHAT MAKES "SILENT" AN ASSERTION** (§113.8): every other
+assertion in §10 — the row on the page, the line empty and focused, the
+count moved — passes perfectly on a page that reloaded, so the check plants
+`window.__stay = 1` before the first press and reads it after each one; the
+check's `reload-on-add` break puts one `location.reload()` back and goes 6
+red, all six the presses after it.
+
+### §356.13 — WHAT WAS RUN, AND FOUR OF THE CHECK'S OWN FIRST REDS WERE THE CHECK
+
+`checks/tracker.mjs` **164/0** on a throwaway Postgres 16 with §10 driven in
+Chromium — the add, the tick, the status, the date box, a last-week date
+reading *Late 1 w · <day>*, the double-click rename and its Escape, the arrow
+open and fold, the notes saved on leaving, the history's paint, the grouping
+changed in place and read back off the cookie on the next visit, the team
+opened and closed by a click elsewhere, an action handed to Islam and the
+old owner's controls gone, Delete's question — with the database read back
+after every press and the mark read after every one. **RED FIVE WAYS**:
+`no-office-gate` 3, `reset-carried` 3, `owner-anyone` 4, `who-everyone` 2,
+`reload-on-add` 6, each reddening its own assertions and no other.
+`check:modules` 100/0; `generated-in-step` all clear; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. **Its own first run was red four times
+and every one was the check**: the script assertion spelt `fetch(API` where
+the one script now has one `fetch(url` for both addresses; two expectations
+had forgotten the second action §8 adds under Islam (the Owner heading, the
+*No date* group); and the count was read with `innerText`, which is
+uppercased by CSS (§301.6, again). The built page was screenshotted beside
+the mockup at rest, with the team open, renaming, expanded and grouped by
+Status, and matches it frame for frame. The frozen product is untouched, so
+`sw.js` is not bumped. **Recorded, not done**: a double-tap on a tablet has
+no hover to say the name can be renamed (Rename beside Delete is a decision
+if wanted); the switcher still lists the tracker for a client's own person
+(spec 046 §4.4); Notes is next and has no spec.
+
+---
+
+## §357 — MEETING NOTES: ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (2026-09-16, spec 055)
+
+Islam, of the second thing the comparison with the other repository found:
+*"notes are for taking meeting notes and refine it by AI and send it as MOM
+for the attendees of the meeting"*, then seven answers that are the whole
+model — *"1. one meeting one note, title date attendees and text is enough /
+2. the free text box is like a note taking app just writing down the the role
+of the ai assistant needs to refine it and my be compile it to agreements
+points and actions etc. so we need to agre on a format and an AI prompt / 3.
+yes for all what you said it do everything / 4. also the office and maybe we
+can add someone casualy to the meeting / 5. no it's an email with no signing
+in. / 6. still edtiable as if we get a note or something we can add more and
+resend / 7. yes ok"* — then *"ok write the spec and draw it"*, then **"build"**.
+
+**THE SIXTH MODULE, AND WHAT IT COST IS THE ARGUMENT FOR THE FRAME**: one
+folder, one entry in `modules/registry.ts`, one word in `lib/modules.ts`, and
+the route was not opened (§354). Everything else it needs — the door, the
+session, the seat, `withTenant`, the client's own colours, the switcher — is
+the spine's, and what it draws is the tracker's stylesheet verbatim, so the
+two office modules read as one product and nothing here invents a second
+vocabulary for a row, a chip or a box.
+
+**THE OFFICE'S, BY SEAT, AT THE SERVER** (spec 054's own gate, never a second
+one): a client's own person is turned away on the page AND at the api, with
+the way back. **ANY OFFICE PERSON MAY EDIT ANY NOTE** — put to Islam as open
+when the drawing was handed over and taken as settled by *"build"*, with the
+cost stated: nothing on the screen is anybody's in particular, and a
+correction somebody else makes arrives silently.
+
+**A SECOND REFINE ADDS AND NEVER REWRITES, WHICH IS DECISION 6 AND IS WHERE
+THE WORK IS.** *"still edtiable as if we get a note or something we can add
+more and resend"* means the minutes are a thing a person EDITS and the model
+comes back to them afterwards — so `mergeMinutes(have, add)` keeps every line
+the writer wrote, de-duplicates the model's near-repeat of it against a
+normalised form (case, punctuation and a trailing stop), keeps the writer's
+summary against the model's, and fills only a part the writer left EMPTY. The
+model is TOLD this in `PROMPT_AGAIN` and the merge does not trust it to have
+obeyed — asserted at both ends, with a model deliberately answering a whole
+new summary and a rewritten line, and the writer's surviving both. **`SMP_BREAK=rewrite-on-refine` reddens nine assertions**, which is the shape
+of what that decision is holding up.
+
+**A CASUAL ATTENDEE NEVER REACHES THE CLIENT'S REGISTER** (decision 4,
+*"maybe we can add someone casualy to the meeting"*): a register attendee is
+stored as a KEY and rendered from the register at draw time (§48, §130.9), a
+casual one as a name and an address and nothing else, marked on the chip as
+*this meeting only*. **An entry that is neither is dropped, never guessed at**
+(§96.2), and **an address that is not an address is nothing**, because the
+minutes have to reach somebody.
+
+**WHAT WENT OUT IS KEPT AS IT WENT** (decision 6's other half): `note_sends`
+holds the minutes AS SENT, so the note goes on being edited and the record
+does not move — and **the assertion that proves it had to be rewritten**,
+because the first version compared the snapshot with a SECOND READING OF
+ITSELF, which a snapshot storing nothing satisfies perfectly (§113.8): it is
+compared with the minutes as they were at send time now, and
+`SMP_BREAK=snapshot-moves` goes from 0 red to 2.
+
+**THE SENDER'S COPY WAS ASSERTED OVER SOMEBODY WHO WAS ALSO AN ATTENDEE**,
+which is the same fault one row along: `no-copy-to-sender` reddened a COUNT in
+a later section and nothing whose subject was the copy. The first send now
+asserts *nobody but the attendees is written to* (its sender is one) and the
+second, whose sender was not at the meeting, asserts the copy — both ends.
+
+**AND THE CHECK FOUND THREE PRODUCT FAULTS, EVERY ONE OF THEM A SECOND COPY
+OF SOMETHING THE PLATFORM ALREADY ANSWERS.** `readableDay()` carries the year
+whenever it is not the current one and nothing here hands it a today, so the
+subject line, the corpus head and the note's meta appended a year that was
+already there — *"Minutes: Q3 review — Wed 16 Sep 2026 2026"*, three sites,
+one deleted expression. **The attendee chip printed `&middot;` as four
+characters** wherever it had two things to say, because the separator was
+joined INSIDE `esc()` and unescaped afterwards one paren too deep — each part
+is escaped and the separator is not now (§235). **And the meeting's date was
+a raw `<input type="date">`**, which prints whatever format the browser's
+locale chooses (`09/16/2026` on this machine), a spelling the platform uses
+nowhere and not what the signed-off drawing reads — it is the TRACKER's own
+control now, a button reading the day that becomes a date box on the press
+(§53.5: a date is set one way in the office's modules, not two). The first
+two were found by the check; **the third was found by looking at the built
+page beside the mockup**, which is what rule 1c's last step is for.
+
+**AND FIXING IT BROKE THE WHOLE SCRIPT IN A WAY `node --check` COULD NOT
+SEE**: the module's browser script is one TEMPLATE LITERAL, so the backticks
+in the comment explaining the new control ENDED it — §272.8's fault one quote
+mark over, the note explaining a rule eating the rule. The comment says so in
+its own words now.
+
+**ONE OPTION ON THE MAIL BUILDER, AND THE TWINS STAY BYTE-IDENTICAL**:
+`lib/mail-html.js` and its `.cjs` carry `bodyHtml` for a caller that has
+already laid its body out — the minutes are six parts with a table in them and
+`paras()` can only make paragraphs. **The minutes body invents no colour**:
+every literal in it is one the mail builder already paints, asserted as that
+rather than re-measured, so the pairs `test-mail-contrast.js` measures are the
+pairs a reader sees (§25, §53.5) — and email is not the web, so the styles are
+inline, the colours are literals and no custom property is used.
+
+**TWO TABLES, FENCED LIKE EVERY OTHER TENANT TABLE**: `notes` and
+`note_sends` in `db/schema.sql` and in migration 014, which **fences its own
+tables** because schema.sql's RLS loop is not re-run on an existing database —
+asserted as the policy being IDENTICAL to an existing tenant table's (§94.8)
+and neither on the platform's own list (§331), and proved on the path a real
+deployment takes (the migration, against a database that already had the
+schema) rather than the easy one (§33.5).
+
+**VERIFIED**: `check:notes` **154/0** with §9 driven in Chromium and Postgres
+read back after every press, RED under all five named breaks, each reddening
+its own assertions; `check:tracker` 164/0; `check:insights` 127/0;
+`check:modules` 107/0; `generated-in-step` clear once committed;
+`test-mail-contrast` 12 pairs 0 failures; `built-in-step.py` all good after
+the rebuild; `next build` compiles and `tsc` is clean but for `lib/prisma.ts`'s
+pre-existing error. `memory-boundary`'s one failure reproduces identically
+with this work stashed (§303) — it is its fixture's own prerequisite. **The
+frozen `lib/mail-html.js` changed, so the built file's bytes changed, which is
+§91's trigger**: `sw.js` is bumped to `smp-shell-v5.06-meeting-notes`,
+confirmed against `origin/main` first (§94.12) — and it reaches the offline
+copy alone, because `build-sw.mjs` drops the caching half and the served
+worker holds `SHELL` nought times (§316.10, §329). **THE FROZEN BROWSER CHECKS
+COULD NOT BE RUN AND IT IS SAID RATHER THAN LEFT AS AN ABSENCE** (§54.5): this
+container has no python playwright, so `qa-run.py` cannot launch; nothing in
+`src/` changed but the inlined mail builder, whose own check is green.
+
+**Built and screenshotted beside the mockup, frame for frame. On the branch,
+NOT merged.** **RECORDED, NOT DONE**: the actions in the minutes do not reach
+the tracker and are not meant to (spec 054 decision 3); a note cannot be
+started from a calendar; the switcher lists the module for a client's own
+person until spec 046 §4.4's access tab exists; and nothing says which office
+person is looking at a note while somebody else edits it.
+
+---
+
 ## §358 — ATTACH THE FILE, THEN CHOOSE THE EXIT (2026-09-16)
 
 Islam, of the Insights report editor: *"why shall I save the draft then add the

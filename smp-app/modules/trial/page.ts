@@ -33,17 +33,16 @@
    NO INLINE SCRIPT: the shell's policy is `script-src 'self'` (lib/shell.ts
    SHELL_CSP), which this page is served under, so the module switcher is a
    <details> and not a handler — which is what E1 draws anyway. */
-import { withTenant } from "./tenant.ts";
-import { readState } from "./state-io.ts";
-import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "./modules.ts";
+import { withTenant } from "../../lib/tenant.ts";
+import { barFrom } from "../../lib/branding.ts";
+import { readState } from "../../lib/state-io.ts";
+import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 
 const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-/* The shipped navigation navy, which is what a tenant that has chosen no bar
-   colour wears everywhere else in the product. */
-const BAR = "#16325C";
+
 /* THE PLURAL IS GIVEN, NEVER DERIVED (§107.8's family, found by RENDERING
    the page against a real tenant: a rule that adds "s" reads "3 persons").
    The platform's own plural() takes the second form for the same reason
@@ -64,13 +63,11 @@ export function registerLine(count: number | null): string {
 type Graph = { people?: unknown[]; group?: { branding?: { bar?: string | null } | null } | null };
 
 /* A colour is written into a style attribute, so only a value this page can
-   stand behind may reach it: the tenant's own bar if it is a plain hex, the
-   shipped navy otherwise. Never the stored string as it comes (§96.2 is
-   about not rewriting what somebody wrote; this is about not PAINTING with
-   something nobody checked). */
+   stand behind may reach it. WHAT COUNTS AS ONE IS NOT DECIDED HERE (§354):
+   `barFrom` is the spine's single answer, and this module reads the graph it
+   was already loading rather than making a second query for a colour. */
 function barOf(g: Graph | null): string {
-  const b = g && g.group && g.group.branding ? g.group.branding.bar : null;
-  return typeof b === "string" && /^#[0-9a-fA-F]{6}$/.test(b) ? b : BAR;
+  return barFrom(g && g.group && g.group.branding ? g.group.branding.bar : null);
 }
 
 /* Active is the absence of a no, which is how the register stores it

@@ -10,16 +10,17 @@
    wanted. The categories are the module's navigation (spec 046 §4.6) and the
    search is a GET form, so the address carries the filter: a filtered library
    is a link somebody can send, Back works, and the shell's `script-src 'self'`
-   policy has nothing to admit (lib/trial.ts made the same call for the same
+   policy has nothing to admit (modules/trial made the same call for the same
    reason).
 
    THE STYLESHEET IS THE ONE SIGNED OFF, verbatim from
    design-mockups/insights/2026-09-13_library-and-publishing-room.html (rule
    1c), which is itself the trial module's token block extended with a list. */
 import { createRequire } from "node:module";
-import { withTenant } from "./tenant.ts";
-import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item } from "./library.ts";
-import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "./modules.ts";
+import { withTenant } from "../../lib/tenant.ts";
+import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
+import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
+import { barFor } from "../../lib/branding.ts";
 
 /* THE MONTH IS THE PRODUCT'S OWN WORD, not the browser's (§53.5). The first
    build used `toLocaleDateString("en-GB")` and the check caught it: Node
@@ -27,23 +28,18 @@ import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "./modules.ts
    this product — the deck, a milestone, a cycle — is three letters, because
    they all come from SMPRules.MONTH_NAMES. A library writing "4 Sept 2026"
    beside a plan writing "Sep 26" is two vocabularies for one month. */
-const R = createRequire(import.meta.url)("./rules.cjs");
+const R = createRequire(import.meta.url)("../../lib/rules.cjs");
 
 const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-/* THE SHIPPED NAVY, which is what a tenant that has chosen no bar colour
-   wears everywhere else (config-data.js BRAND_DEFAULT), so this is the
-   absence of a choice and never a copy of one (§50.6).
-
-   RECORDED, NOT DONE: a client who HAS rebranded gets their colour on
-   Strategy and this navy here. Branding is the spine's (spec 046 §4.1) and a
-   module should get it for nothing — but the two modules that draw their own
-   document each read it for themselves today (lib/trial.ts barOf), and adding
-   a third copy is the drift this project keeps recording (§53.5). It wants
-   one reader both ask, which is its own small piece of work. */
-const BAR = "#16325C";
+/* THE CLIENT'S OWN COLOUR, asked of the spine (§354). This file used to carry
+   the shipped navy as a literal, so a client who had chosen a colour saw it on
+   Strategy and on the trial module and NOT here — the drift its own note
+   recorded and left. `barFor` is that note done: one rule for what counts as a
+   colour, one read of one column, and a database that will not answer gives
+   the shipped navy rather than no page at all. */
 const plural = (n: number, one: string, many: string) => n + " " + (n === 1 ? one : many);
 
 /* A DATE A PERSON READS. Built from the STRING's own parts, so no timezone
@@ -72,7 +68,7 @@ export function factLine(it: Item): string {
   return bits.join(" &middot; ");
 }
 
-/* THE SWITCHER IS lib/trial.ts's, and the module menu behind it is
+/* THE SWITCHER IS the trial module's, and the module menu behind it is
    lib/modules.ts's — a module that drew its own would be the second place a
    module's name is spelt (§53.5). It is also this page's way back. */
 function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
@@ -135,17 +131,18 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 export type Ask = { q?: string; category?: string };
 
 export async function insightsDocument(
-  slug: string, tenantId: string, tenantName: string, have: ModuleKey[], ask: Ask,
+  slug: string, tenantId: string, tenantName: string, have: ModuleKey[], ask: Ask, viewer: Viewer,
 ): Promise<string> {
   const q = oneLine(ask.q).slice(0, 120);
   const category = normalizeCategories(ask.category)[0] || "";
+  const bar = await barFor(tenantId);
 
   /* A LIBRARY THAT COULD NOT BE READ IS NOT AN EMPTY ONE (§35, §93: counting
      an error as absence reports everybody as having none). The two states say
      different things, and neither of them says "nothing has been published". */
   let rows: any[] | null = null;
   try {
-    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category }));
+    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category, viewer }));
   } catch (e) {
     console.error("insights: reading " + slug + "'s library:", (e as Error).message);
   }
@@ -211,8 +208,8 @@ export async function insightsDocument(
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(tenantName) + " &mdash; Insights</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
-    '<meta name="theme-color" content="' + BAR + '">\n' +
-    "<style>" + CSS.replace("%BAR%", BAR) + "</style>\n</head>\n<body>\n" +
+    '<meta name="theme-color" content="' + esc(bar) + '">\n' +
+    "<style>" + CSS.replace("%BAR%", bar) + "</style>\n</head>\n<body>\n" +
     '<header class="bar">' + switcher(slug, have, "insights") +
     "<h1>Strategy Management Platform</h1>" +
     '<span class="org">&middot; ' + esc(tenantName) + " <b>&rsaquo; " + esc(MODULE_DEF.insights.label) + "</b></span></header>\n" +

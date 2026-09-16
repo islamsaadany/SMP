@@ -30,6 +30,23 @@ Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/publishing-room.py
       … --break=delete-published  # Delete offered on a published report
       … --break=mark-published    # every row marked, not only the drafts
 
+SECTION 8 IS FALSIFIED FROM THE SOURCE, WHICH IS THE STRONGER ROAD (§276) and
+is open to it because SMP_PAGE takes any path: copy platform.html, make ONE
+edit, point this at the copy. Four were made and each reddens its own
+assertions and nothing else — `All` ticking every place rather than handing it
+back (2 red), a tick on an everyone report starting at everything-minus-one
+(1), `Done` saving whether or not anything moved (2), and the panel rebuilt on
+every keystroke rather than hiding in place (4).
+
+TWO OF THOSE FOUR TAUGHT THIS FILE SOMETHING BEFORE THEY WORKED. The first
+DIED rather than reporting — `press` throws when the word is not on a button,
+and the word is exactly what an all-ticks build changes, so the one fault the
+break stages was the one that killed the run (§215, inside the helper written
+to stop it; the press is inside the try now). And a search break went GREEN,
+because the assertion counted rows and a rebuilt list holds the same four:
+"in place" is about the nodes being the SAME nodes, so it is asserted as
+identity now and the box being typed into is asserted beside them (§113.8).
+
 THE ONE THING WITH NO BREAK BEHIND IT, said rather than left as a gap (§54.5):
 the piece loop. A break here is a DOM edit after the page has drawn, and
 `sendFile` is inside the card's own closure where nothing outside can reach
@@ -64,8 +81,25 @@ def item(**kw):
     d = {"id": "i1", "kind": "insights", "title": "A report", "summary": "",
          "categories": [], "reportDate": "", "version": 1, "fileName": "", "fileSize": 0,
          "sizeLabel": "", "hasFile": False, "state": "draft", "downloads": 0,
-         "publishedAt": "", "publishedBy": "", "filePath": ""}
+         "publishedAt": "", "publishedBy": "", "filePath": "",
+         # null is everyone, [] is nobody, a list is those places (spec 046
+         # §4.10). `seenLabel` is the SERVER's words, so the row and the card
+         # cannot describe one report's reach two ways (§53.5).
+         "seen": None, "seenLabel": ""}
     d.update(kw); return d
+
+def label_for(seen):
+    """The server's own seenLabel, which is what the stub has to answer with."""
+    if seen is None: return ""
+    if not seen: return "Nobody"
+    return "%d department%s" % (len(seen), "" if len(seen) == 1 else "s")
+
+# This client's own units and functions — and Care is BOTH, which is the row
+# the suffix exists for (§65).
+PLACES = [{"at": "mobile", "label": "Mobile", "kind": "unit"},
+          {"at": "care", "label": "Care", "kind": "unit"},
+          {"at": "fn:finance", "label": "Finance (function)", "kind": "fn"},
+          {"at": "fn:care", "label": "Care (function)", "kind": "fn"}]
 
 # The scene the stub is standing in, and the record of what reached it.
 SCENE = {"items": [], "sent": [], "pieces": [], "store": True}
@@ -132,7 +166,21 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             if body.get("category"): rows = [r for r in rows if body["category"] in r["categories"]]
             if body.get("state"): rows = [r for r in rows if r["state"] == body["state"]]
             self._send(json.dumps({"ok": True, "items": rows, "categories": CATS,
-                                   "kind": body.get("kind")}), "application/json"); return
+                                   "kind": body.get("kind"), "places": PLACES}), "application/json"); return
+        if act == "librarySeen":
+            # The server narrows the list to places this client HAS (§42), so
+            # the stub does too — or the check would prove the panel can send
+            # a word the product would drop.
+            known = [x["at"] for x in PLACES]
+            seen = body.get("seen")
+            seen = None if not isinstance(seen, list) else [k for k in known if k in seen]
+            hit = [r for r in SCENE["items"] if r["id"] == body.get("id")]
+            if not hit:
+                self._send(json.dumps({"ok": False, "error": "That report is not there any more."}),
+                           "application/json", 404); return
+            hit[0]["seen"] = seen
+            hit[0]["seenLabel"] = label_for(seen)
+            self._send(json.dumps({"ok": True, "item": hit[0]}), "application/json"); return
         if act == "librarySave":
             it = item(id=body.get("id") or "new-1", title=body.get("title", ""),
                       summary=body.get("summary", ""), categories=body.get("categories") or [],
@@ -227,6 +275,55 @@ def press(pg, sel_text, root=""):
       if (!b) throw new Error('no button: ' + t);
       b.click();
     }""", [sel_text, root])
+
+def opens(pg, word):
+    """Open the tick panel, and SAY so rather than dying if it does not
+    (§215, in a file whose own comment promises every wait degrades).
+
+    It is also the one place that can catch §222's fault, which is what it
+    was written for: `Done` saves, the save reloads the library, and the
+    card is REBUILT — so a press held over that repaint lands on a DETACHED
+    node, whose panel is then appended to nothing at all. Every assertion
+    about the panel would go on failing with the product behaving perfectly.
+    """
+    try:
+        press(pg, word, ".seen")
+        pg.wait_for_selector(".tickpanel", timeout=9000)
+        return True
+    except Exception as e:
+        # THE PRESS IS INSIDE THE TRY, AND THAT IS NOT TIDINESS: `press` throws
+        # when the word is not on any button, and the word IS the assertion —
+        # a build where All ticks every place says `Change` where this one says
+        # `Narrow it…`, which is the fault reported as a stack trace with no
+        # failures at all until the throw was caught (§215, twice in one file).
+        check("the panel opens when '%s' is pressed" % word, False, str(e).split("\n")[0])
+        return False
+
+def done(pg, saves):
+    """Press Done and then wait for what that press actually CAUSES.
+
+    A Done that changed something saves, and the save reloads the library and
+    replaces the card — so the wait is for the NEW node (stamp the old one and
+    watch the stamp go), never for the panel disappearing, which is true the
+    instant it closes and a whole repaint too early. A Done that changed
+    nothing replaces nothing, which is the point of it, so there the panel
+    going IS the whole event.
+    """
+    if saves:
+        pg.evaluate("""() => document.querySelector('.seen').setAttribute('data-was', '1')""")
+    press(pg, "Done", ".seen")
+    try:
+        if saves:
+            pg.wait_for_function(
+                """() => { const s = document.querySelector('.seen');
+                           return s && !s.hasAttribute('data-was'); }""", timeout=9000)
+        else:
+            pg.wait_for_function("""() => !document.querySelector('.tickpanel')""", timeout=9000)
+        return True
+    except Exception:
+        check("pressing Done closes the panel" + (" and the save lands" if saves else ""),
+              False, "the panel stayed open, or the card was never redrawn")
+        return False
 
 def run():
     serve()
@@ -555,8 +652,149 @@ def run():
         check("...and not one piece was sent", not SCENE["pieces"], SCENE["pieces"])
         SCENE["store"] = True
 
-        # ══ 8 · attaching on a report nobody saved (§358) ═════════════
-        print("\n8 · one press: the draft is saved, then the file is sent (§358)")
+        # ══ 8 · who can see one report ══════════════════════════════════
+        # Spec 046 §4.10, reversing decision 15. EVERY ASSERTION READS WHAT THE
+        # PAGE SENT (§96): a panel that ticks beautifully and posts nothing
+        # renders identically to one that works, and the client's side — where
+        # the report would simply never disappear — is no louder.
+        print("\n8 · who can see one report (spec 046 §4.10)")
+        SCENE["items"] = [item(id="a", title="Everyone Outlook", state="published"),
+                          item(id="b", title="FX Cost Exposure", state="published",
+                               seen=["fn:finance"], seenLabel="1 department"),
+                          item(id="c", title="Staged Governance Review", state="published",
+                               seen=[], seenLabel="Nobody")]
+        SCENE["sent"] = []
+        open_room()
+        marks = pg.evaluate("""() => Array.from(document.querySelectorAll('.erow')).map(r => ({
+          title: (r.querySelector('h3')||{}).textContent,
+          tags: Array.from(r.querySelectorAll('.tag')).map(t => ({ t: t.textContent, c: t.className })),
+          hover: Array.from(r.querySelectorAll('.tag')).map(t => t.title || '')
+        }))""")
+        # ONLY THE EXCEPTION CARRIES A MARK — the Draft tag's own rule, and the
+        # everyone row is asserted BESIDE the other two or "the narrowed one is
+        # marked" is equally true of a build that marks everything (§94.2).
+        check("a report everyone can see wears no mark at all",
+              marks[0]["tags"] == [], marks[0])
+        check("...a narrowed one says how many", 
+              [t["t"] for t in marks[1]["tags"]] == ["1 department"], marks[1])
+        check("...and one nobody can open wears the alarm, which the other two do not",
+              marks[2]["tags"][0]["t"] == "Nobody" and "shut" in marks[2]["tags"][0]["c"]
+              and all("shut" not in t["c"] for t in marks[1]["tags"]), marks)
+        # AND IT TAKES NO ACCENT, found by drawing it: amber beside the amber
+        # Draft tag put two meanings in one colour in one slot (§87's twins).
+        check("the narrowed mark is the plain tag, so it cannot be read as a Draft",
+              marks[1]["tags"][0]["c"].strip() == "tag", marks[1]["tags"][0]["c"])
+        check("the names are on the hover, because the row has no width for three (§88)",
+              marks[1]["hover"][0] == "Finance (function)", marks[1]["hover"])
+
+        pg.evaluate("""() => Array.from(document.querySelectorAll('.erow'))
+          .find(r => /Everyone Outlook/.test(r.textContent)).click()""")
+        pg.wait_for_selector(".ecard .seen", timeout=9000)
+        strip = pg.evaluate("""() => ({
+          says: document.querySelector('.seen .who').textContent,
+          btn: document.querySelector('.seen .sp button').textContent,
+          panel: !!document.querySelector('.tickpanel'),
+          note: Array.from(document.querySelectorAll('.ecard .note')).map(n => n.textContent).join(' ')
+        })""")
+        check("a report nobody has narrowed says EVERYONE, and names the client",
+              "Everyone at Raya Trade" in strip["says"], strip)
+        check("...and the word on the control says it only ever takes people away",
+              strip["btn"] == "Narrow it…", strip)
+        check("...and no panel is open until it is asked for", not strip["panel"], strip)
+        check("THERE IS NO ON/OFF BESIDE IT — the absence of a list IS everyone (§110's pair)",
+              pg.evaluate("""() => !document.querySelector('.ecard .minisw, .ecard input[type=checkbox]')"""))
+
+        if not opens(pg, "Narrow it…"): raise SystemExit(1)
+        panel = pg.evaluate("""() => ({
+          groups: Array.from(document.querySelectorAll('.ticklist .gp')).map(g => g.textContent),
+          rows: Array.from(document.querySelectorAll('.tick')).map(t => t.textContent.trim()),
+          on: Array.from(document.querySelectorAll('.tick[aria-pressed="true"]')).length,
+          links: Array.from(document.querySelectorAll('.tickhead .lnk')).map(l => l.textContent),
+          foot: document.querySelector('.tickfoot').textContent,
+          search: !!document.querySelector('.tickhead input[type=search]'),
+          drawn: Array.from(document.querySelectorAll('.tick .bx svg')).length
+        })""")
+        check("the list is the client's units and then its functions",
+              panel["groups"] == ["Business units", "Supporting functions"], panel["groups"])
+        check("...and a unit called Care and a function called Care are told apart (§65)",
+              panel["rows"] == ["Mobile", "Care", "Finance (function)", "Care (function)"], panel["rows"])
+        check("nothing is ticked on a report everyone can see, which is not the same as all ticked",
+              panel["on"] == 0, panel["on"])
+        check("it is searchable, with All and None", panel["search"] and panel["links"] == ["All", "None"], panel)
+        # THE TICK IS DRAWN, never a text character: the mark is outside the
+        # latin subsets this platform embeds and would ship as a blank box
+        # (§52, §120.2, §130.1).
+        check("every tick is a drawn mark rather than a font character",
+              panel["drawn"] == 4, panel["drawn"])
+        check("...and the panel SAYS that All is not every tick, rather than leaving it to be found",
+              "including a department added later" in panel["foot"], panel["foot"])
+
+        # TICKING ONE STARTS THE LIST AT THAT ONE, never at everything-minus-one.
+        pg.evaluate("""() => document.querySelector('.tick[data-at="fn:finance"]').click()""")
+        done(pg, True)
+        sent = [x for x in SCENE["sent"] if x.get("action") == "librarySeen"]
+        check("ticking one place and pressing Done POSTS exactly that place (§96)",
+              len(sent) == 1 and sent[0]["seen"] == ["fn:finance"] and sent[0]["id"] == "a", sent)
+
+        # AND `All` REMOVES THE KEY. This is the one that would have bitten in
+        # six months: a list of today's four places EXCLUDES a unit made next
+        # month, silently, and nobody would connect the two.
+        SCENE["sent"] = []
+        if not opens(pg, "Change"): raise SystemExit(1)
+        press(pg, "All", ".tickhead")
+        done(pg, True)
+        allSent = [x for x in SCENE["sent"] if x.get("action") == "librarySeen"]
+        check("All sends NULL — everyone, including a department added later",
+              len(allSent) == 1 and allSent[0]["seen"] is None, allSent)
+
+        SCENE["sent"] = []
+        if not opens(pg, "Narrow it…"): raise SystemExit(1)
+        press(pg, "None", ".tickhead")
+        shutSays = pg.evaluate("""() => document.querySelector('.seen .who').textContent""")
+        done(pg, True)
+        noneSent = [x for x in SCENE["sent"] if x.get("action") == "librarySeen"]
+        check("None sends an EMPTY LIST, which is a different row from everyone",
+              len(noneSent) == 1 and noneSent[0]["seen"] == [], noneSent)
+        check("...and the strip says so in words rather than looking like any other report",
+              "Nobody can open this report" in shutSays, shutSays)
+
+        # OPENING IT TO LOOK AND PRESSING DONE WRITES NOTHING (§50.6's habit —
+        # a reader that creates what it looked for puts a phantom change into
+        # every save, and here it would re-assert who may read something).
+        SCENE["sent"] = []
+        if not opens(pg, "Change"): raise SystemExit(1)
+        done(pg, False)
+        check("opening the panel and closing it again writes nothing",
+              not [x for x in SCENE["sent"] if x.get("action") == "librarySeen"], SCENE["sent"])
+
+        # THE SEARCH HIDES IN PLACE AND TAKES ITS EMPTY GROUP WITH IT.
+        if not opens(pg, "Change"): raise SystemExit(1)
+        # ASSERTED AS NODE IDENTITY, NEVER AS A COUNT. A list rebuilt on every
+        # keystroke holds exactly the same four rows, so counting them passes
+        # on the build this exists to catch — measured, a break that rebuilt
+        # the list went green on the count (§113.8). What "in place" means is
+        # that the nodes are the SAME nodes, which is also what keeps the box
+        # being typed into alive (§35, §108.13).
+        pg.evaluate("""() => { document.querySelectorAll('.tick').forEach(t => t.dataset.was = '1');
+                               document.querySelector('.tickhead input[type=search]').dataset.was = '1'; }""")
+        before = pg.evaluate("""() => document.querySelectorAll('.tick').length""")
+        pg.fill(".tickhead input[type=search]", "mob")
+        found = pg.evaluate("""() => ({
+          rows: Array.from(document.querySelectorAll('.tick')).length,
+          kept: Array.from(document.querySelectorAll('.tick')).filter(t => t.dataset.was).length,
+          box: !!(document.querySelector('.tickhead input[type=search]') || {}).dataset?.was,
+          shown: Array.from(document.querySelectorAll('.tick')).filter(t => !t.hidden).map(t => t.textContent.trim()),
+          groups: Array.from(document.querySelectorAll('.ticklist .gp')).filter(g => !g.hidden).map(g => g.textContent)
+        })""")
+        check("the search HIDES rather than rebuilding — the same rows, not four new ones (§35)",
+              found["rows"] == before == 4 and found["kept"] == 4, [before, found])
+        check("...and the box being typed into is the box that was there", found["box"], found)
+        check("...and it shows what matches", found["shown"] == ["Mobile"], found["shown"])
+        check("...and a group with nothing left in it goes with its rows",
+              found["groups"] == ["Business units"], found["groups"])
+
+        # ══ 9 · attaching on a report nobody saved (§358) ═════════════
+        print("\n9 · one press: the draft is saved, then the file is sent (§358)")
         SCENE["items"] = []; SCENE["sent"] = []; SCENE["pieces"] = []
         open_room()
         press(pg, "Publish a report", ".ptitle")

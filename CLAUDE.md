@@ -9097,6 +9097,20 @@ python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and noth
                                 # has gone answers everything after it with None (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
+python3 checks/client-setup.py  # the set-up flow inside the platform (§357,
+                                # spec 055): the bare state MADE (§255), the
+                                # Getting started strip agreeing with the flow's
+                                # own progress() and never a count, the flow
+                                # mounted from it, Branding's controls inside its
+                                # first step with the old `brand` def absent, a
+                                # unit added and read back off the STORED graph
+                                # with every head and weighting row surviving, a
+                                # headed removal refused BY NAME with the row put
+                                # back and the next press proceeding, an unnamed
+                                # row refused in words, Done with set-up moving
+                                # the def to The client as Client set-up, and the
+                                # shape frozen under a plan. Red from the SOURCES
+                                # via SMP_BUILT (§276)
 python3 checks/attention-rows.py # what is waiting on the office — one list, three
                                 # readers, and no fourth (§356, spec 054 §9.1): the
                                 # Setup Overview is DELETED, and this file owns what
@@ -9434,7 +9448,52 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356.6: the sweep, and the viewer a
+*Last Updated: 2026-09-16 &mdash; **&sect;357: the client's settings live in
+the platform, and Strategy's welcome is the welcome (spec 055, on the
+branch).** Islam, with two screenshots &mdash; spec 054's client landing on
+the new stack beside the frozen welcome overlay inside Strategy: *"why do I
+have a welcome screen for the client overall, I just need a welcome screen for
+the strategy module for now."* **&sect;53.5 with a person standing between the
+two copies**: &sect;315 stood the frozen welcome down because the Next landing
+was going to be the welcome, and spec 054 &sect;4.1 put the client's settings
+ON that landing because the spine needed a page outside every module &mdash;
+right on their own terms, and together a second welcome. **Both REVERSED and
+recorded as reversals** (Principle II); &sect;4.1's reason survives, and what
+moved is WHERE. Three placements drawn (`design-mockups/client-settings-door/`,
+rule 1c) and **"A"**: from the console's card, *Settings* opens the client's
+own Setup rail in the client's chrome &mdash; one rail, the set-up flow moving
+from the console into the platform, at the top as a **Getting started strip**
+until *Done with set-up* is pressed and then at the bottom as *Client set-up*;
+Branding absorbed into its first step and the separate page DELETED with the
+`look` group; email a Strategy-module setting (his *"2."*); the knowledge base
+back on Strategy *"until we decide later"*. `/<client>` REDIRECTS into the
+first module the person may open (`openableModules`, the switcher's own
+answer), `Welcome.tsx` and `landingShape` deleted, and `route.js` no longer
+stamps `smp.welcome.done`, so `welcome.js` is offered again once a session.
+**ONE FLOW, TWO HOSTS**: the console's 2,198-line flow CARRIED into
+`src/client-setup.js` (`mount` for the platform's page, `mountCreate` and
+`mountArchived` for the console's two doors that keep no platform to open),
+the registry half writing on `change` through the same `/api/platform`
+actions, the shape half committing on Next/Back/Done through the SAME
+`__smpShape` the server's `shapeClient` runs (moved out of `frozen.cjs`'s
+glue), over a copy of `SYNC.graph()` rebound with the newly exported
+`SYNC.hydrate`, the autosave carrying every row (&sect;210). **AND THE FIRST
+DRIVE WAS REFUSED ON A GRAPH NOBODY HAD RENAMED** (&sect;357.3):
+`addBusinessUnit` mints a key from the NAME and a client's stored keys were
+not always minted that way, so re-minting read three existing heads as
+dropped &mdash; a row is matched by its NAME first and keeps its KEY
+(&sect;48, &sect;232), re-addressed under it. **And a refusal held the person
+on the step**: the refused row stayed in the flow's list and every Next after
+it was refused too &mdash; the rows are PUT BACK, the step redrawn, the
+sentence held across the redraw (&sect;63); and the focus after `+ Add` landed
+on the body because `paint()` is HELD under a click (&sect;30.1), so it lands
+inside `render()`. *Done with set-up* is ONE key on the group
+(`SMPRules.SETUP_DONE`, an absence until pressed), classified `setup` with the
+two server edits falsified separately (**4 / 3 red**, &sect;259.2),
+`test-authorize.js` §41 673/0. [CHECKS] **`main` untouched &mdash; the merge
+is Islam's word, on that merge.***
+
+*Earlier: 2026-09-15 &mdash; **&sect;356.6: the sweep, and the viewer a
 reload put back (spec 054 &sect;9, plan step 6, on the branch).** Step 6 of six,
 and nothing in the product moves for it: `qa.py` at Next **33 viewers / 243
 destinations / ERRORS none**, over `file://` **33 / 241 / ERRORS none**, shell

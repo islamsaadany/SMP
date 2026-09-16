@@ -49001,3 +49001,129 @@ rather than swept; a served viewer with no page on the client's rail is
 counted as walking nothing, which is right and is also the only thing
 `qa.py` says about them there. `main` untouched — the merge is Islam's word,
 on that merge.
+
+## §357 — THE CLIENT'S SETTINGS LIVE IN THE PLATFORM, AND STRATEGY'S WELCOME IS THE WELCOME (2026-09-16, spec 055)
+
+Islam, with two screenshots side by side — spec 054's client landing on the
+new stack and the frozen welcome overlay inside Strategy: *"why do I have a
+welcome screen for the client overall, I just need a welcome screen for the
+strategy module for now."* **HE WAS LOOKING AT §53.5 WITH A PERSON STANDING
+BETWEEN THE TWO COPIES.** §315 stood the shell's own welcome down because the
+Next landing was going to be the welcome, and spec 054 §4.1 then put the
+client's own settings ON that landing because the spine needed a page that
+is not inside any module — each decision right on its own terms, and
+together they made a second welcome that the first one already was. **Both
+are REVERSED here and recorded as reversals** (Principle II): §315's landing
+and spec 054 §4.1's blocks. The reasoning of §4.1 survives whole — the spine
+still has to live somewhere that is not inside any module — and what moved
+is the answer to *where*: not a page of its own, but the platform's own
+Setup rail served for the client. Three drawn placements
+(`design-mockups/client-settings-door/`, rule 1c), and **"A"**: from the
+console's card, *Settings* opens the client's own Setup rail in the
+client's chrome, one rail, the set-up flow moving from the console into the
+platform. His three other answers, each recorded as his: the set-up is a
+one-off, so it sits at the top as a strip until it is finished and then
+*"turns into a normal setting like C"* at the bottom; it absorbs Branding
+and the separate page goes; *Done with set-up* marks it (*"1. ok"*); the
+email settings are a Strategy-module setting (*"2."*); and the knowledge
+base stays on Strategy's rail *"until we decide later"*.
+
+### §357.1 — A CLIENT'S ADDRESS OPENS THE MODULE
+
+`/<client>` resolves the tenant exactly as before — the one-door rule holds
+to the letter (§313.36, §43.2) — and then REDIRECTS into the first module
+the person may open, read from `openableModules()` (§356.5), the same answer
+the switcher and the console's card read and never a second list. Nearly
+everybody lands on `/<client>/strategy`; a person who may open none still
+lands on the default module's address, where its own gate answers in words,
+because a 404 here would say the CLIENT is not available, which is not true.
+`Welcome.tsx` is deleted with `landingShape` and its readers; `lib/landing.ts`
+keeps the three things the route still asks. `shell/route.js` stops writing
+`smp.welcome.done`, so the frozen `welcome.js` is OFFERED again on any deep
+address, once a session, and dismissed through its own way out — and the
+house mark (§193.2) is its way back, which is the whole of what spec 054's
+landing did that the frozen overlay did not already do.
+
+### §357.2 — ONE RAIL, AND THE SET-UP AS A STRIP ON IT
+
+`/<client>/setup` is spec 054's own machinery: the frozen Setup document
+served with `data-setup-scope="client"`, the rail drawn from the defs marked
+for that scope. What is new on it: **a row at the top, `‹ Back to the
+console`** (href `/platform`, client scope only — a module's rail draws
+`Client settings ›` in the same slot, where it drew *Back to the landing*);
+**a strip** while `SMPRules.setupDone(GROUP)` is false — *Getting started*
+and *"N of 7 done · what is left ▸"*, computed from the flow's own
+`progress()` and never a literal, with the `start` def filtered OUT of the
+groups so the page is reachable from exactly one place; and once done, no
+strip and the def in the last group, **The client**, as *Client set-up*.
+**The `look` group and the `brand` def are DELETED** (§24): the mark and the
+colours are the flow's first step, through the one `brandingBody()` the old
+page's renderer now calls too (§53.5). **`kb` goes back to Strategy**
+(`mod:"strategy"`), reversing spec 054's move at his word.
+
+### §357.3 — ONE FLOW, TWO HOSTS, AND A ROW MATCHED BY ITS NAME
+
+The console's flow (spec 044, §322, 2,198 lines of `platform.html`) is
+CARRIED into `SMP-Project-Folder/src/client-setup.js`, not rewritten: every
+step, every word, every refusal. What changed is the host. `CLIENTSETUP.mount`
+is the platform's Setup page; `mountCreate` is the console's *Add a client*
+(ending at `/<key>/setup/start`); `mountArchived` is the console's archived
+card — bring back and delete — because an archived client has no platform
+to open. **THE REGISTRY HALF WRITES ON `change`** (§35) through the same
+`/api/platform` actions the console posted. **THE SHAPE HALF COMMITS ON
+NEXT, BACK OR DONE** through `__smpShape()` — which moved out of
+`lib/frozen.cjs`'s glue into this file, so the server's `shapeClient` and the
+browser's press run ONE function (§53.5) — over a COPY of `SYNC.graph()`,
+rebound with the newly exported `SYNC.hydrate` only if nobody in charge was
+dropped, the ordinary autosave then carrying every row it minted (§210). A
+unit made on Getting started is byte for byte a unit made on Setup ›
+Business units.
+
+**AND THE FIRST DRIVE WAS REFUSED ON A GRAPH NOBODY HAD RENAMED.** Adding
+one unit to the cleared worked example and pressing Next: *"Somebody is in
+charge of Consumer Electronics, IT Dist., Strategy Management Office…"* and
+`UNIT_KEYS` stayed at ten. `addBusinessUnit` mints a key from the NAME, and
+a client's stored keys were not always minted that way — so re-minting gave
+three existing units NEW keys, their heads read as dropped, and the whole
+pass was refused. The console never met this because the console shaped a
+client that had never been shaped by anything else. **A row is matched by
+its name first and only then by its key**, and a matched row KEEPS ITS KEY
+— figures, focus marks, memberships and every snapshot are keyed on it (§48,
+§232) — re-addressed under it rather than appended beside it (`rekeyUnit`).
+Proved on the server side with a head under a key the name would never
+mint (`mob` for *Mobile*): carried, the head kept, the weighting row
+following, and a removal of that same unit still refused.
+
+**AND A REFUSAL HELD THE PERSON ON THE STEP.** The refused removal stayed in
+the flow's own list, so every Next and Back after it was refused too, with
+no way on short of typing the name back in. The rows are PUT BACK as well as
+refused: the list re-read off the graph that stood, the step redrawn so the
+row is seen to be back, the sentence saying both halves — and the sentence
+is held in the flow's state, because the redraw that shows the row would
+otherwise take the words with it (§63). **And the focus after `+ Add` landed
+on nothing**: the shell's `paint()` is HELD while a click is landing
+(§30.1), so a `focus()` on the line after it reached the column about to be
+replaced — measured, `activeElement` the body — and it is landed inside
+`render()` instead, where the new box exists.
+
+### §357.4 — DONE WITH SET-UP IS ONE KEY, AND THE SERVER'S TWO EDITS GO TOGETHER
+
+`GROUP.setupDone === true`, read through `SMPRules.setupDone()`, stored as
+an absence until pressed (§50.6), no migration (`org.extra`).
+`lib/authorize.js` classifies it `setup` AND lists it among the group's
+known keys — falsified separately (§259.2): the classification alone
+removed, the change is INVISIBLE and allowed to everybody, **4 red**; the
+known-list entry alone removed, it reaches the unknown sweep under a
+sentence naming the whole group, **3 red**. `test-authorize.js` §41, 673/0,
+both ends: the office may, a custodian may not and is told Setup, and a
+save carrying the mark unchanged classifies nothing about it.
+
+### §357.5 — WHAT WAS MEASURED
+
+[CHECKS]
+
+**RECORDED, NOT DONE**: Islam has not seen the modules band and the archive
+block on step 1 (they sat on the console's settings page; the mockup drew
+step 1 with the registry fields and Branding) — on the what-to-check list;
+a module that arrives with a set-up question of its own has no step in this
+flow; and the knowledge base's home is his *"later"*.

@@ -4976,6 +4976,28 @@ suite per feature.
 
 ## In flight
 
+**Spec 055 — the client's settings live in the platform (§357), on the
+branch, built 2026-09-16.** Islam, of spec 054's landing beside the frozen
+welcome: *"why do I have a welcome screen for the client overall, I just need
+a welcome screen for the strategy module for now"* — then **"A"** of three
+drawn (`design-mockups/client-settings-door/`). Reverses §315's landing and
+spec 054 §4.1's blocks: `/<client>` redirects into the first openable module
+(`openableModules`), `Welcome.tsx` deleted, the frozen `welcome.js` offered
+again once a session. The console's card's *Settings* opens `/<client>/setup`
+— the client's own Setup rail with `‹ Back to the console`, a *Getting
+started* strip (`N of 7 done · …`, from the flow's `progress()`) until *Done
+with set-up* writes `GROUP.setupDone` and the page moves to the bottom as
+*Client set-up*; Branding absorbed into step 1 and its page deleted with the
+`look` group; `kb` back on Strategy; a module's rail draws `Client settings ›`.
+The console's flow CARRIED into `src/client-setup.js` (one function for three
+hosts: the platform page, Add a client, an archived card); `__smpShape` moved
+out of `frozen.cjs`'s glue so browser and server run one function; a row
+matched by NAME first and keeping its KEY (§357.3 — the first drive was
+refused on a graph nobody had renamed); a refusal puts the rows back; the
+focus after + Add lands inside `render()`. Authoriser §41 673/0, red 4 / 3.
+[CHECKS] **Waiting on Islam: the merge; and a look at step 1's modules band
+and archive block, which he has not seen there.** `main` untouched.
+
 **Spec 054 — Setup per module (§356), on the branch, all six steps built.**
 Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
 Step 1: the Setup Overview is deleted (§356.1) — both its halves were

@@ -139,15 +139,38 @@ export function weekNumber(day: string): number {
   const wk1 = new Date(jan4); wk1.setUTCDate(jan4.getUTCDate() - ((jan4.getUTCDay() + 6) % 7));
   return Math.floor((thu.getTime() - wk1.getTime()) / 86400000 / 7) + 1;
 }
-export const weekWord = (day: string): string => "W" + weekNumber(day);
+/* THE WEEK IN WORDS (§356.15). Islam, of the built tracker: "in the view of
+   the tasks don't write the week number write this week and next week ... and
+   maybe when we are out of the next we can write the week number." So two
+   weeks have a word and everything after is its number in the year, which is
+   what "out of the next" asks for.
+   THE WEEK BEFORE THIS ONE HAS NO WORD, AND HIS OWN EARLIER DECISION IS WHY:
+   an OPEN action due in a past week is LATE, so it reads Late / Late 1 w /
+   Late 2 w (lateWord) and never reaches this function at all — "Previous
+   week" could only ever appear in place of those, and it would take the alarm
+   with it. Where a past week does reach this — a list GROUPED by its due week
+   — it falls through to the number, which is the honest answer there.
+   TODAY IS REQUIRED, NEVER OPTIONAL: a caller that forgot it would silently
+   be handed numbers back, which is this fault wearing a green tick (§93). */
+export function weekWord(day: string, today: string): string {
+  if (brk() === "week-numbers") return "W" + weekNumber(day);   /* §356.15 put back */
+  if (sameWeek(day, today)) return "This week";
+  if (sameWeek(day, addDays(weekOf(today).from, 7))) return "Next week";
+  return "W" + weekNumber(day);
+}
 export function sameWeek(a: string, b: string): boolean { return weekOf(a).from === weekOf(b).from; }
-/* The picker's rows: this week and the weeks after it, each with its days. */
+/* The picker's rows: this week and the weeks after it, each with its days —
+   and its word is weekWord's, so pressing "Next week" gives a row that reads
+   "Next week" and one week is never spelt two ways on one screen (§53.5).
+   Its cost was stated before it was chosen and is paid in the stylesheet: the
+   first column grows from 54px to 86px to hold two words, and the popup with
+   it. */
 export type WeekOption = { from: string; to: string; word: string; days: string; now: boolean };
 export function weekOptions(today: string, n: number = WEEKS_AHEAD): WeekOption[] {
   const out: WeekOption[] = [];
   let w = weekOf(today);
   for (let i = 0; i < n; i++) {
-    out.push({ from: w.from, to: w.to, word: weekWord(w.from), days: weekDays(w, today), now: i === 0 });
+    out.push({ from: w.from, to: w.to, word: weekWord(w.from, today), days: weekDays(w, today), now: i === 0 });
     w = weekOf(addDays(w.from, 7));
   }
   return out;

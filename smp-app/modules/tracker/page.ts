@@ -127,15 +127,17 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .when.late{color:var(--bad);font-weight:600}
 .when.pick{cursor:pointer;border-radius:6px;padding:3px 5px;margin:-3px -5px}
 .when.pick:hover,.when.pick.on,.when.pick:focus-visible{background:var(--surface-2);outline:none}
-/* a week reads as its number in the year, this week's in bold (§356.14) */
+/* a week reads in words — This week, Next week, then its number (§356.15),
+   and nothing on the row marks this one twice */
 .when .wk{display:inline-block;font:500 12.5px/1.4 var(--font);color:var(--ink-2)}
-.when .wk.now{font-weight:700;color:var(--ink)}
 .when.late .wk{color:var(--bad)}
-/* the week picker: a small table — the number, the days — this week bold,
-   No date and a day of your own at the foot */
-.weeks{position:absolute;top:26px;right:0;z-index:5;width:200px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left;font-variant-numeric:tabular-nums}
-.weeks .wh{display:grid;grid-template-columns:54px 1fr;padding:5px 9px 4px;font:600 10px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);margin-bottom:3px}
-.weeks button{display:grid;grid-template-columns:54px 1fr;width:100%;align-items:baseline;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+/* the week picker: a small table — the week, the days — this week bold,
+   because here the rows ARE a list and the mark says which one you are in
+   (§356.15); No date and a day of your own at the foot. Its first column is
+   86px to hold two words, which is what the words cost (§53.5). */
+.weeks{position:absolute;top:26px;right:0;z-index:5;width:232px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left;font-variant-numeric:tabular-nums}
+.weeks .wh{display:grid;grid-template-columns:86px 1fr;padding:5px 9px 4px;font:600 10px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);margin-bottom:3px}
+.weeks button{display:grid;grid-template-columns:86px 1fr;width:100%;align-items:baseline;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left}
 .weeks button b{font-weight:400;font-variant-numeric:tabular-nums}
 .weeks button.now b{font-weight:700}
 .weeks button small{font:400 12px/1.3 var(--mono);color:var(--ink-3);white-space:nowrap}
@@ -291,18 +293,21 @@ const statusPill = (a: Action, live: boolean): string => {
 const TICK = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ARROW = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-/* WHAT THE WHEN CELL SAYS. As weeks (§356.14): the week's number, W38,
-   this week's in bold, and a late row says only how late — in weeks a row is
-   late from the Friday, so the number it was due in is behind it. As exact
-   dates: the day, and late with the day after it. Done is a day either way,
-   because finishing happened on one. */
-export function whenText(a: Action, today: string, dates: Format = "weeks"): { text: string; late: boolean; now?: boolean; week?: string } {
+/* WHAT THE WHEN CELL SAYS. As weeks (§356.15): the week in words — This
+   week, Next week, then W40 and beyond (weekWord) — and a late row says only
+   how late, since in weeks a row is late from the Friday and the week it was
+   due in is behind it. THE BOLD WENT WITH THE WORDS: this week's NUMBER was
+   bold to mark it out among numbers, and once the row says "This week" the
+   bold says it a second time (§87), so the row is plain and the picker keeps
+   its mark. As exact dates: the day, and late with the day after it. Done is
+   a day either way, because finishing happened on one. */
+export function whenText(a: Action, today: string, dates: Format = "weeks"): { text: string; late: boolean; week?: boolean } {
   if (a.status === "done") return { text: "Done " + readableDay(a.doneDay, today), late: false };
   if (!a.due) return { text: "No date", late: false };
   const late = isLate(a.due, today);
   if (dates === "weeks") {
     if (late) return { text: lateWord(carriedWeeks(a.firstDue || a.due, today)), late: true };
-    return { text: weekWord(a.due), late: false, now: sameWeek(a.due, today), week: weekWord(a.due) };
+    return { text: weekWord(a.due, today), late: false, week: true };
   }
   if (!late) return { text: readableDay(a.due, today), late: false };
   return { text: lateWord(carriedWeeks(a.firstDue || a.due, today)) + " · " + readableDay(a.due, today), late: true };
@@ -325,7 +330,7 @@ export function weeksList(today: string, due: string | null): string {
    box in place (the script). */
 function whenCell(a: Action, today: string, dates: Format, live: boolean): string {
   const w = whenText(a, today, dates);
-  const word = w.week ? '<span class="wk' + (w.now ? " now" : "") + '">' + esc(w.text) + "</span>" : esc(w.text);
+  const word = w.week ? '<span class="wk">' + esc(w.text) + "</span>" : esc(w.text);
   if (!live || a.status === "done") return '<span class="when' + (w.late ? " late" : "") + '">' + word + "</span>";
   if (dates === "weeks")
     return '<span class="when' + (w.late ? " late" : "") + ' pick" role="button" tabindex="0" data-act="due" data-due="' + esc(a.due || "") + '" aria-haspopup="listbox" aria-expanded="false" title="Change the week">' +
@@ -414,7 +419,7 @@ function grouped(shown: Action[], L: Loaded, group: Group, today: string, dates:
   }
   const label = (k: string) => group === "owner" ? (L.names.get(k) || k)
     : group === "status" ? STATUS_WORD[k as keyof typeof STATUS_WORD]
-    : group === "due" ? (k === "none" ? "No date" : dates === "weeks" ? weekWord(k) + " · " + weekOptions(k, 1)[0].days : readableDay(k, today))
+    : group === "due" ? (k === "none" ? "No date" : dates === "weeks" ? weekWord(k, today) + " · " + weekOptions(k, 1)[0].days : readableDay(k, today))
     : null;
   return keys.map((k) => ({ key: k, label: label(k), rows: by.get(k)! }));
 }
@@ -449,24 +454,35 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     (g.label == null ? "" : '<div class="grp" data-key="' + esc(g.key) + '">' + esc(g.label) + ' <span class="cnt">' + g.rows.length + "</span></div>") +
     g.rows.map((a) => row(a, L, p.who, today, dates, a.id === L.open) + (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("")).join("");
   /* THE NEXT EMPTY LINE — the sheet's own way in, AND IT TAKES EVERYTHING
-     (§356.14): the action over a quiet note line, the week (this week's
-     Thursday until another is picked — Islam's default), the owner (you
-     until another is picked), Not started. Nothing is posted until Enter;
-     the picks ride on the line as data- attributes the script reads. Somebody
-     the register has not placed yet (§313.32) is told so rather than handed a
-     box that would be refused on Enter (§61). */
+     (§356.14): the action, the week (this week's Thursday until another is
+     picked — Islam's default), the owner (you until another is picked), Not
+     started. Nothing is posted until Enter; the picks ride on the line as
+     data- attributes the script reads. Somebody the register has not placed
+     yet (§313.32) is told so rather than handed a box that would be refused
+     on Enter (§61).
+     AND THE NOTE IS ASKED FOR, NEVER STANDING (§356.15). Islam: "a note
+     should be an option not a common thing in the actions." It was drawn on
+     every add line, so the sheet's one way in read as two fields to fill.
+     THE CONTROL IS THE ARROW THE ROWS ALREADY CARRY, in the column it already
+     sits in, meaning what it already means — a row's notes — so the line adds
+     no word to the screen and there is nothing new to learn; Islam picked it
+     over a word reading "note", which would have sat in that same column and
+     stopped the add line lining up with the rows above it. The box is HIDDEN
+     and never absent (§298's shape, §100.2): folding it must not throw away
+     what a hand has half-typed. */
   const thu = thursdayOf(today);
   const addrow = me
     ? '<div class="addrow" data-due="' + thu + '" data-owner="' + esc(me) + '"><span class="plus">+</span>' +
       '<div class="tn"><input id="add" class="new" data-act="add" placeholder="' + (all.length ? "Type an action and press Enter" : "Type the first action for " + esc(p.tenantName) + " and press Enter") + '" aria-label="New action" maxlength="200">' +
-      '<input id="addnote" class="nt" data-act="add-note" placeholder="A note, if the line needs one" aria-label="Note for the new action" maxlength="5000"></div>' +
+      '<input id="addnote" class="nt" placeholder="A note, if the line needs one" aria-label="Note for the new action" maxlength="5000"' + (brk() === "note-standing" ? "" : " hidden") + '></div>' +
       (dates === "weeks"
-        ? '<span class="when pick" role="button" tabindex="0" data-act="due" data-due="' + thu + '" aria-haspopup="listbox" aria-expanded="false" title="Which week"><span class="wk now">' + weekWord(thu) + "</span>" + weeksList(today, thu) + "</span>"
+        ? '<span class="when pick" role="button" tabindex="0" data-act="due" data-due="' + thu + '" aria-haspopup="listbox" aria-expanded="false" title="Which week"><span class="wk">' + weekWord(thu, today) + "</span>" + weeksList(today, thu) + "</span>"
         : '<button class="when pick" type="button" data-act="due" data-due="' + thu + '" title="Which day">' + esc(readableDay(thu, today)) + "</button>") +
       '<span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Whose it is"><span class="wn">' + esc(meShort) + "</span>" + teamList(L, me) + "</span>" +
-      '<span class="st">Not started</span><span></span></div>'
+      '<span class="st">Not started</span>' +
+      '<button class="more" type="button" data-act="add-note" aria-expanded="false" aria-controls="addnote" aria-label="Add a note" title="Add a note">' + ARROW + "</button></div>"
     : '<div class="addhint">You are not on this client\'s register yet, so nothing can be owned by you here; open the client once more and it will be.</div>';
-  const hint = me ? '<div class="addhint">Enter adds it under you, due this week &middot; set its week, owner or a note before Enter, or on the row after &middot; the arrow for its notes</div>' : "";
+  const hint = me ? '<div class="addhint">Enter adds it under you, due this week &middot; set its week or owner before Enter, or on the row after &middot; the arrow opens a note, here and on every row</div>' : "";
   const none = !all.length
     ? '<div class="none"><b>Nothing on the list for ' + esc(p.tenantName) + ' yet.</b>The first line lands under you, due this week; pick another week on the line before Enter, or on the row after.</div>'
     : !shown.length

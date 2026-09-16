@@ -87,8 +87,8 @@ their own weekly alignment about that client. The client's staff never see it.
 | 6 | Grouping | **By owner unless you choose otherwise** (loosened at §356.11 from *by owner, and nothing else*): Owner is how the list opens; Status, Due date or None are a choice on the views row, remembered by the browser and never stored on the client. The other system's free "scopes" list is still not taken — the client is already the scope. |
 | 7 | The word | **Internal Tracker** (Islam, 2026-09-15). Key `tracker`; two words on the switcher, and the second says who it is for, which is the point. *Actions* was proposed and not taken. |
 | 8 | The week | **Sunday to Thursday** (Islam, 2026-09-15). *This week* is the days somebody is at their desk; anything due on a Friday or Saturday reads as the following week's. |
-| 9 | Dates | **Weeks by default** (Islam, 2026-09-16, §356.14). A row reads its week's number in the year, *W38*, this week's in bold; picking a week stores that week's **Thursday** into the same date column. *Exact dates* is a choice behind the three dots beside Group by, remembered on the browser. The number is the ISO week holding the Thursday. |
-| 10 | The add line | **Takes the week, the owner and a note before Enter** (§356.14). A new line lands due this week's Thursday and owned by you unless the line says otherwise; the note is a quiet second line under the action in its own column, so the three cells on the right never move. |
+| 9 | Dates | **Weeks by default** (Islam, 2026-09-16, §356.14). Picking a week stores that week's **Thursday** into the same date column; *Exact dates* is a choice behind the three dots beside Group by, remembered on the browser. **AMENDED §356.15**: a row reads the week in WORDS — **This week · Next week · W40, W41…** — and the bold came off the row with them (the word says it) while staying in the picker, which says the same words. *Previous week* is deliberately **not** built: an open action due in a past week is **late**, so it already reads *Late / Late 1 w / Late 2 w*, and the word could only ever replace that alarm. A past week reached through a list GROUPED by due week falls through to its number. The number is the ISO week holding the Thursday. |
+| 10 | The add line | **Takes the week, the owner and a note before Enter** (§356.14). A new line lands due this week's Thursday and owned by you unless the line says otherwise; the note is a quiet second line under the action in its own column, so the three cells on the right never move. **AMENDED §356.15**: the note is **asked for, never standing** — Islam, *"a note should be an option not a common thing in the actions"*. The control is the **arrow the rows already carry**, in the column it already sits in, meaning what it already means; Tab from the action opens it too. The box is hidden and never absent, so a swap cannot take what a hand half-typed, and **folding it empties it** — a note folded away with words still in it would be posted by the next Enter with nothing on the screen saying so. An empty note left behind folds itself. |
 | 11 | The settings | **Behind three dots on the far right of the views row**: Group by and Dates as, two short columns, both cookies on the browser and never the client's data. Group by left the row for it. |
 | 12 | The way back | **Above the page's title**, the client's own name with a chevron, to the client's platform (Strategy). Not in the top bar (his correction). |
 
@@ -249,10 +249,14 @@ the week stood, and its proposal on the word did not.
 
 ## 10 · Recorded, not decided
 
-- Dates as weeks (§356.14): a row already late keeps reading how late it is
-  until its new Thursday has passed; the picker offers six weeks ahead and *A
-  day of my own…* beyond; the title's own week label still reads two days
-  where the rows read W38.
+- Dates as weeks (§356.14, §356.15): a row already late keeps reading how late
+  it is until its new Thursday has passed; the picker offers six weeks ahead
+  and *A day of my own…* beyond; the title's own week label still reads two
+  days where the rows read *This week*.
+- The note (§356.15): a ROW's own note is the panel's textarea behind that
+  same arrow, which is right and means the arrow opens two different boxes
+  depending on the line it is on; and nothing on the add line says a note is
+  optional except the placeholder inside a box you have to open to read.
 - A per-module access tab (spec 046 §4.4) is still built for no module; this
   one is office-by-rule and adds nothing to that debt — **but the switcher
   still lists the tracker for a client's own person**, who is then refused at

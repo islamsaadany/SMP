@@ -8019,8 +8019,26 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # every press &mdash; Enter adds, the tick, the status,
                                 # the date box and its Escape, notes on leaving the
                                 # box, Enter renames, Delete asks in the row with the
-                                # question asserted ABSENT before the press. 124/0,
-                                # red three ways (`check:tracker:red`). Its first run
+                                # question asserted ABSENT before the press.
+                                # AND SINCE &sect;356.15 IT ASSERTS WHAT THAT ROUND
+                                # DECIDED, BOTH ENDS EACH (&sect;94.2): no note box
+                                # stands on the add line AND the arrow opens one,
+                                # folding EMPTIES it (a folded note holding words
+                                # would be posted with nothing on the screen saying
+                                # so, &sect;96), Tab from the action is the second
+                                # door and an empty note left behind folds itself;
+                                # This week and Next week are WORDS while a third
+                                # week on &mdash; and a week GONE BY, which is the
+                                # only way a past week is ever spelt &mdash; read a
+                                # number, with no `.wk.now` anywhere on the page and
+                                # the picker's own bold still measuring 700. Every
+                                # note probe DEGRADES (&sect;215): a `fill` on a box
+                                # the broken build has hidden waits thirty seconds
+                                # and takes the rest of &sect;10 with it, which is a
+                                # run that DIED rather than reported &mdash;
+                                # corrected, `note-standing` goes from 2 red and dead
+                                # to 10 red and complete. 214/0,
+                                # red EIGHT ways (`check:tracker:red`). Its first run
                                 # found ONE product fault (an undated line vanishing
                                 # from This week, &sect;356.7), one real page fault
                                 # (`hidden` hiding nothing under an author display,
@@ -9490,7 +9508,49 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;356.14: the tracker's dates by the
+*Last Updated: 2026-09-16 &mdash; **&sect;356.15: the note is asked for, and
+the week is in words (spec 054).** Islam, of the built tracker: *"1. a note
+should be an option not a common thing in the actions tell me my options to add
+one if needed in a neat way 2. in the view of the tasks don't write the week
+number write this week and next week &hellip; and maybe when we are out of the
+next we can write the week number."* **BOTH DRAWN BEFORE EITHER WAS BUILT**
+(rule 1c, &sect;266) in one alignment page made of the module's own stylesheet
+&mdash; three ways to ask for a note and two ways to spell the week, each with
+its cost beside it &mdash; and he answered both: *"the arrow in the column is a
+good option as it opens other things anyway for the picker let's use this week
+and next week."* **THE CONTROL IS THE ARROW THE ROWS ALREADY CARRY**, in the
+column it already sits in, meaning what it already means, so the line gains no
+word and nothing to learn; his own reason is the best one. **ONE RULE SAYS ALL
+OF IT: the note is on the line only while it is open, and folding it EMPTIES
+it** &mdash; a note folded away with words still in it would be posted by the
+next Enter with nothing on the screen saying so (&sect;96), and the cost is
+stated rather than discovered: the arrow throws away an unsent note, which is
+what Escape on that line already does. Hidden and never absent (&sect;298's
+shape), so a swap cannot take what a hand half-typed; **Tab from the action is
+the second door** (&sect;61) and an empty note left behind folds itself.
+**AND "PREVIOUS WEEK" IS THE ONE THING HE ASKED FOR THAT IS NOT BUILT, ON HIS
+OWN EARLIER DECISION**: an open action due in a past week is **late**, so it
+already reads *Late &middot; Late 1 w &middot; Late 2 w*, and that word could
+only ever be replaced &mdash; the alarm would go with it. Put to him that way
+on the drawing and not asked for again; a past week reached through a GROUPED
+list falls through to its number, which is the honest answer there. **THE BOLD
+WENT WITH THE WORDS** (once the row says *This week* the bold says it twice,
+&sect;87) **and stays in the picker**, asserted at both ends; **the picker says
+what the rows say** (&sect;53.5), at a cost paid in the stylesheet (54 &rarr;
+86px) and reversible in one argument. **`today` IS REQUIRED, NEVER OPTIONAL**,
+or a caller that forgot it is handed numbers back in silence (&sect;93).
+**VERIFIED**: `check:tracker` **214/0** with &sect;10 driven in Chromium, **red
+EIGHT ways** &mdash; the six before it plus `week-numbers` (10 red) and
+`note-standing` (10 red), both made from the SOURCES (&sect;276); `modules`
+100/0; `generated-in-step` all clear; `tsc` clean but for `lib/prisma.ts`'s
+pre-existing error. **And the second falsification DIED rather than reporting,
+four times over** (&sect;215, in the file promising every probe degrades)
+&mdash; a `fill` on a box the broken build has hidden waits thirty seconds and
+takes the rest of &sect;10 with it; corrected, it goes from 2 red and dead to
+10 red and complete. **The frozen product is untouched**, so `sw.js` is not
+bumped. **On the branch, not merged.***
+
+*Earlier the same day: **&sect;356.14: the tracker's dates by the
 week, a settings menu, the add line that takes everything, one pill, and a way
 back (spec 054).** Islam, testing: *"I'm not able to set the date and the
 status pill is shifting it's size &hellip; the due dates default should be the
@@ -9562,8 +9622,18 @@ recorded Chromium's rule as `!important` and, asked of the page, it is not),
 caught only because the question was asserted ABSENT before the press
 (&sect;113.8). Three of the check's own first failures were the check
 (&sect;215; the FK's order, &sect;339; a `fill()` that fires its own change).
-**VERIFIED**: `check:tracker` **124/0** with &sect;10 driven in Chromium, red
-2 / 3 / 2 under its breaks; `modules` 100/0; `insights` 127/0;
+**AND SINCE &sect;356.15 THE NOTE IS ASKED FOR AND THE WEEK IS IN WORDS**:
+the note box is not on the add line until the ARROW opens it &mdash; the mark
+the rows already carry, in the column it already sits in (Islam: *"it opens
+other things anyway"*) &mdash; hidden and never absent, folding EMPTIES it (a
+folded note holding words would be posted with nothing on the screen saying so,
+&sect;96), Tab from the action is the second door and an empty note left behind
+folds itself; and a row reads **This week &middot; Next week &middot; W40 and
+beyond**, with *previous week* deliberately NOT built because a past week is
+already **late** and the word could only replace the alarm. The bold came off
+the row and stayed in the picker, which says what the rows say (&sect;53.5) at
+54 &rarr; 86px. **VERIFIED**: `check:tracker` **124/0** then **214/0**, red
+2 / 3 / 2 then EIGHT ways; `modules` 100/0; `insights` 127/0;
 `memory-boundary` 14/0; `generated-in-step` all clear; `tsc` clean but for
 `lib/prisma.ts`'s pre-existing error. **The frozen product is untouched**, so
 `sw.js` is not bumped. **On the branch, not merged.** **RECORDED, NOT DONE**:

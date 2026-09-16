@@ -26,6 +26,8 @@
      SMP_BREAK=who-everyone   node checks/tracker.mjs   # must go red (§356.11)
      SMP_BREAK=reload-on-add  node checks/tracker.mjs   # must go red (§356.12)
      SMP_BREAK=back-on-blur   node checks/tracker.mjs   # must go red (§356.14)
+     SMP_BREAK=week-numbers   node checks/tracker.mjs   # must go red (§356.15)
+     SMP_BREAK=note-standing  node checks/tracker.mjs   # must go red (§356.15)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -109,16 +111,35 @@ check("late reads Late, Late 1 w, Late 2 w — never 'carried'", lateWord(0) ===
 const lateRow = shape({ id: "l", title: "t", description: "", owner_key: "islam", due: "2026-09-03", first_due: "2026-09-03", status: "in_progress", created_by: "islam" });
 check("...and as exact dates the row says the word, then the date", whenText(lateRow, TODAY, "dates").text === "Late 2 w · Thu 3 Sep" && whenText(lateRow, TODAY, "dates").late, whenText(lateRow, TODAY, "dates").text);
 check("a row due this week but past says Late alone, as dates", whenText(shape({ ...lateRow, due: "2026-09-14", first_due: "2026-09-14" }), TODAY, "dates").text === "Late · Mon 14 Sep");
-/* AS WEEKS (§356.14): the number in the year, this week's marked, a late
-   row the word alone, and Weeks is what an unasked page reads as. */
+/* AS WEEKS (§356.15): This week, Next week, then the number in the year, a
+   late row the word alone, and Weeks is what an unasked page reads as. The
+   NUMBER is still asserted, because it is what the third week onward reads
+   and what a past week falls back to — the words did not replace it, they
+   went in front of it. */
 check("dates are two formats, Weeks first, and a near miss is not one", FORMATS.join(",") === "weeks,dates" && FORMAT_WORD.dates === "Exact dates" && !isFormat("Weeks") && isFormat("dates"));
 check("a week is stored as its Thursday — Sunday's, Wednesday's and Friday's week alike", thursdayOf("2026-09-13") === "2026-09-17" && thursdayOf("2026-09-16") === "2026-09-17" && thursdayOf("2026-09-18") === "2026-09-24", thursdayOf("2026-09-18"));
-check("the week's number is the year's — 17 Sep 2026 is W38, and the last week of 2026 is W53", weekNumber("2026-09-16") === 38 && weekWord("2026-09-13") === "W38" && weekNumber("2026-12-30") === 53 && weekNumber("2026-01-01") === 1, weekNumber("2026-09-16") + " " + weekNumber("2026-12-30"));
+check("the week's number is the year's — 17 Sep 2026 is W38, and the last week of 2026 is W53", weekNumber("2026-09-16") === 38 && weekNumber("2026-12-30") === 53 && weekNumber("2026-01-01") === 1, weekNumber("2026-09-16") + " " + weekNumber("2026-12-30"));
+/* THE WORDS, AND BOTH ENDS OF THEM (§94.2, §356.15): two weeks have one and
+   everything else is its number, or a build that said "This week" about every
+   week would pass the half that matters. A week BEFORE this one is asserted
+   to read its NUMBER and never a word — it is the only way that case can be
+   reached (a list grouped by due week), and "Previous week" is what must not
+   appear there. */
+check("this week and next week are words, and the rest are numbers", weekWord("2026-09-13", TODAY) === "This week" && weekWord("2026-09-17", TODAY) === "This week" &&
+  weekWord("2026-09-20", TODAY) === "Next week" && weekWord("2026-09-24", TODAY) === "Next week" && weekWord("2026-10-01", TODAY) === "W40" && weekWord("2026-10-22", TODAY) === "W43",
+  [weekWord("2026-09-13", TODAY), weekWord("2026-09-20", TODAY), weekWord("2026-10-01", TODAY)].join(" · "));
+check("...and a week gone by reads its number, never a word", weekWord("2026-09-10", TODAY) === "W37" && weekWord("2026-09-03", TODAY) === "W36", weekWord("2026-09-10", TODAY));
 const wo = weekOptions(TODAY);
-check("the picker offers this week and five after it, each with its days", wo.length === 6 && wo[0].now && !wo[1].now && wo.map((o) => o.word).join(",") === "W38,W39,W40,W41,W42,W43" && wo[0].days === "13 – 17 Sep" && wo[2].days === "27 Sep – 1 Oct" && wo[0].to === "2026-09-17", JSON.stringify(wo));
+/* THE PICKER SAYS WHAT THE ROWS SAY (§53.5, Islam's pick): press Next week
+   and the row reads Next week — one week, one spelling, on one screen. */
+check("the picker offers this week and five after it, each with its days", wo.length === 6 && wo[0].now && !wo[1].now && wo.map((o) => o.word).join(",") === "This week,Next week,W40,W41,W42,W43" && wo[0].days === "13 – 17 Sep" && wo[2].days === "27 Sep – 1 Oct" && wo[0].to === "2026-09-17", JSON.stringify(wo));
 check("a week's days across a year carry it once", weekDays(weekOf("2027-01-04"), TODAY) === "3 – 7 Jan 2027", weekDays(weekOf("2027-01-04"), TODAY));
 const wk = (due, first) => whenText(shape({ ...lateRow, due, first_due: first || due, status: "not_started" }), TODAY);
-check("as weeks a row reads its number, this week's marked", wk("2026-09-17").text === "W38" && wk("2026-09-17").now === true && wk("2026-10-01").text === "W40" && wk("2026-10-01").now === false, JSON.stringify(wk("2026-10-01")));
+/* THE BOLD WENT WITH THE WORDS (§356.15): the row carries no mark of its own
+   for this week, because the word says it — asserted as an ABSENCE beside the
+   words, or a build that kept both would pass on the words alone. */
+check("as weeks a row reads the week in words, and nothing marks this one twice", wk("2026-09-17").text === "This week" && wk("2026-09-24").text === "Next week" && wk("2026-10-01").text === "W40" &&
+  wk("2026-09-17").now === undefined && wk("2026-10-01").now === undefined, JSON.stringify(wk("2026-09-17")));
 check("...a late row says how late and nothing else", wk("2026-09-03").text === "Late 2 w" && wk("2026-09-03").late && wk("2026-09-14").text === "Late", wk("2026-09-03").text);
 check("...and Done is a day either way", whenText(shape({ ...lateRow, status: "done", done_day: "2026-09-15" }), TODAY).text === "Done Tue 15 Sep");
 check("the same week is the same week whichever day names it", sameWeek("2026-09-13", "2026-09-17") && !sameWeek("2026-09-17", "2026-09-18"));
@@ -389,8 +410,8 @@ try {
   const realThu = thursdayOf(todayIn());
   check("...by Due date as exact dates it is the day, soonest first, and the undated read 'No date', last",
     heads(byDue).join("|") === [realThu, "2026-09-20", "2026-10-01"].sort().map((d) => readableDay(d, TODAY)).join("|") + "|No date", heads(byDue).join("|"));
-  check("...and as weeks it is the WEEK, its number and its days, one heading for every day in it (§356.14)",
-    heads(byWeek).join("|") === [...new Set([realThu, "2026-09-20", "2026-10-01"].map(thursdayOf))].sort().map((t) => weekWord(t) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
+  check("...and as weeks it is the WEEK, its word and its days, one heading for every day in it (§356.14, §356.15)",
+    heads(byWeek).join("|") === [...new Set([realThu, "2026-09-20", "2026-10-01"].map(thursdayOf))].sort().map((t) => weekWord(t, todayIn()) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
   check("...and by None there is no heading at all while the rows are all still there", heads(byNone).length === 0 && /class="row/.test(byNone) && /data-act="set-group" data-value="none" class="on"/.test(byNone));
   const cookied = await serve({ req: new Request("https://smp.example/x/tracker", { headers: { cookie: "a=b; smp.tracker.group=status" } }), slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], rest: [], personKey: "noran", seat: "smoteam" }).then((r) => r.text());
   check("the grouping this browser last chose is read off its cookie, so the page opens grouped that way", /data-value="status" class="on"/.test(cookied) && /data-group="status"/.test(cookied));
@@ -478,10 +499,52 @@ try {
     check("the way back sits above the title, naming the client, and goes to the client's platform", backHref === "/x" && (await pg.locator("a.back").innerText()).trim() === "Raya Trade" &&
       (await pg.evaluate("document.querySelector('a.back').getBoundingClientRect().bottom <= document.querySelector('h2.pt').getBoundingClientRect().top")), backHref);
     /* ENTER ADDS, AND THE LINE IS READ BACK OUT OF POSTGRES (§96) — due
-       THIS WEEK'S THURSDAY by default (§356.14), the row reading W<n> bold. */
+       THIS WEEK'S THURSDAY by default (§356.14), the row reading the week in
+       WORDS (§356.15) with nothing bold on it. */
     const real = todayIn(), thu = thursdayOf(real);
-    check("the add line opens on this week's number in bold, owned by me", (await pg.locator(".addrow .when .wk.now").innerText()) === weekWord(real) &&
+    check("the add line opens on This week in words, owned by me", (await pg.locator(".addrow .when .wk").innerText()) === "This week" &&
+      weekWord(real, real) === "This week" &&
       (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran");
+    /* THE BOLD WENT WITH THE WORDS (§356.15) — asserted over the WHOLE page,
+       because a mark left on one row of one view is exactly what a check
+       scoped to one selector would walk past. Its other end is the picker,
+       which keeps its mark, asserted below. */
+    check("...and no row anywhere on the page marks this week a second time", (await pg.locator(".wk.now").count()) === 0);
+    /* THE NOTE IS ASKED FOR (§356.15): the box is not on the line until the
+       arrow opens it, and BOTH ENDS are asserted — shut at rest, open on the
+       press — or a build that simply deleted the note passes the first half. */
+    check("no note box stands on the add line, and the arrow that opens one does", !(await pg.locator("#addnote").isVisible()) &&
+      (await pg.locator(".addrow [data-act=add-note]").count()) === 1 &&
+      (await pg.locator(".addrow [data-act=add-note]").getAttribute("aria-expanded")) === "false");
+    await pg.locator(".addrow [data-act=add-note]").click();
+    check("...the arrow opens it, lights, and puts the cursor in it", (await pg.locator("#addnote").isVisible()) &&
+      (await pg.evaluate("document.activeElement && document.activeElement.id")) === "addnote" &&
+      (await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")) &&
+      (await pg.locator(".addrow [data-act=add-note]").getAttribute("aria-expanded")) === "true");
+    /* FOLDING EMPTIES IT, and that is the whole rule: a note folded away with
+       words still in it would be posted by the next Enter with nothing on the
+       screen saying so (§96). */
+    await probe("the note box can be typed into once it is open", () => pg.locator("#addnote").fill("something I changed my mind about", { timeout: 4000 }));
+    await pg.locator(".addrow [data-act=add-note]").click();
+    check("...pressed again it folds AND empties, so nothing unseen can be posted", !(await pg.locator("#addnote").isVisible()) &&
+      (await pg.evaluate("document.getElementById('addnote').value")) === "" &&
+      !(await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")));
+    /* TAB FROM THE ACTION IS THE OTHER DOOR (§61). */
+    await pg.locator("#add").focus();
+    await pg.keyboard.press("Tab");
+    check("...and Tab from the action opens it too", (await pg.locator("#addnote").isVisible()) &&
+      (await pg.evaluate("document.activeElement && document.activeElement.id")) === "addnote");
+    await pg.locator("#add").focus();
+    check("...while an empty note left behind folds itself, so the line goes back to one row", !(await pg.locator("#addnote").isVisible()));
+    /* AND THE ARROW CLOSES AN EMPTY ONE, which is the press that races the
+       fold above: focusout fires before the click, so without the guard the
+       arrow would find a shut note and open it again — reading as a control
+       that does nothing on the one press where it plainly did (§96). */
+    await pg.locator(".addrow [data-act=add-note]").click();
+    check("...and the arrow opens it once more", await pg.locator("#addnote").isVisible());
+    await pg.locator(".addrow [data-act=add-note]").click();
+    check("...and closes it again, though it is empty and the focus left it first", !(await pg.locator("#addnote").isVisible()) &&
+      !(await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")));
     await pg.locator("#add").fill("Book the room for Thursday");
     await pg.locator("#add").press("Enter"); await settle();
     const born = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Book the room for Thursday");
@@ -490,50 +553,64 @@ try {
     check("...the line is empty and still under the cursor for the next one",
       (await pg.locator("#add").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.id")) === "add");
     const row = '.row[data-id="' + (born && born.id) + '"] ';
-    check("...and the new row is on the page, under my own name, reading my first name and this week's number in bold", (await pg.locator(row).count()) === 1 &&
+    check("...and the new row is on the page, under my own name, reading my first name and This week", (await pg.locator(row).count()) === 1 &&
       /^Noran Essam/.test(await pg.locator('.grp[data-key="noran"]').innerText()) && (await pg.locator(row + ".who .wn").innerText()) === "Noran" &&
-      (await pg.locator(row + ".when .wk.now").innerText()) === weekWord(real) && (await pg.evaluate("getComputedStyle(document.querySelector('" + row.trim() + " .wk.now')).fontWeight")) === "700");
+      (await pg.locator(row + ".when .wk").innerText()) === "This week" && (await pg.locator(".wk.now").count()) === 0);
     /* textContent, not innerText: the count is uppercased by CSS (§301.6). */
     check("...with the count moved in place", /^\d+ actions on this week$/.test(await pg.locator("#count").textContent()) && +(await pg.locator("#count").textContent()).split(" ")[0] === (await asTenant(A, (c) => listActions(c))).filter((r) => inView(r, "week", NORAN, real)).length, await pg.locator("#count").textContent());
     /* THE ADD LINE TAKES EVERYTHING (§356.14): a note under the action, a
        week picked on the line, an owner picked on the line — nothing posted
-       until Enter, then all of it written. The week picked is NEXT week,
-       so the row lands under Islam reading W<n+1> with no bold. */
+       until Enter, then all of it written. The week picked is NEXT week, so
+       the row lands under Islam reading "Next week" (§356.15). */
     const nextThu = addDays(thu, 7);
     await pg.locator("#add").fill("Send the outcome to the managers");
-    await pg.locator("#addnote").fill("Ahmed's list first. Copy Noran.");
+    await pg.locator(".addrow [data-act=add-note]").click();
+    await probe("the note opens for the line that takes everything", () => pg.locator("#addnote").fill("Ahmed's list first. Copy Noran.", { timeout: 4000 }));
     check("typing lights the line", await pg.evaluate("document.querySelector('.addrow').classList.contains('typing')"));
     await pg.locator(".addrow .when.pick").click();
     const addWeeks = pg.locator(".addrow .weeks");
     check("the week pressed on the line opens the picker — a header, this week marked and bold, No date and a day of my own at the foot", await addWeeks.isVisible() &&
       (await addWeeks.locator(".wh span").allTextContents()).join("|") === "Week|Sun – Thu" &&
-      (await addWeeks.locator("button.now.on b").innerText()) === weekWord(real) && (await addWeeks.locator("[data-act=pick-week]").count()) === 7 &&
+      (await addWeeks.locator("button.now.on b").innerText()) === "This week" && (await addWeeks.locator("button:nth-of-type(2) b").innerText()) === "Next week" &&
+      (await addWeeks.locator("[data-act=pick-week]").count()) === 7 &&
       (await addWeeks.locator('.wf [data-day=""]').count()) === 1 && (await addWeeks.locator(".wf [data-act=pick-day]").count()) === 1,
       (await addWeeks.locator(".wh span").allTextContents()).join("|"));
-    check("...the number is bold on this week's row only, both ends", (await pg.evaluate("getComputedStyle(document.querySelector('.addrow .weeks button.now b')).fontWeight")) === "700" &&
+    /* AND THE WIDER PICKER STILL FITS (§158: fit, never "and it scrolls").
+       The words cost its first column 54 → 86px and the popup 200 → 232, and
+       it hangs off the right edge of a cell near the right edge of the page,
+       so what is asserted is the BOX against the window at both ends. */
+    const pbox = await pg.evaluate("(function(){var e=document.querySelector('.addrow .weeks');if(!e)return null;var r=e.getBoundingClientRect();return [Math.round(r.left),Math.round(r.right),Math.round(r.width),document.documentElement.clientWidth].join(' ')})()");
+    check("...and the wider picker is inside the window, both edges", !!pbox && (() => { const [l, r, w, vw] = pbox.split(" ").map(Number); return l >= 0 && r <= vw && w === 232; })(), pbox);
+    /* THE BOLD STAYS IN THE PICKER and only there — the other end of the
+       assertion above, which is that no ROW carries one (§94.2). */
+    check("...the word is bold on this week's row only, both ends", (await pg.evaluate("getComputedStyle(document.querySelector('.addrow .weeks button.now b')).fontWeight")) === "700" &&
       (await pg.evaluate("getComputedStyle(document.querySelector('.addrow .weeks button:not(.now) b')).fontWeight")) === "400");
     await addWeeks.locator('[data-day="' + nextThu + '"]').click();
-    check("picking next week on the line posts nothing yet and the line reads W<n+1>, not bold", (await pg.locator(".addrow").getAttribute("data-due")) === nextThu &&
-      (await pg.locator(".addrow .when .wk").innerText()) === weekWord(nextThu) && (await pg.locator(".addrow .when .wk.now").count()) === 0 &&
+    check("picking next week on the line posts nothing yet and the line reads Next week, in the picker's own words", (await pg.locator(".addrow").getAttribute("data-due")) === nextThu &&
+      (await pg.locator(".addrow .when .wk").innerText()) === "Next week" && weekWord(nextThu, real) === "Next week" && (await pg.locator(".wk.now").count()) === 0 &&
       !(await asTenant(A, (c) => listActions(c))).some((r) => r.title === "Send the outcome to the managers"));
     await pg.locator(".addrow .who.pick").click();
     await pg.locator(".addrow .team [data-key=islam]").click();
     check("...picking Islam on the line reads Islam, still nothing posted", (await pg.locator(".addrow").getAttribute("data-owner")) === "islam" && (await pg.locator(".addrow .who .wn").innerText()) === "Islam");
-    await pg.locator("#addnote").press("Enter"); await settle();
+    await probe("Enter posts from the note box too", () => pg.locator("#addnote").press("Enter", { timeout: 4000 })); await settle();
     const full = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Send the outcome to the managers");
     check("Enter from the note adds it all — next week's Thursday, Islam's, the note kept", !!full && full.due === nextThu && full.firstDue === nextThu && full.ownerKey === "islam" && full.description === "Ahmed's list first. Copy Noran." && await stayed(), JSON.stringify(full));
     const frow = '.row[data-id="' + (full && full.id) + '"] ';
-    check("...the line is cleared back to this week and me", (await pg.locator("#add").inputValue()) === "" && (await pg.locator("#addnote").inputValue()) === "" &&
-      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran" && (await pg.locator(".addrow .when .wk.now").count()) === 1);
+    check("...the line is cleared back to This week and me, with the note folded away again", (await pg.locator("#add").inputValue()) === "" &&
+      (await pg.evaluate("document.getElementById('addnote').value")) === "" && !(await pg.locator("#addnote").isVisible()) &&
+      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran" && (await pg.locator(".addrow .when .wk").innerText()) === "This week");
     /* Due NEXT week it is not on This week (inView), so it is read under All. */
     check("...and, due next week, it is not on This week", (await pg.locator(frow).count()) === 0);
     await pg.goto(base + "?view=all"); await settle();
-    check("...under All Islam's row reads W<n+1> plain, with no control of mine on it", (await pg.locator(frow + ".when .wk").innerText()) === weekWord(nextThu) &&
-      (await pg.locator(frow + ".when .wk.now").count()) === 0 && (await pg.locator(frow + ".when.pick").count()) === 0 && (await pg.locator(frow + ".who.pick").count()) === 0);
+    const frowWk = await probe("Islam's row is on the page under All", () => pg.locator(frow + ".when .wk").innerText({ timeout: 4000 }));
+    check("...under All Islam's row reads Next week plain, with no control of mine on it", frowWk === "Next week" &&
+      (await pg.locator(".wk.now").count()) === 0 && (await pg.locator(frow + ".when.pick").count()) === 0 && (await pg.locator(frow + ".who.pick").count()) === 0);
     /* THE PILL IS ONE BOX (§356.14): the select on my row and the span on
        Islam's measure the same width, height and font — the fault Islam saw
        was two sizes, so both are measured and compared, never a number. */
-    const box = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');var r=e.getBoundingClientRect();var c=getComputedStyle(e);return [e.tagName,Math.round(r.width),Math.round(r.height),c.fontSize,c.fontFamily.split(',')[0]].join(' ')})()");
+    /* NOT THERE reads as "" rather than throwing (§215): a falsification that
+       stops a row being made must leave this REPORTING, not dying. */
+    const box = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();var c=getComputedStyle(e);return [e.tagName,Math.round(r.width),Math.round(r.height),c.fontSize,c.fontFamily.split(',')[0]].join(' ')})()");
     const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".addrow .st");
     check("the status pill is one box whether it is a select, a span, or the add line's", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
       pillSel.slice(6) === pillSpan.slice(4) && pillSpan === pillAdd, pillSel + " | " + pillSpan + " | " + pillAdd);
@@ -557,7 +634,7 @@ try {
     /* THE WEEK ON A ROW: the picker, No date, and a week two ahead — each
        read back out of Postgres as its Thursday. */
     await pg.locator(row + ".when.pick").click();
-    check("the week pressed on a row opens its picker with this week marked", await pg.locator(row + ".weeks").isVisible() && (await pg.locator(row + ".weeks button.on b").innerText()) === weekWord(real));
+    check("the week pressed on a row opens its picker with this week marked", await pg.locator(row + ".weeks").isVisible() && (await pg.locator(row + ".weeks button.on b").innerText()) === "This week");
     await pg.locator(row + '.weeks [data-day=""]').click(); await settle();
     check("No date clears the date, and the row says so", (await asTenant(A, (c) => oneAction(c, born.id))).due === null && (await pg.locator(row + ".when").innerText()) === "No date" && await stayed());
     await pg.locator(row + ".when.pick").click();
@@ -567,7 +644,8 @@ try {
       (await pg.locator(row).count()) === 0 && await stayed(), JSON.stringify(twoAhead));
     await pg.goto(base + "?view=all"); await settle();
     await pg.evaluate("window.__stay = 1");
-    check("...under All it reads that week's number, plain", (await pg.locator(row + ".when .wk").innerText()) === weekWord(addDays(thu, 14)) && (await pg.locator(row + ".when .wk.now").count()) === 0);
+    check("...under All it reads that week's NUMBER, which is what the third week on is", (await pg.locator(row + ".when .wk").innerText()) === weekWord(addDays(thu, 14), real) &&
+      /^W\d+$/.test(weekWord(addDays(thu, 14), real)) && (await pg.locator(".wk.now").count()) === 0, weekWord(addDays(thu, 14), real));
     /* EXACT DATES, from the dots: the rows read days, the choice is
        remembered, and the DATE BOX STAYS WHEN FOCUS LEAVES IT (§356.14) —
        which is what the calendar popup does, and where the pick was lost. */
@@ -643,7 +721,7 @@ try {
     check("...and the next visit opens grouped the same way (the cookie), the menu saying so", (await pg.locator(".setmenu [data-act=set-group].on").getAttribute("data-value")) === "status" && (await heads()).every((h) => Object.values(STATUS_WORD).includes(h)));
     await pg.locator('.setmenu [data-act=set-group][data-value="owner"]').click(); await settle();
     check("...and back to Owner", /Noran Essam/.test((await heads()).join("|")));
-    await asTenant(A, (c) => deleteAction(c, full.id));
+    if (full) await asTenant(A, (c) => deleteAction(c, full.id));   /* §215: a break that never made it must not kill the rest */
     await pg.evaluate("window.__stay = 1");
     /* THE OWNER'S NAME opens the office on this client, first names only;
        picking one hands the action on — and then the old owner has no

@@ -48791,3 +48791,127 @@ already late keeps reading how late it is until its new Thursday has passed,
 which is the rule and reads oddly for a minute; the picker offers six weeks
 and *A day of my own…* for anything further; the title's own week label
 still says *13 Sep – 17 Sep* where the rows say W38.
+
+### §356.15 — THE NOTE IS ASKED FOR, AND THE WEEK IS IN WORDS (2026-09-16)
+
+Islam, of the built tracker, two things in one message:
+
+> 1. a note should be an option not a common thing in the actions tell me my
+>    options to add one if needed in a neat way
+> 2. in the view of the tasks don't write the week number write this week and
+>    next week and previous week and maybe when we are out of the next we can
+>    write the week number. align with me
+
+**BOTH WERE DRAWN BEFORE EITHER WAS BUILT** (rule 1c, §266: a question the
+reader cannot parse is answered by drawing it), in one alignment page made of
+the BUILT module's own stylesheet —
+`design-mockups/internal-tracker/2026-09-16_note-optional-week-words.html`,
+published as an artifact — three ways to ask for a note and two ways to spell
+the week, each with its cost stated on the page beside it. He answered both:
+*"the arrow in the column is a good option as it opens other things anyway for
+the picker let's use this week and next week."*
+
+#### The note
+
+**IT WAS DRAWN ON EVERY ADD LINE, SO THE SHEET'S ONE WAY IN READ AS TWO FIELDS
+TO FILL.** §356.14 gave the add line everything it can take — the action, its
+note, the week, the owner — and the note is the one of the four that most
+lines do not want, while being the only one drawn as a BOX rather than as a
+value already set.
+
+**THE CONTROL IS THE ARROW THE ROWS ALREADY CARRY**, in the column it already
+sits in, meaning what it already means — a row's notes. Islam's own reason is
+the best one: *it opens other things anyway*. So the line gains no word, no
+new mark and nothing to learn; the cost, stated before he chose, is that the
+mark is silent until it is hovered.
+
+**THE TWO IT BEAT ARE RECORDED RATHER THAN DROPPED.** *B*, a small word
+reading `note` at the line's end, says outright what it does and sits in the
+arrow's own column, so the add line stops lining up with the rows above it.
+*C*, nothing on the line at all — type, Enter, then the arrow on the row it
+just made — is the smallest build and the only one where a line that needs a
+note takes two steps.
+
+**ONE RULE SAYS ALL OF IT: THE NOTE IS ON THE LINE ONLY WHILE IT IS OPEN, AND
+FOLDING IT EMPTIES IT.** A note folded away with words still in it would be
+posted by the next Enter with nothing on the screen saying so, which is §96's
+family — a control that renders perfectly and lies about what it holds — and a
+second mark on the arrow meaning *there is one under here* would be a second
+thing to learn about a control that already means one thing. **The cost is
+stated rather than discovered**: the arrow throws away an unsent note, which
+is exactly what Escape on that line already does to both boxes.
+
+**THE BOX IS HIDDEN AND NEVER ABSENT** (§298's shape, §100.2 from the other
+side): what a hand half-types must survive a swap, and `keep()`/`swap()` carry
+whether it is open across every press.
+
+**TAB FROM THE ACTION IS THE SECOND DOOR** (§61), which the drawing promised:
+forward only, from the action only, and only while the note is shut — and an
+empty note left behind folds itself, so tabbing on through a line that did not
+want one leaves nothing standing open.
+
+#### The week in words
+
+**TWO WEEKS HAVE A WORD AND EVERYTHING AFTER IS ITS NUMBER**, which is what
+*"maybe when we are out of the next we can write the week number"* asks for:
+**This week · Next week · W40, W41…**
+
+**"PREVIOUS WEEK" IS THE ONE HE ASKED FOR THAT IS NOT BUILT, AND THE REASON IS
+HIS OWN EARLIER DECISION.** An OPEN action due in a past week is **late** —
+that is what late means — so it already reads `Late`, `Late 1 w`, `Late 2 w`
+(§356.11's `lateWord`, the short word he chose). *Previous week* could only
+ever appear IN PLACE OF those, and it would take the alarm with it. Put to him
+that way on the drawing, with the last two rows of the sample showing it, and
+he did not ask for it again. Where a past week DOES reach the word — a list
+grouped by its due week — it falls through to its number, which is the honest
+answer there.
+
+**THE BOLD WENT WITH THE WORDS.** This week's NUMBER was bold to mark it out
+among numbers; once the row says *This week*, the bold says it a second time
+(§87's twins, in one cell), so it comes off the row. **It stays in the
+picker**, where the rows are a list and the mark says which one you are in —
+and the check asserts BOTH ENDS (§94.2): no `.wk.now` anywhere on the page,
+and the picker's own `.now b` still measuring 700.
+
+**THE PICKER SAYS WHAT THE ROWS SAY** (§53.5). The drawing offered it two
+ways — numbers, as he first signed off, or the same words — and his answer
+names the words without qualifying them; pressing `W39` to get a row reading
+*Next week* would be one week spelt two ways on one screen, which is the drift
+§53.5 exists to stop. **Its cost is paid in the stylesheet and was stated
+before it was taken**: the first column grows 54 → 86px to hold two words and
+the popup 200 → 232px with it. It is **one argument** to go back (`weekWord`'s
+`today`), and that is written down here rather than left to be rediscovered.
+
+**TODAY IS A REQUIRED ARGUMENT, NEVER OPTIONAL.** A caller that forgot it
+would silently be handed numbers back — the fault wearing a green tick (§93,
+§51.10) — so the signature refuses to compile without it, which is what found
+all four call sites rather than a list somebody has to remember (§104.7).
+
+#### What it cost, and what it is proved by
+
+`checks/tracker.mjs` **214 passed, 0 failed**, and **RED EIGHT WAYS**
+(`npm run check:tracker:red`): §356.11–§356.14's six, plus two of this
+round's own, made FROM THE SOURCES (§276) — `week-numbers` puts the numbers
+back (**10 red**, its first failure printing `W38 · W39 · W40`) and
+`note-standing` draws the note on the line again (**10 red**).
+
+**AND THE SECOND FALSIFICATION DIED RATHER THAN REPORTING, THREE TIMES OVER**
+(§215, in the file whose own docstring promises every probe degrades): a
+`fill` on a box the broken build has hidden waits thirty seconds and takes the
+rest of §10 with it, then the row it never made kills an `innerText`, then a
+`getBoundingClientRect` on nothing, then a cleanup reading `full.id`. Each is
+now a probe that reports — and the run goes from **2 red and dead** to **10
+red and complete**, which is the difference between a falsification that
+proves the guard and one that merely stops.
+
+Neighbours: `check:modules` **100/0**, `generated-in-step` **all clear**,
+`tsc` clean but for `lib/prisma.ts`'s pre-existing error. **The frozen product
+is untouched** — no `src/` file, no built file, no carried `.cjs` — so there
+is no rebuild and `sw.js` is not bumped (§91's trigger is the built file's
+bytes changing, and they did not).
+
+**RECORDED, NOT DONE**: a row's OWN note is still the panel's textarea behind
+the same arrow, which is right and means the arrow now opens two different
+boxes depending on the line it is on; and nothing on the add line says a note
+is optional except the placeholder inside a box you have to open to read.
+

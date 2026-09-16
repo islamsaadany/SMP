@@ -69,7 +69,7 @@ export const APP_JS = `(function () {
       ar = document.querySelector(".addrow"), s = document.querySelector(".srch");
     return { add: add ? add.value : "", note: nt ? nt.value : "", srch: s ? s.value : "",
       due: ar ? ar.getAttribute("data-due") : null, owner: ar ? ar.getAttribute("data-owner") : null,
-      picked: !!(ar && ar.hasAttribute("data-picked")),
+      picked: !!(ar && ar.hasAttribute("data-picked")), noteOpen: !!(nt && !nt.hidden),
       focus: a && a.id === "add" ? "add" : (a && a.id === "addnote") ? "addnote" : (a && a.classList && a.classList.contains("srch")) ? "srch" : null };
   }
   function swap(j, k) {
@@ -81,6 +81,7 @@ export const APP_JS = `(function () {
     if (k && !k.clear) {
       if (add && k.add) add.value = k.add;
       if (nt && k.note) nt.value = k.note;
+      if (k.noteOpen) drawNote(true);
       if (ar && k.picked) { if (k.due != null) setAddDue(ar, k.due); if (k.owner) setAddOwner(ar, k.owner); }
     }
     if (s && k && k.srch) s.value = k.srch;
@@ -122,6 +123,28 @@ export const APP_JS = `(function () {
     var ar = document.querySelector(".addrow"), add = document.getElementById("add"), nt = document.getElementById("addnote");
     if (ar) ar.classList.toggle("typing", !!((add && add.value) || (nt && nt.value)));
   }
+  /* THE NOTE IS ASKED FOR (§356.15), and ONE RULE SAYS IT ALL: the note is
+     on the line only while it is open, and FOLDING IT EMPTIES IT. A note
+     folded away with words still in it would be posted by the next Enter
+     with nothing on the screen saying so (§96), and a mark on the arrow
+     meaning "there is one under here" would be a second thing to learn about
+     a control that already means one thing. The cost is stated rather than
+     discovered: the arrow throws away an unsent note, which is exactly what
+     Escape on this line already does to both boxes.
+     It also folds itself when it is emptied and left, which is the line back
+     to one row with nothing lost. */
+  function noteBits() { return { nt: document.getElementById("addnote"), b: document.querySelector(".addrow [data-act=add-note]") }; }
+  function drawNote(open) {
+    var x = noteBits(); if (!x.nt || !x.b) return;
+    x.nt.hidden = !open;
+    x.b.classList.toggle("on", !!open);
+    x.b.setAttribute("aria-expanded", String(!!open));
+    var w = open ? "Close the note" : "Add a note";
+    x.b.setAttribute("aria-label", w); x.b.setAttribute("title", w);
+  }
+  function openNote() { var x = noteBits(); if (!x.nt) return; drawNote(true); x.nt.focus(); }
+  function foldNote() { var x = noteBits(); if (!x.nt) return; x.nt.value = ""; drawNote(false); typing(); }
+  function noteIsOpen() { var x = noteBits(); return !!(x.nt && !x.nt.hidden); }
   function setAddDue(ar, day) {
     ar.setAttribute("data-due", day || ""); ar.setAttribute("data-picked", "1");
     var w = ar.querySelector(".when");
@@ -135,10 +158,12 @@ export const APP_JS = `(function () {
         b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on));
         if (on && b.getAttribute("data-day")) hit = b;
       });
+      /* The word is the picker's own — press "Next week" and the line reads
+         "Next week" (§356.15, §53.5) — and it is never bold: the bold went
+         with the words, and stays on the picker's own row. */
       if (!word) { word = document.createElement("span"); word.className = "wk"; w.insertBefore(word, list); }
-      if (!day) { word.textContent = "No date"; word.className = "wk"; }
-      else if (hit) { word.textContent = hit.querySelector("b").textContent; word.className = "wk" + (hit.classList.contains("now") ? " now" : ""); }
-      else { word.textContent = dayWord(day); word.className = "wk"; }
+      word.className = "wk";
+      word.textContent = !day ? "No date" : hit ? hit.querySelector("b").textContent : dayWord(day);
     } else {
       w.textContent = day ? dayWord(day) : "No date";
     }
@@ -176,13 +201,31 @@ export const APP_JS = `(function () {
     if (!t || (t.id !== "add" && t.id !== "addnote")) return;
     if (e.key === "Escape") {
       var add = document.getElementById("add"), nt = document.getElementById("addnote");
-      if (add) add.value = ""; if (nt) nt.value = ""; typing(); return;
+      if (add) add.value = ""; if (nt) nt.value = ""; drawNote(false); typing(); return;
+    }
+    /* TAB FROM THE ACTION OPENS THE NOTE, so a line that needs one is one
+       key away and the arrow is not the only door (§61). Only forward, only
+       from the action, and only while the note is shut — tabbing on out of
+       an empty note folds it behind you, so nothing is left standing open
+       for a line that did not want one. */
+    if (e.key === "Tab" && !e.shiftKey && t.id === "add" && !noteIsOpen()) {
+      e.preventDefault(); openNote(); return;
     }
     if (e.key !== "Enter") return;
     e.preventDefault();
     submitAdd();
   });
   document.addEventListener("input", function (e) { if (e.target && (e.target.id === "add" || e.target.id === "addnote")) typing(); });
+  document.addEventListener("focusout", function (e) {
+    if (!e.target || e.target.id !== "addnote" || e.target.value) return;
+    /* NOT WHEN THE ARROW IS WHAT TOOK THE FOCUS: focusout fires before the
+       click, so folding here would leave the press to find a shut note and
+       open it again — the arrow reading as a control that does nothing
+       (§96), on the one press where it plainly did something. */
+    var to = e.relatedTarget;
+    if (to && to.closest && to.closest("[data-act=add-note]")) return;
+    drawNote(false);
+  });
 
   /* ONE POPUP OPEN AT A TIME — the team under a name, the weeks under a
      date, the settings behind the dots — closed by a press elsewhere or
@@ -284,6 +327,8 @@ export const APP_JS = `(function () {
       if (act === "set-group") { B.setAttribute("data-group", v); remember("smp.tracker.group", v); }
       else { B.setAttribute("data-dates", v); remember("smp.tracker.dates", v); }
       refetch();
+    } else if (act === "add-note") {
+      if (noteIsOpen()) foldNote(); else openNote();
     } else if (act === "more") {
       /* Open this row (and only this row), or fold it if it is the open one;
          the address carries which, and the list is read again. */

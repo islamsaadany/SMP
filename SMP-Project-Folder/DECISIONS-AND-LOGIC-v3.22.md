@@ -49593,3 +49593,134 @@ baseline rather than proposing a change (§245's own trap, in a colour). Built a
 the product has it, and the client's own colour still reaches the page through
 the rail's head and the table headers, which take `--panel`. A navy top bar is
 one declaration if he wants it, and it is his to ask for.
+
+---
+
+**§359.2 — FOREFRONT TEAM IS THE STORE AND THE REGISTER IS A READER
+(2026-09-16, spec 056 §3a, stage 2 of six).** Islam, of the drawing showing a
+consultant beside the client's own people: *"a consultant shouldn't be on the
+register one role is enough"*, and then his own revision, which is the
+decision — *"how about the forefront team is a separate view as you did but we
+keep them on the client list reading from the forefront team list."*
+
+**ONE STORE, ONE PLACE TO EDIT, MORE THAN ONE PLACE TO READ** — §9's pattern
+for the fifth time, and the whole of why this was small. *Forefront team* is a
+client-scoped Setup page under *Who*, above the register because it is the
+store the register reads, and it is **MOUNTED rather than moved**: `officeStep`
+is untouched and the page is a SECOND READER of the set-up flow's own renderer
+(`CLIENTSETUP.mountTeam`), sharing the flow's state, so opening either fills
+both and a renderer copied for the page cannot drift (§53.5). `ensureReg` asks
+for the client's record once for whichever host draws first. It takes
+`c_people` rather than a key of its own: *who may see the client's people* and
+*who may see whose consultants they are* is one question, and a second key
+would be a second answer to it (§104.7).
+
+**THE RE-READING §3a ASKED FOR IS THE FINDING, AND IT NARROWED THE RULE
+BEFORE ANYTHING WAS BUILT (T2.1).** That section's closing line — *"§313.32
+lets an office account whose email matches exactly one active register row
+ADOPT that row … under this rule that path needs re-reading"* — is the one
+paragraph that changed the work. **There are two kinds of Forefront row and
+`officeRow` has marked them apart since §313.29, while nothing read the
+difference:** a **MINTED** row (`ffrow`) the platform BUILT for a consultant who
+was on nobody's register, whose `role` IS the seat and is rewritten on every
+request (§338's heal); and an **ADOPTED** row (`forefront` alone), the CLIENT'S
+OWN person, marked because their address matched exactly one active row, which
+that same function says in its own words it *"never rewrites"*. §3a reads *"a
+seat holder can never also be given a client role from the register"*; taken
+literally that **strips the client's own custodian of their custodianship the
+day they join the account team** — data the client entered, which §96.2 forbids
+us to rewrite — and it froze their unit, their address and their name with it.
+So the question is asked of the **MINT, never of the mark**, and Raya Trade is
+exactly the live case: its register came across by the carry, so `made_here` is
+false there and adoption is the path, not a corner nobody reaches.
+
+**ASKED OF `lib/rules.js`, BECAUSE THE SCREEN DRAWS FROM IT AND THE SERVER
+REFUSES FROM IT** (§42, §53.5): `isMintedRow` / `isForefrontRow`, one pair. The
+register's cell splits — a minted row states its seat and offers nothing, an
+adopted row gets its ordinary picker back and carries the mark BESIDE its chips
+(inline, because a mark on a line of its own is what takes a 39px row to 51,
+§116.4) — and `lib/authorize.js` refuses a minted row whole exactly as before
+while holding back only `PLATFORM_MARKS` on an adopted one, they being a claim
+about where the row came from rather than the client's to set.
+
+**AND THE REGISTER'S READ-ONLINESS IS STRONGER THAN §3a ASKS FOR, MEASURED
+RATHER THAN ASSUMED (§100.3).** §116 took the role picker off the ROW — the
+table is `roleCell(p, false)` for everybody and the picker lives in the dialog
+— so a minted row cannot reach it at all, because it is not offered *Edit
+details*. Its menu keeps two entries on purpose: **View the platform as them**,
+which reads and writes nothing, and **Delete permanently**, which is not an
+edit of the row but its removal, classified `destroy` and already the Super
+user's (§89) — a client taking an office person off their own register is a
+real act and a loud one. **The password entry goes for EVERYBODY**, where §89
+only ever kept it from an SMO team member: a consultant signs in at Forefront's
+own door with their account, so a credential minted here is one nobody needs.
+The four columns that mean nothing for them already drew an em-dash when empty,
+which is the truth rather than a suppression.
+
+**AND THE RULE HAD TO BE DRAWN FROM WHAT SITS UNDER IT (§193.2, §24).** Both
+halves below the menu's hairline were unconditional until today, so a rule
+pushed first always had something to separate; with a minted row keeping only
+*Delete permanently* — and an SMO team member not even that — the old line left
+a hairline attached to nothing, and on a RETIRED consultant a menu whose whole
+contents is a rule.
+
+**THE COUNT SAYS BOTH, AND IT IS A NARROW REVERSAL OF §122 RATHER THAN THAT
+COUNT COMING BACK (Principle II).** Islam: *"33 of the client's own people · 3
+from Forefront, rather than one number quietly meaning two things."* §122
+removed a total at his own instruction — *"remove the 77 people active text"* —
+because *the table under it is that count*, which is true of a TOTAL and is the
+one thing a table of 36 rows cannot be read for: its composition. So the chip
+states the SPLIT and never the total, and **it is drawn ONLY where there is a
+split to state** — on a client with no consultants one number means one thing,
+there is nothing to disambiguate, and §122's objection stands whole. An
+ADOPTED person is counted with Forefront and the hover says they are the
+client's own person too, because the sentence must not pretend they are one
+thing. **And the seat chip's hover beside it had gone false** — *"A seat is
+granted by the Super user on this register and by nothing else"* — corrected in
+the same edit rather than left to mislead (§104.8).
+
+**THE SEARCH NEEDED NOTHING BUILT AND EVERYTHING ASSERTED**: `tkApply` matches
+a row's own rendered text, so a consultant is found by name by construction for
+as long as §3a's *the row stays* holds — and the assertion is what would notice
+the day it does not.
+
+**WHAT MUST NOT BE DONE WITHOUT ITS OWN PIECE, and it is §3a's own warning kept
+rather than quietly crossed:** a consultant's standing on a client IS a minted
+register row today — it is how the platform knows they hold the seat, how a
+plan can name them and how the state API places them — and removing it is the
+live defect fixed at §338 and §316.9, where an office person opening a client
+was told *"You are not on this client's register yet"* for ever. **The row
+stays and the TABLE changes.**
+
+**PROVED, AND PROVED ABLE TO FAIL.** `checks/forefront-team.py` 37 assertions,
+0 failures, with **three populations measured in one run** — minted, adopted
+and ordinary — because a build that dropped consultants from the register and
+one that froze every marked row each pass half of it (§94.2, §113.8); the state
+is MADE and put back (§255, §94.2), the count asserted as an AGREEMENT and
+never a number (§94.8). Red **three ways from the SOURCES** (§276): the mark
+read as the mint **4 red**, no mark on an adopted row **1**, the count made a
+total again **3**. `test-authorize.js` §42, the state made because the seed
+carries no Forefront row at all, **683 passed**, red both ways — the old wide
+refusal **2 red** on exactly the adopted assertions, the marks not held back
+**2 red** on exactly the mark ones. And the half `file://` cannot see (§94.11),
+`checks/shell.mjs` **§3c**: the page drawing this client's REAL team, and the
+register's consultants asserted as an agreement with it rather than against a
+typed name — **111 ok, 0 failed.**
+
+**§359.3 — AND THREE OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK.** It
+asked a ROW for a role picker §116 moved into the dialog, so it reported an
+ordinary person as broken (§100.3) — which is how the stronger reading above
+was found at all. It read a node `paint()` had already replaced, and reported
+an empty menu on every row including the ones that have one (§222). And it
+**died rather than reporting** (§215, in the file whose own docstring promises
+every probe degrades): three guessed selectors for the dialog's close control
+matched nothing, the overlay stayed up, and every press after it was
+intercepted for thirty seconds until the run ended with eleven assertions
+unmade. The platform's own way out is `#modal-x`, by its real id (§116.6).
+
+**RECORDED, NOT DONE.** A minted consultant's row still offers *Delete
+permanently* to a Super user, and deleting it is the state §338 exists to
+prevent — the row comes back on their next request, so it heals, but nothing
+says so at the press. And spec 056 §4's simplification, the client's seven
+pages leaving the access matrix, is stage 3: this stage moves nobody's access
+and the T0 baseline is what will say so.

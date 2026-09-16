@@ -122,6 +122,13 @@ const TOP_SETUP = ["people", "unitRoles", "access", "labels", "bands",
                    "koWeights", "companies", "companyKeys", "functionKeys"];
 const TOP_CYCLE = ["history", "priorCycle", "archives"];
 
+/* THE PLATFORM'S OWN MARKS ON A REGISTER ROW (spec 056 §3a.1). `forefront`
+   says a consultant answers to this row and `ffrow` says the platform built
+   it; both are facts about the OUTER platform, so neither is the client's to
+   set or clear from inside — named once here, where the one comparison that
+   holds them back can read the list rather than spelling two strings. */
+const PLATFORM_MARKS = ["forefront", "ffrow"];
+
 function j(v) { return JSON.stringify(v === undefined ? null : v); }
 function same(a, b) { return j(a) === j(b); }
 function pick(o, fields) {
@@ -285,15 +292,37 @@ function collect(stored, incoming, w) {
          reading "a plan is corrected by the SMO", which is true of nothing
          here. Removing the row is still `destroy` above — a client taking an
          office person off their own register is a real act, and a loud one. */
-      /* Flattened by state-io's mergeRow — the graph carries `forefront`, not
-         `extra.forefront` (§52). The database column is `extra`; nothing that
-         reads the GRAPH ever sees it. */
-      const isFF = function (p) { return !!(p && p.forefront); };
+      /* ── AND IT IS THE MINT THAT IS REFUSED, NEVER THE MARK
+         (spec 056 §3a.1, §359.2) ───────────────────────────────
+         The paragraph above is right about a row the PLATFORM BUILT and was
+         being applied to one it merely marked. `officeRow` adopts a row by
+         EMAIL when a consultant's address matches exactly one active person
+         (§313.32) and says in its own words that it never rewrites such a
+         row — so it is the client's own person, holding a role the client
+         typed here, and freezing it took a custodian's custodianship away on
+         the day they joined the account team. Nothing would overwrite it on
+         the next visit, which is the whole argument the refusal rests on.
+
+         So: a MINTED row (`ffrow`) is refused whole, exactly as before. An
+         ADOPTED row is the register's ordinary business again, and only the
+         platform's own two marks are held back — they are a claim about where
+         the row came from and the client may not clear one, which is the same
+         reason the seat is `access` and not `setup` (§89).
+
+         ASKED OF `lib/rules.js`, never spelt again here: the register draws
+         from the same pair, and a screen offering what the save turns down is
+         §42's drift with a refusal on the end of it. */
       const officeTouched = [];
       (incoming.people || []).forEach(function (ip) {
         const sp = (stored.people || []).filter(function (x) { return x.key === ip.key; })[0];
-        if (!sp || !(isFF(sp) || isFF(ip))) return;
-        if (!same(sp, ip)) officeTouched.push(ip.name || ip.key);
+        if (!sp) return;
+        if (R.isMintedRow(sp) || R.isMintedRow(ip)) {
+          if (!same(sp, ip)) officeTouched.push(ip.name || ip.key);
+          return;
+        }
+        if (!(R.isForefrontRow(sp) || R.isForefrontRow(ip))) return;
+        if (!same(pick(sp, PLATFORM_MARKS), pick(ip, PLATFORM_MARKS)))
+          officeTouched.push(ip.name || ip.key);
       });
       if (officeTouched.length)
         add("officeRow", null, "a Forefront row (" + officeTouched.join(", ") +

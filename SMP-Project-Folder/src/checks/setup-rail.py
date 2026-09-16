@@ -294,7 +294,16 @@ with sync_playwright() as p:
       const h=[...document.querySelectorAll('.setuprail .rgroup')]
                 .find(x=>/People/.test(x.textContent));
       return [...h.nextElementSibling.querySelectorAll('.rilab')].map(x=>x.textContent.trim());}""")
-    ck("register, then the BU list", order == ["People register", "Official BU list"], order)
+    # AND REWRITTEN AGAIN FOR §359.2 (§218, §214.3 — the tenth time), because
+    # spec 056 §3a put *Forefront team* in this group ABOVE the register: it is
+    # the STORE the register reads, and §9's pattern puts a store before its
+    # reader. Asserted as the two claims that survive the decision rather than
+    # as a list of three, which the next entry would falsify again — the store
+    # leads, and the two the mockup drew keep the order it drew them in.
+    ck("the store leads its reader (§9, spec 056 §3a)",
+       order[:1] == ["Forefront team"], order)
+    ck("...and then the mockup's own pair, in its order (§120.3)",
+       [x for x in order if x != "Forefront team"] == ["People register", "Official BU list"], order)
     access = pg.evaluate("""()=>{
       const h=[...document.querySelectorAll('.setuprail .rgroup')]
                 .find(x=>/^\\S*Access/.test(x.textContent.trim().replace(/^[\\u25b8\\u25be]\\s*/,'')));

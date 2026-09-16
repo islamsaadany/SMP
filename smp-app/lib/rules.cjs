@@ -776,6 +776,35 @@
      answer "is this the office" without reading thirty tables to build one
      (§97.1). A responsibility role could never make somebody the office or the
      Super user, so nothing is missed by not looking for one. */
+  /* ── TWO KINDS OF FOREFRONT ROW, AND ONLY ONE IS OURS TO REWRITE
+     (spec 056 §3a.1, §359.2) ─────────────────────────────────
+     `officeRow` has marked them apart since §313.29 and nothing read the
+     difference, so the register and the authoriser both treated every marked
+     row as the platform's:
+
+       · MINTED (`ffrow`) — the platform built this row for a consultant who
+         was on nobody's register, and its `role` IS the seat, rewritten on
+         every request (§338's heal). Nothing about it is the client's, so the
+         register offers no picker and the save refuses the whole row.
+       · ADOPTED (`forefront` alone) — the CLIENT'S OWN person, marked because
+         their address matched exactly one active row (§313.32). `officeRow`
+         says so in its own words: *adopted, never rewritten*. Their role is
+         the client's and was typed on this register.
+
+     TAKEN AS ONE, the refusal froze a person the client entered: the day
+     their custodian joins the account team, their unit, their address and
+     their custodianship all stop being editable, and §96.2 forbids us to
+     rewrite what somebody else wrote. So the question is asked of the MINT,
+     never of the mark — here, because the screen draws from it and the server
+     refuses from it and two answers to one question is §42's drift.
+
+     A row carrying `ffrow` and no `forefront` cannot occur (the mint writes
+     both, §313.30) and is read as minted anyway: the mark is a claim about
+     where the row came from, and the safe reading of a half-written one is
+     the stricter. */
+  function isForefrontRow(p) { return !!(p && p.forefront); }
+  function isMintedRow(p) { return !!(p && p.ffrow); }
+
   function isSuperRole(k) { return k === "super"; }
   function isOfficeRole(k) { return k === "super" || k === "smoteam"; }
   function isOffice(w, person) {
@@ -3539,6 +3568,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
+    isForefrontRow: isForefrontRow, isMintedRow: isMintedRow,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,

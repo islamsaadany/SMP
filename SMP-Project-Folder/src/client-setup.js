@@ -409,23 +409,54 @@ var CLIENTSETUP = (function () {
             shape:liveShape(), shapeDirty:false, markState:undefined };
     }
     if (S.at > STEPS.length - 1) S.at = 0;
-    if (!S.reg && !S.regErr && !S.loading && OPTS.live && key) {
-      S.loading = true;
-      post({ action:"client", key:key }).then(function (j) {
-        S.loading = false;
-        if (!j.ok) { S.regErr = j.error || "The client's record could not be read."; }
-        else S.reg = j;
-        var h = document.querySelector("[data-csetup]");
-        if (h) mount(h, OPTS);
-      }).catch(function (e) {
-        S.loading = false;
-        if (String(e.message) === "sign in") return;
-        S.regErr = "Could not reach the server.";
-        var h = document.querySelector("[data-csetup]");
-        if (h) mount(h, OPTS);
-      });
-    }
+    ensureReg("[data-csetup]", mount);
     render();
+  }
+
+  /* ── THE CLIENT'S RECORD, ASKED ONCE FOR WHOEVER IS DRAWING (§359.2) ──
+     Two hosts read it now — the flow, and the Forefront team page below —
+     and the state is module-level and keyed on the client, so the second
+     reader finds the first one's answer rather than asking again (§53.5).
+     What differs is only which box to redraw when it lands, so that is the
+     argument rather than a second copy of the request. */
+  function ensureReg(sel, again){
+    var key = OPTS.key || "";
+    if (S.reg || S.regErr || S.loading || !OPTS.live || !key) return;
+    S.loading = true;
+    var back = function () { var h = document.querySelector(sel); if (h) again(h, OPTS); };
+    post({ action:"client", key:key }).then(function (j) {
+      S.loading = false;
+      if (!j.ok) { S.regErr = j.error || "The client's record could not be read."; }
+      else S.reg = j;
+      back();
+    }).catch(function (e) {
+      S.loading = false;
+      if (String(e.message) === "sign in") return;
+      S.regErr = "Could not reach the server.";
+      back();
+    });
+  }
+
+  /* ── FOREFRONT TEAM, ON A PAGE OF ITS OWN (§359.2, spec 056 §3a) ───────
+     Islam: *"how about the forefront team is a separate view as you did but
+     we keep them on the client list reading from the forefront team list."*
+     So it is a Setup page of the client's, and the SET-UP FLOW'S STEP IS THE
+     SECOND READER rather than the owner: `officeStep` is unchanged and drawn
+     from both, because people join and leave an account team all through an
+     engagement and a renderer copied for the page would be the drift §53.5
+     keeps recording. The state is the flow's, so opening either fills both. */
+  function mountTeam(host, opts){
+    HOST = host; OPTS = opts || {};
+    var key = OPTS.key || "";
+    if (!S || S.key !== key) {
+      S = { key:key, at:0, seen:[], reg:null, regErr:null, loading:false,
+            shape:liveShape(), shapeDirty:false, markState:undefined };
+    }
+    ensureReg("[data-cteam]", mountTeam);
+    host.innerHTML = "";
+    var box = el("div", "wzstep");
+    officeStep(box);
+    host.appendChild(box);
   }
   function redraw(){
     if (OPTS.repaint) OPTS.repaint();
@@ -1483,7 +1514,7 @@ var CLIENTSETUP = (function () {
     host.appendChild(wrap);
   }
 
-  return { mount:mount, mountCreate:mountCreate, mountArchived:mountArchived,
+  return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
            progress:progress, isDone:isDone, STEPS:STEPS,
            /* for the checks: the step the flow stands on, never its DOM */
            at: function () { return S ? STEPS[S.at].k : null; } };

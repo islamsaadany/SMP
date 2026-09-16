@@ -454,6 +454,53 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   } finally { await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]); }
 });
 
+await section("3c · Forefront team is the store, the register is a reader (spec 056 §3a)", async () => {
+  /* THE HALF file:// CANNOT SEE. `checks/forefront-team.py` makes its two
+     kinds in the browser and proves the marks, the menu and the count; what
+     it cannot reach is a REAL consultant — the page is empty off the served
+     platform by construction, and `officeRow` is the only thing that mints
+     or adopts one (§94.11). So this asserts the seam: the team the console
+     holds is what the page draws and what the register reads. */
+  await fresh(); await signIn("office@forefront.example");
+  await open("/raya-trade/setup/team");
+  const team = await page.evaluate(() => {
+    const h = document.querySelector("[data-cteam]");
+    return { host: !!h,
+             rows: Array.from(document.querySelectorAll("[data-cteam] .teamrow .nm")).map((e) => e.textContent.trim()),
+             mails: Array.from(document.querySelectorAll("[data-cteam] .teamrow .em")).map((e) => e.textContent.trim()) };
+  });
+  check(team.host, "the page mounts the flow's own renderer", JSON.stringify(team).slice(0, 160));
+  check(team.rows.length > 0, "\u2026and draws this client's actual team", JSON.stringify(team.rows));
+  check(team.mails.some((m) => /@/.test(m)), "\u2026by name and address", JSON.stringify(team.mails));
+
+  /* AND THE REGISTER READS FROM IT. One screen showing everybody who can
+     touch this client (§3a) — asserted as an AGREEMENT with the team above
+     rather than against a typed name (§94.8), and BOTH ENDS: the client's
+     own people are still there and still editable, or a build that drew the
+     consultants alone passes half (§94.2). */
+  await open("/raya-trade/setup/people");
+  const reg = await page.evaluate(() => {
+    const rows = Array.from(document.querySelectorAll(".peoplecfg tbody tr")).filter((r) => !r.classList.contains("newrow"));
+    const nameOf = (r) => { const b = r.querySelector(".namecell b"); return b ? b.textContent.trim() : ""; };
+    const ff = rows.filter((r) => r.querySelector(".ffrow, .ffmark"));
+    const own = rows.filter((r) => !r.querySelector(".ffrow, .ffmark"));
+    const split = document.querySelector(".psplit");
+    return { ffNames: ff.map(nameOf), ownN: own.length,
+             split: split ? split.textContent.trim() : null,
+             ruleFF: (typeof SMPRules !== "undefined") && ff.every((r) => {
+               const k = (r.querySelector("[data-pmenu]") || {}).dataset;
+               const p = k && PEOPLE.filter((x) => x.key === k.pmenu)[0];
+               return p && SMPRules.isForefrontRow(p); }) };
+  });
+  check(reg.ffNames.length > 0 && team.rows.every((n) => reg.ffNames.includes(n)),
+        "every consultant on the team is on the register too", JSON.stringify(reg.ffNames) + " vs " + JSON.stringify(team.rows));
+  check(reg.ruleFF === true, "\u2026and each is marked by the shared rule, not by a name (\u00a742)", String(reg.ruleFF));
+  check(reg.ownN > 0, "\u2026beside the client's own people, who are still there (\u00a794.2)", String(reg.ownN));
+  check(reg.split !== null && reg.split.includes("from Forefront") && reg.split.startsWith(String(reg.ownN)),
+        "\u2026and the count says both, agreeing with what is drawn (\u00a794.8)", String(reg.split) + " / own " + reg.ownN);
+  check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on either page", errs.join(" | "));
+});
+
 await section("4 · Forefront's own pages", async () => {
   await fresh(); await signIn("office@forefront.example");
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });

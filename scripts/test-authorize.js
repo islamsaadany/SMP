@@ -4279,5 +4279,77 @@ console.log("\n41 · the client's set-up mark (§357)");
         !same.some(function (c) { return /set-up/.test(String(c.what || c.label || "")); }), same.map(function (c) { return c.kind; }).join(","));
 })();
 
+/* ── 42 · the two kinds of Forefront row (spec 056 §3a.1, §359.2) ───────
+   `officeRow` marks a consultant's register row two ways and until today the
+   authoriser read only the mark: a row the platform BUILT (`ffrow`) and one
+   it merely ADOPTED because an address matched (§313.32) were refused alike,
+   which froze a person the CLIENT entered — their unit, their address and
+   their role — from the day their holder joined the account team.
+
+   THE STATE IS MADE (§255): the seed carries no Forefront row at all, so
+   every assertion here would pass on a build that had lost the distinction
+   entirely. BOTH ENDS every time (§94.2) — minted refused beside adopted
+   allowed — or a build that simply stopped refusing anything passes half. */
+console.log("\n42 · the two kinds of Forefront row (spec 056)");
+(function () {
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  /* Two rows, made from real people so nothing else about them is odd. */
+  const base = clone(SEED);
+  const rows = (base.people || []).filter(function (p) { return !p.forefront; });
+  const MINT = rows[0], ADOPT = rows[1];
+  check("§359.2: the fixture found two ordinary rows to mark",
+        !!(MINT && ADOPT && MINT.key !== ADOPT.key), String(rows.length));
+  if (!MINT || !ADOPT) return;
+  MINT.forefront = true; MINT.ffrow = true;
+  ADOPT.forefront = true;               /* adopted — never `ffrow` */
+
+  const edit = function (who, key, f) {
+    const inc = clone(base);
+    f(inc.people.filter(function (p) { return p.key === key; })[0]);
+    return A.authorize(base, inc, personOf(base, who));
+  };
+  const kinds = function (key, f) {
+    const inc = clone(base);
+    f(inc.people.filter(function (p) { return p.key === key; })[0]);
+    return (A.collect(base, inc, W(base)) || []).map(function (c) { return c.kind; });
+  };
+
+  /* — the minted row is the platform's, whole — */
+  check("§359.2: renaming a MINTED row classifies as officeRow",
+        kinds(MINT.key, function (p) { p.name = p.name + " X"; }).indexOf("officeRow") > -1,
+        kinds(MINT.key, function (p) { p.name = p.name + " X"; }).join(","));
+  const mintOffice = edit("smo", MINT.key, function (p) { p.name = p.name + " X"; });
+  check("§359.2 REFUSED: ...and the OFFICE is refused it too",
+        !mintOffice.ok, "was ALLOWED");
+  check("§359.2: ...and the refusal says where it is set (§16.7)",
+        !mintOffice.ok && (mintOffice.refusals || []).join(" ").toLowerCase().indexOf("forefront") > -1,
+        (mintOffice.refusals || []).join(" / "));
+
+  /* — the adopted row is the client's own person again — */
+  const adoptKinds = kinds(ADOPT.key, function (p) { p.name = p.name + " X"; });
+  check("§359.2: renaming an ADOPTED row is ordinary setup, never officeRow",
+        adoptKinds.indexOf("officeRow") < 0 && adoptKinds.indexOf("setup") > -1,
+        adoptKinds.join(",") || "(nothing classified)");
+  check("§359.2: ...so the office may correct it",
+        edit("smo", ADOPT.key, function (p) { p.name = p.name + " X"; }).ok,
+        (edit("smo", ADOPT.key, function (p) { p.name = p.name + " X"; }).refusals || []).join(" / "));
+  if (custKey)
+    check("§359.2 REFUSED: ...and a unit's custodian still may not (a re-housing, never a widening)",
+          !edit(custKey, ADOPT.key, function (p) { p.name = p.name + " X"; }).ok, "was ALLOWED");
+
+  /* — the marks themselves are the platform's on BOTH kinds — */
+  const cleared = kinds(ADOPT.key, function (p) { delete p.forefront; });
+  check("§359.2: clearing the mark on an adopted row is officeRow",
+        cleared.indexOf("officeRow") > -1, cleared.join(",") || "(nothing classified — INVISIBLE)");
+  check("§359.2 REFUSED: ...and the office may not clear it either",
+        !edit("smo", ADOPT.key, function (p) { delete p.forefront; }).ok, "was ALLOWED");
+
+  /* — and nothing is swept up by a save that carries them unchanged (§42) — */
+  const quiet = (A.collect(base, clone(base), W(base)) || []);
+  check("§359.2: a save carrying both rows unchanged classifies nothing",
+        !quiet.some(function (c) { return c.kind === "officeRow"; }),
+        quiet.map(function (c) { return c.kind; }).join(","));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

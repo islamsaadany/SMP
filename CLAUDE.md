@@ -9602,7 +9602,64 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;359.1: the way across runs both
+*Last Updated: 2026-09-16 &mdash; **&sect;359.2: Forefront team is the store
+and the register is a reader (spec 056 &sect;3a, stage 2 of six, on the
+branch).** Islam's own revision of his first instruction &mdash; *"how about
+the forefront team is a separate view as you did but we keep them on the
+client list reading from the forefront team list."* A client-scoped Setup page
+under *Who*, above the register because it is the store the register reads,
+**mounted rather than moved** so the set-up flow's step and the page are two
+readers of ONE renderer sharing one state (&sect;9's pattern, &sect;53.5).
+**THE FINDING IS &sect;3a'S OWN CLOSING WARNING, READ BEFORE ANYTHING WAS
+BUILT**: there are **two kinds of Forefront row** and `officeRow` has marked
+them apart since &sect;313.29 while nothing read the difference &mdash; a
+**MINTED** row the platform BUILT, whose role IS the seat and is rewritten on
+every request (&sect;338's heal), and an **ADOPTED** row, the client's own
+person, marked because their address matched exactly one active row
+(&sect;313.32) and which that same function says in its own words it *"never
+rewrites"*. **&sect;3a's literal rule would have stripped the client's own
+custodian of their custodianship the day they joined the account team**
+&mdash; data the client entered, which &sect;96.2 forbids us to rewrite
+&mdash; and frozen their unit, their address and their name with it. So the
+question is asked of the **MINT, never of the mark**
+(`SMPRules.isMintedRow` / `isForefrontRow`, one pair read by the register and
+by `lib/authorize.js`, &sect;42), and Raya Trade is the live case rather than
+a corner: its register came across by the carry, so adoption is the path
+there. **THE READ-ONLINESS IS STRONGER THAN THE SPEC ASKS AND WAS MEASURED
+RATHER THAN ASSUMED** (&sect;100.3): &sect;116 took the role picker off the
+ROW, so a minted row is read-only by not being offered *Edit details* at all
+&mdash; its menu keeps *View the platform as them*, which reads and writes
+nothing, and *Delete permanently*, which is a removal rather than an edit and
+already the Super user's (&sect;89); **the password entry goes for EVERYBODY**,
+where &sect;89 only ever kept it from an SMO team member, because a consultant
+signs in at Forefront's own door. **AND THE RULE HAD TO BE DRAWN FROM WHAT
+SITS UNDER IT** (&sect;193.2): with a minted row keeping one entry, the menu's
+old unconditional hairline was a rule attached to nothing and, on a retired
+consultant, a menu whose whole contents is a rule. **THE COUNT SAYS BOTH AND
+IT IS A NARROW REVERSAL OF &sect;122** (Principle II): that section removed a
+TOTAL at Islam's instruction because *the table under it is that count*, and
+the one thing a table of 36 rows cannot be read for is its composition
+&mdash; so the chip states the SPLIT, never the total, and is drawn **only
+where there is a split to state**. The seat chip's hover had gone false beside
+it and is corrected in the same edit (&sect;104.8). **VERIFIED**:
+`checks/forefront-team.py` **37 assertions, 0 failures**, three populations
+measured in one run (minted, adopted, ordinary) with the state MADE and put
+back (&sect;255, &sect;94.2) and the count asserted as an AGREEMENT
+(&sect;94.8), red **4 / 1 / 3** from the SOURCES (&sect;276);
+`test-authorize.js` &sect;42 **683 passed**, red **2 / 2**; `checks/shell.mjs`
+**111/0** with a new &sect;3c proving the served seam &mdash; the page drawing
+this client's REAL team and the register's consultants asserted as an
+agreement with it &mdash; red **2** from the sources; door-landing 140/0,
+modules 125/0, `built-in-step` all good, `tsc` clean, and **the access
+baseline still UNMOVED**. **&sect;359.3 &mdash; three of the new check's own
+first failures were the CHECK**: it asked a ROW for a picker &sect;116 moved
+into the dialog and so reported an ordinary person as broken, it read a node
+`paint()` had replaced (&sect;222), and it **died rather than reporting**
+(&sect;215, in the file promising every probe degrades) because three guessed
+close selectors left the overlay up and intercepted every press after it.
+**`main` untouched &mdash; the merge is Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;359.1: the way across runs both
 ways, and Roles &amp; access was never removed.** Islam, having opened the
 client's settings from the console's card &mdash; *"I ca't find the access page
 in the strategy module &hellip; why did we remove it it's a very important

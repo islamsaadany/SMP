@@ -185,6 +185,60 @@ pattern holding rather than an exception to it.
 the carry and not built by the platform, so `made_here` is false there and
 adoption is the live path for it — this is not a corner nobody reaches.
 
+### 3a.2 · What the building then found (T2.2–T2.8, 2026-09-16)
+
+**THE READ-ONLINESS IS STRONGER THAN §3a ASKS AND WAS MEASURED RATHER THAN
+ASSUMED** (§100.3). §3a says *no role picker on their row*; §116 took the
+picker off EVERY row when the register stopped being a form — the table draws
+`roleCell(p, false)` and the picker lives in the dialog behind *Edit details*.
+So a minted row is read-only by **not being offered the door at all**, which
+is the stronger reading and needed nothing added to the cell. The first draft
+of `checks/forefront-team.py` asked a ROW for a picker and duly reported an
+ordinary person as broken, which is how this was found.
+
+**TWO ENTRIES SURVIVE ON THE MENU, DELIBERATELY.** *View the platform as them*
+reads and writes nothing. *Delete permanently* is not an edit of the row but
+its removal, which the authoriser classifies as `destroy` on purpose — a
+client taking an office person off their own register is a real act and a loud
+one — and it is already the Super user's alone (§89).
+
+**AND THE PASSWORD ENTRY GOES FOR EVERYBODY**, where §3a said *"the server
+already refuses (§89)"*. It does not: §89 stops an **SMO team member** from
+issuing to the office and a **Super user may**. A consultant signs in at
+Forefront's own door with their account, so a credential minted on a client's
+register is one nobody needs — the entry is absent rather than left to be
+pressed. Narrower than a server rule and recorded rather than slipped in; if
+it should be refused on the server too, that is a line in `lib/authorize.js`
+and Islam's to ask for.
+
+**THE RULE UNDER THE MENU HAD TO BE DRAWN FROM WHAT SITS UNDER IT**
+(§193.2, §24). Both halves below the hairline were unconditional until now, so
+a rule pushed first always had something to separate; with a minted row
+keeping only *Delete permanently* — and an SMO team member not even that — the
+old line leaves a hairline attached to nothing, and on a RETIRED consultant a
+menu whose whole contents is a rule.
+
+**THE COUNT IS A NARROW REVERSAL OF §122 AND IS DRAWN ONLY WHERE IT SAYS
+SOMETHING.** That section removed a plain total from this header at Islam's own
+instruction — *"remove the 77 people active text"* — because *the table under
+it is that count*. True of a TOTAL; the one thing a table of 36 rows cannot be
+read for is its composition. So the chip states the SPLIT and never the total,
+and on a client with no consultants it is not drawn at all, because there one
+number means one thing and §122's objection stands whole. An ADOPTED person is
+counted with Forefront and the hover says they are the client's own person too.
+
+**THE SEARCH NEEDED NOTHING BUILT**: `tkApply` matches a row's own rendered
+text, so a consultant is found by name by construction for as long as §3a's
+*the row stays* holds. What it needed is the ASSERTION, which is what would
+notice the day it does not.
+
+**AND ONE THING IS CARRIED RATHER THAN MOVED** (T2.2). §3a says the team
+renderer moves out of the set-up flow; it is **mounted** from both instead —
+`officeStep` untouched, the page a second reader of it sharing the flow's own
+state, the client's record asked once for whichever host draws first. Same
+outcome, one renderer, and the step cannot drift from the page (§9's pattern,
+§53.5).
+
 ## 4 · Who may open it
 
 **The two seats, and nobody else.** Islam, asked outright: *"yes access to

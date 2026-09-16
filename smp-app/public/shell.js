@@ -778,6 +778,35 @@
      answer "is this the office" without reading thirty tables to build one
      (§97.1). A responsibility role could never make somebody the office or the
      Super user, so nothing is missed by not looking for one. */
+  /* ── TWO KINDS OF FOREFRONT ROW, AND ONLY ONE IS OURS TO REWRITE
+     (spec 056 §3a.1, §359.2) ─────────────────────────────────
+     `officeRow` has marked them apart since §313.29 and nothing read the
+     difference, so the register and the authoriser both treated every marked
+     row as the platform's:
+
+       · MINTED (`ffrow`) — the platform built this row for a consultant who
+         was on nobody's register, and its `role` IS the seat, rewritten on
+         every request (§338's heal). Nothing about it is the client's, so the
+         register offers no picker and the save refuses the whole row.
+       · ADOPTED (`forefront` alone) — the CLIENT'S OWN person, marked because
+         their address matched exactly one active row (§313.32). `officeRow`
+         says so in its own words: *adopted, never rewritten*. Their role is
+         the client's and was typed on this register.
+
+     TAKEN AS ONE, the refusal froze a person the client entered: the day
+     their custodian joins the account team, their unit, their address and
+     their custodianship all stop being editable, and §96.2 forbids us to
+     rewrite what somebody else wrote. So the question is asked of the MINT,
+     never of the mark — here, because the screen draws from it and the server
+     refuses from it and two answers to one question is §42's drift.
+
+     A row carrying `ffrow` and no `forefront` cannot occur (the mint writes
+     both, §313.30) and is read as minted anyway: the mark is a claim about
+     where the row came from, and the safe reading of a half-written one is
+     the stricter. */
+  function isForefrontRow(p) { return !!(p && p.forefront); }
+  function isMintedRow(p) { return !!(p && p.ffrow); }
+
   function isSuperRole(k) { return k === "super"; }
   function isOfficeRole(k) { return k === "super" || k === "smoteam"; }
   function isOffice(w, person) {
@@ -3541,6 +3570,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
+    isForefrontRow: isForefrontRow, isMintedRow: isMintedRow,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
@@ -32124,16 +32154,37 @@ function renderPeople(){
        `p.extra.forefront` first, which is the shape in the DATABASE and is
        never the shape in the graph: the mark would simply never have drawn,
        and the check that asked for it is what said so. */
-    if (p && p.forefront) {
+    /* ── AND IT IS THE MINT THAT IS READ-ONLY, NEVER THE MARK
+       (spec 056 §3a.1, §359.2) ────────────────────────────────
+       The paragraph above is true of a row the platform BUILT and was being
+       applied to one it merely ADOPTED — the client's own person, marked
+       because their address matched exactly one active row (§313.32), whose
+       role `officeRow` says in its own words it never rewrites. So this cell
+       printed their CUSTODIANSHIP as though it were a seat, under a hover
+       saying it is set in the Forefront platform, which is false of it; and
+       the picker that gives a client role was taken away from a row that is
+       the only place one is given (§61).
+
+       Two branches now, asked of `lib/rules.js` so the screen and the save
+       cannot answer differently (§42, §53.5): a MINTED row states its seat
+       and offers nothing, an ADOPTED row is the register's own business again
+       and carries the mark BESIDE its chips — inline, because a mark on a line
+       of its own is what takes a 39px row to 51 (§116.4, §88). */
+    if (SMPRules.isMintedRow(p)) {
       /* The role's NAME from the one list that defines them (§53.5) — L() is
          the tenant's labels lookup and would have printed a key. */
       var seatDef = (SMPRules.ROLES || []).filter(function (r) { return r.key === p.role; })[0];
       var seat = seatDef ? seatDef.name : "";
       return '<span class="ffrow" title="' +
-        esc("Set on this client\u2019s configuration in the Forefront platform.") + '">' +
+        esc("Set on Forefront team, and nowhere in this client.") + '">' +
         '<span class="chip">' + esc(seat || "Forefront") + '</span>' +
         '<i>Forefront</i></span>';
     }
+    var alsoOurs = SMPRules.isForefrontRow(p)
+      ? '<i class="ffmark" title="' +
+        esc("Also on the Forefront team — their seat is set there, their role here.") +
+        '">Forefront</i>'
+      : "";
     var rs = personRoles(p);
     var home = belongsKey(p);
     /* ONE ROLE WIDE, AND THE REST BEHIND A "…" (Islam, 2026-08-22). Most people
@@ -32192,6 +32243,11 @@ function renderPeople(){
          register — and while the two dropdowns are on screen the answer is
          being typed, not read. */
       : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
+    /* THE MARK RIDES ON `held`, so all three exits below carry it: whether
+       this person is also on the Forefront team is a fact about them and not
+       about the editing state, and appending it at each `return` is three
+       places for one answer to go missing from (§104.7). */
+    held = held + alsoOurs;
     if (!editable) return held;
     /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
        `SMPRules.personRoles()` opens with "a retired person holds nothing" and
@@ -32600,16 +32656,40 @@ function renderPeople(){
        the page already has one edit mode, and a second way to edit the same
        row is a second place for the two to disagree. */
     var acts = [];
+    /* ── A FOREFRONT ROW IS READ-ONLY HERE, AND IT SAYS WHERE (§359.2) ──
+       Spec 056 §3a: Forefront team is the store and the register is a reader,
+       so every act that would REWRITE this row belongs on that page. It is
+       not a new refusal — `lib/authorize.js` has refused the whole row as its
+       own kind (`officeRow`) since spec 042 — it is the screen catching up
+       with the save: a row must not offer what the save will turn down
+       (§61, §42), and an entry that appears to work and silently un-happens
+       is worse than one that is not there.
+
+       WHAT SURVIVES IS DELIBERATE. *View the platform as them* reads and
+       writes nothing. *Delete permanently* stays because it is not an edit of
+       the row but its removal, which the authoriser classifies as `destroy`
+       on purpose — a client taking an office person off their own register is
+       a real act and a loud one — and it is already the Super user's alone.
+
+       AND THE PASSWORD ENTRY GOES FOR EVERYBODY (spec 056 §3a), where §89
+       only ever kept it from an SMO team member: a consultant signs in at
+       Forefront's own door with their account, so a credential minted here is
+       one nobody needs. Recorded rather than slipped in — see §359.2's note.
+
+       AND IT IS THE MINT, NEVER THE MARK (spec 056 §3a.1). An ADOPTED row is
+       the client's own person and every one of these acts is theirs to make;
+       asked of the shared pair so this menu and the save answer alike (§42). */
+    var ffRow = SMPRules.isMintedRow(p);
     /* WHOSE PASSWORD, NOT WHICH ACT (§89). The SMO team may let anybody on the
        client's side in and may not touch the office's own — a Super user's or
        another team member's. The entry is absent on those rows rather than
        disabled: a disabled control on somebody else's row invites a press and
        has nowhere to put "because of who they are, not who you are". */
-    if (live && personActive(p) && mayIssuePasswordTo(p)) {
+    if (live && !ffRow && personActive(p) && mayIssuePasswordTo(p)) {
       acts.push('<button data-setpw="' + p.key + '">' +
         (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
     }
-    if (mayEdit) {
+    if (mayEdit && !ffRow) {
       acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
     if (personActive(p)) {
@@ -32619,16 +32699,26 @@ function renderPeople(){
        Retire and Delete are below the rule because they take something away;
        merging two rows that were always one person takes nothing away, and it
        is the ordinary fix for what the marks on this row are pointing at. */
-    if (mayEdit && personActive(p)) {
+    if (mayEdit && !ffRow && personActive(p)) {
       var cands = mergeCandidates(p.key, DUPES);
       acts.push('<button data-pmerge="' + p.key + '">Merge with another row' +
         (cands.length === 1 ? ' (' + esc(shortName(cands[0].person.name)) + ')' : '\u2026') +
         '</button>');
     }
     if (mayEdit) {
-      acts.push('<hr>');
-      acts.push('<button class="danger" data-pact="' + p.key + '">' +
-        (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
+      /* THE RULE IS DRAWN FROM WHAT IS UNDER IT, never pushed and hoped for
+         (§193.2, §24). Until today both halves below were unconditional, so a
+         rule pushed first always had something to separate; with a Forefront
+         row keeping only *Delete permanently* — and an SMO team member not
+         even that — the old line would leave a hairline attached to nothing,
+         and on a RETIRED consultant a menu whose whole contents is a rule. */
+      var danger = [];
+      /* RETIRING IS AN EDIT OF THE ROW, so it goes with the rest of them: the
+         save refuses it, and `setTeam` is what actually retires a consultant
+         whose seat is taken away (§338's sweep). */
+      if (!ffRow)
+        danger.push('<button class="danger" data-pact="' + p.key + '">' +
+          (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
       /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
          §62's shape, because it is the same job on a different table: the
          entry is always LIVE rather than shown disabled, and pressing it
@@ -32641,7 +32731,9 @@ function renderPeople(){
          disabled-with-the-reason is right where the reason is about THIS row,
          and this reason is about the person reading it. */
       if (mayDestroy())
-        acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
+        danger.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
+      if (danger.length) acts.push('<hr>');
+      acts = acts.concat(danger);
     }
     if (!acts.length) return '<td class="cc kebcell"></td>';
     /* THE CELL WITH A PANEL OPEN HAS TO OUTRANK THE CELLS BELOW IT (§69.22).
@@ -33281,10 +33373,44 @@ function renderPeople(){
         return p.name + " \u2014 " + SMPRules.personRoles(world(), p)
           .filter(function(r){ return SMPRules.isSeatRole(r.role); })
           .map(function(r){ return roleName(r.role); }).join(", ");
-      }).join("\n")) + '\n\nA seat is granted by the Super user on this ' +
-      'register and by nothing else. Take one off with the \u00d7 on the chip ' +
-      'in the Roles column.">' +
+      }).join("\n")) + '\n\nA client\u2019s own person is given a seat from their ' +
+      'row here. A consultant\u2019s comes from Forefront team, and is set there ' +
+      'and nowhere in this client.">' +
       plural(seatHolders.length, "person", "people") + ' hold a seat</span>';
+
+  /* ── THE COUNT SAYS BOTH (spec 056 §3a, §359.2) ─────────────────
+     Islam: *"The count says both: 33 of the client's own people · 3 from
+     Forefront, rather than one number quietly meaning two things."* With
+     Forefront team as the store and this table a reader (§3a), the register
+     holds two populations under one heading and nothing said so.
+
+     AND IT IS NOT §122'S COUNT COMING BACK, which is the reason it may be
+     drawn at all. That one was removed because *the table under it is that
+     count* — true of a TOTAL, and the one thing a table of 36 rows cannot be
+     read for is its composition. So this states the SPLIT and never the
+     total, and it is drawn ONLY where there is a split to state: on a client
+     with no consultants on its register one number means one thing, there is
+     nothing to disambiguate, and §122's objection stands whole. Recorded as
+     a narrow reversal rather than slipped in (Principle II).
+
+     `isForefrontRow` and not `isMintedRow`: an ADOPTED person is on both
+     lists at once and the sentence must not pretend otherwise — they are
+     counted with Forefront and the hover says they are the client's own
+     person too (§3a.1). */
+  var ffRows = PEOPLE.filter(function(p){ return SMPRules.isForefrontRow(p); });
+  var ffAdopted = ffRows.filter(function(p){ return !SMPRules.isMintedRow(p); });
+  var splitChip = !ffRows.length ? "" :
+    '<span class="psplit" title="' +
+      esc("Forefront team is where a consultant is added, given a seat or removed \u2014 " +
+          "this table reads from it, so everybody who can touch this client is on one screen." +
+          (ffAdopted.length
+            ? "\n\n" + plural(ffAdopted.length, "of them is", "of them are") +
+              " also the client\u2019s own person, matched by their address, and stay editable here: " +
+              ffAdopted.map(function(p){ return p.name; }).join(", ") + "."
+            : "")) + '">' +
+      plural(PEOPLE.length - ffRows.length, "of the client\u2019s own people",
+             "of the client\u2019s own people") +
+      ' \u00b7 ' + ffRows.length + ' from Forefront</span>';
 
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
@@ -33304,7 +33430,7 @@ function renderPeople(){
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + noCustChip + seatChip + addBtn + fileMenu + colMenu + pwMenu) +
+      attnBtn + noCustChip + seatChip + splitChip + addBtn + fileMenu + colMenu + pwMenu) +
 
     section("", "",
       null,
@@ -50656,23 +50782,54 @@ var CLIENTSETUP = (function () {
             shape:liveShape(), shapeDirty:false, markState:undefined };
     }
     if (S.at > STEPS.length - 1) S.at = 0;
-    if (!S.reg && !S.regErr && !S.loading && OPTS.live && key) {
-      S.loading = true;
-      post({ action:"client", key:key }).then(function (j) {
-        S.loading = false;
-        if (!j.ok) { S.regErr = j.error || "The client's record could not be read."; }
-        else S.reg = j;
-        var h = document.querySelector("[data-csetup]");
-        if (h) mount(h, OPTS);
-      }).catch(function (e) {
-        S.loading = false;
-        if (String(e.message) === "sign in") return;
-        S.regErr = "Could not reach the server.";
-        var h = document.querySelector("[data-csetup]");
-        if (h) mount(h, OPTS);
-      });
-    }
+    ensureReg("[data-csetup]", mount);
     render();
+  }
+
+  /* ── THE CLIENT'S RECORD, ASKED ONCE FOR WHOEVER IS DRAWING (§359.2) ──
+     Two hosts read it now — the flow, and the Forefront team page below —
+     and the state is module-level and keyed on the client, so the second
+     reader finds the first one's answer rather than asking again (§53.5).
+     What differs is only which box to redraw when it lands, so that is the
+     argument rather than a second copy of the request. */
+  function ensureReg(sel, again){
+    var key = OPTS.key || "";
+    if (S.reg || S.regErr || S.loading || !OPTS.live || !key) return;
+    S.loading = true;
+    var back = function () { var h = document.querySelector(sel); if (h) again(h, OPTS); };
+    post({ action:"client", key:key }).then(function (j) {
+      S.loading = false;
+      if (!j.ok) { S.regErr = j.error || "The client's record could not be read."; }
+      else S.reg = j;
+      back();
+    }).catch(function (e) {
+      S.loading = false;
+      if (String(e.message) === "sign in") return;
+      S.regErr = "Could not reach the server.";
+      back();
+    });
+  }
+
+  /* ── FOREFRONT TEAM, ON A PAGE OF ITS OWN (§359.2, spec 056 §3a) ───────
+     Islam: *"how about the forefront team is a separate view as you did but
+     we keep them on the client list reading from the forefront team list."*
+     So it is a Setup page of the client's, and the SET-UP FLOW'S STEP IS THE
+     SECOND READER rather than the owner: `officeStep` is unchanged and drawn
+     from both, because people join and leave an account team all through an
+     engagement and a renderer copied for the page would be the drift §53.5
+     keeps recording. The state is the flow's, so opening either fills both. */
+  function mountTeam(host, opts){
+    HOST = host; OPTS = opts || {};
+    var key = OPTS.key || "";
+    if (!S || S.key !== key) {
+      S = { key:key, at:0, seen:[], reg:null, regErr:null, loading:false,
+            shape:liveShape(), shapeDirty:false, markState:undefined };
+    }
+    ensureReg("[data-cteam]", mountTeam);
+    host.innerHTML = "";
+    var box = el("div", "wzstep");
+    officeStep(box);
+    host.appendChild(box);
   }
   function redraw(){
     if (OPTS.repaint) OPTS.repaint();
@@ -51730,7 +51887,7 @@ var CLIENTSETUP = (function () {
     host.appendChild(wrap);
   }
 
-  return { mount:mount, mountCreate:mountCreate, mountArchived:mountArchived,
+  return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
            progress:progress, isDone:isDone, STEPS:STEPS,
            /* for the checks: the step the flow stands on, never its DOM */
            at: function () { return S ? STEPS[S.at].k : null; } };
@@ -53415,6 +53572,26 @@ var SYNC = (function () {
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
+      /* ── FOREFRONT TEAM, ABOVE THE REGISTER (§359.2, spec 056 §3a) ────
+         Forefront's own people on this client, each holding one of the two
+         seats — the ONE place a consultant is added, given a seat or taken
+         off. It is `client`-scoped because it is a fact about the client and
+         not about any module, and it sits above the register because it is
+         the STORE the register reads: one store, one place to edit, more
+         than one place to read (§9's pattern, §53.5).
+
+         `c_people` rather than a key of its own: who may see the client's
+         people and who may see whose consultants they are is one question,
+         and a second key would be a second answer to it (§104.7). The page
+         is drawn by the set-up flow's own renderer (client-setup.js
+         officeStep) rather than a copy, so the step and the page cannot
+         disagree about what a seat is. */
+      { k:"team", ac:"c_people", grp:"who", mod:"client", label:"Forefront team", glyph:"◉",
+        find:"forefront team consultants account team seat super user smo team ours us who from forefront add remove",
+        render:function(){
+          return cfgHead("Forefront team", [], null, false, null) +
+            '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
+        } },
       { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
@@ -55825,16 +56002,22 @@ var SYNC = (function () {
        Before wire(), on purpose: the first step draws the Branding controls
        and wire() binds those by querying the document, so a box filled
        afterwards would hold colour pickers wired to nothing (§96). */
+    /* AND THE TEAM PAGE FILLS ITS OWN (§359.2) — the same options, the same
+       shared state and ONE renderer: the flow's step and this page are two
+       readers of it (§9's pattern, §53.5). The options are built once for
+       both, or a slug read one way here and another way there is a client
+       resolved twice (§53.5 again, one line down from where it is cited). */
+    var _csOpts = {
+      key: location.protocol === "file:" ? "" : (location.pathname.split("/")[1] || ""),
+      live: (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive()),
+      door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
+      console: OPTS_CONSOLE,
+      repaint: function(){ paint(); }
+    };
+    var cteam = _panel.querySelector("[data-cteam]");
+    if (cteam && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mountTeam(cteam, _csOpts);
     var csetup = _panel.querySelector("[data-csetup]");
-    if (csetup && typeof CLIENTSETUP !== "undefined") {
-      CLIENTSETUP.mount(csetup, {
-        key: location.protocol === "file:" ? "" : (location.pathname.split("/")[1] || ""),
-        live: (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive()),
-        door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
-        console: OPTS_CONSOLE,
-        repaint: function(){ paint(); }
-      });
-    }
+    if (csetup && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mount(csetup, _csOpts);
 
     /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§150) ─────────────
        Read AFTER the page's render, because the render is what fills the

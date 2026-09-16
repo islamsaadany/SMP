@@ -419,6 +419,26 @@
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
+      /* ── FOREFRONT TEAM, ABOVE THE REGISTER (§359.2, spec 056 §3a) ────
+         Forefront's own people on this client, each holding one of the two
+         seats — the ONE place a consultant is added, given a seat or taken
+         off. It is `client`-scoped because it is a fact about the client and
+         not about any module, and it sits above the register because it is
+         the STORE the register reads: one store, one place to edit, more
+         than one place to read (§9's pattern, §53.5).
+
+         `c_people` rather than a key of its own: who may see the client's
+         people and who may see whose consultants they are is one question,
+         and a second key would be a second answer to it (§104.7). The page
+         is drawn by the set-up flow's own renderer (client-setup.js
+         officeStep) rather than a copy, so the step and the page cannot
+         disagree about what a seat is. */
+      { k:"team", ac:"c_people", grp:"who", mod:"client", label:"Forefront team", glyph:"◉",
+        find:"forefront team consultants account team seat super user smo team ours us who from forefront add remove",
+        render:function(){
+          return cfgHead("Forefront team", [], null, false, null) +
+            '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
+        } },
       { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
@@ -2829,16 +2849,22 @@
        Before wire(), on purpose: the first step draws the Branding controls
        and wire() binds those by querying the document, so a box filled
        afterwards would hold colour pickers wired to nothing (§96). */
+    /* AND THE TEAM PAGE FILLS ITS OWN (§359.2) — the same options, the same
+       shared state and ONE renderer: the flow's step and this page are two
+       readers of it (§9's pattern, §53.5). The options are built once for
+       both, or a slug read one way here and another way there is a client
+       resolved twice (§53.5 again, one line down from where it is cited). */
+    var _csOpts = {
+      key: location.protocol === "file:" ? "" : (location.pathname.split("/")[1] || ""),
+      live: (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive()),
+      door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
+      console: OPTS_CONSOLE,
+      repaint: function(){ paint(); }
+    };
+    var cteam = _panel.querySelector("[data-cteam]");
+    if (cteam && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mountTeam(cteam, _csOpts);
     var csetup = _panel.querySelector("[data-csetup]");
-    if (csetup && typeof CLIENTSETUP !== "undefined") {
-      CLIENTSETUP.mount(csetup, {
-        key: location.protocol === "file:" ? "" : (location.pathname.split("/")[1] || ""),
-        live: (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive()),
-        door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
-        console: OPTS_CONSOLE,
-        repaint: function(){ paint(); }
-      });
-    }
+    if (csetup && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mount(csetup, _csOpts);
 
     /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§150) ─────────────
        Read AFTER the page's render, because the render is what fills the

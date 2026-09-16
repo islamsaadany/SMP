@@ -66,22 +66,65 @@ from the SOURCES before its green run is believed (§276, §94.5).
 
 ## Stage 2 · Forefront team, and the register that reads from it
 
-- [ ] **T2.1** Re-read §313.32's email-match adoption and write down what it
-      means under this rule **before** building.
-- [ ] **T2.2** New client-scoped def *Forefront team* under *Who*, above the
-      register, drawing the team renderer **moved** out of the set-up flow;
-      the flow's step calls it rather than keeping a copy.
-- [ ] **T2.3** The register reads consultants from that list: read-only,
-      marked, no unit / Official BU / Emp ID, no password control.
-- [ ] **T2.4** The rule refuses a client role on a seat holder, both sides.
-- [ ] **T2.5** The two-part count, derived from the two lists.
-- [ ] **T2.6** The register's search still finds a consultant.
-- [ ] **T2.7** `checks/forefront-team.py`: both ends (a consultant read-only
-      **and** a client person still editable), the count as an agreement
-      (§94.8), the search, and the refusal driven rather than read. Red from
-      the sources.
-- [ ] **T2.8** `test-authorize.js`: the refusal asserted server-side, red both
-      ways.
+- [x] **T2.1** Re-read §313.32's email-match adoption and write down what it
+      means under this rule **before** building. — §3a.1 above: **two kinds of
+      row and only one is ours to rewrite**, so the rule narrows from *a seat
+      holder* to **a row the platform MINTED**.
+- [x] **T2.2** New client-scoped def *Forefront team* under *Who*, above the
+      register. **MOUNTED rather than moved**, which is the better half of the
+      task: `officeStep` is untouched and the page is a SECOND READER of it
+      (`CLIENTSETUP.mountTeam`), sharing the flow's own state — so opening
+      either fills both and a renderer copied for the page cannot drift
+      (§9's pattern, §53.5). The client's record is asked once for whichever
+      host draws first (`ensureReg`).
+- [x] **T2.3** The register reads consultants from that list. **STRONGER THAN
+      WRITTEN, and measured rather than assumed** (§100.3): §116 took the role
+      picker off the ROW — the table is `roleCell(p, false)` for everybody and
+      the picker is in the dialog — so a minted row is read-only by not being
+      offered *Edit details* at all. Its menu keeps *View the platform as
+      them* (reads and writes nothing) and *Delete permanently* (§89's, and a
+      removal rather than an edit); the password entry goes for everybody,
+      where §89 only ever kept it from an SMO team member. The four columns
+      that mean nothing already draw an em-dash when empty.
+- [x] **T2.4** The rule refuses a client role on a **minted** row, both sides
+      — `SMPRules.isMintedRow` / `isForefrontRow` in the shared module, asked
+      by the register and by `lib/authorize.js` (§42). An ADOPTED row goes
+      back to being the register's ordinary business and only the platform's
+      two marks are held back (`PLATFORM_MARKS`).
+- [x] **T2.5** The two-part count. **Drawn ONLY where there is a split**,
+      which is what keeps §122 whole: that section removed a TOTAL because the
+      table under it is one, and the one thing a table of 36 rows cannot be
+      read for is its composition. A narrow reversal, recorded (Principle II).
+- [x] **T2.6** The register's search still finds a consultant — **nothing to
+      build and everything to assert**: `tkApply` matches a row's own rendered
+      text, so it holds BY CONSTRUCTION for as long as §3a's *the row stays*
+      does, and the assertion is what would notice the day it does not.
+- [x] **T2.7** `checks/forefront-team.py` — 37 assertions, three populations
+      measured in one run (minted, adopted, ordinary), the state MADE and put
+      back (§255, §94.2), the count as an agreement and never a number
+      (§94.8). Red **three ways from the SOURCES** (§276): the mark read as
+      the mint **4 red**, no mark on an adopted row **1**, the count made a
+      total again **3**. Two of its own first failures were the CHECK — it
+      asked a ROW for a picker §116 moved to the dialog, and read a node
+      `paint()` had replaced (§222) — and one **died rather than reporting**
+      (§215): three guessed close selectors left the overlay up and every
+      press after it was intercepted.
+- [x] **T2.8** `test-authorize.js` §42 — the state made (the seed carries no
+      Forefront row at all), both ends every time, **683 passed**. Red both
+      ways: the old wide refusal **2 red** on exactly the adopted assertions,
+      the marks not held back **2 red** on exactly the mark ones.
+- [x] **T2.10** And one neighbour was stale for a DELIBERATE change and is
+      **REWRITTEN, never loosened** (§218, §214.3 for the tenth time):
+      `checks/setup-rail.py` held the People group as exactly *register, then
+      the BU list*, which §3a's *Forefront team above the register* falsifies.
+      It asserts the two claims that survive — the store leads its reader, and
+      the pair the mockup drew keeps the order it drew them in — rather than a
+      list of three the next entry would falsify again.
+
+- [x] **T2.9** And the served half, which file:// cannot see (§94.11):
+      `checks/shell.mjs` §3c — the page drawing this client's REAL team, and
+      the register's consultants asserted as an AGREEMENT with it rather than
+      against a typed name. **111 ok, 0 failed.**
 
 ## Stage 3 · Access — rows the client's, columns the module's
 

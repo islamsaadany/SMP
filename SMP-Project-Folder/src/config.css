@@ -2551,6 +2551,14 @@
   .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── AND HOW THE REGISTER IS MADE UP (spec 056 §3a, §359.2) ────────
+     Its neighbour's treatment exactly, because it is its neighbour's kind of
+     thing: a fact true on every healthy client, read as a value, with the
+     detail on the hover. Drawn only where there IS a split (config-render),
+     so §122's removal of a plain total stands untouched. */
+  .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -2771,6 +2779,16 @@
 .ffrow{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
 .ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
           color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }
+
+/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§359.2) ──
+   The client's own person, marked because a consultant's address matched
+   theirs (§313.32): their role is the client's and stays editable, so this
+   is a note beside it rather than a cell of its own — same treatment as the
+   mark above, because it says the same thing, and INLINE, since a mark on a
+   line of its own is what takes a 39px row to 51 (§116.4, §88). */
+.ffmark{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+         color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px;
+         margin-left:6px; white-space:nowrap }
 
 /* ── THE LANDING LINE PAGE (§356.4, spec 054 §4.5) ────────────────────
    The radio list and the preview are the signed-off mockup's own

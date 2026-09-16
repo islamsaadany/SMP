@@ -5011,8 +5011,50 @@ shared keys, the only difference `c_landing` ADDED. The baseline is kept as
 `specs/056-the-client-and-its-modules/access-baseline.json` with the commit it
 came from.
 
-*Verified:* shell 103/0 (§3b six new assertions, red 5 and 1 from the sources),
-modules 125/0 with `switch-always` still red, door-landing 140/0,
+**Stage 2 (§359.2) — Forefront team is the store, the register is a reader
+(spec 056 §3a), built 2026-09-16.** Islam's own revision of his first
+instruction: *"how about the forefront team is a separate view as you did but
+we keep them on the client list reading from the forefront team list."* A
+client-scoped Setup page under *Who*, above the register because it is the
+store the register reads — **mounted rather than moved**, so the set-up flow's
+step and the page are two readers of one renderer sharing one state (§9's
+pattern, §53.5).
+
+**The finding is §3a's own closing warning, read before anything was built.**
+There are **two kinds of Forefront row** and `officeRow` has marked them apart
+since §313.29 while nothing read the difference: a **MINTED** row the platform
+BUILT, whose role IS the seat and is rewritten on every request, and an
+**ADOPTED** row — the client's own person, marked because their address matched
+one active row (§313.32), which that same function says it *"never rewrites"*.
+§3a's literal rule would have **stripped the client's own custodian of their
+custodianship the day they joined the account team**, and frozen their unit,
+their address and their name with it. So the question is asked of the **MINT,
+never of the mark** — `SMPRules.isMintedRow` / `isForefrontRow`, one pair read
+by the register and by `lib/authorize.js` (§42) — and Raya Trade is the live
+case, its register having come across by the carry.
+
+**On the register a minted row states its seat and offers nothing that would
+rewrite it**, which is STRONGER than §3a asks and was measured rather than
+assumed: §116 took the role picker off the ROW, so it is read-only by not
+being offered *Edit details*. Its menu keeps *View the platform as them*
+(reads and writes nothing) and *Delete permanently* (a removal, already the
+Super user's); **the password entry goes for everybody**, since a consultant
+signs in at Forefront's own door. An adopted row gets its picker back and
+carries a quiet mark beside its chips. **The count says both** — and only
+where there IS a split, which is what keeps §122's removal of a plain total
+whole (a narrow reversal, recorded).
+
+*Verified:* shell **111/0** with a new §3c proving the served seam — the page
+drawing this client's REAL team, the register's consultants asserted as an
+agreement with it — red **2** from the sources; `checks/forefront-team.py`
+**37 assertions, 0 failures**, three populations in one run, red **4 / 1 / 3**
+from the sources; `test-authorize.js` §42 **683 passed**, red **2 / 2**;
+door-landing 140/0, modules 125/0, `built-in-step` all good, `tsc` clean, and
+**the access baseline still UNMOVED**. Three of the new check's own first
+failures were the CHECK, one of them a death rather than a report (§215).
+
+*Stage 1 verified:* shell 103/0 (§3b six new assertions, red 5 and 1 from the
+sources), modules 125/0 with `switch-always` still red, door-landing 140/0,
 `generated-in-step` all clear, `built-in-step` all good, `tsc` clean cold, the
 access baseline UNMOVED and red 635 / 22 on two falsifications. **`main`
 untouched — the merge is Islam's word, on that merge.**

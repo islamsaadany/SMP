@@ -1520,7 +1520,7 @@
        an empty box: there is one act here and its word says which it is
        (§124).
 
-       AND IT IS LIVE ON A REPORT THAT HAS NEVER BEEN SAVED (§357). It used to
+       AND IT IS LIVE ON A REPORT THAT HAS NEVER BEEN SAVED (§358). It used to
        be switched off with the strip saying "save it first", because the store
        path is built from the report's own id and a report with no row has no
        id for a piece to be written against. That is still true of the SERVER
@@ -1588,7 +1588,7 @@
          into the client's library as a row with no way to open it (§61). */
       var pub = el("button", "btn amber", "Publish to " + LIB.client);
       pub.type = "button";
-      /* ONE GATE NOW, AND IT IS THE ONE ABOUT THE REPORT (§357). The `isNew`
+      /* ONE GATE NOW, AND IT IS THE ONE ABOUT THE REPORT (§358). The `isNew`
          arm said "Save it first", which was the machinery's reason rather than
          the report's — and it is unreachable anyway, because a report with no
          row has no file either, so `!it.hasFile` already covers it. What
@@ -1652,7 +1652,7 @@
     function sendFile(f, strip, btn) {
       if (LIB.busy) return;
 
-      /* THE ROW FIRST, WHERE THERE IS NOT ONE YET (§357). The store path is
+      /* THE ROW FIRST, WHERE THERE IS NOT ONE YET (§358). The store path is
          built on the server from the report's own id and is never sent by a
          browser, so a piece cannot be written against a report that has no
          row. That is the whole of why this used to be two acts — and it is a

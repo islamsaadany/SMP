@@ -225,7 +225,7 @@ check("and a module that is not built cannot be switched on", /!MODULE_DEF\[key\
 const pf = read("platform.html");
 check("the drawer draws the band under the client's name", pf.includes('el("div", "band")') && pf.includes("Modules this client has"));
 check("its rows are the team list's own, so the section adds no vocabulary", /mods[\s\S]{0,700}el\("div", "teamrow"\)/.test(pf));
-/* §357.6 — REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted the band
+/* §358.6 — REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted the band
    sat BEFORE the two columns of the client DRAWER — placement B, chosen while
    the drawer was where a client was configured. §322.1's merge replaced that
    whole page with the set-up flow and CARRIED the band onto step one, the

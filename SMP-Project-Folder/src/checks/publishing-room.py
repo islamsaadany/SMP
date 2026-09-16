@@ -179,7 +179,7 @@ def serve():
 # Applied to the PAGE, because platform.html is hand-written and served as it
 # is: there is no build step to make a broken copy through (§276 needs one).
 BREAKS = {
-  # HELD AND DRAWN AS THOUGH LIVE — the build before §357.12, and the reason
+  # HELD AND DRAWN AS THOUGH LIVE — the build before §358.12, and the reason
   # Islam asked for the fade. Note it keeps `aria-disabled`, so it reddens the
   # dimming assertion ALONE; `publish-anyway` below removes the attribute and
   # therefore reddens the refusal as well, which is a different fault.
@@ -309,7 +309,7 @@ def run():
                    pubDim: getComputedStyle(b).opacity, pubCursor: getComputedStyle(b).cursor,
                    saveDim: sv ? getComputedStyle(sv).opacity : null };
         }""")
-        # §357 REWRITTEN, NEVER LOOSENED (§218, §214.3). Both of these asserted
+        # §358 REWRITTEN, NEVER LOOSENED (§218, §214.3). Both of these asserted
         # the two-step: Publish held because nothing was SAVED, and the file
         # control switched off saying "Save it first". Attaching is the
         # ordinary act now and saving a draft is one of two ways of FINISHING,
@@ -320,11 +320,11 @@ def run():
         # everything would pass the half above.
         check("Publish is HELD on a report with nothing to open, and names the FILE",
               held["pubHeld"] == "true" and "Add the file first" in (held["pubWhy"] or ""), held)
-        check("...and the file control is LIVE on a report that has never been saved (§357)",
+        check("...and the file control is LIVE on a report that has never been saved (§358)",
               held["fileOff"] is False and "No file yet" in (held["fileWhy"] or ""), held)
         check("...and nothing on the card tells anybody to go and save something first",
               "Save it first" not in ((held["fileWhy"] or "") + (held["pubWhy"] or "")), held)
-        # §357.12: THE HELD BUTTON LOOKS HELD. Islam's A, taken from four drawn
+        # §358.12: THE HELD BUTTON LOOKS HELD. Islam's A, taken from four drawn
         # side by side and against the recommendation. Measured as PAINT rather
         # than as a class or an attribute (§94.8, §272.8 — a rule can provably
         # match and provably do nothing), and at BOTH ENDS (§94.2): the live
@@ -333,7 +333,7 @@ def run():
         # guards the decision underneath the look — this button is pressable,
         # and pressing it is what names the gap, so a `default` cursor would be
         # the one part of the treatment that is untrue.
-        check("...and the held button is DIMMED, while the live one beside it is not (§357.12)",
+        check("...and the held button is DIMMED, while the live one beside it is not (§358.12)",
               float(held["pubDim"] or 1) < 0.9 and float(held["saveDim"] or 0) == 1.0, held)
         check("...and it still says it can be pressed, because pressing it is what names the gap",
               held["pubCursor"] == "pointer", held)
@@ -363,7 +363,7 @@ def run():
               const hi = Math.max(L(ink), L(fill)), lo = Math.min(L(ink), L(fill));
               return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100;
             }""")
-            print("       cost of §357.12 · the held label reads %.2f:1 on %s "
+            print("       cost of §358.12 · the held label reads %.2f:1 on %s "
                   "(4.5 is the floor) — Islam's, measured" % (r, pal))
         pg.evaluate("() => document.documentElement.removeAttribute('data-theme')")
         press(pg, "Save the draft", ".byline")
@@ -555,8 +555,8 @@ def run():
         check("...and not one piece was sent", not SCENE["pieces"], SCENE["pieces"])
         SCENE["store"] = True
 
-        # ══ 8 · attaching on a report nobody saved (§357) ═════════════
-        print("\n8 · one press: the draft is saved, then the file is sent (§357)")
+        # ══ 8 · attaching on a report nobody saved (§358) ═════════════
+        print("\n8 · one press: the draft is saved, then the file is sent (§358)")
         SCENE["items"] = []; SCENE["sent"] = []; SCENE["pieces"] = []
         open_room()
         press(pg, "Publish a report", ".ptitle")

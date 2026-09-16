@@ -21,7 +21,7 @@
    here.
 
    IT IS A DECLARED DEPENDENCY, AND THIS SENTENCE USED TO SAY IT WAS NOT
-   (§357.7). It said the package was "deliberately NOT a dependency yet, so
+   (§358.7). It said the package was "deliberately NOT a dependency yet, so
    that degrade path is the one exercised by every check today" — true when it
    was written and false from the day `@vercel/blob` went into
    smp-app/package.json, which is the file Vercel installs from. Leaving it
@@ -113,7 +113,7 @@ function storedSlides(state: any, target: string): any[] {
 const READ_MINUTES = 60;
 async function signedRead(path: string): Promise<string> {
   const b = blob();
-  /* THE TOKEN IS ASKED FOR HERE TOO (§357.5). Its four siblings — beginUpload,
+  /* THE TOKEN IS ASKED FOR HERE TOO (§358.5). Its four siblings — beginUpload,
      putPart, finishUpload and dropBlob — all refuse without one; this was the
      odd one out, so on a deployment carrying the package and no token every
      download made two pointless calls to the store's API and relied on the

@@ -258,7 +258,7 @@ await section("4 · a refusal names its rows, and costs only them (§184)", asyn
   let e = changed(base, (m) => { m.access.custodian.a_unit_own_strat = "fill"; });
   let r = await post(smo, { changes: e.changes });
   check(r.status === 200, "the office grants the custodian Fill gaps", r.status + " " + JSON.stringify(r.j));
-  /* §357 — THE STATE IS MADE, NEVER BORROWED (§255). This asked the SEED for
+  /* §358 — THE STATE IS MADE, NEVER BORROWED (§255). This asked the SEED for
      a tactic with no outcome. True when it was written, and §353 then filled
      all 78 of them — so 0 qualified, this section went red on a build behaving
      exactly as decided (§214.3), and it DIED rather than reporting (§215).

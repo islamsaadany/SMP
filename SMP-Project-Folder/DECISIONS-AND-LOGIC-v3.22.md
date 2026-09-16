@@ -47979,7 +47979,7 @@ difference widened it is not established, and does not need to be.
 
 ---
 
-## §357 — ATTACH THE FILE, THEN CHOOSE THE EXIT (2026-09-16)
+## §358 — ATTACH THE FILE, THEN CHOOSE THE EXIT (2026-09-16)
 
 Islam, of the Insights report editor: *"why shall I save the draft then add the
 file not in the same action?"* — then, better than either option put to him:
@@ -48016,7 +48016,7 @@ refused at the press** (&sect;221, &sect;61) — the thing that is missing is on
 field on the same card — and it posts NOTHING, or the one press would put an
 unfindable row in the library.
 
-**§357.1 — AN ABANDONED DRAFT WARNS, AND HALF OF THAT WAS ALREADY BUILT.**
+**§358.1 — AN ABANDONED DRAFT WARNS, AND HALF OF THAT WAS ALREADY BUILT.**
 Islam: *"an abandoned draft should warn and that's it"* — no cleanup, no expiry.
 One correction to it, and it changes what the warning may SAY: by the time a
 draft can be abandoned the row is saved and the file is in the store, which is
@@ -48028,14 +48028,14 @@ of the fact line. Islam took **B**: the list's existing mark, and no new control
 **Nothing was built for the warning.** The line on the way out is recorded as
 offered and not taken.
 
-**§357.2 — &sect;329'S CHECK CAUGHT THE EDIT IN THE WRONG FILE, WHICH IS WHAT IT
+**§358.2 — &sect;329'S CHECK CAUGHT THE EDIT IN THE WRONG FILE, WHICH IS WHAT IT
 IS FOR.** `smp-app/public/platform-page.js` is GENERATED from the repository
 root's `platform.html` by `scripts/build-shell.mjs` and is TRACKED, and the first
 build of this went into the generated copy — where the next generator run would
 have silently undone it. Reverted, applied to the source, regenerated. *A
 generated file that is committed reads exactly like a source file.*
 
-**§357.3 — AND THE CHECK HELD THE SENTENCE THIS REMOVES** (&sect;214.3, and
+**§358.3 — AND THE CHECK HELD THE SENTENCE THIS REMOVES** (&sect;214.3, and
 &sect;218's rule for what to do about it): `publishing-room.py` asserted
 *"the file control says what has to happen first"* with `"Save it first" in
 fileWhy`. **REWRITTEN, NEVER LOOSENED, AND INVERTED WHERE THE DECISION INVERTED**
@@ -48049,7 +48049,7 @@ report that ALREADY has a row is NOT saved a second time by attaching, which
 would overwrite the stored form with whatever sits in the boxes of a card
 somebody opened only to replace a file.
 
-**§357.4 — TWO OF THE NEW SECTION'S OWN FAULTS WERE THE CHECK.** It asserted
+**§358.4 — TWO OF THE NEW SECTION'S OWN FAULTS WERE THE CHECK.** It asserted
 *"posts NOTHING"* against the whole recorder and `open_room()` is three reads of
 its own, so it failed on a build behaving perfectly (&sect;100.3) — it asks for
 no `librarySave`, `libraryUploadBegin` or `libraryUploadFinish` now. And **the
@@ -48082,7 +48082,7 @@ disabled, so the reason stays reachable"* is satisfied and invisible until
 somebody hovers. Found by rendering the mockup, named in its last panel, and
 left as its own round on Islam's word rather than folded in here (rule 1b).
 
-**§357.5 — THE SEAM BETWEEN US AND THE STORE, MEASURED AT LAST.** Every check
+**§358.5 — THE SEAM BETWEEN US AND THE STORE, MEASURED AT LAST.** Every check
 of the library stopped at our own door: `insights.mjs` proves the rows and the
 boundary, `publishing-room.py` drives the browser against a stub of OUR server.
 **Nothing had ever looked at the four calls `lib/blob-api.ts` makes INTO
@@ -48108,7 +48108,7 @@ on the store to refuse them to produce the `""` the caller already knew it would
 get. Nobody sees a different sentence; what goes is a round trip on a path that
 cannot succeed.
 
-**§357.6 — THE MODULE BAND'S CHECK ASSERTED A PAGE THAT NO LONGER EXISTS.**
+**§358.6 — THE MODULE BAND'S CHECK ASSERTED A PAGE THAT NO LONGER EXISTS.**
 `modules.mjs` held *"the band is drawn BEFORE the two columns, which is
 placement B"*, sliced from `pf.indexOf("function drawClient(")` — and
 &sect;322.1's merge replaced that whole page with the set-up flow and CARRIED
@@ -48124,7 +48124,7 @@ where neither function exists fails loudly rather than comparing two -1s
 it is drawn for him (`design-mockups/console/2026-09-16_*.html`) rather than
 declared settled.
 
-**§357.7 — AND THE COMMENT THAT SENT A SESSION TO THE WRONG ANSWER.**
+**§358.7 — AND THE COMMENT THAT SENT A SESSION TO THE WRONG ANSWER.**
 `blob-api.ts` said the package was *"deliberately NOT a dependency yet, so that
 degrade path is the one exercised by every check today"* — true when written and
 false from the day `@vercel/blob` went into `smp-app/package.json`. **Leaving it
@@ -48136,7 +48136,7 @@ comment describing an intention the code no longer carries out, pointing somebod
 at the wrong thing. Corrected, and the degrade path it claimed is now genuinely
 exercised — by `store-seam.mjs` &sect;1, which unsets the token.
 
-**§357.8 — `state-api` WAS 2 RED ON `main`, AND §353 IS WHY.** Its &sect;4 asked
+**§358.8 — `state-api` WAS 2 RED ON `main`, AND §353 IS WHY.** Its &sect;4 asked
 the SEED for a tactic with no outcome; &sect;353 filled all 78, so **0 of 78
 qualified**, and the section then **DIED rather than reporting** (&sect;215 —
 caught and labelled as such by that file's own harness, which is the design
@@ -48150,7 +48150,7 @@ this section's subject is a good fill travelling beside a bad amendment, and one
 row carrying both proves neither. 91 &rarr; **92/0**, and all six break variants
 still red, or the fix would have been a loosening.
 
-**§357.9 — AND `tsc`'s "PRE-EXISTING ERROR" IS NOT AN ERROR.** &sect;336 records
+**§358.9 — AND `tsc`'s "PRE-EXISTING ERROR" IS NOT AN ERROR.** &sect;336 records
 *"`tsc` clean but for `lib/prisma.ts`'s pre-existing PrismaClient error"*, and
 this session repeated it. It is what `tsc` says when **`prisma generate` has not
 been run** — and that is the FIRST step of `npm run build`, so it is true of a
@@ -48160,7 +48160,7 @@ cannot run on a fresh clone without it. *A reported failure that is not one
 teaches people to scroll past the ones that are* (&sect;54.5 with the sign
 reversed).
 
-**§357.10 — THE HELD BUTTON, MEASURED: THE APPROVED FIX DOES NOT SURVIVE
+**§358.10 — THE HELD BUTTON, MEASURED: THE APPROVED FIX DOES NOT SURVIVE
 IT.** Islam: *"1. ok good fix"* (dim the held Publish button so it reads as
 off) and *"2. ok"* (the modules band stays on step one of the set-up flow).
 The second is settled and needed no code. **The first was stopped before a
@@ -48188,8 +48188,8 @@ button), and **C**, drop the fill and keep the outline in `--amber-tx` (5.27 /
 console already keeps amber twice — as a fill with dark ink and as TYPE (§38.4,
 §259). **C is the recommendation** and it is Islam's to take.
 
-**§357.11 — A TABLE OF NUMBERS IS NOT A COMPARISON.** Islam: *"I can't choose
-without visual comparison."* Fair, and the fault is §357.10's own: it put B and
+**§358.11 — A TABLE OF NUMBERS IS NOT A COMPARISON.** Islam: *"I can't choose
+without visual comparison."* Fair, and the fault is §358.10's own: it put B and
 C in separate panels with a contrast table between them, which **describes** a
 difference and then asks the reader to imagine it — §266's rule (*a question
 the reader cannot parse is answered by drawing it*) applied to an ANSWER rather
@@ -48216,7 +48216,7 @@ being a blocker; and *"I will try the pdf upload once we finish"*, which is the
 one part of the Insights path that cannot be proved from here, since it wants
 the store's key and a key never travels through chat.
 
-**§357.12 — A IS BUILT, AND IT IS HIS AGAINST THE RECOMMENDATION.** Shown the
+**§358.12 — A IS BUILT, AND IT IS HIS AGAINST THE RECOMMENDATION.** Shown the
 four side by side, Islam answered **"A"** — the one drawn with a red border,
 labelled *too faint*, carrying its own number. So it is built, and it is
 recorded as his rather than argued with a second time (the rule: a concern

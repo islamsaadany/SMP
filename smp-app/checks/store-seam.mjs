@@ -1,4 +1,4 @@
-/* ── THE SEAM BETWEEN US AND THE STORE (§357.5) ─────────────────────────
+/* ── THE SEAM BETWEEN US AND THE STORE (§358.5) ─────────────────────────
    Every other check of the library stops at our own door: `insights.mjs`
    proves the rows and the boundary, `publishing-room.py` drives the browser
    against a stub of OUR server. Nothing has ever looked at the four calls

@@ -1364,7 +1364,20 @@ function brandNow(key){
     return ("0" + (+x).toString(16)).slice(-2); }).join("") : "#000000";
 }
 
+/* ── BRANDING IS A PART OF GETTING STARTED NOW (§357, spec 055) ─────────
+   Islam: *"it absorbs the branding part with the mark and the brand colors
+   and remove the separate branding setting."* The page def is gone from
+   SUBS.setup; what it drew is `brandingBody()`, which the client set-up
+   flow (client-setup.js) draws inside its first step — the SAME renderer,
+   wired by the SAME handlers in wire(), so a colour set on Getting started
+   is a colour set on the Branding page that used to be (§53.5).
+   `renderBranding()` stays as head + body for anything that still asks the
+   page by name. */
 function renderBranding(){
+  var mayEdit = grant("c_brand") === "edit";
+  return cfgHead("Branding", [], "brand", mayEdit, null) + brandingBody();
+}
+function brandingBody(){
   var mayEdit = grant("c_brand") === "edit";
   var b = branding(), checks = brandChecks(), t = brandTokens();
   var set = !!(b.accent || b.bar || b.palette || b.font);
@@ -1462,9 +1475,7 @@ function renderBranding(){
     '</div>' +
     (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
 
-  return cfgHead("Branding", [], "brand", mayEdit, null) +
-
-    markBlock +
+  return markBlock +
 
     section("", "The tenant’s colours",
       null,

@@ -9728,3 +9728,164 @@ body.presenting #buildband { display:none; }
 .bempty .row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .bempty .bprim { font-size:13px; font-weight:700; border-radius:999px; padding:10px 20px; }
 .bempty .alt { font-size:13px; color:var(--ink-3); max-width:62ch; }
+
+/* ══ THE CLIENT SET-UP FLOW, IN THE PLATFORM'S OWN CHROME (§357, spec 055) ═══
+   The console's flow drew itself in the console's tokens (--ff, --amber);
+   here the same markup — the wz* classes, verbatim — wears the platform's.
+   Everything is scoped under .csetup, because half these words (.band,
+   .row, .cell, .lab) are already taken by other pages (§65.9). */
+.csetup { --cs-fill: var(--panel); --cs-fill-ink: var(--panel-ink);
+          --cs-acc: var(--gold); --cs-acc-ink: var(--on-accent); --cs-acc-tx: var(--gold-deep);
+          --cs-wash: var(--accent-glow); }
+.csetup .lab { display:block; font:600 10.5px/1 var(--mono); letter-spacing:.12em;
+               text-transform:uppercase; color:var(--ink-3); margin:0 0 6px; }
+.csetup .note { margin:6px 0 0; font-size:var(--fs-small); color:var(--ink-3); }
+.csetup .muted { color:var(--ink-3); }
+.csetup .rowset { display:grid; gap:14px; max-width:640px; }
+.csetup textarea.fld { min-height:52px; resize:vertical; }
+.csetup .btn { font:600 var(--fs-small)/1.3 var(--sans); border:1px solid var(--line);
+               background:var(--surface); color:var(--ink); border-radius:var(--r-sm);
+               padding:7px 12px; cursor:pointer; }
+.csetup .btn:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .btn:disabled { opacity:.45; cursor:default; }
+.csetup .btn.solid { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .btn.amber { background:var(--cs-acc); border-color:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .btn.risk { color:var(--bad-tx); border-color:var(--bad-tx); }
+.csetup .btn.risksolid { background:var(--bad); border-color:var(--bad); color:var(--surface); }
+.csetup .cssaid { margin:12px 0 0; font-size:var(--fs-small); border-radius:var(--r-sm); padding:9px 11px; }
+.csetup .cssaid.said { background:var(--surface-2); border:1px solid var(--line); }
+.csetup .cssaid.err { color:var(--bad-tx); background:var(--bad-bg); border:1px solid var(--bad); }
+
+/* the step rail */
+.csetup .wzrail { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 20px; }
+.csetup .wzstep { display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
+                  border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface);
+                  color:var(--ink-2); font:600 12.5px/1.5 var(--sans); cursor:pointer; }
+.csetup .wzstep:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzstep .n { width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
+                     background:var(--surface-2); color:var(--ink-3); font:600 11px/1 var(--mono);
+                     flex:none; font-variant-numeric:tabular-nums; }
+.csetup .wzstep[aria-current="step"] { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .wzstep[aria-current="step"] .n { background:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .wzstep.done { color:var(--ink-3); }
+.csetup .wzstep.done .n { background:var(--good-bg); color:var(--good-tx); }
+
+.csetup .wzcol { max-width:760px; }
+.csetup .wzq { font:600 20px/1.3 var(--sans); margin:4px 0 12px; text-wrap:balance; }
+.csetup .wzwhy { color:var(--ink-3); font-size:var(--fs-small); margin:14px 0 0; max-width:62ch; }
+.csetup .wzempty { color:var(--ink-3); font-size:var(--fs-small); font-style:italic; margin:0 0 10px; }
+.csetup .wzfoot { display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
+                  border-top:1px solid var(--line); flex-wrap:wrap; }
+.csetup .wzfnote { margin-left:auto; color:var(--ink-3); font-size:var(--fs-micro); }
+.csetup .wzarched { border:1px solid var(--line); background:var(--surface-2); border-radius:var(--r-md);
+                    padding:10px 13px; margin:0 0 16px; font-size:var(--fs-small); color:var(--ink-2); }
+.csetup .wzarched b { color:var(--ink); }
+
+/* rows you add to */
+.csetup .wzrows { display:flex; flex-direction:column; gap:6px; }
+.csetup .wzrow { display:flex; align-items:center; gap:9px; }
+.csetup .wzrow .fld { flex:1 1 160px; min-width:0; }
+.csetup .wzrow .wzname { flex:1 1 160px; font-weight:600; font-size:var(--fs-body); }
+.csetup .wzrt { display:flex; align-items:center; gap:7px; flex:none; }
+.csetup .wzrt .fld { width:auto; flex:none; }
+.csetup .wzsub { font-size:var(--fs-micro); color:var(--ink-3); white-space:nowrap; }
+.csetup .wzx { border:0; background:transparent; color:var(--ink-3); cursor:pointer;
+               font-size:18px; line-height:1; padding:2px 6px; }
+.csetup .wzx:hover { color:var(--bad-tx); }
+.csetup .wzadd { border:1px dashed var(--line); border-radius:var(--r-md); padding:8px 11px; color:var(--ink-3);
+                 background:transparent; cursor:pointer; font:600 var(--fs-small)/1.3 var(--sans);
+                 text-align:left; width:100%; margin-top:8px; }
+.csetup .wzadd:hover { border-color:var(--cs-acc-tx); color:var(--ink-2); }
+.csetup .wzcommon { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 0; }
+.csetup .wzcm { border:1px dashed var(--line); border-radius:7px; background:transparent;
+                padding:4px 9px; font:500 12.5px/1.4 var(--sans); color:var(--ink-2); cursor:pointer; }
+.csetup .wzcm:hover { border-color:var(--cs-acc-tx); color:var(--ink); }
+.csetup .wzcm .p { color:var(--ink-3); margin-right:4px; }
+
+/* one of two */
+.csetup .wzchoices { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.csetup .wzchoice { display:block; width:100%; text-align:left; padding:12px 13px; border-radius:var(--r-md);
+                    border:1px solid var(--line); background:var(--surface); cursor:pointer; font:inherit; color:inherit; }
+.csetup .wzchoice:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzchoice[aria-pressed="true"] { border-color:var(--cs-acc); box-shadow:inset 0 0 0 1px var(--cs-acc); }
+.csetup .wzchoice .cname { display:block; font-weight:600; font-size:14.5px; }
+.csetup .wzchoice .cwhy { display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px; }
+
+/* the searchable industry list and the size band */
+.csetup .wzpick { position:relative; }
+.csetup .wzpanel { position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+                   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md);
+                   box-shadow:var(--shadow-md); max-height:260px; overflow:auto; padding:6px; }
+.csetup .wzpanel .gp { font:600 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+                       color:var(--ink-3); padding:8px 9px 4px; }
+.csetup .wzpanel .opt { display:block; width:100%; text-align:left; border:0; background:transparent;
+                        padding:6px 9px; border-radius:6px; font:inherit; color:var(--ink); cursor:pointer; }
+.csetup .wzpanel .opt:hover, .csetup .wzpanel .opt:focus-visible { background:var(--surface-2); outline:none; }
+.csetup .wzpanel .opt[aria-selected="true"] { background:var(--cs-wash); color:var(--cs-acc-tx); font-weight:600; }
+.csetup .wzpanel .nohit { padding:10px 9px; color:var(--ink-3); font-size:13px; font-style:italic; }
+.csetup .wzband { display:flex; flex-wrap:wrap; gap:6px; }
+.csetup .wzband button { border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+                         border-radius:var(--r-md); padding:6px 11px; cursor:pointer; font:600 12.5px/1.3 var(--sans);
+                         display:flex; flex-direction:column; align-items:flex-start; gap:2px; }
+.csetup .wzband button:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzband button[aria-pressed="true"] { border-color:var(--cs-acc); background:var(--cs-wash); color:var(--ink); }
+.csetup .wzband .ppl { font:400 11px/1.3 var(--mono); color:var(--ink-3); }
+.csetup .wzband button:disabled { cursor:default; }
+
+/* the words */
+.csetup .wztbl { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+.csetup .wztbl table { min-width:520px; width:100%; }
+.csetup .wztbl td { white-space:normal; vertical-align:middle; }
+.csetup .wztbl td .fld { width:100%; }
+
+/* the mark on the door */
+.csetup .wzmark .markrow { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
+                       padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
+.csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
+/* the branding, drawn by its own renderer inside the first step */
+.csetup .wzbrand { margin-top:26px; padding-top:6px; border-top:1px solid var(--line); }
+
+/* the modules band and the team rows (the console's own shape, §320.4, §322) */
+.csetup .band { border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface);
+                padding:12px 14px 10px; margin-top:22px; }
+.csetup .band .teamrow:last-of-type { border-bottom:0; }
+.csetup .teamrow { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+.csetup .teamrow .who .nm { font-weight:600; font-size:var(--fs-body); }
+.csetup .teamrow .who .em { color:var(--ink-3); font-size:12.5px; }
+.csetup .teamrow .sp { margin-left:auto; display:flex; gap:7px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.csetup .teamrow .none, .csetup .tag { font-size:var(--fs-micro); color:var(--ink-3); }
+.csetup .tag.open { color:var(--good-tx); background:var(--good-bg); border-radius:var(--r-pill); padding:2px 8px; font-weight:600; }
+.csetup .row { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+.csetup .row .fld { flex:1 1 170px; min-width:0; width:auto; }
+.csetup .asrow { display:inline-flex; align-items:center; gap:6px; }
+.csetup .asrow .aslab { font:600 9.5px/1.4 var(--mono); letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.csetup .asrow .fld { width:auto; max-width:230px; padding:4px 6px; font-size:12px; }
+.csetup .cell { display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.csetup .cell button { border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+                       padding:5px 9px; font:600 11.5px/1.3 var(--sans); cursor:pointer; }
+.csetup .cell button:last-child { border-right:0; }
+.csetup .cell button.on { background:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .cell button.on.hi { background:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .cell.locked button { cursor:default; }
+
+/* ending it (§323): its own block, behind a rule, at the foot */
+.csetup .wzend { margin-top:26px; padding-top:16px; border-top:1px solid var(--line); max-width:560px; }
+.csetup .wzendkey { display:block; font:600 10.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase;
+                    color:var(--ink-3); margin-bottom:8px; }
+.csetup .wzendwhy { margin:0 0 12px; font-size:var(--fs-small); color:var(--ink-3); max-width:62ch; }
+.csetup .wzendrow { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.csetup .wzask { border:1px solid var(--bad); background:var(--bad-bg); border-radius:var(--r-md); padding:13px 15px; }
+.csetup .wzask p { margin:0 0 11px; font-size:var(--fs-small); color:var(--ink); }
+.csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
+.csetup .wzask .row { margin-top:12px; }
+
+/* ── the rail's strip (§357): Getting started, under the head ─────────── */
+.setuprail .railstart { flex:none; display:block; width:100%; text-align:left; cursor:pointer;
+                        padding:9px 14px 10px; border:0; border-bottom:1px solid var(--line);
+                        background:var(--surface); color:var(--ink); font:inherit; }
+.setuprail .railstart:hover { background:var(--surface-2); }
+.setuprail .railstart.on { box-shadow:inset 3px 0 0 var(--gold); }
+.setuprail .railstart .rslab { display:block; font:700 12.5px/1.3 var(--sans); }
+.setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
+.setuprail .railback.railfwd { display:inline-block; }

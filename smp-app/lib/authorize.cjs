@@ -104,6 +104,7 @@ const HIDE_SLIDES     = R.HIDE_SLIDES;
 const MASTER_FLOW     = R.MASTER_FLOW;
 const PRESENT_MINS    = R.PRESENT_MINS;
 const LANDING_PICK    = R.LANDING_PICK;
+const SETUP_DONE      = R.SETUP_DONE;
 const PLAN_FROM       = R.PLAN_FROM;
 const PLAN_TO         = R.PLAN_TO;
 const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
@@ -467,6 +468,13 @@ function collect(stored, incoming, w) {
      own Landing line page rather than reporting "the group's landing". */
   if (!same(sg[LANDING_PICK], ig[LANDING_PICK]))
     add("setup", null, "the landing line");
+  /* §357 (spec 055): the client's set-up pressed Done. SETUP, the office's,
+     and NAMED — a refusal sends somebody to Getting started on the client's
+     own rail rather than reporting "the group's setupDone". The two edits go
+     together (§259.2): classified here AND listed in gExtra below, or the
+     field is swept as unknown by one build and invisible to the next. */
+  if (!same(sg[SETUP_DONE], ig[SETUP_DONE]))
+    add("setup", null, "whether the client's set-up is done");
   /* ── THE PLANNING PERIOD (§308) ─────────────────────────────────
      `cycle`, not `setup`: it is set in the Reporting cycle pen, by the person
      who sets the cycle's own dates, and asking a different grant for the two
@@ -490,7 +498,7 @@ function collect(stored, incoming, w) {
   collectCapabilities(sg.capabilities, ig.capabilities, add);
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "mainbus", "comms", "kb", "logo",
-                                   MASTER_FLOW, PRESENT_MINS, LANDING_PICK, PLAN_FROM, PLAN_TO]);
+                                   MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, PLAN_FROM, PLAN_TO]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */

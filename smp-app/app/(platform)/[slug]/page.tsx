@@ -2,12 +2,9 @@ import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { doorPool } from "../../../lib/auth.ts";
 import { resolveTenant, tenantByKey } from "../../../lib/door.ts";
-import { landingFor, landingShape } from "../../../lib/landing.ts";
-import { landingFactsFor, viewerFor } from "../../../lib/landing-facts.ts";
-import { modulesFor } from "../../../lib/modules.ts";
+import { clientHref, DEFAULT_MODULE } from "../../../lib/modules.ts";
 import { openableModules } from "../../../lib/access.ts";
 import { currentUser, SLUG } from "../../../lib/session.ts";
-import Welcome from "./Welcome.tsx";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string }> };
@@ -18,11 +15,29 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
   return { title: t ? t.name + " — Strategy Management Platform" : "Strategy Management Platform" };
 }
 
-/* Where a client's person lands (§94.6, §148): the welcome screen for THIS
-   tenant, behind the one door rule (contracts §1). A signed-out person is
-   sent to this client's own door (§313.36); a temporary password to the
-   password card; a client that is not theirs to their own; anything else
-   answers the one refusal. */
+/* ── A CLIENT'S ADDRESS OPENS THE MODULE, NOT A WELCOME OF ITS OWN (§357,
+   spec 055; reversing §315's landing and spec 054 §4.1's blocks).
+
+   Islam: *"why do I have a welcome screen for the client overall, I just need
+   a welcome screen for the strategy module for now."* The landing was a
+   SECOND welcome: the Next page drew spec 054's Client setup and Your modules
+   blocks, while the house mark inside the platform opened the frozen
+   welcome.js overlay, which never had them — two answers to one screen,
+   §53.5's drift with a person standing between them. So `/<client>` is a
+   door and nothing more: the one door rule holds exactly as before (a
+   signed-out person to this client's own door, §313.36; a temporary
+   password to the card; a client that is not theirs to their own; anything
+   else the one refusal), and a person who may open the client is sent into
+   THE FIRST MODULE THEY MAY OPEN — Strategy for nearly everybody, read from
+   the same answer the switcher and the card read (openableModules, §356.5),
+   never from a second list. Strategy's own welcome greets them there, once a
+   session (welcome.js), and the house mark is its way back.
+
+   THE CLIENT'S SET-UP MOVED WITH IT: what the landing's blocks pointed at is
+   the client's own Setup rail now, at `/<client>/setup`, reached from the
+   console's card (platform.html) and from the row under every module's
+   Setup head — not from here, because a page that only ever redirects is not
+   a place to put a door on. */
 export default async function Page({ params }: P) {
   const { slug } = await params;
   if (!SLUG.test(slug)) notFound();
@@ -34,13 +49,9 @@ export default async function Page({ params }: P) {
     if (ans.status === 403) redirect("/" + slug + "/sign-in");
     notFound();
   }
-  const data = await landingFor(ans.tenant.id, ans.personKey, user.email);
-  /* the Client setup block and Your modules read the seat THE DOOR resolved
-     and the client's own module list (spec 054 §4.1) — never the graph */
-  const lines = await landingFactsFor(ans.tenant.id, modulesFor(ans.tenant.modules), await viewerFor(ans.tenant.id, ans.seat, ans.personKey));
-  /* and Your modules lists only what this person may OPEN (§356.5) — the
-     gate in front of a module's address, read from the same function */
   const open = await openableModules(ans.tenant.id, ans.seat, ans.personKey, ans.tenant.modules);
-  const shape = landingShape(slug, ans.seat, ans.tenant.modules, lines, open);
-  return <Welcome slug={slug} tenant={ans.tenant} user={user} data={data} shape={shape} />;
+  /* A PERSON WHO MAY OPEN NONE OF THEM still lands on the default module's
+     address: its own gate answers there in words (route.ts, §356.5), where a
+     404 here would say the CLIENT is not available, which is not true. */
+  redirect(clientHref(slug, open[0] || DEFAULT_MODULE, ""));
 }

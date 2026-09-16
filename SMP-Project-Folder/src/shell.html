@@ -219,6 +219,7 @@
 <script src="HISTORY"></script>
 <script src="SAFETY"></script>
 <script src="CONTINGENCY"></script>
+<script src="CLIENTSETUP"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -514,23 +515,32 @@
          chart. The key `c_labels` and the stored map are untouched. */
       { k:"labels", ac:"c_labels", grp:"meas", mod:"strategy", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
 
-      /* Last in Setup: it changes how everything else LOOKS, which is a thing
-         you do once the things themselves exist (§39). */
-      /* ── AND EMAIL LEFT THIS GROUP (§135.4) ────────────────────────
-         §108.3's rename settled a three-way collision — Messages, Send a
-         message, Communication — by naming each page after the one thing it
-         did, and put Email here on a sound argument: what a message wears
-         leaving the platform is the same subject Branding answers, one step
-         further out. Islam's ask goes further and dissolves the question:
-         *"bring the email as a settings in the Send an email part."*
+      /* ── GETTING STARTED, THEN CLIENT SET-UP (§357, spec 055) ─────────
+         Islam: *"the getting started with the client setup to stay at the
+         top of the rail until it's all fulfilled and then moves to the
+         bottom and it absorbs the branding part with the mark and the brand
+         colors and remove the separate branding setting."* One def, two
+         places: while SMPRules.setupDone(GROUP) is false the rail draws it as
+         a STRIP under its head (setupRail below) and never in a group; once
+         Done with set-up is pressed it is an ordinary row in *The client*,
+         the last group, under the name Client set-up. The label is resolved
+         in setupDefsAll(), the one function that builds this list, so the
+         rail and the page it opens cannot disagree (§53.5).
 
-         WHAT A MESSAGE WEARS AND WHERE A MESSAGE IS WRITTEN ARE ONE ERRAND, and
-         the group "Branding & email" no longer has an email in it. The heading
-         is corrected in SETUP_GROUPS rather than left describing a page that
-         moved (§24) — a rail that names something it no longer holds is the
-         same fault as a page naming itself something the rail does not
-         (§121.1). */
-      { k:"brand",  ac:"c_brand",  grp:"look", mod:"client", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent email sender footer kicker",             render:renderBranding }
+         BRANDING IS ABSORBED, NOT DELETED: `renderBranding()`'s body is drawn
+         inside the flow's first step (config-render.js brandingBody) and the
+         `c_brand` grant still gates it — the page def went, the page's
+         controls did not. The flow itself is client-setup.js, one module for
+         this host and the console (§357). Its render is a box the module
+         fills from paint(), before wire() so the colour controls it draws
+         are wired like any other. */
+      { k:"start",  ac:"c_brand",  grp:"client", mod:"client", label:"Getting started", glyph:"◐",
+        find:"getting started set up setup client name mark logo colour color colours branding units companies functions capabilities words office team archive modules",
+        render:function(){
+          var done = SMPRules.setupDone(GROUP);
+          return cfgHead(done ? "Client set-up" : "Getting started", [], null, false, null) +
+            '<div class="csetup" data-csetup="1"><p class="why">Opening…</p></div>';
+        } }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -713,7 +723,14 @@
          a tick somebody could set on a bad afternoon. `c_kb` stays `area:
          "always"` so the grant machinery is untouched; this gate sits in front
          of it, and nothing else reads that key. */
-      { k:"kb",       ac:"c_kb", grp:"help", mod:"client",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",
+      /* STRATEGY'S, NOT THE CLIENT'S (§357, reversing §356.2's move):
+         Islam — *"the knowledge base is currently in the strategy module as
+         it's where we manage the questions and interaction with the client
+         so let's keep it there until we decide later."* The page holds the
+         questions people ask through Strategy's chat, so it sits on the rail
+         of the module that runs that conversation; whether it becomes the
+         client's is a decision deferred, not one made here. */
+      { k:"kb",       ac:"c_kb", grp:"help", mod:"strategy",   label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",
         when: function(){ return inOffice(); },                          render:renderKB }
     ]
   };
@@ -1238,7 +1255,12 @@
      builds this list, so the rail and the page it opens cannot disagree. */
   function setupDefsAll(){
     return SUBS.manage.concat(SUBS.setup).map(function(d){
-      return d.k === "units" ? Object.assign({}, d, { label:L("unitword","bu") }) : d;
+      if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
+      /* §357: one def, two names — Getting started until Done with set-up
+         is pressed, Client set-up after (SMPRules.setupDone, stored as an
+         absence on the group). */
+      if (d.k === "start") return Object.assign({}, d, { label: SMPRules.setupDone(GROUP) ? "Client set-up" : "Getting started" });
+      return d;
     });
   }
   /* ── WHICH RAIL (§356.2, spec 054 §4.2, research R2) ────────────────
@@ -1260,6 +1282,8 @@
   function setupScope(){
     return document.documentElement.getAttribute("data-setup-scope") || "";
   }
+  /* Forefront's own page (§313.3), the one door out of a client's rail. */
+  var OPTS_CONSOLE = "/platform";
   function setScope(v){
     if (v) document.documentElement.setAttribute("data-setup-scope", v);
     else document.documentElement.removeAttribute("data-setup-scope");
@@ -1328,8 +1352,13 @@
        itself on the client landing. Drawn on a module's rail and never the
        client's, because the def below carries the module. */
     { k:"landing", label:"The landing",     note:"What this module says on the landing" },
-    { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" },
-    { k:"help", label:"Help",             note:"How the platform works, in its own words" }
+    { k:"help", label:"Help",             note:"How the platform works, in its own words" },
+    /* §357 (spec 055): the client's own group, LAST — it holds the set-up
+       once it is done, which is the thing you come back to least. The `look`
+       group went with the Branding page it held; its fold key is left in
+       whatever localStorage holds it, read by nothing (§30.2's cost, paid the
+       cheap way). */
+    { k:"client", label:"The client",     note:"How this client was set up, and what it wears" }
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -1453,6 +1482,26 @@
     /* Asked ONCE for the whole rail rather than per row: every row would
        otherwise re-run five counts, two of which walk the register (§108.15). */
     var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
+    /* ── GETTING STARTED IS A STRIP, NOT A ROW, UNTIL IT IS DONE (§357,
+       spec 055). The def sits in the last group; while the set-up is not
+       done it is taken OUT of the groups and drawn under the head, saying
+       how many of its steps the data holds an answer for (client-setup.js
+       progress — counted, never remembered, §129) and which are still to
+       do. Once Done with set-up is pressed it stays where its def is, at the
+       bottom, as Client set-up. One def either way, so the page cannot be
+       reachable from one and not the other. */
+    var startDef = defs.filter(function(d){ return d.k === "start"; })[0];
+    var startStrip = "";
+    if (startDef && !SMPRules.setupDone(GROUP)) {
+      defs = defs.filter(function(d){ return d.k !== "start"; });
+      var pr = (typeof CLIENTSETUP !== "undefined") ? CLIENTSETUP.progress() : { done:0, total:0, todo:[] };
+      var todo = pr.todo.slice(0, 2).join(", ") + (pr.todo.length > 2 ? " +" + (pr.todo.length - 2) : "");
+      startStrip = '<button type="button" class="railstart' + (activeKey === "start" ? " on" : "") +
+        '" data-setupgo="start" aria-current="' + (activeKey === "start" ? "page" : "false") + '">' +
+        '<span class="rslab">' + esc(startDef.label) + '</span>' +
+        '<span class="rsprog">' + pr.done + ' of ' + pr.total + ' done' +
+          (pr.todo.length ? ' · ' + esc(todo) : '') + ' ▸</span></button>';
+    }
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
       if (!items.length) return "";       /* a group with nothing in it is not a heading */
@@ -1550,14 +1599,24 @@
        is 168px wide inside its padding and "CLIENT · SETUP" with a toggle
        already takes most of that, measured, so a link beside it wraps. */
     var slug = (location.pathname.split("/")[1] || "");
+    /* THE WAY OUT IS THE CONSOLE (§357, spec 055): the client's rail is
+       opened from the console's card and from the row under a module's
+       Setup head, and there is no landing to go back to any more. A
+       MODULE's rail carries the reverse — one row, *Client settings ›*, to
+       the client's own rail — so a consultant already inside reaches the
+       register without the console. Both only where there is a server to
+       serve the address; the offline copy draws one rail and no rows. */
     var back = scope === "client" && slug
-      ? '<div class="railback-row"><a class="railback" href="/' + esc(slug) + '">' +
-        '\u2039 Back to the landing</a></div>'
+      ? '<div class="railback-row"><a class="railback" href="' + esc(OPTS_CONSOLE) + '">' +
+        '\u2039 Back to the console</a></div>'
+      : scope && scope !== "client" && slug
+      ? '<div class="railback-row"><a class="railback railfwd" href="/' + esc(slug) + '/setup">' +
+        'Client settings \u203a</a></div>'
       : "";
     return '<div class="rail setuprail"><div class="rhead">' + esc(headWord) +
       '<button type="button" class="railtog" data-railtog="0" ' +
         'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
-        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + back +
+        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + back + startStrip +
       '<div class="railfind">' +
         '<input type="search" class="railq" data-railq="1" autocomplete="off" ' +
           'placeholder="Find a setting\u2026" aria-label="Find a setting" ' +
@@ -2550,6 +2609,20 @@
        when a page's own wiring cannot be trusted. */
     var failBtn = _panel.querySelector("[data-failreload]");
     if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
+    /* ── THE SET-UP FLOW FILLS ITS BOX (§357) ─────────────────────────
+       Before wire(), on purpose: the first step draws the Branding controls
+       and wire() binds those by querying the document, so a box filled
+       afterwards would hold colour pickers wired to nothing (§96). */
+    var csetup = _panel.querySelector("[data-csetup]");
+    if (csetup && typeof CLIENTSETUP !== "undefined") {
+      CLIENTSETUP.mount(csetup, {
+        key: location.protocol === "file:" ? "" : (location.pathname.split("/")[1] || ""),
+        live: (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive()),
+        door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
+        console: OPTS_CONSOLE,
+        repaint: function(){ paint(); }
+      });
+    }
 
     /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§150) ─────────────
        Read AFTER the page's render, because the render is what fills the

@@ -41,9 +41,10 @@
    the landing writes with). Modes are never in the address (§63.1, §173:
    edit, reporting and arrange are dropped on every navigation).
 
-   The shell's welcome overlay is stood down: the landing at /<client> IS the
-   welcome screen (§315), so a second one drawn over the first page would be
-   two greetings for one arrival. */
+   The shell's welcome overlay is THE welcome again (§357, spec 055): the
+   landing at /<client> was stood in for it while it existed (§315) and is a
+   redirect into the module now, so welcome.js offers itself once a session
+   exactly as it does over file://, and the house mark is its way back. */
 (function () {
   "use strict";
   var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,48})(?:\/(.*))?$/);
@@ -214,7 +215,10 @@
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
   try {
-    sessionStorage.setItem("smp.welcome.done", "1");
+    /* NOTHING MARKS THE WELCOME SEEN HERE ANY MORE (§357): that line stood
+       the frozen overlay down while the Next landing was the welcome, and
+       with the landing gone it was the reason the house mark opened a screen
+       nobody had been offered. welcome.js keeps its own memory. */
     if (here && !here.tour && here.d) {
       var rem = { d: here.d, s: here.s };
       if (here.c && here.s) rem.c = here.c;

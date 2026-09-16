@@ -4236,5 +4236,48 @@ console.log("\n40 · a pillar's breakdown (§343)");
         (from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).refusals || []).join(" / "));
 })();
 
+/* ── 41 · the client's set-up mark (§357, spec 055) ──────────────────────
+   "Done with set-up" writes ONE key on the group (SMPRules.SETUP_DONE) and
+   the Setup rail reads it to move Getting started to the bottom as Client
+   set-up. It is SETUP — the office's — and the two server edits go together
+   (§259.2): classified, or the change is INVISIBLE and therefore allowed to
+   everybody; and in the group's known list, or it reaches the unknown sweep
+   under a sentence naming the whole group. BOTH ENDS: the office may, the
+   custodian may not, and neither direction is `unknown`. */
+console.log("\n41 · the client's set-up mark (§357)");
+(function () {
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  const KEY = R.SETUP_DONE;
+  check("§357: the key is the shared rule's, never a literal here", typeof KEY === "string" && KEY.length > 0, String(KEY));
+  const base = clone(SEED);
+  delete base.group[KEY];
+  function marked(v) { const inc = clone(base); if (v == null) delete inc.group[KEY]; else inc.group[KEY] = v; return inc; }
+  const set = (A.collect(base, marked(true), W(base)) || []);
+  check("§357: marking the set-up done classifies as SETUP",
+        set.length > 0 && set.every(function (c) { return c.kind === "setup"; }),
+        set.map(function (c) { return c.kind; }).join(",") || "(nothing classified — INVISIBLE, so allowed to everybody)");
+  const doneBase = marked(true);
+  const cleared = (A.collect(doneBase, marked(null), W(doneBase)) || []);
+  check("§357: ...and so does taking the mark off (stored as an absence, §50.6)",
+        cleared.length > 0 && cleared.every(function (c) { return c.kind === "setup"; }),
+        cleared.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  check("§357: neither direction reaches the unknown sweep (§191)",
+        !set.concat(cleared).some(function (c) { return c.kind === "unknown"; }), "ok");
+  const office = A.authorize(base, marked(true), personOf(base, "smo"));
+  check("§357: the office marks the set-up done", office.ok, (office.refusals || []).join(" / "));
+  if (custKey) {
+    const cust = A.authorize(base, marked(true), personOf(base, custKey));
+    check("§357 REFUSED: a unit's custodian may not", !cust.ok, "was ALLOWED");
+    check("§357: ...and the refusal names Setup (§16.7)",
+          !cust.ok && (cust.refusals || []).join(" ").toLowerCase().indexOf("setup") > -1,
+          (cust.refusals || []).join(" / "));
+  }
+  /* the mark is not swept up by a save that carries it unchanged (§42's
+     phantom change: a reader that created what it looked for) */
+  const same = (A.collect(doneBase, clone(doneBase), W(doneBase)) || []);
+  check("§357: a save carrying the mark unchanged classifies nothing about it",
+        !same.some(function (c) { return /set-up/.test(String(c.what || c.label || "")); }), same.map(function (c) { return c.kind; }).join(","));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

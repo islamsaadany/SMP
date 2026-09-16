@@ -1412,7 +1412,7 @@
    "id": "branding",
    "group": "Strategy Office questions",
    "q": "How do I set the colours and the logo?",
-   "a": "Go to Setup › Branding for both. The two colours are the accent and the navigation bar, and everything else is worked out from them.|The group's mark sits above them: it is shown on any review deck whose subject has no mark of its own — a business unit that has not uploaded one, and every supporting function, which never has one.|A business unit's own mark is uploaded separately, on Setup › Business units.|Marks must be PNG with a transparent background. SVG is not accepted, for security reasons, and a mark with white behind it paints a box around itself on a dark slide.",
+   "a": "Go to Setup › Client set-up (it reads Getting started until the set-up is finished) — the mark and the colours are on its first step. The two colours are the accent and the navigation bar, and everything else is worked out from them.|The group's mark sits above them: it is shown on any review deck whose subject has no mark of its own — a business unit that has not uploaded one, and every supporting function, which never has one.|A business unit's own mark is uploaded separately, on Setup › Business units.|Marks must be PNG with a transparent background. SVG is not accepted, for security reasons, and a mark with white behind it paints a box around itself on a dark slide.",
    "who": "office"
   },
   {

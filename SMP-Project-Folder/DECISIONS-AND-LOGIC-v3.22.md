@@ -49061,6 +49061,77 @@ which is what keeps two *W1*s apart, and nothing else on a screen does; and the
 add line's details appear on the first keystroke, so a line typed and then
 emptied leaves them standing until Escape or Enter.
 
+### §356.17 — THE MERGE, AND WHAT ONLY THE RECORD COULD LOSE (2026-09-16)
+
+Islam: *"merge to main."* `main` had moved eleven commits under this branch —
+§357 (Meeting Notes) and §358, from another session — so `--ff-only` refused,
+correctly, and the merge was made ON THE BRANCH and the checks re-run there
+before anything was fast-forwarded (§4).
+
+**NO NUMBERING COLLISION, AND IT WAS CHECKED RATHER THAN ASSUMED**: ours are
+sub-sections of §356, which `main` already holds (§356.11–§356.13 reached it
+on 2026-09-15), so §264.3's renumber had no subject here — the one case where
+the answer is to do nothing and say so.
+
+**EVERY CONFLICT WAS A RECORD FILE AND EVERY ONE WAS COMBINED** (§318.7:
+either side taken whole drops the other's work). `package.json` held two
+supersets facing each other — our thirteen tracker breaks against `main`'s
+five, plus `main`'s two new `check:notes` scripts — so the resolution is our
+line and their two, and the file is asserted to PARSE rather than eyeballed.
+The three prose files are ordered newest first, ours above `main`'s §357.
+
+**THE FROZEN HALF CAME FROM `main` BYTE-IDENTICAL AND THAT IS WHAT DECIDED THE
+BUMP**: this branch touches no frozen source at all — `git diff --name-only`
+against `origin/main` over `SMP-Project-Folder/src`, `lib/`, `sw.js` and the
+built file is EMPTY — so there is no rebuild to make and §91's trigger is not
+met; `SHELL` stays `main`'s `v5.06-meeting-notes`, and since no name is being
+chosen §94.12's collision cannot arise either. `node --check sw.js` OK
+(§146.2).
+
+**A MERGE CAN DROP A WHOLE BLOCK WITH NOTHING ABLE TO GO RED, AND IT DID**:
+`main`'s §357 entry in `IMPLEMENTATION_PROGRESS.md` was written over the
+§356.11–§356.13 HEADING, so that body now sat under a heading naming a
+different module — the file reads perfectly and says the wrong thing. §329
+built a check because a generated copy can go stale in silence; the prose files
+are the same relationship with **no generator and no check at all**, which is
+why this needed a human diff to find and why it is recorded rather than merely
+fixed. The heading is restored from our side, which still had it.
+
+**AND THE SAME FILE HAD NO ENTRY FOR §356.15 OR §356.16**, which its own first
+paragraph requires *in the same commit as the work it describes* — two rounds
+shipped without it. Both written here in plain words (1b-iii), and the miss is
+named rather than quietly filled.
+
+**TWO BLOCKS ON BOTH SIDES STILL READ "on the branch, not merged"** over work
+`main` demonstrably holds (§356 and §356.11–§356.13 are in `main`'s own
+`CLAUDE.md`); `main`'s commit *"Record §356 and §357 as merged, not on the
+branch"* fixed that phrase on their neighbours and missed these. Corrected and
+NAMED, which is CLAUDE.md's own instruction — *a drift between the record and
+the code is a documentation bug; report it before silently realigning*. **And
+§356.16's decisions block sat BEFORE §356.15's**, my own drift from the round
+before, put in order here rather than left for a reader to trip over.
+
+**RE-RUN ON THE MERGED TREE, NEVER INFERRED FROM THE TWO SIDES**: tracker
+**228/0** and **red all thirteen ways**, notes **154/0** (`main`'s own number,
+so their work is intact under ours), insights 127/0, modules 107/0,
+`generated-in-step` all clear, `built-in-step.py` all good, `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error — asserted byte-identical to `main`'s copy
+and named four times in `main`'s own record, rather than taken on trust (§303).
+The five module servers were parsed and the merged tree scanned for duplicate
+top-level declarations (§281, §147.4): the one hit was the scan's own false
+positive, a `const v` inside two one-line function bodies.
+
+**AND `notes` DIED AT 38 ON ITS FIRST RUN HERE, AND IT WAS THE DATABASE**
+(§215, §105.6): `relation "notes" does not exist` — the local check database
+predates `main`'s migration 014, so the check was measuring a world `main`'s
+own schema had already left. Established before the merge was blamed, and
+154/0 the moment the migration was applied. *A run that died is a failure of
+its own, and the first question is still whose.*
+
+**RECORDED, NOT DONE**: there is no check over the prose files, so the next
+merge can lose a heading the same way; and the tracker module still has to be
+turned on per client from the client's card.
+
 ---
 
 ## §357 — MEETING NOTES: ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (2026-09-16, spec 055)

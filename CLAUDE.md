@@ -9679,7 +9679,34 @@ is asserted is the AGREEMENT, never a pixel count. **VERIFIED**:
 ways**, one break per decision (the two card breaks overlapped at first, so
 neither was isolated); `modules` 100/0; `generated-in-step` all clear;
 `built-in-step.py` all good; `tsc` clean but for `lib/prisma.ts`'s pre-existing
-error. **The frozen product is untouched**, so `sw.js` is not bumped. **Merged to `main` 2026-09-16.***
+error. **The frozen product is untouched**, so `sw.js` is not bumped.
+**&sect;356.17 &mdash; AND THE MERGE FOUND THREE THINGS, ALL IN THE RECORD AND
+NONE IN THE PRODUCT**, which is the finding rather than the tidy-up: the four
+conflicts were the three record files and `package.json`, every one COMBINED
+rather than picked (&sect;318.7), and the frozen half came from `main`
+byte-identical, so no rebuild and no `sw.js` bump were owed and none was made
+(&sect;91's trigger is the built file's bytes changing). **A MERGE CAN DROP A
+WHOLE BLOCK WITH NOTHING ABLE TO GO RED**: `main`'s &sect;357 entry in
+`IMPLEMENTATION_PROGRESS.md` was written over the &sect;356.11&ndash;&sect;356.13
+HEADING, leaving that body sitting under a different module's title &mdash; the
+file reads perfectly and says the wrong thing, and there is no
+`generated-in-step` for prose (&sect;329's gap on the half that is written by
+hand). **And the same file had no entry for &sect;356.15 or &sect;356.16 at
+all**, which its own first paragraph requires *in the same commit as the work it
+describes*; both written here in plain words (1b-iii). **Two blocks on BOTH
+sides still read *"on the branch, not merged"* over work `main` demonstrably
+holds** &mdash; `main`'s own commit fixed that phrase on its neighbours and
+missed these &mdash; corrected and named rather than realigned silently. **And
+&sect;356.16's decisions block sat BEFORE &sect;356.15's**, my own drift, put in
+order. **Re-run on the merged tree**: tracker **228/0**, notes **154/0**
+(`main`'s own number), insights 127/0, modules 107/0, `generated-in-step` all
+clear, `built-in-step.py` all good, `tsc` clean but for `lib/prisma.ts`'s
+pre-existing error &mdash; asserted byte-identical to `main`'s copy rather than
+assumed (&sect;303). **AND `notes` DIED AT 38 ON ITS FIRST RUN HERE AND IT WAS
+THE DATABASE** (&sect;215, &sect;105.6): `relation "notes" does not exist`,
+because the local check database predates `main`'s migration 014 &mdash;
+established before the merge was blamed, and 154/0 the moment it was applied.
+**Merged to `main` 2026-09-16.***
 
 *Earlier the same day: **&sect;357: Meeting Notes &mdash; one
 meeting, one note, and the minutes as an email (spec 055).** Islam's seven
@@ -9835,13 +9862,13 @@ folds itself; and a row reads **This week &middot; Next week &middot; W40 and
 beyond**, with *previous week* deliberately NOT built because a past week is
 already **late** and the word could only replace the alarm. The bold came off
 the row and stayed in the picker, which says what the rows say (&sect;53.5) at
-54 &rarr; 86px. **VERIFIED**: `check:tracker` **124/0** then **214/0**, red
-2 / 3 / 2 then EIGHT ways; `modules` 100/0; `insights` 127/0;
+54 &rarr; 86px. **VERIFIED**: `check:tracker` **124/0** then **228/0**, red
+2 / 3 / 2 then THIRTEEN ways; `modules` 100/0; `insights` 127/0;
 `memory-boundary` 14/0; `generated-in-step` all clear; `tsc` clean but for
 `lib/prisma.ts`'s pre-existing error. **The frozen product is untouched**, so
 `sw.js` is not bumped. **Merged to `main` 2026-09-16.** **RECORDED, NOT DONE**:
 the switcher lists it for a client's person until spec 046 &sect;4.4's tab
-exists; a module is turned ON per client from the card; Notes is next.*
+exists; a module is turned ON per client from the card. Notes is &sect;357.*
 
 *Earlier the same day: **&sect;355: who can see one report (spec
 046 &sect;4.10).** Islam, of Insights: *"normally every one in the company can

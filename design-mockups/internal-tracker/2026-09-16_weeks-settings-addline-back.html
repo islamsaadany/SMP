@@ -1,0 +1,335 @@
+<title>Tracker weeks and settings</title>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MOCKUP · spec 054 · Internal Tracker — dates by the week, a settings
+     menu, the add line that takes everything, a fixed pill, a way back
+     design-mockups/internal-tracker/2026-09-16_weeks-settings-addline-back.html
+
+     Rule 1c: drawn before a source moves. The stylesheet is the built
+     module's own (smp-app/modules/tracker/page.ts) with two FAULTS fixed
+     in it and the new controls marked CHANGED.
+
+     Islam, 2026-09-16, of the built tracker:
+       "I'm not able to set the date and the status pill is shifting it's
+        size while it should be consistent. and while writing the actoin I
+        should be able to set the date and set the owner and a note the due
+        dates default should be the weeks not the days setting by date can
+        be a toggle beside the group by maybe a 3 dots for a small settings
+        to show group by and planning format and setting the week should
+        default to thursday of this week and we need a backbutton to get
+        from this page to the"
+
+     THE TWO FAULTS, measured on the built page in Chromium:
+       · the pill: every "font: 600 11px/1 inherit" in the stylesheet is
+         INVALID CSS (a font shorthand cannot end in the word inherit), so
+         the browser dropped it — a pill that is a dropdown fell to the
+         browser's own control font (13.3px Arial, 29px tall) and a pill
+         that is plain text inherited the page's 15px (37px tall). Two
+         boxes, two sizes. And the Done pill's green ground wiped the
+         little arrow off it. Fixed here: one named font family, one box
+         for every pill whether it can be pressed or not.
+       · the date: the date box was thrown away 150ms after focus left it,
+         and opening the calendar popup is focus leaving it — so the pick
+         landed on a box that was already gone. Fixed here: the box stays
+         until a date is chosen, Escape, or a press elsewhere on the page.
+
+     Five frames: This week at rest (weeks) · the add line while typing ·
+     the week picker open · the ⋯ settings open · exact dates.
+     Today is Wednesday 16 September 2026; the week is Sun 13 – Thu 17.
+     ═════════════════════════════════════════════════════════════════ -->
+<style>
+*{box-sizing:border-box}
+:root{--bar:#16325C;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
+
+/* ── the built module's own chrome, the font family NAMED (fault 1) ── */
+.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
+.bar h1{margin:0;font-size:14.5px;font-weight:600}
+.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
+.msw{position:relative;flex:none}
+.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
+.msw>summary::-webkit-details-marker{display:none}
+.msw svg{width:17px;height:17px;display:block}
+/* CHANGED: the way back — the client's own name, at the far end of the bar */
+.back{margin-left:auto;display:inline-flex;align-items:center;gap:6px;color:#EAF0FA;text-decoration:none;font:600 13px/1 var(--font);padding:6px 10px 6px 7px;border:1px solid rgba(234,240,250,.28);border-radius:7px}
+.back svg{width:14px;height:14px}
+.back:hover,.back:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.pg{max-width:1000px;margin:0 auto;padding:20px 20px 30px}
+h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
+h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
+.cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px;align-items:flex-end}
+.cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 var(--font);padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+/* CHANGED: Group by leaves the row; a ⋯ on the far right holds the two settings */
+.dots{margin-left:auto;margin-bottom:6px;position:relative}
+.dots>button{width:28px;height:24px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0}
+.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.dots svg{width:16px;height:16px}
+.setmenu{position:absolute;top:30px;right:0;z-index:9;width:230px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:8px 6px}
+.setmenu .lab{font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:4px 9px 2px}
+.setmenu button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.setmenu button:hover{background:var(--ground)}
+.setmenu button.on{font-weight:600}
+.setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+.setmenu hr{border:0;border-top:1px solid var(--line);margin:6px 3px}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font)}
+.cnt{font:600 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+.tile b{display:block;font-size:22px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{display:block;font:600 10.5px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+.tile.late b{color:var(--bad)}
+.grp{display:flex;align-items:center;gap:9px;padding:14px 2px 6px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.grp .cnt{margin-left:0}
+/* the row: tick · name · when · owner · status · the arrow */
+.row{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.row .t{min-width:0;font-size:15px;line-height:1.35}
+.row.done .t{color:var(--ink-3);text-decoration:line-through}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
+.row.done .tick{background:var(--good);border-color:var(--good)}
+.tick svg{width:11px;height:11px}
+/* CHANGED: the WHEN cell — a week by default, a day when the setting says so */
+.when{font:400 12.5px/1.4 var(--mono);color:var(--ink-3);white-space:nowrap;text-align:right;background:none;border:0;padding:0;position:relative}
+.when.late{color:var(--bad);font-weight:600}
+.when.pick{cursor:pointer;border-radius:6px;padding:3px 5px;margin:-3px -5px}
+.when.pick:hover,.when.pick.on{background:var(--surface-2)}
+.when .wk{display:inline-block;font:600 12.5px/1.4 var(--font);color:var(--ink-2)}
+.when.late .wk{color:var(--bad)}
+.weeks{position:absolute;top:26px;right:0;z-index:5;min-width:236px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
+.weeks button{display:grid;grid-template-columns:1fr auto;width:100%;align-items:center;gap:12px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.weeks button small{font:400 12px/1.4 var(--mono);color:var(--ink-3)}
+.weeks button:hover{background:var(--ground)}
+.weeks button.on{font-weight:600}
+.weeks button.on::before{content:"";position:absolute;left:8px;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-top:7px}
+.weeks button.on{padding-left:22px}
+.weeks hr{border:0;border-top:1px solid var(--line);margin:5px 3px}
+.weeks .quiet{color:var(--ink-3)}
+.row input.dt{font:400 12.5px/1.4 var(--mono);color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:2px 5px;background:var(--surface)}
+.who{font:600 12.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right;background:none;border:0;padding:0;position:relative}
+.who.pick{cursor:pointer;border-radius:6px;padding:3px 7px;margin:-3px -7px}
+.who.pick:hover,.who.pick.on{background:var(--surface-2)}
+.team{position:absolute;top:26px;right:0;z-index:5;min-width:140px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
+.team button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.team button.on{font-weight:600}
+.team button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+/* CHANGED (fault 1): ONE box for the pill, pressable or not — same font,
+   same height, same width, the arrow only where it can be pressed, and the
+   Done ground set with background-COLOR so it does not take the arrow off */
+.st{display:inline-grid;place-items:center;height:26px;width:118px;font:600 11px/1 var(--font);letter-spacing:.02em;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap;text-align:center;appearance:none;-webkit-appearance:none;margin:0}
+select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last:center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+.st.prog{border-color:var(--gold);color:var(--gold)}
+.st.done{border-color:var(--good);background-color:var(--good-bg);color:var(--good)}
+.more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
+.more svg{width:16px;height:16px}
+/* CHANGED: the add line — every cell live while a hand is typing */
+.addrow{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:9px 2px;border-bottom:1px dashed var(--line)}
+.addrow .plus{width:18px;height:18px;display:grid;place-items:center;color:var(--ink-3);font:600 15px/1 var(--font)}
+.addrow input.new{border:0;background:transparent;color:var(--ink);font:400 15px/1.35 var(--font);padding:2px 0;width:100%;min-width:0;outline:none}
+.addrow input::placeholder{color:var(--ink-3)}
+.addrow .when,.addrow .who,.addrow .st{opacity:.55}
+.addrow.typing{background:var(--surface)}
+.addrow.typing .when,.addrow.typing .who,.addrow.typing .st{opacity:1}
+.addnote{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:0 2px 10px;border-bottom:1px dashed var(--line);background:var(--surface)}
+.addnote .n{grid-column:2;display:flex;gap:10px;align-items:flex-start}
+.addnote textarea{flex:1;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 10px;font:400 13.5px/1.5 var(--font);min-height:40px;resize:vertical}
+.addnote .k{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding-top:6px;white-space:nowrap}
+.notelink{font:400 12px/1.5 var(--mono);color:var(--ink-3);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;justify-self:end}
+.addhint{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding:6px 2px 0 34px}
+
+/* the mockup's own furniture, not the product's */
+.intro,.note{max-width:1000px;margin:0 auto;padding:22px 20px 6px}
+.intro h1{font-size:22px;margin:0 0 8px;text-wrap:balance}
+.intro p,.note p{color:var(--ink-2);font-size:14.5px;line-height:1.55;margin:6px 0;max-width:72ch}
+.intro ol{color:var(--ink-2);font-size:14.5px;line-height:1.55;margin:6px 0 6px 20px;padding:0;max-width:72ch}
+.intro li{margin:4px 0}
+.cap{max-width:1000px;margin:26px auto 8px;padding:0 20px;font:600 12px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.frame{max-width:1000px;margin:0 auto;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground)}
+.frame.room{overflow:visible}.frame.room .pg{padding-bottom:230px}
+.frame .bar{border-radius:0}
+.faults{max-width:1000px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fault{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px}
+.fault h3{margin:0 0 6px;font-size:14px}
+.fault p{margin:0 0 8px;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.fault .was{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:8px 0}
+.fault .was .k{font:600 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);width:48px}
+/* what the built page draws today, reproduced: a dropdown in the browser's own control font, a plain pill in the page's */
+.oldsel{font:400 13.33px Arial,sans-serif;padding:6px 22px 6px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E") no-repeat right 9px center;min-width:104px;appearance:none;-webkit-appearance:none;text-align:center}
+.oldsel.done{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.oldspan{font:400 15px/1.55 var(--font);padding:6px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);min-width:104px;text-align:center;display:inline-block}
+@media (max-width:720px){.strip{grid-template-columns:1fr 1fr}.faults{grid-template-columns:1fr}.addrow{grid-template-columns:22px 1fr 26px}.addrow .when,.addrow .who,.addrow .st{display:none}
+  .row{grid-template-columns:22px 1fr auto 26px;grid-template-areas:"tick t st more" ". when who more"}.row .tick{grid-area:tick}.row .t{grid-area:t}.row .st{grid-area:st}.row .when{grid-area:when;text-align:left}.row .who{grid-area:who}.row .more{grid-area:more}
+  .team,.weeks{right:auto;left:0}}
+</style>
+
+<div class="intro">
+  <h1>Internal Tracker — weeks, a settings menu, and the add line that takes everything</h1>
+  <p>Same page as the one built. What changes, all yours from the 16 September message:</p>
+  <ol>
+    <li><b>Dates are weeks by default.</b> A row reads <i>This week</i>, <i>Next week</i>, <i>Wk of 27 Sep</i>. Picking a week stores that week's <b>Thursday</b>. Late reads <i>Late 1 w</i>, <i>Late 2 w</i> as before.</li>
+    <li><b>A three-dots button on the far right of the views row</b> holds the two settings: <i>Group by</i> (moved in from the row) and <i>Dates as</i> — Weeks or Exact dates.</li>
+    <li><b>The add line takes the week, the owner and a note</b> while you are typing the action, before Enter. The week starts on <i>This week</i>, the owner on you.</li>
+    <li><b>A way back</b> at the far end of the top bar — the client's own name — to the client's platform (Strategy).</li>
+  </ol>
+  <p>And the two faults you hit, measured and fixed in the same drawing: the status pill is one box at one size on every row, and the date box no longer vanishes when the calendar opens.</p>
+</div>
+
+<p class="cap">The two faults — what the built page draws today, beside the fix</p>
+<div class="faults">
+  <div class="fault">
+    <h3>The status pill shifted size</h3>
+    <p>The stylesheet's <code>font: 600 11px/1 inherit</code> is not a font the browser will read, so it threw the line away. A pill you can press is a dropdown and fell to the browser's own control font; a pill you only read inherited the page's. Two boxes, two sizes — and the Done pill's green wiped its arrow off.</p>
+    <div class="was"><span class="k">Today</span><select class="oldsel"><option>Not started</option></select><select class="oldsel done"><option>Done</option></select><span class="oldspan">Not started</span></div>
+    <div class="was"><span class="k">Fixed</span><select class="st"><option>Not started</option></select><select class="st done"><option>Done</option></select><span class="st">Not started</span><select class="st prog"><option>In progress</option></select></div>
+    <p>One font named for every control on the page, and one box for the pill: 118 wide, 26 tall, whether it can be pressed or not. Only the arrow says which.</p>
+  </div>
+  <div class="fault">
+    <h3>The date could not be set</h3>
+    <p>Pressing the date turned it into a date box, and the box was thrown away the moment the cursor left it. Opening the calendar IS the cursor leaving it — so the day you chose landed on a box that was already gone, and nothing was written.</p>
+    <p>Fixed: the box stays until you choose a day, press Escape, or press somewhere else on the page. With dates as weeks (the default now) there is no calendar at all — the week picker in frame 3 is the platform's own list, like the team list under an owner's name.</p>
+  </div>
+</div>
+
+<!-- ═══ FRAME 1 ═══ -->
+<p class="cap">1 · This week at rest — dates as weeks, one pill size, the three dots on the right, the way back in the bar</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Internal Tracker</h1><span class="org">· <b>Raya Trade</b></span>
+    <a class="back" href="#"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Raya Trade</a>
+  </div>
+  <div class="pg">
+    <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
+    <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a>
+      <span class="dots"><button type="button" title="Settings" aria-label="Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></button></span></nav>
+    <div class="strip">
+      <div class="tile"><b>9</b><span>Open</span></div>
+      <div class="tile late"><b>3</b><span>Late</span></div>
+      <div class="tile"><b>5</b><span>Due this week · 2 not started</span></div>
+      <div class="tile"><b>1</b><span>Done this week</span></div>
+    </div>
+    <div class="tools"><input class="srch" id="q1" placeholder="Search actions" aria-label="Search actions"><span class="cnt">7 on this week</span></div>
+    <div class="list">
+      <div class="grp">Islam Saadany <span class="cnt">3</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Confirm the Q3 review date with the CEO office</div>
+        <span class="when late pick"><span class="wk">Late 1 w</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Send the revised Mobile pillar targets to Ahmed</div>
+        <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><select class="st" aria-label="Status"><option>Not started</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Prepare the cycle board walkthrough for Thursday</div>
+        <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="grp">Noran Essam <span class="cnt">2</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Chase Finance for the August figures upload</div>
+        <span class="when late"><span class="wk">Late 2 w</span></span><span class="who">Noran</span><span class="st prog">In progress</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="row done"><span class="tick" role="checkbox" aria-checked="true"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div class="t">Check Retail's monthly plan after the twelve-month change</div>
+        <span class="when">Done Tue 15 Sep</span><span class="who">Noran</span><span class="st done">Done</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="grp">Omar Khalil <span class="cnt">2</span></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Book the projector for the board review</div>
+        <span class="when"><span class="wk">This week</span></span><span class="who">Omar</span><span class="st">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Walk Care's custodian through the Reporting tab</div>
+        <span class="when">No date</span><span class="who">Omar</span><span class="st">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="addrow"><span class="plus">+</span><input class="new" id="add1" placeholder="Type an action and press Enter" aria-label="New action"><span class="when"><span class="wk">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
+    </div>
+    <div class="addhint">Enter adds it under you, due this week · set its week, owner or a note before Enter, or on the row after</div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 2 ═══ -->
+<p class="cap">2 · The add line while typing — the week, the owner and a note are live before Enter</p>
+<div class="frame">
+  <div class="pg">
+    <div class="list" style="border-top:0">
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Walk Care's custodian through the Reporting tab</div>
+        <span class="when"><span class="wk">This week</span></span><span class="who">Omar</span><span class="st">Not started</span>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="addrow typing" style="border-bottom:0"><span class="plus">+</span><input class="new" id="add2" value="Send the outcome to the managers" aria-label="New action"><span class="when pick"><span class="wk">Next week</span></span><span class="who pick">Islam</span><span class="st">Not started</span><button class="notelink" type="button">note</button></div>
+      <div class="addnote"><div class="n"><textarea id="note2" aria-label="Note" placeholder="A note, if the line needs one">Ahmed's list first, then Retail's. Copy Noran.</textarea><span class="k">Enter on the line adds it all</span></div></div>
+    </div>
+    <div class="addhint">The week starts on This week and the owner on you · the note opens from the word at the line's end and is kept with the action · Escape clears the line</div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 3 ═══ -->
+<p class="cap">3 · The week pressed on a row — the platform's own list, no calendar; a week is stored as its Thursday</p>
+<div class="frame room">
+  <div class="pg">
+    <div class="list" style="border-top:0">
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Send the revised Mobile pillar targets to Ahmed</div>
+        <span class="when pick on"><span class="wk">This week</span>
+          <span class="weeks" role="listbox" aria-label="Due">
+            <button type="button"><span>No date</span></button>
+            <button type="button" class="on"><span>This week</span><small>Thu 17 Sep</small></button>
+            <button type="button"><span>Next week</span><small>Thu 24 Sep</small></button>
+            <button type="button"><span>Wk of 27 Sep</span><small>Thu 1 Oct</small></button>
+            <button type="button"><span>Wk of 4 Oct</span><small>Thu 8 Oct</small></button>
+            <button type="button"><span>Wk of 11 Oct</span><small>Thu 15 Oct</small></button>
+            <button type="button"><span>Wk of 18 Oct</span><small>Thu 22 Oct</small></button>
+            <hr><button type="button" class="quiet"><span>A day of my own…</span></button>
+          </span></span><span class="who pick">Islam</span><select class="st" aria-label="Status"><option>Not started</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="row" style="border-bottom:0"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Prepare the cycle board walkthrough for Thursday</div>
+        <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    </div>
+    <div class="addhint">Six weeks ahead on the list · a day of your own opens a date box for the one action that needs one · this week is next week's on a Friday or a Saturday</div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 4 ═══ -->
+<p class="cap">4 · The three dots pressed — the two settings, remembered on this browser</p>
+<div class="frame room">
+  <div class="pg">
+    <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
+    <nav class="cats" style="margin-bottom:0"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a>
+      <span class="dots"><button type="button" class="on" title="Settings" aria-label="Settings" aria-expanded="true"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></button>
+        <span class="setmenu" role="menu">
+          <div class="lab">Group by</div>
+          <button type="button" class="on">Owner</button><button type="button">Status</button><button type="button">Due date</button><button type="button">None</button>
+          <hr>
+          <div class="lab">Dates as</div>
+          <button type="button" class="on">Weeks</button><button type="button">Exact dates</button>
+        </span></span></nav>
+  </div>
+</div>
+
+<!-- ═══ FRAME 5 ═══ -->
+<p class="cap">5 · Dates as exact dates — the same rows read as days; the date box stays until you choose, Escape, or press elsewhere</p>
+<div class="frame">
+  <div class="pg">
+    <div class="list" style="border-top:0">
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Confirm the Q3 review date with the CEO office</div>
+        <span class="when late pick">Late 1 w · Mon 14 Sep</span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Send the revised Mobile pillar targets to Ahmed</div>
+        <input class="dt" type="date" value="2026-09-17" aria-label="Due date"><span class="who pick">Islam</span><select class="st" aria-label="Status"><option>Not started</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="row" style="border-bottom:0"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Prepare the cycle board walkthrough for Thursday</div>
+        <span class="when pick">Thu 17 Sep</span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
+        <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    </div>
+    <div class="addhint">With exact dates the add line starts on Thu 17 Sep, the same day the week would have stored</div>
+  </div>
+</div>
+
+<div class="note">
+  <p><b>What this costs, said before you choose.</b></p>
+  <p><b>A week is a day underneath.</b> Nothing new is stored: picking a week writes that week's Thursday into the same date field, so late and "carried" go on being worked out the same way, and a list read by somebody with exact dates on shows the same Thursday. A row set by week reads <i>This week</i> or <i>Next week</i>; once its Thursday has passed it reads <i>Late 1 w</i>, because in weeks a row is late from the Friday. A day chosen by the calendar shows as its week to somebody reading in weeks — a Monday is "this week" there.</p>
+  <p><b>A new line is due this week, not undated.</b> Today Enter lands a line with no date. Drawn here, the add line starts on <i>This week</i>, so Enter lands it due this Thursday, and <i>No date</i> is a choice on the picker rather than the default. If you would rather a new line start with no date, say so — it is one word in the drawing.</p>
+  <p><b>Dates as and Group by are this browser's</b>, like Group by is today — remembered as a cookie, never stored on the client, so two of the office can read one list two ways. The Due date grouping under weeks groups by the week rather than the day.</p>
+  <p><b>The note on the add line</b> is the action's own notes, the same box the arrow opens afterwards. It opens from the word at the line's end so a quick line stays one line; Enter from either box adds it all.</p>
+  <p><b>The way back</b> goes to the client's platform — Strategy, where the modules menu also leads. Your sentence ended at "to the", so if you meant somewhere else, say which.</p>
+  <p><b>The status on the add line</b> stays <i>Not started</i>: you named the date, the owner and a note, and a line that starts In progress is one press on the row after.</p>
+</div>

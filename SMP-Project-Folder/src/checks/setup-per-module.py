@@ -383,7 +383,14 @@ with sync_playwright() as p:
         pg2.fill("#user", os.environ.get("SMP_QA_EMAIL", "office@forefront.example"))
         pg2.fill("#password", os.environ["SMP_QA_PASSWORD"])
         pg2.click("#loginForm button[type=submit]")
-        pg2.wait_for_url("**/raya-trade", timeout=15000)
+        # §357: a sign-in lands INSIDE the first module (the bare address is a
+        # redirect), and the shell boots there before the next goto, or the
+        # goto is aborted under the redirect (qa-run.py's own wait)
+        pg2.wait_for_url(re.compile(r"/raya-trade/(?!sign-in)[a-z]"), timeout=15000)
+        pg2.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
+        # the welcome is offered again on every deep address (§357) and stands
+        # the page behind it down: this page has seen it
+        pg2.evaluate("()=>{try{sessionStorage.setItem('smp.welcome.done','1')}catch(e){}}")
 
         def served(path):
             pg2.goto(BASE + path)

@@ -49143,7 +49143,7 @@ subject IS the offer); `modules.mjs` **125/0**, seven of its band assertions
 re-pointed at the file the band moved to, red 2 under `static-hello`;
 `generated-in-step` all clear. Frozen: `setup-per-module.py` file:// all
 passed, red **7 / 2** from the sources (kb given back to the client; the
-client group put before help), its served §8 rewritten [SERVED-SPM];
+client group put before help), its served §8 rewritten and run green served (§8: the client rail headed Client · Setup with Back to the console, the strip pressed writing `/raya-trade/setup/start`, a module rail's *Client settings ›*; its own sign-in taught the same two things as the harness);
 NEW `client-setup.py` all passed, red **39 / 9** from the sources (the
 strip's `data-setupgo` removed; the put-back removed — printing *the row IS
 back on the step — (10, 11)* with the second Next still refused);
@@ -49152,7 +49152,7 @@ failures on both copies** of `platform.html`, red **12** on a doctored
 console whose Settings still opened `/platform`; `client-archive.py` 0
 failures on both copies with the archived state MADE through a stub door
 (§255), red 2; `welcome.py` OK; `qa.py` over `file://` 33 viewers, ERRORS
-none, and at Next [QA-NEXT]. Authoriser **673/0** (§41 red 4 / 3), differ
+none, and at Next **33 viewers / 243 destinations / ERRORS none** — the same 243 §356.6 recorded, so the redirect adds and removes no destination. Authoriser **673/0** (§41 red 4 / 3), differ
 140/0, platform rules 69/0, session-state clear, `tsc` clean cold,
 `built-in-step` all good; `sw.js` `v5.09-client-setup` against
 `origin/main`'s `v5.05-demo-complete`, read again at the push (§94.16).
@@ -49186,6 +49186,19 @@ its first — the gear's own pick (menuGroups) made for a scope; nothing
 reachable in that rail is still null, so somebody the rail holds no page for
 lands where they work rather than in an empty frame (§61). `door-landing.mjs`
 **135/1 → 136/0**, the one line being exactly this.
+
+**AND THE SERVED HARNESSES HAD TO LEARN WHAT §357 CHANGED** (§357.8): a
+sign-in lands INSIDE the module now, and the wait for it was written as
+`/raya-trade/<letter>`, which the sign-in page's own address satisfies —
+so the home address was opened under the sign-in's redirect and ABORTED
+(`net::ERR_ABORTED`, measured with the navigations traced). And the welcome
+offered again stands the page behind it down, so a served check pressing
+the switcher waited thirty seconds on a control the overlay held inert.
+`qa-run.py`, `qa.py` and `setup-per-module.py` §8 wait for a module
+address that is not the sign-in, let the shell boot, and are born having
+seen the welcome — the overlay's own check serves its own stub. `welcome.py`
+died once on a navigation under the load of two served runs and passed
+alone; recorded as timing, not as the product's.
 
 **RECORDED, NOT DONE**: Islam has not seen the modules band and the archive
 block on step 1 (they sat on the console's settings page; the mockup drew

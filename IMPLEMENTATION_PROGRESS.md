@@ -4996,10 +4996,10 @@ matched by NAME first and keeping its KEY (§357.3 — the first drive was
 refused on a graph nobody had renamed); a refusal puts the rows back; the
 focus after + Add lands inside `render()`. Authoriser §41 673/0, red 4 / 3.
 Checks: `door-landing.mjs` 136/0 (red 3 / 18), `shell.mjs` 75/0,
-`modules.mjs` 125/0, `setup-per-module.py` (red 7 / 2) [SERVED-SPM],
+`modules.mjs` 125/0, `setup-per-module.py` (red 7 / 2) and green served,
 NEW `client-setup.py` (red 39 / 9), `client-setup-outside.py` as the
 console's three doors (red 12), `client-archive.py` (red 2), `welcome.py` OK,
-`qa.py` file:// ERRORS none and at Next [QA-NEXT]; `generated-in-step` and
+`qa.py` file:// ERRORS none and at Next 33 / 243 / ERRORS none; `generated-in-step` and
 `built-in-step` clear; `tsc` clean. Two product faults found by the checks
 and fixed (§357.6 Add a client threw before it posted; §357.7 the bare
 `/<client>/setup` landed on the entry page). **Waiting on Islam: the merge; and a look at step 1's modules band

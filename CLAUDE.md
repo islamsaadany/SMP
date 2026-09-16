@@ -9493,11 +9493,11 @@ two server edits falsified separately (**4 / 3 red**, &sect;259.2),
 `test-authorize.js` §41 673/0. **THE CHECKS**: `door-landing.mjs` 136/0 (§7 REPLACED by the client rail;
 red 3 under `--break=done-dropped`, red 18 with the strip inverted from the
 sources), `shell.mjs` 75/0, `modules.mjs` 125/0, `generated-in-step` all
-clear; `setup-per-module.py` file:// all passed (red 7 / 2) [SERVED-SPM];
+clear; `setup-per-module.py` file:// all passed (red 7 / 2) and green served;
 NEW `client-setup.py` all passed (red 39 / 9 from the sources);
 `client-setup-outside.py` rewritten as the console's three doors, 0 on both
 copies (red 12); `client-archive.py` 0 on both (red 2); `welcome.py` OK;
-`qa.py` over `file://` ERRORS none and at Next [QA-NEXT]; 673/0, 140/0, 69/0,
+`qa.py` over `file://` ERRORS none and at Next 33 viewers / 243 destinations / ERRORS none; 673/0, 140/0, 69/0,
 `tsc` clean, `built-in-step` all good, `sw.js` `v5.09-client-setup` against
 main's `v5.05`. **AND TWO PRODUCT FAULTS, BOTH FOUND BY THE CHECKS AND BOTH
 IN THE CARRY** (&sect;357.6, &sect;357.7): *Add a client* THREW before it

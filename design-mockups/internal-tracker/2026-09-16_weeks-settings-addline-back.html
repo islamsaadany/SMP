@@ -105,15 +105,18 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .when.pick:hover,.when.pick.on{background:var(--surface-2)}
 .when .wk{display:inline-block;font:600 12.5px/1.4 var(--font);color:var(--ink-2)}
 .when.late .wk{color:var(--bad)}
-.weeks{position:absolute;top:26px;right:0;z-index:5;min-width:212px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
-.weeks button{display:grid;grid-template-columns:1fr auto;width:100%;align-items:center;gap:12px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
-.weeks button small{font:400 11.5px/1.4 var(--mono);color:var(--ink-3)}
+.when .wk.now{font-weight:700;color:var(--ink)}
+.when .wk{font-weight:500}
+.weeks{position:absolute;top:26px;right:0;z-index:5;width:200px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left;font-variant-numeric:tabular-nums}
+.weeks .wh{display:grid;grid-template-columns:54px 1fr;padding:5px 9px 4px;font:600 10px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);margin-bottom:3px}
+.weeks button{display:grid;grid-template-columns:54px 1fr;width:100%;align-items:baseline;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.weeks button b{font-weight:400;font-variant-numeric:tabular-nums}
+.weeks button.now b{font-weight:700}
+.weeks button small{font:400 12px/1.3 var(--mono);color:var(--ink-3);white-space:nowrap}
 .weeks button:hover{background:var(--ground)}
-.weeks button.on{font-weight:600}
-.weeks button.on::before{content:"";position:absolute;left:8px;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-top:7px}
-.weeks button.on{padding-left:22px}
-.weeks hr{border:0;border-top:1px solid var(--line);margin:5px 3px}
-.weeks .quiet{color:var(--ink-3)}
+.weeks button.on{background:var(--surface-2)}
+.weeks .wf{display:grid;border-top:1px solid var(--line);margin-top:3px;padding-top:3px}
+.weeks .wf button{grid-template-columns:1fr;color:var(--ink-3);font-size:13px}
 .row input.dt{font:400 12.5px/1.4 var(--mono);color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:2px 5px;background:var(--surface)}
 .who{font:600 12.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right;background:none;border:0;padding:0;position:relative}
 .who.pick{cursor:pointer;border-radius:6px;padding:3px 7px;margin:-3px -7px}
@@ -173,9 +176,9 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
   <h1>Internal Tracker — weeks, a settings menu, and the add line that takes everything</h1>
   <p>Same page as the one built. What changes, all yours from the 16 September message:</p>
   <ol>
-    <li><b>Dates are weeks by default.</b> A row reads <i>This week</i>, and after that the week's number in the year — <i>W39</i>, <i>W40</i> — with its days in brackets on the picker. Picking a week stores that week's <b>Thursday</b>. Late reads <i>Late 1 w</i>, <i>Late 2 w</i> as before.</li>
+    <li><b>Dates are weeks by default.</b> A row reads the week's number in the year — <i>W38</i>, <i>W40</i> — and this week's number is bold; on the picker each week carries its Sunday to Thursday in small grey beside it. Picking a week stores that week's <b>Thursday</b>. Late reads <i>Late 1 w</i>, <i>Late 2 w</i> as before.</li>
     <li><b>A three-dots button on the far right of the views row</b> holds the two settings: <i>Group by</i> (moved in from the row) and <i>Dates as</i> — Weeks or Exact dates.</li>
-    <li><b>The add line takes the week, the owner and a note</b> while you are typing the action, before Enter. The note is a second quiet line under the action, in the same column, so the week, the owner and the status stay where they are. The week starts on <i>This week</i>, the owner on you.</li>
+    <li><b>The add line takes the week, the owner and a note</b> while you are typing the action, before Enter. The note is a second quiet line under the action, in the same column, so the week, the owner and the status stay where they are. The week starts on this week's number, the owner on you.</li>
     <li><b>A way back</b> above the page's title — the client's own name — to the client's platform (Strategy).</li>
   </ol>
   <p>And the two faults you hit, measured and fixed in the same drawing: the status pill is one box at one size on every row, and the date box no longer vanishes when the calendar opens.</p>
@@ -222,10 +225,10 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
         <span class="when late pick"><span class="wk">Late 1 w</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Send the revised Mobile pillar targets to Ahmed</div>
-        <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><select class="st" aria-label="Status"><option>Not started</option></select>
+        <span class="when pick"><span class="wk now">W38</span></span><span class="who pick">Islam</span><select class="st" aria-label="Status"><option>Not started</option></select>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Prepare the cycle board walkthrough for Thursday</div>
-        <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
+        <span class="when pick"><span class="wk now">W38</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="grp">Noran Essam <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Chase Finance for the August figures upload</div>
@@ -236,12 +239,12 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="grp">Omar Khalil <span class="cnt">2</span></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Book the projector for the board review</div>
-        <span class="when"><span class="wk">This week</span></span><span class="who">Omar</span><span class="st">Not started</span>
+        <span class="when"><span class="wk now">W38</span></span><span class="who">Omar</span><span class="st">Not started</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Walk Care's custodian through the Reporting tab</div>
         <span class="when">No date</span><span class="who">Omar</span><span class="st">Not started</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-      <div class="addrow"><span class="plus">+</span><input class="new" id="add1" placeholder="Type an action and press Enter" aria-label="New action"><span class="when"><span class="wk">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
+      <div class="addrow"><span class="plus">+</span><input class="new" id="add1" placeholder="Type an action and press Enter" aria-label="New action"><span class="when"><span class="wk now">W38</span></span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
     </div>
     <div class="addhint">Enter adds it under you, due this week · set its week, owner or a note before Enter, or on the row after</div>
   </div>
@@ -253,39 +256,39 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
   <div class="pg">
     <div class="list" style="border-top:0">
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Walk Care's custodian through the Reporting tab</div>
-        <span class="when"><span class="wk">This week</span></span><span class="who">Omar</span><span class="st">Not started</span>
+        <span class="when"><span class="wk now">W38</span></span><span class="who">Omar</span><span class="st">Not started</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="addrow typing" style="border-bottom:0"><span class="plus">+</span>
         <div class="tn"><input class="new" id="add2" value="Send the outcome to the managers" aria-label="New action"><input class="nt" id="note2" value="Ahmed's list first, then Retail's. Copy Noran." aria-label="Note"></div>
         <span class="when pick"><span class="wk">W39</span></span><span class="who pick">Islam</span><span class="st">Not started</span><span></span></div>
     </div>
-    <div class="addhint">Tab from the action to its note, one quiet line under it in the same column · the week starts on This week and the owner on you · Enter from either line adds it all · Escape clears both</div>
+    <div class="addhint">Tab from the action to its note, one quiet line under it in the same column · the week starts on this week and the owner on you · Enter from either line adds it all · Escape clears both</div>
   </div>
 </div>
 
 <!-- ═══ FRAME 3 ═══ -->
-<p class="cap">3 · The week pressed on a row — this week, then the week numbers with their days; a week is stored as its Thursday</p>
+<p class="cap">3 · The week pressed on a row — the week numbers with their days, this week's in bold; a week is stored as its Thursday</p>
 <div class="frame room">
   <div class="pg">
     <div class="list" style="border-top:0">
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Send the revised Mobile pillar targets to Ahmed</div>
-        <span class="when pick on"><span class="wk">This week</span>
+        <span class="when pick on"><span class="wk now">W38</span>
           <span class="weeks" role="listbox" aria-label="Due">
-            <button type="button"><span>No date</span></button>
-            <button type="button" class="on"><span>This week</span><small>[13 – 17 Sep]</small></button>
-            <button type="button"><span>W39</span><small>[20 – 24 Sep]</small></button>
-            <button type="button"><span>W40</span><small>[27 Sep – 1 Oct]</small></button>
-            <button type="button"><span>W41</span><small>[4 – 8 Oct]</small></button>
-            <button type="button"><span>W42</span><small>[11 – 15 Oct]</small></button>
-            <button type="button"><span>W43</span><small>[18 – 22 Oct]</small></button>
-            <hr><button type="button" class="quiet"><span>A day of my own…</span></button>
+            <span class="wh"><span>Week</span><span>Sun – Thu</span></span>
+            <button type="button" class="now on"><b>W38</b><small>13 – 17 Sep</small></button>
+            <button type="button"><b>W39</b><small>20 – 24 Sep</small></button>
+            <button type="button"><b>W40</b><small>27 Sep – 1 Oct</small></button>
+            <button type="button"><b>W41</b><small>4 – 8 Oct</small></button>
+            <button type="button"><b>W42</b><small>11 – 15 Oct</small></button>
+            <button type="button"><b>W43</b><small>18 – 22 Oct</small></button>
+            <span class="wf"><button type="button" class="quiet">No date</button><button type="button" class="quiet">A day of my own…</button></span>
           </span></span><span class="who pick">Islam</span><select class="st" aria-label="Status"><option>Not started</option></select>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <div class="row" style="border-bottom:0"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Prepare the cycle board walkthrough for Thursday</div>
-        <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
+        <span class="when pick"><span class="wk now">W38</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     </div>
-    <div class="addhint">Six weeks ahead · the number is the week of the year, the days in brackets are its Sunday to Thursday · a day of your own opens a date box for the one action that needs one</div>
+    <div class="addhint">This week in bold, six ahead · the number is the week of the year, the days beside it its Sunday to Thursday · No date and a day of your own at the foot</div>
   </div>
 </div>
 
@@ -327,8 +330,8 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
 
 <div class="note">
   <p><b>What this costs, said before you choose.</b></p>
-  <p><b>A week is a day underneath.</b> Nothing new is stored: picking a week writes that week's Thursday into the same date field, so late and "carried" go on being worked out the same way, and a list read by somebody with exact dates on shows the same Thursday. A row set by week reads <i>This week</i>, or its week number — <i>W40</i> — with the days on the hover; once its Thursday has passed it reads <i>Late 1 w</i>, because in weeks a row is late from the Friday. A day chosen by the calendar shows as its week to somebody reading in weeks — a Monday is "this week" there.</p>
-  <p><b>A new line is due this week, not undated.</b> Today Enter lands a line with no date. Drawn here, the add line starts on <i>This week</i>, so Enter lands it due this Thursday, and <i>No date</i> is a choice on the picker rather than the default. If you would rather a new line start with no date, say so — it is one word in the drawing.</p>
+  <p><b>A week is a day underneath.</b> Nothing new is stored: picking a week writes that week's Thursday into the same date field, so late and "carried" go on being worked out the same way, and a list read by somebody with exact dates on shows the same Thursday. A row set by week reads its week number — <i>W38</i> in bold while it is this week, <i>W40</i> otherwise — with the days on the hover; once its Thursday has passed it reads <i>Late 1 w</i>, because in weeks a row is late from the Friday. A day chosen by the calendar shows as its week to somebody reading in weeks — a Monday is "this week" there.</p>
+  <p><b>A new line is due this week, not undated.</b> Today Enter lands a line with no date. Drawn here, the add line starts on this week (W38 in bold), so Enter lands it due this Thursday, and <i>No date</i> is a choice on the picker rather than the default. If you would rather a new line start with no date, say so — it is one word in the drawing.</p>
   <p><b>Dates as and Group by are this browser's</b>, like Group by is today — remembered as a cookie, never stored on the client, so two of the office can read one list two ways. The Due date grouping under weeks groups by the week rather than the day.</p>
   <p><b>The note on the add line</b> is the action's own notes, the same box the arrow opens afterwards — one line here, Tab reaches it, and it is always drawn under the action so nothing on the right moves. Enter from either line adds it all.</p>
   <p><b>The way back</b> sits above the title, where a back link is expected, and goes to the client's platform — Strategy, where the modules menu also leads. Your sentence ended at "to the", so if you meant somewhere else, say which.</p>

@@ -702,124 +702,128 @@ body{ background:var(--ground); }
 .mk .ecard input.fld, .mk .ecard textarea.fld{ pointer-events:none }
 @media (max-width:700px){ .mk h1{ font-size:25px } .mkstage{ padding:14px } }
 @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important } }
+
+/* the three treatments, drawn side by side — only .mkc is recommended */
+.mk .btn.amber.mkb[aria-disabled="true"]{ opacity:.75 }
+.mk .btn.amber.mkc[aria-disabled="true"]{ background:var(--surface); color:var(--amber-tx); border-color:var(--amber) }
+.mkt{ width:100%; border-collapse:collapse; font-size:14px; background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden }
+.mkt th{ text-align:left; font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); padding:10px 14px; border-bottom:1px solid var(--line) }
+.mkt td{ padding:11px 14px; border-bottom:1px solid var(--line-soft); font-variant-numeric:tabular-nums }
+.mkt tr:last-child td{ border-bottom:0 }
+.mkt .mkv{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.08em; text-transform:uppercase }
+.mkt .mkv.good{ color:var(--good) } .mkt .mkv.bad{ color:var(--bad) }
+.mkt tr.mkbad td{ background:var(--bad-bg) }
+.mk .mknote{ margin:12px 0 0; font-size:13px; color:var(--ink-3) }
 </style>
 
 <div class="mk">
 
   <header class="mkhead">
-    <p class="mkkick">Two looks · Forefront console · <span class="mkdate">16 September 2026</span></p>
-    <h1>Two things waiting on your eye</h1>
-    <p class="mklede">Neither is a feature. One is a proposal I found while drawing something else; the other is
-      where a control ended up in a merge that nobody has looked at since. Both are drawn in the console's own
-      stylesheet — <code>platform.html</code>'s <code>&lt;style&gt;</code> verbatim — so these are the real
-      controls, not pictures of them.</p>
+    <p class="mkkick">Forefront console · <span class="mkdate">16 September 2026 · second look</span></p>
+    <h1>The held button, measured</h1>
+    <p class="mklede">You said <i>“ok good fix”</i> to reusing the console's existing dimming on a held button.
+      <b>Measuring it says it cannot be done</b>, and the same measurement says something about the twenty-four
+      buttons already using it. Two corrections and three treatments, with the numbers on them.</p>
   </header>
 
-  <!-- ════════════════════════════════════════════ 1 · THE HELD BUTTON -->
   <section class="mkframe">
     <div class="mkcap">
-      <span class="mkn">1 · a proposal</span>
-      <h2>A held button looks exactly like a live one</h2>
-      <p>The house rule is <b>held, never disabled</b> — so the reason stays reachable by keyboard and hover
-        rather than being switched out of existence. The console follows it and then styles nothing, so the two
-        states are the same picture. The refusal works. It is just invisible until you hover.</p>
+      <span class="mkn">correction 1</span>
+      <h2>It is one button, not a sweep</h2>
+      <p>I told you this would reach every held control in the console — <i>“Delete on a published report and the
+        archive controls are held the same way.”</i> <b>That was wrong.</b> Grepped: <code>aria-disabled</code>
+        appears on exactly <b>one</b> control in the whole console, the Publish button. The other twenty-four use
+        the real <code>disabled</code> property and already dim. So the change is smaller and safer than what you
+        approved — but you approved it on a description that was not true.</p>
     </div>
-
-    <div class="mkab">
-      <div class="mkopt">
-        <div class="mkopth"><span class="mkbadge">A</span><h3>Today</h3></div>
-        <div class="mkstage">
-          <div class="mkrow"><span class="mkwho">Nothing attached</span>
-            <span class="sp">
-              <button class="btn" type="button">Save the draft</button>
-              <button class="btn amber" type="button" aria-disabled="true" title="Add the file first — a report with nothing to open is not a report.">Publish to Raya Trade</button>
-            </span>
-          </div>
-          <div class="mkrow"><span class="mkwho">File attached</span>
-            <span class="sp">
-              <button class="btn" type="button">Save</button>
-              <button class="btn amber" type="button">Publish to Raya Trade</button>
-            </span>
-          </div>
-        </div>
-        <p class="mkwhy">Two different states. One picture. The first button refuses when pressed and says why on
-          hover; nothing on the screen suggests pressing it will do anything but work.</p>
-      </div>
-
-      <div class="mkopt">
-        <div class="mkopth"><span class="mkbadge">B</span><h3>Proposed <span class="mknew">NEW</span></h3></div>
-        <div class="mkstage">
-          <div class="mkrow"><span class="mkwho">Nothing attached</span>
-            <span class="sp">
-              <button class="btn" type="button">Save the draft</button>
-              <button class="btn amber mkheld" type="button" aria-disabled="true" title="Add the file first — a report with nothing to open is not a report.">Publish to Raya Trade</button>
-            </span>
-          </div>
-          <div class="mkrow"><span class="mkwho">File attached</span>
-            <span class="sp">
-              <button class="btn" type="button">Save</button>
-              <button class="btn amber" type="button">Publish to Raya Trade</button>
-            </span>
-          </div>
-        </div>
-        <p class="mkwhy"><b>No new vocabulary.</b> It takes the exact dimming the console already gives a
-          genuinely disabled button, applied to the held one — one rule, no new colour, no new shape. It stays
-          focusable and its reason stays reachable, which is the whole point of holding rather than disabling.</p>
-      </div>
-    </div>
-
-    <p class="mkwhy mkrec"><b>It reaches every held control in the console, not just this one.</b> That is the
-      argument for it and the thing to be sure about: <i>Delete</i> on a published report and the archive
-      controls are held the same way, so they all gain the same dimming. I think that is right — they are all
-      saying the same thing — but it is a sweep, not one button, and it is your call.</p>
   </section>
 
-  <!-- ════════════════════════════════════════════ 2 · THE BAND -->
   <section class="mkframe">
     <div class="mkcap">
-      <span class="mkn">2 · as built</span>
-      <h2>Where the modules band ended up</h2>
-      <p>It used to sit in the client drawer. The set-up flow replaced that whole page, and the merge carried the
-        band onto <b>step one — the client's own details</b>, on the argument that it belongs with the client's
-        own facts rather than in a list. That was a reasonable call made mid-merge, and you have not seen it
-        there. This is it, in position.</p>
+      <span class="mkn">correction 2</span>
+      <h2>The existing dimming would make it unreadable</h2>
+      <p><code>opacity:.45</code> composites the whole button — its fill and its words together — over the card
+        beneath. On a <b>filled</b> button that collapses the very contrast that makes it readable.</p>
     </div>
     <div class="mkstage">
-      <div class="ecard mkclip">
-        <p class="mkstep">Set up a client · Step 1 of 6</p>
-        <h2>Raya Trade</h2>
-        <div class="rowset" style="margin-top:18px">
-          <div><span class="lab">Industry</span><input class="fld" value="Retail &amp; distribution" readonly></div>
-          <div class="wpair">
-            <div><span class="lab">Size</span><input class="fld" value="1,000–5,000 people" readonly></div>
-            <div><span class="lab">Its address here</span><input class="fld" value="raya-trade" readonly></div>
-          </div>
-          <div><span class="lab">Notes</span><textarea class="fld" rows="2" readonly>Group of ten business units. Mobile is the only one with a full plan so far.</textarea></div>
-        </div>
-        <div class="band" style="margin-top:20px">
-          <span class="lab">Modules this client has</span>
-          <div class="teamrow">
-            <span class="who"><span class="nm">Strategy</span><span class="em">Plans, measures, reporting and the review</span></span>
-            <span class="sp"><span class="tag">Always on</span></span>
-          </div>
-          <div class="teamrow">
-            <span class="who"><span class="nm">Insights</span><span class="em">Research, analytics and market reports</span></span>
-            <span class="sp"><button class="btn" type="button">Turn off</button></span>
-          </div>
-          <div class="teamrow">
-            <span class="who"><span class="nm">Trial</span><span class="em">Says hello and names the client. Proves a module can be turned on.</span></span>
-            <span class="sp"><button class="btn" type="button">Turn on</button></span>
-          </div>
-        </div>
-      </div>
+      <table class="mkt">
+        <thead><tr><th>Treatment</th><th>Light</th><th>Dark</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Today — held and live are one picture</td><td>8.79</td><td>8.79</td><td class="mkv good">reads</td></tr>
+          <tr class="mkbad"><td><b>A</b> · dim to .45, as approved</td><td>2.13</td><td>2.82</td><td class="mkv bad">fails</td></tr>
+          <tr><td><b>B</b> · dim to .75</td><td>4.64</td><td>5.43</td><td class="mkv good">passes</td></tr>
+          <tr><td><b>C</b> · drop the fill, keep the outline</td><td>5.27</td><td>8.15</td><td class="mkv good">passes</td></tr>
+        </tbody>
+      </table>
+      <p class="mknote">Contrast of the button's own words against its own ground, both palettes. 4.5 is the floor
+        for text this size.</p>
     </div>
-    <p class="mkwhy"><b>Nothing about it changed in the move</b> — the same rows, the same rules, the same
-      refusals. Only where it is drawn. The check that guarded the old position was red on <code>main</code>
-      until today; it asserts this position now, so if you want it somewhere else, say where and one line
-      follows it.</p>
+    <p class="mkwhy"><b>And the twenty-four already at .45 measure 2.86 and 3.88.</b> They get away with it
+      because a genuinely <code>disabled</code> control is inactive, and an inactive control has no contrast
+      requirement. <b>A held button is not inactive</b> — that is the entire reason the house rule is
+      <code>aria-disabled</code> and never <code>disabled</code>: it takes focus, it answers a press, it says why.
+      <i>The exemption that covers the twenty-four is exactly what does not cover this one.</i></p>
   </section>
 
-  <p class="mkfoot">Nothing here is built. <b>1</b> is a proposal — say yes and I will sweep every held control
-    in the console. <b>2</b> is already live; it needs a yes or a move.</p>
+  <section class="mkframe">
+    <div class="mkcap">
+      <span class="mkn">pick one</span>
+      <h2>Two that survive the measurement</h2>
+    </div>
+    <div class="mkab">
+      <div class="mkopt">
+        <div class="mkopth"><span class="mkbadge">B</span><h3>Dim to .75</h3></div>
+        <div class="mkstage">
+          <div class="mkrow"><span class="mkwho">Nothing attached</span>
+            <span class="sp">
+              <button class="btn" type="button">Save the draft</button>
+              <button class="btn amber mkb" type="button" aria-disabled="true" title="Add the file first — a report with nothing to open is not a report.">Publish to Raya Trade</button>
+            </span></div>
+          <div class="mkrow"><span class="mkwho">File attached</span>
+            <span class="sp">
+              <button class="btn" type="button">Save</button>
+              <button class="btn amber" type="button">Publish to Raya Trade</button>
+            </span></div>
+        </div>
+        <p class="mkwhy">One line, one number, nothing else moves. <b>The cost is that it is a weak signal</b> —
+          at the opacity it needs to stay readable, it barely looks different from the live one. It buys legibility
+          and very little noticing.</p>
+      </div>
+
+      <div class="mkopt">
+        <div class="mkopth"><span class="mkbadge">C</span><h3>Drop the fill <span class="mknew">RECOMMENDED</span></h3></div>
+        <div class="mkstage">
+          <div class="mkrow"><span class="mkwho">Nothing attached</span>
+            <span class="sp">
+              <button class="btn" type="button">Save the draft</button>
+              <button class="btn amber mkc" type="button" aria-disabled="true" title="Add the file first — a report with nothing to open is not a report.">Publish to Raya Trade</button>
+            </span></div>
+          <div class="mkrow"><span class="mkwho">File attached</span>
+            <span class="sp">
+              <button class="btn" type="button">Save</button>
+              <button class="btn amber" type="button">Publish to Raya Trade</button>
+            </span></div>
+        </div>
+        <p class="mkwhy"><b>No new colour.</b> The console already keeps amber twice — as a fill with dark ink, and
+          as <i>type</i> for when the accent has to be a word. This is the second one, which is what it is for. The
+          loud button earns its fill by being ready; until then it is the same button, outlined.</p>
+      </div>
+    </div>
+    <p class="mkwhy mkrec"><b>I would take C.</b> It is the only one where <i>held</i> and <i>live</i> are legible
+      at a glance rather than by comparison, it spends nothing the palette does not already have, and it keeps the
+      accent budget honest — one filled button on the card, and it means <i>this will go</i>.</p>
+  </section>
+
+  <section class="mkframe">
+    <div class="mkcap">
+      <span class="mkn">settled</span>
+      <h2>The modules band stays where it is</h2>
+      <p>Answered 16 September. It sits on step one of the set-up flow, with the client's own details. The check
+        that guarded the old position was red on <code>main</code> and now asserts this one.</p>
+    </div>
+  </section>
+
+  <p class="mkfoot">Nothing is built. Say <b>B</b> or <b>C</b> — or tell me to leave it alone, which is a fair
+    answer too now that it is one button rather than a sweep.</p>
 
 </div>

@@ -7710,6 +7710,74 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
+- **THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (&sect;359, spec 056,
+  stage 1 of six):** Islam, of the page the console's *Settings* chip opens
+  &mdash; *"theclient settings shouldn't open the strategy banner in the top
+  this is a client settings separate than any module"* &mdash; and, of the
+  answer first offered, *"you are trying to make a simple fix. let's discuss
+  the architecture and who sees what it's not a simple fix."* **THE CAUSE IS
+  ONE LINE AND IT IS NOT A MISTAKE**: `/<client>/setup` carries no module word,
+  so the route stamps `DEFAULT_MODULE` and serves the frozen shell, whose
+  chrome is Strategy's navigation &mdash; true until &sect;356.2 gave every
+  Setup def a `mod` and seven of them said `client`, so the rail has been the
+  client's own for a day and the bar above it had not been told. **ONE READER,
+  ASKED WHERE THE CHROME IS DRAWN AND NEVER PER CONTROL** (&sect;53.5,
+  &sect;104.7): `clientScoped()` writes one root attribute and CSS stands down
+  the destination row, the Group dropdown, the Units&nbsp;|&nbsp;Functions
+  switch, the gear and the viewer strip together, so a control added to either
+  line later is covered the day it is added. **THE NAME COMES BACK TO THE
+  BRAND, WHICH IS WHY IT IS NOT A THIRD COPY** &mdash; the way back says
+  **Save &amp; close** (his own words) and names nobody, so the client is on
+  the line exactly once (&sect;120), and both the heading and the mark are
+  asserted PUT BACK on the way out, because a one-way write leaves the client's
+  name over Strategy's navigation for the rest of the session (&sect;94.2) and
+  the first draft of that assertion **could not fail**, being measured after a
+  page load, which serves the product's name out of the static markup whatever
+  `paint()` does. **THE SCOPE IS STAMPED BY THE SERVER, WHICH IS NOT AN
+  OPTIMISATION**: the module switcher is built ONCE AT LOAD, above the line
+  that resolves the address, so it is the one piece of the chrome the frozen
+  shell cannot repaint away &mdash; `lib/shell.ts` stamps the same answer the
+  browser would compute (`w.module` is set only where the module word LED),
+  so there is no second answer, only an earlier one. **&sect;359.6 &mdash; AND
+  THE ROW'S OWN PAINTER IS WHAT SETTLES WHICH PAGE YOU ARE ON**, so nothing
+  reading the page may run before it: the first build had `paintUnits()` ask
+  the question and return early, which needed the scope resolved first
+  &mdash; and on the first paint after a served address `current` and
+  `currentSub` are still NULL until `paintUnits()` resolves the destination
+  (&sect;94.6), so `/<client>/setup/cycle` landed on the client's FIRST page
+  with the client's bar over it, the landing's own spine-form door broken.
+  The row is BUILT and then HIDDEN, and the resolver sits immediately after
+  the painter that enables it. **&sect;359.5 &mdash; AND UNDOING A
+  FALSIFICATION WITH `git checkout` THREW THE WORK AWAY**, which
+  &sect;343.9 records and which happened again with that section in hand:
+  recovered from the BUILT file, a concatenation holding every block verbatim,
+  and proved by rebuilding to a file byte-identical to the one the checks had
+  passed against. Proved in `smp-app/checks/shell.mjs` &sect;3b &mdash; 20
+  assertions, both ends every time, red **six ways**, five from the SOURCES
+  (&sect;276) and one from the server stamp, whose third failure is the
+  switcher drawn where there is nothing to switch to. **&sect;359.8 &mdash; AND
+  ANSWERING THE SITES THAT FAILED IS ANSWERING THE SITES YOU HAVE SEEN FAIL**:
+  with the row and the strip stood down, a click or a select aimed at either
+  waits thirty seconds and the whole sweep ends on *"waiting 500ms"*, a run
+  that STOPPED rather than passed (&sect;298.3). Three rounds &mdash; two
+  sites, then a viewer pick after the template round trip, then the
+  Units&nbsp;|&nbsp;Functions press &mdash; because the real cause is that TWO
+  sections navigate to the client's settings (the client-rail walk, and the
+  Functions page, which is the client's since &sect;356.2) and everything after
+  them inherits the page. **ONE HELPER, ASKED WHERE THE CHROME IS REACHED FOR**
+  (`module_page()`, &sect;53.5): the wrapper every viewer pick already goes
+  through, and `show_units()`; the call-site copies deleted (&sect;24), and
+  guarding the two NAVIGATIONS instead refused, because that is a rule somebody
+  has to remember the next time a section walks there (&sect;104.7). *A control
+  that moves is not one place to correct; it is every place that reaches for
+  it, and how many that is cannot be read off the diff &mdash; only off the
+  run.* **RECORDED, NOT DONE**:
+  the drawing signed off for this showed a NAVY top bar and `header.top` is
+  `var(--surface)` on every page &mdash; what Islam photographed as the
+  strategy banner is the row this removes, so the mockup misrepresented the
+  baseline rather than proposing a change (&sect;245's trap, in a colour);
+  built as the product has it, with the client's colour still reaching the
+  page through the rail's head and the table headers.
 - **ONE REPOSITORY, AND A MODULE IS A FOLDER (§345, spec 046
   `repo-boundary.md`):** anything that runs inside the client platform lives
   here. A module shares `withTenant()`, the door, the session, one route handler
@@ -9448,7 +9516,22 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;357: the client's settings live in
+*Last Updated: 2026-09-16 &mdash; **&sect;359: the client's own settings wear
+the client's bar (spec 056, stage 1 of six, on the branch).** See the entry in
+the project context above; the architecture it is the first stage of is
+`specs/056-the-client-and-its-modules/`. **VERIFIED**: `shell.mjs` **97/0**
+with a new section 3b (21 assertions, red six ways), `door-landing` 140/0,
+`modules` 125/0, `setup-per-module` green on BOTH halves with two assertions
+REWRITTEN never loosened (&sect;218, &sect;214.3 for the eighth and ninth
+time), `generated-in-step` all clear, `built-in-step` all good, `tsc` clean
+cold, 673/0 authoriser and 140/0 change list with **no frozen `api/`, `lib/` or
+`db/` file touched at all** (read off the diff, &sect;172), `qa.py` over
+`file://` ERRORS none and **at Next 33 viewers / 243 destinations / ERRORS
+none**, and the sixteen chrome-adjacent frozen checks green. **`setup-shape.mjs` 32/1 is NOT this
+work's** &mdash; reproduced identically with the change stashed (&sect;303).
+**`main` untouched &mdash; the merge is Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;357: the client's settings live in
 the platform, and Strategy's welcome is the welcome (spec 055, on the
 branch).** Islam, with two screenshots &mdash; spec 054's client landing on
 the new stack beside the frozen welcome overlay inside Strategy: *"why do I

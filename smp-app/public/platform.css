@@ -809,6 +809,38 @@
 }
 .clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
 .clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
+/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ────
+   `data-client-settings` is written on the root by paint() and by nothing
+   else (shell.html clientBar): the pages behind it belong to no module, so
+   the module's navigation is not drawn over them.
+
+   WHY THESE THREE AND NOT A CLASS PER CONTROL. Everything in `nav.units` is a
+   way of choosing which part of a MODULE you are reading — the house into its
+   welcome, the group, the units and functions, the gear into that module's
+   Setup — and the viewer strip is *looking as somebody in this client*, which
+   is a question about a module's pages and not about how the client was set
+   up. Standing down the two CONTAINERS is what makes a control added to
+   either covered the day it is added (§104.7).
+
+   `display:none`, never opacity or a width: a control hidden by paint alone
+   still takes the keyboard and still answers every DOM probe (§3.2, §70).
+   And the row goes as a WHOLE — `nav.units` carries the tenant's own
+   `--panel` ground and a border, so emptying `#units` and leaving the wrapper
+   would draw a navy stripe with nothing in it (§28's rule for an empty
+   heading, one element out). */
+html[data-client-settings] nav.units,
+html[data-client-settings] .viewer { display:none; }
+/* The way back says what it does first. `change` is the word for a control
+   that NAMES the client you are in; here it names the act, so the second half
+   would be saying something the first half already did (§87). */
+.clientback[data-saveclose] i{ display:none }
+/* THE CLIENT'S MARK (§359). Sized like the theme and font controls beside it
+   rather than like the deck's lockup — this is a bar, and a mark taller than
+   the line it sits on is what pushes the whole chrome down a row. `contain`,
+   because a client's mark is whatever shape they uploaded and a stretched one
+   is worse than a small one (§50's own rule for a slide picture). */
+.clientlogo{ height:26px; width:auto; max-width:120px; object-fit:contain;
+             flex-shrink:0; align-self:center; display:block }
 
   /* Sub-nav: Performance is the regular view and is marked as such */
   .tabs button.primary { color:var(--gold-deep); font-weight:700; }

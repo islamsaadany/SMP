@@ -31,7 +31,17 @@ function esc(s: string): string { return String(s).replace(/&/g, "&amp;").replac
    copied from here). */
 export function shellDocument(tenantName: string, module: string | null = null, modules: readonly { key: string; label: string; note: string }[] = [],
                               landing: { module: string; pick: string; lines: { key: string; label: string; example: string; text: string }[] } | null = null,
-                              areas: readonly { key: string; label: string; note: string; states: string[]; shipped: string }[] | null = null): string {
+                              areas: readonly { key: string; label: string; note: string; states: string[]; shipped: string }[] | null = null,
+                              /* WHICH SETUP RAIL THIS DOCUMENT IS (§359, spec 056): `client` for
+                                 `/<client>/setup/…`, the module's own word for
+                                 `/<client>/<module>/setup/…`, absent everywhere else. The
+                                 browser writes the same attribute from the address on arrival
+                                 (shell/route.js placeOf), and this is the SAME answer stamped
+                                 EARLIER — not a second one (§53.5). It has to be earlier,
+                                 because the module switcher is built at load, before placeOf
+                                 has run, and the client's own settings are not a module's
+                                 pages for it to offer a way out of. */
+                              scope: string | null = null): string {
   /* THE CHECK'S BREAKS (constitution XVI, checks/shell.mjs): `no-route`
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
@@ -68,7 +78,11 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        module that declares any — MODULE_DEF's own list, never a copy
        (renderModuleAccess in the frozen config-render.js reads it). Absent,
        the page says the served platform sets it. */
-    (areas && areas.length && brk !== "no-areas-stamp" ? " data-areas='" + esc(JSON.stringify(areas)) + "'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
+    (areas && areas.length && brk !== "no-areas-stamp" ? " data-areas='" + esc(JSON.stringify(areas)) + "'" : "") +
+    /* THE CHECK'S BREAK: a build that served the client's own settings under a
+       module's bar — the fault §359 exists to remove — must go red. Never set
+       on a deployment. */
+    (scope && brk !== "no-setup-scope" ? " data-setup-scope='" + esc(scope) + "'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(tenantName) + " — Strategy Management Platform</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">\n' +

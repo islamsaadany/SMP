@@ -21,18 +21,24 @@ from the SOURCES before its green run is believed (§276, §94.5).
 
 ## Stage 1 · The client's settings wear the client's bar
 
-- [ ] **T1.1** One reader for the scope, asked where the chrome is drawn, never
-      per control.
-- [ ] **T1.2** On a client-scoped document: no destination row, no Group
-      dropdown, no Units | Functions, no module switcher.
-- [ ] **T1.3** The header carries the client's mark, its name and **Save &
+- [x] **T1.1** One reader for the scope, asked where the chrome is drawn, never
+      per control. — `clientScoped()`, two halves, both load-bearing.
+- [x] **T1.2** On a client-scoped document: no destination row, no Group
+      dropdown, no Units | Functions, no module switcher. — and the viewer
+      strip with them; the switcher stands ITSELF down, being built at load
+      (§359.2), off a scope the SERVER stamps.
+- [x] **T1.3** The header carries the client's mark, its name and **Save &
       close** — `#clientback` reworded and kept, not a new control.
-- [ ] **T1.4** Regenerate `public/`; `generated-in-step` clear.
-- [ ] **T1.5** `checks/client-settings-chrome.py`: none of the five on the
-      client's Setup **and all five on a module's page**, both ends (§94.2);
-      Save & close reaching the console; the client's colours and mark on the
-      page. Red from the sources with the scope-blind chrome restored.
-- [ ] **T1.6** Full `qa.py` at Next and over `file://`; `setup-per-module`,
+- [x] **T1.4** Regenerate `public/`; `generated-in-step` clear.
+- [x] **T1.5** The chrome is proved. **NOT a Python check** — the whole
+      surface is served-only, and `checks/shell.mjs` already stands up the
+      built app, a database and a browser with `fresh`/`signIn`/`open` and a
+      break switch; a second harness for one section would be a second copy
+      of all of it (§53.5). It is section **3b** there: 20 assertions, both
+      ends every time, proved able to fail **six ways** — 5 from the SOURCES
+      (4 / 2 / 2 / 1 / 2 red) and `--break=no-setup-scope` (3 red, the third
+      being the switcher drawn where there is nothing to switch to).
+- [x] **T1.6** Full `qa.py` at Next and over `file://`; `setup-per-module`,
       `client-setup`, `client-setup-outside`, `welcome`, `door-landing`,
       `shell`, `modules`.
 

@@ -223,7 +223,24 @@ await section("3 · the office's addresses, and a change that reaches the server
   check(p[0] === "group" && p[1] === "performance", "/strategy/group/performance opens the group", JSON.stringify(p));
   await open("/raya-trade/setup/people"); p = await place();
   check(p[0] === "setup" && p[1] === "people" && (await page.locator("#panel").textContent()).includes("People register"), "/setup/people opens the register", JSON.stringify(p));
-  check(await page.evaluate(() => !document.getElementById("clientback").hidden && document.getElementById("clientbackname").textContent === "Raya Trade"), "the office sees the way back to the cards, named");
+  /* REWRITTEN, NEVER LOOSENED (§218, §214.3 for the eighth time). This
+     asserted the control reads "Raya Trade" — measured HERE, on
+     `/setup/people`, which §359 made the client's own settings, where it
+     deliberately reads *Save & close* instead (the client is named in the
+     heading there, so naming it on the control too would be the second copy
+     §120 took off the register's own header). What the line is ABOUT is that
+     the office has a way back and that it says something — asserted at BOTH
+     ENDS, because a build that stopped naming the client anywhere satisfies
+     half of it (§94.2). */
+  const back = async () => await page.evaluate(() => {
+    const b = document.getElementById("clientback");
+    return { shown: !b.hidden, word: document.getElementById("clientbackname").textContent };
+  });
+  let bk = await back();
+  check(bk.shown && bk.word === "Save & close", "the client's own settings say what the way back DOES", JSON.stringify(bk));
+  await open("/raya-trade/strategy/group/performance"); bk = await back();
+  check(bk.shown && bk.word === "Raya Trade", "…and a module's page names the client it goes back from", JSON.stringify(bk));
+  await open("/raya-trade/setup/people");
   const word = "shell " + Date.now();
   await page.evaluate((w) => { REVIEW.note.mobile = w; paint(); }, word);
   await page.waitForTimeout(1500);
@@ -232,6 +249,142 @@ await section("3 · the office's addresses, and a change that reaches the server
   const logged = (await owner.query("SELECT person_key, email FROM change_log WHERE tenant_id = $1 ORDER BY id DESC LIMIT 1", [tenantId])).rows[0];
   check(logged && logged.person_key === "smo" && logged.email === "office@forefront.example", "…and is recorded as the signer", JSON.stringify(logged));
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
+});
+
+await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7359, spec 056)", async () => {
+  await fresh(); await signIn("office@forefront.example");
+  /* THE SCOPE IS THE SERVER'S ANSWER, READ OFF THE RAW HTML. The browser
+     writes the same attribute from the address on arrival (shell/route.js
+     placeOf), so a DOM probe passes on a build where nothing is stamped at
+     all \u2014 and the whole reason it is stamped is that it must be there before
+     the module switcher is built, which happens at load, ABOVE placeOf. */
+  /* THE SECOND MODULE IS MADE, or the switcher's absence is asserted over a
+     client that could never have one: `data-modules` is written for a client
+     holding MORE THAN ONE (\u00a7320.6), so on the dev tenant's single module the
+     line below went green on a build that drew the switcher everywhere
+     (\u00a7113.8 \u2014 it did, until this was added). Put back in the `finally`,
+     because every section after this one reads the same tenant (\u00a794.2). */
+  await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
+  try {
+  const ck = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
+  const raw = async (u) => await (await fetch(BASE + u, { headers: { cookie: ck } })).text();
+  const cl = await raw("/raya-trade/setup/people"), md = await raw("/raya-trade/strategy/setup/cycle");
+  check(/<html[^>]* data-setup-scope='client'/.test(cl), "the client's own Setup document is stamped `client` by the SERVER", (cl.slice(0, 200).match(/data-setup-scope='[^']*'/) || ["\u2014"])[0]);
+  check(/<html[^>]* data-setup-scope='strategy'/.test(md), "\u2026and a module's own Setup is stamped with the module \u2014 the control (\u00a7113.8)", (md.slice(0, 200).match(/data-setup-scope='[^']*'/) || ["\u2014"])[0]);
+
+  /* WHAT THE BAR DRAWS, MEASURED AS PAINT AND AS A HIT TEST, never as a
+     class (\u00a794.8): a row hidden by opacity renders identically to one that
+     is gone and still takes the keyboard (\u00a73.2). */
+  const bar = () => page.evaluate(() => {
+    const seen = (el) => !!(el && el.checkVisibility && el.checkVisibility());
+    const nav = document.querySelector("nav.units");
+    return {
+      scope: document.documentElement.getAttribute("data-setup-scope") || "",
+      row: seen(nav),
+      dests: Array.from(document.querySelectorAll("#units [data-u], #units [data-fold], #units [data-setup], #units .homebtn")).filter(seen).length,
+      viewer: seen(document.querySelector(".viewer")),
+      switcher: !!document.querySelector(".top-in .topmark"),
+      h1: (document.querySelector(".brand h1") || {}).textContent || "",
+      sub: (() => { const o = document.getElementById("orgname"); return seen(o) ? o.textContent : ""; })(),
+      mark: seen(document.getElementById("clientlogo")),
+    };
+  });
+  await open("/raya-trade/setup/people");
+  let b = await bar();
+  check(b.scope === "client" && b.row === false && b.dests === 0, "the module's navigation is not drawn over the client's own pages", JSON.stringify(b));
+  check(b.viewer === false, "\u2026nor the viewer strip \u2014 looking as somebody is a question about a module's pages", JSON.stringify(b));
+  check(b.switcher === false, "\u2026nor the module switcher, which is built at load and cannot be repainted away", JSON.stringify(b));
+  check(/data-modules=/.test(cl), "\u2026and this client HAS a second module, so that absence is a decision (\u00a7113.8)");
+  check(b.h1 === "Raya Trade" && /Client settings/.test(b.sub), "the heading names the client and what you are looking at", b.h1 + " / " + b.sub);
+
+  /* BOTH ENDS (\u00a794.2). A build that deleted the row outright satisfies every
+     assertion above, so the module's own Setup is measured in the same run \u2014
+     and the heading is asserted PUT BACK, because this is the first thing in
+     the platform to rewrite it and a one-way write leaves the client's name
+     over Strategy's navigation for the rest of the session. */
+  await open("/raya-trade/strategy/setup/cycle");
+  b = await bar();
+  check(b.scope === "strategy" && b.row === true && b.dests > 0, "a module's own Setup keeps its navigation", JSON.stringify(b));
+  check(b.viewer === true, "\u2026and its viewer strip", JSON.stringify(b));
+  check(b.switcher === true, "\u2026and the switcher, because there a module IS what you are in", JSON.stringify(b));
+  check(b.h1 === "Strategy Management Platform", "\u2026and its document is headed by the product", b.h1);
+
+  /* AND THE SPINE-FORM ADDRESS STILL ENDS AT THE MODULE'S SETUP, WEARING ITS
+     BAR. This is the one case the ORDER of the scope resolution decides: the
+     landing's doors write `/<client>/setup/<page>` for every page and let the
+     shell resolve which rail the page belongs to (\u00a7356.2's research R2), so
+     a chrome that asked the question before `paintUnits()` had settled the
+     place drew the CLIENT's bar over Strategy's Reporting cycle \u2014 and
+     landed on the client's first page while it was at it (\u00a7359.6). Asserted
+     here as well as in setup-per-module, because from this file it is the
+     bar that is wrong and that is what this section is about. */
+  await open("/raya-trade/setup/cycle");
+  b = await bar();
+  check(path() === "/raya-trade/strategy/setup/cycle" && b.scope === "strategy" && b.row === true && b.h1 === "Strategy Management Platform",
+        "\u2026and a spine-form address naming a MODULE's page ends there, wearing the module's bar", path() + " / " + JSON.stringify(b));
+
+  /* AND BOTH HALVES OF THE TEST ARE LOAD-BEARING, which is the one thing no
+     address can show: `data-setup-scope` is written on arrival and is NOT
+     cleared by walking to a unit \u2014 it is what addressOf reads to keep
+     writing the right Setup address \u2014 so a rule keyed on the scope ALONE
+     hides the navigation on every unit page reached from here. */
+  await open("/raya-trade/setup/people");
+  await page.evaluate(() => { current = "mobile"; currentSub = "strategy"; paint(); });
+  await page.waitForTimeout(400);
+  b = await bar();
+  check(b.scope === "client" && b.row === true && b.dests > 0, "walking from the client's settings to a unit brings the navigation back, with the scope still standing", JSON.stringify(b));
+  /* AND THE HEADING AND THE MARK COME BACK WITH IT. Measured on the WALK and
+     never on a second page load, which serves the product's name out of the
+     static markup whatever paint() does \u2014 so a one-way write passes there
+     perfectly (\u00a794.5: the first draft of this asserted it after an `open()`
+     and could not fail). This is the only place a build that writes the
+     client's name and never takes it off can be caught: it would stand over
+     Strategy's navigation for the rest of the session. */
+  check(b.h1 === "Strategy Management Platform" && b.sub === "" && b.mark === false,
+        "\u2026and the product's own name is PUT BACK on the way, never left standing (\u00a794.2)", b.h1 + " / " + b.sub + " / mark " + b.mark);
+
+  /* THE MARK IS MADE, because the demo seed carries none on purpose (\u00a7259.2:
+     a client must never inherit Raya's), so every assertion about it would
+     pass on a build that lost it (\u00a7255). Put back in the same run. */
+  await open("/raya-trade/setup/people");
+  check((await bar()).mark === false, "a client with no mark gets no empty box (\u00a715.1)");
+  const PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+  await page.evaluate((src) => { GROUP.logo = src; paint(); }, PNG);
+  await page.waitForTimeout(200);
+  b = await bar();
+  check(b.mark === true, "\u2026and one that has uploaded a mark wears it on its own bar", JSON.stringify(b));
+  await page.evaluate(() => { delete GROUP.logo; paint(); });
+  /* AND THE CLIENT'S OWN COLOUR STILL REACHES THE PAGE. The bar these pages
+     wear is the product's own surface \u2014 `header.top` is
+     `background:var(--surface)` on every page and always was, so the navy
+     Islam photographed was the destination row this removes, not the header
+     under it. What carries the tenant's brand here is the rail's head and the
+     table headers, which take `--panel`, and that is asserted rather than
+     assumed: measured as the PAINT and compared with the token, never named
+     as a hex (\u00a7259's own rule \u2014 a tenant who rebrands must take it with
+     them). */
+  await open("/raya-trade/setup/people");
+  const brand = await page.evaluate(() => {
+    const px = (el) => el ? getComputedStyle(el).backgroundColor : "";
+    const tok = getComputedStyle(document.documentElement).getPropertyValue("--panel").trim();
+    const probe = document.createElement("div");
+    probe.style.background = "var(--panel)"; document.body.appendChild(probe);
+    const want = getComputedStyle(probe).backgroundColor; probe.remove();
+    return { tok: tok, want: want, head: px(document.querySelector(".setuprail .rhead")),
+             top: px(document.querySelector("header.top")) };
+  });
+  check(brand.head === brand.want && brand.want !== "", "the client's own colour still reaches the page \u2014 the rail's head is --panel", JSON.stringify(brand));
+  check(brand.top !== brand.want, "\u2026and the bar above it is the product's surface, as every page's is", JSON.stringify(brand));
+
+  /* AND *Save & close* GOES WHERE IT SAYS. The handler is \u00a7313.23's and is
+     untouched here; what is asserted is that the reworded control is still
+     that control \u2014 a word changed on a button that no longer navigates is
+     \u00a796's family, and renders perfectly. */
+  await page.click("#clientback");
+  await page.waitForURL(/\/platform$/, { timeout: 8000 }).catch(() => {});
+  check(/^\/platform$/.test(path()), "Save & close goes back to the console", path());
+  check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
+  } finally { await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]); }
 });
 
 await section("4 · Forefront's own pages", async () => {

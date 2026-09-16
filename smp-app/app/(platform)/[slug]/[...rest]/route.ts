@@ -84,7 +84,13 @@ export async function GET(req: Request, { params }: P) {
        (§356.4) — computed here, on the Setup document alone — and its Access
        page the module's declared areas (§356.5), the same way */
     const landing = await landingStampFor(ans.tenant.id, key, ans.seat, ans.personKey, ans.tenant.modules);
-    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas), { status: 200, headers: shellHeaders() });
+    /* WHICH RAIL, STAMPED BY THE SIDE THAT KNOWS (§359, spec 056). `w.module`
+       is set only where the module word LED the address, which is exactly the
+       difference between a module's own Setup and the client's — the same
+       test shell/route.js's placeOf makes in the browser, answered here so it
+       is on the document before any of the chrome is built from it. */
+    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
+                                      w.module ? key : "client"), { status: 200, headers: shellHeaders() });
   }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });

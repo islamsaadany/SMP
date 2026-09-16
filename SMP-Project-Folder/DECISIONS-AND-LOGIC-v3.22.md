@@ -49392,3 +49392,204 @@ dies at *"no button: Publish a report"* — words that appear nowhere in
 here was blamed (§303). It is §51.11's shape with §215's failure mode: the
 check's subject has moved, and it **dies rather than reporting**, so the
 sections after it are not run at all.
+
+## §359 — THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (2026-09-16, spec 056, stage 1)
+
+Islam, of the page the console's *Settings* chip opens: *"theclient settings
+shouldn't open the strategy banner in the top this is a client settings
+separate than any module we need to talk about the architecture again"* — and,
+when the first answer offered was a small one, *"you are trying to make a
+simple fix. let's discuss the architecture and who sees what it's not a simple
+fix."* **HE IS RIGHT AND THE ARCHITECTURE IS `specs/056-the-client-and-its-
+modules/`**, settled with him over a round of questions and a drawing; this is
+the first of its six stages, and it is the one that can be seen.
+
+**THE CAUSE IS ONE LINE AND IT IS NOT A MISTAKE.** `/<client>/setup` carries no
+module word, so the route stamps `DEFAULT_MODULE` and serves the frozen shell —
+whose chrome is Strategy's navigation, because until spec 054 every Setup page
+WAS Strategy's. §356.2 gave each def a `mod` and seven of them say `client`, so
+the rail under that bar has been the client's own for a day and the bar above it
+had not been told.
+
+**ONE READER, ASKED WHERE THE CHROME IS DRAWN AND NEVER PER CONTROL** (§53.5,
+§104.7): `clientScoped()`, and the destination row, the Group dropdown, the
+Units | Functions switch, the gear, the viewer strip and the module switcher are
+all stood down by that one answer — so a control added to that line later is
+covered the day it is added rather than the day somebody reports it.
+
+**BOTH HALVES OF THE TEST ARE LOAD-BEARING, AND THE CHECK IS WHAT SAYS SO.**
+`data-setup-scope` is written on arrival and is NOT cleared by walking to a unit
+— it is what `addressOf` reads to keep writing the right Setup address — so a
+rule keyed on the scope ALONE takes the navigation off every unit page reached
+from the client's settings. Falsified: **1 red**, printing
+`row:false, dests:0, h1:"Raya Trade"` on a unit's own Strategy page.
+
+**THE ROW GOES AS A WHOLE, NOT AS AN EMPTY ONE.** `nav.units` carries the
+tenant's own `--panel` ground and a border, so emptying `#units` and leaving the
+wrapper draws a navy stripe with nothing in it — §28's own edit for an empty
+heading, one element out. Falsified with the CSS removed: **2 red**, reading
+`row:true, dests:0` — the stripe exactly.
+
+**§359.6 — AND THE ROW'S OWN PAINTER IS WHAT SETTLES WHICH PAGE YOU ARE ON, SO
+NOTHING THAT READS THE PAGE MAY RUN BEFORE IT.** The first build had
+`paintUnits()` ask `clientScoped()` and return early — *not drawn, never drawn
+and hidden* — which needed the scope resolved first, so the resolver was moved
+above it, on the reasoning that it is idempotent and that `current` and
+`currentSub` are settled by navigation before either point. **The second half of
+that sentence is false and the check said so within the hour**: on the first
+paint after a served address both are still NULL until `paintUnits()` resolves
+the destination (§94.6), so the resolver returned at its own `!currentSub`
+guard and a page belonging to the OTHER rail never moved the scope — measured,
+`/<client>/setup/cycle` landed on the client's FIRST page with the client's bar
+over it, which is the landing's own spine-form door broken (§356.2's research
+R2). Established as mine and not inherited by running the same check on the
+stashed tree, where it is green (§303).
+
+So the row is **BUILT and then HIDDEN**, and the resolver sits immediately after
+the painter that enables it. *Built and hidden is not waste when the thing being
+built is what answers the question* — and `display:none` is what makes it inert,
+which was always the half that mattered (§3.2). Falsified by moving the
+resolver back ABOVE `paintUnits()`, which is the build that was measured
+broken: **1 red**, printing `/raya-trade/setup/people` and
+`scope:"client", row:false` for an address naming Strategy's Reporting cycle.
+
+**AND THE FALSIFICATION THAT WAS TRIED FIRST DID NOT FALSIFY ANYTHING, WHICH IS
+WORTH MORE THAN IF IT HAD** (§54.5). Putting the resolver back where §356 had
+it — at the defs filter, BELOW the painter — came back GREEN, and reproducing
+it by hand agreed: the address resolves, the bar is right. The reason is that
+`paint()` runs again, so a chrome written from an unresolved scope is corrected
+on the next paint and the settled state is the same. So only ONE of the two
+placements is a fault, and it is the early one; the claim in this section is
+narrowed to what was measured rather than left standing at the shape of the
+first guess. **AND THE CHROME'S OWN SECTION HAD TO BE ASKED ABOUT THE ADDRESS
+THAT CROSSES RAILS** — it was silent on both attempts until the spine-form
+address was asserted in it, and this is the file whose subject is the bar.
+
+**AND THE ASSERTION I WROTE FOR THE GEAR THEN MEASURED THE WRONG THING**
+(§94.8, in the section quoting it): *the client's own settings carry no gear*
+asks the DOM, and with the row built the gear EXISTS and cannot be reached — so
+the line was wrong in both directions at once. It measures the PAINT.
+
+**`display:none`, NEVER OPACITY** (§3.2, §70): a control hidden by paint alone
+still takes the keyboard and still answers every DOM probe, which is the fault
+this project has recorded four times under two different names.
+
+**THE NAME COMES BACK TO THE BRAND, WHICH IS WHY IT IS NOT A THIRD COPY.** On a
+module's page the client is named by the way-back control (§313.23) and
+`sync.js` HIDES `.orgname` there for that reason — two copies of one fact on one
+line is what §120 took off the register's header. Here the control says **Save &
+close** and names nobody, so the line has room for the client exactly once: the
+client in the heading, *Client settings* beside it. The words are Islam's own —
+*"I save and close to go back to the console"* — and they are honest rather than
+a promise, because every box on these pages has already written on blur (§35).
+
+**§359.1 — AND THE PUT-BACK IS THE HALF THAT COULD NOT BE CAUGHT BY LOOKING.**
+This is the first thing in the platform to rewrite that heading, so the
+dangerous direction is the other one: walk from the client's settings into a
+module and a one-way write leaves the client's name standing over Strategy's
+navigation for the rest of the session. **The first draft of that assertion
+could not fail** — it was measured after an `open()`, which serves the product's
+name out of the static markup whatever `paint()` does, so the deliberate break
+went GREEN (§94.5, §113.8). Measured on the WALK it is **1 red** — and finding
+it exposed a real regression of my own: unhiding `.orgname` for the client's
+settings and stopping left the client named TWICE on every module page reached
+from them.
+
+**§359.2 — THE SCOPE IS STAMPED BY THE SERVER, AND THAT IS NOT AN
+OPTIMISATION.** The module switcher is built ONCE AT LOAD by `shell/route.js`,
+several lines ABOVE the call that resolves the address — so it is the one piece
+of the chrome the frozen shell cannot repaint away, and a browser-written
+attribute is not there yet when it looks. `lib/shell.ts` stamps the same answer
+the browser would compute (`w.module` is set only where the module word LED the
+address, which IS the difference between a module's Setup and the client's), so
+there is no second answer, only an earlier one (§53.5). Falsified with
+`--break=no-setup-scope`: **3 red**, and the third is the whole reason —
+`switcher:true` on the client's own settings, a menu offering a way out of
+somewhere you are not (§61).
+
+**§359.3 — AND THE ONE ASSERTION ABOUT THE SWITCHER PASSED FOR THE WRONG REASON
+UNTIL THE STATE WAS MADE.** `data-modules` is written only for a client holding
+MORE THAN ONE module (§320.6), and the dev tenant holds one — so *the switcher
+is not drawn* was true of a client that could never have had it, on every build
+including one that drew it everywhere (§113.8, found by falsifying rather than
+by reading). The check gives the tenant a second module and puts it back in a
+`finally` (§255, §94.2).
+
+**§359.4 — AND A NEIGHBOUR HELD A LITERAL THIS DECISION MOVED** (§214.3, the
+eighth time): `checks/shell.mjs` §3 asserted the way-back control reads *"Raya
+Trade"* — measured on `/setup/people`, which is now the client's own settings,
+where it deliberately says *Save & close*. **REWRITTEN, NEVER LOOSENED**
+(§218), to what the line is about — the office has a way back and it says
+something — asserted at BOTH ENDS, because a build that stopped naming the
+client anywhere satisfies half of it.
+
+**§359.5 — AND UNDOING A FALSIFICATION WITH `git checkout` THREW THE WORK
+AWAY.** §343.9 records exactly this and it happened again, with that section in
+front of me: the sources held uncommitted work, the restore took the break AND
+the feature, and two files went back to `main`'s bytes. Recovered from the BUILT
+file, which is a concatenation and therefore held every block verbatim, and
+proved by rebuilding to a file **byte-identical** to the one the checks had
+passed against. *Restore from the copy you saved, and prove the recovery by
+comparing the build.*
+
+**§359.7 — AND THE SWEEP'S OWN CLIENT-RAIL WALK STOPPED RATHER THAN FAILED.**
+§356.6 walks the client's rail once per viewer, and it re-picked the viewer ON
+that page, because a reload lands on whoever signed in. With the strip stood
+down, `select_option` on a `display:none` control waits thirty seconds and the
+whole sweep ends with *"waiting 500ms"* as its last line — **a run that STOPPED
+rather than passed**, and §316.4's own lesson is that the tail is the verdict.
+**REWRITTEN, NEVER LOOSENED** (§218, §214.3, the ninth time): there is no pick
+to make there any more, so a viewer this browser is not signed in as walks
+nothing and counts nothing — which is the same answer §356.6 measured, since
+the router sends such a viewer off that rail anyway — and the strip's absence
+is ASSERTED rather than assumed, so the day it comes back the walk is told it
+owes a pick again. Never `continue`: the per-viewer line under it is that
+loop's own verdict, and skipping it would take a whole viewer out of the count
+while the sweep still printed ok (§54.5).
+
+**AND THE SAME FAULT SAT AT THE TOP OF THAT LOOP, ONE ITERATION LATER.** Each
+pass ENDS on the client's own settings, so the NEXT pass's pick — the one that
+switches viewer at all — was made on a page that no longer has the control.
+Fixed where it is asked rather than where it was left: the loop comes back to
+the module's home first, and only where it needs to, so a run that never left
+it is byte-identical to what it was. *A control that moves is not one place to
+correct; it is every place that reaches for it, and the second one is a whole
+iteration away from the first.*
+
+**§359.8 — AND ANSWERING THE SITES THAT FAILED IS ANSWERING THE SITES YOU HAVE
+SEEN FAIL.** §359.7 fixed the two that had actually stopped the sweep, and the
+run then walked all **33 viewers** and stopped on the identical timeout at a
+THIRD — a viewer pick after the template round trip — and, with that one fixed,
+on a FOURTH: `show_units()` pressing the Units | Functions switch, which lives
+in the row this section stands down. Three rounds, each one a site the previous
+round had no reason to look at. **THE CAUSE IS NOT THE COUNT OF SITES, IT IS
+THAT TWO SECTIONS NAVIGATE TO THE CLIENT'S SETTINGS AND EVERYTHING AFTER THEM
+INHERITS THE PAGE** — the per-viewer client-rail walk (§356.6) and the
+Functions page, which is the CLIENT's since §356.2 — so every later block
+begins standing somewhere its chrome is not drawn. **ONE HELPER, ASKED WHERE
+THE CHROME IS REACHED FOR** (`module_page()`, §53.5, §104.7): the viewer
+wrapper every pick already goes through, and `show_units()`, whose whole job is
+*make sure the module's unit list is on show*; the call-site copies are DELETED
+rather than left beside it (§24). Putting it at the two NAVIGATIONS instead was
+weighed and refused — that is a rule somebody has to remember the next time a
+section walks there, which is the complaint §104.7 exists to record. It fires
+only where the row is genuinely stood down, so a run that never leaves a
+module's page is byte-identical to what it was, and it is `SMP_BASE`-only,
+because these pages do not exist over `file://` at all. *A control that moves
+is not one place to correct; it is every place that reaches for it, and how
+many that is cannot be read off the diff — only off the run.*
+
+**THE MARK IS MADE, BECAUSE THE DEMO CARRIES NONE ON PURPOSE** (§259.2 — a
+client must never inherit Raya's), so every assertion about it would pass on a
+build that lost it (§255); the check uploads one and takes it off again.
+`.clientlogo`, never `.topmark`, which is the module switcher's (§65.9).
+
+**RECORDED, NOT DONE.** The drawing signed off for this showed the client's
+settings under a NAVY top bar, and the product's `header.top` is
+`background:var(--surface)` — white, on every page, always. What Islam
+photographed as *"the strategy banner"* is `nav.units`, the row this removes;
+the header beneath it was never navy, so the drawing misrepresented the
+baseline rather than proposing a change (§245's own trap, in a colour). Built as
+the product has it, and the client's own colour still reaches the page through
+the rail's head and the table headers, which take `--panel`. A navy top bar is
+one declaration if he wants it, and it is his to ask for.

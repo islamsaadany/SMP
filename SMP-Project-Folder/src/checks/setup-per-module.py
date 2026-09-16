@@ -483,9 +483,31 @@ with sync_playwright() as p:
         pg2.click('[data-md="setup"]'); pg2.wait_for_timeout(500)
         ck("the gear from a unit page opens Strategy's Setup at its own address",
            scope(pg2) == "strategy" and ev(pg2, "()=>location.pathname", "").startswith("/raya-trade/strategy/setup/"), ev(pg2, "()=>location.pathname"))
+        # REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted that the gear
+        # on the CLIENT's rail opens the module's Setup — §356.2's answer, and
+        # §359 removed the gear from those pages outright, with everything else
+        # in that row: the client's own settings belong to no module, so a
+        # control into one module's Setup is a door out of somewhere you are
+        # not. The way out is *Save & close* to the console, which is Islam's
+        # own sentence for it. So what is asserted is the decision that
+        # survived — with the unit-page half directly above kept as the
+        # control, or a build that took the gear away everywhere would pass
+        # this half perfectly (§113.8).
         served("/raya-trade/setup/people")
-        pg2.click('[data-md="setup"]'); pg2.wait_for_timeout(500)
-        ck("…and from the client's rail the gear still opens the module's", scope(pg2) == "strategy", scope(pg2))
+        # MEASURED AS THE PAINT, NEVER AS THE DOM (§94.8). The row is BUILT on
+        # every paint — its own painter is what settles which page you are on
+        # (§359) — and stood down by CSS, so asking whether the gear EXISTS
+        # asserts the wrong thing in both directions: it is there and it
+        # cannot be reached.
+        ck("the client's own settings show no gear — they belong to no module (§359)",
+           ev(pg2, "()=>Array.from(document.querySelectorAll('[data-md=\"setup\"]'))"
+                   ".filter(function(e){return e.checkVisibility&&e.checkVisibility()}).length", 1) == 0,
+           ev(pg2, "()=>Array.from(document.querySelectorAll('[data-md=\"setup\"]'))"
+                   ".filter(function(e){return e.checkVisibility&&e.checkVisibility()}).length", 1))
+        ck("…and the way out is Save & close, which is the one control left on that line",
+           ev(pg2, "()=>{var b=document.getElementById('clientback');"
+                   "return b && !b.hidden ? (document.getElementById('clientbackname')||{}).textContent : '';}", "") == "Save & close",
+           ev(pg2, "()=>(document.getElementById('clientbackname')||{}).textContent", ""))
         pg2.close()
     else:
         print("\n── 8 · SERVED half NOT RUN (no SMP_BASE) — this is not a pass ──")

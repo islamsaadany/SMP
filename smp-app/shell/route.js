@@ -159,6 +159,15 @@
      wired exactly once, at load — no second handler on a repaint (§24, §47.2).
      A press navigates, so the menu never has to be closed afterwards. */
   (function modules() {
+    /* NOT ON THE CLIENT'S OWN SETTINGS (§359, spec 056). Those pages belong
+       to no module, so a switcher there offers a way out of somewhere you are
+       not — and it is the one piece of the chrome the frozen shell cannot
+       stand down, because this builds it once at load and nothing repaints
+       `.top-in`. The scope is read off the SERVER's stamp (lib/shell.ts), not
+       off placeOf's: placeOf runs a few lines BELOW this, so the attribute it
+       writes would not be there yet — the same answer, and the only one that
+       has arrived by now. */
+    if (document.documentElement.getAttribute("data-setup-scope") === "client") return;
     var raw = document.documentElement.getAttribute("data-modules");
     if (!raw) return;                               /* one module: no choice to offer */
     var list;

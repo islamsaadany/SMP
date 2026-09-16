@@ -61,6 +61,15 @@
      says where you are, and repeating it cost the whole first line. -->
 <header class="top">
   <div class="top-in">
+    <!-- THE CLIENT'S OWN MARK, ON THE CLIENT'S OWN SETTINGS (§359, spec 056).
+         Drawn nowhere else: on a module's pages the bar below already says
+         which client this is, and a second copy of that fact on one line is
+         what §120 took off the register's header. `.clientlogo` rather than
+         `.topmark`, which is the module switcher's (§65.9) — one word, two
+         controls, is how a rule comes to style the wrong thing. Written by
+         paint() from the group's own mark and hidden when there is none:
+         a client that has not uploaded one gets no empty box (§15.1). -->
+    <img class="clientlogo" id="clientlogo" alt="" hidden>
     <div class="brand">
       <h1>Strategy Management Platform</h1>
       <!-- Whose strategy this is. The product name alone never said it, and a
@@ -1313,6 +1322,36 @@
      file://, where the gear opens everything. */
   function moduleWord(){ return document.documentElement.getAttribute("data-module") || ""; }
   function moduleLabel(){ return document.documentElement.getAttribute("data-module-label") || ""; }
+  /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ──
+     Islam, of the client's Setup rail under Strategy's full navigation:
+     *"theclient settings shouldn't open the strategy banner in the top this
+     is a client settings separate than any module."*
+
+     ONE READER, ASKED WHERE THE CHROME IS DRAWN AND NEVER PER CONTROL
+     (§53.5, §104.7): the destination row, the Group dropdown, the
+     Units | Functions switch, the gear and the viewer strip are all stood
+     down by this one answer — written onto the root and spent as CSS — so a
+     control added to either line later is covered the day it is added rather
+     than the day somebody reports it.
+
+     THE ROW IS BUILT AND THEN HIDDEN, WHICH IS NOT THE SAME AS WASTE: its
+     own painter is what RESOLVES which page you are on (§94.6), so a
+     `paintUnits()` that asked this question first would be asking it before
+     the answer exists — measured, and it took the landing's spine-form door
+     to a module's Setup with it. `display:none` is what makes the built row
+     inert: a control hidden by opacity still takes the keyboard (§3.2).
+
+     BOTH HALVES OF THE TEST ARE LOAD-BEARING. `setupScope()` is written on
+     arrival and is NOT cleared by walking to a unit — it is what `addressOf`
+     reads to keep writing the right Setup address — so a rule keyed on the
+     scope alone would hide the navigation on a unit's page as well. Being ON
+     Setup is the other half, and it is re-asked on every paint.
+
+     ABSENT OVER file:// AND THAT IS RIGHT: the offline copy has no server to
+     say which pages belong to no module, so it draws one rail and its whole
+     navigation, exactly as before this section. */
+  function clientScoped(){ return current === "setup" && setupScope() === "client"; }
+
   function setupDefsFor(scope){
     var all = setupDefsAll();
     if (!scope) return all;
@@ -2399,6 +2438,24 @@
     /* §145: the confirm ticks register the row they act on the same way. */
     fillViewers();
     paintUnits();
+    /* ── THE SCOPE IS RESOLVED AS SOON AS THE PLACE IS, AND NOT BEFORE (§359) ──
+       This call used to sit beside `defsFor(current)` a hundred lines below,
+       which is where the RAIL needs it — and §359 gave the same answer a
+       second reader in the CHROME (`clientScoped()`, which decides whether
+       the client's own bar is worn), so it has to be settled before the bar
+       is written rather than after.
+
+       AND IT CANNOT MOVE ANY EARLIER THAN THIS LINE, which the check found
+       rather than the reading: on the first paint after a served address
+       `current` and `currentSub` are still NULL until `paintUnits()` resolves
+       the destination (§94.6), so a call above it returns at its own
+       `!currentSub` guard and the page whose key belongs to the OTHER rail
+       never moves the scope — measured, `/<client>/setup/cycle` landed on the
+       client's first page with the client's bar over it, which is the
+       landing's own spine-form door broken (§356.2's research R2).
+       *The row's painter is what settles which page you are on, so anything
+       reading the page has to come after it.* */
+    if (current === "setup") resolveSetupScope();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
        It used to be set BEFORE paintUnits(), and paintUnits is the thing that
        corrects `current` when this viewer cannot reach where the last one was
@@ -2423,6 +2480,85 @@
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
+    /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ──
+       Islam: *"theclient settings shouldn't open the strategy banner in the
+       top this is a client settings separate than any module."* He is right
+       twice over — the row below is Strategy's navigation, and the line above
+       it names the Strategy Management Platform. These pages belong to no
+       module (spec 054 §4.2 gave every def a `mod`, and seven say `client`),
+       so a bar that names one is the page arguing with its own rail.
+
+       THE ATTRIBUTE IS THE SWITCH AND IT IS WRITTEN IN ONE PLACE. The row,
+       the viewer strip and anything hung on either are stood down by CSS off
+       `data-client-settings`, so a control added to that line later is
+       covered the day it is added rather than the day somebody reports it
+       (§104.7) — and `display:none` rather than a class that only dims,
+       because a control hidden by opacity still takes the keyboard (§3.2).
+
+       THE NAME COMES BACK TO THE BRAND, WHICH IS WHY IT IS NOT A THIRD COPY.
+       On a module's page the client is named by the way-back control
+       (§313.23), and `sync.js` HIDES `.orgname` there for that reason — two
+       copies of one fact on one line is what §120 took off the register's
+       header. Here the control says *Save & close* and names nobody, so the
+       line has room for the client exactly once: the client in the heading,
+       and what you are looking at beside it.
+
+       AND THE PRODUCT'S OWN NAME IS PUT BACK, never left standing. This is
+       the first thing in the platform to rewrite that heading, so the other
+       branch is the one that can break silently — walk from the client's
+       settings into a module and a one-way write leaves the client's name
+       over Strategy's navigation for the rest of the session (§94.2). */
+    (function clientBar(){
+      var on = clientScoped();
+      if (on) document.documentElement.setAttribute("data-client-settings", "on");
+      else document.documentElement.removeAttribute("data-client-settings");
+      var h1 = document.querySelector(".brand h1");
+      /* A client with no name typed yet still needs a heading, and the one
+         honest thing to say is what the page is (§35). */
+      if (h1) h1.textContent = on ? (GROUP.org || "Client settings")
+                                  : "Strategy Management Platform";
+      var org = document.getElementById("orgname");
+      var back = document.getElementById("clientback");
+      if (org) {
+        if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
+        /* AND HIDDEN AGAIN ON THE WAY OUT, which the check found by walking
+           rather than by reloading: `sync.js` hides this span wherever the way
+           back is drawn, because that control names the client and two copies
+           of one fact on one line is what \u00a7120 took off the register's header.
+           Unhiding it here and stopping would have left the client named twice
+           on every module page reached from the client's settings, for the
+           rest of the session (\u00a794.2 \u2014 a one-way write). */
+        else if (back && !back.hidden) org.hidden = true;
+      }
+      var mark = document.getElementById("clientlogo");
+      if (mark) {
+        var src = on ? groupLogo() : "";
+        /* Setting `src` to "" asks the page for its own address, so the
+           attribute is REMOVED rather than emptied — an empty src is a
+           second request for this document, not an absent picture. */
+        if (src) { mark.src = src; mark.hidden = false; }
+        else { mark.removeAttribute("src"); mark.hidden = true; }
+      }
+      /* The way back says where it goes AND what it does first, which is
+         Islam's own wording: *"I save and close to go back to the console."*
+         Every box on these pages has already written on blur (§35), so the
+         save is a statement of what has happened rather than a promise — and
+         the control is the same control, because a second button beside it
+         would be two doors out of one room (§32). */
+      var backName = document.getElementById("clientbackname");
+      if (backName && back && !back.hidden) {
+        if (on) {
+          backName.textContent = "Save & close";
+          back.title = "Save and go back to your clients";
+          back.setAttribute("data-saveclose", "");
+        } else if (back.hasAttribute("data-saveclose")) {
+          /* PUT BACK, for the same reason the heading is (§94.2). */
+          backName.textContent = back.dataset.client || backName.textContent;
+          back.title = "Back to your clients";
+          back.removeAttribute("data-saveclose");
+        }
+      }
+    })();
     /* THE ROLES, AND WHERE EACH IS HELD (§178). One builder, beside
        `placeLabel()` and asking `personAt()` like every other surface that
        answers "where does this person sit" (§54). This line used to work it
@@ -2466,7 +2602,6 @@
        function that holds it. */
     CURRENT_REPORT_KEY = isFn(current) || isCapDest(current)
       ? current : (UNITS[current] ? UNITS[current].ukey : null);
-    if (current === "setup") resolveSetupScope();
     var defs = reachable(defsFor(current), TARGET, arg);
     /* NO FALLBACK ONTO THE UNFILTERED LIST. It used to re-add every allowed def
        when the reachable set came out empty, which put back exactly the defs

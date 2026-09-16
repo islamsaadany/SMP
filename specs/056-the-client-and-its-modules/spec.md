@@ -1,7 +1,12 @@
 # 056 · The client's settings are the client's, and each module's are its own
 
 **Status:** aligned 2026-09-16 over one conversation, drawn before anything
-moves (rule 1c). Nothing built at the time of writing.
+moves (rule 1c). **Stage 1 built 2026-09-16 (§359), on the branch** — the
+client's settings wear the client's bar; the other five stages are unbuilt.
+Stage 1's one deviation from `tasks.md` is recorded there: its check is a
+section of `smp-app/checks/shell.mjs` rather than a Python file of its own,
+because the whole surface is served-only and that file already stands up the
+built app, a database and a browser.
 
 **Opened by:** Islam, with a screenshot of `/raya-trade/setup` — the client's
 own Setup rail underneath Strategy's full navigation bar — *"theclient

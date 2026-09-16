@@ -54,7 +54,36 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§356.11–§356.13 — the Internal Tracker's row, redrawn at your word and built (spec 054).**
+**Latest version:** **§356.14 — the tracker's dates by the week, a settings menu, the add line that takes everything, one pill size, and a way back (spec 054).**
+
+**It is built and it is on the branch, not on `main`.** Everything on the
+drawing you signed off is in. **The two faults you hit**: the status pill was
+two sizes because the line that sets its type was not one a browser reads, so
+the pill you could press and the pill you could only read each fell to a
+different font — one box now, every row, pressable or not; and the date could
+not be set because the date box was thrown away the moment the cursor left
+it, which is what opening the calendar does — it stays now until you pick a
+day, press Escape, or press somewhere else. **Dates are weeks**: a row reads
+*W38*, this week's number in bold; picking a week stores its Thursday, so a
+row set by week and a row set by day are the same kind of row. The picker is
+a small table, this week bold, six weeks ahead, *No date* and *A day of my
+own…* at the foot. **The three dots** on the far right of the views row hold
+*Group by* and *Dates as* (Weeks or Exact dates), remembered by your browser.
+**The add line** takes the week, the owner and a note before Enter — a new
+line lands due this week, owned by you, unless the line says otherwise. **The
+way back** sits above the title, the client's name.
+
+**Checked:** 206 assertions on a real database, the browser half pressing
+every new control and reading the database after each press; red under six
+deliberate breaks, the sixth putting the old date box back; the modules check
+green; the frozen product untouched.
+
+**Still yours:** the merge; the module still has to be turned on per client
+from the client's card. Notes (meeting minutes) is next and has no spec yet.
+
+---
+
+### Earlier the same day: **§356.11–§356.13 — the Internal Tracker's row, redrawn at your word and built (spec 054).**
 
 **It is built and it is on the branch, not on `main`.** Everything on the
 drawing you signed off is in: the owner is a **first name**, and pressing it

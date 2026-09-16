@@ -48683,3 +48683,111 @@ Status, and matches it frame for frame. The frozen product is untouched, so
 no hover to say the name can be renamed (Rename beside Delete is a decision
 if wanted); the switcher still lists the tracker for a client's own person
 (spec 046 §4.4); Notes is next and has no spec.
+
+### §356.14 — DATES BY THE WEEK, A SETTINGS MENU, THE ADD LINE THAT TAKES EVERYTHING, ONE PILL, AND A WAY BACK (2026-09-16)
+
+Islam, testing the built tracker, with two screenshots: *"I'm not able to
+set the date and the status pill is shifting it's size while it should be
+consistent. and while writing the actoin I should be able to set the date and
+set the owner and a note the due dates default should be the weeks not the
+days setting by date can be a toggle beside the group by maybe a 3 dots for a
+small settings to show group by and planning format and setting the week
+should default to thursday of this week and we need a backbutton to get from
+this page to the"* — the sentence cut off, and the destination confirmed as
+the client's platform. Two faults and five asks; the faults were MEASURED on
+the built page before anything was proposed (§3a), the asks drawn and redrawn
+three times at his word and signed off (rule 1c,
+`design-mockups/internal-tracker/2026-09-16_weeks-settings-addline-back.html`).
+
+**THE PILL WAS AT TWO SIZES BECAUSE ITS FONT WAS NEVER APPLIED.** The
+stylesheet wrote the pill's type as `font: 600 11px/1 inherit` — and a font
+shorthand cannot end in a CSS-wide keyword, so the browser dropped the whole
+line. A pill that can be pressed is a `<select>` and fell to the browser's own
+control font (13.3px Arial, 29px tall); a pill that is only read is a `<span>`
+and inherited the page's 15px (37px tall). Measured on the built page:
+`SELECT 104×29` against `SPAN 108×37`, which is exactly the pair in his
+screenshot. **The same dropped line sat on fourteen controls** — the views,
+the owner's name, the team, the search, the count, the history — so several
+things had been drawing a size the stylesheet never said. And the Done pill's
+`background: var(--good-bg)` is a shorthand, which reset `background-image`
+and took the arrow off exactly one state. Fixed as ONE named family
+(`--font`, `--mono`) used by every shorthand, one box for the pill (118×26,
+select or span, the arrow only where it can be pressed), and `background-color`
+for the green. Asserted by MEASURING a select pill and a span pill on one
+page and comparing them (§94.8), and by refusing any font shorthand ending in
+`inherit` — which the check's first run failed on the CSS COMMENT explaining
+the fault, so the comment no longer spells the pattern.
+
+**THE DATE COULD NOT BE SET BECAUSE THE BOX WAS THROWN AWAY ON BLUR.** The
+first build put the word back 150ms after focus left the date box, and
+opening the browser's calendar popup IS focus leaving it — so the day picked
+landed on a box that was already gone and nothing was written. The calendar
+cannot be opened in the headless browser here, so this is the mechanism and
+not a recording of his click; it is also the only thing on that path that can
+lose a pick. The box now closes on a change, on Escape, or on a `pointerdown`
+anywhere else in the document — never on blur — and the check dispatches a
+blur and asserts the box is still there, with `back-on-blur` putting the
+timer back as the sixth break. **The calendar is deliberately NOT opened by
+script** (`showPicker()`): a popup opened that way takes the next Escape for
+itself, so the box would need two presses to close; the icon on the box is
+one press away.
+
+**DATES ARE WEEKS BY DEFAULT, AND A WEEK IS ITS THURSDAY.** A row reads the
+week's number in the year — *W38*, this week's in bold — and a late row says
+only how late (*Late 1 w*), because in weeks a row is late from the Friday
+and the number it was due in is behind it. Picking a week stores that week's
+Thursday into the same `due` column, so nothing new is stored, late and
+carried are worked out from a day exactly as before, and somebody reading
+in exact dates sees the same Thursday. **The number is the ISO week holding
+the week's Thursday** — ISO numbers weeks by their Thursday too, so a
+Sunday-to-Thursday week and the calendar never disagree; 17 Sep 2026 is W38
+and the last week of 2026 is W53. The picker is a small table (his: *"write
+the number of this week and make it bold and remove the name this week"*):
+a header, six weeks with their Sunday-to-Thursday days, this week's number
+bold, *No date* and *A day of my own…* at the foot. **Exact dates is a
+choice**, behind three dots on the far right of the views row beside Group
+by, both remembered on the browser as cookies and never stored on the client;
+the menu is two short columns no wider than their words (his: *"a lot of
+wasted space"*). A due-date grouping under weeks groups by the WEEK.
+
+**THE ADD LINE TAKES EVERYTHING.** The week (this week's Thursday until
+another is picked — his default, confirmed: a new line lands due this week,
+not undated), the owner (you until another is picked) and a note are set on
+the line before Enter and ride on it as `data-` attributes; nothing is posted
+until Enter, from the action or from its note. The note is a quiet second
+line under the action IN THE SAME COLUMN, so the week, the owner and the
+status never move — the first drawing put it under the whole row and he sent
+it back (*"why isn't it an inline view keeping in the view the owner an
+settings and progress parts?"*). The server takes `due`, `ownerKey` and
+`description` on `add`: absent `due` means this week's Thursday (decided
+there too, so a body from an older tab lands the same way), `null` means no
+date, a day it cannot read is refused. What a hand is typing survives a swap,
+the picks included.
+
+**THE WAY BACK IS ABOVE THE TITLE**, the client's own name with a chevron,
+to the client's platform — his correction of the first drawing, which had put
+it in the top bar (*"normal placement for the back button"*).
+
+**WHAT WAS RUN**: `checks/tracker.mjs` **206/0** on a throwaway Postgres 16
+with §10 driven in Chromium — the settings menu opened, marked and closed;
+the back link measured above the title; a line added with its default week;
+a line added with a picked week, a picked owner and a note, from the note's
+own Enter; the pill measured select against span; the week picker on a row,
+No date, a week two ahead; Exact dates from the dots and its cookie; the date
+box surviving a blur, a day written, Escape, a press elsewhere; back to
+weeks. **RED SIX WAYS**: `no-office-gate` 3, `reset-carried` 7,
+`owner-anyone` 3, `who-everyone` 4, `reload-on-add` 4, `back-on-blur` 1 —
+and that last one first DIED after its red assertion, because the fill that
+follows it throws on a box that is gone (§215); it re-opens the box and
+reports. `check:modules` 100/0; `generated-in-step` all clear; `tsc` clean
+but for `lib/prisma.ts`'s pre-existing error. **Four of the check's own reds
+were the check**: a week-number assertion that took 4 Jan 2026 for week 1
+(it is a Sunday, and its Thursday is in week 2); a header compared through
+`innerText`, which the CSS uppercases (§301.6, a third time); and twice a
+row that had just been given a FUTURE week asserted on This week, where the
+rule correctly no longer draws it. The frozen product is untouched, so
+`sw.js` is not bumped. **Recorded, not done**: a week set on a row that is
+already late keeps reading how late it is until its new Thursday has passed,
+which is the rule and reads oddly for a minute; the picker offers six weeks
+and *A day of my own…* for anything further; the title's own week label
+still says *13 Sep – 17 Sep* where the rows say W38.

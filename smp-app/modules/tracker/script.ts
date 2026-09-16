@@ -24,13 +24,25 @@
    a tick pressed in the same second post in that order and each answer is
    drawn in turn, so the second answer already holds the first change.
 
-   THE ROW'S CONTROLS: the date becomes a date box in place; the name becomes
-   a box on a double-click (Enter or leaving it renames, Escape puts it
-   back); the owner's name opens the office on this client, and picking one
-   hands the action on; the arrow opens the row for its notes and history
-   and folds it again — the opened row rides on the address (?open=), so a
-   link somebody sends opens the same row. How the list is grouped is a
-   cookie the page reads, so the next visit opens grouped the same way. */
+   THE ROW'S CONTROLS: the week opens the week picker (as exact dates, the
+   day becomes a date box in place); the name becomes a box on a
+   double-click (Enter or leaving it renames, Escape puts it back); the
+   owner's name opens the office on this client, and picking one hands the
+   action on; the arrow opens the row for its notes and history and folds it
+   again — the opened row rides on the address (?open=), so a link somebody
+   sends opens the same row. The two settings behind the dots — how the list
+   is grouped, dates as weeks or days — are cookies the page reads, so the
+   next visit opens the same way.
+
+   THE ADD LINE TAKES EVERYTHING (§356.14): the week, the owner and a note
+   are picked on the line before Enter and ride on it as data- attributes;
+   nothing is posted until Enter, from the action or from its note.
+
+   THE DATE BOX STAYS UNTIL YOU ARE DONE WITH IT (§356.14, the fault Islam
+   hit): the first build put the word back 150ms after focus left the box,
+   and opening the browser's calendar popup IS focus leaving it — so the day
+   picked landed on a box already gone. It closes on a change, on Escape, or
+   on a press elsewhere on the page, and never on blur. */
 export const APP_JS = `(function () {
   "use strict";
   var B = document.body;
@@ -45,24 +57,37 @@ export const APP_JS = `(function () {
   }
   function ask() {
     return { view: B.getAttribute("data-view") || "week", q: B.getAttribute("data-q") || "",
-      group: B.getAttribute("data-group") || "owner", open: openId() };
+      group: B.getAttribute("data-group") || "owner", dates: B.getAttribute("data-dates") || "weeks", open: openId() };
   }
-  /* What a hand is typing, read before a swap and put back after it. */
+  function remember(name, value) {
+    try { document.cookie = name + "=" + encodeURIComponent(value) + "; path=" + location.pathname + "; max-age=31536000; samesite=lax"; } catch (x) {}
+  }
+  /* What a hand is typing, read before a swap and put back after it: the
+     action, its note, and the week and owner picked for it. */
   function keep() {
-    var a = document.activeElement, add = document.getElementById("add"), s = document.querySelector(".srch");
-    return { add: add ? add.value : "", srch: s ? s.value : "",
-      focus: a && a.id === "add" ? "add" : (a && a.classList && a.classList.contains("srch")) ? "srch" : null };
+    var a = document.activeElement, add = document.getElementById("add"), nt = document.getElementById("addnote"),
+      ar = document.querySelector(".addrow"), s = document.querySelector(".srch");
+    return { add: add ? add.value : "", note: nt ? nt.value : "", srch: s ? s.value : "",
+      due: ar ? ar.getAttribute("data-due") : null, owner: ar ? ar.getAttribute("data-owner") : null,
+      picked: !!(ar && ar.hasAttribute("data-picked")),
+      focus: a && a.id === "add" ? "add" : (a && a.id === "addnote") ? "addnote" : (a && a.classList && a.classList.contains("srch")) ? "srch" : null };
   }
   function swap(j, k) {
     var body = document.getElementById("body");
     if (!body || !j || typeof j.body !== "string") return;
     body.innerHTML = j.body;
     setOpen(j.open || null);
-    var add = document.getElementById("add"), s = document.querySelector(".srch");
-    if (add && k && k.add && !k.clear) add.value = k.add;
+    var add = document.getElementById("add"), nt = document.getElementById("addnote"), s = document.querySelector(".srch"), ar = document.querySelector(".addrow");
+    if (k && !k.clear) {
+      if (add && k.add) add.value = k.add;
+      if (nt && k.note) nt.value = k.note;
+      if (ar && k.picked) { if (k.due != null) setAddDue(ar, k.due); if (k.owner) setAddOwner(ar, k.owner); }
+    }
     if (s && k && k.srch) s.value = k.srch;
     if (k && k.focus === "add" && add) add.focus();
+    else if (k && k.focus === "addnote" && nt) nt.focus();
     else if (k && k.focus === "srch" && s) s.focus();
+    typing();
   }
   var chain = Promise.resolve();
   function request(method, url, body, k, then) {
@@ -80,78 +105,185 @@ export const APP_JS = `(function () {
     });
   }
   function post(act, k, then) {
-    var a = ask(); act.view = a.view; act.q = a.q; act.group = a.group; act.open = a.open;
+    var a = ask(); act.view = a.view; act.q = a.q; act.group = a.group; act.dates = a.dates; act.open = a.open;
     request("POST", API, act, k || keep(), then);
   }
   function refetch(k) {
     var a = ask();
     request("GET", LIST + "?view=" + encodeURIComponent(a.view) + "&q=" + encodeURIComponent(a.q) +
-      "&group=" + encodeURIComponent(a.group) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep());
+      "&group=" + encodeURIComponent(a.group) + "&dates=" + encodeURIComponent(a.dates) + (a.open ? "&open=" + encodeURIComponent(a.open) : ""), null, k || keep());
   }
   function rowOf(el) { var r = el.closest(".row, .open"); return r ? r.getAttribute("data-id") : null; }
+  function inAdd(el) { return el.closest(".addrow"); }
 
-  /* THE NEXT EMPTY LINE: Enter adds, silently; Escape clears. On a refusal
-     the words stay in the box, said in the red bar, and nothing is drawn. */
+  /* THE ADD LINE: its week and owner are set on the line, drawn at once,
+     posted only on Enter. The line lights while anything is typed in it. */
+  function typing() {
+    var ar = document.querySelector(".addrow"), add = document.getElementById("add"), nt = document.getElementById("addnote");
+    if (ar) ar.classList.toggle("typing", !!((add && add.value) || (nt && nt.value)));
+  }
+  function setAddDue(ar, day) {
+    ar.setAttribute("data-due", day || ""); ar.setAttribute("data-picked", "1");
+    var w = ar.querySelector(".when");
+    if (!w) return;
+    w.setAttribute("data-due", day || "");
+    var word = w.querySelector(".wk"), list = w.querySelector(".weeks");
+    if (list) {
+      var hit = null;
+      list.querySelectorAll("[data-act=pick-week]").forEach(function (b) {
+        var on = (b.getAttribute("data-day") || "") === (day || "");
+        b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on));
+        if (on && b.getAttribute("data-day")) hit = b;
+      });
+      if (!word) { word = document.createElement("span"); word.className = "wk"; w.insertBefore(word, list); }
+      if (!day) { word.textContent = "No date"; word.className = "wk"; }
+      else if (hit) { word.textContent = hit.querySelector("b").textContent; word.className = "wk" + (hit.classList.contains("now") ? " now" : ""); }
+      else { word.textContent = dayWord(day); word.className = "wk"; }
+    } else {
+      w.textContent = day ? dayWord(day) : "No date";
+    }
+  }
+  function setAddOwner(ar, key) {
+    ar.setAttribute("data-owner", key); ar.setAttribute("data-picked", "1");
+    var w = ar.querySelector(".who"), name = "";
+    if (!w) return;
+    w.querySelectorAll("[data-act=pick-owner]").forEach(function (b) {
+      var on = b.getAttribute("data-key") === key;
+      b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on));
+      if (on) name = b.textContent;
+    });
+    var wn = w.querySelector(".wn"); if (wn && name) wn.textContent = name;
+  }
+  /* "Thu 17 Sep" from YYYY-MM-DD, for a day picked by hand on the add line. */
+  var WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MO = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function dayWord(day) {
+    var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(day || ""); if (!m) return day || "";
+    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return WD[d.getUTCDay()] + " " + d.getUTCDate() + " " + MO[d.getUTCMonth()];
+  }
+  function submitAdd() {
+    var add = document.getElementById("add"), nt = document.getElementById("addnote"), ar = document.querySelector(".addrow");
+    if (!add || !ar) return;
+    var t = add.value.replace(/\\s+/g, " ").trim();
+    if (!t) { add.focus(); return; }
+    add.disabled = true; if (nt) nt.disabled = true;
+    var due = ar.getAttribute("data-due") || null, owner = ar.getAttribute("data-owner") || "";
+    post({ act: "add", title: t, description: nt ? nt.value : "", due: due, ownerKey: owner }, { clear: true, focus: "add" },
+      function (j) { if (!j) { add.disabled = false; if (nt) nt.disabled = false; add.focus(); } /*%BRK%*/ });
+  }
   document.addEventListener("keydown", function (e) {
-    var add = e.target;
-    if (!add || add.id !== "add") return;
-    if (e.key === "Escape") { add.value = ""; return; }
+    var t = e.target;
+    if (!t || (t.id !== "add" && t.id !== "addnote")) return;
+    if (e.key === "Escape") {
+      var add = document.getElementById("add"), nt = document.getElementById("addnote");
+      if (add) add.value = ""; if (nt) nt.value = ""; typing(); return;
+    }
     if (e.key !== "Enter") return;
     e.preventDefault();
-    var t = add.value.replace(/\\s+/g, " ").trim();
-    if (!t) return;
-    add.disabled = true;
-    post({ act: "add", title: t }, { clear: true, focus: "add" }, function (j) { if (!j) { add.disabled = false; add.focus(); } /*%BRK%*/ });
+    submitAdd();
   });
+  document.addEventListener("input", function (e) { if (e.target && (e.target.id === "add" || e.target.id === "addnote")) typing(); });
 
-  /* THE TEAM under an owner's name: one open at a time, closed by a press
-     elsewhere or Escape; picking a name hands the action on. */
-  function closeTeams(except) {
-    document.querySelectorAll(".who.pick.on").forEach(function (w) {
+  /* ONE POPUP OPEN AT A TIME — the team under a name, the weeks under a
+     date, the settings behind the dots — closed by a press elsewhere or
+     Escape. */
+  function closePops(except) {
+    document.querySelectorAll(".who.pick.on, .when.pick.on").forEach(function (w) {
       if (w === except) return;
       w.classList.remove("on"); w.setAttribute("aria-expanded", "false");
-      var t = w.querySelector(".team"); if (t) t.hidden = true;
+      var t = w.querySelector(".team, .weeks"); if (t) t.hidden = true;
     });
+    var d = document.querySelector(".dots > button.on");
+    if (d && d !== except) { d.classList.remove("on"); d.setAttribute("aria-expanded", "false"); var m = d.parentNode.querySelector(".setmenu"); if (m) m.hidden = true; }
   }
-  function toggleTeam(w) {
+  function togglePop(w, sel) {
     var on = !w.classList.contains("on");
-    closeTeams(w);
+    closePops(w);
     w.classList.toggle("on", on); w.setAttribute("aria-expanded", String(on));
-    var t = w.querySelector(".team"); if (t) t.hidden = !on;
+    var t = w.querySelector(sel); if (t) t.hidden = !on;
     if (on && t) { var cur = t.querySelector("button.on") || t.querySelector("button"); if (cur) cur.focus(); }
   }
+  function toggleTeam(w) { togglePop(w, ".team"); }
+  function toggleWeeks(w) { togglePop(w, ".weeks"); }
+  function toggleSettings(b) {
+    var on = !b.classList.contains("on");
+    closePops(b);
+    b.classList.toggle("on", on); b.setAttribute("aria-expanded", String(on));
+    var m = b.parentNode.querySelector(".setmenu"); if (m) m.hidden = !on;
+  }
+
+  /* THE DATE BOX, in place of the day (or of the week's word, from "a day of
+     my own"). It stays until a change, Escape, or a press elsewhere on the
+     page — never blur (see the header). On a row a change posts; on the add
+     line it sets the line's day. */
+  var dateBox = null;
+  function openDateBox(cell, was, onPick) {
+    closePops(null);
+    var inp = document.createElement("input");
+    inp.type = "date"; inp.className = "dt"; inp.value = was || "";
+    inp.setAttribute("aria-label", "Due date");
+    cell.replaceWith(inp); inp.focus();
+    var settled = false;
+    var back = function () { if (settled) return; settled = true; dateBox = null; inp.replaceWith(cell); };
+    dateBox = { inp: inp, back: back };
+    inp.addEventListener("change", function () {
+      if (inp.value === (was || "")) { back(); return; }
+      settled = true; dateBox = null; onPick(inp.value || null, inp, cell);
+    });
+    inp.addEventListener("keydown", function (ev) { if (ev.key === "Escape") { ev.preventDefault(); back(); } });
+    /*%BLUR%*/
+    /* The calendar is NOT opened for them: a popup opened by script takes
+       the next Escape for itself, so the box would need two to close, and
+       the icon on the box is one press away. */
+  }
+  document.addEventListener("pointerdown", function (e) {
+    if (dateBox && e.target !== dateBox.inp) dateBox.back();
+  });
 
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-act]");
-    if (!b || !e.target.closest(".who.pick")) closeTeams(null);
+    if (!b || !e.target.closest(".who.pick, .when.pick, .dots")) closePops(null);
     if (!b) return;
-    var act = b.getAttribute("data-act"), id = rowOf(b);
+    var act = b.getAttribute("data-act"), id = rowOf(b), ar = inAdd(b);
     if (act === "tick") {
       var done = b.getAttribute("aria-checked") === "true";
       post({ act: "status", id: id, status: done ? "not_started" : "done" });
     } else if (act === "due") {
-      /* The date becomes a date box in place; a change posts, leaving it
-         alone puts the word back. Clearing the box posts "no date". */
-      var inp = document.createElement("input");
-      inp.type = "date"; inp.className = "dt"; inp.value = b.getAttribute("data-due") || "";
-      inp.setAttribute("aria-label", "Due date");
-      var was = b.getAttribute("data-due") || "";
-      b.replaceWith(inp); inp.focus();
-      var settled = false;
-      var back = function () { if (settled) return; settled = true; inp.replaceWith(b); };
-      inp.addEventListener("change", function () {
-        if (inp.value === was) { back(); return; }
-        settled = true; post({ act: "due", id: id, due: inp.value || null });
+      if (b.querySelector(".weeks")) toggleWeeks(b);
+      else openDateBox(b, b.getAttribute("data-due") || "", function (day, inp, cell) {
+        if (ar) { inp.replaceWith(cell); setAddDue(ar, day); cell.setAttribute("data-due", day || ""); cell.textContent = day ? dayWord(day) : "No date"; }
+        else post({ act: "due", id: id, due: day });
       });
-      inp.addEventListener("keydown", function (ev) { if (ev.key === "Escape") back(); });
-      inp.addEventListener("blur", function () { setTimeout(back, 150); });
+    } else if (act === "pick-week") {
+      var day = b.getAttribute("data-day") || null;
+      closePops(null);
+      if (ar) setAddDue(ar, day);
+      else post({ act: "due", id: id, due: day });
+    } else if (act === "pick-day") {
+      var cell = b.closest(".when.pick");
+      closePops(null);
+      if (cell) openDateBox(cell, cell.getAttribute("data-due") || "", function (day, inp, c) {
+        if (ar) { inp.replaceWith(c); setAddDue(ar, day); }
+        else post({ act: "due", id: id, due: day });
+      });
     } else if (act === "who") {
       toggleTeam(b);
     } else if (act === "pick-owner") {
       var w = b.closest(".who.pick"), key = b.getAttribute("data-key") || "";
-      closeTeams(null);
+      closePops(null);
+      if (ar) { setAddOwner(ar, key); return; }
       if (w && w.querySelector(".wn") && w.querySelector(".wn").textContent === b.textContent) return;
       post({ act: "owner", id: id, ownerKey: key });
+    } else if (act === "settings") {
+      toggleSettings(b);
+    } else if (act === "set-group" || act === "set-dates") {
+      /* Remembered on this browser, in a cookie the page reads on the next
+         visit — a preference, never the client's data (§25, §47.1). */
+      var v = b.getAttribute("data-value") || "";
+      closePops(null);
+      if (act === "set-group") { B.setAttribute("data-group", v); remember("smp.tracker.group", v); }
+      else { B.setAttribute("data-dates", v); remember("smp.tracker.dates", v); }
+      refetch();
     } else if (act === "more") {
       /* Open this row (and only this row), or fold it if it is the open one;
          the address carries which, and the list is read again. */
@@ -167,9 +299,12 @@ export const APP_JS = `(function () {
     }
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { closeTeams(null); return; }
-    var w = e.target.closest && e.target.closest(".who.pick");
-    if (w && e.target === w && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggleTeam(w); }
+    if (e.key === "Escape") { closePops(null); return; }
+    var w = e.target.closest && e.target.closest(".who.pick, .when.pick");
+    if (w && e.target === w && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      if (w.classList.contains("who")) toggleTeam(w); else toggleWeeks(w);
+    }
   });
 
   document.addEventListener("change", function (e) {
@@ -177,13 +312,6 @@ export const APP_JS = `(function () {
     if (!c) return;
     var act = c.getAttribute("data-act"), id = rowOf(c);
     if (act === "status") post({ act: "status", id: id, status: c.value });
-    else if (act === "group") {
-      /* Remembered on this browser, in a cookie the page reads on the next
-         visit — a preference, never the client's data (§25, §47.1). */
-      B.setAttribute("data-group", c.value);
-      try { document.cookie = "smp.tracker.group=" + encodeURIComponent(c.value) + "; path=" + location.pathname + "; max-age=31536000; samesite=lax"; } catch (x) {}
-      refetch();
-    }
   });
 
   /* RENAME IN PLACE: a double-click on the name turns it into a box; Enter

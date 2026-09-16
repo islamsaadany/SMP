@@ -30,8 +30,8 @@ import type { ServeArgs } from "../registry.ts";
 import { trackerDocument, refusedDocument, listFragment, type Ask, type PageArgs } from "./page.ts";
 import { APP_JS } from "./script.ts";
 import {
-  type Who, type Group, isView, isGroup, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE,
-  oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange,
+  type Who, type Group, type Format, isView, isGroup, isFormat, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE, FORMAT_COOKIE,
+  oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -44,7 +44,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
   if (first === "app.js" && a.rest.length === 1)
     /* The check's second break puts the reload back after an add, which must
        turn checks/tracker.mjs §10 red (§94.5). Never set on a deployment. */
-    return new Response(APP_JS.replace("/*%BRK%*/", brk() === "reload-on-add" ? "location.reload();" : ""), { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+    return new Response(APP_JS.replace("/*%BRK%*/", brk() === "reload-on-add" ? "location.reload();" : "")
+      /* The third break puts the blur timer back on the date box — the fault
+         Islam hit (§356.14) — which must turn §10 red (§94.5). */
+      .replace("/*%BLUR%*/", brk() === "back-on-blur" ? 'inp.addEventListener("blur", function () { setTimeout(back, 150); });' : ""),
+      { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
 
   /* THE GATE. The check's break opens it to anybody with a membership, which
      must turn checks/tracker.mjs red (§94.5). Never set on a deployment. */
@@ -104,13 +108,16 @@ function askOf(src: Record<string, unknown>, req: Request): Ask {
     q: s("q"),
     open: s("open") || null,
     group: isGroup(s("group")) ? (s("group") as Group) : groupCookie(req),
+    dates: isFormat(s("dates")) ? (s("dates") as Format) : datesCookie(req),
   };
 }
-function groupCookie(req: Request): Group {
-  const m = new RegExp("(?:^|;\\s*)" + GROUP_COOKIE.replace(/\./g, "\\.") + "=([^;]*)").exec(req.headers.get("cookie") || "");
-  const v = m ? decodeURIComponent(m[1]) : "";
-  return isGroup(v) ? v : "owner";
+function cookie(req: Request, name: string): string {
+  const m = new RegExp("(?:^|;\\s*)" + name.replace(/\./g, "\\.") + "=([^;]*)").exec(req.headers.get("cookie") || "");
+  return m ? decodeURIComponent(m[1]) : "";
 }
+function groupCookie(req: Request): Group { const v = cookie(req, GROUP_COOKIE); return isGroup(v) ? v : "owner"; }
+/* Weeks where nothing chose (§356.14, Islam's default). */
+function datesCookie(req: Request): Format { const v = cookie(req, FORMAT_COOKIE); return isFormat(v) ? v : "weeks"; }
 
 type Q = Parameters<typeof oneAction>[0];
 type Out = { status: number; body: Record<string, unknown> };
@@ -131,7 +138,15 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const ownerKey = String(b.ownerKey || who.personKey || "");
     if (!ownerKey) return refused(400, "You are not on this client's register yet, so nothing can be owned by you here.");
     if (!(await isOfficeRow(c, ownerKey))) return refused(400, "An action is owned by somebody on the office's seats.");
-    const row = await addAction(c, { title, ownerKey, by });
+    /* THE DATE ARRIVES WITH THE LINE (§356.14): absent means this week's
+       Thursday (the add line's own default, decided here too so a body from
+       an older tab lands the same way), null or "" means no date, and a day
+       the list cannot read is refused rather than guessed at. */
+    let due: string | null;
+    if (b.due === undefined) due = thursdayOf(todayIn());
+    else if (b.due === null || b.due === "") due = null;
+    else { due = calendarDay(b.due); if (!due) return refused(400, "That is not a date this list can read."); }
+    const row = await addAction(c, { title, ownerKey, by, due, description: String(b.description || "") });
     return out(200, { ok: true, id: row.id });
   }
 

@@ -7768,7 +7768,23 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   every other assertion passes on a page that reloaded (§113.8) — and four of
   its own first reds were the check (`fetch(API` spelt as the old script had
   it, two expectations forgetting §8's second action, a count read through
-  `innerText` and so uppercased, §301.6). **Recorded, not done**: the switcher
+  `innerText` and so uppercased, §301.6). **AND SINCE §356.14 DATES ARE
+  WEEKS**: a row reads its week's number in the year (W38, this week's bold —
+  the ISO week holding the week's Thursday), picking a week stores that
+  THURSDAY into the same column, *Exact dates* is a choice behind three dots
+  beside Group by (cookies, never the client's data), the add line takes the
+  week, the owner and a note before Enter (a new line lands due this week's
+  Thursday), and the way back is above the title. **TWO FAULTS MEASURED**:
+  `font: 600 11px/1 inherit` is INVALID CSS (a shorthand cannot end in a
+  CSS-wide keyword) and fourteen such lines were silently dropped — a select
+  pill fell to the browser's 13.3px Arial, a span pill inherited the page's
+  15px, and that was the pill at two sizes; a named `--font` family now, one
+  118×26 box for every pill, and `background-color` for the Done green because
+  the shorthand took the arrow off. And the date box was thrown away 150ms
+  after BLUR, which the calendar popup causes, so a picked day landed on a box
+  already gone; it closes on change, Escape or a pointerdown elsewhere, never
+  blur (`back-on-blur` is the sixth break). 206/0, red six ways.
+  **Recorded, not done**: the switcher
   lists it for a client's person (spec 046 §4.4's tab is where that ends); a
   module is turned ON per client from the card; a double-tap has no hover on a
   tablet; Notes is next and has no spec.
@@ -9474,7 +9490,30 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
+*Last Updated: 2026-09-16 &mdash; **&sect;356.14: the tracker's dates by the
+week, a settings menu, the add line that takes everything, one pill, and a way
+back (spec 054).** Islam, testing: *"I'm not able to set the date and the
+status pill is shifting it's size &hellip; the due dates default should be the
+weeks not the days &hellip; a 3 dots for a small settings &hellip; default to
+thursday of this week and we need a backbutton."* **BOTH FAULTS WERE MEASURED
+BEFORE ANYTHING WAS PROPOSED** (&sect;3a): `font: 600 11px/1 inherit` is not
+CSS a browser will read, so fourteen lines of the stylesheet had never applied
+&mdash; a select pill at 104&times;29 in Arial beside a span pill at
+108&times;37 in the page's face, his screenshot exactly &mdash; and the date
+box was put back 150ms after blur, which the calendar popup causes. Drawn and
+redrawn three times at his word before a source moved (rule 1c): the back
+link above the title, the note inline in the action's own column, the week
+picker as a small table with this week's number in bold and no *This week*
+label, the settings menu two short columns. **A WEEK IS ITS THURSDAY** in the
+same column, so nothing new is stored and two of the office reading one list
+two ways read one truth; the number is the ISO week holding that Thursday.
+**VERIFIED**: `check:tracker` **206/0** with &sect;10 driven in Chromium, red
+SIX ways; `modules` 100/0; `generated-in-step` all clear; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. Four of the check's own reds were the
+check. **The frozen product is untouched**, so `sw.js` is not bumped. **On
+the branch, not merged.***
+
+*Earlier: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
 Internal Tracker's row, redrawn at Islam's word and built (spec 054).** Islam,
 using the built tracker: *"The button with my initials should open the list of
 the taem on the project ot assign an owner and it's better to be first name of

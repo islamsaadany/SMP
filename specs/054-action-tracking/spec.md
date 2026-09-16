@@ -87,6 +87,10 @@ their own weekly alignment about that client. The client's staff never see it.
 | 6 | Grouping | **By owner unless you choose otherwise** (loosened at §356.11 from *by owner, and nothing else*): Owner is how the list opens; Status, Due date or None are a choice on the views row, remembered by the browser and never stored on the client. The other system's free "scopes" list is still not taken — the client is already the scope. |
 | 7 | The word | **Internal Tracker** (Islam, 2026-09-15). Key `tracker`; two words on the switcher, and the second says who it is for, which is the point. *Actions* was proposed and not taken. |
 | 8 | The week | **Sunday to Thursday** (Islam, 2026-09-15). *This week* is the days somebody is at their desk; anything due on a Friday or Saturday reads as the following week's. |
+| 9 | Dates | **Weeks by default** (Islam, 2026-09-16, §356.14). A row reads its week's number in the year, *W38*, this week's in bold; picking a week stores that week's **Thursday** into the same date column. *Exact dates* is a choice behind the three dots beside Group by, remembered on the browser. The number is the ISO week holding the Thursday. |
+| 10 | The add line | **Takes the week, the owner and a note before Enter** (§356.14). A new line lands due this week's Thursday and owned by you unless the line says otherwise; the note is a quiet second line under the action in its own column, so the three cells on the right never move. |
+| 11 | The settings | **Behind three dots on the far right of the views row**: Group by and Dates as, two short columns, both cookies on the browser and never the client's data. Group by left the row for it. |
+| 12 | The way back | **Above the page's title**, the client's own name with a chevron, to the client's platform (Strategy). Not in the top bar (his correction). |
 
 ---
 
@@ -117,9 +121,10 @@ late · due this week · done this week.
 **IT WORKS LIKE THE SHEET IT REPLACES** (Islam, 2026-09-15: *"we are shifting
 from a simple google sheet to a tool so it needs to be super simple"*). There
 is **no form and no separate page**. The list ends in the next empty line: you
-type an action there and press Enter, it lands under you with no date and Not
-started, and everything else is changed **on the row itself** — the date, the
-owner, who else, the status, the done tick. A row opens in place for its notes
+type an action there and press Enter, it lands under you due this week's
+Thursday and Not started — or with the week, the owner and a note you set on
+the line before Enter — and everything else is changed **on the row itself**:
+the week (or the day, as exact dates), the owner, the status, the done tick. A row opens in place for its notes
 and its history, and that is where Rename and Delete sit. Every write lands
 when the control is left (§35), so nothing has a Save button.
 
@@ -244,6 +249,10 @@ the week stood, and its proposal on the word did not.
 
 ## 10 · Recorded, not decided
 
+- Dates as weeks (§356.14): a row already late keeps reading how late it is
+  until its new Thursday has passed; the picker offers six weeks ahead and *A
+  day of my own…* beyond; the title's own week label still reads two days
+  where the rows read W38.
 - A per-module access tab (spec 046 §4.4) is still built for no module; this
   one is office-by-rule and adds nothing to that debt — **but the switcher
   still lists the tracker for a client's own person**, who is then refused at

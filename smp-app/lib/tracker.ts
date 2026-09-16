@@ -130,6 +130,9 @@ export function weekOf(day: string): Week {
    to thursday of this week") — the last working day of the week it names,
    so late and carried go on being worked out from a day exactly as before. */
 export function thursdayOf(day: string): string { return weekOf(day).to; }
+const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 /* THE WEEK'S NUMBER IN THE YEAR is the ISO week holding its Thursday — ISO
    numbers weeks by their Thursday too, so a Sunday-to-Thursday week and the
    calendar's own numbering never disagree about which week this is. */
@@ -139,11 +142,19 @@ export function weekNumber(day: string): number {
   const wk1 = new Date(jan4); wk1.setUTCDate(jan4.getUTCDate() - ((jan4.getUTCDay() + 6) % 7));
   return Math.floor((thu.getTime() - wk1.getTime()) / 86400000 / 7) + 1;
 }
-/* THE WEEK IN WORDS (§356.15). Islam, of the built tracker: "in the view of
-   the tasks don't write the week number write this week and next week ... and
-   maybe when we are out of the next we can write the week number." So two
-   weeks have a word and everything after is its number in the year, which is
-   what "out of the next" asks for.
+/* THE WEEK IN WORDS (§356.15, amended §356.16). Islam, of the built tracker:
+   "in the view of the tasks don't write the week number write this week and
+   next week ... and maybe when we are out of the next we can write the week
+   number" — and then, of that number: "for the weeks after this week and next
+   week to have it W1 Oct or W3 Dec". So two weeks have a word and every week
+   after them is ITS PLACE IN ITS MONTH rather than its place in the year: the
+   year's 40th week means nothing to anybody planning, and "the first week of
+   October" is how the work is actually talked about.
+   WHICH MONTH A WEEK BELONGS TO IS ALREADY ANSWERED: a week is stored as its
+   THURSDAY (thursdayOf), so the month is the Thursday's — the week running
+   27 Sep – 1 Oct is W1 Oct. That is one rule rather than a second one about
+   straddling months, and the days are printed beside the word in the picker
+   and in every grouped heading, so nobody has to work it out.
    THE WEEK BEFORE THIS ONE HAS NO WORD, AND HIS OWN EARLIER DECISION IS WHY:
    an OPEN action due in a past week is LATE, so it reads Late / Late 1 w /
    Late 2 w (lateWord) and never reaches this function at all — "Previous
@@ -156,7 +167,9 @@ export function weekWord(day: string, today: string): string {
   if (brk() === "week-numbers") return "W" + weekNumber(day);   /* §356.15 put back */
   if (sameWeek(day, today)) return "This week";
   if (sameWeek(day, addDays(weekOf(today).from, 7))) return "Next week";
-  return "W" + weekNumber(day);
+  if (brk() === "week-of-year") return "W" + weekNumber(day);   /* §356.16 put back */
+  const thu = toDate(thursdayOf(day));
+  return "W" + Math.ceil(thu.getUTCDate() / 7) + " " + MONTH[thu.getUTCMonth()];
 }
 export function sameWeek(a: string, b: string): boolean { return weekOf(a).from === weekOf(b).from; }
 /* The picker's rows: this week and the weeks after it, each with its days —
@@ -200,8 +213,6 @@ export function lateWord(carried: number): string {
   return carried > 0 ? "Late " + carried + " w" : "Late";
 }
 
-const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 /* "Thu 17 Sep", and the year only when it is not this year — the product's
    own three-letter months (SMPRules.MONTH_NAMES spells them the same). */
 export function readableDay(day: string | null, today?: string): string {
@@ -257,7 +268,7 @@ export function inView(a: Action, view: View, who: Who, today: string): boolean 
      what still needs a date, inside This week rather than beside it. */
   return !a.due || a.due <= w.to;
 }
-export type Summary = { open: number; late: number; dueWeek: number; dueWeekNotStarted: number; doneWeek: number };
+export type Summary = { open: number; late: number; dueWeek: number; doneWeek: number };
 export function summary(all: Action[], today: string): Summary {
   const w = weekOf(today);
   const open = all.filter((a) => a.status !== "done");
@@ -266,7 +277,6 @@ export function summary(all: Action[], today: string): Summary {
     open: open.length,
     late: open.filter((a) => isLate(a.due, today)).length,
     dueWeek: dueWeek.length,
-    dueWeekNotStarted: dueWeek.filter((a) => a.status === "not_started").length,
     doneWeek: all.filter((a) => a.status === "done" && !!a.doneDay && a.doneDay >= w.from && a.doneDay <= w.to).length,
   };
 }

@@ -7784,6 +7784,33 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   after BLUR, which the calendar popup causes, so a picked day landed on a box
   already gone; it closes on change, Escape or a pointerdown elsewhere, never
   blur (`back-on-blur` is the sixth break). 206/0, red six ways.
+  **AND SINCE &sect;356.16 A WEEK IS ITS PLACE IN ITS MONTH**: the third week
+  on reads **W1 Oct**, never the ISO week of the year, and a week straddling
+  two months takes the month its THURSDAY is in &mdash; which is the day it is
+  already stored as, so no second rule was needed and both of Islam's own
+  examples come out of one line. The picker says what the rows say
+  (&sect;53.5). **THE CARDS HOLD STILL**: the due card's *&middot; N not
+  started* tail took a second line and `.strip` is a GRID, so all four grew
+  whenever a status moved &mdash; the tail goes and a floor at the taller size
+  goes on, two edits because a label that wraps at some untried window brings
+  the jump straight back. **AND THE ASSERTION WRITTEN FIRST COULD NOT FAIL**:
+  *"the four cards are one height"* is true of every build, the grid stretching
+  them to the tallest whatever any of them asked for (&sect;113.8, found by
+  falsifying); what CAN fail is whether a card is HELD OPEN, measured as the
+  slack under its last line &mdash; `15,15,15,15` shipped, `0,0,0,0` with the
+  floor gone, `15,15,0,15` with the tail back, naming the offending card by its
+  position. **And the jump assertion needed the WORDS beside it**, because the
+  tail merely going from *2 not started* to *1 not started* is the same two
+  lines and the same height with the defect still there. **THE NAMES LIST WAS
+  A FLOOR IN THE STYLESHEET** (140px on names whose longest measures 69), not
+  anything the names needed; the floor goes, and what is asserted is the
+  AGREEMENT &mdash; the box is its widest name plus the page's own padding,
+  never a pixel count (&sect;94.8). **AND THE ADD LINE ASKS LATER**: at rest
+  one box, and the first letter brings the week, the owner, the status and the
+  note's arrow onto it &mdash; their SPACE kept (Islam's B of two drawn), so
+  nothing moves under a hand already typing. 228/0, red thirteen ways, **one
+  break per decision** (the two card breaks overlapped at first, so neither was
+  isolated).
   **Recorded, not done**: the switcher
   lists it for a client's person (spec 046 §4.4's tab is where that ends); a
   module is turned ON per client from the card; a double-tap has no hover on a
@@ -8037,8 +8064,28 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # and takes the rest of &sect;10 with it, which is a
                                 # run that DIED rather than reported &mdash;
                                 # corrected, `note-standing` goes from 2 red and dead
-                                # to 10 red and complete. 214/0,
-                                # red EIGHT ways (`check:tracker:red`). Its first run
+                                # to 10 red and complete. AND SINCE &sect;356.16
+                                # IT MEASURES THE CARDS AS SLACK RATHER THAN AS A
+                                # HEIGHT (&sect;94.8): *"the four cards are one
+                                # height"* is true of EVERY build, `.strip` being a
+                                # grid that stretches them to the tallest whatever
+                                # any of them asked for &mdash; so it passed on the
+                                # broken build under both card breaks
+                                # (&sect;113.8, found by falsifying rather than
+                                # reading). What can fail is whether a card is HELD
+                                # OPEN &mdash; the distance from its last line's
+                                # bottom to its own bottom edge, nought on a card
+                                # sized to its content and real on one carrying a
+                                # floor. And the jump assertion needed the WORDS
+                                # asserted beside the height, because a tail going
+                                # from *2 not started* to *1 not started* is the
+                                # same two lines, the same height, and the defect
+                                # still there. The week's month, the held-back
+                                # details and the names list are asserted the same
+                                # way: an AGREEMENT worked out from the page's own
+                                # padding and the check's own arithmetic, never a
+                                # pixel count somebody typed. 228/0,
+                                # red THIRTEEN ways (`check:tracker:red`). Its first run
                                 # found ONE product fault (an undated line vanishing
                                 # from This week, &sect;356.7), one real page fault
                                 # (`hidden` hiding nothing under an author display,
@@ -9508,7 +9555,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;356.15: the note is asked for, and
+*Last Updated: 2026-09-16 &mdash; **&sect;356.16: the week by its month, cards
+that hold still, and a line that asks later (spec 054).** Islam, of the tracker
+as &sect;356.15 left it: *"for the week in the selection or the due week for the
+weeks after this week and next week to have it W1 Oct or W3 Dec etc."*, *"the
+names list is wide for no reason make it compact"*, and *"the change between the
+status of the actions changes the size of the top cards &hellip; for the new
+action remove the details until someone start typing the action name."* **ALL
+FOUR DRAWN BEFORE ANY WAS BUILT** (rule 1c), the two with a real choice in them
+three ways each with the cost stated beside them; he took **B** twice.
+**THE RULE THE PLATFORM ALREADY HAD ANSWERS THE HARD CASE**: a week is stored as
+its THURSDAY, so *which month owns a straddling week* was settled the day weeks
+were stored &mdash; 27 Sep &ndash; 1 Oct is **W1 Oct** &mdash; and both of
+Islam's own examples come out of one line, measured rather than reasoned about.
+**THE CARDS WERE ONE LABEL**: the due card's *&middot; N not started* tail took a
+second line and `.strip` is a GRID, so all four grew whenever a status moved.
+The tail goes, **and** a floor goes on, because a label that wraps at some
+untried window brings the jump straight back &mdash; two edits, falsified
+separately. **AND THE ASSERTION WRITTEN FIRST COULD NOT FAIL** (&sect;113.8,
+found by falsifying rather than reading): *"the four cards are one height"* is
+true of every build, the grid stretching them to the tallest whatever any asked
+for; what CAN fail is whether a card is HELD OPEN, measured as the slack under
+its last line &mdash; `15,15,15,15` shipped, `0,0,0,0` with the floor gone,
+`15,15,0,15` with the tail back. **And the jump assertion needed the WORDS
+beside it**, a tail going *2 not started* &rarr; *1 not started* being the same
+two lines and the same height with the defect still there. **THE NAMES LIST WAS
+A FLOOR IN THE STYLESHEET** (140px on names whose longest measures 69) and what
+is asserted is the AGREEMENT, never a pixel count. **VERIFIED**:
+`check:tracker` **228/0** with &sect;10 driven in Chromium, **red thirteen
+ways**, one break per decision (the two card breaks overlapped at first, so
+neither was isolated); `modules` 100/0; `generated-in-step` all clear;
+`built-in-step.py` all good; `tsc` clean but for `lib/prisma.ts`'s pre-existing
+error. **The frozen product is untouched**, so `sw.js` is not bumped. **On the
+branch, not merged.***
+
+*Earlier the same day: **&sect;356.15: the note is asked for, and
 the week is in words (spec 054).** Islam, of the built tracker: *"1. a note
 should be an option not a common thing in the actions tell me my options to add
 one if needed in a neat way 2. in the view of the tasks don't write the week

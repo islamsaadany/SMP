@@ -208,7 +208,10 @@ export const APP_JS = `(function () {
        from the action, and only while the note is shut — tabbing on out of
        an empty note folds it behind you, so nothing is left standing open
        for a line that did not want one. */
-    if (e.key === "Tab" && !e.shiftKey && t.id === "add" && !noteIsOpen()) {
+    if (e.key === "Tab" && !e.shiftKey && t.id === "add" && t.value && !noteIsOpen()) {
+      /* ...and only once the line has a name on it (§356.16): at rest the
+         arrow beside it is invisible, so a note reachable by Tab there would
+         be the one detail the line did not hold back. */
       e.preventDefault(); openNote(); return;
     }
     if (e.key !== "Enter") return;

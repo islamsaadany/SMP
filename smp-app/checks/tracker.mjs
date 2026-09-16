@@ -28,6 +28,11 @@
      SMP_BREAK=back-on-blur   node checks/tracker.mjs   # must go red (§356.14)
      SMP_BREAK=week-numbers   node checks/tracker.mjs   # must go red (§356.15)
      SMP_BREAK=note-standing  node checks/tracker.mjs   # must go red (§356.15)
+     SMP_BREAK=week-of-year   node checks/tracker.mjs   # must go red (§356.16)
+     SMP_BREAK=card-count     node checks/tracker.mjs   # must go red (§356.16)
+     SMP_BREAK=card-jumps     node checks/tracker.mjs   # must go red (§356.16)
+     SMP_BREAK=details-always node checks/tracker.mjs   # must go red (§356.16)
+     SMP_BREAK=wide-names     node checks/tracker.mjs   # must go red (§356.16)
 
    SINCE §356.14 DATES ARE WEEKS: a row reads its week's number in the year
    (W38, this week's in bold) and picking a week stores its THURSDAY; Exact
@@ -125,20 +130,29 @@ check("the week's number is the year's — 17 Sep 2026 is W38, and the last week
    to read its NUMBER and never a word — it is the only way that case can be
    reached (a list grouped by due week), and "Previous week" is what must not
    appear there. */
-check("this week and next week are words, and the rest are numbers", weekWord("2026-09-13", TODAY) === "This week" && weekWord("2026-09-17", TODAY) === "This week" &&
-  weekWord("2026-09-20", TODAY) === "Next week" && weekWord("2026-09-24", TODAY) === "Next week" && weekWord("2026-10-01", TODAY) === "W40" && weekWord("2026-10-22", TODAY) === "W43",
-  [weekWord("2026-09-13", TODAY), weekWord("2026-09-20", TODAY), weekWord("2026-10-01", TODAY)].join(" · "));
-check("...and a week gone by reads its number, never a word", weekWord("2026-09-10", TODAY) === "W37" && weekWord("2026-09-03", TODAY) === "W36", weekWord("2026-09-10", TODAY));
+check("this week and next week are words", weekWord("2026-09-13", TODAY) === "This week" && weekWord("2026-09-17", TODAY) === "This week" &&
+  weekWord("2026-09-20", TODAY) === "Next week" && weekWord("2026-09-24", TODAY) === "Next week",
+  [weekWord("2026-09-13", TODAY), weekWord("2026-09-20", TODAY)].join(" · "));
+/* AND EVERY WEEK AFTER THEM IS ITS PLACE IN ITS MONTH (§356.16, Islam's own
+   two examples): the month is the THURSDAY's, so the week running 27 Sep –
+   1 Oct is W1 Oct — asserted on that straddling week, which is the only case
+   where the rule can be got wrong. */
+check("...and every week after them is its place in its month", weekWord("2026-10-01", TODAY) === "W1 Oct" && weekWord("2026-10-08", TODAY) === "W2 Oct" &&
+  weekWord("2026-10-29", TODAY) === "W5 Oct" && weekWord("2026-12-17", TODAY) === "W3 Dec" && weekWord("2027-01-07", TODAY) === "W1 Jan",
+  [weekWord("2026-10-01", TODAY), weekWord("2026-10-29", TODAY), weekWord("2026-12-17", TODAY)].join(" · "));
+check("...the straddling week takes the month it ENDS in, which is where its Thursday is", weekWord("2026-09-27", TODAY) === "W1 Oct" && thursdayOf("2026-09-27") === "2026-10-01",
+  weekWord("2026-09-27", TODAY) + " / " + thursdayOf("2026-09-27"));
+check("...and a week gone by reads its month too, never a word", weekWord("2026-09-10", TODAY) === "W2 Sep" && weekWord("2026-09-03", TODAY) === "W1 Sep", weekWord("2026-09-10", TODAY));
 const wo = weekOptions(TODAY);
 /* THE PICKER SAYS WHAT THE ROWS SAY (§53.5, Islam's pick): press Next week
    and the row reads Next week — one week, one spelling, on one screen. */
-check("the picker offers this week and five after it, each with its days", wo.length === 6 && wo[0].now && !wo[1].now && wo.map((o) => o.word).join(",") === "This week,Next week,W40,W41,W42,W43" && wo[0].days === "13 – 17 Sep" && wo[2].days === "27 Sep – 1 Oct" && wo[0].to === "2026-09-17", JSON.stringify(wo));
+check("the picker offers this week and five after it, each with its days", wo.length === 6 && wo[0].now && !wo[1].now && wo.map((o) => o.word).join(",") === "This week,Next week,W1 Oct,W2 Oct,W3 Oct,W4 Oct" && wo[0].days === "13 – 17 Sep" && wo[2].days === "27 Sep – 1 Oct" && wo[0].to === "2026-09-17", JSON.stringify(wo));
 check("a week's days across a year carry it once", weekDays(weekOf("2027-01-04"), TODAY) === "3 – 7 Jan 2027", weekDays(weekOf("2027-01-04"), TODAY));
 const wk = (due, first) => whenText(shape({ ...lateRow, due, first_due: first || due, status: "not_started" }), TODAY);
 /* THE BOLD WENT WITH THE WORDS (§356.15): the row carries no mark of its own
    for this week, because the word says it — asserted as an ABSENCE beside the
    words, or a build that kept both would pass on the words alone. */
-check("as weeks a row reads the week in words, and nothing marks this one twice", wk("2026-09-17").text === "This week" && wk("2026-09-24").text === "Next week" && wk("2026-10-01").text === "W40" &&
+check("as weeks a row reads the week in words, and nothing marks this one twice", wk("2026-09-17").text === "This week" && wk("2026-09-24").text === "Next week" && wk("2026-10-01").text === "W1 Oct" &&
   wk("2026-09-17").now === undefined && wk("2026-10-01").now === undefined, JSON.stringify(wk("2026-09-17")));
 check("...a late row says how late and nothing else", wk("2026-09-03").text === "Late 2 w" && wk("2026-09-03").late && wk("2026-09-14").text === "Late", wk("2026-09-03").text);
 check("...and Done is a day either way", whenText(shape({ ...lateRow, status: "done", done_day: "2026-09-15" }), TODAY).text === "Done Tue 15 Sep");
@@ -170,8 +184,8 @@ check("All holds everything", ids("all") === "abcdefg", ids("all"));
 check("Mine is what I own — and nothing else, since nobody is 'on' an action any more (§356.11)", ids("mine", ME) === "bdf", ids("mine", ME));
 check("...and a different me reads a different list", ids("mine", OTHER) === "eg", ids("mine", OTHER));
 const s = summary(rows, TODAY);
-check("the strip: 5 open · 2 late · 2 due this week (2 not started — f is done, so it is not owed) · 1 done this week",
-  s.open === 5 && s.late === 2 && s.dueWeek === 2 && s.dueWeekNotStarted === 2 && s.doneWeek === 1, JSON.stringify(s));
+check("the strip: 5 open · 2 late · 2 due this week (f is done, so it is not owed) · 1 done this week",
+  s.open === 5 && s.late === 2 && s.dueWeek === 2 && s.doneWeek === 1 && !("dueWeekNotStarted" in s), JSON.stringify(s));
 check("ONE RULE: the owner may change the action, the Super user may, and nobody else — being on the same team is not being on it",
   mayChange(rows[2], SUPER) && mayChange(rows[2], { personKey: "islam", seat: "smoteam" }) && !mayChange(rows[2], ME) && !mayChange(rows[2], OTHER) && mayChange(rows[2], { personKey: "hana", seat: "super" }));
 check("somebody the register has not placed may change nothing but as Super user", !mayChange(rows[2], { personKey: null, seat: "smoteam" }) && mayChange(rows[2], { personKey: null, seat: "super" }));
@@ -487,6 +501,28 @@ try {
     /* THE TWO SETTINGS BEHIND THE DOTS (§356.14): Group by has left the
        row; the menu is hidden until pressed, then names Owner and Weeks as
        what is in force. And the way back sits above the title. */
+    /* THE FOUR CARDS ARE ONE HEIGHT AND STAY THERE (§356.16). The fault was
+       the third card's own tail taking a second line and pushing all four
+       taller, so the page below shifted whenever somebody changed a status —
+       which is why the height is measured HERE and again after a status has
+       actually been changed, rather than asserted once on a still page. */
+    const tileHs = () => pg.evaluate("[...document.querySelectorAll('.strip .tile')].map(e=>Math.round(e.getBoundingClientRect().height)).join(',')");
+    /* MEASURED AS SLACK, NEVER AS A HEIGHT (§94.8), and never as "the four
+       agree": .strip is a grid, so it stretches every card to the tallest of
+       them whatever any of them asked for — an agreement assertion there
+       passes on a build with no floor at all (§113.8, found by falsifying).
+       What CAN fail is whether the box is HELD OPEN: the distance from the
+       last line's bottom to the card's own bottom edge, which is nought on a
+       card sized to its content and real on one carrying a floor. */
+    const tileSlack = () => pg.evaluate(`[...document.querySelectorAll('.strip .tile')].map(e=>{
+      const cs=getComputedStyle(e), last=e.lastElementChild;
+      const foot=parseFloat(cs.paddingBottom)+parseFloat(cs.borderBottomWidth);
+      return Math.round(e.getBoundingClientRect().bottom-(last.getBoundingClientRect().bottom+foot));
+    }).join(',')`);
+    check("every card is held open at the taller size rather than hugging its own line",
+      (await tileSlack()).split(",").length === 4 && (await tileSlack()).split(",").every((n) => Number(n) > 0), await tileSlack());
+    check("...and the due card says the week and no count of its own", (await pg.locator(".strip .tile:nth-child(3) span").innerText()).toLowerCase() === "due this week",
+      await pg.locator(".strip .tile:nth-child(3) span").innerText());
     check("the views row carries no Group by select any more, and a three-dots button", (await pg.locator(".gby").count()) === 0 && (await pg.locator("[data-act=settings]").count()) === 1);
     check("the menu is hidden until the dots are pressed", !(await pg.locator(".setmenu").isVisible()));
     await pg.locator("[data-act=settings]").click();
@@ -502,6 +538,24 @@ try {
        THIS WEEK'S THURSDAY by default (§356.14), the row reading the week in
        WORDS (§356.15) with nothing bold on it. */
     const real = todayIn(), thu = thursdayOf(real);
+    /* AT REST THE LINE IS THE PLUS AND THE BOX (§356.16, Islam's B of two
+       drawn): the week, the owner, the status and the arrow are invisible and
+       THEIR SPACE IS KEPT, so nothing moves under the hand when they arrive.
+       Both are asserted — invisible, and the box measured before and after the
+       first letter — because visibility alone is satisfied by a build that
+       removed them, which is the other option and the one he did not pick. */
+    const addBox = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();return Math.round(r.left)+','+Math.round(r.width)})()");
+    const restBox = await addBox(".addrow .tn");
+    check("the add line holds its details back until something is typed", !(await pg.locator(".addrow .when").isVisible()) &&
+      !(await pg.locator(".addrow .who").isVisible()) && !(await pg.locator(".addrow .st").isVisible()) &&
+      !(await pg.locator(".addrow [data-act=add-note]").isVisible()));
+    check("...and they are still drawn, so their place is held", (await pg.locator(".addrow .when").count()) === 1 &&
+      (await pg.evaluate("document.querySelector('.addrow .when').getBoundingClientRect().width")) > 0);
+    await pg.locator("#add").fill("x");
+    check("...the first letter brings them back, and nothing moved to make room", (await pg.locator(".addrow .when").isVisible()) &&
+      (await pg.locator(".addrow .who").isVisible()) && (await pg.locator(".addrow .st").isVisible()) &&
+      (await pg.locator(".addrow [data-act=add-note]").isVisible()) && (await addBox(".addrow .tn")) === restBox,
+      restBox + " -> " + (await addBox(".addrow .tn")));
     check("the add line opens on This week in words, owned by me", (await pg.locator(".addrow .when .wk").innerText()) === "This week" &&
       weekWord(real, real) === "This week" &&
       (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran");
@@ -529,7 +583,14 @@ try {
     check("...pressed again it folds AND empties, so nothing unseen can be posted", !(await pg.locator("#addnote").isVisible()) &&
       (await pg.evaluate("document.getElementById('addnote').value")) === "" &&
       !(await pg.evaluate("document.querySelector('.addrow [data-act=add-note]').classList.contains('on')")));
-    /* TAB FROM THE ACTION IS THE OTHER DOOR (§61). */
+    /* TAB FROM THE ACTION IS THE OTHER DOOR (§61) — and only once the line
+       has a name on it, or it would be the one detail the line did not hold
+       back (§356.16). */
+    await pg.locator("#add").fill("");
+    await pg.locator("#add").focus();
+    await pg.keyboard.press("Tab");
+    check("...Tab on an empty line opens nothing, since the arrow is not there either", !(await pg.locator("#addnote").isVisible()));
+    await pg.locator("#add").fill("x");
     await pg.locator("#add").focus();
     await pg.keyboard.press("Tab");
     check("...and Tab from the action opens it too", (await pg.locator("#addnote").isVisible()) &&
@@ -596,9 +657,15 @@ try {
     const full = (await asTenant(A, (c) => listActions(c))).find((r) => r.title === "Send the outcome to the managers");
     check("Enter from the note adds it all — next week's Thursday, Islam's, the note kept", !!full && full.due === nextThu && full.firstDue === nextThu && full.ownerKey === "islam" && full.description === "Ahmed's list first. Copy Noran." && await stayed(), JSON.stringify(full));
     const frow = '.row[data-id="' + (full && full.id) + '"] ';
-    check("...the line is cleared back to This week and me, with the note folded away again", (await pg.locator("#add").inputValue()) === "" &&
+    /* CLEARED means back to the line at rest: empty, the note folded, the
+       details held back again, and the week and owner back to their defaults
+       — read off the line rather than off the screen, because with nothing
+       typed there is deliberately nothing on the screen to read (§356.16). */
+    check("...the line is cleared back to This week and me, with the note and the details held back again", (await pg.locator("#add").inputValue()) === "" &&
       (await pg.evaluate("document.getElementById('addnote').value")) === "" && !(await pg.locator("#addnote").isVisible()) &&
-      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran" && (await pg.locator(".addrow .when .wk").innerText()) === "This week");
+      !(await pg.locator(".addrow .when").isVisible()) && !(await pg.locator(".addrow [data-act=add-note]").isVisible()) &&
+      (await pg.locator(".addrow").getAttribute("data-due")) === thu && (await pg.locator(".addrow").getAttribute("data-owner")) === "noran" &&
+      (await pg.evaluate("document.querySelector('.addrow .when .wk').textContent")) === "This week");
     /* Due NEXT week it is not on This week (inView), so it is read under All. */
     check("...and, due next week, it is not on This week", (await pg.locator(frow).count()) === 0);
     await pg.goto(base + "?view=all"); await settle();
@@ -628,9 +695,21 @@ try {
     await pg.locator("#add").fill("");
     await pg.locator(row + "[data-act=tick]").click(); await settle();
     check("the tick again puts it back to Not started", (await asTenant(A, (c) => oneAction(c, born.id))).status === "not_started");
-    /* THE STATUS SELECT, on change. */
+    /* THE STATUS SELECT, on change — and the cards are measured on EITHER SIDE
+       OF THIS PRESS, not at two far-apart moments that happen to agree: the
+       count on the old card moved with exactly this act, so a measurement taken
+       anywhere else proves nothing (§94.5, found by falsifying). */
+    const dueWords = () => pg.locator(".strip .tile:nth-child(3) span").innerText();
+    const tilesBefore = await tileHs(), wordsBefore = await dueWords();
     await pg.locator(row + "select[data-act=status]").selectOption("in_progress"); await settle();
     check("the status picker writes In progress", (await asTenant(A, (c) => oneAction(c, born.id))).status === "in_progress");
+    /* THE WORDS ARE ASSERTED BESIDE THE HEIGHT, because the words are the
+       cause: the card grew when its own tail took a second line. A height
+       compared alone passes on a build where the tail merely changed from
+       "2 not started" to "1 not started" — same two lines, same height, and
+       the defect still there (§113.8, found by falsifying). */
+    check("...and neither the cards' height nor the due card's words moved with it", (await tileHs()) === tilesBefore && (await dueWords()) === wordsBefore,
+      tilesBefore + " / " + wordsBefore + "  ->  " + (await tileHs()) + " / " + (await dueWords()));
     /* THE WEEK ON A ROW: the picker, No date, and a week two ahead — each
        read back out of Postgres as its Thursday. */
     await pg.locator(row + ".when.pick").click();
@@ -644,8 +723,8 @@ try {
       (await pg.locator(row).count()) === 0 && await stayed(), JSON.stringify(twoAhead));
     await pg.goto(base + "?view=all"); await settle();
     await pg.evaluate("window.__stay = 1");
-    check("...under All it reads that week's NUMBER, which is what the third week on is", (await pg.locator(row + ".when .wk").innerText()) === weekWord(addDays(thu, 14), real) &&
-      /^W\d+$/.test(weekWord(addDays(thu, 14), real)) && (await pg.locator(".wk.now").count()) === 0, weekWord(addDays(thu, 14), real));
+    check("...under All it reads that week's place in its MONTH, which is what the third week on is", (await pg.locator(row + ".when .wk").innerText()) === weekWord(addDays(thu, 14), real) &&
+      /^W[1-5] [A-Z][a-z]{2}$/.test(weekWord(addDays(thu, 14), real)) && (await pg.locator(".wk.now").count()) === 0, weekWord(addDays(thu, 14), real));
     /* EXACT DATES, from the dots: the rows read days, the choice is
        remembered, and the DATE BOX STAYS WHEN FOCUS LEAVES IT (§356.14) —
        which is what the calendar popup does, and where the pick was lost. */
@@ -728,9 +807,23 @@ try {
        control left on that row (both ends, §61). */
     await pg.locator(row + ".who.pick").click();
     const team = pg.locator(row + ".team");
+    /* COMPACT (§356.16): the width was a FLOOR in the stylesheet rather than
+       anything the names needed, so what is asserted is that the floor is gone
+       and the box is what its widest name needs plus the space the stylesheet
+       reserves around it — an agreement worked out from the page's own
+       padding, never a pixel count somebody typed (§94.8). */
+    const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('.team');if(!t)return null;var c=getComputedStyle(t);"
+      + "var w=Math.max(...[...t.querySelectorAll('button')].map(b=>b.scrollWidth));var bc=getComputedStyle(t.querySelector('button'));"
+      + "var slack=parseFloat(c.paddingLeft)+parseFloat(c.paddingRight)+parseFloat(c.borderLeftWidth)+parseFloat(c.borderRightWidth);"
+      + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width),need:Math.round(w+slack),"
+      + "row:Math.round(t.querySelector('button').getBoundingClientRect().height),pad:bc.paddingTop};})()");
     check("pressing my name opens the team, first names only and no heading", await team.isVisible() &&
       (await team.locator("button").allInnerTexts()).join("|") === "Islam|Noran|Omar" && (await pg.locator(row + ".who.pick").getAttribute("aria-expanded")) === "true",
       (await team.locator("button").allInnerTexts()).join("|"));
+    const fit = await teamFit();
+    check("...and the list is no wider than its longest name needs — the floor in the stylesheet is gone", !!fit &&
+      (fit.floor === "0px" || fit.floor === "auto") && fit.box === fit.need, JSON.stringify(fit));
+    check("...with rows short enough to be compact and tall enough to press", !!fit && fit.row <= 30 && fit.row >= 24, fit && fit.row);
     await pg.locator("h2.pt").click();
     check("a click elsewhere closes it and changes nothing", !(await team.isVisible()) && (await asTenant(A, (c) => oneAction(c, born.id))).ownerKey === "noran");
     await pg.locator(row + ".who.pick").click();

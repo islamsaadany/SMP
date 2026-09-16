@@ -43,6 +43,18 @@ const esc = (s: unknown) =>
 const plural = (n: number, one: string, many: string) => n + " " + (n === 1 ? one : many);
 const brk = () => process.env.SMP_BREAK || "";
 
+/* THE FALSIFICATION SWITCHES for the look (§276): each puts back exactly what
+   a decision removed, so a check that goes green with one of them on is a check
+   that was not asserting the decision. They are CSS appended after the
+   stylesheet, never edits inside it, so the shipped rules stay readable. */
+function brkCss(): string {
+  const b = brk();
+  if (b === "card-jumps") return ".tile{min-height:0}";                                         /* §356.16 put back */
+  if (b === "details-always") return ".addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:visible}";
+  if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
+  return "";
+}
+
 const CSS = `
 *{box-sizing:border-box}
 :root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
@@ -105,7 +117,15 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .none{padding:40px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
 .none b{color:var(--ink);font-weight:600;display:block;font-size:15.5px;margin-bottom:6px}
 .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
-.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+/* ONE HEIGHT, WHATEVER THE WORDS SAY (§356.16). Islam: "the change between the
+   status of the actions changes the size of the top cards ... the top cards
+   size should be fixed on the bigger size." Measured: the third card's own
+   tail took a second line and pushed all four 65 → 80px, so the whole page
+   below them shifted every time somebody changed a status. The tail is gone
+   (below) AND the height is fixed at the taller one, so no wording can move
+   them again — the two are separate, because a label that wraps at some
+   window nobody has tried would bring the jump straight back. */
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px;min-height:80px}
 .tile b{display:block;font-size:22px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
 .tile span{display:block;font:600 10.5px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
 .tile.late b{color:var(--bad)}
@@ -150,8 +170,14 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .who{font:600 12.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right;background:none;border:0;padding:0;position:relative}
 .who.pick{cursor:pointer;border-radius:6px;padding:3px 7px;margin:-3px -7px}
 .who.pick:hover,.who.pick.on,.who.pick:focus-visible{background:var(--surface-2);outline:none}
-.team{position:absolute;top:26px;right:0;z-index:5;min-width:140px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
-.team button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+/* COMPACT (§356.16). Islam: "the names list is wide for no reason make it
+   compact." Measured: 140px of box holding a longest first name of 69px, and
+   247px tall for seven people — the width was a FLOOR set here rather than
+   anything the names needed, so taking it off is what makes it narrow and the
+   rows are what make it short. 140 × 247 → 95 × 212, his pick of two drawn;
+   the tighter one took a row to 25px, under every other small control here. */
+.team{position:absolute;top:26px;right:0;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left}
+.team button{display:flex;width:100%;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
 .team button:hover,.team button:focus-visible{background:var(--ground);outline:none}
 .team button.on{font-weight:600}
 .team button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
@@ -178,9 +204,21 @@ select.st:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
    the week, the owner and the status never move (§356.14) */
 .addrow .tn{min-width:0;display:grid;gap:2px}
 .addrow input.nt{border:0;background:transparent;color:var(--ink-2);font:400 13px/1.4 var(--font);padding:0;width:100%;min-width:0;outline:none}
-.addrow .when,.addrow .who,.addrow .st{opacity:.55}
+/* THE DETAILS ARRIVE WITH THE FIRST LETTER (§356.16). Islam: "for the new
+   action remove the details until someone start typing the action name then
+   the details required to set appears to avoid the clutering." At rest the
+   line is the plus and the box and nothing else.
+   THEIR SPACE IS KEPT, WHICH IS HIS PICK OF TWO DRAWN: visibility rather than
+   display, so the typing box does not narrow under the hand the moment a
+   first letter lands — the cost, stated before he chose it, is that the right
+   of the line sits empty until then. TYPING is the trigger and not focus:
+   clicking into the box is not yet an action, and the cells cannot be pressed
+   while they are invisible anyway, so the week and the owner are set after
+   the name rather than before it — which is what the hint under the line now
+   says. */
+.addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:hidden}
 .addrow:focus-within,.addrow.typing{background:var(--surface)}
-.addrow:focus-within .when,.addrow:focus-within .who,.addrow:focus-within .st,.addrow.typing .when,.addrow.typing .who,.addrow.typing .st{opacity:1}
+.addrow.typing .when,.addrow.typing .who,.addrow.typing .st,.addrow.typing .more{visibility:visible}
 .addhint{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding:6px 2px 0 34px}
 /* the opened row is notes and history only — no Title box, no With */
 .open{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:12px 2px 6px 34px;border-bottom:1px solid var(--line);background:var(--surface)}
@@ -242,7 +280,7 @@ function skeleton(slug: string, tenantName: string, have: ModuleKey[], bar: stri
     "<title>" + esc(tenantName) + " &mdash; " + esc(MODULE_DEF.tracker.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    "<style>" + CSS.replace("%BAR%", bar) + "</style>\n</head>\n" +
+    "<style>" + CSS.replace("%BAR%", bar) + brkCss() + "</style>\n</head>\n" +
     "<body" + a + ">\n" +
     '<header class="bar">' + switcher(slug, have, "tracker") +
     "<h1>" + esc(MODULE_DEF.tracker.label) + "</h1>" +
@@ -439,7 +477,22 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
   const strip = '<div class="strip">' +
     '<div class="tile"><b>' + sum.open + "</b><span>Open</span></div>" +
     '<div class="tile' + (sum.late ? " late" : "") + '"><b>' + sum.late + "</b><span>Late</span></div>" +
-    '<div class="tile"><b>' + sum.dueWeek + "</b><span>Due this week" + (sum.dueWeekNotStarted ? " &middot; " + sum.dueWeekNotStarted + " not started" : "") + "</span></div>" +
+    /* NO COUNT ON THE CARD (§356.16, Islam: "in case of not started no need
+       for the naming on the card due is enough") — what is due this week is
+       the number above it, and how many of those have not been started is
+       read off the rows themselves. */
+    /* the break puts back the exact tail §356.16 removed, counted the way the
+       summary counted it, or "the cards did not move" is asserted against a
+       tail that never changes and the falsification proves nothing (§94.5).
+       ONE BREAK PER DECISION: card-count is the tail, card-jumps is the
+       floor — a break that did both would redden the other's assertions too
+       and neither would be isolated (§276). */
+    '<div class="tile"><b>' + sum.dueWeek + "</b><span>Due this week" + (() => {
+      if (brk() !== "card-count") return "";
+      const w = weekOf(today);
+      const n = all.filter((a) => a.status === "not_started" && !!a.due && a.due >= w.from && a.due <= w.to).length;
+      return n ? " &middot; " + n + " not started" : "";
+    })() + "</span></div>" +
     '<div class="tile"><b>' + sum.doneWeek + "</b><span>Done this week</span></div></div>";
   const count = plural(shown.length, "action", "actions") + (view === "week" ? " on this week" : "");
   const tools = '<div class="tools"><form method="get" action="' + esc(here) + '" role="search">' +
@@ -482,7 +535,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
       '<span class="st">Not started</span>' +
       '<button class="more" type="button" data-act="add-note" aria-expanded="false" aria-controls="addnote" aria-label="Add a note" title="Add a note">' + ARROW + "</button></div>"
     : '<div class="addhint">You are not on this client\'s register yet, so nothing can be owned by you here; open the client once more and it will be.</div>';
-  const hint = me ? '<div class="addhint">Enter adds it under you, due this week &middot; set its week or owner before Enter, or on the row after &middot; the arrow opens a note, here and on every row</div>' : "";
+  const hint = me ? '<div class="addhint">Enter adds it under you, due this week &middot; type the action and its week, owner and note appear on the line &middot; or set them on the row after</div>' : "";
   const none = !all.length
     ? '<div class="none"><b>Nothing on the list for ' + esc(p.tenantName) + ' yet.</b>The first line lands under you, due this week; pick another week on the line before Enter, or on the row after.</div>'
     : !shown.length

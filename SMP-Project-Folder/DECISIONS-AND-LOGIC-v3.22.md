@@ -48792,6 +48792,152 @@ which is the rule and reads oddly for a minute; the picker offers six weeks
 and *A day of my own…* for anything further; the title's own week label
 still says *13 Sep – 17 Sep* where the rows say W38.
 
+### §356.16 — THE WEEK BY ITS MONTH, CARDS THAT HOLD STILL, AND A LINE THAT ASKS LATER (2026-09-16)
+
+Islam, of the tracker as §356.15 left it, three messages:
+
+> for the week in the selection or the due week for the weeks after this week
+> and next week to have it W1 Oct or W3 Dec etc.
+
+> the names list is wide for no reason make it compact
+
+> the change between the status of the actions changes the size of the top
+> cards. the top cards size should be fixed on the bigger size .. and i ncase
+> of not started no need for the naming on the card due is enough
+>
+> for the new action remove the details until someone start typing the action
+> name then the details required to set appears to avoid the clutering
+
+**ALL FOUR WERE DRAWN BEFORE ANY OF THEM WAS BUILT** (rule 1c), in one
+alignment page made of the BUILT module's own stylesheet —
+`design-mockups/internal-tracker/2026-09-16_week-in-month-cards-and-add-line.html`,
+published as an artifact — with the two that had a real choice in them drawn
+three ways each and the cost of each stated on the page beside it. He answered
+both: *"for the new action line I'd go for B given that once I start typing the
+options appear correct? / for the name list option B is good."*
+
+#### The week by its month
+
+**THE RULE THE PLATFORM ALREADY HAD ANSWERS THE HARD CASE, WHICH IS WHY THIS
+IS FOUR LINES AND NOT A DATE LIBRARY.** §356.14 stores a week as its
+**Thursday**, so *which month owns a week that straddles two* was settled the
+day weeks were stored: the week of 27 Sep – 1 Oct has its Thursday on 1 Oct,
+so it is **W1 Oct**, and `Math.ceil(thursdayDate / 7)` is the place of that
+Thursday in its own month. **Both of Islam's own examples come out of that one
+line** — `2026-10-01 → W1 Oct`, `2026-12-17 → W3 Dec` — measured, not
+reasoned about, along with `2026-10-29 → W5 Oct` (a month can hold five) and
+`2026-09-10 → W2 Sep`.
+
+**§356.15's TWO WORDS ARE UNTOUCHED AND THE NUMBER BEHIND THEM GOES.** *This
+week* and *Next week* still read as themselves; what changes is the third week
+on, which read `W40` — the ISO week of the YEAR, a number nobody holds in their
+head — and now reads its place in a month anybody can find on a calendar.
+**The picker says the same words as the rows** (§53.5, §356.15's own rule
+carried forward), because `weekOptions` asks `weekWord` rather than spelling a
+week a second way.
+
+**WHAT IS LOST IS STATED**: the ISO number is gone from every screen, so two
+weeks four months apart can both read *W1*, which is the honest cost of a word
+that means something — the picker's own second line still names the days
+(`27 Sep – 1 Oct`), so the week is never ambiguous where it is being CHOSEN.
+
+#### The cards that would not hold still
+
+**THE CAUSE WAS MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a) and it is one
+label: the due card read *DUE THIS WEEK · N NOT STARTED*, that tail took a
+**second line**, and `.strip` is a grid — so every one of the four cards
+stretched to the tallest and the whole page below them shifted the moment
+somebody changed a status and the count moved. Islam saw the symptom on all
+four cards; only one of them was ever the cause.
+
+**IT IS TWO EDITS, DELIBERATELY, AND THE SECOND IS NOT REDUNDANT.** His own
+instruction removes the tail (*"no need for the naming on the card due is
+enough"*), which removes today's jump entirely — and a label that wraps at
+some window nobody tried would bring it straight back, so the cards also carry
+a **floor at the taller size**, which is the other half of what he asked for
+(*"fixed on the bigger size"*). Either alone leaves the fault reachable; the
+two are falsified separately (`card-count`, `card-jumps`) for exactly that
+reason.
+
+**AND THE ASSERTION I WROTE FIRST COULD NOT FAIL** (§113.8, found by
+falsifying rather than by reading): *"the four cards are one height"* is true
+of **every** build, because `.strip{display:grid}` stretches them to the
+tallest whatever any of them asked for — so a build with no floor at all
+passes it, and it passed on the broken build under both breaks. What CAN fail
+is whether a card is **held open**: the distance from its last line's bottom to
+its own bottom edge, which is nought on a card sized to its content and real on
+one carrying a floor. Measured as **slack, never as a height** (§94.8), it
+reads `15,15,15,15` shipped, `0,0,0,0` with the floor removed, and
+`15,15,0,15` with the tail put back — that last one naming the offending card
+by its position in the row.
+
+**AND THE JUMP ASSERTION NEEDED THE WORDS BESIDE IT.** Comparing the four
+heights either side of a status press is the reported symptom and it stayed
+green under the break, because the tail merely went from *2 not started* to *1
+not started* — same two lines, same height, the defect still there. The words
+are the CAUSE, so they are asserted beside the height, and the break then
+prints the whole thing verbatim.
+
+#### The names list
+
+**THE WIDTH WAS A FLOOR IN THE STYLESHEET RATHER THAN ANYTHING THE NAMES
+NEEDED** — `min-width:140px` on a list of first names whose longest measures
+69px, with rows of 34px. Islam is exactly right that it was wide for no
+reason. Three widths were drawn against the real names; he took **B**, which
+takes the floor off and tightens the row, over **C**, which went under every
+other small control on the page and would have been the one thing in the
+tracker too small to press comfortably.
+
+**WHAT IS ASSERTED IS THE AGREEMENT, NEVER A PIXEL COUNT** (§94.8): the floor
+is gone, and the box is exactly what its widest name needs plus the space the
+stylesheet reserves around it — worked out from the page's own padding, so a
+longer name or a changed padding stays green and a floor reintroduced goes red.
+The row height is asserted as a RANGE with both ends (§94.2): short enough to
+be compact, tall enough to press.
+
+#### The line that asks later
+
+**THE DETAILS ARE HELD BACK UNTIL THE ACTION HAS A NAME**, which is his
+*"avoid the clutering"*: at rest the add line shows one box and nothing else,
+and the first letter typed brings the week, the owner, the status and the
+note's arrow onto it.
+
+**ISLAM PICKED B, WHICH KEEPS THE SPACE** — `visibility`, never `display` —
+so nothing on the line moves when they appear and the line never jumps under a
+hand already typing. **A, which removes the space**, was drawn beside it and
+is the one that reads tidier at rest and shifts the box the moment somebody
+starts; the cost of each was on the drawing before he chose. His own question
+— *"given that once I start typing the options appear correct?"* — is exactly
+what it does.
+
+**CLEARED MEANS BACK TO REST**: after Enter the line empties, the note folds,
+and the details are held back again — asserted off the LINE rather than off
+the screen, because with nothing typed there is deliberately nothing on the
+screen to read.
+
+#### What it is proved by
+
+`checks/tracker.mjs` **228 passed, 0 failed**, and **RED THIRTEEN WAYS**
+(`npm run check:tracker:red`) — §356.11–§356.15's eight plus five of this
+round's own, every one made FROM THE SOURCES (§276): `week-of-year` puts the
+ISO number back (**6 red**, its first failure printing `W40 · W44 · W51`),
+`card-count` the tail (**3 red**), `card-jumps` the floor (**1 red**),
+`details-always` the standing details (**2 red**) and `wide-names` the
+stylesheet floor (**2 red**). **One break per decision** — the two card breaks
+overlapped at first, so `card-jumps` reddened `card-count`'s assertions and
+neither was isolated.
+
+Neighbours: `check:modules` **100/0**, `generated-in-step` **all clear**,
+`built-in-step.py` all good, `tsc` clean but for `lib/prisma.ts`'s pre-existing
+error. **The frozen product is untouched** — no `src/` file, no built file, no
+carried `.cjs` — so there is no rebuild and `sw.js` is not bumped (§91's
+trigger is the built file's bytes changing, and they did not).
+
+**RECORDED, NOT DONE**: the picker's own second line still names the days,
+which is what keeps two *W1*s apart, and nothing else on a screen does; and the
+add line's details appear on the first keystroke, so a line typed and then
+emptied leaves them standing until Escape or Enter.
+
 ### §356.15 — THE NOTE IS ASKED FOR, AND THE WEEK IS IN WORDS (2026-09-16)
 
 Islam, of the built tracker, two things in one message:

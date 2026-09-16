@@ -9825,7 +9825,10 @@ drop a whole block of the record with nothing able to go red; there is no
 `generated-in-step` for prose.*
 **RECORDED, NOT DONE**: the tracker's own date control is untouched &mdash; it
 is the same control and could take this, and it is a module this round was not
-asked about (rule 1b), so it is flagged rather than swept.*
+asked about (rule 1b), so it is flagged rather than swept.
+**Merged to `main` 2026-09-16** &mdash; and the merge itself carries this line,
+because &sect;91's way round the deduplication is *a commit `main` holds and the
+branch does not*, and the record owed the line anyway (&sect;356.17).*
 *Earlier the same day: **&sect;356.15: the note is asked for, and
 the week is in words (spec 054).** Islam, of the built tracker: *"1. a note
 should be an option not a common thing in the actions tell me my options to add

@@ -49384,6 +49384,15 @@ quietly realigned (§356.17's own rule, whose finding this is for the second
 time). *A merge can drop a whole block of the record with nothing able to go
 red — there is no `generated-in-step` for prose.*
 
+**Merged to `main` 2026-09-16, on Islam's word, on that merge** (§4). The
+branch already held this round's commit when he gave it, so a fast-forward
+would have handed Vercel a SHA it had already built as a PREVIEW — §91's
+deduplication, which order alone does not fix once the branch has the commit
+(§91.4, §107.15). **So the merge carries a commit `main` holds and the branch
+does not**, which is §91's own way back — and it is one worth making rather
+than ceremony (§24), because it is the merge line the record owed anyway
+(§356.17).
+
 ---
 
 ## §358 — ATTACH THE FILE, THEN CHOOSE THE EXIT (2026-09-16)

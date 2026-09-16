@@ -9597,7 +9597,7 @@ bumped** (&sect;91) &mdash; and it reaches the offline copy alone, the served
 worker holding `SHELL` nought times (&sect;329). **The frozen browser checks
 could not be run in this container and it is said rather than left as an
 absence** (&sect;54.5): no python playwright, so `qa-run.py` cannot launch.
-**On the branch, not merged.***
+**Merged to `main` 2026-09-16.***
 
 *Earlier: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
 Internal Tracker's row, redrawn at Islam's word and built (spec 054).** Islam,
@@ -9652,7 +9652,7 @@ caught only because the question was asserted ABSENT before the press
 2 / 3 / 2 under its breaks; `modules` 100/0; `insights` 127/0;
 `memory-boundary` 14/0; `generated-in-step` all clear; `tsc` clean but for
 `lib/prisma.ts`'s pre-existing error. **The frozen product is untouched**, so
-`sw.js` is not bumped. **On the branch, not merged.** **RECORDED, NOT DONE**:
+`sw.js` is not bumped. **Merged to `main` 2026-09-16.** **RECORDED, NOT DONE**:
 the switcher lists it for a client's person until spec 046 &sect;4.4's tab
 exists; a module is turned ON per client from the card; Notes is next.*
 

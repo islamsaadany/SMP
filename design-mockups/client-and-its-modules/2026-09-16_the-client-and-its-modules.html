@@ -130,6 +130,9 @@
   .pane{ background:var(--surface); border:1px solid var(--line);
          border-radius:9px; padding:14px 15px; min-width:0; }
   .ptitle{ font:600 15px/1.3 var(--sans); color:var(--ink); margin:0 0 11px; }
+  /* a table may outrun a phone; it scrolls in its own box rather than
+     pushing the page sideways */
+  .pane{ overflow-x:auto }
   table{ width:100%; border-collapse:collapse; }
   th{ background:var(--panel); color:var(--panel-ink); text-align:left;
       font:600 9px/1.7 var(--mono); letter-spacing:.09em; text-transform:uppercase;
@@ -183,6 +186,23 @@
   .note li b{ color:var(--note-strong); font-weight:600; }
   .note li.no b{ color:var(--bad) }
 
+  .count{ font:500 11.5px/1.5 var(--mono); color:var(--ink-3); margin:-4px 0 10px; }
+  .count span{ color:var(--line) }
+  .foot{ font:400 12px/1.6 var(--sans); color:var(--ink-3); margin:11px 0 0;
+         padding-top:9px; border-top:1px solid var(--line-soft); }
+  .foot b{ color:var(--ink-2); font-weight:600 }
+  .says{ font:400 12.5px/1.6 var(--sans); color:var(--ink-2); margin:-4px 0 11px;
+         background:var(--over-bg); border:1px solid var(--over-line);
+         border-radius:7px; padding:8px 11px; }
+  .says b{ color:var(--ink); font-weight:600 }
+  tr.ff td{ background:var(--surface-2) }
+  td.na{ color:var(--ink-3) }
+  td.act{ font:500 11px/1.5 var(--sans); color:var(--gold-deep); white-space:nowrap }
+  .src{ font:600 8.5px/1.5 var(--mono); letter-spacing:.09em; text-transform:uppercase;
+        color:var(--ink-3); border:1px solid var(--line); border-radius:4px;
+        padding:1px 5px; margin-left:5px; vertical-align:1px; }
+  .split.one{ grid-template-columns:1fr }
+  .sub{ margin-top:16px }
   .rule{ border:0; border-top:1px solid var(--edge); margin:0 }
 
   .decide{ background:var(--card); border:1px solid var(--edge); border-radius:10px;
@@ -289,6 +309,7 @@
         <div class="rail">
           <div class="rgrp">Who</div>
           <div class="ritem"><span class="g">◐</span>Client set-up</div>
+          <div class="ritem"><span class="g">◆</span>Forefront team</div>
           <div class="ritem on"><span class="g">☰</span>People register</div>
           <div class="ritem"><span class="g">▦</span>Official BU list</div>
           <div class="rgrp">What it runs</div>
@@ -305,15 +326,41 @@
         </div>
         <div class="pane">
           <p class="ptitle">People register</p>
+          <p class="count">33 of the client&rsquo;s own people <span>&middot;</span> 3 from Forefront</p>
           <table>
             <tr><th>Name</th><th>Unit</th><th>Roles</th><th>Seat</th></tr>
-            <tr><td><b>Ramy Behairy</b></td><td>Mobile</td><td><span class="chip">Unit owner</span></td><td>—</td></tr>
-            <tr><td><b>Hala Sabry</b></td><td>CX</td><td><span class="chip">Custodian</span></td><td>—</td></tr>
-            <tr><td><b>Islam Saadany</b></td><td>The group</td><td><span class="chip">SMO</span></td><td><span class="chip seat">Super user</span></td></tr>
+            <tr><td><b>Ramy Behairy</b></td><td>Mobile</td><td><span class="chip">Unit owner</span></td><td>&mdash;</td></tr>
+            <tr><td><b>Hala Sabry</b></td><td>CX</td><td><span class="chip">Custodian</span></td><td>&mdash;</td></tr>
+            <tr><td><b>Yara Kamal</b></td><td>Marketing</td><td><span class="chip">Function head</span></td><td>&mdash;</td></tr>
+            <tr class="ff"><td><b>Islam Saadany</b> <span class="src">Forefront</span></td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="chip seat">Super user</span></td></tr>
+            <tr class="ff"><td><b>Noran Essam</b> <span class="src">Forefront</span></td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="chip seat">SMO team</span></td></tr>
           </table>
+          <p class="foot">The last two are read from <b>Forefront team</b> &mdash; shown here,
+            edited there. No unit, no role, no password on our own rows.</p>
         </div>
       </div>
     </div>
+    <div class="sub">
+      <div class="cap"><b>2b · Forefront team</b><span class="tag new">new entry</span>
+        <span class="addr">/raya-trade/setup/team</span></div>
+      <div class="frame"><div class="split one">
+        <div class="pane">
+          <p class="ptitle">Forefront team</p>
+          <p class="says">These settings belong to the <b>Super user</b> and the
+            <b>SMO team</b> &mdash; the two seats below, and nobody else.</p>
+          <table>
+            <tr><th>Name</th><th>Email</th><th>Seat</th><th></th></tr>
+            <tr><td><b>Islam Saadany</b></td><td>islam.saadany@forefront.consulting</td>
+                <td><span class="chip seat">Super user</span></td><td class="act">Change seat</td></tr>
+            <tr><td><b>Noran Essam</b></td><td>noran.essam@forefront.consulting</td>
+                <td><span class="chip seat">SMO team</span></td><td class="act">Change seat &middot; Remove</td></tr>
+          </table>
+          <p class="foot">One place a consultant is added, seated and removed. The
+            register shows them; this is where they change.</p>
+        </div>
+      </div></div>
+    </div>
+
     <div class="note">
       <h4>What is drawn, and what is not</h4>
       <ul>
@@ -322,6 +369,10 @@
         <li><b>Save &amp; close</b>, which returns to the console.</li>
         <li class="no">No <b>house mark</b>, no <b>Group dropdown</b>, no <b>Units | Functions</b>,
           no <b>row of units</b>, no <b>tabs</b>, no <b>module switcher</b>.</li>
+        <li><b>Forefront team</b> is the store: one place a consultant is added, seated
+          and removed. The register <b>reads</b> from it — shown there, edited here, so a
+          seat holder can never also be given a client role.</li>
+        <li>The <b>count says both</b> rather than one number quietly meaning two things.</li>
         <li><b>Terminology</b> is the same page Strategy opens — one page, two doors, never
           two copies that sync.</li>
         <li><b>Outgoing email</b> is the address, the name and the footer. The inbox and
@@ -389,8 +440,10 @@
     <ol>
       <li><b>The client’s settings wear the client’s bar and nothing else</b> — mark, name,
         Save &amp; close.</li>
-      <li><b>The rail as grouped above</b>, including the three new entries: Terminology,
-        Outgoing email, History. <i>Outgoing email</i> is a proposed name.</li>
+      <li><b>The rail as grouped above</b>, including the four new entries: Forefront team,
+        Terminology, Outgoing email, History. <i>Outgoing email</i> is a proposed name.</li>
+      <li><b>Forefront team is where a consultant is added and seated; the register reads
+        from it</b> and shows them read-only, with no unit, no role and no password.</li>
       <li><b>Back is Save &amp; close, and it lands on the console.</b></li>
       <li><b>Nobody’s access moves</b> on the day this ships — it is a re-housing, never
         a re-granting, and it will be asserted rather than promised.</li>

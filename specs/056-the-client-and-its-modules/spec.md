@@ -67,9 +67,10 @@ conversation.
 **Reached from the console's card, by *Settings*.** Unchanged from spec 055.
 
 **What is on it:** the client's name, its mark and its colours; the rail we
-agreed (*Getting started* / *Client set-up*, People register, Official BU
-list, Business units, Companies, Functions, Capabilities); the page; and
-**Save & close, which returns to the console**.
+agreed (*Client set-up*, **Forefront team**, People register, Official BU
+list, Business units, Companies, Functions, Capabilities, Terminology,
+Outgoing email, History); the page; and **Save & close, which returns to the
+console**.
 
 **What is NOT on it — the whole of the complaint:** no house mark into a
 module, no Group dropdown, no Units | Functions switch, no row of
@@ -91,6 +92,57 @@ people** — stated because it decides nothing gets stranded:
 
 **Branding** is already absorbed into *Getting started* (spec 055) and stays
 there: it describes the client, and every module wears it.
+
+## 3a · Forefront team, and the register that reads from it
+
+Islam, of the drawing's register showing a consultant beside the client's own
+people: *"the client setting has no custodian or owner, it has only the super
+user and the smo team"*, then *"a consultant shouldn't be on the register one
+role is enough"*, and then — his own revision, which is the decision —
+*"how about the forefront team is a separate view as you did but we keep them
+on the client list reading from the forefront team list."*
+
+**Forefront team is the store; the register is a reader.** Written out
+because the pattern is §9's, a fifth time: **one store, one place to edit,
+more than one place to read.**
+
+- **Forefront team** is its own entry under *Who*, above the register. It is
+  the ONE place a consultant is added, given a seat, or removed. It exists
+  today inside the set-up flow (spec 044), so this is mostly a move: people
+  join and leave an account team all through an engagement, which is not a
+  one-off.
+- **The register shows them too**, read from that list, so there is still one
+  screen showing everybody who can touch this client — and one search box
+  that finds all of them.
+- **On the register a consultant is READ-ONLY and marked as ours.** Their role
+  there IS their seat. **One role is enough**, enforced by the platform rather
+  than by whoever is typing: a seat holder can never also be given a client
+  role from the register.
+- **The columns that mean nothing for them are blank and say so** — no unit,
+  no Official BU, no Emp ID — and **no password controls on their row**, which
+  the server already refuses (§89): a row must not offer what the save will
+  turn down.
+- **The count says both**: *33 of the client's own people · 3 from Forefront*,
+  rather than one number quietly meaning two things.
+
+**The name is Islam's**, and it is deliberately not *SMO team*: that is also
+the name of one of the two seats, so a table called it would hold Super users
+too and say one word meaning two things (§87's twins).
+
+**What must NOT be done without its own piece of work, said plainly.** A
+consultant's standing on a client IS a minted register row today — it is how
+the platform knows they hold the seat, how a plan can name them, and how the
+state API places them. Removing the row is the live defect fixed on
+2026-09-12 (§338, §316.9), where an office person opening a client was told
+*"You are not on this client's register yet"* for ever, on every client. So
+the row stays and the TABLE changes. Making the row genuinely go would mean
+the door, the landing and the state API resolving a consultant another way,
+and it is its own item.
+
+**One thing to check when it is built:** §313.32 lets an office account whose
+email matches exactly one active register row ADOPT that row, for a client
+whose register the platform did not build. Under this rule that path needs
+re-reading — it is the one way a human could end up meaning both things.
 
 ## 4 · Who may open it
 
@@ -121,10 +173,14 @@ including the smo office."*
 
 **That page does two jobs today, and separating them is what makes it safe.**
 
-- **The rows — who the people are — are the CLIENT'S.** Super user and SMO
-  team come from the two seats. Group CEO, company CEO, business unit owner,
-  function head and custodian come from the client's register and from the
-  units and functions pages. One list, defined once, read by every module.
+- **The rows — who the people are — are the CLIENT'S.** Islam, checking it
+  back: *"the people registry and their roles is a client wide thing not a
+  module thing but the access and roles view page is per module."* Exactly
+  that. Super user and SMO team come from the two seats (read from Forefront
+  team, §3a). Group CEO, company CEO, business unit owner, function head and
+  custodian come from the client's register and from the units and functions
+  pages. One list, defined once, read by every module — **and the register
+  keeps its roles column, because that is where a client role is given.**
 - **The columns — what each may reach — are the MODULE'S.** Strategy's are
   the group, a unit, a function, the cycle, its own settings. Insights
   declares its own. A module may also add ROWS its own work creates: project
@@ -142,6 +198,16 @@ day this ships.** Every shipped default stays what it is; every client's
 stored matrix goes on meaning what it meant (§30.2). This is a re-housing,
 never a re-granting. The check must compare, for every person and every page,
 what they could open before and after — and require them equal.
+
+**A REVERSAL WITHDRAWN, RECORDED RATHER THAN DELETED (Principle II).** Between
+his two messages this spec briefly proposed the opposite — that the roles are
+the MODULE'S and the client level holds only people, places and the two seats
+— on an over-reading of *"the client setting has no custodian or owner"*. That
+sentence is about **who may open the client's settings** (§4), not about where
+roles live. The proposal was withdrawn on his correction. What survives from
+it and is right: a module may add ROWS its own work creates — project owner,
+pillar owner and contributor are derived from Strategy's plan naming somebody,
+so they are Strategy's rows and appear on no other module's table.
 
 ## 6 · Terminology — one page, two doors
 
@@ -279,5 +345,10 @@ same time (§345, `specs/046-modules/repo-boundary.md`).
   asserted as an AGREEMENT with the log rather than against a typed list
   (§94.8); the derivation's unknown kind lands on the client tab.
 - **The client's colours and mark are on the page** (Islam's (c)).
+- **Forefront team is the only place a consultant changes**: the register
+  draws them read-only with no unit, no role picker and no password control,
+  and a seat holder cannot be given a client role from it — asserted at both
+  ends, or a build that simply dropped them from the register passes half
+  (§94.2). The search finds them from the register's own box.
 - Each claim proved able to fail from the SOURCES before its green run is
   believed (§276, §94.5).

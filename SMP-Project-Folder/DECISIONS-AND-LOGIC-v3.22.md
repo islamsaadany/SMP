@@ -47976,3 +47976,108 @@ row" assertion is unchanged, so the product cannot produce that error on any
 path a person can take. **What is NOT claimed**: it was green on main with the
 same synthetic event, so the repaint's scope depends on the data — which
 difference widened it is not established, and does not need to be.
+
+---
+
+## §357 — ATTACH THE FILE, THEN CHOOSE THE EXIT (2026-09-16)
+
+Islam, of the Insights report editor: *"why shall I save the draft then add the
+file not in the same action?"* — then, better than either option put to him:
+*"I don't upload and publish, save a draft is just an option. The normal
+behavior is I attach the file, the box showed that it was uploaded succesfully
+and I either save draft for later publishing or publish."*
+
+**HALF OF THE TWO-STEP IS NECESSARY AND HALF IS NOT, AND SEPARATING THEM IS THE
+WHOLE SECTION.** The store path is built on the SERVER from the report's own id
+and is never sent by a browser — a browser that could name it could write over
+another client's file however good the guards above were — so a row must exist
+before any piece of the file can be written (`libraryUploadBegin` resolves the
+item first). That rule does not move and nothing here touches it. What it does
+not say is that the PERSON presses twice.
+
+**THE CARD ALREADY HAD THE ANSWER TWO ROWS DOWN.** `saveReport(true)` — Publish
+— saves the form and then publishes, two requests behind one press; the upload
+is already four requests behind one press, because a function refuses a body
+over 4.5MB (&sect;261). *One press over several requests is this card's own
+idiom*, and the file button was the one place it was not applied (&sect;53.5).
+So `sendFile` saves the draft itself when there is no row. Saving a draft stops
+being a turnstile and becomes one of two ways of FINISHING.
+
+**ONE GATE SURVIVES AND IT IS THE ONE ABOUT THE REPORT.** Publish was held two
+ways — *"Save it first"* and *"Add the file first"* — and the first is the
+machinery's reason rather than the report's. It is also unreachable: a report
+with no row has no file either, so `!it.hasFile` already covered it. What is
+left is the only refusal a reader would recognise.
+
+**THE TITLE IS THE ONE THING THAT MUST BE THERE**, and it is the server's own
+rule (`librarySave` refuses without one) rather than the file's: a draft with no
+title is a row nobody can pick out of the list. **Said and focused rather than
+refused at the press** (&sect;221, &sect;61) — the thing that is missing is one
+field on the same card — and it posts NOTHING, or the one press would put an
+unfindable row in the library.
+
+**§357.1 — AN ABANDONED DRAFT WARNS, AND HALF OF THAT WAS ALREADY BUILT.**
+Islam: *"an abandoned draft should warn and that's it"* — no cleanup, no expiry.
+One correction to it, and it changes what the warning may SAY: by the time a
+draft can be abandoned the row is saved and the file is in the store, which is
+what lets the strip say *uploaded* — so *"you will lose this"* would be false,
+and a warning people learn is false is worse than none. **Drawn rather than
+argued** (&sect;266), and drawing it found that the drafts list already marks an
+unpublished report twice — the amber `Draft` tag and *not published* at the end
+of the fact line. Islam took **B**: the list's existing mark, and no new control.
+**Nothing was built for the warning.** The line on the way out is recorded as
+offered and not taken.
+
+**§357.2 — &sect;329'S CHECK CAUGHT THE EDIT IN THE WRONG FILE, WHICH IS WHAT IT
+IS FOR.** `smp-app/public/platform-page.js` is GENERATED from the repository
+root's `platform.html` by `scripts/build-shell.mjs` and is TRACKED, and the first
+build of this went into the generated copy — where the next generator run would
+have silently undone it. Reverted, applied to the source, regenerated. *A
+generated file that is committed reads exactly like a source file.*
+
+**§357.3 — AND THE CHECK HELD THE SENTENCE THIS REMOVES** (&sect;214.3, and
+&sect;218's rule for what to do about it): `publishing-room.py` asserted
+*"the file control says what has to happen first"* with `"Save it first" in
+fileWhy`. **REWRITTEN, NEVER LOOSENED, AND INVERTED WHERE THE DECISION INVERTED**
+— the file control LIVE on a report that has never been saved, Publish still
+held and now naming the FILE, and nothing on the card telling anybody to go and
+save something first. **Both ends** (&sect;94.2), or a build that simply opened
+everything would pass the half above. A new §8 asserts the behaviour itself: one
+press posts `librarySave` and THEN `libraryUploadBegin`, in that order, with the
+pieces addressed to the id the save returned (&sect;48) — and, the other end, a
+report that ALREADY has a row is NOT saved a second time by attaching, which
+would overwrite the stored form with whatever sits in the boxes of a card
+somebody opened only to replace a file.
+
+**§357.4 — TWO OF THE NEW SECTION'S OWN FAULTS WERE THE CHECK.** It asserted
+*"posts NOTHING"* against the whole recorder and `open_room()` is three reads of
+its own, so it failed on a build behaving perfectly (&sect;100.3) — it asks for
+no `librarySave`, `libraryUploadBegin` or `libraryUploadFinish` now. And **the
+first falsification DIED rather than reporting** (&sect;215, in the file whose
+own docstring promises every wait degrades): on the old build the strip never
+names the file, so `wait_for_function` threw a stack trace with **no failures
+printed**, on precisely the build the section exists to catch. Both waits
+degrade; falsified from the SOURCES (&sect;276) it is **11 red**, the reported
+two-step first among them.
+
+**VERIFIED**: `publishing-room.py` 48/0 (11 red reverted) · `insights.mjs` 93/0
+against a real Postgres 16 · `platform-cards`, `client-setup-outside`,
+`client-archive` 0 failures · `built-in-step` all good, the shipped platform
+byte-identical (no file under `SMP-Project-Folder/src/` is touched, so
+&sect;91's shell bump is not triggered) · `generated-in-step` every served copy
+byte-identical to its generator. **Two reds are NOT this work's and were
+established by reproducing them on the reverted build first** (&sect;303):
+`modules.mjs` 69/1 — *"the band is drawn BEFORE the two columns"*, which is
+&sect;322.1's carried module band awaiting Islam's look, identical either side
+of this change — and `tsc`'s one `lib/prisma.ts` error, which &sect;336 already
+records as pre-existing.
+
+**The mockup is `design-mockups/insights/2026-09-16_attach-then-choose.html`**,
+made of `smp-app/shell/platform.html`'s `<style>` verbatim and signed off before
+a source moved (rule 1c).
+
+**RECORDED, NOT DONE**: a held `Publish` is drawn exactly like a live one,
+because the console styles no held state — so &sect;221's *"aria-disabled, never
+disabled, so the reason stays reachable"* is satisfied and invisible until
+somebody hovers. Found by rendering the mockup, named in its last panel, and
+left as its own round on Islam's word rather than folded in here (rule 1b).

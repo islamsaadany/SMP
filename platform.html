@@ -2209,21 +2209,29 @@
 
     /* THE FILE STRIP. A report with no file yet says so rather than drawing
        an empty box: there is one act here and its word says which it is
-       (§124). A report that has never been saved has no id for a piece to be
-       written against, so the control says what has to happen first rather
-       than failing at the press (§61, §221). */
+       (§124).
+
+       AND IT IS LIVE ON A REPORT THAT HAS NEVER BEEN SAVED (§357). It used to
+       be switched off with the strip saying "save it first", because the store
+       path is built from the report's own id and a report with no row has no
+       id for a piece to be written against. That is still true of the SERVER
+       and was never true of the person: `sendFile` saves the draft itself when
+       there is no row, exactly as Publish two rows below has always saved the
+       form before publishing (§53.5 — one press over several requests is this
+       card's own idiom, and the file button was the one place it was not
+       applied). Attaching is the ordinary act; saving a draft and publishing
+       are the two ways of finishing, and neither stands in front of it. */
     var fb = el("div");
     fb.appendChild(el("span", "lab", "The file"));
     var drop = el("div", "filestrip");
     drop.appendChild(el("span", "fname", it.hasFile
       ? it.fileName + (it.sizeLabel ? " · " + it.sizeLabel : "")
-      : (isNew ? "Save it first, then add the file." : "No file yet.")));
+      : "No file yet."));
     var fsp = el("span", "sp");
     var pick = el("input"); pick.type = "file"; pick.accept = "application/pdf,.pdf";
     pick.style.display = "none";
     var fbtn = el("button", "btn", it.hasFile ? "Replace" : "Add the file");
     fbtn.type = "button";
-    if (isNew) fbtn.disabled = true;
     fbtn.addEventListener("click", function () { pick.click(); });
     pick.addEventListener("change", function () {
       var f = pick.files && pick.files[0];
@@ -2271,9 +2279,14 @@
          into the client's library as a row with no way to open it (§61). */
       var pub = el("button", "btn amber", "Publish to " + LIB.client);
       pub.type = "button";
-      if (isNew || !it.hasFile) {
+      /* ONE GATE NOW, AND IT IS THE ONE ABOUT THE REPORT (§357). The `isNew`
+         arm said "Save it first", which was the machinery's reason rather than
+         the report's — and it is unreachable anyway, because a report with no
+         row has no file either, so `!it.hasFile` already covers it. What
+         survives is the only refusal a reader would recognise. */
+      if (!it.hasFile) {
         pub.setAttribute("aria-disabled", "true");
-        pub.title = isNew ? "Save it first." : "Add the file first — a report with nothing to open is not a report.";
+        pub.title = "Add the file first — a report with nothing to open is not a report.";
       }
       pub.addEventListener("click", function () {
         if (pub.getAttribute("aria-disabled") === "true") { say(pub.title, true); return; }
@@ -2329,17 +2342,58 @@
        says it. */
     function sendFile(f, strip, btn) {
       if (LIB.busy) return;
+
+      /* THE ROW FIRST, WHERE THERE IS NOT ONE YET (§357). The store path is
+         built on the server from the report's own id and is never sent by a
+         browser, so a piece cannot be written against a report that has no
+         row. That is the whole of why this used to be two acts — and it is a
+         fact about the SERVER, so it is answered here rather than by asking
+         the person to press something first.
+
+         THE TITLE IS THE ONE THING THAT MUST BE THERE, and it is the same
+         rule `librarySave` already enforces: a draft with no title is a row
+         nobody can pick out of the list. SAID AND FOCUSED rather than refused
+         at the press, because the thing that is missing is one field on this
+         very card (§221, §61). */
+      var d = draft();
+      if (!it.id && !d.title.trim()) {
+        say("A report needs a title.", true);
+        try { title.focus(); } catch (e) {}
+        return;
+      }
+
       var was = btn.textContent;
       var nameCell = strip.querySelector(".fname");
+      /* Set only once the row exists, so a card whose save failed is redrawn
+         to say what is actually stored rather than left claiming "Not saved
+         yet" over a draft that is now in the list (§96). */
+      var made = false;
       LIB.busy = true; btn.disabled = true; btn.textContent = "Reading…";
 
       var fail = function (msg) {
         LIB.busy = false; btn.disabled = false; btn.textContent = was;
         nameCell.textContent = it.hasFile ? it.fileName + (it.sizeLabel ? " · " + it.sizeLabel : "") : "No file yet.";
         say(msg, true);
+        if (made) settle(paintOneReport);
       };
 
-      post({ action: "libraryUploadBegin", key: LIB.key, kind: LIB.kind,
+      /* `it` AND `LIB.one` BOTH, or the pieces are addressed to an id the
+         card does not hold: `it` is what the rest of this function reads and
+         `LIB.one` is what a repaint draws (§48). */
+      var haveRow = it.id ? Promise.resolve(true)
+        : post({ action: "librarySave", key: LIB.key, kind: LIB.kind,
+                 title: d.title, summary: d.summary,
+                 categories: d.categories, reportDate: d.reportDate })
+            .then(function (j) {
+              if (!j || !j.ok) { fail((j && j.error) || "It could not be saved, so the file was not sent."); return false; }
+              it = LIB.one = j.item;
+              made = true;
+              return true;
+            });
+
+      haveRow.then(function (go) {
+        if (!go) return;
+        return post({ action: "libraryUploadBegin", key: LIB.key, kind: LIB.kind,
              id: it.id, name: f.name, bytes: f.size }).then(function (b) {
         if (!b || !b.ok) { fail((b && b.error) || "The upload could not be started."); return; }
         var piece = b.piece || (3 * 1024 * 1024);
@@ -2385,6 +2439,7 @@
             });
         };
         return step(1);
+      });
       }).catch(function (e) {
         if (String(e.message) === "sign in") return;
         fail("Could not reach the server. The file was not uploaded.");

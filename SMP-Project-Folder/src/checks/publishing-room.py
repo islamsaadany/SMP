@@ -294,10 +294,21 @@ def run():
           return { pubHeld: b.getAttribute('aria-disabled'), pubWhy: b.title,
                    fileOff: f.disabled, fileWhy: (document.querySelector('.filestrip .fname')||{}).textContent };
         }""")
-        check("Publish is HELD on a report that has never been saved, and says why",
-              held["pubHeld"] == "true" and held["pubWhy"], held)
-        check("...and the file control says what has to happen first (§61, §221)",
-              held["fileOff"] and "Save it first" in (held["fileWhy"] or ""), held)
+        # §357 REWRITTEN, NEVER LOOSENED (§218, §214.3). Both of these asserted
+        # the two-step: Publish held because nothing was SAVED, and the file
+        # control switched off saying "Save it first". Attaching is the
+        # ordinary act now and saving a draft is one of two ways of FINISHING,
+        # so what must hold is the opposite on one line and NARROWER on the
+        # other — the one refusal that survives is about the report rather
+        # than about the machinery. Asserted at BOTH ENDS (§94.2): the file
+        # control live, AND Publish still shut, or a build that simply opened
+        # everything would pass the half above.
+        check("Publish is HELD on a report with nothing to open, and names the FILE",
+              held["pubHeld"] == "true" and "Add the file first" in (held["pubWhy"] or ""), held)
+        check("...and the file control is LIVE on a report that has never been saved (§357)",
+              held["fileOff"] is False and "No file yet" in (held["fileWhy"] or ""), held)
+        check("...and nothing on the card tells anybody to go and save something first",
+              "Save it first" not in ((held["fileWhy"] or "") + (held["pubWhy"] or "")), held)
         press(pg, "Save the draft", ".byline")
         pg.wait_for_function("""() => document.querySelectorAll('.erow').length === 1 ||
           (document.querySelector('.ecard h2')||{}).textContent === 'Governance Review: Board Reporting Practice'""", timeout=9000)
@@ -486,6 +497,81 @@ def run():
               told["btn"] in ("Add the file", "Replace"), told)
         check("...and not one piece was sent", not SCENE["pieces"], SCENE["pieces"])
         SCENE["store"] = True
+
+        # ══ 8 · attaching on a report nobody saved (§357) ═════════════
+        print("\n8 · one press: the draft is saved, then the file is sent (§357)")
+        SCENE["items"] = []; SCENE["sent"] = []; SCENE["pieces"] = []
+        open_room()
+        press(pg, "Publish a report", ".ptitle")
+        pg.wait_for_selector(".ecard", timeout=9000)
+
+        # THE TITLE IS THE ONE THING THAT MUST BE THERE, and it is asserted
+        # FIRST: if attaching with an empty title posted anything at all it
+        # would put a row nobody can pick out of the list into the library,
+        # which is the one cost this flow must not have.
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "untitled.pdf", "mimeType": "application/pdf", "buffer": b"%PDF-1.7\nx"})
+        pg.wait_for_selector(".err", timeout=9000)
+        # NOTHING ABOUT THE REPORT, never "nothing at all": opening the room
+        # is three reads of its own, so a bare `not SCENE["sent"]` fails on a
+        # build behaving perfectly — which is what it did the first time it
+        # was run (§100.3).
+        posted = [x.get("action") for x in SCENE["sent"]
+                  if x.get("action") in ("librarySave", "libraryUploadBegin", "libraryUploadFinish")]
+        check("attaching with no title says so, and posts nothing about the report",
+              "needs a title" in pg.evaluate("() => document.querySelector('.err').textContent")
+              and not posted, SCENE["sent"])
+        check("...and it puts the cursor in the one box that is missing (§61)",
+              pg.evaluate("() => document.activeElement && document.activeElement.id") == "lib-title")
+
+        SCENE["sent"] = []; SCENE["pieces"] = []
+        pg.fill("#lib-title", "Suppliers under the new tariff")
+        pg.fill("#lib-sum", "What the March schedule does to landed cost.")
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "suppliers-tariff.pdf", "mimeType": "application/pdf",
+            "buffer": b"%PDF-1.7\n" + b"x" * 4096})
+        # EVERY WAIT IN THIS SECTION DEGRADES (§215, and this file's own
+        # docstring promises it). On a build that still makes you save first
+        # the strip never names the file, and a bare wait_for_function throws
+        # a stack trace with NOTHING reported — which is what the first
+        # falsification run of this section did, printing no failures on
+        # precisely the build it exists to catch.
+        def waited(fn, why, ms=20000):
+            try:
+                pg.wait_for_function(fn, timeout=ms); return True
+            except Exception:
+                check(why, False, "waited %dms and it never happened" % ms); return False
+
+        waited("""() => !!document.querySelector('.filestrip .fname') &&
+          /suppliers-tariff/.test(document.querySelector('.filestrip .fname').textContent)""",
+               "the strip names the file that was just attached")
+
+        order = [x["action"] for x in SCENE["sent"] if x.get("action")]
+        saved8 = [x for x in SCENE["sent"] if x.get("action") == "librarySave"]
+        began8 = [x for x in SCENE["sent"] if x.get("action") == "libraryUploadBegin"]
+        check("ONE press saves the draft and THEN begins the upload, in that order",
+              order[:2] == ["librarySave", "libraryUploadBegin"], order)
+        check("...and what it saved is what was typed, never an empty row",
+              len(saved8) == 1 and saved8[0]["title"] == "Suppliers under the new tariff"
+              and saved8[0]["summary"].startswith("What the March"), saved8)
+        check("...and the pieces are addressed to the id that save returned (§48)",
+              len(began8) == 1 and began8[0].get("id") == "new-1", began8)
+        check("...and the card now says the report exists, rather than 'Not saved yet'",
+              "Not saved yet" not in pg.evaluate(
+                  "() => (document.querySelector('.byline .who')||{}).textContent || ''"))
+        # BOTH ENDS (§94.2): a report that ALREADY has a row must not be saved
+        # a second time by attaching — that would overwrite the stored form
+        # with whatever happens to be in the boxes on a card somebody only
+        # opened to replace the file.
+        SCENE["sent"] = []; SCENE["pieces"] = []
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "suppliers-tariff-v2.pdf", "mimeType": "application/pdf",
+            "buffer": b"%PDF-1.7\n" + b"y" * 4096})
+        waited("""() => !!document.querySelector('.filestrip .fname') &&
+          /v2/.test(document.querySelector('.filestrip .fname').textContent)""",
+               "the strip names the replacement file")
+        check("replacing a file on a saved report posts NO second save",
+              not [x for x in SCENE["sent"] if x.get("action") == "librarySave"], SCENE["sent"])
 
         check("no page error anywhere in the room", not errs, errs[:3])
         b.close()

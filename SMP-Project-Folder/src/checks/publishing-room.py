@@ -179,6 +179,17 @@ def serve():
 # Applied to the PAGE, because platform.html is hand-written and served as it
 # is: there is no build step to make a broken copy through (§276 needs one).
 BREAKS = {
+  # HELD AND DRAWN AS THOUGH LIVE — the build before §357.12, and the reason
+  # Islam asked for the fade. Note it keeps `aria-disabled`, so it reddens the
+  # dimming assertion ALONE; `publish-anyway` below removes the attribute and
+  # therefore reddens the refusal as well, which is a different fault.
+  "held-not-dimmed": """() => {
+    const b = Array.from(document.querySelectorAll('.byline .btn'))
+      .find(x => /^Publish/.test(x.textContent));
+    if (!b) return false;
+    b.style.opacity = '1';
+    return true;
+  }""",
   # A Publish that does not ask whether there is anything to open.
   "publish-anyway": """() => {
     const b = Array.from(document.querySelectorAll('.byline .btn'))
@@ -291,8 +302,12 @@ def run():
           const b = Array.from(document.querySelectorAll('.byline .btn'))
             .find(x => /^Publish/.test(x.textContent));
           const f = Array.from(document.querySelectorAll('.filestrip .btn'))[0];
+          const sv = Array.from(document.querySelectorAll('.byline .btn'))
+            .find(x => /^Save/.test(x.textContent));
           return { pubHeld: b.getAttribute('aria-disabled'), pubWhy: b.title,
-                   fileOff: f.disabled, fileWhy: (document.querySelector('.filestrip .fname')||{}).textContent };
+                   fileOff: f.disabled, fileWhy: (document.querySelector('.filestrip .fname')||{}).textContent,
+                   pubDim: getComputedStyle(b).opacity, pubCursor: getComputedStyle(b).cursor,
+                   saveDim: sv ? getComputedStyle(sv).opacity : null };
         }""")
         # §357 REWRITTEN, NEVER LOOSENED (§218, §214.3). Both of these asserted
         # the two-step: Publish held because nothing was SAVED, and the file
@@ -309,6 +324,48 @@ def run():
               held["fileOff"] is False and "No file yet" in (held["fileWhy"] or ""), held)
         check("...and nothing on the card tells anybody to go and save something first",
               "Save it first" not in ((held["fileWhy"] or "") + (held["pubWhy"] or "")), held)
+        # §357.12: THE HELD BUTTON LOOKS HELD. Islam's A, taken from four drawn
+        # side by side and against the recommendation. Measured as PAINT rather
+        # than as a class or an attribute (§94.8, §272.8 — a rule can provably
+        # match and provably do nothing), and at BOTH ENDS (§94.2): the live
+        # button beside it must NOT dim, or a build that faded the whole row
+        # would satisfy the half above. The cursor is its own assertion and
+        # guards the decision underneath the look — this button is pressable,
+        # and pressing it is what names the gap, so a `default` cursor would be
+        # the one part of the treatment that is untrue.
+        check("...and the held button is DIMMED, while the live one beside it is not (§357.12)",
+              float(held["pubDim"] or 1) < 0.9 and float(held["saveDim"] or 0) == 1.0, held)
+        check("...and it still says it can be pressed, because pressing it is what names the gap",
+              held["pubCursor"] == "pointer", held)
+        # AND THE COST IS PRINTED RATHER THAN ASSERTED (§302.3's own device).
+        # The fade composites the fill and the words together, so the label
+        # falls under the 4.5 floor — which is the decision, not a defect, and
+        # asserting it either way would be choosing against Islam or against
+        # the floor. Printing it keeps the cost in front of whoever runs this,
+        # in both palettes, on every run. Nothing else measures it: the console's
+        # contrast sweep walks the three console tabs and the door and never
+        # opens a report, so this line is the only place the number appears.
+        for pal in ("light", "dark"):
+            pg.evaluate("(t) => document.documentElement.setAttribute('data-theme', t)", pal)
+            pg.wait_for_timeout(120)
+            r = pg.evaluate("""() => {
+              const b = Array.from(document.querySelectorAll('.byline .btn'))
+                .find(x => /^Publish/.test(x.textContent));
+              const px = (v) => v.match(/[\\d.]+/g).slice(0, 3).map(Number);
+              const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92
+                                 : Math.pow((c + 0.055) / 1.055, 2.4); };
+              const L = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+              const over = (fg, bg, a) => fg.map((f, i) => Math.round(a * f + (1 - a) * bg[i]));
+              const cs = getComputedStyle(b), a = Number(cs.opacity);
+              // the card behind it, which is what a faded button composites over
+              const ground = px(getComputedStyle(b.closest('.ecard') || document.body).backgroundColor);
+              const ink = over(px(cs.color), ground, a), fill = over(px(cs.backgroundColor), ground, a);
+              const hi = Math.max(L(ink), L(fill)), lo = Math.min(L(ink), L(fill));
+              return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100;
+            }""")
+            print("       cost of §357.12 · the held label reads %.2f:1 on %s "
+                  "(4.5 is the floor) — Islam's, measured" % (r, pal))
+        pg.evaluate("() => document.documentElement.removeAttribute('data-theme')")
         press(pg, "Save the draft", ".byline")
         pg.wait_for_function("""() => document.querySelectorAll('.erow').length === 1 ||
           (document.querySelector('.ecard h2')||{}).textContent === 'Governance Review: Board Reporting Practice'""", timeout=9000)

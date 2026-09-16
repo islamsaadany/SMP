@@ -48216,8 +48216,49 @@ being a blocker; and *"I will try the pdf upload once we finish"*, which is the
 one part of the Insights path that cannot be proved from here, since it wants
 the store's key and a key never travels through chat.
 
-**STILL OPEN AND ISLAM'S**: **B**, **C**, or leave it — the last being a fair
-answer now that it is one button rather than a sweep, since the hover already
-names what is missing. **AND RECORDED, NOT DONE**: the 24 buttons at 2.86 /
-3.88, which are exempt as inactive controls and would stop being exempt the day
-any of them is made to answer a press.
+**§357.12 — A IS BUILT, AND IT IS HIS AGAINST THE RECOMMENDATION.** Shown the
+four side by side, Islam answered **"A"** — the one drawn with a red border,
+labelled *too faint*, carrying its own number. So it is built, and it is
+recorded as his rather than argued with a second time (the rule: a concern
+raised once and reaffirmed is the person's decision, and this one was
+reaffirmed with the measurement in front of him). **ONE DECLARATION**:
+`.btn[aria-disabled="true"]{ opacity:.45 }`, the console's own `:disabled`
+value one line above it, so no new number and no new colour. **AND WHAT IS
+DELIBERATELY NOT IN IT IS THE INTERESTING HALF.** `cursor` is NOT set, unlike
+the `:disabled` rule it copies: pressing this button calls `say(pub.title)`
+and names what is missing, so it is genuinely pressable and a default cursor
+would be the one part of the treatment that is untrue (§124). The hover border
+is left alone for the same reason and for rule 1b's — it was not asked for, and
+a held control that answers a hover is telling the truth about itself. *The
+fade is the look; the hover and the press are now the whole of the meaning,
+and a `disabled` button would have had neither — which is why the house rule
+was `aria-disabled` in the first place* (§221, §163). **THE COST IS PRINTED
+RATHER THAN ASSERTED** (§302.3's own device): asserting the contrast either way
+is choosing against Islam or against the 4.5 floor, so `publishing-room.py`
+prints the measured figure in both palettes on every run — **2.14 light, 2.80
+dark**, derived in the browser from the composited fill and ink rather than
+copied from the mockup's arithmetic, which is why the two agree to a hundredth
+and were reached separately. **AND NOTHING ELSE MEASURES IT, WHICH IS WHY THE
+PRINT EARNS ITS PLACE**: `platform-look.py` sweeps the three console tabs and
+the door and never opens a report, so the one place in the console where
+contrast now deliberately fails is a place no sweep looks — *a cost nothing
+measures is a cost that gets forgotten* (§113.8's spirit, from the other side).
+**TWO NEW ASSERTIONS, BOTH AT BOTH ENDS AND BOTH FALSIFIED FROM THE SOURCES**
+(§94.2, §276): the held button dims while the live one beside it does not —
+`--break=held-not-dimmed` keeps `aria-disabled` and forces the opacity back, so
+it reddens the dimming ALONE where `publish-anyway` reddens the refusal too, and
+it prints `pubDim: '1'`, the build before this, verbatim; and the cursor, proved
+by putting `cursor:default` into `platform.html` itself, rebuilding and watching
+exactly one go red. **Measured as PAINT, never as a class or an attribute**
+(§94.8, §272.8 — a rule can provably match and provably do nothing). 50/0 on the
+source AND on `smp-app/shell/platform.html`, the generated copy the new stack
+serves, because a generated copy is where a drift hides (§53.5, §329);
+`platform-cards`, `client-setup-outside` and `client-archive` green beside it.
+
+**STILL OPEN AND ISLAM'S**: the one upload of a real PDF through the real store
+on the deployment — the only part of the Insights path that cannot be proved
+from here, because it wants the store's key and a key never travels through
+chat. **AND RECORDED, NOT DONE**: the 24 buttons at 2.86 / 3.88, exempt as
+inactive controls and no longer exempt the day any of them is made to answer a
+press; and the fact that the console's contrast sweep cannot reach the
+publishing room at all, which is a gap in the sweep rather than in this change.

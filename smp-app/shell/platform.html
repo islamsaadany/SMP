@@ -112,6 +112,22 @@
     border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
   .btn:hover:not(:disabled){ border-color:var(--amber-tx) }
   .btn:disabled{ opacity:.45; cursor:default }
+  /* A HELD BUTTON LOOKS HELD (§357.12). Islam's A, picked from four drawn
+     side by side and AGAINST the recommendation, with the cost measured and in
+     front of him — recorded as his rather than overwritten (Principle II).
+     THE COST IS THAT THE LABEL STOPS BEING READABLE: the fade composites the
+     fill and the words together, so on this filled button they go from 8.79 to
+     2.13 light and 2.82 dark, against a 4.5 floor. What carries the meaning
+     instead is the hover and the press — and a HELD control answers both
+     where a `disabled` one answers neither, which is the whole reason this is
+     `aria-disabled` and never `disabled` (§221, §163).
+     SO `cursor` IS DELIBERATELY NOT SET, unlike `:disabled` one line above:
+     the button is pressable, pressing it says what is missing, and a default
+     cursor would be the one part of this that is untrue. The hover border is
+     left alone for the same reason (rule 1b — it was not asked for, and it
+     is honest: this button IS alive). One control wears it today; any held
+     control added later inherits it, which is the rule rather than an accident. */
+  .btn[aria-disabled="true"]{ opacity:.45 }
   .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
   .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
   .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);

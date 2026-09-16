@@ -67,6 +67,21 @@ export const GROUP_WORD: Record<Group, string> = { owner: "Owner", status: "Stat
 export function isGroup(s: unknown): s is Group { return typeof s === "string" && (GROUPS as readonly string[]).includes(s); }
 export const GROUP_COOKIE = "smp.tracker.group";
 
+/* HOW A DATE IS READ AND SET IS A CHOICE TOO (Islam, 2026-09-16: "the due
+   dates default should be the weeks not the days"): Weeks is how the page
+   opens — a row reads its week's number in the year, W38, this week's in
+   bold, and picking a week stores that week's THURSDAY; Exact dates is the
+   day, as the page drew it before. A browser's choice like the grouping,
+   never the client's data: the stored date is a day either way, so two of
+   the office reading one list two ways read one truth. */
+export const FORMATS = ["weeks", "dates"] as const;
+export type Format = (typeof FORMATS)[number];
+export const FORMAT_WORD: Record<Format, string> = { weeks: "Weeks", dates: "Exact dates" };
+export function isFormat(s: unknown): s is Format { return typeof s === "string" && (FORMATS as readonly string[]).includes(s); }
+export const FORMAT_COOKIE = "smp.tracker.dates";
+/* How many weeks ahead the picker offers, this week included. */
+export const WEEKS_AHEAD = 6;
+
 export const TITLE_MAX = 200;
 export const NOTES_MAX = 5000;
 export const oneLine = (v: unknown): string => str(v).replace(/\s+/g, " ").trim();
@@ -111,6 +126,76 @@ export function weekOf(day: string): Week {
   return { from, to: addDays(from, 4) };
 }
 
+/* A WEEK IS STORED AS ITS THURSDAY (Islam: "setting the week should default
+   to thursday of this week") — the last working day of the week it names,
+   so late and carried go on being worked out from a day exactly as before. */
+export function thursdayOf(day: string): string { return weekOf(day).to; }
+const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/* THE WEEK'S NUMBER IN THE YEAR is the ISO week holding its Thursday — ISO
+   numbers weeks by their Thursday too, so a Sunday-to-Thursday week and the
+   calendar's own numbering never disagree about which week this is. */
+export function weekNumber(day: string): number {
+  const thu = toDate(thursdayOf(day));
+  const jan4 = new Date(Date.UTC(thu.getUTCFullYear(), 0, 4));
+  const wk1 = new Date(jan4); wk1.setUTCDate(jan4.getUTCDate() - ((jan4.getUTCDay() + 6) % 7));
+  return Math.floor((thu.getTime() - wk1.getTime()) / 86400000 / 7) + 1;
+}
+/* THE WEEK IN WORDS (§356.15, amended §356.16). Islam, of the built tracker:
+   "in the view of the tasks don't write the week number write this week and
+   next week ... and maybe when we are out of the next we can write the week
+   number" — and then, of that number: "for the weeks after this week and next
+   week to have it W1 Oct or W3 Dec". So two weeks have a word and every week
+   after them is ITS PLACE IN ITS MONTH rather than its place in the year: the
+   year's 40th week means nothing to anybody planning, and "the first week of
+   October" is how the work is actually talked about.
+   WHICH MONTH A WEEK BELONGS TO IS ALREADY ANSWERED: a week is stored as its
+   THURSDAY (thursdayOf), so the month is the Thursday's — the week running
+   27 Sep – 1 Oct is W1 Oct. That is one rule rather than a second one about
+   straddling months, and the days are printed beside the word in the picker
+   and in every grouped heading, so nobody has to work it out.
+   THE WEEK BEFORE THIS ONE HAS NO WORD, AND HIS OWN EARLIER DECISION IS WHY:
+   an OPEN action due in a past week is LATE, so it reads Late / Late 1 w /
+   Late 2 w (lateWord) and never reaches this function at all — "Previous
+   week" could only ever appear in place of those, and it would take the alarm
+   with it. Where a past week does reach this — a list GROUPED by its due week
+   — it falls through to the number, which is the honest answer there.
+   TODAY IS REQUIRED, NEVER OPTIONAL: a caller that forgot it would silently
+   be handed numbers back, which is this fault wearing a green tick (§93). */
+export function weekWord(day: string, today: string): string {
+  if (brk() === "week-numbers") return "W" + weekNumber(day);   /* §356.15 put back */
+  if (sameWeek(day, today)) return "This week";
+  if (sameWeek(day, addDays(weekOf(today).from, 7))) return "Next week";
+  if (brk() === "week-of-year") return "W" + weekNumber(day);   /* §356.16 put back */
+  const thu = toDate(thursdayOf(day));
+  return "W" + Math.ceil(thu.getUTCDate() / 7) + " " + MONTH[thu.getUTCMonth()];
+}
+export function sameWeek(a: string, b: string): boolean { return weekOf(a).from === weekOf(b).from; }
+/* The picker's rows: this week and the weeks after it, each with its days —
+   and its word is weekWord's, so pressing "Next week" gives a row that reads
+   "Next week" and one week is never spelt two ways on one screen (§53.5).
+   Its cost was stated before it was chosen and is paid in the stylesheet: the
+   first column grows from 54px to 86px to hold two words, and the popup with
+   it. */
+export type WeekOption = { from: string; to: string; word: string; days: string; now: boolean };
+export function weekOptions(today: string, n: number = WEEKS_AHEAD): WeekOption[] {
+  const out: WeekOption[] = [];
+  let w = weekOf(today);
+  for (let i = 0; i < n; i++) {
+    out.push({ from: w.from, to: w.to, word: weekWord(w.from, today), days: weekDays(w, today), now: i === 0 });
+    w = weekOf(addDays(w.from, 7));
+  }
+  return out;
+}
+/* "13 – 17 Sep", or "27 Sep – 1 Oct" across a month; the year only when it
+   is not this one, on the far end. */
+export function weekDays(w: Week, today?: string): string {
+  const a = readableDay(w.from, today).replace(/^\w+ /, ""), b = readableDay(w.to, today).replace(/^\w+ /, "");
+  const am = a.split(" ")[1], bm = b.split(" ")[1];
+  return (am === bm ? a.split(" ")[0] : a) + " – " + b;
+}
+
 export function isLate(due: string | null, today: string): boolean {
   return !!due && due < today;
 }
@@ -128,8 +213,6 @@ export function lateWord(carried: number): string {
   return carried > 0 ? "Late " + carried + " w" : "Late";
 }
 
-const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 /* "Thu 17 Sep", and the year only when it is not this year — the product's
    own three-letter months (SMPRules.MONTH_NAMES spells them the same). */
 export function readableDay(day: string | null, today?: string): string {
@@ -185,7 +268,7 @@ export function inView(a: Action, view: View, who: Who, today: string): boolean 
      what still needs a date, inside This week rather than beside it. */
   return !a.due || a.due <= w.to;
 }
-export type Summary = { open: number; late: number; dueWeek: number; dueWeekNotStarted: number; doneWeek: number };
+export type Summary = { open: number; late: number; dueWeek: number; doneWeek: number };
 export function summary(all: Action[], today: string): Summary {
   const w = weekOf(today);
   const open = all.filter((a) => a.status !== "done");
@@ -194,7 +277,6 @@ export function summary(all: Action[], today: string): Summary {
     open: open.length,
     late: open.filter((a) => isLate(a.due, today)).length,
     dueWeek: dueWeek.length,
-    dueWeekNotStarted: dueWeek.filter((a) => a.status === "not_started").length,
     doneWeek: all.filter((a) => a.status === "done" && !!a.doneDay && a.doneDay >= w.from && a.doneDay <= w.to).length,
   };
 }
@@ -270,12 +352,16 @@ export async function eventsOf(c: Q, id: string): Promise<Event[]> {
   return r.rows.map((x: any) => ({ kind: str(x.kind), from: x.from_status || null, to: x.to_status || null, by: str(x.by_key), at: str(x.at) }));
 }
 
-export async function addAction(c: Q, a: { title: string; ownerKey: string; by: string }): Promise<Action> {
+/* THE ADD LINE TAKES EVERYTHING (Islam, 2026-09-16): the date, the owner
+   and a note arrive with the title. A date given at birth is the first due
+   date too (spec 054 §5). */
+export async function addAction(c: Q, a: { title: string; ownerKey: string; by: string; due?: string | null; description?: string }): Promise<Action> {
   const title = oneLine(a.title).slice(0, TITLE_MAX);
   if (!title) throw new Error("an action needs a title");
+  const due = a.due || null;
   const r = await c.query(
-    "INSERT INTO tracker_actions (title, owner_key, created_by) VALUES ($1, $2, $3) RETURNING " + COLS,
-    [title, a.ownerKey, a.by]);
+    "INSERT INTO tracker_actions (title, owner_key, created_by, due, first_due, description) VALUES ($1, $2, $3, $4, $4, $5) RETURNING " + COLS,
+    [title, a.ownerKey, a.by, due, trimmed(a.description || "").slice(0, NOTES_MAX)]);
   const row = shape(r.rows[0]);
   await c.query("INSERT INTO tracker_events (action_id, kind, to_status, by_key) VALUES ($1, 'created', $2, $3)",
     [row.id, row.status, a.by]);

@@ -7768,7 +7768,50 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   every other assertion passes on a page that reloaded (§113.8) — and four of
   its own first reds were the check (`fetch(API` spelt as the old script had
   it, two expectations forgetting §8's second action, a count read through
-  `innerText` and so uppercased, §301.6). **Recorded, not done**: the switcher
+  `innerText` and so uppercased, §301.6). **AND SINCE §356.14 DATES ARE
+  WEEKS**: a row reads its week's number in the year (W38, this week's bold —
+  the ISO week holding the week's Thursday), picking a week stores that
+  THURSDAY into the same column, *Exact dates* is a choice behind three dots
+  beside Group by (cookies, never the client's data), the add line takes the
+  week, the owner and a note before Enter (a new line lands due this week's
+  Thursday), and the way back is above the title. **TWO FAULTS MEASURED**:
+  `font: 600 11px/1 inherit` is INVALID CSS (a shorthand cannot end in a
+  CSS-wide keyword) and fourteen such lines were silently dropped — a select
+  pill fell to the browser's 13.3px Arial, a span pill inherited the page's
+  15px, and that was the pill at two sizes; a named `--font` family now, one
+  118×26 box for every pill, and `background-color` for the Done green because
+  the shorthand took the arrow off. And the date box was thrown away 150ms
+  after BLUR, which the calendar popup causes, so a picked day landed on a box
+  already gone; it closes on change, Escape or a pointerdown elsewhere, never
+  blur (`back-on-blur` is the sixth break). 206/0, red six ways.
+  **AND SINCE &sect;356.16 A WEEK IS ITS PLACE IN ITS MONTH**: the third week
+  on reads **W1 Oct**, never the ISO week of the year, and a week straddling
+  two months takes the month its THURSDAY is in &mdash; which is the day it is
+  already stored as, so no second rule was needed and both of Islam's own
+  examples come out of one line. The picker says what the rows say
+  (&sect;53.5). **THE CARDS HOLD STILL**: the due card's *&middot; N not
+  started* tail took a second line and `.strip` is a GRID, so all four grew
+  whenever a status moved &mdash; the tail goes and a floor at the taller size
+  goes on, two edits because a label that wraps at some untried window brings
+  the jump straight back. **AND THE ASSERTION WRITTEN FIRST COULD NOT FAIL**:
+  *"the four cards are one height"* is true of every build, the grid stretching
+  them to the tallest whatever any of them asked for (&sect;113.8, found by
+  falsifying); what CAN fail is whether a card is HELD OPEN, measured as the
+  slack under its last line &mdash; `15,15,15,15` shipped, `0,0,0,0` with the
+  floor gone, `15,15,0,15` with the tail back, naming the offending card by its
+  position. **And the jump assertion needed the WORDS beside it**, because the
+  tail merely going from *2 not started* to *1 not started* is the same two
+  lines and the same height with the defect still there. **THE NAMES LIST WAS
+  A FLOOR IN THE STYLESHEET** (140px on names whose longest measures 69), not
+  anything the names needed; the floor goes, and what is asserted is the
+  AGREEMENT &mdash; the box is its widest name plus the page's own padding,
+  never a pixel count (&sect;94.8). **AND THE ADD LINE ASKS LATER**: at rest
+  one box, and the first letter brings the week, the owner, the status and the
+  note's arrow onto it &mdash; their SPACE kept (Islam's B of two drawn), so
+  nothing moves under a hand already typing. 228/0, red thirteen ways, **one
+  break per decision** (the two card breaks overlapped at first, so neither was
+  isolated).
+  **Recorded, not done**: the switcher
   lists it for a client's person (spec 046 §4.4's tab is where that ends); a
   module is turned ON per client from the card; a double-tap has no hover on a
   tablet; Notes is spec 055 below.
@@ -8050,8 +8093,46 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # every press &mdash; Enter adds, the tick, the status,
                                 # the date box and its Escape, notes on leaving the
                                 # box, Enter renames, Delete asks in the row with the
-                                # question asserted ABSENT before the press. 124/0,
-                                # red three ways (`check:tracker:red`). Its first run
+                                # question asserted ABSENT before the press.
+                                # AND SINCE &sect;356.15 IT ASSERTS WHAT THAT ROUND
+                                # DECIDED, BOTH ENDS EACH (&sect;94.2): no note box
+                                # stands on the add line AND the arrow opens one,
+                                # folding EMPTIES it (a folded note holding words
+                                # would be posted with nothing on the screen saying
+                                # so, &sect;96), Tab from the action is the second
+                                # door and an empty note left behind folds itself;
+                                # This week and Next week are WORDS while a third
+                                # week on &mdash; and a week GONE BY, which is the
+                                # only way a past week is ever spelt &mdash; read a
+                                # number, with no `.wk.now` anywhere on the page and
+                                # the picker's own bold still measuring 700. Every
+                                # note probe DEGRADES (&sect;215): a `fill` on a box
+                                # the broken build has hidden waits thirty seconds
+                                # and takes the rest of &sect;10 with it, which is a
+                                # run that DIED rather than reported &mdash;
+                                # corrected, `note-standing` goes from 2 red and dead
+                                # to 10 red and complete. AND SINCE &sect;356.16
+                                # IT MEASURES THE CARDS AS SLACK RATHER THAN AS A
+                                # HEIGHT (&sect;94.8): *"the four cards are one
+                                # height"* is true of EVERY build, `.strip` being a
+                                # grid that stretches them to the tallest whatever
+                                # any of them asked for &mdash; so it passed on the
+                                # broken build under both card breaks
+                                # (&sect;113.8, found by falsifying rather than
+                                # reading). What can fail is whether a card is HELD
+                                # OPEN &mdash; the distance from its last line's
+                                # bottom to its own bottom edge, nought on a card
+                                # sized to its content and real on one carrying a
+                                # floor. And the jump assertion needed the WORDS
+                                # asserted beside the height, because a tail going
+                                # from *2 not started* to *1 not started* is the
+                                # same two lines, the same height, and the defect
+                                # still there. The week's month, the held-back
+                                # details and the names list are asserted the same
+                                # way: an AGREEMENT worked out from the page's own
+                                # padding and the check's own arithmetic, never a
+                                # pixel count somebody typed. 228/0,
+                                # red THIRTEEN ways (`check:tracker:red`). Its first run
                                 # found ONE product fault (an undated line vanishing
                                 # from This week, &sect;356.7), one real page fault
                                 # (`hidden` hiding nothing under an author display,
@@ -9567,7 +9648,67 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;357: Meeting Notes &mdash; one
+*Last Updated: 2026-09-16 &mdash; **&sect;356.16: the week by its month, cards
+that hold still, and a line that asks later (spec 054).** Islam, of the tracker
+as &sect;356.15 left it: *"for the week in the selection or the due week for the
+weeks after this week and next week to have it W1 Oct or W3 Dec etc."*, *"the
+names list is wide for no reason make it compact"*, and *"the change between the
+status of the actions changes the size of the top cards &hellip; for the new
+action remove the details until someone start typing the action name."* **ALL
+FOUR DRAWN BEFORE ANY WAS BUILT** (rule 1c), the two with a real choice in them
+three ways each with the cost stated beside them; he took **B** twice.
+**THE RULE THE PLATFORM ALREADY HAD ANSWERS THE HARD CASE**: a week is stored as
+its THURSDAY, so *which month owns a straddling week* was settled the day weeks
+were stored &mdash; 27 Sep &ndash; 1 Oct is **W1 Oct** &mdash; and both of
+Islam's own examples come out of one line, measured rather than reasoned about.
+**THE CARDS WERE ONE LABEL**: the due card's *&middot; N not started* tail took a
+second line and `.strip` is a GRID, so all four grew whenever a status moved.
+The tail goes, **and** a floor goes on, because a label that wraps at some
+untried window brings the jump straight back &mdash; two edits, falsified
+separately. **AND THE ASSERTION WRITTEN FIRST COULD NOT FAIL** (&sect;113.8,
+found by falsifying rather than reading): *"the four cards are one height"* is
+true of every build, the grid stretching them to the tallest whatever any asked
+for; what CAN fail is whether a card is HELD OPEN, measured as the slack under
+its last line &mdash; `15,15,15,15` shipped, `0,0,0,0` with the floor gone,
+`15,15,0,15` with the tail back. **And the jump assertion needed the WORDS
+beside it**, a tail going *2 not started* &rarr; *1 not started* being the same
+two lines and the same height with the defect still there. **THE NAMES LIST WAS
+A FLOOR IN THE STYLESHEET** (140px on names whose longest measures 69) and what
+is asserted is the AGREEMENT, never a pixel count. **VERIFIED**:
+`check:tracker` **228/0** with &sect;10 driven in Chromium, **red thirteen
+ways**, one break per decision (the two card breaks overlapped at first, so
+neither was isolated); `modules` 100/0; `generated-in-step` all clear;
+`built-in-step.py` all good; `tsc` clean but for `lib/prisma.ts`'s pre-existing
+error. **The frozen product is untouched**, so `sw.js` is not bumped.
+**&sect;356.17 &mdash; AND THE MERGE FOUND THREE THINGS, ALL IN THE RECORD AND
+NONE IN THE PRODUCT**, which is the finding rather than the tidy-up: the four
+conflicts were the three record files and `package.json`, every one COMBINED
+rather than picked (&sect;318.7), and the frozen half came from `main`
+byte-identical, so no rebuild and no `sw.js` bump were owed and none was made
+(&sect;91's trigger is the built file's bytes changing). **A MERGE CAN DROP A
+WHOLE BLOCK WITH NOTHING ABLE TO GO RED**: `main`'s &sect;357 entry in
+`IMPLEMENTATION_PROGRESS.md` was written over the &sect;356.11&ndash;&sect;356.13
+HEADING, leaving that body sitting under a different module's title &mdash; the
+file reads perfectly and says the wrong thing, and there is no
+`generated-in-step` for prose (&sect;329's gap on the half that is written by
+hand). **And the same file had no entry for &sect;356.15 or &sect;356.16 at
+all**, which its own first paragraph requires *in the same commit as the work it
+describes*; both written here in plain words (1b-iii). **Two blocks on BOTH
+sides still read *"on the branch, not merged"* over work `main` demonstrably
+holds** &mdash; `main`'s own commit fixed that phrase on its neighbours and
+missed these &mdash; corrected and named rather than realigned silently. **And
+&sect;356.16's decisions block sat BEFORE &sect;356.15's**, my own drift, put in
+order. **Re-run on the merged tree**: tracker **228/0**, notes **154/0**
+(`main`'s own number), insights 127/0, modules 107/0, `generated-in-step` all
+clear, `built-in-step.py` all good, `tsc` clean but for `lib/prisma.ts`'s
+pre-existing error &mdash; asserted byte-identical to `main`'s copy rather than
+assumed (&sect;303). **AND `notes` DIED AT 38 ON ITS FIRST RUN HERE AND IT WAS
+THE DATABASE** (&sect;215, &sect;105.6): `relation "notes" does not exist`,
+because the local check database predates `main`'s migration 014 &mdash;
+established before the merge was blamed, and 154/0 the moment it was applied.
+**Merged to `main` 2026-09-16.***
+
+*Earlier the same day: **&sect;357: Meeting Notes &mdash; one
 meeting, one note, and the minutes as an email (spec 055).** Islam's seven
 answers, drawn and signed off, then **"build"**. **THE SIXTH MODULE COST ONE
 FOLDER AND ONE ENTRY IN THE TABLE THE ROUTE ASKS** (&sect;354), and it draws
@@ -9637,6 +9778,69 @@ walked into while the neighbouring file warns about it by name in its own
 header. **The date is drawn and NOT built**: keeping the day where it is and
 opening the calendar on the first press rather than the second, awaiting
 Islam's word on one fork inside it.*
+*Earlier the same day: **&sect;356.15: the note is asked for, and
+the week is in words (spec 054).** Islam, of the built tracker: *"1. a note
+should be an option not a common thing in the actions tell me my options to add
+one if needed in a neat way 2. in the view of the tasks don't write the week
+number write this week and next week &hellip; and maybe when we are out of the
+next we can write the week number."* **BOTH DRAWN BEFORE EITHER WAS BUILT**
+(rule 1c, &sect;266) in one alignment page made of the module's own stylesheet
+&mdash; three ways to ask for a note and two ways to spell the week, each with
+its cost beside it &mdash; and he answered both: *"the arrow in the column is a
+good option as it opens other things anyway for the picker let's use this week
+and next week."* **THE CONTROL IS THE ARROW THE ROWS ALREADY CARRY**, in the
+column it already sits in, meaning what it already means, so the line gains no
+word and nothing to learn; his own reason is the best one. **ONE RULE SAYS ALL
+OF IT: the note is on the line only while it is open, and folding it EMPTIES
+it** &mdash; a note folded away with words still in it would be posted by the
+next Enter with nothing on the screen saying so (&sect;96), and the cost is
+stated rather than discovered: the arrow throws away an unsent note, which is
+what Escape on that line already does. Hidden and never absent (&sect;298's
+shape), so a swap cannot take what a hand half-typed; **Tab from the action is
+the second door** (&sect;61) and an empty note left behind folds itself.
+**AND "PREVIOUS WEEK" IS THE ONE THING HE ASKED FOR THAT IS NOT BUILT, ON HIS
+OWN EARLIER DECISION**: an open action due in a past week is **late**, so it
+already reads *Late &middot; Late 1 w &middot; Late 2 w*, and that word could
+only ever be replaced &mdash; the alarm would go with it. Put to him that way
+on the drawing and not asked for again; a past week reached through a GROUPED
+list falls through to its number, which is the honest answer there. **THE BOLD
+WENT WITH THE WORDS** (once the row says *This week* the bold says it twice,
+&sect;87) **and stays in the picker**, asserted at both ends; **the picker says
+what the rows say** (&sect;53.5), at a cost paid in the stylesheet (54 &rarr;
+86px) and reversible in one argument. **`today` IS REQUIRED, NEVER OPTIONAL**,
+or a caller that forgot it is handed numbers back in silence (&sect;93).
+**VERIFIED**: `check:tracker` **214/0** with &sect;10 driven in Chromium, **red
+EIGHT ways** &mdash; the six before it plus `week-numbers` (10 red) and
+`note-standing` (10 red), both made from the SOURCES (&sect;276); `modules`
+100/0; `generated-in-step` all clear; `tsc` clean but for `lib/prisma.ts`'s
+pre-existing error. **And the second falsification DIED rather than reporting,
+four times over** (&sect;215, in the file promising every probe degrades)
+&mdash; a `fill` on a box the broken build has hidden waits thirty seconds and
+takes the rest of &sect;10 with it; corrected, it goes from 2 red and dead to
+10 red and complete. **The frozen product is untouched**, so `sw.js` is not
+bumped. **Merged to `main` 2026-09-16.***
+
+*Earlier the same day: **&sect;356.14: the tracker's dates by the
+week, a settings menu, the add line that takes everything, one pill, and a way
+back (spec 054).** Islam, testing: *"I'm not able to set the date and the
+status pill is shifting it's size &hellip; the due dates default should be the
+weeks not the days &hellip; a 3 dots for a small settings &hellip; default to
+thursday of this week and we need a backbutton."* **BOTH FAULTS WERE MEASURED
+BEFORE ANYTHING WAS PROPOSED** (&sect;3a): `font: 600 11px/1 inherit` is not
+CSS a browser will read, so fourteen lines of the stylesheet had never applied
+&mdash; a select pill at 104&times;29 in Arial beside a span pill at
+108&times;37 in the page's face, his screenshot exactly &mdash; and the date
+box was put back 150ms after blur, which the calendar popup causes. Drawn and
+redrawn three times at his word before a source moved (rule 1c): the back
+link above the title, the note inline in the action's own column, the week
+picker as a small table with this week's number in bold and no *This week*
+label, the settings menu two short columns. **A WEEK IS ITS THURSDAY** in the
+same column, so nothing new is stored and two of the office reading one list
+two ways read one truth; the number is the ISO week holding that Thursday.
+**VERIFIED**: `check:tracker` **206/0** with &sect;10 driven in Chromium, red
+SIX ways; `modules` 100/0; `generated-in-step` all clear; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. Four of the check's own reds were the
+check. **The frozen product is untouched**, so `sw.js` is not bumped. **Merged to `main` 2026-09-16.***
 
 *Earlier: 2026-09-15 &mdash; **&sect;356.11&ndash;&sect;356.13: the
 Internal Tracker's row, redrawn at Islam's word and built (spec 054).** Islam,
@@ -9661,8 +9865,8 @@ assertion passes on a page that reloaded (`reload-on-add` 6 red). **VERIFIED**:
 `modules` 100/0; `generated-in-step` all clear; `tsc` clean but for
 `lib/prisma.ts`'s pre-existing error. The built page was screenshotted beside
 the mockup at rest, with the team open, renaming, expanded and grouped by
-Status. **The frozen product is untouched**, so `sw.js` is not bumped. **On
-the branch, not merged.***
+Status. **The frozen product is untouched**, so `sw.js` is not bumped. **Merged
+to `main` 2026-09-15.***
 
 *Earlier the same day: **&sect;356: the Internal Tracker is built
 (spec 054).** Islam, of the `strategy-management-system` repository: *"the
@@ -9687,13 +9891,23 @@ recorded Chromium's rule as `!important` and, asked of the page, it is not),
 caught only because the question was asserted ABSENT before the press
 (&sect;113.8). Three of the check's own first failures were the check
 (&sect;215; the FK's order, &sect;339; a `fill()` that fires its own change).
-**VERIFIED**: `check:tracker` **124/0** with &sect;10 driven in Chromium, red
-2 / 3 / 2 under its breaks; `modules` 100/0; `insights` 127/0;
+**AND SINCE &sect;356.15 THE NOTE IS ASKED FOR AND THE WEEK IS IN WORDS**:
+the note box is not on the add line until the ARROW opens it &mdash; the mark
+the rows already carry, in the column it already sits in (Islam: *"it opens
+other things anyway"*) &mdash; hidden and never absent, folding EMPTIES it (a
+folded note holding words would be posted with nothing on the screen saying so,
+&sect;96), Tab from the action is the second door and an empty note left behind
+folds itself; and a row reads **This week &middot; Next week &middot; W40 and
+beyond**, with *previous week* deliberately NOT built because a past week is
+already **late** and the word could only replace the alarm. The bold came off
+the row and stayed in the picker, which says what the rows say (&sect;53.5) at
+54 &rarr; 86px. **VERIFIED**: `check:tracker` **124/0** then **228/0**, red
+2 / 3 / 2 then THIRTEEN ways; `modules` 100/0; `insights` 127/0;
 `memory-boundary` 14/0; `generated-in-step` all clear; `tsc` clean but for
 `lib/prisma.ts`'s pre-existing error. **The frozen product is untouched**, so
 `sw.js` is not bumped. **Merged to `main` 2026-09-16.** **RECORDED, NOT DONE**:
 the switcher lists it for a client's person until spec 046 &sect;4.4's tab
-exists; a module is turned ON per client from the card; Notes is next.*
+exists; a module is turned ON per client from the card. Notes is &sect;357.*
 
 *Earlier the same day: **&sect;355: who can see one report (spec
 046 &sect;4.10).** Islam, of Insights: *"normally every one in the company can

@@ -87,6 +87,12 @@ their own weekly alignment about that client. The client's staff never see it.
 | 6 | Grouping | **By owner unless you choose otherwise** (loosened at §356.11 from *by owner, and nothing else*): Owner is how the list opens; Status, Due date or None are a choice on the views row, remembered by the browser and never stored on the client. The other system's free "scopes" list is still not taken — the client is already the scope. |
 | 7 | The word | **Internal Tracker** (Islam, 2026-09-15). Key `tracker`; two words on the switcher, and the second says who it is for, which is the point. *Actions* was proposed and not taken. |
 | 8 | The week | **Sunday to Thursday** (Islam, 2026-09-15). *This week* is the days somebody is at their desk; anything due on a Friday or Saturday reads as the following week's. |
+| 9 | Dates | **Weeks by default** (Islam, 2026-09-16, §356.14). Picking a week stores that week's **Thursday** into the same date column; *Exact dates* is a choice behind the three dots beside Group by, remembered on the browser. **AMENDED §356.15**: a row reads the week in WORDS — **This week · Next week · W40, W41…** — and the bold came off the row with them (the word says it) while staying in the picker, which says the same words. *Previous week* is deliberately **not** built: an open action due in a past week is **late**, so it already reads *Late / Late 1 w / Late 2 w*, and the word could only ever replace that alarm. A past week reached through a list GROUPED by due week falls through to its number. **AMENDED §356.16**: that number is the week's place in its **MONTH** — **W1 Oct, W3 Dec** — not its place in the year, which is a number nobody holds in their head. A week straddling two months takes the month its **Thursday** is in, which is the day it is already stored as, so no second rule was needed. The ISO number is gone from every screen; two weeks months apart can both read *W1*, and the picker's own second line names the days (`27 Sep – 1 Oct`), so a week being CHOSEN is never ambiguous. |
+| 10 | The add line | **Takes the week, the owner and a note before Enter** (§356.14). A new line lands due this week's Thursday and owned by you unless the line says otherwise; the note is a quiet second line under the action in its own column, so the three cells on the right never move. **AMENDED §356.15**: the note is **asked for, never standing** — Islam, *"a note should be an option not a common thing in the actions"*. The control is the **arrow the rows already carry**, in the column it already sits in, meaning what it already means; Tab from the action opens it too. The box is hidden and never absent, so a swap cannot take what a hand half-typed, and **folding it empties it** — a note folded away with words still in it would be posted by the next Enter with nothing on the screen saying so. An empty note left behind folds itself. **AMENDED §356.16**: the details are **held back until the action has a name** — Islam, *"remove the details until someone start typing the action name"*. At rest the line is one box; the first letter brings the week, the owner, the status and the note's arrow onto it. Their **space is kept** (his B of two drawn), so nothing on the line moves when they appear and the line cannot jump under a hand already typing. Enter puts it back to rest. |
+| 11 | The settings | **Behind three dots on the far right of the views row**: Group by and Dates as, two short columns, both cookies on the browser and never the client's data. Group by left the row for it. |
+| 12 | The way back | **Above the page's title**, the client's own name with a chevron, to the client's platform (Strategy). Not in the top bar (his correction). |
+| 13 | The cards on top | **Fixed at the taller size, and they say no count of their own** (Islam, §356.16). The due card read *Due this week · N not started*, that tail took a second line, and `.strip` is a grid — so all four cards grew and the page below them shifted every time a status changed. The tail goes (his: *"no need for the naming on the card due is enough"*) **and** the cards carry a floor at the taller size, because a label that wraps at some untried window would bring the jump straight back. |
+| 14 | The names list | **No wider than its longest name needs** (Islam, §356.16, *"wide for no reason"*). The width was a floor in the stylesheet (140px) rather than anything the names asked for; the floor is gone and the rows are tighter, stopping short of the size that would go under every other small control on the page. |
 
 ---
 
@@ -117,9 +123,10 @@ late · due this week · done this week.
 **IT WORKS LIKE THE SHEET IT REPLACES** (Islam, 2026-09-15: *"we are shifting
 from a simple google sheet to a tool so it needs to be super simple"*). There
 is **no form and no separate page**. The list ends in the next empty line: you
-type an action there and press Enter, it lands under you with no date and Not
-started, and everything else is changed **on the row itself** — the date, the
-owner, who else, the status, the done tick. A row opens in place for its notes
+type an action there and press Enter, it lands under you due this week's
+Thursday and Not started — or with the week, the owner and a note you set on
+the line before Enter — and everything else is changed **on the row itself**:
+the week (or the day, as exact dates), the owner, the status, the done tick. A row opens in place for its notes
 and its history, and that is where Rename and Delete sit. Every write lands
 when the control is left (§35), so nothing has a Save button.
 
@@ -244,6 +251,19 @@ the week stood, and its proposal on the word did not.
 
 ## 10 · Recorded, not decided
 
+- Dates as weeks (§356.14, §356.15): a row already late keeps reading how late
+  it is until its new Thursday has passed; the picker offers six weeks ahead
+  and *A day of my own…* beyond; the title's own week label still reads two
+  days where the rows read *This week*.
+- The note (§356.15): a ROW's own note is the panel's textarea behind that
+  same arrow, which is right and means the arrow opens two different boxes
+  depending on the line it is on; and nothing on the add line says a note is
+  optional except the placeholder inside a box you have to open to read.
+- The week by its month (§356.16): the picker's second line naming the days is
+  the only thing on any screen keeping two *W1*s apart, and a row does not
+  carry it.
+- The add line (§356.16): the details appear on the first keystroke, so a line
+  typed and then emptied leaves them standing until Escape or Enter.
 - A per-module access tab (spec 046 §4.4) is still built for no module; this
   one is office-by-rule and adds nothing to that debt — **but the switcher
   still lists the tracker for a client's own person**, who is then refused at

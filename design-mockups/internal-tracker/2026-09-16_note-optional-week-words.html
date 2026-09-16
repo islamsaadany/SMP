@@ -1,0 +1,295 @@
+<title>Tracker note and week words</title>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MOCKUP · spec 054 · Internal Tracker — the note asked for, and the
+     week in words
+     design-mockups/internal-tracker/2026-09-16_note-optional-week-words.html
+
+     Rule 1c, and rule 1b: this is an ALIGNMENT drawing — two questions
+     Islam asked, drawn rather than described (§266). Nothing is built.
+     The stylesheet is the BUILT module's own (modules/tracker/page.ts),
+     verbatim, with three rules added for the options below.
+
+     Islam, 2026-09-16, of the built tracker:
+       "1. a note should be an option not a common thing in the actions
+        tell me my options to add one if needed in a neat way
+        2. in the view of the tasks don't write the week number write this
+        week and next week and previous week and maybe when we are out of
+        the next we can write the week number. align with me"
+
+     Today is Wednesday 16 September 2026; the week is Sun 13 – Thu 17,
+     which is W38.
+     ═════════════════════════════════════════════════════════════════ -->
+<style>
+
+*{box-sizing:border-box}
+:root{--bar:#16325C;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+/* THE FONT FAMILY IS NAMED, NEVER "inherit" INSIDE THE SHORTHAND (§356.14):
+   a shorthand such as "600 11px/1" ending in the word inherit is not CSS a browser will read — a CSS-wide
+   keyword cannot sit inside a shorthand beside other values — so every such
+   line was silently DROPPED, and a control fell to whatever font it would
+   have had anyway: the page's 15px for a span, the browser's own 13.3px
+   Arial for a select. That is the pill Islam saw at two sizes. */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
+.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
+.bar h1{margin:0;font-size:14.5px;font-weight:600}
+.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
+.msw{position:relative;flex:none}
+.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
+.msw>summary::-webkit-details-marker{display:none}
+.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.msw svg{width:17px;height:17px;display:block}
+.mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
+.mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
+.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
+.mi.on{background:var(--ground);cursor:default}
+.mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
+.pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
+h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
+h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
+.cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px}
+.cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 var(--font);padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+.cats a:hover,.cats a:focus-visible{color:var(--ink);outline:none}
+/* the way back to the client's platform, above the page's title (§356.14) */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--ink-3);text-decoration:none;font:600 12.5px/1 var(--font);margin:0 0 10px -4px;padding:4px 8px 4px 4px;border-radius:6px}
+.back svg{width:14px;height:14px}
+.back:hover,.back:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+/* the two settings — how the list is grouped, and dates as weeks or days —
+   behind three dots on the far right of the views row (§356.14) */
+.cats{align-items:flex-end}
+.dots{margin-left:auto;margin-bottom:6px;position:relative}
+.dots>button{width:28px;height:24px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0}
+.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.dots svg{width:16px;height:16px}
+.setmenu{position:absolute;top:30px;right:0;z-index:9;display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:6px}
+.setmenu .col{display:grid;align-content:start;min-width:0}
+.setmenu .col+.col{border-left:1px solid var(--line);padding-left:4px}
+.setmenu .lab{display:block;font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:3px 9px 2px}
+.setmenu button{display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
+.setmenu button:hover,.setmenu button:focus-visible{background:var(--ground);outline:none}
+.setmenu button.on{font-weight:600}
+.setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto;flex:none}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.tools form{display:flex;gap:8px;flex:1 1 260px;min-width:0}
+.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font)}
+.go{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 13px;font:600 13px/1.5 var(--font);cursor:pointer;flex:none}
+.cnt{font:600 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
+.none{padding:40px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
+.none b{color:var(--ink);font-weight:600;display:block;font-size:15.5px;margin-bottom:6px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+.tile b{display:block;font-size:22px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{display:block;font:600 10.5px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+.tile.late b{color:var(--bad)}
+.grp{display:flex;align-items:center;gap:9px;padding:14px 2px 6px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.grp .cnt{margin-left:0}
+/* the row: tick · name · date · owner · status · the arrow */
+.row{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+/* the name is plain text; a double-click turns it into a box in place */
+.row .t{min-width:0;font-size:15px;line-height:1.35}
+.row .t[data-rename]{cursor:text}
+.row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 var(--font);outline:none}
+.row.done .t{color:var(--ink-3);text-decoration:line-through}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
+.tick:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row.done .tick{background:var(--good);border-color:var(--good)}
+.tick svg{width:11px;height:11px}
+.tick[disabled]{cursor:default;opacity:.55}
+.when{font:400 12.5px/1.4 var(--mono);color:var(--ink-3);white-space:nowrap;text-align:right;background:none;border:0;padding:0}
+.when.late{color:var(--bad);font-weight:600}
+.when.pick{cursor:pointer;border-radius:6px;padding:3px 5px;margin:-3px -5px}
+.when.pick:hover,.when.pick.on,.when.pick:focus-visible{background:var(--surface-2);outline:none}
+/* a week reads as its number in the year, this week's in bold (§356.14) */
+.when .wk{display:inline-block;font:500 12.5px/1.4 var(--font);color:var(--ink-2)}
+.when .wk.now{font-weight:700;color:var(--ink)}
+.when.late .wk{color:var(--bad)}
+/* the week picker: a small table — the number, the days — this week bold,
+   No date and a day of your own at the foot */
+.weeks{position:absolute;top:26px;right:0;z-index:5;width:200px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left;font-variant-numeric:tabular-nums}
+.weeks .wh{display:grid;grid-template-columns:54px 1fr;padding:5px 9px 4px;font:600 10px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);margin-bottom:3px}
+.weeks button{display:grid;grid-template-columns:54px 1fr;width:100%;align-items:baseline;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.weeks button b{font-weight:400;font-variant-numeric:tabular-nums}
+.weeks button.now b{font-weight:700}
+.weeks button small{font:400 12px/1.3 var(--mono);color:var(--ink-3);white-space:nowrap}
+.weeks button:hover,.weeks button:focus-visible{background:var(--ground);outline:none}
+.weeks button.on{background:var(--surface-2)}
+.weeks .wf{display:grid;border-top:1px solid var(--line);margin-top:3px;padding-top:3px}
+.weeks .wf button{grid-template-columns:1fr;color:var(--ink-3);font-size:13px}
+.row input.dt,.addrow input.dt{font:400 12.5px/1.4 var(--mono);color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:2px 5px;background:var(--surface)}
+/* the owner is a first name, drawn as the fact; a press opens the team */
+.who{font:600 12.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right;background:none;border:0;padding:0;position:relative}
+.who.pick{cursor:pointer;border-radius:6px;padding:3px 7px;margin:-3px -7px}
+.who.pick:hover,.who.pick.on,.who.pick:focus-visible{background:var(--surface-2);outline:none}
+.team{position:absolute;top:26px;right:0;z-index:5;min-width:140px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
+.team button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.team button:hover,.team button:focus-visible{background:var(--ground);outline:none}
+.team button.on{font-weight:600}
+.team button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+/* ONE BOX FOR THE PILL, pressable or not (§356.14): the same font, height
+   and width whether it is a select or a span, the arrow only where it can be
+   pressed — and the Done ground set with background-COLOR, because the
+   shorthand took the arrow off with it. */
+.st{display:inline-grid;place-items:center;height:26px;width:118px;font:600 11px/1 var(--font);letter-spacing:.02em;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap;text-align:center;appearance:none;-webkit-appearance:none;margin:0}
+select.st{cursor:pointer;padding:0 24px 0 14px;text-align-last:center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+select.st:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.st.prog{border-color:var(--gold);color:var(--gold)}
+.st.done{border-color:var(--good);background-color:var(--good-bg);color:var(--good)}
+/* the arrow that expands a row for its notes and history, and folds it */
+.more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
+.more:hover,.more.on,.more:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.more svg{width:16px;height:16px;transition:transform .15s}
+.more.on svg{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.more svg{transition:none}}
+.addrow{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:9px 2px;border-bottom:1px dashed var(--line)}
+.addrow .plus{width:18px;height:18px;display:grid;place-items:center;color:var(--ink-3);font:600 15px/1 var(--font)}
+.addrow input.new{border:0;background:transparent;color:var(--ink);font:400 15px/1.35 var(--font);padding:2px 0;width:100%;min-width:0;outline:none}
+.addrow input::placeholder{color:var(--ink-3)}
+/* the note is a quiet second line under the action, in its own column, so
+   the week, the owner and the status never move (§356.14) */
+.addrow .tn{min-width:0;display:grid;gap:2px}
+.addrow input.nt{border:0;background:transparent;color:var(--ink-2);font:400 13px/1.4 var(--font);padding:0;width:100%;min-width:0;outline:none}
+.addrow .when,.addrow .who,.addrow .st{opacity:.55}
+.addrow:focus-within,.addrow.typing{background:var(--surface)}
+.addrow:focus-within .when,.addrow:focus-within .who,.addrow:focus-within .st,.addrow.typing .when,.addrow.typing .who,.addrow.typing .st{opacity:1}
+.addhint{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding:6px 2px 0 34px}
+/* the opened row is notes and history only — no Title box, no With */
+.open{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:12px 2px 6px 34px;border-bottom:1px solid var(--line);background:var(--surface)}
+.open .lab{font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:10px 0 4px}
+.open .lab:first-child{margin-top:0}
+.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:72px;resize:vertical}
+.open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
+.open .ro{font-size:14px;color:var(--ink-2)}
+/* the history is small type in a box that scrolls, so a long life never
+   lengthens the row it sits under; the track is shown, since on a Mac a
+   scrollbar is an overlay that appears only once you scroll (§158) */
+.hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
+.hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
+.hist li:last-child{border-bottom:0}
+.hist time{font:400 10.5px/1.6 var(--mono);color:var(--ink-3);white-space:nowrap}
+.hist b{font-weight:600;color:var(--ink)}
+.open .acts{display:flex;gap:14px;padding-top:10px;font-size:13px;align-items:center}
+.open .acts button{background:none;border:0;padding:0;font:var(--font);color:var(--ink-3);cursor:pointer;text-decoration:underline}
+.open .acts button.danger{color:var(--bad)}
+.open .acts .sure{display:flex;gap:10px;align-items:center;color:var(--ink-2)}
+/* An author display beats the browser's own [hidden] rule (§298.2 measured
+   it the other way and was wrong about Chromium's; here the question was
+   asked of the page, checks/tracker.mjs §10, and the box was drawn OPEN).
+   So hidden says hidden for every control that uses the attribute. */
+[hidden]{display:none!important}
+.open .acts .sure .go{padding:5px 10px}
+.open .acts .sure .go.danger{color:var(--bad);border-color:var(--bad)}
+.row.on{background:var(--surface);border-bottom-color:transparent}
+.said{margin:0 0 12px;padding:9px 13px;border:1px solid var(--bad);border-radius:8px;background:var(--bad-bg);color:var(--bad);font-size:13.5px}
+.said:empty{display:none}
+.unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
+@media (max-width:720px){.strip{grid-template-columns:1fr 1fr}.open{grid-template-columns:1fr;padding-left:2px}.addrow{grid-template-columns:22px 1fr 26px}.addrow .when,.addrow .who,.addrow .st{display:none}
+  .row{grid-template-columns:22px 1fr auto 26px;grid-template-areas:"tick t st more" ". when who more"}.row .tick{grid-area:tick}.row .t{grid-area:t}.row .st{grid-area:st}.row .when{grid-area:when;text-align:left}.row .who{grid-area:who}.row .more{grid-area:more}
+  .team,.weeks{right:auto;left:0}}
+
+
+/* the mockup's own furniture, not the product's */
+.intro,.note{max-width:1000px;margin:0 auto;padding:22px 20px 6px}
+.intro h1{font-size:22px;margin:0 0 8px;text-wrap:balance}
+.intro p,.note p{color:var(--ink-2);font-size:14.5px;line-height:1.55;margin:6px 0;max-width:72ch}
+.intro ol,.note ol{color:var(--ink-2);font-size:14.5px;line-height:1.55;margin:6px 0 6px 20px;padding:0;max-width:72ch}
+.cap{max-width:1000px;margin:24px auto 8px;padding:0 20px;font:600 12px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.frame{max-width:1000px;margin:0 auto 6px;border:1px solid var(--line);border-radius:12px;background:var(--ground);padding:6px 16px 10px}
+.frame.room{overflow:visible}
+.sub{max-width:1000px;margin:0 auto 4px;padding:6px 20px 0;font-size:13.5px;color:var(--ink-2)}
+.sub b{color:var(--ink)}
+.two{max-width:1000px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.two .frame{margin:0;padding:10px 14px 14px}
+.two h4{margin:0 0 8px;font-size:13px;color:var(--ink-3);font-weight:600}
+.two .weeks{position:static;width:100%;box-shadow:none}
+/* option 2 has to widen the first column for the words — part of its cost */
+.two .words .wh,.two .words button{grid-template-columns:86px 1fr}
+/* CHANGED here: the note is asked for, never standing */
+.addnote-btn{color:var(--ink-3)}
+.addrow .nt{border:0;background:transparent}
+.notelink{font:400 12px/1.5 var(--mono);color:var(--ink-3);background:none;border:0;padding:0 2px;cursor:pointer;text-decoration:underline;justify-self:end}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+
+</style>
+
+<div class="intro">
+  <h1>Two questions, drawn</h1>
+  <p>Nothing here is built. The first part shows three ways to ask for a note; the second shows the week in words. Pick one from each and I build it.</p>
+</div>
+
+<p class="cap">Part 1 — the note is asked for, never standing</p>
+<div class="sub">Today it is always drawn, so every line reads as two fields to fill. Below: what it looks like at rest, then three ways to open one.</div>
+
+<div class="frame">
+  <div class="pg" style="padding:10px 0">
+    <div class="list" style="border-top:0">
+      <div class="row done"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Send emails to the team</div><span class="when">Done Tue 15 Sep</span><span class="who">Islam</span><span class="st">Done</span><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+      <div class="addrow"><span class="plus">+</span><div class="tn"><input class="new" placeholder="Type an action and press Enter" aria-label="New action"><input class="nt" placeholder="A note, if the line needs one" aria-label="Note"></div><span class="when"><span class="wk now">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><span></span></div>
+    </div>
+    <div class="addhint">Today &mdash; the note line is always there, whether the action needs one or not</div>
+  </div>
+</div>
+
+<p class="cap">A · the arrow, in the column the arrow already lives in &mdash; recommended</p>
+<div class="frame">
+  <div class="pg" style="padding:10px 0">
+    <div class="list" style="border-top:0"><div class="addrow"><span class="plus">+</span><div class="tn"><input class="new" placeholder="Type an action and press Enter" aria-label="New action"></div><span class="when"><span class="wk now">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><button class="more addnote-btn" type="button" title="Add a note" aria-label="Add a note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>
+    <div class="addhint">The same mark every row carries, in the same place, meaning the same thing: notes &middot; Tab from the action opens it too</div>
+  </div>
+</div>
+
+<p class="cap">A, opened</p>
+<div class="frame">
+  <div class="pg" style="padding:10px 0">
+    <div class="list" style="border-top:0"><div class="addrow typing"><span class="plus">+</span><div class="tn"><input class="new" placeholder="Type an action and press Enter" aria-label="New action" value="Send the outcome to the managers"><input class="nt" value="Ahmed&rsquo;s list first, then Retail&rsquo;s. Copy Noran." aria-label="Note"></div><span class="when"><span class="wk now">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><button class="more on addnote-btn" type="button" title="Close the note" aria-label="Close the note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>
+    <div class="addhint">Pressed, the note is the quiet line under the action, in its own column &middot; pressed again or emptied, it folds away</div>
+  </div>
+</div>
+
+<p class="cap">B · a quiet word at the line&rsquo;s end</p>
+<div class="frame">
+  <div class="pg" style="padding:10px 0">
+    <div class="list" style="border-top:0"><div class="addrow"><span class="plus">+</span><div class="tn"><input class="new" placeholder="Type an action and press Enter" aria-label="New action"></div><span class="when"><span class="wk now">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><button class="notelink" type="button">note</button></div></div>
+    <div class="addhint">Says what it does in a word &middot; costs the arrow&rsquo;s column, so the add line stops lining up with the rows above it</div>
+  </div>
+</div>
+
+<p class="cap">C · nothing on the line &mdash; the note is where it already lives</p>
+<div class="frame">
+  <div class="pg" style="padding:10px 0">
+    <div class="list" style="border-top:0"><div class="addrow"><span class="plus">+</span><div class="tn"><input class="new" placeholder="Type an action and press Enter" aria-label="New action"></div><span class="when"><span class="wk now">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><span></span></div></div>
+    <div class="addhint">Type, Enter, then the arrow on the row it just made &middot; one control fewer, two steps for a line that needs a note</div>
+  </div>
+</div>
+
+<p class="cap">Part 2 &mdash; the week in words</p>
+<div class="sub">This week and Next week as words, the numbers after that. A row due in a past week is <b>late</b>, which is the word you chose, so &ldquo;previous week&rdquo; never reaches an open row &mdash; see the last two rows.</div>
+
+<div class="frame">
+  <div class="pg" style="padding:10px 0">
+    <div class="list" style="border-top:0">
+      <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Send the revised Mobile pillar targets to Ahmed</div><span class="when"><span class="wk">This week</span></span><span class="who">Islam</span><select class="st"><option>Not started</option></select><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Prepare the cycle board walkthrough</div><span class="when"><span class="wk">Next week</span></span><span class="who">Islam</span><select class="st prog"><option>In progress</option></select><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Draft the Q4 review pack</div><span class="when"><span class="wk">W40</span></span><span class="who">Islam</span><select class="st"><option>Not started</option></select><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Walk Care&rsquo;s custodian through the Reporting tab</div><span class="when"><span class="wk">W43</span></span><span class="who">Omar</span><span class="st">Not started</span><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Chase Finance for the August figures</div><span class="when late">Late 2 w</span><span class="who">Noran</span><span class="st">In progress</span><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Book the projector for the board review</div><span class="when late">Late</span><span class="who">Omar</span><span class="st">Not started</span><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="row done"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Check Retail&rsquo;s monthly plan</div><span class="when">Done Tue 15 Sep</span><span class="who">Noran</span><span class="st">Done</span><button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    </div>
+    <div class="addhint">This week &middot; Next week &middot; W40 and beyond &middot; late says how late &middot; done says the day it was finished</div>
+  </div>
+</div>
+
+<p class="cap">And the picker &mdash; two ways, your call</p>
+<div class="two">
+  <div class="frame"><h4>1 &middot; as you signed it off &mdash; numbers, this week bold</h4><span class="weeks" role="listbox" aria-label="Due"><span class="wh"><span>Week</span><span>Sun &ndash; Thu</span></span><button type="button" class="now on"><b>W38</b><small>13 – 17 Sep</small></button><button type="button"><b>W39</b><small>20 – 24 Sep</small></button><button type="button"><b>W40</b><small>27 Sep – 1 Oct</small></button><button type="button"><b>W41</b><small>4 – 8 Oct</small></button><button type="button"><b>W42</b><small>11 – 15 Oct</small></button><button type="button"><b>W43</b><small>18 – 22 Oct</small></button><span class="wf"><button type="button">No date</button><button type="button">A day of my own&hellip;</button></span></span></div>
+  <div class="frame"><h4>2 &middot; the same words the rows use</h4><span class="weeks words" role="listbox" aria-label="Due"><span class="wh"><span>Week</span><span>Sun &ndash; Thu</span></span><button type="button" class="now on"><b>This week</b><small>13 – 17 Sep</small></button><button type="button"><b>Next week</b><small>20 – 24 Sep</small></button><button type="button"><b>W40</b><small>27 Sep – 1 Oct</small></button><button type="button"><b>W41</b><small>4 – 8 Oct</small></button><button type="button"><b>W42</b><small>11 – 15 Oct</small></button><button type="button"><b>W43</b><small>18 – 22 Oct</small></button><span class="wf"><button type="button">No date</button><button type="button">A day of my own&hellip;</button></span></span></div>
+</div>
+
+<div class="note">
+  <p><b>What each costs, said before you choose.</b></p>
+  <p><b>Part 1.</b> <b>A</b> adds no word to the screen and reuses a mark that already means notes, so there is nothing new to learn; the cost is that the mark is silent until you hover it. <b>B</b> says <i>note</i> outright but sits in the arrow&rsquo;s column, so the add line stops lining up with the rows above it. <b>C</b> is the smallest build and the only one where a line that needs a note takes two steps.</p>
+  <p><b>Part 2, and this is the one I need your word on.</b> An open action due in a past week is <b>late</b> &mdash; that is what late means &mdash; so it reads <i>Late</i>, <i>Late 1 w</i>, <i>Late 2 w</i>, the words you asked for. <b>Previous week</b> can only ever appear in place of those, and it would lose the alarm. So unless you want it to replace <i>Late 1 w</i>, the set is: <b>This week &middot; Next week &middot; W40, W41&hellip;</b></p>
+  <p><b>The bold goes with the words.</b> This week&rsquo;s number was bold to mark it among numbers; once the row says <i>This week</i> in words, the bold says it twice, so it comes off the row. It stays in the picker.</p>
+  <p><b>The picker.</b> You asked for numbers there, and that stands as option 1. Option 2 is only for keeping one vocabulary: press <i>Next week</i>, the row says <i>Next week</i>. Against it: the first column stops being a column of numbers, and it has to grow from 54 to 86 pixels to hold the two words &mdash; which is what made option 1 neat.</p>
+  <p><b>What is not affected.</b> What is stored does not move either way &mdash; a week is still its Thursday in the same column, so nothing is migrated and <i>Exact dates</i> reads exactly as it does now.</p>
+</div>

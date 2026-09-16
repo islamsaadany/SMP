@@ -56,10 +56,10 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
 .msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
 .msw>summary::-webkit-details-marker{display:none}
 .msw svg{width:17px;height:17px;display:block}
-/* CHANGED: the way back — the client's own name, at the far end of the bar */
-.back{margin-left:auto;display:inline-flex;align-items:center;gap:6px;color:#EAF0FA;text-decoration:none;font:600 13px/1 var(--font);padding:6px 10px 6px 7px;border:1px solid rgba(234,240,250,.28);border-radius:7px}
+/* CHANGED: the way back — above the page's title, where a back link sits */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--ink-3);text-decoration:none;font:600 12.5px/1 var(--font);margin:0 0 10px -4px;padding:4px 8px 4px 4px;border-radius:6px}
 .back svg{width:14px;height:14px}
-.back:hover,.back:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.back:hover,.back:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 30px}
 h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
@@ -71,12 +71,14 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .dots>button{width:28px;height:24px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0}
 .dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
 .dots svg{width:16px;height:16px}
-.setmenu{position:absolute;top:30px;right:0;z-index:9;width:230px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:8px 6px}
-.setmenu .lab{font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:4px 9px 2px}
-.setmenu button{display:flex;width:100%;align-items:center;gap:9px;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.setmenu{position:absolute;top:30px;right:0;z-index:9;display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:6px}
+.setmenu .col{display:grid;align-content:start;min-width:0}
+.setmenu .col+.col{border-left:1px solid var(--line);padding-left:4px}
+.setmenu .lab{display:block;font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:3px 9px 2px}
+.setmenu button{display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
 .setmenu button:hover{background:var(--ground)}
 .setmenu button.on{font-weight:600}
-.setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+.setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto;flex:none}
 .setmenu hr{border:0;border-top:1px solid var(--line);margin:6px 3px}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
 .srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font)}
@@ -103,9 +105,9 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .when.pick:hover,.when.pick.on{background:var(--surface-2)}
 .when .wk{display:inline-block;font:600 12.5px/1.4 var(--font);color:var(--ink-2)}
 .when.late .wk{color:var(--bad)}
-.weeks{position:absolute;top:26px;right:0;z-index:5;min-width:236px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
+.weeks{position:absolute;top:26px;right:0;z-index:5;min-width:212px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:5px;text-align:left}
 .weeks button{display:grid;grid-template-columns:1fr auto;width:100%;align-items:center;gap:12px;background:none;border:0;border-radius:7px;padding:7px 9px;font:400 14px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
-.weeks button small{font:400 12px/1.4 var(--mono);color:var(--ink-3)}
+.weeks button small{font:400 11.5px/1.4 var(--mono);color:var(--ink-3)}
 .weeks button:hover{background:var(--ground)}
 .weeks button.on{font-weight:600}
 .weeks button.on::before{content:"";position:absolute;left:8px;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-top:7px}
@@ -134,14 +136,12 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
 .addrow .plus{width:18px;height:18px;display:grid;place-items:center;color:var(--ink-3);font:600 15px/1 var(--font)}
 .addrow input.new{border:0;background:transparent;color:var(--ink);font:400 15px/1.35 var(--font);padding:2px 0;width:100%;min-width:0;outline:none}
 .addrow input::placeholder{color:var(--ink-3)}
+.addrow .tn{min-width:0;display:grid;gap:2px}
+.addrow input.nt{border:0;background:transparent;color:var(--ink-2);font:400 13px/1.4 var(--font);padding:0;width:100%;min-width:0;outline:none}
+.addrow input.nt::placeholder{color:var(--ink-3)}
 .addrow .when,.addrow .who,.addrow .st{opacity:.55}
 .addrow.typing{background:var(--surface)}
 .addrow.typing .when,.addrow.typing .who,.addrow.typing .st{opacity:1}
-.addnote{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:0 2px 10px;border-bottom:1px dashed var(--line);background:var(--surface)}
-.addnote .n{grid-column:2;display:flex;gap:10px;align-items:flex-start}
-.addnote textarea{flex:1;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 10px;font:400 13.5px/1.5 var(--font);min-height:40px;resize:vertical}
-.addnote .k{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding-top:6px;white-space:nowrap}
-.notelink{font:400 12px/1.5 var(--mono);color:var(--ink-3);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;justify-self:end}
 .addhint{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding:6px 2px 0 34px}
 
 /* the mockup's own furniture, not the product's */
@@ -152,7 +152,7 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
 .intro li{margin:4px 0}
 .cap{max-width:1000px;margin:26px auto 8px;padding:0 20px;font:600 12px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
 .frame{max-width:1000px;margin:0 auto;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground)}
-.frame.room{overflow:visible}.frame.room .pg{padding-bottom:230px}
+.frame.room{overflow:visible}.frame.room .pg{padding-bottom:210px}
 .frame .bar{border-radius:0}
 .faults{max-width:1000px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .fault{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:14px 16px}
@@ -173,10 +173,10 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
   <h1>Internal Tracker — weeks, a settings menu, and the add line that takes everything</h1>
   <p>Same page as the one built. What changes, all yours from the 16 September message:</p>
   <ol>
-    <li><b>Dates are weeks by default.</b> A row reads <i>This week</i>, <i>Next week</i>, <i>Wk of 27 Sep</i>. Picking a week stores that week's <b>Thursday</b>. Late reads <i>Late 1 w</i>, <i>Late 2 w</i> as before.</li>
+    <li><b>Dates are weeks by default.</b> A row reads <i>This week</i>, and after that the week's number in the year — <i>W39</i>, <i>W40</i> — with its days in brackets on the picker. Picking a week stores that week's <b>Thursday</b>. Late reads <i>Late 1 w</i>, <i>Late 2 w</i> as before.</li>
     <li><b>A three-dots button on the far right of the views row</b> holds the two settings: <i>Group by</i> (moved in from the row) and <i>Dates as</i> — Weeks or Exact dates.</li>
-    <li><b>The add line takes the week, the owner and a note</b> while you are typing the action, before Enter. The week starts on <i>This week</i>, the owner on you.</li>
-    <li><b>A way back</b> at the far end of the top bar — the client's own name — to the client's platform (Strategy).</li>
+    <li><b>The add line takes the week, the owner and a note</b> while you are typing the action, before Enter. The note is a second quiet line under the action, in the same column, so the week, the owner and the status stay where they are. The week starts on <i>This week</i>, the owner on you.</li>
+    <li><b>A way back</b> above the page's title — the client's own name — to the client's platform (Strategy).</li>
   </ol>
   <p>And the two faults you hit, measured and fixed in the same drawing: the status pill is one box at one size on every row, and the date box no longer vanishes when the calendar opens.</p>
 </div>
@@ -198,14 +198,14 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
 </div>
 
 <!-- ═══ FRAME 1 ═══ -->
-<p class="cap">1 · This week at rest — dates as weeks, one pill size, the three dots on the right, the way back in the bar</p>
+<p class="cap">1 · This week at rest — dates as weeks, one pill size, the three dots on the right, the way back above the title</p>
 <div class="frame">
   <div class="bar">
     <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
     <h1>Internal Tracker</h1><span class="org">· <b>Raya Trade</b></span>
-    <a class="back" href="#"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Raya Trade</a>
   </div>
   <div class="pg">
+    <a class="back" href="#"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Raya Trade</a>
     <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
     <nav class="cats"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a>
       <span class="dots"><button type="button" title="Settings" aria-label="Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></button></span></nav>
@@ -255,15 +255,16 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
       <div class="row"><span class="tick" role="checkbox" aria-checked="false"></span><div class="t">Walk Care's custodian through the Reporting tab</div>
         <span class="when"><span class="wk">This week</span></span><span class="who">Omar</span><span class="st">Not started</span>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-      <div class="addrow typing" style="border-bottom:0"><span class="plus">+</span><input class="new" id="add2" value="Send the outcome to the managers" aria-label="New action"><span class="when pick"><span class="wk">Next week</span></span><span class="who pick">Islam</span><span class="st">Not started</span><button class="notelink" type="button">note</button></div>
-      <div class="addnote"><div class="n"><textarea id="note2" aria-label="Note" placeholder="A note, if the line needs one">Ahmed's list first, then Retail's. Copy Noran.</textarea><span class="k">Enter on the line adds it all</span></div></div>
+      <div class="addrow typing" style="border-bottom:0"><span class="plus">+</span>
+        <div class="tn"><input class="new" id="add2" value="Send the outcome to the managers" aria-label="New action"><input class="nt" id="note2" value="Ahmed's list first, then Retail's. Copy Noran." aria-label="Note"></div>
+        <span class="when pick"><span class="wk">W39</span></span><span class="who pick">Islam</span><span class="st">Not started</span><span></span></div>
     </div>
-    <div class="addhint">The week starts on This week and the owner on you · the note opens from the word at the line's end and is kept with the action · Escape clears the line</div>
+    <div class="addhint">Tab from the action to its note, one quiet line under it in the same column · the week starts on This week and the owner on you · Enter from either line adds it all · Escape clears both</div>
   </div>
 </div>
 
 <!-- ═══ FRAME 3 ═══ -->
-<p class="cap">3 · The week pressed on a row — the platform's own list, no calendar; a week is stored as its Thursday</p>
+<p class="cap">3 · The week pressed on a row — this week, then the week numbers with their days; a week is stored as its Thursday</p>
 <div class="frame room">
   <div class="pg">
     <div class="list" style="border-top:0">
@@ -271,12 +272,12 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
         <span class="when pick on"><span class="wk">This week</span>
           <span class="weeks" role="listbox" aria-label="Due">
             <button type="button"><span>No date</span></button>
-            <button type="button" class="on"><span>This week</span><small>Thu 17 Sep</small></button>
-            <button type="button"><span>Next week</span><small>Thu 24 Sep</small></button>
-            <button type="button"><span>Wk of 27 Sep</span><small>Thu 1 Oct</small></button>
-            <button type="button"><span>Wk of 4 Oct</span><small>Thu 8 Oct</small></button>
-            <button type="button"><span>Wk of 11 Oct</span><small>Thu 15 Oct</small></button>
-            <button type="button"><span>Wk of 18 Oct</span><small>Thu 22 Oct</small></button>
+            <button type="button" class="on"><span>This week</span><small>[13 – 17 Sep]</small></button>
+            <button type="button"><span>W39</span><small>[20 – 24 Sep]</small></button>
+            <button type="button"><span>W40</span><small>[27 Sep – 1 Oct]</small></button>
+            <button type="button"><span>W41</span><small>[4 – 8 Oct]</small></button>
+            <button type="button"><span>W42</span><small>[11 – 15 Oct]</small></button>
+            <button type="button"><span>W43</span><small>[18 – 22 Oct]</small></button>
             <hr><button type="button" class="quiet"><span>A day of my own…</span></button>
           </span></span><span class="who pick">Islam</span><select class="st" aria-label="Status"><option>Not started</option></select>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
@@ -284,23 +285,23 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
         <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><select class="st prog" aria-label="Status"><option>In progress</option></select>
         <button class="more" type="button" aria-label="Notes and history"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     </div>
-    <div class="addhint">Six weeks ahead on the list · a day of your own opens a date box for the one action that needs one · this week is next week's on a Friday or a Saturday</div>
+    <div class="addhint">Six weeks ahead · the number is the week of the year, the days in brackets are its Sunday to Thursday · a day of your own opens a date box for the one action that needs one</div>
   </div>
 </div>
 
 <!-- ═══ FRAME 4 ═══ -->
-<p class="cap">4 · The three dots pressed — the two settings, remembered on this browser</p>
+<p class="cap">4 · The three dots pressed — the two settings side by side, no wider than their words, remembered on this browser</p>
 <div class="frame room">
   <div class="pg">
+    <a class="back" href="#"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Raya Trade</a>
     <h2 class="pt">This week <small>Sun 13 – Thu 17 Sep 2026</small></h2>
     <nav class="cats" style="margin-bottom:0"><a href="#" aria-current="true">This week</a><a href="#">All</a><a href="#">Mine</a><a href="#">Undated</a>
       <span class="dots"><button type="button" class="on" title="Settings" aria-label="Settings" aria-expanded="true"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></button>
         <span class="setmenu" role="menu">
-          <div class="lab">Group by</div>
-          <button type="button" class="on">Owner</button><button type="button">Status</button><button type="button">Due date</button><button type="button">None</button>
-          <hr>
-          <div class="lab">Dates as</div>
-          <button type="button" class="on">Weeks</button><button type="button">Exact dates</button>
+          <span class="col"><span class="lab">Group by</span>
+          <button type="button" class="on">Owner</button><button type="button">Status</button><button type="button">Due date</button><button type="button">None</button></span>
+          <span class="col"><span class="lab">Dates as</span>
+          <button type="button" class="on">Weeks</button><button type="button">Exact dates</button></span>
         </span></span></nav>
   </div>
 </div>
@@ -326,10 +327,10 @@ select.st{cursor:pointer;padding:0 24px 0 14px;text-align:center;text-align-last
 
 <div class="note">
   <p><b>What this costs, said before you choose.</b></p>
-  <p><b>A week is a day underneath.</b> Nothing new is stored: picking a week writes that week's Thursday into the same date field, so late and "carried" go on being worked out the same way, and a list read by somebody with exact dates on shows the same Thursday. A row set by week reads <i>This week</i> or <i>Next week</i>; once its Thursday has passed it reads <i>Late 1 w</i>, because in weeks a row is late from the Friday. A day chosen by the calendar shows as its week to somebody reading in weeks — a Monday is "this week" there.</p>
+  <p><b>A week is a day underneath.</b> Nothing new is stored: picking a week writes that week's Thursday into the same date field, so late and "carried" go on being worked out the same way, and a list read by somebody with exact dates on shows the same Thursday. A row set by week reads <i>This week</i>, or its week number — <i>W40</i> — with the days on the hover; once its Thursday has passed it reads <i>Late 1 w</i>, because in weeks a row is late from the Friday. A day chosen by the calendar shows as its week to somebody reading in weeks — a Monday is "this week" there.</p>
   <p><b>A new line is due this week, not undated.</b> Today Enter lands a line with no date. Drawn here, the add line starts on <i>This week</i>, so Enter lands it due this Thursday, and <i>No date</i> is a choice on the picker rather than the default. If you would rather a new line start with no date, say so — it is one word in the drawing.</p>
   <p><b>Dates as and Group by are this browser's</b>, like Group by is today — remembered as a cookie, never stored on the client, so two of the office can read one list two ways. The Due date grouping under weeks groups by the week rather than the day.</p>
-  <p><b>The note on the add line</b> is the action's own notes, the same box the arrow opens afterwards. It opens from the word at the line's end so a quick line stays one line; Enter from either box adds it all.</p>
-  <p><b>The way back</b> goes to the client's platform — Strategy, where the modules menu also leads. Your sentence ended at "to the", so if you meant somewhere else, say which.</p>
+  <p><b>The note on the add line</b> is the action's own notes, the same box the arrow opens afterwards — one line here, Tab reaches it, and it is always drawn under the action so nothing on the right moves. Enter from either line adds it all.</p>
+  <p><b>The way back</b> sits above the title, where a back link is expected, and goes to the client's platform — Strategy, where the modules menu also leads. Your sentence ended at "to the", so if you meant somewhere else, say which.</p>
   <p><b>The status on the add line</b> stays <i>Not started</i>: you named the date, the owner and a note, and a line that starts In progress is one press on the row after.</p>
 </div>

@@ -49347,3 +49347,48 @@ settings page; the mockup drew step 1 with the registry fields and Branding)
 — on the what-to-check list;
 a module that arrives with a set-up question of its own has no step in this
 flow; and the knowledge base's home is his *"later"*.
+
+---
+
+## §358 — A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR
+
+Islam, having just pressed it: *"the clicker when I go to the settings button
+it turns into the writing arrow not a normal mouse."*
+
+**IT IS THE ONE CONTROL THAT OPENS A CLIENT.** *Settings* on a client's card is
+`el("span", "ccfg", "Settings")` with `role="button"` and a tab index — right
+for the keyboard, and a `<span>` holding text takes the browser's default
+cursor, which over text is the I-beam. So the chip that opens
+`/<client>/setup` looked, under the pointer, like something to select rather
+than something to press.
+
+**THE PROOF IT IS AN OVERSIGHT AND NOT A DECISION IS TWO RULES BELOW IT.**
+`.cback` — *Bring back*, on an archived client's card, built the same way for
+the same kind of act, sitting directly beside this one in the same row — has
+carried `cursor:pointer` since it was written. One of the pair was given it
+and the other was not, and on an archived card the two are side by side: the
+same shape, one a pointer and one an I-beam.
+
+**ONE DECLARATION, AND THE SERVED COPY IS REGENERATED RATHER THAN EDITED**
+(§329): `smp-app/shell/platform.html` and `smp-app/public/platform-page.js`
+are `build-shell.mjs`'s output from the root `platform.html`, so the edit is
+made once and the generator run — `generated-in-step` byte-identical after.
+
+**THE ASSERTION ASKS EVERY SUCH CONTROL AND NEVER THE ONE THAT FAILED**
+(§104.7). `platform-cards.py` §5 derives the set from the page — every element
+carrying `role="button"` that is not a `<button>` or an `<a>` — so the third
+chip somebody adds is covered the day it is added rather than the day it is
+reported. The archived band is put into the scene on purpose, because that is
+where the pair is drawn together. **AND ITS FIRST RUN PASSED FOR THE WRONG
+REASON** (§113.8): the fixture had no `canConfig`, so the band's card drew
+neither chip and the assertion was satisfied by the four live cards while its
+own wording claimed it had measured the pair — it names both words now. Proved
+able to fail: `--break=text-cursor` reddens exactly that one assertion,
+printing `cur: 'auto'` verbatim, on both copies of the page.
+
+**RECORDED, NOT FIXED, AND NOT THIS CHANGE'S**: `checks/publishing-room.py`
+dies at *"no button: Publish a report"* — words that appear nowhere in
+`platform.html` — reproduced identically on the untouched tree before anything
+here was blamed (§303). It is §51.11's shape with §215's failure mode: the
+check's subject has moved, and it **dies rather than reporting**, so the
+sections after it are not run at all.

@@ -172,7 +172,13 @@
     if (!raw) return;                               /* one module: no choice to offer */
     var list;
     try { list = JSON.parse(raw); } catch (e) { return; }
-    if (!Array.isArray(list) || list.length < 2) return;
+    /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
+       rather than on the attribute (§359.1): `data-modules` is the list of
+       modules this person may open, read by this and by the client's own
+       Setup rail, which draws a row per module whatever the count. The
+       check's break forces the switcher on for a client holding one. */
+    var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
+    if (!Array.isArray(list) || (!forceSwitch && list.length < 2)) return;
     var bar = document.querySelector(".top .top-in");
     if (!bar || bar.querySelector(".topmark")) return;
 

@@ -46,7 +46,11 @@ export function shellDocument(tenantName: string, module: string | null = null, 
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
   const brk = process.env.SMP_BREAK || "";
-  return "<!doctype html>\n<html lang='en'" + (brk === "no-route" ? " data-break='no-route'" : "") +
+  /* `switch-always` is route.js's, not this file's (§359.1): the attribute
+     below is the LIST, and who draws a switcher from it is that file's rule,
+     so its break has to reach it. */
+  const routeBrk = (brk === "no-route" || brk === "switch-always") ? brk : "";
+  return "<!doctype html>\n<html lang='en'" + (routeBrk ? " data-break='" + routeBrk + "'" : "") +
     (module ? " data-module='" + esc(module) + "'" : "") +
     /* AND ITS NAME (§356.2): the frozen shell heads a module's own Setup rail
        with the module's word, and a label capitalised out of the key in the
@@ -59,14 +63,18 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        tells it where else it may go, so shell/route.js can draw the switcher
        without a second copy of MODULE_DEF or a request to ask (§53.5).
 
-       WRITTEN ONLY WHERE THERE IS A CHOICE. A client with one module gets no
-       attribute at all, so the switcher is never drawn for them — a menu with
-       one entry is a door behind a door (§32), and the absent attribute is
-       what says so rather than a flag beside it (§50.6). */
-    /* THE CHECK'S BREAK: a build that offered the switcher to a client with
-       one module — a door behind a door (§32) — must go red. Never set on a
-       deployment. */
-    (modules.length > (brk === "switch-always" ? 0 : 1) ? " data-modules='" + esc(JSON.stringify(modules)) + "'" : "") +
+       THE ATTRIBUTE IS THE LIST, AND NOT "IS THERE A CHOICE" (§359.1). It
+       was written only for a client holding more than one, which is the
+       SWITCHER's rule wearing the attribute's name — and it left the client's
+       own Setup rail unable to name the one module it should offer a way
+       across to, which is what Islam met as *"I can't find the access page"*.
+       Two readers now, each with its own rule over one answer (§53.5): the
+       switcher is drawn only where there is a choice (shell/route.js keeps
+       that test, a menu of one being a door behind a door, §32) and the rail
+       draws a row per module whatever the count. The list is already the
+       modules THIS PERSON MAY OPEN (moduleMenu(openableModules)), so neither
+       reader has to ask a second time. */
+    (modules.length ? " data-modules='" + esc(JSON.stringify(modules)) + "'" : "") +
     /* THE LANDING LINE PAGE'S DECLARATION (§356.4): what this module can
        say, its texts right now and the client's pick — stamped on a SETUP
        document only, where the page that draws it lives (lib/landing.ts

@@ -294,7 +294,14 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(b.scope === "client" && b.row === false && b.dests === 0, "the module's navigation is not drawn over the client's own pages", JSON.stringify(b));
   check(b.viewer === false, "\u2026nor the viewer strip \u2014 looking as somebody is a question about a module's pages", JSON.stringify(b));
   check(b.switcher === false, "\u2026nor the module switcher, which is built at load and cannot be repainted away", JSON.stringify(b));
-  check(/data-modules=/.test(cl), "\u2026and this client HAS a second module, so that absence is a decision (\u00a7113.8)");
+  /* REWRITTEN, NEVER LOOSENED (\u00a7218, \u00a7214.3). This asked whether the
+     attribute was PRESENT, which said "this client holds more than one" only
+     while the attribute carried the switcher's rule in its name \u2014 \u00a7359.1
+     stamps it for every client, so presence would now be true of a client
+     with one and the absence above would pass for the wrong reason
+     (\u00a7113.8). It asks the CONTENT, which is what it was always for. */
+  const clMods = JSON.parse(((cl.match(/data-modules='([^']*)'/) || [])[1] || "[]").replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
+  check(clMods.length >= 2, "\u2026and this client HAS a second module, so that absence is a decision (\u00a7113.8)", JSON.stringify(clMods));
   check(b.h1 === "Raya Trade" && /Client settings/.test(b.sub), "the heading names the client and what you are looking at", b.h1 + " / " + b.sub);
 
   /* BOTH ENDS (\u00a794.2). A build that deleted the row outright satisfies every
@@ -376,6 +383,57 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(brand.head === brand.want && brand.want !== "", "the client's own colour still reaches the page \u2014 the rail's head is --panel", JSON.stringify(brand));
   check(brand.top !== brand.want, "\u2026and the bar above it is the product's surface, as every page's is", JSON.stringify(brand));
 
+  /* ── THE WAY ACROSS RUNS BOTH WAYS (\u00a7359.1) ───────────────────────
+     Islam, having opened the client's settings from the console's card:
+     *"I ca't find the access page in the strategy module"*. Roles & access
+     was exactly where it belongs \u2014 on Strategy's rail \u2014 and there was no
+     door to it from the rail he was standing on: a module's rail could cross
+     to the client's and the client's could only go back to the console.
+
+     BOTH ENDS, OR HALF A BUILD PASSES (\u00a794.2): the rows on the client's
+     rail AND the one row still on the module's. ONE PER MODULE, asserted as
+     an AGREEMENT with `data-modules` rather than against the word "Strategy"
+     (\u00a794.8) \u2014 and this tenant holds TWO for the length of this section, so
+     a build that hardcoded one module's name goes red here and could not on
+     the dev tenant's own single module (\u00a7113.8). AT THE FOOT, after the
+     list, because it is a place to go ON to (\u00a7357.9) \u2014 and outside
+     `.raillist`, which is the one thing that scrolls, or the door scrolls
+     away (\u00a7290.1). */
+  await open("/raya-trade/setup/people");
+  const doors = await page.evaluate(() => {
+    const list = document.querySelector(".setuprail .raillist");
+    return Array.from(document.querySelectorAll(".setuprail .railback")).map((a) => ({
+      text: a.textContent.trim(), href: a.getAttribute("href") || "",
+      fwd: a.classList.contains("railfwd"),
+      inList: !!(list && list.contains(a)),
+      afterList: !!(list && (list.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING)),
+      seen: !!(a.checkVisibility && a.checkVisibility()),
+    }));
+  });
+  const across = doors.filter((d) => d.fwd);
+  check(across.length === clMods.length && clMods.every((m) => across.some((d) => d.href === "/raya-trade/" + m.key + "/setup" && d.text === m.label + " settings \u203a")),
+        "the client's rail carries one way across per module this person may open", JSON.stringify(across));
+  check(across.every((d) => d.seen && !d.inList && d.afterList),
+        "\u2026drawn, outside the scrolling list, and after it \u2014 a place to go ON to (\u00a7357.9, \u00a7290.1)", JSON.stringify(across));
+  check(doors.some((d) => !d.fwd && /Back to the console/.test(d.text)),
+        "\u2026and the way OUT is still above the list, where a back link belongs", JSON.stringify(doors.map((d) => d.text)));
+  /* AND IT LANDS ON THE MODULE'S OWN SETUP, WEARING THE MODULE'S BAR \u2014
+     pressed, never read: a door wired to nothing renders perfectly (\u00a796). */
+  await page.click(".setuprail .railfwd");
+  await page.waitForURL(/\/raya-trade\/strategy\/setup/, { timeout: 8000 }).catch(() => {});
+  await booted();
+  b = await bar();
+  const reached = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail [data-setupgo]")).map((e) => e.dataset.setupgo));
+  check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,
+        "\u2026and pressing it lands on the module's Setup, wearing the module's bar", path() + " / " + JSON.stringify(b));
+  check(reached.includes("access"), "\u2026which is the rail Roles & access is on \u2014 the page he could not reach (\u00a761)", reached.join(","));
+  /* THE OTHER END. A build that moved the row rather than adding one would
+     satisfy every assertion above. */
+  const back = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail .railback")).map((a) => a.textContent.trim() + " -> " + (a.getAttribute("href") || "")));
+  check(back.length === 1 && /Client settings/.test(back[0]) && /\/raya-trade\/setup$/.test(back[0]),
+        "\u2026and a module's rail still carries its own one row the other way", JSON.stringify(back));
+
+  await open("/raya-trade/setup/people");
   /* AND *Save & close* GOES WHERE IT SAYS. The handler is \u00a7313.23's and is
      untouched here; what is asserted is that the reworded control is still
      that control \u2014 a word changed on a button that no longer navigates is

@@ -54318,6 +54318,18 @@ var SYNC = (function () {
      file://, where the gear opens everything. */
   function moduleWord(){ return document.documentElement.getAttribute("data-module") || ""; }
   function moduleLabel(){ return document.documentElement.getAttribute("data-module-label") || ""; }
+  /* THE MODULES THIS PERSON MAY OPEN (§359.1), stamped by the server as the
+     switcher's own list (lib/shell.ts) and read here for the row at the foot
+     of the client's rail. Absent over file://, where there is no server to
+     say what a client holds — so the offline copy draws no rows, exactly as
+     it draws no switcher. A malformed value is no list rather than a throw:
+     this is chrome, and chrome that dies takes the page with it. */
+  function modulesHere(){
+    var raw = document.documentElement.getAttribute("data-modules");
+    if (!raw) return [];
+    try { var v = JSON.parse(raw); return Array.isArray(v) ? v : []; }
+    catch (e) { return []; }
+  }
   /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ──
      Islam, of the client's Setup rail under Strategy's full navigation:
      *"theclient settings shouldn't open the strategy banner in the top this
@@ -54684,7 +54696,36 @@ var SYNC = (function () {
       ? '<div class="railback-row"><a class="railback" href="' + esc(OPTS_CONSOLE) + '">' +
         '\u2039 Back to the console</a></div>'
       : "";
-    var across = scope && scope !== "client" && slug
+    /* AND THE CLIENT'S RAIL CARRIES THE REVERSE (§359.1). Islam, having
+       opened the client's settings from the console's card: *"I ca't find
+       the access page in the strategy module"* — and Roles & access was
+       exactly where it belongs, on STRATEGY's rail, with no way to reach it
+       from the rail he was standing on. One-way is how that happened: a
+       module's rail could cross to the client's and the client's could only
+       go back to the console, so arriving by the card left somebody on a
+       list with no door to the one holding the matrix (§61, and §16.7's
+       rule — a page that names a thing and cannot take you to it makes
+       work).
+
+       ONE ROW PER MODULE, where the other direction is one row, because
+       there is one client and there may be several modules. The list is
+       `data-modules` — the modules this person MAY OPEN, which the server
+       already resolved for the switcher — so a module shut to them is not
+       offered here either, without this asking a second time (§53.5, §42).
+
+       THE SAME FOOT, THE SAME WORDS, THE SAME DIRECTION MARK. `Client
+       settings ›` and `Strategy settings ›` are the same row pointing
+       opposite ways: a place to go ON to, so it sits after the list rather
+       than above it (§357.9), never the first thing read on a rail somebody
+       came here to use. */
+    var across = slug && scope === "client"
+      ? modulesHere().map(function(m){
+          if (!m || !m.key) return "";
+          return '<div class="railback-row railfoot"><a class="railback railfwd" href="/' +
+            esc(slug) + '/' + esc(m.key) + '/setup">' +
+            esc(m.label || m.key) + ' settings \u203a</a></div>';
+        }).join("")
+      : slug && scope && scope !== "client"
       ? '<div class="railback-row railfoot"><a class="railback railfwd" href="/' + esc(slug) + '/setup">' +
         'Client settings \u203a</a></div>'
       : "";
@@ -63515,7 +63556,13 @@ var SYNC = (function () {
     if (!raw) return;                               /* one module: no choice to offer */
     var list;
     try { list = JSON.parse(raw); } catch (e) { return; }
-    if (!Array.isArray(list) || list.length < 2) return;
+    /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
+       rather than on the attribute (§359.1): `data-modules` is the list of
+       modules this person may open, read by this and by the client's own
+       Setup rail, which draws a row per module whatever the count. The
+       check's break forces the switcher on for a client holding one. */
+    var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
+    if (!Array.isArray(list) || (!forceSwitch && list.length < 2)) return;
     var bar = document.querySelector(".top .top-in");
     if (!bar || bar.querySelector(".topmark")) return;
 

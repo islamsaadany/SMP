@@ -54,9 +54,94 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§356.14 — the tracker's dates by the week, a settings menu, the add line that takes everything, one pill size, and a way back (spec 054).**
+**Latest version:** **§356.16 — the week by its month, fixed cards, and a line that asks later (spec 054).**
 
-**It is built and it is on the branch, not on `main`.** Everything on the
+**Built and merged to `main`.** All four things you asked for, each drawn
+before it was built, and two of them drawn three ways so you could weigh what
+each cost. **A week three weeks out reads its month** — *W1 Oct*, *W3 Dec* —
+where before it read its number in the year. A week that falls across two
+months takes the month its Thursday is in, so 27 September to 1 October is
+*W1 Oct*; that follows from the way a week was already stored and needed no
+second rule. The picker says what the rows say. **The four cards at the top
+hold still.** They were changing size whenever an action moved from one status
+to another, because the due card's tail ran onto a second line and all four
+cards share a row. The tail is gone and the cards are held open, so nothing
+jumps. **The names list is as wide as its longest name** and no wider. **And
+the add line asks later**: at rest it is one box for the action, and the
+moment you type the first letter the week, the owner, the status and the note
+appear beside it — their space is kept from the start, so nothing moves under
+your hand while you are typing.
+
+**Checked:** 228 assertions on a real database, the browser half pressing
+every control and reading the database back after each press; red under
+thirteen deliberate breaks, one for each decision; the modules check green;
+the frozen product untouched.
+
+**Still yours:** the module still has to be turned on per client from the
+client's card.
+
+---
+
+### Earlier the same day: **§356.15 — the note is asked for, and the week is in words (spec 054).**
+
+**Built and merged to `main`.** Both drawn before either was built — three
+ways to ask for a note and two ways to spell a week, each with its cost beside
+it — and you chose the arrow and the words. **A note is not on the line until
+you ask for it.** The arrow at the end of a row, the one that already opens
+the row, opens the note box with it; folding the row empties that box, and the
+cost of that is stated rather than discovered — the arrow throws away a note
+you had not sent, which is what Escape on that line already did. Tab from the
+action is the second way in, and an empty note left behind folds itself.
+**A week reads in words**: *This week*, *Next week*, and a number only once
+you are past those. **What is not built is the past week, on your own earlier
+decision**: an open action whose week has gone already reads *Late*, *Late
+1 w*, *Late 2 w*, and a week number there could only replace that word — the
+alarm would go with it.
+
+**Checked:** 214 assertions on a real database, the browser half pressed in
+Chromium; red under eight deliberate breaks; the frozen product untouched.
+
+**Still yours:** the module still has to be turned on per client from the
+client's card.
+
+---
+
+### Earlier the same day: **§357 — Meeting Notes: one meeting, one note, and the minutes as an email (spec 055).**
+
+**Built and merged to `main`.** The sixth module, and it
+cost one folder and one line in the table the route asks — everything else it
+needs is the platform's already. **The meetings list** is newest first,
+grouped by month, with a search and what went out on every row. **A note** is
+its title, its date, who was there, and the box you type in while the meeting
+runs. **Refine** hands the notes to the assistant and writes the minutes into
+six parts beside them — Summary, Discussed, Agreed, Actions, Open, Next
+meeting — and **every part is a box you can edit**. **Refining again ADDS**:
+whatever you rewrote stays exactly as you left it and the model's new lines
+join it. **Send** emails the minutes to everybody on the meeting who has an
+address, with a copy to you; a second send says *Updated minutes*, and what
+went out the first time is kept as it went. **Somebody who is not on the
+client's register** can be added for that meeting only, by name and address,
+and is never written to the register. **The office's alone**, by seat, refused
+on the page and at the api both.
+
+Checked: 154 assertions, 0 failures, with the last section pressed in a real
+browser and Postgres read back after every press; red under each of five
+deliberate breaks; a stand-in standing in front of both the assistant and the
+mail service, so what was asked and what left are read off the wire rather
+than assumed. Three faults it found are fixed: a year printed twice in the
+subject line, a stray `&middot;` on an attendee's chip, and a date box that
+printed `09/16/2026` — it is the tracker's own date control now, so a date is
+set one way across the office's modules.
+
+**Still yours:** the module has to be turned on per client from the
+client's card; and the switcher lists it for a client's own person until the
+per-module access tab exists (spec 046 §4.4).
+
+---
+
+### Earlier the same day: **§356.14 — the tracker's dates by the week, a settings menu, the add line that takes everything, one pill size, and a way back (spec 054).**
+
+**Built and merged to `main`.** Everything on the
 drawing you signed off is in. **The two faults you hit**: the status pill was
 two sizes because the line that sets its type was not one a browser reads, so
 the pill you could press and the pill you could only read each fell to a
@@ -78,14 +163,14 @@ every new control and reading the database after each press; red under six
 deliberate breaks, the sixth putting the old date box back; the modules check
 green; the frozen product untouched.
 
-**Still yours:** the merge; the module still has to be turned on per client
+**Still yours:** the module still has to be turned on per client
 from the client's card. Notes (meeting minutes) is next and has no spec yet.
 
 ---
 
 ### Earlier the same day: **§356.11–§356.13 — the Internal Tracker's row, redrawn at your word and built (spec 054).**
 
-**It is built and it is on the branch, not on `main`.** Everything on the
+**Built and merged to `main`.** Everything on the
 drawing you signed off is in: the owner is a **first name**, and pressing it
 opens the team on this client to hand the action on (only the owner and the
 Super user get the press, everybody else reads the name); the **arrow** at the
@@ -108,14 +193,14 @@ real browser and read back from the database after every press, with a mark
 planted on the page to prove nothing reloaded; red under five deliberate
 breaks; the modules check green; the frozen product untouched.
 
-**Still yours:** the merge; the module still has to be turned on per client
-from the client's card. Notes (meeting minutes) is next and has no spec yet.
+**Still yours:** the module still has to be turned on per client
+from the client's card. Notes (meeting minutes) is spec 055, built above.
 
 ---
 
 ### Earlier the same day: **§356 — the Internal Tracker is built (spec 054).**
 
-**It is done and it is on the branch, not on `main`.** The Internal Tracker is
+**Built and merged to `main`.** The Internal Tracker is
 a module a client can be given, like Insights: the office opens it from the
 switcher, and it is the weekly list you asked for — This week (late lines
 first, carried counts on them), All, Mine and Undated, one strip of counts on
@@ -140,7 +225,7 @@ real browser and read back from the database after every press; red under all
 three deliberate breaks; the modules and Insights checks green. The offline
 product is untouched. The mockup you signed off is the record of the look.
 
-**Still yours:** the merge; and the module has to be turned on per client from
+**Still yours:** the module has to be turned on per client from
 the client's card, like Insights. Notes (meeting minutes) is next and has no
 spec yet.
 

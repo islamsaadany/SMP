@@ -397,7 +397,7 @@
    merge was made, so the name goes PAST it rather than beside it (§94.12);
    confirm once more immediately before any push to main (§94.16).
    `node --check sw.js` run after the merge. */
-const SHELL = "smp-shell-v5.05-demo-complete";
+const SHELL = "smp-shell-v5.06-meeting-notes";
 const ASSETS = [
   "/",
   "/index.html",

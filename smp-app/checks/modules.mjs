@@ -226,7 +226,7 @@ check("...and what is not a colour is the shipped default, never painted as it c
 /* EVERY MODULE THAT DRAWS ITS OWN DOCUMENT, and the list is typed because
    each one's page file is read by name — a fifth is a word added here or its
    colour goes unmeasured (§214.3, said rather than hidden). */
-for (const name of ["trial", "insights", "tracker"]) {
+for (const name of ["trial", "insights", "tracker", "notes"]) {
   const src = read("smp-app/modules/" + name + "/page.ts");
   check("the " + name + " module asks the spine for the colour rather than deciding it",
     /lib\/branding\.ts/.test(src));

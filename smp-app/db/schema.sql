@@ -943,6 +943,47 @@ CREATE TABLE tracker_events (
 );
 CREATE INDEX tracker_events_action ON tracker_events (tenant_id, action_id, at);
 
+-- ── MEETING NOTES (spec 055) ─────────────────────────────────────────────
+-- One meeting, one note, kept in the client's own room: the note, and one row
+-- per send of its minutes — who, when, whether it was an update, who it went
+-- to, and THE MINUTES AS SENT, because the note stays editable (decision 6)
+-- and the record of what went out must not move with it. An attendee is a
+-- {key} the register renders at draw and send time (§48), or a {name, email}
+-- for this meeting only (decision 4). Both tenant-owned, so the loop below
+-- fences them on a fresh database and migration 014 on one already up.
+CREATE TABLE notes (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  title text NOT NULL DEFAULT '',
+  met_on date NOT NULL,
+  attendees jsonb NOT NULL DEFAULT '[]'::jsonb,
+  raw text NOT NULL DEFAULT '',
+  minutes jsonb,
+  refined_at timestamptz,
+  refined_by text NOT NULL DEFAULT '',
+  created_by text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id)
+);
+CREATE INDEX notes_met_on ON notes (tenant_id, met_on DESC, created_at DESC);
+
+CREATE TABLE note_sends (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  note_id uuid NOT NULL,
+  sent_by text NOT NULL DEFAULT '',
+  sent_at timestamptz NOT NULL DEFAULT now(),
+  is_update boolean NOT NULL DEFAULT false,
+  subject text NOT NULL DEFAULT '',
+  recipients jsonb NOT NULL DEFAULT '[]'::jsonb,
+  minutes jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, note_id) REFERENCES notes (tenant_id, id) ON DELETE CASCADE
+);
+CREATE INDEX note_sends_note ON note_sends (tenant_id, note_id, sent_at);
+
 -- An office login may be placed on a register that does not exist yet
 -- (§313.32), so the membership's pointer at the person is checked at COMMIT.
 ALTER TABLE tenant_users

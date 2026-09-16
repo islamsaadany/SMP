@@ -19,7 +19,7 @@
    the document it is served in (lib/shell.ts stamps `data-module`), so
    shell/route.js keeps no second copy of these words (§53.5). */
 
-export const MODULES = ["strategy", "portfolio", "insights", "processes", "tracker", "trial"] as const;
+export const MODULES = ["strategy", "portfolio", "insights", "processes", "tracker", "notes", "trial"] as const;
 export type ModuleKey = (typeof MODULES)[number];
 
 /* Where a client lands when the address names no module. */
@@ -99,6 +99,11 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
      day this gains one. Two words on the switcher, Islam's, because the
      second says who it is for. */
   tracker:   { label: "Internal Tracker", note: "The office's weekly actions about this client", built: true, areas: [] },
+  /* ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (spec 055). Built,
+     and NO AREA for the tracker's reason: it is the office's own record of
+     this client, opened by the seat. The attendees get an email and never
+     open it. The word is Islam's to change (decision 11). */
+  notes:     { label: "Meeting Notes",     note: "Notes taken in a meeting, refined into minutes and sent to the attendees", built: true, areas: [] },
   /* DELIBERATELY NOT A PRODUCT NAME (Islam, 2026-09-12: "something even for
      the trial"). It exists to prove a module can be turned on for one client
      and opened, and it says so in its own line, so nobody can mistake it for

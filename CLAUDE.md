@@ -7710,6 +7710,92 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
+- **THE WAY ACROSS RUNS BOTH WAYS, AND ROLES &amp; ACCESS WAS NEVER REMOVED
+  (&sect;359.1):** Islam, having opened the client's settings from the
+  console's card &mdash; *"I ca't find the access page in the strategy module
+  &hellip; why did we remove it it's a very important table that can't be
+  removed. already it was stable."* **MEASURED BEFORE ANYTHING WAS PROPOSED,
+  AND NOTHING WAS REMOVED**: Roles &amp; access is on STRATEGY's rail under a
+  group headed *Access*, and the matrix itself is byte-identical to `main`'s
+  &mdash; `AREAS`, `ROLES` and `ACCESS_DEFAULTS` all diff clean, and the only
+  change to the access keys since is one ADDED (`c_landing`). Two Setup pages
+  did go and neither is an access page: Branding absorbed into *Getting
+  started*'s first step (&sect;357) and the Setup Overview into the landing's
+  own list (&sect;356), both recorded. **THE FAULT IS REAL AND IT IS A MISSING
+  DOOR**: &sect;357.9 gave a module's rail a row across to the client's and
+  left the reverse unbuilt, so arriving by the card's *Settings* chip left
+  somebody on a rail with no Roles &amp; access on it AND no way to the rail
+  that has it &mdash; the console, the client, the module, the gear
+  (&sect;61, and &sect;16.7's rule from the other side: *a rail that cannot
+  take you to the page you came for makes work*). **ONE ROW PER MODULE**,
+  where the other direction is one, because there is one client and there may
+  be several. **AND THE ATTRIBUTE STOPS CARRYING THE SWITCHER'S RULE IN ITS
+  NAME**, which is the cause rather than the symptom: `data-modules` was
+  written only for a client holding more than one, so the client's rail could
+  not name the single module it should cross to. It is the LIST now &mdash;
+  the modules THIS PERSON MAY OPEN, already resolved for the switcher
+  (`moduleMenu(openableModules)`), so a module shut to them is not offered
+  here either and nothing asks twice (&sect;53.5, &sect;42) &mdash; and the
+  *a menu of one is a door behind a door* test (&sect;32) moves into
+  `shell/route.js`, the reader it belongs to, with the check's
+  `switch-always` break moving with it. Same foot, same words, same direction
+  mark: *Client settings &rsaquo;* and *Strategy settings &rsaquo;* are one row
+  pointing opposite ways, after the list rather than above it (&sect;357.9),
+  outside `.raillist` so it cannot scroll away (&sect;290.1).
+  `checks/shell.mjs` &sect;3b gains six assertions, **both ends** &mdash; the
+  rows asserted as an AGREEMENT with `data-modules` rather than against the
+  word *Strategy* (&sect;94.8), on a tenant made to hold TWO modules for the
+  length of the section so a hardcoded name goes red (&sect;113.8); the door
+  **PRESSED rather than read** (&sect;96), landing on the module's Setup
+  wearing the module's bar with Roles &amp; access asserted present on the
+  rail it reaches; and the module's own one row asserted still there, or a
+  build that MOVED the row rather than adding one passes everything above.
+  **ONE ASSERTION REWRITTEN, NEVER LOOSENED** (&sect;218, &sect;214.3): *"this
+  client HAS a second module"* asked whether the attribute was PRESENT, which
+  said that only while it carried the switcher's rule &mdash; it asks the
+  CONTENT now. **AND TWO NEIGHBOURING CHECKS WERE MODELLING THE OLD SERVER**
+  (&sect;100.3): `modules.mjs`'s stub served *one module* as an ABSENT
+  attribute, and `door-landing.mjs` inferred *"Strategy alone"* from that
+  absence &mdash; which on a build that DROPPED the stamp is the same answer a
+  correct build gives (&sect;113.8), so it reads the list and a missing one is
+  red. **AND THE SECTION DIED RATHER THAN REPORTING ON ITS FIRST RUN**
+  (&sect;215): the press waited on `body.ready`, which is `platform.html`'s
+  convention and not this shell's &mdash; the file's own `booted()` is the
+  helper, and using it is &sect;53.5 inside a check. Proved able to fail from
+  the SOURCES (&sect;276): the one-way build **5 red** (2 before the guards
+  below), the row hardcoded to Strategy **1 red**. **AND TWO OF THE NEW
+  ASSERTIONS WERE WEAK, FOUND BY FALSIFYING RATHER THAN READING**:
+  `across.every(&hellip;)` is TRUE over an empty list, so the one-way build
+  satisfied it perfectly (&sect;113.8), and the press took the rest of the
+  section down with it rather than reporting.
+- **WHAT EVERY PERSON CAN OPEN, MEASURED BEFORE ANYTHING MOVES (T0, spec
+  056):** Islam's *"bring any access that was removed"* answered with a
+  measurement rather than a reading, and it is the baseline stage 3's whole
+  promise rests on &mdash; measuring it after the change would be measuring the
+  change (&sect;303). **IT ASKS THE RULE, NOT A SCREEN**, which is the one
+  correction the building made: `grantAtPage` is the one function the browser
+  and the server both ask (&sect;42), so the sweep is the whole access surface
+  and a walk of the pages drawn today would have measured the RAILS rather
+  than the access &mdash; *a page moved between rails is invisible here, which
+  is right, because this exists to tell the two apart*. **NO BROWSER AND NO
+  DATABASE**: the world is built from `db/seed-state.json` with the product's
+  own `worldOf`, never a graph typed out in the check (&sect;100.3), and every
+  target in the tenant is swept because the same page answers differently for
+  a unit somebody owns and one they do not (&sect;37). **THE ANSWER IS
+  UNMOVED**: 33 people &times; 35 page keys &times; 21 targets, and every one
+  of the 33 opens exactly what they opened on `main` at every target across
+  all 34 shared keys &mdash; the only difference is `c_landing` ADDED, whose
+  693 cells (33 &times; 21) are the whole of 8842 &rarr; 9535, which is the
+  arithmetic corroborating it rather than a coincidence. The baseline is kept
+  as `specs/056-the-client-and-its-modules/access-baseline.json` **carrying
+  the commit it came from**, because a baseline with no provenance is a number
+  somebody has to take on trust. Proved able to fail twice: a page moved to
+  another area **635 red**, the Roles &amp; access page deleted **22 red**, the
+  first of them naming the key GONE. **AND THE FIRST TWO FALSIFICATIONS DID
+  NOT FALSIFY** &mdash; narrowing `ACCESS_DEFAULTS` changed nothing, because
+  the tenant's STORED matrix overrides the defaults, so a break there is a
+  break in a value nothing reads (&sect;54.5's shape: a green falsification run
+  is indistinguishable from a working guard).
 - **THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (&sect;359, spec 056,
   stage 1 of six):** Islam, of the page the console's *Settings* chip opens
   &mdash; *"theclient settings shouldn't open the strategy banner in the top
@@ -9516,20 +9602,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;359: the client's own settings wear
-the client's bar (spec 056, stage 1 of six, on the branch).** See the entry in
-the project context above; the architecture it is the first stage of is
-`specs/056-the-client-and-its-modules/`. **VERIFIED**: `shell.mjs` **97/0**
-with a new section 3b (21 assertions, red six ways), `door-landing` 140/0,
-`modules` 125/0, `setup-per-module` green on BOTH halves with two assertions
-REWRITTEN never loosened (&sect;218, &sect;214.3 for the eighth and ninth
-time), `generated-in-step` all clear, `built-in-step` all good, `tsc` clean
-cold, 673/0 authoriser and 140/0 change list with **no frozen `api/`, `lib/` or
-`db/` file touched at all** (read off the diff, &sect;172), `qa.py` over
-`file://` ERRORS none and **at Next 33 viewers / 243 destinations / ERRORS
-none**, and the sixteen chrome-adjacent frozen checks green. **`setup-shape.mjs` 32/1 is NOT this
-work's** &mdash; reproduced identically with the change stashed (&sect;303).
-**`main` untouched &mdash; the merge is Islam's word, on that merge.***
+*Last Updated: 2026-09-16 &mdash; **&sect;359.1: the way across runs both
+ways, and Roles &amp; access was never removed.** Islam, having opened the
+client's settings from the console's card &mdash; *"I ca't find the access page
+in the strategy module &hellip; why did we remove it it's a very important
+table that can't be removed."* **MEASURED, AND NOTHING WAS REMOVED**: the
+matrix is byte-identical to `main`'s, and what was missing is a DOOR &mdash;
+&sect;357.9 built the way across one way only, so arriving by the card's
+*Settings* chip left somebody on a rail with no Roles &amp; access on it and no
+route to the rail that has it. See the entry in the project context above, and
+**T0** beside it: `scripts/test-access-unmoved.js` asks the shared rule for 33
+people &times; 35 page keys &times; 21 targets and answers **UNMOVED** against
+`origin/main` &mdash; the baseline is
+`specs/056-the-client-and-its-modules/access-baseline.json`, carrying the
+commit it came from. **VERIFIED**: `shell.mjs` **103/0** (&sect;3b six new
+assertions, red **5** and **1** from the SOURCES), `modules` **125/0** with
+`switch-always` still red, `door-landing` **140/0**, `setup-per-module` green
+on both halves, `generated-in-step` all clear, `built-in-step` all good, `tsc`
+clean cold, 673/0 authoriser and 140/0 change list, the access baseline
+**UNMOVED** and proved able to fail **635** / **22**, and `qa.py` over
+`file://` and at Next both ERRORS none. **`main` untouched &mdash; the merge is
+Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;359: the client's own settings wear the
+client's bar (spec 056, stage 1 of six).** The reported fault: `/<client>/setup`
+carries no module word, so the route stamped `DEFAULT_MODULE` and served
+Strategy's navigation over the client's own pages. One reader asked where the
+chrome is drawn and never per control (&sect;53.5, &sect;104.7), off a scope the
+SERVER stamps, because the module switcher is built once at load above the line
+that resolves the address. **VERIFIED**: `shell.mjs` **97/0** with a new section
+3b (21 assertions, red six ways), `door-landing` 140/0, `modules` 125/0,
+`setup-per-module` green on BOTH halves with two assertions REWRITTEN never
+loosened (&sect;218, &sect;214.3 for the eighth and ninth time), 673/0
+authoriser and 140/0 change list with **no frozen `api/`, `lib/` or `db/` file
+touched at all** (read off the diff, &sect;172), and `qa.py` at Next **33
+viewers / 243 destinations / ERRORS none**.*
 
 *Earlier the same day: **&sect;357: the client's settings live in
 the platform, and Strategy's welcome is the welcome (spec 055, on the

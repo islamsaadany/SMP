@@ -149,6 +149,42 @@ email matches exactly one active register row ADOPT that row, for a client
 whose register the platform did not build. Under this rule that path needs
 re-reading — it is the one way a human could end up meaning both things.
 
+### 3a.1 · What that re-reading found (T2.1, 2026-09-16, before building)
+
+**THERE ARE TWO KINDS OF FOREFRONT ROW AND ONLY ONE OF THEM IS OURS TO
+REWRITE**, and the register already tells them apart — `lib/state-api.ts`'s
+`officeRow` has marked them since §313.29, so this needs no new field:
+
+- **`extra.ffrow`** — the platform MINTED the row for a consultant who was on
+  nobody's register. Its `role` IS the seat, and `officeRow` rewrites it on
+  every request (§338's heal). So the register must never let anybody set it
+  to a client role: the next page load would put the seat straight back, and a
+  control whose value is overwritten behind the person who set it is §96 with
+  a save on the end of it.
+- **`extra.forefront` WITHOUT `ffrow`** — the row is the CLIENT'S OWN person,
+  adopted because their address matched exactly one active row (§313.32), and
+  `officeRow` deliberately does not touch its role: *"adopted, never
+  rewritten … one mark, `forefront`, and nothing else on a row the platform
+  did not mint."* **That person legitimately holds a client role AND a seat.**
+
+**SO THE REFUSAL NARROWS, AND SAYING SO IS THE POINT.** §3a reads *"a seat
+holder can never also be given a client role from the register"*; taken
+literally that would strip the client's own custodian of their custodianship
+the day they are added to the account team, which is data the client entered
+and which §96.2 forbids us to rewrite. The rule that is both true and safe is
+**you may not give a client role to a row the platform minted** — the
+`ffrow` rows, whose role is not theirs to hold in the first place.
+
+**WHAT AN ADOPTED PERSON THEN LOOKS LIKE, and it is the one thing to check on
+a screen:** they are on Forefront team (they hold a seat) AND on the register
+as the client's own person, editable, marked as also being ours. One human,
+one row, two lists that agree because both are reading it. That is §9's
+pattern holding rather than an exception to it.
+
+**Measured rather than assumed**: Raya Trade's register was brought across by
+the carry and not built by the platform, so `made_here` is false there and
+adoption is the live path for it — this is not a corner nobody reaches.
+
 ## 4 · Who may open it
 
 **The two seats, and nobody else.** Islam, asked outright: *"yes access to

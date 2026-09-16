@@ -795,11 +795,17 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     await inModule(page); await booted(page);
     /* REWRITTEN (§218): the landing's Your modules list went with the landing
        (§357); the same answer (openableModules) is now the served document's
-       own `data-modules` stamp — the switcher's list, absent when there is
-       one module (§32), so absent IS "Strategy alone". */
-    const modsOf = () => page.evaluate(() => { const raw = document.documentElement.getAttribute("data-modules"); if (!raw) return [document.documentElement.getAttribute("data-module")]; try { return JSON.parse(raw).map((m) => m.key); } catch (e) { return null; } });
+       own `data-modules` stamp.
+
+       AND IT IS READ, NEVER INFERRED FROM ITS ABSENCE (§359.1). This fell
+       back to `data-module` when the attribute was missing, because it was
+       written only for a client holding more than one — it is stamped for
+       every client now, so an absent one is a build that dropped it and must
+       go RED here rather than quietly answering "Strategy alone", which is
+       the same thing a correct build says (§113.8). */
+    const modsOf = () => page.evaluate(() => { const raw = document.documentElement.getAttribute("data-modules"); if (!raw) return null; try { return JSON.parse(raw).map((m) => m.key); } catch (e) { return null; } });
     let mods = await modsOf();
-    check(mods.join(",") === "strategy", "shut, the BU owner's document offers Strategy alone — no Insights entry (spec 054 §6.4)", mods.join(","));
+    check(mods && mods.join(",") === "strategy", "shut, the BU owner's document offers Strategy alone — no Insights entry (spec 054 §6.4)", JSON.stringify(mods));
     await page.goto(BASE + "/raya-trade/insights", { waitUntil: "networkidle" });
     check(!page.url().startsWith(BASE + "/raya-trade/insights"), "…and Insights' own address is refused, exactly as an unknown module word is (§320.5)", page.url());
     await page.goto(BASE + "/raya-trade/insights/setup/access", { waitUntil: "networkidle" });

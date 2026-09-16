@@ -259,11 +259,14 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      all \u2014 and the whole reason it is stamped is that it must be there before
      the module switcher is built, which happens at load, ABOVE placeOf. */
   /* THE SECOND MODULE IS MADE, or the switcher's absence is asserted over a
-     client that could never have one: `data-modules` is written for a client
-     holding MORE THAN ONE (\u00a7320.6), so on the dev tenant's single module the
-     line below went green on a build that drew the switcher everywhere
-     (\u00a7113.8 \u2014 it did, until this was added). Put back in the `finally`,
-     because every section after this one reads the same tenant (\u00a794.2). */
+     client that could never have one: the switcher is drawn only where there
+     is a CHOICE (\u00a732, shell/route.js since \u00a7359.1), so on the dev tenant's
+     single module the line below went green on a build that drew it
+     everywhere (\u00a7113.8 \u2014 it did, until this was added). It is what makes
+     the way across measurable too: two modules mean two rows at the foot of
+     the client's rail, so a build that hardcoded one module's name goes red.
+     Put back in the `finally`, because every section after this one reads
+     the same tenant (\u00a794.2). */
   await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
   try {
   const ck = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
@@ -413,15 +416,21 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   const across = doors.filter((d) => d.fwd);
   check(across.length === clMods.length && clMods.every((m) => across.some((d) => d.href === "/raya-trade/" + m.key + "/setup" && d.text === m.label + " settings \u203a")),
         "the client's rail carries one way across per module this person may open", JSON.stringify(across));
-  check(across.every((d) => d.seen && !d.inList && d.afterList),
+  check(across.length > 0 && across.every((d) => d.seen && !d.inList && d.afterList),
         "\u2026drawn, outside the scrolling list, and after it \u2014 a place to go ON to (\u00a7357.9, \u00a7290.1)", JSON.stringify(across));
   check(doors.some((d) => !d.fwd && /Back to the console/.test(d.text)),
         "\u2026and the way OUT is still above the list, where a back link belongs", JSON.stringify(doors.map((d) => d.text)));
   /* AND IT LANDS ON THE MODULE'S OWN SETUP, WEARING THE MODULE'S BAR \u2014
      pressed, never read: a door wired to nothing renders perfectly (\u00a796). */
-  await page.click(".setuprail .railfwd");
-  await page.waitForURL(/\/raya-trade\/strategy\/setup/, { timeout: 8000 }).catch(() => {});
-  await booted();
+  /* DEGRADES RATHER THAN DIES (\u00a7215): a click on a door that is not there
+     waits thirty seconds and takes every assertion after it down, which on
+     the one-way build reported the fault as a DEATH rather than as the two
+     it is. */
+  if (await page.locator(".setuprail .railfwd").count()) {
+    await page.click(".setuprail .railfwd");
+    await page.waitForURL(/\/raya-trade\/strategy\/setup/, { timeout: 8000 }).catch(() => {});
+    await booted();
+  }
   b = await bar();
   const reached = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail [data-setupgo]")).map((e) => e.dataset.setupgo));
   check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,

@@ -12,12 +12,26 @@ from the SOURCES before its green run is believed (§276, §94.5).
 
 ## T0 · The baseline, before anything moves
 
-- [ ] **T0.1** Write `checks/access-unmoved.py`: for **every person in the
-      demo tenant** and **every page**, record what they can open. Print the
-      map and store it as the run's own fixture rather than a typed list.
-- [ ] **T0.2** Run it against the **unchanged build** and keep the result. This
-      is the equality stage 3 must satisfy; measuring it after the change
-      would be measuring the change.
+- [x] **T0.1** `scripts/test-access-unmoved.js` — NOT a browser check, which
+      is the one correction the building made: `grantAtPage` is the one
+      function the screen and the server both ask (§42), so the whole access
+      surface is a pure sweep of it and a walk of the pages drawn today would
+      have measured the rails rather than the access. **No browser and no
+      database**; the world is built from `db/seed-state.json` with the
+      product's own `worldOf` (§100.3). 33 people × 35 page keys × 21 targets,
+      every target in the tenant because the same page answers differently for
+      a unit somebody owns and one they do not (§37).
+- [x] **T0.2** Taken from `origin/main` and kept as
+      `access-baseline.json` beside this file, carrying the commit it came
+      from — a baseline with no provenance is a number somebody has to take on
+      trust (§303). **8842 grants that are not `none`.**
+- [x] **T0.3** And the answer to *"bring any access that was removed"* is a
+      measurement rather than a reading: **UNMOVED** — every one of the 33
+      opens exactly what they opened on `main`, at every target, across all 34
+      shared page keys; the only difference is `c_landing` ADDED, whose 693
+      cells (33 × 21) are the whole of 8842 → 9535. Proved able to fail twice:
+      a page moved to another area **635 red**, the Roles & access page deleted
+      **22 red**, the first of them naming the key GONE.
 
 ## Stage 1 · The client's settings wear the client's bar
 
@@ -41,6 +55,14 @@ from the SOURCES before its green run is believed (§276, §94.5).
 - [x] **T1.6** Full `qa.py` at Next and over `file://`; `setup-per-module`,
       `client-setup`, `client-setup-outside`, `welcome`, `door-landing`,
       `shell`, `modules`.
+- [x] **T1.7** (§359.1, from Islam using it) **The way across runs both
+      ways.** §357.9 gave a module's rail a row to the client's and left the
+      reverse unbuilt, so arriving by the card's *Settings* chip left somebody
+      on a rail with no Roles & access on it and no door to the rail that has
+      it (§61). One row per module at the foot of the client's rail, read off
+      `data-modules` — which stops carrying the switcher's rule in its name
+      and becomes the LIST, the "a menu of one is a door behind a door" test
+      (§32) moving into `shell/route.js`, the reader it belongs to.
 
 ## Stage 2 · Forefront team, and the register that reads from it
 

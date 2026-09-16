@@ -4976,6 +4976,49 @@ suite per feature.
 
 ## In flight
 
+**Spec 056 — the client and its modules (§359), on the branch, stage 1 of
+six built 2026-09-16.** Islam, of the page the console's *Settings* chip
+opens: *"theclient settings shouldn't open the strategy banner in the top this
+is a client settings separate than any module"* — and, of the narrow answer
+first offered, *"you are trying to make a simple fix. let's discuss the
+architecture and who sees what it's not a simple fix."* Six stages, each
+shipping and proved on its own. **Stage 1 (§359)** is the reported fault: on a
+client-scoped Setup document the chrome draws the client's mark, its name and
+*Save & close*, and draws none of the destination row, the Group dropdown, the
+Units | Functions switch, the gear or the viewer strip — one reader asked where
+the chrome is drawn rather than per control (§53.5, §104.7), off a scope the
+SERVER stamps, because the module switcher is built once at load above the line
+that resolves the address.
+
+**§359.1, from Islam using it:** *"I ca't find the access page in the strategy
+module … why did we remove it it's a very important table that can't be
+removed."* **Nothing was removed and the measurement says so** — Roles & access
+is on Strategy's rail under a group headed *Access*, and the matrix is
+byte-identical to `main`'s. What was missing is a DOOR: §357.9 gave a module's
+rail a row across to the client's and left the reverse unbuilt, so arriving by
+the card left somebody on a rail with no Roles & access on it and no way to the
+rail that has it (§61). One row per module at the foot of the client's rail;
+`data-modules` stops carrying the switcher's rule in its name and becomes the
+LIST, with the *a menu of one is a door behind a door* test (§32) moving into
+`shell/route.js`.
+
+**T0, the access baseline, taken before stage 3 moves anything**:
+`scripts/test-access-unmoved.js` asks `grantAtPage` — the one function the
+screen and the server both ask (§42) — for 33 people × 35 page keys × 21
+targets, with no browser and no database. Against `origin/main`: **UNMOVED**,
+every person opening exactly what they opened at every target across all 34
+shared keys, the only difference `c_landing` ADDED. The baseline is kept as
+`specs/056-the-client-and-its-modules/access-baseline.json` with the commit it
+came from.
+
+*Verified:* shell 103/0 (§3b six new assertions, red 5 and 1 from the sources),
+modules 125/0 with `switch-always` still red, door-landing 140/0,
+`generated-in-step` all clear, `built-in-step` all good, `tsc` clean cold, the
+access baseline UNMOVED and red 635 / 22 on two falsifications. **`main`
+untouched — the merge is Islam's word, on that merge.**
+
+---
+
 **Spec 055 — the client's settings live in the platform (§357), on the
 branch, built 2026-09-16.** Islam, of spec 054's landing beside the frozen
 welcome: *"why do I have a welcome screen for the client overall, I just need

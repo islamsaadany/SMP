@@ -520,6 +520,7 @@ const MENU = [{ key: "strategy", label: "Strategy", note: "Plans, measures, repo
 const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 const doc = (menu) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
   (menu ? " data-modules='" + attr(JSON.stringify(menu)) + "'" : "") +
+  (BREAK === "switch-always" ? " data-break='switch-always'" : "") +
   "><head><meta charset='utf-8'><link rel='stylesheet' href='/platform.css'></head><body class='ready'>" +
   BODY + "<script src='/route.js'></script></body></html>";
 const srv = createServer((req, res) => {
@@ -527,11 +528,19 @@ const srv = createServer((req, res) => {
   if (p === "/platform.css") { res.writeHead(200, { "Content-Type": "text/css" }); return res.end(CSS); }
   if (p === "/route.js") { res.writeHead(200, { "Content-Type": "application/javascript" }); return res.end(ROUTE); }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-  /* THE STUB HONOURS THE SAME BREAK AS THE SERVER (lib/shell.ts): this
-     section serves the shell's body itself rather than going through
-     shellDocument(), so without this the falsification would break the
-     product and leave the check measuring an unbroken stub (§100.3). */
-  res.end(doc(p.startsWith("/one/") && BREAK !== "switch-always" ? null : MENU));
+  /* THE STUB HONOURS THE SAME BREAK AS THE SERVER: this section serves the
+     shell's body itself rather than going through shellDocument(), so
+     without this the falsification would break the product and leave the
+     check measuring an unbroken stub (§100.3).
+
+     AND ONE MODULE IS A ONE-ENTRY LIST, NOT AN ABSENT ATTRIBUTE (§359.1).
+     The stub modelled the server as it was, where `data-modules` carried the
+     switcher's rule in its name; it is the LIST now — stamped for every
+     client, because the client's own Setup rail reads it to draw the way
+     across — and the "a menu of one is a door behind a door" test (§32)
+     lives in route.js, which is what this section drives. A stub still
+     omitting it would be testing a server that no longer exists. */
+  res.end(doc(p.startsWith("/one/") ? [MENU[0]] : MENU));
 });
 await new Promise((r) => srv.listen(0, "127.0.0.1", r));
 const base = "http://127.0.0.1:" + srv.address().port;

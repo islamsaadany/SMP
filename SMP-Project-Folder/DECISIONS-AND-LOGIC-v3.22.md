@@ -48160,11 +48160,64 @@ cannot run on a fresh clone without it. *A reported failure that is not one
 teaches people to scroll past the ones that are* (&sect;54.5 with the sign
 reversed).
 
-**STILL OPEN AND ISLAM'S**: whether **Resources** (spec 051) is a module of its
-own beside Insights — it is blocked on reading
-`aleymahmoud-ff/strategy-management-system`, and `add_repo` refuses it in this
-session for the reason spec 051 &sect;2 already records (*cross-tier adds are not
-supported: the session already holds `islamsaadany`'s repos*), **retried and
-confirmed unchanged**, so it wants a session of its own; the **held-button
-dimming**, which would sweep every held control in the console and is therefore
-a decision rather than a line; and **where the modules band belongs**.
+**§357.10 — THE HELD BUTTON, MEASURED: THE APPROVED FIX DOES NOT SURVIVE
+IT.** Islam: *"1. ok good fix"* (dim the held Publish button so it reads as
+off) and *"2. ok"* (the modules band stays on step one of the set-up flow).
+The second is settled and needed no code. **The first was stopped before a
+source moved, because measuring it says it cannot be done — and because the
+description he approved it on was not true.** **CORRECTION 1 — IT IS ONE
+BUTTON, NOT A SWEEP.** I told him it would reach every held control in the
+console, naming Delete on a published report and the archive controls.
+Grepped: `aria-disabled` appears on **one** control in `platform.html` — the
+Publish button — against **24** using `.disabled = true`. *A proposal's reach
+is a measurement, not a recollection.* **CORRECTION 2 — `opacity:.45` MAKES IT
+UNREADABLE.** The console's own `.btn:disabled` value composites the whole
+button, fill and words together, over the card beneath — which on a FILLED
+button collapses the very contrast that made it readable: **8.79 → 2.13 light /
+2.82 dark**, against a 4.5 floor. **AND THE 24 ALREADY AT .45 MEASURE 2.86 AND
+3.88, WHICH IS THE POINT RATHER THAN A SECOND FAULT**: a genuinely `disabled`
+control is INACTIVE and carries no contrast requirement, and **a held button is
+not inactive** — taking focus, answering a press and saying why is the whole
+reason the house rule is `aria-disabled` and never `disabled` (§221, §163).
+*The exemption that covers the twenty-four is exactly what does not cover this
+one.* Two treatments survive the measurement and were drawn rather than
+described: **B**, dim to .75 (4.64 / 5.43, the shape kept and the signal weak —
+at the opacity it needs to stay readable it barely differs from the live
+button), and **C**, drop the fill and keep the outline in `--amber-tx` (5.27 /
+8.15), which spends nothing the palette does not already hold, since the
+console already keeps amber twice — as a fill with dark ink and as TYPE (§38.4,
+§259). **C is the recommendation** and it is Islam's to take.
+
+**§357.11 — A TABLE OF NUMBERS IS NOT A COMPARISON.** Islam: *"I can't choose
+without visual comparison."* Fair, and the fault is §357.10's own: it put B and
+C in separate panels with a contrast table between them, which **describes** a
+difference and then asks the reader to imagine it — §266's rule (*a question
+the reader cannot parse is answered by drawing it*) applied to an ANSWER rather
+than a question. Redrawn as one row: the four treatments side by side at real
+size, each held button with **its own live twin directly beneath it**, because
+*does this read as off* is a question about the PAIR and never about one
+button — and **in BOTH palettes**, since the console follows the viewer's theme
+and a mockup drawn only in the palette the reader happens to be in asks
+somebody to sign off on half the decision (§340's own finding, one surface
+over). A second panel puts the same three in the foot of the report card, which
+answers the other half — not *can I read it* but *does the card still look
+right*. **The forced palette is a complete token block per subtree, never a
+base plus overrides** (the rule the verbatim block's own comment records), and
+it is copied from `:root` rather than re-derived. Measured before publishing:
+four distinct treatments resolving in both palettes, every button the same box,
+no sideways scroll at 1440/1280/1024/860/700, no console error. **AND THE FIRST
+RENDER READ `LIGHTNAME` AND `DARKNAME`** — the generator substituted `PAL`
+before `PALNAME`, so the label ate its own word; found by LOOKING at the render
+rather than by any assertion, which is what that one look is for (§311's four
+faults, §296.1). **TWO ITEMS CLOSED BY ISLAM IN THE SAME BREATH**: *"for the
+resources and insights on aley forget about this"* — so spec 051's question is
+withdrawn rather than left open, and the `add_repo` refusal recorded there stops
+being a blocker; and *"I will try the pdf upload once we finish"*, which is the
+one part of the Insights path that cannot be proved from here, since it wants
+the store's key and a key never travels through chat.
+
+**STILL OPEN AND ISLAM'S**: **B**, **C**, or leave it — the last being a fair
+answer now that it is one button rather than a sweep, since the hover already
+names what is missing. **AND RECORDED, NOT DONE**: the 24 buttons at 2.86 /
+3.88, which are exempt as inactive controls and would stop being exempt the day
+any of them is made to answer a press.

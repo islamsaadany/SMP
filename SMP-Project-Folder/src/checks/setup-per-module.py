@@ -30,6 +30,16 @@ WHAT THIS FILE OWNS, and why each half is here:
     keys, and a renamed key would silently unfold every group anybody had
     folded.
 
+  · §357 (spec 055) MOVED THREE THINGS AND THIS FILE MOVES WITH THEM
+    (§218, §214.3 — rewritten to the new truth, never loosened): the
+    Branding page is GONE and Getting started (`start`, drawn as a strip
+    under the rail's head until Done with set-up, then as Client set-up in
+    the last group) holds its controls; the knowledge base is Strategy's
+    again (Islam: *"let's keep it there until we decide later"*); the `look`
+    group went with the Branding page and *The client* is the last group.
+    And a client rail's way out is the CONSOLE, not a landing — a module's
+    rail carries *Client settings ›* the other way.
+
   · SERVED (SMP_BASE set) — the half that cannot be seen over file://
     (§94.11): the client's rail at /<client>/setup/…, Strategy's at
     /<client>/strategy/setup/…, the address the shell WRITES for each, the
@@ -70,8 +80,12 @@ def ev(pg, js, default=None):
 
 
 def rail(pg):
-    """The rail as drawn: page keys in order, every group unfolded."""
-    return ev(pg, "()=>Array.from(document.querySelectorAll('.setuprail .ritem[data-setupgo]')).map(e=>e.dataset.setupgo)", [])
+    """The rail as drawn: page keys in order, every group unfolded. Getting
+    started is a STRIP under the head while set-up is not done (§357) and a
+    row in the last group after — one def either way, so the strip counts
+    as a page of the rail here, or the agreement with the defs is false on
+    every client rail until somebody presses Done."""
+    return ev(pg, "()=>Array.from(document.querySelectorAll('.setuprail [data-setupgo]')).map(e=>e.dataset.setupgo)", [])
 
 
 def defs_of(pg, scope):
@@ -137,12 +151,21 @@ with sync_playwright() as p:
        mods and all(m == "client" or re.match(r"^[a-z]+$", m or "") for _, m in mods) and "client" in vals and "strategy" in vals, vals)
     ck("Roles & access is Strategy's (spec 054 §4.4) and in the Access group",
        ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='access');return d && d.mod==='strategy' && d.grp==='access';}", False))
-    ck("the knowledge base is the client's (spec 054 §2, the sixth door) and in the Help group",
-       ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='kb');return d && d.mod==='client' && d.grp==='help';}", False))
-    ck("the people, the organisation and branding are the client's",
-       ev(pg, "()=>['people','mainbu','units','companies','fns','caps','brand'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='client';})", False))
-    ck("the cycle, the inbox, the measures and the import are Strategy's",
-       ev(pg, "()=>['cycle','chat','history','send','myfig','import','sets','focusset','bands','labels'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='strategy';})", False))
+    # REWRITTEN, NEVER LOOSENED (§218, §357): §356.2 made the knowledge base
+    # the client's and §357 sent it back to Strategy at Islam's word, on the
+    # Help group; the Branding page is GONE (its controls live inside Getting
+    # started, `start`), so `brand` is asserted ABSENT beside `start` present.
+    ck("the knowledge base is Strategy's (§357 — kept where the questions are asked) and in the Help group",
+       ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='kb');return d && d.mod==='strategy' && d.grp==='help';}", False))
+    ck("the people, the organisation and Getting started are the client's",
+       ev(pg, "()=>['people','mainbu','units','companies','fns','caps','start'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='client';})", False))
+    ck("…and Getting started sits in The client, the last group, gated by the branding grant it absorbed",
+       ev(pg, "()=>{const d=setupDefsAll().find(d=>d.k==='start');return d && d.grp==='client' && d.ac==='c_brand' && SETUP_GROUPS[SETUP_GROUPS.length-1].k==='client';}", False))
+    ck("the Branding page is gone — no def, and no page anybody could land on (§24)",
+       ev(pg, "()=>!setupDefsAll().some(d=>d.k==='brand') && !SETUP_GROUPS.some(g=>g.k==='look')", False),
+       ev(pg, "()=>setupDefsAll().filter(d=>d.k==='brand').length + '/' + SETUP_GROUPS.filter(g=>g.k==='look').length"))
+    ck("the cycle, the inbox, the measures, the import and the knowledge base are Strategy's",
+       ev(pg, "()=>['cycle','chat','history','send','myfig','import','sets','focusset','bands','labels','kb'].every(k=>{const d=setupDefsAll().find(d=>d.k===k);return d && d.mod==='strategy';})", False))
     ck("every group a def names is a group the rail knows (§113.8's silent direction)",
        ev(pg, "()=>setupDefsAll().every(d=>SETUP_GROUPS.some(g=>g.k===d.grp))", False),
        ev(pg, "()=>setupDefsAll().filter(d=>!SETUP_GROUPS.some(g=>g.k===d.grp)).map(d=>d.k)"))
@@ -166,28 +189,44 @@ with sync_playwright() as p:
        "return seen.every((k,i)=>i===0||order.indexOf(k)>order.indexOf(seen[i-1]));}", False))
     ck("…and it holds both a client's page and Strategy's", "people" in everything and "cycle" in everything, everything)
     ck("the head says Setup and nothing more", head(pg) == "Setup", head(pg))
-    ck("no way back is drawn — there is no landing to go back to", pg.query_selector(".setuprail .railback") is None)
+    ck("no way out is drawn — unscoped, there is no console and no client address to point at (§357)",
+       pg.query_selector(".setuprail .railback") is None)
+    ck("…and Getting started is a strip under the head, not a row in a group (§357)",
+       ev(pg, "()=>{const s=document.querySelector('.setuprail .railstart[data-setupgo=\"start\"]');"
+              "return !!s && !document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && !document.querySelector('.setuprail .rgroup[data-railgrp=\"client\"]');}", False))
 
     print("\n── 3 · scoped, the rail is the module's own — asserted as AGREEMENT, both ends ──")
     set_scope(pg, "strategy", "cycle")
     unfold_all(pg)
     strat = rail(pg)
     ck("Strategy's rail is exactly the defs marked strategy", same(strat, defs_of(pg, "strategy")), (strat, defs_of(pg, "strategy")))
-    ck("…and none of the client's", not any(k in strat for k in ("people", "units", "brand", "kb")), strat)
-    ck("…its Access group holds Roles & access", "access" in strat)
+    ck("…and none of the client's", not any(k in strat for k in ("people", "units", "start")), strat)
+    ck("…its Access group holds Roles & access, and its Help group the knowledge base (§357)", "access" in strat and "kb" in strat)
+    # REWRITTEN TO THE NEW TRUTH (§218, §357): a module's rail carries the
+    # way ACROSS — *Client settings ›* to the client's own rail — where §356.2
+    # drew nothing. Over file:// the slug is the file path's first segment,
+    # which is why this is measurable here at all; the served address is §8's.
+    ck("…and the way across to the client's settings is drawn on it (§357)",
+       ev(pg, "()=>{const a=document.querySelector('.setuprail .railback.railfwd');return !!a && /Client settings/.test(a.textContent) && /\\/setup$/.test(a.getAttribute('href')||'');}", False),
+       ev(pg, "()=>{const a=document.querySelector('.setuprail .railback');return a && a.textContent+' '+a.getAttribute('href');}"))
     ck("the head names the module — absent a label over file://, the word Setup",
        head(pg) in ("Setup", "Strategy · Setup"), head(pg))
     set_scope(pg, "client", "people")
     unfold_all(pg)
     cli = rail(pg)
     ck("the client's rail is exactly the defs marked client", same(cli, defs_of(pg, "client")), (cli, defs_of(pg, "client")))
-    ck("…and none of Strategy's", not any(k in cli for k in ("cycle", "bands", "access", "sets")), cli)
-    ck("…its Help group holds the knowledge base", "kb" in cli)
+    ck("…and none of Strategy's", not any(k in cli for k in ("cycle", "bands", "access", "sets", "kb")), cli)
+    ck("…it holds Getting started, as the strip (§357)", "start" in cli and
+       ev(pg, "()=>!!document.querySelector('.setuprail .railstart[data-setupgo=\"start\"]')", False), cli)
     ck("the head says Client · Setup", head(pg) == "Client · Setup", head(pg))
     ck("the two rails between them are the whole list, and share nothing",
        sorted(strat + cli) == sorted(everything) and not set(strat) & set(cli), (len(strat), len(cli), len(everything)))
-    ck("the way back is drawn on the client's rail",
-       ev(pg, "()=>{const a=document.querySelector('.setuprail .railback');return !!a && /landing/i.test(a.textContent);}", False))
+    # REWRITTEN TO THE NEW TRUTH (§218, §357): the way out of a client's rail
+    # is the CONSOLE (there is no landing to go back to any more), and it is
+    # asserted as the reverse of the module rail's row above — never `.railfwd`.
+    ck("the way out to the console is drawn on the client's rail (§357)",
+       ev(pg, "()=>{const a=document.querySelector('.setuprail .railback');return !!a && !a.classList.contains('railfwd') && /Back to the console/.test(a.textContent) && a.getAttribute('href')==='/platform';}", False),
+       ev(pg, "()=>{const a=document.querySelector('.setuprail .railback');return a && a.textContent+' '+a.getAttribute('href');}"))
     ck("…and read (§38.5): its ink clears 4.5:1 on its own ground",
        ev(pg, """()=>{const a=document.querySelector('.setuprail .railback'); if(!a) return false;
          const cs=getComputedStyle(a); const bg=getComputedStyle(a.parentElement).backgroundColor;
@@ -206,9 +245,9 @@ with sync_playwright() as p:
        scope(pg) == "strategy", scope(pg))
     ck("…and the page on screen IS Reporting cycle, not the first client page",
        ev(pg, "()=>currentSub", None) == "cycle" and ev(pg, "()=>!!document.querySelector('.setuprail .ritem.on[data-setupgo=\"cycle\"]')", False))
-    ev(pg, "()=>{currentSub='brand'; paint();}")
+    ev(pg, "()=>{currentSub='start'; paint();}")
     pg.wait_for_timeout(350)
-    ck("…and back the other way for Branding", scope(pg) == "client", scope(pg))
+    ck("…and back the other way for Getting started (§357: the page Branding became)", scope(pg) == "client", scope(pg))
     # A page NOBODY holds does not move the scope — the correction to the
     # first page of the rail is paint()'s own and is left to it.
     ev(pg, "()=>{currentSub='nosuchpage'; paint();}")
@@ -250,12 +289,21 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     after = ev(pg, "()=>JSON.stringify(ACCESS)")
     ck("Roles & access, in its new group, still writes the matrix", wrote == "pressed" and before != after, wrote)
-    set_scope(pg, "client", "people")
+    # REWRITTEN (§218, §357): the knowledge base is on STRATEGY's rail now.
+    set_scope(pg, "strategy", "cycle")
     unfold_all(pg)
-    pg.click('.setuprail [data-setupgo="kb"]')
-    pg.wait_for_timeout(400)
-    ck("the knowledge base, on the client's rail, draws its page",
+    # PRESSED THROUGH A PROBE THAT DEGRADES (§215): on a build that put the
+    # page back on the client's rail there is no row here to press, and a
+    # `pg.click` would wait thirty seconds and take the sections after it
+    # down with it — which is what this file's first red run did.
+    kbrow = pg.query_selector('.setuprail [data-setupgo="kb"]')
+    ck("Strategy's rail holds the knowledge base's row", bool(kbrow))
+    if kbrow:
+        kbrow.click(); pg.wait_for_timeout(400)
+    ck("the knowledge base, on Strategy's rail, draws its page",
        ev(pg, "()=>/Knowledge base/.test((document.querySelector('#panel .setupttl')||{}).textContent||'')", False))
+    ck("…and it is not on the client's rail at all (§94.2)",
+       ev(pg, "()=>!setupDefsFor('client').some(d=>d.k==='kb')", False))
 
     print("\n── 7 · the fold keys are the ones a browser already holds (§30.2) ──")
     # REWRITTEN, NEVER LOOSENED (§218, §214.3): this held the whole list as a
@@ -267,7 +315,12 @@ with sync_playwright() as p:
     keys = ev(pg, "()=>SETUP_GROUPS.map(g=>g.k)")
     ck("the four groups a browser already folds are keyed as before, in place",
        keys[:4] == ["cycle", "who", "run", "meas"], keys)
-    ck("...and access, landing and help are among the groups", all(k in keys for k in ("access", "landing", "help")), keys)
+    # REWRITTEN (§218, §357): `look` went with the Branding page it held,
+    # and *The client* is LAST — the set-up, once done, is the thing you come
+    # back to least. The tail is asserted in ORDER because the order is the
+    # decision, and `look` as an absence beside it (§94.2).
+    ck("...and the tail is access, landing, help, client — in that order, client last (§357)",
+       keys[4:] == ["access", "landing", "help", "client"] and "look" not in keys, keys)
     ck("...and every def's group is one of them",
        ev(pg, "()=>setupDefsAll().every(d=>SETUP_GROUPS.some(g=>g.k===d.grp))", False),
        ev(pg, "()=>setupDefsAll().filter(d=>!SETUP_GROUPS.some(g=>g.k===d.grp)).map(d=>d.k)"))
@@ -281,7 +334,11 @@ with sync_playwright() as p:
     ck("with no declaration it says where the line is set",
        ev(pg, "()=>!!document.querySelector('#panel .lnone')", False))
     ck("...and offers nothing to pick", ev(pg, "()=>document.querySelectorAll('[data-landpick]').length", -1) == 0)
-    ev(pg, "()=>{localStorage.setItem('smp.setup.groups', JSON.stringify({look:1}));}")
+    # REWRITTEN (§218, §357): `look` is no group any more, so the fold that is
+    # asserted to survive is the client group's — and that group is not DRAWN
+    # until Done with set-up is pressed (its only def is the strip until then,
+    # §357), so both ends are measured: absent before, folded after.
+    ev(pg, "()=>{localStorage.setItem('smp.setup.groups', JSON.stringify({client:1}));}")
     pg.reload(); pg.wait_for_timeout(800)
     if not BASE:
         pg.select_option("#asWho", "smo"); pg.wait_for_timeout(300)
@@ -290,9 +347,16 @@ with sync_playwright() as p:
         # served, the reload lands back on the client's rail by its address
         pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
         set_scope(pg, "client", "people")
-    ck("a fold stored before this change still folds the same group",
-       ev(pg, "()=>{const g=document.querySelector('.rgroup[data-railgrp=\"look\"]');return !!g && g.classList.contains('shut');}", False))
-    ev(pg, "()=>localStorage.removeItem('smp.setup.groups')")
+    ck("before Done with set-up, The client is no heading at all — its only page is the strip (§357)",
+       ev(pg, "()=>!document.querySelector('.rgroup[data-railgrp=\"client\"]') && !!document.querySelector('.railstart[data-setupgo=\"start\"]')", False))
+    ev(pg, "()=>{GROUP[SMPRules.SETUP_DONE]=true; paint();}")
+    pg.wait_for_timeout(350)
+    ck("done, a fold stored for the client group folds it",
+       ev(pg, "()=>{const g=document.querySelector('.rgroup[data-railgrp=\"client\"]');return !!g && g.classList.contains('shut');}", False))
+    ck("…and the strip is gone, with Client set-up a row inside that group (§94.2)",
+       ev(pg, "()=>!document.querySelector('.railstart') && !!document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]') && /Client set-up/.test(document.querySelector('.setuprail .ritem[data-setupgo=\"start\"]').textContent)", False))
+    ev(pg, "()=>{delete GROUP[SMPRules.SETUP_DONE]; localStorage.removeItem('smp.setup.groups'); paint();}")
+    pg.wait_for_timeout(300)
 
     print("\n── 7c · Insights' own two pages exist in the list and are drawn on no other document (§356.5) ──")
     # A module's Setup defs share Strategy's KEYS (`access`, `landing`) and
@@ -330,15 +394,21 @@ with sync_playwright() as p:
 
         served("/raya-trade/setup/people")
         ck("the client's address draws the client's rail", scope(pg2) == "client" and same(rail(pg2), defs_of(pg2, "client")), (scope(pg2), rail(pg2)))
-        ck("…headed Client · Setup, with the way back to the landing",
-           head(pg2) == "Client · Setup" and ev(pg2, "()=>{const a=document.querySelector('.setuprail .railback');return a && a.getAttribute('href');}") == "/raya-trade")
-        pg2.click('.setuprail [data-setupgo="brand"]'); pg2.wait_for_timeout(400)
-        ck("pressing inside it writes the spine form", ev(pg2, "()=>location.pathname") == "/raya-trade/setup/brand", ev(pg2, "()=>location.pathname"))
+        # REWRITTEN TO THE NEW TRUTH, UNRUN HERE (§218, §357): the way out of
+        # the client's rail is the console, and the page pressed is Getting
+        # started (the Branding page is gone).
+        ck("…headed Client · Setup, with the way out to the console",
+           head(pg2) == "Client · Setup" and ev(pg2, "()=>{const a=document.querySelector('.setuprail .railback');return a && !a.classList.contains('railfwd') && a.getAttribute('href');}") == "/platform")
+        pg2.click('.setuprail [data-setupgo="start"]'); pg2.wait_for_timeout(400)
+        ck("pressing inside it writes the spine form", ev(pg2, "()=>location.pathname") == "/raya-trade/setup/start", ev(pg2, "()=>location.pathname"))
 
         served("/raya-trade/strategy/setup/cycle")
         ck("the module's address draws the module's rail", scope(pg2) == "strategy" and same(rail(pg2), defs_of(pg2, "strategy")), (scope(pg2), rail(pg2)))
         ck("…headed with the module's own name from the server's stamp", head(pg2) == "Strategy · Setup", head(pg2))
-        ck("…and no way back on it", pg2.query_selector(".setuprail .railback") is None)
+        # REWRITTEN TO THE NEW TRUTH, UNRUN HERE (§218, §357): a module's rail
+        # carries the way ACROSS, *Client settings ›*, to the client's own rail.
+        ck("…and the way across to Client settings on it, to the client's own rail",
+           ev(pg2, "()=>{const a=document.querySelector('.setuprail .railback.railfwd');return !!a && /Client settings/.test(a.textContent) && a.getAttribute('href')==='/raya-trade/setup';}", False))
         pg2.click('.setuprail [data-setupgo="bands"]'); pg2.wait_for_timeout(400)
         ck("pressing inside it writes the module's form", ev(pg2, "()=>location.pathname") == "/raya-trade/strategy/setup/bands", ev(pg2, "()=>location.pathname"))
 

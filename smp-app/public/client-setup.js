@@ -329,7 +329,14 @@ var CLIENTSETUP = (function () {
        (the put-back rows have to be drawn) and a sentence written into the
        old column would go with it (§63). render() writes S.said back and
        the next successful move clears it. */
-    S.said = msg ? { msg: msg, bad: !!bad } : null;
+    /* §357.6: the console's two pieces (mountCreate, mountArchived) hold no
+       step state — S is only ever minted by mount() — and the create piece
+       said "Creating…" through this very function, so Add a client THREW
+       before it posted anything: no refusal written, no createClient sent,
+       the console left standing on /platform with nothing on the console
+       but a TypeError. Found by checks/client-setup-outside.py asserting
+       what is POSTED (§96); the state is held only where there is one. */
+    if (S) S.said = msg ? { msg: msg, bad: !!bad } : null;
     var n = HOST && HOST.querySelector("[data-cssaid]");
     if (!n) return;
     n.textContent = msg || "";

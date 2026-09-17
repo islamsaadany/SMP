@@ -4073,7 +4073,7 @@ console.log("\n39 \u00b7 how long each subject has to present (\u00a7340)");
         r.ok, (r.refusals || []).join(" / "));
 })();
 
-/* ── 40a · the landing line is the office's (§356.4, spec 054 §4.5) ──
+/* ── 40a · the landing line is the office's (§359.4, spec 056 §4.5) ──
    Which sentence a module says on the client landing rides the group under
    SMPRules.LANDING_PICK and is classified `setup`. BOTH ENDS, and the two
    edits that must go together falsified separately (§259.2): classified but
@@ -4086,34 +4086,34 @@ console.log("\n39 \u00b7 how long each subject has to present (\u00a7340)");
     return A.authorize(stored, inc, personOf(stored, who));
   }
   const PICK = R.LANDING_PICK;
-  check("\u00a7356.4: the key is the shared module's own", PICK === "landing", PICK);
+  check("\u00a7359.4: the key is the shared module's own", PICK === "landing", PICK);
   const UK = Object.keys(SEED.units)[0];
   const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
-  if (!(UK && CUST)) { check("\u00a7356.4: the seed holds a custodian to test with", false, ""); return; }
+  if (!(UK && CUST)) { check("\u00a7359.4: the seed holds a custodian to test with", false, ""); return; }
   const SET = function (i) { i.group[PICK] = { strategy: "waiting" }; };
   let r = fromStored(SEED, "smo", SET);
-  check("\u00a7356.4: the office picks a module's landing line", r.ok, (r.refusals || []).join(" / "));
+  check("\u00a7359.4: the office picks a module's landing line", r.ok, (r.refusals || []).join(" / "));
   const kinds = (r.changes || []).map(function (c) { return c.kind; });
-  check("\u00a7356.4: a change to it is classified `setup` and nothing else",
+  check("\u00a7359.4: a change to it is classified `setup` and nothing else",
         kinds.length === 1 && kinds[0] === "setup",
         kinds.join(",") || "(nothing \u2014 the change was invisible)");
   r = fromStored(SEED, CUST, SET);
-  check("\u00a7356.4 REFUSED: a custodian cannot pick it", !r.ok, "was ALLOWED");
-  check("\u00a7356.4: and the refusal names the landing line",
+  check("\u00a7359.4 REFUSED: a custodian cannot pick it", !r.ok, "was ALLOWED");
+  check("\u00a7359.4: and the refusal names the landing line",
         !r.ok && /landing line/.test((r.refusals || []).join(" ")), (r.refusals || []).join(" / "));
   /* CLEARING IS THE SAME ACT (\u00a750.6): the default deletes the key */
   const set = clone(SEED); set.group[PICK] = { strategy: "waiting" };
   r = fromStored(set, CUST, function (i) { delete i.group[PICK]; });
-  check("\u00a7356.4 REFUSED: nor put it back to the default", !r.ok, "was ALLOWED");
+  check("\u00a7359.4 REFUSED: nor put it back to the default", !r.ok, "was ALLOWED");
   r = fromStored(set, "smo", function (i) { delete i.group[PICK]; });
-  check("\u00a7356.4: the office puts it back to the default", r.ok, (r.refusals || []).join(" / "));
+  check("\u00a7359.4: the office puts it back to the default", r.ok, (r.refusals || []).join(" / "));
   /* a second module's pick beside the first is still one sentence */
   r = fromStored(set, "smo", function (i) { i.group[PICK] = { strategy: "waiting", insights: "latest" }; });
-  check("\u00a7356.4: two modules' picks travel as one change",
+  check("\u00a7359.4: two modules' picks travel as one change",
         r.ok && (r.changes || []).length === 1, JSON.stringify((r.changes || []).map(function (c) { return c.kind; })));
 })();
 
-/* ── 40b · a module's grant is the matrix's own write (§356.5, spec 054 §4.4) ──
+/* ── 40b · a module's grant is the matrix's own write (§359.5, spec 056 §4.4) ──
    Insights' Access page writes ACCESS[role].a_insights — a key lib/rules.js
    does not name, because the module declares it (smp-app/lib/modules.ts) and
    the frozen product must not carry a copy (§335). The authoriser sees the
@@ -4127,30 +4127,30 @@ console.log("\n39 \u00b7 how long each subject has to present (\u00a7340)");
   }
   const UK = Object.keys(SEED.units)[0];
   const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
-  if (!(UK && CUST)) { check("\u00a7356.5: the seed holds a custodian to test with", false, ""); return; }
+  if (!(UK && CUST)) { check("\u00a7359.5: the seed holds a custodian to test with", false, ""); return; }
   const SHUT = function (i) { (i.access.owner = i.access.owner || {}).a_insights = "none"; };
   let r = fromStored(SEED, "smo", SHUT);
-  check("\u00a7356.5: the Super user shuts a module to a role", r.ok, (r.refusals || []).join(" / "));
+  check("\u00a7359.5: the Super user shuts a module to a role", r.ok, (r.refusals || []).join(" / "));
   const kinds = (r.changes || []).map(function (c) { return c.kind; });
-  check("\u00a7356.5: a change to a module's grant is classified `access` and nothing else",
+  check("\u00a7359.5: a change to a module's grant is classified `access` and nothing else",
         kinds.length === 1 && kinds[0] === "access",
         kinds.join(",") || "(nothing \u2014 the change was invisible)");
   r = fromStored(SEED, CUST, SHUT);
-  check("\u00a7356.5 REFUSED: a custodian cannot", !r.ok, "was ALLOWED");
+  check("\u00a7359.5 REFUSED: a custodian cannot", !r.ok, "was ALLOWED");
   /* the SMO team: the seed's first person holding it, or one made to */
   const team = clone(SEED);
   const tp = team.people.find(function (p) { return p.role === "smoteam"; }) ||
              (function () { const p = team.people.find(function (x) { return x.key === CUST; }); p.role = "smoteam"; return p; })();
   r = fromStored(team, tp.key, SHUT);
-  check("\u00a7356.5 REFUSED: nor the SMO team \u2014 the matrix is the Super user's whatever page it is written from (\u00a789)", !r.ok, "was ALLOWED");
-  check("\u00a7356.5: and the refusal says who may do what",
+  check("\u00a7359.5 REFUSED: nor the SMO team \u2014 the matrix is the Super user's whatever page it is written from (\u00a789)", !r.ok, "was ALLOWED");
+  check("\u00a7359.5: and the refusal says who may do what",
         !r.ok && /who may do what|access/i.test((r.refusals || []).join(" ")), (r.refusals || []).join(" / "));
   /* OPENING IT AGAIN DELETES THE KEY (\u00a750.6) and is the same act */
   const shut = clone(SEED); SHUT(shut);
   r = fromStored(shut, "smo", function (i) { delete i.access.owner.a_insights; });
-  check("\u00a7356.5: the Super user opens it again (the key deleted)", r.ok && (r.changes || []).length === 1 && r.changes[0].kind === "access", (r.refusals || []).join(" / "));
+  check("\u00a7359.5: the Super user opens it again (the key deleted)", r.ok && (r.changes || []).length === 1 && r.changes[0].kind === "access", (r.refusals || []).join(" / "));
   r = fromStored(shut, CUST, function (i) { delete i.access.owner.a_insights; });
-  check("\u00a7356.5 REFUSED: a custodian cannot open it either", !r.ok, "was ALLOWED");
+  check("\u00a7359.5 REFUSED: a custodian cannot open it either", !r.ok, "was ALLOWED");
 })();
 
 /* ── 40 · a pillar's breakdown is two halves at once (§343) ────────────
@@ -4236,7 +4236,7 @@ console.log("\n40 · a pillar's breakdown (§343)");
         (from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).refusals || []).join(" / "));
 })();
 
-/* ── 41 · the client's set-up mark (§357, spec 055) ──────────────────────
+/* ── 41 · the client's set-up mark (§360, spec 057) ──────────────────────
    "Done with set-up" writes ONE key on the group (SMPRules.SETUP_DONE) and
    the Setup rail reads it to move Getting started to the bottom as Client
    set-up. It is SETUP — the office's — and the two server edits go together
@@ -4244,42 +4244,42 @@ console.log("\n40 · a pillar's breakdown (§343)");
    everybody; and in the group's known list, or it reaches the unknown sweep
    under a sentence naming the whole group. BOTH ENDS: the office may, the
    custodian may not, and neither direction is `unknown`. */
-console.log("\n41 · the client's set-up mark (§357)");
+console.log("\n41 · the client's set-up mark (§360)");
 (function () {
   const W = A.worldOf ? A.worldOf : function (x) { return x; };
   const KEY = R.SETUP_DONE;
-  check("§357: the key is the shared rule's, never a literal here", typeof KEY === "string" && KEY.length > 0, String(KEY));
+  check("§360: the key is the shared rule's, never a literal here", typeof KEY === "string" && KEY.length > 0, String(KEY));
   const base = clone(SEED);
   delete base.group[KEY];
   function marked(v) { const inc = clone(base); if (v == null) delete inc.group[KEY]; else inc.group[KEY] = v; return inc; }
   const set = (A.collect(base, marked(true), W(base)) || []);
-  check("§357: marking the set-up done classifies as SETUP",
+  check("§360: marking the set-up done classifies as SETUP",
         set.length > 0 && set.every(function (c) { return c.kind === "setup"; }),
         set.map(function (c) { return c.kind; }).join(",") || "(nothing classified — INVISIBLE, so allowed to everybody)");
   const doneBase = marked(true);
   const cleared = (A.collect(doneBase, marked(null), W(doneBase)) || []);
-  check("§357: ...and so does taking the mark off (stored as an absence, §50.6)",
+  check("§360: ...and so does taking the mark off (stored as an absence, §50.6)",
         cleared.length > 0 && cleared.every(function (c) { return c.kind === "setup"; }),
         cleared.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
-  check("§357: neither direction reaches the unknown sweep (§191)",
+  check("§360: neither direction reaches the unknown sweep (§191)",
         !set.concat(cleared).some(function (c) { return c.kind === "unknown"; }), "ok");
   const office = A.authorize(base, marked(true), personOf(base, "smo"));
-  check("§357: the office marks the set-up done", office.ok, (office.refusals || []).join(" / "));
+  check("§360: the office marks the set-up done", office.ok, (office.refusals || []).join(" / "));
   if (custKey) {
     const cust = A.authorize(base, marked(true), personOf(base, custKey));
-    check("§357 REFUSED: a unit's custodian may not", !cust.ok, "was ALLOWED");
-    check("§357: ...and the refusal names Setup (§16.7)",
+    check("§360 REFUSED: a unit's custodian may not", !cust.ok, "was ALLOWED");
+    check("§360: ...and the refusal names Setup (§16.7)",
           !cust.ok && (cust.refusals || []).join(" ").toLowerCase().indexOf("setup") > -1,
           (cust.refusals || []).join(" / "));
   }
   /* the mark is not swept up by a save that carries it unchanged (§42's
      phantom change: a reader that created what it looked for) */
   const same = (A.collect(doneBase, clone(doneBase), W(doneBase)) || []);
-  check("§357: a save carrying the mark unchanged classifies nothing about it",
+  check("§360: a save carrying the mark unchanged classifies nothing about it",
         !same.some(function (c) { return /set-up/.test(String(c.what || c.label || "")); }), same.map(function (c) { return c.kind; }).join(","));
 })();
 
-/* ── 42 · the two kinds of Forefront row (spec 056 §3a.1, §359.2) ───────
+/* ── 42 · the two kinds of Forefront row (spec 058 §3a.1, §362.2) ───────
    `officeRow` marks a consultant's register row two ways and until today the
    authoriser read only the mark: a row the platform BUILT (`ffrow`) and one
    it merely ADOPTED because an address matched (§313.32) were refused alike,
@@ -4290,14 +4290,14 @@ console.log("\n41 · the client's set-up mark (§357)");
    every assertion here would pass on a build that had lost the distinction
    entirely. BOTH ENDS every time (§94.2) — minted refused beside adopted
    allowed — or a build that simply stopped refusing anything passes half. */
-console.log("\n42 · the two kinds of Forefront row (spec 056)");
+console.log("\n42 · the two kinds of Forefront row (spec 058)");
 (function () {
   const W = A.worldOf ? A.worldOf : function (x) { return x; };
   /* Two rows, made from real people so nothing else about them is odd. */
   const base = clone(SEED);
   const rows = (base.people || []).filter(function (p) { return !p.forefront; });
   const MINT = rows[0], ADOPT = rows[1];
-  check("§359.2: the fixture found two ordinary rows to mark",
+  check("§362.2: the fixture found two ordinary rows to mark",
         !!(MINT && ADOPT && MINT.key !== ADOPT.key), String(rows.length));
   if (!MINT || !ADOPT) return;
   MINT.forefront = true; MINT.ffrow = true;
@@ -4315,38 +4315,38 @@ console.log("\n42 · the two kinds of Forefront row (spec 056)");
   };
 
   /* — the minted row is the platform's, whole — */
-  check("§359.2: renaming a MINTED row classifies as officeRow",
+  check("§362.2: renaming a MINTED row classifies as officeRow",
         kinds(MINT.key, function (p) { p.name = p.name + " X"; }).indexOf("officeRow") > -1,
         kinds(MINT.key, function (p) { p.name = p.name + " X"; }).join(","));
   const mintOffice = edit("smo", MINT.key, function (p) { p.name = p.name + " X"; });
-  check("§359.2 REFUSED: ...and the OFFICE is refused it too",
+  check("§362.2 REFUSED: ...and the OFFICE is refused it too",
         !mintOffice.ok, "was ALLOWED");
-  check("§359.2: ...and the refusal says where it is set (§16.7)",
+  check("§362.2: ...and the refusal says where it is set (§16.7)",
         !mintOffice.ok && (mintOffice.refusals || []).join(" ").toLowerCase().indexOf("forefront") > -1,
         (mintOffice.refusals || []).join(" / "));
 
   /* — the adopted row is the client's own person again — */
   const adoptKinds = kinds(ADOPT.key, function (p) { p.name = p.name + " X"; });
-  check("§359.2: renaming an ADOPTED row is ordinary setup, never officeRow",
+  check("§362.2: renaming an ADOPTED row is ordinary setup, never officeRow",
         adoptKinds.indexOf("officeRow") < 0 && adoptKinds.indexOf("setup") > -1,
         adoptKinds.join(",") || "(nothing classified)");
-  check("§359.2: ...so the office may correct it",
+  check("§362.2: ...so the office may correct it",
         edit("smo", ADOPT.key, function (p) { p.name = p.name + " X"; }).ok,
         (edit("smo", ADOPT.key, function (p) { p.name = p.name + " X"; }).refusals || []).join(" / "));
   if (custKey)
-    check("§359.2 REFUSED: ...and a unit's custodian still may not (a re-housing, never a widening)",
+    check("§362.2 REFUSED: ...and a unit's custodian still may not (a re-housing, never a widening)",
           !edit(custKey, ADOPT.key, function (p) { p.name = p.name + " X"; }).ok, "was ALLOWED");
 
   /* — the marks themselves are the platform's on BOTH kinds — */
   const cleared = kinds(ADOPT.key, function (p) { delete p.forefront; });
-  check("§359.2: clearing the mark on an adopted row is officeRow",
+  check("§362.2: clearing the mark on an adopted row is officeRow",
         cleared.indexOf("officeRow") > -1, cleared.join(",") || "(nothing classified — INVISIBLE)");
-  check("§359.2 REFUSED: ...and the office may not clear it either",
+  check("§362.2 REFUSED: ...and the office may not clear it either",
         !edit("smo", ADOPT.key, function (p) { delete p.forefront; }).ok, "was ALLOWED");
 
   /* — and nothing is swept up by a save that carries them unchanged (§42) — */
   const quiet = (A.collect(base, clone(base), W(base)) || []);
-  check("§359.2: a save carrying both rows unchanged classifies nothing",
+  check("§362.2: a save carrying both rows unchanged classifies nothing",
         !quiet.some(function (c) { return c.kind === "officeRow"; }),
         quiet.map(function (c) { return c.kind; }).join(","));
 })();

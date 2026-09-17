@@ -15,12 +15,12 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
   return { title: t ? t.name + " — Strategy Management Platform" : "Strategy Management Platform" };
 }
 
-/* ── A CLIENT'S ADDRESS OPENS THE MODULE, NOT A WELCOME OF ITS OWN (§357,
-   spec 055; reversing §315's landing and spec 054 §4.1's blocks).
+/* ── A CLIENT'S ADDRESS OPENS THE MODULE, NOT A WELCOME OF ITS OWN (§360,
+   spec 057; reversing §315's landing and spec 056 §4.1's blocks).
 
    Islam: *"why do I have a welcome screen for the client overall, I just need
    a welcome screen for the strategy module for now."* The landing was a
-   SECOND welcome: the Next page drew spec 054's Client setup and Your modules
+   SECOND welcome: the Next page drew spec 056's Client setup and Your modules
    blocks, while the house mark inside the platform opened the frozen
    welcome.js overlay, which never had them — two answers to one screen,
    §53.5's drift with a person standing between them. So `/<client>` is a
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
    password to the card; a client that is not theirs to their own; anything
    else the one refusal), and a person who may open the client is sent into
    THE FIRST MODULE THEY MAY OPEN — Strategy for nearly everybody, read from
-   the same answer the switcher and the card read (openableModules, §356.5),
+   the same answer the switcher and the card read (openableModules, §359.5),
    never from a second list. Strategy's own welcome greets them there, once a
    session (welcome.js), and the house mark is its way back.
 
@@ -51,7 +51,7 @@ export default async function Page({ params }: P) {
   }
   const open = await openableModules(ans.tenant.id, ans.seat, ans.personKey, ans.tenant.modules);
   /* A PERSON WHO MAY OPEN NONE OF THEM still lands on the default module's
-     address: its own gate answers there in words (route.ts, §356.5), where a
+     address: its own gate answers there in words (route.ts, §359.5), where a
      404 here would say the CLIENT is not available, which is not true. */
   redirect(clientHref(slug, open[0] || DEFAULT_MODULE, ""));
 }

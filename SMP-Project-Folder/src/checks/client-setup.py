@@ -1,5 +1,5 @@
 """Getting started — the client set-up flow, inside the platform's own Setup
-(§357, spec 055).
+(§360, spec 057).
 
 Islam: "the client either we open a module or we go to the client settings
 page where we find a rail with the client settings and I suggest having the
@@ -32,7 +32,7 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
   unit — asserted as agreement between two counts, or every pass appends a
   second row per unit and halves every weight.
 
-· THE REFUSAL PUTS THE ROW BACK (§357.3): a removed headed unit is refused
+· THE REFUSAL PUTS THE ROW BACK (§360.3): a removed headed unit is refused
   BY NAME, its row is on the step again, the graph is untouched, and the
   very next Next proceeds — a refusal that held the person on the step for
   ever was the first build's fault.
@@ -240,7 +240,7 @@ with sync_playwright() as p:
     ck("…the flow stays on the units step", at(pg) == "units", at(pg))
     ck("…and the stored graph is untouched", ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1 and
        ev(pg, "()=>(UNIT_ROLES[UNIT_KEYS[0]]||{}).head", None) == head0.get("head"))
-    ck("the very next Next then proceeds (§357.3 — the person is not held on the step)",
+    ck("the very next Next then proceeds (§360.3 — the person is not held on the step)",
        press(pg, ".csetup [data-wznext]", 500) and at(pg) == "cos" and ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1, (at(pg), said(pg)[:80]))
 
     # ── 6 · A ROW WITH NO NAME ─────────────────────────────────────────────

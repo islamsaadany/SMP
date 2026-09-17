@@ -32,7 +32,7 @@ function esc(s: string): string { return String(s).replace(/&/g, "&amp;").replac
 export function shellDocument(tenantName: string, module: string | null = null, modules: readonly { key: string; label: string; note: string }[] = [],
                               landing: { module: string; pick: string; lines: { key: string; label: string; example: string; text: string }[] } | null = null,
                               areas: readonly { key: string; label: string; note: string; states: string[]; shipped: string }[] | null = null,
-                              /* WHICH SETUP RAIL THIS DOCUMENT IS (§359, spec 056): `client` for
+                              /* WHICH SETUP RAIL THIS DOCUMENT IS (§362, spec 058): `client` for
                                  `/<client>/setup/…`, the module's own word for
                                  `/<client>/<module>/setup/…`, absent everywhere else. The
                                  browser writes the same attribute from the address on arrival
@@ -46,13 +46,13 @@ export function shellDocument(tenantName: string, module: string | null = null, 
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
   const brk = process.env.SMP_BREAK || "";
-  /* `switch-always` is route.js's, not this file's (§359.1): the attribute
+  /* `switch-always` is route.js's, not this file's (§362.1): the attribute
      below is the LIST, and who draws a switcher from it is that file's rule,
      so its break has to reach it. */
   const routeBrk = (brk === "no-route" || brk === "switch-always") ? brk : "";
   return "<!doctype html>\n<html lang='en'" + (routeBrk ? " data-break='" + routeBrk + "'" : "") +
     (module ? " data-module='" + esc(module) + "'" : "") +
-    /* AND ITS NAME (§356.2): the frozen shell heads a module's own Setup rail
+    /* AND ITS NAME (§359.2): the frozen shell heads a module's own Setup rail
        with the module's word, and a label capitalised out of the key in the
        browser is how two screens come to spell one module differently
        (§53.5) — so the label the console and the switcher read is stamped
@@ -63,7 +63,7 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        tells it where else it may go, so shell/route.js can draw the switcher
        without a second copy of MODULE_DEF or a request to ask (§53.5).
 
-       THE ATTRIBUTE IS THE LIST, AND NOT "IS THERE A CHOICE" (§359.1). It
+       THE ATTRIBUTE IS THE LIST, AND NOT "IS THERE A CHOICE" (§362.1). It
        was written only for a client holding more than one, which is the
        SWITCHER's rule wearing the attribute's name — and it left the client's
        own Setup rail unable to name the one module it should offer a way
@@ -75,20 +75,20 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        modules THIS PERSON MAY OPEN (moduleMenu(openableModules)), so neither
        reader has to ask a second time. */
     (modules.length ? " data-modules='" + esc(JSON.stringify(modules)) + "'" : "") +
-    /* THE LANDING LINE PAGE'S DECLARATION (§356.4): what this module can
+    /* THE LANDING LINE PAGE'S DECLARATION (§359.4): what this module can
        say, its texts right now and the client's pick — stamped on a SETUP
        document only, where the page that draws it lives (lib/landing.ts
        landingStampFor). Absent everywhere else, and over file://, where the
        page says the served platform is where the line is set. */
     (landing && brk !== "no-landing-stamp" ? " data-landing='" + esc(JSON.stringify(landing)) + "'" : "") +
-    /* THE MODULE'S DECLARED AREAS (§356.5, spec 054 §4.4): what its Access
+    /* THE MODULE'S DECLARED AREAS (§359.5, spec 056 §4.4): what its Access
        page has columns for, on the Setup document alone and only for a
        module that declares any — MODULE_DEF's own list, never a copy
        (renderModuleAccess in the frozen config-render.js reads it). Absent,
        the page says the served platform sets it. */
     (areas && areas.length && brk !== "no-areas-stamp" ? " data-areas='" + esc(JSON.stringify(areas)) + "'" : "") +
     /* THE CHECK'S BREAK: a build that served the client's own settings under a
-       module's bar — the fault §359 exists to remove — must go red. Never set
+       module's bar — the fault §362 exists to remove — must go red. Never set
        on a deployment. */
     (scope && brk !== "no-setup-scope" ? " data-setup-scope='" + esc(scope) + "'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +

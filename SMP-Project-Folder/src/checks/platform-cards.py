@@ -24,7 +24,7 @@ real deployment (§94.11, §255).
 
 Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-cards.py
       … --break=in-grid   # the behaviour before §317; must go red
-      … --break=text-cursor  # the I-beam of §358, put back; must go red
+      … --break=text-cursor  # the I-beam of §361, put back; must go red
       SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
 
 WHAT THE BREAK CANNOT REACH, SAID RATHER THAN LEFT AS A GAP: `--break=in-grid`
@@ -277,7 +277,7 @@ def run():
             check("the key reads in " + theme + " (" + str(r) + ":1)", r is not None and r >= 4.5, r)
         pg.emulate_media(color_scheme="light")
 
-        # ══ 5 · a control is shaped like a control (§358) ═══════════════
+        # ══ 5 · a control is shaped like a control (§361) ═══════════════
         # Islam: "the clicker when I go to the settings button it turns into
         # the writing arrow not a normal mouse." A <span role="button"> with
         # text in it shows the TEXT cursor unless it is told otherwise, and

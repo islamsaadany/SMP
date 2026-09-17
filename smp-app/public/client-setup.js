@@ -1,5 +1,5 @@
 /* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
-/* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§357, spec 055) ═══════════
+/* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
    with the client settings and I suggest having the getting started with the
@@ -125,7 +125,7 @@ function __smpShape(state, a, hydrate) {
     if (had) COMPANIES[k] = __smpCarry(had, COMPANIES[k], ["name"]);
     byName[nm.toLowerCase()] = k;
   });
-  /* A ROW IS MATCHED BY ITS NAME FIRST, AND ONLY THEN BY ITS KEY (§357.3).
+  /* A ROW IS MATCHED BY ITS NAME FIRST, AND ONLY THEN BY ITS KEY (§360.3).
      addBusinessUnit mints a key from the name, and a client's stored keys
      were not always minted that way — Raya's are `mob`, `fin`, `cx`, and a
      client made on the frozen console carries whatever that day's minter
@@ -242,7 +242,7 @@ var CLIENTSETUP = (function () {
      Seven, as the mockup draws them. There is no Summary step any more:
      the rail beside this page IS the summary — every answer here is a page
      on it — and Done with set-up is a button on every step rather than a
-     destination at the end (spec 055). */
+     destination at the end (spec 057). */
   var STEPS = [
     { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
     { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
@@ -329,7 +329,7 @@ var CLIENTSETUP = (function () {
        (the put-back rows have to be drawn) and a sentence written into the
        old column would go with it (§63). render() writes S.said back and
        the next successful move clears it. */
-    /* §357.6: the console's two pieces (mountCreate, mountArchived) hold no
+    /* §360.6: the console's two pieces (mountCreate, mountArchived) hold no
        step state — S is only ever minted by mount() — and the create piece
        said "Creating…" through this very function, so Add a client THREW
        before it posted anything: no refusal written, no createClient sent,
@@ -374,7 +374,7 @@ var CLIENTSETUP = (function () {
   function holdsNow(){ return __smpHoldsNow(); }
   function isDone(){ return !!(typeof SMPRules !== "undefined" && SMPRules.setupDone(GROUP)); }
 
-  /* ── WHAT THE RAIL'S STRIP SAYS (spec 055): which steps the data holds an
+  /* ── WHAT THE RAIL'S STRIP SAYS (spec 057): which steps the data holds an
      answer for. Counted, never remembered — the data IS the progress
      (§129), so there is no second record of it to fall out of step. The
      client and its words always count (the client exists; a word left as
@@ -414,7 +414,7 @@ var CLIENTSETUP = (function () {
     render();
   }
 
-  /* ── THE CLIENT'S RECORD, ASKED ONCE FOR WHOEVER IS DRAWING (§359.2) ──
+  /* ── THE CLIENT'S RECORD, ASKED ONCE FOR WHOEVER IS DRAWING (§362.2) ──
      Two hosts read it now — the flow, and the Forefront team page below —
      and the state is module-level and keyed on the client, so the second
      reader finds the first one's answer rather than asking again (§53.5).
@@ -438,7 +438,7 @@ var CLIENTSETUP = (function () {
     });
   }
 
-  /* ── FOREFRONT TEAM, ON A PAGE OF ITS OWN (§359.2, spec 056 §3a) ───────
+  /* ── FOREFRONT TEAM, ON A PAGE OF ITS OWN (§362.2, spec 058 §3a) ───────
      Islam: *"how about the forefront team is a separate view as you did but
      we keep them on the client list reading from the forefront team list."*
      So it is a Setup page of the client's, and the SET-UP FLOW'S STEP IS THE
@@ -455,7 +455,7 @@ var CLIENTSETUP = (function () {
     }
     ensureReg("[data-cteam]", mountTeam);
     host.innerHTML = "";
-    /* A PLAIN BOX (§361). This said `wzstep`, which is the class the step
+    /* A PLAIN BOX (§364). This said `wzstep`, which is the class the step
        CHIPS in the rail above the flow wear — a pill — so the whole page was
        drawn inside one (§65.9). Nothing wraps the table but the page. */
     var box = el("div");
@@ -600,7 +600,7 @@ var CLIENTSETUP = (function () {
     var res = __smpShape(copy, S.shape, SYNC.hydrate);
     if (res.dropped.length) {
       SYNC.hydrate(live);
-      /* THE ROWS ARE PUT BACK AS WELL AS REFUSED (§357.3): a refusal that
+      /* THE ROWS ARE PUT BACK AS WELL AS REFUSED (§360.3): a refusal that
          left the removed row out of the flow's own list would refuse every
          Next and Back after it too, with no way to proceed short of typing
          the name back in — the flow held the person on the step. The list
@@ -619,7 +619,7 @@ var CLIENTSETUP = (function () {
     S.said = null;
     return true;
   }
-  /* Done with set-up (spec 055): the shape written, then the mark. ONE key
+  /* Done with set-up (spec 057): the shape written, then the mark. ONE key
      on the group (SMPRules.SETUP_DONE), stored as an absence until pressed
      (§50.6); the rail reads it on the next paint. */
   function markDone(){
@@ -665,7 +665,7 @@ var CLIENTSETUP = (function () {
   }
 
   /* The registry half, then the graph half: the mark on the door, the
-     group's mark and the brand colours (Branding, absorbed here — spec 055),
+     group's mark and the brand colours (Branding, absorbed here — spec 057),
      the modules this client has, and the way to archive it. */
   function clientStep(box){
     var reg = S.reg, c = reg && reg.client;
@@ -765,7 +765,7 @@ var CLIENTSETUP = (function () {
     if (c) rs.appendChild(markBlock(c));
     box.appendChild(rs);
 
-    /* ── THE BRANDING, ABSORBED (spec 055): the group's mark and the two
+    /* ── THE BRANDING, ABSORBED (spec 057): the group's mark and the two
        colours, drawn by the one renderer Branding always had and wired by
        the shell's own handlers after this mounts — no second answer to what
        a colour does (§53.5). */
@@ -1217,8 +1217,8 @@ var CLIENTSETUP = (function () {
     return box;
   }
 
-  /* ── THE OFFICE, AS A SETUP TABLE (§361) ────────────────────────────
-     Islam, of the page §359.2 shipped: *"forefront team is damaged it needs
+  /* ── THE OFFICE, AS A SETUP TABLE (§364) ────────────────────────────
+     Islam, of the page §362.2 shipped: *"forefront team is damaged it needs
      to be a table looks like the people register wiht the required
      columns."* MEASURED BEFORE ANYTHING WAS DRAWN, and the cause was one
      class: `mountTeam` wrapped the rows in `.wzstep`, which is what the
@@ -1277,7 +1277,7 @@ var CLIENTSETUP = (function () {
       tr.appendChild(nm);
       tr.appendChild(el("td", "tmmail", m.email));
       /* A CELL THAT HOLDS A CONTROL CARRIES NO HOVER, AND WHAT MAKES THAT
-         TRUE IS THE WIDTH (§361.4). `clipTitles()` writes a measured title
+         TRUE IS THE WIDTH (§364.4). `clipTitles()` writes a measured title
          on a cell that overflowed, and these do not: the select fills its
          own cell and the two seat buttons set their column's floor, so
          there is nothing to measure. A `data-keep-title` mark was added
@@ -1348,7 +1348,7 @@ var CLIENTSETUP = (function () {
       row.appendChild(add);
       box.appendChild(row);
     }
-    /* ONE SENTENCE, TWO DRESSES (§361). The words are written once; the
+    /* ONE SENTENCE, TWO DRESSES (§364). The words are written once; the
        HOST says how they are dressed, because the two are different rooms:
        on the Setup page it is the family's own `.note` — the bordered block
        Companies and the BU list both end with, which Islam signed off as
@@ -1378,7 +1378,7 @@ var CLIENTSETUP = (function () {
     S.reg = null; S.regErr = null;
     redraw();
   }
-  /* §361: the key inside the cell is GONE — the column heading is the
+  /* §364: the key inside the cell is GONE — the column heading is the
      control's name now, and a label under a heading that already says the
      word says it twice on one row (§87, §267.2). The class stays, because it
      is what sizes the select; `aria-label` carries the name for anybody not
@@ -1497,7 +1497,7 @@ var CLIENTSETUP = (function () {
         .then(function (r) {
           if (!r.ok) { next.disabled = false; say(r.error || "Not created.", true); return; }
           /* INTO THE CLIENT, AT ITS OWN GETTING STARTED PAGE: everything from
-             here on is written where it lives (spec 055). */
+             here on is written where it lives (spec 057). */
           location.assign("/" + r.key + "/setup/start");
         }).catch(function (e) { if (String(e.message) !== "sign in") { next.disabled = false; say("Could not reach the server.", true); } });
     });

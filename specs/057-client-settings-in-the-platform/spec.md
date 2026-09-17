@@ -1,7 +1,7 @@
 # 055 · The client's settings live in the platform, and Strategy's welcome is the welcome
 
 **Status:** decided 2026-09-16, built the same day on the branch. Islam,
-with two screenshots of what spec 054 shipped — the client landing on the
+with two screenshots of what spec 056 shipped — the client landing on the
 new stack and the frozen welcome overlay on the old — *"why do I have a
 welcome screen for the client overall, I just need a welcome screen for the
 strategy module for now"*; then, of where the client's own settings go,
@@ -9,7 +9,7 @@ strategy module for now"*; then, of where the client's own settings go,
 (published and signed off as an artifact, rule 1c; the drawing is the record
 of what was agreed and is not edited to match what was built, Principle II).
 
-**Reverses:** spec 054 §4.1 (*the client-wide settings go to the client
+**Reverses:** spec 056 §4.1 (*the client-wide settings go to the client
 landing, the spine's own page*) and §315's landing (*the landing is the
 welcome, so the shell's own welcome is stood down*). Both reversed at Islam's
 instruction and recorded as reversals, never overwritten. Spec 054's reason —
@@ -17,10 +17,10 @@ instruction and recorded as reversals, never overwritten. Spec 054's reason —
 wrong; what changed is WHERE that somewhere is. The landing put it on a page
 of its own, and a page of its own turned out to be a second welcome.
 
-**Depends on:** spec 054 (a def knows its module; the rail draws by scope),
+**Depends on:** spec 056 (a def knows its module; the rail draws by scope),
 spec 044 (the set-up flow), spec 046 (modules on one spine).
 
-**Decisions log:** §357, written with the build (rule A7).
+**Decisions log:** §360, written with the build (rule A7).
 
 ---
 
@@ -62,7 +62,7 @@ before — the one-door rule holds (a signed-out person to this client's door,
 §313.36; a temporary password to the card; a client that is not theirs to
 their own; anything else the one refusal) — and then **redirects** to
 `clientHref(slug, open[0] || DEFAULT_MODULE, "")`, where `open` is
-`openableModules()` (§356.5): the same answer the switcher and the card read,
+`openableModules()` (§359.5): the same answer the switcher and the card read,
 never a second list. `Welcome.tsx` is deleted; `lib/landing.ts` keeps only
 what the route still asks (`landingStampFor`, `doorHref`, `tourHref`).
 `shell/route.js` no longer stamps `smp.welcome.done`, so the frozen welcome is
@@ -71,7 +71,7 @@ OFFERED again on a deep address, once a session, through its own control.
 ### 2.2 The client's Setup rail, and the set-up as a strip
 
 `/<client>/setup` is the frozen Setup document served with
-`data-setup-scope="client"` (spec 054 §4.2's own machinery). Its rail:
+`data-setup-scope="client"` (spec 056 §4.2's own machinery). Its rail:
 
 - `‹ Back to the console` — a row at the top, href `/platform`, drawn on the
   client scope only. A module's rail draws `Client settings ›` in the same
@@ -113,7 +113,7 @@ in charge of anything was dropped, and the ordinary autosave carries every
 row it minted (§210). So a unit made on Getting started is byte for byte a
 unit made on Setup › Business units.
 
-**A row is matched by its NAME first and only then by its key** (§357.3):
+**A row is matched by its NAME first and only then by its key** (§360.3):
 `addBusinessUnit` mints a key from the name and a client's stored keys were
 not always minted that way, so re-minting read every existing head as
 dropped and refused a pass that added one unit. A matched row keeps its key
@@ -186,10 +186,10 @@ into `smp-app/public/` and refuses a `platform.html` that does not load it.
 
 ## 4.1 · What the checks found in the carry
 
-- **Add a client threw before it posted** (§357.6): the console's create
+- **Add a client threw before it posted** (§360.6): the console's create
   piece holds no step state and the shared `say()` wrote into it; no
   `createClient` was ever sent. Found by asserting what is POSTED.
-- **The bare `/<client>/setup` landed on the entry page** (§357.7): the
+- **The bare `/<client>/setup` landed on the entry page** (§360.7): the
   router writes it as a place with no page and `restoreWhere()` read that
   as nothing remembered. It lands on the scoped rail's own first page now —
   the strip, else the primary, else the first.
@@ -197,7 +197,7 @@ into `smp-app/public/` and refuses a `platform.html` that does not load it.
   route gates modules, not the spine) and the shell lands them where they
   work with no rail drawn — measured and stated, not a refusal in words.
 
-## 4.2 · What Islam found in it, and what changed (§357.9)
+## 4.2 · What Islam found in it, and what changed (§360.9)
 
 He pressed *Settings* on the console's card and met the welcome overlay over
 the client's own Setup rail: *"when I press continue it opens the clietn
@@ -238,14 +238,14 @@ now that the welcome's own card is the only door to it.
 Proved able to fail from the sources (§276): the row back at the head, 1 red;
 the foot rule deleted, 1 red; `data-deep-address` removed, `door-landing.mjs`
 2 red (the first printing `[1,null]`, his report reproduced) and `shell.mjs`
-1 red. Two neighbours were red on the branch, both §357's and both rewritten
+1 red. Two neighbours were red on the branch, both §360's and both rewritten
 rather than loosened: `setup-search` folded the deleted `look` group, and
 `setup-rail` asked the strip to be inside the list it is deliberately outside.
 
 ## 5 · Deliberately not decided here
 
 - Where the knowledge base finally lives (*"until we decide later"*).
-- Whether the email settings ever join Branding (spec 054's table said so;
+- Whether the email settings ever join Branding (spec 056's table said so;
   Islam: a Strategy-module setting).
 - Per-module set-up steps: a module that arrives with a set-up question of
   its own has no step in this flow yet.

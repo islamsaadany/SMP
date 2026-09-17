@@ -83,7 +83,7 @@ with sync_playwright() as p:
     print("\n── 2 · a keyword finds a page whose NAME does not contain it ──")
     # The whole reason keywords exist: these words appear on no label.
     # ("logo", "brand") STOOD HERE and is REWRITTEN, never loosened (§218,
-    # §214.3): §357 absorbed Branding into the client set-up, so that def is
+    # §214.3): §360 absorbed Branding into the client set-up, so that def is
     # gone and the mark-and-colours errand lands on Getting started — which,
     # until the set-up is done, is the STRIP above this box and needs no
     # finding (it is on screen, always). Once it is a row it is findable, and
@@ -116,7 +116,7 @@ with sync_playwright() as p:
     print("\n── 4 · a match inside a FOLDED group is still found (§108.14) ──")
     type_q(pg, "")
     # THE GROUP IS FOUND, NEVER NAMED (§214.3, §94.8). This block folded
-    # `look` and searched for "logo", and §357 deleted that group outright —
+    # `look` and searched for "logo", and §360 deleted that group outright —
     # Branding is the client set-up's first step now — so the check DIED on a
     # selector matching nothing rather than saying a decision had moved. What
     # it is about is the RELATIONSHIP (a folded group's match is still found),
@@ -197,7 +197,7 @@ with sync_playwright() as p:
 
     print("\n── 9 · arriving is the end of the errand ──")
     # THE ROW IS THE SEARCH'S OWN ANSWER, never a named page (§214.3): this
-    # pressed `brand`, which §357 deleted. It presses whatever the query finds
+    # pressed `brand`, which §360 deleted. It presses whatever the query finds
     # and asserts the page that opens is THAT row's — an agreement, so the next
     # page to be renamed or absorbed cannot orphan it (§94.8).
     type_q(pg, "weighting")
@@ -213,7 +213,7 @@ with sync_playwright() as p:
        pg.eval_on_selector("[data-railq]", "e=>e.value") == "" and
        len(shown(pg)) == len(everything), (len(shown(pg)), len(everything)))
 
-    print("\n── 10 · the search reaches the rail on screen and nothing else (§356.2) ──")
+    print("\n── 10 · the search reaches the rail on screen and nothing else (§359.2) ──")
     # Served, Setup is two rails — a module's own and the client's — and a
     # search in one must not find a page that lives in the other, or a match
     # opens a page the rail is not drawing. The scope is the document's own

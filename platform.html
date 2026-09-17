@@ -178,7 +178,7 @@
   .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
     letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
     border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface);
-    /* A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR (§358). This chip is a
+    /* A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR (§361). This chip is a
        <span role="button">, so with no cursor of its own the pointer becomes
        the I-beam over the one control that opens a client — and `.cback`
        directly below, built the same way for the same kind of act, has
@@ -291,7 +291,7 @@
   .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
   @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
 
-  /* ── THE TWO PIECES OF SET-UP THIS PAGE STILL DRAWS (§357, spec 055) ──
+  /* ── THE TWO PIECES OF SET-UP THIS PAGE STILL DRAWS (§360, spec 057) ──
      The flow moved into the client platform (client-setup.js); what is
      left here is adding a client and ending an archived one, in this
      page's tokens. The markup is the module's, so the classes are its. */
@@ -653,7 +653,7 @@
      with a wrong answer available to it. scripts/build-shell.mjs puts it at
      this address and refuses the build if this tag ever goes. -->
 <script src="/memory-split.js"></script>
-<!-- The client set-up flow (§357, spec 055): one file for this page and the
+<!-- The client set-up flow (§360, spec 057): one file for this page and the
      client platform, generated to this address by scripts/build-shell.mjs,
      which refuses the build if this tag ever goes. -->
 <script src="/client-setup.js"></script>
@@ -1699,7 +1699,7 @@
         r.type = "button";
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
-        /* THE LANDING LINE (§356.4): what the client's own landing says under
+        /* THE LANDING LINE (§359.4): what the client's own landing says under
            this module, from the same reader — then the card's own health
            word, when there is one. */
         if (m.line) r.appendChild(el("span", "mline", m.line));
@@ -1722,7 +1722,7 @@
     if (c.canConfig) {
       var cog = el("span", "ccfg", "Settings");
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
-      /* THE CLIENT'S OWN SETUP RAIL (§357, spec 055): one press into the
+      /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
          client at /<client>/setup, in its own chrome — Getting started at the
          top of that rail until it is done, the register and the organisation
          under it. Nothing between the card and the client. */
@@ -1802,7 +1802,7 @@
 
       var cog = el("span", "ccfg", "Settings");
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
-      /* ON THIS PAGE, not the client's (§357): an archived client's address
+      /* ON THIS PAGE, not the client's (§360): an archived client's address
          is closed, so its two acts — bringing it back and deleting it — are
          the one screen the console still draws for a client. */
       var open = function (e) { e.stopPropagation(); e.preventDefault(); drawArchived(c.key); };
@@ -1846,7 +1846,7 @@
     return b;
   }
 
-  /* ── SETTING A CLIENT UP IS INSIDE THE CLIENT NOW (§357, spec 055) ───
+  /* ── SETTING A CLIENT UP IS INSIDE THE CLIENT NOW (§360, spec 057) ───
      Islam: *"the client either we open a module or we go to the client
      settings page where we find a rail with the client settings"* — and, of
      which chrome draws that rail, "A": the client platform's own Setup.

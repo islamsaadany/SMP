@@ -1,7 +1,7 @@
 # 056 · The client's settings are the client's, and each module's are its own
 
 **Status:** aligned 2026-09-16 over one conversation, drawn before anything
-moves (rule 1c). **Stage 1 built 2026-09-16 (§359), on the branch** — the
+moves (rule 1c). **Stage 1 built 2026-09-16 (§362), on the branch** — the
 client's settings wear the client's bar; the other five stages are unbuilt.
 Stage 1's one deviation from `tasks.md` is recorded there: its check is a
 section of `smp-app/checks/shell.mjs` rather than a Python file of its own,
@@ -16,8 +16,8 @@ again"*. Then, of the first answer offered: *"you are trying to make a simple
 fix. let's discuss the architecture and who sees what it's not a simple
 fix."* He was right; this spec is that conversation settled.
 
-**Depends on:** spec 046 (modules on one spine), spec 054 (a def knows its
-module; the rail draws by scope), spec 055 (the client's settings live in the
+**Depends on:** spec 046 (modules on one spine), spec 056 (a def knows its
+module; the rail draws by scope), spec 057 (the client's settings live in the
 platform, reached from the card).
 
 **Reverses nothing.** Spec 055 put the client's settings behind the card's
@@ -69,7 +69,7 @@ conversation.
 
 ## 3 · The client's settings page
 
-**Reached from the console's card, by *Settings*.** Unchanged from spec 055.
+**Reached from the console's card, by *Settings*.** Unchanged from spec 057.
 
 **What is on it:** the client's name, its mark and its colours; the rail we
 agreed (*Client set-up*, **Forefront team**, People register, Official BU
@@ -95,7 +95,7 @@ people** — stated because it decides nothing gets stranded:
   module bar**, which is already built and already drawn only where there is
   more than one module to choose from (§320.6).
 
-**Branding** is already absorbed into *Getting started* (spec 055) and stays
+**Branding** is already absorbed into *Getting started* (spec 057) and stays
 there: it describes the client, and every module wears it.
 
 ## 3a · Forefront team, and the register that reads from it
@@ -321,7 +321,7 @@ proposal below, *"one page ok from 2 doors."*
   Insights and no Strategy would be asked what to call a Pillar.
 
 **Third instance of a pattern** (§9): the module declares, the client sets —
-as with a module's access areas (§356.5) and its landing line (§356.4).
+as with a module's access areas (§359.5) and its landing line (§359.4).
 
 ## 7 · Tools go to the module; the email identity stays with the client
 
@@ -419,7 +419,7 @@ same time (§345, `specs/046-modules/repo-boundary.md`).
   wanted, §4 is the decision to revisit, and `a_setup` would have to stop
   being one all-or-nothing switch.
 - **It does not build a client-level home screen.** `/<client>` stays a door
-  into the first module somebody may open (spec 055).
+  into the first module somebody may open (spec 057).
 - **It does not touch how a module draws its own work** — only its settings
   rail and its chrome.
 

@@ -429,7 +429,7 @@ const CLIENT_ARG = (function () {
     ppcOk ? "" : JSON.stringify(Object.keys(ppClean.group).filter(k => k.indexOf("plan") === 0)));
   if (!ppcOk) process.exitCode = 1;
 
-  /* ── THE LANDING LINE'S PICK (§356.4) ────────────────────────────
+  /* ── THE LANDING LINE'S PICK (§359.4) ────────────────────────────
      A map keyed by module on the GROUP, written, read back, and taken away
      again — "it rides org.extra" measured rather than claimed (§172). */
   const lpState = await io.readState(client);
@@ -448,8 +448,8 @@ const CLIENT_ARG = (function () {
   console.log("  ...and cleared, the key DELETED:", lpcOk ? "PASS" : "FAIL", lpcOk ? "" : JSON.stringify(Object.keys(lpClean.group)));
   if (!lpcOk) process.exitCode = 1;
 
-  /* ── A MODULE'S GRANT UNDER A KEY THE SHIPPED AREAS DO NOT NAME (§356.5,
-     spec 054 research R3) ─────────────────────────────────────────────
+  /* ── A MODULE'S GRANT UNDER A KEY THE SHIPPED AREAS DO NOT NAME (§359.5,
+     spec 056 research R3) ─────────────────────────────────────────────
      Insights' `a_insights` is declared in smp-app/lib/modules.ts and NOT in
      lib/rules.js (§335), so the stored map has to carry a key AREAS has never
      heard of. The store is blind to which keys it holds — measured here

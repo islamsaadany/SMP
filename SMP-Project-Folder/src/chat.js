@@ -3134,7 +3134,7 @@ var CHAT = (function(){
          are answered and still the rail is showing a notification."
 
          Cleared rather than recounted — the next reader that wants it (the
-         rail's pills, the landing's office list; the Overview until §356)
+         rail's pills, the landing's office list; the Overview until §359)
          asks again, which is the one place that fetch belongs (a second asker
          polling in the background is what §98 was about). §35's shape: the
          status you must remember to refresh is the one nobody refreshes. */
@@ -3499,7 +3499,7 @@ var CHAT = (function(){
        carries the two counts — so this is a second READER of one endpoint and
        not a second endpoint, and the number the landing's office list prints
        (attentionRows()'s chat row) is by construction the number the Inbox's
-       own tab prints. Written for the Setup Overview, which §356 deleted.
+       own tab prints. Written for the Setup Overview, which §359 deleted.
 
        IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
        writing box.threads from here would leave a half-built queue behind for

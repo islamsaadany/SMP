@@ -482,7 +482,7 @@ var RECIPES = [
        "figures and clears the reporting fields, so each unit is asked again " +
        "rather than inheriting the last set of answers." },
   { id: "branding", q: "How do I set the colours and the logo?", who: "office",
-    /* §357: the Branding page is gone — the mark and the colours are the
+    /* §360: the Branding page is gone — the mark and the colours are the
        first step of the client's own set-up, Getting started until it is
        finished and Client set-up after (§104.8: prose that names a page
        that no longer exists is corrected in the edit that removes it). */

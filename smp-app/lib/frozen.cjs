@@ -139,8 +139,8 @@ function __smpLanding(state, personKey) {
   }
   var pages = [];
   if (office) {
-    /* Reporting cycle since §356 — the Overview this once opened is gone
-       (step 1 moved welcome.js and left this carried copy behind, §356.3:
+    /* Reporting cycle since §359 — the Overview this once opened is gone
+       (step 1 moved welcome.js and left this carried copy behind, §359.3:
        the door-landing check compared the page with THIS reader and the two
        agreed about a page that no longer exists, §113.8) */
     pages.push({ label: "Setup — Reporting cycle", small: "", go: { setup: "cycle" } });
@@ -160,7 +160,7 @@ function __smpLanding(state, personKey) {
            acts: acts, pages: pages, tour: tour, home: home, continueWord: word };
 }
 function __smpPlaceLabel(state, target) { __smpHydrate(state); try { return placeLabel(target); } catch (e) { return String(target); } }
-/* MAY THIS PERSON OPEN A MODULE (spec 054 research R3, s356.5): the product's
+/* MAY THIS PERSON OPEN A MODULE (spec 056 research R3, s356.5): the product's
    own reader, mayOpenModuleArea in config-data.js -- the one the module's
    Access page draws its cells from -- asked of the stored graph. A person the
    register does not hold is judged as holding nothing, which is the shipped
@@ -171,7 +171,7 @@ function __smpMayOpen(state, personKey, area) {
   for (var i = 0; i < PEOPLE.length; i++) if (PEOPLE[i].key === personKey) { row = PEOPLE[i]; break; }
   try { return !!mayOpenModuleArea(row, area); } catch (e) { return (area.shipped || "none") !== "none"; }
 }
-/* THE FACTS A LANDING LINE IS MADE OF (§356.4): the cycle's state and its
+/* THE FACTS A LANDING LINE IS MADE OF (§359.4): the cycle's state and its
    due day off REVIEW, and how many subjects have submitted off cycleTotals()
    — the product's own count, the one the cycle board and the welcome screen
    read, never a second sum (§53.5). */
@@ -242,7 +242,7 @@ function __smpHydrateAnd(state) { __smpHydrate(state); return state; }
    template literal, so one closes the string and the module stops parsing —
    which is how this comment first shipped. */
 /* WHAT THIS CLIENT HOLDS AND WHAT THE SET-UP WRITES INTO IT ARE THE
-   SOURCE'S OWN NOW (§357, spec 055): __smpHolds and __smpShape live in
+   SOURCE'S OWN NOW (§360, spec 057): __smpHolds and __smpShape live in
    SMP-Project-Folder/src/client-setup.js, where the browser runs them over
    the live graph, and this glue only hands them its hydrate. One shape
    function for both hosts (§53.5) — the copies that lived here went. */
@@ -273,7 +273,7 @@ function placeLabel(graph, target) {
   const c = context();
   return String(c.__smpPlaceLabel(graph, target));
 }
-/* The cycle half of a landing line's facts (§356.4); the library half is
+/* The cycle half of a landing line's facts (§359.4); the library half is
    the server's own (lib/landing-facts.ts). */
 function landingFacts(graph) {
   const c = context();
@@ -306,7 +306,7 @@ function shape(graph, answers) {
   const c = context();
   return detach(c.__smpShapeG(graph, answers));
 }
-/* Whether a person may open a module whose grant is `area` (spec 054 §4.4),
+/* Whether a person may open a module whose grant is `area` (spec 056 §4.4),
    answered by the frozen product's own reader — the cell on the module's
    Access page and the door in front of the module cannot then disagree. */
 function mayOpen(graph, personKey, area) {

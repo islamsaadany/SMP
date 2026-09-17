@@ -421,9 +421,9 @@
          complete without the other, which is what a two-line conflict looks
          like when both edits are right. */
       { k:"access", ac:"c_access", grp:"access", mod:"strategy", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
-      /* THE LANDING LINE (§356.4, spec 054 §4.5): which of its declared
+      /* THE LANDING LINE (§359.4, spec 056 §4.5): which of its declared
          sentences Strategy says under its row on the client landing. The
-         office's by rule (`c_landing` is `area:"always"`, §356.4 in
+         office's by rule (`c_landing` is `area:"always"`, §359.4 in
          lib/rules.js) until spec 046 §4.4's per-module Access table lands
          (step 5). The sentences and their texts arrive on the served
          document (`data-landing`); over file:// the page says so. */
@@ -523,7 +523,7 @@
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* ── WHERE THE GEAR LANDS (§356, spec 054 §9.1) ─────────────────
+      /* ── WHERE THE GEAR LANDS (§359, spec 056 §9.1) ─────────────────
          Reporting cycle, `primary`, for everybody — which is where it landed
          before §108.10 put an Overview in front of it. THE OVERVIEW IS
          DELETED, NOT HIDDEN (§24), because both halves of it were already on
@@ -756,7 +756,7 @@
     /* The TAB has to still be one this viewer holds at that destination, or
        the page under it is an empty frame. The section is corrected further
        down by the renderer itself, so it is enough to hand it over. */
-    /* A SETUP PAGE IS LOOKED FOR IN EVERY RAIL (§356.2): the served router
+    /* A SETUP PAGE IS LOOKED FOR IN EVERY RAIL (§359.2): the served router
        has already scoped the document from the address, and a landing door
        written in the spine form names a page of ANOTHER rail on purpose —
        checked against the scoped list alone it would read as unreachable
@@ -1222,7 +1222,7 @@
       return d.k === "units" ? Object.assign({}, d, { label:L("unitword","bu") }) : d;
     });
   }
-  /* ── WHICH RAIL (§356.2, spec 054 §4.2, research R2) ────────────────
+  /* ── WHICH RAIL (§359.2, spec 056 §4.2, research R2) ────────────────
      The document carries a SCOPE: a module word (`strategy`, `insights`) for
      that module's own Setup, `client` for the pages that belong to no module,
      or nothing at all. It is written by the served router (shell/route.js)
@@ -1257,7 +1257,7 @@
   function setupDefs(){ return setupDefsFor(setupScope()); }
   /* THE PAGE DECIDES THE RAIL WHEN THE TWO DISAGREE. An address is a
      request — the landing's doors write `/<client>/setup/<page>` for every
-     page and let the shell resolve it (spec 054 plan, research R2) — so a
+     page and let the shell resolve it (spec 056 plan, research R2) — so a
      page asked for under the wrong scope moves the scope to the page's own
      module rather than being corrected to the first page of the wrong rail.
      Asked only while a scope is set at all: the offline copy resolves
@@ -1287,7 +1287,7 @@
     { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
     { k:"run",  label:"The organisation",  note:"The things being planned" },
     { k:"meas", label:"Measurement",       note:"What the numbers mean" },
-    /* ── §356.2: A DEF KNOWS ITS MODULE (spec 054 §4.3) ─────────────────
+    /* ── §359.2: A DEF KNOWS ITS MODULE (spec 056 §4.3) ─────────────────
        Every def above carries `mod` — the module that owns the page, or
        "client" for the pages that belong to no module (people, the org,
        branding, the knowledge base). Which rail a page is drawn in is
@@ -1295,10 +1295,10 @@
        never by a second list: a page cannot be in two rails or none.
        `access` is Roles & access, Strategy's own now — the matrix is
        Strategy's roles against Strategy's areas, and the seats stay on the
-       People register (spec 054 §4.4). `help` holds the knowledge base on
+       People register (spec 056 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
-    /* §356.4 (spec 054 §4.5): a module's own group — what it says about
+    /* §359.4 (spec 056 §4.5): a module's own group — what it says about
        itself on the client landing. Drawn on a module's rail and never the
        client's, because the def below carries the module. */
     { k:"landing", label:"The landing",     note:"What this module says on the landing" },
@@ -1511,10 +1511,10 @@
        filters — §108.5 capped that list to the window, and a search box that
        leaves the screen when you scroll to read your own results is a control
        below the fold by another road (§90). */
-    /* THE HEAD SAYS WHICH RAIL THIS IS (§356.2): a module's own word before
+    /* THE HEAD SAYS WHICH RAIL THIS IS (§359.2): a module's own word before
        "Setup", or "Client" for the pages that belong to no module — and that
        one carries the way back to the landing it was opened from, which is
-       the only way in it has (spec 054 §4.1). Unscoped (file://) it says
+       the only way in it has (spec 056 §4.1). Unscoped (file://) it says
        "Setup" and nothing more, exactly as it did. */
     var scope = setupScope();
     var headWord = scope === "client" ? "Client \u00b7 Setup"
@@ -1556,7 +1556,7 @@
        is a door behind a door, which §32 removed once already at the gate. The
        gear IS the door now; this function only answers whether there is
        anything behind it, and which page to land on. */
-    /* THE GEAR'S LIST IS THE MODULE'S (§356.2), whatever rail is on screen:
+    /* THE GEAR'S LIST IS THE MODULE'S (§359.2), whatever rail is on screen:
        from the client's rail the gear still opens Strategy's Setup, so the
        landing page is asked of the module's own defs and not of `setupDefs()`,
        which reads the scope of the moment. */
@@ -2070,7 +2070,7 @@
         if (current !== b.dataset.md) leaveModes();
         current = b.dataset.md;
         currentSub = b.dataset.ms;
-        /* THE GEAR IS THE MODULE'S DOOR (§356.2): pressed inside a module it
+        /* THE GEAR IS THE MODULE'S DOOR (§359.2): pressed inside a module it
            opens that module's Setup; over file:// there is no module word and
            the scope is cleared, which draws every page in one rail. */
         if (b.dataset.md === "setup") setScope(moduleWord());
@@ -6497,7 +6497,7 @@
         paint();
       });
     });
-    /* THE LANDING LINE'S PICK (§356.4): a radio is a select-shaped write, so
+    /* THE LANDING LINE'S PICK (§359.4): a radio is a select-shaped write, so
        it REPAINTS (§257.2a — the preview under the list must follow the
        pick), and the default DELETES the key, the last one leaving deleting
        the map (§50.6). The pick and the module are read off the control the
@@ -7133,7 +7133,7 @@
        retire without anything failing. It asks the two pages that want the
        answer by NAME, which is data rather than markup and cannot silently
        stop matching. It is a LIST rather than one name because the Overview
-       once joined it (§108.10); §356 deleted that page, and the shape is kept
+       once joined it (§108.10); §359 deleted that page, and the shape is kept
        so the next page that counts these facts is one key here and not a
        second gate. Gating on the register's markup would have given such a
        page a permanent, silent null, which draws no row: this exact fault
@@ -7213,10 +7213,10 @@
         paint();
       });
     }
-    /* ── AND WHAT THE INBOX IS HOLDING (§108.10, §356) ────────────────
+    /* ── AND WHAT THE INBOX IS HOLDING (§108.10, §359) ────────────────
        Asked once per visit, whenever the Setup rail is on screen for the
        office: the rail's Inbox pill is drawn from it (§108.15), and until
-       §356 the Overview was the one page that asked, so with that page gone
+       §359 the Overview was the one page that asked, so with that page gone
        the pill would have read nothing for ever — a count keyed on a page
        that no longer exists does not fail, it quietly draws nothing (§51.11).
        Never polled: the Inbox counts its own queue when it is open and the

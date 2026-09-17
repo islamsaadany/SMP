@@ -806,7 +806,7 @@
 }
 .clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
 .clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
-/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ────
+/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ────
    `data-client-settings` is written on the root by paint() and by nothing
    else (shell.html clientBar): the pages behind it belong to no module, so
    the module's navigation is not drawn over them.
@@ -831,7 +831,7 @@ html[data-client-settings] .viewer { display:none; }
    that NAMES the client you are in; here it names the act, so the second half
    would be saying something the first half already did (§87). */
 .clientback[data-saveclose] i{ display:none }
-/* THE CLIENT'S MARK (§359). Sized like the theme and font controls beside it
+/* THE CLIENT'S MARK (§362). Sized like the theme and font controls beside it
    rather than like the deck's lockup — this is a bar, and a mark taller than
    the line it sits on is what pushes the whole chrome down a row. `contain`,
    because a client's mark is whatever shape they uploaded and a stretched one

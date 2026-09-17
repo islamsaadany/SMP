@@ -393,7 +393,7 @@ def main():
             ck("the inbox's waiting count arrives and is drawn", False, "no row in 9s")
         ck("…with its noun", "2 conversations waiting" in pg.inner_text(".wacts"),
            pg.inner_text(".wacts")[:300])
-        # §356: the Overview is gone and the link names the page the gear
+        # §359: the Overview is gone and the link names the page the gear
         # opens now. REWRITTEN, never loosened (§218) — it still asserts the
         # office is offered Setup, by the page's own name.
         ck("the office's pages open Setup, on Reporting cycle",
@@ -636,7 +636,7 @@ def main():
         ctx.close()
 
         # ── 11 · THE CLIENT SETUP BLOCK AND YOUR MODULES ARE THE SERVED
-        #         LANDING'S, NEVER THIS ONE'S (spec 054 §4.1, §9.3) ─────────
+        #         LANDING'S, NEVER THIS ONE'S (spec 056 §4.1, §9.3) ─────────
         # The two blocks are drawn by the Next app's page from the seat the
         # door resolved and the client's registry row — neither of which the
         # frozen welcome can know over file://. Asserted as the OFFICE (the
@@ -655,7 +655,7 @@ def main():
         ck("the welcome is drawn for the office", d["drawn"], d)
         ck("...with no Client setup block", d["setup"] == 0, d)
         ck("...and no Your modules list", d["mods"] == 0, d)
-        ck("...and its first page is the Reporting cycle (§356)",
+        ck("...and its first page is the Reporting cycle (§359)",
            bool(d["pages"]) and d["pages"][0].startswith("Setup — Reporting cycle"), d["pages"])
         ctx.close()
 

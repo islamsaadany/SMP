@@ -1697,7 +1697,7 @@
      36px handle, not an icon strip — see the note in shell.html. */
   .setupsplit.shut { grid-template-columns:36px 1fr; }
   .setuprail .rhead { align-items:center; }
-  /* THE WAY BACK TO THE LANDING (§356.2, spec 054 §4.1). The client's own
+  /* THE WAY BACK TO THE LANDING (§359.2, spec 056 §4.1). The client's own
      rail is reached from the landing's Client setup block and from nowhere
      else — the gear opens the module you stand in — so it carries the one
      door out, as a row of its own under the head: inside the head it would
@@ -1707,7 +1707,7 @@
      is 4.45:1 on `--surface-2` (§38.5). */
   .setuprail .railback-row { flex:none; padding:6px 14px 7px; background:var(--surface);
                              border-bottom:1px solid var(--line); }
-  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§357.9) ──────────────────
+  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§360.9) ──────────────────
      Islam: *"a perosn can access the client settings from the module
      settings page but it should be at the bottom."* `Client settings ›` is
      a place to go ON to rather than the way back out, so it stops being the
@@ -2551,7 +2551,7 @@
   .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
-  /* ── AND HOW THE REGISTER IS MADE UP (spec 056 §3a, §359.2) ────────
+  /* ── AND HOW THE REGISTER IS MADE UP (spec 058 §3a, §362.2) ────────
      Its neighbour's treatment exactly, because it is its neighbour's kind of
      thing: a fact true on every healthy client, read as a value, with the
      detail on the hover. Drawn only where there IS a split (config-render),
@@ -2780,7 +2780,7 @@
 .ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
           color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }
 
-/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§359.2) ──
+/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§362.2) ──
    The client's own person, marked because a consultant's address matched
    theirs (§313.32): their role is the client's and stays editable, so this
    is a note beside it rather than a cell of its own — same treatment as the
@@ -2790,7 +2790,7 @@
          color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px;
          margin-left:6px; white-space:nowrap }
 
-/* ── THE LANDING LINE PAGE (§356.4, spec 054 §4.5) ────────────────────
+/* ── THE LANDING LINE PAGE (§359.4, spec 056 §4.5) ────────────────────
    The radio list and the preview are the signed-off mockup's own
    (design-mockups/module-setup/2026-09-15_setup-per-module.html, Insights'
    Setup frame) in the platform's tokens; the native radio is kept for the

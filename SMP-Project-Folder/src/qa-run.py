@@ -127,7 +127,7 @@ if os.environ.get("SMP_BASE"):
     def _open(self, **kw):
         ctx = self.context
         if id(ctx) not in _signed:
-            # THE WELCOME IS OFFERED AGAIN ON EVERY DEEP ADDRESS (§357), once
+            # THE WELCOME IS OFFERED AGAIN ON EVERY DEEP ADDRESS (§360), once
             # a browser session, and it stands the page behind it down — so a
             # check that presses the switcher under it waits thirty seconds
             # on a control the overlay holds inert. Every served context is
@@ -140,7 +140,7 @@ if os.environ.get("SMP_BASE"):
             self.wait_for_selector(".gate[data-hydrated]", state="attached", timeout=20000)
             self.fill("#user", _EMAIL); self.fill("#password", _PW)
             self.click("#loginForm button[type=submit]")
-            # §357: a sign-in lands INSIDE the first module the person may
+            # §360: a sign-in lands INSIDE the first module the person may
             # open (/raya-trade/strategy/…), never on a landing of its own —
             # the bare address is a redirect now, so the wait is for the
             # module's address, which is what the shell then rewrites.

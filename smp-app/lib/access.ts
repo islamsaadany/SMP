@@ -1,8 +1,8 @@
-/* ── MAY THIS PERSON OPEN A MODULE (§356.5, spec 054 §4.4, research R3) ──
+/* ── MAY THIS PERSON OPEN A MODULE (§359.5, spec 056 §4.4, research R3) ──
    The spine's gate in front of a module's address, and the one answer the
    landing's Your modules list and the switcher read too — a module shut to a
    role by its own address must be gone from that person's landing row and
-   their switcher (spec 054 §6.4), and three surfaces asking three ways is how
+   their switcher (spec 056 §6.4), and three surfaces asking three ways is how
    one of them comes to say yes while the door says no (§53.5).
 
    THREE RULES, IN ORDER, AND ONLY THE THIRD READS ANYTHING:

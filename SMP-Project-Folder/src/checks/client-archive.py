@@ -1,4 +1,4 @@
-"""Archiving a client, and deleting one (§323, spec 047 — and §357, spec 055,
+"""Archiving a client, and deleting one (§323, spec 047 — and §360, spec 057,
 which moved the archiving act INTO the client).
 
 Islam: "we need an option to remove the client" — then, of the two acts drawn
@@ -12,7 +12,7 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
   made against those bodies. It also HOLDS the state and flips it, so the
   round trip — the band, bring back, the grid — is driven rather than staged.
 
-· §357 MOVED THE ARCHIVE BLOCK OFF THIS PAGE (rewritten to the new truth,
+· §360 MOVED THE ARCHIVE BLOCK OFF THIS PAGE (rewritten to the new truth,
   never loosened — §218): a live client's Settings is a DOOR to the client's
   own Setup rail, and the Archiving block sits on that rail's first step,
   where only a served platform can draw it (client-setup.js archiveBlock
@@ -30,7 +30,7 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
 
 · DELETE IS REACHABLE FROM AN ARCHIVED CLIENT AND NOWHERE ELSE. That is the
   guard rather than a second confirmation — the archived card's Settings is
-  the one screen the console still draws for a client (§357), and it is
+  the one screen the console still draws for a client (§360), and it is
   asserted as the only place the control exists.
 
 · THE NAME MUST MATCH EXACTLY. A near miss keeps the button shut; the exact
@@ -138,14 +138,14 @@ class Stub(http.server.SimpleHTTPRequestHandler):
         if path == "/__admin0":
             ADMIN[0] = False
             self._send("{}", "application/json"); return
-        # THE STATE IS MADE (§255, §357): archiving is pressed inside the
+        # THE STATE IS MADE (§255, §360): archiving is pressed inside the
         # client now, on a served platform, so the stub is told.
         if path.startswith("/__archive/"):
             row = WORLD.get(path.split("/", 2)[2])
             if row and may_archive(row):
                 row["status"] = "retired"; row["archived_at"] = "2026-09-12T10:04:00.000Z"; row["archived_by"] = ME
             self._send("{}", "application/json"); return
-        # ONE MODULE, TWO HOSTS (§357): the page loads the client set-up
+        # ONE MODULE, TWO HOSTS (§360): the page loads the client set-up
         # module; the copy served is the one that belongs to the page under
         # test — smp-app/public's beside the generated page, the source
         # beside the root one.
@@ -168,7 +168,7 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(raw)
                 return
-        # EVERY OTHER ADDRESS IS A DOOR THE CONSOLE OPENED (§357): answered
+        # EVERY OTHER ADDRESS IS A DOOR THE CONSOLE OPENED (§360): answered
         # with a page naming the path, so a navigation is READ off
         # location.pathname rather than inferred.
         self._send('<!doctype html><html><head><title>landed</title></head>'
@@ -319,7 +319,7 @@ with sync_playwright() as p:
     ck("…so nothing on the page says Archived", "Archived" not in heads, heads)
 
     # ── 2 · A LIVE CLIENT'S SETTINGS IS A DOOR, AND NEITHER BLOCK IS HERE ─
-    # REWRITTEN TO THE NEW TRUTH (§218, §357): the Archiving block moved into
+    # REWRITTEN TO THE NEW TRUTH (§218, §360): the Archiving block moved into
     # the client's own Setup with the flow; on the console a live client's
     # Settings draws nothing and LEAVES.
     print("\n§2 · a live client's Settings")
@@ -397,7 +397,7 @@ with sync_playwright() as p:
        open_settings(pg, "demo") and path() == "/demo/setup", path())
 
     # ── 7 · DELETING, FROM AN ARCHIVED CLIENT'S SETTINGS ─────────────────
-    # REWRITTEN (§218, §357): the archived piece is drawn ON THIS PAGE by
+    # REWRITTEN (§218, §360): the archived piece is drawn ON THIS PAGE by
     # client-setup.js `mountArchived` — bring back, then delete — and it is
     # the one screen the console still draws for a client.
     print("\n§7 · deleting")

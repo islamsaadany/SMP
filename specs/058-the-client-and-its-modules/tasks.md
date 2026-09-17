@@ -40,7 +40,7 @@ from the SOURCES before its green run is believed (§276, §94.5).
 - [x] **T1.2** On a client-scoped document: no destination row, no Group
       dropdown, no Units | Functions, no module switcher. — and the viewer
       strip with them; the switcher stands ITSELF down, being built at load
-      (§359.2), off a scope the SERVER stamps.
+      (§362.2), off a scope the SERVER stamps.
 - [x] **T1.3** The header carries the client's mark, its name and **Save &
       close** — `#clientback` reworded and kept, not a new control.
 - [x] **T1.4** Regenerate `public/`; `generated-in-step` clear.
@@ -55,8 +55,8 @@ from the SOURCES before its green run is believed (§276, §94.5).
 - [x] **T1.6** Full `qa.py` at Next and over `file://`; `setup-per-module`,
       `client-setup`, `client-setup-outside`, `welcome`, `door-landing`,
       `shell`, `modules`.
-- [x] **T1.7** (§359.1, from Islam using it) **The way across runs both
-      ways.** §357.9 gave a module's rail a row to the client's and left the
+- [x] **T1.7** (§362.1, from Islam using it) **The way across runs both
+      ways.** §360.9 gave a module's rail a row to the client's and left the
       reverse unbuilt, so arriving by the card's *Settings* chip left somebody
       on a rail with no Roles & access on it and no door to the rail that has
       it (§61). One row per module at the foot of the client's rail, read off
@@ -181,7 +181,7 @@ from the SOURCES before its green run is believed (§276, §94.5).
 
 - [ ] **C1** Full sweep: `qa.py` at Next and `file://`; the frozen suite; the
       app's checks; `tsc` cold; `built-in-step`; `generated-in-step`.
-- [ ] **C2** Decisions log §359 written with the work (rule A7), and
+- [ ] **C2** Decisions log §362 written with the work (rule A7), and
       `IMPLEMENTATION_PROGRESS.md` in the same commit.
 - [ ] **C3** `sw.js` `SHELL` bumped and confirmed against `origin/main`
       immediately before the push (§91, §94.16).

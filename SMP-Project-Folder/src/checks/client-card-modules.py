@@ -197,7 +197,7 @@ def main():
         print("── 4 · Settings is still its own control")
         # REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted that Settings
         # "navigates nowhere", which was true while the set-up flow drew itself
-        # on this page — and §357 moved that flow INTO the client, so Settings
+        # on this page — and §360 moved that flow INTO the client, so Settings
         # became a DOOR: one press to /<client>/setup, with nothing drawn
         # between the card and it. The check was red on `main` from that merge
         # and nobody had come back (§51.11). What survives the decision is that
@@ -209,7 +209,7 @@ def main():
         pg.click('.ccard[data-client="raya-trade"] .ccfg')
         pg.wait_for_timeout(500)
         cfg_url = pg.url
-        check("pressing Settings is a door to the client's own Setup (§357)",
+        check("pressing Settings is a door to the client's own Setup (§360)",
               cfg_url.endswith("/raya-trade/setup"), cfg_url)
         check("…and it is not the module's door, which lands inside Strategy",
               not cfg_url.endswith("/raya-trade/strategy"), cfg_url)

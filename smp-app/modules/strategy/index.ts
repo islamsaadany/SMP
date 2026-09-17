@@ -10,7 +10,7 @@
    into another's folder, which is the boundary this round exists to make
    visible (§345 §3). It stays on the spine.
 
-   SETUP NO LONGER ARRIVES HERE (§356.2, spec 054): the route serves every
+   SETUP NO LONGER ARRIVES HERE (§359.2, spec 056): the route serves every
    Setup address — the client's and each module's own — as the spine's
    document itself, before this table is asked, so this module draws its
    pages and nothing about anybody's Setup. The intro round still does,

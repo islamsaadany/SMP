@@ -1040,7 +1040,7 @@
         r.type = "button";
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
-        /* THE LANDING LINE (§356.4): what the client's own landing says under
+        /* THE LANDING LINE (§359.4): what the client's own landing says under
            this module, from the same reader — then the card's own health
            word, when there is one. */
         if (m.line) r.appendChild(el("span", "mline", m.line));
@@ -1063,7 +1063,7 @@
     if (c.canConfig) {
       var cog = el("span", "ccfg", "Settings");
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
-      /* THE CLIENT'S OWN SETUP RAIL (§357, spec 055): one press into the
+      /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
          client at /<client>/setup, in its own chrome — Getting started at the
          top of that rail until it is done, the register and the organisation
          under it. Nothing between the card and the client. */
@@ -1143,7 +1143,7 @@
 
       var cog = el("span", "ccfg", "Settings");
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
-      /* ON THIS PAGE, not the client's (§357): an archived client's address
+      /* ON THIS PAGE, not the client's (§360): an archived client's address
          is closed, so its two acts — bringing it back and deleting it — are
          the one screen the console still draws for a client. */
       var open = function (e) { e.stopPropagation(); e.preventDefault(); drawArchived(c.key); };
@@ -1187,7 +1187,7 @@
     return b;
   }
 
-  /* ── SETTING A CLIENT UP IS INSIDE THE CLIENT NOW (§357, spec 055) ───
+  /* ── SETTING A CLIENT UP IS INSIDE THE CLIENT NOW (§360, spec 057) ───
      Islam: *"the client either we open a module or we go to the client
      settings page where we find a rail with the client settings"* — and, of
      which chrome draws that rail, "A": the client platform's own Setup.

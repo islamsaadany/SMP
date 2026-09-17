@@ -433,7 +433,7 @@ def main():
             pg.click("#nav button[data-tab='clients']")
             pg.wait_for_selector(".ccard .ccfg", timeout=8000)
             pg.click(".ccard[data-client='raya-trade'] .ccfg")
-            # §361: the team is a setup table now, not the flow's own narrow
+            # §364: the team is a setup table now, not the flow's own narrow
             # rows — the same two facts, addressed by the columns they sit in.
             pg.wait_for_selector("table.teamcfg", timeout=8000)
             team = pg.eval_on_selector_all("table.teamcfg td.tmmail", "els => els.map(e => e.textContent)")

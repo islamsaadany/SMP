@@ -1,4 +1,4 @@
-/* THE FACTS A LANDING LINE IS MADE OF (spec 054 §4.5, §356.4) — read ONCE
+/* THE FACTS A LANDING LINE IS MADE OF (spec 056 §4.5, §359.4) — read ONCE
    here for both places that draw a module's line, the console's card
    (lib/platform-api.ts) and the client's landing (lib/landing.ts), so the
    two cannot compute a sentence from two different readings (§53.5).

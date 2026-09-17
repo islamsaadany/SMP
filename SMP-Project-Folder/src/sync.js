@@ -738,7 +738,7 @@ var SYNC = (function () {
       var nameEl = document.getElementById("clientbackname");
       /* textContent, never innerHTML: a client's name is typed by a person. */
       if (nameEl) nameEl.textContent = person.clientName || clientSlug();
-      /* AND KEPT WHERE IT IS DRAWN (§359). This function runs once, at
+      /* AND KEPT WHERE IT IS DRAWN (§362). This function runs once, at
          hydration; the client's own settings reword this control to *Save &
          close* on every paint they are open (shell.html clientBar), so the
          name has to survive being written over — and it is remembered on the
@@ -1089,7 +1089,7 @@ var SYNC = (function () {
        never held. */
     graph: function () { return graph(); },
     /* THE GLOBALS REBOUND FROM A GRAPH, for the ONE thing that shapes a
-       client in the browser (client-setup.js, §357): the set-up flow shapes
+       client in the browser (client-setup.js, §360): the set-up flow shapes
        a COPY through the product's own minters and hands it here, so the
        page cannot hold a second idea of how a state becomes the platform. */
     hydrate: function (state) { hydrate(state); },

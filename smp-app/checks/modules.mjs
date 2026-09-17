@@ -1,5 +1,5 @@
 /* A MODULE PER CLIENT, AND EVERY MODULE SERVING ITSELF
-   (spec 046 §4.5, Islam 2026-09-12; §360).
+   (spec 046 §4.5, Islam 2026-09-12; §363).
 
    Four surfaces have to agree about which modules a client has — the card in
    Forefront's console, the address, the switcher and Setup — and they agree
@@ -13,7 +13,7 @@
      · §1–§4 RUN the rules and §2b RENDERS every built module's own page,
        with no database — each is asked for a tenant that cannot be reached,
        which is also how its honest degrade is proved;
-       (§5 was the trial module's page and went with that module at §360;
+       (§5 was the trial module's page and went with that module at §363;
        what it proved of ANY module's page is asserted in §2b and §2d, and
        what it proved of the trial alone — a greeting made of a register it
        could not read — went with its subject, said rather than mourned.)
@@ -61,7 +61,7 @@ const UNBUILT = MODULES.filter((k) => !MODULE_DEF[k].built);
 const BUILT_EXTRA = MODULES.filter((k) => MODULE_DEF[k].built && k !== DEFAULT_MODULE);
 /* A SECOND MODULE, FOUND RATHER THAN NAMED (§214.3, §218). Every line below
    that needs "a module the client has besides the default" used to spell
-   `"trial"`, so removing that module (§360) would have meant editing a dozen
+   `"trial"`, so removing that module (§363) would have meant editing a dozen
    assertions — and adding the next one means editing none. If there is no
    second built module at all the file says so once, here, rather than going
    quietly green over a list of one (§54.5, §113.8). */
@@ -236,7 +236,7 @@ check("...and what is not a colour is the shipped default, never painted as it c
 /* DERIVED, NEVER NAMED (§214.3): the modules that draw a DOCUMENT of their
    own are the built ones carrying a page.ts — Strategy serves the frozen
    shell and has none — so a module added tomorrow is measured the day it
-   lands and one removed takes its own line with it (§360). */
+   lands and one removed takes its own line with it (§363). */
 const OWN_PAGE = BUILT_EXTRA.filter((k) => existsSync(join(APP, "modules", k, "page.ts")));
 check("at least one module draws a document of its own, or the two below prove nothing",
   OWN_PAGE.length > 0, BUILT_EXTRA.join(", "));
@@ -276,12 +276,12 @@ for (const k of BUILT_EXTRA) {
 }
 check("an unbuilt module's word is not an address either",
   whereOf(["portfolio"], modulesFor(["portfolio"])).legacy, JSON.stringify(whereOf(["portfolio"], modulesFor(["portfolio"]))));
-check("the client's Setup is the spine's and carries no module (spec 054 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
-/* BOTH ENDS (§94.2, §356.2): a module's own Setup reads as that module with
+check("the client's Setup is the spine's and carries no module (spec 056 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
+/* BOTH ENDS (§94.2, §359.2): a module's own Setup reads as that module with
    `setup` inside it, so the route can serve it stamped with the module's
    word — a build that swallowed `setup` after any module word into the spine
    passes the line above alone. */
-check("…and a module's own Setup is that module's, with `setup` inside it (spec 054 §4.2)", same(whereOf(["strategy", "setup", "cycle"], HAVE_BOTH), { module: "strategy", rest: ["setup", "cycle"], legacy: false }));
+check("…and a module's own Setup is that module's, with `setup` inside it (spec 056 §4.2)", same(whereOf(["strategy", "setup", "cycle"], HAVE_BOTH), { module: "strategy", rest: ["setup", "cycle"], legacy: false }));
 check("the tour is the spine's too", whereOf(["tour"], HAVE_BOTH).module === null);
 /* A caller that forgets to say which modules the client has gets the NARROW
    answer, never every module — the safe direction (§42). */
@@ -304,7 +304,7 @@ check("a module with nothing to say says nothing, rather than a placeholder",
 check("every row carries the label the switcher and the drawer use",
   rows.every((r) => r.label === MODULE_DEF[r.key].label));
 
-console.log("\n4b · the landing line, declared and read (spec 054 §4.5, §356.4)");
+console.log("\n4b · the landing line, declared and read (spec 056 §4.5, §359.4)");
 /* EVERY MODULE DECLARES ITS SENTENCES, the first one the default, `none`
    among them so saying nothing is a choice — asked of every module rather
    than the two with sentences, or a third could declare nothing at all
@@ -346,7 +346,7 @@ check("the card's row carries the picked line, from the one reader",
    says nothing" — true of that module and not the rule. The rule is that an
    unchosen module says its FIRST DECLARED line, whatever that line is, which
    is what makes `none` a choice rather than an absence; asserted of every
-   built module, so the next one is covered and the one that went (§360) took
+   built module, so the next one is covered and the one that went (§363) took
    no assertion with it. */
 const UNPICKED = rowsL.filter((r) => r.key !== "strategy");
 check("…and a module with no pick carries its FIRST DECLARED line",
@@ -357,7 +357,7 @@ check("…and an unreadable client says nothing under every module",
 check("a client holding nothing besides the default gets one row", moduleRows(modulesFor([]), facts).length === 1);
 
 
-/* ── 4c · WHO MAY OPEN A MODULE (§356.5, spec 054 §4.4, research R3) ──────
+/* ── 4c · WHO MAY OPEN A MODULE (§359.5, spec 056 §4.4, research R3) ──────
    The gate in front of a module's address, driven as the PURE decision it
    is (decideOpen — the route's mayOpenModule is that with the graph read
    under the tenant) against the worked example's own graph, with NO
@@ -367,7 +367,7 @@ check("a client holding nothing besides the default gets one row", moduleRows(mo
    gated, and the landing's list drops a shut module's row while keeping the
    rest — or a gate that opened for everybody (`gate-open`) passes the
    presence half of all of it. */
-console.log("\n4c · who may open a module (§356.5)");
+console.log("\n4c · who may open a module (§359.5)");
 {
   const seed = JSON.parse(read("db/seed-state.json"));
   const graphWith = (mutate) => { const g = JSON.parse(JSON.stringify(seed)); mutate(g); return g; };
@@ -377,7 +377,7 @@ console.log("\n4c · who may open a module (§356.5)");
   check("Insights is opened by its first declared area, whose shipped state is view",
     !!area && area.key === "a_insights" && area.shipped === "view", JSON.stringify(area));
   /* DERIVED (§214.3): whichever modules declare no area — Strategy is the
-     only one today, and was not the only one yesterday (§360). */
+     only one today, and was not the only one yesterday (§363). */
   const NO_AREA = MODULES.filter((k) => !MODULE_DEF[k].areas.length);
   check("a module declaring no area is opened by nobody's grant",
     NO_AREA.length > 0 && NO_AREA.every((k) => openingArea(k) === null), NO_AREA.join(", "));
@@ -406,10 +406,10 @@ console.log("\n4c · who may open a module (§356.5)");
   /* STRATEGY'S MATRIX IS BYTE-IDENTICAL EITHER SIDE OF A MODULE'S GRANT */
   const strip = (g) => JSON.stringify(Object.fromEntries(Object.entries(g.access).map(([r, row]) => [r, Object.fromEntries(Object.entries(row).filter(([k]) => k !== "a_insights"))])));
   check("a module's grant touches no cell of Strategy's matrix", strip(shutOwner) === strip(seed) && strip(openOwner) === strip(seed));
-  /* THE CLIENT'S ADDRESS READS THE SAME ANSWER (§357, spec 055): there is
+  /* THE CLIENT'S ADDRESS READS THE SAME ANSWER (§360, spec 057): there is
      no landing any more — `/<client>` redirects into the first module the
      person may OPEN, read from openableModules, the one reader the switcher
-     and the card already read (§356.5). Asserted off the SOURCE (§6's
+     and the card already read (§359.5). Asserted off the SOURCE (§6's
      method): a page that only redirects has nothing to render, so the
      thing that can drift is which list it asks. REWRITTEN, never loosened
      (§218): this asserted landingShape()'s module rows, which went with
@@ -426,7 +426,7 @@ console.log("\n4c · who may open a module (§356.5)");
 }
 
 console.log("\n5 · what a module's own page owes (driven)");
-/* §360 REMOVED THE TRIAL MODULE AND THIS SECTION IS WHAT SURVIVED IT. That
+/* §363 REMOVED THE TRIAL MODULE AND THIS SECTION IS WHAT SURVIVED IT. That
    module existed to prove a module can be turned on for one client and
    opened, and its page was asserted here at length. Most of what was
    asserted was never about the trial at all — it was about ANY page a module
@@ -501,7 +501,7 @@ check("turning one on is gated on the same rule as the rest of the configuration
    draws neither control, and the server has to refuse both anyway. */
 check("the default cannot be switched off, however the request is spelt", /key === DEFAULT_MODULE\) return no\(400/.test(api));
 check("and a module that is not built cannot be switched on", /!MODULE_DEF\[key\]\.built\) return no\(400/.test(api));
-/* THE FLOW MOVED OUT OF THE CONSOLE (§357, spec 055): the client's set-up
+/* THE FLOW MOVED OUT OF THE CONSOLE (§360, spec 057): the client's set-up
    is one module, SMP-Project-Folder/src/client-setup.js, mounted by the
    frozen shell inside the platform's own Setup rail AND by the console for
    the two acts that stay there (creating a client; bringing an archived one
@@ -518,7 +518,7 @@ check("the set-up flow draws the band under the client's name", cs.includes('el(
 check("its rows are the team list's own, so the section adds no vocabulary", /mods[\s\S]{0,700}el\("div", "teamrow"\)/.test(cs));
 /* THE SUBJECT MOVED AND THE CHECK DID NOT (§354, §51.11), TWICE: §320.4
    drew this band under the client's name on the settings page, §322 carried
-   it onto the set-up flow's first step, and §357 carried the flow itself
+   it onto the set-up flow's first step, and §360 carried the flow itself
    into the platform. Scoped to that step's own text, because the flow builds
    several and an unscoped indexOf would compare it against another step's
    (§100.3, the trap the old note recorded). The band is on step ONE, the
@@ -567,7 +567,7 @@ const BODY = readFileSync(join(APP, "shell", "body.html"), "utf8");
 const ROUTE = readFileSync(join(APP, "shell", "route.js"), "utf8");
 const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
 /* THE FIXTURE IS THE PRODUCT'S OWN ANSWER (§53.5, §214.3): this was two
-   entries typed out, one of them a module that no longer exists (§360). It
+   entries typed out, one of them a module that no longer exists (§363). It
    is `moduleMenu()` now — the same function the server stamps the attribute
    from — so what is driven below is the list a real client would be sent,
    and a module added or removed changes this file nowhere. */
@@ -588,7 +588,7 @@ const srv = createServer((req, res) => {
      without this the falsification would break the product and leave the
      check measuring an unbroken stub (§100.3).
 
-     AND ONE MODULE IS A ONE-ENTRY LIST, NOT AN ABSENT ATTRIBUTE (§359.1).
+     AND ONE MODULE IS A ONE-ENTRY LIST, NOT AN ABSENT ATTRIBUTE (§362.1).
      The stub modelled the server as it was, where `data-modules` carried the
      switcher's rule in its name; it is the LIST now — stamped for every
      client, because the client's own Setup rail reads it to draw the way

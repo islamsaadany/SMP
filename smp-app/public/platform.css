@@ -809,7 +809,7 @@
 }
 .clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
 .clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
-/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ────
+/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ────
    `data-client-settings` is written on the root by paint() and by nothing
    else (shell.html clientBar): the pages behind it belong to no module, so
    the module's navigation is not drawn over them.
@@ -834,7 +834,7 @@ html[data-client-settings] .viewer { display:none; }
    that NAMES the client you are in; here it names the act, so the second half
    would be saying something the first half already did (§87). */
 .clientback[data-saveclose] i{ display:none }
-/* THE CLIENT'S MARK (§359). Sized like the theme and font controls beside it
+/* THE CLIENT'S MARK (§362). Sized like the theme and font controls beside it
    rather than like the deck's lockup — this is a bar, and a mark taller than
    the line it sits on is what pushes the whole chrome down a row. `contain`,
    because a client's mark is whatever shape they uploaded and a stretched one
@@ -3743,7 +3743,7 @@ html[data-client-settings] .viewer { display:none; }
      36px handle, not an icon strip — see the note in shell.html. */
   .setupsplit.shut { grid-template-columns:36px 1fr; }
   .setuprail .rhead { align-items:center; }
-  /* THE WAY BACK TO THE LANDING (§356.2, spec 054 §4.1). The client's own
+  /* THE WAY BACK TO THE LANDING (§359.2, spec 056 §4.1). The client's own
      rail is reached from the landing's Client setup block and from nowhere
      else — the gear opens the module you stand in — so it carries the one
      door out, as a row of its own under the head: inside the head it would
@@ -3753,7 +3753,7 @@ html[data-client-settings] .viewer { display:none; }
      is 4.45:1 on `--surface-2` (§38.5). */
   .setuprail .railback-row { flex:none; padding:6px 14px 7px; background:var(--surface);
                              border-bottom:1px solid var(--line); }
-  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§357.9) ──────────────────
+  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§360.9) ──────────────────
      Islam: *"a perosn can access the client settings from the module
      settings page but it should be at the bottom."* `Client settings ›` is
      a place to go ON to rather than the way back out, so it stops being the
@@ -4597,7 +4597,7 @@ html[data-client-settings] .viewer { display:none; }
   .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
-  /* ── AND HOW THE REGISTER IS MADE UP (spec 056 §3a, §359.2) ────────
+  /* ── AND HOW THE REGISTER IS MADE UP (spec 058 §3a, §362.2) ────────
      Its neighbour's treatment exactly, because it is its neighbour's kind of
      thing: a fact true on every healthy client, read as a value, with the
      detail on the hover. Drawn only where there IS a split (config-render),
@@ -4826,7 +4826,7 @@ html[data-client-settings] .viewer { display:none; }
 .ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
           color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }
 
-/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§359.2) ──
+/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§362.2) ──
    The client's own person, marked because a consultant's address matched
    theirs (§313.32): their role is the client's and stays editable, so this
    is a note beside it rather than a cell of its own — same treatment as the
@@ -4836,7 +4836,7 @@ html[data-client-settings] .viewer { display:none; }
          color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px;
          margin-left:6px; white-space:nowrap }
 
-/* ── THE LANDING LINE PAGE (§356.4, spec 054 §4.5) ────────────────────
+/* ── THE LANDING LINE PAGE (§359.4, spec 056 §4.5) ────────────────────
    The radio list and the preview are the signed-off mockup's own
    (design-mockups/module-setup/2026-09-15_setup-per-module.html, Insights'
    Setup frame) in the platform's tokens; the native radio is kept for the
@@ -9793,7 +9793,7 @@ body.presenting #buildband { display:none; }
 .bempty .bprim { font-size:13px; font-weight:700; border-radius:999px; padding:10px 20px; }
 .bempty .alt { font-size:13px; color:var(--ink-3); max-width:62ch; }
 
-/* ══ THE CLIENT SET-UP FLOW, IN THE PLATFORM'S OWN CHROME (§357, spec 055) ═══
+/* ══ THE CLIENT SET-UP FLOW, IN THE PLATFORM'S OWN CHROME (§360, spec 057) ═══
    The console's flow drew itself in the console's tokens (--ff, --amber);
    here the same markup — the wz* classes, verbatim — wears the platform's.
    Everything is scoped under .csetup, because half these words (.band,
@@ -9944,7 +9944,7 @@ body.presenting #buildband { display:none; }
 .csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
 .csetup .wzask .row { margin-top:12px; }
 
-/* ── the rail's strip (§357): Getting started, under the head ─────────── */
+/* ── the rail's strip (§360): Getting started, under the head ─────────── */
 .setuprail .railstart { flex:none; display:block; width:100%; text-align:left; cursor:pointer;
                         padding:9px 14px 10px; border:0; border-bottom:1px solid var(--line);
                         background:var(--surface); color:var(--ink); font:inherit; }
@@ -9954,7 +9954,7 @@ body.presenting #buildband { display:none; }
 .setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
 .setuprail .railback.railfwd { display:inline-block; }
 
-/* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§361) ═════════════════════════
+/* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§364) ═════════════════════════
    The shape is the setup tables' own — `.cfg > table.unitcfg` gives the navy
    heading row, one line per cell, the 150px cap and the ellipsis, all from
    `config.css` rather than from rules invented here (§53.5). What is left is

@@ -4976,13 +4976,13 @@ suite per feature.
 
 ## In flight
 
-**Spec 056 — the client and its modules (§359), on the branch, stage 1 of
+**Spec 056 — the client and its modules (§362), on the branch, stage 1 of
 six built 2026-09-16.** Islam, of the page the console's *Settings* chip
 opens: *"theclient settings shouldn't open the strategy banner in the top this
 is a client settings separate than any module"* — and, of the narrow answer
 first offered, *"you are trying to make a simple fix. let's discuss the
 architecture and who sees what it's not a simple fix."* Six stages, each
-shipping and proved on its own. **Stage 1 (§359)** is the reported fault: on a
+shipping and proved on its own. **Stage 1 (§362)** is the reported fault: on a
 client-scoped Setup document the chrome draws the client's mark, its name and
 *Save & close*, and draws none of the destination row, the Group dropdown, the
 Units | Functions switch, the gear or the viewer strip — one reader asked where
@@ -4990,11 +4990,11 @@ the chrome is drawn rather than per control (§53.5, §104.7), off a scope the
 SERVER stamps, because the module switcher is built once at load above the line
 that resolves the address.
 
-**§359.1, from Islam using it:** *"I ca't find the access page in the strategy
+**§362.1, from Islam using it:** *"I ca't find the access page in the strategy
 module … why did we remove it it's a very important table that can't be
 removed."* **Nothing was removed and the measurement says so** — Roles & access
 is on Strategy's rail under a group headed *Access*, and the matrix is
-byte-identical to `main`'s. What was missing is a DOOR: §357.9 gave a module's
+byte-identical to `main`'s. What was missing is a DOOR: §360.9 gave a module's
 rail a row across to the client's and left the reverse unbuilt, so arriving by
 the card left somebody on a rail with no Roles & access on it and no way to the
 rail that has it (§61). One row per module at the foot of the client's rail;
@@ -5008,11 +5008,11 @@ screen and the server both ask (§42) — for 33 people × 35 page keys × 21
 targets, with no browser and no database. Against `origin/main`: **UNMOVED**,
 every person opening exactly what they opened at every target across all 34
 shared keys, the only difference `c_landing` ADDED. The baseline is kept as
-`specs/056-the-client-and-its-modules/access-baseline.json` with the commit it
+`specs/058-the-client-and-its-modules/access-baseline.json` with the commit it
 came from.
 
-**Stage 2 (§359.2) — Forefront team is the store, the register is a reader
-(spec 056 §3a), built 2026-09-16.** Islam's own revision of his first
+**Stage 2 (§362.2) — Forefront team is the store, the register is a reader
+(spec 058 §3a), built 2026-09-16.** Islam's own revision of his first
 instruction: *"how about the forefront team is a separate view as you did but
 we keep them on the client list reading from the forefront team list."* A
 client-scoped Setup page under *Who*, above the register because it is the
@@ -5061,8 +5061,8 @@ untouched — the merge is Islam's word, on that merge.**
 
 ---
 
-**§361 — the Forefront team is a setup table, 2026-09-17.** Islam, of the page
-§359.2 shipped: *"forefront team is damaged it needs to be a table looks like
+**§364 — the Forefront team is a setup table, 2026-09-17.** Islam, of the page
+§362.2 shipped: *"forefront team is damaged it needs to be a table looks like
 the people register wiht the required columns."*
 
 **The cause is one class, and it was measured before anything was drawn.** The
@@ -5131,7 +5131,7 @@ untouched — the merge is Islam's word, on that merge.**
 
 ---
 
-**§360 — the trial module goes, 2026-09-17.** Islam: *"let's remove the trial
+**§363 — the trial module goes, 2026-09-17.** Islam: *"let's remove the trial
 module now."* It was built to prove a module could be turned on for one client
 and opened, and three real modules have proved it since — so it goes, and
 **nothing in any database has to be cleaned up**: a client's stored list is
@@ -5160,7 +5160,7 @@ still eight breaks and all eight still red.
 
 **A red neighbour was cleared on the way**, established as not this round's
 before it was touched: `client-card-modules.py` asserted that pressing a
-card's **Settings** *"navigates nowhere"*, which stopped being true when §357
+card's **Settings** *"navigates nowhere"*, which stopped being true when §360
 made it a door into the client's own Setup. Rewritten to the claim that
 survives — Settings is its own control, going to the client's Setup and not
 into a module — asserted at both ends.
@@ -5174,12 +5174,12 @@ cold. **`main` untouched — the merge is Islam's word, on that merge.**
 
 ---
 
-**Spec 055 — the client's settings live in the platform (§357), on the
-branch, built 2026-09-16.** Islam, of spec 054's landing beside the frozen
+**Spec 055 — the client's settings live in the platform (§360), on the
+branch, built 2026-09-16.** Islam, of spec 056's landing beside the frozen
 welcome: *"why do I have a welcome screen for the client overall, I just need
 a welcome screen for the strategy module for now"* — then **"A"** of three
 drawn (`design-mockups/client-settings-door/`). Reverses §315's landing and
-spec 054 §4.1's blocks: `/<client>` redirects into the first openable module
+spec 056 §4.1's blocks: `/<client>` redirects into the first openable module
 (`openableModules`), `Welcome.tsx` deleted, the frozen `welcome.js` offered
 again once a session. The console's card's *Settings* opens `/<client>/setup`
 — the client's own Setup rail with `‹ Back to the console`, a *Getting
@@ -5190,7 +5190,7 @@ with set-up* writes `GROUP.setupDone` and the page moves to the bottom as
 The console's flow CARRIED into `src/client-setup.js` (one function for three
 hosts: the platform page, Add a client, an archived card); `__smpShape` moved
 out of `frozen.cjs`'s glue so browser and server run one function; a row
-matched by NAME first and keeping its KEY (§357.3 — the first drive was
+matched by NAME first and keeping its KEY (§360.3 — the first drive was
 refused on a graph nobody had renamed); a refusal puts the rows back; the
 focus after + Add lands inside `render()`. Authoriser §41 673/0, red 4 / 3.
 Checks: `door-landing.mjs` 136/0 (red 3 / 18), `shell.mjs` 75/0,
@@ -5199,14 +5199,14 @@ NEW `client-setup.py` (red 39 / 9), `client-setup-outside.py` as the
 console's three doors (red 12), `client-archive.py` (red 2), `welcome.py` OK,
 `qa.py` file:// ERRORS none and at Next 33 / 243 / ERRORS none; `generated-in-step` and
 `built-in-step` clear; `tsc` clean. Two product faults found by the checks
-and fixed (§357.6 Add a client threw before it posted; §357.7 the bare
+and fixed (§360.6 Add a client threw before it posted; §360.7 the bare
 `/<client>/setup` landed on the entry page).
 
-**And two more from Islam pressing it (§357.9, 2026-09-16):** *"when I press
+**And two more from Islam pressing it (§360.9, 2026-09-16):** *"when I press
 continue it opens the clietn settings!! … the settings should open the
 settings directly … a perosn can access the client settings from the module
 settings page but it should be at the bottom."* The screen he pressed was
-right and the WELCOME was standing in front of it: §357 gave the frozen
+right and the WELCOME was standing in front of it: §360 gave the frozen
 overlay its job back and left no condition in its place, so it drew over the
 first client document of a session whatever address opened it, and *Continue*
 taking it down read as the press having opened the settings. It is the
@@ -5218,7 +5218,7 @@ words. And `Client settings ›` moved to the FOOT of a module's rail, after
 the list and outside it so it cannot scroll away, while `‹ Back to the
 console` stays at the top — one row LEAVES and the other goes ON. Red from
 the sources 1 / 1 / 2 / 1, the third printing his report verbatim. Two
-neighbours were red on the branch and both were §357's, established on a
+neighbours were red on the branch and both were §360's, established on a
 worktree built from HEAD (§303) and rewritten rather than loosened:
 `setup-search` folded the deleted `look` group, `setup-rail` asked the strip
 to be inside the list it is deliberately outside — and that rewrite found the
@@ -5227,18 +5227,18 @@ set-up is a strip, asserted now where the done state is made.
 **Waiting on Islam: the merge; and a look at step 1's modules band
 and archive block, which he has not seen there.** `main` untouched.
 
-**Spec 054 — Setup per module (§356), on the branch, all six steps built.**
+**Spec 054 — Setup per module (§359), on the branch, all six steps built.**
 Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
-Step 1: the Setup Overview is deleted (§356.1) — both its halves were
+Step 1: the Setup Overview is deleted (§359.1) — both its halves were
 already on the landing — and the gear lands on Reporting cycle;
 `checks/attention-rows.py` replaces the two Overview checks, 6 red on the
-build before. Step 2 (§356.2): every Setup def carries `mod`, the rail draws
+build before. Step 2 (§359.2): every Setup def carries `mod`, the rail draws
 by the document's scope (the served router writes it from the address, the
 gear from the module the document was served for, nothing over file://), the
 page decides the rail when the two disagree, Setup is the spine's own document
 for every module, and the client's rail carries the way back;
 `checks/setup-per-module.py` 0/0 on both halves, red 4 / 2 / 1 from the
-sources. Step 3 (§356.3): the landing draws a Client setup block for the
+sources. Step 3 (§359.3): the landing draws a Client setup block for the
 Super user's seat — six doors at their spine addresses, Access opening the
 register at its seat column and Email the email settings by a hash the shell
 now honours — and a Your modules list from the client's own registry row,
@@ -5246,14 +5246,14 @@ one row per module in MODULES' order; `door-landing.mjs` 70 → 87/0, red 2 / 2,
 `welcome.py` §11. Measuring it found step 1's carried reader still naming the
 deleted Overview, corrected. Waiting on Islam: whether the email settings
 move to Branding (the spec's table says so, the product holds them on
-Strategy's Send an email). Step 4 (§356.4): each module declares the
+Strategy's Send an email). Step 4 (§359.4): each module declares the
 sentences it can say about itself, the client picks one on the module's own
 Landing line page (Strategy's rail, a new group *The landing*), the pick
 rides the group under `SMPRules.LANDING_PICK` as an absence, and the
 landing's row, the console's card and the page's preview all read ONE server
 reader over facts read once for the viewer; `test-authorize.js` §40a red
 5 / 2, the round trip on a virgin Postgres, `modules.mjs` §4b,
-`door-landing.mjs` §8 red under `no-landing-stamp`. Step 5 (§356.5):
+`door-landing.mjs` §8 red under `no-landing-stamp`. Step 5 (§359.5):
 Insights' rail carries Roles & access and Landing line — the same keys as
 Strategy's, told apart by the scope — the access table is the roles down and
 the module's declared areas across, one eye per cell carrying the shipped
@@ -5266,7 +5266,7 @@ refusal is the legacy redirect (§320.5), the landing's Your modules filtered
 by the same answer; `modules.mjs` §4c 123/0 red 2, `door-landing.mjs` §9
 101 → 127/0 red under `gate-open` and `no-areas-stamp`. The check's first
 fixture wrote a seat a client login cannot hold (§100.3) and is corrected.
-Step 6 (§356.6), the sweep: `qa.py` at Next 33 viewers / 243 destinations /
+Step 6 (§359.6), the sweep: `qa.py` at Next 33 viewers / 243 destinations /
 ERRORS none and over `file://` 33 / 241 / ERRORS none; shell 74/0; door 127/0;
 modules 123/0; `built-in-step` all good, `generated-in-step` all clear; `sw.js`
 at `v5.08-module-access`, unique against `origin/main`. The count was

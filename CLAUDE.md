@@ -7711,7 +7711,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
 - **THE WAY ACROSS RUNS BOTH WAYS, AND ROLES &amp; ACCESS WAS NEVER REMOVED
-  (&sect;359.1):** Islam, having opened the client's settings from the
+  (&sect;362.1):** Islam, having opened the client's settings from the
   console's card &mdash; *"I ca't find the access page in the strategy module
   &hellip; why did we remove it it's a very important table that can't be
   removed. already it was stable."* **MEASURED BEFORE ANYTHING WAS PROPOSED,
@@ -7720,9 +7720,9 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   &mdash; `AREAS`, `ROLES` and `ACCESS_DEFAULTS` all diff clean, and the only
   change to the access keys since is one ADDED (`c_landing`). Two Setup pages
   did go and neither is an access page: Branding absorbed into *Getting
-  started*'s first step (&sect;357) and the Setup Overview into the landing's
-  own list (&sect;356), both recorded. **THE FAULT IS REAL AND IT IS A MISSING
-  DOOR**: &sect;357.9 gave a module's rail a row across to the client's and
+  started*'s first step (&sect;360) and the Setup Overview into the landing's
+  own list (&sect;359), both recorded. **THE FAULT IS REAL AND IT IS A MISSING
+  DOOR**: &sect;360.9 gave a module's rail a row across to the client's and
   left the reverse unbuilt, so arriving by the card's *Settings* chip left
   somebody on a rail with no Roles &amp; access on it AND no way to the rail
   that has it &mdash; the console, the client, the module, the gear
@@ -7740,7 +7740,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `shell/route.js`, the reader it belongs to, with the check's
   `switch-always` break moving with it. Same foot, same words, same direction
   mark: *Client settings &rsaquo;* and *Strategy settings &rsaquo;* are one row
-  pointing opposite ways, after the list rather than above it (&sect;357.9),
+  pointing opposite ways, after the list rather than above it (&sect;360.9),
   outside `.raillist` so it cannot scroll away (&sect;290.1).
   `checks/shell.mjs` &sect;3b gains six assertions, **both ends** &mdash; the
   rows asserted as an AGREEMENT with `data-modules` rather than against the
@@ -7787,7 +7787,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   all 34 shared keys &mdash; the only difference is `c_landing` ADDED, whose
   693 cells (33 &times; 21) are the whole of 8842 &rarr; 9535, which is the
   arithmetic corroborating it rather than a coincidence. The baseline is kept
-  as `specs/056-the-client-and-its-modules/access-baseline.json` **carrying
+  as `specs/058-the-client-and-its-modules/access-baseline.json` **carrying
   the commit it came from**, because a baseline with no provenance is a number
   somebody has to take on trust. Proved able to fail twice: a page moved to
   another area **635 red**, the Roles &amp; access page deleted **22 red**, the
@@ -7796,7 +7796,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   the tenant's STORED matrix overrides the defaults, so a break there is a
   break in a value nothing reads (&sect;54.5's shape: a green falsification run
   is indistinguishable from a working guard).
-- **THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (&sect;359, spec 056,
+- **THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (&sect;362, spec 058,
   stage 1 of six):** Islam, of the page the console's *Settings* chip opens
   &mdash; *"theclient settings shouldn't open the strategy banner in the top
   this is a client settings separate than any module"* &mdash; and, of the
@@ -7804,7 +7804,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   the architecture and who sees what it's not a simple fix."* **THE CAUSE IS
   ONE LINE AND IT IS NOT A MISTAKE**: `/<client>/setup` carries no module word,
   so the route stamps `DEFAULT_MODULE` and serves the frozen shell, whose
-  chrome is Strategy's navigation &mdash; true until &sect;356.2 gave every
+  chrome is Strategy's navigation &mdash; true until &sect;359.2 gave every
   Setup def a `mod` and seven of them said `client`, so the rail has been the
   client's own for a day and the bar above it had not been told. **ONE READER,
   ASKED WHERE THE CHROME IS DRAWN AND NEVER PER CONTROL** (&sect;53.5,
@@ -7824,7 +7824,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   that resolves the address, so it is the one piece of the chrome the frozen
   shell cannot repaint away &mdash; `lib/shell.ts` stamps the same answer the
   browser would compute (`w.module` is set only where the module word LED),
-  so there is no second answer, only an earlier one. **&sect;359.6 &mdash; AND
+  so there is no second answer, only an earlier one. **&sect;362.6 &mdash; AND
   THE ROW'S OWN PAINTER IS WHAT SETTLES WHICH PAGE YOU ARE ON**, so nothing
   reading the page may run before it: the first build had `paintUnits()` ask
   the question and return early, which needed the scope resolved first
@@ -7833,7 +7833,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   (&sect;94.6), so `/<client>/setup/cycle` landed on the client's FIRST page
   with the client's bar over it, the landing's own spine-form door broken.
   The row is BUILT and then HIDDEN, and the resolver sits immediately after
-  the painter that enables it. **&sect;359.5 &mdash; AND UNDOING A
+  the painter that enables it. **&sect;362.5 &mdash; AND UNDOING A
   FALSIFICATION WITH `git checkout` THREW THE WORK AWAY**, which
   &sect;343.9 records and which happened again with that section in hand:
   recovered from the BUILT file, a concatenation holding every block verbatim,
@@ -7841,7 +7841,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   passed against. Proved in `smp-app/checks/shell.mjs` &sect;3b &mdash; 20
   assertions, both ends every time, red **six ways**, five from the SOURCES
   (&sect;276) and one from the server stamp, whose third failure is the
-  switcher drawn where there is nothing to switch to. **&sect;359.8 &mdash; AND
+  switcher drawn where there is nothing to switch to. **&sect;362.8 &mdash; AND
   ANSWERING THE SITES THAT FAILED IS ANSWERING THE SITES YOU HAVE SEEN FAIL**:
   with the row and the strip stood down, a click or a select aimed at either
   waits thirty seconds and the whole sweep ends on *"waiting 500ms"*, a run
@@ -7849,7 +7849,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   sites, then a viewer pick after the template round trip, then the
   Units&nbsp;|&nbsp;Functions press &mdash; because the real cause is that TWO
   sections navigate to the client's settings (the client-rail walk, and the
-  Functions page, which is the client's since &sect;356.2) and everything after
+  Functions page, which is the client's since &sect;359.2) and everything after
   them inherits the page. **ONE HELPER, ASKED WHERE THE CHROME IS REACHED FOR**
   (`module_page()`, &sect;53.5): the wrapper every viewer pick already goes
   through, and `show_units()`; the call-site copies deleted (&sect;24), and
@@ -8048,7 +8048,7 @@ python3 checks/built-in-step.py # THE SHIPPED FILE IS IN STEP WITH ITS SOURCES
                                 # what `build.py` actually reads counts. Proved able to
                                 # fail both ways, one of them the reported state itself
 node smp-app/checks/modules.mjs # a module per client, and every module serving
-                                # itself (&sect;320.5, &sect;360) &mdash; `npm run
+                                # itself (&sect;320.5, &sect;363) &mdash; `npm run
                                 # check:modules`, no database. The list a client has
                                 # (order is MODULES', an unknown or UNBUILT word
                                 # dropped, the default always present), what may be
@@ -8062,7 +8062,7 @@ node smp-app/checks/modules.mjs # a module per client, and every module serving
                                 # client holding only the default offered no door it
                                 # does not have, no row of units, and nothing inline
                                 # needing a script the policy would silence. SINCE
-                                # &sect;360 IT NAMES NO MODULE AT ALL: the second
+                                # &sect;363 IT NAMES NO MODULE AT ALL: the second
                                 # module, the ones drawing a page of their own and the
                                 # ones declaring no area are all DERIVED from
                                 # MODULE_DEF, so removing the trial module edited a
@@ -9260,8 +9260,8 @@ python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and noth
                                 # has gone answers everything after it with None (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
-python3 checks/client-setup.py  # the set-up flow inside the platform (§357,
-                                # spec 055): the bare state MADE (§255), the
+python3 checks/client-setup.py  # the set-up flow inside the platform (§360,
+                                # spec 057): the bare state MADE (§255), the
                                 # Getting started strip agreeing with the flow's
                                 # own progress() and never a count, the flow
                                 # mounted from it, Branding's controls inside its
@@ -9275,7 +9275,7 @@ python3 checks/client-setup.py  # the set-up flow inside the platform (§357,
                                 # shape frozen under a plan. Red from the SOURCES
                                 # via SMP_BUILT (§276)
 python3 checks/attention-rows.py # what is waiting on the office — one list, three
-                                # readers, and no fourth (§356, spec 054 §9.1): the
+                                # readers, and no fourth (§359, spec 056 §9.1): the
                                 # Setup Overview is DELETED, and this file owns what
                                 # `setup-overview.py` owned minus the page. The list
                                 # agrees with its sources, the rail's pills are that
@@ -9290,7 +9290,7 @@ python3 checks/attention-rows.py # what is waiting on the office — one list, t
                                 # list is welcome.py §5. 6 red on the build before,
                                 # exactly the section that exists for the deletion
 python3 checks/setup-per-module.py # a def knows its module, and the rail draws
-                                # by it (§356.2, spec 054 §4.2–§4.3): every def
+                                # by it (§359.2, spec 056 §4.2–§4.3): every def
                                 # carries `mod`, the rail is the defs marked with
                                 # the document's scope — asserted as AGREEMENT, both
                                 # ends (a page absent from the wrong rail AND present
@@ -9611,8 +9611,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;361: the Forefront team is a setup
-table (spec 056 &sect;3a).** Islam, of the page &sect;359.2 shipped:
+*Last Updated: 2026-09-17 &mdash; **&sect;364: the Forefront team is a setup
+table (spec 058 &sect;3a).** Islam, of the page &sect;362.2 shipped:
 *"forefront team is damaged it needs to be a table looks like the people
 register wiht the required columns."* **THE CAUSE IS ONE CLASS, MEASURED
 BEFORE ANYTHING WAS DRAWN**: `mountTeam` wrapped the rows in **`.wzstep`**
@@ -9652,26 +9652,26 @@ page, `.wzwhy` inside the flow), because a class threaded through the renderer
 would be a flag (&sect;104.7). **AND THE ADD ROW ASKS ITS QUESTION IN FULL**
 &mdash; the flow's `flex:1 1 170px` clipped the second select to *"&hellip;as
 who on this client's registe"*, a control asking a question it cannot finish.
-**&sect;361.1 &mdash; THE SLACK HAS TO GO SOMEWHERE, AND SAYING WHICH COLUMN
+**&sect;364.1 &mdash; THE SLACK HAS TO GO SOMEWHERE, AND SAYING WHICH COLUMN
 TAKES IT IS MOST OF THE FIT**: two attempts, each measured rather than reasoned
 &mdash; `width:1%` on the last column, the register's own trick for its two
 frozen ones, **starved it to 10px at 1280 with its own word painted outside
 it**, and `width:100%` on the name **starved the middle three to nought** at
-the same width; left alone the leftover is shared. **&sect;361.2 &mdash; A
+the same width; left alone the leftover is shared. **&sect;364.2 &mdash; A
 COLUMN CAN NEVER BE NARROWER THAN THE WIDEST THING THAT WILL NOT WRAP**, and
 the sum of five of those measured **936px against an 825px pane at 1100**: the
 select **fills its cell** now (what `arrange.css` already does for a select in
 a setup table), so the register column costs its heading and nothing more, and
 the address caps at 220 &mdash; **both measured constants, with the check
 asserting the FIT rather than either of them** (&sect;122.5), fitting at
-**1325 / 1165 / 1005 / 825**. **&sect;361.3 &mdash; AND BELOW THAT NO CAP CAN
+**1325 / 1165 / 1005 / 825**. **&sect;364.3 &mdash; AND BELOW THAT NO CAP CAN
 MAKE IT FIT, SO THE BOX SCROLLS RATHER THAN CUTTING**: the five minima come to
 802px and a 1000px window gives the pane 725, so `overflow-x:auto` is the
 family's own answer (&sect;88), safe because this head is `position:static`
 like every other ordinary setup table's &mdash; &sect;135.2's damaged matrix
 was a STICKY head inside a scroll box &mdash; asserted at both ends, the box
 ABLE to scroll and the last column REACHABLE by scrolling it, with the page
-gaining none. **&sect;361.4 &mdash; A CELL THAT HOLDS A CONTROL HAS NO VALUE
+gaining none. **&sect;364.4 &mdash; A CELL THAT HOLDS A CONTROL HAS NO VALUE
 FOR A HOVER, AND THE FALSIFICATION IS WHAT SAID SO**: `clipTitles()` falls back
 to the cell, and a `<select>`'s text is **every option it holds**, so the first
 build's hover read *"a row of their ownMohamed Essam &middot;&hellip;"* &mdash;
@@ -9680,7 +9680,7 @@ load-bearing came back GREEN** (&sect;298.2, &sect;54.5), because giving the
 select its cell had meanwhile removed the overflow that produced the title at
 all, measured at every width from 1600 to 768; the mark is **DELETED** rather
 than kept as a line the next reader takes for load-bearing (&sect;24).
-**&sect;361.5 &mdash; AND AN EDIT THAT PRINTS NOTHING IS NOT AN EDIT THAT
+**&sect;364.5 &mdash; AND AN EDIT THAT PRINTS NOTHING IS NOT AN EDIT THAT
 HAPPENED**: two cap changes rode on a `replace` whose old text had moved, so
 three measurement rounds read the SAME numbers and called the cap ineffective
 &mdash; every break in the falsification harness **asserts it matched** before
@@ -9701,11 +9701,11 @@ bytes changed, so **`sw.js` is bumped** (&sect;91), confirmed against
 `origin/main` immediately before the push (&sect;94.16). **`main` untouched
 &mdash; the merge is Islam's word, on that merge.***
 
-*Earlier: 2026-09-17 &mdash; **&sect;360: the trial module goes, and what
+*Earlier: 2026-09-17 &mdash; **&sect;363: the trial module goes, and what
 its check proved stays.** Islam: *"let's remove the trial module now."*
 **IT WAS BUILT TO PROVE SOMETHING AND THE THING IS PROVED** &mdash; &sect;320.5
 made it deliberately not a product name to show a module could be turned on for
-one client and opened; &sect;354 then gave the route a table and &sect;355/&sect;356
+one client and opened; &sect;354 then gave the route a table and &sect;355/&sect;359
 gave Insights an area, a landing line and a Setup group, so what the trial
 demonstrated is demonstrated now by a module somebody bought. **THE STORED WORD
 NEEDS NO MIGRATION, AND THAT IS `modulesFor`'s OWN DESIGN**: an unknown or
@@ -9736,7 +9736,7 @@ here. **AND THE BREAK MOVES SO THE FALSIFICATION SURVIVES**:
 naming THIS client &mdash; and `check:modules:red` is still eight breaks, all
 eight still red. **AND A RED NEIGHBOUR WAS CLEARED, ESTABLISHED AS NOT THIS
 ROUND'S BEFORE IT WAS TOUCHED** (&sect;303, by diff): `client-card-modules.py`
-&sect;4 asserted a card's Settings *"navigates nowhere"*, true until &sect;357
+&sect;4 asserted a card's Settings *"navigates nowhere"*, true until &sect;360
 made it a door to `/<client>/setup` &mdash; REWRITTEN, never loosened
 (&sect;218), to the claim that survives, that Settings is its OWN control and
 not the module's, at both ends. **Verified**: modules **115/0** (from 93) red
@@ -9747,8 +9747,8 @@ and measured**, so **`sw.js` is NOT bumped** &mdash; &sect;91's trigger is the
 built file's bytes changing and they did not. **`main` untouched &mdash; the
 merge is Islam's word, on that merge.***
 
-*Earlier: 2026-09-16 &mdash; **&sect;359.2: Forefront team is the store
-and the register is a reader (spec 056 &sect;3a, stage 2 of six, on the
+*Earlier: 2026-09-16 &mdash; **&sect;362.2: Forefront team is the store
+and the register is a reader (spec 058 &sect;3a, stage 2 of six, on the
 branch).** Islam's own revision of his first instruction &mdash; *"how about
 the forefront team is a separate view as you did but we keep them on the
 client list reading from the forefront team list."* A client-scoped Setup page
@@ -9796,7 +9796,7 @@ back (&sect;255, &sect;94.2) and the count asserted as an AGREEMENT
 this client's REAL team and the register's consultants asserted as an
 agreement with it &mdash; red **2** from the sources; door-landing 140/0,
 modules 125/0, `built-in-step` all good, `tsc` clean, and **the access
-baseline still UNMOVED**. **&sect;359.3 &mdash; three of the new check's own
+baseline still UNMOVED**. **&sect;362.3 &mdash; three of the new check's own
 first failures were the CHECK**: it asked a ROW for a picker &sect;116 moved
 into the dialog and so reported an ordinary person as broken, it read a node
 `paint()` had replaced (&sect;222), and it **died rather than reporting**
@@ -9804,19 +9804,19 @@ into the dialog and so reported an ordinary person as broken, it read a node
 close selectors left the overlay up and intercepted every press after it.
 **`main` untouched &mdash; the merge is Islam's word, on that merge.***
 
-*Earlier the same day: **&sect;359.1: the way across runs both
+*Earlier the same day: **&sect;362.1: the way across runs both
 ways, and Roles &amp; access was never removed.** Islam, having opened the
 client's settings from the console's card &mdash; *"I ca't find the access page
 in the strategy module &hellip; why did we remove it it's a very important
 table that can't be removed."* **MEASURED, AND NOTHING WAS REMOVED**: the
 matrix is byte-identical to `main`'s, and what was missing is a DOOR &mdash;
-&sect;357.9 built the way across one way only, so arriving by the card's
+&sect;360.9 built the way across one way only, so arriving by the card's
 *Settings* chip left somebody on a rail with no Roles &amp; access on it and no
 route to the rail that has it. See the entry in the project context above, and
 **T0** beside it: `scripts/test-access-unmoved.js` asks the shared rule for 33
 people &times; 35 page keys &times; 21 targets and answers **UNMOVED** against
 `origin/main` &mdash; the baseline is
-`specs/056-the-client-and-its-modules/access-baseline.json`, carrying the
+`specs/058-the-client-and-its-modules/access-baseline.json`, carrying the
 commit it came from. **VERIFIED**: `shell.mjs` **103/0** (&sect;3b six new
 assertions, red **5** and **1** from the SOURCES), `modules` **125/0** with
 `switch-always` still red, `door-landing` **140/0**, `setup-per-module` green
@@ -9826,8 +9826,8 @@ clean cold, 673/0 authoriser and 140/0 change list, the access baseline
 `file://` and at Next both ERRORS none. **`main` untouched &mdash; the merge is
 Islam's word, on that merge.***
 
-*Earlier the same day: **&sect;359: the client's own settings wear the
-client's bar (spec 056, stage 1 of six).** The reported fault: `/<client>/setup`
+*Earlier the same day: **&sect;362: the client's own settings wear the
+client's bar (spec 058, stage 1 of six).** The reported fault: `/<client>/setup`
 carries no module word, so the route stamped `DEFAULT_MODULE` and served
 Strategy's navigation over the client's own pages. One reader asked where the
 chrome is drawn and never per control (&sect;53.5, &sect;104.7), off a scope the
@@ -9840,14 +9840,14 @@ authoriser and 140/0 change list with **no frozen `api/`, `lib/` or `db/` file
 touched at all** (read off the diff, &sect;172), and `qa.py` at Next **33
 viewers / 243 destinations / ERRORS none**.*
 
-*Earlier the same day: **&sect;357: the client's settings live in
-the platform, and Strategy's welcome is the welcome (spec 055, on the
-branch).** Islam, with two screenshots &mdash; spec 054's client landing on
+*Earlier the same day: **&sect;360: the client's settings live in
+the platform, and Strategy's welcome is the welcome (spec 057, on the
+branch).** Islam, with two screenshots &mdash; spec 056's client landing on
 the new stack beside the frozen welcome overlay inside Strategy: *"why do I
 have a welcome screen for the client overall, I just need a welcome screen for
 the strategy module for now."* **&sect;53.5 with a person standing between the
 two copies**: &sect;315 stood the frozen welcome down because the Next landing
-was going to be the welcome, and spec 054 &sect;4.1 put the client's settings
+was going to be the welcome, and spec 056 &sect;4.1 put the client's settings
 ON that landing because the spine needed a page outside every module &mdash;
 right on their own terms, and together a second welcome. **Both REVERSED and
 recorded as reversals** (Principle II); &sect;4.1's reason survives, and what
@@ -9870,7 +9870,7 @@ actions, the shape half committing on Next/Back/Done through the SAME
 `__smpShape` the server's `shapeClient` runs (moved out of `frozen.cjs`'s
 glue), over a copy of `SYNC.graph()` rebound with the newly exported
 `SYNC.hydrate`, the autosave carrying every row (&sect;210). **AND THE FIRST
-DRIVE WAS REFUSED ON A GRAPH NOBODY HAD RENAMED** (&sect;357.3):
+DRIVE WAS REFUSED ON A GRAPH NOBODY HAD RENAMED** (&sect;360.3):
 `addBusinessUnit` mints a key from the NAME and a client's stored keys were
 not always minted that way, so re-minting read three existing heads as
 dropped &mdash; a row is matched by its NAME first and keeps its KEY
@@ -9892,20 +9892,20 @@ copies (red 12); `client-archive.py` 0 on both (red 2); `welcome.py` OK;
 `qa.py` over `file://` ERRORS none and at Next 33 viewers / 243 destinations / ERRORS none; 673/0, 140/0, 69/0,
 `tsc` clean, `built-in-step` all good, `sw.js` `v5.09-client-setup` against
 main's `v5.05`. **AND TWO PRODUCT FAULTS, BOTH FOUND BY THE CHECKS AND BOTH
-IN THE CARRY** (&sect;357.6, &sect;357.7): *Add a client* THREW before it
+IN THE CARRY** (&sect;360.6, &sect;360.7): *Add a client* THREW before it
 posted, because the console's create piece holds no step state and the shared
 `say()` had just learned to hold the sentence in it (8 red, all one fault);
 and the bare `/<client>/setup` &mdash; what the card's Settings and a module
 rail's *Client settings &rsaquo;* both open &mdash; landed on the ENTRY PAGE,
 the rail served and never drawn, because `restoreWhere()` read a place with
 no page as nothing remembered (135/1 &rarr; 136/0).
-**&sect;357.9 &mdash; AN ADDRESS IS NOT A GREETING, AND THE WAY ACROSS SITS AT
+**&sect;360.9 &mdash; AN ADDRESS IS NOT A GREETING, AND THE WAY ACROSS SITS AT
 THE FOOT.** Islam, pressing *Settings* on the console's card: *"when I press
 continue it opens the clietn settings!! what is that?! the home of the strategy
 module belongs to the strategy module the settings should open the settings
 directly &hellip; a perosn can access the client settings from the module
 settings page but it should be at the bottom."* **THE SCREEN HE PRESSED WAS
-RIGHT AND THE WELCOME WAS STANDING IN FRONT OF IT**: &sect;357 gave the frozen
+RIGHT AND THE WELCOME WAS STANDING IN FRONT OF IT**: &sect;360 gave the frozen
 overlay its job back and removed the line that had been standing it down,
 leaving NO condition in its place &mdash; so it drew over the first client
 document of a session whatever address opened it, and its one control,
@@ -9947,10 +9947,10 @@ red**. **AND THE CHECK NEEDED A SESSION THAT HAD NOT BEEN GREETED**
 overlay here"* would pass on a build that draws one; &sect;7 signs in as the
 office, who lands on the CONSOLE and is greeted by nothing, so the first
 client document of that session is the one the press opens &mdash; Islam's own
-path. **TWO NEIGHBOURS WERE RED ON THE BRANCH AND BOTH WERE &sect;357's**,
+path. **TWO NEIGHBOURS WERE RED ON THE BRANCH AND BOTH WERE &sect;360's**,
 established on a worktree built from HEAD before anything here was blamed
 (&sect;303) and REWRITTEN, never loosened (&sect;218, &sect;214.3 for the
-seventh time): `setup-search` folded the `look` group &sect;357 DELETED, so it
+seventh time): `setup-search` folded the `look` group &sect;360 DELETED, so it
 **died on a selector matching nothing** rather than saying a decision had moved
 &mdash; it finds a group at runtime now, skipping the one holding the page you
 are on (&sect;47.7 refuses to fold that one, and the naive pick chose exactly
@@ -9974,8 +9974,8 @@ re-run on a fresh one, 76/0. **VERIFIED**: door 140/0, shell 76/0, modules
 `sw.js` `v5.10-settings-direct` against main's `v5.05`. **`main` untouched &mdash; the merge
 is Islam's word, on that merge.***
 
-*Earlier: 2026-09-15 &mdash; **&sect;356.6: the sweep, and the viewer a
-reload put back (spec 054 &sect;9, plan step 6, on the branch).** Step 6 of six,
+*Earlier: 2026-09-15 &mdash; **&sect;359.6: the sweep, and the viewer a
+reload put back (spec 056 &sect;9, plan step 6, on the branch).** Step 6 of six,
 and nothing in the product moves for it: `qa.py` at Next **33 viewers / 243
 destinations / ERRORS none**, over `file://` **33 / 241 / ERRORS none**, shell
 74/0, door 127/0, modules 123/0, `built-in-step` all good, `generated-in-step`
@@ -9985,7 +9985,7 @@ WAS ACCOUNTED FOR RATHER THAN QUOTED** (&sect;332's habit, third time): the
 first served run read 275, the office +2 and **exactly +8** on every other
 viewer holding a gear. Measured with a probe listing each stack's rail entries
 per viewer &mdash; the +2 is the Platform Inbox and History, drawn only over
-HTTP (&sect;97, &sect;262), and right; **the +8 was the SWEEP**: &sect;356.2's
+HTTP (&sect;97, &sect;262), and right; **the +8 was the SWEEP**: &sect;359.2's
 client-rail walk reaches the rail with a `goto`, and a reload lands on whoever
 signed in, so it walked the OFFICE's eight client pages under a CEO's name and
 printed *ok* (&sect;50.6, &sect;51.7, in the sweep that quotes both). Re-picked
@@ -9996,8 +9996,8 @@ count**, re-picking the office as the office being a switch to yourself whose
 &rarr; 243 = 241 + 2, exact. The built file is byte-identical. **All six steps
 built; the merge is Islam's word, on that merge.***
 
-*Earlier the same day: **&sect;356.5: Insights' Setup &mdash; Access,
-and a door that asks the table (spec 054 &sect;4.4, &sect;9.5, on the
+*Earlier the same day: **&sect;359.5: Insights' Setup &mdash; Access,
+and a door that asks the table (spec 056 &sect;4.4, &sect;9.5, on the
 branch).** Step 5 of six: Insights' rail carries **Roles &amp; access** and
 **Landing line**, the same keys as Strategy's told apart by the scope (a def is
 (mod, key), and `resolveSetupScope()` asks whether the sub exists ON THIS SCOPE
@@ -10023,8 +10023,8 @@ sits, &sect;100.3); a raw stringify over a table read with no `ORDER BY`
 (&sect;249.3); and a locator held across a closed page (&sect;215).
 `setup-per-module.py` &sect;1 rewritten never loosened, &sect;7c added.*
 
-*Earlier the same day: **&sect;356.4: the landing line &mdash;
-declared, chosen, stored, drawn in both places (spec 054 &sect;4.5, &sect;9.4,
+*Earlier the same day: **&sect;359.4: the landing line &mdash;
+declared, chosen, stored, drawn in both places (spec 056 &sect;4.5, &sect;9.4,
 on the branch).** Step 4 of six: each module DECLARES the sentences it can say
 about itself (`MODULE_DEF[k].lines`, key + label + example + a reader over
 facts), the client picks one on the module's own **Landing line** page &mdash;
@@ -10046,8 +10046,8 @@ two edits; round trip on a virgin Postgres; `modules.mjs` **108/0**;
 `setup-per-module.py` &sect;7 rewritten never loosened (it held the group list
 as a literal), &sect;7b offline; shell 74/0; in-step guards clear.*
 
-*Earlier the same day: **&sect;356.3: the landing's Client setup
-block and Your modules (spec 054 &sect;4.1, &sect;9.3, on the branch).**
+*Earlier the same day: **&sect;359.3: the landing's Client setup
+block and Your modules (spec 056 &sect;4.1, &sect;9.3, on the branch).**
 Step 3 of six: `lib/landing.ts`'s `landingShape()` answers both blocks and
 the page draws them &mdash; a Client setup block for the SEAT the door
 resolved (`super` only, absent for everybody else, &sect;61), six doors at
@@ -10065,8 +10065,8 @@ reported to Islam, not realigned. `door-landing.mjs` 70 &rarr; **87/0**, red
 The cost: at the frozen welcome's 336px side column three of the six
 descriptions wrap where the mockup drew them on one line.*
 
-*Earlier the same day: **&sect;356.2: a def knows its module, and
-the rail draws by it (spec 054 &sect;4.2&ndash;&sect;4.3, on the branch).**
+*Earlier the same day: **&sect;359.2: a def knows its module, and
+the rail draws by it (spec 056 &sect;4.2&ndash;&sect;4.3, on the branch).**
 Step 2 of six: every Setup def carries `mod`, the served router writes
 `data-setup-scope` from whether the module word LED the address and the gear
 writes the module the document was served for, the rail is that one field

@@ -71,7 +71,7 @@ const splitter = readFileSync(join(here, "..", "lib", "memory-split.cjs"), "utf8
 writeFileSync(join(here, "..", "public", "memory-split.js"),
   "/* COPIED by scripts/build-shell.mjs from lib/memory-split.cjs. Do not edit. */\n" + splitter);
 
-/* THE CLIENT SET-UP FLOW IS ONE FILE, TWO HOSTS (§357, spec 055): built
+/* THE CLIENT SET-UP FLOW IS ONE FILE, TWO HOSTS (§360, spec 057): built
    into shell.js above with the rest of the frozen sources, and served ALSO
    on its own at /client-setup.js for the console, which mounts the two
    pieces a client's own address cannot draw — creating a client and ending
@@ -82,7 +82,7 @@ writeFileSync(join(here, "..", "public", "client-setup.js"),
   readFileSync(join(SRC, "client-setup.js"), "utf8"));
 const pf = readFileSync(join(ROOT, "platform.html"), "utf8");
 if (!/<script src="\/client-setup\.js"><\/script>/.test(pf))
-  throw new Error("build-shell: platform.html no longer loads /client-setup.js — the console could neither add a client nor delete one (§357)");
+  throw new Error("build-shell: platform.html no longer loads /client-setup.js — the console could neither add a client nor delete one (§360)");
 if (!/<script src="\/memory-split\.js"><\/script>/.test(pf))
   throw new Error("build-shell: platform.html no longer loads /memory-split.js — the debrief would split nothing (spec 045)");
 const pm = /<script>\n([\s\S]*)<\/script>\s*<\/body>/.exec(pf);

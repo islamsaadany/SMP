@@ -17,7 +17,7 @@
 .holder form { margin-top: 28px; }
 .holder button { font: inherit; font-size: var(--fs-small); background: none; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 6px 12px; color: var(--ink-2); cursor: pointer; }
 
-/* ── THE CLIENT SETUP BLOCK AND YOUR MODULES (spec 054 §4.1) ──────────────
+/* ── THE CLIENT SETUP BLOCK AND YOUR MODULES (spec 056 §4.1) ──────────────
    The rows are the signed-off mockup's own (design-mockups/module-setup/
    2026-09-15_setup-per-module.html, the landing frame) in the platform's
    tokens: a key, a value or the module's line, and the way in on the right.

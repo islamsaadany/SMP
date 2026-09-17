@@ -17,7 +17,7 @@
    THE STYLESHEET IS THE ONE SIGNED OFF, verbatim from
    design-mockups/insights/2026-09-13_library-and-publishing-room.html (rule
    1c), which is itself the trial module's token block extended with a list
-   — that module is gone (§360) and its block lives on here. */
+   — that module is gone (§363) and its block lives on here. */
 import { createRequire } from "node:module";
 import { withTenant } from "../../lib/tenant.ts";
 import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
@@ -71,7 +71,7 @@ export function factLine(it: Item): string {
 }
 
 /* THE SWITCHER IS the trial module's, carried here when that module went
-   (§360), and the module menu behind it is
+   (§363), and the module menu behind it is
    lib/modules.ts's — a module that drew its own would be the second place a
    module's name is spelt (§53.5). It is also this page's way back. */
 function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
@@ -140,7 +140,7 @@ export async function insightsDocument(
   const category = normalizeCategories(ask.category)[0] || "";
   const bar = await barFor(tenantId);
   /* THE CHECK'S BREAK (constitution XVI), carried here from the trial module
-     when that module went (§360): a build whose page stopped naming THIS
+     when that module went (§363): a build whose page stopped naming THIS
      client — the one thing a module drawn per client has to get right, and
      the thing a static page would satisfy every other assertion about —
      must turn checks/modules.mjs red before its green run is believed

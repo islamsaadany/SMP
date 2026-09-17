@@ -5740,7 +5740,7 @@ function renderArchives(){
 }
 
 /* ══ WHAT IS WAITING ON THE OFFICE — the one list three surfaces read
-   (§108.10, §116.2, §148, §197.2; the page that first held it went at §356)
+   (§108.10, §116.2, §148, §197.2; the page that first held it went at §359)
    ════════════════════════════════════════════════════════════════════
    EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design: no
    row is allowed to compute anything; each declares a `count` that calls the
@@ -5762,7 +5762,7 @@ function renderArchives(){
    (attentionByPage below), and the home mark's gold (welcome.js waiting()).
    The Setup Overview was the fourth reader and the one the others made
    redundant — it drew this list beside the cycle column, and the landing
-   draws both (§148, §200) — so it is DELETED at §356 (spec 054 §9.1) rather
+   draws both (§148, §200) — so it is DELETED at §359 (spec 056 §9.1) rather
    than kept as a second drawing of the page the office lands on. */
 function attentionRows(){
   var rows = [
@@ -5796,7 +5796,7 @@ function attentionRows(){
    list rather than written out again — rename a page and this follows (§108.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
-  /* `setupDefsAll` since §356.2: a destination is named whichever rail holds
+  /* `setupDefsAll` since §359.2: a destination is named whichever rail holds
      it — a landing row for the register is drawn beside Strategy's rail. */
   var d = (typeof setupDefsAll === "function" ? setupDefsAll()
            : typeof setupDefs === "function" ? setupDefs() : []).filter(
@@ -8199,7 +8199,7 @@ function tkHead(id, allow){
     if (allow === false) sortable = false;
     /* `id` names a column an ADDRESS can point at — the landing's Access door
        opens the register at `#seat`, the Roles column, where the seats and
-       where each person sits already are (spec 054 §4.4; shell/route.js
+       where each person sits already are (spec 056 §4.4; shell/route.js
        scrolls to it). Only ever a bare word, on the unsortable branch. */
     var idA = id ? ' id="' + esc(id) + '"' : '';
     if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';

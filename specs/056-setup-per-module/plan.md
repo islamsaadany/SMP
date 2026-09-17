@@ -60,7 +60,7 @@ new check.
   heading, the Strategy Landing line page's choices) are the drawing's own
   shapes with the drawing's own words; anything beyond that stops for a
   mockup.
-- **II. The decisions document is the contract** — §356 is written in the
+- **II. The decisions document is the contract** — §359 is written in the
   commit that lands step 2, and the reversal of spec 046 §4.5/§4.4 is already
   recorded in that spec.
 - **III. Edit the sources, never the built file** — every frozen change is in
@@ -82,7 +82,7 @@ new check.
 ## Project Structure
 
 ```text
-specs/054-setup-per-module/
+specs/056-setup-per-module/
 ├── spec.md          # signed off
 ├── research.md      # R1–R5, the plan-stage answers
 ├── plan.md          # this file
@@ -163,7 +163,7 @@ stacks and is a commit of its own; nothing is pushed to `main`.
   `setup-header.py`, `setup-search.py`, `setup-sticky.py`,
   `setup-squeezed.py`, `access-header.py`, and `qa.py`'s Setup walk, which
   must now walk BOTH rails or half the product goes unswept (§51.11).
-- **§356 in the decisions log lands in this commit.**
+- **§359 in the decisions log lands in this commit.**
 
 ### Step 3 · The landing's Client setup block and Your modules (spec §9.3)
 

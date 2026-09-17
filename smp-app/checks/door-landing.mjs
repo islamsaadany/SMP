@@ -1,9 +1,9 @@
 /* The door, the way in, and the client's own Setup rail, driven in a real
-   browser (spec 043's first screen group; §34, §313.36, §148; §357, spec
+   browser (spec 043's first screen group; §34, §313.36, §148; §360, spec
    055). Starts the BUILT app on its own port against the dev tenant
    (scripts/dev-tenant.mjs), then walks: the root door plain and a client's
    door wearing its mark; a wrong password refused in the one sentence; a
-   sign-in REDIRECTED into the first module the person may open (§357 —
+   sign-in REDIRECTED into the first module the person may open (§360 —
    `/<client>` is a door and nothing more) where Strategy's own welcome
    (welcome.js) greets them with the rows the frozen readers give — asserted
    as AGREEMENT with lib/frozen.cjs's own answer read off the same graph,
@@ -14,7 +14,7 @@
    the office's holder; the refusals — a client user sent to their own client,
    the office refused a client that is not theirs identically to one that
    does not exist, a signed-out person sent to the client's own door; and
-   THE CLIENT'S SET-UP IN THE PLATFORM'S OWN SETUP RAIL (spec 055): the way
+   THE CLIENT'S SET-UP IN THE PLATFORM'S OWN SETUP RAIL (spec 057): the way
    back to the console, the Getting started strip that counts the data, the
    flow it opens, the registry written from step 1, Done with set-up stored
    as an absence and the strip becoming a row. Prints one line per property
@@ -24,8 +24,8 @@
      … --break=demo-role-key  (RED: the door reads §313.4's retired key — the demo 404s for the team, §337)
      … --break=other-role-key (RED: the same, one column over — the office's `open` never opens, §339)
      … --break=no-creator     (RED: making a client leaves its creator off its own team, §339)
-     … --break=no-landing-stamp (RED: the Setup document carries no declaration, so the Landing line page draws nothing to pick, §356.4)
-     … --break=done-dropped   (RED: Done with set-up is applied on screen and never reaches the store — lib/save.ts, §357)
+     … --break=no-landing-stamp (RED: the Setup document carries no declaration, so the Landing line page draws nothing to pick, §359.4)
+     … --break=done-dropped   (RED: Done with set-up is applied on screen and never reaches the store — lib/save.ts, §360)
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
    THE STRIP HAS NO ENV HOOK AND IS FALSIFIED FROM THE SOURCES (§276): the
@@ -44,7 +44,7 @@
    "Client settings ›" both point at — landed on the person's entry page
    (shell/route.js writes `{d:"setup", s:null}` and restoreWhere() read a
    place with no page as nothing remembered), measured RED here first and
-   fixed at §357.7: restoreWhere() lands a bare Setup place on the scoped
+   fixed at §360.7: restoreWhere() lands a bare Setup place on the scoped
    rail's own first page. The rest of the rail is driven from
    `/<client>/setup/people`.
 
@@ -119,8 +119,8 @@ if (!up) { console.log("FAIL  the app did not start"); server.kill(); process.ex
 if (shots) mkdirSync(shots, { recursive: true });
 
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
-/* THE WELCOME IS OFFERED AT THE MODULE'S HOME (§357) and NOT over a page
-   the address named (§357.9), once a browser session, and it covers the
+/* THE WELCOME IS OFFERED AT THE MODULE'S HOME (§360) and NOT over a page
+   the address named (§360.9), once a browser session, and it covers the
    viewport — so a context that presses anything under it waits thirty
    seconds on a click the overlay takes (§167.2's finding). Every context is
    born having seen it, through welcome.js's own memory, except the three
@@ -133,7 +133,7 @@ async function fresh(offerWelcome = false) {
 const shot = async (page, name) => { if (shots) await page.screenshot({ path: join(shots, name + ".png"), fullPage: true }); };
 const text = async (page, sel) => (await page.locator(sel).allTextContents()).map((s) => s.trim());
 const hydrated = (page) => page.waitForSelector(".gate[data-hydrated]", { state: "attached", timeout: 15000 });
-/* §357: a sign-in, a chosen password and a bounced door all END INSIDE THE
+/* §360: a sign-in, a chosen password and a bounced door all END INSIDE THE
    FIRST MODULE — `/<client>` is a redirect, and the shell then writes the
    place into the address — so "landed" is the module's prefix, never the
    bare client address a check used to wait for. */
@@ -183,7 +183,7 @@ await section("3 · sign in and land", async () => {
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await signIn(page, "mobhead@raya.example", "Raya-2026!");
   /* REWRITTEN, NEVER LOOSENED (§218): this waited for `/raya-trade` and read
-     a landing page there. §357 (spec 055) made that address a REDIRECT into
+     a landing page there. §360 (spec 057) made that address a REDIRECT into
      the first module the person may open, and the welcome is Strategy's own
      welcome.js overlay again — so what is asserted is the redirect itself
      (a request with no redirect-following, the Location read off it) and
@@ -195,13 +195,13 @@ await section("3 · sign in and land", async () => {
      and its way out is a button too, so there is no href to read — the
      press is asserted instead (§70). */
   await inModule(page);
-  check(page.url().startsWith(BASE + IN_MODULE), "a client user lands inside their first module (§94.6, §357)", page.url());
+  check(page.url().startsWith(BASE + IN_MODULE), "a client user lands inside their first module (§94.6, §360)", page.url());
   const hop = await page.request.get(BASE + "/raya-trade", { maxRedirects: 0 });
   const loc = hop.headers().location || "";
-  check(hop.status() >= 300 && hop.status() < 400 && /\/raya-trade\/strategy$/.test(loc), "…/<client> is a redirect into it and no page of its own (§357)", hop.status() + " " + loc);
-  check(loc.endsWith("/" + DEFAULT_MODULE), "…the first module the person may open — Strategy, for a unit head (openableModules, §356.5)", loc);
+  check(hop.status() >= 300 && hop.status() < 400 && /\/raya-trade\/strategy$/.test(loc), "…/<client> is a redirect into it and no page of its own (§360)", hop.status() + " " + loc);
+  check(loc.endsWith("/" + DEFAULT_MODULE), "…the first module the person may open — Strategy, for a unit head (openableModules, §359.5)", loc);
   await booted(page);
-  check((await page.locator(".welcomeover").count()) === 1, "Strategy's own welcome is offered there, once a session (welcome.js, §357)");
+  check((await page.locator(".welcomeover").count()) === 1, "Strategy's own welcome is offered there, once a session (welcome.js, §360)");
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + want.name, "the greeting names the register's first name", await page.locator(".welcomeover h2").textContent().catch(() => ""));
   const chips = await text(page, ".wwho .wchip:not(.wcycle)");
   const wantChips = want.chips.map((c) => c.role + (c.where ? " · " + c.where : ""));
@@ -267,7 +267,7 @@ await section("4 · a temporary password", async () => {
   await page.fill("#newpw2", "Strong-Pass1!");
   await page.selectOption("#whereSel", "mobile");
   await page.click("#changeForm button[type=submit]"); await inModule(page);
-  check(page.url().startsWith(BASE + IN_MODULE), "a chosen password lands where the sign-in would have — inside the module (§357)", page.url());
+  check(page.url().startsWith(BASE + IN_MODULE), "a chosen password lands where the sign-in would have — inside the module (§360)", page.url());
   const decl = (await owner.query("SELECT at FROM bu_declarations WHERE tenant_id = $1 AND person_key = 'own_mob'", [tenant.id])).rows[0];
   check(decl && decl.at === "mobile", "the declaration is stored (§56)", JSON.stringify(decl));
   const mc = (await owner.query("SELECT must_change FROM users WHERE email = 'own_mob@raya.example'")).rows[0];
@@ -304,7 +304,7 @@ await section("5 · the office", async () => {
   await page.waitForSelector(".ccard", { timeout: 15000 }).catch(() => {});
   check((await text(page, ".ccard h2")).includes("Raya Trade"), "…which lists the clients they may open");
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" }); await inModule(page); await booted(page);
-  check(page.url().startsWith(BASE + IN_MODULE), "the office opening a client is sent into its first module too (§357)", page.url());
+  check(page.url().startsWith(BASE + IN_MODULE), "the office opening a client is sent into its first module too (§360)", page.url());
   const officeWant = frozen.landing(graph, "smo");
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + officeWant.name, "the office's welcome on a client is theirs", await page.locator(".welcomeover h2").textContent().catch(() => ""));
   check((await page.locator(".wexit .wexlab").textContent().catch(() => "")).trim() === officeWant.continueWord, "…and continues to the group");
@@ -446,7 +446,7 @@ await section("6 · a client made here, opened by rule", async () => {
   const r = await page.request.get(BASE + "/api/" + made + "/state");
   check(r.status() === 200, "…and it OPENS, because a made client starts on the cleared graph (§67)", r.status());
   /* REWRITTEN, NEVER LOOSENED (§218): the landing that said "you are not on
-     X's register yet" is gone (§357) — `/<made>` is a redirect into the
+     X's register yet" is gone (§360) — `/<made>` is a redirect into the
      module, whose boot IS a state request. So what is asserted is that the
      client OPENS for its creator: the redirect lands, the shell boots, and
      no refusal is drawn. */
@@ -472,7 +472,7 @@ await section("6 · a client made here, opened by rule", async () => {
   await page.waitForURL(BASE + "/platform");
   const none = await withTenant(tid, async (c) => (await c.query("SELECT key FROM people")).rows.length);
   check(none === 0, "nobody on its register (the state MADE, §94.2)", none);
-  /* REWRITTEN (§218): the landing that only READ is gone (§357); opening the
+  /* REWRITTEN (§218): the landing that only READ is gone (§360); opening the
      client now goes straight into the module, whose boot asks the state API
      — and THAT is the request that places them (officeRow, §313.32; a reader
      that creates what it looked for is how a phantom change reaches every
@@ -487,8 +487,8 @@ await section("6 · a client made here, opened by rule", async () => {
 });
 
 
-/* ══ THE CLIENT'S SET-UP IN THE PLATFORM'S OWN SETUP RAIL (§357, spec 055) ══
-   REWRITTEN, NEVER LOOSENED (§218): this section asserted spec 054 §4.1's
+/* ══ THE CLIENT'S SET-UP IN THE PLATFORM'S OWN SETUP RAIL (§360, spec 057) ══
+   REWRITTEN, NEVER LOOSENED (§218): this section asserted spec 056 §4.1's
    Client setup block and Your modules list on the landing, both of which
    went with the landing. What replaced them is the client's own Setup rail
    at `/<client>/setup/…`, scope `client`: a way back to the console, the
@@ -504,7 +504,7 @@ await section("6 · a client made here, opened by rule", async () => {
    back in a finally. A module's rail is asserted to carry the reverse door
    and NO strip, and a client's own person asking for the client's rail is
    measured rather than assumed. */
-await section("7 · the client's set-up lives in its own Setup rail (§357, spec 055)", async () => {
+await section("7 · the client's set-up lives in its own Setup rail (§360, spec 057)", async () => {
   const goto = async (path) => { await page.goto(BASE + path, { waitUntil: "load" }); await booted(page); await page.waitForTimeout(700); };
   const readRail = () => page.evaluate(() => {
     const q = (s) => document.querySelector(s), t = (s) => (q(s) ? q(s).textContent.trim() : null);
@@ -513,7 +513,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
       scope: document.documentElement.getAttribute("data-setup-scope"), rail: !!q(".setuprail"),
       welcome: document.querySelectorAll(".welcomeover").length, deep: document.documentElement.getAttribute("data-deep-address"),
       back: q(".setuprail .railback") ? { text: t(".setuprail .railback"), href: q(".setuprail .railback").getAttribute("href"), fwd: q(".setuprail .railback").classList.contains("railfwd"),
-        /* AT THE FOOT (§357.9): after the list AND outside it, or it scrolls
+        /* AT THE FOOT (§360.9): after the list AND outside it, or it scrolls
            away with the rows it is meant to outlive (§108.5, §290.1). */
         foot: (function(){ const l = q(".setuprail .raillist"), a = q(".setuprail .railback");
           return !!l && !l.contains(a) && !!(l.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING); })() } : null,
@@ -530,7 +530,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
   const storedDone = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); return st.state && st.state.group ? st.state.group.setupDone : null; };
   const regName = async () => (await owner.query("SELECT name FROM tenants WHERE id = $1", [tenant.id])).rows[0].name;
   const nameBefore = await regName();
-  /* A CONTEXT THAT HAS NOT SEEN THE WELCOME (§357.9), which is the whole
+  /* A CONTEXT THAT HAS NOT SEEN THE WELCOME (§360.9), which is the whole
      subject of the first two assertions below: every other section is born
      having seen it, and over a stamped session "no overlay here" would pass
      on a build that draws it (§113.8). The office signs in to the CONSOLE,
@@ -546,19 +546,19 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
   await goto("/raya-trade/setup");
   let r = await readRail();
   check(r.d === "setup" && r.scope === "client" && r.rail, "the bare address the console's Settings and a module rail's Client settings › both point at opens the client's rail", JSON.stringify([r.path, r.d, r.s, r.scope]));
-  /* ISLAM'S OWN REPORT (§357.9): *"when I press continue it opens the clietn
+  /* ISLAM'S OWN REPORT (§360.9): *"when I press continue it opens the clietn
      settings!! … the settings should open the settings directly."* The
      welcome is Strategy's home screen, so it does not stand in front of a
      page somebody asked for by address. */
-  check(r.welcome === 0 && r.deep === "1", "…and the welcome is not drawn over it: Settings opens the settings directly (§357.9)", JSON.stringify([r.welcome, r.deep]));
+  check(r.welcome === 0 && r.deep === "1", "…and the welcome is not drawn over it: Settings opens the settings directly (§360.9)", JSON.stringify([r.welcome, r.deep]));
   /* THE RAIL, from a page that is the client's */
   await goto("/raya-trade/setup/people");
   r = await readRail();
   check(r.d === "setup" && r.s === "people" && r.scope === "client" && r.rail, "a client page opens in the client's rail (data-setup-scope client)", JSON.stringify([r.d, r.s, r.scope]));
-  check(!!r.back && !r.back.fwd && r.back.href === "/platform" && /Back to the console/.test(r.back.text), "…whose way back is the console (§357: there is no landing to go back to)", JSON.stringify(r.back));
-  /* AND IT STAYS AT THE TOP (§357.9): a back link is where this rail was
+  check(!!r.back && !r.back.fwd && r.back.href === "/platform" && /Back to the console/.test(r.back.text), "…whose way back is the console (§360: there is no landing to go back to)", JSON.stringify(r.back));
+  /* AND IT STAYS AT THE TOP (§360.9): a back link is where this rail was
      opened from, so it reads first — the other end of the foot row below. */
-  check(!!r.back && r.back.foot === false, "…at the TOP, above the list: it LEAVES, where Client settings › goes ON (§357.9)", JSON.stringify(r.back));
+  check(!!r.back && r.back.foot === false, "…at the TOP, above the list: it LEAVES, where Client settings › goes ON (§360.9)", JSON.stringify(r.back));
   check(!!r.strip && r.strip.go === "start" && r.strip.lab === "Getting started", "…and Getting started is a STRIP under the head while the set-up is not done", JSON.stringify(r.strip));
   check(!!r.strip && !!r.progress && r.strip.prog.startsWith(r.progress.done + " of " + r.progress.total + " done"), "…counting what the data holds an answer for — AGREEMENT with CLIENTSETUP.progress(), never a number (§94.8, §129)", JSON.stringify([r.strip && r.strip.prog, r.progress]));
   check(!!r.progress && r.progress.total === 7, "…out of the flow's seven steps", JSON.stringify(r.progress));
@@ -607,10 +607,10 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
   await goto("/raya-trade/strategy/setup/cycle");
   r = await readRail();
   check(r.scope === "strategy" && !!r.back && r.back.fwd && r.back.href === "/raya-trade/setup" && /Client settings/.test(r.back.text), "a module's rail carries Client settings › to the client's rail", JSON.stringify([r.scope, r.back]));
-  /* AT THE BOTTOM, HIS WORD (§357.9), and the client's own row is asserted
+  /* AT THE BOTTOM, HIS WORD (§360.9), and the client's own row is asserted
      at the TOP above — the two ends are the decision, so asserting one
      without the other would pass on a build that put both in one place. */
-  check(!!r.back && r.back.foot === true, "…at the FOOT of that rail, after the list and outside it (§357.9)", JSON.stringify(r.back));
+  check(!!r.back && r.back.foot === true, "…at the FOOT of that rail, after the list and outside it (§360.9)", JSON.stringify(r.back));
   check(r.strip === null && r.startRow === null && !r.groups.includes("client"), "…and neither the strip nor the row — the set-up is the client's, not the module's", JSON.stringify([r.strip, r.startRow, r.groups]));
   check(r.groups.includes("help"), "…while the Knowledge base is back on Strategy's rail (kb is mod strategy)", JSON.stringify(r.groups));
   /* AND THE OTHER END OF THE STAND-DOWN (§94.2): the same session, never
@@ -619,7 +619,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
      welcome altogether would pass every assertion above. */
   await page.goto(BASE + "/raya-trade/strategy", { waitUntil: "load" }); await booted(page); await page.waitForTimeout(900);
   r = await readRail();
-  check(r.welcome === 1 && r.deep === null, "…and at the module's own home the welcome is offered, in that same session (§357.9)", JSON.stringify([r.welcome, r.deep, r.path]));
+  check(r.welcome === 1 && r.deep === null, "…and at the module's own home the welcome is offered, in that same session (§360.9)", JSON.stringify([r.welcome, r.deep, r.path]));
   await ctx.close();
   /* A CLIENT'S OWN PERSON asking for the client's rail: MEASURED. The route
      gates a MODULE's address and serves the spine's pages to anybody the
@@ -639,7 +639,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§357, spec
 });
 
 
-/* ══ THE LANDING LINE (spec 054 §4.5, §356.4) ═══════════════════════════
+/* ══ THE LANDING LINE (spec 056 §4.5, §359.4) ═══════════════════════════
    Declared on the module, chosen on its Landing line page, stored on the
    group, drawn in two places — and the three must AGREE (§53.5): what the
    page offers is the document's own stamp, what the landing says is the
@@ -667,7 +667,7 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
   const stored = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); const g = st.state && st.state.group; return (g && g.landing) || null; };
   const cardLine = async () => { const j = await (await page.request.post(BASE + "/api/platform", { data: { action: "cards" } })).json();
     const c = (j.cards || []).find((x) => x.key === "raya-trade"); const m = c && (c.modules || []).find((x) => x.key === "strategy"); return m ? m.line : null; };
-  /* the landing's own row went with the landing (§357); what is left to
+  /* the landing's own row went with the landing (§360); what is left to
      agree are the Setup page and the console's card (§53.5) */
   await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
   let r = await readPage();
@@ -698,7 +698,7 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
     check(!!lit && lit[1] === true && r.prevKey === "waiting" && !!want && r.prev === want.text, "a pick lights its row and moves the preview to that line's text", JSON.stringify([r.radios, r.prev]));
     const st = await stored();
     check(!!st && st.strategy === "waiting", "…and is STORED on the group under the module's key (read off the server)", JSON.stringify(st));
-    check(want && (await cardLine()) === want.text, "…and the console's card now says that line (the landing's row went with the landing, §357)", JSON.stringify(await cardLine()));
+    check(want && (await cardLine()) === want.text, "…and the console's card now says that line (the landing's row went with the landing, §360)", JSON.stringify(await cardLine()));
     /* THE DEFAULT DELETES THE KEY */
     await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
     await pick("cycle");
@@ -713,7 +713,7 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
 });
 
 
-/* ══ INSIGHTS' OWN SETUP: ACCESS AND LANDING LINE (spec 054 §4.4, §356.5) ══
+/* ══ INSIGHTS' OWN SETUP: ACCESS AND LANDING LINE (spec 056 §4.4, §359.5) ══
    The first page that READS a module's declared areas. Driven through the
    REAL page as the Super user, the grant read back off the STORED graph
    through the tenant (§96), and then the door pressed by the people the
@@ -721,8 +721,8 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
    module's own address, its Setup address, its landing row and the switcher;
    opened again, served; the seat served over a shut row; the SMO team shown
    the table and given no button (§89). Strategy's matrix is asserted
-   byte-identical before and after (spec 054 §6.4). Put back in a finally. */
-await section("9 · Insights' Setup: Access writes a grant the door reads (spec 054 §4.4)", async () => {
+   byte-identical before and after (spec 056 §6.4). Put back in a finally. */
+await section("9 · Insights' Setup: Access writes a grant the door reads (spec 056 §4.4)", async () => {
   const booted = () => page.waitForFunction(() => !document.documentElement.classList.contains("booting"));
   const storedAccess = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); return (st.state && st.state.access) || null; };
   /* KEY ORDER IS NOT CONTENT (§249.3): the store reads access_grants with no
@@ -761,7 +761,7 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     let r = await readAccessPage();
     check(r.sub === "access" && r.scope === "insights", "Insights' Roles & access is on Insights' own rail — the same key as Strategy's, told apart by the scope", JSON.stringify([r.sub, r.scope]));
     check(/Insights/.test(r.head) && /Setup/.test(r.head), "…headed Insights · Setup", r.head);
-    check(r.rail.join(",") === "access,landing", "…whose rail is exactly Insights' two pages and none of Strategy's (spec 054 §4.2)", r.rail.join(","));
+    check(r.rail.join(",") === "access,landing", "…whose rail is exactly Insights' two pages and none of Strategy's (spec 056 §4.2)", r.rail.join(","));
     const decl = MODULE_DEF.insights.areas;
     check(!!r.areas && JSON.parse(r.areas).map((a) => a.key).join(",") === decl.map((a) => a.key).join(","), "the Setup document carries Insights' declared areas (data-areas)", r.areas);
     check(!r.none && r.cols.length === decl.length + 1 && r.cols[1] === decl[0].label, "the table has the module's areas as its columns — one, Insights — and never the no-stamp sentence", JSON.stringify(r.cols));
@@ -777,7 +777,7 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     let acc = await storedAccess();
     check(!!r.owner && !r.owner.on && r.owner.off, "pressing the lit eye turns the cell off — nothing lit IS the answer", JSON.stringify(r.owner));
     check(!!acc && acc.owner && acc.owner.a_insights === "none", "…and is STORED under the module's key on the owner row (read off the server through the tenant)", JSON.stringify(acc && acc.owner));
-    check(!!acc && stripIns(acc) === stripIns(accBefore), "Strategy's cells are byte-identical either side of it (spec 054 §6.4)", acc && stripIns(acc) === stripIns(accBefore) ? "" : stripIns(acc).slice(0, 200) + " vs " + stripIns(accBefore).slice(0, 200));
+    check(!!acc && stripIns(acc) === stripIns(accBefore), "Strategy's cells are byte-identical either side of it (spec 056 §6.4)", acc && stripIns(acc) === stripIns(accBefore) ? "" : stripIns(acc).slice(0, 200) + " vs " + stripIns(accBefore).slice(0, 200));
     await goSetup("/raya-trade/strategy/setup/access");
     const stratAfter = await page.evaluate(() => (document.querySelector("#panel .acgrid") || {}).innerHTML || "");
     check(stratAfter === stratBefore, "…and so is Strategy's own matrix as drawn", stratAfter.length + " vs " + stratBefore.length);
@@ -794,10 +794,10 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     await signIn(page, "mobhead@raya.example", "Raya-2026!");
     await inModule(page); await booted(page);
     /* REWRITTEN (§218): the landing's Your modules list went with the landing
-       (§357); the same answer (openableModules) is now the served document's
+       (§360); the same answer (openableModules) is now the served document's
        own `data-modules` stamp.
 
-       AND IT IS READ, NEVER INFERRED FROM ITS ABSENCE (§359.1). This fell
+       AND IT IS READ, NEVER INFERRED FROM ITS ABSENCE (§362.1). This fell
        back to `data-module` when the attribute was missing, because it was
        written only for a client holding more than one — it is stamped for
        every client now, so an absent one is a build that dropped it and must
@@ -805,7 +805,7 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
        the same thing a correct build says (§113.8). */
     const modsOf = () => page.evaluate(() => { const raw = document.documentElement.getAttribute("data-modules"); if (!raw) return null; try { return JSON.parse(raw).map((m) => m.key); } catch (e) { return null; } });
     let mods = await modsOf();
-    check(mods && mods.join(",") === "strategy", "shut, the BU owner's document offers Strategy alone — no Insights entry (spec 054 §6.4)", JSON.stringify(mods));
+    check(mods && mods.join(",") === "strategy", "shut, the BU owner's document offers Strategy alone — no Insights entry (spec 056 §6.4)", JSON.stringify(mods));
     await page.goto(BASE + "/raya-trade/insights", { waitUntil: "networkidle" });
     check(!page.url().startsWith(BASE + "/raya-trade/insights"), "…and Insights' own address is refused, exactly as an unknown module word is (§320.5)", page.url());
     await page.goto(BASE + "/raya-trade/insights/setup/access", { waitUntil: "networkidle" });

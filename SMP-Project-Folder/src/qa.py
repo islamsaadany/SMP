@@ -10,7 +10,7 @@ BASE=os.environ.get("SMP_BASE")
 def open_platform(pg):
     if not BASE:
         pg.goto(url); pg.wait_for_timeout(600); return
-    # §357: the welcome is offered again on every deep address, once a
+    # §360: the welcome is offered again on every deep address, once a
     # session, and stands the page behind it down — the sweep walks the page,
     # so it is born having seen it (welcome.py is the overlay's own check)
     pg.context.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1')}catch(e){}")
@@ -19,7 +19,7 @@ def open_platform(pg):
     pg.fill("#user", os.environ.get("SMP_QA_EMAIL","office@forefront.example"))
     pg.fill("#password", os.environ["SMP_QA_PASSWORD"])
     pg.click("#loginForm button[type=submit]")
-    # §357: a sign-in lands INSIDE the first module (the bare address is a
+    # §360: a sign-in lands INSIDE the first module (the bare address is a
     # redirect), so the wait is for the module's address
     pg.wait_for_url(re.compile(r"/raya-trade/(?!sign-in)[a-z]"), timeout=15000)
     pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
@@ -77,7 +77,7 @@ def go_top(pg, key):
     return True
 
 def module_page(pg):
-    """THE MODULE'S CHROME IS REACHED FOR WHERE THERE IS ONE (§359.8, spec 056).
+    """THE MODULE'S CHROME IS REACHED FOR WHERE THERE IS ONE (§362.8, spec 058).
     The client's own settings draw no navigation row and no viewer strip —
     those pages belong to no module — so a click or a select aimed at either
     waits thirty seconds and ends the whole sweep on "waiting 500ms", which is
@@ -85,7 +85,7 @@ def module_page(pg):
     verdict, never the count).
 
     TWO SECTIONS NAVIGATE THERE ON PURPOSE (the client-rail walk, and the
-    Functions page, which is the client's since §356.2), so the come-home step
+    Functions page, which is the client's since §359.2), so the come-home step
     lives where the chrome is REACHED FOR rather than in each of them — one
     answer, and a section that walks there tomorrow is covered the day it is
     written (§104.7). It fires only when the row is genuinely stood down, so a
@@ -175,7 +175,7 @@ with sync_playwright() as p:
         _sel = pg.select_option
         def _pick(selector, value, *a, **k):
             # AND THE PICK IS MADE WHERE THERE IS A CONTROL TO MAKE IT WITH
-            # (§359.8, spec 056). The client's own settings draw no viewer
+            # (§362.8, spec 058). The client's own settings draw no viewer
             # strip — those pages belong to no module and there is nobody to
             # look AS on them — so a select there waits thirty seconds and the
             # whole sweep ends on "waiting 500ms", which is a run that STOPPED
@@ -183,7 +183,7 @@ with sync_playwright() as p:
             # never the count).
             #
             # IT LIVES HERE RATHER THAN AT THE CALL SITE, which is what the
-            # first build got wrong: §359.7 answered the two sites that had
+            # first build got wrong: §362.7 answered the two sites that had
             # failed and there are THIRTEEN, so the sweep walked all 33 viewers
             # and then stopped at line 352 on the same timeout. One answer,
             # asked wherever a viewer is picked (§53.5) — and only where it
@@ -248,7 +248,7 @@ with sync_playwright() as p:
                                                   "els=>els.map(e=>e.dataset.sub2)"):
                     pg.click('.setuppane .secrow [data-sub2="%s"]'%k2); pg.wait_for_timeout(160)
                 seen+=1
-            # TWO RAILS WHERE THE APP IS SERVED (356.2, spec 054): the gear
+            # TWO RAILS WHERE THE APP IS SERVED (356.2, spec 056): the gear
             # opens the module's own Setup, and the CLIENT'S pages — people,
             # the organisation, branding, the knowledge base — sit on a rail
             # of their own reached from the landing. Over file:// there is one
@@ -265,7 +265,7 @@ with sync_playwright() as p:
             # client's rail draws nothing for is sent off it by the router
             # (356.2), so there is nothing to walk and nothing is counted.
             if BASE:
-                # AND THERE IS NO PICK TO MAKE HERE ANY MORE (359, spec 056).
+                # AND THERE IS NO PICK TO MAKE HERE ANY MORE (359, spec 058).
                 # The client's own settings belong to no module, so they draw
                 # no viewer strip — there is nobody to look AS on a page the
                 # two Forefront seats hold alone — and a reload lands on
@@ -448,7 +448,7 @@ with sync_playwright() as p:
         errs.append("DELETE: a function that has been reported against is not "
                     "refused on that ground (%r)" % dele["blocked"].get("merchandising"))
     # Through the page, in edit mode, the way a person does it. FUNCTIONS IS
-    # THE CLIENT'S PAGE (356.2, spec 054): served, the gear opens the
+    # THE CLIENT'S PAGE (356.2, spec 056): served, the gear opens the
     # module's rail and this page is on the other one, reached by its own
     # address; over file:// the one rail holds everything and the gear is the
     # way in.

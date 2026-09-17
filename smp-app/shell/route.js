@@ -18,7 +18,7 @@
    054 §4.1) — both of which kindOf() and placeOf() already had to name.
 
    SETUP HAS TWO ADDRESSES AND THE MODULE WORD IS WHAT TELLS THEM APART
-   (§356.2, spec 054 §4.2, research R2). `/<client>/<module>/setup/<page>` is
+   (§359.2, spec 056 §4.2, research R2). `/<client>/<module>/setup/<page>` is
    that module's own Setup and `/<client>/setup/<page>` is the client's; the
    difference is written onto the document as `data-setup-scope` (the module
    word, or `client`) and the frozen shell draws its rail from that one
@@ -41,12 +41,12 @@
    the landing writes with). Modes are never in the address (§63.1, §173:
    edit, reporting and arrange are dropped on every navigation).
 
-   The shell's welcome overlay is THE welcome again (§357, spec 055): the
+   The shell's welcome overlay is THE welcome again (§360, spec 057): the
    landing at /<client> was stood in for it while it existed (§315) and is a
    redirect into the module now, so welcome.js offers itself once a session
    exactly as it does over file://, and the house mark is its way back — over
    the module's HOME, and never over a page somebody asked for by address
-   (§357.9: `data-deep-address`, below). */
+   (§360.9: `data-deep-address`, below). */
 (function () {
   "use strict";
   var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,48})(?:\/(.*))?$/);
@@ -88,7 +88,7 @@
     var kind = kindOf(d), s = null, c = null;
     if (kind === "setup") {
       s = seg[i] || null; setScope(led ? MODULE : "client");
-      /* A HASH ON A SETUP ADDRESS NAMES A PLACE ON THE PAGE (spec 054 §4.1):
+      /* A HASH ON A SETUP ADDRESS NAMES A PLACE ON THE PAGE (spec 056 §4.1):
          the landing's Email door opens `setup/send#comms`, the third section
          of that page, and its Access door opens `setup/people#seat`, a column
          of the register. It rides as the section (`c`): the shell's own
@@ -114,7 +114,7 @@
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
     /* A module's Setup carries its module word and the client's carries
-       none (spec 054 §4.2): the scope the shell resolved decides, so a door
+       none (spec 056 §4.2): the scope the shell resolved decides, so a door
        pressed at `/<client>/setup/cycle` is rewritten to Strategy's own
        address once the page has said whose it is. Unscoped — which the
        served shell never is inside Setup — the spine form is written. */
@@ -160,7 +160,7 @@
      wired exactly once, at load — no second handler on a repaint (§24, §47.2).
      A press navigates, so the menu never has to be closed afterwards. */
   (function modules() {
-    /* NOT ON THE CLIENT'S OWN SETTINGS (§359, spec 056). Those pages belong
+    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058). Those pages belong
        to no module, so a switcher there offers a way out of somewhere you are
        not — and it is the one piece of the chrome the frozen shell cannot
        stand down, because this builds it once at load and nothing repaints
@@ -174,7 +174,7 @@
     var list;
     try { list = JSON.parse(raw); } catch (e) { return; }
     /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
-       rather than on the attribute (§359.1): `data-modules` is the list of
+       rather than on the attribute (§362.1): `data-modules` is the list of
        modules this person may open, read by this and by the client's own
        Setup rail, which draws a row per module whatever the count. The
        check's break forces the switcher on for a client holding one. */
@@ -233,7 +233,7 @@
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
   try {
-    /* NOTHING MARKS THE WELCOME SEEN HERE ANY MORE (§357): that line stood
+    /* NOTHING MARKS THE WELCOME SEEN HERE ANY MORE (§360): that line stood
        the frozen overlay down while the Next landing was the welcome, and
        with the landing gone it was the reason the house mark opened a screen
        nobody had been offered. welcome.js keeps its own memory. */
@@ -241,7 +241,7 @@
       var rem = { d: here.d, s: here.s };
       if (here.c && here.s) rem.c = here.c;
       sessionStorage.setItem("smp.where", JSON.stringify(rem));
-      /* AND AN ADDRESS IS NOT A GREETING EITHER (§357.9). Islam, pressing
+      /* AND AN ADDRESS IS NOT A GREETING EITHER (§360.9). Islam, pressing
          the console card's *Settings* and meeting the welcome overlay over
          the client's own Setup rail: *"when I press continue it opens the
          clietn settings!! … the settings should open the settings
@@ -262,7 +262,7 @@
          it would stand the welcome down for the session on the strength of
          one address, and `welcome.js`'s own memory would then be answering
          two questions instead of one (§107). Written the way the scope is
-         (spec 054 §4.2) because route.js is the only file that knows the
+         (spec 056 §4.2) because route.js is the only file that knows the
          address's shape; read by `WELCOME.offer()` alone, never by
          `WELCOME.open()` — pressing the house mark IS the ask (§185). */
       document.documentElement.setAttribute("data-deep-address", "1");
@@ -278,7 +278,7 @@
          replay button still starts one. */
       sessionStorage.setItem("smp.tour.later", "1");
     }
-    /* AND `/<client>/tour` IS AN ADDRESS TOO (§357.9), which is why the
+    /* AND `/<client>/tour` IS AN ADDRESS TOO (§360.9), which is why the
        welcome's stand-down is asked of it as well and the two lines above are
        not: nothing is remembered for a tour address (it is not a place) and
        the tour's own mark must certainly not be set on it — but somebody who

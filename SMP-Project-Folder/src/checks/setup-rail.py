@@ -134,7 +134,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(200)
     # THE ROWS OF THE LIST, AND THE ENTRIES OUTSIDE IT, ARE TWO CLAIMS
     # (§214.3, §218). This asked every `[data-setupgo]` in the rail to be
-    # findable INSIDE `.raillist`, which was every one of them until §357 drew
+    # findable INSIDE `.raillist`, which was every one of them until §360 drew
     # Getting started as a STRIP above the search — so it reported
     # `start:missing`, which reads as an unreachable entry and is the opposite
     # of the truth: the strip is outside the list precisely so it cannot
@@ -156,7 +156,7 @@ with sync_playwright() as p:
             if (b.height<=0 || b.top<0 || b.bottom>innerHeight+1) bad.push(k+':offscreen');
           }
           return bad;}""", outside)
-        ck("an entry drawn outside the list is on screen without scrolling (the strip, §357)",
+        ck("an entry drawn outside the list is on screen without scrolling (the strip, §360)",
            not off, (outside, off))
     else:
         # SAID, NEVER SKIPPED IN SILENCE (§54.5): whether there is an entry
@@ -283,9 +283,9 @@ with sync_playwright() as p:
         "e=>e.filter(x=>x.scrollWidth>x.clientWidth+1).map(x=>x.textContent.trim())")
     ck("no label is clipped", not clipped, clipped)
 
-    print("\n── 6 · People & access is in the order the mockup drew (§120.3), less the roles (§356.2) ──")
+    print("\n── 6 · People & access is in the order the mockup drew (§120.3), less the roles (§359.2) ──")
     # REWRITTEN, NEVER LOOSENED (§218): §120.3 drew register · roles · BU list,
-    # and spec 054 §4.4 moved Roles & access into a group of its own, the
+    # and spec 056 §4.4 moved Roles & access into a group of its own, the
     # module's Access — so the People group keeps the mockup's order of what
     # it still holds, and the roles are asserted at their NEW home rather than
     # dropped from the assertion (§94.2: a build that lost the page passes
@@ -294,13 +294,13 @@ with sync_playwright() as p:
       const h=[...document.querySelectorAll('.setuprail .rgroup')]
                 .find(x=>/People/.test(x.textContent));
       return [...h.nextElementSibling.querySelectorAll('.rilab')].map(x=>x.textContent.trim());}""")
-    # AND REWRITTEN AGAIN FOR §359.2 (§218, §214.3 — the tenth time), because
-    # spec 056 §3a put *Forefront team* in this group ABOVE the register: it is
+    # AND REWRITTEN AGAIN FOR §362.2 (§218, §214.3 — the tenth time), because
+    # spec 058 §3a put *Forefront team* in this group ABOVE the register: it is
     # the STORE the register reads, and §9's pattern puts a store before its
     # reader. Asserted as the two claims that survive the decision rather than
     # as a list of three, which the next entry would falsify again — the store
     # leads, and the two the mockup drew keep the order it drew them in.
-    ck("the store leads its reader (§9, spec 056 §3a)",
+    ck("the store leads its reader (§9, spec 058 §3a)",
        order[:1] == ["Forefront team"], order)
     ck("...and then the mockup's own pair, in its order (§120.3)",
        [x for x in order if x != "Forefront team"] == ["People register", "Official BU list"], order)

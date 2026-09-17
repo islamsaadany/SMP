@@ -1,4 +1,4 @@
-"""THE FOREFRONT TEAM AS A SETUP TABLE (§361).
+"""THE FOREFRONT TEAM AS A SETUP TABLE (§364).
 
 qa-run: own-server — §316.1. The page is `client-setup.js`'s own renderer
 over the client's record, and that record is `/api/platform`'s: over file://
@@ -9,7 +9,7 @@ make the two states this file needs — a client whose register came across,
 and one the platform built — and the only way to read what a press WROTE
 rather than what it drew (§96).
 
-Islam, of the page §359.2 shipped: *"forefront team is damaged it needs to
+Islam, of the page §362.2 shipped: *"forefront team is damaged it needs to
 be a table looks like the people register wiht the required columns."*
 
 WHAT IS ASSERTED IS THE PROBLEM, NEVER THE LAYOUT (§94.8):

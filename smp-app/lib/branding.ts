@@ -2,7 +2,7 @@
    Branding is the SPINE's: a module should get the client's colour for
    nothing, the way it gets the door and the session. It was not getting it.
    Measured before this file existed: Strategy wore the tenant's bar colour,
-   the trial module read it for itself (that module is gone; §360), and
+   the trial module read it for itself (that module is gone; §363), and
    Insights carried the shipped navy
    as a literal with no reader at all — so a client who had chosen a colour
    saw it on two screens out of three, and the third was not wrong by accident

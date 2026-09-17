@@ -5842,7 +5842,7 @@ var ACCESS_DEFAULTS = SMPRules.ACCESS_DEFAULTS;
 var STATE_RANK = SMPRules.STATE_RANK;
 function grantFor(roleKey, areaKey){ return SMPRules.grantFor(world(), roleKey, areaKey); }
 
-/* ── A MODULE'S OWN GRANT (§356.5, spec 054 §4.4; spec 046 §4.4) ─────
+/* ── A MODULE'S OWN GRANT (§359.5, spec 056 §4.4; spec 046 §4.4) ─────
    A module other than Strategy declares its areas beside its label
    (smp-app/lib/modules.ts MODULE_DEF) and NOT in lib/rules.js — the carried
    rules copy is asserted identical to the frozen one (§335), and a module's
@@ -5877,7 +5877,7 @@ function setModuleGrant(roleKey, areaKey, state, shipped){
 /* MAY THIS PERSON OPEN A MODULE — the most generous answer across the roles
    they hold, the floor included (rolesOrFloor's own shape, §93: somebody on
    the register holding nothing is judged on the Everyone-else row). Asked by
-   the served route before a module is drawn (spec 054 research R3); the seat
+   the served route before a module is drawn (spec 056 research R3); the seat
    is decided before this is asked and never here. */
 function mayOpenModuleArea(person, area){
   if (!person) return (area.shipped || "none") !== "none";

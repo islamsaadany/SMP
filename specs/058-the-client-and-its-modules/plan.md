@@ -21,7 +21,7 @@ Read before planning, so the stages name real work rather than a shape.
   filled by `paintUnits()` with the Group dropdown, the Units | Functions
   switch and the row of destinations. `paint()` draws it on every page.
 - **The document already knows it is the client's.** `data-setup-scope="client"`
-  is written by `shell/route.js` and read by `setupScope()` (spec 054). The
+  is written by `shell/route.js` and read by `setupScope()` (spec 056). The
   rail already filters on it; nothing else does.
 - **The way back already exists.** `#clientback` is the control that returns
   to the console, drawn only where there is a door to go back to. It is *Save
@@ -29,7 +29,7 @@ Read before planning, so the stages name real work rather than a shape.
 - **Setup already has no tab row** — `paint()` hides `#tabrow` and `#secrow`
   for `current === "setup"`. So the only thing to stand down is the
   destination row and the two controls beside it.
-- **A def already carries its module** (`mod`, spec 054). Seven say `client`.
+- **A def already carries its module** (`mod`, spec 056). Seven say `client`.
   Moving a page between rails is one field.
 - **The team list already exists**, inside the set-up flow
   (`src/client-setup.js`, `setTeam` on `/api/platform`).
@@ -93,7 +93,7 @@ human is both a consultant and a client person.
 person still fully editable; the count agreeing with the two lists rather than
 a typed number (§94.8); and the register's search finding a consultant.
 
-**§361 — the page, after Islam used it.** *"forefront team is damaged it needs
+**§364 — the page, after Islam used it.** *"forefront team is damaged it needs
 to be a table looks like the people register wiht the required columns."*
 Stage 2 gave the page the flow's own renderer whole, and the flow's own
 DRESS with it: the rows were wrapped in the class the step chips wear — a pill
@@ -136,7 +136,7 @@ does not.
 - The page becomes **client-scoped**, and **Strategy's rail keeps an entry
   that opens the same page** — one store, two doors, never a copy that syncs.
 - **A module declares its own words**, the way it already declares its areas
-  and its landing lines (spec 054 §4.4, §4.5). The page shows the client's own
+  and its landing lines (spec 056 §4.4, §4.5). The page shows the client's own
   words always, and a module's only where the client has that module.
 
 **Proved by:** a word set from one door reading from the other; a client
@@ -190,7 +190,7 @@ history asserted NOT to contain another module's rows.
 - **A client-side administrator.** §4 is the decision to revisit if that is
   ever wanted; today the client's settings are the two seats'.
 - **A client-level home screen.** `/<client>` stays a door into the first
-  module somebody may open (spec 055).
+  module somebody may open (spec 057).
 - **Moving the register row of a consultant.** Named in stage 2 as the thing
   that must not be done here.
 - **Strategy's *Running the cycle* group** being tools in a settings rail

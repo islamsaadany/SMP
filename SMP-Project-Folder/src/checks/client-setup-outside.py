@@ -1,4 +1,4 @@
-"""The console's three doors (§357, spec 055).
+"""The console's three doors (§360, spec 057).
 
 Islam: "the client either we open a module or we go to the client settings
 page where we find a rail with the client settings" — and, of which chrome
@@ -256,7 +256,7 @@ with sync_playwright() as p:
     console(pg)
 
     # ── 1 · THE FLOW IS GONE FROM THE CONSOLE, AND THE MODULE IS LOADED ──
-    print("\n§1 · the flow is not on the console any more (§357)")
+    print("\n§1 · the flow is not on the console any more (§360)")
     ck("the console's source holds no step flow — no STEPS, no step rail, no Back/Next foot",
        not re.search(r"\bvar STEPS\b|wzstep|data-wzback|data-wznext", SRC),
        [m.group(0) for m in re.finditer(r"\bvar STEPS\b|wzstep|data-wzback|data-wznext", SRC)][:4])

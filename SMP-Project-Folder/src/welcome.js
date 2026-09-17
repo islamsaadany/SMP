@@ -538,7 +538,7 @@ var WELCOME = (function(){
       pages.appendChild(a);
     }
     if (office) {
-      /* Reporting cycle since §356: the Overview this once opened is gone,
+      /* Reporting cycle since §359: the Overview this once opened is gone,
          and its rows are the list ABOVE this one. */
       pageLink("Setup — Reporting cycle", "", function(){ goSetup("cycle"); });
       pageLink("The group — Performance", "", function(){ goGroup(); });
@@ -709,7 +709,7 @@ var WELCOME = (function(){
      session, a projector, already seen this session. Returns whether it
      took the screen, because land() offers the tour only when it did not —
      two docks drawn over one page would fight for every click (§118). */
-  /* AND AN ADDRESS IS NOT A GREETING (§357.9). Islam, pressing *Settings*
+  /* AND AN ADDRESS IS NOT A GREETING (§360.9). Islam, pressing *Settings*
      on the console's card and landing on the client's Setup rail with this
      screen over it: *"when I press continue it opens the clietn settings!!
      … the settings should open the settings directly."* The screen

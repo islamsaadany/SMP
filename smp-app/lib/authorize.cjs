@@ -122,7 +122,7 @@ const TOP_SETUP = ["people", "unitRoles", "access", "labels", "bands",
                    "koWeights", "companies", "companyKeys", "functionKeys"];
 const TOP_CYCLE = ["history", "priorCycle", "archives"];
 
-/* THE PLATFORM'S OWN MARKS ON A REGISTER ROW (spec 056 §3a.1). `forefront`
+/* THE PLATFORM'S OWN MARKS ON A REGISTER ROW (spec 058 §3a.1). `forefront`
    says a consultant answers to this row and `ffrow` says the platform built
    it; both are facts about the OUTER platform, so neither is the client's to
    set or clear from inside — named once here, where the one comparison that
@@ -293,7 +293,7 @@ function collect(stored, incoming, w) {
          here. Removing the row is still `destroy` above — a client taking an
          office person off their own register is a real act, and a loud one. */
       /* ── AND IT IS THE MINT THAT IS REFUSED, NEVER THE MARK
-         (spec 056 §3a.1, §359.2) ───────────────────────────────
+         (spec 058 §3a.1, §362.2) ───────────────────────────────
          The paragraph above is right about a row the PLATFORM BUILT and was
          being applied to one it merely marked. `officeRow` adopts a row by
          EMAIL when a consultant's address matches exactly one active person
@@ -491,13 +491,13 @@ function collect(stored, incoming, w) {
      control that is not there (§16.7). */
   if (!same(sg[PRESENT_MINS], ig[PRESENT_MINS]))
     add("presentMins", null, "how long each subject has to present");
-  /* §356.4: which sentence a module says on the landing. SETUP, the office's
+  /* §359.4: which sentence a module says on the landing. SETUP, the office's
      — it is what the platform says on the office's behalf, like the knowledge
      base's answers — and NAMED so a refusal sends somebody to the module's
      own Landing line page rather than reporting "the group's landing". */
   if (!same(sg[LANDING_PICK], ig[LANDING_PICK]))
     add("setup", null, "the landing line");
-  /* §357 (spec 055): the client's set-up pressed Done. SETUP, the office's,
+  /* §360 (spec 057): the client's set-up pressed Done. SETUP, the office's,
      and NAMED — a refusal sends somebody to Getting started on the client's
      own rail rather than reporting "the group's setupDone". The two edits go
      together (§259.2): classified here AND listed in gExtra below, or the

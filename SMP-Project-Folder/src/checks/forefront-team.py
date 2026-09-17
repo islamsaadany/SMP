@@ -1,5 +1,5 @@
-"""FOREFRONT TEAM IS THE STORE AND THE REGISTER IS A READER (spec 056 §3a,
-   §359.2).
+"""FOREFRONT TEAM IS THE STORE AND THE REGISTER IS A READER (spec 058 §3a,
+   §362.2).
 
    Islam: *"how about the forefront team is a separate view as you did but we
    keep them on the client list reading from the forefront team list."*

@@ -10,7 +10,7 @@
      · `setup`  — the CLIENT'S Setup: the pages that belong to no module
                   (people, the organisation, branding, the knowledge base).
                   A module's own Setup is `/<client>/<module>/setup/…`, which
-                  reads as that module with `setup` inside it (spec 054 §4.2,
+                  reads as that module with `setup` inside it (spec 056 §4.2,
                   REVERSING spec 046 §4.5's one page for the whole client:
                   Islam, 2026-09-15, each module has its own setup elements,
                   its access and its landing line);
@@ -78,7 +78,7 @@ export const SPINE_SEGMENTS = ["setup", "tour"] as const;
    what stops the answer being invented a second time when that page lands
    (§42's drift, from in front). */
 export type ModuleArea = { key: string; label: string; note: string; states: string[]; shipped: string };
-/* ── THE LANDING LINE (spec 054 §4.5, §356.4) ───────────────────────
+/* ── THE LANDING LINE (spec 056 §4.5, §359.4) ───────────────────────
    Each module DECLARES the sentences it can say about itself: a key, the
    label the module's Landing line page offers, an example for that page, and
    a reader that makes the sentence out of facts the module already has
@@ -264,7 +264,7 @@ export function landingLine(k: ModuleKey, pick: string | null | undefined, facts
 }
 
 export type ModuleRow = { key: ModuleKey; label: string; state: string; line: string; room: boolean };
-/* `line` IS THE LANDING LINE (§356.4): the same reader the client's landing
+/* `line` IS THE LANDING LINE (§359.4): the same reader the client's landing
    draws from, given the same facts and the client's own picks, so the
    console cannot say one thing about a module while the landing says
    another. `state` stays the card's own health word — *not answering*, *no

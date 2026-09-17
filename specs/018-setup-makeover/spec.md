@@ -71,7 +71,7 @@ Stored keys never change; every rename is a label (§30.2, §58).
 
 ## 5 · The Overview
 
-> **DELETED at §356 (spec 054 §9.1, signed off 2026-09-15).** Both halves of
+> **DELETED at §359 (spec 056 §9.1, signed off 2026-09-15).** Both halves of
 > this page were already on the client landing — the office's *Waiting on
 > you* is `attentionRows()` row for row (§148) and the cycle column joined it
 > at §200 — so the gear opened a second drawing of the page the office lands

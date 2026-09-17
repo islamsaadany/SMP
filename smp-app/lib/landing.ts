@@ -1,8 +1,8 @@
 /* What the Setup document is stamped with, and how a door inside a client
    is spelt. THIS FILE WAS THE LANDING PAGE'S (§148 on the new stack, spec
    043's first screen group): the welcome's rows, computed by the frozen
-   readers, and spec 054 §4.1's Client setup and Your modules blocks. §357
-   (spec 055) made `/<client>` a redirect into the person's first module —
+   readers, and spec 056 §4.1's Client setup and Your modules blocks. §360
+   (spec 057) made `/<client>` a redirect into the person's first module —
    Islam: "I just need a welcome screen for the strategy module for now" —
    so the rows are Strategy's own welcome.js's again and the blocks went to
    the client's Setup rail, where a set-up is a one-off rather than a
@@ -14,7 +14,7 @@ import { landingFactsFor, viewerFor } from "./landing-facts.ts";
 
 export type Door = { target?: string; tab?: string; report?: boolean; setup?: string };
 
-/* THE LANDING LINE PAGE'S STAMP (spec 054 §4.5, §356.4): what the module the
+/* THE LANDING LINE PAGE'S STAMP (spec 056 §4.5, §359.4): what the module the
    document is served for can say, each line with its example AND its text
    right now, and the client's pick — written onto the Setup document as
    `data-landing` (lib/shell.ts) for the frozen renderLandingLine() to draw
@@ -39,7 +39,7 @@ export async function landingStampFor(tenantId: string, module: string, seat: st
    module puts a row on this screen, that row brings its own (spec 046 §7).
 
    A SETUP DOOR IS WRITTEN IN THE SPINE FORM WHATEVER MODULE OWNS THE PAGE
-   (spec 054 §4.1, research R2): `/<client>/setup/<page>` is a request, and
+   (spec 056 §4.1, research R2): `/<client>/setup/<page>` is a request, and
    the shell moves it to the page's own module — Strategy's Reporting cycle
    ends at `/<client>/strategy/setup/cycle` — so this file keeps no copy of
    which page belongs to which rail (§53.5). */

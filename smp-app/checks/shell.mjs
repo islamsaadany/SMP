@@ -10,8 +10,8 @@
      · a change made in the shell reaches the server through the frozen
        client and the frozen spelling of the address (/api/state);
      · the shell's own welcome overlay is offered at the module's home and
-       not over a page the address named (§357.9)
-       (§357: Strategy's welcome is the welcome) and the chrome says who is
+       not over a page the address named (§360.9)
+       (§360: Strategy's welcome is the welcome) and the chrome says who is
        signed in;
      · Forefront's own pages: the cards, the consultants, the table, a
        client's configuration, a client created from the cards and opened —
@@ -61,7 +61,7 @@ if (!up) { console.log("FAIL  the app did not start"); try { process.kill(-serve
 
 const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
 let ctx, page, errs = [];
-/* THE WELCOME IS OFFERED AGAIN ON EVERY DEEP ADDRESS (§357), once a
+/* THE WELCOME IS OFFERED AGAIN ON EVERY DEEP ADDRESS (§360), once a
    browser session, and it covers the viewport — so a context that presses a
    control under it waits thirty seconds on a click the overlay takes
    (§167.2's finding, the reason the Next landing once stood it down). Every
@@ -107,8 +107,8 @@ await section("1 · the document and its policy", async () => {
 await section("2 · the address names the page, and the page names the address", async () => {
   await fresh(true); await signIn("mobhead@raya.example");
   /* REWRITTEN TWICE, NEVER LOOSENED (§218, §214.3). §315 stood the shell's
-     own welcome down because the Next landing was the welcome; §357 removed
-     that landing and this asserted the overlay on a DEEP address; §357.9
+     own welcome down because the Next landing was the welcome; §360 removed
+     that landing and this asserted the overlay on a DEEP address; §360.9
      then stood it down there, on Islam's report that pressing Continue over
      the client's Setup rail read as the press having opened the settings.
      So what is asserted is the decision that survived both: the welcome is
@@ -116,7 +116,7 @@ await section("2 · the address names the page, and the page names the address",
      never over one it does. Both ends in one session, or a build that lost
      the overlay altogether passes the half that matters here (§113.8). */
   await open("/raya-trade/strategy");
-  check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered at the module's home — Strategy's welcome is the welcome (§357, §357.9)");
+  check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered at the module's home — Strategy's welcome is the welcome (§360, §360.9)");
   await page.evaluate(() => { const b = document.querySelector(".welcomeover .wexit"); if (b) b.click(); });
   await page.waitForFunction(() => !document.querySelector(".welcomeover")).catch(() => {});
   check(await page.evaluate(() => !document.querySelector(".welcomeover")), "…and its own way out takes it down");
@@ -124,7 +124,7 @@ await section("2 · the address names the page, and the page names the address",
   let p = await place();
   check(p[0] === "mobile" && p[1] === "strategy", "/raya-trade/strategy/mobile/strategy opens Mobile's Strategy", JSON.stringify(p));
   check(/^\/raya-trade\/strategy\/mobile\/strategy\/[a-z]+$/.test(path()), "…and the address gains the section the shell opened (the place is the address)", path());
-  check(await page.evaluate(() => !document.querySelector(".welcomeover") && document.documentElement.getAttribute("data-deep-address") === "1"), "…and no welcome over a page the address NAMED (§357.9), so the rest of this section measures the page itself (§167.2)");
+  check(await page.evaluate(() => !document.querySelector(".welcomeover") && document.documentElement.getAttribute("data-deep-address") === "1"), "…and no welcome over a page the address NAMED (§360.9), so the rest of this section measures the page itself (§167.2)");
   check((await page.locator(".viewer-note b").textContent().catch(() => "")) === "Ashraf Laithy", "the chrome says who is signed in (a client's person has no switcher)");
   await open("/raya-trade/strategy/mobile/strategy/plan"); p = await place();
   check(p[2] === "plan", "…/plan opens the Plan section", JSON.stringify(p));
@@ -164,12 +164,12 @@ await section("2b · the module leads the address, and the spine carries none", 
 
   /* …and the spine is served where it stands rather than being pushed under
      a module it does not belong to — the CLIENT'S Setup, the pages that
-     belong to no module (spec 054 §4.1) — while a module's own Setup is
-     served under its word (spec 054 §4.2), both as the same document */
+     belong to no module (spec 056 §4.1) — while a module's own Setup is
+     served under its word (spec 056 §4.2), both as the same document */
   r = await hit("/raya-trade/setup/people");
   check(r.status === 200, "the client's Setup is NOT redirected — it is the client's page, in no module", r.status + " " + (r.headers.get("location") || ""));
   r = await hit("/raya-trade/strategy/setup/cycle");
-  check(r.status === 200 && /data-module='strategy'/.test(await r.text()), "…and Strategy's own Setup is served under its word, as the shell (§356.2)", r.status + " " + (r.headers.get("location") || ""));
+  check(r.status === 200 && /data-module='strategy'/.test(await r.text()), "…and Strategy's own Setup is served under its word, as the shell (§359.2)", r.status + " " + (r.headers.get("location") || ""));
   r = await hit("/raya-trade/tour");
   check(r.status === 200, "…nor is the intro round, which the landing offers", r.status + " " + (r.headers.get("location") || ""));
 
@@ -199,7 +199,7 @@ await section("2b · the module leads the address, and the spine carries none", 
 
   /* the address the SHELL writes, on both sides of the spine line: the
      client's rail writes the spine form and Strategy's rail writes the
-     module form (spec 054 §4.2), and the walk between them is the scope
+     module form (spec 056 §4.2), and the walk between them is the scope
      moving with the page (checks/setup-per-module.py owns the rest) */
   await open("/raya-trade/setup/people");
   await page.click('.setuprail [data-setupgo="mainbu"]').catch(() => {});
@@ -225,7 +225,7 @@ await section("3 · the office's addresses, and a change that reaches the server
   check(p[0] === "setup" && p[1] === "people" && (await page.locator("#panel").textContent()).includes("People register"), "/setup/people opens the register", JSON.stringify(p));
   /* REWRITTEN, NEVER LOOSENED (§218, §214.3 for the eighth time). This
      asserted the control reads "Raya Trade" — measured HERE, on
-     `/setup/people`, which §359 made the client's own settings, where it
+     `/setup/people`, which §362 made the client's own settings, where it
      deliberately reads *Save & close* instead (the client is named in the
      heading there, so naming it on the control too would be the second copy
      §120 took off the register's own header). What the line is ABOUT is that
@@ -251,7 +251,7 @@ await section("3 · the office's addresses, and a change that reaches the server
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
 });
 
-await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7359, spec 056)", async () => {
+await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7362, spec 058)", async () => {
   await fresh(); await signIn("office@forefront.example");
   /* THE SCOPE IS THE SERVER'S ANSWER, READ OFF THE RAW HTML. The browser
      writes the same attribute from the address on arrival (shell/route.js
@@ -260,7 +260,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      the module switcher is built, which happens at load, ABOVE placeOf. */
   /* THE SECOND MODULE IS MADE, or the switcher's absence is asserted over a
      client that could never have one: the switcher is drawn only where there
-     is a CHOICE (\u00a732, shell/route.js since \u00a7359.1), so on the dev tenant's
+     is a CHOICE (\u00a732, shell/route.js since \u00a7362.1), so on the dev tenant's
      single module the line below went green on a build that drew it
      everywhere (\u00a7113.8 \u2014 it did, until this was added). It is what makes
      the way across measurable too: two modules mean two rows at the foot of
@@ -299,7 +299,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(b.switcher === false, "\u2026nor the module switcher, which is built at load and cannot be repainted away", JSON.stringify(b));
   /* REWRITTEN, NEVER LOOSENED (\u00a7218, \u00a7214.3). This asked whether the
      attribute was PRESENT, which said "this client holds more than one" only
-     while the attribute carried the switcher's rule in its name \u2014 \u00a7359.1
+     while the attribute carried the switcher's rule in its name \u2014 \u00a7362.1
      stamps it for every client, so presence would now be true of a client
      with one and the absence above would pass for the wrong reason
      (\u00a7113.8). It asks the CONTENT, which is what it was always for. */
@@ -322,10 +322,10 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   /* AND THE SPINE-FORM ADDRESS STILL ENDS AT THE MODULE'S SETUP, WEARING ITS
      BAR. This is the one case the ORDER of the scope resolution decides: the
      landing's doors write `/<client>/setup/<page>` for every page and let the
-     shell resolve which rail the page belongs to (\u00a7356.2's research R2), so
+     shell resolve which rail the page belongs to (\u00a7359.2's research R2), so
      a chrome that asked the question before `paintUnits()` had settled the
      place drew the CLIENT's bar over Strategy's Reporting cycle \u2014 and
-     landed on the client's first page while it was at it (\u00a7359.6). Asserted
+     landed on the client's first page while it was at it (\u00a7362.6). Asserted
      here as well as in setup-per-module, because from this file it is the
      bar that is wrong and that is what this section is about. */
   await open("/raya-trade/setup/cycle");
@@ -386,7 +386,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(brand.head === brand.want && brand.want !== "", "the client's own colour still reaches the page \u2014 the rail's head is --panel", JSON.stringify(brand));
   check(brand.top !== brand.want, "\u2026and the bar above it is the product's surface, as every page's is", JSON.stringify(brand));
 
-  /* ── THE WAY ACROSS RUNS BOTH WAYS (\u00a7359.1) ───────────────────────
+  /* ── THE WAY ACROSS RUNS BOTH WAYS (\u00a7362.1) ───────────────────────
      Islam, having opened the client's settings from the console's card:
      *"I ca't find the access page in the strategy module"*. Roles & access
      was exactly where it belongs \u2014 on Strategy's rail \u2014 and there was no
@@ -399,7 +399,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      (\u00a794.8) \u2014 and this tenant holds TWO for the length of this section, so
      a build that hardcoded one module's name goes red here and could not on
      the dev tenant's own single module (\u00a7113.8). AT THE FOOT, after the
-     list, because it is a place to go ON to (\u00a7357.9) \u2014 and outside
+     list, because it is a place to go ON to (\u00a7360.9) \u2014 and outside
      `.raillist`, which is the one thing that scrolls, or the door scrolls
      away (\u00a7290.1). */
   await open("/raya-trade/setup/people");
@@ -417,7 +417,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(across.length === clMods.length && clMods.every((m) => across.some((d) => d.href === "/raya-trade/" + m.key + "/setup" && d.text === m.label + " settings \u203a")),
         "the client's rail carries one way across per module this person may open", JSON.stringify(across));
   check(across.length > 0 && across.every((d) => d.seen && !d.inList && d.afterList),
-        "\u2026drawn, outside the scrolling list, and after it \u2014 a place to go ON to (\u00a7357.9, \u00a7290.1)", JSON.stringify(across));
+        "\u2026drawn, outside the scrolling list, and after it \u2014 a place to go ON to (\u00a7360.9, \u00a7290.1)", JSON.stringify(across));
   check(doors.some((d) => !d.fwd && /Back to the console/.test(d.text)),
         "\u2026and the way OUT is still above the list, where a back link belongs", JSON.stringify(doors.map((d) => d.text)));
   /* AND IT LANDS ON THE MODULE'S OWN SETUP, WEARING THE MODULE'S BAR \u2014
@@ -454,7 +454,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   } finally { await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]); }
 });
 
-await section("3c · Forefront team is the store, the register is a reader (spec 056 §3a)", async () => {
+await section("3c · Forefront team is the store, the register is a reader (spec 058 §3a)", async () => {
   /* THE HALF file:// CANNOT SEE. `checks/forefront-team.py` makes its two
      kinds in the browser and proves the marks, the menu and the count; what
      it cannot reach is a REAL consultant — the page is empty off the served
@@ -466,7 +466,7 @@ await section("3c · Forefront team is the store, the register is a reader (spec
   const team = await page.evaluate(() => {
     const h = document.querySelector("[data-cteam]");
     return { host: !!h,
-             /* §361: the page is a setup table now — the rows were the
+             /* §364: the page is a setup table now — the rows were the
                 flow's own `.teamrow`, written for its 760px column, and on a
                 full-width Setup page they laid out side by side. The names
                 and addresses are the same two facts in a different shape. */

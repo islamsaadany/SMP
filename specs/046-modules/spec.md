@@ -159,7 +159,7 @@ switcher into a second tab row.
 
 ### 4.4 Access — one page, a Client tab and a tab per module
 
-> **The "one page" half is REVERSED by spec 054 (2026-09-15, Islam: *"the
+> **The "one page" half is REVERSED by spec 056 (2026-09-15, Islam: *"the
 > setup and access page should be per module"*).** Each module's roles and
 > areas are a page inside that module's own Setup; the seats and where people
 > sit stay on the People register, reached from the landing. What follows is
@@ -187,7 +187,7 @@ Two areas move:
 
 ### 4.5 Setup — one page, a Client group and a group per module
 
-> **REVERSED by spec 054 (2026-09-15), at Islam's instruction and recorded
+> **REVERSED by spec 056 (2026-09-15), at Islam's instruction and recorded
 > rather than overwritten.** Each module has its own Setup reached from
 > inside it, and the Client group goes to the client landing, which is the
 > spine's own page. The rejection below was right about its own question —

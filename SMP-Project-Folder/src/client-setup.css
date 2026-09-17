@@ -1,4 +1,4 @@
-/* ══ THE CLIENT SET-UP FLOW, IN THE PLATFORM'S OWN CHROME (§357, spec 055) ═══
+/* ══ THE CLIENT SET-UP FLOW, IN THE PLATFORM'S OWN CHROME (§360, spec 057) ═══
    The console's flow drew itself in the console's tokens (--ff, --amber);
    here the same markup — the wz* classes, verbatim — wears the platform's.
    Everything is scoped under .csetup, because half these words (.band,
@@ -149,7 +149,7 @@
 .csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
 .csetup .wzask .row { margin-top:12px; }
 
-/* ── the rail's strip (§357): Getting started, under the head ─────────── */
+/* ── the rail's strip (§360): Getting started, under the head ─────────── */
 .setuprail .railstart { flex:none; display:block; width:100%; text-align:left; cursor:pointer;
                         padding:9px 14px 10px; border:0; border-bottom:1px solid var(--line);
                         background:var(--surface); color:var(--ink); font:inherit; }
@@ -159,7 +159,7 @@
 .setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
 .setuprail .railback.railfwd { display:inline-block; }
 
-/* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§361) ═════════════════════════
+/* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§364) ═════════════════════════
    The shape is the setup tables' own — `.cfg > table.unitcfg` gives the navy
    heading row, one line per cell, the 150px cap and the ellipsis, all from
    `config.css` rather than from rules invented here (§53.5). What is left is

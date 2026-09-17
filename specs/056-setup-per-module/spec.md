@@ -23,7 +23,7 @@ This spec answers it with the client landing, which is the spine's own page.
 first module with anything of its own to set), §354 (a module is a folder
 that serves itself), §355 (the module seam carries the viewer's seat).
 
-**Decisions log:** §356, written with the build, not before it (rule A7: in
+**Decisions log:** §359, written with the build, not before it (rule A7: in
 the same commit as the code).
 
 ---
@@ -132,7 +132,7 @@ Six doors, each opening an existing page at its spine address
 | Email | sender name, reply-to, footer | the email half of `brand` (§130.4) |
 | Knowledge base | the platform's own explanations | `kb` |
 
-> **Built 2026-09-15 (§356.3), with one drift reported rather than silently
+> **Built 2026-09-15 (§359.3), with one drift reported rather than silently
 > realigned:** the email settings are not "the email half of `brand`" — since
 > §135/§137 they are the third section of Strategy's *Send an email* page —
 > so the Email door opens `setup/send#comms`, the one door in the block that
@@ -202,7 +202,7 @@ none, by construction.
   the module's own table. **`a_cycle` moves into Strategy's table** in name
   only — it is already only ever Strategy's.
 
-> **Built 2026-09-15 (§356.5)** as decided, with two things said out loud:
+> **Built 2026-09-15 (§359.5)** as decided, with two things said out loud:
 > the eye is drawn on every row `matrixRows()` draws, the Super user's and
 > the SMO team's included, so a client's own Super user who shut their own row
 > is judged by the table while an office login holding the seat is not (the
@@ -229,7 +229,7 @@ whole reason for the line is that it is true today.
 - Every module ships with a default so an unchosen module still says
   something; *Nothing* draws the module's row with no line under it.
 
-> **Built 2026-09-15 (§356.4)** as decided, with one narrowing said out loud:
+> **Built 2026-09-15 (§359.4)** as decided, with one narrowing said out loud:
 > the "units" in *What is waiting* counts every SUBJECT the cycle board has a
 > row for — functions and a capability included — so the sentence says
 > *3 of 18 still to submit* with no noun, because *units* would be untrue of
@@ -342,9 +342,9 @@ Each at both ends (§94.2), each falsified from the sources (§276):
 4. The landing line: declared, chosen, stored, drawn in both places.
 5. Insights' Setup: Access and Landing line, the first page to read a
    module's declared areas.
-6. §356 in the decisions log, in the same commit as step 2.
+6. §359 in the decisions log, in the same commit as step 2.
 
-> **Built 2026-09-15, all six steps (§356.1–§356.6).** The sweep (§356.6):
+> **Built 2026-09-15, all six steps (§359.1–§359.6).** The sweep (§359.6):
 > `qa.py` at Next 33 viewers / 243 destinations / ERRORS none, over
 > `file://` 33 / 241 / ERRORS none, the difference accounted for to the
 > destination — two pages drawn only over HTTP, and a fault in the sweep's

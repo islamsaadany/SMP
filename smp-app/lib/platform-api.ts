@@ -90,7 +90,7 @@ async function factsFor(t: ClientRow) {
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
       return { units, planned: pillars > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
     }).then(async (f) => {
-      /* the landing line's facts and the client's picks (§356.4) — read
+      /* the landing line's facts and the client's picks (§359.4) — read
          through the ONE reader the client's landing uses, as somebody who
          sees everything, which the console is */
       const have = modulesFor(t.modules);

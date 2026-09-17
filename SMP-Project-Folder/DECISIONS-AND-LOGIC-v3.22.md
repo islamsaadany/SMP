@@ -48413,7 +48413,7 @@ not.
 pre-existing seeded-demo-graph failures already on the record (§303, §354.7),
 neither touching a module, the route or a library.
 
-## §356 — SETUP PER MODULE, AND THE CLIENT'S OWN SETUP ON THE LANDING (2026-09-15, spec 054)
+## §359 — SETUP PER MODULE, AND THE CLIENT'S OWN SETUP ON THE LANDING (2026-09-15, spec 056)
 
 Islam, 2026-09-15: *"the setup and access page should be per module because
 each module has its own setup elements including the access and the landing
@@ -48430,11 +48430,11 @@ per module inside that module's Setup, the seats staying on the People
 register; and a landing line per module picked from a short list, never
 typed. Then two more, each with its own answer: *"ok"* to the spine storing
 and writing the landing-line pick with the module only reading it, and *"ok
-signed off"* to the Overview's fate drawn on its own (§356.1). The spec is
-`specs/054-setup-per-module/spec.md`, the plan and research beside it; built
+signed off"* to the Overview's fate drawn on its own (§359.1). The spec is
+`specs/056-setup-per-module/spec.md`, the plan and research beside it; built
 in the spec's own order, one commit a step, each red first.
 
-### §356.1 — THE OVERVIEW GOES, BECAUSE IT WAS ALREADY ON THE LANDING (spec 054 §9.1)
+### §359.1 — THE OVERVIEW GOES, BECAUSE IT WAS ALREADY ON THE LANDING (spec 056 §9.1)
 
 **THE FINDING IS A MEASUREMENT AND NOT AN ARGUMENT.** §108.10 put a Setup
 Overview in front of the gear — a list of what is waiting on the office
@@ -48444,7 +48444,7 @@ landing afterwards by the very functions that drew them there: the office's
 `officeActs`), and the cycle column joined the landing at §200 in the
 Overview's own shape (`.wcyc`, which §200's note says was made to *look like
 itself wherever it appears*). So the page the gear opened was a second
-drawing of the page the office lands on at every sign-in, and spec 054's
+drawing of the page the office lands on at every sign-in, and spec 056's
 line between the client's settings and Strategy's would have left it
 counting across two rails. Three frames drawn (`2026-09-15_overview-fate.html`)
 — the Overview, the landing with the SAME rows marked, the proposal — and
@@ -48492,7 +48492,7 @@ exists for the deletion, every other assertion green on both builds (§94.5).
 `welcome.py`'s office-pages assertion REWRITTEN, never loosened (§218): it
 asks for Reporting cycle by name and asserts the old word absent.
 
-### §356.2 — A DEF KNOWS ITS MODULE, AND THE RAIL DRAWS BY IT (spec 054 §4.2–§4.3, §4.6)
+### §359.2 — A DEF KNOWS ITS MODULE, AND THE RAIL DRAWS BY IT (spec 056 §4.2–§4.3, §4.6)
 
 **ONE FIELD, NEVER A SECOND LIST.** Every Setup def carries `mod` — the
 module that owns the page, or `client` for the pages that belong to no module
@@ -48501,10 +48501,10 @@ a page is drawn in is that field against ONE attribute on the document,
 `data-setup-scope`: a module word for that module's own Setup, `client` for
 the client's, absent for the offline copy. A page cannot be in two rails or
 none, because there is nothing to disagree with (§53.5). `SETUP_GROUPS` gains
-two: **Access**, which holds Roles & access alone and is Strategy's (spec 054
+two: **Access**, which holds Roles & access alone and is Strategy's (spec 056
 §4.4 — the matrix is Strategy's roles against Strategy's areas, and the seats
 stay on the People register), and **Help**, which holds the knowledge base on
-the client's rail (spec 054 §2: the drawing marks it as moving and lists it
+the client's rail (spec 056 §2: the drawing marks it as moving and lists it
 nowhere, so it is the sixth door). **The fold keys do not move** (§30.2): the
 five groups keep theirs and the two new ones are new, so a fold somebody
 stored still folds the same group, asserted by writing one and reloading.
@@ -48612,7 +48612,7 @@ rail reachable from anywhere but its address; and the rail's inbox pill
 (§108.15) is asked whenever Setup is on screen for the office, on either
 rail, which is one request more than the module's rail needs.
 
-### §356.3 — THE LANDING'S CLIENT SETUP BLOCK AND YOUR MODULES (spec 054 §4.1, §9.3)
+### §359.3 — THE LANDING'S CLIENT SETUP BLOCK AND YOUR MODULES (spec 056 §4.1, §9.3)
 
 Step 3 of six, on the Next app and nowhere else: the landing gains, in its
 right column, a **Client setup** block for the Super user, and in its left
@@ -48627,7 +48627,7 @@ page the same question (§53.5, §94.8). The seat is `resolveTenant`'s — the
 membership row's, or the Super user seat a Forefront admin holds BY RULE on
 a client they hold no seat on (§339) — and never the register's role,
 because the seat is what the platform holds about who may configure a client
-(spec 054 §4.4). Absent, never disabled (§61): a unit head and an SMO team
+(spec 056 §4.4). Absent, never disabled (§61): a unit head and an SMO team
 seat are shown nothing, asserted at both ends against the Super user shown
 six doors, or a build that drew it for nobody passes half and one that drew
 it for everybody passes the other half (§113.8).
@@ -48635,7 +48635,7 @@ it for everybody passes the other half (§113.8).
 **SIX DOORS ONTO EXISTING PAGES, EVERY ONE A SPINE ADDRESS** —
 `/<client>/setup/<page>`, research R2's shape, so this list keeps no copy of
 which page sits in which rail; the shell moves a spine-form door to the
-page's own rail (§356.2). Organisation is one door onto four pages, the
+page's own rail (§359.2). Organisation is one door onto four pages, the
 spec's own reason (§32 the other way round: four things that are one job go
 behind one door), landing on Companies, the first of them. **TWO DOORS NAME A
 PLACE ON A PAGE WITH A HASH, AND THE SHELL LEARNED TO HONOUR ONE**: Access
@@ -48670,7 +48670,7 @@ colours — is a decision about where a setting lives, and this step does not
 make it.
 
 **YOUR MODULES IS THE REGISTRY'S OWN LIST** — `modulesFor(tenant.modules)`,
-MODULES' order, a module switched off taking its row with it (spec 054 §4.2)
+MODULES' order, a module switched off taking its row with it (spec 056 §4.2)
 — one row per module opening it at its own address, and DRAWN WITH ONE
 MODULE TOO: a list that appeared at two would be a screen that changes shape
 on the day a module is added. The line under each row is `landingLine()`, a
@@ -48683,7 +48683,7 @@ the list put back in a `finally` (§94.2).
 
 **AND MEASURING THE PAGE FOUND STEP 1'S OMISSION**: the office's *Your pages*
 still read **Setup — Overview** with a door to `setup/overview`, a page
-§356.1 deleted. `welcome.js` was moved to *Setup — Reporting cycle* in step 1
+§359.1 deleted. `welcome.js` was moved to *Setup — Reporting cycle* in step 1
 and `lib/frozen.cjs`'s carried `landing()` — the reader the served page
 draws from — still held the old label and the old door; `door-landing.mjs`
 asserts *Your pages are the reader's pages* as AGREEMENT with that same
@@ -48727,7 +48727,7 @@ every one of which keeps its own gate, and nothing new is stored.
 Email door's home is a question put to Islam (above); and the wrapping
 descriptions at 336px are a width the frozen welcome owns.
 
-### §356.4 — THE LANDING LINE: DECLARED, CHOSEN, STORED, DRAWN IN BOTH PLACES (spec 054 §4.5, §9.4)
+### §359.4 — THE LANDING LINE: DECLARED, CHOSEN, STORED, DRAWN IN BOTH PLACES (spec 056 §4.5, §9.4)
 
 Step 4 of six. Under each row of *Your modules* the landing now says one
 sentence about that module, and the sentence is **never free text**: each
@@ -48821,7 +48821,7 @@ frozen product's own words go through `L()` — a module's lines are the module'
 own and not a tenant's label, so nothing is inflected (§107.8), but a tenant
 cannot rename them.
 
-### §356.5 — INSIGHTS' SETUP: ACCESS, AND A DOOR THAT ASKS THE TABLE (spec 054 §4.4, §9.5, research R3)
+### §359.5 — INSIGHTS' SETUP: ACCESS, AND A DOOR THAT ASKS THE TABLE (spec 056 §4.4, §9.5, research R3)
 
 Step 5 of six. Insights' rail carries its two pages — **Roles & access** and
 **Landing line** — and the first is the first thing in the product that READS
@@ -48933,7 +48933,7 @@ press deleting the key; `setup-per-module.py` §1 REWRITTEN never loosened
 (it held the mod values as a literal, §214.3) and §7c; `built-in-step` and
 `generated-in-step` clear; `tsc` clean with the cache removed first.
 
-### §356.6 — THE SWEEP, AND THE VIEWER A RELOAD PUT BACK (spec 054 §9, plan step 6)
+### §359.6 — THE SWEEP, AND THE VIEWER A RELOAD PUT BACK (spec 056 §9, plan step 6)
 
 **Step 6 of six, and nothing in the product moves for it.** The plan's own
 row: full `qa.py` at Next and over `file://`, ERRORS none on both;
@@ -48958,7 +48958,7 @@ Setup rail entries each stack draws per viewer rather than reasoned about.
 **The +2 is right**: served, the office's gear rail carries `chat` and
 `history` — the Platform Inbox (§97) and History (§262), two pages the
 product draws only over HTTP and never over `file://` — so the served sweep
-legitimately visits two more. **The +8 was the CHECK.** §356.2's client-rail
+legitimately visits two more. **The +8 was the CHECK.** §359.2's client-rail
 walk reaches the client's rail by its own address with a `goto`, and **a
 reload lands on whoever signed in**: `window.VIEWER` read `smo` the line
 after it, whatever the select had said a line before — so for every viewer
@@ -48967,7 +48967,7 @@ CEO's name* and printed *ok*. §50.6's fault exactly (a label must say which
 page was actually scanned), and §51.7's (measuring the thing you built
 proves what you built), in the sweep that quotes both. Picked again on the
 landed page, the client's rail draws **nothing** for a CEO — the router sends
-a viewer the rail has no page for off it (§356.2) — so it counts nothing,
+a viewer the rail has no page for off it (§359.2) — so it counts nothing,
 which is the truth. **AND THE FIRST FIX BROKE THE OFFICE'S OWN COUNT**: re-
 picking the viewer unconditionally re-picks the office as the office, which
 is a switch to yourself, and §237's rebase repainted the remembered unit page
@@ -48991,7 +48991,7 @@ then the gear — *Insights · Setup* with *Roles & access* (roles down,
 Insights' areas across) and *Landing line*. Shut the eye for Business unit
 owner there and view as one: Insights leaves *Your modules* and the switcher,
 and typing its address lands on Strategy; reopen the eye. **Not checkable
-from a screen**: the store proved key-agnostic on a virgin Postgres (§356.5),
+from a screen**: the store proved key-agnostic on a virgin Postgres (§359.5),
 and the sweep's own correction above.
 
 **RECORDED, NOT DONE**: the sweep still reaches Insights' rail through no
@@ -49002,19 +49002,19 @@ counted as walking nothing, which is right and is also the only thing
 `qa.py` says about them there. `main` untouched — the merge is Islam's word,
 on that merge.
 
-## §357 — THE CLIENT'S SETTINGS LIVE IN THE PLATFORM, AND STRATEGY'S WELCOME IS THE WELCOME (2026-09-16, spec 055)
+## §360 — THE CLIENT'S SETTINGS LIVE IN THE PLATFORM, AND STRATEGY'S WELCOME IS THE WELCOME (2026-09-16, spec 057)
 
-Islam, with two screenshots side by side — spec 054's client landing on the
+Islam, with two screenshots side by side — spec 056's client landing on the
 new stack and the frozen welcome overlay inside Strategy: *"why do I have a
 welcome screen for the client overall, I just need a welcome screen for the
 strategy module for now."* **HE WAS LOOKING AT §53.5 WITH A PERSON STANDING
 BETWEEN THE TWO COPIES.** §315 stood the shell's own welcome down because the
-Next landing was going to be the welcome, and spec 054 §4.1 then put the
+Next landing was going to be the welcome, and spec 056 §4.1 then put the
 client's own settings ON that landing because the spine needed a page that
 is not inside any module — each decision right on its own terms, and
 together they made a second welcome that the first one already was. **Both
 are REVERSED here and recorded as reversals** (Principle II): §315's landing
-and spec 054 §4.1's blocks. The reasoning of §4.1 survives whole — the spine
+and spec 056 §4.1's blocks. The reasoning of §4.1 survives whole — the spine
 still has to live somewhere that is not inside any module — and what moved
 is the answer to *where*: not a page of its own, but the platform's own
 Setup rail served for the client. Three drawn placements
@@ -49028,11 +49028,11 @@ and the separate page goes; *Done with set-up* marks it (*"1. ok"*); the
 email settings are a Strategy-module setting (*"2."*); and the knowledge
 base stays on Strategy's rail *"until we decide later"*.
 
-### §357.1 — A CLIENT'S ADDRESS OPENS THE MODULE
+### §360.1 — A CLIENT'S ADDRESS OPENS THE MODULE
 
 `/<client>` resolves the tenant exactly as before — the one-door rule holds
 to the letter (§313.36, §43.2) — and then REDIRECTS into the first module
-the person may open, read from `openableModules()` (§356.5), the same answer
+the person may open, read from `openableModules()` (§359.5), the same answer
 the switcher and the console's card read and never a second list. Nearly
 everybody lands on `/<client>/strategy`; a person who may open none still
 lands on the default module's address, where its own gate answers in words,
@@ -49041,12 +49041,12 @@ because a 404 here would say the CLIENT is not available, which is not true.
 keeps the three things the route still asks. `shell/route.js` stops writing
 `smp.welcome.done`, so the frozen `welcome.js` is OFFERED again on any deep
 address, once a session, and dismissed through its own way out — and the
-house mark (§193.2) is its way back, which is the whole of what spec 054's
+house mark (§193.2) is its way back, which is the whole of what spec 056's
 landing did that the frozen overlay did not already do.
 
-### §357.2 — ONE RAIL, AND THE SET-UP AS A STRIP ON IT
+### §360.2 — ONE RAIL, AND THE SET-UP AS A STRIP ON IT
 
-`/<client>/setup` is spec 054's own machinery: the frozen Setup document
+`/<client>/setup` is spec 056's own machinery: the frozen Setup document
 served with `data-setup-scope="client"`, the rail drawn from the defs marked
 for that scope. What is new on it: **a row at the top, `‹ Back to the
 console`** (href `/platform`, client scope only — a module's rail draws
@@ -49059,9 +49059,9 @@ strip and the def in the last group, **The client**, as *Client set-up*.
 **The `look` group and the `brand` def are DELETED** (§24): the mark and the
 colours are the flow's first step, through the one `brandingBody()` the old
 page's renderer now calls too (§53.5). **`kb` goes back to Strategy**
-(`mod:"strategy"`), reversing spec 054's move at his word.
+(`mod:"strategy"`), reversing spec 056's move at his word.
 
-### §357.3 — ONE FLOW, TWO HOSTS, AND A ROW MATCHED BY ITS NAME
+### §360.3 — ONE FLOW, TWO HOSTS, AND A ROW MATCHED BY ITS NAME
 
 The console's flow (spec 044, §322, 2,198 lines of `platform.html`) is
 CARRIED into `SMP-Project-Folder/src/client-setup.js`, not rewritten: every
@@ -49106,7 +49106,7 @@ on nothing**: the shell's `paint()` is HELD while a click is landing
 replaced — measured, `activeElement` the body — and it is landed inside
 `render()` instead, where the new box exists.
 
-### §357.4 — DONE WITH SET-UP IS ONE KEY, AND THE SERVER'S TWO EDITS GO TOGETHER
+### §360.4 — DONE WITH SET-UP IS ONE KEY, AND THE SERVER'S TWO EDITS GO TOGETHER
 
 `GROUP.setupDone === true`, read through `SMPRules.setupDone()`, stored as
 an absence until pressed (§50.6), no migration (`org.extra`).
@@ -49118,7 +49118,7 @@ sentence naming the whole group, **3 red**. `test-authorize.js` §41, 673/0,
 both ends: the office may, a custodian may not and is told Setup, and a
 save carrying the mark unchanged classifies nothing about it.
 
-### §357.5 — WHAT WAS MEASURED
+### §360.5 — WHAT WAS MEASURED
 
 **THE CHECKS, EACH REWRITTEN TO THE NEW TRUTH AND NEVER LOOSENED (§218),
 EACH RED FIRST.** Served: `door-landing.mjs` **136/0** — §3 waits for the
@@ -49152,17 +49152,17 @@ failures on both copies** of `platform.html`, red **12** on a doctored
 console whose Settings still opened `/platform`; `client-archive.py` 0
 failures on both copies with the archived state MADE through a stub door
 (§255), red 2; `welcome.py` OK; `qa.py` over `file://` 33 viewers, ERRORS
-none, and at Next **33 viewers / 243 destinations / ERRORS none** — the same 243 §356.6 recorded, so the redirect adds and removes no destination. Authoriser **673/0** (§41 red 4 / 3), differ
+none, and at Next **33 viewers / 243 destinations / ERRORS none** — the same 243 §359.6 recorded, so the redirect adds and removes no destination. Authoriser **673/0** (§41 red 4 / 3), differ
 140/0, platform rules 69/0, session-state clear, `tsc` clean cold,
 `built-in-step` all good; `sw.js` `v5.09-client-setup` against
 `origin/main`'s `v5.05-demo-complete`, read again at the push (§94.16).
 
-### §357.6 — ADD A CLIENT THREW BEFORE IT POSTED
+### §360.6 — ADD A CLIENT THREW BEFORE IT POSTED
 
 **The first product fault the checks found was in the carry.** The
 console's create piece holds no step state — `S` is minted by `mount()`
 alone — and said *"Creating…"* through the shared `say()`, which since
-§357.3 holds the sentence in `S` across a redraw. So the press threw
+§360.3 holds the sentence in `S` across a redraw. So the press threw
 `TypeError: Cannot set properties of null`, wrote no refusal, posted no
 `createClient`, and left the console on `/platform` with nothing said:
 **no client could be made from the console at all.** Found by
@@ -49170,7 +49170,7 @@ alone — and said *"Creating…"* through the shared `say()`, which since
 fault — with the stack captured from the page. The sentence is held only
 where there is state to hold it; 0 after.
 
-### §357.7 — THE BARE ADDRESS LANDED ON THE ENTRY PAGE
+### §360.7 — THE BARE ADDRESS LANDED ON THE ENTRY PAGE
 
 **And the second was the door itself.** `/<client>/setup` is what the
 console's Settings and a module rail's *Client settings ›* both open, and
@@ -49187,7 +49187,7 @@ reachable in that rail is still null, so somebody the rail holds no page for
 lands where they work rather than in an empty frame (§61). `door-landing.mjs`
 **135/1 → 136/0**, the one line being exactly this.
 
-**AND THE SERVED HARNESSES HAD TO LEARN WHAT §357 CHANGED** (§357.8): a
+**AND THE SERVED HARNESSES HAD TO LEARN WHAT §360 CHANGED** (§360.8): a
 sign-in lands INSIDE the module now, and the wait for it was written as
 `/raya-trade/<letter>`, which the sign-in page's own address satisfies —
 so the home address was opened under the sign-in's redirect and ABORTED
@@ -49206,9 +49206,9 @@ step 1 with the registry fields and Branding) — on the what-to-check list;
 a module that arrives with a set-up question of its own has no step in this
 flow; and the knowledge base's home is his *"later"*.
 
-### §357.9 — AN ADDRESS IS NOT A GREETING, AND THE WAY ACROSS SITS AT THE FOOT
+### §360.9 — AN ADDRESS IS NOT A GREETING, AND THE WAY ACROSS SITS AT THE FOOT
 
-Islam, pressing *Settings* on the console's card and meeting §357's own
+Islam, pressing *Settings* on the console's card and meeting §360's own
 build: ***"and when I press continue it opens the clietn settings!! what is
 that?! the home of the strategy module belongs to the strategy module the
 settings should open the settings directly. the client settings belong to
@@ -49219,7 +49219,7 @@ page but it should be at the bottom rethink that flow."***
 
 **NOTHING WAS BROKEN AND THE SCREEN HE PRESSED WAS RIGHT** — *Settings* on
 the card does open `/<client>/setup` and it does draw the client's rail,
-which is §357.7's own fix. What stood in front of it was the WELCOME. §357
+which is §360.7's own fix. What stood in front of it was the WELCOME. §360
 took the landing away and gave the frozen overlay back its job, and removed
 the line that had been standing it down; with no condition left, it offered
 itself on the first client document of the session **whatever address opened
@@ -49253,7 +49253,7 @@ same thing, so a session mark is honest for it; the welcome's only memory is
 `smp.welcome.done`, which means SEEN, and stamping it here would be a lie
 about a screen nobody was shown (§107: a memory that answers one question
 answers only that one). `data-deep-address` is true of THIS LOAD, written
-the way `data-setup-scope` is (spec 054 §4.2) because route.js is the only
+the way `data-setup-scope` is (spec 056 §4.2) because route.js is the only
 file that knows the address's shape — so somebody who types the module's
 home afterwards is greeted. **Read by `offer()` and never by `open()`**:
 the house mark is the ask (§185), and it still opens the screen from
@@ -49304,11 +49304,11 @@ welcome, so *"no overlay here"* would have passed on a build that draws one.
 the CONSOLE, which draws no welcome — so the first client document of that
 session is the one the press opens, which is Islam's own path.
 
-**TWO NEIGHBOURS WERE RED ON THE BRANCH AND BOTH WERE §357's**, established
+**TWO NEIGHBOURS WERE RED ON THE BRANCH AND BOTH WERE §360's**, established
 by reproducing them on a worktree built from HEAD before anything here was
 blamed (§303), and REWRITTEN rather than loosened (§218, §214.3 for the
 seventh time). `setup-search` folded the `look` group and searched for
-*"logo"*: §357 deleted that group outright, so it **died on a selector
+*"logo"*: §360 deleted that group outright, so it **died on a selector
 matching nothing** rather than saying a decision had moved — it finds a
 group at RUNTIME now, skipping the one holding the page you are on
 (§47.7 refuses to fold that one, and the naive pick chose exactly it), and
@@ -49338,7 +49338,7 @@ it — *a section that dies at sign-in is the database until the database is
 proved up* (§100.3, §105.6's family). Re-run on a fresh one: 76/0.
 
 **RECORDED, NOT DONE**: `lib/landing.ts`'s `tourHref` has had no caller since
-§357 deleted the landing that linked it (§24), and whether the `/tour`
+§360 deleted the landing that linked it (§24), and whether the `/tour`
 address stays at all is a question about how the intro round is offered now
 that the welcome's own card is its only door — a decision rather than a
 deletion, so it is written down instead of taken. Islam has not seen the
@@ -49350,7 +49350,7 @@ flow; and the knowledge base's home is his *"later"*.
 
 ---
 
-## §358 — A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR
+## §361 — A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR
 
 Islam, having just pressed it: *"the clicker when I go to the settings button
 it turns into the writing arrow not a normal mouse."*
@@ -49393,21 +49393,21 @@ here was blamed (§303). It is §51.11's shape with §215's failure mode: the
 check's subject has moved, and it **dies rather than reporting**, so the
 sections after it are not run at all.
 
-## §359 — THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (2026-09-16, spec 056, stage 1)
+## §362 — THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (2026-09-16, spec 058, stage 1)
 
 Islam, of the page the console's *Settings* chip opens: *"theclient settings
 shouldn't open the strategy banner in the top this is a client settings
 separate than any module we need to talk about the architecture again"* — and,
 when the first answer offered was a small one, *"you are trying to make a
 simple fix. let's discuss the architecture and who sees what it's not a simple
-fix."* **HE IS RIGHT AND THE ARCHITECTURE IS `specs/056-the-client-and-its-
+fix."* **HE IS RIGHT AND THE ARCHITECTURE IS `specs/058-the-client-and-its-
 modules/`**, settled with him over a round of questions and a drawing; this is
 the first of its six stages, and it is the one that can be seen.
 
 **THE CAUSE IS ONE LINE AND IT IS NOT A MISTAKE.** `/<client>/setup` carries no
 module word, so the route stamps `DEFAULT_MODULE` and serves the frozen shell —
-whose chrome is Strategy's navigation, because until spec 054 every Setup page
-WAS Strategy's. §356.2 gave each def a `mod` and seven of them say `client`, so
+whose chrome is Strategy's navigation, because until spec 056 every Setup page
+WAS Strategy's. §359.2 gave each def a `mod` and seven of them say `client`, so
 the rail under that bar has been the client's own for a day and the bar above it
 had not been told.
 
@@ -49430,7 +49430,7 @@ wrapper draws a navy stripe with nothing in it — §28's own edit for an empty
 heading, one element out. Falsified with the CSS removed: **2 red**, reading
 `row:true, dests:0` — the stripe exactly.
 
-**§359.6 — AND THE ROW'S OWN PAINTER IS WHAT SETTLES WHICH PAGE YOU ARE ON, SO
+**§362.6 — AND THE ROW'S OWN PAINTER IS WHAT SETTLES WHICH PAGE YOU ARE ON, SO
 NOTHING THAT READS THE PAGE MAY RUN BEFORE IT.** The first build had
 `paintUnits()` ask `clientScoped()` and return early — *not drawn, never drawn
 and hidden* — which needed the scope resolved first, so the resolver was moved
@@ -49441,7 +49441,7 @@ paint after a served address both are still NULL until `paintUnits()` resolves
 the destination (§94.6), so the resolver returned at its own `!currentSub`
 guard and a page belonging to the OTHER rail never moved the scope — measured,
 `/<client>/setup/cycle` landed on the client's FIRST page with the client's bar
-over it, which is the landing's own spine-form door broken (§356.2's research
+over it, which is the landing's own spine-form door broken (§359.2's research
 R2). Established as mine and not inherited by running the same check on the
 stashed tree, where it is green (§303).
 
@@ -49454,7 +49454,7 @@ broken: **1 red**, printing `/raya-trade/setup/people` and
 `scope:"client", row:false` for an address naming Strategy's Reporting cycle.
 
 **AND THE FALSIFICATION THAT WAS TRIED FIRST DID NOT FALSIFY ANYTHING, WHICH IS
-WORTH MORE THAN IF IT HAD** (§54.5). Putting the resolver back where §356 had
+WORTH MORE THAN IF IT HAD** (§54.5). Putting the resolver back where §359 had
 it — at the defs filter, BELOW the painter — came back GREEN, and reproducing
 it by hand agreed: the address resolves, the bar is right. The reason is that
 `paint()` runs again, so a chrome written from an unresolved scope is corrected
@@ -49483,7 +49483,7 @@ client in the heading, *Client settings* beside it. The words are Islam's own �
 *"I save and close to go back to the console"* — and they are honest rather than
 a promise, because every box on these pages has already written on blur (§35).
 
-**§359.1 — AND THE PUT-BACK IS THE HALF THAT COULD NOT BE CAUGHT BY LOOKING.**
+**§362.1 — AND THE PUT-BACK IS THE HALF THAT COULD NOT BE CAUGHT BY LOOKING.**
 This is the first thing in the platform to rewrite that heading, so the
 dangerous direction is the other one: walk from the client's settings into a
 module and a one-way write leaves the client's name standing over Strategy's
@@ -49495,7 +49495,7 @@ it exposed a real regression of my own: unhiding `.orgname` for the client's
 settings and stopping left the client named TWICE on every module page reached
 from them.
 
-**§359.2 — THE SCOPE IS STAMPED BY THE SERVER, AND THAT IS NOT AN
+**§362.2 — THE SCOPE IS STAMPED BY THE SERVER, AND THAT IS NOT AN
 OPTIMISATION.** The module switcher is built ONCE AT LOAD by `shell/route.js`,
 several lines ABOVE the call that resolves the address — so it is the one piece
 of the chrome the frozen shell cannot repaint away, and a browser-written
@@ -49507,7 +49507,7 @@ there is no second answer, only an earlier one (§53.5). Falsified with
 `switcher:true` on the client's own settings, a menu offering a way out of
 somewhere you are not (§61).
 
-**§359.3 — AND THE ONE ASSERTION ABOUT THE SWITCHER PASSED FOR THE WRONG REASON
+**§362.3 — AND THE ONE ASSERTION ABOUT THE SWITCHER PASSED FOR THE WRONG REASON
 UNTIL THE STATE WAS MADE.** `data-modules` is written only for a client holding
 MORE THAN ONE module (§320.6), and the dev tenant holds one — so *the switcher
 is not drawn* was true of a client that could never have had it, on every build
@@ -49515,7 +49515,7 @@ including one that drew it everywhere (§113.8, found by falsifying rather than
 by reading). The check gives the tenant a second module and puts it back in a
 `finally` (§255, §94.2).
 
-**§359.4 — AND A NEIGHBOUR HELD A LITERAL THIS DECISION MOVED** (§214.3, the
+**§362.4 — AND A NEIGHBOUR HELD A LITERAL THIS DECISION MOVED** (§214.3, the
 eighth time): `checks/shell.mjs` §3 asserted the way-back control reads *"Raya
 Trade"* — measured on `/setup/people`, which is now the client's own settings,
 where it deliberately says *Save & close*. **REWRITTEN, NEVER LOOSENED**
@@ -49523,7 +49523,7 @@ where it deliberately says *Save & close*. **REWRITTEN, NEVER LOOSENED**
 something — asserted at BOTH ENDS, because a build that stopped naming the
 client anywhere satisfies half of it.
 
-**§359.5 — AND UNDOING A FALSIFICATION WITH `git checkout` THREW THE WORK
+**§362.5 — AND UNDOING A FALSIFICATION WITH `git checkout` THREW THE WORK
 AWAY.** §343.9 records exactly this and it happened again, with that section in
 front of me: the sources held uncommitted work, the restore took the break AND
 the feature, and two files went back to `main`'s bytes. Recovered from the BUILT
@@ -49532,15 +49532,15 @@ proved by rebuilding to a file **byte-identical** to the one the checks had
 passed against. *Restore from the copy you saved, and prove the recovery by
 comparing the build.*
 
-**§359.7 — AND THE SWEEP'S OWN CLIENT-RAIL WALK STOPPED RATHER THAN FAILED.**
-§356.6 walks the client's rail once per viewer, and it re-picked the viewer ON
+**§362.7 — AND THE SWEEP'S OWN CLIENT-RAIL WALK STOPPED RATHER THAN FAILED.**
+§359.6 walks the client's rail once per viewer, and it re-picked the viewer ON
 that page, because a reload lands on whoever signed in. With the strip stood
 down, `select_option` on a `display:none` control waits thirty seconds and the
 whole sweep ends with *"waiting 500ms"* as its last line — **a run that STOPPED
 rather than passed**, and §316.4's own lesson is that the tail is the verdict.
 **REWRITTEN, NEVER LOOSENED** (§218, §214.3, the ninth time): there is no pick
 to make there any more, so a viewer this browser is not signed in as walks
-nothing and counts nothing — which is the same answer §356.6 measured, since
+nothing and counts nothing — which is the same answer §359.6 measured, since
 the router sends such a viewer off that rail anyway — and the strip's absence
 is ASSERTED rather than assumed, so the day it comes back the walk is told it
 owes a pick again. Never `continue`: the per-viewer line under it is that
@@ -49556,16 +49556,16 @@ it is byte-identical to what it was. *A control that moves is not one place to
 correct; it is every place that reaches for it, and the second one is a whole
 iteration away from the first.*
 
-**§359.8 — AND ANSWERING THE SITES THAT FAILED IS ANSWERING THE SITES YOU HAVE
-SEEN FAIL.** §359.7 fixed the two that had actually stopped the sweep, and the
+**§362.8 — AND ANSWERING THE SITES THAT FAILED IS ANSWERING THE SITES YOU HAVE
+SEEN FAIL.** §362.7 fixed the two that had actually stopped the sweep, and the
 run then walked all **33 viewers** and stopped on the identical timeout at a
 THIRD — a viewer pick after the template round trip — and, with that one fixed,
 on a FOURTH: `show_units()` pressing the Units | Functions switch, which lives
 in the row this section stands down. Three rounds, each one a site the previous
 round had no reason to look at. **THE CAUSE IS NOT THE COUNT OF SITES, IT IS
 THAT TWO SECTIONS NAVIGATE TO THE CLIENT'S SETTINGS AND EVERYTHING AFTER THEM
-INHERITS THE PAGE** — the per-viewer client-rail walk (§356.6) and the
-Functions page, which is the CLIENT's since §356.2 — so every later block
+INHERITS THE PAGE** — the per-viewer client-rail walk (§359.6) and the
+Functions page, which is the CLIENT's since §359.2 — so every later block
 begins standing somewhere its chrome is not drawn. **ONE HELPER, ASKED WHERE
 THE CHROME IS REACHED FOR** (`module_page()`, §53.5, §104.7): the viewer
 wrapper every pick already goes through, and `show_units()`, whose whole job is
@@ -49596,8 +49596,8 @@ one declaration if he wants it, and it is his to ask for.
 
 ---
 
-**§359.2 — FOREFRONT TEAM IS THE STORE AND THE REGISTER IS A READER
-(2026-09-16, spec 056 §3a, stage 2 of six).** Islam, of the drawing showing a
+**§362.2 — FOREFRONT TEAM IS THE STORE AND THE REGISTER IS A READER
+(2026-09-16, spec 058 §3a, stage 2 of six).** Islam, of the drawing showing a
 consultant beside the client's own people: *"a consultant shouldn't be on the
 register one role is enough"*, and then his own revision, which is the
 decision — *"how about the forefront team is a separate view as you did but we
@@ -49707,7 +49707,7 @@ refusal **2 red** on exactly the adopted assertions, the marks not held back
 register's consultants asserted as an agreement with it rather than against a
 typed name — **111 ok, 0 failed.**
 
-**§359.3 — AND THREE OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK.** It
+**§362.3 — AND THREE OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK.** It
 asked a ROW for a role picker §116 moved into the dialog, so it reported an
 ordinary person as broken (§100.3) — which is how the stronger reading above
 was found at all. It read a node `paint()` had already replaced, and reported
@@ -49721,11 +49721,11 @@ unmade. The platform's own way out is `#modal-x`, by its real id (§116.6).
 **RECORDED, NOT DONE.** A minted consultant's row still offers *Delete
 permanently* to a Super user, and deleting it is the state §338 exists to
 prevent — the row comes back on their next request, so it heals, but nothing
-says so at the press. And spec 056 §4's simplification, the client's seven
+says so at the press. And spec 058 §4's simplification, the client's seven
 pages leaving the access matrix, is stage 3: this stage moves nobody's access
 and the T0 baseline is what will say so.
 
-## §360 — THE TRIAL MODULE GOES, AND WHAT ITS CHECK PROVED STAYS (2026-09-17)
+## §363 — THE TRIAL MODULE GOES, AND WHAT ITS CHECK PROVED STAYS (2026-09-17)
 
 Islam, in one line: *"let's remove the trial module now."*
 
@@ -49733,7 +49733,7 @@ Islam, in one line: *"let's remove the trial module now."*
 deliberately not a product name — his own words, *"something even for the
 trial"* — to show a module could be turned on for one client, opened at its own
 address, and draw a page naming that client. §354 then made three modules real
-and gave the route a table to dispatch through, and §355/§356 gave Insights an
+and gave the route a table to dispatch through, and §355/§359 gave Insights an
 area, a landing line and a Setup group. What the trial demonstrated is now
 demonstrated by a module somebody bought.
 
@@ -49751,13 +49751,13 @@ database that still carries the word is not a database that is wrong.
 `"trial"` in a dozen assertions besides. Both are the same fault at two sizes
 (§214.3, the eleventh time): a literal outliving the decision behind it.
 
-* **§360.1 — A SECOND MODULE IS FOUND, NEVER NAMED.** Every line needing *a
+* **§363.1 — A SECOND MODULE IS FOUND, NEVER NAMED.** Every line needing *a
   module the client has besides the default* now reads `OTHER`, derived from
   `MODULE_DEF`. Removing this module would have meant editing a dozen
   assertions; adding the next one means editing none. And it is guarded —
   if there is no second built module at all the file says so in one assertion
   rather than going quietly green over a list of one (§54.5, §113.8).
-* **§360.2 — §5 WAS ABOUT ANY MODULE'S PAGE AND SAID TRIAL.** Six of its
+* **§363.2 — §5 WAS ABOUT ANY MODULE'S PAGE AND SAID TRIAL.** Six of its
   claims — the document names THIS client, a different client gets a different
   document, there is a door OUT, the module you are in is marked, a client
   holding only the default is offered no door it does not have, no row of
@@ -49765,24 +49765,24 @@ database that still carries the word is not a database that is wrong.
   module draws for itself**. They are asked of every such module now
   (`OWN_PAGE`, found by looking for a `page.ts`), so the next module is
   covered the day it lands.
-* **§360.3 — WHAT WENT WITH IT IS SAID RATHER THAN MOURNED** (§54.5). The
+* **§363.3 — WHAT WENT WITH IT IS SAID RATHER THAN MOURNED** (§54.5). The
   trial's greeting was built from the client's REGISTER, so it proved two
   things nothing else here proves: that a count the page could not read is
   **said** and never printed as a nought (§35, §93), and that a plural is not
   made by adding an `s` (§107.8). The first is answered for Insights in §2c —
   a library it could not read still draws, in the shipped colour. The second
   lives in that page's own `plural()` with nobody asking it here.
-* **§360.4 — THE BREAK MOVES SO THE FALSIFICATION SURVIVES.**
+* **§363.4 — THE BREAK MOVES SO THE FALSIFICATION SURVIVES.**
   `SMP_BREAK=static-hello` was the trial's own line and is now Insights': a
   build whose page stopped naming THIS client. It is the one thing a module
   drawn per client has to get right and the one thing a static page would
   satisfy every other assertion about. `check:modules:red` is still eight
   breaks and all eight are still red.
-* **§360.5 — AND THE SWITCHER'S FIXTURE WAS TWO MODULES TYPED OUT**, one of
+* **§363.5 — AND THE SWITCHER'S FIXTURE WAS TWO MODULES TYPED OUT**, one of
   them this one. It is `moduleMenu(offerable())` now — the same function the
   server stamps the attribute from (§53.5) — so §7 drives the list a real
   client would be sent.
-* **§360.6 — ONE ASSERTION NAMED THE TRIAL BECAUSE OF A PROPERTY IT ALONE
+* **§363.6 — ONE ASSERTION NAMED THE TRIAL BECAUSE OF A PROPERTY IT ALONE
   HAD**, and is REWRITTEN rather than deleted (§218): its only declared
   landing line was `none`, so *"a module with no pick says nothing"* was true
   of that module and not of the rule. The rule is that an unchosen module says
@@ -49794,7 +49794,7 @@ database that still carries the word is not a database that is wrong.
 ROUND'S BEFORE IT WAS TOUCHED** (§303, by diff: neither the check nor either
 of its subjects is in this change). `checks/client-card-modules.py` §4
 asserted that pressing a card's **Settings** *"navigates nowhere"* — true
-while the set-up flow drew itself on the console page, and false since §357
+while the set-up flow drew itself on the console page, and false since §360
 made Settings a door to `/<client>/setup`. REWRITTEN, never loosened (§218):
 what survives the decision is that Settings is its **own** control — it goes
 to the client's own Setup and not into a module, which is what the row above
@@ -49816,9 +49816,9 @@ working as designed.
 ---
 
 
-## §361 — THE FOREFRONT TEAM IS A SETUP TABLE (2026-09-17, spec 056 §3a)
+## §364 — THE FOREFRONT TEAM IS A SETUP TABLE (2026-09-17, spec 058 §3a)
 
-Islam, of the page §359.2 shipped: *"forefront team is damaged it needs to be
+Islam, of the page §362.2 shipped: *"forefront team is damaged it needs to be
 a table looks like the people register wiht the required columns."*
 
 **MEASURED BEFORE ANYTHING WAS DRAWN, AND THE CAUSE IS ONE CLASS.** `mountTeam`
@@ -49873,7 +49873,7 @@ is not.
 placeholder to *"…as who on this client's registe"* — a control asking a
 question it cannot finish. Each select is as wide as its own words now.
 
-**§361.1 — THE SLACK HAS TO GO SOMEWHERE, AND SAYING WHICH COLUMN TAKES IT IS
+**§364.1 — THE SLACK HAS TO GO SOMEWHERE, AND SAYING WHICH COLUMN TAKES IT IS
 MOST OF THE FIT.** A setup table fills its pane, so with every column sized to
 its content the leftover is handed out in proportion. Two attempts, each
 measured rather than reasoned: `width:1%` on the last column — the register's
@@ -49884,7 +49884,7 @@ is; `width:100%` on the name **starved the middle three to nought** at the same
 width. Left alone, the leftover is shared and every column keeps a sane size at
 every width.
 
-**§361.2 — A COLUMN CAN NEVER BE NARROWER THAN THE WIDEST THING THAT WILL NOT
+**§364.2 — A COLUMN CAN NEVER BE NARROWER THAN THE WIDEST THING THAT WILL NOT
 WRAP**, and that is what decides whether the table fits at all. Its minimum is
 the sum of five of them, **measured at 936px against an 825px pane at 1100** —
 over by 111. The two that would not give were a 240px `<select>` and a
@@ -49896,7 +49896,7 @@ of that pane. **Both are measured constants and the check asserts the FIT rather
 than either of them** (§122.5), so a rail that changes width turns it red
 instead of going stale quietly. It fits at **1325 / 1165 / 1005 / 825**.
 
-**§361.3 — AND BELOW THAT NO CAP CAN MAKE IT FIT, SO THE BOX SCROLLS RATHER THAN
+**§364.3 — AND BELOW THAT NO CAP CAN MAKE IT FIT, SO THE BOX SCROLLS RATHER THAN
 CUTTING.** The five minima come to **802px** and a 1000px window gives the pane
 **725**, so under about 1080 the table is wider than its box whatever the numbers
 say — and a table overflowing a box with `overflow:visible` is the reported fault
@@ -49907,21 +49907,21 @@ table's — §135.2's damaged matrix was a STICKY head inside a scroll box. Asse
 at both ends: the box must be ABLE to scroll and the last column must be
 REACHABLE by scrolling it, with the page itself gaining none.
 
-**§361.4 — A CELL THAT HOLDS A CONTROL HAS NO VALUE FOR A HOVER, AND THE
+**§364.4 — A CELL THAT HOLDS A CONTROL HAS NO VALUE FOR A HOVER, AND THE
 FALSIFICATION IS WHAT SAID SO.** `clipTitles()` walks `.cfg table td` and,
 finding no `.val`, `.why`, `b` or `.mono` inside, falls back to the cell — and a
 `<select>`'s text is **every option it holds**, so the first build's hover read
 *"a row of their ownMohamed Essam · …Ashraf…Mennah…"*. §88's measured title is
 for a VALUE that did not fit. It was marked `data-keep-title`, that function's
 own opt-out — **and the run made to prove that mark load-bearing came back
-GREEN** (§298.2, §54.5): giving the select its cell in §361.2 had meanwhile
+GREEN** (§298.2, §54.5): giving the select its cell in §364.2 had meanwhile
 removed the overflow that produced the title at all, measured at every width from
 1600 to 768. So the mark is **DELETED** rather than kept as a line the next
 reader takes for load-bearing (§24), the assertion stands on the paint, and the
 falsification that replaced it puts the 240px select back — which brings the
 overflow and the hover back together.
 
-**§361.5 — AND AN EDIT THAT PRINTS NOTHING IS NOT AN EDIT THAT HAPPENED.** Two
+**§364.5 — AND AN EDIT THAT PRINTS NOTHING IS NOT AN EDIT THAT HAPPENED.** Two
 cap changes in a row were applied by a `replace` whose old text no longer matched
 (the comment above it had moved), so three measurement rounds were spent reading
 the SAME numbers and calling the cap ineffective. §54.5's rule in my own hands:

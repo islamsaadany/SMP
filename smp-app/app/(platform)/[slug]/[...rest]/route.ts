@@ -58,7 +58,7 @@ export async function GET(req: Request, { params }: P) {
      draws — so a fourth module is a folder and an entry, and this file is not
      edited at all.
 
-     SETUP IS THE SPINE'S OWN DOCUMENT, FOR EVERY MODULE (§356.2, spec 054
+     SETUP IS THE SPINE'S OWN DOCUMENT, FOR EVERY MODULE (§359.2, spec 056
      §4.2, research R1). `/<client>/setup/…` is the client's pages and
      `/<client>/<module>/setup/…` is that module's own — both are the frozen
      shell served by lib/shell.ts, stamped with the module whose word led (or
@@ -69,7 +69,7 @@ export async function GET(req: Request, { params }: P) {
      spine with the rest of Setup, and the module brings only its defs.
      `tour` stays the default module's, being where the intro round is drawn. */
   const key = w.module || DEFAULT_MODULE;
-  /* WHO MAY OPEN THE MODULE (§356.5, spec 054 §4.4, research R3): asked of
+  /* WHO MAY OPEN THE MODULE (§359.5, spec 056 §4.4, research R3): asked of
      the spine BEFORE anything of the module is drawn — its Setup included —
      and a refusal is the redirect an unknown module word gets above, so a
      shut module and an absent one answer identically (§320.5). Only an
@@ -81,10 +81,10 @@ export async function GET(req: Request, { params }: P) {
   const open = await openableModules(ans.tenant.id, ans.seat, ans.personKey, ans.tenant.modules);
   if (w.rest[0] === "setup") {
     /* the module's Landing line page reads its declaration off the document
-       (§356.4) — computed here, on the Setup document alone — and its Access
-       page the module's declared areas (§356.5), the same way */
+       (§359.4) — computed here, on the Setup document alone — and its Access
+       page the module's declared areas (§359.5), the same way */
     const landing = await landingStampFor(ans.tenant.id, key, ans.seat, ans.personKey, ans.tenant.modules);
-    /* WHICH RAIL, STAMPED BY THE SIDE THAT KNOWS (§359, spec 056). `w.module`
+    /* WHICH RAIL, STAMPED BY THE SIDE THAT KNOWS (§362, spec 058). `w.module`
        is set only where the module word LED the address, which is exactly the
        difference between a module's own Setup and the client's — the same
        test shell/route.js's placeOf makes in the browser, answered here so it

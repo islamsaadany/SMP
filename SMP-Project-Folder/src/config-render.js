@@ -98,7 +98,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      rather than migrated (§33, §37) — so a direct read was undefined[key] and
      the whole page threw. The cell shows what the platform would actually
      answer, which is the shipped default until somebody changes it. */
-  /* §356.5: A MODULE'S CELL IS THE SAME CELL WITH ITS OWN READER. `opt`
+  /* §359.5: A MODULE'S CELL IS THE SAME CELL WITH ITS OWN READER. `opt`
      carries what a module's area declares — its current value (read through
      moduleGrantFor, whose default is the module's shipped state and never
      ACCESS_DEFAULTS'), the states it admits, and the attribute the press
@@ -157,7 +157,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
     opts + '</span></td>';
 }
 
-/* THE ROWS EVERY ACCESS TABLE WALKS, NAMED ONCE (§356.5): Strategy's matrix
+/* THE ROWS EVERY ACCESS TABLE WALKS, NAMED ONCE (§359.5): Strategy's matrix
    and a module's one-column table are two tables over ONE list of roles, so
    the list — and the floor row that is not a role (§93) — is built here and
    asked by both, or the day a role is added the two disagree about who is on
@@ -183,7 +183,7 @@ function roleCell(r){
     '</span></td>';
 }
 
-/* ── A MODULE'S OWN ACCESS TABLE (§356.5, spec 054 §4.4, spec 046 §4.4) ──
+/* ── A MODULE'S OWN ACCESS TABLE (§359.5, spec 056 §4.4, spec 046 §4.4) ──
    The first thing that READS a module's declared areas other than a check,
    which is what the declaration was written for (spec 053 §4.5). The
    client's roles down — matrixRows(), the matrix's own list — and the
@@ -1364,7 +1364,7 @@ function brandNow(key){
     return ("0" + (+x).toString(16)).slice(-2); }).join("") : "#000000";
 }
 
-/* ── BRANDING IS A PART OF GETTING STARTED NOW (§357, spec 055) ─────────
+/* ── BRANDING IS A PART OF GETTING STARTED NOW (§360, spec 057) ─────────
    Islam: *"it absorbs the branding part with the mark and the brand colors
    and remove the separate branding setting."* The page def is gone from
    SUBS.setup; what it drew is `brandingBody()`, which the client set-up
@@ -1887,7 +1887,7 @@ function renderPeople(){
        never the shape in the graph: the mark would simply never have drawn,
        and the check that asked for it is what said so. */
     /* ── AND IT IS THE MINT THAT IS READ-ONLY, NEVER THE MARK
-       (spec 056 §3a.1, §359.2) ────────────────────────────────
+       (spec 058 §3a.1, §362.2) ────────────────────────────────
        The paragraph above is true of a row the platform BUILT and was being
        applied to one it merely ADOPTED — the client's own person, marked
        because their address matched exactly one active row (§313.32), whose
@@ -2388,7 +2388,7 @@ function renderPeople(){
        the page already has one edit mode, and a second way to edit the same
        row is a second place for the two to disagree. */
     var acts = [];
-    /* ── A FOREFRONT ROW IS READ-ONLY HERE, AND IT SAYS WHERE (§359.2) ──
+    /* ── A FOREFRONT ROW IS READ-ONLY HERE, AND IT SAYS WHERE (§362.2) ──
        Spec 056 §3a: Forefront team is the store and the register is a reader,
        so every act that would REWRITE this row belongs on that page. It is
        not a new refusal — `lib/authorize.js` has refused the whole row as its
@@ -2403,12 +2403,12 @@ function renderPeople(){
        on purpose — a client taking an office person off their own register is
        a real act and a loud one — and it is already the Super user's alone.
 
-       AND THE PASSWORD ENTRY GOES FOR EVERYBODY (spec 056 §3a), where §89
+       AND THE PASSWORD ENTRY GOES FOR EVERYBODY (spec 058 §3a), where §89
        only ever kept it from an SMO team member: a consultant signs in at
        Forefront's own door with their account, so a credential minted here is
-       one nobody needs. Recorded rather than slipped in — see §359.2's note.
+       one nobody needs. Recorded rather than slipped in — see §362.2's note.
 
-       AND IT IS THE MINT, NEVER THE MARK (spec 056 §3a.1). An ADOPTED row is
+       AND IT IS THE MINT, NEVER THE MARK (spec 058 §3a.1). An ADOPTED row is
        the client's own person and every one of these acts is theirs to make;
        asked of the shared pair so this menu and the save answer alike (§42). */
     var ffRow = SMPRules.isMintedRow(p);
@@ -3110,7 +3110,7 @@ function renderPeople(){
       'and nowhere in this client.">' +
       plural(seatHolders.length, "person", "people") + ' hold a seat</span>';
 
-  /* ── THE COUNT SAYS BOTH (spec 056 §3a, §359.2) ─────────────────
+  /* ── THE COUNT SAYS BOTH (spec 058 §3a, §362.2) ─────────────────
      Islam: *"The count says both: 33 of the client's own people · 3 from
      Forefront, rather than one number quietly meaning two things."* With
      Forefront team as the store and this table a reader (§3a), the register
@@ -5925,7 +5925,7 @@ function renderArchives(){
 }
 
 /* ══ WHAT IS WAITING ON THE OFFICE — the one list three surfaces read
-   (§108.10, §116.2, §148, §197.2; the page that first held it went at §356)
+   (§108.10, §116.2, §148, §197.2; the page that first held it went at §359)
    ════════════════════════════════════════════════════════════════════
    EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design: no
    row is allowed to compute anything; each declares a `count` that calls the
@@ -5947,7 +5947,7 @@ function renderArchives(){
    (attentionByPage below), and the home mark's gold (welcome.js waiting()).
    The Setup Overview was the fourth reader and the one the others made
    redundant — it drew this list beside the cycle column, and the landing
-   draws both (§148, §200) — so it is DELETED at §356 (spec 054 §9.1) rather
+   draws both (§148, §200) — so it is DELETED at §359 (spec 056 §9.1) rather
    than kept as a second drawing of the page the office lands on. */
 function attentionRows(){
   var rows = [
@@ -5981,7 +5981,7 @@ function attentionRows(){
    list rather than written out again — rename a page and this follows (§108.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
-  /* `setupDefsAll` since §356.2: a destination is named whichever rail holds
+  /* `setupDefsAll` since §359.2: a destination is named whichever rail holds
      it — a landing row for the register is drawn beside Strategy's rail. */
   var d = (typeof setupDefsAll === "function" ? setupDefsAll()
            : typeof setupDefs === "function" ? setupDefs() : []).filter(
@@ -7301,7 +7301,7 @@ function commsStatusRows(){
   return out;
 }
 
-/* ══ THE LANDING LINE (§356.4, spec 054 §4.5) ═══════════════════════════
+/* ══ THE LANDING LINE (§359.4, spec 056 §4.5) ═══════════════════════════
    Islam: each module has its own setup elements, its access and its landing
    line. The module DECLARES the sentences it can say about itself
    (smp-app/lib/modules.ts) and the client picks one here, from a radio list
@@ -8456,7 +8456,7 @@ function tkHead(id, allow){
     if (allow === false) sortable = false;
     /* `id` names a column an ADDRESS can point at — the landing's Access door
        opens the register at `#seat`, the Roles column, where the seats and
-       where each person sits already are (spec 054 §4.4; shell/route.js
+       where each person sits already are (spec 056 §4.4; shell/route.js
        scrolls to it). Only ever a bare word, on the unsortable branch. */
     var idA = id ? ' id="' + esc(id) + '"' : '';
     if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';

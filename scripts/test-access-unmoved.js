@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* WHAT EVERY PERSON CAN OPEN, MEASURED BEFORE ANYTHING MOVES (T0, spec 056).
+/* WHAT EVERY PERSON CAN OPEN, MEASURED BEFORE ANYTHING MOVES (T0, spec 058).
  *
  * Islam, of the client/module split: *"bring any access that was removed"* —
  * and the only honest answer to that is a measurement rather than a reading.

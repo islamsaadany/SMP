@@ -328,7 +328,7 @@
        on the server (office by rule, §97's shape): who reads every person's
        changes is not a tick somebody could set on a bad afternoon. */
     { key:"c_history", area:"always", scope:"manage", label:"History",          note:"Who changed what, and put a value back" },
-    /* THE LANDING LINE (§356.4). `area:"always"` with the real gate in the
+    /* THE LANDING LINE (§359.4). `area:"always"` with the real gate in the
        page def (the office) and on the server (a `setup` change): what a
        module says about itself on the client landing is the office's, and
        spec 046 §4.4's per-module Access table is where it will be granted
@@ -779,7 +779,7 @@
      (§97.1). A responsibility role could never make somebody the office or the
      Super user, so nothing is missed by not looking for one. */
   /* ── TWO KINDS OF FOREFRONT ROW, AND ONLY ONE IS OURS TO REWRITE
-     (spec 056 §3a.1, §359.2) ─────────────────────────────────
+     (spec 058 §3a.1, §362.2) ─────────────────────────────────
      `officeRow` has marked them apart since §313.29 and nothing read the
      difference, so the register and the authoriser both treated every marked
      row as the platform's:
@@ -3067,7 +3067,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      THE FIELD IS NAMED ONCE and `lib/authorize.js` classifies it by this
      constant, for §234's reason. */
   var PRESENT_MINS = "presentMins";
-  /* ── THE LANDING LINE (§356.4, spec 054 §4.5) ─────────────────────
+  /* ── THE LANDING LINE (§359.4, spec 056 §4.5) ─────────────────────
      Which of its declared sentences each module says on the client landing,
      keyed by module — `{ strategy: "waiting" }` — chosen on the module's own
      Landing line page. The SENTENCES are declared beside the module
@@ -3079,7 +3079,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      this same name. Stored as an ABSENCE (§50.6): a module on its default
      line holds no entry, and the last entry leaving deletes the map. */
   var LANDING_PICK = "landing";
-  /* §357 (spec 055): whether the client's set-up has been pressed Done. ONE
+  /* §360 (spec 057): whether the client's set-up has been pressed Done. ONE
      key on the group, stored as an ABSENCE (§50.6): a client being set up
      holds no entry, and "Done with set-up" writes `true`. The rail reads it
      to move Getting started from the top of the client's Setup to the
@@ -11359,7 +11359,7 @@ var ACCESS_DEFAULTS = SMPRules.ACCESS_DEFAULTS;
 var STATE_RANK = SMPRules.STATE_RANK;
 function grantFor(roleKey, areaKey){ return SMPRules.grantFor(world(), roleKey, areaKey); }
 
-/* ── A MODULE'S OWN GRANT (§356.5, spec 054 §4.4; spec 046 §4.4) ─────
+/* ── A MODULE'S OWN GRANT (§359.5, spec 056 §4.4; spec 046 §4.4) ─────
    A module other than Strategy declares its areas beside its label
    (smp-app/lib/modules.ts MODULE_DEF) and NOT in lib/rules.js — the carried
    rules copy is asserted identical to the frozen one (§335), and a module's
@@ -11394,7 +11394,7 @@ function setModuleGrant(roleKey, areaKey, state, shipped){
 /* MAY THIS PERSON OPEN A MODULE — the most generous answer across the roles
    they hold, the floor included (rolesOrFloor's own shape, §93: somebody on
    the register holding nothing is judged on the Everyone-else row). Asked by
-   the served route before a module is drawn (spec 054 research R3); the seat
+   the served route before a module is drawn (spec 056 research R3); the seat
    is decided before this is asked and never here. */
 function mayOpenModuleArea(person, area){
   if (!person) return (area.shipped || "none") !== "none";
@@ -16607,7 +16607,7 @@ var RECIPES = [
        "figures and clears the reporting fields, so each unit is asked again " +
        "rather than inheriting the last set of answers." },
   { id: "branding", q: "How do I set the colours and the logo?", who: "office",
-    /* §357: the Branding page is gone — the mark and the colours are the
+    /* §360: the Branding page is gone — the mark and the colours are the
        first step of the client's own set-up, Getting started until it is
        finished and Client set-up after (§104.8: prose that names a page
        that no longer exists is corrected in the edit that removes it). */
@@ -30366,7 +30366,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      rather than migrated (§33, §37) — so a direct read was undefined[key] and
      the whole page threw. The cell shows what the platform would actually
      answer, which is the shipped default until somebody changes it. */
-  /* §356.5: A MODULE'S CELL IS THE SAME CELL WITH ITS OWN READER. `opt`
+  /* §359.5: A MODULE'S CELL IS THE SAME CELL WITH ITS OWN READER. `opt`
      carries what a module's area declares — its current value (read through
      moduleGrantFor, whose default is the module's shipped state and never
      ACCESS_DEFAULTS'), the states it admits, and the attribute the press
@@ -30425,7 +30425,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
     opts + '</span></td>';
 }
 
-/* THE ROWS EVERY ACCESS TABLE WALKS, NAMED ONCE (§356.5): Strategy's matrix
+/* THE ROWS EVERY ACCESS TABLE WALKS, NAMED ONCE (§359.5): Strategy's matrix
    and a module's one-column table are two tables over ONE list of roles, so
    the list — and the floor row that is not a role (§93) — is built here and
    asked by both, or the day a role is added the two disagree about who is on
@@ -30451,7 +30451,7 @@ function roleCell(r){
     '</span></td>';
 }
 
-/* ── A MODULE'S OWN ACCESS TABLE (§356.5, spec 054 §4.4, spec 046 §4.4) ──
+/* ── A MODULE'S OWN ACCESS TABLE (§359.5, spec 056 §4.4, spec 046 §4.4) ──
    The first thing that READS a module's declared areas other than a check,
    which is what the declaration was written for (spec 053 §4.5). The
    client's roles down — matrixRows(), the matrix's own list — and the
@@ -31632,7 +31632,7 @@ function brandNow(key){
     return ("0" + (+x).toString(16)).slice(-2); }).join("") : "#000000";
 }
 
-/* ── BRANDING IS A PART OF GETTING STARTED NOW (§357, spec 055) ─────────
+/* ── BRANDING IS A PART OF GETTING STARTED NOW (§360, spec 057) ─────────
    Islam: *"it absorbs the branding part with the mark and the brand colors
    and remove the separate branding setting."* The page def is gone from
    SUBS.setup; what it drew is `brandingBody()`, which the client set-up
@@ -32155,7 +32155,7 @@ function renderPeople(){
        never the shape in the graph: the mark would simply never have drawn,
        and the check that asked for it is what said so. */
     /* ── AND IT IS THE MINT THAT IS READ-ONLY, NEVER THE MARK
-       (spec 056 §3a.1, §359.2) ────────────────────────────────
+       (spec 058 §3a.1, §362.2) ────────────────────────────────
        The paragraph above is true of a row the platform BUILT and was being
        applied to one it merely ADOPTED — the client's own person, marked
        because their address matched exactly one active row (§313.32), whose
@@ -32656,7 +32656,7 @@ function renderPeople(){
        the page already has one edit mode, and a second way to edit the same
        row is a second place for the two to disagree. */
     var acts = [];
-    /* ── A FOREFRONT ROW IS READ-ONLY HERE, AND IT SAYS WHERE (§359.2) ──
+    /* ── A FOREFRONT ROW IS READ-ONLY HERE, AND IT SAYS WHERE (§362.2) ──
        Spec 056 §3a: Forefront team is the store and the register is a reader,
        so every act that would REWRITE this row belongs on that page. It is
        not a new refusal — `lib/authorize.js` has refused the whole row as its
@@ -32671,12 +32671,12 @@ function renderPeople(){
        on purpose — a client taking an office person off their own register is
        a real act and a loud one — and it is already the Super user's alone.
 
-       AND THE PASSWORD ENTRY GOES FOR EVERYBODY (spec 056 §3a), where §89
+       AND THE PASSWORD ENTRY GOES FOR EVERYBODY (spec 058 §3a), where §89
        only ever kept it from an SMO team member: a consultant signs in at
        Forefront's own door with their account, so a credential minted here is
-       one nobody needs. Recorded rather than slipped in — see §359.2's note.
+       one nobody needs. Recorded rather than slipped in — see §362.2's note.
 
-       AND IT IS THE MINT, NEVER THE MARK (spec 056 §3a.1). An ADOPTED row is
+       AND IT IS THE MINT, NEVER THE MARK (spec 058 §3a.1). An ADOPTED row is
        the client's own person and every one of these acts is theirs to make;
        asked of the shared pair so this menu and the save answer alike (§42). */
     var ffRow = SMPRules.isMintedRow(p);
@@ -33378,7 +33378,7 @@ function renderPeople(){
       'and nowhere in this client.">' +
       plural(seatHolders.length, "person", "people") + ' hold a seat</span>';
 
-  /* ── THE COUNT SAYS BOTH (spec 056 §3a, §359.2) ─────────────────
+  /* ── THE COUNT SAYS BOTH (spec 058 §3a, §362.2) ─────────────────
      Islam: *"The count says both: 33 of the client's own people · 3 from
      Forefront, rather than one number quietly meaning two things."* With
      Forefront team as the store and this table a reader (§3a), the register
@@ -36193,7 +36193,7 @@ function renderArchives(){
 }
 
 /* ══ WHAT IS WAITING ON THE OFFICE — the one list three surfaces read
-   (§108.10, §116.2, §148, §197.2; the page that first held it went at §356)
+   (§108.10, §116.2, §148, §197.2; the page that first held it went at §359)
    ════════════════════════════════════════════════════════════════════
    EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design: no
    row is allowed to compute anything; each declares a `count` that calls the
@@ -36215,7 +36215,7 @@ function renderArchives(){
    (attentionByPage below), and the home mark's gold (welcome.js waiting()).
    The Setup Overview was the fourth reader and the one the others made
    redundant — it drew this list beside the cycle column, and the landing
-   draws both (§148, §200) — so it is DELETED at §356 (spec 054 §9.1) rather
+   draws both (§148, §200) — so it is DELETED at §359 (spec 056 §9.1) rather
    than kept as a second drawing of the page the office lands on. */
 function attentionRows(){
   var rows = [
@@ -36249,7 +36249,7 @@ function attentionRows(){
    list rather than written out again — rename a page and this follows (§108.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
-  /* `setupDefsAll` since §356.2: a destination is named whichever rail holds
+  /* `setupDefsAll` since §359.2: a destination is named whichever rail holds
      it — a landing row for the register is drawn beside Strategy's rail. */
   var d = (typeof setupDefsAll === "function" ? setupDefsAll()
            : typeof setupDefs === "function" ? setupDefs() : []).filter(
@@ -37569,7 +37569,7 @@ function commsStatusRows(){
   return out;
 }
 
-/* ══ THE LANDING LINE (§356.4, spec 054 §4.5) ═══════════════════════════
+/* ══ THE LANDING LINE (§359.4, spec 056 §4.5) ═══════════════════════════
    Islam: each module has its own setup elements, its access and its landing
    line. The module DECLARES the sentences it can say about itself
    (smp-app/lib/modules.ts) and the client picks one here, from a radio list
@@ -38724,7 +38724,7 @@ function tkHead(id, allow){
     if (allow === false) sortable = false;
     /* `id` names a column an ADDRESS can point at — the landing's Access door
        opens the register at `#seat`, the Roles column, where the seats and
-       where each person sits already are (spec 054 §4.4; shell/route.js
+       where each person sits already are (spec 056 §4.4; shell/route.js
        scrolls to it). Only ever a bare word, on the unsortable branch. */
     var idA = id ? ' id="' + esc(id) + '"' : '';
     if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
@@ -47262,7 +47262,7 @@ var CHAT = (function(){
          are answered and still the rail is showing a notification."
 
          Cleared rather than recounted — the next reader that wants it (the
-         rail's pills, the landing's office list; the Overview until §356)
+         rail's pills, the landing's office list; the Overview until §359)
          asks again, which is the one place that fetch belongs (a second asker
          polling in the background is what §98 was about). §35's shape: the
          status you must remember to refresh is the one nobody refreshes. */
@@ -47627,7 +47627,7 @@ var CHAT = (function(){
        carries the two counts — so this is a second READER of one endpoint and
        not a second endpoint, and the number the landing's office list prints
        (attentionRows()'s chat row) is by construction the number the Inbox's
-       own tab prints. Written for the Setup Overview, which §356 deleted.
+       own tab prints. Written for the Setup Overview, which §359 deleted.
 
        IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
        writing box.threads from here would leave a half-built queue behind for
@@ -49049,7 +49049,7 @@ var WELCOME = (function(){
       pages.appendChild(a);
     }
     if (office) {
-      /* Reporting cycle since §356: the Overview this once opened is gone,
+      /* Reporting cycle since §359: the Overview this once opened is gone,
          and its rows are the list ABOVE this one. */
       pageLink("Setup — Reporting cycle", "", function(){ goSetup("cycle"); });
       pageLink("The group — Performance", "", function(){ goGroup(); });
@@ -49220,7 +49220,7 @@ var WELCOME = (function(){
      session, a projector, already seen this session. Returns whether it
      took the screen, because land() offers the tour only when it did not —
      two docks drawn over one page would fight for every click (§118). */
-  /* AND AN ADDRESS IS NOT A GREETING (§357.9). Islam, pressing *Settings*
+  /* AND AN ADDRESS IS NOT A GREETING (§360.9). Islam, pressing *Settings*
      on the console's card and landing on the client's Setup rail with this
      screen over it: *"when I press continue it opens the clietn settings!!
      … the settings should open the settings directly."* The screen
@@ -50371,7 +50371,7 @@ var CONT = (function () {
 })();
 
 /* ── client-setup.js ── */
-/* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§357, spec 055) ═══════════
+/* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
    with the client settings and I suggest having the getting started with the
@@ -50497,7 +50497,7 @@ function __smpShape(state, a, hydrate) {
     if (had) COMPANIES[k] = __smpCarry(had, COMPANIES[k], ["name"]);
     byName[nm.toLowerCase()] = k;
   });
-  /* A ROW IS MATCHED BY ITS NAME FIRST, AND ONLY THEN BY ITS KEY (§357.3).
+  /* A ROW IS MATCHED BY ITS NAME FIRST, AND ONLY THEN BY ITS KEY (§360.3).
      addBusinessUnit mints a key from the name, and a client's stored keys
      were not always minted that way — Raya's are `mob`, `fin`, `cx`, and a
      client made on the frozen console carries whatever that day's minter
@@ -50614,7 +50614,7 @@ var CLIENTSETUP = (function () {
      Seven, as the mockup draws them. There is no Summary step any more:
      the rail beside this page IS the summary — every answer here is a page
      on it — and Done with set-up is a button on every step rather than a
-     destination at the end (spec 055). */
+     destination at the end (spec 057). */
   var STEPS = [
     { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
     { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
@@ -50701,7 +50701,7 @@ var CLIENTSETUP = (function () {
        (the put-back rows have to be drawn) and a sentence written into the
        old column would go with it (§63). render() writes S.said back and
        the next successful move clears it. */
-    /* §357.6: the console's two pieces (mountCreate, mountArchived) hold no
+    /* §360.6: the console's two pieces (mountCreate, mountArchived) hold no
        step state — S is only ever minted by mount() — and the create piece
        said "Creating…" through this very function, so Add a client THREW
        before it posted anything: no refusal written, no createClient sent,
@@ -50746,7 +50746,7 @@ var CLIENTSETUP = (function () {
   function holdsNow(){ return __smpHoldsNow(); }
   function isDone(){ return !!(typeof SMPRules !== "undefined" && SMPRules.setupDone(GROUP)); }
 
-  /* ── WHAT THE RAIL'S STRIP SAYS (spec 055): which steps the data holds an
+  /* ── WHAT THE RAIL'S STRIP SAYS (spec 057): which steps the data holds an
      answer for. Counted, never remembered — the data IS the progress
      (§129), so there is no second record of it to fall out of step. The
      client and its words always count (the client exists; a word left as
@@ -50786,7 +50786,7 @@ var CLIENTSETUP = (function () {
     render();
   }
 
-  /* ── THE CLIENT'S RECORD, ASKED ONCE FOR WHOEVER IS DRAWING (§359.2) ──
+  /* ── THE CLIENT'S RECORD, ASKED ONCE FOR WHOEVER IS DRAWING (§362.2) ──
      Two hosts read it now — the flow, and the Forefront team page below —
      and the state is module-level and keyed on the client, so the second
      reader finds the first one's answer rather than asking again (§53.5).
@@ -50810,7 +50810,7 @@ var CLIENTSETUP = (function () {
     });
   }
 
-  /* ── FOREFRONT TEAM, ON A PAGE OF ITS OWN (§359.2, spec 056 §3a) ───────
+  /* ── FOREFRONT TEAM, ON A PAGE OF ITS OWN (§362.2, spec 058 §3a) ───────
      Islam: *"how about the forefront team is a separate view as you did but
      we keep them on the client list reading from the forefront team list."*
      So it is a Setup page of the client's, and the SET-UP FLOW'S STEP IS THE
@@ -50827,7 +50827,7 @@ var CLIENTSETUP = (function () {
     }
     ensureReg("[data-cteam]", mountTeam);
     host.innerHTML = "";
-    /* A PLAIN BOX (§361). This said `wzstep`, which is the class the step
+    /* A PLAIN BOX (§364). This said `wzstep`, which is the class the step
        CHIPS in the rail above the flow wear — a pill — so the whole page was
        drawn inside one (§65.9). Nothing wraps the table but the page. */
     var box = el("div");
@@ -50972,7 +50972,7 @@ var CLIENTSETUP = (function () {
     var res = __smpShape(copy, S.shape, SYNC.hydrate);
     if (res.dropped.length) {
       SYNC.hydrate(live);
-      /* THE ROWS ARE PUT BACK AS WELL AS REFUSED (§357.3): a refusal that
+      /* THE ROWS ARE PUT BACK AS WELL AS REFUSED (§360.3): a refusal that
          left the removed row out of the flow's own list would refuse every
          Next and Back after it too, with no way to proceed short of typing
          the name back in — the flow held the person on the step. The list
@@ -50991,7 +50991,7 @@ var CLIENTSETUP = (function () {
     S.said = null;
     return true;
   }
-  /* Done with set-up (spec 055): the shape written, then the mark. ONE key
+  /* Done with set-up (spec 057): the shape written, then the mark. ONE key
      on the group (SMPRules.SETUP_DONE), stored as an absence until pressed
      (§50.6); the rail reads it on the next paint. */
   function markDone(){
@@ -51037,7 +51037,7 @@ var CLIENTSETUP = (function () {
   }
 
   /* The registry half, then the graph half: the mark on the door, the
-     group's mark and the brand colours (Branding, absorbed here — spec 055),
+     group's mark and the brand colours (Branding, absorbed here — spec 057),
      the modules this client has, and the way to archive it. */
   function clientStep(box){
     var reg = S.reg, c = reg && reg.client;
@@ -51137,7 +51137,7 @@ var CLIENTSETUP = (function () {
     if (c) rs.appendChild(markBlock(c));
     box.appendChild(rs);
 
-    /* ── THE BRANDING, ABSORBED (spec 055): the group's mark and the two
+    /* ── THE BRANDING, ABSORBED (spec 057): the group's mark and the two
        colours, drawn by the one renderer Branding always had and wired by
        the shell's own handlers after this mounts — no second answer to what
        a colour does (§53.5). */
@@ -51589,8 +51589,8 @@ var CLIENTSETUP = (function () {
     return box;
   }
 
-  /* ── THE OFFICE, AS A SETUP TABLE (§361) ────────────────────────────
-     Islam, of the page §359.2 shipped: *"forefront team is damaged it needs
+  /* ── THE OFFICE, AS A SETUP TABLE (§364) ────────────────────────────
+     Islam, of the page §362.2 shipped: *"forefront team is damaged it needs
      to be a table looks like the people register wiht the required
      columns."* MEASURED BEFORE ANYTHING WAS DRAWN, and the cause was one
      class: `mountTeam` wrapped the rows in `.wzstep`, which is what the
@@ -51649,7 +51649,7 @@ var CLIENTSETUP = (function () {
       tr.appendChild(nm);
       tr.appendChild(el("td", "tmmail", m.email));
       /* A CELL THAT HOLDS A CONTROL CARRIES NO HOVER, AND WHAT MAKES THAT
-         TRUE IS THE WIDTH (§361.4). `clipTitles()` writes a measured title
+         TRUE IS THE WIDTH (§364.4). `clipTitles()` writes a measured title
          on a cell that overflowed, and these do not: the select fills its
          own cell and the two seat buttons set their column's floor, so
          there is nothing to measure. A `data-keep-title` mark was added
@@ -51720,7 +51720,7 @@ var CLIENTSETUP = (function () {
       row.appendChild(add);
       box.appendChild(row);
     }
-    /* ONE SENTENCE, TWO DRESSES (§361). The words are written once; the
+    /* ONE SENTENCE, TWO DRESSES (§364). The words are written once; the
        HOST says how they are dressed, because the two are different rooms:
        on the Setup page it is the family's own `.note` — the bordered block
        Companies and the BU list both end with, which Islam signed off as
@@ -51750,7 +51750,7 @@ var CLIENTSETUP = (function () {
     S.reg = null; S.regErr = null;
     redraw();
   }
-  /* §361: the key inside the cell is GONE — the column heading is the
+  /* §364: the key inside the cell is GONE — the column heading is the
      control's name now, and a label under a heading that already says the
      word says it twice on one row (§87, §267.2). The class stays, because it
      is what sizes the select; `aria-label` carries the name for anybody not
@@ -51869,7 +51869,7 @@ var CLIENTSETUP = (function () {
         .then(function (r) {
           if (!r.ok) { next.disabled = false; say(r.error || "Not created.", true); return; }
           /* INTO THE CLIENT, AT ITS OWN GETTING STARTED PAGE: everything from
-             here on is written where it lives (spec 055). */
+             here on is written where it lives (spec 057). */
           location.assign("/" + r.key + "/setup/start");
         }).catch(function (e) { if (String(e.message) !== "sign in") { next.disabled = false; say("Could not reach the server.", true); } });
     });
@@ -52735,7 +52735,7 @@ var SYNC = (function () {
       var nameEl = document.getElementById("clientbackname");
       /* textContent, never innerHTML: a client's name is typed by a person. */
       if (nameEl) nameEl.textContent = person.clientName || clientSlug();
-      /* AND KEPT WHERE IT IS DRAWN (§359). This function runs once, at
+      /* AND KEPT WHERE IT IS DRAWN (§362). This function runs once, at
          hydration; the client's own settings reword this control to *Save &
          close* on every paint they are open (shell.html clientBar), so the
          name has to survive being written over — and it is remembered on the
@@ -53086,7 +53086,7 @@ var SYNC = (function () {
        never held. */
     graph: function () { return graph(); },
     /* THE GLOBALS REBOUND FROM A GRAPH, for the ONE thing that shapes a
-       client in the browser (client-setup.js, §357): the set-up flow shapes
+       client in the browser (client-setup.js, §360): the set-up flow shapes
        a COPY through the product's own minters and hands it here, so the
        page cannot hold a second idea of how a state becomes the platform. */
     hydrate: function (state) { hydrate(state); },
@@ -53673,7 +53673,7 @@ var SYNC = (function () {
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      /* ── FOREFRONT TEAM, ABOVE THE REGISTER (§359.2, spec 056 §3a) ────
+      /* ── FOREFRONT TEAM, ABOVE THE REGISTER (§362.2, spec 058 §3a) ────
          Forefront's own people on this client, each holding one of the two
          seats — the ONE place a consultant is added, given a seat or taken
          off. It is `client`-scoped because it is a fact about the client and
@@ -53705,16 +53705,16 @@ var SYNC = (function () {
          complete without the other, which is what a two-line conflict looks
          like when both edits are right. */
       { k:"access", ac:"c_access", grp:"access", mod:"strategy", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
-      /* THE LANDING LINE (§356.4, spec 054 §4.5): which of its declared
+      /* THE LANDING LINE (§359.4, spec 056 §4.5): which of its declared
          sentences Strategy says under its row on the client landing. The
-         office's by rule (`c_landing` is `area:"always"`, §356.4 in
+         office's by rule (`c_landing` is `area:"always"`, §359.4 in
          lib/rules.js) until spec 046 §4.4's per-module Access table lands
          (step 5). The sentences and their texts arrive on the served
          document (`data-landing`); over file:// the page says so. */
       { k:"landing", ac:"c_landing", grp:"landing", mod:"strategy", label:"Landing line", glyph:"▤", find:"landing line welcome screen what the module says row sentence",
         when: function(){ return inOffice(); },
         render:renderLandingLine },
-      /* ── INSIGHTS' OWN SETUP (§356.5, spec 054 §4.2, §4.4): two pages, and
+      /* ── INSIGHTS' OWN SETUP (§359.5, spec 056 §4.2, §4.4): two pages, and
          that is its honest size — reports are published from the Forefront
          console, so Access and The landing are all there is for a client to
          set. THE SAME KEYS AS STRATEGY'S, `access` and `landing`, because a
@@ -53798,7 +53798,7 @@ var SYNC = (function () {
          chart. The key `c_labels` and the stored map are untouched. */
       { k:"labels", ac:"c_labels", grp:"meas", mod:"strategy", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
 
-      /* ── GETTING STARTED, THEN CLIENT SET-UP (§357, spec 055) ─────────
+      /* ── GETTING STARTED, THEN CLIENT SET-UP (§360, spec 057) ─────────
          Islam: *"the getting started with the client setup to stay at the
          top of the rail until it's all fulfilled and then moves to the
          bottom and it absorbs the branding part with the mark and the brand
@@ -53814,7 +53814,7 @@ var SYNC = (function () {
          inside the flow's first step (config-render.js brandingBody) and the
          `c_brand` grant still gates it — the page def went, the page's
          controls did not. The flow itself is client-setup.js, one module for
-         this host and the console (§357). Its render is a box the module
+         this host and the console (§360). Its render is a box the module
          fills from paint(), before wire() so the colour controls it draws
          are wired like any other. */
       { k:"start",  ac:"c_brand",  grp:"client", mod:"client", label:"Getting started", glyph:"◐",
@@ -53835,7 +53835,7 @@ var SYNC = (function () {
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* ── WHERE THE GEAR LANDS (§356, spec 054 §9.1) ─────────────────
+      /* ── WHERE THE GEAR LANDS (§359, spec 056 §9.1) ─────────────────
          Reporting cycle, `primary`, for everybody — which is where it landed
          before §108.10 put an Overview in front of it. THE OVERVIEW IS
          DELETED, NOT HIDDEN (§24), because both halves of it were already on
@@ -54006,7 +54006,7 @@ var SYNC = (function () {
          a tick somebody could set on a bad afternoon. `c_kb` stays `area:
          "always"` so the grant machinery is untouched; this gate sits in front
          of it, and nothing else reads that key. */
-      /* STRATEGY'S, NOT THE CLIENT'S (§357, reversing §356.2's move):
+      /* STRATEGY'S, NOT THE CLIENT'S (§360, reversing §359.2's move):
          Islam — *"the knowledge base is currently in the strategy module as
          it's where we manage the questions and interaction with the client
          so let's keep it there until we decide later."* The page holds the
@@ -54075,7 +54075,7 @@ var SYNC = (function () {
     /* The TAB has to still be one this viewer holds at that destination, or
        the page under it is an empty frame. The section is corrected further
        down by the renderer itself, so it is enough to hand it over. */
-    /* A SETUP PAGE IS LOOKED FOR IN EVERY RAIL (§356.2): the served router
+    /* A SETUP PAGE IS LOOKED FOR IN EVERY RAIL (§359.2): the served router
        has already scoped the document from the address, and a landing door
        written in the spine form names a page of ANOTHER rail on purpose —
        checked against the scoped list alone it would read as unreachable
@@ -54083,7 +54083,7 @@ var SYNC = (function () {
        pressed (§61). paint() then moves the scope to the page's own module
        (resolveSetupScope). */
     var defs = reachable(w.d === "setup" ? setupDefsAll() : defsFor(w.d), w.d, w.d);
-    /* A BARE SETUP ADDRESS LANDS ON THE RAIL'S OWN FIRST PAGE (§357.7).
+    /* A BARE SETUP ADDRESS LANDS ON THE RAIL'S OWN FIRST PAGE (§360.7).
        `/<client>/setup` is what the console's Settings and a module rail's
        *Client settings ›* both open, and the router writes it as a place
        with a destination and NO page — which this function read as
@@ -54560,14 +54560,14 @@ var SYNC = (function () {
   function setupDefsAll(){
     return SUBS.manage.concat(SUBS.setup).map(function(d){
       if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
-      /* §357: one def, two names — Getting started until Done with set-up
+      /* §360: one def, two names — Getting started until Done with set-up
          is pressed, Client set-up after (SMPRules.setupDone, stored as an
          absence on the group). */
       if (d.k === "start") return Object.assign({}, d, { label: SMPRules.setupDone(GROUP) ? "Client set-up" : "Getting started" });
       return d;
     });
   }
-  /* ── WHICH RAIL (§356.2, spec 054 §4.2, research R2) ────────────────
+  /* ── WHICH RAIL (§359.2, spec 056 §4.2, research R2) ────────────────
      The document carries a SCOPE: a module word (`strategy`, `insights`) for
      that module's own Setup, `client` for the pages that belong to no module,
      or nothing at all. It is written by the served router (shell/route.js)
@@ -54596,7 +54596,7 @@ var SYNC = (function () {
      file://, where the gear opens everything. */
   function moduleWord(){ return document.documentElement.getAttribute("data-module") || ""; }
   function moduleLabel(){ return document.documentElement.getAttribute("data-module-label") || ""; }
-  /* THE MODULES THIS PERSON MAY OPEN (§359.1), stamped by the server as the
+  /* THE MODULES THIS PERSON MAY OPEN (§362.1), stamped by the server as the
      switcher's own list (lib/shell.ts) and read here for the row at the foot
      of the client's rail. Absent over file://, where there is no server to
      say what a client holds — so the offline copy draws no rows, exactly as
@@ -54608,7 +54608,7 @@ var SYNC = (function () {
     try { var v = JSON.parse(raw); return Array.isArray(v) ? v : []; }
     catch (e) { return []; }
   }
-  /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ──
+  /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ──
      Islam, of the client's Setup rail under Strategy's full navigation:
      *"theclient settings shouldn't open the strategy banner in the top this
      is a client settings separate than any module."*
@@ -54646,7 +54646,7 @@ var SYNC = (function () {
   function setupDefs(){ return setupDefsFor(setupScope()); }
   /* THE PAGE DECIDES THE RAIL WHEN THE TWO DISAGREE. An address is a
      request — the landing's doors write `/<client>/setup/<page>` for every
-     page and let the shell resolve it (spec 054 plan, research R2) — so a
+     page and let the shell resolve it (spec 056 plan, research R2) — so a
      page asked for under the wrong scope moves the scope to the page's own
      module rather than being corrected to the first page of the wrong rail.
      Asked only while a scope is set at all: the offline copy resolves
@@ -54655,7 +54655,7 @@ var SYNC = (function () {
     var scope = setupScope();
     if (!scope || !currentSub) return;
     var hits = setupDefsAll().filter(function(d){ return d.k === currentSub; });
-    /* THE SCOPE ON SCREEN WINS WHERE TWO RAILS SHARE A WORD (§356.5): a
+    /* THE SCOPE ON SCREEN WINS WHERE TWO RAILS SHARE A WORD (§359.5): a
        module's Setup keeps Strategy's page keys — `access`, `landing` — so
        the first def holding the key is not necessarily the one asked for.
        A def under the current scope means the page IS this rail's, and the
@@ -54683,7 +54683,7 @@ var SYNC = (function () {
     { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
     { k:"run",  label:"The organisation",  note:"The things being planned" },
     { k:"meas", label:"Measurement",       note:"What the numbers mean" },
-    /* ── §356.2: A DEF KNOWS ITS MODULE (spec 054 §4.3) ─────────────────
+    /* ── §359.2: A DEF KNOWS ITS MODULE (spec 056 §4.3) ─────────────────
        Every def above carries `mod` — the module that owns the page, or
        "client" for the pages that belong to no module (people, the org,
        branding, the knowledge base). Which rail a page is drawn in is
@@ -54691,15 +54691,15 @@ var SYNC = (function () {
        never by a second list: a page cannot be in two rails or none.
        `access` is Roles & access, Strategy's own now — the matrix is
        Strategy's roles against Strategy's areas, and the seats stay on the
-       People register (spec 054 §4.4). `help` holds the knowledge base on
+       People register (spec 056 §4.4). `help` holds the knowledge base on
        the client's rail; Islam took the drawing that marks it as moving. */
     { k:"access", label:"Access",           note:"Who may do what in this module" },
-    /* §356.4 (spec 054 §4.5): a module's own group — what it says about
+    /* §359.4 (spec 056 §4.5): a module's own group — what it says about
        itself on the client landing. Drawn on a module's rail and never the
        client's, because the def below carries the module. */
     { k:"landing", label:"The landing",     note:"What this module says on the landing" },
     { k:"help", label:"Help",             note:"How the platform works, in its own words" },
-    /* §357 (spec 055): the client's own group, LAST — it holds the set-up
+    /* §360 (spec 057): the client's own group, LAST — it holds the set-up
        once it is done, which is the thing you come back to least. The `look`
        group went with the Branding page it held; its fold key is left in
        whatever localStorage holds it, read by nothing (§30.2's cost, paid the
@@ -54828,8 +54828,8 @@ var SYNC = (function () {
     /* Asked ONCE for the whole rail rather than per row: every row would
        otherwise re-run five counts, two of which walk the register (§108.15). */
     var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
-    /* ── GETTING STARTED IS A STRIP, NOT A ROW, UNTIL IT IS DONE (§357,
-       spec 055). The def sits in the last group; while the set-up is not
+    /* ── GETTING STARTED IS A STRIP, NOT A ROW, UNTIL IT IS DONE (§360,
+       spec 057). The def sits in the last group; while the set-up is not
        done it is taken OUT of the groups and drawn under the head, saying
        how many of its steps the data holds an answer for (client-setup.js
        progress — counted, never remembered, §129) and which are still to
@@ -54932,10 +54932,10 @@ var SYNC = (function () {
        filters — §108.5 capped that list to the window, and a search box that
        leaves the screen when you scroll to read your own results is a control
        below the fold by another road (§90). */
-    /* THE HEAD SAYS WHICH RAIL THIS IS (§356.2): a module's own word before
+    /* THE HEAD SAYS WHICH RAIL THIS IS (§359.2): a module's own word before
        "Setup", or "Client" for the pages that belong to no module — and that
        one carries the way back to the landing it was opened from, which is
-       the only way in it has (spec 054 §4.1). Unscoped (file://) it says
+       the only way in it has (spec 056 §4.1). Unscoped (file://) it says
        "Setup" and nothing more, exactly as it did. */
     var scope = setupScope();
     var headWord = scope === "client" ? "Client \u00b7 Setup"
@@ -54945,7 +54945,7 @@ var SYNC = (function () {
        is 168px wide inside its padding and "CLIENT · SETUP" with a toggle
        already takes most of that, measured, so a link beside it wraps. */
     var slug = (location.pathname.split("/")[1] || "");
-    /* THE WAY OUT IS THE CONSOLE (§357, spec 055): the client's rail is
+    /* THE WAY OUT IS THE CONSOLE (§360, spec 057): the client's rail is
        opened from the console's card and from the row at the foot of a
        module's Setup rail, and there is no landing to go back to any more. A
        MODULE's rail carries the reverse — one row, *Client settings ›*, to
@@ -54953,7 +54953,7 @@ var SYNC = (function () {
        register without the console. Both only where there is a server to
        serve the address; the offline copy draws one rail and no rows.
 
-       AND THE TWO ROWS SIT AT OPPOSITE ENDS, WHICH IS THE POINT (§357.9).
+       AND THE TWO ROWS SIT AT OPPOSITE ENDS, WHICH IS THE POINT (§360.9).
        Islam: *"a perosn can access the client settings from the module
        settings page but it should be at the bottom."* They are not two
        spellings of one row: `‹ Back to the console` LEAVES — it is where
@@ -54974,7 +54974,7 @@ var SYNC = (function () {
       ? '<div class="railback-row"><a class="railback" href="' + esc(OPTS_CONSOLE) + '">' +
         '\u2039 Back to the console</a></div>'
       : "";
-    /* AND THE CLIENT'S RAIL CARRIES THE REVERSE (§359.1). Islam, having
+    /* AND THE CLIENT'S RAIL CARRIES THE REVERSE (§362.1). Islam, having
        opened the client's settings from the console's card: *"I ca't find
        the access page in the strategy module"* — and Roles & access was
        exactly where it belongs, on STRATEGY's rail, with no way to reach it
@@ -54994,7 +54994,7 @@ var SYNC = (function () {
        THE SAME FOOT, THE SAME WORDS, THE SAME DIRECTION MARK. `Client
        settings ›` and `Strategy settings ›` are the same row pointing
        opposite ways: a place to go ON to, so it sits after the list rather
-       than above it (§357.9), never the first thing read on a rail somebody
+       than above it (§360.9), never the first thing read on a rail somebody
        came here to use. */
     var across = slug && scope === "client"
       ? modulesHere().map(function(m){
@@ -55035,7 +55035,7 @@ var SYNC = (function () {
        is a door behind a door, which §32 removed once already at the gate. The
        gear IS the door now; this function only answers whether there is
        anything behind it, and which page to land on. */
-    /* THE GEAR'S LIST IS THE MODULE'S (§356.2), whatever rail is on screen:
+    /* THE GEAR'S LIST IS THE MODULE'S (§359.2), whatever rail is on screen:
        from the client's rail the gear still opens Strategy's Setup, so the
        landing page is asked of the module's own defs and not of `setupDefs()`,
        which reads the scope of the moment. */
@@ -55549,7 +55549,7 @@ var SYNC = (function () {
         if (current !== b.dataset.md) leaveModes();
         current = b.dataset.md;
         currentSub = b.dataset.ms;
-        /* THE GEAR IS THE MODULE'S DOOR (§356.2): pressed inside a module it
+        /* THE GEAR IS THE MODULE'S DOOR (§359.2): pressed inside a module it
            opens that module's Setup; over file:// there is no module word and
            the scope is cleared, which draws every page in one rail. */
         if (b.dataset.md === "setup") setScope(moduleWord());
@@ -55753,9 +55753,9 @@ var SYNC = (function () {
     /* §145: the confirm ticks register the row they act on the same way. */
     fillViewers();
     paintUnits();
-    /* ── THE SCOPE IS RESOLVED AS SOON AS THE PLACE IS, AND NOT BEFORE (§359) ──
+    /* ── THE SCOPE IS RESOLVED AS SOON AS THE PLACE IS, AND NOT BEFORE (§362) ──
        This call used to sit beside `defsFor(current)` a hundred lines below,
-       which is where the RAIL needs it — and §359 gave the same answer a
+       which is where the RAIL needs it — and §362 gave the same answer a
        second reader in the CHROME (`clientScoped()`, which decides whether
        the client's own bar is worn), so it has to be settled before the bar
        is written rather than after.
@@ -55767,7 +55767,7 @@ var SYNC = (function () {
        `!currentSub` guard and the page whose key belongs to the OTHER rail
        never moves the scope — measured, `/<client>/setup/cycle` landed on the
        client's first page with the client's bar over it, which is the
-       landing's own spine-form door broken (§356.2's research R2).
+       landing's own spine-form door broken (§359.2's research R2).
        *The row's painter is what settles which page you are on, so anything
        reading the page has to come after it.* */
     if (current === "setup") resolveSetupScope();
@@ -55795,12 +55795,12 @@ var SYNC = (function () {
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
-    /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§359, spec 056) ──
+    /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ──
        Islam: *"theclient settings shouldn't open the strategy banner in the
        top this is a client settings separate than any module."* He is right
        twice over — the row below is Strategy's navigation, and the line above
        it names the Strategy Management Platform. These pages belong to no
-       module (spec 054 §4.2 gave every def a `mod`, and seven say `client`),
+       module (spec 056 §4.2 gave every def a `mod`, and seven say `client`),
        so a bar that names one is the page arguing with its own rail.
 
        THE ATTRIBUTE IS THE SWITCH AND IT IS WRITTEN IN ONE PLACE. The row,
@@ -56099,11 +56099,11 @@ var SYNC = (function () {
        when a page's own wiring cannot be trusted. */
     var failBtn = _panel.querySelector("[data-failreload]");
     if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
-    /* ── THE SET-UP FLOW FILLS ITS BOX (§357) ─────────────────────────
+    /* ── THE SET-UP FLOW FILLS ITS BOX (§360) ─────────────────────────
        Before wire(), on purpose: the first step draws the Branding controls
        and wire() binds those by querying the document, so a box filled
        afterwards would hold colour pickers wired to nothing (§96). */
-    /* AND THE TEAM PAGE FILLS ITS OWN (§359.2) — the same options, the same
+    /* AND THE TEAM PAGE FILLS ITS OWN (§362.2) — the same options, the same
        shared state and ONE renderer: the flow's step and this page are two
        readers of it (§9's pattern, §53.5). The options are built once for
        both, or a slug read one way here and another way there is a client
@@ -56114,7 +56114,7 @@ var SYNC = (function () {
       door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
       console: OPTS_CONSOLE,
       repaint: function(){ paint(); },
-      /* §361: the team page draws a setup table, and a setup table's hover
+      /* §364: the team page draws a setup table, and a setup table's hover
          is MEASURED after it is on the screen (§88). paint() ends in
          clipTitles(), which is too early for a box the client's record fills
          a moment later, so the mount asks for it again when it does. */
@@ -57257,7 +57257,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* A MODULE'S OWN CELL (§356.5): the same press through its own writer,
+    /* A MODULE'S OWN CELL (§359.5): the same press through its own writer,
        because its default is an ABSENCE — the module's shipped state, which
        rides in the press as the fourth field — and the matrix's writer above
        would store it as a row (§50.6). */
@@ -60108,7 +60108,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* THE LANDING LINE'S PICK (§356.4): a radio is a select-shaped write, so
+    /* THE LANDING LINE'S PICK (§359.4): a radio is a select-shaped write, so
        it REPAINTS (§257.2a — the preview under the list must follow the
        pick), and the default DELETES the key, the last one leaving deleting
        the map (§50.6). The pick and the module are read off the control the
@@ -60744,7 +60744,7 @@ var SYNC = (function () {
        retire without anything failing. It asks the two pages that want the
        answer by NAME, which is data rather than markup and cannot silently
        stop matching. It is a LIST rather than one name because the Overview
-       once joined it (§108.10); §356 deleted that page, and the shape is kept
+       once joined it (§108.10); §359 deleted that page, and the shape is kept
        so the next page that counts these facts is one key here and not a
        second gate. Gating on the register's markup would have given such a
        page a permanent, silent null, which draws no row: this exact fault
@@ -60824,10 +60824,10 @@ var SYNC = (function () {
         paint();
       });
     }
-    /* ── AND WHAT THE INBOX IS HOLDING (§108.10, §356) ────────────────
+    /* ── AND WHAT THE INBOX IS HOLDING (§108.10, §359) ────────────────
        Asked once per visit, whenever the Setup rail is on screen for the
        office: the rail's Inbox pill is drawn from it (§108.15), and until
-       §356 the Overview was the one page that asked, so with that page gone
+       §359 the Overview was the one page that asked, so with that page gone
        the pill would have read nothing for ever — a count keyed on a page
        that no longer exists does not fail, it quietly draws nothing (§51.11).
        Never polled: the Inbox counts its own queue when it is open and the
@@ -63691,7 +63691,7 @@ var SYNC = (function () {
    054 §4.1) — both of which kindOf() and placeOf() already had to name.
 
    SETUP HAS TWO ADDRESSES AND THE MODULE WORD IS WHAT TELLS THEM APART
-   (§356.2, spec 054 §4.2, research R2). `/<client>/<module>/setup/<page>` is
+   (§359.2, spec 056 §4.2, research R2). `/<client>/<module>/setup/<page>` is
    that module's own Setup and `/<client>/setup/<page>` is the client's; the
    difference is written onto the document as `data-setup-scope` (the module
    word, or `client`) and the frozen shell draws its rail from that one
@@ -63714,12 +63714,12 @@ var SYNC = (function () {
    the landing writes with). Modes are never in the address (§63.1, §173:
    edit, reporting and arrange are dropped on every navigation).
 
-   The shell's welcome overlay is THE welcome again (§357, spec 055): the
+   The shell's welcome overlay is THE welcome again (§360, spec 057): the
    landing at /<client> was stood in for it while it existed (§315) and is a
    redirect into the module now, so welcome.js offers itself once a session
    exactly as it does over file://, and the house mark is its way back — over
    the module's HOME, and never over a page somebody asked for by address
-   (§357.9: `data-deep-address`, below). */
+   (§360.9: `data-deep-address`, below). */
 (function () {
   "use strict";
   var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,48})(?:\/(.*))?$/);
@@ -63761,7 +63761,7 @@ var SYNC = (function () {
     var kind = kindOf(d), s = null, c = null;
     if (kind === "setup") {
       s = seg[i] || null; setScope(led ? MODULE : "client");
-      /* A HASH ON A SETUP ADDRESS NAMES A PLACE ON THE PAGE (spec 054 §4.1):
+      /* A HASH ON A SETUP ADDRESS NAMES A PLACE ON THE PAGE (spec 056 §4.1):
          the landing's Email door opens `setup/send#comms`, the third section
          of that page, and its Access door opens `setup/people#seat`, a column
          of the register. It rides as the section (`c`): the shell's own
@@ -63787,7 +63787,7 @@ var SYNC = (function () {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
     /* A module's Setup carries its module word and the client's carries
-       none (spec 054 §4.2): the scope the shell resolved decides, so a door
+       none (spec 056 §4.2): the scope the shell resolved decides, so a door
        pressed at `/<client>/setup/cycle` is rewritten to Strategy's own
        address once the page has said whose it is. Unscoped — which the
        served shell never is inside Setup — the spine form is written. */
@@ -63833,7 +63833,7 @@ var SYNC = (function () {
      wired exactly once, at load — no second handler on a repaint (§24, §47.2).
      A press navigates, so the menu never has to be closed afterwards. */
   (function modules() {
-    /* NOT ON THE CLIENT'S OWN SETTINGS (§359, spec 056). Those pages belong
+    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058). Those pages belong
        to no module, so a switcher there offers a way out of somewhere you are
        not — and it is the one piece of the chrome the frozen shell cannot
        stand down, because this builds it once at load and nothing repaints
@@ -63847,7 +63847,7 @@ var SYNC = (function () {
     var list;
     try { list = JSON.parse(raw); } catch (e) { return; }
     /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
-       rather than on the attribute (§359.1): `data-modules` is the list of
+       rather than on the attribute (§362.1): `data-modules` is the list of
        modules this person may open, read by this and by the client's own
        Setup rail, which draws a row per module whatever the count. The
        check's break forces the switcher on for a client holding one. */
@@ -63906,7 +63906,7 @@ var SYNC = (function () {
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
   try {
-    /* NOTHING MARKS THE WELCOME SEEN HERE ANY MORE (§357): that line stood
+    /* NOTHING MARKS THE WELCOME SEEN HERE ANY MORE (§360): that line stood
        the frozen overlay down while the Next landing was the welcome, and
        with the landing gone it was the reason the house mark opened a screen
        nobody had been offered. welcome.js keeps its own memory. */
@@ -63914,7 +63914,7 @@ var SYNC = (function () {
       var rem = { d: here.d, s: here.s };
       if (here.c && here.s) rem.c = here.c;
       sessionStorage.setItem("smp.where", JSON.stringify(rem));
-      /* AND AN ADDRESS IS NOT A GREETING EITHER (§357.9). Islam, pressing
+      /* AND AN ADDRESS IS NOT A GREETING EITHER (§360.9). Islam, pressing
          the console card's *Settings* and meeting the welcome overlay over
          the client's own Setup rail: *"when I press continue it opens the
          clietn settings!! … the settings should open the settings
@@ -63935,7 +63935,7 @@ var SYNC = (function () {
          it would stand the welcome down for the session on the strength of
          one address, and `welcome.js`'s own memory would then be answering
          two questions instead of one (§107). Written the way the scope is
-         (spec 054 §4.2) because route.js is the only file that knows the
+         (spec 056 §4.2) because route.js is the only file that knows the
          address's shape; read by `WELCOME.offer()` alone, never by
          `WELCOME.open()` — pressing the house mark IS the ask (§185). */
       document.documentElement.setAttribute("data-deep-address", "1");
@@ -63951,7 +63951,7 @@ var SYNC = (function () {
          replay button still starts one. */
       sessionStorage.setItem("smp.tour.later", "1");
     }
-    /* AND `/<client>/tour` IS AN ADDRESS TOO (§357.9), which is why the
+    /* AND `/<client>/tour` IS AN ADDRESS TOO (§360.9), which is why the
        welcome's stand-down is asked of it as well and the two lines above are
        not: nothing is remembered for a tour address (it is not a place) and
        the tour's own mark must certainly not be set on it — but somebody who

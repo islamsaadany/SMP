@@ -1697,7 +1697,7 @@
      36px handle, not an icon strip — see the note in shell.html. */
   .setupsplit.shut { grid-template-columns:36px 1fr; }
   .setuprail .rhead { align-items:center; }
-  /* THE WAY BACK TO THE LANDING (§356.2, spec 054 §4.1). The client's own
+  /* THE WAY BACK TO THE LANDING (§359.2, spec 056 §4.1). The client's own
      rail is reached from the landing's Client setup block and from nowhere
      else — the gear opens the module you stand in — so it carries the one
      door out, as a row of its own under the head: inside the head it would

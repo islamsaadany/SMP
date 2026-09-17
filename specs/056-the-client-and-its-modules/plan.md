@@ -93,6 +93,22 @@ human is both a consultant and a client person.
 person still fully editable; the count agreeing with the two lists rather than
 a typed number (§94.8); and the register's search finding a consultant.
 
+**§361 — the page, after Islam used it.** *"forefront team is damaged it needs
+to be a table looks like the people register wiht the required columns."*
+Stage 2 gave the page the flow's own renderer whole, and the flow's own
+DRESS with it: the rows were wrapped in the class the step chips wear — a pill
+— and were a flex row written for a 760px step column, so on a full-width Setup
+page they wanted 2471px in a 1323px box. **A shape built for one room, used in
+another.** The page draws the setup tables' own `.cfg > table.unitcfg` now —
+Name · Email · Seat on this client · On this register as · Remove — with the
+add row and the note under it. **One renderer, two hosts still holds** and is
+what this stage was right about: the table is built in `officeStep`, the flow's
+step and the page are two readers of it, and the host dresses its own note. The
+register column is drawn only on a client whose register came across, where the
+match is by address and has to be confirmed (§313.32); on one the platform
+built there is nothing to pick. `checks/team-page.py`, 31 assertions, red six
+ways from the sources.
+
 ---
 
 ## Stage 3 · Access — the rows are the client's, the columns are the module's

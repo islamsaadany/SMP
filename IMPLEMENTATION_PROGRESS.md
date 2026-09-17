@@ -5061,6 +5061,76 @@ untouched — the merge is Islam's word, on that merge.**
 
 ---
 
+**§361 — the Forefront team is a setup table, 2026-09-17.** Islam, of the page
+§359.2 shipped: *"forefront team is damaged it needs to be a table looks like
+the people register wiht the required columns."*
+
+**The cause is one class, and it was measured before anything was drawn.** The
+team's rows were wrapped in the class the set-up flow's step CHIPS wear — a
+pill — so a control's own shape was painted round a whole page, which is the
+oval he photographed. Under it the rows were the flow's own flex row, written
+for a 760px step column: on a full-width Setup page they laid out side by side
+and wanted **2471px in a 1323px box**, which is the third consultant cut in
+half. Both are one fault seen twice — a shape built for one room, used in
+another.
+
+**It is the setup tables' own shape, never a second one.** The navy heading
+row, one line per cell, the value on a hover where it does not fit and the
+ellipsis all come from the family Companies, the BU list and Functions already
+wear. Five columns — **Name · Email · Seat on this client · On this register as
+· Remove** — the add row under the table, the note under that. Islam signed all
+three off from a mockup made of the RUNNING platform, so *today* was the
+product's own markup rather than a drawing of it.
+
+**One renderer, two hosts**: the flow's seventh step and the Setup page are two
+readers of one function, because people join and leave an account team all
+through an engagement and a renderer copied for the page is a drift waiting to
+happen. Measured on both — 1325 of 1325 in the page's pane at 1600, 760 of 760
+inside the flow's column, one line a row in each. **The register column is
+drawn only where it can be answered** (on a client whose register came across,
+where the match is by address and has to be confirmed; on one the platform
+built the seat IS the register row and there is nothing to pick), **and the
+head follows the cells**, asserted on both client shapes in one run. **The key
+inside the cell is gone** — it was the control's name while the rows were a
+list and is the column heading now, so it said the word twice on one row; the
+name moves onto the control. **One sentence, two dresses**: the note's words
+are written once and the host says how they are dressed.
+
+**The slack has to go somewhere, and saying which column takes it is most of
+the fit.** Two attempts, each measured rather than reasoned: a 1% last column
+— the register's own trick — **starved it to 10px at 1280 with its own word
+painted outside it**; a 100% name column starved the middle three to nought at
+the same width. Left alone the leftover is shared. **A column can never be
+narrower than the widest thing that will not wrap**, and the sum of five of
+those was 936px against an 825px pane: the select fills its cell now, so the
+register column costs its heading and nothing more, and the address caps at
+220. It fits at **1325 / 1165 / 1005 / 825** — and below about 1080 no cap can
+make it fit, so **the box scrolls rather than cutting**, with the last column
+asserted reachable and the page gaining no sideways scroll of its own.
+
+**And the hover on a control was removed by the run that was meant to prove it
+needed keeping.** A cell holding a `<select>` has no value to put on a hover —
+its text is every option it holds — so the first build wore an opt-out mark;
+the falsification made to prove that mark load-bearing came back GREEN, because
+giving the select its own cell had already removed the overflow that produced
+the title at all. The mark is deleted rather than left as a line the next reader
+takes for load-bearing.
+
+*Verified:* `checks/team-page.py` **31 assertions, 0 failures**, over HTTP with
+a stub, because the page is empty over `file://` by construction and a stub is
+the only way to make both client shapes and to read what a press WROTE rather
+than what it drew. Proved able to fail **six ways** from the sources —
+**9 / 2 / 2 / 3 / 3 / 1 red**, and A's nine name the reported fault in its own words.
+`checks/multi-client.py` and `smp-app/checks/shell.mjs` §3c held the flow's row
+selectors and were re-pointed; the first is recorded as unrun, needing the
+rehearsal database. Ten neighbouring checks green, `built-in-step` all good,
+the four generators re-run, `qa.py` over `file://` **33 viewers / 242 destinations /
+ERRORS none — and the same on a build made from the commit before this one**, so nothing this
+changed is reachable from the navigation, measured rather than argued. **`main`
+untouched — the merge is Islam's word, on that merge.**
+
+---
+
 **§360 — the trial module goes, 2026-09-17.** Islam: *"let's remove the trial
 module now."* It was built to prove a module could be turned on for one client
 and opened, and three real modules have proved it since — so it goes, and

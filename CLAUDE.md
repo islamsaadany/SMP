@@ -9611,7 +9611,97 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;360: the trial module goes, and what
+*Last Updated: 2026-09-17 &mdash; **&sect;361: the Forefront team is a setup
+table (spec 056 &sect;3a).** Islam, of the page &sect;359.2 shipped:
+*"forefront team is damaged it needs to be a table looks like the people
+register wiht the required columns."* **THE CAUSE IS ONE CLASS, MEASURED
+BEFORE ANYTHING WAS DRAWN**: `mountTeam` wrapped the rows in **`.wzstep`**
+&mdash; the class the set-up flow's step CHIPS wear, which is a pill &mdash; so
+a control's own shape was painted round a whole page and drew the oval he
+photographed (&sect;65.9: a class name is one global namespace). Under it the
+rows were the flow's own `.teamrow`, a flex row written for a 760px step
+column: on a full-width Setup page they laid out **side by side** and wanted
+**2471px in a 1323px box**, which is the third consultant cut in half. Both
+are one fault seen twice &mdash; *a shape built for one room, used in
+another.* **IT IS THE SETUP TABLES' OWN SHAPE, NEVER A SECOND ONE**
+(&sect;53.5): `.cfg > table.unitcfg`, which Companies, the BU list and
+Functions already wear, so the navy heading row, one line per cell, the cap
+with the value on a hover (&sect;88) and the ellipsis all come from the family
+rather than from rules invented here &mdash; five columns (**Name &middot;
+Email &middot; Seat on this client &middot; On this register as &middot;
+Remove**), the add row under the table and the note under that. Signed off
+from a mockup made of the RUNNING platform (rule 1c, &sect;41.9), so *today*
+was the product's own markup rather than a drawing of it. **ONE RENDERER, TWO
+HOSTS** &mdash; the flow's seventh step and the Setup page are two readers of
+one function (&sect;9's pattern), because people join and leave an account team
+all through an engagement and a renderer copied for the page is the drift
+&sect;53.5 keeps recording; measured **1325/1325** in the page's pane at 1600
+and **760/760** inside `.wzcol` in the flow, one line a row in each. **THE
+REGISTER COLUMN IS DRAWN ONLY WHERE IT CAN BE ANSWERED** (&sect;61: on a client
+whose register came across the match is by address and has to be confirmed,
+&sect;313.32; on one the platform built the seat IS the register row and there
+is nothing to pick), **and the head follows the cells**, asserted on both
+client shapes in one run (&sect;113.8). **AND THE KEY INSIDE THE CELL IS
+GONE**: `registerCell` drew its own uppercase *on this register as* beside the
+select, which was the control's name while the rows were a flex list and is the
+COLUMN HEADING now &mdash; a label under a heading that already says the word
+says it twice on one row (&sect;87, &sect;267.2) &mdash; so the name moves onto
+the control. **ONE SENTENCE, TWO DRESSES**: the note's words are written once
+and the HOST says how they are dressed (the family's bordered `.note` on the
+page, `.wzwhy` inside the flow), because a class threaded through the renderer
+would be a flag (&sect;104.7). **AND THE ADD ROW ASKS ITS QUESTION IN FULL**
+&mdash; the flow's `flex:1 1 170px` clipped the second select to *"&hellip;as
+who on this client's registe"*, a control asking a question it cannot finish.
+**&sect;361.1 &mdash; THE SLACK HAS TO GO SOMEWHERE, AND SAYING WHICH COLUMN
+TAKES IT IS MOST OF THE FIT**: two attempts, each measured rather than reasoned
+&mdash; `width:1%` on the last column, the register's own trick for its two
+frozen ones, **starved it to 10px at 1280 with its own word painted outside
+it**, and `width:100%` on the name **starved the middle three to nought** at
+the same width; left alone the leftover is shared. **&sect;361.2 &mdash; A
+COLUMN CAN NEVER BE NARROWER THAN THE WIDEST THING THAT WILL NOT WRAP**, and
+the sum of five of those measured **936px against an 825px pane at 1100**: the
+select **fills its cell** now (what `arrange.css` already does for a select in
+a setup table), so the register column costs its heading and nothing more, and
+the address caps at 220 &mdash; **both measured constants, with the check
+asserting the FIT rather than either of them** (&sect;122.5), fitting at
+**1325 / 1165 / 1005 / 825**. **&sect;361.3 &mdash; AND BELOW THAT NO CAP CAN
+MAKE IT FIT, SO THE BOX SCROLLS RATHER THAN CUTTING**: the five minima come to
+802px and a 1000px window gives the pane 725, so `overflow-x:auto` is the
+family's own answer (&sect;88), safe because this head is `position:static`
+like every other ordinary setup table's &mdash; &sect;135.2's damaged matrix
+was a STICKY head inside a scroll box &mdash; asserted at both ends, the box
+ABLE to scroll and the last column REACHABLE by scrolling it, with the page
+gaining none. **&sect;361.4 &mdash; A CELL THAT HOLDS A CONTROL HAS NO VALUE
+FOR A HOVER, AND THE FALSIFICATION IS WHAT SAID SO**: `clipTitles()` falls back
+to the cell, and a `<select>`'s text is **every option it holds**, so the first
+build's hover read *"a row of their ownMohamed Essam &middot;&hellip;"* &mdash;
+it was marked `data-keep-title`, and **the run made to prove that mark
+load-bearing came back GREEN** (&sect;298.2, &sect;54.5), because giving the
+select its cell had meanwhile removed the overflow that produced the title at
+all, measured at every width from 1600 to 768; the mark is **DELETED** rather
+than kept as a line the next reader takes for load-bearing (&sect;24).
+**&sect;361.5 &mdash; AND AN EDIT THAT PRINTS NOTHING IS NOT AN EDIT THAT
+HAPPENED**: two cap changes rode on a `replace` whose old text had moved, so
+three measurement rounds read the SAME numbers and called the cap ineffective
+&mdash; every break in the falsification harness **asserts it matched** before
+it is written now. **VERIFIED**: `checks/team-page.py` **31 assertions, 0
+failures**, over HTTP with a stub, because the page is empty over `file://` by
+construction (&sect;94.11) and a stub is the only way to make both client
+shapes and to read what a press WROTE rather than what it drew (&sect;96);
+proved able to fail **six ways from the SOURCES** (&sect;276) &mdash;
+**9 / 2 / 2 / 3 / 3 / 1 red**, A's nine naming the reported fault in its own
+words. `checks/multi-client.py` and `smp-app/checks/shell.mjs` &sect;3c held
+the flow's row selectors and were re-pointed (&sect;51.11); the first is
+recorded as unrun, needing the rehearsal database &sect;328 describes. Ten
+neighbouring checks green, `built-in-step` all good, the four generators
+re-run and `generated-in-step` clear, **`qa.py` over `file://` 33 viewers /
+242 destinations / ERRORS none &mdash; and the SAME 33 / 242 / none on a build
+made from the commit before this one** (&sect;303, &sect;332). The built file's
+bytes changed, so **`sw.js` is bumped** (&sect;91), confirmed against
+`origin/main` immediately before the push (&sect;94.16). **`main` untouched
+&mdash; the merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-17 &mdash; **&sect;360: the trial module goes, and what
 its check proved stays.** Islam: *"let's remove the trial module now."*
 **IT WAS BUILT TO PROVE SOMETHING AND THE THING IS PROVED** &mdash; &sect;320.5
 made it deliberately not a product name to show a module could be turned on for

@@ -49812,3 +49812,140 @@ file's bytes changing, and they did not.
 **RECORDED, NOT DONE**: `modules/portfolio` and `modules/processes` are still
 words the address reserves with nothing behind them, which is `built: false`
 working as designed.
+
+---
+
+
+## §361 — THE FOREFRONT TEAM IS A SETUP TABLE (2026-09-17, spec 056 §3a)
+
+Islam, of the page §359.2 shipped: *"forefront team is damaged it needs to be
+a table looks like the people register wiht the required columns."*
+
+**MEASURED BEFORE ANYTHING WAS DRAWN, AND THE CAUSE IS ONE CLASS.** `mountTeam`
+wrapped the rows in **`.wzstep`** — the class the set-up flow's step CHIPS wear,
+which is a pill — so a control's own shape was painted round a whole page and
+drew the oval he photographed (§65.9: a class name is one global namespace).
+Under it the rows were the flow's own `.teamrow`, a flex row written for a 760px
+step column: on a full-width Setup page they laid out **side by side** and wanted
+**2471px in a 1323px box**, which is the third consultant cut in half. Both are
+one fault seen twice — *a shape built for one room, used in another.*
+
+**IT IS THE SETUP TABLES' OWN SHAPE, NEVER A SECOND ONE** (§53.5): `.cfg >
+table.unitcfg`, which Companies, the BU list and Functions already wear, so the
+navy heading row, one line per cell, the cap with the value on a hover (§88) and
+the ellipsis all come from the family rather than from rules invented here. Five
+columns — **Name · Email · Seat on this client · On this register as · Remove**
+— the add row under the table and the note under that, which is that family's
+order too. Islam signed all three off from a mockup made of the RUNNING platform
+(rule 1c, §41.9): its own Setup chrome, its own stylesheet and Raya Trade's own
+three consultants, so *today* was the product's markup rather than a drawing of
+it.
+
+**ONE RENDERER, TWO HOSTS**, which is why the table is built in `officeStep` and
+not in `mountTeam`: the flow's seventh step and the Setup page are two readers
+of one function (§9's pattern), and people join and leave an account team all
+through an engagement — a renderer copied for the page is the drift §53.5 keeps
+recording. Measured on both: **1325/1325** in the page's pane at 1600 and
+**760/760** inside `.wzcol` in the flow, one line a row in each.
+
+**THE REGISTER COLUMN IS DRAWN ONLY WHERE IT CAN BE ANSWERED** (§61): on a
+client whose register came across the match is by address and has to be
+confirmed (§313.32); on one the platform built the seat IS the register row and
+there is nothing to pick. **The head follows the cells**, or the table says it
+holds a fact it never draws — asserted on both client shapes in one run
+(§113.8).
+
+**AND THE KEY INSIDE THE CELL IS GONE.** `registerCell` drew its own uppercase
+*on this register as* beside the select, which was the control's name while the
+rows were a flex list and is the COLUMN HEADING now: a label under a heading
+that already says the word says it twice on one row (§87, §267.2). The name
+moves onto the control (`aria-label`), where §267.2 already put it.
+
+**ONE SENTENCE, TWO DRESSES.** The note's words are written once and the HOST
+says how they are dressed: the family's bordered `.note` on the Setup page —
+*"the family's own treatment"*, Islam's own words on the mockup — and `.wzwhy`,
+the quiet line every other step ends with, inside the flow. A class threaded
+through the renderer would be a flag (§104.7); the caller dressing its own note
+is not.
+
+**AND THE ADD ROW ASKS ITS QUESTION IN FULL.** The flow's `.row .fld` is
+`flex:1 1 170px`, written for a column, and it clipped the second select's
+placeholder to *"…as who on this client's registe"* — a control asking a
+question it cannot finish. Each select is as wide as its own words now.
+
+**§361.1 — THE SLACK HAS TO GO SOMEWHERE, AND SAYING WHICH COLUMN TAKES IT IS
+MOST OF THE FIT.** A setup table fills its pane, so with every column sized to
+its content the leftover is handed out in proportion. Two attempts, each
+measured rather than reasoned: `width:1%` on the last column — the register's
+own trick for its two frozen ones — **starved it to 10px at 1280 with its own
+word painted outside it**, because Chromium's auto algorithm reads a percentage
+as a request and gives the rest away once the other columns want more than there
+is; `width:100%` on the name **starved the middle three to nought** at the same
+width. Left alone, the leftover is shared and every column keeps a sane size at
+every width.
+
+**§361.2 — A COLUMN CAN NEVER BE NARROWER THAN THE WIDEST THING THAT WILL NOT
+WRAP**, and that is what decides whether the table fits at all. Its minimum is
+the sum of five of them, **measured at 936px against an 825px pane at 1100** —
+over by 111. The two that would not give were a 240px `<select>` and a
+37-character address. The select **fills its cell** now (`width:100%`, which is
+what `arrange.css` already does for a select in a setup table), so the register
+column costs its heading and nothing more; and the address caps at 220, which
+with its padding is the 243px left once the other four have taken their 582 out
+of that pane. **Both are measured constants and the check asserts the FIT rather
+than either of them** (§122.5), so a rail that changes width turns it red
+instead of going stale quietly. It fits at **1325 / 1165 / 1005 / 825**.
+
+**§361.3 — AND BELOW THAT NO CAP CAN MAKE IT FIT, SO THE BOX SCROLLS RATHER THAN
+CUTTING.** The five minima come to **802px** and a 1000px window gives the pane
+**725**, so under about 1080 the table is wider than its box whatever the numbers
+say — and a table overflowing a box with `overflow:visible` is the reported fault
+one size down. `.tblscroll` is the family's own answer for an ordinary Setup
+table that outgrows its box (§88: *"anything wider buys scroll"*), and it is safe
+here because this head is `position:static` like every other ordinary Setup
+table's — §135.2's damaged matrix was a STICKY head inside a scroll box. Asserted
+at both ends: the box must be ABLE to scroll and the last column must be
+REACHABLE by scrolling it, with the page itself gaining none.
+
+**§361.4 — A CELL THAT HOLDS A CONTROL HAS NO VALUE FOR A HOVER, AND THE
+FALSIFICATION IS WHAT SAID SO.** `clipTitles()` walks `.cfg table td` and,
+finding no `.val`, `.why`, `b` or `.mono` inside, falls back to the cell — and a
+`<select>`'s text is **every option it holds**, so the first build's hover read
+*"a row of their ownMohamed Essam · …Ashraf…Mennah…"*. §88's measured title is
+for a VALUE that did not fit. It was marked `data-keep-title`, that function's
+own opt-out — **and the run made to prove that mark load-bearing came back
+GREEN** (§298.2, §54.5): giving the select its cell in §361.2 had meanwhile
+removed the overflow that produced the title at all, measured at every width from
+1600 to 768. So the mark is **DELETED** rather than kept as a line the next
+reader takes for load-bearing (§24), the assertion stands on the paint, and the
+falsification that replaced it puts the 240px select back — which brings the
+overflow and the hover back together.
+
+**§361.5 — AND AN EDIT THAT PRINTS NOTHING IS NOT AN EDIT THAT HAPPENED.** Two
+cap changes in a row were applied by a `replace` whose old text no longer matched
+(the comment above it had moved), so three measurement rounds were spent reading
+the SAME numbers and calling the cap ineffective. §54.5's rule in my own hands:
+every break in the falsification harness now **asserts it matched** before it is
+written, and the cap was confirmed in the built file rather than in the source.
+
+**Verified**: `checks/team-page.py` **31 assertions, 0 failures**, over HTTP with
+a stub, because the page is empty over `file://` by construction (§94.11) and a
+stub is the only way to make both client shapes and to read what a press WROTE
+rather than what it drew (§96). Proved able to fail **six ways** from the SOURCES
+(§276): **9 / 2 / 2 / 3 / 3 / 1 red**, and A's nine name the reported
+fault in its own words — `boxClass 'wzstep'`, the table `808` wide in a `434`
+box. `checks/multi-client.py` and `smp-app/checks/shell.mjs` §3c
+held the flow's row selectors and were re-pointed (§51.11) — the first is
+recorded as unrun, needing the rehearsal database §328 describes. Ten
+neighbouring checks green, `built-in-step` all good, the four generators
+re-run and `generated-in-step` clear. **`qa.py` over `file://` 33 viewers /
+242 destinations / ERRORS none — and the SAME 33 / 242 / none on a build made
+from the commit before this one** (§303, §332), so nothing this changed is
+reachable from the navigation, measured rather than read off the diff.
+
+**RECORDED, NOT DONE**: `clipTitles()` still falls back to the whole cell for any
+`.cc` cell holding a control anywhere else in Setup — the general truth is that
+`.cc` is already the family's declaration for *this cell holds a control*, and
+widening that function reaches every setup table in the product, which is a
+decision of its own (rule 1b). And at 1600 the register column gives its select
+453px, because the leftover is shared.

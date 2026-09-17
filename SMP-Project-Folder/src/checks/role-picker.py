@@ -461,6 +461,28 @@ with sync_playwright() as p:
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
                const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
              return JSON.stringify(hs);}"""))
+        # AND EVERY ROLES BUTTON SAYS ITS VALUE ALOUD (§366). An `aria-label`
+        # REPLACES an element's content as its accessible name, so with the
+        # chips handed over as html the button announced the PERSON and never
+        # the roles — the one control on this page whose value a screen reader
+        # could not hear, and the name was being written AFTER the label
+        # composed it. Both ends over the whole column (§94.2): a row holding
+        # roles names them, a row holding none is just the base, and the
+        # register must have an example of each or the claim proves nothing
+        # (§113.8).
+        names = pg.evaluate("""()=>{
+          const out={with:0, without:0, bad:[]};
+          document.querySelectorAll('.peoplecfg [data-proleset]').forEach(s=>{
+            const a=s.previousElementSibling;
+            const n=(a&&a.getAttribute('aria-label'))||'';
+            const base=s.getAttribute('aria-label')||'';
+            const said=s.dataset.sstitle||'';
+            const want=base+(said?' \u2014 '+said:'');
+            if(n!==want) out.bad.push(n||'(none)');
+            else if(said) out.with++; else out.without++;});
+          return out;}""")
+        ck("%d: every roles button names the person, and what they hold" % w,
+           not names["bad"] and names["with"] and names["without"], names)
         open_row(pg, "cfo")
         # AND NOTHING IN THE DIALOG OVERFLOWS ITS FIELD.
         ck("%d: nothing clipped in the dialog" % w,

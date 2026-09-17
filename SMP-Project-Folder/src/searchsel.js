@@ -159,7 +159,17 @@ var SEARCHSEL = (function(){
     var lb = btn.querySelector(".sslabel");
     if (sel.dataset.sshtml != null) {
       lb.innerHTML = sel.dataset.sshtml;
-      btn.title = sel.dataset.sstitle || "";
+      var said = sel.dataset.sstitle || "";
+      btn.title = said;
+      /* ── AND THE VALUE IS SAID ALOUD, NOT ONLY DRAWN (§366) ───────
+         `wire()` names the button from the select's own `aria-label`, and an
+         aria-label REPLACES the element's content as its accessible name — so
+         with the chips handed over as html a screen reader heard "Roles for
+         Ashraf Laithy" and never which roles, where every other control here
+         announces its value because the value IS its text. The name carries
+         both, which is what the hover already says. */
+      var base = (sel.getAttribute("aria-label") || "").split(" \u2014 ")[0];
+      if (base) btn.setAttribute("aria-label", base + (said ? " \u2014 " + said : ""));
       return;
     }
     /* An em-dash for nothing chosen, which is the word the plan's own cells
@@ -457,6 +467,16 @@ var SEARCHSEL = (function(){
     car.setAttribute("aria-hidden", "true");
     car.textContent = "▾";
     btn.appendChild(car);
+    /* ── THE NAME IS SET BEFORE THE LABEL, NOT AFTER IT (§366) ────────
+       The visible control inherits the hidden one's name, so a screen reader
+       is told what the control is FOR rather than only what it currently says
+       (§48.2). It was set AFTER `setLabel` and therefore overwrote what
+       `setLabel` had just composed — so the roles cell, the first control to
+       hand its chips over as html, announced the person and never the roles.
+       Found by asserting it, not by reading it. */
+    var lbl = sel.id && document.querySelector('label[for="' + sel.id + '"]');
+    var name = (lbl && lbl.textContent.trim()) || sel.getAttribute("aria-label");
+    if (name) btn.setAttribute("aria-label", name);
     setLabel(sel, btn);
     /* Inserted as a SIBLING, never as a parent. sync.js reaches for the
        viewer select by id and inserts a name beside it — reparenting the
@@ -477,13 +497,6 @@ var SEARCHSEL = (function(){
        focuses the select it is `for`, and that should land on the button — but
        it can no longer be reached by Tab, so it cannot loop. */
     sel.addEventListener("focus", function(){ btn.focus(); });
-    /* The visible control inherits the hidden one's name, so a screen reader
-       is told what the control is FOR rather than only what it currently says
-       (§48.2). Without it the viewer switcher announces a person's name with
-       no hint that it switches anything. */
-    var lbl = sel.id && document.querySelector('label[for="' + sel.id + '"]');
-    var name = (lbl && lbl.textContent.trim()) || sel.getAttribute("aria-label");
-    if (name) btn.setAttribute("aria-label", name);
     sel.addEventListener("change", function(){ setLabel(sel, btn); });
   }
 

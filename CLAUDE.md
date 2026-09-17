@@ -9908,7 +9908,18 @@ snapshotted rather than re-derived. **AND ISLAM'S OWN INSTRUCTION IS WHAT KEPT
 IT CORRECT** &mdash; *"before building I urget you to check main"*: main had
 moved **43 commits** carrying `isMintedRow` against `isForefrontRow` (spec 058
 &sect;3a.1), so built against the branch's copy this would have taken inline
-editing off **every ADOPTED row**, which is the client's own person. **AND THE
+editing off **every ADOPTED row**, which is the client's own person. **AND THE ONE CONTROL WHOSE VALUE COULD NOT BE HEARD**
+(&sect;366.12): `searchsel.js` gives the visible button the hidden select's own
+name (&sect;48.2), and **an `aria-label` REPLACES an element's content as its
+accessible name** &mdash; which costs nothing while the label IS the value, and
+the Roles cell is the first control to hand its label over as HTML, so it
+announced *"Roles for Ashraf Laithy"* and never *BU owner &middot; Mobile*, on
+the one column where the value is the point. The name carries both now &mdash;
+**and the fix did not take the first time**, because the base name was written
+AFTER `setLabel` had composed it and overwrote it every wire, so the first build
+measured identically to the broken one; asserted over the WHOLE column and at
+both ends, since the first draft asked it of one person in the dialog who holds
+nothing and so demanded roles correctly absent. **AND THE
 NEW SECTION'S OWN FIRST TWO FAILURES WERE THE CHECK** (&sect;100.3): setting
 `f.value` leaves the box clean as far as the browser is concerned, so the
 `change` that commits never fires and a working build reported as broken &mdash;

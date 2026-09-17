@@ -51630,7 +51630,29 @@ its own assertions and nothing else:
 The tree was restored and rebuilt **byte-identical to the build the breaks were
 made from** (§343.9), which is what says the falsifications left nothing behind.
 
-### §366.12 — THE SERVER NEEDED NOTHING, AND IT IS ASSERTED ANYWAY (§172)
+### §366.12 — AND THE ONE CONTROL WHOSE VALUE COULD NOT BE HEARD
+
+`searchsel.js` gives the visible button the hidden select's own name, so a
+screen reader is told what the control is FOR rather than only what it says
+(§48.2). **An `aria-label` REPLACES an element's content as its accessible
+name** — which costs nothing while the button's label IS the value, and the
+Roles cell is the first control ever to hand its label over as html: the button
+announced *"Roles for Ashraf Laithy"* and never *BU owner · Mobile*, on the one
+column where the value is the whole point.
+
+The name carries both now, which is what the hover already said. **And the fix
+did not take the first time, for a reason worth the line**: the base name was
+written AFTER `setLabel` had composed it, so it overwrote it every wire — the
+name is set BEFORE the label now. Found by asserting it, not by reading it:
+the first build measured identically to the broken one.
+
+**ASSERTED OVER THE WHOLE COLUMN AND AT BOTH ENDS** (§94.2, §113.8): a row
+holding roles names them, a row holding none is just the base, and the register
+must contain an example of each — the first draft asked it of ONE person in the
+dialog, who holds nothing, so it demanded roles that were correctly not there
+and reported a working build broken (§100.3, twice in one file).
+
+### §366.13 — THE SERVER NEEDED NOTHING, AND IT IS ASSERTED ANYWAY (§172)
 
 No `api/`, `lib/` or `db/` file is touched — read off the diff. Every field this
 opens is a field the dialog already wrote through the same bound handler, and a

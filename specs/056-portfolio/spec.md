@@ -211,12 +211,35 @@ answer.
 
 ### 6.1 · Who gets in
 
-| | |
+**There is no Forefront-versus-client distinction inside a client, and drawing
+one was a mistake of mine.** Islam, 2026-09-17: *"a client super user is one of
+the 2 seats .. why it's different that forefront?"* It is not. Read off the
+code rather than remembered:
+
+- a **client's own person** is given Super user or SMO team on their own People
+  page; their `tenant_users` row is written with no seat at all
+  (`register-api.ts`), so it takes the default `none` and the **register role**
+  is what carries their reach;
+- a **Forefront person** is given a seat on the client from the console, and
+  that seat **writes the same register role** — `officeRow()` sets
+  `role = seat`.
+
+By the time anything inside the client asks, both are the same value on the
+same column. A consultant holding Super user on a client and that client's own
+SMO holding Super user on it reach exactly the same things. What differs is how
+many clients you hold it on, and whether you are also a platform admin — neither
+of which is Portfolio's business.
+
+| On this client | Portfolio |
 |---|---|
-| **Forefront** | By seat, every client, every project. Not in any team list. |
-| **The client's Super user** | **Anything**, on every project of their own client — creating one included. Never named on a project, because there is nothing a naming could add. |
-| **The client's SMO team** | Everything the Super user can, **except deleting a project.** Not a new rule: §89 already names the three things that seat does not get, and destruction is the one of the three that lands here — the access matrix does not (Portfolio has no column) and passwords are not Portfolio's business. |
-| **Everybody else** | Only where a project names them, at one of the three roles below. |
+| **Super user** | **Anything**, on every project, deleting one included. |
+| **SMO team** | Everything the Super user can, **except deleting a project.** Not a new rule: §89 already names the three things that seat does not get, and destruction is the one of the three that lands here — the access matrix does not (Portfolio has no column) and passwords are not Portfolio's business. |
+| **Anybody else** | Only where a project names them, at one of the three roles below. |
+
+**So the team list is the people who hold NEITHER seat**, which is a property of
+the model rather than a sentence about Forefront: anybody holding one is already
+on every project, so naming them could add nothing. That is also why the picker
+in §6.4 offers the register minus those two roles.
 
 ### 6.2 · Three roles, on the project
 
@@ -269,6 +292,8 @@ The client's register, through **the platform's own searchable ticking list**
 - **Everybody lands as Viewer** (Islam). Nothing is granted until somebody
   decides, which is the safe direction (§42 fails closed), and the list is
   never in a state where a person is on a project with no role.
+- **The two office roles are not offered.** They are in already (§6.1), so a
+  tick beside them would be a control that changes nothing (§94.15).
 - **Taking somebody off who holds activities is REFUSED, by name** (Islam:
   *"refusal is better"*) — the shape §62 already gives retiring a function
   that still holds capabilities: the press is live and names what is in the

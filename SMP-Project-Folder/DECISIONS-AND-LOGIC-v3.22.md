@@ -49724,3 +49724,91 @@ prevent — the row comes back on their next request, so it heals, but nothing
 says so at the press. And spec 056 §4's simplification, the client's seven
 pages leaving the access matrix, is stage 3: this stage moves nobody's access
 and the T0 baseline is what will say so.
+
+## §360 — THE TRIAL MODULE GOES, AND WHAT ITS CHECK PROVED STAYS (2026-09-17)
+
+Islam, in one line: *"let's remove the trial module now."*
+
+**IT WAS BUILT TO PROVE SOMETHING AND THE THING IS PROVED.** §320.5 made it
+deliberately not a product name — his own words, *"something even for the
+trial"* — to show a module could be turned on for one client, opened at its own
+address, and draw a page naming that client. §354 then made three modules real
+and gave the route a table to dispatch through, and §355/§356 gave Insights an
+area, a landing line and a Setup group. What the trial demonstrated is now
+demonstrated by a module somebody bought.
+
+**THE STORED WORD NEEDS NO MIGRATION, AND THAT IS `modulesFor`'s OWN DESIGN.**
+A client's modules are a list of words chosen weeks ago, and that function has
+always answered with a list the code can stand behind: an unknown or unbuilt
+word is **dropped**, under a comment saying exactly why — *a module retired
+later must not make a client unopenable*. Raya Trade holds `trial` in its row;
+after this the row is simply not drawn, on the card, in the switcher and on the
+client's own Setup rail. Nothing is written, nothing is cleaned up, and a
+database that still carries the word is not a database that is wrong.
+
+**THE CHECK IS WHERE THE WORK WAS, AND IT IS THE PART WORTH READING.**
+`checks/modules.mjs` had a section of its own for the trial's page and spelled
+`"trial"` in a dozen assertions besides. Both are the same fault at two sizes
+(§214.3, the eleventh time): a literal outliving the decision behind it.
+
+* **§360.1 — A SECOND MODULE IS FOUND, NEVER NAMED.** Every line needing *a
+  module the client has besides the default* now reads `OTHER`, derived from
+  `MODULE_DEF`. Removing this module would have meant editing a dozen
+  assertions; adding the next one means editing none. And it is guarded —
+  if there is no second built module at all the file says so in one assertion
+  rather than going quietly green over a list of one (§54.5, §113.8).
+* **§360.2 — §5 WAS ABOUT ANY MODULE'S PAGE AND SAID TRIAL.** Six of its
+  claims — the document names THIS client, a different client gets a different
+  document, there is a door OUT, the module you are in is marked, a client
+  holding only the default is offered no door it does not have, no row of
+  units, nothing inline the policy would silence — are about **any page a
+  module draws for itself**. They are asked of every such module now
+  (`OWN_PAGE`, found by looking for a `page.ts`), so the next module is
+  covered the day it lands.
+* **§360.3 — WHAT WENT WITH IT IS SAID RATHER THAN MOURNED** (§54.5). The
+  trial's greeting was built from the client's REGISTER, so it proved two
+  things nothing else here proves: that a count the page could not read is
+  **said** and never printed as a nought (§35, §93), and that a plural is not
+  made by adding an `s` (§107.8). The first is answered for Insights in §2c —
+  a library it could not read still draws, in the shipped colour. The second
+  lives in that page's own `plural()` with nobody asking it here.
+* **§360.4 — THE BREAK MOVES SO THE FALSIFICATION SURVIVES.**
+  `SMP_BREAK=static-hello` was the trial's own line and is now Insights': a
+  build whose page stopped naming THIS client. It is the one thing a module
+  drawn per client has to get right and the one thing a static page would
+  satisfy every other assertion about. `check:modules:red` is still eight
+  breaks and all eight are still red.
+* **§360.5 — AND THE SWITCHER'S FIXTURE WAS TWO MODULES TYPED OUT**, one of
+  them this one. It is `moduleMenu(offerable())` now — the same function the
+  server stamps the attribute from (§53.5) — so §7 drives the list a real
+  client would be sent.
+* **§360.6 — ONE ASSERTION NAMED THE TRIAL BECAUSE OF A PROPERTY IT ALONE
+  HAD**, and is REWRITTEN rather than deleted (§218): its only declared
+  landing line was `none`, so *"a module with no pick says nothing"* was true
+  of that module and not of the rule. The rule is that an unchosen module says
+  its **first declared line**, whatever that line is — which is what makes
+  `none` a choice rather than an absence — asserted of every module with no
+  pick, with the set asserted non-empty first (§113.8).
+
+**AND A RED NEIGHBOUR WAS CLEARED ON THE WAY, ESTABLISHED AS NOT THIS
+ROUND'S BEFORE IT WAS TOUCHED** (§303, by diff: neither the check nor either
+of its subjects is in this change). `checks/client-card-modules.py` §4
+asserted that pressing a card's **Settings** *"navigates nowhere"* — true
+while the set-up flow drew itself on the console page, and false since §357
+made Settings a door to `/<client>/setup`. REWRITTEN, never loosened (§218):
+what survives the decision is that Settings is its **own** control — it goes
+to the client's own Setup and not into a module, which is what the row above
+it does — asserted at both ends (§94.2), or a build where every control on
+the card landed in one place would pass it.
+
+**Verified**: modules **115/0** (from 93) and **red all eight ways**, insights
+127/0, shell 111/0, door-landing 140/0, client-card-modules 16/0,
+client-archive and client-setup-outside 0 failures, `generated-in-step` clear
+once committed, `built-in-step` all good, `tsc` clean cold. **The frozen
+product is untouched and measured** — `build.py`'s output is byte-identical to
+the shipped file — so **`sw.js` is NOT bumped**: §91's trigger is the built
+file's bytes changing, and they did not.
+
+**RECORDED, NOT DONE**: `modules/portfolio` and `modules/processes` are still
+words the address reserves with nothing behind them, which is `built: false`
+working as designed.

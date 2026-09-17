@@ -215,7 +215,7 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                        # live client's same band is asserted to have one).
                        "modules": ["strategy"], "offer": [
                            {"key": "strategy", "label": "Strategy", "note": "Plans, cycles and reviews.", "always": True},
-                           {"key": "trial", "label": "Trial", "note": "A module with a page of its own.", "always": False}]}
+                           {"key": "insights", "label": "Insights", "note": "A module with a page of its own.", "always": False}]}
         elif act == "archiveClient":
             row = WORLD.get(body.get("key"))
             if not row or not may_archive(row):

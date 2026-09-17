@@ -1,5 +1,5 @@
-/* A MODULE PER CLIENT, AND THE TRIAL THAT PROVES ONE CAN BE ADDED
-   (spec 046 §4.5, Islam 2026-09-12).
+/* A MODULE PER CLIENT, AND EVERY MODULE SERVING ITSELF
+   (spec 046 §4.5, Islam 2026-09-12; §360).
 
    Four surfaces have to agree about which modules a client has — the card in
    Forefront's console, the address, the switcher and Setup — and they agree
@@ -10,9 +10,13 @@
 
    WHAT IS DRIVEN AND WHAT IS READ, said out loud because the difference is
    the strength of the claim (§100.3):
-     · §1–§4 RUN the rules and §5 RENDERS the trial page, with no database —
-       the page is asked for a tenant that cannot be reached, which is also
-       how its honest degrade is proved;
+     · §1–§4 RUN the rules and §2b RENDERS every built module's own page,
+       with no database — each is asked for a tenant that cannot be reached,
+       which is also how its honest degrade is proved;
+       (§5 was the trial module's page and went with that module at §360;
+       what it proved of ANY module's page is asserted in §2b and §2d, and
+       what it proved of the trial alone — a greeting made of a register it
+       could not read — went with its subject, said rather than mourned.)
      · §6 READS the sources for the three facts that live in SQL, in the
        console's markup and in the route, because driving those needs a
        database and a browser and they are checked where those exist.
@@ -30,13 +34,12 @@
      SMP_BREAK=static-hello  node checks/modules.mjs   # must go red
      SMP_BREAK=switch-always node checks/modules.mjs   # must go red
      SMP_BREAK=gate-open     node checks/modules.mjs   # must go red (§4c)      */
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { chromium } from "playwright-core";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, isModule, landingLine, lineDef, NO_FACTS } from "../lib/modules.ts";
-import { trialDocument, registerLine } from "../modules/trial/page.ts";
+import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, moduleMenu, isModule, landingLine, lineDef, NO_FACTS } from "../lib/modules.ts";
 import { SERVERS, serverFor } from "../modules/registry.ts";
 import { insightsDocument } from "../modules/insights/page.ts";
 import { barFrom, BAR_DEFAULT } from "../lib/branding.ts";
@@ -48,7 +51,7 @@ const ROOT = join(APP, "..");
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
 
 /* The product reads its breaks from the environment (lib/modules.ts,
-   modules/trial/page.ts, lib/shell.ts), so this reads the same one — §7 serves the
+   modules/insights/page.ts, lib/shell.ts), so this reads the same one — §7 serves the
    shell itself and has to break with it. */
 const BREAK = process.env.SMP_BREAK || "";
 
@@ -56,6 +59,13 @@ const BREAK = process.env.SMP_BREAK || "";
    it changes as modules land. */
 const UNBUILT = MODULES.filter((k) => !MODULE_DEF[k].built);
 const BUILT_EXTRA = MODULES.filter((k) => MODULE_DEF[k].built && k !== DEFAULT_MODULE);
+/* A SECOND MODULE, FOUND RATHER THAN NAMED (§214.3, §218). Every line below
+   that needs "a module the client has besides the default" used to spell
+   `"trial"`, so removing that module (§360) would have meant editing a dozen
+   assertions — and adding the next one means editing none. If there is no
+   second built module at all the file says so once, here, rather than going
+   quietly green over a list of one (§54.5, §113.8). */
+const OTHER = BUILT_EXTRA[0] || null;
 
 let ok = 0;
 const bad = [];
@@ -66,19 +76,21 @@ const check = (what, good, detail) => {
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 console.log("1 · which modules a client has");
+check("there is a built module besides the default, or half this file proves nothing",
+  !!OTHER, MODULES.map((k) => k + ":" + (MODULE_DEF[k].built ? "built" : "-")).join(" "));
 check("a client that has been told nothing has the default and only that",
   same(modulesFor(null), [DEFAULT_MODULE]), JSON.stringify(modulesFor(null)));
-check("a client given the trial has both", same(modulesFor(["trial"]), ["strategy", "trial"]), JSON.stringify(modulesFor(["trial"])));
+check("a client given a second module has both", same(modulesFor([OTHER]), [DEFAULT_MODULE, OTHER]), JSON.stringify(modulesFor([OTHER])));
 /* THE ORDER IS MODULES', NOT THE ORDER THEY WERE SWITCHED ON — two clients
    holding the same modules must read the same way round, or a row moves under
    somebody because of when it was bought. */
 check("the order is the list's, never the order they were turned on",
-  same(modulesFor(["trial", "strategy"]), modulesFor(["strategy", "trial"])), JSON.stringify(modulesFor(["trial", "strategy"])));
+  same(modulesFor([OTHER, DEFAULT_MODULE]), modulesFor([DEFAULT_MODULE, OTHER])), JSON.stringify(modulesFor([OTHER, DEFAULT_MODULE])));
 /* BOTH ENDS (§94.2): dropping the unknown proves nothing unless something
    survives beside it, or a modulesFor() that returned the default always
    would pass every assertion above. */
 check("a word the code does not know is dropped and the rest survives",
-  same(modulesFor(["banana", "trial"]), ["strategy", "trial"]), JSON.stringify(modulesFor(["banana", "trial"])));
+  same(modulesFor(["banana", OTHER]), [DEFAULT_MODULE, OTHER]), JSON.stringify(modulesFor(["banana", OTHER])));
 check("a module that is NOT BUILT is dropped however it got into the list",
   same(modulesFor(UNBUILT), [DEFAULT_MODULE]), JSON.stringify(modulesFor(UNBUILT)));
 /* THE OTHER END, and it is what stops the assertion above passing because
@@ -91,7 +103,7 @@ check("...and a built one that is not the default IS kept",
   BUILT_EXTRA.length === 0 || modulesFor([BUILT_EXTRA[0]]).includes(BUILT_EXTRA[0]),
   BUILT_EXTRA.join(", "));
 check("the default survives a list that does not name it",
-  modulesFor(["trial"]).includes(DEFAULT_MODULE));
+  modulesFor([OTHER]).includes(DEFAULT_MODULE));
 check("and survives a list that names nothing at all", modulesFor([]).includes(DEFAULT_MODULE));
 
 console.log("\n2 · what a consultant may be offered");
@@ -221,7 +233,14 @@ check("...and what is not a colour is the shipped default, never painted as it c
   barFrom("javascript:alert(1)") === BAR_DEFAULT && barFrom("#ABC") === BAR_DEFAULT
   && barFrom(null) === BAR_DEFAULT && barFrom(undefined) === BAR_DEFAULT,
   [barFrom("javascript:alert(1)"), barFrom("#ABC"), barFrom(null)].join(" "));
-for (const name of ["trial", "insights"]) {
+/* DERIVED, NEVER NAMED (§214.3): the modules that draw a DOCUMENT of their
+   own are the built ones carrying a page.ts — Strategy serves the frozen
+   shell and has none — so a module added tomorrow is measured the day it
+   lands and one removed takes its own line with it (§360). */
+const OWN_PAGE = BUILT_EXTRA.filter((k) => existsSync(join(APP, "modules", k, "page.ts")));
+check("at least one module draws a document of its own, or the two below prove nothing",
+  OWN_PAGE.length > 0, BUILT_EXTRA.join(", "));
+for (const name of OWN_PAGE) {
   const src = read("smp-app/modules/" + name + "/page.ts");
   check("the " + name + " module asks the spine for the colour rather than deciding it",
     /lib\/branding\.ts/.test(src));
@@ -266,7 +285,7 @@ check("…and a module's own Setup is that module's, with `setup` inside it (spe
 check("the tour is the spine's too", whereOf(["tour"], HAVE_BOTH).module === null);
 /* A caller that forgets to say which modules the client has gets the NARROW
    answer, never every module — the safe direction (§42). */
-check("asked without a list, only the default is a module", whereOf(["trial"]).legacy && !whereOf(["strategy"]).legacy);
+check("asked without a list, only the default is a module", whereOf([OTHER]).legacy && !whereOf([DEFAULT_MODULE]).legacy);
 check("and Setup's address carries none", clientHref("raya-trade", null, "setup/people") === "/raya-trade/setup/people");
 
 console.log("\n4 · the card's rows");
@@ -322,13 +341,20 @@ check("unreadable facts say nothing rather than a false figure",
 const rowsL = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: F }, { strategy: "waiting" });
 check("the card's row carries the picked line, from the one reader",
   rowsL[0].line === landingLine("strategy", "waiting", F) && rowsL[0].line === "3 of 10 still to submit", rowsL[0].line);
-check("…and a module with no pick carries its default line",
-  rowsL.filter((r) => r.key === "insights").every((r) => r.line === landingLine("insights", "", F)) &&
-  rowsL.filter((r) => r.key === "trial").every((r) => r.line === ""),
+/* REWRITTEN, NEVER LOOSENED (§218, §214.3). This named the trial module,
+   whose only declared line was `none`, so it read as "a module with no pick
+   says nothing" — true of that module and not the rule. The rule is that an
+   unchosen module says its FIRST DECLARED line, whatever that line is, which
+   is what makes `none` a choice rather than an absence; asserted of every
+   built module, so the next one is covered and the one that went (§360) took
+   no assertion with it. */
+const UNPICKED = rowsL.filter((r) => r.key !== "strategy");
+check("…and a module with no pick carries its FIRST DECLARED line",
+  UNPICKED.length > 0 && UNPICKED.every((r) => r.line === lineDef(r.key, undefined).read(F)),
   rowsL.map((r) => r.key + "=" + JSON.stringify(r.line)).join(" "));
 check("…and an unreadable client says nothing under every module",
   moduleRows(modulesFor(BUILT_EXTRA), { unreadable: true, landing: null }, { strategy: "waiting" }).every((r) => r.line === ""));
-check("a client without the trial gets one row", moduleRows(modulesFor([]), facts).length === 1);
+check("a client holding nothing besides the default gets one row", moduleRows(modulesFor([]), facts).length === 1);
 
 
 /* ── 4c · WHO MAY OPEN A MODULE (§356.5, spec 054 §4.4, research R3) ──────
@@ -350,8 +376,11 @@ console.log("\n4c · who may open a module (§356.5)");
   const area = openingArea("insights");
   check("Insights is opened by its first declared area, whose shipped state is view",
     !!area && area.key === "a_insights" && area.shipped === "view", JSON.stringify(area));
-  check("a module declaring no area is opened by nobody's grant (Strategy, the trial)",
-    openingArea("strategy") === null && openingArea("trial") === null);
+  /* DERIVED (§214.3): whichever modules declare no area — Strategy is the
+     only one today, and was not the only one yesterday (§360). */
+  const NO_AREA = MODULES.filter((k) => !MODULE_DEF[k].areas.length);
+  check("a module declaring no area is opened by nobody's grant",
+    NO_AREA.length > 0 && NO_AREA.every((k) => openingArea(k) === null), NO_AREA.join(", "));
   /* absent = shipped, never none (§30.2) */
   check("with nothing stored a unit head opens Insights — absent is the shipped state, not a refusal",
     decideOpen("none", "insights", seed, head) === true);
@@ -365,7 +394,7 @@ console.log("\n4c · who may open a module (§356.5)");
   check("THE SEAT OPENS EVERYTHING: the Super user and the SMO team are served over a shut row (spec 046 §4.10)",
     decideOpen("super", "insights", shutOwner, head) === true && decideOpen("smoteam", "insights", shutOwner, head) === true);
   check("a module with no area is never gated, whatever the map says",
-    decideOpen("none", "strategy", shutOwner, head) === true && decideOpen("none", "trial", shutOwner, head) === true);
+    NO_AREA.every((k) => decideOpen("none", k, shutOwner, head) === true), NO_AREA.join(", "));
   /* the floor: somebody on the register holding no role is judged on the
      Everyone-else row (§93) */
   const floor = graphWith((g) => { g.people.push({ key: "nobody_x", name: "Nobody Here", unit: UK, email: "" }); g.access.employee.a_insights = "none"; });
@@ -396,41 +425,63 @@ console.log("\n4c · who may open a module (§356.5)");
     routeSrc.indexOf("mayOpenModule(") > -1 && routeSrc.indexOf("mayOpenModule(") < routeSrc.indexOf('w.rest[0] === "setup"') && routeSrc.indexOf("mayOpenModule(") < routeSrc.indexOf("serverFor(key)"));
 }
 
-console.log("\n5 · the trial module's page");
-/* NO DATABASE ON PURPOSE. The tenant cannot be reached, which proves the two
-   things worth proving at once: the greeting comes from the REGISTRY row and
-   is there whatever the graph does, and a count it could not read is SAID and
-   never printed as a nought (§35, §93: counting an error as absence reports
-   everybody as having none). */
-const html = await trialDocument("raya-trade", "not-a-tenant-id", "Raya Trade", HAVE_BOTH);
-check("the greeting names THIS client", /<p class="hi">Hello, Raya Trade\.<\/p>/.test(html),
-  (html.match(/<p class="hi">[^<]*/) || [""])[0]);
-check("and a different client gets a different greeting — the whole point of the module",
-  /Hello, El Abd\./.test(await trialDocument("el-abd", "not-a-tenant-id", "El Abd", HAVE_BOTH)));
-check("a register it could not read is said, never counted as nought",
-  /no plan yet, so there was no register to read/.test(html) && !/\b0 people\b/.test(html));
-/* THE SENTENCE IS DRIVEN, not left to a database (§94.11). Rendering the page
-   against a real tenant is what found "3 persons" — a plural derived by
-   adding an "s" to a word that does not take one (§107.8's family) — and it
-   was unreachable from here until the sentence became a function of its own. */
-check("one person reads as one person", registerLine(1) === "It read this client's own register: <b>1 person</b>", registerLine(1));
-check("and three read as three PEOPLE, not three persons", registerLine(3).includes("3 people"), registerLine(3));
-check("a count it does not have is a sentence, never a nought", registerLine(null) === "This client holds no plan yet, so there was no register to read." && !/0/.test(registerLine(null)), registerLine(null));
-check("the switcher lists the client's own modules, current one marked",
-  /class="mi on"[^>]*>Strategy|aria-current="true"/.test(html) === false
-    ? /aria-current="true">Trial/.test(html) : /aria-current="true">Trial/.test(html),
-  (html.match(/aria-current="true">[A-Za-z]+/) || [""])[0]);
-check("and it offers a door OUT of the trial, back to Strategy (§61)",
-  html.includes('href="/raya-trade/strategy"'), (html.match(/href="\/raya-trade\/[a-z]*"/g) || []).join(" "));
-check("a client holding only Strategy is offered no door it does not have",
-  !(await trialDocument("raya-trade", "not-a-tenant-id", "Raya Trade", HAVE_ONE)).includes('href="/raya-trade/trial"'));
-check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2)",
-  !/data-u=|class="units"/.test(html));
-/* The page is served under the shell's policy, which is `script-src 'self'`
-   (lib/shell.ts SHELL_CSP): an inline handler here would render perfectly and
-   never run, so the switcher is a <details> and this asserts it stayed one. */
-check("nothing inline needs a script, or the policy would silence it", !/<script|onclick=/i.test(html));
-check("the client's own name is the document's title too", /<title>Raya Trade — Trial<\/title>/.test(html));
+console.log("\n5 · what a module's own page owes (driven)");
+/* §360 REMOVED THE TRIAL MODULE AND THIS SECTION IS WHAT SURVIVED IT. That
+   module existed to prove a module can be turned on for one client and
+   opened, and its page was asserted here at length. Most of what was
+   asserted was never about the trial at all — it was about ANY page a module
+   draws for itself — so it is asked of every such module now, found rather
+   than named (OWN_PAGE), and the next module is covered the day it lands.
+
+   WHAT DID GO WITH IT, said rather than quietly dropped (§54.5): the trial's
+   greeting was built from the client's REGISTER, so it proved a count the
+   page could not read is SAID and never printed as a nought (§35, §93), and
+   that a plural is not made by adding an "s" (§107.8). Insights answers the
+   first of those in §2c — a library it could not read still draws, in the
+   shipped colour — and the second lives in `plural()` in its own page with
+   nobody asking it here.
+
+   NO DATABASE ON PURPOSE: the tenant cannot be reached, which is also how
+   each page's honest degrade is proved. */
+const docOf = async (k, slug, name, have) => {
+  const res = await serverFor(k)({ ...argsFor(k, []), slug, tenantName: name, have });
+  return res.status === 200 ? await res.text() : "";
+};
+for (const k of OWN_PAGE) {
+  const doc = await docOf(k, "raya-trade", "Raya Trade", HAVE_BOTH);
+  const other = await docOf(k, "el-abd", "El Abd", HAVE_BOTH);
+  /* THE PAGE NAMES THIS CLIENT, at both ends (§94.2): a page that named
+     nobody, and a page that named everybody the same, are two different
+     faults and only the second is caught by asking one document. This is
+     what SMP_BREAK=static-hello takes away. */
+  check("its document names THIS client — " + k,
+    /<title>([^<]*)</.test(doc) && doc.includes("Raya Trade"),
+    (doc.match(/<title>[^<]*/) || [""])[0]);
+  check("...and a different client gets a different document — " + k,
+    other.includes("El Abd") && !other.includes("Raya Trade"),
+    (other.match(/<title>[^<]*/) || [""])[0]);
+  /* THE WAY OUT (§61): a module you can open and not leave is a room with
+     no door. The switcher is that door and it is asserted BOTH ways — the
+     module you are in marked, and a client holding only Strategy offered no
+     door to a module it does not have. */
+  check("it offers a door OUT, back to the default module — " + k,
+    doc.includes('href="' + clientHref("raya-trade", DEFAULT_MODULE, "") + '"'),
+    (doc.match(/href="\/raya-trade\/[a-z]*"/g) || []).join(" "));
+  check("...and the module you are IN is marked — " + k,
+    new RegExp('aria-current="true">' + MODULE_DEF[k].label).test(doc),
+    (doc.match(/aria-current="true">[A-Za-z]+/) || [""])[0]);
+  check("a client holding only the default is offered no door it does not have — " + k,
+    !(await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE))
+      .includes('href="' + clientHref("raya-trade", k, "") + '"'));
+  check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2) — " + k,
+    !/data-u=|class="units"/.test(doc));
+  /* The page is served under the shell's policy, which is `script-src 'self'`
+     (lib/shell.ts SHELL_CSP): an inline handler here would render perfectly
+     and never run, so the switcher is a <details> and this asserts it stays
+     one. */
+  check("nothing inline needs a script, or the policy would silence it — " + k,
+    !/<script|onclick=/i.test(doc));
+}
 
 console.log("\n6 · what lives in SQL, in the console and in the route (read, not driven)");
 const schema = read("smp-app/db/schema.sql");
@@ -515,8 +566,12 @@ console.log("\n7 · the switcher in the platform's top bar (driven)");
 const BODY = readFileSync(join(APP, "shell", "body.html"), "utf8");
 const ROUTE = readFileSync(join(APP, "shell", "route.js"), "utf8");
 const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
-const MENU = [{ key: "strategy", label: "Strategy", note: "Plans, measures, reporting and the review" },
-              { key: "trial", label: "Trial", note: "Says hello and names the client." }];
+/* THE FIXTURE IS THE PRODUCT'S OWN ANSWER (§53.5, §214.3): this was two
+   entries typed out, one of them a module that no longer exists (§360). It
+   is `moduleMenu()` now — the same function the server stamps the attribute
+   from — so what is driven below is the list a real client would be sent,
+   and a module added or removed changes this file nowhere. */
+const MENU = moduleMenu(offerable());
 const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 const doc = (menu) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
   (menu ? " data-modules='" + attr(JSON.stringify(menu)) + "'" : "") +
@@ -576,11 +631,13 @@ if (browser) {
   await page.locator(".topmark > summary").click();
   await page.waitForTimeout(200);
   const items = await page.locator(".topmark .menu button").allInnerTexts();
-  check("the menu lists every module this client has", items.length === 2 && items[0].startsWith("Strategy") && items[1].startsWith("Trial"),
+  check("the menu lists every module this client has",
+    items.length === MENU.length && MENU.every((m, i) => items[i].startsWith(m.label)),
     items.map((t) => t.split("\n")[0]).join(", "));
   check("each carries the line the server gave it, never one worked out from the key",
-    items[0].includes("Plans, measures, reporting and the review"));
-  check("the module you are IN is marked", (await page.locator('.topmark .menu button[aria-current="true"]').innerText()).startsWith("Strategy"));
+    MENU.every((m, i) => items[i].includes(m.note)), items.map((t) => t.replace(/\n/g, " · ")).join(" | "));
+  check("the module you are IN is marked",
+    (await page.locator('.topmark .menu button[aria-current="true"]').innerText()).startsWith(MODULE_DEF[DEFAULT_MODULE].label));
   /* THE MENU IS OPEN AND ON SCREEN — a panel positioned off its own edge
      renders perfectly and cannot be read (§90: a control below the fold is a
      control that does nothing). */

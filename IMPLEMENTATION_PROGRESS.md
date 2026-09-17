@@ -5061,6 +5061,49 @@ untouched — the merge is Islam's word, on that merge.**
 
 ---
 
+**§360 — the trial module goes, 2026-09-17.** Islam: *"let's remove the trial
+module now."* It was built to prove a module could be turned on for one client
+and opened, and three real modules have proved it since — so it goes, and
+**nothing in any database has to be cleaned up**: a client's stored list is
+read through `modulesFor`, which has always dropped a word the code no longer
+knows, under a comment saying exactly why. Raya Trade keeps the word in its
+row and simply stops being drawn a row for it, on its card, in the switcher
+and on its own Setup rail.
+
+**The work was the check, and it is the same lesson at two sizes.**
+`checks/modules.mjs` had a whole section for the trial's page and spelled that
+word in a dozen assertions besides — a literal outliving the decision behind
+it (§214.3, the eleventh time). It now **names no module at all**: the second
+module, the ones that draw a page of their own and the ones declaring no area
+are all derived, with the derivations themselves guarded so a list of one
+cannot go quietly green. Six of the deleted section's claims were never about
+the trial — they were about any page a module draws for itself — and are asked
+of every such module now, so the next one is covered the day it lands. **Three
+assertions genuinely retired and are named rather than absorbed** (§54.5): the
+trial's greeting was made of the client's register, so it alone proved a count
+the page could not read is said rather than printed as a nought, and that a
+plural is not made by adding an `s`.
+
+**And the falsification survives**: `SMP_BREAK=static-hello` — a build whose
+page stopped naming THIS client — moved to Insights, so `check:modules:red` is
+still eight breaks and all eight still red.
+
+**A red neighbour was cleared on the way**, established as not this round's
+before it was touched: `client-card-modules.py` asserted that pressing a
+card's **Settings** *"navigates nowhere"*, which stopped being true when §357
+made it a door into the client's own Setup. Rewritten to the claim that
+survives — Settings is its own control, going to the client's Setup and not
+into a module — asserted at both ends.
+
+*Verified:* modules **115/0** (from 125, and every one of the ten accounted
+for line by line) **red all eight ways**; insights 127/0; shell 111/0;
+door-landing 140/0; client-card-modules 16/0; client-archive and
+client-setup-outside 0 failures; `built-in-step` all good — the frozen
+product is untouched and measured, so `sw.js` is **not** bumped; `tsc` clean
+cold. **`main` untouched — the merge is Islam's word, on that merge.**
+
+---
+
 **Spec 055 — the client's settings live in the platform (§357), on the
 branch, built 2026-09-16.** Islam, of spec 054's landing beside the frozen
 welcome: *"why do I have a welcome screen for the client overall, I just need

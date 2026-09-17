@@ -8047,20 +8047,29 @@ python3 checks/built-in-step.py # THE SHIPPED FILE IS IN STEP WITH ITS SOURCES
                                 # *"your edits are not built yet"* (&sect;124), so only
                                 # what `build.py` actually reads counts. Proved able to
                                 # fail both ways, one of them the reported state itself
-node smp-app/checks/modules.mjs # a module per client, and the trial that proves
-                                # one can be added (&sect;320.5) &mdash; `npm run
+node smp-app/checks/modules.mjs # a module per client, and every module serving
+                                # itself (&sect;320.5, &sect;360) &mdash; `npm run
                                 # check:modules`, no database. The list a client has
                                 # (order is MODULES', an unknown or UNBUILT word
                                 # dropped, the default always present), what may be
                                 # offered, the address (a module the client does NOT
                                 # have falling through to the legacy branch exactly as
-                                # any other unknown word), the card's rows, and the
-                                # trial page RENDERED &mdash; the greeting naming this
-                                # client, a different client getting a different one,
-                                # a register it could not read SAID rather than counted
-                                # as nought (&sect;35, &sect;93), the way OUT back to
-                                # Strategy (&sect;61), no row of units, and nothing
-                                # inline needing a script the policy would silence.
+                                # any other unknown word), the card's rows, and EVERY
+                                # module's own page RENDERED &mdash; the document
+                                # naming this client, a different client getting a
+                                # different one, the way OUT back to the default
+                                # module (&sect;61), the module you are IN marked, a
+                                # client holding only the default offered no door it
+                                # does not have, no row of units, and nothing inline
+                                # needing a script the policy would silence. SINCE
+                                # &sect;360 IT NAMES NO MODULE AT ALL: the second
+                                # module, the ones drawing a page of their own and the
+                                # ones declaring no area are all DERIVED from
+                                # MODULE_DEF, so removing the trial module edited a
+                                # dozen assertions once and adding the next one edits
+                                # none (&sect;214.3, &sect;218) &mdash; with the
+                                # derivation itself guarded, or a list of one goes
+                                # quietly green (&sect;54.5, &sect;113.8).
                                 # It SAYS which assertions are driven and which are
                                 # read (&sect;100.3). AND SINCE &sect;354 IT COVERS
                                 # ALL THREE BUILT MODULES, not two named by hand
@@ -9602,7 +9611,53 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;359.2: Forefront team is the store
+*Last Updated: 2026-09-17 &mdash; **&sect;360: the trial module goes, and what
+its check proved stays.** Islam: *"let's remove the trial module now."*
+**IT WAS BUILT TO PROVE SOMETHING AND THE THING IS PROVED** &mdash; &sect;320.5
+made it deliberately not a product name to show a module could be turned on for
+one client and opened; &sect;354 then gave the route a table and &sect;355/&sect;356
+gave Insights an area, a landing line and a Setup group, so what the trial
+demonstrated is demonstrated now by a module somebody bought. **THE STORED WORD
+NEEDS NO MIGRATION, AND THAT IS `modulesFor`'s OWN DESIGN**: an unknown or
+unbuilt word is DROPPED, under a comment saying exactly why &mdash; *a module
+retired later must not make a client unopenable* &mdash; so Raya Trade keeps the
+word in its row and simply stops being drawn a row for it, on the card, in the
+switcher and on its own Setup rail. **THE WORK WAS THE CHECK, AND IT IS
+&sect;214.3 FOR THE ELEVENTH TIME**: `checks/modules.mjs` had a section of its
+own for the trial's page and spelled `"trial"` in a dozen assertions besides.
+Both are one literal outliving its decision. **A SECOND MODULE IS FOUND, NEVER
+NAMED** (`OTHER`, derived from `MODULE_DEF`, with the derivation itself guarded
+or a list of one goes quietly green &mdash; &sect;54.5, &sect;113.8); **&sect;5
+WAS ABOUT ANY MODULE'S PAGE AND SAID TRIAL**, so its six general claims are
+asked of every module drawing a page of its own (`OWN_PAGE`, found by looking
+for a `page.ts`); **the switcher's fixture was two modules typed out** and is
+`moduleMenu(offerable())` now (&sect;53.5); and **one assertion named the trial
+because of a property it alone had** &mdash; its only landing line was `none`
+&mdash; REWRITTEN to the rule that survives (an unchosen module says its FIRST
+DECLARED line, which is what makes `none` a choice rather than an absence),
+with the set asserted non-empty first (&sect;218, &sect;113.8). **WHAT WENT WITH
+IT IS SAID RATHER THAN MOURNED** (&sect;54.5): the trial's greeting was made of
+the client's REGISTER, so it alone proved a count the page could not read is
+SAID and never a nought (&sect;35, &sect;93) and that a plural is not made by
+adding an `s` (&sect;107.8) &mdash; the first is answered for Insights in
+&sect;2c, the second lives in that page's own `plural()` with nobody asking it
+here. **AND THE BREAK MOVES SO THE FALSIFICATION SURVIVES**:
+`SMP_BREAK=static-hello` is Insights' now &mdash; a build whose page stopped
+naming THIS client &mdash; and `check:modules:red` is still eight breaks, all
+eight still red. **AND A RED NEIGHBOUR WAS CLEARED, ESTABLISHED AS NOT THIS
+ROUND'S BEFORE IT WAS TOUCHED** (&sect;303, by diff): `client-card-modules.py`
+&sect;4 asserted a card's Settings *"navigates nowhere"*, true until &sect;357
+made it a door to `/<client>/setup` &mdash; REWRITTEN, never loosened
+(&sect;218), to the claim that survives, that Settings is its OWN control and
+not the module's, at both ends. **Verified**: modules **115/0** (from 93) red
+eight ways, insights 127/0, shell 111/0, door-landing 140/0,
+client-card-modules 16/0, client-archive and client-setup-outside 0 failures,
+`built-in-step` all good, `tsc` clean cold. **The frozen product is untouched
+and measured**, so **`sw.js` is NOT bumped** &mdash; &sect;91's trigger is the
+built file's bytes changing and they did not. **`main` untouched &mdash; the
+merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-16 &mdash; **&sect;359.2: Forefront team is the store
 and the register is a reader (spec 056 &sect;3a, stage 2 of six, on the
 branch).** Islam's own revision of his first instruction &mdash; *"how about
 the forefront team is a separate view as you did but we keep them on the

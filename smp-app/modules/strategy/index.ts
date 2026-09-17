@@ -5,7 +5,7 @@
    WHY `lib/shell.ts` DID NOT MOVE IN HERE WITH IT. Two things live in that
    file and only one is Strategy's: `shellDocument` draws the frozen platform,
    and `shellHeaders` is the security policy EVERY served document wears —
-   this module's, the trial module's and Insights'. A policy that lived inside
+   this module's and Insights'. A policy that lived inside
    one module and was imported by the other two would be that module reaching
    into another's folder, which is the boundary this round exists to make
    visible (§345 §3). It stays on the spine.

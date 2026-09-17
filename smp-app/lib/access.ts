@@ -8,7 +8,7 @@
    THREE RULES, IN ORDER, AND ONLY THE THIRD READS ANYTHING:
      1. A module with no declared area is open to everybody the door let in.
         Strategy declares none (its areas ARE the frozen matrix's, which the
-        frozen product enforces page by page); the trial declares none.
+        frozen product enforces page by page).
      2. The seat opens everything (spec 046 §4.10's own rule: whoever holds
         this client's Super user or SMO team seat reads the whole client).
      3. Otherwise the person's roles on the stored graph, through the frozen

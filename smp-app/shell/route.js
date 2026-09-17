@@ -143,9 +143,10 @@
      ABSENT attribute is what says so, rather than a flag beside it (§50.6).
 
      THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
-     one answer to what the switcher lists, read by this and by the trial
-     module's own bar (§53.5): a label worked out here by capitalising a key
-     is how two screens come to spell one module differently.
+     one answer to what the switcher lists, read by this and by a module's
+     own bar (modules/insights/page.ts, §53.5): a label worked out here by
+     capitalising a key is how two screens come to spell one module
+     differently.
 
      IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
      inside, and that drawing's `.brand` was a flex ROW while the product's is

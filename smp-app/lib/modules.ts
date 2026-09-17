@@ -22,7 +22,7 @@
    the document it is served in (lib/shell.ts stamps `data-module`), so
    shell/route.js keeps no second copy of these words (§53.5). */
 
-export const MODULES = ["strategy", "portfolio", "insights", "processes", "trial"] as const;
+export const MODULES = ["strategy", "portfolio", "insights", "processes"] as const;
 export type ModuleKey = (typeof MODULES)[number];
 
 /* Where a client lands when the address names no module. */
@@ -43,7 +43,7 @@ export const SPINE_SEGMENTS = ["setup", "tour"] as const;
    WRONG ROOM. A module nobody has built is a word the address resolves with
    nothing behind it: offered today, Portfolio would open the STRATEGY
    platform wearing another name, which is worse than not offering it at all
-   (§61). So the three unbuilt ones keep their entries — the words stay
+   (§61). So the unbuilt ones keep their entries — the words stay
    reserved and isModule() must go on knowing them, or a business unit keyed
    `portfolio` would quietly claim the address the day the module lands — and
    nobody is offered them until there is something to open. */
@@ -135,11 +135,6 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
               states: ["view", "none"], shipped: "view" }],
     lines: INSIGHTS_LINES },
   processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [], lines: [NOTHING] },
-  /* DELIBERATELY NOT A PRODUCT NAME (Islam, 2026-09-12: "something even for
-     the trial"). It exists to prove a module can be turned on for one client
-     and opened, and it says so in its own line, so nobody can mistake it for
-     something the client bought. */
-  trial:     { label: "Trial",     note: "Says hello and names the client. Proves a module can be turned on.", built: true, areas: [], lines: [NOTHING] },
 };
 
 export function isModule(s: unknown): s is ModuleKey {
@@ -226,9 +221,9 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
 
 /* WHAT THE SWITCHER LISTS (spec 046, E1). One answer for both places that
    draw it — the shell's top bar (shell/route.js, through the document's
-   `data-modules`) and the trial module's own bar (modules/trial/page.ts) —
-   because a label invented at a call site is how two screens come to spell one
-   module differently (§53.5). */
+   `data-modules`) and a module's own bar (modules/insights/page.ts) — because
+   a label invented at a call site is how two screens come to spell one module
+   differently (§53.5). */
 export type ModuleMenuItem = { key: ModuleKey; label: string; note: string };
 export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
   return have.map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));

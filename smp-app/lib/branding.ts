@@ -2,7 +2,8 @@
    Branding is the SPINE's: a module should get the client's colour for
    nothing, the way it gets the door and the session. It was not getting it.
    Measured before this file existed: Strategy wore the tenant's bar colour,
-   the trial module read it for itself, and Insights carried the shipped navy
+   the trial module read it for itself (that module is gone; §360), and
+   Insights carried the shipped navy
    as a literal with no reader at all — so a client who had chosen a colour
    saw it on two screens out of three, and the third was not wrong by accident
    but by there being nowhere to ask.
@@ -14,7 +15,7 @@
      · `barFor(tenantId)` is that rule plus the one small read, for a module
        that has no reason to load the whole graph. Insights lists a library;
        loading thirty tables for a colour would be a page slower for nothing.
-   A module holding the graph already (the trial module reads it for its
+   A module holding the graph already (a module that reads it for its
    count) asks `barFrom` and makes no second query.
 
    THE DEFAULT IS THE ABSENCE OF A CHOICE, never a copy of one (§50.6): it is

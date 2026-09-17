@@ -160,15 +160,23 @@
      wired exactly once, at load — no second handler on a repaint (§24, §47.2).
      A press navigates, so the menu never has to be closed afterwards. */
   (function modules() {
-    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058). Those pages belong
-       to no module, so a switcher there offers a way out of somewhere you are
-       not — and it is the one piece of the chrome the frozen shell cannot
-       stand down, because this builds it once at load and nothing repaints
-       `.top-in`. The scope is read off the SERVER's stamp (lib/shell.ts), not
-       off placeOf's: placeOf runs a few lines BELOW this, so the attribute it
-       writes would not be there yet — the same answer, and the only one that
-       has arrived by now. */
-    if (document.documentElement.getAttribute("data-setup-scope") === "client") return;
+    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
+       CSS RULE RATHER THAN AN EARLY RETURN HERE (§366). Those pages
+       belong to no module, so a switcher there offers a way out of somewhere
+       you are not; what changed is that crossing between the two rails stopped
+       being a page load, so "built once at load" stopped being able to answer
+       the question at all. It was wrong in BOTH directions the moment it
+       could: crossing to a module's settings left the switcher never built,
+       and crossing back left it standing.
+
+       So it is built wherever there is a choice, and `data-client-settings` —
+       the one answer paint() writes for the destination row, the Group
+       dropdown, the Units | Functions switch, the gear and the viewer strip —
+       stands it down with the rest of the chrome (_shared.css). Same
+       mechanism, one rule, and it follows the scope on every paint instead of
+       on every navigation. `display:none`, so it does not take the keyboard
+       either (§3.2); and the whole bar is inside `.chrome`, which the boot
+       skeleton hides (§94.10), so nothing flashes before the first paint. */
     var raw = document.documentElement.getAttribute("data-modules");
     if (!raw) return;                               /* one module: no choice to offer */
     var list;

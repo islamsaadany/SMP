@@ -51454,3 +51454,191 @@ database — the rehearsal database §328.3 describes — so it is UNRUN rather 
 failing, its own header's stated precondition and true on main too.
 `test-concurrent-saves.js` dies on `platform.sessions`, one of the seven
 harnesses §328.3 already records as unrunnable since §313.
+
+---
+
+## §366 — THE CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (2026-09-17)
+
+Islam, of the walk he does most: *"the shifting between the client settings and
+the main console and then getting into the strategy and from the module settings
+to the client settings takes too long — is there a way to make these movements
+smoother in general"*.
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED (rule 3a), AND IT SPLIT THE JOURNEY IN
+THREE.** Everything INSIDE a module — a unit, a tab, the gear into that module's
+own Setup — is `paint()` and a `pushState`: no server, instant. Everything
+BETWEEN the console, a client and a module is an `<a href>`: a full document,
+which on this stack means **3,789,535 bytes of `shell.js` and 659,996 of
+`platform.css` re-read and re-evaluated**, the document itself served
+`no-store`, and then `/api/state` asked for the tenant's WHOLE graph again
+(~363KB on the worked example, read across 42 tables) before anything can be
+drawn. That is the wait, and it is paid in full on every one of those presses.
+
+**AND ONE OF THOSE HOPS IS PURE WASTE, WHICH IS THE FINDING.** Read off
+`app/(platform)/[slug]/[...rest]/route.ts`: for a Setup address BOTH
+`/<client>/setup/…` and `/<client>/<module>/setup/…` return the SAME
+`shellDocument()` call with the SAME arguments but the last — `key` is
+`w.module || DEFAULT_MODULE` and resolves to the same module either way, so the
+landing stamp, the areas stamp, the module menu and the tenant's name are all
+identical. **The two documents differ in one attribute: `data-setup-scope`.** So
+pressing *Client settings ›* or *Strategy settings ›* threw away a 3.8MB
+application and re-fetched the whole plan **to change one word the browser
+already holds a function for** (`setScope`, in both shell.html and
+shell/route.js). The console and the module switcher are not waste — those
+really are different applications — and neither is the first arrival into a
+client. This hop was.
+
+**FOUR OPTIONS WERE PUT TO HIM WITH THE COST OF EACH AND HE TOOK A**, the
+smallest: make that one crossing a press. B (letting the browser keep the page
+you just left — every document here is `no-store`, which is why Back rebuilds)
+is a SECURITY header and is explicitly his call, not mine; C (stop revalidating
+the two generated files on every navigation) and D (the 3.8MB itself) are
+recorded and not done.
+
+### §366.1 — THE `href` STAYS AND THE PLAIN CLICK IS TAKEN
+
+A middle click, a modifier click and *Copy link address* stay the browser's, and
+the address they carry is the one the router writes for that rail — so this is
+faster and **not narrower** (§61). `data-setupcross` carries the scope to cross
+TO and nothing else: who may open which module was already decided when the rows
+were built (`modulesHere()`, the server's own list), so the press asks nothing a
+second time (§42).
+
+**AND THE LINK IS LEFT TO THE BROWSER WHEREVER WE CANNOT DO BETTER.** A viewer
+with no page at all in the target rail answers null, where the server lands them
+where they work rather than in an empty frame (`restoreWhere`'s own note) — so
+that case falls through to the `href` untouched. The press can only ever be
+faster than the link; it can never be a dead end.
+
+### §366.2 — BOTH THE SCOPE AND THE PAGE, OR NEITHER
+
+`resolveSetupScope()` moves the scope to the page's own module whenever the two
+disagree (§359.2) — which is right, and it means writing the scope and leaving
+`currentSub` on a page of the rail just left would be UNDONE inside the same
+paint, and the press would look like a control that does nothing (§96). So the
+handler sets both, and the page it sets is not a second answer: **the "which
+page does this rail open on" rule is EXTRACTED** from `restoreWhere` as
+`setupLandingKey(scope)` and asked by both (§53.5) — the set-up strip while it
+is not done, else the rail's primary, else whatever it holds first (§360.7). It
+takes the scope rather than reading it, so a caller can ask about a rail it is
+not standing in without writing the attribute and putting it back.
+
+**WIRED IN shell.html BESIDE `[data-setupgo]`, NOT IN shell/route.js**, though
+the rows exist only on the served stack: every rail control in the product is
+wired in that one loop, and the two things this needs — which pages a rail holds
+for this viewer, and how to leave a mode — are that file's. What route.js keeps
+is the ADDRESS, and it follows with **no edit at all**: `addressOf` has read
+`data-setup-scope` since §362.1, so the push after the paint writes the module's
+form or the spine's on its own.
+
+### §366.3 — THE SWITCHER STOPS BEING STRUCTURAL, BECAUSE IT STOPPED BEING ABLE TO BE
+
+§362 kept the module switcher off the client's own settings with an EARLY RETURN
+in `shell/route.js`, and said in its own comment why: it is built once at load,
+nothing repaints `.top-in`, so the frozen shell cannot stand it down. That
+answered while the only way between the two rails was a page load. **The moment
+the crossing is a press it is wrong in BOTH directions** — crossing to a
+module's settings leaves it never built, crossing back leaves it standing.
+
+So it is built wherever there is a CHOICE (route.js keeps that test — a menu of
+one is a door behind a door, §32) and `data-client-settings` stands it down with
+the rest of the chrome. **Same mechanism, one rule**: that attribute is what
+already hides the destination row, the Group dropdown, the Units | Functions
+switch, the gear and the viewer strip, written by `paint()` on every paint, so
+the switcher now follows the SCOPE rather than the navigation.
+
+**NAMED RATHER THAN CONTAINED, AND THAT IS THE ONE DIFFERENCE.** §362 stands
+down two CONTAINERS, which is what covers a control added to either later; the
+switcher's container is `.top-in`, which also holds the client's own heading and
+mark — exactly what these pages DO want — so this one is named. `display:none`,
+so it does not take the keyboard either (§3.2); and the whole bar is inside
+`.chrome`, which the boot skeleton hides (§94.10), so nothing flashes between
+the load that builds it and the first paint that judges it.
+
+### §366.4 — ONE ASSERTION REWRITTEN, NEVER LOOSENED (§218)
+
+`checks/shell.mjs` §3b asked whether the switcher ELEMENT was there. That said
+*not offered* only while the early return made it structurally impossible; with
+§366.3 it is in the document on both rails. It is measured as PAINT now
+(`checkVisibility`), which is **what that probe's own comment already says it
+does for every other control on the line** (§94.8) — and it is not a loosening:
+`seen()` is false for `display:none` exactly as it is for absent, so a build
+that draws the switcher on the client's settings still goes red.
+
+**AND THE NEW ASSERTIONS ARE LED BY THE ONE THIS IS ALL FOR.** A build that
+followed the link lands on the same rail, wearing the same bar, at the same
+address — three seconds later — so every other assertion here passes on it. A
+marker planted on `window` before the press survives a repaint and cannot
+survive a document (§356's own technique), and that is what separates them.
+**BOTH ENDS** (§94.2): the outward press, where the chrome must come BACK, and
+the way back, where it must be stood DOWN — the direction Islam presses most,
+and the one a half-built version would have left as a reload. The rail reached
+is asserted as an AGREEMENT — every page on it belongs to no module — rather
+than against a page name, or a build that crossed the bar and left the rail
+would satisfy everything above it.
+
+**AND BACK WALKS THE CROSSING.** The place pushed carries no scope — it never
+has — so returning is `resolveSetupScope()` answering from the PAGE, which is
+the rule that already decides a rail when an address and a page disagree
+(§359.2, research R2). Asserted, because a crossing that pushed an address Back
+could not honour would be a worse dead end than the reload it replaced (§61).
+
+### §366.5 — VERIFIED, AND PROVED ABLE TO FAIL FROM THE SOURCES (§276)
+
+Baseline first, before anything was touched (§303): `checks/shell.mjs`
+**111 ok, 0 failed**. After: **118 ok, 0 failed**, seven assertions added.
+
+Two falsifications, each made by doctoring the SOURCE and re-running
+`build-shell.mjs` — the frozen shell reads no `data-break`, so there is no
+switch to reach for and §276's method is the honest one. Each was asserted to
+have MATCHED before it was written (§344.1: a break that never applied reports
+0 red, which is indistinguishable from a guard that works).
+
+* **the rows are followed as plain links, as before §366** — **2 red**, exactly
+  the two markers, and NOTHING else. That is the right shape and the reason
+  those two assertions exist: the old behaviour is indistinguishable from the
+  new one on every other axis.
+* **the switcher's early return is back** — **1 red**, printing
+  `switcher:false` on the module's rail after the crossing: the control silently
+  missing, which is the fault §366.3 removes.
+
+**THE NEIGHBOURS**: `setup-per-module` all passed on BOTH halves (its served
+half drives the rows' own addresses on both rails), `setup-rail`, `setup-search`,
+`setup-pages`, `setup-sticky`, `setup-squeezed`, `client-setup`,
+`client-setup-outside`, `attention-rows` and `welcome` all green; `modules`
+**143/0**, `door-landing` **140/0**; `built-in-step` all good after the rebuild.
+**`qa.py` over `file://` is 33 viewers / 242 destinations / ERRORS none** — the
+§365 record to the number, so nothing moved.
+
+**THE BUILT FILE'S BYTES CHANGED, SO `sw.js` IS BUMPED** (§91) to
+`smp-shell-v5.16-settings-crossing`, confirmed against `origin/main`'s
+`v4.88-setup-wizard` (§94.12). It reaches the OFFLINE copy alone: §316.10's
+generator drops the caching half, so the served worker holds `SHELL` nought
+times (§365's own witness).
+
+**AND THE SERVED COPIES WERE REGENERATED** — `public/shell.js` and
+`public/platform.css` are what production serves (§329), and a frozen source
+edited without re-running the generators leaves the new stack on the old bytes,
+silently.
+
+### §366.6 — RECORDED, NOT DONE
+
+* **B — the browser keeps the page you just left.** Every document here (the
+  shell AND the console) is served `Cache-Control: no-store`, which is a
+  documented bfcache blocker, so Back between the console and a client rebuilds
+  rather than restoring. Loosening it would make that hop instant at no cost to
+  the figures — the graph never travels in the document — but a page held in
+  memory after a sign-out is a real question and it is a SECURITY header, so it
+  is his to take, and what a signed-out Back actually shows must be measured
+  before it is promised.
+* **C — the two generated files are revalidated on every navigation.** Neither
+  carries a `Cache-Control` of its own, so Next's default for `public/` makes
+  each a conditional request per page change. They change only on a deploy, so a
+  fingerprint and a long cache would remove two round trips per hop. Smaller
+  than A or B; the PARSE cost stays either way.
+* **D — the 3.8MB itself**, which is the floor under every hop that genuinely
+  changes document, the module switcher included. A real piece of work, and
+  where the weight actually is has not been measured.
+* **Not recommended**: merging the console and the client platform into one
+  application. It would make every hop instant and it changes the architecture —
+  too big a change to ride in on a speed complaint.

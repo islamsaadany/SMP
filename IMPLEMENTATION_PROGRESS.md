@@ -5889,3 +5889,81 @@ assistant 10/0, memory 16/0 · 14/0 · 21/0 · 36/0, `tsc` clean cold, `next bui
 green, eight of nine spikes with all sixteen falsifications red.
 
 **Waiting on Islam: the merge, and his word on that merge.**
+
+---
+
+## §366 — moving between the client's settings and a module's stopped reloading the platform (2026-09-17)
+
+**What Islam asked.** *"The shifting between the client settings and the main
+console and then getting into the strategy and from the module settings to the
+client settings takes too long — is there a way to make these movements smoother
+in general?"*
+
+**What was measured first.** Three kinds of movement, and they cost wildly
+different things. Anything **inside** a module — a unit, a tab, the gear into
+that module's own Setup — is redrawn in place: no server, instant. Anything
+**between** the console, a client and a module throws the whole platform away
+and rebuilds it: the browser re-reads **3.8MB** of the platform's code and
+**660KB** of its styling, then asks the server for the client's entire plan again
+(**~360KB**, read across 42 tables) before it can draw anything.
+
+**And one of those hops was doing all of that to change one word.** The client's
+settings and a module's settings are the SAME page: the server builds both from
+the same data and they differ by a single mark saying which list to draw. So
+pressing *Client settings ›* or *Strategy settings ›* rebuilt a 3.8MB
+application and re-fetched the whole plan for no reason at all. The console and
+the module switcher are not waste — those really are different applications —
+and neither is arriving in a client for the first time. This hop was.
+
+**Four options were put to him with the cost of each. He took A**, the smallest:
+make that one crossing a press.
+
+**What was built.** Pressing either of those two rows now changes the rail in
+place, instantly, with no server involved. The link underneath is untouched, so
+a middle click, a right-click *Copy link address* and opening in a new tab all
+still work and still carry the right address — it is faster and not narrower.
+Where somebody has no page at all in the rail they are crossing to, the press
+steps aside and the link goes as before.
+
+**One thing had to follow it.** The four-square module switcher in the top left
+was kept off the client's own settings by never being built there, which worked
+while the only way across was a page load. With the crossing a press it was
+wrong both ways — missing after crossing to a module, still standing after
+crossing back. It now follows the same rule as the rest of that bar: built where
+there is a choice, hidden on the client's own pages by the one CSS rule that
+already hides the navigation row, the Group dropdown, the Units | Functions
+switch, the gear and the viewer strip.
+
+**Checked.** The shell check was **111 green** before this and is **118 green**
+after, seven assertions added — led by the one the whole change is for: a build
+that followed the link lands on the same rail wearing the same bar at the same
+address, three seconds later, so a marker planted in the page before the press
+is the only thing that can tell them apart. Both directions are asserted, and so
+is Back. Proved able to fail twice, each break made from the sources: the rows
+as plain links again → **2 red**, exactly the two markers; the switcher's old
+rule back → **1 red**, the control silently missing after the crossing.
+
+Neighbours: `setup-per-module` green on both halves (its served half drives the
+addresses both rails write), plus `setup-rail`, `setup-search`, `setup-pages`,
+`setup-sticky`, `setup-squeezed`, `client-setup`, `client-setup-outside`,
+`attention-rows` and `welcome`; `modules` 143/0, `door-landing` 140/0,
+`built-in-step` clear. **`qa.py` over `file://` is 33 viewers / 242 destinations
+/ ERRORS none** — the §365 record to the number, so nothing else moved.
+
+**Not done, and recorded rather than quietly skipped.** Three things would make
+the remaining hops faster and none is this change:
+
+* **Back between the console and a client still rebuilds**, because every page
+  here is served with an instruction telling the browser not to keep it.
+  Loosening that would make Back instant at no cost to the figures — the plan
+  never travels in the page — but it is a **security setting**, so it is Islam's
+  call, and what a signed-out Back shows has to be measured before it is
+  promised.
+* **The two big generated files are re-checked on every page change.** They only
+  change when we deploy, so they could be stamped with a version and cached.
+  Removes two round trips per hop; the re-reading cost stays.
+* **The 3.8MB itself** is the floor under every hop that genuinely changes page,
+  the module switcher included. A real piece of work, and where the weight
+  actually sits has not been measured.
+
+**Waiting on Islam: the merge, and his word on that merge.**

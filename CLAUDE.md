@@ -7710,6 +7710,71 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
+- **AND CROSSING IT IS A PRESS, NOT A PAGE LOAD (&sect;366):** Islam &mdash;
+  *"the shifting between the client settings and the main console and then
+  getting into the strategy and from the module settings to the client settings
+  takes too long."* **MEASURED FIRST, AND THE JOURNEY SPLIT IN THREE**: inside a
+  module every move is `paint()` + a `pushState` (no server, instant), and every
+  move BETWEEN the console, a client and a module is an `<a href>` &mdash; a
+  full document, which here means **3,789,535 bytes of `shell.js` and 659,996 of
+  `platform.css`** re-read and re-evaluated, the document `no-store`, and
+  `/api/state` asked for the WHOLE graph again (~363KB, 42 tables) before
+  anything is drawn. **ONE HOP WAS PURE WASTE AND THAT IS THE FINDING**: read off
+  `app/(platform)/[slug]/[...rest]/route.ts`, both Setup addresses return the
+  SAME `shellDocument()` call with the same arguments but the last (`key` is
+  `w.module || DEFAULT_MODULE` and resolves the same either way, so the landing
+  stamp, the areas stamp, the menu and the name are identical) &mdash; **the two
+  documents differ in one attribute**, and the browser already holds `setScope`.
+  Four options were put to Islam with the cost of each; he took the smallest.
+  **THE `href` STAYS AND THE PLAIN CLICK IS TAKEN** &mdash; a middle or modifier
+  click and *Copy link address* stay the browser's, and a viewer with no page in
+  the target rail falls through to the link (&sect;61), so the press can only
+  ever be faster and never a dead end. **BOTH THE SCOPE AND THE PAGE, OR
+  NEITHER**: `resolveSetupScope()` moves the scope to the page's own module when
+  the two disagree (&sect;359.2), so writing one and leaving `currentSub` on the
+  rail just left is UNDONE inside the same paint and the press reads as a control
+  that does nothing (&sect;96). The page is not a second answer &mdash;
+  `setupLandingKey(scope)` is EXTRACTED from `restoreWhere` and asked by both
+  (&sect;53.5, &sect;360.7), taking the scope rather than reading it so a caller
+  can ask about a rail it is not standing in. **WIRED IN shell.html BESIDE
+  `[data-setupgo]`**, where every rail control is wired, and **route.js needed no
+  edit at all**: `addressOf` has read `data-setup-scope` since &sect;362.1, so the
+  push after the paint writes the module's form or the spine's on its own.
+  **&sect;366.3 &mdash; THE SWITCHER STOPS BEING STRUCTURAL BECAUSE IT STOPPED
+  BEING ABLE TO BE**: &sect;362 kept it off the client's settings with an early
+  return in `route.js` and said why in its own comment &mdash; built once at
+  load, nothing repaints `.top-in` &mdash; which answered only while the crossing
+  was a page load; **the moment it is a press that is wrong BOTH ways** (never
+  built crossing out, still standing crossing back). Built wherever there is a
+  CHOICE (&sect;32's test stays) and stood down by `data-client-settings`, the one
+  answer `paint()` already writes for the destination row, the Group dropdown,
+  the Units&nbsp;|&nbsp;Functions switch, the gear and the viewer strip &mdash;
+  **NAMED rather than CONTAINED**, because its container `.top-in` also holds the
+  client's own heading and mark, which these pages DO want; `display:none`
+  (&sect;3.2) and the whole bar is inside `.chrome`, which the boot skeleton hides
+  (&sect;94.10), so nothing flashes. **&sect;366.4 &mdash; ONE ASSERTION REWRITTEN,
+  NEVER LOOSENED** (&sect;218): `checks/shell.mjs` &sect;3b asked whether the
+  switcher ELEMENT was there, which said *not offered* only while the early
+  return made it impossible &mdash; measured as PAINT now, which is what that
+  probe's own comment already claims for every other control on the line
+  (&sect;94.8), and `seen()` is false for `display:none` exactly as for absent.
+  **AND THE NEW ASSERTIONS ARE LED BY THE ONE THIS IS ALL FOR**: a build that
+  followed the link lands on the same rail wearing the same bar at the same
+  address, so a marker planted on `window` before the press &mdash; which
+  survives a repaint and cannot survive a document (&sect;356) &mdash; is the only
+  thing that separates them; BOTH ENDS (&sect;94.2, the way back being the half
+  Islam presses most), the rail asserted as an AGREEMENT (every page on it belongs
+  to no module) rather than by name, and **Back asserted**, because a crossing
+  that pushed an address Back could not honour would be a worse dead end than the
+  reload it replaced. 111 &rarr; **118/0**, red **2** and **1** from the SOURCES
+  (&sect;276 &mdash; the frozen shell reads no `data-break`), each break asserted
+  to have MATCHED before it was written (&sect;344.1). **RECORDED, NOT DONE**:
+  every document here is `Cache-Control: no-store`, so Back between the console
+  and a client rebuilds rather than restoring &mdash; loosening it is a SECURITY
+  header and Islam's call, and what a signed-out Back shows must be measured
+  before it is promised; `public/shell.js` and `public/platform.css` carry no
+  `Cache-Control` of their own, so each is revalidated per navigation; and the
+  3.8MB itself is the floor under every hop that genuinely changes document.
 - **THE WAY ACROSS RUNS BOTH WAYS, AND ROLES &amp; ACCESS WAS NEVER REMOVED
   (&sect;362.1):** Islam, having opened the client's settings from the
   console's card &mdash; *"I ca't find the access page in the strategy module
@@ -9859,7 +9924,52 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
+*Last Updated: 2026-09-17 &mdash; **&sect;366: the crossing between the two
+settings rails is a press.** Islam, of the walk he does most &mdash; *"the
+shifting between the client settings and the main console and then getting into
+the strategy and from the module settings to the client settings takes too long
+&hellip; is there a way to make these movements smoother in general."*
+**MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a) and the journey split in
+three: inside a module every move is a repaint (instant), and every move between
+the console, a client and a module is a full document &mdash; **3.8MB of
+`shell.js` and 660KB of `platform.css` re-read**, the document `no-store`, and
+the tenant's WHOLE graph asked for again. **AND ONE HOP WAS PURE WASTE**: the
+client's Setup and a module's are the SAME document, built from the same data,
+differing in ONE attribute &mdash; so that press rebuilt a 3.8MB application to
+change a word the browser already holds a function for. Four options were put to
+him with the cost of each; he took **A**, the smallest. **THE `href` STAYS AND
+THE PLAIN CLICK IS TAKEN**, so a middle click and *Copy link address* are
+unchanged and a viewer with no page in the target rail falls through to the link
+&mdash; faster, never narrower (&sect;61). **BOTH THE SCOPE AND THE PAGE, OR
+NEITHER**, or `resolveSetupScope()` undoes it inside the same paint (&sect;96);
+the page comes from `setupLandingKey(scope)`, EXTRACTED from `restoreWhere` so
+the address and the press cannot answer differently (&sect;53.5). **route.js
+needed no edit at all** &mdash; `addressOf` has read the scope since &sect;362.1.
+**AND THE SWITCHER STOPPED BEING STRUCTURAL BECAUSE IT STOPPED BEING ABLE TO BE**
+(&sect;366.3): &sect;362 kept it off the client's settings with an early return,
+which answered only while the crossing was a page load and was wrong BOTH ways
+the moment it was not; it follows `data-client-settings` with the rest of the
+chrome now, NAMED rather than contained. **ONE ASSERTION REWRITTEN, NEVER
+LOOSENED** (&sect;218, &sect;366.4) from the element to the PAINT &mdash; which is
+what that probe's own comment already claimed for every other control on the line
+&mdash; and the new ones are led by the only one that can tell this from a
+reload: a marker planted on `window`, which survives a repaint and cannot survive
+a document (&sect;356), at BOTH ENDS, with Back asserted. **VERIFIED**: baseline
+first (&sect;303) **111/0**, after **118/0**; red **2** and **1** from the SOURCES
+(&sect;276), each break asserted to have MATCHED before it was written
+(&sect;344.1); `setup-per-module` green on both halves, `modules` 143/0,
+`door-landing` 140/0, nine Setup neighbours green, `built-in-step` clear, and
+`qa.py` over `file://` **33 viewers / 242 destinations / ERRORS none** &mdash;
+&sect;365's record to the number. The built file's bytes changed, so `sw.js` is
+bumped (&sect;91) and the served copies regenerated (&sect;329). **RECORDED, NOT
+DONE, and all three are the other hops**: every document here is `no-store`, so
+Back between the console and a client rebuilds &mdash; loosening it is a SECURITY
+header and **Islam's call**; the two generated files are revalidated per
+navigation; and the 3.8MB itself is the floor under every hop that genuinely
+changes document. **`main` untouched &mdash; the merge is Islam's word, on that
+merge.***
+
+*Earlier: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
 the four things it found.** Islam, of the branch carrying &sect;359&ndash;&sect;364:
 *"make sure that if we merge to main we will not loose any client access or mess
 with any current behavior."* **THE HONEST SWEEP HAD TO BE OF THE MERGED TREE**,

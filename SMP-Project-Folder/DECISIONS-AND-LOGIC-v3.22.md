@@ -51218,7 +51218,7 @@ decision of its own (rule 1b). And at 1600 the register column gives its select
 
 ---
 
-## §365 — THE SWEEP BEFORE THE MERGE, AND THE FOUR THINGS IT FOUND (2026-09-17)
+## §365 — THE SWEEP BEFORE THE MERGE, AND THE FIVE THINGS IT FOUND (2026-09-17)
 
 Islam, of the branch carrying §359–§364: *"please make a full sweep on the
 branch to make sure that if we merge to main we will not loose any client
@@ -51367,9 +51367,66 @@ written (§361.5), and **all three spellings** — the plain §, CLAUDE.md's
 `&sect;` entity and the `§` JS escape (§336.1, §340.2). Main's own §356–§358
 and its specs 054–055 keep their numbers, which is what the renumber was for.
 
+### §365.6 — THE SORT HEAD WAS ADDRESSED BY A NAME THAT WAS NOT THE TABLE'S
+
+**THE ONE PRODUCT REGRESSION THE SWEEP FOUND, AND IT CAME OUT OF THE LAST FILE
+RUN.** Sorting was dead on every Setup table in the product — the register, the
+business units, the companies, the supporting functions, the Official BU list.
+Not slow, not wrong: **the click landed, `paint()` ran, and nothing moved.**
+
+**THE CAUSE IS ONE WORD.** `tkHead(id, allow)` returns the builder each table's
+head is drawn with, and spec 056 §4.4 gave that inner function a fourth
+parameter — the column id an ADDRESS can point at, so the landing's Access door
+can open the register at `#seat`. It was spelt `id`, and **that shadows the
+table's own `id` one line up**. So `esc(id)` inside wrote the COLUMN's id, which
+is `undefined` for every column but one, and every sortable header in the tenant
+came out `data-tksort="undefined|N"` — while `TKSORT[id]` read **one shared slot
+for all five tables**, so the lit-column mark was broken from the other end too.
+Measured on the register: `undefined|1 … undefined|7` against main's
+`people|1 … people|7`, same columns, same order, same everything else.
+
+**§56.7's COLLISION WITH A SHORTER FUSE.** A `var` that redeclares a name at
+least sits in the same file to be found; a PARAMETER that shadows the closure it
+is written inside is valid, idiomatic and invisible — `node --check` passes, the
+page renders, nothing is logged, and every assertion short of PRESSING the
+control is satisfied (§96, §70). It was found by `table-standard.py` **dying**
+on `document.querySelector('[data-tksort="people|1"]')` returning null, which is
+&sect;215 doing the one thing this project keeps asking of a check.
+
+**ESTABLISHED AS THIS BRANCH'S BEFORE ANYTHING WAS BLAMED** (§303): all three
+files are green on `origin/main`'s own build in the worktree and red here, with
+`tactic-outcome.py`'s four failures **identical on both** and therefore main's,
+recorded rather than fixed in passing.
+
+**THE PARAMETER IS `colId`** — its honest name, since it is the COLUMN's — and
+**both ends are asserted** (§94.2): the table id is back AND `#seat` is still
+rendered on the Roles column, or a fix that quietly took the Access door's
+anchor away would have passed everything above.
+
+**AND TWO CHECKS WERE STALE RATHER THAN BROKEN, REWRITTEN AND NEVER LOOSENED**
+(§218, §214.3). §357 absorbed Branding into the set-up flow's first step and
+DELETED the `brand` def; `wave3.py` §4 walked to a rail entry named *Branding*
+and `deck-dividers.py` set `currentSub='brand'` outright, so both landed on a
+page that no longer exists. **The control moved rather than went** —
+`brandingBody()` is the same renderer wired by the same handlers (§53.5), and
+the group's mark upload inside it was verified still drawn — so what is
+re-pointed is where the walk lands and **every assertion under it is untouched**.
+*A check keyed on a page that has been absorbed does not fail honestly; on
+`deck-dividers` it went on to fail four more times about the DECK, for a mark
+it had never managed to upload.* And `wave3` §4's two remaining assertions pass
+over an empty list (`all([])` is true), which is §113.8 — they are guarded by
+the presence assertion above them, which is what that guard is for.
+
+**AND THE SWEEP FOR THE REST OF IT IS THE PART WORTH KEEPING** (§51.11): every
+check in the tree was grepped for the two defs this branch deleted, `brand` and
+`overview`, and the four that still name them do so deliberately — three of them
+asserting the ABSENCE §356 and §357 decided.
+
 ### WHAT WAS RUN
 
-Frozen sweep `qa.py` **33 viewers, 242 destinations, ERRORS none**; T0 UNMOVED;
+**The whole frozen suite, 181 checks, twice — once to find §365.6 and once on
+the build that fixes it.** Frozen sweep `qa.py` **33 viewers, 242 destinations,
+ERRORS none**; T0 UNMOVED;
 authoriser **683/0**; change list **140/0**; `built-in-step` all good;
 `generated-in-step` all clear; round trip, clean parity, two tabs **21/0** and
 the incremental writer byte-identical on fresh databases. On the served stack:

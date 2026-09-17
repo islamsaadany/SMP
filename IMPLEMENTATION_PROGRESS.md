@@ -5835,7 +5835,7 @@ and it is said why**: not one byte of the frozen build changes here, proved by
 rebuilding it, so `main`'s own sweep carries over rather than being
 re-measured for the sake of a number.
 
-**§365 — the sweep before the merge, and the four things it found,
+**§365 — the sweep before the merge, and the five things it found,
 2026-09-17.** Islam: *"make a full sweep on the branch to make sure that if we
 merge to main we will not loose any client access or mess with any current
 behavior on the platform."* **The honest sweep had to be of the MERGED TREE**,
@@ -5863,7 +5863,22 @@ read 33 ok, 0 failed. **And six of the nine spike proofs dark**, which is main's
 own tables meeting a harness with two hand-written special cases — closed here,
 because the merge cannot be called safe for the tenant boundary without S2.
 
-**Verified on the merged result**: `qa.py` 33 viewers / 242 destinations /
+**And the one that matters most came out of the LAST file run**: sorting was
+dead on every Setup table in the product — the register, the business units, the
+companies, the supporting functions, the Official BU list. Not slow, not wrong:
+the click landed, the page repainted, and nothing moved. **One word** — spec 058
+§4.4 gave the header builder a parameter for the column an address can point at,
+spelt `id`, which shadows the TABLE's own id one line up, so every sortable head
+came out `data-tksort="undefined|N"` and all five tables shared one sort slot.
+It renders perfectly and throws nothing, so only PRESSING it found it; the check
+**died** rather than reporting, which is the one thing this project keeps asking
+of a check. Established as this branch's on main's own build first. Two more
+checks were stale rather than broken — §360 absorbed Branding into the set-up
+flow and they still walked to the page — **rewritten, never loosened**, with the
+group's mark upload verified still drawn where the renderer moved to.
+
+**Verified on the merged result**: the whole frozen suite, 181 checks, **twice** —
+once to find it and once on the build that fixes it; `qa.py` 33 viewers / 242 destinations /
 ERRORS none, T0 unmoved, authoriser 683/0, change list 140/0, built-in-step and
 generated-in-step clear, round trip · clean parity · two tabs 21/0 · the
 incremental writer byte-identical on fresh databases; door 140/0, shell 111/0,

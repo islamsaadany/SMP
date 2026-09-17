@@ -9911,7 +9911,42 @@ thing, do not reason about it).
 merge base holds none of them, measured. &sect;356&rarr;&sect;359 &hellip;
 &sect;361&rarr;&sect;364, specs 054&rarr;056 &hellip; 056&rarr;058, descending,
 each substitution asserted to have MATCHED, **all three spellings** (&sect;336.1,
-&sect;340.2). **VERIFIED**: `qa.py` 33 viewers / 242 destinations / ERRORS none,
+&sect;340.2).
+**&sect;365.6 &mdash; AND THE ONE PRODUCT REGRESSION CAME OUT OF THE LAST FILE
+RUN**: **sorting was dead on every Setup table in the product** &mdash; the
+register, the business units, the companies, the supporting functions, the
+Official BU list. Not slow, not wrong: the click landed, `paint()` ran, and
+nothing moved. **One word.** `tkHead(id, allow)` returns the builder each head
+is drawn with, and spec 058 &sect;4.4 gave its inner function a fourth parameter
+for the column an ADDRESS can point at (the landing's Access door opens the
+register at `#seat`) &mdash; spelt `id`, **which shadows the table's own `id`
+one line up**. So every sortable header came out `data-tksort="undefined|N"`
+(measured, against main's `people|1 … people|7`) and `TKSORT[id]` read **one
+shared slot for all five tables**. **&sect;56.7's collision with a shorter
+fuse**: a parameter shadowing the closure it is written inside is valid,
+idiomatic and invisible &mdash; `node --check` passes, the page renders, nothing
+is logged, and every assertion short of PRESSING the control is satisfied
+(&sect;96, &sect;70). Found by `table-standard.py` **dying** on a null header
+(&sect;215), established as this branch's on main's own build (&sect;303) with
+`tactic-outcome.py`'s four failures IDENTICAL on both and therefore main's. The
+parameter is `colId`, and **both ends are asserted** &mdash; the table id back
+AND `#seat` still rendered, or a fix that took the Access door's anchor away
+would pass everything above (&sect;94.2). **AND TWO CHECKS WERE STALE RATHER
+THAN BROKEN, REWRITTEN NEVER LOOSENED** (&sect;218, &sect;214.3): &sect;360
+absorbed Branding into the set-up flow's first step and DELETED the `brand` def,
+so `wave3.py` &sect;4 and `deck-dividers.py` walked to a page that no longer
+exists &mdash; **the control moved rather than went** (`brandingBody()` is the
+same renderer wired by the same handlers, &sect;53.5, the group's mark upload
+inside it verified still drawn), so only where the walk lands is re-pointed and
+every assertion under it is untouched. *A check keyed on an absorbed page does
+not fail honestly: `deck-dividers` went on to fail four more times about the
+DECK, for a mark it had never managed to upload.* Then every check in the tree
+was grepped for both deleted defs (&sect;51.11) and the four that still name
+them do so deliberately. **VERIFIED**: the whole frozen suite, 181 checks,
+**twice** &mdash; once to find this and once on the build that fixes it;
+`table-standard` died &rarr; ALL GREEN, `table-standard-all` 4 FAILED &rarr; ALL
+GREEN, `wave3` 1 FAILURES &rarr; OK, `deck-dividers` 6 FAILED &rarr; ALL PASS,
+`setup-arrange` and `no-jump` green throughout. `qa.py` 33 viewers / 242 destinations / ERRORS none,
 authoriser 683/0, change list 140/0, built-in-step and generated-in-step clear,
 round trip &middot; clean parity &middot; two tabs 21/0 &middot; incremental
 writer byte-identical on fresh databases; door 140/0, shell 111/0, state 92/0,

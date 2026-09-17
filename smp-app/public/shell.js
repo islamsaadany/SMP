@@ -21566,7 +21566,14 @@ function buildReviewPptx(target){
                right: it is the one part of the message that differs in every
                inbox. */
             greetPara(o.greeting, ink) +
-            '<div data-mail-body>' + paras(o.body, ink) + '</div>' + cta +
+            /* ── A BODY ALREADY LAID OUT (spec 055) ─────────────────────
+               The minutes of a meeting are six parts with a table in them,
+               and `paras()` can only make paragraphs — so a caller that has
+               already built its body in the email's own idiom (tables,
+               inline styles, literal colours) hands it in whole as
+               `bodyHtml`, and the shell around it is this one shell. Absent,
+               every caller is byte-for-byte what it was (§250's shape). */
+            '<div data-mail-body>' + (o.bodyHtml != null ? String(o.bodyHtml) : paras(o.body, ink)) + '</div>' + cta +
           '</td></tr>' +
 
           '<tr><td style="padding:0 28px"><div style="border-top:1px solid ' + line + '"></div></td></tr>' +

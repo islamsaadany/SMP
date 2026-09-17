@@ -1,0 +1,387 @@
+<title>Meeting Notes</title>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     MOCKUP · spec 055 · Meeting Notes — the list, a note being taken, the
+     refined minutes beside the raw notes, and the email as it lands
+     design-mockups/meeting-notes/2026-09-16_list-note-minutes-email.html
+
+     Rule 1c: drawn before a source moves. The chrome and the tokens are the
+     Internal Tracker's own (spec 054, signed off and built), so the two
+     office modules read as one product; what is new is a note's page.
+
+     Islam, 2026-09-16, on the seven questions:
+       1 "one meeting one note, title date attendees and text is enough"
+       2 "the free text box is like a note taking app … the role of the ai
+          assistant needs to refine it and maybe compile it to agreements
+          points and actions etc. so we need to agree on a format and an
+          AI prompt"
+       3 "yes for all what you said it do everything" (tidies, lays out,
+          pulls out decisions and actions; he reads and edits first)
+       4 "also the office and maybe we can add someone casually to the
+          meeting"
+       5 "no it's an email with no signing in"
+       6 "still editable as if we get a note or something we can add more
+          and resend"
+       7 "yes ok" (the list by date, newest first, with a search)
+     and of the format and the prompt proposed: "ok write the spec and
+     draw it".
+
+     Four frames: the list · a note being taken · the minutes refined,
+     beside the raw notes · the email as it lands.
+
+     People are the worked example's own register (Raya Trade), plus one
+     casual attendee with a placeholder address. Today is Wednesday
+     16 September 2026.
+     ═════════════════════════════════════════════════════════════════ -->
+<style>
+*{box-sizing:border-box}
+:root{--bar:#16325C;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* ── the office modules' own chrome (the tracker's, verbatim) ── */
+.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
+.bar h1{margin:0;font-size:14.5px;font-weight:600}
+.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
+.msw{position:relative;flex:none}
+.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
+.msw>summary::-webkit-details-marker{display:none}
+.msw svg{width:17px;height:17px;display:block}
+.pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
+h2.pt{margin:0 0 14px;font-size:21px;font-weight:600;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
+.cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
+.btn{font:600 13px/1 inherit;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#FFF}
+.btn.quiet{color:var(--ink-3)}
+.lab{font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 4px}
+
+/* ── the list ── */
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
+.mrow{display:grid;grid-template-columns:96px 1fr auto auto;gap:14px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.mrow .d{font:400 12.5px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap}
+.mrow .t{min-width:0;font-size:15px}
+.mrow .t small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:1px}
+.mrow .n{font:600 12.5px/1.4 inherit;color:var(--ink-2);white-space:nowrap}
+.sent{font:600 11px/1 inherit;letter-spacing:.02em;padding:6px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap;min-width:96px;text-align:center}
+.sent.ok{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.sent.upd{border-color:var(--gold);color:var(--gold)}
+.grp{display:flex;align-items:center;gap:9px;padding:14px 2px 6px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.grp .cnt{margin-left:0}
+
+/* ── a note ── */
+.head{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;margin-bottom:8px}
+.ttl{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:600 21px/1.3 inherit;padding:4px 0 8px;outline:none}
+.ttl::placeholder{color:var(--ink-3);font-weight:400}
+.date{font:400 13px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 9px;white-space:nowrap;cursor:pointer;margin-top:4px}
+.att{display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:relative}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 inherit;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 10px}
+.chip i{font-style:normal;font-weight:400;color:var(--ink-3)}
+.chip b{font-weight:400;color:var(--ink-3);cursor:pointer}
+.chip.warn{border-color:var(--warn);color:var(--warn)}
+.chip.once{border-style:dashed}
+.addatt{font:600 12.5px/1 inherit;color:var(--gold);background:none;border:1px dashed var(--line);border-radius:999px;padding:6px 10px;cursor:pointer}
+.pick{position:absolute;top:34px;left:0;z-index:5;width:300px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:8px}
+.pick input{width:100%;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 13px/1.5 inherit;margin-bottom:6px}
+.pick .pl{max-height:190px;overflow-y:auto;scrollbar-width:thin}
+.pick label{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:7px;font-size:13.5px;cursor:pointer}
+.pick label:hover{background:var(--ground)}
+.pick label small{margin-left:auto;color:var(--ink-3);font-size:11.5px;white-space:nowrap}
+.pick .sq{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;background:var(--surface);color:var(--surface);flex:none}
+.pick .sq.on{background:var(--gold);border-color:var(--gold)}
+.pick .sq svg{width:9px;height:9px}
+.pick .else{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:grid;grid-template-columns:1fr 1fr auto;gap:6px}
+.pick .else input{margin:0;font-size:12.5px;padding:5px 7px}
+.pick .else .btn{padding:6px 9px;font-size:12px}
+.raw{width:100%;min-height:300px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:14px 16px;font:400 15px/1.6 inherit;resize:vertical;outline:none}
+.raw::placeholder{color:var(--ink-3)}
+.foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.foot .hint{font-size:13px;color:var(--ink-3)}
+.foot .spacer{flex:1}
+.saved{font:400 12px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3)}
+
+/* ── the minutes beside the raw notes ── */
+.two{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:start}
+.mins{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px}
+.mins .lab:first-child{margin-top:0}
+.mins [contenteditable]{outline:none;border-radius:6px;padding:2px 4px;margin:0 -4px}
+.mins [contenteditable]:hover{background:var(--ground)}
+.mins p{margin:0;font-size:14.5px}
+.mins ul{margin:0;padding-left:20px;font-size:14.5px}
+.mins li{margin:0 0 3px}
+.mins .q{color:var(--warn);font-weight:600}
+.acts{width:100%;border-collapse:collapse;font-size:14px}
+.acts th{text-align:left;font:600 10.5px/1.6 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 6px 4px 0;border-bottom:1px solid var(--line)}
+.acts td{padding:6px 6px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.acts td.blank{color:var(--ink-3);font-style:italic}
+.side .raw{min-height:340px;font-size:14px}
+.side .lab{display:flex;align-items:center;gap:8px}
+.side .lab .btn{margin-left:auto;padding:5px 9px;font-size:11.5px;letter-spacing:0;text-transform:none}
+.hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
+.hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
+.hist li:last-child{border-bottom:0}
+.hist time{font:400 10.5px/1.6 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap}
+.hist b{font-weight:600;color:var(--ink)}
+
+/* ── the email as it lands (the platform's own email shell; colours literal
+      because email has no custom properties) ── */
+.mailwrap{background:#F4F6FA;padding:26px 12px}
+.subj{max-width:600px;margin:0 auto 10px;font:400 13px/1.5 system-ui,sans-serif;color:#6B7686}
+.subj b{color:#1B2330;font-weight:600}
+.mail{width:600px;max-width:100%;margin:0 auto;background:#FFF;border:1px solid #E3E8EF;border-radius:8px;overflow:hidden;color:#1B2330;font:400 15px/1.6 Georgia,'Times New Roman',serif}
+.mail .top{background:#16325C;color:#FFF;padding:18px 26px}
+.mail .top .k{font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#B8C4D8;margin:0 0 3px}
+.mail .top .o{font:600 17px/1.3 system-ui,sans-serif;margin:0}
+.mail .in{padding:22px 26px 8px}
+.mail h1{font:600 20px/1.3 system-ui,sans-serif;margin:0 0 6px}
+.mail .meta{font:400 13px/1.6 system-ui,sans-serif;color:#6B7686;margin:0 0 18px;padding-bottom:14px;border-bottom:1px solid #E3E8EF}
+.mail h2{font:600 11.5px/1.4 system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#6B7686;margin:16px 0 5px}
+.mail p{margin:0 0 6px}
+.mail ul{margin:0;padding-left:20px}
+.mail li{margin:0 0 3px}
+.mail table{width:100%;border-collapse:collapse;font:400 14px/1.5 system-ui,sans-serif}
+.mail th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6B7686;padding:0 6px 4px 0;border-bottom:1px solid #E3E8EF;font-weight:600}
+.mail td{padding:6px 6px 6px 0;border-bottom:1px solid #E3E8EF;vertical-align:top}
+.mail .ft{padding:14px 26px 20px;font:400 12.5px/1.6 system-ui,sans-serif;color:#6B7686;border-top:1px solid #E3E8EF;margin-top:16px}
+
+/* the mockup's own furniture, not the product's */
+.frame{margin:0 0 42px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--ground)}
+.cap{font:600 10.5px/1.4 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.intro{max-width:1000px;margin:0 auto;padding:22px 20px 0}
+.intro h1{margin:0 0 6px;font-size:20px;font-weight:600;text-wrap:balance}
+.intro p{margin:0 0 6px;color:var(--ink-2);font-size:14px;max-width:70ch}
+.intro ol{margin:8px 0 0;padding-left:22px;color:var(--ink-2);font-size:14px;max-width:70ch}
+.intro li{margin:0 0 4px}
+.wrapf{max-width:1040px;margin:0 auto;padding:18px 20px 40px}
+.note{max-width:1000px;margin:0 auto;padding:0 20px 30px;color:var(--ink-2);font-size:14px}
+.note b{color:var(--ink)}
+.note p{max-width:70ch;margin:0 0 8px}
+@media (max-width:760px){.two{grid-template-columns:1fr}.mrow{grid-template-columns:1fr auto;grid-template-areas:"t s" "d n"}.mrow .t{grid-area:t}.mrow .sent{grid-area:s}.mrow .d{grid-area:d}.mrow .n{grid-area:n;text-align:right}.head{grid-template-columns:1fr}.pick{width:min(300px,calc(100vw - 60px))}}
+</style>
+
+<div class="intro">
+  <h1>Meeting Notes — the list, a note, the minutes, the email</h1>
+  <p>One meeting, one note: a title, a date, the attendees, and the text you type while it runs. <b>Refine</b> asks the assistant we already have to turn the raw notes into minutes in six parts; you read and edit every part; <b>Send</b> emails the minutes themselves to the attendees, who need no sign-in. Adding to the notes later and sending again is allowed, and the email then says it is an update.</p>
+  <ol>
+    <li>The list of meetings, newest first, with a search.</li>
+    <li>A note being taken, with an attendee being added — the register, the office, or somebody for this meeting only.</li>
+    <li>The minutes as the assistant returned them, every part a box you can edit, with the raw notes untouched beside them.</li>
+    <li>The email as an attendee sees it.</li>
+  </ol>
+</div>
+
+<div class="wrapf">
+
+<!-- ═══ FRAME 1 · the list ═══ -->
+<p class="cap">1 · The list — newest first, with what went out</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Meeting Notes</h1><span class="org">· <b>Raya Trade</b></span>
+  </div>
+  <div class="pg">
+    <h2 class="pt">Meetings</h2>
+    <div class="tools">
+      <input class="srch" id="q1" placeholder="Search meetings" aria-label="Search meetings">
+      <button class="btn gold" type="button">+ New meeting</button>
+    </div>
+    <div class="list">
+      <div class="grp">September 2026 <span class="cnt">3</span></div>
+      <a class="mrow" href="#"><span class="d">Wed 16 Sep</span><span class="t">Q3 review preparation<small>Islam, Ramy, Yara, Hala, Karim</small></span><span class="n">5</span><span class="sent">Not sent</span></a>
+      <a class="mrow" href="#"><span class="d">Thu 10 Sep</span><span class="t">Mobile pillar targets — monthly plan<small>Islam, Noran, Ramy</small></span><span class="n">3</span><span class="sent upd">Updated 11 Sep</span></a>
+      <a class="mrow" href="#"><span class="d">Wed 2 Sep</span><span class="t">Cycle kick-off with the SMO<small>Islam, Noran, Ahmed, Hend</small></span><span class="n">4</span><span class="sent ok">Sent 2 Sep</span></a>
+      <div class="grp">August 2026 <span class="cnt">2</span></div>
+      <a class="mrow" href="#"><span class="d">Tue 25 Aug</span><span class="t">Finance figures — who enters what<small>Islam, Ali, Ahmed</small></span><span class="n">3</span><span class="sent ok">Sent 25 Aug</span></a>
+      <a class="mrow" href="#"><span class="d">Wed 12 Aug</span><span class="t">Retail stores plan walkthrough<small>Noran, Ramy, Yara</small></span><span class="n">3</span><span class="sent ok">Sent 13 Aug</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 2 · a note being taken ═══ -->
+<p class="cap">2 · A note being taken — an attendee being added</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Meeting Notes</h1><span class="org">· <b>Raya Trade</b></span>
+  </div>
+  <div class="pg">
+    <div class="head">
+      <input class="ttl" id="t2" value="Q3 review preparation" aria-label="Meeting title">
+      <span class="date">Wed 16 Sep 2026</span>
+    </div>
+    <div class="lab">Attendees</div>
+    <div class="att">
+      <span class="chip">Islam Saadany <i>· office</i></span>
+      <span class="chip">Ramy Behairy <i>· Mobile</i> <b title="Remove">×</b></span>
+      <span class="chip">Yara Kamal <i>· Marketing</i> <b title="Remove">×</b></span>
+      <span class="chip warn" title="No email on the register — will not receive the minutes">Hala Mostafa <i>· CX · no email</i> <b title="Remove">×</b></span>
+      <button class="addatt" type="button">+ Add attendee</button>
+      <div class="pick">
+        <input id="p2" placeholder="Search the register" aria-label="Search the register">
+        <div class="pl">
+          <label><span class="sq on"><svg viewBox="0 0 10 10"><path d="M1.5 5.2l2.4 2.3 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Ramy Behairy<small>Mobile</small></label>
+          <label><span class="sq on"><svg viewBox="0 0 10 10"><path d="M1.5 5.2l2.4 2.3 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Yara Kamal<small>Marketing</small></label>
+          <label><span class="sq"></span>Noran Essam<small>office</small></label>
+          <label><span class="sq"></span>Ahmed Mostafa<small>Finance</small></label>
+          <label><span class="sq"></span>Hend Fathy<small>Care</small></label>
+          <label><span class="sq"></span>Ali Reda<small>Corporate</small></label>
+        </div>
+        <div class="else">
+          <input id="n2" placeholder="Somebody else — name" aria-label="Name">
+          <input id="e2" placeholder="their email" aria-label="Email">
+          <button class="btn" type="button">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="lab" style="margin-top:56px">Notes</div>
+    <textarea class="raw" id="r2" aria-label="Notes">ramy: mobile Q3 figures ready by 20th, accessory revenue behind flat but on plan against monthly (seasonality) - explain in the deck
+yara: campaign spend moved to Q4, marketing wants the target month changed? check with islam
+hala - CX mystery shopping H2 starts oct, needs the H1 archive restored first
+agreed: every unit sends draft by 22 sep, SMO reviews 23-24
+agreed: no new tactics this cycle
+karim (partner) to send the retail footfall data - when??
+next meeting after the drafts, 25th?</textarea>
+    <div class="foot">
+      <span class="saved">Saved a moment ago</span>
+      <span class="spacer"></span>
+      <span class="hint">Minutes are empty — refine, or write them yourself.</span>
+      <button class="btn gold" type="button">Refine into minutes</button>
+      <button class="btn quiet" type="button">Send to 4 attendees</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 3 · the minutes beside the raw notes ═══ -->
+<p class="cap">3 · The minutes refined — every part editable, the raw notes untouched beside them</p>
+<div class="frame">
+  <div class="bar">
+    <details class="msw"><summary title="Modules" aria-label="Modules"><svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg></summary></details>
+    <h1>Meeting Notes</h1><span class="org">· <b>Raya Trade</b></span>
+  </div>
+  <div class="pg">
+    <div class="head">
+      <input class="ttl" id="t3" value="Q3 review preparation" aria-label="Meeting title">
+      <span class="date">Wed 16 Sep 2026</span>
+    </div>
+    <div class="lab">Attendees</div>
+    <div class="att">
+      <span class="chip">Islam Saadany <i>· office</i></span>
+      <span class="chip">Ramy Behairy <i>· Mobile</i> <b title="Remove">×</b></span>
+      <span class="chip">Yara Kamal <i>· Marketing</i> <b title="Remove">×</b></span>
+      <span class="chip warn" title="No email on the register — will not receive the minutes">Hala Mostafa <i>· CX · no email</i> <b title="Remove">×</b></span>
+      <span class="chip once" title="This meeting only — not added to the register">Karim Fawzy <i>· karim@partner.example</i> <b title="Remove">×</b></span>
+      <button class="addatt" type="button">+ Add attendee</button>
+    </div>
+    <div class="two" style="margin-top:16px">
+      <div class="mins">
+        <div class="lab">Summary</div>
+        <p contenteditable="true">Preparation for the Q3 review: where each unit's figures stand, what moves to Q4, and the timeline for drafts and the SMO's review.</p>
+        <div class="lab">Discussed</div>
+        <ul>
+          <li contenteditable="true">Mobile's Q3 figures will be ready by 20 September. Accessory revenue is behind on a flat reading but on plan against its monthly plan, because of seasonality; this is to be explained in the deck.</li>
+          <li contenteditable="true">Marketing's campaign spend has moved to Q4. <span class="q">? Whether the target month changes is to be checked with Islam.</span></li>
+          <li contenteditable="true">CX mystery shopping for H2 starts in October and needs the H1 archive restored first.</li>
+          <li contenteditable="true">Karim (partner) will send the retail footfall data. <span class="q">? No date was given.</span></li>
+        </ul>
+        <div class="lab">Agreed</div>
+        <ul>
+          <li contenteditable="true">Every unit sends its draft by 22 September; the SMO reviews on 23–24 September.</li>
+          <li contenteditable="true">No new tactics this cycle.</li>
+        </ul>
+        <div class="lab">Actions</div>
+        <table class="acts">
+          <thead><tr><th>What</th><th>Who</th><th>By when</th></tr></thead>
+          <tbody>
+            <tr><td contenteditable="true">Mobile Q3 figures ready, seasonality explained in the deck</td><td contenteditable="true">Ramy</td><td contenteditable="true">20 Sep</td></tr>
+            <tr><td contenteditable="true">Check whether Marketing's target month changes</td><td contenteditable="true">Islam</td><td class="blank" contenteditable="true">—</td></tr>
+            <tr><td contenteditable="true">Restore the CX mystery shopping H1 archive</td><td contenteditable="true">Hala</td><td class="blank" contenteditable="true">—</td></tr>
+            <tr><td contenteditable="true">Send the retail footfall data</td><td contenteditable="true">Karim</td><td class="blank" contenteditable="true">—</td></tr>
+            <tr><td contenteditable="true">Each unit sends its draft</td><td class="blank" contenteditable="true">—</td><td contenteditable="true">22 Sep</td></tr>
+          </tbody>
+        </table>
+        <div class="lab">Open</div>
+        <ul>
+          <li contenteditable="true">Next meeting after the drafts — 25 September was suggested, not confirmed.</li>
+        </ul>
+      </div>
+      <div class="side">
+        <div class="lab">Notes <button class="btn" type="button">Refine again</button></div>
+        <textarea class="raw" id="r3" aria-label="Notes">ramy: mobile Q3 figures ready by 20th, accessory revenue behind flat but on plan against monthly (seasonality) - explain in the deck
+yara: campaign spend moved to Q4, marketing wants the target month changed? check with islam
+hala - CX mystery shopping H2 starts oct, needs the H1 archive restored first
+agreed: every unit sends draft by 22 sep, SMO reviews 23-24
+agreed: no new tactics this cycle
+karim (partner) to send the retail footfall data - when??
+next meeting after the drafts, 25th?</textarea>
+        <div class="lab">History</div>
+        <ul class="hist">
+          <li><time>16 Sep 11:42</time><span><b>Islam</b> refined the notes into minutes</span></li>
+          <li><time>16 Sep 11:05</time><span><b>Islam</b> started the note</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot">
+      <span class="saved">Saved a moment ago</span>
+      <span class="spacer"></span>
+      <span class="hint">Hala has no email and will not receive them.</span>
+      <button class="btn gold" type="button">Send to 4 attendees</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FRAME 4 · the email ═══ -->
+<p class="cap">4 · The email as an attendee sees it — the minutes themselves, no sign-in</p>
+<div class="frame">
+  <div class="mailwrap">
+    <p class="subj">From <b>Islam Saadany via Strategy Management Platform</b> · reply-to islam.saadany@… · Subject: <b>Minutes: Q3 review preparation — Wed 16 Sep 2026</b></p>
+    <div class="mail">
+      <div class="top"><p class="k">Minutes of meeting</p><p class="o">Raya Trade</p></div>
+      <div class="in">
+        <h1>Q3 review preparation</h1>
+        <p class="meta">Wednesday 16 September 2026 · Islam Saadany, Ramy Behairy, Yara Kamal, Hala Mostafa, Karim Fawzy · written up by Islam Saadany</p>
+        <h2>Summary</h2>
+        <p>Preparation for the Q3 review: where each unit's figures stand, what moves to Q4, and the timeline for drafts and the SMO's review.</p>
+        <h2>Discussed</h2>
+        <ul>
+          <li>Mobile's Q3 figures will be ready by 20 September. Accessory revenue is behind on a flat reading but on plan against its monthly plan, because of seasonality; this is to be explained in the deck.</li>
+          <li>Marketing's campaign spend has moved to Q4. Whether the target month changes is to be checked with Islam.</li>
+          <li>CX mystery shopping for H2 starts in October and needs the H1 archive restored first.</li>
+          <li>Karim will send the retail footfall data; no date was given.</li>
+        </ul>
+        <h2>Agreed</h2>
+        <ul>
+          <li>Every unit sends its draft by 22 September; the SMO reviews on 23–24 September.</li>
+          <li>No new tactics this cycle.</li>
+        </ul>
+        <h2>Actions</h2>
+        <table>
+          <thead><tr><th>What</th><th>Who</th><th>By when</th></tr></thead>
+          <tbody>
+            <tr><td>Mobile Q3 figures ready, seasonality explained in the deck</td><td>Ramy</td><td>20 Sep</td></tr>
+            <tr><td>Check whether Marketing's target month changes</td><td>Islam</td><td>—</td></tr>
+            <tr><td>Restore the CX mystery shopping H1 archive</td><td>Hala</td><td>—</td></tr>
+            <tr><td>Send the retail footfall data</td><td>Karim</td><td>—</td></tr>
+            <tr><td>Each unit sends its draft</td><td>—</td><td>22 Sep</td></tr>
+          </tbody>
+        </table>
+        <h2>Open</h2>
+        <ul><li>Next meeting after the drafts — 25 September was suggested, not confirmed.</li></ul>
+      </div>
+      <div class="ft">Sent by Islam Saadany from the Strategy Management Platform. Reply to this email to reach them. If these minutes are corrected, you will receive them again, marked as updated.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="note">
+  <p><b>What a still cannot show.</b> Typing saves as you go, like the tracker: no Save button. Refine takes a few seconds; the button reads <i>Refining…</i> and the boxes fill when the assistant answers. If the assistant is not set up on the deployment, the button says so in words and the minutes can still be written by hand. A second Refine after new notes is told to <b>add</b> to the minutes, never rewrite what you edited. Send again after a send is allowed; the subject then opens with <i>Updated minutes</i>, and the history keeps every send with who, when and to whom.</p>
+  <p><b>Two decisions drawn in.</b> A casual attendee (dashed chip) is added by name and email for this one meeting and does not go onto the client's register. A register person with no email stays an attendee and is marked; the minutes go to everybody who has an address, with a copy to whoever pressed Send.</p>
+  <p><b>Not drawn, said instead.</b> The question marks in the minutes are the assistant marking a point it could not settle rather than guessing; they are yours to answer or delete before sending, and the email carries whatever the boxes hold.</p>
+</div>

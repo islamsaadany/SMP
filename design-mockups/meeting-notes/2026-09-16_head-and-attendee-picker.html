@@ -1,0 +1,183 @@
+<title>Notes head and attendees</title>
+<style>
+/* ── THE PAGE'S OWN TOKENS AND CONTROL RULES, lifted verbatim out of
+   smp-app/modules/notes/page.ts so this is the product's own pixels and not a
+   drawing of them (§41.9). Only the mockup's chrome below is new. ── */
+*{box-sizing:border-box}
+:root{--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;--bar:#16325C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:400 14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1140px;margin:0 auto;padding-block:26px 60px;padding-left:16px;padding-right:16px}
+
+/* mockup chrome */
+.bar{background:var(--bar);color:#fff;border-radius:11px;padding:15px 18px;margin-bottom:22px}
+.bar h1{margin:0;font:600 18px/1.3 inherit}
+.bar p{margin:5px 0 0;font-size:13px;color:#C9D6EA}
+h2.sec{font:600 16px/1.3 inherit;margin:30px 0 4px;display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}
+h2.sec span{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+.why{margin:0 0 14px;color:var(--ink-2);font-size:13.5px;max-width:74ch}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:16px}
+.panel.now{background:var(--surface-2)}
+.tag{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.panel.prop .tag{color:var(--gold)}
+.note{margin:10px 0 0;font-size:12.5px;color:var(--ink-3)}
+.stage{position:relative;min-height:260px}
+
+/* ── the product's own control rules ── */
+.head{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;margin-bottom:8px}
+.ttl{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:600 21px/1.3 inherit;padding:4px 0 8px;outline:none}
+.ttl::placeholder{color:var(--ink-3);font-weight:400}
+.date{font:400 13px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 9px;white-space:nowrap;margin-top:4px;cursor:pointer}
+.lab{font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:12px 0 4px}
+.lab:first-child{margin-top:0}
+.att{display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:relative}
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 inherit;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 10px}
+.chip i{font-style:normal;font-weight:400;color:var(--ink-3)}
+.chip b{font-weight:400;color:var(--ink-3);background:none;border:0;padding:0 2px;font-size:13px}
+.chip.once{border-style:dashed}
+.chip.addb{border-style:dashed;color:var(--gold);cursor:pointer}
+.pick{position:relative;z-index:5;width:300px;max-width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:8px;margin-top:8px}
+.pick input{width:100%;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 13px/1.5 inherit}
+.pick .pl{max-height:190px;overflow-y:auto;scrollbar-width:thin;margin-top:6px}
+.pick .prow{display:flex;width:100%;align-items:center;gap:9px;padding:6px 7px;border:0;background:none;border-radius:7px;font:400 13.5px/1.4 inherit;color:var(--ink);text-align:left;cursor:pointer}
+.pick .prow small{margin-left:auto;color:var(--ink-3);font-size:11.5px;white-space:nowrap}
+.pick .sq{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;background:var(--surface);color:#fff;flex:none}
+.pick .sq.on{background:var(--gold);border-color:var(--gold)}
+.pick .sq svg{width:9px;height:9px}
+.pick .else{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;display:grid;grid-template-columns:1fr 1fr auto;gap:6px}
+.pick .else input{margin:0;font-size:12.5px;padding:5px 7px}
+.btn{font:600 13px/1 inherit;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn.sm{padding:6px 9px;font-size:12px}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#FFF}
+
+/* ── what the proposal adds ── */
+.ttl.box{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:9px 11px}
+.pick .done{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;display:flex;align-items:center;gap:8px}
+.pick .done .btn{flex:none}
+.pick .done span{font-size:12px;color:var(--ink-3)}
+.cal{margin-top:6px;border:1px solid var(--line);border-radius:9px;background:var(--surface);padding:9px;width:212px;box-shadow:0 8px 26px rgba(20,28,43,.16)}
+.cal .ch{display:flex;align-items:center;justify-content:space-between;font:600 12px/1 inherit;color:var(--ink);margin-bottom:7px}
+.cal .cg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font:400 11.5px/1 inherit;text-align:center}
+.cal .cg b{font:600 9.5px/1 ui-monospace,monospace;color:var(--ink-3);padding:3px 0}
+.cal .cg i{font-style:normal;padding:5px 0;border-radius:5px;color:var(--ink-2)}
+.cal .cg i.on{background:var(--gold);color:#fff;font-weight:600}
+.cal .cg i.mut{color:var(--ink-3);opacity:.45}
+</style>
+
+<div class="wrap">
+  <div class="bar">
+    <h1>Meeting Notes — the head and the attendee list</h1>
+    <p>Three refinements, drawn in the page's own stylesheet. Today on the left, the proposal on the right.</p>
+  </div>
+
+  <h2 class="sec">1. The title <span>it can already be typed</span></h2>
+  <p class="why">It is a real box with the placeholder <em>“What was the meeting about?”</em>, drawn with no border and no
+     background at 21px bold — so it reads as a heading the platform wrote. Every other thing on the page carries a small
+     uppercase key above it; the title and the date are the only two without one.</p>
+  <div class="two">
+    <div class="panel now">
+      <p class="tag">Today</p>
+      <div class="head">
+        <input class="ttl" placeholder="What was the meeting about?">
+        <button class="date" type="button">Wed 16 Sep 2026</button>
+      </div>
+      <p class="note">Nothing says it is yours to fill in.</p>
+    </div>
+    <div class="panel prop">
+      <p class="tag">Proposed</p>
+      <div class="head">
+        <div>
+          <p class="lab">Title</p>
+          <input class="ttl box" placeholder="What was the meeting about?">
+        </div>
+        <div>
+          <p class="lab">Date</p>
+          <button class="date" type="button">Wed 16 Sep 2026</button>
+        </div>
+      </div>
+      <p class="note">The same two keys the rest of the page already uses, and a box that looks like one.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">2. The date <span>one press, not two</span></h2>
+  <p class="why">Pressing the date turns it into a date field, and the browser's calendar is then behind a small icon
+     inside it — so it takes two presses to find. It can open on the first press. Nothing about how it looks changes.</p>
+  <div class="two">
+    <div class="panel now">
+      <p class="tag">Today — after one press</p>
+      <button class="date" type="button" style="cursor:auto">2026-09-16 &nbsp;&#128197;</button>
+      <p class="note">A field. The calendar is behind the icon.</p>
+    </div>
+    <div class="panel prop">
+      <p class="tag">Proposed — after one press</p>
+      <div class="cal" aria-hidden="true">
+        <div class="ch"><span>&#8249;</span><span>September 2026</span><span>&#8250;</span></div>
+        <div class="cg">
+          <b>M</b><b>T</b><b>W</b><b>T</b><b>F</b><b>S</b><b>S</b>
+          <i class="mut">31</i><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i>
+          <i>7</i><i>8</i><i>9</i><i>10</i><i>11</i><i>12</i><i>13</i>
+          <i>14</i><i>15</i><i class="on">16</i><i>17</i><i>18</i><i>19</i><i>20</i>
+          <i>21</i><i>22</i><i>23</i><i>24</i><i>25</i><i>26</i><i>27</i>
+          <i>28</i><i>29</i><i>30</i><i class="mut">1</i><i class="mut">2</i><i class="mut">3</i><i class="mut">4</i>
+        </div>
+      </div>
+      <p class="note">The browser's own calendar, opened on the press. Drawn here to show what you get — the real one is the device's.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">3. The attendee list <span>tick several, then done</span></h2>
+  <p class="why">Every press in this module is answered by the server drawing the page again, so the list is rebuilt after
+     each tick and disappears with whatever you had typed in its search. It can be carried across the redraw, the way the
+     cursor already is. A tick is saved the moment you make it — the chip appears above as you go — so there is nothing to
+     confirm; what is missing is a way to say you are finished, since a tablet has no Escape key.</p>
+  <div class="two">
+    <div class="panel now">
+      <p class="tag">Today — after one tick</p>
+      <div class="stage">
+        <div class="att">
+          <span class="chip">Islam Saadany <i>· office</i> <b>&times;</b></span>
+          <span class="chip">Farida Anwar <b>&times;</b></span>
+          <span class="chip addb">+ Add attendee</span>
+        </div>
+        <p class="note">The list has gone, and so has what you typed to find her. Press again for the next person.</p>
+      </div>
+    </div>
+    <div class="panel prop">
+      <p class="tag">Proposed — after one tick</p>
+      <div class="stage">
+        <div class="att">
+          <span class="chip">Islam Saadany <i>· office</i> <b>&times;</b></span>
+          <span class="chip">Farida Anwar <b>&times;</b></span>
+          <span class="chip addb">+ Add attendee</span>
+        </div>
+        <div class="pick">
+          <input placeholder="Search the register" value="" aria-label="Search the register">
+          <div class="pl">
+            <span class="prow"><span class="sq on"><svg viewBox="0 0 10 10"><path d="M1 5l2.6 2.6L9 1.6" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>Farida Anwar</span>
+            <span class="prow"><span class="sq"></span>Group CEO</span>
+            <span class="prow"><span class="sq on"><svg viewBox="0 0 10 10"><path d="M1 5l2.6 2.6L9 1.6" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>Bassem Haddad<small>Devices</small></span>
+            <span class="prow"><span class="sq"></span>Wadih Srour<small>Logistics</small></span>
+            <span class="prow"><span class="sq"></span>Sami Doura<small>Retail Stores</small></span>
+            <span class="prow"><span class="sq"></span>Group CFO</span>
+            <span class="prow"><span class="sq"></span>Lina Kassab<small>B2B Online</small></span>
+          </div>
+          <div class="else">
+            <input placeholder="Somebody else &mdash;"><input placeholder="their email"><button class="btn sm" type="button">Add</button>
+          </div>
+          <div class="done">
+            <button class="btn sm gold" type="button">Done</button>
+            <span>Each tick is already saved.</span>
+          </div>
+        </div>
+        <p class="note">The list stays, your search stays, and the chips above fill in as you tick.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -227,6 +227,17 @@ def serve():
 # Applied to the PAGE, because platform.html is hand-written and served as it
 # is: there is no build step to make a broken copy through (§276 needs one).
 BREAKS = {
+  # HELD AND DRAWN AS THOUGH LIVE — the build before §358.12, and the reason
+  # Islam asked for the fade. Note it keeps `aria-disabled`, so it reddens the
+  # dimming assertion ALONE; `publish-anyway` below removes the attribute and
+  # therefore reddens the refusal as well, which is a different fault.
+  "held-not-dimmed": """() => {
+    const b = Array.from(document.querySelectorAll('.byline .btn'))
+      .find(x => /^Publish/.test(x.textContent));
+    if (!b) return false;
+    b.style.opacity = '1';
+    return true;
+  }""",
   # A Publish that does not ask whether there is anything to open.
   "publish-anyway": """() => {
     const b = Array.from(document.querySelectorAll('.byline .btn'))
@@ -388,13 +399,70 @@ def run():
           const b = Array.from(document.querySelectorAll('.byline .btn'))
             .find(x => /^Publish/.test(x.textContent));
           const f = Array.from(document.querySelectorAll('.filestrip .btn'))[0];
+          const sv = Array.from(document.querySelectorAll('.byline .btn'))
+            .find(x => /^Save/.test(x.textContent));
           return { pubHeld: b.getAttribute('aria-disabled'), pubWhy: b.title,
-                   fileOff: f.disabled, fileWhy: (document.querySelector('.filestrip .fname')||{}).textContent };
+                   fileOff: f.disabled, fileWhy: (document.querySelector('.filestrip .fname')||{}).textContent,
+                   pubDim: getComputedStyle(b).opacity, pubCursor: getComputedStyle(b).cursor,
+                   saveDim: sv ? getComputedStyle(sv).opacity : null };
         }""")
-        check("Publish is HELD on a report that has never been saved, and says why",
-              held["pubHeld"] == "true" and held["pubWhy"], held)
-        check("...and the file control says what has to happen first (§61, §221)",
-              held["fileOff"] and "Save it first" in (held["fileWhy"] or ""), held)
+        # §358 REWRITTEN, NEVER LOOSENED (§218, §214.3). Both of these asserted
+        # the two-step: Publish held because nothing was SAVED, and the file
+        # control switched off saying "Save it first". Attaching is the
+        # ordinary act now and saving a draft is one of two ways of FINISHING,
+        # so what must hold is the opposite on one line and NARROWER on the
+        # other — the one refusal that survives is about the report rather
+        # than about the machinery. Asserted at BOTH ENDS (§94.2): the file
+        # control live, AND Publish still shut, or a build that simply opened
+        # everything would pass the half above.
+        check("Publish is HELD on a report with nothing to open, and names the FILE",
+              held["pubHeld"] == "true" and "Add the file first" in (held["pubWhy"] or ""), held)
+        check("...and the file control is LIVE on a report that has never been saved (§358)",
+              held["fileOff"] is False and "No file yet" in (held["fileWhy"] or ""), held)
+        check("...and nothing on the card tells anybody to go and save something first",
+              "Save it first" not in ((held["fileWhy"] or "") + (held["pubWhy"] or "")), held)
+        # §358.12: THE HELD BUTTON LOOKS HELD. Islam's A, taken from four drawn
+        # side by side and against the recommendation. Measured as PAINT rather
+        # than as a class or an attribute (§94.8, §272.8 — a rule can provably
+        # match and provably do nothing), and at BOTH ENDS (§94.2): the live
+        # button beside it must NOT dim, or a build that faded the whole row
+        # would satisfy the half above. The cursor is its own assertion and
+        # guards the decision underneath the look — this button is pressable,
+        # and pressing it is what names the gap, so a `default` cursor would be
+        # the one part of the treatment that is untrue.
+        check("...and the held button is DIMMED, while the live one beside it is not (§358.12)",
+              float(held["pubDim"] or 1) < 0.9 and float(held["saveDim"] or 0) == 1.0, held)
+        check("...and it still says it can be pressed, because pressing it is what names the gap",
+              held["pubCursor"] == "pointer", held)
+        # AND THE COST IS PRINTED RATHER THAN ASSERTED (§302.3's own device).
+        # The fade composites the fill and the words together, so the label
+        # falls under the 4.5 floor — which is the decision, not a defect, and
+        # asserting it either way would be choosing against Islam or against
+        # the floor. Printing it keeps the cost in front of whoever runs this,
+        # in both palettes, on every run. Nothing else measures it: the console's
+        # contrast sweep walks the three console tabs and the door and never
+        # opens a report, so this line is the only place the number appears.
+        for pal in ("light", "dark"):
+            pg.evaluate("(t) => document.documentElement.setAttribute('data-theme', t)", pal)
+            pg.wait_for_timeout(120)
+            r = pg.evaluate("""() => {
+              const b = Array.from(document.querySelectorAll('.byline .btn'))
+                .find(x => /^Publish/.test(x.textContent));
+              const px = (v) => v.match(/[\\d.]+/g).slice(0, 3).map(Number);
+              const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92
+                                 : Math.pow((c + 0.055) / 1.055, 2.4); };
+              const L = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+              const over = (fg, bg, a) => fg.map((f, i) => Math.round(a * f + (1 - a) * bg[i]));
+              const cs = getComputedStyle(b), a = Number(cs.opacity);
+              // the card behind it, which is what a faded button composites over
+              const ground = px(getComputedStyle(b.closest('.ecard') || document.body).backgroundColor);
+              const ink = over(px(cs.color), ground, a), fill = over(px(cs.backgroundColor), ground, a);
+              const hi = Math.max(L(ink), L(fill)), lo = Math.min(L(ink), L(fill));
+              return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100;
+            }""")
+            print("       cost of §358.12 · the held label reads %.2f:1 on %s "
+                  "(4.5 is the floor) — Islam's, measured" % (r, pal))
+        pg.evaluate("() => document.documentElement.removeAttribute('data-theme')")
         press(pg, "Save the draft", ".byline")
         pg.wait_for_function("""() => document.querySelectorAll('.erow').length === 1 ||
           (document.querySelector('.ecard h2')||{}).textContent === 'Governance Review: Board Reporting Practice'""", timeout=9000)
@@ -724,6 +792,81 @@ def run():
         check("...and it shows what matches", found["shown"] == ["Mobile"], found["shown"])
         check("...and a group with nothing left in it goes with its rows",
               found["groups"] == ["Business units"], found["groups"])
+
+        # ══ 9 · attaching on a report nobody saved (§358) ═════════════
+        print("\n9 · one press: the draft is saved, then the file is sent (§358)")
+        SCENE["items"] = []; SCENE["sent"] = []; SCENE["pieces"] = []
+        open_room()
+        press(pg, "Publish a report", ".ptitle")
+        pg.wait_for_selector(".ecard", timeout=9000)
+
+        # THE TITLE IS THE ONE THING THAT MUST BE THERE, and it is asserted
+        # FIRST: if attaching with an empty title posted anything at all it
+        # would put a row nobody can pick out of the list into the library,
+        # which is the one cost this flow must not have.
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "untitled.pdf", "mimeType": "application/pdf", "buffer": b"%PDF-1.7\nx"})
+        pg.wait_for_selector(".err", timeout=9000)
+        # NOTHING ABOUT THE REPORT, never "nothing at all": opening the room
+        # is three reads of its own, so a bare `not SCENE["sent"]` fails on a
+        # build behaving perfectly — which is what it did the first time it
+        # was run (§100.3).
+        posted = [x.get("action") for x in SCENE["sent"]
+                  if x.get("action") in ("librarySave", "libraryUploadBegin", "libraryUploadFinish")]
+        check("attaching with no title says so, and posts nothing about the report",
+              "needs a title" in pg.evaluate("() => document.querySelector('.err').textContent")
+              and not posted, SCENE["sent"])
+        check("...and it puts the cursor in the one box that is missing (§61)",
+              pg.evaluate("() => document.activeElement && document.activeElement.id") == "lib-title")
+
+        SCENE["sent"] = []; SCENE["pieces"] = []
+        pg.fill("#lib-title", "Suppliers under the new tariff")
+        pg.fill("#lib-sum", "What the March schedule does to landed cost.")
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "suppliers-tariff.pdf", "mimeType": "application/pdf",
+            "buffer": b"%PDF-1.7\n" + b"x" * 4096})
+        # EVERY WAIT IN THIS SECTION DEGRADES (§215, and this file's own
+        # docstring promises it). On a build that still makes you save first
+        # the strip never names the file, and a bare wait_for_function throws
+        # a stack trace with NOTHING reported — which is what the first
+        # falsification run of this section did, printing no failures on
+        # precisely the build it exists to catch.
+        def waited(fn, why, ms=20000):
+            try:
+                pg.wait_for_function(fn, timeout=ms); return True
+            except Exception:
+                check(why, False, "waited %dms and it never happened" % ms); return False
+
+        waited("""() => !!document.querySelector('.filestrip .fname') &&
+          /suppliers-tariff/.test(document.querySelector('.filestrip .fname').textContent)""",
+               "the strip names the file that was just attached")
+
+        order = [x["action"] for x in SCENE["sent"] if x.get("action")]
+        saved8 = [x for x in SCENE["sent"] if x.get("action") == "librarySave"]
+        began8 = [x for x in SCENE["sent"] if x.get("action") == "libraryUploadBegin"]
+        check("ONE press saves the draft and THEN begins the upload, in that order",
+              order[:2] == ["librarySave", "libraryUploadBegin"], order)
+        check("...and what it saved is what was typed, never an empty row",
+              len(saved8) == 1 and saved8[0]["title"] == "Suppliers under the new tariff"
+              and saved8[0]["summary"].startswith("What the March"), saved8)
+        check("...and the pieces are addressed to the id that save returned (§48)",
+              len(began8) == 1 and began8[0].get("id") == "new-1", began8)
+        check("...and the card now says the report exists, rather than 'Not saved yet'",
+              "Not saved yet" not in pg.evaluate(
+                  "() => (document.querySelector('.byline .who')||{}).textContent || ''"))
+        # BOTH ENDS (§94.2): a report that ALREADY has a row must not be saved
+        # a second time by attaching — that would overwrite the stored form
+        # with whatever happens to be in the boxes on a card somebody only
+        # opened to replace the file.
+        SCENE["sent"] = []; SCENE["pieces"] = []
+        pg.set_input_files(".filestrip input[type=file]", {
+            "name": "suppliers-tariff-v2.pdf", "mimeType": "application/pdf",
+            "buffer": b"%PDF-1.7\n" + b"y" * 4096})
+        waited("""() => !!document.querySelector('.filestrip .fname') &&
+          /v2/.test(document.querySelector('.filestrip .fname').textContent)""",
+               "the strip names the replacement file")
+        check("replacing a file on a saved report posts NO second save",
+              not [x for x in SCENE["sent"] if x.get("action") == "librarySave"], SCENE["sent"])
 
         check("no page error anywhere in the room", not errs, errs[:3])
         b.close()

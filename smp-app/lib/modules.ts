@@ -22,7 +22,7 @@
    the document it is served in (lib/shell.ts stamps `data-module`), so
    shell/route.js keeps no second copy of these words (§53.5). */
 
-export const MODULES = ["strategy", "portfolio", "insights", "processes"] as const;
+export const MODULES = ["strategy", "portfolio", "insights", "processes", "tracker", "notes"] as const;
 export type ModuleKey = (typeof MODULES)[number];
 
 /* Where a client lands when the address names no module. */
@@ -135,6 +135,18 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
               states: ["view", "none"], shipped: "view" }],
     lines: INSIGHTS_LINES },
   processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [], lines: [NOTHING] },
+  /* THE OFFICE'S OWN LIST ABOUT THIS CLIENT (spec 054). Built, and NO AREA:
+     it is opened by the seat and by nothing a client could be granted
+     (decision 2) — the way Inbox and Setup are — so a column here would be a
+     cell nobody should fill (§61). The day a client person needs in is the
+     day this gains one. Two words on the switcher, Islam's, because the
+     second says who it is for. */
+  tracker:   { label: "Internal Tracker", note: "The office's weekly actions about this client", built: true, areas: [], lines: [NOTHING] },
+  /* ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (spec 055). Built,
+     and NO AREA for the tracker's reason: it is the office's own record of
+     this client, opened by the seat. The attendees get an email and never
+     open it. The word is Islam's to change (decision 11). */
+  notes:     { label: "Meeting Notes",     note: "Notes taken in a meeting, refined into minutes and sent to the attendees", built: true, areas: [], lines: [NOTHING] },
 };
 
 export function isModule(s: unknown): s is ModuleKey {

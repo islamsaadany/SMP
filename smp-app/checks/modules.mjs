@@ -181,6 +181,10 @@ const argsFor = (module, rest) => ({
   req: new Request("https://smp.example/raya-trade/" + module + rest.map((r) => "/" + r).join("")),
   slug: "raya-trade", module, tenantId: "not-a-tenant-id", tenantName: "Raya Trade",
   have: offerable(), rest,
+  /* WHO IS LOOKING, as the route hands it (spec 046 §4.10) — the office, so
+     a module the office alone may open (the Internal Tracker, spec 054) draws
+     its page here rather than its refusal. */
+  personKey: "islam", seat: "super",
 });
 const drawnBy = async (k, rest = []) => {
   const res = await serverFor(k)(argsFor(k, rest));

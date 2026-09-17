@@ -100,3 +100,11 @@ export async function GET(req: Request, { params }: P) {
   return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
     have: open, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
 }
+
+/* A MODULE MAY BE WRITTEN TO (spec 054): the Internal Tracker's rows are
+   changed on the row, so its server takes a POST at an address inside the
+   module. The door, the client and the module are resolved exactly as for a
+   GET — the same function, so a write cannot reach a module a GET would not
+   — and what to do with the body is the module's own. The frozen shell's
+   writes still go to /api/*; this is only for a module that serves itself. */
+export const POST = GET;

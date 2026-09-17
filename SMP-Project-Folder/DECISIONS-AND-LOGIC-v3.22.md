@@ -48413,6 +48413,1272 @@ not.
 pre-existing seeded-demo-graph failures already on the record (§303, §354.7),
 neither touching a module, the route or a library.
 
+## §356 — THE INTERNAL TRACKER: THE OFFICE'S WEEKLY LIST, PER CLIENT (2026-09-15, spec 054)
+
+Islam, of the `strategy-management-system` repository's Action Tracking:
+*"the tracking tool is for the internal team weekly actions tracking"*, then
+*"no they belong to the client as they are modules for handling this specific
+client"*, *"1. Internal Tracker 2. a week is sunday ti thursday yes"*, *"the
+new action should be in line addition we are shifting from a simple google
+sheet to a tool so it needs to be super simple"*, and *"build and let's me see
+when it's done."* Every decision is spec 054's (1–8) and was taken before a
+source moved; the mockup was published as an artifact and redrawn once at his
+word (a form and a detail page out, the next empty line in).
+
+### §356.1 — A FIFTH MODULE THROUGH THE TABLE, WITH NO NEW SEAM
+
+`tracker` is one folder (`smp-app/modules/tracker/`), one registry entry and
+one word in `lib/modules.ts` — §354's own proof that a module is a folder and
+an entry. **The one thing the spine gained is a verb**: the route handler
+answered GET only, and a module that is WRITTEN to needs a POST, so
+`export const POST = GET` — the table dispatches by module, the module reads
+the method. Nothing else in `app/`, `lib/shell.ts` or the registry moved; the
+`ServeArgs` seam is exactly §355's (`personKey`, `seat`), because the two facts
+this module needs are the two it already carried.
+
+### §356.2 — THE OFFICE BY RULE, ASKED AT THE SERVER
+
+Decision 2: the office's tool, so **who may open it is the SEAT the door
+established** (`super` or `smoteam`), asked in `serve()` on every request —
+never only by leaving the entry off a menu, which is decoration (§42, §44). A
+client's own person is told so in a sentence with the way back (§61) on the
+page and refused at the api alike (§94.2 — both doors, or a build that only
+hid the page passes half). **The switcher still lists the module for a
+client's person**, because the spine's menu knows modules and not seats (spec
+046 §4.4 is unbuilt); recorded in the spec rather than papered over.
+
+### §356.3 — OWNED BY AN OFFICE ROW, AND BY NOTHING ELSE
+
+Decision 5: an action's owner and collaborators are the office's rows on THIS
+client's register (`people` joined to `tenant_users` by `person_key`, seat in
+the two office words), in the register's order. A client's own person is
+refused as an owner by the rule the server asks (`isOfficeRow`), both ends
+asserted; an office login not yet placed on the register is told *"You are not
+on this client's register yet"* and nothing is written (§313.32's shape,
+§316.9's finding). **The name is read from the register, never stored on the
+action** (§130.9): `namesOf(c)` answers at draw time, so a rename reaches every
+row. `mayChange` is owner, collaborator or the Super user; `mayOwn`
+(hand-over, delete) is owner or Super user — a collaborator may NOT hand it on.
+
+### §356.4 — THE FIRST DATE IS WRITTEN ONCE, SO A RESCHEDULE CANNOT RESET THE COUNT
+
+Late is *due before today*; carried is counted in WEEKS from the FIRST date the
+action was ever given (`first_due`, `COALESCE`d and never overwritten by a
+change of date), so moving the date moves DUE and leaves the count where it
+was — "2 weeks back" stays honest through three postponements. Done clears it;
+reopening starts it again from the date the row holds. A week is **Sunday to
+Thursday** (decision 8), worked out in `Africa/Cairo`; a Friday or Saturday
+reads as the following week's. **A date the list cannot read is refused in
+words, never guessed at** (§184).
+
+### §356.5 — EVERY CHANGE ON THE ROW, AND NOTHING WITH A SAVE BUTTON
+
+§3 of the spec, built as it says: Enter on the next empty line adds, owned by
+me, Not started, no date (Escape clears; the line is focused again after the
+reload). The tick is Done and pressed again is Not started; the date becomes a
+date box in place and back again on Escape; the status is a picker on the row;
+the title opens the row in place — notes saved on leaving the box and only when
+changed (§35), the title renamed on Enter, owner and who-else on the opened
+row, Delete asking IN THE ROW and never in a browser dialog (§95, §273.3).
+**The browser holds no copy of the list**: every press POSTs the module's own
+api and the page is read again, so the screen cannot disagree with the server
+(§53.5); a refusal is written into the page in the server's own words (§32,
+§171). No inline script — the shell's policy would silence it — so the module
+serves its one script itself.
+
+### §356.6 — TWO TABLES, FENCED LIKE EVERY OTHER TENANT TABLE
+
+`tracker_actions` (the row: title, notes, owner, who else, due, first due,
+status, done at) and `tracker_events` (append-only: created, and every status
+change with who and when — a date move is deliberately NOT logged, decision in
+the spec's §5, and the mockup's history line that showed one was removed).
+Both in `schema.sql`'s RLS loop, both in migration 012 with the loop's own
+policy text, asserted IDENTICAL to `library_items`' (§94.8) and absent from
+`PLATFORM_TABLES` (§331); events cascade with their action. `extra jsonb` on
+the row, as every tenant table carries (§118).
+
+### §356.7 — THE CHECK FOUND ONE PRODUCT FAULT AND IT WAS THE SPEC'S OWN RULE
+
+`checks/tracker.mjs` §10 serves the module over a real port and PRESSES it in
+Chromium, reading Postgres back after every press (§70, §96) — and its first
+run was **1 red on "the new row is on the page"**: the spec had written *"an
+action with no date is never on This week, so it needs a view of its own or it
+is lost"*, and that rule makes exactly the loss it was written against. The
+landing is This week; the line somebody has just typed has no date; on the
+reload it moved to Undated and **vanished from under their hand** — the sheet
+this replaces never did that. **An open action with no date is on This week
+now**, until somebody says otherwise, never late; Undated stays as the
+narrower list of what still needs a date, INSIDE This week rather than beside
+it. The spec is corrected in place and says it was; the §2 assertion that
+held the two views disjoint is REWRITTEN to *Undated is inside This week*,
+never deleted (§218).
+
+### §356.8 — AND THREE OF THE CHECK'S OWN FIRST FAILURES WERE THE CHECK
+
+- `const [A] = await owner("… RETURNING id")` handed the ROW object where a
+  tenant id was wanted, and the run DIED at the first `person()` (§215).
+- The register row is written BEFORE the seat: `tenant_users.person_key`
+  carries an FK to `people` (§339), and the fixture had them the other way.
+- The date probe `fill()`ed the date box and then dispatched a second
+  `change` — `fill` on a date input fires the change itself, the page had
+  already posted and reloaded, and the probe waited 30s on a box that was gone
+  (§100.3).
+
+**And one was a real fault the both-ends rule caught**: *"Delete asks first"*
+passed on a `.sure` that had been drawn OPEN all along — the span's own
+`display:flex` outranks the browser's `[hidden]` rule, so `hidden` hid nothing
+(§298.2 recorded Chromium's rule as `!important` and it is not; asked of the
+page, the box was visible). `[hidden]{display:none!important}` on the page,
+and the question asserted ABSENT before the press (§113.8).
+
+### §356.9 — WHAT WAS RUN
+
+`check:tracker` **124/0** against a real Postgres 16 with the browser section
+driven in Chromium; red three ways under its own breaks (`no-office-gate` 2,
+`reset-carried` 3, `owner-anyone` 2); `modules` **100/0** (the colour loop now
+reaches the tracker's document, and `argsFor` carries a seat); `insights`
+127/0; `memory-boundary` 14/0 once the dev tenant is seeded (its one red
+before that is the fixture's precondition, said in its own words);
+`generated-in-step` all clear; `tsc` clean but for `lib/prisma.ts`'s
+pre-existing PrismaClient error (recorded 2026-09-13), which is also the one
+thing `next build` stops on. **The frozen product is untouched**: no source in
+`SMP-Project-Folder/src/` moved, nothing rebuilt, so `sw.js` is not bumped.
+**Merged to `main` 2026-09-16** (this line read *"on the branch, not
+merged"* until §357.4 corrected it — §356.17's own finding, on the two blocks
+that section missed).
+
+### §356.10 — RECORDED, NOT DONE
+
+- The switcher lists the tracker for a client's own person, who is then refused
+  at the door; the per-module access tab (spec 046 §4.4) is where that ends.
+- Nothing reminds anybody (spec 054 §10); a weekly digest is §293's collection
+  pointed at this list and its own decision.
+- Notes (meeting minutes, refined and sent as MOM) is the second module Islam
+  named and is deliberately after this one; it has no spec yet.
+- A migration applied on a deployment writes the two tables; the switch that
+  turns the module ON for a client is the card's own drawer (§320.5), pressed
+  by hand — no client has it until somebody presses it.
+
+### §356.11 — THE ROW REDRAWN AT ISLAM'S WORD: ONE OWNER, A FIRST NAME, AN ARROW, A DOUBLE-CLICK, ONE SHORT WORD, AND A CHOICE (2026-09-15)
+
+Islam, using the built tracker within the hour: *"The button with my
+initials should open the list of the taem on the project ot assign an owner
+and it's better to be first name of the owner and have a 3 dots on the right
+to open that expanded view with notes or history and keep the action items
+editable by a double click on the action name and no need for the 'with'
+part for collaborators it's a simple task management thing."* Drawn before a
+source moved (rule 1c) and redrawn twice at his word — *"for the list of
+names, just make the list with the first names simpler with no title or
+second names"*, *"the 3 dots let's make it an arrow that expand and colppase
+the box and please make the shistory font much smaller in a scroll box"*,
+*"on the creation of te a task as if the whole thing refresh make it silent
+for fast and smooth ceatration of tasks"*, then *"carried 1 week is long we
+can make after late and make it late or late 1 w or late 2 w"* and *"the
+groupingby howner should be an option ... on the far right of the same line
+of the tabs"* — and signed off with one change: *"remvoe collaborators and
+the rest is ok to build."*
+
+**ONE ACTION, ONE OWNER, AND THE RULE COLLAPSES WITH IT.** Spec 054 §6 kept
+two rules — change it (the owner, a collaborator, the Super user) and hand
+it on (the owner, the Super user) — and the only person the two told apart
+was the collaborator. With nobody ever "on" an action there is one rule,
+`mayChange`, and `mayOwn` is DELETED rather than left as a second name for
+the same answer (§24, §53.5): two functions answering one question are
+§94's drift the day somebody widens one. The `collab` act is refused as *not
+something this list does* (a tab on the build before may still send one, and
+it writes nothing), `isMine` is ownership alone, and **migration 013 drops
+the column** — a column the platform no longer reads is worse than no column
+(§53.4). `checks/tracker.mjs` §9 asserts the exact column list, so the drop
+is measured rather than claimed.
+
+**THE OWNER IS A FIRST NAME, BY THE REGISTER'S OWN RULE.** `shortNames()`
+asks `rules.cjs`'s `nameWords` for one name — a particle is not a name, so
+*Abd El Moniem* is one word of somebody's name and not three (§130.7) — and
+a clashing pair on one client is lengthened to two words for exactly that
+pair (§81.1), the whole name if still equal. Asked once over everybody named
+on the list, seat or no seat, so a former owner's row is shortened by the
+same rule as a present one. **Who gets the press is both ends** (§61,
+§94.2): the name is a `role="button"` for the owner and the Super user, who
+are the two who may hand an action on, and plain text for everybody else —
+with the tick off and the name not renameable on that same row, so a build
+that drew the press for everybody (the check's `who-everyone` break) goes red
+on the plain-text half and not only on the pressable one. The office rides
+in the cell hidden, first names only, the present owner marked, and every
+option is a register KEY the server checks again (§42).
+
+**THE ARROW OPENS THE ROW AND FOLDS IT; THE TITLE STOPS BEING A LINK.** The
+opened row is the notes, Delete behind its question, and the history — no
+Title box, because the name is renamed ON THE ROW by a double-click (Enter or
+leaving the box renames, Escape puts it back, a single click does nothing so
+a row can still be read without a box opening under the pointer), and no
+owner control, because the name on the row is it. The history is 11.5px in a
+118px box that scrolls, with the track shown (§158), asserted as PAINT off
+`getComputedStyle` rather than off a class. The opened row still rides on
+the address (`?open=`) through `history.replaceState`, so a link somebody
+sends opens the same row, and nothing reloads to open or fold it.
+
+**LATE IS ONE SHORT WORD.** `lateWord(n)` — *Late*, *Late 1 w*, *Late 2 w*
+— and the date after it, never *carried N weeks*; the arithmetic underneath
+(§356.4, the first date written once) is untouched.
+
+**HOW THE LIST IS GROUPED IS A CHOICE, WHICH LOOSENS DECISION 6.** Owner is
+how it opens; Status groups into the three words in their own order; Due date
+groups by the day, soonest first and *No date* last; None is one flat list in
+the order the rows already have. A group is made from the rows it holds, so a
+heading never stands over nothing. The choice is a COOKIE the page reads
+(`smp.tracker.group`, path the tracker's own), so the next visit opens
+grouped the way this browser last chose — a preference, never the client's
+data (§25, §47.1) — and a cookie naming no real grouping falls back to
+Owner. Asserted at both ends: a page served with the cookie opens grouped by
+it, and a link carries the view and the opened row but not the grouping.
+
+### §356.12 — SILENT: EVERY PRESS IS ANSWERED WITH THE LIST DRAWN AGAIN
+
+*"make it silent for fast and smooth ceatration of tasks."* The first build
+reloaded the page after every press, which is the honest way to hold no copy
+of the list in the browser (§356.5) and the wrong way to add a line — the
+whole page blinked and the cursor was lost. **What keeps silence honest is
+that the browser still renders no row of its own** (§53.5): the api answers
+every write with `{ok, body, count, open}`, the `body` being the list, the
+strip and the count drawn AGAIN by `listBody()` — the same function
+`trackerDocument()` wraps — inside the same tenant read, and the script
+swaps it into `#body`. A read of its own for the arrow and the grouping is a
+GET at `/<client>/tracker/list` (the api's 405 already says a GET there is
+not a write), through the same function. **One request at a time** in the
+browser (§240's shape): a notes box left and a tick pressed in the same
+second post in that order, so the second answer already holds the first
+change. **What a hand is typing survives a swap** (§35, §71.2): the add box
+and the search box are read before the redraw and put back after it, focus
+included — a tick pressed with half a line typed must not throw the line
+away, and the check types one and presses one. **A refusal swaps nothing**:
+the reason is said in the red bar, and what was typed stays in the box.
+
+**THE MARK IS WHAT MAKES "SILENT" AN ASSERTION** (§113.8): every other
+assertion in §10 — the row on the page, the line empty and focused, the
+count moved — passes perfectly on a page that reloaded, so the check plants
+`window.__stay = 1` before the first press and reads it after each one; the
+check's `reload-on-add` break puts one `location.reload()` back and goes 6
+red, all six the presses after it.
+
+### §356.13 — WHAT WAS RUN, AND FOUR OF THE CHECK'S OWN FIRST REDS WERE THE CHECK
+
+`checks/tracker.mjs` **164/0** on a throwaway Postgres 16 with §10 driven in
+Chromium — the add, the tick, the status, the date box, a last-week date
+reading *Late 1 w · <day>*, the double-click rename and its Escape, the arrow
+open and fold, the notes saved on leaving, the history's paint, the grouping
+changed in place and read back off the cookie on the next visit, the team
+opened and closed by a click elsewhere, an action handed to Islam and the
+old owner's controls gone, Delete's question — with the database read back
+after every press and the mark read after every one. **RED FIVE WAYS**:
+`no-office-gate` 3, `reset-carried` 3, `owner-anyone` 4, `who-everyone` 2,
+`reload-on-add` 6, each reddening its own assertions and no other.
+`check:modules` 100/0; `generated-in-step` all clear; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. **Its own first run was red four times
+and every one was the check**: the script assertion spelt `fetch(API` where
+the one script now has one `fetch(url` for both addresses; two expectations
+had forgotten the second action §8 adds under Islam (the Owner heading, the
+*No date* group); and the count was read with `innerText`, which is
+uppercased by CSS (§301.6, again). The built page was screenshotted beside
+the mockup at rest, with the team open, renaming, expanded and grouped by
+Status, and matches it frame for frame. The frozen product is untouched, so
+`sw.js` is not bumped. **Recorded, not done**: a double-tap on a tablet has
+no hover to say the name can be renamed (Rename beside Delete is a decision
+if wanted); the switcher still lists the tracker for a client's own person
+(spec 046 §4.4); Notes is next and has no spec.
+
+### §356.14 — DATES BY THE WEEK, A SETTINGS MENU, THE ADD LINE THAT TAKES EVERYTHING, ONE PILL, AND A WAY BACK (2026-09-16)
+
+Islam, testing the built tracker, with two screenshots: *"I'm not able to
+set the date and the status pill is shifting it's size while it should be
+consistent. and while writing the actoin I should be able to set the date and
+set the owner and a note the due dates default should be the weeks not the
+days setting by date can be a toggle beside the group by maybe a 3 dots for a
+small settings to show group by and planning format and setting the week
+should default to thursday of this week and we need a backbutton to get from
+this page to the"* — the sentence cut off, and the destination confirmed as
+the client's platform. Two faults and five asks; the faults were MEASURED on
+the built page before anything was proposed (§3a), the asks drawn and redrawn
+three times at his word and signed off (rule 1c,
+`design-mockups/internal-tracker/2026-09-16_weeks-settings-addline-back.html`).
+
+**THE PILL WAS AT TWO SIZES BECAUSE ITS FONT WAS NEVER APPLIED.** The
+stylesheet wrote the pill's type as `font: 600 11px/1 inherit` — and a font
+shorthand cannot end in a CSS-wide keyword, so the browser dropped the whole
+line. A pill that can be pressed is a `<select>` and fell to the browser's own
+control font (13.3px Arial, 29px tall); a pill that is only read is a `<span>`
+and inherited the page's 15px (37px tall). Measured on the built page:
+`SELECT 104×29` against `SPAN 108×37`, which is exactly the pair in his
+screenshot. **The same dropped line sat on fourteen controls** — the views,
+the owner's name, the team, the search, the count, the history — so several
+things had been drawing a size the stylesheet never said. And the Done pill's
+`background: var(--good-bg)` is a shorthand, which reset `background-image`
+and took the arrow off exactly one state. Fixed as ONE named family
+(`--font`, `--mono`) used by every shorthand, one box for the pill (118×26,
+select or span, the arrow only where it can be pressed), and `background-color`
+for the green. Asserted by MEASURING a select pill and a span pill on one
+page and comparing them (§94.8), and by refusing any font shorthand ending in
+`inherit` — which the check's first run failed on the CSS COMMENT explaining
+the fault, so the comment no longer spells the pattern.
+
+**THE DATE COULD NOT BE SET BECAUSE THE BOX WAS THROWN AWAY ON BLUR.** The
+first build put the word back 150ms after focus left the date box, and
+opening the browser's calendar popup IS focus leaving it — so the day picked
+landed on a box that was already gone and nothing was written. The calendar
+cannot be opened in the headless browser here, so this is the mechanism and
+not a recording of his click; it is also the only thing on that path that can
+lose a pick. The box now closes on a change, on Escape, or on a `pointerdown`
+anywhere else in the document — never on blur — and the check dispatches a
+blur and asserts the box is still there, with `back-on-blur` putting the
+timer back as the sixth break. **The calendar is deliberately NOT opened by
+script** (`showPicker()`): a popup opened that way takes the next Escape for
+itself, so the box would need two presses to close; the icon on the box is
+one press away.
+
+**DATES ARE WEEKS BY DEFAULT, AND A WEEK IS ITS THURSDAY.** A row reads the
+week's number in the year — *W38*, this week's in bold — and a late row says
+only how late (*Late 1 w*), because in weeks a row is late from the Friday
+and the number it was due in is behind it. Picking a week stores that week's
+Thursday into the same `due` column, so nothing new is stored, late and
+carried are worked out from a day exactly as before, and somebody reading
+in exact dates sees the same Thursday. **The number is the ISO week holding
+the week's Thursday** — ISO numbers weeks by their Thursday too, so a
+Sunday-to-Thursday week and the calendar never disagree; 17 Sep 2026 is W38
+and the last week of 2026 is W53. The picker is a small table (his: *"write
+the number of this week and make it bold and remove the name this week"*):
+a header, six weeks with their Sunday-to-Thursday days, this week's number
+bold, *No date* and *A day of my own…* at the foot. **Exact dates is a
+choice**, behind three dots on the far right of the views row beside Group
+by, both remembered on the browser as cookies and never stored on the client;
+the menu is two short columns no wider than their words (his: *"a lot of
+wasted space"*). A due-date grouping under weeks groups by the WEEK.
+
+**THE ADD LINE TAKES EVERYTHING.** The week (this week's Thursday until
+another is picked — his default, confirmed: a new line lands due this week,
+not undated), the owner (you until another is picked) and a note are set on
+the line before Enter and ride on it as `data-` attributes; nothing is posted
+until Enter, from the action or from its note. The note is a quiet second
+line under the action IN THE SAME COLUMN, so the week, the owner and the
+status never move — the first drawing put it under the whole row and he sent
+it back (*"why isn't it an inline view keeping in the view the owner an
+settings and progress parts?"*). The server takes `due`, `ownerKey` and
+`description` on `add`: absent `due` means this week's Thursday (decided
+there too, so a body from an older tab lands the same way), `null` means no
+date, a day it cannot read is refused. What a hand is typing survives a swap,
+the picks included.
+
+**THE WAY BACK IS ABOVE THE TITLE**, the client's own name with a chevron,
+to the client's platform — his correction of the first drawing, which had put
+it in the top bar (*"normal placement for the back button"*).
+
+**WHAT WAS RUN**: `checks/tracker.mjs` **206/0** on a throwaway Postgres 16
+with §10 driven in Chromium — the settings menu opened, marked and closed;
+the back link measured above the title; a line added with its default week;
+a line added with a picked week, a picked owner and a note, from the note's
+own Enter; the pill measured select against span; the week picker on a row,
+No date, a week two ahead; Exact dates from the dots and its cookie; the date
+box surviving a blur, a day written, Escape, a press elsewhere; back to
+weeks. **RED SIX WAYS**: `no-office-gate` 3, `reset-carried` 7,
+`owner-anyone` 3, `who-everyone` 4, `reload-on-add` 4, `back-on-blur` 1 —
+and that last one first DIED after its red assertion, because the fill that
+follows it throws on a box that is gone (§215); it re-opens the box and
+reports. `check:modules` 100/0; `generated-in-step` all clear; `tsc` clean
+but for `lib/prisma.ts`'s pre-existing error. **Four of the check's own reds
+were the check**: a week-number assertion that took 4 Jan 2026 for week 1
+(it is a Sunday, and its Thursday is in week 2); a header compared through
+`innerText`, which the CSS uppercases (§301.6, a third time); and twice a
+row that had just been given a FUTURE week asserted on This week, where the
+rule correctly no longer draws it. The frozen product is untouched, so
+`sw.js` is not bumped. **Recorded, not done**: a week set on a row that is
+already late keeps reading how late it is until its new Thursday has passed,
+which is the rule and reads oddly for a minute; the picker offers six weeks
+and *A day of my own…* for anything further; the title's own week label
+still says *13 Sep – 17 Sep* where the rows say W38.
+
+### §356.15 — THE NOTE IS ASKED FOR, AND THE WEEK IS IN WORDS (2026-09-16)
+
+Islam, of the built tracker, two things in one message:
+
+> 1. a note should be an option not a common thing in the actions tell me my
+>    options to add one if needed in a neat way
+> 2. in the view of the tasks don't write the week number write this week and
+>    next week and previous week and maybe when we are out of the next we can
+>    write the week number. align with me
+
+**BOTH WERE DRAWN BEFORE EITHER WAS BUILT** (rule 1c, §266: a question the
+reader cannot parse is answered by drawing it), in one alignment page made of
+the BUILT module's own stylesheet —
+`design-mockups/internal-tracker/2026-09-16_note-optional-week-words.html`,
+published as an artifact — three ways to ask for a note and two ways to spell
+the week, each with its cost stated on the page beside it. He answered both:
+*"the arrow in the column is a good option as it opens other things anyway for
+the picker let's use this week and next week."*
+
+#### The note
+
+**IT WAS DRAWN ON EVERY ADD LINE, SO THE SHEET'S ONE WAY IN READ AS TWO FIELDS
+TO FILL.** §356.14 gave the add line everything it can take — the action, its
+note, the week, the owner — and the note is the one of the four that most
+lines do not want, while being the only one drawn as a BOX rather than as a
+value already set.
+
+**THE CONTROL IS THE ARROW THE ROWS ALREADY CARRY**, in the column it already
+sits in, meaning what it already means — a row's notes. Islam's own reason is
+the best one: *it opens other things anyway*. So the line gains no word, no
+new mark and nothing to learn; the cost, stated before he chose, is that the
+mark is silent until it is hovered.
+
+**THE TWO IT BEAT ARE RECORDED RATHER THAN DROPPED.** *B*, a small word
+reading `note` at the line's end, says outright what it does and sits in the
+arrow's own column, so the add line stops lining up with the rows above it.
+*C*, nothing on the line at all — type, Enter, then the arrow on the row it
+just made — is the smallest build and the only one where a line that needs a
+note takes two steps.
+
+**ONE RULE SAYS ALL OF IT: THE NOTE IS ON THE LINE ONLY WHILE IT IS OPEN, AND
+FOLDING IT EMPTIES IT.** A note folded away with words still in it would be
+posted by the next Enter with nothing on the screen saying so, which is §96's
+family — a control that renders perfectly and lies about what it holds — and a
+second mark on the arrow meaning *there is one under here* would be a second
+thing to learn about a control that already means one thing. **The cost is
+stated rather than discovered**: the arrow throws away an unsent note, which
+is exactly what Escape on that line already does to both boxes.
+
+**THE BOX IS HIDDEN AND NEVER ABSENT** (§298's shape, §100.2 from the other
+side): what a hand half-types must survive a swap, and `keep()`/`swap()` carry
+whether it is open across every press.
+
+**TAB FROM THE ACTION IS THE SECOND DOOR** (§61), which the drawing promised:
+forward only, from the action only, and only while the note is shut — and an
+empty note left behind folds itself, so tabbing on through a line that did not
+want one leaves nothing standing open.
+
+#### The week in words
+
+**TWO WEEKS HAVE A WORD AND EVERYTHING AFTER IS ITS NUMBER**, which is what
+*"maybe when we are out of the next we can write the week number"* asks for:
+**This week · Next week · W40, W41…**
+
+**"PREVIOUS WEEK" IS THE ONE HE ASKED FOR THAT IS NOT BUILT, AND THE REASON IS
+HIS OWN EARLIER DECISION.** An OPEN action due in a past week is **late** —
+that is what late means — so it already reads `Late`, `Late 1 w`, `Late 2 w`
+(§356.11's `lateWord`, the short word he chose). *Previous week* could only
+ever appear IN PLACE OF those, and it would take the alarm with it. Put to him
+that way on the drawing, with the last two rows of the sample showing it, and
+he did not ask for it again. Where a past week DOES reach the word — a list
+grouped by its due week — it falls through to its number, which is the honest
+answer there.
+
+**THE BOLD WENT WITH THE WORDS.** This week's NUMBER was bold to mark it out
+among numbers; once the row says *This week*, the bold says it a second time
+(§87's twins, in one cell), so it comes off the row. **It stays in the
+picker**, where the rows are a list and the mark says which one you are in —
+and the check asserts BOTH ENDS (§94.2): no `.wk.now` anywhere on the page,
+and the picker's own `.now b` still measuring 700.
+
+**THE PICKER SAYS WHAT THE ROWS SAY** (§53.5). The drawing offered it two
+ways — numbers, as he first signed off, or the same words — and his answer
+names the words without qualifying them; pressing `W39` to get a row reading
+*Next week* would be one week spelt two ways on one screen, which is the drift
+§53.5 exists to stop. **Its cost is paid in the stylesheet and was stated
+before it was taken**: the first column grows 54 → 86px to hold two words and
+the popup 200 → 232px with it. It is **one argument** to go back (`weekWord`'s
+`today`), and that is written down here rather than left to be rediscovered.
+
+**TODAY IS A REQUIRED ARGUMENT, NEVER OPTIONAL.** A caller that forgot it
+would silently be handed numbers back — the fault wearing a green tick (§93,
+§51.10) — so the signature refuses to compile without it, which is what found
+all four call sites rather than a list somebody has to remember (§104.7).
+
+#### What it cost, and what it is proved by
+
+`checks/tracker.mjs` **214 passed, 0 failed**, and **RED EIGHT WAYS**
+(`npm run check:tracker:red`): §356.11–§356.14's six, plus two of this
+round's own, made FROM THE SOURCES (§276) — `week-numbers` puts the numbers
+back (**10 red**, its first failure printing `W38 · W39 · W40`) and
+`note-standing` draws the note on the line again (**10 red**).
+
+**AND THE SECOND FALSIFICATION DIED RATHER THAN REPORTING, THREE TIMES OVER**
+(§215, in the file whose own docstring promises every probe degrades): a
+`fill` on a box the broken build has hidden waits thirty seconds and takes the
+rest of §10 with it, then the row it never made kills an `innerText`, then a
+`getBoundingClientRect` on nothing, then a cleanup reading `full.id`. Each is
+now a probe that reports — and the run goes from **2 red and dead** to **10
+red and complete**, which is the difference between a falsification that
+proves the guard and one that merely stops.
+
+Neighbours: `check:modules` **100/0**, `generated-in-step` **all clear**,
+`tsc` clean but for `lib/prisma.ts`'s pre-existing error. **The frozen product
+is untouched** — no `src/` file, no built file, no carried `.cjs` — so there
+is no rebuild and `sw.js` is not bumped (§91's trigger is the built file's
+bytes changing, and they did not).
+
+**RECORDED, NOT DONE**: a row's OWN note is still the panel's textarea behind
+the same arrow, which is right and means the arrow now opens two different
+boxes depending on the line it is on; and nothing on the add line says a note
+is optional except the placeholder inside a box you have to open to read.
+
+### §356.16 — THE WEEK BY ITS MONTH, CARDS THAT HOLD STILL, AND A LINE THAT ASKS LATER (2026-09-16)
+
+Islam, of the tracker as §356.15 left it, three messages:
+
+> for the week in the selection or the due week for the weeks after this week
+> and next week to have it W1 Oct or W3 Dec etc.
+
+> the names list is wide for no reason make it compact
+
+> the change between the status of the actions changes the size of the top
+> cards. the top cards size should be fixed on the bigger size .. and i ncase
+> of not started no need for the naming on the card due is enough
+>
+> for the new action remove the details until someone start typing the action
+> name then the details required to set appears to avoid the clutering
+
+**ALL FOUR WERE DRAWN BEFORE ANY OF THEM WAS BUILT** (rule 1c), in one
+alignment page made of the BUILT module's own stylesheet —
+`design-mockups/internal-tracker/2026-09-16_week-in-month-cards-and-add-line.html`,
+published as an artifact — with the two that had a real choice in them drawn
+three ways each and the cost of each stated on the page beside it. He answered
+both: *"for the new action line I'd go for B given that once I start typing the
+options appear correct? / for the name list option B is good."*
+
+#### The week by its month
+
+**THE RULE THE PLATFORM ALREADY HAD ANSWERS THE HARD CASE, WHICH IS WHY THIS
+IS FOUR LINES AND NOT A DATE LIBRARY.** §356.14 stores a week as its
+**Thursday**, so *which month owns a week that straddles two* was settled the
+day weeks were stored: the week of 27 Sep – 1 Oct has its Thursday on 1 Oct,
+so it is **W1 Oct**, and `Math.ceil(thursdayDate / 7)` is the place of that
+Thursday in its own month. **Both of Islam's own examples come out of that one
+line** — `2026-10-01 → W1 Oct`, `2026-12-17 → W3 Dec` — measured, not
+reasoned about, along with `2026-10-29 → W5 Oct` (a month can hold five) and
+`2026-09-10 → W2 Sep`.
+
+**§356.15's TWO WORDS ARE UNTOUCHED AND THE NUMBER BEHIND THEM GOES.** *This
+week* and *Next week* still read as themselves; what changes is the third week
+on, which read `W40` — the ISO week of the YEAR, a number nobody holds in their
+head — and now reads its place in a month anybody can find on a calendar.
+**The picker says the same words as the rows** (§53.5, §356.15's own rule
+carried forward), because `weekOptions` asks `weekWord` rather than spelling a
+week a second way.
+
+**WHAT IS LOST IS STATED**: the ISO number is gone from every screen, so two
+weeks four months apart can both read *W1*, which is the honest cost of a word
+that means something — the picker's own second line still names the days
+(`27 Sep – 1 Oct`), so the week is never ambiguous where it is being CHOSEN.
+
+#### The cards that would not hold still
+
+**THE CAUSE WAS MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a) and it is one
+label: the due card read *DUE THIS WEEK · N NOT STARTED*, that tail took a
+**second line**, and `.strip` is a grid — so every one of the four cards
+stretched to the tallest and the whole page below them shifted the moment
+somebody changed a status and the count moved. Islam saw the symptom on all
+four cards; only one of them was ever the cause.
+
+**IT IS TWO EDITS, DELIBERATELY, AND THE SECOND IS NOT REDUNDANT.** His own
+instruction removes the tail (*"no need for the naming on the card due is
+enough"*), which removes today's jump entirely — and a label that wraps at
+some window nobody tried would bring it straight back, so the cards also carry
+a **floor at the taller size**, which is the other half of what he asked for
+(*"fixed on the bigger size"*). Either alone leaves the fault reachable; the
+two are falsified separately (`card-count`, `card-jumps`) for exactly that
+reason.
+
+**AND THE ASSERTION I WROTE FIRST COULD NOT FAIL** (§113.8, found by
+falsifying rather than by reading): *"the four cards are one height"* is true
+of **every** build, because `.strip{display:grid}` stretches them to the
+tallest whatever any of them asked for — so a build with no floor at all
+passes it, and it passed on the broken build under both breaks. What CAN fail
+is whether a card is **held open**: the distance from its last line's bottom to
+its own bottom edge, which is nought on a card sized to its content and real on
+one carrying a floor. Measured as **slack, never as a height** (§94.8), it
+reads `15,15,15,15` shipped, `0,0,0,0` with the floor removed, and
+`15,15,0,15` with the tail put back — that last one naming the offending card
+by its position in the row.
+
+**AND THE JUMP ASSERTION NEEDED THE WORDS BESIDE IT.** Comparing the four
+heights either side of a status press is the reported symptom and it stayed
+green under the break, because the tail merely went from *2 not started* to *1
+not started* — same two lines, same height, the defect still there. The words
+are the CAUSE, so they are asserted beside the height, and the break then
+prints the whole thing verbatim.
+
+#### The names list
+
+**THE WIDTH WAS A FLOOR IN THE STYLESHEET RATHER THAN ANYTHING THE NAMES
+NEEDED** — `min-width:140px` on a list of first names whose longest measures
+69px, with rows of 34px. Islam is exactly right that it was wide for no
+reason. Three widths were drawn against the real names; he took **B**, which
+takes the floor off and tightens the row, over **C**, which went under every
+other small control on the page and would have been the one thing in the
+tracker too small to press comfortably.
+
+**WHAT IS ASSERTED IS THE AGREEMENT, NEVER A PIXEL COUNT** (§94.8): the floor
+is gone, and the box is exactly what its widest name needs plus the space the
+stylesheet reserves around it — worked out from the page's own padding, so a
+longer name or a changed padding stays green and a floor reintroduced goes red.
+The row height is asserted as a RANGE with both ends (§94.2): short enough to
+be compact, tall enough to press.
+
+#### The line that asks later
+
+**THE DETAILS ARE HELD BACK UNTIL THE ACTION HAS A NAME**, which is his
+*"avoid the clutering"*: at rest the add line shows one box and nothing else,
+and the first letter typed brings the week, the owner, the status and the
+note's arrow onto it.
+
+**ISLAM PICKED B, WHICH KEEPS THE SPACE** — `visibility`, never `display` —
+so nothing on the line moves when they appear and the line never jumps under a
+hand already typing. **A, which removes the space**, was drawn beside it and
+is the one that reads tidier at rest and shifts the box the moment somebody
+starts; the cost of each was on the drawing before he chose. His own question
+— *"given that once I start typing the options appear correct?"* — is exactly
+what it does.
+
+**CLEARED MEANS BACK TO REST**: after Enter the line empties, the note folds,
+and the details are held back again — asserted off the LINE rather than off
+the screen, because with nothing typed there is deliberately nothing on the
+screen to read.
+
+#### What it is proved by
+
+`checks/tracker.mjs` **228 passed, 0 failed**, and **RED THIRTEEN WAYS**
+(`npm run check:tracker:red`) — §356.11–§356.15's eight plus five of this
+round's own, every one made FROM THE SOURCES (§276): `week-of-year` puts the
+ISO number back (**6 red**, its first failure printing `W40 · W44 · W51`),
+`card-count` the tail (**3 red**), `card-jumps` the floor (**1 red**),
+`details-always` the standing details (**2 red**) and `wide-names` the
+stylesheet floor (**2 red**). **One break per decision** — the two card breaks
+overlapped at first, so `card-jumps` reddened `card-count`'s assertions and
+neither was isolated.
+
+Neighbours: `check:modules` **100/0**, `generated-in-step` **all clear**,
+`built-in-step.py` all good, `tsc` clean but for `lib/prisma.ts`'s pre-existing
+error. **The frozen product is untouched** — no `src/` file, no built file, no
+carried `.cjs` — so there is no rebuild and `sw.js` is not bumped (§91's
+trigger is the built file's bytes changing, and they did not).
+
+**RECORDED, NOT DONE**: the picker's own second line still names the days,
+which is what keeps two *W1*s apart, and nothing else on a screen does; and the
+add line's details appear on the first keystroke, so a line typed and then
+emptied leaves them standing until Escape or Enter.
+
+### §356.17 — THE MERGE, AND WHAT ONLY THE RECORD COULD LOSE (2026-09-16)
+
+Islam: *"merge to main."* `main` had moved eleven commits under this branch —
+§357 (Meeting Notes) and §358, from another session — so `--ff-only` refused,
+correctly, and the merge was made ON THE BRANCH and the checks re-run there
+before anything was fast-forwarded (§4).
+
+**NO NUMBERING COLLISION, AND IT WAS CHECKED RATHER THAN ASSUMED**: ours are
+sub-sections of §356, which `main` already holds (§356.11–§356.13 reached it
+on 2026-09-15), so §264.3's renumber had no subject here — the one case where
+the answer is to do nothing and say so.
+
+**EVERY CONFLICT WAS A RECORD FILE AND EVERY ONE WAS COMBINED** (§318.7:
+either side taken whole drops the other's work). `package.json` held two
+supersets facing each other — our thirteen tracker breaks against `main`'s
+five, plus `main`'s two new `check:notes` scripts — so the resolution is our
+line and their two, and the file is asserted to PARSE rather than eyeballed.
+The three prose files are ordered newest first, ours above `main`'s §357.
+
+**THE FROZEN HALF CAME FROM `main` BYTE-IDENTICAL AND THAT IS WHAT DECIDED THE
+BUMP**: this branch touches no frozen source at all — `git diff --name-only`
+against `origin/main` over `SMP-Project-Folder/src`, `lib/`, `sw.js` and the
+built file is EMPTY — so there is no rebuild to make and §91's trigger is not
+met; `SHELL` stays `main`'s `v5.06-meeting-notes`, and since no name is being
+chosen §94.12's collision cannot arise either. `node --check sw.js` OK
+(§146.2).
+
+**A MERGE CAN DROP A WHOLE BLOCK WITH NOTHING ABLE TO GO RED, AND IT DID**:
+`main`'s §357 entry in `IMPLEMENTATION_PROGRESS.md` was written over the
+§356.11–§356.13 HEADING, so that body now sat under a heading naming a
+different module — the file reads perfectly and says the wrong thing. §329
+built a check because a generated copy can go stale in silence; the prose files
+are the same relationship with **no generator and no check at all**, which is
+why this needed a human diff to find and why it is recorded rather than merely
+fixed. The heading is restored from our side, which still had it.
+
+**AND THE SAME FILE HAD NO ENTRY FOR §356.15 OR §356.16**, which its own first
+paragraph requires *in the same commit as the work it describes* — two rounds
+shipped without it. Both written here in plain words (1b-iii), and the miss is
+named rather than quietly filled.
+
+**TWO BLOCKS ON BOTH SIDES STILL READ "on the branch, not merged"** over work
+`main` demonstrably holds (§356 and §356.11–§356.13 are in `main`'s own
+`CLAUDE.md`); `main`'s commit *"Record §356 and §357 as merged, not on the
+branch"* fixed that phrase on their neighbours and missed these. Corrected and
+NAMED, which is CLAUDE.md's own instruction — *a drift between the record and
+the code is a documentation bug; report it before silently realigning*. **And
+§356.16's decisions block sat BEFORE §356.15's**, my own drift from the round
+before, put in order here rather than left for a reader to trip over.
+
+**RE-RUN ON THE MERGED TREE, NEVER INFERRED FROM THE TWO SIDES**: tracker
+**228/0** and **red all thirteen ways**, notes **154/0** (`main`'s own number,
+so their work is intact under ours), insights 127/0, modules 107/0,
+`generated-in-step` all clear, `built-in-step.py` all good, `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error — asserted byte-identical to `main`'s copy
+and named four times in `main`'s own record, rather than taken on trust (§303).
+The five module servers were parsed and the merged tree scanned for duplicate
+top-level declarations (§281, §147.4): the one hit was the scan's own false
+positive, a `const v` inside two one-line function bodies.
+
+**AND `notes` DIED AT 38 ON ITS FIRST RUN HERE, AND IT WAS THE DATABASE**
+(§215, §105.6): `relation "notes" does not exist` — the local check database
+predates `main`'s migration 014, so the check was measuring a world `main`'s
+own schema had already left. Established before the merge was blamed, and
+154/0 the moment the migration was applied. *A run that died is a failure of
+its own, and the first question is still whose.*
+
+**RECORDED, NOT DONE**: there is no check over the prose files, so the next
+merge can lose a heading the same way; and the tracker module still has to be
+turned on per client from the client's card.
+
+---
+
+## §357 — MEETING NOTES: ONE MEETING, ONE NOTE, AND THE MINUTES AS AN EMAIL (2026-09-16, spec 055)
+
+Islam, of the second thing the comparison with the other repository found:
+*"notes are for taking meeting notes and refine it by AI and send it as MOM
+for the attendees of the meeting"*, then seven answers that are the whole
+model — *"1. one meeting one note, title date attendees and text is enough /
+2. the free text box is like a note taking app just writing down the the role
+of the ai assistant needs to refine it and my be compile it to agreements
+points and actions etc. so we need to agre on a format and an AI prompt / 3.
+yes for all what you said it do everything / 4. also the office and maybe we
+can add someone casualy to the meeting / 5. no it's an email with no signing
+in. / 6. still edtiable as if we get a note or something we can add more and
+resend / 7. yes ok"* — then *"ok write the spec and draw it"*, then **"build"**.
+
+**THE SIXTH MODULE, AND WHAT IT COST IS THE ARGUMENT FOR THE FRAME**: one
+folder, one entry in `modules/registry.ts`, one word in `lib/modules.ts`, and
+the route was not opened (§354). Everything else it needs — the door, the
+session, the seat, `withTenant`, the client's own colours, the switcher — is
+the spine's, and what it draws is the tracker's stylesheet verbatim, so the
+two office modules read as one product and nothing here invents a second
+vocabulary for a row, a chip or a box.
+
+**THE OFFICE'S, BY SEAT, AT THE SERVER** (spec 054's own gate, never a second
+one): a client's own person is turned away on the page AND at the api, with
+the way back. **ANY OFFICE PERSON MAY EDIT ANY NOTE** — put to Islam as open
+when the drawing was handed over and taken as settled by *"build"*, with the
+cost stated: nothing on the screen is anybody's in particular, and a
+correction somebody else makes arrives silently.
+
+**A SECOND REFINE ADDS AND NEVER REWRITES, WHICH IS DECISION 6 AND IS WHERE
+THE WORK IS.** *"still edtiable as if we get a note or something we can add
+more and resend"* means the minutes are a thing a person EDITS and the model
+comes back to them afterwards — so `mergeMinutes(have, add)` keeps every line
+the writer wrote, de-duplicates the model's near-repeat of it against a
+normalised form (case, punctuation and a trailing stop), keeps the writer's
+summary against the model's, and fills only a part the writer left EMPTY. The
+model is TOLD this in `PROMPT_AGAIN` and the merge does not trust it to have
+obeyed — asserted at both ends, with a model deliberately answering a whole
+new summary and a rewritten line, and the writer's surviving both. **`SMP_BREAK=rewrite-on-refine` reddens nine assertions**, which is the shape
+of what that decision is holding up.
+
+**A CASUAL ATTENDEE NEVER REACHES THE CLIENT'S REGISTER** (decision 4,
+*"maybe we can add someone casualy to the meeting"*): a register attendee is
+stored as a KEY and rendered from the register at draw time (§48, §130.9), a
+casual one as a name and an address and nothing else, marked on the chip as
+*this meeting only*. **An entry that is neither is dropped, never guessed at**
+(§96.2), and **an address that is not an address is nothing**, because the
+minutes have to reach somebody.
+
+**WHAT WENT OUT IS KEPT AS IT WENT** (decision 6's other half): `note_sends`
+holds the minutes AS SENT, so the note goes on being edited and the record
+does not move — and **the assertion that proves it had to be rewritten**,
+because the first version compared the snapshot with a SECOND READING OF
+ITSELF, which a snapshot storing nothing satisfies perfectly (§113.8): it is
+compared with the minutes as they were at send time now, and
+`SMP_BREAK=snapshot-moves` goes from 0 red to 2.
+
+**THE SENDER'S COPY WAS ASSERTED OVER SOMEBODY WHO WAS ALSO AN ATTENDEE**,
+which is the same fault one row along: `no-copy-to-sender` reddened a COUNT in
+a later section and nothing whose subject was the copy. The first send now
+asserts *nobody but the attendees is written to* (its sender is one) and the
+second, whose sender was not at the meeting, asserts the copy — both ends.
+
+**AND THE CHECK FOUND THREE PRODUCT FAULTS, EVERY ONE OF THEM A SECOND COPY
+OF SOMETHING THE PLATFORM ALREADY ANSWERS.** `readableDay()` carries the year
+whenever it is not the current one and nothing here hands it a today, so the
+subject line, the corpus head and the note's meta appended a year that was
+already there — *"Minutes: Q3 review — Wed 16 Sep 2026 2026"*, three sites,
+one deleted expression. **The attendee chip printed `&middot;` as four
+characters** wherever it had two things to say, because the separator was
+joined INSIDE `esc()` and unescaped afterwards one paren too deep — each part
+is escaped and the separator is not now (§235). **And the meeting's date was
+a raw `<input type="date">`**, which prints whatever format the browser's
+locale chooses (`09/16/2026` on this machine), a spelling the platform uses
+nowhere and not what the signed-off drawing reads — it is the TRACKER's own
+control now, a button reading the day that becomes a date box on the press
+(§53.5: a date is set one way in the office's modules, not two). The first
+two were found by the check; **the third was found by looking at the built
+page beside the mockup**, which is what rule 1c's last step is for.
+
+**AND FIXING IT BROKE THE WHOLE SCRIPT IN A WAY `node --check` COULD NOT
+SEE**: the module's browser script is one TEMPLATE LITERAL, so the backticks
+in the comment explaining the new control ENDED it — §272.8's fault one quote
+mark over, the note explaining a rule eating the rule. The comment says so in
+its own words now.
+
+**ONE OPTION ON THE MAIL BUILDER, AND THE TWINS STAY BYTE-IDENTICAL**:
+`lib/mail-html.js` and its `.cjs` carry `bodyHtml` for a caller that has
+already laid its body out — the minutes are six parts with a table in them and
+`paras()` can only make paragraphs. **The minutes body invents no colour**:
+every literal in it is one the mail builder already paints, asserted as that
+rather than re-measured, so the pairs `test-mail-contrast.js` measures are the
+pairs a reader sees (§25, §53.5) — and email is not the web, so the styles are
+inline, the colours are literals and no custom property is used.
+
+**TWO TABLES, FENCED LIKE EVERY OTHER TENANT TABLE**: `notes` and
+`note_sends` in `db/schema.sql` and in migration 014, which **fences its own
+tables** because schema.sql's RLS loop is not re-run on an existing database —
+asserted as the policy being IDENTICAL to an existing tenant table's (§94.8)
+and neither on the platform's own list (§331), and proved on the path a real
+deployment takes (the migration, against a database that already had the
+schema) rather than the easy one (§33.5).
+
+**VERIFIED**: `check:notes` **154/0** with §9 driven in Chromium and Postgres
+read back after every press, RED under all five named breaks, each reddening
+its own assertions; `check:tracker` 164/0; `check:insights` 127/0;
+`check:modules` 107/0; `generated-in-step` clear once committed;
+`test-mail-contrast` 12 pairs 0 failures; `built-in-step.py` all good after
+the rebuild; `next build` compiles and `tsc` is clean but for `lib/prisma.ts`'s
+pre-existing error. `memory-boundary`'s one failure reproduces identically
+with this work stashed (§303) — it is its fixture's own prerequisite. **The
+frozen `lib/mail-html.js` changed, so the built file's bytes changed, which is
+§91's trigger**: `sw.js` is bumped to `smp-shell-v5.06-meeting-notes`,
+confirmed against `origin/main` first (§94.12) — and it reaches the offline
+copy alone, because `build-sw.mjs` drops the caching half and the served
+worker holds `SHELL` nought times (§316.10, §329). **THE FROZEN BROWSER CHECKS
+COULD NOT BE RUN AND IT IS SAID RATHER THAN LEFT AS AN ABSENCE** (§54.5): this
+container has no python playwright, so `qa-run.py` cannot launch; nothing in
+`src/` changed but the inlined mail builder, whose own check is green.
+
+**Built and screenshotted beside the mockup, frame for frame. Merged to `main`
+2026-09-16** (this line read *"on the branch, NOT merged"* until §357.4
+corrected it).** **RECORDED, NOT DONE**: the actions in the minutes do not reach
+the tracker and are not meant to (spec 054 decision 3); a note cannot be
+started from a calendar; the switcher lists the module for a client's own
+person until spec 046 §4.4's access tab exists; and nothing says which office
+person is looking at a note while somebody else edits it.
+
+### §357.1 — THE TITLE WAS ALWAYS A BOX AND DID NOT READ AS ONE
+
+Islam, of the built page: *"I need to set the title manually"* — and he always
+could. The title and the attendees box were borderless, transparent and set in
+heading-sized bold, so they drew as something the platform had written rather
+than as something to type in. **Nothing new was invented to answer it**: every
+other field on that page already carries a small uppercase key and a border, so
+both take the page's own `.lab` and the same border (§53.5). The two were the
+only things on the page without one, which is why they read as prose.
+
+### §357.2 — THE LIST STAYS OPEN WHILE YOU TICK
+
+*"don't close the drop down with each add … let me make the checks for all the
+attendees."* **EVERY PRESS HERE IS ANSWERED BY THE PAGE BEING DRAWN AGAIN**
+(§356.12's shape), so a tick rebuilt the list from nothing and it vanished,
+taking whatever had been typed into its search with it. What is CARRIED across
+that redraw is how far it was scrolled, which of its boxes held the cursor, and
+which row was ticked — **by KEY and never by position** (§48), because a tick
+redraws the list and the person ticked may sort elsewhere in it.
+
+**THERE IS NOTHING TO CONFIRM, which is the answer to the question he asked
+beside it**: a tick is in the database before its chip finishes drawing, and
+nothing in this product has a Save button. So what was missing was not a
+confirmation but a deliberate way to FINISH, since Escape was the only one and
+a tablet has no Escape key.
+
+**AND THE GUARD FOR "A PRESS ELSEWHERE" TESTED THE ACT'S SPELLING**
+(`indexOf("att")`), so `add-casual` — an attendee act that happens not to
+contain those three letters — shut the list every time somebody off the
+register was added. It asks WHERE the press landed now, which is the question
+it was always meant to be.
+
+### §357.3 — AND THE CHECK HELD THE OLD BEHAVIOUR
+
+It re-opened the list after a tick, which now TOGGLES it shut, so a file
+written against the old world goes red on a correct build (§214.3) —
+**REWRITTEN, never loosened** (§218) to assert the new property, with the
+second person ticked AND unticked so the fixture every assertion downstream
+measures is left exactly as it was found (§94.2). **Two of its own first
+failures were the CHECK**: it asked whether the first ROW was visible, which
+with a search term carried across is legitimately hidden, so it reported a
+working build broken; and the new break's death took nine assertions with it,
+so the pass recovers (§215, §280). **And a backtick in a comment ended the
+stylesheet's template literal** — §272.8, walked into while the neighbouring
+file warns about it by name in its own header.
+
+### §357.4 — THE DATE IS ONE PRESS, AND THE WORD STAYS THE WORD (2026-09-16)
+
+The last thing §357 left drawn and not built, and the fork inside it was
+Islam's: whether the day itself stays something you press. Two readings were
+drawn in the platform's own pixels (`design-mockups/meeting-notes/
+2026-09-16_date-calendar-icon.html`, rule 1c) — **A**, the same pill with the
+calendar mark in it, one press anywhere on it; and **B**, the day as plain text
+with the mark as a separate control beside it. **A shipped**: it is the control
+that already exists, it keeps the whole pill as the target rather than a 27px
+icon, and it takes away no press that works today.
+
+**THE MECHANISM IS THE PLATFORM'S OWN AND IT IS WHAT MAKES BOTH HALVES FALL
+OUT** (§45.5, the searchable select): the native date box sits beside the word,
+**hidden in place and DRIVEN**, rather than being swapped in for it. Two things
+then come free rather than being arranged for.
+
+- **The day never reformats under the hand that pressed it.** Swapping a box in
+  printed whatever spelling the browser's locale chose — `09/16/2026` here —
+  over the word the page had just said, which is a spelling this platform uses
+  nowhere (§357's own reason for making the word a button in the first place).
+- **The tracker's stated reason for NOT opening the calendar does not arise.**
+  That control's own comment says *a popup opened by script takes the next
+  Escape for itself, so the box would need two to close* — true of a box
+  underneath a picker, and there is no box underneath this one. Escape closes
+  the picker and the word was never away. *An objection can be right about the
+  shape it was written for and say nothing about a different shape.*
+
+**HIDDEN IN PLACE MEANS CLIPPED, NEVER `display:none`**: a box that is not
+rendered cannot be asked to open its calendar, so it takes the clipped-1px
+treatment `searchsel` already uses, and the check asserts the computed
+`display` rather than the class (§94.8).
+
+**NEVER ON BLUR** (§356.14, this same control one module over, where it was
+measured): the calendar itself takes the focus, so a box dismissed on blur is
+thrown away the moment it is used. The notes module had copied the control
+BEFORE that fix and never inherited it — §53.5's drift, one module wide — and
+with the box no longer swapped in, the primary path has no blur rule to get
+wrong at all. The one path that still shows a box is the fallback, and it
+closes on a change, on Escape, or on a press elsewhere.
+
+**AND THE PRESS STILL DOES SOMETHING WHERE THE CALENDAR CANNOT BE OPENED FOR
+THEM** (§61) — an older Safari or Firefox, which is a real device class here
+(§280 exists because he presents from a tablet): the box is shown in place of
+the word rather than the press doing nothing.
+
+**WHAT THE CHECK CAN AND CANNOT SEE, SAID RATHER THAN GLOSSED** (§124):
+headless draws no native picker, so what is measured is that the calendar was
+**ASKED FOR** — `showPicker` recorded on the prototype, which also makes the
+run deterministic — and that the word is still the word AFTER the press, which
+is the whole of what changed. A picker's only observable effect is the value it
+sets and the change it fires, so that is what stands in for a person choosing a
+day. The mark is asserted **DRAWN** and never a character a font may map and
+fail to draw (§52, §120.2). `checks/notes.mjs` **170/0**, red under all EIGHT
+breaks, the new one (`date-two-presses`) putting the reported state back and
+reddening **exactly its own two assertions and nothing else**.
+
+**The mark's colour was measured rather than assumed** (§38.5): `--gold` on
+`--surface` is **5.27:1** light and **8.15:1** dark, against a 3:1 bar for a
+graphic — and the day beside it carries the meaning either way, so the mark is
+`aria-hidden`.
+
+**Screen only**: `smp-app/modules/notes/` and its check, read off the diff.
+Nothing stored moves, nothing is migrated, no rule about who may save what
+changes, and **the frozen product is untouched** — `build.py` byte-identical
+and `built-in-step.py` all good — so `sw.js` is NOT bumped (§91's trigger is
+the built file's bytes changing, and they did not).
+
+**AND THE LOG OWED MORE THAN THIS ROUND**: §357.1–§357.3 were never written
+into this file at all, and two blocks still read *"on the branch, not merged"*
+over work `main` demonstrably holds. Both corrected above and NAMED rather than
+quietly realigned (§356.17's own rule, whose finding this is for the second
+time). *A merge can drop a whole block of the record with nothing able to go
+red — there is no `generated-in-step` for prose.*
+
+**Merged to `main` 2026-09-16, on Islam's word, on that merge** (§4). The
+branch already held this round's commit when he gave it, so a fast-forward
+would have handed Vercel a SHA it had already built as a PREVIEW — §91's
+deduplication, which order alone does not fix once the branch has the commit
+(§91.4, §107.15). **So the merge carries a commit `main` holds and the branch
+does not**, which is §91's own way back — and it is one worth making rather
+than ceremony (§24), because it is the merge line the record owed anyway
+(§356.17).
+
+---
+
+## §358 — ATTACH THE FILE, THEN CHOOSE THE EXIT (2026-09-16)
+
+Islam, of the Insights report editor: *"why shall I save the draft then add the
+file not in the same action?"* — then, better than either option put to him:
+*"I don't upload and publish, save a draft is just an option. The normal
+behavior is I attach the file, the box showed that it was uploaded succesfully
+and I either save draft for later publishing or publish."*
+
+**HALF OF THE TWO-STEP IS NECESSARY AND HALF IS NOT, AND SEPARATING THEM IS THE
+WHOLE SECTION.** The store path is built on the SERVER from the report's own id
+and is never sent by a browser — a browser that could name it could write over
+another client's file however good the guards above were — so a row must exist
+before any piece of the file can be written (`libraryUploadBegin` resolves the
+item first). That rule does not move and nothing here touches it. What it does
+not say is that the PERSON presses twice.
+
+**THE CARD ALREADY HAD THE ANSWER TWO ROWS DOWN.** `saveReport(true)` — Publish
+— saves the form and then publishes, two requests behind one press; the upload
+is already four requests behind one press, because a function refuses a body
+over 4.5MB (&sect;261). *One press over several requests is this card's own
+idiom*, and the file button was the one place it was not applied (&sect;53.5).
+So `sendFile` saves the draft itself when there is no row. Saving a draft stops
+being a turnstile and becomes one of two ways of FINISHING.
+
+**ONE GATE SURVIVES AND IT IS THE ONE ABOUT THE REPORT.** Publish was held two
+ways — *"Save it first"* and *"Add the file first"* — and the first is the
+machinery's reason rather than the report's. It is also unreachable: a report
+with no row has no file either, so `!it.hasFile` already covered it. What is
+left is the only refusal a reader would recognise.
+
+**THE TITLE IS THE ONE THING THAT MUST BE THERE**, and it is the server's own
+rule (`librarySave` refuses without one) rather than the file's: a draft with no
+title is a row nobody can pick out of the list. **Said and focused rather than
+refused at the press** (&sect;221, &sect;61) — the thing that is missing is one
+field on the same card — and it posts NOTHING, or the one press would put an
+unfindable row in the library.
+
+**§358.1 — AN ABANDONED DRAFT WARNS, AND HALF OF THAT WAS ALREADY BUILT.**
+Islam: *"an abandoned draft should warn and that's it"* — no cleanup, no expiry.
+One correction to it, and it changes what the warning may SAY: by the time a
+draft can be abandoned the row is saved and the file is in the store, which is
+what lets the strip say *uploaded* — so *"you will lose this"* would be false,
+and a warning people learn is false is worse than none. **Drawn rather than
+argued** (&sect;266), and drawing it found that the drafts list already marks an
+unpublished report twice — the amber `Draft` tag and *not published* at the end
+of the fact line. Islam took **B**: the list's existing mark, and no new control.
+**Nothing was built for the warning.** The line on the way out is recorded as
+offered and not taken.
+
+**§358.2 — &sect;329'S CHECK CAUGHT THE EDIT IN THE WRONG FILE, WHICH IS WHAT IT
+IS FOR.** `smp-app/public/platform-page.js` is GENERATED from the repository
+root's `platform.html` by `scripts/build-shell.mjs` and is TRACKED, and the first
+build of this went into the generated copy — where the next generator run would
+have silently undone it. Reverted, applied to the source, regenerated. *A
+generated file that is committed reads exactly like a source file.*
+
+**§358.3 — AND THE CHECK HELD THE SENTENCE THIS REMOVES** (&sect;214.3, and
+&sect;218's rule for what to do about it): `publishing-room.py` asserted
+*"the file control says what has to happen first"* with `"Save it first" in
+fileWhy`. **REWRITTEN, NEVER LOOSENED, AND INVERTED WHERE THE DECISION INVERTED**
+— the file control LIVE on a report that has never been saved, Publish still
+held and now naming the FILE, and nothing on the card telling anybody to go and
+save something first. **Both ends** (&sect;94.2), or a build that simply opened
+everything would pass the half above. A new §8 asserts the behaviour itself: one
+press posts `librarySave` and THEN `libraryUploadBegin`, in that order, with the
+pieces addressed to the id the save returned (&sect;48) — and, the other end, a
+report that ALREADY has a row is NOT saved a second time by attaching, which
+would overwrite the stored form with whatever sits in the boxes of a card
+somebody opened only to replace a file.
+
+**§358.4 — TWO OF THE NEW SECTION'S OWN FAULTS WERE THE CHECK.** It asserted
+*"posts NOTHING"* against the whole recorder and `open_room()` is three reads of
+its own, so it failed on a build behaving perfectly (&sect;100.3) — it asks for
+no `librarySave`, `libraryUploadBegin` or `libraryUploadFinish` now. And **the
+first falsification DIED rather than reporting** (&sect;215, in the file whose
+own docstring promises every wait degrades): on the old build the strip never
+names the file, so `wait_for_function` threw a stack trace with **no failures
+printed**, on precisely the build the section exists to catch. Both waits
+degrade; falsified from the SOURCES (&sect;276) it is **11 red**, the reported
+two-step first among them.
+
+**VERIFIED**: `publishing-room.py` 48/0 (11 red reverted) · `insights.mjs` 93/0
+against a real Postgres 16 · `platform-cards`, `client-setup-outside`,
+`client-archive` 0 failures · `built-in-step` all good, the shipped platform
+byte-identical (no file under `SMP-Project-Folder/src/` is touched, so
+&sect;91's shell bump is not triggered) · `generated-in-step` every served copy
+byte-identical to its generator. **Two reds are NOT this work's and were
+established by reproducing them on the reverted build first** (&sect;303):
+`modules.mjs` 69/1 — *"the band is drawn BEFORE the two columns"*, which is
+&sect;322.1's carried module band awaiting Islam's look, identical either side
+of this change — and `tsc`'s one `lib/prisma.ts` error, which &sect;336 already
+records as pre-existing.
+
+**The mockup is `design-mockups/insights/2026-09-16_attach-then-choose.html`**,
+made of `smp-app/shell/platform.html`'s `<style>` verbatim and signed off before
+a source moved (rule 1c).
+
+**RECORDED, NOT DONE**: a held `Publish` is drawn exactly like a live one,
+because the console styles no held state — so &sect;221's *"aria-disabled, never
+disabled, so the reason stays reachable"* is satisfied and invisible until
+somebody hovers. Found by rendering the mockup, named in its last panel, and
+left as its own round on Islam's word rather than folded in here (rule 1b).
+
+**§358.5 — THE SEAM BETWEEN US AND THE STORE, MEASURED AT LAST.** Every check
+of the library stopped at our own door: `insights.mjs` proves the rows and the
+boundary, `publishing-room.py` drives the browser against a stub of OUR server.
+**Nothing had ever looked at the four calls `lib/blob-api.ts` makes INTO
+`@vercel/blob`** — and that is the one place this module has already been wrong
+once, in a way nothing could see: &sect;261.10's `getDownloadUrl` takes a full
+blob URL and is SYNCHRONOUS, so handed a pathname it threw, the catch swallowed
+it, and **nothing would ever have played**. Found then only because a store
+existed. `checks/store-seam.mjs` stubs the SDK in the require cache before the
+module under test loads it (&sect;261.10's own method) and asserts the CONTRACT:
+the upload is three calls carrying the path we built, private, with the store's
+own `key`/`uploadId` and `partNumber` — its words, not ours; the read is **two
+steps in that order**, the second signed with what the first returned and never
+with the store's token, with `getDownloadUrl` asserted ABSENT by name. 31/0,
+proved able to fail three ways from the SOURCES (&sect;276): **6 / 1 / 1 red**,
+the first being &sect;261.10's own fault put back. **AND IT SAYS WHAT IT CANNOT
+PROVE** (&sect;54.5): bytes landing in a real Vercel store is one upload on the
+deployment by somebody who can sign in, and the check prints that rather than
+letting a green run imply it. **AND §1 FOUND A REAL INCONSISTENCY**: with no
+token, `beginUpload`, `putPart`, `finishUpload` and `dropBlob` all refuse early
+and `signedRead` alone did not — so a deployment carrying the package and no
+token made **two pointless calls to the store's API on every download**, relying
+on the store to refuse them to produce the `""` the caller already knew it would
+get. Nobody sees a different sentence; what goes is a round trip on a path that
+cannot succeed.
+
+**§358.6 — THE MODULE BAND'S CHECK ASSERTED A PAGE THAT NO LONGER EXISTS.**
+`modules.mjs` held *"the band is drawn BEFORE the two columns, which is
+placement B"*, sliced from `pf.indexOf("function drawClient(")` — and
+&sect;322.1's merge replaced that whole page with the set-up flow and CARRIED
+the band onto step one, the client's own details. `drawClient(` stopped
+existing, so `indexOf` answered **-1**, `slice(-1)` took the file's LAST
+CHARACTER, and both offsets compared as -1: **69/1 on `main`, on a build
+behaving exactly as that merge decided** (&sect;214.3). REWRITTEN, never
+loosened (&sect;218), and rewritten to the ARGUMENT rather than the coordinate
+— the band belongs WITH the client's own facts and not in a list, which is
+placement B's own reasoning — with both ends named in the detail so a build
+where neither function exists fails loudly rather than comparing two -1s
+(&sect;113.8). 70/0, 1 red falsified. **Islam has still not SEEN it there**, so
+it is drawn for him (`design-mockups/console/2026-09-16_*.html`) rather than
+declared settled.
+
+**§358.7 — AND THE COMMENT THAT SENT A SESSION TO THE WRONG ANSWER.**
+`blob-api.ts` said the package was *"deliberately NOT a dependency yet, so that
+degrade path is the one exercised by every check today"* — true when written and
+false from the day `@vercel/blob` went into `smp-app/package.json`. **Leaving it
+was not free**: a session read it, concluded no Blob store had ever been set up,
+and told Islam it was still his to create — when `smp-blob` had been connected to
+the project since **4 September** and what was actually missing was the package
+declaration, fixed on the 14th. &sect;104.8 exactly, and the expensive kind: a
+comment describing an intention the code no longer carries out, pointing somebody
+at the wrong thing. Corrected, and the degrade path it claimed is now genuinely
+exercised — by `store-seam.mjs` &sect;1, which unsets the token.
+
+**§358.8 — `state-api` WAS 2 RED ON `main`, AND §353 IS WHY.** Its &sect;4 asked
+the SEED for a tactic with no outcome; &sect;353 filled all 78, so **0 of 78
+qualified**, and the section then **DIED rather than reporting** (&sect;215 —
+caught and labelled as such by that file's own harness, which is the design
+working). **&sect;353 rewrote seven checks for precisely this and could not see
+this one**: those seven are in `SMP-Project-Folder/src/checks/` and this is
+`smp-app/checks/` — *a whole directory outside that sweep's eye, which is the
+finding worth more than the fix.* The state is MADE now (&sect;255): the office
+clears one outcome first, plainly an authoring act it may make, and the cleared
+row is asserted to be a DIFFERENT row from the one whose owner is amended —
+this section's subject is a good fill travelling beside a bad amendment, and one
+row carrying both proves neither. 91 &rarr; **92/0**, and all six break variants
+still red, or the fix would have been a loosening.
+
+**§358.9 — AND `tsc`'s "PRE-EXISTING ERROR" IS NOT AN ERROR.** &sect;336 records
+*"`tsc` clean but for `lib/prisma.ts`'s pre-existing PrismaClient error"*, and
+this session repeated it. It is what `tsc` says when **`prisma generate` has not
+been run** — and that is the FIRST step of `npm run build`, so it is true of a
+bare `npx tsc --noEmit` on a fresh clone and of nothing else. Generated, `tsc`
+exits **0**. It also blocks `next build` outright, which is why `check:state`
+cannot run on a fresh clone without it. *A reported failure that is not one
+teaches people to scroll past the ones that are* (&sect;54.5 with the sign
+reversed).
+
+**§358.10 — THE HELD BUTTON, MEASURED: THE APPROVED FIX DOES NOT SURVIVE
+IT.** Islam: *"1. ok good fix"* (dim the held Publish button so it reads as
+off) and *"2. ok"* (the modules band stays on step one of the set-up flow).
+The second is settled and needed no code. **The first was stopped before a
+source moved, because measuring it says it cannot be done — and because the
+description he approved it on was not true.** **CORRECTION 1 — IT IS ONE
+BUTTON, NOT A SWEEP.** I told him it would reach every held control in the
+console, naming Delete on a published report and the archive controls.
+Grepped: `aria-disabled` appears on **one** control in `platform.html` — the
+Publish button — against **24** using `.disabled = true`. *A proposal's reach
+is a measurement, not a recollection.* **CORRECTION 2 — `opacity:.45` MAKES IT
+UNREADABLE.** The console's own `.btn:disabled` value composites the whole
+button, fill and words together, over the card beneath — which on a FILLED
+button collapses the very contrast that made it readable: **8.79 → 2.13 light /
+2.82 dark**, against a 4.5 floor. **AND THE 24 ALREADY AT .45 MEASURE 2.86 AND
+3.88, WHICH IS THE POINT RATHER THAN A SECOND FAULT**: a genuinely `disabled`
+control is INACTIVE and carries no contrast requirement, and **a held button is
+not inactive** — taking focus, answering a press and saying why is the whole
+reason the house rule is `aria-disabled` and never `disabled` (§221, §163).
+*The exemption that covers the twenty-four is exactly what does not cover this
+one.* Two treatments survive the measurement and were drawn rather than
+described: **B**, dim to .75 (4.64 / 5.43, the shape kept and the signal weak —
+at the opacity it needs to stay readable it barely differs from the live
+button), and **C**, drop the fill and keep the outline in `--amber-tx` (5.27 /
+8.15), which spends nothing the palette does not already hold, since the
+console already keeps amber twice — as a fill with dark ink and as TYPE (§38.4,
+§259). **C is the recommendation** and it is Islam's to take.
+
+**§358.11 — A TABLE OF NUMBERS IS NOT A COMPARISON.** Islam: *"I can't choose
+without visual comparison."* Fair, and the fault is §358.10's own: it put B and
+C in separate panels with a contrast table between them, which **describes** a
+difference and then asks the reader to imagine it — §266's rule (*a question
+the reader cannot parse is answered by drawing it*) applied to an ANSWER rather
+than a question. Redrawn as one row: the four treatments side by side at real
+size, each held button with **its own live twin directly beneath it**, because
+*does this read as off* is a question about the PAIR and never about one
+button — and **in BOTH palettes**, since the console follows the viewer's theme
+and a mockup drawn only in the palette the reader happens to be in asks
+somebody to sign off on half the decision (§340's own finding, one surface
+over). A second panel puts the same three in the foot of the report card, which
+answers the other half — not *can I read it* but *does the card still look
+right*. **The forced palette is a complete token block per subtree, never a
+base plus overrides** (the rule the verbatim block's own comment records), and
+it is copied from `:root` rather than re-derived. Measured before publishing:
+four distinct treatments resolving in both palettes, every button the same box,
+no sideways scroll at 1440/1280/1024/860/700, no console error. **AND THE FIRST
+RENDER READ `LIGHTNAME` AND `DARKNAME`** — the generator substituted `PAL`
+before `PALNAME`, so the label ate its own word; found by LOOKING at the render
+rather than by any assertion, which is what that one look is for (§311's four
+faults, §296.1). **TWO ITEMS CLOSED BY ISLAM IN THE SAME BREATH**: *"for the
+resources and insights on aley forget about this"* — so spec 051's question is
+withdrawn rather than left open, and the `add_repo` refusal recorded there stops
+being a blocker; and *"I will try the pdf upload once we finish"*, which is the
+one part of the Insights path that cannot be proved from here, since it wants
+the store's key and a key never travels through chat.
+
+**§358.12 — A IS BUILT, AND IT IS HIS AGAINST THE RECOMMENDATION.** Shown the
+four side by side, Islam answered **"A"** — the one drawn with a red border,
+labelled *too faint*, carrying its own number. So it is built, and it is
+recorded as his rather than argued with a second time (the rule: a concern
+raised once and reaffirmed is the person's decision, and this one was
+reaffirmed with the measurement in front of him). **ONE DECLARATION**:
+`.btn[aria-disabled="true"]{ opacity:.45 }`, the console's own `:disabled`
+value one line above it, so no new number and no new colour. **AND WHAT IS
+DELIBERATELY NOT IN IT IS THE INTERESTING HALF.** `cursor` is NOT set, unlike
+the `:disabled` rule it copies: pressing this button calls `say(pub.title)`
+and names what is missing, so it is genuinely pressable and a default cursor
+would be the one part of the treatment that is untrue (§124). The hover border
+is left alone for the same reason and for rule 1b's — it was not asked for, and
+a held control that answers a hover is telling the truth about itself. *The
+fade is the look; the hover and the press are now the whole of the meaning,
+and a `disabled` button would have had neither — which is why the house rule
+was `aria-disabled` in the first place* (§221, §163). **THE COST IS PRINTED
+RATHER THAN ASSERTED** (§302.3's own device): asserting the contrast either way
+is choosing against Islam or against the 4.5 floor, so `publishing-room.py`
+prints the measured figure in both palettes on every run — **2.14 light, 2.80
+dark**, derived in the browser from the composited fill and ink rather than
+copied from the mockup's arithmetic, which is why the two agree to a hundredth
+and were reached separately. **AND NOTHING ELSE MEASURES IT, WHICH IS WHY THE
+PRINT EARNS ITS PLACE**: `platform-look.py` sweeps the three console tabs and
+the door and never opens a report, so the one place in the console where
+contrast now deliberately fails is a place no sweep looks — *a cost nothing
+measures is a cost that gets forgotten* (§113.8's spirit, from the other side).
+**TWO NEW ASSERTIONS, BOTH AT BOTH ENDS AND BOTH FALSIFIED FROM THE SOURCES**
+(§94.2, §276): the held button dims while the live one beside it does not —
+`--break=held-not-dimmed` keeps `aria-disabled` and forces the opacity back, so
+it reddens the dimming ALONE where `publish-anyway` reddens the refusal too, and
+it prints `pubDim: '1'`, the build before this, verbatim; and the cursor, proved
+by putting `cursor:default` into `platform.html` itself, rebuilding and watching
+exactly one go red. **Measured as PAINT, never as a class or an attribute**
+(§94.8, §272.8 — a rule can provably match and provably do nothing). 50/0 on the
+source AND on `smp-app/shell/platform.html`, the generated copy the new stack
+serves, because a generated copy is where a drift hides (§53.5, §329);
+`platform-cards`, `client-setup-outside` and `client-archive` green beside it.
+
+**STILL OPEN AND ISLAM'S**: the one upload of a real PDF through the real store
+on the deployment — the only part of the Insights path that cannot be proved
+from here, because it wants the store's key and a key never travels through
+chat. **AND RECORDED, NOT DONE**: the 24 buttons at 2.86 / 3.88, exempt as
+inactive controls and no longer exempt the day any of them is made to answer a
+press; and the fact that the console's contrast sweep cannot reach the
+publishing room at all, which is a gap in the sweep rather than in this change.
+
 ## §359 — SETUP PER MODULE, AND THE CLIENT'S OWN SETUP ON THE LANDING (2026-09-15, spec 056)
 
 Islam, 2026-09-15: *"the setup and access page should be per module because

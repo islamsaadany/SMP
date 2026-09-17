@@ -340,6 +340,185 @@ SHAPE_B = """(key)=>{
   return { rowH: Math.round(row.getBoundingClientRect().height) };
 }"""
 
+# ── THE ROLES CELL THAT FITS, WHICH IS THE REGISTER'S OWN RULE ─────────────
+# ROLES_WIDE above is what the first drawing shipped and Islam sent back:
+# "it still overflows as a box." Measured, it is worse than it looks — two
+# grey chips (189 + 166) plus a 200px ticking button want 555px in a 192px
+# cell, so the COLUMN grew 209 -> 477 and the whole table 1355 -> 1623, and
+# it still overflowed (scrollWidth 573 in 476).
+#
+# AND IT BROKE HIS OWN EARLIER DECISION ON THIS EXACT COLUMN. `roleCell()`
+# has drawn ONE chip with the rest behind a "…" since 2026-08-22, and its
+# comment says why in his words: most people hold one, a handful hold three,
+# and sizing all 31 rows for the handful is what made this the widest column
+# on the page. A drawing that widens it by 268px is that decision undone.
+#
+# So the cell keeps EXACTLY what it draws today and becomes pressable: the
+# label is `roleCell(p, false)` — the register's own builder, read-only, so
+# one chip and the "…" — and the ticking list opens from it. The × on each
+# chip goes, which is not a loss dressed up: removing a role IS unticking it,
+# and two ways to take one off is two answers to one act (§53.5).
+ROLES = """(a)=>{
+  const open = a.open;
+  const t = document.querySelector('.peoplecfg');
+  const head = [...t.querySelectorAll('thead th')].map(x=>x.textContent.trim());
+  const ci = head.indexOf('Roles');
+
+  /* `PROLES` decides whether a cell is drawn as one chip or expanded, and it
+     is asserted null rather than set: setting it would need a repaint, and a
+     row left expanded by an earlier section would make the width argument
+     measure the wrong state (§50.6). */
+  if (PROLES) return { error: 'a row is expanded; the width would be measured wrong' };
+
+  /* EVERY ROW, NEVER ONE. A picture with one boxed cell among thirty bare ones
+     is a picture of a state the product never has — and it hides the only cost
+     this shape carries, which is that a box has a height of its own. So the
+     whole column is drawn and the row heights are read back before and after
+     (§94.2: the claim is that nothing moves, so the thing to measure is
+     movement). */
+  const col0 = Math.round(t.querySelectorAll('thead th')[ci].getBoundingClientRect().width);
+  const table0 = Math.round(t.getBoundingClientRect().width);
+  const rowsAll = [...t.querySelectorAll('tbody tr')].filter(r=>r.querySelector('[data-pmenu]'));
+  const h0 = rowsAll.map(r=>Math.round(r.getBoundingClientRect().height));
+
+  /* WHO HOLDS A ROLE AT THIS PERSON'S OWN PLACE — asked of the graph, never
+     invented, so "held by Rania Fahmy" is the register's own truth. */
+  function holder(at, role){
+    if (role === 'owner')     return (UNIT_ROLES[at]||{}).head;
+    if (role === 'custodian') return at.indexOf('fn:')===0
+      ? (FUNCTIONS[at.slice(3)]||{}).custodian : (UNIT_ROLES[at]||{}).custodian;
+    if (role === 'fnhead')    return at.indexOf('fn:')===0
+      ? (FUNCTIONS[at.slice(3)]||{}).head : null;
+    return null;
+  }
+
+  function one(row){
+    const key = row.querySelector('[data-pmenu]').dataset.pmenu;
+    const p = personBy(key);
+    const at = personAt(p);
+    const rs = personRoles(p);
+    const cell = row.children[ci];
+
+    const mine = {};
+    rs.forEach(r=>{ if (!SMPRules.isOwnLinesRole(r.role) &&
+                        (r.at === at || roleWheres(r.role).length === 1)) mine[r.role] = 1; });
+
+    /* The ticking list. NO `data-ssall`: "give this person every role" is not
+       an act anybody wants, and Select all on a list that displaces people is
+       the one press this whole question is about (§295.1 — the two label rules
+       are per control). */
+    const sel = document.createElement('select');
+    sel.multiple = true;
+    sel.className = 'fld rolepick';
+    sel.setAttribute('aria-label','Roles for ' + p.name);
+    ROLES.forEach(function(r){
+      if (!roleIsGrantable(r.key)) return;
+      const wheres = roleWheres(r.key);
+      const fits = wheres.length === 1 || wheres.some(w=>w.v===at);
+      const op = document.createElement('option');
+      op.value = r.key; op.text = r.name;
+      if (mine[r.key]) op.selected = true;
+      let hint = '';
+      if (!fits) hint = 'held at ' + roleAtWord(r.key) + ' — set the Unit first';
+      else if (SMPRules.isSeatRole(r.key)) hint = 'a seat — asks before it lands';
+      else { const h = holder(at, r.key);
+             if (h && h !== p.key) hint = 'held by ' + (personBy(h)||{}).name; }
+      if (hint) op.dataset.hint = hint;
+      if (!fits) op.dataset.fits = '0';
+      sel.appendChild(op);
+    });
+
+    /* THE LABEL IS THE CELL'S OWN OUTPUT, LIFTED (§53.5). `roleCell()` is
+       private to `renderPeople()` and cannot be called from here — asked of
+       the page rather than assumed, which is the only reason this is not a
+       second copy of a builder. What is on screen IS its output, so it is
+       cloned. */
+    const label = document.createElement('span');
+    [...cell.childNodes].forEach(n=>label.appendChild(n.cloneNode(true)));
+    /* Read-only: the × goes, and that is the decision rather than a tidy-up —
+       removing a role IS unticking it, and two ways to take one off is two
+       answers to one act. */
+    [...label.querySelectorAll('.xbtn')].forEach(x=>x.remove());
+    /* `.rolemore` is a <button> in the register, and a button inside a button
+       is not markup. As a label it is a span — and it has nothing left to do
+       anyway, since one press now opens the whole list. */
+    [...label.querySelectorAll('button.rolemore')].forEach(bm=>{
+      const sp = document.createElement('span');
+      sp.className = bm.className; sp.innerHTML = bm.innerHTML;
+      bm.replaceWith(sp);
+    });
+    cell.innerHTML = '';
+    const holderBox = document.createElement('span');
+    holderBox.className = 'rolebox';
+    holderBox.appendChild(sel);
+    cell.appendChild(holderBox);
+    return { key: key, p: p, at: at, rs: rs, mine: mine, sel: sel, cell: cell, label: label };
+  }
+
+  const built = rowsAll.map(one);
+  /* Wired ONCE, after every cell is in place — `SEARCHSEL.wire()` walks the
+     document, so calling it per row would be thirty walks for one answer. */
+  SEARCHSEL.wire();
+  built.forEach(function(b){
+    const btn = b.cell.querySelector('.ssbtn');
+    if (!btn) return;
+    const lab = btn.querySelector('.sslabel');
+    lab.innerHTML = '';
+    [...b.label.childNodes].forEach(n=>lab.appendChild(n));
+    btn.classList.add('rolebtn');
+    btn.title = b.rs.map(r=>roleName(r.role) + ' · ' + roleWhereLabel(r.at)).join(' · ');
+  });
+
+  const me = built.find(b=>b.key === a.key) || built[0];
+  const row = me.cell.parentElement;
+  const cell = me.cell;
+
+  if (open) {
+    const btn = cell.querySelector('.ssbtn');
+    btn.click();
+    /* WHAT THIS REGISTER CANNOT CHANGE GOES INSIDE THE LIST, and that is the
+       half the fitted cell would otherwise lose. Today the "…" is a CONTROL
+       and its comment says why: a hover cannot be reached on a touch screen
+       and cannot be read aloud, and it is the only place the second role
+       appears. With one press opening the list, the list is that place — so
+       the roles held elsewhere and the roles that come from the plan are
+       named at its head rather than left to a title attribute. */
+    const pop = document.querySelector('.sspop');
+    const ro = me.rs.filter(r => !me.mine[r.role]);
+    if (pop && ro.length) {
+      const note = document.createElement('div');
+      note.className = 'ssnote mk-ro-note';
+      note.innerHTML = '<b>Already held, and not set here</b>' +
+        ro.map(r => '<span class="rolechip mk-ro"><b>' + esc(roleName(r.role)) +
+          '</b><span class="rolewhere">' +
+          esc(SMPRules.isOwnLinesRole(r.role) ? 'from the plan' : placeLabel(r.at)) +
+          '</span></span>').join('');
+      /* The rows sit in a list INSIDE the popup, so the note goes before that
+         list rather than before a row — walked up rather than assumed, because
+         `insertBefore` on a node that is not a child throws. */
+      let first = pop.querySelector('.ssrow');
+      while (first && first.parentElement !== pop) first = first.parentElement;
+      if (first) pop.insertBefore(note, first); else pop.appendChild(note);
+    }
+  }
+
+  const inner = cell.firstElementChild;
+  const c = cell.getBoundingClientRect();
+  const cs = getComputedStyle(cell);
+  const h1 = rowsAll.map(r=>Math.round(r.getBoundingClientRect().height));
+  return { colWas: col0, col: Math.round(t.querySelectorAll('thead th')[ci]
+                  .getBoundingClientRect().width),
+           tableWas: table0, table: Math.round(t.getBoundingClientRect().width),
+           over: Math.round(inner.getBoundingClientRect().right -
+                 (c.right - parseFloat(cs.paddingRight))),
+           scrollW: cell.scrollWidth, clientW: cell.clientWidth,
+           rowsWas: h0, rowsNow: h1,
+           grew: h1.map((h,i)=>h-h0[i]).filter(d=>d!==0).length,
+           offered: [...me.sel.options].map(o=>o.text + (o.dataset.hint?' — '+o.dataset.hint:'')),
+           rowH: Math.round(row.getBoundingClientRect().height) };
+}"""
+
+
 # ── SHAPE C: a DOUBLE-click opens the one cell, and nothing else ───────────
 # Islam's own proposal, and it is not new vocabulary: the Internal Tracker
 # renames an action by double-clicking it, Enter or leaving the box commits,
@@ -348,7 +527,11 @@ SHAPE_B = """(key)=>{
 # writes when you leave it (§35) and a pair of buttons would be a second
 # answer to what committing means.
 SHAPE_C = """(a)=>{
-  const key = a.key, col = a.col || 'Job title';
+  /* The Job title, and only it — the field is written by name below, so an
+     argument naming another column would draw a box holding the wrong value
+     (§96: a control wired to nothing renders perfectly). If C ever needs to be
+     drawn on a second column, the value has to be chosen with it. */
+  const key = a.key, col = 'Job title';
   const t = document.querySelector('.peoplecfg');
   const head = [...t.querySelectorAll('thead th')].map(x=>x.textContent.trim());
   const row = [...t.querySelectorAll('tbody tr')].find(r => {
@@ -369,7 +552,7 @@ SHAPE_C = """(a)=>{
 
 # ── THE ROLES CELL: chips for what cannot be granted here, a ticking list for
 #    what can. Every fact below is read from the platform's own functions. ───
-ROLES = """(a)=>{
+ROLES_WIDE = """(a)=>{
   const key = a.key, open = a.open;
   const t = document.querySelector('.peoplecfg');
   const head = [...t.querySelectorAll('thead th')].map(x=>x.textContent.trim());
@@ -459,6 +642,28 @@ MARKS = """()=>{
     .rolechip.mk-ro b{font-weight:500}
     td.mk-clash{outline:2px solid var(--bad); outline-offset:-2px}
     td.mk-cell{outline:2px solid var(--gold); outline-offset:-2px}
+    /* THE BUTTON IS THE CELL, AND THAT IS THE WHOLE FIX. Left to itself the
+       ticking button sizes to its widest entry (200px) and the two grey chips
+       sit beside it, so the COLUMN grew 209 -> 477 and the table 1355 -> 1623.
+       Capped to the cell it holds exactly what the register draws today. */
+    /* AND THE BOX MAY NOT MAKE THE ROW TALLER. A '.ssbtn' carries
+       'padding:6px 9px' and a border, which is right for a control standing on
+       its own and wrong around chips that already carry their own height —
+       measured, it took every row 39px to 49, and thirty-one rows at 10px is
+       310px of register that moved for a control nobody pressed. A setup row
+       is one line (§88), so the box takes the height the chips already had. */
+    .peoplecfg .ssbtn.rolebtn{width:100%; max-width:100%; min-width:0;
+      padding:1px 6px}
+    .peoplecfg .ssbtn.rolebtn .sslabel{overflow:hidden; min-width:0}
+    /* NO BACKTICKS IN HERE. This block is a JS template literal, so a
+       back-quoted class name in a comment ENDS it (§272.8, §357). The span
+       that replaced the rolemore button needs the button's own look. */
+    .peoplecfg .ssbtn.rolebtn span.rolemore{display:inline-flex}
+    .sspop .mk-ro-note{padding:9px 11px 10px; border-bottom:1px solid var(--line);
+      display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+    .sspop .mk-ro-note > b{font-size:10.5px; letter-spacing:.09em;
+      text-transform:uppercase; color:var(--ink-3); font-weight:500;
+      width:100%; margin-bottom:2px}
   `;
   document.head.appendChild(s);
 }"""
@@ -629,7 +834,7 @@ with sync_playwright() as p:
     pg = newpage(b)
     land(pg)
     pg.evaluate(MARKS)
-    M["c_cell"] = pg.evaluate(SHAPE_C, {"key": WHO, "col": "Job title"})
+    M["c_cell"] = pg.evaluate(SHAPE_C, {"key": WHO})
     pg.wait_for_timeout(250)
     print("  C: one cell %d -> %d, table %d"
           % (M["c_cell"]["cellWas"], M["c_cell"]["cellNow"], M["c_cell"]["tableW"]))
@@ -637,15 +842,41 @@ with sync_playwright() as p:
     pg.close()
 
     # ── 4 · THE ROLES CELL ─────────────────────────────────────────────
+    # First what the previous drawing shipped, because Islam sent it back and
+    # the page has to be able to show what he was looking at.
+    pg = newpage(b)
+    land(pg)
+    pg.evaluate(MARKS)
+    M["roles_wide"] = pg.evaluate(ROLES_WIDE, {"key": WHO, "open": False})
+    pg.wait_for_timeout(300)
+    M["roles_wide"]["cols"] = pg.evaluate(COLW)
+    print("  roles WIDE: table %d (was %d)"
+          % (M["roles_wide"]["cols"]["__table"], M["today"]["tableW"]))
+    shot(pg, "roles-wide", ".peoplecfg", around=WHO, rows=5, scrollx=-1)
+    pg.close()
+
     pg = newpage(b)
     land(pg)
     pg.evaluate(MARKS)
     M["roles"] = pg.evaluate(ROLES, {"key": WHO, "open": False})
     pg.wait_for_timeout(300)
+    print("  roles FITTED: col %d -> %d, table %d -> %d, over %d, scroll %d/%d"
+          % (M["roles"]["colWas"], M["roles"]["col"],
+             M["roles"]["tableWas"], M["roles"]["table"], M["roles"]["over"],
+             M["roles"]["scrollW"], M["roles"]["clientW"]))
+    print("  roles ROWS  : %s -> %s  (%d of %d moved)"
+          % (sorted(set(M["roles"]["rowsWas"])), sorted(set(M["roles"]["rowsNow"])),
+             M["roles"]["grew"], len(M["roles"]["rowsNow"])))
     shot(pg, "roles-closed", ".peoplecfg", around=WHO, rows=5, scrollx=-1)
     pg.close()
 
-    pg = newpage(b)
+    # A TALLER WINDOW FOR THE OPEN LIST, and it is the mockup's own need rather
+    # than the product's: the list grew a head naming what cannot be set here,
+    # and the crop is computed from the popup's box but clamped to the viewport
+    # — so at 950 the last two roles were cut off in the picture while being
+    # perfectly present on the page. A shot that cuts the thing it is of is a
+    # measurement of the camera.
+    pg = newpage(b, 1440, 1150)
     land(pg)
     pg.evaluate(MARKS)
     pg.evaluate("""()=>{const b=document.querySelector('.peoplecfg')
@@ -673,15 +904,15 @@ with sync_playwright() as p:
                     const x = Math.max(0, Math.min(a.left, b.left) - 12);
                     const y = Math.max(0, from.top - 12);
                     return { x, y,
-                             width: Math.min(1440 - x, Math.max(a.right, b.right) - x + 12),
-                             height: Math.min(950 - y, b.bottom - y + 12) };
+                             width: Math.min(innerWidth - x, Math.max(a.right, b.right) - x + 12),
+                             height: Math.min(innerHeight - y, b.bottom - y + 12) };
                   }"""))
     print("  shot roles-open")
     pg.close()
 
     # Dark is a FRESH page, for `dark()`'s own reason: the attribute is
     # written at boot, so it has to be a boot.
-    pg = newpage(b)
+    pg = newpage(b, 1440, 1150)
     land(pg)
     dark(pg)
     land(pg)
@@ -704,8 +935,8 @@ with sync_playwright() as p:
                     const x = Math.max(0, Math.min(a.left, b.left) - 12);
                     const y = Math.max(0, from.top - 12);
                     return { x, y,
-                             width: Math.min(1440 - x, Math.max(a.right, b.right) - x + 12),
-                             height: Math.min(950 - y, b.bottom - y + 12) };
+                             width: Math.min(innerWidth - x, Math.max(a.right, b.right) - x + 12),
+                             height: Math.min(innerHeight - y, b.bottom - y + 12) };
                   }"""))
     pg.close()
 

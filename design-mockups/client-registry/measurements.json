@@ -31,7 +31,7 @@
   "rowH": 45
  },
  "a_open": {
-  "rowH": 41,
+  "rowH": 43,
   "saveX": 1268
  },
  "a_wide": {
@@ -39,19 +39,35 @@
   "Name": 228,
   "Emp. ID": 81,
   "Job title": 150,
-  "Official BU": 158,
-  "Unit": 158,
+  "Official BU": 117,
+  "Unit": 150,
   "Email": 252,
   "Mobile": 130,
   "Roles": 209,
   "Status": 81,
   "Password": 91,
   "(actions)": 133,
-  "__table": 1709,
+  "__table": 1659,
   "__box": 1325
  },
  "b_open": {
   "rowH": 40
+ },
+ "dbl": {
+  "onCopy": {
+   "clicks": 2,
+   "says": "Copied",
+   "selected": ""
+  },
+  "onText": {
+   "selected": "Care"
+  }
+ },
+ "c_cell": {
+  "rowH": 40,
+  "cellWas": 150,
+  "cellNow": 150,
+  "tableW": 1355
  },
  "roles": {
   "at": "care",
@@ -120,14 +136,14 @@
   "#": 38,
   "Name": 228,
   "Job title": 150,
-  "Official BU": 158,
-  "Unit": 158,
+  "Official BU": 117,
+  "Unit": 150,
   "Email": 252,
   "Roles": 209,
   "Status": 81,
   "Password": 91,
   "(actions)": 133,
-  "__table": 1498,
+  "__table": 1449,
   "__box": 1165
  },
  "w_b_open": {
@@ -150,7 +166,7 @@
    "box_right": 1401
   },
   "as_rowActions_returns_it": {
-   "save_x": 1601,
+   "save_x": 1552,
    "box_right": 1401
   }
  },
@@ -158,28 +174,28 @@
   "1600": {
    "box": 1325,
    "today": 1355,
-   "a_open": 1498,
+   "a_open": 1449,
    "b_open": 1355,
    "tallest_row_a": 45
   },
   "1440": {
    "box": 1165,
    "today": 1355,
-   "a_open": 1498,
+   "a_open": 1449,
    "b_open": 1355,
    "tallest_row_a": 45
   },
   "1280": {
    "box": 1005,
    "today": 1355,
-   "a_open": 1498,
+   "a_open": 1449,
    "b_open": 1355,
    "tallest_row_a": 45
   },
   "1100": {
    "box": 825,
    "today": 1355,
-   "a_open": 1498,
+   "a_open": 1449,
    "b_open": 1355,
    "tallest_row_a": 45
   }

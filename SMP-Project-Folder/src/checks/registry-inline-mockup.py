@@ -146,6 +146,29 @@ def land(pg, cols=None):
     pg.wait_for_timeout(700)
 
 
+def dark(pg):
+    """DARK HAS TO BE SET BEFORE THE PAGE BOOTS, and that is a finding rather
+       than a detail. §27 retired Auto, so `theme.js` reads the device ONCE and
+       writes `data-theme` as an explicit attribute — the stylesheet's four
+       blocks are keyed on that attribute and not on the media query. So
+       `emulate_media` AFTER the platform has painted changes nothing, and the
+       first drawing shipped a shot captioned "Dark, same build" that is a
+       light screenshot. Nothing on it is wrong except the caption, which is
+       the worst kind: the picture and the words disagree and only the words
+       can be read at that size.
+
+       Set BOTH — the media (so a fresh boot reads dark) and the stored
+       preference (so nothing depends on which the platform asks first) — and
+       then RELOAD, because the attribute is written at boot."""
+    pg.emulate_media(color_scheme="dark")
+    pg.evaluate("try{localStorage.setItem('smp.theme','dark')}catch(e){}")
+    pg.reload()
+    pg.wait_for_timeout(1200)
+    got = pg.evaluate("()=>document.documentElement.getAttribute('data-theme')")
+    if got != "dark":
+        raise SystemExit("dark() did not take: data-theme=%r" % got)
+
+
 # ── THE SHOT IS THE VIEWPORT, CROPPED (§144.8) ─────────────────────────────
 # An element screenshot DISPLACES the sticky rows inside it, so a pane shot
 # that way loses the pinned head it is partly about.
@@ -262,6 +285,17 @@ SHAPE_A = """(a)=>{
   if (freeze) td.classList.add('kebcell');
   row.lastElementChild.replaceWith(td);
   row.classList.add('tk-open');
+
+  /* WHAT `paint()` DOES AT ITS END, AND THE FIRST DRAWING DID NOT (§45.5).
+     `SEARCHSEL.wire()` hides a long `<select>` in place and draws a `.ssbtn`
+     beside it, and the register's two lists are long — so a transform that
+     stops at the markup draws a control the product never draws. It shipped
+     that way and Islam photographed the consequence: the raw select carries
+     `width:auto` from `arrange.css`, so Official BU ran 17px past its cell
+     and Unit 23px. Wired, both fit exactly (over 0) and the open row goes
+     1498 -> 1449. The ROLES transform below already called it; this one did
+     not, which is the drift rather than the CSS. */
+  SEARCHSEL.wire();
   return { rowH: Math.round(row.getBoundingClientRect().height),
            saveX: Math.round(td.getBoundingClientRect().left) };
 }"""
@@ -304,6 +338,33 @@ SHAPE_B = """(key)=>{
   const e = head.indexOf('Email');
   if (e > -1) row.children[e].classList.add('mk-clash');
   return { rowH: Math.round(row.getBoundingClientRect().height) };
+}"""
+
+# ── SHAPE C: a DOUBLE-click opens the one cell, and nothing else ───────────
+# Islam's own proposal, and it is not new vocabulary: the Internal Tracker
+# renames an action by double-clicking it, Enter or leaving the box commits,
+# Escape puts it back, and a single click does nothing. Same rule here, one
+# module over — so there is no Save and no Cancel, because a bound field
+# writes when you leave it (§35) and a pair of buttons would be a second
+# answer to what committing means.
+SHAPE_C = """(a)=>{
+  const key = a.key, col = a.col || 'Job title';
+  const t = document.querySelector('.peoplecfg');
+  const head = [...t.querySelectorAll('thead th')].map(x=>x.textContent.trim());
+  const row = [...t.querySelectorAll('tbody tr')].find(r => {
+    const k = r.querySelector('[data-pmenu]'); return k && k.dataset.pmenu === key; });
+  if (!row) return null;
+  const p = personBy(key);
+  const i = head.indexOf(col);
+  const td = row.children[i];
+  const was = Math.round(td.getBoundingClientRect().width);
+  td.innerHTML = '<input class="fld" value="'+esc(p.title||'')+'" data-ptitle="'+p.key+'">';
+  td.classList.add('mk-cell');
+  const f = td.querySelector('input'); f.focus(); f.select();
+  SEARCHSEL.wire();
+  return { rowH: Math.round(row.getBoundingClientRect().height),
+           cellWas: was, cellNow: Math.round(td.getBoundingClientRect().width),
+           tableW: Math.round(t.getBoundingClientRect().width) };
 }"""
 
 # ── THE ROLES CELL: chips for what cannot be granted here, a ticking list for
@@ -397,21 +458,36 @@ MARKS = """()=>{
     .rolechip.mk-ro{opacity:.72}
     .rolechip.mk-ro b{font-weight:500}
     td.mk-clash{outline:2px solid var(--bad); outline-offset:-2px}
+    td.mk-cell{outline:2px solid var(--gold); outline-offset:-2px}
   `;
   document.head.appendChild(s);
 }"""
 
-# ── A GUESS THAT MEASURED THE SAME BOTH WAYS (§94.2) ───────────────────────
+# ── TWO GUESSES AT A FAULT THAT WAS THE DRAWING'S OWN (§94.2, §100.3) ──────
 # §110.8 stops an open row widening the table with
 #   .cfg table tr.tk-open td input.fld, … textarea.fld { width:100%; min-width:0 }
 # which names `input` and `textarea` and NOT `select`. The first build of this
 # file added the missing line, watched the table go 1355 → 1498 anyway, and
 # measured it BOTH ways rather than shipping the line on the strength of the
 # reasoning: 1498 with it and 1498 without. It changes nothing, because
-# `tr.tk-open td { max-width:158px }` one block below already caps the cell, so
-# the line is NOT proposed (§24 — a rule that does nothing is one the next
-# reader takes for load-bearing). Where the width actually goes is measured per
-# column instead, in section 5.
+# `tr.tk-open td { max-width:158px }` one block below already caps the cell.
+#
+# THEN THE DRAWING SHIPPED AND ISLAM PHOTOGRAPHED THE CONSEQUENCE — the two
+# dropdowns running past their cells onto the columns beside them. Asked of the
+# browser rather than of the cascade (§93.11), the cause is `arrange.css`'s
+# `select[data-pmainbu], select[data-pat] { width:auto; max-width:164px }`,
+# whose own neighbouring comment records that overlap as cosmetic. Four rules
+# were measured against it and `width:100%` was the best of them.
+#
+# NONE OF IT WAS NEEDED. `SEARCHSEL.wire()` is the last thing `paint()` does
+# and these two lists are long, so the PRODUCT draws a `.ssbtn` where the
+# transform had drawn a raw `<select>` — and a `.ssbtn` fits by construction.
+# Wired: over 0 on every field, and 1498 → 1449. So the fault was a transform
+# that stopped at the markup, and the fix is one call rather than a rule
+# (§100.3: a stand-in that models less than the thing it stands in for reports
+# a working build as broken — here it reported a working build as UGLY, which
+# costs the same and is harder to spot). Neither rule is proposed (§24).
+# Where the width actually goes is measured per column instead, in section 5.
 COLW = """()=>{
   const t = document.querySelector('.peoplecfg');
   const head = [...t.querySelectorAll('thead th')].map(x=>x.textContent.trim());
@@ -461,13 +537,26 @@ with sync_playwright() as p:
     land(pg)
     pg.evaluate(MARKS)
 
+    # THE PEN IS NOT DRAWN IN THE SHOTS ANY MORE, and that is a decision rather
+    # than a tidy-up: Islam has picked the DOOR — "for the editing in general it
+    # shuold be a double click" — so a pen on every row is a second door to the
+    # same act, and drawing one beside a page arguing the table does not change
+    # at rest would be the picture contradicting the prose. Its 34px is still
+    # MEASURED, because it is what that claim rests on.
     M["a_rest"] = pg.evaluate(SHAPE_A_REST)
     pg.wait_for_timeout(200)
-    shot(pg, "a-rest", ".peoplecfg", around=WHO, rows=5)
+    pg.reload(); land(pg); pg.evaluate(MARKS)
     M["a_open"] = pg.evaluate(SHAPE_A, {"key": WHO})
     pg.wait_for_timeout(250)
     shot(pg, "a-open", ".peoplecfg", around=WHO, rows=5)
-    pg.emulate_media(color_scheme="dark")
+    pg.close()
+
+    pg = newpage(b)
+    land(pg)
+    dark(pg)
+    land(pg)
+    pg.evaluate(MARKS)
+    pg.evaluate(SHAPE_A, {"key": WHO})
     pg.wait_for_timeout(250)
     shot(pg, "a-open-dark", ".peoplecfg", around=WHO, rows=5)
     pg.close()
@@ -482,7 +571,6 @@ with sync_playwright() as p:
               "mainbu": True, "bu": True, "company": False, "email": True,
               "phone": True, "roles": True, "status": True, "password": True})
     pg.evaluate(MARKS)
-    pg.evaluate(SHAPE_A_REST)
     pg.evaluate(SHAPE_A, {"key": WHO})
     pg.wait_for_timeout(250)
     M["a_wide"] = pg.evaluate(COLW)
@@ -498,6 +586,54 @@ with sync_playwright() as p:
     M["b_open"] = pg.evaluate(SHAPE_B, WHO)
     pg.wait_for_timeout(250)
     shot(pg, "b-open", ".peoplecfg", around=WHO, rows=5)
+    pg.close()
+
+    # ── 3b · WHAT A DOUBLE-CLICK ACTUALLY DOES TODAY ───────────────────
+    # Islam: "for the editing in general it shuold be a double click would
+    # that fix the issue as 1 copes the item like the mobile or email."
+    # DRIVEN, never reasoned about: a dblclick is preceded by two real
+    # clicks, so the question is what those two leave behind on a value that
+    # is a copy BUTTON (§93.6) and on one that is plain text.
+    pg = newpage(b)
+    land(pg)
+    pg.evaluate("""(key)=>{
+      const row = [...document.querySelectorAll('.peoplecfg tbody tr')]
+        .find(r => { const k = r.querySelector('[data-pmenu]');
+                     return k && k.dataset.pmenu === key; });
+      const head = [...document.querySelectorAll('.peoplecfg thead th')]
+        .map(x=>x.textContent.trim());
+      row.children[head.indexOf('Job title')].setAttribute('data-mk-title','1');
+      const b = row.querySelector('[data-copy]');
+      b.setAttribute('data-mk-copy','1');
+      window.__n = 0;
+      b.addEventListener('click', ()=>{ window.__n++; }, true);
+    }""", WHO)
+    pg.query_selector("[data-mk-copy]").dblclick()
+    pg.wait_for_timeout(250)
+    onCopy = pg.evaluate("""()=>{
+      const b = document.querySelector('[data-mk-copy]');
+      const s = window.getSelection();
+      return { clicks: window.__n, says: b.textContent,
+               selected: s ? s.toString() : '' }; }""")
+    pg.query_selector("[data-mk-title]").dblclick()
+    pg.wait_for_timeout(150)
+    onText = pg.evaluate("""()=>{ const s = window.getSelection();
+      return { selected: s ? s.toString() : '' }; }""")
+    M["dbl"] = {"onCopy": onCopy, "onText": onText}
+    print("  double-click on the Email value: %d clicks, reads %r, selected %r"
+          % (onCopy["clicks"], onCopy["says"], onCopy["selected"]))
+    print("  double-click on a plain value  : selected %r" % onText["selected"])
+    pg.close()
+
+    # ── 3c · SHAPE C — a DOUBLE-click, and the one cell opens ──────────
+    pg = newpage(b)
+    land(pg)
+    pg.evaluate(MARKS)
+    M["c_cell"] = pg.evaluate(SHAPE_C, {"key": WHO, "col": "Job title"})
+    pg.wait_for_timeout(250)
+    print("  C: one cell %d -> %d, table %d"
+          % (M["c_cell"]["cellWas"], M["c_cell"]["cellNow"], M["c_cell"]["tableW"]))
+    shot(pg, "c-cell", ".peoplecfg", around=WHO, rows=5)
     pg.close()
 
     # ── 4 · THE ROLES CELL ─────────────────────────────────────────────
@@ -541,8 +677,20 @@ with sync_playwright() as p:
                              height: Math.min(950 - y, b.bottom - y + 12) };
                   }"""))
     print("  shot roles-open")
-    pg.emulate_media(color_scheme="dark")
+    pg.close()
+
+    # Dark is a FRESH page, for `dark()`'s own reason: the attribute is
+    # written at boot, so it has to be a boot.
+    pg = newpage(b)
+    land(pg)
+    dark(pg)
+    land(pg)
+    pg.evaluate(MARKS)
+    pg.evaluate("""()=>{const b=document.querySelector('.peoplecfg')
+      .closest('.tblscroll'); if(b) b.scrollLeft = b.scrollWidth;}""")
     pg.wait_for_timeout(250)
+    pg.evaluate(ROLES, {"key": WHO, "open": True})
+    pg.wait_for_timeout(500)
     pg.screenshot(path=str(OUT / "roles-open-dark.png"),
                   clip=pg.evaluate("""()=>{
                     const t = document.querySelector('.peoplecfg');

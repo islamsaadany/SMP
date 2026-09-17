@@ -59,7 +59,7 @@ Islam's, 2026-09-17, each answered against the options and the cost of each.
 | 1 | Has anyone really used it? | **"we have plans but we are good to adjust if needed."** Real plans exist, so the rules in §3 are validated by use and are ported faithfully rather than re-argued — **and the shape is open**, so the parent object is redesigned rather than inherited. There is data to migrate (§9). |
 | 2 | What does a plan hang off? | **"a project belongs to a client."** No agreement, no scope, no engagement level. A client has projects; a project holds the tree. |
 | 3 | Whose module is it? | **Both.** The office reaches it by seat; the client's own people through a grant. One module, two audiences — never one module behaving two ways (§6). |
-| 5 | Who starts a project? | **Forefront, by seat.** Consultants scope the work and then name the client's people onto it. *Cost:* a client wanting to run their own workstream has to ask. |
+| 5 | Who starts a project? | **Forefront, by seat** — consultants scope the work and then name the client's people onto it, which is how it normally begins. **Widened the same day** (2026-09-17, *"a client super user can do anything"*): the client's own Super user may start one too. Recorded as a widening rather than overwritten — the usual case is still yours. |
 | 4 | What is it called? | **Portfolio**, keeping his own earlier call (spec 046 decision 3). `Projects` was asked for and put back with the measurement: Strategy already has a **Projects** tab on a supporting function, a **Project owner** role on Roles & access, and a **Projects sheet** whose name is a validation range inside workbooks clients already hold — 98 occurrences of the word in the built product. Renaming Strategy's was offered with that cost and refused, as it was the first time. |
 
 ### 2.1 · What decision 2 dissolves
@@ -213,9 +213,10 @@ answer.
 
 | | |
 |---|---|
-| **Forefront** | By seat, every client, every project. Not in any team list. Forefront also creates projects (decision 5). |
-| **The client's Super user and SMO team** | In, on every project of their own client. Not named on projects. |
-| **Everybody else** | Only where a project names them. |
+| **Forefront** | By seat, every client, every project. Not in any team list. |
+| **The client's Super user** | **Anything**, on every project of their own client — creating one included. Never named on a project, because there is nothing a naming could add. |
+| **The client's SMO team** | Everything the Super user can, **except deleting a project.** Not a new rule: §89 already names the three things that seat does not get, and destruction is the one of the three that lands here — the access matrix does not (Portfolio has no column) and passwords are not Portfolio's business. |
+| **Everybody else** | Only where a project names them, at one of the three roles below. |
 
 ### 6.2 · Three roles, on the project
 
@@ -385,8 +386,9 @@ are not client roles, so they never touch the frozen `lib/rules.js`, and
 `MODULE_DEF` needs no roles field. What was a gap in the module contract turns
 out to be a question Portfolio does not ask.
 
-What remains is one line: **may the client's own Super user name people onto a
-project**, or only Forefront.
+**And the last line of it is answered too** (2026-09-17): the client's Super
+user can do anything — naming people onto a project, and starting one. Nothing
+is left open in §6.
 
 ### 9.3 · The Excel round-trip
 A template pre-filled with the client's context, the team roster, valid values

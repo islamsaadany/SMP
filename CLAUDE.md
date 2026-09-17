@@ -9946,7 +9946,22 @@ them do so deliberately. **VERIFIED**: the whole frozen suite, 181 checks,
 **twice** &mdash; once to find this and once on the build that fixes it;
 `table-standard` died &rarr; ALL GREEN, `table-standard-all` 4 FAILED &rarr; ALL
 GREEN, `wave3` 1 FAILURES &rarr; OK, `deck-dividers` 6 FAILED &rarr; ALL PASS,
-`setup-arrange` and `no-jump` green throughout. `qa.py` 33 viewers / 242 destinations / ERRORS none,
+`setup-arrange` and `no-jump` green throughout. **&sect;365.7 closes the same
+shape one screen away**: `roleCell` was TWO functions, &sect;362.5's top-level
+builder for the access matrix's role row and one nested in `renderPeople()` for
+the register's &mdash; different subject, different signature, one global
+namespace (&sect;65.9). Both callers of each resolved right, so &sect;365's first
+draft recorded it as untidy; &sect;365.6 changed that reading, because leaving a
+name that resolves to something other than what its caller meant is recording a
+trap rather than closing it. **Proved behaviour-neutral by MEASUREMENT rather
+than ceremony**: with the rename normalised away the built file differs from the
+commit before in exactly two places &mdash; the comment, and ONE &sect;238 CSP
+hash regenerated in the same build, which is that section working as designed.
+**And four checks are not green, all four established on `origin/main`'s own
+build** (&sect;303): `contingency`'s one and `tactic-outcome`'s four are
+IDENTICAL there, `multi-client` times out on the same locator there
+(&sect;336.2's own record), and `platform-look` is **27/0** the moment it is
+given a database. `qa.py` 33 viewers / 242 destinations / ERRORS none,
 authoriser 683/0, change list 140/0, built-in-step and generated-in-step clear,
 round trip &middot; clean parity &middot; two tabs 21/0 &middot; incremental
 writer byte-identical on fresh databases; door 140/0, shell 111/0, state 92/0,

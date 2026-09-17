@@ -51438,14 +51438,19 @@ deploy 5/0, frameworks 90/0 and 64/0, assistant 10/0, memory 16/0 · 14/0 · 21/
 36/0, `tsc` clean COLD, `next build` green, eight of nine spike proofs with all
 sixteen falsifications red.
 
+**AND THE WHOLE FROZEN SUITE — 181 CHECKS — RAN TWICE**, once to find §365.6
+and once on the build that fixes it, with every TAIL read rather than a count
+(§298.3). **Four are not green and all four are established on `origin/main`'s
+own build** (§303): `contingency.py`'s one failure and `tactic-outcome.py`'s
+four are IDENTICAL there; `multi-client.py` times out on the same locator there,
+which is §336.2's own record; and `platform-look.py` is **27/0** the moment it
+is given a database, so its suite line was the runner's missing `DATABASE_URL`
+rather than the check. Thirteen more are mockup GENERATORS correctly refusing to
+write during a sweep (§334.14).
+
 **RECORDED, NOT DONE.** `no-caps` reddens by THROWING rather than reporting
 (§215) and main does the identical thing. S8 wants `--from=` a v2.0-shaped
 database — the rehearsal database §328.3 describes — so it is UNRUN rather than
 failing, its own header's stated precondition and true on main too.
 `test-concurrent-saves.js` dies on `platform.sessions`, one of the seven
-harnesses §328.3 already records as unrunnable since §313. And `roleCell` is
-declared twice in `config-render.js` — §362.5 extracted the matrix cell to a
-top-level builder beside the one nested inside `renderPeople()`; both callers of
-each resolve to the one intended, measured, so it is untidy rather than a hazard
-(§281.1's shape), and a third matrix added INSIDE `renderPeople()` would get the
-wrong one.
+harnesses §328.3 already records as unrunnable since §313.

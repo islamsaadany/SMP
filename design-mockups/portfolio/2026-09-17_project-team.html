@@ -1,0 +1,349 @@
+<title>Portfolio Project Team</title>
+<style>
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --on-fill:#FFFFFF;
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px; --fs-body:14px;
+    --fs-lead:17px; --fs-title:20px;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --on-fill:#14161A; color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --on-fill:#14161A; color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:var(--fs-body)/1.55 var(--sans);
+       padding-block:28px 56px;padding-left:16px;padding-right:16px}
+  .wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+  .key{font-size:var(--fs-micro);letter-spacing:.09em;text-transform:uppercase;
+       color:var(--gold-deep);font-weight:700;margin:0 0 8px}
+  .lede h1{font-size:var(--fs-title);margin:0 0 6px;font-weight:700;text-wrap:balance}
+  .lede p{margin:0;color:var(--ink-2);font-size:var(--fs-note);max-width:80ch}
+
+  .correction{border-left:3px solid var(--bad);background:var(--bad-bg);padding:12px 14px;border-radius:0 8px 8px 0}
+  .correction p{margin:0;font-size:var(--fs-note);color:var(--ink-2);max-width:86ch}
+  .correction b{color:var(--ink)}
+
+  /* two layers, drawn as two layers */
+  .layers{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,11fr);gap:16px;align-items:start}
+  @media (max-width:840px){ .layers{grid-template-columns:minmax(0,1fr)} }
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .card > header{padding:11px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);
+    display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .card > header h2{margin:0;font-size:var(--fs-note);font-weight:700}
+  .card > header .lvl{font-size:var(--fs-micro);letter-spacing:.07em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:700}
+  .card .body{padding:13px 14px}
+  .card .why{margin:0;font-size:var(--fs-small);color:var(--ink-3);max-width:60ch}
+
+  .matrix{width:100%;border-collapse:collapse;font-size:var(--fs-note);margin-top:4px}
+  .matrix th{text-align:left;font-size:var(--fs-micro);letter-spacing:.07em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:700;padding:0 8px 6px 0}
+  .matrix td{padding:7px 8px 7px 0;border-top:1px solid var(--line-soft);vertical-align:middle}
+  .matrix td:first-child{font-weight:600;white-space:nowrap}
+  .pick{display:inline-flex;gap:3px}
+  .pick button{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;
+    padding:5px 7px;border:1px solid var(--line);border-radius:4px;background:var(--surface);
+    color:var(--ink-3);cursor:pointer}
+  .pick button:hover{border-color:var(--gold-deep);color:var(--ink-2)}
+  .pick button:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .pick button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold-deep);color:var(--on-fill)}
+
+  .teamhead{padding:12px 14px;background:var(--panel);color:var(--panel-ink);display:flex;
+    align-items:baseline;gap:10px;flex-wrap:wrap}
+  .teamhead .code{font-size:var(--fs-micro);letter-spacing:.08em;font-weight:800;color:var(--panel-accent)}
+  .teamhead .nm{font-weight:700;font-size:var(--fs-note)}
+  .teamhead .meta{font-size:var(--fs-small);color:var(--panel-quiet);margin-left:auto}
+
+  table.team{width:100%;border-collapse:collapse;font-size:var(--fs-note)}
+  table.team thead th{background:var(--surface-2);text-align:left;font-size:var(--fs-micro);
+    letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+    padding:8px 12px;border-bottom:1px solid var(--line)}
+  table.team tbody tr:nth-child(even){background:var(--zebra)}
+  table.team td{padding:9px 12px;border-top:1px solid var(--line-soft);vertical-align:middle}
+  table.team td.who{font-weight:600;white-space:nowrap}
+  table.team td.who small{display:block;font-weight:400;font-size:var(--fs-micro);color:var(--ink-3)}
+  .seat{display:inline-block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;padding:1px 5px;border-radius:3px;border:1px solid var(--stone);
+    color:var(--stone);margin-left:6px;vertical-align:1px}
+  select.lvlsel{font:600 var(--fs-small)/1.2 var(--sans);padding:5px 7px;border:1px solid var(--line);
+    border-radius:5px;background:var(--surface);color:var(--ink);min-width:150px}
+  select.lvlsel:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  td.reach{font-size:var(--fs-small);color:var(--ink-2)}
+  .x{font:700 var(--fs-note)/1 var(--sans);border:0;background:none;color:var(--ink-3);cursor:pointer;padding:4px 6px;border-radius:4px}
+  .x:hover{color:var(--bad-tx);background:var(--bad-bg)}
+  .x:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .addrow td{background:var(--surface)}
+  .linkbu{font:700 var(--fs-small)/1 var(--sans);background:none;border:0;color:var(--gold-deep);cursor:pointer;padding:6px 0}
+  .linkbu:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+  .rules{padding:13px 14px;border-top:1px solid var(--line);background:var(--surface-2)}
+  .rules ul{margin:7px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+  .rules li{font-size:var(--fs-small);color:var(--ink-2);max-width:92ch}
+  .rules b{color:var(--ink)}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:17px}
+  .panel h3{margin:0 0 4px;font-size:var(--fs-body);font-weight:700}
+  .panel > p{margin:0 0 11px;font-size:var(--fs-note);color:var(--ink-2);max-width:84ch}
+  .map{width:100%;border-collapse:collapse;font-size:var(--fs-small)}
+  .map th{color:var(--ink-3);font-size:var(--fs-micro);letter-spacing:.07em;text-transform:uppercase;
+    text-align:left;padding:0 10px 7px 0;font-weight:700}
+  .map td{padding:8px 10px 8px 0;border-top:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+  .map td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  .tagc{display:inline-block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.05em;
+    text-transform:uppercase;padding:1px 5px;border-radius:3px;margin-right:6px;vertical-align:1px}
+  .t-cl{border:1px solid var(--stone);color:var(--stone)}
+  .t-pj{border:1px solid var(--gold-deep);color:var(--gold-deep)}
+  .t-rn{border:1px solid var(--attn);color:var(--attn-tx);background:var(--attn-bg)}
+  .foot{font-size:var(--fs-small);color:var(--ink-3);max-width:86ch}
+  .foot b{color:var(--ink-2)}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+
+  <div class="lede">
+    <p class="key">Mockup · redrawn · nothing built</p>
+    <h1>Portfolio — who is on a project</h1>
+    <p>The six levels ScopePlan already has, kept. What changes is only where each one is
+       answered: two of them are about a whole client, four are about one project.</p>
+  </div>
+
+  <div class="correction">
+    <p><b>This replaces yesterday's drawing, which was wrong.</b> That one put Strategy's company
+      roles — BU owner, Strategy custodian, Function head — down the side of a Portfolio tab.
+      A function head is not a project lead, and being a BU owner says nothing about whether you
+      are on a piece of delivery work. <b>Membership belongs to the project, not to the org
+      chart</b>, which is what ScopePlan already does and what this keeps.</p>
+  </div>
+
+  <div class="layers">
+
+    <!-- LAYER 1 -->
+    <section class="card">
+      <header>
+        <span class="lvl">Layer 1</span>
+        <h2>Roles &amp; access · Portfolio</h2>
+      </header>
+      <div class="body">
+        <p class="why">One question only: <b>may this kind of person open Portfolio on this
+          client at all</b>. It is a company question, so it sits where the company questions
+          already sit. It says nothing about any single project.</p>
+        <table class="matrix">
+          <thead><tr><th>Role</th><th>Portfolio</th></tr></thead>
+          <tbody id="mtx"></tbody>
+        </table>
+      </div>
+      <div class="rules">
+        <p class="key" style="margin:0">Above this table</p>
+        <ul>
+          <li><b>Forefront reaches every client by seat.</b> Consultants are not on this table,
+            the way they are not on the Internal Tracker's.</li>
+          <li><b>Forefront starts a project.</b> You scope the work, then name people onto it.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- LAYER 2 -->
+    <section class="card">
+      <div class="teamhead">
+        <span class="code">PJ-04</span>
+        <span class="nm">Retail Operating Model</span>
+        <span class="meta">6 phases · 41 activities · checkpoint monthly</span>
+      </div>
+      <header style="background:var(--surface-2)">
+        <span class="lvl">Layer 2</span>
+        <h2>This project's team</h2>
+      </header>
+      <div style="overflow-x:auto">
+        <table class="team">
+          <thead>
+            <tr><th>Person</th><th>Level on this project</th><th>What they reach</th><th></th></tr>
+          </thead>
+          <tbody id="team"></tbody>
+          <tr class="addrow"><td colspan="4"><button class="linkbu" type="button">+ Add somebody from the register</button></td></tr>
+        </table>
+      </div>
+      <div class="rules">
+        <p class="key" style="margin:0">True whatever anybody is set to</p>
+        <ul>
+          <li><b>Only a Lead completes an activity.</b> Whoever does the work marks it Done;
+            marking it Completed and setting the real end date is the Lead's, and everything at
+            Done queues for them.</li>
+          <li><b>An assignee reports, a collaborator comments.</b> Read off the activity itself,
+            never from this table.</li>
+          <li><b>A Lead is named here, not granted elsewhere</b> — the way a pillar's owner is
+            already named on the pillar.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <div class="panel">
+    <h3>The six levels, and where each is answered</h3>
+    <p>Nothing is invented and nothing is dropped. Two are about the whole client; four are about
+      one project. Two are renamed, and only because <em>scope</em> no longer exists and
+      <em>client lead</em> already means the client's own SMO in SMP.</p>
+    <table class="map">
+      <thead><tr><th>ScopePlan today</th><th>Here</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Client Lead</td>
+            <td><span class="tagc t-cl">client</span><span class="tagc t-rn">renamed</span><b>Portfolio lead</b></td>
+            <td>Leads every project on the client. That is a standing company answer, so it is the matrix column at Lead.</td></tr>
+        <tr><td>Viewer</td>
+            <td><span class="tagc t-cl">client</span>Viewer</td>
+            <td>Reads every project and changes nothing. The matrix column at View.</td></tr>
+        <tr><td>Scope Lead</td>
+            <td><span class="tagc t-pj">project</span><span class="tagc t-rn">renamed</span><b>Lead</b></td>
+            <td>Scope is gone — a project belongs to a client — so the word goes with it. Same reach: everything on the projects they lead.</td></tr>
+        <tr><td>Senior Contributor</td>
+            <td><span class="tagc t-pj">project</span>Senior contributor</td>
+            <td>Sees the whole plan, works the activities assigned to them.</td></tr>
+        <tr><td>Contributor</td>
+            <td><span class="tagc t-pj">project</span>Contributor</td>
+            <td>Sees and works only their own activities.</td></tr>
+        <tr><td>Collaborator</td>
+            <td><span class="tagc t-pj">project</span>Collaborator</td>
+            <td>Sees the activities they are tagged on, and comments rather than reports.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="foot"><b>What this costs.</b> Somebody on four projects is named four times — which is
+    the honest price of membership belonging to the work. <b>What it buys:</b> a person's reach on
+    one project says nothing about another, and taking them off a project is one row rather than a
+    change to what their company role means. <b>Still open:</b> whether the client's own Super user
+    may name people onto a project, or only Forefront.</p>
+</div>
+
+<script>
+(function () {
+  var ROLES = [
+    { n:"Super user",         d:"view", note:"The client's own SMO" },
+    { n:"SMO team",           d:"view", note:"" },
+    { n:"Group CEO",          d:"view", note:"" },
+    { n:"Company CEO",        d:"none", note:"" },
+    { n:"Everyone else",      d:"none", note:"Anybody holding no role" }
+  ];
+  var LEVELS = ["Lead", "Senior contributor", "Contributor", "Collaborator"];
+  var REACH = {
+    "Lead":               "The whole plan. Restructures it, and signs off completions.",
+    "Senior contributor": "Sees the whole plan. Reports only activities assigned to them.",
+    "Contributor":        "Sees and reports only their own activities.",
+    "Collaborator":       "Sees activities they are tagged on. Comments, does not report."
+  };
+  var TEAM = [
+    { p:"Aley Mahmoud",   sub:"Forefront",            seat:true,  l:"Lead" },
+    { p:"Hala Mansour",   sub:"Customer Experience",  seat:false, l:"Senior contributor" },
+    { p:"Karim Fouad",    sub:"Retail Stores",        seat:false, l:"Contributor" },
+    { p:"Noura Ghanem",   sub:"Finance",              seat:false, l:"Collaborator" }
+  ];
+
+  var mtx = document.getElementById("mtx");
+  ROLES.forEach(function (r, i) {
+    var tr = document.createElement("tr");
+    var td1 = document.createElement("td");
+    td1.textContent = r.n;
+    if (r.note) {
+      var s = document.createElement("small");
+      s.style.cssText = "display:block;font-weight:400;font-size:var(--fs-micro);color:var(--ink-3)";
+      s.textContent = r.note;
+      td1.appendChild(s);
+    }
+    var td2 = document.createElement("td");
+    var pick = document.createElement("div");
+    pick.className = "pick";
+    ["Lead", "View"].forEach(function (w) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = w;
+      b.setAttribute("aria-pressed", String(r.d === "lead" ? true : r.d === "view" && w === "View"));
+      b.setAttribute("aria-label", r.n + " — Portfolio — " + w);
+      b.addEventListener("click", function () {
+        var on = b.getAttribute("aria-pressed") === "true";
+        b.setAttribute("aria-pressed", String(!on));
+        var sibs = pick.querySelectorAll("button");
+        /* Lead implies view; dropping view drops lead with it. */
+        if (w === "Lead" && !on) sibs[1].setAttribute("aria-pressed", "true");
+        if (w === "View" && on) sibs[0].setAttribute("aria-pressed", "false");
+      });
+      pick.appendChild(b);
+    });
+    td2.appendChild(pick);
+    tr.appendChild(td1); tr.appendChild(td2);
+    mtx.appendChild(tr);
+  });
+
+  var team = document.getElementById("team");
+  TEAM.forEach(function (m) {
+    var tr = document.createElement("tr");
+
+    var who = document.createElement("td");
+    who.className = "who";
+    who.appendChild(document.createTextNode(m.p));
+    if (m.seat) {
+      var sp = document.createElement("span");
+      sp.className = "seat";
+      sp.textContent = "Forefront";
+      who.appendChild(sp);
+    }
+    var sm = document.createElement("small");
+    sm.textContent = m.sub;
+    who.appendChild(sm);
+
+    var lv = document.createElement("td");
+    var sel = document.createElement("select");
+    sel.className = "lvlsel";
+    sel.setAttribute("aria-label", "Level for " + m.p + " on this project");
+    LEVELS.forEach(function (L) {
+      var o = document.createElement("option");
+      o.value = L; o.textContent = L;
+      if (L === m.l) o.selected = true;
+      sel.appendChild(o);
+    });
+    lv.appendChild(sel);
+
+    var rc = document.createElement("td");
+    rc.className = "reach";
+    rc.textContent = REACH[m.l];
+    sel.addEventListener("change", function () { rc.textContent = REACH[sel.value] || ""; });
+
+    var rm = document.createElement("td");
+    rm.style.textAlign = "right";
+    var x = document.createElement("button");
+    x.type = "button"; x.className = "x"; x.textContent = "×";
+    x.setAttribute("aria-label", "Take " + m.p + " off this project");
+    x.addEventListener("click", function () { tr.remove(); });
+    rm.appendChild(x);
+
+    tr.appendChild(who); tr.appendChild(lv); tr.appendChild(rc); tr.appendChild(rm);
+    team.appendChild(tr);
+  });
+})();
+</script>

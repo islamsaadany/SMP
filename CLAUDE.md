@@ -9970,8 +9970,29 @@ automatically), comms 47/47, upload 9/0, **tracker 228/0**, **notes 170/0**,
 insights 127/0, blob 23/23, store 31/0, setup 33/0 all six red, standing 7/0,
 demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0, assistant 10/0, memory
 16/0 &middot; 14/0 &middot; 21/0 &middot; 36/0, `tsc` clean COLD, `next build`
-green, eight of nine spikes with all sixteen falsifications red. **`main`
-untouched &mdash; the merge is Islam's word, on that merge.***
+green, eight of nine spikes with all sixteen falsifications red.
+**MERGED TO `main` 2026-09-17 on Islam's word**, as a clean fast-forward: main
+had not moved since the rehearsal, so the tree pushed is the tree swept twice.
+**The deployment was read off the LIVE SITE and `sw.js` could not be the
+witness** (&sect;91.5) &mdash; &sect;316.10's generator drops the caching half
+where `SHELL` lives, so the served worker is **byte-identical before and
+after** (one sha256, 4,104 bytes) and a bumped name reaches nobody; what proves
+production built this commit is `shell.js` **3,648,730 &rarr; 3,789,535** and
+`platform.css` **641,068 &rarr; 659,996**, both matching the served bytes
+exactly, and both asserted to DIFFER from the build before or a match would
+hold on either (&sect;113.8). **NO FORCED SIGN-OUT IS OWED AND THE READING IS
+STATED RATHER THAN ASSUMED** (spec 029): the authoriser did change, and it
+**widened** &mdash; a register row the platform MINTED is refused exactly as
+before while an ADOPTED one is no longer refused whole (&sect;362.2), and the
+two new group keys are ones an old tab has never written, so no save that
+worked before is refused now. **THE RESIDUE IS THE OPPOSITE ONE AND IT IS
+NAMED**: because the served worker's bytes did not move, no
+`controllerchange` fires and &sect;258's *"A newer version of the platform is
+ready"* is NOT offered &mdash; a tab left open keeps its old shell until
+somebody reloads it, and its rails point at pages &sect;360 absorbed and
+&sect;362 rescoped. **`smp-app/lib/save.ts`'s one edit is a falsification hook
+and nothing else**, read off the diff: it lives inside a `brk ===` guard that
+no request can set.***
 
 *Earlier: 2026-09-17 &mdash; **&sect;364: the Forefront team is a setup
 table (spec 058 &sect;3a).** Islam, of the page &sect;362.2 shipped:

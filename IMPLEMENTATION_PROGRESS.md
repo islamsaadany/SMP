@@ -5834,3 +5834,43 @@ running. **Re-run against the merged result**: memory 21 / 12 / 36 / 42 / 16 =
 and it is said why**: not one byte of the frozen build changes here, proved by
 rebuilding it, so `main`'s own sweep carries over rather than being
 re-measured for the sake of a number.
+
+**§365 — the sweep before the merge, and the four things it found,
+2026-09-17.** Islam: *"make a full sweep on the branch to make sure that if we
+merge to main we will not loose any client access or mess with any current
+behavior on the platform."* **The honest sweep had to be of the MERGED TREE**,
+which is the first finding and not a preliminary: `main` had moved **33
+commits** underneath — the Internal Tracker and Meeting Notes, two whole
+modules — so a branch that passes everything says nothing about what production
+would hold (§56.7). Rehearsed locally, resolved, everything re-run on the
+result; `main` untouched.
+
+**The question asked first, answered by measuring**: access is **UNMOVED**,
+both directions — base → main, base → branch, and **merged → main** — 33 people
+× 34 shared page keys × 21 targets, every one opening exactly what they opened,
+with `c_landing` added and its 693 cells the whole of 8842 → 9535.
+
+**One real regression, and it was this branch's**: §363's flow extraction sliced
+a range out of `platform.html` and took the Insights/Processes publishing room
+with it — the console called `drawLibrary()` with the function defined nowhere.
+Established as mine before anything was touched (§303): the check is **74/0 on
+main's own build and DIES on this branch's**. Restored from main's copy, 74/0.
+
+**One that would not have built**: main's registry imports the module this
+branch deleted. **Three checks that had stopped checking**, all from one move —
+including **five of six falsifications become silent no-ops** while the file
+read 33 ok, 0 failed. **And six of the nine spike proofs dark**, which is main's
+own tables meeting a harness with two hand-written special cases — closed here,
+because the merge cannot be called safe for the tenant boundary without S2.
+
+**Verified on the merged result**: `qa.py` 33 viewers / 242 destinations /
+ERRORS none, T0 unmoved, authoriser 683/0, change list 140/0, built-in-step and
+generated-in-step clear, round trip · clean parity · two tabs 21/0 · the
+incremental writer byte-identical on fresh databases; door 140/0, shell 111/0,
+state 92/0, **modules 143/0**, comms 47/47, upload 9/0, **tracker 228/0**,
+**notes 170/0**, insights 127/0, blob 23/23, store 31/0, setup 33/0 with all six
+red, standing 7/0, demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0,
+assistant 10/0, memory 16/0 · 14/0 · 21/0 · 36/0, `tsc` clean cold, `next build`
+green, eight of nine spikes with all sixteen falsifications red.
+
+**Waiting on Islam: the merge, and his word on that merge.**

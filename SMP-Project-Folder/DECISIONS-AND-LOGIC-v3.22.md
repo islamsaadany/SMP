@@ -51215,3 +51215,180 @@ reachable from the navigation, measured rather than read off the diff.
 widening that function reaches every setup table in the product, which is a
 decision of its own (rule 1b). And at 1600 the register column gives its select
 453px, because the leftover is shared.
+
+---
+
+## §365 — THE SWEEP BEFORE THE MERGE, AND THE FOUR THINGS IT FOUND (2026-09-17)
+
+Islam, of the branch carrying §359–§364: *"please make a full sweep on the
+branch to make sure that if we merge to main we will not loose any client
+access or mess with any current behavior on the platform. and give me a
+confirmation then we will merge."*
+
+**THE HONEST SWEEP HAD TO BE OF THE MERGED TREE AND NOT OF THIS BRANCH**, and
+that is the first finding rather than a preliminary: `main` had moved **33
+commits** underneath — two whole modules, the Internal Tracker and Meeting
+Notes — so a branch that passes everything says nothing about what production
+would hold. A clean merge is not a working one (§56.7), so the merge was
+rehearsed locally, resolved, and everything re-run on the result.
+
+### §365.0 — ACCESS IS UNMOVED, MEASURED IN BOTH DIRECTIONS
+
+The question asked first, answered first, and answered by measuring rather than
+reading. **T0** (`scripts/test-access-unmoved.js`) asks `grantAtPage` — the ONE
+function the browser and the server both ask (§42) — for every person, every
+page key and every target, so it is the whole access surface and not a walk of
+the pages that happen to be drawn today.
+
+* base → main: **UNMOVED** (34 page keys, 8842 grants that are not `none`)
+* base → branch: **UNMOVED**, plus `c_landing` ADDED
+* branch → main: **UNMOVED**, plus `c_landing`
+* **merged tree → main: UNMOVED** — 33 people × 34 shared keys × 21 targets,
+  every one opening exactly what they opened.
+
+`c_landing`'s 693 cells (33 × 21) are the whole of 8842 → 9535, which is the
+arithmetic corroborating it rather than a coincidence (§113.8).
+
+### §365.1 — THE PUBLISHING ROOM WAS GONE, AND IT WAS THIS BRANCH'S FAULT
+
+**The one real regression, and it would have reached main.** §363's flow
+extraction sliced a RANGE out of `platform.html` and took spec 053's document
+room with it — the console still called `drawLibrary()` at line 1714 with the
+function defined **nowhere**, so pressing a module's room on a client card
+threw. §214's lesson in its own words: *delete a named function, never a range.*
+
+**ESTABLISHED AS MINE BEFORE ANYTHING WAS TOUCHED** (§303):
+`checks/publishing-room.py` is **74 passed, 0 failed** on `origin/main`'s own
+build and **DIES** on this branch's — the check caught it and nobody had run it.
+Restored from main's copy, which carries main's own later work on that room
+(§360.12), with the flow left in `client-setup.js` because that move was
+deliberate. 74/0 after, matching main exactly.
+
+**AND THE CHECK DIED RATHER THAN REPORTING** (§215), in a file whose docstring
+promises otherwise — recorded, because a check that throws on a missing control
+tells you less than one that names it.
+
+### §365.2 — MAIN'S REGISTRY IMPORTED A MODULE THIS BRANCH HAD DELETED
+
+§363 removed `trial` on Islam's word; main's hunk brings back
+`import { serve as trial } from "./trial/index.ts"` for a directory that is no
+longer there. **Taken whole it would not have built.** §313.37's rule paying
+off: grep the merged result for the names the branch deleted, never only for
+duplicate declarations — a name a hunk brings back is valid on both sides and
+green everywhere.
+
+`lib/modules.ts` is the same shape and neither side whole (§318.7): main's
+`tracker` and `notes`, this branch's `lines` on every def, `trial` still gone.
+The two new modules take `lines: [NOTHING]`, because a landing line is what the
+CLIENT reads on their landing and these are the office's own records.
+
+**AND RESOLVING IT BY DROPPING EVERY LINE HOLDING `trial` TOOK THE TABLE WITH
+IT** — all three `BREAK ===` lines name it, so `export const SERVERS =` was left
+with nothing after it. Caught by the COLD typecheck (§3: the cached one reads
+`tsconfig.tsbuildinfo` and reports a clean tree on a build that does not
+compile), and it is §361.5 from the other side: *an edit that matched is not an
+edit that did the right thing.*
+
+### §365.3 — THREE CHECKS HAD STOPPED CHECKING, ALL FROM ONE MOVE
+
+§363 carried the set-up flow out of `platform.html` into `client-setup.js`, and
+three harnesses were still looking where it used to be. Every one of them
+**passed while proving nothing**, which is the whole reason this section exists.
+
+**`checks/setup-shape.mjs` read the console page for `var WORDS = [`** and found
+none — §51.11, a check keyed on markup that moved. Re-pointed, never loosened
+(§218): the claim is about the FLOW and not about which file holds it, and
+`asked.length > 0` is the assertion that caught the move.
+
+**AND FIVE OF ITS SIX FALSIFICATIONS HAD BECOME NO-OPS.** The same move took
+`__smpShape` out of `frozen.cjs`'s glue into `client-setup.js`, which
+`frozen.cjs` now RUNS rather than holds — so every break's `src.replace` over
+`frozen.cjs`'s text matched nothing, changed nothing and exited 0. The file read
+**33 ok, 0 failed** with five of its guards dark: §54.5 exactly, and
+indistinguishable from a working guard. Measured rather than inferred — all six
+redden on `origin/main`'s own build (§303). The doctoring reaches the text
+`frozen.cjs` LOADS now, and **a pattern that does not match stops the run**
+(§344.1), which is the only thing that stops this a third time. All six red
+again: 3 / 2 / 1 / 1 / die / 1.
+
+**AND TWO SERVED HARNESSES WAITED FOR AN ADDRESS THAT NOW REDIRECTS**: §362 made
+`/<client>` redirect into the first module the person may open, and
+`checks/comms-api.mjs` §8 and `checks/upload-seam.mjs` both waited for that exact
+address after signing in. Neither arrives, so both hung thirty seconds and DIED
+(§215) — upload-seam taking all nine of its assertions with it. §359.8's lesson
+applied rather than quoted: grepped for the SHAPE, found exactly two, fixed both.
+
+**AND MY FIRST FIX WAS SATISFIED BY THE PAGE IT HAD NOT LEFT** (§113.8):
+`startsWith("/" + SLUG)` matches `/<client>/sign-in`, so a REFUSED sign-in reads
+as a successful landing. Found by probing what the page actually held (`SYNC`
+undefined, the title still the door's) rather than by reading the predicate. It
+names the MODULE now, which is `door-landing.mjs`'s own form and the reason that
+file never had this.
+
+### §365.4 — SIX OF THE NINE SPIKE PROOFS WERE DARK, AND IT IS MAIN'S TABLES
+
+**The merge cannot be called safe for the tenant boundary without S2, and S2 was
+not running.** Main's two modules brought a `date` column and two columns with
+an `IN (…)` CHECK; the spike harness seeds one row in every tenant table with
+typed placeholders, so it threw on the date and was refused on the checks — and
+being SHARED it took down the tenant isolation (S2), the delete (S4), the door
+(S7), the Prisma wrapper (S6), the carry (S8) and the row-addressed write (S9).
+Identical on `origin/main`'s own build, same harness line (§303): **main's gap,
+inherited rather than caused**, and closed here because the sweep cannot be
+honest without it.
+
+**DERIVED, NEVER A LIST** (§104.7). The harness carried two hand-written special
+cases — `swot_items.cat` and `access_grants.grant_` — which is the shape that let
+main's new columns through. The value is read OFF THE COLUMN'S OWN CHECK now, so
+a table added tomorrow seeds the day it is added, and both old special cases are
+DELETED rather than kept beside it (§24) — they are also the proof it works,
+because `'s'` and `'view'` are exactly what it derives for them.
+
+**AND THE FIRST DRAFT MATCHED NOTHING** (§93.11): Postgres NORMALISES `IN (…)`
+to `= ANY (ARRAY[…])` in `pg_get_constraintdef`, so reading the source means
+reading what it STORES rather than what was typed — and a derivation that matches
+nothing looks exactly like the special cases having been deleted. Only a
+membership test is read, because `btrim(title) <> ''` carries a literal too and
+it is the empty one.
+
+### §365.5 — THE RENUMBER, DONE BEFORE THE MERGE
+
+Both sides had taken **§356, §357, §358 and specs 054 and 055** for entirely
+different features — mine the module and client-settings work, main's the
+Internal Tracker and Meeting Notes. §264.3's collision, and silent, because the
+number it produces is a real section and nothing parses wrong.
+
+Done BEFORE the merge, which is the only moment it is **provably** scoped: the
+merge base holds no §356+ and no spec 054/055/056 at all, measured rather than
+assumed, so every occurrence in this tree was this branch's own. §356 → §359 …
+§361 → §364, specs 054 → 056 … 056 → 058, descending source order so nothing
+collides mid-flight, each substitution asserted to have MATCHED before it was
+written (§361.5), and **all three spellings** — the plain §, CLAUDE.md's
+`&sect;` entity and the `§` JS escape (§336.1, §340.2). Main's own §356–§358
+and its specs 054–055 keep their numbers, which is what the renumber was for.
+
+### WHAT WAS RUN
+
+Frozen sweep `qa.py` **33 viewers, 242 destinations, ERRORS none**; T0 UNMOVED;
+authoriser **683/0**; change list **140/0**; `built-in-step` all good;
+`generated-in-step` all clear; round trip, clean parity, two tabs **21/0** and
+the incremental writer byte-identical on fresh databases. On the served stack:
+door **140/0**, shell **111/0**, state **92/0**, modules **143/0** (up from 93 —
+the derived list covers main's two automatically), blob 23/23, comms **47/47**,
+upload **9/0**, insights 127/0, tracker **228/0**, notes **170/0**, store 31/0,
+setup 33/0 with all six falsifications red, standing 7/0, demo 7/0, room 10/0,
+deploy 5/0, frameworks 90/0 and 64/0, assistant 10/0, memory 16/0 · 14/0 · 21/0 ·
+36/0, `tsc` clean COLD, `next build` green, eight of nine spike proofs with all
+sixteen falsifications red.
+
+**RECORDED, NOT DONE.** `no-caps` reddens by THROWING rather than reporting
+(§215) and main does the identical thing. S8 wants `--from=` a v2.0-shaped
+database — the rehearsal database §328.3 describes — so it is UNRUN rather than
+failing, its own header's stated precondition and true on main too.
+`test-concurrent-saves.js` dies on `platform.sessions`, one of the seven
+harnesses §328.3 already records as unrunnable since §313. And `roleCell` is
+declared twice in `config-render.js` — §362.5 extracted the matrix cell to a
+top-level builder beside the one nested inside `renderPeople()`; both callers of
+each resolve to the one intended, measured, so it is untidy rather than a hazard
+(§281.1's shape), and a third matrix added INSIDE `renderPeople()` would get the
+wrong one.

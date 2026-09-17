@@ -9859,7 +9859,71 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;364: the Forefront team is a setup
+*Last Updated: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
+the four things it found.** Islam, of the branch carrying &sect;359&ndash;&sect;364:
+*"make sure that if we merge to main we will not loose any client access or mess
+with any current behavior."* **THE HONEST SWEEP HAD TO BE OF THE MERGED TREE**,
+which is the first finding rather than a preliminary: `main` had moved **33
+commits** underneath &mdash; two whole modules, the Internal Tracker and Meeting
+Notes &mdash; so a branch that passes everything says nothing about what
+production would hold (&sect;56.7: a clean merge is not a working one). Rehearsed
+locally, resolved, everything re-run on the result.
+**ACCESS IS UNMOVED, MEASURED IN BOTH DIRECTIONS** (T0, asking `grantAtPage`,
+the ONE function the browser and the server both ask): base &rarr; main unmoved,
+base &rarr; branch unmoved, **merged &rarr; main unmoved** &mdash; 33 people
+&times; 34 shared page keys &times; 21 targets, every one opening exactly what
+they opened, with `c_landing` ADDED and its 693 cells the whole of 8842 &rarr;
+9535.
+**&sect;365.1 &mdash; THE PUBLISHING ROOM WAS GONE AND IT WAS THIS BRANCH'S
+FAULT**: &sect;363's flow extraction sliced a RANGE out of `platform.html` and
+took spec 053's document room with it, so the console called `drawLibrary()`
+with the function defined **nowhere** and a module's room on a client card
+threw (&sect;214: delete a named function, never a range). Established as MINE
+before anything was touched (&sect;303) &mdash; `publishing-room.py` is **74/0**
+on `origin/main`'s own build and **DIES** on this branch's &mdash; and restored
+from main's copy, which carries main's own later work on it. 74/0 after.
+**&sect;365.2 &mdash; MAIN'S REGISTRY IMPORTED A MODULE THIS BRANCH DELETED**
+(&sect;313.37: grep the merged result for the names the branch deleted, not only
+for duplicates) &mdash; taken whole it would not have built; and resolving it by
+dropping every line holding `trial` took the whole `SERVERS` table with it,
+caught by the COLD typecheck (&sect;3, &sect;361.5).
+**&sect;365.3 &mdash; THREE CHECKS HAD STOPPED CHECKING, ALL FROM ONE MOVE**, and
+every one **passed while proving nothing**: `setup-shape.mjs` read the console
+page for a `WORDS` list that had moved (&sect;51.11), **five of its six
+falsifications had become silent no-ops** (&sect;54.5 &mdash; 33 ok, 0 failed
+with five guards dark, all six red on main), and two served harnesses waited for
+an address &sect;362 made redirect, so both DIED rather than reporting
+(&sect;215). **And my first fix was satisfied by the page it had not left**
+&mdash; `/<client>/sign-in` starts with `/<client>` too, so a refused sign-in read
+as a landing (&sect;113.8), found by probing what the page HELD rather than by
+reading the predicate.
+**&sect;365.4 &mdash; SIX OF THE NINE SPIKE PROOFS WERE DARK, AND IT IS MAIN'S
+TABLES**: the merge cannot be called safe for the tenant boundary without S2, and
+S2 was not running &mdash; main's `date` column and two `IN (…)` CHECKs met a
+harness with two hand-written special cases, identical on main (&sect;303). The
+value is DERIVED from the column's own CHECK now (&sect;104.7), both special cases
+deleted as the proof it works &mdash; **and the first draft matched nothing**,
+because Postgres normalises `IN (…)` to `= ANY (ARRAY[…])` (&sect;93.11: ask the
+thing, do not reason about it).
+**&sect;365.5 &mdash; THE RENUMBER, DONE BEFORE THE MERGE**: both sides had taken
+&sect;356&ndash;&sect;358 and specs 054&ndash;055 for different features
+(&sect;264.3), and before is the only moment it is provably scoped &mdash; the
+merge base holds none of them, measured. &sect;356&rarr;&sect;359 &hellip;
+&sect;361&rarr;&sect;364, specs 054&rarr;056 &hellip; 056&rarr;058, descending,
+each substitution asserted to have MATCHED, **all three spellings** (&sect;336.1,
+&sect;340.2). **VERIFIED**: `qa.py` 33 viewers / 242 destinations / ERRORS none,
+authoriser 683/0, change list 140/0, built-in-step and generated-in-step clear,
+round trip &middot; clean parity &middot; two tabs 21/0 &middot; incremental
+writer byte-identical on fresh databases; door 140/0, shell 111/0, state 92/0,
+**modules 143/0** (up from 93 &mdash; the derived list covers main's two
+automatically), comms 47/47, upload 9/0, **tracker 228/0**, **notes 170/0**,
+insights 127/0, blob 23/23, store 31/0, setup 33/0 all six red, standing 7/0,
+demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0, assistant 10/0, memory
+16/0 &middot; 14/0 &middot; 21/0 &middot; 36/0, `tsc` clean COLD, `next build`
+green, eight of nine spikes with all sixteen falsifications red. **`main`
+untouched &mdash; the merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-17 &mdash; **&sect;364: the Forefront team is a setup
 table (spec 058 &sect;3a).** Islam, of the page &sect;362.2 shipped:
 *"forefront team is damaged it needs to be a table looks like the people
 register wiht the required columns."* **THE CAUSE IS ONE CLASS, MEASURED

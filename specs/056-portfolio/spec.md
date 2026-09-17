@@ -365,7 +365,7 @@ in §6.4 offers the register minus those two roles.
 |---|---|
 | **Lead** | Builds and restructures the plan, and signs off completions. |
 | **Contributor** | **Sees the whole plan**; reports the activities assigned to them; comments on the ones they are tagged on. *Seeing all of it is the platform's own rule and it is a choice — §7.4A.* |
-| **Viewer** | Reads, changes nothing. **Where everybody starts.** |
+| **Viewer** | Reads, changes nothing — **not even a comment** (2026-09-17: *"viewer no commenting just viewing"*). **Where everybody starts.** |
 
 **Whether a Contributor reports or only comments is read off the ACTIVITY**,
 never from this table — assigned is one thing, tagged is another, and the
@@ -564,12 +564,15 @@ list, and §93 records what happens when the write half slips. *Cost:* the
 narrower kind — somebody who may see only their own rows — is not available,
 and their own code cannot agree with itself about it today.
 
-**B. Can a Viewer comment?** **Their code says yes and their documentation says
-no** — the matrix grants `view` alone, the docstring says a Viewer cannot
-comment, and `canCommentOnActivity` returns true. §6.2 here says *reads, changes
-nothing*. **Genuinely open, and Islam's**: a sponsor who can ask a question on
-the row is useful, and *Viewer* is then not a read-only word. Everybody lands
-here (§6.4), so it is what the default quietly grants.
+**B. Can a Viewer comment? — answered: no** (2026-09-17, *"viewer no commenting
+just viewing"*). Their code says yes while their own matrix grants `view` alone
+and their own docstring says a Viewer cannot — **three places disagreeing, so
+there was no behaviour to be faithful to**; this picks the one the word means.
+**It matters because of where the word sits**: everybody lands at Viewer
+(§6.4), so this is what the default quietly grants, and read-only is the only
+default that fails closed. *Cost, stated:* a sponsor who wants to ask a question
+on a row has to be made a Contributor, and then they can also report the rows
+assigned to them — which is nothing, unless somebody assigns them one.
 
 **C. Their Lead was narrowed by scope, and that narrowing is NOT lost here.**
 The audit flags it as the widening to watch — *anyone who was Lead of one scope
@@ -923,9 +926,51 @@ carry no figure is a plan nobody can scan from the top.
 rather than ported (§7.6), and a phase's figure is worked out from its
 activities when the page is drawn — which is how a pillar's is (§264: a summary
 must be made of the numbers it summarises, and the whole of that section is what
-happens when it is not). **What is open is the weighting**: equally across
-activities, or by duration. Equal is what their sub-activity rule falls back to,
-and duration is what a Gantt reader would expect.
+happens when it is not).
+
+#### The weighting — answered by the platform, not chosen here (2026-09-17)
+
+Asked *"what do you recommend?"*, and the honest answer is that **neither of the
+two obvious options is the platform's, and the platform's is better than both.**
+
+**Equal across activities is wrong in a way everybody has met**: a phase holding
+*Kick-off meeting* (one day, done) and *Company-wide rollout* (sixty days, ten
+per cent) reads **55%** when almost nothing has happened. A consulting phase is
+exactly that shape — one large piece of work and several small ones.
+
+**By duration is wrong in a worse way: the number moves when nobody reports
+anything.** Extend an activity's end date and its weight grows, so the phase's
+figure changes on a rescheduling. §277 is a whole section about a figure moving
+because something beside it moved, and it is not a fault worth designing in.
+
+**So: a weight per activity, defaulting to equal — which is what this platform
+already does at every level above the activity, and what the reference already
+does one level BELOW it.** A pillar's score is its measures weighted;
+the group is its units weighted and re-normalised (§68); and the reference's own
+sub-activity rule is *by weight if the set sums to 100, otherwise by count*. So
+weighting is already the vocabulary at the bottom of their tree and at every
+level of ours, and this extends it rather than inventing anything.
+
+**And the blank rule is already written and already proved** — §243, in Islam's
+own words: *"missing it should be considered equally weighted objectives not
+0."* A blank counts as the average of the weights that WERE set; none set means
+equal; every weight nought falls back to equal rather than to a dash. Reused,
+never re-decided.
+
+*The cost, stated*: most phases will carry no weights and will read the
+equal-weight average, which is the number the first paragraph calls wrong. The
+difference is that it is **correctable without touching a single date**, and
+correcting it is one number on one row.
+
+**A work package rolls into its phase and a phase with none rolls from its
+activities directly** — the same shape the numbering already has (1.1 sits
+directly under a phase when there is no work package).
+
+**One thing not to conflate, because the same cell would say both**: this figure
+is *how much is done*, and whether that is good depends on the dates. Progress
+and being on schedule are two readings, and §344's rule is the one that applies
+— a figure is read against what it is measured by, beside the box it is typed
+into.
 
 ---
 

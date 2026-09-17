@@ -387,9 +387,21 @@ Nothing here is believed on a green run alone; each is asserted at **both ends**
 
 ## 9 · Open — needs a decision before anything is drawn
 
-Each of these changes what gets built. None is decided here.
+Each of these changes what gets built. **Four of the seven were answered on
+2026-09-17** and are kept here rather than moved, so the question and its answer
+sit together. Three are live: §9.3, §9.5 and §9.6.
 
-### 9.1 · Where the three words live
+**And every claim in §7 is still the handover brief's rather than measured** —
+this session cannot read `aleymahmoud-ff/clientplus` (an `add_repo` across
+owners is refused, and the GitHub tools are scoped to this repository). The
+brief for a session that can is `extraction-brief.md` beside this file; it asks
+for schema, code and counts rather than description, for the reason §7 records.
+
+### 9.1 · Where the three words live — answered (2026-09-17, *"agreed"*)
+**Per client, in `portfolio_terminology`.** The recommendation below, taken as
+it stands. A faithful port would have been per project; one client calling a
+Phase two things in two projects is the confusion the feature removes.
+
 One client calls it a Phase, another a Wave. ClientPlus stores this per
 `(agreement, scope)`; decision 2 deletes that key. **It cannot ride SMP's
 `labels` table** — measured: that is Strategy's own fixed vocabulary, a closed
@@ -401,9 +413,8 @@ those same sources in a vm** to answer the landing page, so a Portfolio row put
 in `labels` would not sit quietly beside Strategy's: it would be hydrated into
 the frozen product's own readers on every request, and travel into the plan
 workbook, which reads that list to build its sheets.
-**Recommendation: per client, in `portfolio_terminology`.** The words are how a
-client talks, and one client calling a Phase two things in two projects is the
-confusion the feature removes. *Cost:* a faithful port would be per project.
+**Why it could not ride `labels`** is the part worth keeping, because it is the
+reason this needed asking at all rather than being assumed.
 
 ### 9.2 · The role ladder — answered (§6)
 Settled 2026-09-17: three roles, on the project, with no module-level column at
@@ -424,17 +435,69 @@ today it is behind a two-name allowlist. **Keep it, drop it, or keep it as the
 office's?** Keeping it brings ExcelJS — which SMP already does elsewhere for
 the Strategy workbook, so the dependency is not new.
 
-### 9.4 · Files
-`activity_files` stores a URL, not an upload. SMP has a blob store already (the
-review clips). **Link-only for the first build, or real attachments?** Real
-attachments are net-new work and a storage cost per client.
+### 9.4 · Files — answered (2026-09-17, *"real uploads"*)
+`activity_files` stores a URL, not an upload. **Files are uploaded into the
+platform.**
 
-### 9.5 · Notifications
-Mention, comment, assignment and status-change notices have no home: SMP has
-push, the office chat and email, and no in-app notification list. The honest
-options are to ride push, to ride the chat, or to build the spine a notification
-list — **which is spine work, not this module's**, and should be specified
-separately if it is wanted.
+**The machine for it is built, connected and proved**, which is most of why this
+was cheap to say yes to — measured in `smp-app/lib/blob-api.ts` rather than
+remembered: a serverless function refuses a body over 4.5MB, so the browser
+slices the file and **every piece is authorised on arrival** rather than one
+address being minted and then trusted (§261); the ceiling is counted on the
+SERVER from what is stored, because a limit the screen alone enforces is
+decoration (§42, §44); a stored file is **private** and is read through a
+two-step signed address, never a public URL (§261.10); and with no store
+configured the endpoint answers in words and the rest of the platform goes on
+working (§231.3). The store has been connected since 4 September.
+
+**What is Portfolio's to decide, and none of it is plumbing**: the path a file
+lives under — which IS the permission, the way `videos/<target>/` already is
+— the ceiling per project, who may attach one, and what happens to the file
+when the activity it hangs off is deleted. **Deleting is where this gets
+expensive**: a blob outlives its row unless something removes it, so an
+orphaned file is a storage cost nobody can see and nobody can reach.
+
+**The link half is kept beside it**, because it costs nothing and it is what a
+plan pointing at a document in the client's own system needs.
+
+### 9.5 · How somebody finds out that a project needs them
+
+**The question in one sentence: when something on a project is waiting on you,
+how do you learn about it without opening the project and looking?** The first
+version of this section was written in jargon and Islam said so
+(2026-09-17: *"I don't understand"*), which is rule 1b-iii — it named four
+kinds of notice and never said what the thing is for.
+
+**The moments are concrete and there are five of them**: an activity is put in
+your name; one in your name falls due, or passes its date; somebody writes your
+name into a comment; a Lead is owed a sign-off, because whoever did the work has
+marked it done and only a Lead closes it; and a checkpoint is a few days off.
+
+**What the platform already has, measured rather than remembered**:
+- a **box on the device** — built for chat messages (§231), per device, off by
+  default, with three switches that must all say yes;
+- **email** — the office's collection (§293), ten minutes after a question goes
+  unanswered, and it exists for the chat and nothing else;
+- the **welcome screen** (§148), which already answers *is anything waiting on
+  me?* — a submission owed, a plan with holes in it, an unread reply — and is
+  Strategy's alone today;
+- **nothing in-app that lists notices.** There is no bell, no feed, no *3 new*.
+
+**Three honest answers, with what each costs**:
+
+| | What happens | Cost |
+|---|---|---|
+| **A** | Nothing arrives. The project list says what each project owes and you look. | Somebody who does not open Portfolio for a week does not know. Cheapest by a distance, and it is what the Internal Tracker does today. |
+| **B** | Portfolio adds its rows to the **welcome screen** — *4 activities due this week, 1 waiting for your sign-off.* | A screen every viewer already opens, so it is seen without being sent. Does not reach anybody who is not in the platform. |
+| **C** | B, plus a **box on the device** when an activity is put in your name or your name is written in a comment. | Real work: a second thing that sends, and a switch of its own or people turn the whole lot off. |
+
+**Recommendation: B, and A for everything else.** It is the one that costs
+little and is seen, it uses a screen the platform already draws, and it does not
+ask anybody to carry a second inbox. C is a later decision and is not made
+harder by starting at B — nothing about B has to be undone to add it.
+
+**A notification list is not built either way** (a bell with a feed behind it):
+that is the spine's, not this module's, and if it is wanted it wants a spec.
 
 ### 9.6 · What the agreement level held
 Budget hours, budget amount, a lead consultant and contract dates. **Are any of
@@ -445,7 +508,10 @@ if no they go. Decision 2 dropped the level, not necessarily the facts.
 Real plans exist. Moving them means: each `(agreement, scope)` pair becomes one
 project; MySQL types become Postgres; every person becomes a register key on the
 right client, and anybody not on that register is a decision rather than a
-default. **How many plans, and on how many clients?**
+default. **Deferred, 2026-09-17** (*"I will bring the old plans data later"*). So the
+first build is authored fresh and the migration is written against the real
+data when it arrives, rather than against a guess at its shape. Nothing in the
+model is decided by it — which is what makes deferring it safe.
 
 ---
 

@@ -122,21 +122,54 @@ def set_unit(pg, key, at):
     pg.wait_for_timeout(400)
 
 
+def open_roles(pg, key):
+    """THE CELL IS THE LIST (§366). There is no "+ role" control to press any
+    more: the Roles cell is a ticking button, so opening it is pressing the
+    cell — and the dialog's copy is preferred, because a row's cell and the
+    open person dialog draw the same picker for the same person."""
+    return pg.evaluate(
+        """(k)=>{const s=document.querySelector('#modal-b [data-proleset="'+k+'"]')
+                 || document.querySelector('[data-proleset="'+k+'"]');
+           if(!s) return false;
+           const b=s.previousElementSibling;
+           if(!b||!b.classList.contains('ssbtn')) return false;
+           b.click(); return true;}""", key)
+
+
+def row_label(r):
+    """The option's own text, without the hint that rides beside it (§130.9)."""
+    return r
+
+
 def pick_role(pg, key, label):
     """THROUGH THE CONTROL A PERSON ACTUALLY TOUCHES. The native <select> is
     hidden in place behind a searchsel button (§45.5), so setting `.value` from
     script would test a path nobody walks — and the bug this file exists for was
-    precisely that the visible control could not be reached."""
-    pg.evaluate(
-        """(k)=>{const s=document.querySelector('[data-prole-pick="'+k+'"]');
-           (s.__ssbtn||s.previousElementSibling).click();}""", key)
+    precisely that the visible control could not be reached.
+
+    THE ROW CARRIES ITS HINT NOW, so it is matched on the option's own text
+    rather than on the whole row: "BU owner" is a row reading "BU owner · held
+    by Ashraf Laithy", and an equality test against the lot would find nothing
+    on every row this list has something to say about."""
+    if not open_roles(pg, key):
+        return False
     pg.wait_for_timeout(250)
     hit = pg.evaluate(
         """(n)=>{const r=[...document.querySelectorAll('.sspop .ssrow')]
-             .find(x=>x.textContent.trim()===n);
+             .find(x=>{const c=x.cloneNode(true);
+                       [...c.querySelectorAll('.sshint')].forEach(h=>h.remove());
+                       return c.textContent.trim()===n;});
            if(!r) return false; r.click(); return true;}""", label)
-    pg.wait_for_timeout(500)
+    pg.wait_for_timeout(600)
     return hit
+
+
+def has_picker(pg, key=None):
+    """Whether this person's Roles cell IS a list — the presence the old
+    `[data-prole-open]` stood for."""
+    sel = '[data-proleset]' if key is None else '[data-proleset="%s"]' % key
+    return pg.evaluate("(q)=>!!document.querySelector('#modal-b '+q) ||"
+                       " !!document.querySelector(q)", sel)
 
 
 def roles_of(pg, key):
@@ -170,11 +203,11 @@ with sync_playwright() as p:
     print("\n1. one dropdown, not two")
     people(pg)
     open_row(pg, "cfo")
-    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-    pg.wait_for_timeout(300)
-    ck("the role picker is there",
-       pg.evaluate("!!document.querySelector('[data-prole-pick]')"))
+    # REWRITTEN, NEVER LOOSENED (§218). The control this asserted — the "+ role"
+    # button and the select it opened — is gone: the Roles cell IS the ticking
+    # list (§366). The claim is the same one, that there is a way to give a role
+    # and exactly one control to do it with.
+    ck("the role picker is there", has_picker(pg, "cfo"))
     ck("and there is no second dropdown",
        pg.evaluate("document.querySelectorAll('[data-prole-where]').length") == 0,
        pg.evaluate("document.querySelectorAll('[data-prole-where]').length"))
@@ -188,9 +221,6 @@ with sync_playwright() as p:
         people(pg)
         open_row(pg, "cfo")
         set_unit(pg, "cfo", at)
-        pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-        pg.wait_for_timeout(300)
         ck(role + ": the option is in the list", pick_role(pg, "cfo", role))
         # §186: A SEAT ASKS FIRST, and Company CEO is one. The other three in
         # this list are jobs on a plan and land on the pick as they always
@@ -231,9 +261,6 @@ with sync_playwright() as p:
         people(pg)
         open_row(pg, "cfo")
         set_unit(pg, "cfo", "mobile")
-        pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-        pg.wait_for_timeout(300)
         pick_role(pg, "cfo", role)
         # NOTHING YET — an ask that grants anyway is a notice, not a question.
         ck(role + ": not granted on the pick",
@@ -258,9 +285,6 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "")
-    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-    pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     said = stop_text(pg) or ""
     ck("no Unit: nothing granted", roles_of(pg, "cfo") == [], roles_of(pg, "cfo"))
@@ -269,9 +293,6 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "mobile")
-    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-    pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "Company CEO")
     said = stop_text(pg) or ""
     ck("wrong kind: nothing granted",
@@ -293,9 +314,6 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "")
-    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-    pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     ck("refused first", roles_of(pg, "cfo") == [], roles_of(pg, "cfo"))
     set_unit(pg, "cfo", "nigeria")
@@ -318,9 +336,6 @@ with sync_playwright() as p:
     people(pg)
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "")
-    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-    pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     ck("refused", stop_text(pg) is not None)
     # Cancel is the dialog's now (§116): `data-rowcancel` was the open row's,
@@ -329,9 +344,12 @@ with sync_playwright() as p:
     pg.wait_for_timeout(500)
     ck("Cancel takes the refusal away", stop_text(pg) is None, stop_text(pg))
     open_row(pg, "cfo")
-    ck("and reopening the row starts clean — the picker is shut",
-       pg.evaluate("!!document.querySelector('[data-prole-open]')") and
-       stop_text(pg) is None, stop_text(pg))
+    # REWRITTEN (§218): "the picker is shut" was a fact about a control that
+    # opened and closed. What has to be true now is that the cell is a list
+    # again and the refusal is not — a list that came back with somebody else's
+    # refusal standing on it is the state this section exists to rule out.
+    ck("and reopening the row starts clean — no refusal standing",
+       has_picker(pg, "cfo") and stop_text(pg) is None, stop_text(pg))
 
     # ── 5. A RETIRED ROW IS REFUSED, AND NOTHING IS WRITTEN ──────────
     print("\n5. a retired row holds nothing and is offered nothing")
@@ -340,8 +358,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>{retirePerson('cfo'); paint();}")
     pg.wait_for_timeout(400)
     open_row(pg, "cfo")
-    ck("no picker on a retired row",
-       not pg.evaluate("!!document.querySelector('[data-prole-open]')"))
+    ck("no picker on a retired row", not has_picker(pg, "cfo"))
     ck("and it says why", "retired" in (stop_text(pg) or "").lower(), stop_text(pg))
     ck("no unit was pointed at them",
        pg.evaluate("JSON.stringify(UNIT_ROLES.nigeria)") == was)
@@ -355,9 +372,6 @@ with sync_playwright() as p:
         "[JSON.stringify(UNIT_ROLES.nigeria), personBy('cfo').unit||null]")
     open_row(pg, "cfo")
     set_unit(pg, "cfo", "nigeria")
-    pg.evaluate("()=>{const b=document.querySelector('[data-prole-open]');"
-                "if(b) b.click();}")
-    pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     mid = pg.evaluate("[JSON.stringify(UNIT_ROLES.nigeria), personBy('cfo').unit||null]")
     ck("the grant landed first", mid != before, mid)
@@ -407,9 +421,37 @@ with sync_playwright() as p:
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 900})
         people(pg)
-        ck("%d: no field in the table" % w,
-           pg.evaluate("document.querySelectorAll('.peoplecfg input, .peoplecfg select').length") == 0,
-           pg.evaluate("document.querySelectorAll('.peoplecfg input, .peoplecfg select').length"))
+        # ── REWRITTEN, NEVER DELETED (§218, §366) ────────────────────
+        # This asserted NO field in the table, and §366 reverses exactly that
+        # at Islam's instruction: one cell opens on a double-click. What made
+        # the old claim worth having was that nothing could overflow a cell it
+        # was not in — so the claim becomes the one that still carries it:
+        # AT REST nothing is a field but the Roles cells, which are the ticking
+        # list and are one per row; OPENED there is exactly one more, and it is
+        # the cell that was pressed. Both ends (§94.2), or a build that never
+        # opened anything would pass the half above it.
+        rest = pg.evaluate("""()=>({
+          fld: document.querySelectorAll('.peoplecfg input.fld, .peoplecfg select.fld').length,
+          roles: document.querySelectorAll('.peoplecfg [data-proleset]').length,
+          rows: document.querySelectorAll('.peoplecfg tbody tr').length,
+          open: document.querySelectorAll('.peoplecfg td.pcellopen').length})""")
+        ck("%d: at rest the table holds no field but the roles lists" % w,
+           rest["fld"] == 0 and rest["open"] == 0 and rest["roles"] == rest["rows"], rest)
+        who = pg.evaluate("()=>PEOPLE[2].key")
+        pg.dblclick('[data-pcell="%s|Job title"]' % who)
+        pg.wait_for_timeout(350)
+        now = pg.evaluate("""()=>({
+          open: document.querySelectorAll('.peoplecfg td.pcellopen').length,
+          fld: document.querySelectorAll('.peoplecfg td.pcellopen .fld').length,
+          fits: [...document.querySelectorAll('.peoplecfg td.pcellopen .fld')]
+                  .every(f=>f.getBoundingClientRect().right <=
+                            f.closest('td').getBoundingClientRect().right + 1)})""")
+        ck("%d: a double-click opens exactly one cell, and it fits it" % w,
+           now["open"] == 1 and now["fld"] == 1 and now["fits"], now)
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(300)
+        ck("%d: and Escape closes it" % w,
+           pg.evaluate("document.querySelectorAll('.peoplecfg td.pcellopen').length") == 0)
         ck("%d: every row is one line" % w,
            pg.evaluate("""()=>{const hs={};
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
@@ -426,13 +468,74 @@ with sync_playwright() as p:
              document.querySelectorAll('#modal-b .pdf .fld').forEach(f=>{
                if(f.scrollWidth>f.clientWidth+1) bad++;});
              return bad;}""") == 0)
+        # PRESSED, not merely present (§70, §93.4): the fault this file was
+        # written for was a control that was in the document and unreachable.
         ck("%d: the role picker can be pressed" % w,
-           pg.evaluate("""()=>{const a=document.querySelector('#modal-b [data-prole-open]');
-             if(!a) return false; const q=a.getBoundingClientRect();
+           pg.evaluate("""()=>{const s=document.querySelector('#modal-b [data-proleset]');
+             const a=s&&s.previousElementSibling;
+             if(!a||!a.classList.contains('ssbtn')) return false;
+             const q=a.getBoundingClientRect();
              const h=document.elementFromPoint(Math.round(q.left+q.width/2),
                                                Math.round(q.top+q.height/2));
              return !!h && (h===a || a.contains(h));}"""))
         close_row(pg)
+
+    # ── 9. ENTER STORES IT AND ESCAPE THROWS IT AWAY (§366) ────────────
+    # Read back off the PERSON and never off the screen (§96): a box holding
+    # what was typed says nothing about what was stored. BOTH ENDS (§94.2),
+    # because "Escape discards" is satisfied perfectly by a build that never
+    # commits anything at all.
+    #
+    # AND ESCAPE HAD TO BE MADE TO DISCARD, which is why this is asserted
+    # rather than assumed: Chromium fires `blur` — and with it `change` — on a
+    # focused element being REMOVED, so the paint that closes the cell was
+    # committing the very value Escape had just been pressed to abandon.
+    # Measured, not reasoned.
+    print("\n9. what the two keys do to the data")
+    pg.set_viewport_size({"width": 1600, "height": 900})
+    people(pg)
+    who = pg.evaluate("()=>PEOPLE[2].key")
+    was = pg.evaluate("(k)=>personBy(k).title || ''", who)
+
+    def type_into(cell, text):
+        """TYPED, NEVER ASSIGNED (§100.3). Setting `.value` from script leaves
+        the field clean as far as the browser is concerned, so the `change`
+        that commits never fires and a WORKING build reports as broken — which
+        is what the first run of this section did."""
+        pg.dblclick('[data-pcell="%s|%s"]' % (who, cell))
+        pg.wait_for_timeout(350)
+        # AND IT DEGRADES (§215, in a file whose §8 already does). On a build
+        # where nothing opens, `pg.click` waits thirty seconds and then THROWS
+        # — so the section died and reported nothing, on exactly the build it
+        # exists to catch. Found by falsifying, not by reading.
+        if not pg.evaluate("!!document.querySelector('.peoplecfg td.pcellopen .fld')"):
+            return False
+        pg.click(".peoplecfg td.pcellopen .fld")
+        pg.keyboard.press("ControlOrMeta+A")
+        pg.keyboard.type(text)
+        return True
+
+    opened = type_into("Job title", "Typed and kept")
+    ck("the cell opens at all", opened)
+    if opened:
+        pg.keyboard.press("Enter")
+    pg.wait_for_timeout(450)
+    ck("Enter stores what was typed",
+       pg.evaluate("(k)=>personBy(k).title", who) == "Typed and kept",
+       pg.evaluate("(k)=>personBy(k).title", who))
+
+    if type_into("Job title", "Typed and thrown away"):
+        pg.keyboard.press("Escape")
+    pg.wait_for_timeout(450)
+    ck("...and Escape leaves the stored value exactly as it was",
+       pg.evaluate("(k)=>personBy(k).title", who) == "Typed and kept",
+       pg.evaluate("(k)=>personBy(k).title", who))
+
+    # PUT IT BACK (§94.2): every later assertion in this file reads this
+    # register, and a check that leaves the world it measured is measuring
+    # whatever the last section did.
+    pg.evaluate("(a)=>{personBy(a[0]).title = a[1]; paint();}", [who, was])
+    pg.wait_for_timeout(300)
 
     ck("no console errors", not errs, errs[:3])
     b.close()

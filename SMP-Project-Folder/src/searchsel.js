@@ -142,10 +142,29 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§366) ───────────────────
+     `data-sslabel="count"` above is a WORD chosen per control; this is the
+     same decision one step further — the register's Roles cell is a row of
+     chips, and the closed control has to be that cell rather than a comma
+     list of role names. The markup is supplied rather than composed here,
+     because what a chip looks like belongs to the register and this file must
+     not learn it (§53.5).
+
+     WRITTEN ON EVERY setLabel, NEVER ONCE AT WIRE TIME: a tick calls this to
+     refresh the label, and a caller whose label is a rendering of the data
+     hands over a fresh one by re-rendering — so the attribute is read, not
+     cached. `data-sstitle` carries the hover, because the markup's own text
+     would arrive with the chips' words run together. */
   function setLabel(sel, btn){
+    var lb = btn.querySelector(".sslabel");
+    if (sel.dataset.sshtml != null) {
+      lb.innerHTML = sel.dataset.sshtml;
+      btn.title = sel.dataset.sstitle || "";
+      return;
+    }
     /* An em-dash for nothing chosen, which is the word the plan's own cells
        already use for nobody (§15.1: absent, never zero). */
-    btn.querySelector(".sslabel").textContent = textOf(sel) || "—";
+    lb.textContent = textOf(sel) || "\u2014";
     btn.title = textOf(sel) || "";
   }
 
@@ -270,6 +289,21 @@ var SEARCHSEL = (function(){
       pop.appendChild(allrow);
     } else {
       pop.appendChild(q);
+    }
+    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§366) ─────────────
+       Supplied by the caller and drawn nowhere else. The register's Roles
+       list can grant what is held at this person's own place and nothing
+       more, so the roles held elsewhere and the ones that come from the plan
+       are stated at its head — they used to be the "…" the cell drew, which
+       is a CONTROL (a hover cannot be reached on a touch screen and cannot be
+       read aloud), and with one press opening the list the list is that
+       place. Below the search, because it is a statement and not a row to
+       find by typing. */
+    if (sel.dataset.sshead) {
+      var head = document.createElement("div");
+      head.className = "sshead";
+      head.innerHTML = sel.dataset.sshead;
+      pop.appendChild(head);
     }
     pop.appendChild(list);
     pop.appendChild(none);
@@ -458,6 +492,28 @@ var SEARCHSEL = (function(){
       close();
       document.querySelectorAll("select").forEach(enhance);
     },
-    close: close
+    close: close,
+    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§366) ─────────────
+       §130.1 commits a tick WITHOUT repainting, and says in its own words
+       what makes that safe: every field this control was used on goes through
+       the shell's one `data-fld` listener, which does not repaint. Granting a
+       ROLE is not one of those — it changes the chips, it can take the role
+       off whoever held it, and a seat has a question to ask — so that handler
+       must paint, and a paint at the top of `wire()` calls close().
+
+       So the register holds the open list as state (`PROLEPICK`) and asks for
+       it back at the end of the paint. The popup is rebuilt rather than
+       preserved: it is `position:fixed` on <body> and its contents are a
+       rendering of the select, so a fresh one is the same popup with the new
+       answer in it. Returns false when there is nothing to open, so a caller
+       can clear its own state rather than holding a key to a control that is
+       no longer drawn (§61). */
+    openOn: function(sel){
+      if (!sel) return false;
+      var btn = buttonFor(sel);
+      if (!btn) return false;
+      openFor(sel, btn);
+      return true;
+    }
   };
 })();

@@ -5206,6 +5206,29 @@ suite per feature.
 
 ## In flight
 
+**Spec 059 — the client's People register: a cell is the control (§366), on the
+branch, built 2026-09-17.** Islam: *"for the client registry I'd like to do some
+in line adjustments like the phone, employee ID, email, the unit/function, job
+title, etc. and about the roles why do I need to add them as chips why can't we
+make it a multi tick serarchable drop down to add the roles?"* A double-click
+opens one cell as the field the dialog already draws for it — Enter stores it,
+Escape throws it away — and the Roles cell IS the ticking list, with the chips it
+already draws handed over as the closed control's label so there is one builder
+for what a role looks like. **The first drawing took the Roles column 209 → 477px
+and grew every row 39 → 49, and the mockup is what said so** (rule 1c); shipped it
+is 236px and 39. §116's reason for moving editing into a dialog is not withdrawn
+and the assertion carrying it is REWRITTEN rather than loosened (§218): one
+control per cell, none past its cell. **Islam's own instruction kept it correct** —
+*"before building I urget you to check main"* — because main had moved 43 commits
+and carried the minted/adopted pair, without which inline editing would have been
+taken off every adopted row. **Escape had to be MADE to discard** (Chromium fires
+`change` on a focused element being removed), and the open field's 8px overrun was
+seven dead `min-width` rules matching nothing since §116. Verified: role-picker,
+people-dialog, seat-grant, smo-team, forefront-team, duplicates and no-jump all
+green; authoriser 683/0, change list 140/0; proved able to fail three ways from
+the sources (1 / 7 / 2 red), restored and rebuilt byte-identical. **Waiting on
+Islam: the merge.**
+
 **Spec 056 — the client and its modules (§362), on the branch, stage 1 of
 six built 2026-09-16.** Islam, of the page the console's *Settings* chip
 opens: *"theclient settings shouldn't open the strategy banner in the top this

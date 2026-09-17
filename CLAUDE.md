@@ -9859,7 +9859,72 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
+*Last Updated: 2026-09-17 &mdash; **&sect;366: the cell is the control (spec
+059).** Islam, of the client's People register: *"for the client registry I'd
+like to do some in line adjustments like the phone, employee ID, email, the
+unit/function, job title, etc. and about the roles why do I need to add them as
+chips why can't we make it a multi tick serarchable drop down to add the
+roles?"* **TWO ASKS, ONE ANSWER SAID TWICE**: a cell should be where the thing
+is changed. &sect;116's reason for moving every edit into a dialog is not
+withdrawn &mdash; its own record says what it was, *every collision this register
+has had was a control being clicked inside a 158px cell* &mdash; so the
+assertion carrying it is REWRITTEN rather than loosened (&sect;218): **one
+control per cell, none past its cell, one per row, at four widths**.
+**THE FIRST DRAWING UNDID HIS OWN AUGUST RULE AND THE MOCKUP SAID SO** (rule
+1c): a ticking button BESIDE the chips sizes itself to its widest entry, so the
+Roles column went **209 &rarr; 477px** and the table 1355 &rarr; 1623 &mdash; the
+very column he had narrowed in August, doubled by the change meant to tidy it.
+So the cell keeps what it draws and the WHOLE THING becomes pressable: the chips
+are handed over as the closed control's label (`data-sshtml`) rather than
+re-drawn, one builder for what a role looks like, open, shut and on a row nobody
+may edit (&sect;53.5) &mdash; 236px, +27 for the box's edges and its caret.
+**AND IT GREW EVERY ROW, WHICH ONE CELL COULD NOT HAVE SHOWN**: 39 &rarr; 49px on
+all 33, found by drawing the WHOLE column, because *a single cell is the one
+sample that cannot show a row-height fault* &mdash; there is nothing beside it to
+be the same height as. **THE GESTURE IS A DOUBLE-CLICK BECAUSE A SINGLE CLICK
+ALREADY DOES SOMETHING** (his: *"1 copes the item like the mobile or email"*
+&mdash; &sect;93.6's copy-on-click), measured rather than assumed, with the word
+it selects cleared or the first keystroke replaces something nobody chose.
+**ESCAPE COMMITTED, AND ONLY MEASURING SAID SO**: Chromium fires `blur` &mdash;
+and `change` before it &mdash; on a FOCUSED element being removed, so the paint
+that closed the cell wrote the value Escape had just been pressed to abandon
+(&sect;93.11's family); the value is put back BEFORE the paint, so whatever fires
+writes what was already there. **THE 8px OVERRUN WAS DEAD CODE**: seven
+`min-width:150px` rules in `arrange.css` measured as matching **nothing** since
+&sect;116 moved those fields into the dialog, deleted (&sect;24) &mdash; and
+&sect;110.8 met from the other side, since Chromium resolves such a child's
+`width:100%` against the cell's PADDING box, where `display:block; width:auto`
+fills the content box with no percentage to resolve. **THE &times; GOES**
+(*"ok for both"*): unticking is the way off, and two ways to take one off is two
+answers to one act. **WHAT THE LIST CANNOT SET IS STATED ABOVE IT AND NEVER
+TICKED** &mdash; a role held somewhere this register cannot reach, and one that
+comes from being named on a plan (&sect;147.7) &mdash; which is what
+`seat-grant.py` had to be rewritten around: it read `ADDROLE_KIND`, the ONE
+pending value of a picker that had exactly one, so `""` meant *nothing is being
+offered*; a ticking list's ticks are what the person HOLDS, so an empty list is
+not the claim and asserting it **reported a correct build broken**. Cancel's
+promise is asserted as *the list is exactly what it was before the pick*,
+snapshotted rather than re-derived. **AND ISLAM'S OWN INSTRUCTION IS WHAT KEPT
+IT CORRECT** &mdash; *"before building I urget you to check main"*: main had
+moved **43 commits** carrying `isMintedRow` against `isForefrontRow` (spec 058
+&sect;3a.1), so built against the branch's copy this would have taken inline
+editing off **every ADOPTED row**, which is the client's own person. **AND THE
+NEW SECTION'S OWN FIRST TWO FAILURES WERE THE CHECK** (&sect;100.3): setting
+`f.value` leaves the box clean as far as the browser is concerned, so the
+`change` that commits never fires and a working build reported as broken &mdash;
+and falsifying it found &sect;215 in a file whose &sect;8 already degrades, the
+section DYING on a 30s `pg.click` rather than reporting (4 red and dead against
+7 red and complete). **Proved able to fail three ways from the SOURCES**
+(&sect;276), one per decision &mdash; **1 / 7 / 2 red**, the last printing
+`{'48': 1, '49': 32}`, &sect;366.2's row-height fault reproduced &mdash; with the
+tree restored and rebuilt **byte-identical to the build the breaks were made
+from** (&sect;343.9). **The server needed nothing and it is asserted**
+(&sect;172): no `api/`, `lib/` or `db/` file touched, read off the diff; 683/0
+and 140/0, nothing stored moves, nothing migrated. **RECORDED, NOT DONE**: a
+cell opens one at a time, so three fields on one row is three double-clicks or
+the dialog &mdash; which is what the dialog is for.*
+
+*Earlier the same day: **&sect;365: the sweep before the merge, and
 the four things it found.** Islam, of the branch carrying &sect;359&ndash;&sect;364:
 *"make sure that if we merge to main we will not loose any client access or mess
 with any current behavior."* **THE HONEST SWEEP HAD TO BE OF THE MERGED TREE**,

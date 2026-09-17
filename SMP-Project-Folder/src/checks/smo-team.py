@@ -47,6 +47,28 @@ def setup(pg, page):
     pg.wait_for_timeout(800)
 
 
+def tick_role(pg, key, role):
+    """TICKING THE ROLES LIST (§366). The "+ role" control and the select it
+    opened are gone: the Roles cell IS a ticking list, so a grant is an option
+    going on and the select firing its own change — searchsel's `toggle`,
+    driven from script because this file is about the RULE rather than the
+    control."""
+    return pg.evaluate("""%s""" % TICK_JS, [key, role])
+
+
+TICK_JS = """(a) => {
+  const k = a[0], role = a[1];
+  const sel = document.querySelector('#modal-b [data-proleset="' + k + '"]')
+           || document.querySelector('[data-proleset="' + k + '"]');
+  if (!sel) return null;
+  const op = [...sel.options].find(o => o.value === role);
+  if (!op) return { has: false };
+  op.selected = true;
+  sel.dispatchEvent(new Event('change', { bubbles: true }));
+  return { has: true };
+}"""
+
+
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium",
                           args=["--no-sandbox", "--disable-dev-shm-usage"])
@@ -190,9 +212,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(250)
     pg.click('[data-pedit="%s"]' % floor)
     pg.wait_for_timeout(500)
-    pg.click('[data-prole-open="%s"]' % floor)
-    pg.wait_for_timeout(350)
-    pg.select_option('[data-prole-pick="%s"]' % floor, "smoteam")
+    tick_role(pg, floor, "smoteam")
     pg.wait_for_timeout(600)
     # A SEAT IS ASKED ABOUT (§186), AND THIS FILE STILL ASSERTED §92's SHAPE.
     # That section granted a one-destination role ON THE PICK, which made the
@@ -233,7 +253,7 @@ with sync_playwright() as p:
     # Cancel where the ⋮ was (spec 012 §2.1), and the first version of this
     # waited thirty seconds for a kebab the product is right not to draw. The
     # check was wrong, not the register.
-    pg.evaluate("(k)=>{ revokePersonRole(k,'smoteam','group'); ADDROLE=null; ADDROLE_KIND=''; paint(); }", floor)
+    pg.evaluate("(k)=>{ revokePersonRole(k,'smoteam','group'); PROLEPICK=null; paint(); }", floor)
     pg.wait_for_timeout(500)
     # THE DIALOG IS WHERE SAVE AND CANCEL ARE NOW (§116). The row keeps its ⋮
     # whatever is open, because the register no longer edits — so the question
@@ -245,9 +265,7 @@ with sync_playwright() as p:
     # what the old pair did silently, so both ends are asked (§94.2).
     pg.evaluate("(k)=>{ attachPersonAt(personBy(k), null); paint(); }", floor)
     pg.wait_for_timeout(400)
-    pg.click('[data-prole-open="%s"]' % floor)
-    pg.wait_for_timeout(350)
-    pg.select_option('[data-prole-pick="%s"]' % floor, "owner")
+    tick_role(pg, floor, "owner")
     pg.wait_for_timeout(500)
     said = pg.evaluate("()=>{const e=document.querySelector('.rolestop');"
                        "return e?e.textContent.trim():null;}")

@@ -5658,8 +5658,8 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
 /* Transient register state. None of this is the tenant's data — it is which
    control happens to be open — so none of it is saved (§25.2: a property of
    the screen never belongs in the state graph).
-     ADDROLE      whose "+ role" control is open, by person key
-     ADDROLE_KIND which role that control currently shows
+     PROLEPICK    whose Roles list is open, by person key
+     PCELL        which one cell of the register is being typed into
      NEWPERSON    what has been typed into the add-a-person row
      PICKING      which assignment picker is open, "<unit>|<role>"
      PICKQ        what has been typed into it */
@@ -5680,7 +5680,21 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
-var ADDROLE = null, ADDROLE_KIND = "owner";
+/* ── WHOSE ROLES LIST IS OPEN (§366) ──────────────────────────────────
+   The Roles cell IS a ticking list now, and granting a role has to repaint —
+   it changes the chips, and it takes the role off whoever held it, whose row
+   is elsewhere in the table. A paint closes every popup (searchsel's wire()
+   opens with close()), so the open list is held here and asked for back at
+   the end of the paint. It replaces `ADDROLE`/`ADDROLE_KIND`, which were the
+   "+ role" control's own state and have no control left to describe (§24). */
+var PROLEPICK = null;
+/* ── AND WHICH CELL IS BEING TYPED INTO (§366) ─────────────────────────
+   `{key, field}` — the person and the dialog's own label for the field — or
+   null. One at a time, for §79.2's reason: two open cells are two unsaved
+   states. There is no Save and no Cancel, because leaving a bound field is
+   what commits it (§35) and Escape puts it back, which is the Tracker's shape
+   one module over (spec 054). */
+var PCELL = null;
 /* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
@@ -32208,7 +32222,15 @@ function renderPeople(){
        what made this the widest column on the page. The overflow is a CONTROL,
        not a hover: a hover cannot be reached on a touch screen and cannot be
        read aloud, and this is the only place the second role appears. */
-    var openRoles = PROLES === p.key;
+    /* ── THE CHIPS, AND THEY ARE THE PICKER'S LABEL TOO (§366) ─────
+       `asLabel` is true when this cell is about to BE the ticking button:
+       there, the "…" is a span rather than a button (a button inside a button
+       is not markup, and one press now opens the whole list anyway) and the
+       expand/collapse it drove has nothing left to do. Read-only it is still
+       the control Islam asked for on 2026-08-22 — the only place a second role
+       appears, reachable on a touch screen and readable aloud. */
+    var asLabel = !!editable && personActive(p);
+    var openRoles = PROLES === p.key && !asLabel;
     var shownRoles = (rs.length > 1 && !openRoles) ? rs.slice(0, 1) : rs;
     var hiddenRoles = rs.length - shownRoles.length;
     var held = rs.length
@@ -32237,18 +32259,23 @@ function renderPeople(){
           var derived = SMPRules.isOwnLinesRole(r.role);
           var tip = roleName(r.role) + " \u00b7 " + at +
             (derived ? " \u2014 comes from being named on the plan; change the Owner there to move it" : "");
+          /* ── AND THERE IS NO \u00d7 ANY MORE (Islam, 2026-09-17) ──────────
+             Removing a role is UNTICKING it in the list this cell opens, and
+             two ways to take one off is two answers to one act (§53.5). The
+             chip is a reading of what somebody holds again, which is what it
+             is on the thirty rows nobody is editing. The full "role \u00b7 where"
+             is still on the hover, as it was. */
           return '<span class="rolechip" title="' + esc(tip) + '">' +
             '<b>' + esc(roleName(r.role)) + '</b>' +
             (elsewhere ? '<span class="rolewhere">' + esc(at) + '</span>' : '') +
-            (editable && !derived
-              ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
-                '" title="Remove this role" aria-label="Remove this role">&times;</button>'
-              : '') + '</span>';
+            '</span>';
         }).join("") +
         (hiddenRoles
-          ? '<button class="rolemore" data-proles="' + p.key + '" title="Show ' +
-            hiddenRoles + ' more" aria-label="Show ' + hiddenRoles + ' more role' +
-            (hiddenRoles === 1 ? "" : "s") + ' for ' + esc(p.name) + '">&hellip;</button>'
+          ? (asLabel
+              ? '<span class="rolemore">&hellip;</span>'
+              : '<button class="rolemore" data-proles="' + p.key + '" title="Show ' +
+                hiddenRoles + ' more" aria-label="Show ' + hiddenRoles + ' more role' +
+                (hiddenRoles === 1 ? "" : "s") + ' for ' + esc(p.name) + '">&hellip;</button>')
           : (openRoles && rs.length > 1
               ? '<button class="rolemore on" data-proles="" title="Show fewer" ' +
                 'aria-label="Show fewer roles">&lsaquo;</button>'
@@ -32258,7 +32285,12 @@ function renderPeople(){
          answers "what does this person hold" for somebody scanning the
          register — and while the two dropdowns are on screen the answer is
          being typed, not read. */
-      : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
+      /* THE PILL STAYS WHILE THE LIST IS OPEN (reversing the 2026-08-24
+         note above, because what it was about is gone). That note removed it while
+         two dropdowns stood in the cell — "the answer is being typed, not
+         read". Nothing stands in the cell now: the list opens OVER the page,
+         and the pill is the label of the button you pressed to open it. */
+      : '<span class="pill none">No role</span>';
     /* THE MARK RIDES ON `held`, so all three exits below carry it: whether
        this person is also on the Forefront team is a fact about them and not
        about the editing state, and appending it at each `return` is three
@@ -32306,17 +32338,84 @@ function renderPeople(){
        other; both have to say something before somebody holds a role somewhere,
        and where they cannot agree the row explains it rather than doing
        nothing. */
-    var addRole = ADDROLE === p.key;
-    return held +
-      (addRole
-        ? '<select class="fld rolepick" data-prole-pick="' + p.key + '" ' +
-            'aria-label="Which role to give ' + esc(p.name) + '">' +
-            '<option value=""' + (ADDROLE_KIND ? "" : " selected") + '>Choose a role\u2026</option>' +
-            ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
-              return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
-                '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p) + seatAsk(p)
-        : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
+    /* ── THE CELL IS THE LIST (§366, Islam 2026-09-17) ───────────────
+       "for the role I'm afraid it still overflows as a box it can open which
+       a button as you do but not overflowing on other voxes can we make this
+       work?" — and the way it works is that the cell keeps exactly what it
+       already draws and the whole thing becomes pressable. Nothing is added
+       BESIDE the chips, which is what the first drawing did: a ticking button
+       sized to its widest entry beside the two chips took the column from
+       209px to 477 and the table from 1355 to 1623, and undid his own August
+       rule about this column in the same stroke.
+
+       The chips are handed over as the closed control's LABEL (`data-sshtml`,
+       §366 in searchsel.js) rather than re-drawn, so there is one builder for
+       what a role looks like and the cell reads the same open, shut and on a
+       row nobody may edit.
+
+       WHAT THE LIST CANNOT SET GOES IN ITS HEAD. A role held somewhere this
+       register cannot reach, and a role that comes from being named on the
+       plan, are both facts about this person that the ticks must not pretend
+       to own — they are stated above the list (`data-sshead`) where the "…"
+       used to be the only place they appeared. */
+    var mine = {}, cannot = [];
+    rs.forEach(function(r){
+      if (!SMPRules.isOwnLinesRole(r.role) &&
+          (r.at === home || roleWheres(r.role).length === 1)) mine[r.role] = 1;
+      else cannot.push(r);
+    });
+    /* WHO HOLDS THIS ROLE AT THIS PERSON'S OWN PLACE — asked of the graph
+       (§33: a responsibility role is a pointer on the THING), so the list says
+       "held by Rania Fahmy" as a fact rather than as a warning about a
+       possibility. A role that is not stored as a pointer answers null and
+       gets no such line, which is honest: nothing here knows who else holds
+       it. */
+    function roleHolder(role){
+      var fn = String(home).indexOf("fn:") === 0 ? FUNCTIONS[String(home).slice(3)] : null;
+      if (role === "owner")     return fn ? fn.head : (UNIT_ROLES[home] || {}).head;
+      if (role === "custodian") return fn ? fn.custodian : (UNIT_ROLES[home] || {}).custodian;
+      if (role === "fnhead")    return fn ? fn.head : null;
+      return null;
+    }
+    var opts = ROLES.filter(function(r){ return roleIsGrantable(r.key); })
+      .map(function(r){
+        var wheres = roleWheres(r.key);
+        var fits = wheres.length === 1 || wheres.some(function(w){ return w.v === home; });
+        /* THE SAME TWO SENTENCES THE REFUSAL USES (§110), said BEFORE the
+           press rather than after it — `roleAtWord` is the one word for what
+           kind of place a role is held at, and which FIELD answers it is read
+           off `roleWheres()` rather than guessed (§135.6). */
+        var hint = "";
+        if (!fits) {
+          var atCo = wheres.every(function(w){ return String(w.v).indexOf("co:") === 0; });
+          hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
+                 (atCo ? "Company" : "Unit") + " first";
+        } else if (SMPRules.isSeatRole(r.key)) {
+          hint = "a seat \u2014 asks before it lands";
+        } else {
+          var h = roleHolder(r.key);
+          var hp = h && h !== p.key ? personBy(h) : null;
+          if (hp) hint = "held by " + hp.name;
+        }
+        return '<option value="' + esc(r.key) + '"' + (mine[r.key] ? " selected" : "") +
+          (hint ? ' data-hint="' + esc(hint) + '"' : '') + '>' + esc(r.name) + '</option>';
+      }).join("");
+    var headHtml = cannot.length
+      ? '<b>Already held, and not set here</b>' +
+        cannot.map(function(r){
+          return '<span class="rolechip"><b>' + esc(roleName(r.role)) + '</b>' +
+            '<span class="rolewhere">' +
+            esc(SMPRules.isOwnLinesRole(r.role) ? "from the plan" : whereLabel(r.at)) +
+            '</span></span>';
+        }).join("")
+      : "";
+    return '<select class="roleset" multiple data-proleset="' + esc(p.key) + '"' +
+        ' data-sshtml="' + esc(held) + '"' +
+        ' data-sstitle="' + esc(rs.map(function(r){
+            return roleName(r.role) + " \u00b7 " + whereLabel(r.at); }).join(" \u00b7 ")) + '"' +
+        (headHtml ? ' data-sshead="' + esc(headHtml) + '"' : '') +
+        ' aria-label="Roles for ' + esc(p.name) + '">' + opts + '</select>' +
+      roleStop(p) + seatAsk(p);
   }
 
   /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§110) ─────
@@ -32419,7 +32518,17 @@ function renderPeople(){
      roles, no password state and no declaration to accept. */
   function personFields(p, add){
     var out = [];
-    var F = function(label, html, wide){ out.push({ label:label, html:html, wide:!!wide }); };
+    /* ── THE NOTE IS NOT THE FIELD (§366) ──────────────────────────
+       Three of these carry a sentence under them — "not on the Official BU
+       list", "the list says Retail Stores", "from the unit above" — and the
+       dialog draws field and note together, as it always has. The REGISTER
+       draws one field inside a 150px cell where a second line takes the row
+       from 39px to 51, which is the fault §116.4 records three times in this
+       one section. So they are two values rather than one string, and the
+       cell takes the field alone. */
+    var F = function(label, html, wide, note){
+      out.push({ label:label, html:html, wide:!!wide, note:note || "" });
+    };
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
         '" placeholder="' + esc(knownName(p, DNAMES)) + '">');
@@ -32457,7 +32566,7 @@ function renderPeople(){
         mainbuNamesFor(p).map(function(nm){
           return '<option value="' + esc(nm) + '"' +
             (mainbuKey(nm) === mainbuKey(p.mainbu) ? " selected" : "") + '>' + esc(nm) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (p.mainbu && !mainbuBy(p.mainbu)
         ? '<span class="vwhy">not on the Official BU list</span>' : ''));
     var drift = mainbuDrift(p);
@@ -32468,7 +32577,7 @@ function renderPeople(){
         personAtChoices().map(function(o){
           return '<option value="' + esc(o.v) + '"' +
             (o.v === belongsKey(p) ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (drift && drift !== belongsKey(p)
         ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
       saidWhereNote(p, true));
@@ -32484,7 +32593,7 @@ function renderPeople(){
         companyChoices().map(function(o){
           return '<option value="' + esc(o.v) + '"' +
             (o.v === co ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (derived
         ? '<span class="vwhy">from the unit above</span>'
         : ''));
@@ -32546,7 +32655,7 @@ function renderPeople(){
       if (mine.length) drawn[f.label] = 1;
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
         (mine.length ? ' attn' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html +
+        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + f.note +
         (mine.length ? attnBlock(p, mine) : '') + '</div>';
     }).join("");
     /* What no field can answer, and anything whose field this person's form
@@ -32918,6 +33027,56 @@ function renderPeople(){
      Cancel, the Add row's three boxes under the wrong headings, the fields
      painting over their neighbours — was a control being clicked inside a
      cell, and none of them survives the move. */
+  /* ══ ONE CELL, OPENED WHERE IT IS READ (§366, spec 059) ═══════════════
+     Islam: "for the client registry I'd like to do some in line adjustments
+     like the phone, employee ID, email, the unit/function, job title, etc."
+
+     Changing one phone number cost three presses and a form holding twelve
+     fields, over the top of the table it was read from. A DOUBLE-CLICK opens
+     the one cell — his own answer, and it is what settles the clash he named
+     in the same breath: a single press on the Email or the Mobile already
+     copies it (§93.6), and making it also mean *edit* would take that away on
+     the two columns most worth editing.
+
+     IT IS THE TRACKER'S SHAPE, ONE MODULE OVER (spec 054): leaving the box
+     saves it — every bound field in this platform writes on `change`, which
+     for a text box means on blur (§35) — Escape puts it back, and there is no
+     Save and no Cancel, because there is nothing for them to do.
+
+     THE FIELD IS THE DIALOG'S OWN. `personFields()` is where every field this
+     register can change is written down, so the cell asks it rather than
+     drawing a second copy that could drift (§53.5) — and takes the FIELD
+     without its note, because a sentence under a value is what takes a 39px
+     row to 51 (§116.4). */
+  function cellField(p, label){
+    var f = personFields(p, false).filter(function(x){ return x.label === label; })[0];
+    return f ? f.html : "";
+  }
+  /* WHICH CELLS OPEN, AND THE GATE IS THE ONE THE MENU ASKS (spec 058 §3a.1).
+     A row the Forefront platform MINTED is read-only here and says where it is
+     set; a row it merely ADOPTED is the client's own person and every field is
+     theirs (§362.2). `isMintedRow` is the shared pair, so this cell and the
+     save answer alike (§42) — `p.forefront` would have taken the register back
+     off the adopted rows main had just given it. */
+  function cellOpens(p, label){
+    if (!mayEdit || SMPRules.isMintedRow(p)) return false;
+    /* A DERIVED COMPANY HAS NO FIELD TO OPEN. The dialog draws it `disabled`,
+       and a cell that opens onto a control nobody can use is §61's trap with
+       an extra press in front of it — the hover says where the answer comes
+       from instead. */
+    if (label === "Company" && personCompanyDerived(p)) return false;
+    return true;
+  }
+  function pcell(p, label, inner, cls, attrs){
+    var open = PCELL && PCELL.key === p.key && PCELL.field === label;
+    if (open) return '<td class="' + (cls ? cls + " " : "") + 'pcellopen">' +
+      cellField(p, label) + '</td>';
+    if (!cellOpens(p, label))
+      return '<td' + (cls ? ' class="' + cls + '"' : '') + (attrs || "") + '>' + inner + '</td>';
+    return '<td' + (cls ? ' class="' + cls + '"' : '') + (attrs || "") +
+      ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
+  }
+
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
@@ -32938,7 +33097,7 @@ function renderPeople(){
       /* `pname` so the frozen column can be named rather than counted (§69.19).
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it. */
-      '<td class="namecell" title="' + esc(p.name) + ' · ' + esc(p.key) + '">' +
+      pcell(p, "Name",
         /* INSIDE THE <b>, NEVER BESIDE IT. §88 makes `b` in a setup cell
            display:block, so a mark placed after it starts a second line and the
            row grows — measured at 51px against its neighbours' 39px. It is the
@@ -32946,19 +33105,20 @@ function renderPeople(){
            under it (the declaration note, the Official BU disagreement, this),
            and the rule is the same each time: a mark belongs inside the block
            it marks. */
-        '<b>' + esc(knownName(p, DNAMES)) + dupeMark(dupes) + '</b></td>' +
+        '<b>' + esc(knownName(p, DNAMES)) + dupeMark(dupes) + '</b>',
+        "namecell", ' title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '"') +
       (showCol("fullname")
-        ? '<td><span class="val">' + esc(p.name) + '</span></td>' : '') +
-      (showCol("empid") ? '<td>' + (p.empId
+        ? pcell(p, "Full name", '<span class="val">' + esc(p.name) + '</span>') : '') +
+      (showCol("empid") ? pcell(p, "Emp. ID", (p.empId
         ? '<span class="mono">' + esc(p.empId) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* READ-ONLY WHEREVER IT APPEARS. The key is minted (§35) and it is what
          `credentials` and `sessions` are keyed on — it is shown so somebody can
          be TOLD it, never so it can be changed. */
       (showCol("key") ? '<td><span class="mono">' + esc(p.key) + '</span></td>' : '') +
-      (showCol("title") ? '<td>' + (p.title
+      (showCol("title") ? pcell(p, "Job title", (p.title
         ? '<span class="val">' + esc(p.title) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* ── A DISAGREEMENT IS A MARK TOO (§116.4) ─────────────────────
          Both notes this cell and the next could add — "not on the Official BU
          list", "the list says Retail Stores" — were a SECOND LINE under a
@@ -32970,11 +33130,11 @@ function renderPeople(){
          `≠` rather than a warning colour: these two say the register and the
          client's own list DISAGREE, which is a thing to know rather than a
          thing that is broken. */
-      (showCol("mainbu") ? '<td>' + (p.mainbu
+      (showCol("mainbu") ? pcell(p, "Official BU", (p.mainbu
         ? '<span class="val">' + esc(p.mainbu) +
           (mainbuBy(p.mainbu) ? '' : '<span class="driftmark" title="' + esc(p.mainbu) +
             ' is not on the Official BU list.">&ne;</span>') + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* ── THE DECLARATION IS A MARK, NOT A SENTENCE (§116.4) ─────────
          Islam: the note "appears glitched and grows the row size with the word
          use it." It did: "They said Retail Stores — Use it" is a second line in
@@ -32986,24 +33146,33 @@ function renderPeople(){
          hover — the shape §87 already uses for a duplicate. The ACT moves to
          where acts now live: the dialog, reached from the attention queue,
          which is also what makes it findable rather than something to spot. */
-      (showCol("bu") ? '<td>' + (function(){
+      (showCol("bu") ? pcell(p, "Unit or function", (function(){
           var marks = saidMark(p) + (drift && drift !== belongsKey(p)
             ? '<span class="driftmark" title="' + esc(p.mainbu || "") + ' points at ' +
               esc(whereLabel(drift)) + ' on the Official BU list.">&ne;</span>' : '');
           return home
             ? '<span class="val">' + esc(home) + marks + '</span>'
             : '<span class="why" style="margin:0">&mdash;' + marks + '</span>';
-        })() + '</td>' : '') +
-      (showCol("company") ? '<td>' + (function(){
+        })()) : '') +
+      (showCol("company") ? pcell(p, "Company", (function(){
           var ck = personCompany(p);
+          var why = personCompanyDerived(p)
+            ? ' title="Comes from the unit. Change the Unit to move them."' : '';
           return ck
-            ? '<span class="val">' + esc(COMPANIES[ck].name) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>';
-        })() + '</td>' : '') +
-      (showCol("email") ? '<td class="wrapany">' + copyable(p.email, "val") + '</td>' : '') +
-      (showCol("phone") ? '<td>' + copyable(p.phone, "mono") + '</td>' : '') +
+            ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
+            : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
+        })()) : '') +
+      (showCol("email")
+        ? pcell(p, "Email", copyable(p.email, "val"), "wrapany") : '') +
+      (showCol("phone") ? pcell(p, "Mobile", copyable(p.phone, "mono")) : '') +
+      /* ── AND THE CELL IS THE PICKER NOW (§366) ─────────────────────
+         `false` was right while the table only ever read: the × and the
+         "+ role" control belonged to the dialog. What the cell draws is
+         unchanged — the same chips, the same "…" — and the whole of it is
+         pressable for somebody who may edit, so the answer to "editable" is
+         the grant rather than which surface is asking. */
       (showCol("roles")
-        ? '<td class="roles"><span class="rolebox">' + roleCell(p, false) + '</span></td>' : '') +
+        ? '<td class="roles"><span class="rolebox">' + roleCell(p, mayEdit) + '</span></td>' : '') +
       (showCol("status")
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
@@ -43829,10 +43998,29 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§366) ───────────────────
+     `data-sslabel="count"` above is a WORD chosen per control; this is the
+     same decision one step further — the register's Roles cell is a row of
+     chips, and the closed control has to be that cell rather than a comma
+     list of role names. The markup is supplied rather than composed here,
+     because what a chip looks like belongs to the register and this file must
+     not learn it (§53.5).
+
+     WRITTEN ON EVERY setLabel, NEVER ONCE AT WIRE TIME: a tick calls this to
+     refresh the label, and a caller whose label is a rendering of the data
+     hands over a fresh one by re-rendering — so the attribute is read, not
+     cached. `data-sstitle` carries the hover, because the markup's own text
+     would arrive with the chips' words run together. */
   function setLabel(sel, btn){
+    var lb = btn.querySelector(".sslabel");
+    if (sel.dataset.sshtml != null) {
+      lb.innerHTML = sel.dataset.sshtml;
+      btn.title = sel.dataset.sstitle || "";
+      return;
+    }
     /* An em-dash for nothing chosen, which is the word the plan's own cells
        already use for nobody (§15.1: absent, never zero). */
-    btn.querySelector(".sslabel").textContent = textOf(sel) || "—";
+    lb.textContent = textOf(sel) || "\u2014";
     btn.title = textOf(sel) || "";
   }
 
@@ -43957,6 +44145,21 @@ var SEARCHSEL = (function(){
       pop.appendChild(allrow);
     } else {
       pop.appendChild(q);
+    }
+    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§366) ─────────────
+       Supplied by the caller and drawn nowhere else. The register's Roles
+       list can grant what is held at this person's own place and nothing
+       more, so the roles held elsewhere and the ones that come from the plan
+       are stated at its head — they used to be the "…" the cell drew, which
+       is a CONTROL (a hover cannot be reached on a touch screen and cannot be
+       read aloud), and with one press opening the list the list is that
+       place. Below the search, because it is a statement and not a row to
+       find by typing. */
+    if (sel.dataset.sshead) {
+      var head = document.createElement("div");
+      head.className = "sshead";
+      head.innerHTML = sel.dataset.sshead;
+      pop.appendChild(head);
     }
     pop.appendChild(list);
     pop.appendChild(none);
@@ -44145,7 +44348,29 @@ var SEARCHSEL = (function(){
       close();
       document.querySelectorAll("select").forEach(enhance);
     },
-    close: close
+    close: close,
+    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§366) ─────────────
+       §130.1 commits a tick WITHOUT repainting, and says in its own words
+       what makes that safe: every field this control was used on goes through
+       the shell's one `data-fld` listener, which does not repaint. Granting a
+       ROLE is not one of those — it changes the chips, it can take the role
+       off whoever held it, and a seat has a question to ask — so that handler
+       must paint, and a paint at the top of `wire()` calls close().
+
+       So the register holds the open list as state (`PROLEPICK`) and asks for
+       it back at the end of the paint. The popup is rebuilt rather than
+       preserved: it is `position:fixed` on <body> and its contents are a
+       rendering of the select, so a fresh one is the same popup with the new
+       answer in it. Returns false when there is nothing to open, so a caller
+       can clear its own state rather than holding a key to a control that is
+       no longer drawn (§61). */
+    openOn: function(sel){
+      if (!sel) return false;
+      var btn = buttonFor(sel);
+      if (!btn) return false;
+      openFor(sel, btn);
+      return true;
+    }
   };
 })();
 
@@ -56321,6 +56546,36 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* ── AND THE ROLES LIST IS ASKED BACK (§366) ────────────────────
+       A tick grants or revokes, which repaints — the chips change, and the
+       role comes off whoever held it, whose row is elsewhere in the table. So
+       the popup is reopened rather than preserved: it is a rendering of the
+       select, and the select has just been rebuilt with the new answer in it.
+
+       THE DIALOG'S COPY WINS. A row's cell and the open person dialog draw the
+       same picker for the same person, so the plain selector would find the
+       one BEHIND the overlay and open a popup over a control nobody can see.
+
+       AND IT CLEARS ITSELF WHEN THERE IS NOTHING TO OPEN — a retired person, a
+       revoked grant, a viewer who may no longer edit — rather than holding a
+       key to a control that is not drawn (§61). */
+    if (PROLEPICK) {
+      var rsel = document.querySelector('#modal-b [data-proleset="' + PROLEPICK + '"]') ||
+                 document.querySelector('[data-proleset="' + PROLEPICK + '"]');
+      if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;
+    }
+    /* AND THE CURSOR GOES INTO THE CELL THAT WAS JUST OPENED (§366) — here
+       rather than in wire(), for searchsel's own reason: three of these cells
+       hold a select, and the button that stands in front of it does not exist
+       until the line above has run. `focusNoScroll`, because the register is
+       its own scrolling box and a plain focus() hauls the row to the top of it
+       (§110.7). */
+    if (PCELL) {
+      var pc = document.querySelector(".peoplecfg td.pcellopen .fld");
+      var pb = pc && pc.tagName === "SELECT" ? pc.previousSibling : null;
+      focusNoScroll(pb && pb.classList && pb.classList.contains("ssbtn") ? pb : pc);
+      if (pc && pc.tagName === "INPUT" && pc.select) pc.select();
+    }
     /* §189: size every growing prose box to what is in it. Here, at the end
        of paint(), for SEARCHSEL's own reason — these are rebuilt on every
        paint, and a height measured before the row is laid out is a height
@@ -59182,6 +59437,71 @@ var SYNC = (function () {
     fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; }, root);
 
     };
+    /* ══ ONE CELL, OPENED WHERE IT IS READ (§366, spec 059) ═══════════
+       Islam: "for the client registry I'd like to do some in line adjustments
+       like the phone, employee ID, email, the unit/function, job title, etc."
+       and, of the clash he named in the same breath, "for the editing in
+       general it shuold be a double click would that fix the issue as 1 copes
+       the item like the mobile or email."
+
+       It does, and it was measured rather than reasoned about: a double-click
+       on the Email reaches the copy button TWICE — same value both times, so
+       the clipboard holds what is about to be edited — and on a plain value it
+       leaves the browser's own selection behind. Both are cleared as the box
+       opens, and a single press still copies exactly as it did (§93.6).
+
+       BEFORE `wirePersonFields`, and that is the whole of why it sits here.
+       The three cells that hold a SELECT have handlers that end in `paint()`;
+       a listener registered after theirs would clear `PCELL` one paint too
+       late, leaving the cell open with the answer already chosen. Listeners on
+       one element run in the order they were added. */
+    (function(){
+      var body = document.querySelector(".peoplecfg tbody");
+      if (body) body.addEventListener("dblclick", function(e){
+        var td = e.target && e.target.closest && e.target.closest("[data-pcell]");
+        if (!td || !body.contains(td)) return;
+        var at = String(td.dataset.pcell).split("|");
+        try { window.getSelection().removeAllRanges(); } catch (err) {}
+        PCELL = { key: at[0], field: at.slice(1).join("|") };
+        paint();
+      });
+      if (!PCELL) return;
+      var cell = document.querySelector(".peoplecfg td.pcellopen");
+      var fld = cell && cell.querySelector(".fld");
+      if (!fld) { PCELL = null; return; }
+      /* LEAVING IT IS WHAT COMMITS IT (§35), so `change` only has to say the
+         cell is finished with; the field's own handler, registered next,
+         writes the value. A select's handler paints and draws the cell shut;
+         a text box's does not, so the blur that follows asks for one — queued,
+         never inside the event, because rebuilding the DOM in the middle of an
+         interaction with it is §30.1's fault. */
+      fld.addEventListener("change", function(){ PCELL = null; });
+      fld.addEventListener("blur", function(){
+        if (PCELL === null && !document.querySelector(".peoplecfg td.pcellopen")) return;
+        PCELL = null;
+        setTimeout(paint, 0);
+      });
+      /* WHAT IT HELD WHEN IT OPENED, so Escape has something to put back. */
+      var was = fld.value;
+      fld.addEventListener("keydown", function(e){
+        /* ── ESCAPE PUTS THE VALUE BACK, NOT THE NODE (§366) ─────────
+           The first build removed the node and relied on that discarding the
+           edit, and it does not: Chromium fires `blur` — and `change` before
+           it — on a focused element being removed, so the field's own handler
+           wrote the typed value and Escape COMMITTED. Measured, not reasoned
+           (§93.11's family: ask the browser rather than the spec in your
+           head). Restoring the value first makes whatever fires a write of
+           what was already there. Enter blurs, which is what commits (§219:
+           never a synthesised change). */
+        if (e.key === "Escape") {
+          e.preventDefault(); e.stopPropagation();
+          fld.value = was;
+          PCELL = null; paint();
+        } else if (e.key === "Enter" && fld.tagName === "INPUT") {
+          e.preventDefault(); fld.blur();
+        }
+      });
+    })();
     wirePersonFields(document);
     document.querySelectorAll("[data-pact]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -59331,16 +59651,13 @@ var SYNC = (function () {
        "Use it" would all be decoration (§96). */
     window.wirePersonDialogControls = function(root){
       var R = root || document;
-    /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
-       It opens EMPTY. Before this it opened on "owner", so a picker somebody
-       opened by mistake was already holding an answer — which was harmless
-       while a Give button stood between it and the grant, and is not now that
-       choosing both halves IS the grant. */
-    R.querySelectorAll("[data-prole-open]").forEach(function(b){
-      b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; ROLESTOP = null; paint();
-      });
-    });
+    /* ── THE ROLE PICKER IS THE CELL (§366) ─────────────────────────
+       The "+ role" control that opened this, the select it opened and the ×
+       that undid it are all gone with it: the Roles cell is a ticking list
+       now, so giving a role is a tick and taking one off is the same tick
+       again. What survives is everything the pick has to be JUDGED by, which
+       is below — the refusal, the seat's question, and "either half finishes
+       it" when the Unit is answered second. */
     /* ── THE ROLE LANDS WHERE THE UNIT CELL ALREADY SAYS (§110) ──────
        There is no second dropdown any more. The picker's other half asked a
        question the Unit cell had already answered and then wrote its own answer
@@ -59369,7 +59686,6 @@ var SYNC = (function () {
        together." Whichever of the two is answered second is the one that
        completes it. */
     function tryGrantRole(key, role){
-        ADDROLE_KIND = role;
         if (!roleIsGrantable(role)) { ROLESTOP = null; paint(); return; }
         var p = personBy(key);
         var at = personAt(p);
@@ -59397,7 +59713,13 @@ var SYNC = (function () {
           var atCo = wheres.every(function(w){
             return String(w.v).indexOf("co:") === 0; });
           var fld = atCo ? "Company" : "Unit";
-          ROLESTOP = { key:key, why: at
+          /* THE ROLE TRAVELS WITH THE REFUSAL (§366). It used to be read back
+             out of `ADDROLE_KIND` — the open picker's current value — and
+             there is no open picker any more: the list commits a tick and
+             closes. So what §110's "either half finishes it" needs is on the
+             refusal itself, which is also where it belongs: it is a fact
+             about the pick that was turned down. */
+          ROLESTOP = { key:key, role:role, why: at
             ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the " + fld + "."
             : "Set the " + fld + " first \u2014 " + roleName(role) + " is held at " +
               roleAtWord(role) + "." };
@@ -59437,15 +59759,9 @@ var SYNC = (function () {
         }
         SEATASK = null;
         grantPersonRole(key, role, at);
-        ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
 
-    R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        tryGrantRole(sel.dataset.prolePick, sel.value);
-      });
-    });
     /* §186's two answers. Cancel puts the picker back to "Choose a role…"
        rather than leaving the seat showing: a select still displaying the
        value it was just refused fires no `change` if it is picked again
@@ -59453,7 +59769,7 @@ var SYNC = (function () {
        changed their mind. */
     R.querySelectorAll("[data-seatno]").forEach(function(b){
       b.addEventListener("click", function(){
-        SEATASK = null; ADDROLE_KIND = ""; paint();
+        SEATASK = null; paint();
       });
     });
     R.querySelectorAll("[data-seatyes]").forEach(function(b){
@@ -59462,15 +59778,64 @@ var SYNC = (function () {
         SEATASK = null;
         if (!a) { paint(); return; }
         grantPersonRole(a.key, a.role, a.at);
-        ADDROLE = null; ADDROLE_KIND = "";
         paint();
       });
     });
-    R.querySelectorAll("[data-prole-off]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.proleOff.split("|");
-        revokePersonRole(p[0], p[1], p[2]);
-        paint();
+    /* ── ONE TICK IS ONE ROLE, GIVEN OR TAKEN (§366) ─────────────────
+       The register's Roles cell IS this list (config-render.js), so a change
+       here is exactly one option going on or off — searchsel fires per tick
+       (§130.1) — and the difference against what the person holds says which
+       it was.
+
+       WHAT IS COMPARED IS WHAT THE LIST CAN SET, never every role they hold:
+       a role held somewhere this register cannot reach, and a role that comes
+       from being named on the plan, are in the list's HEAD and in no option,
+       so they can never read as "unticked" and be revoked by a press nobody
+       made.
+
+       THE LIST STAYS OPEN ACROSS THE PAINT, because a grant must paint — it
+       changes the chips, it takes the role off whoever held it, and that
+       person's row is somewhere else in the table. §130.1's per-tick rule is
+       kept and the thing that made it safe is replaced: the popup is rebuilt
+       at the end of paint() from `PROLEPICK` rather than being left standing
+       (searchsel's openOn). A seat and a refusal both draw IN the cell, which
+       the popup would cover, so those two close it. */
+    R.querySelectorAll("[data-proleset]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var key = sel.dataset.proleset;
+        var p = personBy(key);
+        if (!p || grant("c_people") !== "edit") return;
+        var want = {};
+        Array.prototype.forEach.call(sel.options, function(o){
+          if (o.selected) want[o.value] = 1;
+        });
+        var home = personAt(p);
+        var settable = {};
+        Array.prototype.forEach.call(sel.options, function(o){ settable[o.value] = 1; });
+        var have = {};
+        SMPRules.personRoles(world(), p).forEach(function(r){
+          if (settable[r.role] && !SMPRules.isOwnLinesRole(r.role) &&
+              (r.at === home || roleWheres(r.role).length === 1)) have[r.role] = r.at;
+        });
+        var off = Object.keys(have).filter(function(k){ return !want[k]; });
+        if (off.length) {
+          /* TAKING ONE OFF IS THE ACT THE \u00d7 USED TO BE, and it is the same
+             call — `revokePersonRole` is where a grant is undone and this
+             file already had one caller. */
+          off.forEach(function(k){ revokePersonRole(key, k, have[k]); });
+          PROLEPICK = key;
+          paint();
+          return;
+        }
+        var on = Object.keys(want).filter(function(k){ return !have[k]; })[0];
+        if (!on) { PROLEPICK = key; paint(); return; }
+        /* A SEAT AND A REFUSAL BOTH SPEAK IN THE CELL, so they close the list
+           rather than being drawn underneath it (§186's ask is state in the
+           cell, §110's refusal likewise). Everything else keeps it open. */
+        PROLEPICK = (SMPRules.isSeatRole(on) ||
+                     !roleWheres(on).some(function(w){ return w.v === home; }) &&
+                     roleWheres(on).length !== 1) ? null : key;
+        tryGrantRole(key, on);
       });
     });
     /* ── THE TWO FACTS THAT COULD BE READ AND NOT CORRECTED (§69.17) ──
@@ -59513,9 +59878,8 @@ var SYNC = (function () {
            until the person sits at a company, and the Company field is now the
            only control that can put them there — so answering it while a
            refusal is standing is the answer that refusal was waiting for. */
-        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
-            roleIsGrantable(ADDROLE_KIND)) {
-          tryGrantRole(p.key, ADDROLE_KIND);
+        if (ROLESTOP && ROLESTOP.key === p.key && roleIsGrantable(ROLESTOP.role)) {
+          tryGrantRole(p.key, ROLESTOP.role);
           return;
         }
         paint();
@@ -59533,9 +59897,8 @@ var SYNC = (function () {
            re-pick a role the select is already showing. Only while a refusal is
            standing: changing the Unit on a row nobody is granting a role on
            stays what it has always been, a move and nothing else. */
-        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
-            roleIsGrantable(ADDROLE_KIND)) {
-          tryGrantRole(p.key, ADDROLE_KIND);
+        if (ROLESTOP && ROLESTOP.key === p.key && roleIsGrantable(ROLESTOP.role)) {
+          tryGrantRole(p.key, ROLESTOP.role);
           return;
         }
         paint();
@@ -59865,7 +60228,7 @@ var SYNC = (function () {
         focusNoScroll(document.querySelector(".tk-firstfield"));
       });
     });
-    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§110). `ADDROLE` and
+    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§110). `PROLEPICK` and
        `ROLESTOP` are both properties of one open row, and neither was being
        cleared when the row closed — so a refusal answered by pressing Cancel
        came back the next time that row was opened, about a pick nobody had just
@@ -59873,7 +60236,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-rowsave]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditClose();
-        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+        PROLEPICK = null; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -59881,7 +60244,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-rowcancel]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditCancel();
-        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+        PROLEPICK = null; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -62449,7 +62812,7 @@ var SYNC = (function () {
     if (cancel) rowEditCancel(); else rowEditClose();
     if (PDLG && PDLG.mode === "add") newDraftEnd();
     PDLG = null;
-    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+    PROLEPICK = null; ROLESTOP = null;
     closeModal();
     if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
     paint();
@@ -62519,7 +62882,7 @@ var SYNC = (function () {
     if (at >= PDLG.queue.length) { closePersonDialog(false); return; }
     PDLG.at = at;
     PDLG.key = PDLG.queue[at].key;
-    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+    PROLEPICK = null; ROLESTOP = null;
     rowEditOpen("people", PDLG.key, personBy(PDLG.key));
     personDialogPaint();
     focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));

@@ -1790,6 +1790,61 @@
                     border-color:var(--gold); }
   .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .rolemore.on { padding:2px 7px; }
+  /* ── THE ROLES CELL IS THE BUTTON (§366, Islam 2026-09-17) ────────
+     "for the role I'm afraid it still overflows as a box it can open which a
+     button as you do but not overflowing on other voxes."
+
+     A `.ssbtn` sizes to its content and a ticking list's content is its widest
+     entry, so left alone it took the column from 209px to 477 and the table
+     behind it from 1355 to 1623 — and still overflowed. Capped to the cell it
+     holds exactly what the register draws today.
+
+     AND THE BOX MAY NOT MAKE THE ROW TALLER. `.ssbtn` carries `padding:6px 9px`
+     and a border, which is right for a control standing on its own and wrong
+     wrapped round chips that already have a height of their own: measured, it
+     took every row from 39px to 49, and thirty-one rows at 10px is 310px of
+     register moving for a control nobody pressed. A setup table row is one
+     line (§88), so the box takes the height the chips already had. What it
+     does cost is 27px of column — the box's own edges and the caret that says
+     it opens — and no other column moves. */
+  /* ── THE OPEN CELL (§366) ────────────────────────────────────────
+     One field, filling the cell it replaced. `width:100%` with `min-width:0`
+     rather than a cap: §110.8 measured a percentage doing nothing under
+     `table-layout:auto` — the cell is sized BY its child — and a definite
+     width is what stops the field contributing its intrinsic size to the
+     column. Measured, the row goes 39px to 40 and no column moves. */
+  .peoplecfg td.pcellopen { overflow:visible; }
+  /* A BLOCK, NEVER `width:100%` (§366). Measured: in an auto-layout table
+     Chromium resolves a percentage against the cell's PADDING box, so
+     `width:100%` in a 150px cell with 8px either side came out 150 and hung
+     8px past its own cell — §110.8's note that `max-width:100%` does nothing
+     in this table, met from the other side. A block-level element fills its
+     containing block's CONTENT box with no percentage to resolve, which is
+     the same answer without the quirk. */
+  .peoplecfg td.pcellopen .fld,
+  .peoplecfg td.pcellopen .ssbtn {
+    display:block; width:auto; min-width:0; max-width:none;
+    box-sizing:border-box; }
+
+  .peoplecfg td.roles .ssbtn, .pdf .rolebox .ssbtn {
+    width:100%; max-width:100%; min-width:0; padding:1px 6px; }
+  .peoplecfg td.roles .ssbtn .sslabel, .pdf .rolebox .ssbtn .sslabel {
+    overflow:hidden; min-width:0; }
+  /* As a LABEL the "…" is a span (config-render.js): a button inside a button
+     is not markup, and one press opens the whole list anyway. It keeps the
+     control's look, because what it says — there are more roles than this —
+     is the same fact either way. */
+  .rolemore:not(button) { display:inline-flex; align-items:center; }
+  /* WHAT THE LIST CANNOT SET, ABOVE IT (searchsel's `data-sshead`). The chips
+     are the register's own, so nothing new is drawn; the key over them is the
+     platform's uppercase label at the size every other key wears. */
+  .sspop .sshead { padding:9px 11px 10px; border-bottom:1px solid var(--line);
+                   display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .sspop .sshead > b { width:100%; margin-bottom:2px; font-size:10.5px;
+                       letter-spacing:.09em; text-transform:uppercase;
+                       color:var(--ink-3); font-weight:500; }
+  .sspop .sshead .rolechip { margin:0; opacity:.72; }
+  .sspop .sshead .rolechip b { font-weight:500; }
   /* The rail's groups fold (§47.7). A button now, not a div — it does
      something, so it has to be reachable by keyboard and say what it is. */
   .setuprail .rgroup { display:flex; align-items:center; gap:7px; width:100%;

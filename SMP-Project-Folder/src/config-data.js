@@ -141,8 +141,8 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
 /* Transient register state. None of this is the tenant's data — it is which
    control happens to be open — so none of it is saved (§25.2: a property of
    the screen never belongs in the state graph).
-     ADDROLE      whose "+ role" control is open, by person key
-     ADDROLE_KIND which role that control currently shows
+     PROLEPICK    whose Roles list is open, by person key
+     PCELL        which one cell of the register is being typed into
      NEWPERSON    what has been typed into the add-a-person row
      PICKING      which assignment picker is open, "<unit>|<role>"
      PICKQ        what has been typed into it */
@@ -163,7 +163,21 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
-var ADDROLE = null, ADDROLE_KIND = "owner";
+/* ── WHOSE ROLES LIST IS OPEN (§366) ──────────────────────────────────
+   The Roles cell IS a ticking list now, and granting a role has to repaint —
+   it changes the chips, and it takes the role off whoever held it, whose row
+   is elsewhere in the table. A paint closes every popup (searchsel's wire()
+   opens with close()), so the open list is held here and asked for back at
+   the end of the paint. It replaces `ADDROLE`/`ADDROLE_KIND`, which were the
+   "+ role" control's own state and have no control left to describe (§24). */
+var PROLEPICK = null;
+/* ── AND WHICH CELL IS BEING TYPED INTO (§366) ─────────────────────────
+   `{key, field}` — the person and the dialog's own label for the field — or
+   null. One at a time, for §79.2's reason: two open cells are two unsaved
+   states. There is no Save and no Cancel, because leaving a bound field is
+   what commits it (§35) and Escape puts it back, which is the Tracker's shape
+   one module over (spec 054). */
+var PCELL = null;
 /* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that

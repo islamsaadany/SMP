@@ -51454,3 +51454,191 @@ database — the rehearsal database §328.3 describes — so it is UNRUN rather 
 failing, its own header's stated precondition and true on main too.
 `test-concurrent-saves.js` dies on `platform.sessions`, one of the seven
 harnesses §328.3 already records as unrunnable since §313.
+
+---
+
+## §366 — THE CELL IS THE CONTROL (2026-09-17, spec 059)
+
+Islam, of the client's People register: *"for the client registry I'd like to do
+some in line adjustments like the phone, employee ID, email, the unit/function,
+job title, etc. and about the roles why do I need to add them as chips why can't
+we make it a multi tick serarchable drop down to add the roles?"*
+
+Two asks, and they turn out to be one answer said twice: **a cell should be the
+place the thing is changed, rather than a reading with a separate control
+somewhere else.** §116 moved every edit into a dialog — for a good reason, and
+its own record says what it was: *every collision this register has had was a
+control being clicked inside a 158px cell* (§110.1's *+ role* under the frozen
+Cancel, §110.8's fields painting over their neighbours, the Add row's boxes
+under the wrong headings). **That reason is not withdrawn and the assertion that
+carries it is not loosened** (§218): what changes is that a cell now opens
+exactly ONE control, and it fits the cell it is in.
+
+### §366.1 — THE FIRST DRAWING UNDID HIS OWN AUGUST RULE, AND THE MOCKUP SAID SO
+
+The obvious build of the second ask puts a ticking button BESIDE the chips.
+Drawn and measured rather than reasoned about (rule 1c): the Roles column goes
+**209 → 477px** and the table **1355 → 1623**, because a searchable list sizes
+itself to its widest entry and its widest entry is *"Strategy custodian — held by
+Rania Fahmy"*. That is the column Islam himself had narrowed in August, widened
+by more than double in the stroke that was meant to tidy it.
+
+Islam, looking at it: *"for the role I'm afraid it still overflows as a box it
+can open which a button as you do but not overflowing on other voxes can we make
+this work?"*
+
+**SO THE CELL KEEPS EXACTLY WHAT IT DRAWS AND THE WHOLE THING BECOMES
+PRESSABLE.** The chips are handed to the closed control as its LABEL
+(`data-sshtml` in `searchsel.js`) rather than re-drawn beside it, so there is
+one builder for what a role looks like and the cell reads the same open, shut,
+and on a row nobody may edit (§53.5). Measured: column **209 → 236px** (+27,
+which is the box's own two edges and the caret), table **1355 → 1382**, no other
+column moves, nothing past the edge (`scrollWidth 235` in a `clientWidth 235`).
+
+### §366.2 — AND IT GREW EVERY ROW, WHICH ONE CELL COULD NOT HAVE SHOWN
+
+The first build of that fitted the column and took **every one of the 33 rows
+from 39px to 49** — §88's one-line standard broken on the whole table by a
+control drawn in one cell. It was found by drawing the WHOLE column in the
+mockup rather than one row of it: a single cell is the one sample that cannot
+show a row-height fault, because there is nothing beside it to be the same
+height as. One line of padding; `rowsWas` and `rowsNow` are both 39 × 33.
+
+### §366.3 — A DOUBLE-CLICK, BECAUSE A SINGLE CLICK ALREADY DOES SOMETHING
+
+Islam: *"for the editing in general it shuold be a double click would that fix
+the issue as 1 copes the item like the mobile or email."*
+
+He is right and it is the product's own doing: §93.6 made the email and the
+phone COPY on click. Measured in the mockup — one click on the address says
+*Copied* and selects nothing; a double-click on a text cell selects the word.
+So a single click to edit would have meant two different things in two columns
+of one table (§87's twins, in a gesture), and a double-click means nothing
+anywhere yet. The text selection a double-click makes is cleared as the cell
+opens, or the first keystroke replaces a word nobody chose.
+
+### §366.4 — ESCAPE COMMITTED, AND ONLY MEASURING SAID SO
+
+The first build removed the open cell's node and relied on that discarding the
+edit. **It does not.** Chromium fires `blur` — and `change` before it — on a
+FOCUSED element being removed, so the field's own bound handler wrote the typed
+value and Escape committed the very thing it had been pressed to abandon.
+§93.11's family: ask the browser rather than the specification in your head.
+The value is put back BEFORE the paint, so whatever fires is a write of what was
+already there — and the fix is asserted rather than assumed (§366.9), because an
+unasserted fix comes back silently.
+
+### §366.5 — THE OPEN FIELD HUNG 8px PAST ITS CELL, AND THE CAUSE WAS DEAD CODE
+
+Measured at 1600/1440/1280/1100. **`arrange.css` still carried
+`min-width:150px` on seven register field selectors** — `select.rolepick`,
+`select[data-pmainbu]`, `select[data-pat]`, `input[data-pname]`,
+`input[data-ptitle]`, `input[data-pemail]`, `input[data-pphone]` — written when
+those fields were IN the table and matching **nothing at all** since §116 moved
+them into the dialog. All seven measured as matching zero elements and deleted
+(§24: a rule nobody wears is a rule the next reader takes for load-bearing, and
+this time one did).
+
+**AND §110.8'S NOTE IS MET FROM THE OTHER SIDE**: that section records that
+`max-width:100%` on a field in an auto-layout table does nothing, because the
+percentage has no settled containing block. The same quirk in reverse is that
+Chromium resolves such a child's `width:100%` against the cell's PADDING box, so
+the field is its cell plus the padding. `display:block; width:auto` fills the
+CONTENT box with no percentage to resolve — the same answer without the quirk.
+
+### §366.6 — THE × GOES, BECAUSE UNTICKING IS ALREADY THE WAY OFF
+
+Islam: **"ok for both."** Removing a role is unticking it in the list the cell
+opens, and two ways to take one off is two answers to one act (§53.5). The chip
+becomes a READING of what somebody holds again, which is what it already is on
+the thirty rows nobody is editing; the full *role · where* is still on the hover,
+as it was.
+
+### §366.7 — WHAT THE LIST CANNOT SET IS STATED ABOVE IT, NEVER TICKED
+
+Two kinds of role are facts about this person that the ticks must not pretend to
+own: one held somewhere this register cannot reach, and one that comes from
+being NAMED on the plan (§147.7 — there is nothing here to revoke). They go in
+the list's own head (`data-sshead`), where the "…" used to be the only place
+they appeared; the ticks are the roles this cell can actually set. **This is
+what the check had to be rewritten around** (§366.9).
+
+### §366.8 — AND ISLAM'S OWN INSTRUCTION IS WHAT KEPT IT CORRECT
+
+Mid-build: **"before building I urget you to check main so you can adjust your
+building to the new main."**
+
+`main` had moved **43 commits** underneath, carrying spec 058 §3a.1 / §362.2 —
+the pair `isMintedRow` (a row the Forefront platform BUILT, read-only here and
+saying where it is set) against `isForefrontRow` (a row it merely ADOPTED, which
+is the client's own person and whose role is the register's business). Built
+against the branch's copy, `cellOpens` would have asked `p.forefront` and taken
+inline editing away from **every adopted row** — the rows most likely to need it.
+Merging first is the only reason that was visible, and it was his call rather
+than mine.
+
+### §366.9 — THE CHECKS ARE REWRITTEN, NEVER LOOSENED (§218)
+
+Three files held a claim §366 legitimately reverses, and each is rewritten to
+what it was FOR rather than to what it said:
+
+* **`people-dialog.py` §2** asserted the table holds NO control. Every collision
+  it names was a control drawn BESIDE a value inside a cell, so the claim
+  becomes **one control per cell, none past its cell, and one per row** — at all
+  four widths, because that is where they bit.
+* **`role-picker.py` §8** asserted no field in the table. Both ends now (§94.2):
+  at rest nothing is a field but the Roles lists, opened there is exactly one
+  more and it is the cell that was pressed — or a build that never opened
+  anything would pass the half above it.
+* **`seat-grant.py` §3** read `ADDROLE_KIND`, which was the ONE pending value of
+  a picker that had exactly one, so `""` there meant *nothing is being offered*.
+  A ticking list's ticks are what the person HOLDS — and that fixture holds
+  `fnhead` legitimately — so an empty list is not the claim and asserting it
+  reported a correct build broken. Rewritten to what Cancel has always promised:
+  the refused seat is not left ticked, **and the list is exactly what it was
+  before the pick**, snapshotted rather than re-derived from the product's own
+  rules.
+
+**AND ONE THING THE OLD FILES NEVER ASSERTED IS ADDED**: §366.4's Escape.
+`role-picker.py` §9 types into a cell and reads the PERSON back rather than the
+screen (§96) — Enter stores it, Escape leaves the stored value exactly as it
+was — at both ends, because *Escape discards* is satisfied perfectly by a build
+that never commits anything at all.
+
+### §366.10 — AND TWO OF THAT SECTION'S OWN FIRST FAILURES WERE THE CHECK
+
+It set the field with `f.value = t`, which leaves the box CLEAN as far as the
+browser is concerned, so the `change` that commits never fires — **a working
+build reported as broken** (§100.3). It types now.
+
+And falsifying it found §215 in a file whose own §8 already degrades: on a build
+where nothing opens, `pg.click` waits thirty seconds and THROWS, so the section
+**died rather than reporting** on exactly the build it exists to catch — 4 red
+and dead, against 7 red and complete once every probe degrades.
+
+### §366.11 — PROVED ABLE TO FAIL, FROM THE SOURCES (§276)
+
+Three breaks, one per decision, each built through `build.py` and each reddening
+its own assertions and nothing else:
+
+* Escape stops putting the value back → **1 red**, printing `Typed and thrown
+  away` as the STORED value.
+* the double-click delegate removed → **7 red**, four of them one per width.
+* the roles button's width cap removed → **2 red**, `{'48': 1, '49': 32}` — the
+  row-height fault §366.2 found in the mockup, reproduced.
+
+The tree was restored and rebuilt **byte-identical to the build the breaks were
+made from** (§343.9), which is what says the falsifications left nothing behind.
+
+### §366.12 — THE SERVER NEEDED NOTHING, AND IT IS ASSERTED ANYWAY (§172)
+
+No `api/`, `lib/` or `db/` file is touched — read off the diff. Every field this
+opens is a field the dialog already wrote through the same bound handler, and a
+role granted by ticking goes through `tryGrantRole()` exactly as the picker's did,
+seat ask and all. `test-authorize.js` **683/0**, `test-graph-diff.js` **140/0**,
+nothing stored moves and nothing is migrated.
+
+**RECORDED, NOT DONE**: a cell opens one at a time, so correcting three fields on
+one row is three double-clicks or the dialog — which is what the dialog is for,
+and making a row open whole is a decision about the dialog rather than about the
+cell.

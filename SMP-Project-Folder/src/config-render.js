@@ -1933,7 +1933,15 @@ function renderPeople(){
        what made this the widest column on the page. The overflow is a CONTROL,
        not a hover: a hover cannot be reached on a touch screen and cannot be
        read aloud, and this is the only place the second role appears. */
-    var openRoles = PROLES === p.key;
+    /* ── THE CHIPS, AND THEY ARE THE PICKER'S LABEL TOO (§366) ─────
+       `asLabel` is true when this cell is about to BE the ticking button:
+       there, the "…" is a span rather than a button (a button inside a button
+       is not markup, and one press now opens the whole list anyway) and the
+       expand/collapse it drove has nothing left to do. Read-only it is still
+       the control Islam asked for on 2026-08-22 — the only place a second role
+       appears, reachable on a touch screen and readable aloud. */
+    var asLabel = !!editable && personActive(p);
+    var openRoles = PROLES === p.key && !asLabel;
     var shownRoles = (rs.length > 1 && !openRoles) ? rs.slice(0, 1) : rs;
     var hiddenRoles = rs.length - shownRoles.length;
     var held = rs.length
@@ -1962,18 +1970,23 @@ function renderPeople(){
           var derived = SMPRules.isOwnLinesRole(r.role);
           var tip = roleName(r.role) + " \u00b7 " + at +
             (derived ? " \u2014 comes from being named on the plan; change the Owner there to move it" : "");
+          /* ── AND THERE IS NO \u00d7 ANY MORE (Islam, 2026-09-17) ──────────
+             Removing a role is UNTICKING it in the list this cell opens, and
+             two ways to take one off is two answers to one act (§53.5). The
+             chip is a reading of what somebody holds again, which is what it
+             is on the thirty rows nobody is editing. The full "role \u00b7 where"
+             is still on the hover, as it was. */
           return '<span class="rolechip" title="' + esc(tip) + '">' +
             '<b>' + esc(roleName(r.role)) + '</b>' +
             (elsewhere ? '<span class="rolewhere">' + esc(at) + '</span>' : '') +
-            (editable && !derived
-              ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
-                '" title="Remove this role" aria-label="Remove this role">&times;</button>'
-              : '') + '</span>';
+            '</span>';
         }).join("") +
         (hiddenRoles
-          ? '<button class="rolemore" data-proles="' + p.key + '" title="Show ' +
-            hiddenRoles + ' more" aria-label="Show ' + hiddenRoles + ' more role' +
-            (hiddenRoles === 1 ? "" : "s") + ' for ' + esc(p.name) + '">&hellip;</button>'
+          ? (asLabel
+              ? '<span class="rolemore">&hellip;</span>'
+              : '<button class="rolemore" data-proles="' + p.key + '" title="Show ' +
+                hiddenRoles + ' more" aria-label="Show ' + hiddenRoles + ' more role' +
+                (hiddenRoles === 1 ? "" : "s") + ' for ' + esc(p.name) + '">&hellip;</button>')
           : (openRoles && rs.length > 1
               ? '<button class="rolemore on" data-proles="" title="Show fewer" ' +
                 'aria-label="Show fewer roles">&lsaquo;</button>'
@@ -1983,7 +1996,12 @@ function renderPeople(){
          answers "what does this person hold" for somebody scanning the
          register — and while the two dropdowns are on screen the answer is
          being typed, not read. */
-      : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
+      /* THE PILL STAYS WHILE THE LIST IS OPEN (reversing the 2026-08-24
+         note above, because what it was about is gone). That note removed it while
+         two dropdowns stood in the cell — "the answer is being typed, not
+         read". Nothing stands in the cell now: the list opens OVER the page,
+         and the pill is the label of the button you pressed to open it. */
+      : '<span class="pill none">No role</span>';
     /* THE MARK RIDES ON `held`, so all three exits below carry it: whether
        this person is also on the Forefront team is a fact about them and not
        about the editing state, and appending it at each `return` is three
@@ -2031,17 +2049,84 @@ function renderPeople(){
        other; both have to say something before somebody holds a role somewhere,
        and where they cannot agree the row explains it rather than doing
        nothing. */
-    var addRole = ADDROLE === p.key;
-    return held +
-      (addRole
-        ? '<select class="fld rolepick" data-prole-pick="' + p.key + '" ' +
-            'aria-label="Which role to give ' + esc(p.name) + '">' +
-            '<option value=""' + (ADDROLE_KIND ? "" : " selected") + '>Choose a role\u2026</option>' +
-            ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
-              return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
-                '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p) + seatAsk(p)
-        : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
+    /* ── THE CELL IS THE LIST (§366, Islam 2026-09-17) ───────────────
+       "for the role I'm afraid it still overflows as a box it can open which
+       a button as you do but not overflowing on other voxes can we make this
+       work?" — and the way it works is that the cell keeps exactly what it
+       already draws and the whole thing becomes pressable. Nothing is added
+       BESIDE the chips, which is what the first drawing did: a ticking button
+       sized to its widest entry beside the two chips took the column from
+       209px to 477 and the table from 1355 to 1623, and undid his own August
+       rule about this column in the same stroke.
+
+       The chips are handed over as the closed control's LABEL (`data-sshtml`,
+       §366 in searchsel.js) rather than re-drawn, so there is one builder for
+       what a role looks like and the cell reads the same open, shut and on a
+       row nobody may edit.
+
+       WHAT THE LIST CANNOT SET GOES IN ITS HEAD. A role held somewhere this
+       register cannot reach, and a role that comes from being named on the
+       plan, are both facts about this person that the ticks must not pretend
+       to own — they are stated above the list (`data-sshead`) where the "…"
+       used to be the only place they appeared. */
+    var mine = {}, cannot = [];
+    rs.forEach(function(r){
+      if (!SMPRules.isOwnLinesRole(r.role) &&
+          (r.at === home || roleWheres(r.role).length === 1)) mine[r.role] = 1;
+      else cannot.push(r);
+    });
+    /* WHO HOLDS THIS ROLE AT THIS PERSON'S OWN PLACE — asked of the graph
+       (§33: a responsibility role is a pointer on the THING), so the list says
+       "held by Rania Fahmy" as a fact rather than as a warning about a
+       possibility. A role that is not stored as a pointer answers null and
+       gets no such line, which is honest: nothing here knows who else holds
+       it. */
+    function roleHolder(role){
+      var fn = String(home).indexOf("fn:") === 0 ? FUNCTIONS[String(home).slice(3)] : null;
+      if (role === "owner")     return fn ? fn.head : (UNIT_ROLES[home] || {}).head;
+      if (role === "custodian") return fn ? fn.custodian : (UNIT_ROLES[home] || {}).custodian;
+      if (role === "fnhead")    return fn ? fn.head : null;
+      return null;
+    }
+    var opts = ROLES.filter(function(r){ return roleIsGrantable(r.key); })
+      .map(function(r){
+        var wheres = roleWheres(r.key);
+        var fits = wheres.length === 1 || wheres.some(function(w){ return w.v === home; });
+        /* THE SAME TWO SENTENCES THE REFUSAL USES (§110), said BEFORE the
+           press rather than after it — `roleAtWord` is the one word for what
+           kind of place a role is held at, and which FIELD answers it is read
+           off `roleWheres()` rather than guessed (§135.6). */
+        var hint = "";
+        if (!fits) {
+          var atCo = wheres.every(function(w){ return String(w.v).indexOf("co:") === 0; });
+          hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
+                 (atCo ? "Company" : "Unit") + " first";
+        } else if (SMPRules.isSeatRole(r.key)) {
+          hint = "a seat \u2014 asks before it lands";
+        } else {
+          var h = roleHolder(r.key);
+          var hp = h && h !== p.key ? personBy(h) : null;
+          if (hp) hint = "held by " + hp.name;
+        }
+        return '<option value="' + esc(r.key) + '"' + (mine[r.key] ? " selected" : "") +
+          (hint ? ' data-hint="' + esc(hint) + '"' : '') + '>' + esc(r.name) + '</option>';
+      }).join("");
+    var headHtml = cannot.length
+      ? '<b>Already held, and not set here</b>' +
+        cannot.map(function(r){
+          return '<span class="rolechip"><b>' + esc(roleName(r.role)) + '</b>' +
+            '<span class="rolewhere">' +
+            esc(SMPRules.isOwnLinesRole(r.role) ? "from the plan" : whereLabel(r.at)) +
+            '</span></span>';
+        }).join("")
+      : "";
+    return '<select class="roleset" multiple data-proleset="' + esc(p.key) + '"' +
+        ' data-sshtml="' + esc(held) + '"' +
+        ' data-sstitle="' + esc(rs.map(function(r){
+            return roleName(r.role) + " \u00b7 " + whereLabel(r.at); }).join(" \u00b7 ")) + '"' +
+        (headHtml ? ' data-sshead="' + esc(headHtml) + '"' : '') +
+        ' aria-label="Roles for ' + esc(p.name) + '">' + opts + '</select>' +
+      roleStop(p) + seatAsk(p);
   }
 
   /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§110) ─────
@@ -2144,7 +2229,17 @@ function renderPeople(){
      roles, no password state and no declaration to accept. */
   function personFields(p, add){
     var out = [];
-    var F = function(label, html, wide){ out.push({ label:label, html:html, wide:!!wide }); };
+    /* ── THE NOTE IS NOT THE FIELD (§366) ──────────────────────────
+       Three of these carry a sentence under them — "not on the Official BU
+       list", "the list says Retail Stores", "from the unit above" — and the
+       dialog draws field and note together, as it always has. The REGISTER
+       draws one field inside a 150px cell where a second line takes the row
+       from 39px to 51, which is the fault §116.4 records three times in this
+       one section. So they are two values rather than one string, and the
+       cell takes the field alone. */
+    var F = function(label, html, wide, note){
+      out.push({ label:label, html:html, wide:!!wide, note:note || "" });
+    };
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
         '" placeholder="' + esc(knownName(p, DNAMES)) + '">');
@@ -2182,7 +2277,7 @@ function renderPeople(){
         mainbuNamesFor(p).map(function(nm){
           return '<option value="' + esc(nm) + '"' +
             (mainbuKey(nm) === mainbuKey(p.mainbu) ? " selected" : "") + '>' + esc(nm) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (p.mainbu && !mainbuBy(p.mainbu)
         ? '<span class="vwhy">not on the Official BU list</span>' : ''));
     var drift = mainbuDrift(p);
@@ -2193,7 +2288,7 @@ function renderPeople(){
         personAtChoices().map(function(o){
           return '<option value="' + esc(o.v) + '"' +
             (o.v === belongsKey(p) ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (drift && drift !== belongsKey(p)
         ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
       saidWhereNote(p, true));
@@ -2209,7 +2304,7 @@ function renderPeople(){
         companyChoices().map(function(o){
           return '<option value="' + esc(o.v) + '"' +
             (o.v === co ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (derived
         ? '<span class="vwhy">from the unit above</span>'
         : ''));
@@ -2271,7 +2366,7 @@ function renderPeople(){
       if (mine.length) drawn[f.label] = 1;
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
         (mine.length ? ' attn' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html +
+        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + f.note +
         (mine.length ? attnBlock(p, mine) : '') + '</div>';
     }).join("");
     /* What no field can answer, and anything whose field this person's form
@@ -2643,6 +2738,56 @@ function renderPeople(){
      Cancel, the Add row's three boxes under the wrong headings, the fields
      painting over their neighbours — was a control being clicked inside a
      cell, and none of them survives the move. */
+  /* ══ ONE CELL, OPENED WHERE IT IS READ (§366, spec 059) ═══════════════
+     Islam: "for the client registry I'd like to do some in line adjustments
+     like the phone, employee ID, email, the unit/function, job title, etc."
+
+     Changing one phone number cost three presses and a form holding twelve
+     fields, over the top of the table it was read from. A DOUBLE-CLICK opens
+     the one cell — his own answer, and it is what settles the clash he named
+     in the same breath: a single press on the Email or the Mobile already
+     copies it (§93.6), and making it also mean *edit* would take that away on
+     the two columns most worth editing.
+
+     IT IS THE TRACKER'S SHAPE, ONE MODULE OVER (spec 054): leaving the box
+     saves it — every bound field in this platform writes on `change`, which
+     for a text box means on blur (§35) — Escape puts it back, and there is no
+     Save and no Cancel, because there is nothing for them to do.
+
+     THE FIELD IS THE DIALOG'S OWN. `personFields()` is where every field this
+     register can change is written down, so the cell asks it rather than
+     drawing a second copy that could drift (§53.5) — and takes the FIELD
+     without its note, because a sentence under a value is what takes a 39px
+     row to 51 (§116.4). */
+  function cellField(p, label){
+    var f = personFields(p, false).filter(function(x){ return x.label === label; })[0];
+    return f ? f.html : "";
+  }
+  /* WHICH CELLS OPEN, AND THE GATE IS THE ONE THE MENU ASKS (spec 058 §3a.1).
+     A row the Forefront platform MINTED is read-only here and says where it is
+     set; a row it merely ADOPTED is the client's own person and every field is
+     theirs (§362.2). `isMintedRow` is the shared pair, so this cell and the
+     save answer alike (§42) — `p.forefront` would have taken the register back
+     off the adopted rows main had just given it. */
+  function cellOpens(p, label){
+    if (!mayEdit || SMPRules.isMintedRow(p)) return false;
+    /* A DERIVED COMPANY HAS NO FIELD TO OPEN. The dialog draws it `disabled`,
+       and a cell that opens onto a control nobody can use is §61's trap with
+       an extra press in front of it — the hover says where the answer comes
+       from instead. */
+    if (label === "Company" && personCompanyDerived(p)) return false;
+    return true;
+  }
+  function pcell(p, label, inner, cls, attrs){
+    var open = PCELL && PCELL.key === p.key && PCELL.field === label;
+    if (open) return '<td class="' + (cls ? cls + " " : "") + 'pcellopen">' +
+      cellField(p, label) + '</td>';
+    if (!cellOpens(p, label))
+      return '<td' + (cls ? ' class="' + cls + '"' : '') + (attrs || "") + '>' + inner + '</td>';
+    return '<td' + (cls ? ' class="' + cls + '"' : '') + (attrs || "") +
+      ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
+  }
+
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
@@ -2663,7 +2808,7 @@ function renderPeople(){
       /* `pname` so the frozen column can be named rather than counted (§69.19).
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it. */
-      '<td class="namecell" title="' + esc(p.name) + ' · ' + esc(p.key) + '">' +
+      pcell(p, "Name",
         /* INSIDE THE <b>, NEVER BESIDE IT. §88 makes `b` in a setup cell
            display:block, so a mark placed after it starts a second line and the
            row grows — measured at 51px against its neighbours' 39px. It is the
@@ -2671,19 +2816,20 @@ function renderPeople(){
            under it (the declaration note, the Official BU disagreement, this),
            and the rule is the same each time: a mark belongs inside the block
            it marks. */
-        '<b>' + esc(knownName(p, DNAMES)) + dupeMark(dupes) + '</b></td>' +
+        '<b>' + esc(knownName(p, DNAMES)) + dupeMark(dupes) + '</b>',
+        "namecell", ' title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '"') +
       (showCol("fullname")
-        ? '<td><span class="val">' + esc(p.name) + '</span></td>' : '') +
-      (showCol("empid") ? '<td>' + (p.empId
+        ? pcell(p, "Full name", '<span class="val">' + esc(p.name) + '</span>') : '') +
+      (showCol("empid") ? pcell(p, "Emp. ID", (p.empId
         ? '<span class="mono">' + esc(p.empId) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* READ-ONLY WHEREVER IT APPEARS. The key is minted (§35) and it is what
          `credentials` and `sessions` are keyed on — it is shown so somebody can
          be TOLD it, never so it can be changed. */
       (showCol("key") ? '<td><span class="mono">' + esc(p.key) + '</span></td>' : '') +
-      (showCol("title") ? '<td>' + (p.title
+      (showCol("title") ? pcell(p, "Job title", (p.title
         ? '<span class="val">' + esc(p.title) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* ── A DISAGREEMENT IS A MARK TOO (§116.4) ─────────────────────
          Both notes this cell and the next could add — "not on the Official BU
          list", "the list says Retail Stores" — were a SECOND LINE under a
@@ -2695,11 +2841,11 @@ function renderPeople(){
          `≠` rather than a warning colour: these two say the register and the
          client's own list DISAGREE, which is a thing to know rather than a
          thing that is broken. */
-      (showCol("mainbu") ? '<td>' + (p.mainbu
+      (showCol("mainbu") ? pcell(p, "Official BU", (p.mainbu
         ? '<span class="val">' + esc(p.mainbu) +
           (mainbuBy(p.mainbu) ? '' : '<span class="driftmark" title="' + esc(p.mainbu) +
             ' is not on the Official BU list.">&ne;</span>') + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* ── THE DECLARATION IS A MARK, NOT A SENTENCE (§116.4) ─────────
          Islam: the note "appears glitched and grows the row size with the word
          use it." It did: "They said Retail Stores — Use it" is a second line in
@@ -2711,24 +2857,33 @@ function renderPeople(){
          hover — the shape §87 already uses for a duplicate. The ACT moves to
          where acts now live: the dialog, reached from the attention queue,
          which is also what makes it findable rather than something to spot. */
-      (showCol("bu") ? '<td>' + (function(){
+      (showCol("bu") ? pcell(p, "Unit or function", (function(){
           var marks = saidMark(p) + (drift && drift !== belongsKey(p)
             ? '<span class="driftmark" title="' + esc(p.mainbu || "") + ' points at ' +
               esc(whereLabel(drift)) + ' on the Official BU list.">&ne;</span>' : '');
           return home
             ? '<span class="val">' + esc(home) + marks + '</span>'
             : '<span class="why" style="margin:0">&mdash;' + marks + '</span>';
-        })() + '</td>' : '') +
-      (showCol("company") ? '<td>' + (function(){
+        })()) : '') +
+      (showCol("company") ? pcell(p, "Company", (function(){
           var ck = personCompany(p);
+          var why = personCompanyDerived(p)
+            ? ' title="Comes from the unit. Change the Unit to move them."' : '';
           return ck
-            ? '<span class="val">' + esc(COMPANIES[ck].name) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>';
-        })() + '</td>' : '') +
-      (showCol("email") ? '<td class="wrapany">' + copyable(p.email, "val") + '</td>' : '') +
-      (showCol("phone") ? '<td>' + copyable(p.phone, "mono") + '</td>' : '') +
+            ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
+            : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
+        })()) : '') +
+      (showCol("email")
+        ? pcell(p, "Email", copyable(p.email, "val"), "wrapany") : '') +
+      (showCol("phone") ? pcell(p, "Mobile", copyable(p.phone, "mono")) : '') +
+      /* ── AND THE CELL IS THE PICKER NOW (§366) ─────────────────────
+         `false` was right while the table only ever read: the × and the
+         "+ role" control belonged to the dialog. What the cell draws is
+         unchanged — the same chips, the same "…" — and the whole of it is
+         pressable for somebody who may edit, so the answer to "editable" is
+         the grant rather than which surface is asking. */
       (showCol("roles")
-        ? '<td class="roles"><span class="rolebox">' + roleCell(p, false) + '</span></td>' : '') +
+        ? '<td class="roles"><span class="rolebox">' + roleCell(p, mayEdit) + '</span></td>' : '') +
       (showCol("status")
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +

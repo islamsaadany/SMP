@@ -148,7 +148,7 @@ with sync_playwright() as p:
         got = ev("""(k) => { const e = document.querySelector('[data-pedit="'+k+'"]');
             if (!e) return {door: false}; e.click(); return {door: true}; }""", key)
         pg.wait_for_timeout(400)
-        out = ev("""() => ({ picker: !!document.querySelector('#modal-b [data-prole-open], #modal-b [data-prole-pick]'),
+        out = ev("""() => ({ picker: !!document.querySelector('#modal-b [data-proleset]'),
                               open: !!document.querySelector('#modal-b') })""")
         # THE PLATFORM'S OWN WAY OUT, by its real id (§116.6: every exit is
         # the same exit). The first draft guessed three selectors that match

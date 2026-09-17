@@ -180,8 +180,26 @@ with sync_playwright() as p:
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 940})
         land(pg)
-        ck("%d: no input or select in the table" % w,
-           pg.evaluate("document.querySelectorAll('.peoplecfg input, .peoplecfg select').length") == 0)
+        # ── REWRITTEN, NEVER LOOSENED (§218, §366) ───────────────────
+        # This asserted that the table holds NO control, and §366 reverses
+        # exactly that at Islam's instruction: the Roles cell is a ticking
+        # list, and a double-click opens one cell. What the assertion was FOR
+        # survives whole — every collision it names was a control drawn BESIDE
+        # a value inside a cell, so the claim becomes that no cell holds more
+        # than the one control that replaced it, and that each one fits.
+        got = pg.evaluate("""()=>{
+          const cells=[...document.querySelectorAll('.peoplecfg tbody td')];
+          const withc=cells.filter(c=>c.querySelector('input,select,.ssbtn'));
+          const over=withc.filter(c=>{
+            const k=c.querySelector('input,.ssbtn');
+            return k && k.getBoundingClientRect().right >
+                        c.getBoundingClientRect().right + 1;});
+          return {cells:withc.length, many:withc.filter(c=>
+                    c.querySelectorAll('input,select').length>1).length,
+                  over:over.length,
+                  rows:document.querySelectorAll('.peoplecfg tbody tr').length};}""")
+        ck("%d: one control per cell, and none past its cell" % w,
+           got["many"] == 0 and got["over"] == 0 and got["cells"] == got["rows"], got)
         ck("%d: no Save/Cancel column" % w,
            pg.evaluate("!document.querySelector('.peoplecfg .tk-editcell')"))
     pg.set_viewport_size({"width": 1280, "height": 940})
@@ -301,7 +319,9 @@ with sync_playwright() as p:
     pg.evaluate("()=>document.querySelector('[data-padd-open]').click()")
     pg.wait_for_timeout(600)
     ck("it opens empty", pg.evaluate("!!document.querySelector('#modal-b .pdlg')") and
-       pg.evaluate("!document.querySelector('#modal-b [data-prole-open]')"))
+       # §366: the roles control is the cell's ticking list, and `personFields`
+       # still draws none on the ADD form — a person with no key has no roles.
+       pg.evaluate("!document.querySelector('#modal-b [data-proleset]')"))
     # A NAME IS THE ONE THING NEEDED (§87.3) — and pressing with none must SAY
     # so rather than doing nothing.
     pg.evaluate("()=>document.querySelector('[data-pdlg-add]').click()")

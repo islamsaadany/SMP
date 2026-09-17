@@ -427,13 +427,48 @@ out to be a question Portfolio does not ask.
 user can do anything — naming people onto a project, and starting one. Nothing
 is left open in §6.
 
-### 9.3 · The Excel round-trip
-A template pre-filled with the client's context, the team roster, valid values
-and a sheet of instructions for an AI to write the plan against, uploaded back
-with row-level validation. It is the fastest way to author a large plan and
-today it is behind a two-name allowlist. **Keep it, drop it, or keep it as the
-office's?** Keeping it brings ExcelJS — which SMP already does elsewhere for
-the Strategy workbook, so the dependency is not new.
+### 9.3 · Writing a plan in a spreadsheet instead of on the screen
+
+Islam, 2026-09-17: *"what s theexcel round trip?"* — fairly, because the first
+version of this section named the thing and never said what it is.
+
+**In plain words.** A plan can be two hundred activities. Typing that into a
+screen, one row at a time, is miserable. So the module lets you do it in a
+spreadsheet instead:
+
+1. you **download a file** from the platform. It arrives already knowing the
+   client, already listing the people who could own a row, and already carrying
+   the allowed values in each column, so the dropdowns work;
+2. it also carries **a sheet of instructions written for an AI** — so the file
+   can be handed to one with *"write the plan for this"*, and what comes back is
+   in the shape the platform can read;
+3. you **upload it back**, and the platform reads it row by row, refusing what
+   it cannot accept.
+
+**SMP ALREADY DOES THIS, WHICH IS MOST OF THE ARGUMENT.** A Strategy plan is
+authored by uploading a workbook — that is §22's contract, *an upload authors a
+plan rather than amending one* — and §294 proves the trip is a **fixed point**:
+what goes out and comes back untouched changes nothing. So this is not a new
+idea being imported; it is the idea this product already uses to write a plan,
+arriving in a second module.
+
+**AND THE TOOL IS NOT NEW EITHER.** SMP builds its own `.xlsx` in `xlsx.js` with
+no dependency at all — a zip of XML — which is what lets the whole platform be
+one file that works offline. The reference uses a library instead. Whether the
+port keeps that library or uses SMP's own builder is an implementation question
+and not this one.
+
+**THE ONE RULE THAT WOULD HAVE TO COME WITH IT** is §22's: **an upload authors,
+so a column the file does not carry is a column the plan LOSES.** §294 is the
+whole record of that going wrong five ways at once on the Strategy workbook —
+a write-only column, a dropped weight, a per-cent written into the reporter's
+box — every one invisible because the file looked right. A Portfolio workbook
+inherits that trap the day it exists, and the check that guards it is a round
+trip rather than a list of columns.
+
+**Still open: keep it, drop it, or keep it as the office's?** Today it is behind
+a two-name allowlist in the reference, which is itself worth asking about —
+that is either a deliberate gate or a feature that was never finished.
 
 ### 9.4 · Files — answered (2026-09-17, *"real uploads"*)
 `activity_files` stores a URL, not an upload. **Files are uploaded into the
@@ -460,7 +495,16 @@ orphaned file is a storage cost nobody can see and nobody can reach.
 **The link half is kept beside it**, because it costs nothing and it is what a
 plan pointing at a document in the client's own system needs.
 
-### 9.5 · How somebody finds out that a project needs them
+### 9.5 · How somebody finds out that a project needs them — answered (2026-09-17, *"B for now"*)
+**Portfolio puts its own lines on the welcome screen.** Nothing is sent; a
+screen everybody already opens says what is owed. **"For now"** is recorded as
+his word: C — a box on the device when something is put in your name — is a
+later decision, and **nothing about B has to be undone to add it**, which is
+why starting here costs nothing later.
+
+**What B does NOT reach is stated rather than discovered**: somebody who is not
+in the platform learns nothing. That is the whole of what C buys.
+
 
 **The question in one sentence: when something on a project is waiting on you,
 how do you learn about it without opening the project and looking?** The first
@@ -499,10 +543,39 @@ harder by starting at B — nothing about B has to be undone to add it.
 **A notification list is not built either way** (a bell with a feed behind it):
 that is the spine's, not this module's, and if it is wanted it wants a spec.
 
-### 9.6 · What the agreement level held
-Budget hours, budget amount, a lead consultant and contract dates. **Are any of
-them worked against?** If yes they come back as fields on `portfolio_projects`;
-if no they go. Decision 2 dropped the level, not necessarily the facts.
+### 9.6 · The budget and the contract — not Portfolio's, either way
+
+Islam, 2026-09-17: *"the budget hours and budget amount and contract is
+apparently a client thing not a project thing right?"*
+
+**Right, and measuring it makes the question smaller rather than bigger.** A
+contract is signed with a client, runs for a period, and can cover several
+projects — so it is not a field on a project, and hanging it on one would mean
+copying the same number onto every project it pays for, which is how two of them
+come to disagree.
+
+**But where it lives is the second question. The first is whether anything in
+the PLAN is measured against it** — and that is a fact about the reference code
+rather than a decision:
+
+- if an activity carries estimated hours that roll up towards a budget, then
+  Portfolio needs at least the number, wherever it is kept;
+- if nothing in the tree reads any of it, then budget hours, budget amount,
+  contract dates and the lead consultant are a **commercial record with no part
+  in a delivery plan** — and Portfolio needs none of them.
+
+`extraction-brief.md` §A asks exactly this, in one line per dropped table.
+
+**AND SMP HAS NOWHERE TO PUT IT TODAY, MEASURED**: **57 tables in
+`smp-app/db/schema.sql` and not one holds a budget, a contract, a fee or an
+hour.** The only matches for *budget* in the whole product are comments about
+how much accent colour a screen may spend (§41). So this is not a field being
+moved from one level to another — it is a **concept the platform does not have**,
+and giving it one is a feature of its own with its own spec, not a column added
+in passing (rule 2b).
+
+**Closed for Portfolio.** It comes back only if the code says the plan is
+measured against it.
 
 ### 9.7 · The migration
 Real plans exist. Moving them means: each `(agreement, scope)` pair becomes one

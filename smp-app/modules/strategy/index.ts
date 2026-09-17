@@ -5,16 +5,16 @@
    WHY `lib/shell.ts` DID NOT MOVE IN HERE WITH IT. Two things live in that
    file and only one is Strategy's: `shellDocument` draws the frozen platform,
    and `shellHeaders` is the security policy EVERY served document wears —
-   this module's, the trial module's and Insights'. A policy that lived inside
+   this module's and Insights'. A policy that lived inside
    one module and was imported by the other two would be that module reaching
    into another's folder, which is the boundary this round exists to make
    visible (§345 §3). It stays on the spine.
 
-   AND SETUP ARRIVES HERE, which is not a claim that Setup is Strategy's. A
-   spine segment resolves to the default module's server because the frozen
-   platform is where Setup is drawn today (spec 046 §4.5 wants one Setup page
-   for the whole client, and it is not built). Recorded rather than papered
-   over: the day Setup is the spine's own document, it stops arriving here. */
+   SETUP NO LONGER ARRIVES HERE (§359.2, spec 056): the route serves every
+   Setup address — the client's and each module's own — as the spine's
+   document itself, before this table is asked, so this module draws its
+   pages and nothing about anybody's Setup. The intro round still does,
+   being drawn inside this document. */
 import { shellDocument, shellHeaders } from "../../lib/shell.ts";
 import { moduleMenu } from "../../lib/modules.ts";
 import type { ServeArgs } from "../registry.ts";

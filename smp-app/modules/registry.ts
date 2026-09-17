@@ -40,7 +40,6 @@ import { serve as strategy } from "./strategy/index.ts";
 import { serve as insights } from "./insights/index.ts";
 import { serve as tracker } from "./tracker/index.ts";
 import { serve as notes } from "./notes/index.ts";
-import { serve as trial } from "./trial/index.ts";
 
 export type ServeArgs = {
   req: Request;
@@ -52,6 +51,10 @@ export type ServeArgs = {
   module: ModuleKey;
   tenantId: string;
   tenantName: string;
+  /* The modules THIS PERSON may open here (§359.5): the client's own list
+     narrowed by each module's grant (lib/access.ts openableModules), which is
+     what a switcher may list — a module shut to somebody by its address is
+     not offered to them either (spec 056 §6.4). */
   have: ModuleKey[];
   /* The path INSIDE the module, the module's word already taken off. */
   rest: string[];
@@ -71,12 +74,12 @@ export type ModuleServer = (a: ServeArgs) => Promise<Response>;
 const BREAK = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
 
 export const SERVERS: Partial<Record<ModuleKey, ModuleServer>> =
-  BREAK === "no-server" ? { strategy, trial, tracker, notes }
+  BREAK === "no-server" ? { strategy, tracker, notes }
   /* Two words pointing at one page — the door onto the wrong room, wired
      rather than guessed at. It renders perfectly, which is why the check
      DRIVES each server rather than reading the table (§96). */
-  : BREAK === "wrong-server" ? { strategy, insights: strategy, trial, tracker, notes }
-  : { strategy, insights, tracker, notes, trial };
+  : BREAK === "wrong-server" ? { strategy, insights: strategy, tracker, notes }
+  : { strategy, insights, tracker, notes };
 
 /* Null is "nothing here draws that", which the route answers as Not found
    rather than falling back to the Strategy shell: a module word that resolved

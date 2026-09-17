@@ -809,6 +809,38 @@
 }
 .clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
 .clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
+/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ────
+   `data-client-settings` is written on the root by paint() and by nothing
+   else (shell.html clientBar): the pages behind it belong to no module, so
+   the module's navigation is not drawn over them.
+
+   WHY THESE THREE AND NOT A CLASS PER CONTROL. Everything in `nav.units` is a
+   way of choosing which part of a MODULE you are reading — the house into its
+   welcome, the group, the units and functions, the gear into that module's
+   Setup — and the viewer strip is *looking as somebody in this client*, which
+   is a question about a module's pages and not about how the client was set
+   up. Standing down the two CONTAINERS is what makes a control added to
+   either covered the day it is added (§104.7).
+
+   `display:none`, never opacity or a width: a control hidden by paint alone
+   still takes the keyboard and still answers every DOM probe (§3.2, §70).
+   And the row goes as a WHOLE — `nav.units` carries the tenant's own
+   `--panel` ground and a border, so emptying `#units` and leaving the wrapper
+   would draw a navy stripe with nothing in it (§28's rule for an empty
+   heading, one element out). */
+html[data-client-settings] nav.units,
+html[data-client-settings] .viewer { display:none; }
+/* The way back says what it does first. `change` is the word for a control
+   that NAMES the client you are in; here it names the act, so the second half
+   would be saying something the first half already did (§87). */
+.clientback[data-saveclose] i{ display:none }
+/* THE CLIENT'S MARK (§362). Sized like the theme and font controls beside it
+   rather than like the deck's lockup — this is a bar, and a mark taller than
+   the line it sits on is what pushes the whole chrome down a row. `contain`,
+   because a client's mark is whatever shape they uploaded and a stretched one
+   is worse than a small one (§50's own rule for a slide picture). */
+.clientlogo{ height:26px; width:auto; max-width:120px; object-fit:contain;
+             flex-shrink:0; align-self:center; display:block }
 
   /* Sub-nav: Performance is the regular view and is marked as such */
   .tabs button.primary { color:var(--gold-deep); font-weight:700; }
@@ -3072,90 +3104,6 @@
      width and no height and is what makes a table read as columns. */
   .setuppane table thead th + th { border-left:1px solid rgba(255,255,255,.18); }
 
-  /* ══ SETUP · OVERVIEW (§108.10) ═══════════════════════════════════
-     The page the gear lands on: one strip saying how the cycle is going, and
-     a list of what is waiting on the office.
-
-     IT BORROWS `.fstrip`'s VOCABULARY WITHOUT BORROWING `.fstrip` — the same
-     ground, the same header rule, the same `.badge` chips, because this is
-     the Reporting cycle's own numbers and two different-looking versions of
-     one strip is how a summary stops reading as a summary (§B5). What it does
-     NOT borrow is the layout: `.fstrip` is a card with a titled head and a
-     body, and this is one row that ends in a way through. */
-  /* ── THE OVERVIEW IS TWO COLUMNS (§198) ───────────────────────────────
-     Islam picked Option B from two drawn in the real page. The queue takes
-     the width, the cycle stands beside it as a summary. §24: the one-row
-     strip and every rule that shaped it are DELETED, not left behind —
-     including §120.4's wrap argument, which was three paragraphs about a
-     control that no longer shares a line with anything.
-
-     THE STACK POINT IS CSS, NOT A WIDTH TEST IN JAVASCRIPT. A summary page
-     that measured the window in two places would eventually disagree with
-     itself (§27.1); below 900px the columns become one and the QUEUE is
-     first, because that is the half somebody came for. */
-  .ovcols { display:grid; grid-template-columns:minmax(0,1fr) 320px;
-            gap:16px; align-items:start; }
-  .ovmain { min-width:0; }
-  @media (max-width:900px){ .ovcols { grid-template-columns:1fr; } }
-
-  /* The cycle, as a standing summary. It borrows the Reporting cycle page's
-     own ground, border and `.badge` chips — this is that page's numbers, and
-     two different-looking versions of one set is how a summary stops reading
-     as a summary (§B5). What it no longer borrows is the SIZE: 27px of serif
-     was the loudest thing on a page about something else. */
-  .ovside { background:var(--surface); border:1px solid var(--line);
-            border-radius:var(--r); padding:13px 15px 15px; }
-  .ovside h4 { margin:0 0 9px; font:700 12px/1.3 var(--sans); color:var(--ink);
-               display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .ovsline { display:flex; justify-content:space-between; align-items:baseline;
-             gap:10px; font-size:13px; padding:6px 0;
-             border-bottom:1px solid var(--line); }
-  .ovsline b { font-weight:700; font-variant-numeric:tabular-nums; }
-  /* Not started is the one figure that is a problem rather than a fact, so it
-     is the one that takes a colour — as TYPE, which is why it is `--bad-tx`
-     and not `--bad` (§38.5, and this file has paid for that one six times). */
-  .ovsline b.ovlate { color:var(--bad-tx); }
-  .ovsmeta { color:var(--ink-3); font-size:11.5px; margin:9px 0 0; }
-  .ovside .ovcyc-go { width:100%; margin-top:11px; }
-  .ovcyc-go { white-space:nowrap; }
-
-  .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
-         color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
-  .ovh::after { content:""; flex:1; height:1px; background:var(--line); }
-
-  /* A ROW IS A DOOR, SO IT IS A BUTTON. Each one names something outstanding
-     and goes to the page that fixes it — never a page that merely mentions it
-     (§16.7's rule, applied to a notice rather than to a refusal). */
-  .ovlist { border:1px solid var(--line); border-radius:var(--r);
-            background:var(--surface); overflow:hidden; }
-  .ovrow { display:flex; align-items:center; gap:11px; width:100%; text-align:left;
-           background:none; border:0; border-top:1px solid var(--line-soft);
-           padding:11px 15px; cursor:pointer; font:500 13px/1.4 var(--sans);
-           color:var(--ink); }
-  .ovrow:first-child { border-top:0; }
-  .ovrow:hover { background:var(--surface-2); }
-  .ovrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
-  /* THE MARK IS LIT, BECAUSE EVERY ROW HERE IS SOMETHING OUTSTANDING — there
-     is no quiet state to distinguish it from, so the accent is carrying the
-     one meaning it has on this page. It stays inside §41's budget: a 24px
-     square, and the page draws no other fill. */
-  .ovico { width:24px; height:24px; border-radius:var(--r-sm); flex:none;
-           display:grid; place-items:center; font-size:12px;
-           background:var(--attn-bg); color:var(--attn-tx); }
-  .ovtext { min-width:0; }
-  .ovto { margin-left:auto; flex:none; font:700 11.5px/1 var(--sans);
-          color:var(--gold-deep); white-space:nowrap; }
-  .ovrow:hover .ovto { text-decoration:underline; }
-
-  /* SAYING NO IS THE PAGE'S JOB TOO (§45.2 turned round): a page that exists
-     to report whether anything is waiting must be able to report that nothing
-     is, or an absent list reads as a list that failed to load. */
-  .ovquiet { border:1px solid var(--line); border-radius:var(--r);
-             background:var(--surface); padding:16px 18px;
-             display:flex; flex-direction:column; gap:4px; }
-  .ovquiet b { font-size:13.5px; color:var(--ink); }
-  .ovquiet span { font-size:12.5px; color:var(--ink-3); line-height:1.5; }
-
   /* ══ FILL A FIGURE SET: THE FLAT TABLE (§46.5) ════════════════════ */
   .srctools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
   .srctools .fbtn { font:600 12.5px/1 var(--sans); color:var(--ink-2);
@@ -3795,6 +3743,34 @@
      36px handle, not an icon strip — see the note in shell.html. */
   .setupsplit.shut { grid-template-columns:36px 1fr; }
   .setuprail .rhead { align-items:center; }
+  /* THE WAY BACK TO THE LANDING (§359.2, spec 056 §4.1). The client's own
+     rail is reached from the landing's Client setup block and from nowhere
+     else — the gear opens the module you stand in — so it carries the one
+     door out, as a row of its own under the head: inside the head it would
+     be a third thing in 168px and wrap (measured). `flex:none` for the
+     reason `.rhead` and `.railfind` are (§108.5: the list under it is what
+     scrolls). `--ink-2` on the rail's own surface, never the accent, which
+     is 4.45:1 on `--surface-2` (§38.5). */
+  .setuprail .railback-row { flex:none; padding:6px 14px 7px; background:var(--surface);
+                             border-bottom:1px solid var(--line); }
+  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§360.9) ──────────────────
+     Islam: *"a perosn can access the client settings from the module
+     settings page but it should be at the bottom."* `Client settings ›` is
+     a place to go ON to rather than the way back out, so it stops being the
+     first thing read on every Setup page in the module.
+
+     THE RULE MOVES WITH IT: a row above the list is separated by what is
+     UNDER it and a row below the list by what is OVER it, so the hairline
+     swaps ends. `flex:none` after `.raillist` puts it at the bottom of the
+     rail box by construction — no `position:sticky`, no measured offset,
+     and nothing scrolls under it, because the scroller ends where this
+     begins (§108.5, §290.1's sticky foot arrived at structurally). */
+  .setuprail .railback-row.railfoot { border-bottom:0; border-top:1px solid var(--line);
+                                      padding:7px 14px 8px; }
+  .setuprail .railback { font:600 11.5px/1.3 var(--sans); color:var(--ink-2); text-decoration:none;
+                         white-space:nowrap; }
+  .setuprail .railback:hover { color:var(--ink); text-decoration:underline; }
+  .setuprail .railback:focus-visible { outline:2px solid var(--gold); outline-offset:1px; border-radius:3px; }
   .railtog { width:22px; height:22px; padding:0; border:0; border-radius:4px;
              background:none; color:var(--panel-quiet); cursor:pointer;
              display:inline-flex; align-items:center; justify-content:center; }
@@ -4621,6 +4597,14 @@
   .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── AND HOW THE REGISTER IS MADE UP (spec 058 §3a, §362.2) ────────
+     Its neighbour's treatment exactly, because it is its neighbour's kind of
+     thing: a fact true on every healthy client, read as a value, with the
+     detail on the hover. Drawn only where there IS a split (config-render),
+     so §122's removal of a plain total stands untouched. */
+  .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -4841,6 +4825,40 @@
 .ffrow{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
 .ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
           color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }
+
+/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§362.2) ──
+   The client's own person, marked because a consultant's address matched
+   theirs (§313.32): their role is the client's and stays editable, so this
+   is a note beside it rather than a cell of its own — same treatment as the
+   mark above, because it says the same thing, and INLINE, since a mark on a
+   line of its own is what takes a 39px row to 51 (§116.4, §88). */
+.ffmark{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+         color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px;
+         margin-left:6px; white-space:nowrap }
+
+/* ── THE LANDING LINE PAGE (§359.4, spec 056 §4.5) ────────────────────
+   The radio list and the preview are the signed-off mockup's own
+   (design-mockups/module-setup/2026-09-15_setup-per-module.html, Insights'
+   Setup frame) in the platform's tokens; the native radio is kept for the
+   keyboard and the screen reader and drawn as the mockup's dot. */
+.cfg.landing .lopts{ display:flex; flex-direction:column; gap:8px; max-width:640px }
+.cfg.landing .lopt{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:var(--r-sm); font-size:var(--fs-body); cursor:pointer; background:var(--surface) }
+.cfg.landing .lopt.on{ border-color:var(--gold); background:var(--gold-wash) }
+.cfg.landing .lopt input{ position:absolute; opacity:0; width:1px; height:1px; margin:0 }
+.cfg.landing .lopt:has(input:disabled){ cursor:default }
+.cfg.landing .lopt:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:2px }
+.cfg.landing .ldot{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--ink-3); flex:none; margin-top:3px }
+.cfg.landing .lopt.on .ldot{ border-color:var(--gold-deep); box-shadow:inset 0 0 0 3.5px var(--surface), inset 0 0 0 8px var(--gold-deep) }
+.cfg.landing .ltxt{ display:flex; flex-direction:column; gap:2px }
+.cfg.landing .lex{ color:var(--ink-3); font-size:var(--fs-small) }
+.cfg.landing .lprev{ margin-top:16px; max-width:640px }
+.cfg.landing .lprev h4{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700 }
+.cfg.landing .lrow{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:var(--r-sm); background:var(--surface); font-size:var(--fs-body) }
+.cfg.landing .lk{ font-weight:600; min-width:110px }
+.cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
+.cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -9774,3 +9792,231 @@ body.presenting #buildband { display:none; }
 .bempty .row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .bempty .bprim { font-size:13px; font-weight:700; border-radius:999px; padding:10px 20px; }
 .bempty .alt { font-size:13px; color:var(--ink-3); max-width:62ch; }
+
+/* ══ THE CLIENT SET-UP FLOW, IN THE PLATFORM'S OWN CHROME (§360, spec 057) ═══
+   The console's flow drew itself in the console's tokens (--ff, --amber);
+   here the same markup — the wz* classes, verbatim — wears the platform's.
+   Everything is scoped under .csetup, because half these words (.band,
+   .row, .cell, .lab) are already taken by other pages (§65.9). */
+.csetup { --cs-fill: var(--panel); --cs-fill-ink: var(--panel-ink);
+          --cs-acc: var(--gold); --cs-acc-ink: var(--on-accent); --cs-acc-tx: var(--gold-deep);
+          --cs-wash: var(--accent-glow); }
+.csetup .lab { display:block; font:600 10.5px/1 var(--mono); letter-spacing:.12em;
+               text-transform:uppercase; color:var(--ink-3); margin:0 0 6px; }
+.csetup .note { margin:6px 0 0; font-size:var(--fs-small); color:var(--ink-3); }
+.csetup .muted { color:var(--ink-3); }
+.csetup .rowset { display:grid; gap:14px; max-width:640px; }
+.csetup textarea.fld { min-height:52px; resize:vertical; }
+.csetup .btn { font:600 var(--fs-small)/1.3 var(--sans); border:1px solid var(--line);
+               background:var(--surface); color:var(--ink); border-radius:var(--r-sm);
+               padding:7px 12px; cursor:pointer; }
+.csetup .btn:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .btn:disabled { opacity:.45; cursor:default; }
+.csetup .btn.solid { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .btn.amber { background:var(--cs-acc); border-color:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .btn.risk { color:var(--bad-tx); border-color:var(--bad-tx); }
+.csetup .btn.risksolid { background:var(--bad); border-color:var(--bad); color:var(--surface); }
+.csetup .cssaid { margin:12px 0 0; font-size:var(--fs-small); border-radius:var(--r-sm); padding:9px 11px; }
+.csetup .cssaid.said { background:var(--surface-2); border:1px solid var(--line); }
+.csetup .cssaid.err { color:var(--bad-tx); background:var(--bad-bg); border:1px solid var(--bad); }
+
+/* the step rail */
+.csetup .wzrail { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 20px; }
+.csetup .wzstep { display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
+                  border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface);
+                  color:var(--ink-2); font:600 12.5px/1.5 var(--sans); cursor:pointer; }
+.csetup .wzstep:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzstep .n { width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
+                     background:var(--surface-2); color:var(--ink-3); font:600 11px/1 var(--mono);
+                     flex:none; font-variant-numeric:tabular-nums; }
+.csetup .wzstep[aria-current="step"] { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .wzstep[aria-current="step"] .n { background:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .wzstep.done { color:var(--ink-3); }
+.csetup .wzstep.done .n { background:var(--good-bg); color:var(--good-tx); }
+
+.csetup .wzcol { max-width:760px; }
+.csetup .wzq { font:600 20px/1.3 var(--sans); margin:4px 0 12px; text-wrap:balance; }
+.csetup .wzwhy { color:var(--ink-3); font-size:var(--fs-small); margin:14px 0 0; max-width:62ch; }
+.csetup .wzempty { color:var(--ink-3); font-size:var(--fs-small); font-style:italic; margin:0 0 10px; }
+.csetup .wzfoot { display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
+                  border-top:1px solid var(--line); flex-wrap:wrap; }
+.csetup .wzfnote { margin-left:auto; color:var(--ink-3); font-size:var(--fs-micro); }
+.csetup .wzarched { border:1px solid var(--line); background:var(--surface-2); border-radius:var(--r-md);
+                    padding:10px 13px; margin:0 0 16px; font-size:var(--fs-small); color:var(--ink-2); }
+.csetup .wzarched b { color:var(--ink); }
+
+/* rows you add to */
+.csetup .wzrows { display:flex; flex-direction:column; gap:6px; }
+.csetup .wzrow { display:flex; align-items:center; gap:9px; }
+.csetup .wzrow .fld { flex:1 1 160px; min-width:0; }
+.csetup .wzrow .wzname { flex:1 1 160px; font-weight:600; font-size:var(--fs-body); }
+.csetup .wzrt { display:flex; align-items:center; gap:7px; flex:none; }
+.csetup .wzrt .fld { width:auto; flex:none; }
+.csetup .wzsub { font-size:var(--fs-micro); color:var(--ink-3); white-space:nowrap; }
+.csetup .wzx { border:0; background:transparent; color:var(--ink-3); cursor:pointer;
+               font-size:18px; line-height:1; padding:2px 6px; }
+.csetup .wzx:hover { color:var(--bad-tx); }
+.csetup .wzadd { border:1px dashed var(--line); border-radius:var(--r-md); padding:8px 11px; color:var(--ink-3);
+                 background:transparent; cursor:pointer; font:600 var(--fs-small)/1.3 var(--sans);
+                 text-align:left; width:100%; margin-top:8px; }
+.csetup .wzadd:hover { border-color:var(--cs-acc-tx); color:var(--ink-2); }
+.csetup .wzcommon { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 0; }
+.csetup .wzcm { border:1px dashed var(--line); border-radius:7px; background:transparent;
+                padding:4px 9px; font:500 12.5px/1.4 var(--sans); color:var(--ink-2); cursor:pointer; }
+.csetup .wzcm:hover { border-color:var(--cs-acc-tx); color:var(--ink); }
+.csetup .wzcm .p { color:var(--ink-3); margin-right:4px; }
+
+/* one of two */
+.csetup .wzchoices { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.csetup .wzchoice { display:block; width:100%; text-align:left; padding:12px 13px; border-radius:var(--r-md);
+                    border:1px solid var(--line); background:var(--surface); cursor:pointer; font:inherit; color:inherit; }
+.csetup .wzchoice:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzchoice[aria-pressed="true"] { border-color:var(--cs-acc); box-shadow:inset 0 0 0 1px var(--cs-acc); }
+.csetup .wzchoice .cname { display:block; font-weight:600; font-size:14.5px; }
+.csetup .wzchoice .cwhy { display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px; }
+
+/* the searchable industry list and the size band */
+.csetup .wzpick { position:relative; }
+.csetup .wzpanel { position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+                   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md);
+                   box-shadow:var(--shadow-md); max-height:260px; overflow:auto; padding:6px; }
+.csetup .wzpanel .gp { font:600 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+                       color:var(--ink-3); padding:8px 9px 4px; }
+.csetup .wzpanel .opt { display:block; width:100%; text-align:left; border:0; background:transparent;
+                        padding:6px 9px; border-radius:6px; font:inherit; color:var(--ink); cursor:pointer; }
+.csetup .wzpanel .opt:hover, .csetup .wzpanel .opt:focus-visible { background:var(--surface-2); outline:none; }
+.csetup .wzpanel .opt[aria-selected="true"] { background:var(--cs-wash); color:var(--cs-acc-tx); font-weight:600; }
+.csetup .wzpanel .nohit { padding:10px 9px; color:var(--ink-3); font-size:13px; font-style:italic; }
+.csetup .wzband { display:flex; flex-wrap:wrap; gap:6px; }
+.csetup .wzband button { border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+                         border-radius:var(--r-md); padding:6px 11px; cursor:pointer; font:600 12.5px/1.3 var(--sans);
+                         display:flex; flex-direction:column; align-items:flex-start; gap:2px; }
+.csetup .wzband button:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzband button[aria-pressed="true"] { border-color:var(--cs-acc); background:var(--cs-wash); color:var(--ink); }
+.csetup .wzband .ppl { font:400 11px/1.3 var(--mono); color:var(--ink-3); }
+.csetup .wzband button:disabled { cursor:default; }
+
+/* the words */
+.csetup .wztbl { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+.csetup .wztbl table { min-width:520px; width:100%; }
+.csetup .wztbl td { white-space:normal; vertical-align:middle; }
+.csetup .wztbl td .fld { width:100%; }
+
+/* the mark on the door */
+.csetup .wzmark .markrow { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
+                       padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
+.csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
+/* the branding, drawn by its own renderer inside the first step */
+.csetup .wzbrand { margin-top:26px; padding-top:6px; border-top:1px solid var(--line); }
+
+/* the modules band and the team rows (the console's own shape, §320.4, §322) */
+.csetup .band { border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface);
+                padding:12px 14px 10px; margin-top:22px; }
+.csetup .band .teamrow:last-of-type { border-bottom:0; }
+.csetup .teamrow { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+.csetup .teamrow .who .nm { font-weight:600; font-size:var(--fs-body); }
+.csetup .teamrow .who .em { color:var(--ink-3); font-size:12.5px; }
+.csetup .teamrow .sp { margin-left:auto; display:flex; gap:7px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.csetup .teamrow .none, .csetup .tag { font-size:var(--fs-micro); color:var(--ink-3); }
+.csetup .tag.open { color:var(--good-tx); background:var(--good-bg); border-radius:var(--r-pill); padding:2px 8px; font-weight:600; }
+.csetup .row { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+.csetup .row .fld { flex:1 1 170px; min-width:0; width:auto; }
+.csetup .asrow { display:inline-flex; align-items:center; gap:6px; }
+.csetup .asrow .aslab { font:600 9.5px/1.4 var(--mono); letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.csetup .asrow .fld { width:auto; max-width:230px; padding:4px 6px; font-size:12px; }
+.csetup .cell { display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.csetup .cell button { border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+                       padding:5px 9px; font:600 11.5px/1.3 var(--sans); cursor:pointer; }
+.csetup .cell button:last-child { border-right:0; }
+.csetup .cell button.on { background:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .cell button.on.hi { background:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .cell.locked button { cursor:default; }
+
+/* ending it (§323): its own block, behind a rule, at the foot */
+.csetup .wzend { margin-top:26px; padding-top:16px; border-top:1px solid var(--line); max-width:560px; }
+.csetup .wzendkey { display:block; font:600 10.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase;
+                    color:var(--ink-3); margin-bottom:8px; }
+.csetup .wzendwhy { margin:0 0 12px; font-size:var(--fs-small); color:var(--ink-3); max-width:62ch; }
+.csetup .wzendrow { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.csetup .wzask { border:1px solid var(--bad); background:var(--bad-bg); border-radius:var(--r-md); padding:13px 15px; }
+.csetup .wzask p { margin:0 0 11px; font-size:var(--fs-small); color:var(--ink); }
+.csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
+.csetup .wzask .row { margin-top:12px; }
+
+/* ── the rail's strip (§360): Getting started, under the head ─────────── */
+.setuprail .railstart { flex:none; display:block; width:100%; text-align:left; cursor:pointer;
+                        padding:9px 14px 10px; border:0; border-bottom:1px solid var(--line);
+                        background:var(--surface); color:var(--ink); font:inherit; }
+.setuprail .railstart:hover { background:var(--surface-2); }
+.setuprail .railstart.on { box-shadow:inset 3px 0 0 var(--gold); }
+.setuprail .railstart .rslab { display:block; font:700 12.5px/1.3 var(--sans); }
+.setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
+.setuprail .railback.railfwd { display:inline-block; }
+
+/* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§364) ═════════════════════════
+   The shape is the setup tables' own — `.cfg > table.unitcfg` gives the navy
+   heading row, one line per cell, the 150px cap and the ellipsis, all from
+   `config.css` rather than from rules invented here (§53.5). What is left is
+   which columns may grow, and it is three lines.
+
+   AUTO LAYOUT, LIKE THE REGISTER'S. `table.unitcfg` is `table-layout:fixed`,
+   which divides the width equally — right for Companies, whose six columns
+   are of a size, and wrong here, where a name, an address, two buttons, a
+   select and one word have nothing in common. `.peoplecfg` makes exactly this
+   exception for exactly this reason (§93.6).
+
+   THE NAME IS NOT CAPPED and the EMAIL is capped wider than the family's
+   150px: a name is the only thing written in its column (§93.6) and a
+   Forefront address is ~35 characters, so 150 would clip both on every row
+   rather than on a long one.
+
+   AND THE TWO NUMBERS BELOW ARE WHAT MAKES IT FIT AT 1100 (§158: fit, never
+   "and it scrolls"). A column in auto layout can never be narrower than the
+   widest thing that will not wrap, so the least this table can be is the sum
+   of five of them — measured at 936px against an 825px pane before these two
+   lines, with the third consultant's address and a 240px select the two that
+   would not give. The select FILLS ITS CELL instead (`width:100%`, which is
+   what `arrange.css` already does for a select in a setup table), so the
+   register column costs its heading and nothing more; and the address caps at
+   220, which with its padding is the 243px left once the other four have
+   taken their 582 out of that pane. Both numbers are MEASURED, and the check
+   asserts the FIT rather than either of them, so a rail that changes width
+   turns it red instead of going stale quietly (§122.5). */
+/* AND BELOW THE WIDTH IT FITS AT, THE BOX SCROLLS RATHER THAN CUTTING. The
+   five minima come to 802px and a 1000px window gives the pane 725, so under
+   ~1080 the table is wider than its box whatever the caps say — and a table
+   that overflows a box with `overflow:visible` is the fault this section
+   exists to remove, one size down. `.tblscroll` is the family's own answer
+   for an ordinary Setup table that outgrows its box (§88: "anything wider
+   buys scroll"), and it is safe here because this head is `position:static`
+   like every other ordinary Setup table's (§135.2's damaged matrix was a
+   STICKY head inside a scroll box). The only `.cfg` under `.csetup` is this
+   one. */
+.csetup .cfg { overflow-x:auto; }
+.csetup .cfg > table.teamcfg { table-layout:auto; }
+/* AND NO COLUMN IS GIVEN A WIDTH, which is the third thing measured rather
+   than reasoned: `width:100%` on the name starved the middle three to nought
+   at 1280, and `width:1%` on the last column — the register's own trick for
+   its two frozen ones — starved that one to 10px with its own word painted
+   outside it. Left alone, the leftover is shared. */
+.csetup .teamcfg td.tmname, .csetup .teamcfg th.tmname { max-width:none; }
+.csetup .teamcfg td.tmmail, .csetup .teamcfg th.tmmail { --cell-cap:220px; }
+.csetup .teamcfg td.cc, .csetup .teamcfg th.cc { white-space:nowrap; }
+.csetup .teamcfg td.tmas .fld { width:100%; min-width:0; max-width:none; }
+/* ONE WORD, AT THE END — and NO WIDTH ON IT. `width:1%` is what the register
+   uses on its two frozen columns, and here it starved: measured, Chromium's
+   auto algorithm reads a percentage as a request and hands the rest away once
+   the other columns want more than there is, so at 1280 the Remove column was
+   10px with its own word painted outside it. Left alone, the leftover is
+   shared and every column keeps a sane size at every width. */
+.csetup .teamcfg th.tmrm, .csetup .teamcfg td.tmrm { white-space:nowrap; text-align:right; }
+/* The add row under the table, then the note — the order Companies and the
+   BU list already use. `.row` is the flow's own; it needs the table's gap. */
+.csetup .row.tmadd { margin-top:14px; }
+/* EACH SELECT AS WIDE AS ITS OWN WORDS. The flow's `.row .fld` is
+   `flex:1 1 170px`, written for a column; here the second one's placeholder
+   is "…as who on this client's register?" and a shared basis clipped it to
+   "…as who on this client's registe" — a control asking a question it cannot
+   finish. */
+.csetup .row.tmadd .fld { flex:0 1 auto; max-width:340px; }

@@ -1058,90 +1058,6 @@
      width and no height and is what makes a table read as columns. */
   .setuppane table thead th + th { border-left:1px solid rgba(255,255,255,.18); }
 
-  /* ══ SETUP · OVERVIEW (§108.10) ═══════════════════════════════════
-     The page the gear lands on: one strip saying how the cycle is going, and
-     a list of what is waiting on the office.
-
-     IT BORROWS `.fstrip`'s VOCABULARY WITHOUT BORROWING `.fstrip` — the same
-     ground, the same header rule, the same `.badge` chips, because this is
-     the Reporting cycle's own numbers and two different-looking versions of
-     one strip is how a summary stops reading as a summary (§B5). What it does
-     NOT borrow is the layout: `.fstrip` is a card with a titled head and a
-     body, and this is one row that ends in a way through. */
-  /* ── THE OVERVIEW IS TWO COLUMNS (§198) ───────────────────────────────
-     Islam picked Option B from two drawn in the real page. The queue takes
-     the width, the cycle stands beside it as a summary. §24: the one-row
-     strip and every rule that shaped it are DELETED, not left behind —
-     including §120.4's wrap argument, which was three paragraphs about a
-     control that no longer shares a line with anything.
-
-     THE STACK POINT IS CSS, NOT A WIDTH TEST IN JAVASCRIPT. A summary page
-     that measured the window in two places would eventually disagree with
-     itself (§27.1); below 900px the columns become one and the QUEUE is
-     first, because that is the half somebody came for. */
-  .ovcols { display:grid; grid-template-columns:minmax(0,1fr) 320px;
-            gap:16px; align-items:start; }
-  .ovmain { min-width:0; }
-  @media (max-width:900px){ .ovcols { grid-template-columns:1fr; } }
-
-  /* The cycle, as a standing summary. It borrows the Reporting cycle page's
-     own ground, border and `.badge` chips — this is that page's numbers, and
-     two different-looking versions of one set is how a summary stops reading
-     as a summary (§B5). What it no longer borrows is the SIZE: 27px of serif
-     was the loudest thing on a page about something else. */
-  .ovside { background:var(--surface); border:1px solid var(--line);
-            border-radius:var(--r); padding:13px 15px 15px; }
-  .ovside h4 { margin:0 0 9px; font:700 12px/1.3 var(--sans); color:var(--ink);
-               display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .ovsline { display:flex; justify-content:space-between; align-items:baseline;
-             gap:10px; font-size:13px; padding:6px 0;
-             border-bottom:1px solid var(--line); }
-  .ovsline b { font-weight:700; font-variant-numeric:tabular-nums; }
-  /* Not started is the one figure that is a problem rather than a fact, so it
-     is the one that takes a colour — as TYPE, which is why it is `--bad-tx`
-     and not `--bad` (§38.5, and this file has paid for that one six times). */
-  .ovsline b.ovlate { color:var(--bad-tx); }
-  .ovsmeta { color:var(--ink-3); font-size:11.5px; margin:9px 0 0; }
-  .ovside .ovcyc-go { width:100%; margin-top:11px; }
-  .ovcyc-go { white-space:nowrap; }
-
-  .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
-         color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
-  .ovh::after { content:""; flex:1; height:1px; background:var(--line); }
-
-  /* A ROW IS A DOOR, SO IT IS A BUTTON. Each one names something outstanding
-     and goes to the page that fixes it — never a page that merely mentions it
-     (§16.7's rule, applied to a notice rather than to a refusal). */
-  .ovlist { border:1px solid var(--line); border-radius:var(--r);
-            background:var(--surface); overflow:hidden; }
-  .ovrow { display:flex; align-items:center; gap:11px; width:100%; text-align:left;
-           background:none; border:0; border-top:1px solid var(--line-soft);
-           padding:11px 15px; cursor:pointer; font:500 13px/1.4 var(--sans);
-           color:var(--ink); }
-  .ovrow:first-child { border-top:0; }
-  .ovrow:hover { background:var(--surface-2); }
-  .ovrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
-  /* THE MARK IS LIT, BECAUSE EVERY ROW HERE IS SOMETHING OUTSTANDING — there
-     is no quiet state to distinguish it from, so the accent is carrying the
-     one meaning it has on this page. It stays inside §41's budget: a 24px
-     square, and the page draws no other fill. */
-  .ovico { width:24px; height:24px; border-radius:var(--r-sm); flex:none;
-           display:grid; place-items:center; font-size:12px;
-           background:var(--attn-bg); color:var(--attn-tx); }
-  .ovtext { min-width:0; }
-  .ovto { margin-left:auto; flex:none; font:700 11.5px/1 var(--sans);
-          color:var(--gold-deep); white-space:nowrap; }
-  .ovrow:hover .ovto { text-decoration:underline; }
-
-  /* SAYING NO IS THE PAGE'S JOB TOO (§45.2 turned round): a page that exists
-     to report whether anything is waiting must be able to report that nothing
-     is, or an absent list reads as a list that failed to load. */
-  .ovquiet { border:1px solid var(--line); border-radius:var(--r);
-             background:var(--surface); padding:16px 18px;
-             display:flex; flex-direction:column; gap:4px; }
-  .ovquiet b { font-size:13.5px; color:var(--ink); }
-  .ovquiet span { font-size:12.5px; color:var(--ink-3); line-height:1.5; }
-
   /* ══ FILL A FIGURE SET: THE FLAT TABLE (§46.5) ════════════════════ */
   .srctools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
   .srctools .fbtn { font:600 12.5px/1 var(--sans); color:var(--ink-2);
@@ -1781,6 +1697,34 @@
      36px handle, not an icon strip — see the note in shell.html. */
   .setupsplit.shut { grid-template-columns:36px 1fr; }
   .setuprail .rhead { align-items:center; }
+  /* THE WAY BACK TO THE LANDING (§359.2, spec 056 §4.1). The client's own
+     rail is reached from the landing's Client setup block and from nowhere
+     else — the gear opens the module you stand in — so it carries the one
+     door out, as a row of its own under the head: inside the head it would
+     be a third thing in 168px and wrap (measured). `flex:none` for the
+     reason `.rhead` and `.railfind` are (§108.5: the list under it is what
+     scrolls). `--ink-2` on the rail's own surface, never the accent, which
+     is 4.45:1 on `--surface-2` (§38.5). */
+  .setuprail .railback-row { flex:none; padding:6px 14px 7px; background:var(--surface);
+                             border-bottom:1px solid var(--line); }
+  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§360.9) ──────────────────
+     Islam: *"a perosn can access the client settings from the module
+     settings page but it should be at the bottom."* `Client settings ›` is
+     a place to go ON to rather than the way back out, so it stops being the
+     first thing read on every Setup page in the module.
+
+     THE RULE MOVES WITH IT: a row above the list is separated by what is
+     UNDER it and a row below the list by what is OVER it, so the hairline
+     swaps ends. `flex:none` after `.raillist` puts it at the bottom of the
+     rail box by construction — no `position:sticky`, no measured offset,
+     and nothing scrolls under it, because the scroller ends where this
+     begins (§108.5, §290.1's sticky foot arrived at structurally). */
+  .setuprail .railback-row.railfoot { border-bottom:0; border-top:1px solid var(--line);
+                                      padding:7px 14px 8px; }
+  .setuprail .railback { font:600 11.5px/1.3 var(--sans); color:var(--ink-2); text-decoration:none;
+                         white-space:nowrap; }
+  .setuprail .railback:hover { color:var(--ink); text-decoration:underline; }
+  .setuprail .railback:focus-visible { outline:2px solid var(--gold); outline-offset:1px; border-radius:3px; }
   .railtog { width:22px; height:22px; padding:0; border:0; border-radius:4px;
              background:none; color:var(--panel-quiet); cursor:pointer;
              display:inline-flex; align-items:center; justify-content:center; }
@@ -2607,6 +2551,14 @@
   .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── AND HOW THE REGISTER IS MADE UP (spec 058 §3a, §362.2) ────────
+     Its neighbour's treatment exactly, because it is its neighbour's kind of
+     thing: a fact true on every healthy client, read as a value, with the
+     detail on the hover. Drawn only where there IS a split (config-render),
+     so §122's removal of a plain total stands untouched. */
+  .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -2827,3 +2779,37 @@
 .ffrow{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
 .ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
           color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }
+
+/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§362.2) ──
+   The client's own person, marked because a consultant's address matched
+   theirs (§313.32): their role is the client's and stays editable, so this
+   is a note beside it rather than a cell of its own — same treatment as the
+   mark above, because it says the same thing, and INLINE, since a mark on a
+   line of its own is what takes a 39px row to 51 (§116.4, §88). */
+.ffmark{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+         color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px;
+         margin-left:6px; white-space:nowrap }
+
+/* ── THE LANDING LINE PAGE (§359.4, spec 056 §4.5) ────────────────────
+   The radio list and the preview are the signed-off mockup's own
+   (design-mockups/module-setup/2026-09-15_setup-per-module.html, Insights'
+   Setup frame) in the platform's tokens; the native radio is kept for the
+   keyboard and the screen reader and drawn as the mockup's dot. */
+.cfg.landing .lopts{ display:flex; flex-direction:column; gap:8px; max-width:640px }
+.cfg.landing .lopt{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:var(--r-sm); font-size:var(--fs-body); cursor:pointer; background:var(--surface) }
+.cfg.landing .lopt.on{ border-color:var(--gold); background:var(--gold-wash) }
+.cfg.landing .lopt input{ position:absolute; opacity:0; width:1px; height:1px; margin:0 }
+.cfg.landing .lopt:has(input:disabled){ cursor:default }
+.cfg.landing .lopt:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:2px }
+.cfg.landing .ldot{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--ink-3); flex:none; margin-top:3px }
+.cfg.landing .lopt.on .ldot{ border-color:var(--gold-deep); box-shadow:inset 0 0 0 3.5px var(--surface), inset 0 0 0 8px var(--gold-deep) }
+.cfg.landing .ltxt{ display:flex; flex-direction:column; gap:2px }
+.cfg.landing .lex{ color:var(--ink-3); font-size:var(--fs-small) }
+.cfg.landing .lprev{ margin-top:16px; max-width:640px }
+.cfg.landing .lprev h4{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700 }
+.cfg.landing .lrow{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:var(--r-sm); background:var(--surface); font-size:var(--fs-body) }
+.cfg.landing .lk{ font-weight:600; min-width:110px }
+.cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
+.cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }

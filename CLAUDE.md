@@ -7710,6 +7710,160 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
+- **THE WAY ACROSS RUNS BOTH WAYS, AND ROLES &amp; ACCESS WAS NEVER REMOVED
+  (&sect;362.1):** Islam, having opened the client's settings from the
+  console's card &mdash; *"I ca't find the access page in the strategy module
+  &hellip; why did we remove it it's a very important table that can't be
+  removed. already it was stable."* **MEASURED BEFORE ANYTHING WAS PROPOSED,
+  AND NOTHING WAS REMOVED**: Roles &amp; access is on STRATEGY's rail under a
+  group headed *Access*, and the matrix itself is byte-identical to `main`'s
+  &mdash; `AREAS`, `ROLES` and `ACCESS_DEFAULTS` all diff clean, and the only
+  change to the access keys since is one ADDED (`c_landing`). Two Setup pages
+  did go and neither is an access page: Branding absorbed into *Getting
+  started*'s first step (&sect;360) and the Setup Overview into the landing's
+  own list (&sect;359), both recorded. **THE FAULT IS REAL AND IT IS A MISSING
+  DOOR**: &sect;360.9 gave a module's rail a row across to the client's and
+  left the reverse unbuilt, so arriving by the card's *Settings* chip left
+  somebody on a rail with no Roles &amp; access on it AND no way to the rail
+  that has it &mdash; the console, the client, the module, the gear
+  (&sect;61, and &sect;16.7's rule from the other side: *a rail that cannot
+  take you to the page you came for makes work*). **ONE ROW PER MODULE**,
+  where the other direction is one, because there is one client and there may
+  be several. **AND THE ATTRIBUTE STOPS CARRYING THE SWITCHER'S RULE IN ITS
+  NAME**, which is the cause rather than the symptom: `data-modules` was
+  written only for a client holding more than one, so the client's rail could
+  not name the single module it should cross to. It is the LIST now &mdash;
+  the modules THIS PERSON MAY OPEN, already resolved for the switcher
+  (`moduleMenu(openableModules)`), so a module shut to them is not offered
+  here either and nothing asks twice (&sect;53.5, &sect;42) &mdash; and the
+  *a menu of one is a door behind a door* test (&sect;32) moves into
+  `shell/route.js`, the reader it belongs to, with the check's
+  `switch-always` break moving with it. Same foot, same words, same direction
+  mark: *Client settings &rsaquo;* and *Strategy settings &rsaquo;* are one row
+  pointing opposite ways, after the list rather than above it (&sect;360.9),
+  outside `.raillist` so it cannot scroll away (&sect;290.1).
+  `checks/shell.mjs` &sect;3b gains six assertions, **both ends** &mdash; the
+  rows asserted as an AGREEMENT with `data-modules` rather than against the
+  word *Strategy* (&sect;94.8), on a tenant made to hold TWO modules for the
+  length of the section so a hardcoded name goes red (&sect;113.8); the door
+  **PRESSED rather than read** (&sect;96), landing on the module's Setup
+  wearing the module's bar with Roles &amp; access asserted present on the
+  rail it reaches; and the module's own one row asserted still there, or a
+  build that MOVED the row rather than adding one passes everything above.
+  **ONE ASSERTION REWRITTEN, NEVER LOOSENED** (&sect;218, &sect;214.3): *"this
+  client HAS a second module"* asked whether the attribute was PRESENT, which
+  said that only while it carried the switcher's rule &mdash; it asks the
+  CONTENT now. **AND TWO NEIGHBOURING CHECKS WERE MODELLING THE OLD SERVER**
+  (&sect;100.3): `modules.mjs`'s stub served *one module* as an ABSENT
+  attribute, and `door-landing.mjs` inferred *"Strategy alone"* from that
+  absence &mdash; which on a build that DROPPED the stamp is the same answer a
+  correct build gives (&sect;113.8), so it reads the list and a missing one is
+  red. **AND THE SECTION DIED RATHER THAN REPORTING ON ITS FIRST RUN**
+  (&sect;215): the press waited on `body.ready`, which is `platform.html`'s
+  convention and not this shell's &mdash; the file's own `booted()` is the
+  helper, and using it is &sect;53.5 inside a check. Proved able to fail from
+  the SOURCES (&sect;276): the one-way build **5 red** (2 before the guards
+  below), the row hardcoded to Strategy **1 red**. **AND TWO OF THE NEW
+  ASSERTIONS WERE WEAK, FOUND BY FALSIFYING RATHER THAN READING**:
+  `across.every(&hellip;)` is TRUE over an empty list, so the one-way build
+  satisfied it perfectly (&sect;113.8), and the press took the rest of the
+  section down with it rather than reporting.
+- **WHAT EVERY PERSON CAN OPEN, MEASURED BEFORE ANYTHING MOVES (T0, spec
+  056):** Islam's *"bring any access that was removed"* answered with a
+  measurement rather than a reading, and it is the baseline stage 3's whole
+  promise rests on &mdash; measuring it after the change would be measuring the
+  change (&sect;303). **IT ASKS THE RULE, NOT A SCREEN**, which is the one
+  correction the building made: `grantAtPage` is the one function the browser
+  and the server both ask (&sect;42), so the sweep is the whole access surface
+  and a walk of the pages drawn today would have measured the RAILS rather
+  than the access &mdash; *a page moved between rails is invisible here, which
+  is right, because this exists to tell the two apart*. **NO BROWSER AND NO
+  DATABASE**: the world is built from `db/seed-state.json` with the product's
+  own `worldOf`, never a graph typed out in the check (&sect;100.3), and every
+  target in the tenant is swept because the same page answers differently for
+  a unit somebody owns and one they do not (&sect;37). **THE ANSWER IS
+  UNMOVED**: 33 people &times; 35 page keys &times; 21 targets, and every one
+  of the 33 opens exactly what they opened on `main` at every target across
+  all 34 shared keys &mdash; the only difference is `c_landing` ADDED, whose
+  693 cells (33 &times; 21) are the whole of 8842 &rarr; 9535, which is the
+  arithmetic corroborating it rather than a coincidence. The baseline is kept
+  as `specs/058-the-client-and-its-modules/access-baseline.json` **carrying
+  the commit it came from**, because a baseline with no provenance is a number
+  somebody has to take on trust. Proved able to fail twice: a page moved to
+  another area **635 red**, the Roles &amp; access page deleted **22 red**, the
+  first of them naming the key GONE. **AND THE FIRST TWO FALSIFICATIONS DID
+  NOT FALSIFY** &mdash; narrowing `ACCESS_DEFAULTS` changed nothing, because
+  the tenant's STORED matrix overrides the defaults, so a break there is a
+  break in a value nothing reads (&sect;54.5's shape: a green falsification run
+  is indistinguishable from a working guard).
+- **THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (&sect;362, spec 058,
+  stage 1 of six):** Islam, of the page the console's *Settings* chip opens
+  &mdash; *"theclient settings shouldn't open the strategy banner in the top
+  this is a client settings separate than any module"* &mdash; and, of the
+  answer first offered, *"you are trying to make a simple fix. let's discuss
+  the architecture and who sees what it's not a simple fix."* **THE CAUSE IS
+  ONE LINE AND IT IS NOT A MISTAKE**: `/<client>/setup` carries no module word,
+  so the route stamps `DEFAULT_MODULE` and serves the frozen shell, whose
+  chrome is Strategy's navigation &mdash; true until &sect;359.2 gave every
+  Setup def a `mod` and seven of them said `client`, so the rail has been the
+  client's own for a day and the bar above it had not been told. **ONE READER,
+  ASKED WHERE THE CHROME IS DRAWN AND NEVER PER CONTROL** (&sect;53.5,
+  &sect;104.7): `clientScoped()` writes one root attribute and CSS stands down
+  the destination row, the Group dropdown, the Units&nbsp;|&nbsp;Functions
+  switch, the gear and the viewer strip together, so a control added to either
+  line later is covered the day it is added. **THE NAME COMES BACK TO THE
+  BRAND, WHICH IS WHY IT IS NOT A THIRD COPY** &mdash; the way back says
+  **Save &amp; close** (his own words) and names nobody, so the client is on
+  the line exactly once (&sect;120), and both the heading and the mark are
+  asserted PUT BACK on the way out, because a one-way write leaves the client's
+  name over Strategy's navigation for the rest of the session (&sect;94.2) and
+  the first draft of that assertion **could not fail**, being measured after a
+  page load, which serves the product's name out of the static markup whatever
+  `paint()` does. **THE SCOPE IS STAMPED BY THE SERVER, WHICH IS NOT AN
+  OPTIMISATION**: the module switcher is built ONCE AT LOAD, above the line
+  that resolves the address, so it is the one piece of the chrome the frozen
+  shell cannot repaint away &mdash; `lib/shell.ts` stamps the same answer the
+  browser would compute (`w.module` is set only where the module word LED),
+  so there is no second answer, only an earlier one. **&sect;362.6 &mdash; AND
+  THE ROW'S OWN PAINTER IS WHAT SETTLES WHICH PAGE YOU ARE ON**, so nothing
+  reading the page may run before it: the first build had `paintUnits()` ask
+  the question and return early, which needed the scope resolved first
+  &mdash; and on the first paint after a served address `current` and
+  `currentSub` are still NULL until `paintUnits()` resolves the destination
+  (&sect;94.6), so `/<client>/setup/cycle` landed on the client's FIRST page
+  with the client's bar over it, the landing's own spine-form door broken.
+  The row is BUILT and then HIDDEN, and the resolver sits immediately after
+  the painter that enables it. **&sect;362.5 &mdash; AND UNDOING A
+  FALSIFICATION WITH `git checkout` THREW THE WORK AWAY**, which
+  &sect;343.9 records and which happened again with that section in hand:
+  recovered from the BUILT file, a concatenation holding every block verbatim,
+  and proved by rebuilding to a file byte-identical to the one the checks had
+  passed against. Proved in `smp-app/checks/shell.mjs` &sect;3b &mdash; 20
+  assertions, both ends every time, red **six ways**, five from the SOURCES
+  (&sect;276) and one from the server stamp, whose third failure is the
+  switcher drawn where there is nothing to switch to. **&sect;362.8 &mdash; AND
+  ANSWERING THE SITES THAT FAILED IS ANSWERING THE SITES YOU HAVE SEEN FAIL**:
+  with the row and the strip stood down, a click or a select aimed at either
+  waits thirty seconds and the whole sweep ends on *"waiting 500ms"*, a run
+  that STOPPED rather than passed (&sect;298.3). Three rounds &mdash; two
+  sites, then a viewer pick after the template round trip, then the
+  Units&nbsp;|&nbsp;Functions press &mdash; because the real cause is that TWO
+  sections navigate to the client's settings (the client-rail walk, and the
+  Functions page, which is the client's since &sect;359.2) and everything after
+  them inherits the page. **ONE HELPER, ASKED WHERE THE CHROME IS REACHED FOR**
+  (`module_page()`, &sect;53.5): the wrapper every viewer pick already goes
+  through, and `show_units()`; the call-site copies deleted (&sect;24), and
+  guarding the two NAVIGATIONS instead refused, because that is a rule somebody
+  has to remember the next time a section walks there (&sect;104.7). *A control
+  that moves is not one place to correct; it is every place that reaches for
+  it, and how many that is cannot be read off the diff &mdash; only off the
+  run.* **RECORDED, NOT DONE**:
+  the drawing signed off for this showed a NAVY top bar and `header.top` is
+  `var(--surface)` on every page &mdash; what Islam photographed as the
+  strategy banner is the row this removes, so the mockup misrepresented the
+  baseline rather than proposing a change (&sect;245's trap, in a colour);
+  built as the product has it, with the client's colour still reaching the
+  page through the rail's head and the table headers.
 - **ONE REPOSITORY, AND A MODULE IS A FOLDER (§345, spec 046
   `repo-boundary.md`):** anything that runs inside the client platform lives
   here. A module shares `withTenant()`, the door, the session, one route handler
@@ -8030,20 +8184,29 @@ python3 checks/built-in-step.py # THE SHIPPED FILE IS IN STEP WITH ITS SOURCES
                                 # *"your edits are not built yet"* (&sect;124), so only
                                 # what `build.py` actually reads counts. Proved able to
                                 # fail both ways, one of them the reported state itself
-node smp-app/checks/modules.mjs # a module per client, and the trial that proves
-                                # one can be added (&sect;320.5) &mdash; `npm run
+node smp-app/checks/modules.mjs # a module per client, and every module serving
+                                # itself (&sect;320.5, &sect;363) &mdash; `npm run
                                 # check:modules`, no database. The list a client has
                                 # (order is MODULES', an unknown or UNBUILT word
                                 # dropped, the default always present), what may be
                                 # offered, the address (a module the client does NOT
                                 # have falling through to the legacy branch exactly as
-                                # any other unknown word), the card's rows, and the
-                                # trial page RENDERED &mdash; the greeting naming this
-                                # client, a different client getting a different one,
-                                # a register it could not read SAID rather than counted
-                                # as nought (&sect;35, &sect;93), the way OUT back to
-                                # Strategy (&sect;61), no row of units, and nothing
-                                # inline needing a script the policy would silence.
+                                # any other unknown word), the card's rows, and EVERY
+                                # module's own page RENDERED &mdash; the document
+                                # naming this client, a different client getting a
+                                # different one, the way OUT back to the default
+                                # module (&sect;61), the module you are IN marked, a
+                                # client holding only the default offered no door it
+                                # does not have, no row of units, and nothing inline
+                                # needing a script the policy would silence. SINCE
+                                # &sect;363 IT NAMES NO MODULE AT ALL: the second
+                                # module, the ones drawing a page of their own and the
+                                # ones declaring no area are all DERIVED from
+                                # MODULE_DEF, so removing the trial module edited a
+                                # dozen assertions once and adding the next one edits
+                                # none (&sect;214.3, &sect;218) &mdash; with the
+                                # derivation itself guarded, or a list of one goes
+                                # quietly green (&sect;54.5, &sect;113.8).
                                 # It SAYS which assertions are driven and which are
                                 # read (&sect;100.3). AND SINCE &sect;354 IT COVERS
                                 # ALL THREE BUILT MODULES, not two named by hand
@@ -9345,10 +9508,58 @@ python3 checks/deck-fullscreen.py # fullscreen is the slide, the arrows and noth
                                 # has gone answers everything after it with None (§215)
 python3 checks/notes-slide.py   # the notes slide appears when somebody wrote a note — and
                                 # whitespace is not a note, on all three deck shapes (§246)
-python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
-                                      # MAKES the state, because the demo tenant is all-clear
-python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
-                                      # they exist at all (§101.12)
+python3 checks/client-setup.py  # the set-up flow inside the platform (§360,
+                                # spec 057): the bare state MADE (§255), the
+                                # Getting started strip agreeing with the flow's
+                                # own progress() and never a count, the flow
+                                # mounted from it, Branding's controls inside its
+                                # first step with the old `brand` def absent, a
+                                # unit added and read back off the STORED graph
+                                # with every head and weighting row surviving, a
+                                # headed removal refused BY NAME with the row put
+                                # back and the next press proceeding, an unnamed
+                                # row refused in words, Done with set-up moving
+                                # the def to The client as Client set-up, and the
+                                # shape frozen under a plan. Red from the SOURCES
+                                # via SMP_BUILT (§276)
+python3 checks/attention-rows.py # what is waiting on the office — one list, three
+                                # readers, and no fourth (§359, spec 056 §9.1): the
+                                # Setup Overview is DELETED, and this file owns what
+                                # `setup-overview.py` owned minus the page. The list
+                                # agrees with its sources, the rail's pills are that
+                                # list summed by destination (§108.15), and the page
+                                # is gone at BOTH ENDS (§94.2) — no def, no rail
+                                # entry, the gear on Reporting cycle for the office
+                                # AND a non-office viewer, and an address still
+                                # naming it landing on the first page rather than a
+                                # blank pane (§61: a bookmark is a door). The three
+                                # server-backed rows asserted ABSENT over file://,
+                                # never zero (§93); the landing's own drawing of the
+                                # list is welcome.py §5. 6 red on the build before,
+                                # exactly the section that exists for the deletion
+python3 checks/setup-per-module.py # a def knows its module, and the rail draws
+                                # by it (§359.2, spec 056 §4.2–§4.3): every def
+                                # carries `mod`, the rail is the defs marked with
+                                # the document's scope — asserted as AGREEMENT, both
+                                # ends (a page absent from the wrong rail AND present
+                                # in the right one, or a build drawing an empty rail
+                                # passes half), unscoped (file://) it is the whole
+                                # list as before, the page decides the rail when the
+                                # two disagree (research R2), the moved pages still
+                                # WRITE (§96), the fold keys survive a reload (§30.2),
+                                # and the way back is drawn on the client's rail alone
+                                # and read at 4.5:1. With SMP_BASE the served half:
+                                # two rails at two addresses, the address each writes,
+                                # a spine-form door ending at the module's own address,
+                                # and the gear from a unit page and from the client's
+                                # rail. Without SMP_BASE it SAYS the served half did
+                                # not run (§54.5). 0/0 both halves; red 4 / 2 / 1 from
+                                # the SOURCES on the file:// half and 1 / 6 on the
+                                # served one (restoreWhere scoped again; the router
+                                # writing no scope) — and the filter break leaves the
+                                # agreement line GREEN (both sides vanish, §113.8),
+                                # which is why the "none of the other rail's" half
+                                # exists
 python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
                                 # the filter, and a match inside a FOLDED group is findable
                                 # (§108.13, §108.14 — all three fail silently)
@@ -9648,7 +9859,616 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;356.16: the week by its month, cards
+*Last Updated: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
+the four things it found.** Islam, of the branch carrying &sect;359&ndash;&sect;364:
+*"make sure that if we merge to main we will not loose any client access or mess
+with any current behavior."* **THE HONEST SWEEP HAD TO BE OF THE MERGED TREE**,
+which is the first finding rather than a preliminary: `main` had moved **33
+commits** underneath &mdash; two whole modules, the Internal Tracker and Meeting
+Notes &mdash; so a branch that passes everything says nothing about what
+production would hold (&sect;56.7: a clean merge is not a working one). Rehearsed
+locally, resolved, everything re-run on the result.
+**ACCESS IS UNMOVED, MEASURED IN BOTH DIRECTIONS** (T0, asking `grantAtPage`,
+the ONE function the browser and the server both ask): base &rarr; main unmoved,
+base &rarr; branch unmoved, **merged &rarr; main unmoved** &mdash; 33 people
+&times; 34 shared page keys &times; 21 targets, every one opening exactly what
+they opened, with `c_landing` ADDED and its 693 cells the whole of 8842 &rarr;
+9535.
+**&sect;365.1 &mdash; THE PUBLISHING ROOM WAS GONE AND IT WAS THIS BRANCH'S
+FAULT**: &sect;363's flow extraction sliced a RANGE out of `platform.html` and
+took spec 053's document room with it, so the console called `drawLibrary()`
+with the function defined **nowhere** and a module's room on a client card
+threw (&sect;214: delete a named function, never a range). Established as MINE
+before anything was touched (&sect;303) &mdash; `publishing-room.py` is **74/0**
+on `origin/main`'s own build and **DIES** on this branch's &mdash; and restored
+from main's copy, which carries main's own later work on it. 74/0 after.
+**&sect;365.2 &mdash; MAIN'S REGISTRY IMPORTED A MODULE THIS BRANCH DELETED**
+(&sect;313.37: grep the merged result for the names the branch deleted, not only
+for duplicates) &mdash; taken whole it would not have built; and resolving it by
+dropping every line holding `trial` took the whole `SERVERS` table with it,
+caught by the COLD typecheck (&sect;3, &sect;361.5).
+**&sect;365.3 &mdash; THREE CHECKS HAD STOPPED CHECKING, ALL FROM ONE MOVE**, and
+every one **passed while proving nothing**: `setup-shape.mjs` read the console
+page for a `WORDS` list that had moved (&sect;51.11), **five of its six
+falsifications had become silent no-ops** (&sect;54.5 &mdash; 33 ok, 0 failed
+with five guards dark, all six red on main), and two served harnesses waited for
+an address &sect;362 made redirect, so both DIED rather than reporting
+(&sect;215). **And my first fix was satisfied by the page it had not left**
+&mdash; `/<client>/sign-in` starts with `/<client>` too, so a refused sign-in read
+as a landing (&sect;113.8), found by probing what the page HELD rather than by
+reading the predicate.
+**&sect;365.4 &mdash; SIX OF THE NINE SPIKE PROOFS WERE DARK, AND IT IS MAIN'S
+TABLES**: the merge cannot be called safe for the tenant boundary without S2, and
+S2 was not running &mdash; main's `date` column and two `IN (…)` CHECKs met a
+harness with two hand-written special cases, identical on main (&sect;303). The
+value is DERIVED from the column's own CHECK now (&sect;104.7), both special cases
+deleted as the proof it works &mdash; **and the first draft matched nothing**,
+because Postgres normalises `IN (…)` to `= ANY (ARRAY[…])` (&sect;93.11: ask the
+thing, do not reason about it).
+**&sect;365.5 &mdash; THE RENUMBER, DONE BEFORE THE MERGE**: both sides had taken
+&sect;356&ndash;&sect;358 and specs 054&ndash;055 for different features
+(&sect;264.3), and before is the only moment it is provably scoped &mdash; the
+merge base holds none of them, measured. &sect;356&rarr;&sect;359 &hellip;
+&sect;361&rarr;&sect;364, specs 054&rarr;056 &hellip; 056&rarr;058, descending,
+each substitution asserted to have MATCHED, **all three spellings** (&sect;336.1,
+&sect;340.2).
+**&sect;365.6 &mdash; AND THE ONE PRODUCT REGRESSION CAME OUT OF THE LAST FILE
+RUN**: **sorting was dead on every Setup table in the product** &mdash; the
+register, the business units, the companies, the supporting functions, the
+Official BU list. Not slow, not wrong: the click landed, `paint()` ran, and
+nothing moved. **One word.** `tkHead(id, allow)` returns the builder each head
+is drawn with, and spec 058 &sect;4.4 gave its inner function a fourth parameter
+for the column an ADDRESS can point at (the landing's Access door opens the
+register at `#seat`) &mdash; spelt `id`, **which shadows the table's own `id`
+one line up**. So every sortable header came out `data-tksort="undefined|N"`
+(measured, against main's `people|1 … people|7`) and `TKSORT[id]` read **one
+shared slot for all five tables**. **&sect;56.7's collision with a shorter
+fuse**: a parameter shadowing the closure it is written inside is valid,
+idiomatic and invisible &mdash; `node --check` passes, the page renders, nothing
+is logged, and every assertion short of PRESSING the control is satisfied
+(&sect;96, &sect;70). Found by `table-standard.py` **dying** on a null header
+(&sect;215), established as this branch's on main's own build (&sect;303) with
+`tactic-outcome.py`'s four failures IDENTICAL on both and therefore main's. The
+parameter is `colId`, and **both ends are asserted** &mdash; the table id back
+AND `#seat` still rendered, or a fix that took the Access door's anchor away
+would pass everything above (&sect;94.2). **AND TWO CHECKS WERE STALE RATHER
+THAN BROKEN, REWRITTEN NEVER LOOSENED** (&sect;218, &sect;214.3): &sect;360
+absorbed Branding into the set-up flow's first step and DELETED the `brand` def,
+so `wave3.py` &sect;4 and `deck-dividers.py` walked to a page that no longer
+exists &mdash; **the control moved rather than went** (`brandingBody()` is the
+same renderer wired by the same handlers, &sect;53.5, the group's mark upload
+inside it verified still drawn), so only where the walk lands is re-pointed and
+every assertion under it is untouched. *A check keyed on an absorbed page does
+not fail honestly: `deck-dividers` went on to fail four more times about the
+DECK, for a mark it had never managed to upload.* Then every check in the tree
+was grepped for both deleted defs (&sect;51.11) and the four that still name
+them do so deliberately. **VERIFIED**: the whole frozen suite, 181 checks,
+**twice** &mdash; once to find this and once on the build that fixes it;
+`table-standard` died &rarr; ALL GREEN, `table-standard-all` 4 FAILED &rarr; ALL
+GREEN, `wave3` 1 FAILURES &rarr; OK, `deck-dividers` 6 FAILED &rarr; ALL PASS,
+`setup-arrange` and `no-jump` green throughout. **&sect;365.7 closes the same
+shape one screen away**: `roleCell` was TWO functions, &sect;362.5's top-level
+builder for the access matrix's role row and one nested in `renderPeople()` for
+the register's &mdash; different subject, different signature, one global
+namespace (&sect;65.9). Both callers of each resolved right, so &sect;365's first
+draft recorded it as untidy; &sect;365.6 changed that reading, because leaving a
+name that resolves to something other than what its caller meant is recording a
+trap rather than closing it. **Proved behaviour-neutral by MEASUREMENT rather
+than ceremony**: with the rename normalised away the built file differs from the
+commit before in exactly two places &mdash; the comment, and ONE &sect;238 CSP
+hash regenerated in the same build, which is that section working as designed.
+**And four checks are not green, all four established on `origin/main`'s own
+build** (&sect;303): `contingency`'s one and `tactic-outcome`'s four are
+IDENTICAL there, `multi-client` times out on the same locator there
+(&sect;336.2's own record), and `platform-look` is **27/0** the moment it is
+given a database. `qa.py` 33 viewers / 242 destinations / ERRORS none,
+authoriser 683/0, change list 140/0, built-in-step and generated-in-step clear,
+round trip &middot; clean parity &middot; two tabs 21/0 &middot; incremental
+writer byte-identical on fresh databases; door 140/0, shell 111/0, state 92/0,
+**modules 143/0** (up from 93 &mdash; the derived list covers main's two
+automatically), comms 47/47, upload 9/0, **tracker 228/0**, **notes 170/0**,
+insights 127/0, blob 23/23, store 31/0, setup 33/0 all six red, standing 7/0,
+demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0, assistant 10/0, memory
+16/0 &middot; 14/0 &middot; 21/0 &middot; 36/0, `tsc` clean COLD, `next build`
+green, eight of nine spikes with all sixteen falsifications red.
+**MERGED TO `main` 2026-09-17 on Islam's word**, as a clean fast-forward: main
+had not moved since the rehearsal, so the tree pushed is the tree swept twice.
+**The deployment was read off the LIVE SITE and `sw.js` could not be the
+witness** (&sect;91.5) &mdash; &sect;316.10's generator drops the caching half
+where `SHELL` lives, so the served worker is **byte-identical before and
+after** (one sha256, 4,104 bytes) and a bumped name reaches nobody; what proves
+production built this commit is `shell.js` **3,648,730 &rarr; 3,789,535** and
+`platform.css` **641,068 &rarr; 659,996**, both matching the served bytes
+exactly, and both asserted to DIFFER from the build before or a match would
+hold on either (&sect;113.8). **NO FORCED SIGN-OUT IS OWED AND THE READING IS
+STATED RATHER THAN ASSUMED** (spec 029): the authoriser did change, and it
+**widened** &mdash; a register row the platform MINTED is refused exactly as
+before while an ADOPTED one is no longer refused whole (&sect;362.2), and the
+two new group keys are ones an old tab has never written, so no save that
+worked before is refused now. **THE RESIDUE IS THE OPPOSITE ONE AND IT IS
+NAMED**: because the served worker's bytes did not move, no
+`controllerchange` fires and &sect;258's *"A newer version of the platform is
+ready"* is NOT offered &mdash; a tab left open keeps its old shell until
+somebody reloads it, and its rails point at pages &sect;360 absorbed and
+&sect;362 rescoped. **`smp-app/lib/save.ts`'s one edit is a falsification hook
+and nothing else**, read off the diff: it lives inside a `brk ===` guard that
+no request can set.***
+
+*Earlier: 2026-09-17 &mdash; **&sect;364: the Forefront team is a setup
+table (spec 058 &sect;3a).** Islam, of the page &sect;362.2 shipped:
+*"forefront team is damaged it needs to be a table looks like the people
+register wiht the required columns."* **THE CAUSE IS ONE CLASS, MEASURED
+BEFORE ANYTHING WAS DRAWN**: `mountTeam` wrapped the rows in **`.wzstep`**
+&mdash; the class the set-up flow's step CHIPS wear, which is a pill &mdash; so
+a control's own shape was painted round a whole page and drew the oval he
+photographed (&sect;65.9: a class name is one global namespace). Under it the
+rows were the flow's own `.teamrow`, a flex row written for a 760px step
+column: on a full-width Setup page they laid out **side by side** and wanted
+**2471px in a 1323px box**, which is the third consultant cut in half. Both
+are one fault seen twice &mdash; *a shape built for one room, used in
+another.* **IT IS THE SETUP TABLES' OWN SHAPE, NEVER A SECOND ONE**
+(&sect;53.5): `.cfg > table.unitcfg`, which Companies, the BU list and
+Functions already wear, so the navy heading row, one line per cell, the cap
+with the value on a hover (&sect;88) and the ellipsis all come from the family
+rather than from rules invented here &mdash; five columns (**Name &middot;
+Email &middot; Seat on this client &middot; On this register as &middot;
+Remove**), the add row under the table and the note under that. Signed off
+from a mockup made of the RUNNING platform (rule 1c, &sect;41.9), so *today*
+was the product's own markup rather than a drawing of it. **ONE RENDERER, TWO
+HOSTS** &mdash; the flow's seventh step and the Setup page are two readers of
+one function (&sect;9's pattern), because people join and leave an account team
+all through an engagement and a renderer copied for the page is the drift
+&sect;53.5 keeps recording; measured **1325/1325** in the page's pane at 1600
+and **760/760** inside `.wzcol` in the flow, one line a row in each. **THE
+REGISTER COLUMN IS DRAWN ONLY WHERE IT CAN BE ANSWERED** (&sect;61: on a client
+whose register came across the match is by address and has to be confirmed,
+&sect;313.32; on one the platform built the seat IS the register row and there
+is nothing to pick), **and the head follows the cells**, asserted on both
+client shapes in one run (&sect;113.8). **AND THE KEY INSIDE THE CELL IS
+GONE**: `registerCell` drew its own uppercase *on this register as* beside the
+select, which was the control's name while the rows were a flex list and is the
+COLUMN HEADING now &mdash; a label under a heading that already says the word
+says it twice on one row (&sect;87, &sect;267.2) &mdash; so the name moves onto
+the control. **ONE SENTENCE, TWO DRESSES**: the note's words are written once
+and the HOST says how they are dressed (the family's bordered `.note` on the
+page, `.wzwhy` inside the flow), because a class threaded through the renderer
+would be a flag (&sect;104.7). **AND THE ADD ROW ASKS ITS QUESTION IN FULL**
+&mdash; the flow's `flex:1 1 170px` clipped the second select to *"&hellip;as
+who on this client's registe"*, a control asking a question it cannot finish.
+**&sect;364.1 &mdash; THE SLACK HAS TO GO SOMEWHERE, AND SAYING WHICH COLUMN
+TAKES IT IS MOST OF THE FIT**: two attempts, each measured rather than reasoned
+&mdash; `width:1%` on the last column, the register's own trick for its two
+frozen ones, **starved it to 10px at 1280 with its own word painted outside
+it**, and `width:100%` on the name **starved the middle three to nought** at
+the same width; left alone the leftover is shared. **&sect;364.2 &mdash; A
+COLUMN CAN NEVER BE NARROWER THAN THE WIDEST THING THAT WILL NOT WRAP**, and
+the sum of five of those measured **936px against an 825px pane at 1100**: the
+select **fills its cell** now (what `arrange.css` already does for a select in
+a setup table), so the register column costs its heading and nothing more, and
+the address caps at 220 &mdash; **both measured constants, with the check
+asserting the FIT rather than either of them** (&sect;122.5), fitting at
+**1325 / 1165 / 1005 / 825**. **&sect;364.3 &mdash; AND BELOW THAT NO CAP CAN
+MAKE IT FIT, SO THE BOX SCROLLS RATHER THAN CUTTING**: the five minima come to
+802px and a 1000px window gives the pane 725, so `overflow-x:auto` is the
+family's own answer (&sect;88), safe because this head is `position:static`
+like every other ordinary setup table's &mdash; &sect;135.2's damaged matrix
+was a STICKY head inside a scroll box &mdash; asserted at both ends, the box
+ABLE to scroll and the last column REACHABLE by scrolling it, with the page
+gaining none. **&sect;364.4 &mdash; A CELL THAT HOLDS A CONTROL HAS NO VALUE
+FOR A HOVER, AND THE FALSIFICATION IS WHAT SAID SO**: `clipTitles()` falls back
+to the cell, and a `<select>`'s text is **every option it holds**, so the first
+build's hover read *"a row of their ownMohamed Essam &middot;&hellip;"* &mdash;
+it was marked `data-keep-title`, and **the run made to prove that mark
+load-bearing came back GREEN** (&sect;298.2, &sect;54.5), because giving the
+select its cell had meanwhile removed the overflow that produced the title at
+all, measured at every width from 1600 to 768; the mark is **DELETED** rather
+than kept as a line the next reader takes for load-bearing (&sect;24).
+**&sect;364.5 &mdash; AND AN EDIT THAT PRINTS NOTHING IS NOT AN EDIT THAT
+HAPPENED**: two cap changes rode on a `replace` whose old text had moved, so
+three measurement rounds read the SAME numbers and called the cap ineffective
+&mdash; every break in the falsification harness **asserts it matched** before
+it is written now. **VERIFIED**: `checks/team-page.py` **31 assertions, 0
+failures**, over HTTP with a stub, because the page is empty over `file://` by
+construction (&sect;94.11) and a stub is the only way to make both client
+shapes and to read what a press WROTE rather than what it drew (&sect;96);
+proved able to fail **six ways from the SOURCES** (&sect;276) &mdash;
+**9 / 2 / 2 / 3 / 3 / 1 red**, A's nine naming the reported fault in its own
+words. `checks/multi-client.py` and `smp-app/checks/shell.mjs` &sect;3c held
+the flow's row selectors and were re-pointed (&sect;51.11); the first is
+recorded as unrun, needing the rehearsal database &sect;328 describes. Ten
+neighbouring checks green, `built-in-step` all good, the four generators
+re-run and `generated-in-step` clear, **`qa.py` over `file://` 33 viewers /
+242 destinations / ERRORS none &mdash; and the SAME 33 / 242 / none on a build
+made from the commit before this one** (&sect;303, &sect;332). The built file's
+bytes changed, so **`sw.js` is bumped** (&sect;91), confirmed against
+`origin/main` immediately before the push (&sect;94.16). **`main` untouched
+&mdash; the merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-17 &mdash; **&sect;363: the trial module goes, and what
+its check proved stays.** Islam: *"let's remove the trial module now."*
+**IT WAS BUILT TO PROVE SOMETHING AND THE THING IS PROVED** &mdash; &sect;320.5
+made it deliberately not a product name to show a module could be turned on for
+one client and opened; &sect;354 then gave the route a table and &sect;355/&sect;359
+gave Insights an area, a landing line and a Setup group, so what the trial
+demonstrated is demonstrated now by a module somebody bought. **THE STORED WORD
+NEEDS NO MIGRATION, AND THAT IS `modulesFor`'s OWN DESIGN**: an unknown or
+unbuilt word is DROPPED, under a comment saying exactly why &mdash; *a module
+retired later must not make a client unopenable* &mdash; so Raya Trade keeps the
+word in its row and simply stops being drawn a row for it, on the card, in the
+switcher and on its own Setup rail. **THE WORK WAS THE CHECK, AND IT IS
+&sect;214.3 FOR THE ELEVENTH TIME**: `checks/modules.mjs` had a section of its
+own for the trial's page and spelled `"trial"` in a dozen assertions besides.
+Both are one literal outliving its decision. **A SECOND MODULE IS FOUND, NEVER
+NAMED** (`OTHER`, derived from `MODULE_DEF`, with the derivation itself guarded
+or a list of one goes quietly green &mdash; &sect;54.5, &sect;113.8); **&sect;5
+WAS ABOUT ANY MODULE'S PAGE AND SAID TRIAL**, so its six general claims are
+asked of every module drawing a page of its own (`OWN_PAGE`, found by looking
+for a `page.ts`); **the switcher's fixture was two modules typed out** and is
+`moduleMenu(offerable())` now (&sect;53.5); and **one assertion named the trial
+because of a property it alone had** &mdash; its only landing line was `none`
+&mdash; REWRITTEN to the rule that survives (an unchosen module says its FIRST
+DECLARED line, which is what makes `none` a choice rather than an absence),
+with the set asserted non-empty first (&sect;218, &sect;113.8). **WHAT WENT WITH
+IT IS SAID RATHER THAN MOURNED** (&sect;54.5): the trial's greeting was made of
+the client's REGISTER, so it alone proved a count the page could not read is
+SAID and never a nought (&sect;35, &sect;93) and that a plural is not made by
+adding an `s` (&sect;107.8) &mdash; the first is answered for Insights in
+&sect;2c, the second lives in that page's own `plural()` with nobody asking it
+here. **AND THE BREAK MOVES SO THE FALSIFICATION SURVIVES**:
+`SMP_BREAK=static-hello` is Insights' now &mdash; a build whose page stopped
+naming THIS client &mdash; and `check:modules:red` is still eight breaks, all
+eight still red. **AND A RED NEIGHBOUR WAS CLEARED, ESTABLISHED AS NOT THIS
+ROUND'S BEFORE IT WAS TOUCHED** (&sect;303, by diff): `client-card-modules.py`
+&sect;4 asserted a card's Settings *"navigates nowhere"*, true until &sect;360
+made it a door to `/<client>/setup` &mdash; REWRITTEN, never loosened
+(&sect;218), to the claim that survives, that Settings is its OWN control and
+not the module's, at both ends. **Verified**: modules **115/0** (from 93) red
+eight ways, insights 127/0, shell 111/0, door-landing 140/0,
+client-card-modules 16/0, client-archive and client-setup-outside 0 failures,
+`built-in-step` all good, `tsc` clean cold. **The frozen product is untouched
+and measured**, so **`sw.js` is NOT bumped** &mdash; &sect;91's trigger is the
+built file's bytes changing and they did not. **`main` untouched &mdash; the
+merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-16 &mdash; **&sect;362.2: Forefront team is the store
+and the register is a reader (spec 058 &sect;3a, stage 2 of six, on the
+branch).** Islam's own revision of his first instruction &mdash; *"how about
+the forefront team is a separate view as you did but we keep them on the
+client list reading from the forefront team list."* A client-scoped Setup page
+under *Who*, above the register because it is the store the register reads,
+**mounted rather than moved** so the set-up flow's step and the page are two
+readers of ONE renderer sharing one state (&sect;9's pattern, &sect;53.5).
+**THE FINDING IS &sect;3a'S OWN CLOSING WARNING, READ BEFORE ANYTHING WAS
+BUILT**: there are **two kinds of Forefront row** and `officeRow` has marked
+them apart since &sect;313.29 while nothing read the difference &mdash; a
+**MINTED** row the platform BUILT, whose role IS the seat and is rewritten on
+every request (&sect;338's heal), and an **ADOPTED** row, the client's own
+person, marked because their address matched exactly one active row
+(&sect;313.32) and which that same function says in its own words it *"never
+rewrites"*. **&sect;3a's literal rule would have stripped the client's own
+custodian of their custodianship the day they joined the account team**
+&mdash; data the client entered, which &sect;96.2 forbids us to rewrite
+&mdash; and frozen their unit, their address and their name with it. So the
+question is asked of the **MINT, never of the mark**
+(`SMPRules.isMintedRow` / `isForefrontRow`, one pair read by the register and
+by `lib/authorize.js`, &sect;42), and Raya Trade is the live case rather than
+a corner: its register came across by the carry, so adoption is the path
+there. **THE READ-ONLINESS IS STRONGER THAN THE SPEC ASKS AND WAS MEASURED
+RATHER THAN ASSUMED** (&sect;100.3): &sect;116 took the role picker off the
+ROW, so a minted row is read-only by not being offered *Edit details* at all
+&mdash; its menu keeps *View the platform as them*, which reads and writes
+nothing, and *Delete permanently*, which is a removal rather than an edit and
+already the Super user's (&sect;89); **the password entry goes for EVERYBODY**,
+where &sect;89 only ever kept it from an SMO team member, because a consultant
+signs in at Forefront's own door. **AND THE RULE HAD TO BE DRAWN FROM WHAT
+SITS UNDER IT** (&sect;193.2): with a minted row keeping one entry, the menu's
+old unconditional hairline was a rule attached to nothing and, on a retired
+consultant, a menu whose whole contents is a rule. **THE COUNT SAYS BOTH AND
+IT IS A NARROW REVERSAL OF &sect;122** (Principle II): that section removed a
+TOTAL at Islam's instruction because *the table under it is that count*, and
+the one thing a table of 36 rows cannot be read for is its composition
+&mdash; so the chip states the SPLIT, never the total, and is drawn **only
+where there is a split to state**. The seat chip's hover had gone false beside
+it and is corrected in the same edit (&sect;104.8). **VERIFIED**:
+`checks/forefront-team.py` **37 assertions, 0 failures**, three populations
+measured in one run (minted, adopted, ordinary) with the state MADE and put
+back (&sect;255, &sect;94.2) and the count asserted as an AGREEMENT
+(&sect;94.8), red **4 / 1 / 3** from the SOURCES (&sect;276);
+`test-authorize.js` &sect;42 **683 passed**, red **2 / 2**; `checks/shell.mjs`
+**111/0** with a new &sect;3c proving the served seam &mdash; the page drawing
+this client's REAL team and the register's consultants asserted as an
+agreement with it &mdash; red **2** from the sources; door-landing 140/0,
+modules 125/0, `built-in-step` all good, `tsc` clean, and **the access
+baseline still UNMOVED**. **&sect;362.3 &mdash; three of the new check's own
+first failures were the CHECK**: it asked a ROW for a picker &sect;116 moved
+into the dialog and so reported an ordinary person as broken, it read a node
+`paint()` had replaced (&sect;222), and it **died rather than reporting**
+(&sect;215, in the file promising every probe degrades) because three guessed
+close selectors left the overlay up and intercepted every press after it.
+**`main` untouched &mdash; the merge is Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;362.1: the way across runs both
+ways, and Roles &amp; access was never removed.** Islam, having opened the
+client's settings from the console's card &mdash; *"I ca't find the access page
+in the strategy module &hellip; why did we remove it it's a very important
+table that can't be removed."* **MEASURED, AND NOTHING WAS REMOVED**: the
+matrix is byte-identical to `main`'s, and what was missing is a DOOR &mdash;
+&sect;360.9 built the way across one way only, so arriving by the card's
+*Settings* chip left somebody on a rail with no Roles &amp; access on it and no
+route to the rail that has it. See the entry in the project context above, and
+**T0** beside it: `scripts/test-access-unmoved.js` asks the shared rule for 33
+people &times; 35 page keys &times; 21 targets and answers **UNMOVED** against
+`origin/main` &mdash; the baseline is
+`specs/058-the-client-and-its-modules/access-baseline.json`, carrying the
+commit it came from. **VERIFIED**: `shell.mjs` **103/0** (&sect;3b six new
+assertions, red **5** and **1** from the SOURCES), `modules` **125/0** with
+`switch-always` still red, `door-landing` **140/0**, `setup-per-module` green
+on both halves, `generated-in-step` all clear, `built-in-step` all good, `tsc`
+clean cold, 673/0 authoriser and 140/0 change list, the access baseline
+**UNMOVED** and proved able to fail **635** / **22**, and `qa.py` over
+`file://` and at Next both ERRORS none. **`main` untouched &mdash; the merge is
+Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;362: the client's own settings wear the
+client's bar (spec 058, stage 1 of six).** The reported fault: `/<client>/setup`
+carries no module word, so the route stamped `DEFAULT_MODULE` and served
+Strategy's navigation over the client's own pages. One reader asked where the
+chrome is drawn and never per control (&sect;53.5, &sect;104.7), off a scope the
+SERVER stamps, because the module switcher is built once at load above the line
+that resolves the address. **VERIFIED**: `shell.mjs` **97/0** with a new section
+3b (21 assertions, red six ways), `door-landing` 140/0, `modules` 125/0,
+`setup-per-module` green on BOTH halves with two assertions REWRITTEN never
+loosened (&sect;218, &sect;214.3 for the eighth and ninth time), 673/0
+authoriser and 140/0 change list with **no frozen `api/`, `lib/` or `db/` file
+touched at all** (read off the diff, &sect;172), and `qa.py` at Next **33
+viewers / 243 destinations / ERRORS none**.*
+
+*Earlier the same day: **&sect;360: the client's settings live in
+the platform, and Strategy's welcome is the welcome (spec 057, on the
+branch).** Islam, with two screenshots &mdash; spec 056's client landing on
+the new stack beside the frozen welcome overlay inside Strategy: *"why do I
+have a welcome screen for the client overall, I just need a welcome screen for
+the strategy module for now."* **&sect;53.5 with a person standing between the
+two copies**: &sect;315 stood the frozen welcome down because the Next landing
+was going to be the welcome, and spec 056 &sect;4.1 put the client's settings
+ON that landing because the spine needed a page outside every module &mdash;
+right on their own terms, and together a second welcome. **Both REVERSED and
+recorded as reversals** (Principle II); &sect;4.1's reason survives, and what
+moved is WHERE. Three placements drawn (`design-mockups/client-settings-door/`,
+rule 1c) and **"A"**: from the console's card, *Settings* opens the client's
+own Setup rail in the client's chrome &mdash; one rail, the set-up flow moving
+from the console into the platform, at the top as a **Getting started strip**
+until *Done with set-up* is pressed and then at the bottom as *Client set-up*;
+Branding absorbed into its first step and the separate page DELETED with the
+`look` group; email a Strategy-module setting (his *"2."*); the knowledge base
+back on Strategy *"until we decide later"*. `/<client>` REDIRECTS into the
+first module the person may open (`openableModules`, the switcher's own
+answer), `Welcome.tsx` and `landingShape` deleted, and `route.js` no longer
+stamps `smp.welcome.done`, so `welcome.js` is offered again once a session.
+**ONE FLOW, TWO HOSTS**: the console's 2,198-line flow CARRIED into
+`src/client-setup.js` (`mount` for the platform's page, `mountCreate` and
+`mountArchived` for the console's two doors that keep no platform to open),
+the registry half writing on `change` through the same `/api/platform`
+actions, the shape half committing on Next/Back/Done through the SAME
+`__smpShape` the server's `shapeClient` runs (moved out of `frozen.cjs`'s
+glue), over a copy of `SYNC.graph()` rebound with the newly exported
+`SYNC.hydrate`, the autosave carrying every row (&sect;210). **AND THE FIRST
+DRIVE WAS REFUSED ON A GRAPH NOBODY HAD RENAMED** (&sect;360.3):
+`addBusinessUnit` mints a key from the NAME and a client's stored keys were
+not always minted that way, so re-minting read three existing heads as
+dropped &mdash; a row is matched by its NAME first and keeps its KEY
+(&sect;48, &sect;232), re-addressed under it. **And a refusal held the person
+on the step**: the refused row stayed in the flow's list and every Next after
+it was refused too &mdash; the rows are PUT BACK, the step redrawn, the
+sentence held across the redraw (&sect;63); and the focus after `+ Add` landed
+on the body because `paint()` is HELD under a click (&sect;30.1), so it lands
+inside `render()`. *Done with set-up* is ONE key on the group
+(`SMPRules.SETUP_DONE`, an absence until pressed), classified `setup` with the
+two server edits falsified separately (**4 / 3 red**, &sect;259.2),
+`test-authorize.js` §41 673/0. **THE CHECKS**: `door-landing.mjs` 136/0 (§7 REPLACED by the client rail;
+red 3 under `--break=done-dropped`, red 18 with the strip inverted from the
+sources), `shell.mjs` 75/0, `modules.mjs` 125/0, `generated-in-step` all
+clear; `setup-per-module.py` file:// all passed (red 7 / 2) and green served;
+NEW `client-setup.py` all passed (red 39 / 9 from the sources);
+`client-setup-outside.py` rewritten as the console's three doors, 0 on both
+copies (red 12); `client-archive.py` 0 on both (red 2); `welcome.py` OK;
+`qa.py` over `file://` ERRORS none and at Next 33 viewers / 243 destinations / ERRORS none; 673/0, 140/0, 69/0,
+`tsc` clean, `built-in-step` all good, `sw.js` `v5.09-client-setup` against
+main's `v5.05`. **AND TWO PRODUCT FAULTS, BOTH FOUND BY THE CHECKS AND BOTH
+IN THE CARRY** (&sect;360.6, &sect;360.7): *Add a client* THREW before it
+posted, because the console's create piece holds no step state and the shared
+`say()` had just learned to hold the sentence in it (8 red, all one fault);
+and the bare `/<client>/setup` &mdash; what the card's Settings and a module
+rail's *Client settings &rsaquo;* both open &mdash; landed on the ENTRY PAGE,
+the rail served and never drawn, because `restoreWhere()` read a place with
+no page as nothing remembered (135/1 &rarr; 136/0).
+**&sect;360.9 &mdash; AN ADDRESS IS NOT A GREETING, AND THE WAY ACROSS SITS AT
+THE FOOT.** Islam, pressing *Settings* on the console's card: *"when I press
+continue it opens the clietn settings!! what is that?! the home of the strategy
+module belongs to the strategy module the settings should open the settings
+directly &hellip; a perosn can access the client settings from the module
+settings page but it should be at the bottom."* **THE SCREEN HE PRESSED WAS
+RIGHT AND THE WELCOME WAS STANDING IN FRONT OF IT**: &sect;360 gave the frozen
+overlay its job back and removed the line that had been standing it down,
+leaving NO condition in its place &mdash; so it drew over the first client
+document of a session whatever address opened it, and its one control,
+*Continue*, taking it down reads exactly as *the press opened the client
+settings*. **THE ARGUMENT WAS ALREADY WRITTEN ONE PARAGRAPH DOWN, FOR THE
+TOUR** (&sect;315.3: *an address is somebody who has already chosen a page*),
+and the welcome is that shape with a wider box round it &mdash; it covers the
+viewport and there is no way past it but through. So the same rule, one line
+each side: `route.js` writes `data-deep-address` when `placeOf()` answered a
+place, `WELCOME.offer()` declines when it is there. **AND THE MODULE'S HOME IS
+EXACTLY THE ADDRESS THAT NAMES NO PAGE**, which is what makes it one condition
+rather than a list: the `/<client>` redirect and the door both land on a bare
+`/<client>/<module>`, where `placeOf("")` answers null and the greeting stands.
+**A DOCUMENT FACT, NEVER A REMEMBERED ONE** &mdash; the tour's `smp.tour.later`
+is honest because a *Skip for now* means the same thing, where the welcome's
+only memory means SEEN, and stamping it for an address is a lie about a screen
+nobody was shown (&sect;107) &mdash; and read by `offer()` and never `open()`,
+so the house mark still opens it from anywhere (&sect;185). **AND `/&lt;client&gt;/tour` IS AN ADDRESS TOO**, found by reading the
+condition rather than by a check: nothing is remembered for it and the tour's
+own mark must not be set on it, but `land()` offers the intro round only where
+the welcome DECLINED (&sect;148), so with the welcome offered unconditionally
+**the one address that names the tour was the one address that could not start
+it** &mdash; it gets the document fact and nothing else. **THE WAY ACROSS
+MOVES AND THE WAY BACK DOES NOT**: the two rows are not two spellings of one
+thing &mdash; `&lsaquo; Back to the console` LEAVES, so it reads first, and
+`Client settings &rsaquo;` goes ON, so being the first thing read on every
+Setup page in the module is what he objected to; **at the foot of the RAIL,
+never of the LIST**, as a `flex:none` sibling after `.raillist` so it cannot
+scroll away with the rows it outlives (&sect;108.5, &sect;290.1) &mdash; with
+the hairline swapping ends, measured as paint. **Proved able to fail from the
+SOURCES** (&sect;276): the row back at the head **1 red** on exactly the
+placement (the treatment assertion stays green, because the class travels with
+the row, which is why both exist); the rule deleted **1 red**, printing
+`0px / 1px`; `data-deep-address` removed, `door-landing.mjs` **2 red** &mdash;
+the first `[1,null]`, his report reproduced, the second the section DYING on a
+click the overlay held (&sect;167.2, &sect;215) &mdash; and `shell.mjs` **1
+red**. **AND THE CHECK NEEDED A SESSION THAT HAD NOT BEEN GREETED**
+(&sect;113.8): every context there is born having seen the welcome, so *"no
+overlay here"* would pass on a build that draws one; &sect;7 signs in as the
+office, who lands on the CONSOLE and is greeted by nothing, so the first
+client document of that session is the one the press opens &mdash; Islam's own
+path. **TWO NEIGHBOURS WERE RED ON THE BRANCH AND BOTH WERE &sect;360's**,
+established on a worktree built from HEAD before anything here was blamed
+(&sect;303) and REWRITTEN, never loosened (&sect;218, &sect;214.3 for the
+seventh time): `setup-search` folded the `look` group &sect;360 DELETED, so it
+**died on a selector matching nothing** rather than saying a decision had moved
+&mdash; it finds a group at runtime now, skipping the one holding the page you
+are on (&sect;47.7 refuses to fold that one, and the naive pick chose exactly
+it); and `setup-rail` asked every `[data-setupgo]` to be findable INSIDE the
+scrolling list, reporting `start:missing`, **the opposite of the truth**, since
+the strip is outside the list precisely so it cannot scroll away. **AND THAT
+REWRITE FOUND THE BRANDING ERRAND HAD LOST ITS ANSWER**: &sect;108.13's own
+example is *"where do I change the logo"*, and with the page absorbed those
+words live on the `start` def, which while it is a STRIP is not a row and
+cannot be found &mdash; it does not need to be (it is on screen above the box)
+and once it is a row it is, asserted where the done state is already made.
+**AND SIX SECTIONS DIED AT THE SIGN-IN PAGE ON ONE RUN AND IT WAS THE
+HARNESS**: the throwaway Postgres had PANICked on a data directory whose
+permissions were reset under it &mdash; *a section that dies at sign-in is the
+database until the database is proved up* (&sect;100.3, &sect;105.6's family);
+re-run on a fresh one, 76/0. **VERIFIED**: door 140/0, shell 76/0, modules
+125/0, `setup-per-module` file:// and served all passed, `setup-search`,
+`setup-rail`, `setup-pages`, `client-setup`, `client-setup-outside`,
+`client-archive`, `attention-rows`, `setup-sticky`, `setup-squeezed` and
+`welcome` all passed, 673/0, 140/0, `tsc` clean cold, `built-in-step` all good,
+`sw.js` `v5.10-settings-direct` against main's `v5.05`. **`main` untouched &mdash; the merge
+is Islam's word, on that merge.***
+
+*Earlier: 2026-09-15 &mdash; **&sect;359.6: the sweep, and the viewer a
+reload put back (spec 056 &sect;9, plan step 6, on the branch).** Step 6 of six,
+and nothing in the product moves for it: `qa.py` at Next **33 viewers / 243
+destinations / ERRORS none**, over `file://` **33 / 241 / ERRORS none**, shell
+74/0, door 127/0, modules 123/0, `built-in-step` all good, `generated-in-step`
+all clear, `sw.js` at `v5.08-module-access` against `origin/main`'s
+`v5.05-demo-complete`, read again at the push (&sect;94.16). **AND THE COUNT
+WAS ACCOUNTED FOR RATHER THAN QUOTED** (&sect;332's habit, third time): the
+first served run read 275, the office +2 and **exactly +8** on every other
+viewer holding a gear. Measured with a probe listing each stack's rail entries
+per viewer &mdash; the +2 is the Platform Inbox and History, drawn only over
+HTTP (&sect;97, &sect;262), and right; **the +8 was the SWEEP**: &sect;359.2's
+client-rail walk reaches the rail with a `goto`, and a reload lands on whoever
+signed in, so it walked the OFFICE's eight client pages under a CEO's name and
+printed *ok* (&sect;50.6, &sect;51.7, in the sweep that quotes both). Re-picked
+on the landed page, a CEO is sent off that rail by the router and counts
+nothing, which is the truth &mdash; **and the first fix broke the office's own
+count**, re-picking the office as the office being a switch to yourself whose
+&sect;237 rebase took the rail off the screen (39 against 47). 275 &rarr; 235
+&rarr; 243 = 241 + 2, exact. The built file is byte-identical. **All six steps
+built; the merge is Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;359.5: Insights' Setup &mdash; Access,
+and a door that asks the table (spec 056 &sect;4.4, &sect;9.5, on the
+branch).** Step 5 of six: Insights' rail carries **Roles &amp; access** and
+**Landing line**, the same keys as Strategy's told apart by the scope (a def is
+(mod, key), and `resolveSetupScope()` asks whether the sub exists ON THIS SCOPE
+before deciding the two disagree). The table is the roles down and the module's
+DECLARED areas across &mdash; the first thing in the product that reads
+`MODULE_DEF[k].areas` other than a check &mdash; one eye per cell carrying the
+shipped state, nothing lit being the answer, absent reading as SHIPPED
+(&sect;30.2) and the default stored as an ABSENCE (&sect;50.6). **The store was
+proved key-agnostic on a virgin Postgres before anything was built on it**
+(the plan's own precondition), so no schema change, no migration and no server
+rule &mdash; asserted rather than claimed (&sect;172): `test-authorize.js` &sect;40b
+**665/0, red 6**. **ONE READER FOR THE SCREEN AND THE DOOR**:
+`mayOpenModuleArea()` in the frozen `config-data.js`, run by `frozen.cjs` for
+`smp-app/lib/access.ts`'s pure `decideOpen()` &mdash; a seat opens everything,
+a module with no areas is open to all, the route asks it BEFORE `serverFor`
+and a refusal is the legacy redirect (&sect;320.5), the landing's *Your
+modules* filtered by the same answer. `modules.mjs` &sect;4c **123/0** red 2;
+`door-landing.mjs` &sect;9 **101 &rarr; 127/0** red under `gate-open` and
+`no-areas-stamp`. **Three of the check's own first failures were the CHECK**:
+a fixture giving a CLIENT login a seat in `tenant_users`, which that column
+never holds for one (the register row is where a client's SMO team member
+sits, &sect;100.3); a raw stringify over a table read with no `ORDER BY`
+(&sect;249.3); and a locator held across a closed page (&sect;215).
+`setup-per-module.py` &sect;1 rewritten never loosened, &sect;7c added.*
+
+*Earlier the same day: **&sect;359.4: the landing line &mdash;
+declared, chosen, stored, drawn in both places (spec 056 &sect;4.5, &sect;9.4,
+on the branch).** Step 4 of six: each module DECLARES the sentences it can say
+about itself (`MODULE_DEF[k].lines`, key + label + example + a reader over
+facts), the client picks one on the module's own **Landing line** page &mdash;
+a new group *The landing* on Strategy's rail, radios with the live sentence
+previewed under them, as drawn &mdash; and the pick rides the group under
+`SMPRules.LANDING_PICK` as an ABSENCE (the first line is the default, choosing
+it deletes the entry). **ONE READER FOR THREE PLACES**: `landingLine()` serves
+the landing's row, the console's card (`moduleRows` gains `line`) and the
+page's preview &mdash; which the frozen page cannot ask, so the served Setup
+document is stamped with `data-landing` (lines, examples, texts, pick) and over
+file:// the page says the served platform sets it. Facts read once for the
+VIEWER (`lib/landing-facts.ts`: the cycle half through the frozen reader's
+own `cycleTotals()`, the library half through `listItems` so a narrowed report
+never leaks as a count); unreadable is nothing, never nought. **The first draft
+counted figures** (*"249 of 255 still to submit"*; `units` is the subjects,
+measured before it shipped). `test-authorize.js` **658/0**, red 5 / 2 for the
+two edits; round trip on a virgin Postgres; `modules.mjs` **108/0**;
+`door-landing.mjs` **101/0**, red 15 under `no-landing-stamp`;
+`setup-per-module.py` &sect;7 rewritten never loosened (it held the group list
+as a literal), &sect;7b offline; shell 74/0; in-step guards clear.*
+
+*Earlier the same day: **&sect;359.3: the landing's Client setup
+block and Your modules (spec 056 &sect;4.1, &sect;9.3, on the branch).**
+Step 3 of six: `lib/landing.ts`'s `landingShape()` answers both blocks and
+the page draws them &mdash; a Client setup block for the SEAT the door
+resolved (`super` only, absent for everybody else, &sect;61), six doors at
+their spine addresses with Access opening the register at `#seat` and Email
+opening the email settings by a hash `shell/route.js` now reads as the
+section; and Your modules from the client's own registry row, one row per
+module in MODULES' order, drawn with one module too, its line empty until
+step 4. **Measuring it found step 1's omission**: the carried
+`lib/frozen.cjs` reader still named the deleted Overview and the served check
+agreed with it (&sect;113.8), corrected. **And the spec's table is wrong about
+where the email settings live** (Strategy's Send an email, not Branding) &mdash;
+reported to Islam, not realigned. `door-landing.mjs` 70 &rarr; **87/0**, red
+2 / 2 from the sources; `welcome.py` &sect;11; shell 74/0, modules 94/0,
+`setup-per-module.py` served green; `sw.js` bumped to `v5.07-landing-blocks`.
+The cost: at the frozen welcome's 336px side column three of the six
+descriptions wrap where the mockup drew them on one line.*
+
+*Earlier the same day: **&sect;359.2: a def knows its module, and
+the rail draws by it (spec 056 &sect;4.2&ndash;&sect;4.3, on the branch).**
+Step 2 of six: every Setup def carries `mod`, the served router writes
+`data-setup-scope` from whether the module word LED the address and the gear
+writes the module the document was served for, the rail is that one field
+against that one attribute, and the offline copy &mdash; which nothing scopes
+&mdash; draws everything as before. **The page decides the rail when the two
+disagree** (a landing door in the spine form ends at the module's own
+address), **and `restoreWhere()` had to look in every rail** &mdash; found by
+the served half going red: validated against the scoped list, a spine-form
+door to Reporting cycle read as unreachable and landed the person on the
+group's Performance. Setup is the spine's own document for every module,
+served before the registry is asked; the server stamps the module's label;
+the way back sits in a row of its own because three things in a 168px head
+wrap. `setup-per-module.py` 0/0 on both halves, red 4 / 2 / 1 from the
+sources over file:// and **1 / 6 served** (restoreWhere scoped again is
+exactly the finding; the router writing no scope prints the whole list of
+eighteen six times); `shell.mjs` 74/0, door 70/0, `setup-rail.py` and `setup-search.py`
+rewritten never loosened, `qa.py` walking both rails at Next.*
+
+*Earlier: 2026-09-16 &mdash; **&sect;356.16: the week by its month, cards
 that hold still, and a line that asks later (spec 054).** Islam, of the tracker
 as &sect;356.15 left it: *"for the week in the selection or the due week for the
 weeks after this week and next week to have it W1 Oct or W3 Dec etc."*, *"the

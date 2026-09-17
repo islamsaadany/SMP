@@ -195,12 +195,24 @@ def main():
         check("the worked example is opened the same way (§317 left it a card like any other)", demo == 1, demo)
 
         print("── 4 · Settings is still its own control")
+        # REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted that Settings
+        # "navigates nowhere", which was true while the set-up flow drew itself
+        # on this page — and §360 moved that flow INTO the client, so Settings
+        # became a DOOR: one press to /<client>/setup, with nothing drawn
+        # between the card and it. The check was red on `main` from that merge
+        # and nobody had come back (§51.11). What survives the decision is that
+        # Settings is its OWN control: it goes to the client's own Setup and
+        # not into a module, which is what the row above it does — so BOTH ENDS
+        # (§94.2), or a build where every control on the card landed in one
+        # place would pass this on its own.
         land()
-        before = pg.url
         pg.click('.ccard[data-client="raya-trade"] .ccfg')
         pg.wait_for_timeout(500)
-        check("pressing Settings opens the client's configuration and navigates nowhere",
-              pg.url == before, pg.url)
+        cfg_url = pg.url
+        check("pressing Settings is a door to the client's own Setup (§360)",
+              cfg_url.endswith("/raya-trade/setup"), cfg_url)
+        check("…and it is not the module's door, which lands inside Strategy",
+              not cfg_url.endswith("/raya-trade/strategy"), cfg_url)
 
         check("no page error on the way", not errs, " | ".join(errs)[:200])
         b.close()

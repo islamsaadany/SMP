@@ -132,9 +132,38 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     pg.evaluate("window.scrollTo(0, 200)")
     pg.wait_for_timeout(200)
-    keys = pg.eval_on_selector_all(".setuprail [data-setupgo]",
+    # THE ROWS OF THE LIST, AND THE ENTRIES OUTSIDE IT, ARE TWO CLAIMS
+    # (§214.3, §218). This asked every `[data-setupgo]` in the rail to be
+    # findable INSIDE `.raillist`, which was every one of them until §360 drew
+    # Getting started as a STRIP above the search — so it reported
+    # `start:missing`, which reads as an unreachable entry and is the opposite
+    # of the truth: the strip is outside the list precisely so it cannot
+    # scroll away. Split, and BOTH asserted (§94.2), or an entry that quietly
+    # left the rail altogether would pass as "not a list row".
+    keys = pg.eval_on_selector_all(".setuprail .raillist [data-setupgo]",
                                    "e=>e.map(x=>x.dataset.setupgo)")
+    outside = pg.eval_on_selector_all(".setuprail [data-setupgo]",
+        "e=>e.filter(x=>!x.closest('.raillist')).map(x=>x.dataset.setupgo)")
     ck("the rail has entries at all", len(keys) > 8, len(keys))
+    # …and an entry drawn outside the scrolling list is on screen WITHOUT
+    # scrolling anything: that is the whole reason it is out there (§108.5).
+    if outside:
+        off = pg.evaluate("""(keys)=>{const bad=[];
+          for (const k of keys){
+            const el=document.querySelector('.setuprail [data-setupgo="'+k+'"]');
+            if(!el){ bad.push(k+':missing'); continue; }
+            const b=el.getBoundingClientRect();
+            if (b.height<=0 || b.top<0 || b.bottom>innerHeight+1) bad.push(k+':offscreen');
+          }
+          return bad;}""", outside)
+        ck("an entry drawn outside the list is on screen without scrolling (the strip, §360)",
+           not off, (outside, off))
+    else:
+        # SAID, NEVER SKIPPED IN SILENCE (§54.5): whether there is an entry
+        # outside the list depends on the tenant (the strip is drawn while the
+        # set-up is not done), so this is not a failure here — but a run that
+        # quietly measured nothing must not read as a run that passed.
+        print("      (no entry outside the list on this tenant — nothing to assert)")
     pagescroll_before = pg.evaluate("window.scrollY")
     unreachable = pg.evaluate("""(keys)=>{
       const l=document.querySelector('.setuprail .raillist');
@@ -254,13 +283,32 @@ with sync_playwright() as p:
         "e=>e.filter(x=>x.scrollWidth>x.clientWidth+1).map(x=>x.textContent.trim())")
     ck("no label is clipped", not clipped, clipped)
 
-    print("\n── 6 · People & access is in the order the mockup drew (§120.3) ──")
+    print("\n── 6 · People & access is in the order the mockup drew (§120.3), less the roles (§359.2) ──")
+    # REWRITTEN, NEVER LOOSENED (§218): §120.3 drew register · roles · BU list,
+    # and spec 056 §4.4 moved Roles & access into a group of its own, the
+    # module's Access — so the People group keeps the mockup's order of what
+    # it still holds, and the roles are asserted at their NEW home rather than
+    # dropped from the assertion (§94.2: a build that lost the page passes
+    # the first half alone).
     order = pg.evaluate("""()=>{
       const h=[...document.querySelectorAll('.setuprail .rgroup')]
                 .find(x=>/People/.test(x.textContent));
       return [...h.nextElementSibling.querySelectorAll('.rilab')].map(x=>x.textContent.trim());}""")
-    ck("register, then roles, then the BU list",
-       order == ["People register", "Roles & access", "Official BU list"], order)
+    # AND REWRITTEN AGAIN FOR §362.2 (§218, §214.3 — the tenth time), because
+    # spec 058 §3a put *Forefront team* in this group ABOVE the register: it is
+    # the STORE the register reads, and §9's pattern puts a store before its
+    # reader. Asserted as the two claims that survive the decision rather than
+    # as a list of three, which the next entry would falsify again — the store
+    # leads, and the two the mockup drew keep the order it drew them in.
+    ck("the store leads its reader (§9, spec 058 §3a)",
+       order[:1] == ["Forefront team"], order)
+    ck("...and then the mockup's own pair, in its order (§120.3)",
+       [x for x in order if x != "Forefront team"] == ["People register", "Official BU list"], order)
+    access = pg.evaluate("""()=>{
+      const h=[...document.querySelectorAll('.setuprail .rgroup')]
+                .find(x=>/^\\S*Access/.test(x.textContent.trim().replace(/^[\\u25b8\\u25be]\\s*/,'')));
+      return h ? [...h.nextElementSibling.querySelectorAll('.rilab')].map(x=>x.textContent.trim()) : null;}""")
+    ck("…and Roles & access sits in the Access group", access == ["Roles & access"], access)
 
     b.close()
 

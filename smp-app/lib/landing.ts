@@ -1,55 +1,35 @@
-/* What the landing page shows, and where its doors lead (§148 on the new
-   stack, spec 043's first screen group). The rows are the welcome screen's
-   own — computed by the frozen readers in lib/frozen.cjs from the tenant's
-   graph, read under withTenant() as smp_app — so this page cannot say one
-   thing while the pages behind it say another (§53.5). */
-import { createRequire } from "node:module";
-import { withTenant } from "./tenant.ts";
-import { readState } from "./state-io.ts";
-import { registerKeyFor } from "./state-api.ts";
-import { clientHref, DEFAULT_MODULE } from "./modules.ts";
-
-const frozen = createRequire(import.meta.url)("./frozen.cjs") as {
-  landing: (graph: unknown, personKey: string) => Landing;
-  placeLabel: (graph: unknown, target: string) => string;
-};
+/* What the Setup document is stamped with, and how a door inside a client
+   is spelt. THIS FILE WAS THE LANDING PAGE'S (§148 on the new stack, spec
+   043's first screen group): the welcome's rows, computed by the frozen
+   readers, and spec 056 §4.1's Client setup and Your modules blocks. §360
+   (spec 057) made `/<client>` a redirect into the person's first module —
+   Islam: "I just need a welcome screen for the strategy module for now" —
+   so the rows are Strategy's own welcome.js's again and the blocks went to
+   the client's Setup rail, where a set-up is a one-off rather than a
+   greeting. What stays is what the Setup document still needs: the module's
+   landing-line declaration (landingStampFor) and the one rule for spelling
+   a door's address (doorHref), which the checks read. */
+import { clientHref, DEFAULT_MODULE, MODULE_DEF, modulesFor, isModule, type ModuleKey } from "./modules.ts";
+import { landingFactsFor, viewerFor } from "./landing-facts.ts";
 
 export type Door = { target?: string; tab?: string; report?: boolean; setup?: string };
-export type Act = { title: string; sub: { text: string; kind: "em" | "alert" | "plain" }[]; btn: string; cta: boolean; go: Door };
-export type Landing = {
-  known: boolean; org: string; initials: string;
-  office?: boolean; name?: string; chips?: { role: string; where: string }[];
-  review?: { name: string; open: boolean } | null;
-  cycle?: { name: string; open: boolean; done: number; total: number; sub: number; progress: number; none: number; meta: string } | null;
-  acts?: Act[]; pages?: { label: string; small: string; go: Door }[];
-  tour?: boolean; home?: string | null; continueWord?: string;
-};
 
-/* null when the tenant holds no graph yet (a client made and never seeded). */
-export async function landingFor(tenantId: string, personKey: string | null, email?: string | null): Promise<Landing | null> {
-  /* THE REGISTER, NOT THE MEMBERSHIP. A Forefront admin opens a client BY
-     RULE and holds no membership row (door.ts's seatFor), so asking the
-     membership told them they were not on the register while `people` held
-     their row — see registerKeyFor's own note. Resolved read-only, inside
-     the one transaction that reads the graph. */
-  const read = await withTenant(tenantId, async (c) => ({
-    graph: await readState(c),
-    key: email ? await registerKeyFor(c, email, personKey) : personKey,
-  }));
-  const graph = read.graph;
-  if (!graph) return null;
-  const out = frozen.landing(graph, read.key || "");
-  /* THE CHECK'S BREAKS (constitution XVI, the spike's --break shape, here as
-     an environment switch because the page runs in a server): a build that
-     lost the rows or the doors must turn checks/door-landing.mjs red before
-     its green run is believed. Never set on a deployment. */
-  const brk = process.env.SMP_BREAK || "";
-  if (brk === "no-rows") out.acts = [];
-  if (brk === "first-person") return frozen.landing(graph, "");
-  /* the fault registerKeyFor closed: the landing asking the MEMBERSHIP,
-     which a Forefront admin opening a client by rule does not have */
-  if (brk === "membership-key") return frozen.landing(graph, personKey || "");
-  return out;
+/* THE LANDING LINE PAGE'S STAMP (spec 056 §4.5, §359.4): what the module the
+   document is served for can say, each line with its example AND its text
+   right now, and the client's pick — written onto the Setup document as
+   `data-landing` (lib/shell.ts) for the frozen renderLandingLine() to draw
+   from. The frozen shell cannot import a module's declaration, and the
+   sentence's TEXT is computed by the one reader on the server, so the page's
+   preview is that reader's answer and never a second one (§53.5). */
+export type LandingStamp = { module: ModuleKey; pick: string; lines: { key: string; label: string; example: string; text: string }[] };
+export async function landingStampFor(tenantId: string, module: string, seat: string | null | undefined, personKey: string | null | undefined, stored: unknown): Promise<LandingStamp | null> {
+  if (!isModule(module)) return null;
+  const { facts, picks } = await landingFactsFor(tenantId, modulesFor(stored), await viewerFor(tenantId, seat, personKey));
+  return {
+    module,
+    pick: picks[module] || "",
+    lines: MODULE_DEF[module].lines.map((l) => ({ key: l.key, label: l.label, example: l.example, text: l.read(facts) })),
+  };
 }
 
 /* A door's address inside this client: `/<slug>/<module>/<target>/<tab>`, a
@@ -58,8 +38,11 @@ export async function landingFor(tenantId: string, personKey: string | null, ema
    why the module is the default one rather than a parameter — when a second
    module puts a row on this screen, that row brings its own (spec 046 §7).
 
-   SETUP CARRIES NO MODULE: it is one page for the whole client, a Client
-   group and a group per module (spec 046 §4.5). */
+   A SETUP DOOR IS WRITTEN IN THE SPINE FORM WHATEVER MODULE OWNS THE PAGE
+   (spec 056 §4.1, research R2): `/<client>/setup/<page>` is a request, and
+   the shell moves it to the page's own module — Strategy's Reporting cycle
+   ends at `/<client>/strategy/setup/cycle` — so this file keeps no copy of
+   which page belongs to which rail (§53.5). */
 export function doorHref(slug: string, go: Door): string {
   if (go.setup) return clientHref(slug, null, "setup/" + go.setup);
   const t = String(go.target || "group");
@@ -69,16 +52,3 @@ export function doorHref(slug: string, go: Door): string {
 /* The intro round, offered by the landing and therefore reached from the
    spine (lib/modules.ts). */
 export function tourHref(slug: string): string { return clientHref(slug, null, "tour"); }
-/* The reverse, for a page that answers such an address. CALLERLESS since
-   Phase B replaced the holder pages with the shell's own route — recorded
-   rather than deleted here, because removing it is a tidy-up and not this
-   change (§24 against §2b). If it is given a caller it must be handed the
-   rest INSIDE the module (lib/modules.ts whereOf), never the raw path. */
-export function targetOf(rest: string[]): string {
-  if (rest[0] === "fn" && rest[1]) return "fn:" + rest[1];
-  return rest[0] || "group";
-}
-export async function subjectLabel(tenantId: string, target: string): Promise<string> {
-  const graph = await withTenant(tenantId, (c) => readState(c));
-  return graph ? frozen.placeLabel(graph, target) : target;
-}

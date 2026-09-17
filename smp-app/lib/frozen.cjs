@@ -32,7 +32,7 @@ const RULES = path.join(process.cwd(), "lib", "rules.cjs");
    copy of what a unit or a function is shaped like (§53.5). Proved to
    evaluate in this context before it was relied on, not assumed. */
 const FILES = ["group-data.js", "config-data.js", "group-render.js", "config-render.js",
-               "builder.js"];
+               "builder.js", "client-setup.js"];
 
 /* sync.js's hydrate(), line for line, plus the landing's own builder — ES5,
    because it runs in the frozen sources' world. */
@@ -139,7 +139,11 @@ function __smpLanding(state, personKey) {
   }
   var pages = [];
   if (office) {
-    pages.push({ label: "Setup — Overview", small: "", go: { setup: "overview" } });
+    /* Reporting cycle since §359 — the Overview this once opened is gone
+       (step 1 moved welcome.js and left this carried copy behind, §359.3:
+       the door-landing check compared the page with THIS reader and the two
+       agreed about a page that no longer exists, §113.8) */
+    pages.push({ label: "Setup — Reporting cycle", small: "", go: { setup: "cycle" } });
     pages.push({ label: "The group — Performance", small: "", go: { target: "group", tab: "performance" } });
   } else if (home) {
     var nm = placeLabel(home), isFn = String(home).indexOf("fn:") === 0;
@@ -156,6 +160,40 @@ function __smpLanding(state, personKey) {
            acts: acts, pages: pages, tour: tour, home: home, continueWord: word };
 }
 function __smpPlaceLabel(state, target) { __smpHydrate(state); try { return placeLabel(target); } catch (e) { return String(target); } }
+/* MAY THIS PERSON OPEN A MODULE (spec 056 research R3, s356.5): the product's
+   own reader, mayOpenModuleArea in config-data.js -- the one the module's
+   Access page draws its cells from -- asked of the stored graph. A person the
+   register does not hold is judged as holding nothing, which is the shipped
+   state (absent means not answered yet, s30.2). */
+function __smpMayOpen(state, personKey, area) {
+  __smpHydrate(state);
+  var row = null;
+  for (var i = 0; i < PEOPLE.length; i++) if (PEOPLE[i].key === personKey) { row = PEOPLE[i]; break; }
+  try { return !!mayOpenModuleArea(row, area); } catch (e) { return (area.shipped || "none") !== "none"; }
+}
+/* THE FACTS A LANDING LINE IS MADE OF (§359.4): the cycle's state and its
+   due day off REVIEW, and how many subjects have submitted off cycleTotals()
+   — the product's own count, the one the cycle board and the welcome screen
+   read, never a second sum (§53.5). */
+function __smpLandingFacts(state) {
+  __smpHydrate(state);
+  var out = { cycleOpen: null, cycleName: "", due: "", total: null, sub: null };
+  try {
+    if (REVIEW) {
+      out.cycleOpen = REVIEW.state === "open";
+      out.cycleName = String(REVIEW.name || "");
+      out.due = String(REVIEW.due || "").trim();
+    }
+    /* SUBJECTS, never figures: total and done are the FIGURES entered across
+       the tenant and units is the subjects the board has a row for (§244),
+       of which sub have submitted — the first draft read t.total and the
+       line said "249 of 255 still to submit" about a tenant with eighteen
+       subjects (§100.3, measured before it shipped). */
+    var t = cycleTotals();
+    if (t && typeof t.units === "number") { out.total = t.units; out.sub = t.sub; }
+  } catch (e) {}
+  return out;
+}
 /* §67's clearedGraph(), the platform's own mirror of migration 004: what a
    client's deployment holds on day one. Hydrated first so clone() and the
    graph's own invariants are the product's. */
@@ -203,212 +241,13 @@ function __smpHydrateAnd(state) { __smpHydrate(state); return state; }
    AND NO BACKTICK MAY APPEAR IN THIS BLOCK: it lives inside the GLUE raw
    template literal, so one closes the string and the module stops parsing —
    which is how this comment first shipped. */
-/* WHAT THIS CLIENT ALREADY HOLDS, so the caller can refuse rather than
-   overwrite it. The flow REPLACES the shapes, which is safe on a client
-   being set up and is not safe on one with plans in it — a pillar, an
-   objective, a SWOT point or a capability all mean somebody has authored
-   something, and the set-up flow is not the place to lose it. Counted by
-   walking the graph rather than by asking whether the lists are empty: a
-   client can legitimately hold three units and no plan, and that must not
-   be refused. */
-function __smpHolds(state) {
-  __smpHydrate(state);
-  /* A CAPABILITY THAT HOLDS NOTHING IS NOT AUTHORED WORK (§347). This counted
-     capabilities AT ALL, which was right for as long as nothing out here could
-     make one: the flow could not create a capability, so one existing meant
-     somebody had made it inside the platform. The set-up step makes them now,
-     so counting the box rather than what is in it would mean adding one locks
-     the consultant out of their own set-up on the very next press (§61). What
-     a capability holds is its objectives, its projects and its pillars — the
-     same three things that make a unit's plan count above. */
-  var plans = 0, caps = 0;
-  ((GROUP && GROUP.capabilities) || []).forEach(function (c) {
-    var n = ((c.keyObjectives || []).length) + ((c.projects || []).length) +
-            ((c.items || []).length);
-    if (n) caps++;
-  });
-  (UNIT_KEYS || []).concat((FUNCTION_KEYS || []).map(function (k) { return "fn:" + k; }))
-    .forEach(function (t) {
-      var u = String(t).indexOf("fn:") === 0 ? FUNCTIONS[String(t).slice(3)] : UNITS[t];
-      if (!u) return;
-      plans += ((u.items || []).length) + ((u.keyObjectives || []).length);
-      var sw = u.swot || {};
-      plans += ["s", "w", "o", "t"].reduce(function (n, q) { return n + ((sw[q] || []).length); }, 0);
-    });
-  return { plans: plans, capabilities: caps,
-           units: (UNIT_KEYS || []).length, functions: (FUNCTION_KEYS || []).length };
-}
-
-/* WHAT THE FLOW NEVER ASKED ABOUT IS NOT THE FLOW'S TO RESET (§346).
-   The rewrite below empties four lists and re-mints every row, which is
-   right for the shape and wrong for everything hanging off it: a second
-   pass through the flow — fixing a spelling, adding a unit, changing one
-   word — put back a unit with no head, no custodian, no weight, no mark,
-   no aspiration and no Who we are answers, and a function with no head and
-   no definition. Silently, and on a client the 409 in the caller does not
-   refuse, because that guard counts authored PLAN LINES and a client can
-   hold a full register and not one pillar.
-
-   So a row whose key survives keeps everything except what the flow
-   collects, which is exactly a name, a company and a plan type. Expressed
-   as "start from the old row and let the minter overwrite what it owns",
-   never as a list of fields to carry: a field added to a unit next year is
-   kept by this without anybody remembering to come back (§104.7). */
-function __smpCarry(old, fresh, owned) {
-  var out = {}, k;
-  for (k in old) if (Object.prototype.hasOwnProperty.call(old, k)) out[k] = old[k];
-  for (k in fresh) if (Object.prototype.hasOwnProperty.call(fresh, k)) {
-    if (owned.indexOf(k) > -1 || !Object.prototype.hasOwnProperty.call(out, k)) out[k] = fresh[k];
-  }
-  return out;
-}
-function __smpHeld(r) { return !!(r && (r.head || r.custodian)); }
-
-function __smpShape(state, a) {
-  /* THE ANSWERS ARE THE LIST, so the shapes are replaced rather than added
-     to: a unit taken off the flow's list has to disappear here, or walking
-     the flow a second time leaves rows nobody can see any more. Everything
-     that is NOT a shape — the register the team has been added to, the
-     cycle, the group's own words — is left exactly where it is, which is
-     why this empties four lists rather than starting from a bare graph. */
-  var wasUnits = state.units || {}, wasFns = state.functions || {};
-  var wasCos = state.companies || {}, wasRoles = state.unitRoles || {};
-  /* A CAPABILITY IS A ROW THE FLOW OWNS NOW (§347), so it is replaced with the
-     rest of the shape — and matched by NAME on the way back, because its id is
-     minted fresh by addCapability and the flow's rows carry none. Safe only
-     because the caller refuses the whole re-shape once any capability HOLDS
-     something, so nothing keyed on an id can be standing here. */
-  var wasCaps = {};
-  ((state.group && state.group.capabilities) || []).forEach(function (c) {
-    var nm = String((c && c.name) || "").trim().toLowerCase();
-    if (nm && !wasCaps[nm]) wasCaps[nm] = c;
-  });
-  /* AND THE WEIGHTING ROWS GO WITH THE UNITS, or the flow appends a second
-     row per unit on every pass: addBusinessUnit pushes one, nothing here
-     cleared them, and syncWeights normalises across whatever it finds — so
-     a third pass halved every unit's weight and the composite it feeds.
-     Matched by KEY, which is what that table has been matched by since the
-     rename bug (§ syncWeights' own comment). */
-  var wasW = {};
-  var wlist = (state.group && state.group.weighting && state.group.weighting.units) || [];
-  wlist.forEach(function (row) { if (row && row.key && !wasW[row.key]) wasW[row.key] = row; });
-
-  state.unitKeys = []; state.units = {};
-  state.functionKeys = []; state.functions = {};
-  state.companyKeys = []; state.companies = {};
-  state.unitRoles = {};
-  if (state.group) state.group.capabilities = [];
-  if (state.group && state.group.weighting) state.group.weighting.units = [];
-  __smpHydrate(state);
-  a = a || {};
-  var byName = {}, coByName = {};
-  Object.keys(wasCos).forEach(function (k) {
-    var nm = String((wasCos[k] && wasCos[k].name) || "").trim().toLowerCase();
-    /* A COMPANY'S KEY IS POSITIONAL (addCompany mints newco1, newco2), so it
-       is the one row that cannot be matched by key across a rewrite — drop
-       the first company and every key after it shifts by one. Matched by
-       NAME here, which is the only thing about a company the flow carries,
-       so its CEO and its two visibility flags survive a re-run. */
-    if (nm && !coByName[nm]) coByName[nm] = wasCos[k];
-  });
-  (a.companies || []).forEach(function (c) {
-    var nm = String((c && c.name) || "").trim();
-    if (!nm) return;
-    var k = addCompany();
-    COMPANIES[k].name = nm;
-    var had = coByName[nm.toLowerCase()];
-    if (had) COMPANIES[k] = __smpCarry(had, COMPANIES[k], ["name"]);
-    byName[nm.toLowerCase()] = k;
-  });
-  (a.units || []).forEach(function (u) {
-    var nm = String((u && u.name) || "").trim();
-    if (!nm) return;
-    var co = byName[String((u && u.company) || "").trim().toLowerCase()] || null;
-    var k = addBusinessUnit(nm, (u && u.prefix) || "", co);
-    if (k && wasUnits[k]) {
-      UNITS[k] = __smpCarry(wasUnits[k], UNITS[k], ["name", "company", "ukey"]);
-      if (wasRoles[k]) UNIT_ROLES[k] = wasRoles[k];
-      if (wasW[k]) {
-        var rows = GROUP.weighting.units;
-        for (var i = 0; i < rows.length; i++) {
-          if (rows[i] && rows[i].key === k) { wasW[k].unit = nm; rows[i] = wasW[k]; break; }
-        }
-      }
-    }
-  });
-  (a.functions || []).forEach(function (f) {
-    var nm = String((f && f.name) || "").trim();
-    if (!nm) return;
-    /* §342: THREE FORMATS, so the set-up flow's third choice reaches the
-       graph — without this line the console offers it and the client is
-       shaped as a projects function, which is §96's fault at the one moment
-       nobody is watching (the shape is written before anybody signs in). */
-    var ff = (f && f.format) === "pillars" ? "pillars"
-           : (f && f.format) === "objectives" ? "objectives" : "projects";
-    var k = addFunction(nm, ff);
-    /* BOTH SIDES OF THIS HUNK WERE RIGHT AND EITHER TAKEN WHOLE DROPS THE
-       OTHER (§318.7): main's third format, and the carry that stops a second
-       pass through the flow resetting a function's head and its definition. */
-    if (k && wasFns[k]) FUNCTIONS[k] = __smpCarry(wasFns[k], FUNCTIONS[k], ["name", "format"]);
-  });
-  /* ── AND THE CAPABILITIES, AFTER THE FUNCTIONS THAT CARRY THEM (§347) ──
-     addCapability takes the function's KEY, so the functions have to exist
-     first; the flow names its holder, because a name is the only thing about
-     a function its own rows carry. A name that matches nothing leaves the
-     capability unassigned, which is a real state the Setup page already draws
-     rather than an error to invent (§35). The form is the thing's own since
-     §334, and it is validated here rather than trusted: capFormat reads
-     anything that is not "pillars" as projects, so an unknown word would be
-     silently accepted and silently mean something else (§96.2). */
-  var fnByName = {};
-  (FUNCTION_KEYS || []).forEach(function (k) {
-    var nm = String((FUNCTIONS[k] && FUNCTIONS[k].name) || "").trim().toLowerCase();
-    if (nm && !fnByName[nm]) fnByName[nm] = k;
-  });
-  (a.capabilities || []).forEach(function (cp) {
-    var nm = String((cp && cp.name) || "").trim();
-    if (!nm) return;
-    var holder = fnByName[String((cp && cp.fn) || "").trim().toLowerCase()] || null;
-    var made = addCapability(holder);
-    made.name = nm;
-    made.format = (cp && cp.format) === "pillars" ? "pillars" : "projects";
-    var had = wasCaps[nm.toLowerCase()];
-    if (had) {
-      var keep = __smpCarry(had, made, ["name", "fn", "format", "id", "code"]);
-      for (var kk in keep) if (Object.prototype.hasOwnProperty.call(keep, kk)) made[kk] = keep[kk];
-    }
-  });
-  /* AND A ROW THAT DID NOT SURVIVE IS NOT CARRIED ANYWHERE, so whoever was
-     in charge of it would simply be gone. The caller writes nothing when
-     this list is not empty and says which rows, rather than this deciding
-     on its own: renaming a unit that has a head is a real thing to want,
-     and it is done inside the platform where the rename keeps the row. */
-  var dropped = [];
-  Object.keys(wasRoles).forEach(function (k) {
-    if (__smpHeld(wasRoles[k]) && !UNITS[k]) {
-      dropped.push(String((wasUnits[k] && wasUnits[k].name) || k));
-    }
-  });
-  Object.keys(wasFns).forEach(function (k) {
-    if (__smpHeld(wasFns[k]) && !FUNCTIONS[k]) {
-      dropped.push(String((wasFns[k] && wasFns[k].name) || k));
-    }
-  });
-  syncWeights();
-  /* THE TENANT'S OWN WORDS, through the registry's own entries: the label a
-     client uses is the bu column, which is what every heading reads
-     (L of the key against "bu"). A word left blank leaves the shipped one — a set-up that
-     wrote an empty string would take the word away rather than decline to change it. */
-  var words = a.words || {};
-  (LABELS.entries || []).forEach(function (e) {
-    var v = words[e.key];
-    if (v == null) return;
-    v = String(v).trim();
-    if (v) e.bu = v;
-  });
-  state.labels = LABELS.entries;
-  return { state: state, dropped: dropped };
-}
+/* WHAT THIS CLIENT HOLDS AND WHAT THE SET-UP WRITES INTO IT ARE THE
+   SOURCE'S OWN NOW (§360, spec 057): __smpHolds and __smpShape live in
+   SMP-Project-Folder/src/client-setup.js, where the browser runs them over
+   the live graph, and this glue only hands them its hydrate. One shape
+   function for both hosts (§53.5) — the copies that lived here went. */
+function __smpHoldsG(state) { return __smpHolds(state, __smpHydrate); }
+function __smpShapeG(state, a) { return __smpShape(state, a, __smpHydrate); }
 `;
 
 let ctx = null;
@@ -434,6 +273,12 @@ function placeLabel(graph, target) {
   const c = context();
   return String(c.__smpPlaceLabel(graph, target));
 }
+/* The cycle half of a landing line's facts (§359.4); the library half is
+   the server's own (lib/landing-facts.ts). */
+function landingFacts(graph) {
+  const c = context();
+  return detach(c.__smpLandingFacts(graph));
+}
 /* The graph a NEW client starts with (§67, §313.31): the seed cleared by the
    product's own clearedGraph() — unit and function names kept, every plan
    line, figure, role and person but the bootstrap SMO gone. */
@@ -451,7 +296,7 @@ function bare(graph) {
    (§322). */
 function holds(graph) {
   const c = context();
-  return detach(c.__smpHolds(graph));
+  return detach(c.__smpHoldsG(graph));
 }
 /* The set-up flow's answers written in by the product's own minters (§322).
    Answers { state, dropped }: `dropped` names the units and functions that
@@ -459,6 +304,13 @@ function holds(graph) {
    nothing rather than lose them (§346). */
 function shape(graph, answers) {
   const c = context();
-  return detach(c.__smpShape(graph, answers));
+  return detach(c.__smpShapeG(graph, answers));
 }
-module.exports = { landing, placeLabel, cleared, bare, shape, holds, FILES };
+/* Whether a person may open a module whose grant is `area` (spec 056 §4.4),
+   answered by the frozen product's own reader — the cell on the module's
+   Access page and the door in front of the module cannot then disagree. */
+function mayOpen(graph, personKey, area) {
+  const c = context();
+  return !!c.__smpMayOpen(graph, personKey || "", area);
+}
+module.exports = { landing, placeLabel, landingFacts, mayOpen, cleared, bare, shape, holds, FILES };

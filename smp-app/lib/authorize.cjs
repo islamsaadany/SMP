@@ -103,6 +103,8 @@ const HIDE_SLIDES     = R.HIDE_SLIDES;
    set in the Presentation menu (§16.7). Named from the shared module. */
 const MASTER_FLOW     = R.MASTER_FLOW;
 const PRESENT_MINS    = R.PRESENT_MINS;
+const LANDING_PICK    = R.LANDING_PICK;
+const SETUP_DONE      = R.SETUP_DONE;
 const PLAN_FROM       = R.PLAN_FROM;
 const PLAN_TO         = R.PLAN_TO;
 const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
@@ -119,6 +121,13 @@ const GROUP_OWN = ["org", "horizon", "asOfQuarter", "aspiration", "endInMind",
 const TOP_SETUP = ["people", "unitRoles", "access", "labels", "bands",
                    "koWeights", "companies", "companyKeys", "functionKeys"];
 const TOP_CYCLE = ["history", "priorCycle", "archives"];
+
+/* THE PLATFORM'S OWN MARKS ON A REGISTER ROW (spec 058 §3a.1). `forefront`
+   says a consultant answers to this row and `ffrow` says the platform built
+   it; both are facts about the OUTER platform, so neither is the client's to
+   set or clear from inside — named once here, where the one comparison that
+   holds them back can read the list rather than spelling two strings. */
+const PLATFORM_MARKS = ["forefront", "ffrow"];
 
 function j(v) { return JSON.stringify(v === undefined ? null : v); }
 function same(a, b) { return j(a) === j(b); }
@@ -283,15 +292,37 @@ function collect(stored, incoming, w) {
          reading "a plan is corrected by the SMO", which is true of nothing
          here. Removing the row is still `destroy` above — a client taking an
          office person off their own register is a real act, and a loud one. */
-      /* Flattened by state-io's mergeRow — the graph carries `forefront`, not
-         `extra.forefront` (§52). The database column is `extra`; nothing that
-         reads the GRAPH ever sees it. */
-      const isFF = function (p) { return !!(p && p.forefront); };
+      /* ── AND IT IS THE MINT THAT IS REFUSED, NEVER THE MARK
+         (spec 058 §3a.1, §362.2) ───────────────────────────────
+         The paragraph above is right about a row the PLATFORM BUILT and was
+         being applied to one it merely marked. `officeRow` adopts a row by
+         EMAIL when a consultant's address matches exactly one active person
+         (§313.32) and says in its own words that it never rewrites such a
+         row — so it is the client's own person, holding a role the client
+         typed here, and freezing it took a custodian's custodianship away on
+         the day they joined the account team. Nothing would overwrite it on
+         the next visit, which is the whole argument the refusal rests on.
+
+         So: a MINTED row (`ffrow`) is refused whole, exactly as before. An
+         ADOPTED row is the register's ordinary business again, and only the
+         platform's own two marks are held back — they are a claim about where
+         the row came from and the client may not clear one, which is the same
+         reason the seat is `access` and not `setup` (§89).
+
+         ASKED OF `lib/rules.js`, never spelt again here: the register draws
+         from the same pair, and a screen offering what the save turns down is
+         §42's drift with a refusal on the end of it. */
       const officeTouched = [];
       (incoming.people || []).forEach(function (ip) {
         const sp = (stored.people || []).filter(function (x) { return x.key === ip.key; })[0];
-        if (!sp || !(isFF(sp) || isFF(ip))) return;
-        if (!same(sp, ip)) officeTouched.push(ip.name || ip.key);
+        if (!sp) return;
+        if (R.isMintedRow(sp) || R.isMintedRow(ip)) {
+          if (!same(sp, ip)) officeTouched.push(ip.name || ip.key);
+          return;
+        }
+        if (!(R.isForefrontRow(sp) || R.isForefrontRow(ip))) return;
+        if (!same(pick(sp, PLATFORM_MARKS), pick(ip, PLATFORM_MARKS)))
+          officeTouched.push(ip.name || ip.key);
       });
       if (officeTouched.length)
         add("officeRow", null, "a Forefront row (" + officeTouched.join(", ") +
@@ -460,6 +491,19 @@ function collect(stored, incoming, w) {
      control that is not there (§16.7). */
   if (!same(sg[PRESENT_MINS], ig[PRESENT_MINS]))
     add("presentMins", null, "how long each subject has to present");
+  /* §359.4: which sentence a module says on the landing. SETUP, the office's
+     — it is what the platform says on the office's behalf, like the knowledge
+     base's answers — and NAMED so a refusal sends somebody to the module's
+     own Landing line page rather than reporting "the group's landing". */
+  if (!same(sg[LANDING_PICK], ig[LANDING_PICK]))
+    add("setup", null, "the landing line");
+  /* §360 (spec 057): the client's set-up pressed Done. SETUP, the office's,
+     and NAMED — a refusal sends somebody to Getting started on the client's
+     own rail rather than reporting "the group's setupDone". The two edits go
+     together (§259.2): classified here AND listed in gExtra below, or the
+     field is swept as unknown by one build and invisible to the next. */
+  if (!same(sg[SETUP_DONE], ig[SETUP_DONE]))
+    add("setup", null, "whether the client's set-up is done");
   /* ── THE PLANNING PERIOD (§308) ─────────────────────────────────
      `cycle`, not `setup`: it is set in the Reporting cycle pen, by the person
      who sets the cycle's own dates, and asking a different grant for the two
@@ -483,7 +527,7 @@ function collect(stored, incoming, w) {
   collectCapabilities(sg.capabilities, ig.capabilities, add);
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "mainbus", "comms", "kb", "logo",
-                                   MASTER_FLOW, PRESENT_MINS, PLAN_FROM, PLAN_TO]);
+                                   MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, PLAN_FROM, PLAN_TO]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */

@@ -10,12 +10,14 @@
    wanted. The categories are the module's navigation (spec 046 §4.6) and the
    search is a GET form, so the address carries the filter: a filtered library
    is a link somebody can send, Back works, and the shell's `script-src 'self'`
-   policy has nothing to admit (modules/trial made the same call for the same
+   policy has nothing to admit (the trial module made the same call for the
+   same
    reason).
 
    THE STYLESHEET IS THE ONE SIGNED OFF, verbatim from
    design-mockups/insights/2026-09-13_library-and-publishing-room.html (rule
-   1c), which is itself the trial module's token block extended with a list. */
+   1c), which is itself the trial module's token block extended with a list
+   — that module is gone (§363) and its block lives on here. */
 import { createRequire } from "node:module";
 import { withTenant } from "../../lib/tenant.ts";
 import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
@@ -68,7 +70,8 @@ export function factLine(it: Item): string {
   return bits.join(" &middot; ");
 }
 
-/* THE SWITCHER IS the trial module's, and the module menu behind it is
+/* THE SWITCHER IS the trial module's, carried here when that module went
+   (§363), and the module menu behind it is
    lib/modules.ts's — a module that drew its own would be the second place a
    module's name is spelt (§53.5). It is also this page's way back. */
 function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
@@ -136,6 +139,13 @@ export async function insightsDocument(
   const q = oneLine(ask.q).slice(0, 120);
   const category = normalizeCategories(ask.category)[0] || "";
   const bar = await barFor(tenantId);
+  /* THE CHECK'S BREAK (constitution XVI), carried here from the trial module
+     when that module went (§363): a build whose page stopped naming THIS
+     client — the one thing a module drawn per client has to get right, and
+     the thing a static page would satisfy every other assertion about —
+     must turn checks/modules.mjs red before its green run is believed
+     (§94.5). Never set on a deployment. */
+  const named = process.env.SMP_BREAK === "static-hello" ? "this client" : tenantName;
 
   /* A LIBRARY THAT COULD NOT BE READ IS NOT AN EMPTY ONE (§35, §93: counting
      an error as absence reports everybody as having none). The two states say
@@ -206,13 +216,13 @@ export async function insightsDocument(
 
   return "<!doctype html>\n<html lang='en' data-module='insights'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
-    "<title>" + esc(tenantName) + " &mdash; Insights</title>\n" +
+    "<title>" + esc(named) + " &mdash; Insights</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
     "<style>" + CSS.replace("%BAR%", bar) + "</style>\n</head>\n<body>\n" +
     '<header class="bar">' + switcher(slug, have, "insights") +
     "<h1>Strategy Management Platform</h1>" +
-    '<span class="org">&middot; ' + esc(tenantName) + " <b>&rsaquo; " + esc(MODULE_DEF.insights.label) + "</b></span></header>\n" +
+    '<span class="org">&middot; ' + esc(named) + " <b>&rsaquo; " + esc(MODULE_DEF.insights.label) + "</b></span></header>\n" +
     '<main class="pg">\n<h2 class="pt">' + esc(MODULE_DEF.insights.label) + "</h2>\n" +
     cats + tools + list +
     "\n</main>\n</body>\n</html>\n";

@@ -91,7 +91,7 @@ plan once, and then the people doing the work report against it.
 **A project has two halves and one of them is a page.** The **charter** is the
 one page that says what this project is — why it exists, what is in and out of
 it, what it produces, how success is judged, when, with whom, at what cost, and
-who signed it off (§5.1). The **plan** is the tree underneath it. The charter is
+what could go wrong (§5.1). The **plan** is the tree underneath it. The charter is
 agreed once and is where somebody who has never seen the project starts; the
 plan is worked against every week.
 
@@ -168,7 +168,7 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 
 | Table | Holds |
 |---|---|
-| `portfolio_projects` | **New, and the whole of decision 2.** The plan's parent, and **the charter it is described by** (§5.1) — name, brief, the four accountable people, why, what is in and out, what it produces, when, at what cost, against what risk, and who approved it. Replaces `(client_assignments, scopes)` and the agreement above them. |
+| `portfolio_projects` | **New, and the whole of decision 2.** The plan's parent, and **the charter it is described by** (§5.1) — name, brief, the four accountable people, why, what is in and out, what it produces, when, at what cost and against what risk. Replaces `(client_assignments, scopes)` and the agreement above them. |
 | `portfolio_phase_groups` | Optional grouping above phases, colour-coded |
 | `portfolio_phases` | Phase, numbered, status |
 | `portfolio_work_packages` | **Renamed on the way in.** ClientPlus calls the table `scope_milestones` and the column `milestone_id` — stale since the concept was renamed in Dec 2025. Fixed now or never (the brief's own words), and doubly so here, where `milestones` means a Strategy milestone one module away. |
@@ -206,20 +206,20 @@ capability project grows a budget.
 
 **The form, as his practice writes it** — four bands: who and why; what is in
 and out; what it produces and how success is judged; when, with what, at what
-cost, and against what risk. Ending in a signature.
+cost, and against what risk.
 
 | Row | What it is here |
 |---|---|
 | Title, Brief | The project's own two fields. |
-| **Sponsor, Manager, Consultant(s), Stakeholders** | **People, PICKED — never typed** (§130.1: 32 of 78 demo tactics named an owner who matched nobody on the register, and being named is what decides who may report). A stored value outside the register is KEPT in its own group, because his own example writes *"HR Director/Head"* — a post, not a person (§96.2). |
+| **Sponsor, Consultant(s), Stakeholders** | **People, PICKED — never typed** (§130.1: 32 of 78 demo tactics named an owner who matched nobody on the register, and being named is what decides who may report). A stored value outside the register is KEPT in its own group, because his own example writes *"HR Director/Head"* — a post, not a person (§96.2). |
 | Pain drivers, Gain drivers | Prose. |
 | Scope span | Prose, in and out. |
 | Deliverables, Success criteria | **Prose, written as a list by a person** — his example is dashes and one *"X% reduction"* left as a placeholder. Turning them into rows would be inventing a structure the document does not have. |
+| **Project Manager** | **Not a field at all — it is the Lead** (§5.1a). Read from the team, never stored twice. |
 | Timeline / Milestones | **A door to the plan, never a second copy** — §5.2. |
 | Resources required | Prose. |
 | **Budget required** | A headline figure — §5.2. |
 | Risks & assumptions | Prose. New: nothing in SMP or the reference holds this. |
-| **Approval** | A signature line on paper. Here: approved by whom, and when. **Whether it GATES anything is open** — it could be what says the detailed plan may now be built, or it could be a stamp. Not decided, and not invented. |
 
 **HALF THE ROWS ARE EMPTY IN HIS OWN EXAMPLE** — Date, Consultant(s), Budget and
 Risks all blank. So every field is optional and **the page must not nag**: a red
@@ -227,12 +227,43 @@ Risks all blank. So every field is optional and **the page must not nag**: a red
 with four blanks is a normal charter rather than a broken one (§45.2 with the
 sign reversed).
 
-**THE FOUR NAMES ARE NOT THE THREE ROLES**, and merging them would be a mistake
-worth naming now. §6.2's Lead / Contributor / Viewer say **what you may do**;
-Sponsor / Manager / Consultant / Stakeholder say **who is accountable**. A CEO
-sponsors and touches nothing. **Whether naming somebody Manager should OFFER to
-make them Lead is a real question** (§33: responsibility for a thing lives on the
-thing) — offer, never do it silently, and it is open.
+**APPROVAL IS NOT BUILT** (2026-09-17, *"Approval doesn't do anything. we can
+remove it"*). The paper form ends in a signature; here it would be a stamp
+nothing reads, and a field nothing reads is worse than no field — somebody
+fills it in for nothing, and the next reader takes it for load-bearing (§24,
+§294.2's write-only column). So no approved-by, no approved-at, and **nothing
+gates building the plan**: a project is drafted and worked on, not signed into
+life.
+
+### 5.1a · The Project Manager IS the Lead
+
+Islam, 2026-09-17: *"yes project manager is the lead the rest of the roles are
+not related to the roles of accessability."*
+
+**THIS REMOVES A FIELD RATHER THAN ADDING ONE, which is the best kind of
+answer.** The charter has no Manager column: the row **reads whoever is at Lead**
+on the project, and setting it there sets the role. One fact, two surfaces that
+cannot disagree because only one copy exists — which is **§33's model exactly**:
+a seat belongs to the person, but responsibility for a THING belongs to the
+thing, so a unit's head is written by the People page and by the unit's own page
+and both write the one field.
+
+**The other three grant nothing, and the cost of that is stated rather than
+discovered**: naming somebody Sponsor or Stakeholder **does not let them in**. A
+client's CEO sponsoring a project cannot read it unless somebody also puts them
+in the team at Viewer. That is his decision (*"not related to the roles of
+accessability"*) and it is consistent with how this platform already treats a
+claim about somebody — §56: a person's own declaration of where they work
+**grants nothing**; the office places them. **The screen should say so** where
+those names are drawn, because nothing else on the page would tell anybody
+(§35). *Consultants are the case where it costs nothing anyway* — anybody from
+the office already reaches every project by their seat (§6.1).
+
+**His form says "Project Manager" and "Project Consultant(s)"**, so one is
+singular by intent and the other is not. The row shows **whoever holds Lead**,
+which is normally one person; **Lead is not forced singular**, because a second
+one is a real case (somebody covering a handover) and refusing it would be a
+constraint nobody asked for. The cost: the row can read two names.
 
 ### 5.2 · The two rows that open onto something bigger
 
@@ -245,10 +276,10 @@ charter row states the headline, and the detail lives behind it. What decides
 whether that is sound is the same question both times — **does the headline
 STORE its own copy, or READ the detail?** Two places answering one question is
 the drift this project keeps recording (§53.5), and here the lying copy would be
-the one that was signed.
+the one on the page people read first.
 
 **The milestones row: the plan already holds the dates**, so a typed timeline
-beside it is a second answer by construction. But a charter is signed at a
+beside it is a second answer by construction. But a charter is **agreed** at a
 moment, and *what was agreed* is legitimately not *what is happening* — which is
 **the product's own idiom, not a new one**: §239 puts a figure beside what it is
 measured by, and §344 put that benchmark next to the box it is typed into.

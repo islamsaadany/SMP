@@ -413,6 +413,17 @@ only* — and never as a fourth role.
 
 ### 6.4 · Naming people onto a project
 
+**SIGNED OFF 2026-09-17** (*"ok for the project team mockup"*), from
+`design-mockups/portfolio/2026-09-17_project-team-picker.html`, drawn in the
+platform's own tokens — the third drawing of this screen, after one that put
+the client's Strategy roles down the side of a Portfolio tab (his correction:
+*"the visibility here is subject to the role in the project not the normal
+company role"*) and one that kept a module-level layer above the project (his:
+*"why are you complicating things?"*). **Both are kept in `design-mockups/`
+rather than deleted** — what was rejected is part of the record, and the second
+of the two is the reason this one has no module layer at all (Principle II).
+
+
 The client's register, through **the platform's own searchable ticking list**
 — the control a tactic's collaborators and the import page already use
 (§45.5, §130.1, §295.1), so this costs a call rather than a component.

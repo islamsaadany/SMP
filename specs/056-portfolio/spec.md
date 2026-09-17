@@ -143,13 +143,22 @@ and add notes. They do not restructure the plan.
 |---|---|---|
 | 1 | Its own navigation | A project is picked first; then **Plan** (the tree, the Gantt, the dependencies) · **Progress** (the sign-off queue and what is owed) · **Analytics** (overview and schedule, filtered by phase, group, assignee, status). An activity opens a panel rather than a page. |
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
-| 3 | Its own Setup group | **Yes**, and small: the three words (§9.1), and who leads which project. Nothing else. |
+| 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. |
 | 5 | A landing | The project list for this client, with each project's state. A client with one project lands in it. |
 
 What the spine gives for nothing: the address `/<client>/portfolio/…`, the
 switcher entry, the row on the client's card, the on/off drawer, the door,
 `withTenant`, branding, and the register through `lib/place.ts`.
+
+**WHO SEES IT IN THE SWITCHER FOLLOWS FROM §6 AND IS NOT A NEW SETTING**:
+anybody holding a seat on the client, or named on at least one project. Spec 046
+§6 asks this to be proved at both ends, and Portfolio can answer it from
+`portfolio_members` with nothing stored — **which is the honest answer rather
+than the convenient one**: drawing the entry for somebody on no project opens
+onto an empty list, and a control with nothing behind it is not a choice
+(§61, §32). *Cost, stated*: the entry **appears** the day somebody is named onto
+their first project, which is right and will surprise them once.
 
 ---
 

@@ -168,7 +168,16 @@ function matrixRows(){
     note: "Not a role — what somebody on the register who holds no role may " +
           "open. Most of the register, on a tenant of any size." }]);
 }
-function roleCell(r){
+/* NAMED FOR THE TABLE IT IS A CELL OF (§365.7). `roleCell` was also a
+   function declared INSIDE renderPeople() for the register's own Roles
+   cell — a different subject, a different signature, and one global
+   namespace (§65.9). Both callers of each resolved to the one intended,
+   because the nested declaration shadows this one for the whole of that
+   function, so it was untidy rather than live — and §365.6 had just been
+   paid for by exactly this family, a name resolving to something other
+   than the thing its caller meant, silently and rendering perfectly. A
+   third matrix added inside renderPeople() would have got the wrong one. */
+function matrixRoleCell(r){
   var n = r.floor
     ? PEOPLE.filter(function(p){
         return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
@@ -225,7 +234,7 @@ function renderModuleAccess(){
       esc(a.label || a.key) + '</th>';
   }).join("") + '</tr>';
   var body = matrixRows().map(function(r){
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + roleCell(r) +
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
       areas.map(function(a){
         return stateCell(r.key, a.key, editable, null, {
           value: moduleGrantFor(r.key, a),
@@ -371,7 +380,7 @@ function renderAccess(){
   var MATRIX_ROWS = matrixRows();
 
   var body = MATRIX_ROWS.map(function(r){
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + roleCell(r) +
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
       AREAS.map(function(a){
         return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
       }).join("") + '</tr>';

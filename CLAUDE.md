@@ -8489,7 +8489,19 @@ python3 checks/contingency.py   # the contingency files (§297): the card, the
                                 # the slides asserted to carry YTD, Progress and a figure
                                 # against its benchmark — which the plan download does not,
                                 # so a build shipping that file goes 5 red. 63 assertions;
-                                # falsified from the SOURCES 3 / 1 / 5 (§276)
+                                # falsified from the SOURCES 3 / 1 / 5 (§276).
+                                # AND SINCE §366 THE BENCHMARK PAIR IS THE THING RATHER
+                                # THAN ONE SPELLING OF IT (§94.8): it asked for
+                                # `45% / 50%`, both halves per-cents, and the subject's
+                                # reported rows are counts and days — `5,400# / 6000 #`,
+                                # `8d / 5 d`, `4# / 9 #` — so it went red on a build
+                                # printing the pair perfectly. It asks for a run holding
+                                # both halves with a number in each, which a deck
+                                # printing only the target (or only the figure) cannot
+                                # satisfy. 1 red on that break — aimed at `present.js`,
+                                # because the deck's tactics row builds the pair BY HAND
+                                # rather than through `figVsDue()`, so the first break
+                                # went green (§54.5) and found it
 python3 checks/import-page.py   # Import & archives, three tabs (§295): the mode
                                 # switch gone from BOTH tabs and Build a plan gone from
                                 # the page; the picker's count label and Select all/none
@@ -8845,6 +8857,26 @@ python3 checks/monthly-plan.py  # a target with a shape of its own (§278): the
                                 # no text with the meaning on the hover AND the
                                 # aria-label, and exactly the row with a plan
                                 # lit — measured as PAINT, never as a class
+python3 checks/tactic-outcome.py # a tactic is judged by what it produced
+                                # (§248, §249): the claim is not that the columns are
+                                # drawn but that nothing already reported changes
+                                # meaning and every control written reaches the STORED
+                                # plan (§96). SINCE §366 IT MAKES THE STATE (§255): every
+                                # assertion here is about a row nobody has written an
+                                # outcome for, and §353 filled every one — measured,
+                                # Mobile's 22 tactics each carry an outcome, a target
+                                # AND a figure, so four assertions went red on a build
+                                # behaving exactly as decided (§214.3). The red word is
+                                # asserted as an AGREEMENT, drawn exactly where the plan
+                                # holds nothing, or `reds > 0` passes on a build painting
+                                # Missing on every row (§94.8, §113.8) — and *a unit
+                                # alone is not a target* was REWRITTEN to ask `outcomeOf`
+                                # rather than the SCORE, which also asks whether anybody
+                                # reported and so answered null for the other reason
+                                # (§218). 47/0, red four ways from the SOURCES (§276):
+                                # 1 / 3 / 2, plus the pair that reddens *with no figure
+                                # yet it is NOT scored*, which is held in TWO places and
+                                # says so (§298.2)
 python3 checks/tactic-proration.py # a tactic's OUTCOME is measured against its own
                                 # window, not the year (§250): the share asserted as
                                 # AGREEMENT with a month count the check works out for
@@ -9659,9 +9691,18 @@ it must go red):
 `DATABASE_URL=… node scripts/test-two-tabs.js`
 
 
-The multi-client half needs a database (spec 042, §313). Its fixture is its
-own — `checks/fixture-platform.js` makes the three accounts through the
-product's own hasher, so no check assumes a database somebody prepared by hand:
+The multi-client half needs a database (spec 042, §313) — and a REHEARSAL one,
+in three steps, because the fixture is ADDITIVE and writes onto a registry that
+must already hold `raya-trade` (§328.3, §313.37, spelled out in
+`multi-client.py`'s own header since §366):
+```bash
+DATABASE_URL=… node scripts/test-roundtrip.js           # seed a tenant in public
+DATABASE_URL=… node scripts/migrate-to-multi-client.js  # split it into schemas
+DATABASE_URL=… node SMP-Project-Folder/src/checks/fixture-platform.js
+```
+Its fixture is its own — `checks/fixture-platform.js` makes the three accounts
+through the product's own hasher, so no check assumes a database somebody
+prepared by hand:
 ```bash
 DATABASE_URL=… node scripts/test-platform.js          # the boundary, on the server
 DATABASE_URL=… node scripts/test-platform-rules.js    # the seats and the admin flag
@@ -9671,11 +9712,38 @@ DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/multi-clie
                                 # — and since §313.36 every client's OWN door: the
                                 # mark on both cards, the root plain, the landing from
                                 # three doors, the signed-out redirect, and the mark
-                                # set/refused/cleared from the card (10 red broken)
+                                # set/refused/cleared from the card (10 red broken).
+                                # AND SINCE §366 IT RUNS TO THE END AND SAYS WHAT IT
+                                # CANNOT SEE (§215, §54.5). It DIED on a module row
+                                # the frozen console cannot draw — `api/platform.js`
+                                # has never sent a `modules` field, 0 occurrences and
+                                # no commit that added one, so the band is the SERVED
+                                # console's (`lib/platform-api.ts`, asserted by
+                                # `smp-app/checks/modules.mjs`) and nothing regressed.
+                                # `open_client()` presses the row where one is drawn,
+                                # walks to the address where there is none, asserts
+                                # the OUTCOME either way (§218) and PRINTS which it
+                                # did. It died a second time on the team table, which
+                                # §360 moved to `/<client>/setup` — an address
+                                # `dev-server.js` does not serve — so that half says
+                                # so by name and points at `checks/team-page.py` and
+                                # `smp-app/checks/shell.mjs` §3c, which assert it on
+                                # the stack that draws it; the SERVER half, which is
+                                # the load-bearing one (§42), still runs here.
+                                # AND IT REFUSES A PORT SOMEBODY ELSE IS SERVING:
+                                # `wait_up()` asks only whether SOMETHING answers, so
+                                # a stray dev-server made `mayOpenClient` forced true
+                                # — every client openable by everybody — report
+                                # **124 checks, 0 failed**, twice (§105.6, §54.5).
+                                # 124/0, RED 2 under that break with the guard in.
 DATABASE_URL=… SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-look.py
                                 # Forefront's own two pages: contrast in both themes
                                 # and no sideways scroll at four widths — neither of
-                                # the two product sweeps ever reaches them (§313.11)
+                                # the two product sweeps ever reaches them (§313.11).
+                                # 27/0 given a database; a suite line reading "red"
+                                # for it is the runner's missing `DATABASE_URL` and
+                                # never the check (§366.5, measured rather than
+                                # quoted)
 node smp-app/checks/memory-boundary.mjs
                                 # …and since §331 it also asserts that the two
                                 # copies of WHICH TABLES ARE THE PLATFORM'S OWN
@@ -9859,7 +9927,73 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
+*Last Updated: 2026-09-17 &mdash; **&sect;366: the four that were red, and what
+measuring them found.** Islam, of &sect;365's closing line: *"What are these
+issues that went red? shall we fix them?"*, then **"go"**. **EVERY ONE WAS RUN
+RATHER THAN RECITED**, and establishing that a failure is not yours (&sect;303,
+which &sect;365 did honestly) is not the same as knowing what it IS. **NOT ONE
+OF THE FOUR IS A FAULT IN THE PRODUCT**: three are checks asking about a state
+the platform no longer holds, and the fourth was never run here. **AND THE
+REHEARSAL DATABASE WAS BUILT, WHICH IS WHAT MADE THREE OF THEM FINDABLE**
+&mdash; &sect;328.3 records seven harnesses unrunnable for want of one and
+&sect;364 recorded `multi-client.py` as UNRUN for the same reason; one was stood
+up here in the three steps that file now names in its own header.
+**&sect;366.1 &mdash; THE DEMO OWES NOTHING, SO THE CHECK HAD NOTHING TO LOOK
+AT**: every one of `tactic-outcome.py`'s four failures is about a tactic nobody
+has written an outcome for, and &sect;353 filled every empty area at Islam's own
+word &mdash; measured, Mobile's **22 tactics, 0 blank outcomes, 0 without a
+target, all 22 carrying a figure**. It MAKES the state now (&sect;255), the same
+repair &sect;353.5 gave seven other checks and recorded this one as still
+carrying (&sect;214.3), and the red word is asserted as an AGREEMENT rather than
+a count (&sect;94.8). **One assertion was passing for the wrong reason the
+moment the fixture was right** &mdash; *a unit alone is not a target* asked the
+SCORE, which also asks whether anybody reported &mdash; REWRITTEN to ask
+`outcomeOf` (&sect;218), 0 red &rarr; 2. Proved able to fail four ways from the
+SOURCES (&sect;276). **AND THE FIRST BREAK OF ALL WENT GREEN** (&sect;54.5): it
+was aimed at `outcomeCell()`, which does not draw that cell, so the edit
+provably reached the built file and provably changed nothing &mdash; *only
+measuring what the page drew told the two apart.* **AND ONE ASSERTION IS HELD
+IN TWO PLACES AND NOW SAYS SO** (&sect;298.2): breaking either guard leaves it
+green; the pair together reddens it exactly.
+**&sect;366.2 &mdash; THE CHECK ASKED FOR ONE SPELLING OF THE THING**:
+`contingency.py` wanted `45% / 50%`, both halves per-cents, and the slides
+carry the pair as counts and days (`5,400# / 6000 #`, `8d / 5 d`, `4# / 9 #`)
+&mdash; &sect;94.8, a spelling where it meant a property. **That falsification
+also went green first and found something**: the deck's tactics row builds the
+pair BY HAND rather than through `figVsDue()`; recorded, not changed, because
+making it call the shared builder changes what a slide shows (rule 1b).
+**&sect;366.3 &mdash; THE CONSOLE THAT CHECK DRIVES DRAWS NO MODULE ROWS, AND
+NEVER DID**: `multi-client.py` did not fail, it **DIED** (&sect;215) on
+`.mrow[data-module]`, and `api/platform.js` has **never mentioned modules** (0
+occurrences, no commit that added one) &mdash; the band is the SERVED console's
+(&sect;320.5, asserted by `smp-app/checks/modules.mjs`) and nothing regressed.
+`open_client()` presses the row where one is drawn, walks to the address where
+there is none, asserts the OUTCOME either way (&sect;218) and PRINTS which it
+did. It died a second time on the team table, which &sect;360 moved to
+`/<client>/setup` &mdash; an address `dev-server.js` does not serve &mdash;
+which is &sect;364's own recorded *unrun* arriving; that half names where the
+claim IS asserted (`team-page.py`, `shell.mjs` &sect;3c) and the SERVER half,
+the load-bearing one (&sect;42), still runs. **&sect;366.4 &mdash; AND THE
+FALSIFICATION WENT GREEN TWICE WITH THE BOUNDARY WIDE OPEN**: `mayOpenClient`
+forced true reported **124 checks, 0 failed**, because a stray dev-server held
+the port and `wait_up()` asks only whether SOMETHING answers &mdash; every
+assertion measured against a process started before the rules were touched
+(&sect;105.6). It refuses in words now, naming the port; with the guard in, the
+same break is **2 red**. **&sect;366.5** &mdash; `platform-look.py` was not red
+at all: **27/0** given a database, confirmed by running it.
+**VERIFIED**: tactic-outcome 47/0 (red 1 / 3 / 2 / pair), contingency 0
+failures (red 1), multi-client **124/0** (red 2, and the port guard proved to
+fire), platform-look 27/0, `qa.py` **ERRORS none**, `built-in-step.py` all
+good. **NO PRODUCT FILE CHANGED** &mdash; the whole diff is three files under
+`checks/` &mdash; so nothing stored moves, nothing is migrated, no rule moves
+and `sw.js` is not bumped (&sect;91's trigger is the built file's bytes
+changing, and they did not). **RECORDED, NOT DONE**: the deck's hand-built
+benchmark pair; the drift between the frozen console and the frozen
+`api/platform.js`, harmless while production serves the new stack (&sect;332)
+and a decision about that stack's future rather than a repair; and the other
+six harnesses &sect;328.3 names still do not say what they need.*
+
+*Earlier: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
 the four things it found.** Islam, of the branch carrying &sect;359&ndash;&sect;364:
 *"make sure that if we merge to main we will not loose any client access or mess
 with any current behavior."* **THE HONEST SWEEP HAD TO BE OF THE MERGED TREE**,

@@ -5888,4 +5888,46 @@ red, standing 7/0, demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0,
 assistant 10/0, memory 16/0 · 14/0 · 21/0 · 36/0, `tsc` clean cold, `next build`
 green, eight of nine spikes with all sixteen falsifications red.
 
-**Waiting on Islam: the merge, and his word on that merge.**
+**Merged to `main` 2026-09-17** as a clean fast-forward, deployment read off the
+live site.
+
+---
+
+## §366 — the four that were red (2026-09-17) · **done**
+
+Islam: *"What are these issues that went red? shall we fix them?"* — then
+**"go"**. **Every one was run rather than recited, and not one is a fault in the
+product.** Three are checks asking about a state the platform no longer holds;
+the fourth was never run here.
+
+- **Tactic outcomes, 4 red** — the check needs a tactic whose outcome is still
+  blank and §353 filled every one (measured: Mobile's 22 tactics, 0 blank
+  outcomes, 0 without a target, all 22 carrying a figure). It MAKES the state
+  now, the repair §353.5 gave seven other checks. One assertion rewritten,
+  never loosened — it asked the SCORE, which also asks whether anybody
+  reported, so it answered null for the other reason.
+- **The contingency files, 1 red** — it looked for `45% / 50%`, both halves
+  per-cents; the slides carry the pair as counts and days. It asks for the
+  thing now rather than one way of writing it.
+- **Multi-client — it DIED rather than failing**, on a module row the frozen
+  console cannot draw (that endpoint has never sent a `modules` field — the
+  band is the served console's, and nothing regressed), and again on the team
+  table §360 moved to an address this stack does not serve. It runs to the end
+  now and says what it cannot see and where that claim IS asserted. **And its
+  falsification had been going green because a stray server held its port** —
+  it refuses one in words now.
+- **Forefront's own pages — not red at all**: 27/0 given a database.
+
+**Verified**: tactic-outcome 47/0 (red four ways), contingency 0 failures (red
+one way), multi-client 124/0 (red 2, port guard proved to fire), platform-look
+27/0, `qa.py` ERRORS none, `built-in-step.py` all good. **No product file
+changed** — the whole diff is three files under `checks/` — so nothing stored
+moves, nothing is migrated and `sw.js` is not bumped.
+
+**Recorded, not done**: the deck's tactics row builds its figure-and-benchmark
+pair by hand rather than through the shared builder; the frozen console and the
+frozen platform endpoint have drifted (harmless while production serves the new
+stack, and a decision rather than a repair); and six more harnesses still do not
+say that they need a rehearsal database.
+
+**Waiting on Islam: whether this goes to `main`, and his word on that merge.**

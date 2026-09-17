@@ -1,0 +1,356 @@
+<!-- Portfolio · the project charter (spec 056 §5.1, §5.2).
+     Drawn 2026-09-17 from the one-page form Islam's practice already uses, in
+     the platform's own tokens, both palettes. Awaiting sign-off.
+     Every row here is a decision already recorded: no Approval (§5.1), no
+     Manager field because it IS the Lead (§5.1a), people picked and never typed
+     (§130.1), prose kept as prose, and the plan row a door rather than a second
+     copy of the dates (§5.2). The content is his own charter. -->
+<title>Portfolio Project Charter</title>
+<style>
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --on-fill:#FFFFFF; --on-accent:#16325C;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+      --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+      --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+      --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+      --on-fill:#14161A; --on-accent:#14161A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --on-fill:#14161A; --on-accent:#14161A;
+  }
+
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font:14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding:0 16px; padding-block:28px 56px;
+  }
+  .wrap{ max-width:1180px; margin:0 auto; }
+
+  /* the platform's own page head */
+  .phead{ display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap;
+          padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:22px; }
+  .phead h1{ font-size:21px; font-weight:700; margin:0; letter-spacing:-.01em; text-wrap:balance; }
+  .crumb{ font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+          color:var(--ink-3); font-weight:700; margin:0 0 4px; }
+  .pspacer{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+  button{ font:inherit; cursor:pointer; }
+  .pen{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+        background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+        border-radius:5px; padding:6px 12px; }
+  .pen:hover{ border-color:var(--gold); color:var(--ink); }
+  .pen.on{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .linkbu{ background:none; border:0; padding:0; color:var(--gold-deep);
+           font-size:12.5px; font-weight:600; text-decoration:underline; }
+  .linkbu:hover{ color:var(--ink); }
+  button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible{
+    outline:2px solid var(--focus); outline-offset:1px; }
+
+  /* a band: the navy strip the platform already uses over a table */
+  .band{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+         overflow:hidden; margin-bottom:16px; }
+  .band > h2{ margin:0; background:var(--panel); color:var(--panel-ink);
+              font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+              font-weight:700; padding:9px 14px; }
+  .rows{ padding:4px 14px 12px; }
+
+  .row{ display:grid; grid-template-columns:124px minmax(0,1fr); gap:0 14px;
+        align-items:start; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+  .row > em{ font-style:normal; font-size:10.5px; letter-spacing:.07em;
+             text-transform:uppercase; color:var(--ink-3); font-weight:700;
+             padding-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .val{ min-width:0; font-size:14px; color:var(--ink); }
+  .val p{ margin:0; max-width:68ch; color:var(--ink-2); }
+  .val ul{ margin:0; padding-left:17px; color:var(--ink-2); max-width:68ch; }
+  .val li{ margin:2px 0; }
+  .pair{ display:grid; grid-template-columns:1fr 1fr; gap:0 28px; }
+  .rows > .row:last-child,
+  .rows > .pair:last-child .row{ border-bottom:0; }
+  @media (max-width:820px){ .pair{ grid-template-columns:1fr; } }
+
+  .none{ color:var(--ink-3); }
+  .why{ font-size:12px; color:var(--ink-3); margin-top:3px; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; font-size:13px;
+         background:var(--surface-2); border:1px solid var(--line);
+         border-radius:20px; padding:3px 10px; margin:0 5px 5px 0; }
+  .chip .x{ background:none; border:0; padding:0 0 0 1px; color:var(--ink-3);
+            font-size:14px; line-height:1; }
+  .chip .x:hover{ color:var(--bad-tx); }
+  .kind{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+         color:var(--gold-deep); font-weight:700; }
+
+  .fld{ font:inherit; font-size:14px; width:100%; min-width:0; color:var(--ink);
+        background:var(--surface); border:1px solid var(--line); border-radius:5px;
+        padding:5px 8px; }
+  textarea.fld{ resize:vertical; line-height:1.5; }
+  .num{ font-variant-numeric:tabular-nums; }
+  .mbtn{ font-size:13px; background:var(--surface); color:var(--ink);
+         border:1px solid var(--line); border-radius:5px; padding:4px 9px;
+         font-variant-numeric:tabular-nums; }
+  .mbtn:hover{ border-color:var(--gold); }
+  .mbtn::after{ content:" ▾"; color:var(--ink-3); }
+
+  /* the plan row */
+  .plan{ display:grid; gap:8px; }
+  .span{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .span > b{ font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; min-width:58px; }
+  .dates{ font-variant-numeric:tabular-nums; font-size:14px; }
+  .drift{ font-size:12px; font-weight:600; color:var(--attn-tx);
+          background:var(--attn-bg); border-radius:4px; padding:1px 7px; }
+  .phases{ border-top:1px solid var(--line-soft); margin-top:2px; }
+  .ph{ display:grid; grid-template-columns:22px minmax(0,1fr) auto auto auto;
+       gap:10px; align-items:center; padding:5px 0;
+       border-bottom:1px solid var(--line-soft); font-size:13.5px; }
+  .ph:last-child{ border-bottom:0; }
+  .ph .n{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-weight:700; font-size:12px; }
+  .ph .w{ font-variant-numeric:tabular-nums; color:var(--ink-2); font-size:12.5px; white-space:nowrap; }
+  .bar{ width:64px; height:6px; border-radius:3px; background:var(--surface-2);
+        overflow:hidden; }
+  .bar i{ display:block; height:100%; background:var(--good); }
+  .pct{ font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2);
+        min-width:34px; text-align:right; }
+
+  .panel{ background:var(--surface); border:1px solid var(--line);
+          border-radius:7px; padding:14px 16px; margin-top:16px; }
+  .panel h3{ margin:0 0 8px; font-size:10.5px; letter-spacing:.09em;
+             text-transform:uppercase; color:var(--gold-deep); font-weight:700; }
+  .panel ul{ margin:0; padding-left:18px; }
+  .panel li{ margin:6px 0; color:var(--ink-2); font-size:13.5px; max-width:78ch; }
+  .panel li b{ color:var(--ink); }
+  .ask{ border-left:3px solid var(--gold); }
+</style>
+
+<div class="wrap">
+
+  <div class="phead">
+    <div>
+      <p class="crumb">Raya Trade · Portfolio · Culture Transformation</p>
+      <h1>Charter</h1>
+    </div>
+    <div class="pspacer">
+      <button class="pen" id="pen" aria-pressed="false">Edit</button>
+    </div>
+  </div>
+
+  <section class="band">
+    <h2>Project information</h2>
+    <div class="rows">
+      <div class="row"><em>Title</em><div class="val" data-f="title">Culture Transformation: Aligning Organizational Values with Business Strategy</div></div>
+      <div class="row"><em>Brief</em><div class="val" data-f="brief"><p>A strategic initiative to audit current cultural attributes, define a target state aligned with the corporate strategy, and implement a transformation roadmap to drive behaviors that support long-term growth.</p></div></div>
+      <div class="pair">
+        <div class="row"><em>Sponsor</em><div class="val" data-people="sponsor"></div></div>
+        <div class="row"><em>Project manager</em><div class="val" data-f="manager"></div></div>
+        <div class="row"><em>Consultants</em><div class="val" data-people="consultants"></div></div>
+        <div class="row"><em>Stakeholders</em><div class="val" data-people="stakeholders"></div></div>
+      </div>
+      <div class="row"><em>Agreed on</em><div class="val" data-f="date"></div></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Rationale &amp; scope</h2>
+    <div class="rows">
+      <div class="row"><em>Pain drivers</em><div class="val" data-f="pain"><ul><li>Current internal behaviors are inconsistent with the company strategy</li><li>Lack of cultural cohesion across business units resulting in inefficient cross-functional collaboration</li></ul></div></div>
+      <div class="row"><em>Gain drivers</em><div class="val" data-f="gain"><ul><li>Achieving a “force multiplier” effect where culture drives the speed of strategic goal achievement</li><li>Increase in operational efficiency through unified behavioral standards</li></ul></div></div>
+      <div class="pair">
+        <div class="row"><em>In scope</em><div class="val" data-f="inscope"><p>Cultural attribute assessment, strategy-alignment workshops, behavioral blueprinting, and internal communication rollout.</p></div></div>
+        <div class="row"><em>Out of scope</em><div class="val" data-f="outscope"><p>Organizational restructuring, or technical HRIS implementations.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Outcomes &amp; deliverables</h2>
+    <div class="rows">
+      <div class="row"><em>Deliverables</em><div class="val" data-f="delivs"><ul><li><b>Current Culture Audit Report</b> — a comprehensive data-driven heatmap of existing organizational attributes.</li><li><b>Target Culture Blueprint</b> — documented behavioral pillars required to support the corporate strategy.</li><li><b>Activation Toolkit</b> — leadership communication guides and employee engagement resources.</li></ul></div></div>
+      <div class="row"><em>Success criteria</em><div class="val" data-f="success"><ul><li>100% of plan implementation</li><li>Engagement survey score for the culture aspects</li><li>X% reduction in voluntary turnover of high-performers, due to culture-related reasons</li></ul></div></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <h2>Plan &amp; resources</h2>
+    <div class="rows">
+      <div class="row"><em>Timeline</em><div class="val">
+        <div class="plan">
+          <div class="span"><b>Agreed</b><span class="dates" data-f="agreed">Jan 26 → Jun 26</span><span class="none" style="font-size:12.5px">6 months</span></div>
+          <div class="span"><b>The plan</b><span class="dates">Jan 26 → Aug 26</span><span class="drift">2 months past the agreed end</span></div>
+          <div class="phases">
+            <div class="ph"><span class="n">1</span><span>Culture audit and stakeholder interviews</span><span class="w">Jan 26</span><span class="bar"><i style="width:100%"></i></span><span class="pct">100%</span></div>
+            <div class="ph"><span class="n">2</span><span>Strategy-alignment workshops and blueprint</span><span class="w">Feb 26</span><span class="bar"><i style="width:62%"></i></span><span class="pct">62%</span></div>
+            <div class="ph"><span class="n">3</span><span>Company-wide activation and leadership rollout</span><span class="w">Mar – Aug 26</span><span class="bar"><i style="width:8%"></i></span><span class="pct">8%</span></div>
+          </div>
+          <div><button class="linkbu">Open the plan</button></div>
+        </div>
+      </div></div>
+      <div class="pair">
+        <div class="row"><em>Resources</em><div class="val" data-f="res"><p>Culture Champions from each business unit, focus group participants, and internal branding and comms support.</p></div></div>
+        <div class="row"><em>Budget</em><div class="val" data-f="budget"><span class="num">1,200,000</span> EGP<div class="why">Read by the workbook when it asks an AI to plan within it.</div></div></div>
+      </div>
+      <div class="row"><em>Risks</em><div class="val" data-f="risks"></div></div>
+    </div>
+  </section>
+
+  <div class="panel">
+    <h3>What this page is, and what it is not</h3>
+    <ul>
+      <li><b>There is no Approval row.</b> The paper form ends in a signature; here it would be a
+        stamp nothing reads, and a field nothing reads is worse than no field — somebody fills it
+        in for nothing and the next reader takes it for load-bearing. So <b>nothing gates building
+        the plan</b>: a project is drafted and worked on, not signed into life.</li>
+      <li><b>Project manager is not a field.</b> It reads whoever holds Lead on the project, and
+        setting it there sets the role — one fact, two places showing it, so they cannot disagree.
+        Press Edit: every other row opens and this one says where it is set.</li>
+      <li><b>Agreed on and Risks are empty, on purpose.</b> Half the rows in the real charter are,
+        so every field is optional and the page never nags. An empty row says nothing rather than
+        asking for something.</li>
+      <li><b>Sponsor, Consultants and Stakeholders grant nothing.</b> Naming Karim as sponsor does
+        not let him read the project — somebody has to put him in the team as a Viewer. The page
+        says so where the names are, because nothing else on the screen would.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>The timeline row, which is the one worth arguing about</h3>
+    <ul>
+      <li><b>Agreed is typed here; the plan is read from the plan.</b> Two numbers for one thing is
+        how they come to disagree, and the one on a signed page would be the liar. So the charter
+        keeps only what it genuinely owns — the window that was agreed — and everything below it is
+        the plan speaking for itself.</li>
+      <li><b>The gap is the point.</b> Two months past the agreed end is the most useful fact on the
+        page, and it can only exist because the two are kept apart. A platform that stored one
+        number would have quietly lost it.</li>
+      <li><b>Nobody types the phase list.</b> The paper form has it as prose, which somebody then
+        has to keep in step. Here the phases are the plan's own, with their windows and how far
+        along each is — and a project with no plan yet says so and offers the way in.</li>
+      <li><b>A phase's figure is derived, never stored</b> — its activities, weighted, defaulting to
+        equal. Their version stored two columns for this and never once wrote to either.</li>
+    </ul>
+  </div>
+
+  <div class="panel ask">
+    <h3>Two things this drawing assumes — say if either is wrong</h3>
+    <ul>
+      <li><b>The charter is the office's to edit, not the Lead's.</b> That follows from what a Lead
+        is for — building the plan — rather than being decided here. The cost: a client-side Lead
+        cannot fix a typo in the brief. Easy to widen if you want it.</li>
+      <li><b>In scope and Out of scope are two fields.</b> Your form has them as one cell with the
+        two words typed inside it as headings. Two fields means nobody types a heading into a box,
+        at the cost of not matching the paper exactly.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+  /* The people are picked from the client's register (already signed off on the
+     team screen) — here they are shown as they read, with an × while editing. */
+  var PEOPLE = {
+    sponsor:      [{n:"Hossam El Sayed", r:"CEO"}],
+    consultants:  [],
+    stakeholders: [{n:"Executive Leadership Team"}, {n:"Rania Mounir", r:"Head of HR"},
+                   {n:"Business Unit Heads"}, {n:"Front-line Managers"}]
+  };
+  var LEAD = "Rania Mounir";
+  var ed = false;
+
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+
+  function drawPeople(){
+    Object.keys(PEOPLE).forEach(function(k){
+      var box = document.querySelector('[data-people="' + k + '"]');
+      var list = PEOPLE[k];
+      if (!list.length){
+        box.innerHTML = ed
+          ? '<button class="linkbu">+ Add somebody</button>'
+          : '<span class="none">—</span>';
+        return;
+      }
+      box.innerHTML = list.map(function(p){
+        return '<span class="chip">' + esc(p.n)
+             + (p.r ? ' <span class="kind">' + esc(p.r) + '</span>' : '')
+             + (ed ? ' <button class="x" aria-label="Remove ' + esc(p.n) + '">×</button>' : '')
+             + '</span>';
+      }).join("")
+      + (ed ? ' <button class="linkbu">+ Add somebody</button>' : '')
+      + '<div class="why">Named here, and nothing more — being on this list does not open the project.</div>';
+    });
+  }
+
+  /* Read mode and edit mode. Every field opens EXCEPT the manager, which says
+     where it is set instead — which is the whole of §5.1a on one row. */
+  var STASH = {};
+  function setMode(on){
+    ed = on;
+    var pen = document.getElementById("pen");
+    pen.textContent = ed ? "Done editing" : "Edit";
+    pen.className = ed ? "pen on" : "pen";
+    pen.setAttribute("aria-pressed", ed ? "true" : "false");
+
+    document.querySelectorAll("[data-f]").forEach(function(box){
+      var f = box.getAttribute("data-f");
+      if (f === "manager"){
+        box.innerHTML = ed
+          ? '<span class="none">' + esc(LEAD) + '</span>'
+            + '<div class="why">Set on the project team, where it is the Lead. '
+            + '<button class="linkbu">Open the team</button></div>'
+          : esc(LEAD) + '<div class="why">Whoever leads the project.</div>';
+        return;
+      }
+      if (!ed){
+        if (STASH[f] !== undefined) box.innerHTML = STASH[f];
+        return;
+      }
+      if (STASH[f] === undefined) STASH[f] = box.innerHTML;
+      var txt = box.textContent.replace(/Read by the workbook.*$/, "").trim();
+      if (f === "agreed"){
+        box.innerHTML = '<button class="mbtn">Jan 26</button> → <button class="mbtn">Jun 26</button>';
+      } else if (f === "budget"){
+        box.innerHTML = '<input class="fld num" id="f-budget" style="max-width:160px" value="1,200,000"> EGP'
+                      + '<div class="why">A breakdown behind this figure is named and not built yet.</div>';
+      } else if (f === "date" || f === "title"){
+        box.innerHTML = '<input class="fld" id="f-' + f + '" value="' + esc(f === "date" ? "" : txt) + '"'
+                      + (f === "date" ? ' placeholder="Not set"' : '') + '>';
+      } else {
+        var lines = Array.prototype.map.call(box.querySelectorAll("li"), function(li){
+          return "- " + li.textContent.trim();
+        });
+        var v = lines.length ? lines.join("\n") : (txt === "\u2014" ? "" : txt);
+        var rows = Math.max(2, Math.min(9, v.split("\n").length + (v.length > 150 ? 2 : 0)));
+        box.innerHTML = '<textarea class="fld" id="f-' + f + '" rows="' + rows + '">' + esc(v) + '</textarea>';
+      }
+    });
+    drawPeople();
+  }
+
+  /* An empty row says nothing, in read mode, without asking for anything. */
+  document.querySelectorAll("[data-f]").forEach(function(box){
+    if (!box.textContent.trim()) box.innerHTML = '<span class="none">—</span>';
+  });
+  document.getElementById("pen").addEventListener("click", function(){ setMode(!ed); });
+  setMode(false);
+</script>

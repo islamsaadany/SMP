@@ -194,6 +194,25 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 
 ### 5.1 · The project charter
 
+**DRAWN 2026-09-17, AWAITING SIGN-OFF** —
+`design-mockups/portfolio/2026-09-17_project-charter.html`, in the platform's own
+tokens, both palettes, with his own charter as its content. It draws both states,
+because a page you write once and read often cannot be judged from the reading
+half alone (§273.4: three structures drawn in one state were three identical
+pictures). **Two things in it are assumptions rather than decisions and say so on
+the page**: that the charter is the office's to edit rather than the Lead's
+(which follows from §6.2 — a Lead builds the PLAN — at the cost of a
+client-side Lead being unable to fix a typo in the brief), and that *In scope*
+and *Out of scope* are two fields where his form has one cell with both words
+typed inside it as headings.
+
+**AND IT WAS NOT RENDERED BEFORE PUBLISHING**, which is said rather than left as
+an absence (§54.5): this container has no browser. So it was read instead, and
+two faults were found that way — an em-dash placeholder becoming the text of a
+field somebody opened, and a five-field pair leaving one row dangling with the
+border taken off one of the two cells on the bottom line.
+
+
 Islam, 2026-09-17, with the one-page form his practice already uses:
 *"any project should have a place for an overall view in a project charter that
 sets many things including the budget … in addition to the detailed plan."*

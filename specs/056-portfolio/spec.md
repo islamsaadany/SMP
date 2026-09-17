@@ -364,7 +364,7 @@ in §6.4 offers the register minus those two roles.
 | Role | Reaches |
 |---|---|
 | **Lead** | Builds and restructures the plan, and signs off completions. |
-| **Contributor** | Sees the plan; reports the activities assigned to them; comments on the ones they are tagged on. |
+| **Contributor** | **Sees the whole plan**; reports the activities assigned to them; comments on the ones they are tagged on. *Seeing all of it is the platform's own rule and it is a choice — §7.4A.* |
 | **Viewer** | Reads, changes nothing. **Where everybody starts.** |
 
 **Whether a Contributor reports or only comments is read off the ACTIVITY**,
@@ -378,10 +378,15 @@ rather than a place in the list, and
 completions queue there. The screen states it and does not nag (§45.2 with the
 sign reversed: this is a fact about a healthy project, not something owed).
 
-### 6.3 · The six become three, and nothing is lost
+### 6.3 · The six become three — and two things ARE lost
 
 Only two things ever varied across the reference's six — how much of the plan
 you see, and what you may do to it. Six names for four answers.
+
+**This section said *nothing lost* and that was wrong** (2026-09-17): the audit
+checked the collapse against the four live permission functions rather than
+against their matrix and found three branches that do not map. **§7.4 is the
+correction**, and one of the three turns out not to apply to this model at all.
 
 | ScopePlan today | Here | Why |
 |---|---|---|
@@ -439,22 +444,30 @@ matrix), **both kept as the record of what was tried and turned down**
 
 ## 7 · What is taken from the reference and what is left
 
+**MEASURED NOW, NOT TAKEN ON TRUST.** Every line below was the handover brief's
+claim until 2026-09-17, when a session that could read the repository audited it
+against commit `d569ba6` — `port-audit.md` beside this file, 2,295 lines, DDL
+generated from the schema and every rule quoted with its line numbers. **Four of
+the rows below were wrong**, and they are corrected here rather than softened.
+Two things it could not verify are named at its end: whether any of it has ever
+run against real data, and whether the timezone handling misbehaves.
+
 | Theirs | Here |
 |---|---|
 | The five-level tree | Taken, under a project rather than a triple (decision 2) |
 | Two-step Done → Completed with a validated end date | **Taken whole.** The single most valuable rule in it |
-| Actual dates derived at one chokepoint | **Taken whole**, chokepoint included |
-| Progress computed from weighted sub-activities; manual entry refused | Taken, refusal wording included |
+| Actual dates derived at one chokepoint | **Taken whole**, chokepoint included — and **one copy of it, not four**: `calculateEndDate` exists four times over there and the live copies disagree about whether a date snaps to Sunday (§53.5, their trap 4). |
+| Progress computed from weighted sub-activities; manual entry refused | Taken — **and the rule is narrower than the brief said**: by weight only if the set sums to 100, otherwise by a plain count. Never by duration or effort. |
 | Cascade preview before commit | Taken |
 | Auto-renumbering, including the 1.2.3 → 1.2 collapse | Taken |
-| Planning Mode with draft recovery | **Taken.** Flagged by the brief as the other thing a fresh build would miss |
+| Planning Mode with draft recovery | **NOT taken — reversed on the audit** (§7.3). |
 | Per-agreement terminology | Taken as per-**client** — §9.1 |
 | `client_team_members`, `scope_lead_assignments` | Taken as ONE table, `portfolio_members` — two rows saying one thing (§6.2) |
-| Excel round-trip with a GPT instructions sheet | **Open** — §9.3 |
-| The six-role visibility matrix | **Three roles, on the project** (§6.3) — the six collapse with nothing lost, because only two things ever varied across them. Its *shape* — composable filter fragments rather than scattered conditions — is what makes it port at all |
+| Excel round-trip with a GPT instructions sheet | **Kept, and the office's** — §9.3. **Its gate must move to the server**: theirs checks a session and nothing else, and the only thing in front of it is two names hardcoded on a screen (§7.5). |
+| The six-role visibility matrix | **Three roles, on the project** (§6.3) — **and §6.3's "nothing lost" was wrong**: the audit found three branches that do not map (§7.4). Its *shape* — composable filter fragments rather than scattered conditions — is what makes it port at all |
 | Assignees who are not users | Taken; SMP's register already behaves this way |
 | `client_assignments`, `scopes`, `agreement_scopes`, domains, subdomains | **Left.** Decision 2 |
-| `in_app_notifications` | **Left as a table** — §9.5 |
+| `in_app_notifications` | **Left as a table.** Theirs is a real bell with four notice types — and no deep link, so it cannot take you to what it names (§9.5). |
 | Its own session (`getClientsUser`, `getServerSession`) | Left. SMP's door, one cookie |
 | `getApiUrl()` and its hardcoded `/forefront` prefix | Left. The spine's route |
 | 26 routes under `/api/scopeplan/*` | Left as routes; the module serves itself through `modules/registry.ts` |
@@ -476,6 +489,143 @@ The brief names four, and each is a thing to walk past rather than port:
 - **A hardcoded username allowlist** gates the Excel import behind two names,
   which makes it a private admin tool today. It becomes a real permission or it
   does not come (§9.3).
+
+### 7.2 · The four that are security, and must not be ported in shape
+
+**1. One route deletes any row in the system for any signed-in person.** Their
+`bulk-create` gates on `canManageScope` **inside `if (validatedData.scopeId)`**,
+and `scopeId` is nullable — send it as `null` and the only check left is *are
+you signed in*. Then three `deleteMany` calls run against id arrays that **are
+never checked against the client, the scope or anything**, with cascades taking
+comments, files, history and sub-activities. **Two rules out of one fault**:
+never make a permission check conditional on an optional field, and check
+ownership of **every** id rather than of the request. Both are things this
+platform already says — §42's *an unrecognised change is the SMO's* fails
+closed, and §191 is the whole record of a plan row with no id being read as *no
+change* and therefore ALLOWED.
+
+**2. The workbook endpoint is open, and it hands out the user directory.** Their
+template route checks for a session and nothing else, and the file it returns
+carries a **Team sheet with every active user's username, full name, role and
+email**, plus the client's agreement, budget and existing plan. The importer is
+gated; the exporter is not. — §7.5.
+
+**3. The screen's permission hook fails OPEN**, returning `canCreate` /
+`canEdit` / `canDelete` **true** when its context is missing. The server
+refuses, so it is buttons that 403 rather than a breach — and it is the inverse
+of the convention, and the thing a port copies without noticing.
+
+**4. Terminology is writable by anyone with global edit on clients** — the
+handler parses a `clientId` and never uses it. Small blast radius, and it sits
+on the feature decision 4 keeps.
+
+**And three permission checks ask the wrong module** (`clients` where the other
+48 ask `scope_plan`), so whether you may create a non-user assignee is governed
+by a different module from the action containing it.
+
+### 7.3 · Planning Mode is not ported — reversed on the audit
+
+§7 said *taken*, on the brief's word that a fresh build would miss it. **The
+audit says what it is**: 1,040 lines of browser state keeping every phase, work
+package and activity tagged *new / modified / deleted*, auto-saved to
+**`localStorage`** under a key built from **the client, the agreement and the
+scope** — two of which decision 2 deletes — committed by one POST to the route
+in §7.2. Nothing is on the server until *Save All*, so **a draft does not follow
+anybody between browsers**, and its 502-line renumbering engine runs against
+drafts alone.
+
+**THIS PRODUCT DELETED EXACTLY THIS SHAPE ONCE, AND WROTE DOWN WHY** (§273.4):
+*"there is no Save and no Cancel anywhere else in the product, because there is
+nothing for them to do"* — a field writes when the cursor leaves it and the
+autosave carries it. A draft is what forces a Save, a Cancel **and** a guard on
+closing.
+
+**And the need it serves is already answered here**: building a two-hundred-row
+plan without a request per keystroke is what the **workbook** is for (§9.3), and
+that is SMP's own draft-and-commit — authored somewhere else, applied in one
+act, archiving what it replaces (§22). *The cost is stated rather than
+discovered*: restructuring a plan on screen is visible to anybody looking at it
+as it happens, where Planning Mode let you finish first.
+
+### 7.4 · The three branches that do not map — §6.3 corrected
+
+§6.3 said the six roles collapse **with nothing lost**. The audit checked it
+against the four live `canX` functions rather than the matrix, and found three
+places where that is untrue. **Two of them are one question.**
+
+**A. Does a Contributor see the WHOLE plan, or only their own rows?** Their
+`SENIOR_CONTRIBUTOR` sees everything and works on assigned rows; `CONTRIBUTOR`
+sees only its own; `COLLABORATOR` sees only rows it is tagged on — and a list
+and a detail view **already disagree** about that last one. So the two-role
+split exists because somebody wanted both, and one answer settles all three.
+**Recommendation, and it is the platform's own**: **see the plan, write your own
+rows.** §215 states it for Strategy in those words, `OWN_LINES_ONLY` is the
+list, and §93 records what happens when the write half slips. *Cost:* the
+narrower kind — somebody who may see only their own rows — is not available,
+and their own code cannot agree with itself about it today.
+
+**B. Can a Viewer comment?** **Their code says yes and their documentation says
+no** — the matrix grants `view` alone, the docstring says a Viewer cannot
+comment, and `canCommentOnActivity` returns true. §6.2 here says *reads, changes
+nothing*. **Genuinely open, and Islam's**: a sponsor who can ask a question on
+the row is useful, and *Viewer* is then not a read-only word. Everybody lands
+here (§6.4), so it is what the default quietly grants.
+
+**C. Their Lead was narrowed by scope, and that narrowing is NOT lost here.**
+The audit flags it as the widening to watch — *anyone who was Lead of one scope
+becomes Lead of everything* — and that is true of a port that drops the scope
+and keeps one plan per client. **It is not true of this model**: a client has
+several PROJECTS, `portfolio_members` is a row per *(project, person, role)*
+(§6.2), so a Lead is Lead of one project exactly as a Scope Lead led one scope.
+The narrowing moves rather than going. **What does have to be rewritten** is the
+handful of *"no scope → require Client Lead"* fallbacks their code marks
+*(shouldn't happen)*: with scopes gone those become the only path, and the
+Lead-equivalent tier would lose phase and activity deletion entirely.
+
+### 7.5 · What the workbook may carry
+
+§9.3 keeps the round-trip as the office's. Two things follow from the audit, and
+neither is plumbing.
+
+**The gate goes on the SERVER.** Theirs is two usernames hardcoded in a screen
+(`['aley', 'galal']`), with the endpoint itself asking only whether you are
+signed in — which is §42's rule with nothing behind it: *a switch that only
+hides a control is decoration*, and §186 is the record of a picker offering what
+the save refuses.
+
+**The Team sheet is a decision, not a detail.** A workbook has to name who may
+own a row, and theirs does it by shipping **every active user's email** in a file
+that then leaves the building. The register already holds the short name a plan
+is written against (§130.7), so the sheet can carry names without addresses
+— and it should carry **this client's** register rather than every user of the
+platform.
+
+**And one trap belongs to the AI sheet itself**: their instructions tell the
+model that the end date is required and say nothing about the start, while the
+column is `NOT NULL` — so a model following the prompt produces a file that
+rolls the whole import back. A template and its reader are one artefact; §294 is
+the record of them disagreeing five ways at once.
+
+### 7.6 · What the schema must not inherit
+
+There is **no referential integrity to inherit** — six columns carry no foreign
+key at all, including an activity's assignee and a comment's mentioned user —
+and **no `CHECK` constraint anywhere in their schema**. So orphans are assumed
+rather than ruled out, and the new tables get the constraints on the way in
+(§331's loop gives every one of them row-level security; that is a different
+guarantee).
+
+| Theirs | Here |
+|---|---|
+| An activity has two nullable parents and nothing says exactly one is set | A constraint. *"You will not get a cleaner moment."* |
+| `activity_history` **cascades** with its activity | It does not. §42: a log a save can erase is not a log — which is why `change_log` lives outside the state graph. |
+| Phase numbers are supplied by the browser and a delete never renumbers, leaving gaps and stale codes | The **code is derived from position** here, as a Strategy project's already is (§310) — so a gap cannot happen, and §232's rule holds: ids are never renumbered, because figures are keyed on them. |
+| A MySQL unique index over nullable columns constrains nothing, so duplicate phase numbers exist today | Named as a **migration blocker**: with the nullables gone the key starts biting. Check before adding it. |
+| Mentions match `@(\w+)` against usernames written `first.last` | Broken there, and worth saying what it means: **the volume of mention notices in their production is not evidence of anything.** |
+| A mention writes **two** notices — an unawaited `async` inside a `forEach`, racing the loop below it | One. |
+| Reopening a completed activity **clears the sign-off date** and needs only the work-on gate | If two-step completion is the governance feature being kept, **the reopen is gated like the completion** — or a Contributor undoes a Lead's sign-off. |
+| **82% of `lib/scopeplan/` is dead**, and the dead files are the ones that read like the specification | Stated so nobody ports fiction: 512 lines of role logic, 239 of date logic and 346 of dependency logic with **zero importers**. The live rules are elsewhere. |
+| Three unrelated meanings of *milestone*, plus Strategy's own | §5's `portfolio_work_packages` renames one; the flag on an activity and Strategy's table are the other two. **Name them apart now.** |
 
 ---
 
@@ -645,6 +795,20 @@ marked it done and only a Lead closes it; and a checkpoint is a few days off.
   Strategy's alone today;
 - **nothing in-app that lists notices.** There is no bell, no feed, no *3 new*.
 
+**AND THE REFERENCE HAS A BELL, WHICH MAKES THE COMPARISON REAL RATHER THAN
+HYPOTHETICAL** (audited 2026-09-17). Four notice types written inline in the
+route handlers — an activity put in your name, its status changed, your name in
+a comment, a comment on your row — read by a header dropdown polling an unread
+count **every thirty seconds**. No email, no push, no digest, no preference.
+**And two things it does not do decide the comparison**: it carries an activity
+id and **no route resolves that into an address**, so *open the thing that
+changed* is not implemented — §16.7's rule exactly, *a count that cannot take
+you to what it counts makes work* — and **nothing fires** when an activity is
+deleted, when a dependency cascade moves your dates, or when something lands in
+the sign-off queue, which are the three events most worth being told about.
+So **B is not a lesser version of what they have**: the welcome screen's rows
+are doors, which theirs are not.
+
 **Three honest answers, with what each costs**:
 
 | | What happens | Cost |
@@ -682,7 +846,16 @@ rather than a decision:
   contract dates and the lead consultant are a **commercial record with no part
   in a delivery plan** — and Portfolio needs none of them.
 
-`extraction-brief.md` §A asks exactly this, in one line per dropped table.
+**ANSWERED BY THE AUDIT, 2026-09-17**: `budget_hours`, `start_date` and
+`expected_end_date` are read by **exactly one file** — the workbook's Context
+sheet, where they are printed as prose for the AI to plan against — and **no
+plan-tree logic reads any of them.** Nothing validates an activity against the
+agreement's dates or its budget. So the second reading holds: it is a commercial
+record with no part in the arithmetic.
+
+**Which gives the charter's budget figure a use rather than leaving it
+decorative**: it is what the workbook's context sheet tells the model to plan
+within (§9.3, §7.5).
 
 **AND SMP HAS NOWHERE TO PUT IT TODAY, MEASURED**: **57 tables in
 `smp-app/db/schema.sql` and not one holds a budget, a contract, a fee or an
@@ -713,6 +886,46 @@ default. **Deferred, 2026-09-17** (*"I will bring the old plans data later"*). S
 first build is authored fresh and the migration is written against the real
 data when it arrives, rather than against a guess at its shape. Nothing in the
 model is decided by it — which is what makes deferring it safe.
+
+**Three blockers are known already, from the audit, and they are worth having in
+hand before the data arrives**:
+
+- **duplicate phase numbers almost certainly exist.** Their unique key spans two
+  nullable columns and in MySQL a NULL constrains nothing, so a plan with no
+  scope has **no phase-number uniqueness at all** today. Here those nullables
+  are gone and the key starts biting. Check before adding it.
+- **orphans are assumed rather than ruled out** — six columns carry no foreign
+  key, an activity's assignee and a comment's mentioned user among them.
+- **two people hold Lead by a NAME MATCH and no row**: being named
+  `lead_consultant` on the client, or on any subdomain of it, grants their
+  Client Lead outright. Those grants **cannot be migrated**, because there is no
+  membership row to carry — whoever holds Lead that way has to be named
+  explicitly. Which is §130.1's own lesson arriving from the other side: 32 of
+  78 demo tactics named an owner who matched nobody, and a name match is not a
+  grant.
+
+### 9.8 · Does a phase show how far along it is?
+
+**New, from the audit — and it is the one finding that opens a question rather
+than closing one.** There is **no roll-up above the activity at all.** The
+columns exist: `phases.progress_percent` and the work packages' are both
+`DECIMAL(5,2) NOT NULL DEFAULT 0`, and **nothing in their code ever writes
+either** — the only figure the plan renders is one number for the whole plan.
+So a phase shows nothing, and two columns read `0.00` for ever while looking
+like data (§294.2's write-only column, one step worse: never-written).
+
+**SMP rolls up everywhere**, which is what makes this a question rather than an
+omission: a measure rolls into a pillar, a pillar into a unit, a unit into the
+group, each weighted and each with the arithmetic recorded. A plan whose phases
+carry no figure is a plan nobody can scan from the top.
+
+**Recommendation: derive it, never store it.** Their two columns are dropped
+rather than ported (§7.6), and a phase's figure is worked out from its
+activities when the page is drawn — which is how a pillar's is (§264: a summary
+must be made of the numbers it summarises, and the whole of that section is what
+happens when it is not). **What is open is the weighting**: equally across
+activities, or by duration. Equal is what their sub-activity rule falls back to,
+and duration is what a Gantt reader would expect.
 
 ---
 

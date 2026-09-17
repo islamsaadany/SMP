@@ -88,6 +88,13 @@ not an assumption here.
 A project is a piece of work for a client. Somebody in the office builds its
 plan once, and then the people doing the work report against it.
 
+**A project has two halves and one of them is a page.** The **charter** is the
+one page that says what this project is — why it exists, what is in and out of
+it, what it produces, how success is judged, when, with whom, at what cost, and
+who signed it off (§5.1). The **plan** is the tree underneath it. The charter is
+agreed once and is where somebody who has never seen the project starts; the
+plan is worked against every week.
+
 **The plan is a tree.** A project holds phases, numbered 1, 2, 3. A phase may
 hold work packages, numbered 1.1, 1.2 — or not, and then its activities are
 numbered 1.1 directly. An activity is the working unit and is where everything
@@ -161,7 +168,7 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 
 | Table | Holds |
 |---|---|
-| `portfolio_projects` | **New, and the whole of decision 2.** The plan's parent: name, description, state, dates, who leads it. Replaces `(client_assignments, scopes)`. |
+| `portfolio_projects` | **New, and the whole of decision 2.** The plan's parent, and **the charter it is described by** (§5.1) — name, brief, the four accountable people, why, what is in and out, what it produces, when, at what cost, against what risk, and who approved it. Replaces `(client_assignments, scopes)` and the agreement above them. |
 | `portfolio_phase_groups` | Optional grouping above phases, colour-coded |
 | `portfolio_phases` | Phase, numbered, status |
 | `portfolio_work_packages` | **Renamed on the way in.** ClientPlus calls the table `scope_milestones` and the column `milestone_id` — stale since the concept was renamed in Dec 2025. Fixed now or never (the brief's own words), and doubly so here, where `milestones` means a Strategy milestone one module away. |
@@ -171,10 +178,90 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 | `portfolio_comments` | The discussion on an activity |
 | `portfolio_comment_mentions` | @mentions |
 | `portfolio_comment_reactions` | Emoji reactions |
-| `portfolio_files` | **A link, not an upload** — see §9.4 |
+| `portfolio_files` | **A real upload, and a link beside it** — §9.4 |
 | `portfolio_history` | Field-level audit with a source tag (`auto:status_done`, `manual:lead_adjustment`) |
 | `portfolio_terminology` | The three words, per client — see §9.1 |
 | `portfolio_members` | **New, and §6's whole answer.** A row per (project, person, role): who is on this project and at what. Three roles, defaulting to Viewer. Replaces `client_team_members` and `scope_lead_assignments` together. |
+
+### 5.1 · The project charter
+
+Islam, 2026-09-17, with the one-page form his practice already uses:
+*"any project should have a place for an overall view in a project charter that
+sets many things including the budget … in addition to the detailed plan."*
+
+**THIS IS §109 GROWN UP, AND SAYING SO IS MOST OF WHY IT FITS.** Three months
+ago he asked for the same thing at a smaller scale — *"any project needs 3
+things at its starting part which are the brief, stakeholders, start and end
+date"* — and that is Strategy's project front matter today: **Owner · Start ·
+End** down one side, **Brief · Stakeholders** down the other. The charter is
+what those four become when the project is a delivery engagement rather than a
+capability project. **It is not a new level in the tree**: it is the project
+describing itself, which is the hole decision 2 left when it deleted the
+agreement.
+
+**And it must not be unified with Strategy's.** Spec 046 §8 already records that
+a Strategy project and a Portfolio project are different things; two front
+matters is correct, and the day somebody "tidies" them into one is the day a
+capability project grows a budget.
+
+**The form, as his practice writes it** — four bands: who and why; what is in
+and out; what it produces and how success is judged; when, with what, at what
+cost, and against what risk. Ending in a signature.
+
+| Row | What it is here |
+|---|---|
+| Title, Brief | The project's own two fields. |
+| **Sponsor, Manager, Consultant(s), Stakeholders** | **People, PICKED — never typed** (§130.1: 32 of 78 demo tactics named an owner who matched nobody on the register, and being named is what decides who may report). A stored value outside the register is KEPT in its own group, because his own example writes *"HR Director/Head"* — a post, not a person (§96.2). |
+| Pain drivers, Gain drivers | Prose. |
+| Scope span | Prose, in and out. |
+| Deliverables, Success criteria | **Prose, written as a list by a person** — his example is dashes and one *"X% reduction"* left as a placeholder. Turning them into rows would be inventing a structure the document does not have. |
+| Timeline / Milestones | **A door to the plan, never a second copy** — §5.2. |
+| Resources required | Prose. |
+| **Budget required** | A headline figure — §5.2. |
+| Risks & assumptions | Prose. New: nothing in SMP or the reference holds this. |
+| **Approval** | A signature line on paper. Here: approved by whom, and when. **Whether it GATES anything is open** — it could be what says the detailed plan may now be built, or it could be a stamp. Not decided, and not invented. |
+
+**HALF THE ROWS ARE EMPTY IN HIS OWN EXAMPLE** — Date, Consultant(s), Budget and
+Risks all blank. So every field is optional and **the page must not nag**: a red
+*Missing* over a count of nought is worse than silence (§214.4), and a charter
+with four blanks is a normal charter rather than a broken one (§45.2 with the
+sign reversed).
+
+**THE FOUR NAMES ARE NOT THE THREE ROLES**, and merging them would be a mistake
+worth naming now. §6.2's Lead / Contributor / Viewer say **what you may do**;
+Sponsor / Manager / Consultant / Stakeholder say **who is accountable**. A CEO
+sponsors and touches nothing. **Whether naming somebody Manager should OFFER to
+make them Lead is a real question** (§33: responsibility for a thing lives on the
+thing) — offer, never do it silently, and it is open.
+
+### 5.2 · The two rows that open onto something bigger
+
+Islam, twice and both times as a *maybe*: *"the budget can pop up to build a
+detailed budget"*, and *"the milestones to open a pop up to set the milestones
+timeline setting the start and the end of the project"*.
+
+**They are one shape, and naming it is what stops them being two features**: a
+charter row states the headline, and the detail lives behind it. What decides
+whether that is sound is the same question both times — **does the headline
+STORE its own copy, or READ the detail?** Two places answering one question is
+the drift this project keeps recording (§53.5), and here the lying copy would be
+the one that was signed.
+
+**The milestones row: the plan already holds the dates**, so a typed timeline
+beside it is a second answer by construction. But a charter is signed at a
+moment, and *what was agreed* is legitimately not *what is happening* — which is
+**the product's own idiom, not a new one**: §239 puts a figure beside what it is
+measured by, and §344 put that benchmark next to the box it is typed into.
+**Recommendation: the charter states what was agreed; the plan says what is
+happening; the row shows both when they differ.** That difference is the single
+most useful fact on the page.
+
+**The budget row: recommend the headline now and the breakdown named, not
+built.** A breakdown is lines, amounts, categories and probably planned against
+actual — a feature the size of the plan tree — and **the platform has no money
+concept at all** (§9.6: 57 tables, not one holds a budget, a fee or an hour). One
+number costs one field. What decides the rest is whether anybody tracks spend
+against it, which is a question about the practice rather than the code.
 
 **Thirteen in, fourteen out.** Three of ClientPlus's are dropped or replaced —
 `scope_plan_terminology` is re-keyed per client, and `client_team_members` and
@@ -427,7 +514,7 @@ out to be a question Portfolio does not ask.
 user can do anything — naming people onto a project, and starting one. Nothing
 is left open in §6.
 
-### 9.3 · Writing a plan in a spreadsheet instead of on the screen
+### 9.3 · Writing a plan in a spreadsheet instead of on the screen — answered (2026-09-17)
 
 Islam, 2026-09-17: *"what s theexcel round trip?"* — fairly, because the first
 version of this section named the thing and never said what it is.
@@ -466,9 +553,9 @@ box — every one invisible because the file looked right. A Portfolio workbook
 inherits that trap the day it exists, and the check that guards it is a round
 trip rather than a list of columns.
 
-**Still open: keep it, drop it, or keep it as the office's?** Today it is behind
-a two-name allowlist in the reference, which is itself worth asking about —
-that is either a deliberate gate or a feature that was never finished.
+**Answered 2026-09-17** (*"the uploader is the office only"*): **kept, and the
+office's.** Which also reads the reference's two-name allowlist as a deliberate
+gate rather than an unfinished feature — same answer arrived at twice.
 
 ### 9.4 · Files — answered (2026-09-17, *"real uploads"*)
 `activity_files` stores a URL, not an upload. **Files are uploaded into the
@@ -574,8 +661,18 @@ moved from one level to another — it is a **concept the platform does not have
 and giving it one is a feature of its own with its own spec, not a column added
 in passing (rule 2b).
 
-**Closed for Portfolio.** It comes back only if the code says the plan is
-measured against it.
+**ANSWERED 2026-09-17, AND THE TWO HALVES SPLIT** (*"I beleive the contract is
+irrelevant now. but for the bugdet I think any project should have a place for
+an overall view in a project charter"*):
+
+- **the contract is dropped** — budget hours, contract dates and the lead
+  consultant go with it, and nothing asks for them again;
+- **the budget stays, as a headline on the project's own charter** (§5.1) rather
+  than as a level above it. Which answers the question this section asked
+  without needing the reference's code: it is not a client-level fact being
+  moved, it is **one figure on the page that describes the project**.
+
+The detailed breakdown behind it is §5.2, and is named rather than built.
 
 ### 9.7 · The migration
 Real plans exist. Moving them means: each `(agreement, scope)` pair becomes one

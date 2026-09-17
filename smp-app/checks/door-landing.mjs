@@ -28,6 +28,29 @@
      … --break=done-dropped   (RED: Done with set-up is applied on screen and never reaches the store — lib/save.ts, §360)
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
+   AND FIVE OF `check:door:red`'s BREAKS DIED WITH THE LANDING, WITH THE
+   FIRST OF THEM MASKING THE REST (§366). `no-rows`, `first-person`,
+   `membership-key`, `setup-any-seat` and `modules-unread` were all
+   falsifications of THE CLIENT'S LANDING PAGE — its rows, its viewer
+   fallback, its register lookup, its Client setup block, its Your modules
+   block — and §360 made `/<client>` a redirect, deleted `landingShape()`
+   and replaced §7 with the client's own Setup rail. From that day the five
+   words matched nothing in the product (grepped: 0 hits each in `lib/`,
+   `app/`, `shell/`, `scripts/`, and none applied by this file either), so
+   every one of those runs came back green — which is indistinguishable from
+   a guard that works (§54.5). Worse than a dead assertion: the red script
+   `exit 1`s on the first break that fails to redden, and `no-rows` was
+   FIRST, so the four after it had not run since §360 — a list of ten that
+   exercised one. Established as pre-existing rather than assumed (§303):
+   `no-rows` run at the commit before this one, GREEN 140/0, and the other
+   four absent from the product at that same commit. Removed rather than
+   given new subjects, because what they broke does not exist (§24) —
+   `no-rows` stays live in checks/client-card-modules.py, whose subject is
+   the CARD's rows and is still there. **AND `done-dropped` JOINS THE LIST**:
+   §360 wrote the break, documented it here and never added it to the
+   script, so the one falsification the landing's removal did not kill was
+   also not running. Seven breaks, seven red.
+
    THE STRIP HAS NO ENV HOOK AND IS FALSIFIED FROM THE SOURCES (§276): the
    Getting started strip is the frozen shell's (shell.html setupRail), served
    as the generated public/shell.js, and no server variable reaches it. To
@@ -665,8 +688,10 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
      the first draft read `st.group` and the default's "key deleted" passed on
      null either way (§113.8), so the pick is asserted PRESENT first */
   const stored = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); const g = st.state && st.state.group; return (g && g.landing) || null; };
-  const cardLine = async () => { const j = await (await page.request.post(BASE + "/api/platform", { data: { action: "cards" } })).json();
-    const c = (j.cards || []).find((x) => x.key === "raya-trade"); const m = c && (c.modules || []).find((x) => x.key === "strategy"); return m ? m.line : null; };
+  const cardRow = async () => { const j = await (await page.request.post(BASE + "/api/platform", { data: { action: "cards" } })).json();
+    const c = (j.cards || []).find((x) => x.key === "raya-trade"); return (c && (c.modules || []).find((x) => x.key === "strategy")) || null; };
+  const cardLine = async () => { const m = await cardRow(); return m ? m.line : null; };
+  const cardMark = async () => { const m = await cardRow(); return m ? m.mark : null; };
   /* the landing's own row went with the landing (§360); what is left to
      agree are the Setup page and the console's card (§53.5) */
   await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
@@ -679,8 +704,23 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
   check(!r.none, "…and never the no-stamp sentence", r.none);
   check(r.radios[0] && r.radios[0][1] === true && (await stored()) === null, "with nothing stored the FIRST line is lit — the default is an absence (§50.6)", JSON.stringify([r.radios, await stored()]));
   check(!!r.stamp && r.prev === r.stamp.lines[0].text && !!r.prev, "the preview under the list is the stamp's own text for it", JSON.stringify([r.prev, r.stamp && r.stamp.lines[0].text]));
-  const before = await cardLine();
-  check(!!r.stamp && before === r.stamp.lines[0].text, "the console's card says the same sentence (one reader, §53.5)", JSON.stringify([before, r.stamp && r.stamp.lines[0].text]));
+  /* REWRITTEN, NEVER LOOSENED (§218, §214.3), AND IT IS A REVERSAL.
+     This asserted that the console's card said the same SENTENCE as this
+     page (§359.4's one reader). §366 made the card say Forefront's own MARK
+     instead — Islam's call, because that card exists so a consultant can
+     decide which client to open next — so the property being guarded is now
+     the opposite one, and it is written as the reversal rather than deleted:
+     a build that wires the client's pick back into the console goes red
+     here, driven end to end through the real page and the real endpoint.
+     BOTH ENDS: the mark is asserted PRESENT before it is asserted to be
+     none of this page's sentences, or a card that said nothing at all would
+     satisfy the second half perfectly (§113.8). */
+  const before = await cardMark();
+  check(!!before, "the console's card carries a mark of its own", JSON.stringify(before));
+  check((await cardLine()) === undefined, "…and no line: the row stopped carrying a sentence (§366)", JSON.stringify(await cardLine()));
+  check(!!r.stamp && !r.stamp.lines.some((l) => l.text && l.text === before),
+    "…and that mark is none of the sentences this page offers — it is not the client's pick",
+    JSON.stringify([before, r.stamp && r.stamp.lines.map((l) => l.text)]));
   /* THE PICK */
   const want = r.stamp ? r.stamp.lines[1] : null;
   /* EVERY PRESS IS GUARDED (§215): on the no-stamp build there is nothing to
@@ -698,14 +738,22 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
     check(!!lit && lit[1] === true && r.prevKey === "waiting" && !!want && r.prev === want.text, "a pick lights its row and moves the preview to that line's text", JSON.stringify([r.radios, r.prev]));
     const st = await stored();
     check(!!st && st.strategy === "waiting", "…and is STORED on the group under the module's key (read off the server)", JSON.stringify(st));
-    check(want && (await cardLine()) === want.text, "…and the console's card now says that line (the landing's row went with the landing, §360)", JSON.stringify(await cardLine()));
+    /* REVERSED WITH THE ONE ABOVE (§218, §366): this asserted the card now
+       said the picked line. The card is Forefront's own answer, so what has
+       to hold is that the pick moved the page's preview — asserted two lines
+       up — and moved the card's mark NOT AT ALL. */
+    check((await cardMark()) === before, "…and the console's card is UNMOVED by it: the mark is Forefront's own (§366)", JSON.stringify([before, await cardMark()]));
     /* THE DEFAULT DELETES THE KEY */
     await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
     await pick("cycle");
     check((await stored()) === null, "picking the default again DELETES the key, so never-set and set-then-cleared are the same bytes (§50.6)", JSON.stringify(await stored()));
     /* NOTHING is a choice, drawn as a row with no line */
     await pick("none");
-    check((await cardLine()) === "", "Nothing keeps the card's row and draws no line under it", JSON.stringify(await cardLine()));
+    /* NOTHING is still a choice and still keeps the card's ROW — the door is
+       what the row is — and since §366 it cannot touch the mark either. */
+    const nothingRow = await cardRow();
+    check(!!nothingRow && nothingRow.key === "strategy", "Nothing keeps the card's row: the door is not a sentence", JSON.stringify(nothingRow));
+    check(!!nothingRow && nothingRow.mark === before, "…and leaves the mark where it was", JSON.stringify([before, nothingRow && nothingRow.mark]));
   } finally {
     await owner.query("UPDATE org SET extra = extra - 'landing' WHERE tenant_id = $1", [tenant.id]).catch(() => {});
   }

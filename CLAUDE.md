@@ -8234,7 +8234,22 @@ node smp-app/checks/modules.mjs # a module per client, and every module serving
                                 # out. Its own first run called a correct build broken:
                                 # `page.appendChild(grid)` appears twice in
                                 # platform.html, so an unscoped indexOf compared the
-                                # band against ANOTHER page's grid (&sect;100.3)
+                                # band against ANOTHER page's grid (&sect;100.3).
+                                # AND SINCE &sect;366 &sect;4a IS THE CARD'S MARK, BOTH
+                                # ENDS ON EVERY BRANCH: Strategy's ladder in order
+                                # (not answering &rarr; no plan &rarr; a count &rarr;
+                                # nothing), the count asserted as `total - submitted`
+                                # rather than a literal (&sect;94.8), a cycle whose
+                                # figures could not be read saying *Cycle open* and
+                                # never `0 of 0` (&sect;35, &sect;93), a submitted
+                                # cycle and a module declaring no mark each drawing
+                                # NONE, and **no landing-line pick handed to
+                                # `moduleRows()`** &mdash; the mark is Forefront's own
+                                # answer, so a build that followed the client's pick
+                                # is red (&sect;359.4 is a different question).
+                                # 158/0, red nine ways with `mark-always` new: a
+                                # build that marks every row whatever the facts say,
+                                # which is the whole of what A rejected
 node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly list
                                 # per client (spec 054, &sect;356) &mdash; `npm run
                                 # check:tracker`, needs a database and the image's
@@ -9859,7 +9874,75 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
+*Last Updated: 2026-09-17 &mdash; **&sect;366: a mark, not a sentence, on a
+client card's module rows.** Islam, with the console's four client cards in
+front of him &mdash; *"on the clients cards we don't needs notes that take 2
+lines we can just have a notificaiton here if something is new to check &hellip;
+to keep it neat and clean nad let's make it compact for better view"* &mdash;
+then, of three options drawn at full size, **"A WITH TIGHTER ROWS and forefront
+own"**. **MEASURED BEFORE ANYTHING WAS DRAWN, AND THE COMPLAINT IS EXACT**: a
+two-module card held **nine pieces of text**, five of them constants, and the
+row's state and the landing sentence **said one fact twice** (`Cycle open`
+beside *"Cycle open &middot; reports due 30 Sep"*) &mdash; **the duplicate is
+what wrapped**, a **36px tail on a 57px row at every width swept**, so it was
+two lines because the sentence is long rather than because the column is narrow.
+**THE MARK IS WHAT IS OUTSTANDING**, so a healthy client reads its name, its
+address and its module names and nothing else &mdash; with the cost stated
+before he chose: a cycle open with everything submitted now reads the same as no
+cycle at all, because the mark means *outstanding* and the state is one press
+away. **IT IS FOREFRONT'S OWN ANSWER, NEVER THE CLIENT'S LANDING-LINE PICK**
+(his, and the sharper half of the sign-off): the two questions look alike and
+are not &mdash; &sect;359.4's pick answers what a client's landing says to its
+own people &mdash; so `moduleRows()` is handed the FACTS and **no pick**,
+asserted at both ends. **DECLARED PER MODULE, BESIDE THE LINES**
+(`MODULE_DEF[k].mark`), because what is outstanding is a fact only that module
+knows; **a module that declares none draws none**, which is the honest state for
+the Tracker and Notes. **STRATEGY'S LADDER IS ORDERED** &mdash; not answering,
+no plan, a count of subjects still to submit, nothing &mdash; and where the
+figures could not be READ it says *Cycle open* rather than a number, because
+**absent is not nought** (&sect;35, &sect;93: `0 of 0` reads as everybody
+submitted). **THE COMPACTION IS MEASURED**: tallest card **304 &rarr; 247px**, a
+client card **235 &rarr; 205**, the tallest row **57 &rarr; 33**, and at 1024 the
+card was 252 and is 205, so **its height stops depending on the window**;
+`rowsOverflowing: 0` before and after at five widths. All **nine** ink-on-ground
+pairs read in BOTH palettes, worst 4.70 (&sect;38.4/&sect;38.5). Two things did
+not move and each says why: `.ccard.add` keeps its `min-height`, whose one number
+is the whole of that card's height (&sect;317), and `img.cmark` came down to 30px
+with the initials, or a row would ship two card heights for no visible reason.
+**&sect;366.1 &mdash; MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN
+BUILD CLEAN**: `getClientRects().length == 1` returned **ONE rect for a tail 53px
+tall** under the wrap break &mdash; &sect;88's rule, written down once and walked
+into anyway; it measures the tail's HEIGHT against one line now.
+**&sect;366.2 &mdash; and its alarm-ink assertion passed by default**, the
+fixture's unopenable client drawing no rows at all, so there was no alarm to
+measure (&sect;94.5); the state is MADE (&sect;255) and both inks asserted
+PRESENT before they are asserted different. **&sect;366.3 &mdash; AND FIVE OF
+`check:door:red`'s TEN BREAKS DIED WITH THE LANDING, THE FIRST HIDING THE OTHER
+FOUR**: `NOT RED: no-rows`, established as pre-existing at the commit before this
+one (**GREEN 140/0**, &sect;303) &mdash; it falsified THE LANDING'S ROWS, and
+&sect;360 made `/<client>` a redirect and deleted `landingShape()`. Grepping found
+`first-person`, `membership-key`, `setup-any-seat` and `modules-unread` in the
+same state (**0 hits each** in `lib/`, `app/`, `shell/`, `scripts/`, and none
+applied by the check), every one a falsification of the landing's own viewer
+fallback, register lookup, Client setup block or Your modules block. **And the
+script `exit 1`s on the first break that fails to redden**, so a list of ten had
+been exercising ONE since &sect;360 &mdash; worse than a dead assertion, because
+it reads as a passing suite (&sect;54.5). All five removed rather than given new
+subjects (&sect;24); `no-rows` stays live in `client-card-modules.py`, whose
+subject is the CARD's rows. **And `done-dropped` joins the list** &mdash;
+&sect;360 wrote it, documented it in the check's header and never added it to the
+script. **Seven breaks, seven red.** **FLAGGED RATHER THAN FOLDED IN** (rule 1b):
+with the landing gone and the card no longer reading the pick, the **Landing
+line** Setup page governs nothing but its own preview &mdash; a decision about
+what that page is FOR, stated and left. **VERIFIED**: modules **158/0** red nine
+ways, `client-card-modules.py` **23/0 on BOTH copies** of the console page
+(&sect;53.5) red four ways, door **143/0** red seven ways,
+`generated-in-step` all clear, `typecheck` 0. **No frozen product source
+changed** &mdash; read off the diff, `built-in-step.py` all good &mdash; so the
+built file is untouched and **no `sw.js` bump is owed** (&sect;91). **`main`
+untouched: the merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-17 &mdash; **&sect;365: the sweep before the merge, and
 the four things it found.** Islam, of the branch carrying &sect;359&ndash;&sect;364:
 *"make sure that if we merge to main we will not loose any client access or mess
 with any current behavior."* **THE HONEST SWEEP HAD TO BE OF THE MERGED TREE**,

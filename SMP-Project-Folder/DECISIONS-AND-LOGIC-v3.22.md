@@ -51454,3 +51454,146 @@ database — the rehearsal database §328.3 describes — so it is UNRUN rather 
 failing, its own header's stated precondition and true on main too.
 `test-concurrent-saves.js` dies on `platform.sessions`, one of the seven
 harnesses §328.3 already records as unrunnable since §313.
+
+---
+
+## §366 — A MARK, NOT A SENTENCE, ON A CLIENT CARD'S MODULE ROWS (2026-09-17)
+
+Islam, with the console's four client cards in front of him: *"on the clients
+cards we don't needs notes that take 2 lines we can just have a notificaiton
+here if something is new to check what do. you think? to keep it neat and clean
+nad let's make it compact for better view"* — and then, of three options drawn
+for him, **"A WITH TIGHTER ROWS and forefront own"**.
+
+**MEASURED BEFORE ANYTHING WAS DRAWN, AND THE COMPLAINT IS EXACT.** A card
+carrying two modules held **nine pieces of text**: its mark, its name, its
+address, two module names, two module STATES and two landing SENTENCES. Of the
+nine, five said nothing a consultant can act on — *Strategy*, *Insights* and
+the addresses are constants, and the state and the sentence **said one fact
+twice**: `Cycle open` in the row's tail beside *"Cycle open · reports due 30
+Sep"* on the line under it. **AND THE DUPLICATE IS WHAT WRAPPED** — measured,
+the tail is **36px on a 57px row** at 1600, 1440, 1280, 1024 and 900, which is
+the two lines he photographed, and it is two lines at every width because the
+sentence is long rather than because the column is narrow.
+
+**THE MARK IS WHAT IS OUTSTANDING, AND THAT IS THE DECISION** (his A of three,
+with B — the sentence shortened — and C — the state kept and the sentence
+dropped — drawn beside it at full size and rejected). A row draws a mark only
+when the module has something for the office to do, so a healthy client reads
+its name, its address and its module names and **nothing else**; a row with
+nothing outstanding is a row you can run your eye past. Its cost was stated
+before he chose and is recorded rather than re-argued: **a cycle open with every
+subject submitted now reads the same as no cycle at all**, because the mark means
+*outstanding* and not *what state is this in* — the state is one press away on
+the module itself, and the card is scanned rather than read.
+
+**THE MARK IS FOREFRONT'S OWN ANSWER, NEVER THE CLIENT'S LANDING-LINE PICK**
+(his, and the sharper half of the sign-off). The two questions look alike and
+are not: §359.4's pick answers *what does this client's own landing say to its
+own people*, and this answers *what does the office need to look at*. Following
+the pick would have made the console's card change under Forefront because a
+client chose a different sentence for themselves — so `moduleRows()` is handed
+the FACTS and never the picks, asserted at both ends (`check:modules` §4a:
+the card reads the client's own module list, **and no pick reaches it**).
+
+**IT IS DECLARED PER MODULE, BESIDE THE LINES** (`MODULE_DEF[k].mark`, a
+`MarkDef` over the same `CardFacts` the landing lines already read), because
+*what is outstanding here* is a fact only that module knows — and a table of
+marks kept beside the module table is the drift `lib/modules.ts`'s own header
+exists to prevent (§53.5). **A module that declares none draws none**, which
+is the honest state for the Internal Tracker and Meeting Notes: they declare no
+lines either, so there is nothing for a mark to be made of, and inventing one
+would be the console claiming to know something it does not (§35).
+
+**STRATEGY'S MARK IS A LADDER AND ITS ORDER IS THE POINT**: *Not answering*
+(the client's platform did not answer at all — the loudest, because it is the
+one thing that is wrong rather than owed), then *No plan*, then a count of
+subjects still to submit, then **nothing**. The count is `total − submitted`
+and is drawn only while it is positive, so the last submission clears the card.
+Where the cycle is open and the figures could not be READ, the mark says
+*Cycle open* rather than a number — **absent is not nought** (§35, §93): a
+count the console could not compute must never render as *0 of 0*, which reads
+as *everybody has submitted*. Insights' is *N new*, off its own
+`newReports`.
+
+**THE ALARM IS TWO INKS AND BOTH WERE MEASURED** (§38.4/§38.5): the count is
+`--ink-2` semibold and the alarm `--warn`, and every one of the **nine**
+ink-on-ground pairs the row can produce was read off the page in **both
+palettes** — worst 4.70 (the alarm on a hovered row in light), all nine ≥4.50.
+The alarm is not a fill, because a solid on a row that is itself a door would
+be the loudest thing on a page of four cards (§41's budget).
+
+**THE COMPACTION IS THE SECOND HALF AND IT IS MEASURED, NOT ASSERTED.** With
+the mockup's tighter-rows lever built in — `min-height` off the card, 13px of
+top padding, a 30px mark, a 16px name, 6px rows — the tallest card goes **304 →
+247px** and a client card **235 → 205px**; the tallest row **57 → 33px**; and
+at 1024 the card was **252px and is 205**, so **the card's height stops
+depending on the window**, which it did only because the sentence wrapped at
+one width and not another. `rowsOverflowing: 0` before and after, at all five
+widths.
+
+**TWO THINGS DID NOT MOVE, EACH FOR ITS OWN REASON.** `.ccard.add` keeps its
+`min-height:152px`, because that card has no content and its whole height comes
+from that one number (§317's empty state) — dropping it with the others would
+have collapsed the only control that adds a client. And **`img.cmark` came down
+to 30px with the initials**, which the mockup could not draw: it can only draw
+the two-letter fallback, so leaving the image mark at 36 would have shipped two
+card heights in one row for no reason anybody could see.
+
+**§366.1 — MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN BUILD
+CLEAN.** `checks/client-card-modules.py`'s new one-line assertion was written as
+`getClientRects().length == 1`, and under `--break=mark-wraps` Chrome returned
+**ONE rect for a tail 53px tall** — §88's own rule, written down once already
+and walked into anyway. It measures the tail's HEIGHT against one line-height
+now, and is red under that break and green otherwise.
+
+**§366.2 — AND ITS ALARM ASSERTION PASSED BY DEFAULT.** The fixture's `el-abd`
+cannot be opened, so it draws no rows at all, and there was no alarm anywhere on
+the page for the ink assertion to measure (§94.5). The state is MADE rather than
+waited for (§255): a fourth card holding a client with no plan, and both inks
+asserted PRESENT before they are asserted different.
+
+**§366.3 — AND FIVE OF `check:door:red`'s TEN BREAKS DIED WITH THE LANDING,
+WITH THE FIRST OF THEM HIDING THE OTHER FOUR.** Running the neighbours reported
+`NOT RED: no-rows`, and it is not this round's: **established as pre-existing by
+running it at the commit before this one — GREEN 140/0** (§303). It was spec
+043's falsification of THE LANDING'S ROWS, and §360 made `/<client>` a redirect,
+deleted `landingShape()` and replaced that check's §7 with the client's own
+Setup rail — so from that day the word matched nothing. Grepping the rest found
+`first-person`, `membership-key`, `setup-any-seat` and `modules-unread` in the
+same state: **0 hits each in `lib/`, `app/`, `shell/` and `scripts/`, and none
+applied by the check itself**, every one of them a falsification of the landing's
+own viewer fallback, register lookup, Client setup block or Your modules block.
+**AND THE SCRIPT `exit 1`s ON THE FIRST BREAK THAT FAILS TO REDDEN**, and
+`no-rows` was FIRST — so a list of ten had been exercising ONE since §360, which
+is worse than a dead assertion: it reads as a passing suite. All five removed
+rather than given new subjects, because what they broke does not exist (§24) —
+and `no-rows` stays live in `checks/client-card-modules.py`, whose subject is the
+CARD's rows and is still there. **AND `done-dropped` JOINS THE LIST**: §360 wrote
+that break, documented it in the check's own header and never added it to the
+script, so the one falsification the landing's removal did not kill was also not
+running. **Seven breaks, seven red.**
+
+**FLAGGED RATHER THAN FOLDED IN** (rule 1b): §360 deleted the client's landing,
+so the **Landing line** Setup page's pick is now read by the console's card and
+by that page's own preview — and after this change the card does not read it
+either. So a page the client is asked to answer **governs nothing but its own
+preview**. That is a decision about what the landing line is FOR, not a tidy-up
+to ride along behind a card's compaction, so it is stated and left.
+
+**RECORDED, NOT DONE**: the Internal Tracker and Meeting Notes declare no mark
+and no landing line, so their rows are a name and an address; a cycle open with
+everything submitted is indistinguishable from no cycle at all, which is the
+decision above rather than an omission; and nothing on the card says WHICH
+subjects are outstanding, the count being a door to the module rather than a
+list.
+
+**VERIFIED**: `check:modules` **158/0** red nine ways (`mark-always` new — a
+build that marks every row whatever the facts say); `client-card-modules.py`
+**23/0 on BOTH copies of the console page** (the root file and
+`smp-app/shell/platform.html`, because a generated copy is where a drift hides,
+§53.5) red under four breaks including the two new ones; `check:door` **143/0**
+red seven ways; `generated-in-step` all clear after the four generators were
+re-run; `typecheck` exits 0. **No frozen product source changed** — read off the
+diff, and `built-in-step.py` all good — so the built file is untouched and **no
+`sw.js` bump is owed** (§91's trigger is the built file's bytes changing).

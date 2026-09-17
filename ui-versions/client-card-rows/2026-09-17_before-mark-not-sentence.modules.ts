@@ -97,67 +97,7 @@ export type LandingFacts = {
   newReports: number | null; latestReport: string;
 };
 export type LineDef = { key: string; label: string; example: string; read: (f: LandingFacts) => string };
-
-/* ── WHAT A MODULE MARKS ON A CLIENT'S CARD (§366) ─────────────────────
-   Islam, of the console's cards: "we don't needs notes that take 2 lines we
-   can just have a notificaiton here if something is new to check ... to keep
-   it neat and clean nad let's make it compact." Answered with a MARK rather
-   than a sentence, from a mockup he signed off (design-mockups/
-   client-card-rows/2026-09-17_a-mark-not-a-sentence.html, option A).
-
-   THE MARK SAYS WHAT IS OUTSTANDING, AND NOTHING WHEN NOTHING IS — which is
-   the whole of why the cards get shorter without anything being squeezed:
-   silence is the resting state. Counted off his own screenshot, nine pieces
-   of text sat on nine rows and five of them said that nothing was happening.
-
-   AND IT IS FOREFRONT'S OWN ANSWER, NOT THE CLIENT'S PICK (his, chosen with
-   the cost stated). The landing line lets a client choose the WORDING of a
-   sentence about themselves; this card exists so a consultant can decide
-   which client to open next, so it always says the thing that decides that.
-   `lines` and this are two different questions now and are declared apart —
-   `moduleRows` no longer reads a pick at all, which `checks/modules.mjs`
-   asserts at both ends (a pick moving must NOT move a mark).
-
-   `alarm` IS THE TWO THINGS THAT MEAN SOMETHING IS BROKEN rather than busy —
-   *not answering* and *no plan yet* — and is what the row paints in the
-   warning ink. A count is not an alarm however large it is.
-
-   `tip` IS THE WHOLE SENTENCE, for the hover: the mark is the fact in the
-   fewest words, so this is a nicety and never the only copy of it (a hover
-   is unreachable on a tablet, where pressing the row opens the module —
-   stated rather than solved).
-
-   DECLARED PER MODULE, beside `lines`, for the reason MODULE_DEF exists: a
-   fifth module is an entry here rather than an edit in the console (§53.5).
-   A module with nothing to mark declares none, which is `undefined` and
-   never a function returning a placeholder. */
-export type CardFacts = { unreadable?: boolean; cycleOpen?: boolean | null; planned?: boolean | null; landing?: LandingFacts | null };
-export type Mark = { mark: string; alarm?: boolean; tip?: string };
-export type MarkDef = (f: CardFacts) => Mark | null;
-
-/* WORST FIRST, and every branch that cannot READ its fact answers null —
-   absent is never nought (§35, §93). A cycle known open whose counts cannot
-   be read says *Cycle open* rather than nothing, or an unreadable count
-   would be indistinguishable from nothing owed. */
-const STRATEGY_MARK: MarkDef = (f) => {
-  if (f.unreadable) return { mark: "Not answering", alarm: true, tip: "This client's platform did not answer" };
-  if (f.planned === false) return { mark: "No plan", alarm: true, tip: "No plan has been built for this client yet" };
-  if (f.cycleOpen !== true) return null;
-  const g = f.landing;
-  const due = g && g.due ? " · reports due " + g.due : "";
-  if (!g || g.total === null || g.sub === null) return { mark: "Cycle open", tip: "Cycle open" + due };
-  const owed = g.total - g.sub;
-  if (owed <= 0) return null;
-  return { mark: owed + " of " + g.total, tip: "Cycle open" + due + " · " + owed + " of " + g.total + " still to submit" };
-};
-const INSIGHTS_MARK: MarkDef = (f) => {
-  const g = f.landing;
-  if (!g || g.newReports === null || g.newReports <= 0) return null;
-  return { mark: g.newReports + " new",
-    tip: g.newReports + " new report" + (g.newReports === 1 ? "" : "s") + " this month" };
-};
-
-export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[]; mark?: MarkDef };
+export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[] };
 const NOTHING: LineDef = { key: "none", label: "Nothing", example: "The module is listed with no line under it", read: () => "" };
 const STRATEGY_LINES: LineDef[] = [
   { key: "cycle", label: "The cycle\u2019s state", example: "Cycle open \u00b7 reports due 30 Sep",
@@ -179,7 +119,7 @@ const INSIGHTS_LINES: LineDef[] = [
   NOTHING,
 ];
 export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
-  strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true,  areas: [], lines: STRATEGY_LINES, mark: STRATEGY_MARK },
+  strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true,  areas: [], lines: STRATEGY_LINES },
   portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: false, areas: [], lines: [NOTHING] },
   insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: true,
     /* ONE AREA, because there is one thing to be granted: opening the
@@ -193,7 +133,7 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
     areas: [{ key: "a_insights", label: "Insights",
               note: "Open the library and download what is in it",
               states: ["view", "none"], shipped: "view" }],
-    lines: INSIGHTS_LINES, mark: INSIGHTS_MARK },
+    lines: INSIGHTS_LINES },
   processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [], lines: [NOTHING] },
   /* THE OFFICE'S OWN LIST ABOUT THIS CLIENT (spec 054). Built, and NO AREA:
      it is opened by the seat and by nothing a client could be granted
@@ -335,38 +275,24 @@ export function landingLine(k: ModuleKey, pick: string | null | undefined, facts
   return lineDef(k, pick).read(facts || NO_FACTS);
 }
 
-export type ModuleRow = { key: ModuleKey; label: string; mark: string; alarm: boolean; tip: string; room: boolean };
-/* ONE MARK PER ROW, AND NOTHING WHEN THERE IS NOTHING (§366).
-   REVERSING the pair this returned before — a `line` (the client's chosen
-   sentence) and a `state` (the card's own health word) — which is recorded
-   as a reversal rather than overwritten, because both were right on their
-   own terms and what was never asked is what they did to each other: on a
-   client with a cycle running the two said the SAME FACT TWICE ("Cycle open"
-   in the line and "cycle open" beside it), and it was that duplicate the
-   row could not fit on one line.
-
-   The mark is the module's own declaration (MODULE_DEF[k].mark), so this
-   function decides nothing and a module added tomorrow marks its card the
-   day it is added rather than the day somebody remembers this file (§104.7).
-   The whole-sentence `tip` rides with it for the hover.
-
-   THE PICK IS NO LONGER READ, which is the one thing to know before
-   changing this back: the mark is Forefront's own answer (Islam's, §366),
-   so a client's landing-line pick cannot move it. `landingLine` keeps its
-   other caller — lib/landing.ts's stamp, which is what the Landing line
-   Setup page previews — so nothing about that page changes here. */
-export function moduleRows(have: ModuleKey[], facts: CardFacts): ModuleRow[] {
-  /* A build that marked a row with nothing outstanding — the behaviour
-     §366 removed, and the one that makes the cards no shorter than the ones
-     Islam photographed. Must turn checks/modules.mjs red before its green
-     run is believed (§94.5). Never set on a deployment. */
-  const brk = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
-  return have.map((k) => {
-    const d = MODULE_DEF[k].mark;
-    let m = (d || (() => null))(facts);
-    if (!m && brk === "mark-always") m = { mark: d ? "Nothing to do" : "—" };
-    const got = m || { mark: "", alarm: false, tip: "" };
-    return { key: k, label: MODULE_DEF[k].label, room: isLibrary(k),
-             mark: got.mark, alarm: !!got.alarm, tip: got.tip || "" };
-  });
+export type ModuleRow = { key: ModuleKey; label: string; state: string; line: string; room: boolean };
+/* `line` IS THE LANDING LINE (§359.4): the same reader the client's landing
+   draws from, given the same facts and the client's own picks, so the
+   console cannot say one thing about a module while the landing says
+   another. `state` stays the card's own health word — *not answering*, *no
+   plan yet* — which is about whether the client can be opened at all and
+   not something the client chose. */
+export function moduleRows(have: ModuleKey[], facts: { unreadable?: boolean; cycleOpen?: boolean | null; planned?: boolean | null; landing?: LandingFacts | null },
+                           picks: Record<string, string> = {}): ModuleRow[] {
+  return have.map((k) => ({
+    key: k,
+    label: MODULE_DEF[k].label,
+    room: isLibrary(k),
+    line: facts.unreadable ? "" : landingLine(k, picks[k], facts.landing),
+    state: k !== "strategy" ? ""
+      : facts.unreadable ? "not answering"
+      : facts.cycleOpen ? "cycle open"
+      : facts.planned === false ? "no plan yet"
+      : "",
+  }));
 }

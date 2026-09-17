@@ -5206,6 +5206,59 @@ suite per feature.
 
 ## In flight
 
+**§366 — a mark, not a sentence, on a client card's module rows. On the
+branch, built 2026-09-17.** Your words: *"we don't needs notes that take 2
+lines we can just have a notificaiton here if something is new to check … to
+keep it neat and clean nad let's make it compact for better view"* — and then,
+of three drawings, **"A with tighter rows and Forefront own"**.
+
+**What was there, measured before anything was drawn.** A card with two
+modules carried nine pieces of text. Five of them said nothing you can act on
+— the module names and the addresses are the same on every client — and the
+other two **said one fact twice**: the short word at the end of the row
+(*Cycle open*) and the sentence under it (*Cycle open · reports due 30 Sep*).
+That sentence is what ran onto two lines, and it did so at every window size,
+because it is long rather than because the column is narrow.
+
+**What a row says now.** A short mark at the end of the row, and only when
+there is something for you to look at: *Not answering* if the client's
+platform did not answer at all, *No plan* if no plan has been built, or how
+many subjects are still to submit. Nothing otherwise — so a client with
+nothing outstanding reads its name, its address and its module names, and you
+can run your eye down the page. Insights says *N new* when there are new
+reports this month. **The cost, which you took:** a cycle that is open with
+everybody submitted now looks the same as no cycle at all, because the mark
+means *something to do* rather than *what state is this in*. The state is one
+press away inside the module.
+
+**The mark is Forefront's own answer**, which was your sharper instruction. It
+does not follow the sentence a client picked for their own landing page — that
+is a different question, about what a client says to its own people — so the
+card cannot change under you because a client changed their own wording.
+
+**How compact it got, measured.** The tallest card 304 → 247 pixels, an
+ordinary client card 235 → 205, the tallest row 57 → 33. At a 1024-wide window
+the card was 252 and is now 205, so **its height no longer depends on the
+window**, which it did only because that sentence wrapped at some widths and
+not others. Nothing runs past the edge of a row at any width.
+
+**Checked:** the modules check 158 assertions, red under nine deliberate
+breaks including a new one — a build that puts a mark on every row whatever
+the facts say, which is exactly what you rejected; the card check 23
+assertions on both copies of the console page, red under four breaks; the door
+check 143, red under seven. The client platform itself is untouched, so
+nothing about the product a client opens has moved.
+
+**One thing flagged rather than changed.** When the client's settings moved
+into the platform, the client's own landing page went with it — and with the
+card no longer reading it either, the **Landing line** page in Setup now
+governs nothing except its own preview. That is a decision about what that
+page is for, so it is said rather than quietly tidied away.
+
+**Still yours:** the merge to `main`, which is your word on that merge.
+
+---
+
 **Spec 056 — the client and its modules (§362), on the branch, stage 1 of
 six built 2026-09-16.** Islam, of the page the console's *Settings* chip
 opens: *"theclient settings shouldn't open the strategy banner in the top this

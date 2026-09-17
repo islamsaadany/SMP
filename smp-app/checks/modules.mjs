@@ -297,16 +297,106 @@ const facts = { unreadable: false, cycleOpen: true, planned: true };
 const rows = moduleRows(modulesFor(BUILT_EXTRA), facts);
 check("one row per module the client has, and no more, in the list's own order",
   same(rows.map((r) => r.key), HAVE_BOTH), rows.map((r) => r.key).join(", "));
-check("Strategy still says what it said", rows[0].state === "cycle open", rows[0].state);
+/* REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted `state === "cycle
+   open"` — the health word §366 replaced, and half of the pair that said one
+   fact twice. What survives is the claim it was making: Strategy is the row
+   that speaks about a running cycle, and it now does it as a MARK. */
+check("Strategy marks a running cycle", rows[0].mark === "Cycle open", rows[0].mark);
 /* A module with nothing to say draws its NAME alone — never a placeholder,
    which would read as a state nobody set (§45.2). Asked of EVERY other row
    rather than of the second one, or a third module could say anything at all
    and this would go on passing (§113.8). */
 check("a module with nothing to say says nothing, rather than a placeholder",
-  rows.slice(1).every((r) => r.state === ""),
-  rows.slice(1).map((r) => r.key + "=" + JSON.stringify(r.state)).join(" "));
+  rows.slice(1).every((r) => r.mark === ""),
+  rows.slice(1).map((r) => r.key + "=" + JSON.stringify(r.mark)).join(" "));
 check("every row carries the label the switcher and the drawer use",
   rows.every((r) => r.label === MODULE_DEF[r.key].label));
+
+/* ── 4a · THE MARK, AND NOTHING WHEN THERE IS NOTHING (§366) ──────────────
+   Islam, of the cards: "we don't needs notes that take 2 lines we can just
+   have a notificaiton here if something is new to check ... let's make it
+   compact." The row's tail says what is OUTSTANDING and is silent otherwise,
+   which is where the compactness comes from — so the silence is asserted as
+   hard as the marks are, or a build that marked every row would satisfy
+   every "it says the right thing" assertion here and be no shorter.
+
+   BOTH ENDS ON EVERY BRANCH (§94.2): each mark is asserted beside the state
+   that must NOT draw it. */
+const FULL = { cycleOpen: true, cycleName: "H1", due: "30 Sep", total: 10, sub: 7, newReports: 2, latestReport: "Egypt retail outlook, Q3" };
+const mk = (f) => moduleRows(modulesFor(BUILT_EXTRA), f);
+const markOf = (f, key) => (mk(f).find((r) => r.key === key) || {});
+const OWED = markOf({ unreadable: false, cycleOpen: true, planned: true, landing: FULL }, "strategy");
+check("what is owed is the mark: how many of how many",
+  OWED.mark === "3 of 10", OWED.mark);
+check("…and a count is not an alarm, however large", OWED.alarm === false);
+check("…and the whole sentence rides with it for the hover",
+  OWED.tip === "Cycle open · reports due 30 Sep · 3 of 10 still to submit", OWED.tip);
+/* THE OTHER END, and the cost Islam took with it stated where it is
+   asserted: a cycle running with every subject in owes nothing, so it marks
+   nothing — and therefore reads the same as no cycle at all. That is the
+   mark meaning *outstanding* rather than *state*, and it is the decision. */
+check("a cycle with every subject in marks nothing",
+  markOf({ unreadable: false, cycleOpen: true, planned: true, landing: { ...FULL, sub: 10 } }, "strategy").mark === "");
+check("and no cycle open marks nothing at all",
+  markOf({ unreadable: false, cycleOpen: false, planned: true, landing: { ...FULL, cycleOpen: false } }, "strategy").mark === "");
+/* THE TWO ALARMS, which are what a count can never say and the reason the
+   card did not get one number for the whole client (the mockup's option B). */
+const NOPLAN = markOf({ unreadable: false, cycleOpen: false, planned: false, landing: FULL }, "strategy");
+check("a client with no plan says so, as an alarm",
+  NOPLAN.mark === "No plan" && NOPLAN.alarm === true, NOPLAN.mark + " alarm=" + NOPLAN.alarm);
+const DEAD = markOf({ unreadable: true, landing: null }, "strategy");
+check("a client that did not answer says so, as an alarm",
+  DEAD.mark === "Not answering" && DEAD.alarm === true, DEAD.mark + " alarm=" + DEAD.alarm);
+check("…and it outranks everything else, because it is why nothing else can be read",
+  markOf({ unreadable: true, cycleOpen: true, planned: false, landing: FULL }, "strategy").mark === "Not answering");
+/* AN UNREADABLE COUNT IS NOT NOUGHT (§35, §93). A cycle known open whose
+   totals cannot be read must not fall through to silence, which is what
+   "nothing is owed" looks like. */
+check("a cycle open with counts that cannot be read says the cycle is open",
+  markOf({ unreadable: false, cycleOpen: true, planned: true, landing: { ...FULL, total: null, sub: null } }, "strategy").mark === "Cycle open");
+check("…and says it without an alarm, because nothing is broken",
+  markOf({ unreadable: false, cycleOpen: true, planned: true, landing: { ...FULL, total: null, sub: null } }, "strategy").alarm === false);
+const NEW = markOf({ unreadable: false, cycleOpen: false, planned: true, landing: FULL }, "insights");
+check("Insights marks this month's reports", NEW.mark === "2 new" && NEW.alarm === false, NEW.mark);
+check("…one report is singular in the hover, and none marks nothing",
+  markOf({ unreadable: false, planned: true, landing: { ...FULL, newReports: 1 } }, "insights").tip === "1 new report this month" &&
+  markOf({ unreadable: false, planned: true, landing: { ...FULL, newReports: 0 } }, "insights").mark === "" &&
+  markOf({ unreadable: false, planned: true, landing: { ...FULL, newReports: null } }, "insights").mark === "");
+/* DECLARED PER MODULE, so a fifth one marks its card by adding an entry
+   rather than by editing the console (§53.5, MODULE_DEF's own rule). Asked
+   of every module that declares NO mark, so the next one is covered. */
+const NOMARK = MODULES.filter((k) => !MODULE_DEF[k].mark);
+check("a module that declares no mark never marks anything",
+  NOMARK.length > 0 && NOMARK.every((k) => moduleRows([DEFAULT_MODULE, k].filter(isModule), { unreadable: false, cycleOpen: true, planned: false, landing: FULL })
+    .filter((r) => r.key === k).every((r) => r.mark === "" && r.alarm === false && r.tip === "")),
+  NOMARK.join(", "));
+/* THE MARK IS FOREFRONT'S OWN ANSWER, AND THIS IS THE ASSERTION THAT SAYS
+   SO (§366, Islam's call with the cost stated). It REVERSES the one that
+   stood here — *the card's row carries the picked line, from the one reader*
+   (§359.4) — and is written as the reversal rather than deleted, so a build
+   that quietly wired the client's pick back into the console goes red.
+   `moduleRows` takes no pick at all now, so the guard is that passing one
+   cannot change a thing: both spellings of a pick, and a third argument
+   ignored outright. */
+const PICK_A = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: FULL }, { strategy: "waiting" });
+const PICK_B = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: FULL }, { strategy: "cycle" });
+const PICK_N = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: FULL });
+/* AND THIS ONE IS THE CONTROL RATHER THAN THE ALARM, SAID SO (§113.8):
+   `moduleRows` has no pick parameter at all, so today it passes BY
+   CONSTRUCTION — which is stronger than a check, and worthless as one. It
+   is kept because it is what fails the day somebody gives the function a
+   third argument and reads it; the assertion that can fail today is the
+   source one further down (*no landing-line pick is handed to it*). */
+check("a client's landing-line pick cannot move the mark — it is Forefront's own answer",
+  same(PICK_A, PICK_N) && same(PICK_B, PICK_N),
+  PICK_A.map((r) => r.key + "=" + JSON.stringify(r.mark)).join(" "));
+/* AND THE ROW NO LONGER CARRIES A SENTENCE AT ALL, asserted as an absence
+   beside the presence that makes it mean something — a build that kept the
+   line and added a mark would pass everything above and be exactly as tall
+   as the cards Islam photographed. */
+check("no row carries a line or a health word any more",
+  PICK_N.every((r) => r.line === undefined && r.state === undefined) && PICK_N.some((r) => r.mark !== ""),
+  Object.keys(PICK_N[0]).join(","));
 
 console.log("\n4b · the landing line, declared and read (spec 056 §4.5, §359.4)");
 /* EVERY MODULE DECLARES ITS SENTENCES, the first one the default, `none`
@@ -339,25 +429,26 @@ check("Nothing draws no line, on every module", MODULES.every((k) => landingLine
 check("unreadable facts say nothing rather than a false figure",
   MODULES.every((k) => MODULE_DEF[k].lines.every((l) => landingLine(k, l.key, NO_FACTS) === "")),
   MODULES.map((k) => MODULE_DEF[k].lines.map((l) => JSON.stringify(landingLine(k, l.key, NO_FACTS))).join("|")).join(" "));
-/* THE CARD'S ROW IS THE SAME READER (§53.5): moduleRows' line equals
-   landingLine for the same pick and facts, both ends — a pick moves it, no
-   pick is the default, unreadable is empty. */
-const rowsL = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: F }, { strategy: "waiting" });
-check("the card's row carries the picked line, from the one reader",
-  rowsL[0].line === landingLine("strategy", "waiting", F) && rowsL[0].line === "3 of 10 still to submit", rowsL[0].line);
-/* REWRITTEN, NEVER LOOSENED (§218, §214.3). This named the trial module,
-   whose only declared line was `none`, so it read as "a module with no pick
-   says nothing" — true of that module and not the rule. The rule is that an
-   unchosen module says its FIRST DECLARED line, whatever that line is, which
-   is what makes `none` a choice rather than an absence; asserted of every
-   built module, so the next one is covered and the one that went (§363) took
-   no assertion with it. */
-const UNPICKED = rowsL.filter((r) => r.key !== "strategy");
-check("…and a module with no pick carries its FIRST DECLARED line",
-  UNPICKED.length > 0 && UNPICKED.every((r) => r.line === lineDef(r.key, undefined).read(F)),
-  rowsL.map((r) => r.key + "=" + JSON.stringify(r.line)).join(" "));
-check("…and an unreadable client says nothing under every module",
-  moduleRows(modulesFor(BUILT_EXTRA), { unreadable: true, landing: null }, { strategy: "waiting" }).every((r) => r.line === ""));
+/* ONE READER, AND ITS ONE REMAINING CONSUMER (§366). These two assertions
+   were written against `moduleRows`' `line`, which §366 removed — the
+   console draws Forefront's own mark instead (§4a above). They are REWRITTEN
+   onto `landingLine`, never deleted (§218), because the rule they guard is
+   still live: it is what the Landing line Setup page previews through
+   lib/landing.ts's stamp, and it is the page a client sets. So the claim
+   stands, and what changes is which caller it is asked of.
+
+   AND WHAT IS NOT ASSERTED IS SAID (§54.5): with the client's landing gone
+   (§360 made `/<client>` a redirect) and the console on its own mark, that
+   Setup page's pick is read by its own previewer and by nothing else. It is
+   recorded in the decisions log rather than guarded here, because a check
+   that froze it would freeze the oddity. */
+const UNPICKED = MODULES.filter((k) => k !== "strategy");
+check("a module with no pick reads its FIRST DECLARED line",
+  UNPICKED.length > 0 && UNPICKED.every((k) => landingLine(k, undefined, F) === lineDef(k, undefined).read(F)),
+  UNPICKED.map((k) => k + "=" + JSON.stringify(landingLine(k, undefined, F))).join(" "));
+check("…and a pick MOVES it, or the picker would be a control with nothing behind it",
+  landingLine("strategy", "waiting", F) !== landingLine("strategy", "cycle", F),
+  landingLine("strategy", "waiting", F) + " / " + landingLine("strategy", "cycle", F));
 check("a client holding nothing besides the default gets one row", moduleRows(modulesFor([]), facts).length === 1);
 
 
@@ -497,7 +588,13 @@ const mig = read("smp-app/db/migrations/005-a-module-per-client.sql");
 check("and a database already up gets it by migration", /ADD COLUMN IF NOT EXISTS modules jsonb/.test(mig));
 check("the migration can be run twice", /IF NOT EXISTS/.test(mig));
 const api = read("smp-app/lib/platform-api.ts");
-check("the card reads the client's own list rather than a constant", api.includes("moduleRows(modulesFor(row.modules), facts, facts.picks)"));
+/* REWRITTEN, NEVER LOOSENED (§218): this held the call's exact text with
+   `facts.picks` in it, which §366 removed — the mark is Forefront's own
+   answer. Both halves of what it was guarding survive: the list is the
+   client's own, and NO pick reaches the call, asserted as an absence beside
+   it so wiring one back in goes red here as well as in §4a. */
+check("the card reads the client's own list rather than a constant", api.includes("moduleRows(modulesFor(row.modules), facts)"));
+check("…and no landing-line pick is handed to it", !/moduleRows\([^)]*picks/.test(api));
 check("the drawer is told what this client has AND what it could be given", /modules: modulesFor\(row\.modules\)/.test(api) && /offer: offerable\(\)/.test(api));
 check("turning one on is gated on the same rule as the rest of the configuration",
   /if \(action === "setModules"\)[\s\S]{0,900}mayConfigureClient/.test(api));

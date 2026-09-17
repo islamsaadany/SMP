@@ -58,9 +58,9 @@ Islam's, 2026-09-17, each answered against the options and the cost of each.
 |---|---|---|
 | 1 | Has anyone really used it? | **"we have plans but we are good to adjust if needed."** Real plans exist, so the rules in §3 are validated by use and are ported faithfully rather than re-argued — **and the shape is open**, so the parent object is redesigned rather than inherited. There is data to migrate (§9). |
 | 2 | What does a plan hang off? | **"a project belongs to a client."** No agreement, no scope, no engagement level. A client has projects; a project holds the tree. |
-| 3 | Whose module is it? | **Both.** The office reaches it by seat; the client's own people through a grant. One module, two audiences — never one module behaving two ways (§6). |
-| 5 | Who starts a project? | **Forefront, by seat** — consultants scope the work and then name the client's people onto it, which is how it normally begins. **Widened the same day** (2026-09-17, *"a client super user can do anything"*): the client's own Super user may start one too. Recorded as a widening rather than overwritten — the usual case is still yours. |
+| 3 | Whose module is it? | **Both.** A seat on the client reaches every project; everybody else reaches the projects that name them. One module, two ways in — and the two are not *the office* and *the client*, which §6.1 is the correction of. |
 | 4 | What is it called? | **Portfolio**, keeping his own earlier call (spec 046 decision 3). `Projects` was asked for and put back with the measurement: Strategy already has a **Projects** tab on a supporting function, a **Project owner** role on Roles & access, and a **Projects sheet** whose name is a validation range inside workbooks clients already hold — 98 occurrences of the word in the built product. Renaming Strategy's was offered with that cost and refused, as it was the first time. |
+| 5 | Who starts a project? | **By seat.** Answered *"Forefront only, by seat"* and **widened the same hour** (*"a client super user can do anything"*) — and the two halves turn out to be one mechanism, which is what §6.1 corrects: a seat on this client is a seat on this client, whoever holds it. Consultants scoping the work and then naming the client's people onto it is how an engagement normally begins, which is a fact about engagements rather than a rule in the code. Recorded as a widening rather than overwritten. |
 
 ### 2.1 · What decision 2 dissolves
 
@@ -255,7 +255,8 @@ reference already stores both.
 
 **A client-side Lead is the unusual case and is not a gap** (Islam: *"not
 usual but ok to have the role ready for the future"*). Most projects will have
-nobody in the list at Lead, because Forefront leads them by seat, and
+nobody in the list at Lead, because whoever leads it usually holds a seat
+rather than a place in the list, and
 completions queue there. The screen states it and does not nag (§45.2 with the
 sign reversed: this is a fact about a healthy project, not something owed).
 

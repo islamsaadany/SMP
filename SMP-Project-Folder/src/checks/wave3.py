@@ -207,7 +207,18 @@ with sync_playwright() as p:
        [c["clauseSpace"] for c in caps][:2])
 
     print("— 4 · the branding swatches —")
-    setup_page(pg, "branding")
+    # REWRITTEN, NEVER LOOSENED (§218, §214.3). §357 absorbed Branding into the
+    # set-up flow's FIRST STEP and deleted the page, so `setup_page(pg,
+    # "branding")` reaches a rail entry that no longer exists — and the three
+    # assertions under it are about the CONTROL, which moved rather than went:
+    # `brandingBody()` is the same renderer wired by the same handlers (§53.5).
+    # So the walk is re-pointed and the property asserted is untouched.
+    setup_page(pg, "getting started") or setup_page(pg, "client set-up")
+    for sel in ('.setuprail .railstart[data-setupgo="start"]',
+                '.setuprail [data-setupgo="start"]'):
+        el = pg.query_selector(sel)
+        if el and el.is_visible():
+            el.click(); pg.wait_for_timeout(600); break
     sw = pg.evaluate("""() => {
       function hex(v){ v=v.trim(); if(v[0]==='#') return v.toLowerCase();
         var m=v.match(/\\d+/g);

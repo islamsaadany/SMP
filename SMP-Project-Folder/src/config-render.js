@@ -8451,14 +8451,22 @@ function rowActions(table, key, ed, extra){
    turning sorting back on would sort by the wrong one. */
 function tkHead(id, allow){
   var n = 0;
-  return function(label, cls, sortable, id){
+  /* `colId` NAMES A COLUMN AN ADDRESS CAN POINT AT — the landing's Access door
+     opens the register at `#seat`, the Roles column, where the seats and where
+     each person sits already are (spec 056 §4.4; shell/route.js scrolls to it).
+     Only ever a bare word, and only on the unsortable branch.
+
+     IT IS NOT SPELT `id`, AND THAT IS THE WHOLE OF §365.6. Written that way it
+     SHADOWED the table's own id one line up, so every sortable head in the
+     product came out `data-tksort="undefined|N"` and `TKSORT[id]` read one
+     shared slot for all five tables — the click landed, `paint()` ran, and
+     nothing moved. It renders perfectly and throws nothing (§96), which is why
+     only pressing it found it (§70). A parameter that shadows the closure it
+     is inside is §56.7's collision with a shorter fuse. */
+  return function(label, cls, sortable, colId){
     var i = n++;
     if (allow === false) sortable = false;
-    /* `id` names a column an ADDRESS can point at — the landing's Access door
-       opens the register at `#seat`, the Roles column, where the seats and
-       where each person sits already are (spec 056 §4.4; shell/route.js
-       scrolls to it). Only ever a bare word, on the unsortable branch. */
-    var idA = id ? ' id="' + esc(id) + '"' : '';
+    var idA = colId ? ' id="' + esc(colId) + '"' : '';
     if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
     if (sortable === false)
       return '<th' + idA + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';

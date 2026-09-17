@@ -290,7 +290,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
          (§94.8) — REWRITTEN, NEVER LOOSENED (§218). This asked whether the
          ELEMENT was there, which said "not offered" only while the switcher
          was structurally impossible on the client's scope (shell/route.js's
-         early return). §366 made the crossing a press, so the switcher follows
+         early return). §367 made the crossing a press, so the switcher follows
          the scope by the same CSS the rest of the chrome does and IS in the
          document on both rails — `seen()` is false for `display:none` exactly
          as it is for absent, so the claim that survives is the one that was
@@ -435,7 +435,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      waits thirty seconds and takes every assertion after it down, which on
      the one-way build reported the fault as a DEATH rather than as the two
      it is. */
-  /* AND THE PRESS IS NOT A PAGE LOAD (\u00a7366) \u2014 the one assertion
+  /* AND THE PRESS IS NOT A PAGE LOAD (\u00a7367) \u2014 the one assertion
      this whole crossing is for, and the one every other assertion here passes
      without: a build that followed the link lands on the same rail wearing the
      same bar at the same address, three seconds later. A marker planted on
@@ -452,9 +452,9 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,
         "\u2026and pressing it lands on the module's Setup, wearing the module's bar", path() + " / " + JSON.stringify(b));
   check(reached.includes("access"), "\u2026which is the rail Roles & access is on \u2014 the page he could not reach (\u00a761)", reached.join(","));
-  check(await page.evaluate(() => window.__stay === 1), "\u2026and it crossed WITHOUT reloading the platform (\u00a7366)", "the page was rebuilt");
+  check(await page.evaluate(() => window.__stay === 1), "\u2026and it crossed WITHOUT reloading the platform (\u00a7367)", "the page was rebuilt");
   /* THE SWITCHER CAME WITH IT. It is built once at load and was returned out
-     of on the client's scope, so before \u00a7366 crossing in place left it never
+     of on the client's scope, so before \u00a7367 crossing in place left it never
      built \u2014 a control silently missing after a press that draws everything
      else correctly (\u00a796's family). */
   check(b.switcher === true, "\u2026and the module switcher is back, on a rail where a module IS what you are in", JSON.stringify(b));
@@ -464,7 +464,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(back.length === 1 && /Client settings/.test(back[0]) && /\/raya-trade\/setup$/.test(back[0]),
         "\u2026and a module's rail still carries its own one row the other way", JSON.stringify(back));
 
-  /* AND THE OTHER DIRECTION CROSSES IN PLACE TOO (\u00a7366). BOTH
+  /* AND THE OTHER DIRECTION CROSSES IN PLACE TOO (\u00a7367). BOTH
      ENDS (\u00a794.2): a build that took only the outward press would leave the
      way back a full reload, which is the half Islam presses most \u2014 and it is
      the direction where the chrome has to be STOOD DOWN rather than brought
@@ -475,7 +475,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   await page.waitForTimeout(400);
   b = await bar();
   const mine = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail [data-setupgo]")).map((e) => e.dataset.setupgo));
-  check(await page.evaluate(() => window.__stay === 2), "the way back crosses without reloading either (\u00a7366)", "the page was rebuilt");
+  check(await page.evaluate(() => window.__stay === 2), "the way back crosses without reloading either (\u00a7367)", "the page was rebuilt");
   /* THE SPINE FORM, WITH NO MODULE WORD IN IT \u2014 which is what says the
      address followed the scope rather than the press guessing one (\u00a7362.1's
      `addressOf` reads the same attribute, so this needed no edit there). */

@@ -51457,7 +51457,7 @@ harnesses §328.3 already records as unrunnable since §313.
 
 ---
 
-## §366 — THE CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (2026-09-17)
+## §367 — THE CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (2026-09-17)
 
 Islam, of the walk he does most: *"the shifting between the client settings and
 the main console and then getting into the strategy and from the module settings
@@ -51495,7 +51495,7 @@ is a SECURITY header and is explicitly his call, not mine; C (stop revalidating
 the two generated files on every navigation) and D (the 3.8MB itself) are
 recorded and not done.
 
-### §366.1 — THE `href` STAYS AND THE PLAIN CLICK IS TAKEN
+### §367.1 — THE `href` STAYS AND THE PLAIN CLICK IS TAKEN
 
 A middle click, a modifier click and *Copy link address* stay the browser's, and
 the address they carry is the one the router writes for that rail — so this is
@@ -51510,7 +51510,7 @@ where they work rather than in an empty frame (`restoreWhere`'s own note) — so
 that case falls through to the `href` untouched. The press can only ever be
 faster than the link; it can never be a dead end.
 
-### §366.2 — BOTH THE SCOPE AND THE PAGE, OR NEITHER
+### §367.2 — BOTH THE SCOPE AND THE PAGE, OR NEITHER
 
 `resolveSetupScope()` moves the scope to the page's own module whenever the two
 disagree (§359.2) — which is right, and it means writing the scope and leaving
@@ -51531,7 +51531,7 @@ is the ADDRESS, and it follows with **no edit at all**: `addressOf` has read
 `data-setup-scope` since §362.1, so the push after the paint writes the module's
 form or the spine's on its own.
 
-### §366.3 — THE SWITCHER STOPS BEING STRUCTURAL, BECAUSE IT STOPPED BEING ABLE TO BE
+### §367.3 — THE SWITCHER STOPS BEING STRUCTURAL, BECAUSE IT STOPPED BEING ABLE TO BE
 
 §362 kept the module switcher off the client's own settings with an EARLY RETURN
 in `shell/route.js`, and said in its own comment why: it is built once at load,
@@ -51555,11 +51555,11 @@ so it does not take the keyboard either (§3.2); and the whole bar is inside
 `.chrome`, which the boot skeleton hides (§94.10), so nothing flashes between
 the load that builds it and the first paint that judges it.
 
-### §366.4 — ONE ASSERTION REWRITTEN, NEVER LOOSENED (§218)
+### §367.4 — ONE ASSERTION REWRITTEN, NEVER LOOSENED (§218)
 
 `checks/shell.mjs` §3b asked whether the switcher ELEMENT was there. That said
 *not offered* only while the early return made it structurally impossible; with
-§366.3 it is in the document on both rails. It is measured as PAINT now
+§367.3 it is in the document on both rails. It is measured as PAINT now
 (`checkVisibility`), which is **what that probe's own comment already says it
 does for every other control on the line** (§94.8) — and it is not a loosening:
 `seen()` is false for `display:none` exactly as it is for absent, so a build
@@ -51583,7 +51583,7 @@ the rule that already decides a rail when an address and a page disagree
 (§359.2, research R2). Asserted, because a crossing that pushed an address Back
 could not honour would be a worse dead end than the reload it replaced (§61).
 
-### §366.5 — VERIFIED, AND PROVED ABLE TO FAIL FROM THE SOURCES (§276)
+### §367.5 — VERIFIED, AND PROVED ABLE TO FAIL FROM THE SOURCES (§276)
 
 Baseline first, before anything was touched (§303): `checks/shell.mjs`
 **111 ok, 0 failed**. After: **118 ok, 0 failed**, seven assertions added.
@@ -51594,13 +51594,13 @@ switch to reach for and §276's method is the honest one. Each was asserted to
 have MATCHED before it was written (§344.1: a break that never applied reports
 0 red, which is indistinguishable from a guard that works).
 
-* **the rows are followed as plain links, as before §366** — **2 red**, exactly
+* **the rows are followed as plain links, as before §367** — **2 red**, exactly
   the two markers, and NOTHING else. That is the right shape and the reason
   those two assertions exist: the old behaviour is indistinguishable from the
   new one on every other axis.
 * **the switcher's early return is back** — **1 red**, printing
   `switcher:false` on the module's rail after the crossing: the control silently
-  missing, which is the fault §366.3 removes.
+  missing, which is the fault §367.3 removes.
 
 **THE NEIGHBOURS**: `setup-per-module` all passed on BOTH halves (its served
 half drives the rows' own addresses on both rails), `setup-rail`, `setup-search`,
@@ -51621,7 +51621,7 @@ times (§365's own witness).
 edited without re-running the generators leaves the new stack on the old bytes,
 silently.
 
-### §366.6 — RECORDED, NOT DONE
+### §367.6 — RECORDED, NOT DONE
 
 * **B — the browser keeps the page you just left.** Every document here (the
   shell AND the console) is served `Cache-Control: no-store`, which is a

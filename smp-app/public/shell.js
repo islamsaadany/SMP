@@ -54666,7 +54666,7 @@ var SYNC = (function () {
     return all.filter(function(d){ return (d.mod || "client") === scope; });
   }
   function setupDefs(){ return setupDefsFor(setupScope()); }
-  /* WHICH PAGE A RAIL OPENS ON, ASKED ONCE (§366). This was written
+  /* WHICH PAGE A RAIL OPENS ON, ASKED ONCE (§367). This was written
      inside `restoreWhere` for a bare `/<client>/setup` address (§360.7) and is
      now asked by the crossing rows as well — the two must not answer
      differently, or pressing *Strategy settings ›* lands somewhere the same
@@ -55034,7 +55034,7 @@ var SYNC = (function () {
        opposite ways: a place to go ON to, so it sits after the list rather
        than above it (§360.9), never the first thing read on a rail somebody
        came here to use. */
-    /* AND THE CROSSING IS A PRESS, NOT A PAGE LOAD (§366). Islam,
+    /* AND THE CROSSING IS A PRESS, NOT A PAGE LOAD (§367). Islam,
        of the walk between the console, the client's settings and a module's:
        *"takes too long … is there a way to make these movements smoother in
        general"* — measured, and this hop was the one that was pure waste. The
@@ -57227,7 +57227,7 @@ var SYNC = (function () {
       });
     });
 
-    /* CROSSING BETWEEN THE CLIENT'S RAIL AND A MODULE'S IS A PRESS (§366) — the row
+    /* CROSSING BETWEEN THE CLIENT'S RAIL AND A MODULE'S IS A PRESS (§367) — the row
        above, honoured here rather than by the browser.
 
        WIRED BESIDE `[data-setupgo]` AND NOT IN shell/route.js, though the rows
@@ -63929,7 +63929,7 @@ var SYNC = (function () {
      A press navigates, so the menu never has to be closed afterwards. */
   (function modules() {
     /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
-       CSS RULE RATHER THAN AN EARLY RETURN HERE (§366). Those pages
+       CSS RULE RATHER THAN AN EARLY RETURN HERE (§367). Those pages
        belong to no module, so a switcher there offers a way out of somewhere
        you are not; what changed is that crossing between the two rails stopped
        being a page load, so "built once at load" stopped being able to answer

@@ -7710,7 +7710,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
-- **AND CROSSING IT IS A PRESS, NOT A PAGE LOAD (&sect;366):** Islam &mdash;
+- **AND CROSSING IT IS A PRESS, NOT A PAGE LOAD (&sect;367):** Islam &mdash;
   *"the shifting between the client settings and the main console and then
   getting into the strategy and from the module settings to the client settings
   takes too long."* **MEASURED FIRST, AND THE JOURNEY SPLIT IN THREE**: inside a
@@ -7740,7 +7740,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `[data-setupgo]`**, where every rail control is wired, and **route.js needed no
   edit at all**: `addressOf` has read `data-setup-scope` since &sect;362.1, so the
   push after the paint writes the module's form or the spine's on its own.
-  **&sect;366.3 &mdash; THE SWITCHER STOPS BEING STRUCTURAL BECAUSE IT STOPPED
+  **&sect;367.3 &mdash; THE SWITCHER STOPS BEING STRUCTURAL BECAUSE IT STOPPED
   BEING ABLE TO BE**: &sect;362 kept it off the client's settings with an early
   return in `route.js` and said why in its own comment &mdash; built once at
   load, nothing repaints `.top-in` &mdash; which answered only while the crossing
@@ -7752,7 +7752,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   **NAMED rather than CONTAINED**, because its container `.top-in` also holds the
   client's own heading and mark, which these pages DO want; `display:none`
   (&sect;3.2) and the whole bar is inside `.chrome`, which the boot skeleton hides
-  (&sect;94.10), so nothing flashes. **&sect;366.4 &mdash; ONE ASSERTION REWRITTEN,
+  (&sect;94.10), so nothing flashes. **&sect;367.4 &mdash; ONE ASSERTION REWRITTEN,
   NEVER LOOSENED** (&sect;218): `checks/shell.mjs` &sect;3b asked whether the
   switcher ELEMENT was there, which said *not offered* only while the early
   return made it impossible &mdash; measured as PAINT now, which is what that
@@ -9924,7 +9924,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;366: the crossing between the two
+*Last Updated: 2026-09-17 &mdash; **&sect;367: the crossing between the two
 settings rails is a press.** Islam, of the walk he does most &mdash; *"the
 shifting between the client settings and the main console and then getting into
 the strategy and from the module settings to the client settings takes too long
@@ -9946,11 +9946,11 @@ the page comes from `setupLandingKey(scope)`, EXTRACTED from `restoreWhere` so
 the address and the press cannot answer differently (&sect;53.5). **route.js
 needed no edit at all** &mdash; `addressOf` has read the scope since &sect;362.1.
 **AND THE SWITCHER STOPPED BEING STRUCTURAL BECAUSE IT STOPPED BEING ABLE TO BE**
-(&sect;366.3): &sect;362 kept it off the client's settings with an early return,
+(&sect;367.3): &sect;362 kept it off the client's settings with an early return,
 which answered only while the crossing was a page load and was wrong BOTH ways
 the moment it was not; it follows `data-client-settings` with the rest of the
 chrome now, NAMED rather than contained. **ONE ASSERTION REWRITTEN, NEVER
-LOOSENED** (&sect;218, &sect;366.4) from the element to the PAINT &mdash; which is
+LOOSENED** (&sect;218, &sect;367.4) from the element to the PAINT &mdash; which is
 what that probe's own comment already claimed for every other control on the line
 &mdash; and the new ones are led by the only one that can tell this from a
 reload: a marker planted on `window`, which survives a repaint and cannot survive

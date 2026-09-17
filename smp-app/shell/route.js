@@ -161,7 +161,7 @@
      A press navigates, so the menu never has to be closed afterwards. */
   (function modules() {
     /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
-       CSS RULE RATHER THAN AN EARLY RETURN HERE (§366). Those pages
+       CSS RULE RATHER THAN AN EARLY RETURN HERE (§367). Those pages
        belong to no module, so a switcher there offers a way out of somewhere
        you are not; what changed is that crossing between the two rails stopped
        being a page load, so "built once at load" stopped being able to answer

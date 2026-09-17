@@ -5892,7 +5892,7 @@ green, eight of nine spikes with all sixteen falsifications red.
 
 ---
 
-## §366 — moving between the client's settings and a module's stopped reloading the platform (2026-09-17)
+## §367 — moving between the client's settings and a module's stopped reloading the platform (2026-09-17)
 
 **What Islam asked.** *"The shifting between the client settings and the main
 console and then getting into the strategy and from the module settings to the

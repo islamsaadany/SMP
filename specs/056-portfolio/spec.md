@@ -135,7 +135,7 @@ and add notes. They do not restructure the plan.
 | # | Asks for | Here |
 |---|---|---|
 | 1 | Its own navigation | A project is picked first; then **Plan** (the tree, the Gantt, the dependencies) · **Progress** (the sign-off queue and what is owed) · **Analytics** (overview and schedule, filtered by phase, group, assignee, status). An activity opens a panel rather than a page. |
-| 2 | Its own roles and areas | **One area, and a ladder that is not on the table.** The area answers *may this role open Portfolio on this client at all*. Everything about a single project is membership on that project (§6). |
+| 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and small: the three words (§9.1), and who leads which project. Nothing else. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. |
 | 5 | A landing | The project list for this client, with each project's state. A client with one project lands in it. |
@@ -174,7 +174,7 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 | `portfolio_files` | **A link, not an upload** — see §9.4 |
 | `portfolio_history` | Field-level audit with a source tag (`auto:status_done`, `manual:lead_adjustment`) |
 | `portfolio_terminology` | The three words, per client — see §9.1 |
-| `portfolio_members` | **New, and §6.2's whole answer.** A row per (project, person, level): who is on this project and at what level. Replaces `client_team_members` and `scope_lead_assignments` together. |
+| `portfolio_members` | **New, and §6's whole answer.** A row per (project, person, role): who is on this project and at what. Three roles, defaulting to Viewer. Replaces `client_team_members` and `scope_lead_assignments` together. |
 
 **Thirteen in, fourteen out.** Three of ClientPlus's are dropped or replaced —
 `scope_plan_terminology` is re-keyed per client, and `client_team_members` and
@@ -198,79 +198,97 @@ the two of them saying one thing instead of two. Two are added:
 
 ## 6 · Who may do what
 
-**Two questions, answered in two places — and collapsing them was the first
-drawing's mistake.** Islam, 2026-09-17, of a mockup that put Strategy's company
-roles down the side of a Portfolio tab: *"the visibility here is subject to the
-role in the project not the normal company role the general roles of the
-strategy are not really fitting here."* He is right. A function head is not a
-project lead; being a BU owner says nothing about whether somebody is on a piece
-of delivery work. **Membership belongs to the project**, which is what the
-reference already does.
+**Settled with Islam, 2026-09-17, over two corrections of mine.** The first
+drawing put Strategy's company roles down the side of a Portfolio tab; the
+second kept a module-level column above per-project membership. Both were
+too much: *"I don't understand the 2 layers and the six roles why are you
+complicating things? the portfolio has it's own roles it's that simple. and
+it's relevant to the project itself not even the module."*
 
-### 6.1 · Layer one — the company question
+**There is no Portfolio column on Roles &amp; access.** If you are not on a
+project you see nothing; if you are, your role on that project is the whole
+answer.
 
-One area on the client's access tab, and it answers only *may this kind of
-person open Portfolio on this client at all.* `view` / `none`, plus `lead`,
-which is the client-wide level below. Nothing on it is about a single project.
+### 6.1 · Who gets in
 
-Above it, and not on it: **Forefront reaches every client by seat**, the way the
-Internal Tracker and Meeting Notes already work, and **Forefront starts a
-project** (decision 5).
-
-### 6.2 · Layer two — membership on one project
-
-A row per (project, person, level). Four levels, and the reach of each is the
-reference's own:
-
-| Level | Reaches |
+| | |
 |---|---|
-| **Lead** | The whole plan. Restructures it, and signs off completions. |
-| **Senior contributor** | Sees the whole plan; reports only activities assigned to them. |
-| **Contributor** | Sees and reports only their own activities. |
-| **Collaborator** | Sees activities they are tagged on; comments rather than reports. |
+| **Forefront** | By seat, every client, every project. Not in any team list. Forefront also creates projects (decision 5). |
+| **The client's Super user and SMO team** | In, on every project of their own client. Not named on projects. |
+| **Everybody else** | Only where a project names them. |
 
-### 6.3 · The six levels, and where each is answered
+### 6.2 · Three roles, on the project
 
-**Nothing is invented and nothing is dropped.** Two are about a whole client,
-four about one project; two are renamed, and only because decision 2 removed the
-word *scope* and because *client lead* already means the client's own SMO here.
-
-| ScopePlan today | Here |
+| Role | Reaches |
 |---|---|
-| Client Lead | **Portfolio lead** — client level, the access tab |
-| Viewer | **Viewer** — client level, the access tab |
-| Scope Lead | **Lead** — project level |
-| Senior Contributor | **Senior contributor** — project level |
-| Contributor | **Contributor** — project level |
-| Collaborator | **Collaborator** — project level |
+| **Lead** | Builds and restructures the plan, and signs off completions. |
+| **Contributor** | Sees the plan; reports the activities assigned to them; comments on the ones they are tagged on. |
+| **Viewer** | Reads, changes nothing. **Where everybody starts.** |
 
-### 6.4 · True whatever anybody is set to
+**Whether a Contributor reports or only comments is read off the ACTIVITY**,
+never from this table — assigned is one thing, tagged is another, and the
+reference already stores both.
 
-Three rules, following the shape §89 gave its own three — sentences that hold
-however the table reads:
+**A client-side Lead is the unusual case and is not a gap** (Islam: *"not
+usual but ok to have the role ready for the future"*). Most projects will have
+nobody in the list at Lead, because Forefront leads them by seat, and
+completions queue there. The screen states it and does not nag (§45.2 with the
+sign reversed: this is a fact about a healthy project, not something owed).
+
+### 6.3 · The six become three, and nothing is lost
+
+Only two things ever varied across the reference's six — how much of the plan
+you see, and what you may do to it. Six names for four answers.
+
+| ScopePlan today | Here | Why |
+|---|---|---|
+| Client Lead | **Lead** | Identical to Scope Lead once decision 2 deletes *scope*. |
+| Scope Lead | **Lead** | " |
+| Senior Contributor | **Contributor** | Differed from Contributor only by seeing the rest of the plan — and on a plan with dependencies, seeing what you are waiting on is the normal case, not a privilege. |
+| Contributor | **Contributor** | " |
+| Collaborator | **Contributor** | Not a level: it is whether the ACTIVITY names you as assignee or tags you. Already stored there. |
+| Viewer | **Viewer** | Unchanged. |
+
+**What is given up, stated:** somebody who should see *only their own
+activities* and not the rest of the plan cannot be expressed. If that case
+arrives it comes back as a tick on the membership — *their own activities
+only* — and never as a fourth role.
+
+### 6.4 · Naming people onto a project
+
+The client's register, through **the platform's own searchable ticking list**
+— the control a tactic's collaborators and the import page already use
+(§45.5, §130.1, §295.1), so this costs a call rather than a component.
+
+- **Active people only.** A retired person cannot sign in, so offering them is
+  offering a name that can never open it (§247's own test).
+- **A tick lands at once and there is no Done button.** That list commits per
+  tick and stays open until you click away (§130.1) — a Done here would give
+  one control two behaviours depending on the screen it is on (§53.5).
+- **Everybody lands as Viewer** (Islam). Nothing is granted until somebody
+  decides, which is the safe direction (§42 fails closed), and the list is
+  never in a state where a person is on a project with no role.
+- **Taking somebody off who holds activities is REFUSED, by name** (Islam:
+  *"refusal is better"*) — the shape §62 already gives retiring a function
+  that still holds capabilities: the press is live and names what is in the
+  way rather than being hidden or silently stranding the rows. Unassigned
+  activities in a live plan are what nobody notices until a checkpoint.
+
+### 6.5 · True whatever anybody is set to
 
 - **Only a Lead completes an activity.** Whoever does the work marks it Done;
-  marking it Completed, and setting the real end date, is the Lead's. Everything
-  at Done queues for them.
-- **An assignee reports, a collaborator comments.** Read off the activity,
-  never from the membership table.
-- **A Lead is named on the project, never granted elsewhere** — the shape a
-  pillar's owner already has (§33: responsibility for a thing is a property of
-  the thing).
+  marking it Completed and setting the real end date is the Lead's, and
+  everything at Done queues for them.
+- **An assignee reports, a collaborator comments** — off the activity.
+- **The rule lives on the server and the screen asks the same function**
+  (§42); **Portfolio may not read or write** another module's rows, the client
+  registry, or the access matrix.
 
-And the two that hold everywhere in this product: **the rule lives on the server
-and the screen asks the same function** (§42), and **Portfolio may not read or
-write another module's rows**, the client registry, or another tab of the
-matrix.
-
-**The cost, stated:** somebody on four projects is named four times. That is
-what membership belonging to the work costs, and what it buys is that their
-reach on one project says nothing about another, and taking them off one is a
-row rather than a change to what their company role means.
-
-**Mockup:** `design-mockups/portfolio/2026-09-17_project-team.html`, published
-and awaiting sign-off. It **replaces** `2026-09-17_roles-access-tab.html`, kept
-as the record of the rejected approach (Principle II).
+**Mockup:** `design-mockups/portfolio/2026-09-17_project-team-picker.html`,
+published, awaiting sign-off. It supersedes `2026-09-17_project-team.html`
+(the two-layer version) and `2026-09-17_roles-access-tab.html` (the company
+matrix), **both kept as the record of what was tried and turned down**
+(Principle II).
 
 ---
 
@@ -288,7 +306,7 @@ as the record of the rejected approach (Principle II).
 | Per-agreement terminology | Taken as per-**client** — §9.1 |
 | `client_team_members`, `scope_lead_assignments` | Taken as ONE table, `portfolio_members` — two rows saying one thing (§6.2) |
 | Excel round-trip with a GPT instructions sheet | **Open** — §9.3 |
-| The six-role visibility matrix | **Taken whole** — all six levels kept, split between a client-wide area and per-project membership (§6). Its *shape* — composable filter fragments rather than scattered conditions — is what makes it port at all. Two renamed |
+| The six-role visibility matrix | **Three roles, on the project** (§6.3) — the six collapse with nothing lost, because only two things ever varied across them. Its *shape* — composable filter fragments rather than scattered conditions — is what makes it port at all |
 | Assignees who are not users | Taken; SMP's register already behaves this way |
 | `client_assignments`, `scopes`, `agreement_scopes`, domains, subdomains | **Left.** Decision 2 |
 | `in_app_notifications` | **Left as a table** — §9.5 |
@@ -360,13 +378,15 @@ workbook, which reads that list to build its sheets.
 client talks, and one client calling a Phase two things in two projects is the
 confusion the feature removes. *Cost:* a faithful port would be per project.
 
-### 9.2 · The role ladder — answered in §6, with two ends left
-Settled 2026-09-17: the six levels are kept and split across a client-wide area
-and per-project membership. What is still open is smaller and both ends are
-Islam's: **may the client's own Super user name people onto a project**, or only
-Forefront; and **where a module declares a role at all** — `MODULE_DEF` holds
-areas and has nowhere for *Portfolio lead*, while the client's role list is the
-frozen `lib/rules.js`, where a Portfolio word does not belong (§335).
+### 9.2 · The role ladder — answered (§6)
+Settled 2026-09-17: three roles, on the project, with no module-level column at
+all. **And that closes the question of where a module declares a role**: these
+are not client roles, so they never touch the frozen `lib/rules.js`, and
+`MODULE_DEF` needs no roles field. What was a gap in the module contract turns
+out to be a question Portfolio does not ask.
+
+What remains is one line: **may the client's own Super user name people onto a
+project**, or only Forefront.
 
 ### 9.3 · The Excel round-trip
 A template pre-filled with the client's context, the team roster, valid values

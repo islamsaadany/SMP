@@ -1,0 +1,367 @@
+<title>Portfolio Project Team</title>
+<style>
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --on-fill:#FFFFFF;
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px; --fs-body:14px;
+    --fs-lead:17px; --fs-title:20px;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --on-fill:#14161A; color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --on-fill:#14161A; color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:var(--fs-body)/1.55 var(--sans);
+       padding-block:28px 56px;padding-left:16px;padding-right:16px}
+  .wrap{max-width:1020px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+  .key{font-size:var(--fs-micro);letter-spacing:.09em;text-transform:uppercase;
+       color:var(--gold-deep);font-weight:700;margin:0 0 8px}
+  .lede h1{font-size:var(--fs-title);margin:0 0 6px;font-weight:700;text-wrap:balance}
+  .lede p{margin:0;color:var(--ink-2);font-size:var(--fs-note);max-width:80ch}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:visible}
+  .phead{padding:12px 15px;background:var(--panel);color:var(--panel-ink);display:flex;
+    align-items:baseline;gap:10px;flex-wrap:wrap;border-radius:9px 9px 0 0}
+  .phead .code{font-size:var(--fs-micro);letter-spacing:.08em;font-weight:800;color:var(--panel-accent)}
+  .phead .nm{font-weight:700;font-size:var(--fs-note)}
+  .phead .meta{font-size:var(--fs-small);color:var(--panel-quiet);margin-left:auto}
+  .sect{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;
+    gap:12px;flex-wrap:wrap}
+  .sect h2{margin:0;font-size:var(--fs-note);font-weight:700}
+  .sect .ct{font-size:var(--fs-small);color:var(--ink-3)}
+
+  .addwrap{position:relative;margin-left:auto}
+  .addbu{font:700 var(--fs-small)/1 var(--sans);padding:7px 11px;border:1px solid var(--gold-deep);
+    border-radius:5px;background:var(--surface);color:var(--gold-deep);cursor:pointer}
+  .addbu:hover{background:var(--attn-bg)}
+  .addbu:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .pick{position:absolute;right:0;top:calc(100% + 6px);width:320px;max-width:calc(100vw - 32px);
+    background:var(--surface);border:1px solid var(--line);border-radius:8px;
+    box-shadow:0 10px 26px rgb(0 0 0/.14);z-index:20;overflow:hidden}
+  .pick[hidden]{display:none}
+  .pick .find{padding:9px;border-bottom:1px solid var(--line-soft)}
+  .pick .find input{width:100%;font:var(--fs-note)/1.3 var(--sans);padding:7px 9px;
+    border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink)}
+  .pick .find input:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .pick .list{max-height:250px;overflow-y:auto}
+  .pick .opt{display:flex;align-items:center;gap:9px;padding:7px 11px;cursor:pointer;
+    font-size:var(--fs-note);border:0;background:none;width:100%;text-align:left;color:var(--ink)}
+  .pick .opt:hover{background:var(--surface-2)}
+  .pick .opt:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+  .pick .opt .tk{width:15px;height:15px;border:1px solid var(--line);border-radius:3px;
+    display:grid;place-items:center;flex:none;background:var(--surface);
+    font-size:11px;color:transparent;line-height:1}
+  .pick .opt[aria-checked="true"] .tk{background:var(--gold);border-color:var(--gold-deep);color:var(--on-fill)}
+  .pick .opt small{display:block;font-size:var(--fs-micro);color:var(--ink-3)}
+  .pick .foot{padding:8px 11px;border-top:1px solid var(--line-soft);background:var(--surface-2);
+    font-size:var(--fs-micro);color:var(--ink-3)}
+  .pick .none{padding:14px 11px;font-size:var(--fs-small);color:var(--ink-3)}
+
+  table.team{width:100%;border-collapse:collapse;font-size:var(--fs-note)}
+  table.team thead th{background:var(--surface-2);text-align:left;font-size:var(--fs-micro);
+    letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+    padding:8px 15px;border-bottom:1px solid var(--line)}
+  table.team tbody tr:nth-child(even){background:var(--zebra)}
+  table.team td{padding:9px 15px;border-top:1px solid var(--line-soft);vertical-align:middle}
+  table.team td.who{font-weight:600;white-space:nowrap}
+  table.team td.who small{display:block;font-weight:400;font-size:var(--fs-micro);color:var(--ink-3)}
+  select.lvl{font:600 var(--fs-small)/1.2 var(--sans);padding:5px 7px;border:1px solid var(--line);
+    border-radius:5px;background:var(--surface);color:var(--ink);min-width:118px}
+  select.lvl:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  td.reach{font-size:var(--fs-small);color:var(--ink-2)}
+  .x{font:700 var(--fs-note)/1 var(--sans);border:0;background:none;color:var(--ink-3);
+     cursor:pointer;padding:4px 7px;border-radius:4px}
+  .x:hover{color:var(--bad-tx);background:var(--bad-bg)}
+  .x:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  tr.refused td{background:var(--bad-bg)!important}
+  .refusal td{background:var(--bad-bg)!important;border-top:0;padding-top:0}
+  .refusal p{margin:0 0 4px;font-size:var(--fs-small);color:var(--bad-tx);max-width:78ch}
+  .refusal b{font-weight:700}
+  .refusal button{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;
+    background:none;border:0;color:var(--bad-tx);cursor:pointer;padding:3px 0;text-decoration:underline}
+
+  .notes{padding:12px 15px;background:var(--surface-2);border-top:1px solid var(--line);
+    border-radius:0 0 9px 9px}
+  .notes p{margin:0 0 6px;font-size:var(--fs-small);color:var(--ink-3);max-width:90ch}
+  .notes p:last-child{margin:0}
+  .notes b{color:var(--ink-2)}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+  .panel h3{margin:0 0 9px;font-size:var(--fs-body);font-weight:700}
+  .panel ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
+  .panel li{font-size:var(--fs-small);color:var(--ink-2);max-width:92ch}
+  .panel b{color:var(--ink)}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+
+  <div class="lede">
+    <p class="key">Mockup · for sign-off · nothing built</p>
+    <h1>Portfolio — who is on a project</h1>
+    <p>Three roles, set on the project itself. Tick people out of the client's register; each one
+      lands as a Viewer and you change the ones who are doing the work.</p>
+  </div>
+
+  <section class="card">
+    <div class="phead">
+      <span class="code">PJ-04</span>
+      <span class="nm">Retail Operating Model</span>
+      <span class="meta">6 phases · 41 activities · checkpoint monthly</span>
+    </div>
+
+    <div class="sect">
+      <h2>Team</h2>
+      <span class="ct" id="ct">3 people</span>
+      <div class="addwrap">
+        <button class="addbu" id="addbu" type="button" aria-expanded="false" aria-haspopup="true">
+          + Add people from the register</button>
+        <div class="pick" id="pick" hidden role="dialog" aria-label="Add people from the register">
+          <div class="find">
+            <input id="find" type="search" placeholder="Search the register…" aria-label="Search the register">
+          </div>
+          <div class="list" id="list" role="group" aria-label="People"></div>
+          <div class="foot">Active people only. Each tick puts them on as a Viewer.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table class="team">
+        <thead>
+          <tr><th>Person</th><th>Role on this project</th><th>What they reach</th><th></th></tr>
+        </thead>
+        <tbody id="team"></tbody>
+      </table>
+    </div>
+
+    <div class="notes">
+      <p><b>No lead on this project.</b> Completions queue to Forefront, which is the usual case —
+        a client-side lead is there when you want one.</p>
+      <p><b>Forefront is not listed here.</b> Consultants reach every project by their seat. So do
+        this client's Super user and SMO team.</p>
+    </div>
+  </section>
+
+  <div class="panel">
+    <h3>What the three roles reach</h3>
+    <ul>
+      <li><b>Lead</b> — builds and restructures the plan, and signs off completions. Whoever does
+        the work marks an activity Done; only a Lead marks it Completed and sets the real end date.</li>
+      <li><b>Contributor</b> — sees the plan, reports the activities assigned to them, and comments
+        on the ones they are tagged on. Whether they report or only comment is read off the
+        activity, not from this table.</li>
+      <li><b>Viewer</b> — reads, changes nothing. Where everybody starts.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>Two behaviours worth pressing</h3>
+    <ul>
+      <li><b>Ticks land as you make them.</b> There is no Done button — the platform's ticking
+        lists commit each tick and stay open until you click away, so somebody is on the project
+        the moment you tick them. Untick to take them off again.</li>
+      <li><b>Taking somebody off who holds activities is refused, by name.</b> Press the &times;
+        beside Karim. Unassigned activities in a live plan are exactly what nobody notices until
+        a checkpoint, so the platform says what is in the way instead of letting it happen.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function () {
+  var REACH = {
+    "Lead":        "Builds the plan and signs off completions.",
+    "Contributor": "Sees the plan. Reports the activities assigned to them.",
+    "Viewer":      "Reads. Changes nothing."
+  };
+  var LEVELS = ["Lead", "Contributor", "Viewer"];
+
+  /* The client's own register — active people only. `acts` is how many
+     activities on THIS project name them, which is what the refusal counts. */
+  var REGISTER = [
+    { k:"hala",   n:"Hala Mansour",   at:"Customer Experience", acts:0 },
+    { k:"karim",  n:"Karim Fouad",    at:"Retail Stores",       acts:4 },
+    { k:"noura",  n:"Noura Ghanem",   at:"Finance",             acts:0 },
+    { k:"tarek",  n:"Tarek Sabry",    at:"Retail Stores",       acts:0 },
+    { k:"mona",   n:"Mona Rashad",    at:"Supply Chain",        acts:0 },
+    { k:"yassin", n:"Yassin Adel",    at:"IT",                  acts:0 },
+    { k:"dalia",  n:"Dalia Shafik",   at:"Human Resources",     acts:0 },
+    { k:"omar",   n:"Omar Nabil",     at:"Marketing",           acts:0 }
+  ];
+  var ON = { hala:"Contributor", karim:"Contributor", noura:"Viewer" };
+
+  var team = document.getElementById("team");
+  var list = document.getElementById("list");
+  var pick = document.getElementById("pick");
+  var addbu = document.getElementById("addbu");
+  var find = document.getElementById("find");
+  var ct = document.getElementById("ct");
+
+  function count() {
+    var n = Object.keys(ON).length;
+    ct.textContent = n + (n === 1 ? " person" : " people");
+  }
+
+  function drawTeam() {
+    team.textContent = "";
+    REGISTER.filter(function (p) { return ON[p.k]; }).forEach(function (p) {
+      var tr = document.createElement("tr");
+
+      var who = document.createElement("td");
+      who.className = "who";
+      who.appendChild(document.createTextNode(p.n));
+      var sm = document.createElement("small");
+      sm.textContent = p.at + (p.acts ? " · " + p.acts + " activities" : "");
+      who.appendChild(sm);
+
+      var lv = document.createElement("td");
+      var sel = document.createElement("select");
+      sel.className = "lvl";
+      sel.setAttribute("aria-label", "Role for " + p.n + " on this project");
+      LEVELS.forEach(function (L) {
+        var o = document.createElement("option");
+        o.value = L; o.textContent = L;
+        if (L === ON[p.k]) o.selected = true;
+        sel.appendChild(o);
+      });
+      lv.appendChild(sel);
+
+      var rc = document.createElement("td");
+      rc.className = "reach";
+      rc.textContent = REACH[ON[p.k]];
+      sel.addEventListener("change", function () {
+        ON[p.k] = sel.value;
+        rc.textContent = REACH[sel.value];
+      });
+
+      var rm = document.createElement("td");
+      rm.style.textAlign = "right";
+      var x = document.createElement("button");
+      x.type = "button"; x.className = "x"; x.textContent = "×";
+      x.setAttribute("aria-label", "Take " + p.n + " off this project");
+      x.addEventListener("click", function () { remove(p, tr); });
+      rm.appendChild(x);
+
+      tr.appendChild(who); tr.appendChild(lv); tr.appendChild(rc); tr.appendChild(rm);
+      team.appendChild(tr);
+    });
+    count();
+  }
+
+  /* THE REFUSAL NAMES WHAT IS IN THE WAY, in the row it is about — never a
+     dialog, and never a silent removal that strands the activities. */
+  function remove(p, tr) {
+    if (!p.acts) { delete ON[p.k]; drawTeam(); drawList(); return; }
+    if (tr.nextSibling && tr.nextSibling.classList &&
+        tr.nextSibling.classList.contains("refusal")) return;
+    tr.classList.add("refused");
+    var r = document.createElement("tr");
+    r.className = "refusal";
+    var td = document.createElement("td");
+    td.colSpan = 4;
+    var msg = document.createElement("p");
+    msg.innerHTML = "<b>" + p.n + " cannot come off this project yet.</b> " + p.acts +
+      " activities are assigned to " + (p.n.split(" ")[0]) +
+      " — give them to somebody else first, and then take " +
+      p.n.split(" ")[0] + " off.";
+    var ok = document.createElement("button");
+    ok.type = "button";
+    ok.textContent = "Close";
+    ok.addEventListener("click", function () { tr.classList.remove("refused"); r.remove(); });
+    td.appendChild(msg); td.appendChild(ok);
+    r.appendChild(td);
+    tr.after(r);
+  }
+
+  function drawList() {
+    var q = (find.value || "").trim().toLowerCase();
+    list.textContent = "";
+    var hits = REGISTER.filter(function (p) {
+      return !q || p.n.toLowerCase().indexOf(q) > -1 || p.at.toLowerCase().indexOf(q) > -1;
+    });
+    if (!hits.length) {
+      var none = document.createElement("div");
+      none.className = "none";
+      none.textContent = "Nobody on the register matches that.";
+      list.appendChild(none);
+      return;
+    }
+    hits.forEach(function (p) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "opt";
+      b.setAttribute("role", "checkbox");
+      b.setAttribute("aria-checked", String(!!ON[p.k]));
+      var tk = document.createElement("span");
+      tk.className = "tk";
+      tk.textContent = "✓";
+      tk.setAttribute("aria-hidden", "true");
+      var nm = document.createElement("span");
+      nm.appendChild(document.createTextNode(p.n));
+      var s = document.createElement("small");
+      s.textContent = p.at;
+      nm.appendChild(s);
+      b.appendChild(tk); b.appendChild(nm);
+      b.addEventListener("click", function () {
+        if (ON[p.k]) {
+          if (p.acts) { close(); drawTeam();
+            var rows = team.querySelectorAll("tr");
+            for (var i = 0; i < rows.length; i++) {
+              if (rows[i].textContent.indexOf(p.n) === 0) { remove(p, rows[i]); break; }
+            }
+            return;
+          }
+          delete ON[p.k];
+        } else {
+          /* Everybody lands as a Viewer: nothing is granted until somebody
+             decides, which is the safe direction. */
+          ON[p.k] = "Viewer";
+        }
+        drawTeam(); drawList();
+      });
+      list.appendChild(b);
+    });
+  }
+
+  function open() { pick.hidden = false; addbu.setAttribute("aria-expanded", "true"); drawList(); find.focus(); }
+  function close() { pick.hidden = true; addbu.setAttribute("aria-expanded", "false"); find.value = ""; }
+
+  addbu.addEventListener("click", function () { pick.hidden ? open() : close(); });
+  find.addEventListener("input", drawList);
+  document.addEventListener("pointerdown", function (e) {
+    if (pick.hidden) return;
+    if (!pick.contains(e.target) && e.target !== addbu) close();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !pick.hidden) { close(); addbu.focus(); } });
+
+  drawTeam();
+})();
+</script>

@@ -9953,3 +9953,70 @@ body.presenting #buildband { display:none; }
 .setuprail .railstart .rslab { display:block; font:700 12.5px/1.3 var(--sans); }
 .setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
 .setuprail .railback.railfwd { display:inline-block; }
+
+/* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§361) ═════════════════════════
+   The shape is the setup tables' own — `.cfg > table.unitcfg` gives the navy
+   heading row, one line per cell, the 150px cap and the ellipsis, all from
+   `config.css` rather than from rules invented here (§53.5). What is left is
+   which columns may grow, and it is three lines.
+
+   AUTO LAYOUT, LIKE THE REGISTER'S. `table.unitcfg` is `table-layout:fixed`,
+   which divides the width equally — right for Companies, whose six columns
+   are of a size, and wrong here, where a name, an address, two buttons, a
+   select and one word have nothing in common. `.peoplecfg` makes exactly this
+   exception for exactly this reason (§93.6).
+
+   THE NAME IS NOT CAPPED and the EMAIL is capped wider than the family's
+   150px: a name is the only thing written in its column (§93.6) and a
+   Forefront address is ~35 characters, so 150 would clip both on every row
+   rather than on a long one.
+
+   AND THE TWO NUMBERS BELOW ARE WHAT MAKES IT FIT AT 1100 (§158: fit, never
+   "and it scrolls"). A column in auto layout can never be narrower than the
+   widest thing that will not wrap, so the least this table can be is the sum
+   of five of them — measured at 936px against an 825px pane before these two
+   lines, with the third consultant's address and a 240px select the two that
+   would not give. The select FILLS ITS CELL instead (`width:100%`, which is
+   what `arrange.css` already does for a select in a setup table), so the
+   register column costs its heading and nothing more; and the address caps at
+   220, which with its padding is the 243px left once the other four have
+   taken their 582 out of that pane. Both numbers are MEASURED, and the check
+   asserts the FIT rather than either of them, so a rail that changes width
+   turns it red instead of going stale quietly (§122.5). */
+/* AND BELOW THE WIDTH IT FITS AT, THE BOX SCROLLS RATHER THAN CUTTING. The
+   five minima come to 802px and a 1000px window gives the pane 725, so under
+   ~1080 the table is wider than its box whatever the caps say — and a table
+   that overflows a box with `overflow:visible` is the fault this section
+   exists to remove, one size down. `.tblscroll` is the family's own answer
+   for an ordinary Setup table that outgrows its box (§88: "anything wider
+   buys scroll"), and it is safe here because this head is `position:static`
+   like every other ordinary Setup table's (§135.2's damaged matrix was a
+   STICKY head inside a scroll box). The only `.cfg` under `.csetup` is this
+   one. */
+.csetup .cfg { overflow-x:auto; }
+.csetup .cfg > table.teamcfg { table-layout:auto; }
+/* AND NO COLUMN IS GIVEN A WIDTH, which is the third thing measured rather
+   than reasoned: `width:100%` on the name starved the middle three to nought
+   at 1280, and `width:1%` on the last column — the register's own trick for
+   its two frozen ones — starved that one to 10px with its own word painted
+   outside it. Left alone, the leftover is shared. */
+.csetup .teamcfg td.tmname, .csetup .teamcfg th.tmname { max-width:none; }
+.csetup .teamcfg td.tmmail, .csetup .teamcfg th.tmmail { --cell-cap:220px; }
+.csetup .teamcfg td.cc, .csetup .teamcfg th.cc { white-space:nowrap; }
+.csetup .teamcfg td.tmas .fld { width:100%; min-width:0; max-width:none; }
+/* ONE WORD, AT THE END — and NO WIDTH ON IT. `width:1%` is what the register
+   uses on its two frozen columns, and here it starved: measured, Chromium's
+   auto algorithm reads a percentage as a request and hands the rest away once
+   the other columns want more than there is, so at 1280 the Remove column was
+   10px with its own word painted outside it. Left alone, the leftover is
+   shared and every column keeps a sane size at every width. */
+.csetup .teamcfg th.tmrm, .csetup .teamcfg td.tmrm { white-space:nowrap; text-align:right; }
+/* The add row under the table, then the note — the order Companies and the
+   BU list already use. `.row` is the flow's own; it needs the table's gap. */
+.csetup .row.tmadd { margin-top:14px; }
+/* EACH SELECT AS WIDE AS ITS OWN WORDS. The flow's `.row .fld` is
+   `flex:1 1 170px`, written for a column; here the second one's placeholder
+   is "…as who on this client's register?" and a shared basis clipped it to
+   "…as who on this client's registe" — a control asking a question it cannot
+   finish. */
+.csetup .row.tmadd .fld { flex:0 1 auto; max-width:340px; }

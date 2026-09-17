@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§357, spec 055) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -455,18 +454,9 @@ var CLIENTSETUP = (function () {
     }
     ensureReg("[data-cteam]", mountTeam);
     host.innerHTML = "";
-    /* A PLAIN BOX (§361). This said `wzstep`, which is the class the step
-       CHIPS in the rail above the flow wear — a pill — so the whole page was
-       drawn inside one (§65.9). Nothing wraps the table but the page. */
-    var box = el("div");
-    officeStep(box, "note");
+    var box = el("div", "wzstep");
+    officeStep(box);
     host.appendChild(box);
-    /* THE HOVER IS MEASURED, NEVER WRITTEN (§88), and `clipTitles()` runs at
-       the end of paint() — which on the FIRST visit is before the client's
-       record has landed, because `ensureReg` fills this box again when it
-       does. So the page asks for it after a late draw; the console has no
-       such function and does not pass one. */
-    if (OPTS.clip) OPTS.clip();
   }
   function redraw(){
     if (OPTS.repaint) OPTS.repaint();
@@ -1217,109 +1207,38 @@ var CLIENTSETUP = (function () {
     return box;
   }
 
-  /* ── THE OFFICE, AS A SETUP TABLE (§361) ────────────────────────────
-     Islam, of the page §359.2 shipped: *"forefront team is damaged it needs
-     to be a table looks like the people register wiht the required
-     columns."* MEASURED BEFORE ANYTHING WAS DRAWN, and the cause was one
-     class: `mountTeam` wrapped the rows in `.wzstep`, which is what the
-     flow's STEP CHIPS wear — a pill — so a control's own shape reached a
-     whole page and drew the oval he photographed (§65.9: a class name is
-     one global namespace). Under it the rows were `.teamrow`, written for
-     the flow's 760px column, so on a full-width Setup page they laid out
-     SIDE BY SIDE and wanted 2471px in a 1323px box: the third consultant
-     cut in half.
-
-     IT IS THE SETUP TABLES' OWN SHAPE, NEVER A SECOND ONE (§53.5):
-     `.cfg > table.unitcfg`, which Companies, the BU list and Functions
-     already wear, so the navy heading row, one line per cell, the cap with
-     the value on a hover (§88) and the ellipsis all come from the
-     family rather than from rules invented here. The add row goes under
-     the table and the note under that, which is that family's order too.
-
-     ONE RENDERER FOR BOTH HOSTS, which is why the table is drawn here and
-     not in `mountTeam`: the flow's step and the Setup page are two readers
-     of this one function (§9's pattern), and people join and leave an
-     account team all through an engagement — a renderer copied for the
-     page is the drift §53.5 keeps recording. The flow's column caps at
-     760px and the register column is absent there on a client the platform
-     built, so it draws four columns where the page draws five.
-
-     THE REGISTER COLUMN IS DRAWN ONLY WHERE IT CAN BE ANSWERED (§61): on a
-     client whose register came across, the match is by address and has to
-     be confirmed (§313.32); on one the platform built, the seat IS the
-     register row and there is nothing to pick. The header follows the
-     cells, or a table says it holds a fact it never draws. */
-  function officeStep(box, noteClass){
+  /* The office: Forefront's people on this client, each writing on the
+     press (§322). Needs the registry — it says so when there is none. */
+  function officeStep(box){
     var reg = S.reg;
     if (!reg) {
       box.appendChild(el("p", "wzempty", OPTS.live && !S.regErr ? "Reading the team…" : "The office team is kept by the served platform."));
       return box;
     }
     var ed = !!reg.canEdit;
-    var asks = !reg.client.made_here && (reg.register || []).length > 0;
-    var cfg = el("div", "cfg");
-    var t = el("table", "unitcfg teamcfg");
-    var th = el("thead"), hr = el("tr");
-    var heads = [["Name", "tmname"], ["Email", "tmmail"], ["Seat on this client", "cc tmseat"]];
-    if (asks) heads.push(["On this register as", "cc tmas"]);
-    if (ed) heads.push(["", "cc tmrm"]);
-    heads.forEach(function (h) {
-      var c = el("th", h[1] || null, h[0]);
-      if (!h[0]) c.setAttribute("aria-label", "Remove");
-      hr.appendChild(c);
-    });
-    th.appendChild(hr); t.appendChild(th);
-    var tb = el("tbody");
     (reg.team || []).forEach(function (m) {
-      var tr = el("tr");
-      var nm = el("td", "tmname");
-      nm.appendChild(el("b", null, m.name || m.email));
-      tr.appendChild(nm);
-      tr.appendChild(el("td", "tmmail", m.email));
-      /* A CELL THAT HOLDS A CONTROL CARRIES NO HOVER, AND WHAT MAKES THAT
-         TRUE IS THE WIDTH (§361.4). `clipTitles()` writes a measured title
-         on a cell that overflowed, and these do not: the select fills its
-         own cell and the two seat buttons set their column's floor, so
-         there is nothing to measure. A `data-keep-title` mark was added
-         first and its own falsification proved it a no-op (§298.2), so it
-         is gone (§24) — but the rule is the reason the widths are what they
-         are, because the fallback for a cell with no value inside it is the
-         cell's own text, which for a `<select>` is every option it holds. */
-      var seat = el("td", "cc tmseat");
-      seat.appendChild(seatCell(m, reg.seats || [], ed));
-      tr.appendChild(seat);
-      if (asks) {
-        var as = el("td", "cc tmas");
-        if (ed) as.appendChild(registerCell(m, reg.register));
-        else as.appendChild(el("span", "muted", nameOnRegister(m, reg.register)));
-        tr.appendChild(as);
-      }
+      var tr = el("div", "teamrow");
+      var who = el("div", "who");
+      who.appendChild(el("div", "nm", m.name || m.email));
+      who.appendChild(el("div", "em", m.email));
+      tr.appendChild(who);
+      var sp = el("div", "sp");
+      if (ed && !reg.client.made_here && (reg.register || []).length) sp.appendChild(registerCell(m, reg.register));
+      sp.appendChild(seatCell(m, reg.seats || [], ed));
       if (ed) {
-        var rmc = el("td", "cc tmrm");
-        var rm = el("button", "linkbu", "Remove");
+        var rm = el("button", "btn", "Remove");
         rm.type = "button";
         rm.addEventListener("click", function () {
           post({ action:"setTeam", key:S.key, email:m.email, on:false })
             .then(function (r) { r.ok ? refreshTeam() : say(r.error || "Not removed.", true); });
         });
-        rmc.appendChild(rm);
-        tr.appendChild(rmc);
+        sp.appendChild(rm);
       }
-      tb.appendChild(tr);
+      tr.appendChild(sp);
+      box.appendChild(tr);
     });
-    if (!(reg.team || []).length) {
-      var none = el("tr");
-      var nc = el("td", "muted", "Nobody from Forefront is on this client yet.");
-      nc.colSpan = heads.length;
-      none.appendChild(nc); tb.appendChild(none);
-    }
-    t.appendChild(tb); cfg.appendChild(t);
-    box.appendChild(cfg);
     if (ed) {
-      /* THE ADD ROW IS UNDER THE TABLE, not a dialog: it is two answers,
-         not the register's nine (Islam, on the mockup). The second answer
-         is drawn only where the first table column is. */
-      var row = el("div", "row tmadd");
+      var row = el("div", "row");
       var who2 = el("select", "fld");
       var p0 = el("option", null, "Add somebody from Forefront"); p0.value = "";
       who2.appendChild(p0);
@@ -1344,32 +1263,16 @@ var CLIENTSETUP = (function () {
           .then(function (r) { r.ok ? refreshTeam() : say(r.error || "Not added.", true); });
       });
       row.appendChild(who2);
-      if (asks) row.appendChild(asWho);
+      if (!reg.client.made_here && (reg.register || []).length) row.appendChild(asWho);
       row.appendChild(add);
       box.appendChild(row);
     }
-    /* ONE SENTENCE, TWO DRESSES (§361). The words are written once; the
-       HOST says how they are dressed, because the two are different rooms:
-       on the Setup page it is the family's own `.note` — the bordered block
-       Companies and the BU list both end with, which Islam signed off as
-       "the family's own treatment" — and inside the flow it is `.wzwhy`, the
-       quiet line every other step ends with. A class threaded through this
-       function would be a flag (§104.7); the caller dressing its own note is
-       not. */
-    box.appendChild(el("p", noteClass || "wzwhy", TEAM_NOTE));
+    box.appendChild(el("p", "wzwhy",
+      "These are Forefront's people, not the client's. A seat is held on THIS client: " +
+      "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
+      "cycles and corrects plans. The client's own register — its heads, custodians and their " +
+      "passwords — is built on the People register beside this page."));
     return box;
-  }
-  var TEAM_NOTE =
-    "These are Forefront's people, not the client's. A seat is held on THIS client: " +
-    "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
-    "cycles and corrects plans. The client's own register — its heads, custodians and their " +
-    "passwords — is built on the People register beside this page.";
-  /* Which row on the client's register this consultant is, in words, for
-     somebody who may read the page and not edit it. Absent is said (§35),
-     never left as an empty cell that reads as a control that failed. */
-  function nameOnRegister(member, register){
-    var hit = (register || []).filter(function (r) { return r.key === member.person_key; })[0];
-    return hit ? hit.name : "a row of their own";
   }
   /* The team controls write at once, so the flow re-reads rather than
      guessing what the server now holds. A seat is also a register row
@@ -1378,15 +1281,10 @@ var CLIENTSETUP = (function () {
     S.reg = null; S.regErr = null;
     redraw();
   }
-  /* §361: the key inside the cell is GONE — the column heading is the
-     control's name now, and a label under a heading that already says the
-     word says it twice on one row (§87, §267.2). The class stays, because it
-     is what sizes the select; `aria-label` carries the name for anybody not
-     reading the heading. */
   function registerCell(member, register) {
     var wrap = el("span", "asrow");
+    wrap.appendChild(el("span", "aslab", "on this register as"));
     var sel = el("select", "fld");
-    sel.setAttribute("aria-label", "On this register as");
     var own = el("option", null, "a row of their own"); own.value = "";
     sel.appendChild(own);
     register.forEach(function (r) {

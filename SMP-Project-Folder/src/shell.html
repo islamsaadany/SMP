@@ -2859,7 +2859,12 @@
       live: (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive()),
       door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
       console: OPTS_CONSOLE,
-      repaint: function(){ paint(); }
+      repaint: function(){ paint(); },
+      /* §361: the team page draws a setup table, and a setup table's hover
+         is MEASURED after it is on the screen (§88). paint() ends in
+         clipTitles(), which is too early for a box the client's record fills
+         a moment later, so the mount asks for it again when it does. */
+      clip: function(){ clipTitles(); }
     };
     var cteam = _panel.querySelector("[data-cteam]");
     if (cteam && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mountTeam(cteam, _csOpts);

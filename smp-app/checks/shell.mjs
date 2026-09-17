@@ -466,8 +466,12 @@ await section("3c · Forefront team is the store, the register is a reader (spec
   const team = await page.evaluate(() => {
     const h = document.querySelector("[data-cteam]");
     return { host: !!h,
-             rows: Array.from(document.querySelectorAll("[data-cteam] .teamrow .nm")).map((e) => e.textContent.trim()),
-             mails: Array.from(document.querySelectorAll("[data-cteam] .teamrow .em")).map((e) => e.textContent.trim()) };
+             /* §361: the page is a setup table now — the rows were the
+                flow's own `.teamrow`, written for its 760px column, and on a
+                full-width Setup page they laid out side by side. The names
+                and addresses are the same two facts in a different shape. */
+             rows: Array.from(document.querySelectorAll("[data-cteam] table.teamcfg td.tmname b")).map((e) => e.textContent.trim()),
+             mails: Array.from(document.querySelectorAll("[data-cteam] table.teamcfg td.tmmail")).map((e) => e.textContent.trim()) };
   });
   check(team.host, "the page mounts the flow's own renderer", JSON.stringify(team).slice(0, 160));
   check(team.rows.length > 0, "\u2026and draws this client's actual team", JSON.stringify(team.rows));

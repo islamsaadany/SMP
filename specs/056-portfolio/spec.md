@@ -141,7 +141,7 @@ and add notes. They do not restructure the plan.
 
 | # | Asks for | Here |
 |---|---|---|
-| 1 | Its own navigation | A project is picked first; then **Plan** (the tree, the Gantt, the dependencies) · **Progress** (the sign-off queue and what is owed) · **Analytics** (overview and schedule, filtered by phase, group, assignee, status). An activity opens a panel rather than a page. |
+| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree, the timeline, the dependencies) · **Progress** (the sign-off queue and what is owed) · **Analytics**. An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. |
@@ -1009,6 +1009,20 @@ never re-decided.
 equal-weight average, which is the number the first paragraph calls wrong. The
 difference is that it is **correctable without touching a single date**, and
 correcting it is one number on one row.
+
+**WORKED ON THE DRAWING RATHER THAN ASSERTED** (2026-09-18): the plan mockup's
+figures are computed from its own rows rather than typed — 100 / 67 / 10 across
+the three phases, 20 for a work package, 100 for an activity whose three
+sub-activities carry weights of 40, 40 and 20. **The first draft of it typed
+62 and 8 and both were wrong**, which is the argument for deriving in one
+sentence: two drawings of one project that disagree are the fault this spec
+spends §5.2 warning about, and the charter was corrected to match.
+
+**AND ONE THING THE ARITHMETIC DECIDED RATHER THAN THE OTHER WAY ROUND**: an
+activity marked done and **waiting for a Lead's sign-off counts as 100%**.
+Progress is how much work is done; the sign-off is whether a Lead accepts it.
+Holding it at 99 until somebody signs would make the figure say something about
+governance instead.
 
 **A work package rolls into its phase and a phase with none rolls from its
 activities directly** — the same shape the numbering already has (1.1 sits

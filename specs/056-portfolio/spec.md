@@ -194,17 +194,26 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 
 ### 5.1 · The project charter
 
-**DRAWN 2026-09-17, AWAITING SIGN-OFF** —
+**SIGNED OFF 2026-09-17**, with one widening —
 `design-mockups/portfolio/2026-09-17_project-charter.html`, in the platform's own
 tokens, both palettes, with his own charter as its content. It draws both states,
 because a page you write once and read often cannot be judged from the reading
 half alone (§273.4: three structures drawn in one state were three identical
-pictures). **Two things in it are assumptions rather than decisions and say so on
-the page**: that the charter is the office's to edit rather than the Lead's
-(which follows from §6.2 — a Lead builds the PLAN — at the cost of a
-client-side Lead being unable to fix a typo in the brief), and that *In scope*
-and *Out of scope* are two fields where his form has one cell with both words
-typed inside it as headings.
+pictures). **Both of the things it named as assumptions rather than decisions
+were answered on the page** — *"1. office and lead 2. 2 fields"*:
+
+- **the office AND the Lead hold the pen**, which WIDENS what the drawing
+  assumed. It had the charter as the office's alone, following §6.2 — a Lead
+  builds the PLAN — and a Lead correcting the page that describes the plan they
+  are building is the better reading. **The consequence is named rather than
+  discovered**: a Lead can also change the **budget** and the **agreed window**,
+  which are the two commercial rows, and a client-side Lead doing so is
+  rewriting what was signed up to. It is not a hole — every field records who
+  changed it and when (§7.6's history, which does NOT cascade here) — and
+  narrowing those two rows alone is one line if it ever bites. Left as he said
+  it, because the case it bites in is the one he has already called unusual.
+- **In scope and Out of scope are two fields**, confirmed against his own form's
+  single cell. Nobody types a heading into a box.
 
 **AND IT WAS NOT RENDERED BEFORE PUBLISHING**, which is said rather than left as
 an absence (§54.5): this container has no browser. So it was read instead, and

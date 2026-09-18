@@ -5246,6 +5246,17 @@ of you: **the page's own words** (its title, its search box and its own
 "Reading your clients…"), or **a grey skeleton** of card shapes. Each one's
 cost is on the page beside it. My recommendation is the first.
 
+**One more thing, found while checking the above.** The test I wrote for this
+has to be run twice — once against each of the two copies of the console page —
+and the instructions written at the top of it only worked from one folder. Run
+from the folder everything else is run from, it could not find the second copy
+and said nothing useful: it handed back a browser error rather than telling me
+which file it had looked for. Both ways work now, and if the file genuinely is
+not there it says so by name and stops. Nothing on any screen changes — this is
+the testing tool, not the product — and I re-ran every test afterwards,
+including the two deliberately broken builds, to make sure the edit had not
+quietly stopped it from being able to catch anything.
+
 **Still yours:** that choice, and the merge to main — which is your word on
 that merge, and which I have held as you asked.
 

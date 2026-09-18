@@ -51724,6 +51724,58 @@ lands in whichever body holds it, and **whether it landed is asserted at the end
 of the run** (§344.1) — so both copies read 11/0 green, 4 red and 1 red
 identically.
 
+### §368.4 — AND THE DOCUMENTED COMMAND FAILED FROM THE DIRECTORY THE CHECK IS RUN FROM, SAYING NOTHING
+
+Found by following the check's **own docstring**, on the verification pass after
+§368 was committed. That docstring says to run the file as
+`python3 SMP-Project-Folder/src/checks/console-boot.py` — from the repository
+root — and names the generated copy as
+`SMP_PAGE=smp-app/shell/platform.html`, which is right relative to the root and
+to nowhere else. **But every browser check in this project goes through
+`qa-run.py`, and `qa-run.py` lives in `SMP-Project-Folder/src`** (§320.6b — the
+rule §368.3 had itself just earned, two neighbours having printed Playwright's
+install banner and exited). *So the spelling that is documented is relative to
+one directory and the command that is required is typed from another*, and the
+two had never been run together.
+
+**AND IT IS §368.3'S OWN FAULT ONE LINE OVER.** `PAGE` was taken from the
+environment verbatim and **opened inside the request thread**:
+
+```python
+PAGE = os.environ.get("SMP_PAGE") or os.path.join(REPO, "platform.html")
+…
+if p in ("/platform", "/"):
+    with open(PAGE, encoding="utf-8") as f: self._send(doctor(f.read()), …)
+```
+
+so a path naming no file raised in that thread, killed only that thread, and
+reached the run as **`net::ERR_EMPTY_RESPONSE`** — naming neither the file nor
+the directory it had been looked for in. §368.3 fixed exactly this shape for the
+BREAK and asserted at the end of the run that it had landed; **it guarded the
+break and left the page unguarded** (§54.5, §123).
+
+Both spellings are accepted now — as given, then against the repo root — and
+**a page that is not there is refused BEFORE the server starts**, which is the
+whole of why it can be heard: it names the file and both directories tried and
+**exits non-zero** (§328.8). Proved by pointing it at a page that does not
+exist:
+
+```
+the console page is not there — SMP_PAGE=smp-app/shell/nope.html
+  tried: /home/user/SMP/SMP-Project-Folder/src/smp-app/shell/nope.html
+  tried: /home/user/SMP/smp-app/shell/nope.html
+exit 1
+```
+
+**HARNESS ONLY, AND THE FALSIFICATIONS ARE RE-PROVED RATHER THAN ASSUMED**
+(§94.5): an edit to a check's own path handling is an edit that could quietly
+stop it failing, so all four invocations and both breaks were run again — the
+documented spelling and the default both **11/0** from `src/`, the repo-root
+invocation still **11/0**, and `--break=sequential` and `--break=handed-twice`
+still **4 red and 1 red identically on both copies**. Nothing in the product is
+touched: one file, 33 lines, and `built-in-step` reports the shipped file
+byte-identical.
+
 **VERIFIED**: `console-boot` **11/0 on BOTH copies** of the console page
 (§53.5), red both ways on both; `client-card-modules` 23/0, `platform-cards`
 21/0, `publishing-room` 74/0, `client-setup-outside` and `client-archive` 0

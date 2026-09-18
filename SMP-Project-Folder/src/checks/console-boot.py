@@ -49,6 +49,9 @@ Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/console-boot.py
       … --break=sequential   # the boot before §368; must go red
       … --break=handed-twice # the hand-over reused; must go red
       SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
+      (that spelling is relative to the REPOSITORY ROOT, and is also accepted
+       from SMP-Project-Folder/src, where qa-run.py is — a page that is not
+       there is named rather than served empty)
 """
 import http.server, json, os, re, socketserver, sys, threading, time
 from playwright.sync_api import sync_playwright
@@ -57,8 +60,37 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 REPO = os.path.abspath(os.path.join(ROOT, ".."))
 PORT = int(os.environ.get("SMP_CHECK_PORT", "3991"))
 BREAK = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--break=")), "")
-PAGE = os.environ.get("SMP_PAGE") or os.path.join(REPO, "platform.html")
 LAG = 0.45   # one round trip, held open so the window can be looked at
+
+
+def pagePath():
+    """WHERE THE PAGE IS, SAID RATHER THAN HANDED BACK AS A BROWSER ERROR.
+
+    `SMP_PAGE` is documented relative to the REPOSITORY ROOT, and every
+    browser check in this project is run through `qa-run.py`, which lives in
+    `SMP-Project-Folder/src` (§320.6b) — so the spelling that is documented is
+    relative to one directory and typed from another. Both are accepted: as
+    given, then against the repo root.
+
+    AND A PAGE THAT IS NOT THERE IS REFUSED BEFORE THE SERVER STARTS, never
+    opened inside the request thread. That is §368.3's own fault one line
+    over: a failure raised in the server thread kills only that thread, so the
+    page is never served and the run comes back `ERR_EMPTY_RESPONSE`, naming
+    neither the file nor the directory it was looked for in (§54.5, §123).
+    """
+    want = os.environ.get("SMP_PAGE")
+    tries = [os.path.abspath(want), os.path.abspath(os.path.join(REPO, want))] if want \
+        else [os.path.join(REPO, "platform.html")]
+    tries = list(dict.fromkeys(tries))
+    for p in tries:
+        if os.path.isfile(p):
+            return p
+    sys.exit("the console page is not there — %s\n  tried: %s"
+             % ("SMP_PAGE=%s" % want if want else "no platform.html at the repository root",
+                "\n  tried: ".join(tries)))
+
+
+PAGE = pagePath()
 
 # THE BROKEN BUILD IS MADE FROM THE SOURCE (§276), and every substitution
 # ASSERTS IT MATCHED before it is written — a break that quietly applies to

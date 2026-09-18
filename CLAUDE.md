@@ -9973,7 +9973,26 @@ asserted at the end of the run** (&sect;344.1); both copies then read 11/0 green
 `SMP_CHROME`** &mdash; run directly they printed Playwright's own install banner
 and exited without running, which reads as a pass in a batch (&sect;320.6b, a
 fourth road); both run through `qa-run.py`, which is what this file requires and
-what the round nearly skipped. **VERIFIED**: console-boot 11/0 on both copies red
+what the round nearly skipped. **&sect;368.4 &mdash; AND THE DOCUMENTED COMMAND
+FAILED FROM THE DIRECTORY THE CHECK IS RUN FROM, SAYING NOTHING**: found by
+following the check's own docstring &mdash; `SMP_PAGE=smp-app/shell/platform.html`
+is spelt relative to the REPOSITORY ROOT, where that docstring says to run it,
+and **every browser check in this project goes through `qa-run.py`, which lives
+in `SMP-Project-Folder/src`** (&sect;320.6b, the rule &sect;368.3 had just
+earned), so the spelling that is documented is relative to one directory and
+typed from another. Both are accepted now. **AND IT IS &sect;368.3'S OWN FAULT
+ONE LINE OVER**: the page was opened **inside the request thread**, so a path
+that names no file raised there, killed only that thread, and reached the run as
+`ERR_EMPTY_RESPONSE` &mdash; naming neither the file nor the directory it was
+looked for in. *That section guarded the BREAK landing and left the PAGE
+unguarded* (&sect;54.5, &sect;123). The page is resolved and **refused before the
+server starts**, naming the file and both directories tried, and **exiting
+non-zero** (&sect;328.8) &mdash; proved by pointing it at a page that is not
+there. **Harness only, and the falsifications are re-proved rather than
+assumed** (&sect;94.5): the documented spelling and the default both 11/0 from
+`src/`, the repo-root invocation still 11/0, and both breaks still **4 red and 1
+red identically on both copies** &mdash; or an edit to a check's own path
+handling is an edit that could have quietly stopped it failing. **VERIFIED**: console-boot 11/0 on both copies red
 both ways, client-card-modules 23/0, platform-cards 21/0, publishing-room 74/0,
 client-setup-outside and client-archive 0 failures, modules 158/0 red nine ways,
 `built-in-step` all good, `node --check` on the generated script clean. **The

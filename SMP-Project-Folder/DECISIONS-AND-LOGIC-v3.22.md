@@ -51803,3 +51803,81 @@ silently.
 * **Not recommended**: merging the console and the client platform into one
   application. It would make every hop instant and it changes the architecture —
   too big a change to ride in on a speed complaint.
+
+### §367.5 — MERGED, AND THE MERGE IS PART OF THE RECORD (2026-09-18)
+
+Islam: *"merge to main"*. **`main` HAD MOVED ONE COMMIT UNDERNEATH** — §366,
+which repaired three checks and **changed no product file at all** — so
+`--ff-only` refused, correctly, and this became a real merge. That is the whole
+reason §4 forbids a blind one: the refusal is the notification.
+
+**THE CONFLICT WAS EXACTLY THE THREE RECORD FILES, AND BOTH SIDES WERE COMBINED
+RATHER THAN PICKED** (§318.7). Each side had written its own *Last Updated*
+block, its own tracker section and its own numbered section, at the same
+insertion point. Taken either way round, one round's record disappears with
+nothing left to show for it — the same shape as §318.7's own conflict, where
+whole features were on both sides of one line. So §366 is demoted to *Earlier*
+in `CLAUDE.md`, §366 and §367 sit in ascending order in the decisions log, and
+the tracker keeps §366's correction of §365's closing line **and** §367's
+section under it, with §366's own *"waiting on Islam"* corrected to *merged*,
+because it is on `main` now and a record that says otherwise is a record that
+is wrong.
+
+**NO SOURCE COULD COLLIDE, AND IT WAS CHECKED RATHER THAN REASONED** (§56.7,
+§313.37). Main touched no `src/` file, so the merged sources are this branch's
+alone — but that is an argument, and the scan is a measurement: over `build.py`'s
+own concatenation the tree holds **1512 top-level names and six duplicates**,
+which are precisely the six §281.1 leaves deliberately in `config-render.js`.
+**AND THE SCAN'S OWN FIRST DRAFT REPORTED `scripts: 0`** — its pattern did not
+match the list `build.py` actually holds — which is §54.5 in the tool rather
+than in the product: *a scan of nothing finds nothing, and prints a clean
+answer while doing it.* It asserts it found the files before it believes the
+result.
+
+**EVERYTHING WAS RE-RUN ON THE MERGED TREE, WHICH IS §365's FIRST FINDING AND
+NOT A FORMALITY.** A branch that passes says nothing about what `main` would
+hold. Shell **118/0** (§367's own subject, the branch's number exactly), modules
+143/0, door-landing 140/0; and main's three, which are the ones whose SUBJECT
+this branch could have moved — `tactic-outcome` **47/0**, `contingency`
+**0 failures**, `multi-client` **124/0**, the last on the three-step rehearsal
+database §328.3 describes and §366 wrote into that check's own header. `qa.py`
+over `file://` **33 viewers / 242 destinations / ERRORS none**; `built-in-step`
+all good; `generated-in-step` all clear; `tsc` clean COLD; `node --check sw.js`
+clean with **one** `SHELL` declaration (§146.2), at a name `origin/main` does not
+hold — confirmed once before the work and **again immediately before the push**
+(§94.16, which has collided twice).
+
+**§367.6 — AND THE COUNT WAS MEASURED TWICE BECAUSE THE FIRST CAPTURE WAS A
+TAIL.** The sweep's first run finished clean (`ERRORS: none`, exit 0) and its
+captured output held **ten lines** — the harness keeps a tail, and `qa.py`
+prints one line per viewer long before its summary, so all 33 were gone. The
+verdict was honest and the count was not there to read. §332's habit is to
+ACCOUNT for a number rather than quote it, so the sweep was run again under its
+own redirect: **33 viewers, 242 destinations**, §365's figure reproduced rather
+than copied. *A tail is enough for a verdict and never enough for a count.*
+**AND `pgrep -f` SPENT THE WAIT MATCHING ITS OWN POLLING SHELL**, whose command
+line contains the pattern it was given — so *"still running"* was true of the
+watcher rather than of the sweep, and the wait was on the process id from then
+on.
+
+**THE WITNESS IS NOT `sw.js`, AND THAT IS NOW THE THIRD MERGE IT HAS BEEN TRUE
+OF** (§365, §316.10). `build-sw.mjs` drops the caching half — the half where
+`SHELL` lives — so the SERVED worker is byte-identical either side of any merge
+and a bumped name reaches nobody. What proves production built this commit is
+the two files a browser downloads: `shell.js` **3,789,535 → 3,794,390** and
+`platform.css` **659,996 → 660,815**, read off the live site (§91.5) and matching
+the local generated copies to the byte — **with both asserted to have MOVED from
+their pre-push values**, because a comparison that would hold on either side of
+a deploy proves nothing (§113.8). The branch was fast-forwarded only after that
+(§91). The frozen `sw.js` name is still bumped, for the offline copy, which is
+the one place it is read.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF RATHER THAN ASSUMED** (spec
+029): not one `api/`, `lib/` or `db/` file is in it, so nothing about how a save
+is judged has moved, nothing stored moves and nothing is migrated.
+
+**THE RESIDUE IS §365's, UNCHANGED AND NAMED AGAIN RATHER THAN LEFT TO BE
+REDISCOVERED**: because the served worker's bytes did not move, no
+`controllerchange` fires and §258's *"A newer version of the platform is ready"*
+is **not** offered — a tab left open on the older build keeps it, rails and all,
+until somebody reloads.

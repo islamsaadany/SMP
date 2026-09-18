@@ -6008,4 +6008,31 @@ the remaining hops faster and none is this change:
   the module switcher included. A real piece of work, and where the weight
   actually sits has not been measured.
 
-**Waiting on Islam: the merge, and his word on that merge.**
+**Merged to `main` 2026-09-18** on Islam's word.
+
+`main` had moved one commit underneath — §366, which repaired three checks and
+changed no product file — so this was a real merge and not a fast-forward. The
+three record files conflicted and both sides were **kept**, never picked. Then
+everything was run again **on the merged tree**, which is the only tree that
+matters:
+
+* The frozen sweep: **33 viewers, 242 destinations, no errors.**
+* The check this round is about: **118 of 118.** Its neighbours 143 and 140.
+* The three §366 repaired: **47 of 47**, **no failures**, **124 of 124.**
+* The shipped file is the build; the served copies are what their generators
+  produce; the types are clean from cold; the worker parses.
+
+**How we know it is live.** The service worker cannot be the witness here — the
+generator drops the half its version name sits in, so the served worker is
+identical either side of a merge. What moved are the two files a browser
+actually downloads, read off the live site: the platform script
+**3,789,535 → 3,794,390 bytes** and the stylesheet **659,996 → 660,815**, both
+matching this build exactly. The branch was only brought level after that.
+
+**Nobody is signed out.** Nothing in this merge touches the server, the rules or
+the database — read off the file list, not assumed — so no figure, plan or
+password moves, and nothing needs migrating.
+
+**One thing to know.** Because the served worker did not change, a tab somebody
+left open will **not** be offered "a newer version of the platform is ready". It
+keeps the older screen, with its old settings rail, until it is reloaded.

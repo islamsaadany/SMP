@@ -10034,8 +10034,42 @@ DONE, and all three are the other hops**: every document here is `no-store`, so
 Back between the console and a client rebuilds &mdash; loosening it is a SECURITY
 header and **Islam's call**; the two generated files are revalidated per
 navigation; and the 3.8MB itself is the floor under every hop that genuinely
-changes document. **`main` untouched &mdash; the merge is Islam's word, on that
-merge.***
+changes document.
+**MERGED TO `main` 2026-09-18 on Islam's word**, and `main` had moved one commit
+under it (&sect;366 &mdash; three checks and the record, **no product file**), so
+this is a real merge rather than a fast-forward: the three record files conflicted
+and were **COMBINED, never picked** (&sect;318.7), and everything was re-run on
+the **MERGED tree** rather than on the branch, which is &sect;365's own first
+finding. Shell **118/0**, modules 143/0, door-landing 140/0 &mdash; and main's own
+three green here too: `tactic-outcome` **47/0**, `contingency` **0 failures**,
+`multi-client` **124/0** on the three-step rehearsal database &sect;328.3
+describes. `qa.py` over `file://` **33 viewers / 242 destinations / ERRORS none**,
+the count MEASURED rather than quoted from &sect;365 (&sect;332) &mdash; **and the
+first capture of it was the harness keeping only a tail**, so the 33 viewer lines
+were missing and the run was taken again rather than the number assumed.
+`built-in-step` all good, `generated-in-step` all clear, `tsc` clean COLD,
+`node --check sw.js` clean with **one** `SHELL` declaration (&sect;146.2) at a name
+`origin/main` does not hold, confirmed **again immediately before the push**
+(&sect;94.16); and the concatenation's duplicate scan reads **1512 names and the
+six &sect;281.1 leaves deliberately**, so the merge introduced none (&sect;56.7)
+&mdash; **its own first draft matched the script list with the wrong pattern and
+reported `scripts: 0`**, which is a scan of nothing finding nothing (&sect;54.5),
+so it asserts it found the files before it believes the answer.
+**THE WITNESS IS NOT `sw.js` AND SAYING SO IS PART OF THE PROTOCOL NOW**
+(&sect;365, &sect;316.10): `build-sw.mjs` drops the caching half where `SHELL`
+lives, so the **served** worker is byte-identical either side and a bumped name
+reaches nobody &mdash; what proves production built this commit is `shell.js`
+**3,789,535 &rarr; 3,794,390** and `platform.css` **659,996 &rarr; 660,815**, read
+off the LIVE site (&sect;91.5) and matching the local generated copies to the byte,
+with both asserted to have MOVED from their pre-push values or a match would hold
+on either (&sect;113.8). The branch was fast-forwarded only after that
+(&sect;91). **NO FORCED SIGN-OUT IS OWED, AND IT IS READ OFF THE DIFF RATHER THAN
+ASSUMED** (spec 029): not one `api/`, `lib/` or `db/` file is in it, so nothing
+about how a save is judged moves, nothing stored moves and nothing is migrated.
+**THE RESIDUE IS THE ONE &sect;365 NAMED, UNCHANGED**: because the served worker's
+bytes did not move, no `controllerchange` fires and &sect;258's *"A newer version
+of the platform is ready"* is **not** offered &mdash; a tab left open keeps its
+old shell, rails and all, until somebody reloads it.***
 
 *Earlier: 2026-09-17 &mdash; **&sect;366: the four that were red, and what
 measuring them found.** Islam, of &sect;365's closing line: *"What are these

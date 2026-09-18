@@ -51788,3 +51788,118 @@ CLAUDE.md requires and what this round nearly skipped. **The frozen product is
 untouched** — `platform.html` is the console at the repository root, which
 `build.py` does not read — so the built file does not move and **no `sw.js` bump
 is owed** (§91).
+
+---
+
+## §369 — THE BROWSER SIGNS YOU IN, AND THE CONSOLE STOPS ARRIVING DEAF
+
+Islam, on the branch's own preview and with a screen recording: *"when I go to
+the client the mouse doesn't click from the first time, the whole window should
+be clicked first anywhere, then the hovering effect happens when I point the
+mouse at the areas of clicking"* — then the two facts that decide the whole
+section: *"it happens on the console with the client cards"*, *"only in the
+platform when I use the password to login; if I login when it remembers the
+password it works fine"*, and *"yes it's the front window"*.
+
+**AND I HAD ANSWERED IT TWICE WITH THE WRONG FAULT.** The first answer was
+§368's boot, which is real and was not what he was looking at (it is not on
+`main`, so it had never been in front of him); the second was the client card's
+dead area, which is also real and also not this. **The detail that ruled both
+out was in his own sentence and I had skipped it: HOVER does not work either.**
+Hover is pure CSS. It needs no script, no handler, no wiring — so a slow boot,
+an unwired control and a small click target cannot produce it. A page that will
+not hover is a page not being given the mouse at all.
+
+**MEASURED FROM HIS OWN RECORDING, FRAME BY FRAME.** At **10.7s** the console
+is fully drawn — bar, tabs, every card — the pointer is sitting ON Raya Trade's
+*Insights* row, and there is **a plain arrow and no highlight**. At **14.5s**
+the same card's *Strategy* row lights under the same pointer with the hand
+cursor, **nothing having reloaded in between**. His report reproduced exactly,
+off his own screen, with no theory in it.
+
+**AND WHAT IT IS NOT WAS MEASURED BEFORE WHAT IT IS** (§303's habit, applied to
+our own suspicions): with the console loaded there is **no full-window layer of
+any kind** — every absolutely and fixed-positioned element that covers the
+viewport was enumerated and there are none — and **47 of 47 controls are
+directly reachable** by `elementFromPoint`. There is no invisible overlay,
+there is no document-level click handler anywhere on that page, and there is no
+window in which a control is drawn and dead. *Three candidate causes ruled out
+by measurement rather than by argument, which is what left one.*
+
+**THE AUTOFILL HALF IS WHAT NAMES THE CAUSE**, because it is the only thing
+that differs between his two cases: a password the browser has already saved
+raises no question, and a newly typed one does. `Door.tsx`'s `signIn` took the
+press itself (`preventDefault`), posted the credentials in the background,
+**WIPED THE PASSWORD FIELD**, and then replaced the location — which is the one
+shape a browser's password keeper cannot tie to a submission. It falls back to
+its heuristics (*the password field emptied and the page went somewhere* is its
+classic success signal) and raises its prompt LATE, over the page we navigated
+to. While that prompt holds the pointer the console receives no `mousemove` at
+all, so `:hover` is never recomputed and the first press is spent dismissing
+it. **That is the dead window, and the guessy path was ours.**
+
+**THE SERVER HAD ANSWERED A REAL FORM POST SINCE THE DOOR WAS BUILT**, which is
+why the fix adds nothing: `sign-in/route.ts` already reads
+`application/x-www-form-urlencoded`, sets the cookie and answers **303** — the
+no-script path this door shipped with — and the form already carries `method`,
+`action`, the hidden door, `autocomplete="username"` and
+`autocomplete="current-password"`. **The only thing stopping the browser doing
+this itself was one line.** Handing it back means the keeper sees an ordinary
+submission and asks its question on the SIGN-IN page, before anything
+navigates.
+
+**AND THE MARKER I WROTE FOR THE ONE GAP WAS DELETED ON READING THE CODE.** The
+form path's one weak point looked like a temporary password: the server 303s
+back to the door, and a door that drew the sign-in card again over a session
+the same response had just opened is §61 with a cookie on it. A `?change=1`
+marker was written, mirroring `?refused=1` — and then `DoorPage` turned out to
+**decide it already**: it reads the session, sees `mustChange` and passes
+`initial="change"` itself. Both halves removed (§2b: the shortest thing that
+works, and reading is cheaper than adding).
+
+**WHAT THE CHANGE COSTS, PAID RATHER THAN DISCOVERED.** A refusal is now a
+fresh document, so the address box would come back empty — and the browser only
+refills an address it has SAVED, which for the person this section is about it
+has not, because they are typing their password precisely because nothing is
+saved. The address is carried in `sessionStorage` for that one navigation:
+**per tab**, never in the query string (a query string is browser history and a
+server log), and wrapped, because a store that throws is not worth a broken
+sign-in (§107). `pwRef` and the `landing` state are **DELETED**, not left
+holding nothing for the next reader to take as load-bearing (§24) — `pwRef`
+existed to read the password and then to wipe it, and both of those are what
+this removes.
+
+**WHAT IS NOT CLAIMED** (§124): the password prompt is **not visible anywhere
+in the recording**, so the mechanism is reasoned from the autofill difference
+and never read off the screen. What is certain, and what this changes, is that
+the guessy path was ours. Said to him in those words rather than presented as
+proof.
+
+**PROVED BY WHAT THE BROWSER SENDS, NOT BY READING THE DIFF** — driven against
+the built app: `POST · content-type=application/x-www-form-urlencoded ·
+navigation=true`, a genuinely **new document** (a random mark stamped per
+document changes across the press), the refusal still saying its one sentence,
+the address refilled and the password box empty. Before, that same press was a
+background JSON fetch with no navigation at all. **And the first two runs of
+that proof reported the fix not working** — my harness drove `127.0.0.1` while
+the app's own redirect names `localhost`, so the browser was handed a
+cross-origin location and stayed put: §105.6's shape in a hostname, and it
+looked exactly like a fix that does nothing.
+
+**VERIFIED**: door **143/0** and **red all seven ways** (`check:door:red`),
+against an app REBUILT after the edit (§105.6); shell 111/0, modules 158/0,
+state 92/0, setup-shape 33/0, `generated-in-step` all clear, `declared-deps`
+all clear, `tsc` clean **cold** (§3's cache rule). **The frozen product is not
+touched** — two files, both in `smp-app/` — so `built-in-step` reports the
+shipped file byte-identical and **no `sw.js` bump is owed** (§91's trigger is
+the built file's bytes changing, and they did not).
+
+**RECORDED, NOT DONE.** The **password-change** form still does exactly what
+the sign-in form did — `preventDefault`, fetch, `location.replace` — over two
+`autocomplete="new-password"` fields, so somebody setting their first password
+may well meet the same dead window one screen later. It is not a one-line
+change there: that form compares two fields and asks where the person works
+before it may navigate, so making it a real post is server-side work and a
+decision about where those two questions are answered. Flagged rather than
+folded in (rule 1b), and named here so the next person meets it as a decision
+rather than as a surprise.

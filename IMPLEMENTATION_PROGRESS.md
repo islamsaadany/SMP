@@ -5206,6 +5206,80 @@ suite per feature.
 
 ## In flight
 
+### The mouse that does nothing until you click once — found and fixed
+
+**What you reported.** Signing in, arriving at the console, and the mouse doing
+nothing: no highlight when you point at something you can click, and the first
+press wasted. Click anywhere once and it all starts working. Only when you type
+the password — never when the browser remembers it.
+
+**I got this wrong twice before I got it right, and it is worth saying why.**
+I first blamed how long the page takes to open, and then how much of a client
+card you can actually click. Both are real, and neither is this. The thing that
+ruled them out was in your own message and I read past it: **the highlight does
+not work either.** That highlight is done by the page's styling alone — no
+code, no wiring — so nothing about slowness or missing buttons can explain it. A
+page that will not highlight is a page that is not being given the mouse at all.
+
+**What it actually is.** Your recording settles it. At just under eleven seconds
+the console is completely drawn and your pointer is sitting on Raya Trade's
+*Insights* row with an ordinary arrow and no highlight; four seconds later the
+same card lights up under the same pointer, with nothing having reloaded. So the
+page was finished and deaf.
+
+I then checked, rather than assumed, that nothing of ours was in the way: with
+the console loaded there is **nothing covering the window at all**, and **all 47
+things you can click are directly reachable** by the pointer. No invisible
+layer, nothing swallowing the press.
+
+**Which leaves your own clue, and it is the answer.** The difference between
+your two cases is a password the browser has already saved versus one you have
+just typed. Our sign-in page was not handing the sign-in to the browser the way
+browsers expect: it took the press itself, sent your details in the background,
+**wiped the password box**, and then jumped to the console. To the browser's
+password keeper that is a sign-in it has to guess at — so it raises its "save
+this password?" question late, over the page you have just arrived at. While
+that question is waiting, the browser holds the mouse and the page gets nothing.
+Your first click closes it, and everything wakes up.
+
+**What I changed.** The sign-in is now handed to the browser normally, and we no
+longer wipe the password box. The browser asks its question on the sign-in page,
+where it belongs, and you arrive at the console with nothing in front of it.
+The server already knew how to accept a sign-in this way — that path was built
+from the start for people with scripting switched off — so nothing new was
+added; one line was removed.
+
+**Nothing on any screen changes.** No layout, no colours, no wording. Signing in
+looks exactly as it did.
+
+**One cost, paid rather than left to you to find.** A wrong password now reloads
+the page, so your email address would come back empty — and the browser only
+refills an address it has saved, which in your case it has not. The address is
+carried across that one reload, kept for that tab only and never put in the web
+address.
+
+**What I cannot prove from here, said plainly.** The browser's save-password
+question is not visible anywhere in your recording. So the chain is reasoned
+from your autofill clue rather than seen. What is certain is that the guessing
+was caused by our page, and that is what has gone.
+
+**Checked**: the sign-in driven in a real browser and read off what the browser
+actually sends — a normal form submission and a genuinely new page, where before
+it was a background request and no page change at all; the refusal still says
+its one sentence; the address comes back; the password box is empty. The door's
+own test suite is 143 of 143 with all seven of its deliberate breakages still
+failing as they should, and every neighbouring test is green.
+
+**Still open, and yours:** the password-change screen does the same thing the
+sign-in screen used to, so setting a first password may hit the same dead moment
+one screen later. It is not a one-line change there — that screen compares two
+boxes and asks where you work before it can move on — so I have written it down
+rather than folded it in.
+
+**Also still yours, from before this:** three-quarters of a client card takes no
+click (it stopped being one big button on 11 September), and the console's slow
+opening, which is fixed on the branch and not yet merged.
+
 ### The console's dead first moment (§368) — repaired; one half waiting on you
 
 **What you reported.** Opening Forefront's own console, the window looks open

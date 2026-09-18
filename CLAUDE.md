@@ -9909,7 +9909,73 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-18 &mdash; **&sect;368: the console asks once, and asks
+*Last Updated: 2026-09-18 &mdash; **&sect;369: the browser signs you in, and the
+console stops arriving deaf.** Islam, with a screen recording &mdash; *"the mouse
+doesn't click from the first time, the whole window should be clicked first
+anywhere, then the hovering effect happens when I point the mouse at the areas of
+clicking"* &mdash; *"it happens on the console with the client cards"*, *"only in
+the platform when I use the password to login; if I login when it remembers the
+password it works fine"*, and *"yes it's the front window"*.
+**I ANSWERED IT TWICE WITH THE WRONG FAULT, AND THE DETAIL THAT RULED BOTH OUT
+WAS IN HIS OWN SENTENCE**: &sect;368's boot (real, and never in front of him
+&mdash; it is not on `main`) and the card's dead area (&sect;367, also real, also
+not this). **HOVER DOES NOT WORK EITHER, AND HOVER IS PURE CSS** &mdash; no
+script, no handler, no wiring &mdash; so a slow boot, an unwired control and a
+small target cannot produce it: *a page that will not hover is a page not being
+given the mouse at all.* **MEASURED FRAME BY FRAME OFF HIS OWN RECORDING**: at
+**10.7s** the console is fully drawn, the pointer sits ON a module row, and there
+is a plain arrow and no highlight; at **14.5s** the same card lights under the
+same pointer with **nothing reloaded in between**. **AND WHAT IT IS NOT WAS
+MEASURED BEFORE WHAT IT IS** (&sect;303's habit turned on our own suspicions):
+with the console loaded there is **no full-window layer of any kind** and **47 of
+47 controls are directly reachable**; there is no document-level click handler on
+that page at all, and no window in which a control is drawn and dead &mdash;
+three candidates ruled out by measurement rather than argument, which is what
+left one. **THE AUTOFILL HALF NAMES THE CAUSE**, being the only thing that
+differs between his two cases: `Door.tsx`'s `signIn` took the press itself
+(`preventDefault`), posted in the background, **WIPED THE PASSWORD FIELD** and
+replaced the location &mdash; the one shape a password keeper cannot tie to a
+submission, so it falls to its heuristics (*the field emptied and the page went
+somewhere*) and raises its prompt LATE, over the page we navigated to; while that
+prompt holds the pointer the console gets no `mousemove`, `:hover` is never
+recomputed, and the first press is spent dismissing it. **THE SERVER HAD ANSWERED
+A REAL FORM POST SINCE THE DOOR WAS BUILT** &mdash; `sign-in/route.ts` reads
+`application/x-www-form-urlencoded`, sets the cookie and answers **303**, the
+no-script path this door shipped with &mdash; and the form already carried
+`method`, `action`, the hidden door and both `autocomplete` values, so **one line
+was removed and nothing added**. **AND THE MARKER WRITTEN FOR THE ONE GAP WAS
+DELETED ON READING THE CODE**: a temporary password 303s back to the door, and
+`DoorPage` **already** reads the session, sees `mustChange` and opens on the
+password card &mdash; both halves of a `?change=1` removed (&sect;2b: reading is
+cheaper than adding). **THE COST IS PAID RATHER THAN DISCOVERED**: a refusal is a
+fresh document now, so the address is carried in `sessionStorage` for that one
+navigation &mdash; per TAB, never in the query string (history and a server log)
+&mdash; and `pwRef` and the `landing` state are **DELETED** rather than left
+holding nothing (&sect;24), both having existed to read the password and then
+wipe it. **WHAT IS NOT CLAIMED** (&sect;124): the prompt is **not visible
+anywhere in the recording**, so the chain is reasoned from the autofill
+difference and never read off the screen; what is certain is that the guessy path
+was ours. **PROVED BY WHAT THE BROWSER SENDS, NOT BY READING THE DIFF**:
+`POST &middot; content-type=application/x-www-form-urlencoded &middot;
+navigation=true`, a genuinely **new document** (a per-document mark changes
+across the press), the refusal still saying its one sentence, the address
+refilled, the password box empty &mdash; where that same press was a background
+JSON fetch with no navigation at all. **And the first two runs of that proof
+reported the fix not working**, my harness driving `127.0.0.1` while the app's
+redirect names `localhost`: &sect;105.6's shape in a hostname, and indistinguishable
+from a fix that does nothing. **VERIFIED**: door **143/0** red **all seven ways**,
+against an app REBUILT after the edit (&sect;105.6); shell 111/0, modules 158/0,
+state 92/0, setup-shape 33/0, `generated-in-step` and `declared-deps` all clear,
+`tsc` clean **cold** (&sect;3). **The frozen product is untouched** &mdash; two
+files, both in `smp-app/` &mdash; so `built-in-step` reports the shipped file
+byte-identical and **no `sw.js` bump is owed** (&sect;91). **RECORDED, NOT DONE**:
+the **password-change** form still does exactly what the sign-in form did over two
+`new-password` fields, so a first password may meet the same dead window one
+screen later &mdash; not a one-line change there (it compares two fields and asks
+where the person works before it may navigate), so flagged rather than folded in
+(rule 1b). **`main` untouched: the merge is Islam's word, on that merge.**
+
+*Earlier the same day: 2026-09-18 &mdash; **&sect;368: the console asks once, and asks
 both at once.** Islam, opening Forefront's own console &mdash; *"something strange
 the window is not active on opening I need to click anyway to start accepting
 clicks on the cards"* &mdash; then, with a merge already in flight, *"don't merge

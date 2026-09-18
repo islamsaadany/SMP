@@ -1,12 +1,16 @@
-<!-- Portfolio · the plan (spec 056 §3, §4, §9.8). Drawn 2026-09-18, awaiting sign-off.
-     Same project as the charter, and the figures AGREE with it on purpose: phase 1
-     100%, phase 2 62%, phase 3 8%, and the plan running to Aug against an agreed
-     Jun. Two drawings of one project that disagreed would be the fault this spec
-     keeps warning about.
-     Every behaviour is already decided: the tree is one list because the sequence
-     IS the content; a phase's figure is DERIVED from its activities, weighted,
-     defaulting to equal (§9.8); Done and Completed are two steps and only a Lead
-     takes the second (§6.2); an activity opens a panel rather than a page (§4). -->
+<!-- Portfolio · the plan, in two views (spec 056 §3, §4, §9.8).
+     Drawn 2026-09-18, redrawn the same day when Islam answered its three
+     questions: the Timeline IS the Gantt, billable is a flag and nothing more,
+     and the Charter tab stands.
+
+     BOTH VIEWS COME OFF ONE LIST, which is the point rather than a convenience:
+     the tree and the timeline are two readings of the same rows, so they cannot
+     disagree. Every figure above an activity is DERIVED here in the page —
+     a phase from its children, an activity from its sub-activities by weight —
+     because §9.8 says derived and a drawing that typed them would be arguing
+     the opposite. The first version of this file typed two and both were wrong.
+     Done and Completed are two steps and only a Lead takes the second (§6.2).
+     An activity opens a panel rather than a page (§4). -->
 <title>Portfolio Project Plan</title>
 <style>
   :root{
@@ -52,13 +56,11 @@
   button{ font:inherit; cursor:pointer; }
   button:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
 
-  .phead{ display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap;
-          padding-bottom:10px; margin-bottom:0; }
   .phead h1{ font-size:21px; font-weight:700; margin:0; letter-spacing:-.01em; }
   .crumb{ font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
           color:var(--ink-3); font-weight:700; margin:0 0 4px; }
-  .tabs{ display:flex; gap:2px; border-bottom:1px solid var(--line); margin-bottom:18px;
-         flex-wrap:wrap; }
+  .tabs{ display:flex; gap:2px; border-bottom:1px solid var(--line);
+         margin:10px 0 18px; flex-wrap:wrap; }
   .tabs button{ background:none; border:0; border-bottom:2px solid transparent;
                 padding:8px 13px; font-size:13.5px; color:var(--ink-3); font-weight:600; }
   .tabs button.on{ color:var(--ink); border-bottom-color:var(--gold); }
@@ -73,25 +75,28 @@
   .btn.on{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
   .owed{ font-size:12.5px; color:var(--attn-tx); background:var(--attn-bg);
          border-radius:4px; padding:3px 9px; font-weight:600; }
+  .owed.red{ color:var(--bad-tx); background:var(--bad-bg); }
 
-  .tree{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
-         overflow:hidden; }
+  .box{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+        overflow:hidden; }
+
+  /* ── the list ─────────────────────────────────────────────── */
   .head, .r{ display:grid;
-             grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 104px;
+             grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px;
              gap:12px; align-items:center; padding:7px 14px; }
   .head{ background:var(--panel); color:var(--panel-ink);
          font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
   .head span:nth-child(n+5){ text-align:right; }
   .r{ border-top:1px solid var(--line-soft); font-size:13.5px; }
   .r:hover{ background:var(--zebra); }
-  .r.ph{ background:var(--surface-2); font-weight:700; }
-  .r.wp{ font-weight:600; }
+  .r.lvl0{ background:var(--surface-2); font-weight:700; }
+  .r.lvl1{ font-weight:600; }
   .num{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px;
-        font-weight:700; letter-spacing:.02em; }
+        font-weight:700; }
   .nm{ min-width:0; display:flex; align-items:center; gap:7px; }
   .nm .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .r.wp .nm{ padding-left:16px; }
-  .r.ac .nm{ padding-left:32px; }
+  .r.lvl1 .nm{ padding-left:16px; }
+  .r.lvl2 .nm{ padding-left:32px; }
   .who{ color:var(--ink-2); font-size:12.5px; overflow:hidden;
         text-overflow:ellipsis; white-space:nowrap; }
   .win{ font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2);
@@ -99,7 +104,7 @@
   .win.late{ color:var(--bad-tx); font-weight:600; }
   .fig{ text-align:right; font-variant-numeric:tabular-nums; font-size:12.5px;
         color:var(--ink-2); }
-  .fig b{ color:var(--ink); }
+  .lvl0 .fig, .lvl1 .fig{ color:var(--ink); font-weight:700; }
   .st{ justify-self:end; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
        font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap; }
   .st.done{ background:var(--good-bg); color:var(--good-tx); }
@@ -109,14 +114,62 @@
   .mk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
        color:var(--gold-deep); border:1px solid var(--gold); border-radius:3px;
        padding:0 4px; flex:none; }
-  .blocked{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
-            color:var(--bad-tx); flex:none; }
-  .fold{ background:none; border:0; padding:0 2px 0 0; color:var(--ink-3);
-         font-size:11px; flex:none; width:15px; text-align:left; }
-  .open .fold{ color:var(--ink-2); }
+  .blk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+        font-weight:700; color:var(--bad-tx); flex:none; }
   .r.pick{ background:var(--zebra); box-shadow:inset 3px 0 0 var(--gold); }
 
-  /* the panel an activity opens into */
+  /* ── the timeline ─────────────────────────────────────────── */
+  .gwrap{ overflow-x:auto; }
+  .g{ min-width:820px; }
+  .ghead, .gr{ display:grid; grid-template-columns:300px minmax(0,1fr);
+               align-items:center; }
+  .ghead{ background:var(--panel); color:var(--panel-ink); }
+  .ghead .gl{ padding:7px 14px; font-size:10px; letter-spacing:.08em;
+              text-transform:uppercase; font-weight:700; }
+  .months{ display:grid; }
+  .months span{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+                font-weight:700; padding:7px 0 7px 7px;
+                border-left:1px solid rgba(255,255,255,.18); }
+  .gr{ border-top:1px solid var(--line-soft); font-size:13px; }
+  .gr:hover{ background:var(--zebra); }
+  .gr.lvl0{ background:var(--surface-2); font-weight:700; }
+  .gr.lvl1{ font-weight:600; }
+  .gl{ display:flex; align-items:center; gap:7px; min-width:0; padding:5px 12px; }
+  .gl .gn{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:11.5px;
+           font-weight:700; flex:none; width:44px; }
+  .gl .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gr.lvl1 .gl .t{ padding-left:10px; }
+  .gr.lvl2 .gl .t{ padding-left:22px; }
+  .track{ position:relative; height:28px; border-left:1px solid var(--line); }
+  .grid{ position:absolute; inset:0; display:grid; pointer-events:none; }
+  .grid i{ border-left:1px solid var(--line-soft); }
+  .grid i:first-child{ border-left:0; }
+  .now{ position:absolute; top:0; bottom:0; width:2px; background:var(--gold);
+        pointer-events:none; }
+  .nowlab{ position:absolute; top:2px; transform:translateX(-50%);
+           font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+           font-weight:700; color:var(--on-accent); background:var(--gold);
+           border-radius:3px; padding:0 4px; white-space:nowrap; }
+  .b{ position:absolute; top:8px; height:12px; border-radius:3px;
+      background:var(--surface-2); border:1px solid var(--line); overflow:hidden; }
+  .b > i{ display:block; height:100%; background:var(--good); }
+  .b.sum{ top:11px; height:6px; background:var(--stone); border-color:var(--stone);
+          border-radius:2px; opacity:.55; }
+  .over{ position:absolute; top:8px; height:12px; border-radius:0 3px 3px 0;
+         background:var(--bad); }
+  .dia{ position:absolute; top:8px; width:12px; height:12px; background:var(--gold);
+        border:1px solid var(--gold-deep); transform:translateX(-6px) rotate(45deg); }
+  .dia.not{ background:var(--surface); }
+  .dep{ position:absolute; height:0; border-top:1.5px dotted var(--ink-3); }
+  .depv{ position:absolute; width:0; border-left:1.5px dotted var(--ink-3); }
+  .deph{ position:absolute; width:0; height:0; border-top:4px solid transparent;
+         border-bottom:4px solid transparent; border-left:5px solid var(--ink-3); }
+  .gfoot{ display:flex; gap:16px; flex-wrap:wrap; padding:9px 14px;
+          border-top:1px solid var(--line-soft); font-size:12px; color:var(--ink-3); }
+  .gfoot b{ display:inline-block; width:22px; height:8px; border-radius:2px;
+            vertical-align:middle; margin-right:5px; }
+
+  /* ── the activity panel ───────────────────────────────────── */
   .act{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
         margin-top:16px; overflow:hidden; }
   .act > header{ background:var(--panel); color:var(--panel-ink); padding:10px 16px;
@@ -134,16 +187,17 @@
   .arow .v p{ margin:0; color:var(--ink-2); }
   .full{ grid-column:1 / -1; }
   .sub{ display:grid; gap:4px; }
-  .sub .s{ display:grid; grid-template-columns:minmax(0,1fr) 54px 58px; gap:10px;
+  .sub .s{ display:grid; grid-template-columns:minmax(0,1fr) 62px 52px; gap:10px;
            font-size:13px; align-items:center; }
   .sub .s .w{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px;
               text-align:right; }
+  .note{ font-size:12px; color:var(--ink-3); margin-top:6px; }
   .signrow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
-            background:var(--attn-bg); border-radius:5px; padding:9px 12px; margin-top:12px; }
+            background:var(--attn-bg); border-radius:5px; padding:9px 12px; margin:0 16px 16px; }
   .signrow .t{ font-size:13px; color:var(--attn-tx); }
   .cta{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
         background:var(--panel); color:var(--panel-ink); border:1px solid var(--panel);
-        border-radius:5px; padding:6px 13px; }
+        border-radius:5px; padding:6px 13px; margin-left:auto; }
   .cta:hover{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
 
   .panel{ background:var(--surface); border:1px solid var(--line);
@@ -159,10 +213,8 @@
 <div class="wrap">
 
   <div class="phead">
-    <div>
-      <p class="crumb">Raya Trade · Portfolio</p>
-      <h1>Culture Transformation</h1>
-    </div>
+    <p class="crumb">Raya Trade · Portfolio</p>
+    <h1>Culture Transformation</h1>
   </div>
   <nav class="tabs">
     <button type="button">Charter</button>
@@ -172,114 +224,17 @@
   </nav>
 
   <div class="bar">
-    <span class="owed">1 activity waiting for your sign-off</span>
-    <span class="owed" style="color:var(--bad-tx);background:var(--bad-bg)">2 past their date</span>
+    <span class="owed" id="owed-sign"></span>
+    <span class="owed red" id="owed-late"></span>
     <span class="sp">
-      <button type="button" class="btn on">List</button>
-      <button type="button" class="btn">Timeline</button>
+      <button type="button" class="btn on" id="v-list">List</button>
+      <button type="button" class="btn" id="v-time">Timeline</button>
       <button type="button" class="btn">Edit</button>
     </span>
   </div>
 
-  <div class="tree">
-    <div class="head">
-      <span>#</span><span>Phase · Work package · Activity</span>
-      <span>Owner</span><span>Planned</span><span>Status</span><span>Done</span>
-    </div>
-
-    <div class="r ph open">
-      <span class="num">1</span>
-      <span class="nm"><button class="fold" type="button" aria-label="Fold">▾</button><span class="t">Culture audit and stakeholder interviews</span></span>
-      <span class="who">Rania Mounir</span>
-      <span class="win">Jan 26</span>
-      <span class="st done">Completed</span>
-      <span class="fig"><b>100%</b></span>
-    </div>
-    <div class="r ac">
-      <span class="num">1.1</span>
-      <span class="nm"><span class="t">Attribute survey across the ten units</span></span>
-      <span class="who">Hend Sabry</span><span class="win">5 – 16 Jan</span>
-      <span class="st done">Completed</span><span class="fig">100%</span>
-    </div>
-    <div class="r ac">
-      <span class="num">1.2</span>
-      <span class="nm"><span class="t">Leadership interviews</span><span class="mk">Milestone</span></span>
-      <span class="who">Rania Mounir</span><span class="win">19 – 29 Jan</span>
-      <span class="st done">Completed</span><span class="fig">100%</span>
-    </div>
-
-    <div class="r ph open">
-      <span class="num">2</span>
-      <span class="nm"><button class="fold" type="button" aria-label="Fold">▾</button><span class="t">Strategy-alignment workshops and blueprint</span></span>
-      <span class="who">Rania Mounir</span>
-      <span class="win">Feb 26</span>
-      <span class="st wip">In progress</span>
-      <span class="fig"><b>67%</b></span>
-    </div>
-    <div class="r ac">
-      <span class="num">2.1</span>
-      <span class="nm"><span class="t">Executive alignment workshop</span></span>
-      <span class="who">Rania Mounir</span><span class="win">2 – 6 Feb</span>
-      <span class="st done">Completed</span><span class="fig">100%</span>
-    </div>
-    <div class="r ac pick" id="row-22">
-      <span class="num">2.2</span>
-      <span class="nm"><span class="t">Behavioural blueprint, first draft</span></span>
-      <span class="who">Omar Tarek</span><span class="win late">9 – 20 Feb</span>
-      <span class="st sign">Waiting to sign off</span><span class="fig">100%</span>
-    </div>
-    <div class="r ac">
-      <span class="num">2.3</span>
-      <span class="nm"><span class="t">Blueprint review with the unit heads</span><span class="blocked">Blocked</span></span>
-      <span class="who">Omar Tarek</span><span class="win late">23 – 27 Feb</span>
-      <span class="st not">Not started</span><span class="fig">0%</span>
-    </div>
-
-    <div class="r ph open">
-      <span class="num">3</span>
-      <span class="nm"><button class="fold" type="button" aria-label="Fold">▾</button><span class="t">Company-wide activation and leadership rollout</span></span>
-      <span class="who">Hend Sabry</span>
-      <span class="win">Mar – Aug 26</span>
-      <span class="st wip">In progress</span>
-      <span class="fig"><b>10%</b></span>
-    </div>
-    <div class="r wp">
-      <span class="num">3.1</span>
-      <span class="nm"><button class="fold" type="button" aria-label="Fold">▾</button><span class="t">Activation toolkit</span></span>
-      <span class="who">Hend Sabry</span><span class="win">Mar – Apr 26</span>
-      <span class="st wip">In progress</span><span class="fig">20%</span>
-    </div>
-    <div class="r ac">
-      <span class="num">3.1.1</span>
-      <span class="nm"><span class="t">Leadership communication guide</span></span>
-      <span class="who">Hend Sabry</span><span class="win">2 – 20 Mar</span>
-      <span class="st wip">In progress</span><span class="fig">40%</span>
-    </div>
-    <div class="r ac">
-      <span class="num">3.1.2</span>
-      <span class="nm"><span class="t">Employee engagement resources</span></span>
-      <span class="who">—</span><span class="win">23 Mar – 10 Apr</span>
-      <span class="st not">Not started</span><span class="fig">0%</span>
-    </div>
-    <div class="r wp">
-      <span class="num">3.2</span>
-      <span class="nm"><button class="fold" type="button" aria-label="Fold">▾</button><span class="t">Leadership-led rollout</span></span>
-      <span class="who">Rania Mounir</span><span class="win">Apr – Aug 26</span>
-      <span class="st not">Not started</span><span class="fig">0%</span>
-    </div>
-    <div class="r ac">
-      <span class="num">3.2.1</span>
-      <span class="nm"><span class="t">Unit-by-unit activation sessions</span></span>
-      <span class="who">—</span><span class="win">Apr – Jul 26</span>
-      <span class="st not">Not started</span><span class="fig">0%</span>
-    </div>
-    <div class="r ac">
-      <span class="num">3.2.2</span>
-      <span class="nm"><span class="t">Embed behaviours in the performance cycle</span><span class="mk">Milestone</span></span>
-      <span class="who">—</span><span class="win">Aug 26</span>
-      <span class="st not">Not started</span><span class="fig">0%</span>
-    </div>
-  </div>
+  <div class="box" id="list"></div>
+  <div class="box" id="time" hidden></div>
 
   <div class="act">
     <header>
@@ -290,73 +245,266 @@
     <div class="abody">
       <div class="arow full"><em>Produces</em><div class="v"><p>A documented set of behavioural pillars, one per strategic theme, with observable indicators for each.</p></div></div>
       <div class="arow"><em>Planned</em><div class="v"><span class="win late">9 – 20 Feb 26</span> · 10 working days</div></div>
-      <div class="arow"><em>Actually</em><div class="v"><span class="win">Started 9 Feb</span> · <span class="win late">4 days past the plan</span></div></div>
+      <div class="arow"><em>Actually</em><div class="v">9 – <span class="win late">24 Feb</span> · four days over</div></div>
       <div class="arow"><em>Depends on</em><div class="v">2.1 Executive alignment workshop</div></div>
       <div class="arow"><em>Blocks</em><div class="v">2.3 Blueprint review with the unit heads</div></div>
+      <div class="arow"><em>Billable</em><div class="v"><span class="mk">Yes</span></div></div>
+      <div class="arow"><em>Files</em><div class="v">blueprint-draft-v3.docx <span style="color:var(--ink-3)">· 2.1 MB, 18 Feb, Omar Tarek</span></div></div>
       <div class="arow full"><em>Broken into</em><div class="v">
         <div class="sub">
           <div class="s"><span>Draft the pillars from the audit</span><span class="st done">Done</span><span class="w">40%</span></div>
           <div class="s"><span>Indicators for each pillar</span><span class="st done">Done</span><span class="w">40%</span></div>
           <div class="s"><span>Internal review with the SMO</span><span class="st done">Done</span><span class="w">20%</span></div>
         </div>
-        <div style="font-size:12px;color:var(--ink-3);margin-top:6px">100% is these three by their weights — 40, 40 and 20. Nobody types the figure.</div>
+        <div class="note">100% is these three by their weights — 40, 40 and 20. Nobody types the figure.</div>
       </div></div>
-      <div class="arow full"><em>Files</em><div class="v">blueprint-draft-v3.docx · <span style="color:var(--ink-3)">2.1 MB, uploaded 18 Feb by Omar Tarek</span></div></div>
     </div>
-    <div style="padding:0 16px 16px">
-      <div class="signrow">
-        <span class="t"><b>Omar marked this done on 24 Feb.</b> It counts as finished when a Lead signs it off and sets the real end date.</span>
-        <button type="button" class="cta" style="margin-left:auto">Sign off as complete</button>
-      </div>
+    <div class="signrow">
+      <span class="t"><b>Omar marked this done on 24 February.</b> It counts as finished when a Lead signs it off and sets the real end date.</span>
+      <button type="button" class="cta">Sign off as complete</button>
     </div>
   </div>
 
   <div class="panel">
-    <h3>Why the plan is one list</h3>
+    <h3>Two views, one list</h3>
     <ul>
-      <li><b>The sequence is the content.</b> A rail down the side would hide phases 2 and 3 while
-        you read phase 1, and a delivery plan is read top to bottom — so phases fold rather than
-        being hidden behind a picker, and the whole plan is one scan.</li>
-      <li><b>Six columns, and everything else opens.</b> The reference puts twelve facts on a row;
-        five columns of controls is what breaks a table on an ordinary laptop, so the row carries
-        what you scan — number, name, owner, window, status, how far — and an activity opens into
-        the panel below for what it produces, its real dates, what it depends on and what it
-        blocks.</li>
-      <li><b>Every figure above an activity is derived.</b> Phase 2 reads 67% because its three
-        activities average to it; 3.1 reads 20% and phase 3 reads 10% the same way. Nobody types a phase percentage and
-        nothing stores one — theirs had two columns for this and never once wrote to either.</li>
-      <li><b>86% is the sub-activities by their weights.</b> Also derived, and the panel says so
-        where the number is, so nobody wonders whether somebody typed it.</li>
+      <li><b>The tree and the timeline are the same rows.</b> Press Timeline. Nothing is computed
+        twice and nothing is drawn twice — which is why they cannot disagree, and why a bar can
+        never say something the row beside it does not.</li>
+      <li><b>Every figure above an activity is derived.</b> A phase is its children averaged; an
+        activity is its sub-activities by weight. Nothing stores a phase percentage — theirs had
+        two columns for it and never once wrote to either. <b>The first draft of this page typed
+        two of these and both were wrong</b>, which is the argument in one sentence.</li>
+      <li><b>The plan is one list, not a rail and a pane.</b> A delivery plan is read top to
+        bottom, so phases fold rather than hiding behind a picker.</li>
+      <li><b>Six columns, and everything else opens.</b> Their version puts twelve facts on a row,
+        and five columns of controls is what breaks a table on an ordinary laptop.</li>
     </ul>
   </div>
 
   <div class="panel">
-    <h3>The three things a plan is actually for</h3>
+    <h3>What the timeline says that the list cannot</h3>
+    <ul>
+      <li><b>Today is a line, and it is the whole point.</b> A bar chart of dates without it says
+        nothing about being behind. Phase 3 has barely started and its bar runs to August — you
+        read that in one glance and nowhere in the list.</li>
+      <li><b>An overrun is drawn in red past the planned bar.</b> 2.2 was planned to 20 February
+        and ran to the 24th, and you can see it crossing into 2.3's own window — which is
+        <b>why 2.3 is blocked</b>. The list says <i>Blocked</i>; the timeline shows what by.</li>
+      <li><b>Dependencies are drawn, not listed.</b> One per activity, so the connectors stay
+        readable rather than becoming spaghetti — the dotted elbow runs from what must finish to
+        what waits.</li>
+      <li><b>A milestone is a diamond, not a bar</b>, because it is a date rather than a stretch of
+        work. Hollow until it is reached.</li>
+      <li><b>A phase draws a summary bar</b> — thinner, quieter, spanning its children — so the
+        shape of the project reads before any single activity does.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>Three things a plan is actually for</h3>
     <ul>
       <li><b>Done is not Completed.</b> Whoever does the work marks it done; it counts as finished
         when a <b>Lead</b> signs it off and sets the real end date. 2.2 is in that state — the row
-        says so in the platform's own navy, and the panel carries the only control that closes it.
+        says so in the platform's own navy, and the panel holds the only control that closes it.
         Reopening is gated the same way, or a Contributor could undo a Lead's sign-off.</li>
-      <li><b>Late is on the row, in red, on the date itself.</b> Two activities are past their
-        planned end, and the count is at the top of the page rather than somewhere you have to go
-        looking.</li>
+      <li><b>Late is red, on the date itself</b>, with the count at the top of the page rather than
+        somewhere you have to go looking for it.</li>
       <li><b>Blocked is a fact about the row, not a status.</b> 2.3 cannot start because 2.2 has not
-        finished. Its status is still Not started — that is what it IS — and the mark says why.</li>
-    </ul>
-  </div>
-
-  <div class="panel ask">
-    <h3>Three things I could not settle from what is decided</h3>
-    <ul>
-      <li><b>The Timeline view is a button here and nothing behind it.</b> A Gantt is the other half
-        of this screen and it is a drawing of its own — this one is about what the rows say.</li>
-      <li><b>An activity carries two commercial flags</b> in the reference — is it billable, does it
-        trigger an invoice — and the level they reported into is the one we dropped. Nothing here
-        draws them. If they are worked against, they come back; if nobody uses them, they go.</li>
-      <li><b>The Charter tab is new.</b> The module's navigation was written before the charter
-        existed, so it listed Plan, Progress and Analytics. Four tabs, with the charter first,
-        because it is where somebody who has never seen the project starts.</li>
+        finished. Its status is still <i>Not started</i> — that is what it IS — and the mark says
+        why.</li>
+      <li><b>Billable is a flag and nothing else</b> (2026-09-18, Islam). It sits on the activity,
+        it is drawn on the panel, and nothing counts it, totals it or invoices from it. The
+        invoice-trigger flag their system carries is <b>not</b> ported: the level it reported into
+        is the one decision 2 deleted.</li>
     </ul>
   </div>
 
 </div>
+
+<script>
+  /* ── the plan, once. Both views read this and nothing else. ── */
+  var TODAY = "2026-03-10", FROM = "2026-01-01", TO = "2026-08-31";
+  var ROWS = [
+    {lvl:0, n:"1",     t:"Culture audit and stakeholder interviews",   who:"Rania Mounir"},
+    {lvl:2, n:"1.1",   t:"Attribute survey across the ten units",      who:"Hend Sabry",   s:"2026-01-05", e:"2026-01-16", st:"done", pct:100},
+    {lvl:2, n:"1.2",   t:"Leadership interviews",                      who:"Rania Mounir", s:"2026-01-19", e:"2026-01-29", st:"done", pct:100, ms:true},
+    {lvl:0, n:"2",     t:"Strategy-alignment workshops and blueprint", who:"Rania Mounir"},
+    {lvl:2, n:"2.1",   t:"Executive alignment workshop",               who:"Rania Mounir", s:"2026-02-02", e:"2026-02-06", st:"done", pct:100},
+    {lvl:2, n:"2.2",   t:"Behavioural blueprint, first draft",         who:"Omar Tarek",   s:"2026-02-09", e:"2026-02-20", st:"sign", pct:100, ran:"2026-02-24", dep:"2.1", pick:true},
+    {lvl:2, n:"2.3",   t:"Blueprint review with the unit heads",       who:"Omar Tarek",   s:"2026-02-23", e:"2026-02-27", st:"not",  pct:0, dep:"2.2", blocked:true},
+    {lvl:0, n:"3",     t:"Company-wide activation and leadership rollout", who:"Hend Sabry"},
+    {lvl:1, n:"3.1",   t:"Activation toolkit",                         who:"Hend Sabry"},
+    {lvl:2, n:"3.1.1", t:"Leadership communication guide",             who:"Hend Sabry",   s:"2026-03-02", e:"2026-03-20", st:"wip",  pct:40},
+    {lvl:2, n:"3.1.2", t:"Employee engagement resources",              who:"",             s:"2026-03-23", e:"2026-04-10", st:"not",  pct:0},
+    {lvl:1, n:"3.2",   t:"Leadership-led rollout",                     who:"Rania Mounir"},
+    {lvl:2, n:"3.2.1", t:"Unit-by-unit activation sessions",           who:"",             s:"2026-04-01", e:"2026-07-31", st:"not",  pct:0},
+    {lvl:2, n:"3.2.2", t:"Embed behaviours in the performance cycle",  who:"",             s:"2026-08-28", e:"2026-08-28", st:"not",  pct:0, ms:true}
+  ];
+
+  var DAY = 864e5;
+  function d(s){ return new Date(s + "T00:00:00Z").getTime(); }
+  function esc(s){ return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+
+  /* A parent is its immediate children — the rule, applied rather than typed.
+     A phase with work packages rolls from THEM; one with none rolls from its
+     activities directly (§9.8). Weighted, defaulting to equal. */
+  function kids(i){
+    var out = [], lvl = ROWS[i].lvl;
+    for (var j = i + 1; j < ROWS.length && ROWS[j].lvl > lvl; j++){
+      if (ROWS[j].lvl === lvl + 1) out.push(j);
+    }
+    if (!out.length){
+      for (var k = i + 1; k < ROWS.length && ROWS[k].lvl > lvl; k++) out.push(k);
+    }
+    return out;
+  }
+  function roll(){
+    for (var i = ROWS.length - 1; i >= 0; i--){
+      var r = ROWS[i];
+      if (r.lvl === 2) continue;
+      var ks = kids(i).map(function(j){ return ROWS[j]; });
+      r.pct = Math.round(ks.reduce(function(a,x){ return a + (x.pct || 0); }, 0) / ks.length);
+      r.s = ks.reduce(function(a,x){ return !a || d(x.s) < d(a) ? x.s : a; }, null);
+      r.e = ks.reduce(function(a,x){ return !a || d(x.e) > d(a) ? x.e : a; }, null);
+      r.st = r.pct === 100 ? "done" : r.pct > 0 ? "wip" : "not";
+    }
+  }
+  roll();
+
+  var WORD = { done:"Completed", wip:"In progress", not:"Not started", sign:"Waiting to sign off" };
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function day(s){ var x = new Date(s + "T00:00:00Z"); return x.getUTCDate() + " " + MON[x.getUTCMonth()]; }
+  function span(r){
+    if (!r.s) return "—";
+    var a = new Date(r.s + "T00:00:00Z"), b = new Date(r.e + "T00:00:00Z");
+    if (r.lvl < 2 || (b - a) > 45 * DAY){
+      var m1 = MON[a.getUTCMonth()], m2 = MON[b.getUTCMonth()];
+      return (m1 === m2 ? m1 : m1 + " – " + m2) + " 26";
+    }
+    return a.getUTCMonth() === b.getUTCMonth()
+      ? a.getUTCDate() + " – " + day(r.e) : day(r.s) + " – " + day(r.e);
+  }
+  function late(r){ return r.lvl === 2 && r.pct < 100 && d(r.e) < d(TODAY); }
+
+  /* ── the list ── */
+  function drawList(){
+    var h = '<div class="head"><span>#</span><span>Phase · Work package · Activity</span>'
+          + '<span>Owner</span><span>Planned</span><span>Status</span><span>Done</span></div>';
+    ROWS.forEach(function(r){
+      h += '<div class="r lvl' + r.lvl + (r.pick ? " pick" : "") + '">'
+        +  '<span class="num">' + esc(r.n) + '</span>'
+        +  '<span class="nm">' + (r.lvl < 2 ? '<span style="color:var(--ink-3);font-size:11px">▾</span>' : "")
+        +  '<span class="t">' + esc(r.t) + '</span>'
+        +  (r.ms ? '<span class="mk">Milestone</span>' : "")
+        +  (r.blocked ? '<span class="blk">Blocked</span>' : "") + '</span>'
+        +  '<span class="who">' + (r.who ? esc(r.who) : "—") + '</span>'
+        +  '<span class="win' + (late(r) ? " late" : "") + '">' + span(r) + '</span>'
+        +  '<span class="st ' + r.st + '">' + WORD[r.st] + '</span>'
+        +  '<span class="fig">' + r.pct + '%</span></div>';
+    });
+    document.getElementById("list").innerHTML = h;
+  }
+
+  /* ── the timeline: the same rows, placed on a scale ── */
+  function drawTime(){
+    var t0 = d(FROM), t1 = d(TO) + DAY, W = t1 - t0;
+    var pc = function(ms){ return ((ms - t0) / W * 100) + "%"; };
+    var months = [], cur = new Date(FROM + "T00:00:00Z");
+    while (cur.getTime() < t1){
+      months.push(MON[cur.getUTCMonth()]);
+      cur = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth() + 1, 1));
+    }
+    var cols = "repeat(" + months.length + ",1fr)";
+    var grid = '<div class="grid" style="grid-template-columns:' + cols + '">'
+             + months.map(function(){ return "<i></i>"; }).join("") + "</div>";
+
+    var h = '<div class="gwrap"><div class="g"><div class="ghead"><span class="gl">Phase · Work package · Activity</span>'
+          + '<span class="months" style="grid-template-columns:' + cols + '">'
+          + months.map(function(m){ return "<span>" + m + "</span>"; }).join("") + "</span></div>";
+
+    ROWS.forEach(function(r, i){
+      var s = d(r.s), e = d(r.e) + DAY, isMs = r.ms && (e - s) <= 2 * DAY;
+      var body;
+      if (isMs){
+        body = '<span class="dia' + (r.pct === 100 ? "" : " not") + '" style="left:' + pc(s) + '"></span>';
+      } else {
+        body = '<span class="b' + (r.lvl < 2 ? " sum" : "") + '" style="left:' + pc(s)
+             + ';width:calc(' + pc(e) + ' - ' + pc(s) + ')"><i style="width:' + r.pct + '%"></i></span>';
+        if (r.ran) body += '<span class="over" style="left:' + pc(e)
+             + ';width:calc(' + pc(d(r.ran) + DAY) + ' - ' + pc(e) + ')"></span>';
+      }
+      h += '<div class="gr lvl' + r.lvl + (r.pick ? " pick" : "") + '">'
+        +  '<span class="gl"><span class="gn">' + esc(r.n) + '</span>'
+        +  '<span class="t">' + esc(r.t) + '</span></span>'
+        +  '<span class="track">' + grid + body + '</span></div>';
+    });
+
+    h += '<div class="gfoot">'
+      +  '<span><b style="background:var(--good)"></b>Done</span>'
+      +  '<span><b style="background:var(--surface-2);border:1px solid var(--line)"></b>Still to do</span>'
+      +  '<span><b style="background:var(--bad)"></b>Past the plan</span>'
+      +  '<span><b style="background:var(--stone);opacity:.55"></b>A phase, spanning what is in it</span>'
+      +  '<span><b style="background:var(--gold)"></b>Today</span></div></div></div>';
+
+    document.getElementById("time").innerHTML = h;
+
+    var tracks = [].slice.call(document.querySelectorAll("#time .track"));
+
+    /* today, drawn once over every track rather than per row */
+    var left = pc(d(TODAY));
+    tracks.forEach(function(tr, i){
+      var n = document.createElement("span");
+      n.className = "now"; n.style.left = left; tr.appendChild(n);
+      if (i === 0){
+        var lab = document.createElement("span");
+        lab.className = "nowlab"; lab.style.left = left; lab.textContent = "Today";
+        tr.appendChild(lab);
+      }
+    });
+
+    /* One dependency per activity, so the elbow stays readable — and the drop
+       is MEASURED rather than a row pitch typed in here (§122.5): a row is
+       28px plus its own border today, and a constant written against that
+       goes stale the moment either number moves. */
+    ROWS.forEach(function(r, i){
+      if (!r.dep) return;
+      var p = ROWS.findIndex(function(x){ return x.n === r.dep; });
+      if (p < 0 || !tracks[i] || !tracks[p]) return;
+      var drop = tracks[i].getBoundingClientRect().top - tracks[p].getBoundingClientRect().top;
+      var mid  = tracks[i].clientHeight / 2;
+      var pe = pc(d(ROWS[p].e) + DAY), ps = pc(d(r.s));
+      var add = function(cls, css){
+        var el = document.createElement("span");
+        el.className = cls; el.setAttribute("style", css); tracks[i].appendChild(el);
+      };
+      add("depv", "left:calc(" + pe + " + 6px);top:" + (mid - drop) + "px;height:" + drop + "px");
+      add("dep",  "left:calc(" + pe + " + 6px);top:" + (mid - 1) + "px;width:calc(" + ps + " - " + pe + " - 12px)");
+      add("deph", "left:calc(" + ps + " - 6px);top:" + (mid - 4) + "px");
+    });
+  }
+
+  /* the two counts at the top are read off the same rows */
+  function counts(){
+    var sign = ROWS.filter(function(r){ return r.st === "sign"; }).length;
+    var lt = ROWS.filter(late).length;
+    var a = document.getElementById("owed-sign"), b = document.getElementById("owed-late");
+    a.textContent = sign + (sign === 1 ? " activity waiting for your sign-off"
+                                       : " activities waiting for your sign-off");
+    a.hidden = !sign;
+    b.textContent = lt + (lt === 1 ? " past its date" : " past their date");
+    b.hidden = !lt;
+  }
+
+  function view(t){
+    document.getElementById("list").hidden = t;
+    document.getElementById("time").hidden = !t;
+    document.getElementById("v-list").className = t ? "btn" : "btn on";
+    document.getElementById("v-time").className = t ? "btn on" : "btn";
+  }
+  document.getElementById("v-list").addEventListener("click", function(){ view(false); });
+  document.getElementById("v-time").addEventListener("click", function(){ view(true); });
+
+  drawList(); drawTime(); counts();
+</script>

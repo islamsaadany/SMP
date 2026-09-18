@@ -1,11 +1,13 @@
 # 056 · Portfolio — the delivery plan, per client
 
-**Status:** **not built. Nothing is drawn and no source has moved.** This is the
+**Status:** **not built. No source has moved.** This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
-what it specifies is the shape, not the screens. **No mockup exists yet**, so
-rule 1c is not yet paid: nothing visual may be built from this page until each
-screen is drawn and signed off.
+what it specifies is the shape, not the screens. **Three screens are drawn and
+signed off** — the project team (§6.4), the charter (§5.1) and the plan (§9.9).
+**Progress and Analytics are not**, so rule 1c is paid for the first three and
+owed for the rest: nothing visual may be built from this page until each screen
+is drawn and signed off.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -141,7 +143,7 @@ and add notes. They do not restructure the plan.
 
 | # | Asks for | Here |
 |---|---|---|
-| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree, the timeline, the dependencies) · **Progress** (the sign-off queue and what is owed) · **Analytics**. An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
+| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed) · **Analytics**. An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. |
@@ -181,7 +183,7 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 | `portfolio_phase_groups` | Optional grouping above phases, colour-coded |
 | `portfolio_phases` | Phase, numbered, status |
 | `portfolio_work_packages` | **Renamed on the way in.** ClientPlus calls the table `scope_milestones` and the column `milestone_id` — stale since the concept was renamed in Dec 2025. Fixed now or never (the brief's own words), and doubly so here, where `milestones` means a Strategy milestone one module away. |
-| `portfolio_activities` | The working unit. Name, description, deliverables and their type, duration, planned and actual start/end, one dependency, assignee, status, progress, and the three flags — is it a milestone, is it billable, does it trigger an invoice |
+| `portfolio_activities` | The working unit. Name, description, deliverables and their type, duration, planned and actual start/end, one dependency, assignee, status, progress, and **two** flags — is it a milestone, is it billable. **Their third flag, *does it trigger an invoice*, is not ported** (§9.9). |
 | `portfolio_sub_activities` | Weighted breakdown driving progress |
 | `portfolio_collaborators` | Supporting people on an activity |
 | `portfolio_comments` | The discussion on an activity |
@@ -677,6 +679,7 @@ guarantee).
 | Reopening a completed activity **clears the sign-off date** and needs only the work-on gate | If two-step completion is the governance feature being kept, **the reopen is gated like the completion** — or a Contributor undoes a Lead's sign-off. |
 | **82% of `lib/scopeplan/` is dead**, and the dead files are the ones that read like the specification | Stated so nobody ports fiction: 512 lines of role logic, 239 of date logic and 346 of dependency logic with **zero importers**. The live rules are elsewhere. |
 | Three unrelated meanings of *milestone*, plus Strategy's own | §5's `portfolio_work_packages` renames one; the flag on an activity and Strategy's table are the other two. **Name them apart now.** |
+| `activities.trigger_invoice` — written, guarded as a structural field, and **read by nothing the audit shows**; their own workbook does not carry it | **Not ported** (§9.9). It is an agreement's fact, and decision 2 deleted the agreement. |
 
 ---
 
@@ -1033,6 +1036,70 @@ is *how much is done*, and whether that is good depends on the dates. Progress
 and being on schedule are two readings, and §344's rule is the one that applies
 — a figure is read against what it is measured by, beside the box it is typed
 into.
+
+---
+
+### 9.9 · The plan's second view, and the third flag — answered (2026-09-18)
+
+**SIGNED OFF**, from `design-mockups/portfolio/2026-09-18_project-plan.html`,
+drawn in the platform's own tokens with both palettes. Three things were asked
+on it and Islam answered all three in one line — *"1. tmieline should have the
+gantt 2. a billable for now is just a flag. no need for more now 3. agreed"*.
+
+**1 · The Timeline IS a Gantt.** The first drawing had Timeline as a second
+list sorted by date, which is a sort and not a view. It is a real chart now:
+a month axis, a bar per activity with its progress filled in, a **today line**,
+a **summary bar** per phase spanning what is in it, **milestone diamonds**
+rather than bars (a milestone is a date, not a stretch of work), a red overrun
+past the planned bar where something ran long, and **dotted elbows for
+dependencies**, one per activity so the connectors stay readable.
+
+**What it adds that the list cannot**, in the drawing's own example: phase 3 has
+barely started and its bar runs to August, which reads in one glance and nowhere
+in a list; and 2.2 running four days past its plan is drawn crossing into 2.3's
+own window, so *why* 2.3 is blocked is visible rather than merely stated.
+
+**BOTH VIEWS COME OFF ONE LIST AND THAT IS THE RULE, NOT A CONVENIENCE.** The
+tree and the chart are two readings of the same rows in the drawing, so they
+cannot disagree — the fault §5.2 spends its length on, and the one the charter
+already caught once (§9.8: two typed figures, both wrong). A second builder for
+the timeline would be §305's measured refusal arriving in a module that has not
+been written yet.
+
+**2 · Billable is a flag and nothing else.** It sits on the activity, it is
+drawn on the panel, and **nothing counts it, totals it or invoices from it** —
+so no rate, no hours, no amount and no billing screen, which is the whole of
+*"no need for more now"*.
+
+**AND THE THIRD FLAG IS NOT PORTED.** Their `activities.trigger_invoice` is
+dropped, for a reason that is arithmetic rather than taste: **the level it
+reported into is the one decision 2 deleted.** An invoice trigger is an
+agreement's fact — it says *bill against this engagement when this activity
+lands* — and there is no agreement here to bill against. Measured in the audit
+rather than assumed: it is written, it is guarded as a structural field, and
+**nothing shown reads it** (§294.2's write-only column) — and **their own
+workbook does not carry it**, listing `IsMilestone, IsBillable` and stopping,
+so dropping it costs the round trip nothing. §7.6 takes it.
+
+**3 · The Charter tab stands** (*"agreed"*) — first of four, before Plan, as
+§4's row 1 already had it.
+
+**AND IT WAS NOT RENDERED BEFORE PUBLISHING EITHER** (§54.5, as §5.1 records
+for the charter): this container has no browser. So the script was syntax-checked
+and its arithmetic run outside the page — the three phase figures printed
+**100 / 67 / 10**, which is what §9.8 asserts and what the charter says — and the
+file was read instead. **Two faults were found that way**, both the same shape,
+a rule written for a thing that was not there: the timeline's 820px grid had a
+scroller declared in the stylesheet and **no element wearing it**, so the chart
+would have scrolled the whole PAGE sideways rather than itself (§27.2 — a
+sideways page scroll drags every sticky element with it); and the dependency
+elbow's vertical drop was **a typed row pitch of 28px** where a row is 28 plus
+its own border, so it is measured off the two rows at draw time instead
+(§122.5 — a guessed constant goes stale in silence, and this one was already
+one pixel wrong on the build it was written for).
+
+**RECORDED, NOT DRAWN**: **Progress** (the sign-off queue and what is owed) and
+**Analytics** have no mockup, so rule 1c is still owed for two of the four tabs.
 
 ---
 

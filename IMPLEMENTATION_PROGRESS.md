@@ -5933,4 +5933,151 @@ red, standing 7/0, demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0,
 assistant 10/0, memory 16/0 · 14/0 · 21/0 · 36/0, `tsc` clean cold, `next build`
 green, eight of nine spikes with all sixteen falsifications red.
 
-**Waiting on Islam: the merge, and his word on that merge.**
+**Merged to `main` 2026-09-17** as a clean fast-forward, deployment read off the
+live site.
+
+---
+
+## §366 — the four that were red (2026-09-17) · **done**
+
+Islam: *"What are these issues that went red? shall we fix them?"* — then
+**"go"**. **Every one was run rather than recited, and not one is a fault in the
+product.** Three are checks asking about a state the platform no longer holds;
+the fourth was never run here.
+
+- **Tactic outcomes, 4 red** — the check needs a tactic whose outcome is still
+  blank and §353 filled every one (measured: Mobile's 22 tactics, 0 blank
+  outcomes, 0 without a target, all 22 carrying a figure). It MAKES the state
+  now, the repair §353.5 gave seven other checks. One assertion rewritten,
+  never loosened — it asked the SCORE, which also asks whether anybody
+  reported, so it answered null for the other reason.
+- **The contingency files, 1 red** — it looked for `45% / 50%`, both halves
+  per-cents; the slides carry the pair as counts and days. It asks for the
+  thing now rather than one way of writing it.
+- **Multi-client — it DIED rather than failing**, on a module row the frozen
+  console cannot draw (that endpoint has never sent a `modules` field — the
+  band is the served console's, and nothing regressed), and again on the team
+  table §360 moved to an address this stack does not serve. It runs to the end
+  now and says what it cannot see and where that claim IS asserted. **And its
+  falsification had been going green because a stray server held its port** —
+  it refuses one in words now.
+- **Forefront's own pages — not red at all**: 27/0 given a database.
+
+**Verified**: tactic-outcome 47/0 (red four ways), contingency 0 failures (red
+one way), multi-client 124/0 (red 2, port guard proved to fire), platform-look
+27/0, `qa.py` ERRORS none, `built-in-step.py` all good. **No product file
+changed** — the whole diff is three files under `checks/` — so nothing stored
+moves, nothing is migrated and `sw.js` is not bumped.
+
+**Recorded, not done**: the deck's tactics row builds its figure-and-benchmark
+pair by hand rather than through the shared builder; the frozen console and the
+frozen platform endpoint have drifted (harmless while production serves the new
+stack, and a decision rather than a repair); and six more harnesses still do not
+say that they need a rehearsal database.
+
+**Merged to `main` 2026-09-17.**
+
+---
+
+## §367 — moving between the client's settings and a module's stopped reloading the platform (2026-09-17)
+
+**What Islam asked.** *"The shifting between the client settings and the main
+console and then getting into the strategy and from the module settings to the
+client settings takes too long — is there a way to make these movements smoother
+in general?"*
+
+**What was measured first.** Three kinds of movement, and they cost wildly
+different things. Anything **inside** a module — a unit, a tab, the gear into
+that module's own Setup — is redrawn in place: no server, instant. Anything
+**between** the console, a client and a module throws the whole platform away
+and rebuilds it: the browser re-reads **3.8MB** of the platform's code and
+**660KB** of its styling, then asks the server for the client's entire plan again
+(**~360KB**, read across 42 tables) before it can draw anything.
+
+**And one of those hops was doing all of that to change one word.** The client's
+settings and a module's settings are the SAME page: the server builds both from
+the same data and they differ by a single mark saying which list to draw. So
+pressing *Client settings ›* or *Strategy settings ›* rebuilt a 3.8MB
+application and re-fetched the whole plan for no reason at all. The console and
+the module switcher are not waste — those really are different applications —
+and neither is arriving in a client for the first time. This hop was.
+
+**Four options were put to him with the cost of each. He took A**, the smallest:
+make that one crossing a press.
+
+**What was built.** Pressing either of those two rows now changes the rail in
+place, instantly, with no server involved. The link underneath is untouched, so
+a middle click, a right-click *Copy link address* and opening in a new tab all
+still work and still carry the right address — it is faster and not narrower.
+Where somebody has no page at all in the rail they are crossing to, the press
+steps aside and the link goes as before.
+
+**One thing had to follow it.** The four-square module switcher in the top left
+was kept off the client's own settings by never being built there, which worked
+while the only way across was a page load. With the crossing a press it was
+wrong both ways — missing after crossing to a module, still standing after
+crossing back. It now follows the same rule as the rest of that bar: built where
+there is a choice, hidden on the client's own pages by the one CSS rule that
+already hides the navigation row, the Group dropdown, the Units | Functions
+switch, the gear and the viewer strip.
+
+**Checked.** The shell check was **111 green** before this and is **118 green**
+after, seven assertions added — led by the one the whole change is for: a build
+that followed the link lands on the same rail wearing the same bar at the same
+address, three seconds later, so a marker planted in the page before the press
+is the only thing that can tell them apart. Both directions are asserted, and so
+is Back. Proved able to fail twice, each break made from the sources: the rows
+as plain links again → **2 red**, exactly the two markers; the switcher's old
+rule back → **1 red**, the control silently missing after the crossing.
+
+Neighbours: `setup-per-module` green on both halves (its served half drives the
+addresses both rails write), plus `setup-rail`, `setup-search`, `setup-pages`,
+`setup-sticky`, `setup-squeezed`, `client-setup`, `client-setup-outside`,
+`attention-rows` and `welcome`; `modules` 143/0, `door-landing` 140/0,
+`built-in-step` clear. **`qa.py` over `file://` is 33 viewers / 242 destinations
+/ ERRORS none** — the §365 record to the number, so nothing else moved.
+
+**Not done, and recorded rather than quietly skipped.** Three things would make
+the remaining hops faster and none is this change:
+
+* **Back between the console and a client still rebuilds**, because every page
+  here is served with an instruction telling the browser not to keep it.
+  Loosening that would make Back instant at no cost to the figures — the plan
+  never travels in the page — but it is a **security setting**, so it is Islam's
+  call, and what a signed-out Back shows has to be measured before it is
+  promised.
+* **The two big generated files are re-checked on every page change.** They only
+  change when we deploy, so they could be stamped with a version and cached.
+  Removes two round trips per hop; the re-reading cost stays.
+* **The 3.8MB itself** is the floor under every hop that genuinely changes page,
+  the module switcher included. A real piece of work, and where the weight
+  actually sits has not been measured.
+
+**Merged to `main` 2026-09-18** on Islam's word.
+
+`main` had moved one commit underneath — §366, which repaired three checks and
+changed no product file — so this was a real merge and not a fast-forward. The
+three record files conflicted and both sides were **kept**, never picked. Then
+everything was run again **on the merged tree**, which is the only tree that
+matters:
+
+* The frozen sweep: **33 viewers, 242 destinations, no errors.**
+* The check this round is about: **118 of 118.** Its neighbours 143 and 140.
+* The three §366 repaired: **47 of 47**, **no failures**, **124 of 124.**
+* The shipped file is the build; the served copies are what their generators
+  produce; the types are clean from cold; the worker parses.
+
+**How we know it is live.** The service worker cannot be the witness here — the
+generator drops the half its version name sits in, so the served worker is
+identical either side of a merge. What moved are the two files a browser
+actually downloads, read off the live site: the platform script
+**3,789,535 → 3,794,390 bytes** and the stylesheet **659,996 → 660,815**, both
+matching this build exactly. The branch was only brought level after that.
+
+**Nobody is signed out.** Nothing in this merge touches the server, the rules or
+the database — read off the file list, not assumed — so no figure, plan or
+password moves, and nothing needs migrating.
+
+**One thing to know.** Because the served worker did not change, a tab somebody
+left open will **not** be offered "a newer version of the platform is ready". It
+keeps the older screen, with its old settings rail, until it is reloaded.

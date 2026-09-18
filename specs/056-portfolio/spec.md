@@ -4,10 +4,11 @@
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
 what it specifies is the shape, not the screens. **Three screens are drawn and
-signed off** — the project team (§6.4), the charter (§5.1) and the plan (§9.9).
-**Progress and Analytics are not**, so rule 1c is paid for the first three and
-owed for the rest: nothing visual may be built from this page until each screen
-is drawn and signed off.
+signed off** — the project team (§6.4), the charter (§5.1) and the plan (§9.9);
+**Progress is drawn and awaits sign-off** (§9.10). **Analytics is not drawn and
+cannot honestly be yet** (§9.10). Rule 1c is paid for the first three and owed
+for the rest: nothing visual may be built from this page until each screen is
+drawn and signed off.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -143,7 +144,7 @@ and add notes. They do not restructure the plan.
 
 | # | Asks for | Here |
 |---|---|---|
-| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed) · **Analytics**. An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
+| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed — §9.10) · **Analytics**. An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. |
@@ -485,7 +486,7 @@ The client's register, through **the platform's own searchable ticking list**
   registry, or the access matrix.
 
 **Mockup:** `design-mockups/portfolio/2026-09-17_project-team-picker.html`,
-published, awaiting sign-off. It supersedes `2026-09-17_project-team.html`
+published and **signed off** (§6.4). It supersedes `2026-09-17_project-team.html`
 (the two-layer version) and `2026-09-17_roles-access-tab.html` (the company
 matrix), **both kept as the record of what was tried and turned down**
 (Principle II).
@@ -1098,8 +1099,79 @@ its own border, so it is measured off the two rows at draw time instead
 (§122.5 — a guessed constant goes stale in silence, and this one was already
 one pixel wrong on the build it was written for).
 
-**RECORDED, NOT DRAWN**: **Progress** (the sign-off queue and what is owed) and
-**Analytics** have no mockup, so rule 1c is still owed for two of the four tabs.
+**Progress is drawn at §9.10.** **Analytics** has no mockup, so rule 1c is still
+owed for one of the four tabs.
+
+---
+
+### 9.10 · Progress — drawn 2026-09-18, awaiting sign-off
+
+`design-mockups/portfolio/2026-09-18_project-progress.html`, in the platform's
+own tokens, both palettes. **It reads the plan's rows** — the array is copied
+byte for byte from the plan drawing — so the count at the top of the Plan page
+and the count at the top of this one cannot disagree. That is §5.2's rule and
+§9.8 is the record of it failing once already.
+
+**Four sections, every one derived**: waiting to be signed off (**2.2**), past
+its date (**2.3**, eleven days), nobody on it (**3.1.2, 3.2.1, 3.2.2**) and
+signed off (**1.1, 1.2, 2.1**). Nothing on the page is typed; the figures were
+run outside the browser before publishing and agree with the plan's own.
+
+**THE PAGE SAYS WHAT IS TRUE AND THE CONTROLS ARE DRAWN FOR WHOEVER HOLDS
+THEM** (§301). The drawing carries its own **Lead / Contributor / Viewer**
+switch — the drawing's, never the product's — so both ends can be looked at
+(§94.2): a Lead signs off and reopens; a Contributor reads the same four
+sections and is offered neither; a Viewer is offered nothing at all. **Nothing
+is hidden from anybody**, which is the difference between this and a narrowed
+page: what changes is what can be pressed.
+
+**The real end date is bounded and the row SAYS the bound** (§124), because the
+second half of the rule is the one nobody expects: not before the day the work
+was marked done, **and if the work was on time, not after its planned end
+either**. 2.2 ran four days over, so its upper bound is open, and the row says
+that too. The screen shows the bound; the server is what refuses — the same rule
+twice on purpose (§42: a screen that only narrows a picker has narrowed nothing).
+
+**Nobody is on these is the section §6.4 asked for before this page existed** —
+*unassigned activities in a live plan are what nobody notices until a
+checkpoint.* All three of them sit in the phase that has barely started.
+
+**BLOCKED IS DELIBERATELY NOT A SECTION.** 2.3 cannot start because 2.2 has not
+finished, which is a fact about 2.2 and already counted above; a fifth section
+would make one activity read as two things owed (§108.1's own arithmetic).
+
+**A gold edge means *this one is yours to do*, and it is drawn on what is owed
+and never on what is finished** — marking a Lead's own signed-off rows would be
+a colour that means nothing (§41's budget).
+
+**An empty section says so and does not nag** (§45.2 with the sign reversed, as
+§6.2 already records for the completions queue): a project with nothing waiting
+is a healthy project rather than a screen that failed to load.
+
+**AND IT WAS NOT RENDERED BEFORE PUBLISHING** (§54.5, as §5.1 and §9.9 record):
+this container has no browser. The script was syntax-checked, its four lists run
+outside the page and compared with the plan's own counts, and the file read.
+**Two figures it first typed are derived now** — which phases the unassigned
+rows sit in, and how far 2.2 ran over — because §9.8's whole lesson is that a
+typed figure on a second drawing of one project is the fault, not the shortcut.
+
+#### The two it does not decide
+
+- **The checkpoint is a line, not a mechanism.** §4's row 4 says checkpoints are
+  weekly or monthly and per project and says nothing else, so the page names the
+  next one and invents no cadence, no record and no state around it. **What a
+  checkpoint does, if anything beyond being a date, is open** — and it is worth
+  asking before Progress is built, because if it holds anything at all this is
+  the page it holds it on.
+- **Analytics has no drawing and cannot honestly have one yet.** The audit names
+  its files — 985 lines of page, 642 of a builder for grouping phases into
+  coloured buckets, 410 of a pending-completions tab, 747 of endpoint — and
+  **never says what any of it renders**. Anything drawn now would be invented
+  rather than ported. It needs sight of the reference (§10's last bullet) or a
+  decision about what a client is meant to read there. **One thing the file list
+  does settle**: their pending completions is a page AND a tab inside analytics,
+  the same queue twice, and here it is the Progress page and nowhere else
+  (§87's twins).
 
 ---
 

@@ -5206,7 +5206,7 @@ suite per feature.
 
 ## In flight
 
-**Spec 059 — the client's People register: a cell is the control (§366), on the
+**Spec 059 — the client's People register: a cell is the control (§368), on the
 branch, built 2026-09-17.** Islam: *"for the client registry I'd like to do some
 in line adjustments like the phone, employee ID, email, the unit/function, job
 title, etc. and about the roles why do I need to add them as chips why can't we
@@ -5226,7 +5226,29 @@ taken off every adopted row. **Escape had to be MADE to discard** (Chromium fire
 seven dead `min-width` rules matching nothing since §116. Verified: role-picker,
 people-dialog, seat-grant, smo-team, forefront-team, duplicates and no-jump all
 green; authoriser 683/0, change list 140/0; proved able to fail three ways from
-the sources (1 / 7 / 2 red), restored and rebuilt byte-identical. **Waiting on
+the sources (1 / 7 / 2 red), restored and rebuilt byte-identical.
+
+**AND §368.14–.17 ANSWER WHAT HE FOUND ON TESTING IT** (2026-09-18): *"on
+opening something the arrow appears, no need for the arrow. and for the roles as
+well ... the table in general should look everything fixed and not editable until
+I made the double click."* The caret goes (it announces a list the double-click
+has already opened, and as an inline span after a block label it fell to a line
+of its own, taking the open row 38.6 → 59.6px); the Roles cell stops standing
+open, so at rest the table holds **0 buttons and 0 carets** against 33 of each,
+and the column gives back 27px; and an open cell is one height whichever kind it
+is — `searchsel.js` draws a `<button>`, which `.cfg input`'s own 12.5px/`4px 7px`
+cannot reach, so the drop cell sat 3.4px proud of a resting row and now sits on it
+to the pixel. **Keyed on `PROLEPICK`, never `PCELL`**, because a ticking list
+fires `change` on every tick and would have shut on the first role. **And a real
+live-deployment defect in §368 came out of it**: the paint a double-click makes
+schedules a save, its answer paints again, the box is removed, Chromium fires
+`blur` on removal — so the cell shut under the person who had just opened it,
+invisible over `file://` where nothing saves, which is why every check was green.
+**The check could not see the fault it was written for either** — it opened a
+text cell, which has no button and therefore no caret, and measured the rows after
+Escape; REWRITTEN, never loosened (§218), it opens the two cells that draw a list
+and measures them while open. Proved able to fail four ways from the sources
+(8 / 4 / 16 / 4 red, the last printing his symptom verbatim). **Waiting on
 Islam: the merge.**
 
 **Spec 056 — the client and its modules (§362), on the branch, stage 1 of

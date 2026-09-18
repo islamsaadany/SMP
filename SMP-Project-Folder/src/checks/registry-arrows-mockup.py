@@ -200,7 +200,7 @@ def shot(pg, name, pad=10, rows=6, around=None, scrollx=None):
 
 # ── THE MEASUREMENT THE WHOLE ROUND TURNS ON ───────────────────────────────
 # A drop cell opened, measured against the rows either side of it. The arrow
-# falls to a second line because §366's open-cell rule set the button to
+# falls to a second line because §368's open-cell rule set the button to
 # `display:block` to answer a percentage-width quirk, and `.ssbtn` is normally
 # an inline-flex row — so its two children stopped being flex items.
 OPEN_CELL = """(a)=>{

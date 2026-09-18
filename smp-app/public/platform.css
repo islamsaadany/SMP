@@ -3836,7 +3836,7 @@ html[data-client-settings] .viewer { display:none; }
                     border-color:var(--gold); }
   .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .rolemore.on { padding:2px 7px; }
-  /* ── THE ROLES CELL IS THE BUTTON (§366, Islam 2026-09-17) ────────
+  /* ── THE ROLES CELL IS THE BUTTON (§368, Islam 2026-09-17) ────────
      "for the role I'm afraid it still overflows as a box it can open which a
      button as you do but not overflowing on other voxes."
 
@@ -3853,14 +3853,14 @@ html[data-client-settings] .viewer { display:none; }
      line (§88), so the box takes the height the chips already had. What it
      does cost is 27px of column — the box's own edges and the caret that says
      it opens — and no other column moves. */
-  /* ── THE OPEN CELL (§366) ────────────────────────────────────────
+  /* ── THE OPEN CELL (§368) ────────────────────────────────────────
      One field, filling the cell it replaced. `width:100%` with `min-width:0`
      rather than a cap: §110.8 measured a percentage doing nothing under
      `table-layout:auto` — the cell is sized BY its child — and a definite
      width is what stops the field contributing its intrinsic size to the
      column. Measured, the row goes 39px to 40 and no column moves. */
   .peoplecfg td.pcellopen { overflow:visible; }
-  /* A BLOCK, NEVER `width:100%` (§366). Measured: in an auto-layout table
+  /* A BLOCK, NEVER `width:100%` (§368). Measured: in an auto-layout table
      Chromium resolves a percentage against the cell's PADDING box, so
      `width:100%` in a 150px cell with 8px either side came out 150 and hung
      8px past its own cell — §110.8's note that `max-width:100%` does nothing
@@ -3872,7 +3872,53 @@ html[data-client-settings] .viewer { display:none; }
     display:block; width:auto; min-width:0; max-width:none;
     box-sizing:border-box; }
 
-  .peoplecfg td.roles .ssbtn, .pdf .rolebox .ssbtn {
+  /* ── NO ARROW IN THIS TABLE (§368.14) ───────────────────────────────
+     Islam: "on opening something the arrow appears, no need for the arrow.
+     and for the roles as well no need for the arrow showng the the box is a
+     drop down box."
+
+     IT GOES BECAUSE IT IS POINTLESS, NOT BECAUSE IT IS BEING HIDDEN: the
+     double-click opens the LIST (shell.html), so by the time the box is drawn
+     the thing the arrow announces has already happened.
+
+     AND IT IS WHAT MADE THE ROW GROW. `.pcellopen .ssbtn` is `display:block`
+     — §368's answer to a percentage-width quirk — so the button's two children
+     stopped being flex items and the caret, an inline span after a block
+     label, fell to a line of its own: measured, the open row stood at 59.6px
+     against its neighbours' 38.6, which is the picture he sent. With the caret
+     gone there is nothing left to wrap.
+
+     SCOPED TO THE REGISTER'S TABLE. Every other searchable select in the
+     platform — Setup's dropdowns, the viewer switcher, a plan's owner pickers
+     — is a control standing on its own with nothing else to say it opens, and
+     none of them was asked about (rule 1b). */
+  .peoplecfg .sscar { display:none; }
+
+  /* The open roles cell takes `.pcellopen`'s block form (above) rather than a
+     percentage: §110.8's quirk resolves 100% against the cell's PADDING box in
+     this auto-layout table, so the button hung 8px past its own cell. The
+     dialog's copy keeps `width:100%` — it is in a form, not a table cell. */
+  /* The roles button holds CHIPS rather than a line of text, so it keeps its
+     own tighter padding — measured, `.cfg input`'s 4px puts that row at
+     45.1px where 1px puts it at the resting 39.1. Two paddings, one
+     height, which is the thing that matters. */
+  .peoplecfg td.roles.pcellopen .ssbtn { max-width:100%; min-width:0; padding:1px 6px; }
+
+  /* ── AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS (§368.14) ──
+     "the table in general should look everything fixed ... until I made the
+     double click which opens the box either for writing or a drop box."
+     TWO KINDS OF BOX, SO TWO HEIGHTS UNLESS SOMETHING SAYS OTHERWISE — and
+     something did not: `.cfg input` gives every field in a Setup table
+     12.5px/4px 7px, and `searchsel.js` draws a BUTTON, which that rule cannot
+     reach, so it kept its own 13px/6px 9px. Measured, the open drop cell's
+     row stood at 42.5px against a text cell's 40.4 and a resting row's 39.1 —
+     the 3.4px jump he is describing when he says the table should look fixed.
+     These are `.cfg input`'s own two numbers rather than new ones, and what
+     is ASSERTED is the AGREEMENT (§94.8) — the two kinds of open cell are one
+     height — so if that rule ever moves, the check goes red rather than the
+     two drifting apart in silence (§122.5). */
+  .peoplecfg td.pcellopen .ssbtn { font-size:12.5px; padding:4px 7px; }
+  .pdf .rolebox .ssbtn {
     width:100%; max-width:100%; min-width:0; padding:1px 6px; }
   .peoplecfg td.roles .ssbtn .sslabel, .pdf .rolebox .ssbtn .sslabel {
     overflow:hidden; min-width:0; }
@@ -5390,7 +5436,7 @@ html[data-client-settings] .viewer { display:none; }
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
   /* ══ THE REGISTER'S OWN FIELD FLOORS AND CAPS, ALL SEVEN, DELETED ══
-     (§366; §24, and it is the second half of §24's own sentence — a rule
+     (§368; §24, and it is the second half of §24's own sentence — a rule
      nothing wears is a rule the next reader takes for load-bearing.)
 
      They were written for a mode that no longer exists. §69 and §93.10 bounded
@@ -5406,7 +5452,7 @@ html[data-client-settings] .viewer { display:none; }
      WITHIN THE HOUR. `input[data-ptitle] { min-width:150px }` in a 150px cell
      with 8px of padding either side is a 150px box in a 134px space, so the
      open cell hung 8px over its own neighbour at 1440 and below — the exact
-     overflow §366 exists to stop, from a rule written to prevent an overflow
+     overflow §368 exists to stop, from a rule written to prevent an overflow
      in a mode that was removed. The open cell sizes itself instead
      (config.css: a block, never a percentage). */
   .cfg .unitcfg td { vertical-align:middle; }

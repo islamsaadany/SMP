@@ -123,7 +123,7 @@ def set_unit(pg, key, at):
 
 
 def open_roles(pg, key):
-    """THE CELL IS THE LIST (§366). There is no "+ role" control to press any
+    """THE CELL IS THE LIST (§368). There is no "+ role" control to press any
     more: the Roles cell is a ticking button, so opening it is pressing the
     cell — and the dialog's copy is preferred, because a row's cell and the
     open person dialog draw the same picker for the same person."""
@@ -205,7 +205,7 @@ with sync_playwright() as p:
     open_row(pg, "cfo")
     # REWRITTEN, NEVER LOOSENED (§218). The control this asserted — the "+ role"
     # button and the select it opened — is gone: the Roles cell IS the ticking
-    # list (§366). The claim is the same one, that there is a way to give a role
+    # list (§368). The claim is the same one, that there is a way to give a role
     # and exactly one control to do it with.
     ck("the role picker is there", has_picker(pg, "cfo"))
     ck("and there is no second dropdown",
@@ -421,22 +421,26 @@ with sync_playwright() as p:
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 900})
         people(pg)
-        # ── REWRITTEN, NEVER DELETED (§218, §366) ────────────────────
-        # This asserted NO field in the table, and §366 reverses exactly that
-        # at Islam's instruction: one cell opens on a double-click. What made
-        # the old claim worth having was that nothing could overflow a cell it
-        # was not in — so the claim becomes the one that still carries it:
-        # AT REST nothing is a field but the Roles cells, which are the ticking
-        # list and are one per row; OPENED there is exactly one more, and it is
-        # the cell that was pressed. Both ends (§94.2), or a build that never
-        # opened anything would pass the half above it.
+        # ── REWRITTEN TWICE, NEVER LOOSENED (§218, §368, §368.14) ───────
+        # §116 asserted NO field in the table. §368 reversed it for the Roles
+        # column, which became the ticking list on every row. §368.14 reverses
+        # THAT at Islam's instruction — "the table in general should look
+        # everything fixed and not editable until I made the double click" —
+        # so the claim returns to the one §116 made, with the double-click
+        # beside it: AT REST the table holds no control of any kind, not a
+        # field and not a list; OPENED there is exactly one and it is the cell
+        # that was pressed. Both ends (§94.2), or a build that never opened
+        # anything would pass the half above it.
         rest = pg.evaluate("""()=>({
           fld: document.querySelectorAll('.peoplecfg input.fld, .peoplecfg select.fld').length,
           roles: document.querySelectorAll('.peoplecfg [data-proleset]').length,
+          arrows: [...document.querySelectorAll('.peoplecfg .sscar')]
+                    .filter(c=>c.getClientRects().length).length,
           rows: document.querySelectorAll('.peoplecfg tbody tr').length,
           open: document.querySelectorAll('.peoplecfg td.pcellopen').length})""")
-        ck("%d: at rest the table holds no field but the roles lists" % w,
-           rest["fld"] == 0 and rest["open"] == 0 and rest["roles"] == rest["rows"], rest)
+        ck("%d: at rest the table holds no control at all" % w,
+           rest["fld"] == 0 and rest["open"] == 0 and rest["roles"] == 0
+           and rest["arrows"] == 0 and rest["rows"] > 1, rest)
         who = pg.evaluate("()=>PEOPLE[2].key")
         pg.dblclick('[data-pcell="%s|Job title"]' % who)
         pg.wait_for_timeout(350)
@@ -452,6 +456,57 @@ with sync_playwright() as p:
         pg.wait_for_timeout(300)
         ck("%d: and Escape closes it" % w,
            pg.evaluate("document.querySelectorAll('.peoplecfg td.pcellopen').length") == 0)
+        # ── AND THE TWO CELLS THAT OPEN A LIST (§368.14) ────────────────
+        # THE ASSERTION ABOVE COULD NOT SEE THE REPORTED FAULT, and finding
+        # that out is most of why this block exists: it opens *Job title*,
+        # which is a plain text box with no button and therefore no caret, and
+        # it measures the row heights AFTER Escape — so the one row that can
+        # grow is never measured open. Falsified by putting the caret back:
+        # the whole file went green (§54.5 — a falsification that does not
+        # falsify is indistinguishable from a working guard).
+        #
+        # What Islam reported is a cell that opens a LIST: "on opening
+        # something the arrow appears ... and for the roles as well". Both of
+        # those draw `searchsel.js`'s own button, so both are opened here and
+        # measured WHILE OPEN, on the three things that can be wrong —
+        #   the list is actually open (a build that drew a shut box would pass
+        #     every fit assertion and still cost three presses),
+        #   the button is inside its own cell, and
+        #   the row has not grown, which is the arrow's real cost: the caret
+        #     is an inline span after a block label, so it fell to a line of
+        #     its own and took the row from 38.6px to 59.6.
+        # Both ends (§94.2): the caret is asserted absent WHERE THE BUTTON IS,
+        # never merely absent from a table that has no button in it at all.
+        for fld, what in (("Unit or function", "a unit"), ("Roles", "the roles")):
+            pg.dblclick('[data-pcell="%s|%s"]' % (who, fld))
+            pg.wait_for_timeout(400)
+            o = pg.evaluate("""()=>{
+              const td=document.querySelector('.peoplecfg td.pcellopen');
+              if(!td) return {open:0};
+              const b=td.querySelector('.ssbtn'), tr=td.closest('tr');
+              const hs=[...document.querySelectorAll('.peoplecfg tbody tr')]
+                .filter(r=>r!==tr).map(r=>Math.round(r.getBoundingClientRect().height));
+              return {open:1, btn:!!b,
+                list: !!document.querySelector('.sspop'),
+                cars: [...td.querySelectorAll('.sscar')]
+                        .filter(c=>c.getClientRects().length).length,
+                fits: b ? b.getBoundingClientRect().right <=
+                          td.getBoundingClientRect().right + 1 : false,
+                h: Math.round(tr.getBoundingClientRect().height),
+                others: [...new Set(hs)]};}""")
+            ck("%d: %s opens its list, in its own cell" % (w, what),
+               o.get("open") == 1 and o.get("btn") and o.get("list")
+               and o.get("fits"), o)
+            ck("%d: ...with no arrow, and the row has not grown" % (w, ),
+               o.get("cars") == 0 and len(o.get("others") or []) == 1
+               and o["h"] == o["others"][0], o)
+            pg.keyboard.press("Escape")
+            pg.wait_for_timeout(250)
+            pg.keyboard.press("Escape")
+            pg.wait_for_timeout(250)
+        ck("%d: and both close again" % w,
+           pg.evaluate("document.querySelectorAll('.peoplecfg td.pcellopen').length") == 0
+           and pg.evaluate("()=>typeof PROLEPICK==='undefined'||PROLEPICK===null"))
         ck("%d: every row is one line" % w,
            pg.evaluate("""()=>{const hs={};
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
@@ -461,27 +516,45 @@ with sync_playwright() as p:
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
                const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
              return JSON.stringify(hs);}"""))
-        # AND EVERY ROLES BUTTON SAYS ITS VALUE ALOUD (§366). An `aria-label`
-        # REPLACES an element's content as its accessible name, so with the
-        # chips handed over as html the button announced the PERSON and never
-        # the roles — the one control on this page whose value a screen reader
-        # could not hear, and the name was being written AFTER the label
-        # composed it. Both ends over the whole column (§94.2): a row holding
-        # roles names them, a row holding none is just the base, and the
-        # register must have an example of each or the claim proves nothing
-        # (§113.8).
-        names = pg.evaluate("""()=>{
-          const out={with:0, without:0, bad:[]};
-          document.querySelectorAll('.peoplecfg [data-proleset]').forEach(s=>{
-            const a=s.previousElementSibling;
-            const n=(a&&a.getAttribute('aria-label'))||'';
-            const base=s.getAttribute('aria-label')||'';
-            const said=s.dataset.sstitle||'';
-            const want=base+(said?' \u2014 '+said:'');
-            if(n!==want) out.bad.push(n||'(none)');
-            else if(said) out.with++; else out.without++;});
-          return out;}""")
-        ck("%d: every roles button names the person, and what they hold" % w,
+        # AND THE ROLES BUTTON SAYS ITS VALUE ALOUD (§368, re-aimed §368.14).
+        # An `aria-label` REPLACES an element's content as its accessible name,
+        # so with the chips handed over as html the button announced the PERSON
+        # and never the roles — the one control on this page whose value a
+        # screen reader could not hear. §368.14 draws that button only while the
+        # cell is OPEN, so the claim is asked where the control now is: opened
+        # on somebody who holds roles, and on somebody who holds none. Both
+        # ends (§94.2, §113.8) — the register must carry an example of each or
+        # a build that said nothing at all would pass.
+        names = {"bad": [], "with": 0, "without": 0}
+        for pk in (pg.evaluate("""()=>{
+              const held=PEOPLE.filter(p=>!p.forefront && personRoles(p).length);
+              const none=PEOPLE.filter(p=>!p.forefront && !personRoles(p).length);
+              return [held[0] && held[0].key, none[0] && none[0].key];}""")):
+            if not pk:
+                names["bad"].append("(the register has no such row)")
+                continue
+            pg.dblclick('[data-pcell="%s|Roles"]' % pk)
+            pg.wait_for_timeout(350)
+            got = pg.evaluate("""()=>{
+              const s=document.querySelector('.peoplecfg td.pcellopen [data-proleset]');
+              if(!s) return {bad:'(no list opened)'};
+              const a=s.previousElementSibling;
+              const n=(a&&a.getAttribute('aria-label'))||'';
+              const base=s.getAttribute('aria-label')||'';
+              const said=s.dataset.sstitle||'';
+              const want=base+(said?' \u2014 '+said:'');
+              return n===want ? {said:!!said} : {bad:(n||'(none)')};}""")
+            if got.get("bad"):
+                names["bad"].append(got["bad"])
+            elif got.get("said"):
+                names["with"] += 1
+            else:
+                names["without"] += 1
+            pg.keyboard.press("Escape")
+            pg.wait_for_timeout(200)
+            pg.keyboard.press("Escape")
+            pg.wait_for_timeout(250)
+        ck("%d: the roles list names the person, and what they hold" % w,
            not names["bad"] and names["with"] and names["without"], names)
         open_row(pg, "cfo")
         # AND NOTHING IN THE DIALOG OVERFLOWS ITS FIELD.
@@ -502,7 +575,7 @@ with sync_playwright() as p:
              return !!h && (h===a || a.contains(h));}"""))
         close_row(pg)
 
-    # ── 9. ENTER STORES IT AND ESCAPE THROWS IT AWAY (§366) ────────────
+    # ── 9. ENTER STORES IT AND ESCAPE THROWS IT AWAY (§368) ────────────
     # Read back off the PERSON and never off the screen (§96): a box holding
     # what was typed says nothing about what was stored. BOTH ENDS (§94.2),
     # because "Escape discards" is satisfied perfectly by a build that never

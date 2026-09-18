@@ -5680,7 +5680,7 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
-/* ── WHOSE ROLES LIST IS OPEN (§366) ──────────────────────────────────
+/* ── WHOSE ROLES LIST IS OPEN (§368) ──────────────────────────────────
    The Roles cell IS a ticking list now, and granting a role has to repaint —
    it changes the chips, and it takes the role off whoever held it, whose row
    is elsewhere in the table. A paint closes every popup (searchsel's wire()
@@ -5688,7 +5688,7 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    the end of the paint. It replaces `ADDROLE`/`ADDROLE_KIND`, which were the
    "+ role" control's own state and have no control left to describe (§24). */
 var PROLEPICK = null;
-/* ── AND WHICH CELL IS BEING TYPED INTO (§366) ─────────────────────────
+/* ── AND WHICH CELL IS BEING TYPED INTO (§368) ─────────────────────────
    `{key, field}` — the person and the dialog's own label for the field — or
    null. One at a time, for §79.2's reason: two open cells are two unsaved
    states. There is no Save and no Cancel, because leaving a bound field is
@@ -32169,7 +32169,20 @@ function renderPeople(){
      the answer would always be false and the picker would exist nowhere. It is
      a parameter again — passed false by the row, true by the dialog — and there
      are exactly two callers, both in this file, both named. */
-  function roleCell(p, editable){
+  /* ── AT REST IT IS THE CHIPS, OPENED IT IS THE LIST (§368.14) ────────
+     Islam, of the register on his own deployment: "the roles as well no need
+     for the arrow showng the the box is a drop down box .. the table in
+     general should look everything fixed and not editable until I made the
+     double click."
+
+     §368 made the whole cell the ticking button, which answered "it must not
+     overflow" and left the one column in the table that draws a control when
+     nobody is editing anything — a white box with a border and an arrow, on
+     all 33 rows, measured. `opened` is the third state that was missing: a row
+     somebody MAY edit but is not editing reads exactly as a row nobody may
+     edit does, and the double-click that opens every other cell opens this one
+     too. */
+  function roleCell(p, editable, opened){
     /* ── A FOREFRONT ROW IS SET SOMEWHERE ELSE (spec 042 §6) ──────
        Their seat comes from this client's configuration on the Forefront
        platform, and the next time they open the client it is written again —
@@ -32222,7 +32235,7 @@ function renderPeople(){
        what made this the widest column on the page. The overflow is a CONTROL,
        not a hover: a hover cannot be reached on a touch screen and cannot be
        read aloud, and this is the only place the second role appears. */
-    /* ── THE CHIPS, AND THEY ARE THE PICKER'S LABEL TOO (§366) ─────
+    /* ── THE CHIPS, AND THEY ARE THE PICKER'S LABEL TOO (§368) ─────
        `asLabel` is true when this cell is about to BE the ticking button:
        there, the "…" is a span rather than a button (a button inside a button
        is not markup, and one press now opens the whole list anyway) and the
@@ -32297,6 +32310,18 @@ function renderPeople(){
        places for one answer to go missing from (§104.7). */
     held = held + alsoOurs;
     if (!editable) return held;
+    /* ── AND A ROW NOT BEING EDITED IS READ, NOT OFFERED (§368.14) ──────
+       The chips, with the "…" already a span rather than a button (`asLabel`
+       above) — so the cell carries no single-click behaviour at all and the
+       double-click has the whole of it. What the "…" used to reveal is on the
+       hover and is ticked in the list this cell now opens, so nothing is out
+       of reach (§61).
+
+       `roleStop` and `seatAsk` ride BOTH exits: a refused pick and a seat
+       waiting to be confirmed are answers to something just done, and the pick
+       that produced them closes the cell (§186, §110). Drawn only when their
+       own state names this person, so at rest they are nothing. */
+    if (!opened) return held + roleStop(p) + seatAsk(p);
     /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
        `SMPRules.personRoles()` opens with "a retired person holds nothing" and
        returns [] — but the picker was drawn on a retired row anyway, so giving
@@ -32338,7 +32363,7 @@ function renderPeople(){
        other; both have to say something before somebody holds a role somewhere,
        and where they cannot agree the row explains it rather than doing
        nothing. */
-    /* ── THE CELL IS THE LIST (§366, Islam 2026-09-17) ───────────────
+    /* ── THE CELL IS THE LIST (§368, Islam 2026-09-17) ───────────────
        "for the role I'm afraid it still overflows as a box it can open which
        a button as you do but not overflowing on other voxes can we make this
        work?" — and the way it works is that the cell keeps exactly what it
@@ -32349,7 +32374,7 @@ function renderPeople(){
        rule about this column in the same stroke.
 
        The chips are handed over as the closed control's LABEL (`data-sshtml`,
-       §366 in searchsel.js) rather than re-drawn, so there is one builder for
+       §368 in searchsel.js) rather than re-drawn, so there is one builder for
        what a role looks like and the cell reads the same open, shut and on a
        row nobody may edit.
 
@@ -32518,7 +32543,7 @@ function renderPeople(){
      roles, no password state and no declaration to accept. */
   function personFields(p, add){
     var out = [];
-    /* ── THE NOTE IS NOT THE FIELD (§366) ──────────────────────────
+    /* ── THE NOTE IS NOT THE FIELD (§368) ──────────────────────────
        Three of these carry a sentence under them — "not on the Official BU
        list", "the list says Retail Stores", "from the unit above" — and the
        dialog draws field and note together, as it always has. The REGISTER
@@ -32597,7 +32622,10 @@ function renderPeople(){
       (derived
         ? '<span class="vwhy">from the unit above</span>'
         : ''));
-    if (!add) F("Roles", '<span class="rolebox rolebox-wide">' + roleCell(p, true) + '</span>', true);
+    /* THE DIALOG'S PICKER IS ALWAYS THE LIST. It is a field in a form rather
+       than a cell in a table, so there is no "at rest" for it to have — the
+       third argument is what the table uses to read as fixed (§368.14). */
+    if (!add) F("Roles", '<span class="rolebox rolebox-wide">' + roleCell(p, true, true) + '</span>', true);
     return out;
   }
   /* The dialog's body. `groups` is a marker rather than a field, so the two
@@ -33027,7 +33055,7 @@ function renderPeople(){
      Cancel, the Add row's three boxes under the wrong headings, the fields
      painting over their neighbours — was a control being clicked inside a
      cell, and none of them survives the move. */
-  /* ══ ONE CELL, OPENED WHERE IT IS READ (§366, spec 059) ═══════════════
+  /* ══ ONE CELL, OPENED WHERE IT IS READ (§368, spec 059) ═══════════════
      Islam: "for the client registry I'd like to do some in line adjustments
      like the phone, employee ID, email, the unit/function, job title, etc."
 
@@ -33165,14 +33193,32 @@ function renderPeople(){
       (showCol("email")
         ? pcell(p, "Email", copyable(p.email, "val"), "wrapany") : '') +
       (showCol("phone") ? pcell(p, "Mobile", copyable(p.phone, "mono")) : '') +
-      /* ── AND THE CELL IS THE PICKER NOW (§366) ─────────────────────
+      /* ── AND THE CELL IS THE PICKER NOW (§368) ─────────────────────
          `false` was right while the table only ever read: the × and the
          "+ role" control belonged to the dialog. What the cell draws is
          unchanged — the same chips, the same "…" — and the whole of it is
          pressable for somebody who may edit, so the answer to "editable" is
          the grant rather than which surface is asking. */
-      (showCol("roles")
-        ? '<td class="roles"><span class="rolebox">' + roleCell(p, mayEdit) + '</span></td>' : '') +
+      /* ── AND IT OPENS LIKE EVERY OTHER CELL NOW (§368.14) ─────────────
+         §368 made the whole cell pressable, which is one press where the rest
+         of the table takes two — and drew a bordered box on every row to say
+         so. The cell reads as its chips and a double-click opens the list, so
+         there is ONE rule for the table rather than this column's own. */
+      (showCol("roles") ? (function(){
+          /* OPEN IS `PROLEPICK`, NEVER A SECOND FLAG (§53.5). That state
+             already decides whether this person's list is showing, and the
+             ticking handler already keeps it across the repaint a grant makes
+             — per tick, because a list you are ticking is not answered until
+             you stop (§130.1) — and clears it for the two things that speak IN
+             the cell, a seat ask and a refusal. A `PCELL` entry beside it would
+             be a second answer to one question, and the one that closes on the
+             first tick. */
+          var rOpen = PROLEPICK === p.key;
+          return '<td class="roles' + (rOpen ? ' pcellopen' : '') + '"' +
+            (cellOpens(p, "Roles") ? ' data-pcell="' + esc(p.key) + '|Roles"' : '') +
+            '><span class="rolebox">' + roleCell(p, mayEdit, rOpen) +
+            '</span></td>';
+        })() : '') +
       (showCol("status")
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
@@ -43998,7 +44044,7 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§366) ───────────────────
+  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§368) ───────────────────
      `data-sslabel="count"` above is a WORD chosen per control; this is the
      same decision one step further — the register's Roles cell is a row of
      chips, and the closed control has to be that cell rather than a comma
@@ -44017,7 +44063,7 @@ var SEARCHSEL = (function(){
       lb.innerHTML = sel.dataset.sshtml;
       var said = sel.dataset.sstitle || "";
       btn.title = said;
-      /* ── AND THE VALUE IS SAID ALOUD, NOT ONLY DRAWN (§366) ───────
+      /* ── AND THE VALUE IS SAID ALOUD, NOT ONLY DRAWN (§368) ───────
          `wire()` names the button from the select's own `aria-label`, and an
          aria-label REPLACES the element's content as its accessible name — so
          with the chips handed over as html a screen reader heard "Roles for
@@ -44156,7 +44202,7 @@ var SEARCHSEL = (function(){
     } else {
       pop.appendChild(q);
     }
-    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§366) ─────────────
+    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§368) ─────────────
        Supplied by the caller and drawn nowhere else. The register's Roles
        list can grant what is held at this person's own place and nothing
        more, so the roles held elsewhere and the ones that come from the plan
@@ -44323,7 +44369,7 @@ var SEARCHSEL = (function(){
     car.setAttribute("aria-hidden", "true");
     car.textContent = "▾";
     btn.appendChild(car);
-    /* ── THE NAME IS SET BEFORE THE LABEL, NOT AFTER IT (§366) ────────
+    /* ── THE NAME IS SET BEFORE THE LABEL, NOT AFTER IT (§368) ────────
        The visible control inherits the hidden one's name, so a screen reader
        is told what the control is FOR rather than only what it currently says
        (§48.2). It was set AFTER `setLabel` and therefore overwrote what
@@ -44362,7 +44408,7 @@ var SEARCHSEL = (function(){
       document.querySelectorAll("select").forEach(enhance);
     },
     close: close,
-    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§366) ─────────────
+    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§368) ─────────────
        §130.1 commits a tick WITHOUT repainting, and says in its own words
        what makes that safe: every field this control was used on goes through
        the shell's one `data-fld` listener, which does not repaint. Granting a
@@ -56559,7 +56605,7 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    /* ── AND THE ROLES LIST IS ASKED BACK (§366) ────────────────────
+    /* ── AND THE ROLES LIST IS ASKED BACK (§368) ────────────────────
        A tick grants or revokes, which repaints — the chips change, and the
        role comes off whoever held it, whose row is elsewhere in the table. So
        the popup is reopened rather than preserved: it is a rendering of the
@@ -56577,7 +56623,7 @@ var SYNC = (function () {
                  document.querySelector('[data-proleset="' + PROLEPICK + '"]');
       if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;
     }
-    /* AND THE CURSOR GOES INTO THE CELL THAT WAS JUST OPENED (§366) — here
+    /* AND THE CURSOR GOES INTO THE CELL THAT WAS JUST OPENED (§368) — here
        rather than in wire(), for searchsel's own reason: three of these cells
        hold a select, and the button that stands in front of it does not exist
        until the line above has run. `focusNoScroll`, because the register is
@@ -56586,9 +56632,45 @@ var SYNC = (function () {
     if (PCELL) {
       var pc = document.querySelector(".peoplecfg td.pcellopen .fld");
       var pb = pc && pc.tagName === "SELECT" ? pc.previousSibling : null;
-      focusNoScroll(pb && pb.classList && pb.classList.contains("ssbtn") ? pb : pc);
-      if (pc && pc.tagName === "INPUT" && pc.select) pc.select();
+      pb = pb && pb.classList && pb.classList.contains("ssbtn") ? pb : null;
+      /* ── AND A DROP CELL OPENS ITS LIST (§368.14) ──────────────────────
+         Islam: "on opening something the arrow appears, no need for the
+         arrow." Measured, the arrow was announcing a press he had already
+         made: the double-click drew a SHUT box that had to be pressed again,
+         so changing somebody's unit took three acts. Opening the list is what
+         makes the arrow pointless rather than merely hidden — and it is
+         `SEARCHSEL.openOn`, the function the roles picker two blocks up
+         already calls (§53.5).
+
+         It falls back to focusing the button rather than assuming: `openOn`
+         answers false when there is nothing to open, and a cell left focused
+         is still a cell somebody can press (§61). */
+      if (pb && SEARCHSEL.openOn(pc)) { /* the list has the focus */ }
+      else {
+        focusNoScroll(pb || pc);
+        if (pc && pc.tagName === "INPUT" && pc.select) pc.select();
+      }
     }
+    /* ── ESCAPE SHUTS THE CELL, NOT ONLY THE LIST (§368.14) ──────────────
+       searchsel's own Escape closes the popup and hands the focus back to the
+       button, which left a box standing in a table meant to read as fixed. One
+       listener on the one open button, and BOTH states, because a drop cell is
+       `PCELL` and the roles cell is `PROLEPICK` and Escape means the same thing
+       on either.
+
+       HERE, NOT IN `wire()`, and that is searchsel's own reason again: the
+       button does not exist until `SEARCHSEL.wire()` has run, which is after
+       the register is wired — written there first, it bound to nothing and the
+       second Escape did nothing at all (measured, not read). The table is
+       rebuilt on every paint, so the node is new each time and nothing can
+       bind twice (§24, §47.2). */
+    var pescbtn = document.querySelector(".peoplecfg td.pcellopen .ssbtn");
+    if (pescbtn) pescbtn.addEventListener("keydown", function(e){
+      if (e.key !== "Escape") return;
+      e.preventDefault(); e.stopPropagation();
+      PCELL = null; PROLEPICK = null; ROLESTOP = null;
+      paint();
+    });
     /* §189: size every growing prose box to what is in it. Here, at the end
        of paint(), for SEARCHSEL's own reason — these are rebuilt on every
        paint, and a height measured before the row is laid out is a height
@@ -59450,7 +59532,7 @@ var SYNC = (function () {
     fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; }, root);
 
     };
-    /* ══ ONE CELL, OPENED WHERE IT IS READ (§366, spec 059) ═══════════
+    /* ══ ONE CELL, OPENED WHERE IT IS READ (§368, spec 059) ═══════════
        Islam: "for the client registry I'd like to do some in line adjustments
        like the phone, employee ID, email, the unit/function, job title, etc."
        and, of the clash he named in the same breath, "for the editing in
@@ -59474,8 +59556,18 @@ var SYNC = (function () {
         var td = e.target && e.target.closest && e.target.closest("[data-pcell]");
         if (!td || !body.contains(td)) return;
         var at = String(td.dataset.pcell).split("|");
+        var fld = at.slice(1).join("|");
         try { window.getSelection().removeAllRanges(); } catch (err) {}
-        PCELL = { key: at[0], field: at.slice(1).join("|") };
+        /* ── ROLES OPENS THE STATE IT ALREADY HAD (§368.14) ────────────
+           The ticking list's open/shut is `PROLEPICK`, which survives the
+           repaint every grant makes and closes itself for a seat ask and a
+           refusal (§130.1, §186, §110). A `PCELL` entry for it would be a
+           second answer to one question — and the one that closes on the first
+           tick, because a `change` listener is what closes a `PCELL`. */
+        if (fld === "Roles") {
+          PCELL = null; ROLESTOP = null; PROLEPICK = at[0]; paint(); return;
+        }
+        PCELL = { key: at[0], field: fld };
         paint();
       });
       if (!PCELL) return;
@@ -59490,14 +59582,32 @@ var SYNC = (function () {
          interaction with it is §30.1's fault. */
       fld.addEventListener("change", function(){ PCELL = null; });
       fld.addEventListener("blur", function(){
-        if (PCELL === null && !document.querySelector(".peoplecfg td.pcellopen")) return;
-        PCELL = null;
-        setTimeout(paint, 0);
+        /* ── A REPAINT REMOVED IT; NOBODY LEFT IT (§368.14) ───────────────
+           Chromium fires `blur` — and `change` before it — on a focused
+           element being REMOVED, which §368 relies on for Escape and which
+           also fires every time the register repaints. So on a live
+           deployment the cell closed under the person who had just opened it:
+           the paint the double-click makes schedules a save (§170's leading
+           edge), its answer paints again, the box goes, blur fires and the
+           cell shuts. Invisible over `file://`, where nothing saves and
+           nothing paints — which is why every check was green.
+
+           Asked one tick later, `isConnected` tells the two apart: a box a
+           repaint took away is gone from the document, and `PCELL` is left
+           standing so the end of that paint puts the cursor back in the box it
+           drew. A box somebody moved away from is still there, and that is the
+           blur this rule is for. */
+        setTimeout(function(){
+          if (!fld.isConnected) return;
+          if (PCELL === null && !document.querySelector(".peoplecfg td.pcellopen")) return;
+          PCELL = null;
+          paint();
+        }, 0);
       });
       /* WHAT IT HELD WHEN IT OPENED, so Escape has something to put back. */
       var was = fld.value;
       fld.addEventListener("keydown", function(e){
-        /* ── ESCAPE PUTS THE VALUE BACK, NOT THE NODE (§366) ─────────
+        /* ── ESCAPE PUTS THE VALUE BACK, NOT THE NODE (§368) ─────────
            The first build removed the node and relied on that discarding the
            edit, and it does not: Chromium fires `blur` — and `change` before
            it — on a focused element being removed, so the field's own handler
@@ -59664,7 +59774,7 @@ var SYNC = (function () {
        "Use it" would all be decoration (§96). */
     window.wirePersonDialogControls = function(root){
       var R = root || document;
-    /* ── THE ROLE PICKER IS THE CELL (§366) ─────────────────────────
+    /* ── THE ROLE PICKER IS THE CELL (§368) ─────────────────────────
        The "+ role" control that opened this, the select it opened and the ×
        that undid it are all gone with it: the Roles cell is a ticking list
        now, so giving a role is a tick and taking one off is the same tick
@@ -59726,7 +59836,7 @@ var SYNC = (function () {
           var atCo = wheres.every(function(w){
             return String(w.v).indexOf("co:") === 0; });
           var fld = atCo ? "Company" : "Unit";
-          /* THE ROLE TRAVELS WITH THE REFUSAL (§366). It used to be read back
+          /* THE ROLE TRAVELS WITH THE REFUSAL (§368). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
              there is no open picker any more: the list commits a tick and
              closes. So what §110's "either half finishes it" needs is on the
@@ -59794,7 +59904,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* ── ONE TICK IS ONE ROLE, GIVEN OR TAKEN (§366) ─────────────────
+    /* ── ONE TICK IS ONE ROLE, GIVEN OR TAKEN (§368) ─────────────────
        The register's Roles cell IS this list (config-render.js), so a change
        here is exactly one option going on or off — searchsel fires per tick
        (§130.1) — and the difference against what the person holds says which

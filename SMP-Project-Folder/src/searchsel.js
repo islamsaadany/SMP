@@ -142,7 +142,7 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§366) ───────────────────
+  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§368) ───────────────────
      `data-sslabel="count"` above is a WORD chosen per control; this is the
      same decision one step further — the register's Roles cell is a row of
      chips, and the closed control has to be that cell rather than a comma
@@ -161,7 +161,7 @@ var SEARCHSEL = (function(){
       lb.innerHTML = sel.dataset.sshtml;
       var said = sel.dataset.sstitle || "";
       btn.title = said;
-      /* ── AND THE VALUE IS SAID ALOUD, NOT ONLY DRAWN (§366) ───────
+      /* ── AND THE VALUE IS SAID ALOUD, NOT ONLY DRAWN (§368) ───────
          `wire()` names the button from the select's own `aria-label`, and an
          aria-label REPLACES the element's content as its accessible name — so
          with the chips handed over as html a screen reader heard "Roles for
@@ -300,7 +300,7 @@ var SEARCHSEL = (function(){
     } else {
       pop.appendChild(q);
     }
-    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§366) ─────────────
+    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§368) ─────────────
        Supplied by the caller and drawn nowhere else. The register's Roles
        list can grant what is held at this person's own place and nothing
        more, so the roles held elsewhere and the ones that come from the plan
@@ -467,7 +467,7 @@ var SEARCHSEL = (function(){
     car.setAttribute("aria-hidden", "true");
     car.textContent = "▾";
     btn.appendChild(car);
-    /* ── THE NAME IS SET BEFORE THE LABEL, NOT AFTER IT (§366) ────────
+    /* ── THE NAME IS SET BEFORE THE LABEL, NOT AFTER IT (§368) ────────
        The visible control inherits the hidden one's name, so a screen reader
        is told what the control is FOR rather than only what it currently says
        (§48.2). It was set AFTER `setLabel` and therefore overwrote what
@@ -506,7 +506,7 @@ var SEARCHSEL = (function(){
       document.querySelectorAll("select").forEach(enhance);
     },
     close: close,
-    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§366) ─────────────
+    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§368) ─────────────
        §130.1 commits a tick WITHOUT repainting, and says in its own words
        what makes that safe: every field this control was used on goes through
        the shell's one `data-fld` listener, which does not repaint. Granting a

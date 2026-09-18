@@ -26,6 +26,7 @@ so over `file://` a build that had lost the queue entirely would go green
 """
 import json
 import pathlib
+import os
 import http.server
 import socketserver
 import threading
@@ -33,7 +34,13 @@ import threading
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_bytes()
+# SMP_BUILT POINTS IT AT ANOTHER BUILD (§334.13, §276). This file serves its
+# own stub, so the build under test is a path rather than an argument — and
+# without it the only way to falsify anything here is to overwrite the built
+# file in the tree, which is how §343.9 lost a round's work.
+HTML = pathlib.Path(os.environ.get("SMP_BUILT") or
+                    (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html")
+                    ).read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 SAID = {p["key"]: "retailstores" for p in SEED.get("people", [])[:3]}
@@ -149,6 +156,13 @@ print("the register stops being a form — " + URL)
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={"width": 1280, "height": 940})
+    # §148's WELCOME SCREEN BLINDS ANY CHECK WRITTEN BEFORE IT (§167.2). It
+    # covers the viewport, so every real press lands on it — invisible to this
+    # file until §368.14 gave it a press to make. Suppressed as a RETURNING viewer
+    # does, and in an `add_init_script`, because setting the flag after `goto`
+    # is one paint too late.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
     pg.on("pageerror", lambda e: errs.append("pageerror: " + str(e)))
     pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
     pg.goto(URL)
@@ -180,26 +194,54 @@ with sync_playwright() as p:
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 940})
         land(pg)
-        # ── REWRITTEN, NEVER LOOSENED (§218, §366) ───────────────────
-        # This asserted that the table holds NO control, and §366 reverses
-        # exactly that at Islam's instruction: the Roles cell is a ticking
-        # list, and a double-click opens one cell. What the assertion was FOR
-        # survives whole — every collision it names was a control drawn BESIDE
-        # a value inside a cell, so the claim becomes that no cell holds more
-        # than the one control that replaced it, and that each one fits.
-        got = pg.evaluate("""()=>{
+        # ── REWRITTEN TWICE, NEVER LOOSENED (§218, §368, §368.14) ───────
+        # §116 asserted the table holds NO control. §368 reversed it for the
+        # Roles column, which became a ticking list on every row. §368.14 reverses
+        # THAT — Islam: "the table in general should look everything fixed and
+        # not editable until I made the double click" — so the original claim
+        # is the claim again, with the double-click asserted beside it.
+        #
+        # WHAT IT WAS FOR SURVIVES WHOLE, and that is why it is worth asking at
+        # four widths: every collision it names was a control drawn inside a
+        # cell, so AT REST there are none to collide, and OPENED there is
+        # exactly one and it fits the cell it is in (§94.2 — a build that never
+        # opened anything would pass the first half on its own).
+        got = pg.evaluate("""()=>({
+          cells: document.querySelectorAll(
+                   '.peoplecfg tbody input, .peoplecfg tbody select, '
+                   + '.peoplecfg tbody .ssbtn').length,
+          rows: document.querySelectorAll('.peoplecfg tbody tr').length})""")
+        ck("%d: at rest the table holds no control" % w,
+           got["cells"] == 0 and got["rows"] > 1, got)
+        # BY KEY, never by the column alone: 33 cells carry that suffix and the
+        # first of them may be a row the register does not open (§362.2's
+        # minted rows), so the press is aimed at a person who does.
+        who = pg.evaluate("()=>(PEOPLE.filter(p=>!p.forefront)[2]||{}).key")
+        # AND THE PRESS DELIBERATELY RACES A SAVE (§368.14). `land()` leaves the
+        # graph dirty, so the paint this press makes schedules one (§170's
+        # leading edge); its answer paints again, that paint removes the
+        # focused box, and Chromium fires `blur` on a focused element being
+        # removed — which used to close the cell under whoever had just opened
+        # it. Invisible over `file://`, where nothing saves and nothing
+        # repaints, which is why every check was green on it. Waiting for quiet
+        # before pressing would put that back out of reach, so this does not
+        # wait.
+        pg.dblclick('[data-pcell="%s|Job title"]' % who)
+        pg.wait_for_timeout(350)
+        now = pg.evaluate("""()=>{
           const cells=[...document.querySelectorAll('.peoplecfg tbody td')];
           const withc=cells.filter(c=>c.querySelector('input,select,.ssbtn'));
           const over=withc.filter(c=>{
             const k=c.querySelector('input,.ssbtn');
             return k && k.getBoundingClientRect().right >
                         c.getBoundingClientRect().right + 1;});
-          return {cells:withc.length, many:withc.filter(c=>
-                    c.querySelectorAll('input,select').length>1).length,
-                  over:over.length,
-                  rows:document.querySelectorAll('.peoplecfg tbody tr').length};}""")
-        ck("%d: one control per cell, and none past its cell" % w,
-           got["many"] == 0 and got["over"] == 0 and got["cells"] == got["rows"], got)
+          return {cells:withc.length, over:over.length,
+                  many:withc.filter(c=>
+                    c.querySelectorAll('input,select').length>1).length};}""")
+        ck("%d: a double-click opens one control, and it fits its cell" % w,
+           now["cells"] == 1 and now["many"] == 0 and now["over"] == 0, now)
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(300)
         ck("%d: no Save/Cancel column" % w,
            pg.evaluate("!document.querySelector('.peoplecfg .tk-editcell')"))
     pg.set_viewport_size({"width": 1280, "height": 940})
@@ -319,7 +361,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>document.querySelector('[data-padd-open]').click()")
     pg.wait_for_timeout(600)
     ck("it opens empty", pg.evaluate("!!document.querySelector('#modal-b .pdlg')") and
-       # §366: the roles control is the cell's ticking list, and `personFields`
+       # §368: the roles control is the cell's ticking list, and `personFields`
        # still draws none on the ADD form — a person with no key has no roles.
        pg.evaluate("!document.querySelector('#modal-b [data-proleset]')"))
     # A NAME IS THE ONE THING NEEDED (§87.3) — and pressing with none must SAY

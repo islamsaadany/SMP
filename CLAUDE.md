@@ -9859,7 +9859,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;366: the cell is the control (spec
+*Last Updated: 2026-09-18 &mdash; **&sect;368: the cell is the control (spec
 059).** Islam, of the client's People register: *"for the client registry I'd
 like to do some in line adjustments like the phone, employee ID, email, the
 unit/function, job title, etc. and about the roles why do I need to add them as
@@ -9909,7 +9909,7 @@ IT CORRECT** &mdash; *"before building I urget you to check main"*: main had
 moved **43 commits** carrying `isMintedRow` against `isForefrontRow` (spec 058
 &sect;3a.1), so built against the branch's copy this would have taken inline
 editing off **every ADOPTED row**, which is the client's own person. **AND THE ONE CONTROL WHOSE VALUE COULD NOT BE HEARD**
-(&sect;366.12): `searchsel.js` gives the visible button the hidden select's own
+(&sect;368.12): `searchsel.js` gives the visible button the hidden select's own
 name (&sect;48.2), and **an `aria-label` REPLACES an element's content as its
 accessible name** &mdash; which costs nothing while the label IS the value, and
 the Roles cell is the first control to hand its label over as HTML, so it
@@ -9927,13 +9927,60 @@ and falsifying it found &sect;215 in a file whose &sect;8 already degrades, the
 section DYING on a 30s `pg.click` rather than reporting (4 red and dead against
 7 red and complete). **Proved able to fail three ways from the SOURCES**
 (&sect;276), one per decision &mdash; **1 / 7 / 2 red**, the last printing
-`{'48': 1, '49': 32}`, &sect;366.2's row-height fault reproduced &mdash; with the
+`{'48': 1, '49': 32}`, &sect;368.2's row-height fault reproduced &mdash; with the
 tree restored and rebuilt **byte-identical to the build the breaks were made
 from** (&sect;343.9). **The server needed nothing and it is asserted**
 (&sect;172): no `api/`, `lib/` or `db/` file touched, read off the diff; 683/0
 and 140/0, nothing stored moves, nothing migrated. **RECORDED, NOT DONE**: a
 cell opens one at a time, so three fields on one row is three double-clicks or
-the dialog &mdash; which is what the dialog is for.*
+the dialog &mdash; which is what the dialog is for.
+**&sect;368.14&ndash;.17 &mdash; NO ARROW, NOTHING STANDING, AND A ROW THAT DOES
+NOT MOVE** (2026-09-18). Islam, testing it: *"on opening something the arrow
+appears, no need for the arrow. and for the roles as well &hellip; the table in
+general should look everything fixed and not editable until I made the double
+click."* **THE CARET GOES BECAUSE IT IS POINTLESS**, not because it is being
+hidden &mdash; the double-click opens the LIST, so by the time the box is drawn
+the thing an arrow announces has already happened &mdash; **and it is what made
+the row grow**: `.pcellopen .ssbtn` is `display:block` (&sect;368.5's answer to a
+percentage quirk), so an inline caret after a block label fell to a line of its
+own and the open row stood at **59.6px against its neighbours' 38.6**, which is
+the picture he sent. **AND THE ROLES COLUMN WAS THE ONE COLUMN DRAWING A CONTROL
+WITH NOBODY EDITING** &mdash; 33 boxes and 33 carets at rest &mdash; so it opens
+like every other cell, **keyed on `PROLEPICK` and never on `PCELL`**, because a
+ticking list fires `change` on every tick (&sect;130.1) and would have shut on
+the first role; `roleCell` gains an EXIT rather than a mode, with `roleStop` and
+`seatAsk` on both. **&sect;368.15 &mdash; AN OPEN CELL HAS ONE LOOK, WHICHEVER
+KIND IT IS**: with the caret gone the drop cell still stepped **42.5 against a
+resting 39.1**, because `searchsel.js` draws a `<button>` and `.cfg input`
+&mdash; which gives every field in a Setup table its 12.5px and `4px 7px`
+&mdash; cannot reach one. Those are that rule's own numbers rather than new ones,
+and **what is ASSERTED is the AGREEMENT** (&sect;94.8, &sect;122.5); the roles
+button keeps its tighter padding, measured, because it holds CHIPS (4px puts that
+row at 45.1 where 1px puts it at 39.1) &mdash; two paddings, one height.
+**&sect;368.16 &mdash; AND A SAVE'S REPAINT WAS CLOSING THE CELL UNDER HIM**, a
+live-deployment defect in &sect;368 that no check could see: Chromium fires
+`blur` on a FOCUSED ELEMENT BEING REMOVED, which is what &sect;368 relies on for
+Escape and what also happens on every repaint &mdash; the paint the double-click
+makes schedules a save (&sect;170's leading edge), its answer paints again, the
+box goes, blur fires, the cell shuts. **Invisible over `file://`, where nothing
+saves and nothing paints, which is why every check was green.** `isConnected`
+one tick later tells the two apart. **&sect;368.17 &mdash; AND THE CHECK COULD
+NOT SEE THE FAULT IT WAS WRITTEN FOR**: putting the caret back left the whole
+file GREEN (&sect;54.5), because it opened *Job title* &mdash; a text box with no
+button and therefore no caret &mdash; and measured every row's height AFTER
+Escape, so the one row that can grow was never measured open. REWRITTEN, never
+loosened (&sect;218): it opens the two cells that draw a LIST and measures them
+WHILE OPEN, on the three things that can be wrong, **both ends** (&sect;94.2)
+&mdash; the caret asserted absent WHERE THE BUTTON IS, never merely absent from a
+table holding no button. Proved able to fail **four ways from the SOURCES**
+(&sect;276): **8 / 4 / 16 / 4 red**, the last over HTTP printing `cells: 0`, his
+symptom exactly; `people-dialog.py` learned `SMP_BUILT` in the same edit
+(&sect;334.13), since a file serving its own stub could otherwise only be
+falsified by overwriting the built file in the tree (&sect;343.9). Measured at
+four widths: at rest **0 buttons, 0 carets, 0 hidden selects** against 33 of
+each; the roles column **236 &rarr; 209px**, the table **1382 &rarr; 1355**; the
+open drop cell **59.6 &rarr; 39.1px**, the resting row to the pixel. Twelve
+neighbouring checks green.*
 
 *Earlier the same day: **&sect;365: the sweep before the merge, and
 the four things it found.** Islam, of the branch carrying &sect;359&ndash;&sect;364:

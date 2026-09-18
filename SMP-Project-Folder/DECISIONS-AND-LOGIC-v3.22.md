@@ -51457,6 +51457,167 @@ harnesses §328.3 already records as unrunnable since §313.
 
 ---
 
+## §366 — THE FOUR THAT WERE RED, AND WHAT MEASURING THEM FOUND (2026-09-17)
+
+Islam, of §365's closing line: *"What are these issues that went red? shall we
+fix them?"*, and then **"go"**.
+
+**EVERY ONE WAS RUN RATHER THAN RECITED**, which is the whole reason this
+section is longer than the repair. §365 recorded the four as *not this merge's*
+and established that honestly — by reproducing them on `origin/main`'s own
+build (§303) — and establishing that a failure is not YOURS is not the same as
+knowing what it IS. Four causes, and **not one of them is a fault in the
+product**: three are checks asking about a state the platform no longer holds,
+and the fourth was never run here at all.
+
+**AND THE REHEARSAL DATABASE WAS BUILT, WHICH IS WHAT MADE THREE OF THEM
+FINDABLE.** §328.3 records seven harnesses as unrunnable for want of it and
+§364 recorded `multi-client.py` as UNRUN for the same reason; this session
+stood one up in the three steps that file now names in its own header — seed a
+tenant in `public`, split it with `scripts/migrate-to-multi-client.js`, then
+the fixture — and every finding below came out of the first honest run.
+
+### §366.1 — the demo owes nothing, so the check had nothing to look at
+
+`checks/tactic-outcome.py`, **4 red**. Three of its four failures are in the
+section that writes a plan and one is in the section that reads it, and they
+are one cause: **every assertion is about a tactic nobody has written an
+outcome for**, and §353 filled every empty area in the demo at Islam's own
+instruction. Measured before anything was proposed (§3a): Mobile's **22
+tactics, 0 with a blank outcome, 0 without a target, all 22 carrying a
+figure**. So the red word this section exists to see cannot be drawn on the
+worked example at all.
+
+**IT MAKES THE STATE NOW RATHER THAN BORROWING IT** (§255) — one outcome
+emptied for the reading half, the two written rows cleared for the writing
+half — which is the same repair §353.5 gave seven other checks and recorded
+this one as still carrying (§214.3). The page it uses is a scratch copy opened
+over `file://` and closed at the end of its section, so nothing is left behind
+(§94.2).
+
+**AND THE ASSERTION IS AN AGREEMENT NOW, NEVER A COUNT** (§94.8): `reds > 0`
+is satisfied by a build that paints *Missing* on every row as happily as by a
+correct one, so what is asked is that the word is drawn **exactly where the
+plan holds nothing** — a build that painted it everywhere fails as loudly as
+one that painted it nowhere (§113.8).
+
+**AND ONE ASSERTION WAS PASSING FOR THE WRONG REASON THE MOMENT THE FIXTURE
+WAS RIGHT** — found by falsifying rather than by reading. *"and a unit alone is
+not a target"* asked `tacticOutcomeScore`, which also asks whether anybody has
+REPORTED; with the row's figure cleared it answered null on a build that had
+started scoring a bare unit, true for the other reason. **REWRITTEN, never
+loosened** (§218) to ask `outcomeOf`, which is the question by itself and the
+one §249 settled: the falsification goes **0 red → 2**.
+
+**Proved able to fail four ways from the SOURCES** (§276, because §238's hashed
+CSP silences an edited built file): the pre-§249 em-dash restored on the
+outcome cell → **1 red**, printing the reported symptom; a bare unit dropped
+rather than held (pre-§251) → **3 red**; a bare unit accepted as a target →
+**2 red**. 47/0 after.
+
+**AND THE FIRST BREAK OF ALL WENT GREEN, WHICH IS §54.5 IN THE HAND** — it was
+aimed at `outcomeCell()`, and that cell is drawn by `gapCell()` with a `read`
+callback, so the edit provably reached the built file and provably changed
+nothing. *A green falsification run is indistinguishable from a working guard,
+and the only thing that tells them apart is measuring what the page drew.*
+
+**AND ONE ASSERTION IS HELD IN TWO PLACES, WHICH THE FILE NOW SAYS** (§298.2):
+*"with no figure yet it is NOT scored"* is refused by `tacticOutcomeScore`
+before it asks and by `measureScore` again if asked — breaking either alone
+leaves it green, and the pair together reddens it exactly. It is belt and
+braces, and calling either line load-bearing would have been a claim the
+falsification does not support.
+
+### §366.2 — the check asked for one spelling of the thing
+
+`checks/contingency.py`, **1 red**. It looks for a figure printed against what
+it is measured by, written as `45% / 50%` — both halves per-cents. **The slides
+carry the pair and always did**: measured off the built package, `5,400# /
+6000 #`, `8d / 5 d`, `4# / 9 #`. What the subject reports is counts and days,
+so the literal admitted none of them. §94.8 exactly — it asserted a spelling
+where it meant a property — and it is REWRITTEN to ask for a run holding both
+halves with a number in each. A deck printing only the target, or only the
+figure, carries no such pair at all.
+
+**AND THAT FALSIFICATION ALSO WENT GREEN FIRST, AND FOUND SOMETHING**: aimed at
+`figVsDue()`, the pairs survived — because the deck's tactics row **builds the
+pair by hand** (`<b>shown</b> <i>/ bench</i>` in `present.js`) rather than
+through the one builder §254 wrote for it. Aimed there, **1 red**, exactly that
+assertion. The hand-built pair is **RECORDED, NOT CHANGED**: it reads a
+different benchmark from a different reader, so making it call `figVsDue` is a
+change to what a slide shows and nobody asked for one (rule 1b, §2b).
+
+### §366.3 — the console this check drives draws no module rows, and never did
+
+`checks/multi-client.py` did not fail; it **DIED** (§215), waiting thirty
+seconds on `.ccard[data-client='raya-trade'] .mrow[data-module='strategy']` and
+taking every assertion after it down with the run.
+
+**THE ROW IS THE SERVED CONSOLE'S AND NOTHING REGRESSED**, which took measuring
+to say: the card's band is drawn only where the server sends a `modules` field
+(§61), and `api/platform.js` — the frozen endpoint this file drives through
+`scripts/dev-server.js` — has **never mentioned modules at all**, 0 occurrences
+and no commit that ever added or removed one. §320.5 built the band on the
+served stack, where `lib/platform-api.ts` sends it and
+`smp-app/checks/modules.mjs` asserts it, and §317.8 records the frozen endpoint
+as unreachable in production since the cutover. Measured on the rehearsal
+database: `cards[].modules` is `[]` for every client.
+
+So `open_client()` **presses the row where one is drawn and walks to the
+address where there is none**, asserts the OUTCOME either way — the claim that
+survives on both stacks (§218) — and **PRINTS which route it took**, so the
+cost stays visible in every run rather than disappearing into a green tick
+(§302.3, §313.34).
+
+**AND THE SECOND THING IT DIED ON IS §364's OWN RECORDED "UNRUN"**: §360 moved
+a client's configuration into the client itself, so the console's *Settings*
+chip walks to `/<client>/setup` — an address the served app routes and
+`dev-server.js` does not (measured, `ERR_INVALID_RESPONSE`). §364 re-pointed
+the SELECTOR for the team table here and could not run the file to discover
+that the WAY to it had moved too. **Nothing is lost and the file names where it
+went**: the table's own claims are asserted on the stack that draws it, by
+`checks/team-page.py` (31 assertions, red-first) and `smp-app/checks/shell.mjs`
+§3c; what stays here is the half this stack can still answer, and it is the
+load-bearing half — **the SERVER writes the seats** (§42). The attempt is kept
+and guarded, so a stack that does serve that address measures the table again.
+
+**§366.4 — AND THE FALSIFICATION WENT GREEN TWICE WITH THE BOUNDARY WIDE
+OPEN.** `mayOpenClient` forced true — every client openable by everybody, which
+is the one thing this file exists to refuse — and it reported **124 checks, 0
+failed**. The cause is the harness: the file starts its own dev-server on port
+3994 and `wait_up()` asks only whether SOMETHING answers there, so a server
+left running from an earlier probe took the port, the check's own exited, and
+every assertion was measured against a process started before the rules were
+touched (§105.6's family). **It refuses now, in words, naming the port and the
+way round it** — and the guard was proved to fire before it was believed. With
+it in place the same break is **2 red**, exactly the two boundary assertions.
+124/0 otherwise.
+
+### §366.5 — the fourth was not red at all
+
+`checks/platform-look.py` needs a database and starts its own server; given
+one it is **27 checks, 0 failed**. Confirmed by running it rather than by
+quoting §365.
+
+---
+
+**Screen only in the sense that matters: NO product file changed.** The whole
+diff is three files under `checks/`; `build.py`'s output is byte-identical to
+the shipped file (`built-in-step.py` all good) and the full `qa.py` sweep reads
+**ERRORS none**. Nothing stored moves, nothing is migrated, and no rule about
+who may do what is touched.
+
+**RECORDED, NOT DONE.** The deck's tactics row builds its figure-and-benchmark
+pair by hand rather than through `figVsDue()` (§366.2). The frozen console and
+the frozen `api/platform.js` have drifted — the page draws module rows the
+endpoint cannot fill — which is harmless while production serves the new stack
+(§332) and is a decision about that stack's future rather than a repair. And
+the seven harnesses §328.3 names are still unrunnable without the three-step
+rehearsal database, which `multi-client.py` now spells out in its own header
+and the other six do not.
+
+---
+
 ## §367 — THE CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (2026-09-17)
 
 Islam, of the walk he does most: *"the shifting between the client settings and

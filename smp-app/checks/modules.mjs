@@ -298,7 +298,7 @@ const rows = moduleRows(modulesFor(BUILT_EXTRA), facts);
 check("one row per module the client has, and no more, in the list's own order",
   same(rows.map((r) => r.key), HAVE_BOTH), rows.map((r) => r.key).join(", "));
 /* REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted `state === "cycle
-   open"` — the health word §366 replaced, and half of the pair that said one
+   open"` — the health word §367 replaced, and half of the pair that said one
    fact twice. What survives is the claim it was making: Strategy is the row
    that speaks about a running cycle, and it now does it as a MARK. */
 check("Strategy marks a running cycle", rows[0].mark === "Cycle open", rows[0].mark);
@@ -312,7 +312,7 @@ check("a module with nothing to say says nothing, rather than a placeholder",
 check("every row carries the label the switcher and the drawer use",
   rows.every((r) => r.label === MODULE_DEF[r.key].label));
 
-/* ── 4a · THE MARK, AND NOTHING WHEN THERE IS NOTHING (§366) ──────────────
+/* ── 4a · THE MARK, AND NOTHING WHEN THERE IS NOTHING (§367) ──────────────
    Islam, of the cards: "we don't needs notes that take 2 lines we can just
    have a notificaiton here if something is new to check ... let's make it
    compact." The row's tail says what is OUTSTANDING and is silent otherwise,
@@ -371,7 +371,7 @@ check("a module that declares no mark never marks anything",
     .filter((r) => r.key === k).every((r) => r.mark === "" && r.alarm === false && r.tip === "")),
   NOMARK.join(", "));
 /* THE MARK IS FOREFRONT'S OWN ANSWER, AND THIS IS THE ASSERTION THAT SAYS
-   SO (§366, Islam's call with the cost stated). It REVERSES the one that
+   SO (§367, Islam's call with the cost stated). It REVERSES the one that
    stood here — *the card's row carries the picked line, from the one reader*
    (§359.4) — and is written as the reversal rather than deleted, so a build
    that quietly wired the client's pick back into the console goes red.
@@ -429,8 +429,8 @@ check("Nothing draws no line, on every module", MODULES.every((k) => landingLine
 check("unreadable facts say nothing rather than a false figure",
   MODULES.every((k) => MODULE_DEF[k].lines.every((l) => landingLine(k, l.key, NO_FACTS) === "")),
   MODULES.map((k) => MODULE_DEF[k].lines.map((l) => JSON.stringify(landingLine(k, l.key, NO_FACTS))).join("|")).join(" "));
-/* ONE READER, AND ITS ONE REMAINING CONSUMER (§366). These two assertions
-   were written against `moduleRows`' `line`, which §366 removed — the
+/* ONE READER, AND ITS ONE REMAINING CONSUMER (§367). These two assertions
+   were written against `moduleRows`' `line`, which §367 removed — the
    console draws Forefront's own mark instead (§4a above). They are REWRITTEN
    onto `landingLine`, never deleted (§218), because the rule they guard is
    still live: it is what the Landing line Setup page previews through
@@ -589,7 +589,7 @@ check("and a database already up gets it by migration", /ADD COLUMN IF NOT EXIST
 check("the migration can be run twice", /IF NOT EXISTS/.test(mig));
 const api = read("smp-app/lib/platform-api.ts");
 /* REWRITTEN, NEVER LOOSENED (§218): this held the call's exact text with
-   `facts.picks` in it, which §366 removed — the mark is Forefront's own
+   `facts.picks` in it, which §367 removed — the mark is Forefront's own
    answer. Both halves of what it was guarding survive: the list is the
    client's own, and NO pick reaches the call, asserted as an absence beside
    it so wiring one back in goes red here as well as in §4a. */

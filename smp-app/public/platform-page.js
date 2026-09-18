@@ -29,6 +29,11 @@
   var nav = document.getElementById("nav");
   var TAB = "clients";
   var ME = null;
+  /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
+     (§368). Declared here rather than left to hoist, because a second `var` of
+     one name in this scope is one binding and the later one wins in silence
+     (§56.7) — grepped, and this is the only pair. */
+  var BOOTCARDS = null;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -916,7 +921,18 @@
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
 
-    post({ action: "cards" }).then(function (j) {
+    /* THE BOOT'S OWN ANSWER, ONCE (§368). The boot asks `cards` to learn what
+       the navigation may offer, and this asked the identical question again a
+       round trip later — the heaviest question in the page, which opens a
+       connection per client to read its units, its plan and its cycle. Handed
+       over rather than asked twice.
+       IT IS ONE-SHOT AND MUST BE: `go("clients")` is pressed from six other
+       places — after adding a client, on the way back out of one, after
+       archiving — and every one of those has to read the list AGAIN, or the
+       grid draws a client that has just been archived (§48.2: a value is read
+       at press time, never trusted from the render that drew the button). */
+    var handed = BOOTCARDS; BOOTCARDS = null;
+    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
       grid.textContent = "";
       if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
       /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§313.18, §61) ──
@@ -1040,7 +1056,7 @@
         r.type = "button";
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
-        /* THE MARK (§366): what this module says is OUTSTANDING on this
+        /* THE MARK (§367): what this module says is OUTSTANDING on this
            client, in the fewest words, and NOTHING when nothing is — which
            is where the compactness comes from. It replaces the pair that
            was here, a full sentence (the client's chosen landing line) and
@@ -2919,26 +2935,69 @@
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });
 
-  /* ── Boot ────────────────────────────────────────────────────── */
-  post({ action: "me" }).then(function (j) {
+  /* ── Boot ──────────────────────────────────────────────────────
+     BOTH QUESTIONS AT ONCE (§368). Islam: "something strange the window is not
+     active on opening I need to click anyway to start accepting clicks on the
+     cards." THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, which is worse,
+     because the two are indistinguishable from outside: `.top` is drawn
+     OUTSIDE `.wrap`, so the bar stands up with Forefront's name and a Sign out
+     button over a body that `body:not(.ready)` has hidden — a window that
+     looks open, answers nothing, and says nothing about either.
+
+     Measured at 600ms a round trip, which is production's own shape: the
+     requests went out as `me` → `cards` → `cards`, THREE sequential trips for
+     one page load with the last two the SAME request; the bar was up and dead
+     for 1,255ms, the page then appeared titled and empty, and the cards landed
+     at 1,872. A click inside that window hits BODY — `elementFromPoint` where
+     a card will be, every 100ms of it — so the press he spends is the one that
+     happens to land after the page became ready.
+
+     Nothing in `cards` reads `me`'s ANSWER — the session is the cookie both
+     already carry — so they were sequential for no reason but the order they
+     were written in, and `drawClients()` asked the second one over again. One
+     trip now. The cost, stated: a signed-out visitor sends one `cards` that is
+     thrown away, and they are being redirected anyway.
+
+     IT IS NOT §367's, established before it was blamed (§303): the same probe
+     against the build before that section reports 1,259ms to 1,255. It is the
+     boot's own shape, and §359.4 made the second trip heavier by giving
+     `cards` a per-client read.
+
+     WHAT IS LEFT IS ONE ROUND TRIP OF THE SAME SILENCE, and it is not fixed
+     here. A first draft of this comment said the grid "already says Reading
+     your clients… and this gate hides it", and MEASURING IT SAID OTHERWISE:
+     lifting the gate alone produces a picture byte-identical to today's,
+     because `drawClients()` BUILDS that sentence and is not called until the
+     answer lands — there is nothing behind the gate to reveal. Corrected
+     rather than left standing (§124).
+     So saying anything at all means DRAWING before the answer, which is a
+     decision about what a loading page looks like: the page's own title,
+     search and sentence drawn early (whose cost is that `drawNav()` reads the
+     answer, so the tab row lands a beat later — measured, an early
+     `go("clients")` throws on a null ME), or §94.10's grey skeleton, whose
+     RULE the gate above cites and whose treatment this page never took. Both
+     shot out of the real page and put to Islam
+     (design-mockups/console-loading/), never ridden in behind a repair
+     (rule 1b, 1c). */
+  Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {
+    var j = r[0], c = r[1];
     if (!j || !j.ok) { location.replace("/"); return; }
     ME = { email: j.account.email, name: j.account.name, isAdmin: j.account.isAdmin,
            canConsultants: true, canAccess: !!j.account.isAdmin };
     /* What the navigation may show is asked of the same rules the pages ask —
        `cards` answers it for this account, so the row cannot offer a page the
        next request refuses. */
-    return post({ action: "cards" }).then(function (c) {
-      if (c && c.ok) {
-        ME.canConsultants = !!c.canConsultants;
-        ME.canAccess = !!c.canAccess;
-      }
-      /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
-         after renaming the column is exactly the twins this rename avoided. */
-      document.getElementById("who").textContent =
-        ME.name + (ME.isAdmin ? " · Super user" : "");
-      document.body.classList.add("ready");
-      go("clients");
-    });
+    if (c && c.ok) {
+      ME.canConsultants = !!c.canConsultants;
+      ME.canAccess = !!c.canAccess;
+      BOOTCARDS = c;
+    }
+    /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
+       after renaming the column is exactly the twins this rename avoided. */
+    document.getElementById("who").textContent =
+      ME.name + (ME.isAdmin ? " · Super user" : "");
+    document.body.classList.add("ready");
+    go("clients");
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");

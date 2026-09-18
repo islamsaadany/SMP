@@ -8235,7 +8235,7 @@ node smp-app/checks/modules.mjs # a module per client, and every module serving
                                 # `page.appendChild(grid)` appears twice in
                                 # platform.html, so an unscoped indexOf compared the
                                 # band against ANOTHER page's grid (&sect;100.3).
-                                # AND SINCE &sect;366 &sect;4a IS THE CARD'S MARK, BOTH
+                                # AND SINCE &sect;367 &sect;4a IS THE CARD'S MARK, BOTH
                                 # ENDS ON EVERY BRANCH: Strategy's ladder in order
                                 # (not answering &rarr; no plan &rarr; a count &rarr;
                                 # nothing), the count asserted as `total - submitted`
@@ -8432,6 +8432,41 @@ python3 checks/blob-api.mjs     # (in smp-app: `npm run check:blob`) the clip en
                                 # 23/23, RED both ways (`check:blob:red`); three of its
                                 # own first failures were spellings it invented rather
                                 # than read (§100.3)
+python3 SMP-Project-Folder/src/checks/console-boot.py # the console asks once, and
+                                # asks both at once (&sect;368). Islam: *"the window is not
+                                # active on opening I need to click anyway to start accepting
+                                # clicks on the cards"* &mdash; the window IS active and the
+                                # page is not finished, which from outside is the same thing:
+                                # `.top` is drawn OUTSIDE `.wrap`, so the bar stands up over a
+                                # body the gate has hidden. Measured, at 600ms a round trip:
+                                # `me` &rarr; `cards` &rarr; `cards`, THREE trips for one page
+                                # load with the last two the SAME request, the bar up and dead
+                                # 1,255ms, the cards at 1,872 &mdash; 742 for both after. It
+                                # asserts the PROPERTY and never the milliseconds (&sect;94.8),
+                                # or a fast machine turns it green and a slow one red: `cards`
+                                # asked ONCE, `me` and `cards` OVERLAPPING (overlap rather than
+                                # a duration &mdash; two quick trips are still two trips), no
+                                # window in which the page is ready and the grid empty, and
+                                # **BOTH ENDS of the hand-over** (&sect;94.2), the load-bearing
+                                # half: the boot's answer is used by the FIRST draw and nobody
+                                # else, so a later `go("clients")` reads the list AGAIN or the
+                                # grid draws a client that has just been archived (&sect;48.2).
+                                # &sect;4 asserts the remaining silence as the RECORDED state,
+                                # so the day it gains a word this goes red and is REWRITTEN
+                                # rather than outliving its decision (&sect;214.3, &sect;218)
+                                # &mdash; measured DURING the window, because a visible wrap
+                                # after the cards arrive is true of every build (&sect;113.8).
+                                # NO DATABASE: the page is served as it is by both stacks, and
+                                # a stub is also the only way to hold a round trip open long
+                                # enough to look at the window at all (&sect;94.11, &sect;255).
+                                # Run against BOTH copies (`SMP_PAGE=smp-app/shell/platform.html`).
+                                # 11/0 each, red two ways each &mdash; and its first
+                                # falsification against the generated copy printed **0 FAIL**,
+                                # because `doctor()` exited inside the server thread when the
+                                # boot lived in the SCRIPT file rather than the page
+                                # (&sect;54.5, &sect;215); a break lands wherever the code is
+                                # now, and whether it landed is asserted at the end of the run
+                                # (&sect;344.1)
 python3 checks/deck-pdf.py      # the deck on paper (§296): the entry beside Present
                                 # on all three deck shapes with the word PDF on it;
                                 # the press opening the deck and asking to print
@@ -9874,7 +9909,80 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-17 &mdash; **&sect;366: a mark, not a sentence, on a
+*Last Updated: 2026-09-18 &mdash; **&sect;368: the console asks once, and asks
+both at once.** Islam, opening Forefront's own console &mdash; *"something strange
+the window is not active on opening I need to click anyway to start accepting
+clicks on the cards"* &mdash; then, with a merge already in flight, *"don't merge
+before fixing this."* **THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, AND
+FROM OUTSIDE THOSE TWO ARE THE SAME THING**: `.top` is drawn OUTSIDE `.wrap` and
+`body:not(.ready)` hides the body, so Forefront's name and a Sign out button
+stand up over nothing &mdash; no name beside them, no tabs, no word about it.
+**MEASURED BEFORE ANYTHING WAS PROPOSED** (&sect;3a), driving a real browser
+against a stub holding each trip open for 600ms, which is roughly production's
+own: the requests went out **`me` &rarr; `cards` &rarr; `cards`**, THREE
+sequential trips for one page load with the last two the **same request** &mdash;
+and that is the heaviest in the page, opening a connection per client to count
+its units, count its pillars and read its cycle, plus the landing facts for each
+(&sect;359.4). The bar was up and dead for **1,255ms**, the page then appeared
+titled and empty, and the cards landed at **1,872**. A click inside that window
+hits **BODY**, asked every 100ms of it where a card is about to be &mdash; so the
+press he spends is the one that happens to land after the page became ready.
+**IT IS NOT &sect;367's, ESTABLISHED BEFORE IT WAS BLAMED** (&sect;303): the same
+probe against the build before that section reports **1,259 against 1,255**, and
+the diff shows &sect;367 *removed* a read from that path. **NOTHING IN `cards`
+READS `me`'s ANSWER** &mdash; the session is the cookie both already carry &mdash;
+so they were sequential for no reason but the order they were written in, and the
+boot's own answer is **handed to the first draw** rather than asked for twice.
+**1,872ms &rarr; 742**, and the two-stage appearance gone. The cost is stated
+rather than discovered: a signed-out visitor sends one `cards` that is thrown
+away, and they are being redirected anyway. **THE HAND-OVER IS ONE-SHOT AND MUST
+BE** &mdash; `go("clients")` is pressed from **six** other places, and every one
+has to read the list AGAIN or the grid draws a client that has just been archived
+(&sect;48.2); falsified by keeping it, **1 red** on exactly that assertion, which
+is the dangerous direction and worse than the fault this repairs. **`BOOTCARDS`
+IS DECLARED RATHER THAN LEFT TO HOIST** (&sect;56.7), grepped, the only pair.
+**&sect;368.1 &mdash; AND MY OWN COMMENT CLAIMED SOMETHING THE MEASUREMENT
+REFUTED**: a first draft read *"the grid already says Reading your clients&hellip;
+and this gate hides it"* &mdash; satisfying, and false. Lifting the gate alone
+produces a picture **byte-identical** to today's (18,924 bytes, twice, which is
+what said so), because `drawClients()` **builds** that sentence and is not called
+until the answer lands. Corrected in the comment, the docstring and the assertion
+rather than left standing (&sect;124) &mdash; and the assertion it replaced was
+weak as well as wrong, measuring `visibility` AFTER the cards arrived, which is
+true of every build (&sect;113.8). **&sect;368.2 &mdash; WHAT IS LEFT IS DRAWN AND
+NOT DECIDED**: one round trip of the same silence, and seconds of it on a cold
+function, so saying anything means DRAWING before the answer &mdash; a decision
+about what a loading page looks like, put to Islam rather than ridden in behind a
+repair (rule 1b, 1c). Both candidates shot out of the REAL page, never drawn from
+the stylesheet (&sect;41.9): **the page's own words** (its title, its search, its
+own *Reading your clients&hellip;*), whose cost was measured rather than reasoned
+&mdash; an early `go("clients")` **throws**, because `drawNav()` reads a null
+`ME`, so the tab row lands a beat later; and **&sect;94.10's grey skeleton**,
+whose RULE this gate cites in its own comment and whose treatment it never took,
+and which **guesses how many cards** (three drawn; a platform with seven shows
+three and then seven, which is &sect;94.10's own objection to painting and
+correcting). **&sect;368.3 &mdash; AND THE CHECK'S FIRST FALSIFICATION REPORTED 0
+RED**: the boot lives inline in `platform.html` and in `/platform-page.js` for the
+new stack's copy (&sect;329), and `doctor()` insisted on a match in whichever body
+it was handed first &mdash; against the generated page the substitution missed,
+`sys.exit(1)` ran **inside the server thread** and killed only that thread, the
+page was never served, and the run produced no failures at all (&sect;54.5,
+&sect;215). A break lands wherever the code is now, and **whether it landed is
+asserted at the end of the run** (&sect;344.1); both copies then read 11/0 green,
+4 red and 1 red identically. **AND TWO NEIGHBOURING CHECKS DO NOT HONOUR
+`SMP_CHROME`** &mdash; run directly they printed Playwright's own install banner
+and exited without running, which reads as a pass in a batch (&sect;320.6b, a
+fourth road); both run through `qa-run.py`, which is what this file requires and
+what the round nearly skipped. **VERIFIED**: console-boot 11/0 on both copies red
+both ways, client-card-modules 23/0, platform-cards 21/0, publishing-room 74/0,
+client-setup-outside and client-archive 0 failures, modules 158/0 red nine ways,
+`built-in-step` all good, `node --check` on the generated script clean. **The
+frozen product is untouched** &mdash; `platform.html` is the console at the
+repository root, which `build.py` does not read &mdash; so the built file does not
+move and **no `sw.js` bump is owed** (&sect;91). **`main` untouched: the merge is
+Islam's word, on that merge, and it is held at his instruction.**
+
+*Earlier the same round: 2026-09-17 &mdash; **&sect;367: a mark, not a sentence, on a
 client card's module rows.** Islam, with the console's four client cards in
 front of him &mdash; *"on the clients cards we don't needs notes that take 2
 lines we can just have a notificaiton here if something is new to check &hellip;
@@ -9909,14 +10017,14 @@ pairs read in BOTH palettes, worst 4.70 (&sect;38.4/&sect;38.5). Two things did
 not move and each says why: `.ccard.add` keeps its `min-height`, whose one number
 is the whole of that card's height (&sect;317), and `img.cmark` came down to 30px
 with the initials, or a row would ship two card heights for no visible reason.
-**&sect;366.1 &mdash; MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN
+**&sect;367.1 &mdash; MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN
 BUILD CLEAN**: `getClientRects().length == 1` returned **ONE rect for a tail 53px
 tall** under the wrap break &mdash; &sect;88's rule, written down once and walked
 into anyway; it measures the tail's HEIGHT against one line now.
-**&sect;366.2 &mdash; and its alarm-ink assertion passed by default**, the
+**&sect;367.2 &mdash; and its alarm-ink assertion passed by default**, the
 fixture's unopenable client drawing no rows at all, so there was no alarm to
 measure (&sect;94.5); the state is MADE (&sect;255) and both inks asserted
-PRESENT before they are asserted different. **&sect;366.3 &mdash; AND FIVE OF
+PRESENT before they are asserted different. **&sect;367.3 &mdash; AND FIVE OF
 `check:door:red`'s TEN BREAKS DIED WITH THE LANDING, THE FIRST HIDING THE OTHER
 FOUR**: `NOT RED: no-rows`, established as pre-existing at the commit before this
 one (**GREEN 140/0**, &sect;303) &mdash; it falsified THE LANDING'S ROWS, and

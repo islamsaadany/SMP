@@ -5206,7 +5206,51 @@ suite per feature.
 
 ## In flight
 
-**§366 — a mark, not a sentence, on a client card's module rows. On the
+### The console's dead first moment (§368) — repaired; one half waiting on you
+
+**What you reported.** Opening Forefront's own console, the window looks open
+and nothing responds until you click once.
+
+**What it actually was.** The window was fine. The page had not finished, and
+from where you sit those two look identical — the top bar is drawn outside the
+part that gets hidden while it loads, so Forefront's name and the Sign out
+button stand up over an empty page with nothing saying why.
+
+**What was underneath it.** The console asked the server **three questions in a
+row** to open one page, and the last two were **the same question** — the most
+expensive one it has, which reaches into every client to count its units, check
+whether it has a plan and read its cycle. Asked twice, one after the other,
+every single time you open the page. A click during that stretch lands on
+nothing at all.
+
+**What I changed.** It asks both questions at once now, and asks the expensive
+one once. Measured at the same speed either side:
+
+| | before | after |
+|---|---|---|
+| bar up, nothing responding | 1,255ms | **742ms** |
+| cards on screen | 1,872ms | **742ms** |
+| page appears, then cards appear | two stages | **one** |
+
+The cards now arrive *with* the page rather than a beat after it.
+
+**It was not the card-mark round.** I checked that first rather than assuming:
+the same measurement on the build before it gives 1,259ms against 1,255. This
+has been there since the console was written.
+
+**The one thing still yours.** There is one round trip left, and during it the
+page still shows a bar over nothing — brief when the server is warm, seconds
+when it has gone cold. Making it *say* something means deciding what you see,
+so I have drawn the two candidates out of the real page and put them in front
+of you: **the page's own words** (its title, its search box and its own
+"Reading your clients…"), or **a grey skeleton** of card shapes. Each one's
+cost is on the page beside it. My recommendation is the first.
+
+**Still yours:** that choice, and the merge to main — which is your word on
+that merge, and which I have held as you asked.
+
+
+**§367 — a mark, not a sentence, on a client card's module rows. On the
 branch, built 2026-09-17.** Your words: *"we don't needs notes that take 2
 lines we can just have a notificaiton here if something is new to check … to
 keep it neat and clean nad let's make it compact for better view"* — and then,

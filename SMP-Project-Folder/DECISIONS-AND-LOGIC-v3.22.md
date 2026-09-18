@@ -51457,7 +51457,7 @@ harnesses §328.3 already records as unrunnable since §313.
 
 ---
 
-## §366 — A MARK, NOT A SENTENCE, ON A CLIENT CARD'S MODULE ROWS (2026-09-17)
+## §367 — A MARK, NOT A SENTENCE, ON A CLIENT CARD'S MODULE ROWS (2026-09-17)
 
 Islam, with the console's four client cards in front of him: *"on the clients
 cards we don't needs notes that take 2 lines we can just have a notificaiton
@@ -51540,20 +51540,20 @@ to 30px with the initials**, which the mockup could not draw: it can only draw
 the two-letter fallback, so leaving the image mark at 36 would have shipped two
 card heights in one row for no reason anybody could see.
 
-**§366.1 — MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN BUILD
+**§367.1 — MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN BUILD
 CLEAN.** `checks/client-card-modules.py`'s new one-line assertion was written as
 `getClientRects().length == 1`, and under `--break=mark-wraps` Chrome returned
 **ONE rect for a tail 53px tall** — §88's own rule, written down once already
 and walked into anyway. It measures the tail's HEIGHT against one line-height
 now, and is red under that break and green otherwise.
 
-**§366.2 — AND ITS ALARM ASSERTION PASSED BY DEFAULT.** The fixture's `el-abd`
+**§367.2 — AND ITS ALARM ASSERTION PASSED BY DEFAULT.** The fixture's `el-abd`
 cannot be opened, so it draws no rows at all, and there was no alarm anywhere on
 the page for the ink assertion to measure (§94.5). The state is MADE rather than
 waited for (§255): a fourth card holding a client with no plan, and both inks
 asserted PRESENT before they are asserted different.
 
-**§366.3 — AND FIVE OF `check:door:red`'s TEN BREAKS DIED WITH THE LANDING,
+**§367.3 — AND FIVE OF `check:door:red`'s TEN BREAKS DIED WITH THE LANDING,
 WITH THE FIRST OF THEM HIDING THE OTHER FOUR.** Running the neighbours reported
 `NOT RED: no-rows`, and it is not this round's: **established as pre-existing by
 running it at the commit before this one — GREEN 140/0** (§303). It was spec
@@ -51597,3 +51597,142 @@ red seven ways; `generated-in-step` all clear after the four generators were
 re-run; `typecheck` exits 0. **No frozen product source changed** — read off the
 diff, and `built-in-step.py` all good — so the built file is untouched and **no
 `sw.js` bump is owed** (§91's trigger is the built file's bytes changing).
+
+---
+
+## §368 — THE CONSOLE ASKS ONCE, AND ASKS BOTH AT ONCE (2026-09-18)
+
+Islam, opening Forefront's own console: ***"something strange the window is not
+active on opening I need to click anyway to start accepting clicks on the
+cards."*** Then, when the merge was already in flight: *"don't merge before
+fixing this."*
+
+**THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, AND FROM OUTSIDE THOSE TWO
+ARE THE SAME THING.** `.top` is drawn OUTSIDE `.wrap`, and
+`body:not(.ready) .wrap{ visibility:hidden }` hides the body — so Forefront's
+name and a Sign out button stand up over nothing, with no name beside them, no
+tabs, and no word about what is happening. Shot out of the real page:
+`design-mockups/console-loading/2026-09-18_today.png`. *A window that looks open
+and answers nothing is indistinguishable from one that has not got focus, which
+is why the report names the wrong thing and is nevertheless exactly right.*
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED** (§3a), driving a real browser against
+a stub that holds each round trip open for 600ms, which is roughly production's
+own (measured live: `/api/platform` answers 0.17–0.73s):
+
+| | before | after |
+|---|---|---|
+| requests, in order | `me` → `cards` → `cards` | `me` + `cards`, together |
+| bar up, nothing responding | **1,255ms** | **742ms** |
+| cards on screen | **1,872ms** | **742ms** |
+| stages | ready-and-empty, then cards | one |
+
+**THREE SEQUENTIAL ROUND TRIPS FOR ONE PAGE LOAD, AND THE LAST TWO WERE THE
+SAME REQUEST.** The boot asked `cards` to learn what the navigation may offer,
+then `go("clients")` → `drawClients()` asked the identical question a round trip
+later — and that is the heaviest question in the page: `factsFor` opens a
+connection per client under `withTenant` to count its units, count its pillars
+and read its cycle, plus `landingFactsFor` for each (§359.4). Asked twice, back
+to back, every time the console opens. **A click inside the window hits BODY** —
+asked every 100ms of it with `elementFromPoint`, where a card is about to be —
+so the press he spends is the one that happens to land after the page became
+ready.
+
+**IT IS NOT §367's, ESTABLISHED BEFORE IT WAS BLAMED** (§303): the same probe
+against the build before that section reports **1,259ms against 1,255**, and
+reading the diff shows §367 *removed* a read from that path (`facts.picks` is no
+longer carried). It is the boot's own shape.
+
+**NOTHING IN `cards` READS `me`'s ANSWER** — the session is the cookie both
+already carry — so they were sequential for no reason but the order they were
+written in. `Promise.all`, and the answer the boot gets is **handed to the first
+draw** rather than asked for twice. One trip. The cost is stated rather than
+discovered: a signed-out visitor sends one `cards` that is thrown away, and they
+are being redirected anyway (`send()` already answers a 401 with the door).
+
+**THE HAND-OVER IS ONE-SHOT AND MUST BE, AND THAT IS THE LOAD-BEARING HALF.**
+`go("clients")` is pressed from **six** other places — after adding a client, on
+the way back out of one, after archiving — and every one of those has to read
+the list AGAIN, or the grid draws a client that has just been archived. §48.2's
+rule: a value is read at press time, never trusted from the render that drew the
+button. Falsified by keeping it (`--break=handed-twice`, **1 red**, exactly that
+assertion), which is the dangerous direction and worse than the fault this
+repairs.
+
+**`BOOTCARDS` IS DECLARED RATHER THAN LEFT TO HOIST** (§56.7): a second `var` of
+one name in that scope is one binding and the later one wins in silence —
+grepped, and this is the only pair.
+
+### §368.1 — AND MY OWN COMMENT CLAIMED SOMETHING THE MEASUREMENT REFUTED
+
+A first draft of the code comment read *"the grid already says Reading your
+clients… and this gate hides the one sentence that would answer him"* — a
+satisfying finding, and false. **Lifting the gate alone produces a picture
+byte-identical to today's** (18,924 bytes, twice, which is what said so):
+`drawClients()` **builds** that sentence, and it is not called until the answer
+lands. There is nothing behind the gate to reveal. Corrected in the comment, in
+the check's docstring and in the check's own assertion rather than left standing
+(§124) — and the assertion it replaced was weak as well as wrong, measuring
+`visibility` AFTER the cards had arrived, which is true of every build
+(§113.8); it asserts `childElementCount` DURING the window now.
+
+### §368.2 — WHAT IS LEFT, DRAWN AND NOT DECIDED
+
+One round trip of the same silence — and on a cold function, seconds of it. So
+saying anything at all means **drawing before the answer**, which is a decision
+about what a loading page looks like, put to Islam rather than ridden in behind
+a repair (rule 1b, 1c). Both candidates shot out of the REAL page, never drawn
+from the stylesheet (§41.9):
+
+- **A, recommended — the page's own words.** Its title, its search box and its
+  own *Reading your clients…*, drawn early. Invents nothing, guesses nothing,
+  and none of it is anybody's data, so nothing is corrected on screen. **Its
+  cost was measured rather than reasoned**: an early `go("clients")` **throws**,
+  because `drawNav()` reads `ME`, which is null that early — so the tab row
+  lands a beat after the page, and the grid's draw has to be separated from the
+  navigation's.
+- **B — §94.10's grey skeleton**, the answer that section gave the client
+  platform, whose RULE this gate cites in its own comment and whose treatment it
+  never took. **It guesses how many cards**: three drawn, and a platform with
+  seven would show three and then seven — which is §94.10's own objection to
+  painting and correcting, and is why its client-platform skeleton is
+  deliberately shape-neutral.
+
+`design-mockups/console-loading/2026-09-18_what-the-console-says-while-loading.html`,
+published as an artifact (rule 1c).
+
+### §368.3 — AND THE CHECK'S FIRST FALSIFICATION REPORTED 0 RED
+
+`checks/console-boot.py` asserts the PROPERTY and never the milliseconds
+(§94.8) — `cards` asked once, `me` and `cards` **overlapping** (overlap rather
+than a duration, because two trips that happen to be quick are still two trips),
+no window in which the page is ready and the grid empty, both ends of the
+hand-over, and the remaining silence as the RECORDED state so the day it gains a
+word this goes red and is rewritten (§214.3, §218). **It needs no database** —
+the page is served as it is by both stacks, and a stub is also the only way to
+hold a round trip open long enough to look at the window at all (§94.11, §255).
+
+**AND ITS FIRST RUN AGAINST THE GENERATED COPY PRINTED `0 FAIL` UNDER
+`--break=sequential`** — §54.5's trap, with §215 beside it. The boot lives
+inline in `platform.html` and in `/platform-page.js` for the new stack's copy
+(§329), and `doctor()` insisted on a match in whichever body it was handed
+first: against the generated page the substitution missed, `sys.exit(1)` ran
+**inside the server thread** and killed only that thread, the page was never
+served, and the run produced no failures at all. *A falsification that applies
+to nothing is indistinguishable from a guard that works.* Each substitution now
+lands in whichever body holds it, and **whether it landed is asserted at the end
+of the run** (§344.1) — so both copies read 11/0 green, 4 red and 1 red
+identically.
+
+**VERIFIED**: `console-boot` **11/0 on BOTH copies** of the console page
+(§53.5), red both ways on both; `client-card-modules` 23/0, `platform-cards`
+21/0, `publishing-room` 74/0, `client-setup-outside` and `client-archive` 0
+failures, `modules` 158/0 red nine ways, `built-in-step` all good, `node --check`
+on the generated script clean. **AND TWO OF THOSE CHECKS DO NOT HONOUR
+`SMP_CHROME`** — run directly they printed Playwright's own install banner and
+**exited without running at all**, which read as a pass in a batch (§320.6b, a
+fourth road; §344.1's own finding); both run through `qa-run.py`, which is what
+CLAUDE.md requires and what this round nearly skipped. **The frozen product is
+untouched** — `platform.html` is the console at the repository root, which
+`build.py` does not read — so the built file does not move and **no `sw.js` bump
+is owed** (§91).

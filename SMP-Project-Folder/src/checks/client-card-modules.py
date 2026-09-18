@@ -27,8 +27,8 @@ nothing to say).
 Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/client-card-modules.py
       … --break=card-is-door   # the behaviour before §320.3; must go red
       … --break=no-rows        # the other end; must go red
-      … --break=mark-wraps     # §366: the two-line row, put back
-      … --break=alarm-plain    # §366: the alarm painted like a count
+      … --break=mark-wraps     # §367: the two-line row, put back
+      … --break=alarm-plain    # §367: the alarm painted like a count
       SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
 """
 import http.server, json, os, re, socketserver, sys, threading
@@ -48,7 +48,7 @@ def check(what, ok, detail=""):
     else:
         print("  FAIL " + what + ("  — " + str(detail) if detail else "")); fails.append(what)
 
-# A MARK, NOT A SENTENCE (§366). The row's tail was a pair — the client's
+# A MARK, NOT A SENTENCE (§367). The row's tail was a pair — the client's
 # chosen landing line plus the card's own health word — and on a running
 # cycle the two said the same fact twice, which is what could not fit on one
 # line. One mark now: what is outstanding, `alarm` for the two that mean
@@ -138,7 +138,7 @@ BREAKS = {
     # the other end: the rows are gone, so "the top is not a door" is true of
     # a card nobody can open at all
     "no-rows": "document.querySelectorAll('.mods').forEach(function (m) { m.remove(); });",
-    # THE TWO-LINE ROW ISLAM PHOTOGRAPHED (§366): the tail had no
+    # THE TWO-LINE ROW ISLAM PHOTOGRAPHED (§367): the tail had no
     # `flex:none`, so whatever sat beside it squeezed the mark until it
     # broke. Put back with a long neighbour to squeeze it, because the
     # missing rule alone cannot wrap a mark that has the row to itself —
@@ -198,7 +198,7 @@ def main():
               shape["rows"][0]["text"] if shape["rows"] else None)
 
         # REWRITTEN, NEVER LOOSENED (§218, §214.3): these asserted the health
-        # word ("cycle open") that §366 replaced with a mark. Both claims
+        # word ("cycle open") that §367 replaced with a mark. Both claims
         # survive whole and the second one matters more than it did — ONCE on
         # the card is the §87 rule this round exists to keep, because the old
         # pair said the same fact twice and that duplicate is what wrapped.
@@ -228,11 +228,11 @@ def main():
         check("…on ONE line, whatever sits beside it",
               bool(tail) and tail["h"] <= tail["lh"] + 2, tail)
         # …and the hover carries the whole sentence, because the mark is the
-        # fact in the fewest words (a nicety, never the only copy — §366).
+        # fact in the fewest words (a nicety, never the only copy — §367).
         check("…with the whole sentence on its hover",
               pg.get_attribute('.ccard[data-client="raya-trade"] .mrow i', "title") == "Cycle open · 3 of 10 still to submit",
               pg.get_attribute('.ccard[data-client="raya-trade"] .mrow i', "title"))
-        # THE ALARM IS THE ONE THING A COUNT CANNOT SAY (§366, and the
+        # THE ALARM IS THE ONE THING A COUNT CANNOT SAY (§367, and the
         # argument against one number for the whole card): measured as PAINT
         # in both palettes, never as the class that asks for it (§94.8,
         # §38.5) — and asserted against the count's own ink, or a build that

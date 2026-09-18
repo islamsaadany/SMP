@@ -29,7 +29,7 @@
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
    AND FIVE OF `check:door:red`'s BREAKS DIED WITH THE LANDING, WITH THE
-   FIRST OF THEM MASKING THE REST (§366). `no-rows`, `first-person`,
+   FIRST OF THEM MASKING THE REST (§367). `no-rows`, `first-person`,
    `membership-key`, `setup-any-seat` and `modules-unread` were all
    falsifications of THE CLIENT'S LANDING PAGE — its rows, its viewer
    fallback, its register lookup, its Client setup block, its Your modules
@@ -706,7 +706,7 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
   check(!!r.stamp && r.prev === r.stamp.lines[0].text && !!r.prev, "the preview under the list is the stamp's own text for it", JSON.stringify([r.prev, r.stamp && r.stamp.lines[0].text]));
   /* REWRITTEN, NEVER LOOSENED (§218, §214.3), AND IT IS A REVERSAL.
      This asserted that the console's card said the same SENTENCE as this
-     page (§359.4's one reader). §366 made the card say Forefront's own MARK
+     page (§359.4's one reader). §367 made the card say Forefront's own MARK
      instead — Islam's call, because that card exists so a consultant can
      decide which client to open next — so the property being guarded is now
      the opposite one, and it is written as the reversal rather than deleted:
@@ -717,7 +717,7 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
      satisfy the second half perfectly (§113.8). */
   const before = await cardMark();
   check(!!before, "the console's card carries a mark of its own", JSON.stringify(before));
-  check((await cardLine()) === undefined, "…and no line: the row stopped carrying a sentence (§366)", JSON.stringify(await cardLine()));
+  check((await cardLine()) === undefined, "…and no line: the row stopped carrying a sentence (§367)", JSON.stringify(await cardLine()));
   check(!!r.stamp && !r.stamp.lines.some((l) => l.text && l.text === before),
     "…and that mark is none of the sentences this page offers — it is not the client's pick",
     JSON.stringify([before, r.stamp && r.stamp.lines.map((l) => l.text)]));
@@ -738,11 +738,11 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
     check(!!lit && lit[1] === true && r.prevKey === "waiting" && !!want && r.prev === want.text, "a pick lights its row and moves the preview to that line's text", JSON.stringify([r.radios, r.prev]));
     const st = await stored();
     check(!!st && st.strategy === "waiting", "…and is STORED on the group under the module's key (read off the server)", JSON.stringify(st));
-    /* REVERSED WITH THE ONE ABOVE (§218, §366): this asserted the card now
+    /* REVERSED WITH THE ONE ABOVE (§218, §367): this asserted the card now
        said the picked line. The card is Forefront's own answer, so what has
        to hold is that the pick moved the page's preview — asserted two lines
        up — and moved the card's mark NOT AT ALL. */
-    check((await cardMark()) === before, "…and the console's card is UNMOVED by it: the mark is Forefront's own (§366)", JSON.stringify([before, await cardMark()]));
+    check((await cardMark()) === before, "…and the console's card is UNMOVED by it: the mark is Forefront's own (§367)", JSON.stringify([before, await cardMark()]));
     /* THE DEFAULT DELETES THE KEY */
     await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
     await pick("cycle");
@@ -750,7 +750,7 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
     /* NOTHING is a choice, drawn as a row with no line */
     await pick("none");
     /* NOTHING is still a choice and still keeps the card's ROW — the door is
-       what the row is — and since §366 it cannot touch the mark either. */
+       what the row is — and since §367 it cannot touch the mark either. */
     const nothingRow = await cardRow();
     check(!!nothingRow && nothingRow.key === "strategy", "Nothing keeps the card's row: the door is not a sentence", JSON.stringify(nothingRow));
     check(!!nothingRow && nothingRow.mark === before, "…and leaves the mark where it was", JSON.stringify([before, nothingRow && nothingRow.mark]));

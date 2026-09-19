@@ -70,3 +70,35 @@ fixed and not editable until I made the double click."*
   agreement, never as the number.
 * **A save's repaint no longer closes the cell** — §368.16, a live-deployment
   defect invisible over `file://`.
+
+## 6 · What the third round settled (§369, 2026-09-19)
+
+Islam, testing it again: the open Unit box lying across the Email column, and
+*"you added the 3 dots to the roles whihc is wrong the 3 dots is out of this
+column."* Both drawn out of the running platform and signed off first (rule 1c);
+of the two answers offered for the second, he picked **A**.
+
+* **An open cell is capped to its own column.** `width:auto` fills for an
+  `<input>` and shrink-fits for a `<button>`, and `.ssbtn` is
+  `white-space:nowrap` — so a long label put 261px of control in a 176px cell,
+  93.6px into EMAIL, taking the email's clicks. `max-width:none` →
+  `max-width:100%`, measured with and without the column's declared width.
+* **The frozen column says it is frozen.** The ⋮ was never added to Roles; it is
+  the last column, frozen since §69.19, floating over whatever scrolls beneath.
+  Its seam had **never painted** — no `box-shadow` draws on a `<td>` under
+  `border-collapse:collapse` — so it is a `::before` wash now, `--froze-wash`
+  declared in all four palettes.
+* **The `fits` assertion had no data to exercise it** (§255). It is the right
+  property and it passed throughout, because the demo holds no label long enough
+  to overflow. The state is made and put back there now.
+* **The seam is measured as PAINT** — two screenshots either side of the wash,
+  which must differ — because reading the declaration is exactly what could not
+  tell a live seam from a dead one.
+
+Proved able to fail three ways from the sources: the cap put back, the seam
+removed, and the seam declared as the box-shadow that never painted.
+
+**Not done, recorded:** the kebab cell's block is declared twice in
+`config.css`, byte for byte; and making the table fit a narrower window so it
+never scrolls (option C) is untouched — it means giving up or narrowing a
+column.

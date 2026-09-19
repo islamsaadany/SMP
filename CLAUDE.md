@@ -9992,7 +9992,83 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-18 &mdash; **&sect;368: the cell is the control (spec
+*Last Updated: 2026-09-19 &mdash; **&sect;369: the open box, and the column
+that never said it was frozen (spec 059).** Islam, testing &sect;368, with two
+screenshots: the open Unit box lying across the Email column, and &mdash; of the
+&#8942; &mdash; *"you added the 3 dots to the roles whihc is wrong the 3 dots is
+out of this column."* **NEITHER IS VISIBLE ON THE WORKED EXAMPLE** (&sect;255):
+its longest unit label is *Consumer Electronics* at 151.8px in a 176px column,
+which fits whatever the rule says, and at 1500px the register does not scroll at
+all &mdash; so his own state was made (a function named *Strategy Management
+Office*) and both answers were **drawn out of the RUNNING platform and signed
+off before a source moved** (rule 1c, &sect;41.9). Of the two offered for the
+&#8942;, he picked **A**.
+**&sect;369.1 &mdash; `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
+BUTTON**: measured, **261.1px of control inside a 176px cell**, hanging
+**93.6px** into EMAIL, and a click 20px inside the email cell returns
+`SPAN.sslabel` &mdash; **the box, not the email**, which is &sect;110.1's fault
+exactly, the one that section exists for. &sect;368.5 wrote `max-width:none` on
+the reasoning that a block fills its container, and that is **true of the
+`<input>`** (145.1px in a 162.1px cell, the content box to the pixel) **and
+false of `searchsel.js`'s `<button>`**, which is shrink-to-fit &mdash; and
+`.ssbtn` is `white-space:nowrap`, so its text IS its width. **AND THE FILE
+ALREADY SAID THAT CANNOT WORK**, eighty lines above the rule this changes
+(&sect;110: *"`max-width:100%` DOES NOTHING HERE"*), which is why it was
+measured twice rather than once: both are true and they are about different
+elements &mdash; &sect;110's subject is an `<input>` whose own intrinsic width
+was SIZING the column, so the cap had nothing to resolve against. Falsified by
+**taking the declared width off the column** and measuring again: the box ends
+at the content edge either way, **159 of 176 declared, 156.2 of 173.2 auto**
+(&sect;94.5). The label clips with the `&hellip;` `.sslabel` has always carried,
+the row stays 38.6px beside its neighbours at 1500/1280/1100/1000, and the email
+gets its clicks back. **The cost is stated rather than discovered**: while it is
+open, a name too long to fit reads *Strategy Manageme&hellip;*.
+**&sect;369.2 &mdash; AND THE SEAM HAS NEVER PAINTED.** The &#8942; is **not in
+the Roles column**, and establishing that first was most of the answer: it is
+its own last column, frozen since &sect;69.19 so a row can always be acted on
+however far the table has scrolled, and what he is seeing is that frozen column
+**floating over whatever scrolls under it** &mdash; at 1500px it sits after
+STATUS, at 1200px and below at x1129 inside a Roles column running
+977&rarr;1186, with STATUS out of sight beneath; nothing is lost, since scrolled
+fully right STATUS is whole again. **WHAT IS WRONG IS THAT NOTHING SAID THE
+COLUMN WAS FROZEN, AND THE THING DECLARED TO SAY IT HAS NEVER DRAWN A PIXEL**:
+`box-shadow` on a `<td>` does not paint under `border-collapse:collapse`.
+**Proved rather than reasoned** &mdash; a **solid red 10px** shadow on that cell
+photographed **byte-identical** to none at all, while a border, a `::before` and
+a background each changed the pixels. It fails the way this file keeps
+recording, and the way the vertical sticky twenty lines above it failed:
+**silently, with every property reading back exactly as written** (&sect;93.11).
+So the seam is a `::before`, and a **wash rather than a hairline**, because a
+1px line says *next column* and what this column does is pass OVER the one
+beside it; `--froze-wash` in **all four palette blocks** (&sect;25), a dark wash
+on both grounds because a frozen column's seam is DEPTH, measured in each.
+**FOUND AND DELIBERATELY NOT SWEPT** (rule 1b): `td.namecell` and
+`.fnscfg td.fnamecell` carry the same dead declaration and are left exactly as
+they are &mdash; and the name column could not take this answer unchanged in any
+case, being `overflow:hidden` (&sect;71.2), so a `::before` of its own is
+clipped away, measured.
+**&sect;369.3 &mdash; AND THE CHECK THAT SHOULD HAVE CAUGHT IT WAS RIGHT AND
+STARVED**: `role-picker.py` **already asserted that the open control fits its
+cell**, on the button as well as the box, and went green through the whole round
+that shipped the fault &mdash; the right property with **no data to exercise
+it** (&sect;255). The state is MADE there now and PUT BACK after (&sect;94.2).
+**AND THE SEAM IS MEASURED AS PAINT, NEVER AS A DECLARATION** (&sect;94.8):
+asking `getComputedStyle` is precisely what could not tell the two apart, since
+the dead shadow read back word for word as written &mdash; the strip beside the
+frozen cell is **photographed twice**, once with the wash and once with it made
+transparent, and the two must DIFFER. Proved able to fail **three ways from the
+SOURCES** (&sect;276): the cap put back, the seam removed, and the seam
+**declared as the box-shadow that never painted** &mdash; the third being the
+one that separates a check measuring paint from a check reading a rule. **The
+server needed nothing and it is asserted** (&sect;172): no `api/`, `lib/` or
+`db/` file touched, read off the diff; nothing stored moves, nothing is
+migrated. **RECORDED, NOT DONE**: the kebab cell's block is declared **twice in
+`config.css`, byte for byte** (&sect;29.2's family, the sixth time), with the
+seam declared once and the twin left as it was; and **C** &mdash; making the
+table fit a narrower window so it never scrolls &mdash; is untouched, since it
+means giving up or narrowing a column.*
+
+*Earlier: 2026-09-18 &mdash; **&sect;368: the cell is the control (spec
 059).** Islam, of the client's People register: *"for the client registry I'd
 like to do some in line adjustments like the phone, employee ID, email, the
 unit/function, job title, etc. and about the roles why do I need to add them as

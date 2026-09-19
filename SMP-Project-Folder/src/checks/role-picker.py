@@ -477,6 +477,21 @@ with sync_playwright() as p:
         #     its own and took the row from 38.6px to 59.6.
         # Both ends (§94.2): the caret is asserted absent WHERE THE BUTTON IS,
         # never merely absent from a table that has no button in it at all.
+        # AND THE `fits` ASSERTION BELOW HAD NOTHING TO BITE ON (§255, §369).
+        # It is the right property and it went green through the whole of the
+        # round that shipped the fault, because the longest unit label the
+        # worked example holds is "Consumer Electronics" — 151.8px of button in
+        # a 176px cell, which fits whatever the rule says. Islam's own tenant
+        # has "Strategy Management Office (function)" at 261.1px, hanging 93.6px
+        # into EMAIL. So the state is MADE here and PUT BACK after (§94.2): a
+        # check that can only pass is not a check (§113.8).
+        long_name = pg.evaluate("""(k)=>{const f=FUNCTIONS[FUNCTION_KEYS[0]];
+          const was=f.name; f.name='Strategy Management Office';
+          const p=PEOPLE.find(function(x){return x.key===k;});
+          const had={unit:p.unit,fn:p.fn,company:p.company};
+          p.unit=null; p.company=null; p.fn=FUNCTION_KEYS[0]; paint();
+          return JSON.stringify({was:was, had:had});}""", who)
+        pg.wait_for_timeout(300)
         for fld, what in (("Unit or function", "a unit"), ("Roles", "the roles")):
             pg.dblclick('[data-pcell="%s|%s"]' % (who, fld))
             pg.wait_for_timeout(400)
@@ -507,6 +522,46 @@ with sync_playwright() as p:
         ck("%d: and both close again" % w,
            pg.evaluate("document.querySelectorAll('.peoplecfg td.pcellopen').length") == 0
            and pg.evaluate("()=>typeof PROLEPICK==='undefined'||PROLEPICK===null"))
+        pg.evaluate("""(j)=>{const s=JSON.parse(j);
+          FUNCTIONS[FUNCTION_KEYS[0]].name=s.was;
+          const p=PEOPLE.find(function(x){return x.key===WHO_;});
+          if(p){p.unit=s.had.unit;p.fn=s.had.fn;p.company=s.had.company;}
+          paint();}""".replace("WHO_", repr(who)), long_name)
+        pg.wait_for_timeout(300)
+        # ── THE FROZEN COLUMN SAYS IT IS FROZEN (§369) ──────────────────
+        # Islam: "you added the 3 dots to the roles whihc is wrong the 3 dots is
+        # out of this column." They are their own frozen column — and NOTHING
+        # SAID SO, because the `box-shadow` it is declared with has never
+        # painted: Chromium draws no box-shadow on a `<td>` under
+        # `border-collapse:collapse`.
+        #
+        # SO THIS IS MEASURED AS PAINT AND NEVER AS A DECLARATION (§94.8).
+        # Asking `getComputedStyle` is exactly what could not tell the two
+        # apart — the dead shadow read back word for word as written, which is
+        # how it survived since §69.19. The strip beside the cell is
+        # photographed twice, once with the wash and once with it made
+        # transparent, and the two must DIFFER. A build whose seam is declared
+        # and does not paint gives two identical images.
+        strip = """()=>{const tr=[...document.querySelectorAll('.peoplecfg tbody tr')]
+          .find(x=>x.querySelector('td.kebcell'));
+          const k=tr.querySelector('td.kebcell').getBoundingClientRect();
+          return {x:k.left-30, y:k.top+2, width:28, height:Math.max(k.height-4,6)};}"""
+        box = pg.evaluate(strip)
+        with_wash = pg.screenshot(clip=box)
+        pg.evaluate("()=>document.documentElement.style.setProperty('--froze-wash','transparent')")
+        pg.wait_for_timeout(200)
+        without = pg.screenshot(clip=pg.evaluate(strip))
+        pg.evaluate("()=>document.documentElement.style.removeProperty('--froze-wash')")
+        pg.wait_for_timeout(200)
+        ck("%d: the frozen column's seam actually paints" % w,
+           with_wash != without,
+           "identical pixels either side of --froze-wash")
+        ck("%d: ...and it is not the box-shadow that never painted" % w,
+           pg.evaluate("""()=>{const tr=[...document.querySelectorAll('.peoplecfg tbody tr')]
+             .find(x=>x.querySelector('td.kebcell'));
+             const kc=tr.querySelector('td.kebcell');
+             return getComputedStyle(kc).boxShadow==='none'
+               && getComputedStyle(kc,'::before').backgroundImage!=='none';}"""))
         ck("%d: every row is one line" % w,
            pg.evaluate("""()=>{const hs={};
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{

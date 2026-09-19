@@ -1340,9 +1340,40 @@
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* ── AND THE SEAM WAS NEVER THERE (§369) ─────────────────────────
+     Islam, of this column: "you added the 3 dots to the roles whihc is wrong
+     the 3 dots is out of this column." They are not in Roles — they are this
+     frozen column, floating over whatever scrolls under it. Measured: at
+     1500px the table does not scroll and they sit after STATUS; at 1200px and
+     below they sit at x1129 inside a Roles column running 977→1186, which is
+     his screenshot to the pixel. Nothing is lost — scrolled fully right,
+     STATUS is whole again.
+
+     WHAT WAS WRONG IS THAT NOTHING SAID THIS COLUMN WAS FROZEN. The
+     `box-shadow` below HAS NEVER PAINTED: Chromium draws no box-shadow on a
+     `<td>` under `border-collapse:collapse`. Proved rather than reasoned —
+     a SOLID RED 10px shadow on this cell photographed byte-identical to none
+     at all, while a border, a `::before` and a background each changed the
+     pixels. It fails the way this file keeps recording, and the way the
+     vertical sticky twenty lines up failed: silently, with every property
+     reading back exactly as written (§93.11).
+
+     So the seam is a `::before`, which does paint — and it is a WASH rather
+     than a hairline, because a 1px line says "next column" and what this
+     column is doing is passing OVER the one beside it.
+
+     FOUND AND DELIBERATELY NOT SWEPT (rule 1b): `td.namecell` and
+     `.fnscfg td.fnamecell` carry the same dead declaration and are left
+     exactly as they are — Islam asked about this column. The name column
+     could not take this answer unchanged in any case: it is `overflow:hidden`
+     (§71.2, three rules up), so a `::before` of its own is clipped away —
+     measured. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
+  .peoplecfg td.kebcell::before, .peoplecfg thead th.kebcell::before {
+    content:""; position:absolute; right:100%; top:0; bottom:0; width:14px;
+    pointer-events:none;
+    background:linear-gradient(to left, var(--froze-wash), transparent); }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -1519,9 +1550,12 @@
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* The twin of the block above (§29.2's family — this rule is declared twice
+     in this file, byte for byte). Left as the second copy rather than deleted,
+     because removing one of a pair nobody has reconciled is a change of its
+     own; the seam is declared once, above. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -1821,9 +1855,31 @@
      in this table, met from the other side. A block-level element fills its
      containing block's CONTENT box with no percentage to resolve, which is
      the same answer without the quirk. */
+  /* AND CAPPED, BECAUSE `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
+     BUTTON (§369). Islam, with the Unit cell open on a function called
+     "Strategy Management Office": the box ran into EMAIL. Measured, 261.1px of
+     control inside a 176px cell — 93.6px past its own right edge — and a click
+     20px inside the email cell returned the BUTTON, which is §110.1's fault
+     exactly: a control that is present, correctly sized and eating its
+     neighbour's clicks.
+
+     `max-width:none` assumed a block fills its container. That is true of the
+     `<input>` (measured: 145.1px in a 162.1px cell, the content box to the
+     pixel) and FALSE of `searchsel.js`'s `<button>`, which is shrink-to-fit —
+     and `.ssbtn` is `white-space:nowrap`, so its text IS its width.
+
+     AND §110's "`max-width:100%` DOES NOTHING HERE", eighty lines up, is about
+     an `<input>` whose own intrinsic width was sizing the column — circular, so
+     the cap had nothing to resolve against. A button capped here does not
+     contribute that width in the first place, and it was measured BOTH ways
+     before it was believed (§94.5): with the column's declared 176px and with
+     `width:auto` forced on it, the box ends at the content edge either way
+     (159 of 176, 156.2 of 173.2). The label clips with the "…" `.ssbtn
+     .sslabel` already carries, the row stays 38.6px beside its neighbours, and
+     the email gets its clicks back. */
   .peoplecfg td.pcellopen .fld,
   .peoplecfg td.pcellopen .ssbtn {
-    display:block; width:auto; min-width:0; max-width:none;
+    display:block; width:auto; min-width:0; max-width:100%;
     box-sizing:border-box; }
 
   /* ── NO ARROW IN THIS TABLE (§368.14) ───────────────────────────────
@@ -1856,7 +1912,7 @@
      own tighter padding — measured, `.cfg input`'s 4px puts that row at
      45.1px where 1px puts it at the resting 39.1. Two paddings, one
      height, which is the thing that matters. */
-  .peoplecfg td.roles.pcellopen .ssbtn { max-width:100%; min-width:0; padding:1px 6px; }
+  .peoplecfg td.roles.pcellopen .ssbtn { padding:1px 6px; }
 
   /* ── AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS (§368.14) ──
      "the table in general should look everything fixed ... until I made the

@@ -5251,6 +5251,36 @@ and measures them while open. Proved able to fail four ways from the sources
 (8 / 4 / 16 / 4 red, the last printing his symptom verbatim). **Waiting on
 Islam: the merge.**
 
+**AND §369 ANSWERS THE TWO HE FOUND NEXT** (2026-09-19): the open Unit box lying
+across the Email column, and *"you added the 3 dots to the roles whihc is wrong
+the 3 dots is out of this column."* **Neither is visible on the worked example**
+(§255) — its longest unit label fits, and at 1500px the register does not scroll
+at all — so his own state was made and both answers were **drawn out of the
+running platform and signed off before a source moved** (rule 1c); of the two
+offered for the ⋮, he picked **A**. **§369.1**: measured, **261.1px of control in
+a 176px cell**, 93.6px into EMAIL, and a click inside the email cell returns the
+box — §110.1's fault again. One word: `width:auto` fills for an `<input>` and
+**shrink-fits for a `<button>`**, and `.ssbtn` is `white-space:nowrap`, so its
+text is its width; `max-width:none` → `max-width:100%`, measured **both with and
+without the column's declared width** because the file records eighty lines above
+that this cap does nothing here — true of §110's `<input>`, which was sizing its
+own column, and not of a button. **§369.2**: the ⋮ was never added to Roles; it is
+the frozen last column floating over what scrolls beneath — **and its seam has
+never painted**, because no `box-shadow` draws on a `<td>` under
+`border-collapse:collapse`. Proved by putting a **solid red 10px** shadow on the
+cell and photographing **no change at all**, while a border, a `::before` and a
+background each moved the pixels. A `::before` wash now, `--froze-wash` in all
+four palettes, a dark wash on both grounds because the seam is depth.
+**§369.3**: `role-picker.py` **already asserted that the open control fits its
+cell** and went green through the whole round that shipped the fault — the right
+property with no data to exercise it (§255) — so the state is made and put back
+there now; and the seam is asserted as **PAINT**, two screenshots either side of
+the wash which must differ, because reading the declaration is exactly what could
+not tell a live seam from a dead one. Proved able to fail three ways from the
+sources. **Found and not swept** (rule 1b): the name column and the functions
+table carry the same dead declaration, and the kebab block is declared **twice**
+in `config.css` byte for byte. **Waiting on Islam: the merge.**
+
 **Spec 056 — the client and its modules (§362), on the branch, stage 1 of
 six built 2026-09-16.** Islam, of the page the console's *Settings* chip
 opens: *"theclient settings shouldn't open the strategy banner in the top this

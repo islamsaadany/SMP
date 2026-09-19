@@ -52197,3 +52197,123 @@ and the table **1382 → 1355px**, 27px handed back; the open drop cell **59.6 �
 or `db/` file is touched, read off the diff; nothing stored moves and nothing is
 migrated.
 
+
+---
+
+## §369 — THE OPEN BOX, AND THE COLUMN THAT NEVER SAID IT WAS FROZEN (2026-09-19, spec 059)
+
+Islam, testing what §368 shipped, with two screenshots: the Unit cell open and
+its box lying across the Email column, and — of the ⋮ — *"you added the 3 dots
+to the roles whihc is wrong the 3 dots is out of this column."* Then, of the
+two answers drawn for the second: **"A"**.
+
+**BOTH WERE MEASURED BEFORE EITHER WAS PROPOSED** (rule 3a), and **the worked
+example can show neither** (§255): its longest unit label is *Consumer
+Electronics* at 151.8px in a 176px column, which fits whatever the rule says,
+and at 1500px the register does not scroll at all. His own state was made — a
+supporting function named *Strategy Management Office* — and the answers were
+**drawn out of the running platform and signed off before a source moved**
+(rule 1c, §41.9): `design-mockups/registry-inline/2026-09-19_open-cell-and-frozen-column.html`.
+
+### §369.1 — `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A BUTTON
+
+Measured: **261.1px of control inside a 176px cell**, hanging **93.6px** into
+EMAIL, and a click 20px inside the email cell returned `SPAN.sslabel` — **the
+box, not the email**. That is §110.1's fault exactly, the one that section
+exists for: a control that is present, correctly sized and **eating its
+neighbour's clicks**.
+
+**ONE WORD.** §368.5 wrote `display:block; width:auto; max-width:none` on the
+reasoning that a block fills its container, and that reasoning is **true of the
+typed box and false of the drop box** — measured, the `<input>` fills its cell's
+content box to the pixel (145.1 of 162.1) while `searchsel.js`'s `<button>` is
+**shrink-to-fit**, and `.ssbtn` is `white-space:nowrap`, so its text IS its
+width. `max-width:none` → `max-width:100%`.
+
+**AND THE FILE ALREADY SAID THAT CANNOT WORK**, which is why it was measured
+twice rather than once: §110 records *"`max-width:100%` DOES NOTHING HERE"*
+eighty lines above the rule this changes. Both are true and they are about
+different elements — §110's subject is an `<input>` whose own intrinsic width
+was **sizing the column**, so the cap had nothing to resolve against. A button
+capped here does not contribute that width in the first place. Falsified by
+**taking the declared width off the column** (`th.wcol{width:auto}`) and
+measuring again: the box ends at the content edge either way — **159 of 176
+declared, 156.2 of 173.2 auto** (§94.5).
+
+The label clips with the `…` `.ssbtn .sslabel` has carried since it was
+written, the row stays **38.6px** beside its neighbours at 1500/1280/1100/1000,
+and the email gets its clicks back. **The cost is stated rather than
+discovered**: while it is open, a name too long to fit reads *Strategy
+Manageme…*; the full name is what is stored and what the list shows.
+
+The roles rule's own `max-width:100%; min-width:0` is now the shared one and is
+**deleted rather than left duplicated** (§24); only its tighter padding, which
+is its own (chips, not a line of text), survives.
+
+### §369.2 — AND THE SEAM HAS NEVER PAINTED
+
+**THE ⋮ IS NOT IN THE ROLES COLUMN, AND ESTABLISHING THAT FIRST WAS MOST OF THE
+ANSWER.** It is its own last column, frozen to the right edge since §69.19 so
+that a row can always be acted on however far the table has scrolled. What
+Islam is seeing is that frozen column **floating over whatever scrolls under
+it**: measured, at **1500px** the table does not scroll and the dots sit after
+STATUS; at **1200px and below** they sit at x1129 inside a Roles column running
+977→1186, with STATUS pushed out of sight beneath — his screenshot to the
+pixel. **Nothing is lost**: scrolled fully right, STATUS is whole again.
+
+**WHAT IS WRONG IS THAT NOTHING SAID THE COLUMN WAS FROZEN — AND THE THING
+DECLARED TO SAY IT HAS NEVER DRAWN A PIXEL.** `box-shadow` on a `<td>` does not
+paint under `border-collapse:collapse`. **Proved rather than reasoned**: a
+**solid red 10px** shadow on that cell photographed **byte-identical** to no
+shadow at all, while a border, a `::before` and a background each changed the
+pixels. It fails the way this file keeps recording, and the way the vertical
+sticky twenty lines above it failed — **silently, with every property reading
+back exactly as written** (§93.11). So the seam has been dead since §69.19 froze
+the column, which is the whole reason the dots read as part of whatever is
+underneath them.
+
+The seam is a `::before`, which does paint, and it is a **wash rather than a
+hairline**, because a 1px line says *next column* and what this column is doing
+is passing **over** the one beside it. `--froze-wash` is declared in **all four
+palette blocks** (§25: never a literal, and never one that works in one theme)
+— a dark wash on both grounds, because a frozen column's seam is **depth** —
+measured in both: light `rgba(22,50,92,.22)`, dark `rgba(0,0,0,.50)`.
+
+**FOUND AND DELIBERATELY NOT SWEPT** (rule 1b): `td.namecell` and
+`.fnscfg td.fnamecell` carry the same dead declaration and are **left exactly as
+they are**, with a note on the one this round rewrites naming them. The name
+column could not take this answer unchanged in any case — it is
+`overflow:hidden` (§71.2), so a `::before` of its own is clipped away, measured.
+
+### §369.3 — THE CHECK THAT SHOULD HAVE CAUGHT IT, AND WHY IT DID NOT
+
+`role-picker.py` **already asserted that the open control fits its cell**, on
+the button as well as the box, and it went green through the whole of the round
+that shipped the fault. §255: **it is the right property with no data to
+exercise it.** The state is MADE there now and PUT BACK after (§94.2) — a check
+that can only pass is not a check (§113.8).
+
+**AND THE SEAM IS MEASURED AS PAINT, NEVER AS A DECLARATION** (§94.8). Asking
+`getComputedStyle` is precisely what could not tell the two apart: the dead
+shadow read back word for word as written. The strip beside the frozen cell is
+**photographed twice** — once with the wash and once with it made transparent —
+and the two must **differ**; a build whose seam is declared and does not paint
+gives two identical images. That is the same method that found the fault.
+
+**Proved able to fail three ways from the SOURCES** (§276, because §238's hashed
+CSP silences an edited built file): the cap put back, the seam removed, and the
+seam **declared as the box-shadow that never painted** — the third being the one
+that separates a check measuring paint from a check reading a rule.
+
+**The server needed nothing and it is asserted** (§172): no `api/`, `lib/` or
+`db/` file is touched, read off the diff; nothing stored moves and nothing is
+migrated. Two CSS files and one check.
+
+**RECORDED, NOT DONE**: the kebab cell's whole block is **declared twice in
+`config.css`, byte for byte** (§29.2's family, the sixth time this file has
+recorded a duplicated rule) — the seam is declared once, on the first copy, and
+the twin is left as it was rather than reconciled, because removing one of a
+pair nobody has looked at is a change of its own; and **C** — making the table
+fit a narrower window so it never scrolls at all — is untouched, since it means
+giving up or narrowing a column, which is a decision about what the register
+shows.

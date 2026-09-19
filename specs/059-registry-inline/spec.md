@@ -95,8 +95,10 @@ of the two answers offered for the second, he picked **A**.
   which must differ — because reading the declaration is exactly what could not
   tell a live seam from a dead one.
 
-Proved able to fail three ways from the sources: the cap put back, the seam
-removed, and the seam declared as the box-shadow that never painted.
+Proved able to fail three ways from the sources — **4 / 8 / 8 red**: the cap
+put back, the seam removed, and the seam declared as the box-shadow that never
+painted. The last two go red identically, which is the finding: to the page,
+a seam declared that way and no seam at all are the same build.
 
 **Not done, recorded:** the kebab cell's block is declared twice in
 `config.css`, byte for byte; and making the table fit a narrower window so it

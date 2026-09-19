@@ -5277,7 +5277,8 @@ property with no data to exercise it (§255) — so the state is made and put ba
 there now; and the seam is asserted as **PAINT**, two screenshots either side of
 the wash which must differ, because reading the declaration is exactly what could
 not tell a live seam from a dead one. Proved able to fail three ways from the
-sources. **Found and not swept** (rule 1b): the name column and the functions
+sources — **4 / 8 / 8 red**, the last two identical, which is the finding: to the
+page, a seam declared as that shadow and no seam at all are the same build. **Found and not swept** (rule 1b): the name column and the functions
 table carry the same dead declaration, and the kebab block is declared **twice**
 in `config.css` byte for byte. **Waiting on Islam: the merge.**
 

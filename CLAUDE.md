@@ -10057,9 +10057,13 @@ asking `getComputedStyle` is precisely what could not tell the two apart, since
 the dead shadow read back word for word as written &mdash; the strip beside the
 frozen cell is **photographed twice**, once with the wash and once with it made
 transparent, and the two must DIFFER. Proved able to fail **three ways from the
-SOURCES** (&sect;276): the cap put back, the seam removed, and the seam
-**declared as the box-shadow that never painted** &mdash; the third being the
-one that separates a check measuring paint from a check reading a rule. **The
+SOURCES** (&sect;276) &mdash; **4 / 8 / 8 red**: the cap put back (the reported
+control hanging out of its cell at all four widths), the seam removed, and the
+seam **declared as the box-shadow that never painted** &mdash; the third being
+the one that separates a check measuring paint from a check reading a rule, and
+it reddens **identically to the seam being absent altogether**, which is the
+whole finding stated as a measurement: to the page, those two builds are the
+same build. **The
 server needed nothing and it is asserted** (&sect;172): no `api/`, `lib/` or
 `db/` file touched, read off the diff; nothing stored moves, nothing is
 migrated. **RECORDED, NOT DONE**: the kebab cell's block is declared **twice in

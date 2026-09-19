@@ -52301,9 +52301,12 @@ and the two must **differ**; a build whose seam is declared and does not paint
 gives two identical images. That is the same method that found the fault.
 
 **Proved able to fail three ways from the SOURCES** (§276, because §238's hashed
-CSP silences an edited built file): the cap put back, the seam removed, and the
-seam **declared as the box-shadow that never painted** — the third being the one
-that separates a check measuring paint from a check reading a rule.
+CSP silences an edited built file) — **4 / 8 / 8 red**: the cap put back (the
+reported control hanging out of its cell at every width), the seam removed, and
+the seam **declared as the box-shadow that never painted**. The third is the one
+that separates a check measuring paint from a check reading a rule, and it goes
+red **identically to the seam being absent altogether**, which is the whole of
+the finding: to the page those two builds are the same build.
 
 **The server needed nothing and it is asserted** (§172): no `api/`, `lib/` or
 `db/` file is touched, read off the diff; nothing stored moves and nothing is

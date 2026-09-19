@@ -143,37 +143,70 @@
      to decide which one the top would open. The card stopped being a
      <button> for it — a button cannot hold buttons — so the identity block
      and the rows are its two children and the padding moved onto them. */
+  /* ── A MARK, NOT A SENTENCE — AND TIGHTER (§368) ──────────────────
+     Islam: "we don't needs notes that take 2 lines we can just have a
+     notificaiton here if something is new to check ... to keep it neat and
+     clean nad let's make it compact." Option A of a signed-off mockup
+     (design-mockups/client-card-rows/2026-09-17_a-mark-not-a-sentence.html),
+     with the tighter rows he ticked on it.
+
+     `min-height` GOES FROM THE CARD AND STAYS ON `.ccard.add`, which is the
+     one card whose whole height comes from it: it is a centred dashed box
+     holding four words, and on a platform with no clients yet it is alone in
+     its row with nothing to be stretched against (§317's own empty state).
+     Every other card is as tall as it needs to be, and the grid still levels
+     a row against its tallest. */
   .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
     background:var(--surface); display:flex; flex-direction:column;
-    min-height:152px; font:inherit; color:inherit; box-shadow:var(--shadow) }
+    min-height:0; font:inherit; color:inherit; box-shadow:var(--shadow) }
   .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
   .ccard.listed{ opacity:.72 }
-  .ccard .ctop{ display:flex; flex-direction:column; gap:7px; padding:15px }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:13px 14px }
   .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
-  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:9px 15px;
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:6px 14px;
     font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
     border:0; border-bottom:1px solid var(--line); cursor:pointer }
   .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
-  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto }
-  .mrow .mline{ font-size:12px; color:var(--ink-2); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  /* AND THE TAIL MAY NEVER WRAP, which is the two-line row he photographed:
+     this had no `flex:none`, so the sentence that used to sit beside it
+     squeezed the two-word state until it broke. The sentence is gone, and
+     the guard stays — a mark is a mark on one line whatever ends up next to
+     it, and a wrapped one costs the whole grid a row of height. */
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto;
+    flex:none; white-space:nowrap }
+  /* The two marks that mean something is BROKEN rather than busy, in the
+     warning ink (--warn, measured for words on this surface); a count is not
+     an alarm however large it is, so it stays the row's quiet ink at the
+     weight that lets a figure be picked out of a column of names. */
+  .mrow i.alarm{ color:var(--warn); font-weight:600 }
+  .mrow i.due{ color:var(--ink-2); font-weight:600 }
   .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
   .ccard.add{ cursor:pointer }
   .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
-  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
-    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  .ccard .cmark{ width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber);
+    font:700 11px/30px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
   /* A client that has a mark wears it on its card — the same picture its
      door wears (§313.36), so the two cannot disagree; a light plate under it
-     because a PNG cannot be recoloured (§52). Initials until then. */
-  .ccard img.cmark{ width:auto; max-width:120px; height:36px; object-fit:contain; background:#fff; padding:4px 8px; box-sizing:content-box }
+     because a PNG cannot be recoloured (§52). Initials until then.
+     ITS HEIGHT FOLLOWS THE INITIALS' (§368): the mockup could only draw the
+     initials, and leaving this at 36 would have made a client with a logo
+     taller than one without — two card heights in one row for no reason
+     anybody could read. */
+  .ccard img.cmark{ width:auto; max-width:120px; height:30px; object-fit:contain; background:#fff; padding:3px 7px; box-sizing:content-box }
   .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
   .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
   .markrow .none{ font-size:13px; color:var(--ink-3) }
-  .ccard h2{ margin:0; font-size:17px; font-weight:600 }
+  .ccard h2{ margin:0; font-size:16px; font-weight:600 }
   .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
   .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
     padding:15px; color:var(--ink-3) }
+  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§371). The Add card's
+     own height, shared rather than copied: the waiting card is the same
+     question — how tall is a card in this grid before there is a client in
+     it — and two spellings of one answer is how they come to differ. */
+  .ccard.add, .ccard.skel{ min-height:152px }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -221,6 +254,43 @@
      not work (§61, §96). */
   .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
   .ccard.arch:hover{ border-color:var(--line) }
+
+  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§371) ─────────────────
+     §369 took the console's boot from three round trips to one and left the
+     silence: the bar stands up, the body is hidden, and for about 740ms —
+     seconds on a cold function — the window looks open and dead. What fills
+     it is the answer the CLIENT platform already gives while it waits
+     (§94.10), chosen by Islam over the page's own words.
+
+     IT WEARS NOTHING IT WILL HAVE TO CHANGE, which is that section's whole
+     rule: no name, no mark, no tenant's colour, no figure. Two greys the
+     page already declares (§25 — never a literal), in the shape the real
+     card has, so what arrives replaces a block with the thing that block
+     stood for rather than rearranging the page around it.
+
+     AND IT SAYS NOTHING THAT WOULD MAKE IT LOOK PRESSABLE, by construction
+     rather than by a rule: `.ccard` declares no hover of its own (the two
+     that exist are scoped to `.add` and to `.mrow`), and `:focus-visible`
+     cannot reach a `div` that takes no tabindex. A `pointer-events:none`
+     was written here first and REMOVED on measuring it — nothing behaves
+     differently with or without it, and a line that fixes nothing is one
+     the next reader takes for load-bearing (§298.2, §24). */
+  .ccard.skel .sk-mark{ width:30px; height:30px; border-radius:8px; background:var(--line) }
+  /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
+     signed-off shot has and what the first build lost: `.ctop` is a column
+     flex, so a bar with no width STRETCHES and three cards read as three
+     long rules rather than a name over an industry. A share of the card
+     rather than a pixel count, because the grid's columns are `1fr` and a
+     fixed bar would sit differently in a wide row and a narrow one. */
+  .ccard.skel .sk-line{ width:62%; height:10px; border-radius:5px; background:var(--line) }
+  .ccard.skel .sk-line.thin{ width:42%; height:8px; background:var(--surface-2) }
+  /* AND THE HAIRLINE SITS WHERE THE REAL CARD'S SITS — under the name block,
+     with the module rows below it. `.mods` carries `margin-top:auto`, which
+     on a card holding nothing drives the line to the very bottom edge, where
+     it disappears into the card's own border (measured: invisible in the
+     shot). The space below it is the 152px above, which is the room those
+     rows will take. */
+  .ccard.skel .mods{ margin-top:0 }
   /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
      (§88's own answer, on a card rather than a table row): one line, clipped
      where it does not fit, the whole of it one hover away. Measured — 

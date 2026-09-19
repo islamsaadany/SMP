@@ -25,6 +25,10 @@ export async function POST(req: Request) {
   }
   const landing = await landingAt(pool, r.user, door);
   const cookie = cookieFor(r.token, isSecure(req));
+  /* A temporary password comes back to the door, which needs no marker to
+     know it (§370, checked rather than assumed): the cookie above is set on
+     this very response, so `DoorPage` reads the session, sees `mustChange`
+     and opens on the password card by itself. */
   if (form) return NextResponse.redirect(new URL(r.user.mustChange ? doorPath : landing, req.url), { status: 303, headers: { "Set-Cookie": cookie } });
   return NextResponse.json({ ok: true, mustChange: r.user.mustChange, landing }, { headers: { "Set-Cookie": cookie } });
 }

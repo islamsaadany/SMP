@@ -200,12 +200,7 @@
   .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
-    padding:15px; color:var(--ink-3) }
-  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§371). The Add card's
-     own height, shared rather than copied: the waiting card is the same
-     question — how tall is a card in this grid before there is a client in
-     it — and two spellings of one answer is how they come to differ. */
-  .ccard.add, .ccard.skel{ min-height:152px }
+    padding:15px; color:var(--ink-3); min-height:152px }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -253,43 +248,6 @@
      not work (§61, §96). */
   .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
   .ccard.arch:hover{ border-color:var(--line) }
-
-  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§371) ─────────────────
-     §369 took the console's boot from three round trips to one and left the
-     silence: the bar stands up, the body is hidden, and for about 740ms —
-     seconds on a cold function — the window looks open and dead. What fills
-     it is the answer the CLIENT platform already gives while it waits
-     (§94.10), chosen by Islam over the page's own words.
-
-     IT WEARS NOTHING IT WILL HAVE TO CHANGE, which is that section's whole
-     rule: no name, no mark, no tenant's colour, no figure. Two greys the
-     page already declares (§25 — never a literal), in the shape the real
-     card has, so what arrives replaces a block with the thing that block
-     stood for rather than rearranging the page around it.
-
-     AND IT SAYS NOTHING THAT WOULD MAKE IT LOOK PRESSABLE, by construction
-     rather than by a rule: `.ccard` declares no hover of its own (the two
-     that exist are scoped to `.add` and to `.mrow`), and `:focus-visible`
-     cannot reach a `div` that takes no tabindex. A `pointer-events:none`
-     was written here first and REMOVED on measuring it — nothing behaves
-     differently with or without it, and a line that fixes nothing is one
-     the next reader takes for load-bearing (§298.2, §24). */
-  .ccard.skel .sk-mark{ width:30px; height:30px; border-radius:8px; background:var(--line) }
-  /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
-     signed-off shot has and what the first build lost: `.ctop` is a column
-     flex, so a bar with no width STRETCHES and three cards read as three
-     long rules rather than a name over an industry. A share of the card
-     rather than a pixel count, because the grid's columns are `1fr` and a
-     fixed bar would sit differently in a wide row and a narrow one. */
-  .ccard.skel .sk-line{ width:62%; height:10px; border-radius:5px; background:var(--line) }
-  .ccard.skel .sk-line.thin{ width:42%; height:8px; background:var(--surface-2) }
-  /* AND THE HAIRLINE SITS WHERE THE REAL CARD'S SITS — under the name block,
-     with the module rows below it. `.mods` carries `margin-top:auto`, which
-     on a card holding nothing drives the line to the very bottom edge, where
-     it disappears into the card's own border (measured: invisible in the
-     shot). The space below it is the 152px above, which is the room those
-     rows will take. */
-  .ccard.skel .mods{ margin-top:0 }
   /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
      (§88's own answer, on a card rather than a table row): one line, clipped
      where it does not fit, the whole of it one hover away. Measured — 
@@ -1620,56 +1578,6 @@
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */
-  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§371) ──────────────────────
-     §369 measured the silence and did not fill it: one round trip, about
-     740ms warm and seconds on a cold function, with the bar standing up
-     over a hidden body — a window that looks open, answers nothing, and
-     says nothing about either. Islam chose the grey skeleton over the
-     page's own words, from two shot out of the real page
-     (design-mockups/console-loading/).
-
-     IT IS DRAWN BEFORE THE ANSWER, which is the one thing the gate above
-     was stopping — and it is safe to draw for precisely the reason that
-     gate exists: it holds no name, no mark, no colour of anybody's and no
-     figure, so nothing here can turn out to have been somebody else's
-     screen (§94.10).
-
-     THE TITLE AND THE CARDS, AND NOT THE SEARCH BOX. That box filters the
-     grid it is drawn beside, so one drawn over placeholders would take a
-     word and hide three grey blocks (§61: a control with nothing to act on
-     is not a choice). It arrives with the cards, where `drawClients`
-     builds it — which is also why this draws the title WITHOUT a right-hand
-     group rather than an empty one.
-
-     THREE IS A GUESS, AND IT IS THE COST ISLAM TOOK WITH IT NAMED: a
-     console with seven clients shows three and then seven. It is not
-     remembered from the last visit, because a count kept per device is a
-     second thing that has to stay true and §94.10 refused that same trade
-     for the branding it was about.
-
-     `aria-hidden` BECAUSE IT SAYS NOTHING. Three empty boxes read out one
-     after another is noise, and what a screen reader gets here is what it
-     gets today: the page, and then the cards when they land. */
-  function drawWaiting() {
-    title("Clients");
-    var grid = el("div", "cards");
-    grid.setAttribute("aria-hidden", "true");
-    for (var i = 0; i < 3; i++) {
-      var c = el("div", "ccard skel");
-      var top = el("div", "ctop");
-      top.appendChild(el("div", "sk-mark"));
-      top.appendChild(el("div", "sk-line"));
-      top.appendChild(el("div", "sk-line thin"));
-      c.appendChild(top);
-      /* The hairline the real card draws above its module rows, so the two
-         shapes end the same way rather than the line appearing on arrival. */
-      c.appendChild(el("div", "mods"));
-      grid.appendChild(c);
-    }
-    page.appendChild(grid);
-    document.body.classList.add("ready");
-  }
-
   function drawClients() {
     /* ── WHY A CLIENT SENT THEM BACK HERE (§313.32) ──────────────────
        A client whose register cannot place this account refuses and lands
@@ -3773,14 +3681,7 @@
      RULE the gate above cites and whose treatment this page never took. Both
      shot out of the real page and put to Islam
      (design-mockups/console-loading/), never ridden in behind a repair
-     (rule 1b, 1c).
-
-     ANSWERED (§371): Islam took the skeleton, over the recommendation. It is
-     `drawWaiting()` above, and the window is no longer silent — which is why
-     two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
-     than loosened: they recorded this state on purpose so that the day it
-     moved they would go red (§214.3, §218). */
-  drawWaiting();
+     (rule 1b, 1c). */
   Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {
     var j = r[0], c = r[1];
     if (!j || !j.ok) { location.replace("/"); return; }
@@ -3803,12 +3704,6 @@
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");
-    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§371). A
-       skeleton is a promise that something is arriving, and `say` APPENDS —
-       so without this the sentence lands under three grey cards still
-       saying it is on its way. The happy path needs no such line, because
-       `go` clears the page itself. */
-    clear();
     say("Could not reach the server.", true);
   });
 })();

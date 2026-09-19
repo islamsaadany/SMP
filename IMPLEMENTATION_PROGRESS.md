@@ -5282,6 +5282,190 @@ page, a seam declared as that shadow and no seam at all are the same build. **Fo
 table carry the same dead declaration, and the kebab block is declared **twice**
 in `config.css` byte for byte. **Waiting on Islam: the merge.**
 
+---
+
+### The mouse that does nothing until you click once — found and fixed
+
+**What you reported.** Signing in, arriving at the console, and the mouse doing
+nothing: no highlight when you point at something you can click, and the first
+press wasted. Click anywhere once and it all starts working. Only when you type
+the password — never when the browser remembers it.
+
+**I got this wrong twice before I got it right, and it is worth saying why.**
+I first blamed how long the page takes to open, and then how much of a client
+card you can actually click. Both are real, and neither is this. The thing that
+ruled them out was in your own message and I read past it: **the highlight does
+not work either.** That highlight is done by the page's styling alone — no
+code, no wiring — so nothing about slowness or missing buttons can explain it. A
+page that will not highlight is a page that is not being given the mouse at all.
+
+**What it actually is.** Your recording settles it. At just under eleven seconds
+the console is completely drawn and your pointer is sitting on Raya Trade's
+*Insights* row with an ordinary arrow and no highlight; four seconds later the
+same card lights up under the same pointer, with nothing having reloaded. So the
+page was finished and deaf.
+
+I then checked, rather than assumed, that nothing of ours was in the way: with
+the console loaded there is **nothing covering the window at all**, and **all 47
+things you can click are directly reachable** by the pointer. No invisible
+layer, nothing swallowing the press.
+
+**Which leaves your own clue, and it is the answer.** The difference between
+your two cases is a password the browser has already saved versus one you have
+just typed. Our sign-in page was not handing the sign-in to the browser the way
+browsers expect: it took the press itself, sent your details in the background,
+**wiped the password box**, and then jumped to the console. To the browser's
+password keeper that is a sign-in it has to guess at — so it raises its "save
+this password?" question late, over the page you have just arrived at. While
+that question is waiting, the browser holds the mouse and the page gets nothing.
+Your first click closes it, and everything wakes up.
+
+**What I changed.** The sign-in is now handed to the browser normally, and we no
+longer wipe the password box. The browser asks its question on the sign-in page,
+where it belongs, and you arrive at the console with nothing in front of it.
+The server already knew how to accept a sign-in this way — that path was built
+from the start for people with scripting switched off — so nothing new was
+added; one line was removed.
+
+**Nothing on any screen changes.** No layout, no colours, no wording. Signing in
+looks exactly as it did.
+
+**One cost, paid rather than left to you to find.** A wrong password now reloads
+the page, so your email address would come back empty — and the browser only
+refills an address it has saved, which in your case it has not. The address is
+carried across that one reload, kept for that tab only and never put in the web
+address.
+
+**What I cannot prove from here, said plainly.** The browser's save-password
+question is not visible anywhere in your recording. So the chain is reasoned
+from your autofill clue rather than seen. What is certain is that the guessing
+was caused by our page, and that is what has gone.
+
+**Checked**: the sign-in driven in a real browser and read off what the browser
+actually sends — a normal form submission and a genuinely new page, where before
+it was a background request and no page change at all; the refusal still says
+its one sentence; the address comes back; the password box is empty. The door's
+own test suite is 143 of 143 with all seven of its deliberate breakages still
+failing as they should, and every neighbouring test is green.
+
+**Still open, and yours:** the password-change screen does the same thing the
+sign-in screen used to, so setting a first password may hit the same dead moment
+one screen later. It is not a one-line change there — that screen compares two
+boxes and asks where you work before it can move on — so I have written it down
+rather than folded it in.
+
+**Also still yours, from before this:** three-quarters of a client card takes no
+click (it stopped being one big button on 11 September), and the console's slow
+opening, which is fixed on the branch and not yet merged.
+
+### The console's dead first moment (§369) — repaired; one half waiting on you
+
+**What you reported.** Opening Forefront's own console, the window looks open
+and nothing responds until you click once.
+
+**What it actually was.** The window was fine. The page had not finished, and
+from where you sit those two look identical — the top bar is drawn outside the
+part that gets hidden while it loads, so Forefront's name and the Sign out
+button stand up over an empty page with nothing saying why.
+
+**What was underneath it.** The console asked the server **three questions in a
+row** to open one page, and the last two were **the same question** — the most
+expensive one it has, which reaches into every client to count its units, check
+whether it has a plan and read its cycle. Asked twice, one after the other,
+every single time you open the page. A click during that stretch lands on
+nothing at all.
+
+**What I changed.** It asks both questions at once now, and asks the expensive
+one once. Measured at the same speed either side:
+
+| | before | after |
+|---|---|---|
+| bar up, nothing responding | 1,255ms | **742ms** |
+| cards on screen | 1,872ms | **742ms** |
+| page appears, then cards appear | two stages | **one** |
+
+The cards now arrive *with* the page rather than a beat after it.
+
+**It was not the card-mark round.** I checked that first rather than assuming:
+the same measurement on the build before it gives 1,259ms against 1,255. This
+has been there since the console was written.
+
+**The one thing still yours.** There is one round trip left, and during it the
+page still shows a bar over nothing — brief when the server is warm, seconds
+when it has gone cold. Making it *say* something means deciding what you see,
+so I have drawn the two candidates out of the real page and put them in front
+of you: **the page's own words** (its title, its search box and its own
+"Reading your clients…"), or **a grey skeleton** of card shapes. Each one's
+cost is on the page beside it. My recommendation is the first.
+
+**One more thing, found while checking the above.** The test I wrote for this
+has to be run twice — once against each of the two copies of the console page —
+and the instructions written at the top of it only worked from one folder. Run
+from the folder everything else is run from, it could not find the second copy
+and said nothing useful: it handed back a browser error rather than telling me
+which file it had looked for. Both ways work now, and if the file genuinely is
+not there it says so by name and stops. Nothing on any screen changes — this is
+the testing tool, not the product — and I re-ran every test afterwards,
+including the two deliberately broken builds, to make sure the edit had not
+quietly stopped it from being able to catch anything.
+
+**Still yours:** that choice, and the merge to main — which is your word on
+that merge, and which I have held as you asked.
+
+
+**§368 — a mark, not a sentence, on a client card's module rows. On the
+branch, built 2026-09-17.** Your words: *"we don't needs notes that take 2
+lines we can just have a notificaiton here if something is new to check … to
+keep it neat and clean nad let's make it compact for better view"* — and then,
+of three drawings, **"A with tighter rows and Forefront own"**.
+
+**What was there, measured before anything was drawn.** A card with two
+modules carried nine pieces of text. Five of them said nothing you can act on
+— the module names and the addresses are the same on every client — and the
+other two **said one fact twice**: the short word at the end of the row
+(*Cycle open*) and the sentence under it (*Cycle open · reports due 30 Sep*).
+That sentence is what ran onto two lines, and it did so at every window size,
+because it is long rather than because the column is narrow.
+
+**What a row says now.** A short mark at the end of the row, and only when
+there is something for you to look at: *Not answering* if the client's
+platform did not answer at all, *No plan* if no plan has been built, or how
+many subjects are still to submit. Nothing otherwise — so a client with
+nothing outstanding reads its name, its address and its module names, and you
+can run your eye down the page. Insights says *N new* when there are new
+reports this month. **The cost, which you took:** a cycle that is open with
+everybody submitted now looks the same as no cycle at all, because the mark
+means *something to do* rather than *what state is this in*. The state is one
+press away inside the module.
+
+**The mark is Forefront's own answer**, which was your sharper instruction. It
+does not follow the sentence a client picked for their own landing page — that
+is a different question, about what a client says to its own people — so the
+card cannot change under you because a client changed their own wording.
+
+**How compact it got, measured.** The tallest card 304 → 247 pixels, an
+ordinary client card 235 → 205, the tallest row 57 → 33. At a 1024-wide window
+the card was 252 and is now 205, so **its height no longer depends on the
+window**, which it did only because that sentence wrapped at some widths and
+not others. Nothing runs past the edge of a row at any width.
+
+**Checked:** the modules check 158 assertions, red under nine deliberate
+breaks including a new one — a build that puts a mark on every row whatever
+the facts say, which is exactly what you rejected; the card check 23
+assertions on both copies of the console page, red under four breaks; the door
+check 143, red under seven. The client platform itself is untouched, so
+nothing about the product a client opens has moved.
+
+**One thing flagged rather than changed.** When the client's settings moved
+into the platform, the client's own landing page went with it — and with the
+card no longer reading it either, the **Landing line** page in Setup now
+governs nothing except its own preview. That is a decision about what that
+page is for, so it is said rather than quietly tidied away.
+
+**Still yours:** the merge to `main`, which is your word on that merge.
+
+---
+
 **Spec 056 — the client and its modules (§362), on the branch, stage 1 of
 six built 2026-09-16.** Islam, of the page the console's *Settings* chip
 opens: *"theclient settings shouldn't open the strategy banner in the top this
@@ -6112,3 +6296,54 @@ password moves, and nothing needs migrating.
 **One thing to know.** Because the served worker did not change, a tab somebody
 left open will **not** be offered "a newer version of the platform is ready". It
 keeps the older screen, with its old settings rail, until it is reloaded.
+
+**§371 — the card before there is a client in it (2026-09-19).** Built. Islam,
+of §369's one open item: *"didn't we agree to show a grey skeleton?"* — and he
+is right: §94.10 settled that for the client platform, and the console's own
+boot gate cites the rule while never taking the treatment. Two treatments were
+drawn out of the real page at the time and published; he took the skeleton over
+the recommendation. The console now draws its title and three grey card shapes
+straight away instead of an empty screen, and the real cards replace them —
+nothing drawn that could turn out to have been the wrong tenant's. The Add
+card's own 152px is shared rather than copied; the search box is deliberately
+not drawn over placeholders; the waiting cards come down before a refusal goes
+up. **Two assertions went red the day it gained a treatment, which is what they
+were for** — rewritten, never loosened, and one of them had already started
+passing over an empty sample list. Two neighbouring checks died rather than
+reported on a documented command, which is §369.4's fault in two files it did
+not reach; both now name a missing page rather than timing out.
+
+Verified: console-boot **13/0 on both copies**, red **five ways**;
+platform-cards 21/0, publishing-room 74/0, both also against the generated
+copy; client-card-modules 23/0; client-setup-outside and client-archive 0
+failures; built-in-step all good. The frozen product is untouched, so the
+shipped file is byte-identical and no `sw.js` bump is owed. **Recorded, not
+done:** the heading still shifts 77px down when the tab row lands — it is in
+the signed-off pair, and closing it means drawing a navy band nobody has seen.
+
+**§371.5 — renumbered before the merge (2026-09-19).** Main took §366 and §367
+for different work while this branch was building, so the branch's four
+sections shifted up by one: §367 → §368 (the client card's marks), §368 → §369
+(the console's boot), §369 → §370 (the browser signs you in), §370 → §371 (this
+one). **Done BEFORE the merge, which is what makes it provably scoped** — the
+merge base holds no citation of §366–§371 in any spelling, measured, so every
+occurrence in the tree was a line this branch wrote (§264.3). Descending, or
+each step eats the next; **both spellings**, because CLAUDE.md uses the HTML
+entity throughout and a one-spelling sweep would have left 29 citations naming
+somebody else's sections (§336.1); every substitution asserted it matched the
+count measured first (31 / 9 / 56 / 57); and of 150 changed lines, 0 do not
+carry a citation. **The sweep also took the two sentences describing the
+numbering itself**, which then named the wrong number — the fault in miniature,
+and why both were rewritten by hand.
+
+**§371.6 — a bare `.ccard` stopped meaning a client (2026-09-19).** Found by
+running the neighbours on the merged tree: `door-landing.mjs` 142 ok, 1 failed.
+**This round's fault, not the merge's** — the check is byte-identical to §371's
+tip but for the renumber, and the cause is §371's own markup: a placeholder is
+a `.ccard` with no client, no name and no heading, so the wait returned on the
+skeleton and the name was read a beat early. A race, which is why it passed at
+§371's own run. The wait is `.ccard[data-client]` now — what `.ccard` meant when
+the line was written (§218) — 143/0 twice on two fresh databases; and every
+other reach for a card was swept (§51.11), two more fixed, one left as correct.
+
+**Merged to `main` 2026-09-19 on Islam's word.**

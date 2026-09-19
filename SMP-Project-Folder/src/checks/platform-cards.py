@@ -41,7 +41,32 @@ REPO = os.path.abspath(os.path.join(ROOT, ".."))
 PORT = int(os.environ.get("SMP_CHECK_PORT", "3987"))
 BASE = "http://127.0.0.1:%d" % PORT
 BREAK = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--break=")), "")
-PAGE = os.environ.get("SMP_PAGE") or os.path.join(REPO, "platform.html")
+def pagePath():
+    """WHERE THE PAGE IS, SAID RATHER THAN HANDED BACK AS A TIMEOUT (§371).
+
+    §369.4 found this and fixed it in ONE file: `SMP_PAGE` is documented
+    relative to the REPOSITORY ROOT, and every browser check here is run
+    through `qa-run.py`, which lives in `SMP-Project-Folder/src` (§320.6b) —
+    so the documented spelling is relative to one directory and typed from
+    another. Run from `src/` this resolved to a file that is not there, the
+    page was never served, and the run died on a navigation timeout naming
+    neither the file nor the directory it was looked for in (§215, §123).
+    Both spellings are accepted, and a page that is not there is refused
+    BEFORE the server starts rather than inside a request thread.
+    """
+    want = os.environ.get("SMP_PAGE")
+    tries = [os.path.abspath(want), os.path.abspath(os.path.join(REPO, want))] if want \
+        else [os.path.join(REPO, "platform.html")]
+    tries = list(dict.fromkeys(tries))
+    for p in tries:
+        if os.path.isfile(p):
+            return p
+    sys.exit("the console page is not there — %s\n  tried: %s"
+             % ("SMP_PAGE=%s" % want if want else "no platform.html at the repository root",
+                "\n  tried: ".join(tries)))
+
+
+PAGE = pagePath()
 
 fails = []
 passes = []

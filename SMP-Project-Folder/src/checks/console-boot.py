@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The console asks once, and asks both at once (§368).
+"""The console asks once, and asks both at once (§369).
 
 Islam: "something strange the window is not active on opening I need to click
 anyway to start accepting clicks on the cards." THE WINDOW IS ACTIVE AND THE
@@ -13,7 +13,7 @@ requests went out `me` → `cards` → `cards`, THREE sequential trips for one p
 load with the last two the SAME request — the heaviest in the page, which opens
 a connection per client to read its units, its plan and its cycle. The bar was
 up and dead for 1,255ms, the page then appeared titled and empty, and the cards
-landed at 1,872. Established as NOT §367's first (§303): the same probe against
+landed at 1,872. Established as NOT §368's first (§303): the same probe against
 the build before that section reports 1,259 to 1,255.
 
 WHAT IS ASSERTED IS THE PROPERTY, NEVER THE MILLISECONDS (§94.8) — a faster
@@ -24,14 +24,14 @@ machine must not turn this green and a slower one must not turn it red:
       happen to be quick are still two trips.
   §2  the grid is NEVER STANDING EMPTY — from the moment the page is up it
       holds cards, placeholder or real. That is the property both answers to
-      the second stage he was watching satisfy: §368's (page and cards
-      arriving together) and §370's (placeholders drawn first).
+      the second stage he was watching satisfy: §369's (page and cards
+      arriving together) and §371's (placeholders drawn first).
   §3  BOTH ENDS OF THE HAND-OVER (§94.2), and this is the load-bearing one:
       the boot's answer is used by the FIRST draw and by nobody else, so a
       later `go("clients")` reads the list AGAIN. Used twice, the grid would
       draw a client that had just been archived — worse than the fault this
       repairs — so the second draw is asserted to ask (§48.2).
-  §4  THE WINDOW WHILE IT WAITS (§370). §368 left this silent on purpose and
+  §4  THE WINDOW WHILE IT WAITS (§371). §369 left this silent on purpose and
       recorded the silence here, so that the day it gained a treatment these
       would go red rather than outlive their decision (§214.3) — which is
       what happened: Islam took §94.10's grey skeleton over the page's own
@@ -53,7 +53,7 @@ is by both stacks, so a stub drives it — and a stub is also the only way to
 hold a round trip open long enough to look at the window at all (§94.11, §255).
 
 Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/console-boot.py
-      … --break=sequential   # the boot before §368; must go red
+      … --break=sequential   # the boot before §369; must go red
       … --break=handed-twice # the hand-over reused; must go red
       SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
       (that spelling is relative to the REPOSITORY ROOT, and is also accepted
@@ -80,7 +80,7 @@ def pagePath():
     given, then against the repo root.
 
     AND A PAGE THAT IS NOT THERE IS REFUSED BEFORE THE SERVER STARTS, never
-    opened inside the request thread. That is §368.3's own fault one line
+    opened inside the request thread. That is §369.3's own fault one line
     over: a failure raised in the server thread kills only that thread, so the
     page is never served and the run comes back `ERR_EMPTY_RESPONSE`, naming
     neither the file nor the directory it was looked for in (§54.5, §123).
@@ -104,7 +104,7 @@ PAGE = pagePath()
 # nothing reports 0 red, which is indistinguishable from a guard that works
 # (§54.5, §344.1).
 BREAKS = {
-    # the boot before §368: ask `me`, then `cards`, then let the first draw
+    # the boot before §369: ask `me`, then `cards`, then let the first draw
     # ask `cards` all over again
     "sequential": [
         ('Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {\n    var j = r[0], c = r[1];',
@@ -117,8 +117,8 @@ BREAKS = {
     "handed-twice": [
         ("var handed = BOOTCARDS; BOOTCARDS = null;", "var handed = BOOTCARDS;"),
     ],
-    # §370 reverted: the page waits behind the gate again, silent, which is
-    # the state §368 recorded and Islam replaced
+    # §371 reverted: the page waits behind the gate again, silent, which is
+    # the state §369 recorded and Islam replaced
     "no-skeleton": [
         ("  drawWaiting();\n  Promise.all(", "  Promise.all("),
     ],
@@ -284,8 +284,8 @@ with sync_playwright() as pw:
 
     print("§2 · the grid is never standing empty")
     # THE SECOND STAGE HE WAS WATCHING was ready, titled and nothing where the
-    # cards go. §368 closed it by making the page and the cards arrive
-    # together; §370 closes it the other way round, by drawing placeholders
+    # cards go. §369 closed it by making the page and the cards arrive
+    # together; §371 closes it the other way round, by drawing placeholders
     # first — so what is asserted is the PROPERTY both satisfy and neither
     # spelling of it (§94.8): from the moment the page is up, the grid holds
     # cards, placeholder or real. REWRITTEN, never loosened (§218): this is
@@ -303,7 +303,7 @@ with sync_playwright() as pw:
     check("the first draw used the boot's answer — it asked nobody",
           acts.count("cards") == 1, acts)
     # AND THE SECOND DRAW ASKS. Without this the grid draws a client that has
-    # just been archived (§48.2) — worse than the fault §368 repairs.
+    # just been archived (§48.2) — worse than the fault §369 repairs.
     before = len(HITS)
     pg.evaluate("""() => { document.querySelector('[data-tab=\"clients\"]')?.click(); }""")
     pg.wait_for_timeout(200)
@@ -321,7 +321,7 @@ with sync_playwright() as pw:
     check("and the cards are still drawn after it",
           pg.eval_on_selector_all(".ccard[data-name]", "n => n.length") >= 1)
 
-    print("§4 · the window while it waits (§370)")
+    print("§4 · the window while it waits (§371)")
     # THE DAY IT GAINED A TREATMENT THIS WENT RED, which is what the two
     # assertions it replaces were for (§214.3). They recorded the silence:
     # a dead window, a click hitting BODY, and nothing drawn at all. Islam

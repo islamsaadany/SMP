@@ -90,7 +90,7 @@ async function factsFor(t: ClientRow) {
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
       return { units, planned: pillars > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
     }).then(async (f) => {
-      /* the facts a module's MARK is made of (§367) — read through the ONE
+      /* the facts a module's MARK is made of (§368) — read through the ONE
          reader that also serves the Landing line page's preview, as somebody
          who sees everything, which the console is.
          THE PICKS ARE NOT CARRIED, because nothing here reads them any more:
@@ -126,7 +126,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable,
         /* THE CARD'S DOORS (spec 046 §4.6a): one row per module this client
            has, each with the MARK that module makes of it — what is
-           outstanding, and nothing when nothing is (§367). Worked out HERE
+           outstanding, and nothing when nothing is (§368). Worked out HERE
            and never on the page, so the console cannot spell a module
            differently from the switch or from Setup (§53.5).
            `facts.picks` is deliberately NOT passed: the mark is Forefront's

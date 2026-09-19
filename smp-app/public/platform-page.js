@@ -30,7 +30,7 @@
   var TAB = "clients";
   var ME = null;
   /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
-     (§368). Declared here rather than left to hoist, because a second `var` of
+     (§369). Declared here rather than left to hoist, because a second `var` of
      one name in this scope is one binding and the later one wins in silence
      (§56.7) — grepped, and this is the only pair. */
   var BOOTCARDS = null;
@@ -875,8 +875,8 @@
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */
-  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§370) ──────────────────────
-     §368 measured the silence and did not fill it: one round trip, about
+  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§371) ──────────────────────
+     §369 measured the silence and did not fill it: one round trip, about
      740ms warm and seconds on a cold function, with the bar standing up
      over a hidden body — a window that looks open, answers nothing, and
      says nothing about either. Islam chose the grey skeleton over the
@@ -971,7 +971,7 @@
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
 
-    /* THE BOOT'S OWN ANSWER, ONCE (§368). The boot asks `cards` to learn what
+    /* THE BOOT'S OWN ANSWER, ONCE (§369). The boot asks `cards` to learn what
        the navigation may offer, and this asked the identical question again a
        round trip later — the heaviest question in the page, which opens a
        connection per client to read its units, its plan and its cycle. Handed
@@ -1106,7 +1106,7 @@
         r.type = "button";
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
-        /* THE MARK (§367): what this module says is OUTSTANDING on this
+        /* THE MARK (§368): what this module says is OUTSTANDING on this
            client, in the fewest words, and NOTHING when nothing is — which
            is where the compactness comes from. It replaces the pair that
            was here, a full sentence (the client's chosen landing line) and
@@ -2986,7 +2986,7 @@
   });
 
   /* ── Boot ──────────────────────────────────────────────────────
-     BOTH QUESTIONS AT ONCE (§368). Islam: "something strange the window is not
+     BOTH QUESTIONS AT ONCE (§369). Islam: "something strange the window is not
      active on opening I need to click anyway to start accepting clicks on the
      cards." THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, which is worse,
      because the two are indistinguishable from outside: `.top` is drawn
@@ -3008,7 +3008,7 @@
      trip now. The cost, stated: a signed-out visitor sends one `cards` that is
      thrown away, and they are being redirected anyway.
 
-     IT IS NOT §367's, established before it was blamed (§303): the same probe
+     IT IS NOT §368's, established before it was blamed (§303): the same probe
      against the build before that section reports 1,259ms to 1,255. It is the
      boot's own shape, and §359.4 made the second trip heavier by giving
      `cards` a per-client read.
@@ -3030,7 +3030,7 @@
      (design-mockups/console-loading/), never ridden in behind a repair
      (rule 1b, 1c).
 
-     ANSWERED (§370): Islam took the skeleton, over the recommendation. It is
+     ANSWERED (§371): Islam took the skeleton, over the recommendation. It is
      `drawWaiting()` above, and the window is no longer silent — which is why
      two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
      than loosened: they recorded this state on purpose so that the day it
@@ -3058,7 +3058,7 @@
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");
-    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§370). A
+    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§371). A
        skeleton is a promise that something is arriving, and `say` APPENDS —
        so without this the sentence lands under three grey cards still
        saying it is on its way. The happy path needs no such line, because

@@ -142,7 +142,7 @@
      to decide which one the top would open. The card stopped being a
      <button> for it — a button cannot hold buttons — so the identity block
      and the rows are its two children and the padding moved onto them. */
-  /* ── A MARK, NOT A SENTENCE — AND TIGHTER (§367) ──────────────────
+  /* ── A MARK, NOT A SENTENCE — AND TIGHTER (§368) ──────────────────
      Islam: "we don't needs notes that take 2 lines we can just have a
      notificaiton here if something is new to check ... to keep it neat and
      clean nad let's make it compact." Option A of a signed-off mockup
@@ -187,7 +187,7 @@
   /* A client that has a mark wears it on its card — the same picture its
      door wears (§313.36), so the two cannot disagree; a light plate under it
      because a PNG cannot be recoloured (§52). Initials until then.
-     ITS HEIGHT FOLLOWS THE INITIALS' (§367): the mockup could only draw the
+     ITS HEIGHT FOLLOWS THE INITIALS' (§368): the mockup could only draw the
      initials, and leaving this at 36 would have made a client with a logo
      taller than one without — two card heights in one row for no reason
      anybody could read. */
@@ -201,7 +201,7 @@
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
     padding:15px; color:var(--ink-3) }
-  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§370). The Add card's
+  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§371). The Add card's
      own height, shared rather than copied: the waiting card is the same
      question — how tall is a card in this grid before there is a client in
      it — and two spellings of one answer is how they come to differ. */
@@ -254,8 +254,8 @@
   .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
   .ccard.arch:hover{ border-color:var(--line) }
 
-  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§370) ─────────────────
-     §368 took the console's boot from three round trips to one and left the
+  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§371) ─────────────────
+     §369 took the console's boot from three round trips to one and left the
      silence: the bar stands up, the body is hidden, and for about 740ms —
      seconds on a cold function — the window looks open and dead. What fills
      it is the answer the CLIENT platform already gives while it waits
@@ -775,7 +775,7 @@
   var TAB = "clients";
   var ME = null;
   /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
-     (§368). Declared here rather than left to hoist, because a second `var` of
+     (§369). Declared here rather than left to hoist, because a second `var` of
      one name in this scope is one binding and the later one wins in silence
      (§56.7) — grepped, and this is the only pair. */
   var BOOTCARDS = null;
@@ -1620,8 +1620,8 @@
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */
-  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§370) ──────────────────────
-     §368 measured the silence and did not fill it: one round trip, about
+  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§371) ──────────────────────
+     §369 measured the silence and did not fill it: one round trip, about
      740ms warm and seconds on a cold function, with the bar standing up
      over a hidden body — a window that looks open, answers nothing, and
      says nothing about either. Islam chose the grey skeleton over the
@@ -1716,7 +1716,7 @@
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
 
-    /* THE BOOT'S OWN ANSWER, ONCE (§368). The boot asks `cards` to learn what
+    /* THE BOOT'S OWN ANSWER, ONCE (§369). The boot asks `cards` to learn what
        the navigation may offer, and this asked the identical question again a
        round trip later — the heaviest question in the page, which opens a
        connection per client to read its units, its plan and its cycle. Handed
@@ -1851,7 +1851,7 @@
         r.type = "button";
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
-        /* THE MARK (§367): what this module says is OUTSTANDING on this
+        /* THE MARK (§368): what this module says is OUTSTANDING on this
            client, in the fewest words, and NOTHING when nothing is — which
            is where the compactness comes from. It replaces the pair that
            was here, a full sentence (the client's chosen landing line) and
@@ -3731,7 +3731,7 @@
   });
 
   /* ── Boot ──────────────────────────────────────────────────────
-     BOTH QUESTIONS AT ONCE (§368). Islam: "something strange the window is not
+     BOTH QUESTIONS AT ONCE (§369). Islam: "something strange the window is not
      active on opening I need to click anyway to start accepting clicks on the
      cards." THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, which is worse,
      because the two are indistinguishable from outside: `.top` is drawn
@@ -3753,7 +3753,7 @@
      trip now. The cost, stated: a signed-out visitor sends one `cards` that is
      thrown away, and they are being redirected anyway.
 
-     IT IS NOT §367's, established before it was blamed (§303): the same probe
+     IT IS NOT §368's, established before it was blamed (§303): the same probe
      against the build before that section reports 1,259ms to 1,255. It is the
      boot's own shape, and §359.4 made the second trip heavier by giving
      `cards` a per-client read.
@@ -3775,7 +3775,7 @@
      (design-mockups/console-loading/), never ridden in behind a repair
      (rule 1b, 1c).
 
-     ANSWERED (§370): Islam took the skeleton, over the recommendation. It is
+     ANSWERED (§371): Islam took the skeleton, over the recommendation. It is
      `drawWaiting()` above, and the window is no longer silent — which is why
      two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
      than loosened: they recorded this state on purpose so that the day it
@@ -3803,7 +3803,7 @@
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");
-    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§370). A
+    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§371). A
        skeleton is a promise that something is arriving, and `say` APPENDS —
        so without this the sentence lands under three grey cards still
        saying it is on its way. The happy path needs no such line, because

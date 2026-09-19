@@ -65,9 +65,9 @@ PORT = int(os.environ.get("SMP_CHECK_PORT", "3989"))
 BASE = "http://127.0.0.1:%d" % PORT
 BREAK = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--break=")), "")
 def pagePath():
-    """WHERE THE PAGE IS, SAID RATHER THAN HANDED BACK AS A TIMEOUT (§370).
+    """WHERE THE PAGE IS, SAID RATHER THAN HANDED BACK AS A TIMEOUT (§371).
 
-    §368.4 found this and fixed it in ONE file: `SMP_PAGE` is documented
+    §369.4 found this and fixed it in ONE file: `SMP_PAGE` is documented
     relative to the REPOSITORY ROOT, and every browser check here is run
     through `qa-run.py`, which lives in `SMP-Project-Folder/src` (§320.6b) —
     so the documented spelling is relative to one directory and typed from

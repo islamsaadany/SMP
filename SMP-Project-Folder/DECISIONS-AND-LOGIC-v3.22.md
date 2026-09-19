@@ -51457,7 +51457,7 @@ harnesses §328.3 already records as unrunnable since §313.
 
 ---
 
-## §367 — A MARK, NOT A SENTENCE, ON A CLIENT CARD'S MODULE ROWS (2026-09-17)
+## §368 — A MARK, NOT A SENTENCE, ON A CLIENT CARD'S MODULE ROWS (2026-09-17)
 
 Islam, with the console's four client cards in front of him: *"on the clients
 cards we don't needs notes that take 2 lines we can just have a notificaiton
@@ -51540,20 +51540,20 @@ to 30px with the initials**, which the mockup could not draw: it can only draw
 the two-letter fallback, so leaving the image mark at 36 would have shipped two
 card heights in one row for no reason anybody could see.
 
-**§367.1 — MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN BUILD
+**§368.1 — MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN BUILD
 CLEAN.** `checks/client-card-modules.py`'s new one-line assertion was written as
 `getClientRects().length == 1`, and under `--break=mark-wraps` Chrome returned
 **ONE rect for a tail 53px tall** — §88's own rule, written down once already
 and walked into anyway. It measures the tail's HEIGHT against one line-height
 now, and is red under that break and green otherwise.
 
-**§367.2 — AND ITS ALARM ASSERTION PASSED BY DEFAULT.** The fixture's `el-abd`
+**§368.2 — AND ITS ALARM ASSERTION PASSED BY DEFAULT.** The fixture's `el-abd`
 cannot be opened, so it draws no rows at all, and there was no alarm anywhere on
 the page for the ink assertion to measure (§94.5). The state is MADE rather than
 waited for (§255): a fourth card holding a client with no plan, and both inks
 asserted PRESENT before they are asserted different.
 
-**§367.3 — AND FIVE OF `check:door:red`'s TEN BREAKS DIED WITH THE LANDING,
+**§368.3 — AND FIVE OF `check:door:red`'s TEN BREAKS DIED WITH THE LANDING,
 WITH THE FIRST OF THEM HIDING THE OTHER FOUR.** Running the neighbours reported
 `NOT RED: no-rows`, and it is not this round's: **established as pre-existing by
 running it at the commit before this one — GREEN 140/0** (§303). It was spec
@@ -51600,7 +51600,7 @@ diff, and `built-in-step.py` all good — so the built file is untouched and **n
 
 ---
 
-## §368 — THE CONSOLE ASKS ONCE, AND ASKS BOTH AT ONCE (2026-09-18)
+## §369 — THE CONSOLE ASKS ONCE, AND ASKS BOTH AT ONCE (2026-09-18)
 
 Islam, opening Forefront's own console: ***"something strange the window is not
 active on opening I need to click anyway to start accepting clicks on the
@@ -51638,9 +51638,9 @@ asked every 100ms of it with `elementFromPoint`, where a card is about to be —
 so the press he spends is the one that happens to land after the page became
 ready.
 
-**IT IS NOT §367's, ESTABLISHED BEFORE IT WAS BLAMED** (§303): the same probe
+**IT IS NOT §368's, ESTABLISHED BEFORE IT WAS BLAMED** (§303): the same probe
 against the build before that section reports **1,259ms against 1,255**, and
-reading the diff shows §367 *removed* a read from that path (`facts.picks` is no
+reading the diff shows §368 *removed* a read from that path (`facts.picks` is no
 longer carried). It is the boot's own shape.
 
 **NOTHING IN `cards` READS `me`'s ANSWER** — the session is the cookie both
@@ -51663,7 +51663,7 @@ repairs.
 one name in that scope is one binding and the later one wins in silence —
 grepped, and this is the only pair.
 
-### §368.1 — AND MY OWN COMMENT CLAIMED SOMETHING THE MEASUREMENT REFUTED
+### §369.1 — AND MY OWN COMMENT CLAIMED SOMETHING THE MEASUREMENT REFUTED
 
 A first draft of the code comment read *"the grid already says Reading your
 clients… and this gate hides the one sentence that would answer him"* — a
@@ -51676,7 +51676,7 @@ the check's docstring and in the check's own assertion rather than left standing
 `visibility` AFTER the cards had arrived, which is true of every build
 (§113.8); it asserts `childElementCount` DURING the window now.
 
-### §368.2 — WHAT IS LEFT, DRAWN AND NOT DECIDED
+### §369.2 — WHAT IS LEFT, DRAWN AND NOT DECIDED
 
 One round trip of the same silence — and on a cold function, seconds of it. So
 saying anything at all means **drawing before the answer**, which is a decision
@@ -51701,7 +51701,7 @@ from the stylesheet (§41.9):
 `design-mockups/console-loading/2026-09-18_what-the-console-says-while-loading.html`,
 published as an artifact (rule 1c).
 
-### §368.3 — AND THE CHECK'S FIRST FALSIFICATION REPORTED 0 RED
+### §369.3 — AND THE CHECK'S FIRST FALSIFICATION REPORTED 0 RED
 
 `checks/console-boot.py` asserts the PROPERTY and never the milliseconds
 (§94.8) — `cards` asked once, `me` and `cards` **overlapping** (overlap rather
@@ -51724,21 +51724,21 @@ lands in whichever body holds it, and **whether it landed is asserted at the end
 of the run** (§344.1) — so both copies read 11/0 green, 4 red and 1 red
 identically.
 
-### §368.4 — AND THE DOCUMENTED COMMAND FAILED FROM THE DIRECTORY THE CHECK IS RUN FROM, SAYING NOTHING
+### §369.4 — AND THE DOCUMENTED COMMAND FAILED FROM THE DIRECTORY THE CHECK IS RUN FROM, SAYING NOTHING
 
 Found by following the check's **own docstring**, on the verification pass after
-§368 was committed. That docstring says to run the file as
+§369 was committed. That docstring says to run the file as
 `python3 SMP-Project-Folder/src/checks/console-boot.py` — from the repository
 root — and names the generated copy as
 `SMP_PAGE=smp-app/shell/platform.html`, which is right relative to the root and
 to nowhere else. **But every browser check in this project goes through
 `qa-run.py`, and `qa-run.py` lives in `SMP-Project-Folder/src`** (§320.6b — the
-rule §368.3 had itself just earned, two neighbours having printed Playwright's
+rule §369.3 had itself just earned, two neighbours having printed Playwright's
 install banner and exited). *So the spelling that is documented is relative to
 one directory and the command that is required is typed from another*, and the
 two had never been run together.
 
-**AND IT IS §368.3'S OWN FAULT ONE LINE OVER.** `PAGE` was taken from the
+**AND IT IS §369.3'S OWN FAULT ONE LINE OVER.** `PAGE` was taken from the
 environment verbatim and **opened inside the request thread**:
 
 ```python
@@ -51750,7 +51750,7 @@ if p in ("/platform", "/"):
 
 so a path naming no file raised in that thread, killed only that thread, and
 reached the run as **`net::ERR_EMPTY_RESPONSE`** — naming neither the file nor
-the directory it had been looked for in. §368.3 fixed exactly this shape for the
+the directory it had been looked for in. §369.3 fixed exactly this shape for the
 BREAK and asserted at the end of the run that it had landed; **it guarded the
 break and left the page unguarded** (§54.5, §123).
 
@@ -51791,7 +51791,7 @@ is owed** (§91).
 
 ---
 
-## §369 — THE BROWSER SIGNS YOU IN, AND THE CONSOLE STOPS ARRIVING DEAF
+## §370 — THE BROWSER SIGNS YOU IN, AND THE CONSOLE STOPS ARRIVING DEAF
 
 Islam, on the branch's own preview and with a screen recording: *"when I go to
 the client the mouse doesn't click from the first time, the whole window should
@@ -51802,7 +51802,7 @@ platform when I use the password to login; if I login when it remembers the
 password it works fine"*, and *"yes it's the front window"*.
 
 **AND I HAD ANSWERED IT TWICE WITH THE WRONG FAULT.** The first answer was
-§368's boot, which is real and was not what he was looking at (it is not on
+§369's boot, which is real and was not what he was looking at (it is not on
 `main`, so it had never been in front of him); the second was the client card's
 dead area, which is also real and also not this. **The detail that ruled both
 out was in his own sentence and I had skipped it: HOVER does not work either.**
@@ -51906,15 +51906,15 @@ rather than as a surprise.
 
 ---
 
-## §370 — THE CARD BEFORE THERE IS A CLIENT IN IT (2026-09-19)
+## §371 — THE CARD BEFORE THERE IS A CLIENT IN IT (2026-09-19)
 
-Islam, of §368's one recorded open item: ***"didn't we agree to show a grey
+Islam, of §369's one recorded open item: ***"didn't we agree to show a grey
 skeleton?"*** — and he is right, and the record backs him. §94.10 settled this
 for the client platform, over remembering the branding in `localStorage`, and
 the console's own boot gate **cites that section's rule in its own comment
 while never taking its treatment**.
 
-**THIS IS §368's OWN OPEN ITEM CLOSED, NOT A NEW IDEA.** That section took the
+**THIS IS §369's OWN OPEN ITEM CLOSED, NOT A NEW IDEA.** That section took the
 console's boot from three round trips to one — 1,872ms to 742 — and left the
 silence behind it, deliberately and in writing: *what a loading console looks
 like is a decision about a picture, put to Islam rather than ridden in behind a
@@ -51935,7 +51935,7 @@ what arrives **replaces a block with the thing that block stood for** rather
 than rearranging the page around it.
 
 **ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL.** `.ccard.add` has carried
-`min-height:152px` since §367 took it off the card family — the page's own
+`min-height:152px` since §368 took it off the card family — the page's own
 answer to *how tall is a card in this grid before there is a client in it* —
 and the waiting card is that same question, so the declaration is **shared
 rather than copied**. Two spellings of one answer is how they come to differ.
@@ -51957,7 +51957,7 @@ server"* lands **under three grey cards still promising something is on its
 way** (§124). The happy path needs no such line, because `go` clears the page
 itself.
 
-**§370.1 — THE FIRST BUILD LOST TWO THINGS THE SIGNED-OFF SHOT HAD, AND ONLY
+**§371.1 — THE FIRST BUILD LOST TWO THINGS THE SIGNED-OFF SHOT HAD, AND ONLY
 LOOKING AT IT FOUND THEM** (rule 1c's last step, §296.1). `.ctop` is a column
 flex, so a bar with no width **stretches**: three cards read as three long
 rules rather than a name over an industry. And `.mods` carries
@@ -51966,7 +51966,7 @@ very bottom edge, where it **disappears into the card's own border** —
 measured, invisible in the shot. Both are shares of the card rather than pixel
 counts, because the grid's columns are `1fr`.
 
-**§370.2 — AND A LINE I WROTE AS PART OF THE FIX DOES NOTHING.** `.ccard.skel {
+**§371.2 — AND A LINE I WROTE AS PART OF THE FIX DOES NOTHING.** `.ccard.skel {
 pointer-events:none }` was written to stop a placeholder reading as pressable,
 and nothing behaves differently with or without it: `.ccard` declares no hover
 of its own (the two that exist are scoped to `.add` and to `.mrow`) and
@@ -51974,13 +51974,13 @@ of its own (the two that exist are scoped to `.add` and to `.mrow`) and
 rather than kept as belt and braces, because a line that fixes nothing is one
 the next reader takes for load-bearing (§298.2, §24).
 
-**§370.3 — THE DAY IT GAINED A TREATMENT, TWO ASSERTIONS WENT RED, WHICH IS
+**§371.3 — THE DAY IT GAINED A TREATMENT, TWO ASSERTIONS WENT RED, WHICH IS
 WHAT THEY WERE FOR.** `checks/console-boot.py` §2 and §4 recorded the silence
 on purpose — *so the day it gains a word this goes red and is rewritten rather
 than outliving its decision* (§214.3) — and they did. **REWRITTEN, never
 loosened** (§218), to claims that can each fail: §2 becomes *the grid is never
-standing empty*, which is the property **both** answers satisfy (§368's page
-and cards arriving together, §370's placeholders drawn first) and is stronger
+standing empty*, which is the property **both** answers satisfy (§369's page
+and cards arriving together, §371's placeholders drawn first) and is stronger
 than what it replaces, because it also fails on a build that draws the skeleton
 and then clears the grid before the real cards land; and §4 becomes four
 assertions — the waiting window exists and holds placeholders, they carry no
@@ -51994,8 +51994,8 @@ kept them passes the other three).
 was **EMPTY** — so `all([])` reported the silence as intact on the very build
 that ended it. Every list here is asserted non-empty before it is read.
 
-**§370.4 — AND TWO NEIGHBOURING CHECKS DIED RATHER THAN REPORTING, WHICH IS
-§368.4's OWN FAULT IN TWO FILES THAT SECTION DID NOT REACH.** `SMP_PAGE` is
+**§371.4 — AND TWO NEIGHBOURING CHECKS DIED RATHER THAN REPORTING, WHICH IS
+§369.4's OWN FAULT IN TWO FILES THAT SECTION DID NOT REACH.** `SMP_PAGE` is
 documented relative to the REPOSITORY ROOT, and every browser check here runs
 through `qa-run.py`, which lives in `SMP-Project-Folder/src` (§320.6b) — so the
 documented spelling is relative to one directory and typed from another. Run as
@@ -52010,7 +52010,7 @@ back as a timeout.
 
 **VERIFIED.** `console-boot` **13/0 on BOTH copies of the page** (§53.5 — a
 generated copy is where a drift hides), proved able to fail **five ways** from
-the SOURCES (§276), each break asserted to have landed (§344.1): the two §368
+the SOURCES (§276), each break asserted to have landed (§344.1): the two §369
 already had, plus `no-skeleton` **3 red**, `skeleton-named` **1 red** printing
 `words: 30`, and `skeleton-stays` **2 red** printing `max skel 3`.
 `platform-cards` 21/0, `publishing-room` 74/0 and both again against the

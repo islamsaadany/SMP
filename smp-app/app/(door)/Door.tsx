@@ -29,7 +29,7 @@ const Ic = ({ d }: { d: string }) => (
   </span>
 );
 const LOCK = "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z";
-/* The address, carried across the one navigation a refusal now costs (§369).
+/* The address, carried across the one navigation a refusal now costs (§370).
    Per TAB, so it cannot outlive the attempt or reach another person's. */
 const EMAIL_BACK = "smp.door.email";
 
@@ -89,13 +89,13 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
   /* `pwRef` reached in to read the password and then to WIPE it; with the
      browser posting the form there is nothing here that may touch that
      field, and the wipe was half of what confused the password keeper
-     (§369). PasswordField keeps its own ref for the reveal. */
+     (§370). PasswordField keeps its own ref for the reveal. */
   const newRef = useRef<HTMLInputElement | null>(null);
 
   /* THE FIRST FIELD THAT IS ACTUALLY THERE (§69.11): whoever reveals a card
      decides where the cursor goes. */
   /* THE SIGN-IN FORM POSTS TO THE API ITSELF, ALWAYS (method and action
-     below) — before the script is live, and since §369 after it too, which
+     below) — before the script is live, and since §370 after it too, which
      is why a press in the first few hundred milliseconds behaves exactly
      like every other one. The API answers a form post with a redirect, and
      `?refused=1` is how the door then says the one sentence. The PASSWORD
@@ -108,7 +108,7 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
       const q = new URLSearchParams(location.search);
       if (q.get("refused")) {
         setError("That email and password do not match.");
-        /* AND THE ADDRESS IS PUT BACK (§369). A refusal is a fresh document
+        /* AND THE ADDRESS IS PUT BACK (§370). A refusal is a fresh document
            now, so the field the browser refills is one it has SAVED — which
            for the person this section is about it has not, because they are
            typing their password precisely because it is not saved. Kept for
@@ -133,7 +133,7 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
     }
   }, [card]);
 
-  /* ── THE BROWSER SUBMITS THIS FORM (§369) ────────────────────────────
+  /* ── THE BROWSER SUBMITS THIS FORM (§370) ────────────────────────────
      Islam: "the mouse doesn't click from the first time, the whole window
      should be clicked first anywhere, then the hovering effect happens" —
      on the console, after signing in, "only when I use the password to

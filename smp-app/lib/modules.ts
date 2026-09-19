@@ -98,7 +98,7 @@ export type LandingFacts = {
 };
 export type LineDef = { key: string; label: string; example: string; read: (f: LandingFacts) => string };
 
-/* ── WHAT A MODULE MARKS ON A CLIENT'S CARD (§367) ─────────────────────
+/* ── WHAT A MODULE MARKS ON A CLIENT'S CARD (§368) ─────────────────────
    Islam, of the console's cards: "we don't needs notes that take 2 lines we
    can just have a notificaiton here if something is new to check ... to keep
    it neat and clean nad let's make it compact." Answered with a MARK rather
@@ -336,7 +336,7 @@ export function landingLine(k: ModuleKey, pick: string | null | undefined, facts
 }
 
 export type ModuleRow = { key: ModuleKey; label: string; mark: string; alarm: boolean; tip: string; room: boolean };
-/* ONE MARK PER ROW, AND NOTHING WHEN THERE IS NOTHING (§367).
+/* ONE MARK PER ROW, AND NOTHING WHEN THERE IS NOTHING (§368).
    REVERSING the pair this returned before — a `line` (the client's chosen
    sentence) and a `state` (the card's own health word) — which is recorded
    as a reversal rather than overwritten, because both were right on their
@@ -351,13 +351,13 @@ export type ModuleRow = { key: ModuleKey; label: string; mark: string; alarm: bo
    The whole-sentence `tip` rides with it for the hover.
 
    THE PICK IS NO LONGER READ, which is the one thing to know before
-   changing this back: the mark is Forefront's own answer (Islam's, §367),
+   changing this back: the mark is Forefront's own answer (Islam's, §368),
    so a client's landing-line pick cannot move it. `landingLine` keeps its
    other caller — lib/landing.ts's stamp, which is what the Landing line
    Setup page previews — so nothing about that page changes here. */
 export function moduleRows(have: ModuleKey[], facts: CardFacts): ModuleRow[] {
   /* A build that marked a row with nothing outstanding — the behaviour
-     §367 removed, and the one that makes the cards no shorter than the ones
+     §368 removed, and the one that makes the cards no shorter than the ones
      Islam photographed. Must turn checks/modules.mjs red before its green
      run is believed (§94.5). Never set on a deployment. */
   const brk = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";

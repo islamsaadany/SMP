@@ -5280,7 +5280,7 @@ rather than folded it in.
 click (it stopped being one big button on 11 September), and the console's slow
 opening, which is fixed on the branch and not yet merged.
 
-### The console's dead first moment (§368) — repaired; one half waiting on you
+### The console's dead first moment (§369) — repaired; one half waiting on you
 
 **What you reported.** Opening Forefront's own console, the window looks open
 and nothing responds until you click once.
@@ -5335,7 +5335,7 @@ quietly stopped it from being able to catch anything.
 that merge, and which I have held as you asked.
 
 
-**§367 — a mark, not a sentence, on a client card's module rows. On the
+**§368 — a mark, not a sentence, on a client card's module rows. On the
 branch, built 2026-09-17.** Your words: *"we don't needs notes that take 2
 lines we can just have a notificaiton here if something is new to check … to
 keep it neat and clean nad let's make it compact for better view"* — and then,
@@ -6070,8 +6070,8 @@ red, standing 7/0, demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0,
 assistant 10/0, memory 16/0 · 14/0 · 21/0 · 36/0, `tsc` clean cold, `next build`
 green, eight of nine spikes with all sixteen falsifications red.
 
-**§370 — the card before there is a client in it (2026-09-19).** Built. Islam,
-of §368's one open item: *"didn't we agree to show a grey skeleton?"* — and he
+**§371 — the card before there is a client in it (2026-09-19).** Built. Islam,
+of §369's one open item: *"didn't we agree to show a grey skeleton?"* — and he
 is right: §94.10 settled that for the client platform, and the console's own
 boot gate cites the rule while never taking the treatment. Two treatments were
 drawn out of the real page at the time and published; he took the skeleton over
@@ -6083,7 +6083,7 @@ not drawn over placeholders; the waiting cards come down before a refusal goes
 up. **Two assertions went red the day it gained a treatment, which is what they
 were for** — rewritten, never loosened, and one of them had already started
 passing over an empty sample list. Two neighbouring checks died rather than
-reported on a documented command, which is §368.4's fault in two files it did
+reported on a documented command, which is §369.4's fault in two files it did
 not reach; both now name a missing page rather than timing out.
 
 Verified: console-boot **13/0 on both copies**, red **five ways**;
@@ -6095,7 +6095,7 @@ done:** the heading still shifts 77px down when the tab row lands — it is in
 the signed-off pair, and closing it means drawing a navy band nobody has seen.
 
 **Waiting on Islam: the merge, and his word on that merge — and note that the
-branch and `main` have both been numbering. Main has taken §366 and §367 for
-different work, so this branch's §367 (the client card's marks) must be
+branch and `main` have both been numbering. Main has taken §366 and §368 for
+different work, so this branch's §368 (the client card's marks) must be
 renumbered at the merge, scoped to the lines this branch wrote and covering
-both spellings (§264.3, §336.1). §368, §369 and §370 are free on both sides.**
+both spellings (§264.3, §336.1). §369, §370 and §371 are free on both sides.**

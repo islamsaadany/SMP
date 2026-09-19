@@ -8235,7 +8235,7 @@ node smp-app/checks/modules.mjs # a module per client, and every module serving
                                 # `page.appendChild(grid)` appears twice in
                                 # platform.html, so an unscoped indexOf compared the
                                 # band against ANOTHER page's grid (&sect;100.3).
-                                # AND SINCE &sect;367 &sect;4a IS THE CARD'S MARK, BOTH
+                                # AND SINCE &sect;368 &sect;4a IS THE CARD'S MARK, BOTH
                                 # ENDS ON EVERY BRANCH: Strategy's ladder in order
                                 # (not answering &rarr; no plan &rarr; a count &rarr;
                                 # nothing), the count asserted as `total - submitted`
@@ -8433,7 +8433,7 @@ python3 checks/blob-api.mjs     # (in smp-app: `npm run check:blob`) the clip en
                                 # own first failures were spellings it invented rather
                                 # than read (§100.3)
 python3 SMP-Project-Folder/src/checks/console-boot.py # the console asks once, and
-                                # asks both at once (&sect;368). Islam: *"the window is not
+                                # asks both at once (&sect;369). Islam: *"the window is not
                                 # active on opening I need to click anyway to start accepting
                                 # clicks on the cards"* &mdash; the window IS active and the
                                 # page is not finished, which from outside is the same thing:
@@ -8451,7 +8451,7 @@ python3 SMP-Project-Folder/src/checks/console-boot.py # the console asks once, a
                                 # load-bearing half: the boot's answer is used by the FIRST
                                 # draw and nobody else, so a later `go("clients")` reads the
                                 # list AGAIN or the grid draws a client that has just been
-                                # archived (&sect;48.2). AND SINCE &sect;370 &sect;2 AND
+                                # archived (&sect;48.2). AND SINCE &sect;371 &sect;2 AND
                                 # &sect;4 ARE REWRITTEN, NEVER LOOSENED (&sect;214.3,
                                 # &sect;218): they recorded the silence so that the day it
                                 # gained a treatment they would go red, and they did &mdash;
@@ -9923,12 +9923,12 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-19 &mdash; **&sect;370: the card before there is a client
-in it.** Islam, of &sect;368's one recorded open item &mdash; *"didn't we agree
+*Last Updated: 2026-09-19 &mdash; **&sect;371: the card before there is a client
+in it.** Islam, of &sect;369's one recorded open item &mdash; *"didn't we agree
 to show a grey skeleton?"* **HE IS RIGHT AND THE RECORD BACKS HIM**: &sect;94.10
 settled that treatment for the client platform, over remembering the branding in
 `localStorage`, and the console's own boot gate **cites that rule in its own
-comment while never taking it**. &sect;368 took the boot from three round trips
+comment while never taking it**. &sect;369 took the boot from three round trips
 to one (1,872ms &rarr; 742) and left the silence behind it deliberately, because
 what a loading page looks like is a picture rather than a repair (rule 1b, 1c);
 two treatments were drawn out of the REAL page at the time
@@ -9950,18 +9950,18 @@ per device, because &sect;94.10 refused that same trade for the branding it was
 about. **AND THE WAITING CARDS COME DOWN BEFORE A REFUSAL GOES UP**, since `say`
 APPENDS and would otherwise land *"Could not reach the server"* under three grey
 cards still promising something is coming (&sect;124).
-**&sect;370.1 &mdash; THE FIRST BUILD LOST TWO THINGS THE SIGNED-OFF SHOT HAD,
+**&sect;371.1 &mdash; THE FIRST BUILD LOST TWO THINGS THE SIGNED-OFF SHOT HAD,
 AND ONLY LOOKING AT IT FOUND THEM** (rule 1c's last step, &sect;296.1): `.ctop`
 is a column flex, so a bar with no width STRETCHES and three cards read as three
 long rules rather than a name over an industry; and `.mods` carries
 `margin-top:auto`, which on a card holding nothing drives its hairline to the
 very bottom edge, where it **disappears into the card's own border** &mdash;
-measured, invisible in the shot. **&sect;370.2 &mdash; AND A LINE I WROTE AS
+measured, invisible in the shot. **&sect;371.2 &mdash; AND A LINE I WROTE AS
 PART OF THE FIX DOES NOTHING**: `pointer-events:none` changes no behaviour here,
 because `.ccard` declares no hover of its own and `:focus-visible` cannot reach
 a `div` with no tabindex &mdash; **deleted** rather than kept as belt and braces,
 since a line that fixes nothing is one the next reader takes for load-bearing
-(&sect;298.2, &sect;24). **&sect;370.3 &mdash; THE DAY IT GAINED A TREATMENT TWO
+(&sect;298.2, &sect;24). **&sect;371.3 &mdash; THE DAY IT GAINED A TREATMENT TWO
 ASSERTIONS WENT RED, WHICH IS WHAT THEY WERE FOR** (&sect;214.3): REWRITTEN,
 never loosened (&sect;218) &mdash; &sect;2 becomes *the grid is never standing
 empty*, the property BOTH answers satisfy and stronger than what it replaces
@@ -9973,8 +9973,8 @@ clients arrive* (&sect;94.2). **AND THE PAIR THEY REPLACE HAD ALREADY STARTED
 PASSING FOR THE WRONG REASON** &mdash; with the page ready from the first frame
 their sample list was EMPTY, so `all([])` reported the silence intact on the
 very build that ended it (&sect;113.8); every list here is asserted non-empty
-before it is read. **&sect;370.4 &mdash; AND TWO NEIGHBOURS DIED RATHER THAN
-REPORTING, WHICH IS &sect;368.4's OWN FAULT IN TWO FILES IT DID NOT REACH**:
+before it is read. **&sect;371.4 &mdash; AND TWO NEIGHBOURS DIED RATHER THAN
+REPORTING, WHICH IS &sect;369.4's OWN FAULT IN TWO FILES IT DID NOT REACH**:
 `SMP_PAGE` is documented relative to the REPOSITORY ROOT while every browser
 check runs through `qa-run.py` in `SMP-Project-Folder/src` (&sect;320.6b), so run
 as documented `platform-cards.py` and `publishing-room.py` resolved a file that
@@ -9985,7 +9985,7 @@ lifted into both. **VERIFIED**: console-boot **13/0 on BOTH copies of the page**
 (&sect;53.5), red **five ways** from the SOURCES with every break asserted to
 have landed (&sect;276, &sect;344.1) &mdash; `no-skeleton` 3, `skeleton-named` 1
 printing `words: 30`, `skeleton-stays` 2 printing `max skel 3`, plus
-&sect;368's two; platform-cards 21/0 and publishing-room 74/0, each also against
+&sect;369's two; platform-cards 21/0 and publishing-room 74/0, each also against
 the generated copy; client-card-modules 23/0; client-setup-outside and
 client-archive 0 failures; `built-in-step` all good. **The frozen product is
 untouched and measured** &mdash; `platform.html` is the console at the repository
@@ -9996,11 +9996,11 @@ DONE**: the heading still shifts 77px down when the tab row lands, because
 is in the build, and reserving that height means drawing an empty navy band
 nobody has seen (rule 1c, rule 2b). **`main` untouched: the merge is Islam's
 word, on that merge &mdash; and the branch and `main` have both been numbering,
-so this branch's &sect;367 collides with main's and is renumbered AT the merge,
+so this branch's &sect;368 collides with main's and is renumbered AT the merge,
 scoped to this branch's own lines and covering both spellings (&sect;264.3,
 &sect;336.1).**
 
-*Earlier: 2026-09-18 &mdash; **&sect;369: the browser signs you in, and the
+*Earlier: 2026-09-18 &mdash; **&sect;370: the browser signs you in, and the
 console stops arriving deaf.** Islam, with a screen recording &mdash; *"the mouse
 doesn't click from the first time, the whole window should be clicked first
 anywhere, then the hovering effect happens when I point the mouse at the areas of
@@ -10008,8 +10008,8 @@ clicking"* &mdash; *"it happens on the console with the client cards"*, *"only i
 the platform when I use the password to login; if I login when it remembers the
 password it works fine"*, and *"yes it's the front window"*.
 **I ANSWERED IT TWICE WITH THE WRONG FAULT, AND THE DETAIL THAT RULED BOTH OUT
-WAS IN HIS OWN SENTENCE**: &sect;368's boot (real, and never in front of him
-&mdash; it is not on `main`) and the card's dead area (&sect;367, also real, also
+WAS IN HIS OWN SENTENCE**: &sect;369's boot (real, and never in front of him
+&mdash; it is not on `main`) and the card's dead area (&sect;368, also real, also
 not this). **HOVER DOES NOT WORK EITHER, AND HOVER IS PURE CSS** &mdash; no
 script, no handler, no wiring &mdash; so a slow boot, an unwired control and a
 small target cannot produce it: *a page that will not hover is a page not being
@@ -10066,7 +10066,7 @@ screen later &mdash; not a one-line change there (it compares two fields and ask
 where the person works before it may navigate), so flagged rather than folded in
 (rule 1b). **`main` untouched: the merge is Islam's word, on that merge.**
 
-*Earlier the same day: 2026-09-18 &mdash; **&sect;368: the console asks once, and asks
+*Earlier the same day: 2026-09-18 &mdash; **&sect;369: the console asks once, and asks
 both at once.** Islam, opening Forefront's own console &mdash; *"something strange
 the window is not active on opening I need to click anyway to start accepting
 clicks on the cards"* &mdash; then, with a merge already in flight, *"don't merge
@@ -10084,9 +10084,9 @@ its units, count its pillars and read its cycle, plus the landing facts for each
 titled and empty, and the cards landed at **1,872**. A click inside that window
 hits **BODY**, asked every 100ms of it where a card is about to be &mdash; so the
 press he spends is the one that happens to land after the page became ready.
-**IT IS NOT &sect;367's, ESTABLISHED BEFORE IT WAS BLAMED** (&sect;303): the same
+**IT IS NOT &sect;368's, ESTABLISHED BEFORE IT WAS BLAMED** (&sect;303): the same
 probe against the build before that section reports **1,259 against 1,255**, and
-the diff shows &sect;367 *removed* a read from that path. **NOTHING IN `cards`
+the diff shows &sect;368 *removed* a read from that path. **NOTHING IN `cards`
 READS `me`'s ANSWER** &mdash; the session is the cookie both already carry &mdash;
 so they were sequential for no reason but the order they were written in, and the
 boot's own answer is **handed to the first draw** rather than asked for twice.
@@ -10098,7 +10098,7 @@ has to read the list AGAIN or the grid draws a client that has just been archive
 (&sect;48.2); falsified by keeping it, **1 red** on exactly that assertion, which
 is the dangerous direction and worse than the fault this repairs. **`BOOTCARDS`
 IS DECLARED RATHER THAN LEFT TO HOIST** (&sect;56.7), grepped, the only pair.
-**&sect;368.1 &mdash; AND MY OWN COMMENT CLAIMED SOMETHING THE MEASUREMENT
+**&sect;369.1 &mdash; AND MY OWN COMMENT CLAIMED SOMETHING THE MEASUREMENT
 REFUTED**: a first draft read *"the grid already says Reading your clients&hellip;
 and this gate hides it"* &mdash; satisfying, and false. Lifting the gate alone
 produces a picture **byte-identical** to today's (18,924 bytes, twice, which is
@@ -10106,7 +10106,7 @@ what said so), because `drawClients()` **builds** that sentence and is not calle
 until the answer lands. Corrected in the comment, the docstring and the assertion
 rather than left standing (&sect;124) &mdash; and the assertion it replaced was
 weak as well as wrong, measuring `visibility` AFTER the cards arrived, which is
-true of every build (&sect;113.8). **&sect;368.2 &mdash; WHAT IS LEFT IS DRAWN AND
+true of every build (&sect;113.8). **&sect;369.2 &mdash; WHAT IS LEFT IS DRAWN AND
 NOT DECIDED**: one round trip of the same silence, and seconds of it on a cold
 function, so saying anything means DRAWING before the answer &mdash; a decision
 about what a loading page looks like, put to Islam rather than ridden in behind a
@@ -10118,7 +10118,7 @@ own *Reading your clients&hellip;*), whose cost was measured rather than reasone
 whose RULE this gate cites in its own comment and whose treatment it never took,
 and which **guesses how many cards** (three drawn; a platform with seven shows
 three and then seven, which is &sect;94.10's own objection to painting and
-correcting). **&sect;368.3 &mdash; AND THE CHECK'S FIRST FALSIFICATION REPORTED 0
+correcting). **&sect;369.3 &mdash; AND THE CHECK'S FIRST FALSIFICATION REPORTED 0
 RED**: the boot lives inline in `platform.html` and in `/platform-page.js` for the
 new stack's copy (&sect;329), and `doctor()` insisted on a match in whichever body
 it was handed first &mdash; against the generated page the substitution missed,
@@ -10130,14 +10130,14 @@ asserted at the end of the run** (&sect;344.1); both copies then read 11/0 green
 `SMP_CHROME`** &mdash; run directly they printed Playwright's own install banner
 and exited without running, which reads as a pass in a batch (&sect;320.6b, a
 fourth road); both run through `qa-run.py`, which is what this file requires and
-what the round nearly skipped. **&sect;368.4 &mdash; AND THE DOCUMENTED COMMAND
+what the round nearly skipped. **&sect;369.4 &mdash; AND THE DOCUMENTED COMMAND
 FAILED FROM THE DIRECTORY THE CHECK IS RUN FROM, SAYING NOTHING**: found by
 following the check's own docstring &mdash; `SMP_PAGE=smp-app/shell/platform.html`
 is spelt relative to the REPOSITORY ROOT, where that docstring says to run it,
 and **every browser check in this project goes through `qa-run.py`, which lives
-in `SMP-Project-Folder/src`** (&sect;320.6b, the rule &sect;368.3 had just
+in `SMP-Project-Folder/src`** (&sect;320.6b, the rule &sect;369.3 had just
 earned), so the spelling that is documented is relative to one directory and
-typed from another. Both are accepted now. **AND IT IS &sect;368.3'S OWN FAULT
+typed from another. Both are accepted now. **AND IT IS &sect;369.3'S OWN FAULT
 ONE LINE OVER**: the page was opened **inside the request thread**, so a path
 that names no file raised there, killed only that thread, and reached the run as
 `ERR_EMPTY_RESPONSE` &mdash; naming neither the file nor the directory it was
@@ -10158,7 +10158,7 @@ repository root, which `build.py` does not read &mdash; so the built file does n
 move and **no `sw.js` bump is owed** (&sect;91). **`main` untouched: the merge is
 Islam's word, on that merge, and it is held at his instruction.**
 
-*Earlier the same round: 2026-09-17 &mdash; **&sect;367: a mark, not a sentence, on a
+*Earlier the same round: 2026-09-17 &mdash; **&sect;368: a mark, not a sentence, on a
 client card's module rows.** Islam, with the console's four client cards in
 front of him &mdash; *"on the clients cards we don't needs notes that take 2
 lines we can just have a notificaiton here if something is new to check &hellip;
@@ -10193,14 +10193,14 @@ pairs read in BOTH palettes, worst 4.70 (&sect;38.4/&sect;38.5). Two things did
 not move and each says why: `.ccard.add` keeps its `min-height`, whose one number
 is the whole of that card's height (&sect;317), and `img.cmark` came down to 30px
 with the initials, or a row would ship two card heights for no visible reason.
-**&sect;367.1 &mdash; MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN
+**&sect;368.1 &mdash; MY OWN LINE-COUNT ASSERTION WOULD HAVE CALLED THE BROKEN
 BUILD CLEAN**: `getClientRects().length == 1` returned **ONE rect for a tail 53px
 tall** under the wrap break &mdash; &sect;88's rule, written down once and walked
 into anyway; it measures the tail's HEIGHT against one line now.
-**&sect;367.2 &mdash; and its alarm-ink assertion passed by default**, the
+**&sect;368.2 &mdash; and its alarm-ink assertion passed by default**, the
 fixture's unopenable client drawing no rows at all, so there was no alarm to
 measure (&sect;94.5); the state is MADE (&sect;255) and both inks asserted
-PRESENT before they are asserted different. **&sect;367.3 &mdash; AND FIVE OF
+PRESENT before they are asserted different. **&sect;368.3 &mdash; AND FIVE OF
 `check:door:red`'s TEN BREAKS DIED WITH THE LANDING, THE FIRST HIDING THE OTHER
 FOUR**: `NOT RED: no-rows`, established as pre-existing at the commit before this
 one (**GREEN 140/0**, &sect;303) &mdash; it falsified THE LANDING'S ROWS, and

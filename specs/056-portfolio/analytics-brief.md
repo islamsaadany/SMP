@@ -1,5 +1,9 @@
 # Analytics brief — the one screen the first audit did not reach (spec 056 §9.10)
 
+> **ANSWERED 2026-09-19.** The reply is `analytics-audit.md` (848 lines, commit
+> `bf9793c`), and what it settles and leaves open is §9.11 of the spec. This page
+> is kept as the record of what was asked — do not re-run it.
+
 For a session that can read **`aleymahmoud-ff/clientplus`**. This session
 cannot: an `add_repo` across owners is refused, and the GitHub tools here are
 scoped to `islamsaadany/smp`.

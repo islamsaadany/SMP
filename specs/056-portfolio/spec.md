@@ -5,10 +5,10 @@ spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
 what it specifies is the shape, not the screens. **Three screens are drawn and
 signed off** — the project team (§6.4), the charter (§5.1) and the plan (§9.9);
-**Progress is drawn and awaits sign-off** (§9.10). **Analytics is not drawn and
-cannot honestly be yet** (§9.10). Rule 1c is paid for the first three and owed
-for the rest: nothing visual may be built from this page until each screen is
-drawn and signed off.
+**Progress is drawn and awaits sign-off** (§9.10). **Analytics is audited and not
+drawn** — what it is FOR is a decision, not a hole in the reading (§9.11). Rule
+1c is paid for the first three and owed for the rest: nothing visual may be built
+from this page until each screen is drawn and signed off.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -144,7 +144,7 @@ and add notes. They do not restructure the plan.
 
 | # | Asks for | Here |
 |---|---|---|
-| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed — §9.10) · **Analytics**. An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
+| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed — §9.10) · **Analytics**, whose content is a decision rather than a port (§9.11). An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. **A checkpoint is a date and nothing else** (§9.10): it stores nothing, records nothing and gates nothing. |
@@ -181,7 +181,7 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 | Table | Holds |
 |---|---|
 | `portfolio_projects` | **New, and the whole of decision 2.** The plan's parent, and **the charter it is described by** (§5.1) — name, brief, the four accountable people, why, what is in and out, what it produces, when, at what cost and against what risk. Plus the **checkpoint cadence and its day** (§9.10) — two fields, no table, and the next date derived. Replaces `(client_assignments, scopes)` and the agreement above them. |
-| `portfolio_phase_groups` | Optional grouping above phases, colour-coded |
+| `portfolio_phase_groups` | Optional grouping above phases, colour-coded. **Genuinely optional and probably not in the first build** (§9.11): dropping it degrades the phase roll-up to a plain phase list and changes nothing else, and their own version is 642 lines of CRUD admin screen. |
 | `portfolio_phases` | Phase, numbered, status |
 | `portfolio_work_packages` | **Renamed on the way in.** ClientPlus calls the table `scope_milestones` and the column `milestone_id` — stale since the concept was renamed in Dec 2025. Fixed now or never (the brief's own words), and doubly so here, where `milestones` means a Strategy milestone one module away. |
 | `portfolio_activities` | The working unit. Name, description, deliverables and their type, duration, planned and actual start/end, one dependency, assignee, status, progress, and **two** flags — is it a milestone, is it billable. **Their third flag, *does it trigger an invoice*, is not ported** (§9.9). |
@@ -681,6 +681,10 @@ guarantee).
 | **82% of `lib/scopeplan/` is dead**, and the dead files are the ones that read like the specification | Stated so nobody ports fiction: 512 lines of role logic, 239 of date logic and 346 of dependency logic with **zero importers**. The live rules are elsewhere. |
 | Three unrelated meanings of *milestone*, plus Strategy's own | §5's `portfolio_work_packages` renames one; the flag on an activity and Strategy's table are the other two. **Name them apart now.** |
 | `activities.trigger_invoice` — written, guarded as a structural field, and **read by nothing the audit shows**; their own workbook does not carry it | **Not ported** (§9.9). It is an agreement's fact, and decision 2 deleted the agreement. |
+| `phases.progress_percent` is **selected by the analytics endpoint and read nowhere** in its 747 lines | Confirmed dead by a second reading (§9.11). The column is dropped and the figure derived, which their own analytics already does. |
+| Their **Milestones Hit** counts a milestone delivered late as hit, and an **upcoming** milestone's countdown renders a field that branch never assigns, so every one reads *"(in today)"* | Neither is ported (§9.11). |
+| **On-Time Delivery counts an activity with no recorded actual end date as on time** — and their actual end is cleared on reopen, so the Done-awaiting-sign-off queue inflates it | **An activity with no real end date is not counted at all** here, rather than counted as a success (§9.11). |
+| A label reading **"Weighted avg progress"** over a plain arithmetic mean | §9.8 decided the weighting; the label must not arrive ahead of it. |
 
 ---
 
@@ -969,6 +973,14 @@ either** — the only figure the plan renders is one number for the whole plan.
 So a phase shows nothing, and two columns read `0.00` for ever while looking
 like data (§294.2's write-only column, one step worse: never-written).
 
+**CORRECTED BY THE SECOND AUDIT (2026-09-19, §9.11)**: *"a phase shows nothing"*
+is true of their **plan** page and **false of their analytics page**, which
+computes a figure per phase at request time and renders it with a named status.
+The half that stands is the one that mattered: **the stored columns are still
+never written** — and the analytics endpoint **selects `progress_percent` and
+never reads it**, which is the strongest confirmation the recommendation below
+could have asked for. Somebody started the stored-summary version and stopped.
+
 **SMP rolls up everywhere**, which is what makes this a question rather than an
 omission: a measure rolls into a pillar, a pillar into a unit, a unit into the
 group, each weighted and each with the arithmetic recorded. A plan whose phases
@@ -978,7 +990,8 @@ carry no figure is a plan nobody can scan from the top.
 rather than ported (§7.6), and a phase's figure is worked out from its
 activities when the page is drawn — which is how a pillar's is (§264: a summary
 must be made of the numbers it summarises, and the whole of that section is what
-happens when it is not).
+happens when it is not). **Their own analytics already does exactly this**, and
+caches nothing anywhere (§9.11 §E).
 
 #### The weighting — answered by the platform, not chosen here (2026-09-17)
 
@@ -1194,17 +1207,183 @@ office's only** today, and a project team holds the client's own people, so the
 two do not join up as they stand. Recorded as a possible later link and
 deliberately not designed here (§10).
 
-#### The one it does not decide
+#### And the one it left open — since answered at §9.11
 
-- **Analytics has no drawing and cannot honestly have one yet.** The audit names
-  its files — 985 lines of page, 642 of a builder for grouping phases into
-  coloured buckets, 410 of a pending-completions tab, 747 of endpoint — and
-  **never says what any of it renders**. Anything drawn now would be invented
-  rather than ported. **`specs/056-portfolio/analytics-brief.md` is the brief
-  for a session that can read the reference** (§10's last bullet). **One thing
-  the file list does settle**: their pending completions is a page AND a tab
-  inside analytics, the same queue twice, and here it is the Progress page and
-  nowhere else (§87's twins).
+- **Analytics had no drawing and could not honestly have one** — the first audit
+  named its files and never said what any of them rendered.
+  **`specs/056-portfolio/analytics-brief.md` was written for a session that can
+  read the reference, and `analytics-audit.md` is the answer (§9.11).** It is
+  read now, and what it leaves is a decision about what the fourth tab is FOR
+  rather than a hole in the reading.
+
+---
+
+### 9.11 · Analytics, audited — and the fourth tab may not earn its place
+
+`specs/056-portfolio/analytics-audit.md`, read against commit `bf9793c` by a
+session with the reference attached, answering `analytics-brief.md`. It opened
+the four files the first audit counted and never read — 2,784 lines between them.
+
+#### What it settles, and the answer is the good one
+
+**Analytics is 100% plan tree.** Six database calls, three tables — `phases`,
+`phase_groups`, `activities` — and **nothing else**: no budget hours, no budget
+amount, no agreement dates, no lead consultant, no time entries, no utilisation,
+no consultant costs, no other client. Every figure comes off activity `status`,
+`progress`, `plannedEndDate`, `actualEndDate`, `isMilestone`, `assignedToUsername`
+plus a phase's name and number.
+
+So **the question this spec said mattered most comes back clean**: there is
+nothing on that page that cannot travel, and nothing to drop for want of a level
+decision 2 deleted. **Everything is computed at request time and nothing is
+cached anywhere** — no stored summary, no memo, no header — which is this
+platform's own rule (§264) arriving from the other side.
+
+**And there is no chart library at all.** One hand-built inline `<svg>` ring and
+bars that are `<div>`s with a percentage width. Nothing to port, nothing to add.
+
+#### The grain — and it answers itself
+
+**Their analytics page is per CLIENT, not per plan**, and always has been: every
+other ScopePlan screen refuses to render without an agreement and a scope
+selected, and this one sends neither (the two query parameters exist, are
+applied, and **no caller supplies them**). So it aggregates across all of a
+client's plans at once.
+
+A Portfolio **project** maps to what they call a plan, not to a client — this
+client has several projects — so porting that page as a project tab would
+**silently narrow it**, which is the audit's own warning.
+
+**It answers itself, because §4 row 5 already has the client-wide place**: the
+landing is *the project list for this client, with each project's state*. Their
+page is client-wide because their plan page is per-(agreement, scope) and they
+had nowhere else to put it. We do. **So the cross-project reading goes on the
+landing whatever else happens**, and anything on a project tab is per project by
+construction.
+
+#### The harder question, and it is Islam's
+
+The audit was asked which three things it would keep. Measured against what is
+**already drawn here**, two of the three are not missing:
+
+| It would keep | Here |
+|---|---|
+| **Overdue triage** — late work, worst first, click through to fix | **Progress has it** (§9.10, *Past their date*). What it does **not** have is the three severity buckets — 1–5 / 6–14 / 15+ days — and **click-through to the row**. Both are small, and both belong on Progress. |
+| **Per-phase progress with a named status** — *Phase 3 — 42% — 5/12 done — Early Stage* | **The Plan has the figure** (§9.8: 100 / 67 / 10 derived) and the **Gantt has the shape** (a summary bar per phase). What is missing is the **word** — *On Track · In Progress · Early Stage · Not Started* — which is a label on a number that is already there. |
+| **The Milestone Tracker** — every commitment, met or missed, by how many days | **Genuinely missing.** Nothing here lists the milestones together with whether they were hit. |
+
+**So one section of that page is new, and it is the one for a different
+audience**: Progress is a working queue for the people doing the work, and a
+milestone tracker is what you put in front of the client.
+
+**Three ways to take it, and this is the decision:**
+
+- **A · No fourth tab.** The severity buckets and click-through join Progress;
+  the named phase status joins the Plan; the milestone tracker becomes a section
+  on Progress; the cross-project reading goes on the landing. *Smallest, and it
+  mixes two audiences on one page.*
+- **B · A fourth tab that is the client-facing reading.** Analytics becomes the
+  milestone tracker and the phase roll-up — what you would show a client — while
+  the triage stays on Progress where the work is. *This is the recommendation:
+  it keeps the tab §4 already promised, gives it a reason to exist that Progress
+  does not already serve, and is mostly new rather than a port.*
+- **C · Port it closer to theirs** — four tabs' worth on one Analytics page.
+  *Costs the most and, by the audit's own reading, most of it is furniture.*
+
+#### What is binned, on the audit's own evidence
+
+- **The Health Score.** One composite 0–100 whose weights are arbitrary, and the
+  audit ran the real formula to prove it: **an empty plan and an untouched plan
+  both score 50**; a **totally overdue** plan floors at **20**; and
+  `blockedPenalty` is **absolute, not proportional**, so four blocked activities
+  cost a fifth of the score whether the plan has four or four hundred. Worse, a
+  plan with no phases hardcodes **0** while a plan with phases and no activities
+  computes **50** — *the same emptiness, two different numbers.* If Portfolio
+  ever wants one number it decides its own (§264's shape).
+- **The seven Schedule tiles**, which restate the Overview's status breakdown in
+  a different shape.
+- **Cancelled as a headline figure**, whose own subtitle shows two other numbers.
+- **Upcoming Deadlines**, a weaker version of the overdue list pointed forwards
+  and capped at three rows a column.
+
+#### Four faults not to port
+
+1. **Milestones Hit counts late ones as hit.** A milestone delivered three weeks
+   late is counted.
+2. **Every upcoming milestone reads "(in today)"** — the badge renders a
+   countdown from a field that branch never assigns, so it is always `0`.
+3. **"Weighted avg progress" is not weighted.** It is a plain mean over
+   activities, so a phase with one counts the same per activity as a phase with
+   fifty. §9.8 decided the weighting here; the label must not arrive with it.
+4. **On-Time Delivery is biased upward by exactly the queue it sits beside.** An
+   activity with no recorded actual end date **counts as on time** — and their
+   `actualEndDate` is only ever set on the transition to Completed and **cleared
+   on reopen**, so everything sitting at Done awaiting sign-off is counted on
+   time. Here it cannot arise the same way (§9.10: sign-off is what writes the
+   date), **but the rule must be that an activity with no real end date is not
+   counted at all** rather than counted as a success.
+
+#### The disclosure — and why it does not port as one
+
+The audit found a real one: their analytics endpoint applies **scope-level**
+narrowing and **not** activity-level, where their plan page applies both. So a
+**Contributor** assigned to one activity sees, through analytics, the name,
+assignee, dates and delay of **every activity in that scope** — while the plan
+page shows them only their own rows.
+
+**It does not port, because §6.2 already decided the opposite**: here a
+Contributor **sees the whole plan** — it is written down, it was a choice, and
+it is the reason this is not a leak in our model but is in theirs. *Their leak
+exists because their Contributor is narrowed on one page and not the other; ours
+is narrowed on neither.*
+
+**One part of it would port and must not**: their assignee filter enumerates
+**every assignee across the whole client**, not the plan. Our Contributor is
+scoped to the **project**, so a filter built the same way would name people on
+projects they are not on.
+
+#### Phase groups — a decision this makes cheap
+
+An optional coloured bucket a Lead drags phases into. The audit settles three
+things: **a phase is in at most one group** (one nullable column); **"members"
+are phases, not people**, and the route touches no permission; and **nothing
+grouped is the normal state and the page is built for it** — every ungrouped
+phase is synthesised into a *virtual solo group*, so **dropping groups entirely
+degrades the section to a phase list and changes nothing else on the page.**
+
+**So it is genuinely optional**, and the cost is named: **642 lines**, of which
+about 90 are the drag-and-drop and the rest a full CRUD admin screen — create,
+rename, recolour with an inline picker, delete, reorder, an assign-phases modal
+and an ungrouped preview. **Recommendation: not in the first build.**
+`portfolio_phase_groups` stays in §5 as a table nothing writes yet, or comes out
+until somebody asks for it — **Islam's, and it is a real saving either way.**
+
+#### What the audit could not verify, said rather than left
+
+**The app cannot be run there** — no database, no `.env`, no MySQL binary — and
+**the repository holds no ScopePlan rows at all**, which the first audit already
+established. So **there are no screenshots and no real rendered values**: the
+health-score table in it is the real formula executed against synthetic input,
+and is labelled as such. Also unverified: which of the two pending-completions
+surfaces people actually use (no telemetry, and both call the same endpoint with
+the same query string), the real payload size, and whether the Contributor
+disclosure has ever mattered in practice.
+
+#### And the duplicate is settled
+
+Their pending-completions page and its analytics tab are **the same screen
+twice** — byte-identical query, identical write, identical controls, and the tab
+says so in its own first lines. **Neither is a wider reading**; both are
+client-wide. So the audit's own recommendation stands and is taken: **drop both
+in favour of Progress**, and carry across the two things that make a queue
+clearable rather than browsable — the **On Time / Late split with counts**, and a
+**bulk sign-off**.
+
+**And the bulk action has a decision inside it**, which is presumably why theirs
+is two buttons rather than one: a sign-off writes a real end date, and for an
+on-time activity that date is obvious while for a late one it is not. So *Sign
+off everything that was on time* is safe in one press and *everything late* is
+not — recorded here rather than discovered when it is built.
 
 ---
 
@@ -1219,10 +1398,16 @@ deliberately not designed here (§10).
   optional value passed where a required one is typed — and the brief traced the
   runtime path and found it fails closed. The signature is wrong, not the
   behaviour. It is noted so the count does not frighten anybody pricing this.
-- **This session has not read the reference code.** Every claim about ScopePlan
-  here is the handover brief's, written by a session with that repository
-  attached. Before building, this repository needs sight of it — a fork under
-  `islamsaadany`, or the work done in a session started on it.
+- **This session has not read the reference code, and two sessions that could
+  have.** `port-audit.md` (2,295 lines, commit `d569ba6`) and `analytics-audit.md`
+  (848 lines, commit `bf9793c`) are theirs, written with that repository
+  attached, and every claim in §7 and §9.11 is sourced to one of them with file
+  and line. **What neither could do is RUN it** — no database, no `.env`, no
+  MySQL binary, and the repository holds no ScopePlan rows at all — so there are
+  **no screenshots and no real rendered values anywhere in this spec**, and
+  nothing is known about what a real client's plan looks like on any of those
+  screens. Before building, this repository still needs sight of the code — a
+  fork under `islamsaadany`, or the work done in a session started on it.
 - **A checkpoint and a meeting note may be the same act one day.** §9.10 settles
   that a checkpoint stores nothing; Meeting Notes (spec 055) is what a record of
   that review would be. It is the office's only and a project team holds the

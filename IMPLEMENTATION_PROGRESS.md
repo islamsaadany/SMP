@@ -6258,4 +6258,14 @@ carry a citation. **The sweep also took the two sentences describing the
 numbering itself**, which then named the wrong number — the fault in miniature,
 and why both were rewritten by hand.
 
+**§371.6 — a bare `.ccard` stopped meaning a client (2026-09-19).** Found by
+running the neighbours on the merged tree: `door-landing.mjs` 142 ok, 1 failed.
+**This round's fault, not the merge's** — the check is byte-identical to §371's
+tip but for the renumber, and the cause is §371's own markup: a placeholder is
+a `.ccard` with no client, no name and no heading, so the wait returned on the
+skeleton and the name was read a beat early. A race, which is why it passed at
+§371's own run. The wait is `.ccard[data-client]` now — what `.ccard` meant when
+the line was written (§218) — 143/0 twice on two fresh databases; and every
+other reach for a card was swept (§51.11), two more fixed, one left as correct.
+
 **Merged to `main` 2026-09-19 on Islam's word.**

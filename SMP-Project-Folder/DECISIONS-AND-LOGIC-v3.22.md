@@ -52493,3 +52493,48 @@ are rewritten by hand rather than left to the pass.
 citations are this branch's own; a rollback point whose comments point at
 another section's work is a worse record than one that is not a byte copy of a
 file nothing asserts.
+
+### §371.6 — A bare `.ccard` stopped meaning a client (2026-09-19)
+
+Found by running the neighbours on the merged tree rather than the file that
+was edited (§214): `door-landing.mjs` came back **142 ok, 1 failed** —
+*"…which lists the clients they may open"*.
+
+**IT IS THIS ROUND'S OWN FAULT AND NOT THE MERGE'S**, established before
+anything was blamed (§303): the check file is byte-identical to §371's tip but
+for the renumber, and the cause is in the markup this round added. §371 draws
+**three placeholder cards while the answer is in flight**, and a placeholder is
+a `.ccard` — with no client, no name and **no `h2` at all**. So
+`waitForSelector(".ccard")` stopped waiting for a client and started returning
+on the skeleton, a frame after the page opens, with the name read a beat too
+early.
+
+**A RACE, WHICH IS WHY IT PASSED AT §371'S OWN RUN** — 143/0, recorded, and got
+there by luck: the wait always returns on the skeleton (that exposure is
+deterministic, and `console-boot.py` §4 asserts the placeholders are drawn), so
+what decides the assertion is whether the `cards` round trip lands before the
+next evaluate. §369 made that one trip rather than three, which is exactly what
+makes it close enough to fall either way. *A check that passes on the timing is
+a check that will fail on somebody else's afternoon.*
+
+**REWRITTEN, NEVER LOOSENED** (§218): the wait is `.ccard[data-client]`, the
+mark a real card carries and a placeholder does not — which is what `.ccard`
+MEANT when the line was written, so this restores the assertion rather than
+relaxing it. 143/0 twice on two fresh databases.
+
+**AND THE SWEEP IS THE DELIVERABLE, NOT THE ONE LINE** (§51.11: when a control
+changes shape, grep the checks for the old selector and fix ALL of them, not
+the one that failed first). Every reach for a card in every check was read:
+
+- `publishing-room.py` waited the same way before opening the room — green
+  today, latent tomorrow. Fixed.
+- `multi-client.py` waited the same way and then read `.ccard[data-client] h2`
+  into a list it asserts is at least three long. Fixed. (That file needs the
+  rehearsal database §328.3 describes, so it is **recorded unrun** rather than
+  reported green.)
+- `multi-client.py`'s *the door draws no client cards* counts a bare `.ccard`
+  and asserts **0** — correct as it stands, and left: a skeleton is drawn on
+  the console, never on the door, and if one ever were, that assertion should
+  fail.
+- `client-setup-outside.py` already addresses cards by `[data-client="…"]`
+  throughout. Untouched.

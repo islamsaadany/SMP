@@ -322,10 +322,16 @@ await section("5 · the office", async () => {
   await signIn(page, "office@forefront.example", "Raya-2026!");
   await page.waitForURL(BASE + "/platform");
   check(page.url() === BASE + "/platform", "the office lands on the platform's own address (contracts §2)");
-  /* REWRITTEN (§218): a holder listed them; Phase B serves Forefront's own
-     page, so the clients are its cards. */
-  await page.waitForSelector(".ccard", { timeout: 15000 }).catch(() => {});
-  check((await text(page, ".ccard h2")).includes("Raya Trade"), "…which lists the clients they may open");
+  /* REWRITTEN TWICE (§218). A holder listed them; Phase B serves Forefront's
+     own page, so the clients are its cards — and since §371 a bare `.ccard`
+     is no longer one of them: the console draws THREE PLACEHOLDER CARDS while
+     it waits, and a placeholder has no `h2` at all. So this waited on the
+     skeleton, read the name a beat too early and passed or failed on which
+     round trip won — it is the REAL card that is waited on now
+     (`[data-client]`, the mark the skeleton does not carry), which is what
+     `.ccard` meant when the line was written. */
+  await page.waitForSelector(".ccard[data-client]", { timeout: 15000 }).catch(() => {});
+  check((await text(page, ".ccard[data-client] h2")).includes("Raya Trade"), "…which lists the clients they may open");
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" }); await inModule(page); await booted(page);
   check(page.url().startsWith(BASE + IN_MODULE), "the office opening a client is sent into its first module too (§360)", page.url());
   const officeWant = frozen.landing(graph, "smo");

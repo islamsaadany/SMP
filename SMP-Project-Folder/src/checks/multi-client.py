@@ -225,7 +225,11 @@ def main():
             pg.wait_for_url("**/platform", timeout=9000)
             check("signing in lands on the platform, not on the door",
                   pg.url.rstrip("/").endswith("/platform"), pg.url)
-            pg.wait_for_selector(".ccard", timeout=9000)
+            # A REAL card, never a bare `.ccard` (§371): the console draws three
+            # PLACEHOLDER cards while it waits, and they carry no client and no
+            # name — so the bare wait returns on the skeleton and the line under
+            # it reads an empty list.
+            pg.wait_for_selector(".ccard[data-client]", timeout=9000)
             names = pg.eval_on_selector_all(".ccard[data-client] h2", "els => els.map(e => e.textContent)")
             check("the admin sees every client", len(names) >= 3, names)
             # WHAT IS DRAWN IS WHAT THE SERVER WILL OPEN — asked of the server,

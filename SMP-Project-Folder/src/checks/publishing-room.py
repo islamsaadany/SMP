@@ -365,7 +365,11 @@ def run():
         # broken check rather than a missing feature.
         def open_room():
             pg.goto(BASE + "/platform")
-            pg.wait_for_selector(".ccard", timeout=9000)
+            # A REAL card, never a bare `.ccard` (§371): the console draws three
+            # PLACEHOLDER cards while it waits for the answer, and they carry no
+            # client, no name and no module rows — so waiting on `.ccard` is
+            # waiting for the skeleton and finding the room a beat too early.
+            pg.wait_for_selector(".ccard[data-client]", timeout=9000)
             got = pg.evaluate("""() => {
               const r = document.querySelector('.mrow[data-module="insights"]');
               if (!r) return false;

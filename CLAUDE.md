@@ -10145,8 +10145,28 @@ MATCHED** the count measured beforehand (31 / 9 / 56 / 57, &sect;344.1), and of
 SENTENCES THAT DESCRIBE THE NUMBERING ITSELF** &mdash; this paragraph's
 predecessor and its twin in the progress file both ended up naming the wrong
 number, which is the fault in miniature and is why the note is rewritten by
-hand rather than left to the substitution. **Merged to `main` 2026-09-19 on
-Islam's word.***
+hand rather than left to the substitution.
+**&sect;371.6 &mdash; AND A BARE `.ccard` STOPPED MEANING A CLIENT**, found by
+running the NEIGHBOURS on the merged tree rather than the file that was edited
+(&sect;214): `door-landing.mjs` came back **142 ok, 1 failed** on *"which lists
+the clients they may open"*. **THIS ROUND'S OWN FAULT AND NOT THE MERGE'S**,
+established before anything was blamed (&sect;303) &mdash; the check file is
+byte-identical to &sect;371's tip but for the renumber, and the cause is the
+markup this round added: a placeholder IS a `.ccard`, with no client, no name
+and **no `h2` at all**, so `waitForSelector(".ccard")` stopped waiting for a
+client and returned on the skeleton a frame after the page opens. **A RACE,
+WHICH IS WHY IT PASSED AT &sect;371's OWN RUN** &mdash; the wait always returns
+on the skeleton and what decides the assertion is whether the `cards` trip lands
+before the next evaluate, which &sect;369's single round trip makes close enough
+to fall either way. REWRITTEN, never loosened (&sect;218): `.ccard[data-client]`,
+the mark a real card carries and a placeholder does not, which is what `.ccard`
+MEANT when the line was written &mdash; 143/0 twice on two fresh databases.
+**AND THE SWEEP IS THE DELIVERABLE, NOT THE ONE LINE** (&sect;51.11): every
+reach for a card in every check was read, two more fixed
+(`publishing-room.py`, green today and latent tomorrow; `multi-client.py`), one
+left deliberately (the door's *no client cards* counts a bare `.ccard` and
+asserts **0**, which is right as it stands) and one already specific.
+**Merged to `main` 2026-09-19 on Islam's word.***
 
 *Earlier: 2026-09-18 &mdash; **&sect;370: the browser signs you in, and the
 console stops arriving deaf.** Islam, with a screen recording &mdash; *"the mouse

@@ -8446,21 +8446,35 @@ python3 SMP-Project-Folder/src/checks/console-boot.py # the console asks once, a
                                 # or a fast machine turns it green and a slow one red: `cards`
                                 # asked ONCE, `me` and `cards` OVERLAPPING (overlap rather than
                                 # a duration &mdash; two quick trips are still two trips), no
-                                # window in which the page is ready and the grid empty, and
-                                # **BOTH ENDS of the hand-over** (&sect;94.2), the load-bearing
-                                # half: the boot's answer is used by the FIRST draw and nobody
-                                # else, so a later `go("clients")` reads the list AGAIN or the
-                                # grid draws a client that has just been archived (&sect;48.2).
-                                # &sect;4 asserts the remaining silence as the RECORDED state,
-                                # so the day it gains a word this goes red and is REWRITTEN
-                                # rather than outliving its decision (&sect;214.3, &sect;218)
-                                # &mdash; measured DURING the window, because a visible wrap
-                                # after the cards arrive is true of every build (&sect;113.8).
+                                # window in which the page is up and the grid holds NOTHING,
+                                # and **BOTH ENDS of the hand-over** (&sect;94.2), the
+                                # load-bearing half: the boot's answer is used by the FIRST
+                                # draw and nobody else, so a later `go("clients")` reads the
+                                # list AGAIN or the grid draws a client that has just been
+                                # archived (&sect;48.2). AND SINCE &sect;370 &sect;2 AND
+                                # &sect;4 ARE REWRITTEN, NEVER LOOSENED (&sect;214.3,
+                                # &sect;218): they recorded the silence so that the day it
+                                # gained a treatment they would go red, and they did &mdash;
+                                # Islam took &sect;94.10's grey skeleton. &sect;2 is now the
+                                # property BOTH answers satisfy and is STRONGER than what it
+                                # replaces (it also fails on a build that draws the skeleton
+                                # and then clears the grid before the cards land); &sect;4 is
+                                # four claims that can each fail &mdash; the waiting window
+                                # exists and holds placeholders, they carry no word, no mark
+                                # and nobody's name (&sect;94.10's rule, the whole licence to
+                                # draw before the answer), a press where a card will be lands
+                                # on the page rather than on BODY (his own report at his own
+                                # point), and none is left standing once the clients arrive.
+                                # AND THE PAIR THEY REPLACE HAD STARTED PASSING FOR THE WRONG
+                                # REASON: the page is ready from the first frame now, so their
+                                # sample list was EMPTY and `all([])` reported the silence
+                                # intact on the build that ended it (&sect;113.8) &mdash; every
+                                # list here is asserted non-empty before it is read.
                                 # NO DATABASE: the page is served as it is by both stacks, and
                                 # a stub is also the only way to hold a round trip open long
                                 # enough to look at the window at all (&sect;94.11, &sect;255).
                                 # Run against BOTH copies (`SMP_PAGE=smp-app/shell/platform.html`).
-                                # 11/0 each, red two ways each &mdash; and its first
+                                # 13/0 each, red FIVE ways each &mdash; and its first
                                 # falsification against the generated copy printed **0 FAIL**,
                                 # because `doctor()` exited inside the server thread when the
                                 # boot lived in the SCRIPT file rather than the page
@@ -9909,7 +9923,84 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-18 &mdash; **&sect;369: the browser signs you in, and the
+*Last Updated: 2026-09-19 &mdash; **&sect;370: the card before there is a client
+in it.** Islam, of &sect;368's one recorded open item &mdash; *"didn't we agree
+to show a grey skeleton?"* **HE IS RIGHT AND THE RECORD BACKS HIM**: &sect;94.10
+settled that treatment for the client platform, over remembering the branding in
+`localStorage`, and the console's own boot gate **cites that rule in its own
+comment while never taking it**. &sect;368 took the boot from three round trips
+to one (1,872ms &rarr; 742) and left the silence behind it deliberately, because
+what a loading page looks like is a picture rather than a repair (rule 1b, 1c);
+two treatments were drawn out of the REAL page at the time
+(`design-mockups/console-loading/`, &sect;41.9) and published, and **he took the
+skeleton over the recommendation** &mdash; recorded as overruled rather than
+re-argued, with the reason: a console that waits differently from the platform
+it opens is two answers to one question (&sect;53.5). **IT WEARS NOTHING IT WILL
+HAVE TO CHANGE**, which is the whole of that rule and the only licence to draw
+before the answer: no name, no mark, no tenant's colour, no figure &mdash; two
+greys the page already declares (&sect;25, never a literal) in the shape the
+real card has, so what arrives REPLACES a block rather than rearranging the page
+round it. **ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL**: `.ccard.add`'s
+own 152px, SHARED rather than copied, because the waiting card is that same
+question and two spellings of one answer is how they come to differ. **THE
+SEARCH BOX IS DELIBERATELY NOT DRAWN** &mdash; it filters the grid beside it, so
+one over placeholders would take a word and hide three grey blocks (&sect;61).
+**THREE IS A GUESS AND IT IS THE COST HE TOOK WITH IT NAMED**; not remembered
+per device, because &sect;94.10 refused that same trade for the branding it was
+about. **AND THE WAITING CARDS COME DOWN BEFORE A REFUSAL GOES UP**, since `say`
+APPENDS and would otherwise land *"Could not reach the server"* under three grey
+cards still promising something is coming (&sect;124).
+**&sect;370.1 &mdash; THE FIRST BUILD LOST TWO THINGS THE SIGNED-OFF SHOT HAD,
+AND ONLY LOOKING AT IT FOUND THEM** (rule 1c's last step, &sect;296.1): `.ctop`
+is a column flex, so a bar with no width STRETCHES and three cards read as three
+long rules rather than a name over an industry; and `.mods` carries
+`margin-top:auto`, which on a card holding nothing drives its hairline to the
+very bottom edge, where it **disappears into the card's own border** &mdash;
+measured, invisible in the shot. **&sect;370.2 &mdash; AND A LINE I WROTE AS
+PART OF THE FIX DOES NOTHING**: `pointer-events:none` changes no behaviour here,
+because `.ccard` declares no hover of its own and `:focus-visible` cannot reach
+a `div` with no tabindex &mdash; **deleted** rather than kept as belt and braces,
+since a line that fixes nothing is one the next reader takes for load-bearing
+(&sect;298.2, &sect;24). **&sect;370.3 &mdash; THE DAY IT GAINED A TREATMENT TWO
+ASSERTIONS WENT RED, WHICH IS WHAT THEY WERE FOR** (&sect;214.3): REWRITTEN,
+never loosened (&sect;218) &mdash; &sect;2 becomes *the grid is never standing
+empty*, the property BOTH answers satisfy and stronger than what it replaces
+(it also fails on a build that draws the skeleton and then clears the grid
+before the cards land), and &sect;4 becomes four claims that can each fail,
+among them *a press where a card will be lands on the page, not on BODY*, which
+is his own report measured at his own point, and *none is left standing once the
+clients arrive* (&sect;94.2). **AND THE PAIR THEY REPLACE HAD ALREADY STARTED
+PASSING FOR THE WRONG REASON** &mdash; with the page ready from the first frame
+their sample list was EMPTY, so `all([])` reported the silence intact on the
+very build that ended it (&sect;113.8); every list here is asserted non-empty
+before it is read. **&sect;370.4 &mdash; AND TWO NEIGHBOURS DIED RATHER THAN
+REPORTING, WHICH IS &sect;368.4's OWN FAULT IN TWO FILES IT DID NOT REACH**:
+`SMP_PAGE` is documented relative to the REPOSITORY ROOT while every browser
+check runs through `qa-run.py` in `SMP-Project-Folder/src` (&sect;320.6b), so run
+as documented `platform-cards.py` and `publishing-room.py` resolved a file that
+is not there, the page was never served, and each ended on a navigation timeout
+naming neither the file nor the directory tried (&sect;215, &sect;123).
+Established as not this work's before it was blamed (&sect;303); `pagePath()` is
+lifted into both. **VERIFIED**: console-boot **13/0 on BOTH copies of the page**
+(&sect;53.5), red **five ways** from the SOURCES with every break asserted to
+have landed (&sect;276, &sect;344.1) &mdash; `no-skeleton` 3, `skeleton-named` 1
+printing `words: 30`, `skeleton-stays` 2 printing `max skel 3`, plus
+&sect;368's two; platform-cards 21/0 and publishing-room 74/0, each also against
+the generated copy; client-card-modules 23/0; client-setup-outside and
+client-archive 0 failures; `built-in-step` all good. **The frozen product is
+untouched and measured** &mdash; `platform.html` is the console at the repository
+root, which `build.py` does not read &mdash; so the shipped file is
+byte-identical and **no `sw.js` bump is owed** (&sect;91). **RECORDED, NOT
+DONE**: the heading still shifts 77px down when the tab row lands, because
+`drawNav()` is built from the answer; it is in the signed-off pair exactly as it
+is in the build, and reserving that height means drawing an empty navy band
+nobody has seen (rule 1c, rule 2b). **`main` untouched: the merge is Islam's
+word, on that merge &mdash; and the branch and `main` have both been numbering,
+so this branch's &sect;367 collides with main's and is renumbered AT the merge,
+scoped to this branch's own lines and covering both spellings (&sect;264.3,
+&sect;336.1).**
+
+*Earlier: 2026-09-18 &mdash; **&sect;369: the browser signs you in, and the
 console stops arriving deaf.** Islam, with a screen recording &mdash; *"the mouse
 doesn't click from the first time, the whole window should be clicked first
 anywhere, then the hovering effect happens when I point the mouse at the areas of

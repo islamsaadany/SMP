@@ -201,7 +201,12 @@
   .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
-    padding:15px; color:var(--ink-3); min-height:152px }
+    padding:15px; color:var(--ink-3) }
+  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§370). The Add card's
+     own height, shared rather than copied: the waiting card is the same
+     question — how tall is a card in this grid before there is a client in
+     it — and two spellings of one answer is how they come to differ. */
+  .ccard.add, .ccard.skel{ min-height:152px }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -249,6 +254,43 @@
      not work (§61, §96). */
   .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
   .ccard.arch:hover{ border-color:var(--line) }
+
+  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§370) ─────────────────
+     §368 took the console's boot from three round trips to one and left the
+     silence: the bar stands up, the body is hidden, and for about 740ms —
+     seconds on a cold function — the window looks open and dead. What fills
+     it is the answer the CLIENT platform already gives while it waits
+     (§94.10), chosen by Islam over the page's own words.
+
+     IT WEARS NOTHING IT WILL HAVE TO CHANGE, which is that section's whole
+     rule: no name, no mark, no tenant's colour, no figure. Two greys the
+     page already declares (§25 — never a literal), in the shape the real
+     card has, so what arrives replaces a block with the thing that block
+     stood for rather than rearranging the page around it.
+
+     AND IT SAYS NOTHING THAT WOULD MAKE IT LOOK PRESSABLE, by construction
+     rather than by a rule: `.ccard` declares no hover of its own (the two
+     that exist are scoped to `.add` and to `.mrow`), and `:focus-visible`
+     cannot reach a `div` that takes no tabindex. A `pointer-events:none`
+     was written here first and REMOVED on measuring it — nothing behaves
+     differently with or without it, and a line that fixes nothing is one
+     the next reader takes for load-bearing (§298.2, §24). */
+  .ccard.skel .sk-mark{ width:30px; height:30px; border-radius:8px; background:var(--line) }
+  /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
+     signed-off shot has and what the first build lost: `.ctop` is a column
+     flex, so a bar with no width STRETCHES and three cards read as three
+     long rules rather than a name over an industry. A share of the card
+     rather than a pixel count, because the grid's columns are `1fr` and a
+     fixed bar would sit differently in a wide row and a narrow one. */
+  .ccard.skel .sk-line{ width:62%; height:10px; border-radius:5px; background:var(--line) }
+  .ccard.skel .sk-line.thin{ width:42%; height:8px; background:var(--surface-2) }
+  /* AND THE HAIRLINE SITS WHERE THE REAL CARD'S SITS — under the name block,
+     with the module rows below it. `.mods` carries `margin-top:auto`, which
+     on a card holding nothing drives the line to the very bottom edge, where
+     it disappears into the card's own border (measured: invisible in the
+     shot). The space below it is the 152px above, which is the room those
+     rows will take. */
+  .ccard.skel .mods{ margin-top:0 }
   /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
      (§88's own answer, on a card rather than a table row): one line, clipped
      where it does not fit, the whole of it one hover away. Measured — 

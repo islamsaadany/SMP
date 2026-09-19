@@ -875,6 +875,56 @@
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */
+  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§370) ──────────────────────
+     §368 measured the silence and did not fill it: one round trip, about
+     740ms warm and seconds on a cold function, with the bar standing up
+     over a hidden body — a window that looks open, answers nothing, and
+     says nothing about either. Islam chose the grey skeleton over the
+     page's own words, from two shot out of the real page
+     (design-mockups/console-loading/).
+
+     IT IS DRAWN BEFORE THE ANSWER, which is the one thing the gate above
+     was stopping — and it is safe to draw for precisely the reason that
+     gate exists: it holds no name, no mark, no colour of anybody's and no
+     figure, so nothing here can turn out to have been somebody else's
+     screen (§94.10).
+
+     THE TITLE AND THE CARDS, AND NOT THE SEARCH BOX. That box filters the
+     grid it is drawn beside, so one drawn over placeholders would take a
+     word and hide three grey blocks (§61: a control with nothing to act on
+     is not a choice). It arrives with the cards, where `drawClients`
+     builds it — which is also why this draws the title WITHOUT a right-hand
+     group rather than an empty one.
+
+     THREE IS A GUESS, AND IT IS THE COST ISLAM TOOK WITH IT NAMED: a
+     console with seven clients shows three and then seven. It is not
+     remembered from the last visit, because a count kept per device is a
+     second thing that has to stay true and §94.10 refused that same trade
+     for the branding it was about.
+
+     `aria-hidden` BECAUSE IT SAYS NOTHING. Three empty boxes read out one
+     after another is noise, and what a screen reader gets here is what it
+     gets today: the page, and then the cards when they land. */
+  function drawWaiting() {
+    title("Clients");
+    var grid = el("div", "cards");
+    grid.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 3; i++) {
+      var c = el("div", "ccard skel");
+      var top = el("div", "ctop");
+      top.appendChild(el("div", "sk-mark"));
+      top.appendChild(el("div", "sk-line"));
+      top.appendChild(el("div", "sk-line thin"));
+      c.appendChild(top);
+      /* The hairline the real card draws above its module rows, so the two
+         shapes end the same way rather than the line appearing on arrival. */
+      c.appendChild(el("div", "mods"));
+      grid.appendChild(c);
+    }
+    page.appendChild(grid);
+    document.body.classList.add("ready");
+  }
+
   function drawClients() {
     /* ── WHY A CLIENT SENT THEM BACK HERE (§313.32) ──────────────────
        A client whose register cannot place this account refuses and lands
@@ -2978,7 +3028,14 @@
      RULE the gate above cites and whose treatment this page never took. Both
      shot out of the real page and put to Islam
      (design-mockups/console-loading/), never ridden in behind a repair
-     (rule 1b, 1c). */
+     (rule 1b, 1c).
+
+     ANSWERED (§370): Islam took the skeleton, over the recommendation. It is
+     `drawWaiting()` above, and the window is no longer silent — which is why
+     two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
+     than loosened: they recorded this state on purpose so that the day it
+     moved they would go red (§214.3, §218). */
+  drawWaiting();
   Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {
     var j = r[0], c = r[1];
     if (!j || !j.ok) { location.replace("/"); return; }
@@ -3001,6 +3058,12 @@
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");
+    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§370). A
+       skeleton is a promise that something is arriving, and `say` APPENDS —
+       so without this the sentence lands under three grey cards still
+       saying it is on its way. The happy path needs no such line, because
+       `go` clears the page itself. */
+    clear();
     say("Could not reach the server.", true);
   });
 })();

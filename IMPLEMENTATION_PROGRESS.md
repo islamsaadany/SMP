@@ -6070,4 +6070,32 @@ red, standing 7/0, demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0,
 assistant 10/0, memory 16/0 · 14/0 · 21/0 · 36/0, `tsc` clean cold, `next build`
 green, eight of nine spikes with all sixteen falsifications red.
 
-**Waiting on Islam: the merge, and his word on that merge.**
+**§370 — the card before there is a client in it (2026-09-19).** Built. Islam,
+of §368's one open item: *"didn't we agree to show a grey skeleton?"* — and he
+is right: §94.10 settled that for the client platform, and the console's own
+boot gate cites the rule while never taking the treatment. Two treatments were
+drawn out of the real page at the time and published; he took the skeleton over
+the recommendation. The console now draws its title and three grey card shapes
+straight away instead of an empty screen, and the real cards replace them —
+nothing drawn that could turn out to have been the wrong tenant's. The Add
+card's own 152px is shared rather than copied; the search box is deliberately
+not drawn over placeholders; the waiting cards come down before a refusal goes
+up. **Two assertions went red the day it gained a treatment, which is what they
+were for** — rewritten, never loosened, and one of them had already started
+passing over an empty sample list. Two neighbouring checks died rather than
+reported on a documented command, which is §368.4's fault in two files it did
+not reach; both now name a missing page rather than timing out.
+
+Verified: console-boot **13/0 on both copies**, red **five ways**;
+platform-cards 21/0, publishing-room 74/0, both also against the generated
+copy; client-card-modules 23/0; client-setup-outside and client-archive 0
+failures; built-in-step all good. The frozen product is untouched, so the
+shipped file is byte-identical and no `sw.js` bump is owed. **Recorded, not
+done:** the heading still shifts 77px down when the tab row lands — it is in
+the signed-off pair, and closing it means drawing a navy band nobody has seen.
+
+**Waiting on Islam: the merge, and his word on that merge — and note that the
+branch and `main` have both been numbering. Main has taken §366 and §367 for
+different work, so this branch's §367 (the client card's marks) must be
+renumbered at the merge, scoped to the lines this branch wrote and covering
+both spellings (§264.3, §336.1). §368, §369 and §370 are free on both sides.**

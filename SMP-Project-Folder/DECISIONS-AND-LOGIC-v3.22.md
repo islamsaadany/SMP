@@ -51903,3 +51903,128 @@ before it may navigate, so making it a real post is server-side work and a
 decision about where those two questions are answered. Flagged rather than
 folded in (rule 1b), and named here so the next person meets it as a decision
 rather than as a surprise.
+
+---
+
+## §370 — THE CARD BEFORE THERE IS A CLIENT IN IT (2026-09-19)
+
+Islam, of §368's one recorded open item: ***"didn't we agree to show a grey
+skeleton?"*** — and he is right, and the record backs him. §94.10 settled this
+for the client platform, over remembering the branding in `localStorage`, and
+the console's own boot gate **cites that section's rule in its own comment
+while never taking its treatment**.
+
+**THIS IS §368's OWN OPEN ITEM CLOSED, NOT A NEW IDEA.** That section took the
+console's boot from three round trips to one — 1,872ms to 742 — and left the
+silence behind it, deliberately and in writing: *what a loading console looks
+like is a decision about a picture, put to Islam rather than ridden in behind a
+repair* (rule 1b, 1c). Two treatments were drawn out of the REAL page at the
+time (`design-mockups/console-loading/`, §41.9 — never from the stylesheet),
+published, and it was **the skeleton he took, over the recommendation**. The
+recommendation was the page's own words, on the grounds that they guess
+nothing; recorded as overruled rather than re-argued, and with the reason: a
+skeleton is the answer the client platform already gives, and a console that
+waits differently from the platform it opens is two answers to one question
+(§53.5).
+
+**IT WEARS NOTHING IT WILL HAVE TO CHANGE**, which is the whole of §94.10's
+rule and the only reason anything may be drawn before the answer at all: no
+name, no mark, no tenant's colour, no figure, no count. Two greys the page
+already declares (§25 — never a literal), in the shape the real card has, so
+what arrives **replaces a block with the thing that block stood for** rather
+than rearranging the page around it.
+
+**ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL.** `.ccard.add` has carried
+`min-height:152px` since §367 took it off the card family — the page's own
+answer to *how tall is a card in this grid before there is a client in it* —
+and the waiting card is that same question, so the declaration is **shared
+rather than copied**. Two spellings of one answer is how they come to differ.
+
+**THE TITLE AND THE CARDS, AND NOT THE SEARCH BOX.** That box filters the grid
+it is drawn beside, so one drawn over placeholders would take a word and hide
+three grey blocks (§61: a control with nothing to act on is not a choice). It
+arrives with the cards, where `drawClients` builds it.
+
+**THREE IS A GUESS AND IT IS THE STATED COST**, named on the mockup before he
+chose: a console with seven clients shows three and then seven. It is **not
+remembered from the last visit**, because a count kept per device is a second
+thing that has to stay true, and §94.10 refused exactly that trade for the
+branding it was about.
+
+**THE WAITING CARDS COME DOWN BEFORE A REFUSAL GOES UP.** `say` APPENDS, so
+without one line in the boot's `catch` the sentence *"Could not reach the
+server"* lands **under three grey cards still promising something is on its
+way** (§124). The happy path needs no such line, because `go` clears the page
+itself.
+
+**§370.1 — THE FIRST BUILD LOST TWO THINGS THE SIGNED-OFF SHOT HAD, AND ONLY
+LOOKING AT IT FOUND THEM** (rule 1c's last step, §296.1). `.ctop` is a column
+flex, so a bar with no width **stretches**: three cards read as three long
+rules rather than a name over an industry. And `.mods` carries
+`margin-top:auto`, which on a card holding nothing drives its hairline to the
+very bottom edge, where it **disappears into the card's own border** —
+measured, invisible in the shot. Both are shares of the card rather than pixel
+counts, because the grid's columns are `1fr`.
+
+**§370.2 — AND A LINE I WROTE AS PART OF THE FIX DOES NOTHING.** `.ccard.skel {
+pointer-events:none }` was written to stop a placeholder reading as pressable,
+and nothing behaves differently with or without it: `.ccard` declares no hover
+of its own (the two that exist are scoped to `.add` and to `.mrow`) and
+`:focus-visible` cannot reach a `div` that takes no tabindex. **Deleted**
+rather than kept as belt and braces, because a line that fixes nothing is one
+the next reader takes for load-bearing (§298.2, §24).
+
+**§370.3 — THE DAY IT GAINED A TREATMENT, TWO ASSERTIONS WENT RED, WHICH IS
+WHAT THEY WERE FOR.** `checks/console-boot.py` §2 and §4 recorded the silence
+on purpose — *so the day it gains a word this goes red and is rewritten rather
+than outliving its decision* (§214.3) — and they did. **REWRITTEN, never
+loosened** (§218), to claims that can each fail: §2 becomes *the grid is never
+standing empty*, which is the property **both** answers satisfy (§368's page
+and cards arriving together, §370's placeholders drawn first) and is stronger
+than what it replaces, because it also fails on a build that draws the skeleton
+and then clears the grid before the real cards land; and §4 becomes four
+assertions — the waiting window exists and holds placeholders, they carry no
+word and no mark and nobody's name, a press where a card will be lands on the
+page rather than on BODY (his own report, measured at his own point), and none
+is left standing once the clients arrive (§94.2 — a build that drew them and
+kept them passes the other three).
+
+**AND THE PAIR THEY REPLACE HAD ALREADY STARTED PASSING FOR THE WRONG REASON**
+(§113.8). With the page ready from the first frame, the sample list both read
+was **EMPTY** — so `all([])` reported the silence as intact on the very build
+that ended it. Every list here is asserted non-empty before it is read.
+
+**§370.4 — AND TWO NEIGHBOURING CHECKS DIED RATHER THAN REPORTING, WHICH IS
+§368.4's OWN FAULT IN TWO FILES THAT SECTION DID NOT REACH.** `SMP_PAGE` is
+documented relative to the REPOSITORY ROOT, and every browser check here runs
+through `qa-run.py`, which lives in `SMP-Project-Folder/src` (§320.6b) — so the
+documented spelling is relative to one directory and typed from another. Run as
+documented from `src/`, `platform-cards.py` and `publishing-room.py` resolved a
+file that is not there, **the page was never served, and each run ended on a
+navigation timeout naming neither the file nor the directory it was looked for
+in** (§215, §123). Established as not this work's before it was blamed (§303):
+the resolution line is untouched by this change and both run green from the
+repository root. `pagePath()` is lifted into both — both spellings accepted, a
+missing page **refused before the server starts** and named rather than handed
+back as a timeout.
+
+**VERIFIED.** `console-boot` **13/0 on BOTH copies of the page** (§53.5 — a
+generated copy is where a drift hides), proved able to fail **five ways** from
+the SOURCES (§276), each break asserted to have landed (§344.1): the two §368
+already had, plus `no-skeleton` **3 red**, `skeleton-named` **1 red** printing
+`words: 30`, and `skeleton-stays` **2 red** printing `max skel 3`.
+`platform-cards` 21/0, `publishing-room` 74/0 and both again against the
+generated copy; `client-card-modules` 23/0, `client-setup-outside` and
+`client-archive` 0 failures; `built-in-step` all good. **The frozen product is
+untouched and measured** — `platform.html` is the console at the repository
+root, which `build.py` does not read — so the shipped file is byte-identical
+and **no `sw.js` bump is owed** (§91's trigger is the built file's bytes
+changing, and they did not). The served copies are regenerated and
+`generated-in-step` is clear once committed.
+
+**RECORDED, NOT DONE.** The page's heading still **shifts down when the tab row
+lands**, because `drawNav()` is built from the answer and cannot be drawn
+early — measured at 77px. It is in the signed-off pair exactly as it is in the
+build, so it is what was approved; reserving the row's height would mean
+drawing an empty navy band nobody has seen (rule 1c, rule 2b). Named here
+rather than closed on my own judgement.

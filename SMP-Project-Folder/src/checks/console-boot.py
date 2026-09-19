@@ -22,24 +22,31 @@ machine must not turn this green and a slower one must not turn it red:
   §1  `cards` is asked ONCE for one page load, and `me` and `cards` OVERLAP.
       Overlap is the test rather than a duration, because two trips that
       happen to be quick are still two trips.
-  §2  the page and the cards arrive TOGETHER — no window in which the grid is
-      ready, titled and empty, which is the second stage he was watching.
+  §2  the grid is NEVER STANDING EMPTY — from the moment the page is up it
+      holds cards, placeholder or real. That is the property both answers to
+      the second stage he was watching satisfy: §368's (page and cards
+      arriving together) and §370's (placeholders drawn first).
   §3  BOTH ENDS OF THE HAND-OVER (§94.2), and this is the load-bearing one:
       the boot's answer is used by the FIRST draw and by nobody else, so a
       later `go("clients")` reads the list AGAIN. Used twice, the grid would
       draw a client that had just been archived — worse than the fault this
       repairs — so the second draw is asserted to ask (§48.2).
-  §4  a click inside the dead window hits BODY, and the window is still
-      SILENT — deliberately, because what a loading console looks like is a
-      decision Islam has not taken (rule 1b, 1c). Asserted as the RECORDED
-      state, so the day it gains a word this goes red and is rewritten rather
-      than quietly outliving its decision (§214.3, §218).
-      AND THE SILENCE IS NOT A HIDDEN SENTENCE. A first draft of §368 said the
-      grid already says "Reading your clients…" and the gate hides it; lifting
-      the gate alone produces a picture byte-identical to today's, because
-      `drawClients()` BUILDS that sentence and is not called until the answer
-      lands. So what is asserted is that the page draws NOTHING while it
-      waits, which is the true statement (§124).
+  §4  THE WINDOW WHILE IT WAITS (§370). §368 left this silent on purpose and
+      recorded the silence here, so that the day it gained a treatment these
+      would go red rather than outlive their decision (§214.3) — which is
+      what happened: Islam took §94.10's grey skeleton over the page's own
+      words. Rewritten, never loosened (§218), to four claims that can each
+      fail: the waiting window exists and holds placeholders; they carry no
+      word, no mark and nobody's name (§94.10's rule, and the whole reason
+      anything may be drawn before the answer); a press where a card will be
+      lands on the page rather than on BODY, which is his own report
+      measured at his own point; and none is left standing once the clients
+      arrive (§94.2 — a build that drew them and kept them passes the other
+      three).
+      AND THE PAIR THEY REPLACE HAD STARTED PASSING FOR THE WRONG REASON: the
+      page is ready from the first frame now, so the sample list they read was
+      EMPTY and `all([])` reported the silence intact on the build that ended
+      it (§113.8). Every list here is asserted non-empty before it is read.
 
 IT NEEDS NO DATABASE, for platform-cards.py's reason: the page is served as it
 is by both stacks, so a stub drives it — and a stub is also the only way to
@@ -109,6 +116,24 @@ BREAKS = {
     # it was at boot, so an archived client stays on the grid
     "handed-twice": [
         ("var handed = BOOTCARDS; BOOTCARDS = null;", "var handed = BOOTCARDS;"),
+    ],
+    # §370 reverted: the page waits behind the gate again, silent, which is
+    # the state §368 recorded and Islam replaced
+    "no-skeleton": [
+        ("  drawWaiting();\n  Promise.all(", "  Promise.all("),
+    ],
+    # a placeholder that carries somebody's name — §94.10's own fault, and the
+    # one thing a skeleton may never do, since what is drawn before the answer
+    # must be nothing that could turn out to have been the wrong tenant's
+    "skeleton-named": [
+        ('      top.appendChild(el("div", "sk-line"));',
+         '      top.appendChild(el("h2", null, "Raya Trade"));'),
+    ],
+    # the placeholders left standing under the clients: `go` stops clearing,
+    # so the grid gains the real cards below three grey ones
+    "skeleton-stays": [
+        ("    drawNav();\n    clear();\n    return redraw();",
+         "    drawNav();\n    return redraw();"),
     ],
 }
 
@@ -224,11 +249,22 @@ with sync_playwright() as pw:
             const e = document.elementFromPoint(Math.round(box.left + 120), Math.round(box.top + 60));
             at = e ? e.tagName : null;
           }
+          const sk = document.querySelectorAll('.ccard.skel');
+          /* WHAT THE PLACEHOLDERS HOLD, read off the page rather than off
+             the builder: §94.10's rule is that nothing is drawn which will
+             have to be corrected, so what can fail is a placeholder that
+             carries a word, a picture, or anybody's name. */
+          let words = 0, imgs = 0;
+          sk.forEach((c) => {
+            words += (c.textContent || '').trim().length;
+            imgs += c.querySelectorAll('img, svg').length;
+          });
           return { ready: document.body.classList.contains('ready'),
                    bar: !!(bar && bar.getClientRects().length),
                    cards: document.querySelectorAll('.ccard[data-name]').length,
-                   /* what the page has DRAWN, so §4 can assert the silence
-                      where it can fail rather than after it has ended */
+                   skel: sk.length, words: words, imgs: imgs,
+                   /* what the page has DRAWN, so §4 can assert the waiting
+                      state where it can fail rather than after it has ended */
                    drew: wrap ? wrap.childElementCount : -1, at: at };
         }""")
         dead.append(st)
@@ -246,11 +282,19 @@ with sync_playwright() as pw:
           bool(me and cd) and cd["t0"] < me["t1"] and me["t0"] < cd["t1"],
           {"me": me and round(me["t1"] - me["t0"], 3), "gap": bool(me and cd) and round(cd["t0"] - me["t0"], 3)})
 
-    print("§2 · the page and the cards arrive together")
-    # The second stage he was watching: ready, titled, and no cards yet.
-    staged = [s for s in dead if s["ready"] and not s["cards"]]
-    check("no window in which the page is ready and the grid is empty",
-          len(staged) == 0, "%d of %d samples" % (len(staged), len(dead)))
+    print("§2 · the grid is never standing empty")
+    # THE SECOND STAGE HE WAS WATCHING was ready, titled and nothing where the
+    # cards go. §368 closed it by making the page and the cards arrive
+    # together; §370 closes it the other way round, by drawing placeholders
+    # first — so what is asserted is the PROPERTY both satisfy and neither
+    # spelling of it (§94.8): from the moment the page is up, the grid holds
+    # cards, placeholder or real. REWRITTEN, never loosened (§218): this is
+    # stronger than "no ready-and-empty window", because it also fails on a
+    # build that drew the skeleton and then cleared the grid before the real
+    # cards landed — the flicker a naive redraw produces.
+    empty = [s for s in dead if s["ready"] and not s["cards"] and not s["skel"]]
+    check("no window in which the page is up and the grid holds nothing",
+          len(empty) == 0, "%d of %d samples" % (len(empty), len(dead)))
     check("the bar is drawn the whole time — the window always looked open",
           all(s["bar"] for s in dead), dead[0] if dead else None)
 
@@ -277,22 +321,45 @@ with sync_playwright() as pw:
     check("and the cards are still drawn after it",
           pg.eval_on_selector_all(".ccard[data-name]", "n => n.length") >= 1)
 
-    print("§4 · what is left, recorded rather than claimed")
-    # ONE round trip of the same silence, and a click in it still hits BODY.
-    # Asserted as the recorded state: the day §94.10's skeleton reaches this
-    # page, this goes RED and is rewritten rather than outliving its decision
-    # (§214.3, §218).
-    silent = [s for s in dead if not s["ready"]]
-    check("the dead window is still there, and it is one round trip",
-          len(silent) >= 1 and all(s["at"] == "BODY" for s in silent),
-          "%d samples, targets %s" % (len(silent), sorted(set(s["at"] for s in silent))))
-    # AND IT DRAWS NOTHING WHILE IT WAITS — the true statement, and asserted
-    # where it can fail: measured DURING the window, not after it, where a
-    # visible wrap is true of every build (§113.8). Read off `drew`, sampled
-    # beside the rest.
-    check("and it draws nothing at all while it waits — not even a word",
-          all(s["drew"] == 0 for s in silent),
-          "widest sample drew %d nodes" % max([s["drew"] for s in silent] or [0]))
+    print("§4 · the window while it waits (§370)")
+    # THE DAY IT GAINED A TREATMENT THIS WENT RED, which is what the two
+    # assertions it replaces were for (§214.3). They recorded the silence:
+    # a dead window, a click hitting BODY, and nothing drawn at all. Islam
+    # took §94.10's grey skeleton over the page's own words, so they are
+    # REWRITTEN to the claims that are true now — and not loosened, because
+    # each of these can fail where the old ones no longer could.
+    #
+    # AND THE OLD PAIR HAD ALREADY STARTED PASSING FOR THE WRONG REASON
+    # (§113.8): with the page ready from the first frame the sample list they
+    # read was EMPTY, so `all([])` reported the silence as intact on the very
+    # build that ended it. Asserted over a list proved non-empty here.
+    waiting = [s for s in dead if s["skel"] and not s["cards"]]
+    check("there is a window before the cards, and it holds placeholders",
+          len(waiting) >= 1, "%d of %d samples" % (len(waiting), len(dead)))
+    # AND THEY HOLD NOTHING THAT IS ANYBODY'S, which is the whole reason a
+    # skeleton may be drawn before the answer at all (§94.10). A placeholder
+    # carrying a name, a mark or a word is the painting-and-correcting the
+    # gate above exists to stop.
+    check("and they carry no word, no mark and nobody's name",
+          bool(waiting) and all(s["words"] == 0 and s["imgs"] == 0 for s in waiting),
+          {"words": max([s["words"] for s in waiting] or [-1]),
+           "imgs": max([s["imgs"] for s in waiting] or [-1])})
+    # AND THE PAGE IS DRAWN WHERE HE WAS PRESSING. His report was a window in
+    # which a click over a card hit BODY; measured at that same point, it now
+    # lands inside the grid. It does not make the press DO anything — there is
+    # no client to open yet — so what is asserted is that the page is there,
+    # never that the click works (§124).
+    check("a press where a card will be lands on the page, not on BODY",
+          bool(waiting) and all(s["at"] != "BODY" for s in waiting),
+          sorted(set(s["at"] for s in waiting)))
+    # AND THEY GO WHEN THE REAL ONES ARRIVE. Both ends (§94.2): a build that
+    # drew placeholders and left them standing beside the clients would pass
+    # every assertion above.
+    landed = [s for s in dead if s["cards"]]
+    check("and none is left standing once the clients arrive",
+          bool(landed) and all(s["skel"] == 0 for s in landed),
+          "%d samples with cards, max skel %d"
+          % (len(landed), max([s["skel"] for s in landed] or [-1])))
 
     check("no page errors", not errs, errs[:2])
     br.close()

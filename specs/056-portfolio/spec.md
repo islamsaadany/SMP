@@ -147,7 +147,7 @@ and add notes. They do not restructure the plan.
 | 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed — §9.10) · **Analytics**. An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
-| 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. |
+| 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. **A checkpoint is a date and nothing else** (§9.10): it stores nothing, records nothing and gates nothing. |
 | 5 | A landing | The project list for this client, with each project's state. A client with one project lands in it. |
 
 What the spine gives for nothing: the address `/<client>/portfolio/…`, the
@@ -180,7 +180,7 @@ them are covered on the next apply, and `lib/schema-check.ts`'s
 
 | Table | Holds |
 |---|---|
-| `portfolio_projects` | **New, and the whole of decision 2.** The plan's parent, and **the charter it is described by** (§5.1) — name, brief, the four accountable people, why, what is in and out, what it produces, when, at what cost and against what risk. Replaces `(client_assignments, scopes)` and the agreement above them. |
+| `portfolio_projects` | **New, and the whole of decision 2.** The plan's parent, and **the charter it is described by** (§5.1) — name, brief, the four accountable people, why, what is in and out, what it produces, when, at what cost and against what risk. Plus the **checkpoint cadence and its day** (§9.10) — two fields, no table, and the next date derived. Replaces `(client_assignments, scopes)` and the agreement above them. |
 | `portfolio_phase_groups` | Optional grouping above phases, colour-coded |
 | `portfolio_phases` | Phase, numbered, status |
 | `portfolio_work_packages` | **Renamed on the way in.** ClientPlus calls the table `scope_milestones` and the column `milestone_id` — stale since the concept was renamed in Dec 2025. Fixed now or never (the brief's own words), and doubly so here, where `milestones` means a Strategy milestone one module away. |
@@ -1155,23 +1155,56 @@ outside the page and compared with the plan's own counts, and the file read.
 rows sit in, and how far 2.2 ran over — because §9.8's whole lesson is that a
 typed figure on a second drawing of one project is the fault, not the shortcut.
 
-#### The two it does not decide
+#### The checkpoint — answered (2026-09-18)
 
-- **The checkpoint is a line, not a mechanism.** §4's row 4 says checkpoints are
-  weekly or monthly and per project and says nothing else, so the page names the
-  next one and invents no cadence, no record and no state around it. **What a
-  checkpoint does, if anything beyond being a date, is open** — and it is worth
-  asking before Progress is built, because if it holds anything at all this is
-  the page it holds it on.
+Islam: *"the checkpoint is just a date for the manager to have a look at the
+project and review with the project team."*
+
+**SO IT STORES NOTHING, AND THAT IS THE WHOLE ANSWER.** There is **no
+`portfolio_checkpoints` table**, no attendance, no minutes, no per-checkpoint
+record and no sign-off against one. Two fields on `portfolio_projects` — a
+**cadence** (weekly, monthly, or none) and the **day** it runs on — and the next
+date is **worked out from them, never stored** (§9.8's rule, one field over: a
+figure that can be derived is not a figure to keep in step).
+
+**None is a real answer.** A project with no checkpoint set draws no line and is
+not nagged about one (§45.2 with the sign reversed).
+
+**MISSING ONE COSTS NOTHING AND THE PLATFORM NEVER SAYS YOU MISSED IT.** A date
+that has passed simply rolls to the next; there is nothing to be late against,
+because nothing is recorded per checkpoint. Saying so now is cheaper than
+discovering it: an alarm would be inventing an obligation out of a date he
+described as *a look*.
+
+**It gates nothing** — no save is refused, no figure is owed by it, and it
+reaches no other module. What it is FOR is that the counts on Progress have a
+date to be read against: *three days away* is what turns eleven days late from a
+fact into something somebody does on Friday.
+
+**Set by the office and the Lead**, which is the charter's own pen (§5.1) rather
+than a second rule.
+
+**The drawing is confirmed rather than changed** — it already names the next one
+and holds nothing else, which turns out to be exactly right.
+
+**AND THE RECORD OF THE REVIEW, IF ANYBODY WANTS ONE, IS NOT PORTFOLIO'S.**
+Meeting Notes (spec 055) is one meeting, one note, with attendees and minutes
+that go out as an email — which is the thing he is describing. It is **the
+office's only** today, and a project team holds the client's own people, so the
+two do not join up as they stand. Recorded as a possible later link and
+deliberately not designed here (§10).
+
+#### The one it does not decide
+
 - **Analytics has no drawing and cannot honestly have one yet.** The audit names
   its files — 985 lines of page, 642 of a builder for grouping phases into
   coloured buckets, 410 of a pending-completions tab, 747 of endpoint — and
   **never says what any of it renders**. Anything drawn now would be invented
-  rather than ported. It needs sight of the reference (§10's last bullet) or a
-  decision about what a client is meant to read there. **One thing the file list
-  does settle**: their pending completions is a page AND a tab inside analytics,
-  the same queue twice, and here it is the Progress page and nowhere else
-  (§87's twins).
+  rather than ported. **`specs/056-portfolio/analytics-brief.md` is the brief
+  for a session that can read the reference** (§10's last bullet). **One thing
+  the file list does settle**: their pending completions is a page AND a tab
+  inside analytics, the same queue twice, and here it is the Progress page and
+  nowhere else (§87's twins).
 
 ---
 
@@ -1190,3 +1223,9 @@ typed figure on a second drawing of one project is the fault, not the shortcut.
   here is the handover brief's, written by a session with that repository
   attached. Before building, this repository needs sight of it — a fork under
   `islamsaadany`, or the work done in a session started on it.
+- **A checkpoint and a meeting note may be the same act one day.** §9.10 settles
+  that a checkpoint stores nothing; Meeting Notes (spec 055) is what a record of
+  that review would be. It is the office's only and a project team holds the
+  client's own people, so nothing joins them today. An optional pointer later is
+  a field, not a redesign — the same shape spec 046 §8 records for a Portfolio
+  project pointing at a Strategy one.

@@ -14,8 +14,17 @@ A ROLE IS A SEAT ON A CLIENT (Islam, 2026-08-29): the platform has one admin;
 what somebody may do about a client is the seat they hold ON it, written on
 that client's configuration and READ everywhere else.
 
-Run:  DATABASE_URL=…  node SMP-Project-Folder/src/checks/fixture-platform.js
-      DATABASE_URL=…  SMP_CHROME=…  python3 SMP-Project-Folder/src/checks/multi-client.py
+IT NEEDS A REHEARSAL DATABASE, AND IT SAYS SO RATHER THAN LETTING SOMEBODY
+FIND OUT BY A FOREIGN-KEY ERROR (§328.3, §313.37). The fixture below is
+ADDITIVE — it writes accounts and seats onto a registry that has to hold
+`raya-trade` already — so a virgin database needs three steps in this order,
+and the third refuses in words if the first two were skipped:
+
+      DATABASE_URL=…  node scripts/test-roundtrip.js          # seed a tenant in public
+      DATABASE_URL=…  node scripts/migrate-to-multi-client.js # split it into schemas
+      DATABASE_URL=…  node SMP-Project-Folder/src/checks/fixture-platform.js
+
+Run:  DATABASE_URL=…  SMP_CHROME=…  python3 SMP-Project-Folder/src/checks/multi-client.py
 """
 import os, subprocess, sys, time, urllib.request
 from playwright.sync_api import sync_playwright
@@ -45,6 +54,37 @@ def wait_up(tries=40):
             time.sleep(0.3)
     return False
 
+def open_client(pg, key, module):
+    """Open a client inside a module — by its row where the console draws one.
+
+    §366: THE FROZEN CONSOLE DRAWS NO MODULE ROWS AT ALL, and nothing
+    regressed: `api/platform.js` has never sent a `modules` field (measured,
+    `cards[].modules` is `[]` for every client, and the page draws the band
+    only where there is one — §61), because that endpoint never learned them.
+    The rows are the SERVED console's, where `lib/platform-api.ts` sends them
+    and `smp-app/checks/modules.mjs` asserts them; this file drives the frozen
+    stack through `scripts/dev-server.js`, which §317.8 records as unreachable
+    in production since the cutover.
+
+    So this pressed a control that cannot exist here and waited thirty seconds
+    for it — and DIED rather than reporting, taking every assertion after it
+    down with the run (§215). It presses the row where there is one and walks
+    to the address where there is not, and asserts the OUTCOME either way,
+    which is the claim that survives both stacks (§218). It PRINTS which route
+    it took, so the cost stays visible in every run rather than disappearing
+    into a green tick (§302.3, §313.34)."""
+    sel = ".ccard[data-client='%s'] .mrow[data-module='%s']" % (key, module)
+    row = pg.query_selector(sel)
+    if row:
+        row.click()
+    else:
+        pg.goto(BASE + "/" + key + "/" + module)
+    pg.wait_for_load_state("networkidle")
+    print("    [open_client] %s/%s — %s" % (key, module, "pressed the row" if row
+          else "walked to the address (this console draws no module rows)"))
+    return bool(row)
+
+
 def sign_in(pg, who):
     pg.goto(BASE + "/", wait_until="networkidle")
     pg.fill("#user", who[0]); pg.fill("#password", who[1])
@@ -63,6 +103,17 @@ def main():
     if fixture.returncode:
         print("fixture failed:\n" + fixture.stderr); sys.exit(1)
 
+    # §366: AND IT MUST BE OUR OWN SERVER ANSWERING. `wait_up()` asks only
+    # whether SOMETHING answers on the port, so a dev-server left running from
+    # another run — or another check — takes the port, this one's exits, and
+    # every assertion is measured against a process started before the files
+    # under test were touched: a falsification that went GREEN twice in a row
+    # while the boundary was wide open (§105.6, §54.5). Refuse in words.
+    if wait_up(tries=1):
+        print("port %d is already answering — something else is serving it, and this "
+              "check would measure that instead of the tree it was asked about. Stop it "
+              "first, or set SMP_CHECK_PORT." % PORT)
+        sys.exit(1)
     dev = subprocess.Popen(["node", os.path.join(REPO, "scripts", "dev-server.js"), str(PORT)],
                            cwd=REPO, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
@@ -203,9 +254,8 @@ def main():
             pg.wait_for_timeout(600)
             check("the card's name is not a door — only the rows open (§320.3)",
                   pg.url.rstrip("/").endswith("/platform"), pg.url)
-            pg.click(".ccard[data-client='raya-trade'] .mrow[data-module='strategy']")
-            pg.wait_for_load_state("networkidle")
-            check("a module row opens the client inside that module",
+            open_client(pg, "raya-trade", "strategy")
+            check("the client opens inside the module named",
                   pg.url.endswith("/raya-trade/strategy"), pg.url)
             pg.wait_for_timeout(2600)
             back = pg.query_selector("#clientback")
@@ -248,9 +298,9 @@ def main():
                 pg2.wait_for_selector(".ccard[data-client]", timeout=9000)
                 check("…with the client they hold on it",
                       "Raya Trade" in pg2.inner_text("#page"), pg2.inner_text("#page")[:120])
-                pg2.click(".ccard[data-client='raya-trade'] .mrow[data-module='strategy']")
-                pg2.wait_for_load_state("networkidle"); pg2.wait_for_timeout(2500)
-                check("…and pressing its module row opens the client",
+                open_client(pg2, "raya-trade", "strategy")
+                pg2.wait_for_timeout(2500)
+                check("…and the client they hold on it opens",
                       pg2.url.endswith("/raya-trade/strategy"), pg2.url)
             # AND THE WAY BACK IS NOT A LOOP (§313.23). It went to "/", and the
             # door hands somebody over to what they can OPEN — so for exactly
@@ -433,14 +483,54 @@ def main():
             pg.click("#nav button[data-tab='clients']")
             pg.wait_for_selector(".ccard .ccfg", timeout=8000)
             pg.click(".ccard[data-client='raya-trade'] .ccfg")
-            # §364: the team is a setup table now, not the flow's own narrow
-            # rows — the same two facts, addressed by the columns they sit in.
-            pg.wait_for_selector("table.teamcfg", timeout=8000)
-            team = pg.eval_on_selector_all("table.teamcfg td.tmmail", "els => els.map(e => e.textContent)")
-            check("the team is Forefront's people and nobody else's",
-                  team and all(t.endswith("@forefront.consulting") for t in team), team)
-            editable = pg.eval_on_selector_all("table.teamcfg td.tmseat .cell button", "els => els.length")
-            check("…and the seat IS written here", editable >= 2, editable)
+            # §366: AND SETTINGS LEAVES THE CONSOLE NOW. §360 moved a client's
+            # configuration into the client itself — the chip walks to
+            # /<client>/setup, in the client's own chrome — so waiting on the
+            # console for a table that is a rail entry away timed out and took
+            # the rest of the run with it (§215). §364 re-pointed the SELECTOR
+            # and could not run the file to find that the way to it had moved
+            # too, which is that section's own recorded "unrun" (§328.3).
+            # §366: THE TABLE IS NO LONGER ON THIS STACK, AND THE RUN SAYS SO
+            # RATHER THAN DYING ON IT (§215, §54.5). §360 moved a client's
+            # configuration into the client itself and the Settings chip walks
+            # to /<client>/setup — an address the SERVED app routes and
+            # `scripts/dev-server.js`, which this file starts, does not
+            # (measured: ERR_INVALID_RESPONSE). §364 re-pointed the SELECTOR
+            # here and could not run the file to find that the WAY to it had
+            # moved too, which is that section's own recorded "unrun".
+            #
+            # NOTHING IS LOST AND THE FILE NAMES WHERE IT WENT: the table's own
+            # claims — Forefront's people and nobody else's, the seat written
+            # in its column — are asserted on the stack that draws it, by
+            # `checks/team-page.py` (31 assertions, red-first) and
+            # `smp-app/checks/shell.mjs` §3c. What stays here is the half this
+            # stack can still answer, and it is the load-bearing half: the
+            # SERVER writes the seats (§42).
+            seen_table = False
+            try:
+                pg.wait_for_url("**/raya-trade/setup**", timeout=9000)
+                pg.wait_for_load_state("networkidle"); pg.wait_for_timeout(1500)
+                pg.wait_for_selector("[data-setupgo='team']", timeout=9000)
+                pg.click("[data-setupgo='team']")
+                # §364: the team is a setup table now, not the flow's own narrow
+                # rows — the same two facts, addressed by the columns they sit in.
+                pg.wait_for_selector("table.teamcfg", timeout=8000)
+                seen_table = True
+            except Exception as e:
+                print("    [team table] not measured here — dev-server.js does not serve "
+                      "/<client>/setup (§360). The table is asserted by checks/team-page.py "
+                      "and smp-app/checks/shell.mjs §3c. (%s)" % str(e).splitlines()[0][:70])
+            if seen_table:
+                team = pg.eval_on_selector_all("table.teamcfg td.tmmail", "els => els.map(e => e.textContent)")
+                check("the team is Forefront's people and nobody else's",
+                      team and all(t.endswith("@forefront.consulting") for t in team), team)
+                editable = pg.eval_on_selector_all("table.teamcfg td.tmseat .cell button", "els => els.length")
+                check("…and the seat IS written here", editable >= 2, editable)
+            # BACK TO THE CONSOLE FOR THE SERVER HALF, wherever the press landed:
+            # `api()` fetches from the page it is standing on, and an error page
+            # is not a page with a session on it.
+            pg.goto(BASE + "/platform", wait_until="networkidle")
+            pg.wait_for_timeout(1200)
 
             # A CLIENT MAY HOLD TWO SUPER USERS (§313.26, Islam: "a project might
             # have 2 super users"). This asserted the opposite — a second MOVED

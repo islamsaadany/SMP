@@ -61,7 +61,18 @@ with sync_playwright() as p:
     ck("the plan's tactics table names the outcome and its target",
        h and "Outcome" in h and "Target" in h and "Description" not in h, h)
     ck("no page error", not errs, errs[:2])
-    # THE SHIPPED PLAN HAS NO OUTCOMES, so the quiet state is the one that ships.
+    # §366: THE STATE IS MADE, BECAUSE THE DEMO NO LONGER HOLDS IT. §353
+    # filled every empty area at Islam's word, so the one thing this section is
+    # about — an outcome nobody has written — is a state the worked example
+    # cannot show: measured, Mobile's 22 tactics each carry an outcome, a
+    # target AND a figure, so `reds` came back 0 and this went red on a build
+    # behaving exactly as decided (§214.3, and §353.5's own list of seven
+    # checks rewritten for it, which recorded this one and left it). It MAKES
+    # one (§255) rather than borrowing the demo's emptiness. The page is a
+    # scratch copy opened over file:// and closed at the end of the section,
+    # so nothing is left behind (§94.2).
+    pg.evaluate("()=>{ UNITS.mobile.items[0].tactics[0].outcome=''; paint(); }")
+    pg.wait_for_timeout(350)
     quiet = pg.evaluate("""()=>{
       var t=null; document.querySelectorAll('.tblscroll table').forEach(function(x){
         var hh=x.querySelector('thead tr'); if(!hh||t) return;
@@ -71,13 +82,20 @@ with sync_playwright() as p:
       var rows=Array.from(t.querySelectorAll('tbody tr')).filter(r=>r.children.length>i);
       return {rows:rows.length,
               reds:rows.filter(r=>r.children[i].querySelector('.missing')).length,
-              dashes:rows.filter(r=>r.children[i].querySelector('.nobody')).length};}""")
+              dashes:rows.filter(r=>r.children[i].querySelector('.nobody')).length,
+              blanks:(UNITS.mobile.items[0].tactics||[]).filter(function(t){
+                return !String(t.outcome||'').trim(); }).length};}""")
     # §249 REVERSES §248's OWN QUIET STATE, at Islam's direction: *"the tactics
     # outcome and target ... should count as missing"*. This asserted the
     # em-dash and it is REWRITTEN rather than deleted (§218), so the reversal
     # is deliberate and a later build cannot drift back through it unnoticed.
+    # AND IT IS AN AGREEMENT RATHER THAN A COUNT (§94.8): the word is drawn
+    # exactly where the plan holds nothing, so a build painting Missing on
+    # every row fails as loudly as one painting it on none — where `reds > 0`
+    # alone is satisfied by both (§113.8).
     ck("an empty outcome says MISSING, not a dash",
-       quiet and quiet["reds"] > 0 and quiet["dashes"] == 0, quiet)
+       quiet and quiet["blanks"] > 0 and quiet["reds"] == quiet["blanks"]
+       and quiet["dashes"] == 0, quiet)
     # AND THE COUNT AGREES WITH THE WORD. This used to be `or True` — a
     # no-op standing in for a claim about a state that no longer exists — and
     # it is the half §177 is about: the page saying Missing while the count
@@ -113,6 +131,20 @@ with sync_playwright() as p:
     pg.add_init_script("try{localStorage.setItem('smp.welcome.seen','1');localStorage.setItem('smp.tour.done','1')}catch(e){}")
     pg.goto("file://"+SRC); pg.wait_for_timeout(1200)
     open_plan(pg, edit=True)
+    # §366: AND THE WRITING HALF NEEDS AN UNWRITTEN ROW. Every assertion below
+    # is about the FIRST value reaching the plan — a unit chosen before there
+    # is a number, a target that is not yet a target, a row not yet scored
+    # because nobody has reported it — and §353 filled all three on every
+    # tactic in the demo. So the two rows it writes are emptied first (§255),
+    # which also puts back the claim `the unit picker is there before any
+    # target is` was making: with §353's target in place that assertion is
+    # true of every build (§113.8).
+    pg.evaluate("""()=>{ [0,1].forEach(function(i){
+      var t=UNITS.mobile.items[0].tactics[i]; if(!t) return;
+      delete t.outcome; delete t.outTarget; delete t.outActual;
+      delete t.outDir; delete t.outCompile; });
+      paint(); }""")
+    pg.wait_for_timeout(400)
     box = pg.evaluate("""()=>{ try{
       var g=document.querySelector('td.tgtcell .tgrid'); if(!g) return null;
       /* the native half of a searchable select stays in the DOM, out of flow
@@ -183,14 +215,24 @@ with sync_playwright() as p:
       function fire(el,v){ el.value=v; el.dispatchEvent(new Event('change',{bubbles:true})); }
       var uni=Array.from(g.querySelectorAll('select')).filter(s=>Array.from(s.options).some(o=>o.text==='M EGP'))[0];
       var out={};
-      fire(uni,'#');                       out.unitFirst = t0().outTarget; out.scoredOnUnitAlone = tacticOutcomeScore(t0());
+      /* §366: ASK WHETHER IT IS A TARGET, NEVER WHETHER IT SCORED. The score
+         also asks whether anybody has REPORTED, so with the row's figure
+         cleared this read null on a build that had started scoring a bare
+         unit — true, and true for the other reason (§113.8). `outcomeOf` is
+         the question by itself, and it is the one §249 settled. */
+      fire(uni,'#');                       out.unitFirst = t0().outTarget; out.targetOnUnitAlone = outcomeOf(t0());
       fire(g.querySelector('input'),'6');  out.joined    = t0().outTarget;
       fire(g.querySelector('input'),'');   out.unitKept  = t0().outTarget;
       return out; }catch(e){ return {err:String(e)}; } }""")
     ck("a unit can be chosen before the number", order.get("unitFirst")=="#", order)
-    ck("and a unit alone is not a target", order.get("scoredOnUnitAlone") is None, order)
+    ck("and a unit alone is not a target", order.get("targetOnUnitAlone") is None, order)
     ck("the number joins it", order.get("joined")=="6#", order)
     ck("and clearing the number keeps the unit", order.get("unitKept")=="#", order)
+    # §366: THIS ONE IS HELD IN TWO PLACES, and falsifying it says so —
+    # `tacticOutcomeScore` refuses an unreported row before it asks, and
+    # `measureScore` refuses it again if asked. Breaking either alone leaves
+    # this green; the pair together reddens it exactly (§298.2's rule: say
+    # when a line is belt and braces rather than calling it load-bearing).
     ck("with no figure yet it is NOT scored", rest.get("score") is None, rest)
     ck("and it still reads the way it did", rest.get("reads")==rest.get("reads"), rest)
     ck("no page error while writing", not errs, errs[:2])

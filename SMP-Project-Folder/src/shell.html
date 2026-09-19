@@ -843,11 +843,9 @@
        in that rail is still null, so somebody the rail holds no page for
        lands where they work rather than in an empty frame (§61). */
     if (w.d === "setup" && !w.s) {
-      var own = reachable(setupDefs(), w.d, w.d);
-      var first = own.filter(function(d){ return d.k === "start" && !SMPRules.setupDone(GROUP); })[0]
-               || own.filter(function(d){ return d.primary; })[0] || own[0];
+      var first = setupLandingKey(setupScope());
       if (!first) return null;
-      w.s = first.k;
+      w.s = first;
       return w;
     }
     if (!w.s || !defs.some(function(d){ return d.k === w.s; })) return null;
@@ -1390,6 +1388,22 @@
     return all.filter(function(d){ return (d.mod || "client") === scope; });
   }
   function setupDefs(){ return setupDefsFor(setupScope()); }
+  /* WHICH PAGE A RAIL OPENS ON, ASKED ONCE (§367). This was written
+     inside `restoreWhere` for a bare `/<client>/setup` address (§360.7) and is
+     now asked by the crossing rows as well — the two must not answer
+     differently, or pressing *Strategy settings ›* lands somewhere the same
+     address would not (§53.5). Takes the scope rather than reading it, so the
+     caller can ask about a rail it is not standing in without writing the
+     attribute first and putting it back. Null where this viewer has no page in
+     that rail at all, which is the one case the crossing hands back to the
+     browser (§61: the link still goes, and the server lands them where they
+     work). */
+  function setupLandingKey(scope){
+    var own = reachable(setupDefsFor(scope), "setup", "setup");
+    var first = own.filter(function(d){ return d.k === "start" && !SMPRules.setupDone(GROUP); })[0]
+             || own.filter(function(d){ return d.primary; })[0] || own[0];
+    return first ? first.k : null;
+  }
   /* THE PAGE DECIDES THE RAIL WHEN THE TWO DISAGREE. An address is a
      request — the landing's doors write `/<client>/setup/<page>` for every
      page and let the shell resolve it (spec 056 plan, research R2) — so a
@@ -1742,16 +1756,35 @@
        opposite ways: a place to go ON to, so it sits after the list rather
        than above it (§360.9), never the first thing read on a rail somebody
        came here to use. */
+    /* AND THE CROSSING IS A PRESS, NOT A PAGE LOAD (§367). Islam,
+       of the walk between the console, the client's settings and a module's:
+       *"takes too long … is there a way to make these movements smoother in
+       general"* — measured, and this hop was the one that was pure waste. The
+       two addresses are the SAME DOCUMENT: `app/(platform)/[slug]/[...rest]`
+       serves `shellDocument()` for both with the same arguments but the last,
+       so a client's Setup and a module's differ by `data-setup-scope` and
+       NOTHING else. Following the link threw away 3.8MB of shell and 660KB of
+       stylesheet, re-read both, and asked `/api/state` for the tenant's whole
+       graph again — to change one word the browser already holds a function
+       for (`setScope`).
+
+       THE `href` STAYS AND THE PLAIN CLICK IS TAKEN. A middle click, a
+       modifier click and *Copy link address* are the browser's, and the
+       address they carry is the one the router writes for that rail — so this
+       is faster and not narrower (§61). `data-setupcross` is the scope to
+       cross TO, which is the one fact the wiring needs; who may open which
+       module was already decided when the rows were built (modulesHere(), the
+       server's own list), so the press asks nothing a second time (§42). */
     var across = slug && scope === "client"
       ? modulesHere().map(function(m){
           if (!m || !m.key) return "";
           return '<div class="railback-row railfoot"><a class="railback railfwd" href="/' +
-            esc(slug) + '/' + esc(m.key) + '/setup">' +
+            esc(slug) + '/' + esc(m.key) + '/setup" data-setupcross="' + esc(m.key) + '">' +
             esc(m.label || m.key) + ' settings \u203a</a></div>';
         }).join("")
       : slug && scope && scope !== "client"
-      ? '<div class="railback-row railfoot"><a class="railback railfwd" href="/' + esc(slug) + '/setup">' +
-        'Client settings \u203a</a></div>'
+      ? '<div class="railback-row railfoot"><a class="railback railfwd" href="/' + esc(slug) + '/setup" ' +
+        'data-setupcross="client">Client settings \u203a</a></div>'
       : "";
     return '<div class="rail setuprail"><div class="rhead">' + esc(headWord) +
       '<button type="button" class="railtog" data-railtog="0" ' +
@@ -3912,6 +3945,44 @@
            §2.1). One rule, one place (Constitution IX, one level down). */
         if (currentSub !== b.dataset.setupgo) leaveModes();
         currentSub = b.dataset.setupgo;
+        paint(); window.scrollTo(0,0);
+      });
+    });
+
+    /* CROSSING BETWEEN THE CLIENT'S RAIL AND A MODULE'S IS A PRESS (§367) — the row
+       above, honoured here rather than by the browser.
+
+       WIRED BESIDE `[data-setupgo]` AND NOT IN shell/route.js, though the rows
+       exist only on the served stack: every rail control in the product is
+       wired in this loop, and the two things this needs — which pages a rail
+       holds for this viewer, and how to leave a mode — are this file's
+       (§53.5). What route.js keeps is the ADDRESS, which follows on its own:
+       `addressOf` already reads `data-setup-scope`, so the push after the
+       paint writes the module's form or the spine's with no edit there.
+
+       THE LINK IS LEFT TO THE BROWSER WHEREVER WE CANNOT DO BETTER. A
+       modifier or a middle click is somebody asking for a tab; and a rail this
+       viewer has NO page in answers null, where the server lands them where
+       they work rather than in an empty frame (§61, restoreWhere's own note).
+       Both fall through to the `href`, so this can only ever be faster.
+
+       BOTH THE SCOPE AND THE PAGE, OR NEITHER. `resolveSetupScope()` moves the
+       scope to the page's own module when the two disagree (§359.2), so
+       writing the scope and leaving `currentSub` on a page of the rail we just
+       left would be undone inside the same paint — and the press would look
+       like a control that does nothing (§96). */
+    document.querySelectorAll("[data-setupcross]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var to = b.dataset.setupcross;
+        if (!to || to === setupScope()) return;
+        var k = setupLandingKey(to);
+        if (!k) return;                       /* no page of ours there: the link stands */
+        e.preventDefault();
+        RAILQ = "";
+        if (currentSub !== k) leaveModes();
+        setScope(to);
+        current = "setup"; currentSub = k;
         paint(); window.scrollTo(0,0);
       });
     });

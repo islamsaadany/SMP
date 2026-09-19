@@ -286,7 +286,16 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
       row: seen(nav),
       dests: Array.from(document.querySelectorAll("#units [data-u], #units [data-fold], #units [data-setup], #units .homebtn")).filter(seen).length,
       viewer: seen(document.querySelector(".viewer")),
-      switcher: !!document.querySelector(".top-in .topmark"),
+      /* MEASURED AS PAINT, WHICH IS WHAT THE BLOCK ABOVE ALREADY SAYS IT DOES
+         (§94.8) — REWRITTEN, NEVER LOOSENED (§218). This asked whether the
+         ELEMENT was there, which said "not offered" only while the switcher
+         was structurally impossible on the client's scope (shell/route.js's
+         early return). §367 made the crossing a press, so the switcher follows
+         the scope by the same CSS the rest of the chrome does and IS in the
+         document on both rails — `seen()` is false for `display:none` exactly
+         as it is for absent, so the claim that survives is the one that was
+         always meant: it is not on the screen and not reachable. */
+      switcher: seen(document.querySelector(".top-in .topmark")),
       h1: (document.querySelector(".brand h1") || {}).textContent || "",
       sub: (() => { const o = document.getElementById("orgname"); return seen(o) ? o.textContent : ""; })(),
       mark: seen(document.getElementById("clientlogo")),
@@ -426,6 +435,13 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      waits thirty seconds and takes every assertion after it down, which on
      the one-way build reported the fault as a DEATH rather than as the two
      it is. */
+  /* AND THE PRESS IS NOT A PAGE LOAD (\u00a7367) \u2014 the one assertion
+     this whole crossing is for, and the one every other assertion here passes
+     without: a build that followed the link lands on the same rail wearing the
+     same bar at the same address, three seconds later. A marker planted on
+     `window` before the press survives a repaint and cannot survive a
+     document (\u00a7356's own technique). */
+  await page.evaluate(() => { window.__stay = 1; });
   if (await page.locator(".setuprail .railfwd").count()) {
     await page.click(".setuprail .railfwd");
     await page.waitForURL(/\/raya-trade\/strategy\/setup/, { timeout: 8000 }).catch(() => {});
@@ -436,11 +452,56 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,
         "\u2026and pressing it lands on the module's Setup, wearing the module's bar", path() + " / " + JSON.stringify(b));
   check(reached.includes("access"), "\u2026which is the rail Roles & access is on \u2014 the page he could not reach (\u00a761)", reached.join(","));
+  check(await page.evaluate(() => window.__stay === 1), "\u2026and it crossed WITHOUT reloading the platform (\u00a7367)", "the page was rebuilt");
+  /* THE SWITCHER CAME WITH IT. It is built once at load and was returned out
+     of on the client's scope, so before \u00a7367 crossing in place left it never
+     built \u2014 a control silently missing after a press that draws everything
+     else correctly (\u00a796's family). */
+  check(b.switcher === true, "\u2026and the module switcher is back, on a rail where a module IS what you are in", JSON.stringify(b));
   /* THE OTHER END. A build that moved the row rather than adding one would
      satisfy every assertion above. */
   const back = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail .railback")).map((a) => a.textContent.trim() + " -> " + (a.getAttribute("href") || "")));
   check(back.length === 1 && /Client settings/.test(back[0]) && /\/raya-trade\/setup$/.test(back[0]),
         "\u2026and a module's rail still carries its own one row the other way", JSON.stringify(back));
+
+  /* AND THE OTHER DIRECTION CROSSES IN PLACE TOO (\u00a7367). BOTH
+     ENDS (\u00a794.2): a build that took only the outward press would leave the
+     way back a full reload, which is the half Islam presses most \u2014 and it is
+     the direction where the chrome has to be STOOD DOWN rather than brought
+     back, so the switcher and the navigation are asserted gone by paint. */
+  await page.evaluate(() => { window.__stay = 2; });
+  await page.click(".setuprail .railback.railfwd");
+  await page.waitForURL(/\/raya-trade\/setup\//, { timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(400);
+  b = await bar();
+  const mine = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail [data-setupgo]")).map((e) => e.dataset.setupgo));
+  check(await page.evaluate(() => window.__stay === 2), "the way back crosses without reloading either (\u00a7367)", "the page was rebuilt");
+  /* THE SPINE FORM, WITH NO MODULE WORD IN IT \u2014 which is what says the
+     address followed the scope rather than the press guessing one (\u00a7362.1's
+     `addressOf` reads the same attribute, so this needed no edit there). */
+  check(/^\/raya-trade\/setup\/[\w-]+$/.test(path()) && b.scope === "client",
+        "\u2026and the address it writes is the client's own spine form", path() + " / " + b.scope);
+  check(b.row === false && b.viewer === false && b.switcher === false && b.h1 === "Raya Trade",
+        "\u2026wearing the client's bar, with the module's navigation and switcher stood down", JSON.stringify(b));
+  /* THE RAIL IS THE CLIENT'S, ASSERTED AS AN AGREEMENT rather than against a
+     page name: every page drawn belongs to no module. A build that crossed the
+     bar and left the rail would satisfy everything above. */
+  const mods = await page.evaluate((ks) => ks.map((k) => {
+    const d = setupDefsAll().filter((x) => x.k === k)[0]; return d ? (d.mod || "client") : "?";
+  }), mine);
+  check(mine.length > 0 && mods.every((m) => m === "client"), "\u2026and every page on it is the client's own", JSON.stringify(mine) + " / " + JSON.stringify(mods));
+
+  /* AND BACK WALKS THE CROSSING. The place pushed carries no scope \u2014 it never
+     has \u2014 so this is `resolveSetupScope()` answering from the PAGE, which is
+     the rule that already decides a rail when an address and a page disagree
+     (\u00a7359.2, research R2). Asserted because a crossing that pushed an
+     address Back could not honour would be a worse dead end than the reload it
+     replaced (\u00a761). */
+  await page.goBack();
+  await page.waitForTimeout(500);
+  b = await bar();
+  check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,
+        "\u2026and Back returns to the module's Setup, wearing its bar again", path() + " / " + JSON.stringify(b));
 
   await open("/raya-trade/setup/people");
   /* AND *Save & close* GOES WHERE IT SAYS. The handler is \u00a7313.23's and is

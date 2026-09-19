@@ -9992,8 +9992,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-19 &mdash; **&sect;369: the open box, and the column
-that never said it was frozen (spec 059).** Islam, testing &sect;368, with two
+*Last Updated: 2026-09-19 &mdash; **&sect;373: the open box, and the column
+that never said it was frozen (spec 059).** Islam, testing &sect;372, with two
 screenshots: the open Unit box lying across the Email column, and &mdash; of the
 &#8942; &mdash; *"you added the 3 dots to the roles whihc is wrong the 3 dots is
 out of this column."* **NEITHER IS VISIBLE ON THE WORKED EXAMPLE** (&sect;255):
@@ -10003,11 +10003,11 @@ all &mdash; so his own state was made (a function named *Strategy Management
 Office*) and both answers were **drawn out of the RUNNING platform and signed
 off before a source moved** (rule 1c, &sect;41.9). Of the two offered for the
 &#8942;, he picked **A**.
-**&sect;369.1 &mdash; `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
+**&sect;373.1 &mdash; `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
 BUTTON**: measured, **261.1px of control inside a 176px cell**, hanging
 **93.6px** into EMAIL, and a click 20px inside the email cell returns
 `SPAN.sslabel` &mdash; **the box, not the email**, which is &sect;110.1's fault
-exactly, the one that section exists for. &sect;368.5 wrote `max-width:none` on
+exactly, the one that section exists for. &sect;372.5 wrote `max-width:none` on
 the reasoning that a block fills its container, and that is **true of the
 `<input>`** (145.1px in a 162.1px cell, the content box to the pixel) **and
 false of `searchsel.js`'s `<button>`**, which is shrink-to-fit &mdash; and
@@ -10023,7 +10023,7 @@ at the content edge either way, **159 of 176 declared, 156.2 of 173.2 auto**
 the row stays 38.6px beside its neighbours at 1500/1280/1100/1000, and the email
 gets its clicks back. **The cost is stated rather than discovered**: while it is
 open, a name too long to fit reads *Strategy Manageme&hellip;*.
-**&sect;369.2 &mdash; AND THE SEAM HAS NEVER PAINTED.** The &#8942; is **not in
+**&sect;373.2 &mdash; AND THE SEAM HAS NEVER PAINTED.** The &#8942; is **not in
 the Roles column**, and establishing that first was most of the answer: it is
 its own last column, frozen since &sect;69.19 so a row can always be acted on
 however far the table has scrolled, and what he is seeing is that frozen column
@@ -10047,7 +10047,7 @@ on both grounds because a frozen column's seam is DEPTH, measured in each.
 they are &mdash; and the name column could not take this answer unchanged in any
 case, being `overflow:hidden` (&sect;71.2), so a `::before` of its own is
 clipped away, measured.
-**&sect;369.3 &mdash; AND THE CHECK THAT SHOULD HAVE CAUGHT IT WAS RIGHT AND
+**&sect;373.3 &mdash; AND THE CHECK THAT SHOULD HAVE CAUGHT IT WAS RIGHT AND
 STARVED**: `role-picker.py` **already asserted that the open control fits its
 cell**, on the button as well as the box, and went green through the whole round
 that shipped the fault &mdash; the right property with **no data to exercise
@@ -10072,7 +10072,7 @@ seam declared once and the twin left as it was; and **C** &mdash; making the
 table fit a narrower window so it never scrolls &mdash; is untouched, since it
 means giving up or narrowing a column.*
 
-*Earlier: 2026-09-18 &mdash; **&sect;368: the cell is the control (spec
+*Earlier: 2026-09-18 &mdash; **&sect;372: the cell is the control (spec
 059).** Islam, of the client's People register: *"for the client registry I'd
 like to do some in line adjustments like the phone, employee ID, email, the
 unit/function, job title, etc. and about the roles why do I need to add them as
@@ -10122,7 +10122,7 @@ IT CORRECT** &mdash; *"before building I urget you to check main"*: main had
 moved **43 commits** carrying `isMintedRow` against `isForefrontRow` (spec 058
 &sect;3a.1), so built against the branch's copy this would have taken inline
 editing off **every ADOPTED row**, which is the client's own person. **AND THE ONE CONTROL WHOSE VALUE COULD NOT BE HEARD**
-(&sect;368.12): `searchsel.js` gives the visible button the hidden select's own
+(&sect;372.12): `searchsel.js` gives the visible button the hidden select's own
 name (&sect;48.2), and **an `aria-label` REPLACES an element's content as its
 accessible name** &mdash; which costs nothing while the label IS the value, and
 the Roles cell is the first control to hand its label over as HTML, so it
@@ -10140,21 +10140,21 @@ and falsifying it found &sect;215 in a file whose &sect;8 already degrades, the
 section DYING on a 30s `pg.click` rather than reporting (4 red and dead against
 7 red and complete). **Proved able to fail three ways from the SOURCES**
 (&sect;276), one per decision &mdash; **1 / 7 / 2 red**, the last printing
-`{'48': 1, '49': 32}`, &sect;368.2's row-height fault reproduced &mdash; with the
+`{'48': 1, '49': 32}`, &sect;372.2's row-height fault reproduced &mdash; with the
 tree restored and rebuilt **byte-identical to the build the breaks were made
 from** (&sect;343.9). **The server needed nothing and it is asserted**
 (&sect;172): no `api/`, `lib/` or `db/` file touched, read off the diff; 683/0
 and 140/0, nothing stored moves, nothing migrated. **RECORDED, NOT DONE**: a
 cell opens one at a time, so three fields on one row is three double-clicks or
 the dialog &mdash; which is what the dialog is for.
-**&sect;368.14&ndash;.17 &mdash; NO ARROW, NOTHING STANDING, AND A ROW THAT DOES
+**&sect;372.14&ndash;.17 &mdash; NO ARROW, NOTHING STANDING, AND A ROW THAT DOES
 NOT MOVE** (2026-09-18). Islam, testing it: *"on opening something the arrow
 appears, no need for the arrow. and for the roles as well &hellip; the table in
 general should look everything fixed and not editable until I made the double
 click."* **THE CARET GOES BECAUSE IT IS POINTLESS**, not because it is being
 hidden &mdash; the double-click opens the LIST, so by the time the box is drawn
 the thing an arrow announces has already happened &mdash; **and it is what made
-the row grow**: `.pcellopen .ssbtn` is `display:block` (&sect;368.5's answer to a
+the row grow**: `.pcellopen .ssbtn` is `display:block` (&sect;372.5's answer to a
 percentage quirk), so an inline caret after a block label fell to a line of its
 own and the open row stood at **59.6px against its neighbours' 38.6**, which is
 the picture he sent. **AND THE ROLES COLUMN WAS THE ONE COLUMN DRAWING A CONTROL
@@ -10162,7 +10162,7 @@ WITH NOBODY EDITING** &mdash; 33 boxes and 33 carets at rest &mdash; so it opens
 like every other cell, **keyed on `PROLEPICK` and never on `PCELL`**, because a
 ticking list fires `change` on every tick (&sect;130.1) and would have shut on
 the first role; `roleCell` gains an EXIT rather than a mode, with `roleStop` and
-`seatAsk` on both. **&sect;368.15 &mdash; AN OPEN CELL HAS ONE LOOK, WHICHEVER
+`seatAsk` on both. **&sect;372.15 &mdash; AN OPEN CELL HAS ONE LOOK, WHICHEVER
 KIND IT IS**: with the caret gone the drop cell still stepped **42.5 against a
 resting 39.1**, because `searchsel.js` draws a `<button>` and `.cfg input`
 &mdash; which gives every field in a Setup table its 12.5px and `4px 7px`
@@ -10170,14 +10170,14 @@ resting 39.1**, because `searchsel.js` draws a `<button>` and `.cfg input`
 and **what is ASSERTED is the AGREEMENT** (&sect;94.8, &sect;122.5); the roles
 button keeps its tighter padding, measured, because it holds CHIPS (4px puts that
 row at 45.1 where 1px puts it at 39.1) &mdash; two paddings, one height.
-**&sect;368.16 &mdash; AND A SAVE'S REPAINT WAS CLOSING THE CELL UNDER HIM**, a
-live-deployment defect in &sect;368 that no check could see: Chromium fires
-`blur` on a FOCUSED ELEMENT BEING REMOVED, which is what &sect;368 relies on for
+**&sect;372.16 &mdash; AND A SAVE'S REPAINT WAS CLOSING THE CELL UNDER HIM**, a
+live-deployment defect in &sect;372 that no check could see: Chromium fires
+`blur` on a FOCUSED ELEMENT BEING REMOVED, which is what &sect;372 relies on for
 Escape and what also happens on every repaint &mdash; the paint the double-click
 makes schedules a save (&sect;170's leading edge), its answer paints again, the
 box goes, blur fires, the cell shuts. **Invisible over `file://`, where nothing
 saves and nothing paints, which is why every check was green.** `isConnected`
-one tick later tells the two apart. **&sect;368.17 &mdash; AND THE CHECK COULD
+one tick later tells the two apart. **&sect;372.17 &mdash; AND THE CHECK COULD
 NOT SEE THE FAULT IT WAS WRITTEN FOR**: putting the caret back left the whole
 file GREEN (&sect;54.5), because it opened *Job title* &mdash; a text box with no
 button and therefore no caret &mdash; and measured every row's height AFTER

@@ -3076,7 +3076,7 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    /* ── AND THE ROLES LIST IS ASKED BACK (§368) ────────────────────
+    /* ── AND THE ROLES LIST IS ASKED BACK (§372) ────────────────────
        A tick grants or revokes, which repaints — the chips change, and the
        role comes off whoever held it, whose row is elsewhere in the table. So
        the popup is reopened rather than preserved: it is a rendering of the
@@ -3094,7 +3094,7 @@
                  document.querySelector('[data-proleset="' + PROLEPICK + '"]');
       if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;
     }
-    /* AND THE CURSOR GOES INTO THE CELL THAT WAS JUST OPENED (§368) — here
+    /* AND THE CURSOR GOES INTO THE CELL THAT WAS JUST OPENED (§372) — here
        rather than in wire(), for searchsel's own reason: three of these cells
        hold a select, and the button that stands in front of it does not exist
        until the line above has run. `focusNoScroll`, because the register is
@@ -3104,7 +3104,7 @@
       var pc = document.querySelector(".peoplecfg td.pcellopen .fld");
       var pb = pc && pc.tagName === "SELECT" ? pc.previousSibling : null;
       pb = pb && pb.classList && pb.classList.contains("ssbtn") ? pb : null;
-      /* ── AND A DROP CELL OPENS ITS LIST (§368.14) ──────────────────────
+      /* ── AND A DROP CELL OPENS ITS LIST (§372.14) ──────────────────────
          Islam: "on opening something the arrow appears, no need for the
          arrow." Measured, the arrow was announcing a press he had already
          made: the double-click drew a SHUT box that had to be pressed again,
@@ -3122,7 +3122,7 @@
         if (pc && pc.tagName === "INPUT" && pc.select) pc.select();
       }
     }
-    /* ── ESCAPE SHUTS THE CELL, NOT ONLY THE LIST (§368.14) ──────────────
+    /* ── ESCAPE SHUTS THE CELL, NOT ONLY THE LIST (§372.14) ──────────────
        searchsel's own Escape closes the popup and hands the focus back to the
        button, which left a box standing in a table meant to read as fixed. One
        listener on the one open button, and BOTH states, because a drop cell is
@@ -6041,7 +6041,7 @@
     fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; }, root);
 
     };
-    /* ══ ONE CELL, OPENED WHERE IT IS READ (§368, spec 059) ═══════════
+    /* ══ ONE CELL, OPENED WHERE IT IS READ (§372, spec 059) ═══════════
        Islam: "for the client registry I'd like to do some in line adjustments
        like the phone, employee ID, email, the unit/function, job title, etc."
        and, of the clash he named in the same breath, "for the editing in
@@ -6067,7 +6067,7 @@
         var at = String(td.dataset.pcell).split("|");
         var fld = at.slice(1).join("|");
         try { window.getSelection().removeAllRanges(); } catch (err) {}
-        /* ── ROLES OPENS THE STATE IT ALREADY HAD (§368.14) ────────────
+        /* ── ROLES OPENS THE STATE IT ALREADY HAD (§372.14) ────────────
            The ticking list's open/shut is `PROLEPICK`, which survives the
            repaint every grant makes and closes itself for a seat ask and a
            refusal (§130.1, §186, §110). A `PCELL` entry for it would be a
@@ -6091,9 +6091,9 @@
          interaction with it is §30.1's fault. */
       fld.addEventListener("change", function(){ PCELL = null; });
       fld.addEventListener("blur", function(){
-        /* ── A REPAINT REMOVED IT; NOBODY LEFT IT (§368.14) ───────────────
+        /* ── A REPAINT REMOVED IT; NOBODY LEFT IT (§372.14) ───────────────
            Chromium fires `blur` — and `change` before it — on a focused
-           element being REMOVED, which §368 relies on for Escape and which
+           element being REMOVED, which §372 relies on for Escape and which
            also fires every time the register repaints. So on a live
            deployment the cell closed under the person who had just opened it:
            the paint the double-click makes schedules a save (§170's leading
@@ -6116,7 +6116,7 @@
       /* WHAT IT HELD WHEN IT OPENED, so Escape has something to put back. */
       var was = fld.value;
       fld.addEventListener("keydown", function(e){
-        /* ── ESCAPE PUTS THE VALUE BACK, NOT THE NODE (§368) ─────────
+        /* ── ESCAPE PUTS THE VALUE BACK, NOT THE NODE (§372) ─────────
            The first build removed the node and relied on that discarding the
            edit, and it does not: Chromium fires `blur` — and `change` before
            it — on a focused element being removed, so the field's own handler
@@ -6283,7 +6283,7 @@
        "Use it" would all be decoration (§96). */
     window.wirePersonDialogControls = function(root){
       var R = root || document;
-    /* ── THE ROLE PICKER IS THE CELL (§368) ─────────────────────────
+    /* ── THE ROLE PICKER IS THE CELL (§372) ─────────────────────────
        The "+ role" control that opened this, the select it opened and the ×
        that undid it are all gone with it: the Roles cell is a ticking list
        now, so giving a role is a tick and taking one off is the same tick
@@ -6345,7 +6345,7 @@
           var atCo = wheres.every(function(w){
             return String(w.v).indexOf("co:") === 0; });
           var fld = atCo ? "Company" : "Unit";
-          /* THE ROLE TRAVELS WITH THE REFUSAL (§368). It used to be read back
+          /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
              there is no open picker any more: the list commits a tick and
              closes. So what §110's "either half finishes it" needs is on the
@@ -6413,7 +6413,7 @@
         paint();
       });
     });
-    /* ── ONE TICK IS ONE ROLE, GIVEN OR TAKEN (§368) ─────────────────
+    /* ── ONE TICK IS ONE ROLE, GIVEN OR TAKEN (§372) ─────────────────
        The register's Roles cell IS this list (config-render.js), so a change
        here is exactly one option going on or off — searchsel fires per tick
        (§130.1) — and the difference against what the person holds says which

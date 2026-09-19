@@ -5206,7 +5206,7 @@ suite per feature.
 
 ## In flight
 
-**Spec 059 — the client's People register: a cell is the control (§368), on the
+**Spec 059 — the client's People register: a cell is the control (§372), on the
 branch, built 2026-09-17.** Islam: *"for the client registry I'd like to do some
 in line adjustments like the phone, employee ID, email, the unit/function, job
 title, etc. and about the roles why do I need to add them as chips why can't we
@@ -5228,7 +5228,7 @@ people-dialog, seat-grant, smo-team, forefront-team, duplicates and no-jump all
 green; authoriser 683/0, change list 140/0; proved able to fail three ways from
 the sources (1 / 7 / 2 red), restored and rebuilt byte-identical.
 
-**AND §368.14–.17 ANSWER WHAT HE FOUND ON TESTING IT** (2026-09-18): *"on
+**AND §372.14–.17 ANSWER WHAT HE FOUND ON TESTING IT** (2026-09-18): *"on
 opening something the arrow appears, no need for the arrow. and for the roles as
 well ... the table in general should look everything fixed and not editable until
 I made the double click."* The caret goes (it announces a list the double-click
@@ -5240,7 +5240,7 @@ is — `searchsel.js` draws a `<button>`, which `.cfg input`'s own 12.5px/`4px 7
 cannot reach, so the drop cell sat 3.4px proud of a resting row and now sits on it
 to the pixel. **Keyed on `PROLEPICK`, never `PCELL`**, because a ticking list
 fires `change` on every tick and would have shut on the first role. **And a real
-live-deployment defect in §368 came out of it**: the paint a double-click makes
+live-deployment defect in §372 came out of it**: the paint a double-click makes
 schedules a save, its answer paints again, the box is removed, Chromium fires
 `blur` on removal — so the cell shut under the person who had just opened it,
 invisible over `file://` where nothing saves, which is why every check was green.
@@ -5251,27 +5251,27 @@ and measures them while open. Proved able to fail four ways from the sources
 (8 / 4 / 16 / 4 red, the last printing his symptom verbatim). **Waiting on
 Islam: the merge.**
 
-**AND §369 ANSWERS THE TWO HE FOUND NEXT** (2026-09-19): the open Unit box lying
+**AND §373 ANSWERS THE TWO HE FOUND NEXT** (2026-09-19): the open Unit box lying
 across the Email column, and *"you added the 3 dots to the roles whihc is wrong
 the 3 dots is out of this column."* **Neither is visible on the worked example**
 (§255) — its longest unit label fits, and at 1500px the register does not scroll
 at all — so his own state was made and both answers were **drawn out of the
 running platform and signed off before a source moved** (rule 1c); of the two
-offered for the ⋮, he picked **A**. **§369.1**: measured, **261.1px of control in
+offered for the ⋮, he picked **A**. **§373.1**: measured, **261.1px of control in
 a 176px cell**, 93.6px into EMAIL, and a click inside the email cell returns the
 box — §110.1's fault again. One word: `width:auto` fills for an `<input>` and
 **shrink-fits for a `<button>`**, and `.ssbtn` is `white-space:nowrap`, so its
 text is its width; `max-width:none` → `max-width:100%`, measured **both with and
 without the column's declared width** because the file records eighty lines above
 that this cap does nothing here — true of §110's `<input>`, which was sizing its
-own column, and not of a button. **§369.2**: the ⋮ was never added to Roles; it is
+own column, and not of a button. **§373.2**: the ⋮ was never added to Roles; it is
 the frozen last column floating over what scrolls beneath — **and its seam has
 never painted**, because no `box-shadow` draws on a `<td>` under
 `border-collapse:collapse`. Proved by putting a **solid red 10px** shadow on the
 cell and photographing **no change at all**, while a border, a `::before` and a
 background each moved the pixels. A `::before` wash now, `--froze-wash` in all
 four palettes, a dark wash on both grounds because the seam is depth.
-**§369.3**: `role-picker.py` **already asserted that the open control fits its
+**§373.3**: `role-picker.py` **already asserted that the open control fits its
 cell** and went green through the whole round that shipped the fault — the right
 property with no data to exercise it (§255) — so the state is made and put back
 there now; and the seam is asserted as **PAINT**, two screenshots either side of

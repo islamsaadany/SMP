@@ -69,7 +69,7 @@ def open_person(pg, key):
 
 
 def add_role(pg, key):
-    """OPENS THE ROLES LIST (§368). There is no "+ role" control any more: the
+    """OPENS THE ROLES LIST (§372). There is no "+ role" control any more: the
     Roles cell IS the ticking list, so this presses the cell — the dialog's
     copy first, because a row's cell and the open person dialog draw the same
     picker for the same person."""
@@ -157,7 +157,7 @@ with sync_playwright() as pw:
     add_role(pg, target["key"])
     ck("the fixture's person holds no seat to begin with",
        target["role"] is None, target)
-    # WHAT THE LIST SHOWS BEFORE ANYTHING IS PICKED. §368 made the cell a
+    # WHAT THE LIST SHOWS BEFORE ANYTHING IS PICKED. §372 made the cell a
     # ticking list, so its ticks are the roles this person already holds —
     # `fnhead` here, legitimately. Cancel's claim is that the register is left
     # EXACTLY as it was, so it is compared against this rather than against a
@@ -218,7 +218,7 @@ with sync_playwright() as pw:
     pg.evaluate("()=>{const b=document.querySelector('#modal-b [data-seatno]'); if(b) b.click();}")
     pg.wait_for_timeout(500)
     # `ADDROLE_KIND` was the ONE pending value of a picker that had exactly one,
-    # so an empty string there meant "nothing is being offered" (§368 replaced
+    # so an empty string there meant "nothing is being offered" (§372 replaced
     # it with a ticking list). The list's ticks are what the person HOLDS, and
     # this fixture holds `fnhead` legitimately — so the claim is REWRITTEN to
     # what it was always about: the REFUSED seat is not left ticked, or picking

@@ -51884,7 +51884,7 @@ until somebody reloads.
 
 ---
 
-## §368 — THE CELL IS THE CONTROL (2026-09-17, spec 059)
+## §372 — THE CELL IS THE CONTROL (2026-09-17, spec 059)
 
 Islam, of the client's People register: *"for the client registry I'd like to do
 some in line adjustments like the phone, employee ID, email, the unit/function,
@@ -51901,7 +51901,7 @@ under the wrong headings). **That reason is not withdrawn and the assertion that
 carries it is not loosened** (§218): what changes is that a cell now opens
 exactly ONE control, and it fits the cell it is in.
 
-### §368.1 — THE FIRST DRAWING UNDID HIS OWN AUGUST RULE, AND THE MOCKUP SAID SO
+### §372.1 — THE FIRST DRAWING UNDID HIS OWN AUGUST RULE, AND THE MOCKUP SAID SO
 
 The obvious build of the second ask puts a ticking button BESIDE the chips.
 Drawn and measured rather than reasoned about (rule 1c): the Roles column goes
@@ -51922,7 +51922,7 @@ and on a row nobody may edit (§53.5). Measured: column **209 → 236px** (+27,
 which is the box's own two edges and the caret), table **1355 → 1382**, no other
 column moves, nothing past the edge (`scrollWidth 235` in a `clientWidth 235`).
 
-### §368.2 — AND IT GREW EVERY ROW, WHICH ONE CELL COULD NOT HAVE SHOWN
+### §372.2 — AND IT GREW EVERY ROW, WHICH ONE CELL COULD NOT HAVE SHOWN
 
 The first build of that fitted the column and took **every one of the 33 rows
 from 39px to 49** — §88's one-line standard broken on the whole table by a
@@ -51931,7 +51931,7 @@ mockup rather than one row of it: a single cell is the one sample that cannot
 show a row-height fault, because there is nothing beside it to be the same
 height as. One line of padding; `rowsWas` and `rowsNow` are both 39 × 33.
 
-### §368.3 — A DOUBLE-CLICK, BECAUSE A SINGLE CLICK ALREADY DOES SOMETHING
+### §372.3 — A DOUBLE-CLICK, BECAUSE A SINGLE CLICK ALREADY DOES SOMETHING
 
 Islam: *"for the editing in general it shuold be a double click would that fix
 the issue as 1 copes the item like the mobile or email."*
@@ -51944,7 +51944,7 @@ of one table (§87's twins, in a gesture), and a double-click means nothing
 anywhere yet. The text selection a double-click makes is cleared as the cell
 opens, or the first keystroke replaces a word nobody chose.
 
-### §368.4 — ESCAPE COMMITTED, AND ONLY MEASURING SAID SO
+### §372.4 — ESCAPE COMMITTED, AND ONLY MEASURING SAID SO
 
 The first build removed the open cell's node and relied on that discarding the
 edit. **It does not.** Chromium fires `blur` — and `change` before it — on a
@@ -51952,10 +51952,10 @@ FOCUSED element being removed, so the field's own bound handler wrote the typed
 value and Escape committed the very thing it had been pressed to abandon.
 §93.11's family: ask the browser rather than the specification in your head.
 The value is put back BEFORE the paint, so whatever fires is a write of what was
-already there — and the fix is asserted rather than assumed (§368.9), because an
+already there — and the fix is asserted rather than assumed (§372.9), because an
 unasserted fix comes back silently.
 
-### §368.5 — THE OPEN FIELD HUNG 8px PAST ITS CELL, AND THE CAUSE WAS DEAD CODE
+### §372.5 — THE OPEN FIELD HUNG 8px PAST ITS CELL, AND THE CAUSE WAS DEAD CODE
 
 Measured at 1600/1440/1280/1100. **`arrange.css` still carried
 `min-width:150px` on seven register field selectors** — `select.rolepick`,
@@ -51973,7 +51973,7 @@ Chromium resolves such a child's `width:100%` against the cell's PADDING box, so
 the field is its cell plus the padding. `display:block; width:auto` fills the
 CONTENT box with no percentage to resolve — the same answer without the quirk.
 
-### §368.6 — THE × GOES, BECAUSE UNTICKING IS ALREADY THE WAY OFF
+### §372.6 — THE × GOES, BECAUSE UNTICKING IS ALREADY THE WAY OFF
 
 Islam: **"ok for both."** Removing a role is unticking it in the list the cell
 opens, and two ways to take one off is two answers to one act (§53.5). The chip
@@ -51981,16 +51981,16 @@ becomes a READING of what somebody holds again, which is what it already is on
 the thirty rows nobody is editing; the full *role · where* is still on the hover,
 as it was.
 
-### §368.7 — WHAT THE LIST CANNOT SET IS STATED ABOVE IT, NEVER TICKED
+### §372.7 — WHAT THE LIST CANNOT SET IS STATED ABOVE IT, NEVER TICKED
 
 Two kinds of role are facts about this person that the ticks must not pretend to
 own: one held somewhere this register cannot reach, and one that comes from
 being NAMED on the plan (§147.7 — there is nothing here to revoke). They go in
 the list's own head (`data-sshead`), where the "…" used to be the only place
 they appeared; the ticks are the roles this cell can actually set. **This is
-what the check had to be rewritten around** (§368.9).
+what the check had to be rewritten around** (§372.9).
 
-### §368.8 — AND ISLAM'S OWN INSTRUCTION IS WHAT KEPT IT CORRECT
+### §372.8 — AND ISLAM'S OWN INSTRUCTION IS WHAT KEPT IT CORRECT
 
 Mid-build: **"before building I urget you to check main so you can adjust your
 building to the new main."**
@@ -52004,9 +52004,9 @@ inline editing away from **every adopted row** — the rows most likely to need 
 Merging first is the only reason that was visible, and it was his call rather
 than mine.
 
-### §368.9 — THE CHECKS ARE REWRITTEN, NEVER LOOSENED (§218)
+### §372.9 — THE CHECKS ARE REWRITTEN, NEVER LOOSENED (§218)
 
-Three files held a claim §368 legitimately reverses, and each is rewritten to
+Three files held a claim §372 legitimately reverses, and each is rewritten to
 what it was FOR rather than to what it said:
 
 * **`people-dialog.py` §2** asserted the table holds NO control. Every collision
@@ -52026,13 +52026,13 @@ what it was FOR rather than to what it said:
   before the pick**, snapshotted rather than re-derived from the product's own
   rules.
 
-**AND ONE THING THE OLD FILES NEVER ASSERTED IS ADDED**: §368.4's Escape.
+**AND ONE THING THE OLD FILES NEVER ASSERTED IS ADDED**: §372.4's Escape.
 `role-picker.py` §9 types into a cell and reads the PERSON back rather than the
 screen (§96) — Enter stores it, Escape leaves the stored value exactly as it
 was — at both ends, because *Escape discards* is satisfied perfectly by a build
 that never commits anything at all.
 
-### §368.10 — AND TWO OF THAT SECTION'S OWN FIRST FAILURES WERE THE CHECK
+### §372.10 — AND TWO OF THAT SECTION'S OWN FIRST FAILURES WERE THE CHECK
 
 It set the field with `f.value = t`, which leaves the box CLEAN as far as the
 browser is concerned, so the `change` that commits never fires — **a working
@@ -52043,7 +52043,7 @@ where nothing opens, `pg.click` waits thirty seconds and THROWS, so the section
 **died rather than reporting** on exactly the build it exists to catch — 4 red
 and dead, against 7 red and complete once every probe degrades.
 
-### §368.11 — PROVED ABLE TO FAIL, FROM THE SOURCES (§276)
+### §372.11 — PROVED ABLE TO FAIL, FROM THE SOURCES (§276)
 
 Three breaks, one per decision, each built through `build.py` and each reddening
 its own assertions and nothing else:
@@ -52052,12 +52052,12 @@ its own assertions and nothing else:
   away` as the STORED value.
 * the double-click delegate removed → **7 red**, four of them one per width.
 * the roles button's width cap removed → **2 red**, `{'48': 1, '49': 32}` — the
-  row-height fault §368.2 found in the mockup, reproduced.
+  row-height fault §372.2 found in the mockup, reproduced.
 
 The tree was restored and rebuilt **byte-identical to the build the breaks were
 made from** (§343.9), which is what says the falsifications left nothing behind.
 
-### §368.12 — AND THE ONE CONTROL WHOSE VALUE COULD NOT BE HEARD
+### §372.12 — AND THE ONE CONTROL WHOSE VALUE COULD NOT BE HEARD
 
 `searchsel.js` gives the visible button the hidden select's own name, so a
 screen reader is told what the control is FOR rather than only what it says
@@ -52079,7 +52079,7 @@ must contain an example of each — the first draft asked it of ONE person in th
 dialog, who holds nothing, so it demanded roles that were correctly not there
 and reported a working build broken (§100.3, twice in one file).
 
-### §368.13 — THE SERVER NEEDED NOTHING, AND IT IS ASSERTED ANYWAY (§172)
+### §372.13 — THE SERVER NEEDED NOTHING, AND IT IS ASSERTED ANYWAY (§172)
 
 No `api/`, `lib/` or `db/` file is touched — read off the diff. Every field this
 opens is a field the dialog already wrote through the same bound handler, and a
@@ -52092,9 +52092,9 @@ one row is three double-clicks or the dialog — which is what the dialog is for
 and making a row open whole is a decision about the dialog rather than about the
 cell.
 
-### §368.14 — NO ARROW, NOTHING STANDING, AND A ROW THAT DOES NOT MOVE (2026-09-18)
+### §372.14 — NO ARROW, NOTHING STANDING, AND A ROW THAT DOES NOT MOVE (2026-09-18)
 
-Islam, testing what §368 shipped: *"on opening something the arrow appears, no
+Islam, testing what §372 shipped: *"on opening something the arrow appears, no
 need for the arrow. and for the roles as well no need for the arrow showng the
 the box is a drop down box .. the table in general should look everything fixed
 and not editable until I made the double click which opens the box either for
@@ -52104,7 +52104,7 @@ opened Unit cell, the word on one line and the caret on the next.
 **THREE THINGS, AND THE THIRD IS THE ONE HE LED WITH.** The caret is pointless
 here, because the double-click opens the LIST: by the time the box is drawn, the
 thing an arrow announces has already happened. It was also what made the row
-grow — `.pcellopen .ssbtn` is `display:block` (§368.5's answer to a
+grow — `.pcellopen .ssbtn` is `display:block` (§372.5's answer to a
 percentage-width quirk), so the button's two children stopped being flex items
 and an inline caret after a block label fell to a line of its own: **the open row
 stood at 59.6px against its neighbours' 38.6**, which is the picture he sent. And
@@ -52115,7 +52115,7 @@ being the exception and opens like every other cell: the chips are what a row
 reads, and the ticking list is what a double-click opens.
 
 **KEYED ON `PROLEPICK`, NEVER ON `PCELL`.** The first build reached for the
-state §368 already had and it is the wrong one — a `PCELL` closes on `change`,
+state §372 already had and it is the wrong one — a `PCELL` closes on `change`,
 and a ticking list fires `change` on every tick (§130.1), so the list would have
 shut on the first role. `PROLEPICK` already survives the repaint each grant
 makes, already clears itself for a seat ask (§186) and for a refusal (§110), and
@@ -52127,7 +52127,7 @@ behaviour at all and the double-click has the whole of it. `roleStop` and
 `seatAsk` ride BOTH exits, or a refusal raised while the list was open would
 vanish the moment it closed.
 
-### §368.15 — AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS
+### §372.15 — AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS
 
 With the caret gone the drop cell still stepped: **42.5px against a resting
 39.1**. `searchsel.js` draws a `<button>`, and `.cfg input` — which gives every
@@ -52140,13 +52140,13 @@ ever moves the check goes red rather than the two drifting apart (§122.5).
 **THE ROLES BUTTON KEEPS ITS OWN TIGHTER PADDING**, measured rather than
 reasoned: it holds CHIPS, not a line of text, and `4px` puts that row at 45.1px
 where `1px` puts it at 39.1. Two paddings, one height — the height is the thing
-that matters. The text box stays at 40.4px, which is §368's own recorded 1.3px
+that matters. The text box stays at 40.4px, which is §372's own recorded 1.3px
 and not this round's subject.
 
-### §368.16 — AND A SAVE'S REPAINT WAS CLOSING THE CELL UNDER HIM
+### §372.16 — AND A SAVE'S REPAINT WAS CLOSING THE CELL UNDER HIM
 
-**A LIVE-DEPLOYMENT DEFECT IN §368, AND NO CHECK COULD SEE IT.** Chromium fires
-`blur` on a FOCUSED ELEMENT BEING REMOVED — which is what §368 relies on for
+**A LIVE-DEPLOYMENT DEFECT IN §372, AND NO CHECK COULD SEE IT.** Chromium fires
+`blur` on a FOCUSED ELEMENT BEING REMOVED — which is what §372 relies on for
 Escape, and what also happens every time the register repaints. So on a served
 deployment the cell shut under the person who had just opened it: the paint the
 double-click makes schedules a save (§170's leading edge), the answer paints
@@ -52163,11 +52163,11 @@ away from is still there, and that is the blur the rule is for.
 (`SPAN.val, inCell: True`) and a synthetic dispatch said the handler was bound
 (`synth=1`), which is what left the repaint as the only remaining suspect.
 
-### §368.17 — THE CHECK THAT COULD NOT SEE THE FAULT IT WAS WRITTEN FOR
+### §372.17 — THE CHECK THAT COULD NOT SEE THE FAULT IT WAS WRITTEN FOR
 
 **PUTTING THE CARET BACK LEFT THE WHOLE FILE GREEN** (§54.5 — a falsification
 that does not falsify is indistinguishable from a working guard). Two reasons,
-both of them about which cell is opened and when: §368's block opens *Job title*,
+both of them about which cell is opened and when: §372's block opens *Job title*,
 a plain text box with **no button and therefore no caret**, and it measures every
 row's height AFTER Escape, so the one row that can grow is never measured open.
 
@@ -52200,9 +52200,9 @@ migrated.
 
 ---
 
-## §369 — THE OPEN BOX, AND THE COLUMN THAT NEVER SAID IT WAS FROZEN (2026-09-19, spec 059)
+## §373 — THE OPEN BOX, AND THE COLUMN THAT NEVER SAID IT WAS FROZEN (2026-09-19, spec 059)
 
-Islam, testing what §368 shipped, with two screenshots: the Unit cell open and
+Islam, testing what §372 shipped, with two screenshots: the Unit cell open and
 its box lying across the Email column, and — of the ⋮ — *"you added the 3 dots
 to the roles whihc is wrong the 3 dots is out of this column."* Then, of the
 two answers drawn for the second: **"A"**.
@@ -52215,7 +52215,7 @@ supporting function named *Strategy Management Office* — and the answers were
 **drawn out of the running platform and signed off before a source moved**
 (rule 1c, §41.9): `design-mockups/registry-inline/2026-09-19_open-cell-and-frozen-column.html`.
 
-### §369.1 — `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A BUTTON
+### §373.1 — `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A BUTTON
 
 Measured: **261.1px of control inside a 176px cell**, hanging **93.6px** into
 EMAIL, and a click 20px inside the email cell returned `SPAN.sslabel` — **the
@@ -52223,7 +52223,7 @@ box, not the email**. That is §110.1's fault exactly, the one that section
 exists for: a control that is present, correctly sized and **eating its
 neighbour's clicks**.
 
-**ONE WORD.** §368.5 wrote `display:block; width:auto; max-width:none` on the
+**ONE WORD.** §372.5 wrote `display:block; width:auto; max-width:none` on the
 reasoning that a block fills its container, and that reasoning is **true of the
 typed box and false of the drop box** — measured, the `<input>` fills its cell's
 content box to the pixel (145.1 of 162.1) while `searchsel.js`'s `<button>` is
@@ -52250,7 +52250,7 @@ The roles rule's own `max-width:100%; min-width:0` is now the shared one and is
 **deleted rather than left duplicated** (§24); only its tighter padding, which
 is its own (chips, not a line of text), survives.
 
-### §369.2 — AND THE SEAM HAS NEVER PAINTED
+### §373.2 — AND THE SEAM HAS NEVER PAINTED
 
 **THE ⋮ IS NOT IN THE ROLES COLUMN, AND ESTABLISHING THAT FIRST WAS MOST OF THE
 ANSWER.** It is its own last column, frozen to the right edge since §69.19 so
@@ -52285,7 +52285,7 @@ they are**, with a note on the one this round rewrites naming them. The name
 column could not take this answer unchanged in any case — it is
 `overflow:hidden` (§71.2), so a `::before` of its own is clipped away, measured.
 
-### §369.3 — THE CHECK THAT SHOULD HAVE CAUGHT IT, AND WHY IT DID NOT
+### §373.3 — THE CHECK THAT SHOULD HAVE CAUGHT IT, AND WHY IT DID NOT
 
 `role-picker.py` **already asserted that the open control fits its cell**, on
 the button as well as the box, and it went green through the whole of the round

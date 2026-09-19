@@ -473,7 +473,7 @@
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
   /* ══ THE REGISTER'S OWN FIELD FLOORS AND CAPS, ALL SEVEN, DELETED ══
-     (§368; §24, and it is the second half of §24's own sentence — a rule
+     (§372; §24, and it is the second half of §24's own sentence — a rule
      nothing wears is a rule the next reader takes for load-bearing.)
 
      They were written for a mode that no longer exists. §69 and §93.10 bounded
@@ -489,7 +489,7 @@
      WITHIN THE HOUR. `input[data-ptitle] { min-width:150px }` in a 150px cell
      with 8px of padding either side is a 150px box in a 134px space, so the
      open cell hung 8px over its own neighbour at 1440 and below — the exact
-     overflow §368 exists to stop, from a rule written to prevent an overflow
+     overflow §372 exists to stop, from a rule written to prevent an overflow
      in a mode that was removed. The open cell sizes itself instead
      (config.css: a block, never a percentage). */
   .cfg .unitcfg td { vertical-align:middle; }

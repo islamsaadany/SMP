@@ -1,6 +1,6 @@
 # Spec 059 — the client's People register: a cell is the control
 
-**Asked for by Islam, 2026-09-17.** Built as §368.
+**Asked for by Islam, 2026-09-17.** Built as §372.
 
 > *"for the client registry I'd like to do some in line adjustments like the
 > phone, employee ID, email, the unit/function, job title, etc. and about the
@@ -44,17 +44,17 @@ the Forefront consultants list moves.
   Enter and Escape do to the DATA.
 * `checks/people-dialog.py` §2 — at rest the table holds no control; a
   double-click opens one, and it fits its cell. Served over HTTP, which is the
-  only place §368.16's blur fault is visible at all.
+  only place §372.16's blur fault is visible at all.
 * `checks/seat-grant.py` §3 — a seat still asks before it lands, and Cancel
   leaves the list exactly as it was.
 * `checks/smo-team.py`, `checks/forefront-team.py` — granting through the ticks.
 
-Proved able to fail three ways from the sources (§368.11), and four more for
-§368.14–.17: the caret back (8 red), the boxes back on `width:100%` (4), the
+Proved able to fail three ways from the sources (§372.11), and four more for
+§372.14–.17: the caret back (8 red), the boxes back on `width:100%` (4), the
 roles list left standing at rest (16), and the blur guard removed (4, over
 HTTP).
 
-## 5 · What the second round settled (§368.14–.17, 2026-09-18)
+## 5 · What the second round settled (§372.14–.17, 2026-09-18)
 
 Islam, testing it: *"on opening something the arrow appears, no need for the
 arrow. and for the roles as well ... the table in general should look everything
@@ -68,10 +68,10 @@ fixed and not editable until I made the double click."*
 * **One height for an open cell**, whichever kind it is: `.cfg input`'s own
   12.5px / `4px 7px`, which cannot reach a `<button>`. Asserted as the
   agreement, never as the number.
-* **A save's repaint no longer closes the cell** — §368.16, a live-deployment
+* **A save's repaint no longer closes the cell** — §372.16, a live-deployment
   defect invisible over `file://`.
 
-## 6 · What the third round settled (§369, 2026-09-19)
+## 6 · What the third round settled (§373, 2026-09-19)
 
 Islam, testing it again: the open Unit box lying across the Email column, and
 *"you added the 3 dots to the roles whihc is wrong the 3 dots is out of this

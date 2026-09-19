@@ -1880,13 +1880,13 @@ function renderPeople(){
      the answer would always be false and the picker would exist nowhere. It is
      a parameter again — passed false by the row, true by the dialog — and there
      are exactly two callers, both in this file, both named. */
-  /* ── AT REST IT IS THE CHIPS, OPENED IT IS THE LIST (§368.14) ────────
+  /* ── AT REST IT IS THE CHIPS, OPENED IT IS THE LIST (§372.14) ────────
      Islam, of the register on his own deployment: "the roles as well no need
      for the arrow showng the the box is a drop down box .. the table in
      general should look everything fixed and not editable until I made the
      double click."
 
-     §368 made the whole cell the ticking button, which answered "it must not
+     §372 made the whole cell the ticking button, which answered "it must not
      overflow" and left the one column in the table that draws a control when
      nobody is editing anything — a white box with a border and an arrow, on
      all 33 rows, measured. `opened` is the third state that was missing: a row
@@ -1946,7 +1946,7 @@ function renderPeople(){
        what made this the widest column on the page. The overflow is a CONTROL,
        not a hover: a hover cannot be reached on a touch screen and cannot be
        read aloud, and this is the only place the second role appears. */
-    /* ── THE CHIPS, AND THEY ARE THE PICKER'S LABEL TOO (§368) ─────
+    /* ── THE CHIPS, AND THEY ARE THE PICKER'S LABEL TOO (§372) ─────
        `asLabel` is true when this cell is about to BE the ticking button:
        there, the "…" is a span rather than a button (a button inside a button
        is not markup, and one press now opens the whole list anyway) and the
@@ -2021,7 +2021,7 @@ function renderPeople(){
        places for one answer to go missing from (§104.7). */
     held = held + alsoOurs;
     if (!editable) return held;
-    /* ── AND A ROW NOT BEING EDITED IS READ, NOT OFFERED (§368.14) ──────
+    /* ── AND A ROW NOT BEING EDITED IS READ, NOT OFFERED (§372.14) ──────
        The chips, with the "…" already a span rather than a button (`asLabel`
        above) — so the cell carries no single-click behaviour at all and the
        double-click has the whole of it. What the "…" used to reveal is on the
@@ -2074,7 +2074,7 @@ function renderPeople(){
        other; both have to say something before somebody holds a role somewhere,
        and where they cannot agree the row explains it rather than doing
        nothing. */
-    /* ── THE CELL IS THE LIST (§368, Islam 2026-09-17) ───────────────
+    /* ── THE CELL IS THE LIST (§372, Islam 2026-09-17) ───────────────
        "for the role I'm afraid it still overflows as a box it can open which
        a button as you do but not overflowing on other voxes can we make this
        work?" — and the way it works is that the cell keeps exactly what it
@@ -2085,7 +2085,7 @@ function renderPeople(){
        rule about this column in the same stroke.
 
        The chips are handed over as the closed control's LABEL (`data-sshtml`,
-       §368 in searchsel.js) rather than re-drawn, so there is one builder for
+       §372 in searchsel.js) rather than re-drawn, so there is one builder for
        what a role looks like and the cell reads the same open, shut and on a
        row nobody may edit.
 
@@ -2254,7 +2254,7 @@ function renderPeople(){
      roles, no password state and no declaration to accept. */
   function personFields(p, add){
     var out = [];
-    /* ── THE NOTE IS NOT THE FIELD (§368) ──────────────────────────
+    /* ── THE NOTE IS NOT THE FIELD (§372) ──────────────────────────
        Three of these carry a sentence under them — "not on the Official BU
        list", "the list says Retail Stores", "from the unit above" — and the
        dialog draws field and note together, as it always has. The REGISTER
@@ -2335,7 +2335,7 @@ function renderPeople(){
         : ''));
     /* THE DIALOG'S PICKER IS ALWAYS THE LIST. It is a field in a form rather
        than a cell in a table, so there is no "at rest" for it to have — the
-       third argument is what the table uses to read as fixed (§368.14). */
+       third argument is what the table uses to read as fixed (§372.14). */
     if (!add) F("Roles", '<span class="rolebox rolebox-wide">' + roleCell(p, true, true) + '</span>', true);
     return out;
   }
@@ -2766,7 +2766,7 @@ function renderPeople(){
      Cancel, the Add row's three boxes under the wrong headings, the fields
      painting over their neighbours — was a control being clicked inside a
      cell, and none of them survives the move. */
-  /* ══ ONE CELL, OPENED WHERE IT IS READ (§368, spec 059) ═══════════════
+  /* ══ ONE CELL, OPENED WHERE IT IS READ (§372, spec 059) ═══════════════
      Islam: "for the client registry I'd like to do some in line adjustments
      like the phone, employee ID, email, the unit/function, job title, etc."
 
@@ -2904,14 +2904,14 @@ function renderPeople(){
       (showCol("email")
         ? pcell(p, "Email", copyable(p.email, "val"), "wrapany") : '') +
       (showCol("phone") ? pcell(p, "Mobile", copyable(p.phone, "mono")) : '') +
-      /* ── AND THE CELL IS THE PICKER NOW (§368) ─────────────────────
+      /* ── AND THE CELL IS THE PICKER NOW (§372) ─────────────────────
          `false` was right while the table only ever read: the × and the
          "+ role" control belonged to the dialog. What the cell draws is
          unchanged — the same chips, the same "…" — and the whole of it is
          pressable for somebody who may edit, so the answer to "editable" is
          the grant rather than which surface is asking. */
-      /* ── AND IT OPENS LIKE EVERY OTHER CELL NOW (§368.14) ─────────────
-         §368 made the whole cell pressable, which is one press where the rest
+      /* ── AND IT OPENS LIKE EVERY OTHER CELL NOW (§372.14) ─────────────
+         §372 made the whole cell pressable, which is one press where the rest
          of the table takes two — and drew a bordered box on every row to say
          so. The cell reads as its chips and a double-click opens the list, so
          there is ONE rule for the table rather than this column's own. */

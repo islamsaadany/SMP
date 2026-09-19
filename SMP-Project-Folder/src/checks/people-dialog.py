@@ -158,7 +158,7 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={"width": 1280, "height": 940})
     # §148's WELCOME SCREEN BLINDS ANY CHECK WRITTEN BEFORE IT (§167.2). It
     # covers the viewport, so every real press lands on it — invisible to this
-    # file until §368.14 gave it a press to make. Suppressed as a RETURNING viewer
+    # file until §372.14 gave it a press to make. Suppressed as a RETURNING viewer
     # does, and in an `add_init_script`, because setting the flag after `goto`
     # is one paint too late.
     pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
@@ -194,9 +194,9 @@ with sync_playwright() as p:
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 940})
         land(pg)
-        # ── REWRITTEN TWICE, NEVER LOOSENED (§218, §368, §368.14) ───────
-        # §116 asserted the table holds NO control. §368 reversed it for the
-        # Roles column, which became a ticking list on every row. §368.14 reverses
+        # ── REWRITTEN TWICE, NEVER LOOSENED (§218, §372, §372.14) ───────
+        # §116 asserted the table holds NO control. §372 reversed it for the
+        # Roles column, which became a ticking list on every row. §372.14 reverses
         # THAT — Islam: "the table in general should look everything fixed and
         # not editable until I made the double click" — so the original claim
         # is the claim again, with the double-click asserted beside it.
@@ -217,7 +217,7 @@ with sync_playwright() as p:
         # first of them may be a row the register does not open (§362.2's
         # minted rows), so the press is aimed at a person who does.
         who = pg.evaluate("()=>(PEOPLE.filter(p=>!p.forefront)[2]||{}).key")
-        # AND THE PRESS DELIBERATELY RACES A SAVE (§368.14). `land()` leaves the
+        # AND THE PRESS DELIBERATELY RACES A SAVE (§372.14). `land()` leaves the
         # graph dirty, so the paint this press makes schedules one (§170's
         # leading edge); its answer paints again, that paint removes the
         # focused box, and Chromium fires `blur` on a focused element being
@@ -361,7 +361,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>document.querySelector('[data-padd-open]').click()")
     pg.wait_for_timeout(600)
     ck("it opens empty", pg.evaluate("!!document.querySelector('#modal-b .pdlg')") and
-       # §368: the roles control is the cell's ticking list, and `personFields`
+       # §372: the roles control is the cell's ticking list, and `personFields`
        # still draws none on the ADD form — a person with no key has no roles.
        pg.evaluate("!document.querySelector('#modal-b [data-proleset]')"))
     # A NAME IS THE ONE THING NEEDED (§87.3) — and pressing with none must SAY

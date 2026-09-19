@@ -1340,7 +1340,7 @@
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
-  /* ── AND THE SEAM WAS NEVER THERE (§369) ─────────────────────────
+  /* ── AND THE SEAM WAS NEVER THERE (§373) ─────────────────────────
      Islam, of this column: "you added the 3 dots to the roles whihc is wrong
      the 3 dots is out of this column." They are not in Roles — they are this
      frozen column, floating over whatever scrolls under it. Measured: at
@@ -1824,7 +1824,7 @@
                     border-color:var(--gold); }
   .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .rolemore.on { padding:2px 7px; }
-  /* ── THE ROLES CELL IS THE BUTTON (§368, Islam 2026-09-17) ────────
+  /* ── THE ROLES CELL IS THE BUTTON (§372, Islam 2026-09-17) ────────
      "for the role I'm afraid it still overflows as a box it can open which a
      button as you do but not overflowing on other voxes."
 
@@ -1841,14 +1841,14 @@
      line (§88), so the box takes the height the chips already had. What it
      does cost is 27px of column — the box's own edges and the caret that says
      it opens — and no other column moves. */
-  /* ── THE OPEN CELL (§368) ────────────────────────────────────────
+  /* ── THE OPEN CELL (§372) ────────────────────────────────────────
      One field, filling the cell it replaced. `width:100%` with `min-width:0`
      rather than a cap: §110.8 measured a percentage doing nothing under
      `table-layout:auto` — the cell is sized BY its child — and a definite
      width is what stops the field contributing its intrinsic size to the
      column. Measured, the row goes 39px to 40 and no column moves. */
   .peoplecfg td.pcellopen { overflow:visible; }
-  /* A BLOCK, NEVER `width:100%` (§368). Measured: in an auto-layout table
+  /* A BLOCK, NEVER `width:100%` (§372). Measured: in an auto-layout table
      Chromium resolves a percentage against the cell's PADDING box, so
      `width:100%` in a 150px cell with 8px either side came out 150 and hung
      8px past its own cell — §110.8's note that `max-width:100%` does nothing
@@ -1856,7 +1856,7 @@
      containing block's CONTENT box with no percentage to resolve, which is
      the same answer without the quirk. */
   /* AND CAPPED, BECAUSE `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
-     BUTTON (§369). Islam, with the Unit cell open on a function called
+     BUTTON (§373). Islam, with the Unit cell open on a function called
      "Strategy Management Office": the box ran into EMAIL. Measured, 261.1px of
      control inside a 176px cell — 93.6px past its own right edge — and a click
      20px inside the email cell returned the BUTTON, which is §110.1's fault
@@ -1882,7 +1882,7 @@
     display:block; width:auto; min-width:0; max-width:100%;
     box-sizing:border-box; }
 
-  /* ── NO ARROW IN THIS TABLE (§368.14) ───────────────────────────────
+  /* ── NO ARROW IN THIS TABLE (§372.14) ───────────────────────────────
      Islam: "on opening something the arrow appears, no need for the arrow.
      and for the roles as well no need for the arrow showng the the box is a
      drop down box."
@@ -1892,7 +1892,7 @@
      the thing the arrow announces has already happened.
 
      AND IT IS WHAT MADE THE ROW GROW. `.pcellopen .ssbtn` is `display:block`
-     — §368's answer to a percentage-width quirk — so the button's two children
+     — §372's answer to a percentage-width quirk — so the button's two children
      stopped being flex items and the caret, an inline span after a block
      label, fell to a line of its own: measured, the open row stood at 59.6px
      against its neighbours' 38.6, which is the picture he sent. With the caret
@@ -1914,7 +1914,7 @@
      height, which is the thing that matters. */
   .peoplecfg td.roles.pcellopen .ssbtn { padding:1px 6px; }
 
-  /* ── AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS (§368.14) ──
+  /* ── AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS (§372.14) ──
      "the table in general should look everything fixed ... until I made the
      double click which opens the box either for writing or a drop box."
      TWO KINDS OF BOX, SO TWO HEIGHTS UNLESS SOMETHING SAYS OTHERWISE — and

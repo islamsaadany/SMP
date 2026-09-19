@@ -123,7 +123,7 @@ def set_unit(pg, key, at):
 
 
 def open_roles(pg, key):
-    """THE CELL IS THE LIST (§368). There is no "+ role" control to press any
+    """THE CELL IS THE LIST (§372). There is no "+ role" control to press any
     more: the Roles cell is a ticking button, so opening it is pressing the
     cell — and the dialog's copy is preferred, because a row's cell and the
     open person dialog draw the same picker for the same person."""
@@ -205,7 +205,7 @@ with sync_playwright() as p:
     open_row(pg, "cfo")
     # REWRITTEN, NEVER LOOSENED (§218). The control this asserted — the "+ role"
     # button and the select it opened — is gone: the Roles cell IS the ticking
-    # list (§368). The claim is the same one, that there is a way to give a role
+    # list (§372). The claim is the same one, that there is a way to give a role
     # and exactly one control to do it with.
     ck("the role picker is there", has_picker(pg, "cfo"))
     ck("and there is no second dropdown",
@@ -421,9 +421,9 @@ with sync_playwright() as p:
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 900})
         people(pg)
-        # ── REWRITTEN TWICE, NEVER LOOSENED (§218, §368, §368.14) ───────
-        # §116 asserted NO field in the table. §368 reversed it for the Roles
-        # column, which became the ticking list on every row. §368.14 reverses
+        # ── REWRITTEN TWICE, NEVER LOOSENED (§218, §372, §372.14) ───────
+        # §116 asserted NO field in the table. §372 reversed it for the Roles
+        # column, which became the ticking list on every row. §372.14 reverses
         # THAT at Islam's instruction — "the table in general should look
         # everything fixed and not editable until I made the double click" —
         # so the claim returns to the one §116 made, with the double-click
@@ -456,7 +456,7 @@ with sync_playwright() as p:
         pg.wait_for_timeout(300)
         ck("%d: and Escape closes it" % w,
            pg.evaluate("document.querySelectorAll('.peoplecfg td.pcellopen').length") == 0)
-        # ── AND THE TWO CELLS THAT OPEN A LIST (§368.14) ────────────────
+        # ── AND THE TWO CELLS THAT OPEN A LIST (§372.14) ────────────────
         # THE ASSERTION ABOVE COULD NOT SEE THE REPORTED FAULT, and finding
         # that out is most of why this block exists: it opens *Job title*,
         # which is a plain text box with no button and therefore no caret, and
@@ -477,7 +477,7 @@ with sync_playwright() as p:
         #     its own and took the row from 38.6px to 59.6.
         # Both ends (§94.2): the caret is asserted absent WHERE THE BUTTON IS,
         # never merely absent from a table that has no button in it at all.
-        # AND THE `fits` ASSERTION BELOW HAD NOTHING TO BITE ON (§255, §369).
+        # AND THE `fits` ASSERTION BELOW HAD NOTHING TO BITE ON (§255, §373).
         # It is the right property and it went green through the whole of the
         # round that shipped the fault, because the longest unit label the
         # worked example holds is "Consumer Electronics" — 151.8px of button in
@@ -528,7 +528,7 @@ with sync_playwright() as p:
           if(p){p.unit=s.had.unit;p.fn=s.had.fn;p.company=s.had.company;}
           paint();}""".replace("WHO_", repr(who)), long_name)
         pg.wait_for_timeout(300)
-        # ── THE FROZEN COLUMN SAYS IT IS FROZEN (§369) ──────────────────
+        # ── THE FROZEN COLUMN SAYS IT IS FROZEN (§373) ──────────────────
         # Islam: "you added the 3 dots to the roles whihc is wrong the 3 dots is
         # out of this column." They are their own frozen column — and NOTHING
         # SAID SO, because the `box-shadow` it is declared with has never
@@ -571,11 +571,11 @@ with sync_playwright() as p:
              document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
                const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
              return JSON.stringify(hs);}"""))
-        # AND THE ROLES BUTTON SAYS ITS VALUE ALOUD (§368, re-aimed §368.14).
+        # AND THE ROLES BUTTON SAYS ITS VALUE ALOUD (§372, re-aimed §372.14).
         # An `aria-label` REPLACES an element's content as its accessible name,
         # so with the chips handed over as html the button announced the PERSON
         # and never the roles — the one control on this page whose value a
-        # screen reader could not hear. §368.14 draws that button only while the
+        # screen reader could not hear. §372.14 draws that button only while the
         # cell is OPEN, so the claim is asked where the control now is: opened
         # on somebody who holds roles, and on somebody who holds none. Both
         # ends (§94.2, §113.8) — the register must carry an example of each or
@@ -630,7 +630,7 @@ with sync_playwright() as p:
              return !!h && (h===a || a.contains(h));}"""))
         close_row(pg)
 
-    # ── 9. ENTER STORES IT AND ESCAPE THROWS IT AWAY (§368) ────────────
+    # ── 9. ENTER STORES IT AND ESCAPE THROWS IT AWAY (§372) ────────────
     # Read back off the PERSON and never off the screen (§96): a box holding
     # what was typed says nothing about what was stored. BOTH ENDS (§94.2),
     # because "Escape discards" is satisfied perfectly by a build that never

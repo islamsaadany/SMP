@@ -48,7 +48,7 @@ def setup(pg, page):
 
 
 def tick_role(pg, key, role):
-    """TICKING THE ROLES LIST (§368). The "+ role" control and the select it
+    """TICKING THE ROLES LIST (§372). The "+ role" control and the select it
     opened are gone: the Roles cell IS a ticking list, so a grant is an option
     going on and the select firing its own change — searchsel's `toggle`,
     driven from script because this file is about the RULE rather than the

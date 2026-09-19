@@ -163,7 +163,7 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
-/* ── WHOSE ROLES LIST IS OPEN (§368) ──────────────────────────────────
+/* ── WHOSE ROLES LIST IS OPEN (§372) ──────────────────────────────────
    The Roles cell IS a ticking list now, and granting a role has to repaint —
    it changes the chips, and it takes the role off whoever held it, whose row
    is elsewhere in the table. A paint closes every popup (searchsel's wire()
@@ -171,7 +171,7 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    the end of the paint. It replaces `ADDROLE`/`ADDROLE_KIND`, which were the
    "+ role" control's own state and have no control left to describe (§24). */
 var PROLEPICK = null;
-/* ── AND WHICH CELL IS BEING TYPED INTO (§368) ─────────────────────────
+/* ── AND WHICH CELL IS BEING TYPED INTO (§372) ─────────────────────────
    `{key, field}` — the person and the dialog's own label for the field — or
    null. One at a time, for §79.2's reason: two open cells are two unsaved
    states. There is no Save and no Cancel, because leaving a bound field is

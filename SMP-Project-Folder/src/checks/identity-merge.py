@@ -364,7 +364,7 @@ with sync_playwright() as p:
     ck("...and one written after keeps them apart",
        f["now"] == ["Ahmed Mostafa Mohamed El Gebely", "Ahmed Mostafa"], f["now"])
 
-    # ── REVERSED AND REWRITTEN, NEVER DELETED (§218, §375) ───────────
+    # ── REVERSED AND REWRITTEN, NEVER DELETED (§218, §377) ───────────
     # This block was §93.6's own: the address is a control, its hover carries
     # the value AND the hint, one press says "Copied" and the value comes back.
     # Islam has asked for the press to go — "I can always have a right click

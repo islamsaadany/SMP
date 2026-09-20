@@ -10056,7 +10056,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;375: an address is a value, not a
+*Last Updated: 2026-09-20 &mdash; **&sect;377: an address is a value, not a
 control (spec 059).** Islam: *"please remvoe the 1 click copy bhavior I can
 always have a right click and copy the text."* **AT REST THE TWO BUILDS ARE THE
 SAME PICTURE, BYTE FOR BYTE**, and measuring that first is what decided how much

@@ -5282,7 +5282,7 @@ page, a seam declared as that shadow and no seam at all are the same build. **Fo
 table carry the same dead declaration, and the kebab block is declared **twice**
 in `config.css` byte for byte. 
 
-**AND §375 TAKES THE CONTROL AWAY AGAIN** (2026-09-20): *"please remvoe the 1
+**AND §377 TAKES THE CONTROL AWAY AGAIN** (2026-09-20): *"please remvoe the 1
 click copy bhavior I can always have a right click and copy the text."* Done,
 and measuring it first changed what was worth saying. **At rest the register
 looks exactly the same** — the two builds are the same picture byte for byte,

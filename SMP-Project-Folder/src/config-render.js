@@ -2437,7 +2437,7 @@ function renderPeople(){
      for the row's kebab; what is left is one word in one pill, so the column
      is 76px instead of 150. "Temporary" becomes "Temp" for the same reason —
      three states that have to be told apart at a glance, not read. */
-  /* ── THE ADDRESS AND THE NUMBER ARE ORDINARY VALUES (§375, REVERSING
+  /* ── THE ADDRESS AND THE NUMBER ARE ORDINARY VALUES (§377, REVERSING
      §93.6) ──────────────────────────────────────────────────────
      Islam: "please remvoe the 1 click copy bhavior I can always have a right
      click and copy the text."

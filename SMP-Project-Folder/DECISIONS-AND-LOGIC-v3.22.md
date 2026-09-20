@@ -53061,7 +53061,7 @@ reported (the digits themselves are inside the button, and the copy worked
 throughout), it is a restyle nobody asked for, and it wants a measurement of
 every `.mono` cell rather than one column's (rule 1b).
 
-### §375 — AN ADDRESS IS A VALUE, NOT A CONTROL (2026-09-20, reversing §93.6)
+### §377 — AN ADDRESS IS A VALUE, NOT A CONTROL (2026-09-20, reversing §93.6)
 
 Islam: *"please remvoe the 1 click copy bhavior I can always have a right click
 and copy the text."*
@@ -53129,7 +53129,7 @@ already has. The handler, the five `.copyval` rules and the `data-copy`
 attribute all go — deleted by matched text at both ends, never by line range
 (§214).
 
-**§375.1 — TWO CHECKS REVERSED AND REWRITTEN, NEVER DELETED** (§218).
+**§377.1 — TWO CHECKS REVERSED AND REWRITTEN, NEVER DELETED** (§218).
 `people-dialog` §2b asserted that one press still COPIED, and said why: §374's
 fault and §93.6's control were two acts sharing one element, so a fix reaching
 the wrong one would have traded them. `identity-merge` carried §93.6's own six
@@ -53140,14 +53140,14 @@ because **a build that had EMPTIED the column satisfies *"no control"*
 perfectly** (§113.8). **4 red and 3 red** on the build that still has it, run
 from the SOURCES through `SMP_BUILT` (§276).
 
-**§375.2 — AND THE FALSIFICATION FOUND §215 IN THE FILE THAT RECORDS IT FOUR
+**§377.2 — AND THE FALSIFICATION FOUND §215 IN THE FILE THAT RECORDS IT FOUR
 TIMES.** `eval_on_selector` THROWS on a selector that finds nothing, and on the
 reversed build there is no `.val` in those two cells at all — so the first red
 run printed **one** failure where there are four and took the rest of the
 section down with it. The box is read through `evaluate` and a missing one
 degrades to an empty selection, which is itself the honest answer.
 
-**§375.3 — THE DRAG IS ASSERTED AS *the value is IN the selection*, NEVER *the
+**§377.3 — THE DRAG IS ASSERTED AS *the value is IN the selection*, NEVER *the
 selection is the value*.** `.val` is a block, so a drag to its right edge runs
 on into the rest of the row — which is the table behaving as every other column
 does rather than this cell misbehaving. The tighter assertion **reported a
@@ -53155,7 +53155,7 @@ correct build broken** on its first run, printing the whole row as the
 selection. What can genuinely fail is the value not being selectable at all,
 which is the old build, and that still reddens.
 
-**§375.5 — AND TWO COMMENTS WERE LEFT DESCRIBING A CONTROL THAT HAD GONE**,
+**§377.5 — AND TWO COMMENTS WERE LEFT DESCRIBING A CONTROL THAT HAD GONE**,
 which is §104.8's fault and was caught by reading the diff rather than by any
 check. `config.css` kept §93.6's paragraph — *"it has to look like the value,
 not like a control &hellip; the tick is written into the element by the
@@ -53167,7 +53167,7 @@ number reads heavier than a proportional address at the same size) and what it
 has to outrank, and the shell's says that nothing binds `[data-copy]` any more
 because nothing draws it.
 
-**§375.4 — AND MY OWN GUARD TRIPPED ON MY OWN PROSE.** `assert ".copyval" not
+**§377.4 — AND MY OWN GUARD TRIPPED ON MY OWN PROSE.** `assert ".copyval" not
 in s` fired on the edit that removes the class, because the comment explaining
 the removal spells it. Asserted over selector LINES rather than over the file —
 the small version of §272.8, where a sentence recording why a rule had been

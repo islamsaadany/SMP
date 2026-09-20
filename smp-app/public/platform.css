@@ -4631,7 +4631,7 @@ html[data-client-settings] .top .topmark { display:none; }
   .peoplecfg td.namecell, .peoplecfg thead th.namecell {
     max-width:260px; white-space:nowrap; }
 
-  /* ── THE NUMBER IS A VALUE IN THE REGISTER'S OWN SHAPE (§375) ─────
+  /* ── THE NUMBER IS A VALUE IN THE REGISTER'S OWN SHAPE (§377) ─────
      §93.6's five `.copyval` rules went with the control (the button's own
      reset, its mono size, the hover underline, the focus ring and the green
      "Copied"). What is left is the one thing they carried that was never

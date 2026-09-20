@@ -290,7 +290,7 @@ with sync_playwright() as p:
              active: (document.activeElement||{}).className || ''})""")
         ck("%s (%s): the box opens and is still there a beat later"
            % (field, why), opened and got["open"] and got["pcell"] == field, got)
-        # ── REWRITTEN, NEVER LOOSENED (§218, §375) ─────────────────────
+        # ── REWRITTEN, NEVER LOOSENED (§218, §377) ─────────────────────
         # This asserted that one press still COPIED, because §374's fault and
         # §93.6's control were two acts sharing one element, so a fix reaching
         # the wrong one would have traded them. Islam has since asked for the
@@ -358,7 +358,7 @@ with sync_playwright() as p:
                  if(e.scrollWidth>e.clientWidth+1 && !e.title && !td.title) bad++;});});
              return bad;}""") == 0)
     land(pg)
-    # AND THE ADDRESS FITS, which is where this whole thread started. §375
+    # AND THE ADDRESS FITS, which is where this whole thread started. §377
     # took the control away and the CLASS went with it (§51.11), so the old
     # selector would have matched nothing and passed for it — the count of
     # what was measured is asserted beside the count of what was cut (§113.8).

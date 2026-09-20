@@ -10205,6 +10205,72 @@ It writes into `design-mockups/`, so `qa-run.py` refuses it in a sweep
 (&sect;334.14) and it can redden nothing; left as evidence rather than edited as
 a side effect of a round that was not about it (Principle II, rule 1b).*
 
+**&sect;377.6 &mdash; MERGED TO `main` 2026-09-20 on Islam's word**, and the
+merge is part of the record. `main` had moved **33 commits** &mdash; Portfolio
+(&sect;375, spec 060) and the reports as a tab (&sect;376, spec 061) &mdash; and
+had taken **&sect;375** for different work, so this round became **&sect;377
+BEFORE the merge**, which is the only moment a renumber is provably scoped
+(&sect;264.3). **The assertion that makes it safe is the merge base**: it holds
+&sect;375, &sect;376 and &sect;377 exactly **nought** times, so all 20 citations
+were this branch's own and main's 26 were not yet there to sweep up; both
+spellings (&sect;336.1), a third searched for and absent, and **0 changed lines
+carry anything but a citation**. Spec 059 is NOT renumbered &mdash; it is this
+branch's own and already on main, carried there by &sect;374.
+**`sw.js` IS &sect;94.12 EXACTLY**: both sides independently wrote
+`smp-shell-v5.20-*`, differing only after the number &mdash; so git conflicted
+here where the *same* string on both sides would have merged silently with
+different bytes behind it. Resolved to **v5.21**, proved unique against every
+name the history has ever held, one `const SHELL`, `node --check` clean
+(&sect;146.2). `CLAUDE.md` **COMBINED, never picked** (&sect;318.7): both sides
+rewrote the *Last Updated* block, so either taken whole drops the other's
+record. The built file **REBUILT, never merged** (&sect;91) and byte-identical
+to `build.py`'s output; the four generators re-run and `generated-in-step` all
+clear (&sect;329). **AND THE DECISIONS DOC WAS OUT OF ORDER, AND IT IS MY OWN
+DRIFT RATHER THAN THE MERGE'S** (&sect;356.17): &sect;377's block sat between
+&sect;374 and its own sub-section &sect;374.1, at `###` where every peer is
+`##` &mdash; measured on the branch BEFORE the merge, so the merge only made it
+visible by bringing &sect;374.1 alongside. **BOTH GREPS A MERGE OWES, ON THE
+MERGED RESULT**: the names &sect;377 deleted (&sect;313.37) survive at six sites
+and **every one is a comment explaining the removal**; and the duplicate
+top-level declaration scan over build.py's own concatenation (&sect;56.7,
+&sect;281) reads **1514 names, 6 duplicates &mdash; the six &sect;281.1 leaves
+deliberately**, so the merge introduced none. **AND MY OWN WAITER COULD NEVER
+TERMINATE**: `pgrep -f 'qa-run.py'` matched the waiter's own command line, so
+each one counted itself and its siblings and the count could only climb &mdash;
+*a measurement that includes the measurer*, answered by waiting on the two real
+PIDs. **VERIFIED ON THE MERGED TREE** (&sect;365's own first finding, that an
+honest sweep is of the merged tree and never the branch): `qa.py` over
+`file://` **ERRORS none**; `built-in-step` and `generated-in-step` all clear;
+&sect;377's own `people-dialog` and `identity-merge` green; nine register-family
+neighbours green (`register-header`, `no-jump`, `role-picker`, `seat-grant`,
+`duplicates`, `attention-dismiss`, `attention-rows`, `forefront-team`,
+`team-page`); authoriser **683/0**, change list **140/0**, platform rules
+**69/0**, db-url-choice **10/0**, session-state and kb-audience clear;
+`setup-shape` 33/0, `deploy-context` 5/0, `assistant-defaults` 10/0,
+`declared-deps` and `insights-tab` 16/0. **AND WHAT COULD NOT BE RUN IS SAID
+RATHER THAN LEFT AS AN ABSENCE** (&sect;54.5, &sect;340.4's precedent):
+`smp-app/node_modules` is EMPTY in this container, so **twenty served-stack
+checks and `tsc` are UNRUN, not passing** &mdash; narrowed by the fact that
+&sect;377 touches **no `smp-app` source at all**, only the two generated files,
+which `generated-in-step` (which does run here) proves are exactly what the
+generators produce from the merged sources. **NO FORCED SIGN-OUT IS OWED AND IT
+IS READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029): not one `api/`, `lib/`
+or `db/` file is in it. **AND &sect;91.5's LIVE READ COULD NOT BE MADE FROM
+HERE, SO THE DEPLOYMENT IS UNVERIFIED AND SAID TO BE** (&sect;54.5, rule 3a):
+this environment's egress policy refuses `smp-orpin-tau.vercel.app` at the
+proxy's CONNECT with a 403, which its own README says to report rather than
+route around. **The witness is `shell.js` and `platform.css`, never `sw.js`**
+(&sect;365, &sect;367 &mdash; the generator drops the half that carries `SHELL`,
+so the served worker is byte-identical either side and the bumped name reaches
+nobody): `shell.js` **3,843,984 &rarr; 3,843,142** and `platform.css`
+**674,039 &rarr; 673,729**, both SMALLER because this round is a removal, and
+both asserted to have MOVED or a match would hold either way (&sect;113.8).
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (&sect;374.1, &sect;375.2's
+precedent): the merge commit reached `main` on no other ref, so main's tip is
+unique by construction, and putting that SHA on a second ref is the one thing
+left that could still cost the deployment (&sect;91). A fast-forward is one
+command whenever somebody has read the live site.*
+
 *Earlier: 2026-09-20 &mdash; **&sect;376: the reports, as a tab in the
 platform (spec 061).** Islam, of the Insights module: *"for the users not the
 smo they can see the insights as a tab beside the tabs visible to them. better

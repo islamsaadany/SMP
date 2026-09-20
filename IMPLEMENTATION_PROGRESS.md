@@ -6640,3 +6640,49 @@ is 16/0 with two sections declaring NOT RUN in their own words.
 production serve it; the witness is `shell.js` 3,827,402 → 3,843,984 and
 `platform.css` 669,731 → 674,039. The branch is deliberately not
 fast-forwarded, keeping main's tip unique.
+
+## §377.6 — Merged to main (2026-09-20, spec 059) · **done**
+
+Islam: *"MERGE TO MAIN"*. Merged, pushed, and the deployment is the one
+thing that could not be confirmed from here.
+
+**Main had moved 33 commits and had taken §375** — Portfolio (spec 060)
+and the reports as a tab (spec 061). So this round is **§377**, renumbered
+**before** the merge, which is the only moment that is provably scoped:
+the merge base holds §375, §376 and §377 nought times, so all 20 citations
+were this branch's own and main's 26 could not be swept up. Both
+spellings; no changed line carries anything but a citation. Spec 059 is
+unchanged — it is this branch's own and was already on main.
+
+**`sw.js` was §94.12 exactly**: both sides wrote `smp-shell-v5.20-*`.
+Resolved to **v5.21**, unique against every name the history holds, one
+declaration, parses clean. `CLAUDE.md` combined rather than picked. The
+built file rebuilt from the merged sources and byte-identical to the
+build; the four generators re-run.
+
+**The decisions doc was out of order and it was my own drift, not the
+merge's** — §377's block sat between §374 and its own §374.1 at the wrong
+heading level, measured on the branch before the merge. Put in order.
+
+**Green on the merged tree:** `qa.py` ERRORS none · built-in-step ·
+generated-in-step · people-dialog · identity-merge · nine register-family
+neighbours · authoriser 683/0 · change list 140/0 · platform rules 69/0 ·
+db-url-choice 10/0 · session-state · kb-audience · setup-shape 33/0 ·
+deploy-context 5/0 · assistant-defaults 10/0 · declared-deps ·
+insights-tab 16/0.
+
+**Unrun, and said so rather than left as an absence:** `smp-app/node_modules`
+is empty in this container, so twenty served-stack checks and `tsc` could
+not run at all. §377 touches no `smp-app` source — only the two generated
+files — and `generated-in-step`, which does run, proves those are exactly
+what the generators produce.
+
+**No forced sign-out is owed**, read off the diff: no `api/`, `lib/` or
+`db/` file is in it.
+
+**The deployment is unverified and is said to be:** the proxy refuses
+`smp-orpin-tau.vercel.app` at CONNECT with a 403. The witness would be
+`shell.js` **3,843,984 → 3,843,142** and `platform.css` **674,039 →
+673,729** — never `sw.js`, whose served copy is byte-identical either side.
+**The branch is deliberately not fast-forwarded**, so main's tip stays
+unique until somebody has read the live site.

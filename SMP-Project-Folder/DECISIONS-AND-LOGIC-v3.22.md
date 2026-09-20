@@ -53693,3 +53693,122 @@ it (Principle II, rule 1b).
 **The server needed nothing and it is read off the diff** (§172, spec 029): no
 `api/`, `lib/` or `db/` file is touched, nothing stored moves, nothing is
 migrated and nobody is signed out.
+
+## §377.6 — MERGED TO MAIN, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20, spec 059)
+
+Islam: *"MERGE TO MAIN"*, which is the word §4 requires on that merge.
+
+**MAIN HAD MOVED 33 COMMITS AND HAD TAKEN §375.** Portfolio's rules and
+tables (§375, spec 060) and the reports as a tab in the platform (§376,
+spec 061), with their merges and records. So this round became **§377
+BEFORE the merge**, which is the only moment a renumber is provably
+scoped to the lines one branch wrote (§264.3).
+
+**THE ASSERTION THAT MAKES A PRE-MERGE RENUMBER SAFE IS THE MERGE BASE**,
+and it was measured rather than assumed: the base holds §375, §376 and
+§377 exactly **nought** times, so every one of the 20 citations in this
+tree was this branch's own, and main's 26 were not yet here to be swept
+up (§264.3's fault, where a blanket renumber took somebody else's
+citations). **Both spellings** (§336.1) — `§` and `&sect;` — a third was
+searched for and there is none, and **0 changed lines carry anything but
+a citation**, which is what says the substitution touched nothing else.
+**Spec 059 is NOT renumbered**: it is this branch's own and is already on
+main, carried there by §374.
+
+**`sw.js` IS §94.12 EXACTLY.** Both sides independently wrote
+`smp-shell-v5.20-*`, differing only in the name after the number — so git
+conflicted here, where the *same string on both sides* would have merged
+with no conflict at all while the bytes behind that name differed.
+Resolved to **v5.21**, proved unique against every SHELL name the history
+has ever held rather than against main's current one alone; one `const
+SHELL` declaration, `node --check` clean (§146.2).
+
+**`CLAUDE.md` IS COMBINED, NEVER PICKED** (§318.7): both sides rewrote the
+*Last Updated* block, so either taken whole drops the other's record
+entirely. §377 leads and main's §376 is demoted to *Earlier*, both whole.
+
+**THE BUILT FILE IS REBUILT, NEVER MERGED** (§91) — `built-in-step.py`
+reports it byte-identical to `build.py`'s output, four lines moved, three
+citations and one §238 CSP hash, which is that section working as designed
+— and the four generators are re-run, so `smp-app/public/`, which is what
+production serves, carries both sides' work.
+
+**AND THE DECISIONS DOC WAS OUT OF ORDER, AND IT IS MY OWN DRIFT RATHER
+THAN THE MERGE'S** (§356.17). §377's block sat between §374 and its own
+sub-section §374.1, at `###` where every peer is `##` — and that was
+measured **on the branch BEFORE the merge**, so the merge only made it
+visible by bringing §374.1 alongside. *Establishing whose fault an
+ordering is costs one command and decides whether it is a resolution or a
+repair.* Moved to the end and promoted; §374 and §374.1 are adjacent.
+
+**BOTH GREPS A MERGE OWES, RUN ON THE MERGED RESULT.** The names §377
+DELETED (§313.37 — *a name a hunk brings back is valid on both sides and
+green everywhere*): `copyable`, `copyval` and `data-copy` survive at six
+sites and **every one is a comment explaining the removal**; nothing live
+came back. And the duplicate top-level declaration scan (§56.7, §281) over
+**build.py's own concatenation** (§340.1 — the scan that missed it
+compared two files and never a file against itself): 1514 names scanned,
+6 duplicated, and they are the six §281.1 leaves deliberately.
+
+**AND MY OWN WAITER COULD NEVER TERMINATE.** Waiting for the browser
+checks with `until [ "$(pgrep -fc 'qa-run.py')" -eq 0 ]` counts the
+waiter's own command line, which contains that string — so each waiter
+counted itself and every sibling, and the number could only climb: *a
+measurement that includes the measurer*. Answered by waiting on the two
+real PIDs. It is the same shape as §100.3 with the harness as its subject,
+and it cost three rounds of polling before the count going **up** gave it
+away.
+
+**VERIFIED ON THE MERGED TREE**, which is §365's own first finding — an
+honest sweep is of the merged tree and never of the branch, because main
+had brought two whole modules under it. `qa.py` over `file://`: **ERRORS
+none**, 33 viewers. `built-in-step` and `generated-in-step` all clear.
+§377's own two: `people-dialog` all good, `identity-merge` ALL PASS. Nine
+register-family neighbours, all green: `register-header`, `no-jump`,
+`role-picker`, `seat-grant`, `duplicates`, `attention-dismiss`,
+`attention-rows`, `forefront-team`, `team-page`. Server side, no database:
+authoriser **683/0**, change list **140/0**, platform rules **69/0**,
+db-url-choice **10/0**, `session-state` and `kb-audience` clear. On the new
+stack: `setup-shape` 33/0, `deploy-context` 5/0, `assistant-defaults` 10/0,
+`declared-deps` clear, `insights-tab` 16/0.
+
+**AND `role-picker` TAILED ON A SEPARATOR MID-RUN**, reading `---` where a
+verdict belongs — §298.3 for the second time in a day (*the tail is the
+verdict, the count is not*), and it read `all good` the moment it landed.
+`kb-audience` did the same with a blank line, which is §365.6's own
+recorded trap.
+
+**WHAT COULD NOT BE RUN IS SAID RATHER THAN LEFT AS AN ABSENCE** (§54.5,
+§340.4's precedent): `smp-app/node_modules` is **empty** in this
+container, so twenty served-stack checks and `tsc` are **UNRUN, not
+passing**. What narrows it is read off the diff rather than hoped: §377
+touches **no `smp-app` source at all** — only the two generated files —
+and `generated-in-step`, which does run here, proves those two are exactly
+what the generators produce from the merged frozen sources.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): not one
+`api/`, `lib/` or `db/` file is in it, so nothing about how a save is
+judged moves, nothing stored moves and nothing is migrated.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO THE DEPLOYMENT IS
+UNVERIFIED AND IS SAID TO BE** (§54.5, rule 3a). This environment's egress
+policy refuses `smp-orpin-tau.vercel.app` at the proxy's CONNECT with a
+403 — a policy denial its own README says to report rather than route
+around. **The witness is `shell.js` and `platform.css`, never `sw.js`**
+(§365, §367: `build-sw.mjs` drops the caching half where `SHELL` lives, so
+the served worker is byte-identical either side of this merge and the
+bumped name reaches nobody). `shell.js` **3,843,984 → 3,843,142** and
+`platform.css` **674,039 → 673,729** — both *smaller*, because this round
+is a removal — and both asserted to have MOVED from their pre-push values,
+or a match would hold either way (§113.8).
+
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (§374.1, §375.2's
+precedent). The merge commit reached `main` on no other ref, so main's tip
+is unique by construction; putting that SHA on a second ref is the one
+thing left that could still cost the deployment (§91). A fast-forward is
+one command whenever somebody has read the live site.
+
+**THE RESIDUE IS THE ONE §365 AND §367 BOTH NAMED, UNCHANGED**: because
+the served worker's bytes did not move, no `controllerchange` fires and
+§258's *"A newer version of the platform is ready"* is **not** offered — a
+tab left open keeps its old shell until somebody reloads it.

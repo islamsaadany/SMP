@@ -53812,3 +53812,117 @@ one command whenever somebody has read the live site.
 the served worker's bytes did not move, no `controllerchange` fires and
 §258's *"A newer version of the platform is ready"* is **not** offered — a
 tab left open keeps its old shell until somebody reloads it.
+
+## §378 — AN ADDRESS IS TAKEN WHOLE (2026-09-20, spec 059)
+
+Islam, of the build §377 shipped: *"can you make a right click on the email
+to highlight the whole email to copy on right click .. as it happens on the
+phone number."*
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED (rule 3a), AND THE REPORT DOES NOT
+REPRODUCE.** Since §377 both cells come off the same line — `valueCell(…,
+"val")` and `valueCell(…, "val mono")` — so a difference between them would
+itself be a finding. Driven in a real browser on a real row, with a fresh
+page per gesture and the box re-read each time (§222):
+
+| gesture | Email | Mobile |
+|---|---|---|
+| **right-click** | selects nothing | selects nothing |
+| left-click | selects nothing | selects nothing |
+| double-click | the whole value, and the cell opens | the same |
+| drag across | the whole value | the whole value |
+
+So the two are **identical**, and what differs is his browser's own idea of
+what a word is. **THE FIRST RUN OF THAT PROBE LIED AND IT IS WORTH
+RECORDING**: it measured both boxes ONCE, up front, then double-clicked the
+email — which opens the editor and repaints — so the Mobile coordinates were
+stale and it reported *email selects, mobile does not*, **the reported fault,
+arrived at by measuring wrongly** (§222). One page load per gesture is what
+separated the two readings.
+
+**THE ANSWER CANNOT BE A DIFFERENCE BETWEEN THESE TWO LINES**, because there
+is none. It is `user-select:all`, which makes EVERY gesture take the whole
+value in every engine, so the behaviour stops depending on whose browser it
+is — and it is **the product's own device rather than a new one**: §43.8's
+issued-password box has carried it since it was written, for exactly this
+reason (*a string somebody has to read out loud down a phone, so it has to be
+one unbroken run*). §53.5 — one answer to *this value is copied whole*.
+
+**THE COST WAS STATED BEFORE HE TOOK IT**, and there are two. A plain
+left-click now highlights the value; it copies nothing, so §377 stands
+whole — what he removed was one click COPYING, and a highlight is not that.
+And a drag can no longer take part of an address: the whole thing comes with
+it, which for an email or a phone number is almost always what was wanted.
+He took both: *"yes agreed for the question and build."*
+
+**BOTH CELLS, NEVER ONE.** They are the same today, so changing only the
+Email would create exactly the mismatch he reported, the other way round.
+
+**SCOPED, AND THE SCOPING IS THE HALF A CHECK COULD MISS.** `.val` is every
+value in every Setup table — a unit's name, a company, a job title — and
+`user-select:all` on all of them is a change nobody asked for (rule 1b). So
+the rule is `.cfg .val.selall`, and the check measures a column that was NOT
+asked about in the same run and requires it to select nothing: a build that
+had widened the rule satisfies every *"a right-click highlights the whole
+value"* assertion and quietly changes the whole product (§94.2, §113.8).
+
+**THE GESTURE IS DRIVEN, NEVER THE PROPERTY READ** (§94.8, §96): asking
+`getComputedStyle` for `user-select` passes on a build where the rule is
+declared and something outranks it — which is how §373.2's box-shadow, a
+declaration that had never painted a pixel, survived for as long as it did.
+
+**NOTHING VISUAL MOVES AND IT WAS MEASURED, SO NO MOCKUP WAS OWED** (rule
+1c): same widths, same row heights, same colours, nothing drawn differently —
+the two builds are the same picture. What changes is a behaviour, which a
+still cannot show.
+
+**PROVED ABLE TO FAIL TWICE FROM THE SOURCES** (§276 — §238's hashed CSP
+silences an edited built file), one break per decision, each asserted to have
+MATCHED before it was written (§344.1) and each reddening **its own**
+assertions and no others: the rule removed **2 red**, printing
+`{'selected': '', …}`, which is the reported state verbatim; the rule
+widened to `.cfg .val` **1 red**, printing `{'selected': 'Ashraf Laithy'}` —
+the widened rule reaching a column nobody asked about, in its own words. The
+tree was restored and rebuilt to a file **byte-identical** to the one the
+breaks were made from (§343.9).
+
+## §378.1 — AND TWO OF MY OWN NEW ASSERTIONS PROVED NOTHING (2026-09-20)
+
+**THE SCOPING ASSERTION WENT GREEN ON THE BUILD IT EXISTS TO CATCH**, and
+only falsifying found it (§54.5: a falsification that does not falsify is
+indistinguishable from a guard that works). Two causes, each its own lesson.
+
+**THE SECOND RIGHT-CLICK OF A PAGE DOES NOT LAND.** The first build ran it
+after the drag assertion, in the same page, so it was measuring nothing at
+all — and *nothing selected* is exactly what a correctly scoped build
+reports, which is why it read as a pass. One gesture per page load told the
+two apart.
+
+**AND THE CLICK WAS LANDING ON THE WRONG ELEMENT** (§93.4, recorded in this
+project three times and walked into a fourth). With every column showing the
+register scrolls sideways, so on a freshly landed page those two cells sit
+off the right-hand edge — or beneath the frozen last column, which floats
+over whatever scrolls under it (§373.2). Hit-tested, the probe read back
+`NOTHING` and `TD`. `rclick()` brings the cell into view first, the way a
+person does, and **the caller asserts WHERE the click landed before it
+asserts what was selected** — so a click that misses is reported as a miss
+rather than as an absence of selection.
+
+**IT ALSO PRODUCED A SCARE WORTH RECORDING**: a throwaway probe reported the
+Email as broken on the GOOD build, and the hit test named the cause —
+`BUTTON.kebab`. *A probe that clicks a coordinate proves something about
+that coordinate.*
+
+**AND THE FALSIFICATIONS WERE RUN AGAIN AFTER THE CHECK CHANGED**, which is
+the point of the whole detour: a falsification made before a check is
+rewritten proves nothing about the check that ships.
+
+**The server needed nothing and it is read off the diff** (§172): no `api/`,
+`lib/` or `db/` file, nothing stored moves, nothing is migrated, nobody is
+signed out (spec 029). The built file's bytes changed, so `sw.js` is bumped
+(§91) — and that bump reaches the OFFLINE copy alone, because the generator
+drops the half of the worker that carries the name (§316.10, §365).
+
+**RECORDED, NOT DONE**: a value cut by §88's 150px cap is selected whole
+including the part that is not on screen, which is right and is worth knowing
+before somebody reports it as a surprise.

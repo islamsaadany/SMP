@@ -6686,3 +6686,63 @@ what the generators produce.
 673,729** — never `sw.js`, whose served copy is byte-identical either side.
 **The branch is deliberately not fast-forwarded**, so main's tip stays
 unique until somebody has read the live site.
+
+## §378 — An address is taken whole (2026-09-20, spec 059) · **built, on the branch**
+
+Islam: *"can you make a right click on the email to highlight the whole email
+to copy on right click .. as it happens on the phone number."*
+
+**Measured first, and the report does not reproduce.** Since §377 both cells
+come off the same line, and driven in a real browser a right-click selects
+**nothing** on either, while a double-click and a drag each take the whole
+value on **both**. So what differs is his browser's idea of a word, not this
+table — which is why the answer could not be a difference between those two
+lines. *(The first run of that probe reported the reported fault, because it
+measured both boxes once up front and the email's double-click repainted the
+page underneath the Mobile coordinates — §222. One page load per gesture.)*
+
+**What was built:** `user-select:all` on those two values and nowhere else,
+so every gesture takes the whole of one in every browser. It is the
+product's own device — §43.8's issued-password box has carried it since it
+was written — not a new one.
+
+**The two costs were stated before he took them** (*"yes agreed for the
+question and build"*): a plain left-click highlights the value too (it copies
+nothing, so §377 stands), and a drag can no longer take part of an address.
+
+**Both cells, never one** — they are identical today, so changing only the
+Email would create his own complaint in reverse. **Scoped to those two**, and
+the check measures a column that was NOT asked about in the same run and
+requires it to select nothing, or a build that widened the rule to every
+value in every Setup table passes everything else (§94.2, §113.8).
+
+**Nothing visual moves**, measured: same widths, same row heights, same
+colours — so no mockup was owed (rule 1c).
+
+**Verified:** `people-dialog` all good with four new assertions; proved able
+to fail **twice from the sources** (§276), one break per decision, each
+asserted to have matched first (§344.1) and each reddening only its own:
+the rule removed **2 red**, printing the reported state verbatim; the rule
+widened **1 red** on the scoping assertion, printing `'Ashraf Laithy'` — the
+widened rule reaching a column nobody asked about. The tree was restored and
+rebuilt byte-identical to the build the breaks were made from (§343.9).
+
+**And two of my own new assertions proved nothing first (§378.1)**, found by
+falsifying rather than by reading. The scoping one went GREEN on the very
+build it exists to catch, because it ran after another right-click in the
+same page and the second right-click of a page does not land — *nothing
+selected* is also what a correctly scoped build reports. And the clicks were
+landing on the wrong element: with every column showing the register scrolls
+sideways, so those cells sit off the right edge or beneath the frozen last
+column (§373.2), and the hit test read back `NOTHING` and `TD`. Each gesture
+gets a fresh page now, the cell is brought into view first, and the check
+**asserts where the click landed before it asserts what was selected**
+(§93.4). Both falsifications were then run AGAIN, because one made before a
+check is rewritten proves nothing about the check that ships.
+
+**Nothing stored moves, nothing is migrated, no forced sign-out** — read off
+the diff, no `api/`, `lib/` or `db/` file (§172, spec 029). The built file's
+bytes changed, so `sw.js` is bumped to `v5.22-whole-values` (§91) — reaching
+the offline copy alone, since the generator drops the half carrying the name.
+
+**Not merged: `main` is Islam's word, on that merge.**

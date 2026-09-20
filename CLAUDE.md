@@ -10141,7 +10141,83 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;377: an address is a value, not a
+*Last Updated: 2026-09-20 &mdash; **&sect;378: an address is taken whole
+(spec 059).** Islam, of the build &sect;377 shipped: *"can you make a right
+click on the email to highlight the whole email to copy on right click .. as it
+happens on the phone number."* **MEASURED BEFORE ANYTHING WAS PROPOSED, AND THE
+REPORT DOES NOT REPRODUCE**: since &sect;377 both cells come off the same line,
+and driven in a real browser on a real row a **right-click selects NOTHING on
+either**, while a double-click and a drag each take the whole value on **both**.
+So what differs is his browser's own idea of what a word is, not this table
+&mdash; which is precisely why the answer could not be a difference between
+those two lines. **AND THE FIRST RUN OF THAT PROBE PRODUCED THE REPORTED FAULT
+BY MEASURING WRONGLY**: it read both boxes ONCE up front, and the email's
+double-click opens the editor and repaints, so the Mobile coordinates were
+stale and it reported *email selects, mobile does not* &mdash; &sect;222, and
+one page load per gesture is what separated the two readings. *A measurement
+that reproduces the complaint is not thereby a measurement of the complaint.*
+**THE ANSWER IS `user-select:all`, AND IT IS THE PRODUCT'S OWN DEVICE RATHER
+THAN A NEW ONE** (&sect;53.5): &sect;43.8's issued-password box has carried it
+since it was written, for exactly this reason &mdash; *a string somebody has to
+read out loud down a phone, so it has to be one unbroken run.* With it every
+gesture takes the whole value in every engine, so the behaviour stops depending
+on whose browser it is. **THE TWO COSTS WERE STATED BEFORE HE TOOK THEM**
+(*"yes agreed for the question and build"*): a plain left-click highlights the
+value too &mdash; it copies nothing, so &sect;377 stands whole, since what he
+removed was one click COPYING &mdash; and a drag can no longer take part of an
+address, the whole thing coming with it, which for an email or a phone number
+is almost always what was wanted. **BOTH CELLS, NEVER ONE**: they are identical
+today, so changing only the Email would create his own complaint in reverse.
+**SCOPED, AND THE SCOPING IS THE HALF A CHECK COULD MISS** &mdash; `.val` is
+every value in every Setup table, and `user-select:all` on all of them is a
+change nobody asked for (rule 1b), so the rule is `.cfg .val.selall` and the
+check measures a column that was NOT asked about **in the same run** and
+requires it to select nothing: a build that widened the rule satisfies every
+*"a right-click highlights the whole value"* assertion and quietly changes the
+whole product (&sect;94.2, &sect;113.8). **THE GESTURE IS DRIVEN, NEVER THE
+PROPERTY READ** (&sect;94.8, &sect;96): asking `getComputedStyle` for
+`user-select` passes on a build where the rule is declared and something
+outranks it, which is how &sect;373.2's box-shadow &mdash; a declaration that
+had never painted a pixel &mdash; survived for as long as it did. **NOTHING
+VISUAL MOVES AND IT WAS MEASURED, SO NO MOCKUP WAS OWED** (rule 1c): same
+widths, same row heights, same colours, the two builds the same picture; what
+changes is a behaviour, which a still cannot show. **Proved able to fail TWICE
+FROM THE SOURCES** (&sect;276), one break per decision, each asserted to have
+MATCHED before it was written (&sect;344.1) and each reddening **its own**
+assertions and no others: the rule removed **2 red**, printing
+`{'selected': '', …}`, the reported state verbatim; the rule widened to
+`.cfg .val` **1 red**, printing `{'selected': 'Ashraf Laithy'}` &mdash; the
+widened rule reaching a column nobody asked about, in its own words. The tree
+was restored and rebuilt **byte-identical** to the build the breaks were made
+from (&sect;343.9). **&sect;378.1 &mdash; AND TWO OF MY OWN NEW ASSERTIONS
+PROVED NOTHING FIRST**, found by falsifying rather than by reading: the
+scoping one went **GREEN on the very build it exists to catch** (&sect;54.5),
+because it ran after another right-click in the SAME page and the second
+right-click of a page does not land &mdash; and *nothing selected* is also
+what a correctly scoped build reports, which is why it read as a pass. And
+the clicks were landing on the wrong element (&sect;93.4, recorded here three
+times and walked into a fourth): with every column showing the register
+scrolls sideways, so on a freshly landed page those cells sit off the
+right-hand edge or beneath the frozen last column, which floats over whatever
+scrolls under it (&sect;373.2) &mdash; hit-tested, the probe read back
+`NOTHING` and `TD`, and a throwaway probe had meanwhile reported the Email
+broken on the GOOD build with the cause named as `BUTTON.kebab`. Each gesture
+gets a page of its own now, `rclick()` brings the cell into view the way a
+person does, and **the caller asserts WHERE the click landed before it
+asserts what was selected**, so a click that misses is reported as a miss
+rather than as an absence of selection. **And both falsifications were run
+AGAIN afterwards**, which is the point of the detour: one made before a check
+is rewritten proves nothing about the check that ships. **The server needed nothing and it is read off the diff**
+(&sect;172): no `api/`, `lib/` or `db/` file, nothing stored moves, nothing is
+migrated, nobody is signed out (spec 029). The built file's bytes changed, so
+`sw.js` is bumped (&sect;91) &mdash; reaching the OFFLINE copy alone, because
+the generator drops the half of the worker that carries the name (&sect;316.10,
+&sect;365). **RECORDED, NOT DONE**: a value cut by &sect;88's 150px cap is
+selected whole including the part that is not on screen, which is right and is
+worth knowing before somebody reports it as a surprise. **`main` untouched:
+the merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-20 &mdash; **&sect;377: an address is a value, not a
 control (spec 059).** Islam: *"please remvoe the 1 click copy bhavior I can
 always have a right click and copy the text."* **AT REST THE TWO BUILDS ARE THE
 SAME PICTURE, BYTE FOR BYTE**, and measuring that first is what decided how much

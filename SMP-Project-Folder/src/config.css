@@ -431,6 +431,14 @@
                    color:var(--ink-3); background:var(--surface); }
   .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }
+  /* A VALUE TAKEN WHOLE (§378). An email and a phone number are copied
+     entire or not at all, so every gesture selects the whole of one —
+     which is what makes the behaviour the same in every browser rather
+     than whatever that browser thinks a word is. The issued-password box
+     has said this since §43.8; this is that device, not a second one.
+     SCOPED, never on `.val` at large: a unit's name selected whole on a
+     click is a change nobody asked for (rule 1b). */
+  .cfg .val.selall { -webkit-user-select:all; user-select:all; }
 
   /* ══ The searchable dropdown (searchsel.js) ═════════════════════════
      The button stands where the <select> stood, so it inherits nothing it

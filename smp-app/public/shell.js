@@ -33205,9 +33205,30 @@ function renderPeople(){
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
         })()) : '') +
+      /* ── AN ADDRESS IS TAKEN WHOLE (§378) ──────────────────────────
+         Islam: "can you make a right click on the email to highlight the
+         whole email to copy on right click .. as it happens on the phone
+         number." MEASURED FIRST, AND THE TWO DO NOT DIFFER: since §377 both
+         cells are the same builder, and driving a real browser on a real row
+         says a right-click selects NOTHING on either, while a double-click
+         and a drag each select the whole value on BOTH. So what he is seeing
+         is his browser's own word-selection and not this table — which is
+         also why the answer cannot be a difference between these two lines.
+
+         `selall` is the product's own device rather than a new one: the
+         issued-password box has carried `user-select:all` since §43.8, for
+         exactly this reason — a string somebody copies in one piece, never a
+         part of one. With it, EVERY gesture takes the whole value in every
+         engine, so the behaviour stops depending on whose browser it is.
+
+         THE COST WAS STATED BEFORE HE TOOK IT: a plain left-click highlights
+         the value too (it copies nothing — §377 stands), and a drag can no
+         longer take part of an address. And it is SCOPED to these two, never
+         to `.val`, which is every value in every Setup table: a unit's name
+         selected whole on a click is a change nobody asked for (rule 1b). */
       (showCol("email")
-        ? pcell(p, "Email", valueCell(p.email, "val"), "wrapany") : '') +
-      (showCol("phone") ? pcell(p, "Mobile", valueCell(p.phone, "val mono")) : '') +
+        ? pcell(p, "Email", valueCell(p.email, "val selall"), "wrapany") : '') +
+      (showCol("phone") ? pcell(p, "Mobile", valueCell(p.phone, "val mono selall")) : '') +
       /* ── AND THE CELL IS THE PICKER NOW (§372) ─────────────────────
          `false` was right while the table only ever read: the × and the
          "+ role" control belonged to the dialog. What the cell draws is

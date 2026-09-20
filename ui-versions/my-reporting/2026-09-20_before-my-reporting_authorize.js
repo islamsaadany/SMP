@@ -29,11 +29,11 @@
    (spec 006 §4): a partial save leaves the browser holding a picture the
    database does not share, and its next save writes that picture back. */
 
-const R = require("./rules.cjs");
+const R = require("./rules.js");
 /* §234: the differ and this file must agree about which review fields are
    keyed by target — a field on one list and not the other travels whole and
    reverts every other function's report state (the incident §234 records). */
-const DIFF = require("./graph-diff.cjs");
+const DIFF = require("./graph-diff.js");
 
 /* ── Field families ───────────────────────────────────────────────
    What counts as REPORTING on each kind of row. Everything else on the same
@@ -408,19 +408,6 @@ function collect(stored, incoming, w) {
     const a = sr[field] || {}, b = ir[field] || {};
     Object.keys(a).concat(Object.keys(b)).forEach(function (t) {
       if (same(a[t], b[t])) return;
-      /* §379: an owner locking their OWN lines in one subject. Never
-         `reportState`, which speaks for the whole unit and is refused to
-         every bounded role — this closes the handful of rows that name one
-         person and leaves the unit's report open, which is §309's control one
-         row kind over. The key carries who, so one owner cannot lock
-         another's. */
-      if (field === "lines") {
-        const cut = String(t).indexOf("|");
-        add("lineDone", cut < 0 ? null : String(t).slice(0, cut),
-            "saving your own lines as a draft",
-            [{ id: String(t), who: cut < 0 ? "" : String(t).slice(cut + 1) }]);
-        return;
-      }
       if (field === "parked" && UNPARK(a, b, t)) {
         if (out.some(function (c) { return c.kind === "reportUnpark" && c.target === t; })) return;
         add("reportUnpark", t, "reopening the saved draft");
@@ -491,13 +478,6 @@ function collect(stored, incoming, w) {
      one — it is the same argument as `naming` directly above. */
   if (!same(sg.focusOff, ig.focusOff))
     add("setup", null, "whether focus measures are used at all");
-  /* §379: whether reporting follows the Owner column. SETUP, and the same
-     argument as the two switches above it — it decides whether a whole second
-     way of entering a figure exists, so a switch anybody could flip would be
-     no switch at all. NAMED, or a refusal reads "the group's lineOwners" and
-     sends nobody anywhere (§16.7). */
-  if (!same(sg.lineOwners, ig.lineOwners))
-    add("setup", null, "whether tactic owners enter their own lines");
   /* §266: the master presentation's running order. Deliberately NOT `setup`
      and not `deckHide` either: it hides nothing and scores nothing, it is the
      order the office runs a review in — so it gets a sentence of its own that
@@ -546,7 +526,7 @@ function collect(stored, incoming, w) {
   if (!same(sg.kb, ig.kb)) add("setup", null, "the knowledge base's answers");
   collectCapabilities(sg.capabilities, ig.capabilities, add);
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
-                                   "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
+                                   "naming", "focusOff", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, PLAN_FROM, PLAN_TO]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
@@ -682,32 +662,6 @@ function addFigures(w, unitKey, storedUnit, rows, what, add) {
   Object.keys(byOwner).forEach(function (who) {
     add("sourceReporting", unitKey, what + " entered by " +
         (byOwner[who][0].label || who), byOwner[who]);
-  });
-}
-
-/* §379: A TACTIC WHOSE OWNER ENTERS IT. `addFigures` above is the same split
-   one row kind over, and it is deliberately not reused: that one resolves a
-   register KEY off the figure's own `src`, and a plan's Owner is a NAME the
-   custodian picked (§130.1) — so the two identify their person differently and
-   say so differently when they refuse. What IS shared is the rule underneath:
-   the cycle is open and this row is yours, and nothing about a grant, a role or
-   where the person is attached is asked at all.
-
-   Resolved through the STORED row, so a save cannot name itself the owner and
-   enter the figure in the same request (§42.2). Unowned tactics — and every
-   tactic at all while the switch is off — fall through to the unit exactly as
-   before. */
-function addOwnedTactics(w, unitKey, storedPillar, rows, add, mine) {
-  const byOwner = {};
-  rows.forEach(function (r) {
-    let stored = null;
-    (storedPillar.tactics || []).forEach(function (t) { if (t.id === r.id) stored = t; });
-    const who = R.lineOwned(w, stored) ? R.lineOwnerName(stored) : "";
-    if (!who) { mine.push(r); return; }
-    (byOwner[who] = byOwner[who] || []).push(Object.assign({}, r, { owner: who }));
-  });
-  Object.keys(byOwner).forEach(function (who) {
-    add("lineReporting", unitKey, "figures entered by " + who, byOwner[who]);
   });
 }
 
@@ -1040,7 +994,7 @@ function collectUnit(key, su, iu, add, w) {
         function () {},
         function (rows) { planMoved = true; keep(planRows, rows); });
       splitRows(a.tactics, b.tactics, REPORT.tactic,
-        function (rows) { addOwnedTactics(w, key, a, rows, add, moved); },
+        function (rows) { rows.forEach(function (x) { moved.push(x); }); },
         function (rows) { planMoved = true; keep(planRows, rows); });
     });
     if (moved.length) add("unitReporting", key, "reported figures", moved);
@@ -1812,46 +1766,6 @@ function authorize(stored, incoming, person) {
           const label = (ch.rows || [])[0] && (ch.rows || [])[0].label;
           no("That figure is entered by " + (label || "somebody else") +
              " — " + t + " does not enter it.");
-        }
-        return;
-      }
-
-      /* §379: LOCKING YOUR OWN LINES. The key names the person, so the only
-         question is whether it names YOU — a bounded role holds no
-         `reportState` and must not gain one by another road (§309's own
-         reasoning: parking, submitting, the note and the slides stay the
-         unit's). */
-      case "lineDone": {
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
-          return;
-        }
-        if (smo) return;
-        const notYou = (ch.rows || []).filter(function (r) { return r.who !== person.key; });
-        if (notYou.length) {
-          no("Those are somebody else's lines to save.");
-        }
-        return;
-      }
-
-      /* §379: A LINE ENTERED BY ITS OWNER. The same three gates
-         `sourceReporting` above applies, asking the plan's NAME rather than a
-         register key — `namedOn` is the one matcher (§130.7's runs, a typed
-         short name), so a name the page accepts is a name the server accepts.
-         The office still enters anything; the unit does not, which is the
-         whole of what the switch turns on. */
-      case "lineReporting": {
-        if (locked && !office) {
-          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
-          return;
-        }
-        if (smo) return;
-        const notYours = (ch.rows || []).filter(function (r) {
-          return !R.ownedBy({ owner: r.owner }, person);
-        });
-        if (notYours.length) {
-          no("That line is entered by " + (notYours[0].owner || "its owner") +
-             " \u2014 it is not yours to report.");
         }
         return;
       }

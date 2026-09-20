@@ -4351,5 +4351,186 @@ console.log("\n42 · the two kinds of Forefront row (spec 058)");
         quiet.map(function (c) { return c.kind; }).join(","));
 })();
 
+/* ── 43 · MY REPORTING: the owner of a line enters it (§379, spec 062) ──
+   THE SERVER IS THE HALF THAT DECIDES (§42), and until this section it had
+   none: `scripts/test-my-reporting.js` asks the SCREEN, and every narrowing
+   it measures is `canEnterLine`'s one door — so falsifying the shared rule's
+   own branch left that file entirely GREEN (§54.5). A rule with no assertion
+   is a rule somebody deletes next month.
+
+   THE STATE IS MADE, TWICE OVER (§255). The switch ships off, so the seed
+   cannot exercise any of this; and every collaborator in the worked example
+   is a bare first name, which `nameRuns()`'s two-word floor matches to NOBODY
+   (§130.7) — so a fixture using them would watch a refusal that was already a
+   refusal and call the narrowing proved.
+
+   BOTH ENDS EVERY TIME (§94.2): with the switch OFF the server must classify
+   and answer byte for byte what it answered before, or "nothing anybody holds
+   moves" is a promise rather than a measurement. */
+console.log("\n43 · my reporting (spec 062)");
+(function () {
+  const base = clone(SEED);
+  const uk = base.unitKeys[0];
+  const unit = base.units[uk];
+  const pil = (unit.items || [])[0];
+  const tac = ((pil || {}).tactics || [])[0];
+  check("§379: the fixture found a tactic to own", !!tac, uk);
+  if (!tac) return;
+
+  /* An owner the register recognises, and somebody else who is NOT. */
+  const owner = base.people.filter(function (p) {
+    return p.key !== "smo" && p.key !== (base.unitRoles[uk] || {}).head &&
+           p.key !== (base.unitRoles[uk] || {}).custodian;
+  })[0];
+  /* THE COLLABORATOR MUST HOLD NOTHING ELSE, or the Contributor floor is never
+     reached at all — `personRoles()` derives it only for somebody with no
+     other role (§147.8's own condition), so a person who happens to own a
+     project somewhere else would be refused for a different reason entirely
+     and the switch would look load-bearing when it was not. */
+  const other = base.people.filter(function (p) {
+    return p.key !== owner.key && !R.personRoles(R.worldOf(base), p).length;
+  })[0];
+  check("§379: ...and somebody holding nothing at all, to be the collaborator",
+        !!(owner && other && owner.key !== other.key),
+        other ? other.key : "(nobody on the register holds no role)");
+  if (!owner || !other) return;
+
+  base.group.lineOwners = true;
+  tac.owner = owner.name;
+  owner.unit = uk; other.unit = uk;
+  base.review = base.review || {}; base.review.state = "open";
+
+  const say = function (f) { const inc = clone(base); f(inc); return inc; };
+  const at = function (inc) {
+    return inc.units[uk].items[0].tactics[0];
+  };
+  const kindsOf = function (inc, who) {
+    return (A.collect(base, inc, R.worldOf(base)) || [])
+             .map(function (c) { return c.kind + ":" + (c.what || ""); });
+  };
+  const verdict = function (inc, who) {
+    return A.authorize(base, inc, personOf(base, who));
+  };
+
+  /* — the figure, classified as its own kind and NAMED — */
+  const figure = say(function (i) { at(i).actual = "42"; });
+  const ks = kindsOf(figure);
+  check("§379: a tactic's figure classifies as lineReporting",
+        ks.some(function (k) { return k.indexOf("lineReporting:") === 0; }),
+        ks.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+  check("§379: ...and the entry NAMES whose line it is (§16.7)",
+        ks.some(function (k) { return k.indexOf(owner.name) > -1; }), ks.join(" / "));
+
+  check("§379: the owner enters their own line", verdict(figure, owner.key).ok,
+        (verdict(figure, owner.key).refusals || []).join(" / "));
+  check("§379 REFUSED: somebody else does not", !verdict(figure, other.key).ok,
+        "was ALLOWED");
+  check("§379: ...and the refusal names the owner rather than a rule number",
+        (verdict(figure, other.key).refusals || []).join(" ").indexOf(owner.name) > -1,
+        (verdict(figure, other.key).refusals || []).join(" / "));
+  check("§379: the office still enters it", verdict(figure, "smo").ok,
+        (verdict(figure, "smo").refusals || []).join(" / "));
+
+  /* — a LOCKED cycle refuses it, like every other figure — */
+  (function () {
+    const shut = clone(base); shut.cycle = shut.cycle || {}; shut.cycle.locked = true;
+    const inc = clone(shut); inc.units[uk].items[0].tactics[0].actual = "42";
+    check("§379 REFUSED: a locked cycle takes nothing, owner or not",
+          !A.authorize(shut, inc, personOf(shut, owner.key)).ok, "was ALLOWED");
+  })();
+
+  /* — THE BRANCH THE SCREEN'S OWN CHECK CANNOT REACH: a COLLABORATOR.
+       `canEnterLine` refuses them at the door in the browser, so removing
+       this narrowing leaves that file green — the server has no such door,
+       and this is where "contributor should not report, the owner only"
+       is actually enforced. Both ends, with the switch as the only
+       difference between them. — */
+  (function () {
+    const withColl = clone(base);
+    const t = withColl.units[uk].items[0].tactics[0];
+    t.owner = owner.name;
+    t.collaborators = [other.name];
+    withColl.access = withColl.access || {};
+    withColl.access.contrib = withColl.access.contrib || {};
+    withColl.access.contrib.a_unit_own = "edit";
+    const post = function (st) {
+      const inc = clone(st); inc.units[uk].items[0].tactics[0].actual = "7";
+      return A.authorize(st, inc, personOf(st, other.key));
+    };
+    check("§379: the fixture made a collaborator the register recognises",
+          R.namedOn({ owner: "", collaborators: [other.name] }, other), other.name);
+
+    const off = clone(withColl); delete off.group.lineOwners;
+    check("§379: with the switch OFF a named collaborator enters it, as today",
+          post(off).ok, (post(off).refusals || []).join(" / "));
+    check("§379 REFUSED: with it ON only the owner does",
+          !post(withColl).ok, "was ALLOWED");
+  })();
+
+  /* — the lock is a draft of YOUR OWN lines and nobody else's — */
+  (function () {
+    const key = uk + "|" + owner.key;
+    const mine = say(function (i) {
+      i.review.lines = {}; i.review.lines[key] = { by: owner.key, at: "2026-09-20" };
+    });
+    const lk = kindsOf(mine);
+    check("§379: saving your lines as a draft classifies as lineDone",
+          lk.some(function (k) { return k.indexOf("lineDone:") === 0; }),
+          lk.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+    check("§379: ...and you may", verdict(mine, owner.key).ok,
+          (verdict(mine, owner.key).refusals || []).join(" / "));
+
+    const theirs = say(function (i) {
+      i.review.lines = {}; i.review.lines[uk + "|" + other.key] = { by: other.key, at: "2026-09-20" };
+    });
+    check("§379 REFUSED: saving somebody ELSE's lines is not yours to do",
+          !verdict(theirs, owner.key).ok, "was ALLOWED");
+    check("§379: ...and the review map travels per key, never whole (§234)",
+          (R.REVIEW_PER_TARGET || require("../lib/graph-diff.js").REVIEW_PER_TARGET || [])
+            .indexOf("lines") > -1,
+          JSON.stringify(require("../lib/graph-diff.js").REVIEW_PER_TARGET));
+  })();
+
+  /* — THE SWITCH IS THE OFFICE'S, AND BOTH EDITS GO TOGETHER (§259.2).
+       Classified but unswept adds a second entry; swept but unclassified is
+       INVISIBLE and therefore allowed to everybody, which is the dangerous
+       direction and the one a presence-only assertion misses. — */
+  (function () {
+    const flip = clone(SEED); flip.group.lineOwners = true;
+    const fk = (A.collect(SEED, flip, R.worldOf(SEED)) || [])
+                 .map(function (c) { return c.kind; });
+    check("§379: turning the switch on classifies as setup",
+          fk.indexOf("setup") > -1,
+          fk.join(",") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+    check("§379: ...and it is the office's",
+          A.authorize(SEED, flip, personOf(SEED, "smo")).ok,
+          (A.authorize(SEED, flip, personOf(SEED, "smo")).refusals || []).join(" / "));
+    if (custKey)
+      check("§379 REFUSED: ...and a unit's custodian may not set it",
+            !A.authorize(SEED, flip, personOf(SEED, custKey)).ok, "was ALLOWED");
+    /* AND EXACTLY ONCE. The other half of §259.2, which no verdict can see:
+       classified-and-unswept is refused to the same people and classifies
+       TWICE — `setup:whether tactic owners enter their own lines` beside
+       `unknown:the group's lineOwners` — so the change log gains a phantom
+       row and a refusal names the stored field rather than the control that
+       sets it (§16.7). Measured; both people answer the same either way. */
+    check("§379: ...and exactly once, never as setup AND unknown (§259.2)",
+          fk.length === 1,
+          (A.collect(SEED, flip, R.worldOf(SEED)) || [])
+            .map(function (c) { return c.kind + ":" + c.what; }).join(" / "));
+  })();
+
+  /* — AND WITH IT OFF, NOTHING MOVES. The whole promise of the switch. — */
+  (function () {
+    const off = clone(base); delete off.group.lineOwners;
+    const inc = clone(off); inc.units[uk].items[0].tactics[0].actual = "42";
+    const ks2 = (A.collect(off, inc, R.worldOf(off)) || [])
+                  .map(function (c) { return c.kind; });
+    check("§379: with the switch off a tactic's figure is unitReporting as before",
+          ks2.indexOf("unitReporting") > -1 && ks2.indexOf("lineReporting") < 0,
+          ks2.join(","));
+  })();
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

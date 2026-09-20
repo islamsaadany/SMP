@@ -339,13 +339,7 @@
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
-        render: function(k){ return renderFnReport(k); } },
-      /* §379: MY REPORTING. Drawn only on the person's own place and only for
-         somebody who owns a line somewhere, so nobody else meets it — and
-         gated by `when` alone, because being named IS the permission and
-         there is no cell for it to sit in (§16.7's model, one column over). */
-      { k:"mylines", ac:"c_mylines", label:"My reporting",
-        when: myLinesHere, render: function(){ return renderMyLines(); } }
+        render: function(k){ return renderFnReport(k); } }
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -356,26 +350,14 @@
        whether a company CEO sees the group and the other companies. */
     co: [
       { k:"performance", ac:"g_perf", label:"Performance", primary:true,
-        render:renderCompanyPerformance },
-      /* §379: MY REPORTING. Drawn only on the person's own place and only for
-         somebody who owns a line somewhere, so nobody else meets it — and
-         gated by `when` alone, because being named IS the permission and
-         there is no cell for it to sit in (§16.7's model, one column over). */
-      { k:"mylines", ac:"c_mylines", label:"My reporting",
-        when: myLinesHere, render: function(){ return renderMyLines(); } }
+        render:renderCompanyPerformance }
     ],
     group: [
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
-      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
-      /* §379: MY REPORTING. Drawn only on the person's own place and only for
-         somebody who owns a line somewhere, so nobody else meets it — and
-         gated by `when` alone, because being named IS the permission and
-         there is no cell for it to sit in (§16.7's model, one column over). */
-      { k:"mylines", ac:"c_mylines", label:"My reporting",
-        when: myLinesHere, render: function(){ return renderMyLines(); } }
+      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
     ],
     unit: [
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
@@ -422,13 +404,7 @@
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
-        render: function(u){ return renderReport(u); } },
-      /* §379: MY REPORTING. Drawn only on the person's own place and only for
-         somebody who owns a line somewhere, so nobody else meets it — and
-         gated by `when` alone, because being named IS the permission and
-         there is no cell for it to sit in (§16.7's model, one column over). */
-      { k:"mylines", ac:"c_mylines", label:"My reporting",
-        when: myLinesHere, render: function(){ return renderMyLines(); } }
+        render: function(u){ return renderReport(u); } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 
@@ -1089,13 +1065,7 @@
      currently-open unit's answer for every unit in the navigation. */
   function allowed(defs, target){
     return defs.filter(function(d){
-      /* §379 HANDS `when` THE TARGET. Every existing one ignores it, which is
-         why this is safe — and My reporting cannot be written without it: the
-         tab belongs on the person's own place and on no other destination, so
-         a `when` that can only see the currently-open one would draw it
-         everywhere or nowhere (§37's own reason for `allowed` taking a target
-         at all). */
-      if (d.when && !d.when(target || TARGET)) return false;
+      if (d.when && !d.when()) return false;
       return grantAt(d.ac, target || TARGET) !== "none";
     });
   }
@@ -4759,34 +4729,6 @@
       NEWCYCLE = null;
       paint();
     });
-    /* ── §379: MY REPORTING'S THREE CONTROLS ──────────────────────────
-       The FIGURE needs none of its own — the boxes are `repEntry`'s, so they
-       are the unit's own `[data-rep]` fields carrying `data-repu`, and the one
-       handler below resolves each against its own subject exactly as it has
-       for "Figures I report" since that page existed (§53.5).
-
-       The band filter is a SCREEN state and nothing else: it is not stored, it
-       is not in the graph, and it never leaves the page (§25, §47.1). */
-    document.querySelectorAll("[data-linesf]").forEach(function(el){
-      el.addEventListener("click", function(){
-        MYLINEF = el.dataset.linesf || ""; paint();
-      });
-    });
-    /* SAVE DRAFT AND REOPEN, per subject. Islam: *"the sense of saving that we
-       do in the reporting already gives the feel of saving that locks the
-       reporting with ability to open again"* — so it is §263's own pair rather
-       than a control of this page's, and it locks THIS person's lines in THIS
-       subject, leaving the unit's report open (§309). */
-    document.querySelectorAll("[data-lineslock]").forEach(function(el){
-      el.addEventListener("click", function(){
-        setLineLock(el.dataset.lineslock, true); paint();
-      });
-    });
-    document.querySelectorAll("[data-linesopen]").forEach(function(el){
-      el.addEventListener("click", function(){
-        setLineLock(el.dataset.linesopen, false); paint();
-      });
-    });
     document.querySelectorAll("[data-rep]").forEach(function(el){
       el.addEventListener("change", function(){
         /* `current` is the open destination, which is the unit on its own
@@ -5161,17 +5103,6 @@
        a switch that destroys data is not a switch, and turning it back on must
        find the page as it was left. The namings simply stop being reachable,
        which is what "hidden" means. */
-    /* §379: the one switch that moves who enters a figure. Stored as an
-       ABSENCE — off is what an untouched tenant already is, so turning it back
-       off must leave the graph byte-identical to one that never heard of it
-       (§50.6), or every save afterwards carries a phantom change for ever. */
-    document.querySelectorAll("[data-lineown]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (b.dataset.lineown === "1") GROUP.lineOwners = true;
-        else delete GROUP.lineOwners;
-        paint();
-      });
-    });
     document.querySelectorAll("[data-naming]").forEach(function(b){
       b.addEventListener("click", function(){
         GROUP.naming = b.dataset.naming === "1";

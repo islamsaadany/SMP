@@ -5143,56 +5143,6 @@ function namingSwitch(mayEdit, editing){
     '</span></div>';
 }
 
-/* ── §345: REPORTING FOLLOWS THE OWNER COLUMN ─────────────────────────
-   `namingSwitch`'s own row, class for class, because it is the same KIND of
-   decision one column over — who is master of a number — and a second control
-   shape for it would be two answers to one question (§53.5).
-
-   OFF, AND THAT IS THE WHOLE REASON IT IS A SWITCH. Turning it on MOVES who
-   enters a figure: every tactic that already carries an owner changes hands at
-   once, and nobody chose that. Islam: *"align with me more not to ruin any
-   access."* Off, every rule in the product answers exactly what it answered
-   yesterday — which is what makes "nothing on Roles & access moves" a
-   measurement rather than a promise.
-
-   THE COUNT IS THE COST, SAID BEFORE THE PRESS. A switch whose consequence is
-   "26 lines change hands" must say 26 (§35, §124), and it says it whichever
-   way the switch is set, because somebody turning it OFF needs to know what
-   they are taking back. */
-function lineOwnersSwitch(mayEdit, editing){
-  if (!mayEdit) return "";
-  var on = SMPRules.lineOwnersOn(world());
-  /* Counted off the PLAN rather than off `myLineRows`, which is scoped to the
-     viewer — this is the tenant's number and the office is not an owner. */
-  var owned = 0;
-  myLineTargets().forEach(function(t){
-    var subj = unitLike(t);
-    if (!subj) return;
-    (subj.items || []).forEach(function(p){
-      (p.tactics || []).forEach(function(x){
-        if (SMPRules.lineOwnerName(x)) owned++;
-      });
-    });
-  });
-  return '<div class="imp-row" style="margin:16px 0 0">' +
-    '<span class="cfg-lab">Tactic owners enter their own lines</span>' +
-    (editing
-      ? '<span class="minisw">' +
-          '<button data-lineown="0" aria-pressed="' + (!on) + '">Off</button>' +
-          '<button data-lineown="1" aria-pressed="' + on + '">On</button></span>'
-      : (on ? '<span class="pill attn">On</span>' : '<span class="pill none">Off</span>')) +
-    '<span class="why" style="margin:0">' +
-      (on
-        ? 'The person a tactic names as its <b>Owner</b> enters its figure, on their own ' +
-          '<b>My reporting</b> tab \u2014 and a collaborator enters none. ' +
-          '<b>' + owned + '</b> ' + plural(owned, "line") + ' ' +
-          (owned === 1 ? 'is' : 'are') + ' entered this way.'
-        : 'The unit enters every figure. Turning this on moves <b>' + owned + '</b> ' +
-          plural(owned, "line") + ' to the ' + (owned === 1 ? 'person' : 'people') +
-          ' the plan names as owner.') +
-    '</span></div>';
-}
-
 function renderSetsSetup(){
   var mayEdit = grant("c_sets") === "edit";
   var editing = mayEdit && EDITING.sets;
@@ -5488,117 +5438,6 @@ function renderSourceSetup(){
    so it gets its own surface for the window. Rows come from every unit at
    once — that is the point, Finance enters revenue once per unit in one
    place rather than visiting ten pages. */
-/* ── MY REPORTING (§345, spec 057) ────────────────────────────────────
-   Islam: *"the tab of what I report is not a room it a slice of reporting
-   that's all in the same strategy module and it needs a better name as a tab
-   beside the reporting"*, then *"case 2 no units appear in navigation. he
-   sees his lines and all his lines can be tagged or filtered by the unit he is
-   reporting or grouped."*
-
-   BOTH OF HIS CASES ARE ONE RULE: the tab sits on the person's OWN place, and
-   the units they own lines in are BANDS on that page. Nothing about the
-   navigation moves — measured, every bounded role already ships "none" for
-   another unit, so a foreign unit could never have appeared there (§37's
-   areas). The band names the unit; the chips above it are drawn only where
-   there is a second one to choose (§32, §61: a picker offering one option is
-   a door behind a door), which is the whole of what a "filter" is here.
-
-   THE CELL IS THE UNIT'S OWN (§53.5). `repEntry` is the same builder the
-   Reporting page draws, asked with `where: "mine"` — so a yes/no line, a
-   tactic measured by its outcome and a plain per-cent are all asked here
-   exactly as they are asked there, and a row kind added tomorrow arrives with
-   no edit. */
-var MYLINEF = "";   /* which band is being shown; "" is all of them */
-function renderMyLines(){
-  var rows = myLineRows();
-  if (!rows.length) {
-    return '<div class="note">No line is yours to report. A tactic is yours when the plan ' +
-      'names you as its <b>Owner</b> \u2014 the SMO sets that on the unit\u2019s plan.</div>';
-  }
-  var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
-  var byT = {}, order = [];
-  rows.forEach(function(r){
-    if (!byT[r.target]) { byT[r.target] = []; order.push(r.target); }
-    byT[r.target].push(r);
-  });
-  /* A chip for a band that is no longer there (the plan moved under a stale
-     screen) must not hide every row: the filter falls back to all (§61). */
-  if (MYLINEF && order.indexOf(MYLINEF) < 0) MYLINEF = "";
-  var done = rows.filter(lineAnswered).length;
-
-  var chips = order.length < 2 ? "" :
-    '<div class="kv linechips"><span class="cfg-lab">Showing</span>' +
-    [""].concat(order).map(function(t){
-      return '<button class="pill uchip' + (MYLINEF === t ? " on" : "") +
-        '" data-linesf="' + esc(t) + '">' +
-        esc(t === "" ? "All" : placeLabel(t)) + '</button>';
-    }).join("") + '</div>';
-
-  var blocks = order.filter(function(t){ return !MYLINEF || MYLINEF === t; }).map(function(t){
-    var list = byT[t], n = list.filter(lineAnswered).length;
-    var shut = lineLockShut(t);
-    var body = '<table class="cfg"><thead><tr>' +
-        '<th style="width:34%">Tactic</th><th style="width:26%">What it produced</th>' +
-        '<th class="num" style="width:16%">' + REP_TGT_HEAD + '</th>' +
-        '<th class="cc" style="width:16%">YTD actual</th>' +
-        '<th class="cc" style="width:10%">Progress</th>' +
-      '</tr></thead><tbody>' + list.map(function(r){
-        var oc = outcomeOf(r.obj);
-        /* THE TARGET CELL IS THE REPORTING PAGE'S OWN, composed the same way
-           (§344's builder, with the whole behind it) — a benchmark spelt one
-           way here and another way there is the drift a second table always
-           starts with (§53.5). */
-        var bench = tacticBenchmark(r.obj);
-        var whole = onOutcome(r.obj) || oc ? outcomeTargetShown(r.obj) : null;
-        var pr = tacticProgress(r.obj);
-        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td>' +
-            esc(r.obj.name || "\u2014") +
-            (r.pillar && r.pillar.name
-              ? ' <span class="why" style="margin:0">' + esc(r.pillar.name) + '</span>' : '') + '</td>' +
-          '<td>' + (oc && oc.name ? esc(oc.name)
-                                  : '<span class="why" style="margin:0">how far it got</span>') + '</td>' +
-          '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
-            (whole && whole !== bench && !SMPRules.isYesNo(r.obj.outTarget)
-              ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') + '</td>' +
-          '<td class="cc">' + repEntry(r.target, r, "mine") + '</td>' +
-          '<td class="cc">' + (pr == null
-              ? '<span class="pill kind">Not reported</span>'
-              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>') + '</td></tr>';
-      }).join("") + '</tbody></table>';
-    return section("", esc(placeLabel(t)) +
-      ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +
-      n + ' of ' + list.length + ' entered</span>', null, body + lineBar(t, list, n, shut, open));
-  }).join("");
-
-  return '<div class="kv">' +
-      '<span class="pill kind">' + done + ' of ' + rows.length + ' entered</span>' +
-      '<span class="pill ' + (open ? "good" : "none") + '">' +
-        (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
-    (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
-      'This is a record until the SMO opens the next one.</div>') +
-    chips + blocks +
-    '<div class="note"><b>You enter the figure; the unit writes the note and submits.</b> ' +
-      'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
-}
-/* THE LOCK IS THE REPORTING BAR'S OWN PAIR (§263, §309), not a second control:
-   Save draft while there is anything to do, then the state word beside Reopen.
-   Drawn per band, because each unit submits its own report and one button
-   across them all would freeze an owner out of a unit still working. */
-function lineBar(t, list, n, shut, open){
-  if (!open) return "";
-  var left = list.length - n;
-  if (shut) {
-    return '<div class="repchrome"><span class="rc-state">Draft saved</span>' +
-      '<span class="why" style="margin:0">' + esc(placeLabel(t)) +
-      ' \u00b7 your lines are locked. The unit still submits its own report.</span>' +
-      '<button class="rc-reopen quiet" data-linesopen="' + esc(t) + '">Reopen</button></div>';
-  }
-  return '<div class="repchrome"><span class="why" style="margin:0">' +
-    (left ? left + ' ' + plural(left, "figure") + ' still to enter for ' + esc(placeLabel(t))
-          : 'Every line of yours here is entered.') + '</span>' +
-    '<button class="rc-submit" data-lineslock="' + esc(t) + '">Save draft</button></div>';
-}
-
 function renderMySources(){
   var rows = mySourceRows();
   if (!rows.length) {
@@ -7061,7 +6900,6 @@ function renderCycle(){
             'conversation about whether it is the right number stays between the two ' +
             'teams \u2014 this only decides who enters it.</div>')
       : '') +
-    section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
     section("", "Who has reported", null,
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +

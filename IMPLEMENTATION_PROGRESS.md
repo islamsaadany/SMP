@@ -6531,3 +6531,54 @@ which is the rule for keeping a deployment from being raced away.
 changed, nothing reads the new tables, and the migration only adds its own
 eight.
 
+
+---
+
+## 2026-09-20 — My reporting: the lines a tactic's owner enters (§379, spec 062)
+
+**On the branch, not merged.** The merge is Islam's word, on that merge.
+
+**What he asked.** Whether a tactic's owner can report their own tactic. They
+could not — and the honest answer came with the number: every one of the
+worked example's 83 tactics names an owner, and the machinery that lets
+somebody enter a figure they are named on walks a subject's objectives and its
+measures and **never its tactics**.
+
+**What is built.** A **My reporting** tab beside Reporting, holding the lines
+the plan names this person on, grouped by unit with a filter when there is more
+than one. They enter figures; the note and the submission stay the unit's. On
+the unit's own Reporting page those same rows are read-only, so there is one
+way in. Save draft locks their own lines and Reopen opens them — per person and
+per subject, so one owner's draft never touches another's. And the welcome
+screen tells somebody their lines are waiting.
+
+**What does not move, which was the constraint he set.** Nothing on Roles &
+access. One tenant switch, shipping **off**, stored as an absence — so an
+untouched tenant behaves byte for byte as it does today, and both checks assert
+that end as hard as the other. No migration and no schema change.
+
+**Two things I got wrong and corrected in front of him.** The first drawing put
+two foreign units in somebody's navigation; measuring says a bounded role can
+never see one, so the harder-looking case cost nothing. And I told him *My
+reporting* was a name already taken; it renders on no screen, and the stale
+label is brought into step in the same edit.
+
+**The thing worth keeping from the building.** A narrowing I had written turned
+out to be reached by nothing — both checks stayed green with it removed — and
+what it *would* have done is reverse an earlier decision of his, that being
+named a collaborator on a milestone is a reporting right. He asked about
+tactics. It is deleted, and the decisions document records why rather than
+leaving an absence.
+
+**Checked.** The rules and the page: 53 assertions, proved able to fail six
+ways. The server: 704 assertions, proved able to fail eight ways, including the
+direction that matters — a stranger being allowed. Everything rebuilt and the
+served copies regenerated.
+
+**What could not be checked here, said plainly.** This machine has the browser
+but not the driver that steers it, so no screen check could be run at all —
+including the new one, which is written and waiting for somebody with a
+browser. Nothing on a screen has been driven by a machine in this round; the
+claims about what is drawn come from calling the product's own renderer.
+
+**Waiting on Islam**: the merge.

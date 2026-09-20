@@ -10214,8 +10214,42 @@ migrated, nobody is signed out (spec 029). The built file's bytes changed, so
 the generator drops the half of the worker that carries the name (&sect;316.10,
 &sect;365). **RECORDED, NOT DONE**: a value cut by &sect;88's 150px cap is
 selected whole including the part that is not on screen, which is right and is
-worth knowing before somebody reports it as a surprise. **`main` untouched:
-the merge is Islam's word, on that merge.***
+worth knowing before somebody reports it as a surprise.
+
+**&sect;378.2 &mdash; MERGED TO `main` 2026-09-20 on Islam's word**, and
+**`main` HAD NOT MOVED**, measured rather than assumed (&sect;4's
+fetch-and-look): it stood at &sect;377.6, this commit's own parent, so the
+merge is a clean **fast-forward** and *the tree pushed is byte-for-byte the
+tree that was verified* &mdash; no resolution, no rebuild, nothing
+recombined, which is the strongest case this project ever gets and is worth
+naming because every other merge in this log had to earn the same claim the
+hard way. **&sect;378 was free on `main`**, checked and not assumed, so no
+renumber was owed (&sect;264.3). **`sw.js` CONFIRMED IMMEDIATELY BEFORE THE
+PUSH** (&sect;94.16): `v5.22-whole-values` against main's `v5.21`, a name the
+history has never held, one `const SHELL`, `node --check` clean
+(&sect;146.2). **AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE
+BRANCH TIP WAS ALREADY PUSHED** (&sect;91, by &sect;357.4's road): Vercel
+deduplicates by SHA, so fast-forwarding `main` onto a commit the branch ref
+already holds is ONE deployment and which ref gets it is a race already lost
+&mdash; *the way back is a commit `main` holds and the branch does not, and
+it must be one worth making*, which the record owed anyway, since
+&sect;378's own block still read *"main untouched"* over a merge that had
+happened. **&sect;91.5'S LIVE READ COULD NOT BE MADE FROM HERE AND IS SAID
+RATHER THAN CLAIMED** (&sect;54.5, rule 3a): this environment's egress policy
+refuses `smp-orpin-tau.vercel.app` at the proxy's own CONNECT (403), which
+its README says to report rather than route around &mdash; **nobody here has
+seen production serve this commit**. **THE WITNESS IS `shell.js` AND
+`platform.css`, NEVER `sw.js`** (&sect;365, &sect;367), whose served copy is
+**4,104 bytes on both builds** because the generator drops the half carrying
+the name: `shell.js` **3,843,142 &rarr; 3,844,669** and `platform.css`
+**673,729 &rarr; 674,285**, both LARGER, this round being an addition where
+&sect;377 was a removal, and both asserted to have MOVED or a match would
+hold either way (&sect;113.8). **NO FORCED SIGN-OUT IS OWED, READ OFF THE
+DIFF** (spec 029): not one `api/`, `lib/` or `db/` file is in it. **THE
+RESIDUE IS THE ONE &sect;365 AND &sect;367 BOTH NAMED, UNCHANGED**: with the
+served worker's bytes unmoved no `controllerchange` fires, so &sect;258's
+*"A newer version of the platform is ready"* is not offered and a tab left
+open keeps its old shell until somebody reloads it.***
 
 *Earlier: 2026-09-20 &mdash; **&sect;377: an address is a value, not a
 control (spec 059).** Islam: *"please remvoe the 1 click copy bhavior I can

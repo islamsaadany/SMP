@@ -53926,3 +53926,55 @@ drops the half of the worker that carries the name (§316.10, §365).
 **RECORDED, NOT DONE**: a value cut by §88's 150px cap is selected whole
 including the part that is not on screen, which is right and is worth knowing
 before somebody reports it as a surprise.
+
+## §378.2 — MERGED TO `main` (2026-09-20, spec 059)
+
+Islam: *"merge to main"*, which is the word §4 requires on that merge.
+
+**MAIN HAD NOT MOVED**, measured rather than assumed (§4's fetch-and-look):
+`origin/main` was at §377.6, which is this commit's own parent, so the merge
+is a clean **fast-forward** and *the tree pushed is byte-for-byte the tree
+that was verified* — no resolution, no rebuild, nothing recombined. That is
+the strongest case this project ever gets, and it is worth naming because
+every other merge in this log had to earn the same claim the hard way.
+
+**§378 WAS FREE**, checked and not assumed: `main` holds it nought times, so
+no renumber was owed (§264.3).
+
+**`sw.js` CONFIRMED IMMEDIATELY BEFORE THE PUSH** (§94.16): main carries
+`v5.21-plain-values`, this carries `v5.22-whole-values`, a name the history
+has never held; one `const SHELL`, `node --check` clean (§146.2).
+
+**AND THE MERGE CARRIES THIS LINE, BECAUSE THE BRANCH TIP WAS ALREADY
+PUSHED** (§91, by §357.4's own road). Vercel deduplicates by SHA, so
+fast-forwarding `main` onto a commit the branch ref already holds is ONE
+deployment and which ref gets it is a race already lost. *The way back is a
+commit `main` holds and the branch does not, and it must be one worth
+making* — and the record owed one anyway, since §378's own block still read
+*"main untouched: the merge is Islam's word"* over a merge that had
+happened. A finished round whose record says it is unfinished is a record
+that is wrong.
+
+**§91.5'S LIVE READ COULD NOT BE MADE FROM HERE AND IS SAID RATHER THAN
+CLAIMED** (§54.5, rule 3a): this environment's egress policy refuses
+`smp-orpin-tau.vercel.app` at the proxy's own CONNECT (403), which its
+README says to report rather than route around. **Nobody here has seen
+production serve this commit.**
+
+**THE WITNESS IS `shell.js` AND `platform.css`, NEVER `sw.js`** (§365,
+§367): the generator drops the half of the worker that carries `SHELL`, so
+the served worker is **4,104 bytes on both builds** and a bumped name
+reaches nobody. What separates the two deployments is
+**`shell.js` 3,843,142 → 3,844,669** and
+**`platform.css` 673,729 → 674,285**, both LARGER, this round being an
+addition where §377 was a removal — and both asserted to have MOVED, or a
+match would hold either way (§113.8).
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): not one
+`api/`, `lib/` or `db/` file is in it, so nothing about how a save is judged
+moves, nothing stored moves and nothing is migrated.
+
+**THE RESIDUE IS THE ONE §365 AND §367 BOTH NAMED, UNCHANGED**: because the
+served worker's bytes did not move, no `controllerchange` fires and §258's
+*"A newer version of the platform is ready"* is **not** offered — a tab left
+open keeps its old shell until somebody reloads it.

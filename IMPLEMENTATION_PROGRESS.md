@@ -6746,3 +6746,34 @@ bytes changed, so `sw.js` is bumped to `v5.22-whole-values` (§91) — reaching
 the offline copy alone, since the generator drops the half carrying the name.
 
 **Not merged: `main` is Islam's word, on that merge.**
+
+## §378.2 — Merged to main (2026-09-20, spec 059) · **done**
+
+Islam: *"merge to main"*.
+
+**Main had not moved**, measured rather than assumed — `origin/main` was at
+§377.6, this commit's own parent — so it is a clean **fast-forward** and the
+tree pushed is byte-for-byte the tree that was verified. No resolution, no
+rebuild, nothing recombined. §378 was free on main, so no renumber was owed.
+
+**`sw.js` confirmed immediately before the push** (§94.16): `v5.22-whole-values`
+against main's `v5.21`, a name the history has never held, one declaration,
+`node --check` clean.
+
+**The merge carries its own record commit** (§91, §357.4): the branch tip was
+already pushed, and Vercel deduplicates by SHA, so `main` needs a commit the
+branch does not hold — and the record owed one anyway, since §378's block still
+read *"main untouched"* over a merge that had happened.
+
+**The deployment is unverified from here and is said to be** (§54.5): the proxy
+refuses `smp-orpin-tau.vercel.app` at CONNECT with a 403. The witness is
+`shell.js` **3,843,142 → 3,844,669** and `platform.css` **673,729 → 674,285**,
+both larger — never `sw.js`, whose served copy is **4,104 bytes on both**.
+
+**No forced sign-out is owed**, read off the diff: no `api/`, `lib/` or `db/`
+file. Nothing stored moves, nothing is migrated.
+
+**What to go and check:** Setup › People register — right-click an email, then a
+phone number: the whole value should highlight and Copy should be live. A
+double-click should still open the cell for editing. Nothing else on the page
+should look different.

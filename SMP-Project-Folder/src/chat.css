@@ -184,7 +184,7 @@ body.presenting .chatdock { display:none; }
    attribute either way, so an engine that ever stops hiding it goes red. */
 .chatfoot[hidden] { display:none; }
 .chcomp { display:flex; align-items:flex-end; gap:8px; }
-.chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;
+.chcomp textarea { flex:1; border:1px solid var(--line-ctl); border-radius:8px;
                    background:var(--ground); color:var(--ink); padding:8px 10px;
                    font-family:inherit; font-size:var(--fs-note); line-height:1.45;
                    min-height:38px; max-height:120px; resize:none; }
@@ -241,7 +241,7 @@ body.presenting .chatdock { display:none; }
 .chq { border-right:1px solid var(--line); background:var(--ground);
        display:flex; flex-direction:column; min-height:0; }
 .chqtop { padding:9px 10px; border-bottom:1px solid var(--line); display:flex; gap:7px; }
-.chqtop input { flex:1; border:1px solid var(--line); border-radius:6px;
+.chqtop input { flex:1; border:1px solid var(--line-ctl); border-radius:6px;
                 background:var(--surface); color:var(--ink); padding:6px 9px;
                 font-family:inherit; font-size:var(--fs-small); min-width:0; }
 /* One segmented box divided by a hairline, not three capsules — §41.8's
@@ -403,7 +403,7 @@ body.presenting .chatdock { display:none; }
              display:flex; align-items:center; gap:8px; }
 .chset-ctl { margin-left:auto; flex:none; }
 .chset-hint { font-size:var(--fs-micro); color:var(--ink-3); line-height:1.5; }
-.chset-in { width:100%; border:1px solid var(--line); border-radius:6px;
+.chset-in { width:100%; border:1px solid var(--line-ctl); border-radius:6px;
             background:var(--ground); color:var(--ink); padding:7px 9px;
             font-family:inherit; font-size:var(--fs-note); }
 .chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
@@ -411,7 +411,7 @@ body.presenting .chatdock { display:none; }
    the row: three digits is the whole range, and a full-width box beside the
    words "5 minutes away" reads as a text field somebody should write in. */
 .chset-away { display:flex; align-items:center; gap:8px; }
-.chset-num { width:72px; border:1px solid var(--line); border-radius:6px;
+.chset-num { width:72px; border:1px solid var(--line-ctl); border-radius:6px;
              background:var(--surface); color:var(--ink); padding:5px 8px;
              font-family:inherit; font-size:var(--fs-small); }
 .chset-num:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
@@ -485,7 +485,7 @@ body.presenting .chatdock { display:none; }
 .chnew-grow { flex:1 1 auto; min-height:0; }
 .chnew-l { font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:.06em;
            color:var(--ink-3); font-weight:700; }
-.chnew-sel, .chnew-ta { border:1px solid var(--line); border-radius:8px;
+.chnew-sel, .chnew-ta { border:1px solid var(--line-ctl); border-radius:8px;
                         background:var(--surface); color:var(--ink);
                         font:inherit; font-size:var(--fs-note); padding:9px 11px; }
 .chnew-ta { flex:1 1 auto; min-height:110px; resize:none; line-height:1.5; }
@@ -627,7 +627,7 @@ details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus)
        font-weight: 700; line-height: 1.5; }
 .cqseg button.on .cqn { background: var(--panel-ink); color: var(--panel); }
 
-.cqfind input { width: 100%; box-sizing: border-box; border: 1px solid var(--line);
+.cqfind input { width: 100%; box-sizing: border-box; border: 1px solid var(--line-ctl);
                 border-radius: 8px; padding: 7px 10px; font: inherit;
                 font-size: var(--fs-note); background: var(--surface); color: var(--ink); }
 .cqfind input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }

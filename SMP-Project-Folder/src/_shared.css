@@ -135,7 +135,32 @@
     --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
-    --line:#E2E8F0; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
+    /* ── A CONTROL'S BOUNDARY IS NOT A SEPARATOR (2026-09-20) ──────────
+       `--line` draws hairlines between cells, the edges of cards and the
+       rules between sections. Every FIELD in the product took its border
+       from it too, and measured that is 1.38:1 light and 1.43:1 dark
+       against the surface the field sits on -- so on a page that is mostly
+       fields (a unit's Plan with the pen open) the only thing saying "this
+       is a box you type in" is a line nobody can see. WCAG 2.2 asks 3:1 of
+       the boundary of a CONTROL (1.4.11); it asks nothing of a separator,
+       which is why this is a second token beside `--line` and not a darker
+       `--line`. Darkening `--line` would restyle all 274 selectors that use
+       it -- every table in the product -- to repair 21 fields (rule 1b).
+
+       THE SAME SHAPE AS `--good`/`--good-tx` (38.4): one colour cannot do
+       two jobs, so the two jobs get two tokens rather than one compromise.
+
+       ONE VALUE PER MODE CLEARS EVERY GROUND IN EVERY PALETTE, measured
+       rather than chosen: against surface, ground, surface-2, the zebra
+       stripe and the overrun band, the worst reading is 3.18 light and 3.36
+       dark. A token that cleared on white alone would fail on the stripe,
+       which is where half the fields in a table actually sit.
+
+       A DISABLED CONTROL KEEPS `--line` AND THAT IS DELIBERATE: `.fld.off`
+       overrides this back down, because 1.4.11 exempts a disabled control
+       and an inert box drawn more strongly than a live one reads backwards
+       (251's own argument for the inert ground it already wears). */
+    --line:#E2E8F0; --line-ctl:#7C8798; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
     --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
     --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
@@ -158,7 +183,7 @@
     --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-    --line:#2B3852; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
+    --line:#2B3852; --line-ctl:#6E7A8E; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
     --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
@@ -190,7 +215,7 @@
     --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
-    --line:#D6DCE5; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
+    --line:#D6DCE5; --line-ctl:#7C8798; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
     --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
@@ -210,7 +235,7 @@
     --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
+    --line:#333A45; --line-ctl:#6E7A8E; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
     --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;

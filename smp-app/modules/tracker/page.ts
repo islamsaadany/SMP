@@ -57,7 +57,7 @@ function brkCss(): string {
 
 const CSS = `
 *{box-sizing:border-box}
-:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-ctl:#7C8798;--focus:#8A6B22;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
   --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;
   --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 /* THE FONT FAMILY IS NAMED, NEVER "inherit" INSIDE THE SHORTHAND (§356.14):
@@ -66,8 +66,25 @@ const CSS = `
    line was silently DROPPED, and a control fell to whatever font it would
    have had anyway: the page's 15px for a span, the browser's own 13.3px
    Arial for a select. That is the pill Islam saw at two sizes. */
-@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-ctl:#6E7A8E;--focus:#E6C65C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
   --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
+/* ── THE FOCUS RING (2026-09-20) ────────────────────────────────────
+   This module declared 24 rules between the three of them that set
+   `outline:none` on `:focus-visible` and put a background change in its
+   place -- measured, #FFFFFF to #F5F6F9, which is 1.08:1. So every button
+   and every link here had an invisible keyboard focus, and because each of
+   those rules named `:hover` in the same breath, a keyboard position and a
+   mouse position looked identical. WCAG 2.2 AA, 2.4.7.
+   The rules are gone and this is what the frozen shell has declared since
+   v3.11 (_shared.css :252) -- the same indicator, so there is nothing new
+   to invent and nothing to keep in step. The hover backgrounds are
+   UNTOUCHED, which is what finally makes the two states look different.
+   ON THE BAR THE RING TAKES THE BAR'S OWN INK. The bar is the tenant's
+   colour (barFor), so a gold ring on it is a guess; #EAF0FA is what the
+   bar already draws its text and its borders in, so the ring inherits
+   whatever guarantee that ink already has rather than making a new one. */
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.bar :focus-visible{outline-color:#EAF0FA}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
 .bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
 .bar h1{margin:0;font-size:14.5px;font-weight:600}
@@ -75,11 +92,11 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(-
 .msw{position:relative;flex:none}
 .msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
 .msw>summary::-webkit-details-marker{display:none}
-.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14)}
 .msw svg{width:17px;height:17px;display:block}
 .mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
 .mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
+.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground)}
 .mi.on{background:var(--ground);cursor:default}
 .mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
@@ -88,29 +105,29 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px}
 .cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 var(--font);padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
 .cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
-.cats a:hover,.cats a:focus-visible{color:var(--ink);outline:none}
+.cats a:hover,.cats a:focus-visible{color:var(--ink)}
 /* the way back to the client's platform, above the page's title (§356.14) */
 .back{display:inline-flex;align-items:center;gap:4px;color:var(--ink-3);text-decoration:none;font:600 12.5px/1 var(--font);margin:0 0 10px -4px;padding:4px 8px 4px 4px;border-radius:6px}
 .back svg{width:14px;height:14px}
-.back:hover,.back:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.back:hover,.back:focus-visible{background:var(--surface-2);color:var(--ink)}
 /* the two settings — how the list is grouped, and dates as weeks or days —
    behind three dots on the far right of the views row (§356.14) */
 .cats{align-items:flex-end}
 .dots{margin-left:auto;margin-bottom:6px;position:relative}
 .dots>button{width:28px;height:24px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0}
-.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--surface-2);color:var(--ink)}
 .dots svg{width:16px;height:16px}
 .setmenu{position:absolute;top:30px;right:0;z-index:9;display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:6px}
 .setmenu .col{display:grid;align-content:start;min-width:0}
 .setmenu .col+.col{border-left:1px solid var(--line);padding-left:4px}
 .setmenu .lab{display:block;font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:3px 9px 2px}
 .setmenu button{display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
-.setmenu button:hover,.setmenu button:focus-visible{background:var(--ground);outline:none}
+.setmenu button:hover,.setmenu button:focus-visible{background:var(--ground)}
 .setmenu button.on{font-weight:600}
 .setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto;flex:none}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
 .tools form{display:flex;gap:8px;flex:1 1 260px;min-width:0}
-.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font)}
+.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line-ctl);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font)}
 .go{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 13px;font:600 13px/1.5 var(--font);cursor:pointer;flex:none}
 .cnt{font:600 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
 .list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
@@ -138,7 +155,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .row .t[data-rename]{cursor:text}
 .row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 var(--font);outline:none}
 .row.done .t{color:var(--ink-3);text-decoration:line-through}
-.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
+.tick{width:18px;height:18px;border:1.5px solid var(--line-ctl);border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
 .tick:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .row.done .tick{background:var(--good);border-color:var(--good)}
 .tick svg{width:11px;height:11px}
@@ -146,7 +163,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .when{font:400 12.5px/1.4 var(--mono);color:var(--ink-3);white-space:nowrap;text-align:right;background:none;border:0;padding:0}
 .when.late{color:var(--bad);font-weight:600}
 .when.pick{cursor:pointer;border-radius:6px;padding:3px 5px;margin:-3px -5px}
-.when.pick:hover,.when.pick.on,.when.pick:focus-visible{background:var(--surface-2);outline:none}
+.when.pick:hover,.when.pick.on,.when.pick:focus-visible{background:var(--surface-2)}
 /* a week reads in words — This week, Next week, then its number (§356.15),
    and nothing on the row marks this one twice */
 .when .wk{display:inline-block;font:500 12.5px/1.4 var(--font);color:var(--ink-2)}
@@ -161,7 +178,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 .weeks button b{font-weight:400;font-variant-numeric:tabular-nums}
 .weeks button.now b{font-weight:700}
 .weeks button small{font:400 12px/1.3 var(--mono);color:var(--ink-3);white-space:nowrap}
-.weeks button:hover,.weeks button:focus-visible{background:var(--ground);outline:none}
+.weeks button:hover,.weeks button:focus-visible{background:var(--ground)}
 .weeks button.on{background:var(--surface-2)}
 .weeks .wf{display:grid;border-top:1px solid var(--line);margin-top:3px;padding-top:3px}
 .weeks .wf button{grid-template-columns:1fr;color:var(--ink-3);font-size:13px}
@@ -169,7 +186,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
 /* the owner is a first name, drawn as the fact; a press opens the team */
 .who{font:600 12.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right;background:none;border:0;padding:0;position:relative}
 .who.pick{cursor:pointer;border-radius:6px;padding:3px 7px;margin:-3px -7px}
-.who.pick:hover,.who.pick.on,.who.pick:focus-visible{background:var(--surface-2);outline:none}
+.who.pick:hover,.who.pick.on,.who.pick:focus-visible{background:var(--surface-2)}
 /* COMPACT (§356.16). Islam: "the names list is wide for no reason make it
    compact." Measured: 140px of box holding a longest first name of 69px, and
    247px tall for seven people — the width was a FLOOR set here rather than
@@ -178,21 +195,21 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
    the tighter one took a row to 25px, under every other small control here. */
 .team{position:absolute;top:26px;right:0;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left}
 .team button{display:flex;width:100%;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left}
-.team button:hover,.team button:focus-visible{background:var(--ground);outline:none}
+.team button:hover,.team button:focus-visible{background:var(--ground)}
 .team button.on{font-weight:600}
 .team button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
 /* ONE BOX FOR THE PILL, pressable or not (§356.14): the same font, height
    and width whether it is a select or a span, the arrow only where it can be
    pressed — and the Done ground set with background-COLOR, because the
    shorthand took the arrow off with it. */
-.st{display:inline-grid;place-items:center;height:26px;width:118px;font:600 11px/1 var(--font);letter-spacing:.02em;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap;text-align:center;appearance:none;-webkit-appearance:none;margin:0}
+.st{display:inline-grid;place-items:center;height:26px;width:118px;font:600 11px/1 var(--font);letter-spacing:.02em;padding:0 9px;border-radius:999px;border:1px solid var(--line-ctl);color:var(--ink-2);background:var(--surface);white-space:nowrap;text-align:center;appearance:none;-webkit-appearance:none;margin:0}
 select.st{cursor:pointer;padding:0 24px 0 14px;text-align-last:center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
 select.st:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
 .st.prog{border-color:var(--gold);color:var(--gold)}
 .st.done{border-color:var(--good);background-color:var(--good-bg);color:var(--good)}
 /* the arrow that expands a row for its notes and history, and folds it */
 .more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
-.more:hover,.more.on,.more:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.more:hover,.more.on,.more:focus-visible{background:var(--surface-2);color:var(--ink)}
 .more svg{width:16px;height:16px;transition:transform .15s}
 .more.on svg{transform:rotate(180deg)}
 @media (prefers-reduced-motion:reduce){.more svg{transition:none}}
@@ -224,7 +241,7 @@ select.st:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
 .open{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:12px 2px 6px 34px;border-bottom:1px solid var(--line);background:var(--surface)}
 .open .lab{font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:10px 0 4px}
 .open .lab:first-child{margin-top:0}
-.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:72px;resize:vertical}
+.open textarea{border:1px solid var(--line-ctl);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:72px;resize:vertical}
 .open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
 .open .ro{font-size:14px;color:var(--ink-2)}
 /* the history is small type in a box that scrolls, so a long life never

@@ -339,7 +339,7 @@
   .cfg table { min-width:760px; }
   .cfg .fw { font-family:var(--mono); font-variant-numeric:tabular-nums; }
   .cfg input { font:inherit; font-family:var(--mono); font-size:13px; width:78px; padding:5px 8px;
-               border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
+               border:1px solid var(--line-ctl); border-radius:var(--r); background:var(--surface);
                color:var(--ink); text-align:right; }
   .cfg input:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .cfg input[readonly] { background:var(--surface-2); color:var(--ink-3); }

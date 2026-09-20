@@ -90,7 +90,7 @@
   /* Foundation and analysis in edit: the field replaces the text in place, so
      the page keeps its shape and nothing moves when the mode changes. */
   .fld { font:inherit; font-size:14px; width:100%; padding:6px 9px; resize:vertical;
-         border:1px solid var(--line); border-radius:var(--r);
+         border:1px solid var(--line-ctl); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
@@ -634,7 +634,7 @@
            text-transform:none; letter-spacing:0; font-weight:400; }
   .imp-tally { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 14px; }
   .csvbox { width:100%; height:340px; font-family:var(--mono); font-size:12px;
-            line-height:1.5; padding:12px; border:1px solid var(--line);
+            line-height:1.5; padding:12px; border:1px solid var(--line-ctl);
             border-radius:var(--r); background:var(--surface-2); color:var(--ink);
             white-space:pre; overflow:auto; }
   td.was { color:var(--ink-3); text-decoration:line-through; }
@@ -921,7 +921,7 @@
      constant goes stale silently). */
   :root{--rep-w:104px; --rep-h:32px}
   input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);height:var(--rep-h);
-    border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
+    border:1px solid var(--line-ctl);border-radius:var(--r);text-align:right;background:var(--surface);
     color:var(--ink)}
   input.field.filled{border-color:var(--good);background:var(--good-bg)}
   input.field:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
@@ -1958,11 +1958,11 @@
 .kbed { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
         margin:10px 0; background:var(--surface); }
 .kbed.on { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
-.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line);
+.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line-ctl);
           border-radius:6px; padding:7px 10px; margin-bottom:8px;
           background:var(--surface); color:var(--ink); }
 .kbed-a { width:100%; font:inherit; font-size:var(--fs-note); line-height:1.55;
-          border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+          border:1px solid var(--line-ctl); border-radius:6px; padding:8px 10px;
           min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
 .kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
 .kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px;
@@ -1973,7 +1973,7 @@
 .kbed-aud { display:flex; align-items:center; gap:7px; font-size:12.5px;
   color:var(--ink-3); }
 .kbed-aud select { font:inherit; color:var(--ink); background:var(--surface);
-  border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
+  border:1px solid var(--line-ctl); border-radius:4px; padding:3px 6px; }
 /* The chip in read mode. `everyone` is never drawn — it is the default on 57
    of 64 questions and a mark on nearly every card is furniture (§41). The two
    that ARE drawn read apart at a glance rather than by their words alone:
@@ -2056,7 +2056,7 @@
 .askdone.part { color:var(--ink-3); font-weight:600; }
 .askact { white-space:nowrap; }
 .askgrp { font:inherit; font-size:var(--fs-small); color:var(--ink);
-          background:var(--surface); border:1px solid var(--line);
+          background:var(--surface); border:1px solid var(--line-ctl);
           border-radius:var(--r-sm); padding:4px 7px; margin-right:7px;
           max-width:170px; }
 .askact .mini { font:inherit; font-size:var(--fs-small); font-weight:600;

@@ -9400,6 +9400,38 @@ node scripts/test-safety-peek.js # ...and the server half against a real Postgre
                                 # else, when, the asker excluded, a function under
                                 # fn:<key>, and every malformed ask falling through to
                                 # the ordinary read
+node scripts/test-control-boundary.js # a control has to be findable, by the eye
+                                # and by the keyboard (&sect;375). NO BROWSER AND NO
+                                # DATABASE: every other contrast check in this project
+                                # drives one, and `scripts/contrast-sweep.py` is the
+                                # reason two faults this size survived &mdash; it reads
+                                # `color` against background and NOTHING ELSE, so it has
+                                # never measured a border or a focus ring, and it runs
+                                # against the frozen Strategy file alone. This measures
+                                # what is DECLARED and says so (&sect;124): for a flat
+                                # border on a known ground the two agree, and it
+                                # reproduces the audit's browser-measured 1.38 and 1.43
+                                # exactly; a ring over a gradient would be invisible to
+                                # it (&sect;53.7's blind spot, named rather than implied).
+                                # IT GUARDS THE RULE, NOT THE TWENTY-ONE: &sect;3 DERIVES
+                                # which classes the sources put on an `<input>`,
+                                # `<select>` or `<textarea>` and asserts none draws its
+                                # boundary in `--line`, so the field added next month is
+                                # covered the day it is added (&sect;104.7). BOTH ENDS
+                                # (&sect;94.2): &sect;2 asserts `--line` is UNTOUCHED and
+                                # still draws 251 separators, or a build that darkened it
+                                # would satisfy everything else while restyling every
+                                # table in the product. &sect;4 asserts no `:focus-visible`
+                                # rule in a module page removes the outline AND that each
+                                # declares the ring &mdash; the second half being what
+                                # stops the first passing on a module that never had one
+                                # (&sect;113.8). 25/0, red FOUR ways
+                                # (`--break=weak-token|bare-line|outline-none|no-ring`)
+                                # &mdash; and its first `weak-token` run was a WEAK
+                                # falsification, choosing the replacement by the token's
+                                # own luminance, so five palettes got a dark line on a
+                                # light page and passed for the wrong reason; chosen by
+                                # the palette's own ground it is 10 red
 node scripts/test-session-state.js # nothing session-level on the pooled connection
                                 # (§289.2): every server file read, comments dropped,
                                 # concatenated literals rejoined, and any statement
@@ -10056,7 +10088,61 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
+*Last Updated: 2026-09-20 &mdash; **&sect;375: a control has to be findable, by
+the eye and by the keyboard.** Islam, of the audit against `PRODUCT_RULES.md`
+and the before/after drawn for it (rule 1c): *"proceed."* **TWENTY-FOUR RULES
+REMOVED THE FOCUS RING** &mdash; `tracker`, `notes` and `insights` each serve
+their own document and between them declared 11, 9 and 4 rules setting
+`outline:none` on `:focus-visible`, replacing it with a background change
+measuring **1.08:1**, so `button:focus-visible` and `a:focus-visible` meant
+*every button and every link* in the Internal Tracker had an invisible
+keyboard focus (2.4.7, F78) &mdash; **and each rule named `:hover` in the same
+breath**, so a keyboard position and a mouse position were drawn identically.
+**THE EARLIER AUDIT CALLED THIS AREA SOUND AND WAS LOOKING AT THE WRONG
+PAGE**: its tab sweep was on Strategy, which has had the global ring since
+v3.11, and the modules are separate documents inheriting none of it. The fix
+is DELETIONS plus that same one rule in each module (&sect;53.5), the hover
+backgrounds untouched, and **on the bar the ring takes the bar's own ink**
+rather than the gold, because the bar is the tenant's colour and a gold ring
+there is a guess. **AND A CONTROL'S BOUNDARY IS NOT A SEPARATOR**: every field
+drew its border in `--line`, the table-hairline colour &mdash; **1.38:1** light
+and **1.43:1** dark against the 3:1 WCAG asks of a component's boundary
+(1.4.11) &mdash; so on a page that is mostly fields the only thing saying *this
+is a box you type in* was a line nobody can see. **A SECOND TOKEN, NEVER A
+DARKER `--line`**, and the arithmetic is the argument: **274** selectors draw a
+`--line` border and **21** are controls, so darkening it restyles every table,
+card and chip to repair twenty-one fields (rule 1b). `--line-ctl` is
+`--good`/`--good-tx`'s own shape (&sect;38.4). **ONE VALUE PER MODE CLEARS
+EVERY GROUND IN EVERY PALETTE, MEASURED RATHER THAN CHOSEN** &mdash; worst
+**3.18** light and **3.36** dark across six palettes, where a token picked
+against white alone reads 3.64 and **fails on the zebra stripe**, which is
+where half the fields in a table sit. **A DISABLED CONTROL KEEPS THE FAINT
+LINE AND IT COST NO EDIT**: `.fld.off` already overrode `border-color` back to
+`--line`, and that override started doing real work (1.4.11 exempts it, and an
+inert box drawn more strongly than a live one reads backwards). **WHAT WAS
+DRAWN AND DELIBERATELY NOT BUILT** (&sect;375.3): the mockup gave the tracker's
+date and owner a border; they have none today and gaining one is a change to
+the ROW's shape rather than to a token, which &sect;356 settled on purpose
+&mdash; so the rule shipped is narrower and stated (*anything already bordered
+takes the stronger token; nothing gains a border it did not have*), and **the
+mockup is left as drawn**, being the record of what was signed off rather than
+of what was built (Principle II, &sect;302). `scripts/test-control-boundary.js`
+**25/0, red four ways** &mdash; **and its own first falsification was weak**,
+choosing the replacement by the token's luminance so five palettes passed for
+the wrong reason (&sect;113.8). **Screen only**: no `api/`, `lib/` or `db/`
+file, read off the diff; nothing stored moves, nothing is migrated. The built
+file's bytes changed so `sw.js` is bumped (&sect;91), and that reaches the
+**offline copy alone** &mdash; `build-sw.mjs` drops the half where `SHELL`
+lives, so `public/sw.js` is byte-identical (&sect;365). **AND NOTHING HERE WAS
+RENDERED, WHICH IS SAID RATHER THAN IMPLIED** (&sect;124, rule 3a): no
+Playwright in either runtime and no `node_modules` for `smp-app`, so the
+browser checks and `qa.py` are **unrun**, not passed (&sect;54.5). What ran:
+built-in-step all good, generated-in-step clear, authoriser 683/0, change list
+140/0, platform rules 69/0, session-state and db-url-choice clear,
+`node --check sw.js` clean with one `SHELL` declaration at a name
+`origin/main` does not hold.*
+
+*Earlier: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
 not an address (spec 059).** Islam, of the register: *"for the copy on click for
 the email and double click to edit is working but the same behavior is not
 working on the phone number."* **IT IS NOT A PHONE FAULT, AND ESTABLISHING THAT

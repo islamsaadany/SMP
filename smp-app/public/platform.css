@@ -138,7 +138,32 @@
     --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
-    --line:#E2E8F0; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
+    /* ── A CONTROL'S BOUNDARY IS NOT A SEPARATOR (2026-09-20) ──────────
+       `--line` draws hairlines between cells, the edges of cards and the
+       rules between sections. Every FIELD in the product took its border
+       from it too, and measured that is 1.38:1 light and 1.43:1 dark
+       against the surface the field sits on -- so on a page that is mostly
+       fields (a unit's Plan with the pen open) the only thing saying "this
+       is a box you type in" is a line nobody can see. WCAG 2.2 asks 3:1 of
+       the boundary of a CONTROL (1.4.11); it asks nothing of a separator,
+       which is why this is a second token beside `--line` and not a darker
+       `--line`. Darkening `--line` would restyle all 274 selectors that use
+       it -- every table in the product -- to repair 21 fields (rule 1b).
+
+       THE SAME SHAPE AS `--good`/`--good-tx` (38.4): one colour cannot do
+       two jobs, so the two jobs get two tokens rather than one compromise.
+
+       ONE VALUE PER MODE CLEARS EVERY GROUND IN EVERY PALETTE, measured
+       rather than chosen: against surface, ground, surface-2, the zebra
+       stripe and the overrun band, the worst reading is 3.18 light and 3.36
+       dark. A token that cleared on white alone would fail on the stripe,
+       which is where half the fields in a table actually sit.
+
+       A DISABLED CONTROL KEEPS `--line` AND THAT IS DELIBERATE: `.fld.off`
+       overrides this back down, because 1.4.11 exempts a disabled control
+       and an inert box drawn more strongly than a live one reads backwards
+       (251's own argument for the inert ground it already wears). */
+    --line:#E2E8F0; --line-ctl:#7C8798; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
     --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
     --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
@@ -161,7 +186,7 @@
     --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-    --line:#2B3852; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
+    --line:#2B3852; --line-ctl:#6E7A8E; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
     --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
@@ -193,7 +218,7 @@
     --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
-    --line:#D6DCE5; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
+    --line:#D6DCE5; --line-ctl:#7C8798; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
     --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
@@ -213,7 +238,7 @@
     --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
+    --line:#333A45; --line-ctl:#6E7A8E; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
     --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
@@ -1196,7 +1221,7 @@ html[data-client-settings] .top .topmark { display:none; }
   .cfg table { min-width:760px; }
   .cfg .fw { font-family:var(--mono); font-variant-numeric:tabular-nums; }
   .cfg input { font:inherit; font-family:var(--mono); font-size:13px; width:78px; padding:5px 8px;
-               border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
+               border:1px solid var(--line-ctl); border-radius:var(--r); background:var(--surface);
                color:var(--ink); text-align:right; }
   .cfg input:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .cfg input[readonly] { background:var(--surface-2); color:var(--ink-3); }
@@ -2070,7 +2095,7 @@ html[data-client-settings] .top .topmark { display:none; }
      for in 2.9 was never actually one line for anyone signed in. The name
      truncates instead; the note beside it already says the level and the
      reach, so nothing is lost that is not said twice. */
-  .viewer select { font:inherit; border:1px solid var(--line);
+  .viewer select { font:inherit; border:1px solid var(--line-ctl);
                    border-radius:var(--r); background:var(--surface); color:var(--ink);
                    max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
@@ -2272,7 +2297,7 @@ html[data-client-settings] .top .topmark { display:none; }
   .brandpick { display:inline-flex; align-items:center; gap:8px; }
   .brandchip { width:22px; height:22px; border-radius:var(--r-sm); border:1px solid var(--line);
                display:inline-block; flex:none; }
-  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line);
+  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line-ctl);
                      border-radius:var(--r-sm); background:var(--surface); cursor:pointer; }
   input.brandcolor::-webkit-color-swatch-wrapper { padding:2px; }
   input.brandcolor::-webkit-color-swatch { border:0; border-radius:3px; }
@@ -2681,7 +2706,7 @@ html[data-client-settings] .top .topmark { display:none; }
                          border-bottom:1px solid var(--line); }
   .setuprail .railq { width:100%; box-sizing:border-box; font:400 12.5px/1.3 var(--sans);
                       color:var(--ink); background:var(--ground);
-                      border:1px solid var(--line); border-radius:var(--r-sm);
+                      border:1px solid var(--line-ctl); border-radius:var(--r-sm);
                       padding:6px 26px 6px 9px; }
   .setuprail .railq::placeholder { color:var(--ink-3); }
   .setuprail .railq:focus { outline:none; border-color:var(--gold);
@@ -3141,7 +3166,7 @@ html[data-client-settings] .top .topmark { display:none; }
   .srchbox svg { position:absolute; left:9px; top:50%; transform:translateY(-50%);
                  width:14px; height:14px; color:var(--ink-3); pointer-events:none; }
   .srchbox input { width:100%; font:inherit; font-size:13px; padding:6px 10px 6px 30px;
-                   border:1px solid var(--line); border-radius:var(--r);
+                   border:1px solid var(--line-ctl); border-radius:var(--r);
                    background:var(--surface); color:var(--ink); }
   .srchbox input:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .srctally { margin-left:auto; font:600 11.5px/1 var(--mono); color:var(--ink-3);
@@ -5122,7 +5147,7 @@ html[data-client-settings] .top .topmark { display:none; }
   /* Foundation and analysis in edit: the field replaces the text in place, so
      the page keeps its shape and nothing moves when the mode changes. */
   .fld { font:inherit; font-size:14px; width:100%; padding:6px 9px; resize:vertical;
-         border:1px solid var(--line); border-radius:var(--r);
+         border:1px solid var(--line-ctl); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
@@ -5666,7 +5691,7 @@ html[data-client-settings] .top .topmark { display:none; }
            text-transform:none; letter-spacing:0; font-weight:400; }
   .imp-tally { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 14px; }
   .csvbox { width:100%; height:340px; font-family:var(--mono); font-size:12px;
-            line-height:1.5; padding:12px; border:1px solid var(--line);
+            line-height:1.5; padding:12px; border:1px solid var(--line-ctl);
             border-radius:var(--r); background:var(--surface-2); color:var(--ink);
             white-space:pre; overflow:auto; }
   td.was { color:var(--ink-3); text-decoration:line-through; }
@@ -5953,7 +5978,7 @@ html[data-client-settings] .top .topmark { display:none; }
      constant goes stale silently). */
   :root{--rep-w:104px; --rep-h:32px}
   input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:var(--rep-w);height:var(--rep-h);
-    border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
+    border:1px solid var(--line-ctl);border-radius:var(--r);text-align:right;background:var(--surface);
     color:var(--ink)}
   input.field.filled{border-color:var(--good);background:var(--good-bg)}
   input.field:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
@@ -6990,11 +7015,11 @@ html[data-client-settings] .top .topmark { display:none; }
 .kbed { border:1px solid var(--line); border-radius:8px; padding:14px 16px;
         margin:10px 0; background:var(--surface); }
 .kbed.on { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
-.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line);
+.kbed-q { width:100%; font:inherit; font-weight:650; border:1px solid var(--line-ctl);
           border-radius:6px; padding:7px 10px; margin-bottom:8px;
           background:var(--surface); color:var(--ink); }
 .kbed-a { width:100%; font:inherit; font-size:var(--fs-note); line-height:1.55;
-          border:1px solid var(--line); border-radius:6px; padding:8px 10px;
+          border:1px solid var(--line-ctl); border-radius:6px; padding:8px 10px;
           min-height:96px; resize:vertical; background:var(--surface); color:var(--ink); }
 .kbed-q:focus-visible, .kbed-a:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
 .kbed-foot { display:flex; gap:12px; align-items:center; margin-top:8px;
@@ -7005,7 +7030,7 @@ html[data-client-settings] .top .topmark { display:none; }
 .kbed-aud { display:flex; align-items:center; gap:7px; font-size:12.5px;
   color:var(--ink-3); }
 .kbed-aud select { font:inherit; color:var(--ink); background:var(--surface);
-  border:1px solid var(--line); border-radius:4px; padding:3px 6px; }
+  border:1px solid var(--line-ctl); border-radius:4px; padding:3px 6px; }
 /* The chip in read mode. `everyone` is never drawn — it is the default on 57
    of 64 questions and a mark on nearly every card is furniture (§41). The two
    that ARE drawn read apart at a glance rather than by their words alone:
@@ -7088,7 +7113,7 @@ html[data-client-settings] .top .topmark { display:none; }
 .askdone.part { color:var(--ink-3); font-weight:600; }
 .askact { white-space:nowrap; }
 .askgrp { font:inherit; font-size:var(--fs-small); color:var(--ink);
-          background:var(--surface); border:1px solid var(--line);
+          background:var(--surface); border:1px solid var(--line-ctl);
           border-radius:var(--r-sm); padding:4px 7px; margin-right:7px;
           max-width:170px; }
 .askact .mini { font:inherit; font-size:var(--fs-small); font-weight:600;
@@ -8240,7 +8265,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .picfield > span { font-size:var(--fs-micro); letter-spacing:var(--track);
                      text-transform:uppercase; color:var(--ink-3); font-weight:700; }
   .picfield select { font:inherit; font-size:var(--fs-note); padding:5px 8px;
-                     border:1px solid var(--line); border-radius:var(--r-sm);
+                     border:1px solid var(--line-ctl); border-radius:var(--r-sm);
                      background:var(--surface); color:var(--ink); max-width:320px; }
   /* THE EDITOR'S SLOTS WRAP (§51.6). They took the same fixed column counts
      the slide uses, so four across in a 940px dialog gave 200px frames, and
@@ -8513,7 +8538,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   }
   .mflow .mffind {
     flex:1 1 auto; min-width:0; height:27px; font:inherit; font-size:12.5px;
-    padding:0 9px; border:1px solid var(--line); border-radius:6px;
+    padding:0 9px; border:1px solid var(--line-ctl); border-radius:6px;
     background:var(--surface); color:var(--ink);
   }
   .mflow .mffind:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
@@ -8953,7 +8978,7 @@ body.presenting .chatdock { display:none; }
    attribute either way, so an engine that ever stops hiding it goes red. */
 .chatfoot[hidden] { display:none; }
 .chcomp { display:flex; align-items:flex-end; gap:8px; }
-.chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;
+.chcomp textarea { flex:1; border:1px solid var(--line-ctl); border-radius:8px;
                    background:var(--ground); color:var(--ink); padding:8px 10px;
                    font-family:inherit; font-size:var(--fs-note); line-height:1.45;
                    min-height:38px; max-height:120px; resize:none; }
@@ -9010,7 +9035,7 @@ body.presenting .chatdock { display:none; }
 .chq { border-right:1px solid var(--line); background:var(--ground);
        display:flex; flex-direction:column; min-height:0; }
 .chqtop { padding:9px 10px; border-bottom:1px solid var(--line); display:flex; gap:7px; }
-.chqtop input { flex:1; border:1px solid var(--line); border-radius:6px;
+.chqtop input { flex:1; border:1px solid var(--line-ctl); border-radius:6px;
                 background:var(--surface); color:var(--ink); padding:6px 9px;
                 font-family:inherit; font-size:var(--fs-small); min-width:0; }
 /* One segmented box divided by a hairline, not three capsules — §41.8's
@@ -9172,7 +9197,7 @@ body.presenting .chatdock { display:none; }
              display:flex; align-items:center; gap:8px; }
 .chset-ctl { margin-left:auto; flex:none; }
 .chset-hint { font-size:var(--fs-micro); color:var(--ink-3); line-height:1.5; }
-.chset-in { width:100%; border:1px solid var(--line); border-radius:6px;
+.chset-in { width:100%; border:1px solid var(--line-ctl); border-radius:6px;
             background:var(--ground); color:var(--ink); padding:7px 9px;
             font-family:inherit; font-size:var(--fs-note); }
 .chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
@@ -9180,7 +9205,7 @@ body.presenting .chatdock { display:none; }
    the row: three digits is the whole range, and a full-width box beside the
    words "5 minutes away" reads as a text field somebody should write in. */
 .chset-away { display:flex; align-items:center; gap:8px; }
-.chset-num { width:72px; border:1px solid var(--line); border-radius:6px;
+.chset-num { width:72px; border:1px solid var(--line-ctl); border-radius:6px;
              background:var(--surface); color:var(--ink); padding:5px 8px;
              font-family:inherit; font-size:var(--fs-small); }
 .chset-num:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
@@ -9254,7 +9279,7 @@ body.presenting .chatdock { display:none; }
 .chnew-grow { flex:1 1 auto; min-height:0; }
 .chnew-l { font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:.06em;
            color:var(--ink-3); font-weight:700; }
-.chnew-sel, .chnew-ta { border:1px solid var(--line); border-radius:8px;
+.chnew-sel, .chnew-ta { border:1px solid var(--line-ctl); border-radius:8px;
                         background:var(--surface); color:var(--ink);
                         font:inherit; font-size:var(--fs-note); padding:9px 11px; }
 .chnew-ta { flex:1 1 auto; min-height:110px; resize:none; line-height:1.5; }
@@ -9396,7 +9421,7 @@ details.chtest > summary.chtest-h:focus-visible { outline:2px solid var(--focus)
        font-weight: 700; line-height: 1.5; }
 .cqseg button.on .cqn { background: var(--panel-ink); color: var(--panel); }
 
-.cqfind input { width: 100%; box-sizing: border-box; border: 1px solid var(--line);
+.cqfind input { width: 100%; box-sizing: border-box; border: 1px solid var(--line-ctl);
                 border-radius: 8px; padding: 7px 10px; font: inherit;
                 font-size: var(--fs-note); background: var(--surface); color: var(--ink); }
 .cqfind input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
@@ -9895,7 +9920,7 @@ body.presenting .tourdock { display:none; }
 .bff { margin:0 0 10px; }
 .bfl { font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
   color:var(--ink-3); margin-bottom:3px; }
-.bfi { width:100%; border:1px solid var(--line); border-radius:7px; padding:7px 10px;
+.bfi { width:100%; border:1px solid var(--line-ctl); border-radius:7px; padding:7px 10px;
   font-size:12.5px; background:var(--surface); color:var(--ink); font-family:inherit; box-sizing:border-box; }
 .bfi:focus-visible { outline:2px solid var(--focus); outline-offset:0; }
 .bfi.mono { font-family:var(--mono, ui-monospace, monospace); }

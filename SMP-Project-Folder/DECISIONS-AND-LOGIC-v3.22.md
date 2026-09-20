@@ -53123,3 +53123,106 @@ carried rule module its frozen twin with the one declared transform applied),
 `node --check sw.js` clean with **one** `SHELL` declaration (§146.2) at a name
 `origin/main` does not hold — confirmed again as the last step rather than the
 first (§94.16, which has collided twice).
+
+## §375
+
+**A CONTROL HAS TO BE FINDABLE, BY THE EYE AND BY THE KEYBOARD.** Islam, of
+the audit against `PRODUCT_RULES.md` and the before/after drawing made for it
+(`design-mockups/control-borders-and-focus/2026-09-20_before-and-after.html`,
+rule 1c): *"proceed."* Two repairs, and they are one sentence twice.
+
+**§375.1 — TWENTY-FOUR RULES REMOVED THE FOCUS RING.** `smp-app/modules/`
+`tracker`, `notes` and `insights` each serve their own document, and between
+them they declared **11, 9 and 4** rules setting `outline:none` on
+`:focus-visible`, putting a background change in its place — measured,
+`#FFFFFF` → `#F5F6F9`, which is **1.08:1**. So `button:focus-visible` and
+`a:focus-visible` in the Internal Tracker meant *every button and every link
+on that page had an invisible keyboard focus* (WCAG 2.2 AA, 2.4.7, technique
+F78). **AND EACH RULE NAMED `:hover` IN THE SAME BREATH**, so a keyboard
+position and a mouse position were drawn identically — the one thing a focus
+indicator exists to tell apart. **THE EARLIER AUDIT DECLARED THIS AREA SOUND
+AND IT WAS LOOKING AT THE WRONG PAGE**: its 120 tab presses were on
+**Strategy**, which has had the global ring since v3.11 (`_shared.css`:252) —
+the modules are separate documents and inherit none of it. *A keyboard sweep
+of one document says nothing about a product that serves four.* The fix is
+**deletions**, plus that same one rule in each module, so nothing new is
+invented and there is no second indicator to keep in step (§53.5) — and the
+**hover backgrounds are untouched**, which is what finally makes the two
+states differ. **ON THE BAR THE RING TAKES THE BAR'S OWN INK** (`#EAF0FA`),
+never the gold: the bar is the tenant's colour (`barFor`), so a gold ring
+there is a guess, where the bar's own ink inherits whatever guarantee that
+ink already has. The two controls that already kept an outline (`.tick`,
+`select.st`) keep theirs, so the modules stop disagreeing with themselves.
+
+**§375.2 — A CONTROL'S BOUNDARY IS NOT A SEPARATOR.** Every field in the
+product drew its border in `--line`, which is the **table-hairline** colour:
+**1.38:1** light and **1.43:1** dark against the surface the field sits on,
+against the **3:1** WCAG 2.2 asks of a component's boundary (1.4.11). On a
+page that is mostly fields — a unit's Plan with the pen open — the only thing
+saying *this is a box you type in* was a line nobody can see. **IT IS A
+SECOND TOKEN BESIDE `--line`, NEVER A DARKER `--line`**, and the arithmetic
+is the argument: **274** selectors draw a border in `--line` and **21** of
+them are controls, so darkening it would restyle every table, card, band and
+chip in the product to repair twenty-one fields (rule 1b). `--line-ctl` is
+**`--good`/`--good-tx`'s own shape** (§38.4: one colour cannot do two jobs).
+**ONE VALUE PER MODE CLEARS EVERY GROUND IN EVERY PALETTE, MEASURED RATHER
+THAN CHOSEN** — `#7C8798` and `#6E7A8E` against surface, ground, surface-2,
+the zebra stripe and the overrun band across all six palettes, worst reading
+**3.18** and **3.36**; a token picked against white alone reads 3.64 and
+**fails on the stripe**, which is where half the fields in a table sit.
+**A DISABLED CONTROL KEEPS THE FAINT LINE AND THAT COSTS NOTHING**: `.fld.off`
+already overrides `border-color` back to `--line`, so it needed no edit at
+all and the override started doing real work — 1.4.11 exempts a disabled
+control, and an inert box drawn more strongly than a live one reads
+backwards (§251's own argument for the inert ground it wears).
+
+**§375.3 — WHAT WAS DRAWN AND DELIBERATELY NOT BUILT, said rather than
+quietly dropped.** The mockup showed the Internal Tracker's **date** and
+**owner** gaining a border; they have none today, and giving them one is a
+change to the row's SHAPE rather than to a token — §356 settled that shape on
+purpose (*"we are shifting from a simple google sheet ... it needs to be
+super simple"*). The line actually shipped is narrower and is stated as a
+rule: **anything the product already draws a border on takes the stronger
+token; nothing gains a border it did not have.** By the same test, a bordered
+button whose text is a LABEL (Save, Add, Done) keeps `--line`, because 1.4.11
+asks 3:1 of what is *required to identify* the component and a word does
+that. **The mockup is left as it was drawn** — it is the record of what was
+signed off, not of what was built (Principle II, §302's own rule).
+
+**§375.4 — THE CHECK MEASURES A STYLESHEET, AND SAYS SO.**
+`scripts/test-control-boundary.js`, **25 passed, 0 failed**, proved able to
+fail **four ways** — `weak-token` **10 red**, `bare-line` **1**,
+`outline-none` **1**, `no-ring` **1**. **IT GUARDS THE RULE, NOT THE
+TWENTY-ONE**: §3 derives which classes the sources put on an `<input>`,
+`<select>` or `<textarea>` and asserts that none of them draws its boundary
+in `--line`, so the field added next month is covered the day it is added
+(§104.7) rather than the day somebody remembers. **BOTH ENDS** (§94.2): §2
+asserts `--line` is *untouched* and still draws **251** separators, or a
+build that "fixed" this by darkening `--line` would satisfy every other line
+in the file while restyling the product. **AND ITS FIRST `weak-token` RUN WAS
+A WEAK FALSIFICATION** — it chose the replacement by the TOKEN's own
+luminance, so five palettes were handed a dark line on a light page and
+passed for the wrong reason (§113.8); chosen by the palette's own ground it
+is 10 red. **WHY IT IS NOT A BROWSER CHECK, AND THE LIMIT IS NAMED**: there
+is no Playwright in either runtime and no `node_modules` for `smp-app`, so
+nothing here was rendered. For a flat border on a known ground the declared
+value and the painted one agree, and the two figures it reproduces — 1.38 and
+1.43 — match the browser measurement in the audit exactly; a ring over a
+gradient or a pseudo-element would not be seen by this file at all
+(§53.7's own blind spot, named rather than implied — §124).
+
+**AND THE SWEEP THAT SHOULD HAVE CAUGHT BOTH CANNOT SEE EITHER**:
+`scripts/contrast-sweep.py` reads `color` against background and nothing
+else — it has never measured a border or a focus ring in its life, and it
+runs against the frozen Strategy file alone, which is the whole of why two
+faults this size survived eight recorded contrast repairs. **RECORDED, NOT
+DONE**: pointing a rendered sweep at the three module pages, and teaching it
+to measure a *boundary*. The check above is the floor under that, not a
+substitute for it.
+
+**Screen only** — no `api/`, `lib/` or `db/` file touched, read off the diff;
+nothing stored moves, nothing is migrated, no rule about who may save what
+changes. The built file's bytes changed, so `sw.js` is bumped (§91) — and
+that reaches the **offline copy alone**, because `build-sw.mjs` drops the
+caching half where `SHELL` lives (§365); `public/sw.js` is byte-identical,
+which is that generator working as designed.

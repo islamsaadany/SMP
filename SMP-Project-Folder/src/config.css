@@ -11,7 +11,7 @@
      for in 2.9 was never actually one line for anyone signed in. The name
      truncates instead; the note beside it already says the level and the
      reach, so nothing is lost that is not said twice. */
-  .viewer select { font:inherit; border:1px solid var(--line);
+  .viewer select { font:inherit; border:1px solid var(--line-ctl);
                    border-radius:var(--r); background:var(--surface); color:var(--ink);
                    max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
@@ -213,7 +213,7 @@
   .brandpick { display:inline-flex; align-items:center; gap:8px; }
   .brandchip { width:22px; height:22px; border-radius:var(--r-sm); border:1px solid var(--line);
                display:inline-block; flex:none; }
-  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line);
+  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line-ctl);
                      border-radius:var(--r-sm); background:var(--surface); cursor:pointer; }
   input.brandcolor::-webkit-color-swatch-wrapper { padding:2px; }
   input.brandcolor::-webkit-color-swatch { border:0; border-radius:3px; }
@@ -622,7 +622,7 @@
                          border-bottom:1px solid var(--line); }
   .setuprail .railq { width:100%; box-sizing:border-box; font:400 12.5px/1.3 var(--sans);
                       color:var(--ink); background:var(--ground);
-                      border:1px solid var(--line); border-radius:var(--r-sm);
+                      border:1px solid var(--line-ctl); border-radius:var(--r-sm);
                       padding:6px 26px 6px 9px; }
   .setuprail .railq::placeholder { color:var(--ink-3); }
   .setuprail .railq:focus { outline:none; border-color:var(--gold);
@@ -1082,7 +1082,7 @@
   .srchbox svg { position:absolute; left:9px; top:50%; transform:translateY(-50%);
                  width:14px; height:14px; color:var(--ink-3); pointer-events:none; }
   .srchbox input { width:100%; font:inherit; font-size:13px; padding:6px 10px 6px 30px;
-                   border:1px solid var(--line); border-radius:var(--r);
+                   border:1px solid var(--line-ctl); border-radius:var(--r);
                    background:var(--surface); color:var(--ink); }
   .srchbox input:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .srctally { margin-left:auto; font:600 11.5px/1 var(--mono); color:var(--ink-3);

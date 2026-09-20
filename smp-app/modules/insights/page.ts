@@ -89,8 +89,25 @@ function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
 
 const CSS = `
 *{box-sizing:border-box}
-:root{--bar:%BAR%;--ink:#141C2B;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--gold:#9C5D08}
-@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--gold:#F5A623}}
+:root{--bar:%BAR%;--ink:#141C2B;--ink-3:#5E6E85;--line:#D8DEE8;--line-ctl:#7C8798;--focus:#8A6B22;--ground:#F5F6F9;--surface:#FFF;--gold:#9C5D08}
+@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-3:#8590A3;--line:#333B4A;--line-ctl:#6E7A8E;--focus:#E6C65C;--ground:#12151C;--surface:#1A1F29;--gold:#F5A623}}
+/* ── THE FOCUS RING (2026-09-20) ────────────────────────────────────
+   This module declared 24 rules between the three of them that set
+   `outline:none` on `:focus-visible` and put a background change in its
+   place -- measured, #FFFFFF to #F5F6F9, which is 1.08:1. So every button
+   and every link here had an invisible keyboard focus, and because each of
+   those rules named `:hover` in the same breath, a keyboard position and a
+   mouse position looked identical. WCAG 2.2 AA, 2.4.7.
+   The rules are gone and this is what the frozen shell has declared since
+   v3.11 (_shared.css :252) -- the same indicator, so there is nothing new
+   to invent and nothing to keep in step. The hover backgrounds are
+   UNTOUCHED, which is what finally makes the two states look different.
+   ON THE BAR THE RING TAKES THE BAR'S OWN INK. The bar is the tenant's
+   colour (barFor), so a gold ring on it is a guess; #EAF0FA is what the
+   bar already draws its text and its borders in, so the ring inherits
+   whatever guarantee that ink already has rather than making a new one. */
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.bar :focus-visible{outline-color:#EAF0FA}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 .bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
 .bar h1{margin:0;font-size:14.5px;font-weight:600}
@@ -98,11 +115,11 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 syste
 .msw{position:relative;flex:none}
 .msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
 .msw>summary::-webkit-details-marker{display:none}
-.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14)}
 .msw svg{width:17px;height:17px;display:block}
 .mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
 .mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
+.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground)}
 .mi.on{background:var(--ground);cursor:default}
 .mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
@@ -110,9 +127,9 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 .cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px}
 .cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 inherit;padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
 .cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
-.cats a:hover,.cats a:focus-visible{color:var(--ink);outline:none}
+.cats a:hover,.cats a:focus-visible{color:var(--ink)}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
-.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
+.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line-ctl);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
 .tools form{display:flex;gap:8px;flex:1 1 260px;min-width:0}
 .go{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 13px;font:600 13px/1.5 inherit;cursor:pointer;flex:none}
 .cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
@@ -124,7 +141,7 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 .item .facts{font:400 12px/1.5 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);overflow-wrap:anywhere}
 .item .facts b{font-weight:600;color:var(--ink)}
 .dl{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 13px;font:600 13px/1.5 inherit;text-decoration:none;display:inline-block}
-.dl:hover,.dl:focus-visible{border-color:var(--gold);outline:none}
+.dl:hover,.dl:focus-visible{border-color:var(--gold)}
 .nofile{flex:none;font-size:12.5px;color:var(--ink-3)}
 .none{padding:40px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
 .none b{color:var(--ink);font-weight:600;display:block;font-size:15.5px;margin-bottom:6px}

@@ -4,6 +4,57 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+## §375 — a control has to be findable, by the eye and by the keyboard
+**2026-09-20 · on the branch, not merged.**
+
+Two repairs from the audit against `PRODUCT_RULES.md`, drawn before they were
+built (`design-mockups/control-borders-and-focus/2026-09-20_before-and-after.html`)
+and signed off with *"proceed."*
+
+**The focus ring, in the three newest modules.** Tracker, Notes and Insights
+each serve their own document, and between them 24 rules set `outline:none` on
+`:focus-visible` and put a background change in its place — 1.08:1. Every
+button and every link in the Internal Tracker had an invisible keyboard focus,
+and because each of those rules named `:hover` too, a keyboard position and a
+mouse position looked the same. The repair is deletions plus the one rule the
+frozen shell has had since v3.11; the hover backgrounds are untouched. On the
+navy bar the ring takes the bar's own ink, because the bar is the tenant's
+colour and a gold ring there would be a guess. **The earlier audit called this
+area sound because it tabbed through Strategy**, which has the ring; the
+modules are separate documents and inherit none of it.
+
+**The boundary of a control.** Every field drew its border in `--line`, the
+table-hairline colour: 1.38:1 light, 1.43:1 dark, against the 3:1 the standard
+asks of a control's boundary. A new token `--line-ctl` sits beside `--line`
+rather than replacing it — 274 selectors use `--line` and 21 of them are
+controls, so darkening it would have restyled every table in the product to
+repair twenty-one fields. One value per mode clears every ground in all six
+palettes, worst 3.18 light and 3.36 dark. A disabled control keeps the faint
+line and cost no edit at all.
+
+**Narrower than the drawing, and said so.** The mockup gave the tracker's date
+and owner a border; they have none today and giving them one changes the row's
+shape rather than a token, which §356 settled deliberately. The mockup is left
+as it was drawn — it records what was signed off, not what was built.
+
+**Checked:** `scripts/test-control-boundary.js` 25/0, red four ways;
+built-in-step all good; generated-in-step clear; authoriser 683/0, change list
+140/0, platform rules 69/0, session-state and db-url-choice clear;
+`node --check sw.js` clean with one `SHELL` declaration at a name `origin/main`
+does not hold.
+**Not checked, and that is a gap rather than a pass:** no Playwright in either
+runtime and no `node_modules` for `smp-app`, so nothing was rendered — every
+browser check and `qa.py` are **unrun**. The contrast figures are computed from
+the stylesheets, which for a flat border on a known ground agrees with a
+browser and reproduces the audit's measured 1.38 and 1.43 exactly.
+
+**Waiting on Islam:** the merge, and whether the audit's remaining items — hide
+Tracker and Notes from a client's switcher, the console audit log, a rendered
+sweep over the three modules, the shell question, help and search — are taken
+in that order.
+
+---
+
 **Direction, 2026-09-09 — the rebuild is the work now (spec 043, §314).**
 Islam's decision record, verified against the code and aligned question by
 question: SMP moves to **Next.js with one shared Postgres schema and row-level

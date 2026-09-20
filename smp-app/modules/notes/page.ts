@@ -38,10 +38,27 @@ const plural = (n: number, one: string, many: string) => n + " " + (n === 1 ? on
 
 const CSS = `
 *{box-sizing:border-box}
-:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-ctl:#7C8798;--focus:#8A6B22;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
   --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB}
-@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-ctl:#6E7A8E;--focus:#E6C65C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
   --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
+/* ── THE FOCUS RING (2026-09-20) ────────────────────────────────────
+   This module declared 24 rules between the three of them that set
+   `outline:none` on `:focus-visible` and put a background change in its
+   place -- measured, #FFFFFF to #F5F6F9, which is 1.08:1. So every button
+   and every link here had an invisible keyboard focus, and because each of
+   those rules named `:hover` in the same breath, a keyboard position and a
+   mouse position looked identical. WCAG 2.2 AA, 2.4.7.
+   The rules are gone and this is what the frozen shell has declared since
+   v3.11 (_shared.css :252) -- the same indicator, so there is nothing new
+   to invent and nothing to keep in step. The hover backgrounds are
+   UNTOUCHED, which is what finally makes the two states look different.
+   ON THE BAR THE RING TAKES THE BAR'S OWN INK. The bar is the tenant's
+   colour (barFor), so a gold ring on it is a guess; #EAF0FA is what the
+   bar already draws its text and its borders in, so the ring inherits
+   whatever guarantee that ink already has rather than making a new one. */
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.bar :focus-visible{outline-color:#EAF0FA}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
 .bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
@@ -50,11 +67,11 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 syste
 .msw{position:relative;flex:none}
 .msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
 .msw>summary::-webkit-details-marker{display:none}
-.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14)}
 .msw svg{width:17px;height:17px;display:block}
 .mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
 .mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
+.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground)}
 .mi.on{background:var(--ground);cursor:default}
 .mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
@@ -62,11 +79,11 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600;display:flex;align-items:ba
 h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
 .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
 .tools form{display:flex;gap:8px;flex:1 1 260px;min-width:0}
-.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
+.srch{flex:1 1 260px;min-width:0;border:1px solid var(--line-ctl);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
 .go{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 13px;font:600 13px/1.5 inherit;cursor:pointer;flex:none}
 .cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
 .btn{font:600 13px/1 inherit;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
-.btn:hover,.btn:focus-visible{background:var(--ground);outline:none}
+.btn:hover,.btn:focus-visible{background:var(--ground)}
 .btn.gold{background:var(--gold);border-color:var(--gold);color:#FFF}
 .btn.gold:hover{filter:brightness(1.06);background:var(--gold)}
 .btn[disabled],.btn[aria-disabled="true"]{opacity:.55;cursor:default}
@@ -81,7 +98,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
 /* ── the list ── */
 .list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
 .mrow{display:grid;grid-template-columns:104px 1fr auto auto;gap:14px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
-.mrow:hover,.mrow:focus-visible{background:var(--surface);outline:none}
+.mrow:hover,.mrow:focus-visible{background:var(--surface)}
 .mrow .d{font:400 12.5px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3);white-space:nowrap}
 .mrow .t{min-width:0;font-size:15px}
 .mrow .t small{display:block;font-size:12.5px;color:var(--ink-3);margin-top:1px}
@@ -93,9 +110,9 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
 .grp .cnt{margin-left:0}
 /* ── one note ── */
 .back{display:inline-block;font:600 12.5px/1 inherit;color:var(--ink-3);text-decoration:none;margin-bottom:10px}
-.back:hover,.back:focus-visible{color:var(--ink);outline:none}
+.back:hover,.back:focus-visible{color:var(--ink)}
 .head{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;margin-bottom:8px}
-.ttl{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:600 21px/1.3 inherit;padding:9px 11px;outline:none}
+.ttl{width:100%;border:1px solid var(--line-ctl);border-radius:8px;background:var(--surface);color:var(--ink);font:600 21px/1.3 inherit;padding:9px 11px;outline:none}
 .ttl:focus{border-color:var(--gold)}
 /* THE KEY ABOVE IT IS WHY THE NUDGE GOES: the date carried margin-top:4px to
    sit level with a title that had no key over it. Both have one now.
@@ -104,10 +121,10 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
    and every rule after it is read as JavaScript. */
 .head .date{margin-top:0}
 .ttl::placeholder{color:var(--ink-3);font-weight:400}
-.date{font:400 13px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 9px;white-space:nowrap;margin-top:4px;cursor:pointer}
+.date{font:400 13px/1.4 ui-monospace,SFMono-Regular,monospace;color:var(--ink-2);border:1px solid var(--line-ctl);border-radius:7px;background:var(--surface);padding:6px 9px;white-space:nowrap;margin-top:4px;cursor:pointer}
 button.date{display:inline-flex;align-items:center;gap:8px}
 .date svg{width:14px;height:14px;flex:none;color:var(--gold)}
-.date:hover,.date:focus-visible{border-color:var(--gold);color:var(--ink);outline:none}
+.date:hover,.date:focus-visible{border-color:var(--gold);color:var(--ink)}
 input.date{cursor:auto}
 /* THE NATIVE BOX IS HIDDEN IN PLACE AND DRIVEN, never swapped in for the word
    (the searchable select's own idiom): clipped rather than display:none,
@@ -119,16 +136,16 @@ input.date{cursor:auto}
 .chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px/1 inherit;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 8px 6px 10px}
 .chip i{font-style:normal;font-weight:400;color:var(--ink-3)}
 .chip b{font-weight:400;color:var(--ink-3);cursor:pointer;background:none;border:0;padding:0 2px;font-size:13px}
-.chip b:hover,.chip b:focus-visible{color:var(--bad);outline:none}
+.chip b:hover,.chip b:focus-visible{color:var(--bad)}
 .chip.warn{border-color:var(--warn);color:var(--warn)}
 .chip.once{border-style:dashed}
 .addatt{font:600 12.5px/1 inherit;color:var(--gold);background:none;border:1px dashed var(--line);border-radius:999px;padding:6px 10px;cursor:pointer}
-.addatt:hover,.addatt:focus-visible{border-color:var(--gold);outline:none}
+.addatt:hover,.addatt:focus-visible{border-color:var(--gold)}
 .pick{position:absolute;top:34px;left:0;z-index:5;width:300px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:8px}
-.pick input{width:100%;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 13px/1.5 inherit;margin-bottom:6px}
+.pick input{width:100%;border:1px solid var(--line-ctl);border-radius:7px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 13px/1.5 inherit;margin-bottom:6px}
 .pick .pl{max-height:190px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable}
 .pick .prow{display:flex;width:100%;align-items:center;gap:9px;padding:6px 7px;border:0;background:none;border-radius:7px;font:400 13.5px/1.4 inherit;color:var(--ink);cursor:pointer;text-align:left}
-.pick .prow:hover,.pick .prow:focus-visible{background:var(--ground);outline:none}
+.pick .prow:hover,.pick .prow:focus-visible{background:var(--ground)}
 .pick .prow small{margin-left:auto;color:var(--ink-3);font-size:11.5px;white-space:nowrap}
 .pick .sq{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;background:var(--surface);color:var(--surface);flex:none}
 .pick .sq.on{background:var(--gold);border-color:var(--gold)}
@@ -140,7 +157,7 @@ input.date{cursor:auto}
 .pick .done .btn{flex:none;padding:6px 9px;font-size:12px}
 .pick .done span{font-size:12px;color:var(--ink-3)}
 .pick .nobody{padding:8px 7px;color:var(--ink-3);font-size:13px}
-.raw{width:100%;min-height:300px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:14px 16px;font:400 15px/1.6 inherit;resize:vertical;outline:none}
+.raw{width:100%;min-height:300px;border:1px solid var(--line-ctl);border-radius:10px;background:var(--surface);color:var(--ink);padding:14px 16px;font:400 15px/1.6 inherit;resize:vertical;outline:none}
 .raw:focus{border-color:var(--gold)}
 .raw::placeholder{color:var(--ink-3)}
 .foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}

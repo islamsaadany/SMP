@@ -71,6 +71,8 @@
     if (v) document.documentElement.setAttribute("data-setup-scope", v);
     else document.documentElement.removeAttribute("data-setup-scope");
   }
+  var LIB_TAB_KEY = "insights";
+  function libAddr() { return "/" + SLUG + "/" + LIB_TAB_KEY; }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
     /* the module leads every address but the spine's; `tour` and the
@@ -81,6 +83,11 @@
     if (led) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
+    /* The reports' own address, which `addressOf` writes for the Insights
+       tab. Reached here only by a history entry carrying no state (above);
+       `null` leaves the page exactly where it is rather than reading the
+       word as a destination. */
+    if (seg.length === 1 && seg[0] === LIB_TAB_KEY) return null;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
     else if (seg[0] === "co" && seg[1]) { d = "co:" + seg[1]; i = 2; }
     else if (seg[0] === "tour") { return { tour: true }; }
@@ -110,8 +117,32 @@
     }
     return { d: d, s: s, c: c };
   }
+  /* ── THE REPORTS KEEP THEIR OWN ADDRESS (§376, decision 2) ────────
+     The library is the CLIENT'S and is the same list whichever unit you are
+     standing on, so the ordinary address `addressOf` would write —
+     `/raya-trade/strategy/mobile/insights` — names a unit in a link that is
+     not about that unit. Worse than untidy: the screen's own untruth is
+     gone the moment you look away, and a link outlives the look.
+
+     So the tab writes the module's own address, which is where the reports
+     live from every other direction too. Spelled ONCE and read by both ends
+     of this file (§53.5).
+
+     A SHARED OR RELOADED LINK OPENS THE MODULE'S OWN PAGE — the same
+     reports, the whole window, its own way back — because that address is
+     served by the module and not by the shell. Stated rather than
+     discovered: the room differs, the reports do not.
+
+     BACK AND FORWARD ARE THE STATE OBJECT'S, NEVER THE ADDRESS'S.
+     `sync()` pushes `{d, s, c}` beside the address, and the popstate
+     handler reads `ev.state` first, so the destination somebody was
+     standing on is restored exactly. `placeOf` is the fallback for an entry
+     that carries no state, and there it answers NOTHING rather than reading
+     `insights` as a unit nobody has — landing on an arbitrary destination
+     is worse than staying put (§96.2, §61). */
   function addressOf(d, s, c) {
     var kind = kindOf(d);
+    if (kind !== "setup" && s === LIB_TAB_KEY) return libAddr();
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
     /* A module's Setup carries its module word and the client's carries
        none (spec 056 §4.2): the scope the shell resolved decides, so a door
@@ -187,7 +218,34 @@
        Setup rail, which draws a row per module whatever the count. The
        check's break forces the switcher on for a client holding one. */
     var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
-    if (!Array.isArray(list) || (!forceSwitch && list.length < 2)) return;
+    if (!Array.isArray(list)) return;
+    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§376,
+       decision 3) ───────────────────────────────────────────────────
+       The switcher exists to reach a module the navigation cannot. Since
+       the library reads as a tab beside Strategy and Performance, offering
+       it here as well is the same door twice on one screen (§87's twins,
+       §94.15) — and for a client's own person, who has Strategy and the
+       reports and nothing else, it leaves a mark whose menu holds only the
+       page they are already on.
+
+       DROPPED FROM THE LIST RATHER THAN HIDDEN, so the count below decides
+       on what is actually on offer: with one left there is no choice, and
+       §32's rule takes the mark off the bar entirely.
+
+       WHICH MODULES THE TABS REACH IS ASKED OF THE TAB ITSELF, never
+       listed here — `LIBRARY.shown()` is the one answer to whether the
+       library is on the tab row (it reads the served stamp), so a build
+       that stopped drawing the tab puts it back in this menu on its own
+       rather than leaving it reachable from nowhere (§61, §53.5).
+
+       AND THE `typeof` GUARD FIXES NOTHING TODAY, said rather than left for
+       the next reader to take as load-bearing (§298.2): build-shell.mjs
+       concatenates this file LAST, after every frozen script, so LIBRARY is
+       always there. It is here because this file is the one piece of browser
+       code that is also written as a file of its own. */
+    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown()) ? [LIB_TAB_KEY] : [];
+    list = list.filter(function (mm) { return !mm || reached.indexOf(mm.key) < 0; });
+    if (!forceSwitch && list.length < 2) return;
     var bar = document.querySelector(".top .top-in");
     if (!bar || bar.querySelector(".topmark")) return;
 

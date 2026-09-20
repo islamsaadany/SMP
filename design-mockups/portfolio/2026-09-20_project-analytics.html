@@ -1,0 +1,526 @@
+<!-- Portfolio · Analytics — the reading you take into a review (spec 060 §9.11).
+     Drawn 2026-09-20, after the second audit and Islam's answer: "B".
+
+     B IS WHAT THIS IS. The audit named three things worth keeping and two of
+     them are already drawn here — the overdue triage is Progress, and the phase
+     figures are the Plan and its Gantt. So this tab is NOT those again. It is
+     the third thing, which is for a different audience: Progress is a working
+     queue for the people doing the work, and this is what you put in front of
+     the client.
+
+     SO IT HOLDS TWO SECTIONS AND NOTHING ELSE — where each part of the plan
+     stands, and every commitment with whether it was met. The health score,
+     the seven status tiles, the Cancelled figure and the upcoming-deadline
+     columns are all deliberately absent; §9.11 records why, and the audit ran
+     their own formula to prove the first of them arbitrary.
+
+     Every figure is derived from the same rows the Plan and Progress read
+     (§5.2), spliced in by sync-rows.py. Nothing here is typed. -->
+<title>Portfolio Project Analytics</title>
+<style>
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --none:#8E97A3; --on-fill:#FFFFFF; --on-accent:#16325C;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+      --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+      --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+      --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+      --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+  }
+
+  body{ margin:0; background:var(--ground); color:var(--ink);
+        font:14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        padding:0 16px; padding-block:28px 56px; }
+  .wrap{ max-width:1180px; margin:0 auto; }
+  button{ font:inherit; cursor:pointer; }
+  button:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+
+  .phead h1{ font-size:21px; font-weight:700; margin:0; letter-spacing:-.01em; }
+  .crumb{ font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+          color:var(--ink-3); font-weight:700; margin:0 0 4px; }
+  .tabs{ display:flex; gap:2px; border-bottom:1px solid var(--line);
+         margin:10px 0 18px; flex-wrap:wrap; }
+  .tabs button{ background:none; border:0; border-bottom:2px solid transparent;
+                padding:8px 13px; font-size:13.5px; color:var(--ink-3); font-weight:600; }
+  .tabs button.on{ color:var(--ink); border-bottom-color:var(--gold); }
+  .tabs button:hover{ color:var(--ink); }
+
+  /* the three things a review opens on */
+  .strip{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;
+          margin-bottom:18px; }
+  @media (max-width:820px){ .strip{ grid-template-columns:1fr; } }
+  .cell{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+         padding:12px 15px; }
+  .cell .k{ margin:0; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; }
+  .cell .v{ font-size:26px; font-weight:700; line-height:1.25;
+            font-variant-numeric:tabular-nums; }
+  .cell .v small{ font-size:15px; font-weight:600; color:var(--ink-3); }
+  .cell .w{ font-size:12.5px; color:var(--ink-3); }
+  .cell.warn .v{ color:var(--attn-tx); }
+
+  .sec{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+        overflow:hidden; margin-bottom:16px; }
+  .sec > header{ background:var(--panel); color:var(--panel-ink);
+                 padding:8px 14px; display:flex; gap:10px; align-items:baseline;
+                 flex-wrap:wrap; }
+  .sec > header b{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+  .sec > header .c{ font-size:11px; color:var(--panel-quiet); }
+  .sec .empty{ margin:0; padding:14px; font-size:13.5px; color:var(--ink-3); }
+
+  /* where each part stands */
+  .pr{ display:grid; grid-template-columns:54px minmax(0,1fr) 130px 58px 116px 122px;
+       gap:12px; align-items:center; padding:9px 14px;
+       border-top:1px solid var(--line-soft); font-size:13.5px; }
+  .pr:first-child{ border-top:0; }
+  .pr:hover{ background:var(--zebra); }
+  .pr.lvl0{ font-weight:700; }
+  .pr.lvl1{ background:var(--zebra); }
+  .pr.lvl1 .t{ padding-left:16px; font-weight:600; }
+  .pr .num{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px;
+            font-weight:700; }
+  .pr .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bar{ height:8px; border-radius:4px; background:var(--surface-2);
+        border:1px solid var(--line); overflow:hidden; }
+  .bar > i{ display:block; height:100%; background:var(--good); }
+  .pr .pct{ text-align:right; font-variant-numeric:tabular-nums; font-weight:700; }
+  .pr .wd{ justify-self:end; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+           font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap;
+           background:var(--surface-2); color:var(--ink-3); }
+  .pr .wd.done{ background:var(--good-bg); color:var(--good-tx); }
+  .pr .wd.on{ background:var(--attn-bg); color:var(--attn-tx); }
+  .behind{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+           font-weight:700; color:var(--bad-tx); margin-left:7px; }
+  .pr .cnt{ font-size:12.5px; color:var(--ink-3); font-variant-numeric:tabular-nums;
+             white-space:nowrap; text-align:right; }
+  @media (max-width:760px){
+    .pr{ grid-template-columns:52px minmax(0,1fr) 58px; }
+    .pr .bar{ grid-column:2 / -1; }
+    .pr .cnt, .pr .wd{ grid-column:2; justify-self:start; text-align:left; }
+  }
+
+  /* the commitments */
+  .ms{ display:grid; grid-template-columns:104px minmax(0,1fr) 190px;
+       gap:12px; align-items:baseline; padding:11px 14px;
+       border-top:1px solid var(--line-soft); font-size:13.5px; }
+  .ms:first-child{ border-top:0; }
+  .ms:hover{ background:var(--zebra); }
+  .ms .when{ font-variant-numeric:tabular-nums; color:var(--ink-2); font-weight:600;
+             white-space:nowrap; }
+  .ms .nm{ min-width:0; }
+  .ms .nm b{ display:block; font-weight:600; }
+  .ms .nm span{ font-size:12.5px; color:var(--ink-3); }
+  .ms .bd{ justify-self:end; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+           font-weight:700; border-radius:4px; padding:3px 9px; white-space:nowrap;
+           text-align:center; }
+  .bd.hit{ background:var(--good-bg); color:var(--good-tx); }
+  .bd.late{ background:var(--bad-bg); color:var(--bad-tx); }
+  .bd.over{ background:var(--bad); color:var(--on-fill); }
+  .bd.wait{ background:var(--panel); color:var(--panel-accent); }
+  .bd.soon{ background:var(--attn-bg); color:var(--attn-tx); }
+  .bd.plan{ background:var(--surface-2); color:var(--ink-3); }
+  .ms.past .when{ color:var(--ink-3); }
+  @media (max-width:700px){
+    .ms{ grid-template-columns:104px minmax(0,1fr); }
+    .ms .bd{ grid-column:2; justify-self:start; }
+  }
+
+  .panel{ background:var(--surface); border:1px solid var(--line);
+          border-radius:7px; padding:14px 16px; margin-top:16px; }
+  .panel h3{ margin:0 0 8px; font-size:10.5px; letter-spacing:.09em;
+             text-transform:uppercase; color:var(--gold-deep); font-weight:700; }
+  .panel ul{ margin:0; padding-left:18px; }
+  .panel li{ margin:6px 0; color:var(--ink-2); font-size:13.5px; max-width:78ch; }
+  .panel li b{ color:var(--ink); }
+  .ask{ border-left:3px solid var(--gold); }
+</style>
+
+<div class="wrap">
+
+  <div class="phead">
+    <p class="crumb">Raya Trade · Portfolio</p>
+    <h1>Culture Transformation</h1>
+  </div>
+  <nav class="tabs">
+    <button type="button">Charter</button>
+    <button type="button">Plan</button>
+    <button type="button">Progress</button>
+    <button type="button" class="on" aria-current="page">Analytics</button>
+  </nav>
+
+  <div class="strip" id="strip"></div>
+
+  <div class="sec">
+    <header><b>Where each part stands</b><span class="c" id="c-phase"></span></header>
+    <div id="phases"></div>
+  </div>
+
+  <div class="sec">
+    <header><b>What we committed to</b><span class="c" id="c-ms"></span></header>
+    <div id="miles"></div>
+  </div>
+
+  <div class="panel">
+    <h3>What this tab is, and what it is not</h3>
+    <ul>
+      <li><b>It is the reading you take into a review.</b> Where each part of the plan stands,
+        and every commitment with whether it was met. That is all it holds.</li>
+      <li><b>It is not the working queue.</b> What is late, what is waiting for a sign-off and
+        what has nobody on it live on <b>Progress</b>, because those are jobs rather than a
+        reading. Nothing is repeated across the two.</li>
+      <li><b>And it is not the plan.</b> The activity-by-activity detail and the timeline are the
+        <b>Plan</b> tab. This is the level above them.</li>
+      <li><b>Everything here is derived from the same rows those two pages read.</b> Nothing is
+        typed and nothing is stored — so this page cannot say something the plan does not.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>The two numbers, and how they are worked out</h3>
+    <ul>
+      <li><b>Progress rolls up one level at a time.</b> An activity's figure comes from its
+        sub-activities by weight; a phase's from its activities; the project's from its phases.
+        Equal weights unless somebody sets them, which is this platform's own rule at every
+        level above an activity.</li>
+      <li><b>A milestone is hit when it was signed off on or before the day it was due — and
+        not otherwise.</b> Their version counts a milestone delivered three weeks late as hit,
+        which makes the headline figure say the opposite of what happened.</li>
+      <li><b>Marked done is not hit.</b> A commitment whose work is finished and waiting for a
+        Lead to sign it off is drawn in the platform's own navy and counted in neither column.
+        Their version counts it as delivered on time, because an activity with no recorded end
+        date is assumed to have met its date — which flatters exactly the backlog it sits beside.</li>
+      <li><b>Which is why phase 2 reads <i>2 of 3 done</i> while its commitment still reads
+        <i>Awaiting sign-off</i>.</b> That is not a contradiction and it is the point: progress
+        counts work that has been finished, and a commitment is met when somebody accepts it.
+        The blueprint draft is finished. Nobody has accepted it yet.</li>
+      <li><b>How far along is not the same as on schedule</b>, so the page says both. A phase can
+        be nearly done and still behind, and the word beside the bar answers the first question
+        while the red mark answers the second. Their label for a phase at 90% is
+        <i>On Track</i>, which is a claim about the date made by a figure that cannot see it.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>The commitments are in date order, on purpose</h3>
+    <ul>
+      <li><b>A review walks the timeline.</b> Theirs sorts by severity — overdue first, then
+        upcoming, then what was met — which is the right order for somebody triaging and the
+        wrong one for somebody reading a project out. The outstanding ones stand out by colour
+        without having to be dragged to the top.</li>
+      <li><b>Six milestones on nine activities is not a real plan.</b> This one has been given a
+        commitment in every state the tracker can draw so all six are visible at once. A real
+        project has far fewer.</li>
+    </ul>
+  </div>
+
+  <div class="panel ask">
+    <h3>Two things left out, and one still open</h3>
+    <ul>
+      <li><b>No health score.</b> Theirs is a single 0–100 whose weights do not survive being
+        looked at: an empty plan and an untouched plan both score 50, a completely overdue plan
+        cannot go below 20, and four blocked activities cost a fifth of the score whether the
+        plan has four or four hundred. If Portfolio ever wants one number it should decide its
+        own rather than inherit that.</li>
+      <li><b>No phase groups.</b> Coloured buckets a Lead drags phases into, to group this page
+        by. Left out of the first build: their own page synthesises every ungrouped phase into a
+        group of one, so dropping it turns this section into the plain phase list above and
+        changes nothing else — and their version is 642 lines, of which about 90 are the
+        dragging.</li>
+      <li><b>Still open: across projects.</b> Their page is per client and aggregates every plan
+        at once. This one is per project, and the client-wide reading belongs on the landing —
+        the project list, with each project's state. That is not drawn yet.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+  /* ROWS:start */
+/* ── THE PLAN, ONCE, FOR ALL THREE DRAWINGS ─────────────────────────────────
+   Spec 060 §5.2: two screens of one project that disagree is the fault this
+   spec spends its length on, and §9.8 is the record of it happening — two
+   figures typed onto the charter, both wrong.
+
+   The plan drawing, Progress and Analytics all read these rows. They are
+   SPLICED into each file by `sync-rows.py` rather than copied by hand, because
+   three hand-kept copies is the same fault wearing a tidier coat. Edit this
+   file and run the script; never edit the block inside an HTML file.
+
+   A row's fields, and which drawing reads each:
+     lvl      0 phase · 1 work package · 2 activity      all three
+     n, t     number and name                            all three
+     who      the assignee, "" for nobody                all three
+     s, e     planned start and end                      all three
+     st       done · wip · not · sign                    plan, progress
+     pct      0–100, activities only; phases derive      plan, analytics
+     ms       a milestone — a commitment, not a task     plan, analytics
+     ran      when the work actually finished, or was
+              marked done and is awaiting sign-off       plan (overrun), progress
+     off      when a Lead signed it off. ABSENT until
+              they do, which is what makes "marked done"
+              and "completed" two different things       progress, analytics
+     dep      the one activity that must finish first    plan
+     blocked  its dependency has not finished            plan, progress
+     pick     the row the plan drawing opens on          plan
+
+   SIX MILESTONES ON NINE ACTIVITIES IS NOT A REALISTIC PLAN and is deliberate:
+   there is one in every state the tracker can draw, so all six are visible at
+   once (§255 — a drawing that cannot show the state it is about proves
+   nothing). A real project has far fewer.
+   ────────────────────────────────────────────────────────────────────────── */
+  var TODAY = "2026-03-10", FROM = "2026-01-01", TO = "2026-08-31";
+  var ROWS = [
+    {lvl:0, n:"1",     t:"Culture audit and stakeholder interviews",   who:"Rania Mounir"},
+    {lvl:2, n:"1.1",   t:"Attribute survey across the ten units",      who:"Hend Sabry",   s:"2026-01-05", e:"2026-01-16", st:"done", pct:100, ran:"2026-01-16", off:"2026-01-16", by:"Rania Mounir"},
+    {lvl:2, n:"1.2",   t:"Leadership interviews",                      who:"Rania Mounir", s:"2026-01-19", e:"2026-01-29", st:"done", pct:100, ms:true, ran:"2026-01-29", off:"2026-01-29", by:"Rania Mounir"},
+    {lvl:0, n:"2",     t:"Strategy-alignment workshops and blueprint", who:"Rania Mounir"},
+    {lvl:2, n:"2.1",   t:"Executive alignment workshop",               who:"Rania Mounir", s:"2026-02-02", e:"2026-02-06", st:"done", pct:100, ms:true, ran:"2026-02-11", off:"2026-02-11", by:"Rania Mounir"},
+    {lvl:2, n:"2.2",   t:"Behavioural blueprint, first draft",         who:"Omar Tarek",   s:"2026-02-09", e:"2026-02-20", st:"sign", pct:100, ms:true, ran:"2026-02-24", dep:"2.1", pick:true},
+    {lvl:2, n:"2.3",   t:"Blueprint review with the unit heads",       who:"Omar Tarek",   s:"2026-02-23", e:"2026-02-27", st:"not",  pct:0, ms:true, dep:"2.2", blocked:true},
+    {lvl:0, n:"3",     t:"Company-wide activation and leadership rollout", who:"Hend Sabry"},
+    {lvl:1, n:"3.1",   t:"Activation toolkit",                         who:"Hend Sabry"},
+    {lvl:2, n:"3.1.1", t:"Leadership communication guide",             who:"Hend Sabry",   s:"2026-03-02", e:"2026-03-20", st:"wip",  pct:40, ms:true},
+    {lvl:2, n:"3.1.2", t:"Employee engagement resources",              who:"",             s:"2026-03-23", e:"2026-04-10", st:"not",  pct:0},
+    {lvl:1, n:"3.2",   t:"Leadership-led rollout",                     who:"Rania Mounir"},
+    {lvl:2, n:"3.2.1", t:"Unit-by-unit activation sessions",           who:"",             s:"2026-04-01", e:"2026-07-31", st:"not",  pct:0},
+    {lvl:2, n:"3.2.2", t:"Embed behaviours in the performance cycle",  who:"",             s:"2026-08-28", e:"2026-08-28", st:"not",  pct:0, ms:true}
+  ];
+/* ROWS:end */
+
+  var DAY = 864e5;
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function day(s){ var x = new Date(s + "T00:00:00Z");
+                   return x.getUTCDate() + " " + MON[x.getUTCMonth()] + " " + String(x.getUTCFullYear()).slice(2); }
+  function esc(s){ return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+  function plural(n, w, many){ return n + " " + (n === 1 ? w : (many || w + "s")); }
+  function days(a, b){ return Math.round((d(a) - d(b)) / DAY); }
+
+  /* ── the roll-up, one level at a time ──────────────────────────────────
+     An activity's figure comes from its sub-activities; a phase's from its
+     activities; the project's from its phases. Equal weights unless somebody
+     sets them — the platform's own shape at every level above an activity.
+     Nothing is stored; their two columns for this are never written, and
+     their own analytics derives it too. */
+  /* DERIVE:start */
+/* ── THE ARITHMETIC, ONCE, FOR EVERY DRAWING THAT READS A FIGURE ────────────
+   Spec 060 §5.2, one level further in than `_rows.js`.
+
+   THAT FILE STOPPED THREE DRAWINGS HOLDING THREE COPIES OF THE PLAN AND LEFT
+   THEM HOLDING THREE COPIES OF THE SUMS. `roll()` and `kids()` were written out
+   twice, byte for byte but for a variable declaration, and the predicates that
+   decide what is owed were a third copy on Progress. They agreed, which is what
+   made it worth fixing while they still did: the landing is the fourth drawing
+   and it needs the roll-up AND the owed counts in one place, so copying would
+   have made a fifth and a sixth.
+
+   WHAT LIVES HERE IS A FIGURE. What does not is FORMAT — `day()` prints a date
+   with a year on Analytics and without one on the Plan, which is a choice each
+   screen makes and must keep making. Extracting that would force two screens to
+   read alike for no reason; extracting the sums stops two screens disagreeing
+   about the same project, which is the whole of §5.2.
+
+   Every function takes its rows. Nothing here reads a global but `TODAY`, which
+   is declared in `_rows.js` beside the plan it dates.
+   ────────────────────────────────────────────────────────────────────────── */
+  function d(s){ return new Date(s + "T00:00:00Z").getTime(); }
+
+  /* the rows one level under row i — or, where that level is empty, everything
+     beneath it, so a phase with activities hung straight off it still rolls up */
+  function kids(rows, i){
+    var lvl = rows[i].lvl, out = [], j;
+    for (j = i + 1; j < rows.length && rows[j].lvl > lvl; j++){
+      if (rows[j].lvl === lvl + 1) out.push(j);
+    }
+    if (!out.length){
+      for (j = i + 1; j < rows.length && rows[j].lvl > lvl; j++) out.push(j);
+    }
+    return out;
+  }
+
+  /* ONE LEVEL AT A TIME, equal weights unless somebody sets them (§9.8).
+     Writes pct, the widest span, the status and the activity tally onto every
+     parent — the tally because a phase's "2 of 3 done" and its percentage are
+     two readings of one set and must be taken from it together. */
+  function roll(rows){
+    for (var i = rows.length - 1; i >= 0; i--){
+      var r = rows[i];
+      if (r.lvl === 2) continue;
+      var ks = kids(rows, i).map(function(j){ return rows[j]; });
+      r.pct = Math.round(ks.reduce(function(a,x){ return a + (x.pct || 0); }, 0) / ks.length);
+      r.s = ks.reduce(function(a,x){ return !a || d(x.s) < d(a) ? x.s : a; }, null);
+      r.e = ks.reduce(function(a,x){ return !a || d(x.e) > d(a) ? x.e : a; }, null);
+      r.st = r.pct === 100 ? "done" : r.pct > 0 ? "wip" : "not";
+      var acts = [], j;
+      for (j = i + 1; j < rows.length && rows[j].lvl > r.lvl; j++){
+        if (rows[j].lvl === 2) acts.push(rows[j]);
+      }
+      r.total = acts.length;
+      r.done = acts.filter(function(x){ return x.pct === 100; }).length;
+    }
+  }
+
+  /* the project's own figure — the phases, equally weighted, which is the same
+     rule one level up and not a second one */
+  function overall(rows){
+    var ps = rows.filter(function(r){ return r.lvl === 0; });
+    if (!ps.length) return null;   /* no plan is not nought (§35, §93) */
+    return Math.round(ps.reduce(function(a,p){ return a + p.pct; }, 0) / ps.length);
+  }
+
+  /* LATE IS A FACT ABOUT A DATE AND NEVER ABOUT A PERCENTAGE (§344).
+     "On Track" is the reference's word for 90% and is a claim the figure cannot
+     make; these two answer separate questions and are drawn separately. */
+  function behind(r, today){ return r.pct < 100 && d(r.e) < d(today); }
+  function howFar(p){
+    if (p === 100) return ["Done", "done"];
+    if (p >= 90)   return ["Nearly done", "on"];
+    if (p >= 25)   return ["Under way", "on"];
+    if (p > 0)     return ["Early", "on"];
+    return ["Not started", ""];
+  }
+
+  /* WHAT IS WAITING ON SOMEBODY — three predicates, named once, because
+     Progress draws them as three sections and the landing counts them as one
+     number, and a section and a count that disagree is the fault §5.2 is about.
+     A ROW IS ONE THING TO FIX (§279): an activity nobody is on that is also
+     past its date is owed ONCE, so the union is by row and never a sum of the
+     three lengths (§108.1's arithmetic). */
+  function acts(rows){ return rows.filter(function(r){ return r.lvl === 2; }); }
+  function waiting(rows){ return acts(rows).filter(function(r){ return r.st === "sign"; }); }
+  function overdue(rows, today){
+    return acts(rows).filter(function(r){ return behind(r, today); });
+  }
+  function nobodyOn(rows){
+    return acts(rows).filter(function(r){ return !r.who && r.pct < 100; });
+  }
+  function signedOff(rows){ return acts(rows).filter(function(r){ return r.st === "done"; }); }
+  function owed(rows, today){
+    var out = [];
+    [waiting(rows), overdue(rows, today), nobodyOn(rows)].forEach(function(list){
+      list.forEach(function(r){ if (out.indexOf(r) < 0) out.push(r); });
+    });
+    return out;
+  }
+/* DERIVE:end */
+  roll(ROWS);
+
+  var PHASES = ROWS.filter(function(r){ return r.lvl === 0; });
+  var PROJECT = overall(ROWS);
+
+
+  /* ── the commitments ───────────────────────────────────────────────────
+     Six states, and two of them are corrections of the reference:
+       hit   signed off ON OR BEFORE the day it was due
+       late  signed off after it — NOT counted as hit
+       wait  the work is finished and a Lead has not signed it off. Counted
+             in neither column; theirs counts it as delivered on time.
+       over  not signed off, the day has passed
+       soon  not signed off, due within a fortnight — with a real countdown
+       plan  further out than that */
+  function state(r){
+    if (r.off) return d(r.off) <= d(r.e) ? "hit" : "late";
+    if (r.ran) return "wait";
+    if (d(r.e) < d(TODAY)) return "over";
+    if (days(r.e, TODAY) <= 14) return "soon";
+    return "plan";
+  }
+  var BADGE = {
+    hit:  function(){ return "On time"; },
+    late: function(r){ return plural(days(r.off, r.e), "day") + " late"; },
+    wait: function(){ return "Awaiting sign-off"; },
+    over: function(r){ return plural(days(TODAY, r.e), "day") + " overdue"; },
+    soon: function(r){ return "In " + plural(days(r.e, TODAY), "day"); },
+    plan: function(){ return "Planned"; }
+  };
+
+  var MS = ROWS.filter(function(r){ return r.ms; })
+               .sort(function(a,b){ return d(a.e) - d(b.e); });
+  var HIT = MS.filter(function(r){ return state(r) === "hit"; });
+  var LATE = MS.filter(function(r){ return state(r) === "late"; });
+  var OPEN = MS.filter(function(r){ return !r.off; });
+
+  function phaseOf(r){
+    var top = r.n.split(".")[0];
+    var p = ROWS.filter(function(x){ return x.lvl === 0 && x.n === top; })[0];
+    return p ? p.t : "";
+  }
+
+  function strip(){
+    var near = OPEN[0];
+    var word = near ? BADGE[state(near)](near) : "";
+    document.getElementById("strip").innerHTML =
+        cell("", PROJECT + "%", "Progress",
+             "the " + plural(PHASES.length, "phase") + ", rolled up")
+      + cell(LATE.length ? "warn" : "", HIT.length + ' <small>of ' + MS.length + "</small>",
+             "Commitments met on time",
+             LATE.length ? plural(LATE.length, "more") + " delivered late" : "None delivered late")
+      + cell(OPEN.length ? "warn" : "", String(OPEN.length), "Still to come",
+             near ? "the nearest is " + day(near.e) + " — " + word.toLowerCase()
+                  : "every commitment has been met");
+  }
+  function cell(k, v, lab, sub){
+    return '<div class="cell ' + k + '"><p class="k">' + esc(lab) + '</p>'
+         + '<div class="v">' + v + '</div><div class="w">' + esc(sub) + '</div></div>';
+  }
+
+  function drawPhases(){
+    var rows = ROWS.filter(function(r){ return r.lvl < 2; });
+    document.getElementById("c-phase").textContent =
+      plural(PHASES.length, "phase") + " · " + PROJECT + "% overall";
+    document.getElementById("phases").innerHTML = rows.map(function(r){
+      var w = howFar(r.pct);
+      return '<div class="pr lvl' + r.lvl + '">'
+        + '<span class="num">' + esc(r.n) + '</span>'
+        + '<span class="t">' + esc(r.t)
+        + (behind(r, TODAY) ? '<span class="behind">Behind</span>' : "") + '</span>'
+        + '<span class="bar"><i style="width:' + r.pct + '%"></i></span>'
+        + '<span class="pct">' + r.pct + '%</span>'
+        + '<span class="cnt">' + r.done + " of " + plural(r.total, "activity", "activities") + '</span>'
+        + '<span class="wd ' + w[1] + '">' + esc(w[0]) + '</span></div>';
+    }).join("");
+  }
+
+  function drawMiles(){
+    document.getElementById("c-ms").textContent =
+      plural(MS.length, "commitment") + " · in date order";
+    document.getElementById("miles").innerHTML = MS.map(function(r){
+      var st = state(r), past = d(r.e) < d(TODAY);
+      return '<div class="ms' + (past ? " past" : "") + '">'
+        + '<span class="when">' + day(r.e) + '</span>'
+        + '<span class="nm"><b>' + esc(r.t) + '</b>'
+        + '<span>' + esc(r.n) + " · " + esc(phaseOf(r))
+        + (r.off ? " · signed off " + day(r.off) : "") + '</span></span>'
+        + '<span class="bd ' + st + '">' + esc(BADGE[st](r)) + '</span></div>';
+    }).join("");
+  }
+
+  strip(); drawPhases(); drawMiles();
+</script>

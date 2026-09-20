@@ -23,7 +23,7 @@ import { withTenant } from "../../lib/tenant.ts";
 import { placeOf } from "../../lib/place.ts";
 import type { Viewer } from "../../lib/library.ts";
 import type { ServeArgs } from "../registry.ts";
-import { insightsDocument } from "./page.ts";
+import { insightsDocument, libraryFragment } from "./page.ts";
 
 /* THE OFFICE READS EVERYTHING, AND IT IS THE SEAT THAT SAYS SO (spec 046
    §4.10). Whoever holds this client's Super user or SMO team seat sees every
@@ -57,6 +57,26 @@ export async function serve(a: ServeArgs): Promise<Response> {
       await insightsDocument(a.slug, a.tenantId, a.tenantName, a.have,
         { q: q.get("q") || "", category: q.get("category") || "" }, await viewerOf(a)),
       { status: 200, headers: shellHeaders() });
+  }
+  /* ── THE ROWS, FOR THE TAB INSIDE THE PLATFORM (§376) ──────────────
+     Islam picked the tab over the two other placements, and a tab that is a
+     link is still going to another module from a different button — which is
+     the thing he asked to stop. So the platform draws the reports in its own
+     pane, and this is where it gets them: the module's OWN markup, narrowed
+     by the module's OWN viewer, as JSON so the count can be drawn beside the
+     search without the shell counting nodes (§93 — an unreadable library
+     would otherwise count as nought reports).
+
+     A GET, because it is a read (§356.12's own line). No gate of its own: the
+     route has already asked whether this person may open this module at all
+     (lib/access.ts, before serverFor), and what they may SEE inside it is
+     `viewerOf`, the same answer the page and the file both take. */
+  if (a.rest.length === 1 && a.rest[0] === "list") {
+    const q = new URL(a.req.url).searchParams;
+    const body = await libraryFragment(a.slug, a.tenantId, a.tenantName,
+      { q: q.get("q") || "", category: q.get("category") || "" }, await viewerOf(a));
+    return new Response(JSON.stringify(body), { status: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
   }
   if (a.rest.length === 2 && a.rest[1] === "file")
     return libraryFile(a.tenantId, "insights", a.rest[0]!, a.req.url, await viewerOf(a));

@@ -52977,6 +52977,145 @@ fit a narrower window so it never scrolls at all — is untouched, since it mean
 giving up or narrowing a column, which is a decision about what the register
 shows.
 
+---
+
+## §376 — The reports, as a tab in the platform (spec 061, 2026-09-20)
+
+Islam, of the Insights module: *"for the users not the smo they can see the
+insights as a tab beside the tabs visible to them. better usability than going
+to another module. the module is managed by the smo which is relevant but the
+user to move between modules is not very usable. align wiht me."*
+
+**WHAT WAS ACTUALLY WRONG WAS MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a),
+and it is not that the switcher is hard to find. A client's own person reaches
+the library through a **four-square mark with no word beside it, in the pale top
+bar, in a different row from every other piece of navigation** — and it opens a
+menu of **two**, one of which is the page they are standing on. Every
+destination, tab and section in this product is a word on a navy row; this is a
+picture on a white one.
+
+**AND MEASURING IT FOUND A DEFECT THE ASK DID NOT MENTION.** `decideOpen`'s
+first rule is *a module with no declared area is open to everybody the door let
+in*, and the Internal Tracker and Meeting Notes declare `areas: []` because they
+are the office's and refuse a client's person **at the page**. So a client's
+person on a tenant holding either is offered it in that menu and turned away
+when they press it — §61 with the doors the wrong way round. Named as a
+precondition of any placement rather than fixed in passing (rule 1b), and see
+the last paragraph.
+
+**THREE PLACEMENTS DRAWN AT REAL SIZE IN THE PRODUCT'S OWN CHROME** (rule 1c,
+§41.9), published as an Artifact, and **Islam picked C — the one recommended
+against**. So the cost is his and is recorded rather than re-argued: the three
+tabs beside it are three views of **one subject**, and this library is the
+**client's**, identical whichever unit you stand on. Press *Retail Stores* and
+it shows the same reports. It was drawn that way, side by side, before he chose.
+
+**AND ONE OF MY OWN OBJECTIONS WAS WITHDRAWN IN THE OPEN.** The first drawing
+said C costs *"a second copy of the library"*; reading `insightsDocument`
+afterwards showed the rows lift cleanly into a function both surfaces call, so
+the drift objection was simply wrong and the second mockup said so. What
+survives is the row-says-something-untrue objection, which is a real cost and
+is what the address decision below exists to bound.
+
+**THE LINK-VERSUS-TAB FORK WAS SETTLED FROM HIS OWN WORDS, not by asking again**
+(rule 2b): *"better usability than going to another module"* rules out a door
+that goes to another module from a different button — it would carry the whole
+of C's design cost and none of its point.
+
+**ONE RENDERER, TWO HOSTS (§53.5, §364's own shape).** `libraryRows()` in
+`modules/insights/page.ts` writes the rows for the module's own page AND for the
+tab's fragment, so a report's title, its fact line, its date spelling and its
+download button cannot read one way here and another way there. What the frozen
+file draws is the chrome around them — the search box and the count — because
+the two hosts navigate differently: the module's page uses a GET form, which in
+the platform would take the platform with it.
+
+**A FAILED READ IS NOT AN EMPTY ONE (§93), AND THAT IS THE ASSERTION THIS
+DESERVES.** The count has **three** answers — a number, *Asking…*, and an
+em-dash — and an unreadable library says so and promises nothing has been lost.
+It must never read as *nothing has been published here yet*, which is what an
+empty library says and which tells a client Forefront has published nothing.
+
+**THE ADDRESS IS THE MODULE'S OWN (decision 2).** `addressOf` would otherwise
+write `/raya-trade/strategy/mobile/insights` — a unit's name in a link that is
+not about that unit — and **a screen's untruth is gone the moment you look away
+while a link outlives the look**. The tab writes `/raya-trade/insights`, spelled
+once and read by both ends of `shell/route.js`. **Back and Forward are the state
+object's, never the address's**: `sync()` pushes `{d, s, c}` beside the address
+and the popstate handler reads `ev.state` first, so the destination somebody was
+standing on is restored exactly; `placeOf` is the fallback for an entry carrying
+no state, and there it answers **nothing** rather than reading `insights` as a
+unit nobody has — staying put beats landing on an arbitrary destination (§96.2).
+**The cost is stated rather than discovered**: a shared or reloaded link opens
+the module's own page, which is the same reports in the whole window with its
+own way back.
+
+**THE FOUR-SQUARE MARK STANDS DOWN WHERE THE TABS REACH (decision 3).** The
+switcher exists to reach a module the navigation cannot; with the library on the
+tab row, listing it there as well is the same door twice on one screen (§87's
+twins, §94.15). The module is **dropped from the list** rather than hidden, so
+§32's *a menu of one is a door behind a door* takes the mark off the bar on its
+own — and **which modules the tabs reach is asked of the tab itself**
+(`LIBRARY.shown()`), never listed in the switcher, so a build that stopped
+drawing the tab puts the module back in the menu rather than leaving it
+reachable from nowhere (§61, §53.5).
+
+**THE STAMP ANSWERS THREE QUESTIONS WITH ONE READ (§42).** `lib/shell.ts` writes
+`data-library-cats` on a document it serves to somebody who may **open**
+Insights, so *is there a server*, *does this client have the module* and *may
+this person open it* are one attribute and no second copy of any of them. Absent
+is the honest answer in every case it is absent for, `file://` included — and a
+tab that could never open anything is worse than none.
+
+**AND THE CATEGORIES COULD NOT BE FETCHED IN TIME**, which is why they are
+stamped rather than asked for: the section row is built synchronously inside
+`paint()`, so a fetch would draw a tab with no sections and add them a beat
+later. Writing the five words into the frozen shell would have been a second
+copy of `CATEGORIES` (§53.5); the stamp is the same list the module itself
+holds.
+
+**`ac` IS `c_kb`, AND THAT IS NOT A SECOND GATE.** `c_kb` is `area:"always"`, so
+`allowed()` passes it for everybody and the real question — may this person open
+Insights — is answered by the module's own area **on the server** (spec 046
+§4.4). A grant here would be a cell that could refuse what the door allowed, two
+answers to one question (§37, §53.5). The key is present because `allowed()`
+asks every tab for one.
+
+**`LIB_TAB` IS DECLARED ONCE AND REFERENCED FOUR TIMES.** The same tab typed out
+on four lists is four places to forget when it changes, which is exactly how the
+two sides of the navigation switch drifted twice (§211, §213).
+
+**EVERY CARRIED RULE IS SCOPED TO `.libpane` (§65.9).** The module's classes are
+`.list`, `.item`, `.body` and `.none` — as generic as a class name gets, and
+`.none` already has five rules in this product. Scoping is what stops this block
+reaching them and stops a rule written next month reaching this. The two button
+classes were corrected on the way: `.btn` is **not** a shared class (it exists
+only under `.hist-confirm` and `.csetup`) and `.linkbtn` is scoped to
+`.pband-hist`, so the pane uses `.linkbu`, which is declared once in
+`_shared.css` and reachable from anywhere.
+
+**PROVED ABLE TO FAIL THREE WAYS FROM THE SOURCES** (§276) — `shown()` forced
+true **3 red**, the categories typed out **1 red** printing the short list,
+`All` made a real category **3 red** — each reddening its own assertions and no
+others, with the source restored byte-identical and the build re-run after.
+`checks/insights-tab.mjs` runs the frozen tab's own module in a vm rather than
+describing it, and **says in its own words which halves did not run** (§54.5):
+the row builder needs the app's dependencies and the served half needs
+`SMP_BASE` and a browser.
+
+**NOT DRIVEN IN A BROWSER IN THIS SESSION AND IT IS SAID** (§124): neither
+Playwright binding is installed here, so what is asserted is the rules, the row
+builder's four states and the structure — and **not** that the tab renders. That
+is §5 of the check and is what the served sweep is for.
+
+**RECORDED, NOT DONE.** Tracker and Notes are still offered to a client's person
+on a tenant that holds them: decision 3 removes *Insights* from that menu, which
+empties it entirely for a client with Strategy and the reports and leaves it
+standing for one that also has an office module. **My second mockup said
+decision 3 closes that "for free"; it is true of the shapes in front of us and
+not in general, and the over-claim is corrected here rather than left standing**
+(§124). The honest fix is the two modules' own area declarations, which is a
+change to modules this round was not asked about.
 ## §374 — AN ADDRESS THAT IS NOT UNIQUE IS NOT AN ADDRESS (2026-09-20, spec 059)
 
 Islam, of the register: *"for the copy on click for the email and double click
@@ -53061,7 +53200,377 @@ reported (the digits themselves are inside the button, and the copy worked
 throughout), it is a restyle nobody asked for, and it wants a measurement of
 every `.mono` cell rather than one column's (rule 1b).
 
-### §377 — AN ADDRESS IS A VALUE, NOT A CONTROL (2026-09-20, reversing §93.6)
+### §374.1 — MERGED, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
+
+Islam: *"merge to main"*. **`main` HAD NOT MOVED**, so `--ff-only` took it
+cleanly and the tree that went up is the tree that was checked — which is the
+whole reason §4 forbids a blind merge either way round: a refusal is the
+notification, and its absence is a measurement too, taken rather than assumed.
+
+**THE MERGE CARRIES A SECTION OF ITS OWN BECAUSE THE BRANCH TIP WAS ALREADY
+PUSHED** (§91). Vercel deduplicates by commit SHA, so a fast-forward of `main`
+onto a commit the branch ref already holds is **one** deployment and which ref
+gets it is a race — lost in advance here, the branch having carried that SHA for
+hours. §91's own way round is *a commit `main` holds and the branch does not, and
+it must be one worth making*, and the record owed exactly one: a finished round
+whose tracker still reads **waiting on Islam** is a record that is wrong
+(§367.5's own correction, one round on). So this section IS the distinct commit,
+which is §357.4's road rather than a device invented for it.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, WHICH IS STATED
+RATHER THAN CLAIMED** (§54.5, rule 3a). The environment's egress policy refuses
+`smp-orpin-tau.vercel.app` outright — **403 at the proxy's CONNECT**, whose own
+README says to report a policy denial rather than retry or route around it — so
+no request left this machine and **the deployment is unverified from here**.
+What is NOT claimed is the whole of the claim: nobody here has seen production
+serve this commit.
+
+**THE WITNESS IS NAMED SO THE CHECK IS ONE COMMAND FOR WHOEVER CAN MAKE IT — AND
+IT IS ONE FILE, NOT §367's TWO.** It is **not `sw.js`** (§365, §316.10): the
+generator drops the caching half of the frozen worker, which is the half `SHELL`
+lives in, so the **served** worker is byte-identical either side of this merge
+and the bumped name reaches nobody — it is kept for the offline handover alone.
+**AND IT IS NOT `platform.css`, WHICH IS THE PART §367's SENTENCE COULD NOT BE
+COPIED FOR**: that round moved both files and this one changes no stylesheet at
+all, so `platform.css` reads **669,731** bytes on the build before and on this
+one alike — *a witness that reads the same either way is not a witness*, and it
+would have gone in verbatim had the two builds not been asked (§113.8, in the
+paragraph citing §113.8). What proves production built THIS commit is `shell.js`
+alone: **3,824,282 → 3,827,402** bytes, the second matching
+`smp-app/public/shell.js` exactly.
+
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED.** While it stays where it
+is, `main`'s tip is a SHA no other ref holds — unique by construction rather
+than by timing — and pushing it onto a second ref is the one act left that could
+still cost the build. §91 says to hold the branch until production has served
+it; with the live read impossible from here, holding is not caution but the
+instruction, and the fast-forward is one command the day somebody has looked.
+
+**NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF THE DIFF** (spec 029, precedent
+040): the merged range holds `CLAUDE.md`, the tracker, this document,
+`checks/people-dialog.py`, `src/shell.html`, the built file, `public/shell.js`
+and `sw.js` — **not one `api/`, `lib/` or `db/` file** — so nothing about how a
+save is judged moves, no stored value moves and nothing is migrated. A tab left
+open on the previous build keeps its old shell until somebody reloads it, which
+is §365's own residue and the ordinary cost of a screen-only round.
+
+**RE-CHECKED ON THE MERGED TREE IMMEDIATELY BEFORE THE PUSH**, because a branch
+that passes says nothing about what `main` holds (§365): `built-in-step` all good
+(the shipped file byte-identical to `build.py`'s own output), `generated-in-step`
+all clear (every served copy identical to what its generator produces, and every
+carried rule module its frozen twin with the one declared transform applied),
+`node --check sw.js` clean with **one** `SHELL` declaration (§146.2) at a name
+`origin/main` does not hold — confirmed again as the last step rather than the
+first (§94.16, which has collided twice).
+
+---
+
+## §375 — PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (2026-09-20, spec 060)
+
+Islam, on the handover that said every screen of spec 060 was drawn and three
+of the six signed off: **"proceed."**
+
+**WHAT IS BUILT IS THE HALF THAT IS DECIDED AND HAS NO PICTURE**, which is the
+only half a *proceed* can honestly reach: rule 1c is paid for the project team,
+the charter and the plan, and **owed for Progress, Analytics and the landing** —
+so nothing visual is built from this, and `portfolio` is still `built: false`
+in `lib/modules.ts`. **The flag is asserted rather than assumed** (§1 of the
+check): a module marked built with nothing behind it is the door onto the wrong
+room that flag exists to stop (§61), and the assertion carries the Tracker's
+`built: true` beside it or it would pass on a build where the whole table had
+gone (§113.8).
+
+**§8 OF THE SPEC NAMED THIS SLICE IN ITS OWN WORDS** — *the six rules of §3 are
+checked as rules, not as screens; pure functions where they can be, so the
+sign-off, the derived dates, the computed progress, the cascade and the
+renumbering are provable without a browser.* So `lib/portfolio.ts` is those six
+plus §6's reach and §9.8's roll-up, and `checks/portfolio.mjs` asks them with
+no browser at all.
+
+**A FLAT ORDERED ARRAY IS THE TREE, AND IT IS THE DRAWINGS' OWN SHAPE.** Phases,
+work packages and activities are three tables, and every rule that walks the
+plan — the numbering, the roll-up, the cascade, the tally — wants them in
+document order with a level on each. `design-mockups/portfolio/_derive.js`
+already reads exactly that, so the plan on the screen and the plan on the server
+cannot arrive at two answers for one project (§5.2). *The mockup's shape earned
+its way into the product rather than being translated out of it.*
+
+**§243'S BLANK RULE IS A SECOND COPY ON PURPOSE, AND THAT IS NOT §53.5 BEING
+IGNORED.** `koWeights` is the frozen product's, read by six frozen sources and
+run in a vm by `lib/frozen.cjs`, and Portfolio may not reach into Strategy's
+vocabulary — which is §9.1's whole argument for why the three words could not
+ride `labels`. What must not drift is the RULE, so the check asserts this
+answers what §243 answers — a blank counts as the average of the weights that
+were set, none set means equal, every set weight nought falls back to equal
+rather than to a dash — rather than asserting a number.
+
+**THE WEIGHTED CASE WAS NOT COVERED UNTIL IT WAS MADE.** The plan fixture
+carries no weights, so `--break=equal-only` reddened ONE assertion: everything
+else averaged equally and would have passed on a build that never read the
+column. A weighted phase and a weighted activity are made now and it reddens
+three. **And my own first weighted figure was wrong** — 20 typed where the
+arithmetic is 15 — which is §9.8's own recorded lesson (*the first draft of it
+typed 62 and 8 and both were wrong*) arriving in the check rather than in the
+drawing. It is asserted beside the equally-weighted 50, so the number is pinned
+by a difference and not only by itself.
+
+**THE CONSTRAINTS ARE ASSERTED BY ATTEMPTING THE ROW, NEVER BY READING THE
+DDL** (§96), and the constraint's NAME is asserted with the refusal, or a row
+turned away for some other reason reads as the rule working (§113.8). §7.6's
+first row — *an activity has two nullable parents and nothing says exactly one
+is set* — is a `CHECK` now, and the check sends both the orphan and the
+two-parent row and watches each bounce off `portfolio_activity_parent`.
+
+**THE BREAK THAT MODELLED A BROKEN FUNCTION RATHER THAN THE DEFECT.**
+`--break=no-collapse` first forced every row to the activity level, which made
+phases read `0` — a function that is broken, not a product that has the fault.
+Corrected, it forces the DEPTH instead, so an activity hung straight off a
+phase reads **`1.0.1`**: the plan grows a level it does not have, with a nought
+where a work package would be, which is exactly what §3 №5's collapse exists to
+prevent. *A falsification that breaks the function proves the check runs; one
+that reproduces the defect proves the check is about something.*
+
+**WHAT IS OWED IS A COUNT OF ROWS AND NEVER OF REASONS** (§279, §108.1), and
+the fixture demonstrates it rather than claiming it (§255): one activity is
+past its date AND has nobody on it, so three predicates name **two** rows and
+`--break=owed-sums` reddens the one assertion that says so.
+
+**EIGHT TABLES, AND SIX NAMED AND NOT BUILT.** The tree, the team and the
+words; phase groups, comments, mentions, reactions, files and history arrive
+with the screens that read them, because a table ahead of its screen is a
+column nothing writes (§294.2). **Both paths are proved by running them**
+(§33.5): a fresh database through `db/apply.mjs`, and a database already up —
+`HEAD`'s own `schema.sql` applied first, **0 portfolio tables**, then migration
+015 alone, **8** — with the migration run twice to prove it idempotent. Every
+one is RLS-enabled, forced, carries `tenant_rows`, and its policy text is read
+back and asserted **identical** to `tracker_actions`' (§94.8). Every one
+cascades from `tenants`, or `deleteTenant` would refuse the whole delete.
+
+**AND ONE THING THE BUILD FOUND THAT THE SPEC LEAVES AMBIGUOUS, ANSWERED THE
+NARROW WAY AND NAMED RATHER THAN LEFT**: §6.4 and §9.2 make **naming people
+onto a project** the seat's, while §5.1 gives the charter's pen to the office
+AND the Lead and §5.1a has the charter's *Project Manager* row read whoever is
+at Lead and says *setting it there sets the role*. So a Lead editing that one
+row would be naming somebody. `mayNameTeam()` is the seat's alone until Islam
+says otherwise (§42 fails closed), and the question is written into the spec
+rather than left for whoever builds the charter to discover.
+
+**PROVED ABLE TO FAIL TEN WAYS, ONE PER RULE** (§276, from the sources):
+`any-build` 8 · `team-deletes` 1 · `viewer-comments` 2 · `anyone-completes` 2 ·
+`restamp-start` 3 · `manual-wins` 1 · `equal-only` 3 · `no-collapse` 3 ·
+`no-cascade` 3 · `owed-sums` 1. **121/0** green.
+
+**VERIFIED**: portfolio 121/0 red ten ways; memory-boundary 14/0, schema-room
+10/0, modules 107/0, insights 127/0, notes 170/0, frameworks 90/0, demo-seed
+7/0, office-standing 7/0, deploy-context 5/0, `generated-in-step` all clear;
+`npm run build` green through `scripts/deploy.mjs` and `next build`; `tsc`
+clean COLD but for `lib/prisma.ts`'s recorded pre-existing error. **The frozen
+product is untouched and it is measured rather than assumed** —
+`built-in-step.py` all good — so **`sw.js` is NOT bumped**: §91's trigger is
+the built file's bytes changing and they did not.
+
+**TWO REDS ARE NOT THIS WORK'S AND WERE ESTABLISHED ON A BASELINE WORKTREE OF
+`HEAD` BEFORE ANYTHING HERE WAS BLAMED** (§303): `tracker` 227/1 on the same
+assertion with the same detail, which is a date-relative literal going stale
+(§214.3's family — it was green on 2026-09-16 and today is the 20th); and spike
+S2, which dies in the seed harness on `notes.met_on` with *no placeholder for
+date*, a spec 055 column. Recorded, not fixed in passing (rule 1b).
+
+**AND THE THROWAWAY POSTGRES LOST ITS OWN DATA DIRECTORY MID-RUN**, which is
+worth one line because it reads exactly like a product failure: the scratchpad
+is `700 root` and the server runs as `postgres`, so the `chmod o+x` that let it
+start was reset under it and every later check reported `ECONNREFUSED`. The
+first reading of that was *the checks are broken*. **A run that cannot connect
+is not a run that failed** (§54.5, §320.6b's family) — the data directory moved
+somewhere the server owns and every one of them came back green.
+
+**STILL ISLAM'S, AND NOTHING BELOW IS STARTED**: the three drawings awaiting
+sign-off (§9.10 Progress, §9.12 Analytics, §9.13 the landing), and with them
+every screen of this module; §9.3's workbook, §9.5's notice and §9.6's budget
+question, which §9 still lists as live; and the carry in §9.7.
+
+---
+
+## §375.1 — THE MERGE, AND WHAT RUNNING IT FOUND (2026-09-20, spec 060)
+
+Islam: **"merge to main."** The word on that merge, which is the only thing
+that makes one allowed (rule 4).
+
+**MAIN HAD MOVED 73 COMMITS AND TAKEN BOTH NUMBERS**, so the renumber came
+FIRST and that ordering is what makes it provable rather than careful: at that
+point the tree held none of main's lines, so every `§359` and every `spec 056`
+in it was this branch's by construction — verified against the merge base,
+which holds neither string (§264.3, whose own fault was a blanket sweep taking
+somebody else's citations after a merge). §359 → §375, `specs/056-portfolio` →
+`specs/060-portfolio`, both confirmed free on `origin/main` before either was
+chosen. **Both spellings swept** (§336.1: a renumber knows one spelling unless
+it is told otherwise), **every count declared in advance and a mismatch
+refusing the whole pass** rather than writing what it happened to find
+(§353.4) — 4 / 3 / 4 / 0 / 21 / 11, all matched, residue nil.
+
+**FOUR FILES OVERLAPPED AND EVERY ONE IS COMBINED, NEVER PICKED** (§318.7,
+§356.17): the three record files and `package.json`. **The resolution is
+ASSERTED rather than eyeballed**, which is the part worth keeping — measured
+against `origin/main`, exactly ONE line is removed across the three records and
+it is main's own `*Last Updated:*` line becoming `*Earlier:*`, which is that
+file's own convention for an entry that has stopped being the newest; the rest
+is purely additive, 109 / 69 / 108 lines. The two logs run forward in time, so
+main's §359–§374.1 sit before today's §375; CLAUDE.md runs backwards, so §375
+leads it. `package.json` keeps every one of main's check scripts, compared as a
+SET rather than read (§94.8).
+
+**THE FROZEN HALF IS MAIN'S, BYTE FOR BYTE, AND THAT IS MEASURED**: this branch
+changed no file under `SMP-Project-Folder/src/`, so every frozen source, the
+shipped build, `sw.js` and every generated copy under `smp-app/public/` hashes
+identical to `origin/main`'s. **No rebuild is owed and NO `SHELL` BUMP IS
+OWED** — §91's trigger is the built file's bytes changing and they did not
+(§356.17's own finding, re-earned). `node --check sw.js` clean with **one**
+`SHELL` declaration (§146.2), at a name `origin/main` already serves because it
+IS main's file.
+
+**AND NOTHING OF MAIN'S CODE IS LOST, ASSERTED THE SAME WAY**: outside this
+branch's own files the merged tree is byte-identical to `origin/main`, so
+§147.4's grep-the-deletions has nothing to find — the two sides share no code
+file but `package.json`, which is why §56.7 could not bite here. Said rather
+than left as an absence, because "no conflict" is not the same claim.
+
+**RE-RUN ON THE MERGED TREE, because a branch that passes says nothing about
+what `main` would hold** (§365): portfolio **121/0** and **red all ten ways**,
+door 143/0, shell 118/0, state 92/0, modules 158/0, insights 127/0, notes
+170/0, frameworks 90/0, setup 33/0, room 10/0, deploy 5/0, memory 16/0, demo
+7/0, standing 7/0; `built-in-step.py` all good, `generated-in-step` all clear,
+`declared-deps` all clear, `npm run build` green through `scripts/deploy.mjs`
+and `next build`, and **`tsc` clean COLD with the cache deleted first** — no
+errors at all, where this branch's own record still said "clean but for
+`lib/prisma.ts`", which main has since closed.
+
+**ONE RED, AND IT IS MAIN'S**: `tracker` 227/1, on a heading the check spells
+as a date and the product now spells as a week number — established by running
+it on a WORKTREE OF `origin/main` and getting the identical 227/1 before
+anything here was blamed (§303). Recorded, not fixed in passing.
+
+**THREE THINGS THE RUN ITSELF TAUGHT, none of them the product's.** My own
+sweep called four checks by names `package.json` does not hold, and npm
+answered with an **empty log and a non-zero exit** — which reads exactly like a
+check that died (§298.3, §344.1's family: the tail is the verdict, and an empty
+tail is not a verdict at all). `generated-in-step` **refused to run while the
+merge was uncommitted** and said which errand that was rather than reporting a
+drift — §349.4's own distinction between *stale* and *mid-edit*, working as
+designed and worth seeing work. And `memory` failed with **its own sentence**,
+*"no tenant to write about — run `scripts/dev-tenant.mjs` first"*, which is
+§328.3's rehearsal-database prerequisite saying so in words instead of with a
+foreign-key error.
+
+**WHAT IS ON `main` NOW IS RULES AND TABLES AND NOT ONE SCREEN**: `portfolio`
+is still `built: false`, asserted with a built module beside it, so there is no
+page, no address and no switcher entry. The three drawings awaiting sign-off
+(§9.10 Progress, §9.12 Analytics, §9.13 the landing) are unchanged and still
+Islam's.
+
+---
+
+## §375.2 — PUSHED TO `main`, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
+
+`origin/main` had not moved while the merge was rehearsed, so it fast-forwarded
+onto the tree that was actually checked — `bd211e3..5d612e8`.
+
+**§91 IS SATISFIED BY CONSTRUCTION RATHER THAN BY TIMING.** Vercel deduplicates
+by SHA, so a commit that reaches `main` and a branch ref within a second of
+each other is ONE deployment and which ref gets it is a race lost in advance
+(§91.4, §107.15). The way round is a commit `main` holds and the branch does
+not, and here there are three: the branch's remote is still at the renumber,
+while the merge, the record and this note went to `main` alone.
+
+**§91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, SO IT IS SAID RATHER
+THAN CLAIMED** (§54.5, rule 3a): this environment's egress policy refuses
+`smp-orpin-tau.vercel.app` outright — 403 at the proxy's own CONNECT, which its
+README says to report rather than route around — so no request left this
+machine. **Nobody here has seen production serve this commit.**
+
+**AND THERE IS NO WITNESS FILE THIS TIME, WHICH IS WORTH SAYING** rather than
+leaving as an absence somebody later reads as an oversight. §374.1 proved its
+own deploy by `shell.js` going 3,824,282 → 3,827,402 bytes; **this round
+changes not one served byte** — every file under `smp-app/public/`, the frozen
+build and `sw.js` all hash identical to the commit before — so even with the
+live read available there would be nothing on the wire to tell the two builds
+apart. What production gains is in the DATABASE and in code nothing calls yet.
+
+**THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED.** While it stays where it is,
+`main`'s tip is unique by construction, and putting that SHA on a second ref is
+the one act left that could still cost the build. §91 says hold the branch
+until production has served it; with the live read impossible from here,
+holding is the instruction rather than caution.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): three files under
+`db/` and `lib/` are in the merged range and all three are Portfolio's own and
+new — no `api/` file changed at all. Nothing reads or writes the eight new
+tables, `lib/portfolio.ts` is imported by its check and by nothing that runs,
+and the authoriser, the change list, the review map and what a save touches are
+untouched. Measured, not assumed.
+
+**WHAT THE DEPLOY DOES TO PRODUCTION'S DATABASE IS ADDITIVE AND ONLY THAT**:
+`scripts/deploy.mjs` applies migration 015 on every build, and that file
+creates eight tables and their indexes and alters only what it has just
+created. It names no existing table. Nothing stored moves.
+
+---
+
+## §376.1 — MERGED TO MAIN, AND A RENUMBER THAT LOST ITS OWN WRITES (2026-09-20, Spec 061)
+
+Islam: **"MERGE TO MAIN"**. Main had moved 30 commits and taken **§375 and spec
+060** for Portfolio, so this round is renumbered to **§376 and spec 061** —
+BEFORE the merge, which is what makes the scoping provable (§264.3): at that
+point the tree holds none of main's lines, and the merge base was asserted to
+hold neither string in any spelling.
+
+**BOTH SPELLINGS, EVERY COUNT DECLARED, AND IT REFUSED TWICE** (§336.1,
+§353.4). Both refusals were right: *Spec 060* is capitalised in the spec's own
+title and lower-case in the two record files, so a pass told the wrong case
+would have written a number it had not matched.
+
+**AND THE PASS LOST FOUR OF ITS OWN WRITES, WHICH IS THE FINDING.** Four files
+take TWO substitutions each — a section and a spec — and the plan read each
+file's text ONCE at planning time, so the second write was made from the
+ORIGINAL text and silently discarded the first. **Every per-pass assertion
+passed**, because each was measured against the snapshot it was planned from:
+§344.1's rule satisfied and useless. *Asserting that a substitution matched is
+not asserting that it survived.* What catches it is the FINAL state of the tree
+— 23 of §376 against 23 of §375 before, spelling for spelling, with §375 absent
+from every file — and the 23 is itself the both-spellings point, being the 22
+entity-less plus CLAUDE.md's one `&sect;`.
+
+**THE FIVE CONFLICTS HAD A NAMED RULE EACH.** The three record files are
+COMBINED, never picked (§318.7, §356.17) — either side taken whole drops the
+other's round with nothing able to go red, there being no generated-in-step for
+prose — with every `## ` heading from each side asserted present in the result,
+0 lost from ours and 0 from main. The built file is REBUILT, never merged
+(§91). `sw.js` is rebuilt from main's copy with the branch's one line
+re-applied (§146.2), the name going PAST both rather than picking either.
+
+**AND THE MERGED RESULT IS GREPPED RATHER THAN TRUSTED** (§313.37, §56.7): the
+branch deletes no top-level declaration, and the duplicate scan over build.py's
+own concatenation reads 1514 top-level names with exactly SIX duplicates — the
+six §281.1 deliberately leaves.
+
+**WHAT COULD NOT BE RUN IS SAID** (§54.5, §124): this container holds neither
+`smp-app/node_modules` nor python Playwright, so `qa.py` and every frozen
+browser check could not launch, and `insights-tab.mjs` is 16/0 with two
+sections declaring NOT RUN in their own words. What did run is clean.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): not one frozen
+`api/`, `lib/` or `db/` file is in this branch's work. Nothing stored moves and
+nothing is migrated.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM HERE**: the egress policy
+refuses the production host at the proxy's own CONNECT (403, a policy denial
+its README says to report rather than route around), so nobody here has seen
+production serve this commit. There IS a witness this time — `shell.js`
+3,827,402 → 3,843,984 and `platform.css` 669,731 → 674,039 — so the two builds
+are one request apart for whoever can read the live site. The branch is
+deliberately NOT fast-forwarded (§374.1, §375.2's precedent): while it stays
+behind, main's tip is unique by construction.
+
+## §377 — AN ADDRESS IS A VALUE, NOT A CONTROL (2026-09-20, reversing §93.6)
 
 Islam: *"please remvoe the 1 click copy bhavior I can always have a right click
 and copy the text."*
@@ -53184,66 +53693,3 @@ it (Principle II, rule 1b).
 **The server needed nothing and it is read off the diff** (§172, spec 029): no
 `api/`, `lib/` or `db/` file is touched, nothing stored moves, nothing is
 migrated and nobody is signed out.
-
-### §374.1 — MERGED, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
-
-Islam: *"merge to main"*. **`main` HAD NOT MOVED**, so `--ff-only` took it
-cleanly and the tree that went up is the tree that was checked — which is the
-whole reason §4 forbids a blind merge either way round: a refusal is the
-notification, and its absence is a measurement too, taken rather than assumed.
-
-**THE MERGE CARRIES A SECTION OF ITS OWN BECAUSE THE BRANCH TIP WAS ALREADY
-PUSHED** (§91). Vercel deduplicates by commit SHA, so a fast-forward of `main`
-onto a commit the branch ref already holds is **one** deployment and which ref
-gets it is a race — lost in advance here, the branch having carried that SHA for
-hours. §91's own way round is *a commit `main` holds and the branch does not, and
-it must be one worth making*, and the record owed exactly one: a finished round
-whose tracker still reads **waiting on Islam** is a record that is wrong
-(§367.5's own correction, one round on). So this section IS the distinct commit,
-which is §357.4's road rather than a device invented for it.
-
-**AND §91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, WHICH IS STATED
-RATHER THAN CLAIMED** (§54.5, rule 3a). The environment's egress policy refuses
-`smp-orpin-tau.vercel.app` outright — **403 at the proxy's CONNECT**, whose own
-README says to report a policy denial rather than retry or route around it — so
-no request left this machine and **the deployment is unverified from here**.
-What is NOT claimed is the whole of the claim: nobody here has seen production
-serve this commit.
-
-**THE WITNESS IS NAMED SO THE CHECK IS ONE COMMAND FOR WHOEVER CAN MAKE IT — AND
-IT IS ONE FILE, NOT §367's TWO.** It is **not `sw.js`** (§365, §316.10): the
-generator drops the caching half of the frozen worker, which is the half `SHELL`
-lives in, so the **served** worker is byte-identical either side of this merge
-and the bumped name reaches nobody — it is kept for the offline handover alone.
-**AND IT IS NOT `platform.css`, WHICH IS THE PART §367's SENTENCE COULD NOT BE
-COPIED FOR**: that round moved both files and this one changes no stylesheet at
-all, so `platform.css` reads **669,731** bytes on the build before and on this
-one alike — *a witness that reads the same either way is not a witness*, and it
-would have gone in verbatim had the two builds not been asked (§113.8, in the
-paragraph citing §113.8). What proves production built THIS commit is `shell.js`
-alone: **3,824,282 → 3,827,402** bytes, the second matching
-`smp-app/public/shell.js` exactly.
-
-**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED.** While it stays where it
-is, `main`'s tip is a SHA no other ref holds — unique by construction rather
-than by timing — and pushing it onto a second ref is the one act left that could
-still cost the build. §91 says to hold the branch until production has served
-it; with the live read impossible from here, holding is not caution but the
-instruction, and the fast-forward is one command the day somebody has looked.
-
-**NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF THE DIFF** (spec 029, precedent
-040): the merged range holds `CLAUDE.md`, the tracker, this document,
-`checks/people-dialog.py`, `src/shell.html`, the built file, `public/shell.js`
-and `sw.js` — **not one `api/`, `lib/` or `db/` file** — so nothing about how a
-save is judged moves, no stored value moves and nothing is migrated. A tab left
-open on the previous build keeps its old shell until somebody reloads it, which
-is §365's own residue and the ordinary cost of a screen-only round.
-
-**RE-CHECKED ON THE MERGED TREE IMMEDIATELY BEFORE THE PUSH**, because a branch
-that passes says nothing about what `main` holds (§365): `built-in-step` all good
-(the shipped file byte-identical to `build.py`'s own output), `generated-in-step`
-all clear (every served copy identical to what its generator produces, and every
-carried rule module its frozen twin with the one declared transform applied),
-`node --check sw.js` clean with **one** `SHELL` declaration (§146.2) at a name
-`origin/main` does not hold — confirmed again as the last step rather than the
-first (§94.16, which has collided twice).

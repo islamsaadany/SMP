@@ -50080,6 +50080,209 @@ var TRAIL = (function(){
            locate: locate, noRestore: noRestore, servable: servable };
 })();
 
+/* ── insights.js ── */
+/* ══ THE REPORTS, INSIDE THE PLATFORM (§376) ══════════════════════════════
+   Islam, of the Insights module: *"for the users not the smo they can see the
+   insights as a tab beside the tabs visible to them. better usability than
+   going to another module. the module is managed by the smo which is relevant
+   but the user to move between modules is not very usable."*
+
+   Three placements were drawn at real size in the product's own chrome
+   (design-mockups/insights-in-navigation/, rule 1c) and he picked the tab —
+   the one I argued against, so the reason it is still a tab is his and the
+   cost is recorded rather than re-argued: those three tabs are three views of
+   ONE subject and this library is the CLIENT'S, identical whichever unit you
+   stand on. What the build can do is stop that untruth outliving the screen,
+   which is why the tab writes the module's own address (shell/route.js).
+
+   AND A TAB THAT IS A LINK WOULD NOT HAVE ANSWERED HIM. "Better usability than
+   going to another module" rules out a door that goes to another module from a
+   different button: it would carry the whole of C's design cost and none of
+   its point. So the platform draws the reports in its own pane, and this file
+   is how.
+
+   ONE RENDERER, TWO HOSTS (§53.5, §364's own shape). The ROWS are the
+   module's: this asks `/<client>/insights/list` and drops the answer in, so a
+   report's title, its fact line, its date spelling and its download button
+   cannot read one way on the module's page and another way here. What this
+   file draws is the chrome around them — the search and the count — because
+   the two hosts navigate differently and the module's own page uses a GET form
+   that would take the platform with it.
+
+   NEVER paint() FROM A FETCH (§35, §71.2), which is history.js's rule one page
+   over: the tab draws a frame, asks, and writes the answer into its own node.
+   The count is rewritten IN PLACE for the same reason the outcome sentence is
+   (§63) — it sits in the row the search box is in, and rebuilding that row
+   would throw away what somebody is typing.
+
+   NOTHING HERE IS DRAWN OVER file:// — the contingency copy (§306) has no
+   server to ask, and a tab that could never open anything is worse than none
+   (§61). The test is the SERVED document's own stamp and not the protocol,
+   so it is one answer rather than two that can disagree. */
+var LIBRARY = (function(){
+  /* The state is the ASK and the ANSWER, kept apart on purpose: `q` survives a
+     repaint (it is what the person typed), `html` is whatever the server last
+     said, and `loadedFor` is what stops a slow answer overwriting a newer
+     one. */
+  var Q = "";                      /* what is in the search box              */
+  var loading = false, failed = false, html = "", count = 0, loadedFor = null;
+
+  function E(s){ return typeof esc === "function" ? esc(s) : String(s == null ? "" : s); }
+  function live(){ return typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive(); }
+
+  /* ── IS THERE A LIBRARY BEHIND THIS TAB ─────────────────────────────────
+     The server stamps the categories on a document it serves to somebody who
+     may OPEN Insights (lib/shell.ts), so the attribute answers three questions
+     at once — is there a server, does this client have the module, and may
+     this person open it — with one read and no second copy of any of them
+     (§42: the rule is asked, never re-derived). Absent is the honest answer in
+     every case it is absent for. */
+  function cats(){
+    var raw = document.documentElement.getAttribute("data-library-cats");
+    if (!raw) return null;
+    try { var a = JSON.parse(raw); return Array.isArray(a) ? a : null; } catch (e) { return null; }
+  }
+  function shown(){ return !!cats(); }
+
+  /* ── THE CATEGORIES ARE THE SECTION ROW ────────────────────────────────
+     Signed off in the mockup, and it costs no new control: that third row is
+     what a tab's own sub-navigation already lives in, so the module's five
+     categories read here the way Foundation, SWOT and Plan read one tab over.
+     `All` is a section like the rest — an empty key, because the fragment
+     reads an absent category as every category and a section with no key
+     would be a second way of saying the same thing (§50.6). */
+  function sections(){
+    var cs = cats(); if (!cs) return [];
+    return [{ k:"all", ac:"c_kb", label:"All", render:renderPane }].concat(
+      cs.map(function(c){
+        return { k:"cat-" + c.toLowerCase(), ac:"c_kb", label:c, render:renderPane };
+      }));
+  }
+  /* The category the section row is standing on, as the fragment wants it:
+     the empty string for All. Read from CURSEC, which is where the shell keeps
+     a page's section, so Back through the browser's history lands on the same
+     category the address named (§48: addressed by its key, never by
+     position). */
+  function category(){
+    var cs = cats(); if (!cs) return "";
+    var s = (typeof CURSEC !== "undefined" && CURSEC.insights) || "all";
+    for (var i = 0; i < cs.length; i++)
+      if ("cat-" + cs[i].toLowerCase() === s) return cs[i];
+    return "";
+  }
+
+  /* ── THE PANE ──────────────────────────────────────────────────────────
+     A frame, then an ask. The frame is drawn synchronously because `render`
+     is (every tab in SUBS returns HTML), and the ask is queued so the paint
+     that contains it has finished before anything can write into it. */
+  function renderPane(){
+    setTimeout(function(){ load(true); }, 0);
+    return '<div class="libpane">' +
+      '<div class="libtools">' +
+        '<input class="fld libsrch" type="search" data-lib-q autocomplete="off" ' +
+          'placeholder="Search reports…" aria-label="Search reports" value="' + E(Q) + '">' +
+        '<button type="button" class="libgo" data-lib-go>Search</button>' +
+        '<span class="libcount" data-lib-count>' + E(countWord()) + '</span>' +
+      '</div>' +
+      '<div class="liblist" data-lib-list>' + bodyHtml() + '</div>' +
+    '</div>';
+  }
+  /* THREE ANSWERS, NOT TWO (§35, §93): a count we have, a count we are still
+     asking for, and a library we could not read. Printing nought for the last
+     two tells a client that Forefront has published nothing. */
+  function countWord(){
+    if (loading) return "Asking…";
+    if (failed) return "—";
+    return count + (count === 1 ? " report" : " reports");
+  }
+  function bodyHtml(){
+    if (loading && !html) return '<div class="libwait">Reading the library…</div>';
+    if (failed)
+      return '<div class="none"><b>The reports could not be reached just now.</b>' +
+        'Nothing has been lost. ' +
+        '<button type="button" class="linkbu" data-lib-retry>Try again</button></div>';
+    return html;
+  }
+  /* The list and the count are rewritten and the row they sit in is not — the
+     search box is in that row and a hand may be in the search box. */
+  function draw(){
+    var list = document.querySelector("[data-lib-list]");
+    if (list) list.innerHTML = bodyHtml();
+    var c = document.querySelector("[data-lib-count]");
+    if (c) c.textContent = countWord();
+  }
+
+  /* ── THE ASK ───────────────────────────────────────────────────────────
+     The module's own address, with this client's name on it the way every
+     other request in the browser carries it (SYNC.withClient — a GET has no
+     body to put it in, §313.35). */
+  function load(force){
+    if (!shown()) return;
+    var cat = category();
+    var key = JSON.stringify([cat, Q]);
+    if (!force && key === loadedFor) return;
+    loadedFor = key; loading = true; failed = false; draw();
+    if (!live()) { loading = false; failed = true; draw(); return; }
+    var qs = [];
+    if (cat) qs.push("category=" + encodeURIComponent(cat));
+    if (Q) qs.push("q=" + encodeURIComponent(Q));
+    var url = "/" + slug() + "/insights/list" + (qs.length ? "?" + qs.join("&") : "");
+    fetch(url, { cache:"no-store", credentials:"same-origin" })
+      .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }); })
+      .then(function(x){
+        if (loadedFor !== key) return;        /* a newer ask has superseded this one */
+        loading = false;
+        if (x.st !== 200 || !x.j || !x.j.ok) { failed = true; html = ""; draw(); return; }
+        /* `read:false` is the SERVER saying it could not read the library, and
+           it has already put that sentence in the html — one renderer, so the
+           tab does not invent a second wording for it (§53.5). A transport
+           failure is this file's own to say, and is the branch above. */
+        failed = false; html = String(x.j.html || ""); count = Number(x.j.count) || 0;
+        draw();
+      })
+      .catch(function(){
+        if (loadedFor !== key) return;
+        loading = false; failed = true; html = ""; draw();
+      });
+  }
+  /* The client this page was served at. `SYNC.withClient` puts it in a query
+     for the shared endpoints; this address carries it as the first segment,
+     which is how every module is reached, so it is read from where the browser
+     already is rather than kept a second time. */
+  function slug(){
+    var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,47})/);
+    return m ? m[1] : "";
+  }
+
+  /* ── WIRING, DELEGATED ONCE ────────────────────────────────────────────
+     On the document, so a repaint can never leave a handler on a dead node
+     (§29.5) and nothing has to be re-armed by whoever rewrites the pane. */
+  document.addEventListener("input", function(ev){
+    var i = ev.target && ev.target.closest && ev.target.closest("[data-lib-q]");
+    if (!i) return;
+    Q = i.value;                      /* typing never repaints and never asks (§35) */
+  });
+  document.addEventListener("keydown", function(ev){
+    if (ev.key !== "Enter") return;
+    var i = ev.target && ev.target.closest && ev.target.closest("[data-lib-q]");
+    if (!i) return;
+    ev.preventDefault();              /* or the form-less box submits nothing and the page jumps */
+    Q = i.value; load(true);
+  });
+  document.addEventListener("click", function(ev){
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-lib-go],[data-lib-retry]");
+    if (!b) return;
+    var i = document.querySelector("[data-lib-q]");
+    if (i) Q = i.value;
+    load(true);
+  });
+
+  return { shown: shown, sections: sections, render: renderPane, load: load,
+           /* for the checks */
+           cats: cats, category: category,
+           state: function(){ return { q:Q, loading:loading, failed:failed, count:count }; } };
+})();
+
 /* ── safety.js ── */
 /* ══ SAVE-SAFETY BANNERS (§258) ═════════════════════════════════════════════
    Islam, after a reporting round in which people lost work twice over:
@@ -53815,6 +54018,33 @@ var SYNC = (function () {
 
   /* Page definitions carry the access key the matrix is keyed on, so a page
      is never rendered without a grant having been checked first. */
+  /* ── THE REPORTS, AS A TAB (§376) ────────────────────────────────────
+     Islam picked the tab over the two other placements drawn for him, so the
+     library reads beside Strategy and Performance on every destination a
+     person can open. Declared ONCE and referenced four times below, because
+     the same tab on five lists is five places to forget when it changes —
+     which is exactly how the two sides of the navigation switch drifted twice
+     (§211, §213).
+
+     IT IS THE CLIENT'S LIST AND NOT THE SUBJECT'S, and that is the cost of
+     the placement rather than a defect: press Retail Stores and it shows the
+     same reports. It was drawn that way, side by side, before he chose.
+
+     `when` IS THE SERVED STAMP, so it is absent over file:// and absent for
+     anybody the library is shut to — one read of one attribute, never a
+     second copy of who may open a module (§42, lib/access.ts decides and
+     lib/shell.ts stamps).
+
+     `ac` IS `c_kb`, WHICH IS AN ACCESS KEY THE MATRIX ALREADY HOLDS AT VIEW
+     FOR EVERYONE. Whether this person may open Insights is spec 046 §4.4's
+     question and is answered by the module's OWN area on the server, so a
+     second grant here would be a cell that could refuse what the door
+     allowed — two answers to one question (§37, §53.5). The key is here
+     because `allowed()` asks every tab for one. */
+  var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights",
+                  when: function(){ return LIBRARY.shown(); },
+                  sections: function(){ return LIBRARY.sections(); } };
+
   var SUBS = {
     /* A supporting function is the destination; the capabilities it carries are
        named inside its pages. */
@@ -53916,7 +54146,8 @@ var SYNC = (function () {
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
-        render: function(k){ return renderFnReport(k); } }
+        render: function(k){ return renderFnReport(k); } },
+      LIB_TAB
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -53927,14 +54158,16 @@ var SYNC = (function () {
        whether a company CEO sees the group and the other companies. */
     co: [
       { k:"performance", ac:"g_perf", label:"Performance", primary:true,
-        render:renderCompanyPerformance }
+        render:renderCompanyPerformance },
+      LIB_TAB
     ],
     group: [
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
-      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
+      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
+      LIB_TAB
     ],
     unit: [
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
@@ -53981,7 +54214,8 @@ var SYNC = (function () {
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
-        render: function(u){ return renderReport(u); } }
+        render: function(u){ return renderReport(u); } },
+      LIB_TAB
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 
@@ -64345,6 +64579,8 @@ var SYNC = (function () {
     if (v) document.documentElement.setAttribute("data-setup-scope", v);
     else document.documentElement.removeAttribute("data-setup-scope");
   }
+  var LIB_TAB_KEY = "insights";
+  function libAddr() { return "/" + SLUG + "/" + LIB_TAB_KEY; }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
     /* the module leads every address but the spine's; `tour` and the
@@ -64355,6 +64591,11 @@ var SYNC = (function () {
     if (led) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
+    /* The reports' own address, which `addressOf` writes for the Insights
+       tab. Reached here only by a history entry carrying no state (above);
+       `null` leaves the page exactly where it is rather than reading the
+       word as a destination. */
+    if (seg.length === 1 && seg[0] === LIB_TAB_KEY) return null;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
     else if (seg[0] === "co" && seg[1]) { d = "co:" + seg[1]; i = 2; }
     else if (seg[0] === "tour") { return { tour: true }; }
@@ -64384,8 +64625,32 @@ var SYNC = (function () {
     }
     return { d: d, s: s, c: c };
   }
+  /* ── THE REPORTS KEEP THEIR OWN ADDRESS (§376, decision 2) ────────
+     The library is the CLIENT'S and is the same list whichever unit you are
+     standing on, so the ordinary address `addressOf` would write —
+     `/raya-trade/strategy/mobile/insights` — names a unit in a link that is
+     not about that unit. Worse than untidy: the screen's own untruth is
+     gone the moment you look away, and a link outlives the look.
+
+     So the tab writes the module's own address, which is where the reports
+     live from every other direction too. Spelled ONCE and read by both ends
+     of this file (§53.5).
+
+     A SHARED OR RELOADED LINK OPENS THE MODULE'S OWN PAGE — the same
+     reports, the whole window, its own way back — because that address is
+     served by the module and not by the shell. Stated rather than
+     discovered: the room differs, the reports do not.
+
+     BACK AND FORWARD ARE THE STATE OBJECT'S, NEVER THE ADDRESS'S.
+     `sync()` pushes `{d, s, c}` beside the address, and the popstate
+     handler reads `ev.state` first, so the destination somebody was
+     standing on is restored exactly. `placeOf` is the fallback for an entry
+     that carries no state, and there it answers NOTHING rather than reading
+     `insights` as a unit nobody has — landing on an arbitrary destination
+     is worse than staying put (§96.2, §61). */
   function addressOf(d, s, c) {
     var kind = kindOf(d);
+    if (kind !== "setup" && s === LIB_TAB_KEY) return libAddr();
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
     /* A module's Setup carries its module word and the client's carries
        none (spec 056 §4.2): the scope the shell resolved decides, so a door
@@ -64461,7 +64726,34 @@ var SYNC = (function () {
        Setup rail, which draws a row per module whatever the count. The
        check's break forces the switcher on for a client holding one. */
     var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
-    if (!Array.isArray(list) || (!forceSwitch && list.length < 2)) return;
+    if (!Array.isArray(list)) return;
+    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§376,
+       decision 3) ───────────────────────────────────────────────────
+       The switcher exists to reach a module the navigation cannot. Since
+       the library reads as a tab beside Strategy and Performance, offering
+       it here as well is the same door twice on one screen (§87's twins,
+       §94.15) — and for a client's own person, who has Strategy and the
+       reports and nothing else, it leaves a mark whose menu holds only the
+       page they are already on.
+
+       DROPPED FROM THE LIST RATHER THAN HIDDEN, so the count below decides
+       on what is actually on offer: with one left there is no choice, and
+       §32's rule takes the mark off the bar entirely.
+
+       WHICH MODULES THE TABS REACH IS ASKED OF THE TAB ITSELF, never
+       listed here — `LIBRARY.shown()` is the one answer to whether the
+       library is on the tab row (it reads the served stamp), so a build
+       that stopped drawing the tab puts it back in this menu on its own
+       rather than leaving it reachable from nowhere (§61, §53.5).
+
+       AND THE `typeof` GUARD FIXES NOTHING TODAY, said rather than left for
+       the next reader to take as load-bearing (§298.2): build-shell.mjs
+       concatenates this file LAST, after every frozen script, so LIBRARY is
+       always there. It is here because this file is the one piece of browser
+       code that is also written as a file of its own. */
+    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown()) ? [LIB_TAB_KEY] : [];
+    list = list.filter(function (mm) { return !mm || reached.indexOf(mm.key) < 0; });
+    if (!forceSwitch && list.length < 2) return;
     var bar = document.querySelector(".top .top-in");
     if (!bar || bar.querySelector(".topmark")) return;
 

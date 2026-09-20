@@ -6422,3 +6422,221 @@ the line was written (§218) — 143/0 twice on two fresh databases; and every
 other reach for a card was swept (§51.11), two more fixed, one left as correct.
 
 **Merged to `main` 2026-09-19 on Islam's word.**
+
+---
+
+## §376 — The reports, as a tab in the platform (spec 061, 2026-09-20)
+
+**On the branch `claude/trusting-wright-1m2bgv`, not merged.**
+
+**What Islam asked for.** That a client's own people reach the Insights library
+from a tab beside the tabs they already use, rather than from the module
+switcher — *"the module is managed by the smo which is relevant but the user to
+move between modules is not very usable."*
+
+**What was wrong, measured first.** The switcher is a four-square picture with
+no word beside it, in the pale top bar, in a different row from every other
+piece of navigation — and for a client's person it opens a menu of two, one of
+which is the page they are standing on. **And it offers doors that refuse
+them**: Tracker and Notes declare no area, so `decideOpen` lets a client's
+person through and their pages turn them away.
+
+**What he chose.** Three placements were drawn at real size in the product's own
+chrome and published; he picked **C**, a real tab. It was the one recommended
+against, so the cost is recorded as his: the library is the *client's*, so the
+tab shows the same reports whichever unit you stand on. Then three decisions,
+all confirmed: every destination carries the tab; the tab writes the module's
+own address; the four-square mark is drawn only where the tabs cannot reach.
+
+**Built.** `libraryRows`/`readLibrary`/`libraryFragment` shared by the module's
+page and the tab; `GET /<client>/insights/list`; the `data-library-cats` stamp;
+`src/insights.js` (`LIBRARY`) with its sections, its pane and its three count
+answers; `LIB_TAB` declared once and referenced on all four destination kinds;
+the pane's design scoped to `.libpane`; the address and the switcher in
+`shell/route.js`; `checks/insights-tab.mjs`.
+
+**Checked.** 16/16 on the new check, **proved able to fail three ways from the
+sources** (3 / 1 / 3 red), the source restored byte-identical and the build
+re-run after. `built-in-step.py` all good; the four generators re-run and
+`generated-in-step.mjs` clean but for the uncommitted-edits line, which is its
+"you have edits in flight" answer and not a stale copy. `sw.js` bumped to
+`v5.20-reports-tab`, a name neither `main` nor this branch held.
+
+**Not run here, and said rather than left as an absence (§54.5).** Neither
+Playwright binding is installed in this session, so the tab was **not driven in
+a browser**: what is asserted is the rules, the row builder's four states and
+the structure — not that it renders. §5 of the check is written for the served
+sweep and names what it covers.
+
+**Recorded, not done.** Tracker and Notes are still offered to a client's person
+on a tenant that holds them. Decision 3 empties that menu for a client with
+Strategy and the reports, and leaves it standing for one that also has an office
+module — so **my second mockup's claim that decision 3 closes the defect "for
+free" is true of the shapes in front of us and not in general**, corrected here
+rather than left standing (§124). The fix is those two modules' own area
+declarations, which this round was not asked about (rule 1b).
+## Portfolio — the delivery plan, per client (spec 060)
+
+**Waiting on Islam, not on me.** Nothing is built and no source has moved; this
+is a spec and six drawings. Three screens are signed off — the project team, the
+charter and the plan — and **three await a word**: Progress, Analytics and now
+the landing.
+
+**Every screen is drawn as of 2026-09-20.** The landing was the last one with no
+picture: the project list for this client, with each project's state and the
+cross-project reading §9.11 deliberately kept off the tabs. One question and a
+row answers it four ways — how far along, whether it is late, what is waiting on
+somebody, and when anybody next looks at it.
+
+**A project has no status field and never gains one.** Every figure in that list
+is worked out from the plan underneath it, so the list cannot disagree with the
+four pages behind it. Two of the five projects drawn have no figure at all, on
+purpose: one has a charter and no plan (which says so rather than printing 0%),
+and one has a plan nobody has started (which is 0%, and is the difference).
+
+**What changed in the drawings' own plumbing.** The rows were already shared
+between three drawings; **the sums were not**, and were about to be copied a
+fourth time. They live in one file now and are spliced the same way — proved
+behaviour-neutral (all three render byte-identical to what they published) and
+proved load-bearing one break at a time. The extraction broke the Plan on its
+first attempt, taking a helper out with the block it sliced; the baseline had
+been captured before the first edit, so it was one diff rather than a hunt.
+
+**And this container can render, where the earlier rounds' could not.** So every
+figure on the new page was read out of the rendered document, the three older
+drawings were confirmed byte-identical to what they published, contrast was
+measured across all four in both palettes (**0 failures**, with the probe proved
+able to fail first), and the table's fit was measured at seven widths from 1600
+to 768 with nothing scrolling sideways.
+
+**Next, and it is a decision rather than work**: three sign-offs. After them,
+the spec's own §10 still says what building needs — this repository has never
+seen the reference code, so the two audits behind §7 and §9.11 were written by
+sessions with it attached and nothing has been run.
+
+---
+
+## Portfolio — the rules and the tables (2026-09-20, spec 060, §375)
+
+**Built: the half with no picture.** Every screen of this module is drawn and
+three of the six are signed off, so what could honestly be built is the part
+that is decided and has no design in it — the shape the data takes, and the
+rules that say what may be done to it.
+
+**Nothing on any screen has changed and nothing can be opened.** Portfolio is
+still switched off in the list of modules, so there is no page, no address and
+no entry in the switcher. That is asserted rather than assumed: a module
+switched on with nothing behind it is a door onto an empty room.
+
+**What is in it.** Eight tables — the plan's tree (phases, work packages,
+activities and their breakdown), who is on a project and at what, and the three
+words a client uses for the levels. And the rules the spec calls the actual
+product: two people finish an activity rather than one, and reopening it is
+gated the same way as signing it off; the real dates are worked out and never
+typed, at one place in the code; progress comes from the breakdown and a typed
+figure over it is refused with the reason; moving a date shows you what else
+moves before anything commits; the numbers renumber themselves, so deleting a
+phase cannot leave a gap; and a phase's figure is made of the rows under it
+rather than stored, which is what stops it disagreeing with the page it summarises.
+
+**How it is proved.** 121 assertions with no browser and no screen, each
+refusal asserted beside the same act allowed to somebody the rule admits — and
+the whole file proved able to fail ten times over, one break per rule, before
+the green run was believed. The tables were proved by running them twice: on a
+fresh database, and on one already up, where only the migration creates them.
+
+**Two things worth recording.** One break modelled a broken function rather
+than the defect it was named after, and was rewritten until it reproduces the
+fault exactly. And building §6 found two sentences in the spec pointing
+different ways — whether a Lead can name somebody onto a project, which the
+team screen says no to and the charter implies yes. Answered the narrow way,
+written into the spec, and Islam's to settle.
+
+**Not this work's, established on a baseline first**: the Tracker's check is
+one red on a date that has gone stale since it was written, and one spike proof
+dies in its own seed harness on a Meeting Notes column. Both recorded.
+
+**Next, and still a decision rather than work**: the three sign-offs. Nothing
+visual can be built until they are given.
+
+**§375.1 — merged to `main`, 2026-09-20.** Islam: *"merge to main."*
+
+**Main had moved 73 commits underneath** — Setup per module, the client's
+settings in the platform, the registry drawn inline — and had taken both this
+round's numbers, so §359 became §375 and spec 056 became spec 060 **before**
+the merge, which is what makes the renumber provably this branch's own and not
+somebody else's citations swept up by accident.
+
+**Four files overlapped and every one was combined rather than picked.** The
+proof is a measurement, not a reading: against `main` exactly one line is
+removed across the three records, and it is main's own "Last Updated" line
+becoming "Earlier", which is what that file does with an entry that is no
+longer the newest.
+
+**The frozen platform is untouched, byte for byte**, so nothing was rebuilt and
+the service worker is not bumped — what a client's browser receives does not
+change.
+
+**Everything was re-run on the merged tree**, because a branch that passes says
+nothing about what production would hold: Portfolio 121/0 and red all ten ways,
+and thirteen other checks green, with the build and a cold typecheck clean.
+**One red is main's own**, reproduced on a worktree of main before anything
+here was blamed — a check whose expected wording has gone stale as the weeks
+moved.
+
+**What is on `main` is the rules and the tables and not one screen.** Portfolio
+is still switched off; the three drawings awaiting sign-off are unchanged and
+still waiting on Islam.
+
+**§375.2 — pushed to `main`, 2026-09-20.** Main had not moved, so it
+fast-forwarded onto the tree that was actually checked.
+
+**What could not be checked from here, said rather than claimed**: this
+machine's network policy refuses the production address outright, so nobody
+here has seen the live site serve this commit. And there is no file to compare
+even if it could — this round changes not one served byte, so the two builds
+look identical from outside; what production gains is in the database and in
+code nothing calls yet.
+
+**The branch is deliberately left behind main** until production has served it,
+which is the rule for keeping a deployment from being raced away.
+
+**Nobody is signed out and nothing stored moves**: no request-handling file
+changed, nothing reads the new tables, and the migration only adds its own
+eight.
+
+
+## §376.1 — The reports-as-a-tab round, merged to main (2026-09-20) · **done**
+
+Merged on Islam's word, and the renumber came **first** — main had moved 30
+commits and taken §375 and spec 060 for Portfolio, so this round became **§376
+and spec 061**. Doing it before the merge is what makes the scoping provable:
+the merge base holds neither string, so every occurrence was this branch's by
+construction.
+
+**What the run taught.** The renumber pass planned from a per-pass snapshot, so
+on the four files taking two substitutions each the second write was made from
+the original text and discarded the first — with every per-pass assertion
+passing, because each was measured against the snapshot it was planned from.
+Asserting that a substitution *matched* is not asserting that it *survived*;
+what catches it is the final state of the tree.
+
+**The merge.** Five conflicts: the three record files combined rather than
+picked (0 headings lost from either side, asserted), the built file rebuilt
+rather than merged, and `sw.js` rebuilt from main's copy with the one line
+re-applied at a name past both (v5.20). The merged concatenation scans to 1514
+top-level names with exactly the six duplicates §281.1 leaves.
+
+**What ran, and what could not.** Built-in-step and generated-in-step all clear;
+authoriser 683/0, change list 140/0, platform rules 69/0, KB audience clear,
+session-state and db-url-choice clear, KB corpus in step, seed byte-identical.
+This container holds neither `smp-app/node_modules` nor python Playwright, so
+`qa.py` and every frozen browser check could not launch, and `insights-tab.mjs`
+is 16/0 with two sections declaring NOT RUN in their own words.
+
+**Nobody is signed out and nothing stored moves** — no frozen `api/`, `lib/` or
+`db/` file is in this branch's work. The live read could not be made from here
+(the egress policy refuses the host at CONNECT), so nobody here has seen
+production serve it; the witness is `shell.js` 3,827,402 → 3,843,984 and
+`platform.css` 669,731 → 674,039. The branch is deliberately not
+fast-forwarded, keeping main's tip unique.

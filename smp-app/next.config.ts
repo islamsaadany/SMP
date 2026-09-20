@@ -74,8 +74,31 @@ const man = frozen.manifest;
 if (!man) throw new Error("next.config: the carried /manifest.webmanifest block is missing");
 
 const nextConfig: NextConfig = {
-  /* The Prisma client and the pg driver must stay server-side. */
-  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+  /* The Prisma client and the pg driver must stay server-side.
+
+     AND THE TWO PACKAGES THE SERVER LOADS THROUGH A REQUIRE THE BUNDLER
+     CANNOT SEE (§374). `@vercel/blob` is reached by
+     `createRequire(import.meta.url)("@vercel/blob")` (lib/blob-api.ts) and
+     `web-push` by a plain `require` inside lib/push.cjs — which is itself
+     loaded that way, so nothing static ever looks inside it. Neither call is
+     analysable, so the build's file tracing never learnt those files were
+     needed and NEITHER PACKAGE REACHED ANY FUNCTION: measured on the built
+     app, 0 of their files in all nineteen traces while `pg` — named here —
+     was in all nineteen. On the deployment the require then threw, the catch
+     in blob-api.ts turned it into "there is no file store set up yet", and
+     Islam met that sentence on a deployment whose Blob store had been
+     connected since 4 September.
+     IT HAD ALREADY HAPPENED ONCE AND WAS NEVER EXPLAINED: §282's own "what
+     is not claimed" records *why `web-push` was once missing from the
+     deployment was never established*. This is why. Same cause, same
+     silence, two features apart.
+     NAMING THEM HERE IS WHAT CARRIES THEM, and it is precise rather than a
+     blanket include — after this, `@vercel/blob` is traced into exactly the
+     three routes that reach it and `web-push` into the one that does.
+     checks/deploy-context.mjs §5 asserts the RULE rather than these two
+     names, so a third package loaded this way is caught the day it is
+     added. */
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg", "@vercel/blob", "web-push"],
   /* lib/frozen.cjs reads the frozen product's sources at runtime (D4): they
      are part of the server's files wherever it is packed. */
   outputFileTracingIncludes: { "/**": ["../SMP-Project-Folder/src/*.js", "./lib/rules.cjs", "./shell/body.html", "./shell/platform.html", "../db/seed-state.json"] },

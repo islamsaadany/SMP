@@ -224,8 +224,16 @@ class Stub(http.server.SimpleHTTPRequestHandler):
             self._send(json.dumps({"ok": False, "error": "gone"}), "application/json", 404); return
         if act == "libraryUploadBegin":
             if not SCENE["store"]:
+                # THE STUB SAYS WHAT THE SERVER SAYS (§100.3, §374). This held
+                # "There is no file store set up yet", which the server stopped
+                # producing once the sentence began naming WHICH half is missing
+                # — the software or the key — so the assertion below was reading
+                # this file's own literal back rather than anything the product
+                # does. lib/blob-api.ts's storeWhy() is the one answer; this is
+                # its software half, which is the one that shipped.
                 self._send(json.dumps({"ok": False, "error":
-                    "There is no file store set up yet, so a report cannot be uploaded. "
+                    "The software for the file store is not in this deployment, "
+                    "so a report cannot be uploaded. "
                     "Everything else about the library works."}), "application/json", 503); return
             self._send(json.dumps({"ok": True, "path": "insights/t/i/f.pdf", "storeKey": "K",
                                    "uploadId": "U", "piece": PIECE}), "application/json"); return
@@ -673,8 +681,10 @@ def run():
           btn: Array.from(document.querySelectorAll('.filestrip .btn'))[0].textContent,
           pieces: 0
         })""")
-        check("a store that is not there is said in words, not swallowed (§171)",
-              "no file store" in told["err"], told)
+        check("a store that is not there is said in words, and names WHICH half "
+              "is missing rather than 'not set up' (§171, §374)",
+              "file store" in told["err"]
+              and ("software" in told["err"] or "key" in told["err"]), told)
         check("...and it says the rest of the library still works", "Everything else" in told["err"], told)
         check("...and the control goes back to what it was, rather than staying on 'Sending…'",
               told["btn"] in ("Add the file", "Replace"), told)

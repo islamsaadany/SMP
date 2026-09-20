@@ -73,6 +73,54 @@ check("dropBlob answers TRUE — nothing is left at that path, which is what the
   off.drop === true, off.drop);
 check("...and the store was not called once", CALLS.length === 0, JSON.stringify(CALLS.map((c) => c.name)));
 
+/* ── §1b · AND IT SAYS WHICH HALF IS MISSING (§374) ────────────────────
+   Two entirely different faults used to reach one sentence — the package
+   absent from the deployment, and no key for a store — so "there is no file
+   store set up yet" was true of both and pointed at neither. Islam read it
+   on a deployment whose Blob store had been connected since 4 September, and
+   what was actually missing was the package, which the build had never
+   traced into any function. §123's argument: *it is not working* sends
+   somebody to look at everything, naming the step sends them to one page.
+
+   THE TWO HALVES CANNOT BOTH BE REACHED IN ONE PROCESS, because the loader
+   remembers its first answer — so the KEY half is asked here, where the stub
+   stands in for a package that loaded, and the SOFTWARE half in a child
+   whose resolver refuses that one name exactly as a deployment missing the
+   files does (MODULE_NOT_FOUND). BOTH ENDS AND THEN THE DIFFERENCE (§113.8):
+   the fault this guards against is the two collapsing back into one wording,
+   which every assertion about a single sentence passes perfectly. */
+console.log("\n§1b · and the sentence says WHICH half is missing");
+const KEYWHY = B.storeWhy();
+check("with the package loaded and no key, it names the KEY",
+  /key/i.test(KEYWHY) && !/software/i.test(KEYWHY), JSON.stringify(KEYWHY));
+const child = require("node:child_process").spawnSync(process.execPath,
+  ["--experimental-strip-types", "-e", `
+     const M = require("node:module");
+     const real = M._resolveFilename;
+     M._resolveFilename = function (r, ...rest) {
+       if (r === "@vercel/blob") { const e = new Error("Cannot find module '@vercel/blob'"); e.code = "MODULE_NOT_FOUND"; throw e; }
+       return real.call(this, r, ...rest);
+     };
+     process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_FAKE_seam";
+     import("${new URL("../lib/blob-api.ts", import.meta.url).href}")
+       .then((m) => console.log(JSON.stringify({ ready: m.ready(), why: m.storeWhy() })));`],
+  { encoding: "utf8", cwd: process.cwd() });
+let SOFTWHY = "";
+try { SOFTWHY = JSON.parse(child.stdout.trim().split("\n").pop()).why; }
+catch { SOFTWHY = "(the child said nothing: " + (child.stderr || "").trim().split("\n").pop() + ")"; }
+check("with a key and no package, it names the SOFTWARE",
+  /software/i.test(SOFTWHY) && !/\bkey\b/i.test(SOFTWHY), JSON.stringify(SOFTWHY));
+check("...and the two do not read the same — which is the whole of what was missing",
+  !!KEYWHY && !!SOFTWHY && KEYWHY !== SOFTWHY, JSON.stringify([KEYWHY, SOFTWHY]));
+/* AND THE LOADER'S OWN WORDS REACH THE RUNTIME LOG (§313.34). The screen
+   sentence has to stay readable, so `Cannot find module '@vercel/blob'` goes
+   where an operator reads it — and it is that line which would have answered
+   this in a minute rather than a build. Asserted, or it is a console.warn
+   somebody deletes as noise. */
+check("...and the loader says WHY in the runtime log, once, naming the package",
+  /@vercel\/blob/.test(child.stderr || "") && /did not load/.test(child.stderr || ""),
+  JSON.stringify((child.stderr || "").trim().split("\n").slice(-1)[0]));
+
 /* ── now with one ─────────────────────────────────────────────────────── */
 process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_FAKE_seam";
 const TOK = process.env.BLOB_READ_WRITE_TOKEN;

@@ -42,12 +42,32 @@ const R = createRequire(import.meta.url)("./rules.cjs");
 /* Loaded once, inside a try. A deployment that never installed the package or
    never set the token is not a reason for the chat, the deck or the save to
    stop working. */
-let _blob: any = null, _tried = false;
+let _blob: any = null, _tried = false, _why = "";
 function blob(): any {
   if (!_tried) {
     _tried = true;
+    /* THE REASON IS KEPT AND SAID, WHERE THIS USED TO THROW IT AWAY (§374). Two
+       entirely different faults reached one sentence — the package absent
+       from the deployment, and no key for a store — so "there is no file
+       store set up yet" was true of both and pointed at neither. Islam read
+       it on a deployment whose store HAD been connected, which is §123's
+       argument arriving: *it is not working* sends somebody to look at
+       everything, naming the step sends them to one page. lib/push.cjs has
+       kept its own `webpushWhy` since §231.3 for exactly this; this is that
+       shape, one module over. */
     try { _blob = createRequire(import.meta.url)("@vercel/blob"); }
-    catch { _blob = null; }
+    catch (e: any) {
+      _blob = null;
+      _why = (e && e.message) || "@vercel/blob did not load";
+      /* SAID ONCE, IN THE RUNTIME LOG, BECAUSE THE SCREEN MAY NOT SAY IT.
+         §313.34's rule: a deployment silently running without something it
+         needs is worse than the thing it is missing. The sentence a person
+         reads has to stay readable, so the loader's own words go here — and
+         it is this line that would have answered §374 in a minute instead of
+         a build, because `Cannot find module '@vercel/blob'` names the fault
+         outright. Once, not per request: `_tried` is what makes it once. */
+      console.warn("blob: the store's software did not load — " + _why);
+    }
   }
   return _blob;
 }
@@ -55,6 +75,23 @@ function token(): string {
   return process.env.BLOB_READ_WRITE_TOKEN || process.env.SMP_BLOB_TOKEN || "";
 }
 export function ready(): boolean { return !!blob() && !!token(); }
+
+/* WHICH HALF IS MISSING, IN THE WORDS OF WHOEVER IS LOOKING AT THE SCREEN —
+   and a CLAUSE rather than a sentence, so each caller keeps its own ending
+   (§53.5: one answer to *which half*, never three copies of it). Empty when
+   the store is reachable, so a caller can say it plainly:
+     `if (!ready()) return no(503, storeWhy() + ", so a report …")`.
+   THE UNDERLYING MESSAGE IS DELIBERATELY NOT PRINTED. This page is
+   Forefront's own console and the sentence has to be readable, and the two
+   causes are already one page apart: the software is ours to ship, the key
+   is a setting on the deployment. Naming which is the whole of what was
+   missing (§124 — the word may not claim more than the thing measuring it
+   can see, and it may not claim less either). */
+export function storeWhy(): string {
+  if (ready()) return "";
+  if (!blob()) return "The software for the file store is not in this deployment";
+  return "There is no key for the file store on this deployment";
+}
 
 /* WHERE A CLIP LIVES, and the path is the permission. `videos/<target>/<id>.<ext>`
    — a person may only write under a target they may report for, and the read

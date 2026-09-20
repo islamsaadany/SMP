@@ -9985,7 +9985,29 @@ node smp-app/checks/deploy-context.mjs
                                 # FILES and frozen.cjs's FILES (§53.5); every
                                 # pattern asserted anchored, because a bare
                                 # `scripts/` matches at any depth and would eat
-                                # smp-app/scripts next. 5/0, red both ways
+                                # smp-app/scripts next. AND SINCE &sect;374 IT IS
+                                # NOT ONLY FILES: &sect;5 asserts that every package
+                                # the server loads through a require the BUNDLER
+                                # CANNOT SEE is named in `serverExternalPackages`,
+                                # which is what carries it into a function. Two
+                                # were not &mdash; `@vercel/blob` (createRequire) and
+                                # `web-push` (a require inside a .cjs that is
+                                # itself loaded that way) &mdash; so neither reached
+                                # ANY function: 0 of their files in all nineteen
+                                # route traces while `pg`, which is named, was in
+                                # all nineteen. THE RULE, NEVER THE TWO NAMES
+                                # (&sect;104.7): the sources are asked about
+                                # themselves and Node's own `builtinModules`
+                                # decides what is a package, so a third one added
+                                # next month is caught the day it is added. BOTH
+                                # ENDS (&sect;94.2, &sect;54.5): a scan that matched
+                                # nothing finds nothing stranded and reports a
+                                # clean run, which is this section's own failure
+                                # wearing a green tick &mdash; so it asserts it found
+                                # the requires it is about and PRINTS them. No
+                                # build, no browser, no database. 7/0, red five
+                                # ways (`drop-external` is the state that shipped,
+                                # `no-scan` the control)
 SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-cards.py
                                 # the worked example is not one of the clients
                                 # (§317) — out of the client grid and below it,
@@ -10056,7 +10078,66 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-19 &mdash; **&sect;373: the open box, and the column
+*Last Updated: 2026-09-20 &mdash; **&sect;374: the store was there and the way
+to reach it was not.** Islam, uploading a report on Insights &mdash; the alarm
+band reading *"There is no file store set up yet, so a report cannot be
+uploaded."* &mdash; then, of the one thing the first answer could not see:
+*"we have a blop data base connected to the deployment already."* **HE IS RIGHT
+AND THE TWO FACTS AGREE**: `ready()` is the package AND the key, one sentence
+stood for both, and the store HAS been connected since 4 September (&sect;358.7)
+&mdash; what was missing is our own side of it. **MEASURED BEFORE ANYTHING WAS
+PROPOSED** (&sect;3a): `@vercel/blob` is reached by
+`createRequire(import.meta.url)(&hellip;)` and `web-push` by a plain `require`
+inside `lib/push.cjs`, which is itself loaded that way, so nothing static ever
+looks inside it &mdash; **neither call is analysable, so the build's file
+tracing never learnt those files were needed**. Built here and read out of the
+route traces: **0 of their files in all nineteen**, while `pg` &mdash; named in
+`serverExternalPackages` &mdash; was in all nineteen. On the deployment the
+require throws `MODULE_NOT_FOUND`, the catch turns it into *"there is no file
+store set up yet"*, and that is the band he photographed. **A package declared
+in `package.json` is not a package that reaches a function.** **IT HAD ALREADY
+HAPPENED ONCE AND THE RECORD SAYS IT WAS NEVER EXPLAINED** &mdash; &sect;282's
+own *what is not claimed* reads *why `web-push` was once missing from the
+deployment was never established* &mdash; so this predicts that notifications
+have not been sending on the new stack either, and *Test on this device*
+(&sect;231.6) is what will say so. **THE FIX IS NAMING THEM AND IT IS PRECISE**:
+after it, `@vercel/blob` is traced into the three routes that reach it and no
+others, `web-push` into `api/chat` alone, `api/state` and `api/mail` gain
+nothing and `pg` is unchanged &mdash; the fix and its proof are one measurement.
+**&sect;374.1 &mdash; AND THE SENTENCE NOW SAYS WHICH HALF**, which is the half
+that cost the round: he had the right fact and the screen pointed away from it.
+&sect;123 on a third feature, and `lib/push.cjs` has kept its own `webpushWhy`
+since &sect;231.3 for exactly this while blob-api threw the reason away.
+`storeWhy()` is **a CLAUSE rather than a sentence**, so the three call sites
+keep their own endings and there is one answer to *which half* (&sect;53.5); the
+underlying message is deliberately not printed, because this is Forefront's own
+console and the two causes are already one page apart (&sect;124).
+**&sect;374.2 &mdash; THE GUARD ASSERTS THE RULE AND NOT THE TWO NAMES**
+(&sect;104.7): `checks/deploy-context.mjs` &sect;5, the sources asked about
+themselves, with Node's own `builtinModules` deciding what is a package; both
+ends, because a scan that matched nothing reports a clean run, which is this
+fault wearing a green tick. **&sect;374.3 &mdash; AND THE ROOM'S OWN CHECK WAS
+READING ITS OWN LITERAL BACK**: `publishing-room.py` &sect;7 stubbed the old
+sentence and asserted a phrase from it, so it passed on wording the product had
+stopped producing (&sect;100.3); it asserts the PROPERTY now (&sect;94.8).
+**&sect;374.4 &mdash; THE TWO HALVES CANNOT BOTH BE REACHED IN ONE PROCESS**
+(the loader remembers its first answer), so `store-seam.mjs` &sect;1b asks the
+KEY half in process and the SOFTWARE half in a child whose resolver refuses
+that one name &mdash; **both ends and then the DIFFERENCE** (&sect;113.8),
+because the fault guarded against is the two collapsing back into one wording,
+which every assertion about a single sentence passes perfectly. **VERIFIED**:
+deploy 7/0 red five ways, store 35/0 red two ways from the SOURCES, blob 23/23,
+insights 127/0, publishing-room 74/0 on BOTH copies, shell 118/0, door 143/0,
+modules 158/0, state 92/0, `generated-in-step` all clear, `built-in-step` all
+good, `typecheck` clean but for `lib/prisma.ts`'s recorded error. **The frozen
+product is untouched**, so the built file does not move and no `sw.js` bump is
+owed. **WHAT IS NOT CLAIMED** (&sect;54.5): that bytes have landed in a real
+store &mdash; the SDK is stubbed in every check, so the contract is proved and
+the journey is not; that is one upload on the deployment. **RECORDED, NOT
+DONE**: the clip endpoint's four refusals still read *"no video store here"*
+for both halves.*
+
+*Earlier: 2026-09-19 &mdash; **&sect;373: the open box, and the column
 that never said it was frozen (spec 059).** Islam, testing &sect;372, with two
 screenshots: the open Unit box lying across the Email column, and &mdash; of the
 &#8942; &mdash; *"you added the 3 dots to the roles whihc is wrong the 3 dots is

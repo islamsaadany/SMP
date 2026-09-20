@@ -22,7 +22,7 @@ import { loadGraph, readState } from "./state-io.ts";
 import { officeRow } from "./state-api.ts";
 import * as LIB from "./library.ts";
 import { placesFor } from "./place.ts";
-import { dropBlob, ready as storeReady, beginUpload, putPart, finishUpload } from "./blob-api.ts";
+import { dropBlob, ready as storeReady, storeWhy, beginUpload, putPart, finishUpload } from "./blob-api.ts";
 import { deleteTenant } from "./tenant-delete.ts";
 import { ownerPool } from "./db.ts";
 import { moduleRows, modulesFor, offerable, isModule, MODULE_DEF, DEFAULT_MODULE } from "./modules.ts";
@@ -670,7 +670,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        above were, so it is derived from the tenant and the item's id — both
        of which are things the SERVER resolved. */
     if (action === "libraryUploadBegin") {
-      if (!storeReady()) return no(503, "There is no file store set up yet, so a report cannot be uploaded. Everything else about the library works.");
+      if (!storeReady()) return no(503, storeWhy() + ", so a report cannot be uploaded. Everything else about the library works.");
       const item = await withTenant(row.id, (c) => LIB.oneItem(c, kind, String(body.id || ""), false));
       if (!item) return no(404, "That report is not there any more.");
       const size = Number(body.bytes || 0);
@@ -689,7 +689,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
        old file is deliberately NOT removed here, because the row may still be
        pointing at it). */
     if (action === "libraryUploadFinish") {
-      if (!storeReady()) return no(503, "There is no file store set up yet.");
+      if (!storeReady()) return no(503, storeWhy() + ".");
       const id = String(body.id || ""), path = String(body.path || "");
       const item = await withTenant(row.id, (c) => LIB.oneItem(c, kind, id, false));
       if (!item) return no(404, "That report is not there any more.");
@@ -892,7 +892,7 @@ export async function libraryPart(pool: Q, me: SessionUser, q: URLSearchParams, 
   if (!row || !FF.mayReadConfig(world, account, row)) return no(404, NO_CLIENT);
   if (!FF.mayConfigureClient(world, account, row)) return no(403, "This client's library is not yours to publish to.");
   if (row.status === "retired") return no(409, row.name + " is archived.");
-  if (!storeReady()) return no(503, "There is no file store set up yet.");
+  if (!storeReady()) return no(503, storeWhy() + ".");
 
   const kind = LIB.isKind(q.get("kind")) ? (q.get("kind") as LIB.Kind) : "insights";
   const id = String(q.get("id") || ""), path = String(q.get("path") || "");

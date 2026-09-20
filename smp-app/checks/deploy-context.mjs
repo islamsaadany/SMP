@@ -32,6 +32,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, existsSync, writeFileSync, unlinkSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
+import { builtinModules } from "node:module";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -151,6 +152,85 @@ check("the checks, the mockups and the specs stay out of the deployment",
   [...removed].some((f) => f.startsWith("SMP-Project-Folder/src/checks/")) &&
   [...removed].some((f) => f.startsWith("specs/")),
   removed.size + " files excluded");
+
+/* ── 5 · AND WHAT REACHES THE BUILD IS NOT ONLY FILES (§374) ──────────
+   A package the server loads through a require the BUNDLER CANNOT SEE is
+   never traced into a function, so it is missing from the deployment however
+   correctly it is declared in package.json. Two were:
+   `createRequire(import.meta.url)("@vercel/blob")` in lib/blob-api.ts, and
+   `require("web-push")` inside lib/push.cjs — which is itself loaded that
+   way, so nothing static ever looks inside it. Measured on the built app:
+   0 of their files in all nineteen route traces, while `pg` — named in
+   `serverExternalPackages` — was in all nineteen.
+
+   NEITHER FAILED LOUDLY, WHICH IS WHY THIS EXISTS. Both loaders catch, by
+   design (§231.3: a notification helper must not take the chat down with
+   it), so the deployment degrades to a sentence about a store that is not
+   set up, on a deployment whose store was set up. It had already happened
+   once and was never explained — §282 records *why `web-push` was once
+   missing from the deployment was never established*.
+
+   THE RULE IS ASSERTED, NOT THE TWO NAMES (§104.7, §53.5): every package
+   loaded this way must be named in `serverExternalPackages`, which is what
+   carries it. A third one added next month is checked the day it is added
+   rather than the day somebody remembers this paragraph. Needs no build, no
+   browser and no database — it is the sources asked about themselves. */
+console.log("\n5 · every package the server loads by a require the bundler cannot see");
+const NODE = new Set(builtinModules);
+const pkgOf = (spec) => (spec.startsWith("@") ? spec.split("/").slice(0, 2).join("/") : spec.split("/")[0]);
+const scan = (dir, deep) => {
+  const out = [];
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, e.name);
+    if (e.isDirectory()) { if (deep) out.push(...scan(full, deep)); continue; }
+    if (!/\.(ts|tsx|mjs|cjs)$/.test(e.name)) continue;
+    out.push([full, readFileSync(full, "utf8")]);
+  }
+  return out;
+};
+const loaded = new Map();                   /* package -> where it is reached */
+for (const [file, text] of [...scan(join(APP, "lib"), false), ...scan(join(APP, "app"), true)]) {
+  /* A `.cjs` here is only ever reached through createRequire, so the bundler
+     never looks inside it and EVERY require in it is invisible; a `.ts` hides
+     one only where it spells createRequire itself. */
+  const cjs = file.endsWith(".cjs");
+  const hits = cjs ? text.matchAll(/\brequire\(\s*["']([^"']+)["']\s*\)/g)
+                   : text.matchAll(/createRequire\([^)]*\)\(\s*["']([^"']+)["']\s*\)/g);
+  for (const m of hits) {
+    const spec = m[1];
+    if (spec.startsWith(".") || spec.startsWith("node:") || NODE.has(spec)) continue;
+    if (!loaded.has(spec)) loaded.set(spec, file.replace(APP + "/", ""));
+  }
+}
+/* Read out of next.config.ts rather than kept here — the list that carries
+   them is the one that must name them. */
+const CONFIG = join(APP, "next.config.ts");
+let cfgRestore = null;
+if (BREAK === "drop-external") {
+  /* The state that shipped: the package declared in package.json, reached by
+     a require nothing can see, and not named here. */
+  cfgRestore = readFileSync(CONFIG, "utf8");
+  writeFileSync(CONFIG, cfgRestore.replace(/,\s*"@vercel\/blob"/, ""));
+}
+let external;
+try {
+  const cfg = readFileSync(CONFIG, "utf8");
+  const m = /serverExternalPackages:\s*\[([\s\S]*?)\]/.exec(cfg);
+  if (!m) throw new Error("deploy-context: next.config.ts no longer sets serverExternalPackages");
+  external = new Set([...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]));
+} finally {
+  if (cfgRestore !== null) writeFileSync(CONFIG, cfgRestore);
+}
+const scanned = BREAK === "no-scan" ? [] : [...loaded.keys()];
+const stranded = scanned.filter((spec) => !external.has(pkgOf(spec)));
+check("every one of them is named in serverExternalPackages, so the build carries it"
+      + " (" + scanned.map((k) => k + " ← " + loaded.get(k)).join(", ") + ")",
+  stranded.length === 0, stranded.join(", ") + " — declared in package.json and traced into nothing");
+/* BOTH ENDS (§94.2, §54.5): a scan that matched nothing finds nothing
+   stranded and reports a clean run, which is the failure this whole section
+   is about wearing a green tick. */
+check("…and the scan found the requires it is about", scanned.length > 0,
+  "nothing matched — the check reached no code, so it proved nothing");
 
 console.log("\n%d ok, %d failed", ok, bad.length);
 if (bad.length) { console.log("FAILED: " + bad.join("; ")); process.exit(1); }

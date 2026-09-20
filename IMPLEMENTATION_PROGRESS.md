@@ -6347,3 +6347,62 @@ the line was written (§218) — 143/0 twice on two fresh databases; and every
 other reach for a card was swept (§51.11), two more fixed, one left as correct.
 
 **Merged to `main` 2026-09-19 on Islam's word.**
+
+---
+
+## §374 — THE STORE WAS THERE AND THE WAY TO REACH IT WAS NOT (2026-09-20)
+
+**Built on the branch; `main` untouched — the merge is Islam's word, on that
+merge.**
+
+Islam, uploading a report on Insights: the alarm band reading *"There is no
+file store set up yet, so a report cannot be uploaded."* Then, of the one thing
+the first answer could not see: *"we have a blop data base connected to the
+deployment already."*
+
+**He is right and the two facts agree.** The check in front of the upload is
+the package AND the key, one sentence stood for both, and the store has been
+connected since 4 September — what was missing is our own side of it.
+
+**What was measured.** `@vercel/blob` is loaded by
+`createRequire(import.meta.url)(…)` and `web-push` by a plain `require` inside
+`lib/push.cjs`, which is itself loaded that way. Neither call can be read by
+the build, so its file tracing never learnt those files were needed: built here
+and read out of the route traces, **0 of their files in all nineteen**, against
+`pg` — named in `serverExternalPackages` — in all nineteen. On the deployment
+the require throws, the catch turns it into the sentence he photographed.
+
+**It had already happened once and was never explained.** §282's own *what is
+not claimed* records *why `web-push` was once missing from the deployment was
+never established*. Same cause. So this predicts notifications have not been
+sending on the new stack either, and *Test on this device* will say so.
+
+**What shipped, in three parts:**
+
+1. **The fix** — both packages named in `serverExternalPackages`. Precise
+   rather than a blanket include: after it, `@vercel/blob` is traced into the
+   three routes that reach it and no others, `web-push` into `api/chat` alone.
+   The fix and its proof are one measurement: before 0 / 0, after 4 / 4 / 4
+   and 9.
+2. **The sentence says which half** — the software, or the key. A clause
+   rather than a sentence, so the three call sites keep their own endings.
+   `lib/push.cjs` has kept its own reason since §231.3; blob-api threw it away.
+3. **A guard asserting the rule and not the two names** —
+   `checks/deploy-context.mjs` §5, needing no build, no browser and no
+   database, with both ends so a scan that matched nothing cannot report a
+   clean run.
+
+**Verified:** deploy 7/0 red five ways · store 35/0 red two ways ·
+blob 23/23 · insights 127/0 · publishing-room 74/0 on both copies · shell
+118/0 · door 143/0 · modules 158/0 · state 92/0 · `generated-in-step` all
+clear · `built-in-step` all good · `typecheck` clean but for `lib/prisma.ts`'s
+recorded error. The frozen product is untouched, so the built file does not
+move and no `sw.js` bump is owed.
+
+**Waiting on Islam:** the merge, and then **one upload on the deployment** —
+the one thing no check here can prove (the SDK is stubbed in all of them). If
+it still refuses, the sentence will name the key rather than the software, and
+that one is a Vercel setting.
+
+**Recorded, not done:** the clip endpoint's four refusals still read *"no video
+store here"* for both halves.

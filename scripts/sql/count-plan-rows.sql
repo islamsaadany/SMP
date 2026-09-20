@@ -7,10 +7,10 @@
 -- every bit of it: on the worked example that reads 1 project where the true
 -- figure is 19. Retired units and functions are left out.
 --
--- `total` is the rows people report against. Pillars are counted beside it and
--- left out of it: a pillar is the container its measures and tactics sit in,
--- so adding it would count the shelf along with what is on it. Put it in the
--- sum on the last line if you would rather have it there.
+-- `total` is the rows people report against. Units, functions and pillars are
+-- counted beside it and left out of it: those are the containers the reported
+-- rows sit in, so summing them counts the shelves along with what is on them.
+-- Put them in the sum on the last line if you would rather have them there.
 
 WITH t AS (
   SELECT id FROM smp.tenants WHERE key = 'raya-trade'
@@ -26,6 +26,12 @@ fn_pillar AS (                             -- the pillars inside those blobs
 ),
 n AS (
   SELECT
+    (SELECT count(*) FROM smp.units u JOIN t ON u.tenant_id = t.id
+       WHERE u.active)                                                       AS units,
+
+    (SELECT count(*) FROM smp.functions f JOIN t ON f.tenant_id = t.id
+       WHERE f.active)                                                       AS functions,
+
     (SELECT count(*) FROM smp.group_key_objectives g JOIN t ON g.tenant_id = t.id)
     + (SELECT count(*) FROM smp.unit_key_objectives k JOIN t ON k.tenant_id = t.id
          JOIN smp.units u ON u.tenant_id = k.tenant_id AND u.key = k.unit_key AND u.active)
@@ -54,6 +60,6 @@ n AS (
          THEN x->'projects' ELSE '[]'::jsonb END)), 0) FROM fnx)             AS projects
   FROM t
 )
-SELECT key_objectives, pillars, key_measures, tactics, projects,
+SELECT units, functions, key_objectives, pillars, key_measures, tactics, projects,
        key_objectives + key_measures + tactics + projects AS total
 FROM n;

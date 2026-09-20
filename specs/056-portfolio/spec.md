@@ -5,10 +5,10 @@ spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
 what it specifies is the shape, not the screens. **Three screens are drawn and
 signed off** — the project team (§6.4), the charter (§5.1) and the plan (§9.9);
-**Progress is drawn and awaits sign-off** (§9.10). **Analytics is audited and not
-drawn** — what it is FOR is a decision, not a hole in the reading (§9.11). Rule
-1c is paid for the first three and owed for the rest: nothing visual may be built
-from this page until each screen is drawn and signed off.
+**Progress** (§9.10) and **Analytics** (§9.12) are drawn and await sign-off.
+**The landing is the one screen with no picture.** Rule 1c is paid for the first
+three and owed for the rest: nothing visual may be built from this page until
+each screen is drawn and signed off.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -144,7 +144,7 @@ and add notes. They do not restructure the plan.
 
 | # | Asks for | Here |
 |---|---|---|
-| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed — §9.10) · **Analytics**, whose content is a decision rather than a port (§9.11). An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
+| 1 | Its own navigation | A project is picked first; then **Charter** (§5.1) · **Plan** (the tree and the timeline, which is a Gantt — §9.9) · **Progress** (the sign-off queue and what is owed — §9.10) · **Analytics** — the client-facing reading: the phase roll-up and the commitments, and deliberately not the triage, which is Progress's (§9.11, §9.12). An activity opens a panel rather than a page. **The charter was not in this list when it was written** and is first now, because it is where somebody who has never seen the project starts. |
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. **A checkpoint is a date and nothing else** (§9.10): it stores nothing, records nothing and gates nothing. |
@@ -1218,7 +1218,7 @@ deliberately not designed here (§10).
 
 ---
 
-### 9.11 · Analytics, audited — and the fourth tab may not earn its place
+### 9.11 · Analytics, audited — and what the fourth tab is for
 
 `specs/056-portfolio/analytics-audit.md`, read against commit `bf9793c` by a
 session with the reference attached, answering `analytics-brief.md`. It opened
@@ -1276,17 +1276,18 @@ The audit was asked which three things it would keep. Measured against what is
 audience**: Progress is a working queue for the people doing the work, and a
 milestone tracker is what you put in front of the client.
 
-**Three ways to take it, and this is the decision:**
+**Three ways were put with the cost of each, and Islam took B (2026-09-20):**
 
 - **A · No fourth tab.** The severity buckets and click-through join Progress;
   the named phase status joins the Plan; the milestone tracker becomes a section
   on Progress; the cross-project reading goes on the landing. *Smallest, and it
   mixes two audiences on one page.*
-- **B · A fourth tab that is the client-facing reading.** Analytics becomes the
-  milestone tracker and the phase roll-up — what you would show a client — while
-  the triage stays on Progress where the work is. *This is the recommendation:
-  it keeps the tab §4 already promised, gives it a reason to exist that Progress
-  does not already serve, and is mostly new rather than a port.*
+- **B · A fourth tab that is the client-facing reading** — **TAKEN**, and it was
+  the recommendation. Analytics becomes the phase roll-up and the milestone
+  tracker — what you would show a client — while the triage stays on Progress
+  where the work is. It keeps the tab §4 already promised, gives it a reason
+  Progress does not already serve, and is **mostly new rather than a port**.
+  **Drawn at §9.12.**
 - **C · Port it closer to theirs** — four tabs' worth on one Analytics page.
   *Costs the most and, by the audit's own reading, most of it is furniture.*
 
@@ -1354,9 +1355,10 @@ degrades the section to a phase list and changes nothing else on the page.**
 **So it is genuinely optional**, and the cost is named: **642 lines**, of which
 about 90 are the drag-and-drop and the rest a full CRUD admin screen — create,
 rename, recolour with an inline picker, delete, reorder, an assign-phases modal
-and an ungrouped preview. **Recommendation: not in the first build.**
-`portfolio_phase_groups` stays in §5 as a table nothing writes yet, or comes out
-until somebody asks for it — **Islam's, and it is a real saving either way.**
+and an ungrouped preview. **NOT IN THE FIRST BUILD** — the recommendation, taken
+as offered on 2026-09-20 and reversible on a word. `portfolio_phase_groups`
+stays in §5 as a table nothing writes yet, and **§9.12's drawing is the ungrouped
+reading**, which their own page already renders when nothing has been filed.
 
 #### What the audit could not verify, said rather than left
 
@@ -1384,6 +1386,86 @@ is two buttons rather than one: a sign-off writes a real end date, and for an
 on-time activity that date is obvious while for a late one it is not. So *Sign
 off everything that was on time* is safe in one press and *everything late* is
 not — recorded here rather than discovered when it is built.
+
+---
+
+### 9.12 · Analytics, drawn as B — 2026-09-20, awaiting sign-off
+
+`design-mockups/portfolio/2026-09-20_project-analytics.html`, in the platform's
+own tokens, both palettes. **Two sections and nothing else**: where each part of
+the plan stands, and every commitment with whether it was met.
+
+**WHAT IS ABSENT IS THE DESIGN.** No health score, no seven status tiles, no
+Cancelled figure, no upcoming-deadline columns, no severity buckets and no
+sign-off queue — the first four because §9.11 binned them on the audit's own
+evidence, the last two because **they are Progress's and nothing is repeated
+across the two tabs**. That separation is the whole of what B means: Progress is
+a working queue for the people doing the work, this is the reading you take into
+a review.
+
+**The roll-up is one level at a time** — an activity from its sub-activities, a
+phase from its activities, the project from its phases, equal weights unless
+somebody sets them (§9.8). The drawing reads **100 / 67 / 10** across the three
+phases and **59%** overall, and the figures were run outside the browser before
+publishing.
+
+**TWO CORRECTIONS OF THE REFERENCE ARE VISIBLE ON THE PAGE, WHICH IS WHY THE
+FIXTURE HAS SIX MILESTONES ON NINE ACTIVITIES** — one in every state the tracker
+can draw, said on the page so nobody reads it as a realistic plan (§255):
+
+- **A milestone is hit when it was signed off ON OR BEFORE its date, and not
+  otherwise.** The drawing's *2.1* was signed off five days late and is **not**
+  counted — theirs would count it. The headline reads **1 of 6**; theirs would
+  read 2.
+- **Marked done is not hit.** *2.2* is finished and waiting for a Lead, drawn in
+  the platform's own navy and counted in **neither** column. Theirs counts it as
+  delivered on time, because an activity with no recorded end date is assumed to
+  have met its date — **which flatters exactly the sign-off backlog it sits
+  beside**.
+
+**AND THE TWO NUMBERS LOOK LIKE A CONTRADICTION UNTIL THEY ARE NAMED**, so the
+page names them: phase 2 reads *2 of 3 done* while its commitment reads
+*Awaiting sign-off*. Progress counts work that is finished; a commitment is met
+when somebody accepts it. The blueprint draft is finished and nobody has
+accepted it.
+
+**"ON TRACK" IS NOT A WORD A PERCENTAGE MAY USE.** Theirs labels a phase at 90%
+*On Track*, which is a claim about a schedule the figure cannot see — §344's own
+rule. So the word beside the bar answers *how far along* (**Not started · Early ·
+Under way · Nearly done · Done**, thresholds ours and said so) and a separate red
+**Behind** mark answers *is it late*. Phase 2 in the drawing is 67% **and**
+behind, and both are true.
+
+**THE COMMITMENTS ARE IN DATE ORDER, REVERSING THEIRS.** They sort by severity —
+overdue, then upcoming, then what was met — which is right for triage and wrong
+for reading a project out. A review walks the timeline, and the outstanding ones
+stand out by colour without being dragged to the top.
+
+#### The rows are spliced, not copied — and that is new here
+
+Three drawings now read one plan, and **three hand-kept copies of an array is
+the fault §5.2 is about arriving in my own mockups**. So the canonical rows live
+in `design-mockups/portfolio/_rows.js` and `sync-rows.py` splices them between
+markers in every drawing that carries them — **write, or `--check` to fail when
+one is behind**. It **refuses rather than guesses**: a file with one marker and
+not the other, markers the wrong way round, or a run that matched no drawing at
+all are each a failure with a name (§54.5 — an empty run that prints nothing is
+not a pass). **Nothing is listed by hand**, so a fourth drawing joins by adding
+the markers (§214.3).
+
+**And it paid for itself at once**: this round gave four activities a milestone
+flag and moved one sign-off date, and the plan and Progress drawings picked both
+up with no editing — the plan's Gantt gained a second red overrun it is right to
+have, and Progress's signed-off list moved to the real date.
+
+#### What it leaves
+
+- **Across projects is still not drawn.** §9.11 settled that the client-wide
+  reading belongs on the **landing** — the project list with each project's
+  state (§4 row 5) — and that is the last screen of this module with no picture.
+- **Nothing is printable or exportable.** A review deck out of this page is the
+  obvious next ask and is deliberately not built; Strategy's own `.pptx` and PDF
+  routes (§296, §305, §311) are what it would follow.
 
 ---
 

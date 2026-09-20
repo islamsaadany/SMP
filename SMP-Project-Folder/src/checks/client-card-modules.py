@@ -39,7 +39,22 @@ REPO = os.path.abspath(os.path.join(ROOT, ".."))
 PORT = int(os.environ.get("SMP_CHECK_PORT", "3986"))
 BASE = "http://127.0.0.1:%d" % PORT
 BREAK = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--break=")), "")
-PAGE = os.environ.get("SMP_PAGE") or os.path.join(REPO, "platform.html")
+def pagePath():
+    """Both spellings of SMP_PAGE, and a page that is not there refused before
+    the server starts rather than handed back as a timeout (§369.4)."""
+    want = os.environ.get("SMP_PAGE")
+    tries = [os.path.abspath(want), os.path.abspath(os.path.join(REPO, want))] if want \
+        else [os.path.join(REPO, "platform.html")]
+    tries = list(dict.fromkeys(tries))
+    for p in tries:
+        if os.path.isfile(p):
+            return p
+    sys.exit("the console page is not there — %s\n  tried: %s"
+             % ("SMP_PAGE=%s" % want if want else "no platform.html at the repository root",
+                "\n  tried: ".join(tries)))
+
+
+PAGE = pagePath()
 
 fails, passes = [], []
 def check(what, ok, detail=""):

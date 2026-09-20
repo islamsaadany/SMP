@@ -912,9 +912,16 @@
     for (var i = 0; i < 3; i++) {
       var c = el("div", "ccard skel");
       var top = el("div", "ctop");
-      top.appendChild(el("div", "sk-mark"));
-      top.appendChild(el("div", "sk-line"));
-      top.appendChild(el("div", "sk-line thin"));
+      /* THE SAME ROW THE REAL CARD HAS (§371's own rule, §374): a block that
+         is replaced by the thing it stood for, rather than one the arriving
+         card has to rearrange the page around. */
+      var top_id = el("div", "idrow");
+      top_id.appendChild(el("div", "sk-mark"));
+      var top_names = el("div", "names");
+      top_names.appendChild(el("div", "sk-line"));
+      top_names.appendChild(el("div", "sk-line thin"));
+      top_id.appendChild(top_names);
+      top.appendChild(top_id);
       c.appendChild(top);
       /* The hairline the real card draws above its module rows, so the two
          shapes end the same way rather than the line appearing on arrival. */
@@ -1079,13 +1086,22 @@
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
     var top = el("div", "ctop");
+    /* THE MARK AND THE NAME ARE ONE ROW (§374): the mark in its square slot,
+       the name and the industry beside it. The wrapper is what makes the
+       name's left edge the same on every card whatever the mark is. */
+    var idrow = el("div", "idrow");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; idrow.appendChild(im);
     } else {
-      top.appendChild(el("div", "cmark", initials(c.name)));
+      idrow.appendChild(el("div", "cmark", initials(c.name)));
     }
-    top.appendChild(el("h2", null, c.name));
-    if (c.industry) top.appendChild(el("p", "ind", c.industry));
+    var names = el("div", "names");
+    var h2 = el("h2", null, c.name);
+    h2.title = c.name;   /* clamped to two lines above, so the whole of it is here */
+    names.appendChild(h2);
+    if (c.industry) names.appendChild(el("p", "ind", c.industry));
+    idrow.appendChild(names);
+    top.appendChild(idrow);
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
     if (c.kind === "demo") tag("Demo", "demo");

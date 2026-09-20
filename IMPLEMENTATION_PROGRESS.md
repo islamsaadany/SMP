@@ -6347,3 +6347,39 @@ the line was written (§218) — 143/0 twice on two fresh databases; and every
 other reach for a card was swept (§51.11), two more fixed, one left as correct.
 
 **Merged to `main` 2026-09-19 on Islam's word.**
+
+**§374 — a circular mark, and the name beside it (2026-09-20).** Built. Islam,
+with a round pink logo on the ElAbd Foods card: *"on addiing a circular logo the
+view is not good. plus I'm not sure of the placement of the client name in case
+we have the logo."* **Two questions, and the first had one cause** — the mark's
+slot was `width:auto` inside a column, which in CSS means *fill the card*, so a
+round logo was given a 366px-wide, 30px-tall box and `object-fit` shrank the
+picture into the middle of it: a small circle floating in a wide white band. A
+wordmark filled the same box and looked fine, which is why it had never been
+reported. **The archived card carried the identical fault from the same line.**
+
+Three shapes were drawn in the real console with the real logo and published;
+**Islam took C** — the mark and the name on one line — reversing the
+recommendation, and it is recorded as his. So the mark is a **40×40 square on
+every card**, whether it holds a logo or the two-letter fallback, with the name
+and the industry beside it; the name is capped at **two lines** with the whole
+of it on the hover; and the identity block drops below the Settings chip, which
+is what keeps a long name at full width at every window size. **The card is
+216px tall at every width, where it was 236.**
+
+**The cost is stated rather than discovered**: a wide wordmark is now contained
+in that square and is therefore small — that is C's price, and the shape Islam
+turned down does not pay it.
+
+Verified: `client-card-mark.py` **46/0 on both copies of the console page**,
+red **7 / 2 / 2** under three falsifications; platform-cards 21/0, console-boot
+13/0 with all five breaks red, client-card-modules 23/0, client-archive and
+client-setup-outside 0 failures, publishing-room 74/0 — every one of them **on
+both copies**. `built-in-step` all good: the frozen product is untouched, so
+the shipped file is byte-identical and **no `sw.js` bump is owed**. **Three
+checks had never once run against the generated copy** — the documented command
+made them die naming neither the file nor the directory (§369.4's path bug in
+three more files); all three now resolve it from either directory.
+**Recorded, not done**: two of `client-card-modules`' own falsifications die on
+a locator timeout rather than reporting, established as **pre-existing** by
+running them on the shipped build first.

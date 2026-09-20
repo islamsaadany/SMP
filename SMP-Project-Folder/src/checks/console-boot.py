@@ -126,8 +126,8 @@ BREAKS = {
     # one thing a skeleton may never do, since what is drawn before the answer
     # must be nothing that could turn out to have been the wrong tenant's
     "skeleton-named": [
-        ('      top.appendChild(el("div", "sk-line"));',
-         '      top.appendChild(el("h2", null, "Raya Trade"));'),
+        ('      top_names.appendChild(el("div", "sk-line"));',
+         '      top_names.appendChild(el("h2", null, "Raya Trade"));'),
     ],
     # the placeholders left standing under the clients: `go` stops clearing,
     # so the grid gains the real cards below three grey ones

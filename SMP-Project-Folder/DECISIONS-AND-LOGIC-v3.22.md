@@ -52976,3 +52976,167 @@ pair nobody has looked at is a change of its own; and **C** — making the table
 fit a narrower window so it never scrolls at all — is untouched, since it means
 giving up or narrowing a column, which is a decision about what the register
 shows.
+
+---
+
+## §374 — THE MARK AND THE NAME ON ONE LINE (2026-09-20, spec 060)
+
+Islam, of a client whose logo is a roundel: *"on addiing a circular logo the
+view is not good. plus I'm not sure of the placement of the client name in case
+we have the logo or at least should we remove it or change it's size and loction
+to make the card neat"* — two questions, and the first has one cause.
+
+**REPRODUCED BEFORE ANYTHING WAS PROPOSED** (rule 3a), driving the real console
+against a stub with a roundel, a wordmark and initials in one row: the roundel
+is drawn **30 × 30 inside a 134 × 36 box, floating ≈52px in** from an edge the
+name, the industry and every tag start at (15px). **`.ctop` IS A COLUMN FLEX**,
+so an `<img>` with `width:auto` **stretches to the card** — capped by
+`max-width:120px` — and `object-fit:contain` then **centres the picture inside
+that stretched box**. A wide wordmark fills it and reads right; a square one
+cannot. And the white plate under it is `#fff` on a white card, so **there is
+nothing on screen to explain the gap**. §373.1's family one element over, three
+days later: *`width:auto` means one thing for a block and another for a
+shrink-to-fit box*, and the rule was written against the wordmark that happened
+to be on screen.
+
+**THE ARCHIVED CARD HAD IT TOO, FROM THE SAME DECLARATION** — measured 134 × 36
+there as well — which is what makes this one rule rather than one card.
+
+### §374.1 — THREE SHAPES DRAWN, AND ONE OF THEM KILLED BY BEING DRAWN
+
+Settled from a mockup made of **platform.html's own CSS, lifted verbatim**
+(`design-mockups/client-card-mark/2026-09-20_a-circular-mark.html`, rule 1c,
+§41.9), with every figure on it measured in the running console. **A · stop it
+stretching** is one line and leaves a 30px roundel. **B · one 40px mark band at
+the left**, which was the recommendation. **C · mark and name on one line**, and
+the mockup marked it *killed by drawing it*: the name started **118px** in
+beside a wordmark and **66px** beside initials, a long name wrapped into a
+narrow column, and the mark **slid 192 / 211 / 221** down a row because it was
+centred against a name block of changing height.
+
+**Islam chose C.** Recorded as his, and it is not built as drawn: the three
+faults the mockup itself named are each removed, because building the option
+having told him it was broken is shipping a known defect with a sign-off over
+it. What he chose is the SHAPE.
+
+**FAULT 1 — THE RAGGED NAME INSET, answered by a SQUARE SLOT.** A mark's own
+width varies and the name after it inherits that variation, so the slot is a
+fixed **40 × 40** and every name starts at **65**, at every width. Its cost is
+stated rather than discovered: **a wide wordmark is contained into that square
+and is therefore small** — that is C's price, and B does not pay it.
+
+**FAULT 2 — THE NAME SQUEEZED BY THE SETTINGS CHIP, answered by the BAND ABOVE
+IT.** `.ccfg` is absolute at `top:11px; right:11px` and 69px wide, and with the
+name beside the mark it is the name that pays for it. **Two ways of clearing it
+were built and measured**: a float inside the name block gives the first line
+68px less and **at the narrowest card the grid makes (232px) EVERY name wrapped**
+— *"Raya Trade"* on two lines — while `padding-right` charges every line the
+same 68 and took the long name to **four**. So the row starts **BELOW** the chip
+instead (`padding:36px 14px 13px`, the chip's own 11 + 22 + 3 of air) and the
+name keeps the whole width at every width. It costs 23px of card and **buys back
+32** (236 → 204 before the name's own line-height, 216 as shipped), because the
+name no longer has a line of its own.
+
+**FAULT 3 — THE MARK SLIDING, answered by `align-items:flex-start`.** Measured,
+the mark's top is **37 on every card**, logo or initials.
+
+### §374.2 — AND A NAME IS TWO LINES AT MOST
+
+With the mark beside it the name has **159px rather than 209** on the narrowest
+card, and measured, a 37-character name went from two lines to **FOUR** there —
+**50px charged to every card in that row**, because a grid levels a row against
+its tallest, so the card went **236 → 265.6**, taller than the build this
+replaces. `-webkit-line-clamp:2` with the whole name on the hover — **§88's own
+answer on this very card**, where `.tag.arch` already clips the address that
+archived a client and puts the whole of it one hover away. The clamp bites at
+narrow windows and nowhere else: at 1280 and up the long name is two lines
+either way, and the card is **216 at every width** rather than 216 or 265.6.
+
+**THE LIGHT PLATE STAYS** (§52): a PNG cannot be recoloured, so a dark card
+needs a ground under a dark logo — `box-sizing:border-box`, so the plate is
+inside the 40 rather than added to it, or a client with a logo would be taller
+than one without, which is the equal-height rule **§368 already paid for** and
+which is asserted rather than assumed.
+
+**AND THE NAME IS KEPT EXACTLY AS IT IS**, which was the second question: the
+mockup drew *smaller and quieter* and *removed* on top of B and both put **two
+card designs in one row** — the card with no logo shouts its name while its
+neighbours whisper or drop theirs — and removing it also leaves the industry
+line standing where the name was, so the card leads with *F&B*, while the
+console's search box matches the **name**, so a card showing only a mark cannot
+be found by typing.
+
+**THE WAITING CARD FOLLOWS IT** (§371's own rule): the skeleton is the shape the
+real card has, so its grey mark is the same 40 square in the same row, or the
+arriving card rearranges the page rather than replacing a block.
+
+### §374.3 — THE CHECK THAT OWNS IT, AND WHAT IT ASSERTS
+
+`checks/client-card-mark.py`, **46 assertions, 0 failures on both copies of the
+console page** (§53.5 — a generated copy is where a drift hides), **red three
+ways: 7 / 2 / 2**. It needs no database: a stub is also the only way to put a
+roundel, a wordmark and no mark at all in one row (§94.11, §255).
+
+**WHAT IT ASSERTS IS THE PROBLEM, NOT THE LAYOUT** (§94.8). The fault was that a
+square picture behaved differently from a wide one, so what is asserted is
+**AGREEMENT between the three kinds of mark** — same box, same inset, same top,
+and the name's left edge the same on every card — never a figure, so a later
+change to the slot's size stays green and a build that lets the picture decide
+the layout does not. **BOTH ENDS EVERY TIME** (§94.2): a build that stopped
+drawing marks satisfies *"no mark is wider than another"* perfectly, so every
+agreement sits beside the presence that makes it mean something.
+
+**AND "ON ONE LINE" IS A VERTICAL CLAIM AS WELL AS A HORIZONTAL ONE** — found
+by falsifying rather than by reading: with the row broken to `display:block` the
+name sits UNDER the mark and **still starts at the same x on every card**, so the
+inset assertion passes on exactly the build it exists to catch (§113.8). The
+name's ink must also be level with the mark, and `--break=no-row` goes 1 red → 2.
+
+**AND ONE OF ITS OWN FIRST ASSERTIONS WAS MEASURING ACROSS GRID ROWS**: *"one
+card height in the row"* compared four cards that at 900px and below sit in
+**two** rows, and a grid levels each row against its own tallest whatever the
+cards ask for — so it is vacuous where it holds and wrong where it does not
+(§113.8, §356.16's own finding). What can fail is what the clamp buys, so it is
+**a long name costs one extra line at most**, measured as a share of a name that
+fits on one rather than as a pixel count.
+
+### §374.4 — AND THREE MORE CHECKS HAD NEVER RUN AGAINST THE COPY THEY PROMISE
+
+§369.4 found `SMP_PAGE` documented relative to the **repository root** while
+every browser check runs through `qa-run.py`, which lives in
+`SMP-Project-Folder/src` — and fixed it in the two files it was run from.
+`client-archive.py`, `client-setup-outside.py` and `client-card-modules.py` were
+left, and each died differently and unhelpfully: one at import with a
+`FileNotFoundError`, two on a navigation timeout naming **neither the file nor
+the directory tried** (§215, §123). Which means **none of the three had ever
+been run against the generated copy its own docstring promises to cover.** All
+three take §369.4's `pagePath()`, both spellings are accepted, and a page that
+is not there is refused **before the server starts**. All three are green on both
+copies now.
+
+**AND THE FIRST BASELINE RUN MEASURED THE NEW BUILD TWICE.** The "before"
+figures came back **identical to the after** — mark 40 × 40 at (15, 37), name at
+65 — because the `sed` that was meant to point the probe at the shipped file
+replaced a line the probe does not own: `PAGE` is set by the prefix it `exec`s,
+not by its own text (§105.6). The override is applied **after** the exec and
+**asserts the file is the old one** before it is believed. Measured properly,
+the shipped build is 134 × 36 at (15, 14) with the name at 15, and the long name
+is 2 lines at 236 where the un-clamped build is 4 at 265.6.
+
+**The server needed nothing and it is asserted** (§172): no `api/`, `lib/` or
+`db/` file is touched, read off the diff; nothing stored moves, nothing is
+migrated, and no rule about who may see what changes. **The frozen product is
+untouched and measured** — `platform.html` is the console at the repository
+root, which `build.py` does not read — so `built-in-step.py` reports the shipped
+file byte-identical and **no `sw.js` bump is owed** (§91's trigger is the built
+file's bytes changing, and they did not).
+
+**RECORDED, NOT DONE**: `client-card-modules.py`'s `card-is-door` and `no-rows`
+breaks **die on a 30-second locator timeout rather than reporting** — a check
+that dies under its own falsification is §215's fault in a neighbouring file —
+established as **pre-existing** by reproducing both on the shipped build before
+anything here was blamed (§303); `smp-app/checks/modules.mjs` could not be run
+in this session for want of `node_modules`, and it references neither the card's
+identity block nor its mark, read off the file; and `multi-client.py` needs the
+three-step rehearsal database §328.3 describes, so it is **unrun** rather than
+passing.

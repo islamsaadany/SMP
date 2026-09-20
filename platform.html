@@ -160,7 +160,17 @@
     min-height:0; font:inherit; color:inherit; box-shadow:var(--shadow) }
   .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
   .ccard.listed{ opacity:.72 }
-  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:13px 14px }
+  /* THE TOP BAND IS THE CHIP'S (§374). With the name beside the mark rather
+     than under it, the one thing the name had to itself — the card's full
+     width — is now shared with `.ccfg`, which is absolutely positioned at
+     `top:11px; right:11px` and 69px wide. Measured, reserving it inside the
+     row costs the name 68 of its 195px, and at the narrowest card the grid
+     makes (232px) EVERY name wrapped: "Raya Trade" on two lines. So the row
+     starts BELOW the chip instead and the name keeps the whole width at
+     every width — 36 = the chip's own 11 + 22 + 3 of air. It is 23px of card
+     and it buys back 32 (236 → 204), because the name no longer costs a row
+     of its own. */
+  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:36px 14px 13px }
   .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
   .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:6px 14px;
     font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
@@ -182,20 +192,60 @@
   .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
   .ccard.add{ cursor:pointer }
   .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
-  .ccard .cmark{ width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber);
-    font:700 11px/30px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  /* ── THE MARK AND THE NAME ON ONE LINE (§374) ─────────────────────
+     Islam, of a client whose logo is a roundel: "on addiing a circular logo
+     the view is not good. plus I'm not sure of the placement of the client
+     name in case we have the logo." Option C of a signed-off mockup
+     (design-mockups/client-card-mark/2026-09-20_a-circular-mark.html),
+     chosen over the two that keep the mark on a line of its own.
+
+     THE SLOT IS A SQUARE AND THAT IS WHAT MAKES THE ROW READ. A mark's own
+     width varies — a roundel is square, a wordmark four times as wide — and
+     with the name after it the name starts at a different distance in on
+     every card: measured on the drawing, 66px beside initials and 118 beside
+     a wordmark, so nothing lines up down a row. A fixed 40×40 puts every
+     name at the same 65, and its cost is stated rather than discovered: a
+     wide wordmark is contained into that square and is therefore small.
+
+     AND `flex:none` IS THE WHOLE OF THE REPORTED FAULT. `.ctop` is a COLUMN
+     flex, so the old `width:auto` img STRETCHED to the card (capped at
+     `max-width:120px`) and `object-fit:contain` then CENTRED the picture in
+     that stretched box — a wordmark filled it and read right, a roundel was
+     drawn 30px wide floating ~52px in from an edge every other line on the
+     card started at, with the white plate that would have explained it
+     invisible on a white card. §373.1's family one element over: `width:auto`
+     means one thing for a block and another for a shrink-to-fit box.
+
+     THE LIGHT PLATE STAYS (§52): a PNG cannot be recoloured, so a dark card
+     needs a ground under a dark logo. `border-box`, so it is inside the 40
+     rather than added to it — or a client with a logo would be taller than
+     one without, which is the equal-height rule §368 already paid for. */
+  .ccard .idrow{ display:flex; align-items:flex-start; gap:10px }
+  .ccard .names{ min-width:0; flex:1 1 auto; display:flex; flex-direction:column; gap:3px }
+  .ccard .cmark{ width:40px; height:40px; border-radius:9px; background:var(--ff); color:var(--amber);
+    font:700 13px/40px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em;
+    flex:none }
   /* A client that has a mark wears it on its card — the same picture its
      door wears (§313.36), so the two cannot disagree; a light plate under it
-     because a PNG cannot be recoloured (§52). Initials until then.
-     ITS HEIGHT FOLLOWS THE INITIALS' (§368): the mockup could only draw the
-     initials, and leaving this at 36 would have made a client with a logo
-     taller than one without — two card heights in one row for no reason
-     anybody could read. */
-  .ccard img.cmark{ width:auto; max-width:120px; height:30px; object-fit:contain; background:#fff; padding:3px 7px; box-sizing:content-box }
+     because a PNG cannot be recoloured (§52). Initials until then, in the
+     same square, so a client with a logo is never taller than one without
+     (§368's rule, kept). */
+  .ccard img.cmark{ width:40px; height:40px; flex:none; object-fit:contain; background:#fff;
+    padding:3px; box-sizing:border-box; border-radius:7px }
   .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
   .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
   .markrow .none{ font-size:13px; color:var(--ink-3) }
-  .ccard h2{ margin:0; font-size:16px; font-weight:600 }
+  /* AND A NAME IS TWO LINES AT MOST (§374, §88's own answer on this card —
+     `.tag.arch` already clips the address that archived a client and puts
+     the whole of it on the hover). With the mark beside it the name has 159px
+     rather than 209 on the narrowest card the grid makes, and measured, a
+     37-character name went from two lines to FOUR there — 50px of height
+     charged to every card in that row, because a grid levels a row against
+     its tallest. Two lines is what it takes at the width the console is
+     actually used at, so the clamp bites at narrow windows and nowhere else,
+     and the name is never cut without the whole of it one hover away. */
+  .ccard h2{ margin:0; font-size:16px; font-weight:600;
+    display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden }
   .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
   .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
@@ -274,7 +324,7 @@
      was written here first and REMOVED on measuring it — nothing behaves
      differently with or without it, and a line that fixes nothing is one
      the next reader takes for load-bearing (§298.2, §24). */
-  .ccard.skel .sk-mark{ width:30px; height:30px; border-radius:8px; background:var(--line) }
+  .ccard.skel .sk-mark{ width:40px; height:40px; border-radius:9px; background:var(--line); flex:none }
   /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
      signed-off shot has and what the first build lost: `.ctop` is a column
      flex, so a bar with no width STRETCHES and three cards read as three
@@ -1657,9 +1707,16 @@
     for (var i = 0; i < 3; i++) {
       var c = el("div", "ccard skel");
       var top = el("div", "ctop");
-      top.appendChild(el("div", "sk-mark"));
-      top.appendChild(el("div", "sk-line"));
-      top.appendChild(el("div", "sk-line thin"));
+      /* THE SAME ROW THE REAL CARD HAS (§371's own rule, §374): a block that
+         is replaced by the thing it stood for, rather than one the arriving
+         card has to rearrange the page around. */
+      var top_id = el("div", "idrow");
+      top_id.appendChild(el("div", "sk-mark"));
+      var top_names = el("div", "names");
+      top_names.appendChild(el("div", "sk-line"));
+      top_names.appendChild(el("div", "sk-line thin"));
+      top_id.appendChild(top_names);
+      top.appendChild(top_id);
       c.appendChild(top);
       /* The hairline the real card draws above its module rows, so the two
          shapes end the same way rather than the line appearing on arrival. */
@@ -1824,13 +1881,22 @@
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
     var top = el("div", "ctop");
+    /* THE MARK AND THE NAME ARE ONE ROW (§374): the mark in its square slot,
+       the name and the industry beside it. The wrapper is what makes the
+       name's left edge the same on every card whatever the mark is. */
+    var idrow = el("div", "idrow");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; idrow.appendChild(im);
     } else {
-      top.appendChild(el("div", "cmark", initials(c.name)));
+      idrow.appendChild(el("div", "cmark", initials(c.name)));
     }
-    top.appendChild(el("h2", null, c.name));
-    if (c.industry) top.appendChild(el("p", "ind", c.industry));
+    var names = el("div", "names");
+    var h2 = el("h2", null, c.name);
+    h2.title = c.name;   /* clamped to two lines above, so the whole of it is here */
+    names.appendChild(h2);
+    if (c.industry) names.appendChild(el("p", "ind", c.industry));
+    idrow.appendChild(names);
+    top.appendChild(idrow);
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
     if (c.kind === "demo") tag("Demo", "demo");

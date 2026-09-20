@@ -8497,6 +8497,32 @@ python3 checks/blob-api.mjs     # (in smp-app: `npm run check:blob`) the clip en
                                 # 23/23, RED both ways (`check:blob:red`); three of its
                                 # own first failures were spellings it invented rather
                                 # than read (§100.3)
+python3 SMP-Project-Folder/src/checks/client-card-mark.py # a circular mark, and the
+                                # name beside it (&sect;374). It DRAWS both shapes itself
+                                # &mdash; a roundel and a wide wordmark &mdash; because the
+                                # whole finding is that one slot treated them differently,
+                                # and the worked example ships no logo at all (&sect;255).
+                                # Every claim is an AGREEMENT and never a figure (&sect;94.8):
+                                # the mark box IDENTICAL across a roundel, a wordmark and the
+                                # two-letter fallback, the same inset, the same top, the name
+                                # starting at the same x AND level with the mark (the vertical
+                                # half is load-bearing &mdash; with the row removed the name
+                                # sits UNDER the mark and still starts at the same x, so the
+                                # horizontal assertion passes on the build it exists to catch,
+                                # &sect;113.8), the logo card no taller than the initials card
+                                # (&sect;368: one card must not raise a whole grid row), the
+                                # name's INK never reaching the Settings chip at eight widths
+                                # (&sect;302: ink, not box), a long name costing **one extra
+                                # line at most** &mdash; never *"the row is level"*, which a
+                                # grid makes true of every build &mdash; and the ARCHIVED
+                                # card's mark asserted the same square, since it carried the
+                                # identical fault from the identical declaration. 46/0, red
+                                # THREE ways from the SOURCE (&sect;276) &mdash; 7 / 2 / 2
+                                # &mdash; with a LANDED assertion, or a break that matched
+                                # nothing reads as a guard that works (&sect;344.1, &sect;54.5).
+                                # NO DATABASE: the console is served as it is by both stacks,
+                                # so a stub drives it (&sect;94.11). Run it against BOTH
+                                # copies (`SMP_PAGE=smp-app/shell/platform.html`)
 python3 SMP-Project-Folder/src/checks/console-boot.py # the console asks once, and
                                 # asks both at once (&sect;369). Islam: *"the window is not
                                 # active on opening I need to click anyway to start accepting
@@ -10056,7 +10082,67 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-19 &mdash; **&sect;373: the open box, and the column
+*Last Updated: 2026-09-20 &mdash; **&sect;374: a circular mark, and the name
+beside it (spec 059).** Islam, with a round pink logo on the ElAbd Foods card
+&mdash; *"on addiing a circular logo the view is not good. plus I'm not sure of
+the placement of the client name in case we have the logo or at least should we
+remove it or change it's size and loction to make the card neat."* **TWO
+QUESTIONS, AND THE FIRST HAD ONE CAUSE, MEASURED RATHER THAN READ**: the mark's
+slot was `width:auto` inside a COLUMN flex, which is *fill the container* &mdash;
+so the roundel was handed a **366&times;30** box (the whole card) and
+`object-fit:contain` shrank the picture into the middle of it, a 30px circle
+adrift in a white band the width of the card. **A WORDMARK FILLS THAT BOX AND
+LOOKS RIGHT**, which is the whole of why it had never been reported: one
+declaration treating the two shapes as though they were the same shape.
+**AND THE ARCHIVED CARD CARRIED IT IDENTICALLY** from the same line, found by
+looking rather than by a check. **THREE SHAPES DRAWN IN THE REAL CONSOLE AND
+PUBLISHED** (rule 1c) with the real logo in them &mdash; the mockup lifting
+`platform.html`'s own CSS verbatim rather than being drawn from the stylesheet
+(&sect;41.9's trap) &mdash; and **ISLAM TOOK C, WHICH THE MOCKUP ITSELF HAD
+KILLED**: the drawing of *mark and name on one line* was labelled *killed by
+drawing it*, because as drawn the name ran under the Settings chip. **HE IS
+RIGHT AND THE DRAWING WAS WRONG ABOUT THE CHIP RATHER THAN ABOUT THE LINE**
+&mdash; recorded as his, reversing the recommendation. **THE SLOT IS A SQUARE
+AND IT IS THE SAME SQUARE ON EVERY CARD** (40&times;40, logo or two-letter
+fallback), which is &sect;368's rule kept: a card whose mark band is a different
+height raises the whole grid row it sits in. **THE PLATE STAYS** (&sect;52: a
+PNG cannot be recoloured, so a dark mark on the navy card needs a light ground
+under it) and the padding drops 3px/7px &rarr; 3px all round, because an inset
+that differs by axis is what made a circle read as off-centre in the first
+place. **THE NAME IS CAPPED AT TWO LINES WITH THE WHOLE OF IT ON THE HOVER**
+(&sect;88's rule, which the archived tag on this same card already obeys), and
+**the identity block drops BELOW the chip rather than being cleared sideways**
+&mdash; both sideways mechanisms were drawn and both MEASURED as making *every*
+name wrap at a 232px card track, where one row of padding costs nothing at any
+width. **The card is 216px at every width, where it was 236.** **THE COST IS
+STATED RATHER THAN DISCOVERED**: a wide wordmark is contained into that square
+and is therefore small &mdash; that is C's price, and the shape he turned down
+does not pay it.
+**&sect;374.1 &mdash; AND THE BASELINE MEASURED THE NEW BUILD TWICE**
+(&sect;105.6): a `sed` meant to point the probe at the shipped file replaced a
+line the probe does not own, so the *before* figures came back identical to the
+*after* ones &mdash; which reads exactly like a change that did nothing. The
+baseline is asserted to BE the old build now
+(`assert "idrow" not in open(PAGE).read()`), and the real one is mark
+**134&times;36** against 40&times;40 and card **236** against 216.
+**&sect;374.2 &mdash; THREE CHECKS HAD NEVER RUN AGAINST THE GENERATED COPY**:
+the documented `SMP_PAGE` spelling is relative to the repository root while
+every browser check runs from `SMP-Project-Folder/src`, so `client-archive`,
+`client-setup-outside` and `client-card-modules` each died naming neither the
+file nor the directory &mdash; &sect;369.4's own fault in three more files, found
+by following each docstring rather than by reading them. **VERIFIED**:
+`client-card-mark.py` **46/0 on both copies**, red **7 / 2 / 2**; platform-cards
+21/0, console-boot 13/0 with all five breaks red (one re-pointed at the markup
+this moved, &sect;51.11), client-card-modules 23/0, client-archive and
+client-setup-outside 0 failures, publishing-room 74/0, every one on BOTH copies;
+`built-in-step` all good, so the frozen product is untouched and **no `sw.js`
+bump is owed** (&sect;91's trigger is the built file's bytes changing, and
+`platform.html` is not a file `build.py` reads). **RECORDED, NOT DONE**: two of
+`client-card-modules`' own falsifications die on a 30s locator timeout rather
+than reporting (&sect;215), established as **pre-existing** by stashing this
+work and reproducing them identically on the shipped build (&sect;303).*
+
+*Earlier: 2026-09-19 &mdash; **&sect;373: the open box, and the column
 that never said it was frozen (spec 059).** Islam, testing &sect;372, with two
 screenshots: the open Unit box lying across the Email column, and &mdash; of the
 &#8942; &mdash; *"you added the 3 dots to the roles whihc is wrong the 3 dots is

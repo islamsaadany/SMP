@@ -49,14 +49,41 @@ Run: SMP_CHROME=... python3 qa-run.py checks/client-setup-outside.py
      SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
      SMP_PAGE=<a doctored copy> …             # prove it can fail (§276)
 """
-import copy, http.server, json, os, re, socketserver, threading
+import copy, http.server, json, os, re, socketserver, sys, threading
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 REPO = os.path.abspath(os.path.join(ROOT, ".."))
 PORT = int(os.environ.get("SMP_CHECK_PORT", "3991"))
 BASE = "http://127.0.0.1:%d" % PORT
-PAGE = os.path.abspath(os.environ.get("SMP_PAGE") or os.path.join(REPO, "platform.html"))
+def pagePath():
+    """WHERE THE PAGE IS, SAID RATHER THAN HANDED BACK AS A TIMEOUT (§374.1).
+
+    §369.4 found this and fixed it in the two files it was run from; these
+    two were left. `SMP_PAGE` is documented relative to the REPOSITORY ROOT
+    while every browser check here runs through `qa-run.py`, which lives in
+    `SMP-Project-Folder/src` (§320.6b) — so the documented spelling is
+    relative to one directory and typed from another. Run as documented this
+    resolved a file that is not there, and the two died differently and
+    unhelpfully: one at import, one on a navigation timeout naming neither
+    the file nor the directory tried (§215, §123). Which means NEITHER had
+    ever been run against the generated copy it promises to cover. Both
+    spellings are accepted, and a page that is not there is refused before
+    the server starts.
+    """
+    want = os.environ.get("SMP_PAGE")
+    tries = [os.path.abspath(want), os.path.abspath(os.path.join(REPO, want))] if want \
+        else [os.path.join(REPO, "platform.html")]
+    tries = list(dict.fromkeys(tries))
+    for p in tries:
+        if os.path.isfile(p):
+            return p
+    sys.exit("the console page is not there — %s\n  tried: %s"
+             % ("SMP_PAGE=%s" % want if want else "no platform.html at the repository root",
+                "\n  tried: ".join(tries)))
+
+
+PAGE = pagePath()
 # THE COPY THAT BELONGS TO THE PAGE UNDER TEST (§53.5): the generated page
 # is served beside the generated script; the root page beside the source.
 CSJS = (os.path.join(REPO, "smp-app", "public", "client-setup.js")

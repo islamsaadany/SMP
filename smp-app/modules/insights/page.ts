@@ -131,6 +131,98 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 @media (max-width:560px){.item{flex-direction:column;gap:9px}}
 `;
 
+/* ── THE ROWS, AND THE ROWS ALONE (§375) ──────────────────────────────
+   The reports as a list, or the honest sentence for a list that is empty —
+   asked for by this module's own page AND by the Insights tab inside the
+   platform, which is the whole of why it is a function rather than an
+   expression inside the document.
+
+   WHAT IS SHARED IS THE PART THAT WOULD HURT IF IT DRIFTED: a report's
+   title, its summary, its fact line, its download, and the THREE different
+   reasons a list can be empty. Those are the product's own answers about a
+   report and there must be one of each (§53.5).
+
+   WHAT IS DELIBERATELY NOT SHARED IS THE CHROME AROUND THEM. Here the
+   categories are links and the search is a GET form, because the address
+   carries the filter and a filtered library is a link somebody can send;
+   in the tab the categories are the section row and the search re-asks,
+   because a form that navigates would take the platform's own page with
+   it. §53.5 is about one ANSWER to one question, never about one lump of
+   markup — and the question those two differ on is "how does this host
+   navigate", which genuinely has two answers.
+
+   `read` IS NOT `items.length` AND THE TWO SAY DIFFERENT THINGS (§93,
+   §231.4): a library that could not be read is not a library with nothing
+   in it, and counting an error as absence tells a client that Forefront
+   has published nothing. */
+/* ── READ ONCE, FOR EITHER HOST (§375) ────────────────────────────────
+   The library as this viewer may see it. Its own function because the tab
+   asks for exactly what the page asks for — and because the narrowing is
+   the one thing that must not differ between them: a report kept off
+   somebody's page and listed in their tab would be spec 053's rule undone
+   by the surface that came second.
+
+   A FAILED READ IS `read:false`, NEVER AN EMPTY LIST (§93). */
+export async function readLibrary(
+  tenantId: string, slug: string, ask: Ask, viewer: Viewer,
+): Promise<{ items: Item[]; read: boolean }> {
+  const q = oneLine(ask.q).slice(0, 120);
+  const category = normalizeCategories(ask.category)[0] || "";
+  let rows: any[] | null = null;
+  try {
+    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category, viewer }));
+  } catch (e) {
+    console.error("insights: reading " + slug + "'s library:", (e as Error).message);
+  }
+  return { items: (rows || []).map((r) => shape(r, true) as Item), read: rows !== null };
+}
+
+/* ── THE TAB'S ANSWER (§375) ──────────────────────────────────────────
+   The rows the platform's Insights tab drops into its pane, as JSON so the
+   count can be drawn beside the search box without the shell counting
+   nodes — which would read an empty state as nought reports and an
+   unreadable library as nought as well (§93 again, one layer out).
+
+   THE HTML IS THE MODULE'S OWN, so the tab cannot spell a report's date or
+   its size differently from the page (§53.5). */
+export async function libraryFragment(
+  slug: string, tenantId: string, tenantName: string, ask: Ask, viewer: Viewer,
+): Promise<{ ok: true; html: string; count: number; read: boolean }> {
+  const q = oneLine(ask.q).slice(0, 120);
+  const category = normalizeCategories(ask.category)[0] || "";
+  const { items, read } = await readLibrary(tenantId, slug, ask, viewer);
+  return { ok: true, html: libraryRows(slug, items, read, q, category, tenantName), count: items.length, read };
+}
+
+export function libraryRows(
+  slug: string, items: Item[], read: boolean, q: string, category: string, tenantName: string,
+): string {
+  if (items.length)
+    return '<div class="list">' + items.map((it) =>
+      '<div class="item"><span class="body">' +
+      "<h3>" + esc(it.title) + "</h3>" +
+      (it.summary ? "<p>" + esc(it.summary) + "</p>" : "") +
+      '<span class="facts">' + factLine(it) + "</span>" +
+      "</span>" +
+      (it.hasFile
+        ? '<a class="dl" href="' + esc(clientHref(slug, "insights", it.id + "/file")) + '">Download</a>'
+        /* A report with nothing attached says so rather than drawing a
+           button that would answer "not found" (§61). */
+        : '<span class="nofile">No file yet</span>') +
+      "</div>").join("") + "</div>";
+  return '<div class="none">' + (
+    !read
+      ? "<b>This library could not be read just now.</b>Nothing has been lost. Try again in a moment."
+    : q || category
+      ? "<b>No reports match.</b>Try clearing the search, or choosing a different category."
+      /* IT SAYS WHO, because the client cannot fix it themselves and a
+         screen saying only "nothing here" reads as a fault rather than as
+         a beginning (§45.2). */
+      : "<b>Nothing has been published here yet.</b>Research, market reports and analysis written for " +
+        esc(tenantName) + " will appear here. Forefront publishes them."
+  ) + "</div>";
+}
+
 export type Ask = { q?: string; category?: string };
 
 export async function insightsDocument(
@@ -150,13 +242,7 @@ export async function insightsDocument(
   /* A LIBRARY THAT COULD NOT BE READ IS NOT AN EMPTY ONE (§35, §93: counting
      an error as absence reports everybody as having none). The two states say
      different things, and neither of them says "nothing has been published". */
-  let rows: any[] | null = null;
-  try {
-    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category, viewer }));
-  } catch (e) {
-    console.error("insights: reading " + slug + "'s library:", (e as Error).message);
-  }
-  const items: Item[] = (rows || []).map((r) => shape(r, true) as Item);
+  const { items, read } = await readLibrary(tenantId, slug, ask, viewer);
 
   const here = clientHref(slug, "insights", "");
   const catHref = (c: string) => {
@@ -188,31 +274,7 @@ export async function insightsDocument(
     "</form>" +
     '<span class="cnt">' + esc(plural(items.length, "report", "reports")) + "</span></div>";
 
-  const list = items.length
-    ? '<div class="list">' + items.map((it) =>
-        '<div class="item"><span class="body">' +
-        "<h3>" + esc(it.title) + "</h3>" +
-        (it.summary ? "<p>" + esc(it.summary) + "</p>" : "") +
-        '<span class="facts">' + factLine(it) + "</span>" +
-        "</span>" +
-        (it.hasFile
-          ? '<a class="dl" href="' + esc(clientHref(slug, "insights", it.id + "/file")) + '">Download</a>'
-          /* A report with nothing attached says so rather than drawing a
-             button that would answer "not found" (§61). */
-          : '<span class="nofile">No file yet</span>') +
-        "</div>").join("")
-      + "</div>"
-    : '<div class="none">' + (
-        rows === null
-          ? "<b>This library could not be read just now.</b>Nothing has been lost. Try again in a moment."
-        : q || category
-          ? "<b>No reports match.</b>Try clearing the search, or choosing a different category."
-          /* IT SAYS WHO, because the client cannot fix it themselves and a
-             screen saying only "nothing here" reads as a fault rather than as
-             a beginning (§45.2). */
-          : "<b>Nothing has been published here yet.</b>Research, market reports and analysis written for " +
-            esc(tenantName) + " will appear here. Forefront publishes them."
-      ) + "</div>";
+  const list = libraryRows(slug, items, read, q, category, tenantName);
 
   return "<!doctype html>\n<html lang='en' data-module='insights'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +

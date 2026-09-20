@@ -6347,3 +6347,56 @@ the line was written (§218) — 143/0 twice on two fresh databases; and every
 other reach for a card was swept (§51.11), two more fixed, one left as correct.
 
 **Merged to `main` 2026-09-19 on Islam's word.**
+
+---
+
+## §375 — The reports, as a tab in the platform (spec 060, 2026-09-20)
+
+**On the branch `claude/trusting-wright-1m2bgv`, not merged.**
+
+**What Islam asked for.** That a client's own people reach the Insights library
+from a tab beside the tabs they already use, rather than from the module
+switcher — *"the module is managed by the smo which is relevant but the user to
+move between modules is not very usable."*
+
+**What was wrong, measured first.** The switcher is a four-square picture with
+no word beside it, in the pale top bar, in a different row from every other
+piece of navigation — and for a client's person it opens a menu of two, one of
+which is the page they are standing on. **And it offers doors that refuse
+them**: Tracker and Notes declare no area, so `decideOpen` lets a client's
+person through and their pages turn them away.
+
+**What he chose.** Three placements were drawn at real size in the product's own
+chrome and published; he picked **C**, a real tab. It was the one recommended
+against, so the cost is recorded as his: the library is the *client's*, so the
+tab shows the same reports whichever unit you stand on. Then three decisions,
+all confirmed: every destination carries the tab; the tab writes the module's
+own address; the four-square mark is drawn only where the tabs cannot reach.
+
+**Built.** `libraryRows`/`readLibrary`/`libraryFragment` shared by the module's
+page and the tab; `GET /<client>/insights/list`; the `data-library-cats` stamp;
+`src/insights.js` (`LIBRARY`) with its sections, its pane and its three count
+answers; `LIB_TAB` declared once and referenced on all four destination kinds;
+the pane's design scoped to `.libpane`; the address and the switcher in
+`shell/route.js`; `checks/insights-tab.mjs`.
+
+**Checked.** 16/16 on the new check, **proved able to fail three ways from the
+sources** (3 / 1 / 3 red), the source restored byte-identical and the build
+re-run after. `built-in-step.py` all good; the four generators re-run and
+`generated-in-step.mjs` clean but for the uncommitted-edits line, which is its
+"you have edits in flight" answer and not a stale copy. `sw.js` bumped to
+`v5.20-reports-tab`, a name neither `main` nor this branch held.
+
+**Not run here, and said rather than left as an absence (§54.5).** Neither
+Playwright binding is installed in this session, so the tab was **not driven in
+a browser**: what is asserted is the rules, the row builder's four states and
+the structure — not that it renders. §5 of the check is written for the served
+sweep and names what it covers.
+
+**Recorded, not done.** Tracker and Notes are still offered to a client's person
+on a tenant that holds them. Decision 3 empties that menu for a client with
+Strategy and the reports, and leaves it standing for one that also has an office
+module — so **my second mockup's claim that decision 3 closes the defect "for
+free" is true of the shapes in front of us and not in general**, corrected here
+rather than left standing (§124). The fix is those two modules' own area
+declarations, which this round was not asked about (rule 1b).

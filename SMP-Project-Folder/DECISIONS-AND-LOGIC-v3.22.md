@@ -52976,3 +52976,143 @@ pair nobody has looked at is a change of its own; and **C** — making the table
 fit a narrower window so it never scrolls at all — is untouched, since it means
 giving up or narrowing a column, which is a decision about what the register
 shows.
+
+---
+
+## §375 — The reports, as a tab in the platform (spec 060, 2026-09-20)
+
+Islam, of the Insights module: *"for the users not the smo they can see the
+insights as a tab beside the tabs visible to them. better usability than going
+to another module. the module is managed by the smo which is relevant but the
+user to move between modules is not very usable. align wiht me."*
+
+**WHAT WAS ACTUALLY WRONG WAS MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a),
+and it is not that the switcher is hard to find. A client's own person reaches
+the library through a **four-square mark with no word beside it, in the pale top
+bar, in a different row from every other piece of navigation** — and it opens a
+menu of **two**, one of which is the page they are standing on. Every
+destination, tab and section in this product is a word on a navy row; this is a
+picture on a white one.
+
+**AND MEASURING IT FOUND A DEFECT THE ASK DID NOT MENTION.** `decideOpen`'s
+first rule is *a module with no declared area is open to everybody the door let
+in*, and the Internal Tracker and Meeting Notes declare `areas: []` because they
+are the office's and refuse a client's person **at the page**. So a client's
+person on a tenant holding either is offered it in that menu and turned away
+when they press it — §61 with the doors the wrong way round. Named as a
+precondition of any placement rather than fixed in passing (rule 1b), and see
+the last paragraph.
+
+**THREE PLACEMENTS DRAWN AT REAL SIZE IN THE PRODUCT'S OWN CHROME** (rule 1c,
+§41.9), published as an Artifact, and **Islam picked C — the one recommended
+against**. So the cost is his and is recorded rather than re-argued: the three
+tabs beside it are three views of **one subject**, and this library is the
+**client's**, identical whichever unit you stand on. Press *Retail Stores* and
+it shows the same reports. It was drawn that way, side by side, before he chose.
+
+**AND ONE OF MY OWN OBJECTIONS WAS WITHDRAWN IN THE OPEN.** The first drawing
+said C costs *"a second copy of the library"*; reading `insightsDocument`
+afterwards showed the rows lift cleanly into a function both surfaces call, so
+the drift objection was simply wrong and the second mockup said so. What
+survives is the row-says-something-untrue objection, which is a real cost and
+is what the address decision below exists to bound.
+
+**THE LINK-VERSUS-TAB FORK WAS SETTLED FROM HIS OWN WORDS, not by asking again**
+(rule 2b): *"better usability than going to another module"* rules out a door
+that goes to another module from a different button — it would carry the whole
+of C's design cost and none of its point.
+
+**ONE RENDERER, TWO HOSTS (§53.5, §364's own shape).** `libraryRows()` in
+`modules/insights/page.ts` writes the rows for the module's own page AND for the
+tab's fragment, so a report's title, its fact line, its date spelling and its
+download button cannot read one way here and another way there. What the frozen
+file draws is the chrome around them — the search box and the count — because
+the two hosts navigate differently: the module's page uses a GET form, which in
+the platform would take the platform with it.
+
+**A FAILED READ IS NOT AN EMPTY ONE (§93), AND THAT IS THE ASSERTION THIS
+DESERVES.** The count has **three** answers — a number, *Asking…*, and an
+em-dash — and an unreadable library says so and promises nothing has been lost.
+It must never read as *nothing has been published here yet*, which is what an
+empty library says and which tells a client Forefront has published nothing.
+
+**THE ADDRESS IS THE MODULE'S OWN (decision 2).** `addressOf` would otherwise
+write `/raya-trade/strategy/mobile/insights` — a unit's name in a link that is
+not about that unit — and **a screen's untruth is gone the moment you look away
+while a link outlives the look**. The tab writes `/raya-trade/insights`, spelled
+once and read by both ends of `shell/route.js`. **Back and Forward are the state
+object's, never the address's**: `sync()` pushes `{d, s, c}` beside the address
+and the popstate handler reads `ev.state` first, so the destination somebody was
+standing on is restored exactly; `placeOf` is the fallback for an entry carrying
+no state, and there it answers **nothing** rather than reading `insights` as a
+unit nobody has — staying put beats landing on an arbitrary destination (§96.2).
+**The cost is stated rather than discovered**: a shared or reloaded link opens
+the module's own page, which is the same reports in the whole window with its
+own way back.
+
+**THE FOUR-SQUARE MARK STANDS DOWN WHERE THE TABS REACH (decision 3).** The
+switcher exists to reach a module the navigation cannot; with the library on the
+tab row, listing it there as well is the same door twice on one screen (§87's
+twins, §94.15). The module is **dropped from the list** rather than hidden, so
+§32's *a menu of one is a door behind a door* takes the mark off the bar on its
+own — and **which modules the tabs reach is asked of the tab itself**
+(`LIBRARY.shown()`), never listed in the switcher, so a build that stopped
+drawing the tab puts the module back in the menu rather than leaving it
+reachable from nowhere (§61, §53.5).
+
+**THE STAMP ANSWERS THREE QUESTIONS WITH ONE READ (§42).** `lib/shell.ts` writes
+`data-library-cats` on a document it serves to somebody who may **open**
+Insights, so *is there a server*, *does this client have the module* and *may
+this person open it* are one attribute and no second copy of any of them. Absent
+is the honest answer in every case it is absent for, `file://` included — and a
+tab that could never open anything is worse than none.
+
+**AND THE CATEGORIES COULD NOT BE FETCHED IN TIME**, which is why they are
+stamped rather than asked for: the section row is built synchronously inside
+`paint()`, so a fetch would draw a tab with no sections and add them a beat
+later. Writing the five words into the frozen shell would have been a second
+copy of `CATEGORIES` (§53.5); the stamp is the same list the module itself
+holds.
+
+**`ac` IS `c_kb`, AND THAT IS NOT A SECOND GATE.** `c_kb` is `area:"always"`, so
+`allowed()` passes it for everybody and the real question — may this person open
+Insights — is answered by the module's own area **on the server** (spec 046
+§4.4). A grant here would be a cell that could refuse what the door allowed, two
+answers to one question (§37, §53.5). The key is present because `allowed()`
+asks every tab for one.
+
+**`LIB_TAB` IS DECLARED ONCE AND REFERENCED FOUR TIMES.** The same tab typed out
+on four lists is four places to forget when it changes, which is exactly how the
+two sides of the navigation switch drifted twice (§211, §213).
+
+**EVERY CARRIED RULE IS SCOPED TO `.libpane` (§65.9).** The module's classes are
+`.list`, `.item`, `.body` and `.none` — as generic as a class name gets, and
+`.none` already has five rules in this product. Scoping is what stops this block
+reaching them and stops a rule written next month reaching this. The two button
+classes were corrected on the way: `.btn` is **not** a shared class (it exists
+only under `.hist-confirm` and `.csetup`) and `.linkbtn` is scoped to
+`.pband-hist`, so the pane uses `.linkbu`, which is declared once in
+`_shared.css` and reachable from anywhere.
+
+**PROVED ABLE TO FAIL THREE WAYS FROM THE SOURCES** (§276) — `shown()` forced
+true **3 red**, the categories typed out **1 red** printing the short list,
+`All` made a real category **3 red** — each reddening its own assertions and no
+others, with the source restored byte-identical and the build re-run after.
+`checks/insights-tab.mjs` runs the frozen tab's own module in a vm rather than
+describing it, and **says in its own words which halves did not run** (§54.5):
+the row builder needs the app's dependencies and the served half needs
+`SMP_BASE` and a browser.
+
+**NOT DRIVEN IN A BROWSER IN THIS SESSION AND IT IS SAID** (§124): neither
+Playwright binding is installed here, so what is asserted is the rules, the row
+builder's four states and the structure — and **not** that the tab renders. That
+is §5 of the check and is what the served sweep is for.
+
+**RECORDED, NOT DONE.** Tracker and Notes are still offered to a client's person
+on a tenant that holds them: decision 3 removes *Insights* from that menu, which
+empties it entirely for a client with Strategy and the reports and leaves it
+standing for one that also has an office module. **My second mockup said
+decision 3 closes that "for free"; it is true of the shapes in front of us and
+not in general, and the over-claim is corrected here rather than left standing**
+(§124). The honest fix is the two modules' own area declarations, which is a
+change to modules this round was not asked about.

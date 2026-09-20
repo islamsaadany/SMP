@@ -2057,6 +2057,71 @@ html[data-client-settings] .top .topmark { display:none; }
   .editbtn.reopen:hover { background:var(--cta); color:var(--cta-ink);
                           border-color:var(--cta); }
 
+  /* ══════════════════════════════════════════════════════════════════
+     THE REPORTS, IN THE PLATFORM'S PANE (§375)
+
+     ONE MARKUP, TWO DRESSES (§364, §53.5). `libraryRows()` writes the same
+     rows for the module's own page and for this tab, so a report cannot
+     carry one date here and another there — and each host dresses them,
+     because a page whose whole window is the library and a pane sitting
+     under a tab row are not the same room.
+
+     EVERY RULE IS SCOPED TO `.libpane`, AND THAT IS NOT TIDINESS. The
+     module's classes are `.list`, `.item`, `.body` and `.none` — as generic
+     as a class name gets, and `.none` already has five rules in this product
+     (a pill, a chip, a setup row, a slide). A class name is ONE GLOBAL
+     NAMESPACE (§65.9), so scoping is what stops this block reaching them and
+     stops a rule written next month reaching this. Nothing outside the pane
+     is touched, asserted.
+
+     THE TOKENS ARE THE PRODUCT'S OWN. The module's stylesheet already draws
+     from --line, --surface, --ink, --ink-3 and --gold, which is why a
+     verbatim carry was possible at all; what is added here is the pane's own
+     furniture — the search row, the waiting line — in the sizes the rest of
+     the platform uses rather than in numbers chosen for this one screen. */
+  .libpane { padding:2px 0 8px; }
+  /* THE ROW THE LIST IS REWRITTEN UNDER, never rewritten itself: a hand may
+     be in the search box when an answer lands (§35, §271 one control over),
+     so `draw()` replaces the list and the count and leaves this alone. */
+  .libtools { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+              padding-bottom:2px; }
+  .libpane .libsrch { flex:1 1 260px; max-width:420px; width:auto; }
+  .libgo { flex:none; font:600 var(--fs-small)/1.3 var(--sans); cursor:pointer;
+           color:var(--ink); background:var(--surface);
+           border:1px solid var(--line); border-radius:var(--r-sm);
+           padding:6px 14px; }
+  .libgo:hover { border-color:var(--gold); }
+  .libgo:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* The count sits AFTER the controls and is pushed to the end, so it reads
+     as a fact about the list below rather than as a label on the box beside
+     it (§87: a number next to a control is read as that control's). */
+  .libcount { margin-left:auto; font-size:var(--fs-small); color:var(--ink-3);
+              white-space:nowrap; }
+  .libwait { padding:26px 2px 10px; color:var(--ink-3); font-size:var(--fs-small); }
+
+  /* ── THE ROWS, carried from the module's own stylesheet ───────────── */
+  .libpane .list { display:flex; flex-direction:column;
+                   border-top:1px solid var(--line); margin-top:12px; }
+  .libpane .item { display:flex; gap:16px; align-items:flex-start;
+                   padding:14px 2px; border-bottom:1px solid var(--line); }
+  .libpane .item .body { min-width:0; flex:1 1 auto; display:flex;
+                         flex-direction:column; gap:4px; }
+  .libpane .item h3 { margin:0; font-size:15.5px; font-weight:600; line-height:1.35; }
+  .libpane .item p { margin:0; font-size:13.5px; line-height:1.5; color:var(--ink-3); }
+  .libpane .item .facts { font:400 12px/1.5 var(--mono); color:var(--ink-3);
+                          overflow-wrap:anywhere; }
+  .libpane .item .facts b { font-weight:600; color:var(--ink); }
+  .libpane .dl { flex:none; border:1px solid var(--line); background:var(--surface);
+                 color:var(--ink); border-radius:8px; padding:7px 13px;
+                 font:600 13px/1.5 inherit; text-decoration:none; display:inline-block; }
+  .libpane .dl:hover, .libpane .dl:focus-visible { border-color:var(--gold); outline:none; }
+  .libpane .nofile { flex:none; font-size:12.5px; color:var(--ink-3); }
+  .libpane .none { padding:34px 4px 10px; color:var(--ink-3); font-size:14px;
+                   max-width:60ch; }
+  .libpane .none b { color:var(--ink); font-weight:600; display:block;
+                     font-size:15.5px; margin-bottom:6px; }
+  @media (max-width:560px){ .libpane .item { flex-direction:column; gap:9px; } }
+
   /* ── Viewer switcher ─────────────────────────────────────────────── */
   .viewer { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
   .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;

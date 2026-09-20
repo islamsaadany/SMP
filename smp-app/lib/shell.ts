@@ -11,6 +11,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MODULE_DEF, isModule } from "./modules.ts";
+import { CATEGORIES } from "./library.ts";
 
 let body: string | null = null;
 export function shellBody(): string {
@@ -75,6 +76,21 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        modules THIS PERSON MAY OPEN (moduleMenu(openableModules)), so neither
        reader has to ask a second time. */
     (modules.length ? " data-modules='" + esc(JSON.stringify(modules)) + "'" : "") +
+    /* AND THE LIBRARY'S CATEGORIES, WHERE THIS PERSON MAY OPEN INSIGHTS
+       (§375). The reports are a TAB inside the platform now (Islam's C of
+       three drawn), and its categories are drawn in the section row — which
+       the shell builds at paint time, before any answer from the server can
+       have arrived. So the list is stamped rather than fetched, and stamped
+       rather than written out in the frozen shell, which would be a second
+       copy of lib/library.ts's own CATEGORIES (§53.5).
+
+       ONLY WHERE THE TAB IS DRAWN. `modules` is already the list this person
+       may open, so an absent attribute is the honest answer for somebody the
+       library is shut to — and over file://, where there is no server to ask
+       for the rows at all, there is no attribute and therefore no tab (§61,
+       the switcher's own rule). */
+    (modules.some((m) => m.key === "insights") && brk !== "no-library-cats"
+      ? " data-library-cats='" + esc(JSON.stringify(CATEGORIES)) + "'" : "") +
     /* THE LANDING LINE PAGE'S DECLARATION (§359.4): what this module can
        say, its texts right now and the client's pick — stamped on a SETUP
        document only, where the page that draws it lives (lib/landing.ts

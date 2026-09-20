@@ -10056,7 +10056,93 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-19 &mdash; **&sect;373: the open box, and the column
+*Last Updated: 2026-09-20 &mdash; **&sect;375: the reports, as a tab in the
+platform (spec 060).** Islam, of the Insights module: *"for the users not the
+smo they can see the insights as a tab beside the tabs visible to them. better
+usability than going to another module. the module is managed by the smo which
+is relevant but the user to move between modules is not very usable."*
+**MEASURED BEFORE ANYTHING WAS PROPOSED, AND IT IS NOT THAT THE SWITCHER IS
+HARD TO FIND**: a client's own person reaches the library through a
+**four-square mark with no word beside it, in the pale top bar, in a different
+row from every other piece of navigation** &mdash; opening a menu of **two**,
+one of which is the page they are standing on. Every destination, tab and
+section in this product is a word on a navy row; this is a picture on a white
+one. **AND MEASURING IT FOUND A DEFECT THE ASK DID NOT MENTION**:
+`decideOpen`'s first rule is *a module with no declared area is open to
+everybody the door let in*, and the Internal Tracker and Meeting Notes declare
+`areas: []` because they are the office's and refuse a client's person **at the
+page** &mdash; so a client's person on a tenant holding either is offered it and
+turned away (&sect;61 with the doors the wrong way round). **THREE PLACEMENTS
+DRAWN AT REAL SIZE IN THE PRODUCT'S OWN CHROME** (rule 1c, &sect;41.9),
+published as an Artifact, and **Islam picked C &mdash; the one recommended
+against**, so the cost is his and recorded rather than re-argued: the three tabs
+beside it are three views of ONE subject and this library is the CLIENT'S, so
+pressing *Retail Stores* shows the same reports. **AND ONE OF MY OWN OBJECTIONS
+WAS WITHDRAWN IN THE OPEN** &mdash; the first drawing said C costs *"a second
+copy of the library"*, and reading `insightsDocument` afterwards showed the rows
+lift cleanly into a function both surfaces call, so that objection was simply
+wrong and the second mockup said so. **THE LINK-VERSUS-TAB FORK WAS SETTLED FROM
+HIS OWN WORDS** rather than by asking again (rule 2b): *"better usability than
+going to another module"* rules out a door that goes to another module from a
+different button. **ONE RENDERER, TWO HOSTS** (&sect;53.5, &sect;364's shape):
+`libraryRows()` writes the rows for the module's own page AND the tab's
+fragment, so a report's title, fact line, date spelling and download button
+cannot read one way here and another there; what the frozen file draws is the
+chrome around them, because the module's page uses a GET form that in the
+platform would take the platform with it. **A FAILED READ IS NOT AN EMPTY ONE
+(&sect;93)**: the count has THREE answers &mdash; a number, *Asking&hellip;*, an
+em-dash &mdash; and an unreadable library says so and promises nothing has been
+lost, never *nothing has been published*, which tells a client Forefront has
+published nothing. **THE ADDRESS IS THE MODULE'S OWN**: `addressOf` would write
+`/raya-trade/strategy/mobile/insights`, a unit's name in a link that is not
+about that unit, and **a screen's untruth is gone the moment you look away while
+a link outlives the look** &mdash; the tab writes `/raya-trade/insights`, spelled
+once and read by both ends of `shell/route.js`. **Back and Forward are the state
+object's, never the address's** (`sync()` pushes `{d,s,c}` beside it), and
+`placeOf` answers **nothing** for that address rather than reading `insights` as
+a unit nobody has, because staying put beats landing somewhere arbitrary
+(&sect;96.2); the cost is stated &mdash; a shared or reloaded link opens the
+module's own page, the same reports in the whole window. **THE FOUR-SQUARE MARK
+STANDS DOWN WHERE THE TABS REACH**: the module is DROPPED from the list rather
+than hidden, so &sect;32's *a menu of one is a door behind a door* takes the mark
+off the bar on its own &mdash; and **which modules the tabs reach is asked of the
+tab itself** (`LIBRARY.shown()`), so a build that stopped drawing the tab puts
+the module back in the menu rather than leaving it reachable from nowhere
+(&sect;61). **THE STAMP ANSWERS THREE QUESTIONS WITH ONE READ** (&sect;42):
+`data-library-cats` is written on a document served to somebody who may OPEN
+Insights, so *is there a server*, *does this client have the module* and *may
+this person open it* are one attribute and no second copy of any of them &mdash;
+absent is the honest answer in every case it is absent for, `file://` included.
+**AND THE CATEGORIES COULD NOT BE FETCHED IN TIME**, which is why they are
+stamped: the section row is built synchronously inside `paint()`, and writing
+the five words into the frozen shell would have been a second copy of
+`CATEGORIES`. **`ac` IS `c_kb` AND THAT IS NOT A SECOND GATE** &mdash;
+`area:"always"`, so `allowed()` passes it for everybody and *may this person open
+Insights* is the module's own area on the server (spec 046 &sect;4.4); a grant
+here would be a cell that could refuse what the door allowed. **`LIB_TAB` IS
+DECLARED ONCE AND REFERENCED FOUR TIMES**, because the same tab typed out on
+four lists is four places to forget (&sect;211, &sect;213). **EVERY CARRIED RULE
+IS SCOPED TO `.libpane`** (&sect;65.9): the module's classes are `.list`,
+`.item`, `.body` and `.none`, and `.none` already has five rules in this product
+&mdash; and two button classes were corrected on the way, `.btn` not being a
+shared class at all and `.linkbtn` being scoped to `.pband-hist`. **Proved able
+to fail three ways from the SOURCES** (&sect;276) &mdash; `shown()` forced true
+**3 red**, the categories typed out **1 red**, `All` made a real category **3
+red** &mdash; each reddening its own assertions and no others;
+`checks/insights-tab.mjs` runs the frozen tab's own module in a vm rather than
+describing it and **says in its own words which halves did not run** (&sect;54.5).
+**NOT DRIVEN IN A BROWSER IN THIS SESSION AND IT IS SAID** (&sect;124): neither
+Playwright binding is installed here, so what is asserted is the rules, the row
+builder's four states and the structure, and **not** that the tab renders.
+**RECORDED, NOT DONE**: Tracker and Notes are still offered to a client's person
+on a tenant that holds them &mdash; decision 3 empties that menu for a client
+with Strategy and the reports and leaves it standing for one that also has an
+office module, so **my second mockup's claim that it closes the defect "for
+free" is true of the shapes in front of us and not in general, corrected here
+rather than left standing** (&sect;124); the honest fix is those two modules'
+own area declarations, which this round was not asked about.*
+
+*Earlier: 2026-09-19 &mdash; **&sect;373: the open box, and the column
 that never said it was frozen (spec 059).** Islam, testing &sect;372, with two
 screenshots: the open Unit box lying across the Email column, and &mdash; of the
 &#8942; &mdash; *"you added the 3 dots to the roles whihc is wrong the 3 dots is

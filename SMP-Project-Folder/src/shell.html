@@ -226,6 +226,7 @@
 <script src="TOUR"></script>
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
+<script src="LIBRARY"></script>
 <script src="SAFETY"></script>
 <script src="CONTINGENCY"></script>
 <script src="CLIENTSETUP"></script>
@@ -238,6 +239,33 @@
 
   /* Page definitions carry the access key the matrix is keyed on, so a page
      is never rendered without a grant having been checked first. */
+  /* ── THE REPORTS, AS A TAB (§375) ────────────────────────────────────
+     Islam picked the tab over the two other placements drawn for him, so the
+     library reads beside Strategy and Performance on every destination a
+     person can open. Declared ONCE and referenced four times below, because
+     the same tab on five lists is five places to forget when it changes —
+     which is exactly how the two sides of the navigation switch drifted twice
+     (§211, §213).
+
+     IT IS THE CLIENT'S LIST AND NOT THE SUBJECT'S, and that is the cost of
+     the placement rather than a defect: press Retail Stores and it shows the
+     same reports. It was drawn that way, side by side, before he chose.
+
+     `when` IS THE SERVED STAMP, so it is absent over file:// and absent for
+     anybody the library is shut to — one read of one attribute, never a
+     second copy of who may open a module (§42, lib/access.ts decides and
+     lib/shell.ts stamps).
+
+     `ac` IS `c_kb`, WHICH IS AN ACCESS KEY THE MATRIX ALREADY HOLDS AT VIEW
+     FOR EVERYONE. Whether this person may open Insights is spec 046 §4.4's
+     question and is answered by the module's OWN area on the server, so a
+     second grant here would be a cell that could refuse what the door
+     allowed — two answers to one question (§37, §53.5). The key is here
+     because `allowed()` asks every tab for one. */
+  var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights",
+                  when: function(){ return LIBRARY.shown(); },
+                  sections: function(){ return LIBRARY.sections(); } };
+
   var SUBS = {
     /* A supporting function is the destination; the capabilities it carries are
        named inside its pages. */
@@ -339,7 +367,8 @@
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
-        render: function(k){ return renderFnReport(k); } }
+        render: function(k){ return renderFnReport(k); } },
+      LIB_TAB
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -350,14 +379,16 @@
        whether a company CEO sees the group and the other companies. */
     co: [
       { k:"performance", ac:"g_perf", label:"Performance", primary:true,
-        render:renderCompanyPerformance }
+        render:renderCompanyPerformance },
+      LIB_TAB
     ],
     group: [
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
-      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
+      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
+      LIB_TAB
     ],
     unit: [
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
@@ -404,7 +435,8 @@
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
-        render: function(u){ return renderReport(u); } }
+        render: function(u){ return renderReport(u); } },
+      LIB_TAB
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 

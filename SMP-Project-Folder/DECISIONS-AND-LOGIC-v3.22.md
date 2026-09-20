@@ -53060,3 +53060,66 @@ none. So nearly half the phone cell is dead to a press. It is not what Islam
 reported (the digits themselves are inside the button, and the copy worked
 throughout), it is a restyle nobody asked for, and it wants a measurement of
 every `.mono` cell rather than one column's (rule 1b).
+
+### §374.1 — MERGED, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
+
+Islam: *"merge to main"*. **`main` HAD NOT MOVED**, so `--ff-only` took it
+cleanly and the tree that went up is the tree that was checked — which is the
+whole reason §4 forbids a blind merge either way round: a refusal is the
+notification, and its absence is a measurement too, taken rather than assumed.
+
+**THE MERGE CARRIES A SECTION OF ITS OWN BECAUSE THE BRANCH TIP WAS ALREADY
+PUSHED** (§91). Vercel deduplicates by commit SHA, so a fast-forward of `main`
+onto a commit the branch ref already holds is **one** deployment and which ref
+gets it is a race — lost in advance here, the branch having carried that SHA for
+hours. §91's own way round is *a commit `main` holds and the branch does not, and
+it must be one worth making*, and the record owed exactly one: a finished round
+whose tracker still reads **waiting on Islam** is a record that is wrong
+(§367.5's own correction, one round on). So this section IS the distinct commit,
+which is §357.4's road rather than a device invented for it.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, WHICH IS STATED
+RATHER THAN CLAIMED** (§54.5, rule 3a). The environment's egress policy refuses
+`smp-orpin-tau.vercel.app` outright — **403 at the proxy's CONNECT**, whose own
+README says to report a policy denial rather than retry or route around it — so
+no request left this machine and **the deployment is unverified from here**.
+What is NOT claimed is the whole of the claim: nobody here has seen production
+serve this commit.
+
+**THE WITNESS IS NAMED SO THE CHECK IS ONE COMMAND FOR WHOEVER CAN MAKE IT — AND
+IT IS ONE FILE, NOT §367's TWO.** It is **not `sw.js`** (§365, §316.10): the
+generator drops the caching half of the frozen worker, which is the half `SHELL`
+lives in, so the **served** worker is byte-identical either side of this merge
+and the bumped name reaches nobody — it is kept for the offline handover alone.
+**AND IT IS NOT `platform.css`, WHICH IS THE PART §367's SENTENCE COULD NOT BE
+COPIED FOR**: that round moved both files and this one changes no stylesheet at
+all, so `platform.css` reads **669,731** bytes on the build before and on this
+one alike — *a witness that reads the same either way is not a witness*, and it
+would have gone in verbatim had the two builds not been asked (§113.8, in the
+paragraph citing §113.8). What proves production built THIS commit is `shell.js`
+alone: **3,824,282 → 3,827,402** bytes, the second matching
+`smp-app/public/shell.js` exactly.
+
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED.** While it stays where it
+is, `main`'s tip is a SHA no other ref holds — unique by construction rather
+than by timing — and pushing it onto a second ref is the one act left that could
+still cost the build. §91 says to hold the branch until production has served
+it; with the live read impossible from here, holding is not caution but the
+instruction, and the fast-forward is one command the day somebody has looked.
+
+**NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF THE DIFF** (spec 029, precedent
+040): the merged range holds `CLAUDE.md`, the tracker, this document,
+`checks/people-dialog.py`, `src/shell.html`, the built file, `public/shell.js`
+and `sw.js` — **not one `api/`, `lib/` or `db/` file** — so nothing about how a
+save is judged moves, no stored value moves and nothing is migrated. A tab left
+open on the previous build keeps its old shell until somebody reloads it, which
+is §365's own residue and the ordinary cost of a screen-only round.
+
+**RE-CHECKED ON THE MERGED TREE IMMEDIATELY BEFORE THE PUSH**, because a branch
+that passes says nothing about what `main` holds (§365): `built-in-step` all good
+(the shipped file byte-identical to `build.py`'s own output), `generated-in-step`
+all clear (every served copy identical to what its generator produces, and every
+carried rule module its frozen twin with the one declared transform applied),
+`node --check sw.js` clean with **one** `SHELL` declaration (§146.2) at a name
+`origin/main` does not hold — confirmed again as the last step rather than the
+first (§94.16, which has collided twice).

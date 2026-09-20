@@ -5317,7 +5317,21 @@ reverted (§276), printing the symptom verbatim. **Recorded, not done** (rule
 because the address wears `.val` (4px of padding) and the number wears `.mono`
 (none) — not what he reported, a restyle nobody asked for, and it wants a
 measurement of every `.mono` cell rather than one column's.
-**Waiting on Islam: the merge.**
+**Merged to `main` 2026-09-20 on Islam's word** (§4). `main` had not moved, so
+it is a clean fast-forward and what went up is what was checked. **The merge
+carries a line of its own on purpose**: the branch had already been pushed, and
+Vercel builds once per commit whatever ref it arrives on, so handing it a commit
+the branch ref already holds is a deployment that may never happen — writing the
+record the round owed anyway is what gives `main` something of its own to build.
+**And the live site could not be read from this session, which is said rather
+than glossed**: this environment refuses that address outright, so nobody here
+has seen production serve it. **The one file to compare is `shell.js`**, which
+should read **3,827,402** bytes where the build before it read 3,824,282 — not
+the service worker and not the stylesheet, neither of which changed at all, so
+either would read the same whether or not production built this. **The branch
+is left where it stands** until somebody has looked, because moving it is the
+one thing that could still cost the build. **Nobody is signed out and nothing
+stored moves**: the whole change is one screen, one check and the record.
 
 ---
 

@@ -10114,7 +10114,36 @@ symptom verbatim (`open: False, pcell: None, active: 'copyval mono'`).
 against Email's 28.1, because the address wears `.val` (4px of vertical padding)
 and the number wears `.mono` (none) &mdash; not what was reported, a restyle
 nobody asked for, and it wants a measurement of every `.mono` cell rather than
-one column's (rule 1b).*
+one column's (rule 1b). **MERGED TO `main` 2026-09-20 on Islam's word**, as a
+clean fast-forward &mdash; `main` had not moved, so the tree pushed is the tree
+that was checked. **AND THE MERGE ITSELF CARRIES THIS LINE, BECAUSE THE BRANCH
+TIP WAS ALREADY PUSHED** (&sect;91, by &sect;357.4's own road): Vercel
+deduplicates by SHA, so fast-forwarding `main` onto a commit the branch ref
+already holds is ONE deployment and which ref gets it is a race already lost
+&mdash; and *the way back is a commit `main` holds and the branch does not,*
+*and it must be one worth making*, which the record owed anyway, since a
+finished round that still reads *waiting on Islam* is a record that is wrong.
+**AND &sect;91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, SO IT IS SAID
+RATHER THAN CLAIMED** (&sect;54.5, rule 3a): this environment's egress policy
+refuses `smp-orpin-tau.vercel.app` outright &mdash; 403 at the proxy's CONNECT,
+which its own README says to report rather than route around &mdash; so the
+served bytes are **unread**, and the deployment is unverified from here. The
+witness is **`shell.js` ALONE** and it was measured rather than copied from
+the round before: **not `sw.js`** (&sect;365, &sect;316.10 &mdash; the generator
+drops the half of the worker that carries `SHELL`, so the served worker is
+byte-identical either side of this merge and the bumped name reaches nobody),
+**and not `platform.css`**, which &sect;367 could use and this round cannot: no
+stylesheet changed, so it holds **669,731** bytes on both builds and a match
+would hold either way (&sect;113.8, caught by asking the two builds rather than
+by repeating the previous sentence). `shell.js` goes **3,824,282 &rarr;
+3,827,402**, matching the generated copy to the byte. **SO THE BRANCH IS
+DELIBERATELY NOT FAST-FORWARDED**: `main`'s tip is unique by construction while
+the branch stays where it is, and putting that SHA on a second ref is the one
+thing left that could still cost the deployment &mdash; a fast-forward is one
+command whenever somebody has read the live site. **NO FORCED SIGN-OUT IS OWED
+AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029): not one `api/`,
+`lib/` or `db/` file is in it, so nothing about how a save is judged moves,
+nothing stored moves and nothing is migrated.*
 
 *Earlier: 2026-09-19 &mdash; **&sect;373: the open box, and the column
 that never said it was frozen (spec 059).** Islam, testing &sect;372, with two

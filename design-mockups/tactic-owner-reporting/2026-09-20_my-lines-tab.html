@@ -106,18 +106,18 @@ table.acc td.chg{color:var(--attn-tx);font-weight:600}
 </style></head><body><div class="wrap">
 
 <h1>My reporting</h1>
-<p class="lede">Your four points, answered. One of them I had wrong, and measuring the code changed
-two of the others &mdash; the whole feature turns out to be <b>the figure-set machinery reading the
-plan's Owner column</b>, which is exactly what you said in point&nbsp;2.</p>
+<p class="lede">Your four points, answered &mdash; the access one rewritten in plain words.
+One of them I had wrong. And you were right about point&nbsp;2: this is the <b>same thing the
+platform already does for a Finance number</b>, pointed at the plan's Owner column.</p>
 
 <h2>1 &middot; Saving &mdash; you are right, and the control already exists</h2>
 <div class="ans">
 <p class="q">&ldquo;the sense of saving that we do in the reporting already gives the feel of saving
 that locks the reporting with ability to open again&rdquo;</p>
-<p>That is <b>Save draft &rarr; Draft saved &middot; Reopen</b>, and &sect;309 already built it at
-<i>owner</i> scale: a project owner presses it, their own rows freeze, the report around them does not
-close, and Reopen unfreezes. <b>I withdraw the objection</b> &mdash; my point was that there is nothing
-to save, and you were describing a lock rather than a save, which is a real thing this product has.</p>
+<p>That is <b>Save draft &rarr; Draft saved &middot; Reopen</b>, and the platform already does it for
+one kind of owner: a project owner presses it, their own rows lock, the report around them stays open,
+and Reopen unlocks. <b>I withdraw the objection</b> &mdash; I was arguing there is nothing to save, and
+you were describing a lock, which is a real thing this product has.</p>
 <p>One decision inside it: <b>it locks per unit</b>. Hossam's Mobile line and his B2B&nbsp;Ecomm line
 freeze separately, because each unit submits separately and a single button would lock him out of a
 unit still working.</p>
@@ -154,52 +154,70 @@ unit still working.</p>
 </div>
 <p class="cap">Locked. Before the press the boxes are live and the bar reads
 <span class="mono">1 figure still to enter</span> beside an orange <b>Save draft</b> &mdash;
-the same pair the unit's own Reporting bar has carried since &sect;263.</p>
+the same pair the unit's own Reporting bar already carries.</p>
 
-<h2>2 &middot; Access &mdash; nothing in Roles &amp; access moves</h2>
+<h2>2 &middot; Access &mdash; in plain words</h2>
 <div class="ans">
 <p class="q">&ldquo;align with me more not to ruin any access as this should be similar to what the
-figure sets should appear for the figure owner as a reporting&rdquo;</p>
-<p><b>You are describing the implementation, and reading the code says so.</b> A figure with a named
-master is already entered by that master and by nobody else &mdash; no grant, no role, no attachment:
-the server's rule is literally <i>the cycle is open and this row is yours</i>
-(<span class="mono">sourceReporting</span>). The client half is
-<span class="mono">canEnterFigure</span>, which has worked that way since &sect;16.7.</p>
-<p><b>The only thing missing is which rows it walks.</b> Both halves walk a unit's key objectives and
-its pillars' key measures &mdash; and never its tactics. Teaching them tactics, with the Owner column as
-the master, <i>is</i> the feature. No new rule, no new refusal, no new grant.</p>
+figure sets should appear for the figure owner as a reproting&rdquo;</p>
+<p><b>The platform already does this once, and it works exactly the way you describe.</b> Think of a
+number that belongs to Finance but sits on Mobile's plan. Nobody gave Finance a key to Mobile. The
+number simply has <i>Hossam's name on it</i>, and that is the whole permission &mdash; he types it,
+nobody else does, and Mobile reads it.</p>
+<p><b>All we are doing is letting a tactic work the same way.</b> The plan already has an Owner column.
+Today that name is decoration &mdash; it decides nothing. After this, if a tactic has an owner, that
+person types its figure. If it has no owner, nothing about it changes.</p>
+<p class="why"><b>So the permissions table is not involved at all.</b> This permission does not come
+from a tick on that table. It comes from being named on the line, which is why nothing on it has to
+move.</p>
 </div>
 
 <div class="card">
-<span class="key">Who can do what &mdash; before and after</span>
-<table class="acc">
-<thead><tr><th style="width:40%">&nbsp;</th><th style="width:30%">Today</th><th style="width:30%">After</th></tr></thead>
+<span class="key">What stays exactly as it is</span>
+<table class="acc" style="margin-top:8px">
 <tbody>
-<tr><td>Every cell on Roles &amp; access</td><td class="same">as set</td><td class="same">unchanged</td></tr>
-<tr><td>What each role ships with</td><td class="same">as shipped</td><td class="same">unchanged</td></tr>
-<tr><td>Which units are in somebody's navigation</td><td class="same">their own</td><td class="same">unchanged</td></tr>
-<tr><td>Who may submit a unit's report</td><td class="same">head &middot; custodian &middot; office</td><td class="same">unchanged</td></tr>
-<tr><td>Who writes the unit's note</td><td class="same">the unit</td><td class="same">unchanged</td></tr>
-<tr><td>A figure with a named master</td><td class="same">that person only</td><td class="same">unchanged</td></tr>
-<tr><td>A tactic's figure</td><td>the unit</td><td class="chg">its Owner, if it has one</td></tr>
-<tr><td>Being a collaborator on a milestone</td><td>gives a figure</td><td class="chg">gives none</td></tr>
+<tr><td style="width:66%">Every tick on Roles &amp; access</td><td class="same">does not move</td></tr>
+<tr><td>What each role can open the day it is given</td><td class="same">does not move</td></tr>
+<tr><td>Which units somebody sees in the top bar</td><td class="same">does not move</td></tr>
+<tr><td>Who can submit a unit's report</td><td class="same">does not move</td></tr>
+<tr><td>Who writes the note beside a figure</td><td class="same">does not move</td></tr>
+<tr><td>Nobody gains a page. Nobody loses a page.</td><td class="same">&mdash;</td></tr>
 </tbody></table>
-<div class="note good"><b>Two rows move and both are yours:</b> the Owner column starts deciding a
-tactic's figure, and being named a <i>collaborator</i> stops deciding anything &mdash; your
-&ldquo;contributor should not report, the owner only&rdquo;, which reverses &sect;227.</div>
 </div>
 
 <div class="card">
-<span class="key">One question for you</span>
-<h3 style="margin-top:6px">Should it be a switch, off until the tenant turns it on?</h3>
-<p>Figure sets have one (&sect;44), the assistant has one, the focus board has one &mdash; each because
-turning it on changes who can enter something. This does too: the day it ships, on a live tenant,
-26&nbsp;tactics change hands at once.</p>
+<span class="key">What changes &mdash; two things, and both are yours</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px">
+  <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px">
+    <h3>A tactic's figure</h3>
+    <p style="font-size:13.5px;margin:0 0 6px"><b>Before:</b> typed by the unit's head or custodian.</p>
+    <p style="font-size:13.5px;margin:0"><b>After:</b> typed by the person named as its Owner.
+    Unowned tactics carry on exactly as they are.</p>
+  </div>
+  <div style="border:1px solid var(--line);border-radius:8px;padding:12px 14px">
+    <h3>Being a collaborator</h3>
+    <p style="font-size:13.5px;margin:0 0 6px"><b>Before:</b> being listed beside a milestone let
+    somebody type a figure.</p>
+    <p style="font-size:13.5px;margin:0"><b>After:</b> it does not. Only an owner reports &mdash;
+    your own instruction.</p>
+  </div>
+</div>
+<div class="note good" style="margin-top:14px"><b>And a name only counts if the platform can find the
+person.</b> Eleven tactics in the worked example say just <span class="mono">Karim</span> or
+<span class="mono">Hossam</span>, which matches nobody, so those stay with the unit until somebody
+picks a real name from the register.</div>
+</div>
+
+<div class="card">
+<span class="key">The one thing to be careful about, and my suggestion</span>
+<p style="margin-top:6px">The day this is switched on, <b>every tactic that already has an owner
+changes hands at once</b> &mdash; 26 of them on Raya. Nobody chose that; it just happens.</p>
+<p>So I would put it behind a switch that <b>starts off</b>, the way we did for the Finance numbers,
+the assistant and the focus board. You turn it on once the owner names on the plan have been checked.</p>
 <p class="sw" style="margin:10px 0 0"><i></i>&nbsp;<b>Tactic owners enter their own lines</b>
 &nbsp;<span class="why" style="margin:0">Setup &rsaquo; Reporting cycle &mdash; off until switched on</span></p>
-<p class="why" style="margin-top:10px"><b>My recommendation: yes, and off.</b> It is the only thing in
-this round that can move access without anybody choosing it, and it directly answers
-&ldquo;not to ruin any access&rdquo;.</p>
+<p class="why" style="margin-top:10px">This is the only thing in the round that can move access
+without anybody deciding it, which is exactly what you were asking me to guard.</p>
 </div>
 
 <h2>3 &middot; The filter &mdash; drawn rather than described</h2>
@@ -238,10 +256,10 @@ unit, so there is nothing to filter and no row is drawn. Hossam owns lines in tw
 <div class="ans">
 <p class="q">&ldquo;My reporting is better .. let's see what can we change on the roles and access&rdquo;</p>
 <p><b>Nothing has to change, because &ldquo;My reporting&rdquo; is on no screen.</b> I told you it was
-taken by the access key's label; I have now grepped every source and that label is <i>never drawn</i> &mdash;
-since &sect;37 the matrix shows AREAS (<span class="mono">Own business unit &mdash; Reporting</span>),
-and the knowledge base entry for that key already titles itself <b>Reporting</b>. The word a person
-reads today is the unit's tab, and that says <span class="mono">Reporting</span>.</p>
+taken. I have now searched every file, and that wording sits in the code where nobody sees it &mdash;
+the table shows <span class="mono">Own business unit &mdash; Reporting</span>, and the knowledge base
+page for it is already called <b>Reporting</b>. The only place a person reads the word today is the
+unit's own tab, and that says <span class="mono">Reporting</span>.</p>
 <p><b>The real cost is the pair on one row</b>, which is worth looking at rather than arguing about:</p>
 </div>
 
@@ -255,13 +273,12 @@ reads today is the unit's tab, and that says <span class="mono">Reporting</span>
 
 <div class="card">
 <span class="key">What I would change on Roles &amp; access &mdash; one tidy-up, no behaviour</span>
-<p style="margin-top:6px">The dead internal label <span class="mono">u_report: "My reporting"</span>
-becomes <span class="mono">"Reporting"</span>, so it stops disagreeing with the knowledge base entry
-and with the tab. It renders nowhere, so nothing moves on any screen &mdash; it is a stale copy
-being brought into step, not a rename.</p>
-<p class="why"><b>And the area label stays as it is:</b>
-<span class="mono">Own business unit &mdash; Reporting</span> already names the right thing, and the
-new tab is granted by nothing, so it has no cell to sit in.</p>
+<p style="margin-top:6px">There is one line in the code still calling that page
+<span class="mono">My reporting</span> while the two places you can actually read call it
+<span class="mono">Reporting</span>. Bringing it into step costs nothing and moves nothing on any
+screen &mdash; it is tidying an old copy, not a rename.</p>
+<p class="why"><b>The row on the table stays as it is.</b> It already names the right thing &mdash;
+and the new tab is not given by a tick, so there is no cell for it to sit in.</p>
 </div>
 
 <h2>The two cases, unchanged from the last round</h2>
@@ -334,25 +351,26 @@ the platform cannot see it &mdash; the plan stores his surname alone, which matc
     <div class="note">Every tactic here is entered by its owner. The unit writes the notes and submits.</div>
   </div>
 </div>
-<p class="cap"><b>Case 1 &mdash; the unit's Reporting tab, read-only for him.</b> Note this is the
-figure-set model showing through: the column already says <i>entered by</i>, and the custodian could
-not type these either. Your ruling adds the owner to that list, so the page has one meaning for
-everybody who opens it. It reverses &sect;301.5, which exists to let an owner type on this very page
-&mdash; recorded as a reversal, and I still recommend it covers <b>all three</b> bounded owners rather
-than tactic owners alone.</p>
+<p class="cap"><b>Case 1 &mdash; the unit's Reporting tab, read-only for him.</b> This is the Finance
+model showing through: the column says <i>entered by</i>, and the custodian cannot type these either.
+Your ruling adds the owner to that list, so the page means one thing to everybody who opens it. It
+reverses an earlier decision that let an owner type here &mdash; written down as a reversal &mdash; and
+I still recommend it covers <b>all three</b> kinds of owner rather than tactic owners alone.</p>
 
 <h2>What this settles, if you say yes</h2>
 <div class="card"><ol class="dec">
 <li><b>A tab called My reporting</b>, on the person's own place, beside Reporting &mdash; drawn only for
 somebody who owns a line somewhere, so nobody else sees it.</li>
-<li><b>It is the figure-set machinery reading the Owner column.</b> No new rule, no matrix cell, no
-change to anybody's grants or navigation.</li>
-<li><b>An owner is the Owner column.</b> Collaborators and stakeholders get no figure &mdash; reverses
-&sect;227.</li>
+<li><b>It is the same thing a Finance number already does</b>, pointed at the Owner column. No new
+rule, no tick on Roles &amp; access, no change to what anybody can open.</li>
+<li><b>An owner is the Owner column.</b> Collaborators and stakeholders get no figure &mdash; which
+reverses an earlier decision, so it is written down as a reversal.</li>
 <li><b>He enters and never submits.</b> The unit's head or custodian submits; the note stays theirs.</li>
-<li><b>Save draft locks his lines, per unit, with Reopen</b> &mdash; &sect;309's control, not a new one.</li>
-<li><b>The unit's Reporting tab is read-only for him</b> &mdash; one door. Reverses &sect;301.5, and I
-recommend all three bounded owners.</li>
+<li><b>Save draft locks his lines, per unit, with Reopen</b> &mdash; the control that already exists,
+not a new one.</li>
+<li><b>The unit's Reporting tab is read-only for him</b> &mdash; one door rather than two. This also
+reverses an earlier decision, and I recommend it covers all three kinds of owner rather than tactic
+owners alone.</li>
 <li><b>Grouped by unit always; chips only when there is more than one.</b></li>
 <li><b>A switch, off</b> &mdash; open for your decision above.</li>
 <li><b>The welcome screen gains a row</b>: somebody holding unentered figures is told &ldquo;Nothing is
@@ -360,9 +378,9 @@ waiting on you&rdquo; today.</li>
 </ol>
 <div class="note"><b>Said rather than assumed:</b> eleven owner values in the worked example are a
 single first name (<span class="mono">Karim</span>, <span class="mono">Hossam</span>,
-<span class="mono">Abuelenien</span>&hellip;) and resolve to nobody, so those tactics have no owner the
-platform can see. They predate the Owner column becoming a register picker. Correcting them is a data
-pass on the demo, not code.</div>
+<span class="mono">Abuelenien</span>&hellip;) and match nobody on the register, so those tactics have no
+owner the platform can see. They were written before the Owner column became a list you pick from.
+Putting them right is a pass over the demo's data, not a build.</div>
 </div>
 
 </div></body></html>

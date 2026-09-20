@@ -49681,9 +49681,9 @@ publishing room at all, which is a gap in the sweep rather than in this change.
 
 ---
 
-## §359 — PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (2026-09-20, spec 056)
+## §375 — PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (2026-09-20, spec 060)
 
-Islam, on the handover that said every screen of spec 056 was drawn and three
+Islam, on the handover that said every screen of spec 060 was drawn and three
 of the six signed off: **"proceed."**
 
 **WHAT IS BUILT IS THE HALF THAT IS DECIDED AND HAS NO PICTURE**, which is the

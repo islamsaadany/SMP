@@ -1,4 +1,4 @@
-/* Portfolio — the delivery plan, per client (spec 056 §5)
+/* Portfolio — the delivery plan, per client (spec 060 §5)
 
    The eight tables for a database already up: schema.sql runs ONCE and is
    recorded, so a deployment already up never sees a table added there

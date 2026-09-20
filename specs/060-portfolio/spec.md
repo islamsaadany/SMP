@@ -9,7 +9,7 @@ they can be, so the sign-off, the derived dates, the computed progress, the
 cascade and the renumbering are provable without a browser*. **`portfolio` is
 still `built: false`** and there is no page, no address and no switcher entry:
 rule 1c is owed on three of the six screens, and the check asserts the flag
-rather than assuming it (§359). This is the
+rather than assuming it (§375). This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
 what it specifies is the shape, not the screens. **Every screen is now drawn.**
@@ -486,7 +486,7 @@ The client's register, through **the platform's own searchable ticking list**
 
 #### 6.4a · Can a LEAD name somebody? — open, answered the narrow way (2026-09-20)
 
-**Found by building §6 rather than by reading it** (§359). Two sentences in
+**Found by building §6 rather than by reading it** (§375). Two sentences in
 this page point different ways and both are Islam's:
 
 - §6.4 and §9.2 make naming people onto a project **the seat's** — *the
@@ -1243,7 +1243,7 @@ deliberately not designed here (§10).
 
 - **Analytics had no drawing and could not honestly have one** — the first audit
   named its files and never said what any of them rendered.
-  **`specs/056-portfolio/analytics-brief.md` was written for a session that can
+  **`specs/060-portfolio/analytics-brief.md` was written for a session that can
   read the reference, and `analytics-audit.md` is the answer (§9.11).** It is
   read now, and what it leaves is a decision about what the fourth tab is FOR
   rather than a hole in the reading.
@@ -1252,7 +1252,7 @@ deliberately not designed here (§10).
 
 ### 9.11 · Analytics, audited — and what the fourth tab is for
 
-`specs/056-portfolio/analytics-audit.md`, read against commit `bf9793c` by a
+`specs/060-portfolio/analytics-audit.md`, read against commit `bf9793c` by a
 session with the reference attached, answering `analytics-brief.md`. It opened
 the four files the first audit counted and never read — 2,784 lines between them.
 

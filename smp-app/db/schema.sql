@@ -984,7 +984,7 @@ CREATE TABLE note_sends (
 );
 CREATE INDEX note_sends_note ON note_sends (tenant_id, note_id, sent_at);
 
--- ── PORTFOLIO — the delivery plan, per client (spec 056) ─────────────────
+-- ── PORTFOLIO — the delivery plan, per client (spec 060) ─────────────────
 -- A client has PROJECTS and a project holds a tree: phases, optionally work
 -- packages, and activities, which may be broken into sub-activities. Every
 -- table is tenant-owned, so the loop below fences them on a fresh database

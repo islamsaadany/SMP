@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Splice the shared blocks into every Portfolio drawing that asks for them.
 
-Spec 056 §5.2. Several drawings read one plan and work out one set of figures
+Spec 060 §5.2. Several drawings read one plan and work out one set of figures
 from it, and a hand-kept copy of either is the fault this spec is about — so
 both are MECHANICAL:
 

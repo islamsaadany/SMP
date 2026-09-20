@@ -1,4 +1,4 @@
-/* PORTFOLIO — the rules, before any screen (spec 056).
+/* PORTFOLIO — the rules, before any screen (spec 060).
 
    WHAT THIS FILE IS FOR. The claims that would hurt if they were false:
    that only a Lead signs an activity off and a reopen is gated the same way

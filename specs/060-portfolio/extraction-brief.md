@@ -1,11 +1,11 @@
-# Extraction brief — ScopePlan, for the Portfolio port (spec 056)
+# Extraction brief — ScopePlan, for the Portfolio port (spec 060)
 
 For a session that can read **`aleymahmoud-ff/clientplus`**. This session
 cannot: an `add_repo` across owners is refused, and the GitHub tools are scoped
 to `islamsaadany/smp`.
 
 **Written to produce ARTEFACTS, not a description.** The first handover brief
-was prose, so every claim it made is marked in spec 056 §7 as *the brief's,
+was prose, so every claim it made is marked in spec 060 §7 as *the brief's,
 unverified here* — and a spec built on unverified claims is a spec that has to
 be redone the first time one of them turns out to be wrong. What is asked for
 below is code, schema and counts, so each claim can be checked rather than

@@ -5534,7 +5534,7 @@ re-measured for the sake of a number.
 
 ---
 
-## Portfolio — the delivery plan, per client (spec 056)
+## Portfolio — the delivery plan, per client (spec 060)
 
 **Waiting on Islam, not on me.** Nothing is built and no source has moved; this
 is a spec and six drawings. Three screens are signed off — the project team, the
@@ -5575,7 +5575,7 @@ sessions with it attached and nothing has been run.
 
 ---
 
-## Portfolio — the rules and the tables (2026-09-20, spec 056, §359)
+## Portfolio — the rules and the tables (2026-09-20, spec 060, §375)
 
 **Built: the half with no picture.** Every screen of this module is drawn and
 three of the six are signed off, so what could honestly be built is the part

@@ -1,5 +1,5 @@
 /* ── THE ARITHMETIC, ONCE, FOR EVERY DRAWING THAT READS A FIGURE ────────────
-   Spec 056 §5.2, one level further in than `_rows.js`.
+   Spec 060 §5.2, one level further in than `_rows.js`.
 
    THAT FILE STOPPED THREE DRAWINGS HOLDING THREE COPIES OF THE PLAN AND LEFT
    THEM HOLDING THREE COPIES OF THE SUMS. `roll()` and `kids()` were written out

@@ -1,5 +1,5 @@
 /* ── THE PLAN, ONCE, FOR ALL THREE DRAWINGS ─────────────────────────────────
-   Spec 056 §5.2: two screens of one project that disagree is the fault this
+   Spec 060 §5.2: two screens of one project that disagree is the fault this
    spec spends its length on, and §9.8 is the record of it happening — two
    figures typed onto the charter, both wrong.
 

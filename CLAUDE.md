@@ -7862,7 +7862,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   actions in the minutes do not reach the tracker and are not meant to (spec
   054 decision 3); a module is turned ON per client from the card; nothing says
   which office person is looking at a note while somebody else edits it.
-- **PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (&sect;359, spec
+- **PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (&sect;375, spec
   056):** Islam, on the handover saying every screen was drawn and three of six
   signed off &mdash; *"proceed."* **WHAT IS BUILT IS THE HALF A *PROCEED* CAN
   HONESTLY REACH**: rule 1c is paid for the project team, the charter and the
@@ -8227,7 +8227,7 @@ node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # by LOOKING at the built page beside the mockup,
                                 # which is what rule 1c's last step is for
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
-                                # any screen (spec 056, &sect;359) &mdash; `npm run
+                                # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
                                 # which is what &sect;8 of that spec asks for in its own
                                 # words. &sect;1&ndash;&sect;8 run the six rules pure: who gets in,
@@ -9733,8 +9733,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;359: Portfolio &mdash; the rules and the
-tables, before any screen (spec 056).** Islam, on the handover saying every
+*Last Updated: 2026-09-20 &mdash; **&sect;375: Portfolio &mdash; the rules and the
+tables, before any screen (spec 060).** Islam, on the handover saying every
 screen was drawn and three of six signed off: **"proceed."** **WHAT IS BUILT IS
 THE HALF A *PROCEED* CAN HONESTLY REACH** &mdash; rule 1c is owed on three
 screens, so nothing visual is built, `portfolio` stays `built: false`, and the

@@ -1,4 +1,4 @@
-/* ── PORTFOLIO — the rules, before any screen (spec 056) ──────────────────
+/* ── PORTFOLIO — the rules, before any screen (spec 060) ──────────────────
    The six rules of §3, who gets in (§6), the roll-up (§9.8) and what a row
    owes (§9.13), as functions a check can ask without a browser — which is
    what §8 asks for in those words: *the six rules of §3 are checked as

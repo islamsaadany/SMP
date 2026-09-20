@@ -10056,7 +10056,67 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-19 &mdash; **&sect;373: the open box, and the column
+*Last Updated: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
+not an address (spec 059).** Islam, of the register: *"for the copy on click for
+the email and double click to edit is working but the same behavior is not
+working on the phone number."* **IT IS NOT A PHONE FAULT, AND ESTABLISHING THAT
+WAS THE ROUND**: both cells are built by the same two functions &mdash;
+`copyable()` for the value, `pcell()` for the cell &mdash; with nothing between
+them that could tell a phone from an address, and over `file://` both open
+perfectly. What separates them is the DATA. **Falsified three ways rather than
+argued**: phones shared and emails unique &rarr; Mobile fails, Email works; both
+unique &rarr; both work; the **EMAILS** shared &rarr; **Email fails and Mobile
+works**. The fault follows a value two rows SHARE, and the phone is simply the
+column where one repeats &mdash; a shared office line, or the same number typed
+twice. **THE CHAIN, MEASURED**: `focusMark()` names the control that had the
+cursor by its first `data-` attribute, on the stated grounds that *"every
+editable control in the platform carries one"* &mdash; every editable one
+carries a KEY (`data-pphone="loghead"`) and &sect;93.6's copy button carries
+`data-copy="+20 100 1234567"`, which is the **PAYLOAD**. So the first click of
+the double-click focuses that button, the paint that opens the cell asks for
+`[data-copy="&hellip;"]`, and `querySelector` hands back the **first row
+carrying that number** &mdash; somebody else's button; focus leaves the box that
+was just opened, `blur` fires with the box still in the document, &sect;372.16's
+`isConnected` guard reads it as a person moving away rather than as a repaint,
+and the cell shuts **about 90ms after it opened**. &sect;87 one field over: *a
+value is never an identifier.* **AND THE EMAIL ONLY WORKED BY LUCK** &mdash; an
+address is unique per person, so the selector matched exactly one button, the one
+the paint had just replaced, found nothing and restored nothing: the column that
+behaved was not behaving for a reason anybody had chosen. **INVISIBLE OVER
+`file://`, WHICH IS WHY EVERY CHECK WAS GREEN** (&sect;372.16's own trap, one
+guard along): nothing saves there, so the second paint that carries the stolen
+focus never happens &mdash; measured on the built file first, then over HTTP
+against a stub that saves. **RESTORE ONLY WHAT THE MARK NAMES ONCE**: one guard
+in `putFocus`, which can never lose a correct restore and only ever stops a wrong
+one &mdash; **measured rather than argued**, since swept over a unit's plan (pen
+open and shut), the register with every column on and Roles &amp; access, the
+only marks naming more than one element are `data-copy` (33, the fault) and three
+that are not editable at all, so **not one editable field in the product has an
+ambiguous address** &mdash; landing exactly where that function's own comment
+already said it should
+(*"the worst case is that nothing is restored, which is where the product was
+already"*), with the open dialog's copy winning first for &sect;372.14's reason.
+**In the general helper and not in the copy button**, because a list of
+attributes to skip is a list somebody forgets to add to (&sect;104.7) and the
+same fault reaches any control whose data attribute is a payload, on any repaint.
+**AND THE CHECK'S OWN FIXTURE ALREADY HELD THE STATE AND NOTHING ASKED**:
+`people-dialog.py`'s `REAL` gives every row the same number, and &sect;372.14's
+section &mdash; which deliberately races a save, for exactly this class &mdash;
+presses **Job title**, whose `data-ptitle="<key>"` is unique, so the one thing it
+could never reach is a mark naming two controls. &sect;2b presses the shared
+value with the unique Email beside it as the control (&sect;113.8) and asserts
+the box is **still there a beat later**, because a cell that opens and shuts 90ms
+afterwards passes any probe that looks once (&sect;94.8); the copy is asserted on
+both, or a fix reaching the single click would trade one act for the other.
+**1 red** from the SOURCES with the guard reverted (&sect;276), printing the
+symptom verbatim (`open: False, pcell: None, active: 'copyval mono'`).
+**RECORDED, NOT DONE**: the Mobile copy target is **19.4px in a 38.6px row**
+against Email's 28.1, because the address wears `.val` (4px of vertical padding)
+and the number wears `.mono` (none) &mdash; not what was reported, a restyle
+nobody asked for, and it wants a measurement of every `.mono` cell rather than
+one column's (rule 1b).*
+
+*Earlier: 2026-09-19 &mdash; **&sect;373: the open box, and the column
 that never said it was frozen (spec 059).** Islam, testing &sect;372, with two
 screenshots: the open Unit box lying across the Email column, and &mdash; of the
 &#8942; &mdash; *"you added the 3 dots to the roles whihc is wrong the 3 dots is

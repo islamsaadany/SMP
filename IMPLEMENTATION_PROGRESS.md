@@ -5280,7 +5280,44 @@ not tell a live seam from a dead one. Proved able to fail three ways from the
 sources — **4 / 8 / 8 red**, the last two identical, which is the finding: to the
 page, a seam declared as that shadow and no seam at all are the same build. **Found and not swept** (rule 1b): the name column and the functions
 table carry the same dead declaration, and the kebab block is declared **twice**
-in `config.css` byte for byte. **Waiting on Islam: the merge.**
+in `config.css` byte for byte. 
+
+**AND §374 ANSWERS THE ONE HE FOUND NEXT** (2026-09-20): *"the copy on click for
+the email and double click to edit is working but the same behavior is not
+working on the phone number."* **It is not a phone fault**, and finding that out
+was the round: both cells are built by the same two functions, and over
+`file://` both open perfectly. The fault follows a value **two rows share** — a
+shared office line, or the same number typed twice — and the phone is only where
+one repeats. Falsified three ways: phones shared → Mobile fails and Email works;
+both unique → both work; **emails** shared → Email fails and Mobile works.
+**The chain**: the platform puts the cursor back after a repaint by naming the
+control that had it with its first `data-` attribute, every editable control
+carries a KEY (`data-pphone="loghead"`) and the copy button carries
+**`data-copy="+20 100 1234567"`, which is the value**; so the first click of the
+double-click focuses that button, the paint that opens the cell asks for that
+value, and the browser hands back the **first row carrying that number** —
+somebody else's button. Focus leaves the box, `blur` fires with the box still on
+the page, §372.16's guard reads it as a person moving away, and the cell shuts
+**about 90ms after opening**. §87 one field over: *a value is never an
+identifier* — **and the Email only worked by luck**, being unique, so the
+selector matched the one button the paint had just replaced and restored
+nothing. **Invisible over `file://` and that is why every check was green**
+(§372.16's own trap, one guard along): nothing saves there, so the second paint
+never happens. One guard — restore only what the mark names once, the open
+dialog's copy first — which can never lose a correct restore and only ever stops
+a wrong one, in the general helper rather than in the copy button, because a
+list of attributes to skip is a list somebody forgets to add to (§104.7).
+**The check's own fixture already held the state and nothing asked**: every row
+in `people-dialog.py`'s fixture carries the same number, and §372.14's
+save-racing section presses **Job title**, whose address is unique. §2b presses
+the shared value with the unique Email beside it as the control, and asserts the
+box is **still there a beat later** — **1 red** from the sources with the guard
+reverted (§276), printing the symptom verbatim. **Recorded, not done** (rule
+1b): the Mobile copy target is **19.4px in a 38.6px row** against Email's 28.1,
+because the address wears `.val` (4px of padding) and the number wears `.mono`
+(none) — not what he reported, a restyle nobody asked for, and it wants a
+measurement of every `.mono` cell rather than one column's.
+**Waiting on Islam: the merge.**
 
 ---
 

@@ -10163,7 +10163,37 @@ the narrow way and written in as &sect;6.4a rather than left to be discovered.
 function rather than the defect until it was rewritten to produce `1.0.1`, the
 plan growing a level it does not have. The frozen product is untouched and
 MEASURED, so `sw.js` is not bumped. Two reds are `main`'s, established on a
-baseline worktree first (&sect;303). **Merged to `main` 2026-09-20.***
+baseline worktree first (&sect;303).
+**&sect;375.1 &mdash; AND THE MERGE IS PART OF THE RECORD**: `main` had moved
+**73 commits** and taken both numbers, so the renumber ran BEFORE the merge,
+which is what makes it provably this branch's own rather than somebody else's
+citations swept up by accident (&sect;264.3) &mdash; both spellings, every count
+DECLARED in advance and a mismatch refusing the whole pass (&sect;336.1,
+&sect;353.4). **Four files overlapped and every one is COMBINED, never picked**
+(&sect;318.7), **and the resolution is ASSERTED rather than eyeballed**: against
+`origin/main` exactly ONE line is removed across the three records, and it is
+main's own `*Last Updated:*` becoming `*Earlier:*`, which is that file's own
+convention. **The frozen half is main's byte for byte**, so nothing is rebuilt
+and **no `SHELL` bump is owed** &mdash; &sect;91's trigger is the built file's
+bytes changing and they did not (&sect;356.17, re-earned) &mdash; and outside
+this branch's own files the merged tree hashes identical to `origin/main`, so
+&sect;147.4's grep-the-deletions has nothing to find. **Re-run on the MERGED
+tree** (&sect;365): portfolio 121/0 red ten ways, door 143/0, shell 118/0,
+state 92/0, modules 158/0, insights 127/0, notes 170/0, frameworks 90/0, setup
+33/0, room 10/0, deploy 5/0, memory 16/0, demo 7/0, standing 7/0,
+`built-in-step.py` all good, `generated-in-step` and `declared-deps` all clear,
+`npm run build` green and **`tsc` clean COLD**. **The one red is `main`'s**
+&mdash; `tracker` 227/1 on a heading the check spells as a date and the product
+now spells as a week number, reproduced on a worktree of `origin/main` first
+(&sect;303). **AND THREE THINGS THE RUN TAUGHT WERE THE HARNESS, NOT THE
+PRODUCT**: four checks called by names `package.json` does not hold came back
+with an EMPTY log and a non-zero exit, which reads exactly like a check that
+died (&sect;298.3 &mdash; an empty tail is not a verdict); `generated-in-step`
+REFUSED to run while the merge was uncommitted and said which errand that was
+(&sect;349.4's stale-versus-mid-edit, working as designed); and `memory` failed
+in its own words, *"no tenant to write about &mdash; run
+`scripts/dev-tenant.mjs` first"* (&sect;328.3 saying so rather than throwing a
+foreign-key error). **Merged to `main` 2026-09-20.***
 *Earlier: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
 not an address (spec 059).** Islam, of the register: *"for the copy on click for
 the email and double click to edit is working but the same behavior is not

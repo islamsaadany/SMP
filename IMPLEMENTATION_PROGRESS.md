@@ -6485,3 +6485,32 @@ dies in its own seed harness on a Meeting Notes column. Both recorded.
 **Next, and still a decision rather than work**: the three sign-offs. Nothing
 visual can be built until they are given.
 
+**§375.1 — merged to `main`, 2026-09-20.** Islam: *"merge to main."*
+
+**Main had moved 73 commits underneath** — Setup per module, the client's
+settings in the platform, the registry drawn inline — and had taken both this
+round's numbers, so §359 became §375 and spec 056 became spec 060 **before**
+the merge, which is what makes the renumber provably this branch's own and not
+somebody else's citations swept up by accident.
+
+**Four files overlapped and every one was combined rather than picked.** The
+proof is a measurement, not a reading: against `main` exactly one line is
+removed across the three records, and it is main's own "Last Updated" line
+becoming "Earlier", which is what that file does with an entry that is no
+longer the newest.
+
+**The frozen platform is untouched, byte for byte**, so nothing was rebuilt and
+the service worker is not bumped — what a client's browser receives does not
+change.
+
+**Everything was re-run on the merged tree**, because a branch that passes says
+nothing about what production would hold: Portfolio 121/0 and red all ten ways,
+and thirteen other checks green, with the build and a cold typecheck clean.
+**One red is main's own**, reproduced on a worktree of main before anything
+here was blamed — a check whose expected wording has gone stale as the weeks
+moved.
+
+**What is on `main` is the rules and the tables and not one screen.** Portfolio
+is still switched off; the three drawings awaiting sign-off are unchanged and
+still waiting on Islam.
+

@@ -53250,3 +53250,80 @@ sign-off (§9.10 Progress, §9.12 Analytics, §9.13 the landing), and with them
 every screen of this module; §9.3's workbook, §9.5's notice and §9.6's budget
 question, which §9 still lists as live; and the carry in §9.7.
 
+---
+
+## §375.1 — THE MERGE, AND WHAT RUNNING IT FOUND (2026-09-20, spec 060)
+
+Islam: **"merge to main."** The word on that merge, which is the only thing
+that makes one allowed (rule 4).
+
+**MAIN HAD MOVED 73 COMMITS AND TAKEN BOTH NUMBERS**, so the renumber came
+FIRST and that ordering is what makes it provable rather than careful: at that
+point the tree held none of main's lines, so every `§359` and every `spec 056`
+in it was this branch's by construction — verified against the merge base,
+which holds neither string (§264.3, whose own fault was a blanket sweep taking
+somebody else's citations after a merge). §359 → §375, `specs/056-portfolio` →
+`specs/060-portfolio`, both confirmed free on `origin/main` before either was
+chosen. **Both spellings swept** (§336.1: a renumber knows one spelling unless
+it is told otherwise), **every count declared in advance and a mismatch
+refusing the whole pass** rather than writing what it happened to find
+(§353.4) — 4 / 3 / 4 / 0 / 21 / 11, all matched, residue nil.
+
+**FOUR FILES OVERLAPPED AND EVERY ONE IS COMBINED, NEVER PICKED** (§318.7,
+§356.17): the three record files and `package.json`. **The resolution is
+ASSERTED rather than eyeballed**, which is the part worth keeping — measured
+against `origin/main`, exactly ONE line is removed across the three records and
+it is main's own `*Last Updated:*` line becoming `*Earlier:*`, which is that
+file's own convention for an entry that has stopped being the newest; the rest
+is purely additive, 109 / 69 / 108 lines. The two logs run forward in time, so
+main's §359–§374.1 sit before today's §375; CLAUDE.md runs backwards, so §375
+leads it. `package.json` keeps every one of main's check scripts, compared as a
+SET rather than read (§94.8).
+
+**THE FROZEN HALF IS MAIN'S, BYTE FOR BYTE, AND THAT IS MEASURED**: this branch
+changed no file under `SMP-Project-Folder/src/`, so every frozen source, the
+shipped build, `sw.js` and every generated copy under `smp-app/public/` hashes
+identical to `origin/main`'s. **No rebuild is owed and NO `SHELL` BUMP IS
+OWED** — §91's trigger is the built file's bytes changing and they did not
+(§356.17's own finding, re-earned). `node --check sw.js` clean with **one**
+`SHELL` declaration (§146.2), at a name `origin/main` already serves because it
+IS main's file.
+
+**AND NOTHING OF MAIN'S CODE IS LOST, ASSERTED THE SAME WAY**: outside this
+branch's own files the merged tree is byte-identical to `origin/main`, so
+§147.4's grep-the-deletions has nothing to find — the two sides share no code
+file but `package.json`, which is why §56.7 could not bite here. Said rather
+than left as an absence, because "no conflict" is not the same claim.
+
+**RE-RUN ON THE MERGED TREE, because a branch that passes says nothing about
+what `main` would hold** (§365): portfolio **121/0** and **red all ten ways**,
+door 143/0, shell 118/0, state 92/0, modules 158/0, insights 127/0, notes
+170/0, frameworks 90/0, setup 33/0, room 10/0, deploy 5/0, memory 16/0, demo
+7/0, standing 7/0; `built-in-step.py` all good, `generated-in-step` all clear,
+`declared-deps` all clear, `npm run build` green through `scripts/deploy.mjs`
+and `next build`, and **`tsc` clean COLD with the cache deleted first** — no
+errors at all, where this branch's own record still said "clean but for
+`lib/prisma.ts`", which main has since closed.
+
+**ONE RED, AND IT IS MAIN'S**: `tracker` 227/1, on a heading the check spells
+as a date and the product now spells as a week number — established by running
+it on a WORKTREE OF `origin/main` and getting the identical 227/1 before
+anything here was blamed (§303). Recorded, not fixed in passing.
+
+**THREE THINGS THE RUN ITSELF TAUGHT, none of them the product's.** My own
+sweep called four checks by names `package.json` does not hold, and npm
+answered with an **empty log and a non-zero exit** — which reads exactly like a
+check that died (§298.3, §344.1's family: the tail is the verdict, and an empty
+tail is not a verdict at all). `generated-in-step` **refused to run while the
+merge was uncommitted** and said which errand that was rather than reporting a
+drift — §349.4's own distinction between *stale* and *mid-edit*, working as
+designed and worth seeing work. And `memory` failed with **its own sentence**,
+*"no tenant to write about — run `scripts/dev-tenant.mjs` first"*, which is
+§328.3's rehearsal-database prerequisite saying so in words instead of with a
+foreign-key error.
+
+**WHAT IS ON `main` NOW IS RULES AND TABLES AND NOT ONE SCREEN**: `portfolio`
+is still `built: false`, asserted with a built module beside it, so there is no
+page, no address and no switcher entry. The three drawings awaiting sign-off
+(§9.10 Progress, §9.12 Analytics, §9.13 the landing) are unchanged and still
+Islam's.

@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Borders and Focus</title>
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   THE TOKENS ARE THE PRODUCT'S OWN, COPIED VERBATIM (§245, §362).
+   House light/dark from SMP-Project-Folder/src/_shared.css :185–218.
+   The tracker's own palette from smp-app/modules/tracker/page.ts :60,69 —
+   kept SEPARATE on purpose, because the two are near-copies rather than one
+   set, and that is itself one of the findings.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  --fs-micro:10px; --fs-small:12px; --fs-note:13px;
+  --r-sm:6px; --r:8px; --r-md:12px;
+}
+:root[data-theme="light"]{
+  --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --attn:#B8860B; --bad:#B04434;
+  --bad-bg:#F7E3E0; --attn-bg:#F7EFD6; --good-bg:#E4F0EA;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8;
+  --zebra:#F5F7FA;
+  /* ── THE PROPOSED TOKEN ── a CONTROL's boundary, beside --line, never
+     instead of it. #7C8798 clears 3:1 on every ground a control sits on:
+     surface 3.64 · ground 3.42 · surface-2 3.24 · zebra 3.39. */
+  --line-ctl:#7C8798;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --attn:#D9B23C; --bad:#D97066;
+  --bad-bg:#33211F; --attn-bg:#2A2515; --good-bg:#1B2C26;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#9AA6B8;
+  --zebra:#212630;
+  /* surface 3.76 · ground 4.17 · surface-2 3.36 · zebra 3.49 */
+  --line-ctl:#6E7A8E;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+
+/* ── the mockup's own chrome, deliberately not the product's ───────── */
+.top{background:var(--panel);color:var(--panel-ink);padding:14px 20px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.01em}
+.top .sub{color:var(--panel-quiet);font-size:13px}
+.top .sp{margin-left:auto}
+.tbtn{font:600 11px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--panel-ink);background:rgba(234,240,250,.10);
+  border:1px solid rgba(234,240,250,.30);border-radius:999px;
+  padding:7px 13px;cursor:pointer}
+.tbtn:hover{background:rgba(234,240,250,.20)}
+.tbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.wrap{max-width:1320px;margin:0 auto;padding:26px 20px 80px}
+h2{font-size:19px;font-weight:700;margin:34px 0 4px;letter-spacing:-.01em}
+h2:first-of-type{margin-top:6px}
+.lede{margin:0 0 16px;font-size:14px;color:var(--ink-2);max-width:78ch}
+.lede b{color:var(--ink)}
+
+.key{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3)}
+
+/* two panes side by side, stacking on a narrow window */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:14px 0 6px}
+@media (max-width:940px){.pair{grid-template-columns:1fr}}
+.pane{background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-md);overflow:hidden}
+.pane>.cap{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;
+  padding:11px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.cap .w{font:700 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase}
+.cap .now{color:var(--bad)}
+.cap .next{color:var(--good)}
+.cap .m{font:400 12px/1.4 var(--mono);color:var(--ink-3)}
+.body{padding:14px}
+
+/* the measured note under a pane */
+.meas{margin:10px 0 0;font-size:12.5px;color:var(--ink-3);line-height:1.6}
+.meas b{color:var(--ink-2)}
+.ratio{font-family:var(--mono);font-size:12px;padding:1px 6px;border-radius:var(--r-sm);
+  border:1px solid var(--line)}
+.ratio.fail{color:var(--bad);background:var(--bad-bg);border-color:var(--bad)}
+.ratio.pass{color:var(--good);background:var(--good-bg);border-color:var(--good)}
+
+.note{margin:18px 0 0;padding:12px 15px;border:1px solid var(--line);
+  border-left:3px solid var(--gold);border-radius:var(--r);
+  background:var(--surface);font-size:13.5px;color:var(--ink-2)}
+.note b{color:var(--ink)}
+.note ul{margin:7px 0 0;padding-left:19px}
+.note li{margin:3px 0}
+
+.hint{margin:0 0 12px;padding:9px 13px;border-radius:var(--r);
+  background:var(--attn-bg);color:var(--ink);font-size:13px;
+  border:1px solid var(--attn)}
+.hint kbd{font:600 11px/1 var(--mono);border:1px solid var(--ink-3);
+  border-radius:4px;padding:2px 5px;background:var(--surface)}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECTION 1 — THE INTERNAL TRACKER'S OWN CSS, COPIED VERBATIM
+   from smp-app/modules/tracker/page.ts. Scoped to .trk so it wears the
+   module's own palette rather than the house one.
+   ══════════════════════════════════════════════════════════════════════ */
+.trk{
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;
+  --ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;
+  --line-ctl:#7C8798;
+  background:var(--surface);color:var(--ink)
+}
+:root[data-theme="dark"] .trk{
+  --ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;
+  --ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;
+  --line-ctl:#6E7A8E;
+}
+.trk .bar{background:#16325C;color:#EAF0FA;display:flex;align-items:center;
+  gap:10px;padding:11px 16px;flex-wrap:wrap}
+.trk .bar h3{margin:0;font-size:14.5px;font-weight:600}
+.trk .bar .org{color:#A9BBD8;font-size:13px}
+.trk .bar .org b{color:#EAF0FA;font-weight:600}
+.trk .msw{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+  border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA;
+  background:none;padding:0;flex:none}
+.trk .msw svg{width:17px;height:17px;display:block}
+.trk .list{padding:4px 14px 12px}
+.trk .row{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;
+  gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.trk .row:last-child{border-bottom:0}
+.trk .t{min-width:0;font-size:15px;line-height:1.35;color:var(--ink)}
+.trk .tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;
+  display:grid;place-items:center;color:var(--surface);background:var(--surface);
+  cursor:pointer;padding:0}
+.trk .tick.on{background:var(--good);border-color:var(--good)}
+.trk .tick svg{width:12px;height:12px;display:block}
+.trk .when{font:400 12.5px/1.4 var(--mono);color:var(--ink-3);white-space:nowrap;
+  text-align:right;background:none;border:0;padding:0;cursor:pointer}
+.trk .who{font:600 12.5px/1.4 var(--sans);color:var(--ink-2);white-space:nowrap;
+  min-width:52px;text-align:right;background:none;border:0;padding:0;cursor:pointer}
+.trk .st{display:inline-grid;place-items:center;height:26px;width:118px;
+  font:600 11px/1 var(--sans);letter-spacing:.02em;padding:0 9px;border-radius:999px;
+  border:1px solid var(--line);color:var(--ink-2);background:var(--surface);
+  white-space:nowrap;text-align:center;appearance:none;-webkit-appearance:none;margin:0}
+.trk .more{width:26px;height:26px;border-radius:7px;border:0;background:none;
+  color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;
+  justify-self:end;font-size:16px;line-height:1}
+
+/* ── TODAY: the 24 rules that set outline:none, reproduced exactly ──
+   tracker/page.ts — button:focus-visible, a:focus-visible, .msw>summary,
+   .when.pick, .who.pick, .more, .mi, .back, .dots>button … */
+.pane-now .trk button:focus-visible{background:var(--ground);outline:none}
+.pane-now .trk .msw:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.pane-now .trk .when:focus-visible,
+.pane-now .trk .who:focus-visible,
+.pane-now .trk .more:focus-visible{background:var(--surface-2);outline:none}
+.pane-now .trk .st:focus-visible{outline:none}
+
+/* ── PROPOSED: delete them, and the outline the frozen shell already
+   declares does the work. _shared.css:252 —
+   :focus-visible{outline:2px solid var(--focus);outline-offset:2px} ── */
+.pane-next .trk :focus-visible{outline:2px solid var(--focus);outline-offset:2px;
+  border-radius:var(--r-sm)}
+.pane-next .trk{--focus:#8A6B22}
+:root[data-theme="dark"] .pane-next .trk{--focus:#E6C65C}
+.pane-next .trk .msw:focus-visible{outline-color:#E6C65C}
+
+/* the forced-state demonstration, for a screenshot or a still ───────── */
+.pane-now .trk .is-focus{background:var(--surface-2)}
+.pane-next .trk .is-focus{outline:2px solid var(--focus);outline-offset:2px;
+  border-radius:var(--r-sm)}
+.pane-next .trk .is-focus.msw{outline-color:#E6C65C}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SECTION 2 — THE PLAN PANE'S OWN CSS, COPIED VERBATIM
+   .fld from SMP-Project-Folder/src/arrange.css:92; table, th, td from
+   _shared.css:655,719–723.
+   ══════════════════════════════════════════════════════════════════════ */
+.plan{background:var(--surface)}
+.plan .pband{background:var(--panel);color:var(--panel-ink);
+  padding:9px 14px;display:flex;align-items:baseline;gap:10px}
+.plan .pband .code{font:700 11px/1 var(--mono);letter-spacing:.06em;
+  color:#E6C65C}
+.plan .pband .nm{font-size:14px;font-weight:600}
+.plan table{width:100%;border-collapse:collapse;font-size:var(--fs-note)}
+.plan th,.plan td{text-align:left;padding:10px 13px;
+  border-bottom:1px solid var(--line-soft);vertical-align:top}
+.plan th+th,.plan td+td{border-left:1px solid var(--line-soft)}
+.plan thead th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-2);font-weight:700;background:var(--surface-2);
+  white-space:nowrap;border-bottom:1px solid var(--line)}
+.plan tbody tr:nth-child(even){background:var(--zebra)}
+.plan tbody tr:last-child td{border-bottom:0}
+
+.fld{font:inherit;font-size:14px;width:100%;padding:6px 9px;
+  border:1px solid var(--line);border-radius:var(--r);
+  background:var(--surface);color:var(--ink);font-family:var(--sans)}
+.fld:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.fld.gapfld{border:1px dashed var(--bad)}
+.fld.gapfld::placeholder{color:var(--bad);font-weight:600;opacity:.75}
+select.fld{appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),
+                   linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 15px) 12px,calc(100% - 10px) 12px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:26px}
+.xbtn{background:none;border:0;color:var(--ink-3);font-size:15px;
+  line-height:1;cursor:pointer;padding:2px 4px}
+.xbtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* ── PROPOSED: a control's boundary comes off its own token ── */
+.pane-next .fld,
+.pane-next .trk .tick,
+.pane-next .trk .st{border-color:var(--line-ctl)}
+.pane-next .trk .when,
+.pane-next .trk .who{border:1px solid var(--line-ctl);border-radius:var(--r-sm);
+  padding:3px 7px;background:var(--surface)}
+
+/* swatches ─────────────────────────────────────────────────────────── */
+.sw{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 0}
+.chip{display:flex;align-items:center;gap:9px;border:1px solid var(--line);
+  border-radius:var(--r);padding:8px 12px;background:var(--surface);font-size:12.5px}
+.chip i{width:34px;height:16px;border-radius:4px;display:block;flex:none}
+.chip code{font-family:var(--mono);font-size:11.5px;color:var(--ink-2)}
+
+table.facts{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+table.facts th,table.facts td{text-align:left;padding:8px 11px;
+  border-bottom:1px solid var(--line-soft)}
+table.facts thead th{font:700 10.5px/1 var(--sans);letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-2);background:var(--surface-2);
+  border-bottom:1px solid var(--line)}
+table.facts td.n{font-family:var(--mono);white-space:nowrap}
+
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--ink-3);line-height:1.75}
+footer code{font-family:var(--mono);font-size:11.5px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Borders and Focus &mdash; before and after</h1>
+  <span class="sub">Two repairs, drawn in the product&rsquo;s own stylesheets</span>
+  <span class="sp"></span>
+  <button class="tbtn" id="theme" type="button">Dark</button>
+</header>
+
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>1. The focus indicator, in the three newest modules</h2>
+<p class="lede">
+  Twenty-four rules across <b>Internal Tracker</b>, <b>Meeting Notes</b> and
+  <b>Insights</b> set <code>outline:none</code> on <code>:focus-visible</code>
+  and replace it with a background change. On the left is what that produces.
+  On the right, those rules are deleted and the outline the frozen shell
+  already declares does the work.
+</p>
+
+<p class="hint">
+  Press <kbd>Tab</kbd> through both panes. The controls are real and in the
+  same order in each. On the left nothing tells you where you are; on the
+  right it does. The date, owner and status on the first row are shown
+  <em>already focused</em> so the difference reads in a screenshot too.
+</p>
+
+<div class="pair">
+
+  <!-- TODAY -->
+  <section class="pane pane-now">
+    <div class="cap"><span class="w now">Today</span>
+      <span class="m">outline removed &middot; background shifts #FFFFFF &rarr; #F5F6F9</span></div>
+    <div class="trk">
+      <div class="bar">
+        <button class="msw is-focus" type="button" aria-label="Modules">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+          <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg>
+        </button>
+        <h3>Internal Tracker</h3>
+        <span class="org">&middot; <b>Raya Trade</b></span>
+      </div>
+      <div class="list">
+        <div class="row">
+          <button class="tick" type="button" aria-label="Mark done"></button>
+          <span class="t">Agree the Q4 review dates with Mobile</span>
+          <button class="when is-focus" type="button">W1&nbsp;Oct</button>
+          <button class="who is-focus" type="button">Omar</button>
+          <select class="st is-focus"><option>In progress</option></select>
+          <button class="more" type="button" aria-label="More">&#8942;</button>
+        </div>
+        <div class="row">
+          <button class="tick on" type="button" aria-label="Mark done">
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.2 4.6 8.8 10 3.4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="t">Send the revised weighting sheet to Finance</span>
+          <button class="when" type="button">W38</button>
+          <button class="who" type="button">Essam</button>
+          <select class="st"><option>Done</option></select>
+          <button class="more" type="button" aria-label="More">&#8942;</button>
+        </div>
+        <div class="row">
+          <button class="tick" type="button" aria-label="Mark done"></button>
+          <span class="t">Chase the two supporting functions still to submit</span>
+          <button class="when" type="button">W2&nbsp;Oct</button>
+          <button class="who" type="button">Islam</button>
+          <select class="st"><option>Not started</option></select>
+          <button class="more" type="button" aria-label="More">&#8942;</button>
+        </div>
+      </div>
+    </div>
+    <p class="meas" style="padding:0 14px 14px">
+      The focus background against the resting one:
+      <span class="ratio fail">1.08:1</span>
+      &mdash; and <b>hover and focus are given the identical treatment</b>, so
+      a keyboard position cannot be told from a mouse position.
+    </p>
+  </section>
+
+  <!-- PROPOSED -->
+  <section class="pane pane-next">
+    <div class="cap"><span class="w next">Proposed</span>
+      <span class="m">delete the 24 rules &middot; the shell&rsquo;s own outline applies</span></div>
+    <div class="trk">
+      <div class="bar">
+        <button class="msw is-focus" type="button" aria-label="Modules">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+          <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg>
+        </button>
+        <h3>Internal Tracker</h3>
+        <span class="org">&middot; <b>Raya Trade</b></span>
+      </div>
+      <div class="list">
+        <div class="row">
+          <button class="tick" type="button" aria-label="Mark done"></button>
+          <span class="t">Agree the Q4 review dates with Mobile</span>
+          <button class="when is-focus" type="button">W1&nbsp;Oct</button>
+          <button class="who is-focus" type="button">Omar</button>
+          <select class="st is-focus"><option>In progress</option></select>
+          <button class="more" type="button" aria-label="More">&#8942;</button>
+        </div>
+        <div class="row">
+          <button class="tick on" type="button" aria-label="Mark done">
+            <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6.2 4.6 8.8 10 3.4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="t">Send the revised weighting sheet to Finance</span>
+          <button class="when" type="button">W38</button>
+          <button class="who" type="button">Essam</button>
+          <select class="st"><option>Done</option></select>
+          <button class="more" type="button" aria-label="More">&#8942;</button>
+        </div>
+        <div class="row">
+          <button class="tick" type="button" aria-label="Mark done"></button>
+          <span class="t">Chase the two supporting functions still to submit</span>
+          <button class="when" type="button">W2&nbsp;Oct</button>
+          <button class="who" type="button">Islam</button>
+          <select class="st"><option>Not started</option></select>
+          <button class="more" type="button" aria-label="More">&#8942;</button>
+        </div>
+      </div>
+    </div>
+    <p class="meas" style="padding:0 14px 14px">
+      A 2px ring in <code>--focus</code>, offset 2px:
+      <span class="ratio pass">4.99:1</span> light,
+      <span class="ratio pass">9.80:1</span> dark &mdash; and it is
+      <b>the same indicator Strategy has had since v3.11</b>, so nothing new is
+      invented and nothing has to be kept in step.
+    </p>
+  </section>
+
+</div>
+
+<div class="note">
+  <b>What changes, and what does not.</b>
+  <ul>
+    <li>Deletions only &mdash; 11 rules in Tracker, 9 in Notes, 4 in Insights.
+        Nothing is added except the one global rule the modules are missing.</li>
+    <li><b>Hover is untouched.</b> Every one of those rules also sets a hover
+        background; that half stays exactly as it is, which is what makes
+        hover and focus finally look different from each other.</li>
+    <li>The two controls that already keep an outline &mdash; the done-tick
+        and the status pill &mdash; keep theirs, so the three modules stop
+        disagreeing with themselves.</li>
+    <li><b>The cost:</b> a gold ring now appears on a navy bar and on pale
+        rows. That is what a focus indicator is for, and it is what every
+        Strategy page already looks like.</li>
+  </ul>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<h2>2. The boundary of a control</h2>
+<p class="lede">
+  A field&rsquo;s border is the only thing that says it is a field. Today every
+  one of them is drawn in <code>--line</code>, which is the table-hairline
+  colour &mdash; so on a page that is mostly fields, the page reads as flat
+  text. Below is a unit&rsquo;s Plan pane with the pen open. The cell padding,
+  the hairlines, the zebra and the field shape are all the product&rsquo;s own;
+  the only thing that moves is which token a <em>control</em> takes its edge
+  from.
+</p>
+
+<div class="pair">
+
+  <section class="pane pane-now">
+    <div class="cap"><span class="w now">Today</span>
+      <span class="m">--line &middot; 1.38:1 on white, 1.30:1 on the page</span></div>
+    <div class="plan">
+      <div class="pband"><span class="code">MB01</span>
+        <span class="nm">Digital &amp; Data-Driven Operations</span></div>
+      <table>
+        <thead><tr><th style="width:38px">#</th><th>Key measure</th>
+          <th style="width:130px">This year</th><th style="width:78px">Dir.</th>
+          <th style="width:118px">Compile</th><th style="width:34px"></th></tr></thead>
+        <tbody>
+          <tr><td>1</td>
+            <td><input class="fld" value="Orders fulfilled through the app"></td>
+            <td><input class="fld" value="30%"></td>
+            <td><select class="fld"><option>&ge;</option></select></td>
+            <td><select class="fld"><option>Latest</option></select></td>
+            <td><button class="xbtn" type="button" aria-label="Remove">&times;</button></td></tr>
+          <tr><td>2</td>
+            <td><input class="fld" value="Accessory revenue"></td>
+            <td><input class="fld" value="300M EGP"></td>
+            <td><select class="fld"><option>&ge;</option></select></td>
+            <td><select class="fld"><option>Sum</option></select></td>
+            <td><button class="xbtn" type="button" aria-label="Remove">&times;</button></td></tr>
+          <tr><td>3</td>
+            <td><input class="fld" value="Data duplicate rate"></td>
+            <td><input class="fld gapfld" value="" placeholder="Missing"></td>
+            <td><select class="fld"><option>&le;</option></select></td>
+            <td><select class="fld"><option>Latest</option></select></td>
+            <td><button class="xbtn" type="button" aria-label="Remove">&times;</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meas" style="padding:12px 14px 14px">
+      Nine fields, one of them on a striped row, one of them empty. The only
+      thing separating a field from the cell around it is
+      <span class="ratio fail">1.38:1</span>.
+    </p>
+  </section>
+
+  <section class="pane pane-next">
+    <div class="cap"><span class="w next">Proposed</span>
+      <span class="m">--line-ctl &middot; 3.64:1 on white, 3.24:1 on the stripe</span></div>
+    <div class="plan">
+      <div class="pband"><span class="code">MB01</span>
+        <span class="nm">Digital &amp; Data-Driven Operations</span></div>
+      <table>
+        <thead><tr><th style="width:38px">#</th><th>Key measure</th>
+          <th style="width:130px">This year</th><th style="width:78px">Dir.</th>
+          <th style="width:118px">Compile</th><th style="width:34px"></th></tr></thead>
+        <tbody>
+          <tr><td>1</td>
+            <td><input class="fld" value="Orders fulfilled through the app"></td>
+            <td><input class="fld" value="30%"></td>
+            <td><select class="fld"><option>&ge;</option></select></td>
+            <td><select class="fld"><option>Latest</option></select></td>
+            <td><button class="xbtn" type="button" aria-label="Remove">&times;</button></td></tr>
+          <tr><td>2</td>
+            <td><input class="fld" value="Accessory revenue"></td>
+            <td><input class="fld" value="300M EGP"></td>
+            <td><select class="fld"><option>&ge;</option></select></td>
+            <td><select class="fld"><option>Sum</option></select></td>
+            <td><button class="xbtn" type="button" aria-label="Remove">&times;</button></td></tr>
+          <tr><td>3</td>
+            <td><input class="fld" value="Data duplicate rate"></td>
+            <td><input class="fld gapfld" value="" placeholder="Missing"></td>
+            <td><select class="fld"><option>&le;</option></select></td>
+            <td><select class="fld"><option>Latest</option></select></td>
+            <td><button class="xbtn" type="button" aria-label="Remove">&times;</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="meas" style="padding:12px 14px 14px">
+      <b>The hairlines between the cells have not moved</b> &mdash; they are
+      still <code>--line-soft</code> and <code>--line</code>, and they are
+      separators rather than boundaries, so the standard does not ask 3:1 of
+      them. Only the controls changed.
+    </p>
+  </section>
+
+</div>
+
+<div class="sw">
+  <span class="chip"><i style="background:var(--line)"></i>
+    <span><b>--line</b> &nbsp;<code id="cl"></code><br>hairlines, card edges &mdash; unchanged</span></span>
+  <span class="chip"><i style="background:var(--line-ctl)"></i>
+    <span><b>--line-ctl</b> &nbsp;<code id="cc"></code><br>a control&rsquo;s boundary &mdash; new</span></span>
+</div>
+
+<table class="facts">
+  <thead><tr><th>Where a control sits</th><th>Today</th><th>Proposed</th><th>Needs</th></tr></thead>
+  <tbody>
+    <tr><td>Field on <code>--surface</code>, light</td><td class="n">1.38</td><td class="n">3.64</td><td class="n">3.0</td></tr>
+    <tr><td>Field on the zebra stripe, light</td><td class="n">1.28</td><td class="n">3.39</td><td class="n">3.0</td></tr>
+    <tr><td>Field on <code>--surface</code>, dark</td><td class="n">1.43</td><td class="n">3.76</td><td class="n">3.0</td></tr>
+    <tr><td>Tracker done-tick, light</td><td class="n">1.35</td><td class="n">3.64</td><td class="n">3.0</td></tr>
+    <tr><td>Tracker done-tick, dark</td><td class="n">1.47</td><td class="n">3.80</td><td class="n">3.0</td></tr>
+    <tr><td>Tracker status pill, light</td><td class="n">1.35</td><td class="n">3.64</td><td class="n">3.0</td></tr>
+    <tr><td>Tracker date and owner</td><td class="n">no border at all</td><td class="n">3.64</td><td class="n">3.0</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <b>Why a second token rather than darkening <code>--line</code>.</b>
+  <ul>
+    <li><code>--line</code> draws table hairlines, card edges and dividers.
+        Darkening it would restyle <em>every table in the product</em> to fix
+        the fields &mdash; a change nobody asked for (rule 1b).</li>
+    <li>The standard asks 3:1 of a <b>control&rsquo;s</b> boundary, not of a
+        separator. The two are different jobs, so they get two tokens &mdash;
+        the same shape as <code>--good</code> and <code>--good-tx</code>
+        (&sect;38.4: a colour that works as a fill fails as type).</li>
+    <li><b>The cost:</b> a field&rsquo;s edge is visibly darker. On a plan page
+        that is the point; on a quiet settings form it is a change of
+        character, and that is what this drawing is for.</li>
+    <li><b>Where it has to be declared:</b> four palette blocks in
+        <code>_shared.css</code>, <em>and again</em> in each of the three
+        modules, because each carries its own near-copy of the palette. That
+        is finding 4 of the audit arriving as a bill.</li>
+  </ul>
+</div>
+
+<div class="note" style="border-left-color:var(--bad)">
+  <b>Neither of these is guarded by a check.</b>
+  <code>scripts/contrast-sweep.py</code> reads <code>color</code> against
+  background and nothing else &mdash; it has never measured a border or a focus
+  ring, and it runs against the frozen Strategy file only. Whichever of these
+  is taken, the sweep wants a second pass that measures a
+  <em>boundary</em>, pointed at the three module pages as well &mdash; or the
+  next colour added there is unmeasured again.
+</div>
+
+<footer>
+  Drawn 2026-09-20 for the audit against <code>PRODUCT_RULES.md</code>.
+  Tokens and control CSS copied verbatim from
+  <code>SMP-Project-Folder/src/_shared.css</code> (:185&ndash;218, :252, :655, :719&ndash;723),
+  <code>SMP-Project-Folder/src/arrange.css</code> (:92&ndash;95, :1530),
+  and <code>smp-app/modules/tracker/page.ts</code> (:60, :69, :135&ndash;194).
+  Ratios computed with the WCAG relative-luminance formula; the two figures
+  marked on section&nbsp;1 reproduce the browser-measured 1.38 and 1.43 exactly.
+  The rows are illustrative &mdash; the subject here is a 1px edge and a focus
+  ring, not the layout &mdash; and the awkward cases (a striped row, an empty
+  field, a long name) are present on purpose.
+  Record: <code>design-mockups/control-borders-and-focus/2026-09-20_before-and-after.html</code>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var root = document.documentElement, btn = document.getElementById("theme");
+  function say(){
+    var dark = root.getAttribute("data-theme") === "dark";
+    btn.textContent = dark ? "Light" : "Dark";
+    var cs = getComputedStyle(root);
+    document.getElementById("cl").textContent = cs.getPropertyValue("--line").trim();
+    document.getElementById("cc").textContent = cs.getPropertyValue("--line-ctl").trim();
+  }
+  btn.addEventListener("click", function(){
+    root.setAttribute("data-theme",
+      root.getAttribute("data-theme") === "dark" ? "light" : "dark");
+    say();
+  });
+  say();
+})();
+</script>
+</body>
+</html>

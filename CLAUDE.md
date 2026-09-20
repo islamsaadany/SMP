@@ -10193,7 +10193,28 @@ REFUSED to run while the merge was uncommitted and said which errand that was
 (&sect;349.4's stale-versus-mid-edit, working as designed); and `memory` failed
 in its own words, *"no tenant to write about &mdash; run
 `scripts/dev-tenant.mjs` first"* (&sect;328.3 saying so rather than throwing a
-foreign-key error). **Merged to `main` 2026-09-20.***
+foreign-key error).
+**&sect;375.2 &mdash; PUSHED TO `main`, AND &sect;91.5's LIVE READ COULD NOT BE
+MADE FROM HERE**: this environment's egress policy refuses the production
+address outright (403 at the proxy's CONNECT), so no request left this machine
+and **nobody here has seen production serve this commit** &mdash; said rather
+than claimed (&sect;54.5, rule 3a). **AND THERE IS NO WITNESS FILE THIS TIME**,
+which is worth saying rather than leaving as an absence: &sect;374.1 proved its
+own deploy by `shell.js`'s byte count moving, and this round changes **not one
+served byte** &mdash; every generated copy, the frozen build and `sw.js` hash
+identical to the commit before &mdash; so the two builds are indistinguishable
+from outside and what production gains is in the DATABASE and in code nothing
+calls yet. **&sect;91 is satisfied by construction rather than by timing**: the
+branch's remote is still at the renumber while the merge, the record and the
+push note went to `main` alone, so `main`'s tip is on no other ref &mdash; and
+**the branch is deliberately NOT fast-forwarded** until production has served
+it, because putting that SHA on a second ref is the one act left that could
+still cost the build. **NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec
+029): three `db/`/`lib/` files are in the range and all three are Portfolio's
+own and new, no `api/` file changed, nothing reads the eight new tables,
+`lib/portfolio.ts` is imported by its check and by nothing that runs, and the
+migration creates eight tables and names no existing one. **Merged to `main`
+2026-09-20.***
 *Earlier: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
 not an address (spec 059).** Islam, of the register: *"for the copy on click for
 the email and double click to edit is working but the same behavior is not

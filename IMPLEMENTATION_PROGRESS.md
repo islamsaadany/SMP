@@ -6514,3 +6514,20 @@ moved.
 is still switched off; the three drawings awaiting sign-off are unchanged and
 still waiting on Islam.
 
+**§375.2 — pushed to `main`, 2026-09-20.** Main had not moved, so it
+fast-forwarded onto the tree that was actually checked.
+
+**What could not be checked from here, said rather than claimed**: this
+machine's network policy refuses the production address outright, so nobody
+here has seen the live site serve this commit. And there is no file to compare
+even if it could — this round changes not one served byte, so the two builds
+look identical from outside; what production gains is in the database and in
+code nothing calls yet.
+
+**The branch is deliberately left behind main** until production has served it,
+which is the rule for keeping a deployment from being raced away.
+
+**Nobody is signed out and nothing stored moves**: no request-handling file
+changed, nothing reads the new tables, and the migration only adds its own
+eight.
+

@@ -53327,3 +53327,49 @@ is still `built: false`, asserted with a built module beside it, so there is no
 page, no address and no switcher entry. The three drawings awaiting sign-off
 (§9.10 Progress, §9.12 Analytics, §9.13 the landing) are unchanged and still
 Islam's.
+
+---
+
+## §375.2 — PUSHED TO `main`, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
+
+`origin/main` had not moved while the merge was rehearsed, so it fast-forwarded
+onto the tree that was actually checked — `bd211e3..5d612e8`.
+
+**§91 IS SATISFIED BY CONSTRUCTION RATHER THAN BY TIMING.** Vercel deduplicates
+by SHA, so a commit that reaches `main` and a branch ref within a second of
+each other is ONE deployment and which ref gets it is a race lost in advance
+(§91.4, §107.15). The way round is a commit `main` holds and the branch does
+not, and here there are three: the branch's remote is still at the renumber,
+while the merge, the record and this note went to `main` alone.
+
+**§91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, SO IT IS SAID RATHER
+THAN CLAIMED** (§54.5, rule 3a): this environment's egress policy refuses
+`smp-orpin-tau.vercel.app` outright — 403 at the proxy's own CONNECT, which its
+README says to report rather than route around — so no request left this
+machine. **Nobody here has seen production serve this commit.**
+
+**AND THERE IS NO WITNESS FILE THIS TIME, WHICH IS WORTH SAYING** rather than
+leaving as an absence somebody later reads as an oversight. §374.1 proved its
+own deploy by `shell.js` going 3,824,282 → 3,827,402 bytes; **this round
+changes not one served byte** — every file under `smp-app/public/`, the frozen
+build and `sw.js` all hash identical to the commit before — so even with the
+live read available there would be nothing on the wire to tell the two builds
+apart. What production gains is in the DATABASE and in code nothing calls yet.
+
+**THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED.** While it stays where it is,
+`main`'s tip is unique by construction, and putting that SHA on a second ref is
+the one act left that could still cost the build. §91 says hold the branch
+until production has served it; with the live read impossible from here,
+holding is the instruction rather than caution.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): three files under
+`db/` and `lib/` are in the merged range and all three are Portfolio's own and
+new — no `api/` file changed at all. Nothing reads or writes the eight new
+tables, `lib/portfolio.ts` is imported by its check and by nothing that runs,
+and the authoriser, the change list, the review map and what a save touches are
+untouched. Measured, not assumed.
+
+**WHAT THE DEPLOY DOES TO PRODUCTION'S DATABASE IS ADDITIVE AND ONLY THAT**:
+`scripts/deploy.mjs` applies migration 015 on every build, and that file
+creates eight tables and their indexes and alters only what it has just
+created. It names no existing table. Nothing stored moves.

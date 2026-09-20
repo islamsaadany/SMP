@@ -397,7 +397,13 @@
    merge was made, so the name goes PAST it rather than beside it (§94.12);
    confirm once more immediately before any push to main (§94.16).
    `node --check sw.js` run after the merge. */
-const SHELL = "smp-shell-v5.06-meeting-notes";
+/* AND BOTH SIDES OF THIS MERGE WROTE v5.16 (§94.12, again): main's
+   §367 and this branch's §372 each bumped to that number independently,
+   and git merges one string over another without a word while the bytes
+   behind them differ — so the name goes PAST both rather than picking
+   either. Confirmed against origin/main once more immediately before the
+   push (§94.16). */
+const SHELL = "smp-shell-v5.19-unique-address";
 const ASSETS = [
   "/",
   "/index.html",

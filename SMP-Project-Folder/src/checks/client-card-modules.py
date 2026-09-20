@@ -27,6 +27,8 @@ nothing to say).
 Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/client-card-modules.py
       … --break=card-is-door   # the behaviour before §320.3; must go red
       … --break=no-rows        # the other end; must go red
+      … --break=mark-wraps     # §368: the two-line row, put back
+      … --break=alarm-plain    # §368: the alarm painted like a count
       SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
 """
 import http.server, json, os, re, socketserver, sys, threading
@@ -46,12 +48,18 @@ def check(what, ok, detail=""):
     else:
         print("  FAIL " + what + ("  — " + str(detail) if detail else "")); fails.append(what)
 
-STRAT = lambda st: [{"key": "strategy", "label": "Strategy", "state": st}]
+# A MARK, NOT A SENTENCE (§368). The row's tail was a pair — the client's
+# chosen landing line plus the card's own health word — and on a running
+# cycle the two said the same fact twice, which is what could not fit on one
+# line. One mark now: what is outstanding, `alarm` for the two that mean
+# broken rather than busy, `tip` for the hover.
+STRAT = lambda mark, alarm=False, tip="": [{"key": "strategy", "label": "Strategy",
+                                           "mark": mark, "alarm": alarm, "tip": tip}]
 CARDS = [
     # a client in flight: Strategy has something to say
     {"key": "raya-trade", "name": "Raya Trade", "industry": "Trade & distribution", "kind": "client",
      "mark": None, "mine": True, "seat": "super", "state": "open", "canOpen": True, "canConfig": True,
-     "units": 10, "planned": True, "cycleOpen": True, "unreadable": False, "modules": STRAT("cycle open")},
+     "units": 10, "planned": True, "cycleOpen": True, "unreadable": False, "modules": STRAT("3 of 10", tip="Cycle open \u00b7 3 of 10 still to submit")},
     # a module with NOTHING to say draws its name alone, never a placeholder
     {"key": "rhi", "name": "RHI", "industry": None, "kind": "client",
      "mark": None, "mine": True, "seat": "smoteam", "state": "open", "canOpen": True, "canConfig": True,
@@ -59,11 +67,20 @@ CARDS = [
     # a client this person may NOT open: no way in, so no rows (§61)
     {"key": "el-abd", "name": "El Abd", "industry": None, "kind": "client",
      "mark": None, "mine": False, "seat": None, "state": "open", "canOpen": False, "canConfig": False,
-     "units": 0, "planned": False, "cycleOpen": False, "unreadable": False, "modules": STRAT("no plan yet")},
+     "units": 0, "planned": False, "cycleOpen": False, "unreadable": False, "modules": STRAT("")},
+    # AN ALARM, AND IT HAD TO BE MADE (§255, §113.8): the alarm ink is read
+    # off the page, and the only alarming client in the first draft of this
+    # fixture was one nobody may open — which draws no rows at all, so the
+    # measurement had nothing to look at and passed by default. A client
+    # that CAN be opened and whose plan was never built.
+    {"key": "test-client", "name": "Test Client", "industry": "Media & Entertainment", "kind": "client",
+     "mark": None, "mine": True, "seat": "super", "state": "open", "canOpen": True, "canConfig": True,
+     "units": 0, "planned": False, "cycleOpen": False, "unreadable": False,
+     "modules": STRAT("No plan", alarm=True, tip="No plan has been built for this client yet")},
 ]
 DEMO = {"key": "demo", "name": "Demo", "industry": "The worked example", "kind": "demo",
         "mark": None, "mine": True, "seat": None, "state": "open", "canOpen": True, "canConfig": True,
-        "units": 10, "planned": True, "cycleOpen": True, "unreadable": False, "modules": STRAT("cycle open")}
+        "units": 10, "planned": True, "cycleOpen": True, "unreadable": False, "modules": STRAT("3 of 10", tip="Cycle open \u00b7 3 of 10 still to submit")}
 SCENE = {"cards": CARDS + [DEMO]}
 
 class Stub(http.server.SimpleHTTPRequestHandler):
@@ -121,6 +138,29 @@ BREAKS = {
     # the other end: the rows are gone, so "the top is not a door" is true of
     # a card nobody can open at all
     "no-rows": "document.querySelectorAll('.mods').forEach(function (m) { m.remove(); });",
+    # THE TWO-LINE ROW ISLAM PHOTOGRAPHED (§368): the tail had no
+    # `flex:none`, so whatever sat beside it squeezed the mark until it
+    # broke. Put back with a long neighbour to squeeze it, because the
+    # missing rule alone cannot wrap a mark that has the row to itself —
+    # which is the whole reason the guard belongs on the mark and not on
+    # what happens to be next to it today.
+    "mark-wraps": """
+      var st = document.createElement('style');
+      st.textContent = '.mrow i{ flex:0 1 auto !important; white-space:normal !important }';
+      document.head.appendChild(st);
+      document.querySelectorAll('.ccard[data-client] .mrow').forEach(function (r) {
+        var i = r.querySelector('i'); if (!i) return;
+        var s = document.createElement('span');
+        s.textContent = 'Cycle open \\u00b7 reports due 30 Sep \\u00b7 and then some';
+        s.style.cssText = 'font-size:12px;min-width:0';
+        r.insertBefore(s, i);
+      });""",
+    # AND THE ALARM PAINTED LIKE A COUNT — the one thing a number cannot
+    # say, and the argument against one count for the whole card.
+    "alarm-plain": """
+      var st = document.createElement('style');
+      st.textContent = '.mrow i.alarm{ color:var(--ink-2) !important; font-weight:600 }';
+      document.head.appendChild(st);""",
 }
 
 def main():
@@ -157,12 +197,61 @@ def main():
         check("…named as the server names it", shape["rows"] and shape["rows"][0]["text"].startswith("Strategy"),
               shape["rows"][0]["text"] if shape["rows"] else None)
 
-        # the module's own state moved out of the foot WITH it — said once,
-        # never twice (§87) and never nowhere
-        check("the module's state is on its row", "cycle open" in (shape["rows"][0]["text"] if shape["rows"] else ""),
+        # REWRITTEN, NEVER LOOSENED (§218, §214.3): these asserted the health
+        # word ("cycle open") that §368 replaced with a mark. Both claims
+        # survive whole and the second one matters more than it did — ONCE on
+        # the card is the §87 rule this round exists to keep, because the old
+        # pair said the same fact twice and that duplicate is what wrapped.
+        check("the module's mark is on its row", "3 of 10" in (shape["rows"][0]["text"] if shape["rows"] else ""),
               shape["rows"][0]["text"] if shape["rows"] else None)
         check("…and exactly once on the whole card (§87)",
-              shape["cardText"].lower().count("cycle open") == 1, shape["cardText"])
+              shape["cardText"].count("3 of 10") == 1, shape["cardText"])
+        # AND THE MARK MAY NEVER WRAP, which is the two-line row Islam
+        # photographed: measured as the tail's own box against one line of
+        # it, never as a class (§94.8) — a tail that breaks costs the whole
+        # grid a row of height.
+        tail = pg.evaluate("""() => {
+          const i = document.querySelector('.ccard[data-client="raya-trade"] .mrow i');
+          if (!i) return null;
+          const r = i.getBoundingClientRect();
+          const cs = getComputedStyle(i);
+          return { h: Math.round(r.height), lh: Math.round(parseFloat(cs.fontSize) * 1.55),
+                   rects: i.getClientRects().length, nowrap: cs.whiteSpace };
+        }""")
+        check("the mark is drawn at all", tail is not None, tail)
+        # MEASURED AS THE BOX, NOT AS THE RULE THAT ASKS FOR IT (§94.8) — and
+        # NOT as getClientRects().length, which §88 already records as not
+        # being a line count: under the `mark-wraps` break Chrome returned
+        # ONE rect for a tail three lines tall, so a check written on that
+        # would have called the broken build clean. The height against one
+        # line of its own type is what cannot lie.
+        check("…on ONE line, whatever sits beside it",
+              bool(tail) and tail["h"] <= tail["lh"] + 2, tail)
+        # …and the hover carries the whole sentence, because the mark is the
+        # fact in the fewest words (a nicety, never the only copy — §368).
+        check("…with the whole sentence on its hover",
+              pg.get_attribute('.ccard[data-client="raya-trade"] .mrow i', "title") == "Cycle open · 3 of 10 still to submit",
+              pg.get_attribute('.ccard[data-client="raya-trade"] .mrow i', "title"))
+        # THE ALARM IS THE ONE THING A COUNT CANNOT SAY (§368, and the
+        # argument against one number for the whole card): measured as PAINT
+        # in both palettes, never as the class that asks for it (§94.8,
+        # §38.5) — and asserted against the count's own ink, or a build that
+        # painted every mark alike would pass every assertion above.
+        for theme in ("light", "dark"):
+            pg.evaluate("t => document.documentElement.setAttribute('data-theme', t)", theme)
+            inks = pg.evaluate("""() => {
+              const q = (c) => document.querySelector('.ccard[data-client="' + c + '"] .mrow i');
+              const g = (e) => e ? getComputedStyle(e).color : null;
+              return { alarm: g(q('test-client')), count: g(q('raya-trade')) };
+            }""")
+            # BOTH ENDS, so neither half can vanish and leave this true
+            # (§113.8): each ink is asserted PRESENT before the two are
+            # asserted different.
+            check("the alarm and the count are both painted — " + theme,
+                  bool(inks["alarm"]) and bool(inks["count"]), inks)
+            check("…and not painted alike, because one means broken — " + theme,
+                  bool(inks["alarm"]) and inks["alarm"] != inks["count"], inks)
+        pg.evaluate("() => document.documentElement.removeAttribute('data-theme')")
         check("…while the seat and the units, which are the client's, stay in the foot",
               "Super user" in shape["footText"] and "10 units" in shape["footText"], shape["footText"])
 
@@ -195,12 +284,24 @@ def main():
         check("the worked example is opened the same way (§317 left it a card like any other)", demo == 1, demo)
 
         print("── 4 · Settings is still its own control")
+        # REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted that Settings
+        # "navigates nowhere", which was true while the set-up flow drew itself
+        # on this page — and §360 moved that flow INTO the client, so Settings
+        # became a DOOR: one press to /<client>/setup, with nothing drawn
+        # between the card and it. The check was red on `main` from that merge
+        # and nobody had come back (§51.11). What survives the decision is that
+        # Settings is its OWN control: it goes to the client's own Setup and
+        # not into a module, which is what the row above it does — so BOTH ENDS
+        # (§94.2), or a build where every control on the card landed in one
+        # place would pass this on its own.
         land()
-        before = pg.url
         pg.click('.ccard[data-client="raya-trade"] .ccfg')
         pg.wait_for_timeout(500)
-        check("pressing Settings opens the client's configuration and navigates nowhere",
-              pg.url == before, pg.url)
+        cfg_url = pg.url
+        check("pressing Settings is a door to the client's own Setup (§360)",
+              cfg_url.endswith("/raya-trade/setup"), cfg_url)
+        check("…and it is not the module's door, which lands inside Strategy",
+              not cfg_url.endswith("/raya-trade/strategy"), cfg_url)
 
         check("no page error on the way", not errs, " | ".join(errs)[:200])
         b.close()

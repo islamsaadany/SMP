@@ -24,6 +24,7 @@ real deployment (§94.11, §255).
 
 Run:  SMP_CHROME=… python3 SMP-Project-Folder/src/checks/platform-cards.py
       … --break=in-grid   # the behaviour before §317; must go red
+      … --break=text-cursor  # the I-beam of §361, put back; must go red
       SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
 
 WHAT THE BREAK CANNOT REACH, SAID RATHER THAN LEFT AS A GAP: `--break=in-grid`
@@ -40,7 +41,32 @@ REPO = os.path.abspath(os.path.join(ROOT, ".."))
 PORT = int(os.environ.get("SMP_CHECK_PORT", "3987"))
 BASE = "http://127.0.0.1:%d" % PORT
 BREAK = next((a.split("=", 1)[1] for a in sys.argv[1:] if a.startswith("--break=")), "")
-PAGE = os.environ.get("SMP_PAGE") or os.path.join(REPO, "platform.html")
+def pagePath():
+    """WHERE THE PAGE IS, SAID RATHER THAN HANDED BACK AS A TIMEOUT (§371).
+
+    §369.4 found this and fixed it in ONE file: `SMP_PAGE` is documented
+    relative to the REPOSITORY ROOT, and every browser check here is run
+    through `qa-run.py`, which lives in `SMP-Project-Folder/src` (§320.6b) —
+    so the documented spelling is relative to one directory and typed from
+    another. Run from `src/` this resolved to a file that is not there, the
+    page was never served, and the run died on a navigation timeout naming
+    neither the file nor the directory it was looked for in (§215, §123).
+    Both spellings are accepted, and a page that is not there is refused
+    BEFORE the server starts rather than inside a request thread.
+    """
+    want = os.environ.get("SMP_PAGE")
+    tries = [os.path.abspath(want), os.path.abspath(os.path.join(REPO, want))] if want \
+        else [os.path.join(REPO, "platform.html")]
+    tries = list(dict.fromkeys(tries))
+    for p in tries:
+        if os.path.isfile(p):
+            return p
+    sys.exit("the console page is not there — %s\n  tried: %s"
+             % ("SMP_PAGE=%s" % want if want else "no platform.html at the repository root",
+                "\n  tried: ".join(tries)))
+
+
+PAGE = pagePath()
 
 fails = []
 passes = []
@@ -74,7 +100,7 @@ DEMO = {"key": "demo", "name": "Demo", "industry": "The worked example", "kind":
 # The server sorts `ORDER BY kind, name`, so the demo arrives LAST — modelled
 # exactly, or the check would be measuring a list the product never receives
 # (§100.3: a stub that does not model the server tests something else).
-SCENE = {"cards": CLIENTS + [DEMO]}
+SCENE = {"cards": CLIENTS + [DEMO], "archived": []}
 
 class Stub(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -110,6 +136,7 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                 "isAdmin": True}}), "application/json")
         elif act == "cards":
             self._send(json.dumps({"ok": True, "cards": SCENE["cards"],
+                "archived": SCENE.get("archived") or [],
                 "canAdd": True, "canConsultants": True, "canAccess": True}), "application/json")
         else:
             self._send(json.dumps({"ok": True}), "application/json")
@@ -274,6 +301,46 @@ def run():
             r = pg.evaluate(RATIO, ".apart .akey")
             check("the key reads in " + theme + " (" + str(r) + ":1)", r is not None and r >= 4.5, r)
         pg.emulate_media(color_scheme="light")
+
+        # ══ 5 · a control is shaped like a control (§361) ═══════════════
+        # Islam: "the clicker when I go to the settings button it turns into
+        # the writing arrow not a normal mouse." A <span role="button"> with
+        # text in it shows the TEXT cursor unless it is told otherwise, and
+        # `.ccfg` was never told — while `.cback`, its twin two rules down on
+        # the same card, has carried `cursor:pointer` since it was written.
+        #
+        # ASKED OF EVERY SUCH CONTROL, NEVER OF THE ONE THAT FAILED (§104.7):
+        # the set is DERIVED from the page, so the third chip somebody adds is
+        # covered the day it is added rather than the day it is reported. The
+        # archived band is put in the scene on purpose — that is where both
+        # chips are drawn side by side, and where the pair disagreeing is a
+        # thing somebody can see in one glance.
+        print("\n5 · the cursor over a control")
+        SCENE["cards"] = CLIENTS + [DEMO]
+        # `canConfig` is what draws the pair: without it the band's card
+        # carries neither chip, and the assertion below would be satisfied by
+        # the live cards alone while claiming to have measured the pair
+        # (§113.8 — its first run did exactly that).
+        SCENE["archived"] = [{"key": "old-co", "name": "Old Co", "industry": None, "canConfig": True,
+                              "mark": None, "at": "2026-08-01T00:00:00Z", "by": "Islam Saadany"}]
+        pg.goto(BASE + "/platform")
+        pg.wait_for_selector("[data-grid='archived'] .ccard", timeout=9000)
+        if BREAK == "text-cursor":
+            pg.add_style_tag(content=".ccfg{cursor:auto}")
+        pointers = pg.evaluate("""() => Array.from(
+          document.querySelectorAll('[role="button"]'))
+            .filter(e => e.tagName !== 'BUTTON' && e.tagName !== 'A')
+            .map(e => ({ cls: e.className, word: (e.textContent || '').trim(),
+                         cur: getComputedStyle(e).cursor }))""")
+        # BOTH ENDS (§94.2): an empty list satisfies "none of them shows the
+        # I-beam" perfectly, so the pair has to be FOUND before it is judged.
+        words = sorted(set(p["word"] for p in pointers))
+        check("the pair is on the page — Bring back beside Settings, both spans",
+              "Bring back" in words and "Settings" in words, words)
+        bad = [p for p in pointers if p["cur"] != "pointer"]
+        check("…and every one of them shows a pointer",
+              bad == [], bad or [p["word"] + ": " + p["cur"] for p in pointers])
+        SCENE["archived"] = []
 
         check("no page error anywhere", errs == [], errs)
         b.close()

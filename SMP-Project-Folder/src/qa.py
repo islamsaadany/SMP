@@ -1,5 +1,5 @@
 from playwright.sync_api import sync_playwright
-import pathlib, os
+import pathlib, os, re
 url="file://"+str(pathlib.Path("strategy-management-platform.html").resolve())
 # THE SAME SWEEP, POINTED AT THE NEW APP (spec 043, research §P4): with
 # SMP_BASE set the walk signs in at the client's own door and opens the
@@ -10,12 +10,19 @@ BASE=os.environ.get("SMP_BASE")
 def open_platform(pg):
     if not BASE:
         pg.goto(url); pg.wait_for_timeout(600); return
+    # §360: the welcome is offered again on every deep address, once a
+    # session, and stands the page behind it down — the sweep walks the page,
+    # so it is born having seen it (welcome.py is the overlay's own check)
+    pg.context.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1')}catch(e){}")
     pg.goto(BASE+"/raya-trade/sign-in")
     pg.wait_for_selector(".gate[data-hydrated]", state="attached", timeout=15000)
     pg.fill("#user", os.environ.get("SMP_QA_EMAIL","office@forefront.example"))
     pg.fill("#password", os.environ["SMP_QA_PASSWORD"])
     pg.click("#loginForm button[type=submit]")
-    pg.wait_for_url("**/raya-trade", timeout=15000)
+    # §360: a sign-in lands INSIDE the first module (the bare address is a
+    # redirect), so the wait is for the module's address
+    pg.wait_for_url(re.compile(r"/raya-trade/(?!sign-in)[a-z]"), timeout=15000)
+    pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
     pg.goto(BASE+"/raya-trade/mobile/strategy")
     pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
     pg.wait_for_timeout(600)
@@ -69,11 +76,35 @@ def go_top(pg, key):
     el.click(); pg.wait_for_timeout(250)
     return True
 
+def module_page(pg):
+    """THE MODULE'S CHROME IS REACHED FOR WHERE THERE IS ONE (§362.8, spec 058).
+    The client's own settings draw no navigation row and no viewer strip —
+    those pages belong to no module — so a click or a select aimed at either
+    waits thirty seconds and ends the whole sweep on "waiting 500ms", which is
+    a run that STOPPED rather than one that passed (§298.3: the tail is the
+    verdict, never the count).
+
+    TWO SECTIONS NAVIGATE THERE ON PURPOSE (the client-rail walk, and the
+    Functions page, which is the client's since §359.2), so the come-home step
+    lives where the chrome is REACHED FOR rather than in each of them — one
+    answer, and a section that walks there tomorrow is covered the day it is
+    written (§104.7). It fires only when the row is genuinely stood down, so a
+    run that never leaves a module's page is byte-identical to what it was."""
+    if not BASE: return
+    row = pg.query_selector("nav.units")
+    if row and not pg.eval_on_selector("nav.units",
+                                       "e=>!!(e.checkVisibility&&e.checkVisibility())"):
+        pg.goto(BASE+"/raya-trade/strategy")
+        pg.wait_for_function("!document.documentElement.classList.contains('booting')",
+                             timeout=20000)
+        pg.wait_for_timeout(300)
+
 def show_units(pg):
     """The navigation row shows ONE list at a time (51.9), and a block that
     left it on Functions strands every later block that names a unit — which
     is exactly how the 66 assertions came to sit in the file without ever
     running. Pressing the switch is cheap; assuming the side is not."""
+    module_page(pg)
     el = pg.query_selector('#units [data-u="mobile"]')
     if el and el.is_visible(): return
     show_side(pg, "units")
@@ -143,6 +174,22 @@ with sync_playwright() as p:
         # the switch never took rather than measuring the wrong person.
         _sel = pg.select_option
         def _pick(selector, value, *a, **k):
+            # AND THE PICK IS MADE WHERE THERE IS A CONTROL TO MAKE IT WITH
+            # (§362.8, spec 058). The client's own settings draw no viewer
+            # strip — those pages belong to no module and there is nobody to
+            # look AS on them — so a select there waits thirty seconds and the
+            # whole sweep ends on "waiting 500ms", which is a run that STOPPED
+            # rather than one that passed (§298.3: the tail is the verdict,
+            # never the count).
+            #
+            # IT LIVES HERE RATHER THAN AT THE CALL SITE, which is what the
+            # first build got wrong: §362.7 answered the two sites that had
+            # failed and there are THIRTEEN, so the sweep walked all 33 viewers
+            # and then stopped at line 352 on the same timeout. One answer,
+            # asked wherever a viewer is picked (§53.5) — and only where it
+            # is needed, so a run that never left a module's page is
+            # byte-identical to what it was.
+            if selector == "#asWho": module_page(pg)
             r = _sel(selector, value, *a, **k)
             if selector == "#asWho":
                 pg.wait_for_function(
@@ -201,6 +248,65 @@ with sync_playwright() as p:
                                                   "els=>els.map(e=>e.dataset.sub2)"):
                     pg.click('.setuppane .secrow [data-sub2="%s"]'%k2); pg.wait_for_timeout(160)
                 seen+=1
+            # TWO RAILS WHERE THE APP IS SERVED (356.2, spec 056): the gear
+            # opens the module's own Setup, and the CLIENT'S pages — people,
+            # the organisation, branding, the knowledge base — sit on a rail
+            # of their own reached from the landing. Over file:// there is one
+            # rail holding everything and the walk above has already covered
+            # it; served, the client's rail is walked by its own address, or
+            # half of Setup goes unvisited while the sweep prints "ok".
+            # AND A RELOAD LANDS ON WHOEVER SIGNED IN (356.6): the goto is a
+            # fresh page, so VIEWER is the office again whatever the select
+            # said a line ago — and for two rounds the sweep walked the
+            # OFFICE's client rail under a CEO's name and counted eight pages
+            # that CEO cannot open (50.6's fault: the label must say which
+            # page was scanned, and 51.7's, measuring the thing you built).
+            # The viewer is picked again on the landed page; a viewer the
+            # client's rail draws nothing for is sent off it by the router
+            # (356.2), so there is nothing to walk and nothing is counted.
+            if BASE:
+                # AND THERE IS NO PICK TO MAKE HERE ANY MORE (359, spec 058).
+                # The client's own settings belong to no module, so they draw
+                # no viewer strip — there is nobody to look AS on a page the
+                # two Forefront seats hold alone — and a reload lands on
+                # whoever signed in (356.6), so on this address the viewer IS
+                # the signed-in person and cannot be anybody else.
+                #
+                # REWRITTEN, NEVER LOOSENED (218, 214.3). 356.6 re-picked here
+                # because walking without the pick counted the OFFICE's eight
+                # client pages under a CEO's name (measured, 39 against 47).
+                # That fault is closed the other way now: with no pick to
+                # make, a viewer this is not signed in as WALKS NOTHING and
+                # counts nothing — which is the same answer 356.6 measured,
+                # since the router sends such a viewer off this rail anyway.
+                # Asserted rather than assumed: select_option on a hidden
+                # control waits thirty seconds and stops the sweep with no
+                # verdict at all (316.4 — the tail is the verdict), so the
+                # state is READ and the walk is skipped, never attempted.
+                pg.goto(BASE+"/raya-trade/setup/people")
+                pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
+                pg.wait_for_timeout(400)
+                strip = pg.eval_on_selector(".viewer", "e=>!!(e.checkVisibility&&e.checkVisibility())") \
+                        if pg.query_selector(".viewer") else False
+                if strip:
+                    raise SystemExit("qa.py: the client's own settings drew a viewer strip — 359 stands it down, "
+                                     "and if that changed this walk owes a viewer pick again (356.6)")
+                # NEVER `continue`: the per-viewer line below is this loop's
+                # own verdict, and skipping it would take a whole viewer out
+                # of the count while the sweep still printed "ok" (54.5).
+                if pg.evaluate("window.VIEWER") == v:
+                    for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
+                                                     "els=>els.map(e=>e.dataset.railgrp)"):
+                        pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(120)
+                    for key in pg.eval_on_selector_all(".setuprail [data-setupgo]",
+                                                       "els=>els.map(e=>e.dataset.setupgo)"):
+                        el=pg.query_selector('.setuprail [data-setupgo="%s"]'%key)
+                        if not el: continue
+                        el.click(); pg.wait_for_timeout(160)
+                        for k2 in pg.eval_on_selector_all(".setuppane .secrow [data-sub2]",
+                                                          "els=>els.map(e=>e.dataset.sub2)"):
+                            pg.click('.setuppane .secrow [data-sub2="%s"]'%k2); pg.wait_for_timeout(160)
+                        seen+=1
         print(v,"ok", seen, "destinations")
 
     # ── THE TEMPLATE MUST SURVIVE A ROUND TRIP (51.14) ───────────────
@@ -341,8 +447,17 @@ with sync_playwright() as p:
     if "reported against" not in dele["blocked"].get("merchandising", []):
         errs.append("DELETE: a function that has been reported against is not "
                     "refused on that ground (%r)" % dele["blocked"].get("merchandising"))
-    # Through the page, in edit mode, the way a person does it.
-    pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
+    # Through the page, in edit mode, the way a person does it. FUNCTIONS IS
+    # THE CLIENT'S PAGE (356.2, spec 056): served, the gear opens the
+    # module's rail and this page is on the other one, reached by its own
+    # address; over file:// the one rail holds everything and the gear is the
+    # way in.
+    if BASE:
+        pg.goto(BASE+"/raya-trade/setup/fns")
+        pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
+        pg.wait_for_timeout(400)
+    else:
+        pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
     for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
                                      "els=>els.map(e=>e.dataset.railgrp)"):
         pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(100)

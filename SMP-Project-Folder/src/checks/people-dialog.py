@@ -26,6 +26,7 @@ so over `file://` a build that had lost the queue entirely would go green
 """
 import json
 import pathlib
+import os
 import http.server
 import socketserver
 import threading
@@ -33,7 +34,13 @@ import threading
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_bytes()
+# SMP_BUILT POINTS IT AT ANOTHER BUILD (§334.13, §276). This file serves its
+# own stub, so the build under test is a path rather than an argument — and
+# without it the only way to falsify anything here is to overwrite the built
+# file in the tree, which is how §343.9 lost a round's work.
+HTML = pathlib.Path(os.environ.get("SMP_BUILT") or
+                    (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html")
+                    ).read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 SAID = {p["key"]: "retailstores" for p in SEED.get("people", [])[:3]}
@@ -149,6 +156,13 @@ print("the register stops being a form — " + URL)
 with sync_playwright() as p:
     b = p.chromium.launch()
     pg = b.new_page(viewport={"width": 1280, "height": 940})
+    # §148's WELCOME SCREEN BLINDS ANY CHECK WRITTEN BEFORE IT (§167.2). It
+    # covers the viewport, so every real press lands on it — invisible to this
+    # file until §372.14 gave it a press to make. Suppressed as a RETURNING viewer
+    # does, and in an `add_init_script`, because setting the flag after `goto`
+    # is one paint too late.
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
+                       "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
     pg.on("pageerror", lambda e: errs.append("pageerror: " + str(e)))
     pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
     pg.goto(URL)
@@ -180,11 +194,113 @@ with sync_playwright() as p:
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 940})
         land(pg)
-        ck("%d: no input or select in the table" % w,
-           pg.evaluate("document.querySelectorAll('.peoplecfg input, .peoplecfg select').length") == 0)
+        # ── REWRITTEN TWICE, NEVER LOOSENED (§218, §372, §372.14) ───────
+        # §116 asserted the table holds NO control. §372 reversed it for the
+        # Roles column, which became a ticking list on every row. §372.14 reverses
+        # THAT — Islam: "the table in general should look everything fixed and
+        # not editable until I made the double click" — so the original claim
+        # is the claim again, with the double-click asserted beside it.
+        #
+        # WHAT IT WAS FOR SURVIVES WHOLE, and that is why it is worth asking at
+        # four widths: every collision it names was a control drawn inside a
+        # cell, so AT REST there are none to collide, and OPENED there is
+        # exactly one and it fits the cell it is in (§94.2 — a build that never
+        # opened anything would pass the first half on its own).
+        got = pg.evaluate("""()=>({
+          cells: document.querySelectorAll(
+                   '.peoplecfg tbody input, .peoplecfg tbody select, '
+                   + '.peoplecfg tbody .ssbtn').length,
+          rows: document.querySelectorAll('.peoplecfg tbody tr').length})""")
+        ck("%d: at rest the table holds no control" % w,
+           got["cells"] == 0 and got["rows"] > 1, got)
+        # BY KEY, never by the column alone: 33 cells carry that suffix and the
+        # first of them may be a row the register does not open (§362.2's
+        # minted rows), so the press is aimed at a person who does.
+        who = pg.evaluate("()=>(PEOPLE.filter(p=>!p.forefront)[2]||{}).key")
+        # AND THE PRESS DELIBERATELY RACES A SAVE (§372.14). `land()` leaves the
+        # graph dirty, so the paint this press makes schedules one (§170's
+        # leading edge); its answer paints again, that paint removes the
+        # focused box, and Chromium fires `blur` on a focused element being
+        # removed — which used to close the cell under whoever had just opened
+        # it. Invisible over `file://`, where nothing saves and nothing
+        # repaints, which is why every check was green on it. Waiting for quiet
+        # before pressing would put that back out of reach, so this does not
+        # wait.
+        pg.dblclick('[data-pcell="%s|Job title"]' % who)
+        pg.wait_for_timeout(350)
+        now = pg.evaluate("""()=>{
+          const cells=[...document.querySelectorAll('.peoplecfg tbody td')];
+          const withc=cells.filter(c=>c.querySelector('input,select,.ssbtn'));
+          const over=withc.filter(c=>{
+            const k=c.querySelector('input,.ssbtn');
+            return k && k.getBoundingClientRect().right >
+                        c.getBoundingClientRect().right + 1;});
+          return {cells:withc.length, over:over.length,
+                  many:withc.filter(c=>
+                    c.querySelectorAll('input,select').length>1).length};}""")
+        ck("%d: a double-click opens one control, and it fits its cell" % w,
+           now["cells"] == 1 and now["many"] == 0 and now["over"] == 0, now)
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(300)
         ck("%d: no Save/Cancel column" % w,
            pg.evaluate("!document.querySelector('.peoplecfg .tk-editcell')"))
     pg.set_viewport_size({"width": 1280, "height": 940})
+
+    # ── 2b. A CELL WHOSE VALUE TWO ROWS SHARE (§374) ─────────────────
+    # Islam: "the copy on click for the email and double click to edit is
+    # working but the same behavior is not working on the phone number."
+    #
+    # IT IS NOT A PHONE FAULT, AND FALSIFYING IS WHAT SAID SO: the fault
+    # follows the DUPLICATED VALUE, not the column. §2 above already races a
+    # save — §372.14's own fix — and presses `Job title`, whose
+    # `data-ptitle="<key>"` is unique, so the one thing it could never reach is
+    # a mark that names two controls. `putFocus` restores the cursor by the
+    # focused control's first `data-` attribute, and §93.6's copy button
+    # carries `data-copy="<the value>"`: the first click of the double-click
+    # focuses it, the paint that opens the cell then asks for that value, and
+    # `querySelector` hands back the FIRST row carrying it — somebody else's
+    # button. Focus leaves the box, `blur` fires with the box still connected,
+    # and §372.16's guard reads it as a person moving away.
+    #
+    # THE FIXTURE ALREADY HELD THE STATE AND NOTHING ASKED: `REAL` gives every
+    # row the same number, which is a real register (a shared office line, or
+    # one typed twice). The EMAIL is unique there, so it is asserted beside it
+    # as the control — a build that had stopped opening any cell at all would
+    # satisfy the Mobile half on its own (§113.8).
+    #
+    # IT MUST STILL BE OPEN A BEAT LATER, never merely opened: the fault is a
+    # cell that opens and shuts ~90ms afterwards, so a probe that looks once is
+    # a probe that reports the broken build clean (§94.8).
+    print("\n2b. a duplicated value still opens its cell")
+    pg.set_viewport_size({"width": 1440, "height": 940})
+    land(pg, dict(ALL_ON))
+    who = pg.evaluate("()=>(PEOPLE.filter(p=>!p.forefront)[2]||{}).key")
+    shared = pg.evaluate("""(k)=>{const v=(PEOPLE.filter(p=>p.key===k)[0]||{}).phone;
+       return {v:v, n:PEOPLE.filter(p=>p.phone===v).length};}""", who)
+    ck("the fixture really does share that number",
+       shared["n"] > 1, shared)
+    for field, why in (("Mobile", "shared"), ("Email", "unique")):
+        land(pg, dict(ALL_ON))
+        pg.dblclick('[data-pcell="%s|%s"]' % (who, field))
+        pg.wait_for_timeout(120)
+        opened = pg.evaluate("!!document.querySelector('.peoplecfg td.pcellopen .fld')")
+        pg.wait_for_timeout(700)
+        got = pg.evaluate("""()=>({open:!!document.querySelector('.peoplecfg td.pcellopen .fld'),
+             pcell: PCELL ? PCELL.field : null,
+             active: (document.activeElement||{}).className || ''})""")
+        ck("%s (%s): the box opens and is still there a beat later"
+           % (field, why), opened and got["open"] and got["pcell"] == field, got)
+        # AND THE COPY STILL WORKS ON BOTH — the two acts share one control, so
+        # a fix that reached the single click would trade one for the other.
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(400)
+        pg.click('[data-pcell="%s|%s"] .copyval' % (who, field))
+        pg.wait_for_timeout(200)
+        ck("%s (%s): one press still copies" % (field, why),
+           pg.evaluate("""(s)=>{const b=document.querySelector(s);
+              return !!b && b.textContent.trim()==='Copied';}""",
+              '[data-pcell="%s|%s"] .copyval' % (who, field)))
+        pg.wait_for_timeout(1400)
 
     # ── 3. NEAT WITH EVERYTHING ON ───────────────────────────────────
     # Islam: "if everything is chosen it needs to stay neat." Measured before
@@ -301,7 +417,9 @@ with sync_playwright() as p:
     pg.evaluate("()=>document.querySelector('[data-padd-open]').click()")
     pg.wait_for_timeout(600)
     ck("it opens empty", pg.evaluate("!!document.querySelector('#modal-b .pdlg')") and
-       pg.evaluate("!document.querySelector('#modal-b [data-prole-open]')"))
+       # §372: the roles control is the cell's ticking list, and `personFields`
+       # still draws none on the ADD form — a person with no key has no roles.
+       pg.evaluate("!document.querySelector('#modal-b [data-proleset]')"))
     # A NAME IS THE ONE THING NEEDED (§87.3) — and pressing with none must SAY
     # so rather than doing nothing.
     pg.evaluate("()=>document.querySelector('[data-pdlg-add]').click()")

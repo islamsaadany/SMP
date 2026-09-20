@@ -133,28 +133,71 @@ export async function seedTwoTenants(owner) {
   return { A, B, order };
 }
 
+/* A VALUE THE COLUMN'S OWN CHECK ALLOWS, READ OFF THE CONSTRAINT (§365.2).
+   This was two hand-written special cases — swot_items.cat and
+   access_grants.grant_ — and main's Internal Tracker then added two more
+   columns with an IN (...) CHECK, so the generic 'k' was refused and SIX of
+   the nine proofs went red on a healthy schema: the tenant isolation (S2),
+   the delete (S4), the door (S7), the carry (S8), the row write (S9) and the
+   Prisma wrapper (S6). Measured on origin/main's own build first (§303) —
+   identical there, so it is main's gap and not this merge's.
+
+   DERIVED, NEVER A LIST (§104.7): the first literal the constraint names is a
+   value it accepts by definition, so a table added tomorrow seeds the day it
+   is added. The two old special cases are DELETED rather than kept beside it,
+   because a rule with exceptions nobody re-reads is the list again (§24) —
+   and they are the proof it works: 's' and 'view' are exactly what this
+   derives for them. */
+function allowedByCheck(checks, name) {
+  for (const src of checks[name] || []) {
+    /* Postgres NORMALISES `IN (…)` to `= ANY (ARRAY[…])` in
+       pg_get_constraintdef, so reading the source means reading what it
+       stores and not what was typed — the first draft matched `IN (` and
+       therefore matched nothing at all, which looked exactly like the two
+       special cases having been deleted (§93.11's shape: ask the thing, do
+       not reason about it). Both forms, and only a MEMBERSHIP test: a
+       `btrim(title) <> ''` carries a literal too and it is the empty one. */
+    const m = /= ANY \(ARRAY\[([^\]]*)\]/.exec(src) || /\bIN \(([^)]*)\)/.exec(src);
+    if (m) { const lit = /'([^']+)'/.exec(m[1]); if (lit) return "'" + lit[1] + "'"; }
+  }
+  return null;
+}
 const PLACEHOLDER = { s: "'k'", w: "'w'" };
-function placeholder(col, table) {
-  if (table === "swot_items" && col.name === "cat") return "'s'";
-  if (table === "access_grants" && col.name === "grant_") return "'view'";
+function placeholder(col, table, checks) {
+  const byCheck = checks && allowedByCheck(checks, col.name);
+  if (byCheck) return byCheck;
   const t = col.type;
   if (t === "text" || t.startsWith("character")) return "'k'";
   if (t === "integer" || t === "bigint" || t === "numeric" || t === "smallint") return "1";
   if (t === "boolean") return "true";
   if (t === "jsonb" || t === "json") return "'{}'";
   if (t.startsWith("timestamp")) return "now()";
+  /* A PLAIN DATE, added because main's `notes.met_on` is one (§365.2). Without
+     it this harness threw, and it is SHARED — so six of the nine proofs went
+     RED on a healthy schema, among them the tenant isolation (S2), the door
+     (S7) and the row-addressed write (S9). Measured on origin/main's own
+     build before it was touched (§303): identical there. */
+  if (t === "date") return "current_date";
   if (t === "uuid") return "gen_random_uuid()";
   throw new Error("seed: no placeholder for " + table + "." + col.name + " " + t);
 }
 
 export async function seedRows(owner, tenantId) {
   const tables = await tenantTables(owner);
-  const cols = {}, fks = {};
+  const cols = {}, fks = {}, checks = {};
   for (const t of tables) {
     cols[t] = (await owner.query(
       "SELECT a.attname AS name, format_type(a.atttypid, a.atttypmod) AS type, a.attnotnull AS notnull, " +
       "(a.atthasdef OR a.attidentity <> '') AS hasdef FROM pg_attribute a WHERE a.attrelid = $1::regclass " +
       "AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum", [t])).rows;
+    /* The CHECK constraints, by the column each one names — one query per
+       table, beside the columns, so placeholder() can ask. */
+    checks[t] = {};
+    for (const r of (await owner.query(
+      "SELECT pg_get_constraintdef(f.oid) AS src, " +
+      " (SELECT array_agg(attname::text) FROM unnest(f.conkey) k(attnum) JOIN pg_attribute a ON a.attrelid = f.conrelid AND a.attnum = k.attnum) AS cols " +
+      "FROM pg_constraint f WHERE f.conrelid = $1::regclass AND f.contype = 'c'", [t])).rows)
+      for (const c of (r.cols || [])) (checks[t][c] = checks[t][c] || []).push(r.src);
     fks[t] = (await owner.query(
       "SELECT f.conname, f.confrelid::regclass::text AS ref, " +
       " (SELECT array_agg(attname::text ORDER BY k.ord) FROM unnest(f.conkey) WITH ORDINALITY k(attnum, ord) JOIN pg_attribute a ON a.attrelid = f.conrelid AND a.attnum = k.attnum) AS cols, " +
@@ -183,7 +226,7 @@ export async function seedRows(owner, tenantId) {
     }
     for (const c of cols[t]) {
       if (row[c.name] !== undefined) continue;
-      if (c.notnull && !c.hasdef) row[c.name] = placeholder(c, t);
+      if (c.notnull && !c.hasdef) row[c.name] = placeholder(c, t, checks[t]);
     }
     const names = Object.keys(row);
     const ins = await owner.query("INSERT INTO " + t + " (" + names.join(", ") + ") VALUES (" + names.map((n) => row[n]).join(", ") + ") RETURNING *");

@@ -5206,6 +5206,620 @@ suite per feature.
 
 ## In flight
 
+**Spec 059 — the client's People register: a cell is the control (§372), on the
+branch, built 2026-09-17.** Islam: *"for the client registry I'd like to do some
+in line adjustments like the phone, employee ID, email, the unit/function, job
+title, etc. and about the roles why do I need to add them as chips why can't we
+make it a multi tick serarchable drop down to add the roles?"* A double-click
+opens one cell as the field the dialog already draws for it — Enter stores it,
+Escape throws it away — and the Roles cell IS the ticking list, with the chips it
+already draws handed over as the closed control's label so there is one builder
+for what a role looks like. **The first drawing took the Roles column 209 → 477px
+and grew every row 39 → 49, and the mockup is what said so** (rule 1c); shipped it
+is 236px and 39. §116's reason for moving editing into a dialog is not withdrawn
+and the assertion carrying it is REWRITTEN rather than loosened (§218): one
+control per cell, none past its cell. **Islam's own instruction kept it correct** —
+*"before building I urget you to check main"* — because main had moved 43 commits
+and carried the minted/adopted pair, without which inline editing would have been
+taken off every adopted row. **Escape had to be MADE to discard** (Chromium fires
+`change` on a focused element being removed), and the open field's 8px overrun was
+seven dead `min-width` rules matching nothing since §116. Verified: role-picker,
+people-dialog, seat-grant, smo-team, forefront-team, duplicates and no-jump all
+green; authoriser 683/0, change list 140/0; proved able to fail three ways from
+the sources (1 / 7 / 2 red), restored and rebuilt byte-identical.
+
+**AND §372.14–.17 ANSWER WHAT HE FOUND ON TESTING IT** (2026-09-18): *"on
+opening something the arrow appears, no need for the arrow. and for the roles as
+well ... the table in general should look everything fixed and not editable until
+I made the double click."* The caret goes (it announces a list the double-click
+has already opened, and as an inline span after a block label it fell to a line
+of its own, taking the open row 38.6 → 59.6px); the Roles cell stops standing
+open, so at rest the table holds **0 buttons and 0 carets** against 33 of each,
+and the column gives back 27px; and an open cell is one height whichever kind it
+is — `searchsel.js` draws a `<button>`, which `.cfg input`'s own 12.5px/`4px 7px`
+cannot reach, so the drop cell sat 3.4px proud of a resting row and now sits on it
+to the pixel. **Keyed on `PROLEPICK`, never `PCELL`**, because a ticking list
+fires `change` on every tick and would have shut on the first role. **And a real
+live-deployment defect in §372 came out of it**: the paint a double-click makes
+schedules a save, its answer paints again, the box is removed, Chromium fires
+`blur` on removal — so the cell shut under the person who had just opened it,
+invisible over `file://` where nothing saves, which is why every check was green.
+**The check could not see the fault it was written for either** — it opened a
+text cell, which has no button and therefore no caret, and measured the rows after
+Escape; REWRITTEN, never loosened (§218), it opens the two cells that draw a list
+and measures them while open. Proved able to fail four ways from the sources
+(8 / 4 / 16 / 4 red, the last printing his symptom verbatim). **Waiting on
+Islam: the merge.**
+
+**AND §373 ANSWERS THE TWO HE FOUND NEXT** (2026-09-19): the open Unit box lying
+across the Email column, and *"you added the 3 dots to the roles whihc is wrong
+the 3 dots is out of this column."* **Neither is visible on the worked example**
+(§255) — its longest unit label fits, and at 1500px the register does not scroll
+at all — so his own state was made and both answers were **drawn out of the
+running platform and signed off before a source moved** (rule 1c); of the two
+offered for the ⋮, he picked **A**. **§373.1**: measured, **261.1px of control in
+a 176px cell**, 93.6px into EMAIL, and a click inside the email cell returns the
+box — §110.1's fault again. One word: `width:auto` fills for an `<input>` and
+**shrink-fits for a `<button>`**, and `.ssbtn` is `white-space:nowrap`, so its
+text is its width; `max-width:none` → `max-width:100%`, measured **both with and
+without the column's declared width** because the file records eighty lines above
+that this cap does nothing here — true of §110's `<input>`, which was sizing its
+own column, and not of a button. **§373.2**: the ⋮ was never added to Roles; it is
+the frozen last column floating over what scrolls beneath — **and its seam has
+never painted**, because no `box-shadow` draws on a `<td>` under
+`border-collapse:collapse`. Proved by putting a **solid red 10px** shadow on the
+cell and photographing **no change at all**, while a border, a `::before` and a
+background each moved the pixels. A `::before` wash now, `--froze-wash` in all
+four palettes, a dark wash on both grounds because the seam is depth.
+**§373.3**: `role-picker.py` **already asserted that the open control fits its
+cell** and went green through the whole round that shipped the fault — the right
+property with no data to exercise it (§255) — so the state is made and put back
+there now; and the seam is asserted as **PAINT**, two screenshots either side of
+the wash which must differ, because reading the declaration is exactly what could
+not tell a live seam from a dead one. Proved able to fail three ways from the
+sources — **4 / 8 / 8 red**, the last two identical, which is the finding: to the
+page, a seam declared as that shadow and no seam at all are the same build. **Found and not swept** (rule 1b): the name column and the functions
+table carry the same dead declaration, and the kebab block is declared **twice**
+in `config.css` byte for byte. 
+
+**AND §374 ANSWERS THE ONE HE FOUND NEXT** (2026-09-20): *"the copy on click for
+the email and double click to edit is working but the same behavior is not
+working on the phone number."* **It is not a phone fault**, and finding that out
+was the round: both cells are built by the same two functions, and over
+`file://` both open perfectly. The fault follows a value **two rows share** — a
+shared office line, or the same number typed twice — and the phone is only where
+one repeats. Falsified three ways: phones shared → Mobile fails and Email works;
+both unique → both work; **emails** shared → Email fails and Mobile works.
+**The chain**: the platform puts the cursor back after a repaint by naming the
+control that had it with its first `data-` attribute, every editable control
+carries a KEY (`data-pphone="loghead"`) and the copy button carries
+**`data-copy="+20 100 1234567"`, which is the value**; so the first click of the
+double-click focuses that button, the paint that opens the cell asks for that
+value, and the browser hands back the **first row carrying that number** —
+somebody else's button. Focus leaves the box, `blur` fires with the box still on
+the page, §372.16's guard reads it as a person moving away, and the cell shuts
+**about 90ms after opening**. §87 one field over: *a value is never an
+identifier* — **and the Email only worked by luck**, being unique, so the
+selector matched the one button the paint had just replaced and restored
+nothing. **Invisible over `file://` and that is why every check was green**
+(§372.16's own trap, one guard along): nothing saves there, so the second paint
+never happens. One guard — restore only what the mark names once, the open
+dialog's copy first — which can never lose a correct restore and only ever stops
+a wrong one, in the general helper rather than in the copy button, because a
+list of attributes to skip is a list somebody forgets to add to (§104.7).
+**The check's own fixture already held the state and nothing asked**: every row
+in `people-dialog.py`'s fixture carries the same number, and §372.14's
+save-racing section presses **Job title**, whose address is unique. §2b presses
+the shared value with the unique Email beside it as the control, and asserts the
+box is **still there a beat later** — **1 red** from the sources with the guard
+reverted (§276), printing the symptom verbatim. **Recorded, not done** (rule
+1b): the Mobile copy target is **19.4px in a 38.6px row** against Email's 28.1,
+because the address wears `.val` (4px of padding) and the number wears `.mono`
+(none) — not what he reported, a restyle nobody asked for, and it wants a
+measurement of every `.mono` cell rather than one column's.
+**Merged to `main` 2026-09-20 on Islam's word** (§4). `main` had not moved, so
+it is a clean fast-forward and what went up is what was checked. **The merge
+carries a line of its own on purpose**: the branch had already been pushed, and
+Vercel builds once per commit whatever ref it arrives on, so handing it a commit
+the branch ref already holds is a deployment that may never happen — writing the
+record the round owed anyway is what gives `main` something of its own to build.
+**And the live site could not be read from this session, which is said rather
+than glossed**: this environment refuses that address outright, so nobody here
+has seen production serve it. **The one file to compare is `shell.js`**, which
+should read **3,827,402** bytes where the build before it read 3,824,282 — not
+the service worker and not the stylesheet, neither of which changed at all, so
+either would read the same whether or not production built this. **The branch
+is left where it stands** until somebody has looked, because moving it is the
+one thing that could still cost the build. **Nobody is signed out and nothing
+stored moves**: the whole change is one screen, one check and the record.
+
+---
+
+### The mouse that does nothing until you click once — found and fixed
+
+**What you reported.** Signing in, arriving at the console, and the mouse doing
+nothing: no highlight when you point at something you can click, and the first
+press wasted. Click anywhere once and it all starts working. Only when you type
+the password — never when the browser remembers it.
+
+**I got this wrong twice before I got it right, and it is worth saying why.**
+I first blamed how long the page takes to open, and then how much of a client
+card you can actually click. Both are real, and neither is this. The thing that
+ruled them out was in your own message and I read past it: **the highlight does
+not work either.** That highlight is done by the page's styling alone — no
+code, no wiring — so nothing about slowness or missing buttons can explain it. A
+page that will not highlight is a page that is not being given the mouse at all.
+
+**What it actually is.** Your recording settles it. At just under eleven seconds
+the console is completely drawn and your pointer is sitting on Raya Trade's
+*Insights* row with an ordinary arrow and no highlight; four seconds later the
+same card lights up under the same pointer, with nothing having reloaded. So the
+page was finished and deaf.
+
+I then checked, rather than assumed, that nothing of ours was in the way: with
+the console loaded there is **nothing covering the window at all**, and **all 47
+things you can click are directly reachable** by the pointer. No invisible
+layer, nothing swallowing the press.
+
+**Which leaves your own clue, and it is the answer.** The difference between
+your two cases is a password the browser has already saved versus one you have
+just typed. Our sign-in page was not handing the sign-in to the browser the way
+browsers expect: it took the press itself, sent your details in the background,
+**wiped the password box**, and then jumped to the console. To the browser's
+password keeper that is a sign-in it has to guess at — so it raises its "save
+this password?" question late, over the page you have just arrived at. While
+that question is waiting, the browser holds the mouse and the page gets nothing.
+Your first click closes it, and everything wakes up.
+
+**What I changed.** The sign-in is now handed to the browser normally, and we no
+longer wipe the password box. The browser asks its question on the sign-in page,
+where it belongs, and you arrive at the console with nothing in front of it.
+The server already knew how to accept a sign-in this way — that path was built
+from the start for people with scripting switched off — so nothing new was
+added; one line was removed.
+
+**Nothing on any screen changes.** No layout, no colours, no wording. Signing in
+looks exactly as it did.
+
+**One cost, paid rather than left to you to find.** A wrong password now reloads
+the page, so your email address would come back empty — and the browser only
+refills an address it has saved, which in your case it has not. The address is
+carried across that one reload, kept for that tab only and never put in the web
+address.
+
+**What I cannot prove from here, said plainly.** The browser's save-password
+question is not visible anywhere in your recording. So the chain is reasoned
+from your autofill clue rather than seen. What is certain is that the guessing
+was caused by our page, and that is what has gone.
+
+**Checked**: the sign-in driven in a real browser and read off what the browser
+actually sends — a normal form submission and a genuinely new page, where before
+it was a background request and no page change at all; the refusal still says
+its one sentence; the address comes back; the password box is empty. The door's
+own test suite is 143 of 143 with all seven of its deliberate breakages still
+failing as they should, and every neighbouring test is green.
+
+**Still open, and yours:** the password-change screen does the same thing the
+sign-in screen used to, so setting a first password may hit the same dead moment
+one screen later. It is not a one-line change there — that screen compares two
+boxes and asks where you work before it can move on — so I have written it down
+rather than folded it in.
+
+**Also still yours, from before this:** three-quarters of a client card takes no
+click (it stopped being one big button on 11 September), and the console's slow
+opening, which is fixed on the branch and not yet merged.
+
+### The console's dead first moment (§369) — repaired; one half waiting on you
+
+**What you reported.** Opening Forefront's own console, the window looks open
+and nothing responds until you click once.
+
+**What it actually was.** The window was fine. The page had not finished, and
+from where you sit those two look identical — the top bar is drawn outside the
+part that gets hidden while it loads, so Forefront's name and the Sign out
+button stand up over an empty page with nothing saying why.
+
+**What was underneath it.** The console asked the server **three questions in a
+row** to open one page, and the last two were **the same question** — the most
+expensive one it has, which reaches into every client to count its units, check
+whether it has a plan and read its cycle. Asked twice, one after the other,
+every single time you open the page. A click during that stretch lands on
+nothing at all.
+
+**What I changed.** It asks both questions at once now, and asks the expensive
+one once. Measured at the same speed either side:
+
+| | before | after |
+|---|---|---|
+| bar up, nothing responding | 1,255ms | **742ms** |
+| cards on screen | 1,872ms | **742ms** |
+| page appears, then cards appear | two stages | **one** |
+
+The cards now arrive *with* the page rather than a beat after it.
+
+**It was not the card-mark round.** I checked that first rather than assuming:
+the same measurement on the build before it gives 1,259ms against 1,255. This
+has been there since the console was written.
+
+**The one thing still yours.** There is one round trip left, and during it the
+page still shows a bar over nothing — brief when the server is warm, seconds
+when it has gone cold. Making it *say* something means deciding what you see,
+so I have drawn the two candidates out of the real page and put them in front
+of you: **the page's own words** (its title, its search box and its own
+"Reading your clients…"), or **a grey skeleton** of card shapes. Each one's
+cost is on the page beside it. My recommendation is the first.
+
+**One more thing, found while checking the above.** The test I wrote for this
+has to be run twice — once against each of the two copies of the console page —
+and the instructions written at the top of it only worked from one folder. Run
+from the folder everything else is run from, it could not find the second copy
+and said nothing useful: it handed back a browser error rather than telling me
+which file it had looked for. Both ways work now, and if the file genuinely is
+not there it says so by name and stops. Nothing on any screen changes — this is
+the testing tool, not the product — and I re-ran every test afterwards,
+including the two deliberately broken builds, to make sure the edit had not
+quietly stopped it from being able to catch anything.
+
+**Still yours:** that choice, and the merge to main — which is your word on
+that merge, and which I have held as you asked.
+
+
+**§368 — a mark, not a sentence, on a client card's module rows. On the
+branch, built 2026-09-17.** Your words: *"we don't needs notes that take 2
+lines we can just have a notificaiton here if something is new to check … to
+keep it neat and clean nad let's make it compact for better view"* — and then,
+of three drawings, **"A with tighter rows and Forefront own"**.
+
+**What was there, measured before anything was drawn.** A card with two
+modules carried nine pieces of text. Five of them said nothing you can act on
+— the module names and the addresses are the same on every client — and the
+other two **said one fact twice**: the short word at the end of the row
+(*Cycle open*) and the sentence under it (*Cycle open · reports due 30 Sep*).
+That sentence is what ran onto two lines, and it did so at every window size,
+because it is long rather than because the column is narrow.
+
+**What a row says now.** A short mark at the end of the row, and only when
+there is something for you to look at: *Not answering* if the client's
+platform did not answer at all, *No plan* if no plan has been built, or how
+many subjects are still to submit. Nothing otherwise — so a client with
+nothing outstanding reads its name, its address and its module names, and you
+can run your eye down the page. Insights says *N new* when there are new
+reports this month. **The cost, which you took:** a cycle that is open with
+everybody submitted now looks the same as no cycle at all, because the mark
+means *something to do* rather than *what state is this in*. The state is one
+press away inside the module.
+
+**The mark is Forefront's own answer**, which was your sharper instruction. It
+does not follow the sentence a client picked for their own landing page — that
+is a different question, about what a client says to its own people — so the
+card cannot change under you because a client changed their own wording.
+
+**How compact it got, measured.** The tallest card 304 → 247 pixels, an
+ordinary client card 235 → 205, the tallest row 57 → 33. At a 1024-wide window
+the card was 252 and is now 205, so **its height no longer depends on the
+window**, which it did only because that sentence wrapped at some widths and
+not others. Nothing runs past the edge of a row at any width.
+
+**Checked:** the modules check 158 assertions, red under nine deliberate
+breaks including a new one — a build that puts a mark on every row whatever
+the facts say, which is exactly what you rejected; the card check 23
+assertions on both copies of the console page, red under four breaks; the door
+check 143, red under seven. The client platform itself is untouched, so
+nothing about the product a client opens has moved.
+
+**One thing flagged rather than changed.** When the client's settings moved
+into the platform, the client's own landing page went with it — and with the
+card no longer reading it either, the **Landing line** page in Setup now
+governs nothing except its own preview. That is a decision about what that
+page is for, so it is said rather than quietly tidied away.
+
+**Still yours:** the merge to `main`, which is your word on that merge.
+
+---
+
+**Spec 056 — the client and its modules (§362), on the branch, stage 1 of
+six built 2026-09-16.** Islam, of the page the console's *Settings* chip
+opens: *"theclient settings shouldn't open the strategy banner in the top this
+is a client settings separate than any module"* — and, of the narrow answer
+first offered, *"you are trying to make a simple fix. let's discuss the
+architecture and who sees what it's not a simple fix."* Six stages, each
+shipping and proved on its own. **Stage 1 (§362)** is the reported fault: on a
+client-scoped Setup document the chrome draws the client's mark, its name and
+*Save & close*, and draws none of the destination row, the Group dropdown, the
+Units | Functions switch, the gear or the viewer strip — one reader asked where
+the chrome is drawn rather than per control (§53.5, §104.7), off a scope the
+SERVER stamps, because the module switcher is built once at load above the line
+that resolves the address.
+
+**§362.1, from Islam using it:** *"I ca't find the access page in the strategy
+module … why did we remove it it's a very important table that can't be
+removed."* **Nothing was removed and the measurement says so** — Roles & access
+is on Strategy's rail under a group headed *Access*, and the matrix is
+byte-identical to `main`'s. What was missing is a DOOR: §360.9 gave a module's
+rail a row across to the client's and left the reverse unbuilt, so arriving by
+the card left somebody on a rail with no Roles & access on it and no way to the
+rail that has it (§61). One row per module at the foot of the client's rail;
+`data-modules` stops carrying the switcher's rule in its name and becomes the
+LIST, with the *a menu of one is a door behind a door* test (§32) moving into
+`shell/route.js`.
+
+**T0, the access baseline, taken before stage 3 moves anything**:
+`scripts/test-access-unmoved.js` asks `grantAtPage` — the one function the
+screen and the server both ask (§42) — for 33 people × 35 page keys × 21
+targets, with no browser and no database. Against `origin/main`: **UNMOVED**,
+every person opening exactly what they opened at every target across all 34
+shared keys, the only difference `c_landing` ADDED. The baseline is kept as
+`specs/058-the-client-and-its-modules/access-baseline.json` with the commit it
+came from.
+
+**Stage 2 (§362.2) — Forefront team is the store, the register is a reader
+(spec 058 §3a), built 2026-09-16.** Islam's own revision of his first
+instruction: *"how about the forefront team is a separate view as you did but
+we keep them on the client list reading from the forefront team list."* A
+client-scoped Setup page under *Who*, above the register because it is the
+store the register reads — **mounted rather than moved**, so the set-up flow's
+step and the page are two readers of one renderer sharing one state (§9's
+pattern, §53.5).
+
+**The finding is §3a's own closing warning, read before anything was built.**
+There are **two kinds of Forefront row** and `officeRow` has marked them apart
+since §313.29 while nothing read the difference: a **MINTED** row the platform
+BUILT, whose role IS the seat and is rewritten on every request, and an
+**ADOPTED** row — the client's own person, marked because their address matched
+one active row (§313.32), which that same function says it *"never rewrites"*.
+§3a's literal rule would have **stripped the client's own custodian of their
+custodianship the day they joined the account team**, and frozen their unit,
+their address and their name with it. So the question is asked of the **MINT,
+never of the mark** — `SMPRules.isMintedRow` / `isForefrontRow`, one pair read
+by the register and by `lib/authorize.js` (§42) — and Raya Trade is the live
+case, its register having come across by the carry.
+
+**On the register a minted row states its seat and offers nothing that would
+rewrite it**, which is STRONGER than §3a asks and was measured rather than
+assumed: §116 took the role picker off the ROW, so it is read-only by not
+being offered *Edit details*. Its menu keeps *View the platform as them*
+(reads and writes nothing) and *Delete permanently* (a removal, already the
+Super user's); **the password entry goes for everybody**, since a consultant
+signs in at Forefront's own door. An adopted row gets its picker back and
+carries a quiet mark beside its chips. **The count says both** — and only
+where there IS a split, which is what keeps §122's removal of a plain total
+whole (a narrow reversal, recorded).
+
+*Verified:* shell **111/0** with a new §3c proving the served seam — the page
+drawing this client's REAL team, the register's consultants asserted as an
+agreement with it — red **2** from the sources; `checks/forefront-team.py`
+**37 assertions, 0 failures**, three populations in one run, red **4 / 1 / 3**
+from the sources; `test-authorize.js` §42 **683 passed**, red **2 / 2**;
+door-landing 140/0, modules 125/0, `built-in-step` all good, `tsc` clean, and
+**the access baseline still UNMOVED**. Three of the new check's own first
+failures were the CHECK, one of them a death rather than a report (§215).
+
+*Stage 1 verified:* shell 103/0 (§3b six new assertions, red 5 and 1 from the
+sources), modules 125/0 with `switch-always` still red, door-landing 140/0,
+`generated-in-step` all clear, `built-in-step` all good, `tsc` clean cold, the
+access baseline UNMOVED and red 635 / 22 on two falsifications. **`main`
+untouched — the merge is Islam's word, on that merge.**
+
+---
+
+**§364 — the Forefront team is a setup table, 2026-09-17.** Islam, of the page
+§362.2 shipped: *"forefront team is damaged it needs to be a table looks like
+the people register wiht the required columns."*
+
+**The cause is one class, and it was measured before anything was drawn.** The
+team's rows were wrapped in the class the set-up flow's step CHIPS wear — a
+pill — so a control's own shape was painted round a whole page, which is the
+oval he photographed. Under it the rows were the flow's own flex row, written
+for a 760px step column: on a full-width Setup page they laid out side by side
+and wanted **2471px in a 1323px box**, which is the third consultant cut in
+half. Both are one fault seen twice — a shape built for one room, used in
+another.
+
+**It is the setup tables' own shape, never a second one.** The navy heading
+row, one line per cell, the value on a hover where it does not fit and the
+ellipsis all come from the family Companies, the BU list and Functions already
+wear. Five columns — **Name · Email · Seat on this client · On this register as
+· Remove** — the add row under the table, the note under that. Islam signed all
+three off from a mockup made of the RUNNING platform, so *today* was the
+product's own markup rather than a drawing of it.
+
+**One renderer, two hosts**: the flow's seventh step and the Setup page are two
+readers of one function, because people join and leave an account team all
+through an engagement and a renderer copied for the page is a drift waiting to
+happen. Measured on both — 1325 of 1325 in the page's pane at 1600, 760 of 760
+inside the flow's column, one line a row in each. **The register column is
+drawn only where it can be answered** (on a client whose register came across,
+where the match is by address and has to be confirmed; on one the platform
+built the seat IS the register row and there is nothing to pick), **and the
+head follows the cells**, asserted on both client shapes in one run. **The key
+inside the cell is gone** — it was the control's name while the rows were a
+list and is the column heading now, so it said the word twice on one row; the
+name moves onto the control. **One sentence, two dresses**: the note's words
+are written once and the host says how they are dressed.
+
+**The slack has to go somewhere, and saying which column takes it is most of
+the fit.** Two attempts, each measured rather than reasoned: a 1% last column
+— the register's own trick — **starved it to 10px at 1280 with its own word
+painted outside it**; a 100% name column starved the middle three to nought at
+the same width. Left alone the leftover is shared. **A column can never be
+narrower than the widest thing that will not wrap**, and the sum of five of
+those was 936px against an 825px pane: the select fills its cell now, so the
+register column costs its heading and nothing more, and the address caps at
+220. It fits at **1325 / 1165 / 1005 / 825** — and below about 1080 no cap can
+make it fit, so **the box scrolls rather than cutting**, with the last column
+asserted reachable and the page gaining no sideways scroll of its own.
+
+**And the hover on a control was removed by the run that was meant to prove it
+needed keeping.** A cell holding a `<select>` has no value to put on a hover —
+its text is every option it holds — so the first build wore an opt-out mark;
+the falsification made to prove that mark load-bearing came back GREEN, because
+giving the select its own cell had already removed the overflow that produced
+the title at all. The mark is deleted rather than left as a line the next reader
+takes for load-bearing.
+
+*Verified:* `checks/team-page.py` **31 assertions, 0 failures**, over HTTP with
+a stub, because the page is empty over `file://` by construction and a stub is
+the only way to make both client shapes and to read what a press WROTE rather
+than what it drew. Proved able to fail **six ways** from the sources —
+**9 / 2 / 2 / 3 / 3 / 1 red**, and A's nine name the reported fault in its own words.
+`checks/multi-client.py` and `smp-app/checks/shell.mjs` §3c held the flow's row
+selectors and were re-pointed; the first is recorded as unrun, needing the
+rehearsal database. Ten neighbouring checks green, `built-in-step` all good,
+the four generators re-run, `qa.py` over `file://` **33 viewers / 242 destinations /
+ERRORS none — and the same on a build made from the commit before this one**, so nothing this
+changed is reachable from the navigation, measured rather than argued. **`main`
+untouched — the merge is Islam's word, on that merge.**
+
+---
+
+**§363 — the trial module goes, 2026-09-17.** Islam: *"let's remove the trial
+module now."* It was built to prove a module could be turned on for one client
+and opened, and three real modules have proved it since — so it goes, and
+**nothing in any database has to be cleaned up**: a client's stored list is
+read through `modulesFor`, which has always dropped a word the code no longer
+knows, under a comment saying exactly why. Raya Trade keeps the word in its
+row and simply stops being drawn a row for it, on its card, in the switcher
+and on its own Setup rail.
+
+**The work was the check, and it is the same lesson at two sizes.**
+`checks/modules.mjs` had a whole section for the trial's page and spelled that
+word in a dozen assertions besides — a literal outliving the decision behind
+it (§214.3, the eleventh time). It now **names no module at all**: the second
+module, the ones that draw a page of their own and the ones declaring no area
+are all derived, with the derivations themselves guarded so a list of one
+cannot go quietly green. Six of the deleted section's claims were never about
+the trial — they were about any page a module draws for itself — and are asked
+of every such module now, so the next one is covered the day it lands. **Three
+assertions genuinely retired and are named rather than absorbed** (§54.5): the
+trial's greeting was made of the client's register, so it alone proved a count
+the page could not read is said rather than printed as a nought, and that a
+plural is not made by adding an `s`.
+
+**And the falsification survives**: `SMP_BREAK=static-hello` — a build whose
+page stopped naming THIS client — moved to Insights, so `check:modules:red` is
+still eight breaks and all eight still red.
+
+**A red neighbour was cleared on the way**, established as not this round's
+before it was touched: `client-card-modules.py` asserted that pressing a
+card's **Settings** *"navigates nowhere"*, which stopped being true when §360
+made it a door into the client's own Setup. Rewritten to the claim that
+survives — Settings is its own control, going to the client's Setup and not
+into a module — asserted at both ends.
+
+*Verified:* modules **115/0** (from 125, and every one of the ten accounted
+for line by line) **red all eight ways**; insights 127/0; shell 111/0;
+door-landing 140/0; client-card-modules 16/0; client-archive and
+client-setup-outside 0 failures; `built-in-step` all good — the frozen
+product is untouched and measured, so `sw.js` is **not** bumped; `tsc` clean
+cold. **`main` untouched — the merge is Islam's word, on that merge.**
+
+---
+
+**Spec 055 — the client's settings live in the platform (§360), on the
+branch, built 2026-09-16.** Islam, of spec 056's landing beside the frozen
+welcome: *"why do I have a welcome screen for the client overall, I just need
+a welcome screen for the strategy module for now"* — then **"A"** of three
+drawn (`design-mockups/client-settings-door/`). Reverses §315's landing and
+spec 056 §4.1's blocks: `/<client>` redirects into the first openable module
+(`openableModules`), `Welcome.tsx` deleted, the frozen `welcome.js` offered
+again once a session. The console's card's *Settings* opens `/<client>/setup`
+— the client's own Setup rail with `‹ Back to the console`, a *Getting
+started* strip (`N of 7 done · …`, from the flow's `progress()`) until *Done
+with set-up* writes `GROUP.setupDone` and the page moves to the bottom as
+*Client set-up*; Branding absorbed into step 1 and its page deleted with the
+`look` group; `kb` back on Strategy; a module's rail draws `Client settings ›`.
+The console's flow CARRIED into `src/client-setup.js` (one function for three
+hosts: the platform page, Add a client, an archived card); `__smpShape` moved
+out of `frozen.cjs`'s glue so browser and server run one function; a row
+matched by NAME first and keeping its KEY (§360.3 — the first drive was
+refused on a graph nobody had renamed); a refusal puts the rows back; the
+focus after + Add lands inside `render()`. Authoriser §41 673/0, red 4 / 3.
+Checks: `door-landing.mjs` 136/0 (red 3 / 18), `shell.mjs` 75/0,
+`modules.mjs` 125/0, `setup-per-module.py` (red 7 / 2) and green served,
+NEW `client-setup.py` (red 39 / 9), `client-setup-outside.py` as the
+console's three doors (red 12), `client-archive.py` (red 2), `welcome.py` OK,
+`qa.py` file:// ERRORS none and at Next 33 / 243 / ERRORS none; `generated-in-step` and
+`built-in-step` clear; `tsc` clean. Two product faults found by the checks
+and fixed (§360.6 Add a client threw before it posted; §360.7 the bare
+`/<client>/setup` landed on the entry page).
+
+**And two more from Islam pressing it (§360.9, 2026-09-16):** *"when I press
+continue it opens the clietn settings!! … the settings should open the
+settings directly … a perosn can access the client settings from the module
+settings page but it should be at the bottom."* The screen he pressed was
+right and the WELCOME was standing in front of it: §360 gave the frozen
+overlay its job back and left no condition in its place, so it drew over the
+first client document of a session whatever address opened it, and *Continue*
+taking it down read as the press having opened the settings. It is the
+module's HOME screen now — offered where the address names no page (which is
+what `/<client>`'s redirect and the door both produce) and never over a page
+somebody named, through `data-deep-address` written by `shell/route.js` and
+read by `WELCOME.offer()` alone: the tour's own rule since §315.3, in its own
+words. And `Client settings ›` moved to the FOOT of a module's rail, after
+the list and outside it so it cannot scroll away, while `‹ Back to the
+console` stays at the top — one row LEAVES and the other goes ON. Red from
+the sources 1 / 1 / 2 / 1, the third printing his report verbatim. Two
+neighbours were red on the branch and both were §360's, established on a
+worktree built from HEAD (§303) and rewritten rather than loosened:
+`setup-search` folded the deleted `look` group, `setup-rail` asked the strip
+to be inside the list it is deliberately outside — and that rewrite found the
+Branding errand (*"where do I change the logo"*) had lost its answer while the
+set-up is a strip, asserted now where the done state is made.
+**Waiting on Islam: the merge; and a look at step 1's modules band
+and archive block, which he has not seen there.** `main` untouched.
+
+**Spec 054 — Setup per module (§359), on the branch, all six steps built.**
+Signed off 2026-09-15 from two mockups (`design-mockups/module-setup/`).
+Step 1: the Setup Overview is deleted (§359.1) — both its halves were
+already on the landing — and the gear lands on Reporting cycle;
+`checks/attention-rows.py` replaces the two Overview checks, 6 red on the
+build before. Step 2 (§359.2): every Setup def carries `mod`, the rail draws
+by the document's scope (the served router writes it from the address, the
+gear from the module the document was served for, nothing over file://), the
+page decides the rail when the two disagree, Setup is the spine's own document
+for every module, and the client's rail carries the way back;
+`checks/setup-per-module.py` 0/0 on both halves, red 4 / 2 / 1 from the
+sources. Step 3 (§359.3): the landing draws a Client setup block for the
+Super user's seat — six doors at their spine addresses, Access opening the
+register at its seat column and Email the email settings by a hash the shell
+now honours — and a Your modules list from the client's own registry row,
+one row per module in MODULES' order; `door-landing.mjs` 70 → 87/0, red 2 / 2,
+`welcome.py` §11. Measuring it found step 1's carried reader still naming the
+deleted Overview, corrected. Waiting on Islam: whether the email settings
+move to Branding (the spec's table says so, the product holds them on
+Strategy's Send an email). Step 4 (§359.4): each module declares the
+sentences it can say about itself, the client picks one on the module's own
+Landing line page (Strategy's rail, a new group *The landing*), the pick
+rides the group under `SMPRules.LANDING_PICK` as an absence, and the
+landing's row, the console's card and the page's preview all read ONE server
+reader over facts read once for the viewer; `test-authorize.js` §40a red
+5 / 2, the round trip on a virgin Postgres, `modules.mjs` §4b,
+`door-landing.mjs` §8 red under `no-landing-stamp`. Step 5 (§359.5):
+Insights' rail carries Roles & access and Landing line — the same keys as
+Strategy's, told apart by the scope — the access table is the roles down and
+the module's declared areas across, one eye per cell carrying the shipped
+state, absent reading as shipped and the default stored as an absence; the
+store was proved key-agnostic on a virgin Postgres before anything was built
+on it, so no schema change and no server rule (`test-authorize.js` §40b
+665/0, red 6); `mayOpenModuleArea()` is the one reader the frozen page and
+`smp-app/lib/access.ts` both ask, the route asks it before `serverFor` and a
+refusal is the legacy redirect (§320.5), the landing's Your modules filtered
+by the same answer; `modules.mjs` §4c 123/0 red 2, `door-landing.mjs` §9
+101 → 127/0 red under `gate-open` and `no-areas-stamp`. The check's first
+fixture wrote a seat a client login cannot hold (§100.3) and is corrected.
+Step 6 (§359.6), the sweep: `qa.py` at Next 33 viewers / 243 destinations /
+ERRORS none and over `file://` 33 / 241 / ERRORS none; shell 74/0; door 127/0;
+modules 123/0; `built-in-step` all good, `generated-in-step` all clear; `sw.js`
+at `v5.08-module-access`, unique against `origin/main`. The count was
+accounted for rather than quoted: the office's +2 is the Inbox and History,
+drawn only over HTTP; the +8 on every other viewer with a gear was the SWEEP —
+its client-rail `goto` landed back on the office and walked the office's
+eight pages under a CEO's name (§50.6, §51.7) — corrected in `qa.py`, and its
+first correction re-picked the office as the office, whose §237 rebase took
+the rail off the screen (39 against 47). 275 → 235 → 243 = 241 + 2, exact.
+The built file is byte-identical. **Waiting on Islam: the merge.** `main`
+untouched.
+
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
 v2.9 single file as it always has; nothing anyone uses runs on the new stack
 yet.
@@ -5532,6 +6146,259 @@ and it is said why**: not one byte of the frozen build changes here, proved by
 rebuilding it, so `main`'s own sweep carries over rather than being
 re-measured for the sake of a number.
 
+**§365 — the sweep before the merge, and the five things it found,
+2026-09-17.** Islam: *"make a full sweep on the branch to make sure that if we
+merge to main we will not loose any client access or mess with any current
+behavior on the platform."* **The honest sweep had to be of the MERGED TREE**,
+which is the first finding and not a preliminary: `main` had moved **33
+commits** underneath — the Internal Tracker and Meeting Notes, two whole
+modules — so a branch that passes everything says nothing about what production
+would hold (§56.7). Rehearsed locally, resolved, everything re-run on the
+result; `main` untouched.
+
+**The question asked first, answered by measuring**: access is **UNMOVED**,
+both directions — base → main, base → branch, and **merged → main** — 33 people
+× 34 shared page keys × 21 targets, every one opening exactly what they opened,
+with `c_landing` added and its 693 cells the whole of 8842 → 9535.
+
+**One real regression, and it was this branch's**: §363's flow extraction sliced
+a range out of `platform.html` and took the Insights/Processes publishing room
+with it — the console called `drawLibrary()` with the function defined nowhere.
+Established as mine before anything was touched (§303): the check is **74/0 on
+main's own build and DIES on this branch's**. Restored from main's copy, 74/0.
+
+**One that would not have built**: main's registry imports the module this
+branch deleted. **Three checks that had stopped checking**, all from one move —
+including **five of six falsifications become silent no-ops** while the file
+read 33 ok, 0 failed. **And six of the nine spike proofs dark**, which is main's
+own tables meeting a harness with two hand-written special cases — closed here,
+because the merge cannot be called safe for the tenant boundary without S2.
+
+**And the one that matters most came out of the LAST file run**: sorting was
+dead on every Setup table in the product — the register, the business units, the
+companies, the supporting functions, the Official BU list. Not slow, not wrong:
+the click landed, the page repainted, and nothing moved. **One word** — spec 058
+§4.4 gave the header builder a parameter for the column an address can point at,
+spelt `id`, which shadows the TABLE's own id one line up, so every sortable head
+came out `data-tksort="undefined|N"` and all five tables shared one sort slot.
+It renders perfectly and throws nothing, so only PRESSING it found it; the check
+**died** rather than reporting, which is the one thing this project keeps asking
+of a check. Established as this branch's on main's own build first. Two more
+checks were stale rather than broken — §360 absorbed Branding into the set-up
+flow and they still walked to the page — **rewritten, never loosened**, with the
+group's mark upload verified still drawn where the renderer moved to.
+
+**Verified on the merged result**: the whole frozen suite, 181 checks, **twice** —
+once to find it and once on the build that fixes it; `qa.py` 33 viewers / 242 destinations /
+ERRORS none, T0 unmoved, authoriser 683/0, change list 140/0, built-in-step and
+generated-in-step clear, round trip · clean parity · two tabs 21/0 · the
+incremental writer byte-identical on fresh databases; door 140/0, shell 111/0,
+state 92/0, **modules 143/0**, comms 47/47, upload 9/0, **tracker 228/0**,
+**notes 170/0**, insights 127/0, blob 23/23, store 31/0, setup 33/0 with all six
+red, standing 7/0, demo 7/0, room 10/0, deploy 5/0, frameworks 90/0 and 64/0,
+assistant 10/0, memory 16/0 · 14/0 · 21/0 · 36/0, `tsc` clean cold, `next build`
+green, eight of nine spikes with all sixteen falsifications red.
+
+**Merged to `main` 2026-09-17** as a clean fast-forward, deployment read off the
+live site.
+
+---
+
+## §366 — the four that were red (2026-09-17) · **done**
+
+Islam: *"What are these issues that went red? shall we fix them?"* — then
+**"go"**. **Every one was run rather than recited, and not one is a fault in the
+product.** Three are checks asking about a state the platform no longer holds;
+the fourth was never run here.
+
+- **Tactic outcomes, 4 red** — the check needs a tactic whose outcome is still
+  blank and §353 filled every one (measured: Mobile's 22 tactics, 0 blank
+  outcomes, 0 without a target, all 22 carrying a figure). It MAKES the state
+  now, the repair §353.5 gave seven other checks. One assertion rewritten,
+  never loosened — it asked the SCORE, which also asks whether anybody
+  reported, so it answered null for the other reason.
+- **The contingency files, 1 red** — it looked for `45% / 50%`, both halves
+  per-cents; the slides carry the pair as counts and days. It asks for the
+  thing now rather than one way of writing it.
+- **Multi-client — it DIED rather than failing**, on a module row the frozen
+  console cannot draw (that endpoint has never sent a `modules` field — the
+  band is the served console's, and nothing regressed), and again on the team
+  table §360 moved to an address this stack does not serve. It runs to the end
+  now and says what it cannot see and where that claim IS asserted. **And its
+  falsification had been going green because a stray server held its port** —
+  it refuses one in words now.
+- **Forefront's own pages — not red at all**: 27/0 given a database.
+
+**Verified**: tactic-outcome 47/0 (red four ways), contingency 0 failures (red
+one way), multi-client 124/0 (red 2, port guard proved to fire), platform-look
+27/0, `qa.py` ERRORS none, `built-in-step.py` all good. **No product file
+changed** — the whole diff is three files under `checks/` — so nothing stored
+moves, nothing is migrated and `sw.js` is not bumped.
+
+**Recorded, not done**: the deck's tactics row builds its figure-and-benchmark
+pair by hand rather than through the shared builder; the frozen console and the
+frozen platform endpoint have drifted (harmless while production serves the new
+stack, and a decision rather than a repair); and six more harnesses still do not
+say that they need a rehearsal database.
+
+**Merged to `main` 2026-09-17.**
+
+---
+
+## §367 — moving between the client's settings and a module's stopped reloading the platform (2026-09-17)
+
+**What Islam asked.** *"The shifting between the client settings and the main
+console and then getting into the strategy and from the module settings to the
+client settings takes too long — is there a way to make these movements smoother
+in general?"*
+
+**What was measured first.** Three kinds of movement, and they cost wildly
+different things. Anything **inside** a module — a unit, a tab, the gear into
+that module's own Setup — is redrawn in place: no server, instant. Anything
+**between** the console, a client and a module throws the whole platform away
+and rebuilds it: the browser re-reads **3.8MB** of the platform's code and
+**660KB** of its styling, then asks the server for the client's entire plan again
+(**~360KB**, read across 42 tables) before it can draw anything.
+
+**And one of those hops was doing all of that to change one word.** The client's
+settings and a module's settings are the SAME page: the server builds both from
+the same data and they differ by a single mark saying which list to draw. So
+pressing *Client settings ›* or *Strategy settings ›* rebuilt a 3.8MB
+application and re-fetched the whole plan for no reason at all. The console and
+the module switcher are not waste — those really are different applications —
+and neither is arriving in a client for the first time. This hop was.
+
+**Four options were put to him with the cost of each. He took A**, the smallest:
+make that one crossing a press.
+
+**What was built.** Pressing either of those two rows now changes the rail in
+place, instantly, with no server involved. The link underneath is untouched, so
+a middle click, a right-click *Copy link address* and opening in a new tab all
+still work and still carry the right address — it is faster and not narrower.
+Where somebody has no page at all in the rail they are crossing to, the press
+steps aside and the link goes as before.
+
+**One thing had to follow it.** The four-square module switcher in the top left
+was kept off the client's own settings by never being built there, which worked
+while the only way across was a page load. With the crossing a press it was
+wrong both ways — missing after crossing to a module, still standing after
+crossing back. It now follows the same rule as the rest of that bar: built where
+there is a choice, hidden on the client's own pages by the one CSS rule that
+already hides the navigation row, the Group dropdown, the Units | Functions
+switch, the gear and the viewer strip.
+
+**Checked.** The shell check was **111 green** before this and is **118 green**
+after, seven assertions added — led by the one the whole change is for: a build
+that followed the link lands on the same rail wearing the same bar at the same
+address, three seconds later, so a marker planted in the page before the press
+is the only thing that can tell them apart. Both directions are asserted, and so
+is Back. Proved able to fail twice, each break made from the sources: the rows
+as plain links again → **2 red**, exactly the two markers; the switcher's old
+rule back → **1 red**, the control silently missing after the crossing.
+
+Neighbours: `setup-per-module` green on both halves (its served half drives the
+addresses both rails write), plus `setup-rail`, `setup-search`, `setup-pages`,
+`setup-sticky`, `setup-squeezed`, `client-setup`, `client-setup-outside`,
+`attention-rows` and `welcome`; `modules` 143/0, `door-landing` 140/0,
+`built-in-step` clear. **`qa.py` over `file://` is 33 viewers / 242 destinations
+/ ERRORS none** — the §365 record to the number, so nothing else moved.
+
+**Not done, and recorded rather than quietly skipped.** Three things would make
+the remaining hops faster and none is this change:
+
+* **Back between the console and a client still rebuilds**, because every page
+  here is served with an instruction telling the browser not to keep it.
+  Loosening that would make Back instant at no cost to the figures — the plan
+  never travels in the page — but it is a **security setting**, so it is Islam's
+  call, and what a signed-out Back shows has to be measured before it is
+  promised.
+* **The two big generated files are re-checked on every page change.** They only
+  change when we deploy, so they could be stamped with a version and cached.
+  Removes two round trips per hop; the re-reading cost stays.
+* **The 3.8MB itself** is the floor under every hop that genuinely changes page,
+  the module switcher included. A real piece of work, and where the weight
+  actually sits has not been measured.
+
+**Merged to `main` 2026-09-18** on Islam's word.
+
+`main` had moved one commit underneath — §366, which repaired three checks and
+changed no product file — so this was a real merge and not a fast-forward. The
+three record files conflicted and both sides were **kept**, never picked. Then
+everything was run again **on the merged tree**, which is the only tree that
+matters:
+
+* The frozen sweep: **33 viewers, 242 destinations, no errors.**
+* The check this round is about: **118 of 118.** Its neighbours 143 and 140.
+* The three §366 repaired: **47 of 47**, **no failures**, **124 of 124.**
+* The shipped file is the build; the served copies are what their generators
+  produce; the types are clean from cold; the worker parses.
+
+**How we know it is live.** The service worker cannot be the witness here — the
+generator drops the half its version name sits in, so the served worker is
+identical either side of a merge. What moved are the two files a browser
+actually downloads, read off the live site: the platform script
+**3,789,535 → 3,794,390 bytes** and the stylesheet **659,996 → 660,815**, both
+matching this build exactly. The branch was only brought level after that.
+
+**Nobody is signed out.** Nothing in this merge touches the server, the rules or
+the database — read off the file list, not assumed — so no figure, plan or
+password moves, and nothing needs migrating.
+
+**One thing to know.** Because the served worker did not change, a tab somebody
+left open will **not** be offered "a newer version of the platform is ready". It
+keeps the older screen, with its old settings rail, until it is reloaded.
+
+**§371 — the card before there is a client in it (2026-09-19).** Built. Islam,
+of §369's one open item: *"didn't we agree to show a grey skeleton?"* — and he
+is right: §94.10 settled that for the client platform, and the console's own
+boot gate cites the rule while never taking the treatment. Two treatments were
+drawn out of the real page at the time and published; he took the skeleton over
+the recommendation. The console now draws its title and three grey card shapes
+straight away instead of an empty screen, and the real cards replace them —
+nothing drawn that could turn out to have been the wrong tenant's. The Add
+card's own 152px is shared rather than copied; the search box is deliberately
+not drawn over placeholders; the waiting cards come down before a refusal goes
+up. **Two assertions went red the day it gained a treatment, which is what they
+were for** — rewritten, never loosened, and one of them had already started
+passing over an empty sample list. Two neighbouring checks died rather than
+reported on a documented command, which is §369.4's fault in two files it did
+not reach; both now name a missing page rather than timing out.
+
+Verified: console-boot **13/0 on both copies**, red **five ways**;
+platform-cards 21/0, publishing-room 74/0, both also against the generated
+copy; client-card-modules 23/0; client-setup-outside and client-archive 0
+failures; built-in-step all good. The frozen product is untouched, so the
+shipped file is byte-identical and no `sw.js` bump is owed. **Recorded, not
+done:** the heading still shifts 77px down when the tab row lands — it is in
+the signed-off pair, and closing it means drawing a navy band nobody has seen.
+
+**§371.5 — renumbered before the merge (2026-09-19).** Main took §366 and §367
+for different work while this branch was building, so the branch's four
+sections shifted up by one: §367 → §368 (the client card's marks), §368 → §369
+(the console's boot), §369 → §370 (the browser signs you in), §370 → §371 (this
+one). **Done BEFORE the merge, which is what makes it provably scoped** — the
+merge base holds no citation of §366–§371 in any spelling, measured, so every
+occurrence in the tree was a line this branch wrote (§264.3). Descending, or
+each step eats the next; **both spellings**, because CLAUDE.md uses the HTML
+entity throughout and a one-spelling sweep would have left 29 citations naming
+somebody else's sections (§336.1); every substitution asserted it matched the
+count measured first (31 / 9 / 56 / 57); and of 150 changed lines, 0 do not
+carry a citation. **The sweep also took the two sentences describing the
+numbering itself**, which then named the wrong number — the fault in miniature,
+and why both were rewritten by hand.
+
+**§371.6 — a bare `.ccard` stopped meaning a client (2026-09-19).** Found by
+running the neighbours on the merged tree: `door-landing.mjs` 142 ok, 1 failed.
+**This round's fault, not the merge's** — the check is byte-identical to §371's
+tip but for the renumber, and the cause is §371's own markup: a placeholder is
+a `.ccard` with no client, no name and no heading, so the wait returned on the
+skeleton and the name was read a beat early. A race, which is why it passed at
+§371's own run. The wait is `.ccard[data-client]` now — what `.ccard` meant when
+the line was written (§218) — 143/0 twice on two fresh databases; and every
+other reach for a card was swept (§51.11), two more fixed, one left as correct.
+
+**Merged to `main` 2026-09-19 on Islam's word.**
+
 ---
 
 ## Portfolio — the delivery plan, per client (spec 060)
@@ -5617,3 +6484,4 @@ dies in its own seed harness on a Meeting Notes column. Both recorded.
 
 **Next, and still a decision rather than work**: the three sign-offs. Nothing
 visual can be built until they are given.
+

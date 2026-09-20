@@ -50,29 +50,62 @@ const check = (what, good, detail) => {
 
 /* THE BREAKS ARE MADE FROM THE SOURCE (§276), never by editing the graph a
    probe hands in: a fixture bent into the shape of the bug proves the probe
-   works and nothing about the product. frozen.cjs is doctored into a copy
-   and required from there — it resolves the frozen sources off process.cwd(),
-   which does not move, so the copy reads exactly what the real one reads. */
+   works and nothing about the product.
+
+   AND THE SOURCE THEY MUST REACH MOVED (§365). __smpShape used to live in
+   frozen.cjs's own glue, so doctoring frozen.cjs's text reached it; §363
+   carried the flow out into the frozen source client-setup.js, which
+   frozen.cjs now RUNS rather than holds — so every one of these patterns
+   quietly stopped matching and five of the six breaks became no-ops. The
+   check went on reading 33 ok, 0 failed with five of its guards proving
+   nothing: §54.5's own shape, and indistinguishable from a working guard.
+
+   So the doctoring reaches the text frozen.cjs LOADS, and — §344.1 — a
+   pattern that does not match is a hard failure rather than a silent
+   no-op, which is the only thing that stops this happening a third time. */
 const require_ = createRequire(import.meta.url);
 let frozen;
 if (!BREAK || BREAK === "extra-word") {
   frozen = require_(join(APP, "lib", "frozen.cjs"));
 } else {
-  let src = readFileSync(join(APP, "lib", "frozen.cjs"), "utf8");
-  if (BREAK === "no-carry") {
-    src = src.replace(/UNITS\[k\] = __smpCarry\(wasUnits\[k\], UNITS\[k\], \["name", "company", "ukey"\]\);\n\s*if \(wasRoles\[k\]\) UNIT_ROLES\[k\] = wasRoles\[k\];/,
-      "void 0;")
-             .replace(/FUNCTIONS\[k\] = __smpCarry\(wasFns\[k\], FUNCTIONS\[k\], \["name", "format"\]\);/, "void 0;");
-  } else if (BREAK === "no-dropped") {
-    src = src.replace(/return \{ state: state, dropped: dropped \};/, "return { state: state, dropped: [] };");
-  } else if (BREAK === "keep-weights") {
-    src = src.replace(/if \(state\.group && state\.group\.weighting\) state\.group\.weighting\.units = \[\];/, "void 0;");
-  } else if (BREAK === "no-caps") {
-    src = src.replace(/var made = addCapability\(holder\);/, "var made = { }; return;");
-  } else if (BREAK === "count-any-cap") {
-    src = src.replace(/if \(n\) caps\+\+;/, "caps++;");
-  } else { console.log("unknown break: " + BREAK); process.exit(2); }
+  /* Each break is [pattern, replacement] against client-setup.js — the frozen
+     source that now holds __smpShape and the carry it is all about. */
+  const BREAKS = {
+    "no-carry": [
+      [/UNITS\[k\] = __smpCarry\(wasUnits\[k\], UNITS\[k\], \["name", "company", "ukey"\]\);\n\s*if \(wasRoles\[k\]\) UNIT_ROLES\[k\] = wasRoles\[k\];/, "void 0;"],
+      [/FUNCTIONS\[k\] = __smpCarry\(wasFns\[k\], FUNCTIONS\[k\], \["name", "format"\]\);/, "void 0;"]],
+    "no-dropped":    [[/return \{ state: state, dropped: dropped \};/, "return { state: state, dropped: [] };"]],
+    "keep-weights":  [[/if \(state\.group && state\.group\.weighting\) state\.group\.weighting\.units = \[\];/, "void 0;"]],
+    "no-caps":       [[/var made = addCapability\(holder\);/, "var made = { }; return;"]],
+    "count-any-cap": [[/if \(n\) caps\+\+;/, "caps++;"]]
+  };
+  if (!BREAKS[BREAK]) { console.log("unknown break: " + BREAK); process.exit(2); }
+
+  /* THE PATTERN MUST MATCH, OR THE RUN STOPS (§344.1). A replace over text it
+     no longer fits changes nothing and prints "0 red", which reads exactly
+     like a guard doing its job. */
+  const flow = join(ROOT, "SMP-Project-Folder", "src", "client-setup.js");
+  let text = readFileSync(flow, "utf8");
+  for (const [re, to] of BREAKS[BREAK]) {
+    if (!re.test(text)) {
+      console.log("  BREAK PATTERN DID NOT MATCH — " + BREAK + ": " + String(re).slice(0, 70));
+      console.log("  The source moved and this falsification stopped falsifying (§344.1).");
+      process.exit(2);
+    }
+    text = text.replace(re, to);
+  }
   const dir = mkdtempSync(join(tmpdir(), "smp-frozen-"));
+  writeFileSync(join(dir, "client-setup.js"), text);
+
+  /* frozen.cjs is copied too, with the one line that loads the frozen sources
+     taught to prefer the doctored copy — so everything else it reads is still
+     the real thing. */
+  let src = readFileSync(join(APP, "lib", "frozen.cjs"), "utf8");
+  const loader = 'for (const f of FILES) vm.runInContext(fs.readFileSync(path.join(SRC, f), "utf8"), c, { filename: f });';
+  if (!src.includes(loader)) { console.log("  frozen.cjs's loader line moved; this harness cannot doctor it"); process.exit(2); }
+  src = src.replace(loader,
+    'for (const f of FILES) { const d = path.join(' + JSON.stringify(dir) + ', f);\n' +
+    '    vm.runInContext(fs.readFileSync(fs.existsSync(d) ? d : path.join(SRC, f), "utf8"), c, { filename: f }); }');
   const p = join(dir, "frozen.cjs");
   writeFileSync(p, src);
   frozen = require_(p);
@@ -86,7 +119,13 @@ const bare = frozen.bare(clone(seed));
 console.log("\n1 · the words step and the label registry");
 let asked = [];
 {
-  const page = read("platform.html");
+  /* THE FLOW MOVED AND THIS ASSERTION DID NOT (§51.11, §218). §363 carried
+     the set-up flow out of platform.html into client-setup.js, so reading the
+     console page here found no WORDS at all — and the claim underneath is
+     unchanged, because it is about the FLOW and never about which file holds
+     it. Re-pointed, never loosened; `asked.length > 0` is what caught the
+     move and is why it stays. */
+  const page = read("SMP-Project-Folder/src/client-setup.js");
   const blk = page.slice(page.indexOf("var WORDS = ["));
   const arr = blk.slice(0, blk.indexOf("];"));
   asked = [...arr.matchAll(/\[\s*"([A-Za-z0-9_]+)"/g)].map((m) => m[1]);

@@ -328,6 +328,13 @@
        on the server (office by rule, §97's shape): who reads every person's
        changes is not a tick somebody could set on a bad afternoon. */
     { key:"c_history", area:"always", scope:"manage", label:"History",          note:"Who changed what, and put a value back" },
+    /* THE LANDING LINE (§359.4). `area:"always"` with the real gate in the
+       page def (the office) and on the server (a `setup` change): what a
+       module says about itself on the client landing is the office's, and
+       spec 046 §4.4's per-module Access table is where it will be granted
+       when that page lands (step 5) — a matrix cell today would be a second
+       answer to that question. */
+    { key:"c_landing", area:"always", scope:"manage", label:"Landing line",     note:"What this module says on the landing" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
@@ -771,6 +778,35 @@
      answer "is this the office" without reading thirty tables to build one
      (§97.1). A responsibility role could never make somebody the office or the
      Super user, so nothing is missed by not looking for one. */
+  /* ── TWO KINDS OF FOREFRONT ROW, AND ONLY ONE IS OURS TO REWRITE
+     (spec 058 §3a.1, §362.2) ─────────────────────────────────
+     `officeRow` has marked them apart since §313.29 and nothing read the
+     difference, so the register and the authoriser both treated every marked
+     row as the platform's:
+
+       · MINTED (`ffrow`) — the platform built this row for a consultant who
+         was on nobody's register, and its `role` IS the seat, rewritten on
+         every request (§338's heal). Nothing about it is the client's, so the
+         register offers no picker and the save refuses the whole row.
+       · ADOPTED (`forefront` alone) — the CLIENT'S OWN person, marked because
+         their address matched exactly one active row (§313.32). `officeRow`
+         says so in its own words: *adopted, never rewritten*. Their role is
+         the client's and was typed on this register.
+
+     TAKEN AS ONE, the refusal froze a person the client entered: the day
+     their custodian joins the account team, their unit, their address and
+     their custodianship all stop being editable, and §96.2 forbids us to
+     rewrite what somebody else wrote. So the question is asked of the MINT,
+     never of the mark — here, because the screen draws from it and the server
+     refuses from it and two answers to one question is §42's drift.
+
+     A row carrying `ffrow` and no `forefront` cannot occur (the mint writes
+     both, §313.30) and is read as minted anyway: the mark is a claim about
+     where the row came from, and the safe reading of a half-written one is
+     the stricter. */
+  function isForefrontRow(p) { return !!(p && p.forefront); }
+  function isMintedRow(p) { return !!(p && p.ffrow); }
+
   function isSuperRole(k) { return k === "super"; }
   function isOfficeRole(k) { return k === "super" || k === "smoteam"; }
   function isOffice(w, person) {
@@ -3031,6 +3067,35 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      THE FIELD IS NAMED ONCE and `lib/authorize.js` classifies it by this
      constant, for §234's reason. */
   var PRESENT_MINS = "presentMins";
+  /* ── THE LANDING LINE (§359.4, spec 056 §4.5) ─────────────────────
+     Which of its declared sentences each module says on the client landing,
+     keyed by module — `{ strategy: "waiting" }` — chosen on the module's own
+     Landing line page. The SENTENCES are declared beside the module
+     (smp-app/lib/modules.ts) and never here: nothing frozen can say what a
+     module has to say, and the server is the only reader that holds the
+     facts a line is made of. What is shared is the KEY and the reader, for
+     §234's reason: lib/authorize.js classifies the field by this constant and
+     lists it among the group's known keys, and the browser writes it through
+     this same name. Stored as an ABSENCE (§50.6): a module on its default
+     line holds no entry, and the last entry leaving deletes the map. */
+  var LANDING_PICK = "landing";
+  /* §360 (spec 057): whether the client's set-up has been pressed Done. ONE
+     key on the group, stored as an ABSENCE (§50.6): a client being set up
+     holds no entry, and "Done with set-up" writes `true`. The rail reads it
+     to move Getting started from the top of the client's Setup to the
+     bottom as Client set-up; lib/authorize.js classifies it `setup` by this
+     constant and lists it among the group's known keys (§234's reason). */
+  var SETUP_DONE = "setupDone";
+  function setupDone(group) { return !!(group && group[SETUP_DONE] === true); }
+  var NO_PICKS = Object.freeze({});
+  function landingPicks(group) {
+    var v = group && group[LANDING_PICK];
+    return (v && typeof v === "object" && !Array.isArray(v)) ? v : NO_PICKS;
+  }
+  function landingPick(group, module) {
+    var v = landingPicks(group)[module];
+    return (typeof v === "string" && v) ? v : "";
+  }
   /* Frozen and SHARED, for `NO_FLOW`'s reason: every tenant that has set no
      times is handed this same object, so one careless write would give them
      all a slot. */
@@ -3505,6 +3570,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
+    isForefrontRow: isForefrontRow, isMintedRow: isMintedRow,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
@@ -3560,6 +3626,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     videoSlides: videoSlides, videoRoom: videoRoom, videoHeld: videoHeld,
     MASTER_FLOW: MASTER_FLOW, masterFlow: masterFlow,
     PRESENT_MINS: PRESENT_MINS, presentMinsMap: presentMinsMap,
+    LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
+    SETUP_DONE: SETUP_DONE, setupDone: setupDone,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,
@@ -5590,8 +5658,8 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
 /* Transient register state. None of this is the tenant's data — it is which
    control happens to be open — so none of it is saved (§25.2: a property of
    the screen never belongs in the state graph).
-     ADDROLE      whose "+ role" control is open, by person key
-     ADDROLE_KIND which role that control currently shows
+     PROLEPICK    whose Roles list is open, by person key
+     PCELL        which one cell of the register is being typed into
      NEWPERSON    what has been typed into the add-a-person row
      PICKING      which assignment picker is open, "<unit>|<role>"
      PICKQ        what has been typed into it */
@@ -5612,7 +5680,21 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
-var ADDROLE = null, ADDROLE_KIND = "owner";
+/* ── WHOSE ROLES LIST IS OPEN (§372) ──────────────────────────────────
+   The Roles cell IS a ticking list now, and granting a role has to repaint —
+   it changes the chips, and it takes the role off whoever held it, whose row
+   is elsewhere in the table. A paint closes every popup (searchsel's wire()
+   opens with close()), so the open list is held here and asked for back at
+   the end of the paint. It replaces `ADDROLE`/`ADDROLE_KIND`, which were the
+   "+ role" control's own state and have no control left to describe (§24). */
+var PROLEPICK = null;
+/* ── AND WHICH CELL IS BEING TYPED INTO (§372) ─────────────────────────
+   `{key, field}` — the person and the dialog's own label for the field — or
+   null. One at a time, for §79.2's reason: two open cells are two unsaved
+   states. There is no Save and no Cancel, because leaving a bound field is
+   what commits it (§35) and Escape puts it back, which is the Tracker's shape
+   one module over (spec 054). */
+var PCELL = null;
 /* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
    `{key, why}`, or null. A property of the screen and never of the person
    (§25.2) — it is the outcome of one press, cleared by the press that
@@ -11291,6 +11373,59 @@ var ACCESS_DEFAULTS = SMPRules.ACCESS_DEFAULTS;
 var STATE_RANK = SMPRules.STATE_RANK;
 function grantFor(roleKey, areaKey){ return SMPRules.grantFor(world(), roleKey, areaKey); }
 
+/* ── A MODULE'S OWN GRANT (§359.5, spec 056 §4.4; spec 046 §4.4) ─────
+   A module other than Strategy declares its areas beside its label
+   (smp-app/lib/modules.ts MODULE_DEF) and NOT in lib/rules.js — the carried
+   rules copy is asserted identical to the frozen one (§335), and a module's
+   area in the frozen Strategy product is where it does not belong. So the
+   stored map holds a key the shipped AREAS list does not name, the store is
+   blind to which keys it carries (state-io writes and reads whatever the map
+   holds — measured, never assumed, §172), and the DEFAULT for an absent key
+   is the module's own shipped state rather than ACCESS_DEFAULTS', which
+   has never heard of the key and would answer "none" for a module that ships
+   open (§30.2: absent means not answered yet, never denied).
+
+   ONE READER FOR THE SCREEN AND THE ROUTE. The Access page draws this cell
+   from it, and the served route's gate (smp-app/lib/access.ts, through
+   frozen.cjs) asks this same function of the same graph — a second copy of
+   "absent means shipped" is how the page and the door would come to
+   disagree about who may open a module (§42, §53.5). `area` is the module's
+   declaration, { key, shipped }. */
+function moduleGrantFor(roleKey, area){
+  var row = ACCESS && ACCESS[roleKey];
+  if (row && Object.prototype.hasOwnProperty.call(row, area.key)) return row[area.key] || "none";
+  return area.shipped || "none";
+}
+/* THE DEFAULT IS AN ABSENCE (§50.6): setting a cell back to the module's
+   shipped state DELETES the key, so a role never touched and a role set
+   and set back are the same bytes — and a row left holding nothing goes
+   too, or the map carries an empty object for a role nobody answered. */
+function setModuleGrant(roleKey, areaKey, state, shipped){
+  var row = (ACCESS[roleKey] = ACCESS[roleKey] || {});
+  if (!state || state === shipped) delete row[areaKey]; else row[areaKey] = state;
+  if (!Object.keys(row).length) delete ACCESS[roleKey];
+}
+/* MAY THIS PERSON OPEN A MODULE — the most generous answer across the roles
+   they hold, the floor included (rolesOrFloor's own shape, §93: somebody on
+   the register holding nothing is judged on the Everyone-else row). Asked by
+   the served route before a module is drawn (spec 056 research R3); the seat
+   is decided before this is asked and never here. */
+function mayOpenModuleArea(person, area){
+  if (!person) return (area.shipped || "none") !== "none";
+  var rs = personRoles(person);
+  if (!rs.length) {
+    var at = person.fn ? "fn:" + person.fn : person.company ? "co:" + person.company : person.unit;
+    rs = at ? [{ role: SMPRules.NO_ROLE, at: at }] : [];
+  }
+  if (!rs.length) return (area.shipped || "none") !== "none";
+  var best = "none";
+  rs.forEach(function(r){
+    var g = moduleGrantFor(r.role, area);
+    if (STATE_RANK[g] > STATE_RANK[best]) best = g;
+  });
+  return best !== "none";
+}
+
 /* ── OWN, and how it is decided ─────────────────────────────────────
    Islam: *"own is always about what they have a role in … I see this as a
    logic thing not a settings thing."*
@@ -16486,7 +16621,13 @@ var RECIPES = [
        "figures and clears the reporting fields, so each unit is asked again " +
        "rather than inheriting the last set of answers." },
   { id: "branding", q: "How do I set the colours and the logo?", who: "office",
-    a: "Go to Setup › Branding for both. The two colours are the accent and the " +
+    /* §360: the Branding page is gone — the mark and the colours are the
+       first step of the client's own set-up, Getting started until it is
+       finished and Client set-up after (§104.8: prose that names a page
+       that no longer exists is corrected in the edit that removes it). */
+    a: "Go to Setup › Client set-up (it reads Getting started until the set-up " +
+       "is finished) — the mark and the colours are on its first step. The two " +
+       "colours are the accent and the " +
        "navigation bar, and everything else is worked out from them.|The group's " +
        "mark sits above them: it is shown on any review deck whose subject has no " +
        "mark of its own — a business unit that has not uploaded one, and every " +
@@ -30240,13 +30381,20 @@ var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
     'stroke-linecap="round" stroke-dasharray="2 3"/></svg>';
 
 /* ── Roles & access ─────────────────────────────────────────────────── */
-function stateCell(roleKey, areaKey, editable, disabled){
+function stateCell(roleKey, areaKey, editable, disabled, opt){
   /* grantFor(), never ACCESS[role][area]. A tenant carried across from an
      earlier version has an EMPTY access map by design — the rows were rebuilt
      rather than migrated (§33, §37) — so a direct read was undefined[key] and
      the whole page threw. The cell shows what the platform would actually
      answer, which is the shipped default until somebody changes it. */
-  var v = grantFor(roleKey, areaKey);
+  /* §359.5: A MODULE'S CELL IS THE SAME CELL WITH ITS OWN READER. `opt`
+     carries what a module's area declares — its current value (read through
+     moduleGrantFor, whose default is the module's shipped state and never
+     ACCESS_DEFAULTS'), the states it admits, and the attribute the press
+     writes through (`data-mac`, whose handler deletes the key on the default,
+     §50.6). Absent, the cell is Strategy's exactly as it was. */
+  opt = opt || {};
+  var v = opt.value != null ? opt.value : grantFor(roleKey, areaKey);
   /* A cell that cannot come up is drawn as a dash rather than as "none". The
      group CEO owns every unit, so "other business units" is an empty set for
      them: saying "none" there would read as a denial of something, when there
@@ -30268,7 +30416,8 @@ function stateCell(roleKey, areaKey, editable, disabled){
      view and edit. Only those two cells: everywhere else the state would
      grant nothing (`mayFillPage` answers only for the strategy pages), and
      a toggle that does nothing is decoration (§42). */
-  var states = (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
+  var states = opt.states ? opt.states
+    : (areaKey === "a_unit_own_strat" || areaKey === "a_fn_own_strat")
     ? ["view", "fill", "edit"] : ["view", "edit"];
   var WORD = { view: "May read",
                fill: "May fill what’s empty — Missing values only, and they count straight away",
@@ -30283,8 +30432,9 @@ function stateCell(roleKey, areaKey, editable, disabled){
        button's own rules; it was wearing somebody else's. §56.7 in CSS instead
        of JS: a one-word modifier will eventually collide with a one-word
        component, and the collision is silent because both rules are valid. */
-    return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" data-ac="' +
-      roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
+    return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" ' +
+      (opt.attr || "data-ac") + '="' + roleKey + '|' + areaKey + '|' + (on ? "none" : o) +
+      (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
       (on ? "Turn off — leaves no access" : WORD[o]) +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
       ICON[o] + '</button>';
@@ -30294,6 +30444,99 @@ function stateCell(roleKey, areaKey, editable, disabled){
      which is the one thing it must never be mistaken for. */
   return '<td class="ac"><span class="stset' + (v === "none" ? " off" : "") + '">' +
     opts + '</span></td>';
+}
+
+/* THE ROWS EVERY ACCESS TABLE WALKS, NAMED ONCE (§359.5): Strategy's matrix
+   and a module's one-column table are two tables over ONE list of roles, so
+   the list — and the floor row that is not a role (§93) — is built here and
+   asked by both, or the day a role is added the two disagree about who is on
+   the register (§53.5). */
+function matrixRows(){
+  return ROLES.concat([{
+    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
+    note: "Not a role — what somebody on the register who holds no role may " +
+          "open. Most of the register, on a tenant of any size." }]);
+}
+/* NAMED FOR THE TABLE IT IS A CELL OF (§365.7). `roleCell` was also a
+   function declared INSIDE renderPeople() for the register's own Roles
+   cell — a different subject, a different signature, and one global
+   namespace (§65.9). Both callers of each resolved to the one intended,
+   because the nested declaration shadows this one for the whole of that
+   function, so it was untidy rather than live — and §365.6 had just been
+   paid for by exactly this family, a name resolving to something other
+   than the thing its caller meant, silently and rendering perfectly. A
+   third matrix added inside renderPeople() would have got the wrong one. */
+function matrixRoleCell(r){
+  var n = r.floor
+    ? PEOPLE.filter(function(p){
+        return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
+    : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+  /* Two lines, never more. The role's description is a sentence, and a
+     sentence in a 19% column wraps to eight lines and makes every row of a
+     49-cell table a hundred pixels tall — the exact fault this page was
+     rebuilt to remove. It is on hover instead. */
+  return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
+    '<span class="why">' +
+    (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
+    '</span></td>';
+}
+
+/* ── A MODULE'S OWN ACCESS TABLE (§359.5, spec 056 §4.4, spec 046 §4.4) ──
+   The first thing that READS a module's declared areas other than a check,
+   which is what the declaration was written for (spec 053 §4.5). The
+   client's roles down — matrixRows(), the matrix's own list — and the
+   module's areas across, each cell the states that area admits and no
+   others: Insights declares view | none, so the cell is ONE toggle, and an
+   `edit` here would be a grant with nothing behind it (§94.15).
+
+   THE DECLARATION ARRIVES ON THE DOCUMENT (`data-areas`, written by
+   lib/shell.ts onto a module's Setup document from MODULE_DEF and nowhere
+   else), because the frozen shell cannot import a module's declaration and
+   the frozen product must not carry a copy of it (§335). Over file:// there
+   is no module and no stamp, and the page says so rather than drawing a
+   table that writes to nothing (§45.2, §61).
+
+   THE WRITE IS THE MATRIX'S OWN: a cell lands in ACCESS under the module's
+   key, travels in the ordinary save, and is classified `access` by the
+   authoriser — the Super user's alone (§89), which is why the SMO team is
+   shown the table and given no button (mayEditAccess, the same line
+   Strategy's matrix asks). No new save path, no new rule (research R3). */
+function moduleAreas(){
+  var raw = document.documentElement.getAttribute("data-areas");
+  if (!raw) return null;
+  try {
+    var a = JSON.parse(raw);
+    return (Array.isArray(a) && a.length) ? a : null;
+  } catch (e) { return null; }
+}
+function renderModuleAccess(){
+  var areas = moduleAreas();
+  var label = document.documentElement.getAttribute("data-module-label") || "this module";
+  var head = cfgHead("Roles & access", [], null, false, null);
+  if (!areas) {
+    return head + '<div class="cfg"><p class="why mnone">Who may open a module is set on the ' +
+      'served platform, which knows what each module can be opened for. Nothing is set from this copy.</p></div>';
+  }
+  var editable = grant("c_access") === "edit" && mayEditAccess();
+  var th = '<tr><th style="width:17%">Role</th>' + areas.map(function(a){
+    return '<th class="ac" title="' + esc((a.label || a.key) + " \u2014 " + (a.note || "")) + '">' +
+      esc(a.label || a.key) + '</th>';
+  }).join("") + '</tr>';
+  var body = matrixRows().map(function(r){
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
+      areas.map(function(a){
+        return stateCell(r.key, a.key, editable, null, {
+          value: moduleGrantFor(r.key, a),
+          states: (a.states || ["view"]).filter(function(x){ return x !== "none"; }),
+          attr: "data-mac", shipped: a.shipped || "none" });
+      }).join("") + '</tr>';
+  }).join("");
+  return head + '<div class="cfg acgrid macgrid" data-macmod="' + esc(landingModule()) + '"><table><thead>' + th +
+    '</thead><tbody>' + body + '</tbody></table></div>' +
+    '<div class="chart-legend" style="margin-top:12px">' +
+      '<span><i class="st st-view">' + ICON_EYE + '</i> may open ' + esc(label) + '</span>' +
+      '<span><i class="st st-none">neither</i> cannot open it \u2014 no row on the landing, no address</span>' +
+    '</div>';
 }
 
 /* ── Roles &amp; access (§37) ─────────────────────────────────────────
@@ -30423,25 +30666,10 @@ function renderAccess(){
      It has to stay editable. A client who wants people with no role to see
      nothing sets this row to none and can see that they have; a floor nobody
      can reach is a rule hiding as a default. */
-  var MATRIX_ROWS = ROLES.concat([{
-    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
-    note: "Not a role — what somebody on the register who holds no role may " +
-          "open. Most of the register, on a tenant of any size." }]);
+  var MATRIX_ROWS = matrixRows();
 
   var body = MATRIX_ROWS.map(function(r){
-    var n = r.floor
-      ? PEOPLE.filter(function(p){
-          return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
-      : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
-    /* Two lines, never more. The role's description is a sentence, and a
-       sentence in a 19% column wraps to eight lines and makes every row of a
-       49-cell table a hundred pixels tall — the exact fault this page was
-       rebuilt to remove. It is on hover instead. */
-    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' +
-      '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
-        '<span class="why">' +
-        (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
-        '</span></td>' +
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
       AREAS.map(function(a){
         return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
       }).join("") + '</tr>';
@@ -31434,7 +31662,20 @@ function brandNow(key){
     return ("0" + (+x).toString(16)).slice(-2); }).join("") : "#000000";
 }
 
+/* ── BRANDING IS A PART OF GETTING STARTED NOW (§360, spec 057) ─────────
+   Islam: *"it absorbs the branding part with the mark and the brand colors
+   and remove the separate branding setting."* The page def is gone from
+   SUBS.setup; what it drew is `brandingBody()`, which the client set-up
+   flow (client-setup.js) draws inside its first step — the SAME renderer,
+   wired by the SAME handlers in wire(), so a colour set on Getting started
+   is a colour set on the Branding page that used to be (§53.5).
+   `renderBranding()` stays as head + body for anything that still asks the
+   page by name. */
 function renderBranding(){
+  var mayEdit = grant("c_brand") === "edit";
+  return cfgHead("Branding", [], "brand", mayEdit, null) + brandingBody();
+}
+function brandingBody(){
   var mayEdit = grant("c_brand") === "edit";
   var b = branding(), checks = brandChecks(), t = brandTokens();
   var set = !!(b.accent || b.bar || b.palette || b.font);
@@ -31532,9 +31773,7 @@ function renderBranding(){
     '</div>' +
     (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
 
-  return cfgHead("Branding", [], "brand", mayEdit, null) +
-
-    markBlock +
+  return markBlock +
 
     section("", "The tenant’s colours",
       null,
@@ -31930,7 +32169,20 @@ function renderPeople(){
      the answer would always be false and the picker would exist nowhere. It is
      a parameter again — passed false by the row, true by the dialog — and there
      are exactly two callers, both in this file, both named. */
-  function roleCell(p, editable){
+  /* ── AT REST IT IS THE CHIPS, OPENED IT IS THE LIST (§372.14) ────────
+     Islam, of the register on his own deployment: "the roles as well no need
+     for the arrow showng the the box is a drop down box .. the table in
+     general should look everything fixed and not editable until I made the
+     double click."
+
+     §372 made the whole cell the ticking button, which answered "it must not
+     overflow" and left the one column in the table that draws a control when
+     nobody is editing anything — a white box with a border and an arrow, on
+     all 33 rows, measured. `opened` is the third state that was missing: a row
+     somebody MAY edit but is not editing reads exactly as a row nobody may
+     edit does, and the double-click that opens every other cell opens this one
+     too. */
+  function roleCell(p, editable, opened){
     /* ── A FOREFRONT ROW IS SET SOMEWHERE ELSE (spec 042 §6) ──────
        Their seat comes from this client's configuration on the Forefront
        platform, and the next time they open the client it is written again —
@@ -31945,16 +32197,37 @@ function renderPeople(){
        `p.extra.forefront` first, which is the shape in the DATABASE and is
        never the shape in the graph: the mark would simply never have drawn,
        and the check that asked for it is what said so. */
-    if (p && p.forefront) {
+    /* ── AND IT IS THE MINT THAT IS READ-ONLY, NEVER THE MARK
+       (spec 058 §3a.1, §362.2) ────────────────────────────────
+       The paragraph above is true of a row the platform BUILT and was being
+       applied to one it merely ADOPTED — the client's own person, marked
+       because their address matched exactly one active row (§313.32), whose
+       role `officeRow` says in its own words it never rewrites. So this cell
+       printed their CUSTODIANSHIP as though it were a seat, under a hover
+       saying it is set in the Forefront platform, which is false of it; and
+       the picker that gives a client role was taken away from a row that is
+       the only place one is given (§61).
+
+       Two branches now, asked of `lib/rules.js` so the screen and the save
+       cannot answer differently (§42, §53.5): a MINTED row states its seat
+       and offers nothing, an ADOPTED row is the register's own business again
+       and carries the mark BESIDE its chips — inline, because a mark on a line
+       of its own is what takes a 39px row to 51 (§116.4, §88). */
+    if (SMPRules.isMintedRow(p)) {
       /* The role's NAME from the one list that defines them (§53.5) — L() is
          the tenant's labels lookup and would have printed a key. */
       var seatDef = (SMPRules.ROLES || []).filter(function (r) { return r.key === p.role; })[0];
       var seat = seatDef ? seatDef.name : "";
       return '<span class="ffrow" title="' +
-        esc("Set on this client\u2019s configuration in the Forefront platform.") + '">' +
+        esc("Set on Forefront team, and nowhere in this client.") + '">' +
         '<span class="chip">' + esc(seat || "Forefront") + '</span>' +
         '<i>Forefront</i></span>';
     }
+    var alsoOurs = SMPRules.isForefrontRow(p)
+      ? '<i class="ffmark" title="' +
+        esc("Also on the Forefront team — their seat is set there, their role here.") +
+        '">Forefront</i>'
+      : "";
     var rs = personRoles(p);
     var home = belongsKey(p);
     /* ONE ROLE WIDE, AND THE REST BEHIND A "…" (Islam, 2026-08-22). Most people
@@ -31962,7 +32235,15 @@ function renderPeople(){
        what made this the widest column on the page. The overflow is a CONTROL,
        not a hover: a hover cannot be reached on a touch screen and cannot be
        read aloud, and this is the only place the second role appears. */
-    var openRoles = PROLES === p.key;
+    /* ── THE CHIPS, AND THEY ARE THE PICKER'S LABEL TOO (§372) ─────
+       `asLabel` is true when this cell is about to BE the ticking button:
+       there, the "…" is a span rather than a button (a button inside a button
+       is not markup, and one press now opens the whole list anyway) and the
+       expand/collapse it drove has nothing left to do. Read-only it is still
+       the control Islam asked for on 2026-08-22 — the only place a second role
+       appears, reachable on a touch screen and readable aloud. */
+    var asLabel = !!editable && personActive(p);
+    var openRoles = PROLES === p.key && !asLabel;
     var shownRoles = (rs.length > 1 && !openRoles) ? rs.slice(0, 1) : rs;
     var hiddenRoles = rs.length - shownRoles.length;
     var held = rs.length
@@ -31991,18 +32272,23 @@ function renderPeople(){
           var derived = SMPRules.isOwnLinesRole(r.role);
           var tip = roleName(r.role) + " \u00b7 " + at +
             (derived ? " \u2014 comes from being named on the plan; change the Owner there to move it" : "");
+          /* ── AND THERE IS NO \u00d7 ANY MORE (Islam, 2026-09-17) ──────────
+             Removing a role is UNTICKING it in the list this cell opens, and
+             two ways to take one off is two answers to one act (§53.5). The
+             chip is a reading of what somebody holds again, which is what it
+             is on the thirty rows nobody is editing. The full "role \u00b7 where"
+             is still on the hover, as it was. */
           return '<span class="rolechip" title="' + esc(tip) + '">' +
             '<b>' + esc(roleName(r.role)) + '</b>' +
             (elsewhere ? '<span class="rolewhere">' + esc(at) + '</span>' : '') +
-            (editable && !derived
-              ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
-                '" title="Remove this role" aria-label="Remove this role">&times;</button>'
-              : '') + '</span>';
+            '</span>';
         }).join("") +
         (hiddenRoles
-          ? '<button class="rolemore" data-proles="' + p.key + '" title="Show ' +
-            hiddenRoles + ' more" aria-label="Show ' + hiddenRoles + ' more role' +
-            (hiddenRoles === 1 ? "" : "s") + ' for ' + esc(p.name) + '">&hellip;</button>'
+          ? (asLabel
+              ? '<span class="rolemore">&hellip;</span>'
+              : '<button class="rolemore" data-proles="' + p.key + '" title="Show ' +
+                hiddenRoles + ' more" aria-label="Show ' + hiddenRoles + ' more role' +
+                (hiddenRoles === 1 ? "" : "s") + ' for ' + esc(p.name) + '">&hellip;</button>')
           : (openRoles && rs.length > 1
               ? '<button class="rolemore on" data-proles="" title="Show fewer" ' +
                 'aria-label="Show fewer roles">&lsaquo;</button>'
@@ -32012,8 +32298,30 @@ function renderPeople(){
          answers "what does this person hold" for somebody scanning the
          register — and while the two dropdowns are on screen the answer is
          being typed, not read. */
-      : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
+      /* THE PILL STAYS WHILE THE LIST IS OPEN (reversing the 2026-08-24
+         note above, because what it was about is gone). That note removed it while
+         two dropdowns stood in the cell — "the answer is being typed, not
+         read". Nothing stands in the cell now: the list opens OVER the page,
+         and the pill is the label of the button you pressed to open it. */
+      : '<span class="pill none">No role</span>';
+    /* THE MARK RIDES ON `held`, so all three exits below carry it: whether
+       this person is also on the Forefront team is a fact about them and not
+       about the editing state, and appending it at each `return` is three
+       places for one answer to go missing from (§104.7). */
+    held = held + alsoOurs;
     if (!editable) return held;
+    /* ── AND A ROW NOT BEING EDITED IS READ, NOT OFFERED (§372.14) ──────
+       The chips, with the "…" already a span rather than a button (`asLabel`
+       above) — so the cell carries no single-click behaviour at all and the
+       double-click has the whole of it. What the "…" used to reveal is on the
+       hover and is ticked in the list this cell now opens, so nothing is out
+       of reach (§61).
+
+       `roleStop` and `seatAsk` ride BOTH exits: a refused pick and a seat
+       waiting to be confirmed are answers to something just done, and the pick
+       that produced them closes the cell (§186, §110). Drawn only when their
+       own state names this person, so at rest they are nothing. */
+    if (!opened) return held + roleStop(p) + seatAsk(p);
     /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
        `SMPRules.personRoles()` opens with "a retired person holds nothing" and
        returns [] — but the picker was drawn on a retired row anyway, so giving
@@ -32055,17 +32363,84 @@ function renderPeople(){
        other; both have to say something before somebody holds a role somewhere,
        and where they cannot agree the row explains it rather than doing
        nothing. */
-    var addRole = ADDROLE === p.key;
-    return held +
-      (addRole
-        ? '<select class="fld rolepick" data-prole-pick="' + p.key + '" ' +
-            'aria-label="Which role to give ' + esc(p.name) + '">' +
-            '<option value=""' + (ADDROLE_KIND ? "" : " selected") + '>Choose a role\u2026</option>' +
-            ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
-              return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
-                '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p) + seatAsk(p)
-        : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
+    /* ── THE CELL IS THE LIST (§372, Islam 2026-09-17) ───────────────
+       "for the role I'm afraid it still overflows as a box it can open which
+       a button as you do but not overflowing on other voxes can we make this
+       work?" — and the way it works is that the cell keeps exactly what it
+       already draws and the whole thing becomes pressable. Nothing is added
+       BESIDE the chips, which is what the first drawing did: a ticking button
+       sized to its widest entry beside the two chips took the column from
+       209px to 477 and the table from 1355 to 1623, and undid his own August
+       rule about this column in the same stroke.
+
+       The chips are handed over as the closed control's LABEL (`data-sshtml`,
+       §372 in searchsel.js) rather than re-drawn, so there is one builder for
+       what a role looks like and the cell reads the same open, shut and on a
+       row nobody may edit.
+
+       WHAT THE LIST CANNOT SET GOES IN ITS HEAD. A role held somewhere this
+       register cannot reach, and a role that comes from being named on the
+       plan, are both facts about this person that the ticks must not pretend
+       to own — they are stated above the list (`data-sshead`) where the "…"
+       used to be the only place they appeared. */
+    var mine = {}, cannot = [];
+    rs.forEach(function(r){
+      if (!SMPRules.isOwnLinesRole(r.role) &&
+          (r.at === home || roleWheres(r.role).length === 1)) mine[r.role] = 1;
+      else cannot.push(r);
+    });
+    /* WHO HOLDS THIS ROLE AT THIS PERSON'S OWN PLACE — asked of the graph
+       (§33: a responsibility role is a pointer on the THING), so the list says
+       "held by Rania Fahmy" as a fact rather than as a warning about a
+       possibility. A role that is not stored as a pointer answers null and
+       gets no such line, which is honest: nothing here knows who else holds
+       it. */
+    function roleHolder(role){
+      var fn = String(home).indexOf("fn:") === 0 ? FUNCTIONS[String(home).slice(3)] : null;
+      if (role === "owner")     return fn ? fn.head : (UNIT_ROLES[home] || {}).head;
+      if (role === "custodian") return fn ? fn.custodian : (UNIT_ROLES[home] || {}).custodian;
+      if (role === "fnhead")    return fn ? fn.head : null;
+      return null;
+    }
+    var opts = ROLES.filter(function(r){ return roleIsGrantable(r.key); })
+      .map(function(r){
+        var wheres = roleWheres(r.key);
+        var fits = wheres.length === 1 || wheres.some(function(w){ return w.v === home; });
+        /* THE SAME TWO SENTENCES THE REFUSAL USES (§110), said BEFORE the
+           press rather than after it — `roleAtWord` is the one word for what
+           kind of place a role is held at, and which FIELD answers it is read
+           off `roleWheres()` rather than guessed (§135.6). */
+        var hint = "";
+        if (!fits) {
+          var atCo = wheres.every(function(w){ return String(w.v).indexOf("co:") === 0; });
+          hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
+                 (atCo ? "Company" : "Unit") + " first";
+        } else if (SMPRules.isSeatRole(r.key)) {
+          hint = "a seat \u2014 asks before it lands";
+        } else {
+          var h = roleHolder(r.key);
+          var hp = h && h !== p.key ? personBy(h) : null;
+          if (hp) hint = "held by " + hp.name;
+        }
+        return '<option value="' + esc(r.key) + '"' + (mine[r.key] ? " selected" : "") +
+          (hint ? ' data-hint="' + esc(hint) + '"' : '') + '>' + esc(r.name) + '</option>';
+      }).join("");
+    var headHtml = cannot.length
+      ? '<b>Already held, and not set here</b>' +
+        cannot.map(function(r){
+          return '<span class="rolechip"><b>' + esc(roleName(r.role)) + '</b>' +
+            '<span class="rolewhere">' +
+            esc(SMPRules.isOwnLinesRole(r.role) ? "from the plan" : whereLabel(r.at)) +
+            '</span></span>';
+        }).join("")
+      : "";
+    return '<select class="roleset" multiple data-proleset="' + esc(p.key) + '"' +
+        ' data-sshtml="' + esc(held) + '"' +
+        ' data-sstitle="' + esc(rs.map(function(r){
+            return roleName(r.role) + " \u00b7 " + whereLabel(r.at); }).join(" \u00b7 ")) + '"' +
+        (headHtml ? ' data-sshead="' + esc(headHtml) + '"' : '') +
+        ' aria-label="Roles for ' + esc(p.name) + '">' + opts + '</select>' +
+      roleStop(p) + seatAsk(p);
   }
 
   /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§110) ─────
@@ -32168,7 +32543,17 @@ function renderPeople(){
      roles, no password state and no declaration to accept. */
   function personFields(p, add){
     var out = [];
-    var F = function(label, html, wide){ out.push({ label:label, html:html, wide:!!wide }); };
+    /* ── THE NOTE IS NOT THE FIELD (§372) ──────────────────────────
+       Three of these carry a sentence under them — "not on the Official BU
+       list", "the list says Retail Stores", "from the unit above" — and the
+       dialog draws field and note together, as it always has. The REGISTER
+       draws one field inside a 150px cell where a second line takes the row
+       from 39px to 51, which is the fault §116.4 records three times in this
+       one section. So they are two values rather than one string, and the
+       cell takes the field alone. */
+    var F = function(label, html, wide, note){
+      out.push({ label:label, html:html, wide:!!wide, note:note || "" });
+    };
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
         '" placeholder="' + esc(knownName(p, DNAMES)) + '">');
@@ -32206,7 +32591,7 @@ function renderPeople(){
         mainbuNamesFor(p).map(function(nm){
           return '<option value="' + esc(nm) + '"' +
             (mainbuKey(nm) === mainbuKey(p.mainbu) ? " selected" : "") + '>' + esc(nm) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (p.mainbu && !mainbuBy(p.mainbu)
         ? '<span class="vwhy">not on the Official BU list</span>' : ''));
     var drift = mainbuDrift(p);
@@ -32217,7 +32602,7 @@ function renderPeople(){
         personAtChoices().map(function(o){
           return '<option value="' + esc(o.v) + '"' +
             (o.v === belongsKey(p) ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (drift && drift !== belongsKey(p)
         ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
       saidWhereNote(p, true));
@@ -32233,11 +32618,14 @@ function renderPeople(){
         companyChoices().map(function(o){
           return '<option value="' + esc(o.v) + '"' +
             (o.v === co ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
+        }).join("") + '</select>', false,
       (derived
         ? '<span class="vwhy">from the unit above</span>'
         : ''));
-    if (!add) F("Roles", '<span class="rolebox rolebox-wide">' + roleCell(p, true) + '</span>', true);
+    /* THE DIALOG'S PICKER IS ALWAYS THE LIST. It is a field in a form rather
+       than a cell in a table, so there is no "at rest" for it to have — the
+       third argument is what the table uses to read as fixed (§372.14). */
+    if (!add) F("Roles", '<span class="rolebox rolebox-wide">' + roleCell(p, true, true) + '</span>', true);
     return out;
   }
   /* The dialog's body. `groups` is a marker rather than a field, so the two
@@ -32295,7 +32683,7 @@ function renderPeople(){
       if (mine.length) drawn[f.label] = 1;
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
         (mine.length ? ' attn' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html +
+        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + f.note +
         (mine.length ? attnBlock(p, mine) : '') + '</div>';
     }).join("");
     /* What no field can answer, and anything whose field this person's form
@@ -32421,16 +32809,40 @@ function renderPeople(){
        the page already has one edit mode, and a second way to edit the same
        row is a second place for the two to disagree. */
     var acts = [];
+    /* ── A FOREFRONT ROW IS READ-ONLY HERE, AND IT SAYS WHERE (§362.2) ──
+       Spec 056 §3a: Forefront team is the store and the register is a reader,
+       so every act that would REWRITE this row belongs on that page. It is
+       not a new refusal — `lib/authorize.js` has refused the whole row as its
+       own kind (`officeRow`) since spec 042 — it is the screen catching up
+       with the save: a row must not offer what the save will turn down
+       (§61, §42), and an entry that appears to work and silently un-happens
+       is worse than one that is not there.
+
+       WHAT SURVIVES IS DELIBERATE. *View the platform as them* reads and
+       writes nothing. *Delete permanently* stays because it is not an edit of
+       the row but its removal, which the authoriser classifies as `destroy`
+       on purpose — a client taking an office person off their own register is
+       a real act and a loud one — and it is already the Super user's alone.
+
+       AND THE PASSWORD ENTRY GOES FOR EVERYBODY (spec 058 §3a), where §89
+       only ever kept it from an SMO team member: a consultant signs in at
+       Forefront's own door with their account, so a credential minted here is
+       one nobody needs. Recorded rather than slipped in — see §362.2's note.
+
+       AND IT IS THE MINT, NEVER THE MARK (spec 058 §3a.1). An ADOPTED row is
+       the client's own person and every one of these acts is theirs to make;
+       asked of the shared pair so this menu and the save answer alike (§42). */
+    var ffRow = SMPRules.isMintedRow(p);
     /* WHOSE PASSWORD, NOT WHICH ACT (§89). The SMO team may let anybody on the
        client's side in and may not touch the office's own — a Super user's or
        another team member's. The entry is absent on those rows rather than
        disabled: a disabled control on somebody else's row invites a press and
        has nowhere to put "because of who they are, not who you are". */
-    if (live && personActive(p) && mayIssuePasswordTo(p)) {
+    if (live && !ffRow && personActive(p) && mayIssuePasswordTo(p)) {
       acts.push('<button data-setpw="' + p.key + '">' +
         (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
     }
-    if (mayEdit) {
+    if (mayEdit && !ffRow) {
       acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
     if (personActive(p)) {
@@ -32440,16 +32852,26 @@ function renderPeople(){
        Retire and Delete are below the rule because they take something away;
        merging two rows that were always one person takes nothing away, and it
        is the ordinary fix for what the marks on this row are pointing at. */
-    if (mayEdit && personActive(p)) {
+    if (mayEdit && !ffRow && personActive(p)) {
       var cands = mergeCandidates(p.key, DUPES);
       acts.push('<button data-pmerge="' + p.key + '">Merge with another row' +
         (cands.length === 1 ? ' (' + esc(shortName(cands[0].person.name)) + ')' : '\u2026') +
         '</button>');
     }
     if (mayEdit) {
-      acts.push('<hr>');
-      acts.push('<button class="danger" data-pact="' + p.key + '">' +
-        (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
+      /* THE RULE IS DRAWN FROM WHAT IS UNDER IT, never pushed and hoped for
+         (§193.2, §24). Until today both halves below were unconditional, so a
+         rule pushed first always had something to separate; with a Forefront
+         row keeping only *Delete permanently* — and an SMO team member not
+         even that — the old line would leave a hairline attached to nothing,
+         and on a RETIRED consultant a menu whose whole contents is a rule. */
+      var danger = [];
+      /* RETIRING IS AN EDIT OF THE ROW, so it goes with the rest of them: the
+         save refuses it, and `setTeam` is what actually retires a consultant
+         whose seat is taken away (§338's sweep). */
+      if (!ffRow)
+        danger.push('<button class="danger" data-pact="' + p.key + '">' +
+          (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
       /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
          §62's shape, because it is the same job on a different table: the
          entry is always LIVE rather than shown disabled, and pressing it
@@ -32462,7 +32884,9 @@ function renderPeople(){
          disabled-with-the-reason is right where the reason is about THIS row,
          and this reason is about the person reading it. */
       if (mayDestroy())
-        acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
+        danger.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
+      if (danger.length) acts.push('<hr>');
+      acts = acts.concat(danger);
     }
     if (!acts.length) return '<td class="cc kebcell"></td>';
     /* THE CELL WITH A PANEL OPEN HAS TO OUTRANK THE CELLS BELOW IT (§69.22).
@@ -32631,6 +33055,56 @@ function renderPeople(){
      Cancel, the Add row's three boxes under the wrong headings, the fields
      painting over their neighbours — was a control being clicked inside a
      cell, and none of them survives the move. */
+  /* ══ ONE CELL, OPENED WHERE IT IS READ (§372, spec 059) ═══════════════
+     Islam: "for the client registry I'd like to do some in line adjustments
+     like the phone, employee ID, email, the unit/function, job title, etc."
+
+     Changing one phone number cost three presses and a form holding twelve
+     fields, over the top of the table it was read from. A DOUBLE-CLICK opens
+     the one cell — his own answer, and it is what settles the clash he named
+     in the same breath: a single press on the Email or the Mobile already
+     copies it (§93.6), and making it also mean *edit* would take that away on
+     the two columns most worth editing.
+
+     IT IS THE TRACKER'S SHAPE, ONE MODULE OVER (spec 054): leaving the box
+     saves it — every bound field in this platform writes on `change`, which
+     for a text box means on blur (§35) — Escape puts it back, and there is no
+     Save and no Cancel, because there is nothing for them to do.
+
+     THE FIELD IS THE DIALOG'S OWN. `personFields()` is where every field this
+     register can change is written down, so the cell asks it rather than
+     drawing a second copy that could drift (§53.5) — and takes the FIELD
+     without its note, because a sentence under a value is what takes a 39px
+     row to 51 (§116.4). */
+  function cellField(p, label){
+    var f = personFields(p, false).filter(function(x){ return x.label === label; })[0];
+    return f ? f.html : "";
+  }
+  /* WHICH CELLS OPEN, AND THE GATE IS THE ONE THE MENU ASKS (spec 058 §3a.1).
+     A row the Forefront platform MINTED is read-only here and says where it is
+     set; a row it merely ADOPTED is the client's own person and every field is
+     theirs (§362.2). `isMintedRow` is the shared pair, so this cell and the
+     save answer alike (§42) — `p.forefront` would have taken the register back
+     off the adopted rows main had just given it. */
+  function cellOpens(p, label){
+    if (!mayEdit || SMPRules.isMintedRow(p)) return false;
+    /* A DERIVED COMPANY HAS NO FIELD TO OPEN. The dialog draws it `disabled`,
+       and a cell that opens onto a control nobody can use is §61's trap with
+       an extra press in front of it — the hover says where the answer comes
+       from instead. */
+    if (label === "Company" && personCompanyDerived(p)) return false;
+    return true;
+  }
+  function pcell(p, label, inner, cls, attrs){
+    var open = PCELL && PCELL.key === p.key && PCELL.field === label;
+    if (open) return '<td class="' + (cls ? cls + " " : "") + 'pcellopen">' +
+      cellField(p, label) + '</td>';
+    if (!cellOpens(p, label))
+      return '<td' + (cls ? ' class="' + cls + '"' : '') + (attrs || "") + '>' + inner + '</td>';
+    return '<td' + (cls ? ' class="' + cls + '"' : '') + (attrs || "") +
+      ' data-pcell="' + esc(p.key) + '|' + esc(label) + '">' + inner + '</td>';
+  }
+
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
@@ -32651,7 +33125,7 @@ function renderPeople(){
       /* `pname` so the frozen column can be named rather than counted (§69.19).
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it. */
-      '<td class="namecell" title="' + esc(p.name) + ' · ' + esc(p.key) + '">' +
+      pcell(p, "Name",
         /* INSIDE THE <b>, NEVER BESIDE IT. §88 makes `b` in a setup cell
            display:block, so a mark placed after it starts a second line and the
            row grows — measured at 51px against its neighbours' 39px. It is the
@@ -32659,19 +33133,20 @@ function renderPeople(){
            under it (the declaration note, the Official BU disagreement, this),
            and the rule is the same each time: a mark belongs inside the block
            it marks. */
-        '<b>' + esc(knownName(p, DNAMES)) + dupeMark(dupes) + '</b></td>' +
+        '<b>' + esc(knownName(p, DNAMES)) + dupeMark(dupes) + '</b>',
+        "namecell", ' title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '"') +
       (showCol("fullname")
-        ? '<td><span class="val">' + esc(p.name) + '</span></td>' : '') +
-      (showCol("empid") ? '<td>' + (p.empId
+        ? pcell(p, "Full name", '<span class="val">' + esc(p.name) + '</span>') : '') +
+      (showCol("empid") ? pcell(p, "Emp. ID", (p.empId
         ? '<span class="mono">' + esc(p.empId) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* READ-ONLY WHEREVER IT APPEARS. The key is minted (§35) and it is what
          `credentials` and `sessions` are keyed on — it is shown so somebody can
          be TOLD it, never so it can be changed. */
       (showCol("key") ? '<td><span class="mono">' + esc(p.key) + '</span></td>' : '') +
-      (showCol("title") ? '<td>' + (p.title
+      (showCol("title") ? pcell(p, "Job title", (p.title
         ? '<span class="val">' + esc(p.title) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* ── A DISAGREEMENT IS A MARK TOO (§116.4) ─────────────────────
          Both notes this cell and the next could add — "not on the Official BU
          list", "the list says Retail Stores" — were a SECOND LINE under a
@@ -32683,11 +33158,11 @@ function renderPeople(){
          `≠` rather than a warning colour: these two say the register and the
          client's own list DISAGREE, which is a thing to know rather than a
          thing that is broken. */
-      (showCol("mainbu") ? '<td>' + (p.mainbu
+      (showCol("mainbu") ? pcell(p, "Official BU", (p.mainbu
         ? '<span class="val">' + esc(p.mainbu) +
           (mainbuBy(p.mainbu) ? '' : '<span class="driftmark" title="' + esc(p.mainbu) +
             ' is not on the Official BU list.">&ne;</span>') + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+        : '<span class="why" style="margin:0">&mdash;</span>')) : '') +
       /* ── THE DECLARATION IS A MARK, NOT A SENTENCE (§116.4) ─────────
          Islam: the note "appears glitched and grows the row size with the word
          use it." It did: "They said Retail Stores — Use it" is a second line in
@@ -32699,24 +33174,51 @@ function renderPeople(){
          hover — the shape §87 already uses for a duplicate. The ACT moves to
          where acts now live: the dialog, reached from the attention queue,
          which is also what makes it findable rather than something to spot. */
-      (showCol("bu") ? '<td>' + (function(){
+      (showCol("bu") ? pcell(p, "Unit or function", (function(){
           var marks = saidMark(p) + (drift && drift !== belongsKey(p)
             ? '<span class="driftmark" title="' + esc(p.mainbu || "") + ' points at ' +
               esc(whereLabel(drift)) + ' on the Official BU list.">&ne;</span>' : '');
           return home
             ? '<span class="val">' + esc(home) + marks + '</span>'
             : '<span class="why" style="margin:0">&mdash;' + marks + '</span>';
-        })() + '</td>' : '') +
-      (showCol("company") ? '<td>' + (function(){
+        })()) : '') +
+      (showCol("company") ? pcell(p, "Company", (function(){
           var ck = personCompany(p);
+          var why = personCompanyDerived(p)
+            ? ' title="Comes from the unit. Change the Unit to move them."' : '';
           return ck
-            ? '<span class="val">' + esc(COMPANIES[ck].name) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>';
-        })() + '</td>' : '') +
-      (showCol("email") ? '<td class="wrapany">' + copyable(p.email, "val") + '</td>' : '') +
-      (showCol("phone") ? '<td>' + copyable(p.phone, "mono") + '</td>' : '') +
-      (showCol("roles")
-        ? '<td class="roles"><span class="rolebox">' + roleCell(p, false) + '</span></td>' : '') +
+            ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
+            : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
+        })()) : '') +
+      (showCol("email")
+        ? pcell(p, "Email", copyable(p.email, "val"), "wrapany") : '') +
+      (showCol("phone") ? pcell(p, "Mobile", copyable(p.phone, "mono")) : '') +
+      /* ── AND THE CELL IS THE PICKER NOW (§372) ─────────────────────
+         `false` was right while the table only ever read: the × and the
+         "+ role" control belonged to the dialog. What the cell draws is
+         unchanged — the same chips, the same "…" — and the whole of it is
+         pressable for somebody who may edit, so the answer to "editable" is
+         the grant rather than which surface is asking. */
+      /* ── AND IT OPENS LIKE EVERY OTHER CELL NOW (§372.14) ─────────────
+         §372 made the whole cell pressable, which is one press where the rest
+         of the table takes two — and drew a bordered box on every row to say
+         so. The cell reads as its chips and a double-click opens the list, so
+         there is ONE rule for the table rather than this column's own. */
+      (showCol("roles") ? (function(){
+          /* OPEN IS `PROLEPICK`, NEVER A SECOND FLAG (§53.5). That state
+             already decides whether this person's list is showing, and the
+             ticking handler already keeps it across the repaint a grant makes
+             — per tick, because a list you are ticking is not answered until
+             you stop (§130.1) — and clears it for the two things that speak IN
+             the cell, a seat ask and a refusal. A `PCELL` entry beside it would
+             be a second answer to one question, and the one that closes on the
+             first tick. */
+          var rOpen = PROLEPICK === p.key;
+          return '<td class="roles' + (rOpen ? ' pcellopen' : '') + '"' +
+            (cellOpens(p, "Roles") ? ' data-pcell="' + esc(p.key) + '|Roles"' : '') +
+            '><span class="rolebox">' + roleCell(p, mayEdit, rOpen) +
+            '</span></td>';
+        })() : '') +
       (showCol("status")
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
@@ -33102,10 +33604,44 @@ function renderPeople(){
         return p.name + " \u2014 " + SMPRules.personRoles(world(), p)
           .filter(function(r){ return SMPRules.isSeatRole(r.role); })
           .map(function(r){ return roleName(r.role); }).join(", ");
-      }).join("\n")) + '\n\nA seat is granted by the Super user on this ' +
-      'register and by nothing else. Take one off with the \u00d7 on the chip ' +
-      'in the Roles column.">' +
+      }).join("\n")) + '\n\nA client\u2019s own person is given a seat from their ' +
+      'row here. A consultant\u2019s comes from Forefront team, and is set there ' +
+      'and nowhere in this client.">' +
       plural(seatHolders.length, "person", "people") + ' hold a seat</span>';
+
+  /* ── THE COUNT SAYS BOTH (spec 058 §3a, §362.2) ─────────────────
+     Islam: *"The count says both: 33 of the client's own people · 3 from
+     Forefront, rather than one number quietly meaning two things."* With
+     Forefront team as the store and this table a reader (§3a), the register
+     holds two populations under one heading and nothing said so.
+
+     AND IT IS NOT §122'S COUNT COMING BACK, which is the reason it may be
+     drawn at all. That one was removed because *the table under it is that
+     count* — true of a TOTAL, and the one thing a table of 36 rows cannot be
+     read for is its composition. So this states the SPLIT and never the
+     total, and it is drawn ONLY where there is a split to state: on a client
+     with no consultants on its register one number means one thing, there is
+     nothing to disambiguate, and §122's objection stands whole. Recorded as
+     a narrow reversal rather than slipped in (Principle II).
+
+     `isForefrontRow` and not `isMintedRow`: an ADOPTED person is on both
+     lists at once and the sentence must not pretend otherwise — they are
+     counted with Forefront and the hover says they are the client's own
+     person too (§3a.1). */
+  var ffRows = PEOPLE.filter(function(p){ return SMPRules.isForefrontRow(p); });
+  var ffAdopted = ffRows.filter(function(p){ return !SMPRules.isMintedRow(p); });
+  var splitChip = !ffRows.length ? "" :
+    '<span class="psplit" title="' +
+      esc("Forefront team is where a consultant is added, given a seat or removed \u2014 " +
+          "this table reads from it, so everybody who can touch this client is on one screen." +
+          (ffAdopted.length
+            ? "\n\n" + plural(ffAdopted.length, "of them is", "of them are") +
+              " also the client\u2019s own person, matched by their address, and stay editable here: " +
+              ffAdopted.map(function(p){ return p.name; }).join(", ") + "."
+            : "")) + '">' +
+      plural(PEOPLE.length - ffRows.length, "of the client\u2019s own people",
+             "of the client\u2019s own people") +
+      ' \u00b7 ' + ffRows.length + ' from Forefront</span>';
 
   /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
      remove the 77 people active text ... and accordingly the whole table
@@ -33125,7 +33661,7 @@ function renderPeople(){
       [],
       "people", false, null, null,
       '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + noCustChip + seatChip + addBtn + fileMenu + colMenu + pwMenu) +
+      attnBtn + noCustChip + seatChip + splitChip + addBtn + fileMenu + colMenu + pwMenu) +
 
     section("", "",
       null,
@@ -33172,7 +33708,7 @@ function renderPeople(){
         /* Roles is a stack of chips and Password is a pill: sorting either
            orders them by the text that happens to be rendered, which is not a
            fact anybody asked about. */
-        (showCol("roles")    ? th("Roles", "roles", false) : '') +
+        (showCol("roles")    ? th("Roles", "roles", false, "seat") : '') +
         (showCol("status")   ? th("Status", "cc") : '') +
         (live && showCol("password") ? th("Password", "cc", false) : '') +
         th("", "cc kebcell") +
@@ -35887,33 +36423,31 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
-/* ══ SETUP · OVERVIEW (§108.10, spec 018) ════════════════════════════════
-   Islam, on the makeover: Option A, and the gear lands here.
-
-   THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
-   existed the answer took a walk through five pages, because each outstanding
-   thing lived only on the page that fixes it. That is right for the thing and
-   wrong for the question: nobody opens Setup to read the People register, they
-   open it to find out whether the register needs them.
-
-   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design. A
-   summary page is the one place a disagreement with the page it summarises is
-   guaranteed to be seen and impossible to explain, so no row is allowed to
-   compute anything: each declares a `count` that calls the SAME function the
-   destination page calls, and `checks/setup-overview.py` asserts the two agree
-   rather than asserting the number (§53.5, §94.8). Add a row here with fresh
-   arithmetic in it and the check cannot help you.
+/* ══ WHAT IS WAITING ON THE OFFICE — the one list three surfaces read
+   (§108.10, §116.2, §148, §197.2; the page that first held it went at §359)
+   ════════════════════════════════════════════════════════════════════
+   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design: no
+   row is allowed to compute anything; each declares a `count` that calls the
+   SAME function the destination page calls, so the rows can never disagree
+   with the page they point at (§53.5, §94.8). Add a row here with fresh
+   arithmetic in it and no check can help you.
 
    NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
    fact fetched outside the state graph, so "we have not asked" is a real third
-   state and it is not "nothing is waiting" (§93, §108.10). A row whose count
-   is null is absent — never a 0, and never a spinner, because a page that
-   shows five zeroes while it is thinking has told somebody they are clear when
-   it does not know.
+   state and it is not "nothing is waiting" (§93). A row whose count is null is
+   absent — never a 0.
 
    THE DESTINATION IS THE PAGE THAT FIXES IT, never a page that merely mentions
    it — the row is a door, and §16.7's rule that a refusal must send somebody
-   somewhere applies just as much to a notice. */
+   somewhere applies just as much to a notice.
+
+   WHO READS IT: the landing's "Waiting on you" for the office (welcome.js,
+   and frozen.cjs for the served landing), the Setup rail's pills
+   (attentionByPage below), and the home mark's gold (welcome.js waiting()).
+   The Setup Overview was the fourth reader and the one the others made
+   redundant — it drew this list beside the cycle column, and the landing
+   draws both (§148, §200) — so it is DELETED at §359 (spec 056 §9.1) rather
+   than kept as a second drawing of the page the office lands on. */
 function attentionRows(){
   var rows = [
     { k:"chat",  dest:"chat",   glyph:"✉",
@@ -35946,7 +36480,10 @@ function attentionRows(){
    list rather than written out again — rename a page and this follows (§108.3
    renamed three of them in one afternoon). */
 function attnDestLabel(k){
-  var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
+  /* `setupDefsAll` since §359.2: a destination is named whichever rail holds
+     it — a landing row for the register is drawn beside Strategy's rail. */
+  var d = (typeof setupDefsAll === "function" ? setupDefsAll()
+           : typeof setupDefs === "function" ? setupDefs() : []).filter(
     function(x){ return x.k === k; })[0];
   return d ? d.label : k;
 }
@@ -35977,84 +36514,6 @@ function attentionByPage(){
     by[r.dest] = (by[r.dest] || 0) + (r.n | 0);
   });
   return by;
-}
-
-function renderOverview(){
-  var open = REVIEW.state === "open";
-  var t = cycleTotals();
-  var att = attentionRows();
-
-  /* ── THE WORK FIRST, THE CONTEXT BESIDE IT (§198) ──────────────────────
-     Islam picked Option B from two drawn in the real page. The audit behind
-     it, measured as the office with things actually waiting:
-
-       · 264 pixels of content beside an 870-pixel rail — the page the gear
-         lands on was the shortest in Setup.
-       · The biggest thing on it answered a DIFFERENT question. "222 of 245
-         items reported" is how much the whole business has reported; the
-         office opens Setup to ask *is anything waiting on me*, and that was
-         in 13px grey underneath.
-
-     So the queue leads and the cycle becomes a standing summary in a column
-     beside it. NOTHING NEW IS COUNTED — the rows are `attentionRows()` and
-     the numbers are `cycleTotals()`, exactly as before (§108.9, §108.10);
-     what changes is which one the eye lands on first.
-
-     BELOW 900px IT STACKS, queue first, which is CSS and not a second
-     builder — a summary page whose shape depended on a JS width test would
-     be measuring the window in two places (§27.1). */
-  var side =
-    '<aside class="ovside">' +
-      '<h4>' + esc(REVIEW.name) +
-        ' <span class="badge b-' + (open ? "open" : "none") + '">' +
-        (open ? "Open" : "Closed") + '</span></h4>' +
-      '<div class="ovsline"><span>Reported</span><b>' + t.done + ' of ' + t.total + '</b></div>' +
-      '<div class="ovsline"><span>Submitted</span><b>' + t.sub + '</b></div>' +
-      '<div class="ovsline"><span>In progress</span><b>' + t.progress + '</b></div>' +
-      (t.none ? '<div class="ovsline"><span>Not started</span><b class="ovlate">' +
-        t.none + '</b></div>' : '') +
-      /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant has
-         set no dates, rather than printing the separators alone. */
-      '<div class="ovsmeta">' + esc(cycleMeta()) + '</div>' +
-      '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
-        'Open the cycle page</button>' +
-    '</aside>';
-
-  var body = att.length
-    ? '<div class="ovlist">' + att.map(function(r){
-        return '<button type="button" class="ovrow" data-setupgo="' + esc(r.dest) + '">' +
-          '<span class="ovico" aria-hidden="true">' + r.glyph + '</span>' +
-          '<span class="ovtext">' + esc(r.text) + '</span>' +
-          '<span class="ovto">' + esc(attnDestLabel(r.dest)) + ' ›</span></button>';
-      }).join("") + '</div>'
-    /* NOT AN EMPTY BOX (§45.2 turned round). A page whose one job is to say
-       whether anything is waiting has to be able to say NO — an absent section
-       would read as a section that failed to load. */
-    : '<div class="ovquiet"><b>Nothing is waiting on the office.</b>' +
-      '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
-      'the list on the left.</span></div>';
-
-  /* THE HEADING CARRIES THE TOTAL, because a count belongs on the thing it
-     counts and the rows below it are that thing (§116.2). Never a zero: the
-     empty state says it in words one line down (§108.10). */
-  var n = att.reduce(function(a, r){ return a + (r.n | 0); }, 0);
-
-  /* ── AND THE DOOR WENT WITH IT (§322) ──────────────────────────────
-     §318 put a "Set this client up" door here, drawn only while the client
-     was bare. The flow it opened lives on Forefront's own platform page now
-     (Islam: "the wizard should start on the outside window"), where a client
-     is shaped BEFORE anybody from it signs in — so by the time somebody is
-     reading this Overview there is nothing left for that door to offer, and
-     a door to a page that no longer exists is worse than none (§61). */
-  return cfgHead("Overview", [], null, false, null, null, "") +
-    '<div class="ovcols">' +
-      '<div class="ovmain">' +
-        '<div class="ovh">Waiting on the office' +
-          (n ? ' \u2014 <em>' + plural(n, "thing") + '</em>' : '') + '</div>' +
-        body +
-      '</div>' +
-      side +
-    '</div>';
 }
 
 /* ── A CYCLE FIELD, BOUND LIKE EVERY OTHER FIELD HERE (§273.4) ───────
@@ -37341,6 +37800,78 @@ function commsStatusRows(){
   return out;
 }
 
+/* ══ THE LANDING LINE (§359.4, spec 056 §4.5) ═══════════════════════════
+   Islam: each module has its own setup elements, its access and its landing
+   line. The module DECLARES the sentences it can say about itself
+   (smp-app/lib/modules.ts) and the client picks one here, from a radio list
+   with the sentence previewed under it — as drawn. NEVER FREE TEXT: a typed
+   line goes stale the day the fact behind it changes.
+
+   THE DECLARATION ARRIVES ON THE DOCUMENT. This frozen file cannot import a
+   module's declaration and holds none of the facts a sentence is made of, so
+   the served Setup document is stamped with `data-landing` — the lines, each
+   with its example and its TEXT right now, and the pick — by the one reader
+   the landing itself draws from (lib/landing.ts landingStampFor). The
+   preview is that reader's answer and never a second one (§53.5). Over
+   file:// there is no landing and no stamp, and the page says so rather than
+   drawing a list that writes to nothing (§45.2, §61).
+
+   THE PICK IS STORED ON THE GROUP under SMPRules.LANDING_PICK, keyed by the
+   module the document was served for, as an ABSENCE: the first declared line
+   is the default and choosing it deletes the entry (§50.6). The write is a
+   select-shaped one and repaints (shell.html's [data-landpick] wiring), so
+   the preview follows the pick. */
+function landingStamp(){
+  var raw = document.documentElement.getAttribute("data-landing");
+  if (!raw) return null;
+  try {
+    var d = JSON.parse(raw);
+    return (d && Array.isArray(d.lines) && d.lines.length) ? d : null;
+  } catch (e) { return null; }
+}
+function landingModule(){
+  var st = landingStamp();
+  return (st && st.module) || document.documentElement.getAttribute("data-module") || "strategy";
+}
+function setLandingPick(mod, key, def){
+  var map = {};
+  var cur = SMPRules.landingPicks(GROUP);
+  Object.keys(cur).forEach(function(k){ map[k] = cur[k]; });
+  if (!key || key === def) delete map[mod]; else map[mod] = key;
+  if (Object.keys(map).length) GROUP[SMPRules.LANDING_PICK] = map;
+  else delete GROUP[SMPRules.LANDING_PICK];
+  paint();
+}
+function renderLandingLine(){
+  var st = landingStamp(), mod = landingModule();
+  var mayEdit = inOffice();
+  var head = cfgHead("Landing line", [], null, false, null);
+  if (!st) {
+    /* no declaration: the offline copy, or a document served without one */
+    return head + '<div class="cfg"><p class="why lnone">The line a module says on the landing is set on the ' +
+      'served platform, which knows what each module can say. Nothing is set from this copy.</p></div>';
+  }
+  var def = st.lines[0].key;
+  var pick = SMPRules.landingPick(GROUP, mod) || def;
+  var chosen = st.lines.filter(function(l){ return l.key === pick; })[0] || st.lines[0];
+  var opts = st.lines.map(function(l){
+    var on = l.key === chosen.key;
+    return '<label class="lopt' + (on ? " on" : "") + '">' +
+      '<input type="radio" name="landpick" value="' + esc(l.key) + '" data-landpick="' + esc(l.key) +
+        '" data-landmod="' + esc(mod) + '" data-landdefault="' + esc(def) + '"' +
+        (on ? " checked" : "") + (mayEdit ? "" : " disabled") + '>' +
+      '<span class="ldot" aria-hidden="true"></span>' +
+      '<span class="ltxt"><b>' + esc(l.label) + '</b><span class="lex">' + esc(l.example) + '</span></span></label>';
+  }).join("");
+  var label = document.documentElement.getAttribute("data-module-label") || mod;
+  return head + '<div class="cfg landing">' +
+    '<div class="lopts" role="radiogroup" aria-label="Landing line">' + opts + '</div>' +
+    '<div class="lprev"><h4>On the landing</h4>' +
+      '<div class="lrow" data-landprev="' + esc(chosen.key) + '"><span class="lk">' + esc(label) + '</span>' +
+      '<span class="lll">' + esc(chosen.text || "") + '</span><span class="lgo">Open \u203a</span></div></div>' +
+    '</div>';
+}
+
 function renderComms(){
   /* THE PEN DOES SOMETHING HERE. Branding draws one and gates its fields on
      the grant alone, so its edit icon is decoration — a control that changes
@@ -38419,12 +38950,25 @@ function rowActions(table, key, ed, extra){
    turning sorting back on would sort by the wrong one. */
 function tkHead(id, allow){
   var n = 0;
-  return function(label, cls, sortable){
+  /* `colId` NAMES A COLUMN AN ADDRESS CAN POINT AT — the landing's Access door
+     opens the register at `#seat`, the Roles column, where the seats and where
+     each person sits already are (spec 056 §4.4; shell/route.js scrolls to it).
+     Only ever a bare word, and only on the unsortable branch.
+
+     IT IS NOT SPELT `id`, AND THAT IS THE WHOLE OF §365.6. Written that way it
+     SHADOWED the table's own id one line up, so every sortable head in the
+     product came out `data-tksort="undefined|N"` and `TKSORT[id]` read one
+     shared slot for all five tables — the click landed, `paint()` ran, and
+     nothing moved. It renders perfectly and throws nothing (§96), which is why
+     only pressing it found it (§70). A parameter that shadows the closure it
+     is inside is §56.7's collision with a shorter fuse. */
+  return function(label, cls, sortable, colId){
     var i = n++;
     if (allow === false) sortable = false;
+    var idA = colId ? ' id="' + esc(colId) + '"' : '';
     if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
     if (sortable === false)
-      return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
+      return '<th' + idA + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
     var st = TKSORT[id];
     var on = st && st.col === i;
     return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +
@@ -43500,10 +44044,39 @@ var SEARCHSEL = (function(){
     sel.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  /* ── THE LABEL MAY BE THE CALLER'S MARKUP (§372) ───────────────────
+     `data-sslabel="count"` above is a WORD chosen per control; this is the
+     same decision one step further — the register's Roles cell is a row of
+     chips, and the closed control has to be that cell rather than a comma
+     list of role names. The markup is supplied rather than composed here,
+     because what a chip looks like belongs to the register and this file must
+     not learn it (§53.5).
+
+     WRITTEN ON EVERY setLabel, NEVER ONCE AT WIRE TIME: a tick calls this to
+     refresh the label, and a caller whose label is a rendering of the data
+     hands over a fresh one by re-rendering — so the attribute is read, not
+     cached. `data-sstitle` carries the hover, because the markup's own text
+     would arrive with the chips' words run together. */
   function setLabel(sel, btn){
+    var lb = btn.querySelector(".sslabel");
+    if (sel.dataset.sshtml != null) {
+      lb.innerHTML = sel.dataset.sshtml;
+      var said = sel.dataset.sstitle || "";
+      btn.title = said;
+      /* ── AND THE VALUE IS SAID ALOUD, NOT ONLY DRAWN (§372) ───────
+         `wire()` names the button from the select's own `aria-label`, and an
+         aria-label REPLACES the element's content as its accessible name — so
+         with the chips handed over as html a screen reader heard "Roles for
+         Ashraf Laithy" and never which roles, where every other control here
+         announces its value because the value IS its text. The name carries
+         both, which is what the hover already says. */
+      var base = (sel.getAttribute("aria-label") || "").split(" \u2014 ")[0];
+      if (base) btn.setAttribute("aria-label", base + (said ? " \u2014 " + said : ""));
+      return;
+    }
     /* An em-dash for nothing chosen, which is the word the plan's own cells
        already use for nobody (§15.1: absent, never zero). */
-    btn.querySelector(".sslabel").textContent = textOf(sel) || "—";
+    lb.textContent = textOf(sel) || "\u2014";
     btn.title = textOf(sel) || "";
   }
 
@@ -43628,6 +44201,21 @@ var SEARCHSEL = (function(){
       pop.appendChild(allrow);
     } else {
       pop.appendChild(q);
+    }
+    /* ── WHAT THE LIST CANNOT SET, NAMED ABOVE IT (§372) ─────────────
+       Supplied by the caller and drawn nowhere else. The register's Roles
+       list can grant what is held at this person's own place and nothing
+       more, so the roles held elsewhere and the ones that come from the plan
+       are stated at its head — they used to be the "…" the cell drew, which
+       is a CONTROL (a hover cannot be reached on a touch screen and cannot be
+       read aloud), and with one press opening the list the list is that
+       place. Below the search, because it is a statement and not a row to
+       find by typing. */
+    if (sel.dataset.sshead) {
+      var head = document.createElement("div");
+      head.className = "sshead";
+      head.innerHTML = sel.dataset.sshead;
+      pop.appendChild(head);
     }
     pop.appendChild(list);
     pop.appendChild(none);
@@ -43781,6 +44369,16 @@ var SEARCHSEL = (function(){
     car.setAttribute("aria-hidden", "true");
     car.textContent = "▾";
     btn.appendChild(car);
+    /* ── THE NAME IS SET BEFORE THE LABEL, NOT AFTER IT (§372) ────────
+       The visible control inherits the hidden one's name, so a screen reader
+       is told what the control is FOR rather than only what it currently says
+       (§48.2). It was set AFTER `setLabel` and therefore overwrote what
+       `setLabel` had just composed — so the roles cell, the first control to
+       hand its chips over as html, announced the person and never the roles.
+       Found by asserting it, not by reading it. */
+    var lbl = sel.id && document.querySelector('label[for="' + sel.id + '"]');
+    var name = (lbl && lbl.textContent.trim()) || sel.getAttribute("aria-label");
+    if (name) btn.setAttribute("aria-label", name);
     setLabel(sel, btn);
     /* Inserted as a SIBLING, never as a parent. sync.js reaches for the
        viewer select by id and inserts a name beside it — reparenting the
@@ -43801,13 +44399,6 @@ var SEARCHSEL = (function(){
        focuses the select it is `for`, and that should land on the button — but
        it can no longer be reached by Tab, so it cannot loop. */
     sel.addEventListener("focus", function(){ btn.focus(); });
-    /* The visible control inherits the hidden one's name, so a screen reader
-       is told what the control is FOR rather than only what it currently says
-       (§48.2). Without it the viewer switcher announces a person's name with
-       no hint that it switches anything. */
-    var lbl = sel.id && document.querySelector('label[for="' + sel.id + '"]');
-    var name = (lbl && lbl.textContent.trim()) || sel.getAttribute("aria-label");
-    if (name) btn.setAttribute("aria-label", name);
     sel.addEventListener("change", function(){ setLabel(sel, btn); });
   }
 
@@ -43816,7 +44407,29 @@ var SEARCHSEL = (function(){
       close();
       document.querySelectorAll("select").forEach(enhance);
     },
-    close: close
+    close: close,
+    /* ── RE-OPENED AFTER A REPAINT, BY THE CALLER (§372) ─────────────
+       §130.1 commits a tick WITHOUT repainting, and says in its own words
+       what makes that safe: every field this control was used on goes through
+       the shell's one `data-fld` listener, which does not repaint. Granting a
+       ROLE is not one of those — it changes the chips, it can take the role
+       off whoever held it, and a seat has a question to ask — so that handler
+       must paint, and a paint at the top of `wire()` calls close().
+
+       So the register holds the open list as state (`PROLEPICK`) and asks for
+       it back at the end of the paint. The popup is rebuilt rather than
+       preserved: it is `position:fixed` on <body> and its contents are a
+       rendering of the select, so a fresh one is the same popup with the new
+       answer in it. Returns false when there is nothing to open, so a caller
+       can clear its own state rather than holding a key to a control that is
+       no longer drawn (§61). */
+    openOn: function(sel){
+      if (!sel) return false;
+      var btn = buttonFor(sel);
+      if (!btn) return false;
+      openFor(sel, btn);
+      return true;
+    }
   };
 })();
 
@@ -46956,8 +47569,9 @@ var CHAT = (function(){
          showing the number it was told when the page loaded. Islam: "all chats
          are answered and still the rail is showing a notification."
 
-         Cleared rather than recounted — the next paint on the Overview asks
-         again, which is the one place that fetch belongs (a second asker
+         Cleared rather than recounted — the next reader that wants it (the
+         rail's pills, the landing's office list; the Overview until §359)
+         asks again, which is the one place that fetch belongs (a second asker
          polling in the background is what §98 was about). §35's shape: the
          status you must remember to refresh is the one nobody refreshes. */
       if (typeof window !== "undefined" && typeof window.OVQUEUE !== "undefined")
@@ -47316,16 +47930,17 @@ var CHAT = (function(){
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
     unread: function(){ return state.unread; },
-    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
+    /* ── HOW MANY ARE WAITING, FOR THE LANDING (§108.10, §148) ─────────
        The same `queue` action the inbox already calls, whose answer already
        carries the two counts — so this is a second READER of one endpoint and
-       not a second endpoint, and the number the Overview prints is by
-       construction the number the Inbox's own tab prints.
+       not a second endpoint, and the number the landing's office list prints
+       (attentionRows()'s chat row) is by construction the number the Inbox's
+       own tab prints. Written for the Setup Overview, which §359 deleted.
 
        IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
        writing box.threads from here would leave a half-built queue behind for
        whenever the inbox is next opened, and `drawQueue()` would be painting
-       into a document that does not have it. The Overview wants two integers.
+       into a document that does not have it. The caller wants two integers.
 
        `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
        caller draws nothing for a null and "nothing is waiting" for a 0, and
@@ -48468,7 +49083,8 @@ var WELCOME = (function(){
      rename a page there and this follows (§108.3). */
   function setupWord(k){
     try {
-      var d = setupDefs().filter(function(x){ return x.k === k; })[0];
+      var all = typeof setupDefsAll === "function" ? setupDefsAll() : setupDefs();
+      var d = all.filter(function(x){ return x.k === k; })[0];
       if (d) return d.label;
     } catch(e){}
     return "Setup";
@@ -48741,7 +49357,9 @@ var WELCOME = (function(){
       pages.appendChild(a);
     }
     if (office) {
-      pageLink("Setup — Overview", "", function(){ goSetup("overview"); });
+      /* Reporting cycle since §359: the Overview this once opened is gone,
+         and its rows are the list ABOVE this one. */
+      pageLink("Setup — Reporting cycle", "", function(){ goSetup("cycle"); });
       pageLink("The group — Performance", "", function(){ goGroup(); });
     } else {
       var home = targets[0] || null;
@@ -48910,10 +49528,33 @@ var WELCOME = (function(){
      session, a projector, already seen this session. Returns whether it
      took the screen, because land() offers the tour only when it did not —
      two docks drawn over one page would fight for every click (§118). */
+  /* AND AN ADDRESS IS NOT A GREETING (§360.9). Islam, pressing *Settings*
+     on the console's card and landing on the client's Setup rail with this
+     screen over it: *"when I press continue it opens the clietn settings!!
+     … the settings should open the settings directly."* The screen
+     fills the viewport and its only way out is Continue, so over a page
+     somebody NAMED it is a wall in front of what they asked for — and taking
+     it down reads as the press having opened the thing behind it.
+
+     The router writes `data-deep-address` when the address named a page and
+     leaves it off when it named none, which is the module's own home (spec
+     055 §2.1's redirect, and the door's landing). One fact, one reader, and
+     the same argument the tour already makes one file over (§107: an address
+     is somebody who has already chosen a page).
+
+     IN `offer()` AND NEVER IN `open()`: that one is the house mark, and
+     pressing a button IS the ask (§185). Absent over file://, where the two
+     lines above have already answered. */
+  function deepAddress(){
+    try { return document.documentElement.getAttribute("data-deep-address") === "1"; }
+    catch(e){ return false; }
+  }
+
   function offer(person){
     if (!person) return false;
     if (location.protocol === "file:") return false;
     if (document.body && document.body.classList.contains("presenting")) return false;
+    if (deepAddress()) return false;
     if (seenThisSession()) return false;
     try { build(person); } catch(e){ box = null; return false; }
     return true;
@@ -50037,6 +50678,1630 @@ var CONT = (function () {
   };
 })();
 
+/* ── client-setup.js ── */
+/* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
+   Islam, 2026-09-16, of where a client's settings live: *"the client either
+   we open a module or we go to the client settings page where we find a rail
+   with the client settings and I suggest having the getting started with the
+   client setup to stay at the top of the rail until it's all fulfilled and
+   then moves to the bottom and it absorbs the branding part with the mark and
+   the brand colors and remove the separate branding setting"* — and, of two
+   drawings of which chrome draws that rail, **"A"**: the client platform's
+   own Setup, one rail, one chrome.
+
+   SO THE SET-UP FLOW MOVES FOR THE THIRD TIME. §318 built it inside the
+   platform as a wizard, §322 carried it to the console (*"the setup should
+   happen on the external creation not inside"*), and this brings it back —
+   with §322's reason kept whole, because it was never about the chrome:
+   Settings is pressed FROM the console before anybody at the client has
+   signed in, and it still is. What changes is only that the press opens the
+   client's own Setup rail at /<client>/setup, where the register and the
+   organisation pages the flow feeds already live.
+
+   ONE MODULE, TWO HOSTS. The platform mounts the whole flow on its Getting
+   started page (`mount`); the console keeps the two pieces a client's own
+   address cannot draw — creating a client, which has no address yet
+   (`mountCreate`), and bringing an archived one back or deleting it, whose
+   address is closed (`mountArchived`, §323) — from this same file, generated
+   into /client-setup.js by scripts/build-shell.mjs. A second copy of any
+   step in platform.html is the drift this move exists to end (§53.5).
+
+   THE SHAPE IS WRITTEN BY THE PRODUCT'S OWN MINTERS, IN THE BROWSER. §322's
+   server ran `__smpShape` (below) inside a vm over the frozen sources and
+   wrote the result; here the same function runs over the LIVE graph and the
+   ordinary autosave carries it (§210), so a unit made on Getting started is
+   byte for byte a unit made on Setup › Business units, and the server's
+   shapeClient goes on calling this very function through lib/frozen.cjs —
+   one answer to what a set-up writes, in one file (§53.5).
+
+   NOTHING HERE CALLS `paint()` UNDER A TYPING HAND: a row's name is held in
+   the flow's own state and written on Next, Back or Done with set-up, as the
+   console's flow wrote it; the registry half — the client's name on the
+   door, its mark, its industry — writes on `change`, which is the platform's
+   own rule for a field (§35). */
+
+/* ── THE SHAPE, SHARED WITH THE SERVER (was lib/frozen.cjs's glue) ──────── */
+
+/* What the flow never asked about is not the flow's to reset (§346): a row
+   whose key survives keeps everything except what the flow collects. */
+function __smpCarry(old, fresh, owned) {
+  var out = {}, k;
+  for (k in old) if (Object.prototype.hasOwnProperty.call(old, k)) out[k] = old[k];
+  for (k in fresh) if (Object.prototype.hasOwnProperty.call(fresh, k)) {
+    if (owned.indexOf(k) > -1 || !Object.prototype.hasOwnProperty.call(out, k)) out[k] = fresh[k];
+  }
+  return out;
+}
+function __smpHeld(r) { return !!(r && (r.head || r.custodian)); }
+
+/* What this client already holds, off the LIVE globals (§322, §347): a
+   capability counts only when it holds something, and a plan line is a
+   pillar, an objective or a SWOT point. */
+function __smpHoldsNow() {
+  var plans = 0, caps = 0;
+  ((GROUP && GROUP.capabilities) || []).forEach(function (c) {
+    var n = ((c.keyObjectives || []).length) + ((c.projects || []).length) +
+            ((c.items || []).length);
+    if (n) caps++;
+  });
+  (UNIT_KEYS || []).concat((FUNCTION_KEYS || []).map(function (k) { return "fn:" + k; }))
+    .forEach(function (t) {
+      var u = String(t).indexOf("fn:") === 0 ? FUNCTIONS[String(t).slice(3)] : UNITS[t];
+      if (!u) return;
+      plans += ((u.items || []).length) + ((u.keyObjectives || []).length);
+      var sw = u.swot || {};
+      plans += ["s", "w", "o", "t"].reduce(function (n, q) { return n + ((sw[q] || []).length); }, 0);
+    });
+  return { plans: plans, capabilities: caps,
+           units: (UNIT_KEYS || []).length, functions: (FUNCTION_KEYS || []).length };
+}
+/* The same, of a graph handed in: `hydrate` is the caller's own — sync.js's
+   in the browser, the glue's in lib/frozen.cjs — because rebinding the
+   globals is the one thing this file must not decide for its host. */
+function __smpHolds(state, hydrate) { hydrate(state); return __smpHoldsNow(); }
+
+/* The answers written in by the product's own minters (§322): companies
+   first, then units, then functions, then the capabilities they carry, then
+   the words. IT IS A REPLACE, NOT AN AMEND — the answers are the list — and
+   a row whose key survives keeps what the flow did not collect (§346).
+   Answers { state, dropped }: `dropped` names the units and functions that
+   had somebody in charge and are not in the answers, so the caller writes
+   nothing rather than lose them. */
+function __smpShape(state, a, hydrate) {
+  var wasUnits = state.units || {}, wasFns = state.functions || {};
+  var wasCos = state.companies || {}, wasRoles = state.unitRoles || {};
+  var wasCaps = {};
+  ((state.group && state.group.capabilities) || []).forEach(function (c) {
+    var nm = String((c && c.name) || "").trim().toLowerCase();
+    if (nm && !wasCaps[nm]) wasCaps[nm] = c;
+  });
+  /* The weighting rows go with the units, or every pass appends a second row
+     per unit and syncWeights halves every weight (§346.1). */
+  var wasW = {};
+  var wlist = (state.group && state.group.weighting && state.group.weighting.units) || [];
+  wlist.forEach(function (row) { if (row && row.key && !wasW[row.key]) wasW[row.key] = row; });
+
+  state.unitKeys = []; state.units = {};
+  state.functionKeys = []; state.functions = {};
+  state.companyKeys = []; state.companies = {};
+  state.unitRoles = {};
+  if (state.group) state.group.capabilities = [];
+  if (state.group && state.group.weighting) state.group.weighting.units = [];
+  hydrate(state);
+  a = a || {};
+  var byName = {}, coByName = {};
+  Object.keys(wasCos).forEach(function (k) {
+    /* a company's key is positional (addCompany mints newco1, newco2), so it
+       is matched by NAME, the only thing about a company the flow carries */
+    var nm = String((wasCos[k] && wasCos[k].name) || "").trim().toLowerCase();
+    if (nm && !coByName[nm]) coByName[nm] = wasCos[k];
+  });
+  (a.companies || []).forEach(function (c) {
+    var nm = String((c && c.name) || "").trim();
+    if (!nm) return;
+    var k = addCompany();
+    COMPANIES[k].name = nm;
+    var had = coByName[nm.toLowerCase()];
+    if (had) COMPANIES[k] = __smpCarry(had, COMPANIES[k], ["name"]);
+    byName[nm.toLowerCase()] = k;
+  });
+  /* A ROW IS MATCHED BY ITS NAME FIRST, AND ONLY THEN BY ITS KEY (§360.3).
+     addBusinessUnit mints a key from the name, and a client's stored keys
+     were not always minted that way — Raya's are `mob`, `fin`, `cx`, and a
+     client made on the frozen console carries whatever that day's minter
+     wrote — so re-minting from the name gave every existing unit a NEW key,
+     read every head as dropped, and refused a pass that added one unit
+     (measured: "Somebody is in charge of Consumer Electronics, IT Dist.,
+     Strategy Management Office" on a graph nobody had renamed). The name
+     is what the flow carries (§346), so it is what an existing row is
+     found by; the key match survives for a row renamed under a key the
+     rename did not move. A matched row KEEPS ITS KEY — the figures, the
+     focus marks, the memberships and every snapshot are keyed on it
+     (§48, §232) — and is re-addressed under it, never appended beside it. */
+  var unitByName = {}, claimedU = {};
+  Object.keys(wasUnits).forEach(function (k) {
+    var nm = String((wasUnits[k] && wasUnits[k].name) || "").trim().toLowerCase();
+    if (nm && !unitByName[nm]) unitByName[nm] = k;
+  });
+  function rekeyUnit(from, to, nm) {
+    if (from === to) return;
+    UNITS[to] = UNITS[from]; delete UNITS[from];
+    UNITS[to].ukey = to;
+    UNITS[to].clauses = (UNITS[to].clauses || []).map(function (c, i) { return [c[0], c[1], to + "-F" + (i + 1)]; });
+    UNIT_KEYS[UNIT_KEYS.indexOf(from)] = to;
+    UNIT_ROLES[to] = UNIT_ROLES[from]; delete UNIT_ROLES[from];
+    var rows = GROUP.weighting.units;
+    for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].key === from) { rows[i].key = to; rows[i].unit = nm; }
+  }
+  (a.units || []).forEach(function (u) {
+    var nm = String((u && u.name) || "").trim();
+    if (!nm) return;
+    var co = byName[String((u && u.company) || "").trim().toLowerCase()] || null;
+    var k = addBusinessUnit(nm, (u && u.prefix) || "", co);
+    if (!k) return;
+    var was = unitByName[nm.toLowerCase()];
+    if (was && claimedU[was]) was = null;
+    if (!was && wasUnits[k] && !claimedU[k]) was = k;
+    if (!was) return;
+    claimedU[was] = true;
+    rekeyUnit(k, was, nm); k = was;
+    UNITS[k] = __smpCarry(wasUnits[k], UNITS[k], ["name", "company", "ukey"]);
+    if (wasRoles[k]) UNIT_ROLES[k] = wasRoles[k];
+    if (wasW[k]) {
+      var rows = GROUP.weighting.units;
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i] && rows[i].key === k) { wasW[k].unit = nm; rows[i] = wasW[k]; break; }
+      }
+    }
+  });
+  var fnByOld = {}, claimedF = {};
+  Object.keys(wasFns).forEach(function (k) {
+    var nm = String((wasFns[k] && wasFns[k].name) || "").trim().toLowerCase();
+    if (nm && !fnByOld[nm]) fnByOld[nm] = k;
+  });
+  (a.functions || []).forEach(function (f) {
+    var nm = String((f && f.name) || "").trim();
+    if (!nm) return;
+    var ff = (f && f.format) === "pillars" ? "pillars"
+           : (f && f.format) === "objectives" ? "objectives" : "projects";
+    var k = addFunction(nm, ff);
+    if (!k) return;
+    var was = fnByOld[nm.toLowerCase()];
+    if (was && claimedF[was]) was = null;
+    if (!was && wasFns[k] && !claimedF[k]) was = k;
+    if (!was) return;
+    claimedF[was] = true;
+    if (was !== k) {
+      FUNCTIONS[was] = FUNCTIONS[k]; delete FUNCTIONS[k];
+      FUNCTION_KEYS[FUNCTION_KEYS.indexOf(k)] = was;
+      k = was;
+    }
+    FUNCTIONS[k] = __smpCarry(wasFns[k], FUNCTIONS[k], ["name", "format"]);
+  });
+  var fnByName = {};
+  (FUNCTION_KEYS || []).forEach(function (k) {
+    var nm = String((FUNCTIONS[k] && FUNCTIONS[k].name) || "").trim().toLowerCase();
+    if (nm && !fnByName[nm]) fnByName[nm] = k;
+  });
+  (a.capabilities || []).forEach(function (cp) {
+    var nm = String((cp && cp.name) || "").trim();
+    if (!nm) return;
+    var holder = fnByName[String((cp && cp.fn) || "").trim().toLowerCase()] || null;
+    var made = addCapability(holder);
+    made.name = nm;
+    made.format = (cp && cp.format) === "pillars" ? "pillars" : "projects";
+    var had = wasCaps[nm.toLowerCase()];
+    if (had) {
+      var keep = __smpCarry(had, made, ["name", "fn", "format", "id", "code"]);
+      for (var kk in keep) if (Object.prototype.hasOwnProperty.call(keep, kk)) made[kk] = keep[kk];
+    }
+  });
+  var dropped = [];
+  Object.keys(wasRoles).forEach(function (k) {
+    if (__smpHeld(wasRoles[k]) && !UNITS[k]) dropped.push(String((wasUnits[k] && wasUnits[k].name) || k));
+  });
+  Object.keys(wasFns).forEach(function (k) {
+    if (__smpHeld(wasFns[k]) && !FUNCTIONS[k]) dropped.push(String((wasFns[k] && wasFns[k].name) || k));
+  });
+  syncWeights();
+  var words = a.words || {};
+  (LABELS.entries || []).forEach(function (e) {
+    var v = words[e.key];
+    if (v == null) return;
+    v = String(v).trim();
+    if (v) e.bu = v;
+  });
+  state.labels = LABELS.entries;
+  return { state: state, dropped: dropped };
+}
+
+var CLIENTSETUP = (function () {
+  "use strict";
+
+  /* ── THE STEPS, BY KEY AND NEVER BY NUMBER (§322) ────────────────────
+     Seven, as the mockup draws them. There is no Summary step any more:
+     the rail beside this page IS the summary — every answer here is a page
+     on it — and Done with set-up is a button on every step rather than a
+     destination at the end (spec 057). */
+  var STEPS = [
+    { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
+    { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
+    { k:"cos",    key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
+    { k:"fns",    key:"Strategy",         label:"Functions",      q:"What supporting functions are there?" },
+    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?" },
+    { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
+    { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
+  ];
+  var SHAPE_STEPS = ["units", "cos", "fns", "caps", "words"];
+  function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
+
+  /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own, so a client
+     reads the same in both products (§322). */
+  var INDUSTRIES = [
+    ["Technology & Communications", ["Technology & Software", "Telecommunications", "Media & Entertainment"]],
+    ["Financial", ["Banking & Finance", "Insurance", "Investment & Asset Management"]],
+    ["Healthcare & Life Sciences", ["Healthcare & Hospitals", "Pharmaceuticals & Biotech", "Medical Devices & Equipment"]],
+    ["Consumer", ["Retail & E-commerce", "Consumer Goods & FMCG", "Food & Beverage", "Hospitality & Tourism", "Restaurants & Food Service"]],
+    ["Industrial", ["Manufacturing", "Automotive", "Aerospace & Defense", "Chemicals", "Industrial Equipment & Machinery"]],
+    ["Energy & Utilities", ["Oil & Gas", "Renewable Energy", "Utilities (Electric, Water, Gas)"]],
+    ["Real Estate & Construction", ["Real Estate & Property", "Construction & Engineering", "Architecture & Design"]],
+    ["Services", ["Professional Services & Consulting", "Legal Services", "Accounting & Audit", "Marketing & Advertising", "HR & Recruitment"]],
+    ["Transportation & Logistics", ["Transportation & Logistics", "Shipping & Maritime", "Aviation & Airlines"]],
+    ["Other Sectors", ["Education & Training", "Agriculture & Farming", "Mining & Metals", "Government & Public Sector", "Non-Profit & NGO", "Sports & Recreation", "Fashion & Apparel", "Printing & Publishing"]],
+    ["", ["Other"]]
+  ];
+  /* A band, never a headcount (§322). */
+  var SIZES = [["startup","Startup","1–10"], ["small","Small","11–50"],
+               ["medium","Medium","51–200"], ["large","Large","201–1000"],
+               ["enterprise","Enterprise","1000+"]];
+  function sizeWord(v){
+    for (var i = 0; i < SIZES.length; i++) if (SIZES[i][0] === v) return SIZES[i][1] + " · " + SIZES[i][2] + " people";
+    return "Not set";
+  }
+  /* The three ways a function plans (§342), the two a capability may (§347). */
+  var FORMATS = [["pillars","Pillars"], ["projects","Projects"], ["objectives","Objectives & actions"]];
+  var CAP_FORMATS = [["pillars","Pillars"], ["projects","Projects"]];
+  /* The names most clients have, one click in (§351). */
+  var COMMON_UNITS = ["Retail", "Online", "Wholesale", "Distribution",
+                      "Corporate Sales", "Export", "Services"];
+  var COMMON_FNS   = ["Finance", "HR", "IT", "Marketing", "Legal", "Procurement",
+                      "Operations", "Supply Chain", "Customer Service", "Audit",
+                      "Strategy Management Office"];
+  function markFromChip(row, name){
+    Object.defineProperty(row, "_chip", { value:name, enumerable:false });
+    return row;
+  }
+  function chipUsed(list, name){
+    for (var i = 0; i < list.length; i++) if (list[i]._chip === name) return true;
+    return false;
+  }
+
+  /* ── The flow's own state, kept ACROSS repaints ──────────────────────
+     The shell rebuilds the page on every paint() and mounts this again, so
+     what step you are on and what you have typed live here and not in the
+     DOM. `S.key` is the client; a different key starts over. */
+  var S = null, HOST = null, OPTS = {};
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;   /* never innerHTML: every name here is typed */
+    return e;
+  }
+  /* ONE SHAPE FOR EVERY REQUEST (§71): not signed in is the door, not an
+     error message — the platform's own door for this client, the console's
+     root. Every other refusal is answered in words where it was made. */
+  function post(body) {
+    return fetch("/api/platform", { method:"POST", cache:"no-store",
+      headers:{ "Content-Type":"application/json" }, body:JSON.stringify(body) })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) {
+          return r.json().then(function (j) {
+            if (j && j.auth) { location.replace(OPTS.door || "/"); throw new Error("sign in"); }
+            return j;
+          });
+        }
+        return r.json();
+      });
+  }
+  function say(msg, bad){
+    /* Held in S as well as written, because a refusal now REDRAWS the step
+       (the put-back rows have to be drawn) and a sentence written into the
+       old column would go with it (§63). render() writes S.said back and
+       the next successful move clears it. */
+    /* §360.6: the console's two pieces (mountCreate, mountArchived) hold no
+       step state — S is only ever minted by mount() — and the create piece
+       said "Creating…" through this very function, so Add a client THREW
+       before it posted anything: no refusal written, no createClient sent,
+       the console left standing on /platform with nothing on the console
+       but a TypeError. Found by checks/client-setup-outside.py asserting
+       what is POSTED (§96); the state is held only where there is one. */
+    if (S) S.said = msg ? { msg: msg, bad: !!bad } : null;
+    var n = HOST && HOST.querySelector("[data-cssaid]");
+    if (!n) return;
+    n.textContent = msg || "";
+    n.className = "cssaid " + (msg ? (bad ? "err" : "said") : "");
+    n.hidden = !msg;
+  }
+  function nOf(n, one, many) { return n + " " + (n === 1 ? one : (many || one + "s")); }
+
+  /* ── WHAT THE GRAPH ALREADY SAYS (the platform host) ─────────────────
+     Read off the live globals rather than asked of the server: inside the
+     platform the graph on screen is the truth of the moment, and a server
+     copy could lag an autosave by a second (§210). The same mapping the
+     server's `client` action makes, so a row reads the same in both hosts. */
+  function liveShape(){
+    var g = { companies:[], units:[], functions:[], capabilities:[], words:{} };
+    (COMPANY_KEYS || []).forEach(function (k) { g.companies.push({ name: COMPANIES[k].name }); });
+    (UNIT_KEYS || []).forEach(function (k) {
+      var u = UNITS[k];
+      g.units.push({ name: u.name,
+        company: u.company && COMPANIES[u.company] ? COMPANIES[u.company].name : "" });
+    });
+    (FUNCTION_KEYS || []).forEach(function (k) {
+      var f = FUNCTIONS[k];
+      g.functions.push({ name: f.name,
+        format: f.format === "pillars" ? "pillars" : f.format === "objectives" ? "objectives" : "projects" });
+    });
+    ((GROUP && GROUP.capabilities) || []).forEach(function (c) {
+      g.capabilities.push({ name: c.name,
+        fn: c.fn && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : "",
+        format: c.format === "pillars" ? "pillars" : "projects" });
+    });
+    (LABELS.entries || []).forEach(function (e) { g.words[e.key] = e.bu; });
+    return g;
+  }
+  function holdsNow(){ return __smpHoldsNow(); }
+  function isDone(){ return !!(typeof SMPRules !== "undefined" && SMPRules.setupDone(GROUP)); }
+
+  /* ── WHAT THE RAIL'S STRIP SAYS (spec 057): which steps the data holds an
+     answer for. Counted, never remembered — the data IS the progress
+     (§129), so there is no second record of it to fall out of step. The
+     client and its words always count (the client exists; a word left as
+     it is keeps the platform's own); the office counts when a Forefront
+     row is on the register (§339 writes the creator's). */
+  function progress(){
+    var ff = (PEOPLE || []).some(function (p) { return p && (p.forefront || (p.extra && p.extra.forefront)); });
+    var tests = {
+      client: true,
+      units:  (UNIT_KEYS || []).length > 0,
+      cos:    (COMPANY_KEYS || []).length > 0 || (UNIT_KEYS || []).length > 0,
+      fns:    (FUNCTION_KEYS || []).length > 0,
+      caps:   ((GROUP && GROUP.capabilities) || []).length > 0,
+      words:  true,
+      office: ff
+    };
+    var done = 0, todo = [];
+    STEPS.forEach(function (s) { if (tests[s.k]) done++; else todo.push(s.label); });
+    return { done: done, total: STEPS.length, todo: todo };
+  }
+
+  /* ── MOUNTING IN THE PLATFORM ────────────────────────────────────────
+     `host` is the page's box; `opts.key` the client's slug, `opts.live`
+     whether a server is there at all, `opts.door` where a 401 goes,
+     `opts.repaint` the shell's paint(). Called from paint() on every draw of
+     the Getting started page, before wire() so the brand controls it draws
+     are wired by the shell like any other. */
+  function mount(host, opts){
+    HOST = host; OPTS = opts || {};
+    var key = OPTS.key || "";
+    if (!S || S.key !== key) {
+      S = { key:key, at:0, seen:[], reg:null, regErr:null, loading:false,
+            shape:liveShape(), shapeDirty:false, markState:undefined };
+    }
+    if (S.at > STEPS.length - 1) S.at = 0;
+    ensureReg("[data-csetup]", mount);
+    render();
+  }
+
+  /* ── THE CLIENT'S RECORD, ASKED ONCE FOR WHOEVER IS DRAWING (§362.2) ──
+     Two hosts read it now — the flow, and the Forefront team page below —
+     and the state is module-level and keyed on the client, so the second
+     reader finds the first one's answer rather than asking again (§53.5).
+     What differs is only which box to redraw when it lands, so that is the
+     argument rather than a second copy of the request. */
+  function ensureReg(sel, again){
+    var key = OPTS.key || "";
+    if (S.reg || S.regErr || S.loading || !OPTS.live || !key) return;
+    S.loading = true;
+    var back = function () { var h = document.querySelector(sel); if (h) again(h, OPTS); };
+    post({ action:"client", key:key }).then(function (j) {
+      S.loading = false;
+      if (!j.ok) { S.regErr = j.error || "The client's record could not be read."; }
+      else S.reg = j;
+      back();
+    }).catch(function (e) {
+      S.loading = false;
+      if (String(e.message) === "sign in") return;
+      S.regErr = "Could not reach the server.";
+      back();
+    });
+  }
+
+  /* ── FOREFRONT TEAM, ON A PAGE OF ITS OWN (§362.2, spec 058 §3a) ───────
+     Islam: *"how about the forefront team is a separate view as you did but
+     we keep them on the client list reading from the forefront team list."*
+     So it is a Setup page of the client's, and the SET-UP FLOW'S STEP IS THE
+     SECOND READER rather than the owner: `officeStep` is unchanged and drawn
+     from both, because people join and leave an account team all through an
+     engagement and a renderer copied for the page would be the drift §53.5
+     keeps recording. The state is the flow's, so opening either fills both. */
+  function mountTeam(host, opts){
+    HOST = host; OPTS = opts || {};
+    var key = OPTS.key || "";
+    if (!S || S.key !== key) {
+      S = { key:key, at:0, seen:[], reg:null, regErr:null, loading:false,
+            shape:liveShape(), shapeDirty:false, markState:undefined };
+    }
+    ensureReg("[data-cteam]", mountTeam);
+    host.innerHTML = "";
+    /* A PLAIN BOX (§364). This said `wzstep`, which is the class the step
+       CHIPS in the rail above the flow wear — a pill — so the whole page was
+       drawn inside one (§65.9). Nothing wraps the table but the page. */
+    var box = el("div");
+    officeStep(box, "note");
+    host.appendChild(box);
+    /* THE HOVER IS MEASURED, NEVER WRITTEN (§88), and `clipTitles()` runs at
+       the end of paint() — which on the FIRST visit is before the client's
+       record has landed, because `ensureReg` fills this box again when it
+       does. So the page asks for it after a late draw; the console has no
+       such function and does not pass one. */
+    if (OPTS.clip) OPTS.clip();
+  }
+  function redraw(){
+    if (OPTS.repaint) OPTS.repaint();
+    else if (HOST) render();
+  }
+  function canEdit(){ return !!(S.reg && S.reg.canEdit); }
+  /* The shape is frozen once there is a plan (§346): its own flag, never
+     `canEdit`, because the name, the mark and the team stay changeable. In
+     the platform the graph's own writers decide — anybody who may open this
+     page may shape a client that holds no plan. */
+  function canShape(){
+    var h = holdsNow();
+    return !(h.plans || h.capabilities) && !(S.reg && S.reg.client && S.reg.client.status === "retired");
+  }
+
+  function render(){
+    if (!HOST) return;
+    HOST.textContent = "";
+    var s = STEPS[S.at];
+    var done = isDone();
+
+    var rail = el("nav", "wzrail");
+    rail.setAttribute("aria-label", "Set-up steps");
+    STEPS.forEach(function (st, i) {
+      var seen = S.seen.indexOf(i) >= 0 && i !== S.at;
+      var b = el("button", "wzstep" + (seen ? " done" : ""));
+      b.type = "button";
+      b.dataset.step = st.k;
+      if (i === S.at) b.setAttribute("aria-current", "step");
+      b.appendChild(el("span", "n", seen ? "✓" : String(i + 1)));
+      b.appendChild(document.createTextNode(st.label));
+      b.addEventListener("click", function () { goStep(i); });
+      rail.appendChild(b);
+    });
+    HOST.appendChild(rail);
+
+    if (S.regErr) {
+      var rb = el("p", "wzarched");
+      rb.appendChild(document.createTextNode("The client's own record — its name on the door, its mark, its modules and the office team — could not be read: " + S.regErr + " The pages below that live in the platform still work."));
+      HOST.appendChild(rb);
+    }
+    if (!canShape() && SHAPE_STEPS.indexOf(s.k) > -1) {
+      var hb = el("div", "wzarched");
+      hb.appendChild(document.createTextNode("This client has a plan in it, so its "));
+      hb.appendChild(el("b", null, "shape is set from here on"));
+      hb.appendChild(document.createTextNode(
+        ". Set-up rewrites these lists, which would lose that work, so they are read-only here — " +
+        "rename or retire a row on its own Setup page instead, where the row keeps who runs it."));
+      HOST.appendChild(hb);
+    }
+
+    var col = el("div", "wzcol");
+    col.appendChild(el("span", "lab", s.key));
+    col.appendChild(el("h2", "wzq", s.q));
+    var why = s.k === "units"
+        ? "Add as many as this client has. Leave it empty and the platform opens blank — nothing is put here that nobody asked for."
+      : s.k === "fns"
+        ? "Each function can plan its own way, and that decides what its pages hold. It stays changeable until the function has a plan in it."
+      : "";
+    if (why) col.appendChild(el("p", "wzwhy", why));
+    col.appendChild(stepBody(s.k));
+
+    var foot = el("div", "wzfoot");
+    var back = el("button", "btn", "‹ Back");
+    back.type = "button"; back.disabled = S.at === 0; back.dataset.wzback = "1";
+    back.addEventListener("click", function () { goStep(S.at - 1); });
+    foot.appendChild(back);
+    if (S.at < STEPS.length - 1) {
+      var next = el("button", "btn amber", "Next ›");
+      next.type = "button"; next.dataset.wznext = "1";
+      next.addEventListener("click", function () { goStep(S.at + 1); });
+      foot.appendChild(next);
+    }
+    if (!done) {
+      var fin = el("button", "btn solid", "Done with set-up");
+      fin.type = "button"; fin.dataset.wzdone = "1";
+      fin.title = "Marks the set-up finished: this page moves to the bottom of the rail as Client set-up, and every answer stays editable there.";
+      fin.addEventListener("click", markDone);
+      foot.appendChild(fin);
+    }
+    var fn = el("span", "wzfnote", done
+      ? "Every answer here stays editable."
+      : "Rows are written when you press Next, Back or Done with set-up. Nothing is final.");
+    foot.appendChild(fn);
+    col.appendChild(foot);
+    var said = el("p", "cssaid"); said.dataset.cssaid = "1"; said.hidden = true;
+    if (S.said) { said.textContent = S.said.msg; said.className = "cssaid " + (S.said.bad ? "err" : "said"); said.hidden = false; }
+    col.appendChild(said);
+    HOST.appendChild(col);
+    /* The focus a redraw asked for is landed HERE and never after redraw()
+       returns: the shell's paint() is HELD while a click is landing (§30.1),
+       so a focus() called on the line after it reached the column that was
+       about to be replaced (measured: activeElement "" after + Add). */
+    if (S.focusNew) { S.focusNew = false; focusLastName(); }
+  }
+
+  /* ── Moving between steps commits the shape (§322's rule kept) ─────── */
+  function unnamed(){
+    var bad = [];
+    if (S.shape.units.some(function (u) { return !String(u.name || "").trim(); })) bad.push("a business unit");
+    if (S.shape.companies.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a company");
+    if (S.shape.functions.some(function (f) { return !String(f.name || "").trim(); })) bad.push("a supporting function");
+    if (S.shape.capabilities.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a capability");
+    if (!bad.length) return null;
+    return "Name " + bad.join(" and ") + ", or remove the empty row with the × beside it. A row with no name is not saved.";
+  }
+  function goStep(i){
+    if (i < 0 || i > STEPS.length - 1) return;
+    var why = unnamed();
+    if (why) { say(why, true); return; }
+    if (!commitShape()) return;
+    if (S.seen.indexOf(S.at) < 0) S.seen.push(S.at);
+    S.at = i; S.said = null;
+    redraw();
+    window.scrollTo({ top:0 });
+  }
+
+  /* ── WRITING THE SHAPE INTO THE LIVE GRAPH ───────────────────────────
+     A COPY is shaped first and the live globals are rebound to it only if
+     nobody in charge of anything was dropped — __smpShape rebinds as it
+     goes, so on a refusal the graph that was there is put back (§346).
+     Then the shell's paint() runs and the autosave carries every row it
+     minted (§210). Over file:// the same thing happens to the baked data,
+     which is what the offline copy is for. */
+  function commitShape(){
+    if (!S.shapeDirty) return true;
+    if (!canShape()) { say("This client has a plan in it, so its shape is not rewritten from here.", true); return false; }
+    if (typeof SYNC === "undefined" || !SYNC.graph || !SYNC.hydrate) { say("The shape cannot be written here.", true); return false; }
+    var live = SYNC.graph();
+    var copy = JSON.parse(JSON.stringify(live));
+    var res = __smpShape(copy, S.shape, SYNC.hydrate);
+    if (res.dropped.length) {
+      SYNC.hydrate(live);
+      /* THE ROWS ARE PUT BACK AS WELL AS REFUSED (§360.3): a refusal that
+         left the removed row out of the flow's own list would refuse every
+         Next and Back after it too, with no way to proceed short of typing
+         the name back in — the flow held the person on the step. The list
+         is re-read off the graph that stood, the step redrawn so the row
+         is SEEN to be back, and the sentence says both halves. */
+      var one = res.dropped.length === 1;
+      S.shape = liveShape(); S.shapeDirty = false;
+      say("Somebody is in charge of " + res.dropped.join(", ") + ", and set-up cannot carry that across a rename or a removal, so " +
+          (one ? "its row is back as it was" : "their rows are back as they were") + ". " +
+          "Rename or retire " + (one ? "it" : "them") + " on its own Setup page instead.", true);
+      redraw();
+      return false;
+    }
+    S.shapeDirty = false;
+    S.shape = liveShape();
+    S.said = null;
+    return true;
+  }
+  /* Done with set-up (spec 057): the shape written, then the mark. ONE key
+     on the group (SMPRules.SETUP_DONE), stored as an absence until pressed
+     (§50.6); the rail reads it on the next paint. */
+  function markDone(){
+    var why = unnamed();
+    if (why) { say(why, true); return; }
+    if (!commitShape()) return;
+    GROUP[SMPRules.SETUP_DONE] = true;
+    redraw();
+    window.scrollTo({ top:0 });
+  }
+
+  /* ── Each step ───────────────────────────────────────────────────── */
+  function stepBody(k){
+    var box = el("div");
+    if (k === "client") return clientStep(box);
+    if (k === "units") return listStep(box, S.shape.units, "unit");
+    if (k === "cos") return companiesStep(box);
+    if (k === "caps") return capsStep(box);
+    if (k === "fns") return listStep(box, S.shape.functions, "fn");
+    if (k === "words") return wordsStep(box);
+    return officeStep(box);
+  }
+
+  /* A registry field writes on change, the platform's rule for a field
+     (§35): saveClient with that one value, the refusal said in place. */
+  function saveReg(patch, then){
+    return post(Object.assign({ action:"saveClient", key:S.key }, patch)).then(function (r) {
+      if (!r.ok) { say(r.error || "Not saved.", true); return false; }
+      say(""); if (then) then(); return true;
+    }).catch(function (e) { if (String(e.message) !== "sign in") say("Could not reach the server.", true); return false; });
+  }
+  function field(box, label, value, onChange, note, ro){
+    var w = el("div");
+    w.appendChild(el("span", "lab", label));
+    var i = el("input", "fld");
+    i.type = "text"; i.value = value || "";
+    if (ro) i.readOnly = true;
+    if (onChange) i.addEventListener("change", function () { onChange(i.value); });
+    w.appendChild(i);
+    if (note) w.appendChild(el("p", "note", note));
+    box.appendChild(w);
+    return i;
+  }
+
+  /* The registry half, then the graph half: the mark on the door, the
+     group's mark and the brand colours (Branding, absorbed here — spec 057),
+     the modules this client has, and the way to archive it. */
+  function clientStep(box){
+    var reg = S.reg, c = reg && reg.client;
+    var ed = canEdit();
+    var rs = el("div", "rowset");
+    if (c) {
+      field(rs, "The client's name", c.name, function (v) {
+        v = v.trim(); if (!v || v === c.name) return;
+        saveReg({ name:v }, function () { c.name = v; });
+      }, "What the platform is named after on the console and on the door.", !ed);
+      /* the searchable standard list */
+      var iw = el("div");
+      iw.appendChild(el("span", "lab", "Industry"));
+      var pick = el("div", "wzpick");
+      var inp = el("input", "fld");
+      inp.type = "text"; inp.value = c.industry || "";
+      inp.setAttribute("placeholder", "Type to search the list…");
+      inp.setAttribute("autocomplete", "off");
+      if (!ed) inp.readOnly = true;
+      var panel = el("div", "wzpanel");
+      panel.setAttribute("role", "listbox");
+      panel.hidden = true;
+      function fill(q){
+        panel.textContent = "";
+        var needle = String(q || "").trim().toLowerCase(), hits = 0;
+        INDUSTRIES.forEach(function (g) {
+          var keep = g[1].filter(function (n) { return !needle || n.toLowerCase().indexOf(needle) > -1; });
+          if (!keep.length) return;
+          hits += keep.length;
+          if (g[0]) panel.appendChild(el("div", "gp", g[0]));
+          keep.forEach(function (n) {
+            var b = el("button", "opt", n);
+            b.type = "button";
+            if (n === c.industry) b.setAttribute("aria-selected", "true");
+            b.addEventListener("click", function () {
+              inp.value = n; panel.hidden = true;
+              saveReg({ industry:n }, function () { c.industry = n; });
+            });
+            panel.appendChild(b);
+          });
+        });
+        if (!hits) panel.appendChild(el("div", "nohit", "Nothing matches that — pick Other if none of it fits."));
+      }
+      if (ed) {
+        inp.addEventListener("focus", function () { fill(""); panel.hidden = false; });
+        inp.addEventListener("input", function () { fill(inp.value); panel.hidden = false; });
+        inp.addEventListener("blur", function () { setTimeout(function () { panel.hidden = true; }, 150); });
+      }
+      pick.appendChild(inp); pick.appendChild(panel);
+      iw.appendChild(pick);
+      rs.appendChild(iw);
+
+      var zw = el("div");
+      zw.appendChild(el("span", "lab", "Size"));
+      var band = el("div", "wzband");
+      band.setAttribute("role", "group");
+      SIZES.forEach(function (z) {
+        var b = el("button", null, z[1]);
+        b.type = "button";
+        b.disabled = !ed;
+        b.setAttribute("aria-pressed", c.size === z[0] ? "true" : "false");
+        b.appendChild(el("span", "ppl", z[2] + " people"));
+        b.addEventListener("click", function () {
+          if (!ed) return;
+          saveReg({ size:z[0] }, function () {
+            c.size = z[0];
+            Array.prototype.forEach.call(band.children, function (o) {
+              o.setAttribute("aria-pressed", o === b ? "true" : "false");
+            });
+          });
+        });
+        band.appendChild(b);
+      });
+      zw.appendChild(band);
+      rs.appendChild(zw);
+
+      var nw = el("div");
+      nw.appendChild(el("span", "lab", "Notes"));
+      var ta = el("textarea", "fld");
+      ta.rows = 2; ta.value = c.notes || "";
+      if (!ed) ta.readOnly = true;
+      ta.addEventListener("change", function () { saveReg({ notes:ta.value }, function () { c.notes = ta.value; }); });
+      nw.appendChild(ta);
+      rs.appendChild(nw);
+    } else {
+      field(rs, "The client's name", (GROUP && GROUP.org) || "", null,
+        OPTS.live ? "" : "The client's own record — its name on the door, its industry and its mark — is kept by the served platform.", true);
+    }
+    var aw = el("div");
+    aw.appendChild(el("span", "lab", "Its address here"));
+    var a = el("input", "fld");
+    a.value = S.key ? location.origin + "/" + S.key : location.origin + "/…";
+    a.readOnly = true;
+    aw.appendChild(a);
+    aw.appendChild(el("p", "note", "Made from the name and set once, so a link that has been sent keeps working."));
+    rs.appendChild(aw);
+    if (c) rs.appendChild(markBlock(c));
+    box.appendChild(rs);
+
+    /* ── THE BRANDING, ABSORBED (spec 057): the group's mark and the two
+       colours, drawn by the one renderer Branding always had and wired by
+       the shell's own handlers after this mounts — no second answer to what
+       a colour does (§53.5). */
+    if (typeof brandingBody === "function") {
+      var bb = el("div", "wzbrand");
+      bb.innerHTML = brandingBody();
+      box.appendChild(bb);
+    }
+    if (c) { box.appendChild(modulesBlock()); box.appendChild(archiveBlock()); }
+    return box;
+  }
+
+  /* The mark on this client's door (§313.36): PNG only, shrunk here on a
+     transparent canvas, written the moment it is picked. */
+  function markBlock(c){
+    var mk = el("div", "wzmark");
+    mk.appendChild(el("span", "lab", "Mark on this client's door"));
+    var mrow = el("div", "markrow");
+    var preview = el("img"); preview.alt = "";
+    var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
+    function show(src){
+      if (src) { preview.src = src; preview.hidden = false; noneNote.hidden = true; }
+      else { preview.removeAttribute("src"); preview.hidden = true; noneNote.hidden = false; }
+    }
+    mrow.appendChild(preview); mrow.appendChild(noneNote);
+    show(c.mark);
+    if (canEdit()) {
+      var file = el("input"); file.type = "file"; file.accept = "image/png"; file.hidden = true;
+      file.dataset.doormark = "1";
+      var choose = el("button", "btn", c.mark ? "Replace" : "Choose a PNG"); choose.type = "button";
+      choose.addEventListener("click", function () { file.click(); });
+      var drop = el("button", "btn", "Remove"); drop.type = "button";
+      drop.hidden = !c.mark;
+      drop.addEventListener("click", function () {
+        saveReg({ mark:"" }, function () { c.mark = null; show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
+      });
+      file.addEventListener("change", function () {
+        var f = file.files && file.files[0];
+        file.value = "";
+        if (!f) return;
+        if (f.type !== "image/png") { say("The mark must be a PNG.", true); return; }
+        var url = URL.createObjectURL(f);
+        var img = new Image();
+        img.onload = function () {
+          URL.revokeObjectURL(url);
+          var scale = Math.min(1, 640 / img.naturalWidth, 200 / img.naturalHeight);
+          var cv = document.createElement("canvas");
+          cv.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+          var out = cv.toDataURL("image/png");
+          if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
+          saveReg({ mark:out }, function () { c.mark = out; show(out); drop.hidden = false; choose.textContent = "Replace"; });
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
+        img.src = url;
+      });
+      mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(file);
+    }
+    mk.appendChild(mrow);
+    mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + S.key + "/sign-in, the door this client's people sign in at."));
+    return mk;
+  }
+
+  /* ── WHICH MODULES THIS CLIENT HAS (§320.4, carried whole) ───────────
+     The list comes from the server, the default gets words and not a dead
+     control (§94.15), seeing a state is not setting it (§256), and it
+     rewrites itself rather than the page (§71.2). */
+  function modulesBlock(){
+    var box = el("div");
+    var reg = S.reg;
+    if (!reg || !reg.offer || !reg.offer.length) return box;
+    var mods = el("div", "band");
+    mods.appendChild(el("span", "lab", "Modules this client has"));
+    var rows = el("div");
+    mods.appendChild(rows);
+    function paintRows(){
+      rows.textContent = "";
+      var have = reg.modules || [];
+      reg.offer.forEach(function (m) {
+        var mr = el("div", "teamrow");
+        mr.dataset.module = m.key;
+        var mwho = el("div", "who");
+        mwho.appendChild(el("div", "nm", m.label));
+        mwho.appendChild(el("div", "em", m.note));
+        mr.appendChild(mwho);
+        var msp = el("div", "sp");
+        var on = have.indexOf(m.key) >= 0;
+        if (m.always) msp.appendChild(el("span", "none", "Always on"));
+        else {
+          if (on) msp.appendChild(el("span", "tag open", "On"));
+          else if (!reg.canEdit) msp.appendChild(el("span", "none", "Off"));
+          if (reg.canEdit) {
+            var mb = el("button", "btn", on ? "Turn off" : "Turn on");
+            mb.type = "button";
+            mb.addEventListener("click", function () {
+              mb.disabled = true;
+              post({ action:"setModules", key:S.key, module:m.key, on:!on }).then(function (r) {
+                if (!r.ok) { mb.disabled = false; say(r.error || "Not changed.", true); return; }
+                reg.modules = r.modules || [];
+                paintRows();
+              });
+            });
+            msp.appendChild(mb);
+          }
+        }
+        mr.appendChild(msp);
+        rows.appendChild(mr);
+      });
+    }
+    paintRows();
+    mods.appendChild(el("p", "note",
+      "Turning one on gives this client the module: it appears on their card, in the " +
+      "switcher inside the platform, and at its own address. Turning it off takes it away " +
+      "and deletes nothing."));
+    box.appendChild(mods);
+    return box;
+  }
+
+  /* ── ARCHIVING, FROM INSIDE (§323) ───────────────────────────────────
+     The destructive act in its own block behind a rule at the foot of the
+     step (§273.4), the ask in the block and naming the client — and the
+     press LEAVES: archiving closes the address this page is drawn at, so it
+     lands on the console, where the Archived band now holds the client.
+     Bringing one back and deleting stay on the console (mountArchived),
+     because an archived client's address answers nobody (§61). */
+  function archiveBlock(){
+    var wrap = el("div");
+    var reg = S.reg;
+    if (!reg || !reg.canArchive || (reg.client && reg.client.status === "retired")) return wrap;
+    var name = reg.client.name;
+    function draw(){
+      wrap.textContent = "";
+      var a = el("div", "wzend");
+      a.appendChild(el("span", "wzendkey", "Archiving"));
+      a.appendChild(el("p", "wzendwhy",
+        "Archiving takes " + name + " off the clients page and closes their link — " +
+        "anybody who goes to it is turned away exactly as if this client had never existed. " +
+        "Nothing is lost, and you can bring them back from the console."));
+      var row = el("div", "wzendrow");
+      var go = el("button", "btn risk", "Archive this client");
+      go.type = "button"; go.dataset.archive = "ask";
+      go.addEventListener("click", function () { ask(a); });
+      row.appendChild(go);
+      a.appendChild(row);
+      wrap.appendChild(a);
+    }
+    function ask(box){
+      box.textContent = "";
+      box.appendChild(el("span", "wzendkey", "Archiving"));
+      var q = el("div", "wzask");
+      q.dataset.ask = "archive";
+      var p1 = el("p");
+      p1.appendChild(document.createTextNode("Archive "));
+      p1.appendChild(el("b", null, name));
+      p1.appendChild(document.createTextNode("?"));
+      q.appendChild(p1);
+      var goes = el("p", "goes");
+      goes.appendChild(document.createTextNode("Their link stops working at once — this page included."));
+      goes.appendChild(el("br"));
+      goes.appendChild(document.createTextNode("The card leaves the clients page."));
+      goes.appendChild(el("br"));
+      goes.appendChild(document.createTextNode("Everything they have is kept."));
+      q.appendChild(goes);
+      var row = el("div", "row");
+      var yes = el("button", "btn risksolid", "Archive " + name);
+      yes.type = "button"; yes.dataset.archive = "do";
+      var no2 = el("button", "btn", "Cancel");
+      no2.type = "button"; no2.dataset.archive = "cancel";
+      no2.addEventListener("click", draw);
+      yes.addEventListener("click", function () {
+        yes.disabled = true; no2.disabled = true; yes.textContent = "Archiving…";
+        post({ action:"archiveClient", key:S.key, on:true }).then(function (j) {
+          if (!j.ok) { yes.disabled = false; no2.disabled = false; yes.textContent = "Archive " + name;
+                       say(j.error || "Not archived.", true); return; }
+          location.assign(OPTS.console || "/platform");
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          yes.disabled = false; no2.disabled = false; yes.textContent = "Archive " + name;
+          say("Could not reach the server.", true);
+        });
+      });
+      row.appendChild(yes); row.appendChild(no2);
+      q.appendChild(row);
+      box.appendChild(q);
+    }
+    draw();
+    return wrap;
+  }
+
+  /* ── A list you add to: units and functions are one control ───────── */
+  function focusLastName(){
+    var boxes = HOST ? HOST.querySelectorAll(".wzrow input.fld") : [];
+    if (boxes.length) boxes[boxes.length - 1].focus();
+  }
+  function addThenFocus(){ S.shapeDirty = true; S.focusNew = true; redraw(); }
+  function listStep(box, list, kind){
+    var shape = canShape();
+    if (!list.length) {
+      box.appendChild(el("p", "wzempty", kind === "unit" ? "No business units yet." : "No supporting functions yet."));
+    } else {
+      var rows = el("div", "wzrows");
+      list.forEach(function (row, n) {
+        var r = el("div", "wzrow");
+        var nm = el("input", "fld");
+        nm.type = "text"; nm.value = row.name;
+        if (!shape) nm.readOnly = true;
+        nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
+        r.appendChild(nm);
+        if (kind === "fn") {
+          var tail = el("span", "wzrt");
+          tail.appendChild(el("span", "wzsub", "plans in"));
+          var sel = el("select", "fld");
+          FORMATS.forEach(function (f) {
+            var o = el("option", null, f[1]);
+            o.value = f[0];
+            if (row.format === f[0]) o.selected = true;
+            sel.appendChild(o);
+          });
+          if (!shape) sel.disabled = true;
+          sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; });
+          tail.appendChild(sel);
+          r.appendChild(tail);
+        }
+        if (shape) {
+          var x = el("button", "wzx", "×");
+          x.type = "button";
+          x.setAttribute("aria-label", "Remove " + row.name);
+          x.addEventListener("click", function () { list.splice(n, 1); S.shapeDirty = true; redraw(); });
+          r.appendChild(x);
+        }
+        rows.appendChild(r);
+      });
+      box.appendChild(rows);
+    }
+    if (shape) {
+      var common = kind === "unit" ? COMMON_UNITS : COMMON_FNS;
+      var left = common.filter(function (nm) { return !chipUsed(list, nm); });
+      if (left.length) {
+        var crow = el("div", "wzcommon");
+        left.forEach(function (nm) {
+          var cb = el("button", "wzcm");
+          cb.type = "button";
+          cb.setAttribute("aria-label", "Add " + nm);
+          cb.appendChild(el("span", "p", "+"));
+          cb.appendChild(document.createTextNode(nm));
+          cb.addEventListener("click", function () {
+            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:"pillars" }, nm));
+            addThenFocus();
+          });
+          crow.appendChild(cb);
+        });
+        box.appendChild(crow);
+      }
+      var add = el("button", "wzadd", kind === "unit" ? "+ Add a business unit" : "+ Add a supporting function");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:"pillars" });
+        addThenFocus();
+      });
+      box.appendChild(add);
+    }
+    box.appendChild(el("p", "wzwhy", kind === "unit"
+      ? "A unit plans in pillars, with key measures and tactics under each. Its code is made from the name and prefixes every pillar on it."
+      : "A function's plan type decides what its pages hold, and it stays changeable until the function has a plan in it."));
+    return box;
+  }
+
+  function companiesStep(box){
+    var shape = canShape();
+    var has = S.shape.companies.length > 0;
+    var ch = el("div", "wzchoices");
+    [[false, "No — the units sit directly under " + ((GROUP && GROUP.org) || "this client"),
+      "One less layer to explain. Companies can be added later without touching the plans."],
+     [true, "Yes — group them into companies",
+      "A company holds several units and decides who sees across them. It carries no plan of its own."]]
+      .forEach(function (c) {
+        var b = el("button", "wzchoice");
+        b.type = "button";
+        b.disabled = !shape;
+        b.setAttribute("aria-pressed", c[0] === has ? "true" : "false");
+        b.appendChild(el("span", "cname", c[1]));
+        b.appendChild(el("span", "cwhy", c[2]));
+        b.addEventListener("click", function () {
+          if (!shape) return;
+          if (!c[0]) { S.shape.companies = []; S.shape.units.forEach(function (u) { u.company = ""; }); }
+          else if (!S.shape.companies.length) S.shape.companies.push({ name:"" });
+          S.shapeDirty = true; redraw();
+        });
+        ch.appendChild(b);
+      });
+    box.appendChild(ch);
+    if (!has) return box;
+    var rows = el("div", "wzrows");
+    S.shape.companies.forEach(function (co, n) {
+      var r = el("div", "wzrow");
+      var nm = el("input", "fld");
+      nm.type = "text"; nm.value = co.name;
+      nm.setAttribute("placeholder", "The company's name");
+      if (!shape) nm.readOnly = true;
+      nm.addEventListener("input", function () { co.name = nm.value; S.shapeDirty = true; });
+      r.appendChild(nm);
+      var x = el("button", "wzx", "×");
+      x.disabled = !shape;
+      x.type = "button"; x.setAttribute("aria-label", "Remove");
+      x.addEventListener("click", function () {
+        var gone = co.name;
+        S.shape.companies.splice(n, 1);
+        S.shape.units.forEach(function (u) { if (u.company === gone) u.company = ""; });
+        S.shapeDirty = true; redraw();
+      });
+      r.appendChild(x);
+      rows.appendChild(r);
+    });
+    box.appendChild(rows);
+    var add = el("button", "wzadd", "+ Add a company");
+    add.type = "button"; add.disabled = !shape;
+    add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); S.shapeDirty = true; redraw(); });
+    box.appendChild(add);
+    if (S.shape.units.length) {
+      box.appendChild(el("div", "lab", "Which company each unit belongs to"));
+      var ur = el("div", "wzrows");
+      S.shape.units.forEach(function (u) {
+        var r = el("div", "wzrow");
+        r.appendChild(el("span", "wzname", u.name || "(unnamed)"));
+        var tail = el("span", "wzrt");
+        var sel = el("select", "fld");
+        var none = el("option", null, "Its own — no company"); none.value = "";
+        sel.appendChild(none);
+        S.shape.companies.forEach(function (co) {
+          if (!co.name) return;
+          var o = el("option", null, co.name); o.value = co.name;
+          if (u.company === co.name) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.disabled = !shape;
+        sel.addEventListener("change", function () { u.company = sel.value; S.shapeDirty = true; });
+        tail.appendChild(sel);
+        r.appendChild(tail);
+        ur.appendChild(r);
+      });
+      box.appendChild(ur);
+    }
+    return box;
+  }
+
+  /* A capability is a row you add, like the others (§347): a name, which
+     function carries it, and how it is planned — Setup › Capabilities' own
+     three questions. */
+  function capsStep(box){
+    var shape = canShape();
+    if (!S.shape.capabilities.length) {
+      box.appendChild(el("p", "wzempty", "No capabilities yet."));
+    } else {
+      var rows = el("div", "wzrows");
+      S.shape.capabilities.forEach(function (cp, n) {
+        var r = el("div", "wzrow");
+        var nm = el("input", "fld");
+        nm.type = "text"; nm.value = cp.name;
+        nm.setAttribute("aria-label", "Capability name");
+        if (!shape) nm.readOnly = true;
+        nm.addEventListener("input", function () { cp.name = nm.value; S.shapeDirty = true; });
+        r.appendChild(nm);
+        var tail = el("span", "wzrt");
+        tail.appendChild(el("span", "wzsub", "carried by"));
+        var who = el("select", "fld");
+        who.setAttribute("aria-label", "Which function carries " + (cp.name || "this capability"));
+        var none = el("option", null, "— unassigned —"); none.value = "";
+        who.appendChild(none);
+        S.shape.functions.forEach(function (f) {
+          if (!f.name) return;
+          var o = el("option", null, f.name); o.value = f.name;
+          if (cp.fn === f.name) o.selected = true;
+          who.appendChild(o);
+        });
+        who.disabled = !shape;
+        who.addEventListener("change", function () { cp.fn = who.value; S.shapeDirty = true; });
+        tail.appendChild(who);
+        tail.appendChild(el("span", "wzsub", "plans in"));
+        var how = el("select", "fld");
+        how.setAttribute("aria-label", "How " + (cp.name || "this capability") + " is planned");
+        CAP_FORMATS.forEach(function (f) {
+          var o = el("option", null, f[1]); o.value = f[0];
+          if (cp.format === f[0]) o.selected = true;
+          how.appendChild(o);
+        });
+        how.disabled = !shape;
+        how.addEventListener("change", function () { cp.format = how.value; S.shapeDirty = true; });
+        tail.appendChild(how);
+        r.appendChild(tail);
+        if (shape) {
+          var x = el("button", "wzx", "×");
+          x.type = "button";
+          x.setAttribute("aria-label", "Remove " + cp.name);
+          x.addEventListener("click", function () { S.shape.capabilities.splice(n, 1); S.shapeDirty = true; redraw(); });
+          r.appendChild(x);
+        }
+        rows.appendChild(r);
+      });
+      box.appendChild(rows);
+    }
+    if (shape) {
+      var add = el("button", "wzadd", "+ Add a capability");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        S.shape.capabilities.push({ name:"", fn:"", format:"projects" });
+        addThenFocus();
+      });
+      box.appendChild(add);
+    }
+    box.appendChild(el("p", "wzwhy",
+      "A capability appears on the strategic side of the navigation, beside the business units, " +
+      "with pages of its own. Its code is made from its name, and how it plans stays changeable until it has a plan in it."));
+    return box;
+  }
+
+  /* The words the client uses, only the ones it has (§346.3). */
+  function wordsStep(box){
+    var shape = canShape();
+    var WORDS = [
+      ["unitword", "Business unit", "Business Unit", "Every client has these"],
+      ["pillar", "Pillar", "Pillar", "Units plan in pillars"],
+      ["measure", "Key measure", "Key Measure", "Under a pillar"],
+      ["tactic", "Tactic", "Tactic", "Under a pillar"],
+      ["keyobj", "Key objectives", "Key Objectives", "A subject's own scorecard"]
+    ];
+    var wrap = el("div", "wztbl");
+    var t = el("table");
+    var thead = el("thead"), hr = el("tr");
+    ["What it is", "What this client calls it", "Why we ask"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    thead.appendChild(hr); t.appendChild(thead);
+    var tb = el("tbody");
+    WORDS.forEach(function (w) {
+      var tr = el("tr");
+      var c1 = el("td"); c1.appendChild(el("b", null, w[1])); tr.appendChild(c1);
+      var c2 = el("td");
+      var i = el("input", "fld");
+      i.type = "text";
+      i.value = S.shape.words[w[0]] != null ? S.shape.words[w[0]] : w[2];
+      if (!shape) i.readOnly = true;
+      i.addEventListener("input", function () { S.shape.words[w[0]] = i.value; S.shapeDirty = true; });
+      c2.appendChild(i); tr.appendChild(c2);
+      tr.appendChild(el("td", "muted", w[3]));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); wrap.appendChild(t);
+    box.appendChild(wrap);
+    box.appendChild(el("p", "wzwhy", "Only the words this client actually has. A box left as it is keeps the platform's own word."));
+    return box;
+  }
+
+  /* ── THE OFFICE, AS A SETUP TABLE (§364) ────────────────────────────
+     Islam, of the page §362.2 shipped: *"forefront team is damaged it needs
+     to be a table looks like the people register wiht the required
+     columns."* MEASURED BEFORE ANYTHING WAS DRAWN, and the cause was one
+     class: `mountTeam` wrapped the rows in `.wzstep`, which is what the
+     flow's STEP CHIPS wear — a pill — so a control's own shape reached a
+     whole page and drew the oval he photographed (§65.9: a class name is
+     one global namespace). Under it the rows were `.teamrow`, written for
+     the flow's 760px column, so on a full-width Setup page they laid out
+     SIDE BY SIDE and wanted 2471px in a 1323px box: the third consultant
+     cut in half.
+
+     IT IS THE SETUP TABLES' OWN SHAPE, NEVER A SECOND ONE (§53.5):
+     `.cfg > table.unitcfg`, which Companies, the BU list and Functions
+     already wear, so the navy heading row, one line per cell, the cap with
+     the value on a hover (§88) and the ellipsis all come from the
+     family rather than from rules invented here. The add row goes under
+     the table and the note under that, which is that family's order too.
+
+     ONE RENDERER FOR BOTH HOSTS, which is why the table is drawn here and
+     not in `mountTeam`: the flow's step and the Setup page are two readers
+     of this one function (§9's pattern), and people join and leave an
+     account team all through an engagement — a renderer copied for the
+     page is the drift §53.5 keeps recording. The flow's column caps at
+     760px and the register column is absent there on a client the platform
+     built, so it draws four columns where the page draws five.
+
+     THE REGISTER COLUMN IS DRAWN ONLY WHERE IT CAN BE ANSWERED (§61): on a
+     client whose register came across, the match is by address and has to
+     be confirmed (§313.32); on one the platform built, the seat IS the
+     register row and there is nothing to pick. The header follows the
+     cells, or a table says it holds a fact it never draws. */
+  function officeStep(box, noteClass){
+    var reg = S.reg;
+    if (!reg) {
+      box.appendChild(el("p", "wzempty", OPTS.live && !S.regErr ? "Reading the team…" : "The office team is kept by the served platform."));
+      return box;
+    }
+    var ed = !!reg.canEdit;
+    var asks = !reg.client.made_here && (reg.register || []).length > 0;
+    var cfg = el("div", "cfg");
+    var t = el("table", "unitcfg teamcfg");
+    var th = el("thead"), hr = el("tr");
+    var heads = [["Name", "tmname"], ["Email", "tmmail"], ["Seat on this client", "cc tmseat"]];
+    if (asks) heads.push(["On this register as", "cc tmas"]);
+    if (ed) heads.push(["", "cc tmrm"]);
+    heads.forEach(function (h) {
+      var c = el("th", h[1] || null, h[0]);
+      if (!h[0]) c.setAttribute("aria-label", "Remove");
+      hr.appendChild(c);
+    });
+    th.appendChild(hr); t.appendChild(th);
+    var tb = el("tbody");
+    (reg.team || []).forEach(function (m) {
+      var tr = el("tr");
+      var nm = el("td", "tmname");
+      nm.appendChild(el("b", null, m.name || m.email));
+      tr.appendChild(nm);
+      tr.appendChild(el("td", "tmmail", m.email));
+      /* A CELL THAT HOLDS A CONTROL CARRIES NO HOVER, AND WHAT MAKES THAT
+         TRUE IS THE WIDTH (§364.4). `clipTitles()` writes a measured title
+         on a cell that overflowed, and these do not: the select fills its
+         own cell and the two seat buttons set their column's floor, so
+         there is nothing to measure. A `data-keep-title` mark was added
+         first and its own falsification proved it a no-op (§298.2), so it
+         is gone (§24) — but the rule is the reason the widths are what they
+         are, because the fallback for a cell with no value inside it is the
+         cell's own text, which for a `<select>` is every option it holds. */
+      var seat = el("td", "cc tmseat");
+      seat.appendChild(seatCell(m, reg.seats || [], ed));
+      tr.appendChild(seat);
+      if (asks) {
+        var as = el("td", "cc tmas");
+        if (ed) as.appendChild(registerCell(m, reg.register));
+        else as.appendChild(el("span", "muted", nameOnRegister(m, reg.register)));
+        tr.appendChild(as);
+      }
+      if (ed) {
+        var rmc = el("td", "cc tmrm");
+        var rm = el("button", "linkbu", "Remove");
+        rm.type = "button";
+        rm.addEventListener("click", function () {
+          post({ action:"setTeam", key:S.key, email:m.email, on:false })
+            .then(function (r) { r.ok ? refreshTeam() : say(r.error || "Not removed.", true); });
+        });
+        rmc.appendChild(rm);
+        tr.appendChild(rmc);
+      }
+      tb.appendChild(tr);
+    });
+    if (!(reg.team || []).length) {
+      var none = el("tr");
+      var nc = el("td", "muted", "Nobody from Forefront is on this client yet.");
+      nc.colSpan = heads.length;
+      none.appendChild(nc); tb.appendChild(none);
+    }
+    t.appendChild(tb); cfg.appendChild(t);
+    box.appendChild(cfg);
+    if (ed) {
+      /* THE ADD ROW IS UNDER THE TABLE, not a dialog: it is two answers,
+         not the register's nine (Islam, on the mockup). The second answer
+         is drawn only where the first table column is. */
+      var row = el("div", "row tmadd");
+      var who2 = el("select", "fld");
+      var p0 = el("option", null, "Add somebody from Forefront"); p0.value = "";
+      who2.appendChild(p0);
+      (reg.office || []).forEach(function (o) {
+        if ((reg.team || []).some(function (m) { return m.email === o.email; })) return;
+        var op = el("option", null, (o.name || o.email) + " — " + o.email);
+        op.value = o.email;
+        who2.appendChild(op);
+      });
+      var asWho = el("select", "fld");
+      var a0 = el("option", null, "…as who on this client's register?"); a0.value = "";
+      asWho.appendChild(a0);
+      (reg.register || []).forEach(function (r) {
+        var o = el("option", null, r.name + (r.email ? " · " + r.email : "")); o.value = r.key;
+        asWho.appendChild(o);
+      });
+      var add = el("button", "btn", "Add");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        if (!who2.value) return;
+        post({ action:"setTeam", key:S.key, email:who2.value, seat:"smoteam", personKey:asWho.value })
+          .then(function (r) { r.ok ? refreshTeam() : say(r.error || "Not added.", true); });
+      });
+      row.appendChild(who2);
+      if (asks) row.appendChild(asWho);
+      row.appendChild(add);
+      box.appendChild(row);
+    }
+    /* ONE SENTENCE, TWO DRESSES (§364). The words are written once; the
+       HOST says how they are dressed, because the two are different rooms:
+       on the Setup page it is the family's own `.note` — the bordered block
+       Companies and the BU list both end with, which Islam signed off as
+       "the family's own treatment" — and inside the flow it is `.wzwhy`, the
+       quiet line every other step ends with. A class threaded through this
+       function would be a flag (§104.7); the caller dressing its own note is
+       not. */
+    box.appendChild(el("p", noteClass || "wzwhy", TEAM_NOTE));
+    return box;
+  }
+  var TEAM_NOTE =
+    "These are Forefront's people, not the client's. A seat is held on THIS client: " +
+    "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
+    "cycles and corrects plans. The client's own register — its heads, custodians and their " +
+    "passwords — is built on the People register beside this page.";
+  /* Which row on the client's register this consultant is, in words, for
+     somebody who may read the page and not edit it. Absent is said (§35),
+     never left as an empty cell that reads as a control that failed. */
+  function nameOnRegister(member, register){
+    var hit = (register || []).filter(function (r) { return r.key === member.person_key; })[0];
+    return hit ? hit.name : "a row of their own";
+  }
+  /* The team controls write at once, so the flow re-reads rather than
+     guessing what the server now holds. A seat is also a register row
+     (§339, state-api officeRow), so the page is repainted afterwards. */
+  function refreshTeam(){
+    S.reg = null; S.regErr = null;
+    redraw();
+  }
+  /* §364: the key inside the cell is GONE — the column heading is the
+     control's name now, and a label under a heading that already says the
+     word says it twice on one row (§87, §267.2). The class stays, because it
+     is what sizes the select; `aria-label` carries the name for anybody not
+     reading the heading. */
+  function registerCell(member, register) {
+    var wrap = el("span", "asrow");
+    var sel = el("select", "fld");
+    sel.setAttribute("aria-label", "On this register as");
+    var own = el("option", null, "a row of their own"); own.value = "";
+    sel.appendChild(own);
+    register.forEach(function (r) {
+      var o = el("option", null, r.name + (r.email ? " · " + r.email : "")); o.value = r.key;
+      if (r.key === member.person_key) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener("change", function () {
+      post({ action:"setTeam", key:S.key, email:member.email, seat:member.seat, personKey:sel.value })
+        .then(function (r) { refreshTeam(); if (!r.ok) say(r.error || "Not changed.", true); });
+    });
+    wrap.appendChild(sel);
+    return wrap;
+  }
+  function seatCell(member, seats, editable) {
+    var wrap = el("span", "cell" + (editable ? "" : " locked"));
+    seats.forEach(function (s) {
+      var b = el("button", null, s.name);
+      b.type = "button";
+      b.title = s.note;
+      if (member.seat === s.key) b.className = "on" + (s.key === "super" ? " hi" : "");
+      if (editable && member.seat !== s.key) {
+        b.addEventListener("click", function () {
+          post({ action:"setTeam", key:S.key, email:member.email, seat:s.key })
+            .then(function (r) { r.ok ? refreshTeam() : say(r.error || "Not changed.", true); });
+        });
+      }
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  /* ── THE CONSOLE'S TWO PIECES ─────────────────────────────────────── */
+
+  /* Adding a client (spec 044, §322): the first step creates the row and
+     the address, and then the flow continues INSIDE the client at its own
+     Getting started page, which is where every other answer is written. */
+  function mountCreate(host, opts){
+    HOST = host; OPTS = opts || {};
+    var draft = { name:"", industry:"", size:"", notes:"" };
+    host.textContent = "";
+    var col = el("div", "wzcol");
+    col.appendChild(el("span", "lab", "The client"));
+    col.appendChild(el("h2", "wzq", "Which client are you setting up?"));
+    var rs = el("div", "rowset");
+    field(rs, "The client's name", "", function (v) { draft.name = v; },
+      "What the platform is named after, everywhere — the chrome, the review deck and every email that leaves. Its address is made from it and set once.");
+    var iw = el("div");
+    iw.appendChild(el("span", "lab", "Industry"));
+    var pick = el("div", "wzpick");
+    var inp = el("input", "fld");
+    inp.type = "text";
+    inp.setAttribute("placeholder", "Type to search the list…");
+    inp.setAttribute("autocomplete", "off");
+    var panel = el("div", "wzpanel");
+    panel.setAttribute("role", "listbox"); panel.hidden = true;
+    function fill(q){
+      panel.textContent = "";
+      var needle = String(q || "").trim().toLowerCase(), hits = 0;
+      INDUSTRIES.forEach(function (g) {
+        var keep = g[1].filter(function (n) { return !needle || n.toLowerCase().indexOf(needle) > -1; });
+        if (!keep.length) return;
+        hits += keep.length;
+        if (g[0]) panel.appendChild(el("div", "gp", g[0]));
+        keep.forEach(function (n) {
+          var b = el("button", "opt", n); b.type = "button";
+          if (n === draft.industry) b.setAttribute("aria-selected", "true");
+          b.addEventListener("click", function () { draft.industry = n; inp.value = n; panel.hidden = true; });
+          panel.appendChild(b);
+        });
+      });
+      if (!hits) panel.appendChild(el("div", "nohit", "Nothing matches that — pick Other if none of it fits."));
+    }
+    inp.addEventListener("focus", function () { fill(""); panel.hidden = false; });
+    inp.addEventListener("input", function () { fill(inp.value); panel.hidden = false; });
+    pick.appendChild(inp); pick.appendChild(panel);
+    iw.appendChild(pick);
+    iw.appendChild(el("p", "note", "The standard list — the same one Strategy Formulation uses, so a client reads the same in both."));
+    rs.appendChild(iw);
+    var zw = el("div");
+    zw.appendChild(el("span", "lab", "Size"));
+    var band = el("div", "wzband"); band.setAttribute("role", "group");
+    SIZES.forEach(function (z) {
+      var b = el("button", null, z[1]); b.type = "button";
+      b.setAttribute("aria-pressed", "false");
+      b.appendChild(el("span", "ppl", z[2] + " people"));
+      b.addEventListener("click", function () {
+        draft.size = z[0];
+        Array.prototype.forEach.call(band.children, function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      });
+      band.appendChild(b);
+    });
+    zw.appendChild(band); rs.appendChild(zw);
+    var nw = el("div");
+    nw.appendChild(el("span", "lab", "Notes"));
+    var ta = el("textarea", "fld"); ta.rows = 2;
+    ta.addEventListener("input", function () { draft.notes = ta.value; });
+    nw.appendChild(ta); rs.appendChild(nw);
+    col.appendChild(rs);
+    var foot = el("div", "wzfoot");
+    var next = el("button", "btn amber", "Create and set it up ›");
+    next.type = "button"; next.dataset.wznext = "1";
+    next.addEventListener("click", function () {
+      var nm = String(draft.name || "").trim();
+      if (!nm) { say("A client needs a name before anything else can be set up.", true); return; }
+      next.disabled = true; say("Creating…");
+      post({ action:"createClient", name:nm, industry:draft.industry, size:draft.size, notes:draft.notes })
+        .then(function (r) {
+          if (!r.ok) { next.disabled = false; say(r.error || "Not created.", true); return; }
+          /* INTO THE CLIENT, AT ITS OWN GETTING STARTED PAGE: everything from
+             here on is written where it lives (spec 057). */
+          location.assign("/" + r.key + "/setup/start");
+        }).catch(function (e) { if (String(e.message) !== "sign in") { next.disabled = false; say("Could not reach the server.", true); } });
+    });
+    foot.appendChild(next);
+    foot.appendChild(el("span", "wzfnote", "The rest — its units, functions, words, mark and team — is set up inside the client, at its own address."));
+    col.appendChild(foot);
+    var said = el("p", "cssaid"); said.dataset.cssaid = "1"; said.hidden = true;
+    col.appendChild(said);
+    host.appendChild(col);
+    var first = rs.querySelector("input.fld"); if (first) first.focus();
+  }
+
+  /* An archived client's two acts, on the console (§323): the way back
+     first and on its own, then — for the platform's admin — the way out,
+     reachable from an archived client and nowhere else. `opts.go` is the
+     console's own way back to its cards; `opts.read` a read of the client
+     the console already made. */
+  function mountArchived(host, key, opts){
+    HOST = host; OPTS = opts || {};
+    var reg = OPTS.read, name = reg && reg.client ? reg.client.name : key;
+    host.textContent = "";
+    var wrap = el("div", "wzcol");
+    function block(keyword){ var b = el("div", "wzend"); b.appendChild(el("span", "wzendkey", keyword)); return b; }
+    function trouble(box, msg){ var p2 = el("p", "wzendwhy", msg); p2.style.color = "var(--bad)"; box.appendChild(p2); }
+    function draw(){
+      wrap.textContent = "";
+      var r = block("Bringing them back");
+      r.appendChild(el("p", "wzendwhy", "Their link starts working again and the card returns to the clients page, exactly as it was."));
+      var rrow = el("div", "wzendrow");
+      var rb = el("button", "btn", "Bring " + name + " back");
+      rb.type = "button"; rb.dataset.unarchive = "1";
+      rb.addEventListener("click", function () {
+        rb.disabled = true; rb.textContent = "Bringing them back…";
+        post({ action:"archiveClient", key:key, on:false }).then(function (j) {
+          if (!j.ok) { rb.disabled = false; rb.textContent = "Bring " + name + " back"; trouble(r, j.error || "Not brought back."); return; }
+          if (OPTS.go) OPTS.go();
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          rb.disabled = false; rb.textContent = "Bring " + name + " back"; trouble(r, "Could not reach the server.");
+        });
+      });
+      rrow.appendChild(rb); r.appendChild(rrow);
+      wrap.appendChild(r);
+      if (!reg || !reg.canDelete) return;
+      var d = block("Deleting");
+      d.appendChild(el("p", "wzendwhy",
+        "Deleting removes everything this client has — their plan, their figures, their people " +
+        "and their conversations. It cannot be undone and there is nothing to restore from."));
+      var drow = el("div", "wzendrow");
+      var db = el("button", "btn risk", "Delete permanently…");
+      db.type = "button"; db.dataset.delete = "ask";
+      db.addEventListener("click", function () { askDelete(d); });
+      drow.appendChild(db); d.appendChild(drow);
+      wrap.appendChild(d);
+    }
+    function askDelete(box){
+      box.textContent = "";
+      box.appendChild(el("span", "wzendkey", "Deleting"));
+      var q = el("div", "wzask"); q.dataset.ask = "delete";
+      var p1 = el("p");
+      p1.appendChild(document.createTextNode("Delete "));
+      p1.appendChild(el("b", null, name));
+      p1.appendChild(document.createTextNode(" and everything in it?"));
+      q.appendChild(p1);
+      var goes = el("p", "goes"); goes.dataset.goes = "1";
+      var g = reg && reg.goes;
+      if (!g) {
+        goes.appendChild(document.createTextNode("What is in this client could not be read, so it cannot be listed here."));
+      } else {
+        var lines = [], shape = [];
+        if (g.units != null) shape.push(nOf(g.units, "business unit"));
+        if (g.functions != null) shape.push(nOf(g.functions, "supporting function"));
+        if (shape.length) lines.push(shape.join(" · "));
+        if (g.people != null) lines.push(nOf(g.people, "person", "people") + " on the register");
+        var rest = [];
+        if (g.plans != null) rest.push(nOf(g.plans, "line") + " of plan");
+        if (g.capabilities != null && g.capabilities) rest.push(nOf(g.capabilities, "capability", "capabilities"));
+        if (g.conversations != null) rest.push(nOf(g.conversations, "conversation"));
+        if (rest.length) lines.push(rest.join(" · "));
+        lines.forEach(function (t, i) { if (i) goes.appendChild(el("br")); goes.appendChild(document.createTextNode(t)); });
+      }
+      q.appendChild(goes);
+      q.appendChild(el("p", null, "This cannot be undone, and there is no backup to restore from. If anybody needs their plans, download them first."));
+      var lab = el("label", null, "Type the client's name to confirm"); lab.setAttribute("for", "wz-confirm");
+      q.appendChild(lab);
+      var typed = el("input", "fld"); typed.id = "wz-confirm"; typed.setAttribute("autocomplete", "off"); typed.dataset.confirm = "1";
+      q.appendChild(typed);
+      var row = el("div", "row");
+      var yes = el("button", "btn risksolid", "Delete " + name + " for ever");
+      yes.type = "button"; yes.dataset.delete = "do"; yes.disabled = true;
+      var no2 = el("button", "btn", "Cancel"); no2.type = "button"; no2.dataset.delete = "cancel";
+      no2.addEventListener("click", draw);
+      typed.addEventListener("input", function () { yes.disabled = typed.value.trim() !== String(name).trim(); });
+      yes.addEventListener("click", function () {
+        yes.disabled = true; no2.disabled = true; typed.readOnly = true; yes.textContent = "Deleting…";
+        post({ action:"deleteClient", key:key, confirm:typed.value }).then(function (j) {
+          if (!j.ok) {
+            no2.disabled = false; typed.readOnly = false;
+            yes.textContent = "Delete " + name + " for ever";
+            yes.disabled = typed.value.trim() !== String(name).trim();
+            trouble(q, j.error || "Not deleted."); return;
+          }
+          if (OPTS.go) OPTS.go();
+        }).catch(function (e) {
+          if (String(e.message) === "sign in") return;
+          no2.disabled = false; typed.readOnly = false;
+          yes.textContent = "Delete " + name + " for ever"; yes.disabled = false;
+          trouble(q, "Could not reach the server.");
+        });
+      });
+      row.appendChild(yes); row.appendChild(no2);
+      q.appendChild(row);
+      box.appendChild(q);
+    }
+    draw();
+    host.appendChild(wrap);
+  }
+
+  return { mount:mount, mountTeam:mountTeam, mountCreate:mountCreate, mountArchived:mountArchived,
+           progress:progress, isDone:isDone, STEPS:STEPS,
+           /* for the checks: the step the flow stands on, never its DOM */
+           at: function () { return S ? STEPS[S.at].k : null; } };
+})();
+
 /* ── sync.js ── */
 /* ── Persistence ──────────────────────────────────────────────────────────
    Served over http(s), the platform loads its state from /api/state and
@@ -50778,6 +53043,13 @@ var SYNC = (function () {
       var nameEl = document.getElementById("clientbackname");
       /* textContent, never innerHTML: a client's name is typed by a person. */
       if (nameEl) nameEl.textContent = person.clientName || clientSlug();
+      /* AND KEPT WHERE IT IS DRAWN (§362). This function runs once, at
+         hydration; the client's own settings reword this control to *Save &
+         close* on every paint they are open (shell.html clientBar), so the
+         name has to survive being written over — and it is remembered on the
+         control rather than in a global, because a second copy of a value is
+         a second thing to keep in step (§53.5). */
+      back.dataset.client = person.clientName || clientSlug();
       back.hidden = false;
       back.title = "Back to your clients";
       /* AND THE ORG NAME BESIDE IT GOES. Both say "Raya Trade" — one as a
@@ -51121,6 +53393,11 @@ var SYNC = (function () {
        idea of what the state is would be a backup of something the platform
        never held. */
     graph: function () { return graph(); },
+    /* THE GLOBALS REBOUND FROM A GRAPH, for the ONE thing that shapes a
+       client in the browser (client-setup.js, §360): the set-up flow shapes
+       a COPY through the product's own minters and hands it here, so the
+       page cannot hold a second idea of how a state becomes the platform. */
+    hydrate: function (state) { hydrate(state); },
     isOffline: function () { return OFFLINE; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
@@ -51704,7 +53981,27 @@ var SYNC = (function () {
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      /* ── FOREFRONT TEAM, ABOVE THE REGISTER (§362.2, spec 058 §3a) ────
+         Forefront's own people on this client, each holding one of the two
+         seats — the ONE place a consultant is added, given a seat or taken
+         off. It is `client`-scoped because it is a fact about the client and
+         not about any module, and it sits above the register because it is
+         the STORE the register reads: one store, one place to edit, more
+         than one place to read (§9's pattern, §53.5).
+
+         `c_people` rather than a key of its own: who may see the client's
+         people and who may see whose consultants they are is one question,
+         and a second key would be a second answer to it (§104.7). The page
+         is drawn by the set-up flow's own renderer (client-setup.js
+         officeStep) rather than a copy, so the step and the page cannot
+         disagree about what a seat is. */
+      { k:"team", ac:"c_people", grp:"who", mod:"client", label:"Forefront team", glyph:"◉",
+        find:"forefront team consultants account team seat super user smo team ours us who from forefront add remove",
+        render:function(){
+          return cfgHead("Forefront team", [], null, false, null) +
+            '<div class="csetup" data-cteam="1"><p class="why">Opening\u2026</p></div>';
+        } },
+      { k:"people", ac:"c_people", grp:"who", mod:"client", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -51715,8 +54012,36 @@ var SYNC = (function () {
          §120.3 put it above the BU list and gave both a mark. Neither side is
          complete without the other, which is what a two-line conflict looks
          like when both edits are right. */
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
-      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
+      { k:"access", ac:"c_access", grp:"access", mod:"strategy", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
+      /* THE LANDING LINE (§359.4, spec 056 §4.5): which of its declared
+         sentences Strategy says under its row on the client landing. The
+         office's by rule (`c_landing` is `area:"always"`, §359.4 in
+         lib/rules.js) until spec 046 §4.4's per-module Access table lands
+         (step 5). The sentences and their texts arrive on the served
+         document (`data-landing`); over file:// the page says so. */
+      { k:"landing", ac:"c_landing", grp:"landing", mod:"strategy", label:"Landing line", glyph:"▤", find:"landing line welcome screen what the module says row sentence",
+        when: function(){ return inOffice(); },
+        render:renderLandingLine },
+      /* ── INSIGHTS' OWN SETUP (§359.5, spec 056 §4.2, §4.4): two pages, and
+         that is its honest size — reports are published from the Forefront
+         console, so Access and The landing are all there is for a client to
+         set. THE SAME KEYS AS STRATEGY'S, `access` and `landing`, because a
+         page's key is its word and not its rail: the two are told apart by
+         `mod`, the document's scope filters the rail to one module
+         (setupDefs), and resolveSetupScope prefers the def under the scope
+         on screen. DRAWN ONLY ON INSIGHTS' OWN DOCUMENT (`when`): the served
+         router stamps the module a Setup address leads with (data-module),
+         and over file:// there is no module at all, so the offline copy's
+         single rail never shows a second Roles & access. Access is
+         `c_access` — the same door as Strategy's matrix, readable to the
+         office and written by the Super user alone (§89). */
+      { k:"access", ac:"c_access", grp:"access", mod:"insights", label:"Roles & access", glyph:"⚿", find:"permissions roles who can open insights library grant",
+        when: function(){ return moduleWord() === "insights"; },
+        render:renderModuleAccess },
+      { k:"landing", ac:"c_landing", grp:"landing", mod:"insights", label:"Landing line", glyph:"▤", find:"landing line welcome screen what insights says row sentence",
+        when: function(){ return moduleWord() === "insights" && inOffice(); },
+        render:renderLandingLine },
+      { k:"mainbu", ac:"c_people", grp:"who", mod:"client", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
       /* ── SETTING A CLIENT UP (§318, spec 044) ────────────────────────
          Islam picked the placement: a rail entry under *The organisation*,
@@ -51731,13 +54056,13 @@ var SYNC = (function () {
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
-      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", grp:"run", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
-      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
-      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
+      { k:"companies", ac:"c_units", grp:"run", mod:"client", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    grp:"run", mod:"client", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
+      { k:"caps",   ac:"c_caps",   grp:"run", mod:"client", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
 
       /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
          FILLING one were two Setup pages; they are one page with two sections
@@ -51750,7 +54075,7 @@ var SYNC = (function () {
          who is not the SMO gets only Fill; anybody else gets no entry at all,
          because paint() drops a def whose every section is refused. Gate the
          parent on c_sets and the owner loses the page they exist for. */
-      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", glyph:"Σ", find:"figure sets owner claim source of figures numbers finance", sections: function(){
+      { k:"sets",   ac:"c_source", grp:"meas", mod:"strategy", label:"Figure sets", glyph:"Σ", find:"figure sets owner claim source of figures numbers finance", sections: function(){
           return [{ k:"cfg",  ac:"c_sets",   label:"Sets configuration", render:renderSetsSetup },
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
@@ -51772,32 +54097,41 @@ var SYNC = (function () {
          glyph, the keywords and the page are untouched — and the group is
          the one place order is decided (SETUP_GROUPS), so nothing else needs
          to know it moved. */
-      { k:"focusset", ac:"c_focus", grp:"meas", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
-      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
+      { k:"focusset", ac:"c_focus", grp:"meas", mod:"strategy", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
+      { k:"bands",  ac:"c_bands",  grp:"meas", mod:"strategy", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
          developer calls that; to everybody else it sounds like stickers on a
          chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
+      { k:"labels", ac:"c_labels", grp:"meas", mod:"strategy", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
 
-      /* Last in Setup: it changes how everything else LOOKS, which is a thing
-         you do once the things themselves exist (§39). */
-      /* ── AND EMAIL LEFT THIS GROUP (§135.4) ────────────────────────
-         §108.3's rename settled a three-way collision — Messages, Send a
-         message, Communication — by naming each page after the one thing it
-         did, and put Email here on a sound argument: what a message wears
-         leaving the platform is the same subject Branding answers, one step
-         further out. Islam's ask goes further and dissolves the question:
-         *"bring the email as a settings in the Send an email part."*
+      /* ── GETTING STARTED, THEN CLIENT SET-UP (§360, spec 057) ─────────
+         Islam: *"the getting started with the client setup to stay at the
+         top of the rail until it's all fulfilled and then moves to the
+         bottom and it absorbs the branding part with the mark and the brand
+         colors and remove the separate branding setting."* One def, two
+         places: while SMPRules.setupDone(GROUP) is false the rail draws it as
+         a STRIP under its head (setupRail below) and never in a group; once
+         Done with set-up is pressed it is an ordinary row in *The client*,
+         the last group, under the name Client set-up. The label is resolved
+         in setupDefsAll(), the one function that builds this list, so the
+         rail and the page it opens cannot disagree (§53.5).
 
-         WHAT A MESSAGE WEARS AND WHERE A MESSAGE IS WRITTEN ARE ONE ERRAND, and
-         the group "Branding & email" no longer has an email in it. The heading
-         is corrected in SETUP_GROUPS rather than left describing a page that
-         moved (§24) — a rail that names something it no longer holds is the
-         same fault as a page naming itself something the rail does not
-         (§121.1). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent email sender footer kicker",             render:renderBranding }
+         BRANDING IS ABSORBED, NOT DELETED: `renderBranding()`'s body is drawn
+         inside the flow's first step (config-render.js brandingBody) and the
+         `c_brand` grant still gates it — the page def went, the page's
+         controls did not. The flow itself is client-setup.js, one module for
+         this host and the console (§360). Its render is a box the module
+         fills from paint(), before wire() so the colour controls it draws
+         are wired like any other. */
+      { k:"start",  ac:"c_brand",  grp:"client", mod:"client", label:"Getting started", glyph:"◐",
+        find:"getting started set up setup client name mark logo colour color colours branding units companies functions capabilities words office team archive modules",
+        render:function(){
+          var done = SMPRules.setupDone(GROUP);
+          return cfgHead(done ? "Client set-up" : "Getting started", [], null, false, null) +
+            '<div class="csetup" data-csetup="1"><p class="why">Opening…</p></div>';
+        } }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -51809,22 +54143,18 @@ var SYNC = (function () {
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* ── WHERE THE GEAR LANDS (§108.10, spec 018) ─────────────────────
-         FIRST AND `primary`, taking both from Reporting cycle: the office's
-         first question on opening Setup is not "how is the cycle going" but
-         "is anything waiting on me", and until this page existed the answer
-         took a walk through five pages.
-
-         THE OFFICE'S, BY THE SAME `when` AS Send a message AND Inbox — the
-         page says "waiting on the office", so for anybody else it would be a
-         page about somebody else's work. It is not a matrix cell for the same
-         reason those two are not (§37, §89): reading everything outstanding
-         across the whole tenant is not a tick somebody could set on a bad
-         afternoon. A non-office viewer's gear falls through to `st[0]`, which
-         is Reporting cycle — where it landed before this page existed. */
-      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", glyph:"⌂", find:"waiting attention outstanding needs me summary home todo", primary:true,
-        when: inOffice,                                                 render:renderOverview },
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
+      /* ── WHERE THE GEAR LANDS (§359, spec 056 §9.1) ─────────────────
+         Reporting cycle, `primary`, for everybody — which is where it landed
+         before §108.10 put an Overview in front of it. THE OVERVIEW IS
+         DELETED, NOT HIDDEN (§24), because both halves of it were already on
+         the landing: the office's "Waiting on you" is `attentionRows()` row
+         for row (§148, welcome.js) and the cycle column joined the landing at
+         §200 in the Overview's own shape — so the page the gear opened was a
+         second drawing of the page the office lands on at every sign-in. The
+         rows themselves stay (`attentionRows()`, config-render.js): the
+         landing, the rail's pills (§108.15) and the home mark (§197.2) all
+         read them. What went is one page that said the same thing twice. */
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -51856,13 +54186,13 @@ var SYNC = (function () {
          one is the better one: the qualifier is doing the work either way, and
          a rail entry is scanned rather than read. The KEY stays `chat`, which
          the endpoint, `GROUP.chat` and the checks all name (§65, §108.3). */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
+      { k:"chat",     ac:"c_chat",  grp:"cycle", mod:"strategy",  label:"Platform Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* HISTORY (§262): who changed what, where, from what to what — and a
          way back. The office's by rule, like the inbox above it; never drawn
          where there is no server to hold a log. */
-      { k:"history",  ac:"c_history", grp:"cycle", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
+      { k:"history",  ac:"c_history", grp:"cycle", mod:"strategy", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
         when: function(){ return inOffice() && TRAIL.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
         render:function(){ return TRAIL.renderPage(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
@@ -51894,7 +54224,7 @@ var SYNC = (function () {
          EACH SECTION KEEPS ITS OWN GATE (§108.4), so somebody holding
          `c_comms` and not `c_send` still reaches the settings half, and
          paint() drops the whole entry for somebody holding neither. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sent record history drafts sender reply-to footer kicker display name outgoing from address",
+      { k:"send",     ac:"c_send", grp:"cycle", mod:"strategy",   label:"Send an email", glyph:"➤", find:"broadcast announce notify everyone email the team sent record history drafts sender reply-to footer kicker display name outgoing from address",
         when: function(){ return inOffice(); },
         sections: function(){
           return [{ k:"over",    ac:"c_send",  label:"Overview",       render:renderMsgOverview },
@@ -51905,7 +54235,7 @@ var SYNC = (function () {
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
-      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", glyph:"№", find:"figures i report my numbers named",
+      { k:"myfig",    ac:"c_myfig", grp:"cycle", mod:"strategy",  label:"Figures I report", glyph:"№", find:"figures i report my numbers named",
         when: ownsAnySource,                                render:renderMySources },
 
       /* ── ONE PAGE, TWO SECTIONS (§108.4) ──────────────────────────────
@@ -51947,7 +54277,7 @@ var SYNC = (function () {
          EACH SECTION KEEPS ITS OWN GATE (§130.4), which is what lets Video
          storage be the office's while the others follow `c_import` — and
          it is why this could not simply inherit the page's key. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Import & storage", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace video clips storage space delete clear mb size presentation",
+      { k:"import",   ac:"c_import", grp:"cycle", mod:"strategy", label:"Import & storage", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace video clips storage space delete clear mb size presentation",
         sections: function(){
           /* FOUR: what leaves, what arrives, the record of what an arrival
              displaced, and what the platform is holding. §304 split the one
@@ -51984,7 +54314,14 @@ var SYNC = (function () {
          a tick somebody could set on a bad afternoon. `c_kb` stays `area:
          "always"` so the grant machinery is untouched; this gate sits in front
          of it, and nothing else reads that key. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",
+      /* STRATEGY'S, NOT THE CLIENT'S (§360, reversing §359.2's move):
+         Islam — *"the knowledge base is currently in the strategy module as
+         it's where we manage the questions and interaction with the client
+         so let's keep it there until we decide later."* The page holds the
+         questions people ask through Strategy's chat, so it sits on the rail
+         of the module that runs that conversation; whether it becomes the
+         client's is a decision deferred, not one made here. */
+      { k:"kb",       ac:"c_kb", grp:"help", mod:"strategy",   label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",
         when: function(){ return inOffice(); },                          render:renderKB }
     ]
   };
@@ -52046,7 +54383,33 @@ var SYNC = (function () {
     /* The TAB has to still be one this viewer holds at that destination, or
        the page under it is an empty frame. The section is corrected further
        down by the renderer itself, so it is enough to hand it over. */
-    var defs = reachable(defsFor(w.d), w.d, w.d);
+    /* A SETUP PAGE IS LOOKED FOR IN EVERY RAIL (§359.2): the served router
+       has already scoped the document from the address, and a landing door
+       written in the spine form names a page of ANOTHER rail on purpose —
+       checked against the scoped list alone it would read as unreachable
+       and the person would land where they work instead of where they
+       pressed (§61). paint() then moves the scope to the page's own module
+       (resolveSetupScope). */
+    var defs = reachable(w.d === "setup" ? setupDefsAll() : defsFor(w.d), w.d, w.d);
+    /* A BARE SETUP ADDRESS LANDS ON THE RAIL'S OWN FIRST PAGE (§360.7).
+       `/<client>/setup` is what the console's Settings and a module rail's
+       *Client settings ›* both open, and the router writes it as a place
+       with a destination and NO page — which this function read as
+       "nothing remembered" and the entry destination won: measured, the
+       office pressing Settings on the card landed on the group's
+       Performance with the rail served and never drawn. The scope the
+       router wrote decides whose rail, and the page is that rail's own
+       first: the set-up strip while it is not done, else the rail's
+       primary, else whatever it holds first — the gear's own pick
+       (menuGroups) made for a scope rather than a module. Nothing reachable
+       in that rail is still null, so somebody the rail holds no page for
+       lands where they work rather than in an empty frame (§61). */
+    if (w.d === "setup" && !w.s) {
+      var first = setupLandingKey(setupScope());
+      if (!first) return null;
+      w.s = first;
+      return w;
+    }
     if (!w.s || !defs.some(function(d){ return d.k === w.s; })) return null;
     return w;
   }
@@ -52500,10 +54863,128 @@ var SYNC = (function () {
      would be the SHIPPED word for ever, on a page whose heading now says the
      client's. Resolved at render time instead, in the one function that
      builds this list, so the rail and the page it opens cannot disagree. */
-  function setupDefs(){
+  function setupDefsAll(){
     return SUBS.manage.concat(SUBS.setup).map(function(d){
-      return d.k === "units" ? Object.assign({}, d, { label:L("unitword","bu") }) : d;
+      if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
+      /* §360: one def, two names — Getting started until Done with set-up
+         is pressed, Client set-up after (SMPRules.setupDone, stored as an
+         absence on the group). */
+      if (d.k === "start") return Object.assign({}, d, { label: SMPRules.setupDone(GROUP) ? "Client set-up" : "Getting started" });
+      return d;
     });
+  }
+  /* ── WHICH RAIL (§359.2, spec 056 §4.2, research R2) ────────────────
+     The document carries a SCOPE: a module word (`strategy`, `insights`) for
+     that module's own Setup, `client` for the pages that belong to no module,
+     or nothing at all. It is written by the served router (shell/route.js)
+     from the address — `/<client>/<module>/setup/…` against
+     `/<client>/setup/…` — and by the gear, which opens the module you are
+     standing in. NOTHING WRITES IT OVER file://, and that is the offline copy
+     (§306) keeping its single rail: an unscoped document draws every page in
+     one list, exactly as before this section, because an absent filter is
+     what "no modules here" means rather than a special case written for it.
+
+     `setupDefs()` is the scoped list every caller of the rail reads;
+     `setupDefsAll()` is for the readers that name a page by its key
+     whichever rail it sits in (a landing row's destination, the welcome's
+     page words) — a label looked up in the wrong rail would fall back to
+     the key, which is §51.11's silent direction. */
+  function setupScope(){
+    return document.documentElement.getAttribute("data-setup-scope") || "";
+  }
+  /* Forefront's own page (§313.3), the one door out of a client's rail. */
+  var OPTS_CONSOLE = "/platform";
+  function setScope(v){
+    if (v) document.documentElement.setAttribute("data-setup-scope", v);
+    else document.documentElement.removeAttribute("data-setup-scope");
+  }
+  /* The module this document was served for — the gear's scope. Absent over
+     file://, where the gear opens everything. */
+  function moduleWord(){ return document.documentElement.getAttribute("data-module") || ""; }
+  function moduleLabel(){ return document.documentElement.getAttribute("data-module-label") || ""; }
+  /* THE MODULES THIS PERSON MAY OPEN (§362.1), stamped by the server as the
+     switcher's own list (lib/shell.ts) and read here for the row at the foot
+     of the client's rail. Absent over file://, where there is no server to
+     say what a client holds — so the offline copy draws no rows, exactly as
+     it draws no switcher. A malformed value is no list rather than a throw:
+     this is chrome, and chrome that dies takes the page with it. */
+  function modulesHere(){
+    var raw = document.documentElement.getAttribute("data-modules");
+    if (!raw) return [];
+    try { var v = JSON.parse(raw); return Array.isArray(v) ? v : []; }
+    catch (e) { return []; }
+  }
+  /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ──
+     Islam, of the client's Setup rail under Strategy's full navigation:
+     *"theclient settings shouldn't open the strategy banner in the top this
+     is a client settings separate than any module."*
+
+     ONE READER, ASKED WHERE THE CHROME IS DRAWN AND NEVER PER CONTROL
+     (§53.5, §104.7): the destination row, the Group dropdown, the
+     Units | Functions switch, the gear and the viewer strip are all stood
+     down by this one answer — written onto the root and spent as CSS — so a
+     control added to either line later is covered the day it is added rather
+     than the day somebody reports it.
+
+     THE ROW IS BUILT AND THEN HIDDEN, WHICH IS NOT THE SAME AS WASTE: its
+     own painter is what RESOLVES which page you are on (§94.6), so a
+     `paintUnits()` that asked this question first would be asking it before
+     the answer exists — measured, and it took the landing's spine-form door
+     to a module's Setup with it. `display:none` is what makes the built row
+     inert: a control hidden by opacity still takes the keyboard (§3.2).
+
+     BOTH HALVES OF THE TEST ARE LOAD-BEARING. `setupScope()` is written on
+     arrival and is NOT cleared by walking to a unit — it is what `addressOf`
+     reads to keep writing the right Setup address — so a rule keyed on the
+     scope alone would hide the navigation on a unit's page as well. Being ON
+     Setup is the other half, and it is re-asked on every paint.
+
+     ABSENT OVER file:// AND THAT IS RIGHT: the offline copy has no server to
+     say which pages belong to no module, so it draws one rail and its whole
+     navigation, exactly as before this section. */
+  function clientScoped(){ return current === "setup" && setupScope() === "client"; }
+
+  function setupDefsFor(scope){
+    var all = setupDefsAll();
+    if (!scope) return all;
+    return all.filter(function(d){ return (d.mod || "client") === scope; });
+  }
+  function setupDefs(){ return setupDefsFor(setupScope()); }
+  /* WHICH PAGE A RAIL OPENS ON, ASKED ONCE (§367). This was written
+     inside `restoreWhere` for a bare `/<client>/setup` address (§360.7) and is
+     now asked by the crossing rows as well — the two must not answer
+     differently, or pressing *Strategy settings ›* lands somewhere the same
+     address would not (§53.5). Takes the scope rather than reading it, so the
+     caller can ask about a rail it is not standing in without writing the
+     attribute first and putting it back. Null where this viewer has no page in
+     that rail at all, which is the one case the crossing hands back to the
+     browser (§61: the link still goes, and the server lands them where they
+     work). */
+  function setupLandingKey(scope){
+    var own = reachable(setupDefsFor(scope), "setup", "setup");
+    var first = own.filter(function(d){ return d.k === "start" && !SMPRules.setupDone(GROUP); })[0]
+             || own.filter(function(d){ return d.primary; })[0] || own[0];
+    return first ? first.k : null;
+  }
+  /* THE PAGE DECIDES THE RAIL WHEN THE TWO DISAGREE. An address is a
+     request — the landing's doors write `/<client>/setup/<page>` for every
+     page and let the shell resolve it (spec 056 plan, research R2) — so a
+     page asked for under the wrong scope moves the scope to the page's own
+     module rather than being corrected to the first page of the wrong rail.
+     Asked only while a scope is set at all: the offline copy resolves
+     nothing, having nothing to resolve between. */
+  function resolveSetupScope(){
+    var scope = setupScope();
+    if (!scope || !currentSub) return;
+    var hits = setupDefsAll().filter(function(d){ return d.k === currentSub; });
+    /* THE SCOPE ON SCREEN WINS WHERE TWO RAILS SHARE A WORD (§359.5): a
+       module's Setup keeps Strategy's page keys — `access`, `landing` — so
+       the first def holding the key is not necessarily the one asked for.
+       A def under the current scope means the page IS this rail's, and the
+       scope stays; only a key no def in this rail holds moves it. */
+    if (hits.some(function(d){ return (d.mod || "client") === scope; })) return;
+    var hit = hits[0];
+    if (hit && (hit.mod || "client") !== scope) setScope(hit.mod || "client");
   }
 
   /* THE GROUP NAMES ANSWER RATHER THAN ASK (§108.2). §46 named these as the
@@ -52524,7 +55005,28 @@ var SYNC = (function () {
     { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
     { k:"run",  label:"The organisation",  note:"The things being planned" },
     { k:"meas", label:"Measurement",       note:"What the numbers mean" },
-    { k:"look", label:"Branding",         note:"What the tenant wears, in here and on the way out" }
+    /* ── §359.2: A DEF KNOWS ITS MODULE (spec 056 §4.3) ─────────────────
+       Every def above carries `mod` — the module that owns the page, or
+       "client" for the pages that belong to no module (people, the org,
+       branding, the knowledge base). Which rail a page is drawn in is
+       decided by that one field and the document's scope (setupScope below),
+       never by a second list: a page cannot be in two rails or none.
+       `access` is Roles & access, Strategy's own now — the matrix is
+       Strategy's roles against Strategy's areas, and the seats stay on the
+       People register (spec 056 §4.4). `help` holds the knowledge base on
+       the client's rail; Islam took the drawing that marks it as moving. */
+    { k:"access", label:"Access",           note:"Who may do what in this module" },
+    /* §359.4 (spec 056 §4.5): a module's own group — what it says about
+       itself on the client landing. Drawn on a module's rail and never the
+       client's, because the def below carries the module. */
+    { k:"landing", label:"The landing",     note:"What this module says on the landing" },
+    { k:"help", label:"Help",             note:"How the platform works, in its own words" },
+    /* §360 (spec 057): the client's own group, LAST — it holds the set-up
+       once it is done, which is the thing you come back to least. The `look`
+       group went with the Branding page it held; its fold key is left in
+       whatever localStorage holds it, read by nothing (§30.2's cost, paid the
+       cheap way). */
+    { k:"client", label:"The client",     note:"How this client was set up, and what it wears" }
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -52648,6 +55150,26 @@ var SYNC = (function () {
     /* Asked ONCE for the whole rail rather than per row: every row would
        otherwise re-run five counts, two of which walk the register (§108.15). */
     var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
+    /* ── GETTING STARTED IS A STRIP, NOT A ROW, UNTIL IT IS DONE (§360,
+       spec 057). The def sits in the last group; while the set-up is not
+       done it is taken OUT of the groups and drawn under the head, saying
+       how many of its steps the data holds an answer for (client-setup.js
+       progress — counted, never remembered, §129) and which are still to
+       do. Once Done with set-up is pressed it stays where its def is, at the
+       bottom, as Client set-up. One def either way, so the page cannot be
+       reachable from one and not the other. */
+    var startDef = defs.filter(function(d){ return d.k === "start"; })[0];
+    var startStrip = "";
+    if (startDef && !SMPRules.setupDone(GROUP)) {
+      defs = defs.filter(function(d){ return d.k !== "start"; });
+      var pr = (typeof CLIENTSETUP !== "undefined") ? CLIENTSETUP.progress() : { done:0, total:0, todo:[] };
+      var todo = pr.todo.slice(0, 2).join(", ") + (pr.todo.length > 2 ? " +" + (pr.todo.length - 2) : "");
+      startStrip = '<button type="button" class="railstart' + (activeKey === "start" ? " on" : "") +
+        '" data-setupgo="start" aria-current="' + (activeKey === "start" ? "page" : "false") + '">' +
+        '<span class="rslab">' + esc(startDef.label) + '</span>' +
+        '<span class="rsprog">' + pr.done + ' of ' + pr.total + ' done' +
+          (pr.todo.length ? ' · ' + esc(todo) : '') + ' ▸</span></button>';
+    }
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
       if (!items.length) return "";       /* a group with nothing in it is not a heading */
@@ -52732,10 +55254,104 @@ var SYNC = (function () {
        filters — §108.5 capped that list to the window, and a search box that
        leaves the screen when you scroll to read your own results is a control
        below the fold by another road (§90). */
-    return '<div class="rail setuprail"><div class="rhead">Setup' +
+    /* THE HEAD SAYS WHICH RAIL THIS IS (§359.2): a module's own word before
+       "Setup", or "Client" for the pages that belong to no module — and that
+       one carries the way back to the landing it was opened from, which is
+       the only way in it has (spec 056 §4.1). Unscoped (file://) it says
+       "Setup" and nothing more, exactly as it did. */
+    var scope = setupScope();
+    var headWord = scope === "client" ? "Client \u00b7 Setup"
+                 : scope && moduleLabel() ? moduleLabel() + " \u00b7 Setup"
+                 : "Setup";
+    /* A ROW OF ITS OWN under the head, not a third thing inside it: the head
+       is 168px wide inside its padding and "CLIENT · SETUP" with a toggle
+       already takes most of that, measured, so a link beside it wraps. */
+    var slug = (location.pathname.split("/")[1] || "");
+    /* THE WAY OUT IS THE CONSOLE (§360, spec 057): the client's rail is
+       opened from the console's card and from the row at the foot of a
+       module's Setup rail, and there is no landing to go back to any more. A
+       MODULE's rail carries the reverse — one row, *Client settings ›*, to
+       the client's own rail — so a consultant already inside reaches the
+       register without the console. Both only where there is a server to
+       serve the address; the offline copy draws one rail and no rows.
+
+       AND THE TWO ROWS SIT AT OPPOSITE ENDS, WHICH IS THE POINT (§360.9).
+       Islam: *"a perosn can access the client settings from the module
+       settings page but it should be at the bottom."* They are not two
+       spellings of one row: `‹ Back to the console` LEAVES — it is where
+       this rail was opened from, so it reads first, above the list, the
+       way a back link does everywhere — while `Client settings ›` is a
+       place to go ON to from a rail somebody came here to use, so it must
+       not be the first thing read on every Setup page in the module.
+       The asymmetry is in the words already (‹ against ›); this puts it in
+       the layout.
+
+       AT THE FOOT OF THE RAIL, NOT AT THE FOOT OF THE LIST. `.raillist` is
+       the one thing that scrolls (§108.5), so a row inside it is a row that
+       scrolls away — §290.1's own finding about the corner's one permanent
+       way out. As a `flex:none` sibling AFTER the list it is at the bottom
+       of the rail box by construction and needs no `position:sticky` and no
+       measurement to stay there. */
+    var back = scope === "client" && slug
+      ? '<div class="railback-row"><a class="railback" href="' + esc(OPTS_CONSOLE) + '">' +
+        '\u2039 Back to the console</a></div>'
+      : "";
+    /* AND THE CLIENT'S RAIL CARRIES THE REVERSE (§362.1). Islam, having
+       opened the client's settings from the console's card: *"I ca't find
+       the access page in the strategy module"* — and Roles & access was
+       exactly where it belongs, on STRATEGY's rail, with no way to reach it
+       from the rail he was standing on. One-way is how that happened: a
+       module's rail could cross to the client's and the client's could only
+       go back to the console, so arriving by the card left somebody on a
+       list with no door to the one holding the matrix (§61, and §16.7's
+       rule — a page that names a thing and cannot take you to it makes
+       work).
+
+       ONE ROW PER MODULE, where the other direction is one row, because
+       there is one client and there may be several modules. The list is
+       `data-modules` — the modules this person MAY OPEN, which the server
+       already resolved for the switcher — so a module shut to them is not
+       offered here either, without this asking a second time (§53.5, §42).
+
+       THE SAME FOOT, THE SAME WORDS, THE SAME DIRECTION MARK. `Client
+       settings ›` and `Strategy settings ›` are the same row pointing
+       opposite ways: a place to go ON to, so it sits after the list rather
+       than above it (§360.9), never the first thing read on a rail somebody
+       came here to use. */
+    /* AND THE CROSSING IS A PRESS, NOT A PAGE LOAD (§367). Islam,
+       of the walk between the console, the client's settings and a module's:
+       *"takes too long … is there a way to make these movements smoother in
+       general"* — measured, and this hop was the one that was pure waste. The
+       two addresses are the SAME DOCUMENT: `app/(platform)/[slug]/[...rest]`
+       serves `shellDocument()` for both with the same arguments but the last,
+       so a client's Setup and a module's differ by `data-setup-scope` and
+       NOTHING else. Following the link threw away 3.8MB of shell and 660KB of
+       stylesheet, re-read both, and asked `/api/state` for the tenant's whole
+       graph again — to change one word the browser already holds a function
+       for (`setScope`).
+
+       THE `href` STAYS AND THE PLAIN CLICK IS TAKEN. A middle click, a
+       modifier click and *Copy link address* are the browser's, and the
+       address they carry is the one the router writes for that rail — so this
+       is faster and not narrower (§61). `data-setupcross` is the scope to
+       cross TO, which is the one fact the wiring needs; who may open which
+       module was already decided when the rows were built (modulesHere(), the
+       server's own list), so the press asks nothing a second time (§42). */
+    var across = slug && scope === "client"
+      ? modulesHere().map(function(m){
+          if (!m || !m.key) return "";
+          return '<div class="railback-row railfoot"><a class="railback railfwd" href="/' +
+            esc(slug) + '/' + esc(m.key) + '/setup" data-setupcross="' + esc(m.key) + '">' +
+            esc(m.label || m.key) + ' settings \u203a</a></div>';
+        }).join("")
+      : slug && scope && scope !== "client"
+      ? '<div class="railback-row railfoot"><a class="railback railfwd" href="/' + esc(slug) + '/setup" ' +
+        'data-setupcross="client">Client settings \u203a</a></div>'
+      : "";
+    return '<div class="rail setuprail"><div class="rhead">' + esc(headWord) +
       '<button type="button" class="railtog" data-railtog="0" ' +
         'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
-        'aria-expanded="true">' + ICO_CHEV + '</button></div>' +
+        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + back + startStrip +
       '<div class="railfind">' +
         '<input type="search" class="railq" data-railq="1" autocomplete="off" ' +
           'placeholder="Find a setting\u2026" aria-label="Find a setting" ' +
@@ -52747,7 +55363,7 @@ var SYNC = (function () {
         /* SAYING NO IS THE LIST'S JOB TOO (§45.2, §108.10): a rail that empties
            itself reads as a rail that broke, so it says what was searched for. */
         '<div class="railnone" data-railnone="1" hidden></div>' +
-      '</div></div>';
+      '</div>' + across + '</div>';
   }
 
   function menuGroups(){
@@ -52760,7 +55376,11 @@ var SYNC = (function () {
        is a door behind a door, which §32 removed once already at the gate. The
        gear IS the door now; this function only answers whether there is
        anything behind it, and which page to land on. */
-    var st = reachable(setupDefs(), "group", null);
+    /* THE GEAR'S LIST IS THE MODULE'S (§359.2), whatever rail is on screen:
+       from the client's rail the gear still opens Strategy's Setup, so the
+       landing page is asked of the module's own defs and not of `setupDefs()`,
+       which reads the scope of the moment. */
+    var st = reachable(setupDefsFor(moduleWord()), "group", null);
     /* THE PRIMARY PAGE, falling back to the first the viewer holds. Landing on
        "whatever happens to be first in the array" put the gear on the knowledge
        base — true of the list, wrong for the person pressing it, who is far
@@ -53270,6 +55890,10 @@ var SYNC = (function () {
         if (current !== b.dataset.md) leaveModes();
         current = b.dataset.md;
         currentSub = b.dataset.ms;
+        /* THE GEAR IS THE MODULE'S DOOR (§359.2): pressed inside a module it
+           opens that module's Setup; over file:// there is no module word and
+           the scope is cleared, which draws every page in one rail. */
+        if (b.dataset.md === "setup") setScope(moduleWord());
         paint(); window.scrollTo(0,0);
       });
     });
@@ -53408,8 +56032,54 @@ var SYNC = (function () {
       ? "#" + f.mark.id
       : "[data-" + f.mark.attr.replace(/[A-Z]/g, function(c){ return "-" + c.toLowerCase(); }) +
         "=" + JSON.stringify(String(f.mark.val)) + "]";
-    var el;
-    try { el = document.querySelector(sel); } catch (e) { return; }
+    /* ── AN ADDRESS THAT IS NOT UNIQUE IS NOT AN ADDRESS (§374) ──────
+       Islam: "the copy on click for the email and double click to edit is
+       working but the same behavior is not working on the phone number."
+
+       IT IS NOT A PHONE FAULT — it is any copyable value two rows SHARE, and
+       falsifying it is what said so: with the phones shared and the emails
+       unique, Mobile fails and Email works; with both unique, both work; with
+       the EMAILS shared, Email fails and Mobile works. The phone is simply the
+       column where a value repeats — a shared office line, or the same number
+       typed on two rows.
+
+       The mark above names the focused control by its first `data-` attribute,
+       on the stated grounds that "every editable control in the platform
+       carries one". Every editable one carries a KEY — `data-pphone="loghead"`
+       — and §93.6's copy button carries `data-copy="+20 100 1234567"`, which
+       is the PAYLOAD. So the first click of a double-click focuses that button,
+       the paint that opens the cell then asks for `[data-copy="…"]`, and
+       `querySelector` hands back the FIRST row carrying that number — somebody
+       else's button. Focus leaves the box that was just opened, `blur` fires
+       with the box still in the document, so §372.16's `isConnected` guard
+       reads it as a person moving away rather than as a repaint, and the cell
+       shuts about 90ms after it opened. §87's rule one field over: a value is
+       never an identifier.
+
+       RESTORE ONLY WHAT THE MARK NAMES ONCE, which can never lose a correct
+       restore — it only ever stops a wrong one — and that is MEASURED rather
+       than argued: swept over every focusable control on a unit's plan (pen
+       open and shut), the register with every column showing, and Roles &
+       access, the only marks naming more than one element are `data-copy` (33,
+       the fault) and three that are not editable at all — a hover mark, the
+       viewer keys, a destination button. NOT ONE EDITABLE FIELD IN THE PRODUCT
+       HAS AN AMBIGUOUS ADDRESS, because every one of them is keyed by person or
+       by row id, so there is no cursor here left to lose. It lands exactly
+       where this function's own comment already says it should: "when it does not, the
+       worst case is that nothing is restored, which is where the product was
+       already." The dialog's copy wins first, for §372.14's reason two hundred
+       lines down: a row's cell and the open person dialog draw the same control
+       for the same person, and the one on top is the one somebody is typing in.
+
+       INVISIBLE OVER `file://`, AND THAT IS WHY NO CHECK SAW IT (§372.16, the
+       same trap one guard along): nothing saves, so the second paint that
+       carries the stolen focus never happens, and both columns open perfectly
+       — measured on the built file before this was believed. */
+    var all;
+    try { all = document.querySelectorAll(sel); } catch (e) { return; }
+    if (!all.length) return;
+    var el = document.querySelector("#modal-b " + sel) ||
+             (all.length === 1 ? all[0] : null);
     if (!el) return;
     /* `preventScroll`, and it is the whole point. focus() scrolls its element
        into view by default, so restoring the scroll and THEN restoring the
@@ -53470,6 +56140,24 @@ var SYNC = (function () {
     /* §145: the confirm ticks register the row they act on the same way. */
     fillViewers();
     paintUnits();
+    /* ── THE SCOPE IS RESOLVED AS SOON AS THE PLACE IS, AND NOT BEFORE (§362) ──
+       This call used to sit beside `defsFor(current)` a hundred lines below,
+       which is where the RAIL needs it — and §362 gave the same answer a
+       second reader in the CHROME (`clientScoped()`, which decides whether
+       the client's own bar is worn), so it has to be settled before the bar
+       is written rather than after.
+
+       AND IT CANNOT MOVE ANY EARLIER THAN THIS LINE, which the check found
+       rather than the reading: on the first paint after a served address
+       `current` and `currentSub` are still NULL until `paintUnits()` resolves
+       the destination (§94.6), so a call above it returns at its own
+       `!currentSub` guard and the page whose key belongs to the OTHER rail
+       never moves the scope — measured, `/<client>/setup/cycle` landed on the
+       client's first page with the client's bar over it, which is the
+       landing's own spine-form door broken (§359.2's research R2).
+       *The row's painter is what settles which page you are on, so anything
+       reading the page has to come after it.* */
+    if (current === "setup") resolveSetupScope();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
        It used to be set BEFORE paintUnits(), and paintUnits is the thing that
        corrects `current` when this viewer cannot reach where the last one was
@@ -53494,6 +56182,85 @@ var SYNC = (function () {
        rather than a stranded middot. */
     document.getElementById("orgname").textContent =
       GROUP.org ? "\u00b7 " + GROUP.org : "";
+    /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ──
+       Islam: *"theclient settings shouldn't open the strategy banner in the
+       top this is a client settings separate than any module."* He is right
+       twice over — the row below is Strategy's navigation, and the line above
+       it names the Strategy Management Platform. These pages belong to no
+       module (spec 056 §4.2 gave every def a `mod`, and seven say `client`),
+       so a bar that names one is the page arguing with its own rail.
+
+       THE ATTRIBUTE IS THE SWITCH AND IT IS WRITTEN IN ONE PLACE. The row,
+       the viewer strip and anything hung on either are stood down by CSS off
+       `data-client-settings`, so a control added to that line later is
+       covered the day it is added rather than the day somebody reports it
+       (§104.7) — and `display:none` rather than a class that only dims,
+       because a control hidden by opacity still takes the keyboard (§3.2).
+
+       THE NAME COMES BACK TO THE BRAND, WHICH IS WHY IT IS NOT A THIRD COPY.
+       On a module's page the client is named by the way-back control
+       (§313.23), and `sync.js` HIDES `.orgname` there for that reason — two
+       copies of one fact on one line is what §120 took off the register's
+       header. Here the control says *Save & close* and names nobody, so the
+       line has room for the client exactly once: the client in the heading,
+       and what you are looking at beside it.
+
+       AND THE PRODUCT'S OWN NAME IS PUT BACK, never left standing. This is
+       the first thing in the platform to rewrite that heading, so the other
+       branch is the one that can break silently — walk from the client's
+       settings into a module and a one-way write leaves the client's name
+       over Strategy's navigation for the rest of the session (§94.2). */
+    (function clientBar(){
+      var on = clientScoped();
+      if (on) document.documentElement.setAttribute("data-client-settings", "on");
+      else document.documentElement.removeAttribute("data-client-settings");
+      var h1 = document.querySelector(".brand h1");
+      /* A client with no name typed yet still needs a heading, and the one
+         honest thing to say is what the page is (§35). */
+      if (h1) h1.textContent = on ? (GROUP.org || "Client settings")
+                                  : "Strategy Management Platform";
+      var org = document.getElementById("orgname");
+      var back = document.getElementById("clientback");
+      if (org) {
+        if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
+        /* AND HIDDEN AGAIN ON THE WAY OUT, which the check found by walking
+           rather than by reloading: `sync.js` hides this span wherever the way
+           back is drawn, because that control names the client and two copies
+           of one fact on one line is what \u00a7120 took off the register's header.
+           Unhiding it here and stopping would have left the client named twice
+           on every module page reached from the client's settings, for the
+           rest of the session (\u00a794.2 \u2014 a one-way write). */
+        else if (back && !back.hidden) org.hidden = true;
+      }
+      var mark = document.getElementById("clientlogo");
+      if (mark) {
+        var src = on ? groupLogo() : "";
+        /* Setting `src` to "" asks the page for its own address, so the
+           attribute is REMOVED rather than emptied — an empty src is a
+           second request for this document, not an absent picture. */
+        if (src) { mark.src = src; mark.hidden = false; }
+        else { mark.removeAttribute("src"); mark.hidden = true; }
+      }
+      /* The way back says where it goes AND what it does first, which is
+         Islam's own wording: *"I save and close to go back to the console."*
+         Every box on these pages has already written on blur (§35), so the
+         save is a statement of what has happened rather than a promise — and
+         the control is the same control, because a second button beside it
+         would be two doors out of one room (§32). */
+      var backName = document.getElementById("clientbackname");
+      if (backName && back && !back.hidden) {
+        if (on) {
+          backName.textContent = "Save & close";
+          back.title = "Save and go back to your clients";
+          back.setAttribute("data-saveclose", "");
+        } else if (back.hasAttribute("data-saveclose")) {
+          /* PUT BACK, for the same reason the heading is (§94.2). */
+          backName.textContent = back.dataset.client || backName.textContent;
+          back.title = "Back to your clients";
+          back.removeAttribute("data-saveclose");
+        }
+      }
+    })();
     /* THE ROLES, AND WHERE EACH IS HELD (§178). One builder, beside
        `placeLabel()` and asking `personAt()` like every other surface that
        answers "where does this person sit" (§54). This line used to work it
@@ -53719,6 +56486,31 @@ var SYNC = (function () {
        when a page's own wiring cannot be trusted. */
     var failBtn = _panel.querySelector("[data-failreload]");
     if (failBtn) failBtn.addEventListener("click", function(){ location.reload(); });
+    /* ── THE SET-UP FLOW FILLS ITS BOX (§360) ─────────────────────────
+       Before wire(), on purpose: the first step draws the Branding controls
+       and wire() binds those by querying the document, so a box filled
+       afterwards would hold colour pickers wired to nothing (§96). */
+    /* AND THE TEAM PAGE FILLS ITS OWN (§362.2) — the same options, the same
+       shared state and ONE renderer: the flow's step and this page are two
+       readers of it (§9's pattern, §53.5). The options are built once for
+       both, or a slug read one way here and another way there is a client
+       resolved twice (§53.5 again, one line down from where it is cited). */
+    var _csOpts = {
+      key: location.protocol === "file:" ? "" : (location.pathname.split("/")[1] || ""),
+      live: (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive()),
+      door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
+      console: OPTS_CONSOLE,
+      repaint: function(){ paint(); },
+      /* §364: the team page draws a setup table, and a setup table's hover
+         is MEASURED after it is on the screen (§88). paint() ends in
+         clipTitles(), which is too early for a box the client's record fills
+         a moment later, so the mount asks for it again when it does. */
+      clip: function(){ clipTitles(); }
+    };
+    var cteam = _panel.querySelector("[data-cteam]");
+    if (cteam && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mountTeam(cteam, _csOpts);
+    var csetup = _panel.querySelector("[data-csetup]");
+    if (csetup && typeof CLIENTSETUP !== "undefined") CLIENTSETUP.mount(csetup, _csOpts);
 
     /* ── AND THE REPORTING CONTROLS GO ON THE TAB ROW (§150) ─────────────
        Read AFTER the page's render, because the render is what fills the
@@ -53892,6 +56684,72 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* ── AND THE ROLES LIST IS ASKED BACK (§372) ────────────────────
+       A tick grants or revokes, which repaints — the chips change, and the
+       role comes off whoever held it, whose row is elsewhere in the table. So
+       the popup is reopened rather than preserved: it is a rendering of the
+       select, and the select has just been rebuilt with the new answer in it.
+
+       THE DIALOG'S COPY WINS. A row's cell and the open person dialog draw the
+       same picker for the same person, so the plain selector would find the
+       one BEHIND the overlay and open a popup over a control nobody can see.
+
+       AND IT CLEARS ITSELF WHEN THERE IS NOTHING TO OPEN — a retired person, a
+       revoked grant, a viewer who may no longer edit — rather than holding a
+       key to a control that is not drawn (§61). */
+    if (PROLEPICK) {
+      var rsel = document.querySelector('#modal-b [data-proleset="' + PROLEPICK + '"]') ||
+                 document.querySelector('[data-proleset="' + PROLEPICK + '"]');
+      if (!SEARCHSEL.openOn(rsel)) PROLEPICK = null;
+    }
+    /* AND THE CURSOR GOES INTO THE CELL THAT WAS JUST OPENED (§372) — here
+       rather than in wire(), for searchsel's own reason: three of these cells
+       hold a select, and the button that stands in front of it does not exist
+       until the line above has run. `focusNoScroll`, because the register is
+       its own scrolling box and a plain focus() hauls the row to the top of it
+       (§110.7). */
+    if (PCELL) {
+      var pc = document.querySelector(".peoplecfg td.pcellopen .fld");
+      var pb = pc && pc.tagName === "SELECT" ? pc.previousSibling : null;
+      pb = pb && pb.classList && pb.classList.contains("ssbtn") ? pb : null;
+      /* ── AND A DROP CELL OPENS ITS LIST (§372.14) ──────────────────────
+         Islam: "on opening something the arrow appears, no need for the
+         arrow." Measured, the arrow was announcing a press he had already
+         made: the double-click drew a SHUT box that had to be pressed again,
+         so changing somebody's unit took three acts. Opening the list is what
+         makes the arrow pointless rather than merely hidden — and it is
+         `SEARCHSEL.openOn`, the function the roles picker two blocks up
+         already calls (§53.5).
+
+         It falls back to focusing the button rather than assuming: `openOn`
+         answers false when there is nothing to open, and a cell left focused
+         is still a cell somebody can press (§61). */
+      if (pb && SEARCHSEL.openOn(pc)) { /* the list has the focus */ }
+      else {
+        focusNoScroll(pb || pc);
+        if (pc && pc.tagName === "INPUT" && pc.select) pc.select();
+      }
+    }
+    /* ── ESCAPE SHUTS THE CELL, NOT ONLY THE LIST (§372.14) ──────────────
+       searchsel's own Escape closes the popup and hands the focus back to the
+       button, which left a box standing in a table meant to read as fixed. One
+       listener on the one open button, and BOTH states, because a drop cell is
+       `PCELL` and the roles cell is `PROLEPICK` and Escape means the same thing
+       on either.
+
+       HERE, NOT IN `wire()`, and that is searchsel's own reason again: the
+       button does not exist until `SEARCHSEL.wire()` has run, which is after
+       the register is wired — written there first, it bound to nothing and the
+       second Escape did nothing at all (measured, not read). The table is
+       rebuilt on every paint, so the node is new each time and nothing can
+       bind twice (§24, §47.2). */
+    var pescbtn = document.querySelector(".peoplecfg td.pcellopen .ssbtn");
+    if (pescbtn) pescbtn.addEventListener("keydown", function(e){
+      if (e.key !== "Escape") return;
+      e.preventDefault(); e.stopPropagation();
+      PCELL = null; PROLEPICK = null; ROLESTOP = null;
+      paint();
+    });
     /* §189: size every growing prose box to what is in it. Here, at the end
        of paint(), for SEARCHSEL's own reason — these are rebuilt on every
        paint, and a height measured before the row is laid out is a height
@@ -54764,6 +57622,44 @@ var SYNC = (function () {
         paint(); window.scrollTo(0,0);
       });
     });
+
+    /* CROSSING BETWEEN THE CLIENT'S RAIL AND A MODULE'S IS A PRESS (§367) — the row
+       above, honoured here rather than by the browser.
+
+       WIRED BESIDE `[data-setupgo]` AND NOT IN shell/route.js, though the rows
+       exist only on the served stack: every rail control in the product is
+       wired in this loop, and the two things this needs — which pages a rail
+       holds for this viewer, and how to leave a mode — are this file's
+       (§53.5). What route.js keeps is the ADDRESS, which follows on its own:
+       `addressOf` already reads `data-setup-scope`, so the push after the
+       paint writes the module's form or the spine's with no edit there.
+
+       THE LINK IS LEFT TO THE BROWSER WHEREVER WE CANNOT DO BETTER. A
+       modifier or a middle click is somebody asking for a tab; and a rail this
+       viewer has NO page in answers null, where the server lands them where
+       they work rather than in an empty frame (§61, restoreWhere's own note).
+       Both fall through to the `href`, so this can only ever be faster.
+
+       BOTH THE SCOPE AND THE PAGE, OR NEITHER. `resolveSetupScope()` moves the
+       scope to the page's own module when the two disagree (§359.2), so
+       writing the scope and leaving `currentSub` on a page of the rail we just
+       left would be undone inside the same paint — and the press would look
+       like a control that does nothing (§96). */
+    document.querySelectorAll("[data-setupcross]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var to = b.dataset.setupcross;
+        if (!to || to === setupScope()) return;
+        var k = setupLandingKey(to);
+        if (!k) return;                       /* no page of ours there: the link stands */
+        e.preventDefault();
+        RAILQ = "";
+        if (currentSub !== k) leaveModes();
+        setScope(to);
+        current = "setup"; currentSub = k;
+        paint(); window.scrollTo(0,0);
+      });
+    });
     document.querySelectorAll("[data-modal]").forEach(function(b){
       b.addEventListener("click", function(e){ e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal); });
     });
@@ -54849,6 +57745,17 @@ var SYNC = (function () {
            map and every answer coming from the shipped default. Writing a cell
            is the moment that role gets a row of its own. */
         (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
+        paint();
+      });
+    });
+    /* A MODULE'S OWN CELL (§359.5): the same press through its own writer,
+       because its default is an ABSENCE — the module's shipped state, which
+       rides in the press as the fourth field — and the matrix's writer above
+       would store it as a row (§50.6). */
+    document.querySelectorAll("[data-mac]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.mac.split("|");
+        setModuleGrant(p[0], p[1], p[2], p[3]);
         paint();
       });
     });
@@ -56742,6 +59649,99 @@ var SYNC = (function () {
     fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; }, root);
 
     };
+    /* ══ ONE CELL, OPENED WHERE IT IS READ (§372, spec 059) ═══════════
+       Islam: "for the client registry I'd like to do some in line adjustments
+       like the phone, employee ID, email, the unit/function, job title, etc."
+       and, of the clash he named in the same breath, "for the editing in
+       general it shuold be a double click would that fix the issue as 1 copes
+       the item like the mobile or email."
+
+       It does, and it was measured rather than reasoned about: a double-click
+       on the Email reaches the copy button TWICE — same value both times, so
+       the clipboard holds what is about to be edited — and on a plain value it
+       leaves the browser's own selection behind. Both are cleared as the box
+       opens, and a single press still copies exactly as it did (§93.6).
+
+       BEFORE `wirePersonFields`, and that is the whole of why it sits here.
+       The three cells that hold a SELECT have handlers that end in `paint()`;
+       a listener registered after theirs would clear `PCELL` one paint too
+       late, leaving the cell open with the answer already chosen. Listeners on
+       one element run in the order they were added. */
+    (function(){
+      var body = document.querySelector(".peoplecfg tbody");
+      if (body) body.addEventListener("dblclick", function(e){
+        var td = e.target && e.target.closest && e.target.closest("[data-pcell]");
+        if (!td || !body.contains(td)) return;
+        var at = String(td.dataset.pcell).split("|");
+        var fld = at.slice(1).join("|");
+        try { window.getSelection().removeAllRanges(); } catch (err) {}
+        /* ── ROLES OPENS THE STATE IT ALREADY HAD (§372.14) ────────────
+           The ticking list's open/shut is `PROLEPICK`, which survives the
+           repaint every grant makes and closes itself for a seat ask and a
+           refusal (§130.1, §186, §110). A `PCELL` entry for it would be a
+           second answer to one question — and the one that closes on the first
+           tick, because a `change` listener is what closes a `PCELL`. */
+        if (fld === "Roles") {
+          PCELL = null; ROLESTOP = null; PROLEPICK = at[0]; paint(); return;
+        }
+        PCELL = { key: at[0], field: fld };
+        paint();
+      });
+      if (!PCELL) return;
+      var cell = document.querySelector(".peoplecfg td.pcellopen");
+      var fld = cell && cell.querySelector(".fld");
+      if (!fld) { PCELL = null; return; }
+      /* LEAVING IT IS WHAT COMMITS IT (§35), so `change` only has to say the
+         cell is finished with; the field's own handler, registered next,
+         writes the value. A select's handler paints and draws the cell shut;
+         a text box's does not, so the blur that follows asks for one — queued,
+         never inside the event, because rebuilding the DOM in the middle of an
+         interaction with it is §30.1's fault. */
+      fld.addEventListener("change", function(){ PCELL = null; });
+      fld.addEventListener("blur", function(){
+        /* ── A REPAINT REMOVED IT; NOBODY LEFT IT (§372.14) ───────────────
+           Chromium fires `blur` — and `change` before it — on a focused
+           element being REMOVED, which §372 relies on for Escape and which
+           also fires every time the register repaints. So on a live
+           deployment the cell closed under the person who had just opened it:
+           the paint the double-click makes schedules a save (§170's leading
+           edge), its answer paints again, the box goes, blur fires and the
+           cell shuts. Invisible over `file://`, where nothing saves and
+           nothing paints — which is why every check was green.
+
+           Asked one tick later, `isConnected` tells the two apart: a box a
+           repaint took away is gone from the document, and `PCELL` is left
+           standing so the end of that paint puts the cursor back in the box it
+           drew. A box somebody moved away from is still there, and that is the
+           blur this rule is for. */
+        setTimeout(function(){
+          if (!fld.isConnected) return;
+          if (PCELL === null && !document.querySelector(".peoplecfg td.pcellopen")) return;
+          PCELL = null;
+          paint();
+        }, 0);
+      });
+      /* WHAT IT HELD WHEN IT OPENED, so Escape has something to put back. */
+      var was = fld.value;
+      fld.addEventListener("keydown", function(e){
+        /* ── ESCAPE PUTS THE VALUE BACK, NOT THE NODE (§372) ─────────
+           The first build removed the node and relied on that discarding the
+           edit, and it does not: Chromium fires `blur` — and `change` before
+           it — on a focused element being removed, so the field's own handler
+           wrote the typed value and Escape COMMITTED. Measured, not reasoned
+           (§93.11's family: ask the browser rather than the spec in your
+           head). Restoring the value first makes whatever fires a write of
+           what was already there. Enter blurs, which is what commits (§219:
+           never a synthesised change). */
+        if (e.key === "Escape") {
+          e.preventDefault(); e.stopPropagation();
+          fld.value = was;
+          PCELL = null; paint();
+        } else if (e.key === "Enter" && fld.tagName === "INPUT") {
+          e.preventDefault(); fld.blur();
+        }
+      });
+    })();
     wirePersonFields(document);
     document.querySelectorAll("[data-pact]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -56891,16 +59891,13 @@ var SYNC = (function () {
        "Use it" would all be decoration (§96). */
     window.wirePersonDialogControls = function(root){
       var R = root || document;
-    /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
-       It opens EMPTY. Before this it opened on "owner", so a picker somebody
-       opened by mistake was already holding an answer — which was harmless
-       while a Give button stood between it and the grant, and is not now that
-       choosing both halves IS the grant. */
-    R.querySelectorAll("[data-prole-open]").forEach(function(b){
-      b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; ROLESTOP = null; paint();
-      });
-    });
+    /* ── THE ROLE PICKER IS THE CELL (§372) ─────────────────────────
+       The "+ role" control that opened this, the select it opened and the ×
+       that undid it are all gone with it: the Roles cell is a ticking list
+       now, so giving a role is a tick and taking one off is the same tick
+       again. What survives is everything the pick has to be JUDGED by, which
+       is below — the refusal, the seat's question, and "either half finishes
+       it" when the Unit is answered second. */
     /* ── THE ROLE LANDS WHERE THE UNIT CELL ALREADY SAYS (§110) ──────
        There is no second dropdown any more. The picker's other half asked a
        question the Unit cell had already answered and then wrote its own answer
@@ -56929,7 +59926,6 @@ var SYNC = (function () {
        together." Whichever of the two is answered second is the one that
        completes it. */
     function tryGrantRole(key, role){
-        ADDROLE_KIND = role;
         if (!roleIsGrantable(role)) { ROLESTOP = null; paint(); return; }
         var p = personBy(key);
         var at = personAt(p);
@@ -56957,7 +59953,13 @@ var SYNC = (function () {
           var atCo = wheres.every(function(w){
             return String(w.v).indexOf("co:") === 0; });
           var fld = atCo ? "Company" : "Unit";
-          ROLESTOP = { key:key, why: at
+          /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
+             out of `ADDROLE_KIND` — the open picker's current value — and
+             there is no open picker any more: the list commits a tick and
+             closes. So what §110's "either half finishes it" needs is on the
+             refusal itself, which is also where it belongs: it is a fact
+             about the pick that was turned down. */
+          ROLESTOP = { key:key, role:role, why: at
             ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the " + fld + "."
             : "Set the " + fld + " first \u2014 " + roleName(role) + " is held at " +
               roleAtWord(role) + "." };
@@ -56997,15 +59999,9 @@ var SYNC = (function () {
         }
         SEATASK = null;
         grantPersonRole(key, role, at);
-        ADDROLE = null; ADDROLE_KIND = "";
         paint();
     }
 
-    R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        tryGrantRole(sel.dataset.prolePick, sel.value);
-      });
-    });
     /* §186's two answers. Cancel puts the picker back to "Choose a role…"
        rather than leaving the seat showing: a select still displaying the
        value it was just refused fires no `change` if it is picked again
@@ -57013,7 +60009,7 @@ var SYNC = (function () {
        changed their mind. */
     R.querySelectorAll("[data-seatno]").forEach(function(b){
       b.addEventListener("click", function(){
-        SEATASK = null; ADDROLE_KIND = ""; paint();
+        SEATASK = null; paint();
       });
     });
     R.querySelectorAll("[data-seatyes]").forEach(function(b){
@@ -57022,15 +60018,64 @@ var SYNC = (function () {
         SEATASK = null;
         if (!a) { paint(); return; }
         grantPersonRole(a.key, a.role, a.at);
-        ADDROLE = null; ADDROLE_KIND = "";
         paint();
       });
     });
-    R.querySelectorAll("[data-prole-off]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.proleOff.split("|");
-        revokePersonRole(p[0], p[1], p[2]);
-        paint();
+    /* ── ONE TICK IS ONE ROLE, GIVEN OR TAKEN (§372) ─────────────────
+       The register's Roles cell IS this list (config-render.js), so a change
+       here is exactly one option going on or off — searchsel fires per tick
+       (§130.1) — and the difference against what the person holds says which
+       it was.
+
+       WHAT IS COMPARED IS WHAT THE LIST CAN SET, never every role they hold:
+       a role held somewhere this register cannot reach, and a role that comes
+       from being named on the plan, are in the list's HEAD and in no option,
+       so they can never read as "unticked" and be revoked by a press nobody
+       made.
+
+       THE LIST STAYS OPEN ACROSS THE PAINT, because a grant must paint — it
+       changes the chips, it takes the role off whoever held it, and that
+       person's row is somewhere else in the table. §130.1's per-tick rule is
+       kept and the thing that made it safe is replaced: the popup is rebuilt
+       at the end of paint() from `PROLEPICK` rather than being left standing
+       (searchsel's openOn). A seat and a refusal both draw IN the cell, which
+       the popup would cover, so those two close it. */
+    R.querySelectorAll("[data-proleset]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var key = sel.dataset.proleset;
+        var p = personBy(key);
+        if (!p || grant("c_people") !== "edit") return;
+        var want = {};
+        Array.prototype.forEach.call(sel.options, function(o){
+          if (o.selected) want[o.value] = 1;
+        });
+        var home = personAt(p);
+        var settable = {};
+        Array.prototype.forEach.call(sel.options, function(o){ settable[o.value] = 1; });
+        var have = {};
+        SMPRules.personRoles(world(), p).forEach(function(r){
+          if (settable[r.role] && !SMPRules.isOwnLinesRole(r.role) &&
+              (r.at === home || roleWheres(r.role).length === 1)) have[r.role] = r.at;
+        });
+        var off = Object.keys(have).filter(function(k){ return !want[k]; });
+        if (off.length) {
+          /* TAKING ONE OFF IS THE ACT THE \u00d7 USED TO BE, and it is the same
+             call — `revokePersonRole` is where a grant is undone and this
+             file already had one caller. */
+          off.forEach(function(k){ revokePersonRole(key, k, have[k]); });
+          PROLEPICK = key;
+          paint();
+          return;
+        }
+        var on = Object.keys(want).filter(function(k){ return !have[k]; })[0];
+        if (!on) { PROLEPICK = key; paint(); return; }
+        /* A SEAT AND A REFUSAL BOTH SPEAK IN THE CELL, so they close the list
+           rather than being drawn underneath it (§186's ask is state in the
+           cell, §110's refusal likewise). Everything else keeps it open. */
+        PROLEPICK = (SMPRules.isSeatRole(on) ||
+                     !roleWheres(on).some(function(w){ return w.v === home; }) &&
+                     roleWheres(on).length !== 1) ? null : key;
+        tryGrantRole(key, on);
       });
     });
     /* ── THE TWO FACTS THAT COULD BE READ AND NOT CORRECTED (§69.17) ──
@@ -57073,9 +60118,8 @@ var SYNC = (function () {
            until the person sits at a company, and the Company field is now the
            only control that can put them there — so answering it while a
            refusal is standing is the answer that refusal was waiting for. */
-        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
-            roleIsGrantable(ADDROLE_KIND)) {
-          tryGrantRole(p.key, ADDROLE_KIND);
+        if (ROLESTOP && ROLESTOP.key === p.key && roleIsGrantable(ROLESTOP.role)) {
+          tryGrantRole(p.key, ROLESTOP.role);
           return;
         }
         paint();
@@ -57093,9 +60137,8 @@ var SYNC = (function () {
            re-pick a role the select is already showing. Only while a refusal is
            standing: changing the Unit on a row nobody is granting a role on
            stays what it has always been, a move and nothing else. */
-        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
-            roleIsGrantable(ADDROLE_KIND)) {
-          tryGrantRole(p.key, ADDROLE_KIND);
+        if (ROLESTOP && ROLESTOP.key === p.key && roleIsGrantable(ROLESTOP.role)) {
+          tryGrantRole(p.key, ROLESTOP.role);
           return;
         }
         paint();
@@ -57425,7 +60468,7 @@ var SYNC = (function () {
         focusNoScroll(document.querySelector(".tk-firstfield"));
       });
     });
-    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§110). `ADDROLE` and
+    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§110). `PROLEPICK` and
        `ROLESTOP` are both properties of one open row, and neither was being
        cleared when the row closed — so a refusal answered by pressing Cancel
        came back the next time that row was opened, about a pick nobody had just
@@ -57433,7 +60476,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-rowsave]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditClose();
-        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+        PROLEPICK = null; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -57441,7 +60484,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-rowcancel]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditCancel();
-        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+        PROLEPICK = null; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -57690,6 +60733,17 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         delete GROUP.comms;
         paint();
+      });
+    });
+    /* THE LANDING LINE'S PICK (§359.4): a radio is a select-shaped write, so
+       it REPAINTS (§257.2a — the preview under the list must follow the
+       pick), and the default DELETES the key, the last one leaving deleting
+       the map (§50.6). The pick and the module are read off the control the
+       page drew, never re-derived here. */
+    document.querySelectorAll("[data-landpick]").forEach(function(r){
+      r.addEventListener("change", function(){
+        if (!r.checked) return;
+        setLandingPick(r.dataset.landmod, r.dataset.landpick, r.dataset.landdefault);
       });
     });
     /* THE WORD IS WRITTEN INTO THE ELEMENT, not painted (§63.4): a repaint
@@ -58316,9 +61370,11 @@ var SYNC = (function () {
        and still the same KIND of thing: a class name, which a restyle can
        retire without anything failing. It asks the two pages that want the
        answer by NAME, which is data rather than markup and cannot silently
-       stop matching. The Overview joins the list because it counts these two
-       facts (§108.10) — and gating it on the register's markup would have
-       given it a permanent, silent null, which draws no row: this exact fault
+       stop matching. It is a LIST rather than one name because the Overview
+       once joined it (§108.10); §359 deleted that page, and the shape is kept
+       so the next page that counts these facts is one key here and not a
+       second gate. Gating on the register's markup would have given such a
+       page a permanent, silent null, which draws no row: this exact fault
        twice already, and in the safe-looking direction both times. */
     /* THE FILTER IS RE-APPLIED AFTER EVERY PAINT, or a repaint that arrives
        while somebody is reading their own results would quietly show them the
@@ -58326,7 +61382,7 @@ var SYNC = (function () {
        the two can never disagree. */
     railFilter();
 
-    var WANTS_PEOPLE_FACTS = { people:1, overview:1 };
+    var WANTS_PEOPLE_FACTS = { people:1 };
     var onRegister = !!WANTS_PEOPLE_FACTS[currentSub];
     if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
@@ -58388,19 +61444,24 @@ var SYNC = (function () {
            leaves SAIDWHERE as {} — "asked, and nobody declared anything" —
            the exact shape §93 removed from the passwords beside it and did not
            come back for. It costs the register nothing (a note per row, absent
-           either way) and it costs the Overview a false all-clear, which is
-           the one thing that page must never give. */
+           either way) and it would cost the landing's office list a false
+           all-clear, which is the one thing that list must never give. */
         if (err) { SAIDWHERE = { __error: String(err.message || err) }; return; }
         SAIDWHERE = said;
         paint();
       });
     }
-    /* ── AND WHAT THE INBOX IS HOLDING (§108.10) ─────────────────────
-       Asked only on the Overview, because the Inbox counts its own queue when
-       it is open and the corner has its own cadence (§98.1) — a third asker
-       polling in the background is what §98 was about. Once per visit: this is
-       a summary somebody reads and then acts on, not a live board. */
-    if (OVQUEUE === null && currentSub === "overview" &&
+    /* ── AND WHAT THE INBOX IS HOLDING (§108.10, §359) ────────────────
+       Asked once per visit, whenever the Setup rail is on screen for the
+       office: the rail's Inbox pill is drawn from it (§108.15), and until
+       §359 the Overview was the one page that asked, so with that page gone
+       the pill would have read nothing for ever — a count keyed on a page
+       that no longer exists does not fail, it quietly draws nothing (§51.11).
+       Never polled: the Inbox counts its own queue when it is open and the
+       corner has its own cadence (§98.1) — a third asker polling in the
+       background is what §98 was about. Once per visit: this is a summary
+       somebody reads and then acts on, not a live board. */
+    if (OVQUEUE === null && current === "setup" &&
         typeof CHAT !== "undefined" && CHAT.servable && CHAT.servable() && inOffice()) {
       OVQUEUE = {};
       CHAT.officeQueue(function(err, q){
@@ -59991,7 +63052,7 @@ var SYNC = (function () {
     if (cancel) rowEditCancel(); else rowEditClose();
     if (PDLG && PDLG.mode === "add") newDraftEnd();
     PDLG = null;
-    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+    PROLEPICK = null; ROLESTOP = null;
     closeModal();
     if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
     paint();
@@ -60061,7 +63122,7 @@ var SYNC = (function () {
     if (at >= PDLG.queue.length) { closePersonDialog(false); return; }
     PDLG.at = at;
     PDLG.key = PDLG.queue[at].key;
-    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
+    PROLEPICK = null; ROLESTOP = null;
     rowEditOpen("people", PDLG.key, personBy(PDLG.key));
     personDialogPaint();
     focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));
@@ -61252,9 +64313,20 @@ var SYNC = (function () {
    `data-module` by the server, which owns the list (lib/modules.ts), and this
    writes that word back into every address it pushes — so a module added
    tomorrow needs no edit in the browser. What IS this file's own vocabulary
-   is which destinations belong to the SPINE and carry no module: `setup`,
-   one page for the whole client (spec 046 §4.5), and the intro round, both
-   of which kindOf() and placeOf() already had to name.
+   is which destinations belong to the SPINE and carry no module: the intro
+   round, and the CLIENT'S Setup — the pages that belong to no module (spec
+   054 §4.1) — both of which kindOf() and placeOf() already had to name.
+
+   SETUP HAS TWO ADDRESSES AND THE MODULE WORD IS WHAT TELLS THEM APART
+   (§359.2, spec 056 §4.2, research R2). `/<client>/<module>/setup/<page>` is
+   that module's own Setup and `/<client>/setup/<page>` is the client's; the
+   difference is written onto the document as `data-setup-scope` (the module
+   word, or `client`) and the frozen shell draws its rail from that one
+   attribute. The address is a REQUEST rather than the authority: the landing
+   writes every Setup door in the spine form and the shell moves the scope
+   to the page's own module (shell.html resolveSetupScope), after which the
+   place becomes the address again — so a door pressed on the landing ends
+   at the address the product writes, and Back walks through it.
 
    So this does two things and nothing else:
      · on arrival, the address becomes §173's remembered place, so the
@@ -61269,9 +64341,12 @@ var SYNC = (function () {
    the landing writes with). Modes are never in the address (§63.1, §173:
    edit, reporting and arrange are dropped on every navigation).
 
-   The shell's welcome overlay is stood down: the landing at /<client> IS the
-   welcome screen (§315), so a second one drawn over the first page would be
-   two greetings for one arrival. */
+   The shell's welcome overlay is THE welcome again (§360, spec 057): the
+   landing at /<client> was stood in for it while it existed (§315) and is a
+   redirect into the module now, so welcome.js offers itself once a session
+   exactly as it does over file://, and the house mark is its way back — over
+   the module's HOME, and never over a page somebody asked for by address
+   (§360.9: `data-deep-address`, below). */
 (function () {
   "use strict";
   var m = String(location.pathname || "").match(/^\/([a-z0-9][a-z0-9-]{0,48})(?:\/(.*))?$/);
@@ -61288,11 +64363,22 @@ var SYNC = (function () {
   function kindOf(d) { return d === "group" ? "group" : d === "setup" ? "setup" : /^fn:/.test(d) ? "fn" : /^co:/.test(d) ? "co" : "unit"; }
   /* The path after the client's slug, whichever address this is asked of. */
   function restOf(path) { return String(path || "").replace(/^\/[^/]+\/?/, ""); }
+  /* The rail the document draws (shell.html setupScope): a module word for
+     that module's own Setup, `client` for the pages that belong to no module,
+     absent everywhere else. The frozen shell reads and writes the same
+     attribute, so the two never hold a second copy of each other. */
+  function setScope(v) {
+    if (v) document.documentElement.setAttribute("data-setup-scope", v);
+    else document.documentElement.removeAttribute("data-setup-scope");
+  }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
-    /* the module leads every address but the spine's; `setup` and `tour` are
-       the spine's own words and are read where they stand */
-    if (MODULE && seg[0] === MODULE) seg = seg.slice(1);
+    /* the module leads every address but the spine's; `tour` and the
+       client's `setup` are the spine's own words and are read where they
+       stand — and whether the module word LED is what says which Setup an
+       address names, so it is remembered before the word is dropped */
+    var led = !!(MODULE && seg[0] === MODULE);
+    if (led) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
@@ -61300,7 +64386,21 @@ var SYNC = (function () {
     else if (seg[0] === "tour") { return { tour: true }; }
     else d = seg[0];
     var kind = kindOf(d), s = null, c = null;
-    if (kind === "setup") { s = seg[i] || null; }
+    if (kind === "setup") {
+      s = seg[i] || null; setScope(led ? MODULE : "client");
+      /* A HASH ON A SETUP ADDRESS NAMES A PLACE ON THE PAGE (spec 056 §4.1):
+         the landing's Email door opens `setup/send#comms`, the third section
+         of that page, and its Access door opens `setup/people#seat`, a column
+         of the register. It rides as the section (`c`): the shell's own
+         restoreWhere() applies a section key the page holds and the page's
+         renderer falls back to its first section for a word that is not one
+         (config-render.js's CURSEC guard), so `seat` does no harm there and
+         the element it names is scrolled to after the paint (below). Never
+         written back into the address — addressOf keeps a Setup address to
+         its page — so the hash is consumed on arrival and not carried. */
+      var h = String(location.hash || "").replace(/^#/, "");
+      if (h && /^[\w-]+$/.test(h)) c = h;
+    }
     else {
       var w = seg[i] ? TAB_IN[seg[i]] : null;
       s = w ? (w[kind] || null) : (seg[i] || null);
@@ -61313,9 +64413,14 @@ var SYNC = (function () {
   function addressOf(d, s, c) {
     var kind = kindOf(d);
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
-    /* Setup is the client's, not a module's (spec 046 §4.5), so it is the one
-       destination whose address carries no module word. */
-    var out = "/" + SLUG + (MODULE && kind !== "setup" ? "/" + MODULE : "") + "/" + seg;
+    /* A module's Setup carries its module word and the client's carries
+       none (spec 056 §4.2): the scope the shell resolved decides, so a door
+       pressed at `/<client>/setup/cycle` is rewritten to Strategy's own
+       address once the page has said whose it is. Unscoped — which the
+       served shell never is inside Setup — the spine form is written. */
+    var scoped = kind === "setup" ? (document.documentElement.getAttribute("data-setup-scope") || "") : "";
+    var word = kind === "setup" ? (scoped && scoped !== "client" ? scoped : "") : MODULE;
+    var out = "/" + SLUG + (word ? "/" + word : "") + "/" + seg;
     if (s) out += "/" + (kind === "setup" || kind === "group" ? s : (TAB_OUT[s] || s));
     if (c && kind !== "setup") out += "/" + c;
     return out;
@@ -61338,9 +64443,10 @@ var SYNC = (function () {
      ABSENT attribute is what says so, rather than a flag beside it (§50.6).
 
      THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
-     one answer to what the switcher lists, read by this and by the trial
-     module's own bar (§53.5): a label worked out here by capitalising a key
-     is how two screens come to spell one module differently.
+     one answer to what the switcher lists, read by this and by a module's
+     own bar (modules/insights/page.ts, §53.5): a label worked out here by
+     capitalising a key is how two screens come to spell one module
+     differently.
 
      IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
      inside, and that drawing's `.brand` was a flex ROW while the product's is
@@ -61354,11 +64460,34 @@ var SYNC = (function () {
      wired exactly once, at load — no second handler on a repaint (§24, §47.2).
      A press navigates, so the menu never has to be closed afterwards. */
   (function modules() {
+    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
+       CSS RULE RATHER THAN AN EARLY RETURN HERE (§367). Those pages
+       belong to no module, so a switcher there offers a way out of somewhere
+       you are not; what changed is that crossing between the two rails stopped
+       being a page load, so "built once at load" stopped being able to answer
+       the question at all. It was wrong in BOTH directions the moment it
+       could: crossing to a module's settings left the switcher never built,
+       and crossing back left it standing.
+
+       So it is built wherever there is a choice, and `data-client-settings` —
+       the one answer paint() writes for the destination row, the Group
+       dropdown, the Units | Functions switch, the gear and the viewer strip —
+       stands it down with the rest of the chrome (_shared.css). Same
+       mechanism, one rule, and it follows the scope on every paint instead of
+       on every navigation. `display:none`, so it does not take the keyboard
+       either (§3.2); and the whole bar is inside `.chrome`, which the boot
+       skeleton hides (§94.10), so nothing flashes before the first paint. */
     var raw = document.documentElement.getAttribute("data-modules");
     if (!raw) return;                               /* one module: no choice to offer */
     var list;
     try { list = JSON.parse(raw); } catch (e) { return; }
-    if (!Array.isArray(list) || list.length < 2) return;
+    /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
+       rather than on the attribute (§362.1): `data-modules` is the list of
+       modules this person may open, read by this and by the client's own
+       Setup rail, which draws a row per module whatever the count. The
+       check's break forces the switcher on for a client holding one. */
+    var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
+    if (!Array.isArray(list) || (!forceSwitch && list.length < 2)) return;
     var bar = document.querySelector(".top .top-in");
     if (!bar || bar.querySelector(".topmark")) return;
 
@@ -61412,24 +64541,60 @@ var SYNC = (function () {
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
   try {
-    sessionStorage.setItem("smp.welcome.done", "1");
+    /* NOTHING MARKS THE WELCOME SEEN HERE ANY MORE (§360): that line stood
+       the frozen overlay down while the Next landing was the welcome, and
+       with the landing gone it was the reason the house mark opened a screen
+       nobody had been offered. welcome.js keeps its own memory. */
     if (here && !here.tour && here.d) {
       var rem = { d: here.d, s: here.s };
       if (here.c && here.s) rem.c = here.c;
       sessionStorage.setItem("smp.where", JSON.stringify(rem));
+      /* AND AN ADDRESS IS NOT A GREETING EITHER (§360.9). Islam, pressing
+         the console card's *Settings* and meeting the welcome overlay over
+         the client's own Setup rail: *"when I press continue it opens the
+         clietn settings!! … the settings should open the settings
+         directly."* He is right, and it is the argument two paragraphs down
+         with a wider box around it: the welcome fills the viewport and its
+         only way out is Continue, so over a page somebody NAMED it is a wall
+         in front of the thing they asked for, and taking it down reads as
+         the thing behind it having been opened by the press.
+
+         THE HOME OF THE MODULE IS WHERE IT BELONGS (his own words): a bare
+         `/<client>/<module>` names no page — which is exactly what the
+         redirect at `/<client>` and the door's own landing produce — so
+         `placeOf` answers null there and the greeting stands.
+
+         A DOCUMENT FACT, NOT A REMEMBERED ONE, and that is the difference
+         from the tour's mark below. This is true of THIS LOAD, so a person
+         who types the module's home address afterwards is greeted; storing
+         it would stand the welcome down for the session on the strength of
+         one address, and `welcome.js`'s own memory would then be answering
+         two questions instead of one (§107). Written the way the scope is
+         (spec 056 §4.2) because route.js is the only file that knows the
+         address's shape; read by `WELCOME.offer()` alone, never by
+         `WELCOME.open()` — pressing the house mark IS the ask (§185). */
+      document.documentElement.setAttribute("data-deep-address", "1");
       /* AND AN ADDRESS IS NOT A TOUR. The intro round navigates by pressing
          the platform's own controls (§107), so offered over a page somebody
          asked for by address it walks them off it — measured: a unit head
          opening /<client>/mobile/performance landed on Strategy › Plan, the
-         tour's own first stop, with the address rewritten under them. The
-         landing carries the offer (§159's intro-round card, `/<client>/tour`)
-         and Continue is the answer to it, so a deep address is somebody who
-         has already chosen a page. Stood down for THIS SESSION ONLY, through
-         the tour's own "Skip for now" mark rather than a second memory beside
-         it (§53.5): "Don't show again" is untouched, `/<client>/tour` still
-         offers, and the Knowledge base's replay button still starts one. */
+         tour's own first stop, with the address rewritten under them. So a
+         deep address is somebody who has already chosen a page. Stood down
+         for THIS SESSION ONLY, through the tour's own "Skip for now" mark
+         rather than a second memory beside it (§53.5): "Don't show again" is
+         untouched, `/<client>/tour` still offers, and the Knowledge base's
+         replay button still starts one. */
       sessionStorage.setItem("smp.tour.later", "1");
     }
+    /* AND `/<client>/tour` IS AN ADDRESS TOO (§360.9), which is why the
+       welcome's stand-down is asked of it as well and the two lines above are
+       not: nothing is remembered for a tour address (it is not a place) and
+       the tour's own mark must certainly not be set on it — but somebody who
+       typed it asked for the intro round, and `land()` offers the tour only
+       where the welcome DECLINED (§148: two docks over one page fight for
+       every click). Without this, the one address that names the tour is the
+       one address that cannot start it. */
+    if (here && here.tour) document.documentElement.setAttribute("data-deep-address", "1");
   } catch (e) { /* a store that refuses: the shell opens where it would have */ }
   /* ── after every paint: the place is the address ── */
   var last = null;
@@ -61444,9 +64609,19 @@ var SYNC = (function () {
       else history.replaceState({ d: d, s: s, c: c }, "", a);
     } catch (e) {}
   }
+  /* the element a hash named, scrolled to once it has been drawn — the
+     first paints are the skeleton's, so it is tried on each until found */
+  var wantEl = (here && here.c && String(location.hash || "").replace(/^#/, "") === here.c) ? here.c : null;
+  function scrollToWanted() {
+    if (!wantEl) return;
+    var el = document.getElementById(wantEl);
+    if (!el) return;
+    wantEl = null;
+    try { el.scrollIntoView({ block: "nearest", inline: "center" }); } catch (e) {}
+  }
   if (typeof paint === "function") {
     var painted = paint;
-    paint = function () { var r = painted.apply(this, arguments); try { sync(true); } catch (e) {} return r; };
+    paint = function () { var r = painted.apply(this, arguments); try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));

@@ -738,6 +738,13 @@ var SYNC = (function () {
       var nameEl = document.getElementById("clientbackname");
       /* textContent, never innerHTML: a client's name is typed by a person. */
       if (nameEl) nameEl.textContent = person.clientName || clientSlug();
+      /* AND KEPT WHERE IT IS DRAWN (§362). This function runs once, at
+         hydration; the client's own settings reword this control to *Save &
+         close* on every paint they are open (shell.html clientBar), so the
+         name has to survive being written over — and it is remembered on the
+         control rather than in a global, because a second copy of a value is
+         a second thing to keep in step (§53.5). */
+      back.dataset.client = person.clientName || clientSlug();
       back.hidden = false;
       back.title = "Back to your clients";
       /* AND THE ORG NAME BESIDE IT GOES. Both say "Raya Trade" — one as a
@@ -1081,6 +1088,11 @@ var SYNC = (function () {
        idea of what the state is would be a backup of something the platform
        never held. */
     graph: function () { return graph(); },
+    /* THE GLOBALS REBOUND FROM A GRAPH, for the ONE thing that shapes a
+       client in the browser (client-setup.js, §360): the set-up flow shapes
+       a COPY through the product's own minters and hands it here, so the
+       page cannot hold a second idea of how a state becomes the platform. */
+    hydrate: function (state) { hydrate(state); },
     isOffline: function () { return OFFLINE; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */

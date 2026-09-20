@@ -143,36 +143,70 @@
      to decide which one the top would open. The card stopped being a
      <button> for it — a button cannot hold buttons — so the identity block
      and the rows are its two children and the padding moved onto them. */
+  /* ── A MARK, NOT A SENTENCE — AND TIGHTER (§368) ──────────────────
+     Islam: "we don't needs notes that take 2 lines we can just have a
+     notificaiton here if something is new to check ... to keep it neat and
+     clean nad let's make it compact." Option A of a signed-off mockup
+     (design-mockups/client-card-rows/2026-09-17_a-mark-not-a-sentence.html),
+     with the tighter rows he ticked on it.
+
+     `min-height` GOES FROM THE CARD AND STAYS ON `.ccard.add`, which is the
+     one card whose whole height comes from it: it is a centred dashed box
+     holding four words, and on a platform with no clients yet it is alone in
+     its row with nothing to be stretched against (§317's own empty state).
+     Every other card is as tall as it needs to be, and the grid still levels
+     a row against its tallest. */
   .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
     background:var(--surface); display:flex; flex-direction:column;
-    min-height:152px; font:inherit; color:inherit; box-shadow:var(--shadow) }
+    min-height:0; font:inherit; color:inherit; box-shadow:var(--shadow) }
   .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
   .ccard.listed{ opacity:.72 }
-  .ccard .ctop{ display:flex; flex-direction:column; gap:7px; padding:15px }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:13px 14px }
   .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
-  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:9px 15px;
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:6px 14px;
     font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
     border:0; border-bottom:1px solid var(--line); cursor:pointer }
   .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
-  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto }
+  /* AND THE TAIL MAY NEVER WRAP, which is the two-line row he photographed:
+     this had no `flex:none`, so the sentence that used to sit beside it
+     squeezed the two-word state until it broke. The sentence is gone, and
+     the guard stays — a mark is a mark on one line whatever ends up next to
+     it, and a wrapped one costs the whole grid a row of height. */
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto;
+    flex:none; white-space:nowrap }
+  /* The two marks that mean something is BROKEN rather than busy, in the
+     warning ink (--warn, measured for words on this surface); a count is not
+     an alarm however large it is, so it stays the row's quiet ink at the
+     weight that lets a figure be picked out of a column of names. */
+  .mrow i.alarm{ color:var(--warn); font-weight:600 }
+  .mrow i.due{ color:var(--ink-2); font-weight:600 }
   .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
   .ccard.add{ cursor:pointer }
   .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
-  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
-    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  .ccard .cmark{ width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber);
+    font:700 11px/30px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
   /* A client that has a mark wears it on its card — the same picture its
      door wears (§313.36), so the two cannot disagree; a light plate under it
-     because a PNG cannot be recoloured (§52). Initials until then. */
-  .ccard img.cmark{ width:auto; max-width:120px; height:36px; object-fit:contain; background:#fff; padding:4px 8px; box-sizing:content-box }
+     because a PNG cannot be recoloured (§52). Initials until then.
+     ITS HEIGHT FOLLOWS THE INITIALS' (§368): the mockup could only draw the
+     initials, and leaving this at 36 would have made a client with a logo
+     taller than one without — two card heights in one row for no reason
+     anybody could read. */
+  .ccard img.cmark{ width:auto; max-width:120px; height:30px; object-fit:contain; background:#fff; padding:3px 7px; box-sizing:content-box }
   .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
   .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
   .markrow .none{ font-size:13px; color:var(--ink-3) }
-  .ccard h2{ margin:0; font-size:17px; font-weight:600 }
+  .ccard h2{ margin:0; font-size:16px; font-weight:600 }
   .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
   .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
     padding:15px; color:var(--ink-3) }
+  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§371). The Add card's
+     own height, shared rather than copied: the waiting card is the same
+     question — how tall is a card in this grid before there is a client in
+     it — and two spellings of one answer is how they come to differ. */
+  .ccard.add, .ccard.skel{ min-height:152px }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -193,7 +227,14 @@
     letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
   .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
     letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
-    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface) }
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface);
+    /* A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR (§361). This chip is a
+       <span role="button">, so with no cursor of its own the pointer becomes
+       the I-beam over the one control that opens a client — and `.cback`
+       directly below, built the same way for the same kind of act, has
+       carried `cursor:pointer` since it was written. One of the pair was
+       given it and the other was not. */
+    cursor:pointer }
   .ccfg:hover, .ccfg:focus-visible{ border-color:var(--amber-tx); outline:none }
   .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
     text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
@@ -213,6 +254,43 @@
      not work (§61, §96). */
   .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
   .ccard.arch:hover{ border-color:var(--line) }
+
+  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§371) ─────────────────
+     §369 took the console's boot from three round trips to one and left the
+     silence: the bar stands up, the body is hidden, and for about 740ms —
+     seconds on a cold function — the window looks open and dead. What fills
+     it is the answer the CLIENT platform already gives while it waits
+     (§94.10), chosen by Islam over the page's own words.
+
+     IT WEARS NOTHING IT WILL HAVE TO CHANGE, which is that section's whole
+     rule: no name, no mark, no tenant's colour, no figure. Two greys the
+     page already declares (§25 — never a literal), in the shape the real
+     card has, so what arrives replaces a block with the thing that block
+     stood for rather than rearranging the page around it.
+
+     AND IT SAYS NOTHING THAT WOULD MAKE IT LOOK PRESSABLE, by construction
+     rather than by a rule: `.ccard` declares no hover of its own (the two
+     that exist are scoped to `.add` and to `.mrow`), and `:focus-visible`
+     cannot reach a `div` that takes no tabindex. A `pointer-events:none`
+     was written here first and REMOVED on measuring it — nothing behaves
+     differently with or without it, and a line that fixes nothing is one
+     the next reader takes for load-bearing (§298.2, §24). */
+  .ccard.skel .sk-mark{ width:30px; height:30px; border-radius:8px; background:var(--line) }
+  /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
+     signed-off shot has and what the first build lost: `.ctop` is a column
+     flex, so a bar with no width STRETCHES and three cards read as three
+     long rules rather than a name over an industry. A share of the card
+     rather than a pixel count, because the grid's columns are `1fr` and a
+     fixed bar would sit differently in a wide row and a narrow one. */
+  .ccard.skel .sk-line{ width:62%; height:10px; border-radius:5px; background:var(--line) }
+  .ccard.skel .sk-line.thin{ width:42%; height:8px; background:var(--surface-2) }
+  /* AND THE HAIRLINE SITS WHERE THE REAL CARD'S SITS — under the name block,
+     with the module rows below it. `.mods` carries `margin-top:auto`, which
+     on a card holding nothing drives the line to the very bottom edge, where
+     it disappears into the card's own border (measured: invisible in the
+     shot). The space below it is the 152px above, which is the room those
+     rows will take. */
+  .ccard.skel .mods{ margin-top:0 }
   /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
      (§88's own answer, on a card rather than a table row): one line, clipped
      where it does not fit, the whole of it one hover away. Measured — 
@@ -300,71 +378,21 @@
   .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
   @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
 
-  /* ── SETTING A CLIENT UP (§322) ───────────────────────────────────
-     The flow's own dress, in this page's tokens and nothing else — it is
-     the same chrome, the same buttons and the same fields the rest of the
-     platform page uses, with a step rail and a panel beside it. */
-  .wzrail{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px }
-  .wzstep{ display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
-    border:1px solid var(--line); border-radius:999px; background:var(--surface);
-    color:var(--ink-2); font:600 12.5px/1.5 inherit; cursor:pointer }
-  .wzstep:hover:not(:disabled){ border-color:var(--amber-tx) }
-  .wzstep .n{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
-    background:var(--surface-2); color:var(--ink-3);
-    font:600 11px/1 ui-monospace, SFMono-Regular, monospace; flex:none;
-    font-variant-numeric:tabular-nums }
-  .wzstep[aria-current="step"]{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
-  .wzstep[aria-current="step"] .n{ background:var(--amber); color:var(--amber-ink) }
-  .wzstep.done{ color:var(--ink-3) }
-  .wzstep.done .n{ background:var(--good-bg); color:var(--good) }
-  /* DULLED MEANS INERT AND SAYING SO — never merely grey (§61). */
-  .wzstep.later{ border-style:dashed; opacity:.55; cursor:not-allowed }
-
-  .wzgrid{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px; align-items:start }
-  @media (max-width:900px){ .wzgrid{ grid-template-columns:1fr } }
+  /* ── THE TWO PIECES OF SET-UP THIS PAGE STILL DRAWS (§360, spec 057) ──
+     The flow moved into the client platform (client-setup.js); what is
+     left here is adding a client and ending an archived one, in this
+     page's tokens. The markup is the module's, so the classes are its. */
+  .csetup .lab{ margin-bottom:6px }
+  .csetup .rowset{ max-width:640px }
+  .csetup .cssaid{ margin:12px 0 0; font-size:13.5px; border-radius:8px; padding:9px 11px }
+  .csetup .cssaid.said{ background:var(--surface-2); border:1px solid var(--line) }
+  .csetup .cssaid.err{ color:var(--bad); background:var(--bad-bg); border:1px solid var(--bad) }
   .wzq{ font-size:20px; font-weight:600; margin:7px 0 4px; text-wrap:balance }
   .wzwhy{ color:var(--ink-3); font-size:13.5px; margin:14px 0 0; max-width:62ch }
   .wzempty{ color:var(--ink-3); font-size:13.5px; font-style:italic; margin:0 }
   .wzfoot{ display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
     border-top:1px solid var(--line); flex-wrap:wrap }
   .wzfnote{ margin-left:auto; color:var(--ink-3); font-size:12.5px }
-
-  /* lists you add to */
-  .wzrows{ display:flex; flex-direction:column; gap:6px }
-  .wzrow{ display:flex; align-items:center; gap:9px }
-  .wzrow .fld{ flex:1 1 160px; min-width:0 }
-  .wzrow .wzname{ flex:1 1 160px; font-weight:600; font-size:14px }
-  .wzrt{ display:flex; align-items:center; gap:7px; flex:none }
-  .wzrt .fld{ width:auto }
-  .wzsub{ font-size:12px; color:var(--ink-3); white-space:nowrap }
-  .wzx{ border:0; background:transparent; color:var(--ink-3); cursor:pointer;
-    font-size:17px; line-height:1; padding:2px 5px; flex:none }
-  .wzx:hover{ color:var(--bad) }
-  .wzadd{ border:1px dashed var(--line); border-radius:8px; padding:8px 11px; color:var(--ink-3);
-    background:transparent; font:600 13px/1.5 inherit; text-align:left; cursor:pointer;
-    width:100%; margin-top:8px }
-  .wzadd:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
-  /* The common-name chips (§351): a SIBLING of .wzadd, dashed and quiet,
-     because clicking one is the same act as pressing the button under it —
-     a shortcut into it rather than a second kind of control. */
-  .wzcommon{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 9px }
-  .wzcm{ border:1px dashed var(--line); border-radius:7px; background:transparent;
-         padding:5px 10px; font:inherit; font-size:13px; color:var(--ink-3);
-         cursor:pointer; white-space:nowrap }
-  .wzcm:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
-  .wzcm .p{ color:var(--ink-3); margin-right:4px }
-
-  /* a choice */
-  .wzchoices{ display:flex; flex-direction:column; gap:10px }
-  .wzchoice{ display:block; width:100%; text-align:left; padding:12px 13px; border-radius:9px;
-    border:1px solid var(--line); background:var(--surface); color:inherit; font:inherit;
-    cursor:pointer }
-  .wzchoice:hover{ border-color:var(--amber-tx) }
-  .wzchoice[aria-pressed="true"]{ border-color:var(--amber); box-shadow:inset 0 0 0 1px var(--amber) }
-  .wzchoice .cname{ display:block; font-weight:600; font-size:14.5px }
-  .wzchoice .cwhy{ display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px }
-  .wzlaterline{ margin-top:12px; font-size:13px; color:var(--ink-3);
-    border-left:2px solid var(--line); padding-left:11px }
 
   /* ── ENDING A CLIENT (§323) ─────────────────────────────────────────
      §273.4's shape, which Islam chose for the reporting cycle: the
@@ -432,57 +460,6 @@
   .wzband .ppl{ font:400 11px/1.3 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3);
     font-variant-numeric:tabular-nums }
   .wzband button[aria-pressed="true"] .ppl{ color:var(--amber-tx) }
-
-  /* the words table */
-  .wztbl{ overflow-x:auto; border:1px solid var(--line); border-radius:9px; background:var(--surface) }
-  .wztbl table{ min-width:520px }
-  .wztbl td{ white-space:normal }
-
-  /* what you are building */
-  .wzshape{ position:sticky; top:14px; background:var(--surface); border:1px solid var(--line);
-    border-radius:12px; padding:15px; box-shadow:var(--shadow) }
-  .wzshape h2{ font-size:13.5px; margin:0 0 2px; font-weight:600 }
-  .wzshape .cap{ color:var(--ink-3); font-size:12.5px; margin:0 0 14px }
-  .wzorg{ border:1px solid var(--amber); border-radius:9px; padding:9px 11px;
-    background:var(--amber-wash); display:flex; align-items:center; gap:9px }
-  .wzorg .nm{ font-weight:700; font-size:14.5px; color:var(--ink) }
-  .wzwho{ margin:6px 0 0; font-size:12px; color:var(--ink-3) }
-  .wzswitch{ display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden;
-    font-size:12px; margin-top:13px }
-  .wzswitch span{ flex:1; text-align:center; padding:5px 6px; color:var(--ink-3) }
-  .wzswitch span.on{ background:var(--ff); color:var(--ff-ink); font-weight:600 }
-  .wzside{ margin-top:13px }
-  .wzsidekey{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.12em;
-    text-transform:uppercase; color:var(--ink-3); margin-bottom:7px; display:flex;
-    align-items:center; gap:7px }
-  .wzsidekey .ct{ background:var(--surface-2); border-radius:999px; padding:1px 7px;
-    font-size:10.5px; letter-spacing:0; font-variant-numeric:tabular-nums }
-  .wzchips{ display:flex; flex-wrap:wrap; gap:6px }
-  .wzchip{ border:1px solid var(--line); border-radius:6px; padding:4px 9px; font-size:12.5px;
-    background:var(--surface-2); display:flex; align-items:center; gap:7px }
-  .wzchip.unit{ border-left:3px solid var(--ff) }
-  .wzchip.fn{ border-left:3px solid var(--good) }
-  .wzchip .fmt{ font:600 10px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.04em;
-    text-transform:uppercase; color:var(--ink-3) }
-  .wznone{ color:var(--ink-3); font-size:12.5px; font-style:italic; padding:3px 0 }
-
-  /* the summary */
-  .wzsumm{ display:flex; flex-direction:column; gap:7px; margin-bottom:18px }
-  .wzline{ display:flex; gap:10px; align-items:baseline; font-size:14px; padding:7px 11px;
-    border:1px solid var(--line-soft); border-radius:8px; background:var(--surface); flex-wrap:wrap }
-  .wzline .sk{ color:var(--ink-3); font-size:12.5px; min-width:136px }
-  .wzline .sv{ font-weight:600 }
-  .wzed{ margin-left:auto; color:var(--amber-tx); font-size:12.5px; border:0;
-    background:transparent; cursor:pointer; font-weight:600 }
-  .wzdoors{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:9px }
-  @media (max-width:620px){ .wzdoors{ grid-template-columns:1fr } }
-  .wzdoor{ border:1px solid var(--line); border-radius:10px; padding:14px; background:var(--surface);
-    display:flex; flex-direction:column; gap:5px; cursor:pointer; text-align:left; font:inherit;
-    color:inherit }
-  .wzdoor:hover{ border-color:var(--amber-tx) }
-  .wzdoor.go{ border-color:var(--amber); background:var(--amber-wash) }
-  .wzdoor .dn{ font-weight:700; font-size:14.5px }
-  .wzdoor .dw{ color:var(--ink-3); font-size:12.5px }
   /* ── The consulting memory (spec 045) ────────────────────────────
      FOUR SHAPES, and each is an existing one put to a new use rather than a
      new look: the filter row is .ptitle's own flex row, an entry row is
@@ -763,6 +740,10 @@
      with a wrong answer available to it. scripts/build-shell.mjs puts it at
      this address and refuses the build if this tag ever goes. -->
 <script src="/memory-split.js"></script>
+<!-- The client set-up flow (§360, spec 057): one file for this page and the
+     client platform, generated to this address by scripts/build-shell.mjs,
+     which refuses the build if this tag ever goes. -->
+<script src="/client-setup.js"></script>
 <script src="/platform-page.js"></script>
 </body>
 </html>

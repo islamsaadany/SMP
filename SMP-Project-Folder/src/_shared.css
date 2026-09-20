@@ -135,7 +135,7 @@
     --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
-    --line:#E2E8F0; --line-soft:#F1F5F9;
+    --line:#E2E8F0; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
     --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
     --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
@@ -158,7 +158,7 @@
     --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-    --line:#2B3852; --line-soft:#212C42;
+    --line:#2B3852; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
     --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
@@ -190,7 +190,7 @@
     --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
-    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
     --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
@@ -210,7 +210,7 @@
     --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A;
+    --line:#333A45; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
     --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
@@ -806,3 +806,48 @@
 }
 .clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
 .clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
+/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ────
+   `data-client-settings` is written on the root by paint() and by nothing
+   else (shell.html clientBar): the pages behind it belong to no module, so
+   the module's navigation is not drawn over them.
+
+   WHY THESE THREE AND NOT A CLASS PER CONTROL. Everything in `nav.units` is a
+   way of choosing which part of a MODULE you are reading — the house into its
+   welcome, the group, the units and functions, the gear into that module's
+   Setup — and the viewer strip is *looking as somebody in this client*, which
+   is a question about a module's pages and not about how the client was set
+   up. Standing down the two CONTAINERS is what makes a control added to
+   either covered the day it is added (§104.7).
+
+   `display:none`, never opacity or a width: a control hidden by paint alone
+   still takes the keyboard and still answers every DOM probe (§3.2, §70).
+   And the row goes as a WHOLE — `nav.units` carries the tenant's own
+   `--panel` ground and a border, so emptying `#units` and leaving the wrapper
+   would draw a navy stripe with nothing in it (§28's rule for an empty
+   heading, one element out). */
+html[data-client-settings] nav.units,
+html[data-client-settings] .viewer { display:none; }
+/* AND THE MODULE SWITCHER, WHICH IS NAMED RATHER THAN CONTAINED (§367).
+   The two above are CONTAINERS, and standing a container down is what
+   covers a control added to it later — but the switcher's container is
+   `.top-in`, which also holds the client's own heading and mark, and those are
+   exactly what these pages DO want. So this one is named.
+
+   IT USED TO BE STRUCTURAL AND STOPPED BEING ABLE TO BE. shell/route.js built
+   the switcher once at load and returned early on the client's scope, which
+   answered while the only way between the two rails was a page load; §367 made
+   that crossing a press, so the switcher has to follow the SCOPE rather than
+   the navigation, and this is the rule the rest of the chrome already
+   follows. */
+html[data-client-settings] .top .topmark { display:none; }
+/* The way back says what it does first. `change` is the word for a control
+   that NAMES the client you are in; here it names the act, so the second half
+   would be saying something the first half already did (§87). */
+.clientback[data-saveclose] i{ display:none }
+/* THE CLIENT'S MARK (§362). Sized like the theme and font controls beside it
+   rather than like the deck's lockup — this is a bar, and a mark taller than
+   the line it sits on is what pushes the whole chrome down a row. `contain`,
+   because a client's mark is whatever shape they uploaded and a stretched one
+   is worse than a small one (§50's own rule for a slide picture). */
+.clientlogo{ height:26px; width:auto; max-width:120px; object-fit:contain;
+             flex-shrink:0; align-self:center; display:block }

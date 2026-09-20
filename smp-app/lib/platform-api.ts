@@ -8,6 +8,7 @@
    (account_clients); a client's own rows are reached through withTenant and
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
+import { landingFactsFor } from "./landing-facts.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -88,10 +89,21 @@ async function factsFor(t: ClientRow) {
       const units = await n("units"), pillars = await n("pillars");
       const cyc = (await c.query("SELECT name, locked FROM cycle")).rows[0] || null;
       return { units, planned: pillars > 0, cycleOpen: !!(cyc && String(cyc.name || "").trim() && !cyc.locked), unreadable: false };
+    }).then(async (f) => {
+      /* the facts a module's MARK is made of (§368) — read through the ONE
+         reader that also serves the Landing line page's preview, as somebody
+         who sees everything, which the console is.
+         THE PICKS ARE NOT CARRIED, because nothing here reads them any more:
+         the mark is Forefront's own answer, and a field computed for no
+         reader is the quietest kind of fault (§294.2). `landingFactsFor`
+         still returns them for its other caller, the Setup page's stamp. */
+      const have = modulesFor(t.modules);
+      const { facts } = await landingFactsFor(t.id, have, { place: null, seesAll: true });
+      return { ...f, landing: facts };
     });
   } catch (e) {
     console.error("card facts for " + t.key + ":", (e as Error).message);
-    return { units: null, planned: null, cycleOpen: null, unreadable: true };
+    return { units: null, planned: null, cycleOpen: null, unreadable: true, landing: null };
   }
 }
 
@@ -113,9 +125,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         seat: FF.seatOn(world, row.key), state: FF.clientState(world, account, row), canOpen: FF.mayOpenClient(world, account, row),
         canConfig: FF.mayReadConfig(world, account, row), units: facts.units, planned: facts.planned, cycleOpen: facts.cycleOpen, unreadable: !!facts.unreadable,
         /* THE CARD'S DOORS (spec 046 §4.6a): one row per module this client
-           has, each with the one line that module says about it. Worked out
-           HERE and never on the page, so the console cannot spell a module
-           differently from the switch or from Setup (§53.5). */
+           has, each with the MARK that module makes of it — what is
+           outstanding, and nothing when nothing is (§368). Worked out HERE
+           and never on the page, so the console cannot spell a module
+           differently from the switch or from Setup (§53.5).
+           `facts.picks` is deliberately NOT passed: the mark is Forefront's
+           own answer, so the client's landing-line pick cannot move it. */
         modules: moduleRows(modulesFor(row.modules), facts) });
     }
     /* ── THE ARCHIVED BAND (§323) ────────────────────────────────────

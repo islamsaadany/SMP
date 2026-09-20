@@ -142,36 +142,70 @@
      to decide which one the top would open. The card stopped being a
      <button> for it — a button cannot hold buttons — so the identity block
      and the rows are its two children and the padding moved onto them. */
+  /* ── A MARK, NOT A SENTENCE — AND TIGHTER (§368) ──────────────────
+     Islam: "we don't needs notes that take 2 lines we can just have a
+     notificaiton here if something is new to check ... to keep it neat and
+     clean nad let's make it compact." Option A of a signed-off mockup
+     (design-mockups/client-card-rows/2026-09-17_a-mark-not-a-sentence.html),
+     with the tighter rows he ticked on it.
+
+     `min-height` GOES FROM THE CARD AND STAYS ON `.ccard.add`, which is the
+     one card whose whole height comes from it: it is a centred dashed box
+     holding four words, and on a platform with no clients yet it is alone in
+     its row with nothing to be stretched against (§317's own empty state).
+     Every other card is as tall as it needs to be, and the grid still levels
+     a row against its tallest. */
   .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
     background:var(--surface); display:flex; flex-direction:column;
-    min-height:152px; font:inherit; color:inherit; box-shadow:var(--shadow) }
+    min-height:0; font:inherit; color:inherit; box-shadow:var(--shadow) }
   .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
   .ccard.listed{ opacity:.72 }
-  .ccard .ctop{ display:flex; flex-direction:column; gap:7px; padding:15px }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:13px 14px }
   .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
-  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:9px 15px;
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:6px 14px;
     font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
     border:0; border-bottom:1px solid var(--line); cursor:pointer }
   .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
-  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto }
+  /* AND THE TAIL MAY NEVER WRAP, which is the two-line row he photographed:
+     this had no `flex:none`, so the sentence that used to sit beside it
+     squeezed the two-word state until it broke. The sentence is gone, and
+     the guard stays — a mark is a mark on one line whatever ends up next to
+     it, and a wrapped one costs the whole grid a row of height. */
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto;
+    flex:none; white-space:nowrap }
+  /* The two marks that mean something is BROKEN rather than busy, in the
+     warning ink (--warn, measured for words on this surface); a count is not
+     an alarm however large it is, so it stays the row's quiet ink at the
+     weight that lets a figure be picked out of a column of names. */
+  .mrow i.alarm{ color:var(--warn); font-weight:600 }
+  .mrow i.due{ color:var(--ink-2); font-weight:600 }
   .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
   .ccard.add{ cursor:pointer }
   .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
-  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
-    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  .ccard .cmark{ width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber);
+    font:700 11px/30px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
   /* A client that has a mark wears it on its card — the same picture its
      door wears (§313.36), so the two cannot disagree; a light plate under it
-     because a PNG cannot be recoloured (§52). Initials until then. */
-  .ccard img.cmark{ width:auto; max-width:120px; height:36px; object-fit:contain; background:#fff; padding:4px 8px; box-sizing:content-box }
+     because a PNG cannot be recoloured (§52). Initials until then.
+     ITS HEIGHT FOLLOWS THE INITIALS' (§368): the mockup could only draw the
+     initials, and leaving this at 36 would have made a client with a logo
+     taller than one without — two card heights in one row for no reason
+     anybody could read. */
+  .ccard img.cmark{ width:auto; max-width:120px; height:30px; object-fit:contain; background:#fff; padding:3px 7px; box-sizing:content-box }
   .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
   .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
   .markrow .none{ font-size:13px; color:var(--ink-3) }
-  .ccard h2{ margin:0; font-size:17px; font-weight:600 }
+  .ccard h2{ margin:0; font-size:16px; font-weight:600 }
   .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
   .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
   .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
   .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
     padding:15px; color:var(--ink-3) }
+  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§371). The Add card's
+     own height, shared rather than copied: the waiting card is the same
+     question — how tall is a card in this grid before there is a client in
+     it — and two spellings of one answer is how they come to differ. */
+  .ccard.add, .ccard.skel{ min-height:152px }
   /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
      Islam: "the demo should be a separate client on the platform outside
      beside the clients." It was IN the grid — third across, with the way to
@@ -192,7 +226,14 @@
     letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
   .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
     letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
-    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface) }
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface);
+    /* A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR (§361). This chip is a
+       <span role="button">, so with no cursor of its own the pointer becomes
+       the I-beam over the one control that opens a client — and `.cback`
+       directly below, built the same way for the same kind of act, has
+       carried `cursor:pointer` since it was written. One of the pair was
+       given it and the other was not. */
+    cursor:pointer }
   .ccfg:hover, .ccfg:focus-visible{ border-color:var(--amber-tx); outline:none }
   .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
     text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
@@ -212,6 +253,43 @@
      not work (§61, §96). */
   .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
   .ccard.arch:hover{ border-color:var(--line) }
+
+  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§371) ─────────────────
+     §369 took the console's boot from three round trips to one and left the
+     silence: the bar stands up, the body is hidden, and for about 740ms —
+     seconds on a cold function — the window looks open and dead. What fills
+     it is the answer the CLIENT platform already gives while it waits
+     (§94.10), chosen by Islam over the page's own words.
+
+     IT WEARS NOTHING IT WILL HAVE TO CHANGE, which is that section's whole
+     rule: no name, no mark, no tenant's colour, no figure. Two greys the
+     page already declares (§25 — never a literal), in the shape the real
+     card has, so what arrives replaces a block with the thing that block
+     stood for rather than rearranging the page around it.
+
+     AND IT SAYS NOTHING THAT WOULD MAKE IT LOOK PRESSABLE, by construction
+     rather than by a rule: `.ccard` declares no hover of its own (the two
+     that exist are scoped to `.add` and to `.mrow`), and `:focus-visible`
+     cannot reach a `div` that takes no tabindex. A `pointer-events:none`
+     was written here first and REMOVED on measuring it — nothing behaves
+     differently with or without it, and a line that fixes nothing is one
+     the next reader takes for load-bearing (§298.2, §24). */
+  .ccard.skel .sk-mark{ width:30px; height:30px; border-radius:8px; background:var(--line) }
+  /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
+     signed-off shot has and what the first build lost: `.ctop` is a column
+     flex, so a bar with no width STRETCHES and three cards read as three
+     long rules rather than a name over an industry. A share of the card
+     rather than a pixel count, because the grid's columns are `1fr` and a
+     fixed bar would sit differently in a wide row and a narrow one. */
+  .ccard.skel .sk-line{ width:62%; height:10px; border-radius:5px; background:var(--line) }
+  .ccard.skel .sk-line.thin{ width:42%; height:8px; background:var(--surface-2) }
+  /* AND THE HAIRLINE SITS WHERE THE REAL CARD'S SITS — under the name block,
+     with the module rows below it. `.mods` carries `margin-top:auto`, which
+     on a card holding nothing drives the line to the very bottom edge, where
+     it disappears into the card's own border (measured: invisible in the
+     shot). The space below it is the 152px above, which is the room those
+     rows will take. */
+  .ccard.skel .mods{ margin-top:0 }
   /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
      (§88's own answer, on a card rather than a table row): one line, clipped
      where it does not fit, the whole of it one hover away. Measured — 
@@ -299,71 +377,21 @@
   .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
   @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
 
-  /* ── SETTING A CLIENT UP (§322) ───────────────────────────────────
-     The flow's own dress, in this page's tokens and nothing else — it is
-     the same chrome, the same buttons and the same fields the rest of the
-     platform page uses, with a step rail and a panel beside it. */
-  .wzrail{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px }
-  .wzstep{ display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
-    border:1px solid var(--line); border-radius:999px; background:var(--surface);
-    color:var(--ink-2); font:600 12.5px/1.5 inherit; cursor:pointer }
-  .wzstep:hover:not(:disabled){ border-color:var(--amber-tx) }
-  .wzstep .n{ width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
-    background:var(--surface-2); color:var(--ink-3);
-    font:600 11px/1 ui-monospace, SFMono-Regular, monospace; flex:none;
-    font-variant-numeric:tabular-nums }
-  .wzstep[aria-current="step"]{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
-  .wzstep[aria-current="step"] .n{ background:var(--amber); color:var(--amber-ink) }
-  .wzstep.done{ color:var(--ink-3) }
-  .wzstep.done .n{ background:var(--good-bg); color:var(--good) }
-  /* DULLED MEANS INERT AND SAYING SO — never merely grey (§61). */
-  .wzstep.later{ border-style:dashed; opacity:.55; cursor:not-allowed }
-
-  .wzgrid{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px; align-items:start }
-  @media (max-width:900px){ .wzgrid{ grid-template-columns:1fr } }
+  /* ── THE TWO PIECES OF SET-UP THIS PAGE STILL DRAWS (§360, spec 057) ──
+     The flow moved into the client platform (client-setup.js); what is
+     left here is adding a client and ending an archived one, in this
+     page's tokens. The markup is the module's, so the classes are its. */
+  .csetup .lab{ margin-bottom:6px }
+  .csetup .rowset{ max-width:640px }
+  .csetup .cssaid{ margin:12px 0 0; font-size:13.5px; border-radius:8px; padding:9px 11px }
+  .csetup .cssaid.said{ background:var(--surface-2); border:1px solid var(--line) }
+  .csetup .cssaid.err{ color:var(--bad); background:var(--bad-bg); border:1px solid var(--bad) }
   .wzq{ font-size:20px; font-weight:600; margin:7px 0 4px; text-wrap:balance }
   .wzwhy{ color:var(--ink-3); font-size:13.5px; margin:14px 0 0; max-width:62ch }
   .wzempty{ color:var(--ink-3); font-size:13.5px; font-style:italic; margin:0 }
   .wzfoot{ display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
     border-top:1px solid var(--line); flex-wrap:wrap }
   .wzfnote{ margin-left:auto; color:var(--ink-3); font-size:12.5px }
-
-  /* lists you add to */
-  .wzrows{ display:flex; flex-direction:column; gap:6px }
-  .wzrow{ display:flex; align-items:center; gap:9px }
-  .wzrow .fld{ flex:1 1 160px; min-width:0 }
-  .wzrow .wzname{ flex:1 1 160px; font-weight:600; font-size:14px }
-  .wzrt{ display:flex; align-items:center; gap:7px; flex:none }
-  .wzrt .fld{ width:auto }
-  .wzsub{ font-size:12px; color:var(--ink-3); white-space:nowrap }
-  .wzx{ border:0; background:transparent; color:var(--ink-3); cursor:pointer;
-    font-size:17px; line-height:1; padding:2px 5px; flex:none }
-  .wzx:hover{ color:var(--bad) }
-  .wzadd{ border:1px dashed var(--line); border-radius:8px; padding:8px 11px; color:var(--ink-3);
-    background:transparent; font:600 13px/1.5 inherit; text-align:left; cursor:pointer;
-    width:100%; margin-top:8px }
-  .wzadd:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
-  /* The common-name chips (§351): a SIBLING of .wzadd, dashed and quiet,
-     because clicking one is the same act as pressing the button under it —
-     a shortcut into it rather than a second kind of control. */
-  .wzcommon{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 9px }
-  .wzcm{ border:1px dashed var(--line); border-radius:7px; background:transparent;
-         padding:5px 10px; font:inherit; font-size:13px; color:var(--ink-3);
-         cursor:pointer; white-space:nowrap }
-  .wzcm:hover{ border-color:var(--amber-tx); color:var(--ink-2) }
-  .wzcm .p{ color:var(--ink-3); margin-right:4px }
-
-  /* a choice */
-  .wzchoices{ display:flex; flex-direction:column; gap:10px }
-  .wzchoice{ display:block; width:100%; text-align:left; padding:12px 13px; border-radius:9px;
-    border:1px solid var(--line); background:var(--surface); color:inherit; font:inherit;
-    cursor:pointer }
-  .wzchoice:hover{ border-color:var(--amber-tx) }
-  .wzchoice[aria-pressed="true"]{ border-color:var(--amber); box-shadow:inset 0 0 0 1px var(--amber) }
-  .wzchoice .cname{ display:block; font-weight:600; font-size:14.5px }
-  .wzchoice .cwhy{ display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px }
-  .wzlaterline{ margin-top:12px; font-size:13px; color:var(--ink-3);
-    border-left:2px solid var(--line); padding-left:11px }
 
   /* ── ENDING A CLIENT (§323) ─────────────────────────────────────────
      §273.4's shape, which Islam chose for the reporting cycle: the
@@ -431,57 +459,6 @@
   .wzband .ppl{ font:400 11px/1.3 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3);
     font-variant-numeric:tabular-nums }
   .wzband button[aria-pressed="true"] .ppl{ color:var(--amber-tx) }
-
-  /* the words table */
-  .wztbl{ overflow-x:auto; border:1px solid var(--line); border-radius:9px; background:var(--surface) }
-  .wztbl table{ min-width:520px }
-  .wztbl td{ white-space:normal }
-
-  /* what you are building */
-  .wzshape{ position:sticky; top:14px; background:var(--surface); border:1px solid var(--line);
-    border-radius:12px; padding:15px; box-shadow:var(--shadow) }
-  .wzshape h2{ font-size:13.5px; margin:0 0 2px; font-weight:600 }
-  .wzshape .cap{ color:var(--ink-3); font-size:12.5px; margin:0 0 14px }
-  .wzorg{ border:1px solid var(--amber); border-radius:9px; padding:9px 11px;
-    background:var(--amber-wash); display:flex; align-items:center; gap:9px }
-  .wzorg .nm{ font-weight:700; font-size:14.5px; color:var(--ink) }
-  .wzwho{ margin:6px 0 0; font-size:12px; color:var(--ink-3) }
-  .wzswitch{ display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden;
-    font-size:12px; margin-top:13px }
-  .wzswitch span{ flex:1; text-align:center; padding:5px 6px; color:var(--ink-3) }
-  .wzswitch span.on{ background:var(--ff); color:var(--ff-ink); font-weight:600 }
-  .wzside{ margin-top:13px }
-  .wzsidekey{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.12em;
-    text-transform:uppercase; color:var(--ink-3); margin-bottom:7px; display:flex;
-    align-items:center; gap:7px }
-  .wzsidekey .ct{ background:var(--surface-2); border-radius:999px; padding:1px 7px;
-    font-size:10.5px; letter-spacing:0; font-variant-numeric:tabular-nums }
-  .wzchips{ display:flex; flex-wrap:wrap; gap:6px }
-  .wzchip{ border:1px solid var(--line); border-radius:6px; padding:4px 9px; font-size:12.5px;
-    background:var(--surface-2); display:flex; align-items:center; gap:7px }
-  .wzchip.unit{ border-left:3px solid var(--ff) }
-  .wzchip.fn{ border-left:3px solid var(--good) }
-  .wzchip .fmt{ font:600 10px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.04em;
-    text-transform:uppercase; color:var(--ink-3) }
-  .wznone{ color:var(--ink-3); font-size:12.5px; font-style:italic; padding:3px 0 }
-
-  /* the summary */
-  .wzsumm{ display:flex; flex-direction:column; gap:7px; margin-bottom:18px }
-  .wzline{ display:flex; gap:10px; align-items:baseline; font-size:14px; padding:7px 11px;
-    border:1px solid var(--line-soft); border-radius:8px; background:var(--surface); flex-wrap:wrap }
-  .wzline .sk{ color:var(--ink-3); font-size:12.5px; min-width:136px }
-  .wzline .sv{ font-weight:600 }
-  .wzed{ margin-left:auto; color:var(--amber-tx); font-size:12.5px; border:0;
-    background:transparent; cursor:pointer; font-weight:600 }
-  .wzdoors{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:9px }
-  @media (max-width:620px){ .wzdoors{ grid-template-columns:1fr } }
-  .wzdoor{ border:1px solid var(--line); border-radius:10px; padding:14px; background:var(--surface);
-    display:flex; flex-direction:column; gap:5px; cursor:pointer; text-align:left; font:inherit;
-    color:inherit }
-  .wzdoor:hover{ border-color:var(--amber-tx) }
-  .wzdoor.go{ border-color:var(--amber); background:var(--amber-wash) }
-  .wzdoor .dn{ font-weight:700; font-size:14.5px }
-  .wzdoor .dw{ color:var(--ink-3); font-size:12.5px }
   /* ── The consulting memory (spec 045) ────────────────────────────
      FOUR SHAPES, and each is an existing one put to a new use rather than a
      new look: the filter row is .ptitle's own flex row, an entry row is
@@ -762,6 +739,10 @@
      with a wrong answer available to it. scripts/build-shell.mjs puts it at
      this address and refuses the build if this tag ever goes. -->
 <script src="/memory-split.js"></script>
+<!-- The client set-up flow (§360, spec 057): one file for this page and the
+     client platform, generated to this address by scripts/build-shell.mjs,
+     which refuses the build if this tag ever goes. -->
+<script src="/client-setup.js"></script>
 <script>
 (function () {
   "use strict";
@@ -793,6 +774,11 @@
   var nav = document.getElementById("nav");
   var TAB = "clients";
   var ME = null;
+  /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
+     (§369). Declared here rather than left to hoist, because a second `var` of
+     one name in this scope is one binding and the later one wins in silence
+     (§56.7) — grepped, and this is the only pair. */
+  var BOOTCARDS = null;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -1634,6 +1620,56 @@
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */
+  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§371) ──────────────────────
+     §369 measured the silence and did not fill it: one round trip, about
+     740ms warm and seconds on a cold function, with the bar standing up
+     over a hidden body — a window that looks open, answers nothing, and
+     says nothing about either. Islam chose the grey skeleton over the
+     page's own words, from two shot out of the real page
+     (design-mockups/console-loading/).
+
+     IT IS DRAWN BEFORE THE ANSWER, which is the one thing the gate above
+     was stopping — and it is safe to draw for precisely the reason that
+     gate exists: it holds no name, no mark, no colour of anybody's and no
+     figure, so nothing here can turn out to have been somebody else's
+     screen (§94.10).
+
+     THE TITLE AND THE CARDS, AND NOT THE SEARCH BOX. That box filters the
+     grid it is drawn beside, so one drawn over placeholders would take a
+     word and hide three grey blocks (§61: a control with nothing to act on
+     is not a choice). It arrives with the cards, where `drawClients`
+     builds it — which is also why this draws the title WITHOUT a right-hand
+     group rather than an empty one.
+
+     THREE IS A GUESS, AND IT IS THE COST ISLAM TOOK WITH IT NAMED: a
+     console with seven clients shows three and then seven. It is not
+     remembered from the last visit, because a count kept per device is a
+     second thing that has to stay true and §94.10 refused that same trade
+     for the branding it was about.
+
+     `aria-hidden` BECAUSE IT SAYS NOTHING. Three empty boxes read out one
+     after another is noise, and what a screen reader gets here is what it
+     gets today: the page, and then the cards when they land. */
+  function drawWaiting() {
+    title("Clients");
+    var grid = el("div", "cards");
+    grid.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 3; i++) {
+      var c = el("div", "ccard skel");
+      var top = el("div", "ctop");
+      top.appendChild(el("div", "sk-mark"));
+      top.appendChild(el("div", "sk-line"));
+      top.appendChild(el("div", "sk-line thin"));
+      c.appendChild(top);
+      /* The hairline the real card draws above its module rows, so the two
+         shapes end the same way rather than the line appearing on arrival. */
+      c.appendChild(el("div", "mods"));
+      grid.appendChild(c);
+    }
+    page.appendChild(grid);
+    document.body.classList.add("ready");
+  }
+
   function drawClients() {
     /* ── WHY A CLIENT SENT THEM BACK HERE (§313.32) ──────────────────
        A client whose register cannot place this account refuses and lands
@@ -1680,7 +1716,18 @@
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
 
-    post({ action: "cards" }).then(function (j) {
+    /* THE BOOT'S OWN ANSWER, ONCE (§369). The boot asks `cards` to learn what
+       the navigation may offer, and this asked the identical question again a
+       round trip later — the heaviest question in the page, which opens a
+       connection per client to read its units, its plan and its cycle. Handed
+       over rather than asked twice.
+       IT IS ONE-SHOT AND MUST BE: `go("clients")` is pressed from six other
+       places — after adding a client, on the way back out of one, after
+       archiving — and every one of those has to read the list AGAIN, or the
+       grid draws a client that has just been archived (§48.2: a value is read
+       at press time, never trusted from the render that drew the button). */
+    var handed = BOOTCARDS; BOOTCARDS = null;
+    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
       grid.textContent = "";
       if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
       /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§313.18, §61) ──
@@ -1804,7 +1851,20 @@
         r.type = "button";
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
-        if (m.state) r.appendChild(el("i", null, m.state));
+        /* THE MARK (§368): what this module says is OUTSTANDING on this
+           client, in the fewest words, and NOTHING when nothing is — which
+           is where the compactness comes from. It replaces the pair that
+           was here, a full sentence (the client's chosen landing line) and
+           the card's own health word, which on a running cycle said the
+           same fact twice and could not fit on one line.
+           Both come from the server (lib/modules.ts), so the page decides
+           nothing: `alarm` is the module's own word for *broken rather than
+           busy* and `tip` is the whole sentence for the hover. */
+        if (m.mark) {
+          var mk = el("i", m.alarm ? "alarm" : "due", m.mark);
+          if (m.tip) mk.title = m.tip;
+          r.appendChild(mk);
+        }
         /* A LIBRARY'S ROW OPENS THE ROOM WE PUBLISH FROM, not the client's
            own page (spec 053; the flag is the server's, lib/modules.ts). The
            client's read-only library is one press further in, from there —
@@ -1823,9 +1883,11 @@
     if (c.canConfig) {
       var cog = el("span", "ccfg", "Settings");
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
-      /* THE SAME FLOW, WITH ITS ANSWERS IN IT (§322): there is no second
-         screen for a client, so Settings opens set-up rather than a card. */
-      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawSetup(c.key); };
+      /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
+         client at /<client>/setup, in its own chrome — Getting started at the
+         top of that rail until it is done, the register and the organisation
+         under it. Nothing between the card and the client. */
+      var open = function (e) { e.stopPropagation(); e.preventDefault(); location.assign("/" + c.key + "/setup"); };
       cog.addEventListener("click", open);
       cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
       b.appendChild(cog);
@@ -1901,7 +1963,10 @@
 
       var cog = el("span", "ccfg", "Settings");
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
-      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawSetup(c.key); };
+      /* ON THIS PAGE, not the client's (§360): an archived client's address
+         is closed, so its two acts — bringing it back and deleting it — are
+         the one screen the console still draws for a client. */
+      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawArchived(c.key); };
       cog.addEventListener("click", open);
       cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
       acts.appendChild(cog);
@@ -1942,134 +2007,33 @@
     return b;
   }
 
-  /* ── SETTING A CLIENT UP, OUT HERE (§322, spec 044) ──────────────────
-     Islam: "the setup should happen on the external creatoin not inside ..
-     the default create it's own units and functions that's wrong there is
-     not default. it should open blank if they want bu the wizard should
-     start on the outside window so the people after the setup can get intop
-     the platform ready." And, of the card that used to sit beside it: "the
-     wizard should go like the setting one up I don't know what is the
-     chaning it later?"
+  /* ── SETTING A CLIENT UP IS INSIDE THE CLIENT NOW (§360, spec 057) ───
+     Islam: *"the client either we open a module or we go to the client
+     settings page where we find a rail with the client settings"* — and, of
+     which chrome draws that rail, "A": the client platform's own Setup.
+     So Settings on a card OPENS /<client>/setup, and the flow that lived
+     here for §322–§352 is client-setup.js, served at /client-setup.js and
+     mounted by the platform on its Getting started page. §322's reason for
+     the outside flow is kept whole — Settings is still pressed from here
+     before anybody at the client has signed in — only the chrome changed.
 
-     So there is ONE screen for a client, and it is this flow. Adding a
-     client opens it at step 1; the Settings mark on a card opens the same
-     flow with the client's own answers already in it, and the rail is how
-     you reach the one thing you came to change. The card that asked for
-     name, industry and notes a second time is gone.
-
-     NOTHING IS DRAFTED. Every step commits when you leave it, and what the
-     flow shows is read back from the server — the data IS the progress
-     (§129), so there is no second copy of the answers to fall out of step
-     and walking away costs nothing.
-
-     EVERY STEP IS ADDRESSED BY ITS KEY, NEVER ITS NUMBER: the mockup's first
-     build read the index in four places and every one was off by one the
-     moment a step moved. */
-  var STEPS = [
-    { k:"client", key:"The client",       label:"The client",     q:"Which client are you setting up?" },
-    { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
-    { k:"cos",    key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
-    { k:"fns",    key:"Strategy",         label:"Functions",      q:"What supporting functions are there?" },
-    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?" },
-    { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
-    { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" },
-    { k:"done",   key:"Done",             label:"Summary",        q:"" }
-  ];
-  /* The steps the shape guard speaks for, named once rather than tested as
-     four keys at the two places that ask (§104.7). */
-  var SHAPE_STEPS = ["units", "cos", "fns", "caps", "words"];
-  function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
-
-  /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own
-     lib/constants/industries.ts, 45 entries on GICS in its eleven groupings
-     (they are section comments there). Islam: "the industry should be a
-     serachable drop down check the strategy formulation repo we build that
-     list there so you can have a standard list." Carried here as the one
-     list this page offers, so a client reads the same in both products. */
-  var INDUSTRIES = [
-    ["Technology & Communications", ["Technology & Software", "Telecommunications", "Media & Entertainment"]],
-    ["Financial", ["Banking & Finance", "Insurance", "Investment & Asset Management"]],
-    ["Healthcare & Life Sciences", ["Healthcare & Hospitals", "Pharmaceuticals & Biotech", "Medical Devices & Equipment"]],
-    ["Consumer", ["Retail & E-commerce", "Consumer Goods & FMCG", "Food & Beverage", "Hospitality & Tourism", "Restaurants & Food Service"]],
-    ["Industrial", ["Manufacturing", "Automotive", "Aerospace & Defense", "Chemicals", "Industrial Equipment & Machinery"]],
-    ["Energy & Utilities", ["Oil & Gas", "Renewable Energy", "Utilities (Electric, Water, Gas)"]],
-    ["Real Estate & Construction", ["Real Estate & Property", "Construction & Engineering", "Architecture & Design"]],
-    ["Services", ["Professional Services & Consulting", "Legal Services", "Accounting & Audit", "Marketing & Advertising", "HR & Recruitment"]],
-    ["Transportation & Logistics", ["Transportation & Logistics", "Shipping & Maritime", "Aviation & Airlines"]],
-    ["Other Sectors", ["Education & Training", "Agriculture & Farming", "Mining & Metals", "Government & Public Sector", "Non-Profit & NGO", "Sports & Recreation", "Fashion & Apparel", "Printing & Publishing"]],
-    ["", ["Other"]]
-  ];
-  /* A BAND, NEVER A HEADCOUNT, and the same five that product asks for: a
-     number typed once is stale within the year and nobody comes back to
-     correct it, while a band still reads true. */
-  var SIZES = [["startup","Startup","1–10"], ["small","Small","11–50"],
-               ["medium","Medium","51–200"], ["large","Large","201–1000"],
-               ["enterprise","Enterprise","1000+"]];
-  function sizeWord(v){
-    for (var i = 0; i < SIZES.length; i++) if (SIZES[i][0] === v) return SIZES[i][1] + " · " + SIZES[i][2] + " people";
-    return "Not set";
+     TWO PIECES STAY ON THIS PAGE, from that same module, because a client's
+     own address cannot draw them: creating a client, which has no address
+     until it exists (the first step, then straight into the client's own
+     Getting started), and ending an archived one, whose address is closed
+     (§323: bring back and delete, from the archived band's Settings). */
+  function drawNewClient(){
+    clear();
+    var right = el("div");
+    var leave = el("button", "btn", "Cancel");
+    leave.type = "button";
+    leave.addEventListener("click", function () { go("clients"); });
+    right.appendChild(leave);
+    title("Add a client", right);
+    var host = el("div", "csetup");
+    page.appendChild(host);
+    CLIENTSETUP.mountCreate(host, { door: "/" });
   }
-  /* THE THREE PLAN TYPES THE PLATFORM HAS (§342). Two of them were live and
-     the third was drawn and DULLED at Islam's own instruction — *"keep the
-     mockup as is but kepe the non existing parts dull for now"* — so the
-     intended shape stayed visible and nothing offered a choice that would
-     open an empty page (§61). *For now* has run out: objectives and actions
-     is built, so the dull flag goes and the sentence that explained it goes
-     with it rather than being left to mislead (§104.8). */
-  /* §347: THE MIDDLE OPTION IS "Projects", WHICH IS WHAT IT NOW MEANS. A
-     supporting function needed a capability to hold any project until §334;
-     since then it holds its own directly, so "Capabilities & projects" named
-     the old arrangement — and it was a THIRD spelling of a word planFormatCell
-     and capFormatCell both already write as Projects (§53.5). Only the word
-     changes: a function set either way draws exactly the pages it did. */
-  var FORMATS = [["pillars","Pillars",1], ["projects","Projects",1],
-                 ["objectives","Objectives & actions",1]];
-  /* A CAPABILITY HAS TWO FORMS, NOT THREE — objectives and actions is a
-     FUNCTION's way of planning (§342), and capFormat() reads a capability as
-     pillars or projects and nothing else. Offering the third here would be a
-     control whose answer the graph turns into something else (§61). */
-  var CAP_FORMATS = [["pillars","Pillars"], ["projects","Projects"]];
-  function fmtWord(f){ return f === "objectives" ? "obj" : f === "projects" ? "proj" : "pillars"; }
-
-  /* THE NAMES MOST CLIENTS HAVE, one click into the list beside them (§351).
-     What is offered for a UNIT is the usual way a business is CUT — Retail,
-     Online, Wholesale — rather than an industry's own vocabulary, because a
-     unit is the client's own business and a list of industry names would be
-     wrong more often than right; it works at all only because a clicked name
-     lands in an ordinary editable box, so Retail becomes Retail Shops by
-     typing. Islam, asked whether the lists should narrow by the industry the
-     client step already collects: "not yet by industry" — one list we can
-     defend beats nine we cannot, and the answer is easy to revisit once real
-     clients have shown what recurs.
-     The office's own function is last: every client has one by construction,
-     and it is the platform's rather than the business's. */
-  var COMMON_UNITS = ["Retail", "Online", "Wholesale", "Distribution",
-                      "Corporate Sales", "Export", "Services"];
-  var COMMON_FNS   = ["Finance", "HR", "IT", "Marketing", "Legal", "Procurement",
-                      "Operations", "Supply Chain", "Customer Service", "Audit",
-                      "Strategy Management Office"];
-
-  /* A CHIP IS HELD BY THE ROW IT MADE, NEVER BY THE SPELLING: renaming the row
-     to "Retail Shops" keeps its chip off the list, and removing the row with
-     the × puts the chip back — which is what a person means by "I have used
-     that one". The mark is NON-ENUMERABLE on purpose: `S.shape` is posted as
-     JSON and the endpoint slices the row objects through verbatim, so an
-     ordinary key would travel and be stored on the client for ever. */
-  function markFromChip(row, name){
-    Object.defineProperty(row, "_chip", { value:name, enumerable:false });
-    return row;
-  }
-  function chipUsed(list, name){
-    for (var i = 0; i < list.length; i++) if (list[i]._chip === name) return true;
-    return false;
-  }
-
-  /* The flow's own state: which client, which step, what has been answered,
-     and what is not yet posted. `S.shape` is the server's answer, edited in
-     place and posted back whole — the answers ARE the list (§322). */
-  var S = null;
-
-  function drawNewClient(){ drawSetup(null); }
 
   /* ════ THE DOCUMENT ROOM (spec 053) ══════════════════════════════════
      Where a client's library is published from. Forefront's side of Insights
@@ -2840,1358 +2804,35 @@
     row.appendChild(q);
   }
 
-  function drawSetup(key){
-    if (!key) {
-      S = { key:null, at:0, seen:[], canEdit:true, canShape:true, dirty:false, shapeDirty:false,
-            client:{ name:"", industry:"", size:"", notes:"", mark:null },
-            shape:{ companies:[], units:[], functions:[], capabilities:[], words:{} },
-            team:[], office:[], register:[], seats:null, holds:null,
-            archived:false, archivedAt:null, archivedBy:null,
-            canArchive:false, canDelete:false, goes:null,
-            modules:null, offer:null };
-      paintSetup();
-      return Promise.resolve();
-    }
+  function drawArchived(key){
     lead(false, "Reading…");
     return post({ action:"client", key:key }).then(function (j) {
       if (!j.ok) { clear(); say(j.error || "Could not open that client.", true); return; }
-      /* AN ARCHIVED CLIENT IS READ, NOT EDITED (§323). `canEdit` is the
-         grant AND the standing: their door is closed, so a form that took
-         changes would be collecting them for a client nobody can open. The
-         SERVER refuses the same two saves, or this is a rule the screen
-         keeps and the save does not (§42). */
-      var arch = j.client.status === "retired";
-      S = { key:key, at:0, seen:[], canEdit:!!j.canEdit && !arch, dirty:false, shapeDirty:false,
-            client:{ name:j.client.name, industry:j.client.industry || "",
-                     size:j.client.size || "", notes:j.client.notes || "", mark:j.client.mark || null },
-            shape:j.shape || { companies:[], units:[], functions:[], words:{} },
-            team:j.team || [], office:j.office || [], register:j.register || [],
-            seats:j.seats, holds:j.holds, made_here:j.client.made_here,
-            archived:arch, archivedAt:j.client.archived_at || null,
-            archivedBy:j.client.archived_by || null,
-            canArchive:!!j.canArchive, canDelete:!!j.canDelete, goes:j.goes || null,
-            modules:j.modules || [], offer:j.offer || [] };
-      S.shape.companies = S.shape.companies || [];
-      S.shape.units = S.shape.units || [];
-      S.shape.functions = S.shape.functions || [];
-      S.shape.capabilities = S.shape.capabilities || [];
-      S.shape.words = S.shape.words || {};
-      /* ── AND THE SHAPE STOPS BEING EDITABLE ONCE THERE IS A PLAN (§346) ──
-         shapeClient has refused a re-shape since §322 — rightly, because the
-         answers ARE the list and replacing them on a client with authored
-         work is how real work is lost — and the flow was TOLD so, storing
-         `holds` from the server and reading it nowhere. So the units, the
-         companies, the functions and the words stayed fully editable and the
-         refusal arrived on Next, which is §42's drift with the screen saying
-         yes and the save saying no.
-
-         Its own flag, never `canEdit`: what is frozen is the SHAPE, and the
-         client's name, its mark, its modules and its team are all still the
-         consultant's to change on a client that is running. */
-      S.canShape = S.canEdit && !((j.holds && j.holds.plans) || (j.holds && j.holds.capabilities));
-      paintSetup();
+      clear();
+      var right = el("div");
+      var leave = el("button", "btn", "Back to clients");
+      leave.type = "button";
+      leave.addEventListener("click", function () { go("clients"); });
+      right.appendChild(leave);
+      title(j.client.name, right);
+      /* AN ARCHIVED CLIENT SAYS SO FIRST (§323): whichever block somebody
+         came for, the state has to explain itself before the controls. */
+      var ab = el("div", "wzarched");
+      ab.appendChild(document.createTextNode("This client is "));
+      ab.appendChild(el("b", null, "archived"));
+      var when = archDate(j.client.archived_at);
+      ab.appendChild(document.createTextNode(
+        ". " + (when ? "Archived " + when : "Archived") +
+        (j.client.archived_by ? " by " + j.client.archived_by : "") +
+        ". Their link is closed, and nothing inside can be changed until they are brought back."));
+      page.appendChild(ab);
+      var host = el("div", "csetup");
+      page.appendChild(host);
+      CLIENTSETUP.mountArchived(host, key, { read: j, door: "/", go: function () { go("clients"); } });
     }).catch(function (e) {
       if (String(e.message) === "sign in") return;
       clear(); say("Could not reach the server.", true);
     });
-  }
-
-  /* ── Committing ──────────────────────────────────────────────────────
-     Two posts, because they are two things: the client's own record, and
-     the shape of what it holds. Each goes only when it has changed, and a
-     refusal is SAID rather than swallowed — the shape's refusal is the one
-     that matters (a client with a plan in it is not re-shaped, §322). */
-  function commitSetup(){
-    /* The doors — Save and close, and the summary's two — do not go through
-       goStep, so the guard is asked here too rather than at three call sites
-       (§53.5). It refuses BEFORE posting: a blank row is not a server error. */
-    if (!S) return Promise.resolve(true);
-    var blank = unnamed();
-    if (blank) { setupSay(blank, true); return Promise.resolve(false); }
-    if (!S.key || !S.canEdit) return Promise.resolve(true);
-    var chain = Promise.resolve(true);
-    if (S.dirty) {
-      var b = { action:"saveClient", key:S.key, name:S.client.name,
-                industry:S.client.industry, size:S.client.size, notes:S.client.notes };
-      if (S.markState !== undefined) b.mark = S.markState;
-      chain = chain.then(function (okSoFar) {
-        return post(b).then(function (r) {
-          if (r.ok) { S.dirty = false; if (S.markState !== undefined) { S.client.mark = S.markState || null; S.markState = undefined; } }
-          else setupSay(r.error || "Not saved.", true);
-          return okSoFar && !!r.ok;
-        });
-      });
-    }
-    if (S.shapeDirty) {
-      chain = chain.then(function (okSoFar) {
-        return post({ action:"shapeClient", key:S.key, shape:S.shape }).then(function (r) {
-          if (r.ok) S.shapeDirty = false;
-          else setupSay(r.error || "The set-up was not saved.", true);
-          return okSoFar && !!r.ok;
-        });
-      });
-    }
-    return chain.catch(function () { setupSay("Could not reach the server.", true); return false; });
-  }
-
-  /* ONE NOTICE, REPLACED — never a pile of them. `say()` appends, which is
-     right for a page that is drawn once and wrong for a screen you press
-     Save on repeatedly: that is how two "Saved." lines ended up stacked. */
-  function setupSay(msg, bad){
-    var n = document.getElementById("setupsaid");
-    if (!n) return;
-    n.textContent = msg || "";
-    n.className = msg ? (bad ? "err" : "said") : "";
-    n.hidden = !msg;
-  }
-
-  /* ONE ANSWER TO WHICH STEP IS NEXT, IN EITHER DIRECTION (§346, §53.5).
-     Next stepped over the dulled Capabilities step and Back did not, so Back
-     from Functions called goStep on a step goStep refuses to open and simply
-     returned — an enabled, pressable button that did nothing (§96). The rail
-     still reached Companies, so nothing was unreachable and nothing said so.
-     It walks past a RUN of dulled steps rather than exactly one, because
-     "+1 if the next one is later" is the same fault waiting for a second. */
-  function stepFrom(i, dir){
-    var n = i + dir;
-    while (n >= 0 && n < STEPS.length && STEPS[n].later) n += dir;
-    return (n < 0 || n > STEPS.length - 1) ? -1 : n;
-  }
-
-  /* AND A ROW LEFT UNNAMED IS REFUSED RATHER THAN DROPPED (§346). The minter
-     skips a blank name, so the row was posted, silently thrown away, and left
-     drawn on screen until the client was reopened — §96 with the sign
-     reversed. Islam: "refuse to move on without naming or remove." Asked of
-     the SHAPE and not of the boxes, so it answers the same however the step
-     was left; the × beside each row is the other half of the sentence. */
-  function unnamed(){
-    var bad = [];
-    if (S.shape.units.some(function (u) { return !String(u.name || "").trim(); })) bad.push("a business unit");
-    if (S.shape.companies.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a company");
-    if (S.shape.functions.some(function (f) { return !String(f.name || "").trim(); })) bad.push("a supporting function");
-    if (S.shape.capabilities.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a capability");
-    if (!bad.length) return null;
-    return "Name " + bad.join(" and ") + ", or remove the empty row with the × beside it. " +
-           "A row with no name is not saved.";
-  }
-
-  function goStep(i){
-    if (i < 0 || i > STEPS.length - 1 || STEPS[i].later) return;
-    var why = unnamed();
-    if (why) { setupSay(why, true); return; }
-    if (S.seen.indexOf(S.at) < 0) S.seen.push(S.at);
-    commitSetup().then(function () { S.at = i; paintSetup(); window.scrollTo({ top:0 }); });
-  }
-
-  /* ── The flow ────────────────────────────────────────────────────── */
-  function paintSetup(){
-    clear();
-    var s = STEPS[S.at];
-    var right = el("div");
-    if (S.key) {
-      var closeb = el("button", "btn solid", "Save and close");
-      closeb.type = "button";
-      closeb.addEventListener("click", function () {
-        commitSetup().then(function (good) { if (good) go("clients"); });
-      });
-      right.appendChild(closeb);
-    }
-    var leave = el("button", "btn", S.key ? "Back to clients" : "Cancel");
-    leave.type = "button";
-    leave.addEventListener("click", function () { go("clients"); });
-    right.appendChild(leave);
-    title(S.key ? "Set up " + S.client.name : "Add a client", right);
-
-    /* the rail */
-    var rail = el("nav", "wzrail");
-    rail.setAttribute("aria-label", "Set-up steps");
-    STEPS.forEach(function (st, i) {
-      var done = S.seen.indexOf(i) >= 0 && i !== S.at;
-      var b = el("button", "wzstep" + (done ? " done" : "") + (st.later ? " later" : ""));
-      b.type = "button";
-      if (i === S.at) b.setAttribute("aria-current", "step");
-      if (st.later) b.disabled = true;
-      var n = el("span", "n", done ? "✓" : String(i + 1));
-      b.appendChild(n);
-      b.appendChild(document.createTextNode(st.label));
-      if (!st.later) b.addEventListener("click", function () { goStep(i); });
-      rail.appendChild(b);
-    });
-    page.appendChild(rail);
-
-    /* ── AN ARCHIVED CLIENT SAYS SO FIRST (§323) ────────────────────
-       Before the fields, because they are read-only from here down and a
-       form that refuses every keystroke with nothing saying why reads as
-       broken (§45.2). Drawn on every step, not only the first: whichever
-       step somebody lands on has to explain itself. */
-    if (S.archived) {
-      var ab = el("div", "wzarched");
-      ab.appendChild(document.createTextNode("This client is "));
-      ab.appendChild(el("b", null, "archived"));
-      var when = archDate(S.archivedAt);
-      ab.appendChild(document.createTextNode(
-        ". " + (when ? "Archived " + when : "Archived") +
-        (S.archivedBy ? " by " + S.archivedBy : "") +
-        ". Their link is closed, and nothing here can be changed until they are brought back."));
-      page.appendChild(ab);
-    }
-
-    /* ── AND A CLIENT WITH A PLAN IN IT SAYS SO, ON THE STEPS IT AFFECTS
-       (§346). The same shape as the archived band above and the same reason
-       (§45.2, §53.5) — the fields below are read-only and a form refusing
-       every keystroke with nothing saying why reads as broken. Drawn on the
-       four SHAPE steps alone, because the client's name, its mark, its
-       modules and its team are all still editable on the others, and a band
-       claiming otherwise would be a second thing that is not true (§124).
-       Never beside the archived band: that one already says nothing here can
-       be changed, and saying it twice in two voices is §87's twins. */
-    if (!S.archived && S.key && !S.canShape && SHAPE_STEPS.indexOf(s.k) > -1) {
-      var hb = el("div", "wzarched");
-      hb.appendChild(document.createTextNode("This client has a plan in it, so its "));
-      hb.appendChild(el("b", null, "shape is set from here on"));
-      hb.appendChild(document.createTextNode(
-        ". Set-up rewrites these lists, which would lose that work, so they are " +
-        "read-only out here — change them on the client's own Setup pages. " +
-        "Everything else on this flow is still yours to change."));
-      page.appendChild(hb);
-    }
-
-    var grid = el("div", "wzgrid");
-    var col = el("div");
-    col.appendChild(el("span", "lab", s.key));
-    col.appendChild(el("h2", "wzq", s.q || (S.client.name + " is set up.")));
-    var why = s.k === "units"
-        ? "Add as many as this client has. Leave it empty and it opens blank — nothing is put here that nobody asked for."
-      : s.k === "fns"
-        ? "Each function can plan its own way, and that decides what its pages hold. It stays changeable until the function has a plan in it."
-      : s.k === "done"
-        ? "Everything here stays editable afterwards. Nothing is locked."
-      : "";
-    if (why) col.appendChild(el("p", "wzwhy", why));
-    var bodyBox = el("div");
-    bodyBox.appendChild(setupBody(s.k));
-    col.appendChild(bodyBox);
-
-    var foot = el("div", "wzfoot");
-    var back = el("button", "btn", "Back");
-    back.type = "button"; back.disabled = stepFrom(S.at, -1) < 0;
-    back.addEventListener("click", function () { goStep(stepFrom(S.at, -1)); });
-    foot.appendChild(back);
-    if (S.at < STEPS.length - 1) {
-      var next = el("button", "btn amber", "Next");
-      next.type = "button";
-      next.addEventListener("click", function () {
-        if (!S.key) { createThenGo(); return; }
-        goStep(stepFrom(S.at, 1));
-      });
-      foot.appendChild(next);
-    }
-    var fn = el("span", "wzfnote", "Nothing is final — every answer stays editable afterwards.");
-    foot.appendChild(fn);
-    col.appendChild(foot);
-    var said = el("p"); said.id = "setupsaid"; said.hidden = true;
-    col.appendChild(said);
-    grid.appendChild(col);
-
-    grid.appendChild(setupShapePanel());
-    page.appendChild(grid);
-  }
-
-  /* THE FIRST STEP IS WHAT CREATES THE CLIENT: the address is minted from
-     the name and set once, so it has to exist before anything else can be
-     written against it — and that is also what lets somebody walk away
-     half-way and come back. */
-  function createThenGo(){
-    var nm = String(S.client.name || "").trim();
-    if (!nm) { setupSay("A client needs a name before anything else can be set up.", true); return; }
-    setupSay("Creating…");
-    post({ action:"createClient", name:nm, industry:S.client.industry, size:S.client.size, notes:S.client.notes })
-      .then(function (r) {
-        if (!r.ok) { setupSay(r.error || "Not created.", true); return; }
-        var mark = S.markState, at = S.at;
-        drawSetup(r.key).then(function () {
-          if (!S) return;
-          if (mark !== undefined) { S.markState = mark; S.dirty = true; }
-          S.seen = [at];
-          S.at = at + 1;
-          commitSetup().then(function () { paintSetup(); });
-        });
-      }).catch(function () { setupSay("Could not reach the server.", true); });
-  }
-
-  /* ── What you are building ───────────────────────────────────────── */
-  function setupShapePanel(){
-    var a = el("aside", "wzshape");
-    a.setAttribute("aria-label", "What you are building");
-    a.appendChild(el("h2", null, "What you are building"));
-    a.appendChild(el("p", "cap", S.at >= stepIdx("fns")
-      ? (S.client.name || "This client") + ", as answered so far."
-      : "It fills in as you answer."));
-    var org = el("div", "wzorg");
-    org.appendChild(el("span", "nm", S.client.name || "The client"));
-    a.appendChild(org);
-    if (S.client.industry || S.client.size) {
-      a.appendChild(el("p", "wzwho",
-        [S.client.industry, S.client.size ? sizeWord(S.client.size) : ""].filter(Boolean).join(" · ")));
-    }
-    if (S.at < stepIdx("units")) {
-      a.appendChild(el("p", "wznone", "Its business units come next."));
-      return a;
-    }
-    var sw = el("div", "wzswitch");
-    var s1 = el("span", "on", "Strategic"), s2 = el("span", null, "Functions");
-    sw.appendChild(s1); sw.appendChild(s2);
-    a.appendChild(sw);
-    a.appendChild(chipBlock("Business units", S.shape.units, "unit", "None — this client can open blank."));
-    /* §347: beside the units on the strategic side, which is where they sit in
-       the navigation — so the panel reads as the thing being built rather than
-       as a list of answers (§322's own argument for the switch above it). */
-    if (S.at >= stepIdx("caps") && S.shape.capabilities.length) {
-      a.appendChild(chipBlock("Capabilities", S.shape.capabilities, "unit", "None."));
-    }
-    if (S.at >= stepIdx("fns")) a.appendChild(chipBlock("Supporting functions", S.shape.functions, "fn", "None."));
-    return a;
-  }
-  function chipBlock(label, list, cls, empty){
-    var d = el("div", "wzside");
-    var k = el("div", "wzsidekey", label);
-    var ct = el("span", "ct", String(list.length));
-    k.appendChild(ct);
-    d.appendChild(k);
-    if (!list.length) { d.appendChild(el("div", "wznone", empty)); return d; }
-    var chips = el("div", "wzchips");
-    list.forEach(function (x) {
-      var c = el("span", "wzchip " + cls, x.name);
-      if (x.format) c.appendChild(el("span", "fmt", fmtWord(x.format)));
-      chips.appendChild(c);
-    });
-    d.appendChild(chips);
-    return d;
-  }
-
-  /* ── Each step ───────────────────────────────────────────────────── */
-  function setupBody(k){
-    var box = el("div");
-    if (k === "client") return clientStep(box);
-    if (k === "units") return listStep(box, S.shape.units, "unit");
-    if (k === "cos") return companiesStep(box);
-    if (k === "caps") return capsStep(box);
-    if (k === "fns") return listStep(box, S.shape.functions, "fn");
-    if (k === "words") return wordsStep(box);
-    if (k === "office") return officeStep(box);
-    return summaryStep(box);
-  }
-
-  function field(box, label, value, set, note){
-    var w = el("div");
-    w.appendChild(el("span", "lab", label));
-    var i = el("input", "fld");
-    i.type = "text"; i.value = value || "";
-    if (!S.canEdit) i.readOnly = true;
-    i.addEventListener("input", function () { set(i.value); S.dirty = true; });
-    w.appendChild(i);
-    if (note) w.appendChild(el("p", "note", note));
-    box.appendChild(w);
-    return i;
-  }
-
-  function clientStep(box){
-    var rs = el("div", "rowset");
-    field(rs, "The client's name", S.client.name, function (v) {
-      S.client.name = v;
-      var o = document.querySelector(".wzorg .nm");
-      if (o) o.textContent = v || "The client";
-    }, "What the platform is named after, everywhere — the chrome, the review deck and every email that leaves.");
-
-    /* the searchable standard list */
-    var iw = el("div");
-    iw.appendChild(el("span", "lab", "Industry"));
-    var pick = el("div", "wzpick");
-    var inp = el("input", "fld");
-    inp.type = "text"; inp.value = S.client.industry || "";
-    inp.setAttribute("placeholder", "Type to search the list…");
-    inp.setAttribute("autocomplete", "off");
-    if (!S.canEdit) inp.readOnly = true;
-    var panel = el("div", "wzpanel");
-    panel.setAttribute("role", "listbox");
-    panel.hidden = true;
-    function fill(q){
-      panel.textContent = "";
-      var needle = String(q || "").trim().toLowerCase(), hits = 0;
-      INDUSTRIES.forEach(function (g) {
-        var keep = g[1].filter(function (n) { return !needle || n.toLowerCase().indexOf(needle) > -1; });
-        if (!keep.length) return;
-        hits += keep.length;
-        if (g[0]) panel.appendChild(el("div", "gp", g[0]));
-        keep.forEach(function (n) {
-          var b = el("button", "opt", n);
-          b.type = "button";
-          if (n === S.client.industry) b.setAttribute("aria-selected", "true");
-          b.addEventListener("click", function () {
-            S.client.industry = n; S.dirty = true; inp.value = n; panel.hidden = true;
-            var w = document.querySelector(".wzshape .wzwho");
-            if (w) w.textContent = [n, S.client.size ? sizeWord(S.client.size) : ""].filter(Boolean).join(" · ");
-          });
-          panel.appendChild(b);
-        });
-      });
-      if (!hits) panel.appendChild(el("div", "nohit", "Nothing matches that — pick Other if none of it fits."));
-    }
-    inp.addEventListener("focus", function () { fill(""); panel.hidden = false; });
-    inp.addEventListener("input", function () { fill(inp.value); panel.hidden = false; });
-    pick.appendChild(inp); pick.appendChild(panel);
-    iw.appendChild(pick);
-    iw.appendChild(el("p", "note", "The standard list — the same one Strategy Formulation uses, so a client reads the same in both."));
-    rs.appendChild(iw);
-
-    /* the size band */
-    var zw = el("div");
-    zw.appendChild(el("span", "lab", "Size"));
-    var band = el("div", "wzband");
-    band.setAttribute("role", "group");
-    SIZES.forEach(function (z) {
-      var b = el("button", null, z[1]);
-      b.type = "button";
-      /* DISABLED, NOT MERELY INERT (§220, §61). The handler has always opened
-         `if (!S.canEdit) return;` and nothing had ever made `canEdit` false —
-         `mayConfigureClient` is `mayReadConfig`, so anybody who could open
-         this flow could write in it — so the read-only path had never once
-         been drawn. §323 makes it real for an archived client, and a band
-         that lights under the pointer and stores nothing is §96 with a
-         cursor on it. */
-      b.disabled = !S.canEdit;
-      b.setAttribute("aria-pressed", S.client.size === z[0] ? "true" : "false");
-      b.appendChild(el("span", "ppl", z[2] + " people"));
-      b.addEventListener("click", function () {
-        if (!S.canEdit) return;
-        S.client.size = z[0]; S.dirty = true;
-        Array.prototype.forEach.call(band.children, function (o) {
-          o.setAttribute("aria-pressed", o === b ? "true" : "false");
-        });
-      });
-      band.appendChild(b);
-    });
-    zw.appendChild(band);
-    rs.appendChild(zw);
-
-    var nw = el("div");
-    nw.appendChild(el("span", "lab", "Notes"));
-    var ta = el("textarea", "fld");
-    ta.rows = 2; ta.value = S.client.notes || "";
-    if (!S.canEdit) ta.readOnly = true;
-    ta.addEventListener("input", function () { S.client.notes = ta.value; S.dirty = true; });
-    nw.appendChild(ta);
-    rs.appendChild(nw);
-
-    var aw = el("div");
-    aw.appendChild(el("span", "lab", "Its address here"));
-    var a = el("input", "fld");
-    a.value = S.key ? location.origin + "/" + S.key : location.origin + "/…";
-    a.readOnly = true;
-    aw.appendChild(a);
-    aw.appendChild(el("p", "note", S.key
-      ? "Made from the name and set once, so a link that has been sent keeps working."
-      : "Made from the name when the client is created, and never changed after that."));
-    rs.appendChild(aw);
-
-    rs.appendChild(markBlock());
-    box.appendChild(rs);
-    box.appendChild(modulesBlock());
-    box.appendChild(endBlocks());
-    return box;
-  }
-
-  /* ── WHICH MODULES THIS CLIENT HAS (§322.1, carrying §320.4) ──────
-     CARRIED ACROSS A REWRITE, NOT REBUILT. §320.4 put this band under the
-     client's name on the settings page, and §322 replaced that whole page
-     with this flow — two sessions rewriting one screen, which is the shape
-     §318.7 records: taking either side whole drops a feature with no
-     conflict left to show for it. Every rule, every word and every refusal
-     below is that section's, unchanged; what moved is where it is drawn.
-
-     AND ITS OWN ARGUMENT DECIDED WHERE. §320.4 refused the left column
-     because there the band landed sixth and below the fold. Here step one IS
-     the client's own details and holds five fields, so the band is on screen
-     in one press from the card — and it is on the step that is about the
-     client rather than about its organisation, which is what it is a fact
-     about. Islam has not seen it in this place; it is on the merge's
-     what-to-check list rather than assumed.
-
-     THE LIST COMES FROM THE SERVER (lib/modules.ts offerable/modulesFor),
-     never from a copy here, so the console cannot offer a door the address
-     refuses (§53.5) — and a module that is not BUILT is not drawn at all,
-     because a switch with nothing behind it opens the Strategy platform
-     wearing another name (§61).
-
-     THE DEFAULT GETS WORDS AND NOT A DEAD CONTROL (§94.15): it is where a
-     client lands when the address names no module, so it says "Always on" —
-     and the server refuses to switch it off however the request is spelt,
-     because a guard that only hides a control is decoration (§42).
-
-     SEEING A STATE IS NOT SETTING IT (§256): somebody who may read this
-     client's configuration and not change it gets the words and no button,
-     never a blank right-hand side — which since §323 includes an ARCHIVED
-     client, whose whole flow is read-only and whose modules the server
-     refuses to move.
-
-     IT REWRITES ITSELF AND NEVER `paintSetup()` (§71.2), the rule the ending
-     block below it already follows: a repaint would throw away whatever is
-     half typed on this step. */
-  function modulesBlock(){
-    var box = el("div");
-    if (!S.key || !S.offer || !S.offer.length) return box;
-    var mods = el("div", "band");
-    mods.appendChild(el("span", "lab", "Modules this client has"));
-    var rows = el("div");
-    mods.appendChild(rows);
-    function paintRows(){
-      rows.textContent = "";
-      var have = S.modules || [];
-      S.offer.forEach(function (m) {
-        var mr = el("div", "teamrow");
-        var mwho = el("div", "who");
-        mwho.appendChild(el("div", "nm", m.label));
-        mwho.appendChild(el("div", "em", m.note));
-        mr.appendChild(mwho);
-        var msp = el("div", "sp");
-        var on = have.indexOf(m.key) >= 0;
-        if (m.always) msp.appendChild(el("span", "none", "Always on"));
-        else {
-          if (on) msp.appendChild(el("span", "tag open", "On"));
-          else if (!S.canEdit) msp.appendChild(el("span", "none", "Off"));
-          if (S.canEdit) {
-            var mb = el("button", "btn", on ? "Turn off" : "Turn on");
-            mb.type = "button";
-            mb.addEventListener("click", function () {
-              mb.disabled = true;
-              post({ action:"setModules", key:S.key, module:m.key, on:!on }).then(function (r) {
-                if (!r.ok) { mb.disabled = false; setupSay(r.error || "Not changed.", true); return; }
-                S.modules = r.modules || [];
-                paintRows();
-              });
-            });
-            msp.appendChild(mb);
-          }
-        }
-        mr.appendChild(msp);
-        rows.appendChild(mr);
-      });
-    }
-    paintRows();
-    /* WHAT IT SAYS IS WHAT IT DOES (§320.4's own correction, kept): the
-       Setup group a module brings with it is deferred, so the words say
-       today's truth and the promise stays in the spec. */
-    mods.appendChild(el("p", "note",
-      "Turning one on gives this client the module: it appears on their card, in the " +
-      "switcher inside the platform, and at its own address. Turning it off takes it away " +
-      "and deletes nothing."));
-    box.appendChild(mods);
-    return box;
-  }
-
-  /* ── ENDING A CLIENT (§323, spec 047) ───────────────────────────────
-     Islam: "we need an option to remove the client" — "both, demo client is
-     not removable, and the name is Archive not put aside".
-
-     WHY IT LIVES HERE. Settings is already the door onto everything about a
-     client, and §273.4 settled this shape for the reporting cycle at Islam's
-     own direction: the destructive act in its own block, behind a rule, under
-     a heading, at the foot of the form. A door is only a guard if the
-     dangerous thing is behind it — and a control that sat on the card would
-     be one press from the grid.
-
-     NOT DRAWN RATHER THAN DISABLED. The worked example can be neither
-     archived nor deleted and neither can anybody but the platform's admin, so
-     for them there is no block at all (§61): a greyed control invites a press
-     and then explains itself, where an absent one asks nothing.
-
-     THE ASK IS IN THE BLOCK. There is no dialog anywhere on this page, and
-     one act does not earn the first (§2b) — and a question asked where the
-     button was is a question about that button.
-
-     AND THE BLOCK REWRITES ITSELF, NEVER `paintSetup()` (§71.2): a repaint
-     under a typing hand would throw away the name half typed into the
-     confirmation, which is the one field on this page somebody is asked to
-     copy out by eye. */
-  function endBlocks(){
-    var wrap = el("div");
-    if (!S.key || !S.canArchive) return wrap;
-
-    function block(keyword){
-      var b = el("div", "wzend");
-      b.appendChild(el("span", "wzendkey", keyword));
-      return b;
-    }
-    function rebuild(){ wrap.textContent = ""; draw(); }
-
-    function trouble(box, msg){
-      var p2 = el("p", "wzendwhy", msg);
-      p2.style.color = "var(--bad)";
-      box.appendChild(p2);
-    }
-
-    function draw(){
-      if (!S.archived) {
-        /* ── ARCHIVING ─────────────────────────────────────────────── */
-        var a = block("Archiving");
-        a.appendChild(el("p", "wzendwhy",
-          "Archiving takes " + S.client.name + " off the clients page and closes their link — " +
-          "anybody who goes to it is turned away exactly as if this client had never existed. " +
-          "Nothing is lost, and you can bring them back."));
-        var row = el("div", "wzendrow");
-        var go = el("button", "btn risk", "Archive this client");
-        go.type = "button";
-        go.dataset.archive = "ask";
-        go.addEventListener("click", function () { askArchive(a); });
-        row.appendChild(go);
-        a.appendChild(row);
-        wrap.appendChild(a);
-        return;
-      }
-
-      /* ── THE WAY BACK ──────────────────────────────────────────────
-         First, and on its own, because it is the ordinary thing to want
-         from this screen and the one below it is not. */
-      var r = block("Bringing them back");
-      r.appendChild(el("p", "wzendwhy",
-        "Their link starts working again and the card returns to the clients page, exactly as it was."));
-      var rrow = el("div", "wzendrow");
-      var rb = el("button", "btn", "Bring " + S.client.name + " back");
-      rb.type = "button";
-      rb.dataset.unarchive = "1";
-      rb.addEventListener("click", function () {
-        rb.disabled = true; rb.textContent = "Bringing them back…";
-        setArchived(S.key, false).then(function (j) {
-          if (!j.ok) { rb.disabled = false; rb.textContent = "Bring " + S.client.name + " back";
-                       trouble(r, j.error || "Not brought back."); return; }
-          drawSetup(S.key);
-        }).catch(function (e) {
-          if (String(e.message) === "sign in") return;
-          rb.disabled = false; rb.textContent = "Bring " + S.client.name + " back";
-          trouble(r, "Could not reach the server.");
-        });
-      });
-      rrow.appendChild(rb);
-      r.appendChild(rrow);
-      wrap.appendChild(r);
-
-      if (!S.canDelete) return;
-
-      /* ── AND THE WAY OUT ───────────────────────────────────────────
-         Reachable from an archived client and nowhere else. The server
-         asks the same thing again (§42), so this is where the rule is
-         SHOWN rather than where it is kept. */
-      var d = block("Deleting");
-      d.appendChild(el("p", "wzendwhy",
-        "Deleting removes everything this client has — their plan, their figures, their people " +
-        "and their conversations. It cannot be undone and there is nothing to restore from."));
-      var drow = el("div", "wzendrow");
-      var db = el("button", "btn risk", "Delete permanently\u2026");
-      db.type = "button";
-      db.dataset.delete = "ask";
-      db.addEventListener("click", function () { askDelete(d); });
-      drow.appendChild(db);
-      d.appendChild(drow);
-      wrap.appendChild(d);
-    }
-
-    /* ── THE ARCHIVE QUESTION ─────────────────────────────────────────
-       It NAMES the client, because the way this goes wrong is pressing it
-       on the wrong card — and by the time somebody is here they have been
-       reading a form with this client's name at the top of it. */
-    function askArchive(box){
-      box.textContent = "";
-      box.appendChild(el("span", "wzendkey", "Archiving"));
-      var q = el("div", "wzask");
-      q.dataset.ask = "archive";
-      var p1 = el("p");
-      p1.appendChild(document.createTextNode("Archive "));
-      p1.appendChild(el("b", null, S.client.name));
-      p1.appendChild(document.createTextNode("?"));
-      q.appendChild(p1);
-      var goes = el("p", "goes");
-      goes.appendChild(document.createTextNode("Their link stops working at once."));
-      goes.appendChild(el("br"));
-      goes.appendChild(document.createTextNode("The card leaves the clients page."));
-      goes.appendChild(el("br"));
-      goes.appendChild(document.createTextNode("Everything they have is kept."));
-      q.appendChild(goes);
-      q.appendChild(el("p", null, "You can bring them back from the Archived band at any time."));
-      var row = el("div", "row");
-      var yes = el("button", "btn risksolid", "Archive " + S.client.name);
-      yes.type = "button"; yes.dataset.archive = "do";
-      var no2 = el("button", "btn", "Cancel");
-      no2.type = "button"; no2.dataset.archive = "cancel";
-      no2.addEventListener("click", rebuild);
-      yes.addEventListener("click", function () {
-        yes.disabled = true; no2.disabled = true; yes.textContent = "Archiving…";
-        setArchived(S.key, true).then(function (j) {
-          if (!j.ok) { yes.disabled = false; no2.disabled = false;
-                       yes.textContent = "Archive " + S.client.name;
-                       trouble(q, j.error || "Not archived."); return; }
-          /* Back to the clients page, where the Archived band now holds it —
-             landing on the record of what happened rather than on a form for
-             a client that has just been set aside (§144's rule). */
-          go("clients");
-        }).catch(function (e) {
-          if (String(e.message) === "sign in") return;
-          yes.disabled = false; no2.disabled = false;
-          yes.textContent = "Archive " + S.client.name;
-          trouble(q, "Could not reach the server.");
-        });
-      });
-      row.appendChild(yes); row.appendChild(no2);
-      q.appendChild(row);
-      box.appendChild(q);
-    }
-
-    /* ── THE DELETE QUESTION ──────────────────────────────────────────
-       It counts what goes from the client's OWN rows, read at the moment
-       the card was opened, so the sentence in front of the one irreversible
-       press names what is actually there rather than what somebody wrote
-       into a template. A count that could not be read says so — printing a
-       nought there would read as "there is nothing to lose" (§93). */
-    function askDelete(box){
-      box.textContent = "";
-      box.appendChild(el("span", "wzendkey", "Deleting"));
-      var q = el("div", "wzask");
-      q.dataset.ask = "delete";
-      var p1 = el("p");
-      p1.appendChild(document.createTextNode("Delete "));
-      p1.appendChild(el("b", null, S.client.name));
-      p1.appendChild(document.createTextNode(" and everything in it?"));
-      q.appendChild(p1);
-
-      var goes = el("p", "goes");
-      goes.dataset.goes = "1";
-      var g = S.goes;
-      if (!g) {
-        goes.appendChild(document.createTextNode(
-          "What is in this client could not be read, so it cannot be listed here."));
-      } else {
-        var lines = [];
-        var shape = [];
-        if (g.units != null) shape.push(nOf(g.units, "business unit"));
-        if (g.functions != null) shape.push(nOf(g.functions, "supporting function"));
-        if (shape.length) lines.push(shape.join(" \u00b7 "));
-        if (g.people != null) lines.push(nOf(g.people, "person", "people") + " on the register");
-        var rest = [];
-        if (g.plans != null) rest.push(nOf(g.plans, "line") + " of plan");
-        if (g.capabilities != null && g.capabilities) rest.push(nOf(g.capabilities, "capability", "capabilities"));
-        if (g.conversations != null) rest.push(nOf(g.conversations, "conversation"));
-        if (rest.length) lines.push(rest.join(" \u00b7 "));
-        lines.forEach(function (t, i) {
-          if (i) goes.appendChild(el("br"));
-          goes.appendChild(document.createTextNode(t));
-        });
-      }
-      q.appendChild(goes);
-      q.appendChild(el("p", null,
-        "This cannot be undone, and there is no backup to restore from. " +
-        "If anybody needs their plans, download them first."));
-
-      var lab = el("label", null, "Type the client's name to confirm");
-      lab.setAttribute("for", "wz-confirm");
-      q.appendChild(lab);
-      var typed = el("input", "fld");
-      typed.id = "wz-confirm";
-      typed.setAttribute("autocomplete", "off");
-      typed.dataset.confirm = "1";
-      q.appendChild(typed);
-
-      var row = el("div", "row");
-      var yes = el("button", "btn risksolid", "Delete " + S.client.name + " for ever");
-      yes.type = "button"; yes.dataset.delete = "do"; yes.disabled = true;
-      var no2 = el("button", "btn", "Cancel");
-      no2.type = "button"; no2.dataset.delete = "cancel";
-      no2.addEventListener("click", rebuild);
-      /* THE MATCH IS EXACT, trimmed at the ends and nothing looser — and the
-         SERVER asks it again, so this only decides when the button opens. */
-      typed.addEventListener("input", function () {
-        yes.disabled = typed.value.trim() !== String(S.client.name).trim();
-      });
-      yes.addEventListener("click", function () {
-        yes.disabled = true; no2.disabled = true; typed.readOnly = true;
-        yes.textContent = "Deleting…";
-        post({ action:"deleteClient", key:S.key, confirm:typed.value })
-          .then(function (j) {
-            if (!j.ok) {
-              no2.disabled = false; typed.readOnly = false;
-              yes.textContent = "Delete " + S.client.name + " for ever";
-              yes.disabled = typed.value.trim() !== String(S.client.name).trim();
-              trouble(q, j.error || "Not deleted.");
-              return;
-            }
-            go("clients");
-          }).catch(function (e) {
-            if (String(e.message) === "sign in") return;
-            no2.disabled = false; typed.readOnly = false;
-            yes.textContent = "Delete " + S.client.name + " for ever";
-            yes.disabled = false;
-            trouble(q, "Could not reach the server.");
-          });
-      });
-      row.appendChild(yes); row.appendChild(no2);
-      q.appendChild(row);
-      box.appendChild(q);
-    }
-
-    draw();
-    return wrap;
-  }
-
-  /* ── THE MARK ON THE CLIENT'S DOOR (§313.36) ───────────────────────
-     PNG only (§52: an SVG is executable content, a JPEG paints its own
-     ground). Shrunk here to what a door needs, on a TRANSPARENT canvas.
-
-     AND THE BUTTON IS WIRED TO THE FILE INPUT, which it was not: `var file`
-     is `var pick` no longer — the old card declared `var pick` for this
-     input AND again sixty lines later for the "add somebody" select, and
-     `var` is function-scoped, so pressing Choose a PNG called .click() on a
-     dropdown and opened nothing (§56.7, and Islam pressed it). */
-  function markBlock(){
-    var mk = el("div");
-    mk.appendChild(el("span", "lab", "Mark on this client's door"));
-    var mrow = el("div", "markrow");
-    var preview = el("img"); preview.alt = "";
-    var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
-    function show(src){
-      if (src) { preview.src = src; preview.hidden = false; noneNote.hidden = true; }
-      else { preview.removeAttribute("src"); preview.hidden = true; noneNote.hidden = false; }
-    }
-    mrow.appendChild(preview); mrow.appendChild(noneNote);
-    show(S.markState !== undefined ? S.markState : S.client.mark);
-    if (S.canEdit) {
-      var file = el("input"); file.type = "file"; file.accept = "image/png"; file.hidden = true;
-      var choose = el("button", "btn", "Choose a PNG"); choose.type = "button";
-      choose.addEventListener("click", function () { file.click(); });
-      var drop = el("button", "btn", "Remove"); drop.type = "button";
-      drop.addEventListener("click", function () { S.markState = ""; S.dirty = true; show(null); file.value = ""; });
-      file.addEventListener("change", function () {
-        var f = file.files && file.files[0];
-        if (!f) return;
-        if (f.type !== "image/png") { setupSay("The mark must be a PNG.", true); file.value = ""; return; }
-        var url = URL.createObjectURL(f);
-        var img = new Image();
-        img.onload = function () {
-          URL.revokeObjectURL(url);
-          var scale = Math.min(1, 640 / img.naturalWidth, 200 / img.naturalHeight);
-          var cv = document.createElement("canvas");
-          cv.width = Math.max(1, Math.round(img.naturalWidth * scale));
-          cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
-          cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
-          var out = cv.toDataURL("image/png");
-          if (out.length > 400000) { setupSay("That picture is too large even shrunk — try a simpler PNG.", true); return; }
-          S.markState = out; S.dirty = true; show(out);
-        };
-        img.onerror = function () { URL.revokeObjectURL(url); setupSay("That file could not be read as a picture.", true); };
-        img.src = url;
-      });
-      mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(file);
-    }
-    mk.appendChild(mrow);
-    mk.appendChild(el("p", "note", "Shown on " + (S.key ? location.origin + "/" + S.key : "the client") +
-      "/sign-in, the door this client's people sign in at."));
-    return mk;
-  }
-
-  /* A list you add to — units and functions are the same control, and the
-     only difference is whether the row carries a plan type. */
-  /* THE NAME BOX, never the last .fld — a function's row ends in a SELECT that
-     also wears .fld, so reaching for the last one lands the cursor on the
-     plans-in picker rather than on the name you came to type. §347.1 found it
-     in capsStep and fixed it there with a copy of its own; §352 found it still
-     live in listStep's Add button and made the three call sites ask ONE
-     function, because three answers to "which box does the cursor go in" is
-     how this came to be right in one place and wrong in another (§53.5). */
-  function focusLastName(){
-    var boxes = document.querySelectorAll(".wzrow input.fld");
-    if (boxes.length) boxes[boxes.length - 1].focus();
-  }
-
-  function listStep(box, list, kind){
-    if (!list.length) {
-      box.appendChild(el("p", "wzempty",
-        kind === "unit" ? "No business units yet." : "No supporting functions yet."));
-    } else {
-      var rows = el("div", "wzrows");
-      list.forEach(function (row, n) {
-        var r = el("div", "wzrow");
-        var nm = el("input", "fld");
-        nm.type = "text"; nm.value = row.name;
-        if (!S.canShape) nm.readOnly = true;
-        nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
-        r.appendChild(nm);
-        if (kind === "fn") {
-          var tail = el("span", "wzrt");
-          tail.appendChild(el("span", "wzsub", "plans in"));
-          var sel = el("select", "fld");
-          FORMATS.forEach(function (f) {
-            var o = el("option", null, f[1] + (f[2] ? "" : " (later)"));
-            o.value = f[0];
-            if (!f[2]) o.disabled = true;
-            if (row.format === f[0]) o.selected = true;
-            sel.appendChild(o);
-          });
-          if (!S.canShape) sel.disabled = true;
-          sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; paintSetup(); });
-          tail.appendChild(sel);
-          r.appendChild(tail);
-        }
-        if (S.canShape) {
-          var x = el("button", "wzx", "×");
-          x.type = "button";
-          x.setAttribute("aria-label", "Remove " + row.name);
-          x.addEventListener("click", function () { list.splice(n, 1); S.shapeDirty = true; paintSetup(); });
-          r.appendChild(x);
-        }
-        rows.appendChild(r);
-      });
-      box.appendChild(rows);
-    }
-    if (S.canShape) {
-      /* Above the Add button, because for most clients these ARE the answer and
-         the button under them is the way to say something else. The row is not
-         drawn once every name on it has been used. */
-      var common = kind === "unit" ? COMMON_UNITS : COMMON_FNS;
-      var left = common.filter(function (nm) { return !chipUsed(list, nm); });
-      if (left.length) {
-        var crow = el("div", "wzcommon");
-        left.forEach(function (nm) {
-          var c = el("button", "wzcm");
-          c.type = "button";
-          c.setAttribute("aria-label", "Add " + nm);
-          c.appendChild(el("span", "p", "+"));
-          c.appendChild(document.createTextNode(nm));
-          c.addEventListener("click", function () {
-            list.push(markFromChip(kind === "unit"
-              ? { name:nm, company:"" } : { name:nm, format:"pillars" }, nm));
-            S.shapeDirty = true;
-            paintSetup();
-            focusLastName();
-          });
-          crow.appendChild(c);
-        });
-        box.appendChild(crow);
-      }
-    }
-    if (S.canShape) {
-      var add = el("button", "wzadd", kind === "unit" ? "+ Add a business unit" : "+ Add a supporting function");
-      add.type = "button";
-      add.addEventListener("click", function () {
-        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:"pillars" });
-        S.shapeDirty = true;
-        paintSetup();
-        focusLastName();
-      });
-      box.appendChild(add);
-    }
-    box.appendChild(el("p", "wzwhy", kind === "unit"
-      ? "A unit plans in pillars, with key measures and tactics under each. Its code is made from the name and prefixes every pillar on it."
-      : "A function's plan type decides what its pages hold, and it stays changeable until the function has a plan in it."));
-    return box;
-  }
-
-  function companiesStep(box){
-    var has = S.shape.companies.length > 0;
-    var ch = el("div", "wzchoices");
-    [[false, "No — the units sit directly under " + (S.client.name || "this client"),
-      "One less layer to explain. Companies can be added later without touching the plans."],
-     [true, "Yes — group them into companies",
-      "A company holds several units and decides who sees across them. It carries no plan of its own."]]
-      .forEach(function (c) {
-        var b = el("button", "wzchoice");
-        b.type = "button";
-        b.disabled = !S.canShape;            /* as the size band, and for the same reason */
-        b.setAttribute("aria-pressed", c[0] === has ? "true" : "false");
-        b.appendChild(el("span", "cname", c[1]));
-        b.appendChild(el("span", "cwhy", c[2]));
-        b.addEventListener("click", function () {
-          if (!S.canShape) return;
-          if (!c[0]) { S.shape.companies = []; S.shape.units.forEach(function (u) { u.company = ""; }); }
-          else if (!S.shape.companies.length) S.shape.companies.push({ name:"" });
-          S.shapeDirty = true;
-          paintSetup();
-        });
-        ch.appendChild(b);
-      });
-    box.appendChild(ch);
-    if (!has) return box;
-
-    var rows = el("div", "wzrows");
-    S.shape.companies.forEach(function (co, n) {
-      var r = el("div", "wzrow");
-      var nm = el("input", "fld");
-      nm.type = "text"; nm.value = co.name;
-      nm.setAttribute("placeholder", "The company's name");
-      if (!S.canShape) nm.readOnly = true;
-      nm.addEventListener("input", function () { co.name = nm.value; S.shapeDirty = true; });
-      r.appendChild(nm);
-      var x = el("button", "wzx", "×");
-      x.disabled = !S.canShape;
-      x.type = "button"; x.setAttribute("aria-label", "Remove");
-      x.addEventListener("click", function () {
-        var gone = co.name;
-        S.shape.companies.splice(n, 1);
-        S.shape.units.forEach(function (u) { if (u.company === gone) u.company = ""; });
-        S.shapeDirty = true; paintSetup();
-      });
-      r.appendChild(x);
-      rows.appendChild(r);
-    });
-    box.appendChild(rows);
-    var add = el("button", "wzadd", "+ Add a company");
-    add.type = "button";
-    add.disabled = !S.canShape;
-    add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); S.shapeDirty = true; paintSetup(); });
-    box.appendChild(add);
-
-    if (S.shape.units.length) {
-      box.appendChild(el("div", "lab", "Which company each unit belongs to"));
-      var ur = el("div", "wzrows");
-      S.shape.units.forEach(function (u) {
-        var r = el("div", "wzrow");
-        r.appendChild(el("span", "wzname", u.name || "(unnamed)"));
-        var tail = el("span", "wzrt");
-        var sel = el("select", "fld");
-        var none = el("option", null, "Its own — no company");
-        none.value = "";
-        sel.appendChild(none);
-        S.shape.companies.forEach(function (co) {
-          if (!co.name) return;
-          var o = el("option", null, co.name);
-          o.value = co.name;
-          if (u.company === co.name) o.selected = true;
-          sel.appendChild(o);
-        });
-        sel.disabled = !S.canShape;
-        sel.addEventListener("change", function () { u.company = sel.value; S.shapeDirty = true; });
-        tail.appendChild(sel);
-        r.appendChild(tail);
-        ur.appendChild(r);
-      });
-      box.appendChild(ur);
-    }
-    return box;
-  }
-
-  /* ── A CAPABILITY IS A ROW YOU ADD, LIKE THE OTHERS (§347) ───────────
-     This step was dulled and said the thing it asks for does not exist.
-     It does: spec 049 built a capability as its own entry on the strategic
-     side of the navigation, beside the business units, carried by a
-     supporting function and planning its own way (§341, §343). So the step
-     stops describing a platform two builds ago and starts writing one.
-
-     THREE QUESTIONS PER ROW, AND THEY ARE SETUP'S OWN THREE — a name, which
-     function carries it, and how it is planned. Setup › Capabilities asks
-     exactly those and offers EVERY function as a holder with no filter on
-     how that function itself plans, so this is the same row in a different
-     place rather than a second answer to what a capability is (§53.5).
-
-     THE HOLDER IS A NAME, not a key: the flow's rows carry no keys, and a
-     function one step back is only a name here. Unassigned is a real answer
-     the Setup page already draws, so it leads the list rather than being
-     refused. */
-  function capsStep(box){
-    if (!S.shape.capabilities.length) {
-      box.appendChild(el("p", "wzempty", "No capabilities yet."));
-    } else {
-      var rows = el("div", "wzrows");
-      S.shape.capabilities.forEach(function (cp, n) {
-        var r = el("div", "wzrow");
-        var nm = el("input", "fld");
-        nm.type = "text"; nm.value = cp.name;
-        nm.setAttribute("aria-label", "Capability name");
-        if (!S.canShape) nm.readOnly = true;
-        nm.addEventListener("input", function () { cp.name = nm.value; S.shapeDirty = true; });
-        r.appendChild(nm);
-
-        var tail = el("span", "wzrt");
-        tail.appendChild(el("span", "wzsub", "carried by"));
-        var who = el("select", "fld");
-        who.setAttribute("aria-label", "Which function carries " + (cp.name || "this capability"));
-        var none = el("option", null, "\u2014 unassigned \u2014");
-        none.value = "";
-        who.appendChild(none);
-        S.shape.functions.forEach(function (f) {
-          if (!f.name) return;
-          var o = el("option", null, f.name);
-          o.value = f.name;
-          if (cp.fn === f.name) o.selected = true;
-          who.appendChild(o);
-        });
-        who.disabled = !S.canShape;
-        who.addEventListener("change", function () { cp.fn = who.value; S.shapeDirty = true; });
-        tail.appendChild(who);
-
-        tail.appendChild(el("span", "wzsub", "plans in"));
-        var how = el("select", "fld");
-        how.setAttribute("aria-label", "How " + (cp.name || "this capability") + " is planned");
-        CAP_FORMATS.forEach(function (f) {
-          var o = el("option", null, f[1]);
-          o.value = f[0];
-          if (cp.format === f[0]) o.selected = true;
-          how.appendChild(o);
-        });
-        how.disabled = !S.canShape;
-        how.addEventListener("change", function () { cp.format = how.value; S.shapeDirty = true; });
-        tail.appendChild(how);
-        r.appendChild(tail);
-
-        if (S.canShape) {
-          var x = el("button", "wzx", "\u00d7");
-          x.type = "button";
-          x.setAttribute("aria-label", "Remove " + cp.name);
-          x.addEventListener("click", function () {
-            S.shape.capabilities.splice(n, 1); S.shapeDirty = true; paintSetup();
-          });
-          r.appendChild(x);
-        }
-        rows.appendChild(r);
-      });
-      box.appendChild(rows);
-    }
-    if (S.canShape) {
-      var add = el("button", "wzadd", "+ Add a capability");
-      add.type = "button";
-      add.addEventListener("click", function () {
-        S.shape.capabilities.push({ name:"", fn:"", format:"projects" });
-        S.shapeDirty = true;
-        paintSetup();
-        focusLastName();
-      });
-      box.appendChild(add);
-    }
-    box.appendChild(el("p", "wzwhy",
-      "A capability appears on the strategic side of the navigation, beside the " +
-      "business units, with pages of its own. Its code is made from its name, and " +
-      "how it plans stays changeable until it has a plan in it."));
-    return box;
-  }
-
-
-  /* THE WORDS THE CLIENT USES, and only the ones it has: nothing here asks
-     what a client calls a thing the client does not have. */
-  function wordsStep(box){
-    var WORDS = [
-      ["unitword", "Business unit", "Business Unit", "Every client has these", true],
-      ["pillar", "Pillar", "Pillar", "Units plan in pillars", true],
-      ["measure", "Key measure", "Key Measure", "Under a pillar", true],
-      ["tactic", "Tactic", "Tactic", "Under a pillar", true],
-      ["keyobj", "Key objectives", "Key Objectives", "A subject's own scorecard", true]
-    ];
-    var wrap = el("div", "wztbl");
-    var t = el("table");
-    var thead = el("thead"), hr = el("tr");
-    ["What it is", "What this client calls it", "Why we ask"].forEach(function (h) {
-      hr.appendChild(el("th", null, h));
-    });
-    thead.appendChild(hr); t.appendChild(thead);
-    var tb = el("tbody");
-    WORDS.forEach(function (w) {
-      var tr = el("tr");
-      var c1 = el("td"); c1.appendChild(el("b", null, w[1])); tr.appendChild(c1);
-      var c2 = el("td");
-      var i = el("input", "fld");
-      i.type = "text";
-      i.value = S.shape.words[w[0]] != null ? S.shape.words[w[0]] : w[2];
-      if (!S.canShape) i.readOnly = true;
-      i.addEventListener("input", function () { S.shape.words[w[0]] = i.value; S.shapeDirty = true; });
-      c2.appendChild(i); tr.appendChild(c2);
-      tr.appendChild(el("td", "muted", w[3]));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); wrap.appendChild(t);
-    box.appendChild(wrap);
-    box.appendChild(el("p", "wzwhy",
-      "Only the words this client actually has. A box left as it is keeps the platform's own word."));
-    return box;
-  }
-
-  /* The office step is the card's team half, unchanged: these controls each
-     write on the press, because adding somebody to a client IS an act and
-     never a draft (§322). */
-  function officeStep(box){
-    if (!S.key) { box.appendChild(el("p", "wzempty", "The client is created on the first step.")); return box; }
-    (S.team || []).forEach(function (m) {
-      var tr = el("div", "teamrow");
-      var who = el("div", "who");
-      who.appendChild(el("div", "nm", m.name || m.email));
-      who.appendChild(el("div", "em", m.email));
-      tr.appendChild(who);
-      var sp = el("div", "sp");
-      if (S.canEdit && !S.made_here && (S.register || []).length) sp.appendChild(registerCell(S.key, m, S.register));
-      sp.appendChild(seatCell(S.key, m, S.seats, S.canEdit));
-      if (S.canEdit) {
-        var rm = el("button", "btn", "Remove");
-        rm.type = "button";
-        rm.addEventListener("click", function () {
-          post({ action:"setTeam", key:S.key, email:m.email, on:false })
-            .then(function (r) { r.ok ? refreshTeam() : setupSay(r.error || "Not removed.", true); });
-        });
-        sp.appendChild(rm);
-      }
-      tr.appendChild(sp);
-      box.appendChild(tr);
-    });
-    if (S.canEdit) {
-      var row = el("div", "row");
-      var who = el("select", "fld");
-      var p0 = el("option", null, "Add somebody from Forefront"); p0.value = "";
-      who.appendChild(p0);
-      (S.office || []).forEach(function (o) {
-        if ((S.team || []).some(function (m) { return m.email === o.email; })) return;
-        var op = el("option", null, (o.name || o.email) + " — " + o.email);
-        op.value = o.email;
-        who.appendChild(op);
-      });
-      var asWho = el("select", "fld");
-      var a0 = el("option", null, "…as who on this client's register?");
-      a0.value = "";
-      asWho.appendChild(a0);
-      (S.register || []).forEach(function (r) {
-        var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
-        o.value = r.key;
-        asWho.appendChild(o);
-      });
-      var add = el("button", "btn", "Add");
-      add.type = "button";
-      add.addEventListener("click", function () {
-        if (!who.value) return;
-        post({ action:"setTeam", key:S.key, email:who.value, seat:"smoteam", personKey:asWho.value })
-          .then(function (r) { r.ok ? refreshTeam() : setupSay(r.error || "Not added.", true); });
-      });
-      row.appendChild(who);
-      if (!S.made_here && (S.register || []).length) row.appendChild(asWho);
-      row.appendChild(add);
-      box.appendChild(row);
-    }
-    box.appendChild(el("p", "wzwhy",
-      "These are Forefront's people, not the client's. A seat is held on THIS client: " +
-      "Super user holds its access matrix, retiring people and issuing passwords; SMO team runs " +
-      "cycles and corrects plans. The client's own register — its heads, custodians and their " +
-      "passwords — is built inside the platform once it opens."));
-    return box;
-  }
-  /* The team controls write at once, so the flow re-reads rather than
-     guessing what the server now holds. */
-  function refreshTeam(){
-    var at = S.at, seen = S.seen.slice();
-    drawSetup(S.key).then(function () { if (S) { S.at = at; S.seen = seen; paintSetup(); } });
-  }
-
-  function summaryStep(box){
-    var lines = [
-      ["The client", (S.client.name || "—") + (S.key ? " · /" + S.key : ""), "client"],
-      ["Industry", S.client.industry || "Not set", "client"],
-      ["Size", sizeWord(S.client.size), "client"],
-      ["Business units", S.shape.units.length
-        ? S.shape.units.map(function (u) { return u.name || "(unnamed)"; }).join(" · ") : "None yet", "units"],
-      ["Companies", S.shape.companies.length
-        ? S.shape.companies.map(function (c) { return c.name || "(unnamed)"; }).join(" · ")
-        : "None — units sit under " + (S.client.name || "the client"), "cos"],
-      ["Capabilities", S.shape.capabilities.length
-        ? S.shape.capabilities.map(function (c) {
-            return (c.name || "(unnamed)") + (c.fn ? " (" + c.fn + ")" : " (unassigned)"); }).join(" · ")
-        : "None", "caps"],
-      ["Supporting functions", S.shape.functions.length
-        ? S.shape.functions.map(function (f) { return f.name + " (" + fmtWord(f.format) + ")"; }).join(" · ")
-        : "None yet", "fns"],
-      ["The office", (S.team || []).length
-        ? S.team.map(function (m) { return m.name || m.email; }).join(" · ") : "Nobody yet", "office"]
-    ];
-    var summ = el("div", "wzsumm");
-    lines.forEach(function (l) {
-      var r = el("div", "wzline");
-      r.appendChild(el("span", "sk", l[0]));
-      r.appendChild(el("span", "sv", l[1]));
-      var b = el("button", "wzed", "Change");
-      b.type = "button";
-      b.addEventListener("click", function () { goStep(stepIdx(l[2])); });
-      r.appendChild(b);
-      summ.appendChild(r);
-    });
-    box.appendChild(summ);
-    box.appendChild(el("div", "lab", "Where to now"));
-    var doors = el("div", "wzdoors");
-    /* AND AN ARCHIVED CLIENT HAS NO DOOR TO OFFER (§323, §61). Archiving is
-       what closes their address, so this button would have landed on "that
-       client is not available" — a control that leads somewhere refusing is
-       worse than no control, and the way back is two blocks up the same page.
-       Drawn for a live client exactly as it was. */
-    var d1 = null;
-    if (!S.archived) {
-      d1 = el("button", "wzdoor go");
-      d1.type = "button";
-      d1.appendChild(el("span", "dn", "Open the platform"));
-      d1.appendChild(el("span", "dw", "Go into " + (S.client.name || "the client") + " and start the plans."));
-      d1.addEventListener("click", function () {
-        commitSetup().then(function (good) { if (good && S.key) location.assign("/" + S.key); });
-      });
-    }
-    var d2 = el("button", "wzdoor");
-    d2.type = "button";
-    d2.appendChild(el("span", "dn", "Back to clients"));
-    d2.appendChild(el("span", "dw", "Leave it here. Everything is saved, and the card is where you pick it up."));
-    d2.addEventListener("click", function () {
-      commitSetup().then(function (good) { if (good) go("clients"); });
-    });
-    if (d1) doors.appendChild(d1);
-    doors.appendChild(d2);
-    box.appendChild(doors);
-    return box;
-  }
-
-  /* A LIST, NOT A MATCH (§87: a name is never an identifier). The register is
-     offered and a person answers — the same shape as the role picker, which
-     suggests before it creates. The option a row is ALREADY on is shown as it
-     is, so this reads as a fact about them rather than a question every time. */
-  function registerCell(clientKey, member, register) {
-    var wrap = el("span", "asrow");
-    wrap.appendChild(el("span", "aslab", "on this register as"));
-    var sel = el("select", "fld");
-    var own = el("option", null, "a row of their own");
-    own.value = "";
-    sel.appendChild(own);
-    register.forEach(function (r) {
-      var o = el("option", null, r.name + (r.email ? " · " + r.email : ""));
-      o.value = r.key;
-      if (r.key === member.person_key) o.selected = true;
-      sel.appendChild(o);
-    });
-    sel.addEventListener("change", function () {
-      post({ action: "setTeam", key: clientKey, email: member.email,
-             seat: member.seat, personKey: sel.value })
-        .then(function (r) {
-          /* SAID AFTER THE REDRAW THAT REPORTS IT (§63, and I wrote it the
-             wrong way round again in the same file): `settle()` replaces the
-             page, so a refusal said before it is wiped a moment later and the
-             control simply springs back with no explanation. */
-          refreshTeam();
-          if (!r.ok) setupSay(r.error || "Not changed.", true);
-        });
-    });
-    wrap.appendChild(sel);
-    return wrap;
-  }
-
-  function seatCell(clientKey, member, seats, editable) {
-    var wrap = el("span", "cell" + (editable ? "" : " locked"));
-    seats.forEach(function (s) {
-      var b = el("button", null, s.name);
-      b.type = "button";
-      b.title = s.note;
-      if (member.seat === s.key) b.className = "on" + (s.key === "super" ? " hi" : "");
-      if (editable && member.seat !== s.key) {
-        b.addEventListener("click", function () {
-          post({ action: "setTeam", key: clientKey, email: member.email, seat: s.key })
-            .then(function (r) { r.ok ? refreshTeam()
-                                      : setupSay(r.error || "Not changed.", true); });
-        });
-      }
-      wrap.appendChild(b);
-    });
-    return wrap;
   }
 
   /* ── Consultants ─────────────────────────────────────────────── */
@@ -5089,29 +3730,85 @@
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });
 
-  /* ── Boot ────────────────────────────────────────────────────── */
-  post({ action: "me" }).then(function (j) {
+  /* ── Boot ──────────────────────────────────────────────────────
+     BOTH QUESTIONS AT ONCE (§369). Islam: "something strange the window is not
+     active on opening I need to click anyway to start accepting clicks on the
+     cards." THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, which is worse,
+     because the two are indistinguishable from outside: `.top` is drawn
+     OUTSIDE `.wrap`, so the bar stands up with Forefront's name and a Sign out
+     button over a body that `body:not(.ready)` has hidden — a window that
+     looks open, answers nothing, and says nothing about either.
+
+     Measured at 600ms a round trip, which is production's own shape: the
+     requests went out as `me` → `cards` → `cards`, THREE sequential trips for
+     one page load with the last two the SAME request; the bar was up and dead
+     for 1,255ms, the page then appeared titled and empty, and the cards landed
+     at 1,872. A click inside that window hits BODY — `elementFromPoint` where
+     a card will be, every 100ms of it — so the press he spends is the one that
+     happens to land after the page became ready.
+
+     Nothing in `cards` reads `me`'s ANSWER — the session is the cookie both
+     already carry — so they were sequential for no reason but the order they
+     were written in, and `drawClients()` asked the second one over again. One
+     trip now. The cost, stated: a signed-out visitor sends one `cards` that is
+     thrown away, and they are being redirected anyway.
+
+     IT IS NOT §368's, established before it was blamed (§303): the same probe
+     against the build before that section reports 1,259ms to 1,255. It is the
+     boot's own shape, and §359.4 made the second trip heavier by giving
+     `cards` a per-client read.
+
+     WHAT IS LEFT IS ONE ROUND TRIP OF THE SAME SILENCE, and it is not fixed
+     here. A first draft of this comment said the grid "already says Reading
+     your clients… and this gate hides it", and MEASURING IT SAID OTHERWISE:
+     lifting the gate alone produces a picture byte-identical to today's,
+     because `drawClients()` BUILDS that sentence and is not called until the
+     answer lands — there is nothing behind the gate to reveal. Corrected
+     rather than left standing (§124).
+     So saying anything at all means DRAWING before the answer, which is a
+     decision about what a loading page looks like: the page's own title,
+     search and sentence drawn early (whose cost is that `drawNav()` reads the
+     answer, so the tab row lands a beat later — measured, an early
+     `go("clients")` throws on a null ME), or §94.10's grey skeleton, whose
+     RULE the gate above cites and whose treatment this page never took. Both
+     shot out of the real page and put to Islam
+     (design-mockups/console-loading/), never ridden in behind a repair
+     (rule 1b, 1c).
+
+     ANSWERED (§371): Islam took the skeleton, over the recommendation. It is
+     `drawWaiting()` above, and the window is no longer silent — which is why
+     two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
+     than loosened: they recorded this state on purpose so that the day it
+     moved they would go red (§214.3, §218). */
+  drawWaiting();
+  Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {
+    var j = r[0], c = r[1];
     if (!j || !j.ok) { location.replace("/"); return; }
     ME = { email: j.account.email, name: j.account.name, isAdmin: j.account.isAdmin,
            canConsultants: true, canAccess: !!j.account.isAdmin };
     /* What the navigation may show is asked of the same rules the pages ask —
        `cards` answers it for this account, so the row cannot offer a page the
        next request refuses. */
-    return post({ action: "cards" }).then(function (c) {
-      if (c && c.ok) {
-        ME.canConsultants = !!c.canConsultants;
-        ME.canAccess = !!c.canAccess;
-      }
-      /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
-         after renaming the column is exactly the twins this rename avoided. */
-      document.getElementById("who").textContent =
-        ME.name + (ME.isAdmin ? " · Super user" : "");
-      document.body.classList.add("ready");
-      go("clients");
-    });
+    if (c && c.ok) {
+      ME.canConsultants = !!c.canConsultants;
+      ME.canAccess = !!c.canAccess;
+      BOOTCARDS = c;
+    }
+    /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
+       after renaming the column is exactly the twins this rename avoided. */
+    document.getElementById("who").textContent =
+      ME.name + (ME.isAdmin ? " · Super user" : "");
+    document.body.classList.add("ready");
+    go("clients");
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");
+    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§371). A
+       skeleton is a promise that something is arriving, and `say` APPENDS —
+       so without this the sentence lands under three grey cards still
+       saying it is on its way. The happy path needs no such line, because
+       `go` clears the page itself. */
+    clear();
     say("Could not reach the server.", true);
   });
 })();

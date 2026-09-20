@@ -1,8 +1,12 @@
 import { doorPool } from "../../../../lib/auth.ts";
 import { resolveTenant } from "../../../../lib/door.ts";
 import { requestUser, SLUG } from "../../../../lib/session.ts";
-import { whereOf, clientHref, modulesFor, DEFAULT_MODULE } from "../../../../lib/modules.ts";
+import { whereOf, clientHref, modulesFor, moduleMenu, DEFAULT_MODULE } from "../../../../lib/modules.ts";
 import { serverFor } from "../../../../modules/registry.ts";
+import { landingStampFor } from "../../../../lib/landing.ts";
+import { mayOpenModule, openableModules } from "../../../../lib/access.ts";
+import { MODULE_DEF } from "../../../../lib/modules.ts";
+import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -54,17 +58,47 @@ export async function GET(req: Request, { params }: P) {
      draws — so a fourth module is a folder and an entry, and this file is not
      edited at all.
 
-     A SPINE SEGMENT IS SERVED BY THE DEFAULT MODULE (`setup`, `tour`), which
-     is where Setup is drawn today and is stated rather than implied
-     (modules/strategy/index.ts says why). */
+     SETUP IS THE SPINE'S OWN DOCUMENT, FOR EVERY MODULE (§359.2, spec 056
+     §4.2, research R1). `/<client>/setup/…` is the client's pages and
+     `/<client>/<module>/setup/…` is that module's own — both are the frozen
+     shell served by lib/shell.ts, stamped with the module whose word led (or
+     the default's when none did), and the shell draws the right rail from
+     that stamp (shell/route.js, shell.html setupScope). Served HERE, before
+     the table is asked, so a module that draws its own document (Insights)
+     never has to know how a Setup page is drawn: its Setup arrives on the
+     spine with the rest of Setup, and the module brings only its defs.
+     `tour` stays the default module's, being where the intro round is drawn. */
   const key = w.module || DEFAULT_MODULE;
+  /* WHO MAY OPEN THE MODULE (§359.5, spec 056 §4.4, research R3): asked of
+     the spine BEFORE anything of the module is drawn — its Setup included —
+     and a refusal is the redirect an unknown module word gets above, so a
+     shut module and an absent one answer identically (§320.5). Only an
+     address that LED with a module word is gated: the spine's own pages are
+     the client's. The switcher and the landing read the same answer
+     (openableModules), so a module shut by its address is shut on its row. */
+  if (w.module && !(await mayOpenModule(ans.tenant.id, ans.seat, ans.personKey, w.module)))
+    return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
+  const open = await openableModules(ans.tenant.id, ans.seat, ans.personKey, ans.tenant.modules);
+  if (w.rest[0] === "setup") {
+    /* the module's Landing line page reads its declaration off the document
+       (§359.4) — computed here, on the Setup document alone — and its Access
+       page the module's declared areas (§359.5), the same way */
+    const landing = await landingStampFor(ans.tenant.id, key, ans.seat, ans.personKey, ans.tenant.modules);
+    /* WHICH RAIL, STAMPED BY THE SIDE THAT KNOWS (§362, spec 058). `w.module`
+       is set only where the module word LED the address, which is exactly the
+       difference between a module's own Setup and the client's — the same
+       test shell/route.js's placeOf makes in the browser, answered here so it
+       is on the document before any of the chrome is built from it. */
+    return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
+                                      w.module ? key : "client"), { status: 200, headers: shellHeaders() });
+  }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });
   /* WHO IS LOOKING travels with the address (spec 046 §4.10). The door has
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
   return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
-    have, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
+    have: open, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
 }
 
 /* A MODULE MAY BE WRITTEN TO (spec 054): the Internal Tracker's rows are

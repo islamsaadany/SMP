@@ -393,8 +393,12 @@ def main():
             ck("the inbox's waiting count arrives and is drawn", False, "no row in 9s")
         ck("…with its noun", "2 conversations waiting" in pg.inner_text(".wacts"),
            pg.inner_text(".wacts")[:300])
-        ck("the office's pages open Setup",
-           "Overview" in pg.inner_text(".wpages"), pg.inner_text(".wpages"))
+        # §359: the Overview is gone and the link names the page the gear
+        # opens now. REWRITTEN, never loosened (§218) — it still asserts the
+        # office is offered Setup, by the page's own name.
+        ck("the office's pages open Setup, on Reporting cycle",
+           "Reporting cycle" in pg.inner_text(".wpages")
+           and "Overview" not in pg.inner_text(".wpages"), pg.inner_text(".wpages"))
         # A door into Setup: the no-custodian row goes to the People register.
         pg.locator(".wacts .wact", has_text="no custodian").locator("button").click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
@@ -629,6 +633,30 @@ def main():
         ck("...but they still learn the cycle is open, from the chip",
            u["heroChip"], u)
         ck("...and their welcome screen is otherwise intact", u["screen"], u)
+        ctx.close()
+
+        # ── 11 · THE CLIENT SETUP BLOCK AND YOUR MODULES ARE THE SERVED
+        #         LANDING'S, NEVER THIS ONE'S (spec 056 §4.1, §9.3) ─────────
+        # The two blocks are drawn by the Next app's page from the seat the
+        # door resolved and the client's registry row — neither of which the
+        # frozen welcome can know over file://. Asserted as the OFFICE (the
+        # seat that WOULD see the block served), so the absence measured here
+        # is the stack's and not the seat's (§113.8); a later port that drew
+        # them into welcome.js by accident goes red here.
+        print("\n── 11 · the served landing's two blocks are absent over file://")
+        PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
+        STATE = BASE
+        ctx, pg = fresh(browser, port)
+        d = pg.evaluate("""() => ({
+          drawn: !!document.querySelector('.welcomeover'),
+          setup: document.querySelectorAll('.wsetup, .wsetupbox').length,
+          mods: document.querySelectorAll('.wmods, .wmodslab').length,
+          pages: [...document.querySelectorAll('.wpages a')].map(a => a.textContent.trim()) })""")
+        ck("the welcome is drawn for the office", d["drawn"], d)
+        ck("...with no Client setup block", d["setup"] == 0, d)
+        ck("...and no Your modules list", d["mods"] == 0, d)
+        ck("...and its first page is the Reporting cycle (§359)",
+           bool(d["pages"]) and d["pages"][0].startswith("Setup — Reporting cycle"), d["pages"])
         ctx.close()
 
         browser.close()

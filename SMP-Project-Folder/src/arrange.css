@@ -472,47 +472,28 @@
      took the two name columns down to nothing. Written in config.css first and
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
-  .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  /* `select.rolewhere` was here and went with the control (§110, §24): the Unit
-     cell answers where, so there is no second select to bound. */
-  /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
-     and exactly the same 920px: the role picker's pair were bounded and the
-     pair that appear when a ROW is opened for editing were not, because they
-     are plain `select.fld` and nothing named them. Opening any row therefore
-     blew the table to 1516px inside a 920px box and pushed Email, Roles and
-     Status past the edge — a row you cannot finish editing.
+  /* ══ THE REGISTER'S OWN FIELD FLOORS AND CAPS, ALL SEVEN, DELETED ══
+     (§372; §24, and it is the second half of §24's own sentence — a rule
+     nothing wears is a rule the next reader takes for load-bearing.)
 
-     Converting some members of a family and leaving the others is how the
-     second one gets forgotten (§40); this is that, a version later, in the
-     file that records the rule. Named by their data attributes so the next
-     select added to this row is bounded by being given one. */
-  .cfg .peoplecfg select[data-pmainbu]:not(.ss-native),
-  .cfg .peoplecfg select[data-pat]:not(.ss-native) { min-width:0; width:auto; max-width:164px; }
-  /* THE OPEN ROW'S TEXT FIELDS WERE CAPPED HERE AND THE RULE WAS REMOVED
-     (§93.10). It computed — `max-width` read back as the value written — and
-     the field still measured 170px, at every value tried. Whatever the browser
-     is resolving it against under this auto layout, it is not the cap, so the
-     rule changed nothing and a rule that changes nothing is worse than no rule
-     (§37). The 12px of overlap it was aimed at is cosmetic and recorded rather
-     than papered over; what actually closed the gap was capping the CELLS
-     (config.css, §93.10), which took the open table from 1608px to 1452px. */
+     They were written for a mode that no longer exists. §69 and §93.10 bounded
+     the selects and floored the text fields because turning the pen on
+     collapsed the two columns you edit the page FOR; §116 then moved every one
+     of those fields into the person DIALOG, which is `#modal-b` on <body> and
+     not inside `.peoplecfg`, so from that day all seven matched nothing.
+
+     MEASURED, NOT REASONED (§93.11): asked of the page at rest and with the
+     dialog open, every one of the seven returns 0.
+
+     AND THE FIRST THING TO PUT A FIELD BACK IN THE TABLE WAS BITTEN BY ONE
+     WITHIN THE HOUR. `input[data-ptitle] { min-width:150px }` in a 150px cell
+     with 8px of padding either side is a 150px box in a 134px space, so the
+     open cell hung 8px over its own neighbour at 1440 and below — the exact
+     overflow §372 exists to stop, from a rule written to prevent an overflow
+     in a mode that was removed. The open cell sizes itself instead
+     (config.css: a block, never a percentage). */
   .cfg .unitcfg td { vertical-align:middle; }
   .cfg .unitcfg input.fld { max-width:none; width:100%; }
-  /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
-     an input NO intrinsic minimum, so under the auto layout the register uses
-     (no table-layout:fixed — the name column fits the name, §46.6) the browser
-     hands those columns their minimum content width, which is nothing. Person
-     measured 216px reading and 86px editing, and 71px with a role picker open
-     beside it: the two columns you edit the page FOR were the two that
-     collapsed, and they collapsed further the more there was to do.
-
-     Beside the rule for the same reason the selects are (§69): this selector
-     is (0,3,1) and later in the concatenation than anything config.css can
-     say. The floors are the READ widths, so turning the pen on stops moving
-     the page. */
-  .cfg .peoplecfg input[data-pname] { min-width:170px; }
-  .cfg .peoplecfg input[data-ptitle] { min-width:150px; }
-  .cfg .peoplecfg input[data-pemail], .cfg .peoplecfg input[data-pphone] { min-width:160px; }
 
   /* A tooltip inherits white-space from its cell. Inside a table header, where
      nowrap keeps column titles on one line, the tooltip inherited it too and

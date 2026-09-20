@@ -69,8 +69,14 @@ def open_person(pg, key):
 
 
 def add_role(pg, key):
-    pg.evaluate("(k)=>{const b=document.querySelector('[data-prole-open=\"'+k+'\"]');"
-                " if(b) b.click();}", key)
+    """OPENS THE ROLES LIST (§372). There is no "+ role" control any more: the
+    Roles cell IS the ticking list, so this presses the cell — the dialog's
+    copy first, because a row's cell and the open person dialog draw the same
+    picker for the same person."""
+    pg.evaluate("""(k)=>{const s=document.querySelector('#modal-b [data-proleset="'+k+'"]')
+                        || document.querySelector('[data-proleset="'+k+'"]');
+                   const b=s&&s.previousElementSibling;
+                   if(b&&b.classList.contains('ssbtn')) b.click();}""", key)
     pg.wait_for_timeout(500)
 
 
@@ -151,16 +157,32 @@ with sync_playwright() as pw:
     add_role(pg, target["key"])
     ck("the fixture's person holds no seat to begin with",
        target["role"] is None, target)
+    # WHAT THE LIST SHOWS BEFORE ANYTHING IS PICKED. §372 made the cell a
+    # ticking list, so its ticks are the roles this person already holds —
+    # `fnhead` here, legitimately. Cancel's claim is that the register is left
+    # EXACTLY as it was, so it is compared against this rather than against a
+    # list the check would have to re-derive from the product's own rules.
+    TICKS = """(k)=>{
+      const sel = document.querySelector('#modal-b [data-proleset="'+k+'"]')
+               || document.querySelector('[data-proleset="'+k+'"]');
+      return sel ? [...sel.options].filter(o=>o.selected).map(o=>o.value) : null;
+    }"""
+    ticks0 = pg.evaluate(TICKS, target["key"])
 
-    picked = pg.evaluate("""(k) => {
-      const sel = document.querySelector('[data-prole-pick="' + k + '"]');
+    picked = pg.evaluate("""(a) => {
+      const k = a[0], role = a[1];
+      const sel = document.querySelector('#modal-b [data-proleset="' + k + '"]')
+               || document.querySelector('[data-proleset="' + k + '"]');
       if (!sel) return null;
-      const has = [...sel.options].some(o => o.value === 'super');
-      if (!has) return { has: false };
-      sel.value = 'super';
+      const op = [...sel.options].find(o => o.value === role);
+      if (!op) return { has: false };
+      /* WHAT A TICK IS (searchsel's toggle): the option goes on and the select
+         fires its own change. Driven here rather than through the popup row
+         because this file is about what the SERVER and the rules do with it. */
+      op.selected = true;
       sel.dispatchEvent(new Event('change', { bubbles: true }));
       return { has: true };
-    }""", target["key"])
+    }""", [target["key"], "super"])
     ck("the picker is on the row and offers the seat to the SMO",
        picked and picked.get("has"), picked)
     pg.wait_for_timeout(600)
@@ -195,12 +217,21 @@ with sync_playwright() as pw:
     # CANCEL LEAVES THE REGISTER EXACTLY AS IT WAS.
     pg.evaluate("()=>{const b=document.querySelector('#modal-b [data-seatno]'); if(b) b.click();}")
     pg.wait_for_timeout(500)
-    after = pg.evaluate("(k)=>({role: personBy(k).role || null, kind: ADDROLE_KIND})",
-                        target["key"])
+    # `ADDROLE_KIND` was the ONE pending value of a picker that had exactly one,
+    # so an empty string there meant "nothing is being offered" (§372 replaced
+    # it with a ticking list). The list's ticks are what the person HOLDS, and
+    # this fixture holds `fnhead` legitimately — so the claim is REWRITTEN to
+    # what it was always about: the REFUSED seat is not left ticked, or picking
+    # it again fires no `change` (§110) and the row reads as dead.
+    after = {"role": pg.evaluate("(k)=>personBy(k).role || null", target["key"]),
+             "ticked": pg.evaluate(TICKS, target["key"])}
     ck("Cancel grants nothing", after["role"] is None, after)
-    # ...and puts the picker back, or a select still showing the refused value
-    # fires no `change` when it is picked again (§110) and reads as dead.
-    ck("...and puts the picker back to Choose a role", after["kind"] in ("", None), after)
+    ck("...and the refused seat is not left ticked",
+       "super" not in (after["ticked"] or []), after)
+    # BOTH ENDS (§113.8): a build that emptied the list on Cancel would satisfy
+    # the line above perfectly while throwing away what they do hold.
+    ck("...and the list is exactly what it was before the pick",
+       after["ticked"] == ticks0, {"was": ticks0, "now": after["ticked"]})
 
     # ── 4 · AND YES GRANTS IT ──────────────────────────────────────────────
     print("\n4 · confirming hands it over")
@@ -212,14 +243,23 @@ with sync_playwright() as pw:
     open_person(pg, target["key"])
     add_role(pg, target["key"])
     ck("the picker is back on the row",
-       pg.evaluate("(k)=>!!document.querySelector('[data-prole-pick=\"'+k+'\"]')",
+       pg.evaluate("(k)=>!!document.querySelector('#modal-b [data-proleset=\"'+k+'\"]')"
+                   " || !!document.querySelector('[data-proleset=\"'+k+'\"]')",
                    target["key"]))
-    pg.evaluate("""(k) => {
-      const sel = document.querySelector('[data-prole-pick="' + k + '"]');
-      if (!sel) return;
-      sel.value = 'super';
+    pg.evaluate("""(a) => {
+      const k = a[0], role = a[1];
+      const sel = document.querySelector('#modal-b [data-proleset="' + k + '"]')
+               || document.querySelector('[data-proleset="' + k + '"]');
+      if (!sel) return null;
+      const op = [...sel.options].find(o => o.value === role);
+      if (!op) return { has: false };
+      /* WHAT A TICK IS (searchsel's toggle): the option goes on and the select
+         fires its own change. Driven here rather than through the popup row
+         because this file is about what the SERVER and the rules do with it. */
+      op.selected = true;
       sel.dispatchEvent(new Event('change', { bubbles: true }));
-    }""", target["key"])
+      return { has: true };
+    }""", [target["key"], "super"])
     pg.wait_for_timeout(600)
     pg.evaluate("()=>{const b=document.querySelector('#modal-b [data-seatyes]'); if(b) b.click();}")
     pg.wait_for_timeout(700)

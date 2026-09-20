@@ -29,6 +29,9 @@ const Ic = ({ d }: { d: string }) => (
   </span>
 );
 const LOCK = "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z";
+/* The address, carried across the one navigation a refusal now costs (§370).
+   Per TAB, so it cannot outlive the attempt or reach another person's. */
+const EMAIL_BACK = "smp.door.email";
 
 /* The password reveal, once for every password field (index.html wired it
    over all of them rather than three times by hand). */
@@ -74,26 +77,48 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
   const [card, setCard] = useState<"login" | "change">(initial);
   const [error, setError] = useState<string | null>(null);
   const [changeError, setChangeError] = useState<string | null>(null);
-  const [landing, setLanding] = useState<string | null>(null);
+  /* `landing` was this card's own memory of where the sign-in said to go,
+     and with the browser doing the navigating there is nothing left to
+     remember — the password endpoint answers with its own. Deleted rather
+     than left holding null for a reader to take as load-bearing (§24). */
   const [where, setWhere] = useState<Where | null>(null);
   const [at, setAt] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const emailRef = useRef<HTMLInputElement | null>(null);
-  const pwRef = useRef<HTMLInputElement | null>(null);
+  /* `pwRef` reached in to read the password and then to WIPE it; with the
+     browser posting the form there is nothing here that may touch that
+     field, and the wipe was half of what confused the password keeper
+     (§370). PasswordField keeps its own ref for the reveal. */
   const newRef = useRef<HTMLInputElement | null>(null);
 
   /* THE FIRST FIELD THAT IS ACTUALLY THERE (§69.11): whoever reveals a card
      decides where the cursor goes. */
-  /* BEFORE THE SCRIPT IS LIVE THE FORMS POST TO THE API THEMSELVES (method
-     and action below), so a press in the first few hundred milliseconds
-     never puts a password in the address bar; the API answers a form post
-     with a redirect, and `?refused=1` is how the door then says the one
-     sentence. `data-hydrated` is for the checks, which must not press before
-     the handlers are attached. */
+  /* THE SIGN-IN FORM POSTS TO THE API ITSELF, ALWAYS (method and action
+     below) — before the script is live, and since §370 after it too, which
+     is why a press in the first few hundred milliseconds behaves exactly
+     like every other one. The API answers a form post with a redirect, and
+     `?refused=1` is how the door then says the one sentence. The PASSWORD
+     card is still the script's, because it compares two fields and asks
+     where they work before it may navigate. `data-hydrated` is for the
+     checks, which must not press before the handlers are attached. */
   useEffect(() => {
     setHydrated(true);
-    try { if (new URLSearchParams(location.search).get("refused")) { setError("That email and password do not match."); history.replaceState(null, "", location.pathname); } } catch {}
+    try {
+      const q = new URLSearchParams(location.search);
+      if (q.get("refused")) {
+        setError("That email and password do not match.");
+        /* AND THE ADDRESS IS PUT BACK (§370). A refusal is a fresh document
+           now, so the field the browser refills is one it has SAVED — which
+           for the person this section is about it has not, because they are
+           typing their password precisely because it is not saved. Kept for
+           this tab only, never in the address (a query string is history and
+           a server log), and a store that throws is not worth a broken
+           sign-in (§107). */
+        try { const was = sessionStorage.getItem(EMAIL_BACK); if (was && emailRef.current) emailRef.current.value = was; } catch {}
+        history.replaceState(null, "", location.pathname);
+      }
+    } catch {}
   }, []);
   useEffect(() => {
     if (card === "login") emailRef.current?.focus();
@@ -108,18 +133,47 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
     }
   }, [card]);
 
-  async function signIn(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  /* ── THE BROWSER SUBMITS THIS FORM (§370) ────────────────────────────
+     Islam: "the mouse doesn't click from the first time, the whole window
+     should be clicked first anywhere, then the hovering effect happens" —
+     on the console, after signing in, "only when I use the password to
+     login; if I login when it remembers the password it works fine."
+
+     MEASURED FROM HIS OWN RECORDING: at 10.7s the console is fully drawn,
+     the pointer is sitting ON a module row, and there is no hand cursor and
+     no highlight; at 14.5s the same row lights under the same pointer with
+     nothing reloaded in between. So the page is finished and is not being
+     given the mouse — not a slow boot, and nothing of ours covering it
+     (measured: no full-window layer, 47 of 47 controls reachable).
+
+     AND THE AUTOFILL HALF IS WHAT NAMES THE CAUSE, because it is the one
+     thing that differs between his two cases: a password already saved
+     raises no question, and a newly typed one does. This handler was taking
+     the press itself (`preventDefault`), posting in the background, WIPING
+     THE PASSWORD FIELD and then replacing the location — which is the shape
+     a browser's password keeper cannot tie to a submission, so it falls to
+     its heuristics and raises its prompt late, over the page we navigated
+     to. While that prompt holds the pointer the console gets no `mousemove`
+     at all, so `:hover` is never recomputed and the first press goes to
+     dismissing it. That is the dead window, and it is ours to stop causing.
+
+     THE SERVER ALREADY ANSWERED A REAL FORM POST — `sign-in/route.ts` reads
+     `application/x-www-form-urlencoded`, sets the cookie and answers 303 —
+     because that is the no-script path this door was built with. So there
+     is nothing to add: the form carries `method`, `action`, the hidden
+     door, `autocomplete="username"` and `autocomplete="current-password"`,
+     and the one thing stopping the browser doing this itself was the line
+     below. Handing it back means the keeper sees an ordinary submission and
+     asks its question HERE, where it belongs, before anything navigates.
+
+     WHAT IS NOT CLAIMED (§124): the prompt is not visible anywhere in the
+     recording, so this is reasoned from the autofill difference and not
+     read off the screen. What IS certain is that the guessy path is ours
+     and this removes it. */
+  function signIn() {
     setError(null); setBusy(true);
-    const email = emailRef.current?.value.trim() || "", password = pwRef.current?.value || "";
-    try {
-      const j = await api("sign-in", { email, password, door: slug });
-      if (pwRef.current) pwRef.current.value = "";
-      if (!j.ok) { setError(j.message || "Sign-in failed."); return; }
-      setLanding(j.landing);
-      if (j.mustChange) setCard("change"); else location.replace(j.landing);
-    } catch { setError("Could not reach the server."); }
-    finally { setBusy(false); }
+    try { sessionStorage.setItem(EMAIL_BACK, emailRef.current?.value.trim() || ""); } catch {}
+    /* no preventDefault: the browser posts the form and follows the 303 */
   }
 
   async function setPassword(e: React.FormEvent<HTMLFormElement>) {
@@ -136,7 +190,7 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
       /* THE PASSWORD IS ALREADY SET BY HERE, so nothing about where they work
          may stop them getting in: the declaration is sent and not waited on
          for anything that matters. */
-      const go = () => location.replace(j.landing || landing || "/");
+      const go = () => location.replace(j.landing || "/");
       if (!where || !at) return go();
       api("where", { at }).then(go, go);
     } catch { setChangeError("Could not reach the server."); }
@@ -211,7 +265,7 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
                   <input ref={emailRef} type="text" id="user" name="email" autoComplete="username" autoCapitalize="none" inputMode="email" spellCheck={false} placeholder="Your work email" />
                 </div>
                 <label htmlFor="password">Password</label>
-                <PasswordField id="password" autoComplete="current-password" placeholder="Enter your password" inputRef={pwRef} />
+                <PasswordField id="password" autoComplete="current-password" placeholder="Enter your password" />
                 <div className="error" id="error" style={{ display: error ? "block" : "none" }}>{error}</div>
                 <button type="submit" disabled={busy}>Sign In</button>
               </form>

@@ -138,7 +138,7 @@
     --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
-    --line:#E2E8F0; --line-soft:#F1F5F9;
+    --line:#E2E8F0; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
     --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
     --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
@@ -161,7 +161,7 @@
     --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-    --line:#2B3852; --line-soft:#212C42;
+    --line:#2B3852; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
     --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
@@ -193,7 +193,7 @@
     --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
-    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
     --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
@@ -213,7 +213,7 @@
     --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A;
+    --line:#333A45; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
     --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
@@ -809,6 +809,51 @@
 }
 .clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
 .clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
+/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ────
+   `data-client-settings` is written on the root by paint() and by nothing
+   else (shell.html clientBar): the pages behind it belong to no module, so
+   the module's navigation is not drawn over them.
+
+   WHY THESE THREE AND NOT A CLASS PER CONTROL. Everything in `nav.units` is a
+   way of choosing which part of a MODULE you are reading — the house into its
+   welcome, the group, the units and functions, the gear into that module's
+   Setup — and the viewer strip is *looking as somebody in this client*, which
+   is a question about a module's pages and not about how the client was set
+   up. Standing down the two CONTAINERS is what makes a control added to
+   either covered the day it is added (§104.7).
+
+   `display:none`, never opacity or a width: a control hidden by paint alone
+   still takes the keyboard and still answers every DOM probe (§3.2, §70).
+   And the row goes as a WHOLE — `nav.units` carries the tenant's own
+   `--panel` ground and a border, so emptying `#units` and leaving the wrapper
+   would draw a navy stripe with nothing in it (§28's rule for an empty
+   heading, one element out). */
+html[data-client-settings] nav.units,
+html[data-client-settings] .viewer { display:none; }
+/* AND THE MODULE SWITCHER, WHICH IS NAMED RATHER THAN CONTAINED (§367).
+   The two above are CONTAINERS, and standing a container down is what
+   covers a control added to it later — but the switcher's container is
+   `.top-in`, which also holds the client's own heading and mark, and those are
+   exactly what these pages DO want. So this one is named.
+
+   IT USED TO BE STRUCTURAL AND STOPPED BEING ABLE TO BE. shell/route.js built
+   the switcher once at load and returned early on the client's scope, which
+   answered while the only way between the two rails was a page load; §367 made
+   that crossing a press, so the switcher has to follow the SCOPE rather than
+   the navigation, and this is the rule the rest of the chrome already
+   follows. */
+html[data-client-settings] .top .topmark { display:none; }
+/* The way back says what it does first. `change` is the word for a control
+   that NAMES the client you are in; here it names the act, so the second half
+   would be saying something the first half already did (§87). */
+.clientback[data-saveclose] i{ display:none }
+/* THE CLIENT'S MARK (§362). Sized like the theme and font controls beside it
+   rather than like the deck's lockup — this is a bar, and a mark taller than
+   the line it sits on is what pushes the whole chrome down a row. `contain`,
+   because a client's mark is whatever shape they uploaded and a stretched one
+   is worse than a small one (§50's own rule for a slide picture). */
+.clientlogo{ height:26px; width:auto; max-width:120px; object-fit:contain;
+             flex-shrink:0; align-self:center; display:block }
 
   /* Sub-nav: Performance is the regular view and is marked as such */
   .tabs button.primary { color:var(--gold-deep); font-weight:700; }
@@ -3072,90 +3117,6 @@
      width and no height and is what makes a table read as columns. */
   .setuppane table thead th + th { border-left:1px solid rgba(255,255,255,.18); }
 
-  /* ══ SETUP · OVERVIEW (§108.10) ═══════════════════════════════════
-     The page the gear lands on: one strip saying how the cycle is going, and
-     a list of what is waiting on the office.
-
-     IT BORROWS `.fstrip`'s VOCABULARY WITHOUT BORROWING `.fstrip` — the same
-     ground, the same header rule, the same `.badge` chips, because this is
-     the Reporting cycle's own numbers and two different-looking versions of
-     one strip is how a summary stops reading as a summary (§B5). What it does
-     NOT borrow is the layout: `.fstrip` is a card with a titled head and a
-     body, and this is one row that ends in a way through. */
-  /* ── THE OVERVIEW IS TWO COLUMNS (§198) ───────────────────────────────
-     Islam picked Option B from two drawn in the real page. The queue takes
-     the width, the cycle stands beside it as a summary. §24: the one-row
-     strip and every rule that shaped it are DELETED, not left behind —
-     including §120.4's wrap argument, which was three paragraphs about a
-     control that no longer shares a line with anything.
-
-     THE STACK POINT IS CSS, NOT A WIDTH TEST IN JAVASCRIPT. A summary page
-     that measured the window in two places would eventually disagree with
-     itself (§27.1); below 900px the columns become one and the QUEUE is
-     first, because that is the half somebody came for. */
-  .ovcols { display:grid; grid-template-columns:minmax(0,1fr) 320px;
-            gap:16px; align-items:start; }
-  .ovmain { min-width:0; }
-  @media (max-width:900px){ .ovcols { grid-template-columns:1fr; } }
-
-  /* The cycle, as a standing summary. It borrows the Reporting cycle page's
-     own ground, border and `.badge` chips — this is that page's numbers, and
-     two different-looking versions of one set is how a summary stops reading
-     as a summary (§B5). What it no longer borrows is the SIZE: 27px of serif
-     was the loudest thing on a page about something else. */
-  .ovside { background:var(--surface); border:1px solid var(--line);
-            border-radius:var(--r); padding:13px 15px 15px; }
-  .ovside h4 { margin:0 0 9px; font:700 12px/1.3 var(--sans); color:var(--ink);
-               display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .ovsline { display:flex; justify-content:space-between; align-items:baseline;
-             gap:10px; font-size:13px; padding:6px 0;
-             border-bottom:1px solid var(--line); }
-  .ovsline b { font-weight:700; font-variant-numeric:tabular-nums; }
-  /* Not started is the one figure that is a problem rather than a fact, so it
-     is the one that takes a colour — as TYPE, which is why it is `--bad-tx`
-     and not `--bad` (§38.5, and this file has paid for that one six times). */
-  .ovsline b.ovlate { color:var(--bad-tx); }
-  .ovsmeta { color:var(--ink-3); font-size:11.5px; margin:9px 0 0; }
-  .ovside .ovcyc-go { width:100%; margin-top:11px; }
-  .ovcyc-go { white-space:nowrap; }
-
-  .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
-         color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
-  .ovh::after { content:""; flex:1; height:1px; background:var(--line); }
-
-  /* A ROW IS A DOOR, SO IT IS A BUTTON. Each one names something outstanding
-     and goes to the page that fixes it — never a page that merely mentions it
-     (§16.7's rule, applied to a notice rather than to a refusal). */
-  .ovlist { border:1px solid var(--line); border-radius:var(--r);
-            background:var(--surface); overflow:hidden; }
-  .ovrow { display:flex; align-items:center; gap:11px; width:100%; text-align:left;
-           background:none; border:0; border-top:1px solid var(--line-soft);
-           padding:11px 15px; cursor:pointer; font:500 13px/1.4 var(--sans);
-           color:var(--ink); }
-  .ovrow:first-child { border-top:0; }
-  .ovrow:hover { background:var(--surface-2); }
-  .ovrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
-  /* THE MARK IS LIT, BECAUSE EVERY ROW HERE IS SOMETHING OUTSTANDING — there
-     is no quiet state to distinguish it from, so the accent is carrying the
-     one meaning it has on this page. It stays inside §41's budget: a 24px
-     square, and the page draws no other fill. */
-  .ovico { width:24px; height:24px; border-radius:var(--r-sm); flex:none;
-           display:grid; place-items:center; font-size:12px;
-           background:var(--attn-bg); color:var(--attn-tx); }
-  .ovtext { min-width:0; }
-  .ovto { margin-left:auto; flex:none; font:700 11.5px/1 var(--sans);
-          color:var(--gold-deep); white-space:nowrap; }
-  .ovrow:hover .ovto { text-decoration:underline; }
-
-  /* SAYING NO IS THE PAGE'S JOB TOO (§45.2 turned round): a page that exists
-     to report whether anything is waiting must be able to report that nothing
-     is, or an absent list reads as a list that failed to load. */
-  .ovquiet { border:1px solid var(--line); border-radius:var(--r);
-             background:var(--surface); padding:16px 18px;
-             display:flex; flex-direction:column; gap:4px; }
-  .ovquiet b { font-size:13.5px; color:var(--ink); }
-  .ovquiet span { font-size:12.5px; color:var(--ink-3); line-height:1.5; }
-
   /* ══ FILL A FIGURE SET: THE FLAT TABLE (§46.5) ════════════════════ */
   .srctools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
   .srctools .fbtn { font:600 12.5px/1 var(--sans); color:var(--ink-2);
@@ -3438,9 +3399,40 @@
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* ── AND THE SEAM WAS NEVER THERE (§373) ─────────────────────────
+     Islam, of this column: "you added the 3 dots to the roles whihc is wrong
+     the 3 dots is out of this column." They are not in Roles — they are this
+     frozen column, floating over whatever scrolls under it. Measured: at
+     1500px the table does not scroll and they sit after STATUS; at 1200px and
+     below they sit at x1129 inside a Roles column running 977→1186, which is
+     his screenshot to the pixel. Nothing is lost — scrolled fully right,
+     STATUS is whole again.
+
+     WHAT WAS WRONG IS THAT NOTHING SAID THIS COLUMN WAS FROZEN. The
+     `box-shadow` below HAS NEVER PAINTED: Chromium draws no box-shadow on a
+     `<td>` under `border-collapse:collapse`. Proved rather than reasoned —
+     a SOLID RED 10px shadow on this cell photographed byte-identical to none
+     at all, while a border, a `::before` and a background each changed the
+     pixels. It fails the way this file keeps recording, and the way the
+     vertical sticky twenty lines up failed: silently, with every property
+     reading back exactly as written (§93.11).
+
+     So the seam is a `::before`, which does paint — and it is a WASH rather
+     than a hairline, because a 1px line says "next column" and what this
+     column is doing is passing OVER the one beside it.
+
+     FOUND AND DELIBERATELY NOT SWEPT (rule 1b): `td.namecell` and
+     `.fnscfg td.fnamecell` carry the same dead declaration and are left
+     exactly as they are — Islam asked about this column. The name column
+     could not take this answer unchanged in any case: it is `overflow:hidden`
+     (§71.2, three rules up), so a `::before` of its own is clipped away —
+     measured. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
+  .peoplecfg td.kebcell::before, .peoplecfg thead th.kebcell::before {
+    content:""; position:absolute; right:100%; top:0; bottom:0; width:14px;
+    pointer-events:none;
+    background:linear-gradient(to left, var(--froze-wash), transparent); }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -3617,9 +3609,12 @@
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* The twin of the block above (§29.2's family — this rule is declared twice
+     in this file, byte for byte). Left as the second copy rather than deleted,
+     because removing one of a pair nobody has reconciled is a change of its
+     own; the seam is declared once, above. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -3795,6 +3790,34 @@
      36px handle, not an icon strip — see the note in shell.html. */
   .setupsplit.shut { grid-template-columns:36px 1fr; }
   .setuprail .rhead { align-items:center; }
+  /* THE WAY BACK TO THE LANDING (§359.2, spec 056 §4.1). The client's own
+     rail is reached from the landing's Client setup block and from nowhere
+     else — the gear opens the module you stand in — so it carries the one
+     door out, as a row of its own under the head: inside the head it would
+     be a third thing in 168px and wrap (measured). `flex:none` for the
+     reason `.rhead` and `.railfind` are (§108.5: the list under it is what
+     scrolls). `--ink-2` on the rail's own surface, never the accent, which
+     is 4.45:1 on `--surface-2` (§38.5). */
+  .setuprail .railback-row { flex:none; padding:6px 14px 7px; background:var(--surface);
+                             border-bottom:1px solid var(--line); }
+  /* ── AND THE WAY ACROSS SITS AT THE FOOT (§360.9) ──────────────────
+     Islam: *"a perosn can access the client settings from the module
+     settings page but it should be at the bottom."* `Client settings ›` is
+     a place to go ON to rather than the way back out, so it stops being the
+     first thing read on every Setup page in the module.
+
+     THE RULE MOVES WITH IT: a row above the list is separated by what is
+     UNDER it and a row below the list by what is OVER it, so the hairline
+     swaps ends. `flex:none` after `.raillist` puts it at the bottom of the
+     rail box by construction — no `position:sticky`, no measured offset,
+     and nothing scrolls under it, because the scroller ends where this
+     begins (§108.5, §290.1's sticky foot arrived at structurally). */
+  .setuprail .railback-row.railfoot { border-bottom:0; border-top:1px solid var(--line);
+                                      padding:7px 14px 8px; }
+  .setuprail .railback { font:600 11.5px/1.3 var(--sans); color:var(--ink-2); text-decoration:none;
+                         white-space:nowrap; }
+  .setuprail .railback:hover { color:var(--ink); text-decoration:underline; }
+  .setuprail .railback:focus-visible { outline:2px solid var(--gold); outline-offset:1px; border-radius:3px; }
   .railtog { width:22px; height:22px; padding:0; border:0; border-radius:4px;
              background:none; color:var(--panel-quiet); cursor:pointer;
              display:inline-flex; align-items:center; justify-content:center; }
@@ -3860,6 +3883,129 @@
                     border-color:var(--gold); }
   .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .rolemore.on { padding:2px 7px; }
+  /* ── THE ROLES CELL IS THE BUTTON (§372, Islam 2026-09-17) ────────
+     "for the role I'm afraid it still overflows as a box it can open which a
+     button as you do but not overflowing on other voxes."
+
+     A `.ssbtn` sizes to its content and a ticking list's content is its widest
+     entry, so left alone it took the column from 209px to 477 and the table
+     behind it from 1355 to 1623 — and still overflowed. Capped to the cell it
+     holds exactly what the register draws today.
+
+     AND THE BOX MAY NOT MAKE THE ROW TALLER. `.ssbtn` carries `padding:6px 9px`
+     and a border, which is right for a control standing on its own and wrong
+     wrapped round chips that already have a height of their own: measured, it
+     took every row from 39px to 49, and thirty-one rows at 10px is 310px of
+     register moving for a control nobody pressed. A setup table row is one
+     line (§88), so the box takes the height the chips already had. What it
+     does cost is 27px of column — the box's own edges and the caret that says
+     it opens — and no other column moves. */
+  /* ── THE OPEN CELL (§372) ────────────────────────────────────────
+     One field, filling the cell it replaced. `width:100%` with `min-width:0`
+     rather than a cap: §110.8 measured a percentage doing nothing under
+     `table-layout:auto` — the cell is sized BY its child — and a definite
+     width is what stops the field contributing its intrinsic size to the
+     column. Measured, the row goes 39px to 40 and no column moves. */
+  .peoplecfg td.pcellopen { overflow:visible; }
+  /* A BLOCK, NEVER `width:100%` (§372). Measured: in an auto-layout table
+     Chromium resolves a percentage against the cell's PADDING box, so
+     `width:100%` in a 150px cell with 8px either side came out 150 and hung
+     8px past its own cell — §110.8's note that `max-width:100%` does nothing
+     in this table, met from the other side. A block-level element fills its
+     containing block's CONTENT box with no percentage to resolve, which is
+     the same answer without the quirk. */
+  /* AND CAPPED, BECAUSE `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
+     BUTTON (§373). Islam, with the Unit cell open on a function called
+     "Strategy Management Office": the box ran into EMAIL. Measured, 261.1px of
+     control inside a 176px cell — 93.6px past its own right edge — and a click
+     20px inside the email cell returned the BUTTON, which is §110.1's fault
+     exactly: a control that is present, correctly sized and eating its
+     neighbour's clicks.
+
+     `max-width:none` assumed a block fills its container. That is true of the
+     `<input>` (measured: 145.1px in a 162.1px cell, the content box to the
+     pixel) and FALSE of `searchsel.js`'s `<button>`, which is shrink-to-fit —
+     and `.ssbtn` is `white-space:nowrap`, so its text IS its width.
+
+     AND §110's "`max-width:100%` DOES NOTHING HERE", eighty lines up, is about
+     an `<input>` whose own intrinsic width was sizing the column — circular, so
+     the cap had nothing to resolve against. A button capped here does not
+     contribute that width in the first place, and it was measured BOTH ways
+     before it was believed (§94.5): with the column's declared 176px and with
+     `width:auto` forced on it, the box ends at the content edge either way
+     (159 of 176, 156.2 of 173.2). The label clips with the "…" `.ssbtn
+     .sslabel` already carries, the row stays 38.6px beside its neighbours, and
+     the email gets its clicks back. */
+  .peoplecfg td.pcellopen .fld,
+  .peoplecfg td.pcellopen .ssbtn {
+    display:block; width:auto; min-width:0; max-width:100%;
+    box-sizing:border-box; }
+
+  /* ── NO ARROW IN THIS TABLE (§372.14) ───────────────────────────────
+     Islam: "on opening something the arrow appears, no need for the arrow.
+     and for the roles as well no need for the arrow showng the the box is a
+     drop down box."
+
+     IT GOES BECAUSE IT IS POINTLESS, NOT BECAUSE IT IS BEING HIDDEN: the
+     double-click opens the LIST (shell.html), so by the time the box is drawn
+     the thing the arrow announces has already happened.
+
+     AND IT IS WHAT MADE THE ROW GROW. `.pcellopen .ssbtn` is `display:block`
+     — §372's answer to a percentage-width quirk — so the button's two children
+     stopped being flex items and the caret, an inline span after a block
+     label, fell to a line of its own: measured, the open row stood at 59.6px
+     against its neighbours' 38.6, which is the picture he sent. With the caret
+     gone there is nothing left to wrap.
+
+     SCOPED TO THE REGISTER'S TABLE. Every other searchable select in the
+     platform — Setup's dropdowns, the viewer switcher, a plan's owner pickers
+     — is a control standing on its own with nothing else to say it opens, and
+     none of them was asked about (rule 1b). */
+  .peoplecfg .sscar { display:none; }
+
+  /* The open roles cell takes `.pcellopen`'s block form (above) rather than a
+     percentage: §110.8's quirk resolves 100% against the cell's PADDING box in
+     this auto-layout table, so the button hung 8px past its own cell. The
+     dialog's copy keeps `width:100%` — it is in a form, not a table cell. */
+  /* The roles button holds CHIPS rather than a line of text, so it keeps its
+     own tighter padding — measured, `.cfg input`'s 4px puts that row at
+     45.1px where 1px puts it at the resting 39.1. Two paddings, one
+     height, which is the thing that matters. */
+  .peoplecfg td.roles.pcellopen .ssbtn { padding:1px 6px; }
+
+  /* ── AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS (§372.14) ──
+     "the table in general should look everything fixed ... until I made the
+     double click which opens the box either for writing or a drop box."
+     TWO KINDS OF BOX, SO TWO HEIGHTS UNLESS SOMETHING SAYS OTHERWISE — and
+     something did not: `.cfg input` gives every field in a Setup table
+     12.5px/4px 7px, and `searchsel.js` draws a BUTTON, which that rule cannot
+     reach, so it kept its own 13px/6px 9px. Measured, the open drop cell's
+     row stood at 42.5px against a text cell's 40.4 and a resting row's 39.1 —
+     the 3.4px jump he is describing when he says the table should look fixed.
+     These are `.cfg input`'s own two numbers rather than new ones, and what
+     is ASSERTED is the AGREEMENT (§94.8) — the two kinds of open cell are one
+     height — so if that rule ever moves, the check goes red rather than the
+     two drifting apart in silence (§122.5). */
+  .peoplecfg td.pcellopen .ssbtn { font-size:12.5px; padding:4px 7px; }
+  .pdf .rolebox .ssbtn {
+    width:100%; max-width:100%; min-width:0; padding:1px 6px; }
+  .peoplecfg td.roles .ssbtn .sslabel, .pdf .rolebox .ssbtn .sslabel {
+    overflow:hidden; min-width:0; }
+  /* As a LABEL the "…" is a span (config-render.js): a button inside a button
+     is not markup, and one press opens the whole list anyway. It keeps the
+     control's look, because what it says — there are more roles than this —
+     is the same fact either way. */
+  .rolemore:not(button) { display:inline-flex; align-items:center; }
+  /* WHAT THE LIST CANNOT SET, ABOVE IT (searchsel's `data-sshead`). The chips
+     are the register's own, so nothing new is drawn; the key over them is the
+     platform's uppercase label at the size every other key wears. */
+  .sspop .sshead { padding:9px 11px 10px; border-bottom:1px solid var(--line);
+                   display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .sspop .sshead > b { width:100%; margin-bottom:2px; font-size:10.5px;
+                       letter-spacing:.09em; text-transform:uppercase;
+                       color:var(--ink-3); font-weight:500; }
+  .sspop .sshead .rolechip { margin:0; opacity:.72; }
+  .sspop .sshead .rolechip b { font-weight:500; }
   /* The rail's groups fold (§47.7). A button now, not a div — it does
      something, so it has to be reachable by keyboard and say what it is. */
   .setuprail .rgroup { display:flex; align-items:center; gap:7px; width:100%;
@@ -4621,6 +4767,14 @@
   .phead2 .pseats { font-size:11.5px; font-weight:600; cursor:help;
     color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
     padding:6px 11px; white-space:nowrap; }
+  /* ── AND HOW THE REGISTER IS MADE UP (spec 058 §3a, §362.2) ────────
+     Its neighbour's treatment exactly, because it is its neighbour's kind of
+     thing: a fact true on every healthy client, read as a value, with the
+     detail on the hover. Drawn only where there IS a split (config-render),
+     so §122's removal of a plain total stands untouched. */
+  .phead2 .psplit { font-size:11.5px; font-weight:600; cursor:help;
+    color:var(--ink-2); background:var(--surface-2); border-radius:var(--r-pill);
+    padding:6px 11px; white-space:nowrap; }
   /* ── THE ONE LOUD THING ON THE PAGE (§94.8's accent budget) ──────── */
   .attnbtn { display:inline-flex; align-items:center; gap:7px; border:0;
     background:var(--cta); color:var(--cta-ink); cursor:pointer;
@@ -4841,6 +4995,40 @@
 .ffrow{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
 .ffrow i{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
           color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px }
+
+/* ── AND AN ADOPTED ROW WEARS THE MARK BESIDE ITS OWN CHIPS (§362.2) ──
+   The client's own person, marked because a consultant's address matched
+   theirs (§313.32): their role is the client's and stays editable, so this
+   is a note beside it rather than a cell of its own — same treatment as the
+   mark above, because it says the same thing, and INLINE, since a mark on a
+   line of its own is what takes a 39px row to 51 (§116.4, §88). */
+.ffmark{ font-style:normal; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+         color:var(--ink-3); border:1px solid var(--line); border-radius:5px; padding:2px 5px;
+         margin-left:6px; white-space:nowrap }
+
+/* ── THE LANDING LINE PAGE (§359.4, spec 056 §4.5) ────────────────────
+   The radio list and the preview are the signed-off mockup's own
+   (design-mockups/module-setup/2026-09-15_setup-per-module.html, Insights'
+   Setup frame) in the platform's tokens; the native radio is kept for the
+   keyboard and the screen reader and drawn as the mockup's dot. */
+.cfg.landing .lopts{ display:flex; flex-direction:column; gap:8px; max-width:640px }
+.cfg.landing .lopt{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:var(--r-sm); font-size:var(--fs-body); cursor:pointer; background:var(--surface) }
+.cfg.landing .lopt.on{ border-color:var(--gold); background:var(--gold-wash) }
+.cfg.landing .lopt input{ position:absolute; opacity:0; width:1px; height:1px; margin:0 }
+.cfg.landing .lopt:has(input:disabled){ cursor:default }
+.cfg.landing .lopt:has(input:focus-visible){ outline:2px solid var(--gold-deep); outline-offset:2px }
+.cfg.landing .ldot{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--ink-3); flex:none; margin-top:3px }
+.cfg.landing .lopt.on .ldot{ border-color:var(--gold-deep); box-shadow:inset 0 0 0 3.5px var(--surface), inset 0 0 0 8px var(--gold-deep) }
+.cfg.landing .ltxt{ display:flex; flex-direction:column; gap:2px }
+.cfg.landing .lex{ color:var(--ink-3); font-size:var(--fs-small) }
+.cfg.landing .lprev{ margin-top:16px; max-width:640px }
+.cfg.landing .lprev h4{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700 }
+.cfg.landing .lrow{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:var(--r-sm); background:var(--surface); font-size:var(--fs-body) }
+.cfg.landing .lk{ font-weight:600; min-width:110px }
+.cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
+.cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -5316,47 +5504,28 @@
      took the two name columns down to nothing. Written in config.css first and
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
-  .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  /* `select.rolewhere` was here and went with the control (§110, §24): the Unit
-     cell answers where, so there is no second select to bound. */
-  /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
-     and exactly the same 920px: the role picker's pair were bounded and the
-     pair that appear when a ROW is opened for editing were not, because they
-     are plain `select.fld` and nothing named them. Opening any row therefore
-     blew the table to 1516px inside a 920px box and pushed Email, Roles and
-     Status past the edge — a row you cannot finish editing.
+  /* ══ THE REGISTER'S OWN FIELD FLOORS AND CAPS, ALL SEVEN, DELETED ══
+     (§372; §24, and it is the second half of §24's own sentence — a rule
+     nothing wears is a rule the next reader takes for load-bearing.)
 
-     Converting some members of a family and leaving the others is how the
-     second one gets forgotten (§40); this is that, a version later, in the
-     file that records the rule. Named by their data attributes so the next
-     select added to this row is bounded by being given one. */
-  .cfg .peoplecfg select[data-pmainbu]:not(.ss-native),
-  .cfg .peoplecfg select[data-pat]:not(.ss-native) { min-width:0; width:auto; max-width:164px; }
-  /* THE OPEN ROW'S TEXT FIELDS WERE CAPPED HERE AND THE RULE WAS REMOVED
-     (§93.10). It computed — `max-width` read back as the value written — and
-     the field still measured 170px, at every value tried. Whatever the browser
-     is resolving it against under this auto layout, it is not the cap, so the
-     rule changed nothing and a rule that changes nothing is worse than no rule
-     (§37). The 12px of overlap it was aimed at is cosmetic and recorded rather
-     than papered over; what actually closed the gap was capping the CELLS
-     (config.css, §93.10), which took the open table from 1608px to 1452px. */
+     They were written for a mode that no longer exists. §69 and §93.10 bounded
+     the selects and floored the text fields because turning the pen on
+     collapsed the two columns you edit the page FOR; §116 then moved every one
+     of those fields into the person DIALOG, which is `#modal-b` on <body> and
+     not inside `.peoplecfg`, so from that day all seven matched nothing.
+
+     MEASURED, NOT REASONED (§93.11): asked of the page at rest and with the
+     dialog open, every one of the seven returns 0.
+
+     AND THE FIRST THING TO PUT A FIELD BACK IN THE TABLE WAS BITTEN BY ONE
+     WITHIN THE HOUR. `input[data-ptitle] { min-width:150px }` in a 150px cell
+     with 8px of padding either side is a 150px box in a 134px space, so the
+     open cell hung 8px over its own neighbour at 1440 and below — the exact
+     overflow §372 exists to stop, from a rule written to prevent an overflow
+     in a mode that was removed. The open cell sizes itself instead
+     (config.css: a block, never a percentage). */
   .cfg .unitcfg td { vertical-align:middle; }
   .cfg .unitcfg input.fld { max-width:none; width:100%; }
-  /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
-     an input NO intrinsic minimum, so under the auto layout the register uses
-     (no table-layout:fixed — the name column fits the name, §46.6) the browser
-     hands those columns their minimum content width, which is nothing. Person
-     measured 216px reading and 86px editing, and 71px with a role picker open
-     beside it: the two columns you edit the page FOR were the two that
-     collapsed, and they collapsed further the more there was to do.
-
-     Beside the rule for the same reason the selects are (§69): this selector
-     is (0,3,1) and later in the concatenation than anything config.css can
-     say. The floors are the READ widths, so turning the pen on stops moving
-     the page. */
-  .cfg .peoplecfg input[data-pname] { min-width:170px; }
-  .cfg .peoplecfg input[data-ptitle] { min-width:150px; }
-  .cfg .peoplecfg input[data-pemail], .cfg .peoplecfg input[data-pphone] { min-width:160px; }
 
   /* A tooltip inherits white-space from its cell. Inside a table header, where
      nowrap keeps column titles on one line, the tooltip inherited it too and
@@ -9774,3 +9943,231 @@ body.presenting #buildband { display:none; }
 .bempty .row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .bempty .bprim { font-size:13px; font-weight:700; border-radius:999px; padding:10px 20px; }
 .bempty .alt { font-size:13px; color:var(--ink-3); max-width:62ch; }
+
+/* ══ THE CLIENT SET-UP FLOW, IN THE PLATFORM'S OWN CHROME (§360, spec 057) ═══
+   The console's flow drew itself in the console's tokens (--ff, --amber);
+   here the same markup — the wz* classes, verbatim — wears the platform's.
+   Everything is scoped under .csetup, because half these words (.band,
+   .row, .cell, .lab) are already taken by other pages (§65.9). */
+.csetup { --cs-fill: var(--panel); --cs-fill-ink: var(--panel-ink);
+          --cs-acc: var(--gold); --cs-acc-ink: var(--on-accent); --cs-acc-tx: var(--gold-deep);
+          --cs-wash: var(--accent-glow); }
+.csetup .lab { display:block; font:600 10.5px/1 var(--mono); letter-spacing:.12em;
+               text-transform:uppercase; color:var(--ink-3); margin:0 0 6px; }
+.csetup .note { margin:6px 0 0; font-size:var(--fs-small); color:var(--ink-3); }
+.csetup .muted { color:var(--ink-3); }
+.csetup .rowset { display:grid; gap:14px; max-width:640px; }
+.csetup textarea.fld { min-height:52px; resize:vertical; }
+.csetup .btn { font:600 var(--fs-small)/1.3 var(--sans); border:1px solid var(--line);
+               background:var(--surface); color:var(--ink); border-radius:var(--r-sm);
+               padding:7px 12px; cursor:pointer; }
+.csetup .btn:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .btn:disabled { opacity:.45; cursor:default; }
+.csetup .btn.solid { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .btn.amber { background:var(--cs-acc); border-color:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .btn.risk { color:var(--bad-tx); border-color:var(--bad-tx); }
+.csetup .btn.risksolid { background:var(--bad); border-color:var(--bad); color:var(--surface); }
+.csetup .cssaid { margin:12px 0 0; font-size:var(--fs-small); border-radius:var(--r-sm); padding:9px 11px; }
+.csetup .cssaid.said { background:var(--surface-2); border:1px solid var(--line); }
+.csetup .cssaid.err { color:var(--bad-tx); background:var(--bad-bg); border:1px solid var(--bad); }
+
+/* the step rail */
+.csetup .wzrail { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 20px; }
+.csetup .wzstep { display:flex; align-items:center; gap:7px; padding:5px 11px 5px 6px;
+                  border:1px solid var(--line); border-radius:var(--r-pill); background:var(--surface);
+                  color:var(--ink-2); font:600 12.5px/1.5 var(--sans); cursor:pointer; }
+.csetup .wzstep:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzstep .n { width:19px; height:19px; border-radius:50%; display:grid; place-items:center;
+                     background:var(--surface-2); color:var(--ink-3); font:600 11px/1 var(--mono);
+                     flex:none; font-variant-numeric:tabular-nums; }
+.csetup .wzstep[aria-current="step"] { background:var(--cs-fill); border-color:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .wzstep[aria-current="step"] .n { background:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .wzstep.done { color:var(--ink-3); }
+.csetup .wzstep.done .n { background:var(--good-bg); color:var(--good-tx); }
+
+.csetup .wzcol { max-width:760px; }
+.csetup .wzq { font:600 20px/1.3 var(--sans); margin:4px 0 12px; text-wrap:balance; }
+.csetup .wzwhy { color:var(--ink-3); font-size:var(--fs-small); margin:14px 0 0; max-width:62ch; }
+.csetup .wzempty { color:var(--ink-3); font-size:var(--fs-small); font-style:italic; margin:0 0 10px; }
+.csetup .wzfoot { display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
+                  border-top:1px solid var(--line); flex-wrap:wrap; }
+.csetup .wzfnote { margin-left:auto; color:var(--ink-3); font-size:var(--fs-micro); }
+.csetup .wzarched { border:1px solid var(--line); background:var(--surface-2); border-radius:var(--r-md);
+                    padding:10px 13px; margin:0 0 16px; font-size:var(--fs-small); color:var(--ink-2); }
+.csetup .wzarched b { color:var(--ink); }
+
+/* rows you add to */
+.csetup .wzrows { display:flex; flex-direction:column; gap:6px; }
+.csetup .wzrow { display:flex; align-items:center; gap:9px; }
+.csetup .wzrow .fld { flex:1 1 160px; min-width:0; }
+.csetup .wzrow .wzname { flex:1 1 160px; font-weight:600; font-size:var(--fs-body); }
+.csetup .wzrt { display:flex; align-items:center; gap:7px; flex:none; }
+.csetup .wzrt .fld { width:auto; flex:none; }
+.csetup .wzsub { font-size:var(--fs-micro); color:var(--ink-3); white-space:nowrap; }
+.csetup .wzx { border:0; background:transparent; color:var(--ink-3); cursor:pointer;
+               font-size:18px; line-height:1; padding:2px 6px; }
+.csetup .wzx:hover { color:var(--bad-tx); }
+.csetup .wzadd { border:1px dashed var(--line); border-radius:var(--r-md); padding:8px 11px; color:var(--ink-3);
+                 background:transparent; cursor:pointer; font:600 var(--fs-small)/1.3 var(--sans);
+                 text-align:left; width:100%; margin-top:8px; }
+.csetup .wzadd:hover { border-color:var(--cs-acc-tx); color:var(--ink-2); }
+.csetup .wzcommon { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 0; }
+.csetup .wzcm { border:1px dashed var(--line); border-radius:7px; background:transparent;
+                padding:4px 9px; font:500 12.5px/1.4 var(--sans); color:var(--ink-2); cursor:pointer; }
+.csetup .wzcm:hover { border-color:var(--cs-acc-tx); color:var(--ink); }
+.csetup .wzcm .p { color:var(--ink-3); margin-right:4px; }
+
+/* one of two */
+.csetup .wzchoices { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.csetup .wzchoice { display:block; width:100%; text-align:left; padding:12px 13px; border-radius:var(--r-md);
+                    border:1px solid var(--line); background:var(--surface); cursor:pointer; font:inherit; color:inherit; }
+.csetup .wzchoice:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzchoice[aria-pressed="true"] { border-color:var(--cs-acc); box-shadow:inset 0 0 0 1px var(--cs-acc); }
+.csetup .wzchoice .cname { display:block; font-weight:600; font-size:14.5px; }
+.csetup .wzchoice .cwhy { display:block; color:var(--ink-3); font-size:12.5px; margin-top:3px; }
+
+/* the searchable industry list and the size band */
+.csetup .wzpick { position:relative; }
+.csetup .wzpanel { position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+                   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md);
+                   box-shadow:var(--shadow-md); max-height:260px; overflow:auto; padding:6px; }
+.csetup .wzpanel .gp { font:600 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+                       color:var(--ink-3); padding:8px 9px 4px; }
+.csetup .wzpanel .opt { display:block; width:100%; text-align:left; border:0; background:transparent;
+                        padding:6px 9px; border-radius:6px; font:inherit; color:var(--ink); cursor:pointer; }
+.csetup .wzpanel .opt:hover, .csetup .wzpanel .opt:focus-visible { background:var(--surface-2); outline:none; }
+.csetup .wzpanel .opt[aria-selected="true"] { background:var(--cs-wash); color:var(--cs-acc-tx); font-weight:600; }
+.csetup .wzpanel .nohit { padding:10px 9px; color:var(--ink-3); font-size:13px; font-style:italic; }
+.csetup .wzband { display:flex; flex-wrap:wrap; gap:6px; }
+.csetup .wzband button { border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+                         border-radius:var(--r-md); padding:6px 11px; cursor:pointer; font:600 12.5px/1.3 var(--sans);
+                         display:flex; flex-direction:column; align-items:flex-start; gap:2px; }
+.csetup .wzband button:hover:not(:disabled) { border-color:var(--cs-acc-tx); }
+.csetup .wzband button[aria-pressed="true"] { border-color:var(--cs-acc); background:var(--cs-wash); color:var(--ink); }
+.csetup .wzband .ppl { font:400 11px/1.3 var(--mono); color:var(--ink-3); }
+.csetup .wzband button:disabled { cursor:default; }
+
+/* the words */
+.csetup .wztbl { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+.csetup .wztbl table { min-width:520px; width:100%; }
+.csetup .wztbl td { white-space:normal; vertical-align:middle; }
+.csetup .wztbl td .fld { width:100%; }
+
+/* the mark on the door */
+.csetup .wzmark .markrow { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.csetup .markrow img { height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff;
+                       padding:5px 10px; border:1px solid var(--line); border-radius:var(--r-md); }
+.csetup .markrow .none { font-size:var(--fs-small); color:var(--ink-3); }
+/* the branding, drawn by its own renderer inside the first step */
+.csetup .wzbrand { margin-top:26px; padding-top:6px; border-top:1px solid var(--line); }
+
+/* the modules band and the team rows (the console's own shape, §320.4, §322) */
+.csetup .band { border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface);
+                padding:12px 14px 10px; margin-top:22px; }
+.csetup .band .teamrow:last-of-type { border-bottom:0; }
+.csetup .teamrow { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+.csetup .teamrow .who .nm { font-weight:600; font-size:var(--fs-body); }
+.csetup .teamrow .who .em { color:var(--ink-3); font-size:12.5px; }
+.csetup .teamrow .sp { margin-left:auto; display:flex; gap:7px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.csetup .teamrow .none, .csetup .tag { font-size:var(--fs-micro); color:var(--ink-3); }
+.csetup .tag.open { color:var(--good-tx); background:var(--good-bg); border-radius:var(--r-pill); padding:2px 8px; font-weight:600; }
+.csetup .row { display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-top:12px; }
+.csetup .row .fld { flex:1 1 170px; min-width:0; width:auto; }
+.csetup .asrow { display:inline-flex; align-items:center; gap:6px; }
+.csetup .asrow .aslab { font:600 9.5px/1.4 var(--mono); letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.csetup .asrow .fld { width:auto; max-width:230px; padding:4px 6px; font-size:12px; }
+.csetup .cell { display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.csetup .cell button { border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+                       padding:5px 9px; font:600 11.5px/1.3 var(--sans); cursor:pointer; }
+.csetup .cell button:last-child { border-right:0; }
+.csetup .cell button.on { background:var(--cs-fill); color:var(--cs-fill-ink); }
+.csetup .cell button.on.hi { background:var(--cs-acc); color:var(--cs-acc-ink); }
+.csetup .cell.locked button { cursor:default; }
+
+/* ending it (§323): its own block, behind a rule, at the foot */
+.csetup .wzend { margin-top:26px; padding-top:16px; border-top:1px solid var(--line); max-width:560px; }
+.csetup .wzendkey { display:block; font:600 10.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase;
+                    color:var(--ink-3); margin-bottom:8px; }
+.csetup .wzendwhy { margin:0 0 12px; font-size:var(--fs-small); color:var(--ink-3); max-width:62ch; }
+.csetup .wzendrow { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+.csetup .wzask { border:1px solid var(--bad); background:var(--bad-bg); border-radius:var(--r-md); padding:13px 15px; }
+.csetup .wzask p { margin:0 0 11px; font-size:var(--fs-small); color:var(--ink); }
+.csetup .wzask .goes { margin:0 0 11px; font:400 12.5px/1.7 var(--mono); color:var(--ink-2); }
+.csetup .wzask .row { margin-top:12px; }
+
+/* ── the rail's strip (§360): Getting started, under the head ─────────── */
+.setuprail .railstart { flex:none; display:block; width:100%; text-align:left; cursor:pointer;
+                        padding:9px 14px 10px; border:0; border-bottom:1px solid var(--line);
+                        background:var(--surface); color:var(--ink); font:inherit; }
+.setuprail .railstart:hover { background:var(--surface-2); }
+.setuprail .railstart.on { box-shadow:inset 3px 0 0 var(--gold); }
+.setuprail .railstart .rslab { display:block; font:700 12.5px/1.3 var(--sans); }
+.setuprail .railstart .rsprog { display:block; margin-top:3px; font:500 11px/1.4 var(--sans); color:var(--ink-3); }
+.setuprail .railback.railfwd { display:inline-block; }
+
+/* ══ THE FOREFRONT TEAM, AS A SETUP TABLE (§364) ═════════════════════════
+   The shape is the setup tables' own — `.cfg > table.unitcfg` gives the navy
+   heading row, one line per cell, the 150px cap and the ellipsis, all from
+   `config.css` rather than from rules invented here (§53.5). What is left is
+   which columns may grow, and it is three lines.
+
+   AUTO LAYOUT, LIKE THE REGISTER'S. `table.unitcfg` is `table-layout:fixed`,
+   which divides the width equally — right for Companies, whose six columns
+   are of a size, and wrong here, where a name, an address, two buttons, a
+   select and one word have nothing in common. `.peoplecfg` makes exactly this
+   exception for exactly this reason (§93.6).
+
+   THE NAME IS NOT CAPPED and the EMAIL is capped wider than the family's
+   150px: a name is the only thing written in its column (§93.6) and a
+   Forefront address is ~35 characters, so 150 would clip both on every row
+   rather than on a long one.
+
+   AND THE TWO NUMBERS BELOW ARE WHAT MAKES IT FIT AT 1100 (§158: fit, never
+   "and it scrolls"). A column in auto layout can never be narrower than the
+   widest thing that will not wrap, so the least this table can be is the sum
+   of five of them — measured at 936px against an 825px pane before these two
+   lines, with the third consultant's address and a 240px select the two that
+   would not give. The select FILLS ITS CELL instead (`width:100%`, which is
+   what `arrange.css` already does for a select in a setup table), so the
+   register column costs its heading and nothing more; and the address caps at
+   220, which with its padding is the 243px left once the other four have
+   taken their 582 out of that pane. Both numbers are MEASURED, and the check
+   asserts the FIT rather than either of them, so a rail that changes width
+   turns it red instead of going stale quietly (§122.5). */
+/* AND BELOW THE WIDTH IT FITS AT, THE BOX SCROLLS RATHER THAN CUTTING. The
+   five minima come to 802px and a 1000px window gives the pane 725, so under
+   ~1080 the table is wider than its box whatever the caps say — and a table
+   that overflows a box with `overflow:visible` is the fault this section
+   exists to remove, one size down. `.tblscroll` is the family's own answer
+   for an ordinary Setup table that outgrows its box (§88: "anything wider
+   buys scroll"), and it is safe here because this head is `position:static`
+   like every other ordinary Setup table's (§135.2's damaged matrix was a
+   STICKY head inside a scroll box). The only `.cfg` under `.csetup` is this
+   one. */
+.csetup .cfg { overflow-x:auto; }
+.csetup .cfg > table.teamcfg { table-layout:auto; }
+/* AND NO COLUMN IS GIVEN A WIDTH, which is the third thing measured rather
+   than reasoned: `width:100%` on the name starved the middle three to nought
+   at 1280, and `width:1%` on the last column — the register's own trick for
+   its two frozen ones — starved that one to 10px with its own word painted
+   outside it. Left alone, the leftover is shared. */
+.csetup .teamcfg td.tmname, .csetup .teamcfg th.tmname { max-width:none; }
+.csetup .teamcfg td.tmmail, .csetup .teamcfg th.tmmail { --cell-cap:220px; }
+.csetup .teamcfg td.cc, .csetup .teamcfg th.cc { white-space:nowrap; }
+.csetup .teamcfg td.tmas .fld { width:100%; min-width:0; max-width:none; }
+/* ONE WORD, AT THE END — and NO WIDTH ON IT. `width:1%` is what the register
+   uses on its two frozen columns, and here it starved: measured, Chromium's
+   auto algorithm reads a percentage as a request and hands the rest away once
+   the other columns want more than there is, so at 1280 the Remove column was
+   10px with its own word painted outside it. Left alone, the leftover is
+   shared and every column keeps a sane size at every width. */
+.csetup .teamcfg th.tmrm, .csetup .teamcfg td.tmrm { white-space:nowrap; text-align:right; }
+/* The add row under the table, then the note — the order Companies and the
+   BU list already use. `.row` is the flow's own; it needs the table's gap. */
+.csetup .row.tmadd { margin-top:14px; }
+/* EACH SELECT AS WIDE AS ITS OWN WORDS. The flow's `.row .fld` is
+   `flex:1 1 170px`, written for a column; here the second one's placeholder
+   is "…as who on this client's register?" and a shared basis clipped it to
+   "…as who on this client's registe" — a control asking a question it cannot
+   finish. */
+.csetup .row.tmadd .fld { flex:0 1 auto; max-width:340px; }

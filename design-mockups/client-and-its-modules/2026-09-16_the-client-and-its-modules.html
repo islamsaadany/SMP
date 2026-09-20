@@ -1,0 +1,453 @@
+<title>The Client and Its Modules</title>
+<style>
+  :root{
+    /* THE PRODUCT'S OWN TOKENS, not invented for this drawing (§41.9).
+       Platform, forefront light — src/_shared.css. */
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434; --bad-bg:#F7E3E0;
+    --over-bg:#FBF6E9; --over-line:#E8D9AE;
+    /* Console — platform.html */
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --amber:#F5A623; --amber-tx:#9C5D08;
+    --amber-wash:#FEF4E2;
+    /* the drawing's own chrome: a cool slate, biased toward the product's navy */
+    --page:#EEF1F6; --card:#FFFFFF; --edge:#D3DAE6;
+    --note:#4A5468; --note-strong:#1A2334;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --panel:#1B2431; --panel-ink:#E9ECF1; --panel-quiet:#8A94A4;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --ground:#14161A; --surface:#1B1E24; --surface-2:#22262D;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#8FD3B0; --bad:#E79A93; --bad-bg:#3A2320;
+      --over-bg:#2A2519; --over-line:#4A422C;
+      --ff:#16223D; --ff-ink:#E9ECF1; --amber:#D9A03B; --amber-tx:#E8CA6A;
+      --amber-wash:#2E2617;
+      --page:#0E1014; --card:#171A20; --edge:#2B313B;
+      --note:#A6B0C0; --note-strong:#E9ECF1;
+    }
+  }
+  :root[data-theme="dark"]{
+    --panel:#1B2431; --panel-ink:#E9ECF1; --panel-quiet:#8A94A4;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1B1E24; --surface-2:#22262D;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#8FD3B0; --bad:#E79A93; --bad-bg:#3A2320;
+    --over-bg:#2A2519; --over-line:#4A422C;
+    --ff:#16223D; --ff-ink:#E9ECF1; --amber:#D9A03B; --amber-tx:#E8CA6A;
+    --amber-wash:#2E2617;
+    --page:#0E1014; --card:#171A20; --edge:#2B313B;
+    --note:#A6B0C0; --note-strong:#E9ECF1;
+  }
+
+  body{ background:var(--page); color:var(--note-strong); font-family:var(--sans);
+        margin:0; padding:0 16px; }
+  .wrap{ max-width:1080px; margin:0 auto; padding-block:36px 64px;
+         display:flex; flex-direction:column; gap:40px; }
+
+  .lede h1{ font:600 27px/1.25 var(--sans); margin:0 0 10px; text-wrap:balance;
+            letter-spacing:-.01em; }
+  .lede p{ font:400 14.5px/1.65 var(--sans); color:var(--note); margin:0 0 8px;
+           max-width:66ch; }
+  .lede .said{ border-left:2px solid var(--gold); padding:2px 0 2px 13px;
+               color:var(--note-strong); font-style:italic; }
+  .stamp{ font:600 10.5px/1.5 var(--mono); letter-spacing:.11em;
+          text-transform:uppercase; color:var(--note); margin:0 0 14px; }
+
+  /* ── a screen ───────────────────────────────────────────── */
+  .screen{ display:flex; flex-direction:column; gap:0; }
+  .cap{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+        margin:0 0 9px; }
+  .cap b{ font:600 15px/1.4 var(--sans); }
+  .cap .tag{ font:600 9.5px/1.6 var(--mono); letter-spacing:.1em;
+             text-transform:uppercase; padding:2px 7px; border-radius:5px;
+             border:1px solid var(--edge); color:var(--note); }
+  .cap .tag.now{ border-color:var(--bad); color:var(--bad); background:var(--bad-bg) }
+  .cap .tag.new{ border-color:var(--good); color:var(--good) }
+  .cap .addr{ font:500 11.5px/1.6 var(--mono); color:var(--note);
+              margin-left:auto; }
+
+  .frame{ border:1px solid var(--edge); border-radius:10px; overflow:hidden;
+          background:var(--ground); box-shadow:0 1px 2px rgba(15,25,45,.05),
+          0 10px 30px rgba(15,25,45,.07); }
+
+  /* the platform's navy chrome */
+  .bar{ background:var(--panel); color:var(--panel-ink); }
+  .bar .row1{ display:flex; align-items:center; gap:9px; padding:9px 12px; }
+  .mk{ width:26px; height:26px; border-radius:5px; background:rgba(255,255,255,.1);
+       display:grid; place-items:center; flex:none; }
+  .mk svg{ width:16px; height:16px; }
+  .brandname{ font:600 13px/1.2 var(--sans); }
+  .brandsub{ font:500 9.5px/1.4 var(--mono); letter-spacing:.09em;
+             text-transform:uppercase; color:var(--panel-quiet); }
+  .pill{ font:600 11px/1.5 var(--sans); padding:4px 10px; border-radius:99px;
+         border:1px solid rgba(255,255,255,.22); color:var(--panel-ink); }
+  .seg{ display:flex; border:1px solid rgba(255,255,255,.22); border-radius:99px;
+        overflow:hidden; }
+  .seg span{ font:600 10.5px/1.5 var(--mono); letter-spacing:.07em;
+             text-transform:uppercase; padding:4px 10px; color:var(--panel-quiet); }
+  .seg span.on{ background:rgba(255,255,255,.14); color:var(--panel-ink); }
+  .dests{ display:flex; gap:2px; padding:0 12px 0; overflow-x:auto;
+          border-top:1px solid rgba(255,255,255,.1); }
+  .dests span{ font:600 12px/1 var(--sans); padding:10px 11px; white-space:nowrap;
+               color:var(--panel-quiet); border-bottom:2px solid transparent; }
+  .dests span.on{ color:var(--panel-ink); border-bottom-color:var(--gold); }
+
+  /* the client's own slim header */
+  .chead{ background:var(--panel); color:var(--panel-ink);
+          display:flex; align-items:center; gap:11px; padding:11px 14px; }
+  .chead .who{ display:flex; flex-direction:column; gap:1px; }
+  .chead .save{ margin-left:auto; font:600 11.5px/1.5 var(--sans);
+                padding:6px 13px; border-radius:7px; background:var(--gold);
+                color:#231500; border:1px solid var(--gold); }
+
+  /* body: rail + pane */
+  .split{ display:grid; grid-template-columns:196px 1fr; gap:14px; padding:14px; }
+  .rail{ background:var(--surface); border:1px solid var(--line);
+         border-radius:9px; overflow:hidden; }
+  .rhead{ background:var(--panel); color:var(--panel-ink);
+          font:600 9.5px/1.6 var(--mono); letter-spacing:.1em;
+          text-transform:uppercase; padding:8px 11px; }
+  .rgrp{ font:600 9px/1.6 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+         color:var(--ink-3); padding:9px 11px 4px; }
+  .ritem{ display:flex; align-items:center; gap:7px; padding:6px 11px;
+          font:500 12.5px/1.5 var(--sans); color:var(--ink-2);
+          border-bottom:1px solid var(--line-soft); }
+  .ritem .g{ width:14px; text-align:center; color:var(--ink-3); font-size:11px; }
+  .ritem.on{ background:var(--over-bg); color:var(--ink); font-weight:600;
+             box-shadow:inset 3px 0 0 var(--gold); }
+  .railfoot{ border-top:1px solid var(--line); padding:8px 11px;
+             font:600 11px/1.5 var(--sans); color:var(--gold-deep); }
+
+  .pane{ background:var(--surface); border:1px solid var(--line);
+         border-radius:9px; padding:14px 15px; min-width:0; }
+  .ptitle{ font:600 15px/1.3 var(--sans); color:var(--ink); margin:0 0 11px; }
+  /* a table may outrun a phone; it scrolls in its own box rather than
+     pushing the page sideways */
+  .pane{ overflow-x:auto }
+  table{ width:100%; border-collapse:collapse; }
+  th{ background:var(--panel); color:var(--panel-ink); text-align:left;
+      font:600 9px/1.7 var(--mono); letter-spacing:.09em; text-transform:uppercase;
+      padding:6px 9px; }
+  td{ border-bottom:1px solid var(--line-soft); padding:7px 9px;
+      font:400 12.5px/1.5 var(--sans); color:var(--ink-2); white-space:nowrap; }
+  td b{ color:var(--ink); font-weight:600; }
+  .chip{ display:inline-block; font:600 9.5px/1.5 var(--mono); letter-spacing:.06em;
+         text-transform:uppercase; border:1px solid var(--line); border-radius:5px;
+         padding:1px 6px; color:var(--ink-3); }
+  .chip.seat{ border-color:var(--gold); color:var(--gold-deep); }
+  .tabs{ display:flex; gap:5px; margin:0 0 11px; flex-wrap:wrap; }
+  .tabs span{ font:600 11px/1.5 var(--sans); padding:5px 11px; border-radius:7px;
+              border:1px solid var(--line); color:var(--ink-3); }
+  .tabs span.on{ background:var(--over-bg); border-color:var(--over-line);
+                 color:var(--ink); }
+
+  /* the console */
+  .cbar{ background:var(--ff); color:var(--ff-ink); display:flex;
+         align-items:center; gap:10px; padding:11px 14px; }
+  .cbar .nm{ font:600 13px/1.2 var(--sans); }
+  .cbar .me{ margin-left:auto; font:500 11.5px/1.4 var(--sans); opacity:.8; }
+  .cgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:14px;
+          background:var(--page); }
+  .ccard{ position:relative; background:var(--card); border:1px solid var(--edge);
+          border-radius:9px; padding:13px; display:flex; flex-direction:column;
+          gap:8px; }
+  .ccard .cmk{ width:30px; height:30px; border-radius:7px; background:var(--ff);
+               color:var(--ff-ink); display:grid; place-items:center;
+               font:700 11px/1 var(--mono); }
+  .ccard h3{ font:600 14px/1.3 var(--sans); margin:0; color:var(--note-strong); }
+  .ccard .ind{ font:400 11.5px/1.4 var(--sans); color:var(--note); margin:0; }
+  .ccfg{ position:absolute; top:11px; right:11px; font:600 9.5px/1.6 var(--mono);
+         letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+         border:1px solid var(--edge); border-radius:6px; padding:2px 7px;
+         background:var(--card); cursor:pointer; }
+  .mrow{ display:flex; align-items:center; gap:8px; padding:6px 8px;
+         border:1px solid var(--edge); border-radius:7px;
+         font:500 12px/1.4 var(--sans); color:var(--note-strong); }
+  .mrow em{ margin-left:auto; font-style:normal; font:500 10.5px/1.4 var(--mono);
+            color:var(--note); }
+
+  /* annotation under a screen */
+  .note{ border:1px solid var(--edge); border-left:3px solid var(--gold);
+         border-radius:0 8px 8px 0; background:var(--card); padding:12px 15px;
+         margin-top:11px; }
+  .note h4{ font:600 10px/1.6 var(--mono); letter-spacing:.1em;
+            text-transform:uppercase; color:var(--note); margin:0 0 7px; }
+  .note ul{ margin:0; padding-left:17px; }
+  .note li{ font:400 13px/1.7 var(--sans); color:var(--note); margin:0 0 3px; }
+  .note li b{ color:var(--note-strong); font-weight:600; }
+  .note li.no b{ color:var(--bad) }
+
+  .count{ font:500 11.5px/1.5 var(--mono); color:var(--ink-3); margin:-4px 0 10px; }
+  .count span{ color:var(--line) }
+  .foot{ font:400 12px/1.6 var(--sans); color:var(--ink-3); margin:11px 0 0;
+         padding-top:9px; border-top:1px solid var(--line-soft); }
+  .foot b{ color:var(--ink-2); font-weight:600 }
+  .says{ font:400 12.5px/1.6 var(--sans); color:var(--ink-2); margin:-4px 0 11px;
+         background:var(--over-bg); border:1px solid var(--over-line);
+         border-radius:7px; padding:8px 11px; }
+  .says b{ color:var(--ink); font-weight:600 }
+  tr.ff td{ background:var(--surface-2) }
+  td.na{ color:var(--ink-3) }
+  td.act{ font:500 11px/1.5 var(--sans); color:var(--gold-deep); white-space:nowrap }
+  .src{ font:600 8.5px/1.5 var(--mono); letter-spacing:.09em; text-transform:uppercase;
+        color:var(--ink-3); border:1px solid var(--line); border-radius:4px;
+        padding:1px 5px; margin-left:5px; vertical-align:1px; }
+  .split.one{ grid-template-columns:1fr }
+  .sub{ margin-top:16px }
+  .rule{ border:0; border-top:1px solid var(--edge); margin:0 }
+
+  .decide{ background:var(--card); border:1px solid var(--edge); border-radius:10px;
+           padding:18px 20px; }
+  .decide h2{ font:600 17px/1.3 var(--sans); margin:0 0 12px; }
+  .decide ol{ margin:0; padding-left:20px; }
+  .decide li{ font:400 13.5px/1.75 var(--sans); color:var(--note); margin:0 0 7px; }
+  .decide li b{ color:var(--note-strong); font-weight:600 }
+
+  @media (max-width:760px){
+    .split{ grid-template-columns:1fr }
+    .cgrid{ grid-template-columns:1fr }
+    .cap .addr{ margin-left:0; width:100% }
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="lede">
+    <p class="stamp">Spec 056 · drawn 16 Sep 2026 · nothing built</p>
+    <h1>The client and its modules</h1>
+    <p class="said">“this is a client settings separate than any module … it’s just a
+      settings page for the client and it doesn’t show anything else … after I finish
+      I save and close to go back to the console to choose which module I’d like to see.”</p>
+    <p>Three screens: what the client’s settings look like today, what they become, and
+      the console you land back on. Drawn in the product’s own tokens — the navy is
+      <code>--panel</code>, the gold is <code>--gold</code>, the greys are the platform’s.</p>
+  </div>
+
+  <hr class="rule">
+
+  <!-- ══ 1 · TODAY ══ -->
+  <section class="screen">
+    <div class="cap">
+      <b>1 · Today</b>
+      <span class="tag now">the complaint</span>
+      <span class="addr">/raya-trade/setup</span>
+    </div>
+    <div class="frame">
+      <div class="bar">
+        <div class="row1">
+          <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/>
+            <path d="M5 10v10h14V10"/></svg></span>
+          <span class="brandname">Raya Trade</span>
+          <span class="pill">Group ▾</span>
+          <span class="seg"><span class="on">Units</span><span>Functions</span></span>
+        </div>
+        <div class="dests">
+          <span class="on">Mobile</span><span>Retail</span><span>Mazaya</span>
+          <span>CE</span><span>Online</span><span>Corporate</span><span>Care</span>
+          <span>IT Dist.</span><span>Logistics</span><span>Nigeria</span>
+        </div>
+      </div>
+      <div class="split">
+        <div class="rail">
+          <div class="rhead">Client · Setup</div>
+          <div class="ritem"><span class="g">◐</span>Getting started</div>
+          <div class="ritem on"><span class="g">☰</span>People register</div>
+          <div class="ritem"><span class="g">▦</span>Official BU list</div>
+          <div class="ritem"><span class="g">▤</span>Business units</div>
+          <div class="ritem"><span class="g">◇</span>Functions</div>
+        </div>
+        <div class="pane">
+          <p class="ptitle">People register</p>
+          <table>
+            <tr><th>Name</th><th>Unit</th><th>Roles</th></tr>
+            <tr><td><b>Ramy Behairy</b></td><td>Mobile</td><td><span class="chip">Unit owner</span></td></tr>
+            <tr><td><b>Hala Sabry</b></td><td>CX</td><td><span class="chip">Custodian</span></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <h4>What is wrong with it</h4>
+      <ul>
+        <li>The bar is <b>Strategy’s navigation</b> — the group, the units, the plan.
+          The pages underneath it are the <b>client’s</b>, and only Forefront can open them.</li>
+        <li>None of the seven pages on that rail uses a destination, a switch or a tab.
+          They were never navigating with it.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══ 2 · THE CLIENT'S SETTINGS ══ -->
+  <section class="screen">
+    <div class="cap">
+      <b>2 · The client’s settings</b>
+      <span class="tag new">proposed</span>
+      <span class="addr">/raya-trade/setup</span>
+    </div>
+    <div class="frame">
+      <div class="chead">
+        <span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/>
+          <path d="M5 10v10h14V10"/></svg></span>
+        <span class="who">
+          <span class="brandname">Raya Trade</span>
+          <span class="brandsub">Client settings</span>
+        </span>
+        <span class="save">Save &amp; close</span>
+      </div>
+      <div class="split">
+        <div class="rail">
+          <div class="rgrp">Who</div>
+          <div class="ritem"><span class="g">◐</span>Client set-up</div>
+          <div class="ritem"><span class="g">◆</span>Forefront team</div>
+          <div class="ritem on"><span class="g">☰</span>People register</div>
+          <div class="ritem"><span class="g">▦</span>Official BU list</div>
+          <div class="rgrp">What it runs</div>
+          <div class="ritem"><span class="g">▤</span>Business units</div>
+          <div class="ritem"><span class="g">◫</span>Companies</div>
+          <div class="ritem"><span class="g">◇</span>Functions</div>
+          <div class="ritem"><span class="g">◈</span>Capabilities</div>
+          <div class="rgrp">Words &amp; mail</div>
+          <div class="ritem"><span class="g">“</span>Terminology</div>
+          <div class="ritem"><span class="g">➤</span>Outgoing email</div>
+          <div class="rgrp">The record</div>
+          <div class="ritem"><span class="g">↺</span>History</div>
+          <div class="railfoot">‹ Back to the console</div>
+        </div>
+        <div class="pane">
+          <p class="ptitle">People register</p>
+          <p class="count">33 of the client&rsquo;s own people <span>&middot;</span> 3 from Forefront</p>
+          <table>
+            <tr><th>Name</th><th>Unit</th><th>Roles</th><th>Seat</th></tr>
+            <tr><td><b>Ramy Behairy</b></td><td>Mobile</td><td><span class="chip">Unit owner</span></td><td>&mdash;</td></tr>
+            <tr><td><b>Hala Sabry</b></td><td>CX</td><td><span class="chip">Custodian</span></td><td>&mdash;</td></tr>
+            <tr><td><b>Yara Kamal</b></td><td>Marketing</td><td><span class="chip">Function head</span></td><td>&mdash;</td></tr>
+            <tr class="ff"><td><b>Islam Saadany</b> <span class="src">Forefront</span></td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="chip seat">Super user</span></td></tr>
+            <tr class="ff"><td><b>Noran Essam</b> <span class="src">Forefront</span></td><td class="na">&mdash;</td><td class="na">&mdash;</td><td><span class="chip seat">SMO team</span></td></tr>
+          </table>
+          <p class="foot">The last two are read from <b>Forefront team</b> &mdash; shown here,
+            edited there. No unit, no role, no password on our own rows.</p>
+        </div>
+      </div>
+    </div>
+    <div class="sub">
+      <div class="cap"><b>2b · Forefront team</b><span class="tag new">new entry</span>
+        <span class="addr">/raya-trade/setup/team</span></div>
+      <div class="frame"><div class="split one">
+        <div class="pane">
+          <p class="ptitle">Forefront team</p>
+          <p class="says">These settings belong to the <b>Super user</b> and the
+            <b>SMO team</b> &mdash; the two seats below, and nobody else.</p>
+          <table>
+            <tr><th>Name</th><th>Email</th><th>Seat</th><th></th></tr>
+            <tr><td><b>Islam Saadany</b></td><td>islam.saadany@forefront.consulting</td>
+                <td><span class="chip seat">Super user</span></td><td class="act">Change seat</td></tr>
+            <tr><td><b>Noran Essam</b></td><td>noran.essam@forefront.consulting</td>
+                <td><span class="chip seat">SMO team</span></td><td class="act">Change seat &middot; Remove</td></tr>
+          </table>
+          <p class="foot">One place a consultant is added, seated and removed. The
+            register shows them; this is where they change.</p>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="note">
+      <h4>What is drawn, and what is not</h4>
+      <ul>
+        <li><b>The client’s mark, name and colours</b> — so you know which client you are in
+          when there is nothing else on the screen.</li>
+        <li><b>Save &amp; close</b>, which returns to the console.</li>
+        <li class="no">No <b>house mark</b>, no <b>Group dropdown</b>, no <b>Units | Functions</b>,
+          no <b>row of units</b>, no <b>tabs</b>, no <b>module switcher</b>.</li>
+        <li><b>Forefront team</b> is the store: one place a consultant is added, seated
+          and removed. The register <b>reads</b> from it — shown there, edited here, so a
+          seat holder can never also be given a client role.</li>
+        <li>The <b>count says both</b> rather than one number quietly meaning two things.</li>
+        <li><b>Terminology</b> is the same page Strategy opens — one page, two doors, never
+          two copies that sync.</li>
+        <li><b>Outgoing email</b> is the address, the name and the footer. The inbox and
+          sending a message stay with the module: they are tools, not set-up.</li>
+        <li><b>History</b> is the whole record, with tabs — <i>The client · Strategy ·
+          Insights</i>. Each module’s own settings shows only its own slice.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══ 3 · THE CONSOLE ══ -->
+  <section class="screen">
+    <div class="cap">
+      <b>3 · The console you come back to</b>
+      <span class="tag new">unchanged</span>
+      <span class="addr">/platform</span>
+    </div>
+    <div class="frame">
+      <div class="cbar">
+        <span class="nm">Forefront</span>
+        <span class="me">Islam Saadany</span>
+      </div>
+      <div class="cgrid">
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <span class="cmk">RT</span>
+          <h3>Raya Trade</h3>
+          <p class="ind">Trade &amp; distribution</p>
+          <div class="mrow">Strategy <em>cycle open</em></div>
+          <div class="mrow">Insights <em>4 reports</em></div>
+        </div>
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <span class="cmk">RH</span>
+          <h3>RHI</h3>
+          <p class="ind">Healthcare</p>
+          <div class="mrow">Strategy <em>no plan yet</em></div>
+        </div>
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <span class="cmk">EA</span>
+          <h3>El Abd</h3>
+          <p class="ind">Food &amp; retail</p>
+          <div class="mrow">Strategy <em>no plan yet</em></div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <h4>Nothing here changes</h4>
+      <ul>
+        <li><b>Settings</b> on a card opens screen 2. <b>Save &amp; close</b> comes back here.</li>
+        <li>The <b>module rows are already doors</b> — pressing one opens that module for
+          that client. This is where we choose which module to see.</li>
+        <li>A client’s own people never reach this page. Their chooser is the
+          <b>module switcher in the module bar</b>, already built, already drawn only
+          where there is more than one module.</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <div class="decide">
+    <h2>What this drawing is asking you to sign off</h2>
+    <ol>
+      <li><b>The client’s settings wear the client’s bar and nothing else</b> — mark, name,
+        Save &amp; close.</li>
+      <li><b>The rail as grouped above</b>, including the four new entries: Forefront team,
+        Terminology, Outgoing email, History. <i>Outgoing email</i> is a proposed name.</li>
+      <li><b>Forefront team is where a consultant is added and seated; the register reads
+        from it</b> and shows them read-only, with no unit, no role and no password.</li>
+      <li><b>Back is Save &amp; close, and it lands on the console.</b></li>
+      <li><b>Nobody’s access moves</b> on the day this ships — it is a re-housing, never
+        a re-granting, and it will be asserted rather than promised.</li>
+    </ol>
+  </div>
+
+</div>

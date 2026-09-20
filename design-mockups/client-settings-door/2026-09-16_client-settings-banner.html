@@ -1,0 +1,420 @@
+<title>Client settings door</title>
+<!-- ══════════════════════════════════════════════════════════════════
+     THE CLIENT SETTINGS DOOR, AND SETTING A CLIENT UP AS A BANNER — a mockup
+     for sign-off (rule 1c), 2026-09-16.
+
+     Islam, 2026-09-16, of the Client setup block spec 056 put on the welcome
+     screen: "setting the client up is not a repeated task so it should be
+     burried under the client overall settings as a banner and show me
+     mockups for the options that I'm saying or the ones you recommend."
+
+     So the block LEAVES the welcome screen (frame 1, common to every option).
+     What the options settle is two things: WHERE the door onto the client's
+     own settings sits, and WHAT SHAPE the one-off set-up takes inside them.
+     The pages themselves — People register, Official BU list, Business units,
+     Companies, Functions, Capabilities, Branding, Knowledge base — are the
+     ones §359.2 already draws on the client's rail; nothing here invents a
+     page. Tokens are the platform's own (design-mockups/module-setup).
+     ══════════════════════════════════════════════════════════════════ -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#A9BAD8; --panel-accent:#E2B96B;
+    --gold:#C89B3C; --gold-deep:#9C5D08; --gold-wash:#FBF3E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn-tx:#8A6410; --warn-bg:#FBF2DC;
+    --bad-tx:#B23025;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+    --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans:"Source Sans 3", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --r:10px; --r-sm:6px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --panel:#0D2350; --panel-ink:#F0F4FB; --panel-quiet:#95A9CC; --panel-accent:#E2B96B;
+      --gold:#D4A855; --gold-deep:#E2B96B; --gold-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn-tx:#D7B04A; --warn-bg:#2A2515;
+      --bad-tx:#E8776B;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --panel:#0D2350; --panel-ink:#F0F4FB; --panel-quiet:#95A9CC; --panel-accent:#E2B96B;
+    --gold:#D4A855; --gold-deep:#E2B96B; --gold-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn-tx:#D7B04A; --warn-bg:#2A2515;
+    --bad-tx:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  body{ margin:0; background:var(--ground); color:var(--ink); font:15px/1.45 var(--sans); -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1120px; margin:0 auto; padding-block:32px 72px; padding-inline:20px; display:flex; flex-direction:column; gap:28px; }
+
+  h1{ font:600 30px/1.15 var(--serif); margin:0; letter-spacing:-.01em; text-wrap:balance; }
+  .lede{ display:flex; flex-wrap:wrap; gap:10px 26px; margin:0; padding:0; list-style:none; color:var(--ink-2); font-size:14px; }
+  .lede li::before{ content:"·"; color:var(--gold); font-weight:700; margin-right:8px; }
+  .lede b{ color:var(--ink); font-weight:600; }
+
+  /* ── a frame: a browser window with an address bar ───────────────── */
+  .frame{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden; }
+  .frame > .cap{ display:flex; align-items:baseline; gap:14px; padding:12px 18px; border-bottom:1px solid var(--line); background:var(--surface-2); flex-wrap:wrap; }
+  .frame > .cap h2{ font:600 17px/1.2 var(--serif); margin:0; }
+  .frame > .cap .url{ font:13px/1 var(--mono); color:var(--ink-2); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:5px 12px; }
+  .frame > .cap .url b{ font-weight:500; color:var(--gold-deep); }
+  .frame > .cap .tag{ margin-left:auto; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+
+  /* the platform's own top bar */
+  .bar{ background:var(--panel); color:var(--panel-ink); display:flex; align-items:center; gap:18px; padding:0 18px; height:46px; font-size:13.5px; }
+  .bar .mk{ font-weight:700; letter-spacing:.02em; }
+  .bar .org{ color:var(--panel-quiet); }
+  .bar .org b{ color:var(--panel-ink); font-weight:600; }
+  .bar .sw{ display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.28); border-radius:var(--r-sm); padding:4px 9px; }
+  .bar .sw::before{ content:""; width:10px; height:10px; display:inline-block; background:
+      linear-gradient(currentColor,currentColor) 0 0/4px 4px no-repeat,
+      linear-gradient(currentColor,currentColor) 6px 0/4px 4px no-repeat,
+      linear-gradient(currentColor,currentColor) 0 6px/4px 4px no-repeat,
+      linear-gradient(currentColor,currentColor) 6px 6px/4px 4px no-repeat; }
+  .bar .gear{ margin-left:auto; color:var(--panel-quiet); }
+  .bar .gear.on{ color:var(--panel-accent); }
+
+  /* screen body */
+  .screen{ padding:22px 24px 26px; }
+  .split{ display:grid; grid-template-columns:232px 1fr; gap:22px; align-items:start; }
+  @media (max-width:760px){ .split{ grid-template-columns:1fr; } }
+
+  /* Setup rail, as the product draws it */
+  .rail{ border:1px solid var(--line); border-radius:var(--r); background:var(--surface); overflow:hidden; font-size:13.5px; }
+  .rail .rhead{ background:var(--surface-2); padding:9px 12px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); border-bottom:1px solid var(--line); }
+  .rail .rgroup{ border-top:1px solid var(--line-soft); }
+  .rail .rgroup:first-of-type{ border-top:0; }
+  .rail .gh{ padding:9px 12px 3px; font-weight:700; font-size:12.5px; color:var(--ink-2); }
+  .rail .ritem{ padding:6px 12px 6px 22px; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .rail .ritem.on{ background:var(--gold-wash); color:var(--ink); font-weight:600; box-shadow:inset 3px 0 0 var(--gold); }
+  .rail .ritem.moves{ color:var(--ink-3); }
+  .rail .ritem.moves::after{ content:""; width:7px; height:7px; border-radius:50%; background:var(--gold); margin-left:auto; flex:none; }
+  .rail .ritem.new{ position:relative; }
+  .rail .ritem.new::after{ content:"NEW"; margin-left:auto; font-size:9.5px; letter-spacing:.14em; font-weight:700; color:var(--gold-deep); }
+
+  .pane{ border:1px solid var(--line); border-radius:var(--r); background:var(--surface); overflow:hidden; }
+  .pane .pt{ padding:12px 18px; border-bottom:1px solid var(--line); font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .pane .pt .crumb{ color:var(--ink-3); font-weight:400; }
+  .pane .pb{ padding:18px; }
+
+  /* Roles & access matrix */
+  .ac{ border-collapse:collapse; width:100%; font-size:13px; font-variant-numeric:tabular-nums; }
+  .ac th, .ac td{ border:1px solid var(--line-soft); padding:7px 10px; text-align:left; }
+  .ac thead th{ background:var(--surface-2); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .ac thead th.grp{ text-align:center; }
+  .ac tbody th{ font-weight:600; color:var(--ink); white-space:nowrap; }
+  .ac td{ text-align:center; }
+  .chip{ display:inline-block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--ink-3); }
+  .chip.view{ color:var(--ink-2); }
+  .chip.fill{ background:var(--warn-bg); color:var(--warn-tx); border-color:transparent; }
+  .chip.edit{ background:var(--good-bg); color:var(--good); border-color:transparent; }
+  .chip.none{ color:var(--ink-3); border-style:dashed; }
+  .tblscroll{ overflow-x:auto; }
+
+  /* landing (welcome) screen */
+  .greet{ font:500 24px/1.2 var(--serif); margin:0 0 4px; }
+  .sig{ color:var(--ink-3); font-size:13px; margin:0 0 18px; }
+  .cols{ display:grid; grid-template-columns:1.1fr .9fr; gap:22px; align-items:start; }
+  @media (max-width:760px){ .cols{ grid-template-columns:1fr; } }
+  .blk h3{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700; }
+  .rows{ display:flex; flex-direction:column; gap:6px; }
+  .row{ display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); font-size:14px; }
+  .row .k{ font-weight:600; min-width:96px; }
+  .row .k.m{ min-width:110px; }
+  .row .v{ color:var(--ink-2); flex:1; }
+  .row .go{ color:var(--gold-deep); font-weight:600; font-size:13px; white-space:nowrap; }
+  .row.cta{ background:var(--gold-wash); border-color:transparent; }
+  .row .count{ background:var(--panel); color:var(--panel-ink); font-size:11px; font-weight:700; border-radius:999px; padding:2px 8px; }
+  .row .ll{ color:var(--ink-3); font-size:13px; }
+  .row .ll b{ color:var(--ink-2); font-weight:600; }
+  .rows.client .row{ background:var(--surface-2); border-color:transparent; }
+  .exit{ margin-top:18px; padding:11px 14px; border:1px solid var(--line); border-radius:var(--r-sm); text-align:center; font-weight:600; color:var(--ink-2); }
+  .only{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-deep); font-weight:700; margin-left:8px; }
+
+  /* landing-line setting */
+  .opts{ display:flex; flex-direction:column; gap:8px; }
+  .opt{ display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm); font-size:14px; }
+  .opt.on{ border-color:var(--gold); background:var(--gold-wash); }
+  .opt .dot{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--ink-3); flex:none; margin-top:3px; }
+  .opt.on .dot{ border-color:var(--gold-deep); box-shadow:inset 0 0 0 3.5px var(--surface), inset 0 0 0 8px var(--gold-deep); }
+  .opt .ex{ color:var(--ink-3); font-size:13px; }
+  .prev{ margin-top:16px; }
+  .prev h4{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0 0 8px; font-weight:700; }
+
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:900px){ .two{ grid-template-columns:1fr; } }
+  .key{ display:flex; gap:22px; font-size:13px; color:var(--ink-2); padding:10px 18px; border-top:1px solid var(--line); background:var(--surface-2); }
+  .key i{ display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--gold); margin-right:7px; vertical-align:middle; font-style:normal; }
+  /* ── this drawing's own additions ────────────────────────────────── */
+  .split3{ display:grid; grid-template-columns:212px 212px 1fr; gap:18px; align-items:start; }
+  @media (max-width:900px){ .split3{ grid-template-columns:1fr; } }
+  .rail .rback{ padding:7px 12px; font-size:12.5px; color:var(--gold-deep); font-weight:600; border-bottom:1px solid var(--line-soft); }
+  .rail .ritem.door{ color:var(--gold-deep); font-weight:600; }
+  .rail .ritem.door::after{ content:"›"; margin-left:auto; }
+  .rail .ritem.quiet{ color:var(--ink-3); }
+  .rail .ritem .n{ margin-left:auto; font-size:11px; color:var(--ink-3); font-weight:600; }
+  .arrow{ align-self:center; justify-self:center; color:var(--ink-3); font-size:22px; }
+
+  /* the banner, folded and open */
+  .ban{ border-bottom:1px solid var(--line); background:var(--surface-2); }
+  .ban .bh{ display:flex; align-items:center; gap:12px; padding:10px 18px; font-size:13.5px; }
+  .ban .bh .bk{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+  .ban .bh .bs{ color:var(--ink-2); }
+  .ban .bh .bs b{ color:var(--ink); font-weight:600; }
+  .ban .bh .car{ margin-left:auto; color:var(--ink-3); }
+  .ban .steps{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; padding:0 18px 14px; }
+  @media (max-width:760px){ .ban .steps{ grid-template-columns:1fr; } }
+  .step{ display:flex; align-items:center; gap:9px; padding:8px 10px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm); font-size:13px; }
+  .step .tick{ width:14px; height:14px; border-radius:50%; flex:none; border:1.5px solid var(--line); }
+  .step.done .tick{ background:var(--good); border-color:var(--good); position:relative; }
+  .step.done .tick::after{ content:""; position:absolute; left:4px; top:1.5px; width:3px; height:7px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .step .sk{ font-weight:600; }
+  .step .sv{ color:var(--ink-3); font-size:12px; margin-left:auto; text-align:right; }
+  .step.todo .sv{ color:var(--warn-tx); font-weight:600; }
+  .ban .bfoot{ padding:0 18px 12px; font-size:12.5px; color:var(--ink-3); display:flex; gap:18px; }
+  .ban .bfoot a{ color:var(--gold-deep); font-weight:600; }
+
+  /* rail strip variant */
+  .rail .rstrip{ margin:8px; padding:8px 10px; background:var(--surface-2); border-radius:var(--r-sm); font-size:12.5px; color:var(--ink-2); }
+  .rail .rstrip .bk{ display:block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--ink-3); margin-bottom:3px; }
+  .rail .rstrip b{ color:var(--ink); font-weight:600; }
+  .rail .rstrip .car{ float:right; color:var(--ink-3); }
+
+  /* a page of steps (option C) */
+  .steplist{ display:flex; flex-direction:column; gap:8px; }
+  .steplist .step{ font-size:14px; padding:11px 12px; }
+  .steplist .step .go{ color:var(--gold-deep); font-weight:600; font-size:13px; margin-left:auto; white-space:nowrap; }
+  .steplist .step .sv{ margin-left:0; }
+
+  .tbl{ width:100%; border-collapse:collapse; font-size:13px; }
+  .tbl th, .tbl td{ border-bottom:1px solid var(--line-soft); padding:6px 8px; text-align:left; }
+  .tbl thead th{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; background:var(--surface-2); }
+  .pill{ display:inline-block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--ink-3); }
+
+  .cost{ border-top:1px solid var(--line); background:var(--surface-2); padding:12px 18px; font-size:13px; color:var(--ink-2); display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; }
+  @media (max-width:760px){ .cost{ grid-template-columns:1fr; } }
+  .cost b{ color:var(--ink); font-weight:600; }
+  .cost .rec{ color:var(--gold-deep); font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:11px; }
+  .opttag{ display:inline-block; background:var(--panel); color:var(--panel-ink); font-size:11px; font-weight:700; letter-spacing:.12em; border-radius:999px; padding:3px 10px; margin-right:6px; }
+  .opttag.rec{ background:var(--gold-deep); }
+  .note{ font-size:13px; color:var(--ink-2); margin:0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Where the client's settings live, and the one-off set-up as a banner</h1>
+    <ul class="lede" style="margin-top:12px">
+      <li><b>Common to every option</b>: the Client setup block leaves the welcome screen, and the house mark opens the real landing rather than the old overlay.</li>
+      <li><b>What the options settle</b>: where the door onto the client's own settings sits, and what shape the one-off set-up takes inside them.</li>
+      <li><b>Nothing new is stored</b>: the six steps read what is already on the register, the organisation, Branding and Email.</li>
+    </ul>
+  </header>
+
+  <!-- ═══ 1 · the welcome, common ═══ -->
+  <section class="frame">
+    <div class="cap"><h2>1 · The welcome screen, in every option</h2><span class="url">smp… /<b>raya-trade</b></span><span class="tag">the block is gone</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· <b>Raya Trade</b></span><span class="gear">⌂</span></div>
+    <div class="screen">
+      <p class="greet">Welcome, Islam</p>
+      <p class="sig">Super user · the group &nbsp;·&nbsp; Raya Trade — Strategy Management Office</p>
+      <div class="cols">
+        <div class="blk">
+          <h3>Waiting on you</h3>
+          <div class="rows">
+            <div class="row"><span class="v">Nothing is waiting on you</span></div>
+          </div>
+          <h3 style="margin-top:20px">Your modules</h3>
+          <div class="rows">
+            <div class="row"><span class="k m">Strategy</span><span class="ll">Cycle 2 closed · <b>334 of 400 reported</b></span><span class="go">Open ›</span></div>
+            <div class="row"><span class="k m">Insights</span><span class="ll"><b>2 new reports</b> this month</span><span class="go">Open ›</span></div>
+          </div>
+        </div>
+        <div class="blk">
+          <h3>Your pages</h3>
+          <div class="rows">
+            <div class="row"><span class="k m">Setup — Reporting cycle</span><span class="go">›</span></div>
+            <div class="row"><span class="k m">The group — Performance</span><span class="go">›</span></div>
+          </div>
+          <p class="note" style="margin-top:16px">The cycle card stays as it is. The Client setup block is the only thing that goes.</p>
+        </div>
+      </div>
+      <div class="exit">Continue to SMO</div>
+    </div>
+  </section>
+
+  <!-- ═══ A · Islam's: door at the foot, banner over the page ═══ -->
+  <section class="frame">
+    <div class="cap"><h2><span class="opttag">A</span>Door at the foot of the module's rail · banner over the page</h2><span class="url">…/raya-trade/<b>strategy</b>/setup → …/raya-trade/<b>client</b>/setup</span><span class="tag">as asked</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Strategy</b></span><span class="sw">Strategy ▾</span><span class="gear on">⚙ Setup</span></div>
+    <div class="screen">
+      <div class="split3">
+        <nav class="rail">
+          <div class="rhead">Strategy · Setup</div>
+          <div class="rgroup"><div class="gh">Running the cycle</div>
+            <div class="ritem">Reporting cycle</div><div class="ritem">Platform Inbox</div><div class="ritem">History</div><div class="ritem">Send an email</div><div class="ritem">Import &amp; storage</div></div>
+          <div class="rgroup"><div class="gh">Measurement</div>
+            <div class="ritem">Figure sets</div><div class="ritem">Focus measures</div><div class="ritem">Scoring bands</div><div class="ritem">Terminology</div></div>
+          <div class="rgroup"><div class="gh">Access</div><div class="ritem">Roles &amp; access</div></div>
+          <div class="rgroup"><div class="gh">The landing</div><div class="ritem">Landing line</div></div>
+          <div class="rgroup"><div class="gh">The client</div><div class="ritem door new">Client settings</div></div>
+        </nav>
+        <nav class="rail">
+          <div class="rhead">Client · Setup</div>
+          <div class="rback">‹ Back to Strategy's Setup</div>
+          <div class="rgroup"><div class="gh">People &amp; access</div>
+            <div class="ritem on">People register</div><div class="ritem">Official BU list</div></div>
+          <div class="rgroup"><div class="gh">The organisation</div>
+            <div class="ritem">Business units</div><div class="ritem">Companies</div><div class="ritem">Functions</div><div class="ritem">Capabilities</div></div>
+          <div class="rgroup"><div class="gh">Branding</div><div class="ritem">Branding</div></div>
+          <div class="rgroup"><div class="gh">Help</div><div class="ritem">Knowledge base</div></div>
+        </nav>
+        <div class="pane">
+          <div class="ban">
+            <div class="bh"><span class="bk">Setting this client up</span><span class="bs"><b>4 of 6</b> done · Branding and Email still to do</span><span class="car">▾</span></div>
+            <div class="steps">
+              <div class="step done"><span class="tick"></span><span class="sk">People</span><span class="sv">33 on the register</span></div>
+              <div class="step done"><span class="tick"></span><span class="sk">Access</span><span class="sv">Seats placed</span></div>
+              <div class="step done"><span class="tick"></span><span class="sk">Organisation</span><span class="sv">10 units · 8 functions</span></div>
+              <div class="step todo"><span class="tick"></span><span class="sk">Branding</span><span class="sv">No mark yet ›</span></div>
+              <div class="step todo"><span class="tick"></span><span class="sk">Email</span><span class="sv">Sender not set ›</span></div>
+              <div class="step done"><span class="tick"></span><span class="sk">Knowledge base</span><span class="sv">Shipped answers</span></div>
+            </div>
+            <div class="bfoot"><span>Folds to one line once every step is done.</span><a>Hide this</a></div>
+          </div>
+          <div class="pt"><span class="crumb">Client ›</span> People register</div>
+          <div class="pb tblscroll">
+            <table class="tbl"><thead><tr><th>Name</th><th>Unit</th><th>Roles</th><th>Status</th></tr></thead>
+              <tbody><tr><td>Islam Saadany</td><td>The group</td><td><span class="pill">Super user</span></td><td>Active</td></tr>
+              <tr><td>Mohamed Essam</td><td>The group</td><td><span class="pill">SMO team</span></td><td>Active</td></tr>
+              <tr><td>Ahmed Mostafa</td><td>Mobile</td><td><span class="pill">BU owner</span></td><td>Active</td></tr>
+              <tr><td>Hala Kamel</td><td>CX</td><td><span class="pill">Custodian</span></td><td>Active</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cost">
+      <div><b>Where the door is</b> — the last group on every module's rail, one entry. Rarely used, so it sits below the daily things.</div>
+      <div><b>The banner</b> — folded to one line at the top of every client page once the six are done; open while something is left. Pushes the page down by that much.</div>
+      <div><b>The way back</b> mirrors it: a row under the client rail's head, back to the module you came from.</div>
+      <div><b>Cost</b>: a door at the foot is under the fold on a laptop once a module's rail is long, and the banner takes a page's first line on every client page until it is hidden.</div>
+    </div>
+  </section>
+
+  <!-- ═══ B · door under the head, banner in the rail ═══ -->
+  <section class="frame">
+    <div class="cap"><h2><span class="opttag rec">B</span>Door under the module rail's head · the set-up as a strip in the client rail</h2><span class="url">…/raya-trade/<b>strategy</b>/setup → …/raya-trade/<b>client</b>/setup</span><span class="tag">recommended</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Strategy</b></span><span class="sw">Strategy ▾</span><span class="gear on">⚙ Setup</span></div>
+    <div class="screen">
+      <div class="split3">
+        <nav class="rail">
+          <div class="rhead">Strategy · Setup</div>
+          <div class="rback">Client settings ›</div>
+          <div class="rgroup"><div class="gh">Running the cycle</div>
+            <div class="ritem">Reporting cycle</div><div class="ritem">Platform Inbox</div><div class="ritem">History</div><div class="ritem">Send an email</div><div class="ritem">Import &amp; storage</div></div>
+          <div class="rgroup"><div class="gh">Measurement</div>
+            <div class="ritem">Figure sets</div><div class="ritem">Focus measures</div><div class="ritem">Scoring bands</div><div class="ritem">Terminology</div></div>
+          <div class="rgroup"><div class="gh">Access</div><div class="ritem">Roles &amp; access</div></div>
+          <div class="rgroup"><div class="gh">The landing</div><div class="ritem">Landing line</div></div>
+        </nav>
+        <nav class="rail">
+          <div class="rhead">Client · Setup</div>
+          <div class="rback">‹ Back to Strategy's Setup</div>
+          <div class="rstrip"><span class="bk">Setting this client up</span><b>4 of 6</b> done · Branding, Email <span class="car">▸</span></div>
+          <div class="rgroup"><div class="gh">People &amp; access</div>
+            <div class="ritem on">People register</div><div class="ritem">Official BU list</div></div>
+          <div class="rgroup"><div class="gh">The organisation</div>
+            <div class="ritem">Business units</div><div class="ritem">Companies</div><div class="ritem">Functions</div><div class="ritem">Capabilities</div></div>
+          <div class="rgroup"><div class="gh">Branding</div><div class="ritem">Branding</div></div>
+          <div class="rgroup"><div class="gh">Help</div><div class="ritem">Knowledge base</div></div>
+        </nav>
+        <div class="pane">
+          <div class="pt"><span class="crumb">Client ›</span> People register</div>
+          <div class="pb tblscroll">
+            <table class="tbl"><thead><tr><th>Name</th><th>Unit</th><th>Roles</th><th>Status</th></tr></thead>
+              <tbody><tr><td>Islam Saadany</td><td>The group</td><td><span class="pill">Super user</span></td><td>Active</td></tr>
+              <tr><td>Mohamed Essam</td><td>The group</td><td><span class="pill">SMO team</span></td><td>Active</td></tr>
+              <tr><td>Ahmed Mostafa</td><td>Mobile</td><td><span class="pill">BU owner</span></td><td>Active</td></tr>
+              <tr><td>Hala Kamel</td><td>CX</td><td><span class="pill">Custodian</span></td><td>Active</td></tr></tbody></table>
+          </div>
+          <div class="ban" style="border-top:1px solid var(--line);border-bottom:0">
+            <div class="bh"><span class="bk">The strip, opened</span><span class="bs">what the rail strip unfolds to when pressed — the same six steps as A, drawn under the rail head</span></div>
+            <div class="steps">
+              <div class="step done"><span class="tick"></span><span class="sk">People</span><span class="sv">33 on the register</span></div>
+              <div class="step done"><span class="tick"></span><span class="sk">Access</span><span class="sv">Seats placed</span></div>
+              <div class="step done"><span class="tick"></span><span class="sk">Organisation</span><span class="sv">10 units · 8 functions</span></div>
+              <div class="step todo"><span class="tick"></span><span class="sk">Branding</span><span class="sv">No mark yet ›</span></div>
+              <div class="step todo"><span class="tick"></span><span class="sk">Email</span><span class="sv">Sender not set ›</span></div>
+              <div class="step done"><span class="tick"></span><span class="sk">Knowledge base</span><span class="sv">Shipped answers</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cost">
+      <div><b>Where the door is</b> — a row under the module rail's head, the exact mirror of the <i>Back</i> row the client rail already has. Same place on every module's rail, never under the fold.</div>
+      <div><b>The banner</b> — a strip in the client rail, under its head: one line, folds open to the six steps. The pages themselves do not change shape, and it is on every client page without pushing any of them down.</div>
+      <div><span class="rec">Why recommended</span> — the two rails become each other's mirror, and the set-up is buried where you said, inside the client's settings, without costing any page a line.</div>
+      <div><b>Cost</b>: the strip is small, so "4 of 6 done" is the whole of what it says until pressed; it goes away once every step is done, with nothing to bring it back — the six pages are right under it.</div>
+    </div>
+  </section>
+
+  <!-- ═══ C · the set-up as its own page, no banner ═══ -->
+  <section class="frame">
+    <div class="cap"><h2><span class="opttag">C</span>Door under the head · the set-up as the client rail's first page, no banner</h2><span class="url">…/raya-trade/<b>client</b>/setup/<b>start</b></span><span class="tag">the alternative</span></div>
+    <div class="bar"><span class="mk">SMP</span><span class="org">· Raya Trade <b>› Client</b></span><span class="sw">Strategy ▾</span><span class="gear on">⚙ Setup</span></div>
+    <div class="screen">
+      <div class="split3" style="grid-template-columns:212px 1fr">
+        <nav class="rail">
+          <div class="rhead">Client · Setup</div>
+          <div class="rback">‹ Back to Strategy's Setup</div>
+          <div class="rgroup"><div class="gh">Getting started</div>
+            <div class="ritem on">Setting this client up <span class="n">4/6</span></div></div>
+          <div class="rgroup"><div class="gh">People &amp; access</div>
+            <div class="ritem">People register</div><div class="ritem">Official BU list</div></div>
+          <div class="rgroup"><div class="gh">The organisation</div>
+            <div class="ritem">Business units</div><div class="ritem">Companies</div><div class="ritem">Functions</div><div class="ritem">Capabilities</div></div>
+          <div class="rgroup"><div class="gh">Branding</div><div class="ritem">Branding</div></div>
+          <div class="rgroup"><div class="gh">Help</div><div class="ritem">Knowledge base</div></div>
+        </nav>
+        <div class="pane">
+          <div class="pt"><span class="crumb">Client ›</span> Setting this client up</div>
+          <div class="pb steplist">
+            <div class="step done"><span class="tick"></span><span class="sk">People</span><span class="sv">33 on the register</span><span class="go">People register ›</span></div>
+            <div class="step done"><span class="tick"></span><span class="sk">Access</span><span class="sv">Seats placed, everyone sits somewhere</span><span class="go">People register ›</span></div>
+            <div class="step done"><span class="tick"></span><span class="sk">Organisation</span><span class="sv">10 units · 3 companies · 8 functions</span><span class="go">Business units ›</span></div>
+            <div class="step todo"><span class="tick"></span><span class="sk">Branding</span><span class="sv">No mark uploaded yet</span><span class="go">Branding ›</span></div>
+            <div class="step todo"><span class="tick"></span><span class="sk">Email</span><span class="sv">Sender name not set</span><span class="go">Send an email ›</span></div>
+            <div class="step done"><span class="tick"></span><span class="sk">Knowledge base</span><span class="sv">The platform's own answers</span><span class="go">Knowledge base ›</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cost">
+      <div><b>Where the door is</b> — as B, a row under the module rail's head.</div>
+      <div><b>The set-up</b> — a page of its own, first on the client rail, with its count on the rail entry. Not a banner: it is opened on purpose and never sits over another page.</div>
+      <div><b>What it buys</b>: room for a sentence per step, and a page to send a new consultant to.</div>
+      <div><b>Cost</b>: a page that is done is a page with nothing to do on it, sitting first in the rail for ever — unless it drops to the foot once complete, which is a rail that reorders itself.</div>
+    </div>
+  </section>
+
+  <section class="frame">
+    <div class="cap"><h2>What is the same in A, B and C</h2></div>
+    <div class="cost" style="border-top:0">
+      <div><b>The welcome screen</b> loses the block and keeps everything else; the house mark inside the platform opens this landing, so there is one welcome screen and not two.</div>
+      <div><b>The six steps read the data</b> — the register's count, whether the seats are placed, the units and functions, whether a mark and a sender are set — so a tick is never typed and never goes stale.</div>
+      <div><b>Who sees it</b>: the client's Setup rail is the office's, as it is today; the door draws for whoever may open it and for nobody else.</div>
+      <div><b>Nothing stored, nothing migrated</b> for A or C. B and A's <i>Hide this</i> store one mark on the group, as an absence, so a hidden banner stays hidden for the whole office.</div>
+    </div>
+  </section>
+</div>

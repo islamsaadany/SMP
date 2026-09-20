@@ -2502,8 +2502,54 @@
       ? "#" + f.mark.id
       : "[data-" + f.mark.attr.replace(/[A-Z]/g, function(c){ return "-" + c.toLowerCase(); }) +
         "=" + JSON.stringify(String(f.mark.val)) + "]";
-    var el;
-    try { el = document.querySelector(sel); } catch (e) { return; }
+    /* ── AN ADDRESS THAT IS NOT UNIQUE IS NOT AN ADDRESS (§374) ──────
+       Islam: "the copy on click for the email and double click to edit is
+       working but the same behavior is not working on the phone number."
+
+       IT IS NOT A PHONE FAULT — it is any copyable value two rows SHARE, and
+       falsifying it is what said so: with the phones shared and the emails
+       unique, Mobile fails and Email works; with both unique, both work; with
+       the EMAILS shared, Email fails and Mobile works. The phone is simply the
+       column where a value repeats — a shared office line, or the same number
+       typed on two rows.
+
+       The mark above names the focused control by its first `data-` attribute,
+       on the stated grounds that "every editable control in the platform
+       carries one". Every editable one carries a KEY — `data-pphone="loghead"`
+       — and §93.6's copy button carries `data-copy="+20 100 1234567"`, which
+       is the PAYLOAD. So the first click of a double-click focuses that button,
+       the paint that opens the cell then asks for `[data-copy="…"]`, and
+       `querySelector` hands back the FIRST row carrying that number — somebody
+       else's button. Focus leaves the box that was just opened, `blur` fires
+       with the box still in the document, so §372.16's `isConnected` guard
+       reads it as a person moving away rather than as a repaint, and the cell
+       shuts about 90ms after it opened. §87's rule one field over: a value is
+       never an identifier.
+
+       RESTORE ONLY WHAT THE MARK NAMES ONCE, which can never lose a correct
+       restore — it only ever stops a wrong one — and that is MEASURED rather
+       than argued: swept over every focusable control on a unit's plan (pen
+       open and shut), the register with every column showing, and Roles &
+       access, the only marks naming more than one element are `data-copy` (33,
+       the fault) and three that are not editable at all — a hover mark, the
+       viewer keys, a destination button. NOT ONE EDITABLE FIELD IN THE PRODUCT
+       HAS AN AMBIGUOUS ADDRESS, because every one of them is keyed by person or
+       by row id, so there is no cursor here left to lose. It lands exactly
+       where this function's own comment already says it should: "when it does not, the
+       worst case is that nothing is restored, which is where the product was
+       already." The dialog's copy wins first, for §372.14's reason two hundred
+       lines down: a row's cell and the open person dialog draw the same control
+       for the same person, and the one on top is the one somebody is typing in.
+
+       INVISIBLE OVER `file://`, AND THAT IS WHY NO CHECK SAW IT (§372.16, the
+       same trap one guard along): nothing saves, so the second paint that
+       carries the stolen focus never happens, and both columns open perfectly
+       — measured on the built file before this was believed. */
+    var all;
+    try { all = document.querySelectorAll(sel); } catch (e) { return; }
+    if (!all.length) return;
+    var el = document.querySelector("#modal-b " + sel) ||
+             (all.length === 1 ? all[0] : null);
     if (!el) return;
     /* `preventScroll`, and it is the whole point. focus() scrolls its element
        into view by default, so restoring the scroll and THEN restoring the

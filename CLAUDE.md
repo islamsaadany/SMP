@@ -8081,6 +8081,49 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   actions in the minutes do not reach the tracker and are not meant to (spec
   054 decision 3); a module is turned ON per client from the card; nothing says
   which office person is looking at a note while somebody else edits it.
+- **PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (&sect;375, spec
+  056):** Islam, on the handover saying every screen was drawn and three of six
+  signed off &mdash; *"proceed."* **WHAT IS BUILT IS THE HALF A *PROCEED* CAN
+  HONESTLY REACH**: rule 1c is paid for the project team, the charter and the
+  plan and **owed for Progress, Analytics and the landing**, so nothing visual
+  is built and `portfolio` stays `built: false` &mdash; **asserted rather than
+  assumed**, with the Tracker's `built: true` beside it or the assertion passes
+  on a build where the whole table had gone (&sect;61, &sect;113.8). **&sect;8 OF
+  THE SPEC NAMED THIS SLICE IN ITS OWN WORDS** (*the six rules of &sect;3 are
+  checked as rules, not as screens &hellip; provable without a browser*), so
+  `lib/portfolio.ts` is those six plus &sect;6's reach and &sect;9.8's roll-up
+  and the check asks them with no browser at all. **A FLAT ORDERED ARRAY IS THE
+  TREE, AND IT IS THE DRAWINGS' OWN SHAPE** &mdash; `_derive.js` already reads
+  exactly that, so the plan on the screen and the plan on the server cannot
+  arrive at two answers for one project (&sect;5.2): *the mockup's shape earned
+  its way into the product rather than being translated out of it.*
+  **&sect;243'S BLANK RULE IS A SECOND COPY ON PURPOSE AND THAT IS NOT &sect;53.5
+  IGNORED**: `koWeights` is the frozen product's, read by six frozen sources and
+  run in a vm by `lib/frozen.cjs`, and Portfolio may not reach into Strategy's
+  vocabulary (&sect;9.1's own argument for why the three words could not ride
+  `labels`) &mdash; so what is asserted is that this answers what &sect;243
+  answers, never a number. **THE CONSTRAINTS ARE ASSERTED BY ATTEMPTING THE ROW**
+  (&sect;96) **WITH THE CONSTRAINT'S NAME** (&sect;113.8), which is how &sect;7.6's
+  first row &mdash; *two nullable parents and nothing says exactly one is set* &mdash;
+  becomes a `CHECK` that both the orphan and the two-parent row bounce off.
+  **EIGHT TABLES AND SIX NAMED AND NOT BUILT**, because a table ahead of its
+  screen is a column nothing writes (&sect;294.2); **both paths proved by running
+  them** (&sect;33.5) &mdash; a fresh database, and `HEAD`'s own schema first
+  (**0 portfolio tables**) then migration 015 alone (**8**), run twice for
+  idempotency, every one RLS-forced with its policy read back and asserted
+  identical to `tracker_actions`' (&sect;94.8) and every one cascading from its
+  client or `deleteTenant` would refuse. **AND BUILDING &sect;6 FOUND TWO
+  SENTENCES OF THE SPEC POINTING DIFFERENT WAYS**: &sect;6.4/&sect;9.2 make naming
+  people the SEAT's while &sect;5.1a has the charter's Manager row read whoever is
+  at Lead and *setting it there sets the role* &mdash; answered the narrow way
+  (&sect;42 fails closed) and written into the spec as &sect;6.4a rather than left
+  for whoever builds the charter to discover. 121/0, **red ten ways, one per
+  rule** &mdash; and one break modelled a BROKEN FUNCTION rather than the defect
+  until it was rewritten to produce **`1.0.1`**, the plan growing a level it does
+  not have. **The frozen product is untouched and measured**
+  (`built-in-step.py` all good), so **`sw.js` is NOT bumped**. Two reds are
+  `main`'s, established on a baseline worktree first (&sect;303): `tracker` 227/1
+  on a date-relative literal gone stale, and spike S2 on `notes.met_on`.
 - **A MODULE IS A FOLDER THAT SERVES ITSELF (§354, spec 046):** the third
   module arrived and the route's own comment — *a branch rather than a table
   because there are two of them* — was still there with Insights' eight lines
@@ -8426,6 +8469,48 @@ node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # the browser's locale format &mdash; the third found
                                 # by LOOKING at the built page beside the mockup,
                                 # which is what rule 1c's last step is for
+node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
+                                # any screen (spec 060, &sect;375) &mdash; `npm run
+                                # check:portfolio`, needs a database and NO browser,
+                                # which is what &sect;8 of that spec asks for in its own
+                                # words. &sect;1&ndash;&sect;8 run the six rules pure: who gets in,
+                                # the two-step sign-off and the reopen gated LIKE it
+                                # (&sect;7.6 &mdash; theirs needs only the work-on gate, so a
+                                # Contributor undoes a Lead's), the real dates at one
+                                # chokepoint, progress from the breakdown with a typed
+                                # figure refused, the weighted roll-up by &sect;243's blank
+                                # rule, the numbering with its 1.2.3 &rarr; 1.2 collapse,
+                                # the cascade preview, and what is owed as a count of
+                                # ROWS and never of reasons (&sect;279). &sect;9 runs every
+                                # statement as `smp_app` with the tenant set and asserts
+                                # each constraint by ATTEMPTING the row, never by reading
+                                # the DDL (&sect;96), with the CONSTRAINT'S NAME asserted or a
+                                # row refused for some other reason reads as the rule
+                                # working (&sect;113.8). &sect;10 reads the catalogue: all eight
+                                # tables RLS-forced, their policy IDENTICAL to
+                                # `tracker_actions`' (&sect;94.8), none on PLATFORM_TABLES
+                                # (&sect;331), every one cascading from its client or
+                                # `deleteTenant` would refuse. BOTH ENDS EVERYWHERE
+                                # (&sect;94.2) &mdash; a Viewer cannot comment AND a Lead can, or
+                                # a build that refused everybody passes half. 121/0, red
+                                # TEN ways (`check:portfolio:red`), one break per rule.
+                                # **AND ONE BREAK MODELLED A BROKEN FUNCTION RATHER THAN
+                                # THE DEFECT**: `no-collapse` first forced every row to
+                                # the activity level, so phases read `0`; corrected, it
+                                # forces the DEPTH and an activity under a phase reads
+                                # **`1.0.1`** &mdash; the plan growing a level it does not
+                                # have. *A falsification that breaks the function proves
+                                # the check runs; one that reproduces the defect proves
+                                # the check is about something.* Its weighted coverage
+                                # was one assertion until the state was MADE (&sect;255): the
+                                # fixture carries no weights, so `equal-only` reddened
+                                # once and everything else averaged equally &mdash; a
+                                # weighted phase and activity take it to three. And my
+                                # own first weighted figure was TYPED and wrong (20 where
+                                # the arithmetic is 15), which is &sect;9.8's own lesson in
+                                # the check rather than in the drawing; it is asserted
+                                # beside the equally-weighted 50, so the number is pinned
+                                # by a difference and not only by itself
 node smp-app/checks/insights.mjs # the library, and who can see one report
                                 # (spec 053, &sect;355) &mdash; `npm run check:insights`,
                                 # needs a database. &sect;1b is the narrowing's PURE
@@ -10141,6 +10226,169 @@ office module, so **my second mockup's claim that it closes the defect "for
 free" is true of the shapes in front of us and not in general, corrected here
 rather than left standing** (&sect;124); the honest fix is those two modules'
 own area declarations, which this round was not asked about.*
+
+*Earlier: 2026-09-20 &mdash; **&sect;375: Portfolio &mdash; the rules and the
+tables, before any screen (spec 060).** Islam, on the handover saying every
+screen was drawn and three of six signed off: **"proceed."** **WHAT IS BUILT IS
+THE HALF A *PROCEED* CAN HONESTLY REACH** &mdash; rule 1c is owed on three
+screens, so nothing visual is built, `portfolio` stays `built: false`, and the
+flag is ASSERTED with a built module beside it (&sect;61, &sect;113.8). &sect;8 of
+that spec named this slice in its own words, so the six rules, &sect;6's reach
+and &sect;9.8's roll-up are pure functions a check asks with no browser at all.
+**The drawings' own shape earned its way into the product** &mdash; the flat
+ordered array `_derive.js` reads &mdash; so the plan on the screen and the plan
+on the server cannot arrive at two answers for one project. **&sect;243's blank
+rule is a second copy ON PURPOSE**, because Portfolio may not reach into
+Strategy's frozen vocabulary; what is asserted is that it answers what &sect;243
+answers, never a number. **Every constraint is asserted by ATTEMPTING the row,
+with the constraint's NAME** (&sect;96, &sect;113.8), and both migration paths are
+proved by running them (&sect;33.5). **Building &sect;6 found two sentences of the
+spec pointing different ways** &mdash; can a Lead name somebody? &mdash; answered
+the narrow way and written in as &sect;6.4a rather than left to be discovered.
+**121/0, red ten ways, one per rule** &mdash; and one break modelled a broken
+function rather than the defect until it was rewritten to produce `1.0.1`, the
+plan growing a level it does not have. The frozen product is untouched and
+MEASURED, so `sw.js` is not bumped. Two reds are `main`'s, established on a
+baseline worktree first (&sect;303).
+**&sect;375.1 &mdash; AND THE MERGE IS PART OF THE RECORD**: `main` had moved
+**73 commits** and taken both numbers, so the renumber ran BEFORE the merge,
+which is what makes it provably this branch's own rather than somebody else's
+citations swept up by accident (&sect;264.3) &mdash; both spellings, every count
+DECLARED in advance and a mismatch refusing the whole pass (&sect;336.1,
+&sect;353.4). **Four files overlapped and every one is COMBINED, never picked**
+(&sect;318.7), **and the resolution is ASSERTED rather than eyeballed**: against
+`origin/main` exactly ONE line is removed across the three records, and it is
+main's own `*Last Updated:*` becoming `*Earlier:*`, which is that file's own
+convention. **The frozen half is main's byte for byte**, so nothing is rebuilt
+and **no `SHELL` bump is owed** &mdash; &sect;91's trigger is the built file's
+bytes changing and they did not (&sect;356.17, re-earned) &mdash; and outside
+this branch's own files the merged tree hashes identical to `origin/main`, so
+&sect;147.4's grep-the-deletions has nothing to find. **Re-run on the MERGED
+tree** (&sect;365): portfolio 121/0 red ten ways, door 143/0, shell 118/0,
+state 92/0, modules 158/0, insights 127/0, notes 170/0, frameworks 90/0, setup
+33/0, room 10/0, deploy 5/0, memory 16/0, demo 7/0, standing 7/0,
+`built-in-step.py` all good, `generated-in-step` and `declared-deps` all clear,
+`npm run build` green and **`tsc` clean COLD**. **The one red is `main`'s**
+&mdash; `tracker` 227/1 on a heading the check spells as a date and the product
+now spells as a week number, reproduced on a worktree of `origin/main` first
+(&sect;303). **AND THREE THINGS THE RUN TAUGHT WERE THE HARNESS, NOT THE
+PRODUCT**: four checks called by names `package.json` does not hold came back
+with an EMPTY log and a non-zero exit, which reads exactly like a check that
+died (&sect;298.3 &mdash; an empty tail is not a verdict); `generated-in-step`
+REFUSED to run while the merge was uncommitted and said which errand that was
+(&sect;349.4's stale-versus-mid-edit, working as designed); and `memory` failed
+in its own words, *"no tenant to write about &mdash; run
+`scripts/dev-tenant.mjs` first"* (&sect;328.3 saying so rather than throwing a
+foreign-key error).
+**&sect;375.2 &mdash; PUSHED TO `main`, AND &sect;91.5's LIVE READ COULD NOT BE
+MADE FROM HERE**: this environment's egress policy refuses the production
+address outright (403 at the proxy's CONNECT), so no request left this machine
+and **nobody here has seen production serve this commit** &mdash; said rather
+than claimed (&sect;54.5, rule 3a). **AND THERE IS NO WITNESS FILE THIS TIME**,
+which is worth saying rather than leaving as an absence: &sect;374.1 proved its
+own deploy by `shell.js`'s byte count moving, and this round changes **not one
+served byte** &mdash; every generated copy, the frozen build and `sw.js` hash
+identical to the commit before &mdash; so the two builds are indistinguishable
+from outside and what production gains is in the DATABASE and in code nothing
+calls yet. **&sect;91 is satisfied by construction rather than by timing**: the
+branch's remote is still at the renumber while the merge, the record and the
+push note went to `main` alone, so `main`'s tip is on no other ref &mdash; and
+**the branch is deliberately NOT fast-forwarded** until production has served
+it, because putting that SHA on a second ref is the one act left that could
+still cost the build. **NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec
+029): three `db/`/`lib/` files are in the range and all three are Portfolio's
+own and new, no `api/` file changed, nothing reads the eight new tables,
+`lib/portfolio.ts` is imported by its check and by nothing that runs, and the
+migration creates eight tables and names no existing one. **Merged to `main`
+2026-09-20.***
+*Earlier: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
+not an address (spec 059).** Islam, of the register: *"for the copy on click for
+the email and double click to edit is working but the same behavior is not
+working on the phone number."* **IT IS NOT A PHONE FAULT, AND ESTABLISHING THAT
+WAS THE ROUND**: both cells are built by the same two functions &mdash;
+`copyable()` for the value, `pcell()` for the cell &mdash; with nothing between
+them that could tell a phone from an address, and over `file://` both open
+perfectly. What separates them is the DATA. **Falsified three ways rather than
+argued**: phones shared and emails unique &rarr; Mobile fails, Email works; both
+unique &rarr; both work; the **EMAILS** shared &rarr; **Email fails and Mobile
+works**. The fault follows a value two rows SHARE, and the phone is simply the
+column where one repeats &mdash; a shared office line, or the same number typed
+twice. **THE CHAIN, MEASURED**: `focusMark()` names the control that had the
+cursor by its first `data-` attribute, on the stated grounds that *"every
+editable control in the platform carries one"* &mdash; every editable one
+carries a KEY (`data-pphone="loghead"`) and &sect;93.6's copy button carries
+`data-copy="+20 100 1234567"`, which is the **PAYLOAD**. So the first click of
+the double-click focuses that button, the paint that opens the cell asks for
+`[data-copy="&hellip;"]`, and `querySelector` hands back the **first row
+carrying that number** &mdash; somebody else's button; focus leaves the box that
+was just opened, `blur` fires with the box still in the document, &sect;372.16's
+`isConnected` guard reads it as a person moving away rather than as a repaint,
+and the cell shuts **about 90ms after it opened**. &sect;87 one field over: *a
+value is never an identifier.* **AND THE EMAIL ONLY WORKED BY LUCK** &mdash; an
+address is unique per person, so the selector matched exactly one button, the one
+the paint had just replaced, found nothing and restored nothing: the column that
+behaved was not behaving for a reason anybody had chosen. **INVISIBLE OVER
+`file://`, WHICH IS WHY EVERY CHECK WAS GREEN** (&sect;372.16's own trap, one
+guard along): nothing saves there, so the second paint that carries the stolen
+focus never happens &mdash; measured on the built file first, then over HTTP
+against a stub that saves. **RESTORE ONLY WHAT THE MARK NAMES ONCE**: one guard
+in `putFocus`, which can never lose a correct restore and only ever stops a wrong
+one &mdash; **measured rather than argued**, since swept over a unit's plan (pen
+open and shut), the register with every column on and Roles &amp; access, the
+only marks naming more than one element are `data-copy` (33, the fault) and three
+that are not editable at all, so **not one editable field in the product has an
+ambiguous address** &mdash; landing exactly where that function's own comment
+already said it should
+(*"the worst case is that nothing is restored, which is where the product was
+already"*), with the open dialog's copy winning first for &sect;372.14's reason.
+**In the general helper and not in the copy button**, because a list of
+attributes to skip is a list somebody forgets to add to (&sect;104.7) and the
+same fault reaches any control whose data attribute is a payload, on any repaint.
+**AND THE CHECK'S OWN FIXTURE ALREADY HELD THE STATE AND NOTHING ASKED**:
+`people-dialog.py`'s `REAL` gives every row the same number, and &sect;372.14's
+section &mdash; which deliberately races a save, for exactly this class &mdash;
+presses **Job title**, whose `data-ptitle="<key>"` is unique, so the one thing it
+could never reach is a mark naming two controls. &sect;2b presses the shared
+value with the unique Email beside it as the control (&sect;113.8) and asserts
+the box is **still there a beat later**, because a cell that opens and shuts 90ms
+afterwards passes any probe that looks once (&sect;94.8); the copy is asserted on
+both, or a fix reaching the single click would trade one act for the other.
+**1 red** from the SOURCES with the guard reverted (&sect;276), printing the
+symptom verbatim (`open: False, pcell: None, active: 'copyval mono'`).
+**RECORDED, NOT DONE**: the Mobile copy target is **19.4px in a 38.6px row**
+against Email's 28.1, because the address wears `.val` (4px of vertical padding)
+and the number wears `.mono` (none) &mdash; not what was reported, a restyle
+nobody asked for, and it wants a measurement of every `.mono` cell rather than
+one column's (rule 1b). **MERGED TO `main` 2026-09-20 on Islam's word**, as a
+clean fast-forward &mdash; `main` had not moved, so the tree pushed is the tree
+that was checked. **AND THE MERGE ITSELF CARRIES THIS LINE, BECAUSE THE BRANCH
+TIP WAS ALREADY PUSHED** (&sect;91, by &sect;357.4's own road): Vercel
+deduplicates by SHA, so fast-forwarding `main` onto a commit the branch ref
+already holds is ONE deployment and which ref gets it is a race already lost
+&mdash; and *the way back is a commit `main` holds and the branch does not,*
+*and it must be one worth making*, which the record owed anyway, since a
+finished round that still reads *waiting on Islam* is a record that is wrong.
+**AND &sect;91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, SO IT IS SAID
+RATHER THAN CLAIMED** (&sect;54.5, rule 3a): this environment's egress policy
+refuses `smp-orpin-tau.vercel.app` outright &mdash; 403 at the proxy's CONNECT,
+which its own README says to report rather than route around &mdash; so the
+served bytes are **unread**, and the deployment is unverified from here. The
+witness is **`shell.js` ALONE** and it was measured rather than copied from
+the round before: **not `sw.js`** (&sect;365, &sect;316.10 &mdash; the generator
+drops the half of the worker that carries `SHELL`, so the served worker is
+byte-identical either side of this merge and the bumped name reaches nobody),
+**and not `platform.css`**, which &sect;367 could use and this round cannot: no
+stylesheet changed, so it holds **669,731** bytes on both builds and a match
+would hold either way (&sect;113.8, caught by asking the two builds rather than
+by repeating the previous sentence). `shell.js` goes **3,824,282 &rarr;
+3,827,402**, matching the generated copy to the byte. **SO THE BRANCH IS
+DELIBERATELY NOT FAST-FORWARDED**: `main`'s tip is unique by construction while
+the branch stays where it is, and putting that SHA on a second ref is the one
+thing left that could still cost the deployment &mdash; a fast-forward is one
+command whenever somebody has read the live site. **NO FORCED SIGN-OUT IS OWED
+AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029): not one `api/`,
+`lib/` or `db/` file is in it, so nothing about how a save is judged moves,
+nothing stored moves and nothing is migrated.*
 
 *Earlier: 2026-09-19 &mdash; **&sect;373: the open box, and the column
 that never said it was frozen (spec 059).** Islam, testing &sect;372, with two

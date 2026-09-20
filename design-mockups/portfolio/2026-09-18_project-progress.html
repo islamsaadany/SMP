@@ -1,0 +1,575 @@
+<!-- Portfolio · Progress — the sign-off queue and what is owed (spec 060 §3, §4, §6.5).
+     Drawn 2026-09-18.
+
+     IT READS THE PLAN'S OWN ROWS, which is the point rather than a convenience:
+     the array below is copied byte for byte from 2026-09-18_project-plan.html,
+     so every count on this page and every count on that one come off one list.
+     Two screens of one project that disagree is the fault §5.2 spends its
+     length on, and §9.8 is the record of it happening once already.
+
+     THE PAGE SAYS WHAT IS TRUE AND THE CONTROLS ARE DRAWN FOR WHOEVER HOLDS
+     THEM (§301): the switch at the top is the drawing's own, so both ends can
+     be looked at (§94.2). A Lead signs off; a Contributor sees the same state
+     and no sign-off control; a Viewer changes nothing at all (§6.2). -->
+<title>Portfolio Project Progress</title>
+<style>
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --none:#8E97A3; --on-fill:#FFFFFF; --on-accent:#16325C;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+      --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+      --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+      --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+      --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+  }
+
+  body{ margin:0; background:var(--ground); color:var(--ink);
+        font:14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        padding:0 16px; padding-block:28px 56px; }
+  .wrap{ max-width:1180px; margin:0 auto; }
+  button{ font:inherit; cursor:pointer; }
+  button:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  input{ font:inherit; }
+
+  .phead h1{ font-size:21px; font-weight:700; margin:0; letter-spacing:-.01em; }
+  .crumb{ font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+          color:var(--ink-3); font-weight:700; margin:0 0 4px; }
+  .tabs{ display:flex; gap:2px; border-bottom:1px solid var(--line);
+         margin:10px 0 18px; flex-wrap:wrap; }
+  .tabs button{ background:none; border:0; border-bottom:2px solid transparent;
+                padding:8px 13px; font-size:13.5px; color:var(--ink-3); font-weight:600; }
+  .tabs button.on{ color:var(--ink); border-bottom-color:var(--gold); }
+  .tabs button:hover{ color:var(--ink); }
+
+  .btn{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+        background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+        border-radius:5px; padding:6px 12px; }
+  .btn:hover{ border-color:var(--gold); color:var(--ink); }
+  .btn.on{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+
+  /* the drawing's own switch — never a control of the product */
+  .asrow{ display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+          background:var(--surface-2); border:1px dashed var(--line);
+          border-radius:6px; padding:8px 12px; margin-bottom:16px; }
+  .asrow em{ font-style:normal; font-size:10.5px; letter-spacing:.07em;
+             text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .asrow .n{ font-size:12.5px; color:var(--ink-3); margin-left:auto; }
+
+  /* the three counts */
+  .strip{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;
+          margin-bottom:18px; }
+  @media (max-width:760px){ .strip{ grid-template-columns:1fr; } }
+  .cell{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+         padding:11px 14px; }
+  .cell .k{ margin:0; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; }
+  .cell .v{ font-size:22px; font-weight:700; line-height:1.25;
+            font-variant-numeric:tabular-nums; }
+  .cell .w{ font-size:12.5px; color:var(--ink-3); }
+  .cell.sign .v{ color:var(--attn-tx); }
+  .cell.late .v{ color:var(--bad-tx); }
+
+  .sec{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+        overflow:hidden; margin-bottom:16px; }
+  .sec > header{ background:var(--panel); color:var(--panel-ink);
+                 padding:8px 14px; display:flex; gap:10px; align-items:baseline;
+                 flex-wrap:wrap; }
+  .sec > header b{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+  .sec > header .c{ font-size:11px; color:var(--panel-quiet); font-weight:700; }
+  .sec .empty{ margin:0; padding:14px; font-size:13.5px; color:var(--ink-3); }
+
+  .q{ border-top:1px solid var(--line-soft); padding:12px 14px; }
+  .q:first-child{ border-top:0; }
+  .qh{ display:flex; gap:9px; align-items:baseline; flex-wrap:wrap; }
+  .qh .num{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px;
+            font-weight:700; }
+  .qh b{ font-size:14px; }
+  .qh .who{ font-size:12.5px; color:var(--ink-3); margin-left:auto; }
+  .qsub{ font-size:13px; color:var(--ink-2); margin-top:3px; }
+  .qact{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px; }
+  .fld{ display:flex; gap:7px; align-items:center; font-size:13px; }
+  .fld input{ background:var(--surface); color:var(--ink);
+              border:1px solid var(--line); border-radius:5px; padding:5px 8px;
+              font-variant-numeric:tabular-nums; }
+  .fld input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .bound{ font-size:12.5px; color:var(--ink-3); margin:6px 0 0; max-width:78ch; }
+  .cta{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+        background:var(--panel); color:var(--panel-ink); border:1px solid var(--panel);
+        border-radius:5px; padding:6px 13px; margin-left:auto; }
+  .cta:hover{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .cta.quiet{ background:var(--surface); color:var(--ink-2); border-color:var(--line); }
+  .cta.quiet:hover{ background:var(--surface); border-color:var(--gold); color:var(--ink); }
+  .nocta{ font-size:12.5px; color:var(--ink-3); }
+
+  .row{ display:grid; grid-template-columns:62px minmax(0,1fr) 150px 116px 104px;
+        gap:12px; align-items:center; padding:8px 14px;
+        border-top:1px solid var(--line-soft); font-size:13.5px; }
+  .row:first-of-type{ border-top:0; }
+  .row:hover{ background:var(--zebra); }
+  .row .num{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px;
+             font-weight:700; }
+  .row .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .row .who{ font-size:12.5px; color:var(--ink-2); overflow:hidden;
+             text-overflow:ellipsis; white-space:nowrap; }
+  .row .win{ font-variant-numeric:tabular-nums; font-size:12.5px; text-align:right;
+             white-space:nowrap; color:var(--ink-2); }
+  .row .win.bad{ color:var(--bad-tx); font-weight:600; }
+  .row .tail{ justify-self:end; font-size:12.5px; color:var(--ink-3); text-align:right; }
+  .row.mine{ background:var(--zebra); box-shadow:inset 3px 0 0 var(--gold); }
+  .none{ color:var(--ink-3); font-style:italic; }
+  @media (max-width:700px){
+    .row{ grid-template-columns:52px minmax(0,1fr); }
+    .row .who, .row .win, .row .tail{ grid-column:2; text-align:left; justify-self:start; }
+  }
+
+  .chk{ display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+        background:var(--surface); border:1px solid var(--line); border-radius:7px;
+        padding:11px 14px; margin-bottom:16px; font-size:13.5px; color:var(--ink-2); }
+  .chk b{ color:var(--ink); }
+  .chk .k{ font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+           color:var(--gold-deep); font-weight:700; }
+
+  .panel{ background:var(--surface); border:1px solid var(--line);
+          border-radius:7px; padding:14px 16px; margin-top:16px; }
+  .panel h3{ margin:0 0 8px; font-size:10.5px; letter-spacing:.09em;
+             text-transform:uppercase; color:var(--gold-deep); font-weight:700; }
+  .panel ul{ margin:0; padding-left:18px; }
+  .panel li{ margin:6px 0; color:var(--ink-2); font-size:13.5px; max-width:78ch; }
+  .panel li b{ color:var(--ink); }
+  .ask{ border-left:3px solid var(--gold); }
+</style>
+
+<div class="wrap">
+
+  <div class="phead">
+    <p class="crumb">Raya Trade · Portfolio</p>
+    <h1>Culture Transformation</h1>
+  </div>
+  <nav class="tabs">
+    <button type="button">Charter</button>
+    <button type="button">Plan</button>
+    <button type="button" class="on" aria-current="page">Progress</button>
+    <button type="button">Analytics</button>
+  </nav>
+
+  <div class="asrow">
+    <em>Looking as</em>
+    <button type="button" class="btn on" data-as="lead">Lead · Rania</button>
+    <button type="button" class="btn" data-as="contrib">Contributor · Omar</button>
+    <button type="button" class="btn" data-as="viewer">Viewer · Hend</button>
+    <span class="n">The drawing's own switch, so both ends can be seen. Not a control of the product.</span>
+  </div>
+
+  <div class="strip" id="strip"></div>
+
+  <div class="chk">
+    <span class="k">Next checkpoint</span>
+    <b>Friday 13 March</b>
+    <span>· weekly, set on this project · three days away</span>
+  </div>
+
+  <div class="sec">
+    <header><b>Waiting to be signed off</b><span class="c" id="c-sign"></span></header>
+    <div id="sign"></div>
+  </div>
+
+  <div class="sec">
+    <header><b>Past their date</b><span class="c" id="c-late"></span></header>
+    <div id="late"></div>
+  </div>
+
+  <div class="sec">
+    <header><b>Nobody is on these</b><span class="c" id="c-free"></span></header>
+    <div id="free"></div>
+  </div>
+
+  <div class="sec">
+    <header><b>Signed off</b><span class="c" id="c-done"></span></header>
+    <div id="done"></div>
+  </div>
+
+  <div class="panel">
+    <h3>What this page is</h3>
+    <ul>
+      <li><b>One list, again.</b> Every row here is a row of the plan — the same array, the
+        same figures. The count at the top of the Plan page and the count at the top of this
+        one cannot disagree, because neither is typed.</li>
+      <li><b>Done is not Completed, and this is where the second step happens.</b> Whoever did
+        the work marked it done; a <b>Lead</b> accepts it and sets the real end date. Until
+        then it sits here. That is a governance rule, not a status list.</li>
+      <li><b>The page says what is true; the controls are drawn for whoever holds them.</b>
+        Press the three names above. A Contributor reads the same four sections and is offered
+        no sign-off; a Viewer is offered nothing at all. Nothing is hidden from anybody —
+        what changes is what can be pressed.</li>
+      <li><b>A gold edge means this one is yours to do.</b> Look as Omar: 2.3 is his and it is
+        eleven days past its date. It is drawn on what is <i>owed</i> and never on what is
+        finished — marking a Lead's own signed-off rows would be a colour that means nothing.</li>
+      <li><b>An empty section says so and does not nag.</b> A project with nothing waiting is a
+        healthy project, not a screen that failed to load.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>The real end date, and why it is bounded</h3>
+    <ul>
+      <li><b>It is never typed on the way in and never invented.</b> The real start is stamped
+        the first time progress leaves nought; the real end is stamped here, on sign-off, and
+        cleared if the activity is reopened.</li>
+      <li><b>Not before the day the work was marked done</b> — 2.2 was marked done on 24
+        February, so no earlier date is accepted.</li>
+      <li><b>And if the work was on time, not after the planned end either.</b> That rule is the
+        one nobody expects, so the row says it rather than letting the server refuse a date
+        somebody has already chosen. 2.2 ran four days over, so its upper bound is open; an
+        activity finished inside its window cannot be signed off into next month.</li>
+      <li><b>The bound is shown by the screen and enforced by the server</b>, which is the same
+        rule twice on purpose — a screen that only narrows a picker has narrowed nothing.</li>
+      <li><b>Reopening is gated exactly like signing off.</b> Their version needs only the
+        work-on permission, so a Contributor can undo a Lead's sign-off and clear its date.
+        Here it is the Lead's, or the two-step rule is a formality.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>What is owed, and why these three</h3>
+    <ul>
+      <li><b>Past their date</b> is the count the Plan page carries too. Red on the date itself,
+        with how far past.</li>
+      <li><b>Nobody is on these</b> is the section the spec asked for before this page existed:
+        <i>unassigned activities in a live plan are what nobody notices until a checkpoint.</i>
+        Three of this project's activities have no name against them, all of them in the phase
+        that has barely started.</li>
+      <li><b>Signed off</b> is here so the page is not only a list of problems, and so that
+        undoing one has somewhere to be done from.</li>
+      <li><b>Blocked is deliberately not a section.</b> 2.3 cannot start because 2.2 has not
+        finished — which is a fact about 2.2, already counted above, and listing it twice
+        would make one activity read as two things owed.</li>
+    </ul>
+  </div>
+
+  <div class="panel ask">
+    <h3>Two things this drawing does not decide</h3>
+    <ul>
+      <li><b>The checkpoint is a line, not a mechanism.</b> The spec says checkpoints are weekly
+        or monthly and per project, and says nothing else — so the strip names the next one and
+        this page invents no cadence, no record and no state around it. What a checkpoint
+        actually does, if anything beyond a date, is a decision.</li>
+      <li><b>Analytics has no drawing and cannot honestly have one yet.</b> The audit names its
+        files and never says what it renders — 985 lines of page plus a builder for grouping
+        phases into coloured buckets — so anything drawn for it now would be invented rather
+        than ported. It needs either sight of the reference or a decision about what a client
+        is meant to read there.</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+  /* ROWS:start */
+/* ── THE PLAN, ONCE, FOR ALL THREE DRAWINGS ─────────────────────────────────
+   Spec 060 §5.2: two screens of one project that disagree is the fault this
+   spec spends its length on, and §9.8 is the record of it happening — two
+   figures typed onto the charter, both wrong.
+
+   The plan drawing, Progress and Analytics all read these rows. They are
+   SPLICED into each file by `sync-rows.py` rather than copied by hand, because
+   three hand-kept copies is the same fault wearing a tidier coat. Edit this
+   file and run the script; never edit the block inside an HTML file.
+
+   A row's fields, and which drawing reads each:
+     lvl      0 phase · 1 work package · 2 activity      all three
+     n, t     number and name                            all three
+     who      the assignee, "" for nobody                all three
+     s, e     planned start and end                      all three
+     st       done · wip · not · sign                    plan, progress
+     pct      0–100, activities only; phases derive      plan, analytics
+     ms       a milestone — a commitment, not a task     plan, analytics
+     ran      when the work actually finished, or was
+              marked done and is awaiting sign-off       plan (overrun), progress
+     off      when a Lead signed it off. ABSENT until
+              they do, which is what makes "marked done"
+              and "completed" two different things       progress, analytics
+     dep      the one activity that must finish first    plan
+     blocked  its dependency has not finished            plan, progress
+     pick     the row the plan drawing opens on          plan
+
+   SIX MILESTONES ON NINE ACTIVITIES IS NOT A REALISTIC PLAN and is deliberate:
+   there is one in every state the tracker can draw, so all six are visible at
+   once (§255 — a drawing that cannot show the state it is about proves
+   nothing). A real project has far fewer.
+   ────────────────────────────────────────────────────────────────────────── */
+  var TODAY = "2026-03-10", FROM = "2026-01-01", TO = "2026-08-31";
+  var ROWS = [
+    {lvl:0, n:"1",     t:"Culture audit and stakeholder interviews",   who:"Rania Mounir"},
+    {lvl:2, n:"1.1",   t:"Attribute survey across the ten units",      who:"Hend Sabry",   s:"2026-01-05", e:"2026-01-16", st:"done", pct:100, ran:"2026-01-16", off:"2026-01-16", by:"Rania Mounir"},
+    {lvl:2, n:"1.2",   t:"Leadership interviews",                      who:"Rania Mounir", s:"2026-01-19", e:"2026-01-29", st:"done", pct:100, ms:true, ran:"2026-01-29", off:"2026-01-29", by:"Rania Mounir"},
+    {lvl:0, n:"2",     t:"Strategy-alignment workshops and blueprint", who:"Rania Mounir"},
+    {lvl:2, n:"2.1",   t:"Executive alignment workshop",               who:"Rania Mounir", s:"2026-02-02", e:"2026-02-06", st:"done", pct:100, ms:true, ran:"2026-02-11", off:"2026-02-11", by:"Rania Mounir"},
+    {lvl:2, n:"2.2",   t:"Behavioural blueprint, first draft",         who:"Omar Tarek",   s:"2026-02-09", e:"2026-02-20", st:"sign", pct:100, ms:true, ran:"2026-02-24", dep:"2.1", pick:true},
+    {lvl:2, n:"2.3",   t:"Blueprint review with the unit heads",       who:"Omar Tarek",   s:"2026-02-23", e:"2026-02-27", st:"not",  pct:0, ms:true, dep:"2.2", blocked:true},
+    {lvl:0, n:"3",     t:"Company-wide activation and leadership rollout", who:"Hend Sabry"},
+    {lvl:1, n:"3.1",   t:"Activation toolkit",                         who:"Hend Sabry"},
+    {lvl:2, n:"3.1.1", t:"Leadership communication guide",             who:"Hend Sabry",   s:"2026-03-02", e:"2026-03-20", st:"wip",  pct:40, ms:true},
+    {lvl:2, n:"3.1.2", t:"Employee engagement resources",              who:"",             s:"2026-03-23", e:"2026-04-10", st:"not",  pct:0},
+    {lvl:1, n:"3.2",   t:"Leadership-led rollout",                     who:"Rania Mounir"},
+    {lvl:2, n:"3.2.1", t:"Unit-by-unit activation sessions",           who:"",             s:"2026-04-01", e:"2026-07-31", st:"not",  pct:0},
+    {lvl:2, n:"3.2.2", t:"Embed behaviours in the performance cycle",  who:"",             s:"2026-08-28", e:"2026-08-28", st:"not",  pct:0, ms:true}
+  ];
+/* ROWS:end */
+
+  var DAY = 864e5;
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  /* DERIVE:start */
+/* ── THE ARITHMETIC, ONCE, FOR EVERY DRAWING THAT READS A FIGURE ────────────
+   Spec 060 §5.2, one level further in than `_rows.js`.
+
+   THAT FILE STOPPED THREE DRAWINGS HOLDING THREE COPIES OF THE PLAN AND LEFT
+   THEM HOLDING THREE COPIES OF THE SUMS. `roll()` and `kids()` were written out
+   twice, byte for byte but for a variable declaration, and the predicates that
+   decide what is owed were a third copy on Progress. They agreed, which is what
+   made it worth fixing while they still did: the landing is the fourth drawing
+   and it needs the roll-up AND the owed counts in one place, so copying would
+   have made a fifth and a sixth.
+
+   WHAT LIVES HERE IS A FIGURE. What does not is FORMAT — `day()` prints a date
+   with a year on Analytics and without one on the Plan, which is a choice each
+   screen makes and must keep making. Extracting that would force two screens to
+   read alike for no reason; extracting the sums stops two screens disagreeing
+   about the same project, which is the whole of §5.2.
+
+   Every function takes its rows. Nothing here reads a global but `TODAY`, which
+   is declared in `_rows.js` beside the plan it dates.
+   ────────────────────────────────────────────────────────────────────────── */
+  function d(s){ return new Date(s + "T00:00:00Z").getTime(); }
+
+  /* the rows one level under row i — or, where that level is empty, everything
+     beneath it, so a phase with activities hung straight off it still rolls up */
+  function kids(rows, i){
+    var lvl = rows[i].lvl, out = [], j;
+    for (j = i + 1; j < rows.length && rows[j].lvl > lvl; j++){
+      if (rows[j].lvl === lvl + 1) out.push(j);
+    }
+    if (!out.length){
+      for (j = i + 1; j < rows.length && rows[j].lvl > lvl; j++) out.push(j);
+    }
+    return out;
+  }
+
+  /* ONE LEVEL AT A TIME, equal weights unless somebody sets them (§9.8).
+     Writes pct, the widest span, the status and the activity tally onto every
+     parent — the tally because a phase's "2 of 3 done" and its percentage are
+     two readings of one set and must be taken from it together. */
+  function roll(rows){
+    for (var i = rows.length - 1; i >= 0; i--){
+      var r = rows[i];
+      if (r.lvl === 2) continue;
+      var ks = kids(rows, i).map(function(j){ return rows[j]; });
+      r.pct = Math.round(ks.reduce(function(a,x){ return a + (x.pct || 0); }, 0) / ks.length);
+      r.s = ks.reduce(function(a,x){ return !a || d(x.s) < d(a) ? x.s : a; }, null);
+      r.e = ks.reduce(function(a,x){ return !a || d(x.e) > d(a) ? x.e : a; }, null);
+      r.st = r.pct === 100 ? "done" : r.pct > 0 ? "wip" : "not";
+      var acts = [], j;
+      for (j = i + 1; j < rows.length && rows[j].lvl > r.lvl; j++){
+        if (rows[j].lvl === 2) acts.push(rows[j]);
+      }
+      r.total = acts.length;
+      r.done = acts.filter(function(x){ return x.pct === 100; }).length;
+    }
+  }
+
+  /* the project's own figure — the phases, equally weighted, which is the same
+     rule one level up and not a second one */
+  function overall(rows){
+    var ps = rows.filter(function(r){ return r.lvl === 0; });
+    if (!ps.length) return null;   /* no plan is not nought (§35, §93) */
+    return Math.round(ps.reduce(function(a,p){ return a + p.pct; }, 0) / ps.length);
+  }
+
+  /* LATE IS A FACT ABOUT A DATE AND NEVER ABOUT A PERCENTAGE (§344).
+     "On Track" is the reference's word for 90% and is a claim the figure cannot
+     make; these two answer separate questions and are drawn separately. */
+  function behind(r, today){ return r.pct < 100 && d(r.e) < d(today); }
+  function howFar(p){
+    if (p === 100) return ["Done", "done"];
+    if (p >= 90)   return ["Nearly done", "on"];
+    if (p >= 25)   return ["Under way", "on"];
+    if (p > 0)     return ["Early", "on"];
+    return ["Not started", ""];
+  }
+
+  /* WHAT IS WAITING ON SOMEBODY — three predicates, named once, because
+     Progress draws them as three sections and the landing counts them as one
+     number, and a section and a count that disagree is the fault §5.2 is about.
+     A ROW IS ONE THING TO FIX (§279): an activity nobody is on that is also
+     past its date is owed ONCE, so the union is by row and never a sum of the
+     three lengths (§108.1's arithmetic). */
+  function acts(rows){ return rows.filter(function(r){ return r.lvl === 2; }); }
+  function waiting(rows){ return acts(rows).filter(function(r){ return r.st === "sign"; }); }
+  function overdue(rows, today){
+    return acts(rows).filter(function(r){ return behind(r, today); });
+  }
+  function nobodyOn(rows){
+    return acts(rows).filter(function(r){ return !r.who && r.pct < 100; });
+  }
+  function signedOff(rows){ return acts(rows).filter(function(r){ return r.st === "done"; }); }
+  function owed(rows, today){
+    var out = [];
+    [waiting(rows), overdue(rows, today), nobodyOn(rows)].forEach(function(list){
+      list.forEach(function(r){ if (out.indexOf(r) < 0) out.push(r); });
+    });
+    return out;
+  }
+/* DERIVE:end */
+  function day(s){ var x = new Date(s + "T00:00:00Z"); return x.getUTCDate() + " " + MON[x.getUTCMonth()]; }
+  function esc(s){ return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+  function plural(n, w){ return n + " " + w + (n === 1 ? "" : "s"); }
+
+  /* the four lists, each read off the rows and never counted twice — and the
+     predicates are the shared ones (`_derive.js`), because the landing counts
+     these same three as ONE number and a section that disagrees with the count
+     above it is the fault §5.2 is about */
+  var WAIT = waiting(ROWS);
+  var LATE = overdue(ROWS, TODAY);
+  var FREE = nobodyOn(ROWS);
+  var OFF  = signedOff(ROWS);
+
+  var AS = "lead";
+  var ME = { lead:"Rania Mounir", contrib:"Omar Tarek", viewer:"Hend Sabry" };
+  function leads(){ return AS === "lead"; }
+
+  function strip(){
+    var days = Math.round((d(TODAY) - d(LATE[0] ? LATE[0].e : TODAY)) / DAY);
+    document.getElementById("strip").innerHTML =
+        cell("sign", WAIT.length, "Waiting to be signed off",
+             leads() ? "Yours to accept" : "A Lead accepts these")
+      + cell("late", LATE.length, "Past their date",
+             LATE.length ? "The furthest is " + plural(days, "day") + " over" : "Nothing is late")
+      + cell("free", FREE.length, "Nobody is on these",
+             FREE.length ? inPhases(FREE) : "Everything has a name against it");
+  }
+  /* which phases a list sits in, worked out rather than typed */
+  function inPhases(list){
+    var ps = [];
+    list.forEach(function(r){
+      var p = r.n.split(".")[0];
+      if (ps.indexOf(p) < 0) ps.push(p);
+    });
+    return (ps.length === 1 ? "All in phase " : "Across phases ") + ps.join(", ");
+  }
+  function cell(k, v, lab, sub){
+    return '<div class="cell ' + k + '"><p class="k">' + esc(lab) + '</p>'
+         + '<div class="v">' + v + '</div><div class="w">' + esc(sub) + '</div></div>';
+  }
+
+  /* the sign-off queue — the only place the real end date is set */
+  function drawWait(){
+    var box = document.getElementById("sign");
+    document.getElementById("c-sign").textContent = WAIT.length ? WAIT.length : "";
+    if (!WAIT.length){
+      box.innerHTML = '<p class="empty">Nothing is waiting. Everything marked done on this '
+                    + 'project has been accepted.</p>';
+      return;
+    }
+    box.innerHTML = WAIT.map(function(r){
+      var late = d(r.ran) > d(r.e);
+      var bound = late
+        ? "Not before " + day(r.ran) + ", when it was marked done. It ran past its plan, so "
+          + "there is no upper bound."
+        : "Between " + day(r.ran) + ", when it was marked done, and " + day(r.e)
+          + " — the work was on time, so it cannot be signed off later than it was planned to end.";
+      var act = leads()
+        ? '<span class="fld"><label for="end-' + esc(r.n) + '">Real end date</label>'
+          + '<input id="end-' + esc(r.n) + '" type="date" value="' + esc(r.ran) + '"></span>'
+          + '<button type="button" class="cta">Sign off as complete</button>'
+        : '<span class="nocta">A Lead signs this off and sets the real end date.</span>';
+      return '<div class="q"><div class="qh"><span class="num">' + esc(r.n) + '</span>'
+        + '<b>' + esc(r.t) + '</b><span class="who">' + esc(r.who) + '</span></div>'
+        + '<div class="qsub">Marked done on ' + day(r.ran) + '. Planned to end '
+        + day(r.e) + '.'
+        + (late ? " " + plural(Math.round((d(r.ran) - d(r.e)) / DAY), "day") + " over." : "")
+        + '</div>'
+        + '<p class="bound">' + esc(bound) + '</p>'
+        + '<div class="qact">' + act + '</div></div>';
+    }).join("");
+  }
+
+  function rows(list, box, count, empty, kind){
+    document.getElementById(count).textContent = list.length ? list.length : "";
+    var el = document.getElementById(box);
+    if (!list.length){ el.innerHTML = '<p class="empty">' + esc(empty) + '</p>'; return; }
+    el.innerHTML = list.map(function(r){
+      /* the gold edge means THIS ONE IS YOURS TO DO, so it is drawn on what is
+         owed and never on what is finished — a Lead's own completed rows marked
+         would be a colour that means nothing (§41's budget). */
+      var mine = kind === "late" && r.who && r.who === ME[AS];
+      var right, who;
+      if (kind === "late"){
+        var over = Math.round((d(TODAY) - d(r.e)) / DAY);
+        right = '<span class="win bad">' + plural(over, "day") + " over</span>";
+        who = r.who ? esc(r.who) : '<span class="none">Nobody</span>';
+      } else if (kind === "free"){
+        right = '<span class="win">Starts ' + day(r.s) + "</span>";
+        who = '<span class="none">Nobody</span>';
+      } else {
+        right = '<span class="win">Ended ' + day(r.off) + "</span>";
+        who = esc(r.who);
+      }
+      var tail = kind !== "done" ? ""
+        : leads() ? '<button type="button" class="btn">Reopen</button>'
+                  : "by " + esc(r.by);
+      return '<div class="row' + (mine ? " mine" : "") + '">'
+        + '<span class="num">' + esc(r.n) + '</span>'
+        + '<span class="t">' + esc(r.t) + (r.blocked ? ' — blocked by ' + esc(r.dep) : "") + '</span>'
+        + '<span class="who">' + who + '</span>'
+        + right
+        + '<span class="tail">' + tail + "</span></div>";
+    }).join("");
+  }
+
+  function paint(){
+    strip();
+    drawWait();
+    rows(LATE, "late", "c-late", "Nothing is past its date.", "late");
+    rows(FREE, "free", "c-free", "Every activity has somebody against it.", "free");
+    rows(OFF,  "done", "c-done", "Nothing has been signed off yet.", "done");
+  }
+
+  [].slice.call(document.querySelectorAll("[data-as]")).forEach(function(b){
+    b.addEventListener("click", function(){
+      AS = b.getAttribute("data-as");
+      [].slice.call(document.querySelectorAll("[data-as]")).forEach(function(x){
+        x.classList.toggle("on", x === b);
+      });
+      paint();
+    });
+  });
+
+  paint();
+</script>

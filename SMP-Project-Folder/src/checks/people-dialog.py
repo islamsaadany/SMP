@@ -246,6 +246,62 @@ with sync_playwright() as p:
            pg.evaluate("!document.querySelector('.peoplecfg .tk-editcell')"))
     pg.set_viewport_size({"width": 1280, "height": 940})
 
+    # ── 2b. A CELL WHOSE VALUE TWO ROWS SHARE (§374) ─────────────────
+    # Islam: "the copy on click for the email and double click to edit is
+    # working but the same behavior is not working on the phone number."
+    #
+    # IT IS NOT A PHONE FAULT, AND FALSIFYING IS WHAT SAID SO: the fault
+    # follows the DUPLICATED VALUE, not the column. §2 above already races a
+    # save — §372.14's own fix — and presses `Job title`, whose
+    # `data-ptitle="<key>"` is unique, so the one thing it could never reach is
+    # a mark that names two controls. `putFocus` restores the cursor by the
+    # focused control's first `data-` attribute, and §93.6's copy button
+    # carries `data-copy="<the value>"`: the first click of the double-click
+    # focuses it, the paint that opens the cell then asks for that value, and
+    # `querySelector` hands back the FIRST row carrying it — somebody else's
+    # button. Focus leaves the box, `blur` fires with the box still connected,
+    # and §372.16's guard reads it as a person moving away.
+    #
+    # THE FIXTURE ALREADY HELD THE STATE AND NOTHING ASKED: `REAL` gives every
+    # row the same number, which is a real register (a shared office line, or
+    # one typed twice). The EMAIL is unique there, so it is asserted beside it
+    # as the control — a build that had stopped opening any cell at all would
+    # satisfy the Mobile half on its own (§113.8).
+    #
+    # IT MUST STILL BE OPEN A BEAT LATER, never merely opened: the fault is a
+    # cell that opens and shuts ~90ms afterwards, so a probe that looks once is
+    # a probe that reports the broken build clean (§94.8).
+    print("\n2b. a duplicated value still opens its cell")
+    pg.set_viewport_size({"width": 1440, "height": 940})
+    land(pg, dict(ALL_ON))
+    who = pg.evaluate("()=>(PEOPLE.filter(p=>!p.forefront)[2]||{}).key")
+    shared = pg.evaluate("""(k)=>{const v=(PEOPLE.filter(p=>p.key===k)[0]||{}).phone;
+       return {v:v, n:PEOPLE.filter(p=>p.phone===v).length};}""", who)
+    ck("the fixture really does share that number",
+       shared["n"] > 1, shared)
+    for field, why in (("Mobile", "shared"), ("Email", "unique")):
+        land(pg, dict(ALL_ON))
+        pg.dblclick('[data-pcell="%s|%s"]' % (who, field))
+        pg.wait_for_timeout(120)
+        opened = pg.evaluate("!!document.querySelector('.peoplecfg td.pcellopen .fld')")
+        pg.wait_for_timeout(700)
+        got = pg.evaluate("""()=>({open:!!document.querySelector('.peoplecfg td.pcellopen .fld'),
+             pcell: PCELL ? PCELL.field : null,
+             active: (document.activeElement||{}).className || ''})""")
+        ck("%s (%s): the box opens and is still there a beat later"
+           % (field, why), opened and got["open"] and got["pcell"] == field, got)
+        # AND THE COPY STILL WORKS ON BOTH — the two acts share one control, so
+        # a fix that reached the single click would trade one for the other.
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(400)
+        pg.click('[data-pcell="%s|%s"] .copyval' % (who, field))
+        pg.wait_for_timeout(200)
+        ck("%s (%s): one press still copies" % (field, why),
+           pg.evaluate("""(s)=>{const b=document.querySelector(s);
+              return !!b && b.textContent.trim()==='Copied';}""",
+              '[data-pcell="%s|%s"] .copyval' % (who, field)))
+        pg.wait_for_timeout(1400)
+
     # ── 3. NEAT WITH EVERYTHING ON ───────────────────────────────────
     # Islam: "if everything is chosen it needs to stay neat." Measured before
     # this section: 54 values cut, and rows at 51px on 32 of 34 — §88's one-line

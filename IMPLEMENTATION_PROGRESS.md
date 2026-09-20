@@ -5280,7 +5280,58 @@ not tell a live seam from a dead one. Proved able to fail three ways from the
 sources — **4 / 8 / 8 red**, the last two identical, which is the finding: to the
 page, a seam declared as that shadow and no seam at all are the same build. **Found and not swept** (rule 1b): the name column and the functions
 table carry the same dead declaration, and the kebab block is declared **twice**
-in `config.css` byte for byte. **Waiting on Islam: the merge.**
+in `config.css` byte for byte. 
+
+**AND §374 ANSWERS THE ONE HE FOUND NEXT** (2026-09-20): *"the copy on click for
+the email and double click to edit is working but the same behavior is not
+working on the phone number."* **It is not a phone fault**, and finding that out
+was the round: both cells are built by the same two functions, and over
+`file://` both open perfectly. The fault follows a value **two rows share** — a
+shared office line, or the same number typed twice — and the phone is only where
+one repeats. Falsified three ways: phones shared → Mobile fails and Email works;
+both unique → both work; **emails** shared → Email fails and Mobile works.
+**The chain**: the platform puts the cursor back after a repaint by naming the
+control that had it with its first `data-` attribute, every editable control
+carries a KEY (`data-pphone="loghead"`) and the copy button carries
+**`data-copy="+20 100 1234567"`, which is the value**; so the first click of the
+double-click focuses that button, the paint that opens the cell asks for that
+value, and the browser hands back the **first row carrying that number** —
+somebody else's button. Focus leaves the box, `blur` fires with the box still on
+the page, §372.16's guard reads it as a person moving away, and the cell shuts
+**about 90ms after opening**. §87 one field over: *a value is never an
+identifier* — **and the Email only worked by luck**, being unique, so the
+selector matched the one button the paint had just replaced and restored
+nothing. **Invisible over `file://` and that is why every check was green**
+(§372.16's own trap, one guard along): nothing saves there, so the second paint
+never happens. One guard — restore only what the mark names once, the open
+dialog's copy first — which can never lose a correct restore and only ever stops
+a wrong one, in the general helper rather than in the copy button, because a
+list of attributes to skip is a list somebody forgets to add to (§104.7).
+**The check's own fixture already held the state and nothing asked**: every row
+in `people-dialog.py`'s fixture carries the same number, and §372.14's
+save-racing section presses **Job title**, whose address is unique. §2b presses
+the shared value with the unique Email beside it as the control, and asserts the
+box is **still there a beat later** — **1 red** from the sources with the guard
+reverted (§276), printing the symptom verbatim. **Recorded, not done** (rule
+1b): the Mobile copy target is **19.4px in a 38.6px row** against Email's 28.1,
+because the address wears `.val` (4px of padding) and the number wears `.mono`
+(none) — not what he reported, a restyle nobody asked for, and it wants a
+measurement of every `.mono` cell rather than one column's.
+**Merged to `main` 2026-09-20 on Islam's word** (§4). `main` had not moved, so
+it is a clean fast-forward and what went up is what was checked. **The merge
+carries a line of its own on purpose**: the branch had already been pushed, and
+Vercel builds once per commit whatever ref it arrives on, so handing it a commit
+the branch ref already holds is a deployment that may never happen — writing the
+record the round owed anyway is what gives `main` something of its own to build.
+**And the live site could not be read from this session, which is said rather
+than glossed**: this environment refuses that address outright, so nobody here
+has seen production serve it. **The one file to compare is `shell.js`**, which
+should read **3,827,402** bytes where the build before it read 3,824,282 — not
+the service worker and not the stylesheet, neither of which changed at all, so
+either would read the same whether or not production built this. **The branch
+is left where it stands** until somebody has looked, because moving it is the
+one thing that could still cost the build. **Nobody is signed out and nothing
+stored moves**: the whole change is one screen, one check and the record.
 
 ---
 
@@ -6400,3 +6451,133 @@ module — so **my second mockup's claim that decision 3 closes the defect "for
 free" is true of the shapes in front of us and not in general**, corrected here
 rather than left standing (§124). The fix is those two modules' own area
 declarations, which this round was not asked about (rule 1b).
+## Portfolio — the delivery plan, per client (spec 060)
+
+**Waiting on Islam, not on me.** Nothing is built and no source has moved; this
+is a spec and six drawings. Three screens are signed off — the project team, the
+charter and the plan — and **three await a word**: Progress, Analytics and now
+the landing.
+
+**Every screen is drawn as of 2026-09-20.** The landing was the last one with no
+picture: the project list for this client, with each project's state and the
+cross-project reading §9.11 deliberately kept off the tabs. One question and a
+row answers it four ways — how far along, whether it is late, what is waiting on
+somebody, and when anybody next looks at it.
+
+**A project has no status field and never gains one.** Every figure in that list
+is worked out from the plan underneath it, so the list cannot disagree with the
+four pages behind it. Two of the five projects drawn have no figure at all, on
+purpose: one has a charter and no plan (which says so rather than printing 0%),
+and one has a plan nobody has started (which is 0%, and is the difference).
+
+**What changed in the drawings' own plumbing.** The rows were already shared
+between three drawings; **the sums were not**, and were about to be copied a
+fourth time. They live in one file now and are spliced the same way — proved
+behaviour-neutral (all three render byte-identical to what they published) and
+proved load-bearing one break at a time. The extraction broke the Plan on its
+first attempt, taking a helper out with the block it sliced; the baseline had
+been captured before the first edit, so it was one diff rather than a hunt.
+
+**And this container can render, where the earlier rounds' could not.** So every
+figure on the new page was read out of the rendered document, the three older
+drawings were confirmed byte-identical to what they published, contrast was
+measured across all four in both palettes (**0 failures**, with the probe proved
+able to fail first), and the table's fit was measured at seven widths from 1600
+to 768 with nothing scrolling sideways.
+
+**Next, and it is a decision rather than work**: three sign-offs. After them,
+the spec's own §10 still says what building needs — this repository has never
+seen the reference code, so the two audits behind §7 and §9.11 were written by
+sessions with it attached and nothing has been run.
+
+---
+
+## Portfolio — the rules and the tables (2026-09-20, spec 060, §375)
+
+**Built: the half with no picture.** Every screen of this module is drawn and
+three of the six are signed off, so what could honestly be built is the part
+that is decided and has no design in it — the shape the data takes, and the
+rules that say what may be done to it.
+
+**Nothing on any screen has changed and nothing can be opened.** Portfolio is
+still switched off in the list of modules, so there is no page, no address and
+no entry in the switcher. That is asserted rather than assumed: a module
+switched on with nothing behind it is a door onto an empty room.
+
+**What is in it.** Eight tables — the plan's tree (phases, work packages,
+activities and their breakdown), who is on a project and at what, and the three
+words a client uses for the levels. And the rules the spec calls the actual
+product: two people finish an activity rather than one, and reopening it is
+gated the same way as signing it off; the real dates are worked out and never
+typed, at one place in the code; progress comes from the breakdown and a typed
+figure over it is refused with the reason; moving a date shows you what else
+moves before anything commits; the numbers renumber themselves, so deleting a
+phase cannot leave a gap; and a phase's figure is made of the rows under it
+rather than stored, which is what stops it disagreeing with the page it summarises.
+
+**How it is proved.** 121 assertions with no browser and no screen, each
+refusal asserted beside the same act allowed to somebody the rule admits — and
+the whole file proved able to fail ten times over, one break per rule, before
+the green run was believed. The tables were proved by running them twice: on a
+fresh database, and on one already up, where only the migration creates them.
+
+**Two things worth recording.** One break modelled a broken function rather
+than the defect it was named after, and was rewritten until it reproduces the
+fault exactly. And building §6 found two sentences in the spec pointing
+different ways — whether a Lead can name somebody onto a project, which the
+team screen says no to and the charter implies yes. Answered the narrow way,
+written into the spec, and Islam's to settle.
+
+**Not this work's, established on a baseline first**: the Tracker's check is
+one red on a date that has gone stale since it was written, and one spike proof
+dies in its own seed harness on a Meeting Notes column. Both recorded.
+
+**Next, and still a decision rather than work**: the three sign-offs. Nothing
+visual can be built until they are given.
+
+**§375.1 — merged to `main`, 2026-09-20.** Islam: *"merge to main."*
+
+**Main had moved 73 commits underneath** — Setup per module, the client's
+settings in the platform, the registry drawn inline — and had taken both this
+round's numbers, so §359 became §375 and spec 056 became spec 060 **before**
+the merge, which is what makes the renumber provably this branch's own and not
+somebody else's citations swept up by accident.
+
+**Four files overlapped and every one was combined rather than picked.** The
+proof is a measurement, not a reading: against `main` exactly one line is
+removed across the three records, and it is main's own "Last Updated" line
+becoming "Earlier", which is what that file does with an entry that is no
+longer the newest.
+
+**The frozen platform is untouched, byte for byte**, so nothing was rebuilt and
+the service worker is not bumped — what a client's browser receives does not
+change.
+
+**Everything was re-run on the merged tree**, because a branch that passes says
+nothing about what production would hold: Portfolio 121/0 and red all ten ways,
+and thirteen other checks green, with the build and a cold typecheck clean.
+**One red is main's own**, reproduced on a worktree of main before anything
+here was blamed — a check whose expected wording has gone stale as the weeks
+moved.
+
+**What is on `main` is the rules and the tables and not one screen.** Portfolio
+is still switched off; the three drawings awaiting sign-off are unchanged and
+still waiting on Islam.
+
+**§375.2 — pushed to `main`, 2026-09-20.** Main had not moved, so it
+fast-forwarded onto the tree that was actually checked.
+
+**What could not be checked from here, said rather than claimed**: this
+machine's network policy refuses the production address outright, so nobody
+here has seen the live site serve this commit. And there is no file to compare
+even if it could — this round changes not one served byte, so the two builds
+look identical from outside; what production gains is in the database and in
+code nothing calls yet.
+
+**The branch is deliberately left behind main** until production has served it,
+which is the rule for keeping a deployment from being raced away.
+
+**Nobody is signed out and nothing stored moves**: no request-handling file
+changed, nothing reads the new tables, and the migration only adds its own
+eight.
+

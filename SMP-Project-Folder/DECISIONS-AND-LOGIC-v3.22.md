@@ -53116,3 +53116,399 @@ decision 3 closes that "for free"; it is true of the shapes in front of us and
 not in general, and the over-claim is corrected here rather than left standing**
 (§124). The honest fix is the two modules' own area declarations, which is a
 change to modules this round was not asked about.
+## §374 — AN ADDRESS THAT IS NOT UNIQUE IS NOT AN ADDRESS (2026-09-20, spec 059)
+
+Islam, of the register: *"for the copy on click for the email and double click
+to edit is working but the same behavior is not working on the phone number."*
+
+**IT IS NOT A PHONE FAULT, AND ESTABLISHING THAT WAS THE WHOLE OF THE ROUND.**
+Both cells are built by the same two functions — `copyable()` for the value and
+`pcell()` for the cell — with nothing between them that could tell a phone from
+an address, and over `file://` both open perfectly. What separates them is the
+DATA: the fault follows a value two rows SHARE, and the phone is simply the
+column where one repeats — a shared office line, or the same number typed
+twice. Falsified three ways to say so rather than argued:
+
+| fixture | Email | Mobile |
+| --- | --- | --- |
+| phones shared, emails unique | opens | **does not open** |
+| both unique | opens | opens |
+| phones unique, emails **shared** | **does not open** | opens |
+
+**THE CHAIN, MEASURED RATHER THAN READ.** `focusMark()` records the control
+that had the cursor by its first `data-` attribute, on the stated grounds that
+*"every editable control in the platform carries one"*. Every editable one
+carries a KEY — `data-pphone="loghead"` — and §93.6's copy button carries
+`data-copy="+20 100 1234567"`, which is the **payload**. So: the first click of
+the double-click focuses that button; the paint that opens the cell then asks
+for `[data-copy="…"]`; and `querySelector` hands back the **first row carrying
+that number**, which is somebody else's button. Focus leaves the box that was
+just opened, `blur` fires with the box still in the document, §372.16's
+`isConnected` guard reads that as a person moving away rather than as a
+repaint, and the cell shuts **about 90ms after it opened**. §87's rule one field
+over: *a value is never an identifier.*
+
+**AND THE EMAIL ONLY WORKED BY LUCK, WHICH IS WORTH SAYING.** An address is
+unique per person, so the selector matched exactly one button — the one the
+paint had just replaced with the input — found nothing, and restored nothing.
+The column that behaved was not behaving for a reason anybody had chosen.
+
+**INVISIBLE OVER `file://`, AND THAT IS WHY EVERY CHECK WAS GREEN** — §372.16's
+own trap, one guard along: nothing saves, so the second paint that carries the
+stolen focus never happens. Measured on the built file first (both columns open,
+both copy), then over HTTP against a stub that saves, where Mobile fails and
+Email does not.
+
+**RESTORE ONLY WHAT THE MARK NAMES ONCE.** One guard in `putFocus`, and it can
+never lose a correct restore — it only ever stops a wrong one — which is
+**measured rather than argued**: swept over every focusable control on a unit's
+plan (pen open and shut), the register with every column showing, and Roles &
+access, the only marks naming more than one element are `data-copy` (33 of them,
+the fault) and three that are not editable at all — a hover mark, the viewer
+keys, a destination button. **Not one editable field in the product has an
+ambiguous address**, because every one is keyed by person or by row id, so there
+is no cursor here left to lose. It lands exactly where that function's own
+comment already said it should: *"when it does not,
+the worst case is that nothing is restored, which is where the product was
+already."* The dialog's copy wins first, for §372.14's reason two hundred lines
+down: a row's cell and the open person dialog draw the same control for the same
+person, and the one on top is the one somebody is typing in. **The fix is in the
+general helper and not in the copy button**, because a list of attributes to
+skip is a list somebody forgets to add to (§104.7) — and the same fault reaches
+any control whose data attribute is a payload, on any repaint, not only this
+gesture.
+
+**THE CHECK'S OWN FIXTURE ALREADY HELD THE STATE AND NOTHING ASKED.**
+`checks/people-dialog.py`'s `REAL` gives every row the same phone number, and
+§372.14's section — which deliberately races a save, for exactly this class of
+fault — presses **Job title**, whose `data-ptitle="<key>"` is unique. So the one
+thing it could never reach was a mark naming two controls. §2b presses the
+shared value, with the unique Email asserted beside it as the control (a build
+that had stopped opening any cell would satisfy the Mobile half alone, §113.8),
+and asserts the box is **still there a beat later**, because a cell that opens
+and shuts 90ms afterwards passes any probe that looks once (§94.8). The copy is
+asserted on both, or a fix that reached the single click would trade one act for
+the other. **1 red** on a build made from the SOURCES with the guard reverted
+(§276), printing the symptom verbatim — `{'open': False, 'pcell': None,
+'active': 'copyval mono'}`, the focus sitting on another row's copy button.
+
+**RECORDED, NOT DONE.** The Mobile copy button is **19.4px tall in a 38.6px
+row** where the Email one is 28.1 — the Email cell's value wears `.val`, which
+carries 4px of vertical padding, and the phone wears `.mono`, which carries
+none. So nearly half the phone cell is dead to a press. It is not what Islam
+reported (the digits themselves are inside the button, and the copy worked
+throughout), it is a restyle nobody asked for, and it wants a measurement of
+every `.mono` cell rather than one column's (rule 1b).
+
+### §374.1 — MERGED, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
+
+Islam: *"merge to main"*. **`main` HAD NOT MOVED**, so `--ff-only` took it
+cleanly and the tree that went up is the tree that was checked — which is the
+whole reason §4 forbids a blind merge either way round: a refusal is the
+notification, and its absence is a measurement too, taken rather than assumed.
+
+**THE MERGE CARRIES A SECTION OF ITS OWN BECAUSE THE BRANCH TIP WAS ALREADY
+PUSHED** (§91). Vercel deduplicates by commit SHA, so a fast-forward of `main`
+onto a commit the branch ref already holds is **one** deployment and which ref
+gets it is a race — lost in advance here, the branch having carried that SHA for
+hours. §91's own way round is *a commit `main` holds and the branch does not, and
+it must be one worth making*, and the record owed exactly one: a finished round
+whose tracker still reads **waiting on Islam** is a record that is wrong
+(§367.5's own correction, one round on). So this section IS the distinct commit,
+which is §357.4's road rather than a device invented for it.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, WHICH IS STATED
+RATHER THAN CLAIMED** (§54.5, rule 3a). The environment's egress policy refuses
+`smp-orpin-tau.vercel.app` outright — **403 at the proxy's CONNECT**, whose own
+README says to report a policy denial rather than retry or route around it — so
+no request left this machine and **the deployment is unverified from here**.
+What is NOT claimed is the whole of the claim: nobody here has seen production
+serve this commit.
+
+**THE WITNESS IS NAMED SO THE CHECK IS ONE COMMAND FOR WHOEVER CAN MAKE IT — AND
+IT IS ONE FILE, NOT §367's TWO.** It is **not `sw.js`** (§365, §316.10): the
+generator drops the caching half of the frozen worker, which is the half `SHELL`
+lives in, so the **served** worker is byte-identical either side of this merge
+and the bumped name reaches nobody — it is kept for the offline handover alone.
+**AND IT IS NOT `platform.css`, WHICH IS THE PART §367's SENTENCE COULD NOT BE
+COPIED FOR**: that round moved both files and this one changes no stylesheet at
+all, so `platform.css` reads **669,731** bytes on the build before and on this
+one alike — *a witness that reads the same either way is not a witness*, and it
+would have gone in verbatim had the two builds not been asked (§113.8, in the
+paragraph citing §113.8). What proves production built THIS commit is `shell.js`
+alone: **3,824,282 → 3,827,402** bytes, the second matching
+`smp-app/public/shell.js` exactly.
+
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED.** While it stays where it
+is, `main`'s tip is a SHA no other ref holds — unique by construction rather
+than by timing — and pushing it onto a second ref is the one act left that could
+still cost the build. §91 says to hold the branch until production has served
+it; with the live read impossible from here, holding is not caution but the
+instruction, and the fast-forward is one command the day somebody has looked.
+
+**NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF THE DIFF** (spec 029, precedent
+040): the merged range holds `CLAUDE.md`, the tracker, this document,
+`checks/people-dialog.py`, `src/shell.html`, the built file, `public/shell.js`
+and `sw.js` — **not one `api/`, `lib/` or `db/` file** — so nothing about how a
+save is judged moves, no stored value moves and nothing is migrated. A tab left
+open on the previous build keeps its old shell until somebody reloads it, which
+is §365's own residue and the ordinary cost of a screen-only round.
+
+**RE-CHECKED ON THE MERGED TREE IMMEDIATELY BEFORE THE PUSH**, because a branch
+that passes says nothing about what `main` holds (§365): `built-in-step` all good
+(the shipped file byte-identical to `build.py`'s own output), `generated-in-step`
+all clear (every served copy identical to what its generator produces, and every
+carried rule module its frozen twin with the one declared transform applied),
+`node --check sw.js` clean with **one** `SHELL` declaration (§146.2) at a name
+`origin/main` does not hold — confirmed again as the last step rather than the
+first (§94.16, which has collided twice).
+
+---
+
+## §375 — PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (2026-09-20, spec 060)
+
+Islam, on the handover that said every screen of spec 060 was drawn and three
+of the six signed off: **"proceed."**
+
+**WHAT IS BUILT IS THE HALF THAT IS DECIDED AND HAS NO PICTURE**, which is the
+only half a *proceed* can honestly reach: rule 1c is paid for the project team,
+the charter and the plan, and **owed for Progress, Analytics and the landing** —
+so nothing visual is built from this, and `portfolio` is still `built: false`
+in `lib/modules.ts`. **The flag is asserted rather than assumed** (§1 of the
+check): a module marked built with nothing behind it is the door onto the wrong
+room that flag exists to stop (§61), and the assertion carries the Tracker's
+`built: true` beside it or it would pass on a build where the whole table had
+gone (§113.8).
+
+**§8 OF THE SPEC NAMED THIS SLICE IN ITS OWN WORDS** — *the six rules of §3 are
+checked as rules, not as screens; pure functions where they can be, so the
+sign-off, the derived dates, the computed progress, the cascade and the
+renumbering are provable without a browser.* So `lib/portfolio.ts` is those six
+plus §6's reach and §9.8's roll-up, and `checks/portfolio.mjs` asks them with
+no browser at all.
+
+**A FLAT ORDERED ARRAY IS THE TREE, AND IT IS THE DRAWINGS' OWN SHAPE.** Phases,
+work packages and activities are three tables, and every rule that walks the
+plan — the numbering, the roll-up, the cascade, the tally — wants them in
+document order with a level on each. `design-mockups/portfolio/_derive.js`
+already reads exactly that, so the plan on the screen and the plan on the server
+cannot arrive at two answers for one project (§5.2). *The mockup's shape earned
+its way into the product rather than being translated out of it.*
+
+**§243'S BLANK RULE IS A SECOND COPY ON PURPOSE, AND THAT IS NOT §53.5 BEING
+IGNORED.** `koWeights` is the frozen product's, read by six frozen sources and
+run in a vm by `lib/frozen.cjs`, and Portfolio may not reach into Strategy's
+vocabulary — which is §9.1's whole argument for why the three words could not
+ride `labels`. What must not drift is the RULE, so the check asserts this
+answers what §243 answers — a blank counts as the average of the weights that
+were set, none set means equal, every set weight nought falls back to equal
+rather than to a dash — rather than asserting a number.
+
+**THE WEIGHTED CASE WAS NOT COVERED UNTIL IT WAS MADE.** The plan fixture
+carries no weights, so `--break=equal-only` reddened ONE assertion: everything
+else averaged equally and would have passed on a build that never read the
+column. A weighted phase and a weighted activity are made now and it reddens
+three. **And my own first weighted figure was wrong** — 20 typed where the
+arithmetic is 15 — which is §9.8's own recorded lesson (*the first draft of it
+typed 62 and 8 and both were wrong*) arriving in the check rather than in the
+drawing. It is asserted beside the equally-weighted 50, so the number is pinned
+by a difference and not only by itself.
+
+**THE CONSTRAINTS ARE ASSERTED BY ATTEMPTING THE ROW, NEVER BY READING THE
+DDL** (§96), and the constraint's NAME is asserted with the refusal, or a row
+turned away for some other reason reads as the rule working (§113.8). §7.6's
+first row — *an activity has two nullable parents and nothing says exactly one
+is set* — is a `CHECK` now, and the check sends both the orphan and the
+two-parent row and watches each bounce off `portfolio_activity_parent`.
+
+**THE BREAK THAT MODELLED A BROKEN FUNCTION RATHER THAN THE DEFECT.**
+`--break=no-collapse` first forced every row to the activity level, which made
+phases read `0` — a function that is broken, not a product that has the fault.
+Corrected, it forces the DEPTH instead, so an activity hung straight off a
+phase reads **`1.0.1`**: the plan grows a level it does not have, with a nought
+where a work package would be, which is exactly what §3 №5's collapse exists to
+prevent. *A falsification that breaks the function proves the check runs; one
+that reproduces the defect proves the check is about something.*
+
+**WHAT IS OWED IS A COUNT OF ROWS AND NEVER OF REASONS** (§279, §108.1), and
+the fixture demonstrates it rather than claiming it (§255): one activity is
+past its date AND has nobody on it, so three predicates name **two** rows and
+`--break=owed-sums` reddens the one assertion that says so.
+
+**EIGHT TABLES, AND SIX NAMED AND NOT BUILT.** The tree, the team and the
+words; phase groups, comments, mentions, reactions, files and history arrive
+with the screens that read them, because a table ahead of its screen is a
+column nothing writes (§294.2). **Both paths are proved by running them**
+(§33.5): a fresh database through `db/apply.mjs`, and a database already up —
+`HEAD`'s own `schema.sql` applied first, **0 portfolio tables**, then migration
+015 alone, **8** — with the migration run twice to prove it idempotent. Every
+one is RLS-enabled, forced, carries `tenant_rows`, and its policy text is read
+back and asserted **identical** to `tracker_actions`' (§94.8). Every one
+cascades from `tenants`, or `deleteTenant` would refuse the whole delete.
+
+**AND ONE THING THE BUILD FOUND THAT THE SPEC LEAVES AMBIGUOUS, ANSWERED THE
+NARROW WAY AND NAMED RATHER THAN LEFT**: §6.4 and §9.2 make **naming people
+onto a project** the seat's, while §5.1 gives the charter's pen to the office
+AND the Lead and §5.1a has the charter's *Project Manager* row read whoever is
+at Lead and says *setting it there sets the role*. So a Lead editing that one
+row would be naming somebody. `mayNameTeam()` is the seat's alone until Islam
+says otherwise (§42 fails closed), and the question is written into the spec
+rather than left for whoever builds the charter to discover.
+
+**PROVED ABLE TO FAIL TEN WAYS, ONE PER RULE** (§276, from the sources):
+`any-build` 8 · `team-deletes` 1 · `viewer-comments` 2 · `anyone-completes` 2 ·
+`restamp-start` 3 · `manual-wins` 1 · `equal-only` 3 · `no-collapse` 3 ·
+`no-cascade` 3 · `owed-sums` 1. **121/0** green.
+
+**VERIFIED**: portfolio 121/0 red ten ways; memory-boundary 14/0, schema-room
+10/0, modules 107/0, insights 127/0, notes 170/0, frameworks 90/0, demo-seed
+7/0, office-standing 7/0, deploy-context 5/0, `generated-in-step` all clear;
+`npm run build` green through `scripts/deploy.mjs` and `next build`; `tsc`
+clean COLD but for `lib/prisma.ts`'s recorded pre-existing error. **The frozen
+product is untouched and it is measured rather than assumed** —
+`built-in-step.py` all good — so **`sw.js` is NOT bumped**: §91's trigger is
+the built file's bytes changing and they did not.
+
+**TWO REDS ARE NOT THIS WORK'S AND WERE ESTABLISHED ON A BASELINE WORKTREE OF
+`HEAD` BEFORE ANYTHING HERE WAS BLAMED** (§303): `tracker` 227/1 on the same
+assertion with the same detail, which is a date-relative literal going stale
+(§214.3's family — it was green on 2026-09-16 and today is the 20th); and spike
+S2, which dies in the seed harness on `notes.met_on` with *no placeholder for
+date*, a spec 055 column. Recorded, not fixed in passing (rule 1b).
+
+**AND THE THROWAWAY POSTGRES LOST ITS OWN DATA DIRECTORY MID-RUN**, which is
+worth one line because it reads exactly like a product failure: the scratchpad
+is `700 root` and the server runs as `postgres`, so the `chmod o+x` that let it
+start was reset under it and every later check reported `ECONNREFUSED`. The
+first reading of that was *the checks are broken*. **A run that cannot connect
+is not a run that failed** (§54.5, §320.6b's family) — the data directory moved
+somewhere the server owns and every one of them came back green.
+
+**STILL ISLAM'S, AND NOTHING BELOW IS STARTED**: the three drawings awaiting
+sign-off (§9.10 Progress, §9.12 Analytics, §9.13 the landing), and with them
+every screen of this module; §9.3's workbook, §9.5's notice and §9.6's budget
+question, which §9 still lists as live; and the carry in §9.7.
+
+---
+
+## §375.1 — THE MERGE, AND WHAT RUNNING IT FOUND (2026-09-20, spec 060)
+
+Islam: **"merge to main."** The word on that merge, which is the only thing
+that makes one allowed (rule 4).
+
+**MAIN HAD MOVED 73 COMMITS AND TAKEN BOTH NUMBERS**, so the renumber came
+FIRST and that ordering is what makes it provable rather than careful: at that
+point the tree held none of main's lines, so every `§359` and every `spec 056`
+in it was this branch's by construction — verified against the merge base,
+which holds neither string (§264.3, whose own fault was a blanket sweep taking
+somebody else's citations after a merge). §359 → §375, `specs/056-portfolio` →
+`specs/060-portfolio`, both confirmed free on `origin/main` before either was
+chosen. **Both spellings swept** (§336.1: a renumber knows one spelling unless
+it is told otherwise), **every count declared in advance and a mismatch
+refusing the whole pass** rather than writing what it happened to find
+(§353.4) — 4 / 3 / 4 / 0 / 21 / 11, all matched, residue nil.
+
+**FOUR FILES OVERLAPPED AND EVERY ONE IS COMBINED, NEVER PICKED** (§318.7,
+§356.17): the three record files and `package.json`. **The resolution is
+ASSERTED rather than eyeballed**, which is the part worth keeping — measured
+against `origin/main`, exactly ONE line is removed across the three records and
+it is main's own `*Last Updated:*` line becoming `*Earlier:*`, which is that
+file's own convention for an entry that has stopped being the newest; the rest
+is purely additive, 109 / 69 / 108 lines. The two logs run forward in time, so
+main's §359–§374.1 sit before today's §375; CLAUDE.md runs backwards, so §375
+leads it. `package.json` keeps every one of main's check scripts, compared as a
+SET rather than read (§94.8).
+
+**THE FROZEN HALF IS MAIN'S, BYTE FOR BYTE, AND THAT IS MEASURED**: this branch
+changed no file under `SMP-Project-Folder/src/`, so every frozen source, the
+shipped build, `sw.js` and every generated copy under `smp-app/public/` hashes
+identical to `origin/main`'s. **No rebuild is owed and NO `SHELL` BUMP IS
+OWED** — §91's trigger is the built file's bytes changing and they did not
+(§356.17's own finding, re-earned). `node --check sw.js` clean with **one**
+`SHELL` declaration (§146.2), at a name `origin/main` already serves because it
+IS main's file.
+
+**AND NOTHING OF MAIN'S CODE IS LOST, ASSERTED THE SAME WAY**: outside this
+branch's own files the merged tree is byte-identical to `origin/main`, so
+§147.4's grep-the-deletions has nothing to find — the two sides share no code
+file but `package.json`, which is why §56.7 could not bite here. Said rather
+than left as an absence, because "no conflict" is not the same claim.
+
+**RE-RUN ON THE MERGED TREE, because a branch that passes says nothing about
+what `main` would hold** (§365): portfolio **121/0** and **red all ten ways**,
+door 143/0, shell 118/0, state 92/0, modules 158/0, insights 127/0, notes
+170/0, frameworks 90/0, setup 33/0, room 10/0, deploy 5/0, memory 16/0, demo
+7/0, standing 7/0; `built-in-step.py` all good, `generated-in-step` all clear,
+`declared-deps` all clear, `npm run build` green through `scripts/deploy.mjs`
+and `next build`, and **`tsc` clean COLD with the cache deleted first** — no
+errors at all, where this branch's own record still said "clean but for
+`lib/prisma.ts`", which main has since closed.
+
+**ONE RED, AND IT IS MAIN'S**: `tracker` 227/1, on a heading the check spells
+as a date and the product now spells as a week number — established by running
+it on a WORKTREE OF `origin/main` and getting the identical 227/1 before
+anything here was blamed (§303). Recorded, not fixed in passing.
+
+**THREE THINGS THE RUN ITSELF TAUGHT, none of them the product's.** My own
+sweep called four checks by names `package.json` does not hold, and npm
+answered with an **empty log and a non-zero exit** — which reads exactly like a
+check that died (§298.3, §344.1's family: the tail is the verdict, and an empty
+tail is not a verdict at all). `generated-in-step` **refused to run while the
+merge was uncommitted** and said which errand that was rather than reporting a
+drift — §349.4's own distinction between *stale* and *mid-edit*, working as
+designed and worth seeing work. And `memory` failed with **its own sentence**,
+*"no tenant to write about — run `scripts/dev-tenant.mjs` first"*, which is
+§328.3's rehearsal-database prerequisite saying so in words instead of with a
+foreign-key error.
+
+**WHAT IS ON `main` NOW IS RULES AND TABLES AND NOT ONE SCREEN**: `portfolio`
+is still `built: false`, asserted with a built module beside it, so there is no
+page, no address and no switcher entry. The three drawings awaiting sign-off
+(§9.10 Progress, §9.12 Analytics, §9.13 the landing) are unchanged and still
+Islam's.
+
+---
+
+## §375.2 — PUSHED TO `main`, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
+
+`origin/main` had not moved while the merge was rehearsed, so it fast-forwarded
+onto the tree that was actually checked — `bd211e3..5d612e8`.
+
+**§91 IS SATISFIED BY CONSTRUCTION RATHER THAN BY TIMING.** Vercel deduplicates
+by SHA, so a commit that reaches `main` and a branch ref within a second of
+each other is ONE deployment and which ref gets it is a race lost in advance
+(§91.4, §107.15). The way round is a commit `main` holds and the branch does
+not, and here there are three: the branch's remote is still at the renumber,
+while the merge, the record and this note went to `main` alone.
+
+**§91.5's LIVE READ COULD NOT BE MADE FROM THIS SESSION, SO IT IS SAID RATHER
+THAN CLAIMED** (§54.5, rule 3a): this environment's egress policy refuses
+`smp-orpin-tau.vercel.app` outright — 403 at the proxy's own CONNECT, which its
+README says to report rather than route around — so no request left this
+machine. **Nobody here has seen production serve this commit.**
+
+**AND THERE IS NO WITNESS FILE THIS TIME, WHICH IS WORTH SAYING** rather than
+leaving as an absence somebody later reads as an oversight. §374.1 proved its
+own deploy by `shell.js` going 3,824,282 → 3,827,402 bytes; **this round
+changes not one served byte** — every file under `smp-app/public/`, the frozen
+build and `sw.js` all hash identical to the commit before — so even with the
+live read available there would be nothing on the wire to tell the two builds
+apart. What production gains is in the DATABASE and in code nothing calls yet.
+
+**THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED.** While it stays where it is,
+`main`'s tip is unique by construction, and putting that SHA on a second ref is
+the one act left that could still cost the build. §91 says hold the branch
+until production has served it; with the live read impossible from here,
+holding is the instruction rather than caution.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): three files under
+`db/` and `lib/` are in the merged range and all three are Portfolio's own and
+new — no `api/` file changed at all. Nothing reads or writes the eight new
+tables, `lib/portfolio.ts` is imported by its check and by nothing that runs,
+and the authoriser, the change list, the review map and what a save touches are
+untouched. Measured, not assumed.
+
+**WHAT THE DEPLOY DOES TO PRODUCTION'S DATABASE IS ADDITIVE AND ONLY THAT**:
+`scripts/deploy.mjs` applies migration 015 on every build, and that file
+creates eight tables and their indexes and alters only what it has just
+created. It names no existing table. Nothing stored moves.

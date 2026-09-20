@@ -1,301 +1,330 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>My lines</title>
 <style>
-  :root{
-    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
-    --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C;
-    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
-    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
-    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
-    --good:#2E7D5B; --attn:#B8860B; --bad:#B04434; --none:#676C73;
-    --good-tx:#1F6248; --attn-tx:#7A5D1C; --bad-tx:#8C3327;
-    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --bad-bg:#F7E3E0;
-    --cta:#A4512C; --cta-ink:#FFFFFF;
-    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-    --r-sm:6px; --r:8px; --r-md:12px; --r-pill:999px;
-  }
-  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
-    --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A;
-    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
-    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
-    --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
-    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
-    --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
-    --cta:#C2703F; --cta-ink:#14161A;
-  }}
-  :root[data-theme="dark"]{
-    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
-    --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A;
-    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
-    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
-    --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
-    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
-    --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
-    --cta:#C2703F; --cta-ink:#14161A;
-  }
+:root{
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#A8BBD6; --panel-accent:#E0C179;
+  --gold:#C9A24D; --gold-deep:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --zebra:#F5F7FA;
+  --line:#D6DCE5; --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --good-bg:#E4F0EA; --good-tx:#1F6248;
+  --bad-tx:#8C3327; --bad-bg:#FBF1EF;
+  --attn-bg:#F7EFD6; --attn-tx:#7A5B10;
+  --cta:#A4512C; --cta-ink:#FFFFFF;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 80px}
+h1{font-size:26px;margin:0 0 6px}
+h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:38px 0 10px;font-weight:700}
+h3{font-size:17px;margin:0 0 6px}
+p{margin:0 0 10px;color:var(--ink-2)}
+.lede{font-size:16px;color:var(--ink-2);max-width:78ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:0 0 14px}
+.key{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.why{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+.note{border:1px solid var(--line);border-left:3px solid var(--gold);background:var(--surface-2);
+  border-radius:0 6px 6px 0;padding:10px 12px;font-size:13px;color:var(--ink-2);margin:12px 0 0}
+.note.bad{border-left-color:#B4493A;background:var(--bad-bg)}
+.note.good{border-left-color:var(--good);background:var(--good-bg)}
+.mono{font-family:var(--mono);font-size:13px}
 
-  *{box-sizing:border-box}
-  body{background:var(--ground); color:var(--ink); font:400 14px/1.5 var(--sans); margin:0}
-  .wrap{max-width:1080px; margin:0 auto; padding-block:28px 64px; padding-left:16px; padding-right:16px}
+/* ── the product's chrome, drawn to scale ───────────────────────── */
+.shot{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);margin:0 0 6px}
+.top{background:var(--panel);color:var(--panel-ink);padding:9px 14px;display:flex;align-items:center;gap:12px}
+.mk{font-weight:800;letter-spacing:.02em;font-size:15px}
+.mk small{display:block;font-weight:500;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--panel-quiet)}
+.viewer{margin-left:auto;font-size:11.5px;color:var(--panel-quiet);text-align:right;line-height:1.35}
+.viewer b{display:block;color:#fff;font-size:12.5px;font-weight:600}
+.dests{background:var(--panel);padding:0 14px 8px;display:flex;gap:4px;flex-wrap:wrap}
+.dests button{font:600 12px/1 var(--font);text-transform:uppercase;letter-spacing:.06em;
+  background:transparent;color:var(--panel-quiet);border:0;border-radius:5px;padding:7px 10px;cursor:default}
+.dests button.on{background:rgba(255,255,255,.14);color:#fff}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 14px;background:var(--surface)}
+.tabs button{font:600 13.5px/1 var(--font);background:transparent;border:0;border-bottom:2px solid transparent;
+  padding:11px 12px 9px;color:var(--ink-3);cursor:default}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--gold)}
+.tabs button.cta{color:var(--cta)}
+.tabs button.cta.on{color:var(--cta);border-bottom-color:var(--cta)}
+.tabs button.newtab{color:var(--gold-deep)}
+.tabs button.newtab.on{color:var(--ink);border-bottom-color:var(--gold)}
+.body{padding:14px}
+.secrow{display:flex;gap:16px;align-items:baseline;margin:0 0 12px}
+.secrow span{font:700 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.secrow span.on{color:var(--ink);border-bottom:2px solid var(--gold);padding-bottom:4px}
 
-  /* review chrome — deliberately not the product */
-  .rv{border-top:2px solid var(--gold); padding-top:10px; margin:44px 0 14px}
-  .rvk{font:700 10.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold-deep)}
-  .rv h2{font:700 19px/1.3 var(--sans); margin:8px 0 6px; text-wrap:balance}
-  .rv p{margin:0; color:var(--ink-2); font-size:13.5px; max-width:76ch}
-  .rv p + p{margin-top:7px}
-  .who{display:flex; flex-wrap:wrap; gap:7px; margin-top:11px}
-  .who span{font:600 11px/1 var(--sans); padding:5px 10px; border-radius:var(--r-pill);
-    background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line)}
+table.cfg{width:100%;border-collapse:collapse;font-size:13.5px}
+table.cfg thead th{background:var(--panel);color:#fff;font:700 10.5px/1.3 var(--font);
+  letter-spacing:.07em;text-transform:uppercase;text-align:left;padding:8px 9px}
+table.cfg td{border-bottom:1px solid var(--line);padding:7px 9px;vertical-align:middle;color:var(--ink-2)}
+table.cfg tr:nth-child(even) td{background:var(--zebra)}
+table.cfg td.nm{color:var(--ink)}
+.field{font:500 13px/1 var(--font);border:1px solid var(--line);border-radius:5px;padding:6px 8px;width:86px;background:#fff;color:var(--ink)}
+.entry{display:inline-flex;align-items:center;gap:6px}
+.unitsuf{font-size:12px;color:var(--ink-3)}
+.ro{font-family:var(--mono);font-size:13px;color:var(--ink-3)}
+.pill{display:inline-block;font:700 10px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;
+  padding:4px 7px;border-radius:999px;background:var(--surface-2);color:var(--ink-3);border:1px solid var(--line)}
+.pill.u{background:#EAF0F8;color:#2B4A7A;border-color:#C6D5E9}
+.pill.ok{background:var(--good-bg);color:var(--good-tx);border-color:#BFDCCD}
+.pill.wait{background:var(--attn-bg);color:var(--attn-tx);border-color:#E4D2A2}
+.rtally{font:700 10.5px/1 var(--font);letter-spacing:.05em;padding:3px 7px;border-radius:999px;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink-3);margin-left:8px}
+.ghead{display:flex;align-items:center;gap:8px;margin:16px 0 7px}
+.ghead:first-child{margin-top:0}
+.ghead b{font-size:13.5px}
+.bar{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:8px;padding:9px 12px;margin:12px 0 0;font-size:13px;color:var(--ink-2)}
+.bar .spacer{margin-left:auto}
+.btn{font:700 11.5px/1 var(--font);letter-spacing:.05em;text-transform:uppercase;border-radius:6px;
+  padding:9px 13px;border:1px solid var(--line);background:#fff;color:var(--ink-2);cursor:default}
+.btn.cta{background:var(--cta);border-color:var(--cta);color:var(--cta-ink)}
+.btn.off{opacity:.45}
+.cap{font-size:12px;color:var(--ink-3);margin:0 0 18px}
+.cap b{color:var(--ink-2)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+ol.dec{margin:0;padding-left:20px}
+ol.dec li{margin:0 0 9px;color:var(--ink-2)}
+ol.dec b{color:var(--ink)}
+.ch{border:1px solid var(--line);border-left:3px solid #B4493A;background:#fff;border-radius:0 8px 8px 0;padding:14px 16px;margin:0 0 12px}
+.ch h3{font-size:15px;margin:0 0 4px}
+.namecard{border:1px solid var(--line);border-radius:8px;padding:0;overflow:hidden;background:#fff}
+.namecard .tabs{border-bottom:1px solid var(--line)}
+.namecard p{padding:10px 12px 12px;margin:0;font-size:12.5px}
+</style></head><body><div class="wrap">
 
-  .lede{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--gold);
-    border-radius:0 var(--r-md) var(--r-md) 0; padding:18px 20px}
-  .lede h1{font:700 22px/1.25 var(--sans); margin:0 0 8px; text-wrap:balance}
-  .lede p{margin:0 0 8px; color:var(--ink-2); font-size:13.5px; max-width:80ch}
-  .lede p:last-child{margin-bottom:0}
-  .lede b{color:var(--ink)}
+<h1>My lines &mdash; a tab beside Reporting</h1>
+<p class="lede">Drawn again after your two rulings. Below: what measuring changed in the drawing,
+three things I want to push back on, both cases in the platform's own pixels, and the name.</p>
 
-  /* the product's chrome */
-  .app{border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden; margin-top:16px; background:var(--surface)}
-  .dests{background:var(--panel); display:flex; align-items:stretch; gap:2px; padding:0 8px; overflow-x:auto}
-  .dests button{background:none; border:0; border-bottom:3px solid transparent; cursor:pointer;
-    color:var(--panel-quiet); font:600 12.5px/1.2 var(--sans); padding:12px 12px 9px; white-space:nowrap}
-  .dests button.on{color:var(--panel-ink); border-bottom-color:var(--panel-accent)}
-  .dests .dnew{color:var(--panel-accent)}
-  .tabs{display:flex; gap:2px; border-bottom:1px solid var(--line); background:var(--surface);
-    padding:0 8px; overflow-x:auto}
-  .tabs button{background:none; border:0; border-bottom:3px solid transparent; cursor:pointer;
-    padding:11px 13px; font:500 13.5px/1.2 var(--sans); color:var(--ink-2); white-space:nowrap}
-  .tabs button.on{border-bottom-color:var(--gold); color:var(--ink); font-weight:700}
-  .tabs button.newt{color:var(--gold-deep); font-weight:700}
-  .body{padding:16px 18px 18px}
+<div class="note bad"><b>The last drawing was wrong about Case&nbsp;2 and it was wrong in your favour.</b>
+It showed Hossam's navigation carrying <span class="mono">Mobile</span> and <span class="mono">Retail&nbsp;Stores</span>.
+Measured: every bounded role ships <span class="mono">a_unit_other: "none"</span>, and a unit only enters
+the row when that is not "none" &mdash; so <b>a foreign unit never appears today</b>, and your ruling needs
+no change to the navigation at all. What it needs is for the tab to sit on the person's <b>own</b> place.</div>
 
-  .kv{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:13px}
-  .pill{display:inline-flex; align-items:center; gap:5px; font:600 11px/1 var(--sans);
-    padding:5px 10px; border-radius:var(--r-pill); white-space:nowrap}
-  .pill.kind{background:var(--surface-2); color:var(--ink-2)}
-  .pill.good{background:var(--good-bg); color:var(--good-tx)}
-
-  .sechd{display:flex; align-items:center; gap:9px; margin:16px 0 8px}
-  .sechd:first-child{margin-top:0}
-  .sechd h3{font:700 15px/1.3 var(--sans); margin:0}
-  .rtally{font:400 12.5px/1 var(--mono); color:var(--ink-3); background:var(--surface-2);
-    border:1px solid var(--line); border-radius:20px; padding:4px 10px}
-  .rtally.full{color:var(--good); background:var(--good-bg); border-color:var(--good)}
-
-  .tw{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r)}
-  table{border-collapse:collapse; width:100%; min-width:540px; font-size:13px}
-  thead th{background:var(--panel); color:var(--panel-ink); font:700 10.5px/1.3 var(--sans);
-    letter-spacing:.09em; text-transform:uppercase; text-align:left; padding:9px 11px; white-space:nowrap}
-  thead th + th{border-left:1px solid rgba(255,255,255,.18)}
-  th.cc,td.cc{text-align:center}
-  tbody td{padding:9px 11px; border-bottom:1px solid var(--line-soft); vertical-align:middle}
-  tbody tr:nth-child(even) td{background:var(--zebra)}
-  tbody tr:last-child td{border-bottom:0}
-  .why{display:block; font-size:11.5px; color:var(--ink-3); margin-top:3px}
-  .mono{font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums}
-
-  .entry{display:inline-flex; align-items:stretch; border:1px solid var(--line);
-    border-radius:var(--r); overflow:hidden; background:var(--surface)}
-  .entry.filled{border-color:var(--good)}
-  .entry .field{border:0; width:74px; padding:5px 8px; font:400 13px/1.3 var(--sans);
-    color:var(--ink); background:var(--surface); font-variant-numeric:tabular-nums}
-  .entry.filled .field{background:var(--good-bg); color:var(--good-tx); font-weight:600}
-  .unitsuf{display:flex; align-items:center; padding:0 9px; background:var(--surface-2);
-    border-left:1px solid var(--line); font:400 12px/1 var(--mono); color:var(--ink-3)}
-  .sel{font:400 12.5px/1 var(--sans); padding:6px 8px; border:1px solid var(--line);
-    border-radius:var(--r-sm); background:var(--surface); color:var(--ink)}
-
-  .note{border-left:3px solid var(--gold); background:var(--surface-2); padding:12px 16px;
-    margin:16px 0 0; font-size:13px; color:var(--ink-2); border-radius:0 var(--r) var(--r) 0}
-  .note b{color:var(--ink)}
-  .note.ask{border-left-color:var(--attn); background:var(--attn-bg); color:var(--attn-tx)}
-  .note.ask b{color:var(--attn-tx)}
-
-  .names{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:16px}
-  @media (max-width:860px){ .names{grid-template-columns:1fr} }
-  .nopt{border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); overflow:hidden}
-  .nopt.pick{border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold)}
-  .nopt .cap{padding:11px 13px 13px; font-size:12.5px; color:var(--ink-2); line-height:1.5}
-  .nopt .cap b{color:var(--ink); display:block; margin-bottom:3px}
-
-  ol.decide{margin:12px 0 0; padding-left:20px; color:var(--ink-2); font-size:13.5px; max-width:80ch}
-  ol.decide li{margin-bottom:13px}
-  ol.decide b{color:var(--ink)}
-  .rec{display:inline-block; font:700 10px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase;
-    color:var(--on-accent); background:var(--gold); padding:4px 7px; border-radius:var(--r-sm); margin-right:6px}
-</style>
-
-<div class="wrap">
-
-  <div class="lede">
-    <h1>A tab beside Reporting, for the people who own lines</h1>
-    <p>Corrected from the last drawing. You were right twice: this is not a room, and it does not
-      belong in Setup. It is a <b>slice of Reporting</b> — same Strategy module, one tab along —
-      and it is only ever drawn for somebody who owns a tactic and is not the unit&rsquo;s owner or
-      custodian.</p>
-    <p>I checked the two mechanics it rests on before drawing it. A tab is filtered by
-      <span class="mono">grantAt(d.ac, target)</span> and its own <span class="mono">when()</span>,
-      so a tab that appears only for people named on a line is the pattern the product already
-      uses. And which units are in the navigation comes from one function, so ownership can open a
-      unit the same way a grant does — which is what makes the second case below possible at all.</p>
-  </div>
-
-  <!-- CASE 1 -->
-  <div class="rv">
-    <div class="rvk">Case 1 · in the unit, but not running it</div>
-    <h2>He already reaches Mobile — the tab is where his own rows are</h2>
-    <p>He is Mobile&rsquo;s Director of Digital Operations, not its head and not its custodian. He
-      sees Mobile&rsquo;s Reporting tab today, where every row is read-only except his. The new tab
-      is the same figures with everybody else&rsquo;s taken away.</p>
-    <div class="who"><span>Ramy Behairy</span><span>Director, Digital Operations</span><span>Mobile</span><span>Owns 2 tactics</span></div>
-  </div>
-
-  <div class="app">
-    <div class="dests">
-      <button type="button">Group ▾</button>
-      <button type="button" class="on">Mobile</button>
-    </div>
-    <div class="tabs">
-      <button type="button">Strategy</button>
-      <button type="button">Performance</button>
-      <button type="button">Reporting</button>
-      <button type="button" class="on newt">My lines</button>
-    </div>
-    <div class="body">
-      <div class="kv">
-        <span class="pill kind">2 of 2 entered</span>
-        <span class="pill good">FY26 Mid-year · due 30 Sep</span>
-      </div>
-      <div class="tw"><table>
-        <thead><tr><th style="width:40%">Line</th><th class="cc" style="width:14%">Target</th>
-          <th class="cc" style="width:16%">Status</th><th class="cc" style="width:16%">Reported</th>
-          <th style="width:14%">Note</th></tr></thead>
-        <tbody>
-          <tr><td>Clean and standardize customer and SKU base
-              <span class="why">MB01 · Duplicate customer and SKU records removed</span></td>
-            <td class="cc mono">12,000 #</td>
-            <td class="cc"><select class="sel"><option>In progress</option></select></td>
-            <td class="cc"><span class="entry filled"><input class="field" value="5,400" aria-label="Duplicate records removed"><span class="unitsuf">#</span></span></td>
-            <td><span class="why">—</span></td></tr>
-          <tr><td>Digitize sales reporting via Power BI
-              <span class="why">MB01 · Management reports live on Power BI</span></td>
-            <td class="cc mono">18 #</td>
-            <td class="cc"><select class="sel"><option>In progress</option></select></td>
-            <td class="cc"><span class="entry filled"><input class="field" value="4" aria-label="Reports live on Power BI"><span class="unitsuf">#</span></span></td>
-            <td><span class="why">Finance reports wait on the warehouse.</span></td></tr>
-        </tbody></table></div>
-      <div class="note"><b>You enter the figure; you cannot submit.</b> Mennah sends Mobile&rsquo;s
-        report, and it waits for these two.</div>
-    </div>
-  </div>
-
-  <!-- CASE 2 -->
-  <div class="rv">
-    <div class="rvk">Case 2 · outside the unit entirely</div>
-    <h2>Owning a line is what puts the unit in his navigation</h2>
-    <p>He sits in Finance and holds nothing in Mobile or Retail Stores. Both appear for him because
-      he owns a line in each — and on each there is <b>one tab</b>. Strategy, Performance and
-      Reporting are not drawn, because those are gated on grants he does not have.</p>
-    <p>That is the whole of the narrow door: the unit&rsquo;s name and his own row. He cannot read
-      the unit&rsquo;s plan, its score, or anybody else&rsquo;s figures.</p>
-    <div class="who"><span>Hossam Abuelenien</span><span>Head of Finance</span><span>No unit</span><span>Owns 2 tactics, 2 units</span></div>
-  </div>
-
-  <div class="app">
-    <div class="dests">
-      <button type="button">Group ▾</button>
-      <button type="button" class="on dnew">Mobile</button>
-      <button type="button" class="dnew">Retail Stores</button>
-    </div>
-    <div class="tabs">
-      <button type="button" class="on newt">My lines</button>
-    </div>
-    <div class="body">
-      <div class="kv">
-        <span class="pill kind">0 of 1 entered</span>
-        <span class="pill good">FY26 Mid-year · due 30 Sep</span>
-      </div>
-      <div class="tw"><table>
-        <thead><tr><th style="width:40%">Line</th><th class="cc" style="width:14%">Target</th>
-          <th class="cc" style="width:16%">Status</th><th class="cc" style="width:16%">Reported</th>
-          <th style="width:14%">Note</th></tr></thead>
-        <tbody>
-          <tr><td>End-to-end order-to-cash digitization
-              <span class="why">MB01 · Order-to-cash cycle time</span></td>
-            <td class="cc mono">5 d</td>
-            <td class="cc"><select class="sel"><option>In progress</option></select></td>
-            <td class="cc"><span class="entry"><input class="field" value="" placeholder="—" aria-label="Order-to-cash cycle time"><span class="unitsuf">d</span></span></td>
-            <td><span class="why">—</span></td></tr>
-        </tbody></table></div>
-      <div class="note"><b>Retail Stores is one press away</b>, on the same tab, with its own
-        landlord-frameworks row. Two units, two presses — not one list of everything he owns.</div>
-    </div>
-  </div>
-
-  <!-- THE NAME -->
-  <div class="rv">
-    <div class="rvk">The name</div>
-    <h2>Three candidates, drawn on the row</h2>
-    <p><b>&ldquo;My reporting&rdquo; is already taken</b> — it is the label on the access key behind
-      the Reporting tab, the words the office reads on Roles &amp; access. Two things called My
-      reporting one tab apart is the collision worth avoiding.</p>
-  </div>
-
-  <div class="names">
-    <div class="nopt pick">
-      <div class="tabs"><button type="button">Strategy</button><button type="button">Performance</button>
-        <button type="button">Reporting</button><button type="button" class="on newt">My lines</button></div>
-      <div class="cap"><b>My lines</b> The product&rsquo;s own word — Roles &amp; access already
-        says a bounded role &ldquo;reaches only its own lines&rdquo;. Covers a tactic today and a
-        measure later without being renamed.</div>
-    </div>
-    <div class="nopt">
-      <div class="tabs"><button type="button">Strategy</button><button type="button">Performance</button>
-        <button type="button">Reporting</button><button type="button" class="on newt">My tactics</button></div>
-      <div class="cap"><b>My tactics</b> The plainest today, and wrong the day somebody owns a key
-        measure — which the same rule would already let them report.</div>
-    </div>
-    <div class="nopt">
-      <div class="tabs"><button type="button">Strategy</button><button type="button">Performance</button>
-        <button type="button">Reporting</button><button type="button" class="on newt">My progress</button></div>
-      <div class="cap"><b>My progress</b> Reads as a score rather than a place to type, and the
-        platform already uses <i>Progress</i> as a column heading for a number.</div>
-    </div>
-  </div>
-
-  <!-- DECISIONS -->
-  <div class="rv">
-    <div class="rvk">Before I build</div>
-    <h2>Two are yours, one is mine to get right</h2>
-  </div>
-
-  <ol class="decide">
-    <li><b>The name.</b> <span class="rec">I&rsquo;d say</span> <b>My lines</b>, for the reason under
-      it — the product already uses that word for exactly this person.</li>
-
-    <li><b>Case 1 — does he keep the Reporting tab as well?</b> He can type his figures in both
-      places, which is one figure with two doors. <span class="rec">I&rsquo;d say</span> keep both:
-      the Reporting tab is the unit&rsquo;s whole report and he may legitimately want to read it,
-      and taking it away would make his navigation differ from his colleagues&rsquo; for a reason
-      nothing on the screen explains.</li>
-
-    <li><b>Mine, not yours, but worth naming.</b> Opening the unit for a cross-unit owner touches
-      the one function that answers &ldquo;which units are in my navigation&rdquo;, and a second
-      place guards a link into a unit. Both have to give the same answer or the tab is reachable
-      from the navigation and not from a link. I will make it one answer, and the check will assert
-      that somebody who owns nothing there still reaches nothing.</li>
-  </ol>
-
-  <div class="note"><b>What does not change.</b> They enter and never submit. The unit still writes
-    the note and still sends the report, and its Submit still waits for their figure. Nothing is set
-    on Roles &amp; access — being named in the Owner box is the grant, because only the office edits
-    a plan.</div>
-
-  <div class="note ask"><b>Still open from before.</b> Owner-only means a milestone&rsquo;s
-    collaborators stop reporting, which reverses §227. Say the word and it goes in with this.</div>
-
+<h2>What is actually being asked for</h2>
+<div class="card">
+<p><b>One tab, on the place the person already belongs to.</b> Ramy belongs to Mobile, so it sits beside
+Mobile's Reporting. Hossam belongs to Finance, so it sits beside Finance's Reporting &mdash; and the two
+units he owns lines in are <i>rows on that page</i>, never destinations in the bar. Somebody who sits at
+the group gets it on the group.</p>
+<p class="why">One rule covers both of your cases, and it is the only rule that can keep &ldquo;beside
+Reporting&rdquo; literally true while no foreign unit ever enters the navigation.</p>
 </div>
+
+<h2>Three things I want to push back on</h2>
+
+<div class="ch">
+<h3>1 &middot; &ldquo;on saving it submits his lines in the reporting tab&rdquo; &mdash; there is nothing to save</h3>
+<p>Every box in this product writes when the cursor leaves it and the page autosaves (&sect;35); &sect;273.4
+deleted a Save and Cancel pair for exactly this reason. <b>His figure and the unit's Reporting row are the
+same stored row</b> &mdash; type it on My lines and it is on Reporting before the custodian refreshes. So a
+Save button would be a second state that can disagree with the first.</p>
+<p>If what you mean is a deliberate <i>I am finished</i>, that control already exists: &sect;301's
+<span class="mono">Mark done</span>, which freezes the owner's own rows and shows the custodian a state.
+<b>My recommendation: no Save; keep Mark done.</b></p>
+</div>
+
+<div class="ch">
+<h3>2 &middot; Case&nbsp;1's read-only Reporting reverses &sect;301.5, and its scope needs saying</h3>
+<p>&sect;301.5 exists <i>precisely</i> to fix the fault you are now asking for: a pillar owner could enter
+figures on one page and not on the page named after the act. Reversing it is fine &mdash; it becomes
+<b>one door instead of two</b>, which is cleaner &mdash; but it must be recorded as a reversal and it must
+say who it reaches.</p>
+<p>The platform has <b>three</b> bounded roles: tactic/pillar owner, project owner, contributor. You named
+tactic owners. <b>My recommendation: all bounded roles</b>, or the Reporting page is read-only for one kind
+of owner and writable for another on the same table, which nobody can explain.</p>
+</div>
+
+<div class="ch">
+<h3>3 &middot; A filter by unit is a control with one option for most owners</h3>
+<p>Ramy owns lines in one place. A dropdown offering one unit is a door behind a door (&sect;32) and a
+control with nothing behind it (&sect;61).</p>
+<p><b>My recommendation: group by unit always</b> &mdash; the band is the tag &mdash; and draw the filter
+only where there is more than one unit. That is what is drawn below: Ramy has a band and no filter,
+Hossam has two bands and a filter.</p>
+</div>
+
+<h2>Case 1 &mdash; an owner inside his own unit</h2>
+<p class="cap"><b>Ramy Behairy</b>, Director, Digital Operations &mdash; on the register under Mobile, and
+neither its head nor its custodian. He owns two Mobile tactics. <b>Real rows from the worked example.</b></p>
+
+<div class="shot">
+  <div class="top"><div class="mk">Raya Trade<small>Strategy</small></div>
+    <div class="viewer">Viewing as<b>Ramy Behairy &middot; Mobile</b></div></div>
+  <div class="dests"><button>Group &#9662;</button><button class="on">Mobile</button></div>
+  <div class="tabs">
+    <button>Strategy</button><button>Performance</button>
+    <button class="cta">Reporting</button><button class="newtab on">My lines</button>
+  </div>
+  <div class="body">
+    <div class="ghead"><b>Mobile</b><span class="rtally">1 of 2 entered</span></div>
+    <table class="cfg">
+      <thead><tr><th style="width:38%">Tactic</th><th style="width:26%">What it produced</th>
+        <th style="width:13%">YTD target</th><th style="width:13%">YTD actual</th><th style="width:10%">Progress</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">Clean and standardize customer and SKU base</td>
+            <td>Duplicate customer and SKU records removed</td>
+            <td class="ro">12,000 #<br><span style="font-size:11px">of 6,000 #</span></td>
+            <td><span class="entry"><input class="field" value="5,400"><span class="unitsuf">#</span></span></td>
+            <td><span class="pill ok">90%</span></td></tr>
+        <tr><td class="nm">Digitize sales reporting via Power BI</td>
+            <td>Management reports live on Power BI</td>
+            <td class="ro">18 #<br><span style="font-size:11px">of 9 #</span></td>
+            <td><span class="entry"><input class="field" value=""><span class="unitsuf">#</span></span></td>
+            <td><span class="pill wait">Not reported</span></td></tr>
+      </tbody>
+    </table>
+    <div class="bar"><span>1 figure still to enter on your lines.</span>
+      <span class="spacer"></span>
+      <button class="btn">Mark done</button></div>
+    <div class="note">You enter the figure. The unit writes the note and submits the report.</div>
+  </div>
+</div>
+<p class="cap">Two rows, because he owns two. No pillar bands, no measures, no tactics that are not his.</p>
+
+<div class="shot">
+  <div class="top"><div class="mk">Raya Trade<small>Strategy</small></div>
+    <div class="viewer">Viewing as<b>Ramy Behairy &middot; Mobile</b></div></div>
+  <div class="dests"><button>Group &#9662;</button><button class="on">Mobile</button></div>
+  <div class="tabs">
+    <button>Strategy</button><button>Performance</button>
+    <button class="cta on">Reporting</button><button class="newtab">My lines</button>
+  </div>
+  <div class="body">
+    <div class="ghead"><b>MB01 &middot; Digital &amp; Data-Driven Operations</b><span class="rtally">4 of 6 entered</span></div>
+    <table class="cfg">
+      <thead><tr><th style="width:44%">Tactic</th><th style="width:14%">Owner</th>
+        <th style="width:14%">YTD target</th><th style="width:16%">YTD actual</th><th style="width:12%">Progress</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">Clean and standardize customer and SKU base</td><td>Ramy Behairy</td>
+            <td class="ro">12,000 #</td><td class="ro">5,400 #</td><td><span class="pill ok">90%</span></td></tr>
+        <tr><td class="nm">End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td>
+            <td class="ro">5 d</td><td class="ro">8 d</td><td><span class="pill">63%</span></td></tr>
+        <tr><td class="nm">Digitize sales reporting via Power BI</td><td>Ramy Behairy</td>
+            <td class="ro">18 #</td><td class="ro">&mdash;</td><td><span class="pill wait">Not reported</span></td></tr>
+      </tbody>
+    </table>
+    <div class="note">Your own lines are entered on <b>My lines</b>. Everything here reads only.</div>
+  </div>
+</div>
+<p class="cap">Your ruling: <b>his figures are read-only here too</b>. Note that they already were for
+<i>somebody else's</i> rows &mdash; what changes is the two that are his. The whole page becomes one
+consistent thing to him: a reading.</p>
+
+<h2>Case 2 &mdash; an owner reporting for units he does not belong to</h2>
+<p class="cap"><b>Hossam Abuelenien</b>, Head of Finance. <b>This case is already in the worked example
+and the platform cannot see it</b> &mdash; the plan stores his surname alone (<span class="mono">Abuelenien</span>)
+on a Mobile tactic and a B2B&nbsp;Ecomm tactic, and a single name matches nobody by rule (&sect;130.7).
+One pass through the Owner picker resolves both. Drawn resolved.</p>
+
+<div class="shot">
+  <div class="top"><div class="mk">Raya Trade<small>Strategy</small></div>
+    <div class="viewer">Viewing as<b>Hossam Abuelenien &middot; Finance</b></div></div>
+  <div class="dests"><button>Group &#9662;</button><button class="on">Finance</button></div>
+  <div class="tabs">
+    <button>Overview</button><button>Projects</button><button>Performance</button>
+    <button class="cta">Reporting</button><button class="newtab on">My lines</button>
+  </div>
+  <div class="body">
+    <div class="bar" style="margin:0 0 14px">
+      <span class="key">Showing</span>
+      <span class="pill u">All units</span><span class="pill">Mobile</span><span class="pill">B2B Ecomm</span>
+      <span class="spacer"></span><span class="why" style="margin:0">2 units &middot; 2 lines &middot; 1 still to enter</span>
+    </div>
+
+    <div class="ghead"><b>Mobile</b><span class="rtally">0 of 1 entered</span></div>
+    <table class="cfg">
+      <thead><tr><th style="width:38%">Tactic</th><th style="width:26%">What it produced</th>
+        <th style="width:13%">YTD target</th><th style="width:13%">YTD actual</th><th style="width:10%">Progress</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">Entry model design &amp; B2B e-commerce presence</td>
+            <td>Entry model signed off and storefront live</td>
+            <td class="ro">Y / N</td>
+            <td><span class="entry"><select class="field" style="width:120px"><option>In progress</option></select>
+                <input class="field" style="width:56px" value="18"><span class="unitsuf">%</span></span></td>
+            <td><span class="pill">18%</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="ghead"><b>B2B Ecomm</b><span class="rtally">1 of 1 entered</span></div>
+    <table class="cfg">
+      <thead><tr><th style="width:38%">Tactic</th><th style="width:26%">What it produced</th>
+        <th style="width:13%">YTD target</th><th style="width:13%">YTD actual</th><th style="width:10%">Progress</th></tr></thead>
+      <tbody>
+        <tr><td class="nm">Self-serve merchant onboarding</td>
+            <td>Merchants onboarded without a field visit</td>
+            <td class="ro">1,200 #<br><span style="font-size:11px">of 600 #</span></td>
+            <td><span class="entry"><input class="field" value="215"><span class="unitsuf">#</span></span></td>
+            <td><span class="pill" style="background:var(--bad-bg);color:var(--bad-tx);border-color:#E8CFCA">36%</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="bar"><span>1 figure still to enter on your lines.</span>
+      <span class="spacer"></span><button class="btn">Mark done</button></div>
+    <div class="note">You enter the figure. Each unit writes its own note and submits its own report.</div>
+  </div>
+</div>
+<p class="cap"><b>No unit is in the navigation</b> &mdash; Group and Finance, which is what he sees today.
+The units are <b>bands</b>, and the filter above them is drawn only because there are two.</p>
+
+<h2>The name</h2>
+<p class="cap"><b>&ldquo;My reporting&rdquo; is not available</b> &mdash; it is already the label on the
+<span class="mono">u_report</span> access key, so the matrix and the tab would say one thing twice
+(&sect;87). Three candidates, drawn on the row:</p>
+<div class="two">
+  <div class="namecard">
+    <div class="tabs"><button>Strategy</button><button>Performance</button><button class="cta">Reporting</button><button class="newtab on">My lines</button></div>
+    <p><b>My lines</b> &mdash; the product's own word. &sect;147's rule is literally
+    <i>own lines only</i>, and the page holds tactics, and one day projects and measures.
+    <b>Recommended.</b></p>
+  </div>
+  <div class="namecard">
+    <div class="tabs"><button>Strategy</button><button>Performance</button><button class="cta">Reporting</button><button class="newtab on">My tactics</button></div>
+    <p><b>My tactics</b> &mdash; exact today and wrong the day a project owner joins the page, which is
+    challenge&nbsp;2 above. It would have to be renamed then.</p>
+  </div>
+  <div class="namecard">
+    <div class="tabs"><button>Strategy</button><button>Performance</button><button class="cta">Reporting</button><button class="newtab on">My progress</button></div>
+    <p><b>My progress</b> &mdash; reads as a score about <i>him</i> rather than a list of work, and
+    <span class="mono">Progress</span> is already a column on these very tables (&sect;87 again).</p>
+  </div>
+  <div class="namecard">
+    <div class="tabs"><button>Strategy</button><button>Performance</button><button class="cta">Reporting</button><button class="newtab on">My reporting</button></div>
+    <p style="color:var(--bad-tx)"><b>Ruled out.</b> Taken by the access key's own label, which the SMO
+    reads on Roles &amp; access.</p>
+  </div>
+</div>
+
+<h2>What this settles, if you say yes</h2>
+<div class="card"><ol class="dec">
+<li><b>A tab called My lines</b>, on the person's own place, beside Reporting &mdash; drawn only for
+somebody who owns at least one line anywhere, so nobody else ever sees it.</li>
+<li><b>An owner is the Owner column.</b> Being a collaborator or a stakeholder gives no figure.
+This <b>reverses &sect;227</b>, which made being named on a milestone a reporting right &mdash; recorded
+as a reversal, and it is your &ldquo;contributor should not report, the owner only&rdquo;.</li>
+<li><b>No grant, no attachment, no role.</b> Being named is the whole test, exactly as a named figure
+master already works (&sect;16.7's <span class="mono">canEnterFigure</span>). An open, unlocked cycle
+is the only other condition.</li>
+<li><b>He enters and never submits.</b> The unit's head or custodian submits; the note stays theirs.</li>
+<li><b>The unit's Reporting tab is read-only for him</b> &mdash; one door, not two. Reverses
+&sect;301.5, and I recommend it covers all three bounded roles rather than tactic owners alone.</li>
+<li><b>No Save.</b> The figure lands on the unit's Reporting row as it is typed; <span class="mono">Mark
+done</span> is the deliberate finish.</li>
+<li><b>Grouped by unit always; filtered only when there is more than one.</b></li>
+<li><b>The welcome screen gains a row</b> &mdash; measured: somebody holding unentered figures is told
+&ldquo;Nothing is waiting on you&rdquo; today.</li>
+</ol>
+<div class="note"><b>Not in this round, said rather than assumed:</b> the eleven owner values in the
+worked example that are a single first name (<span class="mono">Karim</span>,
+<span class="mono">Hossam</span>, <span class="mono">Abuelenien</span>&hellip;) resolve to nobody, so those
+tactics have no owner the platform can see. They were uploaded before the Owner column became a register
+picker. Correcting them is a data pass on the demo, not code.</div>
+</div>
+
+</div></body></html>

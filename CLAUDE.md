@@ -7862,6 +7862,49 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   actions in the minutes do not reach the tracker and are not meant to (spec
   054 decision 3); a module is turned ON per client from the card; nothing says
   which office person is looking at a note while somebody else edits it.
+- **PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (&sect;359, spec
+  056):** Islam, on the handover saying every screen was drawn and three of six
+  signed off &mdash; *"proceed."* **WHAT IS BUILT IS THE HALF A *PROCEED* CAN
+  HONESTLY REACH**: rule 1c is paid for the project team, the charter and the
+  plan and **owed for Progress, Analytics and the landing**, so nothing visual
+  is built and `portfolio` stays `built: false` &mdash; **asserted rather than
+  assumed**, with the Tracker's `built: true` beside it or the assertion passes
+  on a build where the whole table had gone (&sect;61, &sect;113.8). **&sect;8 OF
+  THE SPEC NAMED THIS SLICE IN ITS OWN WORDS** (*the six rules of &sect;3 are
+  checked as rules, not as screens &hellip; provable without a browser*), so
+  `lib/portfolio.ts` is those six plus &sect;6's reach and &sect;9.8's roll-up
+  and the check asks them with no browser at all. **A FLAT ORDERED ARRAY IS THE
+  TREE, AND IT IS THE DRAWINGS' OWN SHAPE** &mdash; `_derive.js` already reads
+  exactly that, so the plan on the screen and the plan on the server cannot
+  arrive at two answers for one project (&sect;5.2): *the mockup's shape earned
+  its way into the product rather than being translated out of it.*
+  **&sect;243'S BLANK RULE IS A SECOND COPY ON PURPOSE AND THAT IS NOT &sect;53.5
+  IGNORED**: `koWeights` is the frozen product's, read by six frozen sources and
+  run in a vm by `lib/frozen.cjs`, and Portfolio may not reach into Strategy's
+  vocabulary (&sect;9.1's own argument for why the three words could not ride
+  `labels`) &mdash; so what is asserted is that this answers what &sect;243
+  answers, never a number. **THE CONSTRAINTS ARE ASSERTED BY ATTEMPTING THE ROW**
+  (&sect;96) **WITH THE CONSTRAINT'S NAME** (&sect;113.8), which is how &sect;7.6's
+  first row &mdash; *two nullable parents and nothing says exactly one is set* &mdash;
+  becomes a `CHECK` that both the orphan and the two-parent row bounce off.
+  **EIGHT TABLES AND SIX NAMED AND NOT BUILT**, because a table ahead of its
+  screen is a column nothing writes (&sect;294.2); **both paths proved by running
+  them** (&sect;33.5) &mdash; a fresh database, and `HEAD`'s own schema first
+  (**0 portfolio tables**) then migration 015 alone (**8**), run twice for
+  idempotency, every one RLS-forced with its policy read back and asserted
+  identical to `tracker_actions`' (&sect;94.8) and every one cascading from its
+  client or `deleteTenant` would refuse. **AND BUILDING &sect;6 FOUND TWO
+  SENTENCES OF THE SPEC POINTING DIFFERENT WAYS**: &sect;6.4/&sect;9.2 make naming
+  people the SEAT's while &sect;5.1a has the charter's Manager row read whoever is
+  at Lead and *setting it there sets the role* &mdash; answered the narrow way
+  (&sect;42 fails closed) and written into the spec as &sect;6.4a rather than left
+  for whoever builds the charter to discover. 121/0, **red ten ways, one per
+  rule** &mdash; and one break modelled a BROKEN FUNCTION rather than the defect
+  until it was rewritten to produce **`1.0.1`**, the plan growing a level it does
+  not have. **The frozen product is untouched and measured**
+  (`built-in-step.py` all good), so **`sw.js` is NOT bumped**. Two reds are
+  `main`'s, established on a baseline worktree first (&sect;303): `tracker` 227/1
+  on a date-relative literal gone stale, and spike S2 on `notes.met_on`.
 - **A MODULE IS A FOLDER THAT SERVES ITSELF (§354, spec 046):** the third
   module arrived and the route's own comment — *a branch rather than a table
   because there are two of them* — was still there with Insights' eight lines
@@ -8183,6 +8226,48 @@ node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # the browser's locale format &mdash; the third found
                                 # by LOOKING at the built page beside the mockup,
                                 # which is what rule 1c's last step is for
+node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
+                                # any screen (spec 056, &sect;359) &mdash; `npm run
+                                # check:portfolio`, needs a database and NO browser,
+                                # which is what &sect;8 of that spec asks for in its own
+                                # words. &sect;1&ndash;&sect;8 run the six rules pure: who gets in,
+                                # the two-step sign-off and the reopen gated LIKE it
+                                # (&sect;7.6 &mdash; theirs needs only the work-on gate, so a
+                                # Contributor undoes a Lead's), the real dates at one
+                                # chokepoint, progress from the breakdown with a typed
+                                # figure refused, the weighted roll-up by &sect;243's blank
+                                # rule, the numbering with its 1.2.3 &rarr; 1.2 collapse,
+                                # the cascade preview, and what is owed as a count of
+                                # ROWS and never of reasons (&sect;279). &sect;9 runs every
+                                # statement as `smp_app` with the tenant set and asserts
+                                # each constraint by ATTEMPTING the row, never by reading
+                                # the DDL (&sect;96), with the CONSTRAINT'S NAME asserted or a
+                                # row refused for some other reason reads as the rule
+                                # working (&sect;113.8). &sect;10 reads the catalogue: all eight
+                                # tables RLS-forced, their policy IDENTICAL to
+                                # `tracker_actions`' (&sect;94.8), none on PLATFORM_TABLES
+                                # (&sect;331), every one cascading from its client or
+                                # `deleteTenant` would refuse. BOTH ENDS EVERYWHERE
+                                # (&sect;94.2) &mdash; a Viewer cannot comment AND a Lead can, or
+                                # a build that refused everybody passes half. 121/0, red
+                                # TEN ways (`check:portfolio:red`), one break per rule.
+                                # **AND ONE BREAK MODELLED A BROKEN FUNCTION RATHER THAN
+                                # THE DEFECT**: `no-collapse` first forced every row to
+                                # the activity level, so phases read `0`; corrected, it
+                                # forces the DEPTH and an activity under a phase reads
+                                # **`1.0.1`** &mdash; the plan growing a level it does not
+                                # have. *A falsification that breaks the function proves
+                                # the check runs; one that reproduces the defect proves
+                                # the check is about something.* Its weighted coverage
+                                # was one assertion until the state was MADE (&sect;255): the
+                                # fixture carries no weights, so `equal-only` reddened
+                                # once and everything else averaged equally &mdash; a
+                                # weighted phase and activity take it to three. And my
+                                # own first weighted figure was TYPED and wrong (20 where
+                                # the arithmetic is 15), which is &sect;9.8's own lesson in
+                                # the check rather than in the drawing; it is asserted
+                                # beside the equally-weighted 50, so the number is pinned
+                                # by a difference and not only by itself
 node smp-app/checks/insights.mjs # the library, and who can see one report
                                 # (spec 053, &sect;355) &mdash; `npm run check:insights`,
                                 # needs a database. &sect;1b is the narrowing's PURE
@@ -9648,7 +9733,31 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-16 &mdash; **&sect;356.16: the week by its month, cards
+*Last Updated: 2026-09-20 &mdash; **&sect;359: Portfolio &mdash; the rules and the
+tables, before any screen (spec 056).** Islam, on the handover saying every
+screen was drawn and three of six signed off: **"proceed."** **WHAT IS BUILT IS
+THE HALF A *PROCEED* CAN HONESTLY REACH** &mdash; rule 1c is owed on three
+screens, so nothing visual is built, `portfolio` stays `built: false`, and the
+flag is ASSERTED with a built module beside it (&sect;61, &sect;113.8). &sect;8 of
+that spec named this slice in its own words, so the six rules, &sect;6's reach
+and &sect;9.8's roll-up are pure functions a check asks with no browser at all.
+**The drawings' own shape earned its way into the product** &mdash; the flat
+ordered array `_derive.js` reads &mdash; so the plan on the screen and the plan
+on the server cannot arrive at two answers for one project. **&sect;243's blank
+rule is a second copy ON PURPOSE**, because Portfolio may not reach into
+Strategy's frozen vocabulary; what is asserted is that it answers what &sect;243
+answers, never a number. **Every constraint is asserted by ATTEMPTING the row,
+with the constraint's NAME** (&sect;96, &sect;113.8), and both migration paths are
+proved by running them (&sect;33.5). **Building &sect;6 found two sentences of the
+spec pointing different ways** &mdash; can a Lead name somebody? &mdash; answered
+the narrow way and written in as &sect;6.4a rather than left to be discovered.
+**121/0, red ten ways, one per rule** &mdash; and one break modelled a broken
+function rather than the defect until it was rewritten to produce `1.0.1`, the
+plan growing a level it does not have. The frozen product is untouched and
+MEASURED, so `sw.js` is not bumped. Two reds are `main`'s, established on a
+baseline worktree first (&sect;303). **On the branch, not merged.***
+
+*Earlier: 2026-09-16 &mdash; **&sect;356.16: the week by its month, cards
 that hold still, and a line that asks later (spec 054).** Islam, of the tracker
 as &sect;356.15 left it: *"for the week in the selection or the due week for the
 weeks after this week and next week to have it W1 Oct or W3 Dec etc."*, *"the

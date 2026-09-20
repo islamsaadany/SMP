@@ -5572,3 +5572,48 @@ to 768 with nothing scrolling sideways.
 the spec's own §10 still says what building needs — this repository has never
 seen the reference code, so the two audits behind §7 and §9.11 were written by
 sessions with it attached and nothing has been run.
+
+---
+
+## Portfolio — the rules and the tables (2026-09-20, spec 056, §359)
+
+**Built: the half with no picture.** Every screen of this module is drawn and
+three of the six are signed off, so what could honestly be built is the part
+that is decided and has no design in it — the shape the data takes, and the
+rules that say what may be done to it.
+
+**Nothing on any screen has changed and nothing can be opened.** Portfolio is
+still switched off in the list of modules, so there is no page, no address and
+no entry in the switcher. That is asserted rather than assumed: a module
+switched on with nothing behind it is a door onto an empty room.
+
+**What is in it.** Eight tables — the plan's tree (phases, work packages,
+activities and their breakdown), who is on a project and at what, and the three
+words a client uses for the levels. And the rules the spec calls the actual
+product: two people finish an activity rather than one, and reopening it is
+gated the same way as signing it off; the real dates are worked out and never
+typed, at one place in the code; progress comes from the breakdown and a typed
+figure over it is refused with the reason; moving a date shows you what else
+moves before anything commits; the numbers renumber themselves, so deleting a
+phase cannot leave a gap; and a phase's figure is made of the rows under it
+rather than stored, which is what stops it disagreeing with the page it summarises.
+
+**How it is proved.** 121 assertions with no browser and no screen, each
+refusal asserted beside the same act allowed to somebody the rule admits — and
+the whole file proved able to fail ten times over, one break per rule, before
+the green run was believed. The tables were proved by running them twice: on a
+fresh database, and on one already up, where only the migration creates them.
+
+**Two things worth recording.** One break modelled a broken function rather
+than the defect it was named after, and was rewritten until it reproduces the
+fault exactly. And building §6 found two sentences in the spec pointing
+different ways — whether a Lead can name somebody onto a project, which the
+team screen says no to and the charter implies yes. Answered the narrow way,
+written into the spec, and Islam's to settle.
+
+**Not this work's, established on a baseline first**: the Tracker's check is
+one red on a date that has gone stale since it was written, and one spike proof
+dies in its own seed harness on a Meeting Notes column. Both recorded.
+
+**Next, and still a decision rather than work**: the three sign-offs. Nothing
+visual can be built until they are given.

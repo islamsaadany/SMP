@@ -49678,3 +49678,129 @@ chat. **AND RECORDED, NOT DONE**: the 24 buttons at 2.86 / 3.88, exempt as
 inactive controls and no longer exempt the day any of them is made to answer a
 press; and the fact that the console's contrast sweep cannot reach the
 publishing room at all, which is a gap in the sweep rather than in this change.
+
+---
+
+## §359 — PORTFOLIO: THE RULES AND THE TABLES, BEFORE ANY SCREEN (2026-09-20, spec 056)
+
+Islam, on the handover that said every screen of spec 056 was drawn and three
+of the six signed off: **"proceed."**
+
+**WHAT IS BUILT IS THE HALF THAT IS DECIDED AND HAS NO PICTURE**, which is the
+only half a *proceed* can honestly reach: rule 1c is paid for the project team,
+the charter and the plan, and **owed for Progress, Analytics and the landing** —
+so nothing visual is built from this, and `portfolio` is still `built: false`
+in `lib/modules.ts`. **The flag is asserted rather than assumed** (§1 of the
+check): a module marked built with nothing behind it is the door onto the wrong
+room that flag exists to stop (§61), and the assertion carries the Tracker's
+`built: true` beside it or it would pass on a build where the whole table had
+gone (§113.8).
+
+**§8 OF THE SPEC NAMED THIS SLICE IN ITS OWN WORDS** — *the six rules of §3 are
+checked as rules, not as screens; pure functions where they can be, so the
+sign-off, the derived dates, the computed progress, the cascade and the
+renumbering are provable without a browser.* So `lib/portfolio.ts` is those six
+plus §6's reach and §9.8's roll-up, and `checks/portfolio.mjs` asks them with
+no browser at all.
+
+**A FLAT ORDERED ARRAY IS THE TREE, AND IT IS THE DRAWINGS' OWN SHAPE.** Phases,
+work packages and activities are three tables, and every rule that walks the
+plan — the numbering, the roll-up, the cascade, the tally — wants them in
+document order with a level on each. `design-mockups/portfolio/_derive.js`
+already reads exactly that, so the plan on the screen and the plan on the server
+cannot arrive at two answers for one project (§5.2). *The mockup's shape earned
+its way into the product rather than being translated out of it.*
+
+**§243'S BLANK RULE IS A SECOND COPY ON PURPOSE, AND THAT IS NOT §53.5 BEING
+IGNORED.** `koWeights` is the frozen product's, read by six frozen sources and
+run in a vm by `lib/frozen.cjs`, and Portfolio may not reach into Strategy's
+vocabulary — which is §9.1's whole argument for why the three words could not
+ride `labels`. What must not drift is the RULE, so the check asserts this
+answers what §243 answers — a blank counts as the average of the weights that
+were set, none set means equal, every set weight nought falls back to equal
+rather than to a dash — rather than asserting a number.
+
+**THE WEIGHTED CASE WAS NOT COVERED UNTIL IT WAS MADE.** The plan fixture
+carries no weights, so `--break=equal-only` reddened ONE assertion: everything
+else averaged equally and would have passed on a build that never read the
+column. A weighted phase and a weighted activity are made now and it reddens
+three. **And my own first weighted figure was wrong** — 20 typed where the
+arithmetic is 15 — which is §9.8's own recorded lesson (*the first draft of it
+typed 62 and 8 and both were wrong*) arriving in the check rather than in the
+drawing. It is asserted beside the equally-weighted 50, so the number is pinned
+by a difference and not only by itself.
+
+**THE CONSTRAINTS ARE ASSERTED BY ATTEMPTING THE ROW, NEVER BY READING THE
+DDL** (§96), and the constraint's NAME is asserted with the refusal, or a row
+turned away for some other reason reads as the rule working (§113.8). §7.6's
+first row — *an activity has two nullable parents and nothing says exactly one
+is set* — is a `CHECK` now, and the check sends both the orphan and the
+two-parent row and watches each bounce off `portfolio_activity_parent`.
+
+**THE BREAK THAT MODELLED A BROKEN FUNCTION RATHER THAN THE DEFECT.**
+`--break=no-collapse` first forced every row to the activity level, which made
+phases read `0` — a function that is broken, not a product that has the fault.
+Corrected, it forces the DEPTH instead, so an activity hung straight off a
+phase reads **`1.0.1`**: the plan grows a level it does not have, with a nought
+where a work package would be, which is exactly what §3 №5's collapse exists to
+prevent. *A falsification that breaks the function proves the check runs; one
+that reproduces the defect proves the check is about something.*
+
+**WHAT IS OWED IS A COUNT OF ROWS AND NEVER OF REASONS** (§279, §108.1), and
+the fixture demonstrates it rather than claiming it (§255): one activity is
+past its date AND has nobody on it, so three predicates name **two** rows and
+`--break=owed-sums` reddens the one assertion that says so.
+
+**EIGHT TABLES, AND SIX NAMED AND NOT BUILT.** The tree, the team and the
+words; phase groups, comments, mentions, reactions, files and history arrive
+with the screens that read them, because a table ahead of its screen is a
+column nothing writes (§294.2). **Both paths are proved by running them**
+(§33.5): a fresh database through `db/apply.mjs`, and a database already up —
+`HEAD`'s own `schema.sql` applied first, **0 portfolio tables**, then migration
+015 alone, **8** — with the migration run twice to prove it idempotent. Every
+one is RLS-enabled, forced, carries `tenant_rows`, and its policy text is read
+back and asserted **identical** to `tracker_actions`' (§94.8). Every one
+cascades from `tenants`, or `deleteTenant` would refuse the whole delete.
+
+**AND ONE THING THE BUILD FOUND THAT THE SPEC LEAVES AMBIGUOUS, ANSWERED THE
+NARROW WAY AND NAMED RATHER THAN LEFT**: §6.4 and §9.2 make **naming people
+onto a project** the seat's, while §5.1 gives the charter's pen to the office
+AND the Lead and §5.1a has the charter's *Project Manager* row read whoever is
+at Lead and says *setting it there sets the role*. So a Lead editing that one
+row would be naming somebody. `mayNameTeam()` is the seat's alone until Islam
+says otherwise (§42 fails closed), and the question is written into the spec
+rather than left for whoever builds the charter to discover.
+
+**PROVED ABLE TO FAIL TEN WAYS, ONE PER RULE** (§276, from the sources):
+`any-build` 8 · `team-deletes` 1 · `viewer-comments` 2 · `anyone-completes` 2 ·
+`restamp-start` 3 · `manual-wins` 1 · `equal-only` 3 · `no-collapse` 3 ·
+`no-cascade` 3 · `owed-sums` 1. **121/0** green.
+
+**VERIFIED**: portfolio 121/0 red ten ways; memory-boundary 14/0, schema-room
+10/0, modules 107/0, insights 127/0, notes 170/0, frameworks 90/0, demo-seed
+7/0, office-standing 7/0, deploy-context 5/0, `generated-in-step` all clear;
+`npm run build` green through `scripts/deploy.mjs` and `next build`; `tsc`
+clean COLD but for `lib/prisma.ts`'s recorded pre-existing error. **The frozen
+product is untouched and it is measured rather than assumed** —
+`built-in-step.py` all good — so **`sw.js` is NOT bumped**: §91's trigger is
+the built file's bytes changing and they did not.
+
+**TWO REDS ARE NOT THIS WORK'S AND WERE ESTABLISHED ON A BASELINE WORKTREE OF
+`HEAD` BEFORE ANYTHING HERE WAS BLAMED** (§303): `tracker` 227/1 on the same
+assertion with the same detail, which is a date-relative literal going stale
+(§214.3's family — it was green on 2026-09-16 and today is the 20th); and spike
+S2, which dies in the seed harness on `notes.met_on` with *no placeholder for
+date*, a spec 055 column. Recorded, not fixed in passing (rule 1b).
+
+**AND THE THROWAWAY POSTGRES LOST ITS OWN DATA DIRECTORY MID-RUN**, which is
+worth one line because it reads exactly like a product failure: the scratchpad
+is `700 root` and the server runs as `postgres`, so the `chmod o+x` that let it
+start was reset under it and every later check reported `ECONNREFUSED`. The
+first reading of that was *the checks are broken*. **A run that cannot connect
+is not a run that failed** (§54.5, §320.6b's family) — the data directory moved
+somewhere the server owns and every one of them came back green.
+
+**STILL ISLAM'S, AND NOTHING BELOW IS STARTED**: the three drawings awaiting
+sign-off (§9.10 Progress, §9.12 Analytics, §9.13 the landing), and with them
+every screen of this module; §9.3's workbook, §9.5's notice and §9.6's budget
+question, which §9 still lists as live; and the carry in §9.7.

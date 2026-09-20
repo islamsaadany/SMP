@@ -1,6 +1,15 @@
 # 056 · Portfolio — the delivery plan, per client
 
-**Status:** **not built. No source has moved.** This is the
+**Status:** **the rules and the tables are built; no screen is.** §5's tree,
+team and words are in `db/schema.sql` and `db/migrations/015-portfolio.sql`,
+and §3's six rules, §6's reach and §9.8's roll-up are in
+`smp-app/lib/portfolio.ts`, proved by `checks/portfolio.mjs` (121/0, red ten
+ways) — which is the slice §8 names in its own words, *pure functions where
+they can be, so the sign-off, the derived dates, the computed progress, the
+cascade and the renumbering are provable without a browser*. **`portfolio` is
+still `built: false`** and there is no page, no address and no switcher entry:
+rule 1c is owed on three of the six screens, and the check asserts the flag
+rather than assuming it (§359). This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
 what it specifies is the shape, not the screens. **Every screen is now drawn.**
@@ -474,6 +483,29 @@ The client's register, through **the platform's own searchable ticking list**
   that still holds capabilities: the press is live and names what is in the
   way rather than being hidden or silently stranding the rows. Unassigned
   activities in a live plan are what nobody notices until a checkpoint.
+
+#### 6.4a · Can a LEAD name somebody? — open, answered the narrow way (2026-09-20)
+
+**Found by building §6 rather than by reading it** (§359). Two sentences in
+this page point different ways and both are Islam's:
+
+- §6.4 and §9.2 make naming people onto a project **the seat's** — *the
+  client's Super user can do anything, naming people onto a project and
+  starting one*;
+- §5.1 gives the charter's pen to the office **and the Lead**, and §5.1a has
+  the charter's **Project Manager** row read whoever is at Lead and says
+  *setting it there sets the role*.
+
+So a Lead editing that one row on the charter would be naming somebody, which
+the team screen does not let them do. Neither sentence is wrong; they were
+written about two different surfaces and have not met.
+
+**`mayNameTeam()` is the SEAT's alone until he says otherwise** (§42 fails
+closed, and the narrow answer is the one that can be widened without taking
+anything back). What it costs, stated: a Lead correcting the charter cannot
+change who leads the project from that row, so the Manager row is read-only to
+them and the team screen is where it moves. Whichever way it goes it is one
+predicate, and the check asserts both ends of it already.
 
 ### 6.5 · True whatever anybody is set to
 

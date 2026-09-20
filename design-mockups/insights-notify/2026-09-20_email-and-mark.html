@@ -1,0 +1,290 @@
+<title>Insights report notices</title>
+<style>
+  :root{
+    --pg:#F7F8FA; --pgs:#FFFFFF; --pgl:#D6DCE5; --pgi:#171B22; --pgi2:#414A58; --pgi3:#636C79;
+    --pgnavy:#16325C; --pggold:#C9A24D; --pggoldx:#8A6B22; --pgsoft:#EFF2F6;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --pg:#14161A; --pgs:#1C2027; --pgl:#333A45; --pgi:#E9ECF1; --pgi2:#B4BCC8; --pgi3:#949DAA;
+    --pgnavy:#7FA3D8; --pggold:#D9B665; --pggoldx:#D9B665; --pgsoft:#242932;
+  }}
+  :root[data-theme="dark"]{
+    --pg:#14161A; --pgs:#1C2027; --pgl:#333A45; --pgi:#E9ECF1; --pgi2:#B4BCC8; --pgi3:#949DAA;
+    --pgnavy:#7FA3D8; --pggold:#D9B665; --pggoldx:#D9B665; --pgsoft:#242932;
+  }
+
+  body{ background:var(--pg); color:var(--pgi);
+        font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+        margin:0; }
+  .wrap{ max-width:1020px; margin:0 auto; padding-block:34px 70px; padding-left:20px; padding-right:20px; }
+
+  h1{ font-size:27px; line-height:1.2; margin:0 0 6px; letter-spacing:-.015em; text-wrap:balance; }
+  .sub{ color:var(--pgi2); margin:0 0 4px; max-width:60ch; }
+  .stamp{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--pgi3);
+          font-weight:700; margin:0 0 20px; }
+
+  h2{ font-size:18px; margin:0 0 4px; letter-spacing:-.01em; }
+  h3{ font-size:13px; margin:0 0 8px; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--pgi3); font-weight:700; }
+  p{ max-width:66ch; }
+
+  section{ border-top:1px solid var(--pgl); padding-top:26px; margin-top:34px; }
+  .lede{ color:var(--pgi2); margin:0 0 22px; max-width:66ch; }
+
+  .two{ display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:22px; align-items:start; }
+  .bit{ display:flex; flex-direction:column; gap:9px; }
+  .cap{ font-size:12.5px; color:var(--pgi3); margin:0; }
+
+  /* ── the platform's own top bar, copied from _shared.css / arrange.css ── */
+  .chrome{ --line:#D6DCE5; --surface:#FFFFFF; --surface-2:#EFF2F6; --ink:#171B22;
+           --ink-2:#414A58; --ink-3:#636C79; --stone-soft:#24487A; --gold:#C9A24D;
+           --panel:#16325C; --panel-ink:#FFFFFF; --attn:#B8860B;
+           border:1px solid var(--pgl); border-radius:10px; overflow:hidden;
+           background:var(--surface); }
+  .chrome.night{ --line:#333A45; --surface:#1C2027; --surface-2:#242932; --ink:#E9ECF1;
+                 --ink-2:#B4BCC8; --ink-3:#949DAA; --stone-soft:#5C82BC; --gold:#D9B665;
+                 --panel:#060B16; --panel-ink:#E9ECF1; --attn:#D9B23C; }
+  .top{ border-bottom:1px solid var(--line); background:var(--surface); }
+  .top-in{ padding:14px 16px; display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+  .brand{ display:flex; flex-direction:column; gap:2px; margin-right:auto; }
+  .eyebrow{ font-size:10px; letter-spacing:.15em; text-transform:uppercase; color:var(--ink-3);
+            font-weight:700; }
+  .brand h4{ font-size:16px; font-weight:700; letter-spacing:-.01em; margin:0; color:var(--ink); }
+  .units{ background:var(--panel); padding:0 16px; display:flex; gap:0; }
+  .units b{ color:var(--panel-ink); font-size:12.5px; font-weight:600; padding:9px 12px;
+            border-bottom:3px solid var(--gold); }
+  .units i{ color:#B7C4D8; font-size:12.5px; font-style:normal; padding:9px 12px;
+            border-bottom:3px solid transparent; }
+  .night .units i{ color:#9AA6B8; }
+
+  .topmark{ position:relative; align-self:center; }
+  .topmark .sm{ display:grid; place-items:center; width:28px; height:28px;
+                border:1px solid var(--line); border-radius:8px; color:var(--ink-3);
+                background:none; position:relative; }
+  .topmark svg{ width:17px; height:17px; display:block; }
+
+  /* THE ONE NEW THING: a gold dot, the same answer the home mark already gives. */
+  .topmark .sm.has::after{ content:""; position:absolute; top:-3px; right:-3px;
+                           width:9px; height:9px; border-radius:50%;
+                           background:var(--gold); border:2px solid var(--surface); }
+
+  .menu{ position:absolute; z-index:5; top:calc(100% + 6px); left:0; min-width:290px;
+         background:var(--surface); border:1px solid var(--line); border-radius:8px;
+         box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
+  .menu .it{ display:block; width:100%; text-align:left; font-size:13.5px; color:var(--ink);
+             padding:9px 14px; }
+  .menu .it.here{ font-weight:700; }
+  .menu .it .row{ display:flex; align-items:center; gap:8px; }
+  .dlsub{ display:block; font-size:11.5px; color:var(--ink-2); margin-top:2px; font-weight:400; }
+  .newchip{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+            color:#16325C; background:var(--gold); border-radius:999px; padding:1px 7px; }
+  .night .newchip{ color:#14161A; }
+
+  .stage{ background:var(--pgsoft); border:1px solid var(--pgl); border-radius:10px;
+          padding:16px; min-height:190px; }
+
+  .mail{ width:100%; height:560px; border:1px solid var(--pgl); border-radius:10px;
+         background:#F4F6FA; display:block; }
+
+  ul{ max-width:66ch; padding-left:19px; margin:0 0 14px; }
+  li{ margin-bottom:7px; }
+  li b{ font-weight:650; }
+
+  .note{ border-left:3px solid var(--pggold); background:var(--pgsoft);
+         padding:13px 15px; border-radius:0 7px 7px 0; margin:18px 0 0; }
+  .note p{ margin:0; font-size:14px; color:var(--pgi2); }
+  .note p + p{ margin-top:8px; }
+  .note strong{ color:var(--pgi); }
+
+  .ask{ border:1px solid var(--pgl); border-radius:10px; padding:16px 18px; background:var(--pgs); }
+  .ask h3{ margin-bottom:10px; }
+  .ask p:last-child{ margin-bottom:0; }
+  table{ border-collapse:collapse; width:100%; font-size:13.5px; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--pgl); vertical-align:top; }
+  th{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--pgi3); font-weight:700; }
+  td:first-child{ white-space:nowrap; color:var(--pgi2); }
+  .tw{ overflow-x:auto; }
+</style>
+
+<div class="wrap">
+
+  <p class="stamp">Mockup for sign-off &middot; 20 September 2026</p>
+  <h1>Telling people a report is up</h1>
+  <p class="sub">One email per report, carrying a link straight to it, and a mark in the top bar so
+     the platform agrees with the email when they open it.</p>
+  <p class="sub" style="color:var(--pgi3);font-size:13.5px">Both halves are made of things the platform
+     already has. The email below is the real builder's output, not a drawing of it.</p>
+
+  <section>
+    <h2>1 &middot; The email</h2>
+    <p class="lede">Sent once, when a report is published. The button is the link.</p>
+
+    <iframe class="mail" title="The email, as the platform's own builder renders it"
+            srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot;&gt;&lt;meta name=&quot;color-scheme&quot; content=&quot;light&quot;&gt;&lt;meta name=&quot;supported-color-schemes&quot; content=&quot;light&quot;&gt;&lt;title&gt;A new report is in your library&lt;/title&gt;&lt;/head&gt;&lt;body style=&quot;margin:0;padding:0;background:#F4F6FA&quot;&gt;&lt;div style=&quot;display:none;max-height:0;overflow:hidden;opacity:0&quot;&gt;A new report is in your library&lt;/div&gt;&lt;table role=&quot;presentation&quot; width=&quot;100%&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; border=&quot;0&quot; style=&quot;background:#F4F6FA&quot;&gt;&lt;tr&gt;&lt;td align=&quot;center&quot; style=&quot;padding:28px 12px&quot;&gt;&lt;table role=&quot;presentation&quot; width=&quot;600&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; border=&quot;0&quot; style=&quot;width:600px;max-width:100%;background:#FFFFFF;border:1px solid #E3E8EF;border-radius:10px;overflow:hidden&quot;&gt;&lt;tr&gt;&lt;td bgcolor=&quot;#16325C&quot; style=&quot;padding:20px 28px&quot;&gt;&lt;div style=&quot;font:700 15px/1.3 Helvetica,Arial,sans-serif;color:#FFFFFF;letter-spacing:.01em&quot;&gt;Raya Trade&lt;/div&gt;&lt;div style=&quot;font:600 10.5px/1.4 Helvetica,Arial,sans-serif;color:#BEC6D1;letter-spacing:.14em;text-transform:uppercase;padding-top:3px&quot;&gt;Strategy Management Platform&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td bgcolor=&quot;#C9A227&quot; style=&quot;font-size:0;line-height:0;height:3px&quot;&gt;&amp;nbsp;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:28px 28px 8px&quot;&gt;&lt;h1 data-mail-title style=&quot;margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;color:#1B2330&quot;&gt;A new report is in your library&lt;/h1&gt;&lt;p style=&quot;margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#1B2330&quot;&gt;Dear Ahmed,&lt;/p&gt;&lt;div data-mail-body&gt;&lt;p style=&quot;margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#1B2330&quot;&gt;Q3 Market Position Review has been published to Insights.&lt;br&gt;Prepared for Mobile by the Strategy Office.&lt;/p&gt;&lt;/div&gt;&lt;table role=&quot;presentation&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; border=&quot;0&quot; style=&quot;margin:8px 0 22px&quot;&gt;&lt;tr&gt;&lt;td bgcolor=&quot;#16325C&quot; style=&quot;border-radius:6px&quot;&gt;&lt;a href=&quot;https://example.invalid/raya-trade/insights&quot; style=&quot;display:inline-block;padding:11px 22px;font:600 14px/1 Helvetica,Arial,sans-serif;color:#FFFFFF;text-decoration:none&quot;&gt;Open the report&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:0 28px&quot;&gt;&lt;div style=&quot;border-top:1px solid #E3E8EF&quot;&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:16px 28px 24px&quot;&gt;&lt;p style=&quot;margin:0;font:400 12px/1.55 Helvetica,Arial,sans-serif;color:#6B7686&quot;&gt;Sent from the Strategy Management Platform for Raya Trade. If you were not expecting this, tell your SMO.&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+
+    <div class="note">
+      <p><strong>Nothing in this email is new.</strong> It is the platform's own message shell &mdash;
+         the client's bar, the gold rule, the greeting by first name, the button, the footer.
+         The button already existed for other messages; this is the first one to point at a report.</p>
+      <p><strong>The file is not attached.</strong> A report is often large and is narrowed to
+         particular places, so it stays behind the sign-in and the link is what opens it.</p>
+    </div>
+  </section>
+
+  <section>
+    <h3>Who receives it</h3>
+    <div class="tw"><table>
+      <tr><th>Gets it</th><th>Because</th></tr>
+      <tr><td>The places the report is for</td>
+          <td>Exactly the narrowing you already set on the report. Narrowed to Finance means Finance,
+              and nobody in Mobile is told a Finance report exists.</td></tr>
+      <tr><td>Only if they can open Insights</td>
+          <td>Somebody whose access does not reach the module would be sent to a door that refuses them.</td></tr>
+      <tr><td>Only an active person with an address</td>
+          <td>The register decides. A retired row is not written to.</td></tr>
+      <tr><td>Once</td>
+          <td>The publish date is stamped once and never rewritten, so withdrawing a report and
+              putting it back does not send the email a second time.</td></tr>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>2 &middot; The mark in the top bar</h2>
+    <p class="lede">So somebody already in Strategy can see there is something new without going to look.
+       It is the modules button they already have, wearing a dot.</p>
+
+    <div class="two">
+      <div class="bit">
+        <h3>Today</h3>
+        <div class="stage">
+          <div class="chrome">
+            <div class="top"><div class="top-in">
+              <div class="topmark"><div class="sm">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round" fill="none">
+                  <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+                  <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>
+                </g></svg></div></div>
+              <div class="brand"><span class="eyebrow">Strategy</span><h4>Raya Trade</h4></div>
+            </div></div>
+            <div class="units"><b>Mobile</b><i>Retail Stores</i><i>Care</i></div>
+          </div>
+        </div>
+        <p class="cap">Nothing says a report went up last Tuesday.</p>
+      </div>
+
+      <div class="bit">
+        <h3>Proposed</h3>
+        <div class="stage">
+          <div class="chrome">
+            <div class="top"><div class="top-in">
+              <div class="topmark"><div class="sm has">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round" fill="none">
+                  <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+                  <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>
+                </g></svg></div></div>
+              <div class="brand"><span class="eyebrow">Strategy</span><h4>Raya Trade</h4></div>
+            </div></div>
+            <div class="units"><b>Mobile</b><i>Retail Stores</i><i>Care</i></div>
+          </div>
+        </div>
+        <p class="cap">A gold dot &mdash; the same colour the house mark beside it already turns
+           when something is waiting.</p>
+      </div>
+    </div>
+
+    <div class="two" style="margin-top:26px">
+      <div class="bit">
+        <h3>Opened</h3>
+        <div class="stage" style="min-height:230px">
+          <div class="chrome">
+            <div class="top"><div class="top-in">
+              <div class="topmark">
+                <div class="sm has">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round" fill="none">
+                    <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+                    <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>
+                  </g></svg></div>
+                <div class="menu">
+                  <div class="it here"><span class="row">Strategy</span>
+                    <span class="dlsub">Plans, measures, reporting and the review</span></div>
+                  <div class="it"><span class="row">Insights <span class="newchip">2 new</span></span>
+                    <span class="dlsub">Research, analytics and market reports</span></div>
+                </div>
+              </div>
+              <div class="brand"><span class="eyebrow">Strategy</span><h4>Raya Trade</h4></div>
+            </div></div>
+            <div class="units"><b>Mobile</b><i>Retail Stores</i><i>Care</i></div>
+          </div>
+        </div>
+        <p class="cap">The count is the one the console card already shows us &mdash; read for this
+           person, so a report narrowed away from them is not in it.</p>
+      </div>
+
+      <div class="bit">
+        <h3>In dark, and with nothing new</h3>
+        <div class="stage night" style="min-height:230px;background:#14161A;border-color:#333A45">
+          <div class="chrome night" style="margin-bottom:14px">
+            <div class="top"><div class="top-in">
+              <div class="topmark"><div class="sm has">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round" fill="none">
+                  <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+                  <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>
+                </g></svg></div></div>
+              <div class="brand"><span class="eyebrow">Strategy</span><h4>Raya Trade</h4></div>
+            </div></div>
+            <div class="units"><b>Mobile</b><i>Retail Stores</i><i>Care</i></div>
+          </div>
+          <div class="chrome night">
+            <div class="top"><div class="top-in">
+              <div class="topmark"><div class="sm">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round" fill="none">
+                  <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+                  <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>
+                </g></svg></div></div>
+              <div class="brand"><span class="eyebrow">Strategy</span><h4>Raya Trade</h4></div>
+            </div></div>
+            <div class="units"><b>Mobile</b><i>Retail Stores</i><i>Care</i></div>
+          </div>
+        </div>
+        <p class="cap">With nothing new there is no dot and no chip &mdash; which is how it reads on
+           most days, and the reason the dot means something when it is there.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h3>What this costs, said before you take it</h3>
+    <ul>
+      <li><b>The dot needs more than one module.</b> The modules button is only drawn for a client
+          that has more than one &mdash; a menu with one entry is a door behind a door. Raya Trade has
+          Strategy and Insights, so it is drawn. A client with Strategy alone gets the email and no dot.</li>
+      <li><b>Every page load asks the library a small question</b> to know whether to draw the dot.
+          It is one short read of the reports this person may see.</li>
+      <li><b>The dot follows the count, not the reading.</b> It says <em>this month</em>, not
+          <em>you have not opened these</em> &mdash; the platform does not record who has read what.
+          Remembering that per person is a bigger thing and is not in this.</li>
+      <li><b>A send that fails is not retried.</b> It is recorded, as every other send is, so you can
+          see who it did not reach.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="ask">
+      <h3>Three small things to confirm</h3>
+      <p><b>1 &middot; The subject line.</b> I would use the report's own name, so it reads in an
+         inbox: <em>New report: Q3 Market Position Review</em>.</p>
+      <p><b>2 &middot; Should you get a copy?</b> The office publishes it, so you would know already
+         &mdash; my inclination is no copy unless you ask, with the record on the Insights room
+         showing who it went to.</p>
+      <p><b>3 &middot; Does a re-publish ever re-send?</b> As drawn, no &mdash; once per report, ever.
+         If you correct a report and want people told again, that would be a deliberate
+         <em>Tell them again</em> press rather than something that happens by itself.</p>
+    </div>
+  </section>
+
+</div>

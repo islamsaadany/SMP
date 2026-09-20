@@ -53762,3 +53762,162 @@ migrated, and no rule about who may save what changes.
 **RECORDED, NOT DONE**: a bookmarked address carrying `?viewAs=` that cannot
 be honoured answers 403 as a bare sentence rather than as a page — reachable
 only by forging or by a stale link, and worth a page the day anybody meets it.
+
+---
+
+## §379 — A TACTIC'S OWNER IS A ROW ON THE TABLE (2026-09-20)
+
+Islam, after §377 established that Mahdy reached a whole supporting function
+because a project there named him as Owner:
+
+> *"what we need to follow is the accessablity matrix. we don't have a tactic
+> or measure owner in the roles to set accessability for so until then they are
+> defaulted to see nothing and edit nothing."*
+
+and then, closing the fork:
+
+> *"don't chagne the settings of the accessablity. I believe we need to add
+> measures & tactics owners as roles so I can set their accessability and
+> accordingly Mahdy access can be switched on of orr."*
+
+**AND HE CLOSED THE ORIGINAL COMPLAINT HIMSELF**: *"mahdy is a project owner
+then it ok to see the project and report it ofcourse my bad."* So nothing about
+Project owner moves; what was missing is a row for the level below it.
+
+### §379.1 — §147.7's shape, one level down
+
+A pillar has an Owner and every tactic under it has one, and being named the
+Owner IS the role — the same derivation `powner` and `plowner` have had since
+§147.7. What was missing is that **a tactic's Owner derived nothing at all**.
+The only thing that ever reached such a person was the Contributor floor, and
+that fires on `!out.length` — *holding no other role at all* — so a unit head
+who also owns a tactic somewhere else reached it through **no row anybody could
+see on the table**, and could therefore be switched off by nobody.
+
+That is the whole fault, and it is exactly the one Islam is pointing at.
+
+### §379.2 — All none, and that is his instruction rather than a cautious default
+
+The two owner rows above it ship at `view`, because §147.7 was asked for a role
+that READS its own place and reports it once the cell is opened. This one was
+asked for the opposite: a row that starts shut so a tenant can decide. Shipping
+it at view would hand reach to **every tactic owner in every tenant** on the day
+it landed — measured, 18 people on the worked example — which is the opposite of
+what a switch is for.
+
+**MEASURED, NOT REASONED**: `scripts/test-access-unmoved.js` against the T0
+baseline answers **UNMOVED** — 33 people × 35 page keys × 21 targets, every one
+opening exactly what they opened. Adding the role moves nobody.
+
+### §379.3 — And it takes nothing away, which a reading would miss
+
+Any role deriving here suppresses the Contributor floor, and this one grants
+**nothing** where the floor gives view. So somebody who owns a tactic and is
+named nowhere else would have stopped being a Contributor and started being a
+Tactic owner with every cell at none: *a role that takes away the floor it
+stands on, silently, on the day it ships.*
+
+The floor's question is asked of the roles **other than this one**
+(`grantless`). `powner` and `plowner` are deliberately NOT in that exception —
+they have suppressed the floor since §147.7 and they ship at view, which is what
+the floor gives, so exempting them would be a widening nobody asked for in a
+change about a row that grants nothing (rule 1b).
+
+Nobody in the worked example stands on the floor at all, so the case is MADE
+(§255) rather than waited for.
+
+### §379.4 — A handle of its own, never `ctx.row.owner`
+
+The obvious branch — *does the row's Owner name this person* — reads right and
+is wrong on exactly one row kind. **A measure's reporting context is built with
+`row.owner = the PILLAR's owner`** (§55's rule, kept by §147.7 so nothing a
+contributor could reach before the pillar-owner role existed was taken away by
+its arrival). So the simple test would have made opening the **Tactic owner**
+row quietly open **every measure** to pillar owners as well — a switch that
+moves something it does not name, which is the one thing a switch must not do.
+
+So it is `pillarOwner`'s own pattern: **`ctx.tacticOwner`**, a named handle set
+by whoever builds the context, absent wherever the subject is not a tactic, and
+therefore failing **closed** at any site that has not been taught it (§42). Four
+builders set it — the plan pane's `tctx`, `reportItems`' `town`, `ctxOfUnit`,
+and the authoriser's gap pass — and a collaborator is deliberately not read,
+because that is a Contributor and §147.8 settled it.
+
+**AND THE CHECK THAT EXISTS FOR IT COULD NOT FAIL AS FIRST WRITTEN** (§113.8):
+asked of the pillar's owner alone the question answers *no* on every build,
+because they hold no EDIT grant at all through a row that is shut. The
+falsification went **green**. The subject has to be somebody who owns a pillar
+**and** a tactic under it, which is a fourth person the fixture now mints —
+`--break=row-owner` then reddens exactly the one assertion it is for.
+
+### §379.5 — The measure owner is not here, and the reason is a field
+
+A key measure carries **no Owner anywhere in the product** — 0 of the 76 in the
+worked example, and no column on the table in either mode. The `m.owner` reads
+elsewhere in `group-render.js` are milestones. So a **Measure owner** row would
+be a control with nothing behind it (§61): it lands with the field, and the
+field is a new column on a table, which is a picture before it is a change
+(rule 1c).
+
+**DRAWN AND MEASURED, NOT ARGUED.** The column was injected into the running
+platform and the real table shot twice, in both modes at 1600 and at 1000 —
+`design-mockups/measure-owner/2026-09-20_owner-column-on-key-measures.html`,
+published for sign-off. Nothing runs past its pane at any width and no row gets
+taller; the prose column pays for it and has the room:
+
+| Window | Mode | Measure column | Owner gets | Over |
+|---|---|---|---|---|
+| 1600 | reading | 656 → **527px** | 244px | 0 |
+| 1600 | pen open | 384 → **288px** | 165px | 0 |
+| 1000 | reading | 474 → **381px** | 168px | 0 |
+| 1000 | pen open | 272 → **188px** | 128px | 0 |
+
+Proposed with it and awaiting his word: **optional and never a counted gap**
+(counting it would put the red word on all 76 and hold Submit everywhere, which
+is §249's own lesson), and **carried by the workbook** or a download and an
+untouched upload would drop every owner (§22).
+
+### §379.6 — And the check that objected was right about the rule
+
+`checks/access-header.py` went red: *"Tactic owner: no column is offered that
+this role can never reach — a_fn_own_strat, a_fn_own"*. §174's rule, and the
+check was right about it and wrong about this role — it kept a hand-written
+`{powner, plowner, contrib}` of which roles are DERIVED, so a fourth fell
+through to `roleWheres()`, was told it sits on every unit and nowhere else, and
+was reported as offering two function columns it plainly does reach.
+
+**REWRITTEN, NEVER LOOSENED** (§218, §214.3): the property that made those three
+special is that **nobody can grant them**, which is `roleIsGrantable()`'s own
+question — it refuses exactly the own-lines roles — so the list is derived and a
+fifth one is judged the day it lands (§104.7). Falsified from the SOURCES: with
+the pillars-function half of the derivation removed it reddens again, on exactly
+that assertion.
+
+### §379.7 — What was run
+
+`scripts/test-tactic-owner.js` **29/0**, proved able to fail **five ways from
+the source** — `no-derive` 8, `row-owner` 1, `view-default` 1, `floor` 1,
+`not-bounded` 7 — with the break applied to a copy of `lib/` and a break that
+does not MATCH a loud failure rather than a quiet no-op (§276, §344.1).
+Access **UNMOVED** against the T0 baseline; authoriser **683/0**; change list
+140/0; platform rules 69/0; `access-header` all clear after the rewrite;
+`role-picker`, `seat-grant`, `project-custodian`, `project-done` all green; the
+matrix draws twelve rows with **Tactic owner · 18 people** and nothing
+overflowing at 1600/1280/1000.
+
+**NOTHING STORED MOVES AND NOTHING IS MIGRATED.** The seed gains one access row,
+all `none`, which is the same answer the default already gives (§30.2) — so a
+tenant that has never touched the matrix and one seeded today behave alike.
+No page draws differently; the only visual change in the product is a twelfth
+row on Roles & access, which that table builds from `ROLES` itself.
+
+**`sw.js` IS BUMPED TO `v5.23-tactic-owner`** — past `origin/main`'s own
+`v5.22`, because the built file's bytes changed and a worker caches by NAME
+(§91, §94.12); the branch's previous name and main's are different strings, so
+nothing collided, and the name is confirmed again immediately before any push
+to `main` (§94.16).
+
+**RECORDED, NOT DONE**: the Measure owner row and the field under it, awaiting
+sign-off on the mockup above; and the Insights category filters are still drawn
+whether or not a report of that type exists, which is the other half of the
+report §377 answered and has not been started.

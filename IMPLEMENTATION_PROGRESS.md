@@ -6678,5 +6678,71 @@ finished.
 
 **Nobody is signed out and nothing stored moves**: no frozen `api/`, `lib/` or
 `db/` file is touched, nothing is migrated, no rule about who may save what
-changes. `sw.js` is bumped to `v5.21-nav-and-viewas`, because the built file's
-bytes changed.
+changes. `sw.js` is bumped because the built file's bytes changed — to
+`v5.21-nav-and-viewas` at the time, and past main's own `v5.22` when §379
+landed on the same branch (§94.12: a name nobody else has served, confirmed
+again immediately before a push to `main`).
+
+## §379 — a tactic's owner is a row on the table (2026-09-20)
+
+**Built on the branch, not merged.** Islam, after §377 established that Mahdy
+reached a whole supporting function because a project there named him as
+Owner: *"what we need to follow is the accessablity matrix. we don't have a
+tactic or measure owner in the roles to set accessability for so until then
+they are defaulted to see nothing and edit nothing"*, then *"don't chagne the
+settings of the accessablity. I believe we need to add measures & tactics
+owners as roles so I can set their accessability."* **And he closed the
+original complaint himself** — *"mahdy is a project owner then it ok to see
+the project and report it ofcourse my bad"* — so nothing about Project owner
+moves; what was missing is a row for the level below it.
+
+**The fault, and it is the one he is pointing at.** A pillar has an Owner and
+every tactic under it has one, and being named the Owner IS the role — the
+derivation `powner` and `plowner` have had since §147.7. **A tactic's Owner
+derived nothing.** The only thing that ever reached such a person was the
+Contributor floor, which fires on *holding no other role at all* — so a unit
+head who also owns a tactic somewhere else reached it through no row anybody
+could see on the table, and could be switched off by nobody.
+
+**It ships at `none` in every column**, which is his instruction rather than a
+cautious default, and **it takes nothing away**: the floor is now asked of the
+roles that grant something, so a role granting nothing cannot displace the
+view somebody already stands on. `powner` and `plowner` are deliberately left
+exactly as they are.
+
+**A handle of its own, never the row's owner.** A measure's reporting context
+sets `row.owner` from the **pillar's** owner (§55), so the obvious branch
+would have made opening this row quietly open every key measure to pillar
+owners. `ctx.tacticOwner` is set only where a tactic is the subject — six call
+sites, one meaning.
+
+**The measure half is drawn and not built**, because a key measure has **no
+Owner field anywhere in the product** — a role over a field that does not
+exist is a row that can never match anybody (§61). The mockup is published
+and awaiting sign-off; measured on the real table, the column fits at
+1600/1440/1280/1100/1000 in both read and pen mode with no row growing.
+
+**What ran.** `scripts/test-tactic-owner.js` **29/0**, red five ways from the
+source (8/1/1/1/7); the **access baseline UNMOVED** — 33 people × every page
+key × every target — so nobody's access changes; authoriser 683/0, change list
+140/0, platform rules 69/0, `built-in-step` all good, `access-header` clear
+after its rewrite, `role-picker` · `seat-grant` · `project-custodian` ·
+`project-done` green, and the full `qa.py` sweep **ERRORS none**. The matrix
+draws twelve rows with **Tactic owner · 18 people**, nothing overflowing at
+1600/1280/1000.
+
+**One check was rewritten, never loosened.** `access-header.py` kept a
+hand-written list of which roles are derived and went red on a correct build
+the moment a fourth existed (§214.3, §218); it derives the list from
+`isOwnLinesRole` now, which is the question the register's picker actually
+asks.
+
+**Nothing stored moves and nothing is migrated.** The seed gains one access
+row, all `none` — the same answer the default already gives — so a tenant that
+has never touched the matrix and one seeded today behave alike. `sw.js` is
+bumped to `v5.23-tactic-owner` — past main's own `v5.22`, because the built
+file's bytes changed and a worker caches by name (§91, §94.12).
+
+**Recorded, not done**: the Measure owner row and the field under it; and the
+Insights category filters are still drawn whether or not a report of that type
+exists, which is the other half of the report §377 answered.

@@ -78,6 +78,34 @@
       note:"Named as a project's Owner on a supporting function. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
+    /* ── AND THE ROW UNDER THE PILLAR (§379, Islam 2026-09-20) ──────
+       *"I believe we need to add measures & tactics owners as roles so I can
+       set their accessability and accordingly Mahdy access can be switched on
+       of orr."*
+
+       §147.7'S SHAPE ONE LEVEL DOWN, and that is the whole of it: a pillar
+       has an Owner and so does every tactic under it, and being named the
+       Owner IS the role. What was missing is that a tactic's Owner derived
+       NOTHING — the Contributor floor covered it, and only for somebody
+       holding no other role at all, so a unit head who also owns a tactic
+       somewhere else reached it through no role anybody could see on the
+       table and could therefore be switched off by nobody.
+
+       ALL NONE, AND THAT IS HIS INSTRUCTION RATHER THAN A CAUTIOUS DEFAULT:
+       *"we don't have a tactic or measure owner in the roles to set
+       accessability for so until then they are defaulted to see nothing and
+       edit nothing."* A row shipped at view would hand reach to every tactic
+       owner in every tenant on the day it landed, which is the opposite of
+       what a switch is for — measured on the worked example, 18 people own at
+       least one tactic.
+
+       THE MEASURE OWNER IS NOT HERE, AND THE REASON IS A FIELD RATHER THAN A
+       DECISION: a key measure carries no Owner anywhere in the product — 0 of
+       the 76 in the worked example, and no column on the table in either mode
+       — so a row for it would be a control with nothing behind it (§61). It
+       lands with the field, and the field is drawn first (rule 1c). */
+    { key:"towner", name:"Tactic owner", scope:"unitfn",
+      note:"Named as a tactic's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that tactic — and only it." },
     /* CONTRIBUTOR IS EVERYONE ELSE THE PLAN NAMES (§147.8, Islam): "contributor
        is someone whose name is on the project anywhere but that doesn't mean
        that he is a project owner", and "stakeholders are contributors". They
@@ -236,6 +264,13 @@
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* NOTHING, EVERYWHERE (§379). The two rows above ship at view because
+       §147.7 was asked for a role that READS its own place and reports it
+       once the cell is opened; this one was asked for the opposite — a row
+       that starts shut so a tenant can decide. Islam's own words, and the
+       whole reason it is a row rather than a rule. */
+    towner:    { a_group:"none", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"none", a_fn_own_strat:"none", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW, at Islam's direction (spec 006 §7.2): "contributors only view, and
        if we allow them they should be allowed to their lines only". The second
        half of that sentence is CONTRIB_OWN_LINES below — a rule with teeth,
@@ -499,6 +534,24 @@
       if (String(f.format) === "pillars" && (f.items || []).some(owns))
         once("plowner", "fn:" + k);
     });
+    /* ── THE TACTIC'S OWN OWNER (§379) ────────────────────────────
+       Unconditional, exactly as the two above: a custodian somewhere else who
+       also owns a tactic here holds both, which is the case that could not be
+       switched off before. One entry per PLACE, however many tactics there
+       name them — the reach is narrowed per row by boundedReach(), not by how
+       many entries this list carries. */
+    var ownsTactic = function (pillars) {
+      return (pillars || []).some(function (pl) {
+        return ((pl || {}).tactics || []).some(owns);
+      });
+    };
+    w.unitKeys.forEach(function (k) {
+      if (ownsTactic(((w.units || {})[k] || {}).items)) once("towner", k);
+    });
+    w.functionKeys.forEach(function (k) {
+      var f = w.functions[k] || {};
+      if (String(f.format) === "pillars" && ownsTactic(f.items)) once("towner", "fn:" + k);
+    });
 
     /* THE FLOOR, AND WHICH OF THE TWO IT IS. Somebody attached to a unit and
        holding nothing else is a Contributor if a plan names them and an
@@ -512,7 +565,20 @@
        that stops naming them stops. Somebody attached and named on nothing now
        holds NOTHING — what they may see is NO_ROLE's floor, applied in
        grantIn() rather than dressed up as a role they never got (§93). */
-    if (!out.length && p.unit && namedInUnit(w, p, p.unit))
+    /* ── AND THE FLOOR IS ASKED OF THE ROLES THAT GRANT SOMETHING (§379) ──
+       This tested `out.length`, which meant "holds no role at all" — true
+       until a row deriving here could grant NOTHING. A tactic owner named
+       nowhere else would have stopped being a Contributor and started being a
+       Tactic owner with every cell at none: a role that takes away the floor
+       it stands on, silently, on the day it ships. So the question is asked of
+       the roles OTHER than this one.
+
+       `powner` and `plowner` are deliberately NOT in that exception. They have
+       suppressed the floor since §147.7 and they ship at view, which is what
+       the floor gives — so exempting them here would be a widening nobody
+       asked for, in a change about a row that grants nothing (rule 1b). */
+    var grantless = out.filter(function (r) { return r.role !== "towner"; });
+    if (!grantless.length && p.unit && namedInUnit(w, p, p.unit))
       out.push({ role:"contrib", at:p.unit });
     /* §147.8: THE SAME FLOOR ON A FUNCTION'S PROJECTS — for everyone the
        projects name who is not an OWNER of one: a milestone's owner, a
@@ -522,9 +588,10 @@
        attachment is not asked, because the names are picked from the register
        in the office's own pen. They report nothing until the Contributor row
        is opened, and then only the rows that name them (boundedReach). */
-    if (!out.length) w.functionKeys.forEach(function (k) {
-      if (namedInFn(w, p, k)) out.push({ role:"contrib", at:"fn:" + k });
-    });
+    if (!grantless.length && !out.some(function (r) { return r.role === "contrib"; }))
+      w.functionKeys.forEach(function (k) {
+        if (namedInFn(w, p, k)) out.push({ role:"contrib", at:"fn:" + k });
+      });
     return out;
   }
   function personRoleKeys(w, p) {
@@ -3366,7 +3433,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      save is narrowed to their reach by mayReportRow() below. Adding a key
      here is what wires all of that at once, which is exactly the property
      §55 recorded this list for. */
-  var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner"];
+  /* §379 adds the tactic's owner, and adding the key here is what wires
+     the whole of it at once: no Submit, no cycle note, no picture slides,
+     every reporting save narrowed by mayReportRow(), and the role refused by
+     the register's picker and the people workbook, both of which ask
+     `roleIsGrantable()` — which refuses anything on this list. */
+  var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner", "towner"];
 
   /* Which of a person's roles is what lets them edit here. The floor rule
      applies when the floor is ALL they have. */
@@ -3411,10 +3483,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        row          the row itself; namedOn() reads owner + collaborators
        pillarOwner  the Owner of the pillar the row sits under (unit side —
                     also what §55's measure rule has always leaned on)
+       tacticOwner  the Owner of the tactic, set only where the row IS one
        project      the project the row sits inside (function side)
 
      · a PROJECT OWNER reaches every row of a project whose Owner names them;
      · a PILLAR OWNER reaches every row of a pillar whose Owner names them;
+     · a TACTIC OWNER reaches the one tactic whose Owner names them (§379);
      · a CONTRIBUTOR (and the floor) reaches the rows that NAME them — the
        row's own owner or collaborators, or the project's stakeholder and
        collaborator lists (§147.8: "stakeholders are contributors"). */
@@ -3425,6 +3499,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "plowner")
       return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
              namedOn({ owner: ctx.pillarOwner }, person);
+    /* §379: A HANDLE OF ITS OWN, NEVER `ctx.row.owner`. That reads right and
+       is wrong on exactly one row kind: a MEASURE's reporting ctx is built
+       with `row.owner = the PILLAR's owner` (§55's rule, kept by §147.7 so
+       nothing a contributor could reach before the pillar-owner role existed
+       was taken away by its arrival) — so the simple test would have made
+       opening the Tactic owner row quietly open every measure to pillar
+       owners as well, which is the one thing a switch must not do. And the
+       measure Owner field now being drawn would break it a second way. So
+       this is `pillarOwner`'s own pattern: a named handle set by whoever
+       builds the ctx, absent wherever the subject is not a tactic, and
+       therefore failing CLOSED at any site that has not been taught it
+       (§42). A collaborator is deliberately not read — that is a
+       Contributor, §147.8 settled it, and reading them here would make this
+       row a second un-switchable copy of that one. */
+    if (roleKey === "towner")
+      return ctx.tacticOwner != null && ctx.tacticOwner !== "" &&
+             namedOn({ owner: ctx.tacticOwner }, person);
     if (ctx.row && namedOn(ctx.row, person)) return true;
     return !!ctx.project &&
            (namedOn({ collaborators: ctx.project.stakeholders }, person) ||
@@ -10289,7 +10380,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown });
+      pillarOwner: x.pown, tacticOwner: x.town });   /* §379 */
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -10578,6 +10669,7 @@ function reportItems(u){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
+                 town:t.owner,                          /* §379 */
                  cid:p.id, place:place });
     });
     /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
@@ -12505,8 +12597,10 @@ function gapMap(target, all, fillable){
     }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
+      /* §379: a tactic's own Owner is its own handle — see boundedReach(). */
+      var tctx = function(row){ var c = pctx(row); c.tacticOwner = row && row.owner; return c; };
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
-      (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
+      (p.tactics  || []).forEach(function(x){ n += G(w.plan, tctx(x), "tactic", x); });
       entry("p:" + (p.code || i), pillarCode(u, i), n,
             { sec: w.sec, page: "plan", rail: unitRailKey(u), code: p.code });
     });
@@ -26861,6 +26955,7 @@ function renderReport(u){
     SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
+                town:t.owner,                                  /* §379 */
                 cid:p.id });
     });
     /* §343: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
@@ -29241,6 +29336,12 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  /* §379: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
+     nothing here — `row` is the real object — so reading `ctx.row.owner`
+     would have worked today and stopped working the day a key measure gains
+     an Owner of its own, which is the next thing drawn. Named, so the reach
+     cannot be read off a field two row kinds share (see boundedReach). */
+  var tctx = function(row){ var c = pctx(row); c.tacticOwner = row && row.owner; return c; };
   /* §201.2: does this table carry a Unit column right now? The office's pen
      always; a filler's only while some row has a missing unit to offer. */
   var unitCol = !ed && it.measures.some(function(m){
@@ -29358,7 +29459,7 @@ function unitPlanBody(it, u, railed){
          be byte-identical, or every save carries a change nobody made.
          Read mode keeps §15.1's em-dash: nobody supporting is an ordinary
          answer. */
-      { ctx:pctx(t), text: collabText,
+      { ctx:tctx(t), text: collabText,
         parse: function(v){ return Array.isArray(v)
           ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
           : collabParse(v); },
@@ -29379,12 +29480,12 @@ function unitPlanBody(it, u, railed){
        its fill is pending the four stay the filler's — read mode carries
        the same chip and tick every other pending value wears. */
     var quartersHtml = ed ? qsEdit(t)
-      : (filling("plan", "u_plan", pctx(t)) &&
+      : (filling("plan", "u_plan", tctx(t)) &&
          (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
         ? qsFill(t)
         : qs(t);
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
-      ctx: pctx(t), del: true, fillKind: "tactic",
+      ctx: tctx(t), del: true, fillKind: "tactic",
       /* §257: read mode says "Yes / No", never the stored `Y/N` — one
          formatter for every surface (§53.5). */
       read: tgtShown,
@@ -29438,7 +29539,7 @@ function unitPlanBody(it, u, railed){
            it the cell opens to a filler whatever the shared list says, so a
            later decision to stop counting these would leave the box open and
            the save refusing it — §205's drift, latent until somebody used it. */
-        ctx: pctx(t), del: true, fillKind: "tactic",
+        ctx: tctx(t), del: true, fillKind: "tactic",
         read: function(v){ return '<b>' + esc(v) + '</b>'; },
         control: function(set, pendCls){
           return textOr("plan", t.outcome || "", pendCls || "", set);
@@ -29477,7 +29578,7 @@ function unitPlanBody(it, u, railed){
          fed picker — an owner is PICKED, not typed, in the pen and in fill
          mode alike. */
       '<td>' + gapCell("plan", "u_plan", t, "owner", {
-        ctx:pctx(t),
+        ctx:tctx(t),
         readEmpty:'<span class="missing">Missing</span>',
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,

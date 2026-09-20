@@ -854,8 +854,14 @@ function gapPassUnit(target, su, iu, add) {
     /* §177: the pillar's OWN owner, off the stored pillar, so a pillar owner
        fills the rows of the pillar that names them and nobody else's. */
     const pctx = function (row) { return { pillarOwner: sm[id].owner, row: row }; };
+    /* §379: and the tactic's own Owner beside it, off the STORED row for the
+       same reason the pillar's is — a fill is judged against the world as it
+       stands, never against the one being written. */
+    const tctx = function (row) {
+      const c = pctx(row); c.tacticOwner = row && row.owner; return c;
+    };
     gapRows("measure", sm[id].measures, im[id].measures, target, add, "a key measure", pctx);
-    gapRows("tactic", sm[id].tactics, im[id].tactics, target, add, "a tactic", pctx);
+    gapRows("tactic", sm[id].tactics, im[id].tactics, target, add, "a tactic", tctx);
   });
   return s2;
 }
@@ -1320,7 +1326,7 @@ function ctxOfUnit(u) {
                     pillarOwner: p.owner };
     });
     (p.tactics || []).forEach(function (t) {
-      out[t.id] = { row: t, pillarOwner: p.owner };
+      out[t.id] = { row: t, pillarOwner: p.owner, tacticOwner: t.owner };  /* §379 */
     });
   });
   return out;

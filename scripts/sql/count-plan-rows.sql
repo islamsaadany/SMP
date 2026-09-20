@@ -6,6 +6,11 @@
 -- objectives and its own projects — so a plain count(*) on the tables misses
 -- every bit of it: on the worked example that reads 1 project where the true
 -- figure is 19. Retired units and functions are left out.
+--
+-- `total` is the rows people report against. Pillars are counted beside it and
+-- left out of it: a pillar is the container its measures and tactics sit in,
+-- so adding it would count the shelf along with what is on it. Put it in the
+-- sum on the last line if you would rather have it there.
 
 WITH t AS (
   SELECT id FROM smp.tenants WHERE key = 'raya-trade'
@@ -28,6 +33,10 @@ n AS (
     + (SELECT COALESCE(sum(jsonb_array_length(CASE WHEN jsonb_typeof(x->'keyObjectives') = 'array'
          THEN x->'keyObjectives' ELSE '[]'::jsonb END)), 0) FROM fnx)        AS key_objectives,
 
+    (SELECT count(*) FROM smp.pillars p JOIN t ON p.tenant_id = t.id
+       JOIN smp.units u ON u.tenant_id = p.tenant_id AND u.key = p.unit_key AND u.active)
+    + (SELECT count(*) FROM fn_pillar)                                       AS pillars,
+
     (SELECT count(*) FROM smp.measures m JOIN t ON m.tenant_id = t.id
        JOIN smp.pillars p ON p.tenant_id = m.tenant_id AND p.id = m.pillar_id
        JOIN smp.units u ON u.tenant_id = p.tenant_id AND u.key = p.unit_key AND u.active)
@@ -45,6 +54,6 @@ n AS (
          THEN x->'projects' ELSE '[]'::jsonb END)), 0) FROM fnx)             AS projects
   FROM t
 )
-SELECT key_objectives, key_measures, tactics, projects,
+SELECT key_objectives, pillars, key_measures, tactics, projects,
        key_objectives + key_measures + tactics + projects AS total
 FROM n;

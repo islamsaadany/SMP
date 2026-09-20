@@ -290,17 +290,52 @@ with sync_playwright() as p:
              active: (document.activeElement||{}).className || ''})""")
         ck("%s (%s): the box opens and is still there a beat later"
            % (field, why), opened and got["open"] and got["pcell"] == field, got)
-        # AND THE COPY STILL WORKS ON BOTH — the two acts share one control, so
-        # a fix that reached the single click would trade one for the other.
+        # ── REWRITTEN, NEVER LOOSENED (§218, §375) ─────────────────────
+        # This asserted that one press still COPIED, because §374's fault and
+        # §93.6's control were two acts sharing one element, so a fix reaching
+        # the wrong one would have traded them. Islam has since asked for the
+        # press to go — "I can always have a right click and copy the text" —
+        # so the claim INVERTS rather than disappearing: the value is ordinary
+        # text now, and what makes his fallback work is a DRAG, which a
+        # <button> refuses. Measured on both builds, same row, same drag:
+        # empty before, the whole value after.
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(400)
-        pg.click('[data-pcell="%s|%s"] .copyval' % (who, field))
-        pg.wait_for_timeout(200)
-        ck("%s (%s): one press still copies" % (field, why),
-           pg.evaluate("""(s)=>{const b=document.querySelector(s);
-              return !!b && b.textContent.trim()==='Copied';}""",
-              '[data-pcell="%s|%s"] .copyval' % (who, field)))
-        pg.wait_for_timeout(1400)
+        ck("%s (%s): the value is text, not a control" % (field, why),
+           pg.evaluate("""(s)=>{const td=document.querySelector(s);
+              return !!td && !td.querySelector('[data-copy],button');}""",
+              '[data-pcell="%s|%s"]' % (who, field)))
+        # AND IT DEGRADES RATHER THAN DYING (§215, and this file's own
+        # §372.17 records it dying once already):
+        # on the build this reverses there is no `.val` in these two cells at
+        # all, and eval_on_selector THROWS on a selector that finds nothing —
+        # which would print one failure where there are several and take the
+        # section down with it.
+        box = pg.evaluate("""(s)=>{const e=document.querySelector(s);
+            if(!e) return null; const r=e.getBoundingClientRect();
+            return {x:r.x,y:r.y,w:r.width,h:r.height};}""",
+            '[data-pcell="%s|%s"] .val' % (who, field))
+        got_sel = ""
+        if box:
+            pg.mouse.move(box["x"] + 2, box["y"] + box["h"] / 2)
+            pg.mouse.down()
+            pg.mouse.move(box["x"] + box["w"] - 2, box["y"] + box["h"] / 2, steps=8)
+            pg.mouse.up()
+            pg.wait_for_timeout(200)
+            got_sel = pg.evaluate("()=>String(getSelection()).trim()")
+        # THE VALUE IS IN THE SELECTION, never "the selection is the value":
+        # `.val` is a block, so a drag to its right edge runs on into the rest
+        # of the row exactly as it does in every other column — which is the
+        # table behaving normally, not this cell misbehaving. What can fail is
+        # the value not being selectable at all, which is the old build: a
+        # drag across a <button> comes back EMPTY, measured.
+        cell_txt = pg.evaluate("(s)=>{const e=document.querySelector(s);"
+                               "return e?e.textContent.trim():null;}",
+                               '[data-pcell="%s|%s"]' % (who, field))
+        ck("%s (%s): ...so a drag selects it, which is what right-click needs"
+           % (field, why), bool(cell_txt) and cell_txt in got_sel,
+           {"selected": got_sel, "cell": cell_txt})
+        pg.evaluate("()=>getSelection().removeAllRanges()")
 
     # ── 3. NEAT WITH EVERYTHING ON ───────────────────────────────────
     # Islam: "if everything is chosen it needs to stay neat." Measured before
@@ -319,16 +354,20 @@ with sync_playwright() as p:
         ck("%s: nothing is cut without a hover" % label,
            pg.evaluate("""()=>{let bad=0;
              document.querySelectorAll('.peoplecfg tbody td').forEach(td=>{
-               td.querySelectorAll('.val,.copyval,b,.mono').forEach(e=>{
+               td.querySelectorAll('.val,b,.mono').forEach(e=>{
                  if(e.scrollWidth>e.clientWidth+1 && !e.title && !td.title) bad++;});});
              return bad;}""") == 0)
     land(pg)
-    # AND THE ADDRESS FITS, which is where this whole thread started.
-    ck("every address is whole",
-       pg.evaluate("""()=>{let cut=0;
-         document.querySelectorAll('.peoplecfg .copyval.val').forEach(e=>{
-           if(e.scrollWidth>e.clientWidth+1) cut++;});
-         return cut;}""") == 0)
+    # AND THE ADDRESS FITS, which is where this whole thread started. §375
+    # took the control away and the CLASS went with it (§51.11), so the old
+    # selector would have matched nothing and passed for it — the count of
+    # what was measured is asserted beside the count of what was cut (§113.8).
+    fits = pg.evaluate("""()=>{let cut=0, seen=0;
+         document.querySelectorAll('.peoplecfg td[data-pcell$="|Email"] .val')
+           .forEach(e=>{ seen++; if(e.scrollWidth>e.clientWidth+1) cut++;});
+         return {seen:seen, cut:cut};}""")
+    ck("every address is whole", fits["cut"] == 0, fits)
+    ck("...and there were addresses to measure", fits["seen"] > 5, fits)
 
     # ── 4. THE DIALOG ────────────────────────────────────────────────
     print("\n4. edit opens the dialog, and it writes")

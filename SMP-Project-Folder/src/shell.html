@@ -6952,54 +6952,13 @@
        wizard is open it would have bound a second handler to them — one that
        resets the merge without closing the dialog. wireMerge() owns them. */
 
-    /* ── CLICK TO COPY AN ADDRESS OR A NUMBER (§93.6) ────────────────
-       Islam: "make the email and the phone to be copied on clicking on them."
-
-       THE WORD IS WRITTEN INTO THE ELEMENT, NOT PAINTED. paint() would replace
-       the button that was just pressed — §63's rule, learned on Save draft —
-       so the tick is set on the node and put back on a timer. The original
-       text is kept on the node too, or a second click during the tick would
-       copy the word "Copied".
-
-       AND THE FALLBACK IS NOT DECORATION. `navigator.clipboard` needs a secure
-       context, and this product is opened from `file://` every day of its
-       life — so a hidden textarea and `execCommand("copy")` is the path that
-       actually runs here, and the promise path is the one that runs in
-       production. Both end at the same tick, and a failure says so rather
-       than tick-ing anyway. */
-    document.querySelectorAll("[data-copy]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var self = this, v = self.dataset.copy;
-        var was = self.dataset.copyWas || self.textContent;
-        self.dataset.copyWas = was;
-        function done(ok){
-          /* NOT "Press Cmd-C" — this runs on Windows too, and naming the
-             wrong key is worse than naming none. */
-          self.textContent = ok ? "Copied" : "Could not copy";
-          self.classList.toggle("copied", ok);
-          clearTimeout(self.__copyT);
-          self.__copyT = setTimeout(function(){
-            self.textContent = was;
-            self.classList.remove("copied");
-          }, 1200);
-        }
-        function legacy(){
-          var t = document.createElement("textarea");
-          t.value = v;
-          t.setAttribute("readonly", "");
-          t.style.cssText = "position:fixed;top:-1000px;opacity:0";
-          document.body.appendChild(t);
-          t.select();
-          var ok = false;
-          try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
-          document.body.removeChild(t);
-          done(ok);
-        }
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(v).then(function(){ done(true); }, legacy);
-        } else { legacy(); }
-      });
-    });
+    /* §93.6's CLICK-TO-COPY WAS WIRED HERE, and it went with the control
+       (§375, §24). Islam: "please remvoe the 1 click copy bhavior I can always
+       have a right click and copy the text." Nothing binds `[data-copy]` any
+       more because nothing draws it: the address and the number are ordinary
+       values, which is also what makes his fallback work — a drag across a
+       <button> selects nothing, measured, so the control was the reason the
+       text could not be selected in the first place. */
 
     /* The row's action menu (§46.4). Opening one closes any other, because
        PMENU is a single key rather than a flag per row. */

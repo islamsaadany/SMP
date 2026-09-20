@@ -364,21 +364,40 @@ with sync_playwright() as p:
     ck("...and one written after keeps them apart",
        f["now"] == ["Ahmed Mostafa Mohamed El Gebely", "Ahmed Mostafa"], f["now"])
 
-    cp = pg.query_selector(".peoplecfg [data-copy]")
-    ck("the address is a control, not text", cp is not None)
-    ck("...and its hover carries the value as well as the hint",
-       "click to copy" in (cp.get_attribute("title") or "") and
-       "@" in (cp.get_attribute("title") or ""), cp.get_attribute("title") if cp else "")
-    was = cp.text_content()
-    cp.click()
-    pg.wait_for_timeout(300)
-    # FROM file:// THERE IS NO SECURE CONTEXT, so this exercises the
-    # execCommand fallback — which is the path that actually runs here.
-    ck("clicking it says it copied", cp.text_content() == "Copied", cp.text_content())
-    pg.wait_for_timeout(1400)
-    ck("...and the value comes back", cp.text_content() == was, cp.text_content())
-    ck("the phone copies too",
-       pg.eval_on_selector_all(".peoplecfg [data-copy]", "e=>e.length") >= 2)
+    # ── REVERSED AND REWRITTEN, NEVER DELETED (§218, §375) ───────────
+    # This block was §93.6's own: the address is a control, its hover carries
+    # the value AND the hint, one press says "Copied" and the value comes back.
+    # Islam has asked for the press to go — "I can always have a right click
+    # and copy the text" — so every claim inverts, and each absence is paired
+    # with the presence that makes it mean something (§94.2): a build that had
+    # emptied the column would satisfy "no control" perfectly.
+    em = pg.query_selector('.peoplecfg td[data-pcell$="|Email"] .val')
+    ck("the address is still there and readable",
+       em is not None and "@" in (em.text_content() or ""),
+       em.text_content() if em else None)
+    ck("...and it is text, not a control",
+       pg.eval_on_selector_all(".peoplecfg [data-copy]", "e=>e.length") == 0)
+    # AND IT DEGRADES RATHER THAN DYING (§215): on a build with no `.val`
+    # here at all, `em` is None and asking it for an attribute throws — which
+    # would print one failure where there are three. (It is not None on the
+    # build this reverses, as it happens: §93.6's button wore `copyval val`,
+    # so `.val` matched it too, which is exactly why the class had to be
+    # asserted out of the SELECTOR list rather than trusted, §51.11.)
+    em_title = em.get_attribute("title") if em else None
+    ck("...with no hint on it either, so §88's clipTitles owns the hover",
+       em is not None and "copy" not in (em_title or "").lower(), em_title)
+    # AND §88's CONTRACT IS WHAT MUST SURVIVE IT: the hover goes only from the
+    # values that FIT, so nothing cut is left without one.
+    ck("nothing in the two columns is cut without a hover",
+       pg.evaluate("""()=>{let bad=0;
+         document.querySelectorAll('.peoplecfg td[data-pcell$="|Email"] *,'
+           +'.peoplecfg td[data-pcell$="|Mobile"] *').forEach(e=>{
+           if(e.scrollWidth>e.clientWidth+1 && !e.title
+              && !(e.closest('td')||{}).title) bad++;});
+         return bad;}""") == 0)
+    ck("the phone is a plain value too",
+       pg.eval_on_selector_all('.peoplecfg td[data-pcell$="|Mobile"] .val',
+                               "e=>e.length") >= 1)
 
     # ── THE PAGE'S FURNITURE (§90) ───────────────────────────────────
     # The file moved into the header and the notes moved to the knowledge base.

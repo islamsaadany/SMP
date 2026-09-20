@@ -5282,6 +5282,30 @@ page, a seam declared as that shadow and no seam at all are the same build. **Fo
 table carry the same dead declaration, and the kebab block is declared **twice**
 in `config.css` byte for byte. 
 
+**AND §375 TAKES THE CONTROL AWAY AGAIN** (2026-09-20): *"please remvoe the 1
+click copy bhavior I can always have a right click and copy the text."* Done,
+and measuring it first changed what was worth saying. **At rest the register
+looks exactly the same** — the two builds are the same picture byte for byte,
+because §93.6 styled the button to look like the value rather than like a
+control — so there was no look to sign off on. What goes is what the cell
+**does**: the underline under the cursor, and the address being replaced by the
+word *Copied* for a second, which on the one table whose job is showing values
+was the only thing that hid the value. **And his fallback turns out to need
+this change to work at all**: §93.6's reason for making the value a button was
+that you could not select text in that table — and a drag across a button
+selects nothing, which is what made that true. Measured on both builds, same
+row, same drag: **nothing before, the whole address after**. **The hover changes
+and it is the better behaviour**: today every address and every number carries a
+tooltip repeating itself; now only a value that is actually cut off has one,
+which is what every other column does — 65 tooltips become 1, and nothing cut
+is left without one. **Nothing moves**: every row the same height, every column
+the same width. **Two checks were turned round rather than deleted**, so the
+claim still fails if somebody puts the control back — 4 red and 3 red on the
+build that still has it. **Nobody is signed out and nothing stored moves.**
+**Waiting on Islam: the merge.**
+
+---
+
 **AND §374 ANSWERS THE ONE HE FOUND NEXT** (2026-09-20): *"the copy on click for
 the email and double click to edit is working but the same behavior is not
 working on the phone number."* **It is not a phone fault**, and finding that out

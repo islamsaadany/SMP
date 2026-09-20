@@ -53061,6 +53061,130 @@ reported (the digits themselves are inside the button, and the copy worked
 throughout), it is a restyle nobody asked for, and it wants a measurement of
 every `.mono` cell rather than one column's (rule 1b).
 
+### §375 — AN ADDRESS IS A VALUE, NOT A CONTROL (2026-09-20, reversing §93.6)
+
+Islam: *"please remvoe the 1 click copy bhavior I can always have a right click
+and copy the text."*
+
+**§93.6 IS REVERSED, NOT CORRECTED, AND IT IS RECORDED AS A REVERSAL**
+(Principle II). That section's reasoning was sound on its own terms — the
+address and the number are the two values on this register that always leave it,
+and they are worth one press — and what changed is that Islam does not want the
+press. The argument is kept where it stands, in its own section, rather than
+overwritten.
+
+**AT REST THE TWO BUILDS ARE THE SAME PICTURE, BYTE FOR BYTE**, which is the
+measurement that decided how much this deserved. §93.6's own note says the
+button is *"styled to LOOK like the value rather than like a control"* —
+`linkbu` was tried first and read as a table of links — so the two screenshots
+of the register, one per build, same data and same width, compare **identical**.
+Rule 1c asks for a mockup of the proposed look before any visual element moves;
+here the proposed look IS the current look, so what was drawn instead is the
+thing that genuinely goes: the two STATES of the control, shot from the real
+page.
+
+**AND THE PRESSED STATE IS THE COST NOBODY HAD PHOTOGRAPHED.** Pressing replaces
+the value with the word **Copied**, in green, for 1.2 seconds — so on the one
+table in the product whose job is showing values, the control hid the value it
+was copying. That is not an argument §93.6 got wrong; it is a picture nobody
+had taken, and it is the clearest thing in favour of what he asked for.
+
+**§93.6's REASON FOR THE BUTTON WAS CREATED BY §93.6's OWN ANSWER.** Its
+argument runs: *"selecting text inside a horizontally scrolling table with a
+frozen column is a drag that starts a scroll"* — so make it a button. But **a
+drag across a `<button>` selects NOTHING** — measured in Chromium, the only
+engine this sandbox carries, and said that way rather than as *every browser*,
+which is a claim nothing here can make (§124). On both
+builds, the same row and the same drag: the selection comes back **empty**
+today and **`ashraf.laithy@rayatrade.com`** with the control gone. So his
+fallback is not a poorer substitute for the press; it is a way of working that
+the control itself prevented. *The expected finding was a cost to flag under
+rule 1b; the measurement produced the opposite, which is why it was measured*
+(§93.11's family: ask the browser, do not reason about it).
+
+**THE HOVER STOPS BEING UNCONDITIONAL, AND THAT IS §88 GETTING ITS COLUMN
+BACK.** §93.6 wrote the value INTO the `title` beside the hint, for a good
+reason it states: §88's `clipTitles()` only fills a title that is EMPTY, so a
+bare *"click to copy"* would have taken the hover from exactly the values too
+long to read. With no hint to carry, the title goes back to `clipTitles()` —
+**65 titles become 1**, and that one is the single value actually cut. Every
+other column in that table has always behaved this way. **What must survive is
+§88's contract** — nothing cut without a hover — and it is asserted on both
+builds, or a change that dropped the titles and the clipping together would
+pass for a fix.
+
+**NO LAYOUT MOVES, MEASURED RATHER THAN ASSUMED** (§158): row heights identical
+to the tenth of a pixel (`{38.6: 2, 39.1: 31}` before and after), every column
+width identical, the table 1005px on both. The phone's own box goes **19.4 →
+27.4px** as it takes `.val`'s 4px of padding like every other value, invisible
+in the row because the row was never sized by it — and that **closes §374's
+recorded-not-done in passing**, since a 19.4px press target is a press target no
+longer.
+
+**ONE BUILDER, AND THE PHONE JOINS THE REGISTER'S OWN VALUE SHAPE**:
+`copyable()` becomes `valueCell()`, the Email cell draws `.val` and the Mobile
+cell `.val mono`, and the mono SIZE is the one rule left behind
+(`.cfg .val.mono`), the family coming from the global `.mono` the product
+already has. The handler, the five `.copyval` rules and the `data-copy`
+attribute all go — deleted by matched text at both ends, never by line range
+(§214).
+
+**§375.1 — TWO CHECKS REVERSED AND REWRITTEN, NEVER DELETED** (§218).
+`people-dialog` §2b asserted that one press still COPIED, and said why: §374's
+fault and §93.6's control were two acts sharing one element, so a fix reaching
+the wrong one would have traded them. `identity-merge` carried §93.6's own six
+assertions. Every claim INVERTS rather than disappearing, and **each absence is
+paired with the presence that makes it mean something** (§94.2) — the value
+still there and readable, the hover still honest, and the drag that now works —
+because **a build that had EMPTIED the column satisfies *"no control"*
+perfectly** (§113.8). **4 red and 3 red** on the build that still has it, run
+from the SOURCES through `SMP_BUILT` (§276).
+
+**§375.2 — AND THE FALSIFICATION FOUND §215 IN THE FILE THAT RECORDS IT FOUR
+TIMES.** `eval_on_selector` THROWS on a selector that finds nothing, and on the
+reversed build there is no `.val` in those two cells at all — so the first red
+run printed **one** failure where there are four and took the rest of the
+section down with it. The box is read through `evaluate` and a missing one
+degrades to an empty selection, which is itself the honest answer.
+
+**§375.3 — THE DRAG IS ASSERTED AS *the value is IN the selection*, NEVER *the
+selection is the value*.** `.val` is a block, so a drag to its right edge runs
+on into the rest of the row — which is the table behaving as every other column
+does rather than this cell misbehaving. The tighter assertion **reported a
+correct build broken** on its first run, printing the whole row as the
+selection. What can genuinely fail is the value not being selectable at all,
+which is the old build, and that still reddens.
+
+**§375.5 — AND TWO COMMENTS WERE LEFT DESCRIBING A CONTROL THAT HAD GONE**,
+which is §104.8's fault and was caught by reading the diff rather than by any
+check. `config.css` kept §93.6's paragraph — *"it has to look like the value,
+not like a control &hellip; the tick is written into the element by the
+handler"* — sitting above the one rule that survives, which is a size and has
+nothing to do with a tick; and `shell.html` had a bare one-line marker where
+its own neighbour four lines up explains why an absence matters. Both rewritten
+in the same edit: the CSS comment now says what the size is FOR (a monospaced
+number reads heavier than a proportional address at the same size) and what it
+has to outrank, and the shell's says that nothing binds `[data-copy]` any more
+because nothing draws it.
+
+**§375.4 — AND MY OWN GUARD TRIPPED ON MY OWN PROSE.** `assert ".copyval" not
+in s` fired on the edit that removes the class, because the comment explaining
+the removal spells it. Asserted over selector LINES rather than over the file —
+the small version of §272.8, where a sentence recording why a rule had been
+eaten was written in a way that ate it again.
+
+**RECORDED, NOT DONE**: `checks/registry-inline-mockup.py` is a mockup
+GENERATOR from §372, and its subject is precisely what a double-click leaves
+behind **on a copy button against on plain text** — a question this answers by
+removing one side of it. It writes into `design-mockups/`, so `qa-run.py`
+refuses to run it in a sweep (§334.14) and it can redden nothing; it is left
+as evidence rather than edited as a side effect of a round that was not about
+it (Principle II, rule 1b).
+
+**The server needed nothing and it is read off the diff** (§172, spec 029): no
+`api/`, `lib/` or `db/` file is touched, nothing stored moves, nothing is
+migrated and nobody is signed out.
+
 ### §374.1 — MERGED, AND WHAT COULD NOT BE READ FROM HERE (2026-09-20)
 
 Islam: *"merge to main"*. **`main` HAD NOT MOVED**, so `--ff-only` took it

@@ -2437,28 +2437,43 @@ function renderPeople(){
      for the row's kebab; what is left is one word in one pill, so the column
      is 76px instead of 150. "Temporary" becomes "Temp" for the same reason —
      three states that have to be told apart at a glance, not read. */
-  /* ── AN ADDRESS AND A NUMBER ARE THERE TO BE USED (§93.6) ─────────
-     Islam: "make the email and the phone to be copied on clicking on them."
-     They are the two values on this register that always leave it — into a
-     mail client, into a phone — and selecting text inside a horizontally
-     scrolling table with a frozen column is a drag that starts a scroll.
+  /* ── THE ADDRESS AND THE NUMBER ARE ORDINARY VALUES (§375, REVERSING
+     §93.6) ──────────────────────────────────────────────────────
+     Islam: "please remvoe the 1 click copy bhavior I can always have a right
+     click and copy the text."
 
-     A BUTTON, NOT A SPAN WITH A HANDLER. It is a real action, so it takes a
-     real control: keyboard-reachable, announced, and carrying its own hint.
-     It is styled to LOOK like the value rather than like a control, though —
-     `linkbu` was the first go and put an accent underline on every row of the
-     register, which reads as a table of links to somewhere.
+     §93.6's REASON FOR THE BUTTON WAS THAT YOU COULD NOT SELECT THE TEXT —
+     "selecting text inside a horizontally scrolling table with a frozen column
+     is a drag that starts a scroll" — and the button is what made that true:
+     a drag across a <button> selects NOTHING — measured in Chromium, which is
+     the only engine here, so it is said that way rather than as every browser
+     (§124). On both
+     builds, the same row, the same drag: today the selection comes back empty
+     and with the button gone it comes back as the whole address. So the
+     fallback he named is not a worse way of doing it, it is a way that only
+     works once the control is out.
 
-     Empty stays a dash — there is nothing to copy, and a button that copies
-     "" would report success for doing nothing. */
-  function copyable(v, cls){
+     AT REST THE TWO BUILDS ARE THE SAME PICTURE, BYTE FOR BYTE. §93.6 styled
+     the button to look like the value rather than like a control, so what goes
+     is not a look but two behaviours — the underline under the cursor, and the
+     value being REPLACED by the word "Copied" for 1.2s, which is the one thing
+     on this table that hides the value somebody came to read.
+
+     AND THE HOVER STOPS BEING UNCONDITIONAL. §93.6 wrote the value into the
+     `title` because §88's clipTitles() only fills an EMPTY one, so a bare
+     "click to copy" would have taken the hover from the values too long to
+     read. With no hint to carry, the title goes back to clipTitles(), which is
+     what every other column does: 65 titles become 1, and it is the one value
+     actually cut. §88's contract holds either way (nothing cut without a
+     hover) and is asserted at both ends.
+
+     Empty stays a dash (§15.1). The phone takes `.val` beside `.mono` so both
+     cells sit on the register's own value shape rather than this column's —
+     which closes §374's recorded-not-done in passing, the 19.4px press target
+     being a press target no longer. */
+  function valueCell(v, cls){
     if (!v) return '<span class="why" style="margin:0">&mdash;</span>';
-    /* THE VALUE IS IN THE TITLE, not just the hint. §88's clipTitles() only
-       fills a title that is empty, so a bare "Click to copy" would have taken
-       the hover away from exactly the values too long to read — which is the
-       one case the hover exists for. Both, in one string. */
-    return '<button class="copyval ' + cls + '" data-copy="' + esc(v) +
-      '" title="' + esc(v) + ' \u00b7 click to copy">' + esc(v) + '</button>';
+    return '<span class="' + (cls || "val") + '">' + esc(v) + '</span>';
   }
 
   function pwCell(p){
@@ -2902,8 +2917,8 @@ function renderPeople(){
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
         })()) : '') +
       (showCol("email")
-        ? pcell(p, "Email", copyable(p.email, "val"), "wrapany") : '') +
-      (showCol("phone") ? pcell(p, "Mobile", copyable(p.phone, "mono")) : '') +
+        ? pcell(p, "Email", valueCell(p.email, "val"), "wrapany") : '') +
+      (showCol("phone") ? pcell(p, "Mobile", valueCell(p.phone, "val mono")) : '') +
       /* ── AND THE CELL IS THE PICKER NOW (§372) ─────────────────────
          `false` was right while the table only ever read: the × and the
          "+ role" control belonged to the dialog. What the cell draws is

@@ -10056,7 +10056,71 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
+*Last Updated: 2026-09-20 &mdash; **&sect;375: an address is a value, not a
+control (spec 059).** Islam: *"please remvoe the 1 click copy bhavior I can
+always have a right click and copy the text."* **AT REST THE TWO BUILDS ARE THE
+SAME PICTURE, BYTE FOR BYTE**, and measuring that first is what decided how much
+ceremony this deserved: &sect;93.6 styled the button to LOOK like the value
+rather than like a control, so a mockup of the proposed look would have been two
+identical screenshots (rule 1c, satisfied by there being nothing to choose
+between). What goes is not a look but two behaviours &mdash; the underline under
+the cursor, and the value being **REPLACED by the word "Copied" for 1.2s**,
+which on the one table whose job is showing values means the control hid the
+thing it was copying; photographed from the real page rather than described.
+**AND &sect;93.6's OWN REASON WAS CREATED BY &sect;93.6's OWN ANSWER**: its
+argument for a button was that *"selecting text inside a horizontally scrolling
+table with a frozen column is a drag that starts a scroll"* &mdash; and **a drag
+across a `<button>` selects NOTHING** — measured in Chromium, which is the
+only engine this sandbox has, and stated that way rather than as *every
+browser*, which is a claim nothing here can make (&sect;124). Both builds,
+same row, same drag: the selection comes back **empty** today and **the whole
+address** with the control gone. *His fallback is not a worse way of doing it,
+it is a way that only works once the control is out* &mdash; which is the
+opposite of what I expected to find and is why it was measured rather than
+reasoned about (&sect;93.11's family). **THE HOVER STOPS BEING UNCONDITIONAL AND
+THAT IS &sect;88 GETTING ITS COLUMN BACK**: &sect;93.6 wrote the value into the
+`title` beside the hint because `clipTitles()` only fills an EMPTY one, so a
+bare *"click to copy"* would have taken the hover from exactly the values too
+long to read; with no hint to carry, the title goes back to `clipTitles()`
+&mdash; **65 titles become 1**, and it is the one value actually cut, which is
+what every other column does. **&sect;88's contract is what must survive it**
+(nothing cut without a hover) and is asserted at both ends, or a build that
+dropped the titles and the clipping together would pass. **NO LAYOUT MOVES, AND
+IT WAS MEASURED RATHER THAN ASSUMED** (&sect;158): row heights identical to the
+tenth of a pixel, every column width identical, the table 1005px on both. The
+phone's own box goes **19.4 &rarr; 27.4px** as it takes `.val`'s padding like
+every other value &mdash; which closes &sect;374's recorded-not-done in passing,
+a 19.4px press target being a press target no longer. **TWO CHECKS REVERSED AND
+REWRITTEN, NEVER DELETED** (&sect;218): `people-dialog` &sect;2b asserted that
+one press still copied, because &sect;374's fault and &sect;93.6's control were
+two acts sharing one element; `identity-merge` carried &sect;93.6's own six.
+Each claim INVERTS, and **each absence is paired with the presence that makes it
+mean something** (&sect;94.2) &mdash; the value still there and readable, and
+the drag that now works &mdash; because a build that had EMPTIED the column
+satisfies *"no control"* perfectly. **4 red and 3 red** on the build that still
+has it, from the SOURCES (&sect;276). **AND THE FALSIFICATION FOUND &sect;215 IN
+THE FILE THAT RECORDS IT FOUR TIMES**: `eval_on_selector` THROWS on a selector
+matching nothing, and on the reversed build there is no `.val` in those two
+cells at all &mdash; so the first red run printed **one** failure where there
+are four and took the rest of the section with it; every probe degrades now.
+**AND THE DRAG IS ASSERTED AS *the value is IN the selection*, never *the
+selection is the value***: `.val` is a block, so a drag to its right edge runs
+on into the rest of the row exactly as it does in every other column &mdash;
+which is the table behaving normally rather than this cell misbehaving, and
+asserting the tighter thing reported a correct build broken. **AND MY OWN GUARD
+TRIPPED ON MY OWN PROSE**: `assert ".copyval" not in s` fired because the
+comment explaining the removal spells the class it removes &mdash; it is
+asserted over selector lines rather than over the file. **The server needed
+nothing and it is read off the diff** (&sect;172, spec 029): no `api/`, `lib/`
+or `db/` file, nothing stored moves, nothing is migrated, nobody is signed out.
+**RECORDED, NOT DONE**: `checks/registry-inline-mockup.py` is a mockup
+GENERATOR whose subject was what a double-click leaves behind on a copy button
+against plain text &mdash; a question this answers by removing one side of it.
+It writes into `design-mockups/`, so `qa-run.py` refuses it in a sweep
+(&sect;334.14) and it can redden nothing; left as evidence rather than edited as
+a side effect of a round that was not about it (Principle II, rule 1b).*
+
+*Earlier: 2026-09-20 &mdash; **&sect;374: an address that is not unique is
 not an address (spec 059).** Islam, of the register: *"for the copy on click for
 the email and double click to edit is working but the same behavior is not
 working on the phone number."* **IT IS NOT A PHONE FAULT, AND ESTABLISHING THAT

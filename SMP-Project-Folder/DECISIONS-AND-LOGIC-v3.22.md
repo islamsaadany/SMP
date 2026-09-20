@@ -53512,3 +53512,60 @@ untouched. Measured, not assumed.
 `scripts/deploy.mjs` applies migration 015 on every build, and that file
 creates eight tables and their indexes and alters only what it has just
 created. It names no existing table. Nothing stored moves.
+
+---
+
+## §376.1 — MERGED TO MAIN, AND A RENUMBER THAT LOST ITS OWN WRITES (2026-09-20, Spec 061)
+
+Islam: **"MERGE TO MAIN"**. Main had moved 30 commits and taken **§375 and spec
+060** for Portfolio, so this round is renumbered to **§376 and spec 061** —
+BEFORE the merge, which is what makes the scoping provable (§264.3): at that
+point the tree holds none of main's lines, and the merge base was asserted to
+hold neither string in any spelling.
+
+**BOTH SPELLINGS, EVERY COUNT DECLARED, AND IT REFUSED TWICE** (§336.1,
+§353.4). Both refusals were right: *Spec 060* is capitalised in the spec's own
+title and lower-case in the two record files, so a pass told the wrong case
+would have written a number it had not matched.
+
+**AND THE PASS LOST FOUR OF ITS OWN WRITES, WHICH IS THE FINDING.** Four files
+take TWO substitutions each — a section and a spec — and the plan read each
+file's text ONCE at planning time, so the second write was made from the
+ORIGINAL text and silently discarded the first. **Every per-pass assertion
+passed**, because each was measured against the snapshot it was planned from:
+§344.1's rule satisfied and useless. *Asserting that a substitution matched is
+not asserting that it survived.* What catches it is the FINAL state of the tree
+— 23 of §376 against 23 of §375 before, spelling for spelling, with §375 absent
+from every file — and the 23 is itself the both-spellings point, being the 22
+entity-less plus CLAUDE.md's one `&sect;`.
+
+**THE FIVE CONFLICTS HAD A NAMED RULE EACH.** The three record files are
+COMBINED, never picked (§318.7, §356.17) — either side taken whole drops the
+other's round with nothing able to go red, there being no generated-in-step for
+prose — with every `## ` heading from each side asserted present in the result,
+0 lost from ours and 0 from main. The built file is REBUILT, never merged
+(§91). `sw.js` is rebuilt from main's copy with the branch's one line
+re-applied (§146.2), the name going PAST both rather than picking either.
+
+**AND THE MERGED RESULT IS GREPPED RATHER THAN TRUSTED** (§313.37, §56.7): the
+branch deletes no top-level declaration, and the duplicate scan over build.py's
+own concatenation reads 1514 top-level names with exactly SIX duplicates — the
+six §281.1 deliberately leaves.
+
+**WHAT COULD NOT BE RUN IS SAID** (§54.5, §124): this container holds neither
+`smp-app/node_modules` nor python Playwright, so `qa.py` and every frozen
+browser check could not launch, and `insights-tab.mjs` is 16/0 with two
+sections declaring NOT RUN in their own words. What did run is clean.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): not one frozen
+`api/`, `lib/` or `db/` file is in this branch's work. Nothing stored moves and
+nothing is migrated.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM HERE**: the egress policy
+refuses the production host at the proxy's own CONNECT (403, a policy denial
+its README says to report rather than route around), so nobody here has seen
+production serve this commit. There IS a witness this time — `shell.js`
+3,827,402 → 3,843,984 and `platform.css` 669,731 → 674,039 — so the two builds
+are one request apart for whoever can read the live site. The branch is
+deliberately NOT fast-forwarded (§374.1, §375.2's precedent): while it stays
+behind, main's tip is unique by construction.

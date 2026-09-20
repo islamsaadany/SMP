@@ -10225,7 +10225,62 @@ with Strategy and the reports and leaves it standing for one that also has an
 office module, so **my second mockup's claim that it closes the defect "for
 free" is true of the shapes in front of us and not in general, corrected here
 rather than left standing** (&sect;124); the honest fix is those two modules'
-own area declarations, which this round was not asked about.*
+own area declarations, which this round was not asked about.
+**&sect;376.1 &mdash; MERGED TO `main` 2026-09-20 on Islam's word**, and the
+renumber came FIRST, which is what makes its scoping provable (&sect;264.3):
+main moved 30 commits under this branch and took **&sect;375 and spec 060** for
+Portfolio, so &sect;375 &rarr; &sect;376 and specs/060-reports-as-a-tab &rarr;
+061. The merge base was asserted to hold neither string, so every occurrence in
+the tree was this branch's by construction; both spellings swept (&sect;336.1),
+every count DECLARED, and the pass **refused twice and was right both times**
+&mdash; *Spec 060* is capitalised in the spec's own title and lower-case in the
+two record files, so a sweep told the wrong case would have written a number it
+had not matched (&sect;353.4).
+**AND THE PASS LOST FOUR OF ITS OWN WRITES, WHICH IS THE FINDING**: four files
+take TWO substitutions each (a section and a spec), and the plan read each
+file's text ONCE at planning time &mdash; so the second write was made from the
+ORIGINAL text and silently discarded the first. **Every per-pass assertion
+passed**, because each was measured against the snapshot it was planned from,
+which is &sect;344.1's own rule satisfied and useless: *asserting that a
+substitution matched is not asserting that it survived.* What catches it is the
+FINAL state of the tree &mdash; 23 of &sect;376 against 23 of &sect;375 before,
+spelling for spelling, with &sect;375 absent from every file &mdash; and the 23
+is itself the both-spellings point, being the 22 entity-less plus CLAUDE.md's
+one `&amp;sect;`.
+**THE MERGE'S FIVE CONFLICTS HAD A NAMED RULE EACH**: the three record files
+**COMBINED, never picked** (&sect;318.7, &sect;356.17 &mdash; either side taken
+whole drops the other's round with nothing able to go red, there being no
+generated-in-step for prose), with every `## ` heading from each side asserted
+present in the result, **0 lost from ours and 0 from main**; the built file
+**REBUILT, never merged** (&sect;91); and `sw.js` **rebuilt from main's copy
+with the branch's one line re-applied** (&sect;146.2), the name going PAST both
+rather than picking either (main v5.19, this v5.20). The merged result was
+GREPPED rather than trusted (&sect;313.37, &sect;56.7): the branch deletes no
+top-level declaration, and the duplicate scan over build.py's own concatenation
+reads **1514 top-level names with exactly SIX duplicates** &mdash; the six
+&sect;281.1 deliberately leaves.
+**AND WHAT COULD NOT BE RUN IS SAID RATHER THAN LEFT AS AN ABSENCE**
+(&sect;54.5, &sect;124): this container holds neither `smp-app/node_modules` nor
+python Playwright, so **`qa.py` and every frozen browser check could not
+launch**, and `insights-tab.mjs` is **16/0 with two sections declaring NOT RUN
+in their own words**. What did run: built-in-step and generated-in-step all
+clear, authoriser **683/0**, change list **140/0**, platform rules **69/0**, KB
+audience clear, session-state and db-url-choice clear, the KB corpus in step and
+the seed regenerating **byte-identical**.
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): not one frozen
+`api/`, `lib/` or `db/` file is in this branch's work, so nothing about how a
+save is judged moves, nothing stored moves and nothing is migrated.
+**AND &sect;91.5's LIVE READ COULD NOT BE MADE FROM HERE**: this environment's
+egress policy refuses `smp-orpin-tau.vercel.app` at the proxy's own CONNECT
+(403, *connect_rejected*, a policy denial its README says to report rather than
+route around), so **nobody here has seen production serve this commit**. There
+IS a witness this time, unlike &sect;375.2 &mdash; `shell.js` **3,827,402 &rarr;
+3,843,984** and `platform.css` **669,731 &rarr; 674,039** &mdash; so the moment
+somebody can read the live site the two builds are one request apart. **THE
+BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (&sect;374.1, &sect;375.2's
+precedent): while it stays behind, main's tip is unique by construction, and
+putting that SHA on a second ref is the one act left that could still cost the
+deployment.*
 
 *Earlier: 2026-09-20 &mdash; **&sect;375: Portfolio &mdash; the rules and the
 tables, before any screen (spec 060).** Islam, on the handover saying every

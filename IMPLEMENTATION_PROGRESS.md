@@ -6581,3 +6581,38 @@ which is the rule for keeping a deployment from being raced away.
 changed, nothing reads the new tables, and the migration only adds its own
 eight.
 
+
+## §376.1 — The reports-as-a-tab round, merged to main (2026-09-20) · **done**
+
+Merged on Islam's word, and the renumber came **first** — main had moved 30
+commits and taken §375 and spec 060 for Portfolio, so this round became **§376
+and spec 061**. Doing it before the merge is what makes the scoping provable:
+the merge base holds neither string, so every occurrence was this branch's by
+construction.
+
+**What the run taught.** The renumber pass planned from a per-pass snapshot, so
+on the four files taking two substitutions each the second write was made from
+the original text and discarded the first — with every per-pass assertion
+passing, because each was measured against the snapshot it was planned from.
+Asserting that a substitution *matched* is not asserting that it *survived*;
+what catches it is the final state of the tree.
+
+**The merge.** Five conflicts: the three record files combined rather than
+picked (0 headings lost from either side, asserted), the built file rebuilt
+rather than merged, and `sw.js` rebuilt from main's copy with the one line
+re-applied at a name past both (v5.20). The merged concatenation scans to 1514
+top-level names with exactly the six duplicates §281.1 leaves.
+
+**What ran, and what could not.** Built-in-step and generated-in-step all clear;
+authoriser 683/0, change list 140/0, platform rules 69/0, KB audience clear,
+session-state and db-url-choice clear, KB corpus in step, seed byte-identical.
+This container holds neither `smp-app/node_modules` nor python Playwright, so
+`qa.py` and every frozen browser check could not launch, and `insights-tab.mjs`
+is 16/0 with two sections declaring NOT RUN in their own words.
+
+**Nobody is signed out and nothing stored moves** — no frozen `api/`, `lib/` or
+`db/` file is in this branch's work. The live read could not be made from here
+(the egress policy refuses the host at CONNECT), so nobody here has seen
+production serve it; the witness is `shell.js` 3,827,402 → 3,843,984 and
+`platform.css` 669,731 → 674,039. The branch is deliberately not
+fast-forwarded, keeping main's tip unique.

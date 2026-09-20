@@ -5531,3 +5531,44 @@ running. **Re-run against the merged result**: memory 21 / 12 / 36 / 42 / 16 =
 and it is said why**: not one byte of the frozen build changes here, proved by
 rebuilding it, so `main`'s own sweep carries over rather than being
 re-measured for the sake of a number.
+
+---
+
+## Portfolio — the delivery plan, per client (spec 056)
+
+**Waiting on Islam, not on me.** Nothing is built and no source has moved; this
+is a spec and six drawings. Three screens are signed off — the project team, the
+charter and the plan — and **three await a word**: Progress, Analytics and now
+the landing.
+
+**Every screen is drawn as of 2026-09-20.** The landing was the last one with no
+picture: the project list for this client, with each project's state and the
+cross-project reading §9.11 deliberately kept off the tabs. One question and a
+row answers it four ways — how far along, whether it is late, what is waiting on
+somebody, and when anybody next looks at it.
+
+**A project has no status field and never gains one.** Every figure in that list
+is worked out from the plan underneath it, so the list cannot disagree with the
+four pages behind it. Two of the five projects drawn have no figure at all, on
+purpose: one has a charter and no plan (which says so rather than printing 0%),
+and one has a plan nobody has started (which is 0%, and is the difference).
+
+**What changed in the drawings' own plumbing.** The rows were already shared
+between three drawings; **the sums were not**, and were about to be copied a
+fourth time. They live in one file now and are spliced the same way — proved
+behaviour-neutral (all three render byte-identical to what they published) and
+proved load-bearing one break at a time. The extraction broke the Plan on its
+first attempt, taking a helper out with the block it sliced; the baseline had
+been captured before the first edit, so it was one diff rather than a hunt.
+
+**And this container can render, where the earlier rounds' could not.** So every
+figure on the new page was read out of the rendered document, the three older
+drawings were confirmed byte-identical to what they published, contrast was
+measured across all four in both palettes (**0 failures**, with the probe proved
+able to fail first), and the table's fit was measured at seven widths from 1600
+to 768 with nothing scrolling sideways.
+
+**Next, and it is a decision rather than work**: three sign-offs. After them,
+the spec's own §10 still says what building needs — this repository has never
+seen the reference code, so the two audits behind §7 and §9.11 were written by
+sessions with it attached and nothing has been run.

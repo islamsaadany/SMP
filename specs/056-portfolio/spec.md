@@ -3,12 +3,12 @@
 **Status:** **not built. No source has moved.** This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
-what it specifies is the shape, not the screens. **Three screens are drawn and
-signed off** — the project team (§6.4), the charter (§5.1) and the plan (§9.9);
-**Progress** (§9.10) and **Analytics** (§9.12) are drawn and await sign-off.
-**The landing is the one screen with no picture.** Rule 1c is paid for the first
-three and owed for the rest: nothing visual may be built from this page until
-each screen is drawn and signed off.
+what it specifies is the shape, not the screens. **Every screen is now drawn.**
+Three are signed off — the project team (§6.4), the charter (§5.1) and the plan
+(§9.9); **Progress** (§9.10), **Analytics** (§9.12) and **the landing** (§9.13)
+are drawn and await sign-off. Rule 1c is paid for the first three and owed for
+the rest: nothing visual may be built from this page until each screen is drawn
+and signed off.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -148,7 +148,7 @@ and add notes. They do not restructure the plan.
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. **A checkpoint is a date and nothing else** (§9.10): it stores nothing, records nothing and gates nothing. |
-| 5 | A landing | The project list for this client, with each project's state. A client with one project lands in it. |
+| 5 | A landing | The project list for this client, with each project's state, and the cross-project reading §9.11 kept off the tabs — **drawn at §9.13**. A client with one project lands in it, so this list is only ever seen by somebody who can reach two or more. |
 
 What the spine gives for nothing: the address `/<client>/portfolio/…`, the
 switcher entry, the row on the client's card, the on/off drawer, the door,
@@ -1466,6 +1466,120 @@ have, and Progress's signed-off list moved to the real date.
 - **Nothing is printable or exportable.** A review deck out of this page is the
   obvious next ask and is deliberately not built; Strategy's own `.pptx` and PDF
   routes (§296, §305, §311) are what it would follow.
+
+
+### 9.13 · The landing, drawn — 2026-09-20, awaiting sign-off
+
+`design-mockups/portfolio/2026-09-20_portfolio-landing.html`, in the platform's
+own tokens, both palettes. **The last screen of this module with no picture.**
+
+**ONE QUESTION, AND A ROW ANSWERS IT FOUR WAYS**: which project needs me — how
+far along it is, whether it is late, what is waiting on somebody, and when
+anybody next looks at it. Nothing else is on it. The charter, the tree, the
+queue and the client-facing reading are four tabs one press away, and repeating
+any of them here would be the fault §9.12 kept off Analytics.
+
+**A PROJECT HAS NO STATUS FIELD AND ITS STATE IS DERIVED FROM ITS PLAN.** §5
+stores a name, a charter and a checkpoint cadence and nothing that says how it
+is going — which is §9.8's rule one level up, and is what makes this list unable
+to disagree with the pages behind it. Culture Transformation's **59%**, its
+**Behind** mark and its **5** are the same rows and the same sums the Plan,
+Progress and Analytics read.
+
+**TWO OF THE FIVE HAVE NO FIGURE AND THAT IS THE HONEST ANSWER.** *Retail
+network review* has a charter and no plan, so there is nothing to average and
+the row says **No plan yet** rather than printing 0% — absent is not nought
+(§35, §93), and nothing gates building a plan (§5.1), so it is a normal state
+rather than a broken one. *Finance systems consolidation* has a plan nobody has
+started, which **is** nought and reads 0% — the difference the row above it
+exists to show.
+
+**WHAT IS WAITING IS A COUNT OF ROWS, NEVER OF REASONS** (§279, §108.1) — and
+the fixture **demonstrates it rather than claiming it** (§255): Commercial
+excellence programme's promotion review is past its date *and* has nobody on
+it, so the breakdown names three reasons while the number reads **2**. A list
+that added the reasons up would say 3 and send somebody looking for a row that
+is not there.
+
+**LATE AND HOW FAR ALONG ARE TWO QUESTIONS**, drawn apart for §9.12's reason:
+the word beside the bar answers *how far along* and the red mark answers *is it
+late*, because *On Track* is a claim about a schedule a percentage cannot see
+(§344). A project can be 59% **and** behind.
+
+**THE LIST IS NARROWED AND THE STRIP COUNTS WHAT YOU CAN OPEN.** A seat reaches
+every project, anybody else only the ones naming them (§6.1) — and all three
+headline figures move with the list (5 / 2 / 8 for a seat, 2 / 2 / 7 for Omar),
+which is asserted by the fixture rather than by coincidence: a project only the
+seat can see owes something, so the third figure could not have matched by
+accident (§113.8). **Starting a project is by seat**, so Omar is offered no
+button rather than a dead one (§61, §301), and **the gold edge is his and not
+the seat's** — everything is a seat's, so marking all five would be a colour
+that means nothing (§41).
+
+**SOMEBODY WITH ONE PROJECT NEVER SEES THIS PAGE** (§4 row 5), so there is no
+one-row state to look at and Omar is drawn on two.
+
+**THE ORDER IS THE PLAN'S OWN START, EARLIEST FIRST — NOT WORST FIRST.** A short
+list is scanned for a **name**, and an order that moves as things go wrong is
+one nobody can scan; the marks and the strip do the alerting. Same argument
+§9.12 made for the commitments. A project with no plan sorts last.
+
+#### And this one was rendered before publishing
+
+The three before it say in their own notes that they were not — those containers
+had no browser. **This one has**, and it changes what can be claimed:
+
+- every figure on the page was **read out of the rendered document**, not
+  checked by eye;
+- the Plan, Progress and Analytics drawings were rendered beside it and are
+  **byte-identical to what they published** — 59%, 100 / 67 / 10, 1 of 6 and
+  Progress's 1 / 1 / 3 / 3 are confirmed rather than recorded (§303);
+- **contrast is measured in both palettes on all four drawings: 0 failures**,
+  with the probe proved able to fail first (5 under a deliberate break) —
+  because a sweep that reports nothing may be blind (§68.10);
+- the table **fits its pane at 1600 / 1400 / 1280 / 1100 / 1000 / 900 / 768**
+  with no sideways scroll, and that probe was proved able to report OVER too
+  (§158: fit, never *and it scrolls*).
+
+#### The arithmetic is spliced too, and the landing is why
+
+§9.12 stopped three drawings holding three copies of the plan and left them
+holding **three copies of the sums**: `kids()` and `roll()` were written out
+twice, byte for byte but for a variable declaration, and the three predicates
+that decide what is owed were a third copy on Progress. **They agreed, which is
+what made it worth fixing while they still did** — the landing needs the roll-up
+*and* the owed counts in one place, so copying would have made a fifth and a
+sixth.
+
+`design-mockups/portfolio/_derive.js` holds them, spliced by the same script
+under a second marker pair. **What lives there is a FIGURE; what does not is
+FORMAT** — `day()` prints a date with a year on Analytics and without one on the
+Plan, which is each screen's own choice and must stay one.
+
+**It is proved behaviour-neutral rather than claimed**: all three drawings
+render byte-identical to their published output after the extraction. **And it
+is proved load-bearing**, one break per thing each drawing reads — breaking
+`roll()` reddens the Plan and Analytics and **leaves Progress untouched**,
+because Progress draws only activities and a rolled figure never reaches it; a
+break in `nobodyOn()` is what reddens Progress. *One falsification would have
+left a third of it unproved.*
+
+**AND THE EXTRACTION BROKE THE PLAN, WHICH IS WHY THE BASELINE WAS TAKEN
+FIRST.** The slice that removed the Plan's copy of `d`/`kids`/`roll` took its
+`esc()` with it — sitting between them — and the page rendered its panel and
+**no tree and no Gantt at all**, with `esc is not defined` in a console nobody
+had open. Every published figure was captured before the first edit, so it was
+one diff rather than a discovery (§303, §214: delete a named function, never a
+range).
+
+#### What it leaves
+
+- **Does a finished project stay in this list for ever?** *Supply chain
+  resilience* is drawn in it, because nothing in §5 retires a project and a
+  client with twelve years of work would eventually scroll. An archive, a fold,
+  or nothing at all — a decision rather than a detail, and not taken here.
+- **Nothing is printable**, the same as Analytics and for the same reason.
+
 
 ---
 

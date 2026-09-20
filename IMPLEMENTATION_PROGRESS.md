@@ -6616,3 +6616,67 @@ is 16/0 with two sections declaring NOT RUN in their own words.
 production serve it; the witness is `shell.js` 3,827,402 → 3,843,984 and
 `platform.css` 669,731 → 674,039. The branch is deliberately not
 fast-forwarded, keeping main's tip unique.
+
+---
+
+## §377 — the tab that filled the row, and the mirror that showed your own face (2026-09-20, spec 061)
+
+**Built on the branch, not merged.** Islam, with three screenshots the morning
+after §376 reached main: *"when viewing as Mahdy he started seeing the other
+units and functions while he should only see his unit karim from mobile is
+seeing the report while the report is made only for the retail and online
+team."*
+
+**Two faults, both §376's, and neither is the narrowing itself.**
+
+**The row.** The Insights tab was keyed on `c_kb`, the one access key the
+matrix holds at `area:"always"` — so the question the navigation asks (*is
+there a tab here this person holds*) came back yes at every unit, every
+function and the group, for everybody. Measured on the worked example against
+the shipped build: **31 of 33 people** got a bigger row, **29 of 33** met the
+Units | Functions switch that is meant for the SMO and the CEO, a unit's
+custodian went from one unit to ten. **No plan and no figure was exposed** —
+the tabs that draw those still refused, which is why his own screenshot of
+Mahdy on Mobile shows a tab row holding one tab; what filled up is the row of
+names. Established as §376's by measuring the build before `ac94f9db`.
+
+The fix is `everywhere:true` on the tab and `ownTabs()` beside `allowed()`,
+asked by the six gates that decide what the row offers — marked on the tab so
+a second client-wide tab says so about itself. The tab is still drawn once you
+are somewhere you reach for another reason; it stops being the reason.
+`anyDestination()` keeps the module switcher listing Insights for somebody who
+reaches nowhere, which is the hole §376.3's own comment promises never opens —
+and that forced the switcher to be built on the first paint rather than at
+load, because the question is viewer-dependent and at load the shell has not
+hydrated (§362's wall, from the other side).
+
+**The mirror.** The Insights module resolves who is asking from the seat the
+DOOR established, which is the sign-in — so the office's own seat answered and
+every narrowed report was returned whoever the switcher pointed at. The
+narrowing works for a person signing in themselves; what was broken is the
+mirror the office checks it IN. Now narrowed once at the seam
+(`lib/view-as.ts`, called by the route before anything of the module is
+asked), so every module is right by construction. It can only narrow: the gate
+is the session's seat, the result is the simulated person's, and an unknown
+key is refused rather than read as nobody.
+
+**What ran.** `scripts/test-nav-row.js` 15/0 (red 6 from the source, its first
+failure printing Islam's report); `check:viewas` 20/0 (red 3 ways, the last
+printing the fault itself); the **access baseline UNMOVED** — 33 people ×
+every page key × every target, so nobody's access changed and only what the
+navigation offers narrowed back; authoriser 683/0, change list 140/0, platform
+rules 69/0, built-in-step all good, setup-shape 33/0, deploy-context 5/0,
+session-state and db-url-choice clear.
+
+**What could not.** No `smp-app/node_modules` and no python Playwright here,
+so `qa.py`, every frozen browser check, `check:insights` and `check:modules`
+could not launch (`check:modules` established as already unrunnable by
+stashing the change and getting the identical error). The view-as fix is
+proved as a rule and at both ends of its seam and is **not** yet driven
+through a browser against a client — that run is owed before it is called
+finished.
+
+**Nobody is signed out and nothing stored moves**: no frozen `api/`, `lib/` or
+`db/` file is touched, nothing is migrated, no rule about who may save what
+changes. `sw.js` is bumped to `v5.21-nav-and-viewas`, because the built file's
+bytes changed.

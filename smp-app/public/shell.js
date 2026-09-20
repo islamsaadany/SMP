@@ -50204,13 +50204,34 @@ var LIBRARY = (function(){
   function load(force){
     if (!shown()) return;
     var cat = category();
-    var key = JSON.stringify([cat, Q]);
+    /* WHO IT WAS ASKED FOR IS PART OF THE ASK (§377). `loadedFor` is what
+       stops a slow answer overwriting a newer one, so a viewer switch has to
+       be in it: the pane is re-rendered on every paint and asks again, and
+       without the person in the key the older request could still land last
+       and put somebody else's reports back. */
+    var who = (typeof SYNC !== "undefined" && SYNC.actingAs) ? SYNC.actingAs() : null;
+    var key = JSON.stringify([cat, Q, who]);
     if (!force && key === loadedFor) return;
     loadedFor = key; loading = true; failed = false; draw();
     if (!live()) { loading = false; failed = true; draw(); return; }
     var qs = [];
     if (cat) qs.push("category=" + encodeURIComponent(cat));
     if (Q) qs.push("q=" + encodeURIComponent(Q));
+    /* ── VIEWING AS SOMEBODY ASKS FOR THEIR REPORTS (§377) ──────────
+       Islam: *"karim from mobile is seeing the report while the report is
+       made only for the retail and online team."* He was right, and it was
+       this request: the server resolved who is asking from the SIGN-IN, so
+       the office's own seat answered — and the office reads every report
+       (spec 046 §4.10), whoever the switcher was set to. §185's fault on a
+       read path, and the reason it matters is that view-as is the mirror the
+       office CHECKS a narrowing in: it reported a rule that works as broken.
+
+       `SYNC.actingAs()` is the save's own answer, asked rather than copied
+       (§42) — null unless the switcher is genuinely showing somebody else
+       — and it is read at the moment of the REQUEST rather than kept, so a
+       switch made between two searches asks for the right person. The server
+       narrows with it and can only ever narrow (lib/view-as.ts). */
+    if (who) qs.push("viewAs=" + encodeURIComponent(who));
     var url = "/" + slug() + "/insights/list" + (qs.length ? "?" + qs.join("&") : "");
     fetch(url, { cache:"no-store", credentials:"same-origin" })
       .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }); })
@@ -53608,6 +53629,14 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
+    /* WHO THE SCREEN IS BEING DRAWN FOR (§377). The save has carried the
+       simulated person since §185; a module that READS a person's data has
+       the same question, and it must have the SAME answer — `actingAs()`
+       carries the switcher's own two guards (the seat that draws it, and the
+       key being on the register), so a second test would be a second idea of
+       when a view-as is real (§42, §53.5). Exported rather than re-asked,
+       exactly as `isSMOSession` is below and for the same reason. */
+    actingAs: function () { return actingAs(); },
     person: function () { return person; },
     /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
        the viewer switcher too, and the note above isSMOSession() is explicit
@@ -54025,8 +54054,21 @@ var SYNC = (function () {
      question and is answered by the module's OWN area on the server, so a
      second grant here would be a cell that could refuse what the door
      allowed — two answers to one question (§37, §53.5). The key is here
-     because `allowed()` asks every tab for one. */
-  var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights",
+     because `allowed()` asks every tab for one.
+
+     AND `everywhere` IS WHAT STOPS IT FILLING THE ROW (§377). Every other
+     tab in SUBS is ABOUT the destination it is drawn on — a unit's plan, a
+     function's projects — so the navigation can ask *is there a tab here
+     this person holds* and get an honest answer. The library is the
+     CLIENT's: pressing Retail Stores shows the same reports (§376, Islam's
+     own decision), and with `c_kb` at view for everyone that question came
+     back YES at every unit, every function and the group, for everybody —
+     31 of the worked example's 33 people, the Units | Functions switch with
+     them. Marked on the TAB rather than tested by its key in the gate, so a
+     second client-wide tab says so about itself and `ownTabs()` is never
+     edited (§104.7). It is still DRAWN wherever you are; what it stops
+     being is the REASON to be there. */
+  var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights", everywhere:true,
                   when: function(){ return LIBRARY.shown(); },
                   sections: function(){ return LIBRARY.sections(); } };
 
@@ -54884,6 +54926,31 @@ var SYNC = (function () {
     });
   }
 
+  /* ── WHAT MAKES A DESTINATION WORTH OFFERING (§377) ──────────────────
+     `allowed()` answers which tabs this person holds HERE, and the navigation
+     asks a narrower question: is there anything AT this destination for them.
+     A tab that draws the same thing wherever it is drawn is not an answer to
+     it — so the destination row, the Group button, the companies and the
+     Units | Functions switch all ask THIS, and the tab row itself goes on
+     asking `allowed()`, because once you are here it is a tab like any other.
+
+     ISLAM, OF THE BUILD THAT DID NOT: *"when viewing as Mahdy he started
+     seeing the other units and functions while he should only see his
+     unit."* Measured against the platform's own rule, §376's Insights tab
+     took 31 of the worked example's 33 people from one unit, or two, or
+     none, to all ten and all eight — and 29 of them met the Units |
+     Functions switch, which is meant for the SMO and the CEO. No plan and no
+     figure was exposed by it (the tabs that draw those still refuse, which is
+     why his own screenshot shows a row of one tab on somebody else's unit);
+     what filled up is the row of names.
+
+     THE NAME IS `ownTabs`, NEVER `here`: `here` is taken (§231's chat
+     reads `t.here_at`) and one-word names in this scope have collided before
+     (§56.7, §65.9). */
+  function ownTabs(defs, target){
+    return allowed(defs, target).filter(function(d){ return !d.everywhere; });
+  }
+
   /* A unit tab appears only if the viewer reaches that unit AND holds at least
      one of its pages. Restriction is by removing the page, never by trimming
      what a page shows. */
@@ -54912,21 +54979,21 @@ var SYNC = (function () {
   var NAVFOLD = "units";
 
   function myUnits(){
-    return activeKeys().filter(function(k){ return allowed(SUBS.unit, k).length; });
+    return activeKeys().filter(function(k){ return ownTabs(SUBS.unit, k).length; });
   }
   /* Which capabilities this viewer reaches, asked of the RULE (§42): a
      capability resolves to the function that holds it, so the office and the
      CEO see every one and a function head sees theirs. */
   function myCaps(){
     return capsReachable().filter(function(c){
-      return allowed(SUBS.fn, "cap:" + c.id).length;
+      return ownTabs(SUBS.fn, "cap:" + c.id).length;
     }).map(function(c){ return c.id; });
   }
   function myFns(){
     return FUNCTION_KEYS.filter(function(k){
       /* fnShows(), not `capsOfFunction(k).length` and not fnHasWork() either
          — the same question fnsReachable() asks, asked once (§59, §61). */
-      return fnShows(k) && allowed(SUBS.fn, "fn:" + k).length;
+      return fnShows(k) && ownTabs(SUBS.fn, "fn:" + k).length;
     });
   }
   /* The folds appear only for someone who reaches more than one unit AND more
@@ -54958,6 +55025,19 @@ var SYNC = (function () {
      already use 1424px of a 1485px row — 61px left — so a third kind of thing
      sharing that line overflows on an ordinary laptop the day a second
      capability is created. */
+  /* IS THERE ANYWHERE FOR THIS VIEWER TO STAND (§377). Asked by the module
+     switcher (shell/route.js) and by nothing else: with the library drawn as
+     a tab wherever there is a tab row, somebody who reaches NO destination
+     has no row to be offered it on — so the switcher must go on listing
+     Insights for them, or the reports are reachable from nowhere (§61).
+     Built from the same four answers the row itself is, never a fifth list
+     (§53.5). */
+  function anyDestination(){
+    return !!(navSides().length || ownTabs(SUBS.group, "group").length ||
+      companiesReachable().filter(function(ck){
+        return ownTabs(SUBS.co, "co:" + ck).length; }).length);
+  }
+
   function foldsNeeded(){
     var sides = navSides();
     if (sides.length < 2) return false;
@@ -54991,9 +55071,9 @@ var SYNC = (function () {
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (allowed(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
     companiesReachable().forEach(function(ck){
-      if (allowed(SUBS.co, "co:" + ck).length)
+      if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
     });
     if (tops.length === 1) out.push({ k:tops[0].k, label:tops[0].label });
@@ -55759,7 +55839,7 @@ var SYNC = (function () {
     var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }))
       .concat(myCaps().map(function(id){ return "cap:" + id; }))
       .concat(companiesReachable().map(function(ck){ return "co:" + ck; }));
-    if (allowed(SUBS.group, "group").length) everything.push("group");
+    if (ownTabs(SUBS.group, "group").length) everything.push("group");
     if (allowed(SUBS.setup, "group").length) everything.push("setup");
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
@@ -64722,9 +64802,20 @@ var SYNC = (function () {
 
      NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
      BELOW this one and nothing rewrites `.top-in`, so the markup is built and
-     wired exactly once, at load — no second handler on a repaint (§24, §47.2).
-     A press navigates, so the menu never has to be closed afterwards. */
-  (function modules() {
+     wired exactly ONCE — no second handler on a repaint (§24, §47.2), which
+     is what the `.topmark` guard below is for now that a paint is what calls
+     this. A press navigates, so the menu never has to be closed afterwards.
+
+     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§377). It has to ask
+     whether the tab row already reaches the library, and at load the answer
+     is about the BAKED viewer: over HTTP the shell hydrates from /api/state
+     after this file has been parsed, so anything viewer-dependent answered
+     here is answered about somebody else. §362 hit the same wall from the
+     other side and moved that question to paint time; this is the same move
+     for the same reason. Nothing flashes, because the boot skeleton hides
+     `.chrome` until the first paint anyway (§94.10), and the `.topmark`
+     guard below makes a second call a no-op. */
+  function mountSwitcher() {
     /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
        CSS RULE RATHER THAN AN EARLY RETURN HERE (§367). Those pages
        belong to no module, so a switcher there offers a way out of somewhere
@@ -64776,8 +64867,17 @@ var SYNC = (function () {
        the next reader to take as load-bearing (§298.2): build-shell.mjs
        concatenates this file LAST, after every frozen script, so LIBRARY is
        always there. It is here because this file is the one piece of browser
-       code that is also written as a file of its own. */
-    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown()) ? [LIB_TAB_KEY] : [];
+       code that is also written as a file of its own.
+
+       AND "REACHED" MEANS REACHED BY THIS PERSON (§377). `LIBRARY.shown()`
+       says the library is on the tab row; `anyDestination()` says there is a
+       row — somebody who reaches no unit, no function, no company and not
+       the group has no tab to be offered it on, and dropping it here would
+       leave them the reports nowhere, which is the hole §376's own comment
+       promises this filter never opens (§61). */
+    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown() &&
+                   typeof anyDestination === "function" && anyDestination())
+      ? [LIB_TAB_KEY] : [];
     list = list.filter(function (mm) { return !mm || reached.indexOf(mm.key) < 0; });
     if (!forceSwitch && list.length < 2) return;
     var bar = document.querySelector(".top .top-in");
@@ -64828,7 +64928,7 @@ var SYNC = (function () {
     });
     d.appendChild(menu);
     bar.insertBefore(d, bar.firstChild);
-  })();
+  }
 
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
@@ -64913,7 +65013,9 @@ var SYNC = (function () {
   }
   if (typeof paint === "function") {
     var painted = paint;
-    paint = function () { var r = painted.apply(this, arguments); try { sync(true); scrollToWanted(); } catch (e) {} return r; };
+    paint = function () { var r = painted.apply(this, arguments);
+      try { mountSwitcher(); } catch (e) {}
+      try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));

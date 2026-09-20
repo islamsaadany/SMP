@@ -7710,6 +7710,48 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   whose plan is empty.
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
+- **A TAB THAT IS THE SAME EVERYWHERE IS NOT A REASON TO BE ANYWHERE
+  (&sect;377):** the navigation decides whether to draw a destination by asking
+  *is there at least one tab here this person holds*, and &sect;376's Insights
+  tab is keyed on `c_kb` &mdash; `area:"always"`, which `grantAtPage` answers
+  **`"view"` unconditionally**, for every role at every target. So the library
+  answered YES at every unit, every function and the group, for everybody:
+  measured on the worked example, **31 of 33 people** got a bigger destination
+  row and **29 of 33** met the Units | Functions switch whose own comment says
+  it is *"today the SMO and the CEO"*. **NO PLAN AND NO FIGURE WAS EXPOSED**
+  &mdash; the tabs that draw those still refused, which is why the screenshot
+  of a unit custodian standing on somebody else's unit shows a tab row holding
+  ONE tab &mdash; what filled up is the row of names. `everywhere:true` is
+  marked on the TAB and `ownTabs()` is what the six gates ask (&sect;104.7: a
+  second client-wide tab says so about itself rather than being listed in the
+  gate); the tab is still DRAWN once you are somewhere you reach for another
+  reason. **AND SOMEBODY WHO REACHES NOWHERE KEEPS A WAY TO THE REPORTS**
+  (&sect;61, the hole &sect;376.3's own comment promises this filter never
+  opens): `anyDestination()` keeps the module switcher listing Insights for
+  them &mdash; **which forced the switcher to be built on the first PAINT
+  rather than at load**, because the question is viewer-dependent and at load
+  the shell has not hydrated, so anything viewer-dependent answered there is
+  answered about the BAKED viewer (&sect;362's wall, from the other side).
+- **VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY ON A READ PATH TOO (&sect;377,
+  finishing &sect;185):** a module resolves who is asking from `ServeArgs`'s
+  `personKey` and `seat`, which the DOOR answered about the **sign-in** &mdash;
+  so with the office signed in, the office's seat answered and every narrowed
+  report came back whoever the viewer switcher pointed at. **THE NARROWING
+  ITSELF WORKS** for a person signing in themselves (`checks/insights.mjs`);
+  what was broken is **the mirror the office checks a narrowing IN**, which
+  reports a rule that works as broken with nothing on the screen to say so.
+  Narrowed ONCE **at the seam** (`lib/view-as.ts`, called by the route before
+  `mayOpenModule`, `openableModules`, the Setup stamp and the module itself),
+  never inside a module &mdash; four answers to one question is how three of
+  them get written by somebody who never met the fault (&sect;53.5). **IT CAN
+  ONLY EVER NARROW**: the gate is the seat the SESSION holds and never one read
+  out of the request, and what comes back is the seat the SIMULATED person
+  holds, so `super` becomes `none` and `seesAll` goes false. The browser sends
+  the SAVE's own answer (`SYNC.actingAs()`, exported rather than re-derived
+  &mdash; &sect;42) and **the viewed person is part of the request KEY**, or a
+  slower answer for the previous person lands last and puts their reports back.
+  The cost, stated before it was built: the office no longer sees every report
+  while wearing somebody's view &mdash; they see that person's.
 - **AND CROSSING IT IS A PRESS, NOT A PAGE LOAD (&sect;367):** Islam &mdash;
   *"the shifting between the client settings and the main console and then
   getting into the strategy and from the module settings to the client settings
@@ -8511,6 +8553,48 @@ node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # the check rather than in the drawing; it is asserted
                                 # beside the equally-weighted 50, so the number is pinned
                                 # by a difference and not only by itself
+node scripts/test-nav-row.js     # WHAT THE DESTINATION ROW OFFERS, AND WHY
+                                # (&sect;377). No browser and no database: the
+                                # SHIPPED build's own gates are run in a vm behind a
+                                # permissive global &mdash; `myUnits`, `myFns`,
+                                # `ownTabs`, `foldsNeeded`, never a model of them
+                                # (&sect;100.3) &mdash; over the worked example's 33
+                                # people through `grantAtPage`, the one rule the
+                                # browser and the server both ask (&sect;42). THE
+                                # ASSERTION IS AN AGREEMENT (&sect;94.8): the row a
+                                # person is offered WITH the library on the tab list
+                                # is the row they are offered without it, which stays
+                                # true when a unit is added and when a second
+                                # client-wide tab arrives, where a list of expected
+                                # destinations would not. 15/0, and **red 6 from the
+                                # SOURCE** (`--break=everywhere` strips the one
+                                # `.filter`, asserted to have MATCHED before it is
+                                # written &mdash; &sect;344.1), its first failure
+                                # printing Islam's report verbatim: `own_mob:
+                                # {"units":1,&hellip;} -> {"units":10,&hellip;}`. AND
+                                # IT DEGRADES RATHER THAN DYING (&sect;215) against a
+                                # build that predates &sect;377, saying so in words
+                                # &mdash; which is exactly the run somebody makes to
+                                # establish a fault is not theirs (&sect;303).
+                                # `--built <path>` points it at another build
+node smp-app/checks/view-as.mjs # viewing as somebody, on a READ path (&sect;377)
+                                # &mdash; `npm run check:viewas`, no database and no
+                                # browser, because the rule is pure (`view-as.ts`
+                                # splits the decision from the two lookups for exactly
+                                # that, lib/access.ts's own shape). The gate is the
+                                # SESSION's seat and `smoteam` is deliberately not on
+                                # it (&sect;185 gates on `super` alone); what comes
+                                # back is the SIMULATED person's seat, which is the
+                                # narrowing; an unknown key is REFUSED rather than
+                                # read as nobody (&sect;185: a narrowing that hides a
+                                # mistake instead of reporting it). BOTH ENDS every
+                                # time (&sect;94.2) &mdash; a build that refused every
+                                # simulation satisfies every "it does not widen"
+                                # assertion here and leaves the office unable to look
+                                # through anybody's eyes. 20/0, red three ways, the
+                                # last putting the fault itself back and printing
+                                # `{"personKey":"karim","seat":"super"}`, which is
+                                # what Islam was shown
 node smp-app/checks/insights.mjs # the library, and who can see one report
                                 # (spec 053, &sect;355) &mdash; `npm run check:insights`,
                                 # needs a database. &sect;1b is the narrowing's PURE
@@ -10141,7 +10225,82 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;376: the reports, as a tab in the
+*Last Updated: 2026-09-20 &mdash; **&sect;377: the tab that filled the row, and
+the mirror that showed your own face (spec 061).** Islam, with three
+screenshots the morning after &sect;376 reached `main`: *"when viewing as Mahdy
+he started seeing the other units and functions while he should only see his
+unit karim from mobile is seeing the report while the report is made only for
+the retail and online team in the report settings and he is seeing the other
+functions in terms of insights."* **TWO FAULTS, BOTH &sect;376's, AND NEITHER
+IS THE NARROWING ITSELF** &mdash; separating them was most of the round,
+because from the screen they read as one thing (*this person is seeing what
+other people's is*) and they have nothing to do with each other. Both
+established as &sect;376's own regressions by running against the build before
+it (&sect;303).
+**&sect;377.1 &mdash; A TAB THAT IS THE SAME EVERYWHERE MUST NOT BE WHAT MAKES
+A DESTINATION REACHABLE**: the Insights tab is keyed on `c_kb`, the one access
+key the matrix holds at `area:"always"`, so `grantAtPage` answers **`"view"`
+unconditionally** for every role at every target &mdash; and the navigation
+decides whether to draw a destination by asking *is there at least one tab here
+this person holds*, so the library answered YES at every unit, every function
+and the group, for everybody. **MEASURED BEFORE ANYTHING WAS PROPOSED** (rule
+3a) by running the shipped build's own gates over the worked example's 33
+people: **31 of 33 got a bigger destination row**, 29 met the Units | Functions
+switch for the first time, and Karim's and Mahdy's shapes went **1 unit and 1
+function &rarr; 10 and 8**. **AND NO PLAN AND NO FIGURE WAS EVER EXPOSED**,
+which is the half worth saying first: the tabs that draw those still refuse, so
+Mahdy on Mobile meets a tab row holding one tab &mdash; what filled up was the
+row of NAMES, which is a real disclosure (the client's shape) and not the one
+the screenshots look like. **THE TAB DECLARES ITSELF, RATHER THAN THE GATES
+NAMING IT** (`everywhere:true`, read by `ownTabs()`): a fifth such tab tomorrow
+carries one word and no gate is edited (&sect;104.7), where a list of exempt
+keys would be the sixth place to remember. **ASSERTED AS AN AGREEMENT, NEVER A
+LIST** (&sect;94.8): the row with the library must equal the row without it,
+which is what &sect;376 broke and what a check naming the ten units could not
+have said. **AND THE ONE PERSON WHO REACHES NOTHING WAS FOUND WHILE DESIGNING
+AND SOLVED RATHER THAN LEFT** &mdash; `cfo` goes 0 destinations &rarr; 0, so
+`anyDestination()` keeps the switcher listing Insights for them (&sect;61),
+which forced the switcher to be built on the first PAINT rather than at load:
+&sect;362's own wall from the other side, its stale *"built exactly once, at
+load"* comment corrected in the same edit (&sect;104.8).
+**&sect;377.2 &mdash; VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY ON A READ PATH
+TOO**, which is &sect;185 finished rather than a new rule: that section made
+`/api/state` judge the VIEWED person and the library's own narrowing is
+correct for a real sign-in (asserted since &sect;355) &mdash; what was broken is
+the MIRROR the office checks it in. `viewerOf` reads the SESSION's seat, a
+Forefront admin holds `super` on every client (`door.ts`'s `seatFor`), and
+`seesAll:true` returns every report whoever the switcher points at, so the
+office could not see what they had just narrowed. **NARROWED ONCE, AT THE DOOR**
+(`lib/view-as.ts`, read by the route before `mayOpenModule`, `openableModules`,
+the Setup stamp and the module itself): a module asking for itself would be a
+second answer to a question the door exists to settle (&sect;53.5), and three of
+the four copies would be written by somebody who had never met this fault.
+**IT CAN ONLY NARROW** &mdash; only `super` may simulate, an unknown key is
+refused rather than treated as somebody with no roles, and the seat is the
+VIEWED person's &mdash; and **a refusal is SAID rather than swallowed**, because
+an empty library reads exactly like a client with nothing published (&sect;35,
+&sect;93). The rules import with no `pg` driver (`tenant.ts` required inside the
+one function that needs it), so `checks/view-as.mjs` needs no database and no
+browser: **20/0, red three ways**, the last printing
+`{"personKey":"karim","seat":"super","simulated":true}` &mdash; the reported
+fault verbatim.
+**VERIFIED**: `scripts/test-nav-row.js` **15/0**, red under `--break=everywhere`
+**6**, its first failure printing `own_mob: {"units":1,"fns":1} -> {"units":10,
+"fns":8}`; `check:viewas` 20/0 red 3 ways; authoriser **683/0**, change list
+140/0, platform rules 69/0, setup-shape 33/0, deploy-context 5/0,
+session-state and db-url-choice clear, `built-in-step.py` all good, and **the
+access baseline UNMOVED** &mdash; 33 people &times; every page key &times; every
+target, so nobody's ACCESS moves and only what the navigation offers narrows
+back. `sw.js` bumped (the built file's bytes changed, &sect;91), confirmed
+against `origin/main`. **WHAT COULD NOT BE RUN IS SAID RATHER THAN LEFT AS AN
+ABSENCE** (&sect;54.5, &sect;124): this container holds neither
+`smp-app/node_modules` nor python Playwright, so `qa.py`, every frozen browser
+check, `check:insights` and `check:modules` did not run &mdash; the view-as fix
+is proved as a RULE and at both ends of its seam and **has not been driven
+through a browser against a real client**, and that run is owed before it is
+called finished. **`main` untouched: the merge is Islam's word, on that merge.*
+
+*Earlier: 2026-09-20 &mdash; **&sect;376: the reports, as a tab in the
 platform (spec 061).** Islam, of the Insights module: *"for the users not the
 smo they can see the insights as a tab beside the tabs visible to them. better
 usability than going to another module. the module is managed by the smo which

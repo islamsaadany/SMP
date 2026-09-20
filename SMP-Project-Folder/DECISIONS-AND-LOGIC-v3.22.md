@@ -53140,3 +53140,185 @@ in this session for want of `node_modules`, and it references neither the card's
 identity block nor its mark, read off the file; and `multi-client.py` needs the
 three-step rehearsal database §328.3 describes, so it is **unrun** rather than
 passing.
+
+---
+
+## §375 — THE MARK LEADS THE CARD, AND A LOGO SPEAKS FOR ITSELF (2026-09-20, spec 060)
+
+Islam, of the build §374 shipped: *"what did you fix? we need a mock up to my
+request for the circular it needs to be bigger covering even the line of the
+settings button and the raya trade is not good as the name is not relevant as
+the logo is saying the name. how about we remove the name and the industry if
+the logo is there"* — three things, and the first is a fair question answered
+plainly before anything was drawn.
+
+**WHAT §374 CHANGED WAS THE PLACEMENT AND NOT THE SIZE, AND SAYING SO CAME
+FIRST.** The roundel went from **30px floating ≈52px in** to **34px at the
+card's own left edge**; that is the whole of the size change and no eye would
+notice it. **And the wordmark got no help at all** — §374's fixed square is
+what contains a 4:1 mark to a quarter of the height it is given, and that
+section's own record states the cost in those words. *His second complaint is
+§374's stated cost arriving as a report.*
+
+### §375.1 — TWO DECISIONS, DRAWN SEPARATELY, AND ONE KILLED BY BEING DRAWN
+
+A mockup made of the running console — not of its stylesheet: **platform.html
+driven in headless Chromium at 1440×900 against a stub with each treatment
+injected over the shipped build**, every figure read off that paint
+(`design-mockups/client-card-mark/2026-09-20_bigger-and-the-name.html`, rule
+1c, §41.9, published as an artifact and never handed over as a file). **The
+Raya mark in it is the REAL artwork** (`clients/raya-trade/brand/
+raya-trade-group-mark.png`, 900×187), because the whole of decision two is
+whether a wordmark says the name and a stand-in cannot answer that; the two
+roundels are stand-ins for the two cases that matter — one carrying its own
+name, one carrying none.
+
+**DECISION ONE — HOW BIG, AND WHERE.** *"Covering even the line of the settings
+button"* is arithmetic: the chip runs **y=12 to y=34** and the mark sat at
+**y=37**, under it.
+
+* **A · the same square slot, bigger (56px)** — **KILLED BY DRAWING IT**. It
+  costs *no height at all* (191 → 191) and buys the fault back three times
+  over: **every name wraps to two lines**, one is clipped (*"Nile
+  Manufactur…"*), the name's ink goes **111 → 53px**, and **the wordmark comes
+  out smaller than it is today**, because the slot is still square. It answers
+  *bigger* for a round logo and makes his second complaint worse.
+* **B · the mark takes its own line at its own shape** — **BUILT**. Round marks
+  **56×56**, Raya **172×56**, both at **y=12**, level with the chip and running
+  past it; every name on one line starting at **15px**. Cost **+35px per card**
+  (191 → 226 in the drawing, **231 built** — the drawing stacked the name
+  against the mark with no gap and the build gives it 9px, which is the whole
+  of the 5px difference).
+* The ladder was drawn rather than argued: **48 → 218 · 56 → 226 · 64 → 234 ·
+  72 → 242**, one for one. **56 is his.**
+
+**AND B IS NOT A REVERSAL OF §374'S SQUARE, WHICH IS WHY IT COSTS THAT SECTION
+NOTHING.** The square existed so the name would start in one place on every
+card *when it sat AFTER a mark whose width varies*. With the mark on its own
+line that condition is gone: every name starts at the card's own padding —
+measured **65px → 15px**, the same edge as the industry, the chips and the
+module rows beneath — which is a **better** answer to §374's own problem, and
+the wordmark is freed to be a wordmark.
+
+### §375.2 — THE NAME GOES WHERE THE LOGO CARRIES IT, AND THAT IS HIS CALL
+
+**DECISION TWO, AND THE RECOMMENDATION WAS OVERRULED.** Drawn both ways:
+
+* **C · the name and the industry go wherever there is a logo** — his proposal,
+  and **what he chose**. Raya reads perfectly and nothing is lost there.
+* **D · the client says whether its logo carries the name** — one tick beside
+  the logo upload, recommended, with its cost stated (one stored setting and
+  one control).
+
+**THE COST OF C WAS MEASURED AND STATED ON THE DRAWING BEFORE HE CHOSE**, and
+is recorded rather than re-argued: **a symbol logo says no name**, so such a
+card carries none on its face — the mockup's third card is a green circle and
+nothing else; **a roundel that carries its own name carries it at about 8px**
+at this size, present and not readable at a glance; and **it saves no height at
+all**, because a client with no logo keeps its name and the grid levels the row
+against it, so the space where the words were is simply empty (226 either way).
+**The platform cannot tell a wordmark from a symbol from the file**, and it
+does not guess: the cheap version — *a logo much wider than it is tall is
+probably a wordmark* — was offered and refused, because the day it is wrong a
+card loses its name with nobody told (§176: *completing is not guessing*).
+
+**THE INDUSTRY IS SEPARATED FROM THE NAME IN THE RECORD EVEN THOUGH HE TOOK
+BOTH**: *"F&B"* is written nowhere else on the card and no logo carries it, so
+the name is the only thing a logo can ever say twice (§35, §87). He asked for
+both and both go.
+
+**SO THE PICTURE CARRIES THE NAME ITSELF**, which is the one safety net the
+decision needs and costs nothing: `alt` was deliberately empty while the words
+sat beside it, and with them gone the card would be **nameless to a screen
+reader and blank to anybody whose logo failed to load** — a browser draws the
+alt in the picture's place. The hover is the same answer for a mouse.
+**WHAT IS SEARCHED DOES NOT MOVE** and is asserted: `data-name` is still the
+name and the industry, so a client with no words on its card is still found by
+typing either.
+
+### §375.3 — THE CAP IS ARITHMETIC, AND IT IS NOT TRUSTED
+
+A wide mark must not reach the Settings chip, and at 56px tall the real Raya
+mark's natural width is **269px** on a 276px card — so a cap is load-bearing
+rather than a nicety. It is derived rather than guessed: the chip is **69px
+wide at `right:11`**, so it reaches **65px** into `.ctop`'s content box; **+9px
+of air = 74**, written `max-width:calc(100% - 74px)`. **A guessed constant goes
+stale in silence** (§122.5), so the check **measures the two boxes against each
+other at every width the grid makes** rather than trusting that number —
+measured clear at 1920 / 1440 / 1280 / 1150 / 1024 / 900 / 760 / 430, with the
+mark ending at **187** against a chip beginning at **195**.
+
+### §375.4 — THE ARCHIVED BAND IS LEFT OUT ON PURPOSE, AND SAYS SO
+
+**Neither half reaches the archived card**, and that is a decision rather than
+an omission (rule 1b, §2b): its mark **already shares its line with two
+controls** (`.cacts` is absolute at `top:11` and **158px** wide, leaving 90px
+of room), so growing it there means rebuilding that card's layout — and **at
+40px a logo does not say the name**, which is the whole licence for taking the
+words away. Scoped by `.idrow`, which only a live card has, and the check
+asserts the archived card is **NOT** the live card's mark and still draws its
+name, so a later sweep cannot widen this quietly.
+
+**AND THE WAITING CARD'S MARK TRACKS THE ONE IT STANDS FOR** (§371): `.sk-mark`
+goes 40 → 56 with it. **RECORDED, NOT CHANGED**: `min-height:152px` still binds
+the skeleton while a real card is 231, so the row steps when the clients land —
+it stepped before this (191 against 152) and this widens it, and that number is
+**shared with `.ccard.add` on purpose** (§371), so moving it is a decision about
+that card rather than this one.
+
+### §375.5 — TWO §374 ASSERTIONS REWRITTEN, NEVER LOOSENED
+
+`checks/client-card-mark.py` is rewritten rather than patched (§218), and the
+two claims §374 made that this deliberately ends are **replaced by the claim
+that survives**, never deleted:
+
+* *"the mark's box is the same whatever the picture is"* → **the same HEIGHT**,
+  with a square picture in a square box **and a wide one in a wider box** —
+  both ends, or a build back on one square passes the first half perfectly
+  (§113.8), which is the reported fault itself.
+* *"the name is AFTER the mark, and level with it"* → **BELOW it**, at the
+  card's own left edge, and **only on a card whose mark cannot say the name**.
+
+New beside them: the mark **reaches the chip's line and never touches it** (his
+ask, measured at eight widths); a card with a logo draws **no** name and **no**
+industry **while a card without one draws both** (§94.2); the picture carries
+the client's name; and the client is still searchable by both.
+
+**65 ok, 0 failed on BOTH copies of the console page** — the repository root's
+and `smp-app/shell/platform.html`, which is what production serves (§53.5, a
+generated copy is where a drift hides). **Proved able to fail SIX ways from the
+SOURCE** (§276), identical on both: `stretch` **1**, `names-stay` **1**,
+`no-alt` **1**, `low-mark` **1**, `no-cap` **7**, `no-clamp` **8** — each
+asserted to have LANDED before it is believed (§344.1).
+
+**AND `no-clamp` CAME BACK GREEN FIRST, WHICH IS §54.5 EXACTLY**: a
+falsification that falsifies nothing reads precisely like a working guard.
+§374's long name ran to four lines in a **159px** column beside the mark and
+reached the clamp easily; with the mark on its own line the name has the card's
+**whole width**, so the same string fits in two and removing the clamp changed
+nothing measurable. **The fixture carries a name long enough to reach the rule**
+now (88 characters), and the break goes **0 red → 8**. *A fixture that could
+reach a rule in the old shape does not necessarily reach it in the new one.*
+
+**VERIFIED**: client-card-mark **65/0 on both copies** red six ways;
+platform-cards 21/0, console-boot 13/0 **with all five of its own breaks still
+red on both copies** (the skeleton's mark moved, so they were re-proved rather
+than assumed — §365.6), client-card-modules 23/0 red on its two live breaks,
+client-archive and client-setup-outside 0 failures, publishing-room 74/0 red
+four ways — every one on **both** copies; `setup-shape.mjs` 33/0;
+`generated-in-step` byte-identical for all four generators.
+
+**The server needed nothing and it is asserted** (§172): no `api/`, `lib/` or
+`db/` file is touched, read off the diff; nothing stored moves, nothing is
+migrated, and no rule about who may see what changes. **The frozen product is
+untouched and measured** — `platform.html` is the console at the repository
+root, which `build.py` does not read — so `built-in-step.py` reports the
+shipped file **byte-identical** and **no `sw.js` bump is owed** (§91's trigger
+is the built file's bytes changing, and they did not).
+
+**RECORDED, NOT DONE**: `client-card-modules.py`'s `card-is-door` and `no-rows`
+breaks still **die on a 30-second locator timeout rather than reporting**
+(§215), pre-existing and recorded at §374.2; the skeleton's `min-height` above;
+and `smp-app/checks/modules.mjs` could not be run in this session for want of
+`node_modules` — it references neither `.ccard`, `.cmark`, `h2` nor `.ind`,
+read off the file, so it is **unrun** rather than passing (§54.5).

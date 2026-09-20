@@ -10082,7 +10082,100 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;374: a circular mark, and the name
+*Last Updated: 2026-09-20 &mdash; **&sect;375: the mark leads the card, and a
+logo speaks for itself (spec 060).** Islam, of the build &sect;374 shipped
+&mdash; *"what did you fix? we need a mock up to my request for the circular it
+needs to be bigger covering even the line of the settings button and the raya
+trade is not good as the name is not relevant as the logo is saying the name.
+how about we remove the name and the industry if the logo is there"* &mdash;
+three things, and the first is a fair question answered plainly before anything
+was drawn. **&sect;374 MOVED THE PLACEMENT AND NOT THE SIZE**: the roundel went
+from **30px floating &asymp;52px in** to **34px at the card's own left edge**,
+which no eye notices, **and the wordmark got no help at all** &mdash; that
+section's fixed square is what contains a 4:1 mark to a quarter of the height it
+is given, and its own record states the cost in those words. *His second
+complaint is &sect;374's stated cost arriving as a report.* **THE MOCKUP IS THE
+RUNNING CONSOLE, NOT ITS STYLESHEET** (rule 1c, &sect;41.9): platform.html
+driven in headless Chromium at 1440&times;900 with each treatment injected over
+the shipped build, every figure read off that paint, **and the Raya mark in it
+is the REAL artwork**, because the whole of decision two is whether a wordmark
+says the name and a stand-in cannot answer that; the two roundels are stand-ins
+for the two cases that matter, one carrying its own name and one carrying none.
+**DECISION ONE, AND THE SMALLEST CHANGE WAS KILLED BY DRAWING IT**: a bigger
+square beside the name costs **no height at all** (191 &rarr; 191) and buys the
+fault back three times over &mdash; every name wraps, one is clipped, the name's
+ink goes **111 &rarr; 53px**, and **the wordmark comes out smaller than it is
+today**, because the slot is still square. So the mark **takes its own line at
+its own shape**: round marks **56&times;56**, Raya **172&times;56**, both at
+**y=12** where the Settings chip runs y=12 to y=34, which is what *"covering
+even the line"* asks for; **+35px per card** (191 &rarr; 231), the ladder drawn
+rather than argued (48 &rarr; 218 &middot; 56 &rarr; 226 &middot; 64 &rarr; 234
+&middot; 72 &rarr; 242) and **56 is his**. **AND IT IS NOT A REVERSAL OF
+&sect;374'S SQUARE, WHICH IS WHY IT COSTS THAT SECTION NOTHING**: the square
+existed so the name would start in one place *when it sat AFTER* a mark whose
+width varies, and with the mark on its own line every name starts at the card's
+own padding &mdash; **65px &rarr; 15px**, the same edge as the industry, the
+chips and the module rows &mdash; which is a BETTER answer to &sect;374's own
+problem, with the wordmark freed. **DECISION TWO, AND THE RECOMMENDATION WAS
+OVERRULED**: Islam took **C**, the name and the industry going wherever there is
+a logo, over a per-client tick. **The cost was measured and stated on the
+drawing before he chose** and is recorded rather than re-argued &mdash; a
+**symbol** logo says no name, so such a card carries none on its face; a roundel
+that carries its own name carries it at about **8px** here; and it **saves no
+height at all**, because a client with no logo keeps its name and the grid
+levels the row against it (226 either way). **The platform cannot tell a
+wordmark from a symbol from the file and it does not guess** (&sect;176):
+*a logo much wider than it is tall is probably a wordmark* was offered and
+refused, because the day it is wrong a card loses its name with nobody told.
+**SO THE PICTURE CARRIES THE NAME ITSELF** &mdash; `alt` was deliberately empty
+while the words sat beside it, and with them gone the card would be nameless to
+a screen reader and blank to anybody whose logo failed to load &mdash; and
+**what is searched does not move**, asserted: `data-name` is still the name and
+the industry. **THE CAP IS ARITHMETIC AND IS NOT TRUSTED**: at 56px tall the
+real Raya mark is **269px** wide on a 276px card, so the cap is load-bearing
+&mdash; the chip is 69px at `right:11` and reaches **65px** into the content
+box, +9 of air = **74** &mdash; and because a guessed constant goes stale in
+silence (&sect;122.5) the check **measures the two boxes against each other** at
+eight widths rather than trusting it (mark ends 187, chip begins 195). **THE
+ARCHIVED BAND IS LEFT OUT ON PURPOSE AND SAYS SO** (rule 1b): its mark already
+shares its line with two controls (`.cacts` is absolute and **158px** wide,
+leaving 90), and **at 40px a logo does not say the name**, which is the whole
+licence for taking the words away &mdash; scoped by `.idrow`, which only a live
+card has, and asserted NOT to have followed. **The waiting card's mark tracks
+the one it stands for** (&sect;371, 40 &rarr; 56). **TWO &sect;374 ASSERTIONS
+REWRITTEN, NEVER LOOSENED** (&sect;218) &mdash; *"the mark's box is the same
+whatever the picture is"* becomes **the same HEIGHT**, with a square picture in
+a square box AND a wide one in a wider box (both ends, or a build back on one
+square passes half, &sect;113.8); *"the name is AFTER the mark and level with
+it"* becomes **BELOW it**, at the card's own edge, and only where the mark
+cannot say the name. **65/0 on BOTH copies of the console page**, red **SIX**
+ways from the SOURCE and identical on both (1 / 1 / 1 / 1 / 7 / 8), each
+asserted to have LANDED (&sect;344.1). **AND `no-clamp` CAME BACK GREEN FIRST,
+WHICH IS &sect;54.5 EXACTLY** &mdash; a falsification that falsifies nothing
+reads precisely like a working guard: &sect;374's long name reached the clamp in
+a **159px** column beside the mark and fits in two lines at the card's whole
+width, so the fixture carries a name long enough to reach the rule and the break
+goes **0 red &rarr; 8**. *A fixture that could reach a rule in the old shape
+does not necessarily reach it in the new one.* **VERIFIED**: platform-cards
+21/0, console-boot 13/0 **with all five of its own breaks re-proved red on both
+copies** (the skeleton's mark moved, so they were run rather than assumed,
+&sect;365.6), client-card-modules 23/0, client-archive and client-setup-outside
+0 failures, publishing-room 74/0 red four ways &mdash; every one on **both**
+copies; `setup-shape.mjs` 33/0; `generated-in-step` byte-identical for all four
+generators. **The server needed nothing and it is asserted** (&sect;172): no
+`api/`, `lib/` or `db/` file touched, read off the diff; nothing stored moves,
+nothing is migrated. **The frozen product is untouched and measured** &mdash;
+`platform.html` is the console at the repository root, which `build.py` does not
+read &mdash; so the shipped file is byte-identical and **no `sw.js` bump is
+owed** (&sect;91). **RECORDED, NOT DONE**: the waiting card's `min-height:152px`
+still binds while a real card is 231, a number shared with `.ccard.add` on
+purpose (&sect;371), so moving it is a decision about that card;
+`client-card-modules.py`'s two breaks still die on a locator timeout
+(pre-existing, &sect;374.2); and `smp-app/checks/modules.mjs` could not be run
+here for want of `node_modules` &mdash; it reads neither `.ccard`, `.cmark`,
+`h2` nor `.ind`, so it is **unrun** rather than passing (&sect;54.5).*
+
+*Earlier: 2026-09-20 &mdash; **&sect;374: a circular mark, and the name
 beside it (spec 059).** Islam, with a round pink logo on the ElAbd Foods card
 &mdash; *"on addiing a circular logo the view is not good. plus I'm not sure of
 the placement of the client name in case we have the logo or at least should we

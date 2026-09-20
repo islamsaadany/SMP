@@ -6383,3 +6383,60 @@ three more files); all three now resolve it from either directory.
 **Recorded, not done**: two of `client-card-modules`' own falsifications die on
 a locator timeout rather than reporting, established as **pre-existing** by
 running them on the shipped build first.
+
+**§375 — the mark leads the card, and a logo speaks for itself (2026-09-20).**
+Built. Islam, of what §374 shipped: *"what did you fix? we need a mock up to my
+request for the circular it needs to be bigger covering even the line of the
+settings button and the raya trade is not good as the name is not relevant as
+the logo is saying the name. how about we remove the name and the industry if
+the logo is there."*
+
+**The first question was answered plainly before anything was drawn.** §374
+moved *where* the mark sits — from 30px floating 52px in, to 34px at the card's
+own left edge. The picture itself went 30 → 34, which no eye notices, and the
+wordmark got no help at all, because §374's fixed square is what squeezes it.
+**His second complaint is §374's own stated cost arriving as a report.**
+
+Two decisions were drawn separately, in the real console with the real Raya
+artwork, and published. **The smallest change was killed by drawing it**: a
+bigger square beside the name costs no height and makes every name wrap, clips
+one, and leaves the wordmark *smaller than it is today*. So the mark takes its
+**own line at its own shape** — round logos 56×56, Raya 172×56, both starting
+level with the Settings chip and running past it, which is what he asked for —
+and every name starts at the card's own edge, which is a better answer to the
+problem the square was solving than the square ever was. **The card is 231px
+where it was 191.**
+
+**On the second decision Islam chose C over the recommendation**, and it is
+recorded as his: where a client has a logo, the name and the industry go. The
+cost was measured and stated on the drawing before he chose — a logo that is a
+*symbol* says no name, so such a card carries none on its face, and removing
+the words saves no height, because a client with no logo keeps its name and the
+grid levels the row. **So the picture carries the name itself** (a browser
+draws it in the picture's place and a screen reader announces it), and the card
+is still searched by its name and its industry.
+
+**The archived band is deliberately left out** — its mark already shares a line
+with two controls, and at 40px a logo does not say the name, which is the whole
+licence for taking the words away.
+
+Verified: `client-card-mark.py` **65/0 on both copies of the console page**,
+proved able to fail **six ways** — and one of those falsifications came back
+green first, which reads exactly like a working guard: §374's long name reached
+the two-line clamp in a narrow column and fits in two lines at full card width,
+so the fixture now carries a name long enough to reach the rule (0 red → 8).
+platform-cards 21/0, console-boot 13/0 **with all five of its own breaks
+re-proved red** (the skeleton's mark moved with the card's, so they were run
+rather than assumed), client-card-modules 23/0, client-archive and
+client-setup-outside 0 failures, publishing-room 74/0 red four ways — every one
+on **both** copies; `setup-shape.mjs` 33/0; the four generators byte-identical.
+`built-in-step` all good: the frozen product is untouched, so the shipped file
+is byte-identical and **no `sw.js` bump is owed**.
+
+**Recorded, not done**: the waiting card is still 152px tall where a real card
+is 231, so the row steps when the clients land — it stepped before this and
+that number is shared with the Add card on purpose, so moving it is a decision
+about that card; two of `client-card-modules`' falsifications still die on a
+locator timeout (pre-existing, §374); and `smp-app/checks/modules.mjs` could
+not be run here for want of `node_modules` — it reads none of the card's
+identity block, so it is **unrun** rather than passing.

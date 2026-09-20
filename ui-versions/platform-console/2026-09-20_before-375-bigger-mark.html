@@ -169,16 +169,8 @@
      starts BELOW the chip instead and the name keeps the whole width at
      every width — 36 = the chip's own 11 + 22 + 3 of air. It is 23px of card
      and it buys back 32 (236 → 204), because the name no longer costs a row
-     of its own.
-
-     AND §375 SPENDS THAT RESERVATION, because what leads the band is no
-     longer the name: Islam, of the build §374 shipped — "it needs to be
-     bigger covering even the line of the settings button". The first thing
-     in the band is the MARK now, which is on the left where the chip is on
-     the right, so the two share a line rather than queue for it: 36 → 11,
-     the chip's own top, and the mark starts level with it. The NAME cannot
-     collide with the chip either, because it has moved below the mark. */
-  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:11px 14px 13px }
+     of its own. */
+  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:36px 14px 13px }
   .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
   .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:6px 14px;
     font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
@@ -228,19 +220,8 @@
      needs a ground under a dark logo. `border-box`, so it is inside the 40
      rather than added to it — or a client with a logo would be taller than
      one without, which is the equal-height rule §368 already paid for. */
-  /* §375 STANDS THIS ROW UP. The mark takes the line and the name sits under
-     it — which is a better answer to the problem the square above was
-     solving, not a reversal of it: that square existed so the name would
-     start in the same place on every card when it sat AFTER a mark whose
-     width varies. With the mark on its own line every name starts at the
-     card's own padding (measured 65px → 15px), the same edge as the
-     industry, the chips and the module rows beneath; and the mark is freed
-     to be its own shape. `align-items:flex-start` or the column would
-     stretch the picture to the card, which is §374's reported fault by
-     another road; `align-self:stretch` on the names, or a shrink-wrapped
-     block makes the two-line clamp unreachable. */
-  .ccard .idrow{ display:flex; flex-direction:column; align-items:flex-start; gap:9px }
-  .ccard .names{ min-width:0; align-self:stretch; display:flex; flex-direction:column; gap:3px }
+  .ccard .idrow{ display:flex; align-items:flex-start; gap:10px }
+  .ccard .names{ min-width:0; flex:1 1 auto; display:flex; flex-direction:column; gap:3px }
   .ccard .cmark{ width:40px; height:40px; border-radius:9px; background:var(--ff); color:var(--amber);
     font:700 13px/40px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em;
     flex:none }
@@ -251,38 +232,6 @@
      (§368's rule, kept). */
   .ccard img.cmark{ width:40px; height:40px; flex:none; object-fit:contain; background:#fff;
     padding:3px; box-sizing:border-box; border-radius:7px }
-  /* ── AND ON A LIVE CARD IT IS BIGGER, AND ITS OWN SHAPE (§375) ──────
-     Option C of a signed-off mockup (design-mockups/client-card-mark/
-     2026-09-20_bigger-and-the-name.html), which is B's geometry with the
-     name removed wherever there is a logo.
-
-     40 → 56, AND THE SQUARE ONLY BINDS A SQUARE PICTURE. §374's fixed slot
-     was right while the name sat beside it and is what made Islam's second
-     complaint: "the raya trade is not good" — a wordmark is four times as
-     wide as it is tall, and contained into a square it is drawn at a
-     quarter of the height it was given, whatever the square's size. The
-     four sizes were drawn (48 · 56 · 64 · 72, card 218 · 226 · 234 · 242)
-     and 56 is the one chosen: the mark then runs y=12 to y=68 where the
-     Settings chip runs y=12 to y=34, which is what "covering even the line
-     of the settings button" asks for.
-
-     THE CAP IS WHAT KEEPS A WIDE MARK OFF THE CHIP, and it is arithmetic
-     rather than taste: the chip is 69px wide at `right:11`, so it reaches
-     65px into `.ctop`'s content box; +9px of air = 74. A guessed constant
-     goes stale in silence (§122.5), so the check MEASURES the two boxes
-     against each other at every width the grid makes rather than trusting
-     this number.
-
-     THE ARCHIVED BAND KEEPS THE 40px SQUARE AND ITS NAME, deliberately and
-     not by omission (rule 1b): its mark already SHARES its line with two
-     controls (`.cacts` is absolute at top:11 and 158px wide, leaving 90px),
-     so growing it there means rebuilding that card's layout — and at 40px a
-     logo does not say the name, which is the whole licence for taking the
-     words away. Scoped by `.idrow`, which only a live card has. */
-  .ccard .idrow .cmark{ width:56px; height:56px; border-radius:13px;
-    font-size:18px; line-height:56px }
-  .ccard .idrow img.cmark{ width:auto; height:56px; max-width:calc(100% - 74px);
-    padding:5px; border-radius:11px }
   .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
   .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
   .markrow .none{ font-size:13px; color:var(--ink-3) }
@@ -375,14 +324,7 @@
      was written here first and REMOVED on measuring it — nothing behaves
      differently with or without it, and a line that fixes nothing is one
      the next reader takes for load-bearing (§298.2, §24). */
-  /* AND IT TRACKS THE MARK IT STANDS FOR (§375): a block replaced by the
-     thing it stood for, rather than one the arriving card rearranges the
-     page around. RECORDED AND NOT CHANGED: `min-height:152px` still binds
-     here while a real card is 226, so the row still steps when the clients
-     land — it did before this (191 against 152) and this widens it, and the
-     number is shared with `.ccard.add` on purpose (§371), so moving it is a
-     decision about that card rather than this one. */
-  .ccard.skel .sk-mark{ width:56px; height:56px; border-radius:13px; background:var(--line); flex:none }
+  .ccard.skel .sk-mark{ width:40px; height:40px; border-radius:9px; background:var(--line); flex:none }
   /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
      signed-off shot has and what the first build lost: `.ctop` is a column
      flex, so a bar with no width STRETCHES and three cards read as three
@@ -1939,39 +1881,21 @@
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
     var top = el("div", "ctop");
-    /* THE MARK LEADS THE BAND, AND WHERE IT IS A LOGO IT IS THE WHOLE OF IT
-       (§375). Islam: "the raya trade is not good as the name is not relevant
-       as the logo is saying the name. how about we remove the name and the
-       industry if the logo is there" — option C of a signed-off mockup, over
-       the recommendation, and the cost was stated on it before he chose: a
-       logo that is a SYMBOL rather than a wordmark says no name, so such a
-       card carries none on its face. The platform cannot tell the two apart
-       from the file, and it does not guess (§176: completing is not
-       guessing) — the rule is the one he gave, applied as given.
-
-       SO THE PICTURE CARRIES THE NAME ITSELF. With the words gone the card
-       would otherwise be nameless to a screen reader and blank to anybody
-       whose logo failed to load — `alt` is what a browser draws in its place
-       and what a reader announces, and it was deliberately empty while the
-       name was written beside it. The hover is the same answer for a mouse.
-
-       WHAT IS SEARCHED DOES NOT MOVE: `data-name` above is still the name
-       and the industry, so a client with a logo is still found by typing
-       either of them. */
+    /* THE MARK AND THE NAME ARE ONE ROW (§374): the mark in its square slot,
+       the name and the industry beside it. The wrapper is what makes the
+       name's left edge the same on every card whatever the mark is. */
     var idrow = el("div", "idrow");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark;
-      im.alt = c.name; im.title = c.name;
-      idrow.appendChild(im);
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; idrow.appendChild(im);
     } else {
       idrow.appendChild(el("div", "cmark", initials(c.name)));
-      var names = el("div", "names");
-      var h2 = el("h2", null, c.name);
-      h2.title = c.name;   /* clamped to two lines above, so the whole of it is here */
-      names.appendChild(h2);
-      if (c.industry) names.appendChild(el("p", "ind", c.industry));
-      idrow.appendChild(names);
     }
+    var names = el("div", "names");
+    var h2 = el("h2", null, c.name);
+    h2.title = c.name;   /* clamped to two lines above, so the whole of it is here */
+    names.appendChild(h2);
+    if (c.industry) names.appendChild(el("p", "ind", c.industry));
+    idrow.appendChild(names);
     top.appendChild(idrow);
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };

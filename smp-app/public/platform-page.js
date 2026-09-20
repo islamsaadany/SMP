@@ -1086,21 +1086,39 @@
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
     var top = el("div", "ctop");
-    /* THE MARK AND THE NAME ARE ONE ROW (§374): the mark in its square slot,
-       the name and the industry beside it. The wrapper is what makes the
-       name's left edge the same on every card whatever the mark is. */
+    /* THE MARK LEADS THE BAND, AND WHERE IT IS A LOGO IT IS THE WHOLE OF IT
+       (§375). Islam: "the raya trade is not good as the name is not relevant
+       as the logo is saying the name. how about we remove the name and the
+       industry if the logo is there" — option C of a signed-off mockup, over
+       the recommendation, and the cost was stated on it before he chose: a
+       logo that is a SYMBOL rather than a wordmark says no name, so such a
+       card carries none on its face. The platform cannot tell the two apart
+       from the file, and it does not guess (§176: completing is not
+       guessing) — the rule is the one he gave, applied as given.
+
+       SO THE PICTURE CARRIES THE NAME ITSELF. With the words gone the card
+       would otherwise be nameless to a screen reader and blank to anybody
+       whose logo failed to load — `alt` is what a browser draws in its place
+       and what a reader announces, and it was deliberately empty while the
+       name was written beside it. The hover is the same answer for a mouse.
+
+       WHAT IS SEARCHED DOES NOT MOVE: `data-name` above is still the name
+       and the industry, so a client with a logo is still found by typing
+       either of them. */
     var idrow = el("div", "idrow");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; idrow.appendChild(im);
+      var im = el("img", "cmark"); im.src = c.mark;
+      im.alt = c.name; im.title = c.name;
+      idrow.appendChild(im);
     } else {
       idrow.appendChild(el("div", "cmark", initials(c.name)));
+      var names = el("div", "names");
+      var h2 = el("h2", null, c.name);
+      h2.title = c.name;   /* clamped to two lines above, so the whole of it is here */
+      names.appendChild(h2);
+      if (c.industry) names.appendChild(el("p", "ind", c.industry));
+      idrow.appendChild(names);
     }
-    var names = el("div", "names");
-    var h2 = el("h2", null, c.name);
-    h2.title = c.name;   /* clamped to two lines above, so the whole of it is here */
-    names.appendChild(h2);
-    if (c.industry) names.appendChild(el("p", "ind", c.industry));
-    idrow.appendChild(names);
     top.appendChild(idrow);
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };

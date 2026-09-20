@@ -1,0 +1,471 @@
+<title>Insights as a Tab</title>
+<style>
+:root{
+  --pg-bg:#F1F3F6; --pg-surface:#FFFFFF; --pg-sunk:#E7EAEF;
+  --pg-ink:#181D25; --pg-ink-2:#49535F; --pg-ink-3:#6F7987;
+  --pg-line:#DBE0E7; --pg-line-soft:#E9ECF1;
+  --pg-accent:#1C6B64; --pg-accent-soft:#E2F0EE;
+  --pg-cost:#8F4A28; --pg-cost-soft:#F8EDE6;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --pg-bg:#0C0F14; --pg-surface:#151A21; --pg-sunk:#0F131A;
+  --pg-ink:#E4E9F0; --pg-ink-2:#A6B0BD; --pg-ink-3:#828C99;
+  --pg-line:#272E38; --pg-line-soft:#1E242C;
+  --pg-accent:#63C9BE; --pg-accent-soft:#12302E;
+  --pg-cost:#E2A480; --pg-cost-soft:#2C1E16;
+}}
+:root[data-theme="dark"]{
+  --pg-bg:#0C0F14; --pg-surface:#151A21; --pg-sunk:#0F131A;
+  --pg-ink:#E4E9F0; --pg-ink-2:#A6B0BD; --pg-ink-3:#828C99;
+  --pg-line:#272E38; --pg-line-soft:#1E242C;
+  --pg-accent:#63C9BE; --pg-accent-soft:#12302E;
+  --pg-cost:#E2A480; --pg-cost-soft:#2C1E16;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pg-bg);color:var(--pg-ink);
+  font:400 15px/1.6 ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding-block:34px 72px;padding-left:20px;padding-right:20px}
+.eyebrow{font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--pg-accent)}
+h1{font-size:31px;line-height:1.14;font-weight:680;letter-spacing:-.018em;margin:11px 0 0;text-wrap:balance}
+h2{font-size:20px;line-height:1.25;font-weight:660;letter-spacing:-.012em;margin:0;text-wrap:balance}
+h3{font-size:14.5px;font-weight:650;margin:0 0 6px}
+p{margin:0 0 12px;max-width:68ch}
+p:last-child{margin-bottom:0}
+b,strong{font-weight:640;color:var(--pg-ink)}
+.lede{font-size:16.5px;line-height:1.62;color:var(--pg-ink-2);max-width:66ch;margin-top:14px}
+.meta{margin-top:20px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;
+  font:600 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--pg-ink-3)}
+.meta span{border:1px solid var(--pg-line);border-radius:99px;padding:6px 11px}
+.tgl{border:1px solid var(--pg-line);border-radius:99px;padding:6px 11px;background:var(--pg-surface);
+  color:var(--pg-ink-3);font:inherit;cursor:pointer}
+.tgl:hover{border-color:var(--pg-accent);color:var(--pg-accent)}
+.tgl:focus-visible{outline:2px solid var(--pg-accent);outline-offset:2px}
+hr.rule{border:0;border-top:1px solid var(--pg-line);margin:40px 0}
+section.blk{margin-top:46px}
+.blkhead{display:flex;gap:13px;align-items:baseline;flex-wrap:wrap;margin-bottom:5px}
+.tag{font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--pg-surface);background:var(--pg-accent);
+  border-radius:5px;padding:6px 9px;flex:none}
+.tag.plain{background:none;color:var(--pg-ink-3);border:1px solid var(--pg-line)}
+.sub{color:var(--pg-ink-2);max-width:68ch;margin:0 0 20px}
+.plate{margin:20px 0 0;border:1px solid var(--pg-line);border-radius:12px;
+  background:var(--pg-surface);overflow:hidden}
+.cap{font:600 10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--pg-ink-3);padding:10px 14px;
+  border-bottom:1px solid var(--pg-line-soft);background:var(--pg-sunk);
+  display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cap em{font-style:normal;color:var(--pg-accent)}
+.scr{overflow-x:auto;background:var(--pg-sunk);padding:14px}
+.scr > .smp{min-width:760px}
+.note{padding:13px 15px;border-top:1px solid var(--pg-line-soft);font-size:13.5px;
+  line-height:1.55;color:var(--pg-ink-2)}
+.note b{color:var(--pg-ink)}
+.cost{padding:13px 15px;border-top:1px solid var(--pg-line-soft);background:var(--pg-cost-soft);
+  font-size:13.5px;line-height:1.55;color:var(--pg-ink-2)}
+.cost b{color:var(--pg-cost)}
+ul.pts{margin:0;padding-left:19px}
+ul.pts li{margin:0 0 6px}
+ul.pts li:last-child{margin:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.two .plate{margin:0}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.urlbar{font:600 12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--pg-ink-2);
+  background:var(--pg-sunk);border:1px solid var(--pg-line);border-radius:99px;
+  padding:9px 15px;display:inline-block;max-width:100%;overflow-wrap:anywhere;margin:0 0 4px}
+.urlbar .hot{color:var(--pg-cost);font-weight:700}
+.urlbar .ok{color:var(--pg-accent);font-weight:700}
+.dec{margin-top:22px;border:1px solid var(--pg-line);border-left:3px solid var(--pg-accent);
+  border-radius:10px;background:var(--pg-surface);padding:17px 19px}
+.dec .dn{font:700 10.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--pg-accent);margin-bottom:9px;display:block}
+.dec h3{font-size:16px;margin-bottom:8px}
+.pick{margin-top:12px;border-top:1px solid var(--pg-line-soft);padding-top:12px;
+  font-size:13.5px;color:var(--pg-ink-2)}
+.pick b{color:var(--pg-accent)}
+.ask{margin-top:44px;border:1px solid var(--pg-accent);border-radius:12px;
+  background:var(--pg-accent-soft);padding:20px 22px}
+.ask h2{margin-bottom:9px}
+.ask ol{margin:12px 0 0;padding-left:20px}
+.ask ol li{margin:0 0 9px;max-width:66ch}
+.ask ol li:last-child{margin:0}
+
+/* ══ THE PRODUCT'S OWN TOKENS — forefront, verbatim from _shared.css ══ */
+.smp{
+  --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --serif:var(--sans); --fs-micro:10px; --fs-small:12px; --r:8px;
+  --cta:#A4512C; --cta-ink:#FFFFFF; --on-accent:#16325C;
+  --panel-quiet:#B7C4D8; --stone-soft:#24487A;
+  --gold:#C9A24D; --gold-deep:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --over-bg:#FBF6E9; --over-line:#E8D9AE; --bad:#B04434;
+  font-family:var(--sans);border:1px solid var(--line);border-radius:9px;overflow:hidden;
+  background:var(--surface);color:var(--ink);text-align:left}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .smp{
+  --cta:#E1935F; --cta-ink:#14161A; --on-accent:#14161A;
+  --panel-quiet:#9AA6B8; --stone-soft:#5C82BC;
+  --gold:#D9B665; --gold-deep:#C9A24D;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --over-bg:#332C16; --over-line:#4A3F1E; --bad:#D97066;
+}}
+:root[data-theme="dark"] .smp{
+  --cta:#E1935F; --cta-ink:#14161A; --on-accent:#14161A;
+  --panel-quiet:#9AA6B8; --stone-soft:#5C82BC;
+  --gold:#D9B665; --gold-deep:#C9A24D;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --panel:#0E1014; --panel-ink:#EAF0FA;
+  --over-bg:#332C16; --over-line:#4A3F1E; --bad:#D97066;
+}
+.smp .top{border-bottom:1px solid var(--line);background:var(--surface)}
+.smp .top-in{display:flex;align-items:center;gap:10px;padding:3px 24px;flex-wrap:nowrap}
+.smp .brand{display:flex;flex-direction:row;align-items:baseline;gap:9px;min-width:0;margin-right:auto}
+.smp .brand h1{font-size:12px;line-height:1.1;white-space:nowrap;margin:0;font-weight:700}
+.smp .orgname{font-size:11px;color:var(--ink-3);font-weight:600;line-height:1.1;white-space:nowrap}
+.smp .topacts{margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.smp .infobtn{font:inherit;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;color:var(--ink-3);background:none;border:1px solid var(--line);
+  border-radius:99px;padding:3px 9px;line-height:1.3;cursor:pointer}
+.smp details.dlmenu{position:relative;flex:0 0 auto}
+.smp details.dlmenu > summary{list-style:none;cursor:pointer}
+.smp details.dlmenu > summary::-webkit-details-marker{display:none}
+.smp details.dlmenu.topmark{align-self:center;margin-right:2px}
+.smp details.dlmenu.topmark > summary{display:grid;place-items:center;width:28px;height:28px;
+  border:1px solid var(--line);border-radius:8px;color:var(--ink-3);background:none}
+.smp details.dlmenu.topmark > summary svg{width:17px;height:17px;display:block}
+.smp nav.units{background:var(--panel)}
+.smp .units-in{padding:0 24px;display:flex;align-items:stretch;gap:2px;height:46px;overflow:hidden}
+.smp .units button{font:inherit;font-size:var(--fs-small);font-weight:500;padding:0 13px;
+  border:0;border-bottom:3px solid transparent;background:none;color:var(--panel-quiet);
+  cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.smp .units button[aria-selected="true"]{color:var(--panel-ink);font-weight:700;
+  border-bottom-color:var(--gold)}
+.smp .units .sep{width:1px;background:var(--panel-ink);opacity:.22;margin:12px 8px;flex:0 0 1px}
+.smp .units .navmenu-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+  border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+  text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;
+  gap:6px;white-space:nowrap;margin:0 2px;align-self:center}
+.smp .units .navmenu-btn.homemark{background:none;border-color:transparent;
+  color:rgba(255,255,255,.86);border-radius:5px;padding:0;width:34px;height:34px;flex:none;
+  align-self:center;justify-content:center}
+.smp .units .navmenu-btn.homemark .navmenusvg{width:24px;height:24px}
+.smp .navmenusvg{width:15px;height:15px;display:block}
+.smp .units .navmenu-btn.navmenu-ico{padding:6px;width:34px;height:34px;justify-content:center;
+  border-radius:5px;background:none;border-color:transparent}
+.smp .units .navswitch{display:inline-flex;align-items:center;align-self:center;
+  background:rgba(255,255,255,.08);border:0;border-radius:7px;overflow:hidden;padding:0;gap:0;
+  margin:0 6px;cursor:pointer;font:inherit;flex:none}
+.smp .units .navswitch .nsw{display:block;padding:7px 13px;font-size:13.5px;font-weight:700;
+  color:rgba(255,255,255,.62)}
+.smp .units .navswitch .nsw + .nsw{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+.smp .units .navswitch .nsw.on{color:#fff;background:rgba(255,255,255,.2)}
+.smp details.dlmenu.topsel > summary{display:inline-flex;align-items:center;gap:7px;
+  white-space:nowrap;font:inherit;font-size:var(--fs-small);font-weight:500;padding:0 13px;
+  border-bottom:3px solid transparent;color:var(--panel-quiet);height:100%}
+.smp nav.tabs{border-bottom:1px solid var(--line);background:var(--surface)}
+.smp .tabs-in{display:flex;gap:4px;padding:8px 24px;align-items:center;overflow:hidden}
+.smp .tabs button{font:inherit;font-size:var(--fs-small);font-weight:500;padding:6px 12px;
+  border:0;border-radius:var(--r);background:none;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.smp .tabs button[aria-selected="true"]{background:var(--over-bg);color:var(--gold-deep);font-weight:600}
+.smp .tabs button.cta{background:var(--cta);color:var(--cta-ink);font-weight:600}
+.smp nav.tabs.sectionrow{background:var(--ground)}
+.smp .tabs .tabsep{width:1px;align-self:stretch;background:var(--line);margin:0 6px;flex:none}
+.smp .tabs button .dot{width:7px;height:7px;border-radius:99px;background:var(--gold);
+  display:inline-block;margin-left:6px}
+
+/* The library, inside the pane. The item rules are the Insights page's own,
+   with its literals swapped for the platform's tokens — which is the one real
+   change of substance in drawing it here. */
+.smp .pane{padding:18px 24px 26px;background:var(--ground)}
+.smp .pt{margin:0 0 14px;font-size:20px;font-weight:600;color:var(--ink)}
+.smp .tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 4px}
+.smp .srch{flex:1 1 260px;min-width:0;border:1px solid var(--line);border-radius:8px;
+  background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 inherit}
+.smp .cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
+.smp .list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
+.smp .item{display:flex;gap:16px;align-items:flex-start;padding:14px 2px;
+  border-bottom:1px solid var(--line)}
+.smp .item .body{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:4px}
+.smp .item h3{margin:0;font-size:15.5px;font-weight:600;line-height:1.35;color:var(--ink)}
+.smp .item p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-3);max-width:none}
+.smp .item .facts{font:400 12px/1.5 ui-monospace,SFMono-Regular,monospace;color:var(--ink-3)}
+.smp .item .facts b{font-weight:600;color:var(--ink)}
+.smp .dl{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  border-radius:8px;padding:7px 13px;font:600 13px/1.5 inherit;text-decoration:none;
+  display:inline-block}
+</style>
+
+<div class="wrap">
+
+  <div class="eyebrow">Option C &middot; chosen &middot; nothing built</div>
+  <h1>Insights as a tab, from the inside</h1>
+  <p class="lede">You picked C, so the row will carry it. The first drawing showed the door; this
+    one shows the room behind it, because three things only become real once the reports are a
+    tab rather than a page. Each is marked below with what I would do, so you can say yes or
+    change one.</p>
+  <div class="meta">
+    <span>20 Sep 2026</span>
+    <span>Raya Trade &middot; a unit head on Mobile</span>
+    <button class="tgl" id="themetgl" type="button">Switch to dark</button>
+  </div>
+
+  <hr class="rule">
+
+  <!-- ══════════════════ THE TAB PRESSED ══════════════════ -->
+  <section class="blk" style="margin-top:0">
+    <div class="blkhead"><span class="tag">Pressed</span><h2>The reports, inside the platform</h2></div>
+    <p class="sub">The chrome stays exactly where it was &mdash; same top bar, same navy row, same
+      unit still selected. Only the pane changes. The categories land in the section row, which is
+      the row that already holds a tab's own sub-navigation, so they need nothing new.</p>
+
+    <div class="plate">
+      <div class="cap"><span>C &mdash; Insights selected</span><span>1440px</span></div>
+      <div class="scr">
+        <div class="smp">
+          <header class="top"><div class="top-in">
+            <div class="brand"><h1>Strategy Management Platform</h1><span class="orgname">Raya Trade</span></div>
+            <div class="topacts"><button class="infobtn" type="button">Sign out</button></div>
+          </div></header>
+          <nav class="units"><div class="units-in">
+            <button class="navmenu-btn homemark" type="button"><svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M3 8.6 10 3.2l7 5.4V16a1 1 0 0 1-1 1h-3.4v-4.6H7.4V17H4a1 1 0 0 1-1-1Z"/></g></svg></button>
+            <span class="sep"></span>
+            <details class="dlmenu topsel"><summary>Group &#9662;</summary></details>
+            <button aria-selected="true" type="button">Mobile</button>
+            <span class="navswitch"><span class="nsw on">Units</span><span class="nsw">Functions</span></span>
+          </div></nav>
+          <nav class="tabs"><div class="tabs-in">
+            <button type="button">Strategy</button>
+            <button type="button">Performance</button>
+            <button class="cta" type="button">Reporting</button>
+            <span class="tabsep"></span>
+            <button aria-selected="true" type="button">Insights</button>
+          </div></nav>
+          <nav class="tabs sectionrow"><div class="tabs-in">
+            <button aria-selected="true" type="button">All</button>
+            <button type="button">Analysis</button>
+            <button type="button">Macro</button>
+            <button type="button">Market</button>
+            <button type="button">Sector</button>
+            <button type="button">Governance</button>
+          </div></nav>
+          <div class="pane">
+            <div class="tools">
+              <input class="srch" type="search" placeholder="Search reports&hellip;" aria-label="Search reports">
+              <span class="cnt">3 reports</span>
+            </div>
+            <div class="list">
+              <div class="item"><span class="body">
+                <h3>Egypt consumer electronics &mdash; H1 2026</h3>
+                <p>Category value, channel mix and the handset replacement cycle.</p>
+                <span class="facts"><b>Market &middot; Sector</b> &middot; 4 Sep 2026 &middot; v2 &middot; 3.1 MB</span>
+              </span><a class="dl" href="#">Download</a></div>
+              <div class="item"><span class="body">
+                <h3>Macro outlook &mdash; September</h3>
+                <p>Inflation, the currency and what it does to import pricing.</p>
+                <span class="facts"><b>Macro</b> &middot; 1 Sep 2026 &middot; v1 &middot; 880 KB</span>
+              </span><a class="dl" href="#">Download</a></div>
+              <div class="item"><span class="body">
+                <h3>Competitor moves &mdash; Q3 read</h3>
+                <p>Pricing, new formats and where share shifted in the quarter.</p>
+                <span class="facts"><b>Analysis</b> &middot; 28 Aug 2026 &middot; v1 &middot; 1.4 MB</span>
+              </span><a class="dl" href="#">Download</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note"><b>The categories become the section row.</b> On the module's own page they
+        are a row of links under the title; here they are exactly what that third row is for, so
+        this costs no new control and reads the way every other tab in the product reads. The list
+        itself is the module's own renderer &mdash; the same one the Insights page uses &mdash;
+        handed to this pane rather than copied, so there is never a second version of it to keep
+        in step.</div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ══════════════════ DECISION 1 ══════════════════ -->
+  <div class="dec">
+    <span class="dn">Decision 1</span>
+    <h3>Which destinations carry the tab</h3>
+    <p>This is the cost you accepted when you picked C, so it is worth seeing once. The list is
+      the client's, not the unit's &mdash; so it is identical whichever destination you are
+      standing on.</p>
+
+    <div class="two">
+      <div class="plate">
+        <div class="cap"><span>Standing on Mobile</span></div>
+        <div class="scr" style="padding:10px">
+          <div class="smp" style="min-width:0">
+            <nav class="units"><div class="units-in" style="padding:0 12px;height:38px">
+              <button aria-selected="true" type="button">Mobile</button>
+              <button type="button">Retail Stores</button>
+            </div></nav>
+            <nav class="tabs"><div class="tabs-in" style="padding:6px 12px">
+              <button type="button">Strategy</button><button type="button">Performance</button>
+              <span class="tabsep"></span><button aria-selected="true" type="button">Insights</button>
+            </div></nav>
+            <div class="pane" style="padding:10px 12px 14px">
+              <div class="list" style="margin-top:0">
+                <div class="item" style="padding:8px 0"><span class="body"><h3 style="font-size:13px">Egypt consumer electronics &mdash; H1 2026</h3></span></div>
+                <div class="item" style="padding:8px 0"><span class="body"><h3 style="font-size:13px">Macro outlook &mdash; September</h3></span></div>
+                <div class="item" style="padding:8px 0;border:0"><span class="body"><h3 style="font-size:13px">Competitor moves &mdash; Q3 read</h3></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="plate">
+        <div class="cap"><span>Standing on Retail Stores</span><span><em>the same list</em></span></div>
+        <div class="scr" style="padding:10px">
+          <div class="smp" style="min-width:0">
+            <nav class="units"><div class="units-in" style="padding:0 12px;height:38px">
+              <button type="button">Mobile</button>
+              <button aria-selected="true" type="button">Retail Stores</button>
+            </div></nav>
+            <nav class="tabs"><div class="tabs-in" style="padding:6px 12px">
+              <button type="button">Strategy</button><button type="button">Performance</button>
+              <span class="tabsep"></span><button aria-selected="true" type="button">Insights</button>
+            </div></nav>
+            <div class="pane" style="padding:10px 12px 14px">
+              <div class="list" style="margin-top:0">
+                <div class="item" style="padding:8px 0"><span class="body"><h3 style="font-size:13px">Egypt consumer electronics &mdash; H1 2026</h3></span></div>
+                <div class="item" style="padding:8px 0"><span class="body"><h3 style="font-size:13px">Macro outlook &mdash; September</h3></span></div>
+                <div class="item" style="padding:8px 0;border:0"><span class="body"><h3 style="font-size:13px">Competitor moves &mdash; Q3 read</h3></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pick"><b>What I would do:</b> draw it on every destination a person can open
+      &mdash; a unit, a supporting function, a capability, a company and the group. A tab that
+      appears on some pages and not others is worse than one that repeats, because you have to
+      remember where it lives. The repetition is the honest picture of what you chose: the door is
+      in a familiar place, and the room behind it is the client's rather than the unit's.</div>
+  </div>
+
+  <!-- ══════════════════ DECISION 2 ══════════════════ -->
+  <div class="dec">
+    <span class="dn">Decision 2</span>
+    <h3>What the address says, and what a sent link opens</h3>
+    <p>Every tab writes itself into the address, so pressing this one would ordinarily produce:</p>
+    <p><span class="urlbar">smp&hellip;/raya-trade/strategy/<span class="hot">mobile</span>/insights</span></p>
+    <p>That names Mobile for a list that has nothing to do with Mobile, and it is the one place
+      the untruth would outlive the screen &mdash; somebody sends that link and the person who
+      opens it lands on Mobile.</p>
+    <p>It does not have to. The tab can write the module's own address instead, without leaving
+      the page:</p>
+    <p><span class="urlbar">smp&hellip;/raya-trade/<span class="ok">insights</span></span></p>
+    <div class="pick"><b>What I would do:</b> the second. Nothing about a unit ends up in a link
+      about the reports, and a link somebody sends opens the reports. <b>The cost, stated:</b> if
+      they then reload that page, they get the Insights page on its own rather than the tab
+      &mdash; the same reports, the plainer chrome. Pressing Back from the tab still returns to
+      whatever they were reading.</div>
+  </div>
+
+  <!-- ══════════════════ DECISION 3 ══════════════════ -->
+  <div class="dec">
+    <span class="dn">Decision 3</span>
+    <h3>What happens to the four-square mark</h3>
+    <p>With a tab, a unit head has no use for it at all &mdash; it would be a second door to the
+      one place they can already reach. The office still needs it, because the Internal Tracker
+      and Meeting Notes are theirs and have no tab.</p>
+
+    <div class="two">
+      <div class="plate">
+        <div class="cap"><span>A unit head &mdash; no mark</span></div>
+        <div class="scr" style="padding:10px">
+          <div class="smp" style="min-width:0"><header class="top"><div class="top-in">
+            <div class="brand"><h1>Strategy Management Platform</h1><span class="orgname">Raya Trade</span></div>
+            <div class="topacts"><button class="infobtn" type="button">Sign out</button></div>
+          </div></header></div>
+        </div>
+      </div>
+      <div class="plate">
+        <div class="cap"><span>The office &mdash; mark kept</span></div>
+        <div class="scr" style="padding:10px">
+          <div class="smp" style="min-width:0"><header class="top"><div class="top-in">
+            <details class="dlmenu topmark"><summary title="Modules">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg>
+            </summary></details>
+            <div class="brand"><h1>Strategy Management Platform</h1><span class="orgname">Raya Trade</span></div>
+            <div class="topacts"><button class="infobtn" type="button">Sign out</button></div>
+          </div></header></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pick"><b>What I would do:</b> draw the mark only where there is something the tabs
+      cannot reach. That is one rule rather than a design per role, and it closes the fault the
+      first drawing found for free &mdash; <b>a user is never again offered the office's two
+      lists</b>, because the menu that offered them is no longer drawn for them.</div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="plate" style="margin-top:0">
+    <div class="cap"><span>What changes about searching</span></div>
+    <div class="cost" style="border-top:0"><b>A filtered library stops being a link you can
+      send &mdash; from inside the tab.</b> On the Insights page the search and the category are
+      in the address, so "here are the market reports" is something you paste to somebody. Inside
+      the platform the filter is a state of the screen rather than part of the address, the way
+      every other filter in the product already is. The module's own page keeps its behaviour
+      unchanged, so the sendable filtered link still exists &mdash; it is just not what the tab
+      produces.</div>
+  </div>
+
+  <div class="dec" style="border-left-color:var(--pg-cost)">
+    <span class="dn" style="color:var(--pg-cost)">Not a decision &mdash; a note</span>
+    <h3>The notices dot lands on the tab</h3>
+    <p>The gold dot from the notices drawing sits on the modules mark today. With the mark gone
+      for the people it is meant for, it moves onto the tab &mdash; shown in the first drawing.
+      The email and who receives it are unchanged.</p>
+  </div>
+
+  <div class="ask">
+    <h2>Say yes, or change one</h2>
+    <ol>
+      <li><b>Every destination</b> carries the tab &mdash; or name the ones that should.</li>
+      <li><b>The address stays the module's own</b>, so links are about the reports and not about
+        a unit.</li>
+      <li><b>The mark is drawn only where the tabs cannot reach</b> &mdash; so the office keeps
+        it and a user never sees it.</li>
+      <li><b>The word on the tab:</b> Insights, or something plainer like Reports? It is the
+        module's name everywhere else, so changing it here means changing it everywhere.</li>
+      <li>And the three still open on the notices drawing: the subject line, whether you get a
+        copy, and whether a corrected report tells people twice.</li>
+    </ol>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var b=document.getElementById("themetgl");
+  function cur(){ var a=document.documentElement.getAttribute("data-theme");
+    if(a) return a;
+    return window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"; }
+  function paint(){ b.textContent = cur()==="dark" ? "Switch to light" : "Switch to dark"; }
+  b.addEventListener("click",function(){
+    var next = cur()==="dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme",next);
+    try{ localStorage.setItem("smp.mockup.theme",next); }catch(e){}
+    paint();
+  });
+  try{ var s=localStorage.getItem("smp.mockup.theme");
+       if(s==="dark"||s==="light") document.documentElement.setAttribute("data-theme",s); }catch(e){}
+  paint();
+})();
+</script>

@@ -117,7 +117,7 @@
     }
     return { d: d, s: s, c: c };
   }
-  /* ── THE REPORTS KEEP THEIR OWN ADDRESS (§375, decision 2) ────────
+  /* ── THE REPORTS KEEP THEIR OWN ADDRESS (§376, decision 2) ────────
      The library is the CLIENT'S and is the same list whichever unit you are
      standing on, so the ordinary address `addressOf` would write —
      `/raya-trade/strategy/mobile/insights` — names a unit in a link that is
@@ -219,7 +219,7 @@
        check's break forces the switcher on for a client holding one. */
     var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
     if (!Array.isArray(list)) return;
-    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§375,
+    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§376,
        decision 3) ───────────────────────────────────────────────────
        The switcher exists to reach a module the navigation cannot. Since
        the library reads as a tab beside Strategy and Performance, offering

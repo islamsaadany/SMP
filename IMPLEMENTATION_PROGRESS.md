@@ -6350,7 +6350,7 @@ other reach for a card was swept (§51.11), two more fixed, one left as correct.
 
 ---
 
-## §375 — The reports, as a tab in the platform (spec 060, 2026-09-20)
+## §376 — The reports, as a tab in the platform (spec 061, 2026-09-20)
 
 **On the branch `claude/trusting-wright-1m2bgv`, not merged.**
 

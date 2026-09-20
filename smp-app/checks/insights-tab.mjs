@@ -1,4 +1,4 @@
-/* THE REPORTS, AS A TAB IN THE PLATFORM (§375, Islam 2026-09-20).
+/* THE REPORTS, AS A TAB IN THE PLATFORM (§376, Islam 2026-09-20).
 
    He picked the tab over the two other placements drawn for him, and the
    three decisions that came with it are what this file asserts:

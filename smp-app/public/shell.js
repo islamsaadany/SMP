@@ -50066,7 +50066,7 @@ var TRAIL = (function(){
 })();
 
 /* ── insights.js ── */
-/* ══ THE REPORTS, INSIDE THE PLATFORM (§375) ══════════════════════════════
+/* ══ THE REPORTS, INSIDE THE PLATFORM (§376) ══════════════════════════════
    Islam, of the Insights module: *"for the users not the smo they can see the
    insights as a tab beside the tabs visible to them. better usability than
    going to another module. the module is managed by the smo which is relevant
@@ -54003,7 +54003,7 @@ var SYNC = (function () {
 
   /* Page definitions carry the access key the matrix is keyed on, so a page
      is never rendered without a grant having been checked first. */
-  /* ── THE REPORTS, AS A TAB (§375) ────────────────────────────────────
+  /* ── THE REPORTS, AS A TAB (§376) ────────────────────────────────────
      Islam picked the tab over the two other placements drawn for him, so the
      library reads beside Strategy and Performance on every destination a
      person can open. Declared ONCE and referenced four times below, because
@@ -64605,7 +64605,7 @@ var SYNC = (function () {
     }
     return { d: d, s: s, c: c };
   }
-  /* ── THE REPORTS KEEP THEIR OWN ADDRESS (§375, decision 2) ────────
+  /* ── THE REPORTS KEEP THEIR OWN ADDRESS (§376, decision 2) ────────
      The library is the CLIENT'S and is the same list whichever unit you are
      standing on, so the ordinary address `addressOf` would write —
      `/raya-trade/strategy/mobile/insights` — names a unit in a link that is
@@ -64707,7 +64707,7 @@ var SYNC = (function () {
        check's break forces the switcher on for a client holding one. */
     var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
     if (!Array.isArray(list)) return;
-    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§375,
+    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§376,
        decision 3) ───────────────────────────────────────────────────
        The switcher exists to reach a module the navigation cannot. Since
        the library reads as a tab beside Strategy and Performance, offering

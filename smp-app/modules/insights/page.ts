@@ -131,7 +131,7 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 @media (max-width:560px){.item{flex-direction:column;gap:9px}}
 `;
 
-/* ── THE ROWS, AND THE ROWS ALONE (§375) ──────────────────────────────
+/* ── THE ROWS, AND THE ROWS ALONE (§376) ──────────────────────────────
    The reports as a list, or the honest sentence for a list that is empty —
    asked for by this module's own page AND by the Insights tab inside the
    platform, which is the whole of why it is a function rather than an
@@ -155,7 +155,7 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
    §231.4): a library that could not be read is not a library with nothing
    in it, and counting an error as absence tells a client that Forefront
    has published nothing. */
-/* ── READ ONCE, FOR EITHER HOST (§375) ────────────────────────────────
+/* ── READ ONCE, FOR EITHER HOST (§376) ────────────────────────────────
    The library as this viewer may see it. Its own function because the tab
    asks for exactly what the page asks for — and because the narrowing is
    the one thing that must not differ between them: a report kept off
@@ -177,7 +177,7 @@ export async function readLibrary(
   return { items: (rows || []).map((r) => shape(r, true) as Item), read: rows !== null };
 }
 
-/* ── THE TAB'S ANSWER (§375) ──────────────────────────────────────────
+/* ── THE TAB'S ANSWER (§376) ──────────────────────────────────────────
    The rows the platform's Insights tab drops into its pane, as JSON so the
    count can be drawn beside the search box without the shell counting
    nodes — which would read an empty state as nought reports and an

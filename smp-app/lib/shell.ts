@@ -77,7 +77,7 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        reader has to ask a second time. */
     (modules.length ? " data-modules='" + esc(JSON.stringify(modules)) + "'" : "") +
     /* AND THE LIBRARY'S CATEGORIES, WHERE THIS PERSON MAY OPEN INSIGHTS
-       (§375). The reports are a TAB inside the platform now (Islam's C of
+       (§376). The reports are a TAB inside the platform now (Islam's C of
        three drawn), and its categories are drawn in the section row — which
        the shell builds at paint time, before any answer from the server can
        have arrived. So the list is stamped rather than fetched, and stamped

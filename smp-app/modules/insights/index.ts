@@ -58,7 +58,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
         { q: q.get("q") || "", category: q.get("category") || "" }, await viewerOf(a)),
       { status: 200, headers: shellHeaders() });
   }
-  /* ── THE ROWS, FOR THE TAB INSIDE THE PLATFORM (§375) ──────────────
+  /* ── THE ROWS, FOR THE TAB INSIDE THE PLATFORM (§376) ──────────────
      Islam picked the tab over the two other placements, and a tab that is a
      link is still going to another module from a different button — which is
      the thing he asked to stop. So the platform draws the reports in its own

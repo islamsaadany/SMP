@@ -52979,7 +52979,7 @@ shows.
 
 ---
 
-## §375 — The reports, as a tab in the platform (spec 060, 2026-09-20)
+## §376 — The reports, as a tab in the platform (spec 061, 2026-09-20)
 
 Islam, of the Insights module: *"for the users not the smo they can see the
 insights as a tab beside the tabs visible to them. better usability than going

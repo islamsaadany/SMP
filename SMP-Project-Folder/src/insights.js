@@ -1,4 +1,4 @@
-/* ══ THE REPORTS, INSIDE THE PLATFORM (§375) ══════════════════════════════
+/* ══ THE REPORTS, INSIDE THE PLATFORM (§376) ══════════════════════════════
    Islam, of the Insights module: *"for the users not the smo they can see the
    insights as a tab beside the tabs visible to them. better usability than
    going to another module. the module is managed by the smo which is relevant

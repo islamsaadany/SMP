@@ -1,4 +1,4 @@
-# Spec 060 — The reports, as a tab in the platform
+# Spec 061 — The reports, as a tab in the platform
 
 **Asked for** 2026-09-20 by Islam, of the Insights module:
 
@@ -7,7 +7,7 @@
 > module is managed by the smo which is relevant but the user to move between
 > modules is not very usable. align wiht me"*
 
-Built as **§375**.
+Built as **§376**.
 
 ---
 

@@ -53978,3 +53978,162 @@ moves, nothing stored moves and nothing is migrated.
 served worker's bytes did not move, no `controllerchange` fires and §258's
 *"A newer version of the platform is ready"* is **not** offered — a tab left
 open keeps its old shell until somebody reloads it.
+
+## §379 — THE WORKING COPY CARRIES THE PLATFORM, NOT A LINK TO IT (2026-09-21, spec 030)
+
+Islam, with a file downloaded from his own tenant minutes earlier: *"the
+working copy download html is damaged."*
+
+**NOTHING OF HIS WAS LOST, AND ESTABLISHING THAT FIRST WAS MOST OF THE
+ANSWER.** The file is **1,593,876 bytes** and **1,580,208 characters of it are
+Raya Trade's graph**, whole and readable. What is missing is the platform:
+**12,716 characters** of markup, and every line of code and design a LINK —
+`<script src="/shell.js">` (3,844,669 bytes), `<link rel="stylesheet"
+href="/platform.css">` (674,285) and `<script src="/theme.js">` (14,610). The
+file is short of **about three times its own size**, and all of it is the
+product. Opened from `file://` those resolve to the filesystem root, so the
+backup asks the server for the platform on the one day the whole feature
+exists for: the server being down.
+
+**MEASURED AT BOTH ENDS RATHER THAN REASONED ABOUT** (§3a). His file driven in
+a real browser from a file path: org name **empty**, **0 destinations**, 19
+tags in `#panel` — the boot skeleton and nothing else. The same file with the
+three inlined: **Raya Trade, 28 destinations, 219 rail rows, 11,401 tags**.
+
+**THE CAUSE IS §306 MEETING §316.10's CUTOVER, AND NEITHER WAS WRONG WHEN IT
+WAS WRITTEN.** `buildCopy()` fetches `location.pathname` and inserts the
+graph — which WAS the whole product while production served the frozen single
+self-contained file, whose bytes carry the code and the design (measured:
+4,474,664 bytes, **zero** external script or stylesheet references). §332
+measured that production now serves the new stack, where `lib/shell.ts`
+returns a 12KB shell that links them. *The backup depends on exactly the thing
+it is a backup against, and the plumbing moved underneath it.*
+
+**WHY NOTHING CAUGHT IT.** `checks/contingency.py` serves `HTML` — the frozen
+build — as the platform, because `buildCopy()` fetches `location.pathname` and
+a stub answering anywhere else would test a request the product never makes
+(§100.3, its own comment). So the copy it builds is self-contained by
+construction and §6's *"the copy opens from a file with nothing running"* has
+passed perfectly since §306. **No check had ever made a copy from the page
+production serves** — §94.11's trap, and §329's family on the half that had no
+guard.
+
+**WHAT IS BUILT IS ISLAM'S PICK OF TWO**, with the cost of each stated before
+he chose: the copy collects every script and stylesheet the document links and
+puts them INSIDE itself. The alternative — serving the frozen self-contained
+file for the copy — is smaller and was recommended against, because what you
+open would no longer be the screen you pressed from, and §306's own sentence
+is that *the copy is the platform, not a rendering of it*.
+
+**DERIVED FROM THE DOCUMENT, NEVER A LIST OF THE THREE NAMES** (§104.7): a
+fourth file linked next month is carried the day it is added rather than on
+the day somebody remembers this function exists.
+
+**THE FROZEN BUILD LINKS NOTHING**, so over `file://` and against the offline
+platform there is nothing to inline and the copy is what §306 produced.
+**Asserted at BOTH ENDS** (§94.2) — without it, *"the copy carries no link to
+the server"* is satisfied by the one shape that never had one, and a build
+that stopped inlining passes the whole section.
+
+**ANYTHING THAT CANNOT BE CARRIED IS A REFUSAL, never a quiet omission**: a
+cross-origin file cannot be fetched at all, and a backup missing part of the
+product is the fault this removes — §306's own argument that a copy which
+comes up wrong is worse than no copy, with more force for one that will not
+come up at all. **The mark and the manifest are not refused**: they are
+decoration, and a missing favicon stops nothing.
+
+**NO MOCKUP WAS OWED AND IT WAS CHECKED RATHER THAN ASSUMED** (rule 1c):
+nothing visual moves. The card, its three buttons and their words are
+untouched, and the press already says *Taking…* and writes its outcome into
+the button (§312) — what changes is a behaviour and a few seconds, which a
+still cannot show.
+
+### §379.1 — AND `String.replace` READS PATTERNS IN THE REPLACEMENT
+
+`hay.replace(needle, block)` interprets `$&`, `` $` ``, `$'` and `$1`–`$99`
+**inside `block`** — so handing it 3.8MB of `shell.js`, which writes `"<\/$1"`
+in its own regexes, corrupts the copy at every one of them. **§306's own line
+had it too**, on the JSON: a tenant that typed `$&` into a plan name got it
+silently replaced by the charset tag, and nothing would have said so. One
+helper (`put`) with a **function** replacement, which is the single form that
+is never read for patterns.
+
+**Proved load-bearing rather than asserted**: with the plain string
+replacement put back, **6 red** — the copy's links read
+`['/shell.js', '/platform.css', '/shell.js']`, the tail duplicated by `$'`,
+and the opened file throws *Unexpected end of input*.
+
+### §379.2 — AND THREE OF THE NEW CHECK'S OWN ASSERTIONS WERE THE CHECK
+
+Every one found by falsifying rather than by reading.
+
+**A TEXT SEARCH CANNOT TELL A TAG FROM A SENTENCE ABOUT ONE.** The first draft
+grepped the copy for `<script src="/` and went red on a CORRECT build, because
+`contingency.js`'s own comment spells the tag it exists to remove — so the copy
+carries that sentence inside the platform it inlined. §272.8's shape: the note
+recording a fault, written in the syntax of the fault. It asks the **document**
+now (`document.querySelectorAll('script[src],link[rel~="stylesheet"]')`), which
+can always tell them apart, and asks it of the OPENED copy, which is the real
+question.
+
+**AN ASSERTION CAN THROW.** `shtml.index("<script>")` raises where `.find`
+reports, and on a build that inlines nothing there IS no bare `<script>` — so
+the falsification printed **one** failure and died, §215 in the assertion
+rather than in the probe. What matters is §306's property, that nothing runs
+before the block, so that is what is asserted — **and its first corrected form
+counted the block's OWN opening tag**, which no good build had ever run.
+
+**AND THE PROBES ON AN OPENED COPY DID NOT DEGRADE.** This file's own docstring
+promises every probe does (§215); §6's block and §6b's both called
+`page.evaluate` straight, so on a build whose copy does not boot `UNITS` is not
+there, the probe threw, and the run ended with one failure printed of the forty
+it had left to make — *the falsification reporting a fault it had itself
+stopped measuring.* Both blocks route through `js()` now, with `num()` for the
+counts, and the same falsification reports **7**.
+
+**A GUESSED PROPERTY IS NOT A MEASUREMENT.** *"It is styled"* asked
+`header.top` for `position: sticky`; measured, that element is `static` and
+`.chrome` is the sticky one. It asserts the PAINT instead — the page's own
+`--ground` defined and the body actually painted in it, a colour the browser
+cannot produce on its own — and on the broken build it reads
+`{'token': '', 'body': 'rgba(0, 0, 0, 0)', 'chrome': 'static'}`, which is the
+unstyled page Islam was looking at.
+
+**Proved able to fail THREE ways from the SOURCES** (§276), one per decision:
+the inlining removed **8 red**, among them
+`{'threw': 'ReferenceError: UNITS is not defined'}` — the reported file's own
+behaviour — and `{'token': '', 'chrome': 'static'}`, the unstyled page;
+`put()` made a plain replacement **6 red**; the typeface left behind **1 red**,
+printing `url("/fonts/Source_Sans_3.woff`.
+
+**AND ONE BREAK REFUSED ITSELF, WHICH IS §344.1 EARNING ITS KEEP**: the line
+`no-inline` replaces had moved while §379.3 was built, so the substitution
+matched nothing — and the run that followed reported **0 failures**, which is
+indistinguishable from a guard that works (§54.5). Every break asserts it
+MATCHED before it is written, and that assert is the only reason the green run
+was not believed. The tree was restored from a saved copy and rebuilt
+**byte-identical** to the build the breaks were made from (§343.9).
+
+### §379.3 — AND A STYLESHEET POINTS AT THINGS OF ITS OWN
+
+`platform.css` carries one `url(/fonts/Source_Sans_3.woff2)`, and **§38.7
+embedded that face precisely because *a linked webfont would break the offline
+single-file handover*** — which is what the frozen build does, as a `data:`
+URI, and what the served stylesheet does not (`sync-css.mjs`, in its own
+words: *served, it is a file beside the stylesheet*). So a copy that inlined
+the CSS and stopped there would open in the system stack: the platform, in
+another typeface. Every same-origin `url()` inside an inlined stylesheet is
+carried as a data URI, **derived from the CSS rather than from the one font's
+name**.
+
+**A MISSING ONE IS NOT A REFUSAL, and the line is worth stating because it is
+the opposite of the rule above**: without the script or the stylesheet the copy
+does not work, and without the face it works and reads in a different font. A
+backup that refuses to exist because a woff2 answered 404 is worse than one
+that opens in the fallback.
+
+**ASKED OF THE STYLESHEET THE BROWSER HOLDS, never of the bytes** — the copy
+carries the comment above, which spells `url(/fonts/…)` while explaining why it
+must not be one (§379.2 again, in the same round) — **and at BOTH ENDS**: the
+served page's face must still be a FILE, or *the copy carries it* is true of a
+copy that carried nothing (§113.8).

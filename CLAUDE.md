@@ -8715,7 +8715,33 @@ python3 checks/contingency.py   # the contingency files (§297): the card, the
                                 # satisfy. 1 red on that break — aimed at `present.js`,
                                 # because the deck's tactics row builds the pair BY HAND
                                 # rather than through `figVsDue()`, so the first break
-                                # went green (§54.5) and found it
+                                # went green (§54.5) and found it.
+                                # AND SINCE §379 IT MAKES A COPY FROM THE PAGE PRODUCTION
+                                # SERVES (§6b), which nothing had ever done: everything
+                                # above is built from `HTML`, the frozen self-contained
+                                # file, so the copy was whole by construction and every
+                                # assertion passed while the copy a person downloaded
+                                # held 1.58MB of their figures and no platform at all
+                                # (§94.11). The stub serves a document in the SERVED
+                                # shape — assembled from the REAL generated pieces,
+                                # `shell/body.html` and the three files in `public/`
+                                # (§100.3) — with the linked paths asserted to AGREE
+                                # with the ones `lib/shell.ts` emits, so a fourth file
+                                # linked there goes red rather than untested (§94.8).
+                                # BOTH ENDS: the served page must really link its code,
+                                # or "the copy links nothing" is satisfied by a page that
+                                # never did (§113.8), and the frozen one must link none.
+                                # The copy is OPENED from a file and asked for the
+                                # things a link would have cost it — this tenant's data,
+                                # the navigation PAINTED, and the page's own `--ground`
+                                # defined and painted, a colour the browser cannot
+                                # produce on its own (§94.8: the first draft asked
+                                # `header.top` for `sticky` and that element is static).
+                                # It asks the DOCUMENT and never greps the bytes: the
+                                # copy carries `contingency.js`'s own comment, which
+                                # spells the tag it exists to remove, so a text search
+                                # calls a correct build broken (§272.8). Red 7 / 6 from
+                                # the SOURCES (§276)
 python3 checks/import-page.py   # Import & archives, three tabs (§295): the mode
                                 # switch gone from BOTH tabs and Build a plan gone from
                                 # the page; the picker's count label and Select all/none
@@ -10141,7 +10167,97 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;378: an address is taken whole
+*Last Updated: 2026-09-21 &mdash; **&sect;379: the working copy carries the
+platform, not a link to it (spec 030).** Islam, with a file downloaded from his
+own tenant minutes earlier: *"the working copy download html is damaged."*
+**NOTHING OF HIS WAS LOST AND SAYING SO FIRST WAS MOST OF THE ANSWER** &mdash;
+**1,580,208 of the file's 1,593,876 bytes are Raya Trade's graph**, whole. What
+is missing is the platform: **12,716 characters** of markup, with every line of
+code and design a LINK (`shell.js` 3,844,669, `platform.css` 674,285,
+`theme.js` 14,610), so the backup asks the server for the product on the one
+day it exists for. **MEASURED AT BOTH ENDS RATHER THAN REASONED ABOUT**
+(&sect;3a): his file driven from a file path reads **0 destinations** and 19
+tags in `#panel` &mdash; the boot skeleton and nothing else &mdash; and the
+same file with the three inlined reads **Raya Trade, 28 destinations, 11,401
+tags**. **THE CAUSE IS &sect;306 MEETING &sect;316.10's CUTOVER AND NEITHER WAS
+WRONG WHEN IT WAS WRITTEN**: `buildCopy()` fetches `location.pathname`, which
+WAS the whole product while production served the frozen self-contained file
+(measured: 4,474,664 bytes, **zero** external references), and &sect;332
+measured that production now serves a 12KB shell that links them &mdash; *the
+backup depends on exactly the thing it is a backup against, and the plumbing
+moved underneath it.* **WHY NOTHING CAUGHT IT**: `checks/contingency.py` serves
+the FROZEN build as the platform, for a good reason of its own (&sect;100.3), so
+the copy it builds is self-contained by construction and &sect;6 has passed
+since &sect;306 &mdash; **no check had ever made a copy from the page production
+serves** (&sect;94.11, &sect;329's family). **WHAT IS BUILT IS ISLAM'S PICK OF
+TWO**, with the cost of each stated first: every linked script and stylesheet is
+fetched and put INSIDE the file, **derived from the document and never a list of
+the three names** (&sect;104.7), because the alternative &mdash; serving the
+frozen file for the copy &mdash; means what you open is no longer the screen you
+pressed from, and &sect;306's own sentence is that *the copy is the platform, not
+a rendering of it*. **THE FROZEN BUILD LINKS NOTHING**, so over `file://`
+nothing is inlined and the copy is what &sect;306 produced &mdash; asserted at
+BOTH ENDS, or a build that stopped inlining passes on the one shape that never
+needed it (&sect;94.2). **ANYTHING THAT CANNOT BE CARRIED IS A REFUSAL, never a
+quiet omission**; the mark and the manifest are not refused, being decoration.
+**NO MOCKUP WAS OWED AND IT WAS CHECKED RATHER THAN ASSUMED** (rule 1c): the
+card, its three buttons and their words are untouched, and the press already
+says *Taking&hellip;* (&sect;312).
+**&sect;379.1 &mdash; AND `String.replace` READS PATTERNS IN THE REPLACEMENT**:
+`$&`, `` $` ``, `$'` and `$1`&ndash;`$99` are interpreted INSIDE the replacement,
+so handing it 3.8MB of `shell.js` &mdash; which writes `"<\/$1"` in its own
+regexes &mdash; corrupts the copy at every one of them. **&sect;306's own line
+had it too**, on the JSON: a tenant that typed `$&` into a plan name got it
+silently replaced by the charset tag. One helper with a **function**
+replacement, the single form never read for patterns &mdash; proved
+load-bearing rather than asserted, **6 red** with the plain form back, the copy
+reading `['/shell.js', '/platform.css', '/shell.js']` and throwing *Unexpected
+end of input*.
+**&sect;379.2 &mdash; AND THREE OF THE NEW CHECK'S OWN ASSERTIONS WERE THE
+CHECK**, every one found by falsifying rather than by reading. **A text search
+cannot tell a tag from a sentence about one**: the first draft grepped the copy
+for `<script src="/` and went red on a CORRECT build, because `contingency.js`'s
+own comment spells the tag it exists to remove (&sect;272.8's shape) &mdash; it
+asks the DOCUMENT now, of the OPENED copy. **An assertion can throw**:
+`.index("<script>")` raises where `.find` reports, so the falsification printed
+ONE failure and died (&sect;215, in the assertion rather than the probe), and
+its first correction counted the block's OWN opening tag, which no good build
+had run. **And the probes on an opened copy did not degrade** &mdash; this
+file's docstring promises they do, and on a build whose copy does not boot
+`UNITS` is not there, so the run ended with one failure printed of the forty it
+had left to make, *the falsification reporting a fault it had itself stopped
+measuring*; routed through `js()`, the same break reports **7**. **And a guessed
+property is not a measurement**: *"it is styled"* asked `header.top` for
+`sticky` and that element is `static` &mdash; it asserts the PAINT now, the
+page's own `--ground` defined and the body painted in it, which on the broken
+build reads `{'token': '', 'chrome': 'static'}`, the unstyled page he was
+looking at.
+**&sect;379.3 &mdash; AND A STYLESHEET POINTS AT THINGS OF ITS OWN**:
+`platform.css` carries one `url(/fonts/Source_Sans_3.woff2)`, and &sect;38.7
+embedded that face precisely because *a linked webfont would break the offline
+single-file handover* &mdash; which the frozen build does as a `data:` URI and
+the served stylesheet does not &mdash; so a copy that inlined the CSS and
+stopped would open in the system stack: the platform, in another typeface.
+Every same-origin `url()` inside an inlined stylesheet is carried as a data
+URI, derived from the CSS rather than from the one font's name. **A missing one
+is NOT a refusal**, the opposite of the rule above and worth stating: without
+the script or the stylesheet the copy does not work, and without the face it
+works and reads in a different font. Asserted of the stylesheet the BROWSER
+holds and never of the bytes &mdash; the copy carries the comment that spells
+`url(/fonts/&hellip;)` while explaining why it must not be one &mdash; and at
+BOTH ENDS (&sect;113.8), or *the copy carries it* is true of a copy that
+carried nothing. Proved able to fail **three ways from the SOURCES**
+(&sect;276), one per decision: **8 / 6 / 1 red**. **AND ONE BREAK REFUSED
+ITSELF**, the line it replaces having moved while &sect;379.3 was built, with
+the run that followed reporting **0 failures** &mdash; indistinguishable from a
+guard that works (&sect;54.5); every break asserts it MATCHED before it is
+written (&sect;344.1), and that assert is the only reason the green run was not
+believed. The tree was restored from a saved copy and rebuilt
+**byte-identical** to the build the breaks were made from (&sect;343.9). The built file's bytes changed, so `sw.js`
+is bumped (&sect;91) and the four generators re-run (&sect;329). **`main`
+untouched: the merge is Islam's word, on that merge.***
+
+*Earlier: 2026-09-20 &mdash; **&sect;378: an address is taken whole
 (spec 059).** Islam, of the build &sect;377 shipped: *"can you make a right
 click on the email to highlight the whole email to copy on right click .. as it
 happens on the phone number."* **MEASURED BEFORE ANYTHING WAS PROPOSED, AND THE

@@ -50644,10 +50644,124 @@ var CONT = (function () {
   /* ── THE WORKING COPY ──────────────────────────────────────────────────
      One request for our own bytes, one string insertion, one download. The
      graph is asked of `SYNC` rather than rebuilt, or the copy would carry a
-     second idea of what the state is. */
+     second idea of what the state is.
+
+     AND THE COPY CARRIES THE PLATFORM, NOT A LINK TO IT (§379). §306 fetched
+     the page and stopped there, which was the whole product while the platform
+     was ONE self-contained file: those bytes held the code and the design.
+     Since the cutover the served document is a 12KB shell that LINKS them
+     (`lib/shell.ts`), so the same fetch returned the tenant's graph and a
+     `<script src="/shell.js">` pointing at the server the backup exists
+     because it is down. Measured on a copy taken from production: 1,580,208
+     characters of Raya Trade and 12,716 of markup, with 4.5MB of platform
+     missing — it opened on a blank unstyled page. Every linked script and
+     stylesheet is fetched and put INSIDE the file now.
+
+     DERIVED FROM THE DOCUMENT, NEVER A LIST OF THE THREE NAMES (§104.7): a
+     fourth file linked next month is carried the day it is added, rather than
+     on the day somebody remembers this function exists.
+
+     THE FROZEN BUILD LINKS NOTHING, so over `file://` and against the offline
+     platform there is nothing to inline and the copy is byte-identical to
+     what §306 produced. Asserted at both ends, or a build that stopped
+     inlining would pass on the one shape that never needed it.
+
+     ANYTHING THAT CANNOT BE CARRIED IS A REFUSAL, never a quiet omission:
+     a backup missing part of the product is exactly the fault this removes,
+     and §306's own argument — a copy that silently comes up wrong is worse
+     than no copy — applies with more force to one that will not come up at
+     all. Marks and the manifest are not refused: they are decoration, and a
+     missing favicon stops nothing. */
   var ANCHOR = "<meta charset='utf-8'>";
+  /* Both shapes `lib/shell.ts` emits, and the two the frozen build would emit
+     if it linked anything. A `<script src>` has an empty body by definition,
+     so the pair is matched together and replaced whole. */
+  var SCRIPT_SRC = /<script\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>\s*<\/script\s*>/gi;
+  var LINK_TAG   = /<link\b[^>]*>/gi;
+
+  /* Same server: anything carrying a scheme of its own, or starting `//`, is
+     somewhere else. A cross-origin one could not be fetched at all (the
+     policy admits none today), so it is NAMED rather than dropped. */
+  function ourOwn(u) { return !/^[a-z][a-z0-9+.-]*:|^\/\//i.test(u); }
+
+  function grab(url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error(url + " could not be read (" + r.status + ")");
+      return r.text();
+    });
+  }
+
+  /* ── AND WHAT THE STYLESHEET ITSELF POINTS AT (§379.3) ─────────────────
+     `platform.css` carries one `url(/fonts/Source_Sans_3.woff2)`, and §38.7
+     embedded that face precisely because *a linked webfont would break the
+     offline single-file handover* — which is what the frozen build does, as a
+     `data:` URI, and what the served stylesheet does not (`sync-css.mjs`:
+     served, it is a file beside the stylesheet). So a copy that inlined the
+     CSS and stopped would open in the system stack: the platform, in another
+     typeface.
+
+     A MISSING ONE IS NOT A REFUSAL, and the line is worth stating because it
+     is the opposite of the rule above. Without the script or the stylesheet
+     the copy does not work; without the face it works and reads in a
+     different font. A backup that refuses to exist because a woff2 answered
+     404 is worse than one that opens in Source Sans's fallback — so this is
+     carried where it can be and left alone where it cannot.
+
+     SPLIT AND JOIN rather than `replace`: every occurrence, and no `$`
+     pattern read out of the replacement (§379.1). */
+  var MIME = { woff2: "font/woff2", woff: "font/woff", ttf: "font/ttf",
+               otf: "font/otf", svg: "image/svg+xml", png: "image/png",
+               jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif",
+               webp: "image/webp", ico: "image/x-icon" };
+
+  function b64(buf) {
+    var a = new Uint8Array(buf), s = "", i;
+    /* In chunks: `apply` with a whole font's worth of arguments overflows. */
+    for (i = 0; i < a.length; i += 8192) {
+      s += String.fromCharCode.apply(null, a.subarray(i, i + 8192));
+    }
+    return btoa(s);
+  }
+
+  function inlineCssUrls(css) {
+    var urls = [], seen = {}, m;
+    var RE = /url\(\s*(['"]?)([^'")]+)\1\s*\)/gi;
+    while ((m = RE.exec(css))) {
+      var u = m[2];
+      if (seen[u] || /^data:/i.test(u) || !ourOwn(u)) continue;
+      seen[u] = 1; urls.push(u);
+    }
+    if (!urls.length) return Promise.resolve(css);
+    return Promise.all(urls.map(function (u) {
+      return fetch(u).then(function (r) {
+        if (!r.ok) throw new Error("skip");
+        return r.arrayBuffer();
+      }).then(function (buf) {
+        var ext = (u.split("?")[0].split(".").pop() || "").toLowerCase();
+        return { u: u, data: "data:" + (MIME[ext] || "application/octet-stream") +
+                             ";base64," + b64(buf) };
+      }).catch(function () { return null; });
+    })).then(function (got) {
+      got.forEach(function (g) {
+        if (g) css = css.split(g.u).join(g.data);
+      });
+      return css;
+    });
+  }
+
+  /* ── PUT ONE STRING WHERE ANOTHER WAS, VERBATIM (§379.1) ───────────────
+     `String.replace` reads `$&`, `$1`, `` $` `` and `$'` IN THE REPLACEMENT,
+     so handing it 3.8MB of `shell.js` — which writes `"<\/$1"` in its own
+     regexes — silently corrupts the copy at every one of them. §306's own
+     line had it too, on the JSON: a tenant that typed `$&` into a plan got it
+     replaced by the charset tag, and nothing would have said so. A function
+     replacement is the one form that is never read for patterns. */
+  function put(hay, needle, block) {
+    return hay.replace(needle, function () { return block; });
+  }
 
   function buildCopy(done) {
+    var page;
     fetch(location.pathname, { cache: "no-store" })
       .then(function (r) {
         if (!r.ok) throw new Error("the platform file could not be read (" + r.status + ")");
@@ -50655,13 +50769,53 @@ var CONT = (function () {
       })
       .then(function (html) {
         if (html.indexOf(ANCHOR) < 0) throw new Error("the platform file is not the shape this expects");
+        page = html;
+
+        var want = [], m;
+        SCRIPT_SRC.lastIndex = 0;
+        while ((m = SCRIPT_SRC.exec(html))) want.push({ tag: m[0], url: m[1], css: false });
+        LINK_TAG.lastIndex = 0;
+        while ((m = LINK_TAG.exec(html))) {
+          var tag = m[0];
+          if (!/\brel\s*=\s*["'][^"']*\bstylesheet\b/i.test(tag)) continue;
+          var href = /\bhref\s*=\s*["']([^"']+)["']/i.exec(tag);
+          if (href) want.push({ tag: tag, url: href[1], css: true });
+        }
+        var away = want.filter(function (w) { return !ourOwn(w.url); });
+        if (away.length) {
+          throw new Error("the copy cannot carry " + away[0].url +
+                          " — it is not served from here, so the file would open without it");
+        }
+        return Promise.all(want.map(function (w) {
+          return grab(w.url).then(function (text) {
+            /* A stylesheet points at things of its own — the typeface — and
+               those come too (§379.3). */
+            return w.css ? inlineCssUrls(text) : text;
+          }).then(function (text) { w.text = text; return w; });
+        }));
+      })
+      .then(function (want) {
+        /* A CLOSING TAG INSIDE THE BYTES WOULD END THE BLOCK IT IS IN — the
+           same fault as the JSON below, and §272.8's in a stylesheet. It
+           measures NOUGHT in all three files served today, because the
+           sources already write `<\/script>`; this is here for the file that
+           does not, and it is honest only where the sequence sits inside a
+           string, which in valid JS and CSS is the only place it can. */
+        want.forEach(function (w) {
+          var safe = w.css ? w.text.replace(/<\/(style)/gi, "<\\/$1")
+                           : w.text.replace(/<\/(script)/gi, "<\\/$1");
+          var block = w.css ? "<style>\n" + safe + "\n</style>"
+                            : "<script>\n" + safe + "\n<\/script>";
+          page = put(page, w.tag, block);
+        });
+
         var g = SYNC.graph();
         /* `</` inside a script block ENDS it wherever it appears, so the one
            sequence that can break out is escaped. JSON reads `<\/` as `</`,
            so nothing about the data changes. */
         var json = JSON.stringify(g).replace(/<\//g, "<\\/");
         var isl = '<script type="application/json" id="smp-offline">' + json + '<\/script>\n';
-        done(null, html.replace(ANCHOR, ANCHOR + "\n" + isl, 1));
+        done(null, put(page, ANCHOR, ANCHOR + "\n" + isl));
       })
       .catch(function (e) { done(e, null); });
   }

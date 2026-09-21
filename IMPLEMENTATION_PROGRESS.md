@@ -6777,3 +6777,88 @@ file. Nothing stored moves, nothing is migrated.
 phone number: the whole value should highlight and Copy should be live. A
 double-click should still open the cell for editing. Nothing else on the page
 should look different.
+
+---
+
+## §379 — The working copy carries the platform (2026-09-21, spec 030) · **built, on the branch**
+
+Islam downloaded a working copy from his own tenant and it would not open:
+*"the working copy download html is damaged."*
+
+**Nothing of his was lost, and that was the first thing to establish.** The
+file is 1,593,876 bytes and **1,580,208 of them are Raya Trade's plan**, whole.
+What is missing is the platform — 12,716 characters of markup, with the code
+and the design left as LINKS to the server: `shell.js` (3.84 MB),
+`platform.css` (674 KB) and `theme.js`. So the backup asked the server for the
+product on the one day the whole feature exists for.
+
+**Measured at both ends rather than reasoned about** (§3a). His file, driven in
+a real browser from a file path: **0 destinations**, 19 tags in the page — the
+boot skeleton and nothing else. The same file with the three put inside it:
+**Raya Trade, 28 destinations, 219 rail rows, 11,401 tags**. He has that
+repaired file.
+
+**The cause is §306 meeting the cutover, and neither was wrong when it was
+written.** The copy is made by fetching the page and adding the graph, which
+was the whole product while production served one self-contained file (4.47 MB,
+**zero** external references). Since §316.10 production serves a 12 KB shell
+that links its code. *The backup depended on exactly the thing it is a backup
+against.*
+
+**Why nothing caught it**: `checks/contingency.py` serves the frozen
+self-contained build as the platform, for a reason of its own (§100.3), so the
+copy it makes is whole by construction — **no check had ever made one from the
+page production serves** (§94.11, §329's family).
+
+**What is built is Islam's pick of two**, each with its cost stated first:
+every linked script and stylesheet is fetched and put inside the file, derived
+from the document rather than from a list of the three names (§104.7). The
+alternative — serving the frozen file for the copy — was recommended against,
+because what you open would stop being the screen you pressed from.
+
+**Nothing visual moves and it was checked rather than assumed** (rule 1c): the
+card, its three buttons and their words are untouched, and the press already
+says *Taking…*.
+
+**§379.1 — and `String.replace` reads patterns in the replacement.** `$&`, `$1`
+and friends are interpreted inside it, so inlining 3.8 MB of `shell.js` — which
+writes `"<\/$1"` in its own regexes — corrupted the copy at every one. §306's
+own line had it too, on the JSON. Proved load-bearing: **6 red** with the plain
+form back, the copy throwing *Unexpected end of input*.
+
+**§379.2 — three of the new check's own assertions were the check**, all found
+by falsifying: a text search that cannot tell a tag from a sentence about one
+(the copy carries the comment naming the tag it removes, §272.8); an assertion
+that THREW where it should report, ending the run with one failure printed of
+forty (§215); and a guessed property (`header.top` is `static`, `.chrome` is
+the sticky one) replaced by the paint — the page's own `--ground` defined and
+painted.
+
+**§379.3 — and a stylesheet points at things of its own.** `platform.css`
+links one font, and §38.7 embedded that face precisely because *a linked
+webfont would break the offline single-file handover* — the frozen build
+carries it as a data URI and the served one does not, so a copy that inlined
+the CSS and stopped would open in the system stack. Every same-origin `url()`
+in an inlined stylesheet is carried too. **A missing one is not a refusal**,
+which is the opposite of the rule for the script and the stylesheet and is
+stated rather than left to be discovered: without those the copy does not work,
+without the face it works and reads in a different font.
+
+**Verified**: contingency **0 failures**, red **8 / 6 / 1** from the sources
+(§276), one break per decision; **and one break refused itself**, the line it
+replaces having moved, with the run that followed reporting 0 failures — which
+is indistinguishable from a guard that works (§54.5), and the only reason it
+was not believed is that every break asserts it matched first (§344.1). The
+tree was restored from a saved copy and rebuilt byte-identical (§343.9).
+deck-pdf 0, import-page all green, `qa.py` ERRORS none; `built-in-step` all
+good; the four generators re-run. `sw.js` bumped to
+`v5.23-copy-carries-platform`, because the built file's bytes changed (§91).
+
+**Recorded, not done**: the copy still links the favicon, the manifest and the
+touch icon, which 404 from a file — decoration, and refusing on them would
+refuse a backup for a missing picture.
+
+**What to go and check:** Setup › Import & storage → *Working copy*. The press
+takes a few seconds longer and the file is about 6 MB rather than 1.6. Open it
+with no connection: it should come up on your own tenant, fully styled, with
+the navigation and the decks in it.

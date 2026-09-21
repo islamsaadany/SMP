@@ -7710,10 +7710,45 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   about, with the three that need a `document` NAMED and asserted to be the only
   three. **Recorded, not done**: a projects-format supporting function
   contributes nothing, because tactics live on pillars (seven of the demo's eight
-  functions); the office is not shown the welcome row, because they enter those
-  figures on the unit's own page already; and `checks/my-reporting.py` is
-  **written and unrun** &mdash; that session had Chromium and no Playwright
-  driver.
+  functions); and the office is not shown the welcome row, because they enter
+  those figures on the unit's own page already.
+  **&sect;379.5 &mdash; AND THE SCREEN CHECK RAN AT LAST, WITH EVERY ONE OF ITS
+  FOUR FAILURES THE CHECK** (&sect;54.5: *a file nothing has ever run is a file
+  whose own mistakes are still in it*). `checks/my-reporting.py` was written in
+  a session holding the Chromium binaries and no Playwright driver; installing
+  one is all it took. **NO PRODUCT FAULT** &mdash; the diff is one file under
+  `checks/` and the built file is byte-identical throughout. It asked for
+  `#viewsel`, which is in **no source and in no other check** (the switcher is
+  `#asWho`, 13 times in the built file against 0 &mdash; &sect;100.3,
+  &sect;297.1); it asked with `eval_on_selector`, which THROWS, so section 1
+  **died and took the nine after it** in a file whose own `press()` two lines
+  above exists to stop that (&sect;215); it never stood `.welcomeover` down, so
+  every press retried for thirty seconds against the overlay (&sect;167.2, whose
+  own words are *before the goto*, and which twenty-odd checks already carry
+  &mdash; this one borrowed `project-done.py`'s stub and not its init script);
+  **and its one real-looking failure was a CORRECT build reported broken**
+  &mdash; *"it is NOT on a unit that is not his place"* pressed a unit a
+  **bounded role can never reach** (`a_unit_other: "none"`, which is &sect;379's
+  own note and why case 2 cost nothing), so the press had nothing to land on,
+  `current` stayed put, and it re-read the page it was already on (&sect;113.8,
+  with `press()` degrading to False and the caller ignoring it). **REWRITTEN,
+  NEVER LOOSENED** (&sect;218) and stronger than what it replaced: the rule is
+  one line (`ownsAnyLine() && myLinesHome() === target`), so it is asserted over
+  **every destination he can actually open**, guarded by *the set has more than
+  one in it or "nowhere else" is vacuous* &mdash; **which earned its place
+  immediately**, the first walk opening exactly ONE destination because the
+  group and the companies sit in a dropdown and Playwright waits thirty seconds
+  on a merely INVISIBLE control where `press()` degrades on an ABSENT one
+  (&sect;215 one step along, answered with `measure-score-spread.py`'s own
+  `go_top()` rather than a route invented here). Proved able to fail **three
+  ways from the SOURCES** (&sect;276 &mdash; it serves the built file, which
+  &sect;238's hashed CSP silences if edited): the tab ignoring the person's
+  place **2 red**, the lock never shutting a box **3 red**, the switch ignored
+  **1 red**, each break asserted to have MATCHED and the tree restored from the
+  saved copy rather than with `git checkout` (&sect;343.9, &sect;344.1).
+  **24/0**; `qa.py` **33 viewers / 242 destinations / ERRORS none**, &sect;367's
+  numbers to the digit, which is what it should be when nothing in the product
+  moved.
 - **MULTI-CLIENT (since v3.60, §313, spec 042): ONE PLATFORM, MANY CLIENTS.**
   §36's recommendation, built: **one Postgres schema per client**, resolved from
   the `platform.clients` registry off the slug the browser was **served at**,

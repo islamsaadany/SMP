@@ -37,12 +37,33 @@ live — so every press answers "offline", nothing is ever locked, and a check
 that opened the file would report the whole feature missing on a build that
 carries it perfectly. The stub is project-done.py's, three routes wide.
 
-NOT RUN IN THE SESSION THAT WROTE IT, said rather than left as an absence
-(S54.5, S328's precedent): this sandbox has the Chromium binaries under
-/opt/pw-browsers and no Playwright driver at all — no python module, no
-node_modules — so `qa-run.py` cannot launch. Every assertion here is written
-against the product as measured by the Node check beside it, and the first
-person with a browser should run it and read the tail (S298.3), not the count.
+RUN AT LAST, AND EVERY ONE OF ITS FIRST FOUR FAILURES WAS THE CHECK (S379.5).
+It was written in a session that had the Chromium binaries and no Playwright
+driver, so it had never once launched — and a file nothing has ever run is a
+file whose own mistakes are still in it (S54.5). What the first runs found, in
+order, and not one of them in the product:
+
+  * it asked for `#viewsel`, which is in no source and in no other check — the
+    switcher is `#asWho` (S100.3, S297.1's `sl.video` for `sl.vid`);
+  * it asked with `eval_on_selector`, which THROWS, so section 1 died and took
+    the nine after it with it — in a file whose own `press()` exists to stop
+    exactly that (S215);
+  * it never stood the welcome overlay down, so every press landed on
+    `.welcomeover` and retried for thirty seconds (S167.2, whose own words are
+    that it must be suppressed BEFORE the goto — twenty checks carry the line
+    and this one borrowed project-done.py's stub without it);
+  * and section 1 asserted the tab's ABSENCE on a unit a bounded role can
+    never reach, after a press that never landed — so it read the previous
+    page's tabs and called a CORRECT build broken (S113.8). Rewritten, never
+    loosened (S218): the walk below.
+
+Proved able to fail three ways from the SOURCES (S276 — this file serves the
+built file, and an edited one is silenced by S238's hashed CSP, so every break
+is made in `config-data.js` or `lib/rules.js` and rebuilt, with the tree then
+restored from the saved copy and the rebuild asserted byte-identical to the
+good one, S343.9): the tab ignoring the person's place 2 red, the lock never
+shutting a box 3 red, the switch ignored 1 red. Read the tail, not the count
+(S298.3).
 """
 import json, os, pathlib, threading, http.server, socketserver
 from playwright.sync_api import sync_playwright
@@ -136,9 +157,78 @@ def press(pg, sel, wait=300):
     if not el: return False
     el.click(); pg.wait_for_timeout(wait); return True
 
+def go(pg, key):
+    """Open a destination and say whether it actually OPENED.
+
+    `press()` degrades (S215) and therefore returns False for a control that
+    is not drawn — which is right, and is not the same question as "are we
+    now on that page". Section 1 asserted a tab's ABSENCE straight after a
+    press that never landed, so it read the previous page's tabs and called a
+    correct build broken (S113.8: the assertion's own precondition had failed
+    silently). The two are told apart here rather than in the eye of whoever
+    reads the output.
+    """
+    el = pg.query_selector('#units [data-u="%s"]' % key)
+    # PRESENT IS NOT PRESSABLE, which is S215 one step along: `press()` above
+    # degrades on an ABSENT control and Playwright waits thirty seconds on a
+    # control that is merely INVISIBLE — and the group sits inside a dropdown
+    # (S94.6), so its `[data-u]` is in the document and cannot be clicked.
+    # The walk found that by dying on it. Asked here rather than in `press()`,
+    # which six other sections rely on and none of which walks a set of
+    # controls of mixed visibility.
+    try:
+        if not el or not el.is_visible():
+            # THE GROUP AND THE COMPANIES SIT IN A DROPDOWN (S68, S94.6), so
+            # their `[data-u]` is in the document and not pressable until the
+            # summary is opened. Without this the walk opened exactly ONE
+            # destination and the guard below correctly called "nowhere else"
+            # vacuous — the whole reason that guard is there (S113.8).
+            # measure-score-spread.py's `go_top()` is the route, followed
+            # rather than invented.
+            sm = pg.query_selector("#topsel > summary")
+            if not sm: return False
+            sm.click(); pg.wait_for_timeout(160)
+            el = pg.query_selector('#topsel [data-u="%s"]' % key)
+            if not el or not el.is_visible():
+                sm.click(); return False
+        el.click(timeout=4000)
+        pg.wait_for_function("(k)=>window.current===k", arg=key, timeout=4000)
+    except Exception:
+        return False
+    pg.wait_for_timeout(300)
+    return True
+
+
 def viewer(pg, key):
-    pg.eval_on_selector("#viewsel", "(e,k)=>{ e.value=k; e.dispatchEvent(new Event('change')); }", key)
+    """Switch who we are looking as, through the product's OWN control.
+
+    TWO FAULTS OF MINE, BOTH FOUND ON THE FIRST RUN THIS FILE EVER HAD. It
+    asked for `#viewsel`, which appears in no source and in no other check —
+    the switcher is `#asWho` and has been since the temple (S100.3, S297.1's
+    `sl.video` for `sl.vid`: a probe that invents a shape the product does not
+    use reports a working build as broken). And it asked with
+    `eval_on_selector`, which THROWS on a missing element — so section 1 died
+    and took all nine after it down with it, in a file whose own `press()` two
+    lines up exists to stop exactly that (S215).
+
+    So: the product's own `select_option`, which fires a real change (S219 —
+    a synthesised one is not what a person's pick does), and the switch is
+    ASSERTED TO HAVE TAKEN rather than assumed. S237 rebases the tab on the
+    server's graph, so a pick that was refused leaves the select where it was
+    and every assertion after it measures whoever is still there — which is a
+    working build reported broken, the one failure this file must not make.
+    """
+    if not pg.query_selector("#asWho"):
+        ck("the viewer switcher is drawn (cannot look as %s without it)" % key, False)
+        return False
+    pg.select_option("#asWho", key)
+    try:
+        pg.wait_for_function("(k)=>window.VIEWER===k", arg=key, timeout=20000)
+    except Exception:
+        ck("the switch to %s took" % key, False, pg.evaluate("window.VIEWER"))
+        return False
     pg.wait_for_timeout(600)          # S237 rebases from the server
+    return True
 
 def tabs(pg):
     return pg.eval_on_selector_all("#subtabs [data-s]", "e=>e.map(x=>x.dataset.s)")
@@ -152,6 +242,15 @@ with sync_playwright() as p:
     pg = br.new_page()
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
+    # S167.2: `.welcomeover` covers the viewport, so every press in this file
+    # lands on the overlay and retries for thirty seconds — a run that DIED
+    # rather than reported, again. Suppressed as a RETURNING viewer does, and
+    # it must be BEFORE the goto, not after (that section's own words). Twenty
+    # checks carry this line; this one borrowed project-done.py's stub and not
+    # its init script. qa-run.py does it for a SERVED check and this is an
+    # own-server one, so SMP_BASE is stood down and that never runs here.
+    pg.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1');"
+                       "sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
     pg.goto(URL); pg.wait_for_timeout(900)
 
     print("1 · the tab is on his own place and nowhere else")
@@ -164,9 +263,28 @@ with sync_playwright() as p:
     ck("...beside the unit's own Reporting tab, not instead of it",
        "report" in tabs(pg) and
        tabs(pg).index("mylines") > tabs(pg).index("report"), tabs(pg))
-    press(pg, '#units button[data-u="%s"]' % OTHER)
-    ck("it is NOT on a unit that is not his place", "mylines" not in tabs(pg), tabs(pg))
-    press(pg, '#units button[data-u="%s"]' % UNIT)
+    # NOWHERE ELSE IS WALKED, NOT SAMPLED — REWRITTEN, NEVER LOOSENED (S218).
+    # This asked for `retailstores` and measured nothing: a person who owns a
+    # line and nothing else is a BOUNDED role, which ships at `a_unit_other:
+    # "none"` and can never reach a unit that is not their place (S379's own
+    # note — it is why case 2 cost nothing). So the press had no control to
+    # land on, `current` stayed `mobile`, and the tab it then found was the
+    # one that is SUPPOSED to be there. The rule is one line —
+    # `ownsAnyLine() && myLinesHome() === target` — so what is asserted is
+    # that line over every destination he can actually OPEN, which is a
+    # stronger claim than one other unit and, unlike it, a reachable one.
+    home = pg.evaluate("myLinesHome()")
+    seen, shut = {}, []
+    for d in dests(pg):
+        if go(pg, d): seen[d] = "mylines" in tabs(pg)
+        else: shut.append(d)
+    ck("more than one destination is open to him, or 'nowhere else' is vacuous",
+       len(seen) >= 2, {"opened": sorted(seen), "would not open": shut})
+    ck("...and My reporting is on his own place and on NO other",
+       seen and [d for d in seen if seen[d]] == [home],
+       {"home": home, "carries the tab": sorted(d for d in seen if seen[d]),
+        "opened": sorted(seen), "would not open": shut})
+    go(pg, UNIT)
 
     print("\n2 · case 2 — no unit appears in the navigation that was not there")
     viewer(pg, ELSEWHERE)

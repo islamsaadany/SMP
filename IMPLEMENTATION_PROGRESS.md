@@ -6534,9 +6534,35 @@ eight.
 
 ---
 
+## 2026-09-21 — The screen check runs at last (§379.5)
+
+**On the branch, not merged.** The merge is Islam's word, on that merge.
+
+**What was outstanding.** The round below shipped with one thing openly
+unfinished: the check that drives the screen had never been run, because that
+session had the browser and not the driver that steers it. It has been run now.
+
+**Nothing in the product was wrong.** Every one of the four failures was in
+the check itself — it asked for a control by a name the platform has never
+used, it asked in a way that stops the whole file dead instead of reporting,
+it forgot to dismiss the welcome screen so every press landed on that instead,
+and its last test stood on a page the person it was testing is not allowed to
+open, so it was reading the wrong screen and calling a healthy build broken.
+All four are corrected, and the last one is now a stronger test than it was:
+it walks every page that person can actually reach rather than sampling one.
+
+**Then it was proved it can still catch a real fault** — three deliberate
+breaks in the product, each one making the right part of the check go red, and
+the code put back afterwards and checked byte for byte against what it was.
+
+**Where it stands.** The screen check passes 24 of 24, the whole-platform
+sweep walks 33 people across 242 pages with no errors, and every other check
+around it is green. One file changed, and it is a test file.
+
 ## 2026-09-20 — My reporting: the lines a tactic's owner enters (§379, spec 062)
 
 **On the branch, not merged.** The merge is Islam's word, on that merge.
+**Its one open item — the unrun screen check — is closed above (§379.5).**
 
 **What he asked.** Whether a tactic's owner can report their own tactic. They
 could not — and the honest answer came with the number: every one of the

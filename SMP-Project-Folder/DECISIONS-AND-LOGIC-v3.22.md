@@ -53502,7 +53502,81 @@ stranger allowed) reddening 3; `test-graph-diff.js` 140/0;
 `node_modules` — so `qa-run.py` cannot launch. Every frozen browser check,
 `qa.py` and the new `checks/my-reporting.py` are **unrun here**. That file is
 written against the product as the Node check measures it, and its own
-docstring says so in its first lines.
+docstring says so in its first lines. **ANSWERED IN §379.5 BELOW**, in a later
+session that could install the driver — kept rather than rewritten, because
+what it was honest about is the reason §379.5 has anything to report.
+
+## §379.5 · The screen check runs at last, and every failure was the check
+
+The one thing §379 recorded as outstanding, done: `pip install playwright`
+succeeds in this sandbox, the image's own Chromium launches through
+`qa-run.py`, and the file that had never once been run was run. **NO PRODUCT
+FAULT** — the diff is one file under `checks/`, and the built file is
+byte-identical throughout (`built-in-step.py` all good).
+
+**A FILE NOTHING HAS EVER RUN IS A FILE WHOSE OWN MISTAKES ARE STILL IN IT**
+(§54.5), and it had four, each of them a rule this project has already written
+down:
+
+**§379.5a — IT ASKED FOR A CONTROL THE PRODUCT DOES NOT HAVE.** `#viewsel`
+appears in **no source and in no other check**; the switcher is `#asWho`, 13
+times in the built file and 0 for the invented name, and every one of the
+other eight checks that switches viewer says so. §100.3's family, and
+§297.1's exactly — *a probe that invents a shape the product does not use
+reports a working build as broken.*
+
+**§379.5b — AND IT ASKED WITH SOMETHING THAT THROWS.** `eval_on_selector`
+raises on a missing element, so section 1 **died and took the nine sections
+after it down with it** — in a file whose own `press()` helper, two lines
+above, exists to stop precisely that (§215). It goes through the product's own
+`select_option` now, which fires a real change (§219), and **the switch is
+asserted to have TAKEN**: §237 rebases the tab on the server's graph, so a
+refused pick leaves the select where it was and every assertion after it
+measures whoever is still there.
+
+**§379.5c — AND THE WELCOME OVERLAY ATE EVERY PRESS.** `.welcomeover` covers
+the viewport, so a click retried for thirty seconds against
+`<div class="wviewbar">` — §167.2, whose own words are that it must be
+suppressed **before** the goto, and which **twenty-odd checks already carry**.
+This one borrowed `project-done.py`'s stub and not its init script;
+`qa-run.py` does it for a SERVED check and stands `SMP_BASE` down for an
+own-server one, so that route could never have covered it.
+
+**§379.5d — AND THE ASSERTION THAT FAILED WAS RIGHT ABOUT THE RULE AND WRONG
+ABOUT WHERE TO STAND.** *"It is NOT on a unit that is not his place"* pressed
+`retailstores` — and a person who owns a line and nothing else is a **bounded
+role, which ships at `a_unit_other: "none"` and can never reach a unit that is
+not their place**, which is §379's own note and the reason case 2 cost nothing.
+So the press had no control to land on, `current` stayed `mobile`, and the tab
+it then found is the one that is **supposed** to be there: a correct build
+reported broken (§113.8 — the assertion's own precondition had failed in
+silence, and `press()` degrades by returning False, which the caller ignored).
+**REWRITTEN, NEVER LOOSENED** (§218) and **stronger than what it replaced**:
+the rule is one line — `ownsAnyLine() && myLinesHome() === target` — so it is
+asserted over **every destination he can actually open**, with a guard above
+it that the set has more than one in it or *"nowhere else"* is vacuous
+(§113.8). That guard **earned its place immediately**: the first walk opened
+exactly one destination and said so, because the group and the companies sit
+in a dropdown (§68, §94.6) and `press()` degrades on an ABSENT control while
+Playwright waits thirty seconds on a merely **INVISIBLE** one — §215 one step
+along, answered by following `measure-score-spread.py`'s own `go_top()` rather
+than inventing a route.
+
+**PROVED ABLE TO FAIL THREE WAYS FROM THE SOURCES** (§276 — this file serves
+the built file, and an edited one is silenced by §238's hashed CSP, so every
+break is made in `config-data.js` or `lib/rules.js` and rebuilt): the tab
+ignoring the person's place **2 red**, naming all thirteen destinations it
+then appears on; the lock never shutting a box **3 red**; the switch ignored
+**1 red**. Each break was asserted to have MATCHED and the build asserted to
+DIFFER before it was believed (§344.1), and after each the tree was restored
+**from the saved copy and never with `git checkout`**, with the rebuild
+asserted byte-identical to the good build (§343.9).
+
+**VERIFIED**: `checks/my-reporting.py` **24/0**; full `qa.py` **33 viewers,
+242 destinations, ERRORS none** — §367's recorded numbers to the digit, which
+is what it should be, since nothing in the product moved;
+`test-my-reporting.js` 53/0; `test-authorize.js` 704/0; `test-graph-diff.js`
+140/0; `built-in-step.py` all good.
 
 **AND `main` HAS MOVED TO §378 WHILE THIS WAS BUILT**, so it is renumbered
 **before** any merge (§264.3, §371.5): §345 → §379 and spec 057 → 062, scoped

@@ -33110,28 +33110,43 @@ function renderPeople(){
      for the row's kebab; what is left is one word in one pill, so the column
      is 76px instead of 150. "Temporary" becomes "Temp" for the same reason —
      three states that have to be told apart at a glance, not read. */
-  /* ── AN ADDRESS AND A NUMBER ARE THERE TO BE USED (§93.6) ─────────
-     Islam: "make the email and the phone to be copied on clicking on them."
-     They are the two values on this register that always leave it — into a
-     mail client, into a phone — and selecting text inside a horizontally
-     scrolling table with a frozen column is a drag that starts a scroll.
+  /* ── THE ADDRESS AND THE NUMBER ARE ORDINARY VALUES (§377, REVERSING
+     §93.6) ──────────────────────────────────────────────────────
+     Islam: "please remvoe the 1 click copy bhavior I can always have a right
+     click and copy the text."
 
-     A BUTTON, NOT A SPAN WITH A HANDLER. It is a real action, so it takes a
-     real control: keyboard-reachable, announced, and carrying its own hint.
-     It is styled to LOOK like the value rather than like a control, though —
-     `linkbu` was the first go and put an accent underline on every row of the
-     register, which reads as a table of links to somewhere.
+     §93.6's REASON FOR THE BUTTON WAS THAT YOU COULD NOT SELECT THE TEXT —
+     "selecting text inside a horizontally scrolling table with a frozen column
+     is a drag that starts a scroll" — and the button is what made that true:
+     a drag across a <button> selects NOTHING — measured in Chromium, which is
+     the only engine here, so it is said that way rather than as every browser
+     (§124). On both
+     builds, the same row, the same drag: today the selection comes back empty
+     and with the button gone it comes back as the whole address. So the
+     fallback he named is not a worse way of doing it, it is a way that only
+     works once the control is out.
 
-     Empty stays a dash — there is nothing to copy, and a button that copies
-     "" would report success for doing nothing. */
-  function copyable(v, cls){
+     AT REST THE TWO BUILDS ARE THE SAME PICTURE, BYTE FOR BYTE. §93.6 styled
+     the button to look like the value rather than like a control, so what goes
+     is not a look but two behaviours — the underline under the cursor, and the
+     value being REPLACED by the word "Copied" for 1.2s, which is the one thing
+     on this table that hides the value somebody came to read.
+
+     AND THE HOVER STOPS BEING UNCONDITIONAL. §93.6 wrote the value into the
+     `title` because §88's clipTitles() only fills an EMPTY one, so a bare
+     "click to copy" would have taken the hover from the values too long to
+     read. With no hint to carry, the title goes back to clipTitles(), which is
+     what every other column does: 65 titles become 1, and it is the one value
+     actually cut. §88's contract holds either way (nothing cut without a
+     hover) and is asserted at both ends.
+
+     Empty stays a dash (§15.1). The phone takes `.val` beside `.mono` so both
+     cells sit on the register's own value shape rather than this column's —
+     which closes §374's recorded-not-done in passing, the 19.4px press target
+     being a press target no longer. */
+  function valueCell(v, cls){
     if (!v) return '<span class="why" style="margin:0">&mdash;</span>';
-    /* THE VALUE IS IN THE TITLE, not just the hint. §88's clipTitles() only
-       fills a title that is empty, so a bare "Click to copy" would have taken
-       the hover away from exactly the values too long to read — which is the
-       one case the hover exists for. Both, in one string. */
-    return '<button class="copyval ' + cls + '" data-copy="' + esc(v) +
-      '" title="' + esc(v) + ' \u00b7 click to copy">' + esc(v) + '</button>';
+    return '<span class="' + (cls || "val") + '">' + esc(v) + '</span>';
   }
 
   function pwCell(p){
@@ -33574,9 +33589,30 @@ function renderPeople(){
             ? '<span class="val"' + why + '>' + esc(COMPANIES[ck].name) + '</span>'
             : '<span class="why" style="margin:0"' + why + '>&mdash;</span>';
         })()) : '') +
+      /* ── AN ADDRESS IS TAKEN WHOLE (§378) ──────────────────────────
+         Islam: "can you make a right click on the email to highlight the
+         whole email to copy on right click .. as it happens on the phone
+         number." MEASURED FIRST, AND THE TWO DO NOT DIFFER: since §377 both
+         cells are the same builder, and driving a real browser on a real row
+         says a right-click selects NOTHING on either, while a double-click
+         and a drag each select the whole value on BOTH. So what he is seeing
+         is his browser's own word-selection and not this table — which is
+         also why the answer cannot be a difference between these two lines.
+
+         `selall` is the product's own device rather than a new one: the
+         issued-password box has carried `user-select:all` since §43.8, for
+         exactly this reason — a string somebody copies in one piece, never a
+         part of one. With it, EVERY gesture takes the whole value in every
+         engine, so the behaviour stops depending on whose browser it is.
+
+         THE COST WAS STATED BEFORE HE TOOK IT: a plain left-click highlights
+         the value too (it copies nothing — §377 stands), and a drag can no
+         longer take part of an address. And it is SCOPED to these two, never
+         to `.val`, which is every value in every Setup table: a unit's name
+         selected whole on a click is a change nobody asked for (rule 1b). */
       (showCol("email")
-        ? pcell(p, "Email", copyable(p.email, "val"), "wrapany") : '') +
-      (showCol("phone") ? pcell(p, "Mobile", copyable(p.phone, "mono")) : '') +
+        ? pcell(p, "Email", valueCell(p.email, "val selall"), "wrapany") : '') +
+      (showCol("phone") ? pcell(p, "Mobile", valueCell(p.phone, "val mono selall")) : '') +
       /* ── AND THE CELL IS THE PICKER NOW (§372) ─────────────────────
          `false` was right while the table only ever read: the × and the
          "+ role" control belonged to the dialog. What the cell draws is
@@ -61483,54 +61519,13 @@ var SYNC = (function () {
        wizard is open it would have bound a second handler to them — one that
        resets the merge without closing the dialog. wireMerge() owns them. */
 
-    /* ── CLICK TO COPY AN ADDRESS OR A NUMBER (§93.6) ────────────────
-       Islam: "make the email and the phone to be copied on clicking on them."
-
-       THE WORD IS WRITTEN INTO THE ELEMENT, NOT PAINTED. paint() would replace
-       the button that was just pressed — §63's rule, learned on Save draft —
-       so the tick is set on the node and put back on a timer. The original
-       text is kept on the node too, or a second click during the tick would
-       copy the word "Copied".
-
-       AND THE FALLBACK IS NOT DECORATION. `navigator.clipboard` needs a secure
-       context, and this product is opened from `file://` every day of its
-       life — so a hidden textarea and `execCommand("copy")` is the path that
-       actually runs here, and the promise path is the one that runs in
-       production. Both end at the same tick, and a failure says so rather
-       than tick-ing anyway. */
-    document.querySelectorAll("[data-copy]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var self = this, v = self.dataset.copy;
-        var was = self.dataset.copyWas || self.textContent;
-        self.dataset.copyWas = was;
-        function done(ok){
-          /* NOT "Press Cmd-C" — this runs on Windows too, and naming the
-             wrong key is worse than naming none. */
-          self.textContent = ok ? "Copied" : "Could not copy";
-          self.classList.toggle("copied", ok);
-          clearTimeout(self.__copyT);
-          self.__copyT = setTimeout(function(){
-            self.textContent = was;
-            self.classList.remove("copied");
-          }, 1200);
-        }
-        function legacy(){
-          var t = document.createElement("textarea");
-          t.value = v;
-          t.setAttribute("readonly", "");
-          t.style.cssText = "position:fixed;top:-1000px;opacity:0";
-          document.body.appendChild(t);
-          t.select();
-          var ok = false;
-          try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
-          document.body.removeChild(t);
-          done(ok);
-        }
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(v).then(function(){ done(true); }, legacy);
-        } else { legacy(); }
-      });
-    });
+    /* §93.6's CLICK-TO-COPY WAS WIRED HERE, and it went with the control
+       (§377, §24). Islam: "please remvoe the 1 click copy bhavior I can always
+       have a right click and copy the text." Nothing binds `[data-copy]` any
+       more because nothing draws it: the address and the number are ordinary
+       values, which is also what makes his fallback work — a drag across a
+       <button> selects nothing, measured, so the control was the reason the
+       text could not be selected in the first place. */
 
     /* The row's action menu (§46.4). Opening one closes any other, because
        PMENU is a single key rather than a flag per row. */

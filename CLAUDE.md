@@ -10375,7 +10375,159 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-21 &mdash; **&sect;382.1: the merge, and the two
+*Last Updated: 2026-09-21 &mdash; **&sect;382.2: the second half of the same
+sentence &mdash; `main` comes in.** Islam, at &sect;382.1: *"there are
+intresections and we need it resolved before merging. so better merge that
+branch with ours first."* The branch he named was merged there; **this is the
+rest of that sentence** &mdash; `origin/main`'s &sect;377 and &sect;378 (spec
+059, a third session on the register's Email and Mobile cells), which
+&sect;382.1's own closing line records as still to come in. **NOTHING IS BUILT
+HERE**, read off the diff: five conflict resolutions, two regenerated artefacts
+and the record. **EVERY CONFLICT HAD A NAMED RULE** &mdash; the three record
+files **COMBINED, never picked** (&sect;318.7, &sect;356.17, &sect;375.1), the
+built file **REBUILT from the merged sources, never merged** (&sect;91), and
+`sw.js` rebuilt from main's copy with the branch's one line re-applied
+(&sect;146.2) at a name **past both** (&sect;94.12), one `SHELL` declaration,
+`node --check` clean. **AND THE COMBINE IS ASSERTED RATHER THAN EYEBALLED**,
+because either side of a record file taken whole silently drops the other
+session's round and there is no `generated-in-step` for prose (&sect;356.17's
+own finding): a script asserts **every non-blank line of each side survives**,
+with exactly ONE deliberate edit declared to it &mdash; main's `*Last Updated:*`
+becoming `*Earlier:*`, which is that file's own convention. Ours leads in
+`CLAUDE.md` (newest-first) and main's leads in the other two (append order),
+read off each file's own heading order rather than assumed. **AND THE ARTEFACTS
+CARRY BOTH SIDES, MEASURED**: the rebuilt platform holds main's `selall` on 4 lines and
+this branch's `lineOwnersSwitch`/`lineOwnersOn` on 7, and `lib/shell.ts` still stamps
+`data-library-cats` &mdash; *a merge that rebuilt one side's artefact from one
+side's sources satisfies every "it builds" assertion and ships half the
+product.* **NO RENUMBER WAS OWED AND IT WAS CHECKED IN THREE SPELLINGS**
+(&sect;336.1): &sect;382.1 moved this branch's &sect;377&rarr;&sect;380,
+&sect;379&rarr;&sect;381, &sect;380&rarr;&sect;382 **before** that merge, which
+is what makes a renumber provably scoped (&sect;264.3), so every
+&sect;377/&sect;378 in this tree is prose REFERRING to main's sections and
+`main` cites &sect;379&ndash;&sect;382 **nought** times. **THE MERGED SOURCES
+WERE READ, NOT BELIEVED** (&sect;313.37): main replaced `copyable()` with
+`valueCell()` and deleted the click-to-copy handler, nothing in the merged tree
+still calls the removed name or binds `[data-copy]`, and the concatenation holds
+**1530 top-level names with exactly the SIX &sect;281.1 deliberately leaves**
+&mdash; scanned over build.py's own script list, read from `build.py` rather
+than typed (&sect;53.5, &sect;340.1) &mdash; so **the merge introduced none**
+(&sect;56.7). **AND &sect;274's SWEEP RAN ON BOTH SIDES**: the checks that reach
+for the removed control are main's own two, both asserting its **ABSENCE** and
+both green here, and one mockup GENERATOR the wrapper refuses in a sweep
+(&sect;334.14). **AND THE ONE LINE OUR TWO ROUNDS BOTH TOUCH WAS HANDLED AS A
+REWRITE**: &sect;374's *"a duplicated value still opens its cell"* rested on
+`data-copy` being the 33-way ambiguous mark, and main's &sect;378 **REWROTE it
+rather than loosening it** (&sect;218), the open-and-still-open half surviving
+whole and still able to fail &mdash; which is what keeps &sect;374's `putFocus`
+guard under measurement.
+**&sect;382.2d &mdash; THREE REDS, EVERY ONE ESTABLISHED AS NOT THIS MERGE'S**
+(&sect;303): `test-clean-parity.js`, which &sect;308 already records red on
+`origin/main` and whose subject neither side touched; **spike S2**, reproduced
+identically on a worktree of the pre-merge commit
+(`seed: portfolio_activities references portfolio_activities` &mdash; the seeder
+takes the first FK the catalogue hands back, ordered `BY conname`, and on that
+table the auto-named `…_depends_on_fkey` sorts first, so it picks the
+SELF-reference; **the topological walk one function above it skips a
+self-reference by name and the seeding loop does not**, &sect;53.5), with
+neither side touching `smp-app/db/` or `smp-app/spike/`; and **`check:frameworks:page`** 1/14, where
+**every file of its subject is byte-identical to the pre-merge tree**, so a
+merge that changes no byte of a check's subject cannot change its verdict
+&mdash; and **what it IS is said rather than left as an absence** (&sect;54.5,
+&sect;123): the console's `#nav` is EMPTY with `platform-page.js` served 200,
+`body.ready` set and **no console error**, so `ME` never lands. A container
+condition, not closed here.
+**&sect;382.2e &mdash; AND THE FINDINGS OF THE ROUND WERE MINE, IN THE
+HARNESS.** **`export A=x B=$A` IN ONE STATEMENT LEAVES B EMPTY**, so the first
+pass of every database check ran with `DATABASE_URL_UNPOOLED` unset &mdash; on
+the POOLED connection, which for a request selecting its tenant with a session
+setting is exactly what &sect;313.34 forbids &mdash; **and the product printed
+the warning on every single run**, read past nine times (&sect;105.6's family:
+*a measurement made in the configuration the product warns about is not one
+worth recording*, and the tell was on screen throughout). All re-run with both
+names set. **AND A LAUNCHER THAT DID NOT LAUNCH REPORTED SUCCESS**: the first
+sweep, started as `nohup &hellip; &` inside a backgrounded shell call, was
+killed with its wrapper and came back **exit 0 with an empty log** &mdash;
+&sect;320.6b one layer out, and what catches it is the rule already written
+down, **read the TAIL, and an EMPTY tail is a failure and never a pass**
+(&sect;298.3), which is why the runner written for the 185-file suite prints
+`<EMPTY TAIL>` as a verdict of its own. **AND TWO RECORDED CONDITIONS WERE MET
+RATHER THAN QUOTED**: &sect;328.6's two pixel-reading checks need Pillow and die
+with `ModuleNotFoundError` without it, which reads like a failure in a summary
+and is not one &mdash; installed, both green; and &sect;328.3's
+`multi-client.py` needs the three-step rehearsal database, built here and
+**124/0**, &sect;366.3's own figure. **AND A STALE `next-server` FROM THE OTHER STACK SQUATTED THE FROZEN
+CHECKS' OWN PORTS** &mdash; 3994 and 3995 &mdash; so both came back *"dev-server
+never came up"*, which names the wrong server: **&sect;366.4's collision from the
+other side**, that section recording it as a false PASS and this as a false FAIL.
+**My first diagnosis was a guess and was wrong** (contention with the sweep's
+Chromium, deferred on it &mdash; &sect;105.6); what found it was starting the
+server **by hand exactly as the check does**, the port as **argv** and not the
+`PORT` the server does not read, and reading `EADDRINUSE`. **And the tool reached
+for first was blind**: `ss` called the port free while `fuser` named the pid and
+`curl` got a 200 off it (&sect;100.3, reporting the reassuring direction).
+**&sect;382.2f &mdash; AND THREE HARNESSES WANT THREE DIFFERENT WORLDS, WHICH
+IS &sect;328.3's CLASS WITH A TWIST.** `test-platform.js` came back **92/1** on
+the rehearsal database, on *"the known password is the one said in the open"*
+&mdash; and it is neither a fault nor an ordering slip: `fixture-platform.js`
+makes its three accounts through the product's own hasher (&sect;313.37's own
+sentence) and in doing so REPLACES the bootstrap password that test asserts, so
+on a migrated database **without** the fixture it is **93/0**, its own recorded
+figure. `test-cold-starts.js` is the same shape with the opposite prerequisite
+&mdash; red on the rehearsal database, **all passed** on a virgin one, which is
+what it models. **AND `test-concurrent-saves.js` IS THE THIRD WORLD, WITH THE
+MOST ALARMING READING AND THE SAME ANSWER**: it reports **8 of 8 concurrent
+changes lost**, which is &sect;240's own subject &mdash; and run from a worktree
+of the **pre-merge commit against the same database** it is byte-for-byte the
+same verdict, the same eight units, the same words (&sect;303). What it measures
+is the FROZEN stack's `api/state.js` in a world &sect;328.3 already records those
+harnesses as unable to ask in since &sect;313, while **production serves the new
+stack** (&sect;332), whose concurrency is green here at `check:state` **92/0**.
+**AND ONE OF THE THREE DOES NOT MERELY WANT A DIFFERENT WORLD &mdash; IT
+POISONS ANOTHER'S**: `test-platform.js` leaves its three `@ff.example` fixture
+accounts in `platform.accounts`, and `multi-client.py` asserts every consultant
+the console lists ends `@forefront.consulting` &mdash; a real rule about a real
+leak (&sect;313.4) &mdash; so the contaminated run reads **124/1** naming ten
+addresses and reads exactly like a product fault, against **124/0** rebuilt in
+the three steps (&sect;100.3: *the order is not an inconvenience; the wrong one
+reports a correct build broken*).
+**So the three-step recipe is `multi-client.py`'s and not every harness's**
+&mdash; recorded here rather than left for the next person to rediscover, with
+nothing in the product moving for it.
+**VERIFIED ON THE MERGED TREE, NEVER ON EITHER SIDE** (&sect;365): the frozen
+suite **185 files &mdash; 16 mockup GENERATORS the wrapper refuses** (&sect;334.14)
+and **169 real checks, all green**, the TAIL read for every one with
+`<EMPTY TAIL>` a verdict of its own (&sect;298.3); `qa.py` over `file://` **33
+viewers / 242 destinations / ERRORS none**, SUMMED from the run's own lines and
+not quoted (&sect;332) &mdash; &sect;365's and &sect;367's figure to the digit,
+which is what a merge changing no frozen source must reproduce. Authoriser
+**704/0**, change list **140/0**, platform rules **69/0**, `test-nav-row`
+**18/0**, `test-my-reporting` **53/0**, session-state **ok** with its two named
+printed exceptions, db-url-choice **10/0**; and on the stack production actually
+serves (&sect;332) state **92/0**, modules **159/0**, room 10/0, memory 16/0,
+setup 33/0, viewas 20/0, deploy 5/0, assistant 10/0, insights:tab 24/0, with
+`tsc` clean **COLD** (&sect;3). `built-in-step` **all good** and
+`generated-in-step` **all clear**, the three carried `.cjs` in step by the one
+declared transform (&sect;335). **Nothing stored moves, nothing is migrated and
+nobody is signed out**, read off the diff (spec 029).
+**AND `main` HAS MOVED AGAIN SINCE THIS MERGE WAS MADE, SAID RATHER THAN LEFT
+FOR THE NEXT PERSON** (&sect;4's fetch-and-look, run again as the LAST step of
+a merge rather than only the first &mdash; &sect;94.16's habit pointed at the
+branch instead of the file): this merge is against **e798419c**, whose `sw.js`
+reads v5.22, and `origin/main` now carries **three more commits** &mdash; and it
+has taken **&sect;379**, which its `CLAUDE.md` cites **nine** times, for spec
+059's own continuation. **This tree holds a DIFFERENT &sect;379** (My reporting,
+spec 062, arriving at &sect;382.1), and the two are genuinely disjoint: neither
+body's text appears in the other's tree, and main cites &sect;380&ndash;&sect;382
+**nought** times. So the next merge owes a renumber **BEFORE** it, scoped to
+this branch's own lines and in all three spellings (&sect;264.3, &sect;336.1)
+&mdash; and it is a round of its own, because nothing above is verified against
+those three and re-running the suite on the MERGED tree is what makes a merge
+honest (&sect;365).
+**`main` untouched: this is the rehearsal,
+and the merge is Islam's word, on that merge.*
+
+*Earlier: 2026-09-21 &mdash; **&sect;382.1: the merge, and the two
 intersections.** Islam: *"there are intresections and we need it resolved
 before merging. so better merge that branch with ours first."* **THERE WERE
 TWO, AND ONLY ONE WAS THE BRANCH HE NAMED**: looking before merging (&sect;91's
@@ -10664,6 +10816,246 @@ check, `check:insights` and `check:modules` did not run &mdash; the view-as fix
 is proved as a RULE and at both ends of its seam and **has not been driven
 through a browser against a real client**, and that run is owed before it is
 called finished. **`main` untouched: the merge is Islam's word, on that merge.*
+
+*Earlier: 2026-09-20 &mdash; **&sect;378: an address is taken whole
+(spec 059).** Islam, of the build &sect;377 shipped: *"can you make a right
+click on the email to highlight the whole email to copy on right click .. as it
+happens on the phone number."* **MEASURED BEFORE ANYTHING WAS PROPOSED, AND THE
+REPORT DOES NOT REPRODUCE**: since &sect;377 both cells come off the same line,
+and driven in a real browser on a real row a **right-click selects NOTHING on
+either**, while a double-click and a drag each take the whole value on **both**.
+So what differs is his browser's own idea of what a word is, not this table
+&mdash; which is precisely why the answer could not be a difference between
+those two lines. **AND THE FIRST RUN OF THAT PROBE PRODUCED THE REPORTED FAULT
+BY MEASURING WRONGLY**: it read both boxes ONCE up front, and the email's
+double-click opens the editor and repaints, so the Mobile coordinates were
+stale and it reported *email selects, mobile does not* &mdash; &sect;222, and
+one page load per gesture is what separated the two readings. *A measurement
+that reproduces the complaint is not thereby a measurement of the complaint.*
+**THE ANSWER IS `user-select:all`, AND IT IS THE PRODUCT'S OWN DEVICE RATHER
+THAN A NEW ONE** (&sect;53.5): &sect;43.8's issued-password box has carried it
+since it was written, for exactly this reason &mdash; *a string somebody has to
+read out loud down a phone, so it has to be one unbroken run.* With it every
+gesture takes the whole value in every engine, so the behaviour stops depending
+on whose browser it is. **THE TWO COSTS WERE STATED BEFORE HE TOOK THEM**
+(*"yes agreed for the question and build"*): a plain left-click highlights the
+value too &mdash; it copies nothing, so &sect;377 stands whole, since what he
+removed was one click COPYING &mdash; and a drag can no longer take part of an
+address, the whole thing coming with it, which for an email or a phone number
+is almost always what was wanted. **BOTH CELLS, NEVER ONE**: they are identical
+today, so changing only the Email would create his own complaint in reverse.
+**SCOPED, AND THE SCOPING IS THE HALF A CHECK COULD MISS** &mdash; `.val` is
+every value in every Setup table, and `user-select:all` on all of them is a
+change nobody asked for (rule 1b), so the rule is `.cfg .val.selall` and the
+check measures a column that was NOT asked about **in the same run** and
+requires it to select nothing: a build that widened the rule satisfies every
+*"a right-click highlights the whole value"* assertion and quietly changes the
+whole product (&sect;94.2, &sect;113.8). **THE GESTURE IS DRIVEN, NEVER THE
+PROPERTY READ** (&sect;94.8, &sect;96): asking `getComputedStyle` for
+`user-select` passes on a build where the rule is declared and something
+outranks it, which is how &sect;373.2's box-shadow &mdash; a declaration that
+had never painted a pixel &mdash; survived for as long as it did. **NOTHING
+VISUAL MOVES AND IT WAS MEASURED, SO NO MOCKUP WAS OWED** (rule 1c): same
+widths, same row heights, same colours, the two builds the same picture; what
+changes is a behaviour, which a still cannot show. **Proved able to fail TWICE
+FROM THE SOURCES** (&sect;276), one break per decision, each asserted to have
+MATCHED before it was written (&sect;344.1) and each reddening **its own**
+assertions and no others: the rule removed **2 red**, printing
+`{'selected': '', …}`, the reported state verbatim; the rule widened to
+`.cfg .val` **1 red**, printing `{'selected': 'Ashraf Laithy'}` &mdash; the
+widened rule reaching a column nobody asked about, in its own words. The tree
+was restored and rebuilt **byte-identical** to the build the breaks were made
+from (&sect;343.9). **&sect;378.1 &mdash; AND TWO OF MY OWN NEW ASSERTIONS
+PROVED NOTHING FIRST**, found by falsifying rather than by reading: the
+scoping one went **GREEN on the very build it exists to catch** (&sect;54.5),
+because it ran after another right-click in the SAME page and the second
+right-click of a page does not land &mdash; and *nothing selected* is also
+what a correctly scoped build reports, which is why it read as a pass. And
+the clicks were landing on the wrong element (&sect;93.4, recorded here three
+times and walked into a fourth): with every column showing the register
+scrolls sideways, so on a freshly landed page those cells sit off the
+right-hand edge or beneath the frozen last column, which floats over whatever
+scrolls under it (&sect;373.2) &mdash; hit-tested, the probe read back
+`NOTHING` and `TD`, and a throwaway probe had meanwhile reported the Email
+broken on the GOOD build with the cause named as `BUTTON.kebab`. Each gesture
+gets a page of its own now, `rclick()` brings the cell into view the way a
+person does, and **the caller asserts WHERE the click landed before it
+asserts what was selected**, so a click that misses is reported as a miss
+rather than as an absence of selection. **And both falsifications were run
+AGAIN afterwards**, which is the point of the detour: one made before a check
+is rewritten proves nothing about the check that ships. **The server needed nothing and it is read off the diff**
+(&sect;172): no `api/`, `lib/` or `db/` file, nothing stored moves, nothing is
+migrated, nobody is signed out (spec 029). The built file's bytes changed, so
+`sw.js` is bumped (&sect;91) &mdash; reaching the OFFLINE copy alone, because
+the generator drops the half of the worker that carries the name (&sect;316.10,
+&sect;365). **RECORDED, NOT DONE**: a value cut by &sect;88's 150px cap is
+selected whole including the part that is not on screen, which is right and is
+worth knowing before somebody reports it as a surprise.
+
+**&sect;378.2 &mdash; MERGED TO `main` 2026-09-20 on Islam's word**, and
+**`main` HAD NOT MOVED**, measured rather than assumed (&sect;4's
+fetch-and-look): it stood at &sect;377.6, this commit's own parent, so the
+merge is a clean **fast-forward** and *the tree pushed is byte-for-byte the
+tree that was verified* &mdash; no resolution, no rebuild, nothing
+recombined, which is the strongest case this project ever gets and is worth
+naming because every other merge in this log had to earn the same claim the
+hard way. **&sect;378 was free on `main`**, checked and not assumed, so no
+renumber was owed (&sect;264.3). **`sw.js` CONFIRMED IMMEDIATELY BEFORE THE
+PUSH** (&sect;94.16): `v5.22-whole-values` against main's `v5.21`, a name the
+history has never held, one `const SHELL`, `node --check` clean
+(&sect;146.2). **AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE
+BRANCH TIP WAS ALREADY PUSHED** (&sect;91, by &sect;357.4's road): Vercel
+deduplicates by SHA, so fast-forwarding `main` onto a commit the branch ref
+already holds is ONE deployment and which ref gets it is a race already lost
+&mdash; *the way back is a commit `main` holds and the branch does not, and
+it must be one worth making*, which the record owed anyway, since
+&sect;378's own block still read *"main untouched"* over a merge that had
+happened. **&sect;91.5'S LIVE READ COULD NOT BE MADE FROM HERE AND IS SAID
+RATHER THAN CLAIMED** (&sect;54.5, rule 3a): this environment's egress policy
+refuses `smp-orpin-tau.vercel.app` at the proxy's own CONNECT (403), which
+its README says to report rather than route around &mdash; **nobody here has
+seen production serve this commit**. **THE WITNESS IS `shell.js` AND
+`platform.css`, NEVER `sw.js`** (&sect;365, &sect;367), whose served copy is
+**4,104 bytes on both builds** because the generator drops the half carrying
+the name: `shell.js` **3,843,142 &rarr; 3,844,669** and `platform.css`
+**673,729 &rarr; 674,285**, both LARGER, this round being an addition where
+&sect;377 was a removal, and both asserted to have MOVED or a match would
+hold either way (&sect;113.8). **NO FORCED SIGN-OUT IS OWED, READ OFF THE
+DIFF** (spec 029): not one `api/`, `lib/` or `db/` file is in it. **THE
+RESIDUE IS THE ONE &sect;365 AND &sect;367 BOTH NAMED, UNCHANGED**: with the
+served worker's bytes unmoved no `controllerchange` fires, so &sect;258's
+*"A newer version of the platform is ready"* is not offered and a tab left
+open keeps its old shell until somebody reloads it.***
+
+*Earlier: 2026-09-20 &mdash; **&sect;377: an address is a value, not a
+control (spec 059).** Islam: *"please remvoe the 1 click copy bhavior I can
+always have a right click and copy the text."* **AT REST THE TWO BUILDS ARE THE
+SAME PICTURE, BYTE FOR BYTE**, and measuring that first is what decided how much
+ceremony this deserved: &sect;93.6 styled the button to LOOK like the value
+rather than like a control, so a mockup of the proposed look would have been two
+identical screenshots (rule 1c, satisfied by there being nothing to choose
+between). What goes is not a look but two behaviours &mdash; the underline under
+the cursor, and the value being **REPLACED by the word "Copied" for 1.2s**,
+which on the one table whose job is showing values means the control hid the
+thing it was copying; photographed from the real page rather than described.
+**AND &sect;93.6's OWN REASON WAS CREATED BY &sect;93.6's OWN ANSWER**: its
+argument for a button was that *"selecting text inside a horizontally scrolling
+table with a frozen column is a drag that starts a scroll"* &mdash; and **a drag
+across a `<button>` selects NOTHING** — measured in Chromium, which is the
+only engine this sandbox has, and stated that way rather than as *every
+browser*, which is a claim nothing here can make (&sect;124). Both builds,
+same row, same drag: the selection comes back **empty** today and **the whole
+address** with the control gone. *His fallback is not a worse way of doing it,
+it is a way that only works once the control is out* &mdash; which is the
+opposite of what I expected to find and is why it was measured rather than
+reasoned about (&sect;93.11's family). **THE HOVER STOPS BEING UNCONDITIONAL AND
+THAT IS &sect;88 GETTING ITS COLUMN BACK**: &sect;93.6 wrote the value into the
+`title` beside the hint because `clipTitles()` only fills an EMPTY one, so a
+bare *"click to copy"* would have taken the hover from exactly the values too
+long to read; with no hint to carry, the title goes back to `clipTitles()`
+&mdash; **65 titles become 1**, and it is the one value actually cut, which is
+what every other column does. **&sect;88's contract is what must survive it**
+(nothing cut without a hover) and is asserted at both ends, or a build that
+dropped the titles and the clipping together would pass. **NO LAYOUT MOVES, AND
+IT WAS MEASURED RATHER THAN ASSUMED** (&sect;158): row heights identical to the
+tenth of a pixel, every column width identical, the table 1005px on both. The
+phone's own box goes **19.4 &rarr; 27.4px** as it takes `.val`'s padding like
+every other value &mdash; which closes &sect;374's recorded-not-done in passing,
+a 19.4px press target being a press target no longer. **TWO CHECKS REVERSED AND
+REWRITTEN, NEVER DELETED** (&sect;218): `people-dialog` &sect;2b asserted that
+one press still copied, because &sect;374's fault and &sect;93.6's control were
+two acts sharing one element; `identity-merge` carried &sect;93.6's own six.
+Each claim INVERTS, and **each absence is paired with the presence that makes it
+mean something** (&sect;94.2) &mdash; the value still there and readable, and
+the drag that now works &mdash; because a build that had EMPTIED the column
+satisfies *"no control"* perfectly. **4 red and 3 red** on the build that still
+has it, from the SOURCES (&sect;276). **AND THE FALSIFICATION FOUND &sect;215 IN
+THE FILE THAT RECORDS IT FOUR TIMES**: `eval_on_selector` THROWS on a selector
+matching nothing, and on the reversed build there is no `.val` in those two
+cells at all &mdash; so the first red run printed **one** failure where there
+are four and took the rest of the section with it; every probe degrades now.
+**AND THE DRAG IS ASSERTED AS *the value is IN the selection*, never *the
+selection is the value***: `.val` is a block, so a drag to its right edge runs
+on into the rest of the row exactly as it does in every other column &mdash;
+which is the table behaving normally rather than this cell misbehaving, and
+asserting the tighter thing reported a correct build broken. **AND MY OWN GUARD
+TRIPPED ON MY OWN PROSE**: `assert ".copyval" not in s` fired because the
+comment explaining the removal spells the class it removes &mdash; it is
+asserted over selector lines rather than over the file. **The server needed
+nothing and it is read off the diff** (&sect;172, spec 029): no `api/`, `lib/`
+or `db/` file, nothing stored moves, nothing is migrated, nobody is signed out.
+**RECORDED, NOT DONE**: `checks/registry-inline-mockup.py` is a mockup
+GENERATOR whose subject was what a double-click leaves behind on a copy button
+against plain text &mdash; a question this answers by removing one side of it.
+It writes into `design-mockups/`, so `qa-run.py` refuses it in a sweep
+(&sect;334.14) and it can redden nothing; left as evidence rather than edited as
+a side effect of a round that was not about it (Principle II, rule 1b).*
+
+**&sect;377.6 &mdash; MERGED TO `main` 2026-09-20 on Islam's word**, and the
+merge is part of the record. `main` had moved **33 commits** &mdash; Portfolio
+(&sect;375, spec 060) and the reports as a tab (&sect;376, spec 061) &mdash; and
+had taken **&sect;375** for different work, so this round became **&sect;377
+BEFORE the merge**, which is the only moment a renumber is provably scoped
+(&sect;264.3). **The assertion that makes it safe is the merge base**: it holds
+&sect;375, &sect;376 and &sect;377 exactly **nought** times, so all 20 citations
+were this branch's own and main's 26 were not yet there to sweep up; both
+spellings (&sect;336.1), a third searched for and absent, and **0 changed lines
+carry anything but a citation**. Spec 059 is NOT renumbered &mdash; it is this
+branch's own and already on main, carried there by &sect;374.
+**`sw.js` IS &sect;94.12 EXACTLY**: both sides independently wrote
+`smp-shell-v5.20-*`, differing only after the number &mdash; so git conflicted
+here where the *same* string on both sides would have merged silently with
+different bytes behind it. Resolved to **v5.21**, proved unique against every
+name the history has ever held, one `const SHELL`, `node --check` clean
+(&sect;146.2). `CLAUDE.md` **COMBINED, never picked** (&sect;318.7): both sides
+rewrote the *Last Updated* block, so either taken whole drops the other's
+record. The built file **REBUILT, never merged** (&sect;91) and byte-identical
+to `build.py`'s output; the four generators re-run and `generated-in-step` all
+clear (&sect;329). **AND THE DECISIONS DOC WAS OUT OF ORDER, AND IT IS MY OWN
+DRIFT RATHER THAN THE MERGE'S** (&sect;356.17): &sect;377's block sat between
+&sect;374 and its own sub-section &sect;374.1, at `###` where every peer is
+`##` &mdash; measured on the branch BEFORE the merge, so the merge only made it
+visible by bringing &sect;374.1 alongside. **BOTH GREPS A MERGE OWES, ON THE
+MERGED RESULT**: the names &sect;377 deleted (&sect;313.37) survive at six sites
+and **every one is a comment explaining the removal**; and the duplicate
+top-level declaration scan over build.py's own concatenation (&sect;56.7,
+&sect;281) reads **1514 names, 6 duplicates &mdash; the six &sect;281.1 leaves
+deliberately**, so the merge introduced none. **AND MY OWN WAITER COULD NEVER
+TERMINATE**: `pgrep -f 'qa-run.py'` matched the waiter's own command line, so
+each one counted itself and its siblings and the count could only climb &mdash;
+*a measurement that includes the measurer*, answered by waiting on the two real
+PIDs. **VERIFIED ON THE MERGED TREE** (&sect;365's own first finding, that an
+honest sweep is of the merged tree and never the branch): `qa.py` over
+`file://` **ERRORS none**; `built-in-step` and `generated-in-step` all clear;
+&sect;377's own `people-dialog` and `identity-merge` green; nine register-family
+neighbours green (`register-header`, `no-jump`, `role-picker`, `seat-grant`,
+`duplicates`, `attention-dismiss`, `attention-rows`, `forefront-team`,
+`team-page`); authoriser **683/0**, change list **140/0**, platform rules
+**69/0**, db-url-choice **10/0**, session-state and kb-audience clear;
+`setup-shape` 33/0, `deploy-context` 5/0, `assistant-defaults` 10/0,
+`declared-deps` and `insights-tab` 16/0. **AND WHAT COULD NOT BE RUN IS SAID
+RATHER THAN LEFT AS AN ABSENCE** (&sect;54.5, &sect;340.4's precedent):
+`smp-app/node_modules` is EMPTY in this container, so **twenty served-stack
+checks and `tsc` are UNRUN, not passing** &mdash; narrowed by the fact that
+&sect;377 touches **no `smp-app` source at all**, only the two generated files,
+which `generated-in-step` (which does run here) proves are exactly what the
+generators produce from the merged sources. **NO FORCED SIGN-OUT IS OWED AND IT
+IS READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029): not one `api/`, `lib/`
+or `db/` file is in it. **AND &sect;91.5's LIVE READ COULD NOT BE MADE FROM
+HERE, SO THE DEPLOYMENT IS UNVERIFIED AND SAID TO BE** (&sect;54.5, rule 3a):
+this environment's egress policy refuses `smp-orpin-tau.vercel.app` at the
+proxy's CONNECT with a 403, which its own README says to report rather than
+route around. **The witness is `shell.js` and `platform.css`, never `sw.js`**
+(&sect;365, &sect;367 &mdash; the generator drops the half that carries `SHELL`,
+so the served worker is byte-identical either side and the bumped name reaches
+nobody): `shell.js` **3,843,984 &rarr; 3,843,142** and `platform.css`
+**674,039 &rarr; 673,729**, both SMALLER because this round is a removal, and
+both asserted to have MOVED or a match would hold either way (&sect;113.8).
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (&sect;374.1, &sect;375.2's
+precedent): the merge commit reached `main` on no other ref, so main's tip is
+unique by construction, and putting that SHA on a second ref is the one thing
+left that could still cost the deployment (&sect;91). A fast-forward is one
+command whenever somebody has read the live site.*
 
 *Earlier: 2026-09-20 &mdash; **&sect;376: the reports, as a tab in the
 platform (spec 061).** Islam, of the Insights module: *"for the users not the

@@ -5282,6 +5282,30 @@ page, a seam declared as that shadow and no seam at all are the same build. **Fo
 table carry the same dead declaration, and the kebab block is declared **twice**
 in `config.css` byte for byte. 
 
+**AND §377 TAKES THE CONTROL AWAY AGAIN** (2026-09-20): *"please remvoe the 1
+click copy bhavior I can always have a right click and copy the text."* Done,
+and measuring it first changed what was worth saying. **At rest the register
+looks exactly the same** — the two builds are the same picture byte for byte,
+because §93.6 styled the button to look like the value rather than like a
+control — so there was no look to sign off on. What goes is what the cell
+**does**: the underline under the cursor, and the address being replaced by the
+word *Copied* for a second, which on the one table whose job is showing values
+was the only thing that hid the value. **And his fallback turns out to need
+this change to work at all**: §93.6's reason for making the value a button was
+that you could not select text in that table — and a drag across a button
+selects nothing, which is what made that true. Measured on both builds, same
+row, same drag: **nothing before, the whole address after**. **The hover changes
+and it is the better behaviour**: today every address and every number carries a
+tooltip repeating itself; now only a value that is actually cut off has one,
+which is what every other column does — 65 tooltips become 1, and nothing cut
+is left without one. **Nothing moves**: every row the same height, every column
+the same width. **Two checks were turned round rather than deleted**, so the
+claim still fails if somebody puts the control back — 4 red and 3 red on the
+build that still has it. **Nobody is signed out and nothing stored moves.**
+**Waiting on Islam: the merge.**
+
+---
+
 **AND §374 ANSWERS THE ONE HE FOUND NEXT** (2026-09-20): *"the copy on click for
 the email and double click to edit is working but the same behavior is not
 working on the phone number."* **It is not a phone fault**, and finding that out
@@ -6617,6 +6641,143 @@ production serve it; the witness is `shell.js` 3,827,402 → 3,843,984 and
 `platform.css` 669,731 → 674,039. The branch is deliberately not
 fast-forwarded, keeping main's tip unique.
 
+## §377.6 — Merged to main (2026-09-20, spec 059) · **done**
+
+Islam: *"MERGE TO MAIN"*. Merged, pushed, and the deployment is the one
+thing that could not be confirmed from here.
+
+**Main had moved 33 commits and had taken §375** — Portfolio (spec 060)
+and the reports as a tab (spec 061). So this round is **§377**, renumbered
+**before** the merge, which is the only moment that is provably scoped:
+the merge base holds §375, §376 and §377 nought times, so all 20 citations
+were this branch's own and main's 26 could not be swept up. Both
+spellings; no changed line carries anything but a citation. Spec 059 is
+unchanged — it is this branch's own and was already on main.
+
+**`sw.js` was §94.12 exactly**: both sides wrote `smp-shell-v5.20-*`.
+Resolved to **v5.21**, unique against every name the history holds, one
+declaration, parses clean. `CLAUDE.md` combined rather than picked. The
+built file rebuilt from the merged sources and byte-identical to the
+build; the four generators re-run.
+
+**The decisions doc was out of order and it was my own drift, not the
+merge's** — §377's block sat between §374 and its own §374.1 at the wrong
+heading level, measured on the branch before the merge. Put in order.
+
+**Green on the merged tree:** `qa.py` ERRORS none · built-in-step ·
+generated-in-step · people-dialog · identity-merge · nine register-family
+neighbours · authoriser 683/0 · change list 140/0 · platform rules 69/0 ·
+db-url-choice 10/0 · session-state · kb-audience · setup-shape 33/0 ·
+deploy-context 5/0 · assistant-defaults 10/0 · declared-deps ·
+insights-tab 16/0.
+
+**Unrun, and said so rather than left as an absence:** `smp-app/node_modules`
+is empty in this container, so twenty served-stack checks and `tsc` could
+not run at all. §377 touches no `smp-app` source — only the two generated
+files — and `generated-in-step`, which does run, proves those are exactly
+what the generators produce.
+
+**No forced sign-out is owed**, read off the diff: no `api/`, `lib/` or
+`db/` file is in it.
+
+**The deployment is unverified and is said to be:** the proxy refuses
+`smp-orpin-tau.vercel.app` at CONNECT with a 403. The witness would be
+`shell.js` **3,843,984 → 3,843,142** and `platform.css` **674,039 →
+673,729** — never `sw.js`, whose served copy is byte-identical either side.
+**The branch is deliberately not fast-forwarded**, so main's tip stays
+unique until somebody has read the live site.
+
+## §378 — An address is taken whole (2026-09-20, spec 059) · **built, on the branch**
+
+Islam: *"can you make a right click on the email to highlight the whole email
+to copy on right click .. as it happens on the phone number."*
+
+**Measured first, and the report does not reproduce.** Since §377 both cells
+come off the same line, and driven in a real browser a right-click selects
+**nothing** on either, while a double-click and a drag each take the whole
+value on **both**. So what differs is his browser's idea of a word, not this
+table — which is why the answer could not be a difference between those two
+lines. *(The first run of that probe reported the reported fault, because it
+measured both boxes once up front and the email's double-click repainted the
+page underneath the Mobile coordinates — §222. One page load per gesture.)*
+
+**What was built:** `user-select:all` on those two values and nowhere else,
+so every gesture takes the whole of one in every browser. It is the
+product's own device — §43.8's issued-password box has carried it since it
+was written — not a new one.
+
+**The two costs were stated before he took them** (*"yes agreed for the
+question and build"*): a plain left-click highlights the value too (it copies
+nothing, so §377 stands), and a drag can no longer take part of an address.
+
+**Both cells, never one** — they are identical today, so changing only the
+Email would create his own complaint in reverse. **Scoped to those two**, and
+the check measures a column that was NOT asked about in the same run and
+requires it to select nothing, or a build that widened the rule to every
+value in every Setup table passes everything else (§94.2, §113.8).
+
+**Nothing visual moves**, measured: same widths, same row heights, same
+colours — so no mockup was owed (rule 1c).
+
+**Verified:** `people-dialog` all good with four new assertions; proved able
+to fail **twice from the sources** (§276), one break per decision, each
+asserted to have matched first (§344.1) and each reddening only its own:
+the rule removed **2 red**, printing the reported state verbatim; the rule
+widened **1 red** on the scoping assertion, printing `'Ashraf Laithy'` — the
+widened rule reaching a column nobody asked about. The tree was restored and
+rebuilt byte-identical to the build the breaks were made from (§343.9).
+
+**And two of my own new assertions proved nothing first (§378.1)**, found by
+falsifying rather than by reading. The scoping one went GREEN on the very
+build it exists to catch, because it ran after another right-click in the
+same page and the second right-click of a page does not land — *nothing
+selected* is also what a correctly scoped build reports. And the clicks were
+landing on the wrong element: with every column showing the register scrolls
+sideways, so those cells sit off the right edge or beneath the frozen last
+column (§373.2), and the hit test read back `NOTHING` and `TD`. Each gesture
+gets a fresh page now, the cell is brought into view first, and the check
+**asserts where the click landed before it asserts what was selected**
+(§93.4). Both falsifications were then run AGAIN, because one made before a
+check is rewritten proves nothing about the check that ships.
+
+**Nothing stored moves, nothing is migrated, no forced sign-out** — read off
+the diff, no `api/`, `lib/` or `db/` file (§172, spec 029). The built file's
+bytes changed, so `sw.js` is bumped to `v5.22-whole-values` (§91) — reaching
+the offline copy alone, since the generator drops the half carrying the name.
+
+**Not merged: `main` is Islam's word, on that merge.**
+
+## §378.2 — Merged to main (2026-09-20, spec 059) · **done**
+
+Islam: *"merge to main"*.
+
+**Main had not moved**, measured rather than assumed — `origin/main` was at
+§377.6, this commit's own parent — so it is a clean **fast-forward** and the
+tree pushed is byte-for-byte the tree that was verified. No resolution, no
+rebuild, nothing recombined. §378 was free on main, so no renumber was owed.
+
+**`sw.js` confirmed immediately before the push** (§94.16): `v5.22-whole-values`
+against main's `v5.21`, a name the history has never held, one declaration,
+`node --check` clean.
+
+**The merge carries its own record commit** (§91, §357.4): the branch tip was
+already pushed, and Vercel deduplicates by SHA, so `main` needs a commit the
+branch does not hold — and the record owed one anyway, since §378's block still
+read *"main untouched"* over a merge that had happened.
+
+**The deployment is unverified from here and is said to be** (§54.5): the proxy
+refuses `smp-orpin-tau.vercel.app` at CONNECT with a 403. The witness is
+`shell.js` **3,843,142 → 3,844,669** and `platform.css` **673,729 → 674,285**,
+both larger — never `sw.js`, whose served copy is **4,104 bytes on both**.
+
+**No forced sign-out is owed**, read off the diff: no `api/`, `lib/` or `db/`
+file. Nothing stored moves, nothing is migrated.
+
+**What to go and check:** Setup › People register — right-click an email, then a
+phone number: the whole value should highlight and Copy should be live. A
+double-click should still open the cell for editing. Nothing else on the page
+should look different.
+
 ---
 
 ## §380 — the tab that filled the row, and the mirror that showed your own face (2026-09-20, spec 061)
@@ -7031,3 +7192,105 @@ number would have meant it had come back.
 
 **Main is untouched.** This is the rehearsal he asked for. Merging to main is
 his word, and main's own two sections are still to come across.
+
+---
+
+## 2026-09-21 — main's two sections brought in (§382.2)
+
+**Done on the branch. Main is untouched.**
+
+This is the second half of what you asked for. You said: *"there are
+intresections and we need it resolved before merging. so better merge that
+branch with ours first."* The other branch was merged last time. This brings in
+the two rounds `main` had taken meanwhile — a third session's work on the
+People register, where the email and the phone number stopped being buttons you
+click to copy and became ordinary text you can select.
+
+**Nothing new was built.** Every line of this round is either a conflict being
+resolved or a file being rebuilt from its sources.
+
+### What the two sides each did
+
+- **Ours** (already on the branch): the reports tab's filters, a tactic owner's
+  own reporting tab, and the row on Roles & access.
+- **Main's** (brought in now): the one-click copy removed from the register's
+  Email and Mobile cells, and then a right-click or a drag taking the whole
+  value rather than one word of it.
+
+They do not overlap in what they do. They overlapped in five files, and each
+one had a rule already written down for it:
+
+- **The three record files** — both sides kept, never one picked. A script
+  checked that every line of each side survived.
+- **The built platform file** — rebuilt from the merged sources rather than
+  merged, which is the standing rule, and then checked byte-for-byte against
+  what the builder produces.
+- **`sw.js`** — rebuilt from main's copy with our one line put back, and the
+  version name moved past both sides so no browser is served the wrong shell.
+
+And the rebuilt file was checked to carry **both** sides' work, not one of
+them.
+
+### What went wrong, and it was all mine
+
+Three things, none of them in the product:
+
+1. I set two environment variables in one line in a way that left the second
+   one empty, so the first round of database checks all ran against the wrong
+   kind of connection — **and the platform printed a warning about it on every
+   single run**, which I read past nine times. Everything was re-run properly.
+2. I started the big sweep in a way that killed it immediately, and it came
+   back reporting success with an empty log. The rule that catches this is one
+   we already had: read the last line, and an empty last line is a failure.
+3. Two checks needed a Python library this container did not have, and two
+   needed a rehearsal database set up in three steps. All four were set up, and
+   all four are green.
+4. Two of those checks then said *"the server never came up"*, and I guessed at
+   the cause instead of asking. The real one: a leftover server from the
+   newer stack was still sitting on the exact port they use. I found it by
+   starting the server by hand and reading the error it prints — and the first
+   tool I asked told me the port was free when it was not.
+5. Running one of the database checks left three test accounts behind, which
+   made the next one report a real rule as broken. Rebuilt clean, it passes.
+   The order these are run in matters, and that is now written down.
+
+### Three things are still red, and none of them is this merge's
+
+Each was established by measurement, not by assumption — for two of them by
+running them on the tree as it was *before* the merge and getting the identical
+failure, and for the third by showing that not one file the check looks at
+changed:
+
+- **`test-clean-parity`** — already recorded as red on main, from a difference
+  between the clean-slate migration and the cleared-graph function.
+- **One of the nine database spike proofs** — its seeder cannot handle a table
+  that points at itself, which the Portfolio tables do.
+- **`frameworks-page`** — the console's tab row comes up empty in this
+  container. Every file that check looks at is byte-for-byte what it was before
+  the merge, so it is not this round's; what it is, I could not close from here,
+  and that is said rather than left out.
+
+### What to go and check, if this is merged
+
+- **Setup › People register** — right-click an email, then a phone number: the
+  whole value should highlight and Copy should be live. A double-click should
+  still open the cell for editing. That is main's round, not ours.
+- **Setup › Roles & access** — the Tactic owner row is still there and still
+  starts shut.
+- **The Insights tab** — the filters above the list are still only the kinds of
+  report that actually exist.
+
+Nothing is stored differently, nothing is migrated, and nobody is signed out.
+
+### One thing to know before the next round
+
+While this was being finished, `main` moved on again — three more commits, from
+the same third session. They are **not** in this merge.
+
+They matter for one reason: that session has used the number **§379** for its
+own work, and this branch already uses §379 for the tactic-owner reporting tab
+that came in last time. They are two different pieces of work wearing one
+number. Nothing is wrong today — their §379 is not in our copy — but whoever
+does the next merge has to renumber ours first, before merging, or the two
+become impossible to tell apart. That is written down in the decisions log.
+

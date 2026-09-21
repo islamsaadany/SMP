@@ -431,6 +431,14 @@
                    color:var(--ink-3); background:var(--surface); }
   .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }
+  /* A VALUE TAKEN WHOLE (§378). An email and a phone number are copied
+     entire or not at all, so every gesture selects the whole of one —
+     which is what makes the behaviour the same in every browser rather
+     than whatever that browser thinks a word is. The issued-password box
+     has said this since §43.8; this is that device, not a second one.
+     SCOPED, never on `.val` at large: a unit's name selected whole on a
+     click is a change nobody asked for (rule 1b). */
+  .cfg .val.selall { -webkit-user-select:all; user-select:all; }
 
   /* ══ The searchable dropdown (searchsel.js) ═════════════════════════
      The button stands where the <select> stood, so it inherits nothing it
@@ -2572,19 +2580,15 @@
   .peoplecfg td.namecell, .peoplecfg thead th.namecell {
     max-width:260px; white-space:nowrap; }
 
-  /* ── AN ADDRESS AND A NUMBER ARE CLICK-TO-COPY (§93.6) ────────────
-     It has to look like the value, not like a control, or every row grows a
-     button — so it inherits the cell's type and only the underline on hover
-     says it does something. The tick is written into the element by the
-     handler, because paint() would replace the thing just pressed (§63). */
-  .copyval { font:inherit; font-size:13px; color:var(--ink); padding:0; border:0;
-             background:none; text-align:left; display:block; width:100%;
-             max-width:100%; overflow:hidden; text-overflow:ellipsis;
-             white-space:nowrap; cursor:pointer; }
-  .copyval.mono { font-family:var(--mono); font-size:12.5px; }
-  .copyval:hover { text-decoration:underline; text-underline-offset:2px; }
-  .copyval:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-  .copyval.copied { color:var(--good-tx); text-decoration:none; }
+  /* ── THE NUMBER IS A VALUE IN THE REGISTER'S OWN SHAPE (§377) ─────
+     §93.6's five `.copyval` rules went with the control (the button's own
+     reset, its mono size, the hover underline, the focus ring and the green
+     "Copied"). What is left is the one thing they carried that was never
+     about the press: a phone reads a shade smaller than an address, so that
+     a monospaced number and a proportional address sit at the same weight.
+     The FAMILY comes from the global `.mono` the product already has; this is
+     the size alone, and `.cfg .val` (0,2,0) is what it has to outrank. */
+  .cfg .val.mono { font-size:12.5px; }
 
   /* The two columns a row's edit controls live in (§93.10). A width on the
      HEADER is what auto layout reads — a width on the body cells does nothing

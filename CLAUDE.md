@@ -10254,8 +10254,54 @@ guard that works (&sect;54.5); every break asserts it MATCHED before it is
 written (&sect;344.1), and that assert is the only reason the green run was not
 believed. The tree was restored from a saved copy and rebuilt
 **byte-identical** to the build the breaks were made from (&sect;343.9). The built file's bytes changed, so `sw.js`
-is bumped (&sect;91) and the four generators re-run (&sect;329). **`main`
-untouched: the merge is Islam's word, on that merge.***
+is bumped (&sect;91) and the four generators re-run (&sect;329).
+
+**&sect;379.4 &mdash; MERGED TO `main` 2026-09-21 on Islam's word**, and
+**`main` HAD NOT MOVED**, measured rather than assumed (&sect;4's
+fetch-and-look): it stood at &sect;378.2, this commit's own parent, so the
+merge is a clean **fast-forward** and *the tree pushed is byte-for-byte the
+tree that was verified* &mdash; no resolution, no rebuild, nothing
+recombined, which is the same standing &sect;378.2 earned and is worth naming
+twice rather than assumed once. **&sect;379 was free on `main`**, checked in
+both spellings and not assumed, so no renumber was owed (&sect;264.3); spec
+059 is already there, this branch's own, carried by &sect;374, &sect;377 and
+&sect;378. **`sw.js` CONFIRMED IMMEDIATELY BEFORE THE PUSH** (&sect;94.16):
+`v5.23-copy-carries-platform` against main's `v5.22`, a name the history has
+never held, **one live `const SHELL`** &mdash; the four the first grep
+reported were prose in that file's own comments, which is &sect;272.8's shape
+in a search rather than in a parser &mdash; and `node --check` clean
+(&sect;146.2). **AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE
+BRANCH TIP WAS ALREADY PUSHED** (&sect;91, by &sect;357.4's road): Vercel
+deduplicates by SHA, so fast-forwarding `main` onto a commit the branch ref
+already holds is ONE deployment and which ref gets it is a race already lost
+&mdash; and *the way back is a commit `main` holds and the branch does not,
+and it must be one worth making*, which the record owed anyway, since
+&sect;379's own block still read *"main untouched"* over a merge that had
+happened (&sect;378.2's own finding, one round later). **&sect;91.5's LIVE
+READ COULD NOT BE MADE FROM HERE AND IS SAID RATHER THAN CLAIMED**
+(&sect;54.5, rule 3a): this environment's egress policy refuses
+`smp-orpin-tau.vercel.app` at the proxy's own CONNECT (403), which its README
+says to report rather than route around &mdash; **nobody here has seen
+production serve this commit**. **THE WITNESS IS `shell.js` ALONE, AND IT WAS
+MEASURED RATHER THAN CARRIED OVER FROM THE ROUND BEFORE**: not `sw.js`
+(&sect;365, &sect;316.10 &mdash; the generator drops the half that carries
+`SHELL`, so the served worker is **4,104 bytes on both builds** and the
+bumped name reaches nobody), **and not `platform.css`**, which &sect;367 could
+use and this round cannot &mdash; no stylesheet changed, so it holds
+**674,285** either side and a match would hold whether or not production built
+this (&sect;113.8, the trap &sect;378.2 recorded, caught here by asking the two
+builds rather than by repeating the previous sentence). `shell.js` goes
+**3,844,669 &rarr; 3,852,494**, matching the generated copy to the byte.
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (&sect;374.1,
+&sect;375.2, &sect;377.6): `main`'s tip is unique by construction while the
+branch stays where it is, and putting that SHA on a second ref is the one
+thing left that could still cost the deployment &mdash; a fast-forward is one
+command whenever somebody has read the live site. **NO FORCED SIGN-OUT IS
+OWED AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029): not one
+`api/`, `lib/` or `db/` file is in it, so nothing about how a save is judged
+moves, nothing stored moves and nothing is migrated. **Both in-step guards
+clear before the push**: `built-in-step.py` all good (&sect;349),
+`generated-in-step` all clear (&sect;329).***
 
 *Earlier: 2026-09-20 &mdash; **&sect;378: an address is taken whole
 (spec 059).** Islam, of the build &sect;377 shipped: *"can you make a right

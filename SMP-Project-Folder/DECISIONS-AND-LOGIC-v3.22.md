@@ -54137,3 +54137,86 @@ carries the comment above, which spells `url(/fonts/…)` while explaining why i
 must not be one (§379.2 again, in the same round) — **and at BOTH ENDS**: the
 served page's face must still be a FILE, or *the copy carries it* is true of a
 copy that carried nothing (§113.8).
+
+### §379.4 — MERGED TO `main`, AND THE WITNESS WAS MEASURED RATHER THAN CARRIED OVER
+
+Islam: *"merge to main"* — the word on that merge, which rule 4 requires every
+time.
+
+**`main` HAD NOT MOVED, AND THAT WAS MEASURED RATHER THAN ASSUMED** (rule 4's
+fetch-and-look, which exists because §70 landed on main mid-session once): it
+stood at §378.2, this commit's own parent, so the merge is a clean
+**fast-forward** — *the tree pushed is byte-for-byte the tree that was
+verified*, with no resolution, no rebuild and nothing recombined. That is the
+strongest standing a merge in this project ever gets, and it is worth naming
+rather than assumed, because every other merge here has had to earn the same
+claim the hard way (§318.7, §336, §365).
+
+**§379 WAS FREE ON `main`**, checked in both spellings and not assumed, so no
+renumber was owed (§264.3, §336.1). Spec 059 is already on main and that is
+correct: it is this branch's own, carried there by §374, §377 and §378.
+
+**`sw.js` CONFIRMED IMMEDIATELY BEFORE THE PUSH** (§94.16, because the window
+between reading main and pushing is as long as running the checks):
+`v5.23-copy-carries-platform` against main's `v5.22-whole-values`, a name the
+history has never held, exactly one live `const SHELL`, `node --check` clean
+(§146.2). **AND THE FIRST GREP FOR IT REPORTED FOUR DECLARATIONS**, which is
+§272.8's shape in a search rather than in a parser: `sw.js`'s own comments
+quote the phrase `const SHELL` while recording the merge fault §146.2 exists
+for, so a count of the words is not a count of the declarations. Read line by
+line there is one, at line 406.
+
+**THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE BRANCH TIP WAS ALREADY
+PUSHED** (§91, by §357.4's road): Vercel deduplicates by commit SHA, so
+fast-forwarding `main` onto a commit the branch ref already holds is ONE
+deployment and which ref gets it is a race already lost — *the way back is a
+commit `main` holds and the branch does not, and it must be one worth making.*
+**The record owed this one anyway**, which is §378.2's own finding arriving one
+round later: §379's block in all three record files still read *"main
+untouched: the merge is Islam's word"* over a merge that had happened, and a
+finished round whose record says it is unfinished is a record that is wrong.
+
+**§91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO THE DEPLOYMENT IS
+UNVERIFIED AND SAID TO BE** (§54.5, rule 3a): this environment's egress policy
+refuses `smp-orpin-tau.vercel.app` at the proxy's own CONNECT with a 403, which
+its own README says to report rather than route around. **Nobody here has seen
+production serve this commit.**
+
+**THE WITNESS IS `shell.js` ALONE, AND IT WAS MEASURED ON BOTH BUILDS RATHER
+THAN COPIED FROM THE ROUND BEFORE.** Three served files, three answers:
+
+- **`sw.js` — 4,104 bytes on both builds.** §316.10's generator drops the
+  caching half, where `SHELL` lives, so the served worker is byte-identical
+  either side of this merge and the bumped name reaches nobody (§365, §367).
+  The bump is kept for the OFFLINE copy, which is the half that still caches.
+- **`platform.css` — 674,285 on both.** §367 could use this file and this round
+  cannot: no stylesheet changed, so a match would hold whether or not
+  production built this commit (§113.8). *Asserting it would have been asserting
+  nothing*, and it was caught by asking the two builds rather than by repeating
+  the sentence the previous merge wrote.
+- **`shell.js` — 3,844,669 → 3,852,494.** The one file that moved, matching the
+  generated copy to the byte, so the moment somebody can read the live site the
+  two builds are one request apart.
+
+**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (§374.1, §375.2, §377.6):
+while it stays behind, `main`'s tip is unique by construction, and putting that
+SHA on a second ref is the one act left that could still cost the deployment. A
+fast-forward is one command whenever somebody has read the live site.
+
+**NO FORCED SIGN-OUT IS OWED, AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED**
+(spec 029): not one `api/`, `lib/` or `db/` file is in the eight this merge
+carries — three records, two sources, the built file, the generated shell and
+`sw.js` — so nothing about how a save is judged moves, nothing stored moves and
+nothing is migrated.
+
+**BOTH IN-STEP GUARDS RUN BEFORE THE PUSH RATHER THAN AFTER**:
+`checks/built-in-step.py` all good (§349 — the shipped file byte-identical to
+what `build.py` produces) and `generated-in-step` all clear (§329 — the served
+copies byte-identical to what the four generators produce, which is what
+production actually serves).
+
+**WHAT TO GO AND CHECK** (rule A16): Setup › Import & storage → *Working copy*.
+The press takes a few seconds longer than it did and the file is about 6 MB
+rather than 1.6. Open it with no connection at all: it should come up on your
+own tenant, fully styled, with the navigation and the decks in it. Nothing else
+in the product moves.

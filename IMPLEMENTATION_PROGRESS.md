@@ -6780,7 +6780,7 @@ should look different.
 
 ---
 
-## §379 — The working copy carries the platform (2026-09-21, spec 030) · **built, on the branch**
+## §379 — The working copy carries the platform (2026-09-21, spec 030) · **merged to `main`**
 
 Islam downloaded a working copy from his own tenant and it would not open:
 *"the working copy download html is damaged."*
@@ -6853,6 +6853,31 @@ tree was restored from a saved copy and rebuilt byte-identical (§343.9).
 deck-pdf 0, import-page all green, `qa.py` ERRORS none; `built-in-step` all
 good; the four generators re-run. `sw.js` bumped to
 `v5.23-copy-carries-platform`, because the built file's bytes changed (§91).
+
+**§379.4 — merged to `main` on Islam's word (2026-09-21).** `main` had not
+moved — measured, not assumed: it stood at this commit's own parent, so the
+merge is a clean fast-forward and the tree pushed is byte-for-byte the tree
+that was verified. §379 was free on main, checked in both spellings, so no
+renumber was owed (§264.3). `sw.js` confirmed against main immediately before
+the push (§94.16): `v5.23-copy-carries-platform` against `v5.22`, a name the
+history has never held, one live `const SHELL`, `node --check` clean.
+**The merge carries its own record commit**, because the branch tip was
+already pushed: Vercel deduplicates by SHA, so fast-forwarding main onto a
+commit the branch ref already holds is one deployment and which ref gets it
+is a race already lost (§91) — and the record owed the line anyway, since
+§379's own block still read *"main untouched"* over a merge that had
+happened. **§91.5's live read could not be made from here and is said rather
+than claimed**: this environment's egress refuses the production address at
+the proxy (403), so nobody here has seen production serve this commit. The
+witness is **`shell.js` alone**, measured rather than assumed — the served
+`sw.js` is 4,104 bytes on both builds (the generator drops the half carrying
+`SHELL`) and `platform.css` is 674,285 on both (no stylesheet changed), so
+neither can prove a deploy (§113.8); `shell.js` goes **3,844,669 →
+3,852,494**. **The branch is deliberately not fast-forwarded** until somebody
+has read the live site, so main's tip stays unique by construction. **No
+forced sign-out is owed**, read off the diff (spec 029): not one `api/`,
+`lib/` or `db/` file is in it. `built-in-step` all good, `generated-in-step`
+all clear before the push.
 
 **Recorded, not done**: the copy still links the favicon, the manifest and the
 touch icon, which 404 from a file — decoration, and refusing on them would

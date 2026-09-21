@@ -54099,7 +54099,7 @@ red under **`all-categories` 6**, `everyone-sees-everything` 7 and
 `client-sees-drafts` 9, each on its own assertions;
 `check:insights:tab` **24/0**; the escaping fix falsified from the source at
 **11 red**, its first failure printing the truncated attribute verbatim.
-`check:shell` **116/2 → 120/0**, `check:door` **140/3 → 144/0**,
+`check:shell` **116/2 → 120/0**, and **→ 125/0** once §380.11 gave the seam a section, `check:door` **140/3 → 144/0**,
 `check:modules` **three failures → 159/0**, `check:state` 92/0, `check:viewas` 20/0,
 `check:setup` 33/0.
 
@@ -54156,3 +54156,78 @@ week has a word, then its place in its **month**. Those are the only literals,
 and the third heading is deliberately not among them because `realThu` is the
 real clock's and moves. **1 red under each break**, where the agreement is
 green. 227/1 → **229/0**.
+
+### §380.11 — And the seam between the two halves was measured by nobody
+
+Found running the falsification suites for the checks this round edited: the
+`:red` list for `check:shell` held five breaks and **`no-library-cats` was not
+among them**, though `lib/shell.ts` declares it.
+
+Pulling that thread found the larger thing. §380 has two halves and each is
+asserted in its own place, with what it needs:
+
+| half | file | needs | break |
+|---|---|---|---|
+| the RULE — which categories this person has | `checks/insights.mjs` §14 | a database | `all-categories` |
+| the ROW — what the tab draws with them | `checks/insights-tab.mjs` §2 | nothing | three source edits |
+
+Between them is `data-library-cats`, written by `lib/shell.ts` on the served
+document — **and nothing read it.** §2 asserts the row draws whatever it is
+handed, which is right and is also the whole of why it cannot say *what* it is
+handed; §14 asserts the answer the rule produces and stops at the function.
+
+So **a build whose stamp was still `CATEGORIES` satisfies both files perfectly
+and draws Islam's six filters** (§113.8). That is §316.7's own finding one
+feature over: *the seam was measured by nobody.*
+
+**`checks/shell.mjs` §3d**, which already starts the served app:
+
+* read off the **RAW HTML**, never the DOM — the tab row is built at paint time
+  before any answer could arrive, and a DOM probe passes on a build that
+  fetched the list late, which is the one thing the stamp exists to prevent;
+* asserted as an **AGREEMENT with `categoriesPresent`** rather than against a
+  typed list (§94.8), so it survives a category being added to the module;
+* the **state is MADE** (§255) — the dev tenant publishes nothing, so every
+  assertion here would pass on a build that stamped `[]` always, which is the
+  other way to get this wrong;
+* **BOTH ENDS** (§94.2): a client without the module carries no stamp at all,
+  or a build that stamped nothing satisfies every "it is not the whole list"
+  line above it;
+* and the fixture is put back in a `finally`, because every section after it
+  reads the same tenant.
+
+Every statement about the client's own rows runs as `smp_app` with the tenant
+set, never as the owner: the policies are FORCED, so a probe reading as the
+owner would be measuring a boundary it is standing outside of.
+
+**AND THE CHECK THAT CLAIMED TO RUN IT SAID SO IN ITS OWN DOCSTRING.**
+`checks/insights-tab.mjs`'s header named `no-library-cats` as reddening its §5,
+and §5 prints *"this section is written and is run by the served-app sweep, not
+from here"* — **and no sweep runs it.** §54.5 inside a check's own prose, which
+is the quietest place for it: a file that says a thing is asserted elsewhere is
+read as a file that has covered it. Corrected in words rather than deleted, the
+two halves named with their breaks, and what remains unasserted anywhere —
+the tab on all four destination kinds, the address it writes, typing never
+repainting — said plainly rather than left as an absence.
+
+**5 green, and RED 5 under `no-library-cats` — which is not the same five, and
+the difference is worth the sentence.**
+
+Four are §3d's own. The fifth is **§3b's**, and it is a true consequence rather
+than a stray: dropping the stamp drops the **tab**, and §377's switcher rule
+reads the tab — so with the reports no longer on the row there is somewhere else
+to go, the four-square mark correctly comes back, and the section asserting it
+is NOT drawn goes red. That is the coupling §377 built, measured for the first
+time by a break aimed at something else.
+
+And §3d's own fifth — *a client without the module carries no stamp* — is
+correctly **green** under it: the break makes every document stampless, so the
+absence it asserts is true for the wrong reason. That is what a both-ends
+control looks like when the break lands (§113.8), and it is why it is not the
+only assertion here.
+
+`check:shell` 120/0 → **125/0**, its `:red` list five breaks → **six**.
+
+**RECORDED, NOT DONE**: §5 is still unrun. It needs the served app, which the
+shell check now starts — so the honest next move is for its remaining subjects
+to go there too rather than for a second file to start a second server.

@@ -6847,3 +6847,44 @@ true before the repair too. A second assertion names the two headings the fixed
 today produces — a week has a word, then its place in its month — which is the
 one claim that can fail: 1 red under each break, where the agreement is green.
 227/1 → **229/0**.
+
+**§380.11 — and the seam between the two halves was measured by nobody.**
+Found running the falsification suites for the checks this round edited: the
+`:red` list for the shell check held five breaks and `no-library-cats` — which
+`lib/shell.ts` declares — was not one of them.
+
+Pulling that thread found the larger thing. §380 has two halves and each is
+asserted where it has what it needs: the **rule** (which categories this person
+has) against a database in `checks/insights.mjs`, the **row** (what the tab
+draws with them) with no database in `checks/insights-tab.mjs`. Between them is
+the attribute the server writes on the document, **and nothing read it** — so a
+build whose stamp was still the module's whole list satisfies both files
+perfectly and draws Islam's six filters. §316.7's own finding one feature over.
+
+The shell check already starts the served app, so the seam goes there: read off
+the **raw HTML** rather than the DOM (the tab row is built before any answer
+could arrive, which is the whole reason the list is stamped), asserted as an
+**agreement** with the rule rather than against a typed list, with the state
+**made** — the dev tenant publishes nothing, so every assertion would pass on a
+build that stamped an empty list always, which is the other way to get this
+wrong — and **both ends**, a client without the module carrying no stamp at all.
+
+**And the check that claimed to run it said so in its own docstring.** The
+insights-tab check named that break as reddening its §5, and §5 prints that it
+is *"run by the served-app sweep"* — and nothing runs it. A file saying a thing
+is covered elsewhere is read as a file that has covered it. Corrected in words,
+the two halves named with their breaks, and what is asserted nowhere said
+plainly: the tab on all four destination kinds, the address it writes, and
+typing never repainting.
+
+5 green; **red 5** under the break — four of the new section's own, **plus one
+of §3b's**, which is a true consequence rather than a stray: dropping the stamp
+drops the tab, and §377's switcher rule reads the tab, so the four-square mark
+correctly comes back where that section asserts it does not. The new section's
+fifth is correctly green under it, absent being absent either way — which is
+what a both-ends control looks like when the break lands. Shell 120/0 →
+**125/0**, its falsification list five breaks → **six**.
+
+**Recorded, not done**: §5 is still unrun. It needs the served app, which the
+shell check now starts, so the honest next move is for its remaining subjects to
+go there rather than a second file starting a second server.

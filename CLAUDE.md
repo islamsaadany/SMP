@@ -10229,7 +10229,134 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;377: the tab that filled the row, and
+*Last Updated: 2026-09-21 &mdash; **&sect;380: the reports' filters are the
+reports that exist (spec 061).** Islam, of the tab &sect;376 put in the
+platform: *"the filters of the reports should appear only if there is this type
+of report."* **MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a), and the
+measurement is what makes the case rather than the wording of the ask: the
+section row read `All &middot; Analysis &middot; Macro &middot; Market &middot;
+Sector &middot; Governance` &mdash; the module's whole declared list &mdash; for
+everybody, whatever the library holds. So a client with nothing published yet
+opened on **six filters, five of which could only ever return nothing**, on the
+tab a new client is likely to press first. **IT IS NOT A WRONG LIST**: it is the
+module's, which is the honest answer to *what kinds of report exist in the
+product* and the wrong answer to *what can I filter this library by* &mdash;
+&sect;61's own shape one row down from where that rule usually bites.
+**THE ANSWER HAS TO BE THE SERVER'S, AND THAT IS FORCED RATHER THAN CHOSEN**:
+the row is built synchronously inside `paint()`, so nothing fetched can be in it
+&mdash; by the time an answer landed the row would already be on the screen
+&mdash; and &sect;376's own rule for that tab is that it never calls `paint()`
+from a fetch, because the search box is in that row and a hand may be in it
+(&sect;35, &sect;71.2). So the list is STAMPED on the document, which is what
+`data-library-cats` has been since &sect;376; **what changes is what it is
+stamped with.** **ASKED OF THE LIBRARY THROUGH THE SAME TWO CLAUSES THE LIST
+ITSELF IS READ THROUGH** &mdash; `shelfWhere` (published only) and `seenSql`
+(spec 046 &sect;4.10's per-place narrowing) &mdash; so the row can never offer a
+category the list would refuse: a DRAFT's category is not a filter, and a report
+narrowed away from this person is not a filter for them. **Ordered by the
+module's own list and never by the database** (&sect;48), so two clients read the
+same words in the same order. **The console is deliberately not a caller**:
+publishing is CHOOSING a category, so Forefront is offered all five there
+&mdash; a different question with a different answer. **THREE ANSWERS, NOT TWO,
+AND THE MIDDLE ONE IS THE POINT**: `null` is *no library behind this tab* (no
+module, shut to this person, or `file://`) and draws no tab; **`[]` draws the tab
+and no filters**, because an empty library is a beginning rather than a fault
+(&sect;45.2) and hiding the tab would say Forefront has published nothing rather
+than that it is empty (&sect;35, &sect;93); a list is those filters. **A read
+that THROWS answers `[]` and says so in the log** &mdash; an unreadable library
+must not take the tab down with it (&sect;231.3's rule one module over).
+**&sect;380.5 &mdash; `viewerOf` EXISTED THREE TIMES AND THIS WOULD HAVE BEEN
+THE FOURTH**: the same six lines sat in `modules/insights/index.ts` and in
+`lib/landing-facts.ts`, the second under a comment NAMING the first. One answer
+now in `lib/library-viewer.ts`, **beside `library.ts` rather than in it**,
+because that file takes a connection and imports nothing &mdash; which is
+exactly what lets `checks/insights-tab.mjs` run its first three sections with no
+database and no `node_modules`, and a driver import would have quietly ended
+that (&sect;54.5). **&sect;380.6 &mdash; AND THE SETUP DOCUMENT HAD TO CARRY IT
+TOO**: a Setup document draws no destination tabs, and the shell walks from
+Setup to a unit WITHOUT asking for the document again &mdash; so a stamp right
+only on a module's own document would be the module's whole list on the tab
+drawn on arrival. **&sect;380.7 &mdash; ONE ESCAPER, SAFE IN AN ATTRIBUTE
+(&sect;235, one file over), FOUND BY A FIXTURE RATHER THAN BY READING**:
+`lib/shell.ts` kept an `esc()` of its own escaping `& < > "` and **not `'`**, a
+text-node escaper used inside SINGLE-quoted attributes &mdash; word for word the
+fault &sect;235 fixed in the frozen product, which the served app never learned.
+**It is live**: `MODULE_DEF.tracker.note` holds an apostrophe, so a client with
+the Internal Tracker was served a `data-modules` that ENDED there, `JSON.parse`
+threw, and **the module switcher was silently not drawn** (&sect;96's family).
+The exposure is stated rather than implied &mdash; `script-src 'self'` with
+nothing inline (&sect;238), so an injected attribute cannot run &mdash; and
+`lib/chat-api.cjs`'s twin gap is deliberately NOT touched, being a carried file
+`generated-in-step.mjs` asserts byte-identical (&sect;316.7). **&sect;380.8
+&mdash; TWO CHECKS WERE STALE AND BOTH WERE MY OWN UNMERGED ROUNDS**,
+established as not this work's by stashing it, rebuilding and re-running
+(&sect;303, &sect;105.6): two fixtures shut ONE row and expected a refusal, and
+access is the MOST GENEROUS grant across the roles somebody holds (&sect;33), so
+&sect;379's new tactic-owner row meant the Mobile head was no longer shut &mdash;
+**the product is right and the fixture had stopped making the state its own
+assertions are about**; they shut every row the person holds, asked of
+`personRoles` rather than typed (&sect;42). **&sect;380.11 &mdash; AND THE SEAM
+BETWEEN THE TWO HALVES WAS MEASURED BY NOBODY** (&sect;316.7's own finding, one
+feature over): the RULE is asserted against a database in
+`checks/insights.mjs` &sect;14 and the ROW with no database in
+`checks/insights-tab.mjs` &sect;2 &mdash; which draws whatever it is handed and
+therefore **cannot say what it is handed** &mdash; and between them is the
+attribute, which nothing read. *A build whose stamp was the module's whole list
+satisfies both files perfectly and draws Islam's six filters* (&sect;113.8).
+`checks/shell.mjs` &sect;3d reads it off the RAW HTML of the served document
+(never the DOM: the tab row is built before any answer could arrive, so a DOM
+probe passes on a build that fetched it late), asserted as an AGREEMENT with
+`categoriesPresent` rather than against a typed list (&sect;94.8), with the state
+MADE (&sect;255 &mdash; the dev tenant publishes nothing, so every assertion
+would pass on a build that stamped `[]` always, which is the other way to get
+this wrong) and **both ends** (&sect;94.2): a client without the module carries
+no stamp at all. **AND THE BREAK IT EXISTS FOR WAS IN NO `:red` LIST**
+&mdash; `no-library-cats` was declared in `lib/shell.ts`, documented in
+`checks/insights-tab.mjs`'s header as reddening its &sect;5, and **&sect;5 is run
+by nothing**: that header said it was *"run by the served-app sweep"* and no
+sweep ran it (&sect;54.5, in a check's own docstring). Corrected in words rather
+than quietly, and the break is wired into `check:shell:red`. **VERIFIED**:
+shell **120 &rarr; 125/0** red **six** ways &mdash; and the new break's reach is
+stated rather than rounded off: it reddens **five**, four of &sect;3d's own and
+**one of &sect;3b's**, because removing the stamp removes the TAB and &sect;377's
+switcher rule reads the tab, so with the reports gone the four-square mark
+correctly comes back where that section asserts it does not. A true consequence
+rather than a stray, and worth having: it is the coupling &sect;377 built,
+measured. &sect;3d's fifth &mdash; *a client without the module carries no stamp*
+&mdash; is correctly GREEN under it, absent being absent either way, which is
+what a both-ends control looks like when the break lands (&sect;113.8). Beside
+it: insights 137/0 red five ways with `all-categories` among them, insights:tab 24/0, modules 159/0 red nine ways,
+door 144/0 red seven ways, state 92/0, viewas 20/0, setup 33/0, tracker
+**229/0**, notes 170/0, portfolio 121/0, frameworks 90/0, blob 23/23, demo 7/0,
+standing 7/0, room 10/0, deploy 5/0. **NO FROZEN SOURCE CHANGED**, read off the
+diff, so the built file does not move and **`sw.js` is NOT bumped** &mdash;
+&sect;91's trigger is the built file's bytes changing and they did not.
+**RECORDED, NOT DONE**: &sect;5 of the insights-tab check is still unrun &mdash;
+the tab on all four destination kinds, the address it writes and typing never
+repainting are asserted nowhere; and `lib/chat-api.cjs`'s escaper, named above
+and left where it is. **`main` untouched: the merge is Islam's word, on that
+merge.*
+
+*Earlier: 2026-09-20 &mdash; **&sect;379: a tactic's owner is a row on the
+table.** Islam, after &sect;377: *"I believe we need to add measures & tactics
+owners as roles so I can set their accessability."* **&sect;147.7's shape one
+level down, and he closed the original complaint himself** (*"mahdy is a project
+owner then it ok to see the project and report it ofcourse my bad"*), so nothing
+about Project owner moves. What was missing is that **a tactic's Owner derived
+nothing at all**: the only thing that ever reached such a person was the
+Contributor floor, which fires on holding NO other role &mdash; so a unit head
+who also owns a tactic elsewhere reached it through **no row anybody could see
+on the table**, and could be switched off by nobody. **ALL CELLS NONE, and that
+is his instruction rather than a cautious default**, measured against the T0
+access baseline rather than reasoned about: it takes nothing away, because the
+floor it replaces gives view where this gives nothing only for somebody who
+holds nothing else. **A handle of its own, never `ctx.row.owner`** &mdash; and
+the check that exists for it could not fail as first written (&sect;113.8), the
+fixture gaining a fourth person who owns both a pillar and a tactic under it.
+**RECORDED, NOT DONE**: the Measure owner row and the field under it, awaiting
+sign-off on the mockup published with it.*
+
+*Earlier: 2026-09-20 &mdash; **&sect;377: the tab that filled the row, and
 the mirror that showed your own face (spec 061).** Islam, with three
 screenshots the morning after &sect;376 reached `main`: *"when viewing as Mahdy
 he started seeing the other units and functions while he should only see his

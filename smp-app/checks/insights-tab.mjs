@@ -44,9 +44,21 @@
    assertion, in checks/insights.mjs §14, which has a database to answer it
    with. Its break there is `SMP_BREAK=all-categories`.
 
-   §5's two are environment switches and redden it there:
-     SMP_BREAK=no-library-cats        lib/shell.ts drops the stamp — no tab
-     SMP_BREAK=switch-always          the four-square mark drawn where the tabs reach */
+   AND WHAT THIS FILE CANNOT PROVE IS SAID RATHER THAN LEFT AS AN ABSENCE
+   (§54.5). §2 asserts the row draws whatever it is HANDED, so it is silent
+   about what the server hands it — and the two halves either side of that
+   are asserted where each has what it needs:
+
+     the RULE   checks/insights.mjs §14, with a database
+                (SMP_BREAK=all-categories — must go red)
+     the SEAM   checks/shell.mjs §3d, against the served document
+                (SMP_BREAK=no-library-cats — must go red)
+
+   §5 is not run from here and never was: it needs the served app, which the
+   shell check already starts, so its subject lives there rather than being
+   claimed here (this header said it was "run by the served-app sweep", and
+   nothing ran it — §54.5 in a check's own docstring). What remains for §5 is
+   the four destination kinds and typing never repainting. */
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -234,8 +246,11 @@ console.log("\n5 · the served app: the address, the switcher, and typing");
     console.log("       destination kinds, the address it writes, the switcher standing");
     console.log("       down where the tabs reach, and typing never repainting.");
   } else {
-    console.log("  --   SMP_BASE is set; this section is written and is run by the");
-    console.log("       served-app sweep, not from here.");
+    console.log("  --   SMP_BASE is set, and this section is still NOT RUN from here");
+    console.log("       (§54.5). The stamp it was written for is asserted against the");
+    console.log("       served document in checks/shell.mjs §3d, which already starts");
+    console.log("       the app. Unasserted anywhere: the tab on all four destination");
+    console.log("       kinds, the address it writes, and typing never repainting.");
   }
 }
 

@@ -124,7 +124,13 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        `categoriesPresent`, which reads the shelf through the same two clauses
        the list itself is read through; this file stamps whatever it is
        handed, so there is one answer and this is not the second place it is
-       decided (§53.5). */
+       decided (§53.5).
+
+       THE CHECK'S BREAK: `no-library-cats` drops the stamp, so the tab is
+       not drawn at all — checks/shell.mjs §3d, which is the one place the
+       SEAM is measured (the rule is checks/insights.mjs §14 and the row is
+       checks/insights-tab.mjs §2, and neither can see this attribute).
+       Never set on a deployment. */
     (libraryCats && brk !== "no-library-cats"
       ? " data-library-cats='" + esc(JSON.stringify(libraryCats)) + "'" : "") +
     /* THE LANDING LINE PAGE'S DECLARATION (§359.4): what this module can

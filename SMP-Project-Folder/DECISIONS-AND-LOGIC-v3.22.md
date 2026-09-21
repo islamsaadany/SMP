@@ -54228,6 +54228,19 @@ only assertion here.
 
 `check:shell` 120/0 → **125/0**, its `:red` list five breaks → **six**.
 
+**AND THE FROZEN SWEEP IS UNMOVED, WHICH IS EVIDENCE RATHER THAN CEREMONY.**
+`qa.py` through `qa-run.py` reads **33 viewers / 242 destinations / ERRORS
+none** — the tail read rather than a count (§298.3), and the destinations
+summed from the run's own per-viewer lines rather than copied from the record
+(§332). That sweep runs over `file://` on baked data with no database, so it
+is deterministic: a round touching no frozen source *must* reproduce §365's and
+§367's 33 / 242 exactly, and a figure that had moved would have contradicted
+this section's own claim that the built file does not move. It is the same
+reasoning §332 used the other way round — there a count that differed from the
+record was worth ten minutes before it was worth a sentence; here a count that
+matches is worth stating, because the claim it corroborates is the one §91's
+`sw.js` decision rests on.
+
 **RECORDED, NOT DONE**: §5 is still unrun. It needs the served app, which the
 shell check now starts — so the honest next move is for its remaining subjects
 to go there too rather than for a second file to start a second server.

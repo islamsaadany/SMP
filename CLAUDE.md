@@ -10328,8 +10328,14 @@ what a both-ends control looks like when the break lands (&sect;113.8). Beside
 it: insights 137/0 red five ways with `all-categories` among them, insights:tab 24/0, modules 159/0 red nine ways,
 door 144/0 red seven ways, state 92/0, viewas 20/0, setup 33/0, tracker
 **229/0**, notes 170/0, portfolio 121/0, frameworks 90/0, blob 23/23, demo 7/0,
-standing 7/0, room 10/0, deploy 5/0. **NO FROZEN SOURCE CHANGED**, read off the
-diff, so the built file does not move and **`sw.js` is NOT bumped** &mdash;
+standing 7/0, room 10/0, deploy 5/0, and `qa.py` through `qa-run.py` over
+`file://` **33 viewers / 242 destinations / ERRORS none** &mdash; the tail read
+rather than a count (&sect;298.3) and the destinations SUMMED from the run's own
+per-viewer lines rather than quoted from the record (&sect;332), which is what
+makes them corroboration rather than an echo: the frozen sweep is deterministic,
+so a round that changes no frozen source must reproduce &sect;365's and
+&sect;367's figure exactly, and it does. **NO FROZEN SOURCE CHANGED**, read off
+the diff, so the built file does not move and **`sw.js` is NOT bumped** &mdash;
 &sect;91's trigger is the built file's bytes changing and they did not.
 **RECORDED, NOT DONE**: &sect;5 of the insights-tab check is still unrun &mdash;
 the tab on all four destination kinds, the address it writes and typing never

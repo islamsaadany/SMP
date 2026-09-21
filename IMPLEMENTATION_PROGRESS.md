@@ -6885,6 +6885,15 @@ fifth is correctly green under it, absent being absent either way — which is
 what a both-ends control looks like when the break lands. Shell 120/0 →
 **125/0**, its falsification list five breaks → **six**.
 
+The whole-platform sweep was run again at the end of it and reads **33 people,
+242 pages walked, no errors** — the same figure the last two rounds recorded.
+That sameness is the point rather than a formality: the sweep walks the offline
+file on built-in data, so it gives the same answer every time unless something
+in that file changed. This round changed nothing in it, so a different number
+would have meant the opposite of what this entry says. The number was added up
+from the run's own lines instead of copied from the record, or it would only be
+repeating itself.
+
 **Recorded, not done**: §5 is still unrun. It needs the served app, which the
 shell check now starts, so the honest next move is for its remaining subjects to
 go there rather than a second file starting a second server.

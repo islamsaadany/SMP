@@ -54452,3 +54452,176 @@ matches is worth stating, because the claim it corroborates is the one §91's
 **RECORDED, NOT DONE**: §5 is still unrun. It needs the served app, which the
 shell check now starts — so the honest next move is for its remaining subjects
 to go there too rather than for a second file to start a second server.
+
+
+## §382.1 — THE MERGE, AND THE TWO INTERSECTIONS (2026-09-21)
+
+Islam: *"please check this branch claude/dazzling-heisenberg-vsqfuz and
+migrated what it has as there are intresections and we need it resolved before
+merging. so better merge that branch with ours first."*
+
+**THERE WERE TWO, AND ONLY ONE OF THEM WAS THE BRANCH HE NAMED.** Looking
+before merging anything (§91's fetch-and-look) found that `main` has moved
+since our own §376.1 landed on it and has taken **§377** (*an address is a
+value*) and **§378** (*an address is taken whole*), both spec 059 from a third
+session — while `claude/dazzling-heisenberg-vsqfuz` had taken **§379**.
+
+**AND THE TWO §379s ARE ABOUT THE SAME SUBJECT, WRITTEN TWO MINUTES APART.**
+Theirs at 15:24:28, ours at 15:26:32, on the same afternoon, both quoting
+Islam, both about a tactic's **Owner**:
+
+| | ours (now §381) | theirs (§379, spec 062) |
+|---|---|---|
+| shape | a **row** on Roles &amp; access | a tenant **switch** + a tab |
+| the quote | *"add measures &amp; tactics owners as roles so I can set their accessability"* | *"align with me more not to ruin any access"* |
+| default | every cell `none` | switch off |
+| where they type | the unit's own Reporting page | **My reporting**, their own tab |
+| the unit's page | editable once the cell is opened | **read-only** for them |
+
+Neither supersedes the other by time, and neither is a mistake: they are two
+honest answers to one ask, from two sessions that could not see each other.
+
+### §382.1a — The renumber, first and on its own
+
+§264.3's rule, and it is what makes the scoping provable rather than asserted:
+the merge base with `main` is **our own §376.1 commit**, and it carries **zero**
+citations of §377, §378, §379 or §380 — so every one of them in this tree is a
+line this branch wrote. Renumbered **descending by source**, or each pass eats
+the next (§365.5):
+
+    §377 → §380     §379 → §381     §380 → §382
+
+**THREE SPELLINGS, NOT TWO** (§336.1): `§NNN`, `&sect;NNN`, and the
+`\u00a7NNN` JavaScript escape — seven of the last in `smp-app/checks/shell.mjs`
+and `scripts/test-nav-row.js`, which a two-spelling sweep would have left
+naming somebody else's section. Every count **declared in advance** and the
+whole pass refused on a mismatch (§353.4): 45 / 68 / 66, all three matched, and
+of 179 changed lines **0** do not carry a citation.
+
+The built file is REBUILT rather than renumbered in place (§91) and differs
+from the renumbered copy in exactly the §238 CSP hashes — the renumber changed
+comment bytes inside script blocks, so the hashes move, which is that section
+working as designed rather than a discrepancy.
+
+### §382.1b — Both features are kept, and the order between them is written down
+
+They compose, and the order is a fact rather than a preference:
+`canEnterLine()` asks `lineOwned()` first, which is false while the switch is
+off. So **with the switch off** every owned tactic falls through to
+`canReportRow()` and §381's role decides, exactly as it was built; **with it
+on** an owned tactic on the unit's page is refused there for everybody but the
+office, whatever the role says, and the owner types on My reporting.
+
+**AND ONE COMBINATION SAYS TWO THINGS.** A tenant that opens the Tactic owner
+row AND turns the switch on reads *Reporting: edit* on Roles &amp; access and
+meets a **read-only** row on the unit's page. Nothing breaks and nothing is
+ambiguous to the code — but it is a screen saying yes where a page says no,
+which is the drift §42 exists to stop, and two switches governing one
+capability is §53.5 waiting to happen. **Recorded in `boundedReach()`'s own
+comment, raised here, and deliberately NOT resolved by picking one** (rule 1b).
+It is Islam's, and it is the one thing this merge does not settle.
+
+### §382.1c — How each conflict was resolved, by class
+
+* **The three records** — COMBINED, never picked (§318.7), and asserted heading
+  by heading rather than eyeballed: **0 lost from ours, 0 lost from theirs**.
+  Theirs' `*Last Updated:*` banner demotes to `*Earlier:*`, which is that
+  file's own convention (§356.17).
+* **`lib/rules.js`** — one conflict region, and it is the intersection itself:
+  ours inserts a `towner` branch, theirs inserts a comment explaining why its
+  switch adds none. Both kept, with a merge note saying which question each
+  is about, because a reader meeting *"deliberately does not reach this line"*
+  directly under a branch that does would reasonably read them as arguing.
+* **`shell.html`** — four tab lists, both tabs kept: theirs after Reporting
+  (*"a slice of reporting"*, his own words), ours last. Theirs arrived written
+  out **four times**; declared ONCE as `MY_TAB` beside `LIB_TAB`, which is this
+  file's own idiom from four lines away (§211, §213 each cost a day to learn).
+  Same key, same gate, same renderer, same position — no behaviour moves.
+* **`smp-app/lib/rules.cjs`** — RE-CARRIED from its frozen twin rather than
+  merged (§335), and `authorize.cjs` and `graph-diff.cjs` came out **already in
+  step**, which corroborates their auto-merge rather than assuming it.
+* **The built file and `public/shell.js`** — rebuilt and regenerated, never
+  merged (§91, §329).
+* **`sw.js`** — §94.12 exactly, and git caught it this time because the
+  suffixes differed: **both sessions independently wrote `v5.23`**. Taken past
+  both and past main's `v5.22` → `v5.24-merged`; one `SHELL` declaration, and
+  `node --check` clean (§146.2).
+
+### §382.1d — What reading the merged tree found (§313.37, §56.7)
+
+**THEIR COMMENT DESCRIBED A BRANCH THEY HAD REMOVED.** The paragraph above
+`boundedReach` opens *"§379 TAKES THE WORLD"* and that function takes no world
+— it describes the narrowing branch their own spec records writing and taking
+out again. §104.8 exactly: a comment stating an intention the code does not
+carry out, and the quietest kind, because it reads perfectly. Corrected rather
+than carried.
+
+**THE DUPLICATE SCAN IS CLEAN.** Over build.py's own concatenation (never a
+second list, §53.5): **1530 top-level names, exactly SIX duplicated** — the six
+§281.1 leaves deliberately. The merge introduced none, and every declaration
+either side touched still resolves (§147.4, §340.1).
+
+### §382.1e — And two checks went red, for opposite reasons
+
+**`test-my-reporting` §0 was the check WORKING.** It asserts the SET of sources
+that need a browser, so that a file growing that dependency is a failure rather
+than a silent omission — and §382's `insights.js` grew one. REWRITTEN, never
+loosened (§218, §214.3): the file is named with its reason and the sentence no
+longer says *"the three"*, which was the literal that moved. **53/0.**
+
+**`test-nav-row` reported §380's own fault on a build that does not have it.**
+Its host answers an unknown name with `undefined`, `allowed()` reads
+`if (d.when && …)`, and **a tab whose gate is undefined skips straight to
+`grantAt`** — which for `c_mylines` is `area:"always"` and therefore *view* for
+everybody at every target. So the merged run read **10 units and 8 functions
+for somebody who reaches nowhere**: the exact shape §380 exists to catch,
+produced by a stand-in modelling less than the thing it stands in for
+(§100.3). *An unsupplied `when` is not a closed one.*
+
+**The product was CHECKED rather than assumed** (§303's habit pointed at our
+own suspicion): in the built file `myLinesHere` is declared **44,000 lines
+before** the tab object is created, so the real gate is there. The harness
+supplies it now at **three states** — off, on, and *a tab that ignores its
+gate* — the third being the guard that this file can still see §380's fault
+through a `when` at all (§113.8), since a stand-in that can only answer *no*
+makes every assertion pass while proving nothing.
+
+**AND MY OWN FIRST STAND-IN WAS ITSELF TOO LOOSE**, which is the same lesson
+twice in one hour: it answered *yes* at a person's own place without asking
+whether they own a line, and moved `cfo` — the one person who reaches nowhere
+— by handing them the Group button. It asks the product's own `ownedBy()` now.
+Measured on the seed: **18 of 33 people own at least one tactic**, §381's own
+figure reproduced independently, and `cfo` is not one of them. **18/0**, red 7
+under `--break=everywhere`.
+
+### §382.1f — What was run, on the MERGED tree
+
+§365's rule, and it is the whole reason a rehearsal is worth doing: a branch
+that passes says nothing about what the merge produces.
+
+**Pure, no browser and no database** — authoriser **704/0** (theirs' §43 among
+them), change list **140/0**, `test-my-reporting` **53/0**, `test-tactic-owner`
+**29/0**, `test-nav-row` **18/0** red 7 from the SOURCE.
+
+**The frozen product** — `built-in-step` all good, `checks/access-header.py`
+all clear, and **theirs' own `checks/my-reporting.py` all good**, which its
+spec still records as *written and NOT RUN*.
+
+**The served stack** — `generated-in-step` all clear, `tsc` clean **COLD**
+(§3), `next build` green, modules **159/0**, view-as **20/0**, insights:tab
+**24/0**, setup-shape **33/0**, insights **137/0**, state **92/0**, tracker
+**229/0**, shell **125/0**, door **144/0** — the last two against a real build
+on a real Postgres.
+
+**AND THE SWEEP DID NOT MOVE, WHICH IS THE EVIDENCE RATHER THAN THE TICK.**
+`qa.py` over `file://` reads **33 viewers / 242 destinations / ERRORS none** —
+the same figure §365 and §367 recorded, summed from the run's own per-viewer
+lines rather than quoted (§332). A merge that added a TAB should add no
+DESTINATION, and §380 is the section that exists because one did: the tab is
+gated on `myLinesHere`, the switch ships off, so on the shipped seed it is
+drawn nowhere and the row is byte for byte what it was. A different number
+here would have meant the new tab had reached the navigation.
+
+**`main` IS UNTOUCHED.** This is the rehearsal Islam asked for — the two
+branches resolved against each other, on ours — and the merge to `main` is his
+word, on that merge, with §377 and §378 still to come in from it.

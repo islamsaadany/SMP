@@ -10375,7 +10375,89 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-21 &mdash; **&sect;382: the reports' filters are the
+*Last Updated: 2026-09-21 &mdash; **&sect;382.1: the merge, and the two
+intersections.** Islam: *"there are intresections and we need it resolved
+before merging. so better merge that branch with ours first."* **THERE WERE
+TWO, AND ONLY ONE WAS THE BRANCH HE NAMED**: looking before merging (&sect;91's
+fetch-and-look) found `main` has moved since our own &sect;376.1 landed on it
+and has taken **&sect;377** and **&sect;378** for spec 059 &mdash; while
+`claude/dazzling-heisenberg-vsqfuz` had taken **&sect;379**, **two minutes
+before our own &sect;379 and about the same subject**: a tactic's Owner. Ours
+is a ROW on Roles &amp; access that starts shut; theirs is a tenant SWITCH and
+a **My reporting** tab, with the unit's own Reporting page going read-only for
+the owner. Neither supersedes the other by time and neither is a mistake
+&mdash; two honest answers to one ask, from two sessions that could not see
+each other. **THE RENUMBER RAN FIRST AND ON ITS OWN** (&sect;264.3), which is
+what makes it provably scoped: the merge base with `main` carries **zero**
+citations of &sect;377&ndash;&sect;380, so every one in this tree is ours
+&mdash; &sect;377&rarr;&sect;380, &sect;379&rarr;&sect;381,
+&sect;380&rarr;&sect;382, **descending by source** or each pass eats the next
+(&sect;365.5), in **three spellings** (&sect;336.1: the `\u00a7` JavaScript
+escape is the third, seven of them, which a two-spelling sweep would have left
+naming somebody else's section), every count **declared in advance** and the
+pass refused on a mismatch &mdash; 45 / 68 / 66, and of 179 changed lines
+**0** do not carry a citation. **BOTH FEATURES ARE KEPT AND THE ORDER BETWEEN
+THEM IS WRITTEN DOWN**: `canEnterLine()` asks `lineOwned()` first, so with the
+switch OFF an owned tactic falls through to `canReportRow()` and the role
+decides exactly as &sect;381 built it, and with it ON the unit's page refuses
+and the owner types on their own tab. **AND ONE COMBINATION SAYS TWO THINGS,
+WHICH IS ISLAM'S AND NOT MINE**: a tenant that opens the Tactic owner row AND
+turns the switch on reads *Reporting: edit* on the table and meets a read-only
+row on the page &mdash; nothing breaks, and it is a screen saying yes where a
+page says no (&sect;42), with two switches over one capability (&sect;53.5).
+Recorded in the code, raised in the record, **not resolved by picking one**
+(rule 1b). **EACH CONFLICT BY CLASS**: the three records COMBINED never picked
+(&sect;318.7), asserted heading by heading &mdash; **0 lost from ours, 0 from
+theirs**; `lib/rules.js`'s one region keeping both with a note saying which
+question each is about; `shell.html`'s four tab lists keeping both tabs, with
+theirs **declared once** rather than the four copies it arrived as, which is
+that file's own idiom from four lines away (&sect;211, &sect;213); `rules.cjs`
+**re-carried** from its frozen twin rather than merged (&sect;335), with
+`authorize.cjs` and `graph-diff.cjs` coming out already in step, which
+corroborates their auto-merge; the built file rebuilt and `public/shell.js`
+regenerated (&sect;91, &sect;329); and `sw.js` &mdash; **&sect;94.12 exactly,
+caught by git this time only because the suffixes differed**: both sessions
+independently wrote `v5.23`, so the name goes past both and past main's
+`v5.22`. **READING THE MERGED TREE FOUND TWO THINGS** (&sect;313.37,
+&sect;56.7): their comment opens *"&sect;379 TAKES THE WORLD"* and
+`boundedReach` takes no world &mdash; it describes the branch that section
+wrote and removed (&sect;104.8), corrected rather than carried; and the
+concatenation holds **1530 top-level names with exactly SIX duplicated**, the
+six &sect;281.1 leaves deliberately, so the merge introduced none.
+**AND TWO CHECKS WENT RED FOR OPPOSITE REASONS.** `test-my-reporting` &sect;0
+was the check **working** &mdash; it asserts the SET of sources needing a
+browser and &sect;382's `insights.js` grew one; REWRITTEN never loosened
+(&sect;218, &sect;214.3), 53/0. `test-nav-row` reported **&sect;380's own
+fault on a build that does not have it**: its host answers an unknown name
+with `undefined`, `allowed()` reads `if (d.when && …)`, and **a tab whose gate
+is undefined skips straight to `grantAt`** &mdash; which for `c_mylines` is
+`area:"always"`, so it read 10 units and 8 functions for somebody who reaches
+nowhere. *An unsupplied `when` is not a closed one*, and a stand-in modelling
+less than the thing it stands in for reports a working build broken
+(&sect;100.3). **The product was CHECKED rather than assumed** &mdash;
+`myLinesHere` is declared 44,000 lines before the tab object is created
+&mdash; and the gate is supplied at **three states** now, the third being *a
+tab that ignores its gate*, which must move the row or this file cannot see
+&sect;380's fault through a `when` at all (&sect;113.8). **AND MY OWN FIRST
+STAND-IN WAS TOO LOOSE THE SAME WAY**, moving `cfo` until it asked the
+product's own `ownedBy()`: measured, **18 of 33 people own at least one
+tactic**, &sect;381's figure reproduced independently, and `cfo` is not one.
+**MEASURED ON THE MERGED TREE** (&sect;365): authoriser 704/0, change list
+140/0, my-reporting 53/0, tactic-owner 29/0, nav-row 18/0 red 7,
+`built-in-step` all good, `access-header` all clear, **theirs' own
+`my-reporting.py` all good** (its spec still records it as unrun),
+`generated-in-step` all clear, `tsc` clean **COLD**, `next build` green,
+modules 159/0, viewas 20/0, insights:tab 24/0, setup 33/0, insights 137/0,
+state 92/0, tracker 229/0, shell 125/0, door 144/0. **AND THE SWEEP DID NOT
+MOVE, WHICH IS THE EVIDENCE RATHER THAN THE TICK**: `qa.py` over `file://`
+reads **33 viewers / 242 destinations / ERRORS none**, the same figure
+&sect;365 and &sect;367 recorded, summed from the run's own lines
+(&sect;332) &mdash; a merge that adds a TAB should add no DESTINATION, and
+&sect;380 is the section that exists because one did. **`main` untouched: this
+is the rehearsal, and the merge is Islam's word, on that merge, with
+&sect;377 and &sect;378 still to come in from it.*
+
+*Earlier: 2026-09-21 &mdash; **&sect;382: the reports' filters are the
 reports that exist (spec 061).** Islam, of the tab &sect;376 put in the
 platform: *"the filters of the reports should appear only if there is this type
 of report."* **MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a), and the

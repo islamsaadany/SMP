@@ -6974,3 +6974,60 @@ browser. Nothing on a screen has been driven by a machine in this round; the
 claims about what is drawn come from calling the product's own renderer.
 
 **Waiting on Islam**: the merge.
+
+---
+
+## 2026-09-21 — The two branches merged into one (§382.1)
+
+Islam asked for the other branch to be brought into ours and the overlaps
+sorted out before anything goes to main. There were **two** overlaps, and only
+one of them was the branch he named.
+
+**The one he knew about.** That branch and ours both built something about a
+**tactic's owner**, two minutes apart, in two sessions that could not see each
+other. Ours adds a **row** on the roles table — *Tactic owner*, switched off,
+so the office can decide — and theirs adds a **switch** and a page of the
+owner's own called **My reporting**, where the unit's ordinary reporting page
+becomes read-only for them. Both quote him. Neither came first in any
+meaningful sense.
+
+**Both are kept**, and the order between them is now written into the code
+rather than left to be found out: with the switch **off**, an owner's tactic
+behaves exactly as our row says; with it **on**, the unit's page steps aside
+and they type on their own page.
+
+**One combination still says two different things, and that one is his.** A
+client that switches the row on *and* turns the switch on will read "can
+report" on the roles table and meet a page that will not take the number.
+Nothing is broken and nothing is lost — but two ways of saying yes to one
+thing is how they come to disagree later, so it is flagged rather than decided
+here.
+
+**The one he did not know about.** Main has moved since our last round and has
+taken two of the section numbers we were using, from a third session. So our
+three unmerged sections were renumbered first, before anything was merged —
+which is the only moment that can be done safely, because at that point every
+one of those numbers in our copy is provably ours. Every count was declared in
+advance and the whole pass refused itself on a mismatch; three different ways
+of writing a section number had to be swept, not two.
+
+**What the merge itself turned up.** A comment in the incoming work describes
+something that code no longer does — corrected rather than carried across. The
+two branches had independently given the service worker **the same version
+name**, which is the fault that has bitten this project before and which git
+only caught this time by luck. And two checks went red for opposite reasons:
+one was doing its job (it noticed a new file of ours needing a browser), and
+one was reporting a fault that is not there, because its stand-in answered a
+question it should have refused — the product was checked directly rather than
+believed broken.
+
+**What was run, on the merged result rather than on either branch**: every
+rule suite, the frozen product's own checks, the served app rebuilt from
+scratch against a real database, and the whole-platform sweep. All green, no
+errors — **and the sweep's numbers did not move, which is the point**: the
+merge adds a new tab, and a new tab must not add new places in the navigation.
+That is the exact fault an earlier round of ours existed to fix, so a changed
+number would have meant it had come back.
+
+**Main is untouched.** This is the rehearsal he asked for. Merging to main is
+his word, and main's own two sections are still to come across.

@@ -7711,7 +7711,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
 - **Multi-tenant (§36) — the reasoning behind all of the above.** Read §36 and
   §313 together before changing how a client is resolved.
 - **A TAB THAT IS THE SAME EVERYWHERE IS NOT A REASON TO BE ANYWHERE
-  (&sect;377):** the navigation decides whether to draw a destination by asking
+  (&sect;380):** the navigation decides whether to draw a destination by asking
   *is there at least one tab here this person holds*, and &sect;376's Insights
   tab is keyed on `c_kb` &mdash; `area:"always"`, which `grantAtPage` answers
   **`"view"` unconditionally**, for every role at every target. So the library
@@ -7732,7 +7732,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   rather than at load**, because the question is viewer-dependent and at load
   the shell has not hydrated, so anything viewer-dependent answered there is
   answered about the BAKED viewer (&sect;362's wall, from the other side).
-- **VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY ON A READ PATH TOO (&sect;377,
+- **VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY ON A READ PATH TOO (&sect;380,
   finishing &sect;185):** a module resolves who is asking from `ServeArgs`'s
   `personKey` and `seat`, which the DOOR answered about the **sign-in** &mdash;
   so with the office signed in, the office's seat answered and every narrowed
@@ -8165,7 +8165,7 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   not have. **The frozen product is untouched and measured**
   (`built-in-step.py` all good), so **`sw.js` is NOT bumped**. Two reds are
   `main`'s, established on a baseline worktree first (&sect;303): `tracker` 227/1
-  &mdash; **diagnosed and fixed at &sect;380.10, and it was neither a literal nor
+  &mdash; **diagnosed and fixed at &sect;382.10, and it was neither a literal nor
   stale**: that section renders the page with a FIXED today and the expectation
   worked its answer out from the REAL clock, so the two asked about different
   weeks and it went red on the CALENDAR rather than on a commit &mdash; and
@@ -8558,7 +8558,7 @@ node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # beside the equally-weighted 50, so the number is pinned
                                 # by a difference and not only by itself
 node scripts/test-nav-row.js     # WHAT THE DESTINATION ROW OFFERS, AND WHY
-                                # (&sect;377). No browser and no database: the
+                                # (&sect;380). No browser and no database: the
                                 # SHIPPED build's own gates are run in a vm behind a
                                 # permissive global &mdash; `myUnits`, `myFns`,
                                 # `ownTabs`, `foldsNeeded`, never a model of them
@@ -8577,11 +8577,11 @@ node scripts/test-nav-row.js     # WHAT THE DESTINATION ROW OFFERS, AND WHY
                                 # printing Islam's report verbatim: `own_mob:
                                 # {"units":1,&hellip;} -> {"units":10,&hellip;}`. AND
                                 # IT DEGRADES RATHER THAN DYING (&sect;215) against a
-                                # build that predates &sect;377, saying so in words
+                                # build that predates &sect;380, saying so in words
                                 # &mdash; which is exactly the run somebody makes to
                                 # establish a fault is not theirs (&sect;303).
                                 # `--built <path>` points it at another build
-node smp-app/checks/view-as.mjs # viewing as somebody, on a READ path (&sect;377)
+node smp-app/checks/view-as.mjs # viewing as somebody, on a READ path (&sect;380)
                                 # &mdash; `npm run check:viewas`, no database and no
                                 # browser, because the rule is pure (`view-as.ts`
                                 # splits the decision from the two lookups for exactly
@@ -10229,7 +10229,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-21 &mdash; **&sect;380: the reports' filters are the
+*Last Updated: 2026-09-21 &mdash; **&sect;382: the reports' filters are the
 reports that exist (spec 061).** Islam, of the tab &sect;376 put in the
 platform: *"the filters of the reports should appear only if there is this type
 of report."* **MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a), and the
@@ -10265,18 +10265,18 @@ and no filters**, because an empty library is a beginning rather than a fault
 than that it is empty (&sect;35, &sect;93); a list is those filters. **A read
 that THROWS answers `[]` and says so in the log** &mdash; an unreadable library
 must not take the tab down with it (&sect;231.3's rule one module over).
-**&sect;380.5 &mdash; `viewerOf` EXISTED THREE TIMES AND THIS WOULD HAVE BEEN
+**&sect;382.5 &mdash; `viewerOf` EXISTED THREE TIMES AND THIS WOULD HAVE BEEN
 THE FOURTH**: the same six lines sat in `modules/insights/index.ts` and in
 `lib/landing-facts.ts`, the second under a comment NAMING the first. One answer
 now in `lib/library-viewer.ts`, **beside `library.ts` rather than in it**,
 because that file takes a connection and imports nothing &mdash; which is
 exactly what lets `checks/insights-tab.mjs` run its first three sections with no
 database and no `node_modules`, and a driver import would have quietly ended
-that (&sect;54.5). **&sect;380.6 &mdash; AND THE SETUP DOCUMENT HAD TO CARRY IT
+that (&sect;54.5). **&sect;382.6 &mdash; AND THE SETUP DOCUMENT HAD TO CARRY IT
 TOO**: a Setup document draws no destination tabs, and the shell walks from
 Setup to a unit WITHOUT asking for the document again &mdash; so a stamp right
 only on a module's own document would be the module's whole list on the tab
-drawn on arrival. **&sect;380.7 &mdash; ONE ESCAPER, SAFE IN AN ATTRIBUTE
+drawn on arrival. **&sect;382.7 &mdash; ONE ESCAPER, SAFE IN AN ATTRIBUTE
 (&sect;235, one file over), FOUND BY A FIXTURE RATHER THAN BY READING**:
 `lib/shell.ts` kept an `esc()` of its own escaping `& < > "` and **not `'`**, a
 text-node escaper used inside SINGLE-quoted attributes &mdash; word for word the
@@ -10287,15 +10287,15 @@ threw, and **the module switcher was silently not drawn** (&sect;96's family).
 The exposure is stated rather than implied &mdash; `script-src 'self'` with
 nothing inline (&sect;238), so an injected attribute cannot run &mdash; and
 `lib/chat-api.cjs`'s twin gap is deliberately NOT touched, being a carried file
-`generated-in-step.mjs` asserts byte-identical (&sect;316.7). **&sect;380.8
+`generated-in-step.mjs` asserts byte-identical (&sect;316.7). **&sect;382.8
 &mdash; TWO CHECKS WERE STALE AND BOTH WERE MY OWN UNMERGED ROUNDS**,
 established as not this work's by stashing it, rebuilding and re-running
 (&sect;303, &sect;105.6): two fixtures shut ONE row and expected a refusal, and
 access is the MOST GENEROUS grant across the roles somebody holds (&sect;33), so
-&sect;379's new tactic-owner row meant the Mobile head was no longer shut &mdash;
+&sect;381's new tactic-owner row meant the Mobile head was no longer shut &mdash;
 **the product is right and the fixture had stopped making the state its own
 assertions are about**; they shut every row the person holds, asked of
-`personRoles` rather than typed (&sect;42). **&sect;380.11 &mdash; AND THE SEAM
+`personRoles` rather than typed (&sect;42). **&sect;382.11 &mdash; AND THE SEAM
 BETWEEN THE TWO HALVES WAS MEASURED BY NOBODY** (&sect;316.7's own finding, one
 feature over): the RULE is asserted against a database in
 `checks/insights.mjs` &sect;14 and the ROW with no database in
@@ -10318,10 +10318,10 @@ sweep ran it (&sect;54.5, in a check's own docstring). Corrected in words rather
 than quietly, and the break is wired into `check:shell:red`. **VERIFIED**:
 shell **120 &rarr; 125/0** red **six** ways &mdash; and the new break's reach is
 stated rather than rounded off: it reddens **five**, four of &sect;3d's own and
-**one of &sect;3b's**, because removing the stamp removes the TAB and &sect;377's
+**one of &sect;3b's**, because removing the stamp removes the TAB and &sect;380's
 switcher rule reads the tab, so with the reports gone the four-square mark
 correctly comes back where that section asserts it does not. A true consequence
-rather than a stray, and worth having: it is the coupling &sect;377 built,
+rather than a stray, and worth having: it is the coupling &sect;380 built,
 measured. &sect;3d's fifth &mdash; *a client without the module carries no stamp*
 &mdash; is correctly GREEN under it, absent being absent either way, which is
 what a both-ends control looks like when the break lands (&sect;113.8). Beside
@@ -10343,8 +10343,8 @@ repainting are asserted nowhere; and `lib/chat-api.cjs`'s escaper, named above
 and left where it is. **`main` untouched: the merge is Islam's word, on that
 merge.*
 
-*Earlier: 2026-09-20 &mdash; **&sect;379: a tactic's owner is a row on the
-table.** Islam, after &sect;377: *"I believe we need to add measures & tactics
+*Earlier: 2026-09-20 &mdash; **&sect;381: a tactic's owner is a row on the
+table.** Islam, after &sect;380: *"I believe we need to add measures & tactics
 owners as roles so I can set their accessability."* **&sect;147.7's shape one
 level down, and he closed the original complaint himself** (*"mahdy is a project
 owner then it ok to see the project and report it ofcourse my bad"*), so nothing
@@ -10362,7 +10362,7 @@ fixture gaining a fourth person who owns both a pillar and a tactic under it.
 **RECORDED, NOT DONE**: the Measure owner row and the field under it, awaiting
 sign-off on the mockup published with it.*
 
-*Earlier: 2026-09-20 &mdash; **&sect;377: the tab that filled the row, and
+*Earlier: 2026-09-20 &mdash; **&sect;380: the tab that filled the row, and
 the mirror that showed your own face (spec 061).** Islam, with three
 screenshots the morning after &sect;376 reached `main`: *"when viewing as Mahdy
 he started seeing the other units and functions while he should only see his
@@ -10374,7 +10374,7 @@ because from the screen they read as one thing (*this person is seeing what
 other people's is*) and they have nothing to do with each other. Both
 established as &sect;376's own regressions by running against the build before
 it (&sect;303).
-**&sect;377.1 &mdash; A TAB THAT IS THE SAME EVERYWHERE MUST NOT BE WHAT MAKES
+**&sect;380.1 &mdash; A TAB THAT IS THE SAME EVERYWHERE MUST NOT BE WHAT MAKES
 A DESTINATION REACHABLE**: the Insights tab is keyed on `c_kb`, the one access
 key the matrix holds at `area:"always"`, so `grantAtPage` answers **`"view"`
 unconditionally** for every role at every target &mdash; and the navigation
@@ -10400,7 +10400,7 @@ AND SOLVED RATHER THAN LEFT** &mdash; `cfo` goes 0 destinations &rarr; 0, so
 which forced the switcher to be built on the first PAINT rather than at load:
 &sect;362's own wall from the other side, its stale *"built exactly once, at
 load"* comment corrected in the same edit (&sect;104.8).
-**&sect;377.2 &mdash; VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY ON A READ PATH
+**&sect;380.2 &mdash; VIEWING AS SOMEBODY IS JUDGED AS SOMEBODY ON A READ PATH
 TOO**, which is &sect;185 finished rather than a new rule: that section made
 `/api/state` judge the VIEWED person and the library's own narrowing is
 correct for a real sign-in (asserted since &sect;355) &mdash; what was broken is
@@ -10621,7 +10621,7 @@ state 92/0, modules 158/0, insights 127/0, notes 170/0, frameworks 90/0, setup
 `built-in-step.py` all good, `generated-in-step` and `declared-deps` all clear,
 `npm run build` green and **`tsc` clean COLD**. **The one red is `main`'s**
 &mdash; `tracker` 227/1, reproduced on a worktree of `origin/main` first
-(&sect;303) and read here as a spelling; **&sect;380.10 measured it and it is
+(&sect;303) and read here as a spelling; **&sect;382.10 measured it and it is
 not one** &mdash; the page is rendered with a FIXED today and the expectation
 computed `weekWord` from the REAL clock, so the product said *Next week* and
 the check demanded *This week* about the same rows. Fixed there, 229/0, with

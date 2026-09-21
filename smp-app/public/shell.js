@@ -78,7 +78,7 @@
       note:"Named as a project's Owner on a supporting function. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
-    /* ── AND THE ROW UNDER THE PILLAR (§379, Islam 2026-09-20) ──────
+    /* ── AND THE ROW UNDER THE PILLAR (§381, Islam 2026-09-20) ──────
        *"I believe we need to add measures & tactics owners as roles so I can
        set their accessability and accordingly Mahdy access can be switched on
        of orr."*
@@ -264,7 +264,7 @@
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
-    /* NOTHING, EVERYWHERE (§379). The two rows above ship at view because
+    /* NOTHING, EVERYWHERE (§381). The two rows above ship at view because
        §147.7 was asked for a role that READS its own place and reports it
        once the cell is opened; this one was asked for the opposite — a row
        that starts shut so a tenant can decide. Islam's own words, and the
@@ -534,7 +534,7 @@
       if (String(f.format) === "pillars" && (f.items || []).some(owns))
         once("plowner", "fn:" + k);
     });
-    /* ── THE TACTIC'S OWN OWNER (§379) ────────────────────────────
+    /* ── THE TACTIC'S OWN OWNER (§381) ────────────────────────────
        Unconditional, exactly as the two above: a custodian somewhere else who
        also owns a tactic here holds both, which is the case that could not be
        switched off before. One entry per PLACE, however many tactics there
@@ -565,7 +565,7 @@
        that stops naming them stops. Somebody attached and named on nothing now
        holds NOTHING — what they may see is NO_ROLE's floor, applied in
        grantIn() rather than dressed up as a role they never got (§93). */
-    /* ── AND THE FLOOR IS ASKED OF THE ROLES THAT GRANT SOMETHING (§379) ──
+    /* ── AND THE FLOOR IS ASKED OF THE ROLES THAT GRANT SOMETHING (§381) ──
        This tested `out.length`, which meant "holds no role at all" — true
        until a row deriving here could grant NOTHING. A tactic owner named
        nowhere else would have stopped being a Contributor and started being a
@@ -3433,7 +3433,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      save is narrowed to their reach by mayReportRow() below. Adding a key
      here is what wires all of that at once, which is exactly the property
      §55 recorded this list for. */
-  /* §379 adds the tactic's owner, and adding the key here is what wires
+  /* §381 adds the tactic's owner, and adding the key here is what wires
      the whole of it at once: no Submit, no cycle note, no picture slides,
      every reporting save narrowed by mayReportRow(), and the role refused by
      the register's picker and the people workbook, both of which ask
@@ -3488,7 +3488,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
      · a PROJECT OWNER reaches every row of a project whose Owner names them;
      · a PILLAR OWNER reaches every row of a pillar whose Owner names them;
-     · a TACTIC OWNER reaches the one tactic whose Owner names them (§379);
+     · a TACTIC OWNER reaches the one tactic whose Owner names them (§381);
      · a CONTRIBUTOR (and the floor) reaches the rows that NAME them — the
        row's own owner or collaborators, or the project's stakeholder and
        collaborator lists (§147.8: "stakeholders are contributors"). */
@@ -3499,7 +3499,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "plowner")
       return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
              namedOn({ owner: ctx.pillarOwner }, person);
-    /* §379: A HANDLE OF ITS OWN, NEVER `ctx.row.owner`. That reads right and
+    /* §381: A HANDLE OF ITS OWN, NEVER `ctx.row.owner`. That reads right and
        is wrong on exactly one row kind: a MEASURE's reporting ctx is built
        with `row.owner = the PILLAR's owner` (§55's rule, kept by §147.7 so
        nothing a contributor could reach before the pillar-owner role existed
@@ -10380,7 +10380,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown, tacticOwner: x.town });   /* §379 */
+      pillarOwner: x.pown, tacticOwner: x.town });   /* §381 */
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -10669,7 +10669,7 @@ function reportItems(u){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                 town:t.owner,                          /* §379 */
+                 town:t.owner,                          /* §381 */
                  cid:p.id, place:place });
     });
     /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
@@ -12597,7 +12597,7 @@ function gapMap(target, all, fillable){
     }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
-      /* §379: a tactic's own Owner is its own handle — see boundedReach(). */
+      /* §381: a tactic's own Owner is its own handle — see boundedReach(). */
       var tctx = function(row){ var c = pctx(row); c.tacticOwner = row && row.owner; return c; };
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){ n += G(w.plan, tctx(x), "tactic", x); });
@@ -26955,7 +26955,7 @@ function renderReport(u){
     SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                town:t.owner,                                  /* §379 */
+                town:t.owner,                                  /* §381 */
                 cid:p.id });
     });
     /* §343: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
@@ -29336,7 +29336,7 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
-  /* §379: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
+  /* §381: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
      nothing here — `row` is the real object — so reading `ctx.row.owner`
      would have worked today and stopped working the day a key measure gains
      an Owner of its own, which is the next thing drawn. Named, so the reach
@@ -50305,7 +50305,7 @@ var LIBRARY = (function(){
   function load(force){
     if (!shown()) return;
     var cat = category();
-    /* WHO IT WAS ASKED FOR IS PART OF THE ASK (§377). `loadedFor` is what
+    /* WHO IT WAS ASKED FOR IS PART OF THE ASK (§380). `loadedFor` is what
        stops a slow answer overwriting a newer one, so a viewer switch has to
        be in it: the pane is re-rendered on every paint and asks again, and
        without the person in the key the older request could still land last
@@ -50318,7 +50318,7 @@ var LIBRARY = (function(){
     var qs = [];
     if (cat) qs.push("category=" + encodeURIComponent(cat));
     if (Q) qs.push("q=" + encodeURIComponent(Q));
-    /* ── VIEWING AS SOMEBODY ASKS FOR THEIR REPORTS (§377) ──────────
+    /* ── VIEWING AS SOMEBODY ASKS FOR THEIR REPORTS (§380) ──────────
        Islam: *"karim from mobile is seeing the report while the report is
        made only for the retail and online team."* He was right, and it was
        this request: the server resolved who is asking from the SIGN-IN, so
@@ -53730,7 +53730,7 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
-    /* WHO THE SCREEN IS BEING DRAWN FOR (§377). The save has carried the
+    /* WHO THE SCREEN IS BEING DRAWN FOR (§380). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`
        carries the switcher's own two guards (the seat that draws it, and the
@@ -54157,7 +54157,7 @@ var SYNC = (function () {
      allowed — two answers to one question (§37, §53.5). The key is here
      because `allowed()` asks every tab for one.
 
-     AND `everywhere` IS WHAT STOPS IT FILLING THE ROW (§377). Every other
+     AND `everywhere` IS WHAT STOPS IT FILLING THE ROW (§380). Every other
      tab in SUBS is ABOUT the destination it is drawn on — a unit's plan, a
      function's projects — so the navigation can ask *is there a tab here
      this person holds* and get an honest answer. The library is the
@@ -55027,7 +55027,7 @@ var SYNC = (function () {
     });
   }
 
-  /* ── WHAT MAKES A DESTINATION WORTH OFFERING (§377) ──────────────────
+  /* ── WHAT MAKES A DESTINATION WORTH OFFERING (§380) ──────────────────
      `allowed()` answers which tabs this person holds HERE, and the navigation
      asks a narrower question: is there anything AT this destination for them.
      A tab that draws the same thing wherever it is drawn is not an answer to
@@ -55126,7 +55126,7 @@ var SYNC = (function () {
      already use 1424px of a 1485px row — 61px left — so a third kind of thing
      sharing that line overflows on an ordinary laptop the day a second
      capability is created. */
-  /* IS THERE ANYWHERE FOR THIS VIEWER TO STAND (§377). Asked by the module
+  /* IS THERE ANYWHERE FOR THIS VIEWER TO STAND (§380). Asked by the module
      switcher (shell/route.js) and by nothing else: with the library drawn as
      a tab wherever there is a tab row, somebody who reaches NO destination
      has no row to be offered it on — so the switcher must go on listing
@@ -64907,7 +64907,7 @@ var SYNC = (function () {
      is what the `.topmark` guard below is for now that a paint is what calls
      this. A press navigates, so the menu never has to be closed afterwards.
 
-     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§377). It has to ask
+     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§380). It has to ask
      whether the tab row already reaches the library, and at load the answer
      is about the BAKED viewer: over HTTP the shell hydrates from /api/state
      after this file has been parsed, so anything viewer-dependent answered
@@ -64970,7 +64970,7 @@ var SYNC = (function () {
        always there. It is here because this file is the one piece of browser
        code that is also written as a file of its own.
 
-       AND "REACHED" MEANS REACHED BY THIS PERSON (§377). `LIBRARY.shown()`
+       AND "REACHED" MEANS REACHED BY THIS PERSON (§380). `LIBRARY.shown()`
        says the library is on the tab row; `anyDestination()` says there is a
        row — somebody who reaches no unit, no function, no company and not
        the group has no tab to be offered it on, and dropping it here would

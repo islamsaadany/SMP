@@ -192,7 +192,7 @@
      is what the `.topmark` guard below is for now that a paint is what calls
      this. A press navigates, so the menu never has to be closed afterwards.
 
-     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§377). It has to ask
+     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§380). It has to ask
      whether the tab row already reaches the library, and at load the answer
      is about the BAKED viewer: over HTTP the shell hydrates from /api/state
      after this file has been parsed, so anything viewer-dependent answered
@@ -255,7 +255,7 @@
        always there. It is here because this file is the one piece of browser
        code that is also written as a file of its own.
 
-       AND "REACHED" MEANS REACHED BY THIS PERSON (§377). `LIBRARY.shown()`
+       AND "REACHED" MEANS REACHED BY THIS PERSON (§380). `LIBRARY.shown()`
        says the library is on the tab row; `anyDestination()` says there is a
        row — somebody who reaches no unit, no function, no company and not
        the group has no tab to be offered it on, and dropping it here would

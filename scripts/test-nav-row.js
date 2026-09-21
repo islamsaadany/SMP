@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* WHAT THE DESTINATION ROW OFFERS, AND WHY (§377).
+/* WHAT THE DESTINATION ROW OFFERS, AND WHY (§380).
  *
  * Islam, viewing as a unit's strategy custodian on the build §376 shipped:
  * *"when viewing as Mahdy he started seeing the other units and functions
@@ -109,12 +109,12 @@ console.log("\n§1  the gates are the shipped ones");
 const GATES = ["allowed", "ownTabs", "myUnits", "myFns", "foldsNeeded", "anyDestination"];
 GATES.forEach((n) => check(n + "() is in this build", typeof box[n] === "function"));
 /* A CHECK THAT DIES REPORTS NOTHING (§215). Measured against a build from
-   before §377 every later section would throw on the first missing gate and
+   before §380 every later section would throw on the first missing gate and
    print a stack trace where a verdict belongs — which is exactly the run
    somebody makes to establish that a fault is not theirs (§303). */
 if (GATES.some((n) => typeof box[n] !== "function")) {
   console.log("\nnav-row: " + ok + " ok, " + bad.length + " failed" +
-    "\n  this build predates \u00a7377 \u2014 the gates it measures are not in it, " +
+    "\n  this build predates \u00a7380 \u2014 the gates it measures are not in it, " +
     "so nothing below could be asked");
   process.exit(1);
 }

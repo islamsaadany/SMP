@@ -53570,7 +53570,7 @@ are one request apart for whoever can read the live site. The branch is
 deliberately NOT fast-forwarded (§374.1, §375.2's precedent): while it stays
 behind, main's tip is unique by construction.
 
-## §377 — THE TAB THAT FILLED THE ROW, AND THE MIRROR THAT SHOWED YOUR OWN FACE (2026-09-20, spec 061)
+## §380 — THE TAB THAT FILLED THE ROW, AND THE MIRROR THAT SHOWED YOUR OWN FACE (2026-09-20, spec 061)
 
 Islam, with three screenshots, the morning after §376 reached `main`:
 *"when viewing as Mahdy he started seeing the other units and functions while
@@ -53583,7 +53583,7 @@ them was most of the round, because from the screen they read as one thing —
 *this person is seeing what other people's is* — and they have nothing to do
 with each other.
 
-### §377.1 — A tab that is the same everywhere must not be what makes a destination reachable
+### §380.1 — A tab that is the same everywhere must not be what makes a destination reachable
 
 The Insights tab was keyed on `c_kb`, which is the one access key the matrix
 holds at `area:"always"` — `grantAtPage` returns **`"view"` unconditionally**
@@ -53657,7 +53657,7 @@ said the markup is built "exactly once, at load", was corrected in the same
 edit rather than left describing an intention the code no longer carries out**
 (§104.8).
 
-### §377.2 — Viewing as somebody showed the office's reports, not theirs
+### §380.2 — Viewing as somebody showed the office's reports, not theirs
 
 The Insights module resolves who is asking from `ServeArgs.personKey` and
 `seat` — the two facts the DOOR established — and the door answers about the
@@ -53710,7 +53710,7 @@ reports back (§222's family).
 report while viewing as somebody; they see that person's. That is the point of
 it, and it is a change to what that screen shows them.
 
-### §377.3 — What was measured, and what could not be
+### §380.3 — What was measured, and what could not be
 
 **`scripts/test-nav-row.js`** runs the SHIPPED build's own gates in a vm
 behind a permissive global — the product's `myUnits`, `myFns`, `ownTabs` and
@@ -53765,9 +53765,9 @@ only by forging or by a stale link, and worth a page the day anybody meets it.
 
 ---
 
-## §379 — A TACTIC'S OWNER IS A ROW ON THE TABLE (2026-09-20)
+## §381 — A TACTIC'S OWNER IS A ROW ON THE TABLE (2026-09-20)
 
-Islam, after §377 established that Mahdy reached a whole supporting function
+Islam, after §380 established that Mahdy reached a whole supporting function
 because a project there named him as Owner:
 
 > *"what we need to follow is the accessablity matrix. we don't have a tactic
@@ -53784,7 +53784,7 @@ and then, closing the fork:
 then it ok to see the project and report it ofcourse my bad."* So nothing about
 Project owner moves; what was missing is a row for the level below it.
 
-### §379.1 — §147.7's shape, one level down
+### §381.1 — §147.7's shape, one level down
 
 A pillar has an Owner and every tactic under it has one, and being named the
 Owner IS the role — the same derivation `powner` and `plowner` have had since
@@ -53796,7 +53796,7 @@ see on the table**, and could therefore be switched off by nobody.
 
 That is the whole fault, and it is exactly the one Islam is pointing at.
 
-### §379.2 — All none, and that is his instruction rather than a cautious default
+### §381.2 — All none, and that is his instruction rather than a cautious default
 
 The two owner rows above it ship at `view`, because §147.7 was asked for a role
 that READS its own place and reports it once the cell is opened. This one was
@@ -53809,7 +53809,7 @@ what a switch is for.
 baseline answers **UNMOVED** — 33 people × 35 page keys × 21 targets, every one
 opening exactly what they opened. Adding the role moves nobody.
 
-### §379.3 — And it takes nothing away, which a reading would miss
+### §381.3 — And it takes nothing away, which a reading would miss
 
 Any role deriving here suppresses the Contributor floor, and this one grants
 **nothing** where the floor gives view. So somebody who owns a tactic and is
@@ -53826,7 +53826,7 @@ change about a row that grants nothing (rule 1b).
 Nobody in the worked example stands on the floor at all, so the case is MADE
 (§255) rather than waited for.
 
-### §379.4 — A handle of its own, never `ctx.row.owner`
+### §381.4 — A handle of its own, never `ctx.row.owner`
 
 The obvious branch — *does the row's Owner name this person* — reads right and
 is wrong on exactly one row kind. **A measure's reporting context is built with
@@ -53850,7 +53850,7 @@ falsification went **green**. The subject has to be somebody who owns a pillar
 **and** a tactic under it, which is a fourth person the fixture now mints —
 `--break=row-owner` then reddens exactly the one assertion it is for.
 
-### §379.5 — The measure owner is not here, and the reason is a field
+### §381.5 — The measure owner is not here, and the reason is a field
 
 A key measure carries **no Owner anywhere in the product** — 0 of the 76 in the
 worked example, and no column on the table in either mode. The `m.owner` reads
@@ -53877,7 +53877,7 @@ Proposed with it and awaiting his word: **optional and never a counted gap**
 is §249's own lesson), and **carried by the workbook** or a download and an
 untouched upload would drop every owner (§22).
 
-### §379.6 — And the check that objected was right about the rule
+### §381.6 — And the check that objected was right about the rule
 
 `checks/access-header.py` went red: *"Tactic owner: no column is offered that
 this role can never reach — a_fn_own_strat, a_fn_own"*. §174's rule, and the
@@ -53893,7 +53893,7 @@ fifth one is judged the day it lands (§104.7). Falsified from the SOURCES: with
 the pillars-function half of the derivation removed it reddens again, on exactly
 that assertion.
 
-### §379.7 — What was run
+### §381.7 — What was run
 
 `scripts/test-tactic-owner.js` **29/0**, proved able to fail **five ways from
 the source** — `no-derive` 8, `row-owner` 1, `view-default` 1, `floor` 1,
@@ -53920,11 +53920,11 @@ to `main` (§94.16).
 **RECORDED, NOT DONE**: the Measure owner row and the field under it, awaiting
 sign-off on the mockup above; and the Insights category filters are still drawn
 whether or not a report of that type exists, which is the other half of the
-report §377 answered and has not been started.
+report §380 answered and has not been started.
 
 ---
 
-## §380 — The reports' filters are the reports that exist (2026-09-21)
+## §382 — The reports' filters are the reports that exist (2026-09-21)
 
 Islam, of the reports tab §376 put in the platform:
 
@@ -53932,9 +53932,9 @@ Islam, of the reports tab §376 put in the platform:
 > report, mahdy i seeing transofrmation while karim is seeing only the
 > mobile"*
 
-The second half was §377 and is merged into this branch. This is the first.
+The second half was §380 and is merged into this branch. This is the first.
 
-### §380.1 — Measured first, and it is worst on the first screen a client opens
+### §382.1 — Measured first, and it is worst on the first screen a client opens
 
 Rule 3a, and the measurement is what makes the case rather than the wording of
 the ask. The section row under the tab was **`All · Analysis · Macro · Market ·
@@ -53951,7 +53951,7 @@ It is not a wrong list: it is the module's list, which is the honest answer to
 filter this library by*. §61's own shape — a control with nothing behind it is
 not a choice — one row down from where that rule usually bites.
 
-### §380.2 — It is the server's answer, and that is forced
+### §382.2 — It is the server's answer, and that is forced
 
 The section row is built **synchronously, inside `paint()`** (`SUBS`'s `render`
 returns HTML), so nothing fetched can be in it: by the time an answer landed the
@@ -53964,7 +53964,7 @@ has been since §376 — the change is *what it is stamped with*. It was
 `CATEGORIES`, the module's constant; it is now the categories this library
 actually holds **for this person**.
 
-### §380.3 — Asked of the library, through the same two clauses the list is
+### §382.3 — Asked of the library, through the same two clauses the list is
 
 `categoriesPresent` in `lib/library.ts`:
 
@@ -53990,7 +53990,7 @@ filtered*, which is a different question with a different answer.
 **It costs one query per SERVED DOCUMENT**, not per paint: the stamp is written
 when the page is served and read from the DOM thereafter.
 
-### §380.4 — Three answers, not two
+### §382.4 — Three answers, not two
 
 `libraryStampFor` (`lib/library-viewer.ts`) answers:
 
@@ -54006,7 +54006,7 @@ when the page is served and read from the DOM thereafter.
 A read that THROWS answers `[]` and says so in the log: an unreadable library
 must not take the tab down with it (§231.3's rule one module over).
 
-### §380.5 — `viewerOf` existed three times, and this would have been the fourth
+### §382.5 — `viewerOf` existed three times, and this would have been the fourth
 
 The same six lines — a seat sees all, otherwise `placeOf` — sat in
 `modules/insights/index.ts` and in `lib/landing-facts.ts` (the second under a
@@ -54016,7 +54016,7 @@ takes a connection and imports nothing, which is exactly what lets
 `checks/insights-tab.mjs` run its first three sections with no database and no
 `node_modules`, and a driver import would have quietly ended that.
 
-### §380.6 — And the Setup document had to carry the stamp too
+### §382.6 — And the Setup document had to carry the stamp too
 
 A Setup document draws no destination tabs, and **the shell walks from Setup to
 a unit without asking for the document again** — so a stamp that was right only
@@ -54024,7 +54024,7 @@ on a module's own document would be the module's whole list on the tab drawn on
 arrival. The same answer, from the same function, on both (`route.ts`'s Setup
 branch and `modules/strategy/index.ts`).
 
-### §380.7 — One escaper, safe in an attribute (§235, one file over)
+### §382.7 — One escaper, safe in an attribute (§235, one file over)
 
 **Found by a fixture rather than by reading**, which is the only reason it was
 found at all.
@@ -54053,7 +54053,7 @@ has the same gap and is deliberately **not** touched: it is a CARRIED file
 its subject is an email body rather than an attribute, and editing it here would
 break that check to fix nothing.
 
-### §380.8 — Two checks were stale, and both are my own unmerged rounds
+### §382.8 — Two checks were stale, and both are my own unmerged rounds
 
 Established as **not this work's** by stashing it, rebuilding, restarting the
 served app and re-running — identical failures, identical detail (§303, and
@@ -54061,7 +54061,7 @@ served app and re-running — identical failures, identical detail (§303, and
 
 **`checks/door-landing.mjs` and `checks/modules.mjs` shut ONE row and expected a
 person refused.** Access is the **most generous** grant across the roles
-somebody holds (§33), and §379 made a tactic's owner a role — so the Mobile head
+somebody holds (§33), and §381 made a tactic's owner a role — so the Mobile head
 derives `towner@mobile` as well as `owner@mobile`, and shutting the BU owner's
 cell no longer shuts them. **The product is right**; the fixture had stopped
 making the state its own assertions are about. Both now shut **every row the
@@ -54070,16 +54070,16 @@ derived by whatever somebody is named on next is shut the day it is added — wi
 the custodian beside them asserted **untouched and still open**, or a build that
 refused everybody would pass (§113.8).
 
-**`checks/shell.mjs` asserted a switcher §377 deliberately removes.** That
+**`checks/shell.mjs` asserted a switcher §380 deliberately removes.** That
 section drops a module the tab row already reaches, so on a client holding
 exactly `strategy` and `insights` there is genuinely nowhere else to go and §32
 says a menu of one is a door behind a door. REWRITTEN, never loosened (§218):
 the fixture makes a **third** module so the property this section is about —
 that a module's Setup does not stand the switcher DOWN the way the client's
 settings do — is measurable at all, **and the two-module case is asserted in its
-own right**, so §377's decision is now guarded rather than worked around.
+own right**, so §380's decision is now guarded rather than worked around.
 
-**And `checks/modules.mjs` §7 served the shell's body with no `paint`.** §377
+**And `checks/modules.mjs` §7 served the shell's body with no `paint`.** §380
 mounts the switcher from a paint rather than at load, and that section's own
 comment still promised route.js "builds it whether or not the app has hydrated"
 — true until the day it moved (§104.8). The stub carries a one-line `paint` for
@@ -54091,7 +54091,7 @@ took the whole section with it — one failure reported where the truth was
 eleven — and the way-back press waited thirty seconds on a door that was not
 there. Both degrade now.
 
-### §380.9 — What was run
+### §382.9 — What was run
 
 `check:insights` **137/0** with a new §14 (the state MADE — a Sector report
 narrowed to one function, a Market **draft**, and a third tenant beside them),
@@ -54099,7 +54099,7 @@ red under **`all-categories` 6**, `everyone-sees-everything` 7 and
 `client-sees-drafts` 9, each on its own assertions;
 `check:insights:tab` **24/0**; the escaping fix falsified from the source at
 **11 red**, its first failure printing the truncated attribute verbatim.
-`check:shell` **116/2 → 120/0**, and **→ 125/0** once §380.11 gave the seam a section, `check:door` **140/3 → 144/0**,
+`check:shell` **116/2 → 120/0**, and **→ 125/0** once §382.11 gave the seam a section, `check:door` **140/3 → 144/0**,
 `check:modules` **three failures → 159/0**, `check:state` 92/0, `check:viewas` 20/0,
 `check:setup` 33/0.
 
@@ -54113,10 +54113,10 @@ to nobody.
 not.
 
 **RECORDED, NOT DONE**: the Measure owner row and the field under it, still
-awaiting sign-off on the mockup published at §379; and `lib/chat-api.cjs`'s
+awaiting sign-off on the mockup published at §381; and `lib/chat-api.cjs`'s
 escaper, named above and left where it is.
 
-### §380.10 — And the tracker's one red was two notions of today
+### §382.10 — And the tracker's one red was two notions of today
 
 Run after the push, and it is the red the record has been carrying for two
 rounds — **`tracker` 227/1** — described there as *"a date-relative literal
@@ -54157,13 +54157,13 @@ and the third heading is deliberately not among them because `realThu` is the
 real clock's and moves. **1 red under each break**, where the agreement is
 green. 227/1 → **229/0**.
 
-### §380.11 — And the seam between the two halves was measured by nobody
+### §382.11 — And the seam between the two halves was measured by nobody
 
 Found running the falsification suites for the checks this round edited: the
 `:red` list for `check:shell` held five breaks and **`no-library-cats` was not
 among them**, though `lib/shell.ts` declares it.
 
-Pulling that thread found the larger thing. §380 has two halves and each is
+Pulling that thread found the larger thing. §382 has two halves and each is
 asserted in its own place, with what it needs:
 
 | half | file | needs | break |
@@ -54214,10 +54214,10 @@ repainting — said plainly rather than left as an absence.
 the difference is worth the sentence.**
 
 Four are §3d's own. The fifth is **§3b's**, and it is a true consequence rather
-than a stray: dropping the stamp drops the **tab**, and §377's switcher rule
+than a stray: dropping the stamp drops the **tab**, and §380's switcher rule
 reads the tab — so with the reports no longer on the row there is somewhere else
 to go, the four-square mark correctly comes back, and the section asserting it
-is NOT drawn goes red. That is the coupling §377 built, measured for the first
+is NOT drawn goes red. That is the coupling §380 built, measured for the first
 time by a break aimed at something else.
 
 And §3d's own fifth — *a client without the module carries no stamp* — is

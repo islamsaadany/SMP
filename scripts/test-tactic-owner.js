@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* A TACTIC'S OWNER IS A ROW ON THE TABLE (§379).
+/* A TACTIC'S OWNER IS A ROW ON THE TABLE (§381).
  * Run: node scripts/test-tactic-owner.js        (no database, no browser)
  *      node scripts/test-tactic-owner.js --break=<name>   (falsify)
  *

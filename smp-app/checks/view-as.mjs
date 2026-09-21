@@ -1,4 +1,4 @@
-/* ── VIEWING AS SOMEBODY, ON A READ PATH (§377) ──────────────────────────
+/* ── VIEWING AS SOMEBODY, ON A READ PATH (§380) ──────────────────────────
  *
  * Islam, with the office's own session and the viewer switcher set to a
  * unit's strategy custodian: *"karim from mobile is seeing the report while

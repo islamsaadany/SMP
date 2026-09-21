@@ -4772,7 +4772,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown, tacticOwner: x.town });   /* §379 */
+      pillarOwner: x.pown, tacticOwner: x.town });   /* §381 */
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -5061,7 +5061,7 @@ function reportItems(u){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                 town:t.owner,                          /* §379 */
+                 town:t.owner,                          /* §381 */
                  cid:p.id, place:place });
     });
     /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
@@ -6989,7 +6989,7 @@ function gapMap(target, all, fillable){
     }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
-      /* §379: a tactic's own Owner is its own handle — see boundedReach(). */
+      /* §381: a tactic's own Owner is its own handle — see boundedReach(). */
       var tctx = function(row){ var c = pctx(row); c.tacticOwner = row && row.owner; return c; };
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){ n += G(w.plan, tctx(x), "tactic", x); });

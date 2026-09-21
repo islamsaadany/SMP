@@ -136,7 +136,7 @@ var LIBRARY = (function(){
   function load(force){
     if (!shown()) return;
     var cat = category();
-    /* WHO IT WAS ASKED FOR IS PART OF THE ASK (§377). `loadedFor` is what
+    /* WHO IT WAS ASKED FOR IS PART OF THE ASK (§380). `loadedFor` is what
        stops a slow answer overwriting a newer one, so a viewer switch has to
        be in it: the pane is re-rendered on every paint and asks again, and
        without the person in the key the older request could still land last
@@ -149,7 +149,7 @@ var LIBRARY = (function(){
     var qs = [];
     if (cat) qs.push("category=" + encodeURIComponent(cat));
     if (Q) qs.push("q=" + encodeURIComponent(Q));
-    /* ── VIEWING AS SOMEBODY ASKS FOR THEIR REPORTS (§377) ──────────
+    /* ── VIEWING AS SOMEBODY ASKS FOR THEIR REPORTS (§380) ──────────
        Islam: *"karim from mobile is seeing the report while the report is
        made only for the retail and online team."* He was right, and it was
        this request: the server resolved who is asking from the SIGN-IN, so

@@ -373,7 +373,7 @@ export async function listItems(c: Q, qy: ListQuery): Promise<any[]> {
   return (await c.query(sql + ORDER, args)).rows;
 }
 
-/* ── WHICH CATEGORIES THIS PERSON HAS REPORTS IN (§380) ──────────────────
+/* ── WHICH CATEGORIES THIS PERSON HAS REPORTS IN (§382) ──────────────────
    Islam, of the filter row: *"the filters of the reports should appear only
    if there is this type of report."* Measured on a client with nothing
    published, the tab drew **All and all five categories**, every one of which

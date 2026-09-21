@@ -483,7 +483,7 @@ console.log("\n4c · who may open a module (§359.5)");
   /* SHUT EVERY ROW THIS PERSON HOLDS, ASKED RATHER THAN TYPED (§218,
      §214.3, §255). Access is the MOST GENEROUS grant across the roles
      somebody holds (§33), so shutting ONE row is not shutting a person —
-     and §379 made a tactic's owner a role, so this unit's head derives
+     and §381 made a tactic's owner a role, so this unit's head derives
      `towner` as well as `owner` and the assertion below started reporting a
      correct build broken. The roles come from the product's own rule
      (personRoles, the one both sides ask — §42), so the row derived by
@@ -499,7 +499,7 @@ console.log("\n4c · who may open a module (§359.5)");
     return Array.from(new Set(rulesOf.personRoles(w, p2).map((r) => r.role)));
   };
   const headRoles = rolesHeldBy(head), custRoles = rolesHeldBy(cust);
-  check("the unit head holds more than the one row, so shutting one is not shutting them (§33, §379)",
+  check("the unit head holds more than the one row, so shutting one is not shutting them (§33, §381)",
     headRoles.length >= 2 && headRoles.includes("owner"), JSON.stringify(headRoles));
   const shutOwner = graphWith((g) => { headRoles.forEach((r) => { g.access[r] = g.access[r] || {}; g.access[r].a_insights = "none"; }); });
   check("…and with every row they hold shut, the same person is REFUSED by the decision the route asks",
@@ -686,7 +686,7 @@ console.log("\n7 · the switcher in the platform's top bar (driven)");
    at once unless the address looks like /<client>/…, so a file:// page would
    pass every assertion here by never running the code (§94.11). The 3.4MB
    shell.js is deliberately NOT loaded: this asserts the switcher, not the
-   platform. It IS mounted from a paint since §377, so the stub carries a
+   platform. It IS mounted from a paint since §380, so the stub carries a
    one-line `paint` for route.js to wrap — the sentence that used to stand
    here said route.js builds it whether or not the app has hydrated, which
    stopped being true the day that moved (§104.8). */
@@ -701,9 +701,9 @@ const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
 const MENU = moduleMenu(offerable());
 const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 /* AND THE STUB HAS TO CARRY A `paint`, BECAUSE THE SWITCHER IS A PAINT-TIME
-   CONTROL NOW (§377). It was an IIFE built at load, and the comment above
+   CONTROL NOW (§380). It was an IIFE built at load, and the comment above
    still said route.js "builds it whether or not the app has hydrated" — true
-   until §377 moved it, because the list has to ask whether the tab row
+   until §380 moved it, because the list has to ask whether the tab row
    already reaches the library and at load that question is answered about the
    BAKED viewer. route.js wraps `paint` if there is one, so a stub with none
    never mounts the switcher at all and reported a correct build broken

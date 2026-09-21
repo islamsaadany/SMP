@@ -6828,3 +6828,22 @@ built file's bytes changing, and they did not.
 **Recorded, not done**: the Measure owner row and the field under it, still
 awaiting sign-off on the mockup; and `lib/chat-api.cjs`'s escaper, which has the
 same gap and is a carried file whose twin a check asserts byte-identical.
+
+**§380.10 — and the tracker's one red was two notions of today.** Run after
+the push. The record has carried `tracker` 227/1 for two rounds as *"a
+date-relative literal gone stale"*; it is not a literal. That section renders
+the page with a **fixed** today (2026-09-15) and the expectation worked its
+answer out from the **real clock**, so on 2026-09-21 the page said *Next week ·
+20 – 24 Sep* — right, relative to the 15th — and the check demanded *This
+week*. The days beside the word were already asking the fixed date, which is
+what made the pair disagree with itself. It went red on the **calendar** rather
+than on any commit, which is exactly why it looked like a stale literal. One
+argument, and it stops depending on the calendar at all.
+
+**And it could not fail under either of its own breaks**: both sides call the
+same wording function, so breaking it moves the expectation with the product
+and the assertion goes green on the very build it is there to catch. That was
+true before the repair too. A second assertion names the two headings the fixed
+today produces — a week has a word, then its place in its month — which is the
+one claim that can fail: 1 red under each break, where the agreement is green.
+227/1 → **229/0**.

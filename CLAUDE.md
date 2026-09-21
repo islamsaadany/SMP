@@ -8165,7 +8165,11 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   not have. **The frozen product is untouched and measured**
   (`built-in-step.py` all good), so **`sw.js` is NOT bumped**. Two reds are
   `main`'s, established on a baseline worktree first (&sect;303): `tracker` 227/1
-  on a date-relative literal gone stale, and spike S2 on `notes.met_on`.
+  &mdash; **diagnosed and fixed at &sect;380.10, and it was neither a literal nor
+  stale**: that section renders the page with a FIXED today and the expectation
+  worked its answer out from the REAL clock, so the two asked about different
+  weeks and it went red on the CALENDAR rather than on a commit &mdash; and
+  spike S2 on `notes.met_on`.
 - **A MODULE IS A FOLDER THAT SERVES ITSELF (§354, spec 046):** the third
   module arrived and the route's own comment — *a branch rather than a table
   because there are two of them* — was still there with Insights' eight lines
@@ -10483,9 +10487,12 @@ state 92/0, modules 158/0, insights 127/0, notes 170/0, frameworks 90/0, setup
 33/0, room 10/0, deploy 5/0, memory 16/0, demo 7/0, standing 7/0,
 `built-in-step.py` all good, `generated-in-step` and `declared-deps` all clear,
 `npm run build` green and **`tsc` clean COLD**. **The one red is `main`'s**
-&mdash; `tracker` 227/1 on a heading the check spells as a date and the product
-now spells as a week number, reproduced on a worktree of `origin/main` first
-(&sect;303). **AND THREE THINGS THE RUN TAUGHT WERE THE HARNESS, NOT THE
+&mdash; `tracker` 227/1, reproduced on a worktree of `origin/main` first
+(&sect;303) and read here as a spelling; **&sect;380.10 measured it and it is
+not one** &mdash; the page is rendered with a FIXED today and the expectation
+computed `weekWord` from the REAL clock, so the product said *Next week* and
+the check demanded *This week* about the same rows. Fixed there, 229/0, with
+the one claim that can fail added beside the agreement, which could not. **AND THREE THINGS THE RUN TAUGHT WERE THE HARNESS, NOT THE
 PRODUCT**: four checks called by names `package.json` does not hold came back
 with an EMPTY log and a non-zero exit, which reads exactly like a check that
 died (&sect;298.3 &mdash; an empty tail is not a verdict); `generated-in-step`

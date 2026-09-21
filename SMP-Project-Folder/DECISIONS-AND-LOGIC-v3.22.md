@@ -54115,3 +54115,44 @@ not.
 **RECORDED, NOT DONE**: the Measure owner row and the field under it, still
 awaiting sign-off on the mockup published at §379; and `lib/chat-api.cjs`'s
 escaper, named above and left where it is.
+
+### §380.10 — And the tracker's one red was two notions of today
+
+Run after the push, and it is the red the record has been carrying for two
+rounds — **`tracker` 227/1** — described there as *"a date-relative literal
+gone stale"* and as *"a heading the check spells as a date"*. Both readings are
+wrong, and correcting them matters, because either sends the next person
+looking for a literal that is not there.
+
+**The page and the expectation were asking about different days.** That section
+renders the document with `today: TODAY`, a fixed **2026-09-15**, and the
+expectation computed `weekWord(t, todayIn())` — the **real clock**. Measured on
+2026-09-21:
+
+| week | rendered with `TODAY` | expectation, real clock |
+|---|---|---|
+| 2026-09-24 | **Next week** | This week |
+| 2026-10-01 | **W1 Oct** | Next week |
+
+So the product was right on both and the check demanded the answer for a
+different week. The days beside the word were already asking `TODAY`, which is
+what made the pair disagree with itself — §100.3's shape: *a probe measuring
+something other than what it rendered.*
+
+**It went red on the CALENDAR rather than on a commit**, which is the whole
+reason it read as a stale literal: it passed for as long as the real date
+stayed outside the weeks the fixture uses, and the day the real week became the
+fixture's week the two notions parted. One argument — `todayIn()` → `TODAY` —
+and the assertion stops depending on the calendar at all.
+
+**AND IT COULD NOT FAIL UNDER EITHER OF ITS OWN BREAKS.** Both sides of that
+comparison call `weekWord`, so `week-numbers` and `week-of-year` move the
+expectation with the product and it goes **ok** on exactly the build it exists
+to catch (§113.8: an agreement is preserved by breaking both sides). That was
+true before this repair and is not made true by it — the agreement is right for
+§53.5 and is not enough on its own. A second assertion names the two headings
+this fixture's FIXED today produces, which are §356.16's decision in words: a
+week has a word, then its place in its **month**. Those are the only literals,
+and the third heading is deliberately not among them because `realThu` is the
+real clock's and moves. **1 red under each break**, where the agreement is
+green. 227/1 → **229/0**.

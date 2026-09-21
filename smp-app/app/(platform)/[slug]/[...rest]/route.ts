@@ -8,6 +8,7 @@ import { mayOpenModule, openableModules } from "../../../../lib/access.ts";
 import { MODULE_DEF } from "../../../../lib/modules.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 import { viewAsOf, narrowToViewed } from "../../../../lib/view-as.ts";
+import { libraryStampFor } from "../../../../lib/library-viewer.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -108,8 +109,16 @@ export async function GET(req: Request, { params }: P) {
        difference between a module's own Setup and the client's — the same
        test shell/route.js's placeOf makes in the browser, answered here so it
        is on the document before any of the chrome is built from it. */
+    /* AND THE REPORTS TAB'S FILTERS (§380). A Setup document carries no
+       destination tabs, and the shell walks from Setup to a unit without
+       asking for the document again — so the stamp has to be right on THIS
+       one too, or the tab drawn on arrival would offer the module's whole
+       list. The same answer the module's own document is stamped with
+       (lib/library-viewer.ts), asked once per document and never per paint. */
     return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
-                                      w.module ? key : "client"), { status: 200, headers: shellHeaders() });
+                                      w.module ? key : "client",
+                                      await libraryStampFor(ans.tenant.id, who.seat, who.personKey, open)),
+                        { status: 200, headers: shellHeaders() });
   }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });

@@ -49,11 +49,8 @@ export async function landingFactsFor(tenantId: string, have: readonly ModuleKey
   return { facts, picks: picksOf(g) };
 }
 
-/* Who is looking, for the library half: the seat sees everything, anybody
-   else sees their own place's (modules/insights/index.ts's own rule). */
-export async function viewerFor(tenantId: string, seat: string | null | undefined, personKey: string | null | undefined): Promise<Viewer> {
-  if (seat === "super" || seat === "smoteam") return { place: null, seesAll: true };
-  if (!personKey) return { place: null, seesAll: false };
-  const { placeOf } = await import("./place.ts");
-  return { place: await withTenant(tenantId, (c) => placeOf(c, personKey)), seesAll: false };
-}
+/* WHO IS LOOKING LEFT THIS FILE (§380). It kept a copy of that rule under a
+   comment NAMING the original — *"modules/insights/index.ts's own rule"* —
+   which is §53.5 written down rather than closed. One answer now, in
+   lib/library-viewer.ts, asked by the landing, by the module and by the tab's
+   own stamp; this file's callers import it from there. */

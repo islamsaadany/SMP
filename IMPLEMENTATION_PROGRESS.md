@@ -6746,3 +6746,85 @@ file's bytes changed and a worker caches by name (§91, §94.12).
 **Recorded, not done**: the Measure owner row and the field under it; and the
 Insights category filters are still drawn whether or not a report of that type
 exists, which is the other half of the report §377 answered.
+
+## §380 — the filters are the reports that exist (2026-09-21)
+
+Islam, of the reports tab: *"the filters of the reports should appear only if
+there is this type of report."* The other half of that message was the
+view-as fault §377 answered; this is the first half.
+
+**Measured before anything was proposed.** The row under the tab drew the
+module's whole list — `All · Analysis · Macro · Market · Sector · Governance` —
+for everybody, whatever the library holds. So a client with nothing published
+was shown **six filters, five of which could only ever return nothing**, on a
+tab a new client is likely to press first. Not a wrong list: the honest answer
+to *what kinds of report exist in the product* and the wrong answer to *what can
+I filter this library by*.
+
+**It had to be the server's answer.** That section row is built synchronously
+inside `paint()`, so nothing fetched can be in it — and §376's own rule for the
+tab is that it never repaints from a fetch, because the search box is in that
+row and a hand may be in it. So the categories are stamped on the document, as
+they already were; what changed is *what they are stamped with*.
+
+**Asked of the library, through the same two clauses the list is read
+through** — published only, and the per-place narrowing — so the row can never
+offer a category the list itself would refuse. A draft's category is not a
+filter; a report narrowed away from somebody is not a filter for them. The
+console is not a caller: publishing is CHOOSING a category, which is a different
+question.
+
+**Three answers, not two.** No library behind the tab (no module, not open to
+this person, or no server) draws no tab at all; a library with nothing filed
+draws the tab, no filter row and *0 reports* — hiding it would say Forefront has
+no library rather than that it is empty; a list draws those filters.
+
+**One reader where there were nearly four.** The same six lines that resolve who
+is looking sat in the Insights module and in the landing's facts, the second
+under a comment naming the first, and this needed it again — one answer now, in
+its own file beside the library's, so `lib/library.ts` stays free of a database
+driver and its check can still run with no database at all.
+
+**And the Setup document had to carry it too**, because the shell walks from
+Setup to a unit without asking for the document again.
+
+**A real fault found on the way, and not this round's.** `lib/shell.ts` has an
+escaper of its own and it escaped `& < > "` and not `'` — a text-node escaper
+used inside **single-quoted** attributes, which is §235's fault in the served
+app's own copy. Live: the Internal Tracker's note is *"The office's weekly
+actions about this client"*, so a client holding it was served a root element
+whose module list **ended at that apostrophe** — the browser mis-parsed the
+rest and the module switcher was silently not drawn. The landing stamp carries a
+published report's title, which a person types, so the same break could forge
+attributes the shell reads. No script can run either way (the policy is
+`script-src 'self'` with nothing inline). One line, matching the frozen escaper.
+
+**Two checks were stale and both were my own unmerged rounds.** Established by
+stashing this work, rebuilding, restarting the served app and re-running —
+identical failures (the first attempt measured a server still running the old
+build). §379 made a tactic's owner a role, so the Mobile head derives two rows
+and shutting one no longer shuts them: the product is right and the fixture had
+stopped making the state. Both checks shut **every row the person holds, asked
+of the product's own rule**, with the custodian beside them asserted untouched.
+And §377 drops a module the tab row already reaches, so on a client holding
+Strategy and the reports there is genuinely nowhere to switch to — the fixture
+makes a third module, and the two-module case is now asserted in its own right,
+so that decision is guarded rather than worked around.
+
+**What ran.** `check:insights` **137/0** with a new section whose state is made,
+red under three breaks (6 / 7 / 9); `check:insights:tab` 24/0; the escaping fix
+falsified from the source at **11 red**, its first failure printing the
+truncated attribute verbatim. `check:shell` 116/2 → **120/0**, `check:door`
+140/3 → **144/0**, `check:modules` three failures → **159/0**, `check:state`
+92/0, `check:viewas` 20/0, `check:setup` 33/0. Driven in a real browser against
+the served app: a Mobile head reads `All · Macro`, a Finance head
+`All · Macro · Sector`, and a client with nothing published gets the tab, no
+filter row and *0 reports*.
+
+**Nothing stored moves and nothing is migrated.** No frozen source changed, so
+the built file does not move and `sw.js` is **not** bumped — that trigger is the
+built file's bytes changing, and they did not.
+
+**Recorded, not done**: the Measure owner row and the field under it, still
+awaiting sign-off on the mockup; and `lib/chat-api.cjs`'s escaper, which has the
+same gap and is a carried file whose twin a check asserts byte-identical.

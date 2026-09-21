@@ -19,36 +19,19 @@
 import { clientHref } from "../../lib/modules.ts";
 import { shellHeaders } from "../../lib/shell.ts";
 import { libraryFile } from "../../lib/library-file.ts";
-import { withTenant } from "../../lib/tenant.ts";
-import { placeOf } from "../../lib/place.ts";
+import { viewerFor } from "../../lib/library-viewer.ts";
 import type { Viewer } from "../../lib/library.ts";
 import type { ServeArgs } from "../registry.ts";
 import { insightsDocument, libraryFragment } from "./page.ts";
 
-/* THE OFFICE READS EVERYTHING, AND IT IS THE SEAT THAT SAYS SO (spec 046
-   §4.10). Whoever holds this client's Super user or SMO team seat sees every
-   report whatever its list says — which on every client today is us, because
-   there is no client-side strategy office (Islam, 2026-09-15). Written
-   against the seat rather than against who employs somebody, since the seat
-   is the only one of the two the platform holds.
-
-   WHERE THEY SIT IS ASKED OF THE SPINE, never worked out here: the register
-   is the client's and no module's (spec 046 §4.1, lib/place.ts).
-
-   NEITHER BRANCH THAT ALREADY KNOWS THE ANSWER ASKS THE DATABASE. A seat that
-   sees everything is not asked where it sits, because nothing about the place
-   could change what it reads — and it cannot then disagree with the seat.
-   Nobody on the register has no place to look up, which is not an
-   optimisation but the same answer arrived at without a connection: an office
-   login opening a client before `officeRow` has minted them a row (§313.32)
-   is exactly that person, and every request they make would otherwise open a
-   tenant connection to be told null. Found by checks/modules.mjs, which
-   drives each module's server with no database at all and went red on it. */
-async function viewerOf(a: ServeArgs): Promise<Viewer> {
-  if (a.seat === "super" || a.seat === "smoteam") return { place: null, seesAll: true };
-  if (!a.personKey) return { place: null, seesAll: false };
-  return { place: await withTenant(a.tenantId, (c) => placeOf(c, a.personKey)), seesAll: false };
-}
+/* WHO IS LOOKING IS THE SPINE'S (§380). This rule was written here and then
+   COPIED into lib/landing-facts.ts under a comment naming this file, which is
+   §53.5 written down rather than closed — and the reports tab's own stamp
+   would have been the third copy. It is lib/library-viewer.ts's now: the
+   seat that reads everything, the place the register gives anybody else, and
+   the two branches that answer without opening a connection at all. Nothing
+   about the rule moved; what moved is how many places hold it. */
+const viewerOf = (a: ServeArgs): Promise<Viewer> => viewerFor(a.tenantId, a.seat, a.personKey);
 
 export async function serve(a: ServeArgs): Promise<Response> {
   if (!a.rest.length) {

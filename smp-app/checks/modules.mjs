@@ -39,6 +39,7 @@ import { createServer } from "node:http";
 import { chromium } from "playwright-core";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, moduleMenu, isModule, landingLine, lineDef, NO_FACTS } from "../lib/modules.ts";
 import { SERVERS, serverFor } from "../modules/registry.ts";
 import { insightsDocument } from "../modules/insights/page.ts";
@@ -479,11 +480,33 @@ console.log("\n4c · who may open a module (§359.5)");
   /* absent = shipped, never none (§30.2) */
   check("with nothing stored a unit head opens Insights — absent is the shipped state, not a refusal",
     decideOpen("none", "insights", seed, head) === true);
-  const shutOwner = graphWith((g) => { g.access.owner.a_insights = "none"; });
-  check("…and with the owner row shut, the same person is REFUSED by the decision the route asks",
-    decideOpen("none", "insights", shutOwner, head) === false);
-  check("…while the custodian beside them, whose row is untouched, still opens it (the grant is per role)",
-    decideOpen("none", "insights", shutOwner, cust) === true);
+  /* SHUT EVERY ROW THIS PERSON HOLDS, ASKED RATHER THAN TYPED (§218,
+     §214.3, §255). Access is the MOST GENEROUS grant across the roles
+     somebody holds (§33), so shutting ONE row is not shutting a person —
+     and §379 made a tactic's owner a role, so this unit's head derives
+     `towner` as well as `owner` and the assertion below started reporting a
+     correct build broken. The roles come from the product's own rule
+     (personRoles, the one both sides ask — §42), so the row derived by
+     whatever somebody is named on NEXT is shut here the day it is added.
+
+     THE CUSTODIAN BESIDE THEM IS WHAT MAKES IT MEAN ANYTHING (§113.8): a
+     build that refused everybody passes the line above perfectly, so their
+     rows are asserted UNTOUCHED and still open. */
+  const rulesOf = createRequire(import.meta.url)(join(ROOT, "lib", "rules.js"));
+  const rolesHeldBy = (key) => {
+    const w = rulesOf.worldOf(seed);
+    const p2 = (seed.people || []).find((x) => x.key === key);
+    return Array.from(new Set(rulesOf.personRoles(w, p2).map((r) => r.role)));
+  };
+  const headRoles = rolesHeldBy(head), custRoles = rolesHeldBy(cust);
+  check("the unit head holds more than the one row, so shutting one is not shutting them (§33, §379)",
+    headRoles.length >= 2 && headRoles.includes("owner"), JSON.stringify(headRoles));
+  const shutOwner = graphWith((g) => { headRoles.forEach((r) => { g.access[r] = g.access[r] || {}; g.access[r].a_insights = "none"; }); });
+  check("…and with every row they hold shut, the same person is REFUSED by the decision the route asks",
+    decideOpen("none", "insights", shutOwner, head) === false, JSON.stringify(headRoles));
+  check("…while the custodian beside them, whose rows are untouched, still opens it (the grant is per role)",
+    decideOpen("none", "insights", shutOwner, cust) === true,
+    JSON.stringify([custRoles, custRoles.filter((r) => headRoles.includes(r))]));
   const openOwner = graphWith((g) => { g.access.owner.a_insights = "view"; });
   check("…and a stored view opens it", decideOpen("none", "insights", openOwner, head) === true);
   check("THE SEAT OPENS EVERYTHING: the Super user and the SMO team are served over a shut row (spec 046 §4.10)",
@@ -663,7 +686,10 @@ console.log("\n7 · the switcher in the platform's top bar (driven)");
    at once unless the address looks like /<client>/…, so a file:// page would
    pass every assertion here by never running the code (§94.11). The 3.4MB
    shell.js is deliberately NOT loaded: this asserts the switcher, not the
-   platform, and route.js builds it whether or not the app has hydrated. */
+   platform. It IS mounted from a paint since §377, so the stub carries a
+   one-line `paint` for route.js to wrap — the sentence that used to stand
+   here said route.js builds it whether or not the app has hydrated, which
+   stopped being true the day that moved (§104.8). */
 const BODY = readFileSync(join(APP, "shell", "body.html"), "utf8");
 const ROUTE = readFileSync(join(APP, "shell", "route.js"), "utf8");
 const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
@@ -674,11 +700,22 @@ const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
    and a module added or removed changes this file nowhere. */
 const MENU = moduleMenu(offerable());
 const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+/* AND THE STUB HAS TO CARRY A `paint`, BECAUSE THE SWITCHER IS A PAINT-TIME
+   CONTROL NOW (§377). It was an IIFE built at load, and the comment above
+   still said route.js "builds it whether or not the app has hydrated" — true
+   until §377 moved it, because the list has to ask whether the tab row
+   already reaches the library and at load that question is answered about the
+   BAKED viewer. route.js wraps `paint` if there is one, so a stub with none
+   never mounts the switcher at all and reported a correct build broken
+   (§100.3: a stand-in that models less than the thing it stands in for). It
+   is declared BEFORE route.js is parsed — that is when the wrap happens —
+   and called after, which is the one paint the real platform makes on boot. */
 const doc = (menu) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
   (menu ? " data-modules='" + attr(JSON.stringify(menu)) + "'" : "") +
   (BREAK === "switch-always" ? " data-break='switch-always'" : "") +
   "><head><meta charset='utf-8'><link rel='stylesheet' href='/platform.css'></head><body class='ready'>" +
-  BODY + "<script src='/route.js'></script></body></html>";
+  BODY + "<script>window.paint = function () {};</script>" +
+  "<script src='/route.js'></script><script>paint();</script></body></html>";
 const srv = createServer((req, res) => {
   const p = String(req.url).split("?")[0];
   if (p === "/platform.css") { res.writeHead(200, { "Content-Type": "text/css" }); return res.end(CSS); }

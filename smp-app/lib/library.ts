@@ -373,6 +373,57 @@ export async function listItems(c: Q, qy: ListQuery): Promise<any[]> {
   return (await c.query(sql + ORDER, args)).rows;
 }
 
+/* ── WHICH CATEGORIES THIS PERSON HAS REPORTS IN (§380) ──────────────────
+   Islam, of the filter row: *"the filters of the reports should appear only
+   if there is this type of report."* Measured on a client with nothing
+   published, the tab drew **All and all five categories**, every one of which
+   could only ever return nothing — §94.15's furniture, and §61's control with
+   nothing behind it, five times over on the first screen a new client opens.
+
+   IT ASKS THE LIBRARY, NEVER THE SEARCH. What is drawn is a fact about what
+   has been published, so it is the same row whatever is typed in the box and
+   whichever category is open — a filter row that rearranged itself as you
+   typed would be a worse screen than the one this replaces, and the two hosts
+   would then have to agree about a moving target rather than a fact.
+
+   THE SAME TWO FUNCTIONS THE THREE READ PATHS USE, which is the whole of why
+   this cannot disagree with the list beneath it (§53.5, §42): `shelfWhere`
+   keeps a draft out and `seenSql` keeps another place's report out, so a
+   category is offered exactly when pressing it would return something. Write
+   the test a second way here and the row would eventually offer a category
+   the list refuses.
+
+   ORDERED BY `CATEGORIES` AND NEVER BY THE DATABASE (§48): the row reads in
+   the module's own order however the rows happen to come back, and a category
+   added to that list appears here on its own.
+
+   THE CONSOLE IS NOT A CALLER AND MUST NOT BE. Forefront's own page offers
+   the full list, because publishing is CHOOSING a category rather than
+   filtering by one — a picker narrowed to what already exists could never be
+   used to file the first report of a kind (§61, from the other side).
+
+   SCALE, SAID RATHER THAN DISCOVERED (`seenSql`'s own note, one query over):
+   this is one pass over the rows `library_items_shelf` already narrows to one
+   kind and one state, which at a client's library is tens of rows. It is one
+   extra query per SERVED DOCUMENT — not per paint, because the shell
+   navigates without asking for the document again — and the number to revisit
+   it at is the same one that section names. */
+export async function categoriesPresent(c: Q, kind: Kind, viewer: Viewer | undefined): Promise<Category[]> {
+  /* THE CHECK'S BREAK (constitution XVI): a build that went back to offering
+     the module's whole list — the fault this exists to remove, and one that
+     renders perfectly (§96) — must turn checks/insights.mjs red before its
+     green run is believed (§94.5). Never set on a deployment. */
+  if (brk() === "all-categories") return CATEGORIES.slice();
+  const args: unknown[] = [kind];
+  const seen = seenSql(true, viewer, args.length + 1);
+  args.push(...seen.args);
+  const r = await c.query(
+    "SELECT DISTINCT cat FROM library_items, LATERAL jsonb_array_elements_text(categories) AS cat" +
+    " WHERE kind = $1" + shelfWhere(true) + seen.clause, args);
+  const have = new Set(r.rows.map((x: any) => String(x.cat)));
+  return CATEGORIES.filter((c2) => have.has(c2));
+}
+
 export async function oneItem(c: Q, kind: Kind, id: string, forClient: boolean, viewer?: Viewer): Promise<any | null> {
   const args: unknown[] = [kind, id];
   const seen = seenSql(forClient, viewer, args.length + 1);

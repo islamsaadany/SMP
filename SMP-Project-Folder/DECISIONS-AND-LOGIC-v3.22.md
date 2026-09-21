@@ -53921,3 +53921,197 @@ to `main` (§94.16).
 sign-off on the mockup above; and the Insights category filters are still drawn
 whether or not a report of that type exists, which is the other half of the
 report §377 answered and has not been started.
+
+---
+
+## §380 — The reports' filters are the reports that exist (2026-09-21)
+
+Islam, of the reports tab §376 put in the platform:
+
+> *"the filters of the reports should appear only if there is this type of
+> report, mahdy i seeing transofrmation while karim is seeing only the
+> mobile"*
+
+The second half was §377 and is merged into this branch. This is the first.
+
+### §380.1 — Measured first, and it is worst on the first screen a client opens
+
+Rule 3a, and the measurement is what makes the case rather than the wording of
+the ask. The section row under the tab was **`All · Analysis · Macro · Market ·
+Sector · Governance`** — the module's whole declared list — for everybody,
+whatever the library holds.
+
+So on a client with nothing published yet, the platform draws **six filters,
+five of which can only ever return nothing**, on a tab a new client is likely
+to press first. And on a client where Forefront has published two kinds of
+report, four of the six are dead the day they are drawn.
+
+It is not a wrong list: it is the module's list, which is the honest answer to
+*what kinds of report exist in the product* and the wrong answer to *what can I
+filter this library by*. §61's own shape — a control with nothing behind it is
+not a choice — one row down from where that rule usually bites.
+
+### §380.2 — It is the server's answer, and that is forced
+
+The section row is built **synchronously, inside `paint()`** (`SUBS`'s `render`
+returns HTML), so nothing fetched can be in it: by the time an answer landed the
+row would already be on the screen, and §376's own rule for that tab is that it
+**never calls `paint()` from a fetch** (§35, §71.2 — the search box is in that
+row and a hand may be in it).
+
+So the list is **stamped on the document**, which is what `data-library-cats`
+has been since §376 — the change is *what it is stamped with*. It was
+`CATEGORIES`, the module's constant; it is now the categories this library
+actually holds **for this person**.
+
+### §380.3 — Asked of the library, through the same two clauses the list is
+
+`categoriesPresent` in `lib/library.ts`:
+
+```sql
+SELECT DISTINCT cat FROM library_items,
+       LATERAL jsonb_array_elements_text(categories) AS cat
+ WHERE kind = $1  /* + shelfWhere(true) + seenSql(true, viewer, …) */
+```
+
+**The two clauses are the list's own** — `shelfWhere` (published only) and
+`seenSql` (spec 046 §4.10's per-place narrowing) — never a second copy, so the
+row can never offer a category the list itself would refuse. A draft's category
+is not a filter; a report narrowed away from this person is not a filter for
+them.
+
+**Ordered by `CATEGORIES` and not by the database**, so two clients read the
+same words in the same order however their rows happen to sort.
+
+**The console is not a caller and that is a decision.** Publishing is *choosing*
+a category, so Forefront is offered all five there — this answers *what can be
+filtered*, which is a different question with a different answer.
+
+**It costs one query per SERVED DOCUMENT**, not per paint: the stamp is written
+when the page is served and read from the DOM thereafter.
+
+### §380.4 — Three answers, not two
+
+`libraryStampFor` (`lib/library-viewer.ts`) answers:
+
+* **`null`** — no library behind this tab: the client does not have the module,
+  or this person may not open it, or there is no server at all (`file://`). The
+  attribute is absent and no tab is drawn, which is §376's own rule unchanged.
+* **`[]`** — a library with nothing filed. **The tab is drawn and the filter row
+  is not.** A client with an empty library still opens the reports and reads
+  *0 reports*; hiding the tab would say Forefront has no library rather than
+  that it is empty (§35, §93).
+* **a list** — those filters, in the module's order.
+
+A read that THROWS answers `[]` and says so in the log: an unreadable library
+must not take the tab down with it (§231.3's rule one module over).
+
+### §380.5 — `viewerOf` existed three times, and this would have been the fourth
+
+The same six lines — a seat sees all, otherwise `placeOf` — sat in
+`modules/insights/index.ts` and in `lib/landing-facts.ts` (the second under a
+comment naming the first), and the stamp needed it again. One answer now, in
+`lib/library-viewer.ts`, beside `library.ts` rather than **in** it: that file
+takes a connection and imports nothing, which is exactly what lets
+`checks/insights-tab.mjs` run its first three sections with no database and no
+`node_modules`, and a driver import would have quietly ended that.
+
+### §380.6 — And the Setup document had to carry the stamp too
+
+A Setup document draws no destination tabs, and **the shell walks from Setup to
+a unit without asking for the document again** — so a stamp that was right only
+on a module's own document would be the module's whole list on the tab drawn on
+arrival. The same answer, from the same function, on both (`route.ts`'s Setup
+branch and `modules/strategy/index.ts`).
+
+### §380.7 — One escaper, safe in an attribute (§235, one file over)
+
+**Found by a fixture rather than by reading**, which is the only reason it was
+found at all.
+
+`lib/shell.ts` has an `esc()` of its own and it escaped `& < > "` and **not
+`'`** — a text-node escaper used inside **single-quoted** attributes, which is
+word for word the fault §235 found in the frozen product and fixed *there*. The
+served app kept its own copy and never learned it.
+
+It is live, not hypothetical. `MODULE_DEF.tracker.note` is *"The office's weekly
+actions about this client"*, so a client holding the Internal Tracker was served
+a root element whose **`data-modules` ended at that apostrophe** — the rest
+parsed as stray attributes, `JSON.parse` threw in the browser, and **the module
+switcher was silently not drawn**. §96's family: the page renders perfectly and
+a control is missing.
+
+And `data-landing` carries a published report's **title** (the `latest` line),
+which is typed by a person — so the same break could forge `data-*` attributes
+the shell reads to decide what chrome to draw. **No script**: the policy is
+`script-src 'self'` with nothing inline (§238), so an injected attribute cannot
+run. That is the whole of the exposure and it is stated rather than implied.
+
+One line, matching the frozen escaper exactly. `lib/chat-api.cjs`'s `escHtml`
+has the same gap and is deliberately **not** touched: it is a CARRIED file
+(§316.7) that `generated-in-step.mjs` asserts byte-identical to its frozen twin,
+its subject is an email body rather than an attribute, and editing it here would
+break that check to fix nothing.
+
+### §380.8 — Two checks were stale, and both are my own unmerged rounds
+
+Established as **not this work's** by stashing it, rebuilding, restarting the
+served app and re-running — identical failures, identical detail (§303, and
+§105.6: the first attempt measured a server still running the previous build).
+
+**`checks/door-landing.mjs` and `checks/modules.mjs` shut ONE row and expected a
+person refused.** Access is the **most generous** grant across the roles
+somebody holds (§33), and §379 made a tactic's owner a role — so the Mobile head
+derives `towner@mobile` as well as `owner@mobile`, and shutting the BU owner's
+cell no longer shuts them. **The product is right**; the fixture had stopped
+making the state its own assertions are about. Both now shut **every row the
+person holds, asked of `personRoles` rather than typed** (§42), so the row
+derived by whatever somebody is named on next is shut the day it is added — with
+the custodian beside them asserted **untouched and still open**, or a build that
+refused everybody would pass (§113.8).
+
+**`checks/shell.mjs` asserted a switcher §377 deliberately removes.** That
+section drops a module the tab row already reaches, so on a client holding
+exactly `strategy` and `insights` there is genuinely nowhere else to go and §32
+says a menu of one is a door behind a door. REWRITTEN, never loosened (§218):
+the fixture makes a **third** module so the property this section is about —
+that a module's Setup does not stand the switcher DOWN the way the client's
+settings do — is measurable at all, **and the two-module case is asserted in its
+own right**, so §377's decision is now guarded rather than worked around.
+
+**And `checks/modules.mjs` §7 served the shell's body with no `paint`.** §377
+mounts the switcher from a paint rather than at load, and that section's own
+comment still promised route.js "builds it whether or not the app has hydrated"
+— true until the day it moved (§104.8). The stub carries a one-line `paint` for
+route.js to wrap (§100.3: a stand-in that models less than the thing it stands
+in for reports a working build as broken).
+
+**Two deaths became reports** (§215): the malformed stamp threw inside §3b and
+took the whole section with it — one failure reported where the truth was
+eleven — and the way-back press waited thirty seconds on a door that was not
+there. Both degrade now.
+
+### §380.9 — What was run
+
+`check:insights` **137/0** with a new §14 (the state MADE — a Sector report
+narrowed to one function, a Market **draft**, and a third tenant beside them),
+red under **`all-categories` 6**, `everyone-sees-everything` 7 and
+`client-sees-drafts` 9, each on its own assertions;
+`check:insights:tab` **24/0**; the escaping fix falsified from the source at
+**11 red**, its first failure printing the truncated attribute verbatim.
+`check:shell` **116/2 → 120/0**, `check:door` **140/3 → 144/0**,
+`check:modules` **three failures → 159/0**, `check:state` 92/0, `check:viewas` 20/0,
+`check:setup` 33/0.
+
+**Driven in a real browser against the served app**: a Mobile head reads
+`All · Macro`, a Finance head `All · Macro · Sector`, and a client with nothing
+published gets the tab, no filter row and *0 reports* — the Market draft offered
+to nobody.
+
+**No frozen source changed**, so the built file does not move and `sw.js` is
+**not** bumped: §91's trigger is the built file's bytes changing and they did
+not.
+
+**RECORDED, NOT DONE**: the Measure owner row and the field under it, still
+awaiting sign-off on the mockup published at §379; and `lib/chat-api.cjs`'s
+escaper, named above and left where it is.

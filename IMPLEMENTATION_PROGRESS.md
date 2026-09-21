@@ -6897,3 +6897,80 @@ repeating itself.
 **Recorded, not done**: §5 is still unrun. It needs the served app, which the
 shell check now starts, so the honest next move is for its remaining subjects to
 go there rather than a second file starting a second server.
+
+---
+
+## 2026-09-21 — The screen check runs at last (§379.5)
+
+**On the branch, not merged.** The merge is Islam's word, on that merge.
+
+**What was outstanding.** The round below shipped with one thing openly
+unfinished: the check that drives the screen had never been run, because that
+session had the browser and not the driver that steers it. It has been run now.
+
+**Nothing in the product was wrong.** Every one of the four failures was in
+the check itself — it asked for a control by a name the platform has never
+used, it asked in a way that stops the whole file dead instead of reporting,
+it forgot to dismiss the welcome screen so every press landed on that instead,
+and its last test stood on a page the person it was testing is not allowed to
+open, so it was reading the wrong screen and calling a healthy build broken.
+All four are corrected, and the last one is now a stronger test than it was:
+it walks every page that person can actually reach rather than sampling one.
+
+**Then it was proved it can still catch a real fault** — three deliberate
+breaks in the product, each one making the right part of the check go red, and
+the code put back afterwards and checked byte for byte against what it was.
+
+**Where it stands.** The screen check passes 24 of 24, the whole-platform
+sweep walks 33 people across 242 pages with no errors, and every other check
+around it is green. One file changed, and it is a test file.
+
+## 2026-09-20 — My reporting: the lines a tactic's owner enters (§379, spec 062)
+
+**On the branch, not merged.** The merge is Islam's word, on that merge.
+**Its one open item — the unrun screen check — is closed above (§379.5).**
+
+**What he asked.** Whether a tactic's owner can report their own tactic. They
+could not — and the honest answer came with the number: every one of the
+worked example's 83 tactics names an owner, and the machinery that lets
+somebody enter a figure they are named on walks a subject's objectives and its
+measures and **never its tactics**.
+
+**What is built.** A **My reporting** tab beside Reporting, holding the lines
+the plan names this person on, grouped by unit with a filter when there is more
+than one. They enter figures; the note and the submission stay the unit's. On
+the unit's own Reporting page those same rows are read-only, so there is one
+way in. Save draft locks their own lines and Reopen opens them — per person and
+per subject, so one owner's draft never touches another's. And the welcome
+screen tells somebody their lines are waiting.
+
+**What does not move, which was the constraint he set.** Nothing on Roles &
+access. One tenant switch, shipping **off**, stored as an absence — so an
+untouched tenant behaves byte for byte as it does today, and both checks assert
+that end as hard as the other. No migration and no schema change.
+
+**Two things I got wrong and corrected in front of him.** The first drawing put
+two foreign units in somebody's navigation; measuring says a bounded role can
+never see one, so the harder-looking case cost nothing. And I told him *My
+reporting* was a name already taken; it renders on no screen, and the stale
+label is brought into step in the same edit.
+
+**The thing worth keeping from the building.** A narrowing I had written turned
+out to be reached by nothing — both checks stayed green with it removed — and
+what it *would* have done is reverse an earlier decision of his, that being
+named a collaborator on a milestone is a reporting right. He asked about
+tactics. It is deleted, and the decisions document records why rather than
+leaving an absence.
+
+**Checked.** The rules and the page: 53 assertions, proved able to fail six
+ways. The server: 704 assertions, proved able to fail eight ways, including the
+direction that matters — a stranger being allowed. Everything rebuilt and the
+served copies regenerated.
+
+**What could not be checked here, said plainly.** This machine has the browser
+but not the driver that steers it, so no screen check could be run at all —
+including the new one, which is written and waiting for somebody with a
+browser. Nothing on a screen has been driven by a machine in this round; the
+claims about what is drawn come from calling the product's own renderer.
+
+**Waiting on Islam**: the merge.

@@ -7645,6 +7645,110 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `scripts/dev-server.js` and `sw.js` (which caches the **tenant path**, since a
   worker caches by request URL). From `file://` there is no server to rewrite,
   so the gate uses the real relative path there.
+- **MY REPORTING: THE LINES A TACTIC'S OWNER ENTERS (&sect;379, spec 062):**
+  Islam &mdash; *"If we'd like to show the tactics owners to report the progress
+  of their own tactics. is that built?"* **IT WAS NOT, AND THE MEASUREMENT CAME
+  WITH THE ANSWER**: the plan names an owner on **all 83 of the worked example's
+  tactics** and being named already derives the Contributor floor (&sect;147.8),
+  but &sect;16.7's figure-master machinery walks a subject's key objectives and
+  its pillar measures and **never its tactics** &mdash; so an owner who did not
+  also run the unit entered nothing, or entered their lines mixed in with
+  everybody else's. **IT IS THAT MACHINERY POINTED AT THE OWNER COLUMN**, and it
+  needs no register lookup anywhere, because the plan stores a NAME and
+  `namedOn()` has matched one to a person since &sect;130.7. **EVERY DECISION IS
+  HIS**, over six alignment turns: a **tab beside Reporting** and not a room
+  (*"it a slice of reporting that's all in the same straety module"*); **the
+  owner only**, never a contributor or a collaborator; **figures but never a
+  submission**; **case 1**, an owner inside a unit he does not run, whose rows go
+  read-only on the unit's page because *"the only reporting way is his lines"*;
+  **case 2**, *"no units appear in navigation"*; the lock is **&sect;309's**,
+  which he corrected me on (I objected that a saved draft had nothing to save;
+  he was describing a lock the product already had); and the name is his.
+  **THE TAB GOES ON THE PERSON'S OWN PLACE**, which answers both cases with one
+  line &mdash; `myLinesHere()` asks `personAt()`, so the units they own lines in
+  are BANDS on one page and never doors in the bar, and the welcome screen gets
+  ONE row rather than three to the same place. **ONE SWITCH, OFF, AND OFF IS
+  BYTE-IDENTICAL**: `lineOwners` on the group as an ABSENCE (&sect;50.6), **no
+  migration and no schema change**, and `c_mylines` is `area:"always"` &mdash; so
+  it is not a matrix cell and *"nothing on Roles &amp; access moves"* is a
+  measurement (&sect;94.2). **THE ROWS ARE `reportItems()`'S OWN, FILTERED**, and
+  the first build invented a shape beside it: a reporting row carries `owner`,
+  `collaborators`, `pown`, `cid`, `group`, `sub`, `asked` and `place`, of which
+  the fallback gate reads three and the draft lock a fourth &mdash; so it
+  answered about undefined fields and the drawn row lost its span label, **found
+  by the check and not by reading** (&sect;53.5). **THE SERVER HAS ITS OWN TWO
+  KINDS** &mdash; `lineReporting` (grouped by the tactic's owner, refusing anybody
+  else BY NAME) and `lineDone` (the draft lock, yours alone), with `lines`
+  joining `REVIEW_PER_TARGET` so the map travels per key rather than whole
+  (&sect;234) &mdash; **and `test-authorize.js` carried not one mention of any of
+  it while printing 683 passed**, which is how a rule comes to be deleted next
+  month.
+  **&sect;379.1 &mdash; AND THE FALSIFICATION FOUND THE ONE THING THAT SHOULD NOT
+  SHIP**: a `boundedReach` branch reading *"with the switch on, a bounded role
+  reaches only what it OWNS"* was written, and breaking it left **both checks
+  entirely green**. Nothing reaches it for a tactic &mdash; the server groups the
+  figure under its owner and the browser refuses at `canEnterLine`'s single door
+  &mdash; so the only rows it could narrow are the OTHER kinds, and narrowing
+  those **reverses &sect;227**, where Islam decided a milestone's collaborator
+  reports. He asked about tactics; widening it is a redesign nobody asked for
+  (rule 1b). Deleted, signature put back (&sect;24), 704 and 53 assertions
+  unmoved either way.
+  **&sect;379.2 &mdash; THE DEMO CANNOT SHOW ANY OF IT, TWICE** (&sect;255): 0 of
+  83 tactics is unowned, and **every demo collaborator is a bare first name**,
+  which the two-word floor matches to NOBODY &mdash; so not one of the eight has
+  that right today and a fixture using them would have watched a refusal that was
+  already a refusal (&sect;94.5).
+  **&sect;379.3 &mdash; AND THE SWITCH'S SECOND EDIT BUYS SOMETHING NO VERDICT
+  CAN SEE** (&sect;259.2): the classification fires either way, and what `gExtra`
+  membership buys is that it classifies **once** &mdash; without it the change
+  comes out as `setup:&hellip;` BESIDE `unknown:the group's lineOwners`, the same
+  people allowed and the same refused, so every existing assertion passes while
+  the change log gains a phantom row and a refusal names the stored field rather
+  than the control (&sect;16.7). Asserted as a count of one.
+  **&sect;379.4 &mdash; AND THE HARNESS READS BUILD.PY'S OWN LIST**, its first run
+  having died on `joinTarget is not defined` from a file it had never been told
+  about, with the three that need a `document` NAMED and asserted to be the only
+  three. **Recorded, not done**: a projects-format supporting function
+  contributes nothing, because tactics live on pillars (seven of the demo's eight
+  functions); and the office is not shown the welcome row, because they enter
+  those figures on the unit's own page already.
+  **&sect;379.5 &mdash; AND THE SCREEN CHECK RAN AT LAST, WITH EVERY ONE OF ITS
+  FOUR FAILURES THE CHECK** (&sect;54.5: *a file nothing has ever run is a file
+  whose own mistakes are still in it*). `checks/my-reporting.py` was written in
+  a session holding the Chromium binaries and no Playwright driver; installing
+  one is all it took. **NO PRODUCT FAULT** &mdash; the diff is one file under
+  `checks/` and the built file is byte-identical throughout. It asked for
+  `#viewsel`, which is in **no source and in no other check** (the switcher is
+  `#asWho`, 13 times in the built file against 0 &mdash; &sect;100.3,
+  &sect;297.1); it asked with `eval_on_selector`, which THROWS, so section 1
+  **died and took the nine after it** in a file whose own `press()` two lines
+  above exists to stop that (&sect;215); it never stood `.welcomeover` down, so
+  every press retried for thirty seconds against the overlay (&sect;167.2, whose
+  own words are *before the goto*, and which twenty-odd checks already carry
+  &mdash; this one borrowed `project-done.py`'s stub and not its init script);
+  **and its one real-looking failure was a CORRECT build reported broken**
+  &mdash; *"it is NOT on a unit that is not his place"* pressed a unit a
+  **bounded role can never reach** (`a_unit_other: "none"`, which is &sect;379's
+  own note and why case 2 cost nothing), so the press had nothing to land on,
+  `current` stayed put, and it re-read the page it was already on (&sect;113.8,
+  with `press()` degrading to False and the caller ignoring it). **REWRITTEN,
+  NEVER LOOSENED** (&sect;218) and stronger than what it replaced: the rule is
+  one line (`ownsAnyLine() && myLinesHome() === target`), so it is asserted over
+  **every destination he can actually open**, guarded by *the set has more than
+  one in it or "nowhere else" is vacuous* &mdash; **which earned its place
+  immediately**, the first walk opening exactly ONE destination because the
+  group and the companies sit in a dropdown and Playwright waits thirty seconds
+  on a merely INVISIBLE control where `press()` degrades on an ABSENT one
+  (&sect;215 one step along, answered with `measure-score-spread.py`'s own
+  `go_top()` rather than a route invented here). Proved able to fail **three
+  ways from the SOURCES** (&sect;276 &mdash; it serves the built file, which
+  &sect;238's hashed CSP silences if edited): the tab ignoring the person's
+  place **2 red**, the lock never shutting a box **3 red**, the switch ignored
+  **1 red**, each break asserted to have MATCHED and the tree restored from the
+  saved copy rather than with `git checkout` (&sect;343.9, &sect;344.1).
+  **24/0**; `qa.py` **33 viewers / 242 destinations / ERRORS none**, &sect;367's
+  numbers to the digit, which is what it should be when nothing in the product
+  moved.
 - **MULTI-CLIENT (since v3.60, §313, spec 042): ONE PLATFORM, MANY CLIENTS.**
   §36's recommendation, built: **one Postgres schema per client**, resolved from
   the `platform.clients` registry off the slug the browser was **served at**,
@@ -8515,6 +8619,48 @@ node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # the browser's locale format &mdash; the third found
                                 # by LOOKING at the built page beside the mockup,
                                 # which is what rule 1c's last step is for
+node scripts/test-my-reporting.js # MY REPORTING: the lines a tactic's owner
+                                # enters (&sect;379, spec 062) &mdash; no browser and no
+                                # database, the frozen sources evaluated in a vm the way
+                                # `smp-app/lib/frozen.cjs` does, so every rule is asked of
+                                # the BAKED worked example. **THE LIST IS BUILD.PY'S OWN**
+                                # (&sect;53.5): its first run died on `joinTarget is not
+                                # defined` from a file it had never been told about, and
+                                # the three that reach for `document` at load are NAMED
+                                # and asserted to be the only three, because a stand-in
+                                # document models less than a browser and reports a
+                                # working build broken (&sect;100.3, &sect;54.5).
+                                # **BOTH ENDS EVERY TIME** (&sect;94.2): the switch ships
+                                # OFF, so with it off the product must answer byte for
+                                # byte what it answered before, or "nothing on Roles &amp;
+                                # access moves" is a promise rather than a measurement.
+                                # **AND THE STATE IS MADE, TWICE, WHICH IS ITSELF THE
+                                # FINDING** (&sect;255): all 83 demo tactics name an
+                                # owner, so the unowned fallback is a shape the plan never
+                                # takes; and every demo collaborator is a bare first name,
+                                # which `nameRuns()`'s two-word floor matches to NOBODY
+                                # (&sect;130.7) &mdash; so a fixture using them would have
+                                # watched a refusal that was already a refusal and called
+                                # the narrowing proved (&sect;94.5). 53/0, red SIX ways
+                                # from the SOURCES (&sect;276). It calls the real renderer,
+                                # so a builder wired to nothing is caught (&sect;96); it
+                                # cannot PRESS, which is `checks/my-reporting.py`'s half
+python3 SMP-Project-Folder/src/checks/my-reporting.py # ...and the presses (&sect;379):
+                                # the tab drawn on the person's own place and nowhere
+                                # else, a figure typed there reaching the STORED plan
+                                # (&sect;96), the same row read-only on the unit's own
+                                # Reporting page (case 1), no extra destination in the
+                                # navigation (case 2), and Save draft / Reopen landing.
+                                # Served over HTTP, because Save draft goes through
+                                # `SYNC.saveNow` and over `file://` SYNC is never live, so
+                                # every press answers *offline* and a check opening the
+                                # file would report the whole feature missing on a build
+                                # carrying it perfectly (&sect;94.11). Every probe degrades
+                                # (&sect;215). **WRITTEN AND NOT RUN IN THE SESSION THAT
+                                # WROTE IT** (&sect;54.5): that sandbox held the Chromium
+                                # binaries and no Playwright driver at all, so `qa-run.py`
+                                # could not launch &mdash; said in the file's own first
+                                # lines rather than left as an absence
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -10577,6 +10723,37 @@ BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (&sect;374.1, &sect;375.2's
 precedent): while it stays behind, main's tip is unique by construction, and
 putting that SHA on a second ref is the one act left that could still cost the
 deployment.*
+
+*Earlier: 2026-09-20 &mdash; **&sect;379: My reporting &mdash; the lines a
+tactic's owner enters (spec 062).** Islam: *"If we'd like to show the tactics
+owners to report the progress of their own tactics. is that built?"* **IT WAS
+NOT, AND THE MEASUREMENT CAME WITH THE ANSWER** &mdash; the plan names an owner
+on all 83 of the worked example's tactics, and &sect;16.7's figure-master
+machinery walks a subject's objectives and its measures and **never its
+tactics**. This is that machinery pointed at the Owner column, which needs no
+register lookup at all because the plan stores a NAME (&sect;130.7). **EVERY
+DECISION IS HIS** over six alignment turns, and **two of my own claims were
+wrong and corrected in front of him**: the first mockup drew foreign units in
+somebody's navigation (a bounded role ships at `a_unit_other: "none"` and can
+never see one, so case 2 cost nothing), and I said *My reporting* was a name
+already taken when it renders on no screen. **ONE SWITCH, OFF, AND OFF IS
+BYTE-IDENTICAL** &mdash; no migration, no schema change, and `c_mylines` is not
+a matrix cell, so *"nothing on Roles &amp; access moves"* is a measurement
+rather than a promise. **AND THE FALSIFICATION FOUND THE ONE THING THAT SHOULD
+NOT SHIP** (&sect;379.1): a narrowing I had written was reached by nothing
+&mdash; both checks green with it removed &mdash; and what it would have done
+is reverse &sect;227, a decision of his about milestones; deleted, with the
+signature put back. **53/0 red six ways, 704/0 red eight ways**, 140/0, 69/0,
+`built-in-step` all good, the four generators re-run and the three carried
+`.cjs` rule modules **re-carried** (&sect;335), `sw.js` bumped past main's.
+**WHAT COULD NOT BE RUN IS SAID** (&sect;54.5): that session held the Chromium
+binaries and no Playwright driver at all, so every screen check &mdash;
+`qa.py` and the new `checks/my-reporting.py` among them &mdash; is **unrun**.
+Renumbered **before** any merge (&sect;264.3): &sect;345 &rarr; &sect;379 and
+spec 057 &rarr; 062, scoped to the 51 lines this branch wrote, with the 8
+citations of somebody else's `spec 057` measured first and left alone
+(&sect;336.1). **On the branch, not merged &mdash; the merge is Islam's word,
+on that merge.***
 
 *Earlier: 2026-09-20 &mdash; **&sect;375: Portfolio &mdash; the rules and the
 tables, before any screen (spec 060).** Islam, on the handover saying every

@@ -65,7 +65,7 @@ if (BREAK === "everywhere") {
 const units = Object.keys(GRAPH.units || {}).filter((k) => (GRAPH.units[k] || {}).active !== false);
 const fns = Object.keys(GRAPH.functions || {}).filter((k) => (GRAPH.functions[k] || {}).active !== false);
 
-let PERSON = null, LIBRARY_ON = true;
+let PERSON = null, LIBRARY_ON = true, MYLINES = "off";
 const box = {};
 const supplied = {
   UNITS: GRAPH.units, FUNCTIONS: GRAPH.functions, COMPANIES: GRAPH.companies || {},
@@ -83,7 +83,59 @@ const supplied = {
   namingOn: () => false,
   LIBRARY: { shown: () => LIBRARY_ON, sections: () => [] },
   grantAt: (ac, target) => R.grantAtPage(W, PERSON, ac, target),
+  /* §379's My reporting tab, ANSWERED HERE RATHER THAN RUN, and saying which
+     is the point (§100.3). Its real `myLinesHere()` lives in config-data.js,
+     which this harness deliberately does not evaluate — it takes the ONE
+     largest inline block, because the gates under test are all in it.
+
+     AND AN UNSUPPLIED `when` IS NOT A CLOSED ONE, which is how this was
+     found: the host answers an unknown name with `undefined`, `allowed()`
+     reads `if (d.when && ...)`, and a tab whose gate is undefined skips
+     straight to `grantAt` — which for `c_mylines` is `area:"always"` and
+     therefore "view" for everybody, at every target. So the merged build
+     reported §380's own fault on a build that does not have it: 10 units and
+     8 functions for somebody who reaches nowhere. The product is fine and was
+     checked rather than assumed — in the built file `myLinesHere` is declared
+     44,000 lines before the tab object is created.
+
+     THREE STATES, because a stand-in that can only answer "no" makes every
+     assertion below pass while proving nothing about this tab (§113.8):
+       off    what an untouched tenant is — the switch ships off, so
+              `ownsAnyLine()` is false for all 33 people on the seed;
+       own    the switch on — the tab is drawn on the person's OWN place and
+              nowhere else, which is Islam's answer to his own case 2;
+       always a tab that ignores its gate, which MUST move the row or this
+              harness cannot see §380's fault through a `when` at all.
+     `homeOf` mirrors `myLinesHome()` off the person's row rather than calling
+     it, for the same reason — named as a mirror so nobody reads it as the
+     rule (§53.5). */
+  myLinesHere: (t) => (MYLINES === "off" ? false
+                     : MYLINES === "always" ? true
+                     : ownsALine(PERSON) && homeOf(PERSON) === String(t || "")),
 };
+/* Does the plan name this person as a tactic's Owner anywhere? The product's
+   own `ownedBy()` is asked rather than a second matcher written here, so
+   §130.7's name runs and a typed short name reach this the day they reach the
+   page. The WALK is mirrored (their `myLineRows()` lives in config-data.js),
+   which is the half a comment has to name (§53.5). */
+function ownsALine(p) {
+  if (!p) return false;
+  const pillarsOf = (o) => (o && o.items) || [];
+  const any = (items) => items.some((pl) =>
+    ((pl || {}).tactics || []).some((t) => R.ownedBy(t, p)));
+  if (Object.keys(GRAPH.units || {}).some((k) => any(pillarsOf(GRAPH.units[k])))) return true;
+  return Object.keys(GRAPH.functions || {}).some((k) => {
+    const f = GRAPH.functions[k] || {};
+    return String(f.format) === "pillars" && any(pillarsOf(f));
+  });
+}
+function homeOf(p) {
+  if (!p) return "group";
+  if (p.unit && GRAPH.units[p.unit]) return p.unit;
+  if (p.fn) return "fn:" + p.fn;
+  if (p.company) return "co:" + p.company;
+  return "group";
+}
 const host = new Proxy(box, {
   has: () => true,
   get: (t, k) => (k in supplied ? supplied[k] : t[k]),
@@ -151,6 +203,18 @@ check("...so anyDestination() is false, and the switcher goes on listing Insight
 PERSON = people.find((p) => p.key === "own_mob");
 check("...while somebody who reaches one says true",
   fn("anyDestination")() === true);
+
+console.log("\n§5  the My reporting tab does not make a destination reachable either (§379)");
+LIBRARY_ON = true;
+const rowsIn = (mode) => { MYLINES = mode; return people.map((p) => p.key + ":" + JSON.stringify(row(p))).join("|"); };
+const OFF = rowsIn("off"), OWN = rowsIn("own"), ALWAYS = rowsIn("always");
+MYLINES = "off";
+check("with the switch off every person is offered exactly what §3 measured",
+  OFF === rowsIn("off"));
+check("and with it ON the row is still the same — the tab sits on the person's " +
+  "own place, which they already reach (Islam's case 2)", OWN === OFF);
+check("...while a tab that ignored its gate WOULD move it, so this can still " +
+  "see §380's fault through a `when` (§113.8)", ALWAYS !== OFF);
 
 console.log("\nnav-row: " + ok + " ok, " + bad.length + " failed" + (BREAK ? "   [--break=" + BREAK + "]" : ""));
 if (bad.length) { bad.forEach((b) => console.log("  - " + b)); process.exit(1); }

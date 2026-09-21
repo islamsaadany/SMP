@@ -10278,11 +10278,22 @@ already holds is ONE deployment and which ref gets it is a race already lost
 and it must be one worth making*, which the record owed anyway, since
 &sect;379's own block still read *"main untouched"* over a merge that had
 happened (&sect;378.2's own finding, one round later). **&sect;91.5's LIVE
-READ COULD NOT BE MADE FROM HERE AND IS SAID RATHER THAN CLAIMED**
-(&sect;54.5, rule 3a): this environment's egress policy refuses
-`smp-orpin-tau.vercel.app` at the proxy's own CONNECT (403), which its README
-says to report rather than route around &mdash; **nobody here has seen
-production serve this commit**. **THE WITNESS IS `shell.js` ALONE, AND IT WAS
+READ WAS MADE, AND THE RECORD HAD TO BE CORRECTED TO SAY SO** (&sect;379.5):
+this block first read *"could not be made from here"*, carried over from
+&sect;377.6 and &sect;378.2, where the proxy refused the production address
+&mdash; **written before it was tried, and it answered 200**. *A limitation
+recorded twice is still a measurement of those two days, and quoting it is not
+the same as taking it.* Corrected rather than left standing (&sect;124), and
+the cost of getting it wrong is named: on those two merges the deployment went
+**unverified when it need not have been**. **PRODUCTION HAS SERVED THIS
+COMMIT**, read off the live site and never the dashboard &mdash; and compared
+as BYTES rather than as a length, because a size match is the weaker claim
+(&sect;113.8): `shell.js` sha256
+`702fd30ce7b290a17743db0ec5831c7ed6af1a4c7cf736fe271338ee8605ae7d`, identical
+to the generated copy, with the first read two minutes earlier answering
+**3,844,669** &mdash; &sect;378's build &mdash; so the two readings separate a
+deploy that had landed from one that had not. **THE WITNESS IS `shell.js`
+ALONE, AND IT WAS
 MEASURED RATHER THAN CARRIED OVER FROM THE ROUND BEFORE**: not `sw.js`
 (&sect;365, &sect;316.10 &mdash; the generator drops the half that carries
 `SHELL`, so the served worker is **4,104 bytes on both builds** and the
@@ -10292,11 +10303,17 @@ use and this round cannot &mdash; no stylesheet changed, so it holds
 this (&sect;113.8, the trap &sect;378.2 recorded, caught here by asking the two
 builds rather than by repeating the previous sentence). `shell.js` goes
 **3,844,669 &rarr; 3,852,494**, matching the generated copy to the byte.
-**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (&sect;374.1,
-&sect;375.2, &sect;377.6): `main`'s tip is unique by construction while the
-branch stays where it is, and putting that SHA on a second ref is the one
-thing left that could still cost the deployment &mdash; a fast-forward is one
-command whenever somebody has read the live site. **NO FORCED SIGN-OUT IS
+**THE BRANCH WAS HELD BEHIND AND THEN FAST-FORWARDED, IN THAT ORDER**
+(&sect;374.1, &sect;375.2, &sect;377.6): `main`'s tip was unique by
+construction until the live read, because putting that SHA on a second ref is
+the one thing left that could still cost the deployment &mdash; and the read
+having succeeded, the hold's condition is met and the branch is brought up.
+**AND THE STOP HOOK ASKED FOR THAT PUSH WHILE THE HOLD WAS ON**, which is
+recorded rather than quietly obeyed: it is a generic rule about unpushed work
+and &sect;91 is a specific one about a deployment in flight, so it was
+answered by finishing the wait rather than by pushing early &mdash; the two
+only ever disagree for the minutes between the push and the build.
+**NO FORCED SIGN-OUT IS
 OWED AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029): not one
 `api/`, `lib/` or `db/` file is in it, so nothing about how a save is judged
 moves, nothing stored moves and nothing is migrated. **Both in-step guards

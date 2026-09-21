@@ -6866,18 +6866,27 @@ already pushed: Vercel deduplicates by SHA, so fast-forwarding main onto a
 commit the branch ref already holds is one deployment and which ref gets it
 is a race already lost (§91) — and the record owed the line anyway, since
 §379's own block still read *"main untouched"* over a merge that had
-happened. **§91.5's live read could not be made from here and is said rather
-than claimed**: this environment's egress refuses the production address at
-the proxy (403), so nobody here has seen production serve this commit. The
-witness is **`shell.js` alone**, measured rather than assumed — the served
-`sw.js` is 4,104 bytes on both builds (the generator drops the half carrying
-`SHELL`) and `platform.css` is 674,285 on both (no stylesheet changed), so
-neither can prove a deploy (§113.8); `shell.js` goes **3,844,669 →
-3,852,494**. **The branch is deliberately not fast-forwarded** until somebody
-has read the live site, so main's tip stays unique by construction. **No
-forced sign-out is owed**, read off the diff (spec 029): not one `api/`,
-`lib/` or `db/` file is in it. `built-in-step` all good, `generated-in-step`
-all clear before the push.
+happened. **§379.5 — the live read was made, and this block first said it
+could not be**: that sentence was carried over from §377.6 and §378.2, where
+the proxy refused the production address, and was written before it was tried.
+It answered 200. Corrected rather than left standing (§124) — and the cost is
+named: on those two merges the deploy went unverified when it need not have.
+**Production has served this commit**, read off the live site and compared as
+**bytes** rather than as a length (§113.8): `shell.js` sha256 `702fd30c…`,
+identical to the generated copy, where the read two minutes earlier answered
+3,844,669 — §378's build — so the two readings tell a landed deploy from one
+that had not. The witness is **`shell.js` alone**, measured rather than
+assumed: the served `sw.js` is 4,104 bytes on both builds (the generator drops
+the half carrying `SHELL`) and `platform.css` is 674,285 on both (no
+stylesheet changed), so neither could prove anything; `shell.js` goes
+**3,844,669 → 3,852,494**. **The branch was held behind and then brought up**,
+in that order, so main's tip was unique for the whole window that mattered —
+**and the stop hook asked for that push while the hold was on**, which is
+recorded rather than quietly obeyed: a generic rule about unpushed work
+against a specific one about a deployment in flight, answered by finishing the
+wait. **No forced sign-out is owed**, read off the diff (spec 029): not one
+`api/`, `lib/` or `db/` file is in it. `built-in-step` all good,
+`generated-in-step` all clear before the push.
 
 **Recorded, not done**: the copy still links the favicon, the manifest and the
 touch icon, which 404 from a file — decoration, and refusing on them would

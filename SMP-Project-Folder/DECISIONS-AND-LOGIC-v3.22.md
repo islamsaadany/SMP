@@ -54176,11 +54176,15 @@ round later: §379's block in all three record files still read *"main
 untouched: the merge is Islam's word"* over a merge that had happened, and a
 finished round whose record says it is unfinished is a record that is wrong.
 
-**§91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO THE DEPLOYMENT IS
-UNVERIFIED AND SAID TO BE** (§54.5, rule 3a): this environment's egress policy
-refuses `smp-orpin-tau.vercel.app` at the proxy's own CONNECT with a 403, which
-its own README says to report rather than route around. **Nobody here has seen
-production serve this commit.**
+**§91.5's LIVE READ WAS MADE, AND PRODUCTION HAS SERVED THIS COMMIT** — read
+off the live site and never the dashboard, because the only thing that proves a
+deployment is the bytes a client's browser would receive. **Compared AS BYTES
+rather than as a length**, since a size match is the weaker claim (§113.8):
+`shell.js` sha256 `702fd30ce7b290a17743db0ec5831c7ed6af1a4c7cf736fe271338ee8605ae7d`,
+identical to the generated copy. **AND THE FIRST READ, TWO MINUTES EARLIER,
+ANSWERED 3,844,669** — §378's build — which is what separates *the deploy
+landed* from *the deploy has not started yet*: one reading alone cannot tell
+those apart, and the earlier one is the reason the later one means anything.
 
 **THE WITNESS IS `shell.js` ALONE, AND IT WAS MEASURED ON BOTH BUILDS RATHER
 THAN COPIED FROM THE ROUND BEFORE.** Three served files, three answers:
@@ -54198,10 +54202,20 @@ THAN COPIED FROM THE ROUND BEFORE.** Three served files, three answers:
   generated copy to the byte, so the moment somebody can read the live site the
   two builds are one request apart.
 
-**SO THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (§374.1, §375.2, §377.6):
-while it stays behind, `main`'s tip is unique by construction, and putting that
-SHA on a second ref is the one act left that could still cost the deployment. A
-fast-forward is one command whenever somebody has read the live site.
+**THE BRANCH WAS HELD BEHIND AND THEN BROUGHT UP, IN THAT ORDER** (§374.1,
+§375.2, §377.6): while it stayed behind, `main`'s tip was unique by
+construction, and putting that SHA on a second ref is the one act left that
+could still cost the deployment. With the live read made, the hold's condition
+is met and the fast-forward is the one command it always was.
+
+**AND THE STOP HOOK ASKED FOR THAT PUSH WHILE THE HOLD WAS ON**, which is
+recorded rather than quietly obeyed. It is a generic rule — *there are unpushed
+commits on this branch* — and §91 is a specific one about a deployment in
+flight; the two only ever disagree for the minutes between the push to `main`
+and the build landing, and the answer is to finish the wait rather than to push
+early. **A hook that is right almost always is still not the rule that governs
+the one case it is wrong about**, and the way to honour both is to make the
+window short rather than to widen the exception.
 
 **NO FORCED SIGN-OUT IS OWED, AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED**
 (spec 029): not one `api/`, `lib/` or `db/` file is in the eight this merge
@@ -54220,3 +54234,33 @@ The press takes a few seconds longer than it did and the file is about 6 MB
 rather than 1.6. Open it with no connection at all: it should come up on your
 own tenant, fully styled, with the navigation and the decks in it. Nothing else
 in the product moves.
+
+
+### §379.5 — AND THE RECORD CLAIMED A LIMITATION IT HAD NOT MEASURED
+
+**§379.4's first draft said §91.5's live read *"could not be made from here"*,
+and then it was made.** The sentence was carried over from §377.6 and §378.2,
+where this environment's proxy genuinely refused `smp-orpin-tau.vercel.app` at
+CONNECT with a 403 — a real measurement, on those two days. It was written into
+this round's record **before it was tried**, and trying it answered **200**.
+
+**A LIMITATION RECORDED TWICE IS A MEASUREMENT OF THOSE TWO DAYS, NOT A
+PROPERTY OF THE ENVIRONMENT**, and quoting it is not the same as taking it.
+This is §303's rule with the sign reversed: that one says *establish a failure
+is not yours before you blame your work*, and this says *establish an obstacle
+is still there before you route around it*. Both are the same instruction —
+**measure the thing in front of you, not the note about the last one** (rule
+3a, and §93.11 in a different tree).
+
+**THE COST IS NAMED RATHER THAN LEFT AS AN EMBARRASSMENT**: on §377.6 and
+§378.2 the deployment went **unverified when it need not have been**, and both
+records say so honestly — what they could not say is that the check was
+available and unasked. Whether the proxy's answer varies by day, by address or
+by something else is **not established here and is not guessed at** (§124);
+what is established is that it answered today, so the next merge tries it
+before it writes anything about it.
+
+**CORRECTED RATHER THAN LEFT STANDING** (§124, and the correction rule: a
+record that is wrong about what was verified is the one kind of wrong that
+compounds, because the next person quotes it). All three record files carry the
+correction, and this section is why.

@@ -442,8 +442,13 @@ type Grp = { key: string; label: string | null; rows: Action[] };
 function grouped(shown: Action[], L: Loaded, group: Group, today: string, dates: Format): Grp[] {
   const by = new Map<string, Action[]>();
   /* as weeks, a due-date grouping is by the WEEK — every day of one week
-     under one heading, keyed by its Thursday so the order is still by day */
-  const dueKey = (a: Action) => !a.due ? "none" : dates === "weeks" ? thursdayOf(a.due) : a.due;
+     under one heading, keyed by its Thursday so the order is still by day.
+     THE BREAK GROUPS BY THE DAY WHILE STILL ASKED FOR WEEKS, which is this
+     decision failing rather than a function failing: two days of one week
+     draw the same heading twice, so the check's one-heading-per-week
+     assertion reddens and nothing about weekWord moves (§113.8 — an
+     agreement is preserved by breaking both its sides at once). */
+  const dueKey = (a: Action) => !a.due ? "none" : (dates === "weeks" && brk() !== "day-groups") ? thursdayOf(a.due) : a.due;
   const keyOf = (a: Action) => group === "owner" ? a.ownerKey : group === "status" ? a.status : group === "due" ? dueKey(a) : "all";
   for (const a of shown) { const k = keyOf(a); if (!by.has(k)) by.set(k, []); by.get(k)!.push(a); }
   let keys = Array.from(by.keys());

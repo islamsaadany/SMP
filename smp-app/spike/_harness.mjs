@@ -217,9 +217,25 @@ export async function seedRows(owner, tenantId) {
     const row = { tenant_id: "'" + tenantId + "'" };
     /* FK columns from the parent row: every NOT NULL FK, and — where none is
        NOT NULL — the first nullable one only (pillars_one_owner wants exactly
-       one of two). */
+       one of two).
+
+       A SELF-REFERENCING FK IS NEVER A SEED PARENT, which is the ORDERING
+       rule two blocks up (`f.ref !== t`) said once and this one did not.
+       The first row of a table cannot point at a row of that table, so the
+       first nullable FK has to be the first that leaves it — and until
+       §375's `portfolio_activities.depends_on` (§5's one dependency,
+       nullable because a first activity depends on nothing) no tenant table
+       had ever referenced itself, so the two rules could disagree for as
+       long as they liked. They met alphabetically: `..._depends_on_fkey`
+       sorts before `..._phase_id_fkey`, so `slice(0, 1)` took the self one
+       and S2 DIED IN ITS OWN FIXTURE (§215) — 0 ok, 1 failed, the tenant
+       boundary proved by nothing at all (§54.5). */
     const notNullFk = fks[t].filter((f) => f.cols.every((c) => cols[t].find((x) => x.name === c).notnull));
-    const use = notNullFk.length ? notNullFk : fks[t].slice(0, 1);
+    /* A NOT NULL self-FK cannot be seeded in ANY order, so it is said in
+       words rather than left to come back as a foreign-key violation on a
+       placeholder uuid (§123: name the step that stopped). */
+    if (notNullFk.some((f) => f.ref === t)) throw new Error("seed: " + t + " requires a row of its own table — no order can seed that");
+    const use = notNullFk.length ? notNullFk : fks[t].filter((f) => f.ref !== t).slice(0, 1);
     for (const f of use) {
       if (!first[f.ref]) throw new Error("seed: " + t + " references " + f.ref + " which has no row yet");
       f.cols.forEach((c, i) => { if (c !== "tenant_id") row[c] = first[f.ref][f.refcols[i]]; });

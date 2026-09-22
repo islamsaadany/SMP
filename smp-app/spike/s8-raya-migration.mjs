@@ -41,8 +41,21 @@ try {
   const bBefore = {};
   for (const t of ts) bBefore[t] = (await db.owner.query("SELECT count(*)::int AS n FROM " + t + " WHERE tenant_id = $1", [B])).rows[0].n;
 
-  /* a known password on one account of the copy, so the sign-in can be driven */
-  const src = new pg.Client({ connectionString: from }); await src.connect();
+  /* a known password on one account of the copy, so the sign-in can be driven.
+     IT NEEDS A REHEARSAL DATABASE AND SAYS SO (§328.3, §313.37): a copy of
+     the frozen deployment, split by scripts/migrate-to-multi-client.js, named
+     by --from. `npm run spike` passes none, so this is the one proof of nine
+     that does not run unattended — and it refuses in words rather than coming
+     back as a bare ECONNREFUSED on a default port (§123). */
+  const src = new pg.Client({ connectionString: from });
+  try { await src.connect(); }
+  catch (e) {
+    /* thrown, never fail()ed: the outer catch is what ends the run RED with
+       db.drop() still reached, and a fail() here would carry on into a query
+       on a client that never connected. */
+    throw new Error("this proof needs a COPY of the frozen deployment at --from (tried " + from + "): " + (e && e.message || e)
+      + "\n      Make one as quickstart §3 does — seed a v2.0 tenant, run scripts/migrate-to-multi-client.js — then pass --from=<its url>.");
+  }
   const acct = (await src.query("SELECT email, is_admin, must_change FROM platform.accounts ORDER BY is_admin DESC, email LIMIT 1")).rows[0];
   const pw = "Carried-1!";
   await src.query("UPDATE platform.accounts SET password_hash = $2 WHERE email = $1", [acct.email, auth.hashPassword(pw)]);

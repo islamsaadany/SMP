@@ -10167,7 +10167,81 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-21 &mdash; **&sect;379: the working copy carries the
+*Last Updated: 2026-09-22 &mdash; **&sect;375.3: the two reds &sect;375 left,
+run rather than quoted (spec 060).** That round recorded two failing checks as
+`main`'s, established on a baseline worktree first (&sect;303) &mdash; and run
+two days later **neither was what the record said it was**: one is the check's
+own arithmetic and the other had become THIS round's in the interval. *A red
+recorded as somebody else's is still a guess about the cause until it is
+reproduced.*
+**&sect;375.3a &mdash; ONE CLOCK SPELLS A HEADING, AND IT IS THE PAGE'S**:
+&sect;9 draws its documents at a FIXED clock (the mockup's own Tuesday) while
+the rows it groups carry REAL dates, because &sect;8 adds them through the
+product's own add line; the heading assertion spelt the week word with
+`todayIn()` and the page had been drawn at `TODAY`, with
+`weekDays(weekOf(t), TODAY)` beside it on the same line already using the
+page's. Reproduced first (rule 3a), and the detail names it: the page drew
+`Next week &middot; 20 &ndash; 24 Sep|W1 Oct &middot; 27 Sep &ndash; 1 Oct|No
+date` against the check's `This week`/`Next week` &mdash; **the product is
+right**. **IT WAS TRUE FOR EXACTLY ONE WEEK**, which is what makes it a date
+rather than a bug: `realThu` is this week's Thursday by construction, so the
+check's word is always *This week* while the page's is only that while the real
+clock sits in TODAY's own week. **REWRITTEN, NEVER LOOSENED** (&sect;218) to
+the clock the page was drawn with, still an AGREEMENT rather than a list of
+words (&sect;94.8), with the set of Thursdays DERIVED so two rows falling into
+one week collapse on both sides together.
+**&sect;375.3b &mdash; AND S2 HAD STOPPED PROVING THE TENANT BOUNDARY, IN THIS
+ROUND'S OWN FIXTURE**: not `notes.met_on` any more but
+`seed: portfolio_activities references portfolio_activities which has no row
+yet` &mdash; **&sect;375's own tables**, and the most expensive shape there is,
+since S2 is the isolation proof the whole shared-schema rebuild rests on. It
+DIED rather than reported (&sect;215): **0 ok, 1 failed**, the boundary proved
+by nothing at all (&sect;54.5), on every run since that merge. **THE HARNESS
+ALREADY HELD THE RULE AND HELD IT IN ONE PLACE OF TWO** &mdash; its ORDERING
+pass skips a self-reference (`f.ref !== t`) and its SEEDING pass did not, and
+`portfolio_activities` is **the first tenant table ever to reference itself**
+(&sect;5's one dependency, nullable because a first activity depends on
+nothing), so the two could disagree for as long as they liked and met
+**alphabetically**: `..._depends_on_fkey` sorts before `..._phase_id_fkey`, so
+the *first nullable one only* rule &mdash; written for `pillars_one_owner`'s
+exactly-one-of-two, which `portfolio_activity_parent` also is &mdash; took the
+self one. One line, stated as the rule the other pass already states; **and a
+NOT NULL self-FK is said in words** (&sect;123) rather than returning later as
+a foreign-key violation on a placeholder uuid. S2 is **56 ok, 0 failed, 55
+tenant tables** isolated on all three verbs, against the 42 &sect;314.3
+measured, with Portfolio's eight inside it for the first time; falsified both
+ways (3 red, 166 red).
+**&sect;375.3c &mdash; AND THE CORRECTED ASSERTION HAD NO BREAK OF ITS OWN**:
+with both sides at `TODAY` the file's two week breaks move `weekWord` ITSELF,
+so both sides of the agreement move together and it goes quietly green under
+each &mdash; &sect;113.8's blind spot, and a weakening the fix would otherwise
+have introduced. Both stay red (14 and 6) on &sect;1's literals and &sect;10's
+browser assertions, so the harness is not weaker; what was missing is a break
+for **this** one. `day-groups` breaks the DECISION rather than the function
+&mdash; `dueKey` groups by the DAY while the page is still asked for weeks
+(&sect;356.14), so two days of one week draw the same heading twice &mdash;
+**1 red, exactly that assertion**, printing the duplicate verbatim.
+**&sect;375.3d &mdash; AND TWO OF THE SIXTEEN SPIKE FALSIFICATIONS ARE RED FOR
+THE WRONG REASON**, recorded and not fixed: `s8-raya-migration`'s two are red
+because S8 **cannot connect at all**, needing a copy of the frozen deployment
+at `--from` that `npm run spike` has never passed &mdash; &sect;335's own
+*eight of nine*. *A falsification red for the wrong reason is
+indistinguishable from a working guard* (&sect;54.5), and closing it needs a
+v2.0-shaped rehearsal database built by hand (rule 1b); what is done here is
+&sect;328.3's rule, that it **refuses in words** naming what it wants and how
+to make one.
+**VERIFIED**: tracker **228/0** red **fourteen** ways; spike **eight of nine
+GREEN** with all sixteen falsifications red; modules 158/0; memory-boundary
+14/0; `generated-in-step` all clear; `built-in-step.py` all good; `tsc` clean
+**COLD**. **The frozen product is untouched** &mdash; the whole diff is two
+checks, one `brk()` guard no request can set (&sect;365's own shape), the spike
+harness and `package.json` &mdash; so the built file is byte-identical and **no
+`sw.js` bump is owed** (&sect;91's trigger is the built file's bytes changing,
+and they did not). Nothing stored moves, nothing is migrated, no rule about who
+may save what changes. **On the branch, not merged** &mdash; `main` is Islam's
+word, on that merge.*
+
+*Earlier: 2026-09-21 &mdash; **&sect;379: the working copy carries the
 platform, not a link to it (spec 030).** Islam, with a file downloaded from his
 own tenant minutes earlier: *"the working copy download html is damaged."*
 **NOTHING OF HIS WAS LOST AND SAYING SO FIRST WAS MOST OF THE ANSWER** &mdash;

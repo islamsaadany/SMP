@@ -6896,3 +6896,46 @@ refuse a backup for a missing picture.
 takes a few seconds longer and the file is about 6 MB rather than 1.6. Open it
 with no connection: it should come up on your own tenant, fully styled, with
 the navigation and the decks in it.
+
+---
+
+## §375.3 — The two reds §375 left, run rather than quoted (2026-09-22, spec 060) · **built, on the branch**
+
+§375 wrote down two failing checks and called them somebody else's. Two days
+later both were run, and **neither was what the note said it was**.
+
+**The tracker check was telling the time twice.** Its page is drawn at a fixed
+date on purpose — the mockup's own Tuesday, so the rows read the same every
+run — and one assertion asked *today's real date* what to call a week while the
+page had been drawn at the fixed one. It agreed for exactly one week and has
+been red every day since. The page was right the whole time; the assertion now
+asks the same clock the page was drawn with. **228 of 228.**
+
+**And the tenant-isolation proof had been dead since Portfolio merged — this
+round's own fault.** That proof is the one that shows one client cannot read
+another client's rows, and it stops at the first thing it cannot make: an
+activity that can depend on another activity is the first table in the product
+that points at itself, and the fixture tried to borrow a parent row from a table
+that had no rows yet. It never got as far as asserting anything — **nothing at
+all was being proved**, on every run for two days. One line, and the proof is
+green and wider than it has ever been: **55 tables**, up from 42, with
+Portfolio's eight inside it for the first time.
+
+**A third thing, so the repair cannot rot.** With both sides of the heading
+asking the same clock, the two deliberate faults the file already carries stop
+being able to fail it. A new one was added that breaks the *decision* instead —
+grouping by the day while the page is still asked for weeks — and it fails
+exactly that one assertion and nothing else. The file is now proved able to
+fail **fourteen** ways.
+
+**Said and not fixed:** two of the sixteen deliberate faults on the database
+proofs pass for the wrong reason — one proof needs a copy of the old
+deployment that the run never supplies, so it cannot start, and "it failed" and
+"it never ran" look the same from outside. It now says in words what it wants
+and how to make one. Closing it properly needs a rehearsal database built by
+hand, which is its own piece of work.
+
+**Nothing on any screen moves.** No stored data changes, nothing is migrated,
+nobody's access moves, and the offline file is byte-identical.
+
+**What to go and check:** nothing — this round is checks and a test fixture.

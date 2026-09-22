@@ -419,13 +419,20 @@ try {
   const byNone = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "none", dates: "weeks" }, who: NORAN, today: TODAY });
   check("grouped by Owner the headings are the register's full names, in its order", heads(opened).join("|") === "Islam Saadany|Noran Essam", heads(opened).join("|"));
   check("...by Status it is the three words' own", heads(byStatus).every((h) => Object.values(STATUS_WORD).includes(h)) && heads(byStatus).length >= 1, heads(byStatus).join("|"));
-  /* the rows §8 has made by now: two due this week's real Thursday, one on
-     Sun 20 Sep 2026, one on 1 Oct 2026, and the undated */
+  /* the rows §8 has made by now: two due this week's REAL Thursday (the add
+     line defaults to it, §356.14), one on Sun 20 Sep 2026, one on 1 Oct 2026,
+     and the undated. ONE CLOCK SPELLS A HEADING, AND IT IS THE PAGE'S: the
+     rows carry real dates and the document is drawn at TODAY, so a heading is
+     what the product's own reader says AT TODAY — asking `todayIn()` for the
+     word while the page was rendered at TODAY is two clocks for one string,
+     and it went red the first week the two disagreed (227/1, §303). The set
+     of Thursdays is DERIVED, so two dates falling into one week collapse on
+     both sides together (§94.8 — an agreement, never a list of words). */
   const realThu = thursdayOf(todayIn());
   check("...by Due date as exact dates it is the day, soonest first, and the undated read 'No date', last",
     heads(byDue).join("|") === [realThu, "2026-09-20", "2026-10-01"].sort().map((d) => readableDay(d, TODAY)).join("|") + "|No date", heads(byDue).join("|"));
   check("...and as weeks it is the WEEK, its word and its days, one heading for every day in it (§356.14, §356.15)",
-    heads(byWeek).join("|") === [...new Set([realThu, "2026-09-20", "2026-10-01"].map(thursdayOf))].sort().map((t) => weekWord(t, todayIn()) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
+    heads(byWeek).join("|") === [...new Set([realThu, "2026-09-20", "2026-10-01"].map(thursdayOf))].sort().map((t) => weekWord(t, TODAY) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
   check("...and by None there is no heading at all while the rows are all still there", heads(byNone).length === 0 && /class="row/.test(byNone) && /data-act="set-group" data-value="none" class="on"/.test(byNone));
   const cookied = await serve({ req: new Request("https://smp.example/x/tracker", { headers: { cookie: "a=b; smp.tracker.group=status" } }), slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], rest: [], personKey: "noran", seat: "smoteam" }).then((r) => r.text());
   check("the grouping this browser last chose is read off its cookie, so the page opens grouped that way", /data-value="status" class="on"/.test(cookied) && /data-group="status"/.test(cookied));

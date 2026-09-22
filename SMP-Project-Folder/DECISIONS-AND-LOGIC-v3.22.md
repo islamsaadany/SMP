@@ -53515,6 +53515,118 @@ created. It names no existing table. Nothing stored moves.
 
 ---
 
+## §375.3 — THE TWO REDS §375 LEFT, RUN RATHER THAN QUOTED (2026-09-22, spec 060)
+
+§375 recorded two reds as `main`'s, established on a baseline worktree before
+anything of its own was blamed (§303): `tracker` **227/1** and spike **S2**.
+Running them two days later found **neither was what the record said it was** —
+one is the check's own arithmetic, and the other had become MINE in the interval.
+*A red recorded as somebody else's is still a guess about the cause until it is
+reproduced; the note that records it is not the measurement.*
+
+### §375.3a — ONE CLOCK SPELLS A HEADING, AND IT IS THE PAGE'S
+
+Reproduced first (rule 3a), and the failure detail names it outright — the page
+drew `Next week · 20 – 24 Sep|W1 Oct · 27 Sep – 1 Oct|No date` and the check
+expected `This week`/`Next week`. **The product is right.** §9 draws its
+documents at a FIXED clock — `TODAY` is 2026-09-15, the mockup's own Tuesday —
+and the rows it groups carry REAL dates, because §8 adds them through the
+product's own add line, which defaults to this week's real Thursday (§356.14).
+The heading assertion spelt the week word with `todayIn()` while the document
+had been rendered at `TODAY`: **two clocks for one string**, with
+`weekDays(weekOf(t), TODAY)` beside it on the same line already using the
+page's.
+
+**IT WAS TRUE FOR EXACTLY ONE WEEK, WHICH IS WHAT MAKES IT A DATE RATHER THAN A
+BUG**: `realThu` is this week's Thursday by construction, so
+`weekWord(realThu, todayIn())` is *always* "This week", while
+`weekWord(realThu, TODAY)` is "This week" only while the real clock sits in
+TODAY's own week (Sun 13 – Thu 17 Sep 2026). It went red the first Sunday after
+it was written and every day since. *An assertion that agrees for one week has a
+date in it, however carefully the dates are hidden.*
+
+**REWRITTEN, NEVER LOOSENED** (§218): the heading is what the product's own
+reader says **at the clock the page was drawn with**, which is what the two
+assertions either side of it already do. It stays an AGREEMENT rather than a
+list of words (§94.8) — and the set of Thursdays is DERIVED from the same three
+due dates, so two rows falling into one week collapse on both sides together and
+the real clock may march as far forward as it likes.
+
+### §375.3b — AND S2 HAD STOPPED PROVING THE TENANT BOUNDARY, IN MY OWN FIXTURE
+
+The other red is not `notes.met_on` any more. It is
+`seed: portfolio_activities references portfolio_activities which has no row
+yet` — **§375's own tables**, and the most expensive shape there is: S2 is the
+ISOLATION proof, so what died is the single assertion the whole shared-schema
+rebuild rests on. It DIED rather than reported (§215): **0 ok, 1 failed**, the
+tenant boundary proved by nothing at all (§54.5), on every run since §375
+merged.
+
+**THE HARNESS ALREADY HELD THE RULE AND HELD IT IN ONE PLACE OF TWO.** Its
+ORDERING pass skips a self-reference outright (`f.ref !== t`, or a table
+referencing itself would read as an FK cycle); its SEEDING pass, choosing which
+parent row to borrow keys from, did not. `portfolio_activities` is **the first
+tenant table in this product ever to reference itself** — §5's one dependency,
+nullable because a first activity depends on nothing — so the two rules could
+disagree for as long as they liked, and they met **alphabetically**: the three
+nullable FKs sort `..._depends_on_fkey`, `..._phase_id_fkey`,
+`..._work_package_id_fkey`, and the "first nullable one only" rule (written for
+`pillars_one_owner`'s exactly-one-of-two, which
+`portfolio_activity_parent` also is) took the self one. One line, stated as the
+rule the other pass already states: **the first row of a table cannot point at a
+row of that table.**
+
+**AND A NOT NULL SELF-FK IS SAID IN WORDS** (§123): no table has one and none
+can be seeded in any order, so it refuses by name rather than coming back later
+as a foreign-key violation on a placeholder uuid — which is the same fault
+wearing a confusing hat.
+
+**S2 IS GREEN AND WIDER THAN IT HAS EVER BEEN**: 56 ok, 0 failed, **55 tenant
+tables isolated on all three verbs** — against the 42 §314.3 measured — with the
+eight Portfolio tables inside it for the first time. Falsified both ways
+(`--break=no-policy:tactics` 3 red, `--break=owner` 166 red).
+
+### §375.3c — AND THE CORRECTED ASSERTION HAD NO BREAK OF ITS OWN
+
+With both sides spelling the heading at `TODAY`, the file's two week breaks
+(`week-numbers`, `week-of-year`) move `weekWord` ITSELF, so both sides of the
+agreement move together and it goes quietly green under each — §113.8's blind
+spot, and a weakening I would have introduced by fixing it. Both breaks stay
+red (14 and 6 failures) on §1's literal assertions and §10's browser ones, so
+the harness is not weaker; what was missing is a break for **this** assertion.
+
+`day-groups` breaks the DECISION rather than the function: `dueKey` groups by
+the DAY while the page is still asked for weeks (§356.14), so two days of one
+week draw the same heading twice. **1 red, exactly the heading assertion**,
+printing `Next week · 20 – 24 Sep|Next week · 20 – 24 Sep|…` — the duplicate
+verbatim, and nothing about `weekWord` moved.
+
+### §375.3d — AND TWO OF THE SIXTEEN SPIKE FALSIFICATIONS ARE RED FOR THE WRONG REASON
+
+Recorded, not fixed. `npm run spike:red` reports all sixteen red, and
+`s8-raya-migration --break=short:people` and `--break=wrong-tenant` are red
+because **S8 cannot connect at all**: it needs a COPY of the frozen deployment
+at `--from`, which the `npm run spike` loop has never passed, so it is the one
+proof of nine that does not run unattended (§335's own "eight of nine"). *A
+falsification that is red for the wrong reason is indistinguishable from a
+working guard* (§54.5) — and closing it needs a v2.0-shaped rehearsal database
+built by hand, which is its own errand (rule 1b). What is done here is §328.3's
+rule: it **refuses in words**, naming what it wants and how to make one, rather
+than coming back as a bare `ECONNREFUSED` on a default port.
+
+**VERIFIED**: tracker **228/0**, red **fourteen** ways (`day-groups` new);
+spike **eight of nine GREEN** with all sixteen falsifications red; modules
+158/0; memory-boundary 14/0; `generated-in-step` all clear; `built-in-step.py`
+all good; `tsc` clean **COLD**. **The frozen product is untouched** — the whole
+diff is `smp-app/checks/tracker.mjs`, `smp-app/modules/tracker/page.ts` (a
+`brk()` guard no request can set, §365's own shape), `smp-app/spike/_harness.mjs`,
+`smp-app/spike/s8-raya-migration.mjs` and `package.json` — so the built file is
+byte-identical and **no `sw.js` bump is owed** (§91's trigger is the built
+file's bytes changing, and they did not). **Nothing stored moves, nothing is
+migrated, and no rule about who may save what changes.**
+
+---
+
 ## §376.1 — MERGED TO MAIN, AND A RENUMBER THAT LOST ITS OWN WRITES (2026-09-20, Spec 061)
 
 Islam: **"MERGE TO MAIN"**. Main had moved 30 commits and taken **§375 and spec

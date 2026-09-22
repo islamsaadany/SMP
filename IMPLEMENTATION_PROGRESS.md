@@ -6897,6 +6897,127 @@ takes a few seconds longer and the file is about 6 MB rather than 1.6. Open it
 with no connection: it should come up on your own tenant, fully styled, with
 the navigation and the decks in it.
 
+---
+
+## §380 — One blank template per way of planning (2026-09-22, spec 059) · **merged to `main`**
+
+Islam: *"in the template download we need to have the different types of
+functions plans templates."*
+
+### What was wrong
+
+The blank-template card on **Setup → Import & storage → Download** offered
+**two** buttons where a supporting function plans **three** ways, and its
+sentence had been wrong for some time — *"a capability plans in projects and
+everything else in pillars"* stopped being true when a function was given its
+own projects, and it never mentioned objectives and actions at all.
+
+Worse than a missing button: the card's own words send you to the **wrong**
+one. Pressing *Pillars* for a function that plans in objectives and actions
+gives a unit's workbook; pressing *Projects* gives a file with **no Actions
+sheet**, whose dropdown does not even offer that function.
+
+### What was built
+
+Three buttons — **Pillars · Projects · Objectives & actions** — under a
+sentence that is true: *"One per way of planning. A unit always plans in
+pillars; a function plans whichever way Setup says."*
+
+- **Each blank file carries only the sheets its format uses.** Projects drops
+  Actions; Objectives & actions carries Read me, Objectives and Actions and
+  none of the four project sheets.
+- **Each file's Read me lists only the subjects that format fits**, and says
+  *Supporting function* rather than *Capability* where only a function can plan
+  that way.
+- **A subject downloading its own plan is untouched** and still gets all seven
+  sheets — the earlier decision, not reversed.
+
+Two costs, both stated before they were taken and both accepted: a subject's
+own download keeps every sheet, and a function whose format changes after a
+download has to download again.
+
+### A live defect found while building it
+
+**A function that plans in objectives and actions was offered a template the
+upload could not take back.** The file's dropdown offered it; the upload
+answered *"no business unit, supporting function or capability called
+\"HR\""*. Measured on the shipped build. A plan that downloads and cannot come
+back — one question with two answers, written out in two places, drifting the
+moment one gained a format the other had not heard of. Both sides ask one
+function now.
+
+The check that should have caught it asserted the half that worked: it asserted
+the function is **offered**, then read the file through the reader **directly**,
+never through the door a person actually meets. It drives the real control now.
+
+**And a template nobody can fill in**: before a tenant has a single function
+planning that way, the narrowed list is empty — and an empty dropdown refuses
+every value there is, so the cell can be neither picked from nor typed into. No
+validation is written for an empty list.
+
+### Proof
+
+- `checks/import-page.py` §2 rewritten, `checks/objectives-actions.py` §8b
+  added — 47 → **52 passed, 0 failed**; `import-page` all green.
+- Proved able to fail **six ways from the sources**, one break per decision:
+  2 / 3 / 7 / 2 / 3 / 1 red, each reddening its own assertions. The stranded
+  button prints `{'rows': 2, 'lead': 592}`; the door prints the reported
+  refusal verbatim.
+- Neighbours green: `template-round-trip`, `functional-projects` 45/0,
+  `project-tables`, `fn-pillars`. `qa.py` over `file://` **ERRORS none**.
+- The built file is in step with its sources, the served copies regenerated,
+  and `sw.js` bumped.
+
+### §380.2 — Merged to `main` (2026-09-22) · **done**
+
+**`main` had not moved** — measured, not assumed. It stood at §379.5, this
+branch's own ancestor, so the merge is a clean fast-forward and the tree pushed
+is byte-for-byte the tree that was verified: nothing resolved, nothing rebuilt,
+nothing recombined.
+
+- **§380 was free on `main`**, checked in both spellings rather than assumed, so
+  no renumber was owed.
+- **`sw.js` confirmed immediately before the push**:
+  `v5.24-three-blank-templates` against main's `v5.23`, a name the history has
+  never held — measured across every commit that has ever touched that file,
+  not only against main — one live declaration, and the file parses.
+- **The merge carries its own record commit**, because the branch tip was
+  already pushed: Vercel gives one deployment per commit, so putting the same
+  commit on `main` and on the branch is a race for which one gets built. The
+  record owed the line anyway, since all three files still said *"on the
+  branch"* over a merge that had happened.
+- **The witness for "production has this" was measured, not carried over from
+  last time.** The served `sw.js` is 4,104 bytes on both builds, so it can
+  prove nothing; `shell.js` (3,852,494 → 3,861,361) and `platform.css`
+  (674,285 → 674,961) both moved, so this round has two witnesses where the
+  last had one — because this round changed a stylesheet and that one did not.
+- **Nobody is signed out** — read off the diff: not one `api/`, `lib/` or `db/`
+  file is in it, so nothing about how a save is judged moves, nothing stored
+  moves and nothing is migrated.
+- Both in-step guards clear before the push.
+- **Production has served this commit** — the live read was made rather than
+  written ahead of itself, and it landed in about **60 seconds**. The read
+  taken minutes earlier is what makes it mean something: the site was serving
+  §379's build to the hash, so the two readings tell a landed deploy from one
+  that has not. Both witnesses came back byte-identical to what the generators
+  produce — `shell.js` 3,861,361 and `platform.css` 674,961.
+- **The file that could not be a witness was measured, not quoted**: the served
+  `sw.js` is 4,104 bytes and holds the cache-name string nought times, which is
+  the generator dropping that half, shown on the live site rather than cited.
+- **The branch was held behind and then brought up, in that order**, so `main`'s
+  tip was the only ref carrying the commit for the whole window that mattered.
+- **One thing to expect rather than report**: because the served worker's bytes
+  did not move, a tab left open on the old build is *not* offered *"A newer
+  version of the platform is ready"* — it keeps its old shell until somebody
+  reloads it.
+
+### Waiting on Islam
+
+- Four things flagged on the mockup and deliberately not folded in: the
+  projects file's Read me still says *Capability* over a list of functions; the
+  Pillars button spells the word as a literal where the page beside it uses the
+  tenant's own word; a capability plans two ways where a function plans three;
+  and an archived plan's workbook carries no format.
 
 ---
 
@@ -6940,13 +7061,8 @@ from the sources (4 red and 1 red, each break reddening only its own);
 `functional-projects` 45/0, `objectives-actions` 47/0, `fn-pillars`,
 `fn-ko-edit`, `capability-entry` 43/0, `capability-remove` all green; full
 `qa.py` sweep ERRORS none. Screen only — nothing stored moves, nothing is
-migrated, nobody's rights move. **On the branch, not merged.**
-
-The offline copy's cache name was bumped here rather than left for the merge:
-the branch was still on the name the last round shipped, and that one has
-already been served — so a browser that had opened the platform before would
-have gone on serving itself the old file out of its own disk, silently. The
-name is checked again immediately before anything goes to `main`.
+migrated, nobody's rights move. **Merged to `main` 2026-09-22**, with the
+round below it.
 
 ## §381.2 — one shape, three formats (2026-09-22, spec 020)
 
@@ -6993,5 +7109,30 @@ press of the pen **closed** a pen the builder had just opened, which read for a
 while as a product fault until it was measured.
 
 Screen only — nothing stored moves, nothing is migrated, nobody's rights move.
-**On the branch, not merged**; a merge owes the `sw.js` SHELL bump, because the
-built file's bytes changed.
+**Merged to `main` 2026-09-22 on Islam's word.**
+
+`main` had moved four commits while this was being built, and had used the
+same section numbers for a different piece of work — the blank plan
+templates. This round's numbers were moved up **first, before the merge**,
+which is the only moment it can be shown that only this branch's own lines
+were touched.
+
+The two sides met in one file and **fitted together rather than fighting**:
+the other piece taught the plan page to add an action, this one taught the
+builder to ask for it on a form first, and the merged page tries the form and
+falls back to the plain add — which is what both were written to do. The two
+records were combined rather than one being chosen, with every heading from
+both sides checked present afterwards.
+
+**The offline copy's cache name had been written by both sides in the same
+week**, differing only in its last few words — so the two collided, which is
+the good outcome: the same words on both sides would have gone through in
+silence with different files behind them, and a browser that had opened the
+platform before would have gone on serving itself the old one. Moved past
+both, to a name nothing has ever served.
+
+Everything was re-run on the **merged** result rather than on the branch: the
+nine checks either piece touches — including the workbook round trip, which
+is the other piece's — the full sweep with **no errors**, the plan rules and
+the change list unmoved, and the two guards that the shipped file and the
+served copies are in step.

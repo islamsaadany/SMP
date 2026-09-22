@@ -5849,15 +5849,32 @@ function renderImportDownload(){
       word + ' <span class="cnt">(' + n + ')</span></button>';
   }
 
+  /* ── §380: ONE BLANK TEMPLATE PER WAY OF PLANNING ───────────────────────
+     There are THREE (`FN_FORMATS`) and the card offered two, so the third
+     file could be built by nothing anybody could press — §61's trap, and its
+     own sentence was two decisions stale: §326 gave a function its own
+     projects, so "a capability plans in projects and everything else in
+     pillars" stopped being true, and §342 added the format it does not
+     mention at all.
+
+     WORSE THAN MISSING, because the card's words send you to the wrong one:
+     pressing Pillars for an objectives function gives a file with no Actions
+     sheet whose Read me dropdown does not offer that function.
+
+     GROUPED IN A SPAN, not three loose buttons — `.ffoot` wraps and `.why`
+     takes the free space, so a third button splits 2+1 below ~1100px and the
+     odd one is stranded at the far LEFT under the sentence. Measured. */
   var blank =
     '<div class="fkey">A blank template to fill in</div>' +
     '<div class="fcard"><div class="fbody"><p>The same file whoever it is for &mdash; the ' +
       'subject is chosen on its Read me sheet, and the platform mints every code on ' +
       'arrival.</p></div>' +
-    '<div class="ffoot"><span class="why">Two formats, because a capability plans in ' +
-      'projects and everything else in pillars.</span>' +
+    '<div class="ffoot"><span class="why">One per way of planning. A unit always plans in ' +
+      'pillars; a function plans whichever way Setup says.</span><span class="fbtns">' +
       '<button class="editbtn" data-dlblank="pillars">Pillars</button>' +
-      '<button class="editbtn" data-dlblank="projects">Projects</button></div></div>';
+      '<button class="editbtn" data-dlblank="projects">Projects</button>' +
+      '<button class="editbtn" data-dlblank="objectives">Objectives &amp; actions</button>' +
+      '</span></div></div>';
 
   var files =
     '<div class="fkey">Files from the platform</div>' +

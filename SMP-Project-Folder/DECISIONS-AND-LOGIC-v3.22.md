@@ -54265,6 +54265,279 @@ record that is wrong about what was verified is the one kind of wrong that
 compounds, because the next person quotes it). All three record files carry the
 correction, and this section is why.
 
+---
+
+## §380 — ONE BLANK TEMPLATE PER WAY OF PLANNING (2026-09-22, spec 059)
+
+Islam: *"in the template download we need to have the different types of
+functions plans templates."*
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED (rule 3a), AND THE CARD WAS TWO
+DECISIONS STALE.** The blank-template card on Setup → Import & storage →
+Download offered **two** buttons, Pillars and Projects, under a sentence
+reading *"Two formats, because a capability plans in projects and everything
+else in pillars."* A supporting function plans **three** ways — `FN_FORMATS` is
+`["pillars", "projects", "objectives"]` — and neither half of that sentence had
+been true for some time: **§326** gave a function its own projects, so
+"a capability plans in projects" stopped being the whole of it, and **§342**
+added the format the sentence does not mention at all.
+
+**IT IS WORSE THAN A MISSING BUTTON, WHICH IS WHY IT IS NOT MERELY A THIRD
+ONE.** The third file already exists and is built by nothing anybody can press
+(§61's trap), and the card's own words send you to the wrong one: pressing
+**Pillars** — which is where "everything else in pillars" points an objectives
+function — hands over a unit's workbook, and pressing **Projects** hands over a
+file with no Actions sheet whose Read me dropdown does not offer that function.
+So the thing a person most needs the template for is the state in which the
+card is most misleading.
+
+### The two decisions, and what each costs
+
+Both were put to Islam on a mockup made of the real page (rule 1c,
+`design-mockups/function-plan-templates/2026-09-22_blank-template-three-formats.html`,
+published as an Artifact) with the cost stated under each, and both were taken:
+*"yes for both, build it."*
+
+**1 · EACH BLANK TEMPLATE CARRIES ONLY THE SHEETS ITS FORMAT USES.** The
+projects file drops **Actions**; the objectives file carries **Read me,
+Objectives, Actions** and none of the four project sheets. *Accepted cost: a
+function downloading its OWN plan still gets all seven sheets* — §342 decided
+that deliberately (*"an empty sheet costs a reader nothing and a sheet that
+appears and disappears is a template somebody cannot learn"*, §45.2) and this
+round does not reverse it. The two are told apart by `only`, which the BLANK
+button passes and `impPlanWorkbookFor` does not.
+
+**NAMED BY WHAT EACH FORMAT DROPS, NEVER BY WHAT IT KEEPS.** A drop-list means
+a sheet added tomorrow rides in both blank templates until somebody decides it
+does not; a keep-list would silently leave it out of both — and an upload
+AUTHORS, so a column the file does not carry is a column the plan LOSES (§22).
+**And every sheet a dropped one is referenced BY goes with it**: Deliverables,
+Outcomes and Milestones each validate their first column against the Projects
+sheet's own range, so dropping Projects alone would leave three dropdowns
+pointing at a sheet that is not in the file (§65 — a validation range is a
+POSITION, and a range on a missing sheet is worse than none).
+
+**2 · EACH FILE'S READ ME LISTS ONLY THE SUBJECTS THAT FORMAT FITS.** *Accepted
+cost: a function whose format changes after a download has to download again.*
+The list is where the narrowing belongs because the dropdown is where somebody
+is standing when they choose — and with the file already built, whose name it
+is has exactly one answer whatever format it was built for.
+
+**THE ROW ABOVE THE NAME MOVES WITH IT.** Only a supporting function can plan
+in objectives and actions (`capFormat` has two values and neither is that), so
+that file's dropdown never holds a capability and a row over it reading
+*Capability* would be false on every copy. It says **Supporting function** —
+added to `READ_PICK_LABELS` **in the same edit as the row that writes it**,
+which is the whole of §58's rule and the one place it can be broken: a label is
+a contract with every file already sitting in somebody's Downloads folder, and
+renaming one without adding it there is §51.11's fault exactly — the reader
+stops finding the cell and the upload reports that nothing was chosen.
+
+**AND THE PROSE FOLLOWS THE SHEETS, NOT THE FORMAT.** A Read me telling
+somebody to *"fill Projects FIRST"* in a file with no Projects sheet is the same
+fault as the sheet itself, so `only` — never `fmt` — is what swaps the
+instructions, the dropdown line and *Milestone due dates* → *Action due dates*.
+A per-subject download keeps the full instructions because it keeps the full
+file.
+
+### The live defect the building found
+
+**AN OBJECTIVES FUNCTION WAS OFFERED A TEMPLATE THE UPLOAD COULD NOT TAKE
+BACK.** §342 added such a function to `projectSubjectNames()`, so the file's B2
+dropdown offered it — and the upload's own resolution in `shell.html` matched a
+function with `fnOwnsProjects(k)`, which §342 makes **false** for that format.
+Measured on the shipped build, on a state the probe made itself:
+
+```
+{"offered": true, "pfk": null, "ownsProjects": false, "resolves": false,
+ "wouldSay": "no business unit, supporting function or capability called \"HR\""}
+```
+
+**A plan that downloads and cannot come back** (§22, §61), and §53.5 exactly:
+one question — *whose name is this?* — with two answers, written out in two
+files, drifting the moment one gained a format the other had not heard of. The
+door asks `projectSubjectFns()` now, **with no format at all**, because by then
+the file exists and narrowing is the blank template's job.
+
+**AND THE CHECK THAT SHOULD HAVE CAUGHT IT ASSERTED THE HALF THAT WORKED.**
+`checks/objectives-actions.py` §8 asserts *"and the function is offered as a
+subject"* and then calls `capPlanFromWorkbook` **directly**, bypassing the UI
+door — so the one surface a person actually meets had never been asked about
+this format. §8b drives the real control: the blank file built by the button's
+own builder, the subject picked **from its own dropdown**, the bytes handed to
+the page's file input, and the resolved target read back. Reading the door's
+predicate would have asserted it against itself (§113.8). Both ends (§94.2): a
+name nobody holds is still refused.
+
+### And an empty dropdown refuses every value there is
+
+**§67.5'S MIRROR, AND WORSE THAN THE FAULT §67.5 RECORDS.** That section found
+that Excel silently DROPS an inline list over 255 characters, so the cell is
+merely unguarded. An **empty** list still applies, and with `showErrorMessage`
+on it refuses everything — the cell can be neither picked from nor typed into,
+so the workbook cannot be filled in at all.
+
+It is reachable rather than theoretical, and it is the state somebody most
+needs that file in: **before the tenant has a single objectives function**, the
+narrowed list is empty. §61's trap wearing a dropdown. `sheetXml()` writes no
+validation for an empty list — and a `from` range is left alone, because it
+names a sheet and whether that sheet has anything on it is not knowable from
+there. Asserted on the BYTES (§96), and falsified: with the guard removed the
+file comes back carrying `<dataValidations count="1">` over an empty formula.
+
+### The layout, and why the buttons are a group
+
+`.ffoot` wraps and `.why` carries `margin-right:auto`, so **three loose buttons
+split 2+1 below ~1100px with the third stranded at the FAR LEFT** under the
+sentence — the new flex line starting where the ROW starts, not where the
+buttons were. Measured: `rows 2, lead 592` at 1100. Grouped in a `.fbtns` span
+carrying the auto margin (§304's own fault on this same card: the first auto
+margin in a flex row takes every free pixel), the row breaks as a block and
+stays right-aligned — **one run, 18px from the row's end, at 1440 / 1280 / 1100
+/ 1000**. Asserted as that property and never as a coordinate (§94.8), at four
+widths, because the fault does not exist at the width the check otherwise runs
+at (§27.1).
+
+### What was proved, and how it was proved able to fail
+
+`checks/import-page.py` §2 rewritten and `checks/objectives-actions.py` §8b
+added — **and the count of templates is asserted as the AGREEMENT with
+`FN_FORMATS`, never as the number three** (§94.8, §214.3): a fourth way of
+planning added tomorrow turns it red rather than leaving the card quietly a
+format short, which is exactly how it came to be two decisions stale.
+**The state is MADE and put back** (§255, §94.2) — the worked example has no
+objectives-and-actions function, so every assertion about what that file offers
+would pass on a build that offers nothing.
+
+Proved able to fail **six ways from the SOURCES** (§276 — §238's hashed CSP
+silences an edited built file), every break asserted to have MATCHED before it
+was written (§344.1) and each reddening its own assertions:
+
+| break | red | first failure |
+|---|---|---|
+| `no-drop` | 2 | the objectives file carrying all seven sheets |
+| `no-narrow` | 3 | its dropdown offering all eight subjects |
+| `two-buttons` | 7 | `['pillars','projects'] vs ['pillars','projects','objectives']` |
+| `loose-buttons` | 2 | `{'rows': 2, 'lead': 592}` at 1100 — the stranded button |
+| `old-door` | 3 | `no business unit, supporting function or capability called "HR"` |
+| `empty-list` | 1 | `<dataValidations count="1">` over an empty list |
+
+The tree was restored and rebuilt **byte-identical** to the build the breaks
+were made from (§343.9). Neighbours green: `template-round-trip`,
+`functional-projects` 45/0, `project-tables`, `fn-pillars`, `import-page`,
+`objectives-actions` 47 → **52/0**; `qa.py` over `file://` **ERRORS none**;
+`checks/built-in-step.py` all good; the four generators re-run and
+`generated-in-step` clear (§329). The built file's bytes changed, so `sw.js` is
+bumped (§91) to a name the history has never held, confirmed against
+`origin/main` (§94.16).
+
+**§380.1 — AND ONE OF MY OWN NEW ASSERTIONS COMPARED TWO DIFFERENT TENANTS.**
+*"…and the projects file does not offer it"* went red on a build that narrows
+perfectly, because the projects template had been downloaded **before** the
+state was made — so its list came from a tenant in which that function still
+planned in projects. §105.6's family in a fixture rather than in a file on
+disk: *a measurement whose two halves are of different worlds*. The projects
+file is taken again from the same tenant, and the two lists are then about one
+thing.
+
+**RECORDED, NOT DONE** (rule 1b — each was flagged on the mockup and none was
+approved, so none is folded in here):
+
+- The **projects** workbook's Read me still says **Capability** over a list of
+  seven supporting functions and one capability. True of the file's history and
+  not of its contents; the objectives file's row is right because that format
+  can only ever be a function's.
+- The button reads **Pillars** as a literal where the Setup control beside it
+  uses `L("pillar","bu")`, so a tenant that renamed its pillars sees both words.
+- A **capability** plans two ways where a function plans three, so the blank
+  templates are per FORMAT and a capability quietly has no objectives-and-
+  actions option. That is `capFormat`'s decision, not this card's.
+- An **archived** plan's workbook (`archiveWorkbook`) passes no format, so an
+  archived objectives function's Read me says *Capability*. Pre-existing and
+  unchanged by this round; whether an archive should carry its format is its
+  own question.
+
+**§380.2 — MERGED TO `main` 2026-09-22 ON ISLAM'S WORD, AND `main` HAD NOT
+MOVED.** Measured rather than assumed (§4's fetch-and-look): it stood at
+**§379.5**, this commit's own ancestor, so the merge is a clean
+**fast-forward** and *the tree pushed is byte-for-byte the tree that was
+verified* — nothing resolved, nothing rebuilt, nothing recombined. That is the
+strongest standing a merge gets in this project and it is named rather than
+assumed, because every other merge in this log had to earn the same claim the
+hard way.
+
+**§380 was free on `main`**, checked in **both spellings** (§336.1) and not
+assumed, so no renumber was owed (§264.3); spec 059 is this branch's own,
+already there since §374.
+
+**`sw.js` confirmed immediately before the push** (§94.16):
+`v5.24-three-blank-templates` against main's `v5.23`, **a name the history has
+never held** — measured across every commit that has ever touched the file
+rather than against main alone, which is the half a §94.12 collision slips
+through — **one** live `const SHELL`, the other three matches being prose in
+that file's own comments (§272.8's shape in a search rather than in a parser),
+and `node --check` clean (§146.2).
+
+**AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE BRANCH TIP WAS
+ALREADY PUSHED** (§91, by §357.4's road). Vercel deduplicates by SHA, so
+fast-forwarding `main` onto a commit the branch ref already holds is ONE
+deployment and which ref gets it is a race already lost — and *the way back is
+a commit `main` holds and the branch does not, and it must be one worth
+making*, which the record owed anyway: §380's own blocks still read *"main
+untouched"* and *"built, on the branch"* over a merge that had happened.
+§378.2's own finding, arriving for the third time.
+
+**THE WITNESS IS MEASURED RATHER THAN CARRIED OVER FROM THE ROUND BEFORE**
+(§379.4's discipline), and this round has TWO where that one had one:
+
+- **Not `sw.js`** — §316.10's `build-sw.mjs` drops the caching half where
+  `SHELL` lives, so the **served** worker is **4,104 bytes on both builds** and
+  the bumped name reaches no client; it is kept for the offline copy alone
+  (§365).
+- `shell.js` **3,852,494 → 3,861,361**, sha256 `8c85f63a…`
+- `platform.css` **674,285 → 674,961**, sha256 `fbb21ceb…` — a witness again
+  this round because it changed `arrange.css`, where §379 changed no stylesheet
+  and had to rule that same file out.
+
+Each asserted to have **MOVED** before it was trusted, or a match would hold
+whether or not production built this (§113.8), and compared as **bytes** rather
+than as a length, a size match being the weaker claim.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF RATHER THAN ASSUMED** (spec
+029): not one `api/`, `lib/` or `db/` file is in it, so nothing about how a
+save is judged moves, nothing stored moves and nothing is migrated. Both
+in-step guards clear before the push: `built-in-step.py` all good (§349),
+`generated-in-step` all clear (§329).
+
+**AND THE LIVE READ WAS MADE RATHER THAN WRITTEN AHEAD OF ITSELF** (§91.5).
+§379.5 records a block that claimed a limitation it had not measured; the
+matching risk here is recording a success nobody has seen, so the read was
+taken **twice** and the first one is what makes the second mean anything:
+
+- **Before the push** the site served `shell.js` at **3,852,494 / `702fd30c`**
+  — §379.4's own recorded hash, to the character — so a later match could not
+  be a coincidence of a build that had never changed.
+- **After**, landed in about **60 seconds**: `shell.js` **3,861,361 /
+  `8c85f63a`** and `platform.css` **674,961 / `fbb21ceb`**, each **byte-identical
+  to its generated copy**. Both witnesses agree, rather than one carrying the
+  claim alone.
+
+**AND THE FILE THAT COULD NOT BE A WITNESS WAS MEASURED RATHER THAN QUOTED**:
+the served `sw.js` comes back at **4,104 bytes holding the string `SHELL`
+NOUGHT times**. That is §316.10's generator dropping the caching half —
+demonstrated on the live deployment instead of cited from the record, which is
+the difference between knowing it and having read it somewhere.
+
+**THE BRANCH WAS HELD BEHIND AND THEN BROUGHT UP, IN THAT ORDER** (§374.1,
+§375.2, §377.6, §379.4). `main`'s tip was on no other ref for the whole window
+that mattered — putting that SHA on a second ref is the one thing left that
+could still have cost the build — and the hold's condition having been met, the
+branch is fast-forwarded.
+
+**THE RESIDUE IS THE ONE §365, §367 AND §379.4 EACH NAMED, UNCHANGED**: because
+the served worker's bytes did not move, no `controllerchange` fires and §258's
+*"A newer version of the platform is ready"* is **not** offered — a tab left
+open on the previous build keeps its old shell until somebody reloads it.
 
 ## §381 — THE BUILDER'S MAP READ EMPTY OVER A PLAN THAT WAS THERE (2026-09-22, spec 020)
 
@@ -54450,3 +54723,67 @@ caching half where `SHELL` lives, so the SERVED worker is byte-identical either
 side of the bump (4,104 bytes, measured). It is confirmed again immediately
 before any push to `main` (§94.16), which is the last step of a merge and not
 the first.
+
+**§381.5 — MERGED TO `main` 2026-09-22 ON ISLAM'S WORD**, and the merge is part
+of the record. **`main` HAD MOVED FOUR COMMITS AND HAD TAKEN THREE OF THIS
+BRANCH'S NUMBERS** — its own §380 is *ONE BLANK TEMPLATE PER WAY OF PLANNING*
+(spec 059), a different feature by another session, with §380.2 and §380.3
+beside it. So this round is **renumbered §380 → §381 BEFORE the merge**, which
+is the only moment a renumber is provably scoped to the branch's own lines
+(§264.3): **the merge base holds §380 in no spelling at all**, measured, so
+every occurrence in the tree was one this branch wrote and there was nothing of
+main's to sweep up. **THREE SPELLINGS, AND THE THIRD IS THE ONE §340.2
+RECORDS** — `§380`, `&sect;380` and the JS-escaped `§380`, which was
+present in `builder.js`: a two-spelling sweep would have left it naming
+somebody else's section, reading perfectly. 23 citations moved, every file's
+count **asserted against the count measured beforehand** (§344.1), and of 22
+changed lines not one carries anything but a citation.
+
+**`--ff-only` REFUSED IT, WHICH IS WHAT IT IS FOR** (§4), so main was merged
+INTO the branch and resolved here. **FOUR CONFLICTS, A NAMED RULE EACH**: the
+two record files **COMBINED, never picked** (§318.7 — either side taken whole
+drops the other's round, with nothing able to go red, since there is no
+`generated-in-step` for prose), with **every `## ` heading from each side
+asserted present in the result, 0 lost from ours and 0 from theirs**; the built
+file **REBUILT from the merged sources, never merged** (§91); and `sw.js`
+**rebuilt from main's copy with this branch's one line re-applied** (§146.2).
+
+**AND `sw.js` IS §94.12 EXACTLY, THE SECOND HALF OF IT**: both sides
+independently wrote `smp-shell-v5.24-*`, differing only after the number — so
+git **conflicted** here, where the *same* string on both sides would have
+merged silently with different bytes behind it and a returning browser would
+have gone on serving itself the old shell. Resolved **past both** to
+`v5.25-function-builder`, proved unheld by any commit on any ref, one `const
+SHELL` declaration, `node --check` clean. It reaches the OFFLINE copy alone and
+that is said rather than assumed: §316.10's generator drops the caching half
+where the name lives, so the served worker is byte-identical either side
+(4,104 bytes, measured).
+
+**BOTH GREPS A MERGE OWES, ON THE MERGED RESULT.** The names this branch
+deleted (§313.37): `capsOfFunction` survives once and it is **a comment
+explaining the removal**, which is §377's own recorded shape. And the duplicate
+top-level declaration scan over **build.py's own concatenation** (§56.7,
+§281) — **27 files, 3,200,630 bytes, 1,518 names, 6 duplicated, and the six are
+exactly the ones §281.1 deliberately leaves** — so the merge introduced none;
+the scan asserts it found the files before it believes the answer (§54.5: a
+scan of nothing finds nothing).
+
+**AND THE ONE FILE BOTH SIDES CHANGED COMPOSED RATHER THAN COLLIDED**: main's
+§380 added the pen's own `action` minting to the `[data-rowadd]` handler and
+§381.2 added the builder's routing of the same press, and the merged handler
+consults the **builder's form first** and falls through to the pen — which is
+what that branch was written to do, and was read rather than assumed. Every
+file only main changed is asserted **byte-identical to main's copy**.
+
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (§365): plan-builder all
+green, **objectives-actions 52/0** (main's own, five assertions longer than
+this branch last saw it), import-page green, **template-round-trip all passed**
+(main changed `xlsx.js`, so it is the one that had to run), functional-projects
+45/0, fn-pillars, fn-ko-edit, capability-entry 43/0 and capability-remove all
+green; the authoriser and the change list unmoved; full `qa.py` sweep **ERRORS
+none**; `built-in-step` all good and `generated-in-step` all clear.
+
+**NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED**
+(spec 029): **neither side** puts one `api/`, `lib/` or `db/` file in the range,
+so nothing about how a save is judged moves, nothing stored moves and nothing
+is migrated.

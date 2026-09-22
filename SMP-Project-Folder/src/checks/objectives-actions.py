@@ -398,6 +398,79 @@ def main():
            bool(prog) and prog.get("status") == "wip" and prog.get("pct") == 40
            and prog.get("note") == "Two cohorts held", prog)
 
+        print("\n§8b the DOOR resolves the name the dropdown offers (§380)")
+        # THE GAP THAT HID A LIVE DEFECT. §8 above asserts the function is
+        # OFFERED in the file's own B2 dropdown and then calls
+        # `capPlanFromWorkbook` DIRECTLY — so the upload's own resolution, which
+        # is what a person actually meets, had never once been asked about this
+        # format. It refused: that predicate matched a function with
+        # `fnOwnsProjects`, which §342 makes false here, so the template offered
+        # a name and the upload answered "no business unit, supporting function
+        # or capability called …". A plan that downloads and cannot come back
+        # (§22, §61), and §53.5 exactly — one question with two answers.
+        #
+        # DRIVEN THROUGH THE REAL CONTROL (§96, §70): the blank template is
+        # built by the button's own builder, the subject is picked from the
+        # file's own dropdown, the bytes are written to disk and handed to the
+        # page's file input. Reading the door's predicate would assert it
+        # against itself (§113.8).
+        # THE BYTES GO STRAIGHT TO THE INPUT, never through a file on disk:
+        # `qa-run.py` refuses to sweep a file that mentions `design-mockups`
+        # AND writes (§334.14), and this file's own docstring names the mockup
+        # it was built from — so writing a temp .xlsx here would take the whole
+        # check out of every sweep. Spelling the write differently would be
+        # dodging a guard rather than satisfying it; not writing is neither.
+        import base64
+        b64 = ev(pg, """(k)=>{
+          var wb = capPlanWorkbook(blankCapShape(), { fmt:"objectives", only:true });
+          var list = wb[0].validations[0].list || [];
+          if (list.indexOf(FUNCTIONS[k].name) < 0) return { picked:null, list:list };
+          wb[0].rows[1][1] = FUNCTIONS[k].name;        /* chosen from its own list */
+          wb[1].rows = [["Time to hire", "\\u2264", "30", "d", "60", "Latest", ""]];
+          wb[2].rows = [["Sign the framework agreement", "Hala Nabil", "Jul 2026", ""]];
+          var u8 = buildXlsx(wb), s = "";
+          for (var i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+          return { picked: FUNCTIONS[k].name, list:list, b64: btoa(s) };
+        }""", {}, FK)
+        ck("the blank objectives template offers this function",
+           bool(b64.get("picked")), b64.get("list"))
+        if b64.get("b64"):
+            ev(pg, "()=>{ current='setup'; currentSub='import'; CURSEC.import='up'; paint(); }")
+            pg.wait_for_timeout(420)
+            try:
+                pg.set_input_files("#imp-file-plan", {
+                    "name": "objectives-plan.xlsx",
+                    "mimeType": "application/vnd.openxmlformats-officedocument."
+                                "spreadsheetml.sheet",
+                    "buffer": base64.b64decode(b64["b64"]) })
+                pg.wait_for_timeout(1200)
+            except Exception as e:
+                ck("the upload control is there", False, e)
+            door = ev(pg, """()=>({
+              problems: ((IMP.check && IMP.check.problems) || []).map(function(x){ return x.msg; }),
+              target: IMP.unit || "", read: !!IMP.summary
+            })""", {})
+            ck("the upload resolves it rather than refusing by name",
+               not any("no business unit" in (m or "") for m in (door.get("problems") or [])),
+               door.get("problems"))
+            ck("…and it resolves to that function, never to a capability",
+               door.get("target") == "fn:" + FK, door.get("target"))
+            ck("…and the file was read", door.get("read") is True, door)
+            # BOTH ENDS (§94.2): the door must still refuse a name nobody holds,
+            # or "it resolved" is true of a build that resolves anything.
+            bogus = ev(pg, """()=>{
+              var picked = "Nobody At All";
+              var uk = UNIT_KEYS.filter(function(x){ return UNITS[x].name === picked; })[0];
+              var fk = uk ? null : FUNCTION_KEYS.filter(function(x){
+                var f = FUNCTIONS[x];
+                return f.active !== false && fnPlansInPillars(f) && f.name === picked; })[0];
+              var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
+              var pfk = projectSubjectFns().filter(function(x){
+                return FUNCTIONS[x].name === picked; })[0];
+              return !!(uk || fk || pfk || caps.length);
+            }""", None)
+            ck("…and a name nobody holds is still refused", bogus is False, bogus)
+
         print("\n§9 the deck says what it holds")
         deck = ev(pg, """(k)=>{
           var d = document.createElement('div'); d.innerHTML = deckHtmlFor("fn:" + k);

@@ -8918,13 +8918,23 @@
     var cs = document.getElementById("imp-cycle");
     if (cs) cs.addEventListener("change", function(){ IMP.cycle = cs.value; impCounts(); });
 
-    /* THE BLANK TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
-       an empty shape rather than a chosen subject's content, with the subject
-       named on the Read me sheet. */
+    /* THE BLANK TEMPLATE IS GENERIC, IN ALL THREE FORMATS (§22, §61, §380):
+       built against an empty shape rather than a chosen subject's content,
+       with the subject named on the Read me sheet.
+
+       `only:true` is what drops the sheets the format does not use, and it is
+       passed HERE and nowhere else: a subject downloading its own plan keeps
+       all seven (§342's decision, not reversed). The two project formats share
+       one builder, because they are one model with one sheet's difference —
+       which is also why the drop-list lives with the builder rather than being
+       spelt out at these two call sites (§53.5). */
     document.querySelectorAll("[data-dlblank]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (this.dataset.dlblank === "projects")
-          sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - projects plan template.xlsx");
+        var k = this.dataset.dlblank;
+        if (k === "projects" || k === "objectives")
+          sendXlsx(capPlanWorkbook(blankCapShape(), { fmt:k, only:true }),
+                   k === "objectives" ? "SMP - objectives and actions plan template.xlsx"
+                                      : "SMP - projects plan template.xlsx");
         else
           sendXlsx(planWorkbook(blankUnitShape()), "SMP - pillars plan template.xlsx");
       });
@@ -9097,11 +9107,24 @@
                  searched BESIDE the capabilities rather than before them, so a name
                  on both is caught by the refusal below instead of being resolved by
                  whichever list was looked at first (§51.19's silent wrong-plan). */
+              /* §380: AND IT ASKS THE LIST'S OWN QUESTION RATHER THAN A COPY
+                 OF IT. This predicate was written out here and asked
+                 `fnOwnsProjects`, which §342 makes FALSE for a function that
+                 plans in objectives and actions — so the template offered such
+                 a function in B2 and the upload answered "no business unit,
+                 supporting function or capability called …". Measured on the
+                 shipped build: offered true, resolves false. A plan that
+                 downloads and cannot come back (§22), and §53.5 exactly — two
+                 answers to one question, drifting the moment one gained a
+                 format the other had not heard of.
+
+                 `projectSubjectFns()` is asked with NO format, because by now
+                 the file exists and the only question left is whose name this
+                 is; narrowing is the blank template's job, where somebody is
+                 still choosing. */
               var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
-              var pfk = FUNCTION_KEYS.filter(function(k){
-                var f = FUNCTIONS[k];
-                return f && f.active !== false && !fnPlansInPillars(f) &&
-                       f.name === picked && fnOwnsProjects(k);
+              var pfk = projectSubjectFns().filter(function(k){
+                return FUNCTIONS[k].name === picked;
               })[0];
               if (!uk && !fk && pfk && caps.length) {
                 impFail('"' + esc(picked) + '" is both a supporting function and a ' +

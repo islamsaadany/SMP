@@ -68,6 +68,11 @@
        padding:11px 14px;margin:12px 0 0;font-size:var(--fs-note)}
   .ask b{display:block;font-size:var(--fs-label);letter-spacing:var(--track);text-transform:uppercase;
          color:var(--gold-deep);margin:0 0 4px}
+  .ask.done{border-left-color:var(--good);background:var(--good-bg)}
+  .ask.done b{color:var(--good-tx)}
+  .ask.done i{color:var(--good-tx);font-weight:600;font-style:normal}
+  .ask.flag{border-left-color:var(--attn);background:var(--attn-bg)}
+  .ask.flag b{color:var(--attn-tx)}
   .screenlab{font-size:var(--fs-label);letter-spacing:var(--track);text-transform:uppercase;
              font-weight:800;color:var(--ink-3);margin:34px 0 10px;display:flex;align-items:baseline;gap:10px}
   .screenlab span{font-weight:400;letter-spacing:0;text-transform:none;font-size:var(--fs-note);color:var(--ink-3)}
@@ -156,6 +161,9 @@
   .linked{color:var(--gold-deep);text-decoration:underline;text-underline-offset:2px;font-weight:600}
   .assume{color:var(--ink-3);font-style:italic}
   .missing{color:var(--bad);font-style:italic;font-size:12.5px}
+  /* NOT RED (decision 2). Red on a value means "this is holding something up"
+     everywhere else in the platform, and this holds nothing up. */
+  .notyet{color:var(--ink-3);font-style:italic;font-size:12.5px}
   .pct{font-size:var(--fs-micro);color:var(--ink-3);display:block;margin-top:1px}
   .good{color:var(--good-tx);font-weight:600}
   .badv{color:var(--bad-tx);font-weight:600}
@@ -175,10 +183,11 @@
 
   <div class="mk">
     <p class="kick">Mockup · not built · 22 September 2026</p>
-    <h1>Revenue drivers — the screens, for your sign-off</h1>
-    <p>Three screens, drawn before anything is built. The arithmetic behind them
-       <b>is</b> built and is proved against your own tool, so every figure on this page is
-       a real number out of your five-channel tree — nothing is typed in to look plausible.</p>
+    <h1>Revenue drivers — the screens, as you settled them</h1>
+    <p>Three screens, drawn before anything is built, and <b>redrawn on your five answers of
+       22 September</b>. The arithmetic behind them <b>is</b> built and is proved against your own
+       tool, so every figure on this page is a real number out of your five-channel tree —
+       nothing is typed in to look plausible.</p>
     <ul>
       <li><b>Real</b> — every baseline, uplift, month count and total, and the whole growth split.</li>
       <li><b>Invented, and marked where it appears</b> — the <i>actual</i> figures on screen 3
@@ -198,15 +207,12 @@
   <div class="screenlab">Screen 1 <span>— where the tree lives, on a business unit that sells one way</span></div>
 
   <div class="mk">
-    <div class="ask">
-      <b>Decision 1 · where it sits</b>
-      I am recommending <b>a section inside Strategy</b>, between SWOT and Plan — so a unit reads
-      <i>who we are → where we stand → where the number comes from → what we will do about it</i>.
-      It costs nothing: it uses the same permission the Plan already uses, so nobody's access changes
-      and no new column appears on Roles &amp; access.<br><br>
-      The alternative is a tab of its own beside Strategy, Performance and Reporting. That is more
-      obvious to find, and it makes a five-tab row where there are four today, and it separates
-      the tree from the plan it exists to justify. <b>Say which you want.</b>
+    <div class="ask done">
+      <b>Decision 1 · where it sits — settled</b>
+      <i>"it's a tab beside the swot ok."</i> So it sits in Strategy's own row, between SWOT and
+      Plan, and a unit reads <i>who we are → where we stand → where the number comes from →
+      what we will do about it</i>. It uses the same permission the Plan already uses, so
+      nobody's access changes and no new column appears on Roles &amp; access.
     </div>
   </div>
 
@@ -402,7 +408,7 @@
               <td class="num">—</td>
               <td class="num">—</td>
               <td class="num">70%</td>
-              <td><span class="missing">Nobody has said yet</span></td>
+              <td><span class="notyet">Nobody has said yet</span></td>
             </tr>
           </tbody>
         </table>
@@ -430,14 +436,17 @@
       <li><b>Three states in the last column</b>, and the difference matters at review time:
           <span class="linked">connected</span> to something somebody is working on,
           <span class="assume">an assumption</span> that moves for a reason nobody is scored on, and
-          <span class="missing">nobody has said yet</span> — which is the only one the page complains about.</li>
+          <span class="notyet">nobody has said yet</span> — outstanding, findable, and holding
+          nothing up.</li>
     </ul>
-    <div class="ask">
-      <b>Decision 2 · the last column</b>
-      An assumption row and an unanswered row look different on purpose. Do you want the page to
-      <b>hold the plan back</b> until every row is either connected or deliberately marked as an
-      assumption — the way it already holds a report back when a figure is missing — or just
-      say so quietly and let you get on?
+    <div class="ask done">
+      <b>Decision 2 · an unanswered row — settled</b>
+      <i>"just say so."</i> Nothing is held back.<br><br>
+      <b>Which changed the colour, and that is worth a line.</b> I had drawn <i>Nobody has said
+      yet</i> in red. Red on a value means <i>this is holding something up</i> everywhere else in
+      this platform — a missing figure, a gap that shuts Submit — so a red word over something that
+      holds nothing up teaches people to stop reading the red. It is the platform's quiet grey now:
+      still plainly outstanding, still findable, and stopping nobody.
     </div>
   </div>
 
@@ -689,13 +698,17 @@
       <button>Reporting</button>
       <button>Insights</button>
     </div>
+    <div class="secrow">
+      <button>Strategy</button>
+      <button class="on">Revenue drivers<span class="new">NEW</span></button>
+    </div>
     <div class="body">
 
       <div class="strip">
         <div class="stile">
           <div class="k">Strategy performance</div>
           <div class="v" style="color:var(--good-tx)">94%</div>
-          <div class="s">we did what we said we would do</div>
+          <div class="s">we did what we said we would do · in the Strategy section</div>
         </div>
         <div class="stile lead">
           <div class="k">Revenue performance</div>
@@ -810,33 +823,49 @@
   </div>
 
   <div class="mk">
-    <div class="ask">
-      <b>Decision 3 · where this reading lives</b>
-      I have drawn it on <b>Performance</b>, beside the strategy score, because the whole point is
-      reading the two side by side. It could instead be a fourth section under Drivers.
-      <b>Which?</b>
+    <div class="ask done">
+      <b>Decision 3 · where this reading lives — settled</b>
+      <i>"the perfomance shall split to strategy and revenue driver."</i> So Performance gains two
+      sections, and this is the second of them.<br><br>
+      <b>Each section still carries both numbers</b>, which is the one thing the split must not cost:
+      the whole value is reading them beside each other, so the headline strip shows 94% and 90%
+      whichever section you are standing in, and the section row is how you cross.
     </div>
-    <div class="ask">
-      <b>Decision 4 · how much of a driver's actual gets typed</b>
-      You said the office types an unconnected row's actual, for now. On this screen that is
-      <b>five of the seven rows</b> per period. The connected ones read themselves from the measure.
-      Is that the right split to start with, or should the office type all of them and the
-      connection only be used for reading, not for filling?
+    <div class="ask done">
+      <b>Decision 4 · who types a driver's actual — settled</b>
+      <i>"what do oyu mean? they are all typed."</i> Every driver's actual is typed by the office.
+      <b>That corrects me, not you</b> — you only ever answered about the unconnected rows, and I
+      wrote down that a connected row would read itself from the measure. It was my inference and
+      it was wrong twice over: a measure and the driver beside it are usually different
+      quantities anyway, which is exactly why this screen can say <i>the measure reported 96% and
+      still cost 10.4M</i>.<br><br>
+      <b>So the connection does no filling at all — it is only for reading.</b> One cost, named
+      rather than found later: where a measure's target genuinely IS a driver's Year 1 figure, the
+      same number gets typed in two places and the two can drift.
     </div>
-    <div class="ask">
-      <b>Decision 5 · the seasons page</b>
-      Seasons are defined once for the whole client — a name and two dates — and used by name in any
-      unit. I have not drawn it because it is four fields and a list. It goes in Setup,
-      beside the reporting cycle. <b>Any objection?</b>
+    <div class="ask done">
+      <b>Decision 5 · the seasons page — settled</b>
+      <i>"ok."</i> Defined once for the client, a name and two dates, in Setup beside the reporting
+      cycle. Change Ramadan's dates once and every base period in the client moves with it.
+    </div>
+    <div class="ask flag">
+      <b>One thing to say, not a question</b>
+      A section called <b>Strategy</b> under Performance sits one row below a tab called
+      <b>Strategy</b>. Two levels, one word — the tab is what we plan, the section is how it went.
+      I have used your words. If it reads oddly on the screen, <b>Delivery</b> is the alternative
+      and it is one word to change.
     </div>
   </div>
 
   <div class="mk">
     <p class="kick">What happens next</p>
-    <p>Nothing on these screens is built. The arithmetic is, and it is checked against your tool
-       on all five channels — every period, every roll-up and the growth split, 59 checks with
-       nothing typed in by hand. Once you have answered the five questions above I build the screens
-       and nothing else changes in the platform.</p>
+    <p>All five are settled, so these screens are what gets built. The arithmetic already is, and
+       it is checked against your own tool on all five channels — every period, every roll-up and
+       the growth split, 59 checks with nothing typed in by hand.</p>
+    <p><b>What is still open is not about the screens.</b> The tree is copied forward each cycle
+       and the new baseline is last year's achievement, typed — so the store has to hold more than
+       one year without the copy becoming a second source of the truth. That is the next thing I
+       work out, and it changes nothing you have seen here.</p>
   </div>
 
 </div>

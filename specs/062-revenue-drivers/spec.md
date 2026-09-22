@@ -4,8 +4,8 @@
 page (`reference/alignment-note-2026-09-21.md`), and answered question by
 question on 2026-09-22.
 
-**Status:** the arithmetic is built and proved against his own tool. No screen
-is built and none is drawn. Rule 1c is owed on every screen in §6.
+**Status:** the arithmetic is built and proved against his own tool. The
+screens are **drawn and signed off** (§6) — nothing visual is built yet.
 
 **Reference, and this time it is in the repository:** his working tool,
 `reference/revenue-driver-tree-tool-v12.html`, kept here unchanged. Every
@@ -42,6 +42,18 @@ Islam's, 2026-09-22, in his own words where the words decide something.
 | 3 | The revenue target | **"tree is the main source."** The typed revenue target goes away; the tree is where the number comes from. §4.2. |
 | 4 | A new cycle | **"it's copied to add new numbers."** The tree is copied forward and new numbers go into the copy. Not archived-and-rebuilt. §4.4. |
 | 5 | Who builds it | **"the smo build the trees."** |
+
+And five more on 2026-09-22, against the drawn screens
+(`design-mockups/revenue-drivers/2026-09-22_the-drivers-tab.html`, published as
+an artifact — rule 1c):
+
+| # | Question | Answer |
+|---|---|---|
+| 6 | Where the tree sits | **"it's a tab beside the swot ok."** Strategy's own section row, between SWOT and Plan. §6.1 |
+| 7 | An unanswered connection | **"just say so."** Nothing is held back — which changed the colour. §6.2 |
+| 8 | The review reading | **"the perfomance shall split to strategy and revenue driver."** §6.3 |
+| 9 | Who types a driver's actual | **"what do oyu mean? they are all typed."** Corrects §4.5. §6.4 |
+| 10 | The seasons page | **"ok."** In Setup, beside the reporting cycle. |
 
 ### 2.1 · One thing changed from the note, and it is worth saying
 
@@ -199,12 +211,34 @@ It is **typed**, not derived, which is the same answer as §4.5.
 
 | | |
 |---|---|
-| **The baseline** | the office, by hand (answer 3: *"typed by office"*) |
-| **A connected row's actual** | read from the measure or key objective it connects to — nothing is entered twice |
-| **An unconnected row's actual** | the office (answer 2: *"the smo for now"*) |
+| **The baseline** | the office, by hand (*"typed by office"*) |
+| **Every driver's actual** | the office, by hand (answer 9: *"they are all typed"*) |
+
+**THE MIDDLE ROW WAS MINE AND IT WAS WRONG** (§4.5a). This table first read
+*"a connected row's actual is read from the measure it connects to — nothing is
+entered twice"*, and he never said that: he answered only about the
+**unconnected** rows (*"the smo for now"*) and I filled the other line in by
+inference. Asked directly, answer 9 is *"what do oyu mean? they are all
+typed."*
+
+And the inference was wrong on the arithmetic as well as on the authority: **a
+measure and the driver beside it are usually different quantities.** A measure
+reads *the work to lift conversion was 96% delivered* while the driver beside
+it reads *4,100 transactions a month against 4,500 assumed* — which is the
+whole of what the review screen exists to show (§6.3), and it cannot be shown
+by a build that copies one into the other.
+
+**SO THE CONNECTION DOES NO FILLING AT ALL — IT IS ONLY FOR READING.** That
+makes the build smaller and leaves §4.3's storage finding untouched: the
+pointer still has to survive the positional renumbering, so it still rides on
+the objective.
+
+**One cost, named rather than discovered:** where a measure's target genuinely
+IS a driver's Year 1 figure, the same number is typed in two places and the two
+can drift. Nothing here forecloses reading one from the other later.
 
 **"For now" is recorded as his**, not smoothed away: the natural next step is
-the unit entering its own assumption figures, and nothing here forecloses it.
+the unit entering its own assumption figures.
 
 **AND THE PLATFORM COULD OFTEN FILL THE BASELINE AND WILL NOT.** Where a row
 connects to a measure, last year's actual is already in the closed cycle, so
@@ -231,18 +265,91 @@ in the navigation, and no frozen file is touched.
 
 ---
 
-## 6 · What is not built, and needs drawing first
+## 6 · The screens, drawn and signed off
 
-Rule 1c is owed on all of it.
+Rule 1c paid: `design-mockups/revenue-drivers/2026-09-22_the-drivers-tab.html`,
+published as an artifact and answered point by point.
 
-1. **The drivers tab** on a business unit — the periods, the driver table, the
-   why column.
-2. **The seasons page** — defined once per client.
-3. **The roll-up** on the group and a company.
-4. **The review reading** — headline first, then the deviation and the rows that
-   caused it.
-5. **The connection control** — a row asking which objective or measure it
-   belongs to, and saying when it is not connected yet.
+**Every planned figure on it is real** — run out of his own tool through the
+port, never typed to look plausible: Retail 125.02M → 153.83M with its bridge
+(volume 0.91M · price 12.50M · interaction 0.09M · new business 15.31M),
+E-commerce 13.48M → 34.83M and its three routes. **The ACTUAL column on the
+review screen is invented and says so on the page** — nobody has reported
+against a tree yet — but it goes through the same arithmetic, so the per-driver
+effects add to the period gaps and the period gaps add to the channel's
+−15.38M.
+
+**AND WHAT COULD NOT BE CHECKED IS ON THE PAGE RATHER THAN LEFT TO BE
+DISCOVERED** (§124): python playwright is not installed in this session, so
+this is **not** a mockup driven out of the running platform the §41.9 way. The
+palette, the type scale, the radii, the navy band, the zebra and the table
+rules are lifted from `platform.css`; the pixel fit of a long table at a narrow
+window is unproved until it is built.
+
+### 6.1 Where the tree sits
+
+**A section in Strategy's own row, between SWOT and Plan** (answer 6). A unit
+reads *who we are → where we stand → where the number comes from → what we will
+do about it*.
+
+It uses `u_plan`'s grant, so **nobody's access moves and no column appears on
+Roles & access** — which is the promise §2.1 made. A top-level tab was the
+alternative, and was refused with its cost stated: a five-tab row where there
+are four, and the tree separated from the plan it exists to justify.
+
+### 6.2 An unanswered connection says so and holds nothing back
+
+Answer 7: *"just say so."*
+
+**WHICH CHANGED THE COLOUR, AND THAT IS THE DECISION RATHER THAN A DETAIL.** It
+was drawn as the platform's red `Missing`, and red on a value means *this is
+holding something up* everywhere else here — a missing figure, a gap that shuts
+Submit. A red word over something that stops nobody teaches people to stop
+reading the red (§214.4's own fault, §41's budget). It takes §272's quiet grey:
+outstanding, findable, blocking nothing.
+
+So the last column has three states and the difference is what the review turns
+on: **connected** to work somebody is doing, an **assumption** that moves for a
+reason nobody is scored on (§343's indicator column, the absence of a direction
+being the signal), and **nobody has said yet**.
+
+### 6.3 Performance splits in two
+
+Answer 8: *"the perfomance shall split to strategy and revenue driver."* Two
+sections — **Strategy** and **Revenue drivers**.
+
+**EACH SECTION CARRIES BOTH HEADLINE NUMBERS**, which is the one thing the
+split must not cost: §1's whole argument is that the two readings are worth
+reading beside each other, so 94% and 90% show whichever section you stand in
+and the section row is how you cross.
+
+**§63 IS NOT REVERSED AND IT IS WORTH SAYING WHY.** That section removed a
+Reporting *section* from inside Performance on Islam's own point that
+*"performance is a result of reporting, so having inside performance 2 buttons
+performance and reporting doesn't make sense"* — two siblings repeating the
+tab's own word. These two are different readings, and neither repeats the tab.
+
+**FLAGGED, NOT DECIDED** (rule 1b): a section called **Strategy** under
+Performance sits one row below a **tab** called Strategy — two levels, one word
+(§87's twins). His words are used. *Delivery* is the alternative and is one
+word to change.
+
+### 6.4 The connection reads; it does not fill
+
+Answer 9, and §4.5a. Every driver's actual is typed by the office; the
+connection exists so the review can say which work a moved driver belonged to.
+
+### 6.5 The seasons page
+
+Answer 10: *"ok."* In Setup beside the reporting cycle — a name and two dates,
+defined once for the client, used by name in any unit. Change Ramadan's dates
+once and every base period in the client moves with it.
+
+### 6.6 What the mockup does not draw
+
+**The roll-up on the group and a company.** §4.1 says a channel is a unit and
+the Master roll-up is what those pages already are, so there is nothing new to
+draw until the unit-level screens exist to roll up.
 
 ---
 
@@ -252,8 +359,10 @@ All three of the questions this page opened with were answered on 2026-09-22
 and are recorded in §4.4 and §4.5. What is left is not a question about the
 model:
 
-1. **Rule 1c on all five screens in §6.** Nothing visual may be built until
-   each is drawn and signed off.
-2. **Where the baseline figures live**, which follows the screens rather than
-   leading them — the tree is per cycle and copied forward, so the store has
-   to hold more than one year without the copy being a second source (§4.4).
+1. **Where the baseline figures live.** The tree is per cycle and copied
+   forward (§4.4) and the new baseline is last year's ACHIEVEMENT, typed — so
+   the store has to hold more than one year without the copy becoming a second
+   source of the truth. This follows the screens rather than leading them, and
+   it is the next thing to settle.
+2. **The section's name under Performance** (§6.3's flag), which is one word
+   and is Islam's whenever he looks at it on a screen.

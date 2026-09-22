@@ -136,13 +136,34 @@ var LIBRARY = (function(){
   function load(force){
     if (!shown()) return;
     var cat = category();
-    var key = JSON.stringify([cat, Q]);
+    /* WHO IT WAS ASKED FOR IS PART OF THE ASK (§381). `loadedFor` is what
+       stops a slow answer overwriting a newer one, so a viewer switch has to
+       be in it: the pane is re-rendered on every paint and asks again, and
+       without the person in the key the older request could still land last
+       and put somebody else's reports back. */
+    var who = (typeof SYNC !== "undefined" && SYNC.actingAs) ? SYNC.actingAs() : null;
+    var key = JSON.stringify([cat, Q, who]);
     if (!force && key === loadedFor) return;
     loadedFor = key; loading = true; failed = false; draw();
     if (!live()) { loading = false; failed = true; draw(); return; }
     var qs = [];
     if (cat) qs.push("category=" + encodeURIComponent(cat));
     if (Q) qs.push("q=" + encodeURIComponent(Q));
+    /* ── VIEWING AS SOMEBODY ASKS FOR THEIR REPORTS (§381) ──────────
+       Islam: *"karim from mobile is seeing the report while the report is
+       made only for the retail and online team."* He was right, and it was
+       this request: the server resolved who is asking from the SIGN-IN, so
+       the office's own seat answered — and the office reads every report
+       (spec 046 §4.10), whoever the switcher was set to. §185's fault on a
+       read path, and the reason it matters is that view-as is the mirror the
+       office CHECKS a narrowing in: it reported a rule that works as broken.
+
+       `SYNC.actingAs()` is the save's own answer, asked rather than copied
+       (§42) — null unless the switcher is genuinely showing somebody else
+       — and it is read at the moment of the REQUEST rather than kept, so a
+       switch made between two searches asks for the right person. The server
+       narrows with it and can only ever narrow (lib/view-as.ts). */
+    if (who) qs.push("viewAs=" + encodeURIComponent(who));
     var url = "/" + slug() + "/insights/list" + (qs.length ? "?" + qs.join("&") : "");
     fetch(url, { cache:"no-store", credentials:"same-origin" })
       .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }); })

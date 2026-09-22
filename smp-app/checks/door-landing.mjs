@@ -827,6 +827,30 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     const ownerBtn = page.locator('[data-mac^="owner|a_insights|"]');
     if (await ownerBtn.count()) { await ownerBtn.click(); await page.waitForTimeout(2500); }
     else fail("pressing the BU owner's eye", "no such button to press");
+    /* AND EVERY OTHER ROW THIS PERSON HOLDS \u2014 ASKED, NEVER TYPED
+       (\u00a7218, \u00a7214.3, \u00a7255). Shutting one role is not shutting a
+       person: access is the MOST GENEROUS grant across the roles they hold
+       (\u00a733), and the matrix has a row per role precisely so two can
+       differ. \u00a7382 made a tactic's owner a role, so the Mobile head derives
+       `towner@mobile` as well as `owner@mobile` and the door below went on
+       serving them Insights with the BU owner's cell plainly shut \u2014 the
+       fixture had stopped making the state its own assertions are about,
+       which is a check reporting a correct build broken.
+
+       THE ROLES COME FROM THE PRODUCT'S OWN RULE (personRoles, the one both
+       sides ask \u2014 \u00a742), so the row derived by the NEXT thing somebody is
+       named on is shut here the day it is added rather than being a second
+       list to remember. */
+    const heldRows = await page.evaluate(() =>
+      Array.from(new Set(personRoles(personBy("mobhead")).map((r) => r.role))));
+    check(heldRows.length >= 2 && heldRows.includes("owner"),
+          "\u2026and the Mobile head holds more than the one row, so shutting one is not shutting them (\u00a733, \u00a7382)", JSON.stringify(heldRows));
+    for (const role of heldRows) {
+      if (role === "owner") continue;
+      const b2 = page.locator('[data-mac^="' + role + '|a_insights|"]');
+      if (await b2.count()) { await b2.click(); await page.waitForTimeout(2000); }
+      else fail("pressing the " + role + " row's eye", "no such button to press");
+    }
     r = await readAccessPage();
     let acc = await storedAccess();
     check(!!r.owner && !r.owner.on && r.owner.off, "pressing the lit eye turns the cell off — nothing lit IS the answer", JSON.stringify(r.owner));
@@ -907,6 +931,16 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     await signIn(page, "office@forefront.example", "Raya-2026!");
     await page.waitForURL(BASE + "/platform");
     await goSetup("/raya-trade/insights/setup/access");
+    /* THE OTHER ROWS COME BACK FIRST, so the assertion below reads the whole
+       map restored rather than one row of it: `canon(acc) === canon(accBefore)`
+       is what says never-set and set-then-cleared are the same bytes, and it
+       is about every row this section touched (\u00a794.2, \u00a750.6). */
+    for (const role of heldRows) {
+      if (role === "owner") continue;
+      const b3 = page.locator('[data-mac^="' + role + '|a_insights|"]');
+      if (await b3.count()) { await b3.click(); await page.waitForTimeout(2000); }
+      else fail("opening the " + role + " row's eye again", "no such button to press");
+    }
     /* a NEW locator: the earlier one was bound to a page since closed, and a
        locator on a closed page throws rather than reporting (§215) */
     const ownerBtn2 = page.locator('[data-mac^="owner|a_insights|"]');

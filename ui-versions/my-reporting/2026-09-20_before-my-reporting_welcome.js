@@ -135,7 +135,6 @@ var WELCOME = (function(){
          in the PRODUCT rather than in a check: a control changed shape and a
          selector somewhere else went on failing silently, in the
          safe-looking direction. Caught by checks/welcome.py. */
-      if (tab === "mylines") press('#subtabs [data-s="mylines"]');
       if (report) press('#subtabs [data-s="report"]');
       window.scrollTo(0, 0);
     }, 0);
@@ -221,42 +220,6 @@ var WELCOME = (function(){
     return rows;
   }
 
-  /* ── THE LINES THAT ARE YOURS (§380, spec 062) ────────────────────────
-     Islam's ninth decision: somebody whose only job this cycle is a handful
-     of tactic figures should be told so on the screen they land on, like
-     everybody else with something outstanding.
-
-     ONE ROW, NOT ONE PER UNIT, because the tab is ONE page — `myLinesHome()`
-     puts it on the person's own place and the units they own lines in are
-     bands on it (Islam: *"no units appear in navigation"*). A row per unit
-     would send them to the same page three times.
-
-     WHAT IS COUNTED IS WHAT THE PRODUCT WOULD LET THEM TYPE, asked of
-     `canEnterFigure()` itself rather than re-derived here (§53.5): the switch
-     being off, a closed cycle, a locked cycle and their own saved draft all
-     answer through that one gate, so a subject they have already parked stops
-     being "waiting on you" without this row knowing what a draft is.
-
-     IT SIMULATES HONESTLY, unlike the reply row above it: these lines are a
-     fact about the PLAN and `myLineRows()` reads the viewer, so looking as
-     somebody else shows THEIR lines rather than yours (§179's own test). */
-  function lineRows(){
-    var owed = 0;
-    try {
-      if (typeof myLineRows !== "function") return [];
-      myLineRows().forEach(function(r){
-        if (lineAnswered(r)) return;
-        if (!canEnterFigure(r.target, r, "mine")) return;
-        owed++;
-      });
-    } catch(e){ return []; }
-    if (!owed) return [];
-    return [actRow("Enter the lines that are yours",
-      '<em class="walert">' + wesc(plural(owed, "line")) + "</em> still to report",
-      "Open my reporting", true,
-      function(){ goPlace(myLinesHome(), "mylines"); })];
-  }
-
   function replyRow(n){
     return actRow("The Strategy Office replied to you",
       wesc(n === 1 ? "1 unread reply" : n + " unread replies"),
@@ -339,14 +302,6 @@ var WELCOME = (function(){
       var row = rowFor(person), rs = rolesOf(row), targets = ownTargets(row, rs);
       n += submitRows(targets).length;
       n += gapRows(targets).length;
-      /* COUNTED EXACTLY WHERE IT IS DRAWN (§197.2). The office's list is the
-         Overview's own rows and never these, so counting them for the office
-         would turn the home mark gold over a screen with nothing on it to
-         clear — which is the fault that section exists to stop. They are not
-         shown the row because they do not need it: `canEnterLine()` lets the
-         office type a tactic's figure on the unit's own Reporting page, which
-         they already reach. */
-      if (!inOffice(rs)) n += lineRows().length;
       if (inOffice(rs)) {
         try { n += attentionRows().length; } catch(e){}
       }
@@ -546,7 +501,7 @@ var WELCOME = (function(){
 
     var list = box.querySelector(".wacts");
     var acts = office ? officeActs(list)
-                      : submitRows(targets).concat(gapRows(targets)).concat(lineRows());
+                      : submitRows(targets).concat(gapRows(targets));
     /* THE REPLY ROW IS THE SIGNED-IN PERSON'S AND CANNOT BE SIMULATED (§179).
        There is one conversation per person and it belongs to the SESSION, not
        to the view (§97) — so while viewing as somebody else `CHAT.unread()`

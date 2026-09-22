@@ -20,7 +20,8 @@
    — that module is gone (§363) and its block lives on here. */
 import { createRequire } from "node:module";
 import { withTenant } from "../../lib/tenant.ts";
-import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
+import { listItems, shape, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
+import { categoriesFor } from "../../lib/library-viewer.ts";
 import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { barFor } from "../../lib/branding.ts";
 
@@ -253,19 +254,40 @@ export async function insightsDocument(
     return here + (s ? "?" + s : "");
   };
 
-  /* THE CATEGORIES ARE NOT DRAWN OVER AN EMPTY LIBRARY. A row of filters that
-     can only ever return nothing is furniture (§94.15) — but they ARE drawn
-     when a filter is what emptied the list, or there would be no way back to
-     the reports (§61). */
-  const anyShelf = items.length > 0 || !!q || !!category;
+  /* A FILTER IS DRAWN ONLY WHERE THERE IS THAT TYPE OF REPORT (§383). Islam:
+     *"the filters of the reports should appear only if there is this type of
+     report."* It was the module's whole list, so a client with nothing
+     published met five filters that could only ever return nothing — §94.15's
+     furniture and §61's control with nothing behind it, on the first screen
+     they open.
+
+     THE SAME ANSWER THE TAB IS STAMPED WITH (lib/library-viewer.ts), never a
+     second reading of the same shelf: the two hosts draw this row from one
+     function, or one of them would eventually offer a category the other
+     refuses (§53.5).
+
+     IT ASKS THE LIBRARY AND NOT THE SEARCH, which is why it is not `items`:
+     the row says what has been published, so it is the same row whatever is
+     typed — a filter row that rearranged itself as you typed would be a worse
+     screen than the one this replaces.
+
+     THE ROW IS STILL DRAWN WHEN A FILTER IS WHAT EMPTIED THE LIST, or there
+     would be no way back to the reports (§61) — All is always in it. */
+  const present = await categoriesFor(tenantId, viewer);
+  const anyShelf = present.length > 0 || !!q || !!category;
   const cats = !anyShelf ? "" :
     '<nav class="cats" aria-label="Categories">' +
     ['<a href="' + esc(catHref("")) + '"' + (category ? "" : ' aria-current="true"') + ">All</a>"]
-      .concat(CATEGORIES.map((c) =>
+      .concat(present.map((c) =>
         '<a href="' + esc(catHref(c)) + '"' + (category === c ? ' aria-current="true"' : "") + ">" + esc(c) + "</a>"))
       .join("") + "</nav>";
 
-  const tools = !anyShelf ? "" :
+  /* THE SEARCH BOX KEEPS ITS OWN QUESTION, which is not the row's: it is
+     drawn where there is something to search, and the categories where there
+     is something to filter by. A library of five reports under no category at
+     all has a search box and no filters, and that is the honest pair. */
+  const anyReports = items.length > 0 || !!q || !!category;
+  const tools = !anyReports ? "" :
     '<div class="tools">' +
     '<form method="get" action="' + esc(here) + '" role="search">' +
     (category ? '<input type="hidden" name="category" value="' + esc(category) + '">' : "") +

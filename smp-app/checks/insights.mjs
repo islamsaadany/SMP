@@ -30,6 +30,7 @@
        spellings drifting.
 
      DATABASE_URL_UNPOOLED=postgres://owner@… node checks/insights.mjs
+     SMP_BREAK=all-categories     node checks/insights.mjs   # must go red
      SMP_BREAK=client-sees-drafts node checks/insights.mjs   # must go red
      SMP_BREAK=leak-file-path     node checks/insights.mjs   # must go red
      SMP_BREAK=version-always     node checks/insights.mjs   # must go red   */
@@ -41,7 +42,7 @@ import {
   CATEGORIES, KINDS, normalizeCategories, isCategory, isKind, safeFileName, looksLikePdf,
   filePath, sizeLabel, calendarDay, dayOut, oneLine, shape, shelfWhere,
   listItems, oneItem, draftOf, insertItem, updateItem, setFile, setState, deleteItem, countDownload,
-  normalizeSeen, seenOf, seenLabel, setSeen, SEEN_KEY,
+  normalizeSeen, seenOf, seenLabel, setSeen, SEEN_KEY, categoriesPresent,
 } from "../lib/library.ts";
 import { placesFor, placeOf, placeLabel } from "../lib/place.ts";
 
@@ -444,8 +445,21 @@ try {
     page.includes('href="/client-a/insights/' + draft.id + '/file"'), "the file link is wrong");
   check("the count says what is there",
     page.includes("2 reports"));
-  check("the categories are the navigation row",
-    CATEGORIES.every((c) => page.includes(">" + c + "</a>")));
+  /* §383, AND IT IS A REWRITE RATHER THAN A LOOSENING (§218, §214.3). This
+     asked for `CATEGORIES.every(...)` — every category the MODULE offers, on
+     every page — which was true only while the row was a fixed list, and went
+     red the day Islam's *"the filters should appear only if there is this
+     type of report"* was built. What survives the decision is the agreement:
+     the row offers what this library has and nothing it has not, asserted at
+     BOTH ENDS and with the shelf asserted non-empty first, or a page drawing
+     no filters at all satisfies the second half perfectly (§113.8). */
+  const shelfCats = [...new Set((await asTenant(a.id, (c) =>
+    listItems(c, { kind: "insights", forClient: true, viewer: ALL }))).flatMap((r) => r.categories || []))];
+  check("the row offers every category this library has, and none it has not",
+    shelfCats.length > 0 &&
+    shelfCats.every((c) => page.includes(">" + c + "</a>")) &&
+    CATEGORIES.filter((c) => !shelfCats.includes(c)).every((c) => !page.includes(">" + c + "</a>")),
+    "has: " + shelfCats.join(" · "));
   check("NOTHING ON IT CAN WRITE — no upload, no publish, no delete, no form but the search",
     !/type="file"/.test(page) && !/Publish|Withdraw|Delete|Upload/i.test(page) &&
     (page.match(/<form/g) || []).length === 1);
@@ -462,8 +476,15 @@ try {
   const filtered = await insightsDocument("client-a", a.id, "Client A", have, { q: "nothing like this" }, ALL);
   check("a search that matches nothing says so",
     filtered.includes("No reports match"));
+  /* REWRITTEN with the decision above (§218): it asked for one category by
+     name, which is a spelling where it meant a property. Two properties now,
+     and the second is §383's own rule — the row says what has been PUBLISHED,
+     so it is the same row whatever is typed, and a filter row that rearranged
+     itself as you searched would be a worse screen than the one that fault
+     replaced. */
   check("...and KEEPS the categories, or there is no way back to the reports (§61)",
-    filtered.includes(">Macro</a>"));
+    filtered.includes(">All</a>") && shelfCats.every((c) => filtered.includes(">" + c + "</a>")),
+    "the row does not survive a search that matches nothing");
 
   const emptyPage = await insightsDocument("client-b2", b.id, "Client B", have, {}, ALL);
   /* B's own report is still published, so the empty state is made rather than
@@ -613,6 +634,85 @@ try {
   const pgOffice = await insightsDocument("client-a", a.id, "Client A", have, {}, ALL);
   check("the office's page carries both",
     pgOffice.includes("FX Cost Exposure") && pgOffice.includes("Everyone Outlook"));
+
+section("§14 · which filters a person is offered (§383)");
+{
+  /* Islam: *"the filters of the reports should appear only if there is this
+     type of report."* Measured on a client with nothing published, the tab
+     drew All and all five categories, every one of which could only ever
+     return nothing.
+
+     THE STATE IS MADE, because the fixture above cannot show it (§255): every
+     published report in it is filed under Macro, so a build that ignored the
+     narrowing entirely would answer the same list for everybody and pass.
+     Two reports are added — one in a category NOBODY ELSE USES, narrowed to
+     Finance, and one draft in another — so each end of both rules has
+     something only it can see. */
+  const known = places.map((p) => p.at);
+  const onlyFin = await asTenant(a.id, (c) => insertItem(c, "insights",
+    draftOf({ title: "Treasury Sector Note", categories: ["Sector"], reportDate: "2026-09-01" })));
+  await asTenant(a.id, (c) => setState(c, onlyFin.id, "published", "islam@forefront.consulting"));
+  await asTenant(a.id, (c) => setSeen(c, onlyFin.id, normalizeSeen(["fn:finance"], known)));
+  const never = await asTenant(a.id, (c) => insertItem(c, "insights",
+    draftOf({ title: "Market Draft", categories: ["Market"], reportDate: "2026-09-02" })));
+
+  const catsFor = (v) => asTenant(a.id, (c) => categoriesPresent(c, "insights", v));
+  const finC = await catsFor(at("fn:finance"));
+  const mobC = await catsFor(at("mobile"));
+  const offC = await catsFor(ALL);
+
+  /* BOTH ENDS (§94.2). A build that offered nothing satisfies every "it is
+     not there" assertion perfectly (§113.8), so every absence is asserted
+     beside the presence that proves the row is being built at all. */
+  check("a category only a narrowed report is filed under is offered to somebody it is for",
+    finC.includes("Sector"), finC.join(" · "));
+  check("...and NOT to somebody it is not, though they read the same library",
+    !mobC.includes("Sector"), mobC.join(" · "));
+  check("...while the category they both have reports in is offered to both",
+    finC.includes("Macro") && mobC.includes("Macro"));
+  check("the office is offered it too, the seat reading everything",
+    offC.includes("Sector"), offC.join(" · "));
+
+  /* THE SAME CLAUSE THE LIST IS READ THROUGH, or the row would offer a filter
+     whose own page says "no reports match" (§61 by the long way round). */
+  check("a category only a DRAFT is filed under is offered to nobody",
+    !offC.includes("Market") && !finC.includes("Market"), offC.join(" · "));
+  const shelf = await asTenant(a.id, (c) => listItems(c, { kind: "insights", forClient: true, viewer: ALL }));
+  check("...and that draft exists, or the line above is true of an empty library",
+    (await asTenant(a.id, (c) => listItems(c, { kind: "insights", forClient: false })))
+      .some((r) => r.id === never.id));
+
+  /* EVERY FILTER OFFERED RETURNS SOMETHING, asserted as an AGREEMENT with the
+     list rather than against a typed set (§94.8): it is the property Islam
+     asked for, it survives a category being added to the module, and it is
+     the one thing a build that stamped a fixed list can never satisfy. */
+  const empties = [];
+  for (const c of finC) {
+    const rows = await asTenant(a.id, (c2) => listItems(c2, { kind: "insights", forClient: true, category: c, viewer: at("fn:finance") }));
+    if (!rows.length) empties.push(c);
+  }
+  check("every filter offered returns at least one report", empties.length === 0, empties.join(" · "));
+  check("...and every category the shelf holds is offered, or a report is unreachable by filter",
+    [...new Set(shelf.flatMap((r) => r.categories || []))].every((c) => offC.includes(c)),
+    offC.join(" · "));
+  /* THE ORDER IS THE MODULE'S, never the database's (§48): the row reads the
+     same way on every client whatever order the rows came back in. */
+  check("the categories come back in the module's own order",
+    JSON.stringify(offC) === JSON.stringify(CATEGORIES.filter((c) => offC.includes(c))),
+    offC.join(" · "));
+
+  /* A LIBRARY WITH NOTHING IN IT OFFERS NO FILTERS AT ALL — the state every
+     new client opens in, and the one the fault was measured on: six sections,
+     five of which could only ever return nothing. Its own tenant, because
+     both the others hold published reports by now and a state this file does
+     not have is a state to MAKE rather than to read around (§255). It goes
+     with the rest of the fixture, which deletes on the stamp. */
+  const [fresh] = await owner(
+    "INSERT INTO " + SCHEMA + ".tenants (key, name) VALUES ($1, $2) RETURNING id", [stamp + "-c", "Client C"]);
+  const freshC = await asTenant(fresh.id, (c) => categoriesPresent(c, "insights", ALL));
+  check("a client with nothing published is offered no filters",
+    freshC.length === 0, freshC.join(" · ") || "(none)");
+}
 
   /* the fixture goes, whatever happened above (§94.2) */
   await owner("DELETE FROM " + SCHEMA + ".tenants WHERE key LIKE $1", [stamp + "%"]);

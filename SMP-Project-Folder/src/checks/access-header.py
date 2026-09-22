@@ -150,8 +150,23 @@ with sync_playwright() as p:
       /* Granted roles say where they may sit; the derived ones never can —
          `roleWheres()` falls through to "every unit" for them, which is simply
          untrue — so their places come from what `personRoles()` actually
-         mints on this register. */
-      const DERIVED = {powner:1, plowner:1, contrib:1};
+         mints on this register.
+
+         DERIVED, NEVER LISTED (§104.7, §214.3). This was `{powner, plowner,
+         contrib}` written out by hand, so §382's Tactic owner — derived the
+         same way, and held on a pillars FUNCTION as well as a unit — fell
+         through to `roleWheres()`, was told it sits on every unit and nowhere
+         else, and was reported as offering two function columns it cannot
+         reach. The check was right about the RULE and wrong about the role,
+         which is the shape a literal takes when the world moves past it.
+
+         The property is the one that made those three special in the first
+         place: a role nobody can GRANT has no grantable places, so its places
+         have to come from the register. That is `roleIsGrantable()`'s own
+         question — it refuses exactly the own-lines roles — so a fifth one
+         added tomorrow is judged the day it lands. */
+      const DERIVED = {};
+      (R.ROLES || []).forEach(r => { if (R.isOwnLinesRole(r.key)) DERIVED[r.key] = 1; });
       const derived = {};
       PEOPLE.forEach(p => { (R.personRoles(w, p) || []).forEach(r => {
         (derived[r.role] = derived[r.role] || {})[r.at] = 1; }); });

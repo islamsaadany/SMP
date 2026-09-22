@@ -10,7 +10,8 @@
    landing-line declaration (landingStampFor) and the one rule for spelling
    a door's address (doorHref), which the checks read. */
 import { clientHref, DEFAULT_MODULE, MODULE_DEF, modulesFor, isModule, type ModuleKey } from "./modules.ts";
-import { landingFactsFor, viewerFor } from "./landing-facts.ts";
+import { landingFactsFor } from "./landing-facts.ts";
+import { viewerFor } from "./library-viewer.ts";
 
 export type Door = { target?: string; tab?: string; report?: boolean; setup?: string };
 

@@ -188,9 +188,20 @@
 
      NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
      BELOW this one and nothing rewrites `.top-in`, so the markup is built and
-     wired exactly once, at load — no second handler on a repaint (§24, §47.2).
-     A press navigates, so the menu never has to be closed afterwards. */
-  (function modules() {
+     wired exactly ONCE — no second handler on a repaint (§24, §47.2), which
+     is what the `.topmark` guard below is for now that a paint is what calls
+     this. A press navigates, so the menu never has to be closed afterwards.
+
+     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§381). It has to ask
+     whether the tab row already reaches the library, and at load the answer
+     is about the BAKED viewer: over HTTP the shell hydrates from /api/state
+     after this file has been parsed, so anything viewer-dependent answered
+     here is answered about somebody else. §362 hit the same wall from the
+     other side and moved that question to paint time; this is the same move
+     for the same reason. Nothing flashes, because the boot skeleton hides
+     `.chrome` until the first paint anyway (§94.10), and the `.topmark`
+     guard below makes a second call a no-op. */
+  function mountSwitcher() {
     /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
        CSS RULE RATHER THAN AN EARLY RETURN HERE (§367). Those pages
        belong to no module, so a switcher there offers a way out of somewhere
@@ -242,8 +253,17 @@
        the next reader to take as load-bearing (§298.2): build-shell.mjs
        concatenates this file LAST, after every frozen script, so LIBRARY is
        always there. It is here because this file is the one piece of browser
-       code that is also written as a file of its own. */
-    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown()) ? [LIB_TAB_KEY] : [];
+       code that is also written as a file of its own.
+
+       AND "REACHED" MEANS REACHED BY THIS PERSON (§381). `LIBRARY.shown()`
+       says the library is on the tab row; `anyDestination()` says there is a
+       row — somebody who reaches no unit, no function, no company and not
+       the group has no tab to be offered it on, and dropping it here would
+       leave them the reports nowhere, which is the hole §376's own comment
+       promises this filter never opens (§61). */
+    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown() &&
+                   typeof anyDestination === "function" && anyDestination())
+      ? [LIB_TAB_KEY] : [];
     list = list.filter(function (mm) { return !mm || reached.indexOf(mm.key) < 0; });
     if (!forceSwitch && list.length < 2) return;
     var bar = document.querySelector(".top .top-in");
@@ -294,7 +314,7 @@
     });
     d.appendChild(menu);
     bar.insertBefore(d, bar.firstChild);
-  })();
+  }
 
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
@@ -379,7 +399,9 @@
   }
   if (typeof paint === "function") {
     var painted = paint;
-    paint = function () { var r = painted.apply(this, arguments); try { sync(true); scrollToWanted(); } catch (e) {} return r; };
+    paint = function () { var r = painted.apply(this, arguments);
+      try { mountSwitcher(); } catch (e) {}
+      try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));

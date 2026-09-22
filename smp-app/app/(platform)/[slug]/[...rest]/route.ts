@@ -7,6 +7,8 @@ import { landingStampFor } from "../../../../lib/landing.ts";
 import { mayOpenModule, openableModules } from "../../../../lib/access.ts";
 import { MODULE_DEF } from "../../../../lib/modules.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
+import { viewAsOf, narrowToViewed } from "../../../../lib/view-as.ts";
+import { libraryStampFor } from "../../../../lib/library-viewer.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -46,6 +48,24 @@ export async function GET(req: Request, { params }: P) {
      does not hold — redirected once and landed on the person's own first
      page — rather than refused in a second way that would have to be worded
      and kept in step with the first (lib/modules.ts whereOf). */
+  /* ── WHO THE PAGE IS BEING DRAWN FOR (§381) ────────────────────────
+     Narrowed ONCE, here, before any of it is used: which modules may be
+     opened, what the Setup document is stamped with, and what the module
+     itself is handed. A module that asked about view-as for itself would be
+     a second answer to a question the door exists to settle (§53.5), and
+     three of the four copies would be written by somebody who had never met
+     the fault — the office's seat answering for a client's person, so every
+     narrowed report read as everyone's (lib/view-as.ts).
+
+     IT CAN ONLY NARROW, and a refusal is said rather than swallowed: the
+     only way to reach one from a browser is a forged or stale request, and
+     an empty library reads exactly like a client with nothing published
+     (§35, §93). */
+  const asked = viewAsOf(req.url);
+  const who = asked
+    ? await narrowToViewed(doorPool(), ans.tenant.id, { personKey: ans.personKey, seat: ans.seat }, asked)
+    : { personKey: ans.personKey, seat: ans.seat };
+  if ("refuse" in who) return new Response(who.refuse, { status: 403 });
   const have = modulesFor(ans.tenant.modules);
   const w = whereOf(rest || [], have);
   if (w.legacy) return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
@@ -76,21 +96,29 @@ export async function GET(req: Request, { params }: P) {
      address that LED with a module word is gated: the spine's own pages are
      the client's. The switcher and the landing read the same answer
      (openableModules), so a module shut by its address is shut on its row. */
-  if (w.module && !(await mayOpenModule(ans.tenant.id, ans.seat, ans.personKey, w.module)))
+  if (w.module && !(await mayOpenModule(ans.tenant.id, who.seat, who.personKey, w.module)))
     return Response.redirect(new URL(clientHref(slug, DEFAULT_MODULE, (rest || []).join("/")), req.url), 302);
-  const open = await openableModules(ans.tenant.id, ans.seat, ans.personKey, ans.tenant.modules);
+  const open = await openableModules(ans.tenant.id, who.seat, who.personKey, ans.tenant.modules);
   if (w.rest[0] === "setup") {
     /* the module's Landing line page reads its declaration off the document
        (§359.4) — computed here, on the Setup document alone — and its Access
        page the module's declared areas (§359.5), the same way */
-    const landing = await landingStampFor(ans.tenant.id, key, ans.seat, ans.personKey, ans.tenant.modules);
+    const landing = await landingStampFor(ans.tenant.id, key, who.seat, who.personKey, ans.tenant.modules);
     /* WHICH RAIL, STAMPED BY THE SIDE THAT KNOWS (§362, spec 058). `w.module`
        is set only where the module word LED the address, which is exactly the
        difference between a module's own Setup and the client's — the same
        test shell/route.js's placeOf makes in the browser, answered here so it
        is on the document before any of the chrome is built from it. */
+    /* AND THE REPORTS TAB'S FILTERS (§383). A Setup document carries no
+       destination tabs, and the shell walks from Setup to a unit without
+       asking for the document again — so the stamp has to be right on THIS
+       one too, or the tab drawn on arrival would offer the module's whole
+       list. The same answer the module's own document is stamped with
+       (lib/library-viewer.ts), asked once per document and never per paint. */
     return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
-                                      w.module ? key : "client"), { status: 200, headers: shellHeaders() });
+                                      w.module ? key : "client",
+                                      await libraryStampFor(ans.tenant.id, who.seat, who.personKey, open)),
+                        { status: 200, headers: shellHeaders() });
   }
   const serve = serverFor(key);
   if (!serve) return new Response("Not found", { status: 404 });
@@ -98,7 +126,7 @@ export async function GET(req: Request, { params }: P) {
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
   return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
-    have: open, rest: w.rest, personKey: ans.personKey, seat: ans.seat });
+    have: open, rest: w.rest, personKey: who.personKey, seat: who.seat });
 }
 
 /* A MODULE MAY BE WRITTEN TO (spec 054): the Internal Tracker's rows are

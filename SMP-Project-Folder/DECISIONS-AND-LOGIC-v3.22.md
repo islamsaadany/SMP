@@ -54264,3 +54264,1495 @@ before it writes anything about it.
 record that is wrong about what was verified is the one kind of wrong that
 compounds, because the next person quotes it). All three record files carry the
 correction, and this section is why.
+
+## §380 · My reporting: the lines a tactic's owner enters (spec 062)
+
+Islam: *"If we'd like to show the tactics owners to report the progress of
+their own tactics. is that built?"*
+
+**IT WAS NOT, AND THE HONEST ANSWER CAME WITH THE MEASUREMENT RATHER THAN
+INSTEAD OF IT.** Two of the three pieces were already in the platform, which
+is why it looked as though it might be: the plan names an owner on **every one
+of the worked example's 83 tactics**, and being named already derives the
+Contributor floor and reaches the rows that name you (§147.8). What was
+missing is that the figure-master machinery §16.7 built — `row.src`,
+`assigneeOf`, `sourceReporting` — walks a subject's key objectives and its
+pillar measures and **never its tactics**. So an owner who did not also run
+the unit either entered nothing, or entered their lines on the unit's own
+Reporting page mixed in with everybody else's.
+
+**IT IS THAT SAME MACHINERY POINTED AT THE OWNER COLUMN**, which is the whole
+argument for how small it is: no register lookup anywhere, because the plan
+stores a NAME and `namedOn()` has matched a name to a person since §130.7.
+
+**SIX ALIGNMENT TURNS AND EVERY DECISION IS HIS.** A **tab beside Reporting**
+and not a room — *"the tab of what I report is not a room it a slice of
+reporting that's all in the same straety module"*; **the owner only**, never a
+contributor or a collaborator; **figures but never a submission**, so the note
+and the submit stay the unit's; **case 1**, an owner inside a unit he does not
+run, whose rows go read-only on the unit's page because *"the only reporting
+way is his lines"*; **case 2**, an owner of lines in a unit he does not belong
+to, who gets *"no units appear in navigation"*; the **lock is §309's**, which
+he corrected me on — I objected that a saved draft had nothing to save and he
+was describing a lock the product already had; and the **name is his**, after
+I told him *My reporting* was taken and it was not.
+
+**AND TWO OF MY OWN CLAIMS WERE WRONG AND WERE CORRECTED IN FRONT OF HIM**:
+the first mockup drew two foreign units in his navigation, and measuring
+`ACCESS_DEFAULTS` says every bounded role ships `a_unit_other: "none"`, so a
+foreign unit can never appear — wrong in his favour, and it made case 2 cost
+nothing. And *My reporting* renders on no screen: since §37 the matrix shows
+AREAS, and `pageinfo.js` already titles that key *Reporting*. The stale label
+is brought into step in the same edit (§104.8).
+
+**THE TAB GOES ON THE PERSON'S OWN PLACE**, which answers both cases with one
+line: `myLinesHere()` asks `personAt()` — their unit, their function, their
+company or the group — so the units they own lines in are **bands** on that
+one page and never doors in the bar. A row per unit on the welcome screen
+would have sent them to the same page three times, so there is one row.
+
+**ONE SWITCH, OFF, AND OFF IS BYTE-IDENTICAL TO TODAY.** `lineOwners` on the
+group, stored as an absence (§50.6), **no migration and no schema change** —
+and that is what makes *"nothing on Roles & access moves"* a measurement
+rather than a promise: `c_mylines` is `area:"always"`, so it is not a matrix
+cell at all, and both checks assert the off end as hard as the on one (§94.2).
+
+**THE ROWS ARE `reportItems()`'S OWN, FILTERED — AND THE FIRST BUILD INVENTED
+A SHAPE BESIDE IT.** `myLineRows()` pushed `{target, pillar, id, kind, obj}`,
+and a reporting row is not that: it carries `owner`, `collaborators`, `pown`,
+`cid`, `group`, `sub`, `asked` and `place`, of which `canReportRow()` reads
+three, `ownDraftShut()` a fourth and the shared entry cell the rest. So the
+fallback gate answered about undefined fields and the drawn row lost its span
+label. **Found by the check and not by reading** (§53.5 — a second answer to
+*what is a reporting row*).
+
+**THE SERVER HAS ITS OWN TWO KINDS, AND HAD NO ASSERTION AT ALL UNTIL IT WAS
+FALSIFIED.** `lineReporting` groups a tactic's figure rows by the tactic's
+resolved owner and refuses anybody else **by name**; `lineDone` is the draft
+lock, and `lines` joins `REVIEW_PER_TARGET` so the map travels per key rather
+than whole (§234). `test-authorize.js` carried **not one** mention of any of
+it while printing 683 passed — which is how a rule gets deleted next month.
+
+**AND THE FALSIFICATION IS WHAT FOUND THE ONE THING THAT SHOULD NOT SHIP**
+(§380.1). A branch in `boundedReach` reading *"with the switch on, a bounded
+role reaches only what it OWNS"* was written, and breaking it left **both
+checks entirely green**. Measured rather than argued: nothing reaches it for a
+tactic — the server groups the figure under its owner into `lineReporting` and
+refuses a stranger there, and the browser refuses one at `canEnterLine`'s
+single door — so the only rows it could ever have narrowed are the **other**
+kinds, and narrowing those **reverses §227**, where Islam decided that being
+named a collaborator on a MILESTONE is a reporting right. He asked about
+tactics; widening it to every row a plan names is a redesign nobody asked for
+(rule 1b). Deleted, with `boundedReach`'s signature put back (§24), and 704
+and 53 assertions unmoved either way.
+
+**§380.2 — THE DEMO CANNOT SHOW ANY OF IT, TWICE OVER, AND THAT IS ITSELF THE
+MEASUREMENT** (§255). All 83 tactics name an owner, so the unowned-row
+fallback is a shape the plan never takes; and **every collaborator in the
+worked example is a bare first name** — *Nour*, *Dalia*, *Hossam* — which
+`nameRuns()`'s two-word floor matches to **NOBODY**, because a lone first name
+would hand a reporting right to whoever shares it (§130.7). So not one of the
+eight has that right today, and a fixture built on them would have watched a
+refusal that was already a refusal and called the narrowing proved (§94.5).
+Both states are made and put back, and the *making* is asserted.
+
+**§380.3 — AND THE SWITCH'S TWO EDITS GO TOGETHER, WITH A COST NO VERDICT CAN
+SEE** (§259.2). Classified-but-unswept is the known failure; here the
+classification fires either way and what `gExtra` membership buys is that it
+classifies **once**. Without it the change comes out as
+`setup:whether tactic owners enter their own lines` **beside**
+`unknown:the group's lineOwners` — the same people allowed and the same people
+refused, so every existing assertion passes, while the change log gains a
+phantom row and a refusal names the stored field rather than the control that
+sets it (§16.7). Asserted as a count of one.
+
+**§380.4 — THE HARNESS READS BUILD.PY'S OWN LIST** (§53.5). The vm check's
+first run died on `joinTarget is not defined` from `templates.js`, a file it
+had simply never been told about — so it derives the list from `build.py`
+rather than typing one, and the **three that reach for `document` at load**
+(`history.js`, `safety.js`, `sync.js`) are NAMED and asserted to be the only
+three, because a stand-in document would model less than a browser and report
+a working build broken (§100.3, §54.5).
+
+**VERIFIED**: `test-my-reporting.js` **53/0**, red **six ways** from the
+SOURCES (§276) — the switch ignored 5, two doors 1, the lines anybody's 7, the
+tab everywhere 1, the lock left empty 1, the filter always 1;
+`test-authorize.js` **704/0**, red **eight ways**, the dangerous direction (a
+stranger allowed) reddening 3; `test-graph-diff.js` 140/0;
+`test-platform-rules.js` 69/0; `build.py` 28 script blocks parse;
+`built-in-step.py` all good; the four generators re-run and the three carried
+`.cjs` rule modules **re-carried** (§335 — production serves those, and
+`rules.js`, `authorize.js` and `graph-diff.js` all changed); `sw.js` bumped to
+`v5.23-my-reporting`, confirmed against `origin/main`'s `v5.22` first (§94.12).
+
+**WHAT COULD NOT BE RUN, SAID RATHER THAN LEFT AS AN ABSENCE** (§54.5,
+§328's precedent): this sandbox holds the Chromium binaries under
+`/opt/pw-browsers` and **no Playwright driver at all** — no python module, no
+`node_modules` — so `qa-run.py` cannot launch. Every frozen browser check,
+`qa.py` and the new `checks/my-reporting.py` are **unrun here**. That file is
+written against the product as the Node check measures it, and its own
+docstring says so in its first lines. **ANSWERED IN §380.5 BELOW**, in a later
+session that could install the driver — kept rather than rewritten, because
+what it was honest about is the reason §380.5 has anything to report.
+
+## §380.5 · The screen check runs at last, and every failure was the check
+
+The one thing §380 recorded as outstanding, done: `pip install playwright`
+succeeds in this sandbox, the image's own Chromium launches through
+`qa-run.py`, and the file that had never once been run was run. **NO PRODUCT
+FAULT** — the diff is one file under `checks/`, and the built file is
+byte-identical throughout (`built-in-step.py` all good).
+
+**A FILE NOTHING HAS EVER RUN IS A FILE WHOSE OWN MISTAKES ARE STILL IN IT**
+(§54.5), and it had four, each of them a rule this project has already written
+down:
+
+**§380.5a — IT ASKED FOR A CONTROL THE PRODUCT DOES NOT HAVE.** `#viewsel`
+appears in **no source and in no other check**; the switcher is `#asWho`, 13
+times in the built file and 0 for the invented name, and every one of the
+other eight checks that switches viewer says so. §100.3's family, and
+§297.1's exactly — *a probe that invents a shape the product does not use
+reports a working build as broken.*
+
+**§380.5b — AND IT ASKED WITH SOMETHING THAT THROWS.** `eval_on_selector`
+raises on a missing element, so section 1 **died and took the nine sections
+after it down with it** — in a file whose own `press()` helper, two lines
+above, exists to stop precisely that (§215). It goes through the product's own
+`select_option` now, which fires a real change (§219), and **the switch is
+asserted to have TAKEN**: §237 rebases the tab on the server's graph, so a
+refused pick leaves the select where it was and every assertion after it
+measures whoever is still there.
+
+**§380.5c — AND THE WELCOME OVERLAY ATE EVERY PRESS.** `.welcomeover` covers
+the viewport, so a click retried for thirty seconds against
+`<div class="wviewbar">` — §167.2, whose own words are that it must be
+suppressed **before** the goto, and which **twenty-odd checks already carry**.
+This one borrowed `project-done.py`'s stub and not its init script;
+`qa-run.py` does it for a SERVED check and stands `SMP_BASE` down for an
+own-server one, so that route could never have covered it.
+
+**§380.5d — AND THE ASSERTION THAT FAILED WAS RIGHT ABOUT THE RULE AND WRONG
+ABOUT WHERE TO STAND.** *"It is NOT on a unit that is not his place"* pressed
+`retailstores` — and a person who owns a line and nothing else is a **bounded
+role, which ships at `a_unit_other: "none"` and can never reach a unit that is
+not their place**, which is §380's own note and the reason case 2 cost nothing.
+So the press had no control to land on, `current` stayed `mobile`, and the tab
+it then found is the one that is **supposed** to be there: a correct build
+reported broken (§113.8 — the assertion's own precondition had failed in
+silence, and `press()` degrades by returning False, which the caller ignored).
+**REWRITTEN, NEVER LOOSENED** (§218) and **stronger than what it replaced**:
+the rule is one line — `ownsAnyLine() && myLinesHome() === target` — so it is
+asserted over **every destination he can actually open**, with a guard above
+it that the set has more than one in it or *"nowhere else"* is vacuous
+(§113.8). That guard **earned its place immediately**: the first walk opened
+exactly one destination and said so, because the group and the companies sit
+in a dropdown (§68, §94.6) and `press()` degrades on an ABSENT control while
+Playwright waits thirty seconds on a merely **INVISIBLE** one — §215 one step
+along, answered by following `measure-score-spread.py`'s own `go_top()` rather
+than inventing a route.
+
+**PROVED ABLE TO FAIL THREE WAYS FROM THE SOURCES** (§276 — this file serves
+the built file, and an edited one is silenced by §238's hashed CSP, so every
+break is made in `config-data.js` or `lib/rules.js` and rebuilt): the tab
+ignoring the person's place **2 red**, naming all thirteen destinations it
+then appears on; the lock never shutting a box **3 red**; the switch ignored
+**1 red**. Each break was asserted to have MATCHED and the build asserted to
+DIFFER before it was believed (§344.1), and after each the tree was restored
+**from the saved copy and never with `git checkout`**, with the rebuild
+asserted byte-identical to the good build (§343.9).
+
+**VERIFIED**: `checks/my-reporting.py` **24/0**; full `qa.py` **33 viewers,
+242 destinations, ERRORS none** — §367's recorded numbers to the digit, which
+is what it should be, since nothing in the product moved;
+`test-my-reporting.js` 53/0; `test-authorize.js` 704/0; `test-graph-diff.js`
+140/0; `built-in-step.py` all good.
+
+**AND `main` HAS MOVED TO §378 WHILE THIS WAS BUILT**, so it is renumbered
+**before** any merge (§264.3, §371.5): §345 → §380 and spec 057 → 062, scoped
+to the 51 lines this branch wrote, with the **8** citations of somebody else's
+`spec 057` (§360's, in five of the same files) measured first and left
+untouched. Both counts declared in advance and asserted (§336.1, §353.4).
+
+## §381 — THE TAB THAT FILLED THE ROW, AND THE MIRROR THAT SHOWED YOUR OWN FACE (2026-09-20, spec 061)
+
+Islam, with three screenshots, the morning after §376 reached `main`:
+*"when viewing as Mahdy he started seeing the other units and functions while
+he should only see his unit karim from mobile is seeing the report while the
+report is made only for the retail and online team in the report settings and
+he is seeing the other functions in terms of insights."*
+
+**TWO FAULTS, BOTH §376's, AND NEITHER IS THE NARROWING ITSELF.** Separating
+them was most of the round, because from the screen they read as one thing —
+*this person is seeing what other people's is* — and they have nothing to do
+with each other.
+
+### §381.1 — A tab that is the same everywhere must not be what makes a destination reachable
+
+The Insights tab was keyed on `c_kb`, which is the one access key the matrix
+holds at `area:"always"` — `grantAtPage` returns **`"view"` unconditionally**
+for it, for every role at every target. The navigation decides whether to draw
+a destination by asking *is there at least one tab here this person holds*
+(`myUnits`, `myFns`, `myCaps`, and the group and company tests), so the
+library answered YES at every unit, every function and the group, for
+everybody, and the row filled up.
+
+**MEASURED BEFORE ANYTHING WAS PROPOSED** (rule 3a), by running the shipped
+build's own gates over the worked example's 33 people:
+
+| | before §376 | on `main` |
+|---|---|---|
+| a unit's strategy custodian (Karim's shape) | 1 unit, 1 function | **10 and 8** |
+| the other custodian (Mahdy's shape) | 1 and 1 | **10 and 8** |
+| somebody who reached nothing at all (`cfo`) | 0 and 0 | **10 and 8** |
+| people whose row grew | — | **31 of 33** |
+| people who met the Units \| Functions switch | — | **29 of 33** |
+
+Only the CEO and the SMO were unchanged, because they legitimately saw
+everything already. The switch is documented in its own comment as *"today the
+SMO and the CEO … everyone else sees the row exactly as it has always been,
+and never meets the concept"*, and 29 people met it.
+
+**NO PLAN AND NO FIGURE WAS EXPOSED BY IT, AND SAYING SO FIRST WAS WORTH MORE
+THAN THE FIX** (§5's four parts): the tabs that draw a unit's work still
+refused, which is why Islam's own screenshot of Mahdy standing on Mobile shows
+a tab row holding **one tab and nothing else**. What filled up is the row of
+names — and for most people those names were already reachable through the
+group's own Performance page. For the `cfo` shape, who reached nothing at all,
+they were new.
+
+**ESTABLISHED AS §376's BEFORE ANYTHING WAS BLAMED** (§303): `LIB_TAB` does
+not exist in the build before `ac94f9db`, and against that build the same
+measurement reports the old row for all 33.
+
+**THE FIX IS ONE PROPERTY AND ONE HELPER.** `everywhere:true` on the tab, and
+`ownTabs()` beside `allowed()` — *which tabs this person holds here, minus the
+ones that are the same wherever they are drawn* — asked by the six gates that
+decide what the row offers. **Marked on the TAB rather than tested by its key
+in the gate** (§104.7), so the day a second client-wide tab is added it says so
+about itself and the gate is not edited. The tab is still DRAWN once you are
+somewhere you reach for another reason; what it stops being is the reason.
+
+**AND THE `everywhere` MARK IS THE HONEST NAME FOR WHAT §376 ALREADY DECIDED**:
+that section records Islam choosing the tab over two other placements with its
+cost stated — *"the three tabs beside it are three views of ONE subject and
+this library is the CLIENT'S, so pressing Retail Stores shows the same
+reports."* A tab that shows the same thing at every destination is, by his own
+sign-off, not a fact about the destination.
+
+**AND SOMEBODY WHO REACHES NOWHERE KEEPS A WAY TO THE REPORTS** (§61).
+§376.3's switcher drops Insights from the module menu *"so a build that
+stopped drawing the tab puts it back in this menu on its own rather than
+leaving it reachable from nowhere"* — a promise the fix would have made false,
+because a person with no destination has no tab row to draw it on and would
+then have reached the reports nowhere at all. `anyDestination()` answers it,
+built from the same four answers the row itself is (§53.5).
+
+**WHICH FORCED THE SWITCHER TO BE BUILT ON THE FIRST PAINT RATHER THAN AT
+LOAD.** The question is viewer-dependent, and at load the shell has not
+hydrated — over HTTP `/api/state` answers after `shell/route.js` has been
+parsed, so anything viewer-dependent answered there is answered about the
+BAKED viewer, which is somebody else. **§362 hit the same wall from the other
+side** and moved the client-settings stand-down to paint time for exactly this
+reason; this is the same move. Nothing flashes, because the boot skeleton
+hides `.chrome` until the first paint anyway (§94.10), and the `.topmark`
+guard makes every later call a no-op — **and that guard's own comment, which
+said the markup is built "exactly once, at load", was corrected in the same
+edit rather than left describing an intention the code no longer carries out**
+(§104.8).
+
+### §381.2 — Viewing as somebody showed the office's reports, not theirs
+
+The Insights module resolves who is asking from `ServeArgs.personKey` and
+`seat` — the two facts the DOOR established — and the door answers about the
+**sign-in**. So with Forefront signed in, the office's seat answered
+(`seesAll: true`, spec 046 §4.10), and every narrowed report was returned
+whoever the viewer switcher was pointing at. `door.ts` gives an admin `super`
+either through their `tenant_users` row or by the admin fallback, so there is
+no third possibility.
+
+**THE NARROWING ITSELF WAS WORKING**, and that is the reassuring half: a
+person signing in themselves resolves to their own place and the Retail report
+is filtered out, which is what `checks/insights.mjs` asserts and what was
+green when §355 shipped. What was broken is the **mirror the office checks a
+narrowing in** — and a mirror that shows your own face reports a rule that
+works as broken, with nothing on the screen to say so. **§185 is this same
+fault on the save path**, in Islam's words then: *"the view-as function is not
+showing exactly what people see."*
+
+**AT THE SEAM, NEVER INSIDE A MODULE.** Every module that reads a person's
+data has this question, and a copy per module is four answers to one (§53.5) —
+three of them written by somebody who never met this fault. The route narrows
+`personKey` and `seat` ONCE, before `mayOpenModule`, `openableModules`, the
+Setup stamp and the module itself, so every module is right by construction
+and none of them knows view-as exists.
+
+**IT CAN ONLY EVER NARROW** (§185's rule, carried): the gate is the seat the
+SESSION holds and never one read out of the request, and what comes back is
+the seat the SIMULATED person holds — so the office's `super` becomes a client
+person's `none` and `seesAll` goes false. `smoteam` is deliberately NOT on the
+gate, because §185 gates on `super` alone and widening it here would answer one
+question two ways depending on which path you came down. **An unknown key is
+REFUSED rather than read as nobody**, which is that section's own words: *a
+narrowing that hides a mistake instead of reporting it* — and here it would
+draw an empty library that reads exactly like a client with nothing published
+(§35, §93).
+
+**THE DECISION IS PURE AND THE LOOKUPS ARE NOT** (`lib/access.ts`'s own shape,
+§355), so the whole rule can be asked with no database and no driver:
+`view-as.ts` imports `tenant.ts` **where it is used** rather than at the top,
+or a pure decision would be untestable without a Postgres (§100.3).
+
+**THE BROWSER SENDS THE SAVE's OWN ANSWER, NEVER A SECOND ONE**:
+`SYNC.actingAs()` is exported rather than re-derived (§42, §53.5) — it already
+carries the switcher's two guards, the seat that draws it and the key being on
+the register — and **the viewed person is part of the request KEY**, or a
+slower answer for the previous person could still land last and put their
+reports back (§222's family).
+
+**THE COST WAS STATED BEFORE IT WAS BUILT**: the office no longer sees every
+report while viewing as somebody; they see that person's. That is the point of
+it, and it is a change to what that screen shows them.
+
+### §381.3 — What was measured, and what could not be
+
+**`scripts/test-nav-row.js`** runs the SHIPPED build's own gates in a vm
+behind a permissive global — the product's `myUnits`, `myFns`, `ownTabs` and
+`foldsNeeded`, not a model of them (§100.3) — and asserts an **AGREEMENT**:
+the row a person is offered with the library on the tab list is the row they
+are offered without it (§94.8), which stays true when a unit is added and when
+a second client-wide tab arrives. **15/0**, and proved able to fail from the
+SOURCE: with the one `.filter` removed it is **6 red**, its first failure
+printing Islam's report as `own_mob: {"units":1,…} -> {"units":10,…}`. The
+break asserts it MATCHED before it is written (§344.1), and **the check
+DEGRADES rather than dying** against a build that predates this (§215) — which
+is exactly the run somebody makes to establish a fault is not theirs (§303).
+
+**`smp-app/checks/view-as.mjs`** asks the whole rule with no database and no
+browser: **20/0**, red three ways (`viewas-any-seat` 6, `viewas-unknown-ok` 2,
+`viewas-keeps-seat` 2) — the last putting the fault itself back and printing
+`{"personKey":"karim","seat":"super"}`, which is what Islam was shown. **Both
+ends every time** (§94.2): a build that refused every simulation would satisfy
+every "it does not widen" assertion here and leave the office unable to look
+through anybody's eyes.
+
+**AND THE ACCESS BASELINE IS UNMOVED**, which is the strongest reassurance
+available and is a measurement rather than a promise (T0, spec 058): 33 people
+× every page key × every target, and every person opens exactly what they
+opened. **Nobody's access changed.** What changed is what the navigation
+OFFERS, which is what the fault was.
+
+Beside them: authoriser 683/0, change list 140/0, platform rules 69/0,
+`built-in-step.py` all good, session-state and db-url-choice clear, KB
+audience clear, setup-shape 33/0, deploy-context 5/0, `node --check` on
+`sw.js` with one `SHELL` declaration at a name `origin/main` does not hold
+(§91, §94.12).
+
+**WHAT COULD NOT BE RUN IS SAID RATHER THAN LEFT AS AN ABSENCE** (§54.5,
+§124): this container holds neither `smp-app/node_modules` nor python
+Playwright, so **`qa.py`, every frozen browser check, `check:insights`,
+`check:modules` and a real end-to-end run of the view-as narrowing against a
+database could not launch** — `check:modules` was established as already
+unrunnable here by stashing the change and getting the identical
+`playwright-core` error (§303). `generated-in-step` refuses while the edits
+are uncommitted, which is §349.4 working as designed. So the view-as fix is
+proved as a RULE and at both ends of its seam, and **not** driven through a
+browser against a client; that run is owed before it is called finished.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): no frozen
+`api/`, `lib/` or `db/` file is touched, nothing stored moves, nothing is
+migrated, and no rule about who may save what changes.
+
+**RECORDED, NOT DONE**: a bookmarked address carrying `?viewAs=` that cannot
+be honoured answers 403 as a bare sentence rather than as a page — reachable
+only by forging or by a stale link, and worth a page the day anybody meets it.
+
+---
+
+## §382 — A TACTIC'S OWNER IS A ROW ON THE TABLE (2026-09-20)
+
+Islam, after §381 established that Mahdy reached a whole supporting function
+because a project there named him as Owner:
+
+> *"what we need to follow is the accessablity matrix. we don't have a tactic
+> or measure owner in the roles to set accessability for so until then they are
+> defaulted to see nothing and edit nothing."*
+
+and then, closing the fork:
+
+> *"don't chagne the settings of the accessablity. I believe we need to add
+> measures & tactics owners as roles so I can set their accessability and
+> accordingly Mahdy access can be switched on of orr."*
+
+**AND HE CLOSED THE ORIGINAL COMPLAINT HIMSELF**: *"mahdy is a project owner
+then it ok to see the project and report it ofcourse my bad."* So nothing about
+Project owner moves; what was missing is a row for the level below it.
+
+### §382.1 — §147.7's shape, one level down
+
+A pillar has an Owner and every tactic under it has one, and being named the
+Owner IS the role — the same derivation `powner` and `plowner` have had since
+§147.7. What was missing is that **a tactic's Owner derived nothing at all**.
+The only thing that ever reached such a person was the Contributor floor, and
+that fires on `!out.length` — *holding no other role at all* — so a unit head
+who also owns a tactic somewhere else reached it through **no row anybody could
+see on the table**, and could therefore be switched off by nobody.
+
+That is the whole fault, and it is exactly the one Islam is pointing at.
+
+### §382.2 — All none, and that is his instruction rather than a cautious default
+
+The two owner rows above it ship at `view`, because §147.7 was asked for a role
+that READS its own place and reports it once the cell is opened. This one was
+asked for the opposite: a row that starts shut so a tenant can decide. Shipping
+it at view would hand reach to **every tactic owner in every tenant** on the day
+it landed — measured, 18 people on the worked example — which is the opposite of
+what a switch is for.
+
+**MEASURED, NOT REASONED**: `scripts/test-access-unmoved.js` against the T0
+baseline answers **UNMOVED** — 33 people × 35 page keys × 21 targets, every one
+opening exactly what they opened. Adding the role moves nobody.
+
+### §382.3 — And it takes nothing away, which a reading would miss
+
+Any role deriving here suppresses the Contributor floor, and this one grants
+**nothing** where the floor gives view. So somebody who owns a tactic and is
+named nowhere else would have stopped being a Contributor and started being a
+Tactic owner with every cell at none: *a role that takes away the floor it
+stands on, silently, on the day it ships.*
+
+The floor's question is asked of the roles **other than this one**
+(`grantless`). `powner` and `plowner` are deliberately NOT in that exception —
+they have suppressed the floor since §147.7 and they ship at view, which is what
+the floor gives, so exempting them would be a widening nobody asked for in a
+change about a row that grants nothing (rule 1b).
+
+Nobody in the worked example stands on the floor at all, so the case is MADE
+(§255) rather than waited for.
+
+### §382.4 — A handle of its own, never `ctx.row.owner`
+
+The obvious branch — *does the row's Owner name this person* — reads right and
+is wrong on exactly one row kind. **A measure's reporting context is built with
+`row.owner = the PILLAR's owner`** (§55's rule, kept by §147.7 so nothing a
+contributor could reach before the pillar-owner role existed was taken away by
+its arrival). So the simple test would have made opening the **Tactic owner**
+row quietly open **every measure** to pillar owners as well — a switch that
+moves something it does not name, which is the one thing a switch must not do.
+
+So it is `pillarOwner`'s own pattern: **`ctx.tacticOwner`**, a named handle set
+by whoever builds the context, absent wherever the subject is not a tactic, and
+therefore failing **closed** at any site that has not been taught it (§42). Four
+builders set it — the plan pane's `tctx`, `reportItems`' `town`, `ctxOfUnit`,
+and the authoriser's gap pass — and a collaborator is deliberately not read,
+because that is a Contributor and §147.8 settled it.
+
+**AND THE CHECK THAT EXISTS FOR IT COULD NOT FAIL AS FIRST WRITTEN** (§113.8):
+asked of the pillar's owner alone the question answers *no* on every build,
+because they hold no EDIT grant at all through a row that is shut. The
+falsification went **green**. The subject has to be somebody who owns a pillar
+**and** a tactic under it, which is a fourth person the fixture now mints —
+`--break=row-owner` then reddens exactly the one assertion it is for.
+
+### §382.5 — The measure owner is not here, and the reason is a field
+
+A key measure carries **no Owner anywhere in the product** — 0 of the 76 in the
+worked example, and no column on the table in either mode. The `m.owner` reads
+elsewhere in `group-render.js` are milestones. So a **Measure owner** row would
+be a control with nothing behind it (§61): it lands with the field, and the
+field is a new column on a table, which is a picture before it is a change
+(rule 1c).
+
+**DRAWN AND MEASURED, NOT ARGUED.** The column was injected into the running
+platform and the real table shot twice, in both modes at 1600 and at 1000 —
+`design-mockups/measure-owner/2026-09-20_owner-column-on-key-measures.html`,
+published for sign-off. Nothing runs past its pane at any width and no row gets
+taller; the prose column pays for it and has the room:
+
+| Window | Mode | Measure column | Owner gets | Over |
+|---|---|---|---|---|
+| 1600 | reading | 656 → **527px** | 244px | 0 |
+| 1600 | pen open | 384 → **288px** | 165px | 0 |
+| 1000 | reading | 474 → **381px** | 168px | 0 |
+| 1000 | pen open | 272 → **188px** | 128px | 0 |
+
+Proposed with it and awaiting his word: **optional and never a counted gap**
+(counting it would put the red word on all 76 and hold Submit everywhere, which
+is §249's own lesson), and **carried by the workbook** or a download and an
+untouched upload would drop every owner (§22).
+
+### §382.6 — And the check that objected was right about the rule
+
+`checks/access-header.py` went red: *"Tactic owner: no column is offered that
+this role can never reach — a_fn_own_strat, a_fn_own"*. §174's rule, and the
+check was right about it and wrong about this role — it kept a hand-written
+`{powner, plowner, contrib}` of which roles are DERIVED, so a fourth fell
+through to `roleWheres()`, was told it sits on every unit and nowhere else, and
+was reported as offering two function columns it plainly does reach.
+
+**REWRITTEN, NEVER LOOSENED** (§218, §214.3): the property that made those three
+special is that **nobody can grant them**, which is `roleIsGrantable()`'s own
+question — it refuses exactly the own-lines roles — so the list is derived and a
+fifth one is judged the day it lands (§104.7). Falsified from the SOURCES: with
+the pillars-function half of the derivation removed it reddens again, on exactly
+that assertion.
+
+### §382.7 — What was run
+
+`scripts/test-tactic-owner.js` **29/0**, proved able to fail **five ways from
+the source** — `no-derive` 8, `row-owner` 1, `view-default` 1, `floor` 1,
+`not-bounded` 7 — with the break applied to a copy of `lib/` and a break that
+does not MATCH a loud failure rather than a quiet no-op (§276, §344.1).
+Access **UNMOVED** against the T0 baseline; authoriser **683/0**; change list
+140/0; platform rules 69/0; `access-header` all clear after the rewrite;
+`role-picker`, `seat-grant`, `project-custodian`, `project-done` all green; the
+matrix draws twelve rows with **Tactic owner · 18 people** and nothing
+overflowing at 1600/1280/1000.
+
+**NOTHING STORED MOVES AND NOTHING IS MIGRATED.** The seed gains one access row,
+all `none`, which is the same answer the default already gives (§30.2) — so a
+tenant that has never touched the matrix and one seeded today behave alike.
+No page draws differently; the only visual change in the product is a twelfth
+row on Roles & access, which that table builds from `ROLES` itself.
+
+**`sw.js` IS BUMPED TO `v5.23-tactic-owner`** — past `origin/main`'s own
+`v5.22`, because the built file's bytes changed and a worker caches by NAME
+(§91, §94.12); the branch's previous name and main's are different strings, so
+nothing collided, and the name is confirmed again immediately before any push
+to `main` (§94.16).
+
+**RECORDED, NOT DONE**: the Measure owner row and the field under it, awaiting
+sign-off on the mockup above; and the Insights category filters are still drawn
+whether or not a report of that type exists, which is the other half of the
+report §381 answered and has not been started.
+
+---
+
+## §383 — The reports' filters are the reports that exist (2026-09-21)
+
+Islam, of the reports tab §376 put in the platform:
+
+> *"the filters of the reports should appear only if there is this type of
+> report, mahdy i seeing transofrmation while karim is seeing only the
+> mobile"*
+
+The second half was §381 and is merged into this branch. This is the first.
+
+### §383.1 — Measured first, and it is worst on the first screen a client opens
+
+Rule 3a, and the measurement is what makes the case rather than the wording of
+the ask. The section row under the tab was **`All · Analysis · Macro · Market ·
+Sector · Governance`** — the module's whole declared list — for everybody,
+whatever the library holds.
+
+So on a client with nothing published yet, the platform draws **six filters,
+five of which can only ever return nothing**, on a tab a new client is likely
+to press first. And on a client where Forefront has published two kinds of
+report, four of the six are dead the day they are drawn.
+
+It is not a wrong list: it is the module's list, which is the honest answer to
+*what kinds of report exist in the product* and the wrong answer to *what can I
+filter this library by*. §61's own shape — a control with nothing behind it is
+not a choice — one row down from where that rule usually bites.
+
+### §383.2 — It is the server's answer, and that is forced
+
+The section row is built **synchronously, inside `paint()`** (`SUBS`'s `render`
+returns HTML), so nothing fetched can be in it: by the time an answer landed the
+row would already be on the screen, and §376's own rule for that tab is that it
+**never calls `paint()` from a fetch** (§35, §71.2 — the search box is in that
+row and a hand may be in it).
+
+So the list is **stamped on the document**, which is what `data-library-cats`
+has been since §376 — the change is *what it is stamped with*. It was
+`CATEGORIES`, the module's constant; it is now the categories this library
+actually holds **for this person**.
+
+### §383.3 — Asked of the library, through the same two clauses the list is
+
+`categoriesPresent` in `lib/library.ts`:
+
+```sql
+SELECT DISTINCT cat FROM library_items,
+       LATERAL jsonb_array_elements_text(categories) AS cat
+ WHERE kind = $1  /* + shelfWhere(true) + seenSql(true, viewer, …) */
+```
+
+**The two clauses are the list's own** — `shelfWhere` (published only) and
+`seenSql` (spec 046 §4.10's per-place narrowing) — never a second copy, so the
+row can never offer a category the list itself would refuse. A draft's category
+is not a filter; a report narrowed away from this person is not a filter for
+them.
+
+**Ordered by `CATEGORIES` and not by the database**, so two clients read the
+same words in the same order however their rows happen to sort.
+
+**The console is not a caller and that is a decision.** Publishing is *choosing*
+a category, so Forefront is offered all five there — this answers *what can be
+filtered*, which is a different question with a different answer.
+
+**It costs one query per SERVED DOCUMENT**, not per paint: the stamp is written
+when the page is served and read from the DOM thereafter.
+
+### §383.4 — Three answers, not two
+
+`libraryStampFor` (`lib/library-viewer.ts`) answers:
+
+* **`null`** — no library behind this tab: the client does not have the module,
+  or this person may not open it, or there is no server at all (`file://`). The
+  attribute is absent and no tab is drawn, which is §376's own rule unchanged.
+* **`[]`** — a library with nothing filed. **The tab is drawn and the filter row
+  is not.** A client with an empty library still opens the reports and reads
+  *0 reports*; hiding the tab would say Forefront has no library rather than
+  that it is empty (§35, §93).
+* **a list** — those filters, in the module's order.
+
+A read that THROWS answers `[]` and says so in the log: an unreadable library
+must not take the tab down with it (§231.3's rule one module over).
+
+### §383.5 — `viewerOf` existed three times, and this would have been the fourth
+
+The same six lines — a seat sees all, otherwise `placeOf` — sat in
+`modules/insights/index.ts` and in `lib/landing-facts.ts` (the second under a
+comment naming the first), and the stamp needed it again. One answer now, in
+`lib/library-viewer.ts`, beside `library.ts` rather than **in** it: that file
+takes a connection and imports nothing, which is exactly what lets
+`checks/insights-tab.mjs` run its first three sections with no database and no
+`node_modules`, and a driver import would have quietly ended that.
+
+### §383.6 — And the Setup document had to carry the stamp too
+
+A Setup document draws no destination tabs, and **the shell walks from Setup to
+a unit without asking for the document again** — so a stamp that was right only
+on a module's own document would be the module's whole list on the tab drawn on
+arrival. The same answer, from the same function, on both (`route.ts`'s Setup
+branch and `modules/strategy/index.ts`).
+
+### §383.7 — One escaper, safe in an attribute (§235, one file over)
+
+**Found by a fixture rather than by reading**, which is the only reason it was
+found at all.
+
+`lib/shell.ts` has an `esc()` of its own and it escaped `& < > "` and **not
+`'`** — a text-node escaper used inside **single-quoted** attributes, which is
+word for word the fault §235 found in the frozen product and fixed *there*. The
+served app kept its own copy and never learned it.
+
+It is live, not hypothetical. `MODULE_DEF.tracker.note` is *"The office's weekly
+actions about this client"*, so a client holding the Internal Tracker was served
+a root element whose **`data-modules` ended at that apostrophe** — the rest
+parsed as stray attributes, `JSON.parse` threw in the browser, and **the module
+switcher was silently not drawn**. §96's family: the page renders perfectly and
+a control is missing.
+
+And `data-landing` carries a published report's **title** (the `latest` line),
+which is typed by a person — so the same break could forge `data-*` attributes
+the shell reads to decide what chrome to draw. **No script**: the policy is
+`script-src 'self'` with nothing inline (§238), so an injected attribute cannot
+run. That is the whole of the exposure and it is stated rather than implied.
+
+One line, matching the frozen escaper exactly. `lib/chat-api.cjs`'s `escHtml`
+has the same gap and is deliberately **not** touched: it is a CARRIED file
+(§316.7) that `generated-in-step.mjs` asserts byte-identical to its frozen twin,
+its subject is an email body rather than an attribute, and editing it here would
+break that check to fix nothing.
+
+### §383.8 — Two checks were stale, and both are my own unmerged rounds
+
+Established as **not this work's** by stashing it, rebuilding, restarting the
+served app and re-running — identical failures, identical detail (§303, and
+§105.6: the first attempt measured a server still running the previous build).
+
+**`checks/door-landing.mjs` and `checks/modules.mjs` shut ONE row and expected a
+person refused.** Access is the **most generous** grant across the roles
+somebody holds (§33), and §382 made a tactic's owner a role — so the Mobile head
+derives `towner@mobile` as well as `owner@mobile`, and shutting the BU owner's
+cell no longer shuts them. **The product is right**; the fixture had stopped
+making the state its own assertions are about. Both now shut **every row the
+person holds, asked of `personRoles` rather than typed** (§42), so the row
+derived by whatever somebody is named on next is shut the day it is added — with
+the custodian beside them asserted **untouched and still open**, or a build that
+refused everybody would pass (§113.8).
+
+**`checks/shell.mjs` asserted a switcher §381 deliberately removes.** That
+section drops a module the tab row already reaches, so on a client holding
+exactly `strategy` and `insights` there is genuinely nowhere else to go and §32
+says a menu of one is a door behind a door. REWRITTEN, never loosened (§218):
+the fixture makes a **third** module so the property this section is about —
+that a module's Setup does not stand the switcher DOWN the way the client's
+settings do — is measurable at all, **and the two-module case is asserted in its
+own right**, so §381's decision is now guarded rather than worked around.
+
+**And `checks/modules.mjs` §7 served the shell's body with no `paint`.** §381
+mounts the switcher from a paint rather than at load, and that section's own
+comment still promised route.js "builds it whether or not the app has hydrated"
+— true until the day it moved (§104.8). The stub carries a one-line `paint` for
+route.js to wrap (§100.3: a stand-in that models less than the thing it stands
+in for reports a working build as broken).
+
+**Two deaths became reports** (§215): the malformed stamp threw inside §3b and
+took the whole section with it — one failure reported where the truth was
+eleven — and the way-back press waited thirty seconds on a door that was not
+there. Both degrade now.
+
+### §383.9 — What was run
+
+`check:insights` **137/0** with a new §14 (the state MADE — a Sector report
+narrowed to one function, a Market **draft**, and a third tenant beside them),
+red under **`all-categories` 6**, `everyone-sees-everything` 7 and
+`client-sees-drafts` 9, each on its own assertions;
+`check:insights:tab` **24/0**; the escaping fix falsified from the source at
+**11 red**, its first failure printing the truncated attribute verbatim.
+`check:shell` **116/2 → 120/0**, and **→ 125/0** once §383.11 gave the seam a section, `check:door` **140/3 → 144/0**,
+`check:modules` **three failures → 159/0**, `check:state` 92/0, `check:viewas` 20/0,
+`check:setup` 33/0.
+
+**Driven in a real browser against the served app**: a Mobile head reads
+`All · Macro`, a Finance head `All · Macro · Sector`, and a client with nothing
+published gets the tab, no filter row and *0 reports* — the Market draft offered
+to nobody.
+
+**No frozen source changed**, so the built file does not move and `sw.js` is
+**not** bumped: §91's trigger is the built file's bytes changing and they did
+not.
+
+**RECORDED, NOT DONE**: the Measure owner row and the field under it, still
+awaiting sign-off on the mockup published at §382; and `lib/chat-api.cjs`'s
+escaper, named above and left where it is.
+
+### §383.10 — And the tracker's one red was two notions of today
+
+Run after the push, and it is the red the record has been carrying for two
+rounds — **`tracker` 227/1** — described there as *"a date-relative literal
+gone stale"* and as *"a heading the check spells as a date"*. Both readings are
+wrong, and correcting them matters, because either sends the next person
+looking for a literal that is not there.
+
+**The page and the expectation were asking about different days.** That section
+renders the document with `today: TODAY`, a fixed **2026-09-15**, and the
+expectation computed `weekWord(t, todayIn())` — the **real clock**. Measured on
+2026-09-21:
+
+| week | rendered with `TODAY` | expectation, real clock |
+|---|---|---|
+| 2026-09-24 | **Next week** | This week |
+| 2026-10-01 | **W1 Oct** | Next week |
+
+So the product was right on both and the check demanded the answer for a
+different week. The days beside the word were already asking `TODAY`, which is
+what made the pair disagree with itself — §100.3's shape: *a probe measuring
+something other than what it rendered.*
+
+**It went red on the CALENDAR rather than on a commit**, which is the whole
+reason it read as a stale literal: it passed for as long as the real date
+stayed outside the weeks the fixture uses, and the day the real week became the
+fixture's week the two notions parted. One argument — `todayIn()` → `TODAY` —
+and the assertion stops depending on the calendar at all.
+
+**AND IT COULD NOT FAIL UNDER EITHER OF ITS OWN BREAKS.** Both sides of that
+comparison call `weekWord`, so `week-numbers` and `week-of-year` move the
+expectation with the product and it goes **ok** on exactly the build it exists
+to catch (§113.8: an agreement is preserved by breaking both sides). That was
+true before this repair and is not made true by it — the agreement is right for
+§53.5 and is not enough on its own. A second assertion names the two headings
+this fixture's FIXED today produces, which are §356.16's decision in words: a
+week has a word, then its place in its **month**. Those are the only literals,
+and the third heading is deliberately not among them because `realThu` is the
+real clock's and moves. **1 red under each break**, where the agreement is
+green. 227/1 → **229/0**.
+
+### §383.11 — And the seam between the two halves was measured by nobody
+
+Found running the falsification suites for the checks this round edited: the
+`:red` list for `check:shell` held five breaks and **`no-library-cats` was not
+among them**, though `lib/shell.ts` declares it.
+
+Pulling that thread found the larger thing. §383 has two halves and each is
+asserted in its own place, with what it needs:
+
+| half | file | needs | break |
+|---|---|---|---|
+| the RULE — which categories this person has | `checks/insights.mjs` §14 | a database | `all-categories` |
+| the ROW — what the tab draws with them | `checks/insights-tab.mjs` §2 | nothing | three source edits |
+
+Between them is `data-library-cats`, written by `lib/shell.ts` on the served
+document — **and nothing read it.** §2 asserts the row draws whatever it is
+handed, which is right and is also the whole of why it cannot say *what* it is
+handed; §14 asserts the answer the rule produces and stops at the function.
+
+So **a build whose stamp was still `CATEGORIES` satisfies both files perfectly
+and draws Islam's six filters** (§113.8). That is §316.7's own finding one
+feature over: *the seam was measured by nobody.*
+
+**`checks/shell.mjs` §3d**, which already starts the served app:
+
+* read off the **RAW HTML**, never the DOM — the tab row is built at paint time
+  before any answer could arrive, and a DOM probe passes on a build that
+  fetched the list late, which is the one thing the stamp exists to prevent;
+* asserted as an **AGREEMENT with `categoriesPresent`** rather than against a
+  typed list (§94.8), so it survives a category being added to the module;
+* the **state is MADE** (§255) — the dev tenant publishes nothing, so every
+  assertion here would pass on a build that stamped `[]` always, which is the
+  other way to get this wrong;
+* **BOTH ENDS** (§94.2): a client without the module carries no stamp at all,
+  or a build that stamped nothing satisfies every "it is not the whole list"
+  line above it;
+* and the fixture is put back in a `finally`, because every section after it
+  reads the same tenant.
+
+Every statement about the client's own rows runs as `smp_app` with the tenant
+set, never as the owner: the policies are FORCED, so a probe reading as the
+owner would be measuring a boundary it is standing outside of.
+
+**AND THE CHECK THAT CLAIMED TO RUN IT SAID SO IN ITS OWN DOCSTRING.**
+`checks/insights-tab.mjs`'s header named `no-library-cats` as reddening its §5,
+and §5 prints *"this section is written and is run by the served-app sweep, not
+from here"* — **and no sweep runs it.** §54.5 inside a check's own prose, which
+is the quietest place for it: a file that says a thing is asserted elsewhere is
+read as a file that has covered it. Corrected in words rather than deleted, the
+two halves named with their breaks, and what remains unasserted anywhere —
+the tab on all four destination kinds, the address it writes, typing never
+repainting — said plainly rather than left as an absence.
+
+**5 green, and RED 5 under `no-library-cats` — which is not the same five, and
+the difference is worth the sentence.**
+
+Four are §3d's own. The fifth is **§3b's**, and it is a true consequence rather
+than a stray: dropping the stamp drops the **tab**, and §381's switcher rule
+reads the tab — so with the reports no longer on the row there is somewhere else
+to go, the four-square mark correctly comes back, and the section asserting it
+is NOT drawn goes red. That is the coupling §381 built, measured for the first
+time by a break aimed at something else.
+
+And §3d's own fifth — *a client without the module carries no stamp* — is
+correctly **green** under it: the break makes every document stampless, so the
+absence it asserts is true for the wrong reason. That is what a both-ends
+control looks like when the break lands (§113.8), and it is why it is not the
+only assertion here.
+
+`check:shell` 120/0 → **125/0**, its `:red` list five breaks → **six**.
+
+**AND THE FROZEN SWEEP IS UNMOVED, WHICH IS EVIDENCE RATHER THAN CEREMONY.**
+`qa.py` through `qa-run.py` reads **33 viewers / 242 destinations / ERRORS
+none** — the tail read rather than a count (§298.3), and the destinations
+summed from the run's own per-viewer lines rather than copied from the record
+(§332). That sweep runs over `file://` on baked data with no database, so it
+is deterministic: a round touching no frozen source *must* reproduce §365's and
+§367's 33 / 242 exactly, and a figure that had moved would have contradicted
+this section's own claim that the built file does not move. It is the same
+reasoning §332 used the other way round — there a count that differed from the
+record was worth ten minutes before it was worth a sentence; here a count that
+matches is worth stating, because the claim it corroborates is the one §91's
+`sw.js` decision rests on.
+
+**RECORDED, NOT DONE**: §5 is still unrun. It needs the served app, which the
+shell check now starts — so the honest next move is for its remaining subjects
+to go there too rather than for a second file to start a second server.
+
+
+## §383.1 — THE MERGE, AND THE TWO INTERSECTIONS (2026-09-21)
+
+Islam: *"please check this branch claude/dazzling-heisenberg-vsqfuz and
+migrated what it has as there are intresections and we need it resolved before
+merging. so better merge that branch with ours first."*
+
+**THERE WERE TWO, AND ONLY ONE OF THEM WAS THE BRANCH HE NAMED.** Looking
+before merging anything (§91's fetch-and-look) found that `main` has moved
+since our own §376.1 landed on it and has taken **§377** (*an address is a
+value*) and **§378** (*an address is taken whole*), both spec 059 from a third
+session — while `claude/dazzling-heisenberg-vsqfuz` had taken **§380**.
+
+**AND THE TWO §380s ARE ABOUT THE SAME SUBJECT, WRITTEN TWO MINUTES APART.**
+Theirs at 15:24:28, ours at 15:26:32, on the same afternoon, both quoting
+Islam, both about a tactic's **Owner**:
+
+| | ours (now §382) | theirs (§380, spec 062) |
+|---|---|---|
+| shape | a **row** on Roles &amp; access | a tenant **switch** + a tab |
+| the quote | *"add measures &amp; tactics owners as roles so I can set their accessability"* | *"align with me more not to ruin any access"* |
+| default | every cell `none` | switch off |
+| where they type | the unit's own Reporting page | **My reporting**, their own tab |
+| the unit's page | editable once the cell is opened | **read-only** for them |
+
+Neither supersedes the other by time, and neither is a mistake: they are two
+honest answers to one ask, from two sessions that could not see each other.
+
+### §383.1a — The renumber, first and on its own
+
+§264.3's rule, and it is what makes the scoping provable rather than asserted:
+the merge base with `main` is **our own §376.1 commit**, and it carries **zero**
+citations of §377, §378, §379 or §380 — so every one of them in this tree is a
+line this branch wrote. Renumbered **descending by source**, or each pass eats
+the next (§365.5):
+
+    §377 → §380     §379 → §381     §380 → §382
+
+**THREE SPELLINGS, NOT TWO** (§336.1): `§NNN`, `&sect;NNN`, and the
+`\u00a7NNN` JavaScript escape — seven of the last in `smp-app/checks/shell.mjs`
+and `scripts/test-nav-row.js`, which a two-spelling sweep would have left
+naming somebody else's section. Every count **declared in advance** and the
+whole pass refused on a mismatch (§353.4): 45 / 68 / 66, all three matched, and
+of 179 changed lines **0** do not carry a citation.
+
+The built file is REBUILT rather than renumbered in place (§91) and differs
+from the renumbered copy in exactly the §238 CSP hashes — the renumber changed
+comment bytes inside script blocks, so the hashes move, which is that section
+working as designed rather than a discrepancy.
+
+### §383.1b — Both features are kept, and the order between them is written down
+
+They compose, and the order is a fact rather than a preference:
+`canEnterLine()` asks `lineOwned()` first, which is false while the switch is
+off. So **with the switch off** every owned tactic falls through to
+`canReportRow()` and §382's role decides, exactly as it was built; **with it
+on** an owned tactic on the unit's page is refused there for everybody but the
+office, whatever the role says, and the owner types on My reporting.
+
+**AND ONE COMBINATION SAYS TWO THINGS.** A tenant that opens the Tactic owner
+row AND turns the switch on reads *Reporting: edit* on Roles &amp; access and
+meets a **read-only** row on the unit's page. Nothing breaks and nothing is
+ambiguous to the code — but it is a screen saying yes where a page says no,
+which is the drift §42 exists to stop, and two switches governing one
+capability is §53.5 waiting to happen. **Recorded in `boundedReach()`'s own
+comment, raised here, and deliberately NOT resolved by picking one** (rule 1b).
+It is Islam's, and it is the one thing this merge does not settle.
+
+### §383.1c — How each conflict was resolved, by class
+
+* **The three records** — COMBINED, never picked (§318.7), and asserted heading
+  by heading rather than eyeballed: **0 lost from ours, 0 lost from theirs**.
+  Theirs' `*Last Updated:*` banner demotes to `*Earlier:*`, which is that
+  file's own convention (§356.17).
+* **`lib/rules.js`** — one conflict region, and it is the intersection itself:
+  ours inserts a `towner` branch, theirs inserts a comment explaining why its
+  switch adds none. Both kept, with a merge note saying which question each
+  is about, because a reader meeting *"deliberately does not reach this line"*
+  directly under a branch that does would reasonably read them as arguing.
+* **`shell.html`** — four tab lists, both tabs kept: theirs after Reporting
+  (*"a slice of reporting"*, his own words), ours last. Theirs arrived written
+  out **four times**; declared ONCE as `MY_TAB` beside `LIB_TAB`, which is this
+  file's own idiom from four lines away (§211, §213 each cost a day to learn).
+  Same key, same gate, same renderer, same position — no behaviour moves.
+* **`smp-app/lib/rules.cjs`** — RE-CARRIED from its frozen twin rather than
+  merged (§335), and `authorize.cjs` and `graph-diff.cjs` came out **already in
+  step**, which corroborates their auto-merge rather than assuming it.
+* **The built file and `public/shell.js`** — rebuilt and regenerated, never
+  merged (§91, §329).
+* **`sw.js`** — §94.12 exactly, and git caught it this time because the
+  suffixes differed: **both sessions independently wrote `v5.23`**. Taken past
+  both and past main's `v5.22` → `v5.24-merged`; one `SHELL` declaration, and
+  `node --check` clean (§146.2).
+
+### §383.1d — What reading the merged tree found (§313.37, §56.7)
+
+**THEIR COMMENT DESCRIBED A BRANCH THEY HAD REMOVED.** The paragraph above
+`boundedReach` opens *"§380 TAKES THE WORLD"* and that function takes no world
+— it describes the narrowing branch their own spec records writing and taking
+out again. §104.8 exactly: a comment stating an intention the code does not
+carry out, and the quietest kind, because it reads perfectly. Corrected rather
+than carried.
+
+**THE DUPLICATE SCAN IS CLEAN.** Over build.py's own concatenation (never a
+second list, §53.5): **1530 top-level names, exactly SIX duplicated** — the six
+§281.1 leaves deliberately. The merge introduced none, and every declaration
+either side touched still resolves (§147.4, §340.1).
+
+### §383.1e — And two checks went red, for opposite reasons
+
+**`test-my-reporting` §0 was the check WORKING.** It asserts the SET of sources
+that need a browser, so that a file growing that dependency is a failure rather
+than a silent omission — and §383's `insights.js` grew one. REWRITTEN, never
+loosened (§218, §214.3): the file is named with its reason and the sentence no
+longer says *"the three"*, which was the literal that moved. **53/0.**
+
+**`test-nav-row` reported §381's own fault on a build that does not have it.**
+Its host answers an unknown name with `undefined`, `allowed()` reads
+`if (d.when && …)`, and **a tab whose gate is undefined skips straight to
+`grantAt`** — which for `c_mylines` is `area:"always"` and therefore *view* for
+everybody at every target. So the merged run read **10 units and 8 functions
+for somebody who reaches nowhere**: the exact shape §381 exists to catch,
+produced by a stand-in modelling less than the thing it stands in for
+(§100.3). *An unsupplied `when` is not a closed one.*
+
+**The product was CHECKED rather than assumed** (§303's habit pointed at our
+own suspicion): in the built file `myLinesHere` is declared **44,000 lines
+before** the tab object is created, so the real gate is there. The harness
+supplies it now at **three states** — off, on, and *a tab that ignores its
+gate* — the third being the guard that this file can still see §381's fault
+through a `when` at all (§113.8), since a stand-in that can only answer *no*
+makes every assertion pass while proving nothing.
+
+**AND MY OWN FIRST STAND-IN WAS ITSELF TOO LOOSE**, which is the same lesson
+twice in one hour: it answered *yes* at a person's own place without asking
+whether they own a line, and moved `cfo` — the one person who reaches nowhere
+— by handing them the Group button. It asks the product's own `ownedBy()` now.
+Measured on the seed: **18 of 33 people own at least one tactic**, §382's own
+figure reproduced independently, and `cfo` is not one of them. **18/0**, red 7
+under `--break=everywhere`.
+
+### §383.1f — What was run, on the MERGED tree
+
+§365's rule, and it is the whole reason a rehearsal is worth doing: a branch
+that passes says nothing about what the merge produces.
+
+**Pure, no browser and no database** — authoriser **704/0** (theirs' §43 among
+them), change list **140/0**, `test-my-reporting` **53/0**, `test-tactic-owner`
+**29/0**, `test-nav-row` **18/0** red 7 from the SOURCE.
+
+**The frozen product** — `built-in-step` all good, `checks/access-header.py`
+all clear, and **theirs' own `checks/my-reporting.py` all good**, which its
+spec still records as *written and NOT RUN*.
+
+**The served stack** — `generated-in-step` all clear, `tsc` clean **COLD**
+(§3), `next build` green, modules **159/0**, view-as **20/0**, insights:tab
+**24/0**, setup-shape **33/0**, insights **137/0**, state **92/0**, tracker
+**229/0**, shell **125/0**, door **144/0** — the last two against a real build
+on a real Postgres.
+
+**AND THE SWEEP DID NOT MOVE, WHICH IS THE EVIDENCE RATHER THAN THE TICK.**
+`qa.py` over `file://` reads **33 viewers / 242 destinations / ERRORS none** —
+the same figure §365 and §367 recorded, summed from the run's own per-viewer
+lines rather than quoted (§332). A merge that added a TAB should add no
+DESTINATION, and §381 is the section that exists because one did: the tab is
+gated on `myLinesHere`, the switch ships off, so on the shipped seed it is
+drawn nowhere and the row is byte for byte what it was. A different number
+here would have meant the new tab had reached the navigation.
+
+**`main` IS UNTOUCHED.** This is the rehearsal Islam asked for — the two
+branches resolved against each other, on ours — and the merge to `main` is his
+word, on that merge, with §377 and §378 still to come in from it.
+
+## §383.2 — THE SECOND HALF OF THE SAME SENTENCE: `main` COMES IN (2026-09-21)
+
+Islam, at §383.1: *"there are intresections and we need it resolved before
+merging. so better merge that branch with ours first."* The branch he named was
+merged there. **This is the rest of that sentence** — `origin/main`'s §377 and
+§378 (spec 059, a third session's work on the register's Email and Mobile
+cells), which §383.1's own closing line records as still to come in.
+
+**NOTHING IS BUILT HERE**, and it is read off the diff rather than promised:
+**13 files**, of which three are the record, five are what git could not
+resolve (those three plus the built platform file and `sw.js`), two are the
+generated copies `smp-app/public/` holds, and the remaining five — two sources,
+one stylesheet, two checks and a mockup — are main's own work arriving by a
+clean auto-merge. Not one source is edited for its own sake. `main` is
+untouched — this is the rehearsal, and the merge to `main` is Islam's word, on
+that merge.
+
+### §383.2a — Every conflict had a named rule, and the rule was followed
+
+Five conflicts, and each one is a shape this file has already written down:
+
+| file | rule |
+|---|---|
+| `CLAUDE.md`, `IMPLEMENTATION_PROGRESS.md`, `DECISIONS-AND-LOGIC-v3.22.md` | **COMBINED, never picked** (§318.7, §356.17, §375.1) |
+| `strategy-management-platform-v3.22.html` | **REBUILT from the merged sources, never merged** (§91) |
+| `sw.js` | rebuilt from main's copy with the branch's one line re-applied (§146.2), the name **past both** (§94.12) |
+
+**AND THE COMBINE IS ASSERTED RATHER THAN EYEBALLED.** Either side of a record
+file taken whole silently drops the other session's round, and there is no
+`generated-in-step` for prose (§356.17's own finding). So the resolution is
+made by a script that asserts **every non-blank line of each side survives in
+the result**, with exactly one deliberate edit declared to it: main's
+`*Last Updated:*` becoming `*Earlier:*`, which is `CLAUDE.md`'s own convention
+for an entry that is no longer the newest. `CLAUDE.md` is newest-first, so ours
+leads; the other two append, so main's §377–§378.2 come before our
+§380–§383.1 — read off each file's own heading order rather than assumed.
+
+**AND THE ARTEFACTS CARRY BOTH SIDES, MEASURED**: the rebuilt platform file
+holds main's `selall` on **4 lines** and this branch's
+`lineOwnersSwitch`/`lineOwnersOn` on **7**, and `smp-app/lib/shell.ts` still stamps `data-library-cats`. A merge that
+rebuilt one side's artefact from one side's sources would satisfy every
+"it builds" assertion and ship half the product.
+
+### §383.2b — No renumber was owed, and that was checked in three spellings
+
+§383.1 renumbered this branch's §377 → §380, §379 → §381, §380 → §382
+**before** that merge, precisely because `main` had taken §377 and §378
+(§264.3: a renumber is provably scoped only while the branch's own lines are
+the only ones there). So this merge owes none — and it is **measured rather
+than assumed**: every `§377`/`§378` in this tree is prose REFERRING to main's
+sections, not a citation of our own work, and `main` cited **§379–§382 nought
+times**. Checked in all three spellings (§336.1) — the `§` character, the
+`&sect;` entity, and the `§` JavaScript escape.
+
+### §383.2c — The merged sources were READ, not believed (§313.37)
+
+Main replaced `copyable()` with `valueCell()` and deleted the click-to-copy
+handler. Two things follow, and neither is visible in a clean auto-merge:
+
+- **No name main removed is still called.** `copyable` survives in the merged
+  tree only in comments and in `build.py`'s own untracked intermediate; nothing
+  binds `[data-copy]`, because nothing draws it.
+- **The concatenation holds 1530 top-level names with exactly SIX duplicates**
+  — the six §281.1 deliberately leaves in `config-render.js`. Scanned over
+  build.py's own script list (§340.1), read from `build.py` rather than typed
+  (§53.5). **The merge introduced none** (§56.7).
+
+**AND §335's RE-CARRY WAS NOT OWED, WHICH IS MEASURED RATHER THAN SKIPPED.**
+The three shared rule modules and their carried `.cjs` twins are what a merge
+can silently leave half-stale — and against the merge base **main touched none
+of them** while our side changed all six together, so this merge brings nothing
+to carry. Asserted anyway by the rule itself (one declared transform, a
+`require` of a carried sibling becoming `.cjs`): all three **in step**.
+
+**AND §274's SWEEP RAN ON BOTH SIDES OF THE MERGE.** The checks that reach for
+the control main removed are main's own two — `identity-merge.py` and
+`people-dialog.py`, both asserting its **ABSENCE**, both green here — and one
+mockup GENERATOR, which the wrapper refuses in a sweep (§334.14) and whose
+reference is the record of what was drawn rather than a live assertion.
+
+**AND THE ONE LINE OUR TWO ROUNDS BOTH TOUCH WAS HANDLED AS A REWRITE**: §374's
+*"a duplicated value still opens its cell"* rested on `data-copy` being the
+33-way ambiguous mark, and main's §378 **REWROTE it rather than loosening it**
+(§218) — the open-and-still-open half survives whole and can still fail, which
+is what keeps §374's `putFocus` guard under measurement.
+
+### §383.2d — Three reds, every one established as not this merge's (§303)
+
+- **`test-clean-parity.js`** — §308 already records it red on `origin/main`,
+  reproduced there on a virgin database. Neither side touched migration 004 or
+  `clearedGraph()`, measured off the diff.
+- **spike S2, AND FIVE MORE BEHIND IT FOR ONE REASON** —
+  `seed: portfolio_activities references portfolio_activities`. **Reproduced
+  identically on a worktree of the pre-merge commit**, and neither side touched
+  `smp-app/db/` or `smp-app/spike/`. **SIX OF THE NINE PROOFS ARE DARK AND IT IS
+  ONE LINE**, which is §365.4's own finding recurring for a different table:
+  `spike/_harness.mjs` seeds each table's FK columns from a parent row, taking
+  every NOT NULL foreign key and — where none is NOT NULL — **the first one the
+  catalogue hands back**, which its query orders `BY f.conname`. On
+  `portfolio_activities` (§375's own table) all three FKs have a nullable member,
+  so none is NOT NULL, and its three auto-named constraints sort
+  `…_depends_on_fkey` before `…_phase_id_fkey` and `…_work_package_id_fkey` —
+  so **the one picked is the SELF-reference**, which can never have a row yet.
+  **And the half above it was written with exactly this in mind**: the
+  topological walk skips a self-reference by name (`f.ref !== t`) and the
+  seeding loop does not — *one function knowing a rule its neighbour does not*
+  (§53.5). A nullable self-reference is what a first row legitimately leaves
+  NULL. **Named rather than fixed** (rule 1b): it is a harness outside this
+  merge's scope, and the property those six prove — the tenant boundary — is
+  independently green on the merged tree in `check:state` 92/0, `check:room`
+  10/0, `check:modules` 159/0, `memory-boundary` 16/0 and `multi-client`
+  124/0.
+- **`check:frameworks:page`** — 1 passed, 14 failed, the first being *Frameworks
+  is in the console's nav* and the rest §215 deaths behind it. **Every file of
+  its subject is byte-identical to the pre-merge tree** — `platform.html`,
+  `smp-app/shell/platform.html`, `public/platform-page.js`, the check itself,
+  `dev-tenant.mjs` and the frameworks route — so a merge that changes no byte of
+  a check's subject cannot change its verdict. **What it IS, said rather than
+  left as an absence** (§54.5, §123): the console's `#nav` is EMPTY with
+  `platform-page.js` served 200, `body.ready` set and **no console error**, so
+  `ME` never lands — a container condition this round did not close, and not
+  this merge's to close.
+
+### §383.2e — And the findings of the round were mine, in the harness
+
+**`export A=x B=$A` IN ONE STATEMENT LEAVES B EMPTY.** Every database check in
+the first pass ran with `DATABASE_URL_UNPOOLED` unset — on the POOLED
+connection, which for a request that selects its tenant with a session setting
+is precisely what §313.34 forbids — **and the product printed the warning on
+every single run**: `[db] connecting through DATABASE_URL — POOLED; set
+DATABASE_URL_UNPOOLED (§313.34)`. It was read past nine times. §105.6's family:
+*a measurement made in the configuration the product warns about is not a
+measurement worth recording*, and the tell was on screen the whole time. Every
+database check was re-run with both names set.
+
+**AND A LAUNCHER THAT DID NOT LAUNCH REPORTED SUCCESS.** The first sweep was
+started as `nohup … &` inside a backgrounded shell call; the wrapper exited
+immediately, the sweep was killed with it, and the run came back **exit 0 with
+an empty log**. §320.6b one layer out — *a check that cannot launch reports no
+failures*, and here a launcher that ran nothing reported a clean exit. What
+catches it is the rule already written down: **read the TAIL, and an EMPTY tail
+is a failure and never a pass** (§298.3), which is why the runner written for
+the 185-file suite prints `<EMPTY TAIL>` as a verdict of its own.
+
+**AND TWO RECORDED CONDITIONS WERE MET RATHER THAN QUOTED.** §328.6's two
+pixel-reading checks (`home-mark`, `chat-settings-scroll`) need Pillow and die
+with `ModuleNotFoundError` without it, which reads like a failure in a summary
+and is not one — installed, and both re-run green (**all passed**,
+**0 failures**). §328.3's `multi-client.py` needs
+the three-step rehearsal database (seed a tenant in `public`, run
+`migrate-to-multi-client.js`, then `fixture-platform.js`) — built, and it is
+**124/0**, §366.3's own figure.
+
+
+**AND A STALE SERVER FROM THE OTHER STACK SQUATTED THE FROZEN CHECKS' OWN
+PORTS.** `multi-client.py` defaults to 3994 and `platform-look.py` to 3995, and
+both came back *"dev-server never came up"* — which names the wrong server: ours
+could not come up because a **`next-server` left over from the served-stack
+checks** (`npm run check:*`, which spawn `next start`) was already holding the
+port. **§366.4 recorded this exact collision in the direction of a false PASS** —
+a stray dev-server answering, so `wait_up()` reported the server up and
+`mayOpenClient` forced true still printed *124 checks, 0 failed* — and this is
+the same collision from the other stack, producing a false FAIL.
+
+**AND MY FIRST DIAGNOSIS WAS A GUESS AND WAS WRONG**: I put it down to
+contention with the running sweep's Chromium and deferred both checks on it
+(§105.6). What found it was starting the server **by hand exactly as the check
+does** — `node scripts/dev-server.js 3994`, the port as **argv**, not the `PORT`
+environment variable the server does not read — and reading `EADDRINUSE` off its
+own stderr. **AND THE TOOL I REACHED FOR FIRST WAS BLIND**: `ss -ltn` reported
+3994 **NOT LISTENING** while `fuser -n tcp` named the pid and `curl` got a 200
+off it — *a diagnostic that models less than the thing it measures reports
+wrong* (§100.3), and this one reported the reassuring direction.
+
+### §383.2f — And one prerequisite was written down for the wrong check
+
+`test-platform.js` came back **92 passed, 1 failed** on the rehearsal database,
+on *"…and the known password is the one said in the open"* — the bootstrap
+account's password no longer verifying as `1234`.
+
+**IT IS NOT A FAULT AND IT IS NOT ORDERING**: run first on a *fresh* rehearsal
+database it still fails, and run on one that has had the migration but **not**
+`checks/fixture-platform.js` it is **93/0**, this file's own recorded figure.
+The fixture makes its three accounts through the product's own hasher
+(§313.37's own sentence) and in doing so replaces the bootstrap password the
+test asserts.
+
+**AND `test-concurrent-saves.js` IS THE THIRD WORLD, WITH THE MOST ALARMING
+READING AND THE SAME ANSWER.** On a virgin database it dies exactly as §328.3
+records — `relation "platform.sessions" does not exist` — and on the rehearsal
+database it RUNS and reports **8 of 8 concurrent changes lost**. That is §240's
+own subject and it is not this merge's: run from a worktree of the **pre-merge
+commit against the same database** it is byte-for-byte the same verdict, the
+same eight units, the same words. What it measures is the FROZEN stack's
+`api/state.js` in a world (a rehearsal database, a client's schema) that
+§328.3 already records those seven harnesses as unable to ask in since §313 —
+and **production serves the new stack** (§332), whose concurrency is green here
+at `check:state` **92/0**. Reproduced rather than reasoned about, and named
+rather than quietly left out of the run list.
+
+**SO THE THREE-STEP RECIPE IS `multi-client.py`'s AND NOT EVERY HARNESS'S.**
+CLAUDE.md records it under `multi-client.py`, where it is right;
+`test-platform.js` wants the same database **before** the fixture, or one of its
+own. §328.3's class — a harness needing a world prepared a particular way —
+with the twist that here TWO harnesses want the same database prepared to two
+different points, and running them in the wrong order reports a correct build
+broken (§100.3). Recorded here rather than left for the next person to
+rediscover; nothing in the product moves for it.
+
+**AND ONE OF THE THREE DOES NOT MERELY WANT A DIFFERENT WORLD — IT POISONS
+ANOTHER'S.** Run against the rehearsal database, `test-platform.js` leaves its
+own three fixture accounts (`a@ff.example`, `o@ff.example`, `two@ff.example`) in
+`platform.accounts` — and `multi-client.py` asserts that every consultant the
+console lists ends `@forefront.consulting`, which is a real rule about a real
+leak (§313.4: `account_clients` maps a client's own people too, so a list read
+without `kind = 'office'` offers to make Raya's SMO its super user). So the
+contaminated run reads **124 checks, 1 failed**, naming ten addresses, and it
+reads exactly like a product fault. Rebuilt in the three steps on a fresh
+database it is **124/0**, §366.3's own figure. *The order is not an
+inconvenience; running them in the wrong one reports a correct build broken*
+(§100.3).
+
+**AND `test-cold-starts.js` IS THE SAME SHAPE WITH THE OPPOSITE PREREQUISITE**:
+run against the rehearsal database it fails *"and what it adds is there"*, and
+on a **virgin** one — which is what it models, a deployment booting for the
+first time — it is **all cold-start checks passed**. Three harnesses, three
+different worlds, one database each; measured rather than assumed, and the
+whole of that red was mine for pointing it at the wrong one.
+
+### §383.2g — Verified on the MERGED tree, not on either side of it
+
+§365's own first finding is that an honest sweep is of the merged result and
+never of the branch, so every figure below was taken after the merge was
+resolved and the two artefacts regenerated.
+
+**The frozen suite, every file, through `qa-run.py` (§320.6b):** 185 files, of
+which **16 are mockup GENERATORS the wrapper refuses in a sweep** (§334.14),
+leaving **169 real checks — 165 green in the sweep and the four below answered
+out of band**, with the TAIL read for every one and **`<EMPTY TAIL>` printed as
+a verdict of its own** (§298.3). `home-mark` **all passed** and
+`chat-settings-scroll` **0 failures** once Pillow was installed (§328.6);
+`multi-client` **124/0** and `platform-look` **27/0** on a clean three-step
+rehearsal database with its port cleared. Of the 165, `setup-per-module` says in
+its own tail that only its `file://` half ran, which is what that file is
+written to say when `SMP_BASE` is unset (§54.5) — its served half is covered by
+the app suite below.
+
+**The frozen sweep:** `qa.py` over `file://` — **33 viewers, 242 destinations,
+ERRORS none**, the count SUMMED from the run's own per-viewer lines rather than
+quoted from the record (§332). A merge that changes no frozen source must
+reproduce §365's and §367's figure exactly, and it does.
+
+**The rules, with no browser and no database:** authoriser **704/0**, change
+list **140/0**, platform rules **69/0**, `test-nav-row` **18/0**,
+`test-my-reporting` **53/0**, KB audience **all clear**, `test-session-state`
+**ok** with its two named printed exceptions (§313.34, §313.35),
+`test-db-url-choice` **10/0**.
+
+**The served stack, which is what production runs** (§332): `check:state`
+**92/0**, `check:room` **10/0**, `check:modules` **159/0**, `memory-boundary`
+**16/0**, `check:setup` **33/0**, `check:viewas` **20/0**, `check:deploy`
+**5/0**, `check:assistant` **10/0**, `check:insights:tab` **24/0**; `tsc` clean
+**COLD** (§3 — a cached typecheck reports a clean tree on a build that does not
+compile).
+
+**The artefacts:** `built-in-step.py` **all good** — the shipped file
+byte-identical to `build.py`'s own output from the merged sources (§349) — and
+`generated-in-step` **all clear**, with the three carried `.cjs` rule modules in
+step by the one declared transform (§335).
+
+**Nothing stored moves, nothing is migrated and nobody is signed out**, read off
+the diff rather than promised (spec 029): the merge brings main's two sources,
+one stylesheet, two checks and a mockup, and touches no `api/`, `lib/` or `db/`
+file of its own.
+
+
+### §383.2h — And `main` has moved again, which is said rather than left
+
+**§4's fetch-and-look, run again as the LAST step of a merge** rather than only
+the first — §94.16 already makes that the rule for the `sw.js` name, and the
+same window applies to the branch it is being merged from.
+
+This merge is against **e798419c** (`sw.js` reading `v5.22-whole-values`), and
+`origin/main` now carries **three more commits** — §379, §379.4 and §379.5,
+spec 059's own continuation. **It has taken §379**, which its `CLAUDE.md` cites
+**ten** times.
+
+**AND THIS TREE HELD A DIFFERENT §379** — *My reporting: the lines a tactic's
+owner enters* (spec 062), which arrived at §383.1 from the other branch, with a
+§379.5 of its own. The two are **genuinely disjoint**, measured rather than
+assumed: neither body's text appears in the other's tree, and `main` cited
+§380–§382 **nought** times.
+
+So the collision is real and it belongs to the **next** merge, not this one —
+nothing in this tree is wrong today, because main's §379 is not in it. What the
+next round owes, in order:
+
+1. **Renumber BEFORE the merge**, scoped to this branch's own lines, in all
+   three spellings (§264.3, §336.1) — `§`, `&sect;`, and the `\u00a7`
+   JavaScript escape, the third being the one a two-spelling sweep leaves
+   naming somebody else's section.
+2. **Re-run the suite on the MERGED tree** (§365's own first finding). Nothing
+   in §383.2g is verified against those three commits.
+
+Recorded here rather than left for the next person to discover at the moment
+they are resolving conflicts.
+
+
+---
+
+## §383.3 — THE RENUMBER OWED BEFORE THE MERGE (2026-09-22)
+
+§383.2h wrote down what the next round owes and this is that round, done on its
+own before any merge — which is not tidiness but the only moment the scoping can
+be proved (§264.3).
+
+**NOTHING IS BUILT HERE.** Read off the diff: 346 citations, two regenerated
+artefacts, and the record. No rule moved, nothing stored moves, nothing is
+migrated, nobody is signed out (spec 029).
+
+### §383.3a — The scoping is proved, not asserted
+
+The merge base with `main` is **e798419c** (§378.2), and it carries
+**§379–§383 nought times in every spelling**. So every one of those numbers in
+this tree is a line this branch wrote, and every one on `main` is a line `main`
+wrote. There is nothing of anybody else's for a sweep to take.
+
+*That is why a renumber runs BEFORE a merge and never inside it* — afterwards
+the sources are not all yours, and §264.3 is the section that exists because a
+blanket sweep took seventeen of somebody else's citations.
+
+### §383.3b — The whole run shifts, not only the collision
+
+`main` took **§379** alone. Renaming ours to §383 and stopping would leave a
+section describing work done *before* §380 sitting *above* it — so the branch
+moves up by one and keeps its order:
+
+    §382 → §383     §381 → §382     §380 → §381     §379 → §380
+
+**Descending by source, or each pass eats the next** (§365.5). §379 is handed
+back to `main`; this branch is §380–§383.
+
+**Spec numbers needed nothing** and it was checked rather than assumed: ours is
+`062-my-reporting` and `main`'s highest is `061`.
+
+### §383.3c — Three spellings, every count declared, every step guarded
+
+`§NNN`, the `&sect;NNN` entity, and the `\u00a7NNN` JavaScript escape — **nine
+of the last**, in `smp-app/checks/shell.mjs`, `smp-app/checks/door-landing.mjs`
+and `scripts/test-nav-row.js`, which a two-spelling sweep would have left naming
+somebody else's section (§336.1). A fourth (`u00A7`, `&#167;`) was searched for
+and does not exist.
+
+Counts **declared in advance** and the pass refused on a mismatch (§344.1,
+§353.4): **89 / 61 / 75 / 121 — 346 in all**, all four matched. Each step also
+asserted that its **target was free** before it wrote, and that the **source was
+0 after**.
+
+**Applied to the file on disk each pass, never from a planning-time snapshot** —
+§376.1's own finding, where four files took two substitutions each and the
+second was written from the ORIGINAL text, silently discarding the first while
+every per-pass assertion passed.
+
+**The two generated artefacts are REBUILT, never renumbered in place** (§91,
+§329): the shipped file from `build.py`, `smp-app/public/` from its four
+generators.
+
+### §383.3d — And the sweep takes the sentences that DESCRIBE the numbering
+
+§371.5 recorded this once; it is the finding of this round because it is now a
+rule rather than an anecdote. **A number in these records is one of two things,
+and only one of them may move:**
+
+- a **LABEL** naming a section in this tree — swept, so it still points at the
+  thing it names;
+- a **HISTORICAL FACT** — the arrows of a past renumber, or a measurement of
+  `main` made at that moment — **not swept**, or the record calmly states
+  something that never happened.
+
+Nine sentences had become false. §383.1's own arrow table read
+*§377 → §381* where what it did was *§377 → §380*; §383.2b said `main` cites
+*§380–§383 nought times* where that was a measurement of §379–§382 taken before
+`main` moved; and §383.2h — the paragraph whose whole subject is that `main` has
+taken a number — said it had taken **§380**. *The sweep rewrote the sentence
+that was about the sweep.*
+
+Rewritten **by hand**, each with a one-match guard that refuses rather than
+writing nothing — **and the ninth refused, correctly**, because it was written
+against the text as it stood BEFORE the pass rather than after it.
+
+**And My reporting's number has moved twice** (§345 → §379 at §380, then
+§379 → §380 here). Said in full, rather than left as the half a sweep produces.
+
+**One number was corrected while it was being restored**: §383.2h said `main`'s
+`CLAUDE.md` cites its §379 **nine** times, which is the count in the `&sect;`
+entity alone. Counted in both spellings it is **ten** — §336.1's own lesson, in
+miniature, inside the paragraph that cites §336.1.
+
+### §383.3e — The assertion that only citations moved was wrong before it was right
+
+The first run of *"every changed line carries a citation"* matched only the
+**new** numbers, so all 108 removed `§379` lines read as uncited and it reported
+a clean pass as **108 faults**. Corrected, it answers **0**.
+
+A second reading proves it from the other end: **mask every citation on both
+sides of the diff and the two are identical** — so nothing but the number moved.
+356 lines out, 356 in, across 37 files.
+
+### §383.3f — What was run
+
+`built-in-step` all good · `generated-in-step` all clear, with the three carried
+`.cjs` in step by the one declared transform (§335) · the citation counts
+asserted at both ends · authoriser and change list green.
+
+`generated-in-step`'s single FAIL before the commit is **§349.4's guard working
+as designed** — it refuses a tree with uncommitted edits and says *which* errand
+that is, rather than calling a mid-edit tree stale.
+
+**The `sw.js` SHELL bump is deliberately NOT made here.** The built file's bytes
+did change, which is §91's trigger — but that bump is the **last** step of a
+merge and is confirmed against `origin/main` immediately before the push
+(§94.16). Choosing the name now is choosing it from information that will be
+stale by the time it is pushed.
+
+### §383.3g — What is still owed
+
+1. **Re-run the suite on the MERGED tree** (§365) — nothing in §383.2g is
+   verified against `main`'s three new commits.
+2. **Bump `SHELL` in `sw.js`** at the merge, confirmed against `origin/main`
+   immediately before the push (§91, §94.12, §94.16).
+3. The three reds §383.2d establishes as not ours: `test-clean-parity.js`,
+   spike **S2**'s self-referencing foreign key, and `check:frameworks:page`.
+
+**`main` untouched: this is the preparation, and the merge is Islam's word, on
+that merge.**

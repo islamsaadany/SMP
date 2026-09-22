@@ -1100,6 +1100,14 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
+    /* WHO THE SCREEN IS BEING DRAWN FOR (§381). The save has carried the
+       simulated person since §185; a module that READS a person's data has
+       the same question, and it must have the SAME answer — `actingAs()`
+       carries the switcher's own two guards (the seat that draws it, and the
+       key being on the register), so a second test would be a second idea of
+       when a view-as is real (§42, §53.5). Exported rather than re-asked,
+       exactly as `isSMOSession` is below and for the same reason. */
+    actingAs: function () { return actingAs(); },
     person: function () { return person; },
     /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
        the viewer switcher too, and the note above isSMOSession() is explicit

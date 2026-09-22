@@ -76,34 +76,6 @@
       note:"Named as a project's Owner on a supporting function. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
-    /* ── AND THE ROW UNDER THE PILLAR (§382, Islam 2026-09-20) ──────
-       *"I believe we need to add measures & tactics owners as roles so I can
-       set their accessability and accordingly Mahdy access can be switched on
-       of orr."*
-
-       §147.7'S SHAPE ONE LEVEL DOWN, and that is the whole of it: a pillar
-       has an Owner and so does every tactic under it, and being named the
-       Owner IS the role. What was missing is that a tactic's Owner derived
-       NOTHING — the Contributor floor covered it, and only for somebody
-       holding no other role at all, so a unit head who also owns a tactic
-       somewhere else reached it through no role anybody could see on the
-       table and could therefore be switched off by nobody.
-
-       ALL NONE, AND THAT IS HIS INSTRUCTION RATHER THAN A CAUTIOUS DEFAULT:
-       *"we don't have a tactic or measure owner in the roles to set
-       accessability for so until then they are defaulted to see nothing and
-       edit nothing."* A row shipped at view would hand reach to every tactic
-       owner in every tenant on the day it landed, which is the opposite of
-       what a switch is for — measured on the worked example, 18 people own at
-       least one tactic.
-
-       THE MEASURE OWNER IS NOT HERE, AND THE REASON IS A FIELD RATHER THAN A
-       DECISION: a key measure carries no Owner anywhere in the product — 0 of
-       the 76 in the worked example, and no column on the table in either mode
-       — so a row for it would be a control with nothing behind it (§61). It
-       lands with the field, and the field is drawn first (rule 1c). */
-    { key:"towner", name:"Tactic owner", scope:"unitfn",
-      note:"Named as a tactic's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that tactic — and only it." },
     /* CONTRIBUTOR IS EVERYONE ELSE THE PLAN NAMES (§147.8, Islam): "contributor
        is someone whose name is on the project anywhere but that doesn't mean
        that he is a project owner", and "stakeholders are contributors". They
@@ -262,13 +234,6 @@
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
-    /* NOTHING, EVERYWHERE (§382). The two rows above ship at view because
-       §147.7 was asked for a role that READS its own place and reports it
-       once the cell is opened; this one was asked for the opposite — a row
-       that starts shut so a tenant can decide. Islam's own words, and the
-       whole reason it is a row rather than a rule. */
-    towner:    { a_group:"none", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
-                 a_fn_own:"none", a_fn_own_strat:"none", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW, at Islam's direction (spec 006 §7.2): "contributors only view, and
        if we allow them they should be allowed to their lines only". The second
        half of that sentence is CONTRIB_OWN_LINES below — a rule with teeth,
@@ -396,19 +361,7 @@
     { key:"u_src",    area:"unit",   scope:"unit",   label:"Who enters", note:"Name who enters each of this unit's figures" },
     { key:"c_kb",     area:"always", scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
     { key:"c_cycle",  area:"a_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
-    /* §380: "Reporting", which is what the tab says and what the knowledge
-       base entry for this key has always been titled. It was "My reporting"
-       and was drawn on NO screen — since §37 the matrix shows AREAS — so the
-       word was free for the tab beside it, and this is one stale copy being
-       brought into step rather than a rename (§104.8). */
-    { key:"u_report", area:"unit", scope:"unit",  label:"Reporting",    note:"Enter this cycle's figures" },
-    /* §380: the lines the plan names this person on, wherever they are. NO
-       AREA, exactly as "Figures I report" has none: the permission is being
-       named, so there is no cell for it to sit in and no grant to consult —
-       `when` on the tab is the whole gate, and it asks whether this person
-       owns a line at all. */
-    { key:"c_mylines", area:"always", scope:"unit", label:"My reporting",
-      note:"Enter the lines the plan names you on" }
+    { key:"u_report", area:"unit", scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
   ];
   var PAGE_AREA = {};
   PAGES.forEach(function (p) { PAGE_AREA[p.key] = p.area; });
@@ -430,14 +383,6 @@
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
       naming: !!o.naming,
-      /* §380: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
-         turning it on MOVES who enters a figure — 26 tactics change hands on
-         Raya the moment it is set, and nobody chose that. Off, every rule
-         below answers exactly what it answered before, which is what makes
-         "nothing on Roles & access moves" true rather than aspirational.
-         Added HERE and in worldOf(), in the same edit as the rules that read
-         it (§102.4's trap). */
-      lineOwners: o.lineOwners === true,
       /* §147: a project's owner is a Contributor of its function, and the
          projects live on the capabilities — so the world has to carry them or
          namedInFn() reads an empty list and the floor never derives. §102.4's
@@ -462,7 +407,6 @@
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
                naming: (state.group || {}).naming,
-               lineOwners: (state.group || {}).lineOwners,
                capabilities: (state.group || {}).capabilities });
   }
 
@@ -553,24 +497,6 @@
       if (String(f.format) === "pillars" && (f.items || []).some(owns))
         once("plowner", "fn:" + k);
     });
-    /* ── THE TACTIC'S OWN OWNER (§382) ────────────────────────────
-       Unconditional, exactly as the two above: a custodian somewhere else who
-       also owns a tactic here holds both, which is the case that could not be
-       switched off before. One entry per PLACE, however many tactics there
-       name them — the reach is narrowed per row by boundedReach(), not by how
-       many entries this list carries. */
-    var ownsTactic = function (pillars) {
-      return (pillars || []).some(function (pl) {
-        return ((pl || {}).tactics || []).some(owns);
-      });
-    };
-    w.unitKeys.forEach(function (k) {
-      if (ownsTactic(((w.units || {})[k] || {}).items)) once("towner", k);
-    });
-    w.functionKeys.forEach(function (k) {
-      var f = w.functions[k] || {};
-      if (String(f.format) === "pillars" && ownsTactic(f.items)) once("towner", "fn:" + k);
-    });
 
     /* THE FLOOR, AND WHICH OF THE TWO IT IS. Somebody attached to a unit and
        holding nothing else is a Contributor if a plan names them and an
@@ -584,20 +510,7 @@
        that stops naming them stops. Somebody attached and named on nothing now
        holds NOTHING — what they may see is NO_ROLE's floor, applied in
        grantIn() rather than dressed up as a role they never got (§93). */
-    /* ── AND THE FLOOR IS ASKED OF THE ROLES THAT GRANT SOMETHING (§382) ──
-       This tested `out.length`, which meant "holds no role at all" — true
-       until a row deriving here could grant NOTHING. A tactic owner named
-       nowhere else would have stopped being a Contributor and started being a
-       Tactic owner with every cell at none: a role that takes away the floor
-       it stands on, silently, on the day it ships. So the question is asked of
-       the roles OTHER than this one.
-
-       `powner` and `plowner` are deliberately NOT in that exception. They have
-       suppressed the floor since §147.7 and they ship at view, which is what
-       the floor gives — so exempting them here would be a widening nobody
-       asked for, in a change about a row that grants nothing (rule 1b). */
-    var grantless = out.filter(function (r) { return r.role !== "towner"; });
-    if (!grantless.length && p.unit && namedInUnit(w, p, p.unit))
+    if (!out.length && p.unit && namedInUnit(w, p, p.unit))
       out.push({ role:"contrib", at:p.unit });
     /* §147.8: THE SAME FLOOR ON A FUNCTION'S PROJECTS — for everyone the
        projects name who is not an OWNER of one: a milestone's owner, a
@@ -607,10 +520,9 @@
        attachment is not asked, because the names are picked from the register
        in the office's own pen. They report nothing until the Contributor row
        is opened, and then only the rows that name them (boundedReach). */
-    if (!grantless.length && !out.some(function (r) { return r.role === "contrib"; }))
-      w.functionKeys.forEach(function (k) {
-        if (namedInFn(w, p, k)) out.push({ role:"contrib", at:"fn:" + k });
-      });
+    if (!out.length) w.functionKeys.forEach(function (k) {
+      if (namedInFn(w, p, k)) out.push({ role:"contrib", at:"fn:" + k });
+    });
     return out;
   }
   function personRoleKeys(w, p) {
@@ -3452,12 +3364,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      save is narrowed to their reach by mayReportRow() below. Adding a key
      here is what wires all of that at once, which is exactly the property
      §55 recorded this list for. */
-  /* §382 adds the tactic's owner, and adding the key here is what wires
-     the whole of it at once: no Submit, no cycle note, no picture slides,
-     every reporting save narrowed by mayReportRow(), and the role refused by
-     the register's picker and the people workbook, both of which ask
-     `roleIsGrantable()` — which refuses anything on this list. */
-  var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner", "towner"];
+  var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner"];
 
   /* Which of a person's roles is what lets them edit here. The floor rule
      applies when the floor is ALL they have. */
@@ -3493,50 +3400,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return via.length > 0 && via.every(function (r) { return OWN_LINES_ONLY.indexOf(r) > -1; });
   }
 
-  /* ── REPORTING FOLLOWS THE OWNER COLUMN (§380, spec 062) ──────────
-     Islam: *"it's only for owners of tactics to report progress either on the
-     units they belong to but they are not the bu owner or the custodian or
-     report progress for other units that he doesn't belong to at all"*, and
-     *"contributor should not report, the owner only"*.
-
-     THE PLATFORM ALREADY DOES THIS ONCE. A figure with a named master is
-     entered by that person and by nobody else — no grant, no role, no
-     attachment; the whole permission is being named (§16.7's `canEnterFigure`
-     and the server's `sourceReporting`). This points the same idea at the
-     plan's own Owner column, which until now decided nothing at all.
-
-     IT IS A NAME, NEVER A KEY, AND THAT IS WHAT KEEPS IT SMALL. A figure set
-     resolves to a register key because the SET carries one; a plan's Owner is
-     a name the custodian picked (§130.1's decision: the name is stored, never
-     a key). So nothing here needs the register — `ownedBy()` asks the same
-     question `namedOn()` has always answered, with the collaborators left
-     out, and the refusal names the string the plan holds, which is what the
-     page shows.
-
-     AND THE SWITCH GUARDS BOTH DIRECTIONS AT ONCE. On: an owner gains their
-     lines and a collaborator loses a figure they never should have had. Off:
-     byte for byte what the product did yesterday. One decision, one sentence,
-     and a no-op until the tenant turns it on. */
-  function lineOwnersOn(w) { return !!(w && w.lineOwners); }
-  /* The name the plan holds, or "" — trimmed, because a stray space is not an
-     owner and a row whose Owner is whitespace must read as unowned (§104.10's
-     family: `String(null).trim()` is "null", so the null check comes first). */
-  function lineOwnerName(row) {
-    var v = row && row.owner;
-    return v == null ? "" : String(v).trim();
-  }
-  /* Is this person the OWNER of this row? `namedOn` with the collaborators
-     left out, so the two questions cannot drift apart (§53.5) and a change to
-     how a name is matched (§130.7's runs, a typed short name) reaches both. */
-  function ownedBy(row, person) {
-    return namedOn({ owner: lineOwnerName(row) }, person);
-  }
-  /* Does this row's figure belong to somebody other than the unit? Only while
-     the switch is on, and only where the plan actually names somebody. */
-  function lineOwned(w, row) {
-    return lineOwnersOn(w) && !!lineOwnerName(row);
-  }
-
   /* ── WHICH ROWS A BOUNDED ROLE REACHES (§147.7) ───────────────────
      One rule for both sides and every bounded role, because three copies of
      "is this row theirs" is how the screen and the server come to disagree
@@ -3546,27 +3409,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        row          the row itself; namedOn() reads owner + collaborators
        pillarOwner  the Owner of the pillar the row sits under (unit side —
                     also what §55's measure rule has always leaned on)
-       tacticOwner  the Owner of the tactic, set only where the row IS one
        project      the project the row sits inside (function side)
 
      · a PROJECT OWNER reaches every row of a project whose Owner names them;
      · a PILLAR OWNER reaches every row of a pillar whose Owner names them;
-     · a TACTIC OWNER reaches the one tactic whose Owner names them (§382);
      · a CONTRIBUTOR (and the floor) reaches the rows that NAME them — the
        row's own owner or collaborators, or the project's stakeholder and
        collaborator lists (§147.8: "stakeholders are contributors"). */
-  /* §380's SWITCH CHANGES WHAT THE LAST TWO LINES MEAN, and it does it
-     somewhere else — corrected at the merge, because this paragraph opened
-     "§380 TAKES THE WORLD" and `boundedReach` takes no world: it described the
-     branch that section wrote and then removed, which is §104.8 exactly, a
-     comment stating an intention the code does not carry out. What is true is
-     that with the switch on, being NAMED stops being enough for a tactic's
-     figure and being the OWNER is the whole test — enforced at
-     `canEnterLine()` and at the server's `lineReporting`, never here — Islam's *"contributor should not report, the owner
-     only"*, which reverses §147.8's reading of "stakeholders are
-     contributors" for REPORTING and leaves it standing for everything else
-     (a collaborator still derives the role, still opens the unit, still reads
-     it; what goes is typing a figure on a line that is not theirs). */
   function boundedReach(person, roleKey, ctx) {
     ctx = ctx || {};
     if (roleKey === "powner")
@@ -3574,65 +3423,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "plowner")
       return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
              namedOn({ owner: ctx.pillarOwner }, person);
-    /* §382: A HANDLE OF ITS OWN, NEVER `ctx.row.owner`. That reads right and
-       is wrong on exactly one row kind: a MEASURE's reporting ctx is built
-       with `row.owner = the PILLAR's owner` (§55's rule, kept by §147.7 so
-       nothing a contributor could reach before the pillar-owner role existed
-       was taken away by its arrival) — so the simple test would have made
-       opening the Tactic owner row quietly open every measure to pillar
-       owners as well, which is the one thing a switch must not do. And the
-       measure Owner field now being drawn would break it a second way. So
-       this is `pillarOwner`'s own pattern: a named handle set by whoever
-       builds the ctx, absent wherever the subject is not a tactic, and
-       therefore failing CLOSED at any site that has not been taught it
-       (§42). A collaborator is deliberately not read — that is a
-       Contributor, §147.8 settled it, and reading them here would make this
-       row a second un-switchable copy of that one. */
-    if (roleKey === "towner")
-      return ctx.tacticOwner != null && ctx.tacticOwner !== "" &&
-             namedOn({ owner: ctx.tacticOwner }, person);
-    /* ── AND THE TWO NOTES ABOVE AND BELOW ARE ABOUT DIFFERENT QUESTIONS
-       (merge of §380 and §382, 2026-09-21) ──────────────────────────────
-       Two parallel sessions answered one ask two minutes apart, and both
-       landed here. The branch above is §382's ROLE: a row on Roles & access
-       that starts shut, and once its Reporting cell is opened lets a tactic's
-       Owner report that tactic on the unit's own Reporting page. The note
-       below is §380's SWITCH: a tenant setting that moves a tactic's figure
-       onto a page of its own and deliberately adds no branch here. They are
-       not two readings of one decision and neither is stale.
-
-       THEY COMPOSE, AND THE ORDER IS WORTH KNOWING RATHER THAN DISCOVERING.
-       `canEnterLine()` asks `lineOwned()` first, which is false while the
-       switch is off — so with it off every owned tactic falls through to
-       `canReportRow()` and the role below decides, exactly as §382 built it.
-       With the switch ON, an owned tactic on the unit's page is refused there
-       for everybody but the office, whatever the role says, and the owner
-       types on My reporting instead.
-
-       WHICH LEAVES ONE COMBINATION THAT SAYS TWO THINGS, AND IT IS ISLAM'S TO
-       SETTLE RATHER THAN MINE: a tenant that opens the Tactic owner row AND
-       turns the switch on reads *Reporting: edit* on the table and meets a
-       read-only row on the unit's page. Nothing breaks and nothing is
-       ambiguous to the code — but it is a screen saying yes where a page says
-       no, which is the drift §42 exists to stop. Recorded here, raised in the
-       merge's own record, and NOT resolved by picking one (rule 1b). */
-    /* §380: MY REPORTING DELIBERATELY DOES NOT REACH THIS LINE, and saying so
-       is the point rather than leaving an absence. A branch here reading
-       "with the switch on, a bounded role reaches only what it OWNS" was
-       built and taken out again: nothing reaches it for a tactic — the
-       server groups a tactic's figure by its owner into `lineReporting` and
-       refuses a stranger there, and the browser refuses one at
-       `canEnterLine`'s single door — so the only rows it could ever have
-       narrowed are the OTHER kinds, and narrowing those reverses §227, where
-       Islam decided that being named a collaborator on a MILESTONE is a
-       reporting right. He asked about tactics; widening it to every row a
-       plan names is a redesign nobody asked for (rule 1b), and it would have
-       been invisible, because both checks stayed green with the branch
-       removed. Measured, not reasoned: 703 and 43 assertions, unmoved.
-
-       (At the merge: this says the SWITCH adds no branch here, and it stays
-       true — the branch above it belongs to §382's role and is a different
-       question.) */
     if (ctx.row && namedOn(ctx.row, person)) return true;
     return !!ctx.project &&
            (namedOn({ collaborators: ctx.project.stakeholders }, person) ||
@@ -3847,8 +3637,6 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,
     boundedReach: boundedReach, mayReportRow: mayReportRow,
-    lineOwnersOn: lineOwnersOn, lineOwnerName: lineOwnerName,
-    ownedBy: ownedBy, lineOwned: lineOwned,
     mayMarkDone: mayMarkDone,
     fillingRoles: fillingRoles, mayFillRow: mayFillRow,
     isSourced: isSourced, sourceRows: sourceRows, sourcesFor: sourcesFor,

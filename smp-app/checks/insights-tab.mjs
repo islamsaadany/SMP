@@ -38,14 +38,32 @@
      the categories typed out         1 red  — §94.8's drift, printing the short list
      `All` made a real category       3 red  — §50.6, asking for a word the server refuses
 
-   §5's two are environment switches and redden it there:
-     SMP_BREAK=no-library-cats        lib/shell.ts drops the stamp — no tab
-     SMP_BREAK=switch-always          the four-square mark drawn where the tabs reach */
+   AND SINCE §383 THE ROW IS WHAT THE DOCUMENT WAS STAMPED WITH rather than
+   the module's whole list, so §2 asserts the tab draws WHATEVER it is handed,
+   in the order it is handed — WHICH categories those are is the server's
+   assertion, in checks/insights.mjs §14, which has a database to answer it
+   with. Its break there is `SMP_BREAK=all-categories`.
+
+   AND WHAT THIS FILE CANNOT PROVE IS SAID RATHER THAN LEFT AS AN ABSENCE
+   (§54.5). §2 asserts the row draws whatever it is HANDED, so it is silent
+   about what the server hands it — and the two halves either side of that
+   are asserted where each has what it needs:
+
+     the RULE   checks/insights.mjs §14, with a database
+                (SMP_BREAK=all-categories — must go red)
+     the SEAM   checks/shell.mjs §3d, against the served document
+                (SMP_BREAK=no-library-cats — must go red)
+
+   §5 is not run from here and never was: it needs the served app, which the
+   shell check already starts, so its subject lives there rather than being
+   claimed here (this header said it was "run by the served-app sweep", and
+   nothing ran it — §54.5 in a check's own docstring). What remains for §5 is
+   the four destination kinds and typing never repainting. */
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createContext, runInContext } from "node:vm";
-import { CATEGORIES } from "../lib/library.ts";
+import { CATEGORIES, shape as PAGE_SHAPE } from "../lib/library.ts";
 /* THE ROW BUILDER IS IMPORTED LAZILY, and that is not a nicety: it sits in
    the module's page beside `withTenant`, so importing it pulls the database
    driver in — and §1–§3 need neither. Loaded here so those three always run
@@ -105,14 +123,17 @@ console.log("1 · is there a library behind this tab");
     loadLibrary("{not json").lib.shown() === false);
 }
 
-console.log("\n2 · the section row is the module's own categories");
+console.log("\n2 · the section row is what the document was stamped with");
 {
   const { lib } = loadLibrary(STAMP);
   const secs = lib.sections();
-  /* ASSERTED AS AN AGREEMENT WITH `CATEGORIES`, never as a typed list
-     (§94.8): a category added to lib/library.ts appears here on its own,
-     and a build that hardcoded five words goes red the day there are six. */
-  check("All leads, then every category in the module's own order",
+  /* ASSERTED AS AN AGREEMENT WITH THE STAMP, never as a typed list (§94.8),
+     and since §383 the stamp is WHAT THIS CLIENT HAS rather than what the
+     module offers — so what this file can prove is that the tab draws
+     whatever it is handed, in the order it is handed, and WHICH categories
+     those are is the server's assertion (checks/insights.mjs §14, which has a
+     database to answer it with). */
+  check("All leads, then every category the document named, in its order",
     JSON.stringify(secs.map((s) => s.label)) === JSON.stringify(["All"].concat(CATEGORIES)),
     secs.map((s) => s.label).join(" · "));
   check("every section has a key of its own",
@@ -121,6 +142,24 @@ console.log("\n2 · the section row is the module's own categories");
     secs.every((s) => s.ac === "c_kb") && secs.every((s) => typeof s.render === "function"));
   check("and with no library there are no sections at all",
     loadLibrary(null).lib.sections().length === 0);
+  /* §383, BOTH ENDS (§94.2). A build that went on reading the module's whole
+     list — the fault Islam reported as *"the filters of the reports should
+     appear only if there is this type of report"* — satisfies every assertion
+     above, because above the stamp IS the whole list. These two are the ones
+     it cannot satisfy: a short stamp draws a short row, and an empty one
+     draws no filters at all. */
+  const two = loadLibrary(JSON.stringify(["Macro", "Sector"])).lib.sections();
+  check("a client with two kinds of report gets two filters and no more",
+    JSON.stringify(two.map((s) => s.label)) === JSON.stringify(["All", "Macro", "Sector"]),
+    two.map((s) => s.label).join(" · "));
+  /* ONE SECTION DRAWS NO ROW — the shell's own rule (`secs.length > 1`), which
+     is why a library with nothing filed anywhere needs no second mechanism to
+     take the filters away: there is nothing to filter by and All is not a
+     filter (§32, a menu of one). */
+  const none = loadLibrary("[]").lib;
+  check("a library with nothing filed draws the tab and no filter row",
+    none.shown() === true && none.sections().length === 1,
+    "sections: " + none.sections().length);
 }
 
 console.log("\n3 · which category the fragment is asked for");
@@ -152,10 +191,23 @@ if (!PAGE) {
   console.log("       four states of the list, and that an unreadable library never");
   console.log("       reads as one with nothing published in it (§93).");
 } else {
-  const item = {
-    id: "r1", title: "Egypt retail 2026", summary: "Where the market goes next.",
-    hasFile: true, category: "Market", day: "2026-09-04", size: "1.2 MB",
-  };
+  /* THE FIXTURE IS THE PRODUCT'S OWN SHAPE, NEVER ONE TYPED HERE (§100.3).
+     It was typed here — `category`, `day`, `size`, none of which an Item has
+     — so the first line of `factLine` threw on `it.categories.length` and
+     this section DIED rather than reporting (§215). It never showed, because
+     §4 is skipped wherever the app's dependencies are missing and that is
+     where it was written: **a section that has never run is not a section
+     that passed** (§54.5). Built through `shape()` now, the one function that
+     produces what `libraryRows` is handed, so the keys cannot drift apart
+     again. */
+  const item = PAGE_SHAPE({
+    id: "r1", kind: "insights", title: "Egypt retail 2026",
+    summary: "Where the market goes next.", categories: ["Market"],
+    report_date: "2026-09-04", state: "published", version: 1,
+    file_path: "x/y.pdf", file_name: "y.pdf", file_size: 1258291,
+    downloads: 0, published_at: null, published_by: "", created_at: null,
+    updated_at: null, extra: {},
+  }, true);
   const rows = (items, read, q, cat) =>
     PAGE.libraryRows("raya-trade", items, read, q, cat, "Raya Trade");
   const full = rows([item], true, "", "");
@@ -194,8 +246,11 @@ console.log("\n5 · the served app: the address, the switcher, and typing");
     console.log("       destination kinds, the address it writes, the switcher standing");
     console.log("       down where the tabs reach, and typing never repainting.");
   } else {
-    console.log("  --   SMP_BASE is set; this section is written and is run by the");
-    console.log("       served-app sweep, not from here.");
+    console.log("  --   SMP_BASE is set, and this section is still NOT RUN from here");
+    console.log("       (§54.5). The stamp it was written for is asserted against the");
+    console.log("       served document in checks/shell.mjs §3d, which already starts");
+    console.log("       the app. Unasserted anywhere: the tab on all four destination");
+    console.log("       kinds, the address it writes, and typing never repainting.");
   }
 }
 

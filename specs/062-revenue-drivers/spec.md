@@ -183,12 +183,34 @@ not carry is a column the plan loses on the next download-and-re-upload.
 
 ### 4.4 A new cycle
 
-Answer 4: copied forward. The tree is duplicated into the new cycle, last
-year's stays where it is, and the new numbers go into the copy.
+Answer 4: **"it's copied to add new numbers."** The tree is duplicated into the
+new cycle, last year's stays where it is, and the new numbers go into the copy.
 
-The natural reading, which needs confirming when the screen is drawn: **Year 1
-becomes the new baseline**, so the copy opens with last year's plan as this
-year's starting point and the uplifts cleared.
+**And the new baseline is what was ACHIEVED, not what was planned** — Islam,
+2026-09-22: *"no the new baseline is the achievement which is added as well
+manually."* This is the answer I did not expect and it is the better one: a
+plan of 1B that delivered 900M has a baseline of 900M next year, so a unit
+cannot quietly compound growth on a number it never reached. Carrying Year 1
+forward — which is what I had proposed — would do exactly that.
+
+It is **typed**, not derived, which is the same answer as §4.5.
+
+### 4.5 Who types what
+
+| | |
+|---|---|
+| **The baseline** | the office, by hand (answer 3: *"typed by office"*) |
+| **A connected row's actual** | read from the measure or key objective it connects to — nothing is entered twice |
+| **An unconnected row's actual** | the office (answer 2: *"the smo for now"*) |
+
+**"For now" is recorded as his**, not smoothed away: the natural next step is
+the unit entering its own assumption figures, and nothing here forecloses it.
+
+**AND THE PLATFORM COULD OFTEN FILL THE BASELINE AND WILL NOT.** Where a row
+connects to a measure, last year's actual is already in the closed cycle, so
+the box could arrive with a figure in it. He said typed, so it is typed — the
+most this should ever do is OFFER what it knows beside an empty box, and even
+that is a screen decision rather than something to slip in here.
 
 ---
 
@@ -226,10 +248,12 @@ Rule 1c is owed on all of it.
 
 ## 7 · Open
 
-1. **Does Year 1 become the new baseline on the copy** (§4.4)?
-2. **Who types the actual** for a row that connects to nothing — the office, or
-   whoever reports the unit?
-3. **Baseline figures** are new data the platform has never held. Typed by the
-   office, or read from the closed cycle where one exists?
+All three of the questions this page opened with were answered on 2026-09-22
+and are recorded in §4.4 and §4.5. What is left is not a question about the
+model:
 
-None of the three blocks the arithmetic.
+1. **Rule 1c on all five screens in §6.** Nothing visual may be built until
+   each is drawn and signed off.
+2. **Where the baseline figures live**, which follows the screens rather than
+   leading them — the tree is per cycle and copied forward, so the store has
+   to hold more than one year without the copy being a second source (§4.4).

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Driver Tree — Forefront</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#00285F;--navy-deep:#001B40;--gold:#C9A227;--gold-soft:#E8D9A0;
+  --paper:#F7F5F1;--card:#FFFFFF;--ink:#1A1D24;--muted:#7A8290;
+  --rule:#E2DED6;--volume:#00285F;--price:#C9A227;--inter:#8FA3BF;--neg:#B4453A;
+  --season:#8A6F18;--new:#1F7A4C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.5;padding-bottom:80px}
+.num{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+
+header{background:var(--navy);color:#fff;padding:30px 40px 26px;position:relative;overflow:hidden}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold) 22%,transparent 22%)}
+header::before{content:"";position:absolute;top:-90px;right:-70px;width:320px;height:320px;border:1px solid rgba(255,255,255,.07);border-radius:50%}
+.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-soft);font-weight:600;margin-bottom:9px}
+h1{font-size:27px;font-weight:300}h1 b{font-weight:700}
+.sub{color:#B9C6DA;font-size:12.5px;margin-top:8px;max-width:700px;font-weight:300}
+
+.tabbar{display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--rule);padding:0 40px;position:sticky;top:0;z-index:50;gap:16px}
+.tabs{display:flex;align-items:stretch;overflow-x:auto;flex:1;min-width:0}
+.tabctl{display:flex;align-items:center;gap:8px;flex:none;padding-left:8px;border-left:1px solid var(--rule)}
+.tab{font-family:inherit;font-size:12.5px;font-weight:600;white-space:nowrap;padding:15px 18px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:var(--navy)}
+.tab.active{color:var(--navy);border-bottom-color:var(--gold)}
+.tab.master{color:var(--navy)}
+.tab.master::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-right:8px;vertical-align:middle}
+.tab.cfg{color:var(--season)}
+.tab.cfg::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--season);margin-right:8px;vertical-align:middle}
+.tab.add{color:#B4B0A6}
+.tab.add:hover{color:var(--navy)}
+
+.btn{font-family:inherit;font-size:11.5px;font-weight:600;letter-spacing:.04em;padding:8px 14px;border:1px solid var(--rule);background:#fff;color:var(--navy);border-radius:2px;cursor:pointer;transition:all .15s}
+.btn:hover{border-color:var(--navy);background:var(--navy);color:#fff}
+.btn.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.curr{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;font-weight:600}
+.curr input{font-family:inherit;font-size:12px;font-weight:600;width:64px;border:1px solid var(--rule);padding:6px 8px;border-radius:2px;text-align:center;color:var(--navy)}
+
+main{padding:26px 40px;max-width:1340px;margin:0 auto}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 16px}
+.sec-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.1em}
+.sec-title{font-size:16px;font-weight:600}
+.sec-note{font-size:12px;color:var(--muted);margin-left:auto;max-width:440px;text-align:right}
+
+/* sub-channel strip */
+.substrip{display:flex;align-items:stretch;background:#fff;border:1px solid var(--rule);border-radius:3px;margin-bottom:16px;overflow-x:auto}
+.subtab{font-family:inherit;font-size:12px;font-weight:600;white-space:nowrap;padding:12px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.subtab:hover{color:var(--navy)}
+.subtab.active{color:var(--navy);border-bottom-color:var(--navy);background:#FCFBF9}
+.subtab.add{color:#B4B0A6}
+.subtab.add:hover{color:var(--navy)}
+
+.block{background:var(--card);border:1px solid var(--rule);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.block.season{border-left:3px solid var(--gold)}
+.block.increment{border-left:3px solid var(--new)}
+.blk-head{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--rule);background:linear-gradient(90deg,#FCFBF9,#fff)}
+.blk-tag{font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:4px 8px;border-radius:2px;flex:none}
+.blk-tag.base{background:#EDF1F7;color:var(--navy)}
+.blk-tag.season{background:#FAF4E2;color:var(--season)}
+.blk-tag.increment{background:#E7F2EC;color:var(--new)}
+.blk-name{font-family:inherit;font-size:14px;font-weight:600;color:var(--navy);border:none;background:transparent;padding:3px 5px;border-radius:2px;width:240px;flex:none}
+.blk-name:hover{background:#F2F0EC}
+.blk-name:focus{outline:none;background:#F2F0EC;box-shadow:inset 0 -2px 0 var(--gold)}
+.blk-name[readonly]{cursor:default}.blk-name[readonly]:hover{background:transparent}
+.dates{display:flex;align-items:center;gap:6px;flex:none}
+.from-cfg{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);background:#FBF6E8;padding:5px 8px;border-radius:2px}
+.cfg-link{font-family:inherit;font-size:10px;font-weight:600;border:none;background:transparent;color:#B4B0A6;cursor:pointer;text-decoration:underline;padding:2px}
+.cfg-link:hover{color:var(--season)}
+.figs{margin-left:auto;display:flex;gap:24px;align-items:baseline}
+.fig{text-align:right}
+.fig-l{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:600;display:block;margin-bottom:2px}
+.fig-v{font-size:14.5px;font-weight:500}
+.fig-v.y1{color:var(--navy);font-weight:600}
+.fig-v.gr{color:#1F7A4C;font-weight:600}
+.fig-v.gr.down{color:var(--neg)}
+.x-btn{border:none;background:transparent;color:#C9C3B8;font-size:17px;cursor:pointer;padding:2px 6px;line-height:1;border-radius:2px;flex:none}
+.x-btn:hover{color:var(--neg);background:#FBEDEC}
+
+.months{display:flex;align-items:baseline;gap:12px;padding:9px 18px;background:#F4F7FB;border-bottom:1px solid var(--rule)}
+.months.seasonm{background:#FBF6E8}
+.months.flat{background:#FAF9F7}
+.m-l{font-size:9px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--navy)}
+.m-v{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--navy)}
+.m-n{font-size:11px;color:var(--muted)}
+
+table{width:100%;border-collapse:collapse}
+thead th{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;padding:9px 12px;border-bottom:1px solid var(--rule);background:#FCFBF9}
+thead th:first-child{text-align:left;padding-left:18px}
+tbody td{padding:6px 12px;border-bottom:1px solid #F1EEE9;text-align:right;vertical-align:middle}
+tbody td:first-child{text-align:left;padding-left:18px}
+tbody td.drv-cell{text-align:left;width:19%;min-width:150px;padding-right:6px}
+tbody td.note-cell{text-align:left;width:29%;min-width:185px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FCFBF8}
+
+.d-name{font-family:inherit;font-size:13px;font-weight:500;color:var(--ink);line-height:1.35;border:1px solid transparent;background:transparent;padding:5px 6px;width:100%;border-radius:2px;resize:none;overflow:hidden;display:block;min-height:28px}
+.d-name:hover{background:#F2F0EC}
+.d-name:focus{outline:none;background:#fff;border-color:var(--gold)}
+.inp{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:13px;text-align:right;border:1px solid transparent;background:#F7F5F1;padding:6px 9px;width:104px;border-radius:2px;color:var(--ink)}
+.inp:hover{border-color:var(--rule)}
+.inp:focus{outline:none;border-color:var(--navy);background:#fff}
+.inp.up{width:74px;color:#8a6f18;font-weight:500}
+.inp.up:focus{border-color:var(--gold)}
+.up-wrap{display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.upunit{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;color:#8a6f18;background:#FAF4E2;border:1px solid #EEE0B8;padding:5px 6px;border-radius:2px;cursor:pointer;min-width:32px}
+.upunit.abs{background:#EDF1F7;color:var(--navy);border-color:#D3DEEC}
+.upunit:hover{filter:brightness(.95)}
+.pill{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:2px;cursor:pointer;border:1px solid;font-family:inherit;min-width:70px}
+.pill.vol{background:#EDF1F7;color:var(--navy);border-color:#D3DEEC}
+.pill.val{background:#FAF4E2;color:#8a6f18;border-color:#EEE0B8}
+.pill:hover{filter:brightness(.95)}
+.unit{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--rule);padding:5px 7px;border-radius:2px;cursor:pointer;min-width:32px}
+.unit:hover{border-color:var(--navy);color:var(--navy)}
+.y1v{font-size:13px;color:var(--muted);font-weight:500;min-width:92px;display:inline-block}
+.note{font-family:inherit;font-size:11.5px;line-height:1.45;color:#4A5260;width:100%;min-width:170px;border:1px solid transparent;background:#FCFBF8;padding:6px 9px;border-radius:2px;resize:none;overflow:hidden;min-height:32px;display:block;text-align:left}
+.note::placeholder{color:#C2BDB2;font-style:italic}
+.note:hover{border-color:var(--rule)}
+.note:focus{outline:none;border-color:var(--gold);background:#fff}
+
+.blk-foot{padding:9px 18px 12px;display:flex;gap:8px;align-items:center;background:#FCFBF9;border-top:1px solid var(--rule)}
+.mini{font-family:inherit;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px dashed var(--rule);background:transparent;color:var(--muted);padding:6px 11px;border-radius:2px;cursor:pointer}
+.mini:hover{border-color:var(--navy);border-style:solid;color:var(--navy)}
+.formula{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#A8AFBA}
+.add-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.add-season{flex:1;min-width:200px;padding:14px;border:1px dashed var(--rule);background:transparent;font-family:inherit;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-radius:3px}
+.add-season:hover{border-color:var(--gold);border-style:solid;color:var(--season);background:#fff}
+.add-season.inc:hover{border-color:var(--new);color:var(--new)}
+
+.summary{background:var(--navy);color:#fff;border-radius:3px;padding:24px 28px;margin:0 0 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative;overflow:hidden}
+.summary::before{content:"";position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--gold),transparent 55%)}
+.s-cell{border-left:1px solid rgba(255,255,255,.14);padding-left:20px}
+.s-cell:first-child{border-left:none;padding-left:0}
+.s-l{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-soft);font-weight:600;margin-bottom:7px}
+.s-v{font-size:25px;font-weight:300}.s-v b{font-weight:600}
+.s-sub{font-size:11px;color:#9FB2CC;margin-top:4px;font-weight:300}
+
+.panel{background:#fff;border:1px solid var(--rule);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.panel-h{padding:13px 18px;border-bottom:1px solid var(--rule);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--navy);background:#FCFBF9;display:flex;align-items:center;gap:10px}
+.ro{font-size:9px;letter-spacing:.12em;background:#EDF1F7;color:var(--muted);padding:3px 7px;border-radius:2px;font-weight:700}
+.panel-h .btn{margin-left:auto;text-transform:none;letter-spacing:.02em}
+.dt{width:100%;border-collapse:collapse;font-size:13px}
+.dt th{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;padding:10px 16px;border-bottom:1px solid var(--rule)}
+.dt th:first-child{text-align:left}
+.dt td{padding:9px 16px;text-align:right;border-bottom:1px solid #F4F1EC}
+.dt td:first-child{text-align:left;font-weight:500}
+.dt tr.chan td{font-weight:700;color:var(--navy);background:#F7F9FC}
+.dt tr.subch td{font-weight:600;color:#33507D}
+.dt tr.subch td:first-child{padding-left:34px}
+.dt tr.subch td:first-child::before{content:"↳";color:#C9C3B8;margin-right:8px}
+.dt tr.per td{font-size:11.5px;color:var(--muted);background:#FCFBF8}
+.dt tr.per td:first-child{padding-left:56px;font-weight:400}
+.dt tr.per td:first-child::before{content:"·";color:#C9C3B8;margin-right:10px}
+.dt tr.per.flatper td:first-child{padding-left:34px}
+.dt tr.per.incr td:first-child::before{content:"+";color:var(--new);font-weight:700}
+.dt tr.total td{border-top:2px solid var(--navy);border-bottom:none;font-weight:700;color:var(--navy);background:#FBFAF8}
+.cfg-name{font-family:inherit;font-size:13px;font-weight:600;color:var(--navy);border:1px solid var(--rule);background:#fff;padding:6px 8px;border-radius:2px;width:210px}
+.cfg-name:focus{outline:none;border-color:var(--gold)}
+.cfg-table td{vertical-align:middle}
+.cfg-table input[type=date]{font-family:'IBM Plex Mono',monospace;font-size:11.5px;border:1px solid var(--rule);background:#fff;padding:6px 8px;border-radius:2px;color:var(--ink)}
+.cfg-table input[type=date]:focus{outline:none;border-color:var(--gold)}
+.cfg-table td.used{font-size:11.5px;color:var(--muted);font-weight:400;text-align:right}
+.cfg-table td.used i{color:#C2BDB2}
+
+.bridge-wrap{padding:20px 18px 18px}
+.bbar{display:flex;height:42px;border-radius:3px;overflow:hidden;margin-bottom:15px;background:#F1EEE9}
+.bseg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;transition:width .4s ease;min-width:0}
+.bseg.v{background:var(--volume)}.bseg.p{background:var(--price)}.bseg.i{background:var(--inter)}.bseg.n{background:var(--new)}
+.blegend{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.bl{border-top:2px solid;padding-top:10px}
+.bl.v{border-color:var(--volume)}.bl.p{border-color:var(--price)}.bl.i{border-color:var(--inter)}.bl.n{border-color:var(--new)}
+.bl-l{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.bl-v{font-size:18px;font-weight:500;margin-top:5px}
+.bl-s{font-size:11.5px;color:var(--muted);margin-top:2px}
+.read{margin-top:16px;padding:14px 18px;background:#FBFAF7;border-left:2px solid var(--gold);font-size:12.5px;line-height:1.65;color:#3D4451}
+.read b{color:var(--navy);font-weight:600}
+
+.calc{padding:6px 0 10px}
+.calc-ch{padding:14px 18px 4px;font-size:12.5px;font-weight:700;color:var(--navy)}
+.calc-sub-h{padding:8px 18px 4px 30px;font-size:11.5px;font-weight:600;color:#33507D}
+.calc-row{display:flex;align-items:baseline;gap:12px;padding:7px 18px 7px 42px;border-bottom:1px solid #F6F3EE;flex-wrap:wrap}
+.calc-lbl{font-size:11.5px;font-weight:600;color:var(--ink);min-width:180px}
+.calc-lbl .t{font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#B4B0A6;display:block;margin-bottom:1px}
+.calc-exp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);flex:1;min-width:250px}
+.calc-exp .arrow{color:#C9C3B8;margin:0 6px}
+.calc-val{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:var(--navy);min-width:92px;text-align:right}
+.calc-tot{background:#FBFAF8;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.calc-tot .calc-lbl{color:var(--navy);font-weight:700}
+.seasons-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.seasons-strip .chip{font-size:11.5px;color:#4A5260;background:#fff;border:1px solid var(--rule);border-left:3px solid var(--gold);padding:7px 12px;border-radius:2px}
+.seasons-strip .chip b{color:var(--navy)}
+.empty{padding:24px 18px;color:#A8AFBA;font-size:12.5px}
+.foot{padding:24px 40px;text-align:center;font-size:10.5px;color:#A8AFBA;letter-spacing:.1em;text-transform:uppercase}
+@media(max-width:900px){header,main,.tabbar,.foot{padding-left:16px;padding-right:16px}
+ .summary{grid-template-columns:repeat(2,1fr);gap:18px}.s-cell:nth-child(3){border-left:none;padding-left:0}
+ .blegend{grid-template-columns:1fr}}
+@media print{.tabbar,.substrip,.x-btn,.mini,.add-season{display:none!important}body{background:#fff}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Forefront Strategy Consulting</div>
+  <h1>Revenue <b>Driver Tree</b></h1>
+  <p class="sub">A channel holds sub-channels where the routes to market differ. Each carries a base year, its seasons, and any increments — and those periods always sum to twelve months.</p>
+</header>
+
+<div class="tabbar">
+  <div class="tabs" id="tabs"></div>
+  <div class="tabctl">
+    <button class="btn" onclick="resetTree()">Reset to F&amp;B</button>
+    <div class="curr">Currency <input id="cur" value="EGP" oninput="render()"></div>
+  </div>
+</div>
+
+<main id="view"></main>
+<div class="foot">Forefront Strategy Consulting · Revenue Driver Tree</div>
+
+<script>
+/* =========================================================
+   model = [ { name, mode:'rate'|'count', flat:bool,
+               subs:[ { name, tables:[ {name,type,seasonId,drivers:[]} ] } ] } ]
+   A flat channel has exactly one sub and never shows the sub strip.
+   Periods inside a SUB must sum to 12 months.
+   ========================================================= */
+
+const D = (n,k,u,b,up,note,uu) => ({name:n,kind:k,unit:u,base:b,up:up,note:note||'',upUnit:uu||'%'});
+const S = (name,tables) => ({name,tables});
+
+let SEASONS = [ {id:'ramadan', name:'Ramadan season', start:'2026-02-17', end:'2026-03-19'} ];
+
+const SKELETON = [
+  {name:'Retail', mode:'rate', flat:true, subs:[ S('Retail',[
+    {name:'Base year — excluding seasons', type:'base', drivers:[
+      D('Number of stores','vol','n',12,0),
+      D('Transactions per store-month','vol','n',4500,0,'Mature-store monthly rate.'),
+      D('Average basket','val','n',180,10,'List price rise across the range from March.')]},
+    {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+      D('Number of stores','vol','n',12,0),
+      D('Transactions per store-month','vol','n',6500,5,'Roughly 1.4x a normal trading month.'),
+      D('Average basket','val','n',230,10,'Gifting and bulk purchase lift the basket well above the 180 annual average.')]},
+    {name:'New stores — 2026 openings', type:'increment', drivers:[
+      D('New stores','vol','n',3,0,'Mall of Egypt, Zamalek, Alex Corniche — leases signed. Owner: Retail Director.'),
+      D('Months active','vol','n',9,0,'Staggered openings Feb–Jun, so nine months average.'),
+      D('Transactions per store-month (mature)','vol','n',4500,0,'Mature-store rate. The ramp is applied separately below.'),
+      D('Average basket','val','n',180,0),
+      D('Maturity factor','val','%',70,0,'New stores trade below mature levels in year one.')]}
+  ])]},
+
+  {name:'E-commerce', mode:'rate', flat:false, subs:[
+    S('Own app',[
+      {name:'Base year — excluding seasons', type:'base', drivers:[
+        D('Sessions per month','vol','n',62000,40),
+        D('Conversion rate','vol','%',2,25,'New checkout flow launching Q2. Category benchmark is 2.4%.'),
+        D('Average order value','val','n',450,8)]},
+      {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+        D('Sessions per month','vol','n',88000,40,'About 1.4x a normal month. Traffic peaks before Eid.'),
+        D('Conversion rate','vol','%',2.2,25),
+        D('Average order value','val','n',520,8,'Gifting and multi-item baskets.')]},
+      {name:'New hubs — dark stores', type:'increment', drivers:[
+        D('Dark stores','vol','n',1,0,'Alexandria — an area not currently served. Capacity added where we already deliver belongs as an uplift on the base table.'),
+        D('Months active','vol','n',8,0,'Live from May.'),
+        D('Orders per store-month (mature)','vol','n',5000,0,'Ops throughput ceiling, not a forecast. Cross-check against unserved-area sessions that currently bounce.'),
+        D('Average order value','val','n',450,0),
+        D('Maturity factor','val','%',70,0,'Throughput ramps as the catchment learns we deliver there.')]}
+    ]),
+    S('Call centre',[
+      {name:'Base year — excluding seasons', type:'base', drivers:[
+        D('Agents','vol','n',6,0),
+        D('Orders per agent-month','vol','n',60,10,'No sessions exist here — the funnel is agent capacity, not traffic.'),
+        D('Average order value','val','n',520,8,'Higher than app: agents upsell.')]},
+      {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+        D('Agents','vol','n',6,2,'Two seasonal agents added.','#'),
+        D('Orders per agent-month','vol','n',95,10),
+        D('Average order value','val','n',600,8)]}
+    ]),
+    S('Aggregators',[
+      {name:'Base year — excluding seasons', type:'base', drivers:[
+        D('Platforms','vol','n',3,0,'Talabat, Elmenus, Breadfast.'),
+        D('Orders per platform-month','vol','n',300,35),
+        D('Average order value','val','n',430,8),
+        D('Commission retention','val','%',78,0,'We bank 78% of gross — the platform takes the rest. Confirm whether reported revenue is already net.')]},
+      {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+        D('Platforms','vol','n',3,0),
+        D('Orders per platform-month','vol','n',520,35,'Aggregator demand spikes harder than own app in Ramadan.'),
+        D('Average order value','val','n',500,8),
+        D('Commission retention','val','%',76,0,'Peak-season commission is worse, not better.')]}
+    ])
+  ]},
+
+  {name:'FMCG', mode:'rate', flat:false, subs:[
+    S('Key accounts',[
+      {name:'Base year — excluding seasons', type:'base', drivers:[
+        D('Key accounts','vol','n',45,4,'Modern trade chains we serve directly.','#'),
+        D('Orders per account-month','vol','n',4,0),
+        D('Average order value','val','n',42000,6,'List price rise plus premium mix.')]},
+      {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+        D('Key accounts','vol','n',45,4,'','#'),
+        D('Orders per account-month','vol','n',6,0,'Chains restock harder and earlier.'),
+        D('Average order value','val','n',50000,6)]}
+    ]),
+    S('Distributors',[
+      {name:'Base year — excluding seasons', type:'base', drivers:[
+        D('Outlets covered','vol','n',3600,8,'Sell-out basis. These outlets must exclude anything key accounts serve directly, or the same shelf is counted twice.'),
+        D('Drops per outlet-month','vol','n',2,0),
+        D('Average drop value','val','n',3400,6,'List price rise of 4% plus mix shift toward the premium SKU.')]},
+      {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+        D('Outlets covered','vol','n',3600,8),
+        D('Drops per outlet-month','vol','n',3,0,'Three drops against two in a normal month.'),
+        D('Average drop value','val','n',4100,6,'Larger order sizes and a heavier premium skew.')]},
+      {name:'New product launch — premium line', type:'increment', drivers:[
+        D('Outlets carrying the line','vol','n',1200,0,'A-class groceries only in year one.'),
+        D('Months active','vol','n',7,0,'Listing lands in June.'),
+        D('Drops per outlet-month','vol','n',2,0),
+        D('Average drop value','val','n',1400,0),
+        D('Cannibalisation offset','val','%',85,0,'15% of volume assumed to shift from the existing range. Challenge with the category team.')]}
+    ])
+  ]},
+
+  {name:'B2B', mode:'count', flat:true, subs:[ S('B2B',[
+    {name:'Base year — excluding seasons', type:'base', drivers:[
+      D('Active accounts','vol','n',140,20),
+      D('Average contract value','val','n',320000,5,'Annual contract value per account — not a rate, so this channel is not pro-rated.')]},
+    {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+      D('Accounts ordering for Ramadan','vol','n',60,20,'Roughly 43% of the account base orders gifting or iftar catering.'),
+      D('Average Ramadan order value','val','n',45000,5,'One-off seasonal orders, separate from the annual contract.')]}
+  ])]},
+
+  {name:'Events', mode:'count', flat:true, subs:[ S('Events',[
+    {name:'Base year — excluding seasons', type:'base', drivers:[
+      D('Events per year','vol','n',45,9,'A count of discrete events, not a rate. The uplift is nine more events, entered as a number.','#'),
+      D('Revenue per event','val','n',260000,10)]},
+    {name:'Ramadan season', type:'season', seasonId:'ramadan', drivers:[
+      D('Ramadan events','vol','n',18,3,'Iftar and sohour events compressed into one month — the constraint is team capacity, not demand.','#'),
+      D('Revenue per Ramadan event','val','n',340000,10)]}
+  ])]}
+];
+
+let model = JSON.parse(JSON.stringify(SKELETON));
+let active = 'master';
+let activeSub = {};           // channel index -> sub index
+let showPeriods = false;
+
+/* ---------- season windows ---------- */
+const MPD = 365/12;
+const seasonById = id => SEASONS.find(x=>x.id===id);
+function seasonMonths(sn){
+  if(!sn||!sn.start||!sn.end) return 0;
+  const d0=new Date(sn.start), d1=new Date(sn.end);
+  if(isNaN(d0)||isNaN(d1)||d1<d0) return 0;
+  return (Math.round((d1-d0)/86400000)+1)/MPD;
+}
+// months a table represents. Periods inside a SUB sum to 12.
+function monthsFor(t,ch,sub){
+  if(ch.mode==='count' || t.type==='increment') return 1;
+  if(t.type==='season') return seasonMonths(seasonById(t.seasonId));
+  const used = sub.tables.filter(x=>x.type==='season')
+                         .reduce((n,x)=>n+seasonMonths(seasonById(x.seasonId)),0);
+  return Math.max(0,12-used);
+}
+
+/* ---------- maths ---------- */
+const y1of = d => d.upUnit==='#' ? d.base+(d.up||0) : d.base*(1+(d.up||0)/100);
+const eff = (d,y1) => { const v = y1 ? y1of(d) : d.base; return d.unit==='%' ? v/100 : v; };
+function fac(t,y1){ let vol=1,val=1; t.drivers.forEach(d=>{const v=eff(d,y1); if(d.kind==='vol') vol*=v; else val*=v;}); return {vol,val,rev:vol*val}; }
+function tCalc(t,ch,sub){
+  const m=monthsFor(t,ch,sub), y=fac(t,true);
+  if(t.type==='increment')
+    return {b0:0,b1:y.rev*m,growth:y.rev*m,volEff:0,valEff:0,intEff:0,newEff:y.rev*m,months:m};
+  const b=fac(t,false);
+  return {b0:b.rev*m,b1:y.rev*m,growth:(y.rev-b.rev)*m,
+          volEff:(y.vol-b.vol)*b.val*m, valEff:(y.val-b.val)*b.vol*m,
+          intEff:(y.vol-b.vol)*(y.val-b.val)*m, newEff:0, months:m};
+}
+function agg(list,fn){ const t={b0:0,b1:0,growth:0,volEff:0,valEff:0,intEff:0,newEff:0}; list.forEach(x=>{const c=fn(x); for(const k in t) t[k]+=c[k];}); return t; }
+const sCalc = (ch,sub) => agg(sub.tables, t=>tCalc(t,ch,sub));
+const cCalc = ch => agg(ch.subs, sub=>sCalc(ch,sub));
+const totals = () => agg(model, cCalc);
+
+/* ---------- format ---------- */
+const cur = () => (document.getElementById('cur')||{value:'EGP'}).value.trim();
+function money(n){const a=Math.abs(n),s=n<0?'-':'';
+  if(a>=1e9) return s+(a/1e9).toFixed(2)+'B';
+  if(a>=1e6) return s+(a/1e6).toFixed(2)+'M';
+  if(a>=1e3) return s+(a/1e3).toFixed(1)+'K';
+  return s+a.toFixed(0);}
+const pct=(n,d)=>(!isFinite(n)||d===0)?'—':(n>=0?'+':'')+n.toFixed(1)+'%';
+const raw=n=>n.toLocaleString('en-US',{maximumFractionDigits:2});
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const parseNum=s=>{const n=parseFloat(String(s).replace(/[^0-9.\-]/g,''));return isFinite(n)?n:0;};
+
+/* ---------- tabs ---------- */
+function renderTabs(){
+  const t=['<button class="tab master '+(active==='master'?'active':'')+'" onclick="go(\'master\')">Master</button>'];
+  model.forEach((ch,i)=>t.push('<button class="tab '+(active===i?'active':'')+'" onclick="go('+i+')">'+esc(ch.name)+'</button>'));
+  t.push('<button class="tab cfg '+(active==='config'?'active':'')+'" onclick="go(\'config\')">Seasons</button>');
+  t.push('<button class="tab add" onclick="addChannel()">+ Channel</button>');
+  document.getElementById('tabs').innerHTML=t.join('');
+}
+function go(t){ active=t; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function goSub(ci,si){ activeSub[ci]=si; render(); }
+
+/* ---------- one period block ---------- */
+function blockHTML(ch,ci,sub,si,t,ti){
+  const k=tCalc(t,ch,sub), g=k.b0?k.growth/k.b0*100:0;
+  const isInc=t.type==='increment', isBase=t.type==='base';
+  const sn=t.type==='season'?seasonById(t.seasonId):null;
+  const mo=monthsFor(t,ch,sub), prorated=ch.mode==='rate'&&!isInc;
+
+  const rows=t.drivers.map((d,j)=>`
+    <tr>
+      <td class="drv-cell"><textarea class="d-name" rows="1" oninput="setDName(${ci},${si},${ti},${j},this)">${esc(d.name)}</textarea></td>
+      <td><button class="pill ${d.kind==='vol'?'vol':'val'}" onclick="flipKind(${ci},${si},${ti},${j})">${d.kind==='vol'?'Volume':'Value'}</button></td>
+      <td><button class="unit" onclick="flipUnit(${ci},${si},${ti},${j})" title="Absolute number or percentage">${d.unit==='%'?'%':'#'}</button></td>
+      <td><input class="inp num" value="${raw(d.base)}" onchange="setNum(${ci},${si},${ti},${j},'base',this.value)"></td>
+      <td><div class="up-wrap">
+        <input class="inp up num" value="${d.up}" onchange="setNum(${ci},${si},${ti},${j},'up',this.value)">
+        <button class="upunit ${d.upUnit==='#'?'abs':''}" onclick="flipUpUnit(${ci},${si},${ti},${j})" title="${d.upUnit==='#'?'Absolute change added to the baseline':'Percentage of the baseline'}">${d.upUnit==='#'?'+ n':'%'}</button>
+      </div></td>
+      <td class="note-cell"><textarea class="note" rows="1" placeholder="Why this uplift?" oninput="setNote(${ci},${si},${ti},${j},this)">${esc(d.note||'')}</textarea></td>
+      <td><span class="y1v num">${raw(y1of(d))}${d.unit==='%'?'%':''}</span></td>
+      <td><button class="x-btn" onclick="delD(${ci},${si},${ti},${j})" title="Remove driver">&times;</button></td>
+    </tr>`).join('');
+
+  const vN=t.drivers.filter(d=>d.kind==='vol').length, lN=t.drivers.filter(d=>d.kind==='val').length;
+
+  return `
+  <div class="block ${isBase?'':(isInc?'increment':'season')}">
+    <div class="blk-head">
+      <span class="blk-tag ${isBase?'base':(isInc?'increment':'season')}">${isBase?'Base':(isInc?'Increment':'Season')}</span>
+      <input class="blk-name" value="${esc(t.type==='season'&&sn?sn.name:t.name)}" ${isBase||t.type==='season'?'readonly':''} oninput="setT(${ci},${si},${ti},this.value)">
+      ${t.type==='season'?`<div class="dates">
+        <span class="from-cfg">${sn?sn.start+' → '+sn.end:'season deleted from configuration'}</span>
+        <button class="cfg-link" onclick="go('config')">edit in Seasons</button></div>`:''}
+      <div class="figs">
+        <div class="fig"><span class="fig-l">Baseline</span><span class="fig-v num">${isInc?'—':money(k.b0)}</span></div>
+        <div class="fig"><span class="fig-l">Year 1</span><span class="fig-v y1 num">${money(k.b1)}</span></div>
+        <div class="fig"><span class="fig-l">Growth</span><span class="fig-v gr num ${k.growth<0?'down':''}">${isInc?'all new':pct(g,k.b0)}</span></div>
+      </div>
+      ${isBase?'':`<button class="x-btn" onclick="delT(${ci},${si},${ti})" title="Remove this ${isInc?'increment':'season'}">&times;</button>`}
+    </div>
+    ${prorated?`<div class="months ${isBase?'':'seasonm'}">
+      <span class="m-l">${isBase?'Months in base period':'Months in season'}</span>
+      <span class="m-v num">${mo.toFixed(2)}</span>
+      <span class="m-n">${isBase?'12 months less the seasons below — calculated, not entered'
+        :(sn?Math.round(seasonMonths(sn)*MPD)+' days, '+sn.start+' to '+sn.end:'no dates set')}</span>
+    </div>`:(isInc?'':`<div class="months flat"><span class="m-l">Not pro-rated</span><span class="m-n">${esc(ch.name)} is count-based — figures are absolute, and season dates are recorded for reference only.</span></div>`)}
+    <table>
+      <thead><tr><th>Driver</th><th>Type</th><th>Unit</th><th>${isInc?'Plan value':'Baseline'}</th><th>Uplift</th><th style="text-align:left">Rationale</th><th>${isInc?'Applied':'Year 1'}</th><th></th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="8" style="color:#A8AFBA;padding:16px 18px">No drivers yet.</td></tr>'}</tbody>
+    </table>
+    <div class="blk-foot">
+      <button class="mini" onclick="addD(${ci},${si},${ti},'vol')">+ Volume driver</button>
+      <button class="mini" onclick="addD(${ci},${si},${ti},'val')">+ Value driver</button>
+      <span class="formula">${vN} volume × ${lN} value → ${prorated?'monthly revenue × '+mo.toFixed(2)+' months':'revenue'}${isInc?'  ·  no baseline: all of this is new business':''}</span>
+    </div>
+  </div>`;
+}
+
+/* ---------- channel view ---------- */
+function channelView(ci){
+  const ch=model[ci];
+  const si=Math.min(activeSub[ci]||0, ch.subs.length-1);
+  const sub=ch.subs[si];
+  const c=cCalc(ch), sc=sCalc(ch,sub);
+  const gp=c.b0?c.growth/c.b0*100:0, sgp=sc.b0?sc.growth/sc.b0*100:0;
+
+  const strip = ch.flat ? '' : `<div class="substrip">
+    ${ch.subs.map((s,k)=>`<button class="subtab ${k===si?'active':''}" onclick="goSub(${ci},${k})">${esc(s.name)}</button>`).join('')}
+    <button class="subtab add" onclick="addSub(${ci})">+ Sub-channel</button>
+  </div>`;
+
+  const blocks = sub.tables.map((t,ti)=>blockHTML(ch,ci,sub,si,t,ti)).join('');
+
+  return `
+  <div class="sec-head">
+    <span class="sec-num">CH</span>
+    <span class="sec-title"><input class="blk-name" style="font-size:16px;width:300px" value="${esc(ch.name)}" oninput="setCh(${ci},this.value)"></span>
+    <span class="sec-note">${ch.flat
+      ? 'The base year covers trading outside the seasons below, so periods never overlap.'
+      : 'Each sub-channel has its own driver logic. Its periods sum to twelve months independently.'}</span>
+  </div>
+
+  <div class="summary">
+    <div class="s-cell"><div class="s-l">Channel baseline</div><div class="s-v num">${money(c.b0)}</div><div class="s-sub">${cur()} · ${ch.flat?'no sub-channels':ch.subs.length+' sub-channels'}</div></div>
+    <div class="s-cell"><div class="s-l">Channel Year 1</div><div class="s-v num"><b>${money(c.b1)}</b></div><div class="s-sub">${cur()}</div></div>
+    <div class="s-cell"><div class="s-l">Growth</div><div class="s-v num">${money(c.growth)}</div><div class="s-sub">${cur()}</div></div>
+    <div class="s-cell"><div class="s-l">Growth rate</div><div class="s-v num">${pct(gp,c.b0)}</div><div class="s-sub">on channel baseline</div></div>
+  </div>
+
+  ${strip}
+
+  ${ch.flat?'':`<div class="sec-head" style="margin-top:4px">
+    <span class="sec-num">SUB</span>
+    <span class="sec-title"><input class="blk-name" style="font-size:15px;width:260px" value="${esc(sub.name)}" oninput="setSub(${ci},${si},this.value)"></span>
+    <span class="sec-note">${money(sc.b0)} → <b>${money(sc.b1)}</b> · ${pct(sgp,sc.b0)}
+      ${ch.subs.length>1?`&nbsp; <button class="cfg-link" onclick="delSub(${ci},${si})">remove sub-channel</button>`:''}</span>
+  </div>`}
+
+  ${blocks}
+  <div class="add-row">
+    <button class="add-season" onclick="addSeason(${ci},${si})">+ Add a season</button>
+    <button class="add-season inc" onclick="addIncrement(${ci},${si},'generic')">+ Add an increment — new stores, new products</button>
+    ${/e-?commerce|app|aggregat|call/i.test(ch.name+' '+sub.name)?`<button class="add-season inc" onclick="addIncrement(${ci},${si},'hub')">+ Add hubs — dark stores</button>`:''}
+  </div>
+  <div style="display:flex;gap:10px;justify-content:flex-end">
+    ${ch.flat?`<button class="btn" onclick="addSub(${ci})">Split into sub-channels</button>`:''}
+    <button class="btn" onclick="delCh(${ci})">Remove this channel</button>
+  </div>`;
+}
+
+/* ---------- master ---------- */
+function masterView(){
+  const t=totals(), c=cur();
+  const gp=t.b0?t.growth/t.b0*100:0;
+
+  let rows='';
+  model.forEach(ch=>{
+    const k=cCalc(ch); const g=k.b0?k.growth/k.b0*100:0;
+    const share=t.growth?k.growth/t.growth*100:0;
+    rows+=`<tr class="chan"><td>${esc(ch.name)}</td><td class="num">${ch.mode==='rate'?'':'—'}</td><td class="num">${money(k.b0)}</td><td class="num">${money(k.b1)}</td><td class="num">${money(k.growth)}</td><td class="num">${pct(g,k.b0)}</td><td class="num">${share.toFixed(0)}%</td></tr>`;
+    ch.subs.forEach(sub=>{
+      if(!ch.flat){
+        const s=sCalc(ch,sub); const sg=s.b0?s.growth/s.b0*100:0;
+        rows+=`<tr class="subch"><td>${esc(sub.name)}</td><td class="num"></td><td class="num">${money(s.b0)}</td><td class="num">${money(s.b1)}</td><td class="num">${money(s.growth)}</td><td class="num">${pct(sg,s.b0)}</td><td></td></tr>`;
+      }
+      if(showPeriods){
+        sub.tables.forEach(tb=>{
+          const q=tCalc(tb,ch,sub); const qg=q.b0?q.growth/q.b0*100:0; const inc=tb.type==='increment';
+          rows+=`<tr class="per ${inc?'incr':''} ${ch.flat?'flatper':''}"><td>${esc(tb.type==='season'&&seasonById(tb.seasonId)?seasonById(tb.seasonId).name:tb.name)}</td><td class="num">${ch.mode==='rate'&&!inc?q.months.toFixed(2):'—'}</td><td class="num">${inc?'—':money(q.b0)}</td><td class="num">${money(q.b1)}</td><td class="num">${money(q.growth)}</td><td class="num">${inc?'new':pct(qg,q.b0)}</td><td></td></tr>`;
+        });
+      }
+    });
+  });
+
+  const g=t.growth, sh=x=>g?x/g*100:0;
+  const v=sh(t.volEff), p=sh(t.valEff), it=sh(t.intEff), nw=sh(t.newEff);
+  let read;
+  if(g<=0) read=`The plan does not grow on these assumptions. Check the uplifts before reading the bridge.`;
+  else if(nw>=50) read=`Over half the growth — ${nw.toFixed(0)}% — comes from <b>new business</b> that does not exist yet. New stores, products and hubs carry execution and capital risk that growth on an existing base does not. Ask what the plan looks like if the openings slip a quarter.`;
+  else if(v>=60) read=`Growth is <b>volume-led</b> — about ${v.toFixed(0)}% of the increase comes from selling more on the existing base. Test it against capacity, coverage, working capital and headcount.`;
+  else if(p>=60) read=`Growth is <b>price-led</b> — about ${p.toFixed(0)}% comes from value per unit rather than quantity. Test it against pricing power, mix shift and elasticity.`;
+  else read=`Growth is spread across volume (${v.toFixed(0)}%), price (${p.toFixed(0)}%) and new business (${nw.toFixed(0)}%) — generally the more resilient shape. Confirm each has a named owner.`;
+
+  let calc='';
+  model.forEach(ch=>{
+    const k=cCalc(ch);
+    calc+=`<div class="calc-ch">${esc(ch.name)}</div>`;
+    ch.subs.forEach(sub=>{
+      if(!ch.flat) calc+=`<div class="calc-sub-h">${esc(sub.name)}</div>`;
+      sub.tables.forEach(tb=>{
+        const q=tCalc(tb,ch,sub), inc=tb.type==='increment';
+        const expr=y1=>tb.drivers.map(d=>{const val=y1?y1of(d):d.base;return raw(val)+(d.unit==='%'?'%':'');}).join('  ×  ')||'—';
+        calc+=`<div class="calc-row">
+          <div class="calc-lbl"><span class="t">${tb.type==='base'?'Base period':(inc?'Increment':'Season')}</span>${esc(tb.name)}</div>
+          <div class="calc-exp">${inc?'no baseline — new business':expr(false)+(ch.mode==='rate'?'  ×  '+q.months.toFixed(2)+' mo':'')+'<span class="arrow">→</span>'+money(q.b0)}<br>${expr(true)}${ch.mode==='rate'&&!inc?'  ×  '+q.months.toFixed(2)+' mo':''}<span class="arrow">→</span>${money(q.b1)}</div>
+          <div class="calc-val">${money(q.b1)}</div></div>`;
+      });
+    });
+    calc+=`<div class="calc-row calc-tot"><div class="calc-lbl">${esc(ch.name)} total</div>
+      <div class="calc-exp">baseline ${money(k.b0)}<span class="arrow">→</span>Year 1</div>
+      <div class="calc-val">${money(k.b1)}</div></div>`;
+  });
+  calc+=`<div class="calc-row calc-tot" style="border-top:2px solid var(--navy)">
+    <div class="calc-lbl">All channels</div>
+    <div class="calc-exp">baseline ${money(t.b0)}<span class="arrow">→</span>Year 1 · growth ${money(t.growth)} (${pct(gp,t.b0)})</div>
+    <div class="calc-val">${money(t.b1)}</div></div>`;
+
+  return `
+  <div class="seasons-strip">${SEASONS.map(x=>`<span class="chip"><b>${esc(x.name)}</b> ${x.start} → ${x.end} · ${seasonMonths(x).toFixed(2)} months</span>`).join('')}</div>
+
+  <div class="sec-head"><span class="sec-num">01</span><span class="sec-title">Total position</span>
+    <span class="sec-note">Read-only. Every figure is calculated from the channel tabs.</span></div>
+  <div class="summary">
+    <div class="s-cell"><div class="s-l">Baseline revenue</div><div class="s-v num">${money(t.b0)}</div><div class="s-sub">${c} · last completed year</div></div>
+    <div class="s-cell"><div class="s-l">Year 1 revenue</div><div class="s-v num"><b>${money(t.b1)}</b></div><div class="s-sub">${c} · the plan</div></div>
+    <div class="s-cell"><div class="s-l">Absolute growth</div><div class="s-v num">${money(t.growth)}</div><div class="s-sub">${c}</div></div>
+    <div class="s-cell"><div class="s-l">Growth rate</div><div class="s-v num">${pct(gp,t.b0)}</div><div class="s-sub">on baseline</div></div>
+  </div>
+
+  <div class="sec-head" style="margin-top:26px"><span class="sec-num">02</span><span class="sec-title">Roll-up</span>
+    <span class="sec-note">Channel, then sub-channel where the routes differ.</span></div>
+  <div class="panel">
+    <div class="panel-h">Channel roll-up <span class="ro">READ ONLY</span>
+      <button class="btn ${showPeriods?'on':''}" onclick="togglePeriods()">${showPeriods?'Hide periods':'Show periods'}</button></div>
+    <table class="dt">
+      <thead><tr><th>Channel / sub-channel${showPeriods?' / period':''}</th><th>Months</th><th>Baseline</th><th>Year 1</th><th>Growth</th><th>Growth %</th><th>Share</th></tr></thead>
+      <tbody>${rows}
+        <tr class="total"><td>Total</td><td></td><td class="num">${money(t.b0)}</td><td class="num">${money(t.b1)}</td><td class="num">${money(t.growth)}</td><td class="num">${pct(gp,t.b0)}</td><td class="num">100%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec-head" style="margin-top:26px"><span class="sec-num">03</span><span class="sec-title">Growth bridge</span>
+    <span class="sec-note">Volume, price, their compounding, and business that does not exist yet.</span></div>
+  <div class="panel">
+    <div class="panel-h">Where the growth comes from <span class="ro">READ ONLY</span></div>
+    <div class="bridge-wrap">
+      <div class="bbar">
+        <div class="bseg v" style="width:${Math.max(0,v)}%">${v>=9?v.toFixed(0)+'%':''}</div>
+        <div class="bseg p" style="width:${Math.max(0,p)}%">${p>=9?p.toFixed(0)+'%':''}</div>
+        <div class="bseg i" style="width:${Math.max(0,it)}%">${it>=9?it.toFixed(0)+'%':''}</div>
+        <div class="bseg n" style="width:${Math.max(0,nw)}%">${nw>=9?nw.toFixed(0)+'%':''}</div>
+      </div>
+      <div class="blegend">
+        <div class="bl v"><div class="bl-l">Volume effect</div><div class="bl-v num">${money(t.volEff)}</div><div class="bl-s">${v.toFixed(0)}% · selling more</div></div>
+        <div class="bl p"><div class="bl-l">Price / value effect</div><div class="bl-v num">${money(t.valEff)}</div><div class="bl-s">${p.toFixed(0)}% · value per unit</div></div>
+        <div class="bl i"><div class="bl-l">Interaction</div><div class="bl-v num">${money(t.intEff)}</div><div class="bl-s">${it.toFixed(0)}% · compounding</div></div>
+        <div class="bl n"><div class="bl-l">New business</div><div class="bl-v num">${money(t.newEff)}</div><div class="bl-s">${nw.toFixed(0)}% · does not exist yet</div></div>
+      </div>
+      <div class="read">${read}</div>
+    </div>
+  </div>
+
+  <div class="sec-head" style="margin-top:26px"><span class="sec-num">04</span><span class="sec-title">Full calculation</span>
+    <span class="sec-note">Every period multiplied out — baseline first, Year 1 second.</span></div>
+  <div class="panel">
+    <div class="panel-h">Period by period <span class="ro">READ ONLY</span></div>
+    <div class="calc">${calc||'<div class="empty">No channels yet.</div>'}</div>
+  </div>`;
+}
+
+/* ---------- seasons configuration ---------- */
+function configView(){
+  const rows=SEASONS.map(sn=>{
+    const used=[];
+    model.forEach(ch=>ch.subs.forEach(sub=>{
+      if(sub.tables.some(t=>t.seasonId===sn.id)) used.push(ch.flat?ch.name:ch.name+' · '+sub.name);
+    }));
+    return `<tr>
+      <td><input class="cfg-name" value="${esc(sn.name)}" oninput="setSeasonName('${sn.id}',this.value)"></td>
+      <td><input type="date" value="${sn.start}" onchange="setSeason('${sn.id}','start',this.value)"></td>
+      <td><input type="date" value="${sn.end}" onchange="setSeason('${sn.id}','end',this.value)"></td>
+      <td class="num">${Math.round(seasonMonths(sn)*MPD)} days</td>
+      <td class="num">${seasonMonths(sn).toFixed(2)}</td>
+      <td class="used">${used.length?used.map(esc).join(', '):'<i>not used yet</i>'}</td>
+      <td><button class="x-btn" onclick="delSeasonDef('${sn.id}')" title="Remove season">&times;</button></td>
+    </tr>`;}).join('');
+
+  return `
+  <div class="sec-head"><span class="sec-num">CFG</span><span class="sec-title">Seasons</span>
+    <span class="sec-note">Defined once here. Adding a season to a sub-channel takes its name and dates from this table.</span></div>
+  <div class="panel">
+    <div class="panel-h">Season windows</div>
+    <table class="dt cfg-table">
+      <thead><tr><th>Season</th><th>Start</th><th>End</th><th>Length</th><th>Months</th><th>Used in</th><th></th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="7" class="empty">No seasons configured.</td></tr>'}</tbody>
+    </table>
+    <div class="blk-foot"><button class="mini" onclick="addSeasonDef()">+ Add a season</button></div>
+  </div>
+  <div class="read" style="margin-top:4px">
+    Season days are <b>cut out of the base year</b> in every rate-based sub-channel, so periods never overlap and each sub-channel's periods sum to twelve months. Changing a date here changes the base period everywhere at once. Count-based channels — B2B and Events — keep absolute figures and are not pro-rated.
+  </div>`;
+}
+
+function render(){
+  renderTabs();
+  document.getElementById('view').innerHTML =
+    active==='config' ? configView()
+    : (active==='master'||!model[active]) ? masterView() : channelView(active);
+  sizeAll();
+}
+function autosize(el){ el.style.height='auto'; el.style.height=(el.scrollHeight+2)+'px'; }
+function sizeAll(){ document.querySelectorAll('textarea.note, textarea.d-name').forEach(autosize); }
+
+/* ---------- edits ---------- */
+const T=(ci,si,ti)=>model[ci].subs[si].tables[ti];
+function setCh(i,v){ model[i].name=v; }
+function setSub(ci,si,v){ model[ci].subs[si].name=v; }
+function setT(ci,si,ti,v){ T(ci,si,ti).name=v; }
+function setDName(ci,si,ti,j,el){ T(ci,si,ti).drivers[j].name=el.value; autosize(el); }
+function setNote(ci,si,ti,j,el){ T(ci,si,ti).drivers[j].note=el.value; autosize(el); }
+function setNum(ci,si,ti,j,k,v){ T(ci,si,ti).drivers[j][k]=parseNum(v); render(); }
+function flipKind(ci,si,ti,j){ const d=T(ci,si,ti).drivers[j]; d.kind=d.kind==='vol'?'val':'vol'; render(); }
+function flipUnit(ci,si,ti,j){ const d=T(ci,si,ti).drivers[j]; d.unit=d.unit==='%'?'n':'%'; render(); }
+function flipUpUnit(ci,si,ti,j){ const d=T(ci,si,ti).drivers[j]; d.upUnit=d.upUnit==='#'?'%':'#'; render(); }
+function addD(ci,si,ti,kind){ T(ci,si,ti).drivers.push(D(kind==='vol'?'New volume driver':'New value driver',kind,'n',1,0,'','%')); render(); }
+function delD(ci,si,ti,j){ T(ci,si,ti).drivers.splice(j,1); render(); }
+function togglePeriods(){ showPeriods=!showPeriods; render(); }
+
+function addSeason(ci,si){
+  const sub=model[ci].subs[si];
+  const used=sub.tables.filter(t=>t.type==='season').map(t=>t.seasonId);
+  const sn=SEASONS.find(x=>!used.includes(x.id));
+  if(!sn){ alert('Every configured season is already used here.\n\nAdd a new season in the Seasons tab first — names and dates are defined there once and apply everywhere.'); return; }
+  sub.tables.push({name:sn.name,type:'season',seasonId:sn.id,drivers:JSON.parse(JSON.stringify(sub.tables[0].drivers))});
+  render();
+}
+function addIncrement(ci,si,kind){
+  const ch=model[ci], sub=ch.subs[si];
+  let drivers,name;
+  if(kind==='hub'){
+    name='New hubs — dark stores';
+    drivers=[
+      D('Dark stores','vol','n',1,0,'New areas only. Capacity added where we already deliver belongs as an uplift on the base table.'),
+      D('Months active','vol','n',12,0,'How many months of the year this actually operates.'),
+      D('Orders per store-month (mature)','vol','n',5000,0,'Ops throughput ceiling, not a forecast.'),
+      D('Average order value','val','n',450,0),
+      D('Maturity factor','val','%',70,0,'Throughput ramps as the catchment learns we deliver there.')];
+  } else {
+    drivers=JSON.parse(JSON.stringify(sub.tables[0].drivers));
+    drivers.forEach(d=>{d.up=0;d.note='';d.upUnit='%';});
+    drivers.splice(1,0,D('Months active','vol','n',12,0,'How many months of the year this actually trades.'));
+    if(/retail/i.test(ch.name+' '+sub.name))
+      drivers.push(D('Maturity factor','val','%',70,0,'New units trade below mature levels in year one.'));
+    name='New increment — rename me';
+  }
+  sub.tables.push({name,type:'increment',drivers});
+  render();
+}
+function delT(ci,si,ti){
+  const t=T(ci,si,ti);
+  if(t.type==='base') return;
+  if(confirm('Remove "'+t.name+'"?')){ model[ci].subs[si].tables.splice(ti,1); render(); }
+}
+
+function addSub(ci){
+  const ch=model[ci];
+  if(ch.flat){
+    // the channel's existing tables become the first sub-channel
+    ch.flat=false;
+    ch.subs[0].name=ch.name;
+  }
+  const src=ch.subs[0];
+  const tables=[{name:'Base year — excluding seasons',type:'base',
+    drivers:JSON.parse(JSON.stringify(src.tables[0].drivers)).map(d=>({...d,up:0,note:'',upUnit:'%'}))}];
+  ch.subs.push({name:'New sub-channel',tables});
+  activeSub[ci]=ch.subs.length-1;
+  render();
+}
+function delSub(ci,si){
+  const ch=model[ci];
+  if(ch.subs.length<=1) return;
+  if(!confirm('Remove the sub-channel "'+ch.subs[si].name+'" and all its periods?')) return;
+  ch.subs.splice(si,1);
+  if(ch.subs.length===1){ ch.flat=true; ch.subs[0].name=ch.name; }
+  activeSub[ci]=0; render();
+}
+function addChannel(){
+  model.push({name:'New channel',mode:'rate',flat:true,subs:[S('New channel',[
+    {name:'Base year — excluding seasons',type:'base',drivers:[
+      D('Units','vol','n',100,0),D('Price per unit','val','n',100,0)]}])]});
+  active=model.length-1; render();
+}
+function delCh(i){
+  if(confirm('Remove "'+model[i].name+'" and everything inside it?')){
+    model.splice(i,1); active='master'; render();
+  }
+}
+function resetTree(){
+  if(confirm('Reset to the F&B starting skeleton? Unsaved changes will be lost.')){
+    model=JSON.parse(JSON.stringify(SKELETON));
+    SEASONS=[{id:'ramadan',name:'Ramadan season',start:'2026-02-17',end:'2026-03-19'}];
+    activeSub={}; active='master'; showPeriods=false; render();
+  }
+}
+function setSeason(id,k,v){ const sn=seasonById(id); if(sn){ sn[k]=v; render(); } }
+function setSeasonName(id,v){ const sn=seasonById(id); if(sn) sn.name=v; }
+function addSeasonDef(){ SEASONS.push({id:'s'+Date.now(),name:'New season',start:'2026-01-01',end:'2026-01-31'}); render(); }
+function delSeasonDef(id){
+  const sn=seasonById(id); const used=[];
+  model.forEach(ch=>ch.subs.forEach(sub=>{ if(sub.tables.some(t=>t.seasonId===id)) used.push(ch.name); }));
+  const msg=used.length
+    ? 'Remove "'+sn.name+'"?\n\nIt is used in '+used.length+' place'+(used.length>1?'s':'')+' ('+[...new Set(used)].join(', ')+'). Those season tables will be removed too, and those days return to the base year.'
+    : 'Remove "'+sn.name+'"?';
+  if(!confirm(msg)) return;
+  model.forEach(ch=>ch.subs.forEach(sub=>{ sub.tables=sub.tables.filter(t=>t.seasonId!==id); }));
+  SEASONS=SEASONS.filter(x=>x.id!==id);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

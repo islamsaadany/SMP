@@ -10335,14 +10335,29 @@ THE DIFF RATHER THAN ASSUMED** (spec 029): not one `api/`, `lib/` or `db/` file
 is in it, so nothing about how a save is judged moves, nothing stored moves and
 nothing is migrated. **Both in-step guards clear before the push**:
 `built-in-step.py` all good (&sect;349), `generated-in-step` all clear
-(&sect;329). **AND THE LIVE READ IS OWED RATHER THAN WRITTEN AHEAD OF ITSELF**
+(&sect;329). **AND THE LIVE READ WAS MADE RATHER THAN WRITTEN AHEAD OF ITSELF**
 (&sect;91.5, &sect;379.5's lesson with the sign reversed &mdash; that one
 recorded a limitation it had not measured, and the matching risk here is
-recording a success nobody has seen): until those two files are read off the
-live site the deployment is **unverified**, and the branch is deliberately
-**held behind** meanwhile, because while it stays where it is `main`'s tip is
-unique by construction and putting that SHA on a second ref is the one thing
-left that could still cost the build.
+recording a success nobody has seen), **with the pre-push read kept as the
+baseline that tells a landed build from one that has not**: minutes before,
+the site served `shell.js` at **3,852,494 / `702fd30c`**, which is
+&sect;379.4's own recorded hash to the character. **PRODUCTION HAS SERVED THIS
+COMMIT** &mdash; landed in about **60 seconds** &mdash; `shell.js`
+**3,861,361 / `8c85f63a`** and `platform.css` **674,961 / `fbb21ceb`**, each
+**byte-identical to its generated copy**, so both witnesses agree rather than
+one carrying the claim alone. **AND THE FILE THAT COULD NOT BE A WITNESS WAS
+MEASURED RATHER THAN QUOTED**: the served `sw.js` comes back at **4,104 bytes
+holding the string `SHELL` NOUGHT times**, which is &sect;316.10's generator
+dropping the caching half, demonstrated on the live deployment instead of cited
+from the record. **THE BRANCH WAS HELD BEHIND AND THEN BROUGHT UP, IN THAT
+ORDER** (&sect;374.1, &sect;375.2, &sect;377.6, &sect;379.4): `main`'s tip was
+on no other ref for the whole window that mattered, which is the one thing left
+that could still have cost the build, and the hold's condition having been met
+the branch is fast-forwarded. **THE RESIDUE IS THE ONE &sect;365, &sect;367 AND
+&sect;379.4 EACH NAMED, UNCHANGED**: the served worker's bytes did not move, so
+no `controllerchange` fires and &sect;258's *"A newer version of the platform is
+ready"* is **not** offered &mdash; a tab left open keeps its old shell until
+somebody reloads it.
 
 *Earlier: 2026-09-21 &mdash; **&sect;379: the working copy carries the
 platform, not a link to it (spec 030).** Islam, with a file downloaded from his

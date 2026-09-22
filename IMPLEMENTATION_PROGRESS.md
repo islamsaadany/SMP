@@ -6995,10 +6995,21 @@ nothing recombined.
   file is in it, so nothing about how a save is judged moves, nothing stored
   moves and nothing is migrated.
 - Both in-step guards clear before the push.
-- **The live read is owed and is recorded when it is made**, never written
-  ahead of itself: until those two files are read back off the live site the
-  deploy is unverified, and the branch is held where it is meanwhile, so
-  `main`'s tip stays the only ref carrying that commit.
+- **Production has served this commit** — the live read was made rather than
+  written ahead of itself, and it landed in about **60 seconds**. The read
+  taken minutes earlier is what makes it mean something: the site was serving
+  §379's build to the hash, so the two readings tell a landed deploy from one
+  that has not. Both witnesses came back byte-identical to what the generators
+  produce — `shell.js` 3,861,361 and `platform.css` 674,961.
+- **The file that could not be a witness was measured, not quoted**: the served
+  `sw.js` is 4,104 bytes and holds the cache-name string nought times, which is
+  the generator dropping that half, shown on the live site rather than cited.
+- **The branch was held behind and then brought up, in that order**, so `main`'s
+  tip was the only ref carrying the commit for the whole window that mattered.
+- **One thing to expect rather than report**: because the served worker's bytes
+  did not move, a tab left open on the old build is *not* offered *"A newer
+  version of the platform is ready"* — it keeps its old shell until somebody
+  reloads it.
 
 ### Waiting on Islam
 

@@ -54509,10 +54509,32 @@ save is judged moves, nothing stored moves and nothing is migrated. Both
 in-step guards clear before the push: `built-in-step.py` all good (§349),
 `generated-in-step` all clear (§329).
 
-**AND THE LIVE READ IS OWED RATHER THAN WRITTEN AHEAD OF ITSELF** (§91.5).
+**AND THE LIVE READ WAS MADE RATHER THAN WRITTEN AHEAD OF ITSELF** (§91.5).
 §379.5 records a block that claimed a limitation it had not measured; the
-matching risk here is recording a success nobody has seen, so until those two
-files are read off the live site the deployment is **unverified** and says so.
-**The branch is deliberately held behind meanwhile** — while it stays where it
-is `main`'s tip is unique by construction, and putting that SHA on a second ref
-is the one thing left that could still cost the build.
+matching risk here is recording a success nobody has seen, so the read was
+taken **twice** and the first one is what makes the second mean anything:
+
+- **Before the push** the site served `shell.js` at **3,852,494 / `702fd30c`**
+  — §379.4's own recorded hash, to the character — so a later match could not
+  be a coincidence of a build that had never changed.
+- **After**, landed in about **60 seconds**: `shell.js` **3,861,361 /
+  `8c85f63a`** and `platform.css` **674,961 / `fbb21ceb`**, each **byte-identical
+  to its generated copy**. Both witnesses agree, rather than one carrying the
+  claim alone.
+
+**AND THE FILE THAT COULD NOT BE A WITNESS WAS MEASURED RATHER THAN QUOTED**:
+the served `sw.js` comes back at **4,104 bytes holding the string `SHELL`
+NOUGHT times**. That is §316.10's generator dropping the caching half —
+demonstrated on the live deployment instead of cited from the record, which is
+the difference between knowing it and having read it somewhere.
+
+**THE BRANCH WAS HELD BEHIND AND THEN BROUGHT UP, IN THAT ORDER** (§374.1,
+§375.2, §377.6, §379.4). `main`'s tip was on no other ref for the whole window
+that mattered — putting that SHA on a second ref is the one thing left that
+could still have cost the build — and the hold's condition having been met, the
+branch is fast-forwarded.
+
+**THE RESIDUE IS THE ONE §365, §367 AND §379.4 EACH NAMED, UNCHANGED**: because
+the served worker's bytes did not move, no `controllerchange` fires and §258's
+*"A newer version of the platform is ready"* is **not** offered — a tab left
+open on the previous build keeps its old shell until somebody reloads it.

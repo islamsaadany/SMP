@@ -482,15 +482,23 @@ console.log("\n4c · who may open a module (§359.5)");
     decideOpen("none", "insights", seed, head) === true);
   /* SHUT EVERY ROW THIS PERSON HOLDS, ASKED RATHER THAN TYPED (§218,
      §214.3, §255). Access is the MOST GENEROUS grant across the roles
-     somebody holds (§33), so shutting ONE row is not shutting a person —
-     and §384 made a tactic's owner a role, so this unit's head derives
-     `towner` as well as `owner` and the assertion below started reporting a
-     correct build broken. The roles come from the product's own rule
-     (personRoles, the one both sides ask — §42), so the row derived by
-     whatever somebody is named on NEXT is shut here the day it is added.
+     somebody holds (§33), so shutting ONE row is not shutting a person. The
+     roles come from the product's own rule (personRoles, the one both sides
+     ask — §42), so the row derived by whatever somebody is named on NEXT is
+     shut here the day it is added.
 
-     THE CUSTODIAN BESIDE THEM IS WHAT MAKES IT MEAN ANYTHING (§113.8): a
-     build that refused everybody passes the line above perfectly, so their
+     AND WHICH PERSON MAKES §33's POINT BELONGS TO THE SEED, NOT TO THIS FILE
+     (§218, §385.5): the guard here read `headRoles.length >= 2`, true only
+     while §384's tactic-owner row existed — §385 took that row off the table
+     and the guard started reporting a correct build broken, which is the same
+     staleness §383.8 recorded in this file's own fixtures, arriving from the
+     other direction. What is asserted now is the CLAIM rather than a count,
+     and it is DRIVEN: the custodian beside the head holds two rows (25 of the
+     seed's 33 people hold more than one), so shutting one of theirs and
+     watching them still open is §33 measured rather than assumed.
+
+     THE CUSTODIAN BESIDE THEM IS WHAT MAKES THE SHUT MEAN ANYTHING (§113.8):
+     a build that refused everybody passes the line below perfectly, so their
      rows are asserted UNTOUCHED and still open. */
   const rulesOf = createRequire(import.meta.url)(join(ROOT, "lib", "rules.js"));
   const rolesHeldBy = (key) => {
@@ -499,8 +507,14 @@ console.log("\n4c · who may open a module (§359.5)");
     return Array.from(new Set(rulesOf.personRoles(w, p2).map((r) => r.role)));
   };
   const headRoles = rolesHeldBy(head), custRoles = rolesHeldBy(cust);
-  check("the unit head holds more than the one row, so shutting one is not shutting them (§33, §384)",
-    headRoles.length >= 2 && headRoles.includes("owner"), JSON.stringify(headRoles));
+  check("the head's rows are the product's own answer, never a typed list (§42)",
+    headRoles.length > 0 && headRoles.includes("owner"), JSON.stringify(headRoles));
+  check("…and shutting ONE row of somebody who holds several is not shutting them (§33)",
+    custRoles.length >= 2 &&
+      decideOpen("none", "insights",
+        graphWith((g) => { g.access[custRoles[0]] = { ...(g.access[custRoles[0]] || {}), a_insights: "none" }; }),
+        cust) === true,
+    JSON.stringify({ [head]: headRoles, [cust]: custRoles }));
   const shutOwner = graphWith((g) => { headRoles.forEach((r) => { g.access[r] = g.access[r] || {}; g.access[r].a_insights = "none"; }); });
   check("…and with every row they hold shut, the same person is REFUSED by the decision the route asks",
     decideOpen("none", "insights", shutOwner, head) === false, JSON.stringify(headRoles));

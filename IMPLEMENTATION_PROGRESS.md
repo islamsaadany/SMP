@@ -6899,7 +6899,7 @@ the navigation and the decks in it.
 
 ---
 
-## §380 — One blank template per way of planning (2026-09-22, spec 059) · **built, on the branch**
+## §380 — One blank template per way of planning (2026-09-22, spec 059) · **merged to `main`**
 
 Islam: *"in the template download we need to have the different types of
 functions plans templates."*
@@ -6968,9 +6968,40 @@ validation is written for an empty list.
 - The built file is in step with its sources, the served copies regenerated,
   and `sw.js` bumped.
 
+### §380.2 — Merged to `main` (2026-09-22) · **done**
+
+**`main` had not moved** — measured, not assumed. It stood at §379.5, this
+branch's own ancestor, so the merge is a clean fast-forward and the tree pushed
+is byte-for-byte the tree that was verified: nothing resolved, nothing rebuilt,
+nothing recombined.
+
+- **§380 was free on `main`**, checked in both spellings rather than assumed, so
+  no renumber was owed.
+- **`sw.js` confirmed immediately before the push**:
+  `v5.24-three-blank-templates` against main's `v5.23`, a name the history has
+  never held — measured across every commit that has ever touched that file,
+  not only against main — one live declaration, and the file parses.
+- **The merge carries its own record commit**, because the branch tip was
+  already pushed: Vercel gives one deployment per commit, so putting the same
+  commit on `main` and on the branch is a race for which one gets built. The
+  record owed the line anyway, since all three files still said *"on the
+  branch"* over a merge that had happened.
+- **The witness for "production has this" was measured, not carried over from
+  last time.** The served `sw.js` is 4,104 bytes on both builds, so it can
+  prove nothing; `shell.js` (3,852,494 → 3,861,361) and `platform.css`
+  (674,285 → 674,961) both moved, so this round has two witnesses where the
+  last had one — because this round changed a stylesheet and that one did not.
+- **Nobody is signed out** — read off the diff: not one `api/`, `lib/` or `db/`
+  file is in it, so nothing about how a save is judged moves, nothing stored
+  moves and nothing is migrated.
+- Both in-step guards clear before the push.
+- **The live read is owed and is recorded when it is made**, never written
+  ahead of itself: until those two files are read back off the live site the
+  deploy is unverified, and the branch is held where it is meanwhile, so
+  `main`'s tip stays the only ref carrying that commit.
+
 ### Waiting on Islam
 
-- **The merge to `main`** — his word, on that merge.
 - Four things flagged on the mockup and deliberately not folded in: the
   projects file's Read me still says *Capability* over a list of functions; the
   Pillars button spells the word as a literal where the page beside it uses the

@@ -10293,8 +10293,56 @@ file's Read me still says *Capability* over a list of seven functions; the
 Pillars button spells the word as a literal where the control beside it uses
 `L("pillar","bu")`; a capability plans two ways where a function plans three;
 and an archived plan's workbook passes no format, so an archived objectives
-function's Read me says *Capability*. **`main` untouched &mdash; the merge is
-Islam's word, on that merge.**
+function's Read me says *Capability*.
+
+**&sect;380.2 &mdash; MERGED TO `main` 2026-09-22 on Islam's word**, and
+**`main` HAD NOT MOVED**, measured rather than assumed (&sect;4's
+fetch-and-look): it stood at **&sect;379.5**, this branch's own ancestor, so
+the merge is a clean **fast-forward** and *the tree pushed is byte-for-byte the
+tree that was verified* &mdash; no resolution, no rebuild, nothing recombined,
+which is the same standing &sect;378.2 and &sect;379.4 earned and is worth
+naming rather than assumed. **&sect;380 was free on `main`**, checked in **both
+spellings** (&sect;336.1) and not assumed, so no renumber was owed
+(&sect;264.3); spec 059 is this branch's own and already there, carried by
+&sect;374, &sect;377 and &sect;378. **`sw.js` CONFIRMED IMMEDIATELY BEFORE THE
+PUSH** (&sect;94.16): `v5.24-three-blank-templates` against main's `v5.23`, a
+name the history has **never** held &mdash; measured across every commit that
+has ever touched the file, rather than against main alone, which is the half
+&sect;94.12's collision would slip through &mdash; **one** live `const SHELL`,
+the other three matches being prose in that file's own comments (&sect;272.8's
+shape in a search rather than in a parser), and `node --check` clean
+(&sect;146.2). **AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE
+BRANCH TIP WAS ALREADY PUSHED** (&sect;91, by &sect;357.4's road): Vercel
+deduplicates by SHA, so fast-forwarding `main` onto a commit the branch ref
+already holds is ONE deployment and which ref gets it is a race already lost
+&mdash; and *the way back is a commit `main` holds and the branch does not, and
+it must be one worth making*, which the record owed anyway, since &sect;380's
+own block still read *"main untouched"* over a merge that had happened
+(&sect;378.2's own finding, arriving for the third time).
+**THE WITNESS IS MEASURED RATHER THAN CARRIED OVER FROM THE ROUND BEFORE**
+(&sect;379.4's discipline, and this round has TWO where that one had one):
+**not `sw.js`** (&sect;365, &sect;316.10 &mdash; `build-sw.mjs` drops the
+caching half where `SHELL` lives, so the **served** worker is **4,104 bytes on
+both builds** and the bumped name reaches nobody, which is why it is kept for
+the offline copy alone), but `shell.js` **3,852,494 &rarr; 3,861,361** AND
+`platform.css` **674,285 &rarr; 674,961** &mdash; both, because this round
+changed `arrange.css` where &sect;379 changed no stylesheet, so the one file
+that round had to rule out is a witness again. Each asserted to have **MOVED**
+before it was trusted, or a match would hold whether or not production built
+this (&sect;113.8), and compared as **bytes** rather than as a length: sha256
+`8c85f63a…` and `fbb21ceb…`. **NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF
+THE DIFF RATHER THAN ASSUMED** (spec 029): not one `api/`, `lib/` or `db/` file
+is in it, so nothing about how a save is judged moves, nothing stored moves and
+nothing is migrated. **Both in-step guards clear before the push**:
+`built-in-step.py` all good (&sect;349), `generated-in-step` all clear
+(&sect;329). **AND THE LIVE READ IS OWED RATHER THAN WRITTEN AHEAD OF ITSELF**
+(&sect;91.5, &sect;379.5's lesson with the sign reversed &mdash; that one
+recorded a limitation it had not measured, and the matching risk here is
+recording a success nobody has seen): until those two files are read off the
+live site the deployment is **unverified**, and the branch is deliberately
+**held behind** meanwhile, because while it stays where it is `main`'s tip is
+unique by construction and putting that SHA on a second ref is the one thing
+left that could still cost the build.
 
 *Earlier: 2026-09-21 &mdash; **&sect;379: the working copy carries the
 platform, not a link to it (spec 030).** Islam, with a file downloaded from his

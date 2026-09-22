@@ -54456,3 +54456,63 @@ approved, so none is folded in here):
   archived objectives function's Read me says *Capability*. Pre-existing and
   unchanged by this round; whether an archive should carry its format is its
   own question.
+
+**§380.2 — MERGED TO `main` 2026-09-22 ON ISLAM'S WORD, AND `main` HAD NOT
+MOVED.** Measured rather than assumed (§4's fetch-and-look): it stood at
+**§379.5**, this commit's own ancestor, so the merge is a clean
+**fast-forward** and *the tree pushed is byte-for-byte the tree that was
+verified* — nothing resolved, nothing rebuilt, nothing recombined. That is the
+strongest standing a merge gets in this project and it is named rather than
+assumed, because every other merge in this log had to earn the same claim the
+hard way.
+
+**§380 was free on `main`**, checked in **both spellings** (§336.1) and not
+assumed, so no renumber was owed (§264.3); spec 059 is this branch's own,
+already there since §374.
+
+**`sw.js` confirmed immediately before the push** (§94.16):
+`v5.24-three-blank-templates` against main's `v5.23`, **a name the history has
+never held** — measured across every commit that has ever touched the file
+rather than against main alone, which is the half a §94.12 collision slips
+through — **one** live `const SHELL`, the other three matches being prose in
+that file's own comments (§272.8's shape in a search rather than in a parser),
+and `node --check` clean (§146.2).
+
+**AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE BRANCH TIP WAS
+ALREADY PUSHED** (§91, by §357.4's road). Vercel deduplicates by SHA, so
+fast-forwarding `main` onto a commit the branch ref already holds is ONE
+deployment and which ref gets it is a race already lost — and *the way back is
+a commit `main` holds and the branch does not, and it must be one worth
+making*, which the record owed anyway: §380's own blocks still read *"main
+untouched"* and *"built, on the branch"* over a merge that had happened.
+§378.2's own finding, arriving for the third time.
+
+**THE WITNESS IS MEASURED RATHER THAN CARRIED OVER FROM THE ROUND BEFORE**
+(§379.4's discipline), and this round has TWO where that one had one:
+
+- **Not `sw.js`** — §316.10's `build-sw.mjs` drops the caching half where
+  `SHELL` lives, so the **served** worker is **4,104 bytes on both builds** and
+  the bumped name reaches no client; it is kept for the offline copy alone
+  (§365).
+- `shell.js` **3,852,494 → 3,861,361**, sha256 `8c85f63a…`
+- `platform.css` **674,285 → 674,961**, sha256 `fbb21ceb…` — a witness again
+  this round because it changed `arrange.css`, where §379 changed no stylesheet
+  and had to rule that same file out.
+
+Each asserted to have **MOVED** before it was trusted, or a match would hold
+whether or not production built this (§113.8), and compared as **bytes** rather
+than as a length, a size match being the weaker claim.
+
+**NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF RATHER THAN ASSUMED** (spec
+029): not one `api/`, `lib/` or `db/` file is in it, so nothing about how a
+save is judged moves, nothing stored moves and nothing is migrated. Both
+in-step guards clear before the push: `built-in-step.py` all good (§349),
+`generated-in-step` all clear (§329).
+
+**AND THE LIVE READ IS OWED RATHER THAN WRITTEN AHEAD OF ITSELF** (§91.5).
+§379.5 records a block that claimed a limitation it had not measured; the
+matching risk here is recording a success nobody has seen, so until those two
+files are read off the live site the deployment is **unverified** and says so.
+**The branch is deliberately held behind meanwhile** — while it stays where it
+is `main`'s tip is unique by construction, and putting that SHA on a second ref
+is the one thing left that could still cost the build.

@@ -6900,7 +6900,7 @@ the navigation and the decks in it.
 
 ---
 
-## §380 — the plan builder, on a supporting function (2026-09-22, spec 020)
+## §381 — the plan builder, on a supporting function (2026-09-22, spec 020)
 
 Islam: *"we need to have build a plan for the functions like what we did with
 the units."*
@@ -6948,7 +6948,7 @@ already been served — so a browser that had opened the platform before would
 have gone on serving itself the old file out of its own disk, silently. The
 name is checked again immediately before anything goes to `main`.
 
-## §380.2 — one shape, three formats (2026-09-22, spec 020)
+## §381.2 — one shape, three formats (2026-09-22, spec 020)
 
 Islam, of the shape drawn before anything was built: *"yes the shape is right,
 go ahead"*, then *"proceed."*

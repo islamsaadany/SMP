@@ -477,7 +477,7 @@ with sync_playwright() as p:
     FK = "sharedservices"
     ck("the function exists under a key minted from its name",
        pg.evaluate("!!FUNCTIONS['%s']" % FK))
-    # §380.2: the MINTER had to learn the third value too — it read
+    # §381.2: the MINTER had to learn the third value too — it read
     # `format === 'pillars' ? 'pillars' : 'projects'`, so a function created
     # as objectives-and-actions would have arrived planning in projects,
     # silently, on the one screen that asks the question.
@@ -529,7 +529,7 @@ with sync_playwright() as p:
        tf["pillars"][2]["mark"] ==
        (str(tf["pillarsTruth"]) if tf["pillarsTruth"] else "\u25cb"),
        "%s / %s" % (tf["pillars"][2]["mark"], tf["pillarsTruth"]))
-    # §380.2’s own claim, and the one a PROJECTS function cannot test: the
+    # §381.2’s own claim, and the one a PROJECTS function cannot test: the
     # definition and the objectives are read off the FUNCTION and never off a
     # holder. A projects function’s holder MIRRORS both, so the plausible
     # mistake — reading the holder, which is what the work box reads — is

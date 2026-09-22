@@ -54266,7 +54266,7 @@ compounds, because the next person quotes it). All three record files carry the
 correction, and this section is why.
 
 
-## §380 — THE BUILDER'S MAP READ EMPTY OVER A PLAN THAT WAS THERE (2026-09-22, spec 020)
+## §381 — THE BUILDER'S MAP READ EMPTY OVER A PLAN THAT WAS THERE (2026-09-22, spec 020)
 
 Islam: *"we need to have build a plan for the functions like what we did with
 the units."*
@@ -54318,7 +54318,7 @@ deliberately left plural for now** (*Definitions* over one definition): a label
 is a visual element and belongs in the drawing Islam signs off, not in a repair
 (rule 1c).
 
-**§380.1 — AND "LIKE THE UNITS" CANNOT MEAN IDENTICAL, WHICH IS THE PART THAT
+**§381.1 — AND "LIKE THE UNITS" CANNOT MEAN IDENTICAL, WHICH IS THE PART THAT
 STOPS THE NEXT PIECE BEING WRONG.** Reading what each format actually draws:
 all three function shapes draw an **Overview** and one work section. So a
 function's builder is **Definition · Objectives · its work · Review** — four
@@ -54360,7 +54360,7 @@ all green; full `qa.py` sweep **ERRORS none**; the shipped file back in step and
 the four served copies regenerated (§329). A merge owes the `sw.js` SHELL bump,
 because the built file's bytes changed (§91).
 
-## §380.2 — ONE SHAPE, THREE FORMATS (2026-09-22, spec 020)
+## §381.2 — ONE SHAPE, THREE FORMATS (2026-09-22, spec 020)
 
 Islam, of the shape drawn for him before anything was built: *"yes the shape is
 right, go ahead"*, and then, of the three pieces put to him, *"proceed."*
@@ -54413,7 +54413,7 @@ way is offered the day it exists (§53.5).
 **PROVED ABLE TO FAIL FIVE WAYS FROM THE SOURCES** (§276), each break asserted
 to have MATCHED before it was written (§344.1): **3 / 9 / 8 / 8 / 1 red**.
 
-**§380.3 — AND THE FIRST FALSIFICATION RUN DIED RATHER THAN REPORTING, THREE
+**§381.3 — AND THE FIRST FALSIFICATION RUN DIED RATHER THAN REPORTING, THREE
 TIMES OUT OF FIVE** (§215) — in a file whose own §5 carries that rule in a
 comment. A `.click()` on a control the broken build does not draw throws, the
 section ends there, and the run reports the failures it had rather than the
@@ -54422,7 +54422,7 @@ probe was made to degrade and **3 / 9 / 8 / 8 / 1** after. *A run that stopped
 is not a run that measured* (§298.3), and the three that more than doubled are
 the measure of how much a death hides.
 
-**§380.4 — AND ITS OWN PEN PRESS SHUT THE PEN A CHIP HAD JUST OPENED** (§273.4,
+**§381.4 — AND ITS OWN PEN PRESS SHUT THE PEN A CHIP HAD JUST OPENED** (§273.4,
 recorded and walked into anyway): Edit is a TOGGLE, the `act` chip opens the
 section with the mode on (§269), so a blind press CLOSED it and the Add row
 below went missing on a build that draws it perfectly — reported as a product
@@ -54440,7 +54440,7 @@ moves, nothing is migrated and no rule about who may save what changes (spec
 
 **AND THE SHELL NAME IS BUMPED HERE RATHER THAN AT THE MERGE** (§94.12):
 the branch has been sitting on `v5.23-copy-carries-platform`, and §379.4 records
-PRODUCTION HAVING SERVED those bytes — so §380 and §380.2 each changed the built
+PRODUCTION HAVING SERVED those bytes — so §381 and §381.2 each changed the built
 file underneath a name a returning browser already holds, which is that
 section's collision exactly and is silent, because a worker caches by NAME.
 `v5.24-function-builder`, proved against every name the history has ever held,

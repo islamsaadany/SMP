@@ -39250,7 +39250,7 @@ function builderHere(){
   return !!(typeof BUILDER !== "undefined" && BUILDER &&
             typeof current !== "undefined" && BUILDER.target === current);
 }
-/* §380.2: THREE WAYS A FUNCTION PLANS, AND THE ROUTE NAMES ALL THREE.
+/* §381.2: THREE WAYS A FUNCTION PLANS, AND THE ROUTE NAMES ALL THREE.
    It read `fnPlansInPillars(f) ? "fnpillars" : "fnprojects"`, so §342's
    objectives-and-actions fell through to the PROJECTS route and was offered a
    Projects box its pages do not have — measured, a function holding five
@@ -39287,7 +39287,7 @@ function builderHasPlan(target){
   if (r === "unit" || r === "fnpillars")
     return !planIsEmpty(unitSnapshotCounts(unitPlanSnapshot(unitLike(target))));
   if (r === "fnprojects") return fnHasWork(String(target).slice(3));
-  /* §380.2: AND THE OBJECTIVES ROUTE ASKS ITS OWN QUESTION, DELIBERATELY.
+  /* §381.2: AND THE OBJECTIVES ROUTE ASKS ITS OWN QUESTION, DELIBERATELY.
      `fnHasWork` does not know about actions — measured, a function holding two
      of them and nothing else answers FALSE — so routing this through it would
      offer *Build* over a standing plan, and Build does not archive (§49.2).
@@ -39315,7 +39315,7 @@ function builderSections(target){
   var u = function(){ return unitLike(target); };
   var fk = function(){ return String(target).slice(3); };
   /* THE FUNCTION'S OWN WORK, THROUGH THE ONE LIST ITS PAGES READ (§334).
-     It counted `capsOfFunction` until §380, and §326 moved a function's
+     It counted `capsOfFunction` until §381, and §326 moved a function's
      projects onto the function itself — so the box was empty and every chip
      read ○ over a plan that was plainly there: measured, Finance holds three
      projects, a definition and two key objectives and its band read
@@ -39361,7 +39361,7 @@ function builderSections(target){
     return secs;
   }
 
-  /* ── A SUPPORTING FUNCTION: ONE SHAPE, THREE FORMATS (§380.2) ─────────
+  /* ── A SUPPORTING FUNCTION: ONE SHAPE, THREE FORMATS (§381.2) ─────────
      Islam, of the shape put to him before anything was built: *"yes the shape
      is right."* Four boxes — Definition, Objectives, its work, Review — where
      a unit has five, because a supporting function does not author its own
@@ -39490,7 +39490,7 @@ function builderChooserHtml(){
     ? activeKeys().map(function(k){ return { t:k, name:UNITS[k].name }; })
     : activeFunctionKeys().map(function(k){
         return { t:"fn:" + k, name:FUNCTIONS[k].name,
-                 /* §380.2: three ways now, so the word is read off the format
+                 /* §381.2: three ways now, so the word is read off the format
                     rather than off a yes/no — which called an objectives
                     function "projects" on the one screen where you pick what
                     to build. */
@@ -39542,7 +39542,7 @@ function builderStartFresh(target){
     clearUnitPlan(w, why);
     fnWriteBack(fk, w);
   }
-  /* §380.2: and an objectives function clears the same way — measured, not
+  /* §381.2: and an objectives function clears the same way — measured, not
      assumed: `clearFunction` goes through `fnOwnHolder`, which carries the
      function's actions, and `clearCapability` empties them (two actions in,
      nought out). So the third format needed no clearing rule of its own. */
@@ -39637,7 +39637,7 @@ function bformDef(kind, ctx){
         { k:"owner", label:"Owner" },
         { k:"finish", label:"Due date", mono:true, ph:"e.g. March 2026" }
       ] },
-    /* §380.2: AN ACTION IS THE MILESTONE'S FORM, THREE FIELDS RATHER THAN
+    /* §381.2: AN ACTION IS THE MILESTONE'S FORM, THREE FIELDS RATHER THAN
        FOUR — §342 built it as *a milestone with a DATE where a tactic has
        quarters*, and its plan table draws exactly Action · Owner · Due, so
        the form asks what that table holds and nothing else. `status` is
@@ -39671,7 +39671,7 @@ function bformDef(kind, ctx){
     newfn: { title:"New supporting function", noAnother:true, verb:"Create",
       fields:[
         { k:"name", label:"Name", req:true },
-        /* §380.2: THREE, because §342 made objectives-and-actions a real
+        /* §381.2: THREE, because §342 made objectives-and-actions a real
            format and this control was the last list still offering two —
            read from FN_FORMATS rather than written out again (§53.5), so a
            fourth way is offered here the day it exists. */
@@ -39839,7 +39839,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "action") {
-    /* §380.2: addAction() is what the plan pane's own Add presses, so the
+    /* §381.2: addAction() is what the plan pane's own Add presses, so the
        row a form makes and the row the pen makes are the same row (§53.5) —
        id minted from the maximum, `status` left empty for the reporter. */
     var ac = addAction(ctx.fnKey); if (!ac) return false;
@@ -39876,7 +39876,7 @@ function addFunction(name, format){
   while (FUNCTIONS[key]) { key = base + n; n++; }
   FUNCTIONS[key] = { name:nm, navName:null, codePrefix:nm.slice(0, 3).toUpperCase(),
     head:null, custodian:null, active:true,
-    /* §380.2: the chooser offers three now, so the minter has to accept
+    /* §381.2: the chooser offers three now, so the minter has to accept
        three — anything else falls back to projects, which is what an
        unknown value already reads as (§fnFormat). */
     format:FN_FORMATS.indexOf(format) >= 0 ? format : "projects" };
@@ -39922,7 +39922,7 @@ function builderGaps(target){
     pillarGaps(u);
   }
 
-  /* \u00a7380.2: ONE BRANCH FOR ALL THREE FORMATS, so what the Review names cannot
+  /* \u00a7381.2: ONE BRANCH FOR ALL THREE FORMATS, so what the Review names cannot
      drift from what the band counts \u2014 the definition and the objectives are
      asked of the FUNCTION for every format, exactly as the chips ask them, and
      only the work differs. */
@@ -64094,7 +64094,7 @@ var SYNC = (function () {
       return true;
     }
     if (what === "project") { openBuilderForm("project", { capId:a[1] }); return true; }
-    /* §380.2: an ACTION carries its FUNCTION's key rather than a row id —
+    /* §381.2: an ACTION carries its FUNCTION's key rather than a row id —
        §342 hangs actions off the function itself, with no pillar and no
        project between (`data-rowadd="action|<fk>"`). Without this line the
        press fell through to the pen's own minter, so §129's "a row is added

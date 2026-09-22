@@ -831,11 +831,23 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
        (\u00a7218, \u00a7214.3, \u00a7255). Shutting one role is not shutting a
        person: access is the MOST GENEROUS grant across the roles they hold
        (\u00a733), and the matrix has a row per role precisely so two can
-       differ. \u00a7384 made a tactic's owner a role, so the Mobile head derives
+       differ. \u00a7384 made a tactic's owner a role, so the Mobile head derived
        `towner@mobile` as well as `owner@mobile` and the door below went on
        serving them Insights with the BU owner's cell plainly shut \u2014 the
        fixture had stopped making the state its own assertions are about,
        which is a check reporting a correct build broken.
+
+       \u00a7387.1 THEN REMOVED THAT ROW on Islam's word, and the guard written
+       for it \u2014 `heldRows.length >= 2` \u2014 went red on a correct build:
+       \u00a7214.3, the same literal-outliving-its-decision one round later, and
+       in the SECOND file carrying it (\u00a751.11: when a decision moves, grep
+       every check for the assumption rather than the one that failed first).
+       REWRITTEN, NEVER LOOSENED (\u00a7218) to the claim that survives EITHER
+       decision \u2014 the rows are the product's own answer and one of them is
+       the BU owner's \u2014 which still fails if personRoles stops deriving it
+       or the head stops being an owner. What the COUNT was standing in for is
+       driven where it can be driven, in checks/modules.mjs \u00a74c, over a
+       person who does hold two.
 
        THE ROLES COME FROM THE PRODUCT'S OWN RULE (personRoles, the one both
        sides ask \u2014 \u00a742), so the row derived by the NEXT thing somebody is
@@ -843,8 +855,8 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
        list to remember. */
     const heldRows = await page.evaluate(() =>
       Array.from(new Set(personRoles(personBy("mobhead")).map((r) => r.role))));
-    check(heldRows.length >= 2 && heldRows.includes("owner"),
-          "\u2026and the Mobile head holds more than the one row, so shutting one is not shutting them (\u00a733, \u00a7384)", JSON.stringify(heldRows));
+    check(heldRows.length > 0 && heldRows.includes("owner"),
+          "\u2026and the rows shut below are the product's own answer for the Mobile head, never a typed list (\u00a742)", JSON.stringify(heldRows));
     for (const role of heldRows) {
       if (role === "owner") continue;
       const b2 = page.locator('[data-mac^="' + role + '|a_insights|"]');

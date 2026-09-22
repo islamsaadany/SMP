@@ -10586,7 +10586,120 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-22 &mdash; **&sect;385.3: the renumber owed before the
+*Last Updated: 2026-09-22 &mdash; **&sect;388: the second renumber, the merge,
+and two guards a decision had already invalidated.** Islam: *"merge to main."*
+**FETCHING BEFORE GOING NEAR A MERGE FOUND THE COLLISION AGAIN** (&sect;91's
+fetch-and-look): `main` had moved **nine commits** and taken **&sect;380 and
+&sect;381** for another session's work on the plan builder (spec 020), while
+this tree held &sect;380&ndash;&sect;385 for My reporting and the two rounds
+beside it. Two numbers, two meanings, for the second round running.
+**NOTHING IS BUILT IN THE RENUMBER** &mdash; read off the diff, the whole of it
+is citations, two regenerated artefacts and the record. **AND THE SCOPING IS
+PROVED RATHER THAN ASSERTED** (&sect;264.3): the merge base holds
+&sect;380&ndash;&sect;387 **nought** times in every spelling, so every one of
+them in this tree is a line this branch wrote and every one on `main` is a line
+`main` wrote &mdash; which is the only moment a renumber is provably scoped, and
+the reason it runs BEFORE the merge rather than inside it. **DESCENDING BY
+SOURCE, or each pass eats the next** (&sect;365.5): &sect;385&rarr;&sect;387,
+&sect;384&rarr;&sect;386, &sect;383&rarr;&sect;385, &sect;382&rarr;&sect;384,
+&sect;381&rarr;&sect;383, &sect;380&rarr;&sect;382. **THREE SPELLINGS**
+(&sect;336.1) &mdash; `&sect;NNN`, the entity, and the `§NNN` JavaScript
+escape, **nine of the last across three check files**, which a two-spelling
+sweep would have left naming somebody else's section &mdash; with **every count
+DECLARED in advance and the pass refused on a mismatch** (&sect;344.1):
+89 / 2 / 115 / 113 / 91 / 185, **595 in all**, each step also asserting its
+target was free before it wrote and its source **0 after**, and **applied to the
+file on disk each pass**, never from a planning-time snapshot (&sect;376.1).
+**&sect;388a &mdash; AND THE SWEEP TAKES THE SENTENCES THAT DESCRIBE THE
+NUMBERING, WHICH IS &sect;385.3a ARRIVING FOR THE SECOND TIME AND IS THE FINDING
+OF THE ROUND.** *A number in these records is one of two things and only one of
+them may move*: a **LABEL** naming a section in this tree is rightly swept, so it
+still points at the thing it names; a **HISTORICAL FACT** &mdash; the arrows of a
+past renumber, or a measurement of `main` made at that moment &mdash; must NOT
+be, or the record calmly states something that never happened. **Forty-one
+lines** across all three record files had become false: &sect;385.1's arrow
+table read *&sect;377 &rarr; &sect;383* where it did &sect;377 &rarr; &sect;380,
+&sect;385.3's read *&sect;384&rarr;&sect;385* where it did
+&sect;382&rarr;&sect;383, the tracker's four-row table was rewritten end to end,
+and two merge-base measurements were restated as numbers nobody had taken. Put
+back **by hand**, each guarded on the line it was aimed at and refusing rather
+than writing nothing (&sect;353.4), the labels beside them left swept, and every
+region re-read afterwards to confirm **only labels remain changed**. **AND MY
+FIRST KEYWORD FILTER MISSED LINES** &mdash; *"before our own &sect;380 and about
+the same subject"* carries no renumber word &mdash; so what is read is **every**
+changed line in the numbering regions rather than the ones a filter volunteers.
+**&sect;388b &mdash; THE MERGE'S FIVE CONFLICTS EACH HAD A NAMED RULE**: the
+three record files **COMBINED, never picked** (&sect;318.7, &sect;356.17), with
+every non-blank line of each side asserted present in the result &mdash; **0 lost
+from ours, 0 from main** &mdash; because either side taken whole drops the other
+session's round and there is no `generated-in-step` for prose; the built file
+**REBUILT from the merged sources, never merged** (&sect;91) and byte-identical
+to `build.py`'s output, with `smp-app/public/` regenerated from its four
+generators (&sect;329); and `sw.js` rebuilt from main's copy with this branch's
+one line re-applied (&sect;146.2) at a name **past both** rather than picking
+either (main v5.25, ours v5.27, merged **v5.28**), proved never held anywhere in
+the history, **one live `const SHELL`** (the other three the first grep reports
+are prose in that file's own comments, &sect;383.2), `node --check` clean.
+**THE MERGED RESULT IS READ, NOT BELIEVED** (&sect;313.37): every name this
+branch deleted was grepped for and the survivors are a comment explaining the
+removal and two substrings of an unrelated attribute, and the duplicate
+top-level declaration scan over build.py's OWN script list (&sect;56.7,
+&sect;281) reads **1534 names with exactly SIX duplicated** &mdash; the six
+&sect;281.1 leaves deliberately &mdash; so the merge introduced none.
+**&sect;388.1 &mdash; AND RUNNING THE MERGED TREE FOUND TWO CHECKS HOLDING A
+GUARD &sect;387.1 HAD ALREADY INVALIDATED**, in two files, one round apart
+(&sect;214.3; &sect;51.11's rule that when a decision moves you grep **every**
+check for the assumption rather than the one that failed first). Both read
+*"the head holds more than one row"* &mdash; written at &sect;385.8 while
+&sect;384's Tactic owner row existed, so the Mobile head derived a second role
+&mdash; and &sect;387.1 removed that row on Islam's word, so both began
+**reporting a correct build broken** (`check:modules` 158 ok / 1 failed,
+`check:door` 143 / 1). **INVISIBLE ON THE BRANCH**: &sect;387's own session held
+no `node_modules` and records `check:modules` as **UNRUN**, so only the merged
+tree ever ran it &mdash; which is &sect;365's argument for re-running on the
+merged tree rather than the branch, paid a second time. **REWRITTEN, NEVER
+LOOSENED** (&sect;218) into the claims that survive **either** decision: the
+rows are the PRODUCT's own answer (`personRoles` over `worldOf`, &sect;42) and
+one of them is the BU owner's &mdash; which still fails if the derivation stops
+or the head stops being an owner &mdash; **and what the count was standing in
+for is DRIVEN where it can be**, in `checks/modules.mjs` &sect;4c over the
+custodian, who does hold two: one of their rows is shut and `decideOpen` is
+asked, so &sect;33's most-generous rule is measured rather than assumed.
+**&sect;388.2 &mdash; AND MY FIRST FALSIFICATION WAS A NO-OP THAT LOOKED
+EXACTLY LIKE A WORKING GUARD** (&sect;54.5): inverting `mayOpenModuleArea` as
+`if (best === "none" || RANK[g] < RANK[best])` fires on **every** iteration
+while `best` is none, so it takes the last non-none grant and is still
+generous. It matched exactly once, `check:modules` reported **160 ok, 0
+failed**, and that is indistinguishable from a rule that holds. A faithful
+inverse needs a **sentinel** (`best === null`), and only measuring
+`frozen.mayOpen` directly with the break in place &mdash; untouched true, one
+row shut **true**, all shut false &mdash; told the two apart. With the sentinel
+the same break is **1 red and it is exactly the &sect;33 assertion**, the
+head's own line beside it staying green, so the break provably reaches only
+what it should. Restored from the saved copy rather than with `git checkout`
+(&sect;343.9), and the rebuilt platform and all four generated copies asserted
+**byte-identical** to the build the checks passed against.
+**&sect;388.3 &mdash; AND SPEC 029's QUESTION IS ANSWERED BY MEASUREMENT RATHER
+THAN BY READING THE DIFF**: `lib/authorize.js`, `lib/rules.js` and
+`lib/graph-diff.js` all changed, which is the trigger for a forced sign-out
+&mdash; so `origin/main`'s **own** authoriser and change-list suites were run
+against the **merged** rule modules in a worktree, and come back **683/0 and
+140/0**. No rule an old tab relies on has moved: &sect;382's new kinds are
+behind a switch that ships OFF and off is byte-identical, so a save that worked
+before is not refused now. **No forced sign-out is owed**, said as a
+measurement. **AND ONE RED WAS A RUN THAT DIED RATHER THAN A FAULT**
+(&sect;298.3): `check:door` first read *97 ok, 21 failed* &mdash; 118
+assertions against the complete run's 144 &mdash; under contention with the
+build finishing beside it; re-run it is 143 / 1, and the one is &sect;388.1's.
+**VERIFIED ON THE MERGED TREE** (&sect;365): the frozen suite and
+`qa.py` as recorded at the merge, `built-in-step` all good,
+`generated-in-step` all clear, authoriser **709/0**, change list 140/0,
+platform rules 69/0, `test-my-reporting` 65/0, and on the stack production
+serves state 92/0, modules **160/0**, door **144/0**, insights 137/0,
+frameworks 90/0, tracker 229/0, notes 170/0, portfolio 121/0, upload 9/0, demo
+7/0, standing 7/0, room 10/0, deploy 5/0.*
+
+*Earlier: 2026-09-22 &mdash; **&sect;385.3: the renumber owed before the
 merge, and what the sweep took with it.** &sect;385.2's own closing line
 recorded it: `main` had moved three commits and taken **&sect;379** for spec
 059's continuation, while this tree held a DIFFERENT &sect;379 (My reporting,

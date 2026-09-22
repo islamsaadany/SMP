@@ -56460,3 +56460,160 @@ unchanged and not chased: `test-clean-parity.js`, spike **S2**, and
 `check:frameworks:page`.
 
 **`main` untouched: the merge is Islam's word, on that merge.**
+
+---
+
+## §388 — THE SECOND RENUMBER, THE MERGE, AND TWO GUARDS A DECISION HAD ALREADY INVALIDATED
+
+Islam: **"merge to main."**
+
+**FETCHING BEFORE GOING NEAR A MERGE FOUND THE COLLISION AGAIN** (§91's
+fetch-and-look, which is the first step of every merge and not a formality):
+`main` had moved **nine commits** and taken **§380 and §381** for another
+session's work on the plan builder (spec 020), while this tree held
+§380–§385. Two numbers, two meanings, for the second round running.
+
+**THE RENUMBER RUNS BEFORE THE MERGE, WHICH IS WHAT MAKES IT PROVABLY SCOPED**
+(§264.3): the merge base holds §380–§387 **nought** times in every spelling, so
+every one of them in this tree is a line this branch wrote and every one on
+`main` is a line `main` wrote. After a merge that is no longer true, and a
+renumber run then takes somebody else's citations with it — which is the fault
+§264.3 records and this avoids by ordering rather than by care.
+
+Descending by source, or each pass eats the next (§365.5): §385→§387,
+§384→§386, §383→§385, §382→§384, §381→§383, §380→§382. **Three spellings**
+(§336.1) — `§NNN`, the `&sect;NNN` entity, and the `§NNN` JavaScript
+escape, **nine of the last across three check files**, which a two-spelling
+sweep would have left naming somebody else's section and reading perfectly.
+**Every count declared in advance and the pass refused on a mismatch**
+(§344.1): 89 / 2 / 115 / 113 / 91 / 185, **595 in all**, each step also
+asserting its target was free before it wrote and its source **0 after**, and
+**applied to the file on disk each pass**, never from a planning-time snapshot
+(§376.1 — four files take more than one substitution, and a second write made
+from the original text silently discards the first while every per-pass
+assertion passes).
+
+### §388a — the sweep takes the sentences that describe the numbering
+
+§385.3a arriving for the second time, and the finding of the round. **A number
+in these records is one of two things and only one of them may move.** A
+**LABEL** naming a section in this tree is rightly swept, so it still points at
+the thing it names. A **HISTORICAL FACT** — the arrows of a past renumber, or a
+measurement of `main` made at that moment — must NOT be, or the record calmly
+states something that never happened and there is nothing in a build that can
+notice.
+
+**Forty-one lines** across CLAUDE.md, the tracker and this document had become
+false: §385.1's own arrow table read *§377 → §383* where it did §377 → §380,
+§385.3's read *§384→§385* where it did §382→§383, the tracker's four-row table
+was rewritten end to end, and two merge-base measurements were restated as
+numbers nobody had taken. Put back **by hand**, each guarded on the line it was
+aimed at and refusing rather than writing nothing (§353.4); the labels beside
+them left swept, and every region re-read afterwards to confirm only labels
+remain changed.
+
+**AND THE FIRST KEYWORD FILTER MISSED LINES** — *"before our own §380 and about
+the same subject"* carries no renumber word — so what is read is **every**
+changed line in the numbering regions rather than the ones a filter volunteers.
+
+### §388b — the merge's five conflicts, each with a named rule
+
+The three record files are **COMBINED, never picked** (§318.7, §356.17): either
+side taken whole drops the other session's round, and there is no
+`generated-in-step` for prose. Asserted rather than eyeballed — every non-blank
+line of each side present in the result, **0 lost from ours, 0 from main**.
+Ours leads in CLAUDE.md (newest-first) and main's leads in the other two
+(append order), read off each file's own heading order rather than assumed.
+
+The built file is **REBUILT from the merged sources, never merged** (§91) and
+byte-identical to `build.py`'s output; `smp-app/public/` regenerated from its
+four generators (§329). `sw.js` rebuilt from main's copy with this branch's one
+line re-applied (§146.2) at a name **past both** rather than picking either —
+main v5.25, ours v5.27, merged **v5.28** — proved never held anywhere in the
+history, one live `const SHELL`, `node --check` clean, and confirmed against
+`origin/main` again immediately before the push (§94.16).
+
+**THE MERGED RESULT IS READ, NOT BELIEVED** (§313.37): every name this branch
+deleted was grepped for, and the duplicate top-level declaration scan runs over
+build.py's OWN script list (§56.7, §281) and reads **1534 names with exactly
+six duplicated** — the six §281.1 leaves deliberately — so the merge introduced
+none.
+
+### §388.1 — two checks held a guard §387.1 had already invalidated
+
+Both read *"the head holds more than one row"* — written at §385.8 while
+§384's Tactic owner row existed, so the Mobile head derived `towner@mobile` as
+well as `owner@mobile` — and **§387.1 removed that row on Islam's word**, so
+both began **reporting a correct build broken**: `check:modules` 158 ok / 1
+failed, `check:door` 143 / 1. §214.3, one round later, and in TWO files
+(§51.11: when a decision moves, grep **every** check for the assumption rather
+than the one that failed first).
+
+**INVISIBLE ON THE BRANCH**: §387's own session held no `node_modules` and
+records `check:modules` as **UNRUN**, so only the merged tree ever ran it —
+§365's argument for re-running on the merged tree rather than the branch, paid
+a second time.
+
+**REWRITTEN, NEVER LOOSENED** (§218) into the claims that survive **either**
+decision: the rows are the PRODUCT's own answer (`personRoles` over `worldOf`,
+§42) and one of them is the BU owner's — which still fails if the derivation
+stops or the head stops being an owner, so it is a real claim and not a
+tolerance. **And what the count was standing in for is DRIVEN where it can be**:
+`checks/modules.mjs` §4c shuts ONE row of the custodian, who does hold two, and
+asks `decideOpen` — so §33's most-generous rule is **measured** rather than
+counted, which is the stronger assertion the count was only ever a proxy for.
+
+### §388.2 — and the first falsification was a no-op that looked exactly like a working guard
+
+Inverting `mayOpenModuleArea` from most-generous to least-generous as
+
+```js
+if (best === "none" || STATE_RANK[g] < STATE_RANK[best]) best = g;
+```
+
+fires on **every** iteration while `best` is `"none"`, so it takes the last
+non-none grant and is still generous. It matched exactly once, `check:modules`
+reported **160 ok, 0 failed**, and that is indistinguishable from a rule that
+holds (§54.5). A faithful inverse needs a **sentinel**:
+
+```js
+var best = null;
+rs.forEach(function(r){
+  var g = moduleGrantFor(r.role, area);
+  if (best === null || STATE_RANK[g] < STATE_RANK[best]) best = g;
+});
+return (best || "none") !== "none";
+```
+
+Only measuring `frozen.mayOpen` directly with the break in place — untouched
+`true`, one row shut **`true`**, all shut `false` — told the two apart. With
+the sentinel the same break is **1 red and it is exactly the §33 assertion**,
+the head's own line beside it staying green, so the break provably reaches only
+what it should. Restored from the saved copy rather than with `git checkout`
+(§343.9), and the rebuilt platform and all four generated copies asserted
+**byte-identical** to the build the checks passed against.
+
+### §388.3 — spec 029's question answered by measurement, not by reading the diff
+
+`lib/authorize.js`, `lib/rules.js` and `lib/graph-diff.js` all changed, which is
+the trigger for the forced sign-out. So `origin/main`'s **own** authoriser and
+change-list suites were run against the **merged** rule modules in a worktree:
+**683/0 and 140/0**, the same figures they give on main's own modules. No rule
+an old tab relies on has moved — §382's new kinds sit behind a switch that
+ships OFF and off is byte-identical — so a save that worked before is not
+refused now. **No forced sign-out is owed**, and that is a measurement rather
+than a reading.
+
+**AND ONE RED WAS A RUN THAT DIED RATHER THAN A FAULT** (§298.3): `check:door`
+first read *97 ok, 21 failed* — 118 assertions against the complete run's 144,
+so the run stopped rather than failed — under contention with `next build`
+finishing beside it; re-run it is 143 / 1, and the one is §388.1's. *A count is
+not a verdict, and a count that is SHORT is the tell.*
+
+**VERIFIED ON THE MERGED TREE** (§365): `built-in-step` all good,
+`generated-in-step` all clear, authoriser **709/0**, change list 140/0,
+platform rules 69/0, `test-my-reporting` 65/0, the frozen browser suite and
+`qa.py` as recorded at the merge; and on the stack production actually serves
+(§332) state 92/0, modules **160/0**, door **144/0**, insights 137/0,
+frameworks 90/0, tracker 229/0, notes 170/0, portfolio 121/0, upload 9/0, demo
+7/0, standing 7/0, room 10/0, deploy 5/0.

@@ -7792,3 +7792,110 @@ both in-step guards clear. The seed is regenerated and the offline file matches
 the build.
 
 **`main` is untouched. The merge is yours to say.**
+
+---
+
+## §388 — the second renumber, the merge, and two guards a decision had already invalidated (2026-09-22)
+
+**Islam: *"merge to main."***
+
+**Fetching `main` before going near a merge found the collision again.** It had
+moved **nine commits** and taken **§380 and §381** for another session's work on
+the plan builder (spec 020), while this tree held §380–§385 for My reporting and
+the two rounds beside it. Two numbers, two meanings, for the second round
+running — so the renumber ran **first**, which is the only moment it is provably
+scoped (§264.3): the merge base holds §380–§387 **nought** times in every
+spelling, so every one of them here is a line this branch wrote.
+
+**The renumber.** Descending by source, or each pass eats the next (§365.5):
+
+| was | is |
+| --- | --- |
+| My reporting | §380 → §382 |
+| The nav row | §381 → §383 |
+| The tactic owner | §382 → §384 |
+| The reports tab | §383 → §385 |
+| — | §384 → §386 |
+| Do I run this one? | §385 → §387 |
+
+Three spellings (§336.1) — `§NNN`, the `&sect;NNN` entity, and the `§NNN`
+JavaScript escape, **nine of the last across three check files**, which a
+two-spelling sweep would have left naming somebody else's section. Every count
+declared in advance and the pass refused on a mismatch (§344.1): **89 / 2 / 115
+/ 113 / 91 / 185, 595 in all**, each step also asserting its target was free
+before it wrote and its source 0 after, and applied to the file on disk each
+pass rather than from a planning-time snapshot (§376.1).
+
+**§388a — and the sweep takes the sentences that describe the numbering.**
+§385.3a arriving for the second time, and the finding of the round. *A number in
+these records is one of two things and only one of them may move*: a **label**
+naming a section in this tree is rightly swept, so it still points at the thing
+it names; a **historical fact** — the arrows of a past renumber, or a
+measurement of `main` made at that moment — must not be, or the record calmly
+states something that never happened. **Forty-one lines** across all three
+record files had become false, the table above among them. Put back by hand,
+each guarded on the line it was aimed at and refusing rather than writing
+nothing (§353.4), the labels beside them left swept, and every region re-read
+afterwards to confirm only labels remain changed. **And the first keyword filter
+missed lines** — *"before our own §380 and about the same subject"* carries no
+renumber word — so what is read is **every** changed line in the numbering
+regions rather than the ones a filter volunteers.
+
+**§388b — the merge's five conflicts, each with a named rule.** The three record
+files **combined, never picked** (§318.7, §356.17), with every non-blank line of
+each side asserted present in the result — 0 lost from ours, 0 from main —
+because either side taken whole drops the other session's round and there is no
+`generated-in-step` for prose. The built file **rebuilt from the merged sources,
+never merged** (§91) and byte-identical to `build.py`'s output, with
+`smp-app/public/` regenerated from its four generators (§329). `sw.js` rebuilt
+from main's copy with this branch's one line re-applied (§146.2) at a name
+**past both** rather than picking either — main v5.25, ours v5.27, merged
+**v5.28** — proved never held anywhere in the history, one live `const SHELL`,
+`node --check` clean. The merged result is **read, not believed** (§313.37):
+every name this branch deleted grepped for, and the duplicate top-level
+declaration scan over build.py's own script list reads 1534 names with exactly
+the six §281.1 leaves deliberately.
+
+**§388.1 — two checks held a guard §387.1 had already invalidated.** Both read
+*"the head holds more than one row"*, written at §385.8 while §384's Tactic
+owner row existed; §387.1 removed that row on Islam's word, so both began
+**reporting a correct build broken** (`check:modules` 158/1, `check:door`
+143/1). **Invisible on the branch** — §387's own session held no `node_modules`
+and records `check:modules` as unrun — which is §365's argument for re-running
+on the merged tree rather than the branch, paid a second time. Rewritten, never
+loosened (§218), to the claims that survive either decision: the rows are the
+product's own answer (`personRoles` over `worldOf`, §42) and one of them is the
+BU owner's. **What the count was standing in for is driven where it can be**, in
+`checks/modules.mjs` §4c over the custodian, who does hold two — one row shut
+and `decideOpen` asked, so §33's most-generous rule is measured rather than
+assumed.
+
+**§388.2 — and the first falsification was a no-op that looked exactly like a
+working guard** (§54.5). Inverting `mayOpenModuleArea` as
+`if (best === "none" || RANK[g] < RANK[best])` fires on every iteration while
+`best` is none, so it takes the last non-none grant and is still generous. It
+matched exactly once, the check reported **160 ok, 0 failed**, and that is
+indistinguishable from a rule that holds. A faithful inverse needs a sentinel
+(`best === null`); only measuring `frozen.mayOpen` directly with the break in
+place told the two apart. With the sentinel the same break is **1 red and it is
+exactly the §33 assertion**. Restored from the saved copy rather than with
+`git checkout` (§343.9), and the rebuild asserted byte-identical.
+
+**§388.3 — spec 029 answered by measurement.** `lib/authorize.js`,
+`lib/rules.js` and `lib/graph-diff.js` all changed, which is the trigger for a
+forced sign-out — so `origin/main`'s **own** authoriser and change-list suites
+were run against the **merged** rule modules in a worktree: **683/0 and 140/0**.
+No rule an old tab relies on has moved (§382's new kinds sit behind a switch
+that ships off, and off is byte-identical), so **no forced sign-out is owed**.
+
+**And one red was a run that died rather than a fault** (§298.3): `check:door`
+first read *97 ok, 21 failed* — 118 assertions against the complete run's 144 —
+under contention with the build finishing beside it; re-run it is 143/1, and the
+one is §388.1's.
+
+**Verified on the merged tree** (§365): `built-in-step` all good,
+`generated-in-step` all clear, authoriser 709/0, change list 140/0, platform
+rules 69/0, `test-my-reporting` 65/0, and on the stack production serves state
+92/0, modules 160/0, door 144/0, insights 137/0, frameworks 90/0, tracker 229/0,
+notes 170/0, portfolio 121/0, upload 9/0, demo 7/0, standing 7/0, room 10/0,
+deploy 5/0.

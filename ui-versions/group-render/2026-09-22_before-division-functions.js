@@ -210,18 +210,12 @@ function drillCard(title, val, opts){
    the dot, and at 3.77:1 it was not readable as a figure. */
 function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
-/* `execHtml` (§382) replaces the execution box's body for a subject whose
-   execution is not "delivered against planned" — a function planning in
-   projects or objectives reports a completion figure, and drawing it as
-   "Planned 100%" would state a plan nobody made. Absent, nothing changes. */
-function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip, execHtml){
+function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip){
   var pid = modalFor(ctx + " \u2014 objectives", "Where the objectives figure comes from", perfDrill);
   var eid = execDrill ? modalFor(ctx + " \u2014 execution", "Where the execution figure comes from", execDrill) : null;
 
   var execBody;
-  if (execHtml != null) {
-    execBody = execHtml;
-  } else if (exec == null || planned == null || planned === 0) {
+  if (exec == null || planned == null || planned === 0) {
     execBody = '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
                '<span class="ratio-l">no plan</span>';
   } else {
@@ -1866,15 +1860,10 @@ function renderCompanyPerformance(coKey){
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
-  var keys = companyUnitKeys(ck), fks = companyFnKeys(ck);
-  if (!keys.length && !fks.length) return '<div class="note"><b>' + esc(co.name) +
-    ' holds nothing yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
-    '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
-  /* §382: a company that holds functions reads them into its figures, and the
-     page says so — its headline cards stop being "Business units — …" because
-     they no longer are. With none, everything below is exactly what it was. */
-  if (fks.length) return renderCompanyWithFunctions(ck, co, keys, fks);
+  var keys = companyUnitKeys(ck);
+  if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
+    ' holds no business unit yet.</b> A unit belongs to a company on ' +
+    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>; until one does, there is nothing here to read.</div>';
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);
@@ -1944,99 +1933,6 @@ function renderCompanyPerformance(coKey){
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
       TIP_PERF, viewToggle("units"));
-}
-
-/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§382) ───────────────────
-   Settled from a mockup drawn out of this very page: the same three cards,
-   the units' section unchanged, and a Supporting functions section under it
-   drawing each function with the card a unit wears. The drill says how every
-   member's share was reached, because a weight nobody can trace is a weight
-   nobody can defend. */
-function fnCompanyCard(fk, ck, share){
-  var f = FUNCTIONS[fk], sc = fnMemberScores(fk), co = COMPANIES[ck];
-  var w = Math.round(share.w * 10) / 10;
-  var sub = w + "% of " + esc(co.name) + (share.set ? "" : " (weight left blank)") +
-    " &middot; supporting function";
-  var name = '<button class="linkbu" data-go="fn:' + esc(fk) + '">' + esc(f.name) + '</button>';
-  if (fnPlansInPillars(f)) {
-    var u = unitLike("fn:" + fk);
-    return '<div class="gwrap">' + splitCard(name, sub, sc.perf, unitExec(u), unitPlan(u),
-      "", "", f.name, "") + '</div>';
-  }
-  var t = fnPlansInObjectives(f) ? fnActionsTally(fk) : (fnHolders(fk)[0] ? capExec(fnHolders(fk)[0]) : null);
-  var word = fnPlansInObjectives(f) ? "actions" : "milestones";
-  var body = (t && t.pct != null)
-    ? '<div class="ratio">' + t.pct + '<small>%</small></div><span class="ratio-l">complete</span>' +
-      '<dl class="led"><dt>Done</dt><dd>' + t.done + '</dd><dt>In progress</dt><dd>' + t.wip +
-      '</dd><dt>Of</dt><dd>' + t.total + ' ' + word + '</dd></dl>'
-    : '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
-      '<span class="ratio-l">nothing reported</span>';
-  return '<div class="gwrap">' + splitCard(name, sub, sc.perf, null, null, "", "", f.name, "", body) + '</div>';
-}
-function renderCompanyWithFunctions(ck, co, keys, fks){
-  var shares = companyShares(ck);
-  var perf = companyObjectives(ck), r = companyRatio(ck), share = companyWeight(ck);
-  var nameOf = function(s){ return s.unit ? UNITS[s.unit].name : FUNCTIONS[s.fn].name; };
-  var how = function(s){
-    if (s.unit) return (UNITS[s.unit].weight || 0) + "% of the group";
-    return s.set ? "weight set on Setup" : "weight left blank";
-  };
-  var drill = function(which){
-    var tot = 0;
-    var rows = shares.map(function(s){
-      var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
-                     : fnMemberScores(s.fn)[which];
-      var w = Math.round(s.w * 10) / 10;
-      return '<tr><td><b>' + esc(nameOf(s)) + '</b><span class="why" style="margin:0;display:block">' +
-          how(s) + '</span></td>' +
-        '<td>' + (s.unit ? "Business unit" : "Supporting function") + '</td>' +
-        '<td class="num">' + pct(v) + '</td><td class="num">' + w + '%</td>' +
-        '<td class="num">' + (v == null ? "&mdash;" : (Math.round(v * w) / 100).toFixed(1)) + '</td></tr>';
-    }).join("");
-    return miniTable(["Part of " + esc(co.name), "Kind",
-        which === "perf" ? "Performance" : "Execution", "Weight in " + esc(co.name), "Contribution"],
-      rows + '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td><td></td>' +
-        '<td class="num">100%</td><td class="num"><b>' + pct(which === "perf" ? perf : r) + '</b></td></tr>') +
-      '<p class="sub">The functions take their share first: a weight set on Setup is used as ' +
-      'given, a blank takes the average of the weights that are set, and with none set each ' +
-      'function counts as one equal member. ' + (keys.length
-        ? 'The units share what is left in proportion to the weights they carry at group level.'
-        : '') + '</p>';
-  };
-  var parts = plural(keys.length, "unit") + " and " +
-    plural(fks.length, "supporting function") + " in " + esc(co.name);
-  var head = '<div class="scores">' +
-    drillCard("Performance" + tip(TIP_PERF), perf, {
-      primary: true,
-      sub: "The " + (keys.length ? parts : plural(fks.length, "supporting function") + " in " + esc(co.name)) +
-        ", each on its own key objectives, weighted.",
-      drill: drill("perf"), modalTitle: esc(co.name) + " — performance",
-      modalSub: "Weighted across everything this company holds"
-    }) +
-    drillCard("Execution" + tip(TIP_EXEC), r, {
-      sub: "Each part’s own execution figure, weighted as in performance.",
-      drill: drill("exec"), modalTitle: esc(co.name) + " — execution",
-      modalSub: "Weighted across everything this company holds"
-    }) +
-    (keys.length ? drillCard("Share of the group" + tip("What these units together are worth at group level. " +
-        "Supporting functions carry no group weight, so they are not in this number."), share, {
-      plain: true, pill: "of the group",
-      sub: plural(keys.length, "unit") + " of the group’s " + activeKeys().length +
-        ", carrying <b>" + share + "%</b> of its weight between them. Functions carry no group " +
-        "weight, so they are not in this number.",
-      drill: drill("perf"), modalTitle: esc(co.name) + " — weight",
-      modalSub: "Where this company's share comes from"
-    }) : '') +
-  '</div>';
-  var byFn = {};
-  shares.forEach(function(s){ if (s.fn) byFn[s.fn] = s; });
-  return perfActs("") + head +
-    (keys.length ? section("", L("unitword","bu"), null,
-      GVIEW.units === "table" ? unitsTable(keys)
-        : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF, viewToggle("units")) : '') +
-    section("", "Supporting functions", null,
-      '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck, byFn[k]); }).join("") + '</div>');
 }
 
 function renderGroupPerformance(){

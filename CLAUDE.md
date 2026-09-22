@@ -8900,6 +8900,17 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/division-functions.py # a supporting function belongs to a
+                                # division and counts in it (&sect;382): a company
+                                # with no functions agrees with &sect;68's formula
+                                # (asserted FIRST), the shares add to 100 with a set
+                                # weight as given, a blank the average of the set
+                                # ones and none set one equal member, the headline
+                                # and execution the weighted sum of what each
+                                # member's own page shows, a company of functions
+                                # alone reachable, the Setup dialog PRESSED and read
+                                # back (a total over 100 refused and said), and a
+                                # retire refused by name. 25/0, red 1 / 2 / 1
 python3 checks/objectives-actions.py # the third way a function plans
                                 # (§342, spec 049): the format is a THIRD value
                                 # read back off the stored function and never off
@@ -10214,7 +10225,19 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-22 &mdash; **&sect;380: one blank template per way of
+*Last Updated: 2026-09-22 &mdash; **&sect;382: a supporting function can
+belong to a division.** A division is the existing Company layer; a function's
+Setup row gains which company it belongs to (none = the group, stored as an
+absence) and its weight there (Islam's A: set as given, blank = average of the
+set ones, none set = one equal member, units share the rest by group weight).
+It counts in the company's performance AND execution; a company with no
+functions reads exactly as before (asserted first). No migration, no server
+rule, the CEO sees and does not report. `checks/division-functions.py` 25/0,
+red 1 / 2 / 1 from the sources. The Terminology naming (description, default,
+chosen word for every term) is drawn and waits for sign-off. **On the branch,
+not merged.***
+
+*Earlier: 2026-09-22 &mdash; **&sect;380: one blank template per way of
 planning (spec 059).** Islam: *"in the template download we need to have the
 different types of functions plans templates."* **MEASURED FIRST, AND THE CARD
 WAS TWO DECISIONS STALE** (rule 3a): it offered **two** buttons where a

@@ -8002,45 +8002,6 @@
           switchPlanFormat(this.dataset.fnformat, this.value, this);
         });
       });
-      /* §382: where a function belongs, and its weight there. The group is
-         the absence of a company, and a blank weight is the absence of one
-         (§50.6). Moving a function also drops its weight, because a share of
-         one company is not a share of another. A total over the whole is
-         refused and SAID beside the box, never quietly clamped (§62). */
-      root.querySelectorAll("[data-fnco]").forEach(function(sel){
-        sel.addEventListener("change", function(){
-          var f = FUNCTIONS[this.dataset.fnco];
-          if (!f) return;
-          if (this.value) f.company = this.value; else delete f.company;
-          delete f.coWeight;
-          FNCOW_SAID = null;
-          paint();
-        });
-      });
-      root.querySelectorAll("[data-fncow]").forEach(function(inp){
-        inp.addEventListener("change", function(){
-          var fk = this.dataset.fncow, f = FUNCTIONS[fk], raw = String(this.value).trim();
-          if (!f) return;
-          FNCOW_SAID = null;
-          if (raw === "") { delete f.coWeight; paint(); return; }
-          var v = Number(raw), ck = fnCompanyOf(fk);
-          if (!isFinite(v) || v < 0 || v > 100) {
-            FNCOW_SAID = { k: fk, msg: "A weight is a per cent between 0 and 100." };
-            paint(); return;
-          }
-          var others = companyFnKeys(ck).filter(function(k){ return k !== fk; })
-            .map(fnCoWeightSet).filter(function(x){ return x != null; })
-            .reduce(function(a, b){ return a + b; }, 0);
-          if (others + v > 100) {
-            FNCOW_SAID = { k: fk, msg: "The functions in " + COMPANIES[ck].name + " would add up to " +
-              (Math.round((others + v) * 10) / 10) + "% \u2014 more than the whole company. " +
-              "Lower this one or another first." };
-            paint(); return;
-          }
-          f.coWeight = v;
-          paint();
-        });
-      });
       root.querySelectorAll("[data-fnunder]").forEach(function(sel){
         sel.addEventListener("change", function(){
           var f = FUNCTIONS[this.dataset.fnunder];

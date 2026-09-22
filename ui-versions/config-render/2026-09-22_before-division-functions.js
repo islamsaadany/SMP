@@ -1220,13 +1220,6 @@ var ROWDLG_SPECS = {
            could not be reached at all. In a dialog every field is drawn
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
-        /* §382: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
-           plans, because both answer "what is this function part of". */
-        pdSect("Where it belongs") +
-        pdField("Company", fnCompanyCell(k, f, true)) +
-        pdField("Weight in its company", fnCoWeightCell(k, f, true)) +
-        (FNCOW_SAID && FNCOW_SAID.k === k
-          ? pdField("", '<p class="why missing" style="margin:0">' + esc(FNCOW_SAID.msg) + '</p>', true) : '') +
         pdSect("Who runs it") +
         pdField("Head", assignPicker("fn:" + k, "fnhead", f.head, true)) +
         pdField("Custodian", assignPicker("fn:" + k, "custodian", f.custodian, true));
@@ -4082,13 +4075,8 @@ function coPanels(ck, co, on){
          the refusal and reading it, not by reading the code. `fnPanels` joins
          sentences the same way and has the same latent fault; it is recorded
          rather than fixed here, because that one is not this change's. */
-      /* §382: a function it holds is in the list too, so the sentence names
-         both kinds rather than calling a function a business unit. */
-      'Move its ' + (blockers.length === unitsOfCompany(ck).length
-        ? plural(blockers.length, "business unit")
-        : plural(blockers.length, "business unit or function", "business units and functions")) +
-      ' to another company, or ' + (blockers.length === unitsOfCompany(ck).length
-        ? 'make each of them its own' : 'back to the group') + ', and this becomes possible. ' +
+      'Move its ' + plural(blockers.length, "business unit") + ' to another ' +
+      'company, or make each of them its own, and this becomes possible. ' +
       'Nothing is lost meanwhile' + endStop(" — " + esc(blockers.join(", "))) +
       '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
   return '<div class="kmenu kconfirm"><div class="cq">' +
@@ -7082,41 +7070,6 @@ function capFormatCell(c, editable){
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
-/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§382) ────────────────
-   Two cells, read on the row and set in the dialog. The group is the ABSENCE
-   of a company (§50.6), so a function nobody placed reads exactly as every
-   function did before. The weight is offered only where there is a company
-   to weigh it in — a weight at the group would be a number nothing reads
-   (§61). A blank weight SAYS what it counts as, because "blank" alone reads
-   as nought, and nought is the one thing it is not. */
-var FNCOW_SAID = null;
-function fnCompanyCell(fk, f, editable){
-  var at = fnCompanyOf(fk) || "";
-  if (!editable) return at ? '<span class="val"><b>' + esc(COMPANIES[at].name) + '</b></span>'
-                           : '<span class="why" style="margin:0">The group</span>';
-  return '<select class="fld" data-fnco="' + esc(fk) + '" aria-label="Where ' + esc(f.name) + ' belongs">' +
-    '<option value=""' + (at ? "" : " selected") + '>The group</option>' +
-    activeCompanyKeys().map(function(ck){
-      return '<option value="' + esc(ck) + '"' + (ck === at ? " selected" : "") + '>' +
-        esc(COMPANIES[ck].name) + '</option>';
-    }).join("") + '</select>';
-}
-function fnCoWeightShown(fk){
-  var ck = fnCompanyOf(fk);
-  if (!ck) return null;
-  var s = companyShares(ck).filter(function(x){ return x.fn === fk; })[0];
-  return s ? Math.round(s.w * 10) / 10 : null;
-}
-function fnCoWeightCell(fk, f, editable){
-  var ck = fnCompanyOf(fk), set = fnCoWeightSet(fk), shown = fnCoWeightShown(fk);
-  if (!ck) return editable ? '<span class="why" style="margin:0">Only when it belongs to a company</span>'
-                           : '<span class="why" style="margin:0">&mdash;</span>';
-  if (!editable) return set != null ? '<span class="val">' + set + '%</span>'
-    : '<span class="why" style="margin:0">Blank \u2192 ' + shown + '%</span>';
-  return '<input class="fld" type="number" min="0" max="100" step="any" data-fncow="' + esc(fk) + '"' +
-    ' value="' + (set != null ? set : "") + '" placeholder="Blank counts as ' + shown + '%"' +
-    ' aria-label="Weight of ' + esc(f.name) + ' in ' + esc(COMPANIES[ck].name) + ', in per cent">';
-}
 function planUnderCell(fk, f, editable){
   /* Only a pillars function borrows a foundation, so only it has somewhere to
      sit under — offering this to a projects function would be a control that
@@ -7146,8 +7099,6 @@ var FN_COLS = [
   { k:"nav",     label:"Nav name" },
   { k:"code",    label:"Code" },
   { k:"plansin", label:"Plans in" },
-  { k:"company", label:"Company" },
-  { k:"coweight", label:"Weight" },
   { k:"caps",    label:"Caps" },
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
@@ -7316,8 +7267,6 @@ function renderFunctions(){
          same contract as retiring a company that still holds units (§49.3).
          The control is in the dialog; this cell reads it. */
       (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("coweight") ? '<td class="cc">' + fnCoWeightCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
       (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
       (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
@@ -7399,8 +7348,6 @@ function renderFunctions(){
                  (fnShowCol("nav")     ? h("Nav name")          : '') +
                  (fnShowCol("code")    ? h("Code", "cc")        : '') +
                  (fnShowCol("plansin") ? h("Plans in", "cc")    : '') +
-                 (fnShowCol("company") ? h("Company", "cc")     : '') +
-                 (fnShowCol("coweight") ? h("Weight", "cc")     : '') +
                  (fnShowCol("caps")    ? h("Caps", "cc")        : '') +
                  (fnShowCol("head")    ? h("Head", "cc")        : '') +
                  (fnShowCol("cust")    ? h("Custodian", "cc")   : '') +

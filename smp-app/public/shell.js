@@ -9311,7 +9311,12 @@ function addCompany(){
 function companyActive(ck){ return COMPANIES[ck] && COMPANIES[ck].active !== false; }
 function activeCompanyKeys(){ return COMPANY_KEYS.filter(companyActive); }
 function companyRetireBlockers(ck){
-  return unitsOfCompany(ck).map(function(k){ return UNITS[k].name; });
+  /* §382: a function it holds is in the way too — retiring the company would
+     otherwise drop that function back to the group without anybody deciding. */
+  return unitsOfCompany(ck).map(function(k){ return UNITS[k].name; })
+    .concat(FUNCTION_KEYS.filter(function(k){
+      return FUNCTIONS[k] && FUNCTIONS[k].company === ck;
+    }).map(function(k){ return FUNCTIONS[k].name; }));
 }
 function retireCompany(ck){
   var co = COMPANIES[ck];
@@ -15176,10 +15181,110 @@ function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
 function companyUnitKeys(ck){
   return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
 }
-function companyObjectives(ck){ return weightedOver(companyUnitKeys(ck), unitObjectives); }
+/* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§382) ──
+   Islam: *"I have a case for functions that belong to divisions and we will
+   need to see the performance in division view"* — and, asked, a division IS
+   a company here; a function belongs to the group or to exactly ONE; it
+   COUNTS, "because some divisions are only functions"; and its CEO sees it
+   and does not report on it (which the matrix already answers: `cceo` holds
+   `a_fn_other` at view, so nothing in the rules moves).
+
+   `FUNCTIONS[k].company` and `.coWeight` ride the function's `extra`, so
+   nothing is migrated, and both are ABSENCES by default (§50.6): a function
+   nobody placed is the group's, exactly as every function was before.
+
+   A RETIRED COMPANY HOLDS NOBODY. Pointing at one reads as the group, the way
+   a unit's retired company does not open a page either. */
+function fnCompanyOf(fk){
+  var f = FUNCTIONS[fk], c = f && f.company;
+  return c && companyActive(c) ? c : null;
+}
+function companyFnKeys(ck){
+  return FUNCTION_KEYS.filter(function(k){
+    return FUNCTIONS[k] && FUNCTIONS[k].active !== false && fnCompanyOf(k) === ck;
+  });
+}
+/* A weight the office typed, or null — never NaN and never a blank read as
+   nought (§104.10: Number("") is 0, and nought is a real weight). */
+function fnCoWeightSet(fk){
+  var v = FUNCTIONS[fk] && FUNCTIONS[fk].coWeight;
+  return (typeof v === "number" && isFinite(v) && v >= 0) ? v : null;
+}
+/* WHAT ONE FUNCTION SCORES, READ OFF THE PAGE THAT FUNCTION DRAWS — its own
+   Performance page's primary figure and its execution figure, per format, so
+   a division can never print a different number for a function from the one
+   that function shows about itself (§53.5). */
+function fnMemberScores(fk){
+  var f = FUNCTIONS[fk];
+  if (!f) return { perf:null, exec:null };
+  if (fnPlansInPillars(f)) {
+    var u = unitLike("fn:" + fk);
+    return u ? { perf: unitObjectives(u), exec: unitRatio(u) } : { perf:null, exec:null };
+  }
+  if (fnPlansInObjectives(f)) return { perf: fnObjScore(fk), exec: fnActionsTally(fk).pct };
+  var h = fnHolders(fk)[0];
+  if (!h) return { perf:null, exec:null };
+  var ko = capKOScore(h);
+  return { perf: ko != null ? ko : capPerf(h), exec: capExec(h).pct };
+}
+/* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
+   The functions take their share first: a weight the office set is used as
+   given; a blank takes the AVERAGE of the weights that are set (§243's rule
+   for objectives); and with none set each function counts as one equal member
+   of the company. The units split what is left in proportion to the weights
+   they already carry at group level, so their relative sizes never move.
+   A company of functions alone divides the whole by their weights. */
+function companyShares(ck){
+  var units = companyUnitKeys(ck), fns = companyFnKeys(ck), out = [];
+  if (!fns.length) {
+    var uw0 = companyWeight(ck);
+    units.forEach(function(k){
+      out.push({ unit:k, w: uw0 ? (UNITS[k].weight || 0) / uw0 * 100 : 100 / units.length });
+    });
+    return out;
+  }
+  var set = fns.map(fnCoWeightSet).filter(function(v){ return v != null; });
+  var blank = set.length ? set.reduce(function(a, b){ return a + b; }, 0) / set.length
+                         : 100 / (units.length + fns.length);
+  var fw = fns.map(function(k){ var v = fnCoWeightSet(k); return v == null ? blank : v; });
+  var ftot = fw.reduce(function(a, b){ return a + b; }, 0);
+  /* More than the whole, or no units to share the rest: the functions are
+     scaled to 100 between them. Setup refuses a total over 100, so the first
+     case is a stored value from elsewhere, never a normal one. */
+  var scale = (!units.length || ftot > 100) ? (ftot ? 100 / ftot : 0) : 1;
+  var left = units.length ? Math.max(0, 100 - ftot * scale) : 0;
+  var uw = companyWeight(ck);
+  units.forEach(function(k){
+    out.push({ unit:k, w: uw ? (UNITS[k].weight || 0) / uw * left : left / units.length });
+  });
+  fns.forEach(function(k, i){
+    out.push({ fn:k, w: ftot ? fw[i] * scale : 100 / fns.length, set: fnCoWeightSet(k) != null });
+  });
+  return out;
+}
+function companyMix(ck, which){
+  var acc = 0, tot = 0;
+  companyShares(ck).forEach(function(s){
+    var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
+                   : fnMemberScores(s.fn)[which];
+    if (v == null || !s.w) return;
+    acc += v * s.w; tot += s.w;
+  });
+  return tot ? Math.round(acc / tot) : null;
+}
+/* A COMPANY WITH NO FUNCTIONS COMPILES EXACTLY AS IT DID (§68), byte for
+   byte, through the same weightedOver() — asserted, because a rounding step
+   moved would change every company's figure on a day nothing about it did. */
+function companyObjectives(ck){
+  return companyFnKeys(ck).length ? companyMix(ck, "perf")
+                                  : weightedOver(companyUnitKeys(ck), unitObjectives);
+}
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-function companyRatio(ck){ return ratioOf(companyExec(ck), companyPlan(ck)); }
+function companyRatio(ck){
+  return companyFnKeys(ck).length ? companyMix(ck, "exec")
+                                  : ratioOf(companyExec(ck), companyPlan(ck));
+}
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately
    forget it. */
@@ -15189,7 +15294,8 @@ function companyWeight(ck){
 /* The companies somebody may open, in the order they are declared. */
 function companiesReachable(){
   return activeCompanyKeys().filter(function(ck){
-    return grantAt("g_perf", "co:" + ck) !== "none" && companyUnitKeys(ck).length;
+    return grantAt("g_perf", "co:" + ck) !== "none" &&
+      (companyUnitKeys(ck).length || companyFnKeys(ck).length);
   });
 }
 
@@ -21953,12 +22059,18 @@ function drillCard(title, val, opts){
    the dot, and at 3.77:1 it was not readable as a figure. */
 function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
-function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip){
+/* `execHtml` (§382) replaces the execution box's body for a subject whose
+   execution is not "delivered against planned" — a function planning in
+   projects or objectives reports a completion figure, and drawing it as
+   "Planned 100%" would state a plan nobody made. Absent, nothing changes. */
+function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip, execHtml){
   var pid = modalFor(ctx + " \u2014 objectives", "Where the objectives figure comes from", perfDrill);
   var eid = execDrill ? modalFor(ctx + " \u2014 execution", "Where the execution figure comes from", execDrill) : null;
 
   var execBody;
-  if (exec == null || planned == null || planned === 0) {
+  if (execHtml != null) {
+    execBody = execHtml;
+  } else if (exec == null || planned == null || planned === 0) {
     execBody = '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
                '<span class="ratio-l">no plan</span>';
   } else {
@@ -23603,10 +23715,15 @@ function renderCompanyPerformance(coKey){
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
-  var keys = companyUnitKeys(ck);
-  if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
-    ' holds no business unit yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>; until one does, there is nothing here to read.</div>';
+  var keys = companyUnitKeys(ck), fks = companyFnKeys(ck);
+  if (!keys.length && !fks.length) return '<div class="note"><b>' + esc(co.name) +
+    ' holds nothing yet.</b> A unit belongs to a company on ' +
+    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
+    '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
+  /* §382: a company that holds functions reads them into its figures, and the
+     page says so — its headline cards stop being "Business units — …" because
+     they no longer are. With none, everything below is exactly what it was. */
+  if (fks.length) return renderCompanyWithFunctions(ck, co, keys, fks);
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);
@@ -23676,6 +23793,99 @@ function renderCompanyPerformance(coKey){
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
       TIP_PERF, viewToggle("units"));
+}
+
+/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§382) ───────────────────
+   Settled from a mockup drawn out of this very page: the same three cards,
+   the units' section unchanged, and a Supporting functions section under it
+   drawing each function with the card a unit wears. The drill says how every
+   member's share was reached, because a weight nobody can trace is a weight
+   nobody can defend. */
+function fnCompanyCard(fk, ck, share){
+  var f = FUNCTIONS[fk], sc = fnMemberScores(fk), co = COMPANIES[ck];
+  var w = Math.round(share.w * 10) / 10;
+  var sub = w + "% of " + esc(co.name) + (share.set ? "" : " (weight left blank)") +
+    " &middot; supporting function";
+  var name = '<button class="linkbu" data-go="fn:' + esc(fk) + '">' + esc(f.name) + '</button>';
+  if (fnPlansInPillars(f)) {
+    var u = unitLike("fn:" + fk);
+    return '<div class="gwrap">' + splitCard(name, sub, sc.perf, unitExec(u), unitPlan(u),
+      "", "", f.name, "") + '</div>';
+  }
+  var t = fnPlansInObjectives(f) ? fnActionsTally(fk) : (fnHolders(fk)[0] ? capExec(fnHolders(fk)[0]) : null);
+  var word = fnPlansInObjectives(f) ? "actions" : "milestones";
+  var body = (t && t.pct != null)
+    ? '<div class="ratio">' + t.pct + '<small>%</small></div><span class="ratio-l">complete</span>' +
+      '<dl class="led"><dt>Done</dt><dd>' + t.done + '</dd><dt>In progress</dt><dd>' + t.wip +
+      '</dd><dt>Of</dt><dd>' + t.total + ' ' + word + '</dd></dl>'
+    : '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
+      '<span class="ratio-l">nothing reported</span>';
+  return '<div class="gwrap">' + splitCard(name, sub, sc.perf, null, null, "", "", f.name, "", body) + '</div>';
+}
+function renderCompanyWithFunctions(ck, co, keys, fks){
+  var shares = companyShares(ck);
+  var perf = companyObjectives(ck), r = companyRatio(ck), share = companyWeight(ck);
+  var nameOf = function(s){ return s.unit ? UNITS[s.unit].name : FUNCTIONS[s.fn].name; };
+  var how = function(s){
+    if (s.unit) return (UNITS[s.unit].weight || 0) + "% of the group";
+    return s.set ? "weight set on Setup" : "weight left blank";
+  };
+  var drill = function(which){
+    var tot = 0;
+    var rows = shares.map(function(s){
+      var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
+                     : fnMemberScores(s.fn)[which];
+      var w = Math.round(s.w * 10) / 10;
+      return '<tr><td><b>' + esc(nameOf(s)) + '</b><span class="why" style="margin:0;display:block">' +
+          how(s) + '</span></td>' +
+        '<td>' + (s.unit ? "Business unit" : "Supporting function") + '</td>' +
+        '<td class="num">' + pct(v) + '</td><td class="num">' + w + '%</td>' +
+        '<td class="num">' + (v == null ? "&mdash;" : (Math.round(v * w) / 100).toFixed(1)) + '</td></tr>';
+    }).join("");
+    return miniTable(["Part of " + esc(co.name), "Kind",
+        which === "perf" ? "Performance" : "Execution", "Weight in " + esc(co.name), "Contribution"],
+      rows + '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td><td></td>' +
+        '<td class="num">100%</td><td class="num"><b>' + pct(which === "perf" ? perf : r) + '</b></td></tr>') +
+      '<p class="sub">The functions take their share first: a weight set on Setup is used as ' +
+      'given, a blank takes the average of the weights that are set, and with none set each ' +
+      'function counts as one equal member. ' + (keys.length
+        ? 'The units share what is left in proportion to the weights they carry at group level.'
+        : '') + '</p>';
+  };
+  var parts = plural(keys.length, "unit") + " and " +
+    plural(fks.length, "supporting function") + " in " + esc(co.name);
+  var head = '<div class="scores">' +
+    drillCard("Performance" + tip(TIP_PERF), perf, {
+      primary: true,
+      sub: "The " + (keys.length ? parts : plural(fks.length, "supporting function") + " in " + esc(co.name)) +
+        ", each on its own key objectives, weighted.",
+      drill: drill("perf"), modalTitle: esc(co.name) + " — performance",
+      modalSub: "Weighted across everything this company holds"
+    }) +
+    drillCard("Execution" + tip(TIP_EXEC), r, {
+      sub: "Each part’s own execution figure, weighted as in performance.",
+      drill: drill("exec"), modalTitle: esc(co.name) + " — execution",
+      modalSub: "Weighted across everything this company holds"
+    }) +
+    (keys.length ? drillCard("Share of the group" + tip("What these units together are worth at group level. " +
+        "Supporting functions carry no group weight, so they are not in this number."), share, {
+      plain: true, pill: "of the group",
+      sub: plural(keys.length, "unit") + " of the group’s " + activeKeys().length +
+        ", carrying <b>" + share + "%</b> of its weight between them. Functions carry no group " +
+        "weight, so they are not in this number.",
+      drill: drill("perf"), modalTitle: esc(co.name) + " — weight",
+      modalSub: "Where this company's share comes from"
+    }) : '') +
+  '</div>';
+  var byFn = {};
+  shares.forEach(function(s){ if (s.fn) byFn[s.fn] = s; });
+  return perfActs("") + head +
+    (keys.length ? section("", L("unitword","bu"), null,
+      GVIEW.units === "table" ? unitsTable(keys)
+        : '<div class="gauges g3">' + unitCards(keys) + '</div>',
+      TIP_PERF, viewToggle("units")) : '') +
+    section("", "Supporting functions", null,
+      '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck, byFn[k]); }).join("") + '</div>');
 }
 
 function renderGroupPerformance(){
@@ -31611,6 +31821,13 @@ var ROWDLG_SPECS = {
            could not be reached at all. In a dialog every field is drawn
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
+        /* §382: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
+           plans, because both answer "what is this function part of". */
+        pdSect("Where it belongs") +
+        pdField("Company", fnCompanyCell(k, f, true)) +
+        pdField("Weight in its company", fnCoWeightCell(k, f, true)) +
+        (FNCOW_SAID && FNCOW_SAID.k === k
+          ? pdField("", '<p class="why missing" style="margin:0">' + esc(FNCOW_SAID.msg) + '</p>', true) : '') +
         pdSect("Who runs it") +
         pdField("Head", assignPicker("fn:" + k, "fnhead", f.head, true)) +
         pdField("Custodian", assignPicker("fn:" + k, "custodian", f.custodian, true));
@@ -34466,8 +34683,13 @@ function coPanels(ck, co, on){
          the refusal and reading it, not by reading the code. `fnPanels` joins
          sentences the same way and has the same latent fault; it is recorded
          rather than fixed here, because that one is not this change's. */
-      'Move its ' + plural(blockers.length, "business unit") + ' to another ' +
-      'company, or make each of them its own, and this becomes possible. ' +
+      /* §382: a function it holds is in the list too, so the sentence names
+         both kinds rather than calling a function a business unit. */
+      'Move its ' + (blockers.length === unitsOfCompany(ck).length
+        ? plural(blockers.length, "business unit")
+        : plural(blockers.length, "business unit or function", "business units and functions")) +
+      ' to another company, or ' + (blockers.length === unitsOfCompany(ck).length
+        ? 'make each of them its own' : 'back to the group') + ', and this becomes possible. ' +
       'Nothing is lost meanwhile' + endStop(" — " + esc(blockers.join(", "))) +
       '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
   return '<div class="kmenu kconfirm"><div class="cq">' +
@@ -37461,6 +37683,41 @@ function capFormatCell(c, editable){
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
+/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§382) ────────────────
+   Two cells, read on the row and set in the dialog. The group is the ABSENCE
+   of a company (§50.6), so a function nobody placed reads exactly as every
+   function did before. The weight is offered only where there is a company
+   to weigh it in — a weight at the group would be a number nothing reads
+   (§61). A blank weight SAYS what it counts as, because "blank" alone reads
+   as nought, and nought is the one thing it is not. */
+var FNCOW_SAID = null;
+function fnCompanyCell(fk, f, editable){
+  var at = fnCompanyOf(fk) || "";
+  if (!editable) return at ? '<span class="val"><b>' + esc(COMPANIES[at].name) + '</b></span>'
+                           : '<span class="why" style="margin:0">The group</span>';
+  return '<select class="fld" data-fnco="' + esc(fk) + '" aria-label="Where ' + esc(f.name) + ' belongs">' +
+    '<option value=""' + (at ? "" : " selected") + '>The group</option>' +
+    activeCompanyKeys().map(function(ck){
+      return '<option value="' + esc(ck) + '"' + (ck === at ? " selected" : "") + '>' +
+        esc(COMPANIES[ck].name) + '</option>';
+    }).join("") + '</select>';
+}
+function fnCoWeightShown(fk){
+  var ck = fnCompanyOf(fk);
+  if (!ck) return null;
+  var s = companyShares(ck).filter(function(x){ return x.fn === fk; })[0];
+  return s ? Math.round(s.w * 10) / 10 : null;
+}
+function fnCoWeightCell(fk, f, editable){
+  var ck = fnCompanyOf(fk), set = fnCoWeightSet(fk), shown = fnCoWeightShown(fk);
+  if (!ck) return editable ? '<span class="why" style="margin:0">Only when it belongs to a company</span>'
+                           : '<span class="why" style="margin:0">&mdash;</span>';
+  if (!editable) return set != null ? '<span class="val">' + set + '%</span>'
+    : '<span class="why" style="margin:0">Blank \u2192 ' + shown + '%</span>';
+  return '<input class="fld" type="number" min="0" max="100" step="any" data-fncow="' + esc(fk) + '"' +
+    ' value="' + (set != null ? set : "") + '" placeholder="Blank counts as ' + shown + '%"' +
+    ' aria-label="Weight of ' + esc(f.name) + ' in ' + esc(COMPANIES[ck].name) + ', in per cent">';
+}
 function planUnderCell(fk, f, editable){
   /* Only a pillars function borrows a foundation, so only it has somewhere to
      sit under — offering this to a projects function would be a control that
@@ -37490,6 +37747,8 @@ var FN_COLS = [
   { k:"nav",     label:"Nav name" },
   { k:"code",    label:"Code" },
   { k:"plansin", label:"Plans in" },
+  { k:"company", label:"Company" },
+  { k:"coweight", label:"Weight" },
   { k:"caps",    label:"Caps" },
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
@@ -37658,6 +37917,8 @@ function renderFunctions(){
          same contract as retiring a company that still holds units (§49.3).
          The control is in the dialog; this cell reads it. */
       (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
+      (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
+      (fnShowCol("coweight") ? '<td class="cc">' + fnCoWeightCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
       (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
       (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
@@ -37739,6 +38000,8 @@ function renderFunctions(){
                  (fnShowCol("nav")     ? h("Nav name")          : '') +
                  (fnShowCol("code")    ? h("Code", "cc")        : '') +
                  (fnShowCol("plansin") ? h("Plans in", "cc")    : '') +
+                 (fnShowCol("company") ? h("Company", "cc")     : '') +
+                 (fnShowCol("coweight") ? h("Weight", "cc")     : '') +
                  (fnShowCol("caps")    ? h("Caps", "cc")        : '') +
                  (fnShowCol("head")    ? h("Head", "cc")        : '') +
                  (fnShowCol("cust")    ? h("Custodian", "cc")   : '') +
@@ -62234,6 +62497,45 @@ var SYNC = (function () {
       root.querySelectorAll("[data-fnformat]").forEach(function(sel){
         sel.addEventListener("change", function(){
           switchPlanFormat(this.dataset.fnformat, this.value, this);
+        });
+      });
+      /* §382: where a function belongs, and its weight there. The group is
+         the absence of a company, and a blank weight is the absence of one
+         (§50.6). Moving a function also drops its weight, because a share of
+         one company is not a share of another. A total over the whole is
+         refused and SAID beside the box, never quietly clamped (§62). */
+      root.querySelectorAll("[data-fnco]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var f = FUNCTIONS[this.dataset.fnco];
+          if (!f) return;
+          if (this.value) f.company = this.value; else delete f.company;
+          delete f.coWeight;
+          FNCOW_SAID = null;
+          paint();
+        });
+      });
+      root.querySelectorAll("[data-fncow]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var fk = this.dataset.fncow, f = FUNCTIONS[fk], raw = String(this.value).trim();
+          if (!f) return;
+          FNCOW_SAID = null;
+          if (raw === "") { delete f.coWeight; paint(); return; }
+          var v = Number(raw), ck = fnCompanyOf(fk);
+          if (!isFinite(v) || v < 0 || v > 100) {
+            FNCOW_SAID = { k: fk, msg: "A weight is a per cent between 0 and 100." };
+            paint(); return;
+          }
+          var others = companyFnKeys(ck).filter(function(k){ return k !== fk; })
+            .map(fnCoWeightSet).filter(function(x){ return x != null; })
+            .reduce(function(a, b){ return a + b; }, 0);
+          if (others + v > 100) {
+            FNCOW_SAID = { k: fk, msg: "The functions in " + COMPANIES[ck].name + " would add up to " +
+              (Math.round((others + v) * 10) / 10) + "% \u2014 more than the whole company. " +
+              "Lower this one or another first." };
+            paint(); return;
+          }
+          f.coWeight = v;
+          paint();
         });
       });
       root.querySelectorAll("[data-fnunder]").forEach(function(sel){

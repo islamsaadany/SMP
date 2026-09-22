@@ -54787,3 +54787,68 @@ none**; `built-in-step` all good and `generated-in-step` all clear.
 (spec 029): **neither side** puts one `api/`, `lib/` or `db/` file in the range,
 so nothing about how a save is judged moves, nothing stored moves and nothing
 is migrated.
+
+## §382 — A SUPPORTING FUNCTION CAN BELONG TO A DIVISION, AND COUNTS IN IT (2026-09-22)
+
+Islam: *"I have a case for functions that belong to divisions and we will need
+to see the performance in divisin view."* Four answers settled the model before
+anything was drawn — *"1. yes companies 2. count because some division s are
+only functions 3. one 4. see only"* — then **A** for the weighting and, of the
+drawn page, *"the laytou it ok"*, with *"execution is part of the function why
+not?"* settling the second number.
+
+**A DIVISION IS THE COMPANY LAYER, NOT A NEW ONE.** §23 built the level between
+the group and a unit and §68 gave it a page; a fourth layer beside it would be
+two answers to *what sits under the group*. What was missing is that a function
+could not belong to one.
+
+**THE FUNCTION CARRIES THE POINTER, AND IT IS AN ABSENCE BY DEFAULT** (§50.6):
+`FUNCTIONS[k].company`, riding `functions.extra` (§118, §213) — **no migration,
+no schema change, no server rule**. No key is the group. The authoriser already
+reads an unnamed function field as Setup, which is the office's, so both new
+fields are guarded the day they exist (§42's fall-through). `fnCompanyOf()`
+reads the pointer only while the company is active, so a retired company does
+not keep a function it can no longer show.
+
+**THE WEIGHTING IS ISLAM'S A, IN ONE FUNCTION** (`companyShares`): a set
+weight is a per cent of the company used as given; a blank takes the average of
+the weights set (§243's blank rule, one layer up); with none set each function
+is one equal member, `100 / (units + functions)`; the units share what is left
+by their group weights re-normalised — which is §68's own arithmetic, so a unit
+keeps its size against its neighbours. A company of functions only divides the
+whole between them. Sets over the whole are scaled rather than trusted, and the
+screen refuses a total over 100 before it is stored, naming the company (§62).
+Moving a function to another company or to the group DELETES its weight, because
+a weight is a share *of* a company and means nothing in the next one.
+
+**A FUNCTION'S FIGURE IS WHAT ITS OWN PAGE SHOWS** (`fnMemberScores`, §53.5):
+a pillars function reads through `unitLike()` exactly as its Performance page
+does; an objectives function through `fnObjScore`/`fnActionsTally`; a projects
+function through its own holder's objectives, else `capPerf`, and `capExec`.
+Execution uses the same weights (his *"why not?"*).
+
+**A COMPANY WITH NO FUNCTIONS IS BYTE-FOR-BYTE WHAT IT WAS**: `companyObjectives`
+and `companyRatio` take the new mix only when the company holds a function,
+else the §68 expression untouched — asserted FIRST in the check, against that
+expression rather than a number (§94.8, §113.8).
+
+**THE CEO SEES AND DOES NOT REPORT, AND IT NEEDED NOTHING**: `cceo` already
+holds `a_fn_other` at view, and `companiesReachable` now counts a company that
+holds functions only (§61 — otherwise a company made of functions is one nobody
+can open). The company page draws its functions in their own section and a
+drill table naming each member's kind and contribution; the *share of the group*
+card is drawn only where there are units, and says functions are not in it.
+Retiring a company still holding a function is refused BY NAME.
+
+**THE NAMING IS NOT BUILT HERE AND THAT IS HIS**: *"we don't rename .. we
+name"*, then *"yes all terinilogies get the same treatment"* — every term on
+Terminology gains a description, a default and the chosen word. It is a visual
+change, so it is drawn (`design-mockups/division-functions/2026-09-22_terminology-naming.html`)
+and waits for sign-off (rule 1c).
+
+**Checked:** `checks/division-functions.py` 25/0, proved able to fail three
+ways from the SOURCES (§276) — performance ignoring functions **1 red**, the
+company unreachable **2 red**, execution ignoring functions **1 red**; 683/0
+authoriser, 140/0 differ, full `qa.py` ERRORS none, `built-in-step` all good.
+Renumbered §381 → §382 before commit, scoped to this change's own lines,
+because main's builder work took §381 (§264.3).

@@ -3794,12 +3794,7 @@ function addCompany(){
 function companyActive(ck){ return COMPANIES[ck] && COMPANIES[ck].active !== false; }
 function activeCompanyKeys(){ return COMPANY_KEYS.filter(companyActive); }
 function companyRetireBlockers(ck){
-  /* §382: a function it holds is in the way too — retiring the company would
-     otherwise drop that function back to the group without anybody deciding. */
-  return unitsOfCompany(ck).map(function(k){ return UNITS[k].name; })
-    .concat(FUNCTION_KEYS.filter(function(k){
-      return FUNCTIONS[k] && FUNCTIONS[k].company === ck;
-    }).map(function(k){ return FUNCTIONS[k].name; }));
+  return unitsOfCompany(ck).map(function(k){ return UNITS[k].name; });
 }
 function retireCompany(ck){
   var co = COMPANIES[ck];
@@ -9664,110 +9659,10 @@ function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
 function companyUnitKeys(ck){
   return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
 }
-/* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§382) ──
-   Islam: *"I have a case for functions that belong to divisions and we will
-   need to see the performance in division view"* — and, asked, a division IS
-   a company here; a function belongs to the group or to exactly ONE; it
-   COUNTS, "because some divisions are only functions"; and its CEO sees it
-   and does not report on it (which the matrix already answers: `cceo` holds
-   `a_fn_other` at view, so nothing in the rules moves).
-
-   `FUNCTIONS[k].company` and `.coWeight` ride the function's `extra`, so
-   nothing is migrated, and both are ABSENCES by default (§50.6): a function
-   nobody placed is the group's, exactly as every function was before.
-
-   A RETIRED COMPANY HOLDS NOBODY. Pointing at one reads as the group, the way
-   a unit's retired company does not open a page either. */
-function fnCompanyOf(fk){
-  var f = FUNCTIONS[fk], c = f && f.company;
-  return c && companyActive(c) ? c : null;
-}
-function companyFnKeys(ck){
-  return FUNCTION_KEYS.filter(function(k){
-    return FUNCTIONS[k] && FUNCTIONS[k].active !== false && fnCompanyOf(k) === ck;
-  });
-}
-/* A weight the office typed, or null — never NaN and never a blank read as
-   nought (§104.10: Number("") is 0, and nought is a real weight). */
-function fnCoWeightSet(fk){
-  var v = FUNCTIONS[fk] && FUNCTIONS[fk].coWeight;
-  return (typeof v === "number" && isFinite(v) && v >= 0) ? v : null;
-}
-/* WHAT ONE FUNCTION SCORES, READ OFF THE PAGE THAT FUNCTION DRAWS — its own
-   Performance page's primary figure and its execution figure, per format, so
-   a division can never print a different number for a function from the one
-   that function shows about itself (§53.5). */
-function fnMemberScores(fk){
-  var f = FUNCTIONS[fk];
-  if (!f) return { perf:null, exec:null };
-  if (fnPlansInPillars(f)) {
-    var u = unitLike("fn:" + fk);
-    return u ? { perf: unitObjectives(u), exec: unitRatio(u) } : { perf:null, exec:null };
-  }
-  if (fnPlansInObjectives(f)) return { perf: fnObjScore(fk), exec: fnActionsTally(fk).pct };
-  var h = fnHolders(fk)[0];
-  if (!h) return { perf:null, exec:null };
-  var ko = capKOScore(h);
-  return { perf: ko != null ? ko : capPerf(h), exec: capExec(h).pct };
-}
-/* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
-   The functions take their share first: a weight the office set is used as
-   given; a blank takes the AVERAGE of the weights that are set (§243's rule
-   for objectives); and with none set each function counts as one equal member
-   of the company. The units split what is left in proportion to the weights
-   they already carry at group level, so their relative sizes never move.
-   A company of functions alone divides the whole by their weights. */
-function companyShares(ck){
-  var units = companyUnitKeys(ck), fns = companyFnKeys(ck), out = [];
-  if (!fns.length) {
-    var uw0 = companyWeight(ck);
-    units.forEach(function(k){
-      out.push({ unit:k, w: uw0 ? (UNITS[k].weight || 0) / uw0 * 100 : 100 / units.length });
-    });
-    return out;
-  }
-  var set = fns.map(fnCoWeightSet).filter(function(v){ return v != null; });
-  var blank = set.length ? set.reduce(function(a, b){ return a + b; }, 0) / set.length
-                         : 100 / (units.length + fns.length);
-  var fw = fns.map(function(k){ var v = fnCoWeightSet(k); return v == null ? blank : v; });
-  var ftot = fw.reduce(function(a, b){ return a + b; }, 0);
-  /* More than the whole, or no units to share the rest: the functions are
-     scaled to 100 between them. Setup refuses a total over 100, so the first
-     case is a stored value from elsewhere, never a normal one. */
-  var scale = (!units.length || ftot > 100) ? (ftot ? 100 / ftot : 0) : 1;
-  var left = units.length ? Math.max(0, 100 - ftot * scale) : 0;
-  var uw = companyWeight(ck);
-  units.forEach(function(k){
-    out.push({ unit:k, w: uw ? (UNITS[k].weight || 0) / uw * left : left / units.length });
-  });
-  fns.forEach(function(k, i){
-    out.push({ fn:k, w: ftot ? fw[i] * scale : 100 / fns.length, set: fnCoWeightSet(k) != null });
-  });
-  return out;
-}
-function companyMix(ck, which){
-  var acc = 0, tot = 0;
-  companyShares(ck).forEach(function(s){
-    var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
-                   : fnMemberScores(s.fn)[which];
-    if (v == null || !s.w) return;
-    acc += v * s.w; tot += s.w;
-  });
-  return tot ? Math.round(acc / tot) : null;
-}
-/* A COMPANY WITH NO FUNCTIONS COMPILES EXACTLY AS IT DID (§68), byte for
-   byte, through the same weightedOver() — asserted, because a rounding step
-   moved would change every company's figure on a day nothing about it did. */
-function companyObjectives(ck){
-  return companyFnKeys(ck).length ? companyMix(ck, "perf")
-                                  : weightedOver(companyUnitKeys(ck), unitObjectives);
-}
+function companyObjectives(ck){ return weightedOver(companyUnitKeys(ck), unitObjectives); }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-function companyRatio(ck){
-  return companyFnKeys(ck).length ? companyMix(ck, "exec")
-                                  : ratioOf(companyExec(ck), companyPlan(ck));
-}
+function companyRatio(ck){ return ratioOf(companyExec(ck), companyPlan(ck)); }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately
    forget it. */
@@ -9777,7 +9672,6 @@ function companyWeight(ck){
 /* The companies somebody may open, in the order they are declared. */
 function companiesReachable(){
   return activeCompanyKeys().filter(function(ck){
-    return grantAt("g_perf", "co:" + ck) !== "none" &&
-      (companyUnitKeys(ck).length || companyFnKeys(ck).length);
+    return grantAt("g_perf", "co:" + ck) !== "none" && companyUnitKeys(ck).length;
   });
 }

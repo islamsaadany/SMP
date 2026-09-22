@@ -7136,3 +7136,34 @@ nine checks either piece touches — including the workbook round trip, which
 is the other piece's — the full sweep with **no errors**, the plan rules and
 the change list unmoved, and the two guards that the shipped file and the
 served copies are in step.
+
+## §382 — a supporting function can belong to a division (2026-09-22) · **on the branch, not merged**
+
+You asked for functions that belong to a division, with the division's
+performance counting them. A division is the **Company** the platform already
+has — nothing new was invented for it. On a function's Setup row there are now
+two new things: **which company it belongs to** (or the group, which is what
+every function starts as), and **its weight in that company**.
+
+The weight works the way you chose (A): a weight you set is used as given; a
+blank takes the average of the weights that are set; with none set, each
+function counts as one equal member beside the units; the units then share
+what is left, keeping their sizes against each other. A company made of
+functions only shares the whole between them. A total over 100% is refused,
+and the page says why beside the box.
+
+The company page draws its functions in their own section, and both headline
+numbers — performance and execution — count them. **A company with no
+functions reads exactly what it read before**; that is checked first, against
+the old arithmetic. The company's CEO sees the functions and does not report on
+them. Retiring a company that still holds a function is refused, naming it.
+
+**Checked:** a new check (`checks/division-functions.py`) of 25 assertions,
+shown to fail three ways when the decisions are broken on purpose; the
+permission rules (683) and the change list (140) unmoved; the full sweep of
+every page as every person with no errors; the shipped file and the served
+copies in step.
+
+**Waiting on you:** the **Terminology** change — each word with a description,
+a default and the name you choose — is drawn and published for sign-off and
+not built yet.

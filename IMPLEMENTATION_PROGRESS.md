@@ -6896,3 +6896,83 @@ refuse a backup for a missing picture.
 takes a few seconds longer and the file is about 6 MB rather than 1.6. Open it
 with no connection: it should come up on your own tenant, fully styled, with
 the navigation and the decks in it.
+
+---
+
+## §380 — One blank template per way of planning (2026-09-22, spec 059) · **built, on the branch**
+
+Islam: *"in the template download we need to have the different types of
+functions plans templates."*
+
+### What was wrong
+
+The blank-template card on **Setup → Import & storage → Download** offered
+**two** buttons where a supporting function plans **three** ways, and its
+sentence had been wrong for some time — *"a capability plans in projects and
+everything else in pillars"* stopped being true when a function was given its
+own projects, and it never mentioned objectives and actions at all.
+
+Worse than a missing button: the card's own words send you to the **wrong**
+one. Pressing *Pillars* for a function that plans in objectives and actions
+gives a unit's workbook; pressing *Projects* gives a file with **no Actions
+sheet**, whose dropdown does not even offer that function.
+
+### What was built
+
+Three buttons — **Pillars · Projects · Objectives & actions** — under a
+sentence that is true: *"One per way of planning. A unit always plans in
+pillars; a function plans whichever way Setup says."*
+
+- **Each blank file carries only the sheets its format uses.** Projects drops
+  Actions; Objectives & actions carries Read me, Objectives and Actions and
+  none of the four project sheets.
+- **Each file's Read me lists only the subjects that format fits**, and says
+  *Supporting function* rather than *Capability* where only a function can plan
+  that way.
+- **A subject downloading its own plan is untouched** and still gets all seven
+  sheets — the earlier decision, not reversed.
+
+Two costs, both stated before they were taken and both accepted: a subject's
+own download keeps every sheet, and a function whose format changes after a
+download has to download again.
+
+### A live defect found while building it
+
+**A function that plans in objectives and actions was offered a template the
+upload could not take back.** The file's dropdown offered it; the upload
+answered *"no business unit, supporting function or capability called
+\"HR\""*. Measured on the shipped build. A plan that downloads and cannot come
+back — one question with two answers, written out in two places, drifting the
+moment one gained a format the other had not heard of. Both sides ask one
+function now.
+
+The check that should have caught it asserted the half that worked: it asserted
+the function is **offered**, then read the file through the reader **directly**,
+never through the door a person actually meets. It drives the real control now.
+
+**And a template nobody can fill in**: before a tenant has a single function
+planning that way, the narrowed list is empty — and an empty dropdown refuses
+every value there is, so the cell can be neither picked from nor typed into. No
+validation is written for an empty list.
+
+### Proof
+
+- `checks/import-page.py` §2 rewritten, `checks/objectives-actions.py` §8b
+  added — 47 → **52 passed, 0 failed**; `import-page` all green.
+- Proved able to fail **six ways from the sources**, one break per decision:
+  2 / 3 / 7 / 2 / 3 / 1 red, each reddening its own assertions. The stranded
+  button prints `{'rows': 2, 'lead': 592}`; the door prints the reported
+  refusal verbatim.
+- Neighbours green: `template-round-trip`, `functional-projects` 45/0,
+  `project-tables`, `fn-pillars`. `qa.py` over `file://` **ERRORS none**.
+- The built file is in step with its sources, the served copies regenerated,
+  and `sw.js` bumped.
+
+### Waiting on Islam
+
+- **The merge to `main`** — his word, on that merge.
+- Four things flagged on the mockup and deliberately not folded in: the
+  projects file's Read me still says *Capability* over a list of functions; the
+  Pillars button spells the word as a literal where the page beside it uses the
+  tenant's own word; a capability plans two ways where a function plans three;
+  and an archived plan's workbook carries no format.

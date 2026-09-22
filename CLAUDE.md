@@ -8757,7 +8757,34 @@ python3 checks/import-page.py   # Import & archives, three tabs (§295): the mod
                                 # held at nought with its reason and live once the check
                                 # MAKES an archive (§255); and a plan pressed as Progress
                                 # refused BY NAME with nothing read. 1 red / 2 red on the
-                                # two falsifications, from the SOURCES (§276)
+                                # two falsifications, from the SOURCES (§276).
+                                # AND SINCE §380 ITS §2 IS ONE BLANK TEMPLATE PER WAY OF
+                                # PLANNING: the count asserted as the AGREEMENT with
+                                # `FN_FORMATS` rather than as the number three (§94.8,
+                                # §214.3 — a fourth way added tomorrow reddens it rather
+                                # than leaving the card quietly a format short, which is
+                                # exactly how it came to be two decisions stale); BOTH
+                                # ENDS of what each format drops (§94.2 — a build shipping
+                                # one file with every sheet in it satisfies "it carries
+                                # Actions" perfectly); the Read me's own B2 list read out
+                                # of the BYTES (§96) and the two files compared from the
+                                # SAME tenant, which the first draft did not — it took the
+                                # projects file before the state was MADE and reported the
+                                # narrowing broken on a build that does it perfectly
+                                # (§105.6's family, §380.1); the row over the name and the
+                                # prose under it, or a file with no Projects sheet tells
+                                # somebody to fill Projects first; and the empty-list case
+                                # asserted on the bytes, because before a tenant has one
+                                # such function the list is EMPTY and an empty dropdown
+                                # refuses every value there is (§67.5's mirror, and worse
+                                # — a long list is DROPPED, an empty one APPLIES). Plus
+                                # the button row at four widths, which nothing measured:
+                                # three loose buttons split 2+1 below ~1100px with the
+                                # third stranded at the FAR LEFT under the sentence
+                                # (`rows 2, lead 592`), because `.ffoot` wraps and `.why`
+                                # takes the free space — asserted as one run ending where
+                                # the row ends, never as a coordinate. Red SIX ways from
+                                # the SOURCES: 2 / 3 / 7 / 2 / 3 / 1
 python3 checks/project-row-type.py # a project row's type is a picker and its
                                 # direction opens (§292): ONE way to add a row and
                                 # pressing it adds a DELIVERABLE (an outcome's blank
@@ -8905,7 +8932,27 @@ python3 checks/objectives-actions.py # the third way a function plans
                                 # its own first failures were the CHECK (§301.6's
                                 # rendered case, §215's unlanded press, a `.rrow`
                                 # that is nought on both formats, and a fixed point
-                                # asked over a row no file can carry)
+                                # asked over a row no file can carry).
+                                # AND SINCE §380 §8b DRIVES THE DOOR, which is the gap
+                                # that hid a live defect: §8 asserts the function is
+                                # OFFERED in the file's own B2 dropdown and then calls
+                                # `capPlanFromWorkbook` DIRECTLY, so the upload's own
+                                # resolution — the surface a person actually meets — had
+                                # never once been asked about this format, and it
+                                # REFUSED (`fnOwnsProjects` is false here since §342),
+                                # answering *no business unit, supporting function or
+                                # capability called "HR"*. The blank file is built by the
+                                # button's own builder, the subject picked FROM ITS OWN
+                                # LIST, the bytes handed to the page's file input
+                                # (never a temp file — `qa-run.py` refuses to sweep a
+                                # check that mentions design-mockups AND writes, §334.14,
+                                # and spelling the write differently would be dodging the
+                                # guard rather than satisfying it), and the resolved
+                                # target read back. Reading the door's predicate would
+                                # assert it against itself (§113.8); BOTH ENDS, so a name
+                                # nobody holds is still refused. 52/0, red 3 under
+                                # `old-door` with the first failure printing the reported
+                                # refusal verbatim
 python3 checks/pillar-breakdown.py # a breakdown of a pillar's targets
                                 # (&sect;343, spec 050): the state is MADE and PUT
                                 # BACK (&sect;255, &sect;94.2) — no pillar in the
@@ -10167,7 +10214,89 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-21 &mdash; **&sect;379: the working copy carries the
+*Last Updated: 2026-09-22 &mdash; **&sect;380: one blank template per way of
+planning (spec 059).** Islam: *"in the template download we need to have the
+different types of functions plans templates."* **MEASURED FIRST, AND THE CARD
+WAS TWO DECISIONS STALE** (rule 3a): it offered **two** buttons where a
+supporting function plans **three** ways (`FN_FORMATS`), under a sentence
+&mdash; *"a capability plans in projects and everything else in pillars"*
+&mdash; whose first half stopped being true at &sect;326 and whose second never
+mentioned &sect;342's format at all. **WORSE THAN A MISSING BUTTON, WHICH IS
+WHY IT IS NOT MERELY A THIRD ONE**: the third file already existed and was
+built by nothing anybody could press (&sect;61), and the card's own words send
+you to the WRONG one &mdash; pressing *Pillars* for an objectives function
+hands over a unit's workbook, and *Projects* hands over a file with no Actions
+sheet whose dropdown does not offer that function. So the state somebody most
+needs the template in is the state the card is most misleading in.
+**TWO DECISIONS, EACH WITH ITS COST STATED BEFORE IT WAS TAKEN** (rule 1c, from
+a mockup made of the real page and published as an Artifact; *"yes for both,
+build it"*): each blank file carries **only the sheets its format uses** (the
+accepted cost being that a subject's OWN download still gets all seven &mdash;
+&sect;342's decision, not reversed), and each file's Read me **lists only the
+subjects that format fits** (the accepted cost being that a function whose
+format changes downloads again). **NAMED BY WHAT EACH FORMAT DROPS, NEVER BY
+WHAT IT KEEPS**: a sheet added tomorrow then rides in both blanks until
+somebody decides it does not, where a keep-list would silently leave it out of
+both &mdash; and an upload AUTHORS, so a column the file does not carry is a
+column the plan LOSES (&sect;22). **And every sheet a dropped one is referenced
+BY goes with it**, or three dropdowns point at a Projects sheet that is not in
+the file (&sect;65). **THE ROW ABOVE THE NAME MOVES WITH IT** &mdash; only a
+function can plan that way, so that file says *Supporting function*, **added to
+`READ_PICK_LABELS` in the same edit as the row that writes it**, which is the
+whole of &sect;58's rule and the one place it can be broken. **AND THE PROSE
+FOLLOWS THE SHEETS, NOT THE FORMAT**: a Read me telling somebody to *"fill
+Projects FIRST"* in a file with no Projects sheet is the same fault as the
+sheet itself, so `only` &mdash; never `fmt` &mdash; swaps the instructions.
+**AND THE BUILDING FOUND A LIVE DEFECT**: &sect;342 added such a function to
+the template's dropdown while the upload's own resolution matched
+`fnOwnsProjects`, which that section makes **false** for the format &mdash; so
+the file offered a name the door could not resolve and answered *"no business
+unit, supporting function or capability called \"HR\""*, measured on the
+shipped build. **A plan that downloads and cannot come back** (&sect;22,
+&sect;61), and &sect;53.5 exactly: one question with two answers, drifting the
+moment one gained a format the other had not heard of. **AND THE CHECK THAT
+SHOULD HAVE CAUGHT IT ASSERTED THE HALF THAT WORKED** &mdash;
+`objectives-actions` &sect;8 asserts the function is OFFERED and then calls the
+reader DIRECTLY, bypassing the door; &sect;8b drives the real control, with the
+subject picked from the file's own list and the resolved target read back.
+**AND AN EMPTY DROPDOWN REFUSES EVERY VALUE THERE IS** &mdash; &sect;67.5's
+mirror and worse than the fault it records, since a list too long is DROPPED
+(the cell merely unguarded) where an empty one APPLIES, so the workbook cannot
+be filled in at all: reachable rather than theoretical, because before a tenant
+has one such function the narrowed list is empty, which is exactly when the
+file is most needed. No validation is written for an empty list; a `from` range
+is left alone, because whether that sheet holds anything is not knowable from
+there. **THE BUTTONS ARE A GROUP AND NOTHING HAD MEASURED THE ROW**: `.ffoot`
+wraps and `.why` takes the free space, so three loose buttons split 2+1 below
+~1100px with the third stranded at the FAR LEFT under the sentence (`rows 2,
+lead 592`) &mdash; grouped, one run ending 18px from the row's end at 1440 /
+1280 / 1100 / 1000, asserted as that property and never as a coordinate
+(&sect;94.8). **Proved able to fail SIX ways from the SOURCES** (&sect;276),
+every break asserted to have MATCHED before it was written (&sect;344.1) and
+each reddening its own assertions: **2 / 3 / 7 / 2 / 3 / 1 red**, `old-door`
+printing the reported refusal verbatim and `loose-buttons` printing the
+stranded button's own numbers. The tree was restored and rebuilt
+**byte-identical** to the build the breaks were made from (&sect;343.9).
+**&sect;380.1 &mdash; AND ONE OF MY OWN NEW ASSERTIONS COMPARED TWO DIFFERENT
+TENANTS**: *"the projects file does not offer it"* went red on a build that
+narrows perfectly, because that file had been downloaded BEFORE the state was
+made (&sect;105.6's family, in a fixture rather than in a file on disk) &mdash;
+both files are taken from the same tenant now. `import-page` all green,
+`objectives-actions` 47 &rarr; **52/0**, `template-round-trip`,
+`functional-projects` 45/0, `project-tables` and `fn-pillars` green, `qa.py`
+over `file://` **ERRORS none**, `built-in-step.py` all good, the four
+generators re-run and `generated-in-step` clear (&sect;329). The built file's
+bytes changed, so **`sw.js` is bumped** (&sect;91) to a name the history has
+never held, confirmed against `origin/main` (&sect;94.16). **RECORDED, NOT
+DONE**, each flagged on the mockup and none approved (rule 1b): the projects
+file's Read me still says *Capability* over a list of seven functions; the
+Pillars button spells the word as a literal where the control beside it uses
+`L("pillar","bu")`; a capability plans two ways where a function plans three;
+and an archived plan's workbook passes no format, so an archived objectives
+function's Read me says *Capability*. **`main` untouched &mdash; the merge is
+Islam's word, on that merge.**
+
+*Earlier: 2026-09-21 &mdash; **&sect;379: the working copy carries the
 platform, not a link to it (spec 030).** Islam, with a file downloaded from his
 own tenant minutes earlier: *"the working copy download html is damaged."*
 **NOTHING OF HIS WAS LOST AND SAYING SO FIRST WAS MOST OF THE ANSWER** &mdash;

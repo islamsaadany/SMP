@@ -60,7 +60,7 @@ export function shellDocument(tenantName: string, module: string | null = null, 
                                  pages for it to offer a way out of. */
                               scope: string | null = null,
                               /* WHICH CATEGORIES THE LIBRARY ACTUALLY HAS FOR THIS PERSON
-                                 (§383). Worked out by the CALLER, because this file is a
+                                 (§385). Worked out by the CALLER, because this file is a
                                  pure function of its arguments and the answer needs the
                                  tenant and the viewer — `lib/library.ts` categoriesPresent,
                                  which asks the same two clauses the list itself is read
@@ -117,7 +117,7 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        there is no server to ask for the rows at all, there is no attribute
        and therefore no tab (§61, the switcher's own rule).
 
-       AND IT IS WHAT THE CLIENT HAS, NOT WHAT THE MODULE OFFERS (§383).
+       AND IT IS WHAT THE CLIENT HAS, NOT WHAT THE MODULE OFFERS (§385).
        It was `CATEGORIES` whole, so a client with nothing published opened on
        a row of six sections, five of which could only ever return nothing —
        measured before it was changed. The caller works the list out through

@@ -48,7 +48,7 @@ export async function GET(req: Request, { params }: P) {
      does not hold — redirected once and landed on the person's own first
      page — rather than refused in a second way that would have to be worded
      and kept in step with the first (lib/modules.ts whereOf). */
-  /* ── WHO THE PAGE IS BEING DRAWN FOR (§381) ────────────────────────
+  /* ── WHO THE PAGE IS BEING DRAWN FOR (§383) ────────────────────────
      Narrowed ONCE, here, before any of it is used: which modules may be
      opened, what the Setup document is stamped with, and what the module
      itself is handed. A module that asked about view-as for itself would be
@@ -109,7 +109,7 @@ export async function GET(req: Request, { params }: P) {
        difference between a module's own Setup and the client's — the same
        test shell/route.js's placeOf makes in the browser, answered here so it
        is on the document before any of the chrome is built from it. */
-    /* AND THE REPORTS TAB'S FILTERS (§383). A Setup document carries no
+    /* AND THE REPORTS TAB'S FILTERS (§385). A Setup document carries no
        destination tabs, and the shell walks from Setup to a unit without
        asking for the document again — so the stamp has to be right on THIS
        one too, or the tab drawn on arrival would offer the module's whole

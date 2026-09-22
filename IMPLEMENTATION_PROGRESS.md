@@ -6897,7 +6897,7 @@ takes a few seconds longer and the file is about 6 MB rather than 1.6. Open it
 with no connection: it should come up on your own tenant, fully styled, with
 the navigation and the decks in it.
 
-## §381 — the tab that filled the row, and the mirror that showed your own face (2026-09-20, spec 061)
+## §383 — the tab that filled the row, and the mirror that showed your own face (2026-09-20, spec 061)
 
 **Built on the branch, not merged.** Islam, with three screenshots the morning
 after §376 reached main: *"when viewing as Mahdy he started seeing the other
@@ -6957,13 +6957,13 @@ finished.
 **Nobody is signed out and nothing stored moves**: no frozen `api/`, `lib/` or
 `db/` file is touched, nothing is migrated, no rule about who may save what
 changes. `sw.js` is bumped because the built file's bytes changed — to
-`v5.21-nav-and-viewas` at the time, and past main's own `v5.22` when §382
+`v5.21-nav-and-viewas` at the time, and past main's own `v5.22` when §384
 landed on the same branch (§94.12: a name nobody else has served, confirmed
 again immediately before a push to `main`).
 
-## §382 — a tactic's owner is a row on the table (2026-09-20)
+## §384 — a tactic's owner is a row on the table (2026-09-20)
 
-**Built on the branch, not merged.** Islam, after §381 established that Mahdy
+**Built on the branch, not merged.** Islam, after §383 established that Mahdy
 reached a whole supporting function because a project there named him as
 Owner: *"what we need to follow is the accessablity matrix. we don't have a
 tactic or measure owner in the roles to set accessability for so until then
@@ -7023,13 +7023,13 @@ file's bytes changed and a worker caches by name (§91, §94.12).
 
 **Recorded, not done**: the Measure owner row and the field under it; and the
 Insights category filters are still drawn whether or not a report of that type
-exists, which is the other half of the report §381 answered.
+exists, which is the other half of the report §383 answered.
 
-## §383 — the filters are the reports that exist (2026-09-21)
+## §385 — the filters are the reports that exist (2026-09-21)
 
 Islam, of the reports tab: *"the filters of the reports should appear only if
 there is this type of report."* The other half of that message was the
-view-as fault §381 answered; this is the first half.
+view-as fault §383 answered; this is the first half.
 
 **Measured before anything was proposed.** The row under the tab drew the
 module's whole list — `All · Analysis · Macro · Market · Sector · Governance` —
@@ -7080,11 +7080,11 @@ attributes the shell reads. No script can run either way (the policy is
 **Two checks were stale and both were my own unmerged rounds.** Established by
 stashing this work, rebuilding, restarting the served app and re-running —
 identical failures (the first attempt measured a server still running the old
-build). §382 made a tactic's owner a role, so the Mobile head derives two rows
+build). §384 made a tactic's owner a role, so the Mobile head derives two rows
 and shutting one no longer shuts them: the product is right and the fixture had
 stopped making the state. Both checks shut **every row the person holds, asked
 of the product's own rule**, with the custodian beside them asserted untouched.
-And §381 drops a module the tab row already reaches, so on a client holding
+And §383 drops a module the tab row already reaches, so on a client holding
 Strategy and the reports there is genuinely nowhere to switch to — the fixture
 makes a third module, and the two-module case is now asserted in its own right,
 so that decision is guarded rather than worked around.
@@ -7107,7 +7107,7 @@ built file's bytes changing, and they did not.
 awaiting sign-off on the mockup; and `lib/chat-api.cjs`'s escaper, which has the
 same gap and is a carried file whose twin a check asserts byte-identical.
 
-**§383.10 — and the tracker's one red was two notions of today.** Run after
+**§385.10 — and the tracker's one red was two notions of today.** Run after
 the push. The record has carried `tracker` 227/1 for two rounds as *"a
 date-relative literal gone stale"*; it is not a literal. That section renders
 the page with a **fixed** today (2026-09-15) and the expectation worked its
@@ -7126,12 +7126,12 @@ today produces — a week has a word, then its place in its month — which is t
 one claim that can fail: 1 red under each break, where the agreement is green.
 227/1 → **229/0**.
 
-**§383.11 — and the seam between the two halves was measured by nobody.**
+**§385.11 — and the seam between the two halves was measured by nobody.**
 Found running the falsification suites for the checks this round edited: the
 `:red` list for the shell check held five breaks and `no-library-cats` — which
 `lib/shell.ts` declares — was not one of them.
 
-Pulling that thread found the larger thing. §383 has two halves and each is
+Pulling that thread found the larger thing. §385 has two halves and each is
 asserted where it has what it needs: the **rule** (which categories this person
 has) against a database in `checks/insights.mjs`, the **row** (what the tab
 draws with them) with no database in `checks/insights-tab.mjs`. Between them is
@@ -7157,7 +7157,7 @@ typing never repainting.
 
 5 green; **red 5** under the break — four of the new section's own, **plus one
 of §3b's**, which is a true consequence rather than a stray: dropping the stamp
-drops the tab, and §381's switcher rule reads the tab, so the four-square mark
+drops the tab, and §383's switcher rule reads the tab, so the four-square mark
 correctly comes back where that section asserts it does not. The new section's
 fifth is correctly green under it, absent being absent either way — which is
 what a both-ends control looks like when the break lands. Shell 120/0 →
@@ -7178,7 +7178,7 @@ go there rather than a second file starting a second server.
 
 ---
 
-## 2026-09-21 — The screen check runs at last (§380.5)
+## 2026-09-21 — The screen check runs at last (§382.5)
 
 **On the branch, not merged.** The merge is Islam's word, on that merge.
 
@@ -7203,10 +7203,10 @@ the code put back afterwards and checked byte for byte against what it was.
 sweep walks 33 people across 242 pages with no errors, and every other check
 around it is green. One file changed, and it is a test file.
 
-## 2026-09-20 — My reporting: the lines a tactic's owner enters (§380, spec 062)
+## 2026-09-20 — My reporting: the lines a tactic's owner enters (§382, spec 062)
 
 **On the branch, not merged.** The merge is Islam's word, on that merge.
-**Its one open item — the unrun screen check — is closed above (§380.5).**
+**Its one open item — the unrun screen check — is closed above (§382.5).**
 
 **What he asked.** Whether a tactic's owner can report their own tactic. They
 could not — and the honest answer came with the number: every one of the
@@ -7255,7 +7255,7 @@ claims about what is drawn come from calling the product's own renderer.
 
 ---
 
-## 2026-09-21 — The two branches merged into one (§383.1)
+## 2026-09-21 — The two branches merged into one (§385.1)
 
 Islam asked for the other branch to be brought into ours and the overlaps
 sorted out before anything goes to main. There were **two** overlaps, and only
@@ -7312,7 +7312,7 @@ his word, and main's own two sections are still to come across.
 
 ---
 
-## 2026-09-21 — main's two sections brought in (§383.2)
+## 2026-09-21 — main's two sections brought in (§385.2)
 
 **Done on the branch. Main is untouched.**
 
@@ -7413,7 +7413,7 @@ apart.
 
 **That renumber is now done — it is the round below.**
 
-## 2026-09-22 — The numbers moved, so the next merge can happen (§383.3)
+## 2026-09-22 — The numbers moved, so the next merge can happen (§385.3)
 
 **Nothing was built.** No screen changed, no rule changed, nothing is stored
 differently, nothing is migrated, and nobody is signed out. The whole of this

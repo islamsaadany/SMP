@@ -5,7 +5,7 @@
 > *"If we'd like to show the tactics owners to report the progress of their own
 > tactics. is that built?"*
 
-Built as **§380**.
+Built as **§382**.
 
 ---
 
@@ -93,7 +93,7 @@ their lines on the unit's own Reporting page, mixed in with everybody else's.
 
 ---
 
-## 6 · §385 — one question, and it is "do I run this one?"
+## 6 · §387 — one question, and it is "do I run this one?"
 
 Islam, correcting §3's one-door rule two days after it shipped: *"we need not
 to confuse the custodian with the tactic owner … the custodian should have
@@ -139,9 +139,9 @@ of those are owned by somebody who also runs that subject, and lose a second
 screen · **2 reach My reporting**, one person · 32 name nobody and go back to
 the unit.
 
-## 7 · §385 — and §382's Tactic owner row comes off the table
+## 7 · §387 — and §384's Tactic owner row comes off the table
 
-§382 added a **Tactic owner** row to Roles & access on Islam's ask, shipped at
+§384 added a **Tactic owner** row to Roles & access on Islam's ask, shipped at
 *none* everywhere. It lasted two days; shown two drawn options he picked
 **A — the switch decides, and the row goes.**
 
@@ -151,31 +151,31 @@ the unit.
   enter their own lines*. So the row could only ever say no to something the
   switch had just said yes to; and it ships SHUT, so a tenant turning the
   switch on would have found owners typing on a row they had never opened.
-  The merge that brought §380 and §382 together recorded that contradiction
+  The merge that brought §382 and §384 together recorded that contradiction
   and left it for Islam rather than picking one (rule 1b). He picked.
 - **Removing it moves nobody: 33 people × 36 page keys × 21 targets = 24,948
   answers from `grantAtPage`, 0 changed** — the two companies included, because
   a company CEO's reach is resolved per target (§37). A tactic's owner is
   `namedInUnit`,
-  so the Contributor floor covers them exactly as it did before §382 — which
+  so the Contributor floor covers them exactly as it did before §384 — which
   is where the role came from in the first place.
-- **The floor's exemption goes with it.** §382 had to exclude its own role
+- **The floor's exemption goes with it.** §384 had to exclude its own role
   from `!out.length`, because a role granting nothing would have taken away
   the floor it stood on. The test is `out.length` again.
 - **`ctx.tacticOwner` goes too** (§24), at all four sites that were taught it.
 
-Recorded as a reversal rather than overwritten (Principle II): §382's reasoning
+Recorded as a reversal rather than overwritten (Principle II): §384's reasoning
 is right that a tactic's owner derived nothing anybody could see on the table,
 and what changed is that the switch turned out to be the visible control.
 
-## 8 · How §385 is checked
+## 8 · How §387 is checked
 
 - `scripts/test-my-reporting.js` §3b/§3c — the four states, the unmatched
   name, and the role's removal with the floor it stood on put back (the one
   claim carried out of the deleted `scripts/test-tactic-owner.js`, §218).
   **65 assertions, 0 failed.**
 - `scripts/test-authorize.js` §43 — the server, both ends. **709 assertions**,
-  and the §385 pair proved able to fail: with `lineOwnerIsHere` taken out of
+  and the §387 pair proved able to fail: with `lineOwnerIsHere` taken out of
   `addOwnedTactics`, **2 red**.
 - `SMP-Project-Folder/src/checks/my-reporting.py` §8/§9 — the presses and a
   sweep of every line owner. Proved able to fail **three ways from the

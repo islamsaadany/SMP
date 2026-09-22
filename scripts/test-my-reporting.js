@@ -1,4 +1,4 @@
-/* ── MY REPORTING, ASKED OF THE PRODUCT'S OWN READERS (§380, spec 062) ──
+/* ── MY REPORTING, ASKED OF THE PRODUCT'S OWN READERS (§382, spec 062) ──
    No browser and no database: the frozen sources are evaluated in a vm the
    way `smp-app/lib/frozen.cjs` and `scripts/extract-kb.js` already do, so the
    rules under this feature are exercised against the BAKED worked example —
@@ -35,7 +35,7 @@ const FILES = [...BUILD.match(/for tag, f in \[([\s\S]*?)\]:/)[1]
    ASSERTED below, so a file growing that dependency is a failure here rather
    than a silent omission.
 
-   AND IT DID EXACTLY THAT AT THE MERGE (2026-09-21). §383's Insights tab
+   AND IT DID EXACTLY THAT AT THE MERGE (2026-09-21). §385's Insights tab
    added `insights.js`, which wires its own listeners at load, and this
    assertion went red on the merged tree — the check working, not breaking.
    REWRITTEN rather than loosened (§218, §214.3): the file is NAMED here with
@@ -130,20 +130,20 @@ ck("a tactic with NO owner is the unit's exactly as before",
         r.obj.owner = had;
         return made && answer === true; })()`));
 
-/* ── 3b · §385: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ───────
-   Islam picked option A of two drawn: the switch decides, and §382's Tactic
+/* ── 3b · §387: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ───────
+   Islam picked option A of two drawn: the switch decides, and §384's Tactic
    owner row comes off Roles & access. The rule that replaces the two controls
    is asked once per subject, and three of its four answers REVERSE something
-   §380 built — so a file that only measured the unchanged half would be green
+   §382 built — so a file that only measured the unchanged half would be green
    on a build that had not made the change at all (§94.2).
 
    §3 ABOVE IS THE UNCHANGED HALF AND STAYS EXACTLY AS IT WAS: `dir` runs
    nothing, so his line is his on My reporting and nobody else's anywhere.
    What follows is every state that person cannot be in. */
-sec("3b · §385 — a subject I run, and a name that reaches nobody");
+sec("3b · §387 — a subject I run, and a name that reaches nobody");
 /* THE STATE IS FOUND, NOT MADE, AND IT IS ASSERTED TO HAVE BEEN FOUND
    (§94.5): one demo tactic on Mobile is owned by the unit's own head, which
-   is the case §380 never had to think about. */
+   is the case §382 never had to think about. */
 const RUNS = `(function(){ var hit = null;
   (UNITS.mobile.items||[]).forEach(function(p){ (p.tactics||[]).forEach(function(x){
     if (SMPRules.ownedBy(x, personBy("mobhead"))) hit = hit || x; }); });
@@ -179,8 +179,8 @@ ck("a line whose owner names nobody is the unit's",
         return made && answer === true; })()`));
 ck("...and the fixture put the name back", run(`${RUNS} !== null`));
 
-/* ── 3c · AND THE ROLE THAT WAS HERE FOR TWO DAYS IS GONE (§382 → §385) ──
-   §382 gave a tactic's Owner a row on Roles & access; option A takes it off,
+/* ── 3c · AND THE ROLE THAT WAS HERE FOR TWO DAYS IS GONE (§384 → §387) ──
+   §384 gave a tactic's Owner a row on Roles & access; option A takes it off,
    and `scripts/test-tactic-owner.js` goes with it, because its whole subject
    was that role (§24). ONE of its claims survives the removal and is carried
    here rather than lost with the file (§218, §301.7's rule): that section had
@@ -188,10 +188,10 @@ ck("...and the fixture put the name back", run(`${RUNS} !== null`));
    only for somebody holding NO role at all and a Tactic owner with every cell
    at none would have taken away the floor it stood on. With the role gone the
    exemption goes too, and what must be true again is what was true before
-   §382 — a tactic's owner named nowhere else is a Contributor, with the view
+   §384 — a tactic's owner named nowhere else is a Contributor, with the view
    the floor gives. The state is MADE, because nobody in the worked example
    stands on the floor at all (§255). */
-sec("3c · §385 — the role is gone, and the floor it stood on is back");
+sec("3c · §387 — the role is gone, and the floor it stood on is back");
 const REGISTER_WAS = run("PEOPLE.length");
 ck("no role on the table is a tactic owner's",
    run(`SMPRules.ROLES.filter(function(r){ return r.key === "towner"; }).length`) === 0);

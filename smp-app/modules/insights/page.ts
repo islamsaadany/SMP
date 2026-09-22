@@ -254,7 +254,7 @@ export async function insightsDocument(
     return here + (s ? "?" + s : "");
   };
 
-  /* A FILTER IS DRAWN ONLY WHERE THERE IS THAT TYPE OF REPORT (§383). Islam:
+  /* A FILTER IS DRAWN ONLY WHERE THERE IS THAT TYPE OF REPORT (§385). Islam:
      *"the filters of the reports should appear only if there is this type of
      report."* It was the module's whole list, so a client with nothing
      published met five filters that could only ever return nothing — §94.15's

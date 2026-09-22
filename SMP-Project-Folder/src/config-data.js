@@ -106,7 +106,7 @@ function world(){
     unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
     functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
     companies:COMPANIES, access:ACCESS, group:GROUP,
-    /* §385: the register, so a rule can ask whether a plan's Owner column
+    /* §387: the register, so a rule can ask whether a plan's Owner column
        names anybody the tenant actually holds. Named here AND in W() AND in
        worldOf() (§102.4) — forget any one and the reader sees an empty list
        and answers as though nobody exists. */
@@ -4937,7 +4937,7 @@ function canEnterFigure(unitKey, x, where){
   if (inOffice()) return canReport(unitKey);
   return who === viewer().key && REVIEW.state === "open" && !CYCLE.locked;
 }
-/* ── §380: A TACTIC WHOSE OWNER ENTERS IT ──────────────────────────────
+/* ── §382: A TACTIC WHOSE OWNER ENTERS IT ──────────────────────────────
    The figure-master rule above, asked of the plan's Owner column instead of a
    figure's `src` — being named is the whole permission, so no grant, no role
    and no attachment is consulted at all.
@@ -4957,8 +4957,8 @@ function canEnterFigure(unitKey, x, where){
    (§220's rule: a screen that shuts the figure and leaves the picker open has
    shut nothing).
 
-   ── §385: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ─────────────────
-   Islam, correcting §380: *"we need not to confuse the custodian with the
+   ── §387: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ─────────────────
+   Islam, correcting §382: *"we need not to confuse the custodian with the
    tactic owner … the custodian should have always access to their unit or
    function entry except in one case when we set figure sets … my reporting
    appears for tactics for units or functions she is not the custodian or the
@@ -4971,7 +4971,7 @@ function canEnterFigure(unitKey, x, where){
    rows already on the first is a second place to look for one number (§87's
    twins, at the level of a screen). DON'T RUN IT and the lines you own are on
    My reporting and nowhere else. A line SOMEBODY ELSE owns, inside a unit you
-   run, you read and do not type — which is §380's own decision, kept, and the
+   run, you read and do not type — which is §382's own decision, kept, and the
    one place the two rules still agree.
 
    "DO I RUN IT" IS THE GRANT, NEVER A LIST OF ROLE NAMES, and that is the
@@ -4983,7 +4983,7 @@ function canEnterFigure(unitKey, x, where){
    moves either way; what differs is a tenant that has narrowed a cell, where
    only this reading leaves somebody a door.
 
-   AND A NAME THAT REACHES NOBODY IS NOT AN OWNER (§385's own predicate): 32
+   AND A NAME THAT REACHES NOBODY IS NOT AN OWNER (§387's own predicate): 32
    of the demo's 83 tactics name somebody the register does not hold, and
    read-only-for-everybody-but-the-owner on such a row means nobody at all —
    so the line falls back to the unit exactly as it was before the switch was
@@ -5011,7 +5011,7 @@ function canEnterNote(unitKey, x){
      a capability it refused the note to somebody the right column allows. */
   if (who && !inOffice() && who === viewer().key &&
       grantAt(SMPRules.reportPageOf(unitKey), unitKey) !== "edit") return false;
-  /* §380: AND THE SAME IS TRUE OF A LINE'S OWNER. Islam: *"You enter the
+  /* §382: AND THE SAME IS TRUE OF A LINE'S OWNER. Islam: *"You enter the
      figure; the unit writes the note."* Somebody whose only way onto this row
      is the Owner column gets the number and not the explanation — where an
      owner who ALSO holds edit here (a custodian who owns a tactic) keeps the
@@ -5028,7 +5028,7 @@ function canEnterNote(unitKey, x){
 function mySourceRows(){ return SMPRules.sourcesFor(world(), viewer()); }
 function ownsAnySource(){ return mySourceRows().length > 0; }
 
-/* ── MY REPORTING: THE LINES THIS PERSON OWNS (§380, spec 062) ──────────
+/* ── MY REPORTING: THE LINES THIS PERSON OWNS (§382, spec 062) ──────────
    Islam: *"it's only for owners of tactics to report progress either on the
    units they belong to but they are not the bu owner or the custodian or
    report progress for other units that he doesn't belong to at all."*
@@ -5067,7 +5067,7 @@ function myLineRows(){
   myLineTargets().forEach(function(t){
     var subj = unitLike(t);
     if (!subj) return;
-    /* §385: A SUBJECT I RUN DRAWS NO ROW HERE. Its tactics are on its own
+    /* §387: A SUBJECT I RUN DRAWS NO ROW HERE. Its tactics are on its own
        Reporting page, where I enter them beside everything else the unit
        owes — so listing them again would be the same number in two places
        with two controls able to disagree about it. This is the whole of what
@@ -7178,7 +7178,7 @@ function gapMap(target, all, fillable){
     }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
-      /* §382: a tactic's own Owner is its own handle — see boundedReach(). */
+      /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
       entry("p:" + (p.code || i), pillarCode(u, i), n,

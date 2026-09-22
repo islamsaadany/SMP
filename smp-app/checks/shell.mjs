@@ -285,9 +285,9 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      the client's rail, so a build that hardcoded one module's name goes red.
      Put back in the `finally`, because every section after this one reads
      the same tenant (\u00a794.2). */
-  /* AND A THIRD, BECAUSE THE SECOND IS ON THE TAB ROW (\u00a7381). REWRITTEN,
+  /* AND A THIRD, BECAUSE THE SECOND IS ON THE TAB ROW (\u00a7383). REWRITTEN,
      NEVER LOOSENED (\u00a7218, \u00a7214.3): with exactly `strategy` and
-     `insights` the switcher below is correctly NOT drawn \u2014 \u00a7381 drops a
+     `insights` the switcher below is correctly NOT drawn \u2014 \u00a7383 drops a
      module the tab row already reaches, so for anybody who HAS a tab row the
      list comes down to the one they are standing in and \u00a732 says a menu of
      one is a door behind a door. The assertion this section is about is that
@@ -296,7 +296,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      measurable at all. `tracker` is the office's own module and is not on the
      tab row, so it stays in the list; this section signs in as the office.
      The two-module case is asserted in its own right further down, so the
-     decision \u00a7381 made is guarded rather than merely worked around. */
+     decision \u00a7383 made is guarded rather than merely worked around. */
   await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights", "tracker"]), tenantId]);
   try {
   const ck = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
@@ -377,12 +377,12 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(b.switcher === true, "\u2026and the switcher, because there a module IS what you are in", JSON.stringify(b));
   check(b.h1 === "Strategy Management Platform", "\u2026and its document is headed by the product", b.h1);
 
-  /* AND THE OTHER END OF \u00a7381'S OWN RULE, MADE (\u00a794.2, \u00a7255). Take the
+  /* AND THE OTHER END OF \u00a7383'S OWN RULE, MADE (\u00a794.2, \u00a7255). Take the
      third module away and the switcher must go with it: the only place left
      to go is the reports, and they are on the tab row of the page you are
      standing on. Without this the fixture above would simply be a bigger
      client \u2014 with it, a build that went back to offering a module the tab
-     row already reaches goes red here, which is the fault \u00a7381 removed
+     row already reaches goes red here, which is the fault \u00a7383 removed
      (a menu whose one live entry is the page under it, \u00a732).
 
      THE PRESENCE ABOVE IS WHAT MAKES THIS ABSENCE MEAN ANYTHING (\u00a7113.8):
@@ -391,7 +391,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   await open("/raya-trade/strategy/setup/cycle");
   const two = await bar();
   check(two.switcher === false && two.row === true,
-        "\u2026and with the reports as the only other module it is NOT drawn \u2014 the tab row already reaches them (\u00a7381, \u00a732)", JSON.stringify(two));
+        "\u2026and with the reports as the only other module it is NOT drawn \u2014 the tab row already reaches them (\u00a7383, \u00a732)", JSON.stringify(two));
   await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights", "tracker"]), tenantId]);
   await open("/raya-trade/strategy/setup/cycle");
 
@@ -639,9 +639,9 @@ await section("3c · Forefront team is the store, the register is a reader (spec
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on either page", errs.join(" | "));
 });
 
-await section("3d · the reports tab is stamped with what this client HAS (§383)", async () => {
+await section("3d · the reports tab is stamped with what this client HAS (§385)", async () => {
   /* THE SEAM, AND IT WAS MEASURED BY NOBODY (§316.7's own finding, one
-     feature over). §383 has two halves and each is asserted in its own
+     feature over). §385 has two halves and each is asserted in its own
      place: the RULE is `categoriesPresent`, asserted against a database in
      checks/insights.mjs §14, and the ROW is `sections()`, asserted with no
      database in checks/insights-tab.mjs §2 — which draws whatever it is

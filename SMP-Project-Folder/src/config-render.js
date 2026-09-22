@@ -5206,7 +5206,7 @@ function lineOwnersSwitch(mayEdit, editing){
      "83 83 lines" on both sentences. Every other caller in the product wraps
      the whole `plural()` in the <b>, and so does this one now (§53.5).
 
-     §385: AND THE NUMBER IS WHAT THE SWITCH ACTUALLY MOVES, WHICH IS NOT THE
+     §387: AND THE NUMBER IS WHAT THE SWITCH ACTUALLY MOVES, WHICH IS NOT THE
      SAME AS WHAT THE PLAN NAMES. This counted every tactic carrying an Owner
      and said 83 on the worked example, where the honest figure is 2 — and the
      gap is two whole facts, both of them the decision this switch now carries:

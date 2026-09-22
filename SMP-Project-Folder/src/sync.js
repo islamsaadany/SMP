@@ -1100,7 +1100,7 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
-    /* WHO THE SCREEN IS BEING DRAWN FOR (§381). The save has carried the
+    /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`
        carries the switcher's own two guards (the seat that draws it, and the

@@ -445,7 +445,7 @@ try {
     page.includes('href="/client-a/insights/' + draft.id + '/file"'), "the file link is wrong");
   check("the count says what is there",
     page.includes("2 reports"));
-  /* §383, AND IT IS A REWRITE RATHER THAN A LOOSENING (§218, §214.3). This
+  /* §385, AND IT IS A REWRITE RATHER THAN A LOOSENING (§218, §214.3). This
      asked for `CATEGORIES.every(...)` — every category the MODULE offers, on
      every page — which was true only while the row was a fixed list, and went
      red the day Islam's *"the filters should appear only if there is this
@@ -478,7 +478,7 @@ try {
     filtered.includes("No reports match"));
   /* REWRITTEN with the decision above (§218): it asked for one category by
      name, which is a spelling where it meant a property. Two properties now,
-     and the second is §383's own rule — the row says what has been PUBLISHED,
+     and the second is §385's own rule — the row says what has been PUBLISHED,
      so it is the same row whatever is typed, and a filter row that rearranged
      itself as you searched would be a worse screen than the one that fault
      replaced. */
@@ -635,7 +635,7 @@ try {
   check("the office's page carries both",
     pgOffice.includes("FX Cost Exposure") && pgOffice.includes("Everyone Outlook"));
 
-section("§14 · which filters a person is offered (§383)");
+section("§14 · which filters a person is offered (§385)");
 {
   /* Islam: *"the filters of the reports should appear only if there is this
      type of report."* Measured on a client with nothing published, the tab

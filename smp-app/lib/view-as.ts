@@ -1,4 +1,4 @@
-/* ── VIEWING AS SOMEBODY, ON A READ PATH (§381, §185) ────────────────────
+/* ── VIEWING AS SOMEBODY, ON A READ PATH (§383, §185) ────────────────────
    Islam, with the office's own session and the switcher set to a unit's
    custodian: *"karim from mobile is seeing the report while the report is
    made only for the retail and online team in the report settings."*

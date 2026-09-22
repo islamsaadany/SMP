@@ -54265,7 +54265,7 @@ record that is wrong about what was verified is the one kind of wrong that
 compounds, because the next person quotes it). All three record files carry the
 correction, and this section is why.
 
-## §380 · My reporting: the lines a tactic's owner enters (spec 062)
+## §382 · My reporting: the lines a tactic's owner enters (spec 062)
 
 Islam: *"If we'd like to show the tactics owners to report the progress of
 their own tactics. is that built?"*
@@ -54334,7 +54334,7 @@ than whole (§234). `test-authorize.js` carried **not one** mention of any of
 it while printing 683 passed — which is how a rule gets deleted next month.
 
 **AND THE FALSIFICATION IS WHAT FOUND THE ONE THING THAT SHOULD NOT SHIP**
-(§380.1). A branch in `boundedReach` reading *"with the switch on, a bounded
+(§382.1). A branch in `boundedReach` reading *"with the switch on, a bounded
 role reaches only what it OWNS"* was written, and breaking it left **both
 checks entirely green**. Measured rather than argued: nothing reaches it for a
 tactic — the server groups the figure under its owner into `lineReporting` and
@@ -54346,7 +54346,7 @@ tactics; widening it to every row a plan names is a redesign nobody asked for
 (rule 1b). Deleted, with `boundedReach`'s signature put back (§24), and 704
 and 53 assertions unmoved either way.
 
-**§380.2 — THE DEMO CANNOT SHOW ANY OF IT, TWICE OVER, AND THAT IS ITSELF THE
+**§382.2 — THE DEMO CANNOT SHOW ANY OF IT, TWICE OVER, AND THAT IS ITSELF THE
 MEASUREMENT** (§255). All 83 tactics name an owner, so the unowned-row
 fallback is a shape the plan never takes; and **every collaborator in the
 worked example is a bare first name** — *Nour*, *Dalia*, *Hossam* — which
@@ -54356,7 +54356,7 @@ eight has that right today, and a fixture built on them would have watched a
 refusal that was already a refusal and called the narrowing proved (§94.5).
 Both states are made and put back, and the *making* is asserted.
 
-**§380.3 — AND THE SWITCH'S TWO EDITS GO TOGETHER, WITH A COST NO VERDICT CAN
+**§382.3 — AND THE SWITCH'S TWO EDITS GO TOGETHER, WITH A COST NO VERDICT CAN
 SEE** (§259.2). Classified-but-unswept is the known failure; here the
 classification fires either way and what `gExtra` membership buys is that it
 classifies **once**. Without it the change comes out as
@@ -54366,7 +54366,7 @@ refused, so every existing assertion passes, while the change log gains a
 phantom row and a refusal names the stored field rather than the control that
 sets it (§16.7). Asserted as a count of one.
 
-**§380.4 — THE HARNESS READS BUILD.PY'S OWN LIST** (§53.5). The vm check's
+**§382.4 — THE HARNESS READS BUILD.PY'S OWN LIST** (§53.5). The vm check's
 first run died on `joinTarget is not defined` from `templates.js`, a file it
 had simply never been told about — so it derives the list from `build.py`
 rather than typing one, and the **three that reach for `document` at load**
@@ -54391,13 +54391,13 @@ stranger allowed) reddening 3; `test-graph-diff.js` 140/0;
 `node_modules` — so `qa-run.py` cannot launch. Every frozen browser check,
 `qa.py` and the new `checks/my-reporting.py` are **unrun here**. That file is
 written against the product as the Node check measures it, and its own
-docstring says so in its first lines. **ANSWERED IN §380.5 BELOW**, in a later
+docstring says so in its first lines. **ANSWERED IN §382.5 BELOW**, in a later
 session that could install the driver — kept rather than rewritten, because
-what it was honest about is the reason §380.5 has anything to report.
+what it was honest about is the reason §382.5 has anything to report.
 
-## §380.5 · The screen check runs at last, and every failure was the check
+## §382.5 · The screen check runs at last, and every failure was the check
 
-The one thing §380 recorded as outstanding, done: `pip install playwright`
+The one thing §382 recorded as outstanding, done: `pip install playwright`
 succeeds in this sandbox, the image's own Chromium launches through
 `qa-run.py`, and the file that had never once been run was run. **NO PRODUCT
 FAULT** — the diff is one file under `checks/`, and the built file is
@@ -54407,14 +54407,14 @@ byte-identical throughout (`built-in-step.py` all good).
 (§54.5), and it had four, each of them a rule this project has already written
 down:
 
-**§380.5a — IT ASKED FOR A CONTROL THE PRODUCT DOES NOT HAVE.** `#viewsel`
+**§382.5a — IT ASKED FOR A CONTROL THE PRODUCT DOES NOT HAVE.** `#viewsel`
 appears in **no source and in no other check**; the switcher is `#asWho`, 13
 times in the built file and 0 for the invented name, and every one of the
 other eight checks that switches viewer says so. §100.3's family, and
 §297.1's exactly — *a probe that invents a shape the product does not use
 reports a working build as broken.*
 
-**§380.5b — AND IT ASKED WITH SOMETHING THAT THROWS.** `eval_on_selector`
+**§382.5b — AND IT ASKED WITH SOMETHING THAT THROWS.** `eval_on_selector`
 raises on a missing element, so section 1 **died and took the nine sections
 after it down with it** — in a file whose own `press()` helper, two lines
 above, exists to stop precisely that (§215). It goes through the product's own
@@ -54423,7 +54423,7 @@ asserted to have TAKEN**: §237 rebases the tab on the server's graph, so a
 refused pick leaves the select where it was and every assertion after it
 measures whoever is still there.
 
-**§380.5c — AND THE WELCOME OVERLAY ATE EVERY PRESS.** `.welcomeover` covers
+**§382.5c — AND THE WELCOME OVERLAY ATE EVERY PRESS.** `.welcomeover` covers
 the viewport, so a click retried for thirty seconds against
 `<div class="wviewbar">` — §167.2, whose own words are that it must be
 suppressed **before** the goto, and which **twenty-odd checks already carry**.
@@ -54431,11 +54431,11 @@ This one borrowed `project-done.py`'s stub and not its init script;
 `qa-run.py` does it for a SERVED check and stands `SMP_BASE` down for an
 own-server one, so that route could never have covered it.
 
-**§380.5d — AND THE ASSERTION THAT FAILED WAS RIGHT ABOUT THE RULE AND WRONG
+**§382.5d — AND THE ASSERTION THAT FAILED WAS RIGHT ABOUT THE RULE AND WRONG
 ABOUT WHERE TO STAND.** *"It is NOT on a unit that is not his place"* pressed
 `retailstores` — and a person who owns a line and nothing else is a **bounded
 role, which ships at `a_unit_other: "none"` and can never reach a unit that is
-not their place**, which is §380's own note and the reason case 2 cost nothing.
+not their place**, which is §382's own note and the reason case 2 cost nothing.
 So the press had no control to land on, `current` stayed `mobile`, and the tab
 it then found is the one that is **supposed** to be there: a correct build
 reported broken (§113.8 — the assertion's own precondition had failed in
@@ -54473,7 +54473,7 @@ to the 51 lines this branch wrote, with the **8** citations of somebody else's
 `spec 057` (§360's, in five of the same files) measured first and left
 untouched. Both counts declared in advance and asserted (§336.1, §353.4).
 
-## §381 — THE TAB THAT FILLED THE ROW, AND THE MIRROR THAT SHOWED YOUR OWN FACE (2026-09-20, spec 061)
+## §383 — THE TAB THAT FILLED THE ROW, AND THE MIRROR THAT SHOWED YOUR OWN FACE (2026-09-20, spec 061)
 
 Islam, with three screenshots, the morning after §376 reached `main`:
 *"when viewing as Mahdy he started seeing the other units and functions while
@@ -54486,7 +54486,7 @@ them was most of the round, because from the screen they read as one thing —
 *this person is seeing what other people's is* — and they have nothing to do
 with each other.
 
-### §381.1 — A tab that is the same everywhere must not be what makes a destination reachable
+### §383.1 — A tab that is the same everywhere must not be what makes a destination reachable
 
 The Insights tab was keyed on `c_kb`, which is the one access key the matrix
 holds at `area:"always"` — `grantAtPage` returns **`"view"` unconditionally**
@@ -54560,7 +54560,7 @@ said the markup is built "exactly once, at load", was corrected in the same
 edit rather than left describing an intention the code no longer carries out**
 (§104.8).
 
-### §381.2 — Viewing as somebody showed the office's reports, not theirs
+### §383.2 — Viewing as somebody showed the office's reports, not theirs
 
 The Insights module resolves who is asking from `ServeArgs.personKey` and
 `seat` — the two facts the DOOR established — and the door answers about the
@@ -54613,7 +54613,7 @@ reports back (§222's family).
 report while viewing as somebody; they see that person's. That is the point of
 it, and it is a change to what that screen shows them.
 
-### §381.3 — What was measured, and what could not be
+### §383.3 — What was measured, and what could not be
 
 **`scripts/test-nav-row.js`** runs the SHIPPED build's own gates in a vm
 behind a permissive global — the product's `myUnits`, `myFns`, `ownTabs` and
@@ -54668,9 +54668,9 @@ only by forging or by a stale link, and worth a page the day anybody meets it.
 
 ---
 
-## §382 — A TACTIC'S OWNER IS A ROW ON THE TABLE (2026-09-20)
+## §384 — A TACTIC'S OWNER IS A ROW ON THE TABLE (2026-09-20)
 
-Islam, after §381 established that Mahdy reached a whole supporting function
+Islam, after §383 established that Mahdy reached a whole supporting function
 because a project there named him as Owner:
 
 > *"what we need to follow is the accessablity matrix. we don't have a tactic
@@ -54687,7 +54687,7 @@ and then, closing the fork:
 then it ok to see the project and report it ofcourse my bad."* So nothing about
 Project owner moves; what was missing is a row for the level below it.
 
-### §382.1 — §147.7's shape, one level down
+### §384.1 — §147.7's shape, one level down
 
 A pillar has an Owner and every tactic under it has one, and being named the
 Owner IS the role — the same derivation `powner` and `plowner` have had since
@@ -54699,7 +54699,7 @@ see on the table**, and could therefore be switched off by nobody.
 
 That is the whole fault, and it is exactly the one Islam is pointing at.
 
-### §382.2 — All none, and that is his instruction rather than a cautious default
+### §384.2 — All none, and that is his instruction rather than a cautious default
 
 The two owner rows above it ship at `view`, because §147.7 was asked for a role
 that READS its own place and reports it once the cell is opened. This one was
@@ -54712,7 +54712,7 @@ what a switch is for.
 baseline answers **UNMOVED** — 33 people × 35 page keys × 21 targets, every one
 opening exactly what they opened. Adding the role moves nobody.
 
-### §382.3 — And it takes nothing away, which a reading would miss
+### §384.3 — And it takes nothing away, which a reading would miss
 
 Any role deriving here suppresses the Contributor floor, and this one grants
 **nothing** where the floor gives view. So somebody who owns a tactic and is
@@ -54729,7 +54729,7 @@ change about a row that grants nothing (rule 1b).
 Nobody in the worked example stands on the floor at all, so the case is MADE
 (§255) rather than waited for.
 
-### §382.4 — A handle of its own, never `ctx.row.owner`
+### §384.4 — A handle of its own, never `ctx.row.owner`
 
 The obvious branch — *does the row's Owner name this person* — reads right and
 is wrong on exactly one row kind. **A measure's reporting context is built with
@@ -54753,7 +54753,7 @@ falsification went **green**. The subject has to be somebody who owns a pillar
 **and** a tactic under it, which is a fourth person the fixture now mints —
 `--break=row-owner` then reddens exactly the one assertion it is for.
 
-### §382.5 — The measure owner is not here, and the reason is a field
+### §384.5 — The measure owner is not here, and the reason is a field
 
 A key measure carries **no Owner anywhere in the product** — 0 of the 76 in the
 worked example, and no column on the table in either mode. The `m.owner` reads
@@ -54780,7 +54780,7 @@ Proposed with it and awaiting his word: **optional and never a counted gap**
 is §249's own lesson), and **carried by the workbook** or a download and an
 untouched upload would drop every owner (§22).
 
-### §382.6 — And the check that objected was right about the rule
+### §384.6 — And the check that objected was right about the rule
 
 `checks/access-header.py` went red: *"Tactic owner: no column is offered that
 this role can never reach — a_fn_own_strat, a_fn_own"*. §174's rule, and the
@@ -54796,7 +54796,7 @@ fifth one is judged the day it lands (§104.7). Falsified from the SOURCES: with
 the pillars-function half of the derivation removed it reddens again, on exactly
 that assertion.
 
-### §382.7 — What was run
+### §384.7 — What was run
 
 `scripts/test-tactic-owner.js` **29/0**, proved able to fail **five ways from
 the source** — `no-derive` 8, `row-owner` 1, `view-default` 1, `floor` 1,
@@ -54823,11 +54823,11 @@ to `main` (§94.16).
 **RECORDED, NOT DONE**: the Measure owner row and the field under it, awaiting
 sign-off on the mockup above; and the Insights category filters are still drawn
 whether or not a report of that type exists, which is the other half of the
-report §381 answered and has not been started.
+report §383 answered and has not been started.
 
 ---
 
-## §383 — The reports' filters are the reports that exist (2026-09-21)
+## §385 — The reports' filters are the reports that exist (2026-09-21)
 
 Islam, of the reports tab §376 put in the platform:
 
@@ -54835,9 +54835,9 @@ Islam, of the reports tab §376 put in the platform:
 > report, mahdy i seeing transofrmation while karim is seeing only the
 > mobile"*
 
-The second half was §381 and is merged into this branch. This is the first.
+The second half was §383 and is merged into this branch. This is the first.
 
-### §383.1 — Measured first, and it is worst on the first screen a client opens
+### §385.1 — Measured first, and it is worst on the first screen a client opens
 
 Rule 3a, and the measurement is what makes the case rather than the wording of
 the ask. The section row under the tab was **`All · Analysis · Macro · Market ·
@@ -54854,7 +54854,7 @@ It is not a wrong list: it is the module's list, which is the honest answer to
 filter this library by*. §61's own shape — a control with nothing behind it is
 not a choice — one row down from where that rule usually bites.
 
-### §383.2 — It is the server's answer, and that is forced
+### §385.2 — It is the server's answer, and that is forced
 
 The section row is built **synchronously, inside `paint()`** (`SUBS`'s `render`
 returns HTML), so nothing fetched can be in it: by the time an answer landed the
@@ -54867,7 +54867,7 @@ has been since §376 — the change is *what it is stamped with*. It was
 `CATEGORIES`, the module's constant; it is now the categories this library
 actually holds **for this person**.
 
-### §383.3 — Asked of the library, through the same two clauses the list is
+### §385.3 — Asked of the library, through the same two clauses the list is
 
 `categoriesPresent` in `lib/library.ts`:
 
@@ -54893,7 +54893,7 @@ filtered*, which is a different question with a different answer.
 **It costs one query per SERVED DOCUMENT**, not per paint: the stamp is written
 when the page is served and read from the DOM thereafter.
 
-### §383.4 — Three answers, not two
+### §385.4 — Three answers, not two
 
 `libraryStampFor` (`lib/library-viewer.ts`) answers:
 
@@ -54909,7 +54909,7 @@ when the page is served and read from the DOM thereafter.
 A read that THROWS answers `[]` and says so in the log: an unreadable library
 must not take the tab down with it (§231.3's rule one module over).
 
-### §383.5 — `viewerOf` existed three times, and this would have been the fourth
+### §385.5 — `viewerOf` existed three times, and this would have been the fourth
 
 The same six lines — a seat sees all, otherwise `placeOf` — sat in
 `modules/insights/index.ts` and in `lib/landing-facts.ts` (the second under a
@@ -54919,7 +54919,7 @@ takes a connection and imports nothing, which is exactly what lets
 `checks/insights-tab.mjs` run its first three sections with no database and no
 `node_modules`, and a driver import would have quietly ended that.
 
-### §383.6 — And the Setup document had to carry the stamp too
+### §385.6 — And the Setup document had to carry the stamp too
 
 A Setup document draws no destination tabs, and **the shell walks from Setup to
 a unit without asking for the document again** — so a stamp that was right only
@@ -54927,7 +54927,7 @@ on a module's own document would be the module's whole list on the tab drawn on
 arrival. The same answer, from the same function, on both (`route.ts`'s Setup
 branch and `modules/strategy/index.ts`).
 
-### §383.7 — One escaper, safe in an attribute (§235, one file over)
+### §385.7 — One escaper, safe in an attribute (§235, one file over)
 
 **Found by a fixture rather than by reading**, which is the only reason it was
 found at all.
@@ -54956,7 +54956,7 @@ has the same gap and is deliberately **not** touched: it is a CARRIED file
 its subject is an email body rather than an attribute, and editing it here would
 break that check to fix nothing.
 
-### §383.8 — Two checks were stale, and both are my own unmerged rounds
+### §385.8 — Two checks were stale, and both are my own unmerged rounds
 
 Established as **not this work's** by stashing it, rebuilding, restarting the
 served app and re-running — identical failures, identical detail (§303, and
@@ -54964,7 +54964,7 @@ served app and re-running — identical failures, identical detail (§303, and
 
 **`checks/door-landing.mjs` and `checks/modules.mjs` shut ONE row and expected a
 person refused.** Access is the **most generous** grant across the roles
-somebody holds (§33), and §382 made a tactic's owner a role — so the Mobile head
+somebody holds (§33), and §384 made a tactic's owner a role — so the Mobile head
 derives `towner@mobile` as well as `owner@mobile`, and shutting the BU owner's
 cell no longer shuts them. **The product is right**; the fixture had stopped
 making the state its own assertions are about. Both now shut **every row the
@@ -54973,16 +54973,16 @@ derived by whatever somebody is named on next is shut the day it is added — wi
 the custodian beside them asserted **untouched and still open**, or a build that
 refused everybody would pass (§113.8).
 
-**`checks/shell.mjs` asserted a switcher §381 deliberately removes.** That
+**`checks/shell.mjs` asserted a switcher §383 deliberately removes.** That
 section drops a module the tab row already reaches, so on a client holding
 exactly `strategy` and `insights` there is genuinely nowhere else to go and §32
 says a menu of one is a door behind a door. REWRITTEN, never loosened (§218):
 the fixture makes a **third** module so the property this section is about —
 that a module's Setup does not stand the switcher DOWN the way the client's
 settings do — is measurable at all, **and the two-module case is asserted in its
-own right**, so §381's decision is now guarded rather than worked around.
+own right**, so §383's decision is now guarded rather than worked around.
 
-**And `checks/modules.mjs` §7 served the shell's body with no `paint`.** §381
+**And `checks/modules.mjs` §7 served the shell's body with no `paint`.** §383
 mounts the switcher from a paint rather than at load, and that section's own
 comment still promised route.js "builds it whether or not the app has hydrated"
 — true until the day it moved (§104.8). The stub carries a one-line `paint` for
@@ -54994,7 +54994,7 @@ took the whole section with it — one failure reported where the truth was
 eleven — and the way-back press waited thirty seconds on a door that was not
 there. Both degrade now.
 
-### §383.9 — What was run
+### §385.9 — What was run
 
 `check:insights` **137/0** with a new §14 (the state MADE — a Sector report
 narrowed to one function, a Market **draft**, and a third tenant beside them),
@@ -55002,7 +55002,7 @@ red under **`all-categories` 6**, `everyone-sees-everything` 7 and
 `client-sees-drafts` 9, each on its own assertions;
 `check:insights:tab` **24/0**; the escaping fix falsified from the source at
 **11 red**, its first failure printing the truncated attribute verbatim.
-`check:shell` **116/2 → 120/0**, and **→ 125/0** once §383.11 gave the seam a section, `check:door` **140/3 → 144/0**,
+`check:shell` **116/2 → 120/0**, and **→ 125/0** once §385.11 gave the seam a section, `check:door` **140/3 → 144/0**,
 `check:modules` **three failures → 159/0**, `check:state` 92/0, `check:viewas` 20/0,
 `check:setup` 33/0.
 
@@ -55016,10 +55016,10 @@ to nobody.
 not.
 
 **RECORDED, NOT DONE**: the Measure owner row and the field under it, still
-awaiting sign-off on the mockup published at §382; and `lib/chat-api.cjs`'s
+awaiting sign-off on the mockup published at §384; and `lib/chat-api.cjs`'s
 escaper, named above and left where it is.
 
-### §383.10 — And the tracker's one red was two notions of today
+### §385.10 — And the tracker's one red was two notions of today
 
 Run after the push, and it is the red the record has been carrying for two
 rounds — **`tracker` 227/1** — described there as *"a date-relative literal
@@ -55060,13 +55060,13 @@ and the third heading is deliberately not among them because `realThu` is the
 real clock's and moves. **1 red under each break**, where the agreement is
 green. 227/1 → **229/0**.
 
-### §383.11 — And the seam between the two halves was measured by nobody
+### §385.11 — And the seam between the two halves was measured by nobody
 
 Found running the falsification suites for the checks this round edited: the
 `:red` list for `check:shell` held five breaks and **`no-library-cats` was not
 among them**, though `lib/shell.ts` declares it.
 
-Pulling that thread found the larger thing. §383 has two halves and each is
+Pulling that thread found the larger thing. §385 has two halves and each is
 asserted in its own place, with what it needs:
 
 | half | file | needs | break |
@@ -55117,10 +55117,10 @@ repainting — said plainly rather than left as an absence.
 the difference is worth the sentence.**
 
 Four are §3d's own. The fifth is **§3b's**, and it is a true consequence rather
-than a stray: dropping the stamp drops the **tab**, and §381's switcher rule
+than a stray: dropping the stamp drops the **tab**, and §383's switcher rule
 reads the tab — so with the reports no longer on the row there is somewhere else
 to go, the four-square mark correctly comes back, and the section asserting it
-is NOT drawn goes red. That is the coupling §381 built, measured for the first
+is NOT drawn goes red. That is the coupling §383 built, measured for the first
 time by a break aimed at something else.
 
 And §3d's own fifth — *a client without the module carries no stamp* — is
@@ -55149,7 +55149,7 @@ shell check now starts — so the honest next move is for its remaining subjects
 to go there too rather than for a second file to start a second server.
 
 
-## §383.1 — THE MERGE, AND THE TWO INTERSECTIONS (2026-09-21)
+## §385.1 — THE MERGE, AND THE TWO INTERSECTIONS (2026-09-21)
 
 Islam: *"please check this branch claude/dazzling-heisenberg-vsqfuz and
 migrated what it has as there are intresections and we need it resolved before
@@ -55165,7 +55165,7 @@ session — while `claude/dazzling-heisenberg-vsqfuz` had taken **§380**.
 Theirs at 15:24:28, ours at 15:26:32, on the same afternoon, both quoting
 Islam, both about a tactic's **Owner**:
 
-| | ours (now §382) | theirs (§380, spec 062) |
+| | ours (now §384) | theirs (§382, spec 062) |
 |---|---|---|
 | shape | a **row** on Roles &amp; access | a tenant **switch** + a tab |
 | the quote | *"add measures &amp; tactics owners as roles so I can set their accessability"* | *"align with me more not to ruin any access"* |
@@ -55176,7 +55176,7 @@ Islam, both about a tactic's **Owner**:
 Neither supersedes the other by time, and neither is a mistake: they are two
 honest answers to one ask, from two sessions that could not see each other.
 
-### §383.1a — The renumber, first and on its own
+### §385.1a — The renumber, first and on its own
 
 §264.3's rule, and it is what makes the scoping provable rather than asserted:
 the merge base with `main` is **our own §376.1 commit**, and it carries **zero**
@@ -55198,12 +55198,12 @@ from the renumbered copy in exactly the §238 CSP hashes — the renumber change
 comment bytes inside script blocks, so the hashes move, which is that section
 working as designed rather than a discrepancy.
 
-### §383.1b — Both features are kept, and the order between them is written down
+### §385.1b — Both features are kept, and the order between them is written down
 
 They compose, and the order is a fact rather than a preference:
 `canEnterLine()` asks `lineOwned()` first, which is false while the switch is
 off. So **with the switch off** every owned tactic falls through to
-`canReportRow()` and §382's role decides, exactly as it was built; **with it
+`canReportRow()` and §384's role decides, exactly as it was built; **with it
 on** an owned tactic on the unit's page is refused there for everybody but the
 office, whatever the role says, and the owner types on My reporting.
 
@@ -55216,7 +55216,7 @@ capability is §53.5 waiting to happen. **Recorded in `boundedReach()`'s own
 comment, raised here, and deliberately NOT resolved by picking one** (rule 1b).
 It is Islam's, and it is the one thing this merge does not settle.
 
-### §383.1c — How each conflict was resolved, by class
+### §385.1c — How each conflict was resolved, by class
 
 * **The three records** — COMBINED, never picked (§318.7), and asserted heading
   by heading rather than eyeballed: **0 lost from ours, 0 lost from theirs**.
@@ -55242,10 +55242,10 @@ It is Islam's, and it is the one thing this merge does not settle.
   both and past main's `v5.22` → `v5.24-merged`; one `SHELL` declaration, and
   `node --check` clean (§146.2).
 
-### §383.1d — What reading the merged tree found (§313.37, §56.7)
+### §385.1d — What reading the merged tree found (§313.37, §56.7)
 
 **THEIR COMMENT DESCRIBED A BRANCH THEY HAD REMOVED.** The paragraph above
-`boundedReach` opens *"§380 TAKES THE WORLD"* and that function takes no world
+`boundedReach` opens *"§382 TAKES THE WORLD"* and that function takes no world
 — it describes the narrowing branch their own spec records writing and taking
 out again. §104.8 exactly: a comment stating an intention the code does not
 carry out, and the quietest kind, because it reads perfectly. Corrected rather
@@ -55256,20 +55256,20 @@ second list, §53.5): **1530 top-level names, exactly SIX duplicated** — the s
 §281.1 leaves deliberately. The merge introduced none, and every declaration
 either side touched still resolves (§147.4, §340.1).
 
-### §383.1e — And two checks went red, for opposite reasons
+### §385.1e — And two checks went red, for opposite reasons
 
 **`test-my-reporting` §0 was the check WORKING.** It asserts the SET of sources
 that need a browser, so that a file growing that dependency is a failure rather
-than a silent omission — and §383's `insights.js` grew one. REWRITTEN, never
+than a silent omission — and §385's `insights.js` grew one. REWRITTEN, never
 loosened (§218, §214.3): the file is named with its reason and the sentence no
 longer says *"the three"*, which was the literal that moved. **53/0.**
 
-**`test-nav-row` reported §381's own fault on a build that does not have it.**
+**`test-nav-row` reported §383's own fault on a build that does not have it.**
 Its host answers an unknown name with `undefined`, `allowed()` reads
 `if (d.when && …)`, and **a tab whose gate is undefined skips straight to
 `grantAt`** — which for `c_mylines` is `area:"always"` and therefore *view* for
 everybody at every target. So the merged run read **10 units and 8 functions
-for somebody who reaches nowhere**: the exact shape §381 exists to catch,
+for somebody who reaches nowhere**: the exact shape §383 exists to catch,
 produced by a stand-in modelling less than the thing it stands in for
 (§100.3). *An unsupplied `when` is not a closed one.*
 
@@ -55277,7 +55277,7 @@ produced by a stand-in modelling less than the thing it stands in for
 own suspicion): in the built file `myLinesHere` is declared **44,000 lines
 before** the tab object is created, so the real gate is there. The harness
 supplies it now at **three states** — off, on, and *a tab that ignores its
-gate* — the third being the guard that this file can still see §381's fault
+gate* — the third being the guard that this file can still see §383's fault
 through a `when` at all (§113.8), since a stand-in that can only answer *no*
 makes every assertion pass while proving nothing.
 
@@ -55285,11 +55285,11 @@ makes every assertion pass while proving nothing.
 twice in one hour: it answered *yes* at a person's own place without asking
 whether they own a line, and moved `cfo` — the one person who reaches nowhere
 — by handing them the Group button. It asks the product's own `ownedBy()` now.
-Measured on the seed: **18 of 33 people own at least one tactic**, §382's own
+Measured on the seed: **18 of 33 people own at least one tactic**, §384's own
 figure reproduced independently, and `cfo` is not one of them. **18/0**, red 7
 under `--break=everywhere`.
 
-### §383.1f — What was run, on the MERGED tree
+### §385.1f — What was run, on the MERGED tree
 
 §365's rule, and it is the whole reason a rehearsal is worth doing: a branch
 that passes says nothing about what the merge produces.
@@ -55312,7 +55312,7 @@ on a real Postgres.
 `qa.py` over `file://` reads **33 viewers / 242 destinations / ERRORS none** —
 the same figure §365 and §367 recorded, summed from the run's own per-viewer
 lines rather than quoted (§332). A merge that added a TAB should add no
-DESTINATION, and §381 is the section that exists because one did: the tab is
+DESTINATION, and §383 is the section that exists because one did: the tab is
 gated on `myLinesHere`, the switch ships off, so on the shipped seed it is
 drawn nowhere and the row is byte for byte what it was. A different number
 here would have meant the new tab had reached the navigation.
@@ -55321,13 +55321,13 @@ here would have meant the new tab had reached the navigation.
 branches resolved against each other, on ours — and the merge to `main` is his
 word, on that merge, with §377 and §378 still to come in from it.
 
-## §383.2 — THE SECOND HALF OF THE SAME SENTENCE: `main` COMES IN (2026-09-21)
+## §385.2 — THE SECOND HALF OF THE SAME SENTENCE: `main` COMES IN (2026-09-21)
 
-Islam, at §383.1: *"there are intresections and we need it resolved before
+Islam, at §385.1: *"there are intresections and we need it resolved before
 merging. so better merge that branch with ours first."* The branch he named was
 merged there. **This is the rest of that sentence** — `origin/main`'s §377 and
 §378 (spec 059, a third session's work on the register's Email and Mobile
-cells), which §383.1's own closing line records as still to come in.
+cells), which §385.1's own closing line records as still to come in.
 
 **NOTHING IS BUILT HERE**, and it is read off the diff rather than promised:
 **13 files**, of which three are the record, five are what git could not
@@ -55338,7 +55338,7 @@ clean auto-merge. Not one source is edited for its own sake. `main` is
 untouched — this is the rehearsal, and the merge to `main` is Islam's word, on
 that merge.
 
-### §383.2a — Every conflict had a named rule, and the rule was followed
+### §385.2a — Every conflict had a named rule, and the rule was followed
 
 Five conflicts, and each one is a shape this file has already written down:
 
@@ -55356,7 +55356,7 @@ the result**, with exactly one deliberate edit declared to it: main's
 `*Last Updated:*` becoming `*Earlier:*`, which is `CLAUDE.md`'s own convention
 for an entry that is no longer the newest. `CLAUDE.md` is newest-first, so ours
 leads; the other two append, so main's §377–§378.2 come before our
-§380–§383.1 — read off each file's own heading order rather than assumed.
+§382–§385.1 — read off each file's own heading order rather than assumed.
 
 **AND THE ARTEFACTS CARRY BOTH SIDES, MEASURED**: the rebuilt platform file
 holds main's `selall` on **4 lines** and this branch's
@@ -55364,9 +55364,9 @@ holds main's `selall` on **4 lines** and this branch's
 rebuilt one side's artefact from one side's sources would satisfy every
 "it builds" assertion and ship half the product.
 
-### §383.2b — No renumber was owed, and that was checked in three spellings
+### §385.2b — No renumber was owed, and that was checked in three spellings
 
-§383.1 renumbered this branch's §377 → §380, §379 → §381, §380 → §382
+§385.1 renumbered this branch's §377 → §380, §379 → §381, §380 → §382
 **before** that merge, precisely because `main` had taken §377 and §378
 (§264.3: a renumber is provably scoped only while the branch's own lines are
 the only ones there). So this merge owes none — and it is **measured rather
@@ -55375,7 +55375,7 @@ sections, not a citation of our own work, and `main` cited **§379–§382 nough
 times**. Checked in all three spellings (§336.1) — the `§` character, the
 `&sect;` entity, and the `§` JavaScript escape.
 
-### §383.2c — The merged sources were READ, not believed (§313.37)
+### §385.2c — The merged sources were READ, not believed (§313.37)
 
 Main replaced `copyable()` with `valueCell()` and deleted the click-to-copy
 handler. Two things follow, and neither is visible in a clean auto-merge:
@@ -55407,7 +55407,7 @@ reference is the record of what was drawn rather than a live assertion.
 (§218) — the open-and-still-open half survives whole and can still fail, which
 is what keeps §374's `putFocus` guard under measurement.
 
-### §383.2d — Three reds, every one established as not this merge's (§303)
+### §385.2d — Three reds, every one established as not this merge's (§303)
 
 - **`test-clean-parity.js`** — §308 already records it red on `origin/main`,
   reproduced there on a virgin database. Neither side touched migration 004 or
@@ -55444,7 +55444,7 @@ is what keeps §374's `putFocus` guard under measurement.
   `ME` never lands — a container condition this round did not close, and not
   this merge's to close.
 
-### §383.2e — And the findings of the round were mine, in the harness
+### §385.2e — And the findings of the round were mine, in the harness
 
 **`export A=x B=$A` IN ONE STATEMENT LEAVES B EMPTY.** Every database check in
 the first pass ran with `DATABASE_URL_UNPOOLED` unset — on the POOLED
@@ -55495,7 +55495,7 @@ own stderr. **AND THE TOOL I REACHED FOR FIRST WAS BLIND**: `ss -ltn` reported
 off it — *a diagnostic that models less than the thing it measures reports
 wrong* (§100.3), and this one reported the reassuring direction.
 
-### §383.2f — And one prerequisite was written down for the wrong check
+### §385.2f — And one prerequisite was written down for the wrong check
 
 `test-platform.js` came back **92 passed, 1 failed** on the rehearsal database,
 on *"…and the known password is the one said in the open"* — the bootstrap
@@ -55550,7 +55550,7 @@ first time — it is **all cold-start checks passed**. Three harnesses, three
 different worlds, one database each; measured rather than assumed, and the
 whole of that red was mine for pointing it at the wrong one.
 
-### §383.2g — Verified on the MERGED tree, not on either side of it
+### §385.2g — Verified on the MERGED tree, not on either side of it
 
 §365's own first finding is that an honest sweep is of the merged result and
 never of the branch, so every figure below was taken after the merge was
@@ -55597,7 +55597,7 @@ one stylesheet, two checks and a mockup, and touches no `api/`, `lib/` or `db/`
 file of its own.
 
 
-### §383.2h — And `main` has moved again, which is said rather than left
+### §385.2h — And `main` has moved again, which is said rather than left
 
 **§4's fetch-and-look, run again as the LAST step of a merge** rather than only
 the first — §94.16 already makes that the rule for the `sw.js` name, and the
@@ -55609,7 +55609,7 @@ spec 059's own continuation. **It has taken §379**, which its `CLAUDE.md` cites
 **ten** times.
 
 **AND THIS TREE HELD A DIFFERENT §379** — *My reporting: the lines a tactic's
-owner enters* (spec 062), which arrived at §383.1 from the other branch, with a
+owner enters* (spec 062), which arrived at §385.1 from the other branch, with a
 §379.5 of its own. The two are **genuinely disjoint**, measured rather than
 assumed: neither body's text appears in the other's tree, and `main` cited
 §380–§382 **nought** times.
@@ -55623,7 +55623,7 @@ next round owes, in order:
    JavaScript escape, the third being the one a two-spelling sweep leaves
    naming somebody else's section.
 2. **Re-run the suite on the MERGED tree** (§365's own first finding). Nothing
-   in §383.2g is verified against those three commits.
+   in §385.2g is verified against those three commits.
 
 Recorded here rather than left for the next person to discover at the moment
 they are resolving conflicts.
@@ -55631,9 +55631,9 @@ they are resolving conflicts.
 
 ---
 
-## §383.3 — THE RENUMBER OWED BEFORE THE MERGE (2026-09-22)
+## §385.3 — THE RENUMBER OWED BEFORE THE MERGE (2026-09-22)
 
-§383.2h wrote down what the next round owes and this is that round, done on its
+§385.2h wrote down what the next round owes and this is that round, done on its
 own before any merge — which is not tidiness but the only moment the scoping can
 be proved (§264.3).
 
@@ -55641,7 +55641,7 @@ be proved (§264.3).
 artefacts, and the record. No rule moved, nothing stored moves, nothing is
 migrated, nobody is signed out (spec 029).
 
-### §383.3a — The scoping is proved, not asserted
+### §385.3a — The scoping is proved, not asserted
 
 The merge base with `main` is **e798419c** (§378.2), and it carries
 **§379–§383 nought times in every spelling**. So every one of those numbers in
@@ -55652,7 +55652,7 @@ wrote. There is nothing of anybody else's for a sweep to take.
 the sources are not all yours, and §264.3 is the section that exists because a
 blanket sweep took seventeen of somebody else's citations.
 
-### §383.3b — The whole run shifts, not only the collision
+### §385.3b — The whole run shifts, not only the collision
 
 `main` took **§379** alone. Renaming ours to §383 and stopping would leave a
 section describing work done *before* §380 sitting *above* it — so the branch
@@ -55666,7 +55666,7 @@ back to `main`; this branch is §380–§383.
 **Spec numbers needed nothing** and it was checked rather than assumed: ours is
 `062-my-reporting` and `main`'s highest is `061`.
 
-### §383.3c — Three spellings, every count declared, every step guarded
+### §385.3c — Three spellings, every count declared, every step guarded
 
 `§NNN`, the `&sect;NNN` entity, and the `\u00a7NNN` JavaScript escape — **nine
 of the last**, in `smp-app/checks/shell.mjs`, `smp-app/checks/door-landing.mjs`
@@ -55688,7 +55688,7 @@ every per-pass assertion passed.
 §329): the shipped file from `build.py`, `smp-app/public/` from its four
 generators.
 
-### §383.3d — And the sweep takes the sentences that DESCRIBE the numbering
+### §385.3d — And the sweep takes the sentences that DESCRIBE the numbering
 
 §371.5 recorded this once; it is the finding of this round because it is now a
 rule rather than an anecdote. **A number in these records is one of two things,
@@ -55700,10 +55700,10 @@ and only one of them may move:**
   `main` made at that moment — **not swept**, or the record calmly states
   something that never happened.
 
-Nine sentences had become false. §383.1's own arrow table read
-*§377 → §381* where what it did was *§377 → §380*; §383.2b said `main` cites
+Nine sentences had become false. §385.1's own arrow table read
+*§377 → §381* where what it did was *§377 → §380*; §385.2b said `main` cites
 *§380–§383 nought times* where that was a measurement of §379–§382 taken before
-`main` moved; and §383.2h — the paragraph whose whole subject is that `main` has
+`main` moved; and §385.2h — the paragraph whose whole subject is that `main` has
 taken a number — said it had taken **§380**. *The sweep rewrote the sentence
 that was about the sweep.*
 
@@ -55711,15 +55711,15 @@ Rewritten **by hand**, each with a one-match guard that refuses rather than
 writing nothing — **and the ninth refused, correctly**, because it was written
 against the text as it stood BEFORE the pass rather than after it.
 
-**And My reporting's number has moved twice** (§345 → §379 at §380, then
+**And My reporting's number has moved twice** (§345 → §379 at §382, then
 §379 → §380 here). Said in full, rather than left as the half a sweep produces.
 
-**One number was corrected while it was being restored**: §383.2h said `main`'s
+**One number was corrected while it was being restored**: §385.2h said `main`'s
 `CLAUDE.md` cites its §379 **nine** times, which is the count in the `&sect;`
 entity alone. Counted in both spellings it is **ten** — §336.1's own lesson, in
 miniature, inside the paragraph that cites §336.1.
 
-### §383.3e — The assertion that only citations moved was wrong before it was right
+### §385.3e — The assertion that only citations moved was wrong before it was right
 
 The first run of *"every changed line carries a citation"* matched only the
 **new** numbers, so all 108 removed `§379` lines read as uncited and it reported
@@ -55729,7 +55729,7 @@ A second reading proves it from the other end: **mask every citation on both
 sides of the diff and the two are identical** — so nothing but the number moved.
 356 lines out, 356 in, across 37 files.
 
-### §383.3f — What was run
+### §385.3f — What was run
 
 `built-in-step` all good · `generated-in-step` all clear, with the three carried
 `.cjs` in step by the one declared transform (§335) · the citation counts
@@ -55745,13 +55745,13 @@ merge and is confirmed against `origin/main` immediately before the push
 (§94.16). Choosing the name now is choosing it from information that will be
 stale by the time it is pushed.
 
-### §383.3g — What is still owed
+### §385.3g — What is still owed
 
-1. **Re-run the suite on the MERGED tree** (§365) — nothing in §383.2g is
+1. **Re-run the suite on the MERGED tree** (§365) — nothing in §385.2g is
    verified against `main`'s three new commits.
 2. **Bump `SHELL` in `sw.js`** at the merge, confirmed against `origin/main`
    immediately before the push (§91, §94.12, §94.16).
-3. The three reds §383.2d establishes as not ours: `test-clean-parity.js`,
+3. The three reds §385.2d establishes as not ours: `test-clean-parity.js`,
    spike **S2**'s self-referencing foreign key, and `check:frameworks:page`.
 
 **`main` untouched: this is the preparation, and the merge is Islam's word, on
@@ -55759,7 +55759,7 @@ that merge.**
 
 ---
 
-## §384 — THE SWITCH PRINTED ITS OWN NUMBER TWICE (2026-09-22)
+## §386 — THE SWITCH PRINTED ITS OWN NUMBER TWICE (2026-09-22)
 
 The tenant switch on Setup › Reporting cycle read **"83 83 lines"**, on both
 of its sentences.
@@ -55771,19 +55771,19 @@ file has now recorded that trap four times (§107.8's *"2 pillarss"*, §160.6's
 Every other caller in the product wraps the whole `plural()` in the `<b>`, and
 so does this one now (§53.5).
 
-**The COUNT itself was also wrong and is deliberately left for §385**, which is
+**The COUNT itself was also wrong and is deliberately left for §387**, which is
 the round that decides what it should say. Flagged rather than folded in
 (rule 1b).
 
 ---
 
-## §385 — ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" (2026-09-22, spec 062)
+## §387 — ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" (2026-09-22, spec 062)
 
-Islam, correcting §380 two days after it shipped: *"we need not to confuse the
+Islam, correcting §382 two days after it shipped: *"we need not to confuse the
 custodian with the tactic owner … the custodian should have always access to
 their unit or function entry except in one case when we set figure sets … my
 reporting appears for tactics for units or functions she is not the custodian
-or the owner."* Then, shown two drawn options for what that leaves of §382's
+or the owner."* Then, shown two drawn options for what that leaves of §384's
 Tactic owner row: **"A"** — the switch decides, and the row comes off Roles &
 access.
 
@@ -55792,7 +55792,7 @@ somebody types, and whether they get a second screen for it. Run the subject
 and everything is on its own Reporting page, tactics included, with no My
 reporting tab drawn for it; don't run it and the lines you own are on My
 reporting and nowhere else. **A line somebody else owns, inside a unit you
-run, you read and do not type** — which is §380's own decision, kept, and the
+run, you read and do not type** — which is §382's own decision, kept, and the
 one place the two rules still agree.
 
 **"DO I RUN IT" IS THE GRANT, NEVER A LIST OF ROLE NAMES**, and that is the
@@ -55831,7 +55831,7 @@ register and claim their line in the same request (§42.2) — where a parameter
 passed down five frames can be handed the incoming register by a caller who
 does not know the difference. Named in `W()` AND in `worldOf()` AND in the
 browser's own `world()`, which is §102.4's instruction followed for the third
-time (`lineOwners` §380, `capabilities` §147): forget any one and the reader
+time (`lineOwners` §382, `capabilities` §147): forget any one and the reader
 sees an empty list and answers as though nobody exists, in silence.
 
 **WHAT IT MOVES, MEASURED**: 83 tactics name an owner · 51 name a person · **49
@@ -55839,7 +55839,7 @@ of those are owned by somebody who also runs that subject**, and lose a second
 screen · **2 reach My reporting**, one person · 32 name nobody and go back to
 the unit.
 
-### §385.1 — AND §382's ROW COMES OFF THE TABLE
+### §387.1 — AND §384's ROW COMES OFF THE TABLE
 
 **THE TWO CONTROLS ANSWERED ONE QUESTION AND COULD DISAGREE ABOUT IT.** Measured
 across the four states, the Tactic owner row is **not consulted at all while
@@ -55847,7 +55847,7 @@ the switch is on** — and the switch is what a tenant turns on to mean *owners
 enter their own lines*. So the row could only ever say no to something the
 switch had just said yes to; and it ships SHUT, so a tenant turning the switch
 on would have found owners typing on a row they had never opened. The merge
-that brought §380 and §382 together recorded that contradiction in
+that brought §382 and §384 together recorded that contradiction in
 `boundedReach`'s own comment and left it for Islam rather than picking one
 (rule 1b). He picked.
 
@@ -55859,10 +55859,10 @@ resolved per target (§37) and a sweep that stopped at the units and functions
 would have been silent about the two targets where "other" and "own" differ.
 A tactic's owner
 is `namedInUnit` — the walk reads every tactic's Owner through `namedOn` — so
-the Contributor floor covers them exactly as it did before §382, which is where
+the Contributor floor covers them exactly as it did before §384, which is where
 the role came from in the first place.
 
-**THE FLOOR'S EXEMPTION GOES WITH IT.** §382 had to exclude its own role from
+**THE FLOOR'S EXEMPTION GOES WITH IT.** §384 had to exclude its own role from
 `!out.length`, because a role deriving here that grants NOTHING would have
 taken away the floor it stood on. The test is `out.length` again, restored
 rather than left as a filter over a list the value can no longer be in (§24) —
@@ -55871,16 +55871,16 @@ is carried into `test-my-reporting.js` §3c rather than deleted with the file
 (§218, §301.7's rule). **`ctx.tacticOwner` goes too**, at all four sites that
 were taught it.
 
-Recorded as a reversal rather than overwritten (Principle II): §382's reasoning
+Recorded as a reversal rather than overwritten (Principle II): §384's reasoning
 is right that a tactic's owner derived nothing anybody could see on the table,
 and what changed is that the switch turned out to be the visible control.
 
-### §385.2 — AND THE SWITCH NOW STATES THE COST IT ACTUALLY HAS
+### §387.2 — AND THE SWITCH NOW STATES THE COST IT ACTUALLY HAS
 
-§384 fixed the doubled word and left the number, because what it should say is
+§386 fixed the doubled word and left the number, because what it should say is
 this round's decision. It counted every tactic carrying an Owner and said
 **83** where the honest figure is **2** — and the gap is two whole facts, both
-of them §385's: 32 of those 83 name nobody the register holds, and 49 of the
+of them §387's: 32 of those 83 name nobody the register holds, and 49 of the
 rest are owned by the person who RUNS that subject. What MOVES is a line whose
 owner is a real person who does not run the subject. *A cost stated before the
 press (§35, §124) is only worth stating if it is the cost: 83 reads as a
@@ -55891,7 +55891,7 @@ tenant-wide upheaval where the truth is one person and two rows.*
 — with `VIEWER` put back in a `finally`, or the office is left looking at the
 tenant as somebody else because a settings row drew itself (§94.2).
 
-### §385.3 — AND MY OWN NEW SECTION DESTROYED THE CHECK'S VERDICT
+### §387.3 — AND MY OWN NEW SECTION DESTROYED THE CHECK'S VERDICT
 
 `checks/my-reporting.py` §9 opened `bad, swept = [], 0` — and `bad` is the
 module-level **failure count that file's verdict is printed from**. So the
@@ -55919,10 +55919,10 @@ reported `[]`: green on a build that had not made this change. §237's trap,
 true of every build there has ever been (§113.8, written into the file by the
 section that quotes it). The count is taken before the fixture runs now.
 
-### §385.4 — VERIFIED
+### §387.4 — VERIFIED
 
 `scripts/test-my-reporting.js` **65/0** · `scripts/test-authorize.js` **709/0**,
-the §385 pair red **2** with `lineOwnerIsHere` taken out of `addOwnedTactics` ·
+the §387 pair red **2** with `lineOwnerIsHere` taken out of `addOwnedTactics` ·
 `test-graph-diff.js` 140/0 · `test-platform-rules.js` 69/0 ·
 `checks/my-reporting.py` **all good**, proved able to fail **three ways from the
 SOURCES** (§276) at **2 / 1 / 1 red**, with the tree restored from the saved
@@ -55932,7 +55932,7 @@ The seed is regenerated from the sources (`node scripts/extract-state.js`) and
 holds no `towner` row; the built file's bytes changed, so `sw.js` is bumped to
 `smp-shell-v5.27-the-switch-decides`, proved unique against every name the
 history holds and confirmed against `origin/main` immediately before the push
-(§91, §94.12, §94.16). The three reds §383.2d establishes as **not ours** are
+(§91, §94.12, §94.16). The three reds §385.2d establishes as **not ours** are
 unchanged and not chased: `test-clean-parity.js`, spike **S2**, and
 `check:frameworks:page`.
 

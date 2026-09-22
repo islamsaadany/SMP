@@ -153,14 +153,14 @@ with sync_playwright() as p:
          mints on this register.
 
          DERIVED, NEVER LISTED (§104.7, §214.3). This was `{powner, plowner,
-         contrib}` written out by hand, so §382's Tactic owner — derived the
+         contrib}` written out by hand, so §384's Tactic owner — derived the
          same way, and held on a pillars FUNCTION as well as a unit — fell
          through to `roleWheres()`, was told it sits on every unit and nowhere
          else, and was reported as offering two function columns it cannot
          reach. The check was right about the RULE and wrong about the role,
          which is the shape a literal takes when the world moves past it.
 
-         THAT ROLE LASTED TWO DAYS (§385 took it off the table again), and
+         THAT ROLE LASTED TWO DAYS (§387 took it off the table again), and
          the line stays exactly as it is — which is the whole argument for
          having written it this way. A literal would have had to be edited
          twice: once when the role arrived and once when it left.

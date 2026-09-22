@@ -7619,7 +7619,7 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
-  /* §382: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
+  /* §384: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
      nothing here — `row` is the real object — so reading `ctx.row.owner`
      would have worked today and stopped working the day a key measure gains
      an Owner of its own, which is the next thing drawn. Named, so the reach

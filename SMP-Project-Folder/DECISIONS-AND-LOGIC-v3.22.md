@@ -54359,3 +54359,94 @@ green with seven new assertions; `functional-projects` 45/0, `objectives-actions
 all green; full `qa.py` sweep **ERRORS none**; the shipped file back in step and
 the four served copies regenerated (§329). A merge owes the `sw.js` SHELL bump,
 because the built file's bytes changed (§91).
+
+## §380.2 — ONE SHAPE, THREE FORMATS (2026-09-22, spec 020)
+
+Islam, of the shape drawn for him before anything was built: *"yes the shape is
+right, go ahead"*, and then, of the three pieces put to him, *"proceed."*
+
+**A FUNCTION'S BUILDER IS FOUR BOXES WHERE A UNIT HAS FIVE, AND THE TWO THAT
+ARE ABSENT ARE ABSENT BY DECISION** — a supporting function does not author its
+own aspiration and does not author its own SWOT: it inherits both from the unit
+it plans under (§213). So *"like the units"* cannot mean identical, and saying
+which two are missing and why is most of what the mockup was for. The four are
+**Definition · Objectives · its work · Review**.
+
+**ONE BRANCH FOR ALL THREE FORMATS, MEASURED RATHER THAN ASSUMED.** §342 made
+objectives-and-actions a real way for a function to plan, so there are three,
+and the question was whether they need three shapes. They do not: all three
+draw their Overview at `found` and their work at `proj`, with `SEC_PENS`
+mapping those to `capfoundation` and `plan` — measured, identical on every
+format. So only the WORK box differs, and it differs in exactly three things
+(its key, its word and what it counts), which is what keeps this one branch
+rather than three (§53.5). Three branches is how the two halves of a
+supporting function came to disagree twice already (§211, §213).
+
+**THE DEFINITION AND THE OBJECTIVES ARE THE FUNCTION'S OWN, NEVER A HOLDER'S**,
+and that is the line the whole section rests on: a **pillars** function has no
+holder at all (`fnOwnHolder` answers null for one), while a projects function's
+holder MIRRORS both — so the plausible mistake, reading the holder because the
+work box reads one, is invisible on a projects function and total on a pillars
+one. It shipped **0 red** on the falsification that makes exactly that mistake,
+until the check MADE a definition and an objective on the pillars function
+(§255, §113.8: an absence over an empty subject is not an absence).
+
+**§129'S "A ROW IS ADDED WHOLE" BROKE ON THE FORMAT THIS ROUTE IS FOR.**
+`builderFormFromRowadd` knew pillar, measure, tactic, project, deliverable,
+outcome and milestone, and did not know `action` — so in build mode the press
+fell through to the pen's own minter and wrote a blank row, leaving somebody to
+find three fields on a table. An action carries its FUNCTION's key rather than
+a row id, because §342 hangs actions off the function itself with no pillar and
+no project between. The form is the **milestone's**, three fields rather than
+four (Action · Owner · Due date), and `status` is deliberately absent: it is
+what a REPORTER writes, and a plan pane holds none (§104).
+
+**AND THE MINTER COULD NOT MAKE THE THIRD FORMAT.** `addFunction` read
+`format === "pillars" ? "pillars" : "projects"`, and the chooser's *Plans in*
+control still offered two — so §342's format was unofferable, and had the
+control been widened alone a function created as objectives-and-actions would
+have arrived planning in **projects**, silently, on the one screen that asks
+the question. Both halves are fixed and both are asserted; the control's
+options are read from `FN_FORMATS` rather than written out again, so a fourth
+way is offered the day it exists (§53.5).
+
+**PROVED ABLE TO FAIL FIVE WAYS FROM THE SOURCES** (§276), each break asserted
+to have MATCHED before it was written (§344.1): **3 / 9 / 8 / 8 / 1 red**.
+
+**§380.3 — AND THE FIRST FALSIFICATION RUN DIED RATHER THAN REPORTING, THREE
+TIMES OUT OF FIVE** (§215) — in a file whose own §5 carries that rule in a
+comment. A `.click()` on a control the broken build does not draw throws, the
+section ends there, and the run reports the failures it had rather than the
+failures there are: the same five breaks read **1 / 1 / 3 / 3 / 0** before every
+probe was made to degrade and **3 / 9 / 8 / 8 / 1** after. *A run that stopped
+is not a run that measured* (§298.3), and the three that more than doubled are
+the measure of how much a death hides.
+
+**§380.4 — AND ITS OWN PEN PRESS SHUT THE PEN A CHIP HAD JUST OPENED** (§273.4,
+recorded and walked into anyway): Edit is a TOGGLE, the `act` chip opens the
+section with the mode on (§269), so a blind press CLOSED it and the Add row
+below went missing on a build that draws it perfectly — reported as a product
+fault for as long as it took to probe. It asks before it presses now, and
+asserts the pen is open rather than assuming the press did it.
+
+**VERIFIED**: `plan-builder` all green with 27 new assertions and every probe
+degrading; `objectives-actions` 47/0, `functional-projects` 45/0,
+`capability-entry` 43/0, `fn-pillars`, `fn-ko-edit`, `capability-remove` and
+`import-page` all green; full `qa.py` sweep ERRORS none; the shipped file back
+in step (`built-in-step.py`) and the four served copies regenerated (§329). No
+`api/`, `lib/` or `db/` file is touched, read off the diff — nothing stored
+moves, nothing is migrated and no rule about who may save what changes (spec
+029).
+
+**AND THE SHELL NAME IS BUMPED HERE RATHER THAN AT THE MERGE** (§94.12):
+the branch has been sitting on `v5.23-copy-carries-platform`, and §379.4 records
+PRODUCTION HAVING SERVED those bytes — so §380 and §380.2 each changed the built
+file underneath a name a returning browser already holds, which is that
+section's collision exactly and is silent, because a worker caches by NAME.
+`v5.24-function-builder`, proved against every name the history has ever held,
+one declaration, `node --check` clean (§146.2). **It reaches the OFFLINE copy
+alone and that is said rather than assumed**: §316.10's generator drops the
+caching half where `SHELL` lives, so the SERVED worker is byte-identical either
+side of the bump (4,104 bytes, measured). It is confirmed again immediately
+before any push to `main` (§94.16), which is the last step of a merge and not
+the first.

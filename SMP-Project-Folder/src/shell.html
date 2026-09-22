@@ -9979,6 +9979,12 @@
       return true;
     }
     if (what === "project") { openBuilderForm("project", { capId:a[1] }); return true; }
+    /* §380.2: an ACTION carries its FUNCTION's key rather than a row id —
+       §342 hangs actions off the function itself, with no pillar and no
+       project between (`data-rowadd="action|<fk>"`). Without this line the
+       press fell through to the pen's own minter, so §129's "a row is added
+       whole" broke on exactly the format the builder's third route is for. */
+    if (what === "action") { openBuilderForm("action", { fnKey:a[1] }); return true; }
     if (what === "deliverable" || what === "outcome" || what === "milestone") {
       openBuilderForm(what, { projId:a[1] });
       return true;

@@ -6940,5 +6940,58 @@ from the sources (4 red and 1 red, each break reddening only its own);
 `functional-projects` 45/0, `objectives-actions` 47/0, `fn-pillars`,
 `fn-ko-edit`, `capability-entry` 43/0, `capability-remove` all green; full
 `qa.py` sweep ERRORS none. Screen only — nothing stored moves, nothing is
-migrated, nobody's rights move. **On the branch, not merged**; a merge owes the
-`sw.js` SHELL bump, because the built file's bytes changed.
+migrated, nobody's rights move. **On the branch, not merged.**
+
+The offline copy's cache name was bumped here rather than left for the merge:
+the branch was still on the name the last round shipped, and that one has
+already been served — so a browser that had opened the platform before would
+have gone on serving itself the old file out of its own disk, silently. The
+name is checked again immediately before anything goes to `main`.
+
+## §380.2 — one shape, three formats (2026-09-22, spec 020)
+
+Islam, of the shape drawn before anything was built: *"yes the shape is right,
+go ahead"*, then *"proceed."*
+
+**Built and verified: the other two pieces.** A supporting function's builder
+now shows the same four boxes whichever of the three ways it plans —
+**Definition · Objectives · its work · Review** — and only the work box
+differs: *Pillars*, *Projects* or *Actions*, each counting the thing that page
+actually holds. A function that plans in pillars had two boxes where it should
+have four; a function that plans in objectives and actions had no route of its
+own at all and was being offered a *Projects* box its pages do not have.
+
+**The two boxes a unit has and a function does not are missing on purpose** —
+a supporting function does not write its own aspiration and does not write its
+own SWOT: it takes both from the unit it plans under. So *"like the units"*
+cannot mean identical, and which two are absent is part of what was agreed.
+
+**Two things were broken underneath and neither had been reported.** Adding an
+action while building wrote a **blank row** — every other kind of row is asked
+for on a small form first, and the action was the one the builder did not know
+about, on exactly the way of planning this piece is for. And a function
+**could not be created** as objectives-and-actions at all: the question on the
+form offered two answers, and the part that makes the function was written for
+two as well — so widening the question alone would have created a function
+that says it plans one way and plans another, silently, on the one screen that
+asks. Both ends are fixed and both are checked.
+
+**The chip label is *Definition*, singular**, as drawn.
+
+`plan-builder` all green with 27 new assertions, proved able to fail five ways
+from the sources (3 / 9 / 8 / 8 / 1 red, each break reddening its own);
+`objectives-actions` 47/0, `functional-projects` 45/0, `capability-entry`
+43/0, `fn-pillars`, `fn-ko-edit`, `capability-remove` and `import-page` all
+green; full `qa.py` sweep ERRORS none; the shipped file and the four served
+copies back in step.
+
+**Two faults in the check itself, both recorded rather than tidied away.** Its
+first falsification run **died rather than reporting** on three of the five
+breaks, so it reported four failures where there are twenty-nine — the counts
+above are the second run, after every probe was made to carry on. And its own
+press of the pen **closed** a pen the builder had just opened, which read for a
+while as a product fault until it was measured.
+
+Screen only — nothing stored moves, nothing is migrated, nobody's rights move.
+**On the branch, not merged**; a merge owes the `sw.js` SHELL bump, because the
+built file's bytes changed.

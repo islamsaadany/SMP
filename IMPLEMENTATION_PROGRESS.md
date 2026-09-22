@@ -6896,3 +6896,49 @@ refuse a backup for a missing picture.
 takes a few seconds longer and the file is about 6 MB rather than 1.6. Open it
 with no connection: it should come up on your own tenant, fully styled, with
 the navigation and the decks in it.
+
+
+---
+
+## §380 — the plan builder, on a supporting function (2026-09-22, spec 020)
+
+Islam: *"we need to have build a plan for the functions like what we did with
+the units."*
+
+**The builder already opens on functions and was largely blind there.** Driven
+on **Finance** — which holds three projects, a definition and two key
+objectives — its band read **○ ○ ○ ○**, every box empty, and the same on
+**six of the seven functions that plan in projects**. It counted a function's
+work inside the function's **capabilities**, and that work moved onto the
+function itself earlier this month, so it was counting an empty box. The map
+is the whole point of the builder, and it said the plan was empty when it was
+not.
+
+**Built and verified: the repair.** The count now reads where a function's
+work actually lives — the same list its own pages read, so the band cannot
+disagree with the page it points at. Finance now reads **✓ Definition · 2
+Objectives · 3 Projects**, exactly what it holds; all seven functions agree
+with their own plans. Nothing visual moved, so no drawing was owed for this
+part.
+
+**The shape for the rest, confirmed by Islam before building** (*"yes the
+shape is right"*): a function's builder is **Definition · Objectives · its
+work · Review** — four boxes where a unit has five, because a supporting
+function does not write its own aspiration or its own SWOT; it takes both from
+the unit it plans under.
+
+**Waiting on Islam — the drawing.** Two pieces change what the band shows and
+are drawn first: a function that plans in **pillars** gaining its Definition
+and Objectives boxes (it has two today where a unit has five), and the third
+way of planning — **objectives and actions** — getting a route at all; today
+it falls through to the projects one and would be offered a *Projects* box its
+pages do not have. The chip label *Definitions* becoming *Definition* is in
+that drawing too, since a label is a visual element.
+
+`plan-builder` all green with seven new assertions, proved able to fail twice
+from the sources (4 red and 1 red, each break reddening only its own);
+`functional-projects` 45/0, `objectives-actions` 47/0, `fn-pillars`,
+`fn-ko-edit`, `capability-entry` 43/0, `capability-remove` all green; full
+`qa.py` sweep ERRORS none. Screen only — nothing stored moves, nothing is
+migrated, nobody's rights move. **On the branch, not merged**; a merge owes the
+`sw.js` SHELL bump, because the built file's bytes changed.

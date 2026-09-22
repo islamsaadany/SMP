@@ -54264,3 +54264,98 @@ before it writes anything about it.
 record that is wrong about what was verified is the one kind of wrong that
 compounds, because the next person quotes it). All three record files carry the
 correction, and this section is why.
+
+
+## §380 — THE BUILDER'S MAP READ EMPTY OVER A PLAN THAT WAS THERE (2026-09-22, spec 020)
+
+Islam: *"we need to have build a plan for the functions like what we did with
+the units."*
+
+**THE BUILDER ALREADY OPENS ON FUNCTIONS, AND IT WAS LARGELY BLIND THERE** —
+which is the finding, and it is not what the ask predicted. Measured before
+anything was proposed (§3a), by driving the real builder rather than reading
+it: on **Finance**, a function holding **three projects, a definition and two
+key objectives**, the band read
+
+```
+○ Definitions   ○ Objectives   ○ Projects   ○ Review
+```
+
+— every chip empty — and the same on **six of the seven functions that plan in
+projects** (HR, Treasury, IT, Care and the Strategy Management Office beside
+it). **THE ONE FAILURE THE BUILDER CANNOT HAVE**, because §129's whole promise
+is that the map is DERIVED from the plan so that pausing costs nothing: a map
+that reads empty over a plan is the feature arguing with itself.
+
+**THE CAUSE IS §326 AND THE BUILDER WAS NEVER TOLD.** Stage 1 moved a
+supporting function's projects onto the FUNCTION; the builder went on counting
+them **inside the function's capabilities**, and `capsOfFunction('finance')`
+answers **`[]`**. So the count was nought, honestly, of the wrong box. The hint
+under the band still read *"what each capability is"* on a page that has none
+(§104.8's family — prose describing a world the code has left).
+
+**AND THE REVIEW READ THE SAME EMPTY LIST**, so it can name no gap on any
+function that plans in projects. **What is NOT claimed**: it is not printing
+anything false today — measured, the demo holds none of the four gap kinds it
+looks for on those functions, so there is nothing for it to have missed. It is
+structurally blind rather than actively lying, and saying which is the
+difference between a report and a guess (§124).
+
+**`fnHolders` IS THE ONE LIST AND USING IT IS WHY THIS IS SMALL** (§334): it is
+what a function's four pages already read, so the band cannot disagree with the
+page it points at — and it answers for exactly the cases those pages draw a
+holder for, which is what stops the builder offering somewhere to put a first
+project where the page draws nowhere, and stops it hiding one where the page
+does (§61, §334.18 one surface over). **A CAPABILITY IS NOT WALKED HERE**, and
+that is a decision rather than an omission: §334 made it a destination of its
+own, built by opening the builder ON IT, and minting one from the builder is
+paused at Islam's word (§336).
+
+**THE WORDING MOVED WITH THE READER** — the holder here IS the function, so the
+hints and the Review's gap sentence say *function* where they said *capability*,
+and the row form's two placeholders with them. **The chip's LABEL is
+deliberately left plural for now** (*Definitions* over one definition): a label
+is a visual element and belongs in the drawing Islam signs off, not in a repair
+(rule 1c).
+
+**§380.1 — AND "LIKE THE UNITS" CANNOT MEAN IDENTICAL, WHICH IS THE PART THAT
+STOPS THE NEXT PIECE BEING WRONG.** Reading what each format actually draws:
+all three function shapes draw an **Overview** and one work section. So a
+function's builder is **Definition · Objectives · its work · Review** — four
+boxes where a unit has five, because a supporting function does not author its
+own aspiration or its own SWOT; it takes both from the unit it plans under
+(§213). **Islam confirmed the shape before anything was built**: *"yes the
+shape is right."* One shape for all three formats, differing only in the work
+box — §53.5 rather than three answers.
+
+**WHAT IS BUILT HERE IS THE REPAIR ALONE, AND THAT SPLIT IS DELIBERATE**: it
+changes no chip set and no control, so nothing visual moves and no mockup is
+owed. The two pieces that DO change what the band shows — a pillars function
+gaining its Definition and Objectives boxes, and the third way of planning
+getting a route at all — are drawn first.
+
+**PROVED ABLE TO FAIL TWICE, FROM THE SOURCES** (§276), each break asserted to
+have MATCHED before it was written (§344.1) and each reddening **its own
+assertions and no others**: the reader put back to `capsOfFunction` is **4
+red**, the first printing the reported fault verbatim
+(`{'def': '○', 'obj': '○', 'proj': '○'}`); a chip that always claims
+something is there is **1 red**, on the empty end alone. **AND THE FIRST BREAK
+LEFT THE EMPTY-END ASSERTION GREEN**, which is exactly why both ends exist
+(§113.8): a one-ended check would have passed on the build this repairs. The
+tree was restored from the saved copy, never `git checkout` (§343.9), and the
+rebuild proved deterministic across two runs.
+
+**THE ASSERTION IS AN AGREEMENT, NEVER A NUMBER** (§94.8): the chip's own mark
+against the function's own fields, read **without going through the reader
+under test** (§264.1 — a check that measures with the thing it is measuring
+reports a broken build clean). So a plan edited tomorrow stays green. A UNIT's
+band is asserted beside it as the control, or a break scoped to functions could
+not be told from one that reached everything.
+
+**Screen only**, read off the diff: no `api/`, `lib/` or `db/` file, nothing
+stored moves, nothing is migrated, nobody's rights move. `plan-builder` all
+green with seven new assertions; `functional-projects` 45/0, `objectives-actions`
+47/0, `fn-pillars`, `fn-ko-edit`, `capability-entry` 43/0 and `capability-remove`
+all green; full `qa.py` sweep **ERRORS none**; the shipped file back in step and
+the four served copies regenerated (§329). A merge owes the `sw.js` SHELL bump,
+because the built file's bytes changed (§91).

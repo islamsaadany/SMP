@@ -363,6 +363,73 @@ with sync_playwright() as p:
        pg.evaluate("ARCHIVES[0].kind==='unit' && ARCHIVES[0].key==='mobile' && ARCHIVES[0].why.includes('built on the platform')"))
     ck("…and the plan is now empty for building", pg.evaluate("UNITS.mobile.items.length") == 0)
 
+    # ── 11 · A FUNCTION'S BAND READS THE FUNCTION'S OWN PLAN ──────────
+    # The builder counted a function's work by walking its CAPABILITIES, and
+    # §326 moved a function's projects onto the FUNCTION — so the box it
+    # counted was empty and every chip read ○ over a plan that was plainly
+    # there: measured, six of the seven functions that plan in projects, with
+    # Finance holding three projects, a definition and two key objectives
+    # under a band reading ○ ○ ○ ○. The builder's whole promise is that the
+    # map is DERIVED from the plan (§129), so a map that reads empty over a
+    # plan is the one failure it cannot have.
+    #
+    # ASSERTED AS AGREEMENT, NEVER AS A NUMBER (§94.8), and measured WITHOUT
+    # going through the reader under test (§264.1: a check that measures with
+    # the thing it is measuring reports a broken build clean) — so a plan
+    # edited tomorrow stays green and a chip that stops counting goes red.
+    #
+    # BOTH ENDS (§94.2, §113.8): a function that HOLDS work reads its counts
+    # AND the same function emptied reads ○ on all three. Without the second
+    # half a build that counts nothing at all satisfies the first; without the
+    # first, one that marks everything filled does.
+    print("\n── 11 · a function's band reads the function's own plan ──")
+    fb = pg.evaluate("""() => {
+      const read = (t) => { BUILDER = { target: t }; current = t; paint();
+        const o = {};
+        document.querySelectorAll('.bchip').forEach(c => {
+          o[c.dataset.bnav] = (c.querySelector('.bst') || {}).textContent; });
+        return o; };
+      const out = {};
+      const fk = Object.keys(FUNCTIONS).find(k =>
+        fnFormat(FUNCTIONS[k]) === 'projects' && (FUNCTIONS[k].projects || []).length);
+      out.fk = fk;
+      out.chips = read('fn:' + fk);
+      /* the truth, off the function's own fields */
+      out.truth = { def: !!FUNCTIONS[fk].def,
+                    obj: (FUNCTIONS[fk].keyObjectives || []).length,
+                    proj: (FUNCTIONS[fk].projects || []).length };
+      /* …and the other end, put back afterwards (§94.2) */
+      const keep = { d: FUNCTIONS[fk].def, k: FUNCTIONS[fk].keyObjectives,
+                     p: FUNCTIONS[fk].projects };
+      FUNCTIONS[fk].def = ''; FUNCTIONS[fk].keyObjectives = []; FUNCTIONS[fk].projects = [];
+      out.empty = read('fn:' + fk);
+      FUNCTIONS[fk].def = keep.d; FUNCTIONS[fk].keyObjectives = keep.k;
+      FUNCTIONS[fk].projects = keep.p;
+      out.restored = read('fn:' + fk);
+      /* the CONTROL: a unit, whose band this change does not touch */
+      out.unit = read(UNIT_KEYS[1]);
+      out.unitTruth = UNITS[UNIT_KEYS[1]].items.length;
+      BUILDER = null;
+      return out;
+    }""")
+    t, c = fb["truth"], fb["chips"]
+    ck("a function holding work is not reported empty",
+       [c.get("def"), c.get("obj"), c.get("proj")] != ["\u25cb"] * 3, c)
+    ck("its definition chip agrees with the function's own definition",
+       (c.get("def") == "\u2713") == t["def"], "%s / def=%s" % (c.get("def"), t["def"]))
+    ck("its objectives chip agrees with the function's own key objectives",
+       c.get("obj") == (str(t["obj"]) if t["obj"] else "\u25cb"),
+       "%s / %s" % (c.get("obj"), t["obj"]))
+    ck("its projects chip agrees with the function's own projects",
+       c.get("proj") == (str(t["proj"]) if t["proj"] else "\u25cb"),
+       "%s / %s" % (c.get("proj"), t["proj"]))
+    ck("…and the same function emptied reads ○ on all three",
+       [fb["empty"].get(k) for k in ("def", "obj", "proj")] == ["\u25cb"] * 3, fb["empty"])
+    ck("the plan is put back as it was found", fb["restored"] == c)
+    ck("a unit's band is untouched and still agrees with its own plan",
+       fb["unit"].get("plan") == (str(fb["unitTruth"]) if fb["unitTruth"] else "\u25cb"),
+       "%s / %s" % (fb["unit"].get("plan"), fb["unitTruth"]))
+
     print()
     if errs:
         print("console/page errors:", errs[:6])

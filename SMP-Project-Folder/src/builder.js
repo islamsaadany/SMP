@@ -82,8 +82,21 @@ function builderHasPlan(target){
 function builderSections(target){
   var route = builderRoute(target);
   var u = function(){ return unitLike(target); };
-  var caps = function(){
-    return route === "fnprojects" ? capsOfFunction(String(target).slice(3)) : [];
+  /* THE FUNCTION'S OWN WORK, THROUGH THE ONE LIST ITS PAGES READ (§334).
+     It counted `capsOfFunction` until today, and stage 1 moved a function's
+     projects onto the function itself — so the box was empty and every chip
+     read ○ over a plan that was plainly there: measured, Finance holds three
+     projects, a definition and two key objectives and its band read
+     ○ ○ ○ ○, on six of the seven functions that plan in projects. The
+     builder's whole promise is that the map is DERIVED from the plan (§129),
+     so a map reading empty over a plan is the one failure it cannot have.
+     A capability is a destination of its own now and is built by opening the
+     builder ON IT (§334), so nothing here walks one — and `fnHolders` answers
+     for exactly the cases the pages draw a holder for, which is what stops the
+     band and the page disagreeing about whether there is anywhere to put a
+     first project (§61, §334.18). */
+  var holders = function(){
+    return route === "fnprojects" ? fnHolders(String(target).slice(3)) : [];
   };
   var listChip = function(n){ return n ? { s:"part", mark:String(n) } : { s:"empty", mark:"○" }; };
 
@@ -129,23 +142,23 @@ function builderSections(target){
     return [
       { k:"def", label:"Definitions", tab:"fnstrat", sec:"found", pen:"capfoundation",
         chip:function(){
-          var cs = caps(), have = cs.filter(function(c){ return c.def; }).length;
+          var cs = holders(), have = cs.filter(function(c){ return c.def; }).length;
           if (!cs.length) return { s:"empty", mark:"○" };
           return have === cs.length ? { s:"ok", mark:"✓" } : have ? { s:"part", mark:"…" } : { s:"empty", mark:"○" };
         },
-        hint:function(){ return '<b>Definitions</b> — what each capability is, in a sentence somebody outside the function would recognise.'; } },
+        hint:function(){ return '<b>Definition</b> — what this function is, in a sentence somebody outside it would recognise.'; } },
       { k:"obj", label:"Objectives", tab:"fnstrat", sec:"found", pen:"capfoundation",
         chip:function(){
-          return listChip(caps().reduce(function(a,c){ return a + (c.keyObjectives || []).length; }, 0));
+          return listChip(holders().reduce(function(a,c){ return a + (c.keyObjectives || []).length; }, 0));
         },
-        hint:function(){ return '<b>' + esc(L("keyobj","bu")) + '</b> — optional: a capability with none is judged by its projects.'; } },
+        hint:function(){ return '<b>' + esc(L("keyobj","bu")) + '</b> — optional: a function with none is judged by its projects.'; } },
       { k:"proj", label:"Projects", tab:"fnstrat", sec:"proj", pen:"plan",
         chip:function(){
-          return listChip(caps().reduce(function(a,c){ return a + (c.projects || []).length; }, 0));
+          return listChip(holders().reduce(function(a,c){ return a + (c.projects || []).length; }, 0));
         },
         hint:function(){
           var d = 0, o = 0, ms = 0, n = 0;
-          caps().forEach(function(c){ (c.projects || []).forEach(function(p){
+          holders().forEach(function(c){ (c.projects || []).forEach(function(p){
             n++; d += p.deliverables.length; o += p.outcomes.length; ms += p.milestones.length; }); });
           return '<b>Projects</b> — the enhancement work: front matter, deliverables, outcomes, milestones.' +
             (n ? ' <b>' + n + ' · ' + d + ' deliverables · ' + o + ' outcomes · ' + ms + ' milestones.</b>' : '');
@@ -303,11 +316,11 @@ function bformDef(kind, ctx){
       ] },
     capko: { title:"Add a key objective",
       fields:[
-        { k:"name", label:"Objective", req:true, ph:"What this capability is judged on" },
+        { k:"name", label:"Objective", req:true, ph:"What this function is judged on" },
         dirSeg,
         { k:"target", label:"Target this year", mono:true },
         compileSeg,
-        { k:"weight", label:"Weight %", mono:true, ph:"its share of the capability’s score" }
+        { k:"weight", label:"Weight %", mono:true, ph:"its share of the function’s score" }
       ] },
     cap: { title:"Add a capability",
       fields:[
@@ -588,7 +601,7 @@ function builderGaps(target){
   }
   if (route === "fnprojects") {
     var noDef = 0, emptyP = 0, oNoT = 0, msNoDue = 0;
-    capsOfFunction(String(target).slice(3)).forEach(function(c){
+    fnHolders(String(target).slice(3)).forEach(function(c){
       if (!c.def) noDef++;
       (c.projects || []).forEach(function(p){
         if (!p.deliverables.length && !p.outcomes.length) emptyP++;
@@ -596,7 +609,7 @@ function builderGaps(target){
         p.milestones.forEach(function(m){ if (!m.finish) msNoDue++; });
       });
     });
-    say("def", noDef, "capability has no definition", "capabilities have no definition");
+    say("def", noDef, "function has no definition", "functions have no definition");
     say("proj", emptyP, "project holds neither deliverables nor outcomes",
       "projects hold neither deliverables nor outcomes");
     say("proj", oNoT, "outcome has no target", "outcomes have no target");

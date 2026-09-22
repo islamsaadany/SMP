@@ -50,12 +50,29 @@ function builderHere(){
   return !!(typeof BUILDER !== "undefined" && BUILDER &&
             typeof current !== "undefined" && BUILDER.target === current);
 }
+/* §381.2: THREE WAYS A FUNCTION PLANS, AND THE ROUTE NAMES ALL THREE.
+   It read `fnPlansInPillars(f) ? "fnpillars" : "fnprojects"`, so §342's
+   objectives-and-actions fell through to the PROJECTS route and was offered a
+   Projects box its pages do not have — measured, a function holding five
+   actions with its band reading ○ Projects: a box that can never fill, beside
+   no box at all for the work it really has (§61). `fnFormat` is the product's
+   own reader and answers all three, so a fourth format is a case here rather
+   than a fall-through. */
 function builderRoute(target){
   var t = String(target || "");
   if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;
   var f = FUNCTIONS[t.slice(3)];
   if (!f) return null;
-  return fnPlansInPillars(f) ? "fnpillars" : "fnprojects";
+  var fmt = fnFormat(f);
+  return fmt === "pillars" ? "fnpillars"
+       : fmt === "objectives" ? "fnobjectives"
+       : "fnprojects";
+}
+/* Is this route a supporting function's? Named once: four places ask, and a
+   list of three spellings is a list somebody forgets to add a fourth to
+   (§104.7). */
+function builderIsFnRoute(route){
+  return route === "fnpillars" || route === "fnprojects" || route === "fnobjectives";
 }
 function builderSubjectName(target){
   /* Not unitLike(): that resolver answers only what the UNIT PAGES draw, and
@@ -70,6 +87,20 @@ function builderHasPlan(target){
   if (r === "unit" || r === "fnpillars")
     return !planIsEmpty(unitSnapshotCounts(unitPlanSnapshot(unitLike(target))));
   if (r === "fnprojects") return fnHasWork(String(target).slice(3));
+  /* §381.2: AND THE OBJECTIVES ROUTE ASKS ITS OWN QUESTION, DELIBERATELY.
+     `fnHasWork` does not know about actions — measured, a function holding two
+     of them and nothing else answers FALSE — so routing this through it would
+     offer *Build* over a standing plan, and Build does not archive (§49.2).
+     That gap is wider than the builder (`fnShows` reads the same answer, so on
+     a tenant where somebody holds no fill grant such a function is invisible
+     to them in the navigation, §61); it is LATENT on this one, because all 33
+     people can fill. Flagged for Islam rather than widened here, since
+     changing it changes who sees a function (rule 1b). */
+  if (r === "fnobjectives") {
+    var f = FUNCTIONS[String(target).slice(3)];
+    return !!(f && (fnActions(String(target).slice(3)).length ||
+                    (f.keyObjectives || []).length || f.def));
+  }
   return false;
 }
 
@@ -82,77 +113,129 @@ function builderHasPlan(target){
 function builderSections(target){
   var route = builderRoute(target);
   var u = function(){ return unitLike(target); };
-  var caps = function(){
-    return route === "fnprojects" ? capsOfFunction(String(target).slice(3)) : [];
+  var fk = function(){ return String(target).slice(3); };
+  /* THE FUNCTION'S OWN WORK, THROUGH THE ONE LIST ITS PAGES READ (§334).
+     It counted `capsOfFunction` until §381, and §326 moved a function's
+     projects onto the function itself — so the box was empty and every chip
+     read ○ over a plan that was plainly there: measured, Finance holds three
+     projects, a definition and two key objectives and its band read
+     ○ ○ ○ ○, on six of the seven functions that plan in projects. The
+     builder's whole promise is that the map is DERIVED from the plan (§129),
+     so a map reading empty over a plan is the one failure it cannot have.
+     A capability is a destination of its own now and is built by opening the
+     builder ON IT (§334), so nothing here walks one — and `fnHolders` answers
+     for exactly the cases the pages draw a holder for, which is what stops the
+     band and the page disagreeing about whether there is anywhere to put a
+     first project (§61, §334.18). */
+  var holders = function(){
+    return builderIsFnRoute(route) ? fnHolders(fk()) : [];
   };
-  var listChip = function(n){ return n ? { s:"part", mark:String(n) } : { s:"empty", mark:"○" }; };
+  var listChip = function(n){ return n ? { s:"part", mark:String(n) } : { s:"empty", mark:"\u25cb" }; };
 
-  if (route === "unit" || route === "fnpillars") {
+  if (route === "unit") {
     var secs = [];
-    if (route === "unit") {
-      secs.push({ k:"found", label:"Foundation", tab:"strategy", sec:"found", pen:"foundation",
-        chip:function(){
-          var x = u(), filled = (x.aspiration ? 1 : 0) + (x.endInMind ? 1 : 0) +
-            ((x.clauses || []).some(function(c){ return c && c[1]; }) ? 1 : 0);
-          return filled === 3 ? { s:"ok", mark:"✓" } : filled ? { s:"part", mark:"…" } : { s:"empty", mark:"○" };
-        },
-        hint:function(){ return '<b>Foundation</b> — who this unit is: the “who we are” lines, the aspiration and the end in mind.'; } });
-      secs.push({ k:"obj", label:"Objectives", tab:"strategy", sec:"found", pen:"foundation", scrollTo:".koband",
-        chip:function(){ return listChip(u().keyObjectives.length); },
-        hint:function(){
-          var n = u().keyObjectives.length;
-          return '<b>' + esc(L("keyobj","bu")) + '</b> — what this unit is judged on. Name, direction, targets and compile; 3–5 is typical.' +
-            (n ? ' <b>' + n + ' added.</b>' : '');
-        } });
-      secs.push({ k:"swot", label:"SWOT", tab:"strategy", sec:"swot", pen:"analysis",
-        chip:function(){
-          var s = u().swot || {}, n = ["s","w","o","t"].reduce(function(a,q){ return a + ((s[q] || []).length); }, 0);
-          return listChip(n);
-        },
-        hint:function(){ return '<b>SWOT</b> — the analysis the ' + esc(L("pillar","bu").toLowerCase()) + ' are reasoned from. Empty is allowed; say what you know.'; } });
-    }
-    secs.push({ k:"plan", label:L("pillar", "bu"),
-      tab:route === "unit" ? "strategy" : "fnstrat",
-      sec:route === "unit" ? "plan" : "proj", pen:"plan",
-      chip:function(){ return listChip(u().items.length); },
+    secs.push({ k:"found", label:"Foundation", tab:"strategy", sec:"found", pen:"foundation",
+      chip:function(){
+        var x = u(), filled = (x.aspiration ? 1 : 0) + (x.endInMind ? 1 : 0) +
+          ((x.clauses || []).some(function(c){ return c && c[1]; }) ? 1 : 0);
+        return filled === 3 ? { s:"ok", mark:"\u2713" } : filled ? { s:"part", mark:"\u2026" } : { s:"empty", mark:"\u25cb" };
+      },
+      hint:function(){ return '<b>Foundation</b> \u2014 who this unit is: the \u201cwho we are\u201d lines, the aspiration and the end in mind.'; } });
+    secs.push({ k:"obj", label:"Objectives", tab:"strategy", sec:"found", pen:"foundation", scrollTo:".koband",
+      chip:function(){ return listChip(u().keyObjectives.length); },
       hint:function(){
-        var x = u(), m = 0, t = 0;
-        x.items.forEach(function(p){ m += p.measures.length; t += p.tactics.length; });
-        return '<b>' + esc(L("pillar","bu")) + '</b> — the work the strategy commits to, each with its measures and tactics.' +
-          (x.items.length ? ' <b>' + x.items.length + ' · ' + m + ' measures · ' + t + ' tactics so far.</b>' : '');
+        var n = u().keyObjectives.length;
+        return '<b>' + esc(L("keyobj","bu")) + '</b> \u2014 what this unit is judged on. Name, direction, targets and compile; 3\u20135 is typical.' +
+          (n ? ' <b>' + n + ' added.</b>' : '');
       } });
+    secs.push({ k:"swot", label:"SWOT", tab:"strategy", sec:"swot", pen:"analysis",
+      chip:function(){
+        var sw = u().swot || {}, n = ["s","w","o","t"].reduce(function(a,q){ return a + ((sw[q] || []).length); }, 0);
+        return listChip(n);
+      },
+      hint:function(){ return '<b>SWOT</b> \u2014 the analysis the ' + esc(L("pillar","bu").toLowerCase()) + ' are reasoned from. Empty is allowed; say what you know.'; } });
+    secs.push({ k:"plan", label:L("pillar", "bu"), tab:"strategy", sec:"plan", pen:"plan",
+      chip:function(){ return listChip(u().items.length); },
+      hint:function(){ return builderPillarHint(u()); } });
     secs.push(builderReviewSection());
     return secs;
   }
 
-  if (route === "fnprojects") {
-    return [
-      { k:"def", label:"Definitions", tab:"fnstrat", sec:"found", pen:"capfoundation",
-        chip:function(){
-          var cs = caps(), have = cs.filter(function(c){ return c.def; }).length;
-          if (!cs.length) return { s:"empty", mark:"○" };
-          return have === cs.length ? { s:"ok", mark:"✓" } : have ? { s:"part", mark:"…" } : { s:"empty", mark:"○" };
-        },
-        hint:function(){ return '<b>Definitions</b> — what each capability is, in a sentence somebody outside the function would recognise.'; } },
-      { k:"obj", label:"Objectives", tab:"fnstrat", sec:"found", pen:"capfoundation",
-        chip:function(){
-          return listChip(caps().reduce(function(a,c){ return a + (c.keyObjectives || []).length; }, 0));
-        },
-        hint:function(){ return '<b>' + esc(L("keyobj","bu")) + '</b> — optional: a capability with none is judged by its projects.'; } },
-      { k:"proj", label:"Projects", tab:"fnstrat", sec:"proj", pen:"plan",
-        chip:function(){
-          return listChip(caps().reduce(function(a,c){ return a + (c.projects || []).length; }, 0));
-        },
+  /* ── A SUPPORTING FUNCTION: ONE SHAPE, THREE FORMATS (§381.2) ─────────
+     Islam, of the shape put to him before anything was built: *"yes the shape
+     is right."* Four boxes — Definition, Objectives, its work, Review — where
+     a unit has five, because a supporting function does not author its own
+     aspiration or its own SWOT: it inherits both from the unit it plans under
+     (§213). So the two the unit has and this does not are absent by DECISION,
+     and "like the units" cannot mean identical.
+
+     ALL THREE FORMATS DRAW THE SAME TWO SECTIONS, measured rather than
+     assumed: `found` (Overview) and `proj` (the work, labelled Plan, Projects
+     or Plan), with SEC_PENS mapping them to `capfoundation` and `plan`. So
+     only the WORK box differs, and it differs in three things — its key, its
+     word and what it counts — which is what keeps this one branch rather than
+     three (§53.5).
+
+     THE DEFINITION AND THE OBJECTIVES ARE THE FUNCTION'S OWN, read off the
+     function and never off a holder: a pillars function HAS no holder
+     (`fnOwnHolder` answers null for one), and §213's Overview draws both from
+     the function itself — which `fnOwnHolder`'s own comment says in as many
+     words. One reader, so the three formats cannot answer differently. */
+  if (builderIsFnRoute(route)) {
+    var work = {
+      fnpillars: { k:"plan", label:L("pillar", "bu"),
+        count:function(){ return u().items.length; },
+        hint:function(){ return builderPillarHint(u()); } },
+      fnprojects: { k:"proj", label:"Projects",
+        count:function(){ return holders().reduce(function(a,c){ return a + (c.projects || []).length; }, 0); },
         hint:function(){
           var d = 0, o = 0, ms = 0, n = 0;
-          caps().forEach(function(c){ (c.projects || []).forEach(function(p){
-            n++; d += p.deliverables.length; o += p.outcomes.length; ms += p.milestones.length; }); });
-          return '<b>Projects</b> — the enhancement work: front matter, deliverables, outcomes, milestones.' +
-            (n ? ' <b>' + n + ' · ' + d + ' deliverables · ' + o + ' outcomes · ' + ms + ' milestones.</b>' : '');
+          holders().forEach(function(c){ (c.projects || []).forEach(function(pr){
+            n++; d += pr.deliverables.length; o += pr.outcomes.length; ms += pr.milestones.length; }); });
+          return '<b>Projects</b> \u2014 the enhancement work: front matter, deliverables, outcomes, milestones.' +
+            (n ? ' <b>' + n + ' \u00b7 ' + d + ' deliverables \u00b7 ' + o + ' outcomes \u00b7 ' + ms + ' milestones.</b>' : '');
+        } },
+      fnobjectives: { k:"act", label:"Actions",
+        count:function(){ return fnActions(fk()).length; },
+        hint:function(){
+          var n = fnActions(fk()).length;
+          return '<b>Actions</b> \u2014 the work itself, each with an owner and a date it is due.' +
+            (n ? ' <b>' + n + ' added.</b>' : '');
         } }
-      , builderReviewSection()];
+    }[route];
+
+    return [
+      { k:"def", label:"Definition", tab:"fnstrat", sec:"found", pen:"capfoundation",
+        chip:function(){
+          var f = FUNCTIONS[fk()];
+          return (f && f.def) ? { s:"ok", mark:"\u2713" } : { s:"empty", mark:"\u25cb" };
+        },
+        hint:function(){ return '<b>Definition</b> \u2014 what this function is, in a sentence somebody outside it would recognise.'; } },
+      { k:"obj", label:"Objectives", tab:"fnstrat", sec:"found", pen:"capfoundation",
+        chip:function(){
+          var f = FUNCTIONS[fk()];
+          return listChip(((f && f.keyObjectives) || []).length);
+        },
+        hint:function(){
+          var f = FUNCTIONS[fk()], n = ((f && f.keyObjectives) || []).length;
+          return '<b>' + esc(L("keyobj","bu")) + '</b> \u2014 what this function is judged on. ' +
+            'Optional: one with none is judged by its work.' + (n ? ' <b>' + n + ' added.</b>' : '');
+        } },
+      { k:work.k, label:work.label, tab:"fnstrat", sec:"proj", pen:"plan",
+        chip:function(){ return listChip(work.count()); },
+        hint:work.hint },
+      builderReviewSection()
+    ];
   }
   return [];
+}
+/* The pillar box's sentence, written once: a unit and a pillars function draw
+   the same work from the same reader, so they say the same thing about it. */
+function builderPillarHint(x){
+  var m = 0, t = 0;
+  x.items.forEach(function(pi){ m += pi.measures.length; t += pi.tactics.length; });
+  return '<b>' + esc(L("pillar","bu")) + '</b> \u2014 the work the strategy commits to, each with its measures and tactics.' +
+    (x.items.length ? ' <b>' + x.items.length + ' \u00b7 ' + m + ' measures \u00b7 ' + t + ' tactics so far.</b>' : '');
 }
 function builderReviewSection(){
   return { k:"review", label:"Review", tab:null, sec:null, pen:null,
@@ -207,7 +290,13 @@ function builderChooserHtml(){
     ? activeKeys().map(function(k){ return { t:k, name:UNITS[k].name }; })
     : activeFunctionKeys().map(function(k){
         return { t:"fn:" + k, name:FUNCTIONS[k].name,
-                 fmt:fnPlansInPillars(FUNCTIONS[k]) ? L("pillar","bu").toLowerCase() : "projects" };
+                 /* §381.2: three ways now, so the word is read off the format
+                    rather than off a yes/no — which called an objectives
+                    function "projects" on the one screen where you pick what
+                    to build. */
+                 fmt:{ pillars:L("pillar","bu").toLowerCase(),
+                       projects:"projects",
+                       objectives:"objectives and actions" }[fnFormat(FUNCTIONS[k])] };
       })
   ).map(function(r){
     var has = builderHasPlan(r.t);
@@ -253,7 +342,12 @@ function builderStartFresh(target){
     clearUnitPlan(w, why);
     fnWriteBack(fk, w);
   }
-  else if (route === "fnprojects") clearFunction(String(target).slice(3), "plan", why);
+  /* §381.2: and an objectives function clears the same way — measured, not
+     assumed: `clearFunction` goes through `fnOwnHolder`, which carries the
+     function's actions, and `clearCapability` empties them (two actions in,
+     nought out). So the third format needed no clearing rule of its own. */
+  else if (route === "fnprojects" || route === "fnobjectives")
+    clearFunction(String(target).slice(3), "plan", why);
 }
 
 /* ── The row forms ────────────────────────────────────────────────────
@@ -303,11 +397,11 @@ function bformDef(kind, ctx){
       ] },
     capko: { title:"Add a key objective",
       fields:[
-        { k:"name", label:"Objective", req:true, ph:"What this capability is judged on" },
+        { k:"name", label:"Objective", req:true, ph:"What this function is judged on" },
         dirSeg,
         { k:"target", label:"Target this year", mono:true },
         compileSeg,
-        { k:"weight", label:"Weight %", mono:true, ph:"its share of the capability’s score" }
+        { k:"weight", label:"Weight %", mono:true, ph:"its share of the function’s score" }
       ] },
     cap: { title:"Add a capability",
       fields:[
@@ -343,6 +437,18 @@ function bformDef(kind, ctx){
         { k:"owner", label:"Owner" },
         { k:"finish", label:"Due date", mono:true, ph:"e.g. March 2026" }
       ] },
+    /* §381.2: AN ACTION IS THE MILESTONE'S FORM, THREE FIELDS RATHER THAN
+       FOUR — §342 built it as *a milestone with a DATE where a tactic has
+       quarters*, and its plan table draws exactly Action · Owner · Due, so
+       the form asks what that table holds and nothing else. `status` is
+       deliberately absent: it is what a REPORTER writes, and a plan pane
+       holds none (§104). */
+    action: { title:"Add an action",
+      fields:[
+        { k:"name", label:"Action", req:true, ph:"The work itself, as a sentence" },
+        { k:"owner", label:"Owner", ph:"Who runs it" },
+        { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
+      ] },
     clause: { title:"Add a line to “Who we are”",
       fields:[
         { k:"label", label:"The lead — the words down the left", req:true, ph:"e.g. We serve" },
@@ -365,8 +471,15 @@ function bformDef(kind, ctx){
     newfn: { title:"New supporting function", noAnother:true, verb:"Create",
       fields:[
         { k:"name", label:"Name", req:true },
+        /* §381.2: THREE, because §342 made objectives-and-actions a real
+           format and this control was the last list still offering two —
+           read from FN_FORMATS rather than written out again (§53.5), so a
+           fourth way is offered here the day it exists. */
         { k:"format", label:"Plans in", type:"seg", def:"projects",
-          opts:[["projects","Projects"],["pillars",L("pillar","bu")]] }
+          opts:FN_FORMATS.map(function(fm){
+            return [fm, fm === "pillars" ? L("pillar","bu")
+                      : fm === "objectives" ? "Objectives and actions" : "Projects"];
+          }) }
       ] }
   };
   return defs[kind] || null;
@@ -525,6 +638,14 @@ function bApply(kind, ctx, d){
     }
     return true;
   }
+  if (kind === "action") {
+    /* §381.2: addAction() is what the plan pane's own Add presses, so the
+       row a form makes and the row the pen makes are the same row (§53.5) —
+       id minted from the maximum, `status` left empty for the reporter. */
+    var ac = addAction(ctx.fnKey); if (!ac) return false;
+    ac.name = v("name"); ac.owner = v("owner"); ac.due = v("due");
+    return true;
+  }
   if (kind === "clause") {
     var cu = ctx.target === "group" ? GROUP : unitLikeWritable(ctx.target);
     if (!cu || !Array.isArray(cu.clauses)) return false;
@@ -555,7 +676,10 @@ function addFunction(name, format){
   while (FUNCTIONS[key]) { key = base + n; n++; }
   FUNCTIONS[key] = { name:nm, navName:null, codePrefix:nm.slice(0, 3).toUpperCase(),
     head:null, custodian:null, active:true,
-    format:format === "pillars" ? "pillars" : "projects" };
+    /* §381.2: the chooser offers three now, so the minter has to accept
+       three — anything else falls back to projects, which is what an
+       unknown value already reads as (§fnFormat). */
+    format:FN_FORMATS.indexOf(format) >= 0 ? format : "projects" };
   FUNCTION_KEYS.push(key);
   return key;
 }
@@ -569,38 +693,75 @@ function builderGaps(target){
   var say = function(k, n, one, many){
     if (n) gaps.push({ k:k, text:plural(n, one, many) });
   };
-  if (route === "unit" || route === "fnpillars") {
-    var u = unitLike(target);
-    say("obj", u.keyObjectives.filter(function(m){ return !m.target; }).length,
-      "objective has no target this year", "objectives have no target this year");
-    var mNoTarget = 0, bareP = 0, idleT = 0;
-    u.items.forEach(function(p){
-      if (!p.measures.length && !p.tactics.length) bareP++;
-      p.measures.forEach(function(m){ if (!m.target) mNoTarget++; });
-      p.tactics.forEach(function(t){ if (!t.q1 && !t.q2 && !t.q3 && !t.q4) idleT++; });
+  /* The pillar work's three gaps, shared by a unit and a pillars function
+     because they are the same rows read by the same reader (\u00a753.5, A15) \u2014
+     written once here rather than in both branches, which is how the two came
+     to be able to differ at all. */
+  var pillarGaps = function(x){
+    var bare = 0, noTarget = 0, idle = 0;
+    x.items.forEach(function(pi){
+      if (!pi.measures.length && !pi.tactics.length) bare++;
+      pi.measures.forEach(function(m){ if (!m.target) noTarget++; });
+      pi.tactics.forEach(function(t){ if (!t.q1 && !t.q2 && !t.q3 && !t.q4) idle++; });
     });
     var pw = L("pillar","bu").toLowerCase().replace(/s$/, "");
-    say("plan", bareP, pw + " holds no measures and no tactics yet", pw + "s hold no measures and no tactics yet");
-    say("plan", mNoTarget, "measure has no target — it will read as missing it",
-      "measures have no target — they will read as missing it");
-    say("plan", idleT, "tactic is due in no quarter, so no cycle will ask for it",
+    say("plan", bare, pw + " holds no measures and no tactics yet", pw + "s hold no measures and no tactics yet");
+    say("plan", noTarget, "measure has no target \u2014 it will read as missing it",
+      "measures have no target \u2014 they will read as missing it");
+    say("plan", idle, "tactic is due in no quarter, so no cycle will ask for it",
       "tactics are due in no quarter, so no cycle will ask for them");
+  };
+  var noTargetIn = function(list){
+    return (list || []).filter(function(m){ return !m.target; }).length;
+  };
+
+  if (route === "unit") {
+    var u = unitLike(target);
+    say("obj", noTargetIn(u.keyObjectives),
+      "objective has no target this year", "objectives have no target this year");
+    pillarGaps(u);
   }
-  if (route === "fnprojects") {
-    var noDef = 0, emptyP = 0, oNoT = 0, msNoDue = 0;
-    capsOfFunction(String(target).slice(3)).forEach(function(c){
-      if (!c.def) noDef++;
-      (c.projects || []).forEach(function(p){
-        if (!p.deliverables.length && !p.outcomes.length) emptyP++;
-        p.outcomes.forEach(function(o){ if (!o.target) oNoT++; });
-        p.milestones.forEach(function(m){ if (!m.finish) msNoDue++; });
+
+  /* \u00a7381.2: ONE BRANCH FOR ALL THREE FORMATS, so what the Review names cannot
+     drift from what the band counts \u2014 the definition and the objectives are
+     asked of the FUNCTION for every format, exactly as the chips ask them, and
+     only the work differs. */
+  if (builderIsFnRoute(route)) {
+    var fk = String(target).slice(3), f = FUNCTIONS[fk] || {};
+    say("def", f.def ? 0 : 1, "the function has no definition", "");
+    say("obj", noTargetIn(f.keyObjectives),
+      "objective has no target this year", "objectives have no target this year");
+
+    if (route === "fnpillars") pillarGaps(unitLike(target));
+
+    if (route === "fnprojects") {
+      var emptyP = 0, oNoT = 0, msNoDue = 0;
+      fnHolders(fk).forEach(function(c){
+        (c.projects || []).forEach(function(pr){
+          if (!pr.deliverables.length && !pr.outcomes.length) emptyP++;
+          pr.outcomes.forEach(function(o){ if (!o.target) oNoT++; });
+          pr.milestones.forEach(function(m){ if (!m.finish) msNoDue++; });
+        });
       });
-    });
-    say("def", noDef, "capability has no definition", "capabilities have no definition");
-    say("proj", emptyP, "project holds neither deliverables nor outcomes",
-      "projects hold neither deliverables nor outcomes");
-    say("proj", oNoT, "outcome has no target", "outcomes have no target");
-    say("proj", msNoDue, "milestone has no due date", "milestones have no due date");
+      say("proj", emptyP, "project holds neither deliverables nor outcomes",
+        "projects hold neither deliverables nor outcomes");
+      say("proj", oNoT, "outcome has no target", "outcomes have no target");
+      say("proj", msNoDue, "milestone has no due date", "milestones have no due date");
+    }
+
+    if (route === "fnobjectives") {
+      /* An action's two plan-time facts (\u00a7342): who runs it and when it is
+         due. Its STATUS is a reporting field, so a plan cannot owe one \u2014 a
+         gap list that asked for it would name something no cycle has yet
+         asked anybody for. */
+      var aNoOwner = 0, aNoDue = 0;
+      fnActions(fk).forEach(function(a){
+        if (!a.owner) aNoOwner++;
+        if (!a.due) aNoDue++;
+      });
+      say("act", aNoOwner, "action has no owner", "actions have no owner");
+      say("act", aNoDue, "action has no date it is due", "actions have no date they are due");
+    }
   }
   return gaps;
 }

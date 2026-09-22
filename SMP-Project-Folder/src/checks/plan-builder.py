@@ -363,6 +363,270 @@ with sync_playwright() as p:
        pg.evaluate("ARCHIVES[0].kind==='unit' && ARCHIVES[0].key==='mobile' && ARCHIVES[0].why.includes('built on the platform')"))
     ck("…and the plan is now empty for building", pg.evaluate("UNITS.mobile.items.length") == 0)
 
+    # ── 11 · A FUNCTION'S BAND READS THE FUNCTION'S OWN PLAN ──────────
+    # The builder counted a function's work by walking its CAPABILITIES, and
+    # §326 moved a function's projects onto the FUNCTION — so the box it
+    # counted was empty and every chip read ○ over a plan that was plainly
+    # there: measured, six of the seven functions that plan in projects, with
+    # Finance holding three projects, a definition and two key objectives
+    # under a band reading ○ ○ ○ ○. The builder's whole promise is that the
+    # map is DERIVED from the plan (§129), so a map that reads empty over a
+    # plan is the one failure it cannot have.
+    #
+    # ASSERTED AS AGREEMENT, NEVER AS A NUMBER (§94.8), and measured WITHOUT
+    # going through the reader under test (§264.1: a check that measures with
+    # the thing it is measuring reports a broken build clean) — so a plan
+    # edited tomorrow stays green and a chip that stops counting goes red.
+    #
+    # BOTH ENDS (§94.2, §113.8): a function that HOLDS work reads its counts
+    # AND the same function emptied reads ○ on all three. Without the second
+    # half a build that counts nothing at all satisfies the first; without the
+    # first, one that marks everything filled does.
+    print("\n── 11 · a function's band reads the function's own plan ──")
+    fb = pg.evaluate("""() => {
+      const read = (t) => { BUILDER = { target: t }; current = t; paint();
+        const o = {};
+        document.querySelectorAll('.bchip').forEach(c => {
+          o[c.dataset.bnav] = (c.querySelector('.bst') || {}).textContent; });
+        return o; };
+      const out = {};
+      const fk = Object.keys(FUNCTIONS).find(k =>
+        fnFormat(FUNCTIONS[k]) === 'projects' && (FUNCTIONS[k].projects || []).length);
+      out.fk = fk;
+      out.chips = read('fn:' + fk);
+      /* the truth, off the function's own fields */
+      out.truth = { def: !!FUNCTIONS[fk].def,
+                    obj: (FUNCTIONS[fk].keyObjectives || []).length,
+                    proj: (FUNCTIONS[fk].projects || []).length };
+      /* …and the other end, put back afterwards (§94.2) */
+      const keep = { d: FUNCTIONS[fk].def, k: FUNCTIONS[fk].keyObjectives,
+                     p: FUNCTIONS[fk].projects };
+      FUNCTIONS[fk].def = ''; FUNCTIONS[fk].keyObjectives = []; FUNCTIONS[fk].projects = [];
+      out.empty = read('fn:' + fk);
+      FUNCTIONS[fk].def = keep.d; FUNCTIONS[fk].keyObjectives = keep.k;
+      FUNCTIONS[fk].projects = keep.p;
+      out.restored = read('fn:' + fk);
+      /* the CONTROL: a unit, whose band this change does not touch */
+      out.unit = read(UNIT_KEYS[1]);
+      out.unitTruth = UNITS[UNIT_KEYS[1]].items.length;
+      BUILDER = null;
+      return out;
+    }""")
+    t, c = fb["truth"], fb["chips"]
+    ck("a function holding work is not reported empty",
+       [c.get("def"), c.get("obj"), c.get("proj")] != ["\u25cb"] * 3, c)
+    ck("its definition chip agrees with the function's own definition",
+       (c.get("def") == "\u2713") == t["def"], "%s / def=%s" % (c.get("def"), t["def"]))
+    ck("its objectives chip agrees with the function's own key objectives",
+       c.get("obj") == (str(t["obj"]) if t["obj"] else "\u25cb"),
+       "%s / %s" % (c.get("obj"), t["obj"]))
+    ck("its projects chip agrees with the function's own projects",
+       c.get("proj") == (str(t["proj"]) if t["proj"] else "\u25cb"),
+       "%s / %s" % (c.get("proj"), t["proj"]))
+    ck("…and the same function emptied reads ○ on all three",
+       [fb["empty"].get(k) for k in ("def", "obj", "proj")] == ["\u25cb"] * 3, fb["empty"])
+    ck("the plan is put back as it was found", fb["restored"] == c)
+    ck("a unit's band is untouched and still agrees with its own plan",
+       fb["unit"].get("plan") == (str(fb["unitTruth"]) if fb["unitTruth"] else "\u25cb"),
+       "%s / %s" % (fb["unit"].get("plan"), fb["unitTruth"]))
+
+    # ── 12 · ONE SHAPE, THREE FORMATS ─────────────────────────────────
+    # Islam: *"we need to have build a plan for the functions like what we
+    # did with the units"* — and the shape he signed off is FOUR boxes where
+    # a unit has five, because a supporting function does not author its own
+    # aspiration or its own SWOT (§213). So the two a unit has and this does
+    # not are absent BY DECISION, and both halves are asserted: the four are
+    # there AND foundation and swot are not, or a build that simply copied
+    # the unit's five passes everything below (§94.2).
+    #
+    # ASSERTED AS THE AGREEMENT BETWEEN THE THREE FORMATS (§94.8, §53.5):
+    # what must hold is that they draw the same boxes in the same order and
+    # differ in the WORK alone — never four literal labels, which a
+    # relabelled chip would falsify while the shape stayed right.
+    #
+    # THE STATE IS MADE THROUGH THE PRODUCT'S OWN DOOR (§255): no demo
+    # function plans in objectives and actions, so one is CREATED from the
+    # chooser — which drives the third option §342 left that form without,
+    # and needs nothing put back afterwards.
+    print("\n── 12 · one shape, three formats ──")
+    pg.evaluate("() => { BUILDER = null; paint(); }")
+    open_chooser()
+    for sel in ('[data-bside="fns"]', '[data-bnew="fn"]'):
+        el = pg.query_selector(sel)
+        ck("the chooser draws " + sel, bool(el))
+        if el:
+            el.click(); pg.wait_for_timeout(200)
+    segs = pg.evaluate(
+        "Array.from(document.querySelectorAll('#modal-b [data-bfseg=\"format\"] [data-bfv]'))"
+        ".map(e=>e.dataset.bfv)")
+    ck("the chooser offers every format the platform has, on the form itself",
+       segs == pg.evaluate("FN_FORMATS.slice()"),
+       "%s / %s" % (segs, pg.evaluate("FN_FORMATS.slice()")))
+    pg.fill('[data-bf="name"]', "Shared Services")
+    # §215: EVERY PROBE DEGRADES. A `.click()` on a control the broken
+    # build does not draw throws, the section dies, and the run reports ONE
+    # failure where the truth is several — which is what the first
+    # falsification of this section did, in a file whose own §5 quotes that
+    # rule. A run that stopped is not a run that measured (§298.3).
+    ofmt = pg.query_selector('[data-bfseg="format"] [data-bfv="objectives"]')
+    if ofmt:
+        ofmt.click(); pg.wait_for_timeout(100)
+    go = pg.query_selector('[data-bfadd="one"]')
+    if go:
+        go.click(); pg.wait_for_timeout(600)
+    FK = "sharedservices"
+    ck("the function exists under a key minted from its name",
+       pg.evaluate("!!FUNCTIONS['%s']" % FK))
+    # §381.2: the MINTER had to learn the third value too — it read
+    # `format === 'pillars' ? 'pillars' : 'projects'`, so a function created
+    # as objectives-and-actions would have arrived planning in projects,
+    # silently, on the one screen that asks the question.
+    ck("…planning the way the form was asked to plan",
+       pg.evaluate("fnFormat(FUNCTIONS['%s'])" % FK) == "objectives",
+       pg.evaluate("FUNCTIONS['%s'].format" % FK))
+    ck("the builder entered it", pg.evaluate("BUILDER && BUILDER.target") == "fn:" + FK)
+
+    # The label is the chip's own trailing text node — the mark is a span in
+    # front of it, so `textContent` reads "1Actions" and would have made this
+    # assertion about the mark as much as the word.
+    READ = ("""(t) => { BUILDER = { target: t }; current = t; paint();
+      return [...document.querySelectorAll('#buildband .bchip')].map(c => ({
+        k: c.dataset.bnav,
+        label: c.lastChild ? c.lastChild.textContent.trim() : '',
+        mark: (c.querySelector('.bst') || {}).textContent })); }""")
+    tf = pg.evaluate("""(READ) => {
+      const read = eval('(' + READ + ')');
+      const F = Object.keys(FUNCTIONS), pick = (fmt) =>
+        F.find(k => fnFormat(FUNCTIONS[k]) === fmt && k !== 'sharedservices');
+      const out = { pillarsFk: pick('pillars'), projectsFk: pick('projects') };
+      out.objectives = read('fn:sharedservices');
+      out.pillars  = read('fn:' + out.pillarsFk);
+      out.projects = read('fn:' + out.projectsFk);
+      out.pillarsTruth = fnAsUnit(out.pillarsFk).items.length;
+      out.unit = read(UNIT_KEYS[1]);
+      BUILDER = null;
+      return out;
+    }""", READ)
+
+    keys = {k: [c["k"] for c in tf[k]] for k in ("pillars", "projects", "objectives")}
+    ck("a function's band is four boxes, not a unit's five",
+       all(len(v) == 4 for v in keys.values()), keys)
+    ck("the three formats agree on the three boxes that are not the work",
+       len({(v[0], v[1], v[3]) for v in keys.values()}) == 1, keys)
+    ck("…and the work box is the one that differs, one key per format",
+       len({v[2] for v in keys.values()}) == 3, [v[2] for v in keys.values()])
+    ck("neither the aspiration nor the SWOT is asked of a function",
+       not ({"found", "swot"} & set(sum(keys.values(), []))), keys)
+    ck("a unit still carries both, so the absence above is a decision",
+       {"found", "swot"} <= {c["k"] for c in tf["unit"]},
+       [c["k"] for c in tf["unit"]])
+
+    lbl = {k: tf[k][2]["label"] for k in ("pillars", "projects", "objectives")}
+    ck("the work box wears the format's own word",
+       lbl["projects"] == "Projects" and lbl["objectives"] == "Actions"
+       and lbl["pillars"] not in ("Projects", "Actions"), lbl)
+    ck("a pillars function counts its own pillars",
+       tf["pillars"][2]["mark"] ==
+       (str(tf["pillarsTruth"]) if tf["pillarsTruth"] else "\u25cb"),
+       "%s / %s" % (tf["pillars"][2]["mark"], tf["pillarsTruth"]))
+    # §381.2’s own claim, and the one a PROJECTS function cannot test: the
+    # definition and the objectives are read off the FUNCTION and never off a
+    # holder. A projects function’s holder MIRRORS both, so the plausible
+    # mistake — reading the holder, which is what the work box reads — is
+    # invisible there and TOTAL on a pillars function, where `fnOwnHolder`
+    # answers null. The state is MADE and put back (§255, §94.2): the demo’s
+    # one pillars function carries no definition and no objective at all, so
+    # without this both readers answer ○ and the break passes — it did, at
+    # 0 red, which is how this assertion came to exist (§113.8).
+    pdo = pg.evaluate("""(READ) => {
+      const read = eval('(' + READ + ')');
+      const F = Object.keys(FUNCTIONS);
+      const pf = F.find(k => fnFormat(FUNCTIONS[k]) === 'pillars');
+      const keep = { d: FUNCTIONS[pf].def, k: FUNCTIONS[pf].keyObjectives };
+      FUNCTIONS[pf].def = 'What this function is, in a sentence.';
+      FUNCTIONS[pf].keyObjectives = [{ id:'fn:' + pf + '-KO1', name:'On time in full' }];
+      const out = { fk: pf, holder: fnOwnHolder(pf), chips: read('fn:' + pf) };
+      FUNCTIONS[pf].def = keep.d; FUNCTIONS[pf].keyObjectives = keep.k;
+      out.back = read('fn:' + pf);
+      BUILDER = null;
+      return out;
+    }""", READ)
+    ck("a pillars function has no holder to read from",
+       pdo["holder"] is None, pdo["holder"])
+    ck("…so its definition chip is the FUNCTION’s own",
+       pdo["chips"][0]["mark"] == "✓", pdo["chips"][0])
+    ck("…and its objectives chip counts the FUNCTION’s own",
+       pdo["chips"][1]["mark"] == "1", pdo["chips"][1])
+    ck("…and both are put back as they were found",
+       [c["mark"] for c in pdo["back"][:2]] == ["○"] * 2, pdo["back"])
+
+    ck("a function with nothing built reads ○ on all three",
+       [c["mark"] for c in tf["objectives"][:3]] == ["\u25cb"] * 3,
+       tf["objectives"])
+
+    # §129: A ROW IS ADDED WHOLE, and it broke on exactly the format this
+    # route is for — `builderFormFromRowadd` knew pillar, measure, tactic,
+    # project, deliverable, outcome and milestone, and not `action`, so the
+    # press fell through to the pen's own minter and wrote a blank row.
+    # Driven through the REAL controls, never by poking EDIT_PAGE (§48.2 —
+    # the rule this file states in its own §5 and this section first broke).
+    pg.evaluate("() => { BUILDER = { target: 'fn:%s' }; current = 'fn:%s'; paint(); }" % (FK, FK))
+    # §215 again, and this is the press three of the five falsifications
+    # died on: a build whose work box is not the actions has no `act` chip at
+    # all, so the section ended here and reported the failures it had rather
+    # than the failures there are — a run that stopped, not a run that
+    # measured (§298.3).
+    actchip = pg.query_selector('#buildband [data-bnav="act"]')
+    ck("the Actions box is on the band", bool(actchip))
+    if actchip:
+        actchip.click(); pg.wait_for_timeout(400)
+    ck("the Actions box opens the function's own plan page",
+       pg.evaluate("currentSub === 'fnstrat' && CURSEC['fnstrat'] === 'proj'"),
+       pg.evaluate("[currentSub, CURSEC['fnstrat']]"))
+    pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
+    ck("the pen is on the section line", bool(pen))
+    # §273.4: EDIT IS A TOGGLE, SO ASK BEFORE PRESSING — the chip that opened
+    # this section had already opened the pen with it (§269: one edit, one
+    # done), so a blind press SHUT it and the Add row below went missing on a
+    # build that draws it perfectly. Pressed only if it is not already open.
+    if pen and not pg.evaluate("projEditing()"):
+        pen.click(); pg.wait_for_timeout(300)
+    ck("…and the pen is open on the actions", pg.evaluate("projEditing()"))
+    aa = pg.query_selector('[data-rowadd^="action|"]')
+    ck("an empty plan offers the first action (§61)", bool(aa))
+    if aa:
+        aa.click(); pg.wait_for_timeout(300)
+        order = pg.evaluate(
+            "Array.from(document.querySelectorAll('#modal-b .bfl')).map(e=>e.textContent.trim())")
+        ck("…and it opens the builder's form, asking the action's own three fields",
+           order == ["Action", "Owner", "Due date"], order)
+        add1 = pg.query_selector('[data-bfadd="one"]')
+        ck("Add is dead until the action has a name",
+           bool(add1) and add1.get_property("disabled").json_value())
+        for k, v in (("name", "Agree the service levels"),
+                     ("owner", "Hala Mansour"), ("due", "Sep 2026")):
+            box = pg.query_selector('[data-bf="%s"]' % k)
+            if box:
+                box.fill(v)
+        pg.wait_for_timeout(100)
+        add1 = pg.query_selector('[data-bfadd="one"]')
+        if add1:
+            add1.click(); pg.wait_for_timeout(500)
+        row = pg.evaluate("""() => { const l = fnActions('%s');
+          return l.length === 1 ? { name:l[0].name, owner:l[0].owner, due:l[0].due,
+            id:l[0].id, status:l[0].status } : { n:l.length }; }""" % FK)
+        ck("one press writes ONE whole row, read back off the data (§96)",
+           row.get("name") == "Agree the service levels" and
+           row.get("owner") == "Hala Mansour" and row.get("due") == "Sep 2026", row)
+        # §316: a row with no id renders, scores and reports — and cannot be
+        # written, because the row-addressed writer refuses the save by name.
+        ck("…with an id, and with the reporter's own field left empty (§104)",
+           bool(row.get("id")) and not row.get("status"), row)
+        ck("the Actions box now counts it", pg.evaluate("""() => {
+          BUILDER = { target:'fn:%s' }; paint();
+          const c = document.querySelector('#buildband [data-bnav="act"] .bst');
+          return c ? c.textContent : null; }""" % FK) == "1")
+
     print()
     if errs:
         print("console/page errors:", errs[:6])

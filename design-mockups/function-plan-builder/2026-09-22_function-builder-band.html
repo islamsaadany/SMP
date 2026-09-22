@@ -1,0 +1,281 @@
+<title>Function Plan Builder</title>
+<style>
+:root {
+    --ink: #171B22;
+    --ink-2: #414A58;
+    --ink-3: #636C79;
+    --good: #2E7D5B;
+    --gold: #C9A24D;
+    --gold-deep: #8A6B22;
+    --panel: #16325C;
+    --panel-ink: #FFFFFF;
+    --panel-quiet: #B7C4D8;
+    --focus: #8A6B22;
+    --line: #D6DCE5;
+    --surface: #FFFFFF;
+    --surface-2: #EFF2F6;
+    --ground: #F7F8FA;
+    --sans: ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --bad: #B04434;
+    --attn: #B8860B;
+    --stone: #16325C;
+  --maxw: 1120px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ink: #E9ECF1;
+    --ink-2: #B4BCC8;
+    --ink-3: #949DAA;
+    --good: #5FB68C;
+    --gold: #D9B665;
+    --gold-deep: #C9A24D;
+    --panel: #0E1014;
+    --panel-ink: #EAF0FA;
+    --panel-quiet: #9AA6B8;
+    --focus: #E6C65C;
+    --line: #333A45;
+    --surface: #1C2027;
+    --surface-2: #242932;
+    --ground: #14161A;
+    --sans: ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --bad: #D97066;
+    --attn: #D9B23C;
+    --stone: #7FA3D8;
+} }
+:root[data-theme="dark"] {
+    --ink: #E9ECF1;
+    --ink-2: #B4BCC8;
+    --ink-3: #949DAA;
+    --good: #5FB68C;
+    --gold: #D9B665;
+    --gold-deep: #C9A24D;
+    --panel: #0E1014;
+    --panel-ink: #EAF0FA;
+    --panel-quiet: #9AA6B8;
+    --focus: #E6C65C;
+    --line: #333A45;
+    --surface: #1C2027;
+    --surface-2: #242932;
+    --ground: #14161A;
+    --sans: ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --bad: #D97066;
+    --attn: #D9B23C;
+    --stone: #7FA3D8;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink);
+  font-family: ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif; font-size: 14px; line-height: 1.55; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding-block: 40px 64px;
+  padding-left: 20px; padding-right: 20px; }
+h1 { font-size: 23px; margin: 0 0 6px; letter-spacing: -.01em; text-wrap: balance; }
+.sub { color: var(--ink-2); margin: 0 0 4px; max-width: 64ch; }
+.stamp { color: var(--ink-3); font-size: 11.5px; margin: 0 0 34px; }
+.eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--gold-deep); margin: 0 0 6px; }
+.lede { margin: 0 0 16px; color: var(--ink-2); max-width: 70ch; }
+.side { font-size: 10px; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px; }
+.cmp { padding-block: 26px; border-top: 1px solid var(--line); }
+.cmp .side + .bandwrap { margin-bottom: 18px; }
+.delta { margin: 14px 0 0; color: var(--ink-2); max-width: 70ch; }
+.delta b { color: var(--ink); }
+.bandwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface); }
+.bandwrap #buildband { border-bottom: none; min-width: 720px; }
+.ask { margin-top: 34px; padding: 18px 20px; border: 1px solid var(--line);
+  border-left: 3px solid var(--gold); border-radius: 8px; background: var(--surface); }
+.ask h2 { font-size: 14px; margin: 0 0 8px; }
+.ask ul { margin: 0; padding-left: 18px; color: var(--ink-2); }
+.ask li { margin-bottom: 6px; }
+.ask li:last-child { margin-bottom: 0; }
+.ref { background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 18px 20px; margin-bottom: 8px; }
+.note { color: var(--ink-3); font-size: 11.5px; margin: 10px 0 0; }
+@media (max-width: 560px) { h1 { font-size: 20px; } }
+
+/* ── the product's own band rules, verbatim from src/builder.css ── */
+/* ══ THE PLAN BUILDER (§129, spec 020) ══════════════════════════════
+   The band is CHROME — it sits under the tab rows, spans the window like
+   them, and carries the accent as an EDGE (§41's budget: one mark, not a
+   colour scheme). Everything wears tokens, so a tenant's branding and the
+   dark palette both carry it with no rule of their own (§38). */
+
+#buildband { border-bottom:1px solid var(--line); background:var(--surface); }
+.bband { display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:8px 22px; border-left:3px solid var(--gold); }
+.bwho { font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--gold-deep); flex:none; }
+.bchips { display:flex; align-items:center; gap:4px; flex:none; }
+.bchip { display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--ink-2);
+  padding:3px 10px; border-radius:99px; border:1px solid var(--line);
+  background:var(--surface); cursor:pointer; font:inherit; }
+.bchip:hover { border-color:var(--gold); }
+.bchip:focus-visible { outline:2px solid var(--focus); outline-offset:1px; }
+.bchip.cur { background:var(--panel); color:var(--panel-ink); border-color:var(--panel);
+  font-weight:700; }
+.bst { font-weight:800; font-size:10px; }
+.bst.ok { color:var(--good); }
+.bst.part { color:var(--gold-deep); }
+.bst.empty { color:var(--ink-3); }
+/* On the lit chip the page's status inks vanish into the navy — the mark
+   takes the accent, the one colour that reads on the panel (§38.5). */
+.bchip.cur .bst { color:var(--gold); }
+.bhint { font-size:11.5px; color:var(--ink-2); flex:1; min-width:180px; }
+.bhint b { color:var(--ink); }
+.bacts { display:flex; gap:8px; align-items:center; flex:none; margin-left:auto; }
+
+/* The builder's three button voices, quietest to loudest (§94.8's order of
+   loudness): a link, an outlined act, the one solid primary. */
+.blink { border:none; background:none; color:var(--ink-3); font-size:11.5px;
+  text-decoration:underline; cursor:pointer; padding:4px 4px; font:inherit; }
+.blink:hover { color:var(--ink); }
+.bgo { border:1px solid var(--panel); color:var(--panel); background:var(--surface);
+  border-radius:7px; padding:4px 12px; font-size:11.5px; font-weight:700; cursor:pointer; font:inherit; }
+.bprim { border:1px solid var(--panel); background:var(--panel); color:var(--panel-ink);
+  border-radius:7px; padding:4px 12px; font-size:11.5px; font-weight:700; cursor:pointer; font:inherit; }
+.bgo:hover, .bprim:hover { border-color:var(--gold); }
+.bgo:focus-visible, .bprim:focus-visible, .blink:focus-visible,
+.bdanger:focus-visible { outline:2px solid var(--focus); outline-offset:1px; }
+.bprim:disabled, .bgo:disabled { opacity:.45; cursor:default; }
+.bdanger { border:1px solid var(--bad); color:var(--bad); background:var(--surface);
+  border-radius:7px; padding:3px 10px; font-size:11.5px; font-weight:700; cursor:pointer; font:inherit; }
+
+/* ── The chooser ──────────────────────────────────────────────────── */
+.bseg { display:inline-flex; border:1px solid var(--line); border-radius:8px;
+  overflow:hidden; margin:0 0 10px; }
+.bseg button { padding:5px 14px; font-size:12px; color:var(--ink-2); background:var(--surface);
+  border:none; border-right:1px solid var(--line); cursor:pointer; font:inherit; }
+.bseg button:last-child { border-right:none; }
+.bseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); font-weight:700; }
+.blist { border:1px solid var(--line-soft); border-radius:9px; overflow:hidden; margin:0 0 10px; }
+.brow { display:flex; align-items:center; gap:10px; padding:8px 12px;
+  border-top:1px solid var(--line-soft); font-size:12.5px; flex-wrap:wrap; }
+.brow:first-child { border-top:none; }
+.brow > b { flex:1; }
+.bwhy { font-size:11px; color:var(--ink-3); }
+.bstat { font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+  border-radius:99px; padding:2px 8px; flex:none; }
+.bstat.empty { background:var(--surface-2); color:var(--ink-3); }
+.bstat.has { background:var(--over-bg); color:var(--gold-deep); }
+.bconfirm { font-size:11.5px; color:var(--ink-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.bnewrow { display:flex; gap:10px; align-items:center; }
+.bfoot { font-size:11px; color:var(--ink-3); margin:10px 0 0; max-width:60ch; }
+
+/* ── The row form: ordered boxes, §116's dialog shape ─────────────── */
+.bform { max-width:520px; }
+.bff { margin:0 0 10px; }
+.bfl { font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:3px; }
+.bfi { width:100%; border:1px solid var(--line); border-radius:7px; padding:7px 10px;
+  font-size:12.5px; background:var(--surface); color:var(--ink); font-family:inherit; box-sizing:border-box; }
+.bfi:focus-visible { outline:2px solid var(--focus); outline-offset:0; }
+.bfi.mono { font-family:var(--mono, ui-monospace, monospace); }
+textarea.bfi { resize:vertical; }
+.bfseg { display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.bfseg button { padding:6px 13px; font-size:12px; color:var(--ink-2); background:var(--surface);
+  border:none; border-right:1px solid var(--line); cursor:pointer; font:inherit; }
+.bfseg button:last-child { border-right:none; }
+.bfseg button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); font-weight:700; }
+.bfseg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.bfmiss { font-size:11.5px; color:var(--attn-tx); background:var(--attn-bg); border-radius:7px;
+  padding:6px 10px; margin:2px 0 10px; }
+.bfacts { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.bfnote { font-size:11.5px; color:var(--good); font-weight:700; }
+
+/* ── The review ───────────────────────────────────────────────────── */
+.brv { border:1px solid var(--line-soft); border-radius:9px; overflow:hidden; margin:0 0 6px; }
+.brvrow { display:flex; align-items:center; gap:10px; padding:8px 12px; width:100%;
+  border:none; border-top:1px solid var(--line-soft); font-size:12.5px; text-align:left;
+  background:var(--surface); color:var(--ink); cursor:pointer; font:inherit; }
+.brvrow:first-child { border-top:none; }
+.brvrow:hover { background:var(--surface-2); }
+.brvrow:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.brvrow b { width:130px; flex:none; }
+.brvwhat { flex:1; color:var(--ink-2); }
+
+/* The door on Import & plans: the build door is the sibling of the upload,
+   quietly marked as the on-platform one. */
+.bdoor { display:flex; align-items:center; gap:12px; border:1px solid var(--gold);
+  border-radius:9px; background:var(--over-bg); padding:10px 14px; margin:0 0 14px; flex-wrap:wrap; }
+.bdoor b { font-size:12.5px; }
+.bdoor .bwhy { flex:1; min-width:200px; }
+
+/* On a projector nothing of the builder exists (§97's rule for the corner). */
+body.presenting #buildband { display:none; }
+
+/* ── WHERE BUILDING STARTS (§304.2) ───────────────────────────────────
+   The subject's own empty Plan page. An offer rather than a note: the guided
+   build is the loud control, and the two routes the sentence already carried
+   keep their words beside it. */
+.bempty { border:1px solid var(--gold); border-radius:10px; background:var(--surface);
+  padding:18px 20px; max-width:1080px; }
+.bempty b { font-size:15px; }
+.bempty p { margin:6px 0 14px; color:var(--ink-3); font-size:13.5px; max-width:70ch; }
+.bempty .row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.bempty .bprim { font-size:13px; font-weight:700; border-radius:999px; padding:10px 20px; }
+.bempty .alt { font-size:13px; color:var(--ink-3); max-width:62ch; }
+
+</style>
+
+<div class="wrap">
+  <h1>The plan builder, on a supporting function</h1>
+  <p class="sub">Every band below is the real control, rendered by the product's own
+  code out of the running platform. The proposal is the same renderer handed a
+  different list of boxes &mdash; so the two sides are one build, not a drawing of one.</p>
+  <p class="stamp">22 September 2026 &middot; for sign-off before anything is built</p>
+
+  <section class="ref">
+    <p class="eyebrow">The reference &mdash; a business unit</p>
+    <p class="lede">This is what you are asking functions to be like. Five boxes: who the
+    unit is, what it is judged on, the analysis, the work, and a last look.</p>
+    <div class="bandwrap"><div id="buildband"><div class="bband"><span class="bwho">Building this plan — Mobile</span><span class="bchips" role="tablist"><button class="bchip" data-bnav="found" title="Open Foundation"><span class="bst ok">✓</span>Foundation</button><button class="bchip" data-bnav="obj" title="Open Objectives"><span class="bst part">4</span>Objectives</button><button class="bchip" data-bnav="swot" title="Open SWOT"><span class="bst part">23</span>SWOT</button><button class="bchip" data-bnav="plan" title="Open Pillars"><span class="bst part">4</span>Pillars</button><button class="bchip" data-bnav="review" title="Open Review"><span class="bst empty">○</span>Review</button></span><span class="bhint">Open any section — the order is a suggestion, not a gate.</span><span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button><button class="bprim" data-bfinish="1">Finish building</button></span></div></div></div>
+    <p class="note">No box is lit in any band here. In the product the box for the page
+    you are standing on is filled navy; leaving it out is what makes the six bands
+    below comparable.</p>
+  </section>
+
+  
+<section class="cmp">
+  <p class="eyebrow">A function that plans in pillars</p>
+  <p class="lede">Merchandising. It has a definition and key objectives of its own, on its Overview page — and the builder never offers either.</p>
+  <p class="side">Today</p>
+  <div class="bandwrap"><div id="buildband"><div class="bband"><span class="bwho">Building this plan — Merchandising</span><span class="bchips" role="tablist"><button class="bchip" data-bnav="plan" title="Open Pillars"><span class="bst part">3</span>Pillars</button><button class="bchip" data-bnav="review" title="Open Review"><span class="bst empty">○</span>Review</button></span><span class="bhint">Open any section — the order is a suggestion, not a gate.</span><span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button><button class="bprim" data-bfinish="1">Finish building</button></span></div></div></div>
+  <p class="side">Proposed</p>
+  <div class="bandwrap"><div id="buildband"><div class="bband"><span class="bwho">Building this plan — Merchandising</span><span class="bchips" role="tablist"><button class="bchip" data-bnav="def" title="Open Definition"><span class="bst ok">✓</span>Definition</button><button class="bchip" data-bnav="obj" title="Open Objectives"><span class="bst empty">○</span>Objectives</button><button class="bchip" data-bnav="plan" title="Open Pillars"><span class="bst part">3</span>Pillars</button><button class="bchip" data-bnav="review" title="Open Review"><span class="bst empty">○</span>Review</button></span><span class="bhint">Open any section — the order is a suggestion, not a gate.</span><span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button><button class="bprim" data-bfinish="1">Finish building</button></span></div></div></div>
+  <p class="delta"><b>Two boxes become four.</b> Its definition and its key objectives are on its Overview today with no box pointing at them, so the builder walks past the first half of the plan.</p>
+</section>
+  
+<section class="cmp">
+  <p class="eyebrow">A function that plans in projects</p>
+  <p class="lede">Finance. The boxes are right; what they counted was wrong, and that is already repaired — shown here so the set can be compared.</p>
+  <p class="side">Today</p>
+  <div class="bandwrap"><div id="buildband"><div class="bband"><span class="bwho">Building this plan — Finance</span><span class="bchips" role="tablist"><button class="bchip" data-bnav="def" title="Open Definitions"><span class="bst ok">✓</span>Definitions</button><button class="bchip" data-bnav="obj" title="Open Objectives"><span class="bst part">2</span>Objectives</button><button class="bchip" data-bnav="proj" title="Open Projects"><span class="bst part">3</span>Projects</button><button class="bchip" data-bnav="review" title="Open Review"><span class="bst empty">○</span>Review</button></span><span class="bhint">Open any section — the order is a suggestion, not a gate.</span><span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button><button class="bprim" data-bfinish="1">Finish building</button></span></div></div></div>
+  <p class="side">Proposed</p>
+  <div class="bandwrap"><div id="buildband"><div class="bband"><span class="bwho">Building this plan — Finance</span><span class="bchips" role="tablist"><button class="bchip" data-bnav="def" title="Open Definition"><span class="bst ok">✓</span>Definition</button><button class="bchip" data-bnav="obj" title="Open Objectives"><span class="bst part">2</span>Objectives</button><button class="bchip" data-bnav="proj" title="Open Projects"><span class="bst part">3</span>Projects</button><button class="bchip" data-bnav="review" title="Open Review"><span class="bst empty">○</span>Review</button></span><span class="bhint">Open any section — the order is a suggestion, not a gate.</span><span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button><button class="bprim" data-bfinish="1">Finish building</button></span></div></div></div>
+  <p class="delta"><b>One word.</b> The count now reads the function's own work, so this band already says 3 Projects rather than ○. The only thing left is the plural: it counts one definition.</p>
+</section>
+  
+<section class="cmp">
+  <p class="eyebrow">A function that plans in objectives and actions</p>
+  <p class="lede">The third way of planning. It has no route in the builder, so it falls through to the projects one.</p>
+  <p class="side">Today</p>
+  <div class="bandwrap"><div id="buildband"><div class="bband"><span class="bwho">Building this plan — HR</span><span class="bchips" role="tablist"><button class="bchip" data-bnav="def" title="Open Definitions"><span class="bst ok">✓</span>Definitions</button><button class="bchip" data-bnav="obj" title="Open Objectives"><span class="bst empty">○</span>Objectives</button><button class="bchip" data-bnav="proj" title="Open Projects"><span class="bst empty">○</span>Projects</button><button class="bchip" data-bnav="review" title="Open Review"><span class="bst empty">○</span>Review</button></span><span class="bhint">Open any section — the order is a suggestion, not a gate.</span><span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button><button class="bprim" data-bfinish="1">Finish building</button></span></div></div></div>
+  <p class="side">Proposed</p>
+  <div class="bandwrap"><div id="buildband"><div class="bband"><span class="bwho">Building this plan — HR</span><span class="bchips" role="tablist"><button class="bchip" data-bnav="def" title="Open Definition"><span class="bst ok">✓</span>Definition</button><button class="bchip" data-bnav="obj" title="Open Objectives"><span class="bst empty">○</span>Objectives</button><button class="bchip" data-bnav="act" title="Open Actions"><span class="bst part">5</span>Actions</button><button class="bchip" data-bnav="review" title="Open Review"><span class="bst empty">○</span>Review</button></span><span class="bhint">Open any section — the order is a suggestion, not a gate.</span><span class="bacts"><button class="blink" data-bpause="1" title="Leave the builder — everything built stays; come back from Setup → Import &amp; plans">Pause</button><button class="bprim" data-bfinish="1">Finish building</button></span></div></div></div>
+  <p class="delta"><b>It is offered a box its pages do not have.</b> This function holds five actions and the band reads ○ Projects &mdash; a box that can never fill, beside no box at all for the work it really has.</p>
+</section>
+
+  <div class="ask">
+    <h2>What I am asking you to sign off</h2>
+    <ul>
+      <li><b>Four boxes for every function</b>, differing only in the third &mdash; one
+      shape rather than three.</li>
+      <li><b>No Foundation box and no SWOT box</b>, because a supporting function does
+      not write its own aspiration or its own SWOT; it takes both from the unit it
+      plans under.</li>
+      <li><b>&ldquo;Definitions&rdquo; becomes &ldquo;Definition&rdquo;</b> &mdash; it
+      counts the function's one definition now, not several capabilities'.</li>
+      <li><b>Objectives stays optional</b> and says so on the hover: a function with
+      none is judged by its work.</li>
+    </ul>
+  </div>
+</div>

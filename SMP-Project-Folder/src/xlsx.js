@@ -175,7 +175,23 @@ function sheetXml(sh){
       " characters, and Excel silently ignores an inline list over 255. " +
       "Put the values in a sheet and use `from` instead (" + v.range + ").");
   });
-  var dv = (sh.validations || []).map(function(v){
+  /* AND A LIST WITH NOTHING IN IT IS NOT WRITTEN AT ALL (§380) — §67.5's
+     mirror, and worse than the fault above. A list too long is DROPPED, so the
+     cell is merely unguarded; an EMPTY one still applies, and with
+     `showErrorMessage` on it refuses every value there is — the cell can be
+     neither picked from nor typed into, so the workbook cannot be filled in.
+
+     It is reachable rather than theoretical: since §380 the blank
+     objectives-and-actions template lists the functions that plan that way,
+     and the moment somebody most needs that file is before the tenant has
+     one — a template nobody can fill in is §61's trap wearing a dropdown.
+
+     A `from` range is left alone: it names a sheet, and whether that sheet has
+     anything on it is not knowable from here. */
+  var vals = (sh.validations || []).filter(function(v){
+    return v.from || (v.list && v.list.length);
+  });
+  var dv = vals.map(function(v){
     var f = v.from ? xesc(v.from) : '"' + xesc((v.list || []).join(",")) + '"';
     return '<dataValidation type="list" allowBlank="1" showInputMessage="1" ' +
       'showErrorMessage="' + (v.soft ? "0" : "1") + '" ' +
@@ -190,7 +206,7 @@ function sheetXml(sh){
     '</sheetView></sheetViews>' +
     '<sheetFormatPr defaultRowHeight="15"/>' + cols +
     '<sheetData>' + rows.join("") + '</sheetData>' +
-    (dv ? '<dataValidations count="' + (sh.validations || []).length + '">' + dv + '</dataValidations>' : '') +
+    (dv ? '<dataValidations count="' + vals.length + '">' + dv + '</dataValidations>' : '') +
     '</worksheet>';
 }
 
@@ -454,7 +470,12 @@ function readmeCell(sheets, label){
    still reads — and renaming it without this is the §51.11 fault exactly: the
    reader stops finding the cell, the upload reports "no business unit called
    ''", and nothing says why. */
-var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability"];
+/* §380: and "Supporting function", which the objectives-and-actions template
+   writes because only a function can plan that way. Added here in the same
+   edit as the row that writes it — that is the whole of the rule above, and
+   the one place it can be broken. */
+var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability",
+                        "Supporting function"];
 /* WHICH KIND OF WORKBOOK THIS IS, off its own first cell (§304.4). Written by
    `readme()` and `capReadme()` for every file the platform produces, so it is
    the file's own word rather than a guess about its shape. "" when the sheet
@@ -1153,25 +1174,49 @@ var MS_STATUSES_D = ["Not started", "In progress", "Delivered"];
    The ambiguity §51.2 worried about does not go unanswered — it is answered
    where it belongs, on arrival: two capabilities sharing a name are REFUSED BY
    NAME rather than resolved by whichever came first in the array. */
-function capReadme(kind, capNames, picked){
+/* \u2500\u2500 \u00a7380: THE ROW ABOVE THE NAME SAYS WHAT THE LIST HOLDS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Only a supporting function can plan in objectives and actions \u2014 `capFormat`
+   has two values and neither of them is that \u2014 so the objectives file's
+   dropdown never holds a capability, and a row over it reading "Capability"
+   would be false on every copy of a file this round creates.
+
+   READ BACK BY `READ_PICK_LABELS`, which carries every label the platform has
+   ever written (\u00a758): a label is a contract with every file already sitting in
+   somebody's Downloads folder, and renaming one without adding it there is
+   \u00a751.11's fault exactly \u2014 the reader stops finding the cell and the upload
+   reports that nothing was chosen.
+
+   THE PROSE FOLLOWS THE SHEETS, not the format: `only` is what drops them
+   (below), so a per-subject download still carries every sheet and still gets
+   the full instructions. A Read me telling somebody to "fill Projects FIRST"
+   in a file with no Projects sheet is the same fault as the sheet itself. */
+function capReadme(kind, capNames, picked, opts){
+  var o = opts || {};
+  var who = o.fmt === "objectives" ? "Supporting function" : "Capability";
+  var objOnly = !!o.only && o.fmt === "objectives";
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
-       ["Capability", ""],
+       [who, ""],
        ["Cycle", REVIEW.name || ""],
        ["", ""],
-       ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
-       ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
+       ["How to fill it", objOnly
+         ? "Two sheets. Objectives are what the function is judged on; Actions are the work it has committed to, each with an owner and a due date."
+         : "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
+       ["Dropdowns", objOnly
+         ? "Direction and Compile are lists. Unit suggests rather than insists: type your own if it is not offered."
+         : "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
        ["Owners", "Type the person's name."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
-       ["Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."],
-       ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
+       [objOnly ? "Action due dates" : "Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."]]
+      .concat(objOnly ? [] : [["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."]])
+      .concat([
        ["Blank rows", "Ignored."],
        ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
        ["What upload does", "Writes this plan from scratch. Whatever is recorded now is archived first and can be restored \u2014 nothing is deleted."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]])
     : [["Progress workbook", ""],
-       ["Capability", ""],
+       [who, ""],
        ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
@@ -1211,9 +1256,26 @@ function impPlanWorkbookFor(v){
      and a function's holder is exactly that shape, so the projects template is
      built for both from one builder (§53.5). */
   var h = impHolderFor(v);
-  if (h) return capPlanWorkbook(h);
+  /* §380: the FORMAT and never `only` — the file keeps all seven sheets, and
+     what the format decides here is the Read me: which subjects its dropdown
+     offers, and whether the row above the name says Capability or Supporting
+     function. A subject downloading its own plan is already chosen, so the
+     list is a courtesy; getting it wrong is how a file downloaded for one
+     subject is uploaded for another. */
+  if (h) return capPlanWorkbook(h, { fmt:impSubjectFormat(v) });
   var u = unitLike(v);
   return u ? planWorkbook(u) : null;
+}
+/* Which way the ticked subject plans, in the template's own words. A
+   capability is never `objectives` (`capFormat` has two values), so the
+   question only ever has a third answer for a supporting function. */
+function impSubjectFormat(v){
+  var t = String(v || "");
+  if (t.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[t.slice(3)];
+    if (f && fnPlansInObjectives(f)) return "objectives";
+  }
+  return "projects";
 }
 /* The subject a download was asked for, resolved the same way the upload
    resolves the one it was handed — or the two disagree about what `fn:finance`
@@ -1293,26 +1355,56 @@ function archiveWorkbook(a){
 
    A function with neither projects nor a capability is offered too: it is the
    one that most needs a plan, and `fnOwnsProjects` is exactly that question
-   (§61's trap — a subject unreachable until it already has content). */
-function projectSubjectNames(){
-  var out = [];
-  FUNCTION_KEYS.forEach(function(k){
+   (§61's trap — a subject unreachable until it already has content).
+
+   ── §380: AND THE LIST IS NARROWED BY THE FORMAT THE FILE WAS BUILT FOR ────
+   With no `fmt` it answers exactly what it answered before, which is what a
+   per-subject download and every existing caller want: that file carries every
+   sheet, so every subject fits it.
+
+   A BLANK template is built FOR one way of planning and carries only that
+   format's sheets, so listing a subject it does not fit offers a file that
+   cannot hold that subject's plan — and an upload AUTHORS, so filling in the
+   wrong blank does not fail, it writes a plan with the missing half empty
+   (§22). The list is the narrowing, because the dropdown is where somebody is
+   standing when they choose.
+
+   IT RETURNS KEYS AS WELL AS NAMES, and that is the load-bearing half: the
+   UPLOAD resolves the name in the file against its own predicate, and until
+   today that predicate asked `fnOwnsProjects`, which §342 makes false for an
+   objectives function — so the template offered a name the door could not
+   resolve and the upload answered "no business unit, supporting function or
+   capability called …". Measured on the shipped build. One question, one
+   answer (§53.5), and the door asks it with no `fmt` at all, because by then
+   the file exists and the only question left is who the name belongs to. */
+function projectSubjectFns(fmt){
+  return FUNCTION_KEYS.filter(function(k){
     var f = FUNCTIONS[k];
-    /* §342: AND A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS. Its plan is
-       this template's subject too — the Objectives and Actions sheets — and
-       `fnOwnsProjects` rightly answers false for it, so without this clause
-       its plan downloads for nobody and cannot come back (§22, §61, and
-       §334.15's own finding one format along). */
-    if (f && f.active !== false && (fnPlansInObjectives(f) ||
-        (!fnPlansInPillars(f) && fnOwnsProjects(k)))) out.push(f.name);
+    if (!f || f.active === false || fnPlansInPillars(f)) return false;
+    return fnPlansInObjectives(f) ? fmt !== "projects"
+                                  : fmt !== "objectives" && fnOwnsProjects(k);
   });
-  return out.concat(GROUP.capabilities.map(function(x){ return x.name; }));
 }
-function capPlanWorkbook(c){
-  var names = projectSubjectNames();
+function projectSubjectNames(fmt){
+  return projectSubjectFns(fmt).map(function(k){ return FUNCTIONS[k].name; })
+    .concat(fmt === "objectives" ? []
+            : GROUP.capabilities.map(function(x){ return x.name; }));
+}
+/* `opts` is `{fmt, only}`. `fmt` narrows the Read me's list and its prose;
+   `only` drops the sheets that format does not use, and is passed by the BLANK
+   template alone — a subject's own download carries all seven whatever it
+   plans, because §342 decided that and this round does not reverse it.
+
+   NAMED BY WHAT EACH FORMAT DROPS, never by what it keeps: a sheet added
+   tomorrow then rides in both blank templates until somebody decides it does
+   not, where a keep-list would silently leave it out of both — and a column
+   the file does not carry is a column the plan LOSES (§22). */
+function capPlanWorkbook(c, opts){
+  var o = opts || {};
+  var names = projectSubjectNames(o.fmt);
   var units = unitSuggestions();
-  return [
-    capReadme("plan", names, c ? c.name : ""),
+  var sheets = [
+    capReadme("plan", names, c ? c.name : "", o),
 
     { name:"Objectives", widths:[40, 11, 14, 12, 10, 12, 9],
       head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "Hidden"],
@@ -1424,6 +1516,16 @@ function capPlanWorkbook(c){
         return acc;
       }, []) }
   ];
+  if (!o.only) return sheets;
+  /* Every sheet a dropped one is referenced BY goes with it: the three project
+     sheets each validate their first column against the Projects sheet's own
+     range, so dropping Projects alone would leave three dropdowns pointing at
+     a sheet that is not in the file (§65 — a validation range is a POSITION,
+     and a range on a missing sheet is worse than none). */
+  var drop = o.fmt === "objectives"
+    ? ["Projects", "Deliverables", "Outcomes", "Milestones"]
+    : o.fmt === "projects" ? ["Actions"] : [];
+  return sheets.filter(function(s){ return drop.indexOf(s.name) < 0; });
 }
 
 function capProgressWorkbook(c){

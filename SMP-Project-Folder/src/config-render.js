@@ -5199,7 +5199,12 @@ function lineOwnersSwitch(mayEdit, editing){
   if (!mayEdit) return "";
   var on = SMPRules.lineOwnersOn(world());
   /* Counted off the PLAN rather than off `myLineRows`, which is scoped to the
-     viewer — this is the tenant's number and the office is not an owner. */
+     viewer — this is the tenant's number and the office is not an owner.
+
+     AND `plural()` RETURNS THE COUNT AND THE WORD (§107.8, §160.6, §301 — the
+     fourth time), so the number goes in front of it nowhere: this read
+     "83 83 lines" on both sentences. Every other caller in the product wraps
+     the whole `plural()` in the <b>, and so does this one now (§53.5). */
   var owned = 0;
   myLineTargets().forEach(function(t){
     var subj = unitLike(t);
@@ -5221,10 +5226,10 @@ function lineOwnersSwitch(mayEdit, editing){
       (on
         ? 'The person a tactic names as its <b>Owner</b> enters its figure, on their own ' +
           '<b>My reporting</b> tab \u2014 and a collaborator enters none. ' +
-          '<b>' + owned + '</b> ' + plural(owned, "line") + ' ' +
+          '<b>' + plural(owned, "line") + '</b> ' +
           (owned === 1 ? 'is' : 'are') + ' entered this way.'
-        : 'The unit enters every figure. Turning this on moves <b>' + owned + '</b> ' +
-          plural(owned, "line") + ' to the ' + (owned === 1 ? 'person' : 'people') +
+        : 'The unit enters every figure. Turning this on moves <b>' +
+          plural(owned, "line") + '</b> to the ' + (owned === 1 ? 'person' : 'people') +
           ' the plan names as owner.') +
     '</span></div>';
 }

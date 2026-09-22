@@ -4977,6 +4977,143 @@ function renderBandsExtra(){
   return section("", "Focus and reward", null, rows);
 }
 
+/* ── Setup · Seasons (spec 062 §6.5) ──────────────────────────────────
+   Islam, of the drawn screen: *"ok."*
+
+   A season is a named window of real days — Ramadan, the school run, the
+   fourth quarter of a retail year — and it is defined ONCE for the client
+   and used BY NAME in any unit's tree. Change Ramadan's dates here and every
+   base period in the client moves with it, because `driverMonths` takes a
+   base year to be twelve months LESS the seasons its own sub-channel names
+   (§4.2): the dates are read at the moment the tree is drawn and are never
+   copied onto a period.
+
+   IT IS IN *MEASUREMENT* AND NOT IN *RUNNING THE CYCLE*, which is a
+   placement rather than a detail and is §261.9's own ruling applied
+   forward: that group's note says **what you do while a cycle is open**,
+   and naming Ramadan is what you do when one is not. This group's note is
+   *what the numbers mean*, and a season is the line that decides how many
+   months a base year has — the same kind of fact as a scoring band two rows
+   above it. One word from Islam moves it.
+
+   `c_bands` IS ITS GRANT, deliberately, and no column appears on Roles &
+   access: a season and a scoring band are both *the office decides what a
+   figure means*, and a cell of its own would be a second answer to one
+   question (§37 — a column whose every cell repeats its neighbour's is a
+   question with no second answer). The SERVER classifies it separately all
+   the same (`seasons`, §42), because a refusal has to name the page that
+   answers it and "Setup → Seasons" sends somebody somewhere. */
+function seasonsUnits(){
+  return UNIT_KEYS.map(function(k){ return UNITS[k]; }).filter(Boolean);
+}
+/* ISO IN, THE PLATFORM'S OWN WORDS OUT, AND BACK AGAIN THROUGH ITS OWN
+   READER (§53.5). The stored value is ISO — it sorts, it is unambiguous and
+   `seasonMonths` subtracts two of them — while the picker is the one date
+   control this product has (§307's `monthBtnHtml`, `{day:true}`), which
+   shows and writes the spoken form. So the button is HANDED the spoken form
+   and its setter converts back, through `dayParts` rather than through a
+   second parser: one reader for every date shape the platform has ever
+   accepted.
+
+   MIXING THE TWO SPELLINGS IS WHY THIS IS NOT LEFT TO `new Date` AT EACH
+   END: `new Date("2026-02-17")` is UTC midnight and `new Date("17 Feb 2026")`
+   is LOCAL midnight, so a window with one of each is out by the timezone
+   offset and the day count can land a day either side. */
+function seasonIso(v){
+  var p = dayParts(String(v == null ? "" : v));
+  if (p.day == null) return "";
+  return p.year + "-" + String(p.mi + 1).padStart(2, "0") + "-" +
+         String(p.day).padStart(2, "0");
+}
+/* THE NAME, BOUND, AND ITS OWN BUILDER RATHER THAN `cycleField`'s — twice
+   over. That one draws a visible `<span>` label beside the box, which under a
+   column heading already reading *Season* says the word twice on one row
+   (§§87, 267.2); and its put-back is scoped to `.newcycle`, so a refusal
+   here would find nothing and leave the box showing what was NOT stored,
+   which is §124 with the sign reversed.
+
+   A SEASON WITH NO NAME IS THE ONE THING THIS PAGE CANNOT DRAW — a tree
+   names a season by `id` and shows the name, so a blank one is a period
+   reading nothing at all. There is no Save to refuse at, so the refusal is
+   the stored name coming back into the box (§273.4's own answer). */
+function seasonNameCell(s, mayEdit){
+  if (!mayEdit) return '<b>' + esc(s.name || "") + '</b>';
+  var i = FIELDS.length;
+  FIELDS.push(function(v){
+    var t = String(v).trim();
+    if (!t) {
+      var el = document.querySelector('[data-fld="' + i + '"]');
+      if (el) el.value = s.name || "";
+      return;
+    }
+    s.name = t; paint();
+  });
+  return '<input class="fld" data-fld="' + i + '" value="' + esc(s.name || "") +
+    '" placeholder="Ramadan" aria-label="Season name">';
+}
+function seasonDayCell(s, key, mayEdit){
+  var shown = s[key] ? drvDay(s[key], true) : "";
+  if (!mayEdit) return shown ? esc(shown) : '<span class="why">Not set</span>';
+  return monthBtnHtml(shown, "", function(v){
+    /* CLEARED IS DELETED, never an empty string (§50.6): a season nobody has
+       dated is the same season whether it has never been dated or was dated
+       and cleared, and two spellings of one absence is a change the
+       authoriser has to judge that nobody made (§249.3). */
+    var iso = seasonIso(v);
+    if (iso) s[key] = iso; else delete s[key];
+    paint();
+  }, { day:true, none:"Not set" });
+}
+/* HOW LONG IT IS, DERIVED AND NEVER TYPED — the one line that stops a season
+   and its base year disagreeing about a month. Both ends inclusive, because
+   17 Feb to 19 Mar is 31 days and not 30 (`seasonMonths`). */
+function seasonLenCell(s){
+  var m = SMPRules.seasonMonths(s);
+  if (!m) return '<span class="why">—</span>';
+  var days = Math.round(m * SMPRules.MONTH_DAYS);
+  return '<span class="mono">' + days + ' day' + (days === 1 ? '' : 's') + '</span>' +
+    '<span class="why">' + m.toFixed(2) + ' months</span>';
+}
+function renderSeasons(){
+  var mayEdit = grant("c_bands") === "edit";
+  var list = SMPRules.seasonsOf(GROUP);
+  return cfgHead("Seasons", [], null, mayEdit) +
+    section("", "Seasons", null,
+      (list.length
+        ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+            '<th class="idx">#</th><th>Season</th><th>Starts</th><th>Ends</th>' +
+            '<th class="cc">Length</th><th class="cc">Used by</th>' +
+            (mayEdit ? '<th class="cc"></th>' : '') +
+          '</tr></thead><tbody>' +
+          list.map(function(s, i){
+            var used = SMPRules.seasonUsedBy(seasonsUnits(), s.id);
+            return '<tr><td class="idx">' + (i + 1) + '</td>' +
+              '<td>' + seasonNameCell(s, mayEdit) + '</td>' +
+              '<td>' + seasonDayCell(s, "start", mayEdit) + '</td>' +
+              '<td>' + seasonDayCell(s, "end", mayEdit) + '</td>' +
+              '<td class="cc">' + seasonLenCell(s) + '</td>' +
+              '<td class="cc">' + (used.length
+                ? '<span class="mono" title="' +
+                    esc(used.map(function(u){ return u.name; }).join(", ")) + '">' +
+                    used.length + '</span>'
+                : '<span class="why">—</span>') + '</td>' +
+              (mayEdit
+                ? '<td class="cc"><button class="xbtn" data-seasrm="' + esc(s.id) + '" ' +
+                    'title="Remove this season">×</button></td>'
+                : '') + '</tr>';
+          }).join("") + '</tbody></table></div>'
+        : '<div class="note">No seasons yet. A season is a named window of real ' +
+          'days that a unit can pull out of its base year — Ramadan, the school ' +
+          'run, a peak quarter.</div>') +
+      (mayEdit ? '<div class="addrow"><button class="editbtn" id="addseason">' +
+                 '+ Add a season</button></div>' : '') +
+      '<div class="note"><b>A season is defined once here and used by name in any unit.</b> ' +
+      'Change its dates and every base year that names it moves with them, because a base ' +
+      'year is twelve months less the seasons pulled out of it — calculated, never typed. ' +
+      'A season is used on <b>Strategy → Drivers</b>, where a unit adds it as a period of ' +
+      'its own. It cannot be removed while a unit still names it.</div>');
+}
+
 /* ── Setup · Focus measures ─────────────────────────────────────────
    Marking is a configuration act, not something to be done while reading a
    unit's page \u2014 a marking mode sitting in a reading view invites a stray click

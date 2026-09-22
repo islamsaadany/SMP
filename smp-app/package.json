@@ -43,7 +43,7 @@
     "check:insights:red": "for b in client-sees-drafts leak-file-path version-always everyone-sees-everything; do SMP_BREAK=$b node --experimental-strip-types checks/insights.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:portfolio": "node --experimental-strip-types checks/portfolio.mjs",
     "check:drivers": "node checks/drivers.mjs",
-    "check:drivers:red": "for b in no-season-cut count-prorated pct-raw increment-baseline no-interaction; do echo \"--- $b\"; SMP_BREAK=$b node checks/drivers.mjs > /dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; done; echo \"all five red\"",
+    "check:drivers:red": "for b in no-season-cut count-prorated pct-raw increment-baseline no-interaction no-cascade season-id-from-count; do echo \"--- $b\"; SMP_BREAK=$b node checks/drivers.mjs > /dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; done; echo \"all seven red\"",
     "check:portfolio:red": "for b in any-build team-deletes viewer-comments anyone-completes restamp-start manual-wins equal-only no-collapse no-cascade owed-sums; do SMP_BREAK=$b node --experimental-strip-types checks/portfolio.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:tracker": "node --experimental-strip-types checks/tracker.mjs",
     "check:tracker:red": "for b in no-office-gate reset-carried owner-anyone who-everyone reload-on-add back-on-blur week-numbers note-standing week-of-year card-count card-jumps details-always wide-names; do SMP_BREAK=$b node --experimental-strip-types checks/tracker.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",

@@ -40,7 +40,8 @@
      SMP_BREAK=count-prorated     node checks/drivers.mjs   # must go red
      SMP_BREAK=pct-raw            node checks/drivers.mjs   # must go red
      SMP_BREAK=increment-baseline node checks/drivers.mjs   # must go red
-     SMP_BREAK=no-interaction     node checks/drivers.mjs   # must go red */
+     SMP_BREAK=no-interaction     node checks/drivers.mjs   # must go red
+     SMP_BREAK=no-cascade         node checks/drivers.mjs   # must go red */
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -87,6 +88,18 @@ const BREAKS = {
                          "if (false) {\n      var rev = y.rev * months;"],
   /* The interaction term dropped, so the four parts stop adding up. */
   "no-interaction": ["intEff: (y.vol - b.vol) * (y.val - b.val) * months,", "intEff: 0,"],
+  /* EACH DRIVER'S EFFECT MEASURED AGAINST THE FULLY PLANNED PERIOD rather
+     than against what had already gone wrong above it — the obvious reading,
+     and the one whose column does not add up to the gap it explains
+     (§10's whole subject). */
+  "no-cascade": ["var raw = (k <= i && a != null) ? a : driverYearOne(d);",
+                 "var raw = (k === i && a != null) ? a : driverYearOne(d);"],
+  /* A NEW SEASON'S ID MINTED FROM THE COUNT rather than from the highest
+     (§96.2): remove the middle of s1·s2·s3 and the next Add hands back an id
+     a unit's period still names, so Setup → Seasons silently re-points
+     somebody's base year at a season they never chose. */
+  "season-id-from-count": ['return "s" + (top + 1);',
+                           'return "s" + (seasonsOf(group).length + 1);'],
 };
 
 let src = readFileSync(RULES, "utf8");
@@ -111,7 +124,9 @@ if (typeof R.driverFigures !== "function") stop("the shared module did not expor
 const { seasonMonths, driverMonths, driverPeriod, driverSub, driverFigures,
         driverTarget, driverBridge, driverFlat, driverRows, driverById,
         driverMintId, driverState, driverUnanswered, driverChannel,
-        seasonsOf } = R;
+        seasonsOf, driverActual, driverReported, driverPeriodActual,
+        driverActualFigures, driverScore, seasonMintId, seasonUsedBy,
+        seasonById } = R;
 
 /* ══ §1 · THE REFERENCE, RUN RATHER THAN READ ══════════════════════════ */
 console.log("\n§1 · the reference tool");
@@ -363,6 +378,161 @@ ok("reading a group with no seasons mints nothing on it",
    seasonsOf(bareGroup).length === 0 && Object.keys(bareGroup).length === 0);
 ok("and a malformed tree reads as no tree rather than throwing",
    driverChannel({ drivers: "yes" }) === null && driverChannel({ drivers: {} }) === null);
+
+/* ══ §10 · WHAT ACTUALLY HAPPENED, AND WHY THE COLUMN ADDS UP ═══════════
+   The review reading (spec 062 §6.3). Every driver's figure is TYPED —
+   Islam, of whether a connected row reads its actual from the work it
+   connects to: *"what do oyu mean? they are all typed"* — and the property
+   that has to hold is not a number but a RELATIONSHIP: the per-driver
+   effects down a period must come to that period's own gap, and the periods
+   must come to the channel's. A breakdown that disagrees with the headline
+   it sits under is worse than none (§99.7, §264), so that is what is
+   asserted rather than the figures (§94.8).
+
+   THE FIXTURE IS ISLAM'S OWN RETAIL TREE with reported figures added, and
+   the figures ARE invented — nobody has reported against a tree yet, and the
+   mockup says so on its own face. What is not invented is the arithmetic
+   they go through. */
+console.log("\n§10 · what actually happened");
+{
+  const SE = [{ id: "ramadan", name: "Ramadan season",
+                start: "2026-02-17", end: "2026-03-19" }];
+  const D = (id, n, k, u, b, up, act) =>
+    ({ id, name: n, kind: k, unit: u, base: b, up, upUnit: "%", actual: act });
+  const ch = { subs: [{ name: "Retail", periods: [
+    { name: "Base", type: "base", drivers: [
+      D("a", "stores", "vol", "n", 12, 0, 12),
+      D("b", "trans", "vol", "n", 4500, 0, 4100),
+      D("c", "basket", "val", "n", 180, 10, 201)] },
+    { name: "Ram", type: "season", seasonId: "ramadan", drivers: [
+      D("d", "stores", "vol", "n", 12, 0, null),
+      D("e", "trans", "vol", "n", 6500, 5, 7200),
+      D("f", "basket", "val", "n", 230, 10, 249)] },
+    { name: "New", type: "increment", drivers: [
+      D("g", "new stores", "vol", "n", 3, 0, 2),
+      D("h", "months", "vol", "n", 9, 0, 7),
+      D("i", "trans", "vol", "n", 4500, 0, null),
+      D("j", "basket", "val", "n", 180, 0, null),
+      D("k", "maturity", "val", "%", 70, 0, null)] }] }] };
+  const sub = ch.subs[0], near = (a, b) => Math.abs(a - b) < 1e-6;
+
+  /* THE ONE THAT MATTERS, asserted per period rather than once on the total:
+     a channel whose periods' errors happened to cancel would satisfy a
+     single total assertion perfectly (§113.8). */
+  sub.periods.forEach((p) => {
+    const a = driverPeriodActual(SE, ch, sub, p);
+    const sum = a.rows.reduce((t, r) => t + r.effect, 0);
+    ok("the effects down " + p.name + " come to its own gap",
+       near(sum, a.gap), sum.toFixed(2) + " against " + a.gap.toFixed(2));
+    ok("and " + p.name + "'s planned figure is the one the plan already says",
+       near(a.planned, driverPeriod(SE, ch, sub, p).b1));
+  });
+
+  const f = driverActualFigures(SE, ch);
+  const per = sub.periods.map((p) => driverPeriodActual(SE, ch, sub, p));
+  ok("the channel's gap is the sum of its periods'",
+     near(f.gap, per.reduce((t, x) => t + x.gap, 0)));
+  ok("and its planned total is the tree's own year-one figure",
+     near(f.planned, driverFigures(SE, ch).b1));
+
+  /* NOT REPORTED IS NOT NOUGHT (§35, §93), and it is asserted at BOTH ENDS
+     (§94.2): a row nobody typed against moves nothing AND a row that WAS
+     typed against moves something, or a build that ignored every reported
+     figure would satisfy the first half perfectly. */
+  const base = driverPeriodActual(SE, ch, sub, sub.periods[0]);
+  ok("a driver reported at its plan moves nothing", near(base.rows[0].effect, 0));
+  ok("and one reported under it moves the money", base.rows[1].effect < -1e6);
+  const inc = driverPeriodActual(SE, ch, sub, sub.periods[2]);
+  ok("a driver nobody reported against reads as not reported, never as nought",
+     inc.rows[2].reported === false && inc.rows[2].actual === null &&
+     near(inc.rows[2].effect, 0));
+  ok("so the unreported rows leave the period's actual standing on the reported ones",
+     inc.actual > 0 && inc.actual < inc.planned);
+
+  /* THE CASCADE IS THE DECISION (§10's own subject). Measured one at a time
+     against the fully planned period, these same figures do NOT sum to the
+     gap — which is what `--break=no-cascade` restores. */
+  const one = base.rows.map((r, i) => {
+    const alt = { ...sub.periods[0],
+      drivers: sub.periods[0].drivers.map((d, k) =>
+        k === i ? d : { ...d, actual: null }) };
+    return driverPeriodActual(SE, ch, sub, alt).gap;
+  }).reduce((t, x) => t + x, 0);
+  ok("and measuring each row against the untouched plan would NOT add up",
+     !near(one, base.gap), one.toFixed(2) + " against " + base.gap.toFixed(2));
+
+  ok("a tree nobody has reported against says so",
+     driverReported(ch) === true &&
+     driverReported({ subs: [{ name: "x", periods: [
+       { name: "p", type: "base", drivers: [D("z", "n", "vol", "n", 1, 0, null)] }] }] }) === false);
+  ok("a blank figure is not a figure", driverActual({ actual: "" }) === null &&
+     driverActual({ actual: "not a number" }) === null && driverActual({ actual: 0 }) === 0);
+  /* A SHARE OF NOUGHT IS NOT A HUNDRED PER CENT (§239.4). */
+  ok("a tree that argues for nothing is not scored",
+     driverScore({ planned: 0, actual: 0 }) === null && driverScore(f) === 90,
+     String(driverScore(f)));
+}
+
+/* ══ §11 · SEASONS, SET ONCE FOR THE CLIENT (spec 062 §6.5) ════════════
+   The two readers behind Setup → Seasons. Pure: no browser, no database —
+   the page that draws them is driven separately.
+
+   BOTH ENDS EVERY TIME (§94.2): a season nobody names must be removable and
+   one a unit names must not, or a build that refused every removal satisfies
+   half of this perfectly and leaves a page with a dead button on it. */
+{
+  console.log("\n§11 · seasons");
+
+  /* §96.2, `driverMintId`'s own rule one collection over. The list here has
+     had its middle removed, which is the only state that separates minting
+     from the maximum from minting from the count — a list of 1·2·3 gives the
+     same answer either way, so a fixture without the hole would pass on the
+     broken build (§113.8). */
+  const holed = { seasons: [{ id: "s1", name: "a" }, { id: "s3", name: "c" }] };
+  ok("a new season's id is one more than the HIGHEST, never one more than the count",
+     seasonMintId(holed) === "s4", seasonMintId(holed));
+  ok("and the first one on a client that has none is s1",
+     seasonMintId({}) === "s1" && seasonMintId({ seasons: [] }) === "s1");
+  /* THE DEMO'S OWN SEASON IS NOT NUMBERED — it is `ramadan`, which is what a
+     hand-written dataset looks like — so the minter has to survive an id it
+     cannot read as a number rather than answering `sNaN`. */
+  ok("an id the minter cannot read as a number is skipped, not counted",
+     seasonMintId({ seasons: [{ id: "ramadan" }] }) === "s1",
+     seasonMintId({ seasons: [{ id: "ramadan" }] }));
+
+  /* WHO STILL NAMES IT — the refusal behind Remove (§62). */
+  const withSeason = { name: "Retail", drivers: { subs: [{ name: "s", periods: [
+    { name: "base", type: "base", drivers: [] },
+    { name: "Ramadan", type: "season", seasonId: "ramadan", drivers: [] }] }] } };
+  const without = { name: "Mobile", drivers: { subs: [{ name: "s", periods: [
+    { name: "base", type: "base", drivers: [] }] }] } };
+  const noTree = { name: "Care" };
+  const units = [withSeason, without, noTree];
+  ok("a season a unit names is refused, and the unit is NAMED",
+     seasonUsedBy(units, "ramadan").length === 1 &&
+     seasonUsedBy(units, "ramadan")[0].name === "Retail",
+     seasonUsedBy(units, "ramadan").map((u) => u.name).join(","));
+  ok("and one nobody names is free to go",
+     seasonUsedBy(units, "s9").length === 0);
+  ok("a unit with no tree at all is not a holder", seasonUsedBy([noTree], "ramadan").length === 0);
+  /* The id is compared as a STRING at both ends, or a numeric id stored by a
+     migration and a string typed by the page stop matching (§48). */
+  ok("the id is matched as a string, so 3 and \"3\" are one season",
+     seasonUsedBy([{ name: "x", drivers: { subs: [{ periods: [
+       { type: "season", seasonId: 3 }] }] } }], "3").length === 1);
+
+  /* A SEASON NOBODY HAS DATED TAKES NOTHING OUT OF A BASE YEAR (§93 — absent
+     is never a number somebody could mistake for one), which is what lets
+     Setup → Seasons add one undated and name it afterwards. */
+  ok("an undated season is nought months, never a negative or a throw",
+     seasonMonths({ id: "s1", name: "x" }) === 0 &&
+     seasonMonths({ start: "2026-03-19", end: "2026-02-17" }) === 0 &&
+     seasonMonths({ start: "nonsense", end: "also" }) === 0);
+  ok("and a dated one is inclusive of both ends",
+     Math.round(seasonMonths({ start: "2026-02-17", end: "2026-03-19" }) * R.MONTH_DAYS) === 31);
+  ok("seasonById answers null rather than throwing for an id that has gone",
+     seasonById([{ id: "s1" }], "s9") === null && seasonById(null, "s1") === null);
+}
 
 /* ══ VERDICT ═══════════════════════════════════════════════════════════ */
 console.log("\n" + (bad.length ? bad.length + " FAILED of " + (pass + bad.length) : pass + " checks, 0 failed"));

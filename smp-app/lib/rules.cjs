@@ -3643,6 +3643,47 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return null;
   }
 
+  /* A NEW SEASON'S ID IS ONE MORE THAN THE HIGHEST (§96.2, `driverMintId`'s
+     own rule one collection over): delete the middle of s1·s2·s3 and a
+     count-minted id collides with a season a unit's period still names, so
+     removing Ramadan would silently re-point every period that named it at
+     whatever was added next. */
+  function seasonMintId(group) {
+    var top = 0;
+    seasonsOf(group).forEach(function (s) {
+      var n = parseInt(String(s && s.id).replace(/^s/, ""), 10);
+      if (isFinite(n) && n > top) top = n;
+    });
+    return "s" + (top + 1);
+  }
+
+  /* WHICH UNITS STILL NAME A SEASON — the refusal behind Remove (§62: the
+     refusal is the feature, and it names what is in the way).
+
+     A season removed while a period names it does not corrupt anything —
+     `seasonById` answers null and `seasonMonths(null)` is 0, so the base year
+     gets its month back and the tree still adds up — and it leaves a period
+     on somebody's Drivers page reading an em-dash for ever, with no control
+     on that page able to say what it was. That is §61's dead end wearing a
+     clean save, so the removal is refused here and the units are NAMED.
+
+     It takes the units rather than reading a global, because this module is
+     run by the browser AND by Node with no collections of its own (§42). */
+  function seasonUsedBy(units, id) {
+    var out = [];
+    (units || []).forEach(function (u) {
+      var ch = driverChannel(u);
+      if (!ch) return;
+      var hit = (ch.subs || []).some(function (sub) {
+        return ((sub && sub.periods) || []).some(function (p) {
+          return p && p.type === "season" && String(p.seasonId) === String(id);
+        });
+      });
+      if (hit) out.push(u);
+    });
+    return out;
+  }
+
   /* HOW MANY MONTHS A PERIOD STANDS FOR, and the three answers are three
      different kinds of thing rather than three cases of one:
 
@@ -3794,6 +3835,112 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       shares: g > 0 ? { volume: v, price: p, interaction: i, newBusiness: n } : null,
       reading: reading
     };
+  }
+
+  /* ── WHAT ACTUALLY HAPPENED (spec 062 §4.5a, §6.4) ──────────────────
+     Islam, asked which drivers are read from the work they connect to and
+     which are typed: *"what do oyu mean? they are all typed."* So every
+     driver carries its own reported figure and the connection exists to say
+     WHOSE WORK a moved driver belonged to, never to supply the number — which
+     is also the only reading that is arithmetically honest, because a measure
+     and the driver it answers to are usually different quantities (a
+     conversion rate against transactions per store-month).
+
+     NOT REPORTED IS NOT NOUGHT (§35, §93). A driver nobody has typed a figure
+     against reads at its PLANNED value, so it contributes no effect and the
+     period's actual is the part that has been reported rather than a number
+     dragged to zero by silence. */
+  function driverActual(d) {
+    if (!d) return null;
+    var v = d.actual;
+    if (v == null || v === "") return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+  function driverReported(ch) {
+    var subs = (ch && ch.subs) || [];
+    for (var i = 0; i < subs.length; i++) {
+      var ps = (subs[i] && subs[i].periods) || [];
+      for (var j = 0; j < ps.length; j++) {
+        var ds = (ps[j] && ps[j].drivers) || [];
+        for (var k = 0; k < ds.length; k++)
+          if (driverActual(ds[k]) != null) return true;
+      }
+    }
+    return false;
+  }
+
+  /* ONE PERIOD, READ AGAINST WHAT HAPPENED — and every driver's effect is
+     measured with the ones ABOVE IT ALREADY AT THEIR ACTUAL.
+
+     THAT CASCADE IS THE WHOLE OF WHY THE COLUMN ADDS UP, and it is a decision
+     rather than an implementation detail. Measuring each driver against the
+     fully planned period is the obvious reading and it does NOT sum to the
+     period's own gap: the shortfalls interact, exactly as §4.2's growth split
+     needs its interaction term, and a breakdown that disagrees with the
+     headline it sits under is worse than none (§99.7, §264). Read down the
+     column in order, each row's effect is the money that row cost or earned
+     GIVEN what had already gone wrong above it, and the parts come to the
+     whole by construction.
+
+     `rev` IS THE PERIOD AT ITS REPORTED VALUES, which for an increment is the
+     whole of it (there is no baseline to compare against, §4.2) and for a
+     base or a season is the year-one multiplication with the reported figures
+     substituted in. */
+  function driverPeriodActual(seasons, ch, sub, p) {
+    var months = driverMonths(seasons, ch, sub, p);
+    var list = (p && p.drivers) || [];
+    /* Where each driver stands now: its reported figure if it has one, its
+       year-one plan if it has not. */
+    function at(i) {
+      var vol = 1, val = 1;
+      for (var k = 0; k < list.length; k++) {
+        var d = list[k], a = driverActual(d);
+        var raw = (k <= i && a != null) ? a : driverYearOne(d);
+        var v = (d && d.unit === "%") ? raw / 100 : raw;
+        if (d && d.kind === "val") val *= v; else vol *= v;
+      }
+      return vol * val * months;
+    }
+    var planned = at(-1), prev = planned, rows = [];
+    for (var i = 0; i < list.length; i++) {
+      var here = at(i), a = driverActual(list[i]);
+      rows.push({
+        driver: list[i],
+        planned: driverYearOne(list[i]),
+        actual: a,
+        reported: a != null,
+        effect: here - prev
+      });
+      prev = here;
+    }
+    return { months: months, planned: planned, actual: prev,
+             gap: prev - planned, rows: rows };
+  }
+  function driverActualAdd(list, of) {
+    var t = { planned: 0, actual: 0, gap: 0 };
+    (list || []).forEach(function (x) {
+      var c = of(x);
+      t.planned += c.planned; t.actual += c.actual; t.gap += c.gap;
+    });
+    return t;
+  }
+  function driverSubActual(seasons, ch, sub) {
+    return driverActualAdd(sub && sub.periods, function (p) {
+      return driverPeriodActual(seasons, ch, sub, p);
+    });
+  }
+  function driverActualFigures(seasons, ch) {
+    return driverActualAdd(ch && ch.subs, function (sub) {
+      return driverSubActual(seasons, ch, sub);
+    });
+  }
+  /* HOW THE REVENUE READ AGAINST WHAT THE TREE ARGUED FOR. Null where the
+     tree argues for nothing — a share of nought is not a hundred per cent
+     (§239.4's own guard, one arithmetic along). */
+  function driverScore(f) {
+    if (!f || !f.planned) return null;
+    return Math.round((f.actual / f.planned) * 100);
   }
 
   /* EVERY DRIVER IN A UNIT'S TREE, in reading order, each carrying where it
@@ -3992,6 +4139,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     DRIVER_KINDS: DRIVER_KINDS, PERIOD_TYPES: PERIOD_TYPES,
     CHANNEL_MODES: CHANNEL_MODES, MONTH_DAYS: MONTH_DAYS,
     seasonsOf: seasonsOf, seasonMonths: seasonMonths, seasonById: seasonById,
+    seasonMintId: seasonMintId, seasonUsedBy: seasonUsedBy,
     driverChannel: driverChannel, driverFlat: driverFlat, driverMode: driverMode,
     driverMonths: driverMonths, driverYearOne: driverYearOne,
     driverEffective: driverEffective, driverFactors: driverFactors,
@@ -3999,6 +4147,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     driverTarget: driverTarget, driverBridge: driverBridge,
     driverRows: driverRows, driverById: driverById, driverMintId: driverMintId,
     driverLinkedIds: driverLinkedIds, driverState: driverState,
-    driverUnanswered: driverUnanswered
+    driverUnanswered: driverUnanswered,
+    driverActual: driverActual, driverReported: driverReported,
+    driverPeriodActual: driverPeriodActual, driverSubActual: driverSubActual,
+    driverActualFigures: driverActualFigures, driverScore: driverScore
   };
 });

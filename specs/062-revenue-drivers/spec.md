@@ -248,10 +248,15 @@ that is a screen decision rather than something to slip in here.
 
 ---
 
-## 5 · What is built now
+## 5 · What is built
 
-**The arithmetic, and nothing else.** `smp-app/lib/drivers.ts` — the shape, the
-season windows, the months, the multiply-and-roll-up, and the growth split.
+**The arithmetic is in `lib/rules.js`, the SHARED module** — inlined into the
+platform by `build.py` and `require`d by `api/state.js` (§42) — not in a
+module of the new stack's own, because the browser draws the tree and the
+server authorises every change to it, and two copies of *what a driver
+multiplies* is the drift that module exists to stop. It carries the shape, the
+season windows, the months, the multiply-and-roll-up, the growth split, the
+three connection states, and what actually happened.
 
 `smp-app/checks/drivers.mjs` proves it by **running his tool's own functions in
 a sandbox beside the port and asserting the two agree** on every channel,
@@ -259,9 +264,24 @@ sub-channel, period and every figure in the bridge — on the tool's own five
 channels, which carry all four awkward cases (flat and split, rate and count,
 seasons, increments, `%` drivers, plus-n uplifts). Agreement, never a typed
 number: if the port drifts, the check goes red without anybody editing it.
+**99 assertions, red under seven breaks**, one per decision.
 
-Nothing is stored, no table is created, no screen exists, `drivers` is nowhere
-in the navigation, and no frozen file is touched.
+**The three signed-off screens are built** (§6.1–§6.5 below record each one,
+what was decided inside it, and how it was proved):
+
+| | where | what |
+|---|---|---|
+| The tree | Strategy → **Drivers**, between SWOT and Plan | the whole channel, editable end to end behind the plan's own pen |
+| The reading | **Performance**, split *Strategy* \| *Revenue drivers* | what was argued against what was delivered, per period and per driver |
+| The seasons | Setup → **Seasons** | a name and two dates, set once for the client |
+
+**Nothing new is stored where a migration would be needed**: a unit's tree
+rides `units.extra` and the seasons ride the group's, both of which
+`lib/state-io.js` already files and reads back (§118, §213). Nothing on
+Roles & access moves — the tree is `u_plan`'s and the seasons are `c_bands`'s.
+The demo carries Islam's own Retail tree and Ramadan, and **both are scrubbed**
+so no client inherits them: `clearedGraph()` on the screen and migration 004 in
+the database (§21, §45.3).
 
 ---
 
@@ -296,6 +316,25 @@ It uses `u_plan`'s grant, so **nobody's access moves and no column appears on
 Roles & access** — which is the promise §2.1 made. A top-level tab was the
 alternative, and was refused with its cost stated: a five-tab row where there
 are four, and the tree separated from the plan it exists to justify.
+
+**Built 2026-09-22.** The whole channel on one page: a total line, a band per
+period naming what it is (a base year carries the months it has left after its
+own seasons, a season its real dates, an increment how long its rows trade),
+the drivers under it, and a sub-channel rail where there is more than one.
+Editable end to end behind the plan's own pen — add and remove a driver, type
+a baseline and a target, pick volume or value, name the unit, mark a row an
+assumption, connect it to an objective, add a period, add a route.
+
+**A PERIOD IS ADDED FROM A `<select>` AND NEVER A BUTTON**, which is
+arithmetic rather than taste: `driverMonths` gives every base period twelve
+months less its own seasons, so two base periods are two full years added
+together — a plain *+ Add a period* would have silently doubled the plan. The
+control is narrowed to the choices that are legal, and a season already used in
+this sub-channel is not one of them.
+
+**A ROW IS ADDRESSED BY INDEX AND A DRIVER BY ITS ID**, because `paint()`
+redraws after every change while a driver keeps its id — an objective points
+AT it (§4.3), so it is the one thing on the page that cannot be renumbered.
 
 ### 6.2 An unanswered connection says so and holds nothing back
 
@@ -334,16 +373,119 @@ Performance sits one row below a **tab** called Strategy — two levels, one wor
 (§87's twins). His words are used. *Delivery* is the alternative and is one
 word to change.
 
+**Built 2026-09-22.** *Revenue drivers* is drawn only for a unit that HAS a
+tree — a section that opens on nothing is worse than no section (§45.2) — so a
+unit nobody has built one for keeps the Performance page it has today, with no
+second section and no row of its own.
+
+The reading is three bands, one per period: **argued &middot; delivered &middot;
+the gap**, and under each the drivers that explain it, each with the money its
+own movement accounts for. The effects in a period sum **exactly** to that
+period's gap, which is the cascade (§3.4) and the reason it is measured that
+way rather than one driver at a time.
+
+**A DEVIATION FROM THE MOCKUP, STATED RATHER THAN QUIET**: the drawn screen
+shows the revenue score in red. The build gives it **the tenant's own scoring
+band**, so on the demo's scale 90% reads *On track* and is green. A second
+answer to *what does 90% mean* is exactly what §167 built the bands page to
+prevent, and a figure that wore its own colour here would disagree with every
+other figure on the same page. One word from Islam puts the drawing back.
+
+**A FIGURE THAT WAS NEVER TYPED IS NOT NOUGHT** (§35, §93): a driver nobody
+reported against says so and moves nothing, and the period's delivered figure
+stands on the rows that WERE reported. Both ends are asserted, because a build
+that ignored every reported figure satisfies the first half perfectly.
+
+**ONE SCALE PER LINE.** The money formatter takes a reference figure, so a band
+reading *argued 117.41M &middot; delivered 108.59M &middot; −8.82M* never puts
+a K beside two Ms and make a reader rescale in their head — and the negative
+sign is a true minus (U+2212), which lines up in tabular figures where a hyphen
+does not.
+
 ### 6.4 The connection reads; it does not fill
 
 Answer 9, and §4.5a. Every driver's actual is typed by the office; the
 connection exists so the review can say which work a moved driver belonged to.
 
+**Built 2026-09-22.** The connection is stored **on the objective**
+(`obj.driver = "d10"`) and never on the driver, which is not a preference:
+`renumberUnit()` rewrites a unit's key objective, measure and tactic ids BY
+POSITION on every load (§48), so a pointer kept the other way round would
+re-aim itself at whichever row moved into that slot. The driver's own id is
+minted from the MAXIMUM and never the count (§96.2), so it survives a row
+above it being removed.
+
 ### 6.5 The seasons page
 
-Answer 10: *"ok."* In Setup beside the reporting cycle — a name and two dates,
-defined once for the client, used by name in any unit. Change Ramadan's dates
-once and every base period in the client moves with it.
+Answer 10: *"ok."* In Setup — a name and two dates, defined once for the
+client, used by name in any unit. Change Ramadan's dates once and every base
+period in the client moves with it.
+
+**Built 2026-09-22.** A table in the family's own shape (`unitcfg`): the name
+in a bound box, the two dates on the platform's one date control (§307's
+`monthBtnHtml` with `{day:true}`), the length **derived** beside them, and a
+count of the units that still name it.
+
+**It is under *Measurement*, not under *Running the cycle*, and that is a
+deviation from the sentence above.** §261.9 settled this shape of question
+once already — a page was put in *Running the cycle*, Islam questioned it, and
+the answer was that the group's own note is the test. That note says **what you
+do while a cycle is open**, and naming Ramadan is what you do when one is not;
+*Measurement*'s note says **what the numbers mean**, and a season is the line
+that decides how many months a base year has. It sits immediately under
+**Scoring bands**, which is the same kind of fact set the same way. One word
+from Islam moves it.
+
+**`c_bands` is its grant**, so no column appears on Roles & access and nobody's
+access moves: a season and a scoring band are both *the office decides what a
+figure means*, and a cell of its own would be a question with no second answer
+(§37). The SERVER still classifies it separately (`seasons`), because a
+refusal has to name the page that answers it (§16.7).
+
+**Four decisions inside it, each with a reason that is not taste:**
+
+* **A season is added UNDATED and named afterwards** — the dates are picked,
+  and a picker has nothing to open beside a row that is not there yet.
+  `driverMonths` reads a missing window as nought months (§93), so an undated
+  season takes nothing out of anybody's base year and every tree goes on adding
+  up while somebody is still deciding.
+* **The stored value is ISO and the control speaks** — `2026-02-17` stored,
+  *17 Feb 2026* shown and written, converted at the one seam through the
+  platform's own `dayParts` rather than a second parser. Mixing the two
+  spellings is not cosmetic: `new Date("2026-02-17")` is UTC midnight and
+  `new Date("17 Feb 2026")` is local, so a window with one of each is out by
+  the timezone offset and the day count can land a day either side.
+* **A blank name is refused and the stored one comes back into the box**
+  (§124, §273.4's own answer): there is no Save to refuse at, and a tree
+  names a season by `id` while showing the name, so a nameless season is a
+  period reading nothing at all.
+* **Removing is refused while a unit still names it, and the units are NAMED**
+  (§62). Nothing would corrupt — `seasonById` answers null, the base year
+  gets its month back and the tree still adds up — but it leaves a period on
+  somebody's Drivers page reading an em-dash for ever with no control able to
+  say what it was, which is §61's dead end wearing a clean save. Asked again
+  at press time rather than trusted from the render (§48.2), and the last row
+  leaving **deletes** `GROUP.seasons` (§50.6).
+
+**Proved by driving it**, on the built file with no console error: Add mints
+beside the demo's hand-written `ramadan` with no collision, the name writes and
+a blank one is put back, the picker writes ISO and clearing deletes the key,
+the refusal names Retail Stores, an unused season goes and the last one leaving
+takes the key with it. **And the promise the page makes is measured end to
+end**: moving Ramadan's end date on this page takes Retail Stores' base year
+from **10.981 to 9.962 months** and its season from 1.019 to 2.038, still
+summing to twelve. The table fits its box at 1600 / 1280 / 1100 / 1000 with no
+page scroll.
+
+**Checked**: `smp-app/checks/drivers.mjs` §11 (10 assertions on
+`seasonMintId`, `seasonUsedBy`, `seasonMonths` and `seasonById`, both ends
+every time), red under a seventh break (`season-id-from-count`);
+`scripts/test-authorize.js` §43 gains five — adding, removing, and the key
+being deleted outright are all `seasons` and all the office's — **8 red** with
+the classification removed, which is the §259.2 failure this exists to stop: a
+change that is swept but unclassified is INVISIBLE and therefore allowed to
+everybody, so a unit head could otherwise empty the client's seasons and take
+every base year to twelve months.
 
 ### 6.6 What the mockup does not draw
 

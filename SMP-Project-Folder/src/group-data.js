@@ -9,6 +9,18 @@ var GROUP = {
      footer as literal text, so a second screen that needed it \u2014 the deck cover
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
+  /* ── THE CLIENT'S SEASONS (spec 062 §6.5) ────────────────────────
+     Defined once for the whole client and used BY NAME in any unit's tree, so
+     changing Ramadan's dates once moves every base period in every unit with
+     it — which is the whole reason a season is not typed into the tree it
+     phases (§53.5).
+
+     THE DEMO'S, NOT A TENANT'S: migration 004 strips `seasons` from
+     org.extra after the seed, exactly as it strips `sets` and `mainbus`. A
+     client deploying SMP must not inherit Raya's Ramadan (§21, §45.3). */
+  seasons: [
+    { id:"ramadan", name:"Ramadan season", start:"2026-02-17", end:"2026-03-19" }
+  ],
   /* ── THE BU LIST (§54.1, spec 011) ───────────────────────────────
      Raya's own ten names for parts of the business, exactly as its employee
      data spells them (Islam, 2026-08-23). NOT invented (B3) — they are the
@@ -698,6 +710,55 @@ var UNITS = {
     logo: UNIT_MARKS["retail"],
     name: "Retail Stores", codePrefix: "RS", weight: 0, real: false,
     perf: { objectives: 86, pillars: 78, exec: 71 },
+    /* ── THE REVENUE TREE (spec 062) ────────────────────────────────
+       ISLAM'S OWN WORKED EXAMPLE, carried across from his tool unchanged —
+       `specs/062-revenue-drivers/reference/revenue-driver-tree-tool-v12.html`
+       — so the demo shows the model being argued with the numbers it was
+       argued with, rather than a plausible-looking set typed to fill a table.
+       125.02M last year, 153.83M at year one, and the growth splitting into
+       0.91M of volume, 12.50M of price and 15.31M of new business.
+
+       IT IS HERE AND NOT IN THE DATABASE, which is §21's rule: invented
+       content belongs in the demo dataset, and migration 004 strips
+       `drivers` from `units.extra` so no client inherits it (§45.3's fault,
+       avoided rather than repeated).
+
+       THREE OF THE ELEVEN ROWS CARRY A CONNECTION and the rest do not, on
+       purpose — the three states of the last column are what the review turns
+       on (§6.2), so a demo where every row is answered shows one of them.
+       The pointer faces FROM the objective TO the driver (§4.3): *Stores
+       operating* carries `driver:"d10"` below, and *Maturity factor* is left
+       for somebody to answer. */
+    drivers: { subs: [ { name: "Retail Stores", periods: [
+      { name: "Base year \u2014 excluding seasons", type: "base", drivers: [
+        { id:"d1", name:"Number of stores", kind:"vol", unit:"n", base:12, up:0, upUnit:"%",
+          assume:true, actual:12 },
+        { id:"d2", name:"Transactions per store-month", kind:"vol", unit:"n",
+          base:4500, up:0, upUnit:"%", actual:4100,
+          note:"Assumed the mature-store rate held. It did not \u2014 traffic softened from April." },
+        { id:"d3", name:"Average basket", kind:"val", unit:"n", base:180, up:10, upUnit:"%",
+          assume:true, actual:201, note:"List price rise across the range from March." } ] },
+      { name:"Ramadan season", type:"season", seasonId:"ramadan", drivers: [
+        { id:"d4", name:"Number of stores", kind:"vol", unit:"n", base:12, up:0, upUnit:"%",
+          assume:true },
+        { id:"d5", name:"Transactions per store-month", kind:"vol", unit:"n",
+          base:6500, up:5, upUnit:"%", actual:7200,
+          note:"The season ran harder than assumed." },
+        { id:"d6", name:"Average basket", kind:"val", unit:"n", base:230, up:10, upUnit:"%",
+          assume:true, actual:249, note:"Gifting and bulk purchase lift the basket well above the 180 annual average." } ] },
+      { name:"New stores \u2014 2026 openings", type:"increment", drivers: [
+        { id:"d10", name:"New stores", kind:"vol", unit:"n", base:3, up:0, upUnit:"%", actual:2,
+          note:"Alex Corniche did not open \u2014 the lease completed in November." },
+        { id:"d7", name:"Months active", kind:"vol", unit:"n", base:9, up:0, upUnit:"%", actual:7,
+          assume:true, note:"Both openings ran late against the Feb\u2013Jun plan." },
+        { id:"d8", name:"Transactions per store-month (mature)", kind:"vol", unit:"n",
+          base:4500, up:0, upUnit:"%", assume:true,
+          note:"Mature-store rate. The ramp is applied separately below." },
+        { id:"d9", name:"Average basket", kind:"val", unit:"n", base:180, up:0, upUnit:"%",
+          assume:true },
+        { id:"d11", name:"Maturity factor", kind:"val", unit:"%", base:70, up:0, upUnit:"%",
+          note:"New stores trade below mature levels in year one." } ] }
+    ] } ] },
     clauses: [
       ["We are", "a consumer electronics retail chain and e-store"],
       ["We provide", "in-store and online retail, trade-in, care and after-sales services"],
@@ -710,7 +771,7 @@ var UNITS = {
     endInMind: "",
     keyObjectives: [
       { src: { set: "financialfigures" }, name: "Retail revenue",     dir: "≥", target3y: "6.8B EGP", target: "4.5B EGP", compile: "Sum", actual: "3.8B", progress: 84 },
-      { name: "Stores operating",   dir: "≥", target3y: "120", target: "88",       compile: "Latest", actual: "91", progress: 103 },
+      { name: "Stores operating",   dir: "≥", target3y: "120", target: "88",       compile: "Latest", actual: "91", progress: 103, driver: "d10" },
       { name: "E-store share of revenue", dir: "≥", target3y: "38%", target: "25%", compile: "Latest", actual: "21%", progress: 84 },
       { name: "Net promoter score", dir: "≥", target3y: "65", target: "55",       compile: "Latest", actual: "45", progress: 82 }
     ],
@@ -725,7 +786,7 @@ var UNITS = {
         kind: "Direction", theme: "OT", owner: "Hossam", outcomes: 84, exec: 78, planned: 50,
         measures: [
           { name: "New stores opened",     dir: "≥", target: "14",   compile: "Sum", actual: "12", progress: 86 },
-          { name: "Revenue per store",     dir: "≥", target: "52M",  compile: "Latest", actual: "55M", progress: 106 },
+          { name: "Revenue per store",     dir: "≥", target: "52M",  compile: "Latest", actual: "55M", progress: 106 , driver: "d2" },
           { name: "Prime-location share",  dir: "≥", target: "60%",  compile: "Latest", actual: "47%", progress: 78 }
         ],
         tactics: [

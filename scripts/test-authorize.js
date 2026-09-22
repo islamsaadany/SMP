@@ -4492,6 +4492,42 @@ console.log("\n43 · revenue drivers (spec 062)");
        plan pass on its own, which is the office's, and a build that had
        made it invisible would allow a unit head to re-point it. — */
   const koBase = clone(base);
+
+  /* ADDING AND REMOVING ONE, which is what Setup → Seasons does and what
+     moving a date does not: the LIST changes rather than a value on a row
+     already in it. Both ends, because a build that classified the value and
+     left the list unclassified is INVISIBLE and therefore allowed to
+     everybody (§191, §259.2) — the shape this file has caught twice. */
+  const addSea = kinds(function (s) {
+    s.group[R.SEASONS].push({ id: "s9", name: "Peak", start: "2026-11-01", end: "2026-12-31" });
+  });
+  check("§062: adding a season classifies as seasons",
+        addSea.indexOf("seasons") > -1 && addSea.indexOf("unknown") < 0,
+        addSea.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  const rmSea = kinds(function (s) { s.group[R.SEASONS] = []; });
+  check("§062: and removing the last one classifies as seasons",
+        rmSea.indexOf("seasons") > -1 && rmSea.indexOf("unknown") < 0,
+        rmSea.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  /* AND THE KEY LEAVING ALTOGETHER IS THE SAME CHANGE (§50.6): the page
+     deletes `seasons` once its last row goes, so a build that only noticed
+     an array-to-array difference would let a unit head empty the client's
+     seasons and take every base year to twelve months. */
+  const gonSea = kinds(function (s) { delete s.group[R.SEASONS]; });
+  check("§062: and so is the key being deleted outright",
+        gonSea.indexOf("seasons") > -1 && gonSea.indexOf("unknown") < 0,
+        gonSea.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  check("§062 REFUSED: a unit head may not add or remove a season either",
+        !verdict(headKey, function (s) {
+          s.group[R.SEASONS].push({ id: "s9", name: "Peak" });
+        }).ok &&
+        !verdict(headKey, function (s) { delete s.group[R.SEASONS]; }).ok,
+        "was ALLOWED");
+  check("§062: ...and the office may do both",
+        verdict("smo", function (s) {
+          s.group[R.SEASONS].push({ id: "s9", name: "Peak" });
+        }).ok &&
+        verdict("smo", function (s) { delete s.group[R.SEASONS]; }).ok,
+        (verdict("smo", function (s) { delete s.group[R.SEASONS]; }).refusals || []).join(" / "));
   const ko = (koBase.units[UNIT].keyObjectives || [])[0];
   check("§062: the fixture has a key objective to connect", !!ko);
   if (ko) {

@@ -7749,6 +7749,104 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   **24/0**; `qa.py` **33 viewers / 242 destinations / ERRORS none**, &sect;367's
   numbers to the digit, which is what it should be when nothing in the product
   moved.
+- **ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" (&sect;385, spec 062):**
+  Islam, correcting &sect;380 two days after it shipped &mdash; *"we need not to
+  confuse the custodian with the tactic owner &hellip; the custodian should have
+  always access to their unit or function entry except in one case when we set
+  figure sets &hellip; my reporting appears for tactics for units or functions
+  she is not the custodian or the owner"* &mdash; then, of two drawn options for
+  what that leaves of &sect;382's Tactic owner row, **"A"**: the switch decides
+  and the row comes off Roles &amp; access. **ONE QUESTION PER SUBJECT DECIDES
+  BOTH HALVES AT ONCE**, where somebody types and whether they get a second
+  screen for it: run it and everything is on its own Reporting page with **no My
+  reporting tab drawn for it** (a second page holding rows already on the first
+  is a second place to look for one number, &sect;87's twins at the level of a
+  screen); don't run it and the lines you own are on My reporting and nowhere
+  else; **a line somebody else owns inside a unit you run you read and do not
+  type**, which is &sect;380's own decision kept. **"DO I RUN IT" IS THE GRANT,
+  NEVER A LIST OF ROLE NAMES** &mdash; `canReport()` is *may I enter figures
+  here at all*, so a custodian whose Reporting cell the office narrowed to
+  `view` types their own lines on My reporting rather than being told they run a
+  unit they cannot report on (&sect;61); the two readings answer identically on
+  the worked example, and only this one leaves somebody a door on a tenant that
+  has narrowed a cell. **SETTLED RATHER THAN ASKED A THIRD TIME**, Islam's own
+  *"I don't understand the judgement you need from me &mdash; let's fix what
+  needs requires fixing and then we start building"* (rule 2b). **AND A NAME
+  THAT REACHES NOBODY IS NOT AN OWNER**: `lineOwned()` asks whether the plan
+  NAMES somebody and `lineOwnerIsHere()` whether the register HOLDS them, which
+  on any real tenant are different questions &mdash; **83 tactics name an owner
+  and 51 name a person**, a plan being typed by a custodian and a register
+  filled from HR &mdash; and classified as its owner's such a row is refused to
+  EVERYBODY, since `lineReporting` admits the owner alone by name and there is
+  nobody to be them: measured, **one of 33 could enter those 32 lines, the
+  SMO**, on rows the office has no way of knowing about (&sect;61). They fall
+  back to the unit exactly as before the switch was turned on, on the screen and
+  on the server, **through one predicate** (&sect;42). **THE REGISTER RIDES THE
+  WORLD RATHER THAN BEING THREADED THROUGH, FOR THE GUARANTEE AND NOT THE LINE
+  COUNT**: the server builds its world from the STORED state, so a save cannot
+  put somebody on the register and claim their line in the same request
+  (&sect;42.2), where a parameter passed down five frames can be handed the
+  incoming one by a caller who does not know the difference &mdash; named in
+  `W()` AND `worldOf()` AND the browser's `world()`, &sect;102.4's instruction
+  for the third time. **WHAT IT MOVES, MEASURED**: 49 of the 51 are owned by
+  somebody who also RUNS that subject and lose a second screen; **2 reach My
+  reporting**, one person.
+  **&sect;385.1 &mdash; AND &sect;382's ROW COMES OFF THE TABLE**: measured
+  across the four states it is **not consulted at all while the switch is on**,
+  and the switch is what a tenant turns on to mean *owners enter their own
+  lines* &mdash; so the row could only ever say no to something the switch had
+  just said yes to, and it ships SHUT, so turning the switch on would have found
+  owners typing on a row nobody had opened. The merge that brought &sect;380 and
+  &sect;382 together recorded that contradiction in `boundedReach`'s own comment
+  and left it for Islam (rule 1b); he picked. **REMOVING IT MOVES NOBODY AND
+  THAT IS A MEASUREMENT**: 33 people &times; 36 page keys &times; 21 targets =
+  **24,948 answers from `grantAtPage`, 0 changed**, taken on a build with the
+  derivation removed and compared row by row &mdash; a tactic's owner is
+  `namedInUnit`, so the Contributor floor covers them exactly as before
+  &sect;382, which is where the role came from. **THE FLOOR'S EXEMPTION GOES
+  WITH IT** (&sect;382 had to exclude its own role from `!out.length`, or a role
+  granting nothing takes away the floor it stands on), **`ctx.tacticOwner` goes
+  at all four sites** (&sect;24), and the one claim of the deleted
+  `scripts/test-tactic-owner.js` that survives is CARRIED into
+  `test-my-reporting.js` &sect;3c rather than lost with the file (&sect;218,
+  &sect;301.7). Recorded as a reversal, never overwritten (Principle II).
+  **&sect;385.2 &mdash; AND THE SWITCH STATES THE COST IT ACTUALLY HAS**: it
+  counted every tactic carrying an Owner and said **83** where the honest figure
+  is **2**, the gap being those same two facts &mdash; *a cost stated before the
+  press (&sect;35, &sect;124) is only worth stating if it is the cost.* Asked
+  through `canReport` with the person swapped, never a second reading of *do
+  they run it* (&sect;53.5), with `VIEWER` put back in a `finally` or the office
+  is left looking at the tenant as somebody else because a settings row drew
+  itself (&sect;94.2).
+  **&sect;385.3 &mdash; AND MY OWN NEW SECTION DESTROYED THE CHECK'S VERDICT**:
+  `checks/my-reporting.py` &sect;9 opened `bad, swept = [], 0`, and `bad` is the
+  module-level FAILURE COUNT that file's verdict is printed from &mdash; so
+  **two genuine failures in &sect;8 were reported under the words "all good"**,
+  and the falsification meant to prove &sect;9 works printed nothing at all,
+  because `"%d FAILED" % []` throws. &sect;56.7's collision in Python, and
+  &sect;298.3's rule broken by the very section written to measure a decision:
+  *a run that says it passed while printing its own failures is the one outcome
+  a check may never produce.* Found by falsifying rather than by reading. **Two
+  more of that section's first failures were the CHECK**: it picked the seed's
+  unmatched owner off a tactic marked Q3/Q4, which this cycle does not ask for
+  at all, so the cell reads *Not asked* and it reported `{'there': False}` on a
+  correct build (&sect;113.8: an absence is not a refusal); and its sweep called
+  `switchViewer()` in a loop INSIDE one evaluate, which over `file://` moves the
+  viewer and **over HTTP does nothing at all** &mdash; measured, `VIEWER` stayed
+  `smo` through all 33 calls, so a sweep of 33 people was a sweep of one and it
+  reported `[]` on a build that had not made this change (&sect;237's trap,
+  `hide-slide`'s own fault, in a file already carrying the answer in its
+  `viewer()` helper). **And one assertion I wrote could not fail**:
+  `PEOPLE.length === PEOPLE.length` (&sect;113.8, written in by the section that
+  quotes it). **VERIFIED**: `test-my-reporting.js` 65/0, `test-authorize.js`
+  **709/0** with the &sect;385 pair red **2** when `lineOwnerIsHere` is taken out
+  of `addOwnedTactics`, differ 140/0, platform rules 69/0,
+  `checks/my-reporting.py` all good and proved able to fail **three ways from
+  the SOURCES** (&sect;276) at **2 / 1 / 1 red** with the tree restored from the
+  saved copy and the rebuild asserted byte-identical (&sect;343.9),
+  `built-in-step.py` all good, `generated-in-step.mjs` all clear, `qa.py` ERRORS
+  none; the seed regenerated and holding no `towner` row, and `sw.js` bumped
+  because the built file's bytes changed (&sect;91).
 - **MULTI-CLIENT (since v3.60, §313, spec 042): ONE PLATFORM, MANY CLIENTS.**
   §36's recommendation, built: **one Postgres schema per client**, resolved from
   the `platform.clients` registry off the slug the browser was **served at**,
@@ -8644,7 +8742,21 @@ node scripts/test-my-reporting.js # MY REPORTING: the lines a tactic's owner
                                 # the narrowing proved (&sect;94.5). 53/0, red SIX ways
                                 # from the SOURCES (&sect;276). It calls the real renderer,
                                 # so a builder wired to nothing is caught (&sect;96); it
-                                # cannot PRESS, which is `checks/my-reporting.py`'s half
+                                # cannot PRESS, which is `checks/my-reporting.py`'s half.
+                                # AND SINCE &sect;385 IT OWNS THE FOUR STATES OF *do I run
+                                # this one?*: a line owned by the person who RUNS the subject
+                                # typed on its own Reporting page and absent from My
+                                # reporting; a line whose Owner names nobody the register
+                                # holds falling back to the unit (a DIFFERENT state from
+                                # &sect;3's *no owner at all*, and the one that actually
+                                # occurs &mdash; 32 of 83); and &sect;3c, the role &sect;382
+                                # added GONE with the Contributor floor it suppressed put
+                                # back, which is the one claim carried out of the deleted
+                                # `scripts/test-tactic-owner.js` rather than lost with it
+                                # (&sect;218, &sect;301.7). **And one of its own new assertions
+                                # could not fail** &mdash; `PEOPLE.length === PEOPLE.length`,
+                                # true of every build there has ever been (&sect;113.8, written
+                                # in by the section that quotes it). 65/0
 python3 SMP-Project-Folder/src/checks/my-reporting.py # ...and the presses (&sect;380):
                                 # the tab drawn on the person's own place and nowhere
                                 # else, a figure typed there reaching the STORED plan
@@ -8660,7 +8772,33 @@ python3 SMP-Project-Folder/src/checks/my-reporting.py # ...and the presses (&sec
                                 # WROTE IT** (&sect;54.5): that sandbox held the Chromium
                                 # binaries and no Playwright driver at all, so `qa-run.py`
                                 # could not launch &mdash; said in the file's own first
-                                # lines rather than left as an absence
+                                # lines rather than left as an absence.
+                                # **RUN AT LAST, AND SINCE &sect;385 IT SWEEPS EVERY LINE
+                                # OWNER**: &sect;8 drives the three row states as the person
+                                # who RUNS the unit and &sect;9 asserts that no row on My
+                                # reporting belongs to a subject its viewer runs &mdash;
+                                # **through the CONTROL, one person at a time**, because the
+                                # first draft called `switchViewer()` in a loop inside ONE
+                                # evaluate, which over `file://` moves the viewer and **over
+                                # HTTP does nothing at all**: measured, `VIEWER` stayed `smo`
+                                # through all 33 calls, so the sweep asked one person, found
+                                # the office running everything and owning nothing, and
+                                # reported `[]` &mdash; green on a build that had not made the
+                                # change (&sect;237, `hide-slide`'s own fault, in a file
+                                # already carrying the answer in its `viewer()` helper).
+                                # **AND THAT SECTION DESTROYED THE FILE'S VERDICT**: it opened
+                                # `bad, swept = [], 0` and `bad` is the module-level FAILURE
+                                # COUNT, so two genuine failures in &sect;8 printed under the
+                                # words *all good* and the falsification printed nothing at
+                                # all, because `"%d FAILED" % []` throws (&sect;56.7 in
+                                # Python, &sect;298.3's rule broken by the section written to
+                                # measure a decision). **And its unmatched-owner row had no
+                                # control on it**: the seed's own sits on a tactic marked
+                                # Q3/Q4, which this cycle does not ask for, so it reported
+                                # `{'there': False}` on a correct build (&sect;113.8) &mdash;
+                                # MADE now from a row that IS asked, with the quarters
+                                # asserted. All good; red three ways from the SOURCES at
+                                # **2 / 1 / 1**
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,

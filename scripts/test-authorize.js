@@ -4530,6 +4530,45 @@ console.log("\n43 · my reporting (spec 062)");
           ks2.indexOf("unitReporting") > -1 && ks2.indexOf("lineReporting") < 0,
           ks2.join(","));
   })();
+
+  /* — §385: AND A NAME THAT REACHES NOBODY IS NOT AN OWNER —
+     `lineOwned` asks whether the plan NAMES somebody; `lineOwnerIsHere` asks
+     whether the register holds them. 32 of the worked example's 83 tactics
+     answer yes to the first and no to the second, because a plan is typed by a
+     custodian and a register is filled from HR. Classified as its owner's,
+     such a row is refused to EVERYBODY — `lineReporting` admits the owner
+     alone by name and there is nobody to be them — so the unit could not enter
+     its own figure and neither could anybody else but the office (§61).
+
+     BOTH ENDS, OR THE FIRST HALF IS SATISFIED BY A BUILD THAT CLASSIFIED
+     NOTHING AS `lineReporting` AT ALL (§94.2): the unmatched name falls to the
+     unit, and the MATCHED one beside it still does not. */
+  (function () {
+    const w = R.worldOf(base);
+    check("§385: the fixture's owner is somebody the register holds",
+          R.lineOwnerIsHere(w, { owner: owner.name }), owner.name);
+    check("§385: ...and a bare first name is not (§130.7's two-word floor)",
+          !R.lineOwnerIsHere(w, { owner: "Abdelrahim" }));
+
+    const orphan = clone(base);
+    orphan.units[uk].items[0].tactics[0].owner = "Abdelrahim";
+    const inc = clone(orphan); inc.units[uk].items[0].tactics[0].actual = "42";
+    const ks3 = (A.collect(orphan, inc, R.worldOf(orphan)) || [])
+                  .map(function (c) { return c.kind; });
+    check("§385: a line whose owner names nobody is the unit's figure",
+          ks3.indexOf("unitReporting") > -1 && ks3.indexOf("lineReporting") < 0,
+          ks3.join(","));
+    const cust = (base.unitRoles[uk] || {}).custodian;
+    if (cust)
+      check("§385: ...so the unit's custodian enters it",
+            A.authorize(orphan, inc, personOf(orphan, cust)).ok,
+            (A.authorize(orphan, inc, personOf(orphan, cust)).refusals || []).join(" / "));
+    const named = clone(base);
+    const inc2 = clone(named); inc2.units[uk].items[0].tactics[0].actual = "42";
+    check("§385 REFUSED: ...and a line whose owner IS on the register is still theirs",
+          cust ? !A.authorize(named, inc2, personOf(named, cust)).ok : true,
+          "was ALLOWED");
+  })();
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

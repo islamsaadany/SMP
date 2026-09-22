@@ -5233,7 +5233,6 @@ function renderReport(u){
     SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                town:t.owner,                                  /* §382 */
                 cid:p.id });
     });
     /* §343: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
@@ -7625,7 +7624,6 @@ function unitPlanBody(it, u, railed){
      would have worked today and stopped working the day a key measure gains
      an Owner of its own, which is the next thing drawn. Named, so the reach
      cannot be read off a field two row kinds share (see boundedReach). */
-  var tctx = function(row){ var c = pctx(row); c.tacticOwner = row && row.owner; return c; };
   /* §201.2: does this table carry a Unit column right now? The office's pen
      always; a filler's only while some row has a missing unit to offer. */
   var unitCol = !ed && it.measures.some(function(m){
@@ -7743,7 +7741,7 @@ function unitPlanBody(it, u, railed){
          be byte-identical, or every save carries a change nobody made.
          Read mode keeps §15.1's em-dash: nobody supporting is an ordinary
          answer. */
-      { ctx:tctx(t), text: collabText,
+      { ctx:pctx(t), text: collabText,
         parse: function(v){ return Array.isArray(v)
           ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
           : collabParse(v); },
@@ -7764,12 +7762,12 @@ function unitPlanBody(it, u, railed){
        its fill is pending the four stay the filler's — read mode carries
        the same chip and tick every other pending value wears. */
     var quartersHtml = ed ? qsEdit(t)
-      : (filling("plan", "u_plan", tctx(t)) &&
+      : (filling("plan", "u_plan", pctx(t)) &&
          (SMPRules.quartersBlank(t) || SMPRules.pendOf(t).quarters))
         ? qsFill(t)
         : qs(t);
     var tgtCell = gapCell("plan", "u_plan", t, "outTarget", {
-      ctx: tctx(t), del: true, fillKind: "tactic",
+      ctx: pctx(t), del: true, fillKind: "tactic",
       /* §257: read mode says "Yes / No", never the stored `Y/N` — one
          formatter for every surface (§53.5). */
       read: tgtShown,
@@ -7823,7 +7821,7 @@ function unitPlanBody(it, u, railed){
            it the cell opens to a filler whatever the shared list says, so a
            later decision to stop counting these would leave the box open and
            the save refusing it — §205's drift, latent until somebody used it. */
-        ctx: tctx(t), del: true, fillKind: "tactic",
+        ctx: pctx(t), del: true, fillKind: "tactic",
         read: function(v){ return '<b>' + esc(v) + '</b>'; },
         control: function(set, pendCls){
           return textOr("plan", t.outcome || "", pendCls || "", set);
@@ -7862,7 +7860,7 @@ function unitPlanBody(it, u, railed){
          fed picker — an owner is PICKED, not typed, in the pen and in fill
          mode alike. */
       '<td>' + gapCell("plan", "u_plan", t, "owner", {
-        ctx:tctx(t),
+        ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,

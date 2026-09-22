@@ -130,6 +130,93 @@ ck("a tactic with NO owner is the unit's exactly as before",
         r.obj.owner = had;
         return made && answer === true; })()`));
 
+/* ── 3b · §385: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ───────
+   Islam picked option A of two drawn: the switch decides, and §382's Tactic
+   owner row comes off Roles & access. The rule that replaces the two controls
+   is asked once per subject, and three of its four answers REVERSE something
+   §380 built — so a file that only measured the unchanged half would be green
+   on a build that had not made the change at all (§94.2).
+
+   §3 ABOVE IS THE UNCHANGED HALF AND STAYS EXACTLY AS IT WAS: `dir` runs
+   nothing, so his line is his on My reporting and nobody else's anywhere.
+   What follows is every state that person cannot be in. */
+sec("3b · §385 — a subject I run, and a name that reaches nobody");
+/* THE STATE IS FOUND, NOT MADE, AND IT IS ASSERTED TO HAVE BEEN FOUND
+   (§94.5): one demo tactic on Mobile is owned by the unit's own head, which
+   is the case §380 never had to think about. */
+const RUNS = `(function(){ var hit = null;
+  (UNITS.mobile.items||[]).forEach(function(p){ (p.tactics||[]).forEach(function(x){
+    if (SMPRules.ownedBy(x, personBy("mobhead"))) hit = hit || x; }); });
+  return hit; })()`;
+ck("the demo names the unit's own head on a tactic there",
+   run(`${RUNS} !== null`));
+ck("he runs Mobile", run(`(VIEWER="mobhead", canReport("mobile"))`));
+ck("...so he types his own line on the unit's Reporting page",
+   run(`(function(){ var x = ${RUNS}; VIEWER = "mobhead";
+        return canEnterFigure("mobile", { kind:"tactic", id:x.id, obj:x }, "unit"); })()`));
+ck("...and My reporting draws him no row for it",
+   run(`(function(){ VIEWER = "mobhead";
+        return myLineRows().filter(function(r){ return r.target === "mobile"; }).length; })()`) === 0);
+/* AND A NAME THAT REACHES NOBODY IS NOT AN OWNER — a DIFFERENT state from
+   §3's "no owner at all", and the one that actually occurs: 32 of the worked
+   example's 83 tactics name somebody the register does not hold, because a
+   plan is typed by a custodian and a register is filled from HR. Classified
+   as its owner's, such a row is refused to everybody, since there is nobody
+   to be them (§61). Made on a real row and PUT BACK (§94.2). */
+ck("the demo really does hold names the register does not",
+   run(`(function(){ var n = 0, w = world();
+        myLineTargets().forEach(function(t){ var s = unitLike(t); if (!s) return;
+          (s.items||[]).forEach(function(p){ (p.tactics||[]).forEach(function(x){
+            if (SMPRules.lineOwnerName(x) && !SMPRules.lineOwnerIsHere(w, x)) n++; }); }); });
+        return n; })()`) > 0);
+ck("a line whose owner names nobody is the unit's",
+   run(`(function(){ var x = ${RUNS}, had = x.owner;
+        x.owner = "Abdelrahim";                      /* one word: the floor is two (§130.7) */
+        var made = SMPRules.lineOwnerName(x) && !SMPRules.lineOwnerIsHere(world(), x);
+        VIEWER = "own_mob";
+        var answer = canEnterFigure("mobile", { kind:"tactic", id:x.id, obj:x }, "unit");
+        x.owner = had;
+        return made && answer === true; })()`));
+ck("...and the fixture put the name back", run(`${RUNS} !== null`));
+
+/* ── 3c · AND THE ROLE THAT WAS HERE FOR TWO DAYS IS GONE (§382 → §385) ──
+   §382 gave a tactic's Owner a row on Roles & access; option A takes it off,
+   and `scripts/test-tactic-owner.js` goes with it, because its whole subject
+   was that role (§24). ONE of its claims survives the removal and is carried
+   here rather than lost with the file (§218, §301.7's rule): that section had
+   to exempt its own role from the Contributor floor, since the floor fires
+   only for somebody holding NO role at all and a Tactic owner with every cell
+   at none would have taken away the floor it stood on. With the role gone the
+   exemption goes too, and what must be true again is what was true before
+   §382 — a tactic's owner named nowhere else is a Contributor, with the view
+   the floor gives. The state is MADE, because nobody in the worked example
+   stands on the floor at all (§255). */
+sec("3c · §385 — the role is gone, and the floor it stood on is back");
+const REGISTER_WAS = run("PEOPLE.length");
+ck("no role on the table is a tactic owner's",
+   run(`SMPRules.ROLES.filter(function(r){ return r.key === "towner"; }).length`) === 0);
+ck("...and the table is not simply empty", run("SMPRules.ROLES.length") > 5);
+ck("nothing derives one either",
+   run(`(function(){ var w = world(), n = 0;
+        PEOPLE.forEach(function(p){ (SMPRules.personRoles(w, p)||[]).forEach(function(r){
+          if (r.role === "towner") n++; }); });
+        return n; })()`) === 0);
+ck("somebody whose only name on the plan is a tactic's Owner is a Contributor",
+   run(`(function(){
+        var x = (UNITS.mobile.items[0].tactics||[])[0], had = x.owner;
+        var p = { key:"t385", name:"Floor Person 385", active:true, unit:"mobile" };
+        PEOPLE.push(p); x.owner = p.name;
+        var roles = SMPRules.personRoles(world(), p) || [];
+        var only = roles.length === 1 && roles[0].role === "contrib" && roles[0].at === "mobile";
+        x.owner = had; PEOPLE.pop();
+        return only; })()`));
+/* AND THE FIRST DRAFT OF THIS LINE COULD NOT FAIL — `PEOPLE.length ===
+   PEOPLE.length`, which is true of every build there has ever been (§113.8,
+   written into this file by the section that quotes it). The count is taken
+   BEFORE the fixture runs and compared against it. */
+ck("...and the fixture put the register back", run("PEOPLE.length") === REGISTER_WAS,
+   [run("PEOPLE.length"), REGISTER_WAS]);
+
 /* ── 4 · the note stays the unit's ────────────────────────────────── */
 sec("4 · you enter the figure, the unit writes the note");
 ck("the owner gets no note box",

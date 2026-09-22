@@ -55756,3 +55756,184 @@ stale by the time it is pushed.
 
 **`main` untouched: this is the preparation, and the merge is Islam's word, on
 that merge.**
+
+---
+
+## §384 — THE SWITCH PRINTED ITS OWN NUMBER TWICE (2026-09-22)
+
+The tenant switch on Setup › Reporting cycle read **"83 83 lines"**, on both
+of its sentences.
+
+**`plural()` RETURNS THE COUNT AND THE WORD.** `plural(83, "line")` is
+*"83 lines"*, so putting the number in front of it says it twice — and this
+file has now recorded that trap four times (§107.8's *"2 pillarss"*, §160.6's
+*"How do I reorder my 2 Pillarss?"*, §301's own `plural()` on a tenant label).
+Every other caller in the product wraps the whole `plural()` in the `<b>`, and
+so does this one now (§53.5).
+
+**The COUNT itself was also wrong and is deliberately left for §385**, which is
+the round that decides what it should say. Flagged rather than folded in
+(rule 1b).
+
+---
+
+## §385 — ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" (2026-09-22, spec 062)
+
+Islam, correcting §380 two days after it shipped: *"we need not to confuse the
+custodian with the tactic owner … the custodian should have always access to
+their unit or function entry except in one case when we set figure sets … my
+reporting appears for tactics for units or functions she is not the custodian
+or the owner."* Then, shown two drawn options for what that leaves of §382's
+Tactic owner row: **"A"** — the switch decides, and the row comes off Roles &
+access.
+
+**ONE QUESTION PER SUBJECT, AND IT DECIDES BOTH HALVES AT ONCE** — where
+somebody types, and whether they get a second screen for it. Run the subject
+and everything is on its own Reporting page, tactics included, with no My
+reporting tab drawn for it; don't run it and the lines you own are on My
+reporting and nowhere else. **A line somebody else owns, inside a unit you
+run, you read and do not type** — which is §380's own decision, kept, and the
+one place the two rules still agree.
+
+**"DO I RUN IT" IS THE GRANT, NEVER A LIST OF ROLE NAMES**, and that is the
+judgement inside this. `canReport()` is *may I enter figures for this unit at
+all*, so a custodian whose Reporting cell the office has narrowed to `view`
+falls to the other branch and types their own lines on My reporting, rather
+than being told they run a unit they have no way to report on (§61). On the
+worked example the two readings answer identically, so nothing on screen moves
+either way; what differs is a tenant that has narrowed a cell, where only this
+reading leaves somebody a door. Settled here rather than asked, because Islam's
+answer to being asked was *"I don't understand the judgement you need from me
+— let's fix what needs requires fixing and then we start building"* (rule 2b:
+a routine call a careful colleague makes).
+
+**A SECOND PAGE HOLDING ROWS THAT ARE ALREADY ON THE FIRST IS A SECOND PLACE TO
+LOOK FOR ONE NUMBER** (§87's twins, at the level of a screen), and worse, two
+controls able to disagree about it. So `myLineRows()` skips a target the viewer
+runs — one line, and it is the whole of what keeps My reporting to Islam's own
+sentence.
+
+**AND A NAME THAT REACHES NOBODY IS NOT AN OWNER.** `lineOwned()` asks whether
+the plan NAMES somebody and `SMPRules.lineOwnerIsHere()` asks whether the
+register holds them, and the two are not the same question on any real tenant:
+measured on the worked example, **83 tactics name an owner and only 51 name a
+person**, because a plan is typed by a custodian and a register is filled from
+HR. Classified as its owner's, such a row is refused to EVERYBODY — the
+server's `lineReporting` admits the owner alone by name and there is nobody to
+be them — so before this, **one of 33 active people could enter those 32 lines,
+the SMO**, on rows the office has no way of knowing about (§61). They fall back
+to the unit exactly as they were before the switch was turned on.
+
+**THE REGISTER RIDES THE WORLD RATHER THAN BEING THREADED THROUGH**, and the
+reason is the guarantee rather than the line count: the server builds its world
+from the STORED state (`worldOf(stored)`), so a save cannot put somebody on the
+register and claim their line in the same request (§42.2) — where a parameter
+passed down five frames can be handed the incoming register by a caller who
+does not know the difference. Named in `W()` AND in `worldOf()` AND in the
+browser's own `world()`, which is §102.4's instruction followed for the third
+time (`lineOwners` §380, `capabilities` §147): forget any one and the reader
+sees an empty list and answers as though nobody exists, in silence.
+
+**WHAT IT MOVES, MEASURED**: 83 tactics name an owner · 51 name a person · **49
+of those are owned by somebody who also runs that subject**, and lose a second
+screen · **2 reach My reporting**, one person · 32 name nobody and go back to
+the unit.
+
+### §385.1 — AND §382's ROW COMES OFF THE TABLE
+
+**THE TWO CONTROLS ANSWERED ONE QUESTION AND COULD DISAGREE ABOUT IT.** Measured
+across the four states, the Tactic owner row is **not consulted at all while
+the switch is on** — and the switch is what a tenant turns on to mean *owners
+enter their own lines*. So the row could only ever say no to something the
+switch had just said yes to; and it ships SHUT, so a tenant turning the switch
+on would have found owners typing on a row they had never opened. The merge
+that brought §380 and §382 together recorded that contradiction in
+`boundedReach`'s own comment and left it for Islam rather than picking one
+(rule 1b). He picked.
+
+**REMOVING IT MOVES NOBODY, AND THAT IS A MEASUREMENT**: 33 people × 36 page
+keys × 21 targets = **24,948 answers from `grantAtPage`, 0 changed**, taken on
+a build with the derivation removed and compared row by row — and **the two
+companies are in that count deliberately**, because a company CEO's reach is
+resolved per target (§37) and a sweep that stopped at the units and functions
+would have been silent about the two targets where "other" and "own" differ.
+A tactic's owner
+is `namedInUnit` — the walk reads every tactic's Owner through `namedOn` — so
+the Contributor floor covers them exactly as it did before §382, which is where
+the role came from in the first place.
+
+**THE FLOOR'S EXEMPTION GOES WITH IT.** §382 had to exclude its own role from
+`!out.length`, because a role deriving here that grants NOTHING would have
+taken away the floor it stood on. The test is `out.length` again, restored
+rather than left as a filter over a list the value can no longer be in (§24) —
+and the one claim of `scripts/test-tactic-owner.js` that survives the removal
+is carried into `test-my-reporting.js` §3c rather than deleted with the file
+(§218, §301.7's rule). **`ctx.tacticOwner` goes too**, at all four sites that
+were taught it.
+
+Recorded as a reversal rather than overwritten (Principle II): §382's reasoning
+is right that a tactic's owner derived nothing anybody could see on the table,
+and what changed is that the switch turned out to be the visible control.
+
+### §385.2 — AND THE SWITCH NOW STATES THE COST IT ACTUALLY HAS
+
+§384 fixed the doubled word and left the number, because what it should say is
+this round's decision. It counted every tactic carrying an Owner and said
+**83** where the honest figure is **2** — and the gap is two whole facts, both
+of them §385's: 32 of those 83 name nobody the register holds, and 49 of the
+rest are owned by the person who RUNS that subject. What MOVES is a line whose
+owner is a real person who does not run the subject. *A cost stated before the
+press (§35, §124) is only worth stating if it is the cost: 83 reads as a
+tenant-wide upheaval where the truth is one person and two rows.*
+
+**Asked through `canReport` with the person swapped, never a second reading of
+"do they run it"** (§53.5) — the same call `canEnterLine` and `myLineRows` make
+— with `VIEWER` put back in a `finally`, or the office is left looking at the
+tenant as somebody else because a settings row drew itself (§94.2).
+
+### §385.3 — AND MY OWN NEW SECTION DESTROYED THE CHECK'S VERDICT
+
+`checks/my-reporting.py` §9 opened `bad, swept = [], 0` — and `bad` is the
+module-level **failure count that file's verdict is printed from**. So the
+moment section 9 ran, **two genuine failures in section 8 were reported under
+the words "all good"**, and the falsification written to prove section 9 works
+printed nothing at all, because `"%d FAILED" % []` throws. §56.7's collision in
+Python, and §298.3's rule broken by the very section written to measure a
+decision: *a run that says it passed while printing its own failures is the one
+outcome a check may never produce.* Found by falsifying rather than by reading.
+
+**Two more of that section's own first failures were the CHECK.** It picked the
+seed's unmatched owner off a tactic marked Q3/Q4, which this cycle does not ask
+for at all — so the cell reads *Not asked* and it reported `{'there': False}` on
+a build that answers the question perfectly (§113.8: an absence is not a
+refusal); the row is MADE now from one that IS asked, with the quarters
+asserted. And its sweep called `switchViewer()` in a loop **inside one
+evaluate**, which over `file://` moves the viewer and **over HTTP does nothing
+at all** — measured, `VIEWER` stayed `smo` through all 33 calls, so the sweep
+asked one person, found the office running everything and owning nothing, and
+reported `[]`: green on a build that had not made this change. §237's trap,
+`hide-slide`'s own fault, in a file that already carries the answer in its
+`viewer()` helper.
+
+**And one assertion I wrote could not fail**: `PEOPLE.length === PEOPLE.length`,
+true of every build there has ever been (§113.8, written into the file by the
+section that quotes it). The count is taken before the fixture runs now.
+
+### §385.4 — VERIFIED
+
+`scripts/test-my-reporting.js` **65/0** · `scripts/test-authorize.js` **709/0**,
+the §385 pair red **2** with `lineOwnerIsHere` taken out of `addOwnedTactics` ·
+`test-graph-diff.js` 140/0 · `test-platform-rules.js` 69/0 ·
+`checks/my-reporting.py` **all good**, proved able to fail **three ways from the
+SOURCES** (§276) at **2 / 1 / 1 red**, with the tree restored from the saved
+copy and the rebuild asserted byte-identical (§343.9) · `built-in-step.py` all
+good · `generated-in-step.mjs` all clear once committed · `qa.py` ERRORS none.
+The seed is regenerated from the sources (`node scripts/extract-state.js`) and
+holds no `towner` row; the built file's bytes changed, so `sw.js` is bumped to
+`smp-shell-v5.27-the-switch-decides`, proved unique against every name the
+history holds and confirmed against `origin/main` immediately before the push
+(§91, §94.12, §94.16). The three reds §383.2d establishes as **not ours** are
+unchanged and not chased: `test-clean-parity.js`, spike **S2**, and
+`check:frameworks:page`.
+
+**`main` untouched: the merge is Islam's word, on that merge.**

@@ -160,6 +160,11 @@ with sync_playwright() as p:
          reach. The check was right about the RULE and wrong about the role,
          which is the shape a literal takes when the world moves past it.
 
+         THAT ROLE LASTED TWO DAYS (§385 took it off the table again), and
+         the line stays exactly as it is — which is the whole argument for
+         having written it this way. A literal would have had to be edited
+         twice: once when the role arrived and once when it left.
+
          The property is the one that made those three special in the first
          place: a role nobody can GRANT has no grantable places, so its places
          have to come from the register. That is `roleIsGrantable()`'s own

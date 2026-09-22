@@ -7475,3 +7475,80 @@ other way round: hide the numbers on both sides and the two are identical.
    main's own build first. They are listed in the previous round.
 
 **`main` is untouched. The merge is yours to say.**
+
+---
+
+## 2026-09-22 — the switch decides, and the Tactic owner row comes off
+
+**What you said.** *"We need not to confuse the custodian with the tactic
+owner. The custodian should have always access to their unit or function
+entry, except in one case when we set figure sets. My reporting appears for
+tactics for units or functions she is not the custodian or the owner."* And
+then, of the two drawings: **"A"**.
+
+### What is built
+
+**One question is asked per subject: do I run this one?** Its answer decides
+both things at once.
+
+- **I run it** — I enter everything on that unit's own Reporting page, tactics
+  included. There is **no My reporting tab** for it, because a second page
+  holding rows that are already on the first is a second place to look for one
+  number.
+- **I don't run it, but I own tactics there** — those lines are on My
+  reporting, and that is where I type them.
+- **A line somebody else owns, inside a unit I run** — I see the figure, I do
+  not type it. That part is unchanged.
+- **Figure sets are untouched**, which is the one exception you named.
+
+**The Tactic owner row is off Roles & access**, with the whole role and
+everything that plumbed it. The switch on Setup › Reporting cycle is the only
+control, and it still ships off.
+
+### What it actually moves, on the worked example
+
+| | |
+|---|---|
+| tactics naming an owner | **83** |
+| ...that name somebody on the register | **51** |
+| ...owned by the person who also runs that subject | **49** — they lose a second screen |
+| **...that reach My reporting** | **2**, one person |
+| tactics naming somebody the register does not hold | **32** |
+
+**Those 32 are the finding.** A plan is typed by a custodian and a register is
+filled from HR, so a third of the owner names reach nobody. Before today, a
+line like that was treated as belonging to a person who does not exist — so
+**one of your 33 people could enter it, the SMO**, and nothing on any screen
+said why. It goes back to the unit, exactly as it was before the switch was
+turned on.
+
+**And removing the row moves nobody's access.** 33 people × 36 pages × 21
+places = 24,948 answers, measured both ways: **0 changed.** Somebody who owns a
+tactic and nothing else is a Contributor again, which is what they were before
+that row existed.
+
+### What the switch now says
+
+It read **"83 83 lines"** — the word printed twice, and the wrong number. Both
+are fixed: it says the number it actually moves, which on your tenant is **2**.
+
+### What went wrong while building it
+
+**My own new check reported "all good" over two real failures.** The section I
+added to measure this used a variable name the file already uses for its
+failure count, so it wiped it. Found by deliberately breaking the product and
+watching the check fail to notice. Two more of that section's mistakes were the
+same shape — it measured a row nothing asks for this cycle, and it switched
+viewer in a way that silently does nothing over a real server, so a sweep of 33
+people was really a sweep of one.
+
+None of the three was in the product. All three are fixed and written down.
+
+### Checked
+
+The four states driven in a browser and proved able to fail three ways; 709
+server assertions, 65 rule assertions, the full page sweep with no errors, and
+both in-step guards clear. The seed is regenerated and the offline file matches
+the build.
+
+**`main` is untouched. The merge is yours to say.**

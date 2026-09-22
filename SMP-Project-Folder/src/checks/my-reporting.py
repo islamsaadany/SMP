@@ -100,6 +100,36 @@ _t[1]["owner"] = "Outside Owner 379"
 MINE, THEIRS = _t[0]["id"], _t[1]["id"]
 MINE_NAME = _t[0]["name"]
 
+# ── AND S385's TWO MORE STATES (S255 again, and one of them is FOUND) ────
+# S385 asks one question per subject — do I run this one? — so the two states
+# S380 never had to think about are a line owned by the person who RUNS the
+# unit, and a line whose Owner names nobody the register holds.
+#
+# THE FIRST IS IN THE SEED ALREADY and is FOUND rather than made: one tactic
+# on this pillar is owned by the unit's own head. It is asserted to be what
+# this file claims it is, because a fixture that quietly stops holding its
+# state makes every assertion under it pass for nothing (S94.5).
+RUNNER = BASE["unitRoles"][UNIT]["head"]
+RUNNER_NAME = next(p["name"] for p in BASE["people"] if p.get("key") == RUNNER)
+RUNS_AND_OWNS = next((t for t in _t if t.get("owner") == RUNNER_NAME), None)
+assert RUNS_AND_OWNS, "no tactic on %s's first pillar is owned by its head" % UNIT
+HIS = RUNS_AND_OWNS["id"]
+#
+# THE SECOND IS MADE, AND THE FIRST ATTEMPT TO FIND ONE PICKED A ROW WITH NO
+# CONTROL ON IT. The seed's own unmatched owner sits on a tactic marked Q3/Q4,
+# which this cycle does not ask for at all — so the cell reads "Not asked" and
+# the check reported `{'there': False}` on a build that answers the question
+# perfectly (S113.8: an absence is not a refusal). The row is made from one
+# that IS asked, and the quarters are asserted rather than assumed.
+NOBODY_NAME = "Abdelrahim"          # one word: nameRuns()'s floor is two (S130.7)
+assert NOBODY_NAME not in set(p.get("name") for p in BASE["people"]), \
+    "the fixture's unmatched owner is on the register after all"
+assert len(_t) >= 3, "the seed's %s pillar owns fewer than three tactics" % UNIT
+assert any(_t[2].get(q) for q in ("q1", "q2", "q3", "q4")), \
+    "the tactic being given an unmatched owner names no quarter, so nothing asks for it"
+_t[2]["owner"] = NOBODY_NAME
+NOONES = _t[2]["id"]
+
 
 class H(http.server.BaseHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -344,6 +374,89 @@ with sync_playwright() as p:
     ck("no My reporting", "mylines" not in tabs(pg), tabs(pg))
     pg.evaluate("GROUP.lineOwners = true; paint();"); pg.wait_for_timeout(400)
     ck("...and it comes back", "mylines" in tabs(pg), tabs(pg))
+
+    # ── S385: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ───────────────
+    # Islam picked option A of two drawn: the switch decides and the Tactic
+    # owner row comes off Roles & access. What that leaves is one rule with
+    # four states, and every one of them is asserted here — because three of
+    # them REVERSE something S380 built, and a file that only measured the
+    # unchanged half would go green on a build that had not made the change at
+    # all (S94.2).
+    print("\n8 · S385 — the four states, as the person who RUNS the unit")
+    viewer(pg, RUNNER)
+    press(pg, '#units button[data-u="%s"]' % UNIT)
+    ck("the Reporting tab opens", press(pg, '#subtabs [data-s="report"]'))
+
+    def live(rid):
+        return pg.evaluate("""(id)=>{ var e=document.querySelector('[data-rep="'+id+'"]');
+            return e ? { there:true, live:!e.disabled } : { there:false, live:false }; }""", rid)
+
+    # (a) HIS OWN LINE, on the unit's own page. S380 made this read-only and
+    #     sent him to a second screen for it; the whole of option A is that a
+    #     person who runs a unit enters everything on that unit's page.
+    ck("his own line is typed into on the unit's page", live(HIS).get("live"), live(HIS))
+    # (b) A LINE NAMING NOBODY falls to the unit, exactly as it did before the
+    #     switch was turned on. Classified as its owner's it would be refused
+    #     to everybody, because there is nobody to be them (S385's predicate).
+    ck("a line naming nobody is the unit's", live(NOONES).get("live"), live(NOONES))
+    # (c) SOMEBODY ELSE'S LINE is read there and not typed — which is S380's
+    #     own decision, kept, and the one place the two rules agree. Asserted
+    #     beside (a) and (b) or a build that simply opened every row passes
+    #     both of them (S113.8).
+    ck("somebody else's line is not", not live(MINE).get("live"), live(MINE))
+
+    print("\n9 · S385 — and a subject I run draws no row on My reporting")
+    # THE SWEEP IS DRIVEN THROUGH THE CONTROL, ONE PERSON AT A TIME, AND THE
+    # FIRST DRAFT OF IT WAS NOT (S237, S113.8). It called `switchViewer()` in a
+    # loop inside one evaluate — which over `file://` moves the viewer and over
+    # HTTP does NOTHING AT ALL: measured, `VIEWER` stayed `smo` through all 33
+    # calls, so the sweep asked one person, found the office running everything
+    # and owning nothing, and reported `[]` — green on a build that had not
+    # made this change at all. hide-slide fell into the same hole and this file
+    # already carries the answer in `viewer()`, which asserts the switch took.
+    #
+    # WHO IS SWEPT IS COMPUTED WITHOUT SWITCHING, so the walk is the handful of
+    # people who own a line anywhere rather than the whole register — the same
+    # set, at a thirtieth of the wall clock, and it says how many it swept so a
+    # list that quietly empties reads as a skip rather than a pass (S54.5).
+    owners = pg.evaluate("""() => {
+      const out = {};
+      myLineTargets().forEach(t => { const s = unitLike(t); if (!s) return;
+        (s.items || []).forEach(pl => (pl.tactics || []).forEach(x => {
+          PEOPLE.filter(p => SMPRules.personActive(p)).forEach(p => {
+            if (SMPRules.ownedBy(x, p)) out[p.key] = p.name; }); })); });
+      return out;
+    }""")
+    ck("there are line owners to sweep", len(owners) > 0, owners)
+    # AND `stray` IS NOT CALLED `bad`, WHICH IS NOT A STYLE NOTE (S56.7 in
+    # Python): the first draft of this section named its list `bad`, which is
+    # the module-level FAILURE COUNT this whole file's verdict is printed from
+    # — so the moment section 9 ran, two genuine failures in section 8 were
+    # reported under the words "all good", and the falsification that was meant
+    # to prove the section works printed nothing at all, because
+    # `"%d FAILED" % []` throws. A run that says it passed while printing its
+    # own failures is the one outcome a check may never produce (S298.3: the
+    # tail is the verdict), and it was introduced by the section written to
+    # measure a decision rather than by the decision.
+    stray, swept = [], 0
+    for key in sorted(owners):
+        if not viewer(pg, key):
+            continue
+        swept += 1
+        stray += pg.evaluate("""() => {
+          const runs = myLineTargets().filter(t => canReport(t));
+          return myLineRows().filter(r => runs.indexOf(r.target) >= 0)
+                             .map(r => [viewer().name, r.target, r.id]);
+        }""")
+    ck("every owner was actually looked at", swept == len(owners),
+       {"swept": swept, "of": len(owners)})
+    ck("no row on My reporting belongs to a subject its viewer runs",
+       stray == [], stray[:3])
+    # BOTH ENDS (S94.2): a build that had simply stopped drawing the tab
+    # satisfies every assertion above.
+    viewer(pg, ELSEWHERE)
+    ck("...and the tab is still drawn for somebody who owns a line elsewhere",
+       pg.evaluate("myLineRows().length") > 0)
 
     ck("no page error anywhere in the run", not errs, errs[:2])
     br.close()

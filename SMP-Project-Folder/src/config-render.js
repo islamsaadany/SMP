@@ -5204,17 +5204,50 @@ function lineOwnersSwitch(mayEdit, editing){
      AND `plural()` RETURNS THE COUNT AND THE WORD (§107.8, §160.6, §301 — the
      fourth time), so the number goes in front of it nowhere: this read
      "83 83 lines" on both sentences. Every other caller in the product wraps
-     the whole `plural()` in the <b>, and so does this one now (§53.5). */
-  var owned = 0;
-  myLineTargets().forEach(function(t){
-    var subj = unitLike(t);
-    if (!subj) return;
-    (subj.items || []).forEach(function(p){
-      (p.tactics || []).forEach(function(x){
-        if (SMPRules.lineOwnerName(x)) owned++;
+     the whole `plural()` in the <b>, and so does this one now (§53.5).
+
+     §385: AND THE NUMBER IS WHAT THE SWITCH ACTUALLY MOVES, WHICH IS NOT THE
+     SAME AS WHAT THE PLAN NAMES. This counted every tactic carrying an Owner
+     and said 83 on the worked example, where the honest figure is 2 — and the
+     gap is two whole facts, both of them the decision this switch now carries:
+
+       · 32 of those 83 name somebody the register does not hold at all, so
+         the line stays the unit's whichever way the switch is set; and
+       · 49 of the rest are owned by the person who RUNS that subject, who
+         enters them on its own Reporting page either way.
+
+     What MOVES is a line whose owner is a real person who does not run the
+     subject — and it moves onto a page of their own, which is the sentence
+     beside it. A cost stated before the press (§35, §124) is only worth
+     stating if it is the cost: 83 reads as a tenant-wide upheaval where the
+     truth is one person and two rows.
+
+     ASKED THROUGH `canReport` WITH THE PERSON SWAPPED, never a second reading
+     of "do they run it" (§53.5) — the same call `canEnterLine` and
+     `myLineRows` make, so the number on the switch cannot disagree with what
+     the pages then do. VIEWER is put back in a `finally`, or the office is
+     left looking at the tenant as somebody else because a settings row drew
+     itself (§94.2). */
+  var owned = 0, w = world(), was = VIEWER;
+  try {
+    myLineTargets().forEach(function(t){
+      var subj = unitLike(t);
+      if (!subj) return;
+      (subj.items || []).forEach(function(p){
+        (p.tactics || []).forEach(function(x){
+          if (!SMPRules.lineOwnerIsHere(w, x)) return;
+          var moves = false;
+          PEOPLE.forEach(function(who){
+            if (moves || !SMPRules.personActive(who)) return;
+            if (!SMPRules.ownedBy(x, who)) return;
+            VIEWER = who.key;
+            moves = !canReport(t);
+          });
+          if (moves) owned++;
+        });
       });
     });
-  });
+  } finally { VIEWER = was; }
   return '<div class="imp-row" style="margin:16px 0 0">' +
     '<span class="cfg-lab">Tactic owners enter their own lines</span>' +
     (editing

@@ -105,7 +105,12 @@ function world(){
   return SMPRules.worldOf({
     unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
     functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
-    companies:COMPANIES, access:ACCESS, group:GROUP
+    companies:COMPANIES, access:ACCESS, group:GROUP,
+    /* §385: the register, so a rule can ask whether a plan's Owner column
+       names anybody the tenant actually holds. Named here AND in W() AND in
+       worldOf() (§102.4) — forget any one and the reader sees an empty list
+       and answers as though nobody exists. */
+    people:PEOPLE
   });
 }
 function personRoles(p){ return SMPRules.personRoles(world(), p); }
@@ -4772,7 +4777,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown, tacticOwner: x.town });   /* §382 */
+      pillarOwner: x.pown });
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -4950,15 +4955,53 @@ function canEnterFigure(unitKey, x, where){
 
    AND THE LOCK IS ASKED HERE, so every control on the row closes together
    (§220's rule: a screen that shuts the figure and leaves the picker open has
-   shut nothing). */
+   shut nothing).
+
+   ── §385: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ─────────────────
+   Islam, correcting §380: *"we need not to confuse the custodian with the
+   tactic owner … the custodian should have always access to their unit or
+   function entry except in one case when we set figure sets … my reporting
+   appears for tactics for units or functions she is not the custodian or the
+   owner."* So the person is asked ONE thing per subject and the answer decides
+   both halves at once — where they type, and whether they get a second screen
+   for it at all.
+
+   RUN IT and everything is on that unit's own Reporting page, tactics
+   included; My reporting is not drawn for it, because a second page holding
+   rows already on the first is a second place to look for one number (§87's
+   twins, at the level of a screen). DON'T RUN IT and the lines you own are on
+   My reporting and nowhere else. A line SOMEBODY ELSE owns, inside a unit you
+   run, you read and do not type — which is §380's own decision, kept, and the
+   one place the two rules still agree.
+
+   "DO I RUN IT" IS THE GRANT, NEVER A LIST OF ROLE NAMES, and that is the
+   judgement inside this: `canReport()` is *may I enter figures for this unit
+   at all*, so a custodian whose Reporting cell the office has set to `view`
+   falls to the other branch and types their own lines on My reporting, rather
+   than being told they run a unit they have no way to report on (§61). On the
+   worked example the two readings answer identically, so nothing on screen
+   moves either way; what differs is a tenant that has narrowed a cell, where
+   only this reading leaves somebody a door.
+
+   AND A NAME THAT REACHES NOBODY IS NOT AN OWNER (§385's own predicate): 32
+   of the demo's 83 tactics name somebody the register does not hold, and
+   read-only-for-everybody-but-the-owner on such a row means nobody at all —
+   so the line falls back to the unit exactly as it was before the switch was
+   turned on. The server is asked the same question through the same function
+   (§42). */
 function canEnterLine(unitKey, x, where){
   var o = x && (x.obj || x);
   if (!(x && x.kind === "tactic" && SMPRules.lineOwned(world(), o)))
     return canReportRow(unitKey, x);
   if (inOffice()) return canReport(unitKey);
-  if (where !== "mine") return false;
-  return SMPRules.ownedBy(o, viewer()) &&
-         REVIEW.state === "open" && !CYCLE.locked && !lineLockShut(unitKey);
+  var runsIt = canReport(unitKey);
+  var mine   = SMPRules.ownedBy(o, viewer());
+  if (where === "mine")
+    return mine && !runsIt &&
+           REVIEW.state === "open" && !CYCLE.locked && !lineLockShut(unitKey);
+  if (!runsIt) return false;
+  if (mine) return canReportRow(unitKey, x);
+  return !SMPRules.lineOwnerIsHere(world(), o) && canReportRow(unitKey, x);
 }
 /* The note stays with the unit whatever the figure does. */
 function canEnterNote(unitKey, x){
@@ -5024,6 +5067,13 @@ function myLineRows(){
   myLineTargets().forEach(function(t){
     var subj = unitLike(t);
     if (!subj) return;
+    /* §385: A SUBJECT I RUN DRAWS NO ROW HERE. Its tactics are on its own
+       Reporting page, where I enter them beside everything else the unit
+       owes — so listing them again would be the same number in two places
+       with two controls able to disagree about it. This is the whole of what
+       keeps My reporting to Islam's own sentence: *"units or functions she is
+       not the custodian or the owner"*. */
+    if (canReport(t)) return;
     reportItems(subj).forEach(function(x){
       if (x.kind !== "tactic" || !SMPRules.ownedBy(x.obj, me)) return;
       var row = {};
@@ -5201,7 +5251,6 @@ function reportItems(u){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                 town:t.owner,                          /* §382 */
                  cid:p.id, place:place });
     });
     /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
@@ -7130,9 +7179,8 @@ function gapMap(target, all, fillable){
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
       /* §382: a tactic's own Owner is its own handle — see boundedReach(). */
-      var tctx = function(row){ var c = pctx(row); c.tacticOwner = row && row.owner; return c; };
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
-      (p.tactics  || []).forEach(function(x){ n += G(w.plan, tctx(x), "tactic", x); });
+      (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
       entry("p:" + (p.code || i), pillarCode(u, i), n,
             { sec: w.sec, page: "plan", rail: unitRailKey(u), code: p.code });
     });

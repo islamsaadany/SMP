@@ -24,7 +24,7 @@ import type { Viewer } from "../../lib/library.ts";
 import type { ServeArgs } from "../registry.ts";
 import { insightsDocument, libraryFragment } from "./page.ts";
 
-/* WHO IS LOOKING IS THE SPINE'S (§382). This rule was written here and then
+/* WHO IS LOOKING IS THE SPINE'S (§383). This rule was written here and then
    COPIED into lib/landing-facts.ts under a comment naming this file, which is
    §53.5 written down rather than closed — and the reports tab's own stamp
    would have been the third copy. It is lib/library-viewer.ts's now: the

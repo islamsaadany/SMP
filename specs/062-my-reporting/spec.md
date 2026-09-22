@@ -5,7 +5,7 @@
 > *"If we'd like to show the tactics owners to report the progress of their own
 > tactics. is that built?"*
 
-Built as **§379**.
+Built as **§380**.
 
 ---
 

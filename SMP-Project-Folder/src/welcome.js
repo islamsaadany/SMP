@@ -221,7 +221,7 @@ var WELCOME = (function(){
     return rows;
   }
 
-  /* ── THE LINES THAT ARE YOURS (§379, spec 062) ────────────────────────
+  /* ── THE LINES THAT ARE YOURS (§380, spec 062) ────────────────────────
      Islam's ninth decision: somebody whose only job this cycle is a handful
      of tactic figures should be told so on the screen they land on, like
      everybody else with something outstanding.

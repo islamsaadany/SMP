@@ -1,4 +1,4 @@
-/* ── MY REPORTING, ASKED OF THE PRODUCT'S OWN READERS (§379, spec 062) ──
+/* ── MY REPORTING, ASKED OF THE PRODUCT'S OWN READERS (§380, spec 062) ──
    No browser and no database: the frozen sources are evaluated in a vm the
    way `smp-app/lib/frozen.cjs` and `scripts/extract-kb.js` already do, so the
    rules under this feature are exercised against the BAKED worked example —
@@ -35,7 +35,7 @@ const FILES = [...BUILD.match(/for tag, f in \[([\s\S]*?)\]:/)[1]
    ASSERTED below, so a file growing that dependency is a failure here rather
    than a silent omission.
 
-   AND IT DID EXACTLY THAT AT THE MERGE (2026-09-21). §382's Insights tab
+   AND IT DID EXACTLY THAT AT THE MERGE (2026-09-21). §383's Insights tab
    added `insights.js`, which wires its own listeners at load, and this
    assertion went red on the merged tree — the check working, not breaking.
    REWRITTEN rather than loosened (§218, §214.3): the file is NAMED here with

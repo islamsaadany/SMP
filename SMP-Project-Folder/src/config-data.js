@@ -4772,7 +4772,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown, tacticOwner: x.town });   /* §381 */
+      pillarOwner: x.pown, tacticOwner: x.town });   /* §382 */
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -4932,7 +4932,7 @@ function canEnterFigure(unitKey, x, where){
   if (inOffice()) return canReport(unitKey);
   return who === viewer().key && REVIEW.state === "open" && !CYCLE.locked;
 }
-/* ── §379: A TACTIC WHOSE OWNER ENTERS IT ──────────────────────────────
+/* ── §380: A TACTIC WHOSE OWNER ENTERS IT ──────────────────────────────
    The figure-master rule above, asked of the plan's Owner column instead of a
    figure's `src` — being named is the whole permission, so no grant, no role
    and no attachment is consulted at all.
@@ -4968,7 +4968,7 @@ function canEnterNote(unitKey, x){
      a capability it refused the note to somebody the right column allows. */
   if (who && !inOffice() && who === viewer().key &&
       grantAt(SMPRules.reportPageOf(unitKey), unitKey) !== "edit") return false;
-  /* §379: AND THE SAME IS TRUE OF A LINE'S OWNER. Islam: *"You enter the
+  /* §380: AND THE SAME IS TRUE OF A LINE'S OWNER. Islam: *"You enter the
      figure; the unit writes the note."* Somebody whose only way onto this row
      is the Owner column gets the number and not the explanation — where an
      owner who ALSO holds edit here (a custodian who owns a tactic) keeps the
@@ -4985,7 +4985,7 @@ function canEnterNote(unitKey, x){
 function mySourceRows(){ return SMPRules.sourcesFor(world(), viewer()); }
 function ownsAnySource(){ return mySourceRows().length > 0; }
 
-/* ── MY REPORTING: THE LINES THIS PERSON OWNS (§379, spec 062) ──────────
+/* ── MY REPORTING: THE LINES THIS PERSON OWNS (§380, spec 062) ──────────
    Islam: *"it's only for owners of tactics to report progress either on the
    units they belong to but they are not the bu owner or the custodian or
    report progress for other units that he doesn't belong to at all."*
@@ -5201,7 +5201,7 @@ function reportItems(u){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
                  owner:t.owner, collaborators:t.collaborators, pown:p.owner,
-                 town:t.owner,                          /* §381 */
+                 town:t.owner,                          /* §382 */
                  cid:p.id, place:place });
     });
     /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
@@ -7129,7 +7129,7 @@ function gapMap(target, all, fillable){
     }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
-      /* §381: a tactic's own Owner is its own handle — see boundedReach(). */
+      /* §382: a tactic's own Owner is its own handle — see boundedReach(). */
       var tctx = function(row){ var c = pctx(row); c.tacticOwner = row && row.owner; return c; };
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){ n += G(w.plan, tctx(x), "tactic", x); });

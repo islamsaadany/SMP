@@ -38,7 +38,7 @@
      the categories typed out         1 red  — §94.8's drift, printing the short list
      `All` made a real category       3 red  — §50.6, asking for a word the server refuses
 
-   AND SINCE §382 THE ROW IS WHAT THE DOCUMENT WAS STAMPED WITH rather than
+   AND SINCE §383 THE ROW IS WHAT THE DOCUMENT WAS STAMPED WITH rather than
    the module's whole list, so §2 asserts the tab draws WHATEVER it is handed,
    in the order it is handed — WHICH categories those are is the server's
    assertion, in checks/insights.mjs §14, which has a database to answer it
@@ -128,7 +128,7 @@ console.log("\n2 · the section row is what the document was stamped with");
   const { lib } = loadLibrary(STAMP);
   const secs = lib.sections();
   /* ASSERTED AS AN AGREEMENT WITH THE STAMP, never as a typed list (§94.8),
-     and since §382 the stamp is WHAT THIS CLIENT HAS rather than what the
+     and since §383 the stamp is WHAT THIS CLIENT HAS rather than what the
      module offers — so what this file can prove is that the tab draws
      whatever it is handed, in the order it is handed, and WHICH categories
      those are is the server's assertion (checks/insights.mjs §14, which has a
@@ -142,7 +142,7 @@ console.log("\n2 · the section row is what the document was stamped with");
     secs.every((s) => s.ac === "c_kb") && secs.every((s) => typeof s.render === "function"));
   check("and with no library there are no sections at all",
     loadLibrary(null).lib.sections().length === 0);
-  /* §382, BOTH ENDS (§94.2). A build that went on reading the module's whole
+  /* §383, BOTH ENDS (§94.2). A build that went on reading the module's whole
      list — the fault Islam reported as *"the filters of the reports should
      appear only if there is this type of report"* — satisfies every assertion
      above, because above the stamp IS the whole list. These two are the ones

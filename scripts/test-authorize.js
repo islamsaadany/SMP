@@ -4351,7 +4351,7 @@ console.log("\n42 · the two kinds of Forefront row (spec 058)");
         quiet.map(function (c) { return c.kind; }).join(","));
 })();
 
-/* ── 43 · MY REPORTING: the owner of a line enters it (§379, spec 062) ──
+/* ── 43 · MY REPORTING: the owner of a line enters it (§380, spec 062) ──
    THE SERVER IS THE HALF THAT DECIDES (§42), and until this section it had
    none: `scripts/test-my-reporting.js` asks the SCREEN, and every narrowing
    it measures is `canEnterLine`'s one door — so falsifying the shared rule's
@@ -4374,7 +4374,7 @@ console.log("\n43 · my reporting (spec 062)");
   const unit = base.units[uk];
   const pil = (unit.items || [])[0];
   const tac = ((pil || {}).tactics || [])[0];
-  check("§379: the fixture found a tactic to own", !!tac, uk);
+  check("§380: the fixture found a tactic to own", !!tac, uk);
   if (!tac) return;
 
   /* An owner the register recognises, and somebody else who is NOT. */
@@ -4390,7 +4390,7 @@ console.log("\n43 · my reporting (spec 062)");
   const other = base.people.filter(function (p) {
     return p.key !== owner.key && !R.personRoles(R.worldOf(base), p).length;
   })[0];
-  check("§379: ...and somebody holding nothing at all, to be the collaborator",
+  check("§380: ...and somebody holding nothing at all, to be the collaborator",
         !!(owner && other && owner.key !== other.key),
         other ? other.key : "(nobody on the register holds no role)");
   if (!owner || !other) return;
@@ -4415,27 +4415,27 @@ console.log("\n43 · my reporting (spec 062)");
   /* — the figure, classified as its own kind and NAMED — */
   const figure = say(function (i) { at(i).actual = "42"; });
   const ks = kindsOf(figure);
-  check("§379: a tactic's figure classifies as lineReporting",
+  check("§380: a tactic's figure classifies as lineReporting",
         ks.some(function (k) { return k.indexOf("lineReporting:") === 0; }),
         ks.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
-  check("§379: ...and the entry NAMES whose line it is (§16.7)",
+  check("§380: ...and the entry NAMES whose line it is (§16.7)",
         ks.some(function (k) { return k.indexOf(owner.name) > -1; }), ks.join(" / "));
 
-  check("§379: the owner enters their own line", verdict(figure, owner.key).ok,
+  check("§380: the owner enters their own line", verdict(figure, owner.key).ok,
         (verdict(figure, owner.key).refusals || []).join(" / "));
-  check("§379 REFUSED: somebody else does not", !verdict(figure, other.key).ok,
+  check("§380 REFUSED: somebody else does not", !verdict(figure, other.key).ok,
         "was ALLOWED");
-  check("§379: ...and the refusal names the owner rather than a rule number",
+  check("§380: ...and the refusal names the owner rather than a rule number",
         (verdict(figure, other.key).refusals || []).join(" ").indexOf(owner.name) > -1,
         (verdict(figure, other.key).refusals || []).join(" / "));
-  check("§379: the office still enters it", verdict(figure, "smo").ok,
+  check("§380: the office still enters it", verdict(figure, "smo").ok,
         (verdict(figure, "smo").refusals || []).join(" / "));
 
   /* — a LOCKED cycle refuses it, like every other figure — */
   (function () {
     const shut = clone(base); shut.cycle = shut.cycle || {}; shut.cycle.locked = true;
     const inc = clone(shut); inc.units[uk].items[0].tactics[0].actual = "42";
-    check("§379 REFUSED: a locked cycle takes nothing, owner or not",
+    check("§380 REFUSED: a locked cycle takes nothing, owner or not",
           !A.authorize(shut, inc, personOf(shut, owner.key)).ok, "was ALLOWED");
   })();
 
@@ -4457,13 +4457,13 @@ console.log("\n43 · my reporting (spec 062)");
       const inc = clone(st); inc.units[uk].items[0].tactics[0].actual = "7";
       return A.authorize(st, inc, personOf(st, other.key));
     };
-    check("§379: the fixture made a collaborator the register recognises",
+    check("§380: the fixture made a collaborator the register recognises",
           R.namedOn({ owner: "", collaborators: [other.name] }, other), other.name);
 
     const off = clone(withColl); delete off.group.lineOwners;
-    check("§379: with the switch OFF a named collaborator enters it, as today",
+    check("§380: with the switch OFF a named collaborator enters it, as today",
           post(off).ok, (post(off).refusals || []).join(" / "));
-    check("§379 REFUSED: with it ON only the owner does",
+    check("§380 REFUSED: with it ON only the owner does",
           !post(withColl).ok, "was ALLOWED");
   })();
 
@@ -4474,18 +4474,18 @@ console.log("\n43 · my reporting (spec 062)");
       i.review.lines = {}; i.review.lines[key] = { by: owner.key, at: "2026-09-20" };
     });
     const lk = kindsOf(mine);
-    check("§379: saving your lines as a draft classifies as lineDone",
+    check("§380: saving your lines as a draft classifies as lineDone",
           lk.some(function (k) { return k.indexOf("lineDone:") === 0; }),
           lk.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
-    check("§379: ...and you may", verdict(mine, owner.key).ok,
+    check("§380: ...and you may", verdict(mine, owner.key).ok,
           (verdict(mine, owner.key).refusals || []).join(" / "));
 
     const theirs = say(function (i) {
       i.review.lines = {}; i.review.lines[uk + "|" + other.key] = { by: other.key, at: "2026-09-20" };
     });
-    check("§379 REFUSED: saving somebody ELSE's lines is not yours to do",
+    check("§380 REFUSED: saving somebody ELSE's lines is not yours to do",
           !verdict(theirs, owner.key).ok, "was ALLOWED");
-    check("§379: ...and the review map travels per key, never whole (§234)",
+    check("§380: ...and the review map travels per key, never whole (§234)",
           (R.REVIEW_PER_TARGET || require("../lib/graph-diff.js").REVIEW_PER_TARGET || [])
             .indexOf("lines") > -1,
           JSON.stringify(require("../lib/graph-diff.js").REVIEW_PER_TARGET));
@@ -4499,14 +4499,14 @@ console.log("\n43 · my reporting (spec 062)");
     const flip = clone(SEED); flip.group.lineOwners = true;
     const fk = (A.collect(SEED, flip, R.worldOf(SEED)) || [])
                  .map(function (c) { return c.kind; });
-    check("§379: turning the switch on classifies as setup",
+    check("§380: turning the switch on classifies as setup",
           fk.indexOf("setup") > -1,
           fk.join(",") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
-    check("§379: ...and it is the office's",
+    check("§380: ...and it is the office's",
           A.authorize(SEED, flip, personOf(SEED, "smo")).ok,
           (A.authorize(SEED, flip, personOf(SEED, "smo")).refusals || []).join(" / "));
     if (custKey)
-      check("§379 REFUSED: ...and a unit's custodian may not set it",
+      check("§380 REFUSED: ...and a unit's custodian may not set it",
             !A.authorize(SEED, flip, personOf(SEED, custKey)).ok, "was ALLOWED");
     /* AND EXACTLY ONCE. The other half of §259.2, which no verdict can see:
        classified-and-unswept is refused to the same people and classifies
@@ -4514,7 +4514,7 @@ console.log("\n43 · my reporting (spec 062)");
        `unknown:the group's lineOwners` — so the change log gains a phantom
        row and a refusal names the stored field rather than the control that
        sets it (§16.7). Measured; both people answer the same either way. */
-    check("§379: ...and exactly once, never as setup AND unknown (§259.2)",
+    check("§380: ...and exactly once, never as setup AND unknown (§259.2)",
           fk.length === 1,
           (A.collect(SEED, flip, R.worldOf(SEED)) || [])
             .map(function (c) { return c.kind + ":" + c.what; }).join(" / "));
@@ -4526,7 +4526,7 @@ console.log("\n43 · my reporting (spec 062)");
     const inc = clone(off); inc.units[uk].items[0].tactics[0].actual = "42";
     const ks2 = (A.collect(off, inc, R.worldOf(off)) || [])
                   .map(function (c) { return c.kind; });
-    check("§379: with the switch off a tactic's figure is unitReporting as before",
+    check("§380: with the switch off a tactic's figure is unitReporting as before",
           ks2.indexOf("unitReporting") > -1 && ks2.indexOf("lineReporting") < 0,
           ks2.join(","));
   })();

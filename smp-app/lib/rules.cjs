@@ -76,7 +76,7 @@
       note:"Named as a project's Owner on a supporting function. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
-    /* ── AND THE ROW UNDER THE PILLAR (§381, Islam 2026-09-20) ──────
+    /* ── AND THE ROW UNDER THE PILLAR (§382, Islam 2026-09-20) ──────
        *"I believe we need to add measures & tactics owners as roles so I can
        set their accessability and accordingly Mahdy access can be switched on
        of orr."*
@@ -262,7 +262,7 @@
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
-    /* NOTHING, EVERYWHERE (§381). The two rows above ship at view because
+    /* NOTHING, EVERYWHERE (§382). The two rows above ship at view because
        §147.7 was asked for a role that READS its own place and reports it
        once the cell is opened; this one was asked for the opposite — a row
        that starts shut so a tenant can decide. Islam's own words, and the
@@ -396,13 +396,13 @@
     { key:"u_src",    area:"unit",   scope:"unit",   label:"Who enters", note:"Name who enters each of this unit's figures" },
     { key:"c_kb",     area:"always", scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
     { key:"c_cycle",  area:"a_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
-    /* §379: "Reporting", which is what the tab says and what the knowledge
+    /* §380: "Reporting", which is what the tab says and what the knowledge
        base entry for this key has always been titled. It was "My reporting"
        and was drawn on NO screen — since §37 the matrix shows AREAS — so the
        word was free for the tab beside it, and this is one stale copy being
        brought into step rather than a rename (§104.8). */
     { key:"u_report", area:"unit", scope:"unit",  label:"Reporting",    note:"Enter this cycle's figures" },
-    /* §379: the lines the plan names this person on, wherever they are. NO
+    /* §380: the lines the plan names this person on, wherever they are. NO
        AREA, exactly as "Figures I report" has none: the permission is being
        named, so there is no cell for it to sit in and no grant to consult —
        `when` on the tab is the whole gate, and it asks whether this person
@@ -430,7 +430,7 @@
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
       naming: !!o.naming,
-      /* §379: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
+      /* §380: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
          turning it on MOVES who enters a figure — 26 tactics change hands on
          Raya the moment it is set, and nobody chose that. Off, every rule
          below answers exactly what it answered before, which is what makes
@@ -553,7 +553,7 @@
       if (String(f.format) === "pillars" && (f.items || []).some(owns))
         once("plowner", "fn:" + k);
     });
-    /* ── THE TACTIC'S OWN OWNER (§381) ────────────────────────────
+    /* ── THE TACTIC'S OWN OWNER (§382) ────────────────────────────
        Unconditional, exactly as the two above: a custodian somewhere else who
        also owns a tactic here holds both, which is the case that could not be
        switched off before. One entry per PLACE, however many tactics there
@@ -584,7 +584,7 @@
        that stops naming them stops. Somebody attached and named on nothing now
        holds NOTHING — what they may see is NO_ROLE's floor, applied in
        grantIn() rather than dressed up as a role they never got (§93). */
-    /* ── AND THE FLOOR IS ASKED OF THE ROLES THAT GRANT SOMETHING (§381) ──
+    /* ── AND THE FLOOR IS ASKED OF THE ROLES THAT GRANT SOMETHING (§382) ──
        This tested `out.length`, which meant "holds no role at all" — true
        until a row deriving here could grant NOTHING. A tactic owner named
        nowhere else would have stopped being a Contributor and started being a
@@ -3452,7 +3452,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      save is narrowed to their reach by mayReportRow() below. Adding a key
      here is what wires all of that at once, which is exactly the property
      §55 recorded this list for. */
-  /* §381 adds the tactic's owner, and adding the key here is what wires
+  /* §382 adds the tactic's owner, and adding the key here is what wires
      the whole of it at once: no Submit, no cycle note, no picture slides,
      every reporting save narrowed by mayReportRow(), and the role refused by
      the register's picker and the people workbook, both of which ask
@@ -3493,7 +3493,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return via.length > 0 && via.every(function (r) { return OWN_LINES_ONLY.indexOf(r) > -1; });
   }
 
-  /* ── REPORTING FOLLOWS THE OWNER COLUMN (§379, spec 062) ──────────
+  /* ── REPORTING FOLLOWS THE OWNER COLUMN (§380, spec 062) ──────────
      Islam: *"it's only for owners of tactics to report progress either on the
      units they belong to but they are not the bu owner or the custodian or
      report progress for other units that he doesn't belong to at all"*, and
@@ -3551,13 +3551,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
      · a PROJECT OWNER reaches every row of a project whose Owner names them;
      · a PILLAR OWNER reaches every row of a pillar whose Owner names them;
-     · a TACTIC OWNER reaches the one tactic whose Owner names them (§381);
+     · a TACTIC OWNER reaches the one tactic whose Owner names them (§382);
      · a CONTRIBUTOR (and the floor) reaches the rows that NAME them — the
        row's own owner or collaborators, or the project's stakeholder and
        collaborator lists (§147.8: "stakeholders are contributors"). */
-  /* §379's SWITCH CHANGES WHAT THE LAST TWO LINES MEAN, and it does it
+  /* §380's SWITCH CHANGES WHAT THE LAST TWO LINES MEAN, and it does it
      somewhere else — corrected at the merge, because this paragraph opened
-     "§379 TAKES THE WORLD" and `boundedReach` takes no world: it described the
+     "§380 TAKES THE WORLD" and `boundedReach` takes no world: it described the
      branch that section wrote and then removed, which is §104.8 exactly, a
      comment stating an intention the code does not carry out. What is true is
      that with the switch on, being NAMED stops being enough for a tactic's
@@ -3574,7 +3574,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "plowner")
       return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
              namedOn({ owner: ctx.pillarOwner }, person);
-    /* §381: A HANDLE OF ITS OWN, NEVER `ctx.row.owner`. That reads right and
+    /* §382: A HANDLE OF ITS OWN, NEVER `ctx.row.owner`. That reads right and
        is wrong on exactly one row kind: a MEASURE's reporting ctx is built
        with `row.owner = the PILLAR's owner` (§55's rule, kept by §147.7 so
        nothing a contributor could reach before the pillar-owner role existed
@@ -3592,19 +3592,19 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       return ctx.tacticOwner != null && ctx.tacticOwner !== "" &&
              namedOn({ owner: ctx.tacticOwner }, person);
     /* ── AND THE TWO NOTES ABOVE AND BELOW ARE ABOUT DIFFERENT QUESTIONS
-       (merge of §379 and §381, 2026-09-21) ──────────────────────────────
+       (merge of §380 and §382, 2026-09-21) ──────────────────────────────
        Two parallel sessions answered one ask two minutes apart, and both
-       landed here. The branch above is §381's ROLE: a row on Roles & access
+       landed here. The branch above is §382's ROLE: a row on Roles & access
        that starts shut, and once its Reporting cell is opened lets a tactic's
        Owner report that tactic on the unit's own Reporting page. The note
-       below is §379's SWITCH: a tenant setting that moves a tactic's figure
+       below is §380's SWITCH: a tenant setting that moves a tactic's figure
        onto a page of its own and deliberately adds no branch here. They are
        not two readings of one decision and neither is stale.
 
        THEY COMPOSE, AND THE ORDER IS WORTH KNOWING RATHER THAN DISCOVERING.
        `canEnterLine()` asks `lineOwned()` first, which is false while the
        switch is off — so with it off every owned tactic falls through to
-       `canReportRow()` and the role below decides, exactly as §381 built it.
+       `canReportRow()` and the role below decides, exactly as §382 built it.
        With the switch ON, an owned tactic on the unit's page is refused there
        for everybody but the office, whatever the role says, and the owner
        types on My reporting instead.
@@ -3616,7 +3616,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        ambiguous to the code — but it is a screen saying yes where a page says
        no, which is the drift §42 exists to stop. Recorded here, raised in the
        merge's own record, and NOT resolved by picking one (rule 1b). */
-    /* §379: MY REPORTING DELIBERATELY DOES NOT REACH THIS LINE, and saying so
+    /* §380: MY REPORTING DELIBERATELY DOES NOT REACH THIS LINE, and saying so
        is the point rather than leaving an absence. A branch here reading
        "with the switch on, a bounded role reaches only what it OWNS" was
        built and taken out again: nothing reaches it for a tactic — the
@@ -3631,7 +3631,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        removed. Measured, not reasoned: 703 and 43 assertions, unmoved.
 
        (At the merge: this says the SWITCH adds no branch here, and it stays
-       true — the branch above it belongs to §381's role and is a different
+       true — the branch above it belongs to §382's role and is a different
        question.) */
     if (ctx.row && namedOn(ctx.row, person)) return true;
     return !!ctx.project &&

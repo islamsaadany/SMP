@@ -49,7 +49,7 @@ export async function landingFactsFor(tenantId: string, have: readonly ModuleKey
   return { facts, picks: picksOf(g) };
 }
 
-/* WHO IS LOOKING LEFT THIS FILE (§382). It kept a copy of that rule under a
+/* WHO IS LOOKING LEFT THIS FILE (§383). It kept a copy of that rule under a
    comment NAMING the original — *"modules/insights/index.ts's own rule"* —
    which is §53.5 written down rather than closed. One answer now, in
    lib/library-viewer.ts, asked by the landing, by the module and by the tab's

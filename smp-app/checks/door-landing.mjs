@@ -831,7 +831,7 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
        (\u00a7218, \u00a7214.3, \u00a7255). Shutting one role is not shutting a
        person: access is the MOST GENEROUS grant across the roles they hold
        (\u00a733), and the matrix has a row per role precisely so two can
-       differ. \u00a7381 made a tactic's owner a role, so the Mobile head derives
+       differ. \u00a7382 made a tactic's owner a role, so the Mobile head derives
        `towner@mobile` as well as `owner@mobile` and the door below went on
        serving them Insights with the BU owner's cell plainly shut \u2014 the
        fixture had stopped making the state its own assertions are about,
@@ -844,7 +844,7 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     const heldRows = await page.evaluate(() =>
       Array.from(new Set(personRoles(personBy("mobhead")).map((r) => r.role))));
     check(heldRows.length >= 2 && heldRows.includes("owner"),
-          "\u2026and the Mobile head holds more than the one row, so shutting one is not shutting them (\u00a733, \u00a7381)", JSON.stringify(heldRows));
+          "\u2026and the Mobile head holds more than the one row, so shutting one is not shutting them (\u00a733, \u00a7382)", JSON.stringify(heldRows));
     for (const role of heldRows) {
       if (role === "owner") continue;
       const b2 = page.locator('[data-mac^="' + role + '|a_insights|"]');

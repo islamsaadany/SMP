@@ -1,7 +1,7 @@
 /* ── WHO IS LOOKING AT THE LIBRARY, AND WHAT THEY HAVE IN IT ─────────────
    Two answers the spine owes every surface that draws the reports: WHO is
    asking (spec 046 §4.10), and — for the tab's filter row — WHICH CATEGORIES
-   that person actually has anything under (§382).
+   that person actually has anything under (§383).
 
    IT IS ONE ANSWER BECAUSE IT WAS THREE. `viewerOf` was written in
    modules/insights/index.ts, copied into lib/landing-facts.ts under a comment
@@ -47,7 +47,7 @@ export async function viewerFor(tenantId: string, seat: string | null | undefine
   return { place: await withTenant(tenantId, (c) => placeOf(c, personKey)), seesAll: false };
 }
 
-/* WHAT THE PLATFORM DOCUMENT CARRIES FOR THE REPORTS TAB (§382), in the shape
+/* WHAT THE PLATFORM DOCUMENT CARRIES FOR THE REPORTS TAB (§383), in the shape
    lib/shell.ts stamps: the categories this person has reports under, `[]` for
    a library with nothing filed yet, and **null where there is no library
    behind the tab at all** — a client without the module, or somebody it is
@@ -68,7 +68,7 @@ export async function libraryStampFor(tenantId: string, seat: string | null | un
   return categoriesFor(tenantId, await viewerFor(tenantId, seat, personKey));
 }
 
-/* THE SAME QUESTION THE MODULE'S OWN PAGE ASKS (§382, §53.5). Two hosts draw
+/* THE SAME QUESTION THE MODULE'S OWN PAGE ASKS (§383, §53.5). Two hosts draw
    that filter row — the tab inside the platform and the module's page — and
    they must offer the same categories or one of them is lying about the same
    library. One function, so the answer cannot be arrived at twice.

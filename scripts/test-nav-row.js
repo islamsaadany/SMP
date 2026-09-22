@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* WHAT THE DESTINATION ROW OFFERS, AND WHY (§380).
+/* WHAT THE DESTINATION ROW OFFERS, AND WHY (§381).
  *
  * Islam, viewing as a unit's strategy custodian on the build §376 shipped:
  * *"when viewing as Mahdy he started seeing the other units and functions
@@ -83,7 +83,7 @@ const supplied = {
   namingOn: () => false,
   LIBRARY: { shown: () => LIBRARY_ON, sections: () => [] },
   grantAt: (ac, target) => R.grantAtPage(W, PERSON, ac, target),
-  /* §379's My reporting tab, ANSWERED HERE RATHER THAN RUN, and saying which
+  /* §380's My reporting tab, ANSWERED HERE RATHER THAN RUN, and saying which
      is the point (§100.3). Its real `myLinesHere()` lives in config-data.js,
      which this harness deliberately does not evaluate — it takes the ONE
      largest inline block, because the gates under test are all in it.
@@ -93,7 +93,7 @@ const supplied = {
      reads `if (d.when && ...)`, and a tab whose gate is undefined skips
      straight to `grantAt` — which for `c_mylines` is `area:"always"` and
      therefore "view" for everybody, at every target. So the merged build
-     reported §380's own fault on a build that does not have it: 10 units and
+     reported §381's own fault on a build that does not have it: 10 units and
      8 functions for somebody who reaches nowhere. The product is fine and was
      checked rather than assumed — in the built file `myLinesHere` is declared
      44,000 lines before the tab object is created.
@@ -105,7 +105,7 @@ const supplied = {
        own    the switch on — the tab is drawn on the person's OWN place and
               nowhere else, which is Islam's answer to his own case 2;
        always a tab that ignores its gate, which MUST move the row or this
-              harness cannot see §380's fault through a `when` at all.
+              harness cannot see §381's fault through a `when` at all.
      `homeOf` mirrors `myLinesHome()` off the person's row rather than calling
      it, for the same reason — named as a mirror so nobody reads it as the
      rule (§53.5). */
@@ -161,12 +161,12 @@ console.log("\n§1  the gates are the shipped ones");
 const GATES = ["allowed", "ownTabs", "myUnits", "myFns", "foldsNeeded", "anyDestination"];
 GATES.forEach((n) => check(n + "() is in this build", typeof box[n] === "function"));
 /* A CHECK THAT DIES REPORTS NOTHING (§215). Measured against a build from
-   before §380 every later section would throw on the first missing gate and
+   before §381 every later section would throw on the first missing gate and
    print a stack trace where a verdict belongs — which is exactly the run
    somebody makes to establish that a fault is not theirs (§303). */
 if (GATES.some((n) => typeof box[n] !== "function")) {
   console.log("\nnav-row: " + ok + " ok, " + bad.length + " failed" +
-    "\n  this build predates \u00a7380 \u2014 the gates it measures are not in it, " +
+    "\n  this build predates \u00a7381 \u2014 the gates it measures are not in it, " +
     "so nothing below could be asked");
   process.exit(1);
 }
@@ -204,7 +204,7 @@ PERSON = people.find((p) => p.key === "own_mob");
 check("...while somebody who reaches one says true",
   fn("anyDestination")() === true);
 
-console.log("\n§5  the My reporting tab does not make a destination reachable either (§379)");
+console.log("\n§5  the My reporting tab does not make a destination reachable either (§380)");
 LIBRARY_ON = true;
 const rowsIn = (mode) => { MYLINES = mode; return people.map((p) => p.key + ":" + JSON.stringify(row(p))).join("|"); };
 const OFF = rowsIn("off"), OWN = rowsIn("own"), ALWAYS = rowsIn("always");
@@ -214,7 +214,7 @@ check("with the switch off every person is offered exactly what §3 measured",
 check("and with it ON the row is still the same — the tab sits on the person's " +
   "own place, which they already reach (Islam's case 2)", OWN === OFF);
 check("...while a tab that ignored its gate WOULD move it, so this can still " +
-  "see §380's fault through a `when` (§113.8)", ALWAYS !== OFF);
+  "see §381's fault through a `when` (§113.8)", ALWAYS !== OFF);
 
 console.log("\nnav-row: " + ok + " ok, " + bad.length + " failed" + (BREAK ? "   [--break=" + BREAK + "]" : ""));
 if (bad.length) { bad.forEach((b) => console.log("  - " + b)); process.exit(1); }

@@ -84,7 +84,7 @@
      apart from the other four — a bounded role may write it and may not
      submit, which is a fact about who may write the field rather than about
      how it is addressed. */
-  /* §379 adds `lines`: an owner saving their OWN lines in one subject as a
+  /* §380 adds `lines`: an owner saving their OWN lines in one subject as a
      draft. Keyed "<target>|<person>", so two owners in one unit travel apart
      exactly as §234 made the other four travel apart. */
   var REVIEW_PER_TARGET = ["submitted", "parked", "note", "slides", "done", "lines"];

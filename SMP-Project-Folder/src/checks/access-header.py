@@ -153,7 +153,7 @@ with sync_playwright() as p:
          mints on this register.
 
          DERIVED, NEVER LISTED (§104.7, §214.3). This was `{powner, plowner,
-         contrib}` written out by hand, so §381's Tactic owner — derived the
+         contrib}` written out by hand, so §382's Tactic owner — derived the
          same way, and held on a pillars FUNCTION as well as a unit — fell
          through to `roleWheres()`, was told it sits on every unit and nowhere
          else, and was reported as offering two function columns it cannot

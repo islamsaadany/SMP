@@ -15,38 +15,52 @@ var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
   entries: [
-    { key:"theme",       internal:"Theme",              group:"Themes",            bu:"Themes",
-      note:"The group's standing columns. Also called pillars or motto elements by clients." },
-    { key:"pillar",      internal:"Pillar",             group:"Group capabilities", bu:"Pillars",
-      note:"A business unit's direction or capability. Carries key measures and tactics." },
-    { key:"keyobj",      internal:"Key Objectives",     group:"Key Objectives",    bu:"Key Objectives",
-      note:"A unit's own scorecard. Previously called North Star and Guiding Objectives." },
-    { key:"aspiration",  internal:"Winning Aspiration", group:"Vision",            bu:"Winning Aspiration",
-      note:"One entity. Vision, End State and Winning Aspiration are display labels for it." },
-    { key:"purpose",     internal:"Purpose",            group:"Mission",           bu:"—",
-      note:"Held by the top unit only. Business units inherit it." },
-    { key:"values",      internal:"Core Values",        group:"Core Values",       bu:"—",
-      note:"Group-level only. A unit never declares its own." },
-    { key:"measure",     internal:"Key Measure",        group:"Key measures",      bu:"Key measures",
-      note:"The measures under a single pillar." },
-    { key:"tactic",      internal:"Tactic",             group:"Tactics",           bu:"Tactics",
-      note:"The work under a pillar. Spans quarters, has an owner." },
-    /* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL NOW (§346). The set-up
-       flow has asked for it since §322 and wrote it NOWHERE — there was no
-       such entry, so the minter walked this list, found no match and dropped
-       the answer: accepted, saved and never used, which is the quietest kind
-       of fault because the file looks right (§294.2). The key is the one the
-       flow already spells, `unitword`; nothing was ever stored under it, so
-       moving it would buy nothing a reader can see (§30.2).
-
-       IT IS THE PLURAL WORD, like every entry beside it, and that is what
-       decides where it may be read: a heading and a group label take it, and
-       an inflected sentence never does — plural() returns a count and a word,
-       so "3 " + this would print "3 Business unitss" (§107.8, twice). */
-    { key:"unitword",    internal:"Business Unit",      group:"Business units",    bu:"Business units",
-      note:"What this client calls a business unit. Headings only \u2014 sentences keep the platform's own word." }
+    /* ONE WORD PER THING, IN TWO FORMS (§383). Islam set every description
+       and default here in chat, then chose two boxes over one: `group` is
+       the word for ONE ("Pillar", a column heading, "Add a Project") and `bu`
+       is the word for MANY ("Pillars", a page heading, the navigation). The
+       stored KEYS did not move (§30.2) — a tab on the previous build posts
+       `group`/`bu`, and a renamed field would have written NULL into both
+       columns. What moved is what each one MEANS: there is no longer a group
+       word and a business-unit word, one word is used at the group, in every
+       business unit and in every function. L() always answers MANY, L1() the
+       ONE, and migration 045 (016 on the new stack) moved every tenant over. */
+    { key:"theme",       internal:"Theme",               group:"Theme",               bu:"Themes",
+      note:"The general motto or themes the whole company is following" },
+    { key:"pillar",      internal:"Pillar",              group:"Pillar",              bu:"Pillars",
+      note:"A business unit's direction or capability focus areas" },
+    { key:"capability",  internal:"Capability",          group:"Capability",          bu:"Capabilities",
+      note:"The internal abilities built to achieve the strategic choices" },
+    { key:"keyobj",      internal:"Key Objective",       group:"Key Objective",       bu:"Key Objectives",
+      note:"The targets set for a business unit, a company or the group" },
+    { key:"aspiration",  internal:"Winning Aspiration",  group:"Winning Aspiration",  bu:"Winning Aspirations",
+      note:"A description of what success looks like" },
+    { key:"purpose",     internal:"Mission",             group:"Mission",             bu:"Missions",
+      note:"Answering the question: why do we exist" },
+    { key:"values",      internal:"Core Values",         group:"Core Values",         bu:"Core Values",
+      note:"The company culture elements" },
+    { key:"measure",     internal:"Key Measure",         group:"Key measure",         bu:"Key measures",
+      note:"The measures under a single pillar" },
+    { key:"tactic",      internal:"Tactic",              group:"Tactic",              bu:"Tactics",
+      note:"The work under a pillar: spans quarters and has an owner" },
+    /* THE WORD FOR A BUSINESS UNIT IS A REAL LABEL (§346). The set-up flow
+       writes the MANY form (`bu`); nothing inflects it — plural() returns a
+       count and a word, so "3 " + this would print "3 Business unitss"
+       (§107.8, twice). */
+    { key:"unitword",    internal:"Business Unit",       group:"Business unit",       bu:"Business units",
+      note:"A part of the business with a plan of its own" },
+    { key:"division",    internal:"Division",            group:"Division",            bu:"Divisions",
+      note:"The layer between the company or group level and the units and functions" },
+    { key:"fnword",      internal:"Supporting Function", group:"Supporting Function", bu:"Supporting Functions",
+      note:"The supporting functions that enable the strategy" },
+    { key:"project",     internal:"Project",             group:"Project",             bu:"Projects",
+      note:"The group of activities with correlated timelines and outcomes" }
   ]
 };
+/* What the platform would say, kept BEFORE hydration replaces the list with
+   the tenant's (sync.js), so the Terminology page can show it and reset to
+   it. A copy, never the live entries. */
+var LABEL_DEFAULTS = LABELS.entries.map(function(e){ return { key:e.key, one:e.group, many:e.bu }; });
 
 /* ── ROLES, which replaced LEVELS in 3.8 ────────────────────────────
    N-1 / N-2 / N-3 were org DEPTH, invented before anyone knew what the

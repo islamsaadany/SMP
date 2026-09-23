@@ -107,7 +107,8 @@ with sync_playwright() as p:
     print("\n§4  the company page draws its functions")
     js(pg, "current='co:distribution'; paint()"); pg.wait_for_timeout(300)
     heads = js(pg, "[...document.querySelectorAll('#panel h2')].map(function(h){return h.textContent.trim()})", [])
-    ck("a Supporting functions section is drawn", any(h.startswith("Supporting functions") for h in heads), heads)
+    fw = js(pg, "labelWord('fnword','bu')", "?")  # §383: the client's word, asked of the page
+    ck("a Supporting functions section is drawn", any(h.startswith(fw) for h in heads), heads)
     names = js(pg, "[...document.querySelectorAll('#panel .gname')].map(function(n){return n.textContent.trim()})", [])
     ck("both functions have a card", "Finance" in names and "IT" in names, names)
     big = js(pg, "(document.querySelector('#panel .scores .big')||{}).textContent", "")
@@ -121,7 +122,7 @@ with sync_playwright() as p:
     ck("its functions share the whole", sh and abs(sum(s["w"] for s in sh) - 100) < 1e-6 and all(s.get("fn") for s in sh), sh)
     js(pg, "current='co:b2c'; paint()"); pg.wait_for_timeout(300)
     txt = js(pg, "document.querySelector('#panel').innerText", "")
-    ck("its page draws the functions and no units section", "Supporting functions" in txt and "holds nothing" not in txt)
+    ck("its page draws the functions and no units section", fw in txt and "holds nothing" not in txt)
     js(pg, "UNIT_KEYS.forEach(function(k){ if ('__was' in UNITS[k]) { UNITS[k].company = UNITS[k].__was; delete UNITS[k].__was; } })")
 
     print("\n§6  Setup writes through the dialog")

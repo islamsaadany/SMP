@@ -186,13 +186,13 @@ function builderSections(target){
       fnpillars: { k:"plan", label:L("pillar", "bu"),
         count:function(){ return u().items.length; },
         hint:function(){ return builderPillarHint(u()); } },
-      fnprojects: { k:"proj", label:"Projects",
+      fnprojects: { k:"proj", label:L("project"),
         count:function(){ return holders().reduce(function(a,c){ return a + (c.projects || []).length; }, 0); },
         hint:function(){
           var d = 0, o = 0, ms = 0, n = 0;
           holders().forEach(function(c){ (c.projects || []).forEach(function(pr){
             n++; d += pr.deliverables.length; o += pr.outcomes.length; ms += pr.milestones.length; }); });
-          return '<b>Projects</b> \u2014 the enhancement work: front matter, deliverables, outcomes, milestones.' +
+          return '<b>' + L("project") + '</b> \u2014 the enhancement work: front matter, deliverables, outcomes, milestones.' +
             (n ? ' <b>' + n + ' \u00b7 ' + d + ' deliverables \u00b7 ' + o + ' outcomes \u00b7 ' + ms + ' milestones.</b>' : '');
         } },
       fnobjectives: { k:"act", label:"Actions",
@@ -284,7 +284,7 @@ function builderChooserHtml(){
   var side = (BCHOOSE && BCHOOSE.side) || "units";
   var seg = '<div class="bseg">' +
     '<button data-bside="units" aria-pressed="' + (side === "units") + '">' + L("unitword","bu") + '</button>' +
-    '<button data-bside="fns" aria-pressed="' + (side === "fns") + '">Supporting functions</button></div>';
+    '<button data-bside="fns" aria-pressed="' + (side === "fns") + '">' + L("fnword") + '</button></div>';
 
   var rows = (side === "units"
     ? activeKeys().map(function(k){ return { t:k, name:UNITS[k].name }; })
@@ -463,7 +463,7 @@ function bformDef(kind, ctx){
       fields:[
         { k:"name", label:"Name", req:true },
         { k:"prefix", label:"Code prefix", mono:true, ph:"e.g. LE — minted from the name if left empty" },
-        { k:"company", label:"Company", type:"select",
+        { k:"company", label:L1("division"), type:"select",
           opts:COMPANY_KEYS.filter(function(ck){ return companyActive(ck); })
             .map(function(ck){ return [ck, COMPANIES[ck].name]; })
             .concat([["","— its own company —"]]) }

@@ -335,7 +335,7 @@
              saying one thing and the page another (§124). */
           var fmt = fnFormat(FUNCTIONS[fnKeyOf(k)]);
           var plan = { k:"proj", ac:"k_proj",
-                       label: fmt === "projects" ? "Projects" : "Plan",
+                       label: fmt === "projects" ? L("project") : "Plan",
                        render:renderFnProjects };
           /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
              FORMAT. §211.2 removed the Overview here on a premise measured
@@ -1175,11 +1175,11 @@
      how many sides there are (§53.5). */
   function navSides(){
     var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
-    if (us.length) out.push({ fold:"units", label:"Units",
+    if (us.length) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
-    if (cs.length) out.push({ fold:"caps",  label:"Capabilities",
+    if (cs.length) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
       keys:cs.map(function(id){ return "cap:" + id; }) });
-    if (fs.length) out.push({ fold:"fns",   label:"Functions",
+    if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -1336,6 +1336,10 @@
   function setupDefsAll(){
     return SUBS.manage.concat(SUBS.setup).map(function(d){
       if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
+      /* §383: and the three rows Terminology gained, the same way. */
+      if (d.k === "companies") return Object.assign({}, d, { label:L("division") });
+      if (d.k === "fns") return Object.assign({}, d, { label:L("fnword") });
+      if (d.k === "caps") return Object.assign({}, d, { label:L("capability") });
       /* §360: one def, two names — Getting started until Done with set-up
          is pressed, Client set-up after (SMPRules.setupDone, stored as an
          absence on the group). */
@@ -4199,7 +4203,18 @@
     /* Labels */
     document.querySelectorAll("input.lbl").forEach(function(inp){
       inp.addEventListener("change", function(){
-        LABELS.entries[+inp.dataset.lbl][inp.dataset.scope] = inp.value || "—";
+        /* An emptied box goes back to the default (§383), which is what the
+           Reset beside it does for both at once. */
+        var e = LABELS.entries[+inp.dataset.lbl], d = labelDefault(e.key);
+        var v = inp.value.trim();
+        e[inp.dataset.scope] = v || (d ? (inp.dataset.scope === "group" ? d.one : d.many) : e.internal);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-lblreset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var e = LABELS.entries[+b.dataset.lblreset], d = labelDefault(e.key);
+        if (d) { e.group = d.one; e.bu = d.many; }
         paint();
       });
     });

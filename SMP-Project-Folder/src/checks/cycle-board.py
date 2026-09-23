@@ -116,9 +116,10 @@ BOARD = """() => {
   const out = {
     groups:   groups.map(function (g) {
                 return { band: g.band, names: g.rows.map(function (r) { return r.name; }) }; }),
-    fnBand:   groupNamed("Supporting functions").band,
-    fnRows:   groupNamed("Supporting functions").rows.map(function (r) { return r.name; }),
-    capRows:  groupNamed("Capabilities").rows.map(function (r) { return r.name; }),
+    fnBand:   groupNamed(labelWord("fnword", "bu")).band,
+    fnWord:   labelWord("fnword", "bu"),
+    fnRows:   groupNamed(labelWord("fnword", "bu")).rows.map(function (r) { return r.name; }),
+    capRows:  groupNamed(labelWord("capability", "bu")).rows.map(function (r) { return r.name; }),
     unitHalf: rows.slice(0, cut).filter(r => r.children.length > 3).map(read),
     fnHalf:   rows.slice(cut).filter(r => r.children.length > 3).map(read),
     tallest:  Math.max.apply(null, body.map(r => r.getBoundingClientRect().height)),
@@ -200,7 +201,7 @@ with sync_playwright() as p:
     # are ONE group whatever shape their plan is.
     ok("the functions are ONE group, so the formats are not split (§245)",
        len([g for g in (board.get("groups") or [])
-            if (g.get("band") or "").startswith("Supporting functions")]) == 1,
+            if (g.get("band") or "").startswith(board.get("fnWord") or "?")]) == 1,
        [g.get("band") for g in (board.get("groups") or [])])
     ok("...and a capability is its own group beside them (§334)",
        len(cap_names) > 0 and not set(cap_names) & set(fn_names),
@@ -250,7 +251,8 @@ with sync_playwright() as p:
     # Capabilities band's own name trip the vocabulary assertion below, which
     # is that band saying exactly what it holds.
     bt = board.get("fnBand") or ""
-    ok("the band names the functions and their number", "Supporting functions" in bt, bt)
+    # §383: the band says the client's word for them (Terminology), asked of the page.
+    ok("the band names the functions and their number", bool(board.get("fnWord")) and board["fnWord"] in bt, bt)
     ok("...and claims no single vocabulary over rows of two shapes (§35)",
        "capabilit" not in bt.lower() and "deliverable" not in bt.lower(), bt)
 

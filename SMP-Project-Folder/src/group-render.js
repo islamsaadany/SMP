@@ -1471,7 +1471,7 @@ function capsTable(){
       '<td class="num final" style="color:' + bandInk(perf) + '">' + pct(perf) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
-    '<th style="width:44%">Capability</th><th class="num">Projects</th>' +
+    '<th style="width:44%">' + L1("capability") + '</th><th class="num">' + L("project") + '</th>' +
     '<th class="cc">Milestones</th><th class="num">Performance</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<p class="sub">Ranked on project performance. Milestones read completed / in progress / not started.</p>';
@@ -1989,7 +1989,7 @@ function renderCompanyWithFunctions(ck, co, keys, fks){
       var w = Math.round(s.w * 10) / 10;
       return '<tr><td><b>' + esc(nameOf(s)) + '</b><span class="why" style="margin:0;display:block">' +
           how(s) + '</span></td>' +
-        '<td>' + (s.unit ? "Business unit" : "Supporting function") + '</td>' +
+        '<td>' + (s.unit ? L1("unitword") : L1("fnword")) + '</td>' +
         '<td class="num">' + pct(v) + '</td><td class="num">' + w + '%</td>' +
         '<td class="num">' + (v == null ? "&mdash;" : (Math.round(v * w) / 100).toFixed(1)) + '</td></tr>';
     }).join("");
@@ -2035,7 +2035,7 @@ function renderCompanyWithFunctions(ck, co, keys, fks){
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
       TIP_PERF, viewToggle("units")) : '') +
-    section("", "Supporting functions", null,
+    section("", L("fnword"), null,
       '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck, byFn[k]); }).join("") + '</div>');
 }
 
@@ -2140,7 +2140,7 @@ function renderGroupPerformance(){
                 '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
-      miniTable(["#","Project","Deliverables","Outcomes","Performance"],
+      miniTable(["#",L1("project"),"Deliverables","Outcomes","Performance"],
         c.projects.map(function(p, i){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
             '<td class="num">' + pct(projDeliverySide(p)) + '</td>' +
@@ -2148,7 +2148,7 @@ function renderGroupPerformance(){
             '<td class="num final" style="color:' + bandInk(projPerf(p)) + '">' + pct(projPerf(p)) + '</td></tr>';
         }).join("")) +
       '<p class="sub">Half from the deliverables side, half from the outcomes side, per side rather than per row.</p>';
-    var ed = miniTable(["#","Project","Completed","In progress","Not started"],
+    var ed = miniTable(["#",L1("project"),"Completed","In progress","Not started"],
         c.projects.map(function(p, i){
           var m = projMilestones(p);
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
@@ -2179,7 +2179,7 @@ function renderGroupPerformance(){
         '<dl class="led">' +
           '<dt>In progress</dt><dd>' + ce.wip + '</dd>' +
           '<dt>Not started</dt><dd>' + ce.todo + '</dd>' +
-          '<dt>Projects</dt><dd>' + c.projects.length + '</dd>' +
+          '<dt>' + L("project") + '</dt><dd>' + c.projects.length + '</dd>' +
         '</dl>';
     return '<div class="gwrap" data-oi="' + ci + '"><div class="gcard">' +
       '<div class="card-head">' + (arranging("group") ? handle("Reorder " + c.name) : '') +
@@ -2311,7 +2311,7 @@ function templeTables(){
   var editing = EDIT_PAGE.temple;
 
   var stmt =
-    '<h4 class="mini">' + L("aspiration","group") + '</h4>' +
+    '<h4 class="mini">' + L1("aspiration") + '</h4>' +
     '<div class="tcard">' +
       '<div class="trow"><label>Statement</label>' +
         fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
@@ -2372,7 +2372,7 @@ function templeTables(){
       '<th style="width:24%">Name</th><th>Note</th><th class="cc">Pillars</th><th class="cc"></th>' +
       '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a theme") +
 
-    '<h4 class="mini">' + L("pillar","group") + '</h4>' +
+    '<h4 class="mini">' + L("capability") + '</h4>' +
     '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">Capability</th>' +
       '<th>Definition</th><th class="cc">Measures</th><th class="cc">Tactics</th><th class="cc"></th>' +
       '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a capability") +
@@ -2414,7 +2414,7 @@ function renderTemple(){
     '<div class="pillars">' + GROUP.themes.map(function(p){
       return '<div class="pillar"><span>' + esc(p.ab) + '</span><b>' + esc(p.name) + '</b><em>' + esc(p.note || "") + '</em></div>';
     }).join("") + '</div>' +
-    '<div class="stylobate"><div class="base-head">' + L("pillar","group") + ' &mdash; cross-cutting, no theme</div><div class="base-grid">' +
+    '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no theme</div><div class="base-grid">' +
       GROUP.capabilities.map(function(c){
         return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
           '<span>' + c.projects.length + ' project' + (c.projects.length === 1 ? '' : 's') +
@@ -2457,10 +2457,10 @@ function renderGroupFoundation(){
       (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
       '</div>' +
       '<div class="fcol">' +
-        '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
+        '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
         '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
           function(v){ GROUP.mission = v; }) + '</p></div>' +
-        aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
+        aspirationCard(L1("aspiration"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
           function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
           true, GROUP) +
       '</div>' +
@@ -4960,7 +4960,7 @@ function renderUnitFoundation(u){
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
         '">+ Add a line</button></div>' : '') + '</div>' +
-      aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
+      aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
         false, u) +
     '</div>' +
@@ -5904,7 +5904,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
         esc(opts.capId || "") + '">' + rows + '</div>'
     : rows;
   return '<div class="rail' + (opts.arranging ? ' arranging' : '') + '">' +
-    railHead("Projects", list.length) + body +
+    railHead(L("project"), list.length) + body +
     (opts.add ? '<div class="railadd"><button class="linkbu" data-rowadd="project|' +
       esc(opts.capId) + '">+ Add a project</button>' +
       /* §334: AND THE SECOND DOOR TO A CAPABILITY, where the projects are.
@@ -6240,7 +6240,7 @@ function capScoreCards(c){
     '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
       '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
-      '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
+      '<div><em>' + L("project") + '</em><b>' + c.projects.length + '</b></div></div></div>');
   /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§106). An In
      progress milestone with no per-cent LEAVES the average rather than
      counting as nought (§104.10) -- honest, and silent, so the figure rises

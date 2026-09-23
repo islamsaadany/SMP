@@ -54852,3 +54852,88 @@ company unreachable **2 red**, execution ignoring functions **1 red**; 683/0
 authoriser, 140/0 differ, full `qa.py` ERRORS none, `built-in-step` all good.
 Renumbered §381 → §382 before commit, scoped to this change's own lines,
 because main's builder work took §381 (§264.3).
+
+## §383 — ONE WORD PER THING, IN TWO FORMS (2026-09-23)
+
+Islam, of Setup › Terminology: the content first, in chat and not in a mockup
+(*"content fix doesn't need a mockup it needs alignment here first"*), then
+thirteen rows written by him — a description and a default word for each —
+and, asked how a plural is made, *"yes two boxes"*. The redrawn page was signed
+off with *"build"* (`design-mockups/division-functions/2026-09-23_terminology-two-words.html`).
+
+**THERE IS NO GROUP WORD AND BUSINESS-UNIT WORD ANY MORE.** Each row holds a
+word for ONE (a column heading, a single one named in a sentence) and a word
+for MANY (a page heading, the navigation, a list), and that one pair is used at
+the group, in every business unit and in every function. The old split let the
+group say *Vision* while a unit said *Winning Aspiration* for the same idea.
+
+**TWO BOXES, BECAUSE A PLURAL IS NOT A RULE.** Capability → Capabilities, Core
+Values is already plural, and a client's own word follows no rule at all; a
+platform-made plural would print *Capabilitys*. Both boxes start on the
+default, the default sits beside them, Reset appears only on a row that differs
+and puts both back, and an emptied box goes back to its default.
+
+**THE STORED KEYS DID NOT MOVE (§30.2).** `grp`/`group` now holds the word for
+ONE and `bu` the word for MANY. A tab left open on the previous build posts
+`group`/`bu`; renaming the fields would have had the writer put NULL into both
+columns. What changed is what each MEANS, said in the registry's own comment.
+`L()` always answers MANY (the scope argument is kept so ninety call sites need
+not change, and chooses nothing now); `L1()` answers ONE.
+
+**THIRTEEN ROWS IN HIS ORDER**: Theme, Pillar, Capability, Key Objective,
+Winning Aspiration, Mission, Core Values, Key measure, Tactic, Business unit,
+Division, Supporting Function, Project — the last three new, and Capability
+split out of the Pillars row, where the group's cross-cutting capabilities had
+been the Pillars row's "group word" (*Group capabilities*) though they are a
+different thing from a unit's pillars. **Division is the word for the Companies
+layer** (§23, §382), so Setup's Companies page, the unit and function dialogs'
+field and the tables' column follow it — by default *Divisions*.
+
+**MIGRATION 045 (016 ON THE NEW STACK) MOVES EVERY TENANT**, and the rules are
+the ones on the signed-off drawing: the word a client typed for business-unit
+pages is kept as the MANY; a row that only had a group word (Mission, Core
+Values, whose unit box read "—") keeps that; a word still on the old shipped
+default moves to the new one; the ONE form is filled from the default; a client
+who had typed their own group word for Pillars keeps it as the capabilities'
+word; descriptions and order are set for all. Run twice on throwaway databases
+in both shapes (one table, and per tenant): the second run changes nothing.
+
+**WHERE THE WORDS ARE READ.** The aspiration and the mission take the word for
+ONE on both the group's Foundation and a unit's (a heading over one thing).
+The Setup rail's Companies, Functions and Capabilities entries and their page
+headings take the MANY, resolved at render time for §346.3's reason (the rail's
+list is built before the tenant's words arrive). Tables, bands, the builder's
+switch, the import picker's groups, the project headings on the pages and the
+deck follow. **The navigation switch keeps its short words** (*Units*,
+*Capabilities*, *Functions*) while a client is on the defaults, and shows the
+client's word once they change it — so nothing moves for a tenant that never
+touches the page.
+
+**A SENTENCE THAT WAS NOT TRUE, CORRECTED** (§104.8): the collision warning
+said *"Saving is blocked"*, and nothing ever blocked it. It now says to change
+one of them.
+
+**LEFT ALONE, ON PURPOSE**: the workbook's headers and the Read me's pick rows
+(a header is a contract, §22, §65); the People register's Company column, whose
+label is also the key its cells are opened by; the set-up flow's words step,
+which still asks only the word for MANY; and sentences that inflect a count,
+which keep the platform's own word (§107.8).
+
+**PROVED**: `checks/terminology.py` 26/0, falsified three ways from the SOURCES
+(§276) — the word for one answering the plural **3 red**, the rail's division
+override removed **3 red**, the navigation ignoring a client's word **1 red**.
+Four neighbours held the old words and were REWRITTEN to ask the page, never
+loosened (§218): `cycle-board.py`, `division-functions.py`, `setup-arrange.py`
+(which now finds a renamed page by its key), and `no-wrap.py`, which names the
+Terminology description as the one column that wraps — held to two lines,
+because the row is already two lines tall for the stacked default.
+
+**AND ONE HAZARD WORTH WRITING DOWN** (§343.9's family): the first
+falsification loop's copy step failed, so two of its deliberate breaks were
+written into the REAL sources instead of the copy. Caught because the rebuilt
+file's size differed from the build before; both put back and the build
+re-measured byte-identical to the first. Breaks now run in a subshell that
+stops on the first failure.
+
+This section is numbered on the branch; `main` has reached §389 while it was
+built, so the merge owes a renumber of §382 and §383 first (§264.3).

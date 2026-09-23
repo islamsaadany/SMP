@@ -10230,7 +10230,20 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-22 &mdash; **&sect;382: a supporting function can
+*Last Updated: 2026-09-23 &mdash; **&sect;383: one word per thing, in two
+forms.** Terminology is thirteen rows in Islam's order with his descriptions and
+defaults, aligned in chat first and then drawn. No group word and unit word any
+more: each row holds a word for ONE (`group`/`grp`) and a word for MANY
+(`bu`), used everywhere &mdash; the KEYS did not move (&sect;30.2), what they
+mean did. `L()` always answers MANY, `L1()` the ONE, `navWord()` keeps the
+switch's short words until a client changes theirs. New rows: Capability,
+Division (the Companies layer), Supporting Function, Project. Migrations 045 /
+016 move every tenant, proved twice on throwaway databases in both shapes.
+`checks/terminology.py` 26/0, red 3 / 3 / 1 from the sources; four neighbours
+rewritten to ask the page's word. **On the branch, not merged; `main` is at
+&sect;389, so the merge owes a renumber.***
+
+*Earlier: 2026-09-22 &mdash; **&sect;382: a supporting function can
 belong to a division.** A division is the existing Company layer; a function's
 Setup row gains which company it belongs to (none = the group, stored as an
 absence) and its weight there (Islam's A: set as given, blank = average of the

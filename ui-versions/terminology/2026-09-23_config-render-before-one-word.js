@@ -10,85 +10,54 @@
    every reader goes through L(). Safe: L()'s 88 uses are all display-only
    (verified — no comparison, key, or data-attribute read back), and a normal
    label has no special characters, so cleaning it changes nothing on screen. */
-function labelDefault(key){
-  return LABEL_DEFAULTS.filter(function(x){ return x.key === key; })[0] || null;
-}
-/* ONE WORD PER THING (§383). The scope argument is kept so ninety call sites
-   need not change, and it no longer chooses anything: there is one word, used
-   at the group and in every unit and function. L() is the word for MANY and
-   L1() the word for ONE. An empty box, or the retired "—" (a row that used to
-   be "not held" at one level), falls back to the platform's default and then
-   to the internal name, so a word is never blank on screen. */
-function labelWord(key, which){
+function L(key, scope){
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
-  var v = e && e[which];
-  if (!v || v === "\u2014") {
-    var d = labelDefault(key);
-    v = d ? (which === "group" ? d.one : d.many) : (e ? e.internal : key);
-  }
-  return v;
-}
-function L(key, scope){ return esc(labelWord(key, "bu")); }
-function L1(key){ return esc(labelWord(key, "group")); }
-/* THE NAVIGATION'S SHORT WORDS (§383). The switch has always said "Units",
-   "Capabilities" and "Functions", shortened from the defaults to fit one
-   segmented control. A client who types their own word sees it there too;
-   a client on the default keeps the short word, so nothing moves for them. */
-function navWord(key, short){
-  var d = labelDefault(key);
-  return d && labelWord(key, "bu") === d.many ? short : L(key);
+  if (!e) return esc(key);
+  return esc((scope === "group" ? e.group : e.bu) || e.internal);
 }
 
-/* ── Terminology ─────────────────────────────────────────────────────── */
+/* ── Labels ─────────────────────────────────────────────────────────── */
 function renderLabels(){
   var editable = grant("c_labels") === "edit";
 
   var rows = LABELS.entries.map(function(e, i){
-    var d = labelDefault(e.key) || { one:e.internal, many:e.internal };
-    var one = labelWord(e.key, "group"), many = labelWord(e.key, "bu");
-    var box = function(which, val, what){
-      return editable
-        ? '<input class="lbl" data-lbl="' + i + '" data-scope="' + which + '" value="' + esc(val) +
-          '" aria-label="' + esc(d.one) + ': ' + what + '" />'
-        : '<span>' + esc(val) + '</span>';
+    var cell = function(which){
+      var val = e[which];
+      if (val === "—") return '<td><span class="pill none">Not held</span></td>';
+      return '<td>' + (editable
+        ? '<input class="lbl" data-lbl="' + i + '" data-scope="' + which + '" value="' + esc(val) + '" aria-label="' + esc(e.internal) + ' label at ' + which + ' level" />'
+        : '<span class="mono">' + esc(val) + '</span>') + '</td>';
     };
-    var differs = one !== d.one || many !== d.many;
-    var reset = editable && differs
-      ? '<button type="button" class="linkbu lblreset" data-lblreset="' + i + '">Reset</button>' : '';
-    return '<tr><td class="lbldesc">' + esc(e.note || "") + '</td>' +
-      '<td class="lbldef">' + esc(d.one) + '<br>' + esc(d.many) + '</td>' +
-      '<td>' + box("group", one, "the word for one") + '</td>' +
-      '<td><div class="lblmany">' + box("bu", many, "the word for many") + reset + '</div></td></tr>';
+    return '<tr><td><b>' + esc(e.internal) + '</b><span class="why">' + esc(e.note) + '</span></td>' +
+      cell("group") + cell("bu") + '</tr>';
   }).join("");
 
-  /* Two things sharing one word would render two different objects under one
-     name on the same screen. Caught here, not in a client demo. Asked of
-     each form separately: "Project" as one thing's single word and another's
-     plural is not a collision anybody reads. */
+  /* Two entities sharing one display label would render two different things
+     under one word on the same screen. Caught here, not in a client demo. */
   var seen = {}, clashes = [];
   LABELS.entries.forEach(function(e){
-    [["group","one"],["bu","many"]].forEach(function(s){
-      var v = labelWord(e.key, s[0]).toLowerCase();
-      if (seen[s[1] + "|" + v]) clashes.push(labelWord(e.key, s[0]));
-      seen[s[1] + "|" + v] = true;
+    ["group","bu"].forEach(function(s){
+      var v = (e[s] || "").toLowerCase();
+      if (!v || v === "—") return;
+      if (seen[s + "|" + v]) clashes.push(e[s]);
+      seen[s + "|" + v] = true;
     });
   });
 
   var warn = clashes.length
-    ? '<div class="note bad-note"><b>Two things share a word.</b> <span class="mono">' + esc(clashes[0]) +
-      '</span> is used for two different things. Change one of them &mdash; ' +
-      'two different objects under one word on the same screen cannot be told apart by the reader.</div>'
-    /* The old wording said saving is blocked, and nothing ever blocked it
-       (§104.8's family: a sentence nothing compares with the code). It now
-       says what is true. */
+    ? '<div class="note bad-note"><b>Label collision.</b> <span class="mono">' + esc(clashes[0]) +
+      '</span> is in use by two entities at the same level. Saving is blocked until one of them changes &mdash; ' +
+      'two different objects rendering under one word on the same screen is not recoverable by the reader.</div>'
+    /* The "all clear" note went to the knowledge base with the rest of the
+       explanation (§30.4). A collision still shouts, because that is not an
+       explanation - it is a state that blocks saving and has to be seen. */
     : '';
 
   return section("", "Terminology", null,
-      '<div class="cfg"><table class="lbltable"><thead><tr>' +
-      '<th style="width:38%">What it is</th>' +
-      '<th style="width:18%">Default</th>' +
-      '<th style="width:20%">Your word &middot; one</th>' +
-      '<th style="width:24%">Your word &middot; many</th>' +
+      '<div class="cfg"><table><thead><tr>' +
+      '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
+      '<th style="width:33%">Display at group level</th>' +
+      '<th style="width:33%">Display at business unit level</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
 }
 
@@ -1103,7 +1072,7 @@ function renderUnits(){
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
-        '<th style="width:12%">' + L1("division") + '</th>' +
+        '<th style="width:12%">Company</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:7%">Status</th>' +
         '<th class="cc kebcell" style="width:44px"></th>' +
@@ -1195,7 +1164,7 @@ var ROWDLG_SPECS = {
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
         pdSect("Where it sits, and who runs it") +
-        pdField(L1("division"),
+        pdField("Company",
           '<select class="fld" data-ucomp="' + esc(k) + '">' +
             /* A retired company is nowhere a unit can be MOVED to, but a unit
                already in one still shows it — hiding it would silently read as
@@ -1254,8 +1223,8 @@ var ROWDLG_SPECS = {
         /* §382: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
            plans, because both answer "what is this function part of". */
         pdSect("Where it belongs") +
-        pdField(L1("division"), fnCompanyCell(k, f, true)) +
-        pdField("Weight in its " + L1("division").toLowerCase(), fnCoWeightCell(k, f, true)) +
+        pdField("Company", fnCompanyCell(k, f, true)) +
+        pdField("Weight in its company", fnCoWeightCell(k, f, true)) +
         (FNCOW_SAID && FNCOW_SAID.k === k
           ? pdField("", '<p class="why missing" style="margin:0">' + esc(FNCOW_SAID.msg) + '</p>', true) : '') +
         pdSect("Who runs it") +
@@ -4151,8 +4120,8 @@ function renderCompanies(){
      anything on this page at all. */
   var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
-  return cfgHead(L("division"), [], null, mayEdit) +
-    section("", L("division"), null,
+  return cfgHead("Companies", [], null, mayEdit) +
+    section("", "Companies", null,
       /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
          nothing and costs a header — the threshold is in the spec (§2.2) and
          this is the table it was written for. It still sorts and still carries
@@ -4161,7 +4130,7 @@ function renderCompanies(){
       tkBar("companies", { placeholder:"Search the companies\u2026" }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
         (function(){ var h = tkHead("companies");
-          return h("#", "idx", false) + h(L1("division")) + h("Units", "cc") +
+          return h("#", "idx", false) + h("Company") + h("Units", "cc") +
                  h("Sees other companies", "cc") + h("Sees the group", "cc") +
                  h("Status", "cc") + h("", "cc kebcell", false); })() +
       '</tr></thead><tbody>' +
@@ -5094,7 +5063,7 @@ function focusNav(){
      something behind them, so a tenant with no capabilities meets exactly the
      two-part control it has today and never learns the concept. */
   var subs = focusSubjects();
-  var sides = [["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
+  var sides = [["units", "Units"], ["caps", "Capabilities"], ["fns", "Functions"]]
     .filter(function(x){ return (subs[x[0]] || []).length; });
   var side = (subs[FSET.side] || []).length ? FSET.side
            : (sides.length ? sides[0][0] : "units");
@@ -5867,7 +5836,7 @@ function renderImportDownload(){
     ["Business units", "Supporting functions", "Capabilities"].map(function(g){
       var rows = subs.filter(function(o){ return o.grp === g; });
       if (!rows.length) return "";
-      return '<optgroup label="' + ({ "Business units":L("unitword"), "Supporting functions":L("fnword"), "Capabilities":L("capability") }[g] || esc(g)) + '">' + rows.map(function(o){
+      return '<optgroup label="' + esc(g) + '">' + rows.map(function(o){
         return '<option value="' + esc(o.v) + '"' +
           (keys.indexOf(o.v) > -1 ? " selected" : "") +
           (o.hint ? ' data-hint="' + esc(o.hint) + '"' : '') + '>' +
@@ -5915,7 +5884,7 @@ function renderImportDownload(){
     '<div class="ffoot"><span class="why">One per way of planning. A unit always plans in ' +
       'pillars; a function plans whichever way Setup says.</span><span class="fbtns">' +
       '<button class="editbtn" data-dlblank="pillars">Pillars</button>' +
-      '<button class="editbtn" data-dlblank="projects">' + L("project") + '</button>' +
+      '<button class="editbtn" data-dlblank="projects">Projects</button>' +
       '<button class="editbtn" data-dlblank="objectives">Objectives &amp; actions</button>' +
       '</span></div></div>';
 
@@ -6140,7 +6109,7 @@ function renderImportUpload(){
     var changed = d.rows.filter(function(r){ return r.status === "changed"; });
     var unknown = d.rows.filter(function(r){ return r.status === "unknown"; });
     var rowsHtml = changed.length
-        ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? L1("project") : L("pillar","bu")) + '</th><th>Item</th>' +
+        ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? "Project" : L("pillar","bu")) + '</th><th>Item</th>' +
             '<th class="cc">Type</th><th class="cc">Recorded</th><th class="cc">In the file</th></tr></thead><tbody>' +
           changed.map(function(r){
             return '<tr><td>' + esc(r.pillar) + '</td><td>' + esc(r.name) + '</td>' +
@@ -6700,7 +6669,7 @@ function renderCycle(){
        and 1b-ii: a line that merely describes what the reader can see is
        furniture). The mapped columns still explain themselves where the
        mapping is not obvious, on the cells' own hovers (§124). */
-    fnRows = '<tr class="dxband"><th colspan="8">' + L("fnword") +
+    fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
         '<em>' + plural(fnKeys.length, "function") + ' reporting</em></th></tr>' + fnRows;
   }
   /* §334: A GROUP OF ITS OWN, BESIDE THE UNITS AND THE FUNCTIONS — Islam's
@@ -6709,7 +6678,7 @@ function renderCycle(){
      that supports it, which is the order the navigation switch reads in too
      (§53.5). Drawn only when there is one, like the functions band. */
   if (capRows) {
-    capRows = '<tr class="dxband"><th colspan="8">' + L("capability") +
+    capRows = '<tr class="dxband"><th colspan="8">Capabilities' +
         '<em>' + plural(capTargets.length, "capability", "capabilities") +
         ' reporting</em></th></tr>' + capRows;
   }
@@ -7040,7 +7009,7 @@ function planCell(fk, f, editable){
 function planFormatWord(f){
   var fmt = fnFormat(f);
   return fmt === "pillars" ? L("pillar","bu")
-       : fmt === "objectives" ? "Objectives & actions" : L("project");
+       : fmt === "objectives" ? "Objectives & actions" : "Projects";
 }
 function planFormatCell(fk, f, editable){
   var fmt = fnFormat(f);
@@ -7068,7 +7037,7 @@ function planFormatCell(fk, f, editable){
   var caps = capsOfFunction(fk).length;
   return '<select class="fld" data-fnformat="' + esc(fk) + '"' +
       ' aria-label="How ' + esc(f.name || fk) + ' plans">' +
-    '<option value="projects"' + (fmt === "projects" ? " selected" : "") + '>' + L("project") + '</option>' +
+    '<option value="projects"' + (fmt === "projects" ? " selected" : "") + '>Projects</option>' +
     '<option value="pillars"' + (fmt === "pillars" ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
     '<option value="objectives"' + (fmt === "objectives" ? " selected" : "") + '>Objectives &amp; actions</option>' +
     '</select>' +
@@ -7099,7 +7068,7 @@ function planFormatCell(fk, f, editable){
    function whatever the question). */
 function capFormatCell(c, editable){
   var pillars = capPlansInPillars(c);
-  var word = pillars ? L("pillar","bu") : L("project");
+  var word = pillars ? L("pillar","bu") : "Projects";
   if (!editable) return '<span class="pill kind">' + esc(word) + '</span>';
   var blocked = pillars
     ? (capItems(c).length ? "its plan" : "")
@@ -7108,7 +7077,7 @@ function capFormatCell(c, editable){
   return '<select class="fld" data-capformat="' + esc(c.id) + '"' +
       (blocked ? ' disabled title="Clear the plan on this row first"' : '') +
       ' aria-label="How ' + esc(c.name) + ' is planned">' +
-    '<option value="projects"' + (pillars ? "" : " selected") + '>' + L("project") + '</option>' +
+    '<option value="projects"' + (pillars ? "" : " selected") + '>Projects</option>' +
     '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
@@ -7399,7 +7368,7 @@ function renderFunctions(){
         : '') +
     '</span>';
 
-  return cfgHead(L("fnword"), [], null, mayEdit, "fnall",
+  return cfgHead("Functions", [], null, mayEdit, "fnall",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("fns", mayEdit) + fnColMenu) +
     section("", "", null,
       /* §84. Eight rows and nine columns — over the search threshold, so it
@@ -7430,7 +7399,7 @@ function renderFunctions(){
                  (fnShowCol("nav")     ? h("Nav name")          : '') +
                  (fnShowCol("code")    ? h("Code", "cc")        : '') +
                  (fnShowCol("plansin") ? h("Plans in", "cc")    : '') +
-                 (fnShowCol("company") ? h(L1("division"), "cc") : '') +
+                 (fnShowCol("company") ? h("Company", "cc")     : '') +
                  (fnShowCol("coweight") ? h("Weight", "cc")     : '') +
                  (fnShowCol("caps")    ? h("Caps", "cc")        : '') +
                  (fnShowCol("head")    ? h("Head", "cc")        : '') +
@@ -7503,10 +7472,10 @@ function renderCaps(){
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
      mark. What is left is drawn only when there IS an orphan. */
-  return cfgHead(L("capability"),
+  return cfgHead("Capabilities",
       orphan ? ['<span class="pill none">' + orphan + ' unassigned</span>'] : [],
       null, false) +
-    section("", L("capability"), null,
+    section("", "Capabilities", null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
          shading rather than as a long name. */
@@ -7518,7 +7487,7 @@ function renderCaps(){
         (function(){ var h = tkHead("caps");
           return h("#", "idx", false) + h("Capability") + h("Held by") + h("Head") +
                  h("Plans in") +
-                 h(L("keyobj"), "cc") + h(L("project"), "cc") + h("", "cc", false); })() +
+                 h("Key objectives", "cc") + h("Projects", "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (mayEdit
@@ -8128,8 +8097,8 @@ function renderSendMessage(){
        ROLES.map(function(r){ return ddrow("roles", r.key, r.name); }).join(""),
        (c.roles || []).length) +
     dd("wide", "Group & companies", tgRows(WIDE), tgCount(WIDE)) +
-    dd("units", L("unitword"), tgRows("Business units"), tgCount("Business units")) +
-    dd("fns", L("fnword"), tgRows("Supporting functions"), tgCount("Supporting functions")) +
+    dd("units", "Business units", tgRows("Business units"), tgCount("Business units")) +
+    dd("fns", "Functions", tgRows("Supporting functions"), tgCount("Supporting functions")) +
     dd("people", "People",
        PEOPLE.filter(personActive).map(function(p){
          return ddrow("keys", p.key, p.name + (p.email ? "" : " \u2014 no address"));

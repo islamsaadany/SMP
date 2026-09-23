@@ -7167,3 +7167,33 @@ copies in step.
 **Waiting on you:** the **Terminology** change — each word with a description,
 a default and the name you choose — is drawn and published for sign-off and
 not built yet.
+
+## §383 — Terminology: one word per thing, a word for one and a word for many (2026-09-23) · **on the branch, not merged**
+
+The Terminology page now has your thirteen rows, in your order, each with your
+description and default word. There is no separate group word and
+business-unit word any more: whatever is typed is used at the group, in every
+business unit and in every function. Each row has two boxes: the word for one
+("Project") and the word for many ("Projects"), because the platform cannot
+make a plural reliably. The default sits beside the boxes; Reset appears only
+on a row that differs; emptying a box puts its default back.
+
+Three rows are new: Division (the Companies layer, *Divisions* by default),
+Supporting Function and Project. Capability has its own row instead of hiding
+in Pillars as "Group capabilities". The aspiration uses one word everywhere, so
+the group no longer says *Vision* while a unit says *Winning Aspiration*.
+
+Existing clients are moved over once, on the next deploy: a word a client typed
+for business-unit pages is kept, a word still on the old default moves to the
+new default, and the single form starts on the default.
+
+The Setup rail, the page headings, the tables and the deck follow the words.
+The navigation switch keeps its short "Units / Capabilities / Functions" until
+a client types their own word.
+
+Not changed: the workbook's column headings, the People register's Company
+column, and the set-up flow's words step (it still asks only the word for
+many).
+
+**Waiting on Islam**: the merge. `main` has moved to §389, so §382 and this
+need renumbering first.

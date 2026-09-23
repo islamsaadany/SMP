@@ -9037,6 +9037,12 @@ python3 checks/review-pptx.py   # the review deck as a PowerPoint (§311):
                                 # and the PLAN download is asserted untouched
                                 # (§94.2 — it shares every primitive changed).
                                 # 5 falsifications from the SOURCES, 1/3/4/3/2 red
+python3 checks/drivers-switch.py  # revenue drivers On | Off (spec 063 §6.7,
+                                # §389): the real control pressed both ways, the
+                                # Drivers section, Performance's Revenue drivers
+                                # half and the revenue card present On, absent Off,
+                                # back as they were; the key DELETED on Off and the
+                                # trees still stored. Red 2 ways from the SOURCES
 python3 checks/presentation-timer.py # a clock on the review (§340): the minutes
                                 # set in the flow and read back off the STORED graph
                                 # (§96); the lit button pressed again CLEARING, and the
@@ -10586,7 +10592,21 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-22 &mdash; **&sect;388: the second renumber, the merge,
+*Last Updated: 2026-09-23 &mdash; **&sect;389: Revenue drivers (spec 063),
+an On | Off switch, and the merge.** A unit's revenue argued from its parts,
+its review reading, and the client's seasons, all recorded in
+`specs/063-revenue-drivers/spec.md`. Islam, as the merge was asked for: *"this
+module it should have an on and off button"* &mdash; **Setup &rsaquo; Revenue
+drivers** carries it for the office, `GROUP.driversOn` stored as an absence,
+only an explicit `true` on, so every existing client starts Off; Off hides the
+Drivers section, Performance's Revenue drivers half and the revenue card and
+forgets nothing. **Main took spec 062 for My reporting while this was in
+flight**, so it was renumbered 063 before the merge (&sect;264.3), and reading
+the merge conflict found the switch's server assertions pasted INSIDE another
+check's callback (&sect;389.2). `checks/drivers-switch.py` presses the real
+control, both ends, red two ways.*
+
+*Earlier: 2026-09-22 &mdash; **&sect;388: the second renumber, the merge,
 and two guards a decision had already invalidated.** Islam: *"merge to main."*
 **FETCHING BEFORE GOING NEAR A MERGE FOUND THE COLLISION AGAIN** (&sect;91's
 fetch-and-look): `main` had moved **nine commits** and taken **&sect;380 and

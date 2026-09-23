@@ -56618,6 +56618,56 @@ platform rules 69/0, `test-my-reporting` 65/0, the frozen browser suite and
 frameworks 90/0, tracker 229/0, notes 170/0, portfolio 121/0, upload 9/0, demo
 7/0, standing 7/0, room 10/0, deploy 5/0.
 
+## §389 — REVENUE DRIVERS, A SWITCH, AND THE MERGE (2026-09-23, spec 063)
+
+**THE RECORD IS THE SPEC.** Revenue drivers — a unit's revenue argued from its
+parts, the review reading of what was argued against what came in, and the
+client's seasons — was built across five commits on its branch, each decision
+drawn and signed off first (rule 1c) and written into
+`specs/063-revenue-drivers/spec.md` §4–§6 as it was made. This section exists
+because that branch wrote nothing here, which this file's own rule requires
+before a merge; it points rather than repeats (§53.5 applies to prose too).
+
+**§389.1 — THE SWITCH.** Islam, as the merge was asked for: *"wait this module
+it should have an on and off button to show or not"*; the office sets it, in
+Setup, and an existing client starts Off. `GROUP.driversOn`, stored as an
+ABSENCE (§50.6), only an explicit `true` on (§104) — which is what makes every
+existing client start Off with no migration. Off HIDES and never forgets (§44):
+the Drivers section, Performance's Revenue drivers half and the Revenue
+performance card go, every tree and season stays, and the page carrying the
+switch stays reachable (§61). The server's two edits go together (§259.2),
+falsified separately **3 red / 2 red**. Spec 063 §6.7 has the rest.
+
+**§389.2 — AND THE FIRST DRAFT OF ITS SERVER ASSERTIONS RAN INSIDE ANOTHER
+CHECK.** Found by reading my own side of a merge conflict, not by any failure:
+the switch block had been pasted into the middle of a `verdict(...)` call's
+callback, so it ran as a side effect each time that callback was invoked and
+passed for as long as the callback happened to be called. Moved out, run once,
+still green. *A check that passes because of where it was pasted is not a check
+of the thing it names.* And the seed now carries the demo's `driversOn`, so the
+switch's base is set Off explicitly or "switching it on" is a no-op (§94.5).
+
+**§389.3 — THE NUMBER WAS TAKEN, SO IT MOVED BEFORE THE MERGE.** Main took
+*spec 062* for My reporting while this was in flight. The merge base held no
+`spec 062`, `§062` or `062-revenue`, so every occurrence on the branch was its
+own: 137 substitutions, counts asserted, done BEFORE the merge — the only moment
+a renumber is provably scoped (§264.3). Both `scripts/test-authorize.js`
+sections called themselves 43; main's keeps 43 and this becomes 44. The
+authoriser's swept-keys list took both sides' additions (`lineOwners` and
+`SEASONS, DRIVERS_ON`). The built file, the seed, the served copies and `sw.js`
+(`v5.29-revenue-drivers`, a name never used) were regenerated rather than
+merged (§91, §146.2); no duplicate top-level declaration in the merged sources.
+
+**Verified on the merged tree**: authoriser 739/0, change list 140/0, platform
+rules 69/0, my-reporting 65/0, nav-row 18/0, drivers 99/0; the served stack
+built against a throwaway Postgres — state 92/0, shell 125/0, door 144/0,
+modules 160/0, insights-tab 18/0; the frozen browser checks drivers-switch,
+my-reporting, plan-builder, objectives-actions 52/0, access-header, import-page,
+setup-pages, setup-rail, setup-search, scoring-bands all green; `qa.py` ERRORS
+none; built-in-step and generated-in-step clear. **Nothing about how an
+existing save is judged is narrowed** — the new keys are ones no old tab has
+ever written — so no forced sign-out is owed (spec 029).
+
 ---
 
 ## §390 — THE PEOPLE FILE TAKES A CLIENT'S OWN SHEET, AND NAME · JOB TITLE · EMAIL IS ENOUGH (2026-09-23)

@@ -1,6 +1,15 @@
 {
  "group": {
   "org": "Raya Trade",
+  "driversOn": true,
+  "seasons": [
+   {
+    "id": "ramadan",
+    "name": "Ramadan season",
+    "start": "2026-02-17",
+    "end": "2026-03-19"
+   }
+  ],
   "mainbus": [
    {
     "name": "Distribution",
@@ -1252,6 +1261,155 @@
     "pillars": 78,
     "exec": 71
    },
+   "drivers": {
+    "subs": [
+     {
+      "name": "Retail Stores",
+      "periods": [
+       {
+        "name": "Base year — excluding seasons",
+        "type": "base",
+        "drivers": [
+         {
+          "id": "d1",
+          "name": "Number of stores",
+          "kind": "vol",
+          "unit": "n",
+          "base": 12,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true,
+          "actual": 12
+         },
+         {
+          "id": "d2",
+          "name": "Transactions per store-month",
+          "kind": "vol",
+          "unit": "n",
+          "base": 4500,
+          "up": 0,
+          "upUnit": "%",
+          "actual": 4100,
+          "note": "Assumed the mature-store rate held. It did not — traffic softened from April."
+         },
+         {
+          "id": "d3",
+          "name": "Average basket",
+          "kind": "val",
+          "unit": "n",
+          "base": 180,
+          "up": 10,
+          "upUnit": "%",
+          "assume": true,
+          "actual": 201,
+          "note": "List price rise across the range from March."
+         }
+        ]
+       },
+       {
+        "name": "Ramadan season",
+        "type": "season",
+        "seasonId": "ramadan",
+        "drivers": [
+         {
+          "id": "d4",
+          "name": "Number of stores",
+          "kind": "vol",
+          "unit": "n",
+          "base": 12,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true
+         },
+         {
+          "id": "d5",
+          "name": "Transactions per store-month",
+          "kind": "vol",
+          "unit": "n",
+          "base": 6500,
+          "up": 5,
+          "upUnit": "%",
+          "actual": 7200,
+          "note": "The season ran harder than assumed."
+         },
+         {
+          "id": "d6",
+          "name": "Average basket",
+          "kind": "val",
+          "unit": "n",
+          "base": 230,
+          "up": 10,
+          "upUnit": "%",
+          "assume": true,
+          "actual": 249,
+          "note": "Gifting and bulk purchase lift the basket well above the 180 annual average."
+         }
+        ]
+       },
+       {
+        "name": "New stores — 2026 openings",
+        "type": "increment",
+        "drivers": [
+         {
+          "id": "d10",
+          "name": "New stores",
+          "kind": "vol",
+          "unit": "n",
+          "base": 3,
+          "up": 0,
+          "upUnit": "%",
+          "actual": 2,
+          "note": "Alex Corniche did not open — the lease completed in November."
+         },
+         {
+          "id": "d7",
+          "name": "Months active",
+          "kind": "vol",
+          "unit": "n",
+          "base": 9,
+          "up": 0,
+          "upUnit": "%",
+          "actual": 7,
+          "assume": true,
+          "note": "Both openings ran late against the Feb–Jun plan."
+         },
+         {
+          "id": "d8",
+          "name": "Transactions per store-month (mature)",
+          "kind": "vol",
+          "unit": "n",
+          "base": 4500,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true,
+          "note": "Mature-store rate. The ramp is applied separately below."
+         },
+         {
+          "id": "d9",
+          "name": "Average basket",
+          "kind": "val",
+          "unit": "n",
+          "base": 180,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true
+         },
+         {
+          "id": "d11",
+          "name": "Maturity factor",
+          "kind": "val",
+          "unit": "%",
+          "base": 70,
+          "up": 0,
+          "upUnit": "%",
+          "note": "New stores trade below mature levels in year one."
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
    "clauses": [
     [
      "We are",
@@ -1308,6 +1466,7 @@
      "compile": "Latest",
      "actual": "91",
      "progress": 103,
+     "driver": "d10",
      "id": "retailstores-KO2"
     },
     {
@@ -1382,6 +1541,7 @@
        "compile": "Latest",
        "actual": "55M",
        "progress": 106,
+       "driver": "d2",
        "id": "retailstores-P1-M2"
       },
       {

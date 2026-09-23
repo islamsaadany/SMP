@@ -54,7 +54,36 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **§356.16 — the week by its month, fixed cards, and a line that asks later (spec 054).**
+**Latest version:** **Revenue drivers (spec 063, §389) — built and merged to `main` 2026-09-23.**
+
+A new part of the Strategy module for units whose revenue is argued from its
+parts (stores &times; basket &times; visits, and so on). Three screens, all
+drawn and signed off first: a **Drivers** section beside Plan where the tree is
+written, a **Revenue drivers** half on Performance showing what was argued for
+against what came in, and **Setup &rsaquo; Revenue drivers**, where the office
+names the seasons (Ramadan and the like) once for the whole client.
+
+**And it can be switched off.** At your word, the Revenue drivers page carries
+an **On | Off** switch for the office. Off hides the Drivers section, the
+Performance half and the Revenue performance card for the whole client, so the
+pages look exactly as they did before the module existed; nothing is thrown
+away, and On brings it all back as it was. **Every existing client starts
+Off**; the demo shows it On.
+
+**Checked:** the arithmetic against your own tool, 99 assertions on the rules,
+713 on who may change what (a unit head cannot flip the switch), the switch
+pressed in a real browser both ways, the Setup checks, and a full sweep of
+every page as every viewer with no errors.
+
+**Merged 2026-09-23 on your word**, with main's My reporting (§380–§388)
+brought in first. My reporting had taken the number *spec 062*, so this is
+**spec 063** now. Everything was re-run on the combined version, not on the
+branch alone.
+
+**Still yours:** turning it On for any client that should use it — every
+existing client starts Off.
+
+### Earlier: **§356.16 — the week by its month, fixed cards, and a line that asks later (spec 054).**
 
 **Built and merged to `main`.** All four things you asked for, each drawn
 before it was built, and two of them drawn three ways so you could weigh what

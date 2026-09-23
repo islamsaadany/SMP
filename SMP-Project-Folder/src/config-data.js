@@ -3554,6 +3554,15 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
+/* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
+   is the shared module's (only an explicit true is on); this reads it off the
+   group and writes it, deleting the key for Off (§50.6) so a client that
+   was never asked and one switched on and off again are byte-identical. Off
+   HIDES and never forgets — every tree and every season stays stored (§44). */
+function driversOn(){ return SMPRules.driversOn(GROUP); }
+function setDriversOn(on){
+  if (on) GROUP[SMPRules.DRIVERS_ON] = true; else delete GROUP[SMPRules.DRIVERS_ON];
+}
 function toggleFocus(id){
   if (CYCLE.locked) return false;
   if (CYCLE.focus[id]) delete CYCLE.focus[id]; else CYCLE.focus[id] = true;
@@ -8989,6 +8998,15 @@ function clearedGraph(g){
     u.real = true;                /* nothing left to mark as illustrative */
     if (u.extra) delete u.extra.perf;
     delete u.perf;
+    /* §21, §45.3: A CLIENT MUST NOT INHERIT RAYA'S REVENUE TREE. The demo
+       carries one on Retail Stores — the worked example the whole of spec 063
+       was argued from — and it rides `units.extra`, which is exactly where
+       §45.3's figure set survived the clean slate and had to be scrubbed by
+       name. Migration 004 strips it on the deployment; this is the same act
+       on the screen, and `scripts/test-clean-parity.js` is what holds the two
+       to each other. */
+    delete u.drivers;
+    if (u.extra) delete u.extra.drivers;
   });
 
   /* ── Group foundation ─────────────────────────────────────────────── */
@@ -9001,6 +9019,10 @@ function clearedGraph(g){
   delete G.keyObjectivesScore;
   /* §44's sets, §54's BU list — the two that 004 had to be amended for. */
   delete G.sets; delete G.claims; delete G.naming; delete G.mainbus;
+  /* And spec 063's seasons, for the same reason: Ramadan's dates are the
+     demo's, and a client's phasing is the client's to set on Setup › Seasons. */
+  delete G.seasons;
+  delete G.driversOn;
 
   /* ── Capabilities (§326: NONE, where the shells used to stay) ─────────
      This emptied the eight boxes and kept their names, which was right while

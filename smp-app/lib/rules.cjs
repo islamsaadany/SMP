@@ -3752,6 +3752,493 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return { projects: take };
   }
 
+  /* ══ 24 · REVENUE DRIVERS (spec 063) ════════════════════════════════
+     A business unit is handed a revenue number and builds the logic that
+     gets to it — how many stores, how many transactions, what basket — and
+     the strategy is then built to deliver that logic.
+
+     IT LIVES HERE AND NOT IN A MODULE OF ITS OWN, for the reason every rule
+     in this file lives here: the browser asks these functions to DRAW a
+     figure and the server asks them to judge a save, and two copies of an
+     arithmetic drift silently into two different revenue targets (§42,
+     §53.5). It is also why there is no second module beside this one —
+     `smp-app/lib/drivers.ts` was exactly that for a day and is deleted.
+
+     PORTED FROM ISLAM'S OWN TOOL, NEVER FROM A DESCRIPTION. That file is
+     kept unchanged at `specs/063-revenue-drivers/reference/` and
+     `smp-app/checks/drivers.mjs` RUNS ITS OWN FUNCTIONS in a sandbox beside
+     these and asserts the two agree on every channel, sub-channel, period
+     and every figure in the growth split (§94.8 — agreement, never a typed
+     number). A drift in either direction goes red with nobody editing it.
+
+     ── THE SHAPE ──────────────────────────────────────────────────────
+       unit.drivers = { mode:"rate"|"count", subs:[ sub ] }
+       sub          = { name, periods:[ period ] }
+       period       = { id, name, type:"base"|"season"|"increment",
+                        seasonId, drivers:[ driver ] }
+       driver       = { id, name, kind:"vol"|"val", unit:"n"|"%",
+                        base, up, upUnit:"%"|"#", note }
+       group.seasons = [ { id, name, start, end } ]
+
+     A CHANNEL IS A UNIT (spec 063 §4.1), so the tool's Master tab is what
+     the group and a company already are and no roll-up is invented. A
+     SUB-CHANNEL is a route to market whose driver logic genuinely differs —
+     an app has sessions and a call centre has agents, and no one set of
+     drivers describes both. A PERIOD is a slice of the year, and the slices
+     inside one sub-channel sum to twelve BY CONSTRUCTION (see
+     `driverMonths`), which is what stops a season being counted twice.
+
+     FLAT IS DERIVED, NEVER STORED. The tool carries a `flat` flag; here it
+     is `subs.length <= 1`, because a stored flag beside the list it
+     describes is §110's pair — two facts that can disagree, and only one of
+     them is the truth.
+
+     THE IDS ARE REAL AND THEY MATTER. `renumberUnit()` rewrites a key
+     objective's id BY POSITION on every load (§48), which is exactly why
+     spec 063 §4.3 puts the connection pointer on the OBJECTIVE rather than
+     on the driver row — and why a driver row carries a stable id of its
+     own: nothing renumbers `extra`, so an id minted here survives a row
+     being deleted above it. */
+
+  var DRIVERS = "drivers";          /* on a unit's extra   */
+  var SEASONS = "seasons";          /* on the group's extra */
+  /* WHETHER THE CLIENT USES REVENUE DRIVERS AT ALL (Islam, 2026-09-23: *"this
+     module it should have an on and off button"*; the office's, in Setup,
+     OFF for every client until somebody turns it on). ONLY AN EXPLICIT `true`
+     TURNS IT ON, which is the assistant's rule (§104) and not focus's
+     (§102): focus existed before its switch did, so absent had to mean on;
+     this did not, so absent means OFF and a stale value cannot switch it on
+     by accident. Stored as an ABSENCE (§50.6) — Off deletes the key. Off
+     HIDES and never forgets: every tree and every season is kept (§44). */
+  var DRIVERS_ON = "driversOn";
+  var DRIVER_LINK = "driver";       /* on a key objective or a measure */
+  var DRIVER_KINDS = ["vol", "val"];
+  var PERIOD_TYPES = ["base", "season", "increment"];
+  var CHANNEL_MODES = ["rate", "count"];
+  /* 365/12 and never 30: a season is a window of real days, so a month is
+     the average one. Ramadan 2026 is 31 days, which is 1.02 months. */
+  var MONTH_DAYS = 365 / 12;
+  var NO_SEASONS = Object.freeze([]);
+
+  /* READERS THAT CREATE NOTHING (§42, §50.6). A reader that mints the thing
+     it looked for puts a phantom change into every save and the first
+     non-office save is refused for ever — `branding()` cost this project
+     exactly that. Both hand back a shared frozen empty. */
+  function driversOn(group) { return !!group && group[DRIVERS_ON] === true; }
+  function seasonsOf(group) {
+    var a = group && group[SEASONS];
+    return Array.isArray(a) ? a : NO_SEASONS;
+  }
+  function driverChannel(unit) {
+    var c = unit && unit[DRIVERS];
+    return c && typeof c === "object" && Array.isArray(c.subs) ? c : null;
+  }
+  function driverFlat(ch) { return !ch || !ch.subs || ch.subs.length <= 1; }
+  function driverMode(ch) { return ch && ch.mode === "count" ? "count" : "rate"; }
+
+  /* A SEASON'S LENGTH, INCLUSIVE OF BOTH ENDS — 17 Feb to 19 Mar is 31 days
+     and not 30. An unreadable or backwards window is NOUGHT rather than a
+     negative or a throw: a season nobody has dated yet takes no days out of
+     the base year, which is the reading that leaves the tree adding up
+     (§93 — absent is never a number somebody could mistake for one). */
+  function seasonMonths(s) {
+    if (!s || !s.start || !s.end) return 0;
+    var a = new Date(s.start).getTime(), b = new Date(s.end).getTime();
+    if (!isFinite(a) || !isFinite(b) || b < a) return 0;
+    return (Math.round((b - a) / 86400000) + 1) / MONTH_DAYS;
+  }
+  function seasonById(seasons, id) {
+    var a = seasons || [];
+    for (var i = 0; i < a.length; i++) if (a[i] && a[i].id === id) return a[i];
+    return null;
+  }
+
+  /* A NEW SEASON'S ID IS ONE MORE THAN THE HIGHEST (§96.2, `driverMintId`'s
+     own rule one collection over): delete the middle of s1·s2·s3 and a
+     count-minted id collides with a season a unit's period still names, so
+     removing Ramadan would silently re-point every period that named it at
+     whatever was added next. */
+  function seasonMintId(group) {
+    var top = 0;
+    seasonsOf(group).forEach(function (s) {
+      var n = parseInt(String(s && s.id).replace(/^s/, ""), 10);
+      if (isFinite(n) && n > top) top = n;
+    });
+    return "s" + (top + 1);
+  }
+
+  /* WHICH UNITS STILL NAME A SEASON — the refusal behind Remove (§62: the
+     refusal is the feature, and it names what is in the way).
+
+     A season removed while a period names it does not corrupt anything —
+     `seasonById` answers null and `seasonMonths(null)` is 0, so the base year
+     gets its month back and the tree still adds up — and it leaves a period
+     on somebody's Drivers page reading an em-dash for ever, with no control
+     on that page able to say what it was. That is §61's dead end wearing a
+     clean save, so the removal is refused here and the units are NAMED.
+
+     It takes the units rather than reading a global, because this module is
+     run by the browser AND by Node with no collections of its own (§42). */
+  function seasonUsedBy(units, id) {
+    var out = [];
+    (units || []).forEach(function (u) {
+      var ch = driverChannel(u);
+      if (!ch) return;
+      var hit = (ch.subs || []).some(function (sub) {
+        return ((sub && sub.periods) || []).some(function (p) {
+          return p && p.type === "season" && String(p.seasonId) === String(id);
+        });
+      });
+      if (hit) out.push(u);
+    });
+    return out;
+  }
+
+  /* HOW MANY MONTHS A PERIOD STANDS FOR, and the three answers are three
+     different kinds of thing rather than three cases of one:
+
+       · a COUNT channel is not a rate at all — *Events per year 45* is
+         already the year, so multiplying by twelve would say 540 events;
+       · an INCREMENT carries its own *Months active* driver, because stores
+         opening through the year do not trade for all of it, and how long
+         they trade is a plan decision rather than a fact about the calendar;
+       · a BASE period is twelve months LESS the seasons used in its own
+         sub-channel — calculated and never typed, which is the one line
+         that makes a sub-channel's periods sum to twelve by construction.
+         Typing it would let somebody enter eleven and lose a month in
+         silence.
+
+     `Math.max(0, …)` is a floor and not a tidy-up: seasons totalling more
+     than a year is a mistake somebody can make, and a negative base period
+     would SUBTRACT revenue rather than reading as the nonsense it is. */
+  function driverMonths(seasons, ch, sub, p) {
+    if (driverMode(ch) === "count" || (p && p.type === "increment")) return 1;
+    if (p && p.type === "season") return seasonMonths(seasonById(seasons, p.seasonId));
+    var used = 0, list = (sub && sub.periods) || [];
+    for (var i = 0; i < list.length; i++)
+      if (list[i] && list[i].type === "season")
+        used += seasonMonths(seasonById(seasons, list[i].seasonId));
+    return Math.max(0, 12 - used);
+  }
+
+  /* What a driver reads at year one: plus-n adds, per cent scales. */
+  function driverYearOne(d) {
+    if (!d) return 0;
+    var base = Number(d.base) || 0, up = Number(d.up) || 0;
+    return d.upUnit === "#" ? base + up : base * (1 + up / 100);
+  }
+  /* What it contributes to the multiplication. A `%` driver divides by a
+     hundred first — that is how *Maturity factor 70%* and *Commission
+     retention 78%* work, and reading one raw multiplies a plan by seventy. */
+  function driverEffective(d, atYearOne) {
+    var v = atYearOne ? driverYearOne(d) : (Number(d && d.base) || 0);
+    return (d && d.unit === "%") ? v / 100 : v;
+  }
+  /* VOLUME AND VALUE ARE MULTIPLIED APART AND THEN TOGETHER, and keeping
+     them apart is the whole of why the growth split below is possible: with
+     one product there is no way to say how much of an increase was selling
+     more and how much was charging more. An empty side is 1 rather than 0 —
+     a period with no value driver is one whose value is unchanged, not one
+     worth nothing. */
+  function driverFactors(p, atYearOne) {
+    var vol = 1, val = 1, list = (p && p.drivers) || [];
+    for (var i = 0; i < list.length; i++) {
+      var d = list[i], v = driverEffective(d, atYearOne);
+      if (d && d.kind === "val") val *= v; else vol *= v;
+    }
+    return { vol: vol, val: val, rev: vol * val };
+  }
+
+  function driverZero() {
+    return { b0: 0, b1: 0, growth: 0, volEff: 0, valEff: 0, intEff: 0, newEff: 0 };
+  }
+  var FIG_KEYS = ["b0", "b1", "growth", "volEff", "valEff", "intEff", "newEff"];
+
+  /* ONE PERIOD'S FIGURES.
+
+     AN INCREMENT HAS NO BASELINE, and that is the point of it: new stores
+     did not trade last year, so every pound of it is new business. Giving it
+     a baseline of its own plan would report it as flat growth and lose the
+     one distinction a reviewer most needs.
+
+     THE SPLIT IS THE STANDARD DECOMPOSITION and the interaction term is not
+     a rounding artefact — selling 10% more at 10% more each is 21% more
+     revenue, and the extra 1% belongs to neither volume nor price. Dropping
+     it leaves the four parts not adding up to the growth they explain. */
+  function driverPeriod(seasons, ch, sub, p) {
+    var months = driverMonths(seasons, ch, sub, p);
+    var y = driverFactors(p, true), f;
+    if (p && p.type === "increment") {
+      var rev = y.rev * months;
+      f = { b0: 0, b1: rev, growth: rev, volEff: 0, valEff: 0, intEff: 0, newEff: rev };
+    } else {
+      var b = driverFactors(p, false);
+      f = {
+        b0: b.rev * months,
+        b1: y.rev * months,
+        growth: (y.rev - b.rev) * months,
+        volEff: (y.vol - b.vol) * b.val * months,
+        valEff: (y.val - b.val) * b.vol * months,
+        intEff: (y.vol - b.vol) * (y.val - b.val) * months,
+        newEff: 0
+      };
+    }
+    f.months = months;
+    return f;
+  }
+
+  /* THE ROLL-UP. Everything above a period ADDS, through one adder, so a
+     sub-channel's total and the unit's cannot be arrived at two ways
+     (§53.5). `months` is deliberately not summed — twelve months of base
+     and one of increment is not thirteen months of anything. */
+  function driverAdd(list, of) {
+    var t = driverZero();
+    (list || []).forEach(function (x) {
+      var c = of(x);
+      for (var i = 0; i < FIG_KEYS.length; i++) t[FIG_KEYS[i]] += c[FIG_KEYS[i]];
+    });
+    return t;
+  }
+  function driverSub(seasons, ch, sub) {
+    return driverAdd(sub && sub.periods, function (p) {
+      return driverPeriod(seasons, ch, sub, p);
+    });
+  }
+  function driverFigures(seasons, ch) {
+    return driverAdd(ch && ch.subs, function (sub) {
+      return driverSub(seasons, ch, sub);
+    });
+  }
+
+  /* WHAT A UNIT'S REVENUE TARGET IS (spec 063 §4.2). Islam: *"tree is the
+     main source."* The Year 1 figure IS the target, so nothing is typed and
+     nothing can disagree — the same shape `monthlyAnnual` already has one
+     level down, which is why that precedent was the one followed.
+
+     NULL WHERE THERE IS NO TREE, never nought: a unit whose tree has not
+     been built has no revenue target, which is a different fact from a
+     target of zero and must never be scored as one (§35, §93). */
+  function driverTarget(group, unit) {
+    var ch = driverChannel(unit);
+    if (!ch || !ch.subs.length) return null;
+    return driverFigures(seasonsOf(group), ch).b1;
+  }
+
+  /* WHERE THE GROWTH CAME FROM, which is the reading a review is for.
+
+     NOTHING IS A SHARE OF NOUGHT. A plan that does not grow gets no
+     percentages at all — dividing by a growth of zero is how a bridge comes
+     to read 100% volume on a plan that went backwards (an arithmetic answer
+     that is true and says something false). */
+  function driverBridge(f) {
+    var g = (f && f.growth) || 0;
+    function share(x) { return g ? (x / g) * 100 : 0; }
+    var v = share(f.volEff), p = share(f.valEff),
+        i = share(f.intEff), n = share(f.newEff), reading;
+    if (g <= 0) reading = "This plan does not grow on these assumptions. Check the uplifts before reading the split.";
+    else if (n >= 50) reading = "Over half the growth is revenue that does not exist yet. New stores, products and hubs carry execution and capital risk that growth on an existing base does not. Ask what the plan looks like if the openings slip a quarter.";
+    else if (v >= 60) reading = "Growth is volume-led — most of the increase is selling more on what is already there. Test it against capacity, coverage, working capital and headcount.";
+    else if (p >= 60) reading = "Growth is price-led — most of it is value per unit rather than quantity. Test it against pricing power, mix shift and elasticity.";
+    else reading = "Growth is spread across volume, price and new business, which is generally the more resilient shape. Confirm each has a named owner.";
+    return {
+      volume: f.volEff, price: f.valEff, interaction: f.intEff, newBusiness: f.newEff,
+      shares: g > 0 ? { volume: v, price: p, interaction: i, newBusiness: n } : null,
+      reading: reading
+    };
+  }
+
+  /* ── WHAT ACTUALLY HAPPENED (spec 063 §4.5a, §6.4) ──────────────────
+     Islam, asked which drivers are read from the work they connect to and
+     which are typed: *"what do oyu mean? they are all typed."* So every
+     driver carries its own reported figure and the connection exists to say
+     WHOSE WORK a moved driver belonged to, never to supply the number — which
+     is also the only reading that is arithmetically honest, because a measure
+     and the driver it answers to are usually different quantities (a
+     conversion rate against transactions per store-month).
+
+     NOT REPORTED IS NOT NOUGHT (§35, §93). A driver nobody has typed a figure
+     against reads at its PLANNED value, so it contributes no effect and the
+     period's actual is the part that has been reported rather than a number
+     dragged to zero by silence. */
+  function driverActual(d) {
+    if (!d) return null;
+    var v = d.actual;
+    if (v == null || v === "") return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+  function driverReported(ch) {
+    var subs = (ch && ch.subs) || [];
+    for (var i = 0; i < subs.length; i++) {
+      var ps = (subs[i] && subs[i].periods) || [];
+      for (var j = 0; j < ps.length; j++) {
+        var ds = (ps[j] && ps[j].drivers) || [];
+        for (var k = 0; k < ds.length; k++)
+          if (driverActual(ds[k]) != null) return true;
+      }
+    }
+    return false;
+  }
+
+  /* ONE PERIOD, READ AGAINST WHAT HAPPENED — and every driver's effect is
+     measured with the ones ABOVE IT ALREADY AT THEIR ACTUAL.
+
+     THAT CASCADE IS THE WHOLE OF WHY THE COLUMN ADDS UP, and it is a decision
+     rather than an implementation detail. Measuring each driver against the
+     fully planned period is the obvious reading and it does NOT sum to the
+     period's own gap: the shortfalls interact, exactly as §4.2's growth split
+     needs its interaction term, and a breakdown that disagrees with the
+     headline it sits under is worse than none (§99.7, §264). Read down the
+     column in order, each row's effect is the money that row cost or earned
+     GIVEN what had already gone wrong above it, and the parts come to the
+     whole by construction.
+
+     `rev` IS THE PERIOD AT ITS REPORTED VALUES, which for an increment is the
+     whole of it (there is no baseline to compare against, §4.2) and for a
+     base or a season is the year-one multiplication with the reported figures
+     substituted in. */
+  function driverPeriodActual(seasons, ch, sub, p) {
+    var months = driverMonths(seasons, ch, sub, p);
+    var list = (p && p.drivers) || [];
+    /* Where each driver stands now: its reported figure if it has one, its
+       year-one plan if it has not. */
+    function at(i) {
+      var vol = 1, val = 1;
+      for (var k = 0; k < list.length; k++) {
+        var d = list[k], a = driverActual(d);
+        var raw = (k <= i && a != null) ? a : driverYearOne(d);
+        var v = (d && d.unit === "%") ? raw / 100 : raw;
+        if (d && d.kind === "val") val *= v; else vol *= v;
+      }
+      return vol * val * months;
+    }
+    var planned = at(-1), prev = planned, rows = [];
+    for (var i = 0; i < list.length; i++) {
+      var here = at(i), a = driverActual(list[i]);
+      rows.push({
+        driver: list[i],
+        planned: driverYearOne(list[i]),
+        actual: a,
+        reported: a != null,
+        effect: here - prev
+      });
+      prev = here;
+    }
+    return { months: months, planned: planned, actual: prev,
+             gap: prev - planned, rows: rows };
+  }
+  function driverActualAdd(list, of) {
+    var t = { planned: 0, actual: 0, gap: 0 };
+    (list || []).forEach(function (x) {
+      var c = of(x);
+      t.planned += c.planned; t.actual += c.actual; t.gap += c.gap;
+    });
+    return t;
+  }
+  function driverSubActual(seasons, ch, sub) {
+    return driverActualAdd(sub && sub.periods, function (p) {
+      return driverPeriodActual(seasons, ch, sub, p);
+    });
+  }
+  function driverActualFigures(seasons, ch) {
+    return driverActualAdd(ch && ch.subs, function (sub) {
+      return driverSubActual(seasons, ch, sub);
+    });
+  }
+  /* HOW THE REVENUE READ AGAINST WHAT THE TREE ARGUED FOR. Null where the
+     tree argues for nothing — a share of nought is not a hundred per cent
+     (§239.4's own guard, one arithmetic along). */
+  function driverScore(f) {
+    if (!f || !f.planned) return null;
+    return Math.round((f.actual / f.planned) * 100);
+  }
+
+  /* EVERY DRIVER IN A UNIT'S TREE, in reading order, each carrying where it
+     sits. ONE WALK, because the table, the connection picker, the review
+     reading and the count of unanswered rows are four readers of one list
+     and four walks are four chances to disagree (§104.7). */
+  function driverRows(unit) {
+    var ch = driverChannel(unit), out = [];
+    if (!ch) return out;
+    (ch.subs || []).forEach(function (sub) {
+      ((sub && sub.periods) || []).forEach(function (p) {
+        ((p && p.drivers) || []).forEach(function (d) {
+          if (d) out.push({ sub: sub, period: p, driver: d });
+        });
+      });
+    });
+    return out;
+  }
+  function driverById(unit, id) {
+    if (id == null || id === "") return null;
+    var rows = driverRows(unit);
+    for (var i = 0; i < rows.length; i++)
+      if (String(rows[i].driver.id) === String(id)) return rows[i];
+    return null;
+  }
+  /* A NEW ID IS ONE MORE THAN THE HIGHEST, never one more than the count
+     (§96.2, §316): delete the middle of 1·2·3 and a count-minted id
+     collides with a row still on the screen. */
+  function driverMintId(unit) {
+    var top = 0;
+    driverRows(unit).forEach(function (r) {
+      var n = parseInt(String(r.driver.id).replace(/^d/, ""), 10);
+      if (isFinite(n) && n > top) top = n;
+    });
+    return "d" + (top + 1);
+  }
+
+  /* WHAT A ROW ANSWERS TO, and the three states are the decision rather
+     than a rendering choice (spec 063 §6.2):
+
+       · CONNECTED  — an objective or measure carries this driver's id, so
+                      somebody is doing work the row moves with;
+       · ASSUMPTION — the row is deliberately marked as moving for a reason
+                      nobody is scored on (a price decision, a maturity
+                      ramp). §343's indicator column, one level along: the
+                      absence of a direction IS the signal, so there is no
+                      second switch to disagree with it;
+       · NOT YET    — nobody has said which, and it HOLDS NOTHING BACK
+                      (Islam, 2026-09-22: *"just say so"*). Which is why it
+                      is drawn in the quiet register and never in `--bad`:
+                      red on a value means *this is stopping something*
+                      everywhere else here, and a red word over something
+                      that stops nobody teaches people to stop reading the
+                      red (§214.4, §272).
+
+     THE POINTER FACES FROM THE OBJECTIVE TO THE DRIVER and never back
+     (§4.3). A unit's key objectives and pillar measures are renumbered BY
+     POSITION on every load, so a connection stored on the driver row would
+     silently re-point the moment somebody deleted an objective above it.
+     Stored the other way it travels with the row it belongs to. */
+  function driverLinkedIds(unit) {
+    var seen = {};
+    function take(list) {
+      (list || []).forEach(function (r) {
+        var v = r && r[DRIVER_LINK];
+        if (v != null && v !== "") seen[String(v)] = 1;
+      });
+    }
+    take(unit && unit.keyObjectives);
+    ((unit && unit.items) || []).forEach(function (p) { take(p && p.measures); });
+    return seen;
+  }
+  function driverState(unit, d) {
+    if (!d) return "notyet";
+    if (driverLinkedIds(unit)[String(d.id)]) return "linked";
+    return d.assume === true ? "assume" : "notyet";
+  }
+  /* THE ONES NOBODY HAS ANSWERED — counted so a screen can say so, and
+     deliberately NOT wired to anything that refuses a save. */
+  function driverUnanswered(unit) {
+    var n = 0, linked = driverLinkedIds(unit);
+    driverRows(unit).forEach(function (r) {
+      var d = r.driver;
+      if (!linked[String(d.id)] && d.assume !== true) n++;
+    });
+    return n;
+  }
+
   return {
     ROLES: ROLES, ROLE_KEYS: ROLE_KEYS,
     AREAS: AREAS, AREA_KEYS: AREA_KEYS,
@@ -3859,6 +4346,24 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     kbParas: kbParas, kbSame: kbSame,
     dissolvePlan: dissolvePlan,
     oneLine: oneLine, ONE_LINE_FIELDS: ONE_LINE_FIELDS,
-    PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER
+    PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER,
+    /* Revenue drivers (spec 063) */
+    DRIVERS: DRIVERS, SEASONS: SEASONS, DRIVER_LINK: DRIVER_LINK,
+    DRIVERS_ON: DRIVERS_ON, driversOn: driversOn,
+    DRIVER_KINDS: DRIVER_KINDS, PERIOD_TYPES: PERIOD_TYPES,
+    CHANNEL_MODES: CHANNEL_MODES, MONTH_DAYS: MONTH_DAYS,
+    seasonsOf: seasonsOf, seasonMonths: seasonMonths, seasonById: seasonById,
+    seasonMintId: seasonMintId, seasonUsedBy: seasonUsedBy,
+    driverChannel: driverChannel, driverFlat: driverFlat, driverMode: driverMode,
+    driverMonths: driverMonths, driverYearOne: driverYearOne,
+    driverEffective: driverEffective, driverFactors: driverFactors,
+    driverPeriod: driverPeriod, driverSub: driverSub, driverFigures: driverFigures,
+    driverTarget: driverTarget, driverBridge: driverBridge,
+    driverRows: driverRows, driverById: driverById, driverMintId: driverMintId,
+    driverLinkedIds: driverLinkedIds, driverState: driverState,
+    driverUnanswered: driverUnanswered,
+    driverActual: driverActual, driverReported: driverReported,
+    driverPeriodActual: driverPeriodActual, driverSubActual: driverSubActual,
+    driverActualFigures: driverActualFigures, driverScore: driverScore
   };
 });

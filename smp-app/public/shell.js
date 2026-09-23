@@ -8749,7 +8749,7 @@ function planPeopleFile(rows){
            row of the worked example, and the bootstrap SMO on every real
            tenant — so it is left alone, as it always was;
          - anything else can only be somebody NEW, and a new person without
-           an email is missing an essential (§389.2): a problem, and the file
+           an email is missing an essential (§390.2): a problem, and the file
            stops until the row is fixed. */
       var already = name && PEOPLE.some(function(x){
         return !x.email && !x.empId &&
@@ -8818,7 +8818,7 @@ function planPeopleFile(rows){
       conflict = { kind:"newId", byId:null, byMail:byMail };
     }
 
-    /* THE THREE ESSENTIALS OF A NEW PERSON (§389.2). Islam: "the
+    /* THE THREE ESSENTIALS OF A NEW PERSON (§390.2). Islam: "the
        essentails are 3 things name, title and email" — and a missing one
        STOPS the file. A row that would ADD somebody must carry all three; a
        row matching somebody already here is untouched by this, because a
@@ -20490,7 +20490,7 @@ function peopleWorkbook(){
       head:["Unit, function or company", "Official BU"],
       rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
-      /* THE ESSENTIALS WEAR AN ASTERISK (§389.1). Written on the header only,
+      /* THE ESSENTIALS WEAR AN ASTERISK (§390.1). Written on the header only,
          never on PEOPLE_FILE_COLS: the validation ranges above look a column
          up by its bare name, and the reader matches headings ignoring
          punctuation, so "Email *" comes back as Email. In this file the
@@ -20509,7 +20509,7 @@ function peopleWorkbook(){
 /* The sheet is named People and read by its header row, so a column moved or
    a column added later costs nothing — sheetObjects() keys on the heading, not
    on the position. */
-/* ── A CLIENT'S OWN FILE, NOT ONLY OURS (§389) ───────────────────────────
+/* ── A CLIENT'S OWN FILE, NOT ONLY OURS (§390) ───────────────────────────
    Islam: "accept the minimum of the name and the title and email for the
    essentials." The planner already accepted those three alone; what turned
    such a file away was the READER — it asked for a sheet called "People" and
@@ -60943,13 +60943,13 @@ var SYNC = (function () {
         readXlsx(rx.result).then(function(sheets){
           var rows = peopleFromWorkbook(sheets);
           /* §48.8's rule: a file that cannot be read has to SAY so, where the
-             upload is. Since §389 a client's own sheet is read (the first one
+             upload is. Since §390 a client's own sheet is read (the first one
              when there is no People sheet), so what is refused is a file
              missing the headings a person CANNOT be added without: Name and
              Email. A plan workbook dropped here is the likely mistake, and
              naming the sheet read and the headings missing tells somebody which
              file they picked up. */
-          /* All three are essential (§389.2): a file without one of the
+          /* All three are essential (§390.2): a file without one of the
              headings cannot add anybody, so it is refused whole. */
           var lacks = rows.missing;
           if (!rows.sheet || lacks.length || !rows.length) {

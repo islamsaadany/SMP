@@ -1883,7 +1883,7 @@ function peopleWorkbook(){
       head:["Unit, function or company", "Official BU"],
       rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
-      /* THE ESSENTIALS WEAR AN ASTERISK (§389.1). Written on the header only,
+      /* THE ESSENTIALS WEAR AN ASTERISK (§390.1). Written on the header only,
          never on PEOPLE_FILE_COLS: the validation ranges above look a column
          up by its bare name, and the reader matches headings ignoring
          punctuation, so "Email *" comes back as Email. In this file the
@@ -1902,7 +1902,7 @@ function peopleWorkbook(){
 /* The sheet is named People and read by its header row, so a column moved or
    a column added later costs nothing — sheetObjects() keys on the heading, not
    on the position. */
-/* ── A CLIENT'S OWN FILE, NOT ONLY OURS (§389) ───────────────────────────
+/* ── A CLIENT'S OWN FILE, NOT ONLY OURS (§390) ───────────────────────────
    Islam: "accept the minimum of the name and the title and email for the
    essentials." The planner already accepted those three alone; what turned
    such a file away was the READER — it asked for a sheet called "People" and

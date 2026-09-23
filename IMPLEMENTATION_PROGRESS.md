@@ -7900,7 +7900,7 @@ rules 69/0, `test-my-reporting` 65/0, and on the stack production serves state
 notes 170/0, portfolio 121/0, upload 9/0, demo 7/0, standing 7/0, room 10/0,
 deploy 5/0.
 
-## §389 — the people upload takes a client's own sheet (2026-09-23)
+## §390 — the people upload takes a client's own sheet (2026-09-23)
 
 **Built, on the branch.** A new person needs three things: Name, Job title
 and Email. The downloaded template marks those three columns with an asterisk.

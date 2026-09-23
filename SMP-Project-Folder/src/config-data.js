@@ -3026,7 +3026,7 @@ function planPeopleFile(rows){
            row of the worked example, and the bootstrap SMO on every real
            tenant — so it is left alone, as it always was;
          - anything else can only be somebody NEW, and a new person without
-           an email is missing an essential (§389.2): a problem, and the file
+           an email is missing an essential (§390.2): a problem, and the file
            stops until the row is fixed. */
       var already = name && PEOPLE.some(function(x){
         return !x.email && !x.empId &&
@@ -3095,7 +3095,7 @@ function planPeopleFile(rows){
       conflict = { kind:"newId", byId:null, byMail:byMail };
     }
 
-    /* THE THREE ESSENTIALS OF A NEW PERSON (§389.2). Islam: "the
+    /* THE THREE ESSENTIALS OF A NEW PERSON (§390.2). Islam: "the
        essentails are 3 things name, title and email" — and a missing one
        STOPS the file. A row that would ADD somebody must carry all three; a
        row matching somebody already here is untouched by this, because a

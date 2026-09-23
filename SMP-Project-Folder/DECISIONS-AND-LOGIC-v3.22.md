@@ -56620,7 +56620,7 @@ frameworks 90/0, tracker 229/0, notes 170/0, portfolio 121/0, upload 9/0, demo
 
 ---
 
-## §389 — THE PEOPLE FILE TAKES A CLIENT'S OWN SHEET, AND NAME · JOB TITLE · EMAIL IS ENOUGH (2026-09-23)
+## §390 — THE PEOPLE FILE TAKES A CLIENT'S OWN SHEET, AND NAME · JOB TITLE · EMAIL IS ENOUGH (2026-09-23)
 
 Islam: *"In the upload of the excel with the people names accept the minimum of
 the name and the title and email for the essentials"* — and, of the one open
@@ -56663,16 +56663,16 @@ missing-title notice; a sheet with no Email heading is refused naming the sheet
 and heading; no page errors. `identity-merge`, `duplicates`, `people-dialog`,
 `import-page` green; `built-in-step` all good; full `qa.py` ERRORS none (its people round trip included).
 
-### §389.1–§389.2 — the three are ESSENTIAL, and the template marks them (2026-09-23)
+### §390.1–§390.2 — the three are ESSENTIAL, and the template marks them (2026-09-23)
 
 Islam, the same day: *"can we add an astrict in the downloaded sheet with the
 essential boxes?"* — and then, correcting how I had read his earlier *"JOB TITLE
 EASY TO FIX YES"*: *"a missing job should stop I said the essentails are 3
 things name, title and email."* **I read "easy to fix" as "let it through and
-fix it later"; he meant the opposite, and §389's missing-title notice is
+fix it later"; he meant the opposite, and §390's missing-title notice is
 REVERSED, not left beside the new rule** (Principle II).
 
-- **§389.1 — the asterisk.** The downloaded People sheet heads three columns
+- **§390.1 — the asterisk.** The downloaded People sheet heads three columns
   `Full Name *`, `Job title *`, `Email *`. Full Name, not Name, because in the
   template the short Name is the register's display name and the full one is
   what a person is added under (§93.8). Written on the HEADER only, never on
@@ -56680,7 +56680,7 @@ REVERSED, not left beside the new rule** (Principle II).
   and the reader already matches headings ignoring punctuation, so `Email *`
   comes back as Email — asserted by feeding the platform's own download back
   through the reader and planner: nothing missing, nothing refused.
-- **§389.2 — a new person needs all three, and one missing STOPS the file.**
+- **§390.2 — a new person needs all three, and one missing STOPS the file.**
   A row that would ADD somebody without a name, a job title or an email is a
   problem, named with what it lacks, and problems block Apply for the whole
   file (the existing rule). A file with no heading for one of the three is

@@ -5927,13 +5927,13 @@
         readXlsx(rx.result).then(function(sheets){
           var rows = peopleFromWorkbook(sheets);
           /* §48.8's rule: a file that cannot be read has to SAY so, where the
-             upload is. Since §389 a client's own sheet is read (the first one
+             upload is. Since §390 a client's own sheet is read (the first one
              when there is no People sheet), so what is refused is a file
              missing the headings a person CANNOT be added without: Name and
              Email. A plan workbook dropped here is the likely mistake, and
              naming the sheet read and the headings missing tells somebody which
              file they picked up. */
-          /* All three are essential (§389.2): a file without one of the
+          /* All three are essential (§390.2): a file without one of the
              headings cannot add anybody, so it is refused whole. */
           var lacks = rows.missing;
           if (!rows.sheet || lacks.length || !rows.length) {

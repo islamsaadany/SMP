@@ -827,6 +827,42 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     const ownerBtn = page.locator('[data-mac^="owner|a_insights|"]');
     if (await ownerBtn.count()) { await ownerBtn.click(); await page.waitForTimeout(2500); }
     else fail("pressing the BU owner's eye", "no such button to press");
+    /* AND EVERY OTHER ROW THIS PERSON HOLDS \u2014 ASKED, NEVER TYPED
+       (\u00a7218, \u00a7214.3, \u00a7255). Shutting one role is not shutting a
+       person: access is the MOST GENEROUS grant across the roles they hold
+       (\u00a733), and the matrix has a row per role precisely so two can
+       differ. \u00a7384 made a tactic's owner a role, so the Mobile head derived
+       `towner@mobile` as well as `owner@mobile` and the door below went on
+       serving them Insights with the BU owner's cell plainly shut \u2014 the
+       fixture had stopped making the state its own assertions are about,
+       which is a check reporting a correct build broken.
+
+       \u00a7387.1 THEN REMOVED THAT ROW on Islam's word, and the guard written
+       for it \u2014 `heldRows.length >= 2` \u2014 went red on a correct build:
+       \u00a7214.3, the same literal-outliving-its-decision one round later, and
+       in the SECOND file carrying it (\u00a751.11: when a decision moves, grep
+       every check for the assumption rather than the one that failed first).
+       REWRITTEN, NEVER LOOSENED (\u00a7218) to the claim that survives EITHER
+       decision \u2014 the rows are the product's own answer and one of them is
+       the BU owner's \u2014 which still fails if personRoles stops deriving it
+       or the head stops being an owner. What the COUNT was standing in for is
+       driven where it can be driven, in checks/modules.mjs \u00a74c, over a
+       person who does hold two.
+
+       THE ROLES COME FROM THE PRODUCT'S OWN RULE (personRoles, the one both
+       sides ask \u2014 \u00a742), so the row derived by the NEXT thing somebody is
+       named on is shut here the day it is added rather than being a second
+       list to remember. */
+    const heldRows = await page.evaluate(() =>
+      Array.from(new Set(personRoles(personBy("mobhead")).map((r) => r.role))));
+    check(heldRows.length > 0 && heldRows.includes("owner"),
+          "\u2026and the rows shut below are the product's own answer for the Mobile head, never a typed list (\u00a742)", JSON.stringify(heldRows));
+    for (const role of heldRows) {
+      if (role === "owner") continue;
+      const b2 = page.locator('[data-mac^="' + role + '|a_insights|"]');
+      if (await b2.count()) { await b2.click(); await page.waitForTimeout(2000); }
+      else fail("pressing the " + role + " row's eye", "no such button to press");
+    }
     r = await readAccessPage();
     let acc = await storedAccess();
     check(!!r.owner && !r.owner.on && r.owner.off, "pressing the lit eye turns the cell off — nothing lit IS the answer", JSON.stringify(r.owner));
@@ -907,6 +943,16 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     await signIn(page, "office@forefront.example", "Raya-2026!");
     await page.waitForURL(BASE + "/platform");
     await goSetup("/raya-trade/insights/setup/access");
+    /* THE OTHER ROWS COME BACK FIRST, so the assertion below reads the whole
+       map restored rather than one row of it: `canon(acc) === canon(accBefore)`
+       is what says never-set and set-then-cleared are the same bytes, and it
+       is about every row this section touched (\u00a794.2, \u00a750.6). */
+    for (const role of heldRows) {
+      if (role === "owner") continue;
+      const b3 = page.locator('[data-mac^="' + role + '|a_insights|"]');
+      if (await b3.count()) { await b3.click(); await page.waitForTimeout(2000); }
+      else fail("opening the " + role + " row's eye again", "no such button to press");
+    }
     /* a NEW locator: the earlier one was bound to a page since closed, and a
        locator on a closed page throws rather than reporting (§215) */
     const ownerBtn2 = page.locator('[data-mac^="owner|a_insights|"]');

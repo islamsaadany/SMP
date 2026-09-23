@@ -30,6 +30,8 @@ import { join } from "node:path";
 import { chromium } from "playwright-core";
 import pg from "pg";
 import { devTenant, DEV_PASSWORD } from "../scripts/dev-tenant.mjs";
+import { MODULE_DEF } from "../lib/modules.ts";
+import { categoriesPresent, insertItem, setState, draftOf, CATEGORIES } from "../lib/library.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
 const CHROME = process.env.SMP_CHROME || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
@@ -85,6 +87,22 @@ const booted = async () => { await page.waitForFunction(() => !document.document
 const open = async (path) => { await page.goto(BASE + path, { waitUntil: "networkidle" }); await booted(); };
 const place = () => page.evaluate(() => [current, currentSub, (currentSub && CURSEC[currentSub]) || null]);
 const path = () => new URL(page.url()).pathname;
+/* EVERY STATEMENT ABOUT A CLIENT'S OWN ROWS RUNS AS `smp_app` WITH THE TENANT
+   SET (§314), never as the owner: the policies are FORCED, so a probe that
+   read as the owner would be measuring a boundary it is standing outside of. */
+async function asTenant(id, fn) {
+  const c = await owner.connect();
+  try {
+    await c.query("BEGIN");
+    await c.query("SET LOCAL search_path TO " + SCHEMA);
+    await c.query("SET LOCAL ROLE smp_app");
+    await c.query("SELECT set_config('app.tenant_id', $1, true)", [id]);
+    const out = await fn(c);
+    await c.query("COMMIT");
+    return out;
+  } catch (e) { await c.query("ROLLBACK").catch(() => {}); throw e; }
+  finally { c.release(); }
+}
 async function section(name, fn) {
   console.log("── " + name);
   try { await fn(); } catch (e) { fail(name + " — the section died rather than reporting (§215)", (e && e.message ? e.message.split("\n")[0] : e) + " @ " + (page ? page.url() : "")); }
@@ -267,7 +285,19 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      the client's rail, so a build that hardcoded one module's name goes red.
      Put back in the `finally`, because every section after this one reads
      the same tenant (\u00a794.2). */
-  await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
+  /* AND A THIRD, BECAUSE THE SECOND IS ON THE TAB ROW (\u00a7383). REWRITTEN,
+     NEVER LOOSENED (\u00a7218, \u00a7214.3): with exactly `strategy` and
+     `insights` the switcher below is correctly NOT drawn \u2014 \u00a7383 drops a
+     module the tab row already reaches, so for anybody who HAS a tab row the
+     list comes down to the one they are standing in and \u00a732 says a menu of
+     one is a door behind a door. The assertion this section is about is that
+     a module's own Setup does not STAND the switcher DOWN the way the
+     client's settings do, and that property needs somewhere else to go to be
+     measurable at all. `tracker` is the office's own module and is not on the
+     tab row, so it stays in the list; this section signs in as the office.
+     The two-module case is asserted in its own right further down, so the
+     decision \u00a7383 made is guarded rather than merely worked around. */
+  await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights", "tracker"]), tenantId]);
   try {
   const ck = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
   const raw = async (u) => await (await fetch(BASE + u, { headers: { cookie: ck } })).text();
@@ -312,7 +342,26 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      stamps it for every client, so presence would now be true of a client
      with one and the absence above would pass for the wrong reason
      (\u00a7113.8). It asks the CONTENT, which is what it was always for. */
-  const clMods = JSON.parse(((cl.match(/data-modules='([^']*)'/) || [])[1] || "[]").replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
+  /* AND THE APOSTROPHE IS DECODED, WHICH IS NOT A DETAIL: these stamps are
+     SINGLE-quoted attributes and `MODULE_DEF.tracker.note` holds one, so
+     before lib/shell.ts learned §235's rule the attribute ENDED there and
+     this line threw on a document the browser had already mis-parsed. The
+     note is asserted whole below, or the decode could quietly go missing
+     again and the only symptom would be a switcher that is not drawn. */
+  const unesc = (v) => String(v).replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  /* AND IT DEGRADES RATHER THAN DYING (§215, in a file that carries that
+     rule). An unescaped apostrophe ends the attribute mid-string, so this
+     THREW — and a throw here takes the whole section down and reports one
+     failure where the truth is this one plus every assertion after it
+     unmade. The malformed stamp is a FAILURE with the fragment printed, and
+     the section carries on. */
+  let clMods = [];
+  try { clMods = JSON.parse(unesc((cl.match(/data-modules='([^']*)'/) || [])[1] || "[]")); }
+  catch (e) { fail("the client's document carries a parseable list of its modules", (cl.match(/data-modules='([^']*)'/) || [])[1] || "—"); }
+  const apos = clMods.find((m) => /'/.test(MODULE_DEF[m.key] ? MODULE_DEF[m.key].note : ""));
+  check(!!apos && apos.note === MODULE_DEF[apos.key].note,
+        "a module whose note holds an apostrophe survives the stamp whole — the attribute is single-quoted (§235)",
+        JSON.stringify(apos || clMods.map((m) => m.key)));
   check(clMods.length >= 2, "\u2026and this client HAS a second module, so that absence is a decision (\u00a7113.8)", JSON.stringify(clMods));
   check(b.h1 === "Raya Trade" && /Client settings/.test(b.sub), "the heading names the client and what you are looking at", b.h1 + " / " + b.sub);
 
@@ -327,6 +376,24 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(b.viewer === true, "\u2026and its viewer strip", JSON.stringify(b));
   check(b.switcher === true, "\u2026and the switcher, because there a module IS what you are in", JSON.stringify(b));
   check(b.h1 === "Strategy Management Platform", "\u2026and its document is headed by the product", b.h1);
+
+  /* AND THE OTHER END OF \u00a7383'S OWN RULE, MADE (\u00a794.2, \u00a7255). Take the
+     third module away and the switcher must go with it: the only place left
+     to go is the reports, and they are on the tab row of the page you are
+     standing on. Without this the fixture above would simply be a bigger
+     client \u2014 with it, a build that went back to offering a module the tab
+     row already reaches goes red here, which is the fault \u00a7383 removed
+     (a menu whose one live entry is the page under it, \u00a732).
+
+     THE PRESENCE ABOVE IS WHAT MAKES THIS ABSENCE MEAN ANYTHING (\u00a7113.8):
+     measured alone it passes on a build that lost the switcher entirely. */
+  await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
+  await open("/raya-trade/strategy/setup/cycle");
+  const two = await bar();
+  check(two.switcher === false && two.row === true,
+        "\u2026and with the reports as the only other module it is NOT drawn \u2014 the tab row already reaches them (\u00a7383, \u00a732)", JSON.stringify(two));
+  await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights", "tracker"]), tenantId]);
+  await open("/raya-trade/strategy/setup/cycle");
 
   /* AND THE SPINE-FORM ADDRESS STILL ENDS AT THE MODULE'S SETUP, WEARING ITS
      BAR. This is the one case the ORDER of the scope resolution decides: the
@@ -470,8 +537,14 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      the direction where the chrome has to be STOOD DOWN rather than brought
      back, so the switcher and the navigation are asserted gone by paint. */
   await page.evaluate(() => { window.__stay = 2; });
-  await page.click(".setuprail .railback.railfwd");
-  await page.waitForURL(/\/raya-trade\/setup\//, { timeout: 8000 }).catch(() => {});
+  /* GUARDED LIKE ITS TWIN ABOVE (§215): a click on a door that is not there
+     waits thirty seconds and takes every assertion after it down — which on
+     a build where the outward press never landed reported the whole section
+     as a DEATH rather than as the failures it had already found. */
+  if (await page.locator(".setuprail .railback.railfwd").count()) {
+    await page.click(".setuprail .railback.railfwd");
+    await page.waitForURL(/\/raya-trade\/setup\//, { timeout: 8000 }).catch(() => {});
+  } else fail("a way back across, to press", "no .railback.railfwd on this rail");
   await page.waitForTimeout(400);
   b = await bar();
   const mine = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail [data-setupgo]")).map((e) => e.dataset.setupgo));
@@ -564,6 +637,66 @@ await section("3c · Forefront team is the store, the register is a reader (spec
   check(reg.split !== null && reg.split.includes("from Forefront") && reg.split.startsWith(String(reg.ownN)),
         "\u2026and the count says both, agreeing with what is drawn (\u00a794.8)", String(reg.split) + " / own " + reg.ownN);
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on either page", errs.join(" | "));
+});
+
+await section("3d · the reports tab is stamped with what this client HAS (§385)", async () => {
+  /* THE SEAM, AND IT WAS MEASURED BY NOBODY (§316.7's own finding, one
+     feature over). §385 has two halves and each is asserted in its own
+     place: the RULE is `categoriesPresent`, asserted against a database in
+     checks/insights.mjs §14, and the ROW is `sections()`, asserted with no
+     database in checks/insights-tab.mjs §2 — which draws whatever it is
+     handed and therefore cannot say what it is handed. Between them is this
+     attribute, written by lib/shell.ts on the served document. Nothing read
+     it, so a build whose stamp was the module's whole list satisfied both
+     files perfectly and drew Islam's six filters (§113.8). */
+  await fresh(); await signIn("office@forefront.example");
+  const ck = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
+  const raw = async (u) => await (await fetch(BASE + u, { headers: { cookie: ck } })).text();
+  const stamp = (h) => { const m = h.slice(0, 900).match(/data-library-cats='([^']*)'/); return m ? JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&")) : null; };
+  /* READ OFF THE RAW HTML, never off the DOM: the tab row is built at paint
+     time, before any answer from the server could arrive, and the whole
+     reason the list is stamped rather than fetched is that it must already
+     be there (§376). A DOM probe passes on a build that fetched it late. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
+
+    /* A LIBRARY WITH NOTHING FILED IS `[]`, NOT ABSENT, and the difference is
+       the feature: absent draws no tab at all (§61), `[]` draws the tab and
+       no filters, because the module IS this client's and an empty library is
+       a beginning rather than a fault (§45.2). */
+    const bare = stamp(await raw("/raya-trade/strategy"));
+    check(Array.isArray(bare) && bare.length === 0,
+          "a client with nothing published is stamped with an empty list — the tab, no filters", JSON.stringify(bare));
+
+    /* THE STATE IS MADE (§255): the dev tenant publishes nothing, so every
+       assertion here would pass on a build that stamped the empty list
+       always — which is the other way to get Islam's fault wrong. */
+    const put = await asTenant(tenantId, (c) => insertItem(c, "insights",
+      draftOf({ title: "Egypt retail 2026", summary: "", categories: ["Sector"], reportDate: "2026-09-04" })));
+    await asTenant(tenantId, (c) => setState(c, put.id, "published", "office@forefront.example"));
+
+    const one = stamp(await raw("/raya-trade/strategy"));
+    /* ASSERTED AS AN AGREEMENT WITH THE RULE, never against a typed list
+       (§94.8): it stays true the day a category is added to the module, and
+       it is the one thing a build that stamped `CATEGORIES` cannot satisfy. */
+    const rule = await asTenant(tenantId, (c) => categoriesPresent(c, "insights", { place: null, seesAll: true }));
+    check(JSON.stringify(one) === JSON.stringify(rule),
+          "…and once one report is published the stamp is what the RULE answered", JSON.stringify(one) + " vs " + JSON.stringify(rule));
+    check(Array.isArray(one) && one.length === 1 && one[0] === "Sector",
+          "…which is the one category it is filed under and not the module's five (§113.8)", JSON.stringify(one));
+    check(Array.isArray(one) && one.length < CATEGORIES.length,
+          "…so the row offers fewer filters than the module has categories", JSON.stringify(one) + " of " + CATEGORIES.length);
+
+    /* BOTH ENDS (§94.2). A build that stamped nothing at all satisfies every
+       "it is not the whole list" assertion above perfectly. */
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]);
+    check(stamp(await raw("/raya-trade/strategy")) === null,
+          "a client WITHOUT the module carries no stamp, so there is no tab (§61)");
+  } finally {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+    await asTenant(tenantId, (c) => c.query("delete from library_items where kind = 'insights'")).catch(() => {});
+  }
 });
 
 await section("4 · Forefront's own pages", async () => {

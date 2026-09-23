@@ -1,0 +1,503 @@
+<title>Figures I report</title>
+<style>
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --stone:#16325C;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --bad:#B04434; --none:#676C73;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --bad-tx:#8C3327;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --bad-bg:#F7E3E0;
+    --cta:#A4512C; --cta-ink:#FFFFFF;
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-pill:999px;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+    --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+    --cta:#C2703F; --cta-ink:#14161A;
+  }}
+  :root[data-theme="dark"]{
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --on-accent:#14161A; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --bad:#D97066; --none:#8E97A3;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+    --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+    --cta:#C2703F; --cta-ink:#14161A;
+  }
+
+  /* ── surfaces the placement panels need, taken from the product ── */
+  .cmp{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-top:16px}
+  @media (max-width:900px){ .cmp{grid-template-columns:1fr} }
+  .opt{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md);
+    padding:16px 16px 18px; display:flex; flex-direction:column; gap:12px; min-width:0}
+  .opt.pick{border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold)}
+  .opth{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+  .opth h3{font:700 15px/1.25 var(--sans); margin:0}
+  .optk{font:700 10px/1 var(--mono); letter-spacing:.12em; color:var(--ink-3)}
+  .opt p{margin:0; font-size:12.5px; line-height:1.55; color:var(--ink-2)}
+  .verdict{margin-top:auto; padding-top:10px; border-top:1px solid var(--line-soft);
+    font-size:12.5px; color:var(--ink-2)}
+  .verdict b{color:var(--ink)}
+
+  .topbar{background:var(--panel); color:var(--panel-ink); border-radius:var(--r) var(--r) 0 0;
+    padding:9px 12px; display:flex; align-items:center; gap:10px; font-size:12.5px}
+  .topmark{width:26px; height:26px; flex:none; border-radius:var(--r-sm);
+    border:1px solid rgba(255,255,255,.35); display:grid; place-items:center; color:var(--panel-ink)}
+  .topmark svg{width:16px; height:16px}
+  .brandw{font:700 12.5px/1.2 var(--sans)}
+  .brandw span{display:block; font:400 10px/1.2 var(--sans); color:var(--panel-quiet)}
+  .dlmenu{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:5px; margin:-1px 0 0 0; box-shadow:0 4px 6px -1px rgb(15 23 42/.10)}
+  .dlmenu button{display:block; width:100%; text-align:left; background:none; border:0;
+    padding:7px 9px; border-radius:var(--r-sm); font:600 13px/1.3 var(--sans); color:var(--ink-2); cursor:pointer}
+  .dlmenu button[aria-current]{background:var(--surface-2); color:var(--ink)}
+  .dlsub{display:block; font:400 11px/1.3 var(--sans); color:var(--ink-3); margin-top:2px}
+
+  .tabs{display:flex; gap:2px; border-bottom:1px solid var(--line); background:var(--surface);
+    padding:0 6px; overflow-x:auto}
+  .tabs button{background:none; border:0; border-bottom:3px solid transparent; cursor:pointer;
+    padding:11px 13px; font:500 13.5px/1.2 var(--sans); color:var(--ink-2); white-space:nowrap}
+  .tabs button.on{border-bottom-color:var(--gold); color:var(--ink); font-weight:700}
+  .tabs button.newt{color:var(--gold-deep); font-weight:700}
+
+  .wsim{background:var(--ground); border:1px solid var(--line); border-radius:var(--r); padding:13px}
+  .wseclab{font:900 11px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-3); margin:0 0 9px}
+  .wacts{display:flex; flex-direction:column; gap:9px}
+  .wact{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+    padding:13px 14px; display:flex; align-items:center; gap:13px}
+  .wact.newrow{border-color:var(--gold)}
+  .wwhat{flex:1; min-width:0}
+  .wwhat b{display:block; font-size:14px; letter-spacing:-.01em}
+  .wwhat span{display:block; font-size:12.5px; color:var(--ink-2); margin-top:2px}
+  .walert{font-style:normal; color:var(--bad-tx); font-weight:600}
+  .wbtn{flex:none; font:700 12px/1 var(--sans); letter-spacing:.03em; padding:8px 14px;
+    border-radius:var(--r-sm); border:1px solid var(--line); background:var(--surface); color:var(--ink-2); cursor:pointer}
+  .wbtn.wcta{background:var(--cta); border-color:var(--cta); color:var(--cta-ink)}
+  .wempty b{font-weight:600; color:var(--ink-2)}
+  .statek{font:700 9.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-3); margin:0 0 7px}
+
+  *{box-sizing:border-box}
+  body{background:var(--ground); color:var(--ink); font:400 14px/1.5 var(--sans); margin:0}
+  .wrap{max-width:1180px; margin:0 auto; padding-block:28px 64px; padding-left:16px; padding-right:16px}
+
+  /* ── the review chrome. Deliberately not the product: a thin rule and a
+     mono key, so nothing here can be mistaken for something on a screen. ── */
+  .rv{border-top:2px solid var(--gold); padding-top:10px; margin:46px 0 14px}
+  .rv:first-of-type{margin-top:28px}
+  .rvk{font:700 10.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--gold-deep)}
+  .rv h2{font:700 19px/1.3 var(--sans); margin:8px 0 6px; text-wrap:balance}
+  .rv p{margin:0; color:var(--ink-2); font-size:13.5px; max-width:74ch}
+  .rv p + p{margin-top:7px}
+  .who{display:flex; flex-wrap:wrap; gap:7px; margin-top:11px}
+  .who span{font:600 11px/1 var(--sans); padding:5px 10px; border-radius:var(--r-pill);
+    background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line)}
+
+  /* ── the product surface ── */
+  .screen{display:grid; grid-template-columns:238px minmax(0,1fr); gap:18px; margin-top:16px}
+  @media (max-width:760px){ .screen{grid-template-columns:1fr} }
+
+  .rail{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden; align-self:start}
+  .rhead{background:var(--panel); color:var(--panel-ink); font:800 10.5px/1 var(--sans);
+    letter-spacing:.12em; text-transform:uppercase; padding:14px 13px; display:flex; align-items:center; gap:8px}
+  .rgroup{display:flex; align-items:center; gap:7px; padding:9px 13px; border-top:1px solid var(--line-soft);
+    font:700 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3)}
+  .rgn{margin-left:auto; font:400 10px/1 var(--mono)}
+  .ritem{display:grid; grid-template-columns:15px 1fr auto; gap:8px; align-items:center;
+    padding:7px 13px; color:var(--ink-2); font:500 13px/1.35 var(--sans); border-left:3px solid transparent}
+  .ritem .rigl{text-align:center; font-size:12px; color:var(--ink-3); line-height:1}
+  .ritem.on{background:var(--surface-2); color:var(--ink); font-weight:650; border-left-color:var(--gold)}
+  .ritem.on .rigl{color:var(--ink-2)}
+  .ritem.ghost{opacity:.42}
+  .railnone{padding:13px; color:var(--ink-3); font:400 12px/1.5 var(--sans)}
+
+  .pane{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:18px 20px 20px; min-width:0}
+  .ptitle{font:700 20px/1.25 var(--sans); margin:0 0 14px}
+  .kv{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px}
+  .pill{display:inline-flex; align-items:center; gap:5px; font:600 11px/1 var(--sans);
+    padding:5px 10px; border-radius:var(--r-pill); white-space:nowrap}
+  .pill.kind{background:var(--surface-2); color:var(--ink-2)}
+  .pill.good{background:var(--good-bg); color:var(--good-tx)}
+  .pill.none{color:var(--none); border:1px dashed var(--none)}
+
+  .sechd{display:flex; align-items:center; gap:9px; margin:18px 0 8px}
+  .sechd h3{font:700 15px/1.3 var(--sans); margin:0}
+  .rtally{font:400 12.5px/1 var(--mono); color:var(--ink-3); background:var(--surface-2);
+    border:1px solid var(--line); border-radius:20px; padding:4px 10px}
+  .rtally.full{color:var(--good); background:var(--good-bg); border-color:var(--good)}
+
+  .tw{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--surface)}
+  table{border-collapse:collapse; width:100%; min-width:520px; font-size:13px}
+  thead th{background:var(--panel); color:var(--panel-ink); font:700 10.5px/1.3 var(--sans);
+    letter-spacing:.09em; text-transform:uppercase; text-align:left; padding:9px 11px; white-space:nowrap}
+  thead th + th{border-left:1px solid rgba(255,255,255,.18)}
+  th.cc,td.cc{text-align:center}
+  tbody td{padding:9px 11px; border-bottom:1px solid var(--line-soft); vertical-align:middle; color:var(--ink)}
+  tbody tr:nth-child(even) td{background:var(--zebra)}
+  tbody tr:last-child td{border-bottom:0}
+  .why{display:block; font-size:11.5px; color:var(--ink-3); margin-top:3px}
+  .mono{font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums}
+
+  .entry{display:inline-flex; align-items:stretch; border:1px solid var(--line);
+    border-radius:var(--r); overflow:hidden; background:var(--surface)}
+  .entry.filled{border-color:var(--good)}
+  .entry .field{border:0; width:74px; padding:5px 8px; font:400 13px/1.3 var(--sans);
+    color:var(--ink); background:var(--surface); font-variant-numeric:tabular-nums}
+  .entry.filled .field{background:var(--good-bg); color:var(--good-tx); font-weight:600}
+  .unitsuf{display:flex; align-items:center; padding:0 9px; background:var(--surface-2);
+    border-left:1px solid var(--line); font:400 12px/1 var(--mono); color:var(--ink-3)}
+
+  .note{border-left:3px solid var(--gold); background:var(--surface-2); padding:12px 16px;
+    margin:16px 0 0; font-size:13px; color:var(--ink-2); border-radius:0 var(--r) var(--r) 0}
+  .note b{color:var(--ink)}
+  .note.ask{border-left-color:var(--attn); background:var(--attn-bg); color:var(--attn-tx)}
+  .note.ask b{color:var(--attn-tx)}
+
+  .lede{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--gold);
+    border-radius:0 var(--r-md) var(--r-md) 0; padding:18px 20px}
+  .lede h1{font:700 22px/1.25 var(--sans); margin:0 0 8px; text-wrap:balance}
+  .lede p{margin:0 0 8px; color:var(--ink-2); font-size:13.5px; max-width:78ch}
+  .lede p:last-child{margin-bottom:0}
+
+  ol.decide{margin:12px 0 0; padding-left:20px; color:var(--ink-2); font-size:13.5px; max-width:78ch}
+  ol.decide li{margin-bottom:12px}
+  ol.decide b{color:var(--ink)}
+  .rec{display:inline-block; font:700 10px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase;
+    color:var(--on-accent); background:var(--gold); padding:4px 7px; border-radius:var(--r-sm); margin-right:6px}
+</style>
+
+<div class="wrap">
+
+  <div class="lede">
+    <h1>A tactic owner enters their own figures</h1>
+    <p>The page already exists. <b>Figures I report</b> was built for people who are master of a
+      number — a Finance person enters it wherever it appears, in units they cannot otherwise open.
+      What it does not carry today is a <b>tactic</b>.</p>
+    <p>Two questions below: <b>where it is reached from</b> — three placements, since you asked
+      about the Insights shape — and <b>who sees it</b>, drawn as each person would meet it. Every row is
+      real Raya Trade plan data. The one thing made up is who owns the two Finance rows: measured,
+      no tactic in the worked example is owned by somebody sitting outside its unit, so the case
+      you asked about had to be constructed.</p>
+  </div>
+
+
+  <!-- ── WHERE IT IS REACHED FROM ──────────────────────────────── -->
+  <div class="rv">
+    <div class="rvk">Where it is reached from</div>
+    <h2>Three placements — and Insights is not one of them</h2>
+    <p>Insights is a <b>module</b>: its own address, reached from the square switcher in the top
+      bar, with its own access and its own Setup group. It sits beside Strategy, not beside
+      Reporting. So the shape you are pointing at is a separate room rather than a tab.</p>
+    <p>Here are the three real placements, each drawn on the surface it would live on.</p>
+  </div>
+
+  <div class="cmp">
+
+    <!-- A -->
+    <div class="opt pick">
+      <div class="opth"><span class="optk">A</span><h3>A row on the welcome screen</h3></div>
+      <p>The page stays where it is; what changes is that the one screen built to say
+        <i>what is waiting on you</i> finally mentions it.</p>
+
+      <div class="wsim">
+        <p class="statek">Today — Hossam, Head of Finance</p>
+        <p class="wseclab">Waiting on you</p>
+        <div class="wacts">
+          <div class="wact wempty"><div class="wwhat"><b>Nothing is waiting on you</b></div></div>
+        </div>
+      </div>
+
+      <div class="wsim">
+        <p class="statek">Proposed</p>
+        <p class="wseclab">Waiting on you</p>
+        <div class="wacts">
+          <div class="wact newrow"><div class="wwhat"><b>Enter the figures you own</b>
+            <span><em class="walert">1 of 2 still to enter</em> — Mobile · Retail Stores</span></div>
+            <button class="wbtn wcta" type="button">Open</button></div>
+        </div>
+      </div>
+
+      <div class="verdict"><b>He owns two unentered figures and his welcome screen says nothing
+        is waiting on him.</b> That is live today, for every figure owner — not something this
+        round introduces. One row fixes it and adds no new surface.</div>
+    </div>
+
+    <!-- B -->
+    <div class="opt">
+      <div class="opth"><span class="optk">B</span><h3>A module, like Insights</h3></div>
+      <p>Its own slot in the switcher and its own address.</p>
+
+      <div>
+        <div class="topbar">
+          <span class="topmark"><svg viewBox="0 0 20 20" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+              <rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>
+              <rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>
+            </g></svg></span>
+          <span class="brandw">Raya Trade<span>Strategy Management Office</span></span>
+        </div>
+        <div class="dlmenu">
+          <button type="button" aria-current="true">Strategy<span class="dlsub">Plans, reviews and the cycle</span></button>
+          <button type="button">Insights<span class="dlsub">Reports Forefront publishes</span></button>
+          <button type="button">What I report<span class="dlsub">The lines you own</span></button>
+        </div>
+      </div>
+
+      <div class="verdict"><b>A module brings four things</b> — an address, an access tab, a Setup
+        group and a landing line. Behind this one there is a single table. It would be the
+        smallest room in the building and would still cost the whole structure.</div>
+    </div>
+
+    <!-- C -->
+    <div class="opt">
+      <div class="opth"><span class="optk">C</span><h3>A tab beside Reporting</h3></div>
+      <p>A fourth tab on a unit&rsquo;s own page.</p>
+
+      <div>
+        <div class="topbar"><span class="brandw">Mobile<span>Business unit</span></span></div>
+        <div class="tabs">
+          <button type="button">Strategy</button>
+          <button type="button">Performance</button>
+          <button type="button" class="on">Reporting</button>
+          <button type="button" class="newt">My lines</button>
+        </div>
+        <div class="tw" style="border-radius:0 0 var(--r) var(--r); border-top:0">
+          <table><thead><tr><th>Line</th><th class="cc" style="width:24%">Reported</th></tr></thead>
+            <tbody><tr><td>Clean and standardize customer and SKU base</td>
+              <td class="cc"><span class="entry filled"><input class="field" value="5,400" aria-label="Duplicate records removed"><span class="unitsuf">#</span></span></td></tr>
+            </tbody></table></div>
+      </div>
+
+      <div class="verdict"><b>Hossam can never see this tab.</b> The tab row is drawn on Mobile&rsquo;s
+        page and gated on Mobile&rsquo;s grant, and he holds none — which is the case you started
+        with. For somebody inside the unit it works, and their rows are already open one tab to
+        the left.</div>
+    </div>
+
+  </div>
+
+  <div class="note"><b>Why A rather than C.</b> A tab belongs to a subject; this page belongs to a
+    person. Every tab in the product answers <i>what about this unit</i>, and the question here is
+    <i>what is mine</i> — which is the welcome screen&rsquo;s question, and it is already asked
+    there for submissions, missing plan elements and unread replies.</div>
+
+  <!-- ── TODAY ─────────────────────────────────────────────────── -->
+  <div class="rv">
+    <div class="rvk">Today</div>
+    <h2>What the page holds now</h2>
+    <p>Key objectives and pillar measures only, and only where somebody has been named master of
+      the number on <b>Setup › Figure sets</b>. Nothing here changes.</p>
+    <div class="who"><span>Hossam Abuelenien</span><span>Head of Finance</span><span>Named on 3 figures</span></div>
+  </div>
+
+  <div class="screen">
+    <div class="rail">
+      <div class="rhead">Setup</div>
+      <div class="rgroup">Running the cycle <span class="rgn">6</span></div>
+      <div class="ritem"><span class="rigl">◷</span><span>Reporting cycle</span><span></span></div>
+      <div class="ritem on"><span class="rigl">№</span><span>Figures I report</span><span></span></div>
+      <div class="ritem"><span class="rigl">✉</span><span>Send an email</span><span></span></div>
+      <div class="ritem"><span class="rigl">☷</span><span>Fill a figure set</span><span></span></div>
+    </div>
+    <div class="pane">
+      <div class="ptitle">Figures I report</div>
+      <div class="kv">
+        <span class="pill kind">2 of 3 entered</span>
+        <span class="pill good">FY26 Mid-year · due 30 Sep</span>
+      </div>
+      <div class="sechd"><h3>Mobile</h3><span class="rtally">2/2</span></div>
+      <div class="tw"><table>
+        <thead><tr><th style="width:46%">Figure</th><th class="cc" style="width:16%">Target</th>
+          <th class="cc" style="width:20%">Reported</th><th style="width:18%">The unit’s note</th></tr></thead>
+        <tbody>
+          <tr><td>Gross margin<span class="why">Commercial Excellence</span></td>
+            <td class="cc mono">22%</td>
+            <td class="cc"><span class="entry filled"><input class="field" value="19.4" aria-label="Gross margin"><span class="unitsuf">%</span></span></td>
+            <td><span class="why">Mix shifted to handsets in Q2.</span></td></tr>
+          <tr><td>Working capital days<span class="why">Commercial Excellence</span></td>
+            <td class="cc mono">45 d</td>
+            <td class="cc"><span class="entry filled"><input class="field" value="52" aria-label="Working capital days"><span class="unitsuf">d</span></span></td>
+            <td><span class="why">—</span></td></tr>
+        </tbody></table></div>
+      <div class="note"><b>You enter the figure; the unit writes the note.</b> The number is yours,
+        the performance is theirs, and a unit cannot complete its report until these are in.</div>
+    </div>
+  </div>
+
+  <!-- ── CASE A ────────────────────────────────────────────────── -->
+  <div class="rv">
+    <div class="rvk">Case A · from outside the unit</div>
+    <h2>Owns two tactics, in two units he cannot open</h2>
+    <p>He sits in Finance. He is on no unit’s register, holds no role in Mobile or Retail Stores,
+      and has no way into either from the navigation. This page is the whole of what he sees —
+      his two lines, grouped by the unit they belong to.</p>
+    <p>Nothing about where he is attached is asked. Being named in the Owner box is the entire
+      trigger, which is what makes the cross-unit case work at all.</p>
+    <div class="who"><span>Hossam Abuelenien</span><span>Head of Finance</span><span>No unit</span><span>Owns 2 tactics</span></div>
+  </div>
+
+  <div class="screen">
+    <div class="rail">
+      <div class="rhead">Setup</div>
+      <div class="rgroup">Running the cycle <span class="rgn">2</span></div>
+      <div class="ritem on"><span class="rigl">№</span><span>Figures I report</span><span></span></div>
+      <div class="ritem"><span class="rigl">✎</span><span>Knowledge base</span><span></span></div>
+    </div>
+    <div class="pane">
+      <div class="ptitle">Figures I report</div>
+      <div class="kv">
+        <span class="pill kind">1 of 2 entered</span>
+        <span class="pill good">FY26 Mid-year · due 30 Sep</span>
+      </div>
+
+      <div class="sechd"><h3>Mobile</h3><span class="rtally full">1/1</span></div>
+      <div class="tw"><table>
+        <thead><tr><th style="width:46%">Line</th><th class="cc" style="width:16%">Target</th>
+          <th class="cc" style="width:20%">Reported</th><th style="width:18%">The unit’s note</th></tr></thead>
+        <tbody>
+          <tr><td>End-to-end order-to-cash digitization
+              <span class="why">MB01 Digital &amp; Data-Driven Operations · Order-to-cash cycle time</span></td>
+            <td class="cc mono">5 d</td>
+            <td class="cc"><span class="entry filled"><input class="field" value="8" aria-label="Order-to-cash cycle time"><span class="unitsuf">d</span></span></td>
+            <td><span class="why">Manual credit check goes with the Q3 cutover.</span></td></tr>
+        </tbody></table></div>
+
+      <div class="sechd"><h3>Retail Stores</h3><span class="rtally">0/1</span></div>
+      <div class="tw"><table>
+        <thead><tr><th style="width:46%">Line</th><th class="cc" style="width:16%">Target</th>
+          <th class="cc" style="width:20%">Reported</th><th style="width:18%">The unit’s note</th></tr></thead>
+        <tbody>
+          <tr><td>Landlord framework agreements
+              <span class="why">RS02 Network Expansion · Landlord frameworks signed</span></td>
+            <td class="cc mono">12 #</td>
+            <td class="cc"><span class="entry"><input class="field" value="" placeholder="—" aria-label="Landlord frameworks signed"><span class="unitsuf">#</span></span></td>
+            <td><span class="why">—</span></td></tr>
+        </tbody></table></div>
+
+      <div class="note"><b>You enter the figure; the unit writes the note.</b> You cannot submit —
+        the unit’s head sends the report, and it waits for these.</div>
+    </div>
+  </div>
+
+  <!-- ── CASE B ────────────────────────────────────────────────── -->
+  <div class="rv">
+    <div class="rvk">Case B · inside the unit</div>
+    <h2>Owns tactics in the unit he already works in</h2>
+    <p>He is in Mobile, so he already reaches Mobile’s own <b>Reporting</b> tab, where his rows are
+      open and everybody else’s are read-only. This page would show him the same two rows a second
+      time — <b>the one thing here I would not ship without your word.</b></p>
+    <div class="who"><span>Ramy Behairy</span><span>Director, Digital Operations</span><span>Mobile</span><span>Owns 2 tactics</span></div>
+  </div>
+
+  <div class="screen">
+    <div class="rail">
+      <div class="rhead">Setup</div>
+      <div class="rgroup">Running the cycle <span class="rgn">2</span></div>
+      <div class="ritem on"><span class="rigl">№</span><span>Figures I report</span><span></span></div>
+      <div class="ritem"><span class="rigl">✎</span><span>Knowledge base</span><span></span></div>
+    </div>
+    <div class="pane">
+      <div class="ptitle">Figures I report</div>
+      <div class="kv">
+        <span class="pill kind">2 of 2 entered</span>
+        <span class="pill good">FY26 Mid-year · due 30 Sep</span>
+      </div>
+      <div class="sechd"><h3>Mobile</h3><span class="rtally full">2/2</span></div>
+      <div class="tw"><table>
+        <thead><tr><th style="width:46%">Line</th><th class="cc" style="width:16%">Target</th>
+          <th class="cc" style="width:20%">Reported</th><th style="width:18%">The unit’s note</th></tr></thead>
+        <tbody>
+          <tr><td>Clean and standardize customer and SKU base
+              <span class="why">MB01 · Duplicate customer and SKU records removed</span></td>
+            <td class="cc mono">12,000 #</td>
+            <td class="cc"><span class="entry filled"><input class="field" value="5,400" aria-label="Duplicate records removed"><span class="unitsuf">#</span></span></td>
+            <td><span class="why">—</span></td></tr>
+          <tr><td>Digitize sales reporting via Power BI
+              <span class="why">MB01 · Management reports live on Power BI</span></td>
+            <td class="cc mono">18 #</td>
+            <td class="cc"><span class="entry filled"><input class="field" value="4" aria-label="Reports live on Power BI"><span class="unitsuf">#</span></span></td>
+            <td><span class="why">Finance reports wait on the data warehouse.</span></td></tr>
+        </tbody></table></div>
+      <div class="note ask"><b>Two doors onto one act.</b> He can enter these here, or on Mobile ›
+        Reporting, where his rows sit in the pillar they belong to. Option 1: show him both — this
+        page is a shortcut. Option 2: draw this page only for somebody who cannot reach the unit,
+        so there is exactly one place to do it.</div>
+    </div>
+  </div>
+
+  <!-- ── CASE C ────────────────────────────────────────────────── -->
+  <div class="rv">
+    <div class="rvk">Case C · named on nothing</div>
+    <h2>The entry is not drawn at all</h2>
+    <p>Not greyed, not an empty page — absent. This is how the page behaves today and it does not
+      change: somebody who owns no line never learns the page exists.</p>
+    <div class="who"><span>Mennah Farouk</span><span>Strategy custodian, Mobile</span><span>Owns no line</span></div>
+  </div>
+
+  <div class="screen">
+    <div class="rail">
+      <div class="rhead">Setup</div>
+      <div class="rgroup">Running the cycle <span class="rgn">1</span></div>
+      <div class="ritem ghost"><span class="rigl">№</span><span><s>Figures I report</s></span><span></span></div>
+      <div class="ritem"><span class="rigl">✎</span><span>Knowledge base</span><span></span></div>
+      <div class="railnone">Struck through here to show what is missing. On the real rail there is
+        no such row.</div>
+    </div>
+    <div class="pane">
+      <div class="ptitle">Mobile › Reporting</div>
+      <div class="kv"><span class="pill none">She reports through the unit, as she does now</span></div>
+      <div class="note">A custodian reports the whole unit and always has. Nothing about her changes.</div>
+    </div>
+  </div>
+
+  <!-- ── DECISIONS ─────────────────────────────────────────────── -->
+  <div class="rv">
+    <div class="rvk">Before I build</div>
+    <h2>Three things are yours</h2>
+  </div>
+
+  <ol class="decide">
+    <li><b>Which placement — A, B or C?</b>
+      <span class="rec">I’d say</span> <b>A</b>. It adds no surface, it puts the page on the one
+      screen that already answers <i>what is mine</i>, and it closes a gap that is live today:
+      somebody who owns figures is currently told nothing on that screen. B is a whole module’s
+      structure for one table. C cannot serve the person you asked about first.</li>
+
+    <li><b>Case B — one door or two?</b>
+      <span class="rec">I’d say</span> show it to everybody. A person who owns three lines in their
+      own unit still benefits from seeing them on one screen, and hiding the page from people
+      inside the unit means the rail changes shape depending on where somebody sits, which is
+      harder to explain than a shortcut.</li>
+
+    <li><b>The page is no longer only about figures.</b> A tactic is a line of work, not a number,
+      so <i>Figures I report</i> stops being true.
+      <span class="rec">I’d say</span> <b>What I report</b> — it covers both and stays short. Say
+      the word if you want something else; the stored key does not move either way.</li>
+
+    <li><b>Owner only means the collaborators lose what §227 gave them.</b> A milestone’s
+      collaborators can report that milestone today, because you ruled being named there a
+      reporting right. Taking it to Owner-only removes that.
+      <span class="rec">I’d say</span> do it — one rule everywhere is worth more than the
+      exception — but it is a reversal of your own decision, so I want it said rather than
+      absorbed.</li>
+  </ol>
+
+  <div class="note"><b>What does not change.</b> They enter and never submit. The unit still writes
+    the note. The unit’s Submit still waits for their figure, so the head can see whose line is
+    outstanding. And the office sets nothing on Roles &amp; access — naming somebody in the Owner
+    box is the grant, because only the office edits a plan.</div>
+
+</div>

@@ -107,12 +107,20 @@ const LANDING_PICK    = R.LANDING_PICK;
 const SETUP_DONE      = R.SETUP_DONE;
 const PLAN_FROM       = R.PLAN_FROM;
 const PLAN_TO         = R.PLAN_TO;
+/* Spec 063: a unit's revenue driver tree, and the client's seasons. Named
+   from the shared module for HIDE_SLIDES' reason above — a field the screen
+   writes under one name and the server classifies under another is seen by
+   NOTHING at all (§191), and §234 is what that costs. */
+const DRIVERS         = R.DRIVERS;
+const SEASONS         = R.SEASONS;
+const DRIVERS_ON      = R.DRIVERS_ON;
 const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
 /* `pend` is §145's pending-fill marks — known here so a mark the gap pass
    did not accept falls to the PLAN comparison (office-only) rather than to
    `unknown`, which would be true but would name the wrong screen. */
 const UNIT_KNOWN      = UNIT_CONFIG.concat(UNIT_FOUNDATION,
-  ["ukey", "weight", "perf", "keyObjectives", "swot", "items", "pend", HIDE_SLIDES]);
+  ["ukey", "weight", "perf", "keyObjectives", "swot", "items", "pend",
+   HIDE_SLIDES, DRIVERS]);
 
 const GROUP_OWN = ["org", "horizon", "asOfQuarter", "aspiration", "endInMind",
                    "mission", "values", "clauses", "keyObjectives", "themes",
@@ -408,6 +416,19 @@ function collect(stored, incoming, w) {
     const a = sr[field] || {}, b = ir[field] || {};
     Object.keys(a).concat(Object.keys(b)).forEach(function (t) {
       if (same(a[t], b[t])) return;
+      /* §382: an owner locking their OWN lines in one subject. Never
+         `reportState`, which speaks for the whole unit and is refused to
+         every bounded role — this closes the handful of rows that name one
+         person and leaves the unit's report open, which is §309's control one
+         row kind over. The key carries who, so one owner cannot lock
+         another's. */
+      if (field === "lines") {
+        const cut = String(t).indexOf("|");
+        add("lineDone", cut < 0 ? null : String(t).slice(0, cut),
+            "saving your own lines as a draft",
+            [{ id: String(t), who: cut < 0 ? "" : String(t).slice(cut + 1) }]);
+        return;
+      }
       if (field === "parked" && UNPARK(a, b, t)) {
         if (out.some(function (c) { return c.kind === "reportUnpark" && c.target === t; })) return;
         add("reportUnpark", t, "reopening the saved draft");
@@ -478,6 +499,13 @@ function collect(stored, incoming, w) {
      one — it is the same argument as `naming` directly above. */
   if (!same(sg.focusOff, ig.focusOff))
     add("setup", null, "whether focus measures are used at all");
+  /* §382: whether reporting follows the Owner column. SETUP, and the same
+     argument as the two switches above it — it decides whether a whole second
+     way of entering a figure exists, so a switch anybody could flip would be
+     no switch at all. NAMED, or a refusal reads "the group's lineOwners" and
+     sends nobody anywhere (§16.7). */
+  if (!same(sg.lineOwners, ig.lineOwners))
+    add("setup", null, "whether tactic owners enter their own lines");
   /* §266: the master presentation's running order. Deliberately NOT `setup`
      and not `deckHide` either: it hides nothing and scores nothing, it is the
      order the office runs a review in — so it gets a sentence of its own that
@@ -525,9 +553,25 @@ function collect(stored, incoming, w) {
      and named here so a refusal sends somebody to the page with the pen. */
   if (!same(sg.kb, ig.kb)) add("setup", null, "the knowledge base's answers");
   collectCapabilities(sg.capabilities, ig.capabilities, add);
+  /* ── THE CLIENT'S SEASONS (spec 063 §6.5) ────────────────────────
+     Defined once and used by name in any unit, so changing Ramadan's dates
+     moves every base period in the client at once — which is exactly why it
+     is not a per-unit field. Its own kind for the refusal's sake, and
+     canonically compared for the tree's reason above. */
+  if (!sameCanon(sg[SEASONS], ig[SEASONS]))
+    add("seasons", null, "the client's seasons");
+  /* THE SWITCH THAT SAYS WHETHER ANY OF IT IS SHOWN, the same page's and the
+     same grant's — a unit head who could flip it would hide the tree the
+     office built from the whole client. The two edits go together (§259.2):
+     classified here AND named in `gExtra` below, or it is swept unseen and
+     therefore allowed to everybody. */
+  if (!same(sg[DRIVERS_ON], ig[DRIVERS_ON]))
+    add("seasons", null, "whether revenue drivers are used at all");
+
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
-                                   "naming", "focusOff", "mainbus", "comms", "kb", "logo",
-                                   MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, PLAN_FROM, PLAN_TO]);
+                                   "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
+                                   MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, PLAN_FROM, PLAN_TO,
+                                   SEASONS, DRIVERS_ON]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -662,6 +706,47 @@ function addFigures(w, unitKey, storedUnit, rows, what, add) {
   Object.keys(byOwner).forEach(function (who) {
     add("sourceReporting", unitKey, what + " entered by " +
         (byOwner[who][0].label || who), byOwner[who]);
+  });
+}
+
+/* §382: A TACTIC WHOSE OWNER ENTERS IT. `addFigures` above is the same split
+   one row kind over, and it is deliberately not reused: that one resolves a
+   register KEY off the figure's own `src`, and a plan's Owner is a NAME the
+   custodian picked (§130.1) — so the two identify their person differently and
+   say so differently when they refuse. What IS shared is the rule underneath:
+   the cycle is open and this row is yours, and nothing about a grant, a role or
+   where the person is attached is asked at all.
+
+   Resolved through the STORED row, so a save cannot name itself the owner and
+   enter the figure in the same request (§42.2). Unowned tactics — and every
+   tactic at all while the switch is off — fall through to the unit exactly as
+   before.
+
+   §387: AND A NAME THAT REACHES NOBODY IS NOT AN OWNER. `lineOwned` asks
+   whether the plan NAMES somebody and `lineOwnerIsHere` asks whether that name
+   is somebody the register holds — 32 of the worked example's 83 tactics
+   answer yes to the first and no to the second, because a plan is typed by a
+   custodian and a register is filled from HR. Classified as the owner's, such
+   a row is refused to everybody: `lineReporting` admits the owner alone by
+   name (below) and there is nobody to be them. So it falls to `mine` and the
+   unit enters it exactly as it did before the switch was turned on — the same
+   answer `canEnterLine()` gives on the screen, through the same predicate, so
+   the two cannot disagree about which rows are nobody's (§42).
+
+   The register comes off the STORED world by construction, so this cannot be
+   claimed in the request that uses it (§42.2 again, one field over). */
+function addOwnedTactics(w, unitKey, storedPillar, rows, add, mine) {
+  const byOwner = {};
+  rows.forEach(function (r) {
+    let stored = null;
+    (storedPillar.tactics || []).forEach(function (t) { if (t.id === r.id) stored = t; });
+    const who = R.lineOwned(w, stored) && R.lineOwnerIsHere(w, stored)
+      ? R.lineOwnerName(stored) : "";
+    if (!who) { mine.push(r); return; }
+    (byOwner[who] = byOwner[who] || []).push(Object.assign({}, r, { owner: who }));
+  });
+  Object.keys(byOwner).forEach(function (who) {
+    add("lineReporting", unitKey, "figures entered by " + who, byOwner[who]);
   });
 }
 
@@ -855,6 +940,9 @@ function gapPassUnit(target, su, iu, add) {
        fills the rows of the pillar that names them and nobody else's. */
     const pctx = function (row) { return { pillarOwner: sm[id].owner, row: row }; };
     gapRows("measure", sm[id].measures, im[id].measures, target, add, "a key measure", pctx);
+    /* §384 wrapped pctx here to carry the tactic's own Owner for its role;
+       §387 removed the role, so a tactic is filled through the pillar's ctx
+       exactly as a measure is (§24: the handle goes with what read it). */
     gapRows("tactic", sm[id].tactics, im[id].tactics, target, add, "a tactic", pctx);
   });
   return s2;
@@ -907,6 +995,27 @@ function collectUnit(key, su, iu, add, w) {
      setting nor unknown, and a change to it produces exactly one sentence. */
   if (!same(su[HIDE_SLIDES], iu[HIDE_SLIDES]))
     add("deckHide", key, "which slides the review shows");
+
+  /* ── THE REVENUE DRIVER TREE (spec 063) ──────────────────────────
+     ITS OWN KIND, AND THE SAME GATE AS THE PLAN. Decision 1 put the tree in
+     Strategy's own section row beside SWOT and Plan, using `u_plan`'s
+     grant — so this moves nobody's access and adds no column to Roles &
+     access. What a kind of its own buys is the REFUSAL: `unitPlan` would
+     say *a plan is corrected by the SMO*, which is true and sends somebody
+     to the wrong section (§16.7).
+
+     COMPARED CANONICALLY, WHICH IS NOT OPTIONAL HERE. The tree is a deeply
+     nested object in a jsonb column, and Postgres hands an object's keys
+     back in its own order (§145, §249.3) — compared with `same()` an
+     UNTOUCHED tree would read as a change on every save, and since this
+     kind is office-only that would refuse every save by everybody else in
+     the tenant, for ever (§42's own `branding()` fault, one field along).
+
+     SWEPT ABOVE AND CLASSIFIED HERE, AND THE TWO GO TOGETHER (§259.2):
+     with only the classification removed the field is invisible to this
+     file and therefore ALLOWED TO EVERYBODY. */
+  if (!sameCanon(su[DRIVERS], iu[DRIVERS]))
+    add("unitDrivers", key, "the unit's revenue drivers");
 
   if (!same(pick(su, UNIT_CONFIG), pick(iu, UNIT_CONFIG))) add("setup", key, "the unit's settings");
   if (!same(pick(su, UNIT_FOUNDATION), pick(iu, UNIT_FOUNDATION)))
@@ -994,7 +1103,7 @@ function collectUnit(key, su, iu, add, w) {
         function () {},
         function (rows) { planMoved = true; keep(planRows, rows); });
       splitRows(a.tactics, b.tactics, REPORT.tactic,
-        function (rows) { rows.forEach(function (x) { moved.push(x); }); },
+        function (rows) { addOwnedTactics(w, key, a, rows, add, moved); },
         function (rows) { planMoved = true; keep(planRows, rows); });
     });
     if (moved.length) add("unitReporting", key, "reported figures", moved);
@@ -1604,6 +1713,37 @@ function authorize(stored, incoming, person) {
           no("A plan is corrected by the SMO — " + ch.what + where + " cannot be changed here.");
         return;
 
+      /* ── THE REVENUE DRIVER TREE (spec 063) ──────────────────────────
+         THE SAME GATE AS THE PLAN AND A DIFFERENT SENTENCE. Islam, asked who
+         builds the trees: *"the smo build the trees."* That is `u_plan`'s
+         authoring grant, which §94 already makes the office's — so this
+         grants nothing new and refuses nobody who could edit the plan.
+         Asked through the shared rule, never re-derived, or the section that
+         draws the pen and the save that accepts it answer two questions
+         (§42).
+
+         NOT GATED ON THE CYCLE LOCK, and for the plan's own reason rather
+         than the deck's: a tree is the logic a plan was built to deliver, so
+         correcting a baseline somebody mistyped is exactly as legitimate
+         after the cycle locks as correcting a target is. */
+      case "unitDrivers":
+        if (!R.mayAuthorPage(w, person, R.strategyPageOf(ch.target, "u_plan"), ch.target))
+          no("The revenue drivers are built by the SMO — " + ch.what + where +
+             " is set in Strategy \u203a Drivers.");
+        return;
+
+      /* ── THE CLIENT'S SEASONS (spec 063 §6.5) ────────────────────────
+         One list for the whole client, so it is the office's and it is a
+         SETUP page — `a_setup` is the grant, and the sentence names the page
+         rather than the tree, because a season changed here moves every
+         unit's base period and somebody sent to a unit would find nothing to
+         change (§16.7). */
+      case "seasons":
+        if (!edits(w, person, "a_setup", "group"))
+          no("The seasons are set by the SMO — " + ch.what +
+             " is set in Setup \u203a Revenue drivers.");
+        return;
+
       /* REORDERING IS ITS OWN GRANT AGAIN (§101). Asked through the shared
          rule, never re-derived here — a screen that offers a handle the server
          then refuses is the drift this file exists to prevent, and it is
@@ -1766,6 +1906,46 @@ function authorize(stored, incoming, person) {
           const label = (ch.rows || [])[0] && (ch.rows || [])[0].label;
           no("That figure is entered by " + (label || "somebody else") +
              " — " + t + " does not enter it.");
+        }
+        return;
+      }
+
+      /* §382: LOCKING YOUR OWN LINES. The key names the person, so the only
+         question is whether it names YOU — a bounded role holds no
+         `reportState` and must not gain one by another road (§309's own
+         reasoning: parking, submitting, the note and the slides stay the
+         unit's). */
+      case "lineDone": {
+        if (locked && !office) {
+          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
+        if (smo) return;
+        const notYou = (ch.rows || []).filter(function (r) { return r.who !== person.key; });
+        if (notYou.length) {
+          no("Those are somebody else's lines to save.");
+        }
+        return;
+      }
+
+      /* §382: A LINE ENTERED BY ITS OWNER. The same three gates
+         `sourceReporting` above applies, asking the plan's NAME rather than a
+         register key — `namedOn` is the one matcher (§130.7's runs, a typed
+         short name), so a name the page accepts is a name the server accepts.
+         The office still enters anything; the unit does not, which is the
+         whole of what the switch turns on. */
+      case "lineReporting": {
+        if (locked && !office) {
+          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
+        if (smo) return;
+        const notYours = (ch.rows || []).filter(function (r) {
+          return !R.ownedBy({ owner: r.owner }, person);
+        });
+        if (notYours.length) {
+          no("That line is entered by " + (notYours[0].owner || "its owner") +
+             " \u2014 it is not yours to report.");
         }
         return;
       }

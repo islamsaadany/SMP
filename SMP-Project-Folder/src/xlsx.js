@@ -1765,7 +1765,7 @@ function peopleReadme(){
     ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
-    ["Adding somebody", "Fill Name, and Emp ID or Email. Everything else is optional — but a row with neither identifier cannot be matched by the next upload, so it gets added a second time."],
+    ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
@@ -1883,7 +1883,14 @@ function peopleWorkbook(){
       head:["Unit, function or company", "Official BU"],
       rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
-      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
+      /* THE ESSENTIALS WEAR AN ASTERISK (§390.1). Written on the header only,
+         never on PEOPLE_FILE_COLS: the validation ranges above look a column
+         up by its bare name, and the reader matches headings ignoring
+         punctuation, so "Email *" comes back as Email. In this file the
+         person's name is the FULL NAME column; "Name" is the short one. */
+      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]).map(function(h){
+        return PEOPLE_FILE_STARRED.indexOf(h) > -1 ? h + " *" : h;
+      }),
       /* "Also holds" is written and never read, so it is locked — and its
          index moved with the new column (§65). */
       lockedCols:[9],
@@ -1895,8 +1902,53 @@ function peopleWorkbook(){
 /* The sheet is named People and read by its header row, so a column moved or
    a column added later costs nothing — sheetObjects() keys on the heading, not
    on the position. */
+/* ── A CLIENT'S OWN FILE, NOT ONLY OURS (§390) ───────────────────────────
+   Islam: "accept the minimum of the name and the title and email for the
+   essentials." The planner already accepted those three alone; what turned
+   such a file away was the READER — it asked for a sheet called "People" and
+   for three headings spelled exactly as our download spells them, so a
+   client's own export ("Sheet1", "Title", "E-mail") read as NOTHING, with no
+   word said.
+
+   So: the "People" sheet when there is one, else the FIRST sheet, and the
+   sheet actually read is carried back so the page can say which. Headings are
+   matched ignoring case, spaces and punctuation, plus a short list of the
+   spellings an HR export uses. A heading it does not know is kept as it is,
+   which is what keeps "Main BU" and "BU" readable (§58, §65). */
+var PEOPLE_HEAD_ALIASES = {
+  title:"Job title", position:"Job title", designation:"Job title", jobtitle:"Job title",
+  mail:"Email", emailaddress:"Email", email:"Email", workemail:"Email",
+  employeename:"Name", employee:"Name",
+  employeeid:"Emp ID", employeenumber:"Emp ID", empno:"Emp ID", staffid:"Emp ID",
+  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
+};
+var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
+/* What the downloaded template marks with an asterisk: the same three, with
+   the template's own full-name column standing for Name. */
+var PEOPLE_FILE_STARRED = ["Full Name", "Job title", "Email"];
+function peopleHeadKey(h){ return String(h || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function peopleCanonHead(h){
+  var k = peopleHeadKey(h);
+  var known = PEOPLE_FILE_COLS.concat(["Main BU", "BU", PEOPLE_FILE_EXTRA]);
+  for (var i = 0; i < known.length; i++) if (peopleHeadKey(known[i]) === k) return known[i];
+  return PEOPLE_HEAD_ALIASES[k] || String(h || "").trim();
+}
 function peopleFromWorkbook(sheets){
-  return sheetObjects(sheets["People"] || []);
+  var names = Object.keys(sheets || {});
+  var sheet = sheets && sheets["People"] ? "People"
+    : names.filter(function(n){ return n !== "Read me" && n !== "Lists"; })[0] || null;
+  var raw = sheet ? sheets[sheet] : [];
+  if (raw && raw.length) {
+    raw = [raw[0].map(peopleCanonHead)].concat(raw.slice(1));
+  }
+  var rows = sheetObjects(raw || []);
+  var head = raw && raw.length ? raw[0] : [];
+  rows.sheet = sheet;
+  /* "Full Name" answers for Name (fileFullName() reads either). */
+  rows.missing = PEOPLE_ESSENTIALS.filter(function(c){
+    return head.indexOf(c) < 0 && !(c === "Name" && head.indexOf("Full Name") > -1);
+  });
+  return rows;
 }
 
 /* ── THE QUESTIONS FILE (§161) ─────────────────────────────────────────────

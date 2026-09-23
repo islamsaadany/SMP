@@ -7671,6 +7671,83 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 .readbar .why { color:var(--ink-3); font-size:12.5px; }
 .readbar .linkbu { margin-left:auto; }
 
+  /* ── THE REVENUE TREE (spec 063) ──────────────────────────────────
+     Almost nothing here is new. The table is the plan's own `.scroll` table,
+     the period band is `tr.dxband` (§99) and the pane band is `.pband` — so
+     the tree reads as the same product as the plan beside it and adds no
+     vocabulary of its own (§53.5). What is declared is the four things this
+     page says that no other page says.
+
+     THE TOTAL LINE, above everything, because the figure the tree argues for
+     is the one thing somebody opens this page to read. */
+  .drvtot { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 14px;
+            margin:0 0 16px; }
+  .drvtot-n { font:650 clamp(26px, 3.2vw, 34px)/1 var(--sans); color:var(--ink);
+              letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .drvtot-w { font:500 12.5px/1.5 var(--sans); color:var(--ink-3); }
+  /* NOT RED AND NOT A COUNT OF GAPS (§214.4, §272). An unanswered connection
+     holds nothing up — Islam: *"just say so"* — so it is a fact in the quiet
+     register beside the number, and painting it `--bad` would teach people to
+     stop reading the red that does stop something. */
+  .drvtot-open { font:500 12.5px/1.5 var(--sans); color:var(--ink-3);
+                 padding-left:14px; border-left:1px solid var(--line); }
+
+  /* A DRIVER'S NAME AND ITS WHY, stacked — the way a tactic's description
+     already sits under its name (§248, §255), and for that section's own
+     measured reason: a column of its own takes about 150px off the name at
+     every width, and the name is the column that has to be readable. */
+  .drvtbl .dname { display:block; font:600 13.5px/1.35 var(--sans); color:var(--ink); }
+  .drvtbl .dname textarea.fld { font:600 13.5px/1.35 var(--sans); }
+  .drvtbl td .why { display:block; margin:3px 0 0; }
+  .drvtbl td.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .drvtbl td.num .fld { width:100%; min-width:0; text-align:right; }
+  .drvtbl td.xcell { width:1%; }
+
+  /* VOLUME OR VALUE — a quiet key, never the accent. The two are read down a
+     column rather than picked out one at a time, so they take the page's own
+     chip treatment and spend none of §41's accent budget. */
+  .kindchip { display:inline-block; font:600 10px/1 var(--sans); letter-spacing:.09em;
+              text-transform:uppercase; color:var(--ink-3); background:var(--surface-2);
+              border:1px solid var(--line); border-radius:var(--r-pill);
+              padding:4px 8px; white-space:nowrap; }
+  /* VALUE KEEPS THE ACCENT AS A BORDER AND TAKES `--ink-2` FOR THE WORD —
+     §266.10's own answer for the FUNC chip, and for its reason: `--gold-deep`
+     as 10px type on `--surface-2` measures 4.45:1 (§38.5, recorded five times
+     in this project). The mark is the edge; the word stays readable. */
+  .kindchip.val { color:var(--ink-2); border-color:var(--gold-deep); }
+
+  /* THE THREE STATES OF THE LAST COLUMN (§6.2). `linked` is the only one that
+     is a name somebody wrote, so it is the only one set in the page's ink;
+     the other two are the platform SPEAKING, so they take its quiet voice and
+     the third is italic because it is an absence rather than a statement. */
+  .drvtbl .linked { display:block; font:600 12.5px/1.35 var(--sans); color:var(--ink); }
+  .drvtbl .assume { display:block; font:500 12.5px/1.35 var(--sans); color:var(--ink-3); }
+  .drvtbl .notyet { display:block; font:500 12.5px/1.35 var(--sans); color:var(--ink-3);
+                    font-style:italic; }
+
+  /* The band's own two controls, pushed to its far end so the period's name
+     and its figures read first. They are `.linkbu`, which on `--panel` takes
+     the panel's own accent (§259) rather than the page's. */
+  .dxacts { float:right; display:inline-flex; gap:14px; }
+  tr.dxband th .dxacts .linkbu { font:600 10.5px/1 var(--sans); letter-spacing:.09em;
+    text-transform:uppercase; color:var(--panel-accent); }
+  tr.dxband th .dxacts .linkbu:hover { color:var(--on-accent); }
+
+  .paneact.drvact { position:static; display:flex; flex-wrap:wrap; align-items:center;
+                    gap:10px; margin:14px 0 0; }
+  .paneact.drvact .fld { width:auto; min-width:0; }
+
+  /* THE REVIEW READING (spec 063 §6.3). An effect that cost money and one that
+     earned it, and the pair takes the platform's own scoring inks rather than
+     a colour of this page's — `--bad`/`--good` as TYPE is §38.4's own trap,
+     which is why both are the `-tx` twins. */
+  .drvtbl .drvdown { color:var(--bad-tx); font-weight:600; }
+  .drvtbl .drvup   { color:var(--good-tx); font-weight:600; }
+  /* A ROW NOBODY REPORTED AGAINST IS QUIET, NEVER HIDDEN. It is part of the
+     multiplication and part of why the period reads as it does — leaving it
+     out would make the column stop adding up to the gap above it (§99.7). */
+  .drvtbl tr.drvquiet td:first-child .dname { color:var(--ink-3); font-weight:500; }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.

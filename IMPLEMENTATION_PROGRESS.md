@@ -7902,11 +7902,10 @@ deploy 5/0.
 
 ## §389 — the people upload takes a client's own sheet (2026-09-23)
 
-**Built, on the branch.** A people file now needs only three columns: Name,
-Job title and Email. Your own HR export works as it is: if there's no sheet
-called "People", the first sheet is read, and headings like *Title*, *E-mail*
-or *Employee Name* are understood. A row with no job title is still added, and
-the review lists those people in one line so you can fill the title in on the
-register. A file with no Name or no Email heading is refused, and the message
-says which sheet was read and which heading is missing. Nothing else about the
-upload changed.
+**Built, on the branch.** A new person needs three things: Name, Job title
+and Email. The downloaded template marks those three columns with an asterisk.
+If a row that would add somebody is missing any of them, the upload stops and
+the review names the row and what it lacks. People already on the register can
+still be updated with blank cells, which keep what is recorded. Your own HR
+export works as it is: if there's no sheet called "People", the first sheet is
+read, and headings like *Title*, *E-mail* or *Employee Name* are understood.

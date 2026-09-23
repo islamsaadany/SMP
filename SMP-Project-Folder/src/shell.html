@@ -5932,12 +5932,10 @@
              missing the headings a person CANNOT be added without: Name and
              Email. A plan workbook dropped here is the likely mistake, and
              naming the sheet read and the headings missing tells somebody which
-             file they picked up. A missing Job title is NOT refused: the
-             planner lists those rows instead (Islam: "job title easy to fix"). */
-          var lacks = rows.missing.filter(function(c){
-            /* An Emp ID column answers for Email as the identifier (§87). */
-            return c === "Name" || (c === "Email" && !rows.hasEmpId);
-          });
+             file they picked up. */
+          /* All three are essential (§389.2): a file without one of the
+             headings cannot add anybody, so it is refused whole. */
+          var lacks = rows.missing;
           if (!rows.sheet || lacks.length || !rows.length) {
             PPLF.plan = { rows:[], notices:[], newBus:[],
                           problems:[{ at:file.name, msg:(!rows.sheet

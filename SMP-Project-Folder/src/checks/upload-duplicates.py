@@ -29,10 +29,10 @@ with sync_playwright() as p:
     # somebody pressing "take everything from the file" would.
     out = pg.evaluate("""() => {
       const plan = planPeopleFile([
-        {"Emp ID":"N1","Name":"New One","Email":"same@rayacorp.com"},
-        {"Emp ID":"N2","Name":"New Two","Email":"SAME@rayacorp.com"},
-        {"Emp ID":"N3","Name":"New Three","Email":"taken@rayacorp.com"},
-        {"Emp ID":"N4","Name":"New Four","Email":"fine@rayacorp.com"},
+        {"Emp ID":"N1","Name":"New One","Job title":"Analyst","Email":"same@rayacorp.com"},
+        {"Emp ID":"N2","Name":"New Two","Job title":"Analyst","Email":"SAME@rayacorp.com"},
+        {"Emp ID":"N3","Name":"New Three","Job title":"Analyst","Email":"taken@rayacorp.com"},
+        {"Emp ID":"N4","Name":"New Four","Job title":"Analyst","Email":"fine@rayacorp.com"},
         {"Emp ID":"OLD1","Name":"The Existing One","Email":"taken@rayacorp.com","Job title":"Amended"}
       ]);
       plan.rows.forEach(r => (r.picks || []).forEach(f => { f.take = true; }));

@@ -56662,3 +56662,42 @@ a `Sheet1` with `Employee Name / Title / E-mail` adds both people with the
 missing-title notice; a sheet with no Email heading is refused naming the sheet
 and heading; no page errors. `identity-merge`, `duplicates`, `people-dialog`,
 `import-page` green; `built-in-step` all good; full `qa.py` ERRORS none (its people round trip included).
+
+### §389.1–§389.2 — the three are ESSENTIAL, and the template marks them (2026-09-23)
+
+Islam, the same day: *"can we add an astrict in the downloaded sheet with the
+essential boxes?"* — and then, correcting how I had read his earlier *"JOB TITLE
+EASY TO FIX YES"*: *"a missing job should stop I said the essentails are 3
+things name, title and email."* **I read "easy to fix" as "let it through and
+fix it later"; he meant the opposite, and §389's missing-title notice is
+REVERSED, not left beside the new rule** (Principle II).
+
+- **§389.1 — the asterisk.** The downloaded People sheet heads three columns
+  `Full Name *`, `Job title *`, `Email *`. Full Name, not Name, because in the
+  template the short Name is the register's display name and the full one is
+  what a person is added under (§93.8). Written on the HEADER only, never on
+  `PEOPLE_FILE_COLS`: the validation ranges look a column up by its bare name,
+  and the reader already matches headings ignoring punctuation, so `Email *`
+  comes back as Email — asserted by feeding the platform's own download back
+  through the reader and planner: nothing missing, nothing refused.
+- **§389.2 — a new person needs all three, and one missing STOPS the file.**
+  A row that would ADD somebody without a name, a job title or an email is a
+  problem, named with what it lacks, and problems block Apply for the whole
+  file (the existing rule). A file with no heading for one of the three is
+  refused before it is read. **A row matching somebody already here is not
+  touched by this**: a blank cell on an update still means "nothing to say"
+  (§54), and refusing it would refuse the platform's own export for anybody
+  whose title was never recorded.
+- **AND ONE REFUSAL WOULD HAVE REFUSED THE EXPORT ITSELF, found by feeding the
+  download back rather than by reading.** A row with no email and no Emp ID was
+  a notice ("left as they are"); made a problem, it refused all 33 rows of the
+  worked example, whose register holds no addresses — and on a real tenant the
+  bootstrap SMO has none either. §54.4's fault exactly. So such a row stays a
+  notice when it is somebody ALREADY ON THE REGISTER with neither identifier,
+  and is a problem otherwise. **The name decides only which sentence is said,
+  never whom a row changes** (§87): nothing is matched or applied on a name.
+- `checks/upload-duplicates.py`'s fixture added four new people with no job
+  title; under the new rule the clean one is correctly refused, so the fixture
+  gives them one (§218 — the assertion is unchanged, the fixture was stale);
+  and `qa.py`'s old-"BU"-header row was a brand-new person with no title and
+  no email, now correctly refused, so it carries both. Full `qa.py` ERRORS none.

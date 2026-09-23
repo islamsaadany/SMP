@@ -1765,7 +1765,7 @@ function peopleReadme(){
     ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
-    ["Adding somebody", "The minimum is Name, Job title and Email. Everything else is optional. A missing Job title does not stop the row — it is added and listed on the review so you can fill it on the register. A row with no Email and no Emp ID is skipped, because the next upload could not recognise it. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
+    ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
@@ -1883,7 +1883,14 @@ function peopleWorkbook(){
       head:["Unit, function or company", "Official BU"],
       rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
-      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
+      /* THE ESSENTIALS WEAR AN ASTERISK (§389.1). Written on the header only,
+         never on PEOPLE_FILE_COLS: the validation ranges above look a column
+         up by its bare name, and the reader matches headings ignoring
+         punctuation, so "Email *" comes back as Email. In this file the
+         person's name is the FULL NAME column; "Name" is the short one. */
+      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]).map(function(h){
+        return PEOPLE_FILE_STARRED.indexOf(h) > -1 ? h + " *" : h;
+      }),
       /* "Also holds" is written and never read, so it is locked — and its
          index moved with the new column (§65). */
       lockedCols:[9],
@@ -1916,6 +1923,9 @@ var PEOPLE_HEAD_ALIASES = {
   phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
 };
 var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
+/* What the downloaded template marks with an asterisk: the same three, with
+   the template's own full-name column standing for Name. */
+var PEOPLE_FILE_STARRED = ["Full Name", "Job title", "Email"];
 function peopleHeadKey(h){ return String(h || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
 function peopleCanonHead(h){
   var k = peopleHeadKey(h);
@@ -1934,7 +1944,6 @@ function peopleFromWorkbook(sheets){
   var rows = sheetObjects(raw || []);
   var head = raw && raw.length ? raw[0] : [];
   rows.sheet = sheet;
-  rows.hasEmpId = head.indexOf("Emp ID") > -1;
   /* "Full Name" answers for Name (fileFullName() reads either). */
   rows.missing = PEOPLE_ESSENTIALS.filter(function(c){
     return head.indexOf(c) < 0 && !(c === "Name" && head.indexOf("Full Name") > -1);

@@ -8739,8 +8739,29 @@ function planPeopleFile(rows){
        under, and inventing a person from a name is exactly what put three
        humans on this register twice. */
     if (!id && !email) {
-      plan.notices.push({ at:at, msg:'"' + label + '" has no employee number and no email, so ' +
-        'there is nothing to match them on. Left exactly as they are.' });
+      /* Nothing to match them on. TWO CASES, told apart by the name and
+         NOTHING ELSE — the name decides only which sentence is said, never
+         whom a row changes (§87):
+
+         - a row that is somebody ALREADY ON THE REGISTER who has neither an
+           email nor an employee number is the platform's own export coming
+           back. Refusing it would refuse the export itself (§54.4) — every
+           row of the worked example, and the bootstrap SMO on every real
+           tenant — so it is left alone, as it always was;
+         - anything else can only be somebody NEW, and a new person without
+           an email is missing an essential (§389.2): a problem, and the file
+           stops until the row is fixed. */
+      var already = name && PEOPLE.some(function(x){
+        return !x.email && !x.empId &&
+               fileTxt(x.name).toLowerCase() === name.toLowerCase();
+      });
+      if (already) {
+        plan.notices.push({ at:at, msg:'"' + label + '" has no employee number and no email, so ' +
+          'there is nothing to match them on. Left exactly as they are.' });
+        return;
+      }
+      plan.problems.push({ at:at, msg:'"' + label + '" has no email (and no employee number), ' +
+        'so they cannot be matched or added. A new person needs a name, a job title and an email.' });
       return;
     }
     if (id && seenId[id]) {
@@ -8797,10 +8818,24 @@ function planPeopleFile(rows){
       conflict = { kind:"newId", byId:null, byMail:byMail };
     }
 
-    if (!existing && !conflict && !name) {
-      plan.problems.push({ at:at, msg:(id ? 'employee number ' + id : email) +
-        ' is not on the register and the row has no name, so there is nobody to add.' });
-      return;
+    /* THE THREE ESSENTIALS OF A NEW PERSON (§389.2). Islam: "the
+       essentails are 3 things name, title and email" — and a missing one
+       STOPS the file. A row that would ADD somebody must carry all three; a
+       row matching somebody already here is untouched by this, because a
+       blank cell on an update means "nothing to say" (§54) and they already
+       have what the register holds. Named in one sentence, so the SMO fixes
+       the row once rather than meeting the second gap on the next upload. */
+    if (!existing && !conflict) {
+      var lacking = [];
+      if (!name) lacking.push("name");
+      if (!fileTxt(r["Job title"])) lacking.push("job title");
+      if (!email) lacking.push("email");
+      if (lacking.length) {
+        plan.problems.push({ at:at, msg:'"' + label + '" is not on the register, and a new ' +
+          'person needs a name, a job title and an email \u2014 this row has no ' +
+          lacking.join(" and no ") + '.' });
+        return;
+      }
     }
 
     /* An unknown department is ADDED TO THE BU LIST, unmapped, rather than
@@ -8992,16 +9027,6 @@ function planPeopleFile(rows){
     peopleRowPicks(row, conflict ? null : existing, dnames);
     plan.rows.push(row);
   });
-  /* A MISSING JOB TITLE IS SAID, NEVER A REFUSAL (§389). Islam: "job title
-     easy to fix yes" — so the row is added and named here, ONE notice for
-     the lot, because a file with no title column would otherwise put a line
-     per person between the SMO and the Apply button. */
-  var noTitle = plan.rows.filter(function(x){ return x.action === "add" && !x.title; });
-  if (noTitle.length) {
-    plan.notices.push({ at:noTitle.map(function(x){ return x.at; }).join(", "),
-      msg:plural(noTitle.length, "person") + " will be added with no job title. " +
-        "Fill it on the register afterwards." });
-  }
   return plan;
 }
 
@@ -20347,7 +20372,7 @@ function peopleReadme(){
     ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
-    ["Adding somebody", "The minimum is Name, Job title and Email. Everything else is optional. A missing Job title does not stop the row — it is added and listed on the review so you can fill it on the register. A row with no Email and no Emp ID is skipped, because the next upload could not recognise it. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
+    ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
@@ -20465,7 +20490,14 @@ function peopleWorkbook(){
       head:["Unit, function or company", "Official BU"],
       rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
-      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
+      /* THE ESSENTIALS WEAR AN ASTERISK (§389.1). Written on the header only,
+         never on PEOPLE_FILE_COLS: the validation ranges above look a column
+         up by its bare name, and the reader matches headings ignoring
+         punctuation, so "Email *" comes back as Email. In this file the
+         person's name is the FULL NAME column; "Name" is the short one. */
+      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]).map(function(h){
+        return PEOPLE_FILE_STARRED.indexOf(h) > -1 ? h + " *" : h;
+      }),
       /* "Also holds" is written and never read, so it is locked — and its
          index moved with the new column (§65). */
       lockedCols:[9],
@@ -20498,6 +20530,9 @@ var PEOPLE_HEAD_ALIASES = {
   phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
 };
 var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
+/* What the downloaded template marks with an asterisk: the same three, with
+   the template's own full-name column standing for Name. */
+var PEOPLE_FILE_STARRED = ["Full Name", "Job title", "Email"];
 function peopleHeadKey(h){ return String(h || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
 function peopleCanonHead(h){
   var k = peopleHeadKey(h);
@@ -20516,7 +20551,6 @@ function peopleFromWorkbook(sheets){
   var rows = sheetObjects(raw || []);
   var head = raw && raw.length ? raw[0] : [];
   rows.sheet = sheet;
-  rows.hasEmpId = head.indexOf("Emp ID") > -1;
   /* "Full Name" answers for Name (fileFullName() reads either). */
   rows.missing = PEOPLE_ESSENTIALS.filter(function(c){
     return head.indexOf(c) < 0 && !(c === "Name" && head.indexOf("Full Name") > -1);
@@ -60914,12 +60948,10 @@ var SYNC = (function () {
              missing the headings a person CANNOT be added without: Name and
              Email. A plan workbook dropped here is the likely mistake, and
              naming the sheet read and the headings missing tells somebody which
-             file they picked up. A missing Job title is NOT refused: the
-             planner lists those rows instead (Islam: "job title easy to fix"). */
-          var lacks = rows.missing.filter(function(c){
-            /* An Emp ID column answers for Email as the identifier (§87). */
-            return c === "Name" || (c === "Email" && !rows.hasEmpId);
-          });
+             file they picked up. */
+          /* All three are essential (§389.2): a file without one of the
+             headings cannot add anybody, so it is refused whole. */
+          var lacks = rows.missing;
           if (!rows.sheet || lacks.length || !rows.length) {
             PPLF.plan = { rows:[], notices:[], newBus:[],
                           problems:[{ at:file.name, msg:(!rows.sheet

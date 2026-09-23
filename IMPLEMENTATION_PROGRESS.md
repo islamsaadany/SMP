@@ -8003,7 +8003,7 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
-## §394 — a capability planned in pillars can be saved by the office (2026-09-23)
+## §394 — a capability planned in pillars can be saved by the office (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built.** On a capability that plans in pillars (Data Management), the SMO
 team was refused when adding or changing a pillar, and the function head

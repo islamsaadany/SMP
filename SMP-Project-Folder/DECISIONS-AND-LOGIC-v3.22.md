@@ -57039,3 +57039,9 @@ only the SMO may change (a capability)".**
   file is byte-identical, so no `sw.js` bump (§91). The change only ALLOWS
   saves that were refused, so an old tab's save cannot newly fail — **no
   forced sign-out is owed** (spec 029).
+- **Merged to `main` 2026-09-23 on Islam's word** (`b27e783`), as a clean
+  fast-forward — `main` had not moved. Server only: nothing the browser
+  downloads changed, so there is no byte count to read off the live site
+  (§91.5), and the deploy is confirmed by Islam's own save rather than by a
+  file. The branch carries this note as a commit `main` does not hold, so the
+  two refs never share a tip (§91).

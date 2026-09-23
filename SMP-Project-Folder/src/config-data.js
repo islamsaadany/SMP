@@ -3016,8 +3016,29 @@ function planPeopleFile(rows){
        under, and inventing a person from a name is exactly what put three
        humans on this register twice. */
     if (!id && !email) {
-      plan.notices.push({ at:at, msg:'"' + label + '" has no employee number and no email, so ' +
-        'there is nothing to match them on. Left exactly as they are.' });
+      /* Nothing to match them on. TWO CASES, told apart by the name and
+         NOTHING ELSE — the name decides only which sentence is said, never
+         whom a row changes (§87):
+
+         - a row that is somebody ALREADY ON THE REGISTER who has neither an
+           email nor an employee number is the platform's own export coming
+           back. Refusing it would refuse the export itself (§54.4) — every
+           row of the worked example, and the bootstrap SMO on every real
+           tenant — so it is left alone, as it always was;
+         - anything else can only be somebody NEW, and a new person without
+           an email is missing an essential (§390.2): a problem, and the file
+           stops until the row is fixed. */
+      var already = name && PEOPLE.some(function(x){
+        return !x.email && !x.empId &&
+               fileTxt(x.name).toLowerCase() === name.toLowerCase();
+      });
+      if (already) {
+        plan.notices.push({ at:at, msg:'"' + label + '" has no employee number and no email, so ' +
+          'there is nothing to match them on. Left exactly as they are.' });
+        return;
+      }
+      plan.problems.push({ at:at, msg:'"' + label + '" has no email (and no employee number), ' +
+        'so they cannot be matched or added. A new person needs a name, a job title and an email.' });
       return;
     }
     if (id && seenId[id]) {
@@ -3074,10 +3095,24 @@ function planPeopleFile(rows){
       conflict = { kind:"newId", byId:null, byMail:byMail };
     }
 
-    if (!existing && !conflict && !name) {
-      plan.problems.push({ at:at, msg:(id ? 'employee number ' + id : email) +
-        ' is not on the register and the row has no name, so there is nobody to add.' });
-      return;
+    /* THE THREE ESSENTIALS OF A NEW PERSON (§390.2). Islam: "the
+       essentails are 3 things name, title and email" — and a missing one
+       STOPS the file. A row that would ADD somebody must carry all three; a
+       row matching somebody already here is untouched by this, because a
+       blank cell on an update means "nothing to say" (§54) and they already
+       have what the register holds. Named in one sentence, so the SMO fixes
+       the row once rather than meeting the second gap on the next upload. */
+    if (!existing && !conflict) {
+      var lacking = [];
+      if (!name) lacking.push("name");
+      if (!fileTxt(r["Job title"])) lacking.push("job title");
+      if (!email) lacking.push("email");
+      if (lacking.length) {
+        plan.problems.push({ at:at, msg:'"' + label + '" is not on the register, and a new ' +
+          'person needs a name, a job title and an email \u2014 this row has no ' +
+          lacking.join(" and no ") + '.' });
+        return;
+      }
     }
 
     /* An unknown department is ADDED TO THE BU LIST, unmapped, rather than

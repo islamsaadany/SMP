@@ -56668,3 +56668,86 @@ none; built-in-step and generated-in-step clear. **Nothing about how an
 existing save is judged is narrowed** — the new keys are ones no old tab has
 ever written — so no forced sign-out is owed (spec 029).
 
+---
+
+## §390 — THE PEOPLE FILE TAKES A CLIENT'S OWN SHEET, AND NAME · JOB TITLE · EMAIL IS ENOUGH (2026-09-23)
+
+Islam: *"In the upload of the excel with the people names accept the minimum of
+the name and the title and email for the essentials"* — and, of the one open
+question, *"JOB TITLE EASY TO FIX YES"*.
+
+**THE PLANNER ALREADY ACCEPTED THOSE THREE ALONE, AND SAYING SO CAME FIRST.**
+A row with a Name and an Email and nothing else was already added
+(`planPeopleFile`'s only refusal of a new row is no Emp ID *and* no Email,
+§87.5). What turned such a file away was the READER in front of it: the upload
+refused any workbook without a sheet called **People**, and `sheetObjects()`
+keys on the header text exactly, so a client's own export — `Sheet1`, `Title`,
+`E-mail`, `Employee Name` — was either refused outright or read as rows with no
+title and no address. Nothing on the screen said which.
+
+**WHAT CHANGED.**
+- `peopleFromWorkbook()` reads **People** when there is one and otherwise the
+  first sheet that is not the template's own *Read me* / *Lists*, and carries
+  the sheet it read back so the page can name it.
+- Headings are matched **ignoring case, spaces and punctuation**, plus a short
+  list of HR spellings (`Title`, `Position`, `Designation` → Job title;
+  `E-mail`, `Email address`, `Work email` → Email; `Employee name` → Name;
+  `Employee ID/Number` → Emp ID; `Phone` → Mobile). A heading it does not know
+  is kept verbatim, which is what keeps `Main BU` and `BU` readable (§58, §65).
+- The upload refuses only a file missing a **Name** heading, or missing
+  **Email** where there is no **Emp ID** column either (an Emp ID still answers
+  as the identifier, §87) — and the sentence names the sheet and the heading.
+- **A missing Job title is never a refusal** (Islam's answer): the row is added
+  and ONE notice lists every such row, because a file with no title column
+  would otherwise put a line per person between the SMO and Apply.
+- The *Read me* sheet says the minimum is Name, Job title and Email.
+
+**NOTHING ELSE MOVES**: matching on Emp ID then Email, the review before
+Apply, adds-and-amends-never-removes, and the export's own headers are
+byte-identical; the export round-trips exactly as before (its headings are the
+canonical ones, so the matcher leaves them alone).
+
+**VERIFIED**: driven through the real Register file control over `file://` —
+a `Sheet1` with `Employee Name / Title / E-mail` adds both people with the
+missing-title notice; a sheet with no Email heading is refused naming the sheet
+and heading; no page errors. `identity-merge`, `duplicates`, `people-dialog`,
+`import-page` green; `built-in-step` all good; full `qa.py` ERRORS none (its people round trip included).
+
+### §390.1–§390.2 — the three are ESSENTIAL, and the template marks them (2026-09-23)
+
+Islam, the same day: *"can we add an astrict in the downloaded sheet with the
+essential boxes?"* — and then, correcting how I had read his earlier *"JOB TITLE
+EASY TO FIX YES"*: *"a missing job should stop I said the essentails are 3
+things name, title and email."* **I read "easy to fix" as "let it through and
+fix it later"; he meant the opposite, and §390's missing-title notice is
+REVERSED, not left beside the new rule** (Principle II).
+
+- **§390.1 — the asterisk.** The downloaded People sheet heads three columns
+  `Full Name *`, `Job title *`, `Email *`. Full Name, not Name, because in the
+  template the short Name is the register's display name and the full one is
+  what a person is added under (§93.8). Written on the HEADER only, never on
+  `PEOPLE_FILE_COLS`: the validation ranges look a column up by its bare name,
+  and the reader already matches headings ignoring punctuation, so `Email *`
+  comes back as Email — asserted by feeding the platform's own download back
+  through the reader and planner: nothing missing, nothing refused.
+- **§390.2 — a new person needs all three, and one missing STOPS the file.**
+  A row that would ADD somebody without a name, a job title or an email is a
+  problem, named with what it lacks, and problems block Apply for the whole
+  file (the existing rule). A file with no heading for one of the three is
+  refused before it is read. **A row matching somebody already here is not
+  touched by this**: a blank cell on an update still means "nothing to say"
+  (§54), and refusing it would refuse the platform's own export for anybody
+  whose title was never recorded.
+- **AND ONE REFUSAL WOULD HAVE REFUSED THE EXPORT ITSELF, found by feeding the
+  download back rather than by reading.** A row with no email and no Emp ID was
+  a notice ("left as they are"); made a problem, it refused all 33 rows of the
+  worked example, whose register holds no addresses — and on a real tenant the
+  bootstrap SMO has none either. §54.4's fault exactly. So such a row stays a
+  notice when it is somebody ALREADY ON THE REGISTER with neither identifier,
+  and is a problem otherwise. **The name decides only which sentence is said,
+  never whom a row changes** (§87): nothing is matched or applied on a name.
+- `checks/upload-duplicates.py`'s fixture added four new people with no job
+  title; under the new rule the clean one is correctly refused, so the fixture
+  gives them one (§218 — the assertion is unchanged, the fixture was stale);
+  and `qa.py`'s old-"BU"-header row was a brand-new person with no title and
+  no email, now correctly refused, so it carries both. Full `qa.py` ERRORS none.

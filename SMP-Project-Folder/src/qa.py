@@ -963,7 +963,8 @@ with sync_playwright() as p:
             return n;
           })(),
           unitOldHeader: planPeopleFile(
-            [{ "Emp ID":"E-oldhdr", "Name":"Old Header", "BU":"Mobile" }]).rows[0].where
+            [{ "Emp ID":"E-oldhdr", "Name":"Old Header", "Job title":"Analyst",
+               "Email":"old.header@example.com", "BU":"Mobile" }]).rows[0].where
         };
       });
     }""")

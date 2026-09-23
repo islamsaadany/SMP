@@ -428,21 +428,8 @@
              unreachable by the only person it is for. `when` hides it outright
              until the tenant switches naming on \u2014 a tab that opens a page
              nobody may use is worse than no tab. */
-          /* ── AND THE REVENUE TREE SITS BETWEEN THEM (spec 063 §6.1) ──
-             Islam: *"it's a tab beside the swot ok."* A SECTION of this row
-             rather than a fifth top-level tab, and the order is the reading:
-             who we are, where we stand, WHERE THE NUMBER COMES FROM, then
-             what we will do about it.
-
-             `u_plan` IS ITS GRANT, which is the promise that nobody's access
-             moves and no column appears on Roles & access — the tree is part
-             of the plan's authorship and is refused to everybody else by the
-             rule that already refuses the plan (§42). */
           return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
                   { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
-                  { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
-                    /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
-                    when: function(){ return driversOn(); } },
                   { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
@@ -453,30 +440,9 @@
          which is what it always was for two weeks a quarter (§15.10), now said
          in the navigation instead of in a comment. REPORTING holds the TARGET
          rather than a boolean, so it can never open somebody else's report. */
-      /* ── AND PERFORMANCE SPLITS IN TWO (spec 063 §6.3) ───────────
-         Islam: *"the perfomance shall split to strategy and revenue driver."*
-         Two readings that answer different questions and can disagree — the
-         plan delivered and the money missed — so they are siblings under the
-         tab rather than one page trying to say both.
-
-         THE SECOND SECTION IS DRAWN ONLY WHERE THERE IS A TREE, which is
-         what keeps this free for every unit that has none: `secs.length > 1`
-         is what makes the row appear at all, so a unit whose office has not
-         built one sees exactly the page it saw yesterday. And it is never a
-         dead end — the tree is built on Strategy › Drivers, which is always
-         reachable (§61).
-
-         REPORTING STAYS ON THE FIRST SECTION. It is a MODE that takes the
-         whole tab (§222), and it is the strategy reading it replaces. */
       { k:"performance", ac:"u_perf", label:"Performance", primary:true,
-        sections: function(u){
-          return [{ k:"perfstrat", ac:"u_perf", label:"Strategy",
-                    render: function(x){
-                      return REPORTING === x.ukey ? renderReport(x) : renderUnitPerformance(x);
-                    } },
-                  { k:"perfdrv", ac:"u_perf", label:"Revenue drivers",
-                    when: function(){ return drvShown(u); },
-                    render: renderUnitRevenue }];
+        render: function(u){
+          return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
         } },
       /* ── REPORTING IS A TAB (§222, revisiting §63) ────────────────────
          Islam: *"how about for the reporting to split it as a tab beside the
@@ -635,20 +601,6 @@
          to know it moved. */
       { k:"focusset", ac:"c_focus", grp:"meas", mod:"strategy", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       { k:"bands",  ac:"c_bands",  grp:"meas", mod:"strategy", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
-      /* ── SEASONS (spec 063 §6.5) ──────────────────────────
-         A named window of real days, defined ONCE for the client and used by
-         name in any unit's revenue tree. Immediately under the scoring bands,
-         because the two are the same kind of fact: the office deciding what a
-         figure MEANS. `c_bands` is its grant for the same reason — no new
-         column on Roles &amp; access, and nobody's access moves (§37: a column
-         whose every cell repeats its neighbour's is a question with no second
-         answer).
-
-         IN *MEASUREMENT* AND NOT IN *RUNNING THE CYCLE*, which is §261.9's
-         own ruling applied forward rather than a placement chosen by feel:
-         that group's note says **what you do while a cycle is open**, and
-         naming Ramadan is what you do when one is not. One word moves it. */
-      { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
@@ -5882,63 +5834,6 @@
     var ac = document.getElementById("addcompany");
     if (ac) ac.addEventListener("click", function(){ addCompany(); paint(); });
 
-    /* ── Setup · Seasons (spec 063 §6.5) ─────────────────────
-       A season is added UNDATED and named later, because the two dates are
-       picked and a picker has nothing to open beside a row that is not there
-       yet. It is the only shape this page can add: `driverMonths` reads a
-       missing window as nought months (§93 — absent is never a number), so an
-       undated season takes nothing out of anybody's base year and the tree
-       goes on adding up while somebody is still deciding.
-
-       THE LIST IS MINTED WHERE IT IS WRITTEN, never by a reader (§50.6,
-       §42): `seasonsOf` hands back a shared frozen empty, so the array is
-       created here on the first Add and the group carries no `seasons` key
-       until a client has one. */
-    /* Revenue drivers on or off (2026-09-23) — focus's own control and
-       handler shape (§102, §135.5); `this`, never a closure. */
-    document.querySelectorAll("[data-drvswitch]").forEach(function(b){
-      b.addEventListener("click", function(){
-        setDriversOn(this.dataset.drvswitch === "1"); paint();
-      });
-    });
-    var as = document.getElementById("addseason");
-    if (as) as.addEventListener("click", function(){
-      if (!Array.isArray(GROUP[SMPRules.SEASONS])) GROUP[SMPRules.SEASONS] = [];
-      GROUP[SMPRules.SEASONS].push({ id: SMPRules.seasonMintId(GROUP), name: "" });
-      paint();
-    });
-    /* REMOVING IS REFUSED WHILE A UNIT STILL NAMES IT, and the refusal NAMES
-       the units (§62: the refusal is the feature, and it belongs where the
-       confirmation would be). Asked again at press time rather than trusted
-       from the render that drew the button (§48.2) — a tree added in another
-       tab is a real possibility on the one page that is the whole client's.
-
-       AND THE LAST KEY LEAVING DELETES THE LIST (§50.6): a client that has
-       never had a season and one whose last season was removed must be
-       byte-identical, or the difference is a change the authoriser has to
-       judge that nobody made. */
-    document.querySelectorAll("[data-seasrm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var id = b.dataset.seasrm;
-        var list = SMPRules.seasonsOf(GROUP);
-        var se = SMPRules.seasonById(list, id);
-        var used = SMPRules.seasonUsedBy(seasonsUnits(), id);
-        if (used.length) {
-          alert('"' + (se && se.name ? se.name : "This season") + '" cannot be removed — ' +
-                (used.length === 1 ? 'a unit still has it as a period of its own: '
-                                   : used.length + ' units still have it as a period of their own: ') +
-                used.map(function(u){ return u.name; }).join(", ") +
-                '. Take it off their Drivers page first.');
-          return;
-        }
-        var i = list.indexOf(se);
-        if (i < 0) return;
-        list.splice(i, 1);
-        if (!list.length) delete GROUP[SMPRules.SEASONS];
-        paint();
-      });
-    });
-
     /* ── The BU list (§54.1) ────────────────────────────────────────
        A name, where it points, and a Remove that is refused while anybody
        carries it. The NAME is the key here — unlike a unit or a company,
@@ -6030,32 +5925,23 @@
       var rx = new FileReader();
       rx.onload = function(){
         readXlsx(rx.result).then(function(sheets){
-          var rows = peopleFromWorkbook(sheets);
-          /* §48.8's rule: a file that cannot be read has to SAY so, where the
-             upload is. Since §390 a client's own sheet is read (the first one
-             when there is no People sheet), so what is refused is a file
-             missing the headings a person CANNOT be added without: Name and
-             Email. A plan workbook dropped here is the likely mistake, and
-             naming the sheet read and the headings missing tells somebody which
-             file they picked up. */
-          /* All three are essential (§390.2): a file without one of the
-             headings cannot add anybody, so it is refused whole. */
-          var lacks = rows.missing;
-          if (!rows.sheet || lacks.length || !rows.length) {
+          if (!sheets["People"]) {
+            /* §48.8's rule: a file that cannot be read has to SAY so, where
+               the upload is. A plan workbook dropped here is the likely
+               mistake, and naming the sheet it is missing is what tells
+               somebody which of the two files they picked up. */
             PPLF.plan = { rows:[], notices:[], newBus:[],
-                          problems:[{ at:file.name, msg:(!rows.sheet
-                            ? "has no sheet to read."
-                            : lacks.length
-                              ? "sheet “" + rows.sheet + "” has no " + lacks.join(" or ") +
-                                " heading. The minimum is Name, Job title and Email in the first row."
-                              : "sheet “" + rows.sheet + "” has headings but nobody under them.") }] };
+                          problems:[{ at:file.name, msg:"has no sheet called People. This is " +
+                            "the people workbook's own sheet \u2014 download the template from " +
+                            "Register file " +
+                            "and fill that." }] };
             PPLF.read = ""; PPLF.done = null;
             paint();
             return;
           }
+          var rows = peopleFromWorkbook(sheets);
           PPLF.plan = planPeopleFile(rows);
-          PPLF.read = file.name + " · " + (rows.sheet !== "People"
-            ? "sheet “" + rows.sheet + "” · " : "") + plural(rows.length, "row");
+          PPLF.read = file.name + " \u00b7 " + plural(rows.length, "row");
           PPLF.done = null;
           paint();
         }).catch(function(e){
@@ -8791,177 +8677,6 @@
             !confirm("Remove this line? This cannot be undone here.")) return;
         u.swot[q].splice(i, 1);
         fieldSaved(); paint();
-      });
-    });
-    /* ── THE REVENUE TREE'S OWN CONTROLS (spec 063) ──────────────────
-       EVERY ONE RE-ASKS THE SHARED RULE rather than trusting the render that
-       drew it (§48.2), and every one asks `mayEditPlan()` — the tree rides
-       `u_plan`'s grant, so a control here can never accept what `/api/state`
-       would refuse (§42).
-
-       A PERIOD AND A ROUTE ARE ADDRESSED BY INDEX AND A DRIVER BY ITS ID, and
-       the difference is not an inconsistency: `paint()` redraws the whole
-       section after every one of these, so an index is never stale between the
-       draw and the click — while a driver's id is what a key objective POINTS
-       AT (§4.3), so it has to survive the row moving. */
-    function drvUnit(t){
-      if (!mayEditPlan || !mayEditPlan()) return null;
-      if (!mayAuthor("u_plan", t)) return null;
-      var u = unitLikeWritable(t);
-      return (u && typeof u === "object") ? u : null;
-    }
-    function drvCh(u){ return u && u[SMPRules.DRIVERS]; }
-    function drvSubAt(u, i){
-      var c = drvCh(u);
-      return (c && c.subs && c.subs[i]) ? c.subs[i] : null;
-    }
-    document.querySelectorAll("[data-drvnew]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var u = drvUnit(b.dataset.drvnew);
-        if (!u || drvCh(u)) return;
-        u[SMPRules.DRIVERS] = { mode:"rate", subs:[
-          { name:u.name || "Route", periods:[
-            { name:"Base year — excluding seasons", type:"base", drivers:[] }] }] };
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-drvsnew]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var u = drvUnit(b.dataset.drvsnew), c = drvCh(u);
-        if (!c) return;
-        c.subs.push({ name:"New route", periods:[
-          { name:"Base year — excluding seasons", type:"base", drivers:[] }] });
-        RAIL["drv:" + u.ukey] = "New route";
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-drvsrm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.drvsrm.split("|"), u = drvUnit(a[0]), c = drvCh(u);
-        var sub = drvSubAt(u, +a[1]);
-        if (!sub || c.subs.length < 2) return;
-        if (!confirm("Remove “" + (sub.name || "this route") +
-              "” and everything in it? This cannot be undone here.")) return;
-        c.subs.splice(+a[1], 1);
-        delete RAIL["drv:" + u.ukey];
-        fieldSaved(); paint();
-      });
-    });
-    /* A SELECT THAT ACTS, so it is read once and PUT BACK to its blank entry
-       before the repaint — a control still showing the value it just carried
-       out fires no `change` the second time (§110's own finding). */
-    document.querySelectorAll("[data-drvpnew]").forEach(function(s){
-      s.addEventListener("change", function(){
-        var a = s.dataset.drvpnew.split("|"), u = drvUnit(a[0]);
-        var sub = drvSubAt(u, +a[1]), v = s.value;
-        s.value = "";
-        if (!sub || !v) return;
-        var p = v === "base"
-          ? { name:"Base year — excluding seasons", type:"base", drivers:[] }
-          : v === "increment"
-            ? { name:"Something new", type:"increment", drivers:[] }
-            : null;
-        if (!p && v.indexOf("s:") === 0) {
-          var sid = v.slice(2),
-              se = SMPRules.seasonById(SMPRules.seasonsOf(GROUP), sid);
-          p = { name:(se && se.name) || "Season", type:"season", seasonId:sid, drivers:[] };
-        }
-        if (!p) return;
-        sub.periods.push(p);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-drvprm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.drvprm.split("|"), u = drvUnit(a[0]);
-        var sub = drvSubAt(u, +a[1]), p = sub && sub.periods[+a[2]];
-        if (!p) return;
-        if ((p.drivers || []).length &&
-            !confirm("Remove “" + (p.name || "this period") + "” and its " +
-              plural(p.drivers.length, "driver") + "? This cannot be undone here.")) return;
-        sub.periods.splice(+a[2], 1);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-drvmode]").forEach(function(s){
-      s.addEventListener("change", function(){
-        var u = drvUnit(s.dataset.drvmode), c = drvCh(u);
-        if (!c) return;
-        /* STORED AS AN ABSENCE (§50.6): `rate` is what an unasked channel
-           already reads, so choosing it deletes the key rather than writing
-           the default back and putting a phantom change into every save. */
-        if (s.value === "count") c.mode = "count"; else delete c.mode;
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-drvadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.drvadd.split("|"), u = drvUnit(a[0]);
-        var sub = drvSubAt(u, +a[1]), p = sub && sub.periods[+a[2]];
-        if (!p) return;
-        if (!Array.isArray(p.drivers)) p.drivers = [];
-        /* MINTED FROM THE MAXIMUM, never from the count (§96.2): delete the
-           middle of d1·d2·d3 and a count-minted id collides with a row still
-           on the screen — and an objective already points at that id. */
-        p.drivers.push({ id:SMPRules.driverMintId(u), name:"", kind:"vol",
-                         unit:"n", base:0, up:0, upUnit:"%" });
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-drvrm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.drvrm.split("|"), u = drvUnit(a[0]);
-        var hit = u && SMPRules.driverById(u, a[1]);
-        if (!hit) return;
-        if (String(hit.driver.name || "").trim() &&
-            !confirm("Remove “" + hit.driver.name +
-              "”? This cannot be undone here.")) return;
-        var list = hit.period.drivers, i = list.indexOf(hit.driver);
-        if (i < 0) return;
-        list.splice(i, 1);
-        /* AND THE CONNECTION GOES WITH IT, or an objective is left pointing at
-           a driver that no longer exists — a pointer nothing can resolve and
-           nothing would ever draw (§48). */
-        drvUnlink(u, a[1]);
-        fieldSaved(); paint();
-      });
-    });
-    /* WHAT A DRIVER ANSWERS TO IS WRITTEN ONTO THE OBJECTIVE (§4.3) — the
-       control sits in the column that SHOWS the state, and the pointer is
-       stored the way round that survives a renumber. One driver answers to one
-       thing, so the id is cleared from every row before it is written to the
-       one that was picked. */
-    function drvUnlink(u, id){
-      var k = SMPRules.DRIVER_LINK;
-      function sweep(list){
-        (list || []).forEach(function(r){
-          if (r && r[k] != null && String(r[k]) === String(id)) delete r[k];
-        });
-      }
-      sweep(u.keyObjectives);
-      (u.items || []).forEach(function(p){ sweep(p && p.measures); });
-    }
-    document.querySelectorAll("[data-drvans]").forEach(function(s){
-      s.addEventListener("change", function(){
-        var a = s.dataset.drvans.split("|"), u = drvUnit(a[0]);
-        var hit = u && SMPRules.driverById(u, a[1]);
-        if (!hit) return;
-        var d = hit.driver, v = s.value;
-        drvUnlink(u, a[1]);
-        delete d.assume;
-        if (v === "assume") d.assume = true;
-        else if (v.indexOf("r") === 0) {
-          var all = drvAnswerables(u), row = all[+v.slice(1)];
-          if (row) row.row[SMPRules.DRIVER_LINK] = a[1];
-        }
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-drail]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.drail.split("|");
-        RAIL["drv:" + a[0]] = a.slice(1).join("|");
-        paint();
       });
     });
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){

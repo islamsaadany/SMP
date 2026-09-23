@@ -7928,3 +7928,13 @@ rules 69/0, `test-my-reporting` 65/0, and on the stack production serves state
 92/0, modules 160/0, door 144/0, insights 137/0, frameworks 90/0, tracker 229/0,
 notes 170/0, portfolio 121/0, upload 9/0, demo 7/0, standing 7/0, room 10/0,
 deploy 5/0.
+
+## §390 — the people upload takes a client's own sheet (2026-09-23)
+
+**Built, on the branch.** A new person needs three things: Name, Job title
+and Email. The downloaded template marks those three columns with an asterisk.
+If a row that would add somebody is missing any of them, the upload stops and
+the review names the row and what it lacks. People already on the register can
+still be updated with blank cells, which keep what is recorded. Your own HR
+export works as it is: if there's no sheet called "People", the first sheet is
+read, and headings like *Title*, *E-mail* or *Employee Name* are understood.

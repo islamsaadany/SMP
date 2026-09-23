@@ -54937,3 +54937,12 @@ stops on the first failure.
 
 This section is numbered on the branch; `main` has reached §389 while it was
 built, so the merge owes a renumber of §382 and §383 first (§264.3).
+
+**§383.1 — THE WHOLE SUITE FOUND ONE MORE.** 186 checks run; the one real
+failure was `setup-rail.py`: the default *Supporting Functions* is cut off in
+the 196px Setup rail. The rail entry and its page heading now ask `navWord()`
+like the navigation switch — *Functions* while a client is on the default,
+their own word once they change it. `multi-client.py` and `platform-look.py`
+need a rehearsal database this session does not have (§328.3); `welcome.py`
+failed only when run beside three others and passes alone; everything else
+green, `qa.py` ERRORS none.

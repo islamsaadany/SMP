@@ -30648,7 +30648,10 @@ function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§383). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one
    segmented control. A client who types their own word sees it there too;
-   a client on the default keeps the short word, so nothing moves for them. */
+   a client on the default keeps the short word, so nothing moves for them.
+   The Setup rail's Functions entry and its page heading ask it too: the
+   default "Supporting Functions" is cut off in the 196px rail (setup-rail.py
+   measured it), and "Functions" is the word Islam gave that page. */
 function navWord(key, short){
   var d = labelDefault(key);
   return d && labelWord(key, "bu") === d.many ? short : L(key);
@@ -38014,7 +38017,7 @@ function renderFunctions(){
         : '') +
     '</span>';
 
-  return cfgHead(L("fnword"), [], null, mayEdit, "fnall",
+  return cfgHead(navWord("fnword", "Functions"), [], null, mayEdit, "fnall",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("fns", mayEdit) + fnColMenu) +
     section("", "", null,
       /* §84. Eight rows and nine columns — over the search threshold, so it
@@ -55880,7 +55883,7 @@ var SYNC = (function () {
       if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
       /* §383: and the three rows Terminology gained, the same way. */
       if (d.k === "companies") return Object.assign({}, d, { label:L("division") });
-      if (d.k === "fns") return Object.assign({}, d, { label:L("fnword") });
+      if (d.k === "fns") return Object.assign({}, d, { label:navWord("fnword", "Functions") });
       if (d.k === "caps") return Object.assign({}, d, { label:L("capability") });
       /* §360: one def, two names — Getting started until Done with set-up
          is pressed, Client set-up after (SMPRules.setupDone, stored as an

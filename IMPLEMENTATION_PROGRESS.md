@@ -8003,9 +8003,9 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
-## §397 — every release offers the reload (2026-09-23)
+## §397 — every release offers the reload (2026-09-23) · **merged to `main` 2026-09-23**
 
-**Built on the branch; not merged.** The platform already has a banner that
+**Built; merged to `main` 2026-09-23 on Islam's word.** The platform already has a banner that
 says "A newer version of the platform is ready" with a button to reload and keep
 your work, but it had stopped appearing: it only shows when a small background
 file changes, and that file had been identical in every release since the

@@ -57128,6 +57128,8 @@ and Islam chose the recommendation: *"go with your recommendation"*.
 
 ## §397 — every release offers the reload (2026-09-23)
 
+**Merged to `main` 2026-09-23 on Islam's word**, as a fast-forward — `main` had not moved since §396. The live `/sw.js` carried no stamp before the push.
+
 Islam, after §396's merge note told people to reload an open tab: *"don't we
 have a rule that makes the user have a button to refresh … at the top with the
 updates that require refresh? … why don't we have it as a rule of such

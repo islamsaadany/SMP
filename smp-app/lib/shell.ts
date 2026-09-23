@@ -75,10 +75,9 @@ export function shellDocument(tenantName: string, module: string | null = null, 
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
   const brk = process.env.SMP_BREAK || "";
-  /* `switch-always` is route.js's, not this file's (§362.1): the attribute
-     below is the LIST, and who draws a switcher from it is that file's rule,
-     so its break has to reach it. */
-  const routeBrk = (brk === "no-route" || brk === "switch-always") ? brk : "";
+  /* `trail-for-staff` is route.js's, not this file's (§399): who is drawn
+     the trail is that file's rule, so its break has to reach it. */
+  const routeBrk = (brk === "no-route" || brk === "trail-for-staff") ? brk : "";
   return "<!doctype html>\n<html lang='en'" + (routeBrk ? " data-break='" + routeBrk + "'" : "") +
     (module ? " data-module='" + esc(module) + "'" : "") +
     /* AND ITS NAME (§359.2): the frozen shell heads a module's own Setup rail

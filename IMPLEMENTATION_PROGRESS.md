@@ -7929,6 +7929,20 @@ rules 69/0, `test-my-reporting` 65/0, and on the stack production serves state
 notes 170/0, portfolio 121/0, upload 9/0, demo 7/0, standing 7/0, room 10/0,
 deploy 5/0.
 
+## §399 — moving between the console, a client and its modules (2026-09-23)
+
+**Built on the branch, not merged.** Four things, from the before/after mockups
+Islam approved: a trail at the top for Forefront's own people (Forefront ›
+client › module, with the client menu holding the modules, Client settings and
+Switch client); Home is the house mark and a page under the navigation rather
+than a cover with a Continue button; the console opens on **My work** — your
+open Internal Tracker actions across every client, late first, each row opening
+that client's Tracker, and each client card saying how many are open; and a
+client's own staff see no trail or switcher, just their company's name. One
+thing added beyond the drawing: on Client settings the client menu also lists
+each module's settings, so the one-press way across is not lost. All checks
+green; nothing stored or migrated.
+
 ## §390 — the people upload takes a client's own sheet (2026-09-23)
 
 **Built, on the branch.** A new person needs three things: Name, Job title

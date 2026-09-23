@@ -135,9 +135,18 @@ await section("2 · the address names the page, and the page names the address",
      the overlay altogether passes the half that matters here (§113.8). */
   await open("/raya-trade/strategy");
   check(await page.evaluate(() => !!document.querySelector(".welcomeover")), "the shell's own welcome overlay is offered at the module's home — Strategy's welcome is the welcome (§360, §360.9)");
-  await page.evaluate(() => { const b = document.querySelector(".welcomeover .wexit"); if (b) b.click(); });
+  /* REWRITTEN, NEVER LOOSENED (§218, §399). Home stopped being an overlay
+     with a Continue bar: it is a page inside the chrome, the house is lit
+     while it is open, and the way out is the navigation itself. So the claim
+     is that there is NO Continue left, that the house says Home is open, and
+     that pressing a tab takes Home down — both ends, or a build that simply
+     never drew Home passes the last one (§113.8). */
+  check(await page.evaluate(() => !document.querySelector(".welcomeover .wexit") && document.documentElement.getAttribute("data-home-open") === "1"),
+    "…with no Continue bar, and the house marks Home as open (§399)");
+  await page.locator("#tabrow button").first().click({ timeout: 5000 }).catch(() => {});
   await page.waitForFunction(() => !document.querySelector(".welcomeover")).catch(() => {});
-  check(await page.evaluate(() => !document.querySelector(".welcomeover")), "…and its own way out takes it down");
+  check(await page.evaluate(() => !document.querySelector(".welcomeover") && !document.documentElement.hasAttribute("data-home-open")),
+    "…and pressing a tab takes it down, the house going quiet with it");
   await open("/raya-trade/strategy/mobile/strategy");
   let p = await place();
   check(p[0] === "mobile" && p[1] === "strategy", "/raya-trade/strategy/mobile/strategy opens Mobile's Strategy", JSON.stringify(p));
@@ -241,23 +250,27 @@ await section("3 · the office's addresses, and a change that reaches the server
   check(p[0] === "group" && p[1] === "performance", "/strategy/group/performance opens the group", JSON.stringify(p));
   await open("/raya-trade/setup/people"); p = await place();
   check(p[0] === "setup" && p[1] === "people" && (await page.locator("#panel").textContent()).includes("People register"), "/setup/people opens the register", JSON.stringify(p));
-  /* REWRITTEN, NEVER LOOSENED (§218, §214.3 for the eighth time). This
-     asserted the control reads "Raya Trade" — measured HERE, on
-     `/setup/people`, which §362 made the client's own settings, where it
-     deliberately reads *Save & close* instead (the client is named in the
-     heading there, so naming it on the control too would be the second copy
-     §120 took off the register's own header). What the line is ABOUT is that
-     the office has a way back and that it says something — asserted at BOTH
-     ENDS, because a build that stopped naming the client anywhere satisfies
-     half of it (§94.2). */
+  /* REWRITTEN, NEVER LOOSENED (§218, §399). The way back was a pill
+     (#clientback) reading "Save & close" here and the client's name on a
+     module page; §399 replaces it with the TRAIL — Forefront › client ›
+     where you are — for the office alone. What the line was ABOUT survives:
+     the office always has a way back, and it says where they are. Both ends:
+     the client's settings end in the plain words "Client settings", a
+     module's page ends in the module's own menu, and the old pill is gone
+     from both (a build drawing both is two ways back, §87). */
   const back = async () => await page.evaluate(() => {
-    const b = document.getElementById("clientback");
-    return { shown: !b.hidden, word: document.getElementById("clientbackname").textContent };
+    const t = document.querySelector("nav.trail"), b = document.getElementById("clientback");
+    return { trail: t ? t.innerText.replace(/\s+/g, " ").trim() : null,
+      here: t && t.querySelector(".trhere") ? t.querySelector(".trhere").textContent.trim() : null,
+      mod: t && t.querySelector("details.trstep:not(.trclient) > summary") ? t.querySelector("details.trstep:not(.trclient) > summary").textContent.trim() : null,
+      ff: !!(t && t.querySelector("a.trff[href='/platform']")), pill: !!(b && !b.hidden && b.offsetParent) };
   });
   let bk = await back();
-  check(bk.shown && bk.word === "Save & close", "the client's own settings say what the way back DOES", JSON.stringify(bk));
+  check(bk.ff && /Raya Trade/.test(bk.trail || "") && bk.here === "Client settings" && !bk.pill,
+    "the client's own settings end the trail in \"Client settings\", with Forefront as the way back", JSON.stringify(bk));
   await open("/raya-trade/strategy/group/performance"); bk = await back();
-  check(bk.shown && bk.word === "Raya Trade", "…and a module's page names the client it goes back from", JSON.stringify(bk));
+  check(bk.ff && /Raya Trade/.test(bk.trail || "") && bk.here === null && /Strategy/.test(bk.mod || "") && !bk.pill,
+    "…and a module's page ends it in that module's own menu", JSON.stringify(bk));
   await open("/raya-trade/setup/people");
   const word = "shell " + Date.now();
   await page.evaluate((w) => { REVIEW.note.mobile = w; paint(); }, word);
@@ -325,17 +338,29 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
          document on both rails — `seen()` is false for `display:none` exactly
          as it is for absent, so the claim that survives is the one that was
          always meant: it is not on the screen and not reachable. */
+      /* §399: FOR THE OFFICE THE BAR IS THE TRAIL. `switcher` asked for the
+         four-square mark, which §399 DELETED — the modules are offered by the
+         trail's client step now — so it counts what that step offers, and
+         the heading is what the trail says rather than a brand the office no
+         longer wears. REWRITTEN, NEVER LOOSENED (§218): every claim below
+         is still about what the office can see and reach. */
       switcher: seen(document.querySelector(".top-in .topmark")),
-      h1: (document.querySelector(".brand h1") || {}).textContent || "",
-      sub: (() => { const o = document.getElementById("orgname"); return seen(o) ? o.textContent : ""; })(),
-      mark: seen(document.getElementById("clientlogo")),
+      trail: seen(document.querySelector("nav.trail")),
+      client: ((document.querySelector("nav.trail .trclient > summary span") || {}).textContent || "").trim(),
+      where: (() => { const h = document.querySelector("nav.trail .trhere"), m = document.querySelector("nav.trail details.trstep:not(.trclient) > summary span");
+        return ((h || m || {}).textContent || "").trim(); })(),
+      mods: Array.from(document.querySelectorAll("nav.trail .trclient [data-trgo]")).map((e) => e.dataset.trgo).filter((g) => /^\/raya-trade\/[a-z]+$/.test(g)),
+      sets: Array.from(document.querySelectorAll("nav.trail .trclient [data-trgo]")).map((e) => e.dataset.trgo).filter((g) => /^cross:(?!client$)/.test(g)),
+      h1: seen(document.querySelector(".brand")) ? ((document.querySelector(".brand h1") || {}).textContent || "") : "",
+      mark: seen(document.querySelector("nav.trail .trmark")) || seen(document.getElementById("clientlogo")),
     };
   });
   await open("/raya-trade/setup/people");
   let b = await bar();
   check(b.scope === "client" && b.row === false && b.dests === 0, "the module's navigation is not drawn over the client's own pages", JSON.stringify(b));
   check(b.viewer === false, "\u2026nor the viewer strip \u2014 looking as somebody is a question about a module's pages", JSON.stringify(b));
-  check(b.switcher === false, "\u2026nor the module switcher, which is built at load and cannot be repainted away", JSON.stringify(b));
+  check(b.switcher === false && b.trail === true && b.h1 === "",
+        "\u2026nor the retired four-square switcher: the office's bar is the trail, and the brand stands down for it (\u00a7399)", JSON.stringify(b));
   /* REWRITTEN, NEVER LOOSENED (\u00a7218, \u00a7214.3). This asked whether the
      attribute was PRESENT, which said "this client holds more than one" only
      while the attribute carried the switcher's rule in its name \u2014 \u00a7362.1
@@ -363,7 +388,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
         "a module whose note holds an apostrophe survives the stamp whole — the attribute is single-quoted (§235)",
         JSON.stringify(apos || clMods.map((m) => m.key)));
   check(clMods.length >= 2, "\u2026and this client HAS a second module, so that absence is a decision (\u00a7113.8)", JSON.stringify(clMods));
-  check(b.h1 === "Raya Trade" && /Client settings/.test(b.sub), "the heading names the client and what you are looking at", b.h1 + " / " + b.sub);
+  check(b.client === "Raya Trade" && b.where === "Client settings", "the trail names the client and what you are looking at", b.client + " / " + b.where);
 
   /* BOTH ENDS (\u00a794.2). A build that deleted the row outright satisfies every
      assertion above, so the module's own Setup is measured in the same run \u2014
@@ -374,8 +399,9 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   b = await bar();
   check(b.scope === "strategy" && b.row === true && b.dests > 0, "a module's own Setup keeps its navigation", JSON.stringify(b));
   check(b.viewer === true, "\u2026and its viewer strip", JSON.stringify(b));
-  check(b.switcher === true, "\u2026and the switcher, because there a module IS what you are in", JSON.stringify(b));
-  check(b.h1 === "Strategy Management Platform", "\u2026and its document is headed by the product", b.h1);
+  check(clMods.every((m) => b.mods.includes("/raya-trade/" + m.key)) && b.mods.length === clMods.length,
+        "\u2026and the trail's client step offers every module this person may open, because there a module IS what you are in", JSON.stringify(b.mods));
+  check(b.where === "Strategy" && b.client === "Raya Trade", "\u2026and the trail ends in the module, not in Client settings", b.client + " / " + b.where);
 
   /* AND THE OTHER END OF \u00a7383'S OWN RULE, MADE (\u00a794.2, \u00a7255). Take the
      third module away and the switcher must go with it: the only place left
@@ -390,8 +416,14 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
   await open("/raya-trade/strategy/setup/cycle");
   const two = await bar();
-  check(two.switcher === false && two.row === true,
-        "\u2026and with the reports as the only other module it is NOT drawn \u2014 the tab row already reaches them (\u00a7383, \u00a732)", JSON.stringify(two));
+  /* REWRITTEN, NEVER LOOSENED (\u00a7218). \u00a7383 took the switcher down when
+     its only other entry was a module the tab row already reaches, because a
+     menu of one is a door behind a door (\u00a732). The trail's client step is
+     never a menu of one \u2014 it always carries Client settings and Switch
+     client \u2014 so what survives is that it offers EXACTLY the modules this
+     client has, no more: with two, two. */
+  check(two.mods.length === 2 && two.row === true && two.switcher === false,
+        "\u2026and with two modules the trail offers exactly two, and no retired switcher comes back (\u00a7383, \u00a7399)", JSON.stringify(two));
   await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights", "tracker"]), tenantId]);
   await open("/raya-trade/strategy/setup/cycle");
 
@@ -406,7 +438,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      bar that is wrong and that is what this section is about. */
   await open("/raya-trade/setup/cycle");
   b = await bar();
-  check(path() === "/raya-trade/strategy/setup/cycle" && b.scope === "strategy" && b.row === true && b.h1 === "Strategy Management Platform",
+  check(path() === "/raya-trade/strategy/setup/cycle" && b.scope === "strategy" && b.row === true && b.where === "Strategy",
         "\u2026and a spine-form address naming a MODULE's page ends there, wearing the module's bar", path() + " / " + JSON.stringify(b));
 
   /* AND BOTH HALVES OF THE TEST ARE LOAD-BEARING, which is the one thing no
@@ -426,8 +458,8 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      and could not fail). This is the only place a build that writes the
      client's name and never takes it off can be caught: it would stand over
      Strategy's navigation for the rest of the session. */
-  check(b.h1 === "Strategy Management Platform" && b.sub === "" && b.mark === false,
-        "\u2026and the product's own name is PUT BACK on the way, never left standing (\u00a794.2)", b.h1 + " / " + b.sub + " / mark " + b.mark);
+  check(b.where === "Strategy" && b.mark === false,
+        "\u2026and the trail stops saying Client settings on the way, never left standing (\u00a794.2)", b.where + " / mark " + b.mark);
 
   /* THE MARK IS MADE, because the demo seed carries none on purpose (\u00a7259.2:
      a client must never inherit Raya's), so every assertion about it would
@@ -479,97 +511,60 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      `.raillist`, which is the one thing that scrolls, or the door scrolls
      away (\u00a7290.1). */
   await open("/raya-trade/setup/people");
-  const doors = await page.evaluate(() => {
-    const list = document.querySelector(".setuprail .raillist");
-    return Array.from(document.querySelectorAll(".setuprail .railback")).map((a) => ({
-      text: a.textContent.trim(), href: a.getAttribute("href") || "",
-      fwd: a.classList.contains("railfwd"),
-      inList: !!(list && list.contains(a)),
-      afterList: !!(list && (list.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING)),
-      seen: !!(a.checkVisibility && a.checkVisibility()),
-    }));
-  });
-  const across = doors.filter((d) => d.fwd);
-  check(across.length === clMods.length && clMods.every((m) => across.some((d) => d.href === "/raya-trade/" + m.key + "/setup" && d.text === m.label + " settings \u203a")),
-        "the client's rail carries one way across per module this person may open", JSON.stringify(across));
-  check(across.length > 0 && across.every((d) => d.seen && !d.inList && d.afterList),
-        "\u2026drawn, outside the scrolling list, and after it \u2014 a place to go ON to (\u00a7360.9, \u00a7290.1)", JSON.stringify(across));
-  check(doors.some((d) => !d.fwd && /Back to the console/.test(d.text)),
-        "\u2026and the way OUT is still above the list, where a back link belongs", JSON.stringify(doors.map((d) => d.text)));
-  /* AND IT LANDS ON THE MODULE'S OWN SETUP, WEARING THE MODULE'S BAR \u2014
-     pressed, never read: a door wired to nothing renders perfectly (\u00a796). */
-  /* DEGRADES RATHER THAN DIES (\u00a7215): a click on a door that is not there
-     waits thirty seconds and takes every assertion after it down, which on
-     the one-way build reported the fault as a DEATH rather than as the two
-     it is. */
-  /* AND THE PRESS IS NOT A PAGE LOAD (\u00a7367) \u2014 the one assertion
-     this whole crossing is for, and the one every other assertion here passes
-     without: a build that followed the link lands on the same rail wearing the
-     same bar at the same address, three seconds later. A marker planted on
-     `window` before the press survives a repaint and cannot survive a
-     document (\u00a7356's own technique). */
+  /* §399: THE WAY ACROSS IS THE TRAIL'S NOW. REWRITTEN, NEVER LOOSENED
+     (§218): what this block is FOR is §362.1 — from the client's
+     settings, every module's settings is one press away, and the press is not
+     a page load (§367). The rail rows that carried it are stood down for the
+     office (the trail says the same thing once, §87), so they are asserted
+     GONE and the crossings are asserted where they moved: one "<Module>
+     settings" per module in the client step, as an AGREEMENT with
+     `data-modules` (§94.8), never listed on a module's own page, where its
+     settings are the third step's. */
+  const railRows = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail .railback")).filter((a) => a.checkVisibility && a.checkVisibility()).length);
+  check(railRows === 0, "the rail's own back and across rows are stood down for the office \u2014 the trail carries them (\u00a7399)", railRows);
+  b = await bar();
+  check(b.sets.length === clMods.length && clMods.every((m) => b.sets.includes("cross:" + m.key)),
+        "the client step carries one way across per module this person may open (\u00a7362.1, kept)", JSON.stringify(b.sets));
   await page.evaluate(() => { window.__stay = 1; });
-  if (await page.locator(".setuprail .railfwd").count()) {
-    await page.click(".setuprail .railfwd");
+  const pressTrail = async (go) => {
+    if (!(await page.locator("nav.trail [data-trgo='" + go + "']").count())) { fail("a trail entry to press", go); return false; }
+    await page.evaluate((g) => { const d = document.querySelector("nav.trail [data-trgo='" + g + "']").closest("details"); if (d) d.open = true; }, go);
+    await page.click("nav.trail [data-trgo='" + go + "']", { timeout: 5000 }).catch((e) => fail("pressing " + go, e.message.split("\n")[0]));
+    return true;
+  };
+  if (await pressTrail("cross:strategy")) {
     await page.waitForURL(/\/raya-trade\/strategy\/setup/, { timeout: 8000 }).catch(() => {});
     await booted();
   }
   b = await bar();
   const reached = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail [data-setupgo]")).map((e) => e.dataset.setupgo));
-  check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,
-        "\u2026and pressing it lands on the module's Setup, wearing the module's bar", path() + " / " + JSON.stringify(b));
+  check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true && b.where === "Strategy",
+        "\u2026and pressing it lands on the module's Setup, the trail ending in the module", path() + " / " + JSON.stringify(b));
   check(reached.includes("access"), "\u2026which is the rail Roles & access is on \u2014 the page he could not reach (\u00a761)", reached.join(","));
   check(await page.evaluate(() => window.__stay === 1), "\u2026and it crossed WITHOUT reloading the platform (\u00a7367)", "the page was rebuilt");
-  /* THE SWITCHER CAME WITH IT. It is built once at load and was returned out
-     of on the client's scope, so before \u00a7367 crossing in place left it never
-     built \u2014 a control silently missing after a press that draws everything
-     else correctly (\u00a796's family). */
-  check(b.switcher === true, "\u2026and the module switcher is back, on a rail where a module IS what you are in", JSON.stringify(b));
-  /* THE OTHER END. A build that moved the row rather than adding one would
-     satisfy every assertion above. */
-  const back = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail .railback")).map((a) => a.textContent.trim() + " -> " + (a.getAttribute("href") || "")));
-  check(back.length === 1 && /Client settings/.test(back[0]) && /\/raya-trade\/setup$/.test(back[0]),
-        "\u2026and a module's rail still carries its own one row the other way", JSON.stringify(back));
+  check(b.sets.length === 0 && b.mods.length === clMods.length,
+        "\u2026and on a module's page the client step lists the modules, not their settings twice (\u00a787)", JSON.stringify(b));
+  const third = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail details.trstep:not(.trclient) [data-trgo]")).map((e) => e.dataset.trgo));
+  check(third.includes("home") && third.includes("cross:strategy"), "\u2026and the module's own step offers Home and its settings", JSON.stringify(third));
 
-  /* AND THE OTHER DIRECTION CROSSES IN PLACE TOO (\u00a7367). BOTH
-     ENDS (\u00a794.2): a build that took only the outward press would leave the
-     way back a full reload, which is the half Islam presses most \u2014 and it is
-     the direction where the chrome has to be STOOD DOWN rather than brought
-     back, so the switcher and the navigation are asserted gone by paint. */
+  /* AND THE OTHER DIRECTION CROSSES IN PLACE TOO (\u00a7367). BOTH ENDS
+     (\u00a794.2): the way back is the half Islam presses most. */
   await page.evaluate(() => { window.__stay = 2; });
-  /* GUARDED LIKE ITS TWIN ABOVE (§215): a click on a door that is not there
-     waits thirty seconds and takes every assertion after it down — which on
-     a build where the outward press never landed reported the whole section
-     as a DEATH rather than as the failures it had already found. */
-  if (await page.locator(".setuprail .railback.railfwd").count()) {
-    await page.click(".setuprail .railback.railfwd");
-    await page.waitForURL(/\/raya-trade\/setup\//, { timeout: 8000 }).catch(() => {});
-  } else fail("a way back across, to press", "no .railback.railfwd on this rail");
+  if (await pressTrail("cross:client")) await page.waitForURL(/\/raya-trade\/setup\//, { timeout: 8000 }).catch(() => {});
   await page.waitForTimeout(400);
   b = await bar();
   const mine = await page.evaluate(() => Array.from(document.querySelectorAll(".setuprail [data-setupgo]")).map((e) => e.dataset.setupgo));
   check(await page.evaluate(() => window.__stay === 2), "the way back crosses without reloading either (\u00a7367)", "the page was rebuilt");
-  /* THE SPINE FORM, WITH NO MODULE WORD IN IT \u2014 which is what says the
-     address followed the scope rather than the press guessing one (\u00a7362.1's
-     `addressOf` reads the same attribute, so this needed no edit there). */
   check(/^\/raya-trade\/setup\/[\w-]+$/.test(path()) && b.scope === "client",
         "\u2026and the address it writes is the client's own spine form", path() + " / " + b.scope);
-  check(b.row === false && b.viewer === false && b.switcher === false && b.h1 === "Raya Trade",
-        "\u2026wearing the client's bar, with the module's navigation and switcher stood down", JSON.stringify(b));
-  /* THE RAIL IS THE CLIENT'S, ASSERTED AS AN AGREEMENT rather than against a
-     page name: every page drawn belongs to no module. A build that crossed the
-     bar and left the rail would satisfy everything above. */
+  check(b.row === false && b.viewer === false && b.where === "Client settings",
+        "\u2026with the module's navigation stood down and the trail ending in Client settings", JSON.stringify(b));
   const mods = await page.evaluate((ks) => ks.map((k) => {
     const d = setupDefsAll().filter((x) => x.k === k)[0]; return d ? (d.mod || "client") : "?";
   }), mine);
   check(mine.length > 0 && mods.every((m) => m === "client"), "\u2026and every page on it is the client's own", JSON.stringify(mine) + " / " + JSON.stringify(mods));
 
-  /* AND BACK WALKS THE CROSSING. The place pushed carries no scope \u2014 it never
-     has \u2014 so this is `resolveSetupScope()` answering from the PAGE, which is
-     the rule that already decides a rail when an address and a page disagree
-     (\u00a7359.2, research R2). Asserted because a crossing that pushed an
-     address Back could not honour would be a worse dead end than the reload it
-     replaced (\u00a761). */
+  /* AND BACK WALKS THE CROSSING (\u00a7359.2, research R2). */
   await page.goBack();
   await page.waitForTimeout(500);
   b = await bar();
@@ -577,13 +572,12 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
         "\u2026and Back returns to the module's Setup, wearing its bar again", path() + " / " + JSON.stringify(b));
 
   await open("/raya-trade/setup/people");
-  /* AND *Save & close* GOES WHERE IT SAYS. The handler is \u00a7313.23's and is
-     untouched here; what is asserted is that the reworded control is still
-     that control \u2014 a word changed on a button that no longer navigates is
-     \u00a796's family, and renders perfectly. */
-  await page.click("#clientback");
-  await page.waitForURL(/\/platform$/, { timeout: 8000 }).catch(() => {});
-  check(/^\/platform$/.test(path()), "Save & close goes back to the console", path());
+  /* AND THE WAY OUT GOES WHERE IT SAYS. *Save & close* was \u00a7362's word for
+     the pill \u00a7399 retired; the trail's first step is that way out now,
+     pressed rather than read (\u00a796). */
+  await page.click("nav.trail a.trff", { timeout: 5000 }).catch((e) => fail("pressing Forefront", e.message.split("\n")[0]));
+  await page.waitForURL(/\/platform/, { timeout: 8000 }).catch(() => {});
+  check(/^\/platform$/.test(path()), "the trail's Forefront goes back to the console", path());
   check(errs.filter((e) => /PAGEERROR/.test(e)).length === 0, "no page error on the way", errs.join(" | "));
   } finally { await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]); }
 });
@@ -713,7 +707,77 @@ await section("4 · Forefront's own pages", async () => {
   check(ffTabs.includes("Clients") && ffTabs.includes("Consultants") && ffTabs.includes("Who sees what"),
     "Forefront's own pages, the gated one among them for an admin", ffTabs.join("|"));
   check(ffTabs.includes("Memory"), "…and the consulting memory, which every consultant reaches (spec 045)", ffTabs.join("|"));
+  /* \u00a7399: THE CONSOLE OPENS ON *MY WORK*, which is the first tab \u2014 so the
+     cards are one press away rather than the landing. REWRITTEN, NEVER
+     LOOSENED (\u00a7218): the landing is asserted as the new decision, and the
+     cards are still asserted, by pressing Clients, and by the address that
+     names them (a link to the cards must keep working). */
+  check(ffTabs[0] === "My work" && (await page.locator("#page").textContent()).includes("My work"),
+    "the console opens on My work, its first tab (\u00a7399)", ffTabs.join("|"));
+  await page.locator("#nav button", { hasText: "Clients" }).click();
+  await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
   check((await page.locator("#page").textContent()).includes("Raya Trade") && (await page.locator("#page").textContent()).includes("Add a client"), "the cards: Raya Trade, and Add a client");
+  check(new URL(page.url()).hash === "#clients", "\u2026and the address names the cards, so a link back to them lands there", page.url());
+
+  /* \u00a74b \u2014 MY WORK (\u00a7399). The state is MADE (\u00a7255): the dev tenant
+     holds no Tracker actions and no tracker module, so every assertion below
+     would pass on a build that lost the list. Three of the office's open
+     actions in the three buckets, one of theirs DONE and one belonging to
+     somebody else \u2014 the two that must NOT appear, or a build that read the
+     whole tracker passes every presence assertion (\u00a794.2). Put back after. */
+  const was = (await owner.query("SELECT modules FROM tenants WHERE id = $1", [tenantId])).rows[0].modules;
+  await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(["strategy", "tracker"]), tenantId]);
+  await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);
+  const ta = (title, who, days, status) => owner.query(
+    "INSERT INTO tracker_actions (tenant_id, title, owner_key, due, first_due, status) VALUES ($1,$2,$3,current_date + $4::int, current_date + $4::int, $5)",
+    [tenantId, title, who, days, status]);
+  await ta("MW late one", "smo", -14, "in_progress");
+  await ta("MW this week", "smo", 0, "not_started");
+  await ta("MW far off", "smo", 30, "not_started");
+  await ta("MW finished", "smo", -3, "done");
+  await ta("MW not mine", "mobhead", 0, "not_started");
+  try {
+    await page.locator("#nav button", { hasText: "My work" }).click();
+    await page.waitForSelector("table.work tr.wrow", { timeout: 8000 }).catch(() => {});
+    const w = await page.evaluate(() => ({
+      rows: Array.from(document.querySelectorAll("table.work tr.wrow td.act")).map((e) => e.textContent),
+      groups: Array.from(document.querySelectorAll("table.work tr.grp")).map((e) => e.textContent.trim()),
+      late: Array.from(document.querySelectorAll("table.work td.late")).length,
+    }));
+    check(w.rows.length === 3 && w.rows.includes("MW late one") && w.rows.includes("MW this week") && w.rows.includes("MW far off"),
+      "My work lists the office's three open actions on this client", JSON.stringify(w.rows));
+    check(!w.rows.includes("MW finished") && !w.rows.includes("MW not mine"),
+      "\u2026and neither a finished action nor somebody else's (\u00a794.2)", JSON.stringify(w.rows));
+    check(JSON.stringify(w.groups) === JSON.stringify(["Late", "This week", "Next week and later"]) && w.rows[0] === "MW late one" && w.late === 1,
+      "\u2026grouped Late, This week, Next week and later, with the late one said in the alarm ink", JSON.stringify(w));
+    await page.click("table.work tr.wrow >> nth=0");
+    await page.waitForURL(/\/raya-trade\/tracker/, { timeout: 8000 }).catch(() => {});
+    check(path() === "/raya-trade/tracker", "\u2026and a row opens that client's Tracker", path());
+    await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" });
+    await page.waitForSelector(".ccard[data-client]", { timeout: 8000 }).catch(() => {});
+    const card = (await page.locator(".ccard[data-client]").first().textContent()) || "";
+    check(/3 open\s*\u00b7\s*1 late/.test(card), "the client's card says how many of yours are open and late on its Tracker row", card.replace(/\s+/g, " ").slice(0, 200));
+  } finally {
+    await owner.query("DELETE FROM tracker_actions WHERE tenant_id = $1", [tenantId]);
+    await owner.query("UPDATE tenants SET modules = $1 WHERE id = $2", [JSON.stringify(was), tenantId]);
+  }
+
+  /* \u00a74c \u2014 A CLIENT'S OWN PERSON HAS NO TRAIL (\u00a7399): they do not travel
+     between clients or modules, so their bar names their company and nothing
+     leads anywhere. Both ends \u2014 the office's trail is asserted in \u00a73. */
+  await fresh(); await signIn("mobhead@raya.example");
+  await open("/raya-trade/strategy/mobile/strategy");
+  const staff = await page.evaluate(() => ({
+    trail: !!document.querySelector("nav.trail"),
+    h1: ((document.querySelector(".brand h1") || {}).textContent || "").trim(),
+    sub: ((document.getElementById("orgname") || {}).textContent || "").trim(),
+    switcher: !!(document.querySelector(".topmark") && document.querySelector(".topmark").checkVisibility()),
+  }));
+  check(!staff.trail && !staff.switcher && staff.h1 === "Raya Trade" && /Strategy Management Platform/.test(staff.sub),
+    "a client's own person gets no trail and no switcher; their bar names their company", JSON.stringify(staff));
+  /* Back to the office for the rest of this section, on the page it expects. */
+  await fresh(); await signIn("office@forefront.example");
+  await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });
   const post = (body) => page.evaluate(async (b) => (await (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) })).json()), body);
   let j = await post({ action: "consultants" });
   check(j.ok && j.people.some((x) => x.email === "office@forefront.example" && x.seats.some((s) => s.key === "raya-trade" && s.seat === "super")), "the consultants list carries the seats", JSON.stringify(j).slice(0, 160));

@@ -830,19 +830,6 @@
    heading, one element out). */
 html[data-client-settings] nav.units,
 html[data-client-settings] .viewer { display:none; }
-/* AND THE MODULE SWITCHER, WHICH IS NAMED RATHER THAN CONTAINED (§367).
-   The two above are CONTAINERS, and standing a container down is what
-   covers a control added to it later — but the switcher's container is
-   `.top-in`, which also holds the client's own heading and mark, and those are
-   exactly what these pages DO want. So this one is named.
-
-   IT USED TO BE STRUCTURAL AND STOPPED BEING ABLE TO BE. shell/route.js built
-   the switcher once at load and returned early on the client's scope, which
-   answered while the only way between the two rails was a page load; §367 made
-   that crossing a press, so the switcher has to follow the SCOPE rather than
-   the navigation, and this is the rule the rest of the chrome already
-   follows. */
-html[data-client-settings] .top .topmark { display:none; }
 /* The way back says what it does first. `change` is the word for a control
    that NAMES the client you are in; here it names the act, so the second half
    would be saying something the first half already did (§87). */
@@ -5697,17 +5684,43 @@ html[data-client-settings] .top .topmark { display:none; }
      is a server to say which ones a client has. The offline copy (§306) has
      no modules, so a switcher baked into the frozen shell would be a control
      that could never open anything (§61). */
-  details.dlmenu.topmark { align-self:center; margin-right:2px; }
-  details.dlmenu.topmark > summary { list-style:none; display:grid; place-items:center;
-             width:28px; height:28px; border:1px solid var(--line); border-radius:8px;
-             color:var(--ink-3); background:none; cursor:pointer; }
-  details.dlmenu.topmark > summary::-webkit-details-marker { display:none; }
-  details.dlmenu.topmark > summary:hover { border-color:var(--stone-soft); color:var(--ink); }
-  details.dlmenu.topmark > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  details.dlmenu.topmark[open] > summary { border-color:var(--stone-soft); color:var(--ink); }
-  details.dlmenu.topmark > summary svg { width:17px; height:17px; display:block; }
-  details.dlmenu.topmark > .menu { min-width:290px; top:calc(100% + 6px); left:0; }
-  details.dlmenu.topmark > .menu button[aria-current="true"] { font-weight:700; }
+  /* ══ THE TRAIL (§399) ═══════════════════════════════════════════════
+     Replaces the four-square switcher (deleted with its markup, §24) and the
+     client-name pill, for Forefront's own people only — `data-console`,
+     written by sync.js. One line: Forefront › [mark] client ▾ › module ▾.
+     The menus are `details.dlmenu > .menu`'s own, unchanged (§53.5); what is
+     here is the line. The step you are ON is the ink colour and weight, the
+     steps above it the quieter ink, which is how a trail reads everywhere. */
+  nav.trail { display:flex; align-items:center; gap:6px; min-width:0; margin-right:auto;
+              font-size:13.5px; white-space:nowrap; }
+  nav.trail .trff { color:var(--ink-2); text-decoration:none; font-weight:600;
+                    letter-spacing:.04em; font-size:12px; text-transform:uppercase; }
+  nav.trail .trff:hover { color:var(--ink); text-decoration:underline; }
+  nav.trail .trff:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:3px; }
+  nav.trail .trsep { color:var(--ink-3); font-size:15px; line-height:1; }
+  nav.trail details.trstep > summary { cursor:pointer; gap:6px; padding:3px 7px; border-radius:7px;
+                                       color:var(--ink); font-weight:600; min-width:0; }
+  nav.trail details.trclient > summary { color:var(--ink-2); }
+  nav.trail details.trstep > summary:hover,
+  nav.trail details.trstep[open] > summary { background:var(--surface-2); color:var(--ink); }
+  nav.trail details.trstep > summary > span { overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+  nav.trail details.trstep > summary > svg { width:10px; height:10px; flex:none; color:var(--ink-3); }
+  nav.trail .trmark { height:20px; width:auto; max-width:72px; object-fit:contain; display:block; }
+  nav.trail .trhere { color:var(--ink); font-weight:600; padding:3px 7px; }
+  nav.trail .menu button[aria-current="true"] { font-weight:700; }
+  nav.trail .trrule { height:1px; background:var(--line); margin:4px 0; }
+  /* THE TRAIL IS THE BRAND LINE FOR FOREFRONT'S PEOPLE, so the product's own
+     name, the client's mark and the old pill stand down under it — the
+     client is named once, in the trail (§120). */
+  html[data-console] .top .brand,
+  html[data-console] .top .clientlogo,
+  html[data-console] .top .clientback { display:none; }
+  /* The rail's own "‹ Back to the console" and "… settings ›" rows answered
+     the same question the trail now answers on every page; with the trail
+     drawn they are a second way to say it (§87), so they stand down. Kept
+     for the one reader with no trail: a client's own office on the client's
+     settings. */
+  html[data-console] .setuprail .railback-row { display:none; }
 
   details.dlmenu.topsel { position:relative; display:flex; }
   details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
@@ -6405,6 +6418,11 @@ html[data-client-settings] .top .topmark { display:none; }
   .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  /* AND GOLD WHILE YOU ARE HOME (§399): Home is a page now, and on the
+     destination row gold is where you are (§197.2) — so the house wears it
+     while Home is open, whether or not anything is waiting. */
+  html[data-home-open] .units .navmenu-btn.homemark{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
      the two-door split (§47.7): the gear is one destination now, so there is
@@ -9780,7 +9798,11 @@ body.presenting .tourdock { display:none; }
 
    LAYERING: above the chat dock (45) — its row on this screen IS the door —
    and below the tour (70), which the intro-round card hands the screen to. */
-.welcomeover { position:fixed; inset:0; z-index:60; overflow:auto;
+/* HOME IS A PAGE INSIDE THE CHROME (§399), not a screen over it: it starts
+   under the sticky chrome, so the navigation above stays on screen and is
+   the way on — and it sits BELOW the chrome's own layer (9), or a menu
+   opened from the trail would drop behind it. */
+.welcomeover { position:fixed; inset:0; top:var(--chrome-h, 0px); z-index:8; overflow:auto;
                background:var(--ground); color:var(--ink);
                -webkit-font-smoothing:antialiased; }
 .welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
@@ -9889,34 +9911,6 @@ body.presenting .tourdock { display:none; }
 .welcomeover .wbtn.wcta { background:var(--cta); border-color:var(--cta);
   color:var(--cta-ink); }
 .welcomeover .wbtn.wcta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
-/* ── THE WAY OUT (§159) ──────────────────────────────────────────────────
-   It was a text link at the foot of the LEFT COLUMN, which is three faults at
-   once: it is the only exit (there is no ×, no Escape, no click-outside), it
-   was the quietest thing on a screen holding three bordered buttons and one
-   solid fill, and it read as the end of the "Waiting on you" list rather than
-   the way past the screen. Below 960px it was not even last — the columns
-   stack, so 411px of side column sat AFTER the way out at 900px wide.
-
-   One bar across both columns answers all three: a real control, spanning the
-   grid so its scope is the screen, and last at every width. It wears the wide
-   row shape .wpages already uses (§53.5) and spends none of §41's accent —
-   except on the one screen where there is no other act to spend it on. */
-.welcomeover .wexit { margin-top:22px; width:100%; display:flex;
-  align-items:center; justify-content:space-between; gap:16px; cursor:pointer;
-  text-align:left; font:inherit; padding:17px 22px; border-radius:var(--r);
-  border:1px solid var(--line); background:var(--surface); color:var(--stone); }
-.welcomeover .wexit .wexlab { font-size:15px; font-weight:800; letter-spacing:-.01em; }
-.welcomeover .wexit .wgo { font-family:var(--mono); font-size:var(--fs-lead);
-  color:var(--gold-deep); }
-.welcomeover .wexit:hover { border-color:var(--gold-deep); }
-.welcomeover .wexit:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-/* PROMOTED ONLY WHEN IT IS THE ONLY ACT (§41, §45.2): with nothing waiting
-   there is no CTA on the screen, so the exit takes the fill — its own class,
-   because .wcta means "an action row shouts" and this is not an action row. */
-.welcomeover .wexit.wloud { background:var(--cta); border-color:var(--cta);
-  color:var(--cta-ink); }
-.welcomeover .wexit.wloud .wgo { color:var(--cta-ink); }
-.welcomeover .wexit.wloud:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
 
 /* ── The side column ────────────────────────────────────────────────────── */
 .welcomeover .wside { display:flex; flex-direction:column; gap:22px; }

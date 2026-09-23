@@ -57100,3 +57100,57 @@ words — *"yes go ahead with 1 and 2"*.
   `lib/` or `db/` rule changes, so no forced sign-out is owed (spec 029). The
   built file's bytes changed, so `sw.js` is bumped (§91) and the served copies
   regenerated (§329).
+
+## §399 — moving between the console, a client and its modules (2026-09-23)
+
+Islam: *"review the different pages and suggest different flow of going forward
+and back … I don't like the overview page of the strategy because it has no
+navigation … and for the main console we can have the person tasks across the
+different clients … derived from the internal tracker."* Before/after mockups
+first (rule 1c); he took every recommendation with two changes — *"replace the
+home word with the Home icon that we already have"*, and *"for the client user
+he doesn't need the rail at the top"* — then *"proceed"*.
+
+- **ONE TRAIL FOR THE OFFICE**: `Forefront › [mark] Client ▾ › Module ▾`
+  replaces the client pill and the four-square switcher. The client menu lists
+  its modules, Client settings and *Switch client…* (`/platform#clients`); on
+  Client settings the last step reads **Client settings** and replaces *Save &
+  close* and the two crossing rows on the rail. Drawn only where the document
+  carries `data-console` (the server's answer that this is somebody Forefront
+  sent in) — a client's own staff get **no trail and no switcher**, and their
+  bar says the company's name with the product's small beneath it.
+- **ONE PRESS FROM CLIENT SETTINGS TO A MODULE'S SETTINGS SURVIVES** (§362.1's
+  promise): hiding the rail rows took it away, so on Client settings the
+  client menu also lists *<Module> settings*, crossing without a reload
+  (§367). Not drawn in the mockup; added so nothing that worked is lost.
+- **HOME IS THE HOUSE AND A PAGE INSIDE THE CHROME**: the welcome is no longer
+  an overlay with a Continue button. It sits under the navigation, the house
+  is lit gold while it is open, any tab or destination press takes it down, and
+  it opens once per sign-in as before. A theme press leaves it standing.
+- **MY WORK, THE CONSOLE'S FIRST TAB**: every open Internal Tracker action the
+  person owns, across the clients they may open, grouped *Late · This week ·
+  Next week and later*, each row opening that client's Tracker. Read through
+  `withTenant` per client with the tracker's own words (§53.5); nothing
+  stored; Meeting Notes' actions deliberately NOT read (his word); a client
+  that will not answer is named, never taken for nothing (§93). Admins get a
+  colleague picker, drawn only when there is somebody else to pick. The client
+  card's Tracker row reads *"3 open · 1 late"* — a mark, never a sentence
+  (§368). `who` is refused for anybody who is not an admin, on the server.
+- **§65.9 AGAIN**: the rows were first classed `.row`, which is the page's
+  global flex row, so every cell floated as its own box — renamed `wrow`.
+  And one font shorthand ending in `inherit` was invalid CSS (§356.14's fault);
+  mine is fixed, four older ones in the console stylesheet are untouched and
+  recorded.
+- **CHECKS**: `shell.mjs` 133/0 (new §4b seeds five actions — two not his or
+  done, asserted absent; §4c signs in as a client's own head and asserts no
+  trail), `modules.mjs` 160/0, `door-landing.mjs` 145/0, `welcome.py` OK, and
+  every break red, two new: `mywork-everyone` (the owner filter dropped) and
+  `trail-for-staff`. Stale assertions REWRITTEN, never loosened (§218): the
+  Continue button, *Save & close*, the switcher, and six console checks that
+  assumed the console opens on Clients now go to `/platform#clients` — via
+  `about:blank` first, because a same-page hash change is not a navigation.
+  Full `qa.py` ERRORS none; `built-in-step` and `generated-in-step` clear;
+  `tsc` clean.
+- **Nothing stored moves, nothing is migrated, no save rule changes**, so no
+  forced sign-out is owed (spec 029). The built file's bytes changed, so
+  `sw.js` is bumped (§91).

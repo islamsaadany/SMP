@@ -172,7 +172,9 @@ def main():
         pg.on("pageerror", lambda e: errs.append(str(e)))
 
         def land():
-            pg.goto(BASE + "/platform", wait_until="networkidle")
+            # §399: the console opens on My work now, and a same-page hash change is
+            # not a navigation — leave the page first so the goto really reloads.
+            pg.goto("about:blank"); pg.goto(BASE + "/platform#clients", wait_until="networkidle")
             pg.wait_for_selector(".ccard[data-client]", timeout=9000)
             if BREAK in BREAKS: pg.evaluate(BREAKS[BREAK])
 

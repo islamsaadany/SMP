@@ -9,6 +9,7 @@
    nothing else. What each action answers is what the frozen page reads, so
    platform.html is served unchanged. */
 import { landingFactsFor } from "./landing-facts.ts";
+import { myWork, tallyMark } from "./my-work.ts";
 import type { Pool, PoolClient } from "pg";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
@@ -119,6 +120,9 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
     const shown: ClientRow[] = FF.visibleClients(world, account, all);
     const cards = [];
+    /* the Tracker row's mark is YOUR open actions there (§399) — read once
+       for every client through the same reader My work uses */
+    const work = await myWork(shown, world.mine, account.email);
     for (const row of shown) {
       const facts = await factsFor(row);
       cards.push({ key: row.key, name: row.name, industry: row.industry, kind: row.kind, mark: row.mark, mine: FF.isMine(world, row.key),
@@ -131,7 +135,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
            differently from the switch or from Setup (§53.5).
            `facts.picks` is deliberately NOT passed: the mark is Forefront's
            own answer, so the client's landing-line pick cannot move it. */
-        modules: moduleRows(modulesFor(row.modules), facts) });
+        modules: moduleRows(modulesFor(row.modules), facts).map((m) => {
+          if (m.key !== "tracker") return m;
+          const t = tallyMark(work.tally[row.key]);
+          return t ? { ...m, mark: t.mark, alarm: t.alarm, tip: t.tip } : m;
+        }) });
     }
     /* ── THE ARCHIVED BAND (§323) ────────────────────────────────────
        Its own list, not a flag on the grid's: `visibleClients` keeps a
@@ -148,6 +156,30 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       canConfig: FF.mayReadConfig(world, account, row)
     }));
     return ok({ cards, archived, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
+  }
+
+  /* ── MY WORK (§399): the console's first tab ──────────────────────
+     Your own open Tracker actions across every client you may see. An
+     admin may look at a colleague's (`who`, an office address) — the list
+     is then read as THEIR world, so it can never show a client that person
+     could not open. The office people are handed back for the picker. */
+  if (action === "mywork") {
+    const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
+    let whoAcc: Account = account, whoWorld: World = world;
+    const asked = body && body.who ? String(body.who).toLowerCase() : "";
+    if (asked && asked !== account.email.toLowerCase()) {
+      if (!account.is_admin) return no(403, "Only an admin looks at a colleague's list.");
+      const other = await accountByEmail(pool, asked);
+      if (!other || other.kind !== "office") return no(404, "There is nobody on the team with that address.");
+      whoAcc = other; whoWorld = await worldFor(pool, other.id);
+    }
+    const shown: ClientRow[] = FF.visibleClients(whoWorld, whoAcc, all);
+    const w = await myWork(shown, whoWorld.mine, whoAcc.email);
+    const people = account.is_admin
+      ? (await pool.query("SELECT email, name FROM users WHERE kind = 'office' AND status = 'active' ORDER BY name")).rows
+      : [];
+    return ok({ who: { email: whoAcc.email, name: whoAcc.name, self: whoAcc.id === account.id },
+      today: w.today, rows: w.rows, stats: w.stats, unanswered: w.unanswered, people });
   }
 
   /* ── Forefront's own people ── */

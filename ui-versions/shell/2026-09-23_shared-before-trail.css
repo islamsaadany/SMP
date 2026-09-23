@@ -827,6 +827,19 @@
    heading, one element out). */
 html[data-client-settings] nav.units,
 html[data-client-settings] .viewer { display:none; }
+/* AND THE MODULE SWITCHER, WHICH IS NAMED RATHER THAN CONTAINED (§367).
+   The two above are CONTAINERS, and standing a container down is what
+   covers a control added to it later — but the switcher's container is
+   `.top-in`, which also holds the client's own heading and mark, and those are
+   exactly what these pages DO want. So this one is named.
+
+   IT USED TO BE STRUCTURAL AND STOPPED BEING ABLE TO BE. shell/route.js built
+   the switcher once at load and returned early on the client's scope, which
+   answered while the only way between the two rails was a page load; §367 made
+   that crossing a press, so the switcher has to follow the SCOPE rather than
+   the navigation, and this is the rule the rest of the chrome already
+   follows. */
+html[data-client-settings] .top .topmark { display:none; }
 /* The way back says what it does first. `change` is the word for a control
    that NAMES the client you are in; here it names the act, so the second half
    would be saying something the first half already did (§87). */

@@ -27,7 +27,14 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
-  var TAB = "clients";
+  /* THE CONSOLE OPENS ON MY WORK (§399), and the tab you are on is the
+     address's hash, so a reload keeps it and a link can name one
+     ("Switch client…" from a client is /platform#clients). */
+  var TABS_KNOWN = ["mywork", "clients", "consultants", "access", "memory", "frameworks"];
+  var TAB = (function () {
+    var h = String(location.hash || "").replace(/^#/, "");
+    return TABS_KNOWN.indexOf(h) >= 0 ? h : "mywork";
+  })();
   var ME = null;
   /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
      (§369). Declared here rather than left to hoist, because a second `var` of
@@ -79,7 +86,8 @@
        insight, which is what makes it a memory rather than a filing cabinet.
        The boundary it does keep is on the server — a client's own account
        never reaches /api/memory — and it is checked there. */
-    var tabs = [["clients", "Clients", true],
+    var tabs = [["mywork", "My work", true],
+                ["clients", "Clients", true],
                 ["consultants", "Consultants", ME.canConsultants],
                 ["access", "Who sees what", ME.canAccess],
                 ["memory", "Memory", true],
@@ -100,6 +108,7 @@
 
   function go(tab) {
     TAB = tab;
+    try { history.replaceState(null, "", tab === "mywork" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
     MEM.view = "list";
     FW.view = "list";
     drawNav();
@@ -119,6 +128,7 @@
      a working hand — applied to the one page that had no other way to update
      itself. */
   function redraw() {
+    if (TAB === "mywork") return drawMyWork();
     if (TAB === "clients") return drawClients();
     if (TAB === "consultants") return drawConsultants();
     if (TAB === "access") return drawAccess();
@@ -906,6 +916,9 @@
      after another is noise, and what a screen reader gets here is what it
      gets today: the page, and then the cards when they land. */
   function drawWaiting() {
+    /* Opening on another tab (§399), the waiting page is that tab's title
+       and nothing it would have to take back (§94.10). */
+    if (TAB !== "clients") { title(TAB === "mywork" ? "My work" : ""); document.body.classList.add("ready"); return; }
     title("Clients");
     var grid = el("div", "cards");
     grid.setAttribute("aria-hidden", "true");
@@ -923,6 +936,94 @@
     }
     page.appendChild(grid);
     document.body.classList.add("ready");
+  }
+
+  /* ── MY WORK (§399) ───────────────────────────────────────────────
+     Islam: "for the main console we can have the person tasks across the
+     different clients outside on the main platform derived from the internal
+     tracker of the different clients work." Every row is read from that
+     client's own Tracker on the server (lib/my-work.ts) — nothing here is
+     stored, and every word ("Late 1 w", "This week", "In progress") is the
+     Tracker's own, so an action reads the same in both places (§53.5).
+     Pressing a row opens that client's Tracker. An admin may look at a
+     colleague's list; the server reads it as THEIR world. */
+  var WORK = { who: "" };
+  function drawMyWork() {
+    var right = el("div");
+    title("My work", right);
+    var body = el("div");
+    page.appendChild(body);
+    body.appendChild(el("p", "muted", "Reading your actions…"));
+    post({ action: "mywork", who: WORK.who || undefined }).then(function (j) {
+      if (TAB !== "mywork") return;
+      body.textContent = "";
+      if (!j.ok) { body.appendChild(el("p", "err", j.error || "Could not read the actions.")); return; }
+      if (j.people && j.people.length > 1) {
+        var pick = el("label", "wpick");
+        pick.appendChild(document.createTextNode("Show"));
+        var sel = el("select");
+        sel.setAttribute("data-workwho", "");
+        j.people.forEach(function (p) {
+          var o = el("option", null, p.email === ME.email ? "Me" : p.name);
+          o.value = p.email === ME.email ? "" : p.email;
+          if ((WORK.who || "") === o.value) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.addEventListener("change", function () { WORK.who = sel.value; go("mywork"); });
+        pick.appendChild(sel);
+        right.className = "right"; right.appendChild(pick);
+        if (!right.parentNode) page.querySelector(".ptitle").appendChild(right);
+      }
+      var st = j.stats || {};
+      var tiles = el("div", "wstat");
+      [[st.open, "open actions"], [st.late, "late", "bad"], [st.dueWeek, "due this week"], [st.clients, st.clients === 1 ? "client" : "clients"]]
+        .forEach(function (t) {
+          var d = el("div", t[2] && t[0] ? t[2] : null);
+          d.appendChild(el("b", null, String(t[0] || 0)));
+          d.appendChild(document.createTextNode(t[1]));
+          tiles.appendChild(d);
+        });
+      body.appendChild(tiles);
+      if (j.unanswered && j.unanswered.length) {
+        body.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + " — nothing has been lost; try again shortly."));
+      }
+      if (!j.rows.length) {
+        body.appendChild(el("p", "muted", (j.who && !j.who.self ? j.who.name + " has" : "You have") +
+          " no open actions in any client's Tracker."));
+        return;
+      }
+      var t = el("table", "work");
+      t.setAttribute("data-grid", "mywork");
+      var th = el("thead"), hr = el("tr");
+      ["Action", "Client", "Due", "Status"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+      th.appendChild(hr); t.appendChild(th);
+      var tb = el("tbody");
+      var HEAD = { late: "Late", week: "This week", later: "Next week and later" };
+      var last = "";
+      j.rows.forEach(function (r) {
+        if (r.bucket !== last) {
+          last = r.bucket;
+          var g = el("tr", "grp"), gd = el("td", null, HEAD[r.bucket]);
+          gd.colSpan = 4; g.appendChild(gd); tb.appendChild(g);
+        }
+        var tr = el("tr", "wrow");
+        tr.tabIndex = 0;
+        tr.setAttribute("data-client", r.client);
+        tr.appendChild(el("td", "act", r.title || "(untitled)"));
+        var cl = el("td"); cl.appendChild(el("span", "cl", r.clientName)); tr.appendChild(cl);
+        tr.appendChild(el("td", r.late ? "late" : "when", r.when));
+        tr.appendChild(el("td", null, r.statusWord));
+        var open = function () { location.assign("/" + r.client + "/tracker"); };
+        tr.addEventListener("click", open);
+        tr.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb);
+      body.appendChild(t);
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
+    });
   }
 
   function drawClients() {
@@ -3054,7 +3155,13 @@
     document.getElementById("who").textContent =
       ME.name + (ME.isAdmin ? " · Super user" : "");
     document.body.classList.add("ready");
-    go("clients");
+    /* The boot's `cards` answer is for the Clients tab's FIRST draw only
+       (§369); opening on another tab, it is let go rather than handed to a
+       later visit as a stale list (§48.2). */
+    if (TAB !== "clients") BOOTCARDS = null;
+    if (!ME.canConsultants && TAB === "consultants") TAB = "mywork";
+    if (!ME.canAccess && TAB === "access") TAB = "mywork";
+    go(TAB);
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");

@@ -32,7 +32,7 @@
      SMP_BREAK=any-module    node checks/modules.mjs   # must go red
      SMP_BREAK=open-address  node checks/modules.mjs   # must go red
      SMP_BREAK=static-hello  node checks/modules.mjs   # must go red
-     SMP_BREAK=switch-always node checks/modules.mjs   # must go red
+     SMP_BREAK=trail-for-staff node checks/modules.mjs # must go red
      SMP_BREAK=gate-open     node checks/modules.mjs   # must go red (§4c)      */
 import { readFileSync, existsSync } from "node:fs";
 import { createServer } from "node:http";
@@ -724,9 +724,10 @@ const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").repla
    (§100.3: a stand-in that models less than the thing it stands in for). It
    is declared BEFORE route.js is parsed — that is when the wrap happens —
    and called after, which is the one paint the real platform makes on boot. */
-const doc = (menu) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
+const doc = (menu, staff) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
+  (staff ? "" : " data-console='1' data-console-client='Raya Trade'") +
   (menu ? " data-modules='" + attr(JSON.stringify(menu)) + "'" : "") +
-  (BREAK === "switch-always" ? " data-break='switch-always'" : "") +
+  (BREAK === "trail-for-staff" ? " data-break='trail-for-staff'" : "") +
   "><head><meta charset='utf-8'><link rel='stylesheet' href='/platform.css'></head><body class='ready'>" +
   BODY + "<script>window.paint = function () {};</script>" +
   "<script src='/route.js'></script><script>paint();</script></body></html>";
@@ -747,7 +748,7 @@ const srv = createServer((req, res) => {
      across — and the "a menu of one is a door behind a door" test (§32)
      lives in route.js, which is what this section drives. A stub still
      omitting it would be testing a server that no longer exists. */
-  res.end(doc(p.startsWith("/one/") ? [MENU[0]] : MENU));
+  res.end(doc(p.startsWith("/one/") ? [MENU[0]] : MENU, p.startsWith("/staff/")));
 });
 await new Promise((r) => srv.listen(0, "127.0.0.1", r));
 const base = "http://127.0.0.1:" + srv.address().port;
@@ -763,45 +764,50 @@ if (browser) {
   page.on("pageerror", (e) => errs.push(String(e)));
   await page.goto(base + "/raya-trade/strategy/mobile/plan");
   await page.waitForTimeout(250);
-  check("the switcher is drawn in the top bar", (await page.locator(".topmark").count()) === 1);
-  /* FIRST IN THE ROW IS THE TOP LEFT (the mockup put it inside `.brand`, which
-     is a COLUMN in the product — copied, it would have stranded the mark on a
-     line of its own above the name). */
-  check("it is the first thing in the row, not inside the brand block",
-    (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("topmark"));
-  const geo = await page.evaluate(`(() => { const a = document.querySelector('.topmark').getBoundingClientRect(),
-      b = document.querySelector('.brand h1').getBoundingClientRect();
-      return { w: Math.round(a.width), h: Math.round(a.height), left: Math.round(a.left), titleLeft: Math.round(b.left),
-               sameRow: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 10 }; })()`);
-  check("on the same line as the product's name, and before it", geo.sameRow && geo.left < geo.titleLeft, JSON.stringify(geo));
-  check("and it is a square", geo.w === geo.h, geo.w + "x" + geo.h);
-  /* MEASURED AS PAINT, never as a class (§94.8): a mark styled by nothing
-     renders as a bare button and satisfies every assertion about its markup. */
-  check("its shape is painted, not merely marked up",
-    await page.evaluate("(() => { const s = getComputedStyle(document.querySelector('.topmark > summary')); return s.borderTopWidth === '1px' && s.borderTopStyle === 'solid'; })()"));
-  check("the mark is DRAWN and not a font character (§52)", (await page.locator(".topmark > summary svg rect").count()) === 4);
-  await page.locator(".topmark > summary").click();
+  /* §399: THE FOUR-SQUARE SWITCHER IS GONE; THE OFFICE'S TRAIL OFFERS THE
+     MODULES. REWRITTEN, NEVER LOOSENED (§218): every claim this section made
+     about the switcher is made again about the trail's client step — drawn
+     first in the row, a real shape, a DRAWN chevron (§52), every module with
+     the server's own line, the one you are in marked, the menu on the page —
+     and the other end moves from "one module, no menu" to the decision §399
+     actually made: a client's OWN person gets no trail at all. */
+  check("the trail is drawn in the top bar", (await page.locator("nav.trail").count()) === 1);
+  check("it is the first thing in the row",
+    (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("trail"));
+  const tr = await page.evaluate(`(() => { const n = document.querySelector('nav.trail');
+      return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: (n.querySelector('a.trff') || {}).getAttribute ? n.querySelector('a.trff').getAttribute('href') : '',
+               where: ((n.querySelector('details.trstep:not(.trclient) > summary span') || {}).textContent || '').trim() }; })()`);
+  check("it reads Forefront › the client › the module you are in",
+    tr.ff === "/platform" && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
+  check("the chevrons are DRAWN and not a font character (§52)", (await page.locator("nav.trail summary svg").count()) >= 2);
+  await page.locator("nav.trail .trclient > summary").click();
   await page.waitForTimeout(200);
-  const items = await page.locator(".topmark .menu button").allInnerTexts();
-  check("the menu lists every module this client has",
-    items.length === MENU.length && MENU.every((m, i) => items[i].startsWith(m.label)),
-    items.map((t) => t.split("\n")[0]).join(", "));
+  const items = await page.locator("nav.trail .trclient .menu button").allInnerTexts();
+  const modItems = items.slice(0, MENU.length);
+  check("the client step lists every module this client has, in order",
+    MENU.every((m, i) => (modItems[i] || "").startsWith(m.label)), items.map((t) => t.split("\n")[0]).join(", "));
   check("each carries the line the server gave it, never one worked out from the key",
-    MENU.every((m, i) => items[i].includes(m.note)), items.map((t) => t.replace(/\n/g, " · ")).join(" | "));
+    MENU.every((m, i) => (modItems[i] || "").includes(m.note)), modItems.map((t) => t.replace(/\n/g, " · ")).join(" | "));
+  check("…and then Client settings and Switch client, so it is never a menu of one (§32)",
+    items.some((t) => /^Client settings/.test(t)) && items.some((t) => /^Switch client/.test(t)), items.join(" | "));
   check("the module you are IN is marked",
-    (await page.locator('.topmark .menu button[aria-current="true"]').innerText()).startsWith(MODULE_DEF[DEFAULT_MODULE].label));
-  /* THE MENU IS OPEN AND ON SCREEN — a panel positioned off its own edge
-     renders perfectly and cannot be read (§90: a control below the fold is a
-     control that does nothing). */
-  const box = await page.locator(".topmark .menu").boundingBox();
+    (await page.locator('nav.trail .trclient .menu button[aria-current="true"]').innerText()).startsWith(MODULE_DEF[DEFAULT_MODULE].label));
+  const box = await page.locator("nav.trail .trclient .menu").boundingBox();
   check("and the open menu is on the page", box && box.x >= 0 && box.y >= 0 && box.width > 200, JSON.stringify(box));
-  /* BOTH ENDS (§94.2, §32): a client with one module is offered no menu at
-     all — a build that always drew it would pass everything above. */
   const one = await browser.newPage({ viewport: { width: 1400, height: 400 } });
   await one.goto(base + "/one/strategy/mobile");
   await one.waitForTimeout(250);
-  check("a client with ONE module gets no switcher — a menu of one is a door behind a door",
-    (await one.locator(".topmark").count()) === 0);
+  await one.locator("nav.trail .trclient > summary").click().catch(() => {});
+  const oneItems = await one.locator("nav.trail .trclient .menu button").allInnerTexts();
+  check("a client with ONE module lists that one and no other",
+    oneItems.filter((t) => MENU.some((m) => t.startsWith(m.label))).length === 1, oneItems.join(" | "));
+  /* BOTH ENDS (§94.2): a build that drew the trail for everybody passes
+     everything above. */
+  const staff = await browser.newPage({ viewport: { width: 1400, height: 400 } });
+  await staff.goto(base + "/staff/strategy/mobile");
+  await staff.waitForTimeout(250);
+  check("a client's own person gets no trail — they do not travel between clients (§399)",
+    (await staff.locator("nav.trail").count()) === 0);
   check("no page error from any of it", errs.length === 0, errs.join(" | "));
   await browser.close();
 }

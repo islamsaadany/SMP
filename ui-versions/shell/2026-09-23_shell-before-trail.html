@@ -65,7 +65,7 @@
          Drawn nowhere else: on a module's pages the bar below already says
          which client this is, and a second copy of that fact on one line is
          what §120 took off the register's header. `.clientlogo` rather than
-         `.topmark`, which was the module switcher's (§65.9, removed §399) — one word, two
+         `.topmark`, which is the module switcher's (§65.9) — one word, two
          controls, is how a rule comes to style the wrong thing. Written by
          paint() from the group's own mark and hidden when there is none:
          a client that has not uploaded one gets no empty box (§15.1). -->
@@ -2822,22 +2822,7 @@
                                   : "Strategy Management Platform";
       var org = document.getElementById("orgname");
       var back = document.getElementById("clientback");
-      /* ── A CLIENT'S OWN PERSON: THEIR COMPANY, NOT OURS (§399) ─────────
-         Islam: "for the client user he doesn't need the rail at the top with
-         raya trade and strategy as he doesn't really navigate." They get no
-         trail and no switcher, so the line says whose platform this is: the
-         company's mark and name, with the product's name after it, small.
-         Served pages only — the offline copy (§306) has no server to say who
-         is looking, so it keeps the line it has always had — and never for
-         somebody with a console, whose line is the trail (route.js). */
-      var staff = !on && location.protocol !== "file:" &&
-                  !document.documentElement.hasAttribute("data-console") &&
-                  document.documentElement.hasAttribute("data-module");
-      if (staff) {
-        if (h1) h1.textContent = GROUP.org || "Strategy Management Platform";
-        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org ? "Strategy Management Platform" : ""; }
-      }
-      if (org && !staff) {
+      if (org) {
         if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
         /* AND HIDDEN AGAIN ON THE WAY OUT, which the check found by walking
            rather than by reloading: `sync.js` hides this span wherever the way
@@ -2850,7 +2835,7 @@
       }
       var mark = document.getElementById("clientlogo");
       if (mark) {
-        var src = (on || staff) ? groupLogo() : "";
+        var src = on ? groupLogo() : "";
         /* Setting `src` to "" asks the page for its own address, so the
            attribute is REMOVED rather than emptied — an empty src is a
            second request for this document, not an absent picture. */

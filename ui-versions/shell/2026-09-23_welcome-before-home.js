@@ -361,6 +361,10 @@ var WELCOME = (function(){
   function unEmpty(list){
     var e = list.querySelector(".wempty");
     if (e) e.remove();
+    /* A row arriving late means the exit is no longer the only act on the
+       screen, so it gives the fill back (§41). */
+    var x = box && box.querySelector("[data-wcontinue]");
+    if (x) x.classList.remove("wloud");
   }
   function watchReplies(list){
     /* The corner's first poll is in flight while this screen is built, so
@@ -474,10 +478,8 @@ var WELCOME = (function(){
 
     box = document.createElement("div");
     box.className = "welcomeover";
-    /* A page, not a dialog (§399): nothing is behind it but the page it
-       stands in for, and the navigation above it is live. */
-    box.setAttribute("role", "region");
-    box.setAttribute("aria-label", "Home");
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-label", "Welcome");
     box.innerHTML =
       '<div class="wwrap">' +
         '<div class="whero">' +
@@ -532,12 +534,14 @@ var WELCOME = (function(){
             "</div>" +
           "</div>" +
         "</div>" +
-        /* NO WAY OUT OF ITS OWN (§399). Home is a page inside the chrome
-           now, not a screen over it, so the way on is the navigation already
-           above it — every destination, tab and section is on screen and
-           pressing one leaves Home. The Continue bar (§159) was the only
-           exit of a screen that covered everything; with nothing covered it
-           would be a second way to do what the row does (§87, §94.15). */
+        /* THE WAY OUT SPANS BOTH COLUMNS (§159): inside .wwrap and AFTER
+           .wcols, so its scope is the screen rather than the list it used to
+           end — and so it is last at every width, including the stacked
+           layout below 960px, where the side column falls beneath the left
+           one and a control living in that column is stranded mid-screen. */
+        '<button type="button" class="wexit" data-wcontinue>' +
+          '<span class="wexlab"></span><span class="wgo">\u203a</span>' +
+        "</button>" +
       "</div>";
 
     var list = box.querySelector(".wacts");
@@ -563,6 +567,7 @@ var WELCOME = (function(){
       empty.className = "wact wempty";
       empty.innerHTML = '<div class="wwhat"><b>Nothing is waiting on you</b></div>';
       list.appendChild(empty);
+      box.querySelector("[data-wcontinue]").classList.add("wloud");
     }
     acts.forEach(function(a){ list.appendChild(a); });
     if (!office && isSelf(person)) watchReplies(list);
@@ -632,13 +637,34 @@ var WELCOME = (function(){
       });
     }
 
-
+    /* ── Continue ───────────────────────────────────────────────────────
+       The platform under this screen is already on the page §94.6 chose, so
+       Continue only steps aside — and names where that is. The drawing
+       carried a grey "Strategy · Plan" under the name and it is deliberately
+       not built: the label already names the destination, and the second
+       line would mean re-adding the navigation-word reader §99 deleted. */
+    /* AND SETUP IS A PLACE TOO (§202). Islam: *"the continue button should
+       show continue to the function or BU name."* It already did for a unit,
+       a function, a company and the group — and read a bare "Continue" from
+       Setup, which is where the house button now sits beside the gear
+       (§193.2), so it is a common way in rather than an edge. Measured
+       before it was changed: `mobile` → "Continue to Mobile", `fn:finance` →
+       "Continue to Finance", `setup` → "Continue". The word is the
+       navigation's own; `placeLabel` does not answer for Setup because Setup
+       is not a place a ROLE is held, which is what that function is for. */
+    var here = null;
+    try { here = typeof current !== "undefined" ? current : null; } catch(e){}
+    var word = "Continue";
+    if (here === "setup" || here === "manage") word = "Continue to Setup";
+    else if (here) {
+      try { word = "Continue to " + subjectName(here); } catch(e){}
+    }
+    var cont = box.querySelector("[data-wcontinue]");
+    cont.querySelector(".wexlab").textContent = word;
+    cont.addEventListener("click", function(ev){ ev.preventDefault(); dismiss(); });
 
     viewerBar(box);
     document.body.appendChild(box);
-    /* THE HOUSE IS LIT WHILE YOU ARE HOME (§399) — the destination row's
-       own meaning of gold (§197.2): this is where you are. */
-    document.documentElement.setAttribute("data-home-open", "1");
     /* AFTER the box is in the document, or there is nothing to enhance: the
        switcher is 33 people and searchsel takes over any select past five
        (§45.5). Its popup is `.sspop` at z-index 120, above this overlay's 60,
@@ -721,27 +747,7 @@ var WELCOME = (function(){
   function dismiss(){
     markDone();
     if (box) { box.remove(); box = null; }
-    document.documentElement.removeAttribute("data-home-open");
   }
-
-  /* ── LEAVING HOME IS PRESSING WHERE YOU WANT TO GO (§399) ──────────────
-     Home sits under the chrome, so a press on the destination row, the tabs,
-     the sections or the trail is somebody going somewhere — the page under
-     Home is repainted by that same press, and Home steps aside for it.
-     CAPTURE PHASE, so it is gone before the press's own handler paints.
-     What does NOT leave: the house itself (it is Home), the viewer strip
-     (it changes whose Home this is), a menu being OPENED (a summary), the
-     trail's own "Home" entry, and the bar's theme and font buttons, which
-     change how the page looks rather than where you are. */
-  document.addEventListener("click", function(ev){
-    if (!box) return;
-    var t = ev.target;
-    if (!t || !t.closest) return;
-    if (!t.closest(".chrome")) return;
-    if (t.closest("[data-welcomego], .viewer, summary, [data-trgo='home'], .themebtn, .fontbtn")) return;
-    if (!t.closest("button, a, [role=menuitem], [role=tab]")) return;
-    dismiss();
-  }, true);
 
   /* ── THE OFFER ──────────────────────────────────────────────────────────
      Called from land() beside TOUR.offer, with the same silences: no

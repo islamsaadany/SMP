@@ -234,7 +234,9 @@ with sync_playwright() as pw:
     pg.on("pageerror", lambda e: errs.append(str(e)))
 
     print("§1 · one question each, asked together")
-    pg.goto(BASE + "/platform", wait_until="commit")
+    # §399: the console opens on My work now, and a same-page hash change is
+    # not a navigation — leave the page first so the goto really reloads.
+    pg.goto("about:blank"); pg.goto(BASE + "/platform#clients", wait_until="commit")
     # WHAT IS ON SCREEN WHILE IT WAITS, sampled — the dead window is read from
     # the page rather than described (§3a). A click's target is asked where a
     # card will be, which is what he was pressing.

@@ -130,6 +130,35 @@
   .btn[aria-disabled="true"]{ opacity:.45 }
   .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
   .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+
+  /* ── MY WORK (§399) — the office's open Tracker actions, across clients.
+     Drawn out of this page's own table and tile vocabulary (§53.5); the late
+     word takes --bad, which is type here and measured as such (5.3 / 5.6). */
+  .wstat{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin-bottom:16px }
+  .wstat > div{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 14px;
+    font-size:12.5px; color:var(--ink-3) }
+  .wstat b{ display:block; font-size:22px; line-height:1.2; color:var(--ink); font-weight:600 }
+  .wstat .bad b{ color:var(--bad) }
+  @media (max-width:640px){ .wstat{ grid-template-columns:repeat(2, minmax(0,1fr)) } }
+  table.work tr.grp td{ background:var(--surface-2); font-weight:600; font-size:11px; line-height:1.6; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-2); padding:6px 12px }
+  table.work td{ padding:9px 12px; border-bottom:1px solid var(--line-soft); vertical-align:top }
+  /* `wrow`, never `row`: `.row` is this page's flex row (§65.9 — a class
+     name is one global namespace), and on a <tr> it laid every cell out as
+     a separate box. */
+  table.work tr.wrow{ cursor:pointer }
+  /* White rows under grey headings: the page's zebra would otherwise stripe
+     every action grey, because each sits one row after its heading. The
+     action wraps rather than widening the table (§88 is Setup's rule). */
+  table.work tr.wrow td{ background:var(--surface) }
+  table.work tr.wrow td.act{ white-space:normal; width:50% }
+  table.work tr.wrow:hover td, table.work tr.wrow:focus-visible td{ background:var(--surface-2); outline:none }
+  table.work td.late{ color:var(--bad); font-weight:600; white-space:nowrap }
+  table.work td.when{ white-space:nowrap }
+  table.work .cl{ color:var(--ink-2); white-space:nowrap }
+  .wpick{ display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-3) }
+  .wpick select{ border:1px solid var(--line); border-radius:8px; padding:5px 8px;
+    background:var(--surface); color:var(--ink); font:inherit }
   .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
     border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
   .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;

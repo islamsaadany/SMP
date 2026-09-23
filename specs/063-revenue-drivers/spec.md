@@ -1,4 +1,4 @@
-# Spec 062 — Revenue drivers
+# Spec 063 — Revenue drivers
 
 **Asked for** 2026-09-21 by Islam, in a written alignment note kept beside this
 page (`reference/alignment-note-2026-09-21.md`), and answered question by

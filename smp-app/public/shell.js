@@ -3554,7 +3554,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return { projects: take };
   }
 
-  /* ══ 24 · REVENUE DRIVERS (spec 062) ════════════════════════════════
+  /* ══ 24 · REVENUE DRIVERS (spec 063) ════════════════════════════════
      A business unit is handed a revenue number and builds the logic that
      gets to it — how many stores, how many transactions, what basket — and
      the strategy is then built to deliver that logic.
@@ -3567,7 +3567,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      `smp-app/lib/drivers.ts` was exactly that for a day and is deleted.
 
      PORTED FROM ISLAM'S OWN TOOL, NEVER FROM A DESCRIPTION. That file is
-     kept unchanged at `specs/062-revenue-drivers/reference/` and
+     kept unchanged at `specs/063-revenue-drivers/reference/` and
      `smp-app/checks/drivers.mjs` RUNS ITS OWN FUNCTIONS in a sandbox beside
      these and asserts the two agree on every channel, sub-channel, period
      and every figure in the growth split (§94.8 — agreement, never a typed
@@ -3582,7 +3582,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
                         base, up, upUnit:"%"|"#", note }
        group.seasons = [ { id, name, start, end } ]
 
-     A CHANNEL IS A UNIT (spec 062 §4.1), so the tool's Master tab is what
+     A CHANNEL IS A UNIT (spec 063 §4.1), so the tool's Master tab is what
      the group and a company already are and no roll-up is invented. A
      SUB-CHANNEL is a route to market whose driver logic genuinely differs —
      an app has sessions and a call centre has agents, and no one set of
@@ -3597,7 +3597,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
      THE IDS ARE REAL AND THEY MATTER. `renumberUnit()` rewrites a key
      objective's id BY POSITION on every load (§48), which is exactly why
-     spec 062 §4.3 puts the connection pointer on the OBJECTIVE rather than
+     spec 063 §4.3 puts the connection pointer on the OBJECTIVE rather than
      on the driver row — and why a driver row carries a stable id of its
      own: nothing renumbers `extra`, so an id minted here survives a row
      being deleted above it. */
@@ -3812,7 +3812,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     });
   }
 
-  /* WHAT A UNIT'S REVENUE TARGET IS (spec 062 §4.2). Islam: *"tree is the
+  /* WHAT A UNIT'S REVENUE TARGET IS (spec 063 §4.2). Islam: *"tree is the
      main source."* The Year 1 figure IS the target, so nothing is typed and
      nothing can disagree — the same shape `monthlyAnnual` already has one
      level down, which is why that precedent was the one followed.
@@ -3849,7 +3849,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     };
   }
 
-  /* ── WHAT ACTUALLY HAPPENED (spec 062 §4.5a, §6.4) ──────────────────
+  /* ── WHAT ACTUALLY HAPPENED (spec 063 §4.5a, §6.4) ──────────────────
      Islam, asked which drivers are read from the work they connect to and
      which are typed: *"what do oyu mean? they are all typed."* So every
      driver carries its own reported figure and the connection exists to say
@@ -3991,7 +3991,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
 
   /* WHAT A ROW ANSWERS TO, and the three states are the decision rather
-     than a rendering choice (spec 062 §6.2):
+     than a rendering choice (spec 063 §6.2):
 
        · CONNECTED  — an objective or measure carries this driver's id, so
                       somebody is doing work the row moves with;
@@ -4146,7 +4146,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     dissolvePlan: dissolvePlan,
     oneLine: oneLine, ONE_LINE_FIELDS: ONE_LINE_FIELDS,
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER,
-    /* Revenue drivers (spec 062) */
+    /* Revenue drivers (spec 063) */
     DRIVERS: DRIVERS, SEASONS: SEASONS, DRIVER_LINK: DRIVER_LINK,
     DRIVERS_ON: DRIVERS_ON, driversOn: driversOn,
     DRIVER_KINDS: DRIVER_KINDS, PERIOD_TYPES: PERIOD_TYPES,
@@ -4811,7 +4811,7 @@ var GROUP = {
      footer as literal text, so a second screen that needed it \u2014 the deck cover
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
-  /* ── THE CLIENT'S SEASONS (spec 062 §6.5) ────────────────────────
+  /* ── THE CLIENT'S SEASONS (spec 063 §6.5) ────────────────────────
      Defined once for the whole client and used BY NAME in any unit's tree, so
      changing Ramadan's dates once moves every base period in every unit with
      it — which is the whole reason a season is not typed into the tree it
@@ -5517,9 +5517,9 @@ var UNITS = {
     logo: UNIT_MARKS["retail"],
     name: "Retail Stores", codePrefix: "RS", weight: 0, real: false,
     perf: { objectives: 86, pillars: 78, exec: 71 },
-    /* ── THE REVENUE TREE (spec 062) ────────────────────────────────
+    /* ── THE REVENUE TREE (spec 063) ────────────────────────────────
        ISLAM'S OWN WORKED EXAMPLE, carried across from his tool unchanged —
-       `specs/062-revenue-drivers/reference/revenue-driver-tree-tool-v12.html`
+       `specs/063-revenue-drivers/reference/revenue-driver-tree-tool-v12.html`
        — so the demo shows the model being argued with the numbers it was
        argued with, rather than a plausible-looking set typed to fill a table.
        125.02M last year, 153.83M at year one, and the growth splitting into
@@ -9602,7 +9602,7 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
-/* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 062, 2026-09-23). The rule
+/* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
    is the shared module's (only an explicit true is on); this reads it off the
    group and writes it, deleting the key for Off (§50.6) so a client that
    was never asked and one switched on and off again are byte-identical. Off
@@ -14861,7 +14861,7 @@ function clearedGraph(g){
     if (u.extra) delete u.extra.perf;
     delete u.perf;
     /* §21, §45.3: A CLIENT MUST NOT INHERIT RAYA'S REVENUE TREE. The demo
-       carries one on Retail Stores — the worked example the whole of spec 062
+       carries one on Retail Stores — the worked example the whole of spec 063
        was argued from — and it rides `units.extra`, which is exactly where
        §45.3's figure set survived the clean slate and had to be scrubbed by
        name. Migration 004 strips it on the deployment; this is the same act
@@ -14881,7 +14881,7 @@ function clearedGraph(g){
   delete G.keyObjectivesScore;
   /* §44's sets, §54's BU list — the two that 004 had to be amended for. */
   delete G.sets; delete G.claims; delete G.naming; delete G.mainbus;
-  /* And spec 062's seasons, for the same reason: Ramadan's dates are the
+  /* And spec 063's seasons, for the same reason: Ramadan's dates are the
      demo's, and a client's phasing is the client's to set on Setup › Seasons. */
   delete G.seasons;
   delete G.driversOn;
@@ -24826,7 +24826,7 @@ function renderUnitPerformance(u){
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
           '<div><em>Planned</em><b>' + pct(unitPlan(u)) + '</b></div>' +
           '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>' +
-      /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 062 §6.3) ────────
+      /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 063 §6.3) ────────
          §6.3's one promise: each section carries BOTH headline numbers, so
          whichever you are standing in you can see the other and cross. Drawn
          only where there is a tree, so a unit with none reads exactly the
@@ -27141,7 +27141,7 @@ function renderUnitAnalysis(u){
     box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
 }
 
-/* ── UNIT · Strategy · Drivers (spec 062, §6.1) ─────────────────────
+/* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────
    Islam: *"it's a tab beside the swot ok"* — so a SECTION of Strategy's own
    row, between SWOT and Plan, and a unit reads left to right: who we are,
    where we stand, where the number comes from, what we will do about it.
@@ -27504,7 +27504,7 @@ function renderUnitDrivers(u){
 }
 
 
-/* ── UNIT · Performance · Revenue drivers (spec 062 §6.3) ────────────
+/* ── UNIT · Performance · Revenue drivers (spec 063 §6.3) ────────────
    Islam: *"the perfomance shall split to strategy and revenue driver."*
 
    WHY THE SPLIT IS WORTH A SECTION ROW rather than a fourth card: the two
@@ -36399,7 +36399,7 @@ function renderBandsExtra(){
   return section("", "Focus and reward", null, rows);
 }
 
-/* ── Setup · Seasons (spec 062 §6.5) ──────────────────────────────────
+/* ── Setup · Seasons (spec 063 §6.5) ──────────────────────────────────
    Islam, of the drawn screen: *"ok."*
 
    A season is a named window of real days — Ramadan, the school run, the
@@ -55650,7 +55650,7 @@ var SYNC = (function () {
              unreachable by the only person it is for. `when` hides it outright
              until the tenant switches naming on \u2014 a tab that opens a page
              nobody may use is worse than no tab. */
-          /* ── AND THE REVENUE TREE SITS BETWEEN THEM (spec 062 §6.1) ──
+          /* ── AND THE REVENUE TREE SITS BETWEEN THEM (spec 063 §6.1) ──
              Islam: *"it's a tab beside the swot ok."* A SECTION of this row
              rather than a fifth top-level tab, and the order is the reading:
              who we are, where we stand, WHERE THE NUMBER COMES FROM, then
@@ -55675,7 +55675,7 @@ var SYNC = (function () {
          which is what it always was for two weeks a quarter (§15.10), now said
          in the navigation instead of in a comment. REPORTING holds the TARGET
          rather than a boolean, so it can never open somebody else's report. */
-      /* ── AND PERFORMANCE SPLITS IN TWO (spec 062 §6.3) ───────────
+      /* ── AND PERFORMANCE SPLITS IN TWO (spec 063 §6.3) ───────────
          Islam: *"the perfomance shall split to strategy and revenue driver."*
          Two readings that answer different questions and can disagree — the
          plan delivered and the money missed — so they are siblings under the
@@ -55856,7 +55856,7 @@ var SYNC = (function () {
          to know it moved. */
       { k:"focusset", ac:"c_focus", grp:"meas", mod:"strategy", label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       { k:"bands",  ac:"c_bands",  grp:"meas", mod:"strategy", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
-      /* ── SEASONS (spec 062 §6.5) ──────────────────────────
+      /* ── SEASONS (spec 063 §6.5) ──────────────────────────
          A named window of real days, defined ONCE for the client and used by
          name in any unit's revenue tree. Immediately under the scoring bands,
          because the two are the same kind of fact: the office deciding what a
@@ -61020,7 +61020,7 @@ var SYNC = (function () {
     var ac = document.getElementById("addcompany");
     if (ac) ac.addEventListener("click", function(){ addCompany(); paint(); });
 
-    /* ── Setup · Seasons (spec 062 §6.5) ─────────────────────
+    /* ── Setup · Seasons (spec 063 §6.5) ─────────────────────
        A season is added UNDATED and named later, because the two dates are
        picked and a picker has nothing to open beside a row that is not there
        yet. It is the only shape this page can add: `driverMonths` reads a
@@ -63922,7 +63922,7 @@ var SYNC = (function () {
         fieldSaved(); paint();
       });
     });
-    /* ── THE REVENUE TREE'S OWN CONTROLS (spec 062) ──────────────────
+    /* ── THE REVENUE TREE'S OWN CONTROLS (spec 063) ──────────────────
        EVERY ONE RE-ASKS THE SHARED RULE rather than trusting the render that
        drew it (§48.2), and every one asks `mayEditPlan()` — the tree rides
        `u_plan`'s grant, so a control here can never accept what `/api/state`

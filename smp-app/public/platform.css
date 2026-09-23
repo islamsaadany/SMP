@@ -7652,7 +7652,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 .readbar .why { color:var(--ink-3); font-size:12.5px; }
 .readbar .linkbu { margin-left:auto; }
 
-  /* ── THE REVENUE TREE (spec 062) ──────────────────────────────────
+  /* ── THE REVENUE TREE (spec 063) ──────────────────────────────────
      Almost nothing here is new. The table is the plan's own `.scroll` table,
      the period band is `tr.dxband` (§99) and the pane band is `.pband` — so
      the tree reads as the same product as the plan beside it and adds no
@@ -7718,7 +7718,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
                     gap:10px; margin:14px 0 0; }
   .paneact.drvact .fld { width:auto; min-width:0; }
 
-  /* THE REVIEW READING (spec 062 §6.3). An effect that cost money and one that
+  /* THE REVIEW READING (spec 063 §6.3). An effect that cost money and one that
      earned it, and the pair takes the platform's own scoring inks rather than
      a colour of this page's — `--bad`/`--good` as TYPE is §38.4's own trap,
      which is why both are the `-tx` twins. */

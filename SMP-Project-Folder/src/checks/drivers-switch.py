@@ -1,4 +1,4 @@
-"""Revenue drivers can be switched off for a client (spec 062, 2026-09-23).
+"""Revenue drivers can be switched off for a client (spec 063, 2026-09-23).
 
 Islam: "this module it should have an on and off button to show or not".
 The switch is the office's, at the top of Setup > Revenue drivers, and it is

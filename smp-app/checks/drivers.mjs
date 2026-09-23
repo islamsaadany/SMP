@@ -1,5 +1,5 @@
 /* REVENUE DRIVERS — the arithmetic, proved against the tool it came from
-   (spec 062 §5).
+   (spec 063 §5).
 
    WHAT THIS FILE IS FOR. The drivers model in `lib/rules.js` is a
    translation of somebody else's working arithmetic, and the failure that
@@ -51,7 +51,7 @@ import vm from "node:vm";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..", "..");
 const RULES = join(ROOT, "lib", "rules.js");
-const REF = join(ROOT, "specs", "062-revenue-drivers", "reference",
+const REF = join(ROOT, "specs", "063-revenue-drivers", "reference",
                  "revenue-driver-tree-tool-v12.html");
 
 let pass = 0; const bad = [];
@@ -167,7 +167,7 @@ ok("his own five channels are loaded", theirs.length === 5, "channels=" + theirs
 ok("at least one season is defined", T.SEASONS.length >= 1);
 
 /* ══ §2 · THE SAME TREE, IN THE PLATFORM'S SHAPE ═══════════════════════
-   A CHANNEL IS A UNIT (spec 062 §4.1), so each of his channels converts to
+   A CHANNEL IS A UNIT (spec 063 §4.1), so each of his channels converts to
    one `unit.drivers` object and his seasons to the group's. Two renames and
    nothing else — `tables` is his word for a period and reads as a database
    table in this codebase, and `flat` is DERIVED here rather than stored
@@ -262,7 +262,7 @@ theirs.forEach((ch, ci) => {
 });
 /* The group's roll-up is every unit added, which is what the group page
    already does for every other figure — so the check adds them the same way
-   rather than the module growing a function for it (spec 062 §4.1). */
+   rather than the module growing a function for it (spec 063 §4.1). */
 const tA = T.totals();
 const tB = KEYS.reduce((t, k) => (t[k] = 0, t), {});
 mine.forEach((ch) => { const f = driverFigures(seasons, ch); KEYS.forEach((k) => { tB[k] += f[k]; }); });
@@ -285,7 +285,7 @@ ok("a plan that does not grow is given no shares at all",
 ok("and it says so in words rather than printing nought per cent",
    /does not grow/.test(driverBridge({ b0: 100, b1: 90, growth: -10, volEff: -10, valEff: 0, intEff: 0, newEff: 0 }).reading));
 
-/* ══ §7 · THE UNIT'S REVENUE TARGET (spec 062 §4.2) ════════════════════ */
+/* ══ §7 · THE UNIT'S REVENUE TARGET (spec 063 §4.2) ════════════════════ */
 console.log("\n§7 · the revenue target a unit would read");
 ok("a unit's Year 1 figure is its target",
    near(driverTarget(group, units[0]), driverFigures(seasons, mine[0]).b1),
@@ -324,7 +324,7 @@ ok("and a base period is genuinely shortened by its season",
 
 /* ══ §9 · THE PLATFORM'S OWN HALF ══════════════════════════════════════
    Not the tool's arithmetic — what the screens read. Every one of these is
-   a decision in spec 062 §6, and each has BOTH ENDS asserted (§94.2). */
+   a decision in spec 063 §6, and each has BOTH ENDS asserted (§94.2). */
 console.log("\n§9 · what the screens read");
 
 const u0 = units[0];
@@ -347,7 +347,7 @@ driverRows(gappy).forEach((r) => { held[String(r.driver.id)] = 1; });
 ok("a new id cannot collide with a row still on the screen",
    !held[driverMintId(gappy)], "minted " + driverMintId(gappy));
 
-/* THE THREE STATES (spec 062 §6.2), all three made rather than waited for
+/* THE THREE STATES (spec 063 §6.2), all three made rather than waited for
    (§255) — none of the tool's rows carries a connection or an assumption
    mark, so without making them this section would prove one state. */
 const linked = JSON.parse(JSON.stringify(u0));
@@ -380,7 +380,7 @@ ok("and a malformed tree reads as no tree rather than throwing",
    driverChannel({ drivers: "yes" }) === null && driverChannel({ drivers: {} }) === null);
 
 /* ══ §10 · WHAT ACTUALLY HAPPENED, AND WHY THE COLUMN ADDS UP ═══════════
-   The review reading (spec 062 §6.3). Every driver's figure is TYPED —
+   The review reading (spec 063 §6.3). Every driver's figure is TYPED —
    Islam, of whether a connected row reads its actual from the work it
    connects to: *"what do oyu mean? they are all typed"* — and the property
    that has to hold is not a number but a RELATIONSHIP: the per-driver
@@ -473,7 +473,7 @@ console.log("\n§10 · what actually happened");
      String(driverScore(f)));
 }
 
-/* ══ §11 · SEASONS, SET ONCE FOR THE CLIENT (spec 062 §6.5) ════════════
+/* ══ §11 · SEASONS, SET ONCE FOR THE CLIENT (spec 063 §6.5) ════════════
    The two readers behind Setup → Seasons. Pure: no browser, no database —
    the page that draws them is driven separately.
 

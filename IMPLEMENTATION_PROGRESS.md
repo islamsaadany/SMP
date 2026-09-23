@@ -54,7 +54,7 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **Revenue drivers (spec 062) — built, on the branch, not merged.**
+**Latest version:** **Revenue drivers (spec 063) — built, on the branch, not merged.**
 
 A new part of the Strategy module for units whose revenue is argued from its
 parts (stores &times; basket &times; visits, and so on). Three screens, all

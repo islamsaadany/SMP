@@ -4977,7 +4977,7 @@ function renderBandsExtra(){
   return section("", "Focus and reward", null, rows);
 }
 
-/* ── Setup · Seasons (spec 062 §6.5) ──────────────────────────────────
+/* ── Setup · Seasons (spec 063 §6.5) ──────────────────────────────────
    Islam, of the drawn screen: *"ok."*
 
    A season is a named window of real days — Ramadan, the school run, the

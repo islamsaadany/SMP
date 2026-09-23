@@ -9,7 +9,7 @@ var GROUP = {
      footer as literal text, so a second screen that needed it \u2014 the deck cover
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
-  /* ── THE CLIENT'S SEASONS (spec 062 §6.5) ────────────────────────
+  /* ── THE CLIENT'S SEASONS (spec 063 §6.5) ────────────────────────
      Defined once for the whole client and used BY NAME in any unit's tree, so
      changing Ramadan's dates once moves every base period in every unit with
      it — which is the whole reason a season is not typed into the tree it
@@ -715,9 +715,9 @@ var UNITS = {
     logo: UNIT_MARKS["retail"],
     name: "Retail Stores", codePrefix: "RS", weight: 0, real: false,
     perf: { objectives: 86, pillars: 78, exec: 71 },
-    /* ── THE REVENUE TREE (spec 062) ────────────────────────────────
+    /* ── THE REVENUE TREE (spec 063) ────────────────────────────────
        ISLAM'S OWN WORKED EXAMPLE, carried across from his tool unchanged —
-       `specs/062-revenue-drivers/reference/revenue-driver-tree-tool-v12.html`
+       `specs/063-revenue-drivers/reference/revenue-driver-tree-tool-v12.html`
        — so the demo shows the model being argued with the numbers it was
        argued with, rather than a plausible-looking set typed to fill a table.
        125.02M last year, 153.83M at year one, and the growth splitting into

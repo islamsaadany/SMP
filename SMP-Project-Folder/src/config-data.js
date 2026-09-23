@@ -3514,7 +3514,7 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
-/* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 062, 2026-09-23). The rule
+/* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 063, 2026-09-23). The rule
    is the shared module's (only an explicit true is on); this reads it off the
    group and writes it, deleting the key for Off (§50.6) so a client that
    was never asked and one switched on and off again are byte-identical. Off
@@ -8773,7 +8773,7 @@ function clearedGraph(g){
     if (u.extra) delete u.extra.perf;
     delete u.perf;
     /* §21, §45.3: A CLIENT MUST NOT INHERIT RAYA'S REVENUE TREE. The demo
-       carries one on Retail Stores — the worked example the whole of spec 062
+       carries one on Retail Stores — the worked example the whole of spec 063
        was argued from — and it rides `units.extra`, which is exactly where
        §45.3's figure set survived the clean slate and had to be scrubbed by
        name. Migration 004 strips it on the deployment; this is the same act
@@ -8793,7 +8793,7 @@ function clearedGraph(g){
   delete G.keyObjectivesScore;
   /* §44's sets, §54's BU list — the two that 004 had to be amended for. */
   delete G.sets; delete G.claims; delete G.naming; delete G.mainbus;
-  /* And spec 062's seasons, for the same reason: Ramadan's dates are the
+  /* And spec 063's seasons, for the same reason: Ramadan's dates are the
      demo's, and a client's phasing is the client's to set on Setup › Seasons. */
   delete G.seasons;
   delete G.driversOn;

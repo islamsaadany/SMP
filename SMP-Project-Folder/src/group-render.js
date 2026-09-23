@@ -2592,7 +2592,7 @@ function renderUnitPerformance(u){
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
           '<div><em>Planned</em><b>' + pct(unitPlan(u)) + '</b></div>' +
           '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>' +
-      /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 062 §6.3) ────────
+      /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 063 §6.3) ────────
          §6.3's one promise: each section carries BOTH headline numbers, so
          whichever you are standing in you can see the other and cross. Drawn
          only where there is a tree, so a unit with none reads exactly the
@@ -4907,7 +4907,7 @@ function renderUnitAnalysis(u){
     box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
 }
 
-/* ── UNIT · Strategy · Drivers (spec 062, §6.1) ─────────────────────
+/* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────
    Islam: *"it's a tab beside the swot ok"* — so a SECTION of Strategy's own
    row, between SWOT and Plan, and a unit reads left to right: who we are,
    where we stand, where the number comes from, what we will do about it.
@@ -5270,7 +5270,7 @@ function renderUnitDrivers(u){
 }
 
 
-/* ── UNIT · Performance · Revenue drivers (spec 062 §6.3) ────────────
+/* ── UNIT · Performance · Revenue drivers (spec 063 §6.3) ────────────
    Islam: *"the perfomance shall split to strategy and revenue driver."*
 
    WHY THE SPLIT IS WORTH A SECTION ROW rather than a fourth card: the two

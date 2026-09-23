@@ -8003,9 +8003,9 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
-## §395 — the client's words on every screen (2026-09-23)
+## §395 — the client's words on every screen (2026-09-23) · **merged to `main` 2026-09-23**
 
-**Built, on the branch, not merged.** After §392 the terminology page held two
+**Built; merged to `main` 2026-09-23 on Islam's word.** After §392 the terminology page held two
 words per term, but many screens still printed the platform's own word. Every
 term was renamed to a nonsense word and every page, tab, section, the edit
 pen, the slides and Setup were walked: 139 places still said "Pillar",

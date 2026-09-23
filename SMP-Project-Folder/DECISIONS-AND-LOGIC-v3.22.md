@@ -57042,6 +57042,8 @@ only the SMO may change (a capability)".**
 
 ## §395 — the client's words reach every screen (2026-09-23)
 
+**Merged to `main` 2026-09-23 on Islam's word**, as a fast-forward — `main` had not moved since §394. Shell `v5.33-client-words-everywhere`, a name the history never held.
+
 Islam, after §392: *"what's next we need to build the wording in all clients"*,
 then, of two things proposed — every screen, and the set-up flow asking both
 words — *"yes go ahead with 1 and 2"*.

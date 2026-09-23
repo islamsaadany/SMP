@@ -6272,65 +6272,93 @@
   {
    "key": "theme",
    "internal": "Theme",
-   "group": "Themes",
+   "group": "Theme",
    "bu": "Themes",
-   "note": "The group's standing columns. Also called pillars or motto elements by clients."
+   "note": "The general motto or themes the whole company is following"
   },
   {
    "key": "pillar",
    "internal": "Pillar",
-   "group": "Group capabilities",
+   "group": "Pillar",
    "bu": "Pillars",
-   "note": "A business unit's direction or capability. Carries key measures and tactics."
+   "note": "A business unit's direction or capability focus areas"
+  },
+  {
+   "key": "capability",
+   "internal": "Capability",
+   "group": "Capability",
+   "bu": "Capabilities",
+   "note": "The internal abilities built to achieve the strategic choices"
   },
   {
    "key": "keyobj",
-   "internal": "Key Objectives",
-   "group": "Key Objectives",
+   "internal": "Key Objective",
+   "group": "Key Objective",
    "bu": "Key Objectives",
-   "note": "A unit's own scorecard. Previously called North Star and Guiding Objectives."
+   "note": "The targets set for a business unit, a company or the group"
   },
   {
    "key": "aspiration",
    "internal": "Winning Aspiration",
-   "group": "Vision",
-   "bu": "Winning Aspiration",
-   "note": "One entity. Vision, End State and Winning Aspiration are display labels for it."
+   "group": "Winning Aspiration",
+   "bu": "Winning Aspirations",
+   "note": "A description of what success looks like"
   },
   {
    "key": "purpose",
-   "internal": "Purpose",
+   "internal": "Mission",
    "group": "Mission",
-   "bu": "—",
-   "note": "Held by the top unit only. Business units inherit it."
+   "bu": "Missions",
+   "note": "Answering the question: why do we exist"
   },
   {
    "key": "values",
    "internal": "Core Values",
    "group": "Core Values",
-   "bu": "—",
-   "note": "Group-level only. A unit never declares its own."
+   "bu": "Core Values",
+   "note": "The company culture elements"
   },
   {
    "key": "measure",
    "internal": "Key Measure",
-   "group": "Key measures",
+   "group": "Key measure",
    "bu": "Key measures",
-   "note": "The measures under a single pillar."
+   "note": "The measures under a single pillar"
   },
   {
    "key": "tactic",
    "internal": "Tactic",
-   "group": "Tactics",
+   "group": "Tactic",
    "bu": "Tactics",
-   "note": "The work under a pillar. Spans quarters, has an owner."
+   "note": "The work under a pillar: spans quarters and has an owner"
   },
   {
    "key": "unitword",
    "internal": "Business Unit",
-   "group": "Business units",
+   "group": "Business unit",
    "bu": "Business units",
-   "note": "What this client calls a business unit. Headings only — sentences keep the platform's own word."
+   "note": "A part of the business with a plan of its own"
+  },
+  {
+   "key": "division",
+   "internal": "Division",
+   "group": "Division",
+   "bu": "Divisions",
+   "note": "The layer between the company or group level and the units and functions"
+  },
+  {
+   "key": "fnword",
+   "internal": "Supporting Function",
+   "group": "Supporting Function",
+   "bu": "Supporting Functions",
+   "note": "The supporting functions that enable the strategy"
+  },
+  {
+   "key": "project",
+   "internal": "Project",
+   "group": "Project",
+   "bu": "Projects",
+   "note": "The group of activities with correlated timelines and outcomes"
   }
  ],
  "bands": [

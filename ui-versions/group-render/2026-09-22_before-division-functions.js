@@ -210,18 +210,12 @@ function drillCard(title, val, opts){
    the dot, and at 3.77:1 it was not readable as a figure. */
 function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
-/* `execHtml` (§391) replaces the execution box's body for a subject whose
-   execution is not "delivered against planned" — a function planning in
-   projects or objectives reports a completion figure, and drawing it as
-   "Planned 100%" would state a plan nobody made. Absent, nothing changes. */
-function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip, execHtml){
+function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip){
   var pid = modalFor(ctx + " \u2014 objectives", "Where the objectives figure comes from", perfDrill);
   var eid = execDrill ? modalFor(ctx + " \u2014 execution", "Where the execution figure comes from", execDrill) : null;
 
   var execBody;
-  if (execHtml != null) {
-    execBody = execHtml;
-  } else if (exec == null || planned == null || planned === 0) {
+  if (exec == null || planned == null || planned === 0) {
     execBody = '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
                '<span class="ratio-l">no plan</span>';
   } else {
@@ -1471,7 +1465,7 @@ function capsTable(){
       '<td class="num final" style="color:' + bandInk(perf) + '">' + pct(perf) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
-    '<th style="width:44%">' + L1("capability") + '</th><th class="num">' + L("project") + '</th>' +
+    '<th style="width:44%">Capability</th><th class="num">Projects</th>' +
     '<th class="cc">Milestones</th><th class="num">Performance</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<p class="sub">Ranked on project performance. Milestones read completed / in progress / not started.</p>';
@@ -1866,15 +1860,10 @@ function renderCompanyPerformance(coKey){
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
-  var keys = companyUnitKeys(ck), fks = companyFnKeys(ck);
-  if (!keys.length && !fks.length) return '<div class="note"><b>' + esc(co.name) +
-    ' holds nothing yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
-    '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
-  /* §391: a company that holds functions reads them into its figures, and the
-     page says so — its headline cards stop being "Business units — …" because
-     they no longer are. With none, everything below is exactly what it was. */
-  if (fks.length) return renderCompanyWithFunctions(ck, co, keys, fks);
+  var keys = companyUnitKeys(ck);
+  if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
+    ' holds no business unit yet.</b> A unit belongs to a company on ' +
+    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>; until one does, there is nothing here to read.</div>';
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);
@@ -1944,99 +1933,6 @@ function renderCompanyPerformance(coKey){
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
       TIP_PERF, viewToggle("units"));
-}
-
-/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§391) ───────────────────
-   Settled from a mockup drawn out of this very page: the same three cards,
-   the units' section unchanged, and a Supporting functions section under it
-   drawing each function with the card a unit wears. The drill says how every
-   member's share was reached, because a weight nobody can trace is a weight
-   nobody can defend. */
-function fnCompanyCard(fk, ck, share){
-  var f = FUNCTIONS[fk], sc = fnMemberScores(fk), co = COMPANIES[ck];
-  var w = Math.round(share.w * 10) / 10;
-  var sub = w + "% of " + esc(co.name) + (share.set ? "" : " (weight left blank)") +
-    " &middot; supporting function";
-  var name = '<button class="linkbu" data-go="fn:' + esc(fk) + '">' + esc(f.name) + '</button>';
-  if (fnPlansInPillars(f)) {
-    var u = unitLike("fn:" + fk);
-    return '<div class="gwrap">' + splitCard(name, sub, sc.perf, unitExec(u), unitPlan(u),
-      "", "", f.name, "") + '</div>';
-  }
-  var t = fnPlansInObjectives(f) ? fnActionsTally(fk) : (fnHolders(fk)[0] ? capExec(fnHolders(fk)[0]) : null);
-  var word = fnPlansInObjectives(f) ? "actions" : "milestones";
-  var body = (t && t.pct != null)
-    ? '<div class="ratio">' + t.pct + '<small>%</small></div><span class="ratio-l">complete</span>' +
-      '<dl class="led"><dt>Done</dt><dd>' + t.done + '</dd><dt>In progress</dt><dd>' + t.wip +
-      '</dd><dt>Of</dt><dd>' + t.total + ' ' + word + '</dd></dl>'
-    : '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
-      '<span class="ratio-l">nothing reported</span>';
-  return '<div class="gwrap">' + splitCard(name, sub, sc.perf, null, null, "", "", f.name, "", body) + '</div>';
-}
-function renderCompanyWithFunctions(ck, co, keys, fks){
-  var shares = companyShares(ck);
-  var perf = companyObjectives(ck), r = companyRatio(ck), share = companyWeight(ck);
-  var nameOf = function(s){ return s.unit ? UNITS[s.unit].name : FUNCTIONS[s.fn].name; };
-  var how = function(s){
-    if (s.unit) return (UNITS[s.unit].weight || 0) + "% of the group";
-    return s.set ? "weight set on Setup" : "weight left blank";
-  };
-  var drill = function(which){
-    var tot = 0;
-    var rows = shares.map(function(s){
-      var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
-                     : fnMemberScores(s.fn)[which];
-      var w = Math.round(s.w * 10) / 10;
-      return '<tr><td><b>' + esc(nameOf(s)) + '</b><span class="why" style="margin:0;display:block">' +
-          how(s) + '</span></td>' +
-        '<td>' + (s.unit ? L1("unitword") : L1("fnword")) + '</td>' +
-        '<td class="num">' + pct(v) + '</td><td class="num">' + w + '%</td>' +
-        '<td class="num">' + (v == null ? "&mdash;" : (Math.round(v * w) / 100).toFixed(1)) + '</td></tr>';
-    }).join("");
-    return miniTable(["Part of " + esc(co.name), "Kind",
-        which === "perf" ? "Performance" : "Execution", "Weight in " + esc(co.name), "Contribution"],
-      rows + '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td><td></td>' +
-        '<td class="num">100%</td><td class="num"><b>' + pct(which === "perf" ? perf : r) + '</b></td></tr>') +
-      '<p class="sub">The functions take their share first: a weight set on Setup is used as ' +
-      'given, a blank takes the average of the weights that are set, and with none set each ' +
-      'function counts as one equal member. ' + (keys.length
-        ? 'The units share what is left in proportion to the weights they carry at group level.'
-        : '') + '</p>';
-  };
-  var parts = plural(keys.length, "unit") + " and " +
-    plural(fks.length, "supporting function") + " in " + esc(co.name);
-  var head = '<div class="scores">' +
-    drillCard("Performance" + tip(TIP_PERF), perf, {
-      primary: true,
-      sub: "The " + (keys.length ? parts : plural(fks.length, "supporting function") + " in " + esc(co.name)) +
-        ", each on its own key objectives, weighted.",
-      drill: drill("perf"), modalTitle: esc(co.name) + " — performance",
-      modalSub: "Weighted across everything this company holds"
-    }) +
-    drillCard("Execution" + tip(TIP_EXEC), r, {
-      sub: "Each part’s own execution figure, weighted as in performance.",
-      drill: drill("exec"), modalTitle: esc(co.name) + " — execution",
-      modalSub: "Weighted across everything this company holds"
-    }) +
-    (keys.length ? drillCard("Share of the group" + tip("What these units together are worth at group level. " +
-        "Supporting functions carry no group weight, so they are not in this number."), share, {
-      plain: true, pill: "of the group",
-      sub: plural(keys.length, "unit") + " of the group’s " + activeKeys().length +
-        ", carrying <b>" + share + "%</b> of its weight between them. Functions carry no group " +
-        "weight, so they are not in this number.",
-      drill: drill("perf"), modalTitle: esc(co.name) + " — weight",
-      modalSub: "Where this company's share comes from"
-    }) : '') +
-  '</div>';
-  var byFn = {};
-  shares.forEach(function(s){ if (s.fn) byFn[s.fn] = s; });
-  return perfActs("") + head +
-    (keys.length ? section("", L("unitword","bu"), null,
-      GVIEW.units === "table" ? unitsTable(keys)
-        : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF, viewToggle("units")) : '') +
-    section("", L("fnword"), null,
-      '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck, byFn[k]); }).join("") + '</div>');
 }
 
 function renderGroupPerformance(){
@@ -2140,7 +2036,7 @@ function renderGroupPerformance(){
                 '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
-      miniTable(["#",L1("project"),"Deliverables","Outcomes","Performance"],
+      miniTable(["#","Project","Deliverables","Outcomes","Performance"],
         c.projects.map(function(p, i){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
             '<td class="num">' + pct(projDeliverySide(p)) + '</td>' +
@@ -2148,7 +2044,7 @@ function renderGroupPerformance(){
             '<td class="num final" style="color:' + bandInk(projPerf(p)) + '">' + pct(projPerf(p)) + '</td></tr>';
         }).join("")) +
       '<p class="sub">Half from the deliverables side, half from the outcomes side, per side rather than per row.</p>';
-    var ed = miniTable(["#",L1("project"),"Completed","In progress","Not started"],
+    var ed = miniTable(["#","Project","Completed","In progress","Not started"],
         c.projects.map(function(p, i){
           var m = projMilestones(p);
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
@@ -2179,7 +2075,7 @@ function renderGroupPerformance(){
         '<dl class="led">' +
           '<dt>In progress</dt><dd>' + ce.wip + '</dd>' +
           '<dt>Not started</dt><dd>' + ce.todo + '</dd>' +
-          '<dt>' + L("project") + '</dt><dd>' + c.projects.length + '</dd>' +
+          '<dt>Projects</dt><dd>' + c.projects.length + '</dd>' +
         '</dl>';
     return '<div class="gwrap" data-oi="' + ci + '"><div class="gcard">' +
       '<div class="card-head">' + (arranging("group") ? handle("Reorder " + c.name) : '') +
@@ -2311,7 +2207,7 @@ function templeTables(){
   var editing = EDIT_PAGE.temple;
 
   var stmt =
-    '<h4 class="mini">' + L1("aspiration") + '</h4>' +
+    '<h4 class="mini">' + L("aspiration","group") + '</h4>' +
     '<div class="tcard">' +
       '<div class="trow"><label>Statement</label>' +
         fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
@@ -2372,7 +2268,7 @@ function templeTables(){
       '<th style="width:24%">Name</th><th>Note</th><th class="cc">Pillars</th><th class="cc"></th>' +
       '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a theme") +
 
-    '<h4 class="mini">' + L("capability") + '</h4>' +
+    '<h4 class="mini">' + L("pillar","group") + '</h4>' +
     '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">Capability</th>' +
       '<th>Definition</th><th class="cc">Measures</th><th class="cc">Tactics</th><th class="cc"></th>' +
       '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a capability") +
@@ -2414,7 +2310,7 @@ function renderTemple(){
     '<div class="pillars">' + GROUP.themes.map(function(p){
       return '<div class="pillar"><span>' + esc(p.ab) + '</span><b>' + esc(p.name) + '</b><em>' + esc(p.note || "") + '</em></div>';
     }).join("") + '</div>' +
-    '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no theme</div><div class="base-grid">' +
+    '<div class="stylobate"><div class="base-head">' + L("pillar","group") + ' &mdash; cross-cutting, no theme</div><div class="base-grid">' +
       GROUP.capabilities.map(function(c){
         return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
           '<span>' + c.projects.length + ' project' + (c.projects.length === 1 ? '' : 's') +
@@ -2457,10 +2353,10 @@ function renderGroupFoundation(){
       (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
       '</div>' +
       '<div class="fcol">' +
-        '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
+        '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
         '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
           function(v){ GROUP.mission = v; }) + '</p></div>' +
-        aspirationCard(L1("aspiration"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
+        aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
           function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
           true, GROUP) +
       '</div>' +
@@ -2696,12 +2592,6 @@ function renderUnitPerformance(u){
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
           '<div><em>Planned</em><b>' + pct(unitPlan(u)) + '</b></div>' +
           '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>' +
-      /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 063 §6.3) ────────
-         §6.3's one promise: each section carries BOTH headline numbers, so
-         whichever you are standing in you can see the other and cross. Drawn
-         only where there is a tree, so a unit with none reads exactly the
-         three cards it read yesterday. */
-      drvScoreCard(u) +
     '</div>' +
 
     focusStrip(u) +
@@ -2850,17 +2740,11 @@ function paneActs(page, acKey){
    `strategyPageOf()` exists to answer (§53.5). What varies per side and is
    NOT an access question is the render page: a unit's Foundation is
    `foundation`, a function's Overview is `capfoundation` (§213). */
-/* `drivers` NAMES `plan` FOR ITS RENDER PAGE TOO, and that is deliberate
-   rather than a shortcut: §269 made the edit mode the TAB's, so one press of
-   Edit opens the tree and the plan together, and a page key of its own would
-   be a second flag that could disagree with the first (§268's own finding,
-   which is exactly what this table exists to stop). */
 var SEC_PENS = {
-  found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
-  swot:    { unit: "analysis",                        ac: "u_anal"  },
-  drivers: { unit: "plan",                            ac: "u_plan"  },
-  plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
-  proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
+  found: { unit: "foundation", fn: "capfoundation", ac: "u_found" },
+  swot:  { unit: "analysis",                        ac: "u_anal"  },
+  plan:  { unit: "plan",       fn: "plan",          ac: "u_plan"  },
+  proj:  { unit: "plan",       fn: "plan",          ac: "u_plan"  }
 };
 function secPagePair(sec){
   var e = SEC_PENS[sec];
@@ -4972,7 +4856,7 @@ function renderUnitFoundation(u){
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
         '">+ Add a line</button></div>' : '') + '</div>' +
-      aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
+      aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
         false, u) +
     '</div>' +
@@ -5009,534 +4893,6 @@ function renderUnitAnalysis(u){
   return '<div class="swot">' +
     box("s","s","Strengths") + box("w","w","Weaknesses") +
     box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
-}
-
-/* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────
-   Islam: *"it's a tab beside the swot ok"* — so a SECTION of Strategy's own
-   row, between SWOT and Plan, and a unit reads left to right: who we are,
-   where we stand, where the number comes from, what we will do about it.
-
-   IT ASKS `u_plan`'S GRANT AND OWNS NO PAGE KEY OF ITS OWN, which is what
-   keeps the promise that nobody's access moves and no column appears on
-   Roles & access: `SEC_PENS.drivers` names `plan` for its render page too, so
-   one press of Edit opens the tree and the plan together (§269 — the mode is
-   the TAB's) and there is no second flag to disagree with the first.
-
-   EVERY FIGURE ON IT IS `lib/rules.js`'s, NEVER COMPUTED HERE. The months, the
-   year-one value, the period totals and the growth split are the same
-   functions `api/state.js` runs and `smp-app/checks/drivers.mjs` proves
-   against Islam's own tool — a second arithmetic on the screen is a second
-   revenue target (§42, §53.5). */
-
-/* Money at the scale a plan is read at. The tree's own figures are the
-   multiplication of counts and prices, so they arrive at full precision and
-   are drawn at the magnitude the review speaks in — 125.02M, never
-   125,018,400 (§254.1's own reason, one table along). */
-function drvMoney(v, ref){
-  if (v == null || !isFinite(v)) return "&mdash;";
-  /* A TRUE MINUS SIGN, never a hyphen: these sit in tabular figures beside
-     one another, and U+002D is a dash the width of a letter in a column of
-     digits that are all the width of a digit. */
-  var a = Math.abs(v), s = v < 0 ? "\u2212" : "";
-  /* ONE LINE, ONE SCALE. `ref` is the figure the others on its line are read
-     against, so a period argued in millions does not report its gap in
-     thousands — "argued 21.12M · delivered 21.93M · +808.1K" is three numbers
-     a reader has to rescale in their head before they can be compared, which
-     is the one thing a summary line must not ask for. */
-  var m = Math.abs(ref == null ? v : ref);
-  if (m >= 1e9) return s + (a / 1e9).toFixed(2) + "B";
-  if (m >= 1e6) return s + (a / 1e6).toFixed(2) + "M";
-  if (m >= 1e3) return s + (a / 1e3).toFixed(1) + "K";
-  return s + (Math.round(a * 100) / 100);
-}
-/* A driver's own value, which is a COUNT or a PRICE or a per cent and never a
-   sum of money — so it keeps its separators and its unit rather than being
-   scaled (4,500 transactions is not 4.5K of anything). */
-function drvVal(v, unit){
-  if (v == null || !isFinite(v)) return "&mdash;";
-  var r = Math.round(v * 100) / 100;
-  return (unit === "%" ? r + "%" : String(r).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-}
-function drvMonths(m){ return (Math.round(m * 100) / 100) + " months"; }
-/* A SEASON'S DATES READ THE WAY EVERY OTHER DATE IN THIS PRODUCT READS.
-   `2026-02-17` is what a date input stores and what the arithmetic needs; it
-   is not what a band says. `17 Feb` reads one way in every country, where
-   17/02/26 and 02/17/26 do not (§177's own reason for the month picker), and
-   the year is said once at the end rather than on both halves. */
-function drvDay(iso, withYear){
-  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
-  if (!m) return esc(iso || "");
-  var mi = +m[2] - 1;
-  if (mi < 0 || mi > 11) return esc(iso);
-  return (+m[3]) + " " + MONTH_ABB[mi] + (withYear ? " " + m[1] : "");
-}
-
-/* WHAT A PERIOD'S BAND SAYS, and the three kinds say three different things
-   because they ARE three different things (§4.2): a base year carries the
-   months it has left after its own seasons, a season carries its real dates,
-   and an increment has no baseline at all — so saying "0 →" there would be
-   claiming a comparison nobody made. */
-function drvBandLine(seasons, ch, sub, p, f){
-  var ms = drvMonths(f.months);
-  if (p.type === "increment")
-    return 'no baseline &middot; ' + drvMoney(f.b1) + ' &middot; new business';
-  if (p.type === "season") {
-    var s = SMPRules.seasonById(seasons, p.seasonId);
-    return (s && s.start && s.end
-      ? drvDay(s.start) + ' &ndash; ' + drvDay(s.end, true) + ' &middot; ' : '') +
-      ms + ' &middot; ' + drvMoney(f.b0) + ' &rarr; ' + drvMoney(f.b1);
-  }
-  return ms + ' &middot; ' + drvMoney(f.b0) + ' &rarr; ' + drvMoney(f.b1, f.b0);
-}
-
-/* EVERY PLACE A DRIVER CAN ANSWER TO, in the unit's own reading order: its key
-   objectives first, then each pillar's measures under the pillar's name. One
-   walk, so the picker and the column below it cannot list different things. */
-function drvAnswerables(u){
-  var out = [];
-  (u.keyObjectives || []).forEach(function(r){
-    if (r && r.name) out.push({ row:r, name:r.name, where:"a key objective" });
-  });
-  (u.items || []).forEach(function(p, pi){
-    (p.measures || []).forEach(function(m){
-      if (m && m.name)
-        out.push({ row:m, name:m.name, where:esc(pillarCode(u, pi)) + " &middot; a pillar measure" });
-    });
-  });
-  return out;
-}
-/* WHAT A DRIVER ANSWERS TO, READ AND NEVER STORED ON THE DRIVER (§4.3). A
-   unit's objectives and measures are renumbered BY POSITION on every load
-   (§48), so a connection stored the other way round would silently re-point
-   the moment somebody deleted an objective above it. */
-function drvAnsweredBy(u, d){
-  var all = drvAnswerables(u), id = String(d && d.id);
-  for (var i = 0; i < all.length; i++)
-    if (all[i].row[SMPRules.DRIVER_LINK] != null &&
-        String(all[i].row[SMPRules.DRIVER_LINK]) === id) return all[i];
-  return null;
-}
-
-/* THE LAST COLUMN, AND ITS THREE STATES ARE THE DECISION (§6.2). Islam, of a
-   driver nobody has connected: *"just say so."* So it is the QUIET register
-   and never the platform's red `Missing` — red on a value means *this is
-   holding something up* everywhere else here, and a red word over something
-   that stops nobody teaches people to stop reading the red (§214.4, §272).
-
-   THE CONTROL WRITES ONTO THE OBJECTIVE, WHICH IS WHERE THE POINTER LIVES.
-   It is drawn in this column because this is the column that SHOWS the state
-   — a picker on the objectives table would take about 150px off the objective
-   name at every width for a field most rows never use (§278.3's own
-   measurement, one table over) — but nothing about §4.3 moves: the select's
-   handler clears the id from every row that holds it and writes it onto the
-   one that was picked. */
-function drvAnswerCell(u, d, ed){
-  var hit = drvAnsweredBy(u, d);
-  var read = hit
-    ? '<span class="linked">' + esc(hit.name) + '</span><span class="why">' + hit.where + '</span>'
-    : d.assume === true
-      ? '<span class="assume">Assumption &mdash; not scored</span>'
-      : '<span class="notyet">Nobody has said yet</span>';
-  if (!ed) return read;
-  var opts = [{ v:"", label:"Nobody has said yet" },
-              { v:"assume", label:"Assumption — not scored" }];
-  var all = drvAnswerables(u);
-  if (all.length) opts.push({ group:"Answers to", items: all.map(function(x, i){
-    return { v:"r" + i, label:x.name };
-  }) });
-  var cur = hit ? "r" + all.indexOf(hit) : (d.assume === true ? "assume" : "");
-  return '<select class="fld drvans" data-drvans="' + esc(u.ukey) + '|' + esc(d.id) + '">' +
-    optionsHtml(opts, function(v){ return v === cur; }) + '</select>';
-}
-
-/* ── ONE SUB-CHANNEL'S TABLE ────────────────────────────────────────
-   Six columns, and the WHY sits under the driver's name rather than in a
-   column of its own — the way a tactic's description already does (§248), and
-   for the same measured reason: a Note column takes about 150px off the name
-   at every width, which is the one column that has to be readable.
-
-   THE BAND IS `tr.dxband`, the platform's own in-table band (§99), so a
-   period is opened the way a project's two halves already are and this table
-   adds no vocabulary of its own (§53.5). */
-function drvSubTable(u, seasons, ch, sub, si, ed){
-  var head = '<thead><tr>' +
-    '<th style="width:31%">Driver</th>' +
-    '<th style="width:9%">Kind</th>' +
-    '<th class="num" style="width:11%">Baseline</th>' +
-    '<th class="num" style="width:10%">Uplift</th>' +
-    '<th class="num" style="width:11%">Year 1</th>' +
-    /* THE REPORTED FIGURE IS TYPED HERE, beside the number it is read against
-       (§4.5a, Islam: *"they are all typed"*) — one page writes the tree and
-       what happened to it, so there is one place to look and one writer. It
-       is drawn while the pen is open and as a value when it is shut, and a
-       row nobody has typed against reads NOT REPORTED rather than nought
-       (§35, §93). */
-    '<th class="num" style="width:10%">Actual' +
-      (ed ? '' : '<span class="subhd">what happened</span>') + '</th>' +
-    '<th style="width:22%">Answers to' +
-      (ed ? '' : '<span class="subhd">the objective or measure this belongs to</span>') +
-    '</th></tr></thead>';
-  var body = (sub.periods || []).map(function(p, pi){
-    var at = esc(u.ukey) + '|' + si + '|' + pi;
-    var f = SMPRules.driverPeriod(seasons, ch, sub, p);
-    var inc = p.type === "increment";
-    var rows = (p.drivers || []).map(function(d){
-      var one = SMPRules.driverYearOne(d);
-      return '<tr>' +
-        '<td><span class="dname">' +
-          (ed ? textOr("plan", d.name || "", "grow", function(v){ d.name = v; })
-              : esc(d.name || "")) + '</span>' +
-          (ed || d.note
-            ? '<span class="why">' +
-              (ed ? textOr("plan", d.note || "", "grow", function(v){
-                      if (v) d.note = v; else delete d.note; })
-                  : esc(d.note)) + '</span>'
-            : '') + '</td>' +
-        '<td>' + (ed
-          ? selectOr("plan", d.kind === "val" ? "val" : "vol",
-              [{ v:"vol", label:"Volume" }, { v:"val", label:"Value" }], "",
-              function(v){ d.kind = v; })
-          : '<span class="kindchip' + (d.kind === "val" ? " val" : "") + '">' +
-            (d.kind === "val" ? "Value" : "Volume") + '</span>') + '</td>' +
-        /* AN INCREMENT HAS NO BASELINE AND NO UPLIFT, and the cells say so
-           rather than offering boxes that feed nothing: `driverPeriod()`
-           reads only the year-one value there, so a number typed into a
-           baseline would be stored, drawn and silently ignored (§96). */
-        '<td class="num">' + (inc ? '&mdash;' : (ed
-          ? inputOr("plan", d.base == null ? "" : d.base, "num",
-              function(v){ d.base = v === "" ? 0 : Number(v); })
-          : drvVal(Number(d.base) || 0, d.unit))) + '</td>' +
-        '<td class="num">' + (inc ? '&mdash;' : (ed
-          ? inputOr("plan", d.up == null ? "" : d.up, "num",
-              function(v){ d.up = v === "" ? 0 : Number(v); }) +
-            selectOr("plan", d.upUnit === "#" ? "#" : "%",
-              [{ v:"%", label:"%" }, { v:"#", label:"+n" }], "",
-              function(v){ d.upUnit = v; })
-          : (Number(d.up) ? (d.upUnit === "#" ? "+" + drvVal(Number(d.up))
-                                              : "+" + Number(d.up) + "%")
-                          : '&mdash;'))) + '</td>' +
-        '<td class="num">' + drvVal(inc ? Number(d.base) || 0 : one, d.unit) + '</td>' +
-        '<td class="num">' + (ed
-          ? inputOr("plan", d.actual == null ? "" : d.actual, "num", function(v){
-              /* STORED AS AN ABSENCE (§50.6): an emptied box is a figure
-                 nobody has reported, which is a different fact from a
-                 reported nought and must never be scored as one. */
-              if (v === "" || v == null) delete d.actual; else d.actual = Number(v);
-            })
-          : (SMPRules.driverActual(d) == null
-              ? '<span class="notyet">not reported</span>'
-              : drvVal(SMPRules.driverActual(d), d.unit))) + '</td>' +
-        '<td>' + drvAnswerCell(u, d, ed) + '</td>' +
-        (ed ? '<td class="xcell"><button class="xbtn" data-drvrm="' + esc(u.ukey) + '|' +
-          esc(d.id) + '" title="Remove this driver" aria-label="Remove this driver">' +
-          '&times;</button></td>' : '') + '</tr>';
-    }).join("");
-    return '<tr class="dxband"><th colspan="' + (ed ? 8 : 7) + '">' +
-        esc(p.name || "Period") + '<em>' + drvBandLine(seasons, ch, sub, p, f) + '</em>' +
-        (ed ? '<span class="dxacts">' +
-          '<button class="linkbu" data-drvadd="' + at + '">+ Add a driver</button>' +
-          '<button class="linkbu" data-drvprm="' + at + '">Remove this period</button>' +
-          '</span>' : '') +
-      '</th></tr>' + rows;
-  }).join("");
-  return '<div class="scroll"><table class="drvtbl">' + head +
-    '<tbody>' + body + '</tbody></table></div>';
-}
-
-function drvRailKey(u){ return "drv:" + u.ukey; }
-/* A CHANNEL WITH ONE ROUTE DRAWS NO RAIL, and `flat` is DERIVED from the list
-   rather than stored beside it (§110's pair): two facts that can disagree
-   about the same thing is how a rail comes to be drawn over one row. */
-function drvRailPick(ch, u){
-  var want = RAIL[drvRailKey(u)], subs = ch.subs || [];
-  for (var i = 0; i < subs.length; i++) if (subs[i].name === want) return i;
-  return 0;
-}
-
-/* WHAT THE TREE ADDS UP TO, on the pane's own band. The unit's revenue target
-   IS this figure (§4.2, Islam: *"tree is the main source"*), so the band says
-   the number the plan is built to rather than making somebody add the periods
-   up themselves. */
-function drvPaneBand(u, ch, sub, f, flat){
-  var tail = (flat ? 'one route to market' : plural((sub.periods || []).length, "period")) +
-    ' &middot; ' + drvMoney(f.b0) + ' &rarr; ' + drvMoney(f.b1, f.b0);
-  return pillarBand(u.codePrefix || "", flat ? u.name : sub.name,
-    '<span class="why" style="margin:0">' + tail + '</span>');
-}
-
-/* ── WHAT CAN BE ADDED, AND ONLY WHAT CAN (§61) ─────────────────────
-   A SECOND BASE PERIOD WOULD DOUBLE THE PLAN, silently. `driverMonths()`
-   gives every base period twelve months less the seasons used in its own
-   sub-channel, so two of them are two full years of revenue added together —
-   an arithmetic answer that is true and says something false. The same holds
-   one step down for a season already phased here.
-
-   So the control OFFERS ONLY THE LEGAL ONES rather than accepting anything
-   and refusing it afterwards: one select, narrowed to what this sub-channel
-   does not already have, absent entirely when there is nothing left to add.
-   A client with no seasons is told where they are set rather than shown an
-   empty list (§16.7). */
-function drvPaneActs(u, ch, sub, si, seasons, flat){
-  var used = {}, hasBase = false;
-  (sub.periods || []).forEach(function(p){
-    if (p.type === "base") hasBase = true;
-    if (p.type === "season" && p.seasonId) used[p.seasonId] = 1;
-  });
-  var opts = [{ v:"", label:"+ Add a period\u2026" }];
-  if (!hasBase) opts.push({ v:"base", label:"The base year" });
-  var free = (seasons || []).filter(function(s){ return s && s.id && !used[s.id]; });
-  if (free.length) opts.push({ group:"A season", items: free.map(function(s){
-    return { v:"s:" + s.id, label:s.name || s.id }; }) });
-  opts.push({ v:"increment", label:"Something new \u2014 no baseline" });
-
-  return '<div class="paneact drvact">' +
-    '<select class="fld drvadd" data-drvpnew="' + esc(u.ukey) + '|' + si + '">' +
-      optionsHtml(opts, function(v){ return v === ""; }) + '</select>' +
-    /* A COUNT CHANNEL IS NOT A RATE AT ALL (§4.2): *Events per year 45* is
-       already the year, so the months never multiply it. It is a fact about
-       the whole channel, which is why it sits here once rather than on each
-       route. */
-    '<select class="fld drvmode" data-drvmode="' + esc(u.ukey) + '">' +
-      optionsHtml([{ v:"rate", label:"Read as a monthly rate" },
-                   { v:"count", label:"Read as a yearly count" }],
-        function(v){ return v === SMPRules.driverMode(ch); }) + '</select>' +
-    '<button class="editbtn" data-drvsnew="' + esc(u.ukey) + '">+ Add a route</button>' +
-    (flat ? '' : '<button class="editbtn" data-drvsrm="' + esc(u.ukey) + '|' + si +
-      '">Remove this route</button>') +
-    (!free.length && !(seasons || []).length
-      ? '<span class="why" style="margin:0">Seasons are set once for the client on ' +
-        '<b>Setup \u2192 Seasons</b>.</span>' : '') + '</div>';
-}
-
-function renderUnitDrivers(u){
-  var seasons = SMPRules.seasonsOf(GROUP), ch = SMPRules.driverChannel(u);
-  var ed = authoring("plan", "u_plan");
-
-  /* AN EMPTY TREE IS WHERE THE FIRST ONE GOES (§61, §129's audit). The button
-     asks `mayEditPlan()` ITSELF, because on an empty page there is no pen for
-     it to be gated by — the control's anchor is the thing that does not exist
-     yet — and a unit whose office has not built a tree reads a sentence rather
-     than a blank pane (§45.2). */
-  if (!ch || !(ch.subs || []).length)
-    return '<div class="bempty">' +
-      '<b>' + esc(u.name) + ' has no revenue tree yet.</b>' +
-      (typeof mayEditPlan === "function" && mayEditPlan()
-        ? '<p>A tree is how a revenue number is argued: how many stores, how ' +
-          'many transactions, what basket &mdash; so the plan beside it can be ' +
-          'built to deliver the logic rather than to hit a figure nobody broke ' +
-          'down.</p>' +
-          '<div class="row"><button class="bprim" data-drvnew="' + esc(u.ukey) +
-            '">Start the tree</button>' +
-          '<span class="alt">the seasons it phases by are the client\'s, on ' +
-            '<b>Setup → Seasons</b>.</span></div>'
-        : '<p>The revenue tree is built by the SMO, on this page.</p>') + '</div>';
-
-  var flat = SMPRules.driverFlat(ch), subs = ch.subs;
-  var si = flat ? 0 : drvRailPick(ch, u), sub = subs[si];
-  var fig = SMPRules.driverFigures(seasons, ch);
-  var subFig = SMPRules.driverSub(seasons, ch, sub);
-  var open = SMPRules.driverUnanswered(u);
-
-  /* THE TOTAL LINE IS DRAWN ONCE, ABOVE EVERYTHING, and it is the whole
-     channel rather than the sub-channel on screen — a figure that changed
-     when you clicked a rail row would be a second reading of the same
-     question (§108.1's miscount, from the other side). */
-  var head = '<div class="drvtot">' +
-    '<span class="drvtot-n">' + drvMoney(fig.b1) + '</span>' +
-    '<span class="drvtot-w">the revenue this tree argues for &middot; ' +
-      drvMoney(fig.b0, fig.b1) + ' last year &middot; ' +
-      (fig.growth >= 0 ? '+' : '') + drvMoney(fig.growth, fig.b1) + ' of growth</span>' +
-    /* NOT A COUNT OF GAPS AND NOT IN RED. An unanswered connection holds
-       nothing up (Islam: *"just say so"*), so it is a fact in the quiet
-       register beside the number and joins no total that refuses a save
-       (§214.4, §272). */
-    (open ? '<span class="drvtot-open">' + plural(open, "driver") +
-      ' nobody has connected yet</span>' : '') + '</div>';
-
-  var pane = '<div class="pane">' + drvPaneBand(u, ch, sub, subFig, flat) +
-    drvSubTable(u, seasons, ch, sub, si, ed) +
-    (ed ? drvPaneActs(u, ch, sub, si, seasons, flat) : '') + '</div>';
-
-  if (flat) return head + pane;
-
-  var rows = subs.map(function(s, i){
-    var f = SMPRules.driverSub(seasons, ch, s);
-    return '<button class="ritem' + (i === si ? " on" : "") + '" data-drail="' +
-      esc(u.ukey) + '|' + esc(s.name) + '">' +
-      railName("", s.name) +
-      (RAIL_TERSE ? '' : '<span class="rsub">' +
-        plural((s.periods || []).length, "period") + ' &middot; ' +
-        drvMoney(f.b1) + '</span>') + '</button>';
-  }).join("");
-  return head + '<div class="split"><div class="rail">' +
-    railHead("Routes to market", subs.length) + rows +
-    '</div>' + pane + '</div>';
-}
-
-
-/* ── UNIT · Performance · Revenue drivers (spec 063 §6.3) ────────────
-   Islam: *"the perfomance shall split to strategy and revenue driver."*
-
-   WHY THE SPLIT IS WORTH A SECTION ROW rather than a fourth card: the two
-   readings answer different questions and can disagree — the plan was
-   delivered and the money was not — and §1's whole argument is that they are
-   worth reading BESIDE each other. Which is why each section carries the
-   other's headline: the Strategy section gains a revenue card, this one names
-   the execution figure, and the row is how you cross.
-
-   §63 IS NOT REVERSED. That section removed a Reporting *section* from inside
-   Performance on Islam's own point that *"performance is a result of
-   reporting, so having inside performance 2 buttons performance and reporting
-   doesn't make sense"* — two siblings repeating the tab's own word. These two
-   are different readings and neither repeats the tab.
-
-   NOTHING HERE COMPUTES ANYTHING. Every figure is `lib/rules.js`'s, which is
-   the same arithmetic `api/state.js` judges a save with and
-   `smp-app/checks/drivers.mjs` proves against Islam's own tool. */
-
-/* Is there anything to read at all — and the two halves are different facts
-   (§93): a unit with no tree has no revenue reading, and a unit with a tree
-   nobody has reported against has one that is honestly empty. */
-function drvHasTree(u){
-  var ch = SMPRules.driverChannel(u);
-  return !!(ch && (ch.subs || []).length);
-}
-/* WHAT PERFORMANCE SHOWS: a tree, AND the client having the switch on. The
-   one gate both the section and the score card ask, so Off cannot leave one
-   of them standing. */
-function drvShown(u){ return driversOn() && drvHasTree(u); }
-function drvReadingFigures(u){
-  var ch = SMPRules.driverChannel(u);
-  if (!ch || !(ch.subs || []).length) return null;
-  var se = SMPRules.seasonsOf(GROUP);
-  return { ch:ch, seasons:se,
-           reported: SMPRules.driverReported(ch),
-           f: SMPRules.driverActualFigures(se, ch) };
-}
-
-/* THE REVENUE CARD, drawn on the Strategy section so the two numbers are
-   read together (§6.3). It is `.card tight`, the same shape the three beside
-   it already are — a card of its own design would read as a different kind of
-   fact (§53.5). */
-function drvScoreCard(u){
-  if (!drvShown(u)) return "";
-  var r = drvReadingFigures(u);
-  if (!r) return "";
-  var s = r.reported ? SMPRules.driverScore(r.f) : null;
-  return '<div class="card tight"><div class="score-h"><h4>Revenue performance</h4>' +
-    (s == null ? '<span class="pill">Not reported</span>'
-               : '<span class="pill ' + band(s) + '">' + bandWord(s) + '</span>') + '</div>' +
-    '<div class="headline"><span class="big" style="color:' + bandInk(s) + '">' +
-      pctBig(s) + '</span>' +
-      '<button class="drill" data-sub2="perfdrv">See where it went &rarr;</button></div>' +
-    '<div class="minirow"><div><em>Argued for</em><b>' + drvMoney(r.f.planned) + '</b></div>' +
-      '<div><em>Delivered</em><b>' + (r.reported ? drvMoney(r.f.actual) : '&mdash;') + '</b></div>' +
-      '<div><em>Gap</em><b style="color:' + (r.reported ? bandInk(s) : 'inherit') + '">' +
-        (r.reported ? (r.f.gap >= 0 ? '+' : '') + drvMoney(r.f.gap, r.f.planned) : '&mdash;') +
-      '</b></div></div></div>';
-}
-
-function renderUnitRevenue(u){
-  var r = drvReadingFigures(u);
-  /* A UNIT WITH NO TREE NEVER REACHES THIS — the section's own `when` is what
-     keeps the row from appearing at all — so this is the belt for a target
-     that arrived some other way, and it points at the page that fills it
-     rather than at nothing (§61). */
-  if (!r) return '<div class="bempty"><b>' + esc(u.name) +
-    ' has no revenue tree yet.</b><p>A tree is built on ' +
-    '<b>Strategy → Drivers</b>, and this page reads what happened against it.</p></div>';
-
-  var ch = r.ch, se = r.seasons, f = r.f, s = r.reported ? SMPRules.driverScore(f) : null;
-  var ex = unitRatio(u);
-
-  /* THE STRIP CARRIES THE OTHER SECTION'S NUMBER AND SAYS WHERE IT LIVES —
-     §6.3's promise, and the sub-line is what stops it reading as a second,
-     different execution figure (§87's twins). */
-  var strip = '<div class="scores">' +
-    '<div class="card tight"><div class="score-h"><h4>Strategy performance</h4>' +
-      '<span class="pill ' + band(ex) + '">' + bandWord(ex) + '</span></div>' +
-      '<div class="headline"><span class="big" style="color:' + bandInk(ex) + '">' +
-        pctBig(ex) + '</span>' +
-        '<button class="drill" data-sub2="perfstrat">Read it &rarr;</button></div>' +
-      '<div class="minirow"><div><em>We did what we said we would do</em>' +
-        '<b>' + pct(unitExec(u)) + ' of ' + pct(unitPlan(u)) + ' planned</b></div></div></div>' +
-    '<div class="card tight primary"><div class="score-h"><h4>Revenue performance</h4>' +
-      (s == null ? '<span class="pill">Not reported</span>'
-                 : '<span class="pill ' + band(s) + '">' + bandWord(s) + '</span>') + '</div>' +
-      '<div class="headline"><span class="big" style="color:' + bandInk(s) + '">' +
-        pctBig(s) + '</span></div>' +
-      '<div class="minirow"><div><em>Argued for</em><b>' + drvMoney(f.planned) + '</b></div>' +
-        '<div><em>Delivered</em><b>' + (r.reported ? drvMoney(f.actual) : '&mdash;') + '</b></div>' +
-        '<div><em>Gap</em><b style="color:' + (r.reported ? bandInk(s) : 'inherit') + '">' +
-          (r.reported ? (f.gap >= 0 ? '+' : '') + drvMoney(f.gap, f.planned) : '&mdash;') + '</b></div>' +
-      '</div></div>' + '</div>';
-
-  /* NOTHING REPORTED IS SAID, NEVER DRAWN AS NOUGHT (§35, §45.2). A page of
-     em-dashes under a heading reads as a feature that failed rather than as a
-     cycle nobody has typed into yet. */
-  if (!r.reported) return strip +
-    '<div class="bempty"><b>Nothing has been reported against this tree yet.</b>' +
-    '<p>Every driver\'s figure is typed on <b>Strategy → Drivers</b>, beside the ' +
-    'number the plan argued for. Once they are in, this page says where the ' +
-    'money went and which work each moved driver belonged to.</p></div>';
-
-  var panes = (ch.subs || []).map(function(sub){
-    var sf = SMPRules.driverSubActual(se, ch, sub);
-    var body = (sub.periods || []).map(function(p){
-      var a = SMPRules.driverPeriodActual(se, ch, sub, p);
-      var rows = a.rows.map(function(x){
-        var d = x.driver, hit = drvAnsweredBy(u, d);
-        /* EFFECT AND ACTUAL ARE TWO DIFFERENT SILENCES. A row nobody typed
-           against has no actual and therefore no effect, and both cells say
-           so rather than one of them printing a nought that reads as "this
-           cost nothing" (§35). */
-        return '<tr' + (x.reported ? '' : ' class="drvquiet"') + '>' +
-          '<td><span class="dname">' + esc(d.name || "") + '</span>' +
-          (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
-          '<td class="num">' + drvVal(x.planned, d.unit) + '</td>' +
-          '<td class="num">' + (x.reported ? drvVal(x.actual, d.unit)
-            : '<span class="notyet">not reported</span>') + '</td>' +
-          '<td class="num">' + (!x.reported || Math.abs(x.effect) < 1
-            ? '&mdash;'
-            : '<span class="' + (x.effect < 0 ? "drvdown" : "drvup") + '">' +
-              (x.effect > 0 ? '+' : '') + drvMoney(x.effect, a.planned) + '</span>') + '</td>' +
-          '<td>' + (hit
-            ? '<span class="linked">' + esc(hit.name) + '</span>' +
-              '<span class="why">' + hit.where + '</span>'
-            : d.assume === true
-              ? '<span class="assume">Assumption</span>'
-              : '<span class="notyet">Nobody has said yet</span>') + '</td></tr>';
-      }).join("");
-      return '<tr class="dxband"><th colspan="5">' + esc(p.name || "Period") +
-        '<em>argued ' + drvMoney(a.planned) + ' &middot; delivered ' +
-        drvMoney(a.actual, a.planned) + ' &middot; ' + (a.gap >= 0 ? '+' : '') +
-        drvMoney(a.gap, a.planned) + '</em></th></tr>' + rows;
-    }).join("");
-    return '<div class="pane">' +
-      pillarBand(u.codePrefix || "", SMPRules.driverFlat(ch)
-          ? "Where the " + drvMoney(Math.abs(f.gap)) + " went" : sub.name,
-        '<span class="why" style="margin:0">' + drvMoney(sf.planned) + ' &rarr; ' +
-          drvMoney(sf.actual, sf.planned) + '</span>') +
-      '<div class="scroll"><table class="drvtbl"><thead><tr>' +
-        '<th style="width:30%">Driver</th>' +
-        '<th class="num" style="width:12%">Planned</th>' +
-        '<th class="num" style="width:12%">Actual</th>' +
-        '<th class="num" style="width:16%">Effect on revenue</th>' +
-        '<th style="width:30%">Answers to</th></tr></thead>' +
-        '<tbody>' + body + '</tbody></table></div></div>';
-  }).join("");
-
-  /* THE FOOTNOTE IS THE WHOLE POINT OF THE PAGE, and it is the product's own
-     sentence rather than a reading of these particular figures — the platform
-     cannot know why a driver moved, and saying so in the product's voice is
-     what keeps it honest on every tenant (§35, §124). */
-  return strip + panes +
-    '<p class="sub" style="margin:16px 0 0">A row that answers to something is ' +
-    'work somebody is measured on; the rest moved for reasons nobody was ' +
-    'measured against. The two readings can disagree &mdash; a unit can deliver ' +
-    'every tactic it committed to and still miss the number, because the plan ' +
-    'assumed a rate the base year never produced. That is the conversation this ' +
-    'page exists to start.</p>';
 }
 
 /* ── GROUP · Focus board ────────────────────────────────────────────
@@ -5695,17 +5051,29 @@ function reportBar(target){
 
    Only this unit's items, only what this cycle asks for, and no plan editing:
    a target cannot be moved from the screen where it is being reported against. */
-/* ── ONE CELL FOR EVERY REPORTABLE ROW, ON BOTH PAGES (§345) ───────────
-   Lifted out of `renderReport` unchanged when My reporting gained the same
-   rows: a tactic entered by its owner and a tactic entered by its unit must
-   be the SAME control, or the two pages drift the way §211 and §213 each
-   cost a day to undo (§53.5). `subj` is the subject the row belongs to —
-   written into the field as `data-repu`, which the shell's one handler has
-   read since "Figures I report" existed, so a row from another unit resolves
-   against its OWN plan rather than the page you are standing on. `where`
-   says which page is asking, which is the only thing the two answer
-   differently (§345: one door). */
-function repEntry(subj, x, where){
+function renderReport(u){
+  var may = canReport(u.ukey);
+  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
+     contributor limited to their own lines does neither — the server refuses
+     both, so the screen does not offer them (spec 006 §7.2). */
+  var mayAll = canSpeakFor(u.ukey);
+  var c = reportedCount(u);
+  var subd = !!REVIEW.submitted[u.ukey];
+  var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
+
+  if (REVIEW.state !== "open") {
+    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
+      'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
+  }
+
+  /* One cell shape for every reportable row, so a measure and a tactic are
+     entered the same way even though they mean different things. */
+  /* The box carries the measure's own unit as a fixed suffix, so a tactic is
+     plainly a percentage and a revenue measure is plainly billions of EGP. The
+     number alone goes in the field \u2014 actuals are stored with their unit, and
+     showing "28%" beside a "%" suffix reads as 28% %. The unit is rejoined on
+     save so nothing downstream sees a bare number. */
+  var entry = function(x){
     var isT = x.kind === "tactic";
     /* §248: a tactic measured by its OUTCOME is asked for the outcome's
        figure, in the outcome's own unit, and stores it in `outActual` — never
@@ -5738,7 +5106,7 @@ function repEntry(subj, x, where){
        named on (spec 006 §7.2); a figure with a SOURCE is entered by that
        source and by nobody in the unit (§16.7). Both are refused by the
        server, so neither is offered here. */
-    if (!canEnterFigure(subj, x, where)) {
+    if (!canEnterFigure(u.ukey, x)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
       /* §300: a yes/no figure is READ through `ynShown`, so a row holding a
          tenant's old `Yes` reads in the words the control now offers without
@@ -5751,38 +5119,13 @@ function repEntry(subj, x, where){
     /* §300: the status picker and its per-cent box, which are §104's own pair
        (`ynBoxes`) rather than a control of this table's — Islam: *"for the
        inprogress and the % we used ot have them 2 stached boxes not one"*. */
-    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld, subj);
+    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld);
     return '<span class="entry' + (has ? " filled" : "") + '">' +
-      '<input class="field" data-rep="' + x.id + '" data-repu="' + esc(subj) +
-      '" data-fld="' + fld +
+      '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
-  }
-
-function renderReport(u){
-  var may = canReport(u.ukey);
-  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
-     contributor limited to their own lines does neither — the server refuses
-     both, so the screen does not offer them (spec 006 §7.2). */
-  var mayAll = canSpeakFor(u.ukey);
-  var c = reportedCount(u);
-  var subd = !!REVIEW.submitted[u.ukey];
-  var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
-
-  if (REVIEW.state !== "open") {
-    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
-      'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
-  }
-
-  /* One cell shape for every reportable row, so a measure and a tactic are
-     entered the same way even though they mean different things. */
-  /* The box carries the measure's own unit as a fixed suffix, so a tactic is
-     plainly a percentage and a revenue measure is plainly billions of EGP. The
-     number alone goes in the field \u2014 actuals are stored with their unit, and
-     showing "28%" beside a "%" suffix reads as 28% %. The unit is rejoined on
-     save so nothing downstream sees a bare number. */
-  var entry = function(x){ return repEntry(u.ukey, x, "unit"); };
+  };
   /* §343: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
      than `entry` itself, because every branch in that function is about a
      field on the row (`actual` / `outActual`, the yes/no pair, a sourced
@@ -6045,12 +5388,12 @@ function renderReport(u){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
-      var e = owedAt["p:" + (p.id || pi)], owes = e && e.count > 0;
+      var e = owedAt["p:" + (p.code || pi)], owes = e && e.count > 0;
       var sub = t.total === 0 ? 'Not asked this cycle'
               : t.done >= t.total ? 'Complete'
               : (t.total - t.done) + ' still to enter';
-      return '<button class="ritem' + (pillarRailId(p) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
-          esc(u.ukey) + '|' + esc(pillarRailId(p)) + '">' +
+      return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
+          esc(u.ukey) + '|' + esc(p.code) + '">' +
         railName(code, p.name) +
         /* AND THE TALLY STOPS READING AS FINISHED. Green is the platform's
            word for "nothing left here", and on a pillar owing a note it was
@@ -6457,7 +5800,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
         esc(opts.capId || "") + '">' + rows + '</div>'
     : rows;
   return '<div class="rail' + (opts.arranging ? ' arranging' : '') + '">' +
-    railHead(L("project"), list.length) + body +
+    railHead("Projects", list.length) + body +
     (opts.add ? '<div class="railadd"><button class="linkbu" data-rowadd="project|' +
       esc(opts.capId) + '">+ Add a project</button>' +
       /* §334: AND THE SECOND DOOR TO A CAPABILITY, where the projects are.
@@ -6793,7 +6136,7 @@ function capScoreCards(c){
     '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
       '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
-      '<div><em>' + L("project") + '</em><b>' + c.projects.length + '</b></div></div></div>');
+      '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
   /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§106). An In
      progress milestone with no per-cent LEAVES the average rather than
      counting as nought (§104.10) -- honest, and silent, so the figure rises
@@ -7663,15 +7006,9 @@ function capEntryBox(x, unit, may, label){
    AND THE NUMBER IS ASKED FOR WHERE IT IS OWED: an In progress with no
    per-cent is not an answer (§104.10), so the box carries `needsPct()`, the
    same mark the projects page puts on a milestone in that state. */
-function ynBoxes(id, hook, cur, label, fld, subj){
+function ynBoxes(id, hook, cur, label, fld){
   var st = SMPRules.ynState(cur), keys = ["todo", "wip", "done"];
-  /* §345: the subject rides with the row, for the same reason it does on the
-     box beside it — a yes/no line drawn on My reporting belongs to another
-     unit, and without it the shell's handler resolves the row against the page
-     you are standing on and writes nothing (§183's silent discard). Absent on
-     the unit's own page, where the handler falls back to `current`. */
   var at = ' data-' + hook + '="' + esc(id) + '"' +
-    (subj ? ' data-repu="' + esc(subj) + '"' : '') +
     (fld ? ' data-fld="' + esc(fld) + '"' : '') + ' data-unit=""';
   var pick = '<select class="fld selbox ynpick"' + at +
     ' data-ynpart="status" aria-label="Report ' + esc(label) + '">' +
@@ -7928,24 +7265,16 @@ function renderFnReport(fnKey){
    they group by kind \u2014 a Direction and a Capability are different things and
    the rail says so. */
 function unitRailKey(u){ return "unit:" + u.ukey; }
-/* §393 WHICH PILLAR THE RAIL MEANS IS ITS ROW ID, NEVER ITS CODE. A pillar
-   added with the pen is minted `code: ""` (addPillar) and nothing fills it in
-   on a tenant's saved plan, so every hand-added pillar shared ONE rail key:
-   all of them lit at once and pressing any opened the first. The code is
-   what the plan arrived with and nothing makes it unique; the id is the
-   row's address everywhere else (§48, §191). The code is the fallback only
-   for a row with no id, which renumberUnit() and mintRowId() never leave. */
-function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
 function unitRailPick(u){
   var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
-    if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
+    if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
   /* §301.4 on the other side of the switch: a pillar owner's own pillar
      opens, exactly as a project owner's project does (§53.5). */
   var mine = railMine(u.ukey, list, function(p){ return p.owner; });
   var pick = mine || list[0];
-  railShow(k, pillarRailId(pick));
+  railShow(k, pick.code);
   return pick;
 }
 function unitRailFor(u, sel){
@@ -7967,9 +7296,9 @@ function unitRailFor(u, sel){
        pillar 01 and the next called it MB01.
 
        So the DISPLAY moves to pillarCode() and the data attribute does NOT:
-       `data-urail` is the rail's selection key. Since §393 that key is the
-       pillar's ROW ID (pillarRailId), not its stored code: a code can be empty
-       or shared, and a shared key lights every row that has it. */
+       `data-urail` is the rail's selection key and unitRailPick() matches on
+       `it.code`. Change that and the rail stops being able to find the pillar
+       it just selected. */
     /* §145.12: which pillar owes what, for the people who can act on it —
        drawn only while it owes something (§41's budget), and rewritten in
        place as fills land (gapBandRefresh finds it by data-rgap). */
@@ -7988,14 +7317,14 @@ function unitRailFor(u, sel){
       (it.measures || []).forEach(function(m){ empt += SMPRules.gapEmptyFields("measure", m).length; });
       (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
     }
-    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
-        esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+    return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
+        esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
-        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.id || String(i)) +
+        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
           '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
           gaps + ' Missing</span>'
-        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.id || String(i)) +
+        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.code || String(i)) +
           '" title="' + plural(empt, "empty field") + ' you can fill in">' +
           empt + ' empty</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
@@ -8271,11 +7600,6 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
-  /* §384: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
-     nothing here — `row` is the real object — so reading `ctx.row.owner`
-     would have worked today and stopped working the day a key measure gains
-     an Owner of its own, which is the next thing drawn. Named, so the reach
-     cannot be read off a field two row kinds share (see boundedReach). */
   /* §201.2: does this table carry a Unit column right now? The office's pen
      always; a filler's only while some row has a missing unit to offer. */
   var unitCol = !ed && it.measures.some(function(m){
@@ -8794,9 +8118,9 @@ function renderUnitPlan(u){
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
     (railWorthIt(u.items)
-      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
+      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
-      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
+      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
           unitPlanBody(sel, u, false) + '</div>');
 }
 
@@ -9248,8 +8572,8 @@ function unitPerfRail(u){
   var on = arranging("unit", u.ukey);
   var rows = u.items.map(function(it, i){
     var perf = pillarPerf(it), r = pillarRatio(it);
-    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
-      esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+    return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
+      esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +

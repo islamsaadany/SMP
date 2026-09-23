@@ -56751,6 +56751,193 @@ REVERSED, not left beside the new rule** (Principle II).
   gives them one (§218 — the assertion is unchanged, the fixture was stale);
   and `qa.py`'s old-"BU"-header row was a brand-new person with no title and
   no email, now correctly refused, so it carries both. Full `qa.py` ERRORS none.
+## §391 — A SUPPORTING FUNCTION CAN BELONG TO A DIVISION, AND COUNTS IN IT (2026-09-22)
+
+Islam: *"I have a case for functions that belong to divisions and we will need
+to see the performance in divisin view."* Four answers settled the model before
+anything was drawn — *"1. yes companies 2. count because some division s are
+only functions 3. one 4. see only"* — then **A** for the weighting and, of the
+drawn page, *"the laytou it ok"*, with *"execution is part of the function why
+not?"* settling the second number.
+
+**A DIVISION IS THE COMPANY LAYER, NOT A NEW ONE.** §23 built the level between
+the group and a unit and §68 gave it a page; a fourth layer beside it would be
+two answers to *what sits under the group*. What was missing is that a function
+could not belong to one.
+
+**THE FUNCTION CARRIES THE POINTER, AND IT IS AN ABSENCE BY DEFAULT** (§50.6):
+`FUNCTIONS[k].company`, riding `functions.extra` (§118, §213) — **no migration,
+no schema change, no server rule**. No key is the group. The authoriser already
+reads an unnamed function field as Setup, which is the office's, so both new
+fields are guarded the day they exist (§42's fall-through). `fnCompanyOf()`
+reads the pointer only while the company is active, so a retired company does
+not keep a function it can no longer show.
+
+**THE WEIGHTING IS ISLAM'S A, IN ONE FUNCTION** (`companyShares`): a set
+weight is a per cent of the company used as given; a blank takes the average of
+the weights set (§243's blank rule, one layer up); with none set each function
+is one equal member, `100 / (units + functions)`; the units share what is left
+by their group weights re-normalised — which is §68's own arithmetic, so a unit
+keeps its size against its neighbours. A company of functions only divides the
+whole between them. Sets over the whole are scaled rather than trusted, and the
+screen refuses a total over 100 before it is stored, naming the company (§62).
+Moving a function to another company or to the group DELETES its weight, because
+a weight is a share *of* a company and means nothing in the next one.
+
+**A FUNCTION'S FIGURE IS WHAT ITS OWN PAGE SHOWS** (`fnMemberScores`, §53.5):
+a pillars function reads through `unitLike()` exactly as its Performance page
+does; an objectives function through `fnObjScore`/`fnActionsTally`; a projects
+function through its own holder's objectives, else `capPerf`, and `capExec`.
+Execution uses the same weights (his *"why not?"*).
+
+**A COMPANY WITH NO FUNCTIONS IS BYTE-FOR-BYTE WHAT IT WAS**: `companyObjectives`
+and `companyRatio` take the new mix only when the company holds a function,
+else the §68 expression untouched — asserted FIRST in the check, against that
+expression rather than a number (§94.8, §113.8).
+
+**THE CEO SEES AND DOES NOT REPORT, AND IT NEEDED NOTHING**: `cceo` already
+holds `a_fn_other` at view, and `companiesReachable` now counts a company that
+holds functions only (§61 — otherwise a company made of functions is one nobody
+can open). The company page draws its functions in their own section and a
+drill table naming each member's kind and contribution; the *share of the group*
+card is drawn only where there are units, and says functions are not in it.
+Retiring a company still holding a function is refused BY NAME.
+
+**THE NAMING IS NOT BUILT HERE AND THAT IS HIS**: *"we don't rename .. we
+name"*, then *"yes all terinilogies get the same treatment"* — every term on
+Terminology gains a description, a default and the chosen word. It is a visual
+change, so it is drawn (`design-mockups/division-functions/2026-09-22_terminology-naming.html`)
+and waits for sign-off (rule 1c).
+
+**Checked:** `checks/division-functions.py` 25/0, proved able to fail three
+ways from the SOURCES (§276) — performance ignoring functions **1 red**, the
+company unreachable **2 red**, execution ignoring functions **1 red**; 683/0
+authoriser, 140/0 differ, full `qa.py` ERRORS none, `built-in-step` all good.
+Renumbered §381 → §391 before commit, scoped to this change's own lines,
+because main's builder work took §381 (§264.3).
+
+## §392 — ONE WORD PER THING, IN TWO FORMS (2026-09-23)
+
+Islam, of Setup › Terminology: the content first, in chat and not in a mockup
+(*"content fix doesn't need a mockup it needs alignment here first"*), then
+thirteen rows written by him — a description and a default word for each —
+and, asked how a plural is made, *"yes two boxes"*. The redrawn page was signed
+off with *"build"* (`design-mockups/division-functions/2026-09-23_terminology-two-words.html`).
+
+**THERE IS NO GROUP WORD AND BUSINESS-UNIT WORD ANY MORE.** Each row holds a
+word for ONE (a column heading, a single one named in a sentence) and a word
+for MANY (a page heading, the navigation, a list), and that one pair is used at
+the group, in every business unit and in every function. The old split let the
+group say *Vision* while a unit said *Winning Aspiration* for the same idea.
+
+**TWO BOXES, BECAUSE A PLURAL IS NOT A RULE.** Capability → Capabilities, Core
+Values is already plural, and a client's own word follows no rule at all; a
+platform-made plural would print *Capabilitys*. Both boxes start on the
+default, the default sits beside them, Reset appears only on a row that differs
+and puts both back, and an emptied box goes back to its default.
+
+**THE STORED KEYS DID NOT MOVE (§30.2).** `grp`/`group` now holds the word for
+ONE and `bu` the word for MANY. A tab left open on the previous build posts
+`group`/`bu`; renaming the fields would have had the writer put NULL into both
+columns. What changed is what each MEANS, said in the registry's own comment.
+`L()` always answers MANY (the scope argument is kept so ninety call sites need
+not change, and chooses nothing now); `L1()` answers ONE.
+
+**THIRTEEN ROWS IN HIS ORDER**: Theme, Pillar, Capability, Key Objective,
+Winning Aspiration, Mission, Core Values, Key measure, Tactic, Business unit,
+Division, Supporting Function, Project — the last three new, and Capability
+split out of the Pillars row, where the group's cross-cutting capabilities had
+been the Pillars row's "group word" (*Group capabilities*) though they are a
+different thing from a unit's pillars. **Division is the word for the Companies
+layer** (§23, §391), so Setup's Companies page, the unit and function dialogs'
+field and the tables' column follow it — by default *Divisions*.
+
+**MIGRATION 045 (016 ON THE NEW STACK) MOVES EVERY TENANT**, and the rules are
+the ones on the signed-off drawing: the word a client typed for business-unit
+pages is kept as the MANY; a row that only had a group word (Mission, Core
+Values, whose unit box read "—") keeps that; a word still on the old shipped
+default moves to the new one; the ONE form is filled from the default; a client
+who had typed their own group word for Pillars keeps it as the capabilities'
+word; descriptions and order are set for all. Run twice on throwaway databases
+in both shapes (one table, and per tenant): the second run changes nothing.
+
+**WHERE THE WORDS ARE READ.** The aspiration and the mission take the word for
+ONE on both the group's Foundation and a unit's (a heading over one thing).
+The Setup rail's Companies, Functions and Capabilities entries and their page
+headings take the MANY, resolved at render time for §346.3's reason (the rail's
+list is built before the tenant's words arrive). Tables, bands, the builder's
+switch, the import picker's groups, the project headings on the pages and the
+deck follow. **The navigation switch keeps its short words** (*Units*,
+*Capabilities*, *Functions*) while a client is on the defaults, and shows the
+client's word once they change it — so nothing moves for a tenant that never
+touches the page.
+
+**A SENTENCE THAT WAS NOT TRUE, CORRECTED** (§104.8): the collision warning
+said *"Saving is blocked"*, and nothing ever blocked it. It now says to change
+one of them.
+
+**LEFT ALONE, ON PURPOSE**: the workbook's headers and the Read me's pick rows
+(a header is a contract, §22, §65); the People register's Company column, whose
+label is also the key its cells are opened by; the set-up flow's words step,
+which still asks only the word for MANY; and sentences that inflect a count,
+which keep the platform's own word (§107.8).
+
+**PROVED**: `checks/terminology.py` 26/0, falsified three ways from the SOURCES
+(§276) — the word for one answering the plural **3 red**, the rail's division
+override removed **3 red**, the navigation ignoring a client's word **1 red**.
+Four neighbours held the old words and were REWRITTEN to ask the page, never
+loosened (§218): `cycle-board.py`, `division-functions.py`, `setup-arrange.py`
+(which now finds a renamed page by its key), and `no-wrap.py`, which names the
+Terminology description as the one column that wraps — held to two lines,
+because the row is already two lines tall for the stacked default.
+
+**AND ONE HAZARD WORTH WRITING DOWN** (§343.9's family): the first
+falsification loop's copy step failed, so two of its deliberate breaks were
+written into the REAL sources instead of the copy. Caught because the rebuilt
+file's size differed from the build before; both put back and the build
+re-measured byte-identical to the first. Breaks now run in a subshell that
+stops on the first failure.
+
+This section and §391 were built as §383 and §382; `main` took §382–§390 while
+they were in flight, so both were renumbered BEFORE the merge, when every
+citation in the tree was provably this branch's own (§264.3, §392.2).
+
+**§392.1 — THE WHOLE SUITE FOUND ONE MORE.** 186 checks run; the one real
+failure was `setup-rail.py`: the default *Supporting Functions* is cut off in
+the 196px Setup rail. The rail entry and its page heading now ask `navWord()`
+like the navigation switch — *Functions* while a client is on the default,
+their own word once they change it. `multi-client.py` and `platform-look.py`
+need a rehearsal database this session does not have (§328.3); `welcome.py`
+failed only when run beside three others and passes alone; everything else
+green, `qa.py` ERRORS none.
+
+**§392.2 — THE MERGE.** Islam: *"merge to main."* `main` had moved to §390
+(§382–§390 from other sessions: My reporting, the tactic owner row, revenue
+drivers, the people file), so this branch's §382/§383 became **§391/§392
+BEFORE the merge**, when the merge base held neither number in either
+spelling and every one of the 69 substitutions was provably this branch's
+own (§264.3, §336.1). The three record files were COMBINED, never picked
+(§318.7); the built file, the seed and every served copy REBUILT rather than
+merged (§91). **§94.12 AGAIN**: both sides had independently written
+`smp-shell-v5.30-…`, so `sw.js` was rebuilt from main's copy and bumped to a
+name the history has never held, `v5.31-one-word-per-thing`, one `const
+SHELL`, `node --check` clean (§146.2). The duplicate scan over build.py's own
+concatenation reads the six §281.1 leaves and nothing else, and main's new
+code asks no label at all, so `L()` answering the plural reaches none of it.
+**ONE HARNESS NEEDED A STAND-IN**: main's `scripts/test-nav-row.js` runs the
+shell's inline block in a vm and supplies everything declared elsewhere, and
+`navWord()` is this branch's — so on the merged build it threw; the word is
+not what that test measures, so the platform's short word stands in (18/0,
+and `--break=everywhere` still red). **ON THE MERGED TREE**: `qa.py` ERRORS
+none; 188 checks walked; authoriser 739/0, change list 140/0, platform rules
+69/0, my-reporting 65/0; `built-in-step` and `generated-in-step` clear.
+**RECORDED, NOT FIXED** (§303): `checks/yn-in-progress.py` is **23 red on
+`main`'s own build and green on this branch before the merge** — it is main's,
+from the tactic-owner rounds, and not ridden in here (rule 1b).
+`multi-client.py` and `platform-look.py` need a rehearsal database (§328.3).
+No forced sign-out is owed: nothing about how a save is judged moved, and
+migrations 045/016 only rewrite the labels rows.
+
 
 ## §393 — the pillar rail selects by row id, never by stored code (2026-09-23)
 

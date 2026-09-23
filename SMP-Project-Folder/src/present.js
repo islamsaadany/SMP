@@ -276,7 +276,7 @@ function deckSlides(u){
   if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
     (fnAim ? '' :
-      '<div class="aimtop"><div><span class="dlab">' + L("aspiration","bu") + '</span>' +
+      '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
       (u.endInMind
         ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
@@ -899,8 +899,8 @@ function deckSlidesFn(subject){
         '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
     }).join("");
     S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 projects") +
-      '><h2>Projects<span class="dwhich">' + esc(c.name) + '</span></h2>' +
-      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Project</th>' +
+      '><h2>' + L("project") + '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("project") + '</th>' +
       '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
       '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
       '<tbody>' + (pRows || '<tr><td colspan="6">No projects yet.</td></tr>') + '</tbody></table>' +

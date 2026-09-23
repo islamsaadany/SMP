@@ -7938,6 +7938,70 @@ the review names the row and what it lacks. People already on the register can
 still be updated with blank cells, which keep what is recorded. Your own HR
 export works as it is: if there's no sheet called "People", the first sheet is
 read, and headings like *Title*, *E-mail* or *Employee Name* are understood.
+## §391 — a supporting function can belong to a division (2026-09-22) · **merged to `main` 2026-09-23**
+
+You asked for functions that belong to a division, with the division's
+performance counting them. A division is the **Company** the platform already
+has — nothing new was invented for it. On a function's Setup row there are now
+two new things: **which company it belongs to** (or the group, which is what
+every function starts as), and **its weight in that company**.
+
+The weight works the way you chose (A): a weight you set is used as given; a
+blank takes the average of the weights that are set; with none set, each
+function counts as one equal member beside the units; the units then share
+what is left, keeping their sizes against each other. A company made of
+functions only shares the whole between them. A total over 100% is refused,
+and the page says why beside the box.
+
+The company page draws its functions in their own section, and both headline
+numbers — performance and execution — count them. **A company with no
+functions reads exactly what it read before**; that is checked first, against
+the old arithmetic. The company's CEO sees the functions and does not report on
+them. Retiring a company that still holds a function is refused, naming it.
+
+**Checked:** a new check (`checks/division-functions.py`) of 25 assertions,
+shown to fail three ways when the decisions are broken on purpose; the
+permission rules (683) and the change list (140) unmoved; the full sweep of
+every page as every person with no errors; the shipped file and the served
+copies in step.
+
+**Waiting on you:** the **Terminology** change — each word with a description,
+a default and the name you choose — is drawn and published for sign-off and
+not built yet.
+
+## §392 — Terminology: one word per thing, a word for one and a word for many (2026-09-23) · **merged to `main` 2026-09-23**
+
+The Terminology page now has your thirteen rows, in your order, each with your
+description and default word. There is no separate group word and
+business-unit word any more: whatever is typed is used at the group, in every
+business unit and in every function. Each row has two boxes: the word for one
+("Project") and the word for many ("Projects"), because the platform cannot
+make a plural reliably. The default sits beside the boxes; Reset appears only
+on a row that differs; emptying a box puts its default back.
+
+Three rows are new: Division (the Companies layer, *Divisions* by default),
+Supporting Function and Project. Capability has its own row instead of hiding
+in Pillars as "Group capabilities". The aspiration uses one word everywhere, so
+the group no longer says *Vision* while a unit says *Winning Aspiration*.
+
+Existing clients are moved over once, on the next deploy: a word a client typed
+for business-unit pages is kept, a word still on the old default moves to the
+new default, and the single form starts on the default.
+
+The Setup rail, the page headings, the tables and the deck follow the words.
+The navigation switch keeps its short "Units / Capabilities / Functions" until
+a client types their own word.
+
+Not changed: the workbook's column headings, the People register's Company
+column, and the set-up flow's words step (it still asks only the word for
+many).
+
+**Merged to `main` 2026-09-23** on Islam's word, renumbered from §382/§383 before
+the merge because main had taken those numbers.
+On the merged build: whole-platform sweep clean, 188 checks walked. One check
+(`yn-in-progress`) is red, and it is red on main's own build too, from the
+tactic-owner rounds — recorded, not fixed in this merge.
+
 
 ## §393 — clicking a pillar opens that pillar (2026-09-23)
 

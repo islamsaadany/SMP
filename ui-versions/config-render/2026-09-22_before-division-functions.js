@@ -10,88 +10,54 @@
    every reader goes through L(). Safe: L()'s 88 uses are all display-only
    (verified — no comparison, key, or data-attribute read back), and a normal
    label has no special characters, so cleaning it changes nothing on screen. */
-function labelDefault(key){
-  return LABEL_DEFAULTS.filter(function(x){ return x.key === key; })[0] || null;
-}
-/* ONE WORD PER THING (§392). The scope argument is kept so ninety call sites
-   need not change, and it no longer chooses anything: there is one word, used
-   at the group and in every unit and function. L() is the word for MANY and
-   L1() the word for ONE. An empty box, or the retired "—" (a row that used to
-   be "not held" at one level), falls back to the platform's default and then
-   to the internal name, so a word is never blank on screen. */
-function labelWord(key, which){
+function L(key, scope){
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
-  var v = e && e[which];
-  if (!v || v === "\u2014") {
-    var d = labelDefault(key);
-    v = d ? (which === "group" ? d.one : d.many) : (e ? e.internal : key);
-  }
-  return v;
-}
-function L(key, scope){ return esc(labelWord(key, "bu")); }
-function L1(key){ return esc(labelWord(key, "group")); }
-/* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
-   "Capabilities" and "Functions", shortened from the defaults to fit one
-   segmented control. A client who types their own word sees it there too;
-   a client on the default keeps the short word, so nothing moves for them.
-   The Setup rail's Functions entry and its page heading ask it too: the
-   default "Supporting Functions" is cut off in the 196px rail (setup-rail.py
-   measured it), and "Functions" is the word Islam gave that page. */
-function navWord(key, short){
-  var d = labelDefault(key);
-  return d && labelWord(key, "bu") === d.many ? short : L(key);
+  if (!e) return esc(key);
+  return esc((scope === "group" ? e.group : e.bu) || e.internal);
 }
 
-/* ── Terminology ─────────────────────────────────────────────────────── */
+/* ── Labels ─────────────────────────────────────────────────────────── */
 function renderLabels(){
   var editable = grant("c_labels") === "edit";
 
   var rows = LABELS.entries.map(function(e, i){
-    var d = labelDefault(e.key) || { one:e.internal, many:e.internal };
-    var one = labelWord(e.key, "group"), many = labelWord(e.key, "bu");
-    var box = function(which, val, what){
-      return editable
-        ? '<input class="lbl" data-lbl="' + i + '" data-scope="' + which + '" value="' + esc(val) +
-          '" aria-label="' + esc(d.one) + ': ' + what + '" />'
-        : '<span>' + esc(val) + '</span>';
+    var cell = function(which){
+      var val = e[which];
+      if (val === "—") return '<td><span class="pill none">Not held</span></td>';
+      return '<td>' + (editable
+        ? '<input class="lbl" data-lbl="' + i + '" data-scope="' + which + '" value="' + esc(val) + '" aria-label="' + esc(e.internal) + ' label at ' + which + ' level" />'
+        : '<span class="mono">' + esc(val) + '</span>') + '</td>';
     };
-    var differs = one !== d.one || many !== d.many;
-    var reset = editable && differs
-      ? '<button type="button" class="linkbu lblreset" data-lblreset="' + i + '">Reset</button>' : '';
-    return '<tr><td class="lbldesc">' + esc(e.note || "") + '</td>' +
-      '<td class="lbldef">' + esc(d.one) + '<br>' + esc(d.many) + '</td>' +
-      '<td>' + box("group", one, "the word for one") + '</td>' +
-      '<td><div class="lblmany">' + box("bu", many, "the word for many") + reset + '</div></td></tr>';
+    return '<tr><td><b>' + esc(e.internal) + '</b><span class="why">' + esc(e.note) + '</span></td>' +
+      cell("group") + cell("bu") + '</tr>';
   }).join("");
 
-  /* Two things sharing one word would render two different objects under one
-     name on the same screen. Caught here, not in a client demo. Asked of
-     each form separately: "Project" as one thing's single word and another's
-     plural is not a collision anybody reads. */
+  /* Two entities sharing one display label would render two different things
+     under one word on the same screen. Caught here, not in a client demo. */
   var seen = {}, clashes = [];
   LABELS.entries.forEach(function(e){
-    [["group","one"],["bu","many"]].forEach(function(s){
-      var v = labelWord(e.key, s[0]).toLowerCase();
-      if (seen[s[1] + "|" + v]) clashes.push(labelWord(e.key, s[0]));
-      seen[s[1] + "|" + v] = true;
+    ["group","bu"].forEach(function(s){
+      var v = (e[s] || "").toLowerCase();
+      if (!v || v === "—") return;
+      if (seen[s + "|" + v]) clashes.push(e[s]);
+      seen[s + "|" + v] = true;
     });
   });
 
   var warn = clashes.length
-    ? '<div class="note bad-note"><b>Two things share a word.</b> <span class="mono">' + esc(clashes[0]) +
-      '</span> is used for two different things. Change one of them &mdash; ' +
-      'two different objects under one word on the same screen cannot be told apart by the reader.</div>'
-    /* The old wording said saving is blocked, and nothing ever blocked it
-       (§104.8's family: a sentence nothing compares with the code). It now
-       says what is true. */
+    ? '<div class="note bad-note"><b>Label collision.</b> <span class="mono">' + esc(clashes[0]) +
+      '</span> is in use by two entities at the same level. Saving is blocked until one of them changes &mdash; ' +
+      'two different objects rendering under one word on the same screen is not recoverable by the reader.</div>'
+    /* The "all clear" note went to the knowledge base with the rest of the
+       explanation (§30.4). A collision still shouts, because that is not an
+       explanation - it is a state that blocks saving and has to be seen. */
     : '';
 
   return section("", "Terminology", null,
-      '<div class="cfg"><table class="lbltable"><thead><tr>' +
-      '<th style="width:38%">What it is</th>' +
-      '<th style="width:18%">Default</th>' +
-      '<th style="width:20%">Your word &middot; one</th>' +
-      '<th style="width:24%">Your word &middot; many</th>' +
+      '<div class="cfg"><table><thead><tr>' +
+      '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
+      '<th style="width:33%">Display at group level</th>' +
+      '<th style="width:33%">Display at business unit level</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
 }
 
@@ -1106,7 +1072,7 @@ function renderUnits(){
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
-        '<th style="width:12%">' + L1("division") + '</th>' +
+        '<th style="width:12%">Company</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:7%">Status</th>' +
         '<th class="cc kebcell" style="width:44px"></th>' +
@@ -1198,7 +1164,7 @@ var ROWDLG_SPECS = {
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
         pdSect("Where it sits, and who runs it") +
-        pdField(L1("division"),
+        pdField("Company",
           '<select class="fld" data-ucomp="' + esc(k) + '">' +
             /* A retired company is nowhere a unit can be MOVED to, but a unit
                already in one still shows it — hiding it would silently read as
@@ -1254,13 +1220,6 @@ var ROWDLG_SPECS = {
            could not be reached at all. In a dialog every field is drawn
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
-        /* §391: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
-           plans, because both answer "what is this function part of". */
-        pdSect("Where it belongs") +
-        pdField(L1("division"), fnCompanyCell(k, f, true)) +
-        pdField("Weight in its " + L1("division").toLowerCase(), fnCoWeightCell(k, f, true)) +
-        (FNCOW_SAID && FNCOW_SAID.k === k
-          ? pdField("", '<p class="why missing" style="margin:0">' + esc(FNCOW_SAID.msg) + '</p>', true) : '') +
         pdSect("Who runs it") +
         pdField("Head", assignPicker("fn:" + k, "fnhead", f.head, true)) +
         pdField("Custodian", assignPicker("fn:" + k, "custodian", f.custodian, true));
@@ -4116,13 +4075,8 @@ function coPanels(ck, co, on){
          the refusal and reading it, not by reading the code. `fnPanels` joins
          sentences the same way and has the same latent fault; it is recorded
          rather than fixed here, because that one is not this change's. */
-      /* §391: a function it holds is in the list too, so the sentence names
-         both kinds rather than calling a function a business unit. */
-      'Move its ' + (blockers.length === unitsOfCompany(ck).length
-        ? plural(blockers.length, "business unit")
-        : plural(blockers.length, "business unit or function", "business units and functions")) +
-      ' to another company, or ' + (blockers.length === unitsOfCompany(ck).length
-        ? 'make each of them its own' : 'back to the group') + ', and this becomes possible. ' +
+      'Move its ' + plural(blockers.length, "business unit") + ' to another ' +
+      'company, or make each of them its own, and this becomes possible. ' +
       'Nothing is lost meanwhile' + endStop(" — " + esc(blockers.join(", "))) +
       '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
   return '<div class="kmenu kconfirm"><div class="cq">' +
@@ -4154,8 +4108,8 @@ function renderCompanies(){
      anything on this page at all. */
   var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
-  return cfgHead(L("division"), [], null, mayEdit) +
-    section("", L("division"), null,
+  return cfgHead("Companies", [], null, mayEdit) +
+    section("", "Companies", null,
       /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
          nothing and costs a header — the threshold is in the spec (§2.2) and
          this is the table it was written for. It still sorts and still carries
@@ -4164,7 +4118,7 @@ function renderCompanies(){
       tkBar("companies", { placeholder:"Search the companies\u2026" }) +
       '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
         (function(){ var h = tkHead("companies");
-          return h("#", "idx", false) + h(L1("division")) + h("Units", "cc") +
+          return h("#", "idx", false) + h("Company") + h("Units", "cc") +
                  h("Sees other companies", "cc") + h("Sees the group", "cc") +
                  h("Status", "cc") + h("", "cc kebcell", false); })() +
       '</tr></thead><tbody>' +
@@ -5023,172 +4977,6 @@ function renderBandsExtra(){
   return section("", "Focus and reward", null, rows);
 }
 
-/* ── Setup · Seasons (spec 063 §6.5) ──────────────────────────────────
-   Islam, of the drawn screen: *"ok."*
-
-   A season is a named window of real days — Ramadan, the school run, the
-   fourth quarter of a retail year — and it is defined ONCE for the client
-   and used BY NAME in any unit's tree. Change Ramadan's dates here and every
-   base period in the client moves with it, because `driverMonths` takes a
-   base year to be twelve months LESS the seasons its own sub-channel names
-   (§4.2): the dates are read at the moment the tree is drawn and are never
-   copied onto a period.
-
-   IT IS IN *MEASUREMENT* AND NOT IN *RUNNING THE CYCLE*, which is a
-   placement rather than a detail and is §261.9's own ruling applied
-   forward: that group's note says **what you do while a cycle is open**,
-   and naming Ramadan is what you do when one is not. This group's note is
-   *what the numbers mean*, and a season is the line that decides how many
-   months a base year has — the same kind of fact as a scoring band two rows
-   above it. One word from Islam moves it.
-
-   `c_bands` IS ITS GRANT, deliberately, and no column appears on Roles &
-   access: a season and a scoring band are both *the office decides what a
-   figure means*, and a cell of its own would be a second answer to one
-   question (§37 — a column whose every cell repeats its neighbour's is a
-   question with no second answer). The SERVER classifies it separately all
-   the same (`seasons`, §42), because a refusal has to name the page that
-   answers it and "Setup → Seasons" sends somebody somewhere. */
-function seasonsUnits(){
-  return UNIT_KEYS.map(function(k){ return UNITS[k]; }).filter(Boolean);
-}
-/* ISO IN, THE PLATFORM'S OWN WORDS OUT, AND BACK AGAIN THROUGH ITS OWN
-   READER (§53.5). The stored value is ISO — it sorts, it is unambiguous and
-   `seasonMonths` subtracts two of them — while the picker is the one date
-   control this product has (§307's `monthBtnHtml`, `{day:true}`), which
-   shows and writes the spoken form. So the button is HANDED the spoken form
-   and its setter converts back, through `dayParts` rather than through a
-   second parser: one reader for every date shape the platform has ever
-   accepted.
-
-   MIXING THE TWO SPELLINGS IS WHY THIS IS NOT LEFT TO `new Date` AT EACH
-   END: `new Date("2026-02-17")` is UTC midnight and `new Date("17 Feb 2026")`
-   is LOCAL midnight, so a window with one of each is out by the timezone
-   offset and the day count can land a day either side. */
-function seasonIso(v){
-  var p = dayParts(String(v == null ? "" : v));
-  if (p.day == null) return "";
-  return p.year + "-" + String(p.mi + 1).padStart(2, "0") + "-" +
-         String(p.day).padStart(2, "0");
-}
-/* THE NAME, BOUND, AND ITS OWN BUILDER RATHER THAN `cycleField`'s — twice
-   over. That one draws a visible `<span>` label beside the box, which under a
-   column heading already reading *Season* says the word twice on one row
-   (§§87, 267.2); and its put-back is scoped to `.newcycle`, so a refusal
-   here would find nothing and leave the box showing what was NOT stored,
-   which is §124 with the sign reversed.
-
-   A SEASON WITH NO NAME IS THE ONE THING THIS PAGE CANNOT DRAW — a tree
-   names a season by `id` and shows the name, so a blank one is a period
-   reading nothing at all. There is no Save to refuse at, so the refusal is
-   the stored name coming back into the box (§273.4's own answer). */
-function seasonNameCell(s, mayEdit){
-  if (!mayEdit) return '<b>' + esc(s.name || "") + '</b>';
-  var i = FIELDS.length;
-  FIELDS.push(function(v){
-    var t = String(v).trim();
-    if (!t) {
-      var el = document.querySelector('[data-fld="' + i + '"]');
-      if (el) el.value = s.name || "";
-      return;
-    }
-    s.name = t; paint();
-  });
-  return '<input class="fld" data-fld="' + i + '" value="' + esc(s.name || "") +
-    '" placeholder="Ramadan" aria-label="Season name">';
-}
-function seasonDayCell(s, key, mayEdit){
-  var shown = s[key] ? drvDay(s[key], true) : "";
-  if (!mayEdit) return shown ? esc(shown) : '<span class="why">Not set</span>';
-  return monthBtnHtml(shown, "", function(v){
-    /* CLEARED IS DELETED, never an empty string (§50.6): a season nobody has
-       dated is the same season whether it has never been dated or was dated
-       and cleared, and two spellings of one absence is a change the
-       authoriser has to judge that nobody made (§249.3). */
-    var iso = seasonIso(v);
-    if (iso) s[key] = iso; else delete s[key];
-    paint();
-  }, { day:true, none:"Not set" });
-}
-/* HOW LONG IT IS, DERIVED AND NEVER TYPED — the one line that stops a season
-   and its base year disagreeing about a month. Both ends inclusive, because
-   17 Feb to 19 Mar is 31 days and not 30 (`seasonMonths`). */
-function seasonLenCell(s){
-  var m = SMPRules.seasonMonths(s);
-  if (!m) return '<span class="why">—</span>';
-  var days = Math.round(m * SMPRules.MONTH_DAYS);
-  return '<span class="mono">' + days + ' day' + (days === 1 ? '' : 's') + '</span>' +
-    '<span class="why">' + m.toFixed(2) + ' months</span>';
-}
-/* THE MODULE'S OWN SWITCH, ON THE PINNED LINE (Islam, 2026-09-23: *"this
-   module it should have an on and off button to show or not"*). The page is
-   the module's now — *Revenue drivers*, with the seasons as its table — and
-   the switch is focus's own segmented pair (§135.5), because you press the
-   state you want. The KEY stays `seasons` (§30.2): a remembered page and a
-   folded group keep working.
-
-   THE PAGE STAYS REACHABLE WHILE IT IS OFF (§61) and so do the seasons, so
-   the office can set them up before anybody sees a tree. Off says what it
-   keeps, because a switch that looked like it had deleted the trees would be
-   switched back on in a panic. */
-function driversSwitch(mayEdit){
-  var on = driversOn();
-  if (mayEdit) PAGE_ACTS +=
-    '<span class="segsw" role="group" aria-label="Revenue drivers on or off">' +
-      '<button type="button" class="seg' + (on ? ' on' : '') + '" data-drvswitch="1" ' +
-        'aria-pressed="' + on + '">On</button>' +
-      '<button type="button" class="seg' + (on ? '' : ' on') + '" data-drvswitch="0" ' +
-        'aria-pressed="' + (!on) + '">Off</button>' +
-    '</span>';
-  if (on) return '';
-  var kept = seasonsUnits().filter(drvHasTree).length;
-  return '<div class="note"><b>Revenue drivers are off for this client.</b> No unit shows a ' +
-    'Drivers tab and Performance shows no revenue reading.' +
-    (kept === 1 ? ' One unit\u2019s tree is kept and comes back as it was when this is turned on.' :
-     kept > 1   ? ' ' + kept + ' units\u2019 trees are kept and come back as they were when this is turned on.' :
-     '') +
-    (mayEdit ? '' : ' The Strategy Office can turn them on.') + '</div>';
-}
-function renderSeasons(){
-  var mayEdit = grant("c_bands") === "edit";
-  var list = SMPRules.seasonsOf(GROUP);
-  return cfgHead("Revenue drivers", [], null, mayEdit) + driversSwitch(mayEdit) +
-    section("", "Seasons", null,
-      (list.length
-        ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-            '<th class="idx">#</th><th>Season</th><th>Starts</th><th>Ends</th>' +
-            '<th class="cc">Length</th><th class="cc">Used by</th>' +
-            (mayEdit ? '<th class="cc"></th>' : '') +
-          '</tr></thead><tbody>' +
-          list.map(function(s, i){
-            var used = SMPRules.seasonUsedBy(seasonsUnits(), s.id);
-            return '<tr><td class="idx">' + (i + 1) + '</td>' +
-              '<td>' + seasonNameCell(s, mayEdit) + '</td>' +
-              '<td>' + seasonDayCell(s, "start", mayEdit) + '</td>' +
-              '<td>' + seasonDayCell(s, "end", mayEdit) + '</td>' +
-              '<td class="cc">' + seasonLenCell(s) + '</td>' +
-              '<td class="cc">' + (used.length
-                ? '<span class="mono" title="' +
-                    esc(used.map(function(u){ return u.name; }).join(", ")) + '">' +
-                    used.length + '</span>'
-                : '<span class="why">—</span>') + '</td>' +
-              (mayEdit
-                ? '<td class="cc"><button class="xbtn" data-seasrm="' + esc(s.id) + '" ' +
-                    'title="Remove this season">×</button></td>'
-                : '') + '</tr>';
-          }).join("") + '</tbody></table></div>'
-        : '<div class="note">No seasons yet. A season is a named window of real ' +
-          'days that a unit can pull out of its base year — Ramadan, the school ' +
-          'run, a peak quarter.</div>') +
-      (mayEdit ? '<div class="addrow"><button class="editbtn" id="addseason">' +
-                 '+ Add a season</button></div>' : '') +
-      '<div class="note"><b>A season is defined once here and used by name in any unit.</b> ' +
-      'Change its dates and every base year that names it moves with them, because a base ' +
-      'year is twelve months less the seasons pulled out of it — calculated, never typed. ' +
-      'A season is used on <b>Strategy → Drivers</b>, where a unit adds it as a period of ' +
-      'its own. It cannot be removed while a unit still names it.</div>');
-}
-
 /* ── Setup · Focus measures ─────────────────────────────────────────
    Marking is a configuration act, not something to be done while reading a
    unit's page \u2014 a marking mode sitting in a reading view invites a stray click
@@ -5263,7 +5051,7 @@ function focusNav(){
      something behind them, so a tenant with no capabilities meets exactly the
      two-part control it has today and never learns the concept. */
   var subs = focusSubjects();
-  var sides = [["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
+  var sides = [["units", "Units"], ["caps", "Capabilities"], ["fns", "Functions"]]
     .filter(function(x){ return (subs[x[0]] || []).length; });
   var side = (subs[FSET.side] || []).length ? FSET.side
            : (sides.length ? sides[0][0] : "units");
@@ -5388,94 +5176,6 @@ function namingSwitch(mayEdit, editing){
       (on
         ? 'Every unit gains a <b>Strategy › Who enters</b> page. A figure a set already holds cannot be named there.'
         : 'Figures are assigned on <b>Fill a figure set</b> only.') +
-    '</span></div>';
-}
-
-/* ── §345: REPORTING FOLLOWS THE OWNER COLUMN ─────────────────────────
-   `namingSwitch`'s own row, class for class, because it is the same KIND of
-   decision one column over — who is master of a number — and a second control
-   shape for it would be two answers to one question (§53.5).
-
-   OFF, AND THAT IS THE WHOLE REASON IT IS A SWITCH. Turning it on MOVES who
-   enters a figure: every tactic that already carries an owner changes hands at
-   once, and nobody chose that. Islam: *"align with me more not to ruin any
-   access."* Off, every rule in the product answers exactly what it answered
-   yesterday — which is what makes "nothing on Roles & access moves" a
-   measurement rather than a promise.
-
-   THE COUNT IS THE COST, SAID BEFORE THE PRESS. A switch whose consequence is
-   "26 lines change hands" must say 26 (§35, §124), and it says it whichever
-   way the switch is set, because somebody turning it OFF needs to know what
-   they are taking back. */
-function lineOwnersSwitch(mayEdit, editing){
-  if (!mayEdit) return "";
-  var on = SMPRules.lineOwnersOn(world());
-  /* Counted off the PLAN rather than off `myLineRows`, which is scoped to the
-     viewer — this is the tenant's number and the office is not an owner.
-
-     AND `plural()` RETURNS THE COUNT AND THE WORD (§107.8, §160.6, §301 — the
-     fourth time), so the number goes in front of it nowhere: this read
-     "83 83 lines" on both sentences. Every other caller in the product wraps
-     the whole `plural()` in the <b>, and so does this one now (§53.5).
-
-     §387: AND THE NUMBER IS WHAT THE SWITCH ACTUALLY MOVES, WHICH IS NOT THE
-     SAME AS WHAT THE PLAN NAMES. This counted every tactic carrying an Owner
-     and said 83 on the worked example, where the honest figure is 2 — and the
-     gap is two whole facts, both of them the decision this switch now carries:
-
-       · 32 of those 83 name somebody the register does not hold at all, so
-         the line stays the unit's whichever way the switch is set; and
-       · 49 of the rest are owned by the person who RUNS that subject, who
-         enters them on its own Reporting page either way.
-
-     What MOVES is a line whose owner is a real person who does not run the
-     subject — and it moves onto a page of their own, which is the sentence
-     beside it. A cost stated before the press (§35, §124) is only worth
-     stating if it is the cost: 83 reads as a tenant-wide upheaval where the
-     truth is one person and two rows.
-
-     ASKED THROUGH `canReport` WITH THE PERSON SWAPPED, never a second reading
-     of "do they run it" (§53.5) — the same call `canEnterLine` and
-     `myLineRows` make, so the number on the switch cannot disagree with what
-     the pages then do. VIEWER is put back in a `finally`, or the office is
-     left looking at the tenant as somebody else because a settings row drew
-     itself (§94.2). */
-  var owned = 0, w = world(), was = VIEWER;
-  try {
-    myLineTargets().forEach(function(t){
-      var subj = unitLike(t);
-      if (!subj) return;
-      (subj.items || []).forEach(function(p){
-        (p.tactics || []).forEach(function(x){
-          if (!SMPRules.lineOwnerIsHere(w, x)) return;
-          var moves = false;
-          PEOPLE.forEach(function(who){
-            if (moves || !SMPRules.personActive(who)) return;
-            if (!SMPRules.ownedBy(x, who)) return;
-            VIEWER = who.key;
-            moves = !canReport(t);
-          });
-          if (moves) owned++;
-        });
-      });
-    });
-  } finally { VIEWER = was; }
-  return '<div class="imp-row" style="margin:16px 0 0">' +
-    '<span class="cfg-lab">Tactic owners enter their own lines</span>' +
-    (editing
-      ? '<span class="minisw">' +
-          '<button data-lineown="0" aria-pressed="' + (!on) + '">Off</button>' +
-          '<button data-lineown="1" aria-pressed="' + on + '">On</button></span>'
-      : (on ? '<span class="pill attn">On</span>' : '<span class="pill none">Off</span>')) +
-    '<span class="why" style="margin:0">' +
-      (on
-        ? 'The person a tactic names as its <b>Owner</b> enters its figure, on their own ' +
-          '<b>My reporting</b> tab \u2014 and a collaborator enters none. ' +
-          '<b>' + plural(owned, "line") + '</b> ' +
-          (owned === 1 ? 'is' : 'are') + ' entered this way.'
-        : 'The unit enters every figure. Turning this on moves <b>' +
-          plural(owned, "line") + '</b> to the ' + (owned === 1 ? 'person' : 'people') +
-          ' the plan names as owner.') +
     '</span></div>';
 }
 
@@ -5774,117 +5474,6 @@ function renderSourceSetup(){
    so it gets its own surface for the window. Rows come from every unit at
    once — that is the point, Finance enters revenue once per unit in one
    place rather than visiting ten pages. */
-/* ── MY REPORTING (§345, spec 057) ────────────────────────────────────
-   Islam: *"the tab of what I report is not a room it a slice of reporting
-   that's all in the same strategy module and it needs a better name as a tab
-   beside the reporting"*, then *"case 2 no units appear in navigation. he
-   sees his lines and all his lines can be tagged or filtered by the unit he is
-   reporting or grouped."*
-
-   BOTH OF HIS CASES ARE ONE RULE: the tab sits on the person's OWN place, and
-   the units they own lines in are BANDS on that page. Nothing about the
-   navigation moves — measured, every bounded role already ships "none" for
-   another unit, so a foreign unit could never have appeared there (§37's
-   areas). The band names the unit; the chips above it are drawn only where
-   there is a second one to choose (§32, §61: a picker offering one option is
-   a door behind a door), which is the whole of what a "filter" is here.
-
-   THE CELL IS THE UNIT'S OWN (§53.5). `repEntry` is the same builder the
-   Reporting page draws, asked with `where: "mine"` — so a yes/no line, a
-   tactic measured by its outcome and a plain per-cent are all asked here
-   exactly as they are asked there, and a row kind added tomorrow arrives with
-   no edit. */
-var MYLINEF = "";   /* which band is being shown; "" is all of them */
-function renderMyLines(){
-  var rows = myLineRows();
-  if (!rows.length) {
-    return '<div class="note">No line is yours to report. A tactic is yours when the plan ' +
-      'names you as its <b>Owner</b> \u2014 the SMO sets that on the unit\u2019s plan.</div>';
-  }
-  var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
-  var byT = {}, order = [];
-  rows.forEach(function(r){
-    if (!byT[r.target]) { byT[r.target] = []; order.push(r.target); }
-    byT[r.target].push(r);
-  });
-  /* A chip for a band that is no longer there (the plan moved under a stale
-     screen) must not hide every row: the filter falls back to all (§61). */
-  if (MYLINEF && order.indexOf(MYLINEF) < 0) MYLINEF = "";
-  var done = rows.filter(lineAnswered).length;
-
-  var chips = order.length < 2 ? "" :
-    '<div class="kv linechips"><span class="cfg-lab">Showing</span>' +
-    [""].concat(order).map(function(t){
-      return '<button class="pill uchip' + (MYLINEF === t ? " on" : "") +
-        '" data-linesf="' + esc(t) + '">' +
-        esc(t === "" ? "All" : placeLabel(t)) + '</button>';
-    }).join("") + '</div>';
-
-  var blocks = order.filter(function(t){ return !MYLINEF || MYLINEF === t; }).map(function(t){
-    var list = byT[t], n = list.filter(lineAnswered).length;
-    var shut = lineLockShut(t);
-    var body = '<table class="cfg"><thead><tr>' +
-        '<th style="width:34%">Tactic</th><th style="width:26%">What it produced</th>' +
-        '<th class="num" style="width:16%">' + REP_TGT_HEAD + '</th>' +
-        '<th class="cc" style="width:16%">YTD actual</th>' +
-        '<th class="cc" style="width:10%">Progress</th>' +
-      '</tr></thead><tbody>' + list.map(function(r){
-        var oc = outcomeOf(r.obj);
-        /* THE TARGET CELL IS THE REPORTING PAGE'S OWN, composed the same way
-           (§344's builder, with the whole behind it) — a benchmark spelt one
-           way here and another way there is the drift a second table always
-           starts with (§53.5). */
-        var bench = tacticBenchmark(r.obj);
-        var whole = onOutcome(r.obj) || oc ? outcomeTargetShown(r.obj) : null;
-        var pr = tacticProgress(r.obj);
-        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td>' +
-            esc(r.obj.name || "\u2014") +
-            (r.pillar && r.pillar.name
-              ? ' <span class="why" style="margin:0">' + esc(r.pillar.name) + '</span>' : '') + '</td>' +
-          '<td>' + (oc && oc.name ? esc(oc.name)
-                                  : '<span class="why" style="margin:0">how far it got</span>') + '</td>' +
-          '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
-            (whole && whole !== bench && !SMPRules.isYesNo(r.obj.outTarget)
-              ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') + '</td>' +
-          '<td class="cc">' + repEntry(r.target, r, "mine") + '</td>' +
-          '<td class="cc">' + (pr == null
-              ? '<span class="pill kind">Not reported</span>'
-              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>') + '</td></tr>';
-      }).join("") + '</tbody></table>';
-    return section("", esc(placeLabel(t)) +
-      ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +
-      n + ' of ' + list.length + ' entered</span>', null, body + lineBar(t, list, n, shut, open));
-  }).join("");
-
-  return '<div class="kv">' +
-      '<span class="pill kind">' + done + ' of ' + rows.length + ' entered</span>' +
-      '<span class="pill ' + (open ? "good" : "none") + '">' +
-        (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
-    (open ? '' : '<div class="note">Lines are entered while a cycle is open. ' +
-      'This is a record until the SMO opens the next one.</div>') +
-    chips + blocks +
-    '<div class="note"><b>You enter the figure; the unit writes the note and submits.</b> ' +
-      'A unit cannot complete its report until your lines are in \u2014 which is why they will ask.</div>';
-}
-/* THE LOCK IS THE REPORTING BAR'S OWN PAIR (§263, §309), not a second control:
-   Save draft while there is anything to do, then the state word beside Reopen.
-   Drawn per band, because each unit submits its own report and one button
-   across them all would freeze an owner out of a unit still working. */
-function lineBar(t, list, n, shut, open){
-  if (!open) return "";
-  var left = list.length - n;
-  if (shut) {
-    return '<div class="repchrome"><span class="rc-state">Draft saved</span>' +
-      '<span class="why" style="margin:0">' + esc(placeLabel(t)) +
-      ' \u00b7 your lines are locked. The unit still submits its own report.</span>' +
-      '<button class="rc-reopen quiet" data-linesopen="' + esc(t) + '">Reopen</button></div>';
-  }
-  return '<div class="repchrome"><span class="why" style="margin:0">' +
-    (left ? left + ' ' + plural(left, "figure") + ' still to enter for ' + esc(placeLabel(t))
-          : 'Every line of yours here is entered.') + '</span>' +
-    '<button class="rc-submit" data-lineslock="' + esc(t) + '">Save draft</button></div>';
-}
-
 function renderMySources(){
   var rows = mySourceRows();
   if (!rows.length) {
@@ -6235,7 +5824,7 @@ function renderImportDownload(){
     ["Business units", "Supporting functions", "Capabilities"].map(function(g){
       var rows = subs.filter(function(o){ return o.grp === g; });
       if (!rows.length) return "";
-      return '<optgroup label="' + ({ "Business units":L("unitword"), "Supporting functions":L("fnword"), "Capabilities":L("capability") }[g] || esc(g)) + '">' + rows.map(function(o){
+      return '<optgroup label="' + esc(g) + '">' + rows.map(function(o){
         return '<option value="' + esc(o.v) + '"' +
           (keys.indexOf(o.v) > -1 ? " selected" : "") +
           (o.hint ? ' data-hint="' + esc(o.hint) + '"' : '') + '>' +
@@ -6283,7 +5872,7 @@ function renderImportDownload(){
     '<div class="ffoot"><span class="why">One per way of planning. A unit always plans in ' +
       'pillars; a function plans whichever way Setup says.</span><span class="fbtns">' +
       '<button class="editbtn" data-dlblank="pillars">Pillars</button>' +
-      '<button class="editbtn" data-dlblank="projects">' + L("project") + '</button>' +
+      '<button class="editbtn" data-dlblank="projects">Projects</button>' +
       '<button class="editbtn" data-dlblank="objectives">Objectives &amp; actions</button>' +
       '</span></div></div>';
 
@@ -6508,7 +6097,7 @@ function renderImportUpload(){
     var changed = d.rows.filter(function(r){ return r.status === "changed"; });
     var unknown = d.rows.filter(function(r){ return r.status === "unknown"; });
     var rowsHtml = changed.length
-        ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? L1("project") : L("pillar","bu")) + '</th><th>Item</th>' +
+        ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? "Project" : L("pillar","bu")) + '</th><th>Item</th>' +
             '<th class="cc">Type</th><th class="cc">Recorded</th><th class="cc">In the file</th></tr></thead><tbody>' +
           changed.map(function(r){
             return '<tr><td>' + esc(r.pillar) + '</td><td>' + esc(r.name) + '</td>' +
@@ -7068,7 +6657,7 @@ function renderCycle(){
        and 1b-ii: a line that merely describes what the reader can see is
        furniture). The mapped columns still explain themselves where the
        mapping is not obvious, on the cells' own hovers (§124). */
-    fnRows = '<tr class="dxband"><th colspan="8">' + L("fnword") +
+    fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
         '<em>' + plural(fnKeys.length, "function") + ' reporting</em></th></tr>' + fnRows;
   }
   /* §334: A GROUP OF ITS OWN, BESIDE THE UNITS AND THE FUNCTIONS — Islam's
@@ -7077,7 +6666,7 @@ function renderCycle(){
      that supports it, which is the order the navigation switch reads in too
      (§53.5). Drawn only when there is one, like the functions band. */
   if (capRows) {
-    capRows = '<tr class="dxband"><th colspan="8">' + L("capability") +
+    capRows = '<tr class="dxband"><th colspan="8">Capabilities' +
         '<em>' + plural(capTargets.length, "capability", "capabilities") +
         ' reporting</em></th></tr>' + capRows;
   }
@@ -7364,7 +6953,6 @@ function renderCycle(){
             'conversation about whether it is the right number stays between the two ' +
             'teams \u2014 this only decides who enters it.</div>')
       : '') +
-    section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
     section("", "Who has reported", null,
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
@@ -7409,7 +6997,7 @@ function planCell(fk, f, editable){
 function planFormatWord(f){
   var fmt = fnFormat(f);
   return fmt === "pillars" ? L("pillar","bu")
-       : fmt === "objectives" ? "Objectives & actions" : L("project");
+       : fmt === "objectives" ? "Objectives & actions" : "Projects";
 }
 function planFormatCell(fk, f, editable){
   var fmt = fnFormat(f);
@@ -7437,7 +7025,7 @@ function planFormatCell(fk, f, editable){
   var caps = capsOfFunction(fk).length;
   return '<select class="fld" data-fnformat="' + esc(fk) + '"' +
       ' aria-label="How ' + esc(f.name || fk) + ' plans">' +
-    '<option value="projects"' + (fmt === "projects" ? " selected" : "") + '>' + L("project") + '</option>' +
+    '<option value="projects"' + (fmt === "projects" ? " selected" : "") + '>Projects</option>' +
     '<option value="pillars"' + (fmt === "pillars" ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
     '<option value="objectives"' + (fmt === "objectives" ? " selected" : "") + '>Objectives &amp; actions</option>' +
     '</select>' +
@@ -7468,7 +7056,7 @@ function planFormatCell(fk, f, editable){
    function whatever the question). */
 function capFormatCell(c, editable){
   var pillars = capPlansInPillars(c);
-  var word = pillars ? L("pillar","bu") : L("project");
+  var word = pillars ? L("pillar","bu") : "Projects";
   if (!editable) return '<span class="pill kind">' + esc(word) + '</span>';
   var blocked = pillars
     ? (capItems(c).length ? "its plan" : "")
@@ -7477,45 +7065,10 @@ function capFormatCell(c, editable){
   return '<select class="fld" data-capformat="' + esc(c.id) + '"' +
       (blocked ? ' disabled title="Clear the plan on this row first"' : '') +
       ' aria-label="How ' + esc(c.name) + ' is planned">' +
-    '<option value="projects"' + (pillars ? "" : " selected") + '>' + L("project") + '</option>' +
+    '<option value="projects"' + (pillars ? "" : " selected") + '>Projects</option>' +
     '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
-}
-/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────
-   Two cells, read on the row and set in the dialog. The group is the ABSENCE
-   of a company (§50.6), so a function nobody placed reads exactly as every
-   function did before. The weight is offered only where there is a company
-   to weigh it in — a weight at the group would be a number nothing reads
-   (§61). A blank weight SAYS what it counts as, because "blank" alone reads
-   as nought, and nought is the one thing it is not. */
-var FNCOW_SAID = null;
-function fnCompanyCell(fk, f, editable){
-  var at = fnCompanyOf(fk) || "";
-  if (!editable) return at ? '<span class="val"><b>' + esc(COMPANIES[at].name) + '</b></span>'
-                           : '<span class="why" style="margin:0">The group</span>';
-  return '<select class="fld" data-fnco="' + esc(fk) + '" aria-label="Where ' + esc(f.name) + ' belongs">' +
-    '<option value=""' + (at ? "" : " selected") + '>The group</option>' +
-    activeCompanyKeys().map(function(ck){
-      return '<option value="' + esc(ck) + '"' + (ck === at ? " selected" : "") + '>' +
-        esc(COMPANIES[ck].name) + '</option>';
-    }).join("") + '</select>';
-}
-function fnCoWeightShown(fk){
-  var ck = fnCompanyOf(fk);
-  if (!ck) return null;
-  var s = companyShares(ck).filter(function(x){ return x.fn === fk; })[0];
-  return s ? Math.round(s.w * 10) / 10 : null;
-}
-function fnCoWeightCell(fk, f, editable){
-  var ck = fnCompanyOf(fk), set = fnCoWeightSet(fk), shown = fnCoWeightShown(fk);
-  if (!ck) return editable ? '<span class="why" style="margin:0">Only when it belongs to a company</span>'
-                           : '<span class="why" style="margin:0">&mdash;</span>';
-  if (!editable) return set != null ? '<span class="val">' + set + '%</span>'
-    : '<span class="why" style="margin:0">Blank \u2192 ' + shown + '%</span>';
-  return '<input class="fld" type="number" min="0" max="100" step="any" data-fncow="' + esc(fk) + '"' +
-    ' value="' + (set != null ? set : "") + '" placeholder="Blank counts as ' + shown + '%"' +
-    ' aria-label="Weight of ' + esc(f.name) + ' in ' + esc(COMPANIES[ck].name) + ', in per cent">';
 }
 function planUnderCell(fk, f, editable){
   /* Only a pillars function borrows a foundation, so only it has somewhere to
@@ -7546,8 +7099,6 @@ var FN_COLS = [
   { k:"nav",     label:"Nav name" },
   { k:"code",    label:"Code" },
   { k:"plansin", label:"Plans in" },
-  { k:"company", label:"Company" },
-  { k:"coweight", label:"Weight" },
   { k:"caps",    label:"Caps" },
   { k:"head",    label:"Head" },
   { k:"cust",    label:"Custodian" }
@@ -7716,8 +7267,6 @@ function renderFunctions(){
          same contract as retiring a company that still holds units (§49.3).
          The control is in the dialog; this cell reads it. */
       (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("company") ? '<td class="cc">' + fnCompanyCell(fk, f, false) + '</td>' : '') +
-      (fnShowCol("coweight") ? '<td class="cc">' + fnCoWeightCell(fk, f, false) + '</td>' : '') +
       (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
       (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, false) + '</td>' : '') +
       (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, false) + '</td>' : '') +
@@ -7768,7 +7317,7 @@ function renderFunctions(){
         : '') +
     '</span>';
 
-  return cfgHead(navWord("fnword", "Functions"), [], null, mayEdit, "fnall",
+  return cfgHead("Functions", [], null, mayEdit, "fnall",
       ["Clear all progress", "Clear all plans"], setArrangeBtn("fns", mayEdit) + fnColMenu) +
     section("", "", null,
       /* §84. Eight rows and nine columns — over the search threshold, so it
@@ -7799,8 +7348,6 @@ function renderFunctions(){
                  (fnShowCol("nav")     ? h("Nav name")          : '') +
                  (fnShowCol("code")    ? h("Code", "cc")        : '') +
                  (fnShowCol("plansin") ? h("Plans in", "cc")    : '') +
-                 (fnShowCol("company") ? h(L1("division"), "cc") : '') +
-                 (fnShowCol("coweight") ? h("Weight", "cc")     : '') +
                  (fnShowCol("caps")    ? h("Caps", "cc")        : '') +
                  (fnShowCol("head")    ? h("Head", "cc")        : '') +
                  (fnShowCol("cust")    ? h("Custodian", "cc")   : '') +
@@ -7872,10 +7419,10 @@ function renderCaps(){
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
      mark. What is left is drawn only when there IS an orphan. */
-  return cfgHead(L("capability"),
+  return cfgHead("Capabilities",
       orphan ? ['<span class="pill none">' + orphan + ' unassigned</span>'] : [],
       null, false) +
-    section("", L("capability"), null,
+    section("", "Capabilities", null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
          shading rather than as a long name. */
@@ -7887,7 +7434,7 @@ function renderCaps(){
         (function(){ var h = tkHead("caps");
           return h("#", "idx", false) + h("Capability") + h("Held by") + h("Head") +
                  h("Plans in") +
-                 h(L("keyobj"), "cc") + h(L("project"), "cc") + h("", "cc", false); })() +
+                 h("Key objectives", "cc") + h("Projects", "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (mayEdit
@@ -8497,8 +8044,8 @@ function renderSendMessage(){
        ROLES.map(function(r){ return ddrow("roles", r.key, r.name); }).join(""),
        (c.roles || []).length) +
     dd("wide", "Group & companies", tgRows(WIDE), tgCount(WIDE)) +
-    dd("units", L("unitword"), tgRows("Business units"), tgCount("Business units")) +
-    dd("fns", L("fnword"), tgRows("Supporting functions"), tgCount("Supporting functions")) +
+    dd("units", "Business units", tgRows("Business units"), tgCount("Business units")) +
+    dd("fns", "Functions", tgRows("Supporting functions"), tgCount("Supporting functions")) +
     dd("people", "People",
        PEOPLE.filter(personActive).map(function(p){
          return ddrow("keys", p.key, p.name + (p.email ? "" : " \u2014 no address"));

@@ -83,9 +83,12 @@ def go(b, page_name, who=None):
     pg.evaluate("""() => { var g = document.querySelector('button[title="Setup"]');
                            if (g) g.click(); }""")
     pg.wait_for_timeout(450)
-    pg.evaluate("""(n) => { var b = [].filter.call(
-        document.querySelectorAll('.setuprail button'),
-        x => x.textContent.indexOf(n) >= 0)[0]; if (b) b.click(); }""", page_name)
+    # §392: a page whose name is the client's word is found by its KEY ("@key"),
+    # because the rail now says whatever Terminology says (Divisions, Sectors…).
+    pg.evaluate("""(n) => { var b = n.charAt(0) === '@'
+        ? document.querySelector('.setuprail [data-setupgo="' + n.slice(1) + '"]')
+        : [].filter.call(document.querySelectorAll('.setuprail button'),
+            x => x.textContent.indexOf(n) >= 0)[0]; if (b) b.click(); }""", page_name)
     pg.wait_for_timeout(500)
     return pg
 
@@ -411,7 +414,7 @@ with sync_playwright() as p:
 
     # ══ 7. COMPANIES: THE MENU, AND THE REFUSAL INSIDE IT ═══════════════
     head("7 · Companies — two entries, and the refusal names what is in the way")
-    pg = go(b, "Companies")
+    pg = go(b, "@companies")
     co = ev(pg, """() => ({
       kebabs: document.querySelectorAll('[data-comenu]').length,
       keys: COMPANY_KEYS.length,

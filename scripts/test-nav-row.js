@@ -75,6 +75,10 @@ const supplied = {
   capsReachable: () => [],
   companiesReachable: () => [],
   navName: (o) => (o && o.name) || "",
+  /* §392's word for a side of the switch lives in config-render.js, which this
+     harness does not evaluate; the WORD is not what is measured here — only how
+     many sides there are — so the platform's own short word stands in. */
+  navWord: (k, short) => short,
   TARGET: "group",
   /* the two `when` helpers a unit's and a function's tab lists ask; both OFF,
      which is the ordinary state and the one where the library would be the

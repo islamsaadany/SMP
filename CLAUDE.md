@@ -99,6 +99,11 @@ A drift between specs and code is a documentation bug — report it before silen
   it — under the weaker "describe it in words" rule, and that is why the reversal exists.
   `SMP-Project-Folder/mockups/` remains the historical record of what was settled and what was
   rejected; `design-mockups/` is produced again from today.)*
+- **CONTENT IS ALIGNED IN CHAT, NOT IN A MOCKUP (2026-09-23).** Islam:
+  *"content fix doesn't need a mockup it needs alignment here first mockup is
+  for visual after we agree on content."* Words, descriptions, defaults, which
+  rows exist and what each means are agreed here, in plain words, first. The
+  mockup comes after, and only for how it looks.
 - **After ANY UI change, save a snapshot of the changed file to `ui-versions/` (see UI Version Tracking below).**
 
 ### 2. Think Before Acting
@@ -9278,6 +9283,17 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # draft and Submit both LOCK the report (controls
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
+python3 checks/division-functions.py # a supporting function belongs to a
+                                # division and counts in it (&sect;391): a company
+                                # with no functions agrees with &sect;68's formula
+                                # (asserted FIRST), the shares add to 100 with a set
+                                # weight as given, a blank the average of the set
+                                # ones and none set one equal member, the headline
+                                # and execution the weighted sum of what each
+                                # member's own page shows, a company of functions
+                                # alone reachable, the Setup dialog PRESSED and read
+                                # back (a total over 100 refused and said), and a
+                                # retire refused by name. 25/0, red 1 / 2 / 1
 python3 checks/objectives-actions.py # the third way a function plans
                                 # (§342, spec 049): the format is a THIRD value
                                 # read back off the stored function and never off
@@ -10601,6 +10617,30 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 *Last Updated: 2026-09-23 &mdash; **&sect;393: clicking a pillar opens that pillar.** Islam, from a client's plan: *"when I click on the E5 I can't click e3 and e 2 only e1."* The side list keyed which pillar is open on its stored code, and a pillar added with the pen is minted with an EMPTY one, so four of his five pillars shared one key: all lit at once and every press opened the first. Islam chose to key the rail by the pillar's row id (&sect;48), asked through one function by the three rails, the gap-walk address, the missing-bar chips and the reporting places. Nothing stored moves. `checks/pillar-rail.py` makes three states and is **18 red** on the build before; six checks that addressed the rail by code were repointed (&sect;51.11).*
 
+*Earlier: 2026-09-23 &mdash; **&sect;392: one word per thing, in two
+forms.** Terminology is thirteen rows in Islam's order with his descriptions and
+defaults, aligned in chat first and then drawn. No group word and unit word any
+more: each row holds a word for ONE (`group`/`grp`) and a word for MANY
+(`bu`), used everywhere &mdash; the KEYS did not move (&sect;30.2), what they
+mean did. `L()` always answers MANY, `L1()` the ONE, `navWord()` keeps the
+switch's short words until a client changes theirs. New rows: Capability,
+Division (the Companies layer), Supporting Function, Project. Migrations 045 /
+016 move every tenant, proved twice on throwaway databases in both shapes.
+`checks/terminology.py` 26/0, red 3 / 3 / 1 from the sources; four neighbours
+rewritten to ask the page's word. **Merged to `main` 2026-09-23 on Islam's word,
+renumbered from &sect;382/&sect;383 before the merge.***
+
+*Earlier: 2026-09-22 &mdash; **&sect;391: a supporting function can
+belong to a division.** A division is the existing Company layer; a function's
+Setup row gains which company it belongs to (none = the group, stored as an
+absence) and its weight there (Islam's A: set as given, blank = average of the
+set ones, none set = one equal member, units share the rest by group weight).
+It counts in the company's performance AND execution; a company with no
+functions reads exactly as before (asserted first). No migration, no server
+rule, the CEO sees and does not report. `checks/division-functions.py` 25/0,
+red 1 / 2 / 1 from the sources. The Terminology naming (description, default,
+chosen word for every term) is drawn and waits for sign-off. **Merged to `main`
+2026-09-23.***
 *Earlier: 2026-09-23 &mdash; **&sect;389: Revenue drivers (spec 063),
 an On | Off switch, and the merge.** A unit's revenue argued from its parts,
 its review reading, and the client's seasons, all recorded in
@@ -11238,6 +11278,7 @@ check, `check:insights` and `check:modules` did not run &mdash; the view-as fix
 is proved as a RULE and at both ends of its seam and **has not been driven
 through a browser against a real client**, and that run is owed before it is
 called finished. **`main` untouched: the merge is Islam's word, on that merge.*
+
 
 *Earlier: 2026-09-22 &mdash; **&sect;380: one blank template per way of
 planning (spec 059).** Islam: *"in the template download we need to have the

@@ -56751,3 +56751,52 @@ REVERSED, not left beside the new rule** (Principle II).
   gives them one (§218 — the assertion is unchanged, the fixture was stale);
   and `qa.py`'s old-"BU"-header row was a brand-new person with no title and
   no email, now correctly refused, so it carries both. Full `qa.py` ERRORS none.
+
+## §391 — the pillar rail selects by row id, never by stored code (2026-09-23)
+
+Islam, from a client's plan with five pillars: *"THE PILLARS clikcing are not
+behaving right … when I click on the E5 I can't click e3 and e 2 only e1."*
+His screenshot showed four of the five rail rows lit at once.
+
+- **REPRODUCED BEFORE ANYTHING WAS PROPOSED.** The rail keyed which pillar is
+  open on the pillar's STORED CODE (`p.code`), and four of his five pillars
+  carried an EMPTY one. Four rows with one key: all four lit, and pressing any
+  of them asked for "the pillar whose code is empty" and got the first — E5.
+  Only E1 had a code of its own, so only E1 answered. Blanking three codes on
+  Mobile reproduced his screen exactly.
+- **WHERE THE BLANK COMES FROM**: `addPillar()` mints `code: ""`, and
+  `renumberUnit()` — which fills a missing code positionally — runs over the
+  BAKED data at load and on the builder and upload paths, never over a
+  tenant's saved plan. So every pillar added with the pen stays blank for
+  ever. §46.3 had already said the stored code is "what the plan arrived
+  with", and nothing about that makes it unique; an upload can carry two
+  pillars with one code as easily.
+- **ISLAM CHOSE OPTION 1 of two**: address the pillar by its ROW ID, which
+  §48 and §191 already make the address of every plan row, rather than
+  filling in the missing codes (smaller, and it leaves a duplicated code
+  broken). `pillarRailId(p)` is `p.id`, falling back to the code only for a
+  row with no id, which `renumberUnit()` and `mintRowId()` never leave.
+- **ONE KEY, EVERY READER** (§53.5): the three rails that draw pillars
+  (Plan, Performance, Reporting), `unitRailPick()`, the pane's gap-walk
+  address (`gapPlaceAttr`), the missing-bar's chips and the reporting
+  places' `rail`/`code` (§279.1) all ask the same function — a chip that
+  still said the code would press a rail that no longer matches it. The
+  per-pillar gap key (`p:` + …, and the rail's `data-rgap`) moved to the id
+  at the same time, since `p.code || index` collides on two shared codes.
+- **Nothing stored moves**: the code is untouched and still what the plan
+  arrived with; the shown code is still `pillarCode()` by position. A place
+  remembered from before the change (§173) names a code and simply no
+  longer matches, so the rail opens on its usual first-or-mine pillar.
+- **The order he saw is the plan's order**, not a fault: the list is the
+  order pillars were added (E5, E1, E3, E2, then an unnamed fifth), and the
+  shown WAN01–WAN05 count down it. The arrange arrows reorder it (§101).
+- `checks/pillar-rail.py` MAKES three states (§255) — codes blanked as on his
+  tenant, two pillars sharing a code, pillars added through `addPillar()` —
+  and walks every row on all three pages, asserting exactly ONE row lit, the
+  one pressed, and that the pane shows it, with each page asserted to be the
+  page actually drawn (§50.6). **18 red on the build before**, the first
+  failure printing his screen verbatim (`[[0,2,3],[1],[0,2,3],[0,2,3]]`).
+  Six checks addressed the rail by code and were pointed at the id (§51.11):
+  `measure-score-spread`, `monthly-plan`, `reporting-ytd-target`,
+  `pillar-breakdown`, `project-done`, `unit-before-number` (the last one had
+  been writing `RAIL['mobile']`, a key nothing reads).

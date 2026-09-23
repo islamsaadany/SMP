@@ -5271,7 +5271,7 @@ function reportItems(u){
     /* THE RAIL IS ADDRESSED BY THE STORED CODE AND DRAWN WITH THE DISPLAY
        ONE, and they are not the same string: `pillarCode()` renders the
        tenant's prefix (BE03) while the rail's own button and `unitRailPick()`
-       match the stored identifier — the row id since §388 (pillarRailId). Keying a chip on what the page SAYS is §48's rule
+       match the stored identifier — the row id since §391 (pillarRailId). Keying a chip on what the page SAYS is §48's rule
        broken — address by the identifier, label with the word — and it would
        fail invisibly on a tenant where the two happen to coincide. Found by
        pressing Next and watching the rail not move. */

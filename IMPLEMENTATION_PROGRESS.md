@@ -7938,3 +7938,15 @@ the review names the row and what it lacks. People already on the register can
 still be updated with blank cells, which keep what is recorded. Your own HR
 export works as it is: if there's no sheet called "People", the first sheet is
 read, and headings like *Title*, *E-mail* or *Employee Name* are understood.
+
+## §391 — clicking a pillar opens that pillar (2026-09-23)
+
+**Built, on the branch.** On a client with pillars added by hand, the side
+list lit several pillars at once and clicking some of them opened a different
+one. Pillars added with the pen never got the short identifier the list used
+to tell them apart, so they all looked like the same pillar. The list now
+tells pillars apart by their row number, which is always unique, on the Plan,
+Performance and Reporting pages, and the missing-items chips follow it.
+Nothing saved changes. Checked: a new check that clicks every pillar in three
+awkward states (it fails 18 ways on the old build), six neighbouring checks
+updated, the full sweep. **Waiting on Islam**: the merge.

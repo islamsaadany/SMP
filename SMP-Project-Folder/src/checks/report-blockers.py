@@ -22,8 +22,9 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE
   something outstanding → a bar; a viewer who cannot submit → no bar, the
   office → a bar.
 
-· THE PLACE IS ADDRESSED BY THE STORED CODE, NOT THE DRAWN ONE. `pillarCode()`
-  renders the tenant's prefix (BE03) and the rail matches `p.code` (M03) —
+· THE PLACE IS ADDRESSED BY THE PILLAR'S ROW ID, NOT THE DRAWN CODE. `pillarCode()`
+  renders the tenant's prefix (BE03) and the rail matches the row id (§391 —
+  it matched the stored code until that code proved empty or shared) —
   keying the chip on the label made Next set the rail to a code no pillar has,
   so the press repainted the same pane and looked like a dead button. Found by
   pressing it. The two are asserted to DIFFER on this tenant, or the assertion
@@ -113,7 +114,7 @@ ONE_NOTE = """(u)=>{const un=UNITS[u],last=un.items[un.items.length-1],m=last.me
  m.actual=String(Math.round((parseFloat(m.target)||100)*0.3))+
           (String(m.target).replace(/^[\\d.,\\s]+/,"")||"");
  m.note="";
- return {code:last.code, id:m.id};}"""
+ return {code:last.id, id:m.id};}"""
 
 BAR = """()=>{const b=document.querySelector('[data-repband]');
  if(!b) return {none:true};
@@ -190,8 +191,8 @@ with sync_playwright() as p:
        at(r.get("chips"), 0).get("txt", "").startswith(at(places, 0).get("label", "\u0000")), r)
 
     # 3 ── ADDRESSED BY THE STORED CODE, LABELLED WITH THE DRAWN ONE
-    print("\n3 · the chip is addressed by the stored code (§48)")
-    ck("the chip's rail code is the pillar's stored code",
+    print("\n3 · the chip is addressed by the pillar's row id (§48, §391)")
+    ck("the chip's rail code is the pillar's row id",
        at(r.get("chips") if isinstance(r, dict) else [], 0).get("code") ==
        (made.get("code") if isinstance(made, dict) else None), (r, made))
     ck("...which is NOT what the page draws, or this assertion proves nothing",

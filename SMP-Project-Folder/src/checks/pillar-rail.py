@@ -1,4 +1,4 @@
-"""The pillar rail selects by the pillar's row id, never its code (§388).
+"""The pillar rail selects by the pillar's row id, never its code (§391).
 
 Islam, from a client's plan: "when I click on the E5 I can't click E3 and E2
 only E1". Four of five pillars there carried an EMPTY stored code (a pillar
@@ -81,6 +81,15 @@ with sync_playwright() as pw:
                  paint(); }""", [sub, sec])
             pg.wait_for_timeout(300)
             print("\n── %s · %s ──" % (label, page))
+            # Three rail builders, one per page: prove each was the one drawn,
+            # or all three sections measure the Plan's rail (§50.6).
+            where = ev(pg, """()=>({sub: currentSub,
+                 rep: !!document.querySelector('.repchrome'),
+                 plan: !!document.querySelector('#panel .pane .measures, #panel .pane table')})""")
+            want = {"plan": "strategy", "performance": "performance", "reporting": "report"}[page]
+            ck("the page drawn is " + page,
+               isinstance(where, dict) and where.get("sub") == want and
+               (where.get("rep") if page == "reporting" else not where.get("rep")), where)
             res = ev(pg, WALK)
             if isinstance(res, dict):
                 ck("the rail draws one row per pillar", False, res); pg.close(); continue

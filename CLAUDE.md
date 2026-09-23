@@ -9845,6 +9845,13 @@ python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a 
 # which reads like a failure in a summary and is not one — `pip install pillow`.
 # band-corner.py argues the other way in its own docstring and unfilters the PNG
 # by hand; not reconciled, and said rather than left to be rediscovered.
+python3 checks/pillar-rail.py   # clicking a pillar opens THAT pillar (§391): the rail
+                                # keys on the row id, never the stored code, which a
+                                # pen-added pillar leaves empty. MAKES three states
+                                # (blank codes, a shared code, pillars added with the
+                                # pen) and walks every row on Plan, Performance and
+                                # Reporting: exactly one row lit, the pressed one, and
+                                # its pane shown. 18 red on the build before
 python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS because a
                                 # DOM probe calls the broken build clean (§130.3, §53.7)
                                 # — and since §327 the case the fill exists for: a
@@ -10592,7 +10599,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-23 &mdash; **&sect;389: Revenue drivers (spec 063),
+*Last Updated: 2026-09-23 &mdash; **&sect;391: clicking a pillar opens that pillar.** Islam, from a client's plan: *"when I click on the E5 I can't click e3 and e 2 only e1."* The side list keyed which pillar is open on its stored code, and a pillar added with the pen is minted with an EMPTY one, so four of his five pillars shared one key: all lit at once and every press opened the first. Islam chose to key the rail by the pillar's row id (&sect;48), asked through one function by the three rails, the gap-walk address, the missing-bar chips and the reporting places. Nothing stored moves. `checks/pillar-rail.py` makes three states and is **18 red** on the build before; six checks that addressed the rail by code were repointed (&sect;51.11).*
+
+*Earlier: 2026-09-23 &mdash; **&sect;389: Revenue drivers (spec 063),
 an On | Off switch, and the merge.** A unit's revenue argued from its parts,
 its review reading, and the client's seasons, all recorded in
 `specs/063-revenue-drivers/spec.md`. Islam, as the merge was asked for: *"this

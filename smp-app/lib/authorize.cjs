@@ -552,7 +552,7 @@ function collect(stored, incoming, w) {
      SETUP, like comms — it is what the platform says on the office's behalf —
      and named here so a refusal sends somebody to the page with the pen. */
   if (!same(sg.kb, ig.kb)) add("setup", null, "the knowledge base's answers");
-  collectCapabilities(sg.capabilities, ig.capabilities, add);
+  collectCapabilities(sg.capabilities, ig.capabilities, add, w);
   /* ── THE CLIENT'S SEASONS (spec 063 §6.5) ────────────────────────
      Defined once and used by name in any unit, so changing Ramadan's dates
      moves every base period in the client at once — which is exactly why it
@@ -1265,6 +1265,13 @@ function asUnit(f, ukey) {
    (k_report). */
 const CAP_SETUP = ["id", "name", "fn"];
 const CAP_KNOWN = CAP_SETUP.concat(["def", "keyObjectives", "projects", "perf", "exec"]);
+/* §394: what the pillars form adds. Kept as a second list so CAP_KNOWN keeps
+   meaning what it meant to every other reader. */
+const CAP_KNOWN_ALL = CAP_KNOWN.concat(["format", "items"]);
+function capAsUnitView(c, ukey) {
+  return { ukey: ukey, items: (c && c.items) || [], keyObjectives: [],
+           swot: {}, aspiration: "", endInMind: "", clauses: [] };
+}
 
 /* ── A LIST OF PROJECTS, CLASSIFIED (§326) ────────────────────────────────
    Lifted out of collectCapabilities unchanged, because a supporting function
@@ -1346,7 +1353,7 @@ function targetWord(w, t) {
   return s.replace(/^fn:/, "");
 }
 
-function collectCapabilities(sList, iList, add) {
+function collectCapabilities(sList, iList, add, w) {
   if (same(sList, iList)) return;
   if (!same(idsOf(sList), idsOf(iList))) { add("setup", null, "the list of capabilities"); return; }
   const sm = byId(sList), im = byId(iList);
@@ -1398,7 +1405,27 @@ function collectCapabilities(sList, iList, add) {
       function () { add("arrange", target, "the order of a capability's key objectives"); });
 
     collectProjects(a.projects, b.projects, target, add);
-    if (!same(omit(a, CAP_KNOWN), omit(b, CAP_KNOWN))) add("unknown", target, "a capability");
+    /* §394: A CAPABILITY THAT PLANS IN PILLARS IS JUDGED AS A PILLARS FUNCTION
+       IS. §334 gave a capability the pillars form (`format: "pillars"`, its
+       plan in `items`) and this file was never told, so every change inside
+       one fell to the unknown sweep below — the Super user's alone. Measured:
+       the SMO team refused adding a pillar, and the function head refused
+       REPORTING A FIGURE, i.e. nobody but the Super user could report on such
+       a capability at all. The rows go through collectUnit(), the one set of
+       rules a unit's and a pillars function's plan already answer to (§53.5),
+       against the capability's own target — whose access resolves to the
+       holding function in lib/rules.js (§334). Read from the STORED side, as
+       collectFunction() does (§42.2). Its key objectives stay OUT of that
+       view: they are classified above by the capability's own rules, and
+       passing them through twice would judge one change twice. Switching
+       `format` is Setup, like a function's. */
+    if (String(a.format) === "pillars" || String(b.format) === "pillars") {
+      if (!same(a.format, b.format)) add("setup", null, "how a capability is planned");
+      if (String(a.format) === "pillars")
+        collectUnit(target, capAsUnitView(a, target), capAsUnitView(b, target), add, w);
+      else if (!same(a.items, b.items)) add("setup", null, "a capability's " + "pillars");
+    }
+    if (!same(omit(a, CAP_KNOWN_ALL), omit(b, CAP_KNOWN_ALL))) add("unknown", target, "a capability");
   });
 }
 

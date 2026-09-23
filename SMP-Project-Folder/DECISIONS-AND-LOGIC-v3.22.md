@@ -56996,3 +56996,46 @@ His screenshot showed four of the five rail rows lit at once.
   division-functions 25/0 and seven neighbours green; `qa.py` ERRORS none;
   built-in-step and generated-in-step clear. Screen only: no `api/`, `lib/` or
   `db/` file, so no forced sign-out is owed (spec 029).
+
+## §394 — a capability that plans in pillars is judged as a pillars function is (2026-09-23)
+
+Islam, minutes after §393 went live, with Ahmed Galal (SMO team) on the
+capability *Data Management*: **403 — "Not saved. This save changes something
+only the SMO may change (a capability)".**
+
+- **REPRODUCED BEFORE ANYTHING WAS PROPOSED** (§3a), against the real
+  authoriser: adding a pillar to a pillars-format capability is REFUSED for
+  the SMO team, a rename is refused, and — the half nobody had reported yet —
+  **the holding function's head could not REPORT A FIGURE there at all**.
+- **THE CAUSE IS ONE SWEEP.** §334 gave a capability the pillars form
+  (`format: "pillars"`, its plan in `items`, drawn through `capAsUnit`) and
+  `lib/authorize.js` was never told: `collectCapabilities` walked a
+  capability's objectives and projects and swept every OTHER key into
+  `unknown`, which the verdict hands to the Super user alone. So `items` and
+  `format` — every pillar, measure, tactic and figure in the form — were
+  "something only the SMO may change", and "SMO" there means the Super user,
+  which is why the SMO team was refused. §42's fail-closed rule working
+  exactly as written on a shape it had never been taught (§59's lesson for a
+  function, one kind of subject over).
+- **THE ANSWER IS THE PILLARS FUNCTION'S OWN** (§53.5, §59): the plan is
+  classified through `collectUnit()` against the `cap:<id>` target, so a
+  pillar, a measure and a tactic are the plan (the office's, via
+  `mayAuthorPage`), a figure is reporting (whoever the holding function's
+  Reporting column allows, via §334's `capHolderTarget`), and nothing new is
+  decided. Switching how a capability is planned is `setup` (§59's refusal to
+  switch a holding form is the screen's). `CAP_KNOWN` is left meaning what it
+  meant to every other reader; the pillars form adds `format` and `items` in a
+  second list.
+- **BOTH ENDS ASSERTED** (§94.2), `scripts/test-authorize.js` §394: the Super
+  user and the SMO team add and rename a pillar, the holding head reports a
+  figure — and REFUSED: the head authoring the plan, another function's head
+  reporting on it. Proved able to fail: with the pillars branch removed **5
+  red**, the two refusals green either way. 747/0; change list 140/0.
+- **THE LIVE SITE RUNS THE CARRIED COPY** (§335), so `smp-app/lib/authorize.cjs`
+  is re-carried by the one declared transform; `generated-in-step` all clear.
+  No database in this session, so the served app's own state check was not
+  run — the carried file is the tested file, which is what that check asserts.
+- **Nothing on screen moves and nothing stored moves**; the built platform
+  file is byte-identical, so no `sw.js` bump (§91). The change only ALLOWS
+  saves that were refused, so an old tab's save cannot newly fail — **no
+  forced sign-out is owed** (spec 029).

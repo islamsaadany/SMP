@@ -4180,7 +4180,7 @@ console.log("\n40 · a pillar's breakdown (§343)");
   function kinds(mutate) {
     const inc = clone(base);
     mutate(inc.units[UK].items[0].breakdown);
-    return (A.collect(base, inc, W(base)) || []);
+    return (A.collect(base, inc, R.worldOf(base)) || []);
   }
   const fig = kinds(function (b) { b.rows[1].a_c1 = "27%"; });
   check("§343: a category's FIGURE is reporting",
@@ -4204,7 +4204,7 @@ console.log("\n40 · a pillar's breakdown (§343)");
         nm.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
   const gone = (function () {
     const inc = clone(base); delete inc.units[UK].items[0].breakdown;
-    return (A.collect(base, inc, W(base)) || []);
+    return (A.collect(base, inc, R.worldOf(base)) || []);
   })();
   check("§343: taking the whole breakdown away is the plan",
         gone.some(function (c) { return c.kind === "unitPlan"; }),
@@ -4311,7 +4311,7 @@ console.log("\n42 · the two kinds of Forefront row (spec 058)");
   const kinds = function (key, f) {
     const inc = clone(base);
     f(inc.people.filter(function (p) { return p.key === key; })[0]);
-    return (A.collect(base, inc, W(base)) || []).map(function (c) { return c.kind; });
+    return (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
   };
 
   /* — the minted row is the platform's, whole — */
@@ -4614,7 +4614,7 @@ console.log("\n44 · revenue drivers (spec 063)");
 
   const kinds = function (f) {
     const inc = clone(base); f(inc);
-    return (A.collect(base, inc, W(base)) || []).map(function (c) { return c.kind; });
+    return (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
   };
   const verdict = function (who, f) {
     const inc = clone(base); f(inc);
@@ -4799,6 +4799,59 @@ console.log("\n44 · revenue drivers (spec 063)");
   check("§063: only an explicit true is on, and absent is OFF",
         R.driversOn({ driversOn: true }) === true && R.driversOn({}) === false &&
         R.driversOn({ driversOn: "true" }) === false && R.driversOn(null) === false);
+})();
+
+/* ── §394: A CAPABILITY THAT PLANS IN PILLARS ───────────────────────
+   Every change inside one fell to the unknown sweep, which is the Super
+   user's alone: the SMO team could not add a pillar and the holding
+   function's head could not REPORT A FIGURE. Built from the raw seed (this
+   file's SEED re-wraps function projects, which is not this subject), and
+   asserted at BOTH ENDS, or a build that allowed everything passes (§94.2). */
+(function () {
+  const raw = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+  const base = clone(raw);
+  const cap = base.group.capabilities[0];
+  const holder = cap.fn;
+  cap.format = "pillars"; delete cap.projects;
+  cap.items = [{ id: "cap-" + cap.id + "-P1", code: "", name: "Existing", sub: "", kind: "",
+                 theme: "", owner: "", tactics: [],
+                 measures: [{ id: "cap-" + cap.id + "-P1-M1", name: "M", target: "5",
+                              dir: ">=", compile: "Sum", actual: "" }] }];
+  let team = base.people.find(function (p) { return p.role === "smoteam"; });
+  if (!team) { team = base.people.find(function (p) { return p.key !== "smo" && p.role !== "super"; }); team.role = "smoteam"; }
+  const head = base.functions[holder].head;
+  const otherFn = Object.keys(base.functions).filter(function (k) {
+    return k !== holder && k !== "smo" && base.functions[k].head; })[0];
+  const outsider = base.functions[otherFn].head;
+  function run(who, mutate) {
+    const inc = clone(base); mutate(inc.group.capabilities[0]);
+    return A.authorize(base, inc, personOf(base, who));
+  }
+  const addP = function (c) { c.items.push({ id: "x2", code: "", name: "New", sub: "", kind: "",
+    theme: "", owner: "", measures: [], tactics: [] }); };
+  const fig = function (c) { c.items[0].measures[0].actual = "3"; };
+  let v = run("smo", addP);
+  check("§394: the Super user adds a pillar to a pillars capability", v.ok, v.refusals.join(" / "));
+  v = run(team.key, addP);
+  check("§394: ...and so does the SMO team (was refused: 'only the SMO')", v.ok, v.refusals.join(" / "));
+  v = run(team.key, function (c) { c.items[0].name = "Renamed"; });
+  check("§394: the SMO team renames a pillar there", v.ok, v.refusals.join(" / "));
+  v = run(head, fig);
+  check("§394: the holding function's head REPORTS a figure there", v.ok, v.refusals.join(" / "));
+  v = run(head, addP);
+  check("§394 REFUSED: the head may not author the plan (the office's)", !v.ok, "was ALLOWED");
+  v = run(outsider, fig);
+  check("§394 REFUSED: another function's head may not report on it", !v.ok, "was ALLOWED");
+  const kinds = function (who, mutate) {
+    const inc = clone(base); mutate(inc.group.capabilities[0]);
+    return (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
+  };
+  const k1 = kinds("smo", addP);
+  check("§394: a pillar added is classified as a plan change, not unknown",
+        k1.indexOf("unknown") < 0 && k1.length > 0, k1.join(",") || "(nothing)");
+  const k2 = kinds("smo", function (c) { c.format = "projects"; });
+  check("§394: switching how it is planned is Setup",
+        k2.indexOf("setup") > -1 && k2.indexOf("unknown") < 0, k2.join(","));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

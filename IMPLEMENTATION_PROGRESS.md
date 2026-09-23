@@ -8003,6 +8003,17 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §394 — a capability planned in pillars can be saved by the office (2026-09-23)
+
+**Built.** On a capability that plans in pillars (Data Management), the SMO
+team was refused when adding or changing a pillar, and the function head
+could not enter figures there. The server had never been told a capability
+can plan that way, so it treated every change inside it as something only the
+Super user may do. It now judges such a capability exactly as it judges a
+function that plans in pillars: the office writes the plan, the function's
+people report. Checked: seven new server checks, both ways (five of them fail
+on the old rule, the two refusals hold either way), the full server suite.
+
 ## §393 — clicking a pillar opens that pillar (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built, on the branch.** On a client with pillars added by hand, the side

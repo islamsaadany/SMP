@@ -15,7 +15,7 @@ var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
   entries: [
-    /* ONE WORD PER THING, IN TWO FORMS (§383). Islam set every description
+    /* ONE WORD PER THING, IN TWO FORMS (§392). Islam set every description
        and default here in chat, then chose two boxes over one: `group` is
        the word for ONE ("Pillar", a column heading, "Add a Project") and `bu`
        is the word for MANY ("Pillars", a page heading, the navigation). The
@@ -3808,7 +3808,7 @@ function addCompany(){
 function companyActive(ck){ return COMPANIES[ck] && COMPANIES[ck].active !== false; }
 function activeCompanyKeys(){ return COMPANY_KEYS.filter(companyActive); }
 function companyRetireBlockers(ck){
-  /* §382: a function it holds is in the way too — retiring the company would
+  /* §391: a function it holds is in the way too — retiring the company would
      otherwise drop that function back to the group without anybody deciding. */
   return unitsOfCompany(ck).map(function(k){ return UNITS[k].name; })
     .concat(FUNCTION_KEYS.filter(function(k){
@@ -9678,7 +9678,7 @@ function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
 function companyUnitKeys(ck){
   return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
 }
-/* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§382) ──
+/* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§391) ──
    Islam: *"I have a case for functions that belong to divisions and we will
    need to see the performance in division view"* — and, asked, a division IS
    a company here; a function belongs to the group or to exactly ONE; it

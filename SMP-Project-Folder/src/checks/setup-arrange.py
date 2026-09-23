@@ -83,7 +83,7 @@ def go(b, page_name, who=None):
     pg.evaluate("""() => { var g = document.querySelector('button[title="Setup"]');
                            if (g) g.click(); }""")
     pg.wait_for_timeout(450)
-    # §383: a page whose name is the client's word is found by its KEY ("@key"),
+    # §392: a page whose name is the client's word is found by its KEY ("@key"),
     # because the rail now says whatever Terminology says (Divisions, Sectors…).
     pg.evaluate("""(n) => { var b = n.charAt(0) === '@'
         ? document.querySelector('.setuprail [data-setupgo="' + n.slice(1) + '"]')

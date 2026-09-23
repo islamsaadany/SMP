@@ -135,7 +135,7 @@ MEASURE = r"""() => {
           if (rc.width > 0.5 && rc.height > 0.5) tops[Math.round(rc.top)] = 1;
         });
         const lines = Object.keys(tops).length;
-        /* TERMINOLOGY'S DESCRIPTION WRAPS ON PURPOSE (§383). Islam signed off
+        /* TERMINOLOGY'S DESCRIPTION WRAPS ON PURPOSE (§392). Islam signed off
            a drawing where it takes a second line, and the row is two lines
            tall anyway because the Default cell stacks the word for one over
            the word for many — so a description on two lines costs no height,

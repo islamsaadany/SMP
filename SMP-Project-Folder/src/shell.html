@@ -1336,7 +1336,7 @@
   function setupDefsAll(){
     return SUBS.manage.concat(SUBS.setup).map(function(d){
       if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
-      /* §383: and the three rows Terminology gained, the same way. */
+      /* §392: and the three rows Terminology gained, the same way. */
       if (d.k === "companies") return Object.assign({}, d, { label:L("division") });
       if (d.k === "fns") return Object.assign({}, d, { label:navWord("fnword", "Functions") });
       if (d.k === "caps") return Object.assign({}, d, { label:L("capability") });
@@ -4203,7 +4203,7 @@
     /* Labels */
     document.querySelectorAll("input.lbl").forEach(function(inp){
       inp.addEventListener("change", function(){
-        /* An emptied box goes back to the default (§383), which is what the
+        /* An emptied box goes back to the default (§392), which is what the
            Reset beside it does for both at once. */
         var e = LABELS.entries[+inp.dataset.lbl], d = labelDefault(e.key);
         var v = inp.value.trim();
@@ -8017,7 +8017,7 @@
           switchPlanFormat(this.dataset.fnformat, this.value, this);
         });
       });
-      /* §382: where a function belongs, and its weight there. The group is
+      /* §391: where a function belongs, and its weight there. The group is
          the absence of a company, and a blank weight is the absence of one
          (§50.6). Moving a function also drops its weight, because a share of
          one company is not a share of another. A total over the whole is

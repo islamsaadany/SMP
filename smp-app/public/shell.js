@@ -5532,7 +5532,7 @@ var LABELS = {
   scope: "tenant",              /* not per-cycle */
   managedBy: "SMO",
   entries: [
-    /* ONE WORD PER THING, IN TWO FORMS (§383). Islam set every description
+    /* ONE WORD PER THING, IN TWO FORMS (§392). Islam set every description
        and default here in chat, then chose two boxes over one: `group` is
        the word for ONE ("Pillar", a column heading, "Add a Project") and `bu`
        is the word for MANY ("Pillars", a page heading, the navigation). The
@@ -9325,7 +9325,7 @@ function addCompany(){
 function companyActive(ck){ return COMPANIES[ck] && COMPANIES[ck].active !== false; }
 function activeCompanyKeys(){ return COMPANY_KEYS.filter(companyActive); }
 function companyRetireBlockers(ck){
-  /* §382: a function it holds is in the way too — retiring the company would
+  /* §391: a function it holds is in the way too — retiring the company would
      otherwise drop that function back to the group without anybody deciding. */
   return unitsOfCompany(ck).map(function(k){ return UNITS[k].name; })
     .concat(FUNCTION_KEYS.filter(function(k){
@@ -15195,7 +15195,7 @@ function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
 function companyUnitKeys(ck){
   return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
 }
-/* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§382) ──
+/* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§391) ──
    Islam: *"I have a case for functions that belong to divisions and we will
    need to see the performance in division view"* — and, asked, a division IS
    a company here; a function belongs to the group or to exactly ONE; it
@@ -22073,7 +22073,7 @@ function drillCard(title, val, opts){
    the dot, and at 3.77:1 it was not readable as a figure. */
 function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
-/* `execHtml` (§382) replaces the execution box's body for a subject whose
+/* `execHtml` (§391) replaces the execution box's body for a subject whose
    execution is not "delivered against planned" — a function planning in
    projects or objectives reports a completion figure, and drawing it as
    "Planned 100%" would state a plan nobody made. Absent, nothing changes. */
@@ -23734,7 +23734,7 @@ function renderCompanyPerformance(coKey){
     ' holds nothing yet.</b> A unit belongs to a company on ' +
     '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
     '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
-  /* §382: a company that holds functions reads them into its figures, and the
+  /* §391: a company that holds functions reads them into its figures, and the
      page says so — its headline cards stop being "Business units — …" because
      they no longer are. With none, everything below is exactly what it was. */
   if (fks.length) return renderCompanyWithFunctions(ck, co, keys, fks);
@@ -23809,7 +23809,7 @@ function renderCompanyPerformance(coKey){
       TIP_PERF, viewToggle("units"));
 }
 
-/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§382) ───────────────────
+/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§391) ───────────────────
    Settled from a mockup drawn out of this very page: the same three cards,
    the units' section unchanged, and a Supporting functions section under it
    drawing each function with the card a unit wears. The drill says how every
@@ -30628,7 +30628,7 @@ function unitPerfPane(it, u, railed){
 function labelDefault(key){
   return LABEL_DEFAULTS.filter(function(x){ return x.key === key; })[0] || null;
 }
-/* ONE WORD PER THING (§383). The scope argument is kept so ninety call sites
+/* ONE WORD PER THING (§392). The scope argument is kept so ninety call sites
    need not change, and it no longer chooses anything: there is one word, used
    at the group and in every unit and function. L() is the word for MANY and
    L1() the word for ONE. An empty box, or the retired "—" (a row that used to
@@ -30645,7 +30645,7 @@ function labelWord(key, which){
 }
 function L(key, scope){ return esc(labelWord(key, "bu")); }
 function L1(key){ return esc(labelWord(key, "group")); }
-/* THE NAVIGATION'S SHORT WORDS (§383). The switch has always said "Units",
+/* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one
    segmented control. A client who types their own word sees it there too;
    a client on the default keeps the short word, so nothing moves for them.
@@ -31869,7 +31869,7 @@ var ROWDLG_SPECS = {
            could not be reached at all. In a dialog every field is drawn
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
-        /* §382: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
+        /* §391: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
            plans, because both answer "what is this function part of". */
         pdSect("Where it belongs") +
         pdField(L1("division"), fnCompanyCell(k, f, true)) +
@@ -34731,7 +34731,7 @@ function coPanels(ck, co, on){
          the refusal and reading it, not by reading the code. `fnPanels` joins
          sentences the same way and has the same latent fault; it is recorded
          rather than fixed here, because that one is not this change's. */
-      /* §382: a function it holds is in the list too, so the sentence names
+      /* §391: a function it holds is in the list too, so the sentence names
          both kinds rather than calling a function a business unit. */
       'Move its ' + (blockers.length === unitsOfCompany(ck).length
         ? plural(blockers.length, "business unit")
@@ -37731,7 +37731,7 @@ function capFormatCell(c, editable){
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
-/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§382) ────────────────
+/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────
    Two cells, read on the row and set in the dialog. The group is the ABSENCE
    of a company (§50.6), so a function nobody placed reads exactly as every
    function did before. The weight is offered only where there is a company
@@ -55881,7 +55881,7 @@ var SYNC = (function () {
   function setupDefsAll(){
     return SUBS.manage.concat(SUBS.setup).map(function(d){
       if (d.k === "units") return Object.assign({}, d, { label:L("unitword","bu") });
-      /* §383: and the three rows Terminology gained, the same way. */
+      /* §392: and the three rows Terminology gained, the same way. */
       if (d.k === "companies") return Object.assign({}, d, { label:L("division") });
       if (d.k === "fns") return Object.assign({}, d, { label:navWord("fnword", "Functions") });
       if (d.k === "caps") return Object.assign({}, d, { label:L("capability") });
@@ -58748,7 +58748,7 @@ var SYNC = (function () {
     /* Labels */
     document.querySelectorAll("input.lbl").forEach(function(inp){
       inp.addEventListener("change", function(){
-        /* An emptied box goes back to the default (§383), which is what the
+        /* An emptied box goes back to the default (§392), which is what the
            Reset beside it does for both at once. */
         var e = LABELS.entries[+inp.dataset.lbl], d = labelDefault(e.key);
         var v = inp.value.trim();
@@ -62562,7 +62562,7 @@ var SYNC = (function () {
           switchPlanFormat(this.dataset.fnformat, this.value, this);
         });
       });
-      /* §382: where a function belongs, and its weight there. The group is
+      /* §391: where a function belongs, and its weight there. The group is
          the absence of a company, and a blank weight is the absence of one
          (§50.6). Moving a function also drops its weight, because a share of
          one company is not a share of another. A total over the whole is

@@ -1,4 +1,4 @@
-"""ONE WORD PER THING, IN TWO FORMS (§383).
+"""ONE WORD PER THING, IN TWO FORMS (§392).
 
 Islam set every description and default in chat, then chose two boxes per row
 over one: a word for ONE ("Project", a column heading) and a word for MANY

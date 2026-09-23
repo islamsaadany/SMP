@@ -275,7 +275,7 @@
   .cfg input.lbl, .cfg input.lvl { width:100%; max-width:none; text-align:left;
                                     font-family:var(--sans); font-size:13px; }
   .cfg input.fwt, .cfg input.kow { width:64px; max-width:64px; }
-  /* TERMINOLOGY (§383): the description is prose and wraps, as the signed-off
+  /* TERMINOLOGY (§392): the description is prose and wraps, as the signed-off
      drawing shows — the one column on this table §88's one-line rule does not
      govern. The default is two short words stacked; Reset sits beside the
      word for many and only appears when a row differs from its default. */

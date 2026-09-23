@@ -251,7 +251,7 @@ with sync_playwright() as p:
     # Capabilities band's own name trip the vocabulary assertion below, which
     # is that band saying exactly what it holds.
     bt = board.get("fnBand") or ""
-    # §383: the band says the client's word for them (Terminology), asked of the page.
+    # §392: the band says the client's word for them (Terminology), asked of the page.
     ok("the band names the functions and their number", bool(board.get("fnWord")) and board["fnWord"] in bt, bt)
     ok("...and claims no single vocabulary over rows of two shapes (§35)",
        "capabilit" not in bt.lower() and "deliverable" not in bt.lower(), bt)

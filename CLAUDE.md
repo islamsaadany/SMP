@@ -8906,7 +8906,7 @@ python3 checks/submit-gate.py  # Submit is shut until the report is complete and
                                 # actually disabled, never a class) and one Reopen
                                 # unlocks either (§220, §221)
 python3 checks/division-functions.py # a supporting function belongs to a
-                                # division and counts in it (&sect;382): a company
+                                # division and counts in it (&sect;391): a company
                                 # with no functions agrees with &sect;68's formula
                                 # (asserted FIRST), the shares add to 100 with a set
                                 # weight as given, a blank the average of the set
@@ -10230,7 +10230,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-23 &mdash; **&sect;383: one word per thing, in two
+*Last Updated: 2026-09-23 &mdash; **&sect;392: one word per thing, in two
 forms.** Terminology is thirteen rows in Islam's order with his descriptions and
 defaults, aligned in chat first and then drawn. No group word and unit word any
 more: each row holds a word for ONE (`group`/`grp`) and a word for MANY
@@ -10243,7 +10243,7 @@ Division (the Companies layer), Supporting Function, Project. Migrations 045 /
 rewritten to ask the page's word. **On the branch, not merged; `main` is at
 &sect;389, so the merge owes a renumber.***
 
-*Earlier: 2026-09-22 &mdash; **&sect;382: a supporting function can
+*Earlier: 2026-09-22 &mdash; **&sect;391: a supporting function can
 belong to a division.** A division is the existing Company layer; a function's
 Setup row gains which company it belongs to (none = the group, stored as an
 absence) and its weight there (Islam's A: set as given, blank = average of the

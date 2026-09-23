@@ -54788,7 +54788,7 @@ none**; `built-in-step` all good and `generated-in-step` all clear.
 so nothing about how a save is judged moves, nothing stored moves and nothing
 is migrated.
 
-## §382 — A SUPPORTING FUNCTION CAN BELONG TO A DIVISION, AND COUNTS IN IT (2026-09-22)
+## §391 — A SUPPORTING FUNCTION CAN BELONG TO A DIVISION, AND COUNTS IN IT (2026-09-22)
 
 Islam: *"I have a case for functions that belong to divisions and we will need
 to see the performance in divisin view."* Four answers settled the model before
@@ -54850,10 +54850,10 @@ and waits for sign-off (rule 1c).
 ways from the SOURCES (§276) — performance ignoring functions **1 red**, the
 company unreachable **2 red**, execution ignoring functions **1 red**; 683/0
 authoriser, 140/0 differ, full `qa.py` ERRORS none, `built-in-step` all good.
-Renumbered §381 → §382 before commit, scoped to this change's own lines,
+Renumbered §381 → §391 before commit, scoped to this change's own lines,
 because main's builder work took §381 (§264.3).
 
-## §383 — ONE WORD PER THING, IN TWO FORMS (2026-09-23)
+## §392 — ONE WORD PER THING, IN TWO FORMS (2026-09-23)
 
 Islam, of Setup › Terminology: the content first, in chat and not in a mockup
 (*"content fix doesn't need a mockup it needs alignment here first"*), then
@@ -54886,7 +54886,7 @@ Division, Supporting Function, Project — the last three new, and Capability
 split out of the Pillars row, where the group's cross-cutting capabilities had
 been the Pillars row's "group word" (*Group capabilities*) though they are a
 different thing from a unit's pillars. **Division is the word for the Companies
-layer** (§23, §382), so Setup's Companies page, the unit and function dialogs'
+layer** (§23, §391), so Setup's Companies page, the unit and function dialogs'
 field and the tables' column follow it — by default *Divisions*.
 
 **MIGRATION 045 (016 ON THE NEW STACK) MOVES EVERY TENANT**, and the rules are
@@ -54936,9 +54936,9 @@ re-measured byte-identical to the first. Breaks now run in a subshell that
 stops on the first failure.
 
 This section is numbered on the branch; `main` has reached §389 while it was
-built, so the merge owes a renumber of §382 and §383 first (§264.3).
+built, so the merge owes a renumber of §391 and §392 first (§264.3).
 
-**§383.1 — THE WHOLE SUITE FOUND ONE MORE.** 186 checks run; the one real
+**§392.1 — THE WHOLE SUITE FOUND ONE MORE.** 186 checks run; the one real
 failure was `setup-rail.py`: the default *Supporting Functions* is cut off in
 the 196px Setup rail. The rail entry and its page heading now ask `navWord()`
 like the navigation switch — *Functions* while a client is on the default,

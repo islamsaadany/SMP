@@ -1,4 +1,4 @@
-/* ONE WORD PER THING, IN TWO FORMS (§383)
+/* ONE WORD PER THING, IN TWO FORMS (§392)
 
    Islam set every description and default in chat and chose two boxes per
    row: `grp` now holds the word for ONE and `bu` the word for MANY. There is

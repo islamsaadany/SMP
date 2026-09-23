@@ -210,7 +210,7 @@ function drillCard(title, val, opts){
    the dot, and at 3.77:1 it was not readable as a figure. */
 function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
-/* `execHtml` (§382) replaces the execution box's body for a subject whose
+/* `execHtml` (§391) replaces the execution box's body for a subject whose
    execution is not "delivered against planned" — a function planning in
    projects or objectives reports a completion figure, and drawing it as
    "Planned 100%" would state a plan nobody made. Absent, nothing changes. */
@@ -1871,7 +1871,7 @@ function renderCompanyPerformance(coKey){
     ' holds nothing yet.</b> A unit belongs to a company on ' +
     '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
     '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
-  /* §382: a company that holds functions reads them into its figures, and the
+  /* §391: a company that holds functions reads them into its figures, and the
      page says so — its headline cards stop being "Business units — …" because
      they no longer are. With none, everything below is exactly what it was. */
   if (fks.length) return renderCompanyWithFunctions(ck, co, keys, fks);
@@ -1946,7 +1946,7 @@ function renderCompanyPerformance(coKey){
       TIP_PERF, viewToggle("units"));
 }
 
-/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§382) ───────────────────
+/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§391) ───────────────────
    Settled from a mockup drawn out of this very page: the same three cards,
    the units' section unchanged, and a Supporting functions section under it
    drawing each function with the card a unit wears. The drill says how every

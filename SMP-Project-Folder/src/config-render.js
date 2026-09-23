@@ -13,7 +13,7 @@
 function labelDefault(key){
   return LABEL_DEFAULTS.filter(function(x){ return x.key === key; })[0] || null;
 }
-/* ONE WORD PER THING (§383). The scope argument is kept so ninety call sites
+/* ONE WORD PER THING (§392). The scope argument is kept so ninety call sites
    need not change, and it no longer chooses anything: there is one word, used
    at the group and in every unit and function. L() is the word for MANY and
    L1() the word for ONE. An empty box, or the retired "—" (a row that used to
@@ -30,7 +30,7 @@ function labelWord(key, which){
 }
 function L(key, scope){ return esc(labelWord(key, "bu")); }
 function L1(key){ return esc(labelWord(key, "group")); }
-/* THE NAVIGATION'S SHORT WORDS (§383). The switch has always said "Units",
+/* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one
    segmented control. A client who types their own word sees it there too;
    a client on the default keeps the short word, so nothing moves for them.
@@ -1254,7 +1254,7 @@ var ROWDLG_SPECS = {
            could not be reached at all. In a dialog every field is drawn
            whatever that menu says: a fault closed, not a feature added. */
         pdField("Plans in", planCell(k, f, true), true) +
-        /* §382: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
+        /* §391: WHERE IT BELONGS, AND HOW MUCH IT COUNTS THERE. Beside how it
            plans, because both answer "what is this function part of". */
         pdSect("Where it belongs") +
         pdField(L1("division"), fnCompanyCell(k, f, true)) +
@@ -4116,7 +4116,7 @@ function coPanels(ck, co, on){
          the refusal and reading it, not by reading the code. `fnPanels` joins
          sentences the same way and has the same latent fault; it is recorded
          rather than fixed here, because that one is not this change's. */
-      /* §382: a function it holds is in the list too, so the sentence names
+      /* §391: a function it holds is in the list too, so the sentence names
          both kinds rather than calling a function a business unit. */
       'Move its ' + (blockers.length === unitsOfCompany(ck).length
         ? plural(blockers.length, "business unit")
@@ -7116,7 +7116,7 @@ function capFormatCell(c, editable){
     '</select>' +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
-/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§382) ────────────────
+/* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────
    Two cells, read on the row and set in the dialog. The group is the ABSENCE
    of a company (§50.6), so a function nobody placed reads exactly as every
    function did before. The weight is offered only where there is a company

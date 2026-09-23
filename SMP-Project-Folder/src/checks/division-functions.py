@@ -1,4 +1,4 @@
-"""A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§382).
+"""A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§391).
 
 Islam: *"I have a case for functions that belong to divisions and we will need
 to see the performance in division view."* Settled in four answers and a
@@ -107,7 +107,7 @@ with sync_playwright() as p:
     print("\n§4  the company page draws its functions")
     js(pg, "current='co:distribution'; paint()"); pg.wait_for_timeout(300)
     heads = js(pg, "[...document.querySelectorAll('#panel h2')].map(function(h){return h.textContent.trim()})", [])
-    fw = js(pg, "labelWord('fnword','bu')", "?")  # §383: the client's word, asked of the page
+    fw = js(pg, "labelWord('fnword','bu')", "?")  # §392: the client's word, asked of the page
     ck("a Supporting functions section is drawn", any(h.startswith(fw) for h in heads), heads)
     names = js(pg, "[...document.querySelectorAll('#panel .gname')].map(function(n){return n.textContent.trim()})", [])
     ck("both functions have a card", "Finance" in names and "IT" in names, names)

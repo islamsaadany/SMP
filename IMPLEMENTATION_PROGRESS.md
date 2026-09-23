@@ -7137,7 +7137,7 @@ is the other piece's — the full sweep with **no errors**, the plan rules and
 the change list unmoved, and the two guards that the shipped file and the
 served copies are in step.
 
-## §382 — a supporting function can belong to a division (2026-09-22) · **on the branch, not merged**
+## §391 — a supporting function can belong to a division (2026-09-22) · **on the branch, not merged**
 
 You asked for functions that belong to a division, with the division's
 performance counting them. A division is the **Company** the platform already
@@ -7168,7 +7168,7 @@ copies in step.
 a default and the name you choose — is drawn and published for sign-off and
 not built yet.
 
-## §383 — Terminology: one word per thing, a word for one and a word for many (2026-09-23) · **on the branch, not merged**
+## §392 — Terminology: one word per thing, a word for one and a word for many (2026-09-23) · **on the branch, not merged**
 
 The Terminology page now has your thirteen rows, in your order, each with your
 description and default word. There is no separate group word and
@@ -7195,5 +7195,5 @@ Not changed: the workbook's column headings, the People register's Company
 column, and the set-up flow's words step (it still asks only the word for
 many).
 
-**Waiting on Islam**: the merge. `main` has moved to §389, so §382 and this
+**Waiting on Islam**: the merge. `main` has moved to §389, so §391 and this
 need renumbering first.

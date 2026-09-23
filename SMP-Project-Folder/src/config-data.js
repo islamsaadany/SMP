@@ -3514,6 +3514,15 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
 }
+/* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 062, 2026-09-23). The rule
+   is the shared module's (only an explicit true is on); this reads it off the
+   group and writes it, deleting the key for Off (§50.6) so a client that
+   was never asked and one switched on and off again are byte-identical. Off
+   HIDES and never forgets — every tree and every season stays stored (§44). */
+function driversOn(){ return SMPRules.driversOn(GROUP); }
+function setDriversOn(on){
+  if (on) GROUP[SMPRules.DRIVERS_ON] = true; else delete GROUP[SMPRules.DRIVERS_ON];
+}
 function toggleFocus(id){
   if (CYCLE.locked) return false;
   if (CYCLE.focus[id]) delete CYCLE.focus[id]; else CYCLE.focus[id] = true;
@@ -8787,6 +8796,7 @@ function clearedGraph(g){
   /* And spec 062's seasons, for the same reason: Ramadan's dates are the
      demo's, and a client's phasing is the client's to set on Setup › Seasons. */
   delete G.seasons;
+  delete G.driversOn;
 
   /* ── Capabilities (§326: NONE, where the shells used to stay) ─────────
      This emptied the eight boxes and kept their names, which was right while

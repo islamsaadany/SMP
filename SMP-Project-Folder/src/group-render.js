@@ -5297,6 +5297,10 @@ function drvHasTree(u){
   var ch = SMPRules.driverChannel(u);
   return !!(ch && (ch.subs || []).length);
 }
+/* WHAT PERFORMANCE SHOWS: a tree, AND the client having the switch on. The
+   one gate both the section and the score card ask, so Off cannot leave one
+   of them standing. */
+function drvShown(u){ return driversOn() && drvHasTree(u); }
 function drvReadingFigures(u){
   var ch = SMPRules.driverChannel(u);
   if (!ch || !(ch.subs || []).length) return null;
@@ -5311,6 +5315,7 @@ function drvReadingFigures(u){
    it already are — a card of its own design would read as a different kind of
    fact (§53.5). */
 function drvScoreCard(u){
+  if (!drvShown(u)) return "";
   var r = drvReadingFigures(u);
   if (!r) return "";
   var s = r.reported ? SMPRules.driverScore(r.f) : null;

@@ -4386,6 +4386,11 @@ console.log("\n43 · revenue drivers (spec 062)");
   };
   base.units[UNIT][R.DRIVERS] = clone(TREE);
   base.group[R.SEASONS] = [{ id: "ramadan", name: "Ramadan", start: "2026-02-17", end: "2026-03-19" }];
+  /* The base is OFF, stated rather than inherited: the demo seed ships the
+     switch ON (it is the worked example of the feature), so a base taken
+     from it as-is makes "switching it on" a no-op that classifies nothing
+     and reads as a refusal gap (§94.5 — found the day the seed gained it). */
+  delete base.group[R.DRIVERS_ON];
 
   const kinds = function (f) {
     const inc = clone(base); f(inc);
@@ -4483,8 +4488,10 @@ console.log("\n43 · revenue drivers (spec 062)");
   const headSea = verdict(headKey, function (s) { s.group[R.SEASONS][0].end = "2026-03-20"; });
   check("§062 REFUSED: ...and a unit head does not",
         !headSea.ok, "was ALLOWED");
-  check("§062: ...and the refusal names the Seasons page (§16.7)",
-        !headSea.ok && (headSea.refusals || []).join(" ").indexOf("Seasons") > -1,
+  /* The page is Setup › Revenue drivers since the switch joined it (the
+     seasons table is its second half), so the refusal names THAT page. */
+  check("§062: ...and the refusal names the Revenue drivers page (§16.7)",
+        !headSea.ok && (headSea.refusals || []).join(" ").indexOf("Revenue drivers") > -1,
         (headSea.refusals || []).join(" / "));
 
   /* — THE CONNECTION IS A PLAN FIELD AND NEEDED NO EDIT, asserted rather
@@ -4525,6 +4532,31 @@ console.log("\n43 · revenue drivers (spec 062)");
   check("§062: ...and the office may do both",
         verdict("smo", function (s) {
           s.group[R.SEASONS].push({ id: "s9", name: "Peak" });
+
+  /* THE ON/OFF SWITCH (2026-09-23). Both ends (§94.2), and asserted by
+     setting it, clearing it and deleting it, because Off deletes the key
+     (§50.6) and a build that only noticed true-to-false would let a unit
+     head switch the whole thing off by removing it. */
+  const onKinds = kinds(function (s) { s.group[R.DRIVERS_ON] = true; });
+  check("§062: switching revenue drivers on classifies as seasons",
+        onKinds.indexOf("seasons") > -1 && onKinds.indexOf("unknown") < 0,
+        onKinds.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  /* OFF is measured FROM a stored On, or deleting an absent key is a no-op
+     that passes on every build (§94.5, this file's own recorded trap). */
+  const onBase = clone(base); onBase.group[R.DRIVERS_ON] = true;
+  const offInc = clone(onBase); delete offInc.group[R.DRIVERS_ON];
+  const offKinds = (A.collect(onBase, offInc, W(onBase)) || []).map(function (c) { return c.kind; });
+  check("§062: and switching it off (the key deleted) is the same change",
+        offKinds.indexOf("seasons") > -1 && offKinds.indexOf("unknown") < 0,
+        offKinds.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  check("§062 REFUSED: a unit head may not switch revenue drivers on",
+        !verdict(headKey, function (s) { s.group[R.DRIVERS_ON] = true; }).ok, "was ALLOWED");
+  check("§062: ...and the office may",
+        verdict("smo", function (s) { s.group[R.DRIVERS_ON] = true; }).ok,
+        (verdict("smo", function (s) { s.group[R.DRIVERS_ON] = true; }).refusals || []).join(" / "));
+  check("§062: only an explicit true is on, and absent is OFF",
+        R.driversOn({ driversOn: true }) === true && R.driversOn({}) === false &&
+        R.driversOn({ driversOn: "true" }) === false && R.driversOn(null) === false);
         }).ok &&
         verdict("smo", function (s) { delete s.group[R.SEASONS]; }).ok,
         (verdict("smo", function (s) { delete s.group[R.SEASONS]; }).refusals || []).join(" / "));

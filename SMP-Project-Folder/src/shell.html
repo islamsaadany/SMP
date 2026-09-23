@@ -409,7 +409,9 @@
              rule that already refuses the plan (§42). */
           return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
                   { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
-                  { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers },
+                  { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
+                    /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
+                    when: function(){ return driversOn(); } },
                   { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
@@ -442,7 +444,7 @@
                       return REPORTING === x.ukey ? renderReport(x) : renderUnitPerformance(x);
                     } },
                   { k:"perfdrv", ac:"u_perf", label:"Revenue drivers",
-                    when: function(){ return drvHasTree(u); },
+                    when: function(){ return drvShown(u); },
                     render: renderUnitRevenue }];
         } },
       /* ── REPORTING IS A TAB (§222, revisiting §63) ────────────────────
@@ -614,7 +616,7 @@
          own ruling applied forward rather than a placement chosen by feel:
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
-      { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Seasons", glyph:"☾", find:"season seasons ramadan peak window dates base year months revenue drivers tree", render:renderSeasons },
+      { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
@@ -5777,6 +5779,13 @@
        §42): `seasonsOf` hands back a shared frozen empty, so the array is
        created here on the first Add and the group carries no `seasons` key
        until a client has one. */
+    /* Revenue drivers on or off (2026-09-23) — focus's own control and
+       handler shape (§102, §135.5); `this`, never a closure. */
+    document.querySelectorAll("[data-drvswitch]").forEach(function(b){
+      b.addEventListener("click", function(){
+        setDriversOn(this.dataset.drvswitch === "1"); paint();
+      });
+    });
     var as = document.getElementById("addseason");
     if (as) as.addEventListener("click", function(){
       if (!Array.isArray(GROUP[SMPRules.SEASONS])) GROUP[SMPRules.SEASONS] = [];

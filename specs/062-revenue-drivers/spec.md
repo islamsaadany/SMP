@@ -487,6 +487,47 @@ change that is swept but unclassified is INVISIBLE and therefore allowed to
 everybody, so a unit head could otherwise empty the client's seasons and take
 every base year to twelve months.
 
+### 6.7 The switch: a client uses revenue drivers or does not
+
+Islam, after the three screens were built: *"this module it should have an on
+and off button to show or not"* &mdash; and, asked two questions, **the office
+sets it, in Setup**, and **an existing client starts Off**.
+
+**Built 2026-09-23.** The Seasons page becomes **Setup &rsaquo; Revenue
+drivers**, and an On | Off pair sits on its pinned header line (the Focus
+page's own segmented control, §135.5). Off takes away the three things a
+person sees: the unit's **Drivers** section, the **Revenue drivers** half of
+Performance, and the **Revenue performance** card &mdash; so a client with it
+off sees exactly the page it had before this module existed.
+
+**Four rules, each with a reason:**
+
+* **Stored as an absence** (`GROUP.driversOn`, §50.6): Off deletes the key,
+  so an untouched client and one switched off and on again are byte-identical,
+  and **only an explicit `true` turns it on** (§104), which is what makes
+  every existing client start Off with no migration.
+* **Off hides and never forgets** (§44): every tree, every season and every
+  connection stays stored, and the page says how many units' trees are kept.
+* **The page carrying the switch stays reachable while it is off** (§61), or
+  the only way back on is to turn it on first.
+* **The server classifies it as `seasons`** and names it in the group's swept
+  list &mdash; both edits, because swept-but-unclassified is invisible and
+  therefore allowed to everybody (§259.2): falsified separately, **3 red** and
+  **2 red**. The office may set it and a unit head may not.
+
+**The demo carries it ON** (it is the worked example of the feature) and
+migration 004 and `clearedGraph()` both strip it, so a client never inherits
+the demo's answer. `scripts/test-authorize.js` &sect;43's base is therefore
+set OFF explicitly &mdash; taken from the seed as-is, "switching it on" was a
+no-op that classified nothing (§94.5, found the day the seed gained the key).
+
+**Checked:** `checks/drivers-switch.py` presses the real control and asserts
+both ends on all three surfaces &mdash; present when on, absent when off,
+back as they were when on again &mdash; with the key deleted on Off and the
+trees still stored. Red two ways from the SOURCES: the gate ignored (**2 red**,
+the section and the card still drawn) and Off written as `false` rather than
+deleted (**1 red**).
+
 ### 6.6 What the mockup does not draw
 
 **The roll-up on the group and a company.** §4.1 says a channel is a unit and

@@ -3604,6 +3604,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
   var DRIVERS = "drivers";          /* on a unit's extra   */
   var SEASONS = "seasons";          /* on the group's extra */
+  /* WHETHER THE CLIENT USES REVENUE DRIVERS AT ALL (Islam, 2026-09-23: *"this
+     module it should have an on and off button"*; the office's, in Setup,
+     OFF for every client until somebody turns it on). ONLY AN EXPLICIT `true`
+     TURNS IT ON, which is the assistant's rule (§104) and not focus's
+     (§102): focus existed before its switch did, so absent had to mean on;
+     this did not, so absent means OFF and a stale value cannot switch it on
+     by accident. Stored as an ABSENCE (§50.6) — Off deletes the key. Off
+     HIDES and never forgets: every tree and every season is kept (§44). */
+  var DRIVERS_ON = "driversOn";
   var DRIVER_LINK = "driver";       /* on a key objective or a measure */
   var DRIVER_KINDS = ["vol", "val"];
   var PERIOD_TYPES = ["base", "season", "increment"];
@@ -3617,6 +3626,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      it looked for puts a phantom change into every save and the first
      non-office save is refused for ever — `branding()` cost this project
      exactly that. Both hand back a shared frozen empty. */
+  function driversOn(group) { return !!group && group[DRIVERS_ON] === true; }
   function seasonsOf(group) {
     var a = group && group[SEASONS];
     return Array.isArray(a) ? a : NO_SEASONS;
@@ -4138,6 +4148,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER,
     /* Revenue drivers (spec 062) */
     DRIVERS: DRIVERS, SEASONS: SEASONS, DRIVER_LINK: DRIVER_LINK,
+    DRIVERS_ON: DRIVERS_ON, driversOn: driversOn,
     DRIVER_KINDS: DRIVER_KINDS, PERIOD_TYPES: PERIOD_TYPES,
     CHANNEL_MODES: CHANNEL_MODES, MONTH_DAYS: MONTH_DAYS,
     seasonsOf: seasonsOf, seasonMonths: seasonMonths, seasonById: seasonById,
@@ -4809,6 +4820,11 @@ var GROUP = {
      THE DEMO'S, NOT A TENANT'S: migration 004 strips `seasons` from
      org.extra after the seed, exactly as it strips `sets` and `mainbus`. A
      client deploying SMP must not inherit Raya's Ramadan (§21, §45.3). */
+  /* ON IN THE DEMO, AND ONLY THERE: every client starts with revenue drivers
+     OFF (Islam, 2026-09-23), and the worked example is where the tree is
+     shown, so it carries the switch on. Scrubbed with the seasons below
+     (migration 004, clearedGraph) so no client inherits it switched on. */
+  driversOn: true,
   seasons: [
     { id:"ramadan", name:"Ramadan season", start:"2026-02-17", end:"2026-03-19" }
   ],
@@ -9585,6 +9601,15 @@ function isFocus(id){ return focusOn() && focusMarked(id); }
    byte-identical — otherwise every save afterwards carries a phantom change. */
 function setFocusOn(on){
   if (on) delete GROUP.focusOff; else GROUP.focusOff = true;
+}
+/* REVENUE DRIVERS, ON OR OFF FOR THE CLIENT (spec 062, 2026-09-23). The rule
+   is the shared module's (only an explicit true is on); this reads it off the
+   group and writes it, deleting the key for Off (§50.6) so a client that
+   was never asked and one switched on and off again are byte-identical. Off
+   HIDES and never forgets — every tree and every season stays stored (§44). */
+function driversOn(){ return SMPRules.driversOn(GROUP); }
+function setDriversOn(on){
+  if (on) GROUP[SMPRules.DRIVERS_ON] = true; else delete GROUP[SMPRules.DRIVERS_ON];
 }
 function toggleFocus(id){
   if (CYCLE.locked) return false;
@@ -14859,6 +14884,7 @@ function clearedGraph(g){
   /* And spec 062's seasons, for the same reason: Ramadan's dates are the
      demo's, and a client's phasing is the client's to set on Setup › Seasons. */
   delete G.seasons;
+  delete G.driversOn;
 
   /* ── Capabilities (§326: NONE, where the shells used to stay) ─────────
      This emptied the eight boxes and kept their names, which was right while
@@ -27505,6 +27531,10 @@ function drvHasTree(u){
   var ch = SMPRules.driverChannel(u);
   return !!(ch && (ch.subs || []).length);
 }
+/* WHAT PERFORMANCE SHOWS: a tree, AND the client having the switch on. The
+   one gate both the section and the score card ask, so Off cannot leave one
+   of them standing. */
+function drvShown(u){ return driversOn() && drvHasTree(u); }
 function drvReadingFigures(u){
   var ch = SMPRules.driverChannel(u);
   if (!ch || !(ch.subs || []).length) return null;
@@ -27519,6 +27549,7 @@ function drvReadingFigures(u){
    it already are — a card of its own design would read as a different kind of
    fact (§53.5). */
 function drvScoreCard(u){
+  if (!drvShown(u)) return "";
   var r = drvReadingFigures(u);
   if (!r) return "";
   var s = r.reported ? SMPRules.driverScore(r.f) : null;
@@ -36465,10 +36496,39 @@ function seasonLenCell(s){
   return '<span class="mono">' + days + ' day' + (days === 1 ? '' : 's') + '</span>' +
     '<span class="why">' + m.toFixed(2) + ' months</span>';
 }
+/* THE MODULE'S OWN SWITCH, ON THE PINNED LINE (Islam, 2026-09-23: *"this
+   module it should have an on and off button to show or not"*). The page is
+   the module's now — *Revenue drivers*, with the seasons as its table — and
+   the switch is focus's own segmented pair (§135.5), because you press the
+   state you want. The KEY stays `seasons` (§30.2): a remembered page and a
+   folded group keep working.
+
+   THE PAGE STAYS REACHABLE WHILE IT IS OFF (§61) and so do the seasons, so
+   the office can set them up before anybody sees a tree. Off says what it
+   keeps, because a switch that looked like it had deleted the trees would be
+   switched back on in a panic. */
+function driversSwitch(mayEdit){
+  var on = driversOn();
+  if (mayEdit) PAGE_ACTS +=
+    '<span class="segsw" role="group" aria-label="Revenue drivers on or off">' +
+      '<button type="button" class="seg' + (on ? ' on' : '') + '" data-drvswitch="1" ' +
+        'aria-pressed="' + on + '">On</button>' +
+      '<button type="button" class="seg' + (on ? '' : ' on') + '" data-drvswitch="0" ' +
+        'aria-pressed="' + (!on) + '">Off</button>' +
+    '</span>';
+  if (on) return '';
+  var kept = seasonsUnits().filter(drvHasTree).length;
+  return '<div class="note"><b>Revenue drivers are off for this client.</b> No unit shows a ' +
+    'Drivers tab and Performance shows no revenue reading.' +
+    (kept === 1 ? ' One unit\u2019s tree is kept and comes back as it was when this is turned on.' :
+     kept > 1   ? ' ' + kept + ' units\u2019 trees are kept and come back as they were when this is turned on.' :
+     '') +
+    (mayEdit ? '' : ' The Strategy Office can turn them on.') + '</div>';
+}
 function renderSeasons(){
   var mayEdit = grant("c_bands") === "edit";
   var list = SMPRules.seasonsOf(GROUP);
-  return cfgHead("Seasons", [], null, mayEdit) +
+  return cfgHead("Revenue drivers", [], null, mayEdit) + driversSwitch(mayEdit) +
     section("", "Seasons", null,
       (list.length
         ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
@@ -55602,7 +55662,9 @@ var SYNC = (function () {
              rule that already refuses the plan (§42). */
           return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
                   { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
-                  { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers },
+                  { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
+                    /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
+                    when: function(){ return driversOn(); } },
                   { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
@@ -55635,7 +55697,7 @@ var SYNC = (function () {
                       return REPORTING === x.ukey ? renderReport(x) : renderUnitPerformance(x);
                     } },
                   { k:"perfdrv", ac:"u_perf", label:"Revenue drivers",
-                    when: function(){ return drvHasTree(u); },
+                    when: function(){ return drvShown(u); },
                     render: renderUnitRevenue }];
         } },
       /* ── REPORTING IS A TAB (§222, revisiting §63) ────────────────────
@@ -55807,7 +55869,7 @@ var SYNC = (function () {
          own ruling applied forward rather than a placement chosen by feel:
          that group's note says **what you do while a cycle is open**, and
          naming Ramadan is what you do when one is not. One word moves it. */
-      { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Seasons", glyph:"☾", find:"season seasons ramadan peak window dates base year months revenue drivers tree", render:renderSeasons },
+      { k:"seasons", ac:"c_bands", grp:"meas", mod:"strategy", label:"Revenue drivers", glyph:"☾", find:"revenue drivers tree on off switch season seasons ramadan peak window dates base year months", render:renderSeasons },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
@@ -60970,6 +61032,13 @@ var SYNC = (function () {
        §42): `seasonsOf` hands back a shared frozen empty, so the array is
        created here on the first Add and the group carries no `seasons` key
        until a client has one. */
+    /* Revenue drivers on or off (2026-09-23) — focus's own control and
+       handler shape (§102, §135.5); `this`, never a closure. */
+    document.querySelectorAll("[data-drvswitch]").forEach(function(b){
+      b.addEventListener("click", function(){
+        setDriversOn(this.dataset.drvswitch === "1"); paint();
+      });
+    });
     var as = document.getElementById("addseason");
     if (as) as.addEventListener("click", function(){
       if (!Array.isArray(GROUP[SMPRules.SEASONS])) GROUP[SMPRules.SEASONS] = [];

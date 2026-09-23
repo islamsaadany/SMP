@@ -5074,10 +5074,39 @@ function seasonLenCell(s){
   return '<span class="mono">' + days + ' day' + (days === 1 ? '' : 's') + '</span>' +
     '<span class="why">' + m.toFixed(2) + ' months</span>';
 }
+/* THE MODULE'S OWN SWITCH, ON THE PINNED LINE (Islam, 2026-09-23: *"this
+   module it should have an on and off button to show or not"*). The page is
+   the module's now — *Revenue drivers*, with the seasons as its table — and
+   the switch is focus's own segmented pair (§135.5), because you press the
+   state you want. The KEY stays `seasons` (§30.2): a remembered page and a
+   folded group keep working.
+
+   THE PAGE STAYS REACHABLE WHILE IT IS OFF (§61) and so do the seasons, so
+   the office can set them up before anybody sees a tree. Off says what it
+   keeps, because a switch that looked like it had deleted the trees would be
+   switched back on in a panic. */
+function driversSwitch(mayEdit){
+  var on = driversOn();
+  if (mayEdit) PAGE_ACTS +=
+    '<span class="segsw" role="group" aria-label="Revenue drivers on or off">' +
+      '<button type="button" class="seg' + (on ? ' on' : '') + '" data-drvswitch="1" ' +
+        'aria-pressed="' + on + '">On</button>' +
+      '<button type="button" class="seg' + (on ? '' : ' on') + '" data-drvswitch="0" ' +
+        'aria-pressed="' + (!on) + '">Off</button>' +
+    '</span>';
+  if (on) return '';
+  var kept = seasonsUnits().filter(drvHasTree).length;
+  return '<div class="note"><b>Revenue drivers are off for this client.</b> No unit shows a ' +
+    'Drivers tab and Performance shows no revenue reading.' +
+    (kept === 1 ? ' One unit\u2019s tree is kept and comes back as it was when this is turned on.' :
+     kept > 1   ? ' ' + kept + ' units\u2019 trees are kept and come back as they were when this is turned on.' :
+     '') +
+    (mayEdit ? '' : ' The Strategy Office can turn them on.') + '</div>';
+}
 function renderSeasons(){
   var mayEdit = grant("c_bands") === "edit";
   var list = SMPRules.seasonsOf(GROUP);
-  return cfgHead("Seasons", [], null, mayEdit) +
+  return cfgHead("Revenue drivers", [], null, mayEdit) + driversSwitch(mayEdit) +
     section("", "Seasons", null,
       (list.length
         ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +

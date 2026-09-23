@@ -113,6 +113,7 @@ const PLAN_TO         = R.PLAN_TO;
    NOTHING at all (§191), and §234 is what that costs. */
 const DRIVERS         = R.DRIVERS;
 const SEASONS         = R.SEASONS;
+const DRIVERS_ON      = R.DRIVERS_ON;
 const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
 /* `pend` is §145's pending-fill marks — known here so a mark the gap pass
    did not accept falls to the PLAN comparison (office-only) rather than to
@@ -539,11 +540,18 @@ function collect(stored, incoming, w) {
      canonically compared for the tree's reason above. */
   if (!sameCanon(sg[SEASONS], ig[SEASONS]))
     add("seasons", null, "the client's seasons");
+  /* THE SWITCH THAT SAYS WHETHER ANY OF IT IS SHOWN, the same page's and the
+     same grant's — a unit head who could flip it would hide the tree the
+     office built from the whole client. The two edits go together (§259.2):
+     classified here AND named in `gExtra` below, or it is swept unseen and
+     therefore allowed to everybody. */
+  if (!same(sg[DRIVERS_ON], ig[DRIVERS_ON]))
+    add("seasons", null, "whether revenue drivers are used at all");
 
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, PLAN_FROM, PLAN_TO,
-                                   SEASONS]);
+                                   SEASONS, DRIVERS_ON]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -1669,7 +1677,7 @@ function authorize(stored, incoming, person) {
       case "seasons":
         if (!edits(w, person, "a_setup", "group"))
           no("The seasons are set by the SMO — " + ch.what +
-             " is set in Setup \u203a Seasons.");
+             " is set in Setup \u203a Revenue drivers.");
         return;
 
       /* REORDERING IS ITS OWN GRANT AGAIN (§101). Asked through the shared

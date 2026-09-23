@@ -3602,6 +3602,15 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
 
   var DRIVERS = "drivers";          /* on a unit's extra   */
   var SEASONS = "seasons";          /* on the group's extra */
+  /* WHETHER THE CLIENT USES REVENUE DRIVERS AT ALL (Islam, 2026-09-23: *"this
+     module it should have an on and off button"*; the office's, in Setup,
+     OFF for every client until somebody turns it on). ONLY AN EXPLICIT `true`
+     TURNS IT ON, which is the assistant's rule (§104) and not focus's
+     (§102): focus existed before its switch did, so absent had to mean on;
+     this did not, so absent means OFF and a stale value cannot switch it on
+     by accident. Stored as an ABSENCE (§50.6) — Off deletes the key. Off
+     HIDES and never forgets: every tree and every season is kept (§44). */
+  var DRIVERS_ON = "driversOn";
   var DRIVER_LINK = "driver";       /* on a key objective or a measure */
   var DRIVER_KINDS = ["vol", "val"];
   var PERIOD_TYPES = ["base", "season", "increment"];
@@ -3615,6 +3624,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      it looked for puts a phantom change into every save and the first
      non-office save is refused for ever — `branding()` cost this project
      exactly that. Both hand back a shared frozen empty. */
+  function driversOn(group) { return !!group && group[DRIVERS_ON] === true; }
   function seasonsOf(group) {
     var a = group && group[SEASONS];
     return Array.isArray(a) ? a : NO_SEASONS;
@@ -4136,6 +4146,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER,
     /* Revenue drivers (spec 062) */
     DRIVERS: DRIVERS, SEASONS: SEASONS, DRIVER_LINK: DRIVER_LINK,
+    DRIVERS_ON: DRIVERS_ON, driversOn: driversOn,
     DRIVER_KINDS: DRIVER_KINDS, PERIOD_TYPES: PERIOD_TYPES,
     CHANNEL_MODES: CHANNEL_MODES, MONTH_DAYS: MONTH_DAYS,
     seasonsOf: seasonsOf, seasonMonths: seasonMonths, seasonById: seasonById,

@@ -18,6 +18,11 @@ var GROUP = {
      THE DEMO'S, NOT A TENANT'S: migration 004 strips `seasons` from
      org.extra after the seed, exactly as it strips `sets` and `mainbus`. A
      client deploying SMP must not inherit Raya's Ramadan (§21, §45.3). */
+  /* ON IN THE DEMO, AND ONLY THERE: every client starts with revenue drivers
+     OFF (Islam, 2026-09-23), and the worked example is where the tree is
+     shown, so it carries the switch on. Scrubbed with the seasons below
+     (migration 004, clearedGraph) so no client inherits it switched on. */
+  driversOn: true,
   seasons: [
     { id:"ramadan", name:"Ramadan season", start:"2026-02-17", end:"2026-03-19" }
   ],

@@ -85,7 +85,7 @@ UPDATE org SET horizon = '';
 -- per tenant, so editing it here reaches every future deployment and no
 -- existing one — which is correct, because an existing tenant is never
 -- re-seeded and so never receives them.
-UPDATE org SET extra = extra - 'sets' - 'claims' - 'naming' - 'mainbus' - 'seasons';
+UPDATE org SET extra = extra - 'sets' - 'claims' - 'naming' - 'mainbus' - 'seasons' - 'driversOn';
 
 -- ── Capability content (the names and their owning function stay) ───────
 DELETE FROM projects;                -- cascades deliverables, outcomes, milestones

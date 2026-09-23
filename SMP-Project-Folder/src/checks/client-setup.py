@@ -253,6 +253,10 @@ with sync_playwright() as p:
     # §395: the sentence names the thing in the CLIENT's word, so it is asked
     # as an agreement with the label and never as the platform's literal.
     one = pg.evaluate("labelWord('unitword','group')")
+    # §398: inside the flow's sentences the word is lowered, every part of it
+    # whose rest is already lower case (so an acronym is left alone) — the
+    # same rule, worked out here rather than read back from the product.
+    one = " ".join(x if x[1:] != x[1:].lower() else x[:1].lower() + x[1:] for x in one.split())
     ck("Next with an empty row is refused in words", ("Name a " + one) in s and "remove the empty row" in s, s[:120])
     ck("…and nothing is written", at(pg) == "units" and ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1)
     ck("taking the empty row off lets Next through", press(pg, ".csetup .wzrow >> nth=-1 >> .wzx", 300) and rows(pg) == r2

@@ -8017,6 +8017,37 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §398 — the set-up flow's sentences use lower case (2026-09-23) · **merged to `main` 2026-09-23**
+
+**Built; merged to `main` 2026-09-23 on Islam's word.** The set-up questions now read "Are the
+business units grouped into divisions?" rather than capitalising the words
+mid-sentence. Short forms like "BUs" are left as typed, and headings keep
+their capitals. Five places on the Divisions step still said "company"; they
+now use the client's word too.
+
+
+## §397 — every release offers the reload (2026-09-23) · **merged to `main` 2026-09-23**
+
+**Built; merged to `main` 2026-09-23 on Islam's word.** The platform already has a banner that
+says "A newer version of the platform is ready" with a button to reload and keep
+your work, but it had stopped appearing: it only shows when a small background
+file changes, and that file had been identical in every release since the
+rebuild. Each release now stamps that file with a fingerprint of the pages it
+serves, so any release that changes what people see brings the banner up in
+every open tab. A check fails if the fingerprint is missing or out of date, and
+the merge rules now require confirming it changed on the live site.
+
+
+## §396 — the set-up flow's questions use the client's words (2026-09-23) · **merged to `main` 2026-09-23**
+
+**Built; merged to `main` 2026-09-23 on Islam's word.** On Client set-up, the Divisions step's
+question still said "Are the units grouped into companies?" under a heading
+reading "Divisions". The question and both answers now use the client's own
+words, and so do the questions on the business units, supporting functions and
+capabilities steps. The "Yes" answer also says a division can hold supporting
+functions, which has been true since §391. Nothing stored changes.
+
+
 ## §395 — the client's words on every screen (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built; merged to `main` 2026-09-23 on Islam's word.** After §392 the terminology page held two

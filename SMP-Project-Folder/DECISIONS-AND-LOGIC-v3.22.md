@@ -57101,6 +57101,93 @@ words — *"yes go ahead with 1 and 2"*.
   built file's bytes changed, so `sw.js` is bumped (§91) and the served copies
   regenerated (§329).
 
+## §396 — the set-up flow's questions speak the client's words (2026-09-23)
+
+**Merged to `main` 2026-09-23 on Islam's word**, as a fast-forward — `main` had not moved since §395. Shell `v5.34-setup-questions-words`, a name the history never held.
+
+Islam, of Client set-up's Divisions step, with a screenshot: *"under the
+divisions its asking if the units grouped under companies."* The step's
+heading had taken the client's word at §395 and the **question and both
+answers under it were literals**, so one screen gave one thing two names.
+The step's other questions had the same problem ("What are the business
+units?", "What supporting functions are there?", "Are there capabilities
+beside the units?"). Aligned in chat first (1c: content before any mockup),
+and Islam chose the recommendation: *"go with your recommendation"*.
+
+- **Every question on the four shape steps takes the client's word**, as a
+  getter so a renamed term is read at draw time, through the flow's own `W()`
+  (the console's copy, which has no label registry, keeps the platform's
+  word). Words taken as typed, never inflected (§107.8, §160.6).
+- **The Divisions answers name functions**: since §391 a division can hold
+  supporting functions, so the Yes line says so. The question itself stays
+  about business units only (his choice), so it stays short.
+- Screen only: nothing stored, nothing migrated, no server rule.
+  `client-setup.py` all passed; a probe with the word renamed to *Sectors*
+  reads "Are the Business units grouped into Sectors?" and both answers
+  follow it, with no page errors.
+
+## §397 — every release offers the reload (2026-09-23)
+
+**Merged to `main` 2026-09-23 on Islam's word**, as a fast-forward — `main` had not moved since §396. The live `/sw.js` carried no stamp before the push.
+
+Islam, after §396's merge note told people to reload an open tab: *"don't we
+have a rule that makes the user have a button to refresh … at the top with the
+updates that require refresh? … why don't we have it as a rule of such
+updates?"* — then *"yes build it"*.
+
+- **THE BANNER EXISTS AND COULD NOT FIRE.** §258's *"A newer version of the
+  platform is ready"* (with **Reload & keep mine**, which saves first) hears of
+  a release only through the browser seeing `/sw.js` change. The served worker
+  is generated from the frozen one with the caching half — where `SHELL` lives —
+  dropped (§316.10), so it was byte-identical in every release from spec 054
+  on. §365, §367 and §379.4 each recorded that as residue and left it; no rule
+  asserted the banner could fire, so nothing noticed when it stopped.
+- **THE STAMP IS CONTENT, NEVER THE COMMIT.** `scripts/release-stamp.mjs`
+  hashes every file a tab holds — `public/` except the worker (or it would
+  depend on itself), `shell/`, and `lib/shell.ts`, which writes the document
+  around them — and `build-sw.mjs` writes it into the worker's first lines. A
+  commit id would change on every commit and `generated-in-step` would call
+  each one stale; a content hash comes out the same from the same sources.
+  **Server code a tab does not hold is left out on purpose**: a reload offered
+  for an endpoint change teaches people to dismiss the banner.
+- **PROVED IN A REAL BROWSER**: a page controlled by the generated worker,
+  `update()` against the same release fires `controllerchange` **0** times and
+  against a new stamp **1** — which is exactly what `safety.js` listens for
+  (its own check, `safety-banners.py`, all green). `checks/release-stamp.mjs`
+  9/0: the served stamp is current, **every** held file moves it (asked of each
+  in a scratch copy, never one sample), the worker does not, the same sources
+  give the same stamp, and no other server module is in it. Red both ways: the
+  stamp left out (2 red), and a held file changed after the build (1 red).
+- **THE RULE**: CLAUDE.md's merge rules now say every release is announced by
+  this banner, and the post-merge live read confirms the served `/sw.js`
+  carries a new stamp.
+- **The first release carrying it is itself announced**, because its worker
+  differs from the one every browser holds. Nothing stored moves, nothing is
+  migrated, no server rule changes.
+
+## §398 — the set-up flow's sentences read the client's word in lower case (2026-09-23)
+
+Islam, of §396: *"make the setup questions lower case."* §396 put the
+client's word in the flow's questions exactly as typed, so they read "Are
+the Business units grouped into Divisions?" — a heading dropped into prose.
+
+- **A NARROWING OF §160.6 FOR THIS FLOW'S SENTENCES ONLY**: `w()` lowers the
+  word wherever it sits mid-sentence (questions, the Divisions answers, the
+  empty-row refusal, the Add buttons, the empty states and the summary
+  counts); `wc()` gives the same word at the start of a sentence. Step
+  headings, the rail and every other screen keep the word as typed.
+- **AN ACRONYM IS LEFT ALONE**: a word is lowered only where everything
+  after its first letter is already lower case, so "BUs" and "IT" stay as
+  typed — proved with the unit word renamed to *BUs*.
+- **AND FIVE LITERALS ON THE DIVISIONS STEP WERE STILL "COMPANY"**, found by
+  the probe rather than by reading: the Add button, the name placeholder, the
+  "which … each unit belongs to" label, the "no company" option and the
+  empty-row refusal. All take the client's word now — the rest of §396.
+- `checks/client-setup.py`'s refusal assertion expected the word as typed
+  and is REWRITTEN to the lowered form, never loosened (§218) — worked out in
+  the check rather than read back from the product. Both set-up checks
+  green. Screen only; nothing stored, nothing migrated.
+
 ## §399 — moving between the console, a client and its modules (2026-09-23)
 
 Islam: *"review the different pages and suggest different flow of going forward

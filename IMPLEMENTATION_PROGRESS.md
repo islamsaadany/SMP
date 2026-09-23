@@ -8003,9 +8003,9 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
-## §396 — the set-up flow's questions use the client's words (2026-09-23)
+## §396 — the set-up flow's questions use the client's words (2026-09-23) · **merged to `main` 2026-09-23**
 
-**Built on the branch; not merged.** On Client set-up, the Divisions step's
+**Built; merged to `main` 2026-09-23 on Islam's word.** On Client set-up, the Divisions step's
 question still said "Are the units grouped into companies?" under a heading
 reading "Divisions". The question and both answers now use the client's own
 words, and so do the questions on the business units, supporting functions and

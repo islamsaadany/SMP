@@ -57103,6 +57103,8 @@ words — *"yes go ahead with 1 and 2"*.
 
 ## §396 — the set-up flow's questions speak the client's words (2026-09-23)
 
+**Merged to `main` 2026-09-23 on Islam's word**, as a fast-forward — `main` had not moved since §395. Shell `v5.34-setup-questions-words`, a name the history never held.
+
 Islam, of Client set-up's Divisions step, with a screenshot: *"under the
 divisions its asking if the units grouped under companies."* The step's
 heading had taken the client's word at §395 and the **question and both

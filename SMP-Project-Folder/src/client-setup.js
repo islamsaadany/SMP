@@ -259,10 +259,17 @@ var CLIENTSETUP = (function () {
   }
   var STEPS = [
     { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
-    { k:"units",  key:"The organisation", get label(){ return W("unitword", "many", "Business units"); }, q:"What are the business units?" },
-    { k:"cos",    key:"The organisation", get label(){ return W("division", "many", "Companies"); },      q:"Are the units grouped into companies?" },
-    { k:"fns",    key:"Strategy",         get label(){ return W("fnword", "many", "Functions"); },       q:"What supporting functions are there?" },
-    { k:"caps",   key:"Strategy",         get label(){ return W("capability", "many", "Capabilities"); }, q:"Are there capabilities beside the units?" },
+    /* The questions speak the client's words too (§396): a step headed
+       "Divisions" asking about "companies" is two names for one thing on one
+       screen. Each word is taken as typed, never inflected (§107.8). */
+    { k:"units",  key:"The organisation", get label(){ return W("unitword", "many", "Business units"); },
+      get q(){ return "What are the " + W("unitword", "many", "business units") + "?"; } },
+    { k:"cos",    key:"The organisation", get label(){ return W("division", "many", "Companies"); },
+      get q(){ return "Are the " + W("unitword", "many", "business units") + " grouped into " + W("division", "many", "companies") + "?"; } },
+    { k:"fns",    key:"Strategy",         get label(){ return W("fnword", "many", "Functions"); },
+      get q(){ return "What " + W("fnword", "many", "supporting functions") + " are there?"; } },
+    { k:"caps",   key:"Strategy",         get label(){ return W("capability", "many", "Capabilities"); },
+      get q(){ return "Are there " + W("capability", "many", "capabilities") + " beside the " + W("unitword", "many", "business units") + "?"; } },
     { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
   ];
@@ -1052,10 +1059,14 @@ var CLIENTSETUP = (function () {
     var shape = canShape();
     var has = S.shape.companies.length > 0;
     var ch = el("div", "wzchoices");
-    [[false, "No — the units sit directly under " + ((GROUP && GROUP.org) || "this client"),
-      "One less layer to explain. Companies can be added later without touching the plans."],
-     [true, "Yes — group them into companies",
-      "A company holds several units and decides who sees across them. It carries no plan of its own."]]
+    /* The client's words (§396), and a division can hold supporting
+       functions as well since §391, so the Yes line says so. */
+    var bus = W("unitword", "many", "business units"), divs = W("division", "many", "companies"),
+        div = W("division", "one", "company"), fns = W("fnword", "many", "supporting functions");
+    [[false, "No — the " + bus + " sit directly under " + ((GROUP && GROUP.org) || "this client"),
+      "One less layer to explain. " + divs + " can be added later without touching the plans."],
+     [true, "Yes — group them into " + divs,
+      "A " + div + " holds several " + bus + ", and can hold " + fns + " too. It decides who sees across them and carries no plan of its own."]]
       .forEach(function (c) {
         var b = el("button", "wzchoice");
         b.type = "button";

@@ -8003,6 +8003,16 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §396 — the set-up flow's questions use the client's words (2026-09-23)
+
+**Built on the branch; not merged.** On Client set-up, the Divisions step's
+question still said "Are the units grouped into companies?" under a heading
+reading "Divisions". The question and both answers now use the client's own
+words, and so do the questions on the business units, supporting functions and
+capabilities steps. The "Yes" answer also says a division can hold supporting
+functions, which has been true since §391. Nothing stored changes.
+
+
 ## §395 — the client's words on every screen (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built; merged to `main` 2026-09-23 on Islam's word.** After §392 the terminology page held two

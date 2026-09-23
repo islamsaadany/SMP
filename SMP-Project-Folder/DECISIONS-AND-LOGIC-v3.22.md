@@ -57100,3 +57100,26 @@ words — *"yes go ahead with 1 and 2"*.
   `lib/` or `db/` rule changes, so no forced sign-out is owed (spec 029). The
   built file's bytes changed, so `sw.js` is bumped (§91) and the served copies
   regenerated (§329).
+
+## §396 — the set-up flow's questions speak the client's words (2026-09-23)
+
+Islam, of Client set-up's Divisions step, with a screenshot: *"under the
+divisions its asking if the units grouped under companies."* The step's
+heading had taken the client's word at §395 and the **question and both
+answers under it were literals**, so one screen gave one thing two names.
+The step's other questions had the same problem ("What are the business
+units?", "What supporting functions are there?", "Are there capabilities
+beside the units?"). Aligned in chat first (1c: content before any mockup),
+and Islam chose the recommendation: *"go with your recommendation"*.
+
+- **Every question on the four shape steps takes the client's word**, as a
+  getter so a renamed term is read at draw time, through the flow's own `W()`
+  (the console's copy, which has no label registry, keeps the platform's
+  word). Words taken as typed, never inflected (§107.8, §160.6).
+- **The Divisions answers name functions**: since §391 a division can hold
+  supporting functions, so the Yes line says so. The question itself stays
+  about business units only (his choice), so it stays short.
+- Screen only: nothing stored, nothing migrated, no server rule.
+  `client-setup.py` all passed; a probe with the word renamed to *Sectors*
+  reads "Are the Business units grouped into Sectors?" and both answers
+  follow it, with no page errors.

@@ -5236,12 +5236,12 @@ function reportItems(u){
     /* THE RAIL IS ADDRESSED BY THE STORED CODE AND DRAWN WITH THE DISPLAY
        ONE, and they are not the same string: `pillarCode()` renders the
        tenant's prefix (BE03) while the rail's own button and `unitRailPick()`
-       match `p.code` (M03). Keying a chip on what the page SAYS is §48's rule
+       match the stored identifier — the row id since §388 (pillarRailId). Keying a chip on what the page SAYS is §48's rule
        broken — address by the identifier, label with the word — and it would
        fail invisibly on a tenant where the two happen to coincide. Found by
        pressing Next and watching the rail not move. */
-    var place = { key:"p:" + (p.code || pi), label:code,
-                  rail:unitRailKey(u), code:p.code || "" };
+    var place = { key:"p:" + (p.id || pi), label:code,
+                  rail:unitRailKey(u), code:pillarRailId(p) };
     /* `owner` travels with the row so canReportRow() can answer without
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
@@ -7190,8 +7190,8 @@ function gapMap(target, all, fillable){
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
-      entry("p:" + (p.code || i), pillarCode(u, i), n,
-            { sec: w.sec, page: "plan", rail: unitRailKey(u), code: p.code });
+      entry("p:" + (p.id || i), pillarCode(u, i), n,
+            { sec: w.sec, page: "plan", rail: unitRailKey(u), code: pillarRailId(p) });
     });
   };
   /* ONE HOLDER'S GAPS, WHOEVER HOLDS IT (§334.13). A function's own work and

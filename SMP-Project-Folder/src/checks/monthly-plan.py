@@ -167,7 +167,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(250)
     press(pg, '#units button[data-u="mobile"]')
     pg.wait_for_timeout(500)
-    press(pg, '.rail [data-urail="mobile|03"]')
+    press(pg, '.rail [data-urail="mobile|mobile-P3"]')
     pg.wait_for_timeout(400)
 
     # ── 2 · what the row reads BEFORE, so the change can be measured ────

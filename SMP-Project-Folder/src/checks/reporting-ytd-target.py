@@ -239,7 +239,7 @@ with sync_playwright() as p:
     pg.evaluate("""() => { const b=[...document.querySelectorAll('#subtabs button, .tabs button')]
         .find(x=>/^Performance/i.test(x.textContent.trim())); if(b) b.click(); }""")
     pg.wait_for_timeout(700)
-    press(pg, '.rail [data-urail="mobile|03"]')
+    press(pg, '.rail [data-urail="mobile|mobile-P3"]')
     pg.wait_for_timeout(500)
     perf = ev(pg, """() => {
       const t=[...document.querySelectorAll('.pane table')]
@@ -255,7 +255,7 @@ with sync_playwright() as p:
        and "29%" in (perf.get("rows", {}).get("Samsung market share") or ""), perf)
 
     # ── 1 · A UNIT'S REPORTING PAGE ────────────────────────────────────
-    go_report(pg, "mobile", "mobile|03")
+    go_report(pg, "mobile", "mobile|mobile-P3")
     read = ev(pg, READ)
     ms = table(read, "measure") or {}
     ob = table(read, "objective") or {}
@@ -339,7 +339,7 @@ with sync_playwright() as p:
            cr.get("of") == "of 80%" and cr.get("head") not in (None, "", "80%"), cr)
 
     # ── 4 · THE TABLE STILL FITS ITS PANE (§158) ───────────────────────
-    go_report(pg, "mobile", "mobile|03")
+    go_report(pg, "mobile", "mobile|mobile-P3")
     fits = {}
     for w in (1600, 1440, 1280, 1100, 1000):
         pg.set_viewport_size({"width": w, "height": 1800})

@@ -5941,12 +5941,12 @@ function renderReport(u){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
-      var e = owedAt["p:" + (p.id || pi)], owes = e && e.count > 0;
+      var e = owedAt["p:" + (p.code || pi)], owes = e && e.count > 0;
       var sub = t.total === 0 ? 'Not asked this cycle'
               : t.done >= t.total ? 'Complete'
               : (t.total - t.done) + ' still to enter';
-      return '<button class="ritem' + (pillarRailId(p) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
-          esc(u.ukey) + '|' + esc(pillarRailId(p)) + '">' +
+      return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
+          esc(u.ukey) + '|' + esc(p.code) + '">' +
         railName(code, p.name) +
         /* AND THE TALLY STOPS READING AS FINISHED. Green is the platform's
            word for "nothing left here", and on a pillar owing a note it was
@@ -7824,24 +7824,16 @@ function renderFnReport(fnKey){
    they group by kind \u2014 a Direction and a Capability are different things and
    the rail says so. */
 function unitRailKey(u){ return "unit:" + u.ukey; }
-/* §388 WHICH PILLAR THE RAIL MEANS IS ITS ROW ID, NEVER ITS CODE. A pillar
-   added with the pen is minted `code: ""` (addPillar) and nothing fills it in
-   on a tenant's saved plan, so every hand-added pillar shared ONE rail key:
-   all of them lit at once and pressing any opened the first. The code is
-   what the plan arrived with and nothing makes it unique; the id is the
-   row's address everywhere else (§48, §191). The code is the fallback only
-   for a row with no id, which renumberUnit() and mintRowId() never leave. */
-function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
 function unitRailPick(u){
   var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
-    if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
+    if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
   /* §301.4 on the other side of the switch: a pillar owner's own pillar
      opens, exactly as a project owner's project does (§53.5). */
   var mine = railMine(u.ukey, list, function(p){ return p.owner; });
   var pick = mine || list[0];
-  railShow(k, pillarRailId(pick));
+  railShow(k, pick.code);
   return pick;
 }
 function unitRailFor(u, sel){
@@ -7863,9 +7855,9 @@ function unitRailFor(u, sel){
        pillar 01 and the next called it MB01.
 
        So the DISPLAY moves to pillarCode() and the data attribute does NOT:
-       `data-urail` is the rail's selection key. Since §388 that key is the
-       pillar's ROW ID (pillarRailId), not its stored code: a code can be empty
-       or shared, and a shared key lights every row that has it. */
+       `data-urail` is the rail's selection key and unitRailPick() matches on
+       `it.code`. Change that and the rail stops being able to find the pillar
+       it just selected. */
     /* §145.12: which pillar owes what, for the people who can act on it —
        drawn only while it owes something (§41's budget), and rewritten in
        place as fills land (gapBandRefresh finds it by data-rgap). */
@@ -7884,14 +7876,14 @@ function unitRailFor(u, sel){
       (it.measures || []).forEach(function(m){ empt += SMPRules.gapEmptyFields("measure", m).length; });
       (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
     }
-    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
-        esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+    return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
+        esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
         railName(pillarCode(u, i), it.name) +
-        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.id || String(i)) +
+        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
           '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
           gaps + ' Missing</span>'
-        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.id || String(i)) +
+        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.code || String(i)) +
           '" title="' + plural(empt, "empty field") + ' you can fill in">' +
           empt + ' empty</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
@@ -8690,9 +8682,9 @@ function renderUnitPlan(u){
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
     (railWorthIt(u.items)
-      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
+      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
-      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
+      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
           unitPlanBody(sel, u, false) + '</div>');
 }
 
@@ -9144,8 +9136,8 @@ function unitPerfRail(u){
   var on = arranging("unit", u.ukey);
   var rows = u.items.map(function(it, i){
     var perf = pillarPerf(it), r = pillarRatio(it);
-    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
-      esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
+    return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
+      esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
       railName(pillarCode(u, i), it.name) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +

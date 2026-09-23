@@ -255,7 +255,7 @@ with sync_playwright() as pw:
       const m = UNITS.mobile.items[0].measures[0];
       m.target = ""; delete m.target3y; delete m.pend;
       current = "mobile"; currentSub = "strategy"; CURSEC.strategy = "plan";
-      RAIL['mobile'] = UNITS.mobile.items[0].code || RAIL['mobile'];
+      RAIL['unit:mobile'] = UNITS.mobile.items[0].id;
       EDIT_PAGE['plan'] = true; paint();
     }""")
     pg.wait_for_timeout(700)

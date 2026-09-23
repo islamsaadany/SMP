@@ -212,7 +212,7 @@ def main():
                 var st = rows.map(function(m){ return m.progress; });
                 if (Math.max.apply(null, sc) !== Math.max.apply(null, st) ||
                     Math.min.apply(null, sc) !== Math.min.apply(null, st)){
-                  out.pillar = it.code; out.unit = k;
+                  out.pillar = it.id; out.unit = k;
                 }
               }
             });
@@ -249,7 +249,7 @@ def main():
         if rail:
             rail.click(); pg.wait_for_timeout(560)
         want = ev(pg, """(a)=>{
-          var it = (UNITS[a[0]].items||[]).filter(function(x){ return x.code === a[1]; })[0];
+          var it = (UNITS[a[0]].items||[]).filter(function(x){ return x.id === a[1]; })[0];
           if (!it) return null;
           var rows = scorableMeasures(it);
           var sc = rows.map(function(m){ return measureScore(m); });

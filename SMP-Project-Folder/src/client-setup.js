@@ -224,11 +224,19 @@ function __smpShape(state, a, hydrate) {
   });
   syncWeights();
   var words = a.words || {};
+  /* A word arrives as {one, many} since §395 — the flow asks both, as
+     Setup › Terminology does — and as a bare string from a tab on an older
+     build, which was always the MANY form. A box left empty keeps the word
+     that was there. */
   (LABELS.entries || []).forEach(function (e) {
     var v = words[e.key];
     if (v == null) return;
-    v = String(v).trim();
-    if (v) e.bu = v;
+    var one = typeof v === "object" ? v.one : null;
+    var many = typeof v === "object" ? v.many : v;
+    one = one == null ? "" : String(one).trim();
+    many = many == null ? "" : String(many).trim();
+    if (one) e.group = one;
+    if (many) e.bu = many;
   });
   state.labels = LABELS.entries;
   return { state: state, dropped: dropped };
@@ -242,12 +250,19 @@ var CLIENTSETUP = (function () {
      the rail beside this page IS the summary — every answer here is a page
      on it — and Done with set-up is a button on every step rather than a
      destination at the end (spec 057). */
+  /* The client's own word where the platform holds one (§395). The console
+     mounts this file with no label registry, so the platform's word is the
+     fallback there — which is also what a client that has named nothing
+     says. Raw text: every caller hands it to a text node, never to HTML. */
+  function W(k, form, fb){
+    return typeof labelWord === "function" ? labelWord(k, form === "one" ? "group" : "bu") : fb;
+  }
   var STEPS = [
     { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
-    { k:"units",  key:"The organisation", label:"Business units", q:"What are the business units?" },
-    { k:"cos",    key:"The organisation", label:"Companies",      q:"Are the units grouped into companies?" },
-    { k:"fns",    key:"Strategy",         label:"Functions",      q:"What supporting functions are there?" },
-    { k:"caps",   key:"Strategy",         label:"Capabilities",   q:"Are there capabilities beside the units?" },
+    { k:"units",  key:"The organisation", get label(){ return W("unitword", "many", "Business units"); }, q:"What are the business units?" },
+    { k:"cos",    key:"The organisation", get label(){ return W("division", "many", "Companies"); },      q:"Are the units grouped into companies?" },
+    { k:"fns",    key:"Strategy",         get label(){ return W("fnword", "many", "Functions"); },       q:"What supporting functions are there?" },
+    { k:"caps",   key:"Strategy",         get label(){ return W("capability", "many", "Capabilities"); }, q:"Are there capabilities beside the units?" },
     { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
   ];
@@ -367,7 +382,7 @@ var CLIENTSETUP = (function () {
         fn: c.fn && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : "",
         format: c.format === "pillars" ? "pillars" : "projects" });
     });
-    (LABELS.entries || []).forEach(function (e) { g.words[e.key] = e.bu; });
+    (LABELS.entries || []).forEach(function (e) { g.words[e.key] = { one: e.group, many: e.bu }; });
     return g;
   }
   function holdsNow(){ return __smpHoldsNow(); }
@@ -565,10 +580,10 @@ var CLIENTSETUP = (function () {
   /* ── Moving between steps commits the shape (§322's rule kept) ─────── */
   function unnamed(){
     var bad = [];
-    if (S.shape.units.some(function (u) { return !String(u.name || "").trim(); })) bad.push("a business unit");
+    if (S.shape.units.some(function (u) { return !String(u.name || "").trim(); })) bad.push("a " + W("unitword", "one", "business unit"));
     if (S.shape.companies.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a company");
-    if (S.shape.functions.some(function (f) { return !String(f.name || "").trim(); })) bad.push("a supporting function");
-    if (S.shape.capabilities.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a capability");
+    if (S.shape.functions.some(function (f) { return !String(f.name || "").trim(); })) bad.push("a " + W("fnword", "one", "supporting function"));
+    if (S.shape.capabilities.some(function (c) { return !String(c.name || "").trim(); })) bad.push("a " + W("capability", "one", "capability"));
     if (!bad.length) return null;
     return "Name " + bad.join(" and ") + ", or remove the empty row with the × beside it. A row with no name is not saved.";
   }
@@ -964,7 +979,7 @@ var CLIENTSETUP = (function () {
   function listStep(box, list, kind){
     var shape = canShape();
     if (!list.length) {
-      box.appendChild(el("p", "wzempty", kind === "unit" ? "No business units yet." : "No supporting functions yet."));
+      box.appendChild(el("p", "wzempty", kind === "unit" ? "No " + W("unitword", "many", "business units") + " yet." : "No " + W("fnword", "many", "supporting functions") + " yet."));
     } else {
       var rows = el("div", "wzrows");
       list.forEach(function (row, n) {
@@ -1019,7 +1034,7 @@ var CLIENTSETUP = (function () {
         });
         box.appendChild(crow);
       }
-      var add = el("button", "wzadd", kind === "unit" ? "+ Add a business unit" : "+ Add a supporting function");
+      var add = el("button", "wzadd", kind === "unit" ? "+ Add a " + W("unitword", "one", "business unit") : "+ Add a " + W("fnword", "one", "supporting function"));
       add.type = "button";
       add.addEventListener("click", function () {
         list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:"pillars" });
@@ -1117,14 +1132,14 @@ var CLIENTSETUP = (function () {
   function capsStep(box){
     var shape = canShape();
     if (!S.shape.capabilities.length) {
-      box.appendChild(el("p", "wzempty", "No capabilities yet."));
+      box.appendChild(el("p", "wzempty", "No " + W("capability", "many", "capabilities") + " yet."));
     } else {
       var rows = el("div", "wzrows");
       S.shape.capabilities.forEach(function (cp, n) {
         var r = el("div", "wzrow");
         var nm = el("input", "fld");
         nm.type = "text"; nm.value = cp.name;
-        nm.setAttribute("aria-label", "Capability name");
+        nm.setAttribute("aria-label", W("capability", "one", "Capability") + " name");
         if (!shape) nm.readOnly = true;
         nm.addEventListener("input", function () { cp.name = nm.value; S.shapeDirty = true; });
         r.appendChild(nm);
@@ -1167,7 +1182,7 @@ var CLIENTSETUP = (function () {
       box.appendChild(rows);
     }
     if (shape) {
-      var add = el("button", "wzadd", "+ Add a capability");
+      var add = el("button", "wzadd", "+ Add a " + W("capability", "one", "capability"));
       add.type = "button";
       add.addEventListener("click", function () {
         S.shape.capabilities.push({ name:"", fn:"", format:"projects" });
@@ -1184,30 +1199,44 @@ var CLIENTSETUP = (function () {
   /* The words the client uses, only the ones it has (§346.3). */
   function wordsStep(box){
     var shape = canShape();
+    /* Both forms, as Setup › Terminology asks them (§395): the word for
+       ONE is a column heading and "Add a …", the word for MANY is a page
+       heading and the navigation. The platform's own pair is the default. */
+    var DEF = {};
+    (typeof LABEL_DEFAULTS !== "undefined" ? LABEL_DEFAULTS : []).forEach(function (d) { DEF[d.key] = d; });
     var WORDS = [
-      ["unitword", "Business unit", "Business Unit", "Every client has these"],
-      ["pillar", "Pillar", "Pillar", "Units plan in pillars"],
-      ["measure", "Key measure", "Key Measure", "Under a pillar"],
-      ["tactic", "Tactic", "Tactic", "Under a pillar"],
-      ["keyobj", "Key objectives", "Key Objectives", "A subject's own scorecard"]
+      ["unitword", "Business unit", "Every client has these"],
+      ["pillar", "Pillar", "Units plan in pillars"],
+      ["measure", "Key measure", "Under a pillar"],
+      ["tactic", "Tactic", "Under a pillar"],
+      ["keyobj", "Key objective", "A subject's own scorecard"]
     ];
     var wrap = el("div", "wztbl");
     var t = el("table");
     var thead = el("thead"), hr = el("tr");
-    ["What it is", "What this client calls it", "Why we ask"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+    ["What it is", "One", "Many", "Why we ask"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
     thead.appendChild(hr); t.appendChild(thead);
     var tb = el("tbody");
     WORDS.forEach(function (w) {
       var tr = el("tr");
       var c1 = el("td"); c1.appendChild(el("b", null, w[1])); tr.appendChild(c1);
-      var c2 = el("td");
-      var i = el("input", "fld");
-      i.type = "text";
-      i.value = S.shape.words[w[0]] != null ? S.shape.words[w[0]] : w[2];
-      if (!shape) i.readOnly = true;
-      i.addEventListener("input", function () { S.shape.words[w[0]] = i.value; S.shapeDirty = true; });
-      c2.appendChild(i); tr.appendChild(c2);
-      tr.appendChild(el("td", "muted", w[3]));
+      var had = S.shape.words[w[0]];
+      var d = DEF[w[0]] || {};
+      var cur = { one: (had && typeof had === "object" && had.one) || d.one || w[1],
+                  many: (had && typeof had === "object") ? (had.many || d.many || "") : (had != null ? had : (d.many || "")) };
+      S.shape.words[w[0]] = cur;
+      ["one", "many"].forEach(function (form) {
+        var c = el("td");
+        var i = el("input", "fld");
+        i.type = "text";
+        i.value = cur[form];
+        i.setAttribute("aria-label", w[1] + " — the word for " + form);
+        i.setAttribute("data-word", w[0] + "|" + form);
+        if (!shape) i.readOnly = true;
+        i.addEventListener("input", function () { cur[form] = i.value; S.shapeDirty = true; });
+        c.appendChild(i); tr.appendChild(c);
+      });
+      tr.appendChild(el("td", "muted", w[2]));
       tb.appendChild(tr);
     });
     t.appendChild(tb); wrap.appendChild(t);
@@ -1567,13 +1596,13 @@ var CLIENTSETUP = (function () {
         goes.appendChild(document.createTextNode("What is in this client could not be read, so it cannot be listed here."));
       } else {
         var lines = [], shape = [];
-        if (g.units != null) shape.push(nOf(g.units, "business unit"));
-        if (g.functions != null) shape.push(nOf(g.functions, "supporting function"));
+        if (g.units != null) shape.push(nOf(g.units, W("unitword", "one", "business unit"), W("unitword", "many", "business units")));
+        if (g.functions != null) shape.push(nOf(g.functions, W("fnword", "one", "supporting function"), W("fnword", "many", "supporting functions")));
         if (shape.length) lines.push(shape.join(" · "));
         if (g.people != null) lines.push(nOf(g.people, "person", "people") + " on the register");
         var rest = [];
         if (g.plans != null) rest.push(nOf(g.plans, "line") + " of plan");
-        if (g.capabilities != null && g.capabilities) rest.push(nOf(g.capabilities, "capability", "capabilities"));
+        if (g.capabilities != null && g.capabilities) rest.push(nOf(g.capabilities, W("capability", "one", "capability"), W("capability", "many", "capabilities")));
         if (g.conversations != null) rest.push(nOf(g.conversations, "conversation"));
         if (rest.length) lines.push(rest.join(" · "));
         lines.forEach(function (t, i) { if (i) goes.appendChild(el("br")); goes.appendChild(document.createTextNode(t)); });

@@ -57039,3 +57039,62 @@ only the SMO may change (a capability)".**
   file is byte-identical, so no `sw.js` bump (§91). The change only ALLOWS
   saves that were refused, so an old tab's save cannot newly fail — **no
   forced sign-out is owed** (spec 029).
+
+## §395 — the client's words reach every screen (2026-09-23)
+
+Islam, after §392: *"what's next we need to build the wording in all clients"*,
+then, of two things proposed — every screen, and the set-up flow asking both
+words — *"yes go ahead with 1 and 2"*.
+
+- **MEASURED FIRST, NOT READ** (§3a): every label renamed to `ZQ<key>` /
+  `ZQ<key>s`, then every destination, tab, section — reading and with the pen
+  open — the review deck and every Setup page walked, and every visible string
+  still holding a default word listed: **139 distinct places**. §392 had
+  routed the places people see most; this is the rest.
+- **THE RULE IS §160.6's, UNCHANGED**: a tenant's word is used exactly as
+  typed, never lowercased and never pluralised by adding an "s". Headings,
+  column heads, buttons, tabs, labels, placeholders and slide heads take
+  `L()`/`L1()`; a counted phrase takes `plural(n, L1(k), L(k))`, because every
+  term now carries both forms (§392) — which retires the "counted sentences
+  keep the platform's word" limit that held while a label had only one. Mid-
+  sentence the word keeps the client's capital ("3 Key measures"), which is
+  the cost of "as typed" and is stated rather than tidied.
+- **LEFT DELIBERATELY, AND THE CHECK SAYS SO**: knowledge-base prose (it
+  describes the PLATFORM, §160), hover notes and explanatory sentences, the
+  workbook's column heads (a header is a contract, §58, §65), role names
+  (Pillar owner, Project owner), the Focus measures feature's own name, a
+  pillar's kind (Direction · Capability), and the access matrix's short heads,
+  which Islam chose to fit one line (§174).
+- **THE SET-UP FLOW ASKS BOTH WORDS** (item 2): the words step draws One and
+  Many per row, like Setup › Terminology; `asked()` hands the minter
+  `{one, many}` and `__smpShape` writes `group`/`bu`, an empty box keeping the
+  word that was there. **A bare string is still read as the MANY form**, so a
+  tab on an older build loses nothing. `smp-app/checks/setup-shape.mjs` §2
+  asserts both shapes; the step's own labels, empty notes, add buttons and
+  refusal read the client's word through a fallback that works in the
+  console too, where no label registry is loaded.
+- **TWO TRAPS, BOTH A LOCAL HIDING A GLOBAL** (§56.7's family): `paintUnits()`
+  held `var L = lit.offsetLeft`, hoisted over the whole function, so the first
+  `L()` routed into it threw on every paint — the page stayed on screen and
+  the only witness was the console (§118). And `renderKB()` held
+  `var L1 = L("pillar","bu")`, hiding `L1()` and printing *"Pillars owner"*.
+  Both renamed, with a comment saying why.
+- **`esc()` IS IDEMPOTENT ON ITS OWN FIVE ENTITIES**, so a label already
+  escaped by `L()` and passed through `tip()`, `bxkey`, a confirmation or a
+  title does not show `&amp;amp;`. Nothing else it escapes changes.
+- **`checks/terminology-reach.py`** renames every term, walks everything and
+  asserts BOTH ENDS (§94.2): the client's words present on a unit's Plan, a
+  function's projects and the deck, and the platform's word left nowhere a
+  heading, button, tab, label or placeholder is drawn, with the tenant's own
+  data names removed first. Proved able to fail from the SOURCES (§276): a
+  table head put back to "Tactic" goes red; a counted "measures" put back went
+  GREEN until the check asked for "measure" on its own — and that widening
+  found ten more real places (the plan's measures table, the deck, Setup's
+  figure-set search, Add a measure), all routed.
+- **FIVE NEIGHBOURS HELD THE OLD LITERAL** (§214.3): `client-setup`,
+  `plan-builder`, `fn-pillars`, `capability-remove`, `pillar-project-remove` —
+  each REWRITTEN as an agreement with `labelWord()`, never loosened (§218).
+- **Screen only**: nothing stored moves, nothing is migrated, no `api/`,
+  `lib/` or `db/` rule changes, so no forced sign-out is owed (spec 029). The
+  built file's bytes changed, so `sw.js` is bumped (§91) and the served copies
+  regenerated (§329).

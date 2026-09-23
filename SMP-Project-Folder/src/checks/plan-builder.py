@@ -154,8 +154,11 @@ with sync_playwright() as p:
     ck("the measure add is there behind the pen", bool(ma))
     ma.click(); pg.wait_for_timeout(200)
     order = pg.evaluate("Array.from(document.querySelectorAll('#modal-b .bfl')).map(e=>e.textContent.split(' —')[0])")
+    # §395: the client's word, asked as an agreement with the label, never the
+    # platform's literal (§214.3, §218).
+    mw = pg.evaluate("labelWord('measure','group')")
     ck("the fields come in the outcome's order",
-       order[:2] == ["Measure", "Direction"] and "Compile rule" in order[-1], order)
+       order[:2] == [mw, "Direction"] and "Compile rule" in order[-1], order)
     segs = pg.evaluate("Array.from(document.querySelectorAll('#modal-b .bfseg [data-bfv]')).map(e=>e.dataset.bfv)")
     # §276: asserted as AGREEMENT with the shared list rather than as a literal
     # — this line held the three old rules and went red on a correct build

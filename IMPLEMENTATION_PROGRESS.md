@@ -8003,6 +8003,24 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §395 — the client's words on every screen (2026-09-23)
+
+**Built, on the branch, not merged.** After §392 the terminology page held two
+words per term, but many screens still printed the platform's own word. Every
+term was renamed to a nonsense word and every page, tab, section, the edit
+pen, the slides and Setup were walked: 139 places still said "Pillar",
+"Key measure", "Project" and so on. They now all use the client's own word,
+exactly as typed, including column heads, buttons, tabs, the slides and the
+counted lines like "3 Key measures · 2 Tactics asked". The set-up flow's
+"words" step now asks both words, the one and the many, like the Terminology
+page. Left as they are, on purpose: the knowledge base's sentences, hover
+notes, the workbook's column headings, role names like "Pillar owner", the
+Focus measures page name, a pillar's kind, and the short column heads on
+Roles & access. Nothing saved changes. Checked: a new check that renames
+everything and fails if the platform's word is left anywhere a heading, button
+or label is drawn (proved to fail twice), the full check suite, the full
+sweep.
+
 ## §394 — a capability planned in pillars can be saved by the office (2026-09-23)
 
 **Built.** On a capability that plans in pillars (Data Management), the SMO

@@ -2377,11 +2377,11 @@ function removeMainbu(name){
 function mainbuWheres(){
   return [
     { label:"The group", opts:[{ v:"group", label:"The group" }] },
-    { label:"Business units", opts:UNIT_KEYS.map(function(k){
+    { label:labelWord("unitword","bu"), opts:UNIT_KEYS.map(function(k){
         return { v:k, label:UNITS[k].name }; }) },
-    { label:"Supporting functions", opts:FUNCTION_KEYS.map(function(f){
+    { label:labelWord("fnword","bu"), opts:FUNCTION_KEYS.map(function(f){
         return { v:"fn:" + f, label:FUNCTIONS[f].name }; }) },
-    { label:"Companies", opts:COMPANY_KEYS.map(function(c){
+    { label:labelWord("division","bu"), opts:COMPANY_KEYS.map(function(c){
         return { v:"co:" + c, label:COMPANIES[c].name }; }) }
   ];
 }
@@ -2911,8 +2911,8 @@ function roleAtWord(roleKey){
         : String(w.v).indexOf("fn:") === 0 ? "fn"
         : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
   });
-  var WORD = { group:"the group", unit:"a business unit",
-               fn:"a supporting function", co:"a company" };
+  var WORD = { group:"the group", unit:"a " + labelWord("unitword","group"),
+               fn:"a " + labelWord("fnword","group"), co:"a " + labelWord("division","group") };
   var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
   if (!out.length) return "somewhere that does not exist yet";
   if (out.length === 1) return out[0];
@@ -3171,8 +3171,8 @@ function planPeopleFile(rows){
         return;
       }
       if (hit.unknown) {
-        plan.problems.push({ at:at, msg:'there is no business unit, supporting function ' +
-          'or company called "' + buCell + '". Choose one from the dropdown in the Unit ' +
+        plan.problems.push({ at:at, msg:'there is no ' + labelWord("unitword","group") + ', ' + labelWord("fnword","group") + ' ' +
+          'or ' + labelWord("division","group") + ' called "' + buCell + '". Choose one from the dropdown in the Unit ' +
           'column, or leave it blank to keep where they are.' });
         return;
       }
@@ -3621,7 +3621,7 @@ function focusStanding(progress){
    these. */
 function unitBands(u){
   if (!u) return [];
-  return [{ band:L("keyobj","bu"), src:L("keyobj","bu").toLowerCase(),
+  return [{ band:L("keyobj","bu"), src:L("keyobj","bu"),
             items:u.keyObjectives || [] }]
     .concat((u.items || []).map(function(p, pi){
       return { band:pillarCode(u, pi) + " " + p.name, src:pillarCode(u, pi),
@@ -4496,10 +4496,10 @@ function fnDeleteBlockers(fk){
   if (!f) return [fnBlock("unknown", "no such function")];
   var caps = capsOfFunction(fk);
   if (caps.length) out.push(fnBlock(
-    plural(caps.length, "capability", "capabilities"),
-    plural(caps.length, "capability", "capabilities") +
+    plural(caps.length, L1("capability"), L("capability")),
+    plural(caps.length, L1("capability"), L("capability")) +
     " improved here (" + caps.map(function(c){ return c.name; }).join(", ") +
-    ") \u2014 reallocate them on Setup \u2192 Capabilities"));
+    ") \u2014 reallocate them on Setup \u2192 " + labelWord("capability","bu")));
 
   /* §334, CLOSING §326: ITS OWN PROJECTS ARE ITS OWN WORK. A capability held
      here has always blocked the delete, for the reason §62 gives — a function
@@ -4515,10 +4515,10 @@ function fnDeleteBlockers(fk){
      says to reach for when something is a record. */
   var own = fnOwnProjects(fk);
   if (own.length) out.push(fnBlock(
-    plural(own.length, "project") + " of its own",
-    plural(own.length, "project") + " of its own (" +
+    plural(own.length, L1("project"), L("project")) + " of its own",
+    plural(own.length, L1("project"), L("project")) + " of its own (" +
     own.map(function(p){ return p.name; }).join(", ") +
-    ") \u2014 remove them on its Projects page, or retire the function instead " +
+    ") \u2014 remove them on its " + labelWord("project","bu") + " page, or retire the function instead " +
     "of deleting it"));
 
   /* A pillar anywhere in the tenant that reads its score from this function.
@@ -4537,8 +4537,8 @@ function fnDeleteBlockers(fk){
     });
   });
   if (carried.length) out.push(fnBlock(
-    plural(carried.length, "pillar") + " scored from here",
-    plural(carried.length, "pillar") + " scored from here (" +
+    plural(carried.length, L1("pillar"), L("pillar")) + " scored from here",
+    plural(carried.length, L1("pillar"), L("pillar")) + " scored from here (" +
     carried.join(", ") + ") \u2014 clear the pointer on the plan that names it"));
 
   var here = PEOPLE.filter(function(p){ return p.fn === fk && personActive(p); })
@@ -4622,7 +4622,7 @@ function fnDeleteTakes(fk){
   var f = FUNCTIONS[fk], out = [];
   if (!f) return out;
   var items = fnItems(f);
-  if (items.length) out.push(plural(items.length, L("pillar", "bu").toLowerCase().replace(/s$/, "")));
+  if (items.length) out.push(plural(items.length, L1("pillar"), L("pillar")));
   if (f.head || f.custodian) out.push(plural((f.head ? 1 : 0) + (f.custodian ? 1 : 0), "named role"));
   return out;
 }
@@ -9257,7 +9257,7 @@ function mintCapId(){
   return "cap" + (n + 1);
 }
 function addCapability(fnKey){
-  var made = { id:mintCapId(), name:"New capability", def:"",
+  var made = { id:mintCapId(), name:"New " + labelWord("capability","group"), def:"",
                fn:fnKey || null, keyObjectives:[], projects:[] };
   GROUP.capabilities.push(made);
   renumberCapability(made);
@@ -9294,9 +9294,9 @@ function promoteToCapability(fnKey, ids, name){
   var mv = SMPRules.promotePlan(f, ids);
   if (!mv) return null;
   var own = fnOwnHolder(fnKey);
-  if (own) archiveCapPlan(own, "before " + plural(mv.projects.length, "project") +
+  if (own) archiveCapPlan(own, "before " + plural(mv.projects.length, L1("project"), L("project")) +
     " became \u201c" + (String(name || "").trim() || "a capability") + "\u201d");
-  var made = { id:mintCapId(), name:String(name || "").trim() || "New capability",
+  var made = { id:mintCapId(), name:String(name || "").trim() || "New " + labelWord("capability","group"),
                def:"", fn:fnKey, keyObjectives:[], projects:mv.projects.slice() };
   mv.projects.forEach(function(p){
     var i = f.projects.indexOf(p);

@@ -154,6 +154,16 @@ console.log("\n2 · the word is stored");
   const r2 = frozen.shape(clone(bare), { units: [{ name: "Mobile" }], companies: [], functions: [], words: {} });
   const e2 = (r2.state.labels.find((x) => x.key === "unitword") || {}).bu;
   check("a word left alone keeps the platform's own (§50.6)", e2 === "Business units", String(e2));
+  /* §395: the flow asks both forms now, as Setup › Terminology does. The
+     old string shape above still lands on MANY (a tab on an older build);
+     the pair lands on both, and an empty box keeps the word that was there. */
+  const r3 = frozen.shape(clone(bare), { units: [{ name: "Mobile" }], companies: [], functions: [],
+    words: { pillar: { one: "Theme of work", many: "Themes of work" }, measure: { one: "", many: "KPIs" } } });
+  const l3 = (k) => r3.state.labels.find((x) => x.key === k) || {};
+  check("the word for ONE is stored beside the word for many (§395)",
+    l3("pillar").group === "Theme of work" && l3("pillar").bu === "Themes of work", JSON.stringify(l3("pillar")));
+  check("…and an empty box keeps the word that was there",
+    l3("measure").group === "Key measure" && l3("measure").bu === "KPIs", JSON.stringify(l3("measure")));
 }
 
 /* ── 3 · a row that survives keeps what the flow never asked about ──────── */

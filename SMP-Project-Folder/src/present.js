@@ -341,7 +341,7 @@ function deckSlides(u){
         : '') +
       '<div class="headcell"><span class="dlab">' + L("pillar","bu") + ' performance</span>' +
         '<b class="' + dBand(pl) + '">' + dPct(pl) + '</b>' +
-        '<span class="headsub">' + u.items.length + ' ' + esc(L("pillar","bu").toLowerCase()) +
+        '<span class="headsub">' + u.items.length + ' ' + esc(L("pillar","bu")) +
           ', by their measures</span></div>' +
       '<div class="headcell"><span class="dlab">Execution performance</span>' +
         '<b class="' + dBand(ex) + '">' + dPct(ex) + '</b>' +
@@ -464,13 +464,13 @@ function deckSlides(u){
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
   if (u.items.length)
-    S.push(sectSlide("spillars", "After the Strategic pillars divider",
-      "Strategic " + L("pillar","bu").toLowerCase(),
-      "The " + u.items.length + " " + L("pillar","bu").toLowerCase() +
+    S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
+      "Strategic " + L("pillar","bu"),
+      "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
 
   if (u.items.length) S.push('<section class="dslide"' +
-    anch("pillarnames", "After the " + L("pillar","bu").toLowerCase() + " names") +
+    anch("pillarnames", "After the " + L("pillar","bu") + " names") +
     '><h2>' + L("pillar","bu") + '</h2>' +
     '<div class="pcards" style="--n:' + u.items.length +
       ';--c:' + pillarCols(u.items.length) +
@@ -492,10 +492,10 @@ function deckSlides(u){
      scoring table takes the deck's OWN existing phrasing, the one the
      objectives table has always worn, rather than a new form of words. */
   var pillarScoreSlide = '<section class="dslide"' +
-    anch("pillars", "After the " + L("pillar","bu").toLowerCase() + " overview") +
+    anch("pillars", "After the " + L("pillar","bu") + " overview") +
     '><h2>' + L("pillar","bu") + ' &mdash; where we stand</h2>' +
-    '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Pillar</th>' +
-    '<th class="num">Measures</th><th class="num">Execution</th></tr></thead>' +
+    '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("pillar") + '</th>' +
+    '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
     '<tbody>' + pRows + '</tbody></table></section>';
 
   u.items.forEach(function(p, pi){
@@ -504,12 +504,12 @@ function deckSlides(u){
       anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
       sec(pillarCode(u, pi), p.name) +
       '><span class="seclab">' + esc(p.kind) +
-      ' &middot; theme ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
+      ' &middot; ' + L1("theme") + ' ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
       '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
         esc(p.name) + '</h1>' +
       (p.sub ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
       '<div class="coverrule"></div><div class="leadstats">' +
-        '<div><span class="dlab">Key measures</span><b class="' + dBand(pillarPerf(p)) + '">' +
+        '<div><span class="dlab">' + L("measure") + '</span><b class="' + dBand(pillarPerf(p)) + '">' +
           dPct(pillarPerf(p)) + '</b></div>' +
         '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
       '</div></section>');
@@ -528,9 +528,9 @@ function deckSlides(u){
        clear of the tactics anchor below ("p" + code), which stored slides
        already name. */
     if (mRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M"' +
-      anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — key measures") + '>' +
-      deckPillarHead(u, p, pi, "Key measures") +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>' +
+      anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — " + labelWord("measure","bu")) + '>' +
+      deckPillarHead(u, p, pi, L("measure")) +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("measure") + '</th>' +
       '<th class="num">Annual target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
@@ -643,8 +643,8 @@ function deckSlides(u){
     }).join("");
     if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
       anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
-      deckPillarHead(u, p, pi, "Tactics") +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th>' +
+      deckPillarHead(u, p, pi, L("tactic")) +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
       '<th>Outcome</th><th>Owner</th>' +
       '<th>Collabs.</th>' +
       '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
@@ -700,7 +700,7 @@ function deckSlides(u){
      slide always draws, so there is always something behind this. */
   S.push(sectSlide("sperf", "After the Overall performance divider",
     "Overall performance",
-    "Where the " + L("pillar","bu").toLowerCase() + " stand, where " +
+    "Where the " + L("pillar","bu") + " stand, where " +
       (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
     null));
   if (u.items.length) S.push(pillarScoreSlide);
@@ -758,7 +758,7 @@ function deckPillarHead(u, p, pi, which){
        The figures are unchanged: `pillarExec` and `pillarPlan` are still what
        Execution is computed from, and are still explained in words on "Where
        the unit stands", which he looked at and kept. */
-    '<div class="dstats"><span><i>Measures</i><b class="' + dBand(pillarPerf(p)) + '">' +
+    '<div class="dstats"><span><i>' + L("measure") + '</i><b class="' + dBand(pillarPerf(p)) + '">' +
       dPct(pillarPerf(p)) + '</b></span>' +
     '<span><i>Execution</i><b class="' + dBand(r) + '">' + dPct(r) + '</b></span></div></div>';
 }
@@ -801,8 +801,8 @@ function deckSlidesFn(subject){
        first slide in front of a room is Islam's complaint at its loudest. The
        capability wording survives for a function that really carries one. */
     '<p class="coversub">' + (realCaps.length
-      ? 'Capability review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
-        realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
+      ? L1("capability") + ' review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
+        realCaps.length + ' ' + (realCaps.length === 1 ? L1("capability") : L("capability"))
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         (objMode
           /* §342: the cover says what the deck holds, which is the whole of
@@ -829,15 +829,15 @@ function deckSlidesFn(subject){
     if (!c.own)
     S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
       sec(secTwo(c.name), c.name) +
-      '><span class="seclab">Capability &middot; ' +
+      '><span class="seclab">' + L1("capability") + ' &middot; ' +
         esc(f.name) + '</span>' +
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
       '<div class="coverrule"></div><div class="leadstats">' +
         (SMPRules.shown(c.keyObjectives).length
-          ? '<div><span class="dlab">Key objectives</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
+          ? '<div><span class="dlab">' + L("keyobj") + '</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
           : '') +
-        '<div><span class="dlab">Project performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
+        '<div><span class="dlab">' + L1("project") + ' performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
@@ -851,8 +851,8 @@ function deckSlidesFn(subject){
           '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
-      S.push('<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — key objectives") +
-        '><h2>Key objectives &mdash; where we stand' +
+      S.push('<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
+        '><h2>' + L("keyobj") + ' &mdash; where we stand' +
         '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
         '<th class="num">Weight</th><th class="num">Annual target</th>' +
@@ -898,12 +898,12 @@ function deckSlidesFn(subject){
         '<td class="num final ' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</td>' +
         '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
     }).join("");
-    S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 projects") +
+    S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 " + labelWord("project","bu")) +
       '><h2>' + L("project") + '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
       '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("project") + '</th>' +
       '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
       '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
-      '<tbody>' + (pRows || '<tr><td colspan="6">No projects yet.</td></tr>') + '</tbody></table>' +
+      '<tbody>' + (pRows || '<tr><td colspan="6">No ' + L("project") + ' yet.</td></tr>') + '</tbody></table>' +
       '<p class="headfoot">Performance is half deliverables, half outcomes, per side. Milestones are completed of total.</p></section>');
 
     c.projects.forEach(function(p){
@@ -982,7 +982,7 @@ function deckSlidesFn(subject){
           /* §227: the same cell the deck's tactic tables carry (§50). */
           '<td class="collabs">' + collabCell(m) + '</td>' +
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
-          (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
+          (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the ' + L1("project") + ' ends</span>' : '') + '</td>' +
           '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
           '<td class="num">' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';

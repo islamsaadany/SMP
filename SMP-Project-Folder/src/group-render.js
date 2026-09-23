@@ -17,7 +17,14 @@
    renders as the character — so nothing that displays normally changes; only a
    payload is neutralised. Verified: esc()'s output is only ever concatenated
    into innerHTML, never compared, stored as a key, or read back. */
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+/* ESCAPING TWICE IS A SECOND FAULT, NOT A SECOND SAFETY (§395). A client's
+   own words reach the page through L(), which escapes them, and some of those
+   words are then handed to a helper that escapes again (a search box's
+   placeholder, a hover, a column key) — so a word holding "&" or an apostrophe
+   showed its entity. The five entities THIS function writes are left as they
+   are; every other "&" is still escaped. Still safe: those five decode to
+   text, never to markup, so nothing written through here can open a tag. */
+function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
@@ -164,7 +171,7 @@ function plus(id, label){
    a row. */
 function deliveryLine(ex, pl, whose){
   if (ex == null || pl == null || !pl)
-    return "No tactic " + (whose || "anywhere in the group") +
+    return "No " + L1("tactic") + " " + (whose || "anywhere in the group") +
            " has a plan against it yet, so there is nothing to deliver against.";
   var r = Math.round(ex / pl * 100);
   var verdict = r > 100 ? "ahead of plan" : r < 100 ? "behind plan" : "exactly on plan";
@@ -550,7 +557,7 @@ function measureHead(unscored){
   /* §239: "Annual target" says outright that it is the year's number, which
      is what makes the quiet figure beside the actual make sense. And "YTD
      actual" replaces a hardcoded "H1 actual" that read H1 in every cycle. */
-  return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Annual target</th>' +
+  return '<thead><tr><th class="idx">#</th><th>' + L1("measure") + '</th><th class="cc">Dir.</th><th class="cc">Annual target</th>' +
     '<th class="cc">Compile</th>' + (unscored ? '' : '<th class="cc">YTD actual</th><th class="cc">Progress</th>') +
     '</tr></thead>';
 }
@@ -830,7 +837,7 @@ function tacticRows(ts, unitKey){
   }).join("");
 }
 function tacticHead(){
-  return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th>' +
+  return '<thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th><th>Outcome</th>' +
     '<th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
     /* §239: VARIANCE GOES -- the pair beside it already shows it, and the
        column was spending width to restate a subtraction. "Of plan" becomes
@@ -1059,7 +1066,7 @@ function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
     '<div class="card tight primary"><div class="score-h"><h4>' + L("measure","bu") + ' performance</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
-      '<div class="minirow"><div><em>Measures</em><b>' + nMeasures + '</b>' +
+      '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b>' +
           (nScored < nMeasures ? '<em class="sub-n">' + nScored + ' scored</em>' : '') + '</div>' +
         '<div><em>Highest</em><b style="color:' + bandInk(hi) + '">' +
           pct(hi) + '</b></div>' +
@@ -1113,14 +1120,14 @@ function pillarList(u){
     '<div class="pheadwrap"><div class="phead" style="' + pgrid(on) + '">' +
       (on ? '<span></span>' : '') +
       '<span class="hfirst">' + L("pillar","bu") + allToggle() + '</span>' +
-      '<span>Kind</span><span>Theme</span><span>Owner</span>' +
+      '<span>Kind</span><span>' + L1("theme") + '</span><span>Owner</span>' +
       '<span class="num">Perform.</span><span class="num">Execution</span>' +
       '<span class="num">Var.</span><span></span></div></div>' +
     '<div class="sortable" data-item=".prow-wrap" data-kind="pillars" data-u="' + u.ukey + '">' +
       u.items.map(function(it, i){ return pillarRow(it, i, u); }).join("") + '</div>' +
     '<div class="ptotal" style="' + pgrid(on) + '">' +
       (on ? '<span></span>' : '') +
-      '<span>' + esc(u.name) + '<span class="tsub">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() + '</span></span>' +
+      '<span>' + esc(u.name) + '<span class="tsub">' + u.items.length + ' ' + L("pillar","bu") + '</span></span>' +
       '<span></span><span></span><span></span>' +
       '<span class="num">' + pct(unitPillars(u)) + '</span>' +
       '<span class="num">' + pct(unitRatio(u)) + '</span>' +
@@ -1138,22 +1145,21 @@ function pillarList(u){
    figure as a third headline, and unitPillars() has been computing it since
    the scoring model existed — it was in the rail's footer as a bare number.
    The decision that changed is where it is SHOWN, not what it means. */
-var TIP_PERF = "Performance scores this unit's own Key Objectives \u2014 each actual against its target, averaged. It is NOT a roll-up of its pillars' key measures: those average to their own figure, shown beside this one, and the two are meant to be comparable rather than the same number.";
+function TIP_PERF(){ return "Performance scores this unit's own " + L("keyobj") + " \u2014 each actual against its target, averaged. It is NOT a roll-up of its " + L("pillar") + "' " + L("measure") + ": those average to their own figure, shown beside this one, and the two are meant to be comparable rather than the same number."; }
 /* A FUNCTION, not a string. Every other TIP_ is a constant because it names no
    tenant-specific thing; this one names the tenant's word for a pillar, and a
    constant would freeze whatever LABELS held when the file loaded — before
    hydration on a deployed tenant, so it would say "Pillars" for a client who
    calls them Directions (§30.2's shape, in prose). */
 function tipPillars(){
-  var w = L("pillar", "bu").toLowerCase().replace(/s$/, "");
-  return "The mean of every " + esc(w) + "'s own performance \u2014 each one being " +
-    "its key measures scored against their targets, averaged. It says how the work " +
-    "the unit set itself is going, one level below the Key Objectives it is judged " +
+  return "The mean of every " + L1("pillar") + "'s own performance \u2014 each one being " +
+    "its " + L("measure") + " scored against their targets, averaged. It says how the work " +
+    "the unit set itself is going, one level below the " + L("keyobj") + " it is judged " +
     "on, and the two are meant to be comparable rather than the same number.";
 }
-var TIP_EXEC = "Execution scores the tactics under this unit's pillars \u2014 each tactic's percent complete, averaged across those whose quarter span has started. Planned is derived from those same spans.";
-var TIP_THEME = "Performance and execution across every pillar carrying this theme, in every business unit.";
-var TIP_CAP = "Group capabilities are pillars in their own right: performance from their key measures, execution from their tactics.";
+function TIP_EXEC(){ return "Execution scores the " + L("tactic") + " under this unit's " + L("pillar") + " \u2014 each " + L1("tactic") + "'s percent complete, averaged across those whose quarter span has started. Planned is derived from those same spans."; }
+function TIP_THEME(){ return "Performance and execution across every " + L1("pillar") + " carrying this " + L1("theme") + ", in every " + L1("unitword") + "."; }
+function TIP_CAP(){ return "Group " + L("capability") + " are " + L("pillar") + " in their own right: performance from their " + L("measure") + ", execution from their " + L("tactic") + "."; }
 
 /* THE COLOURS MOVE BEHIND A BUTTON (§163) ─────────────────────────────
    It was a full-width bar reading "READING THE COLOURS" with every band spelt
@@ -1443,7 +1449,7 @@ function unitsTable(keys){
       '<td class="num final" style="color:' + bandInk(ko) + '">' + pct(ko) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
-    '<th style="width:30%">Business unit</th><th class="num">Weight</th>' +
+    '<th style="width:30%">' + L1("unitword") + '</th><th class="num">Weight</th>' +
     '<th class="num">' + L("pillar","bu") + '</th><th class="num">Execution of plan</th>' +
     '<th class="num">Var.</th><th class="num">Objectives</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -1716,7 +1722,7 @@ function renderWeighting(){
     return '<span class="why fw">' + (sv == null ? "share \u2014" : "share " + Math.round(sv) + "%") + '</span>';
   };
 
-  var head = '<tr><th>Business unit</th>' + f.map(function(x){
+  var head = '<tr><th>' + L1("unitword") + '</th>' + f.map(function(x){
       var kindNote = x.kind === "derived" ? "derived" : x.kind === "judgement" ? "set by hand" : "estimated";
       return '<th><div class="factor-h"><b>' + esc(x.name) + '</b><span>' + esc(x.basis) +
              '<br>' + kindNote + ' &middot; weight ' + x.weight + '%</span></div></th>';
@@ -1780,13 +1786,13 @@ function renderWeighting(){
     '<tfoot><tr><td>Always totals</td>' + f.map(function(){ return '<td></td>'; }).join("") +
     '<td class="num">100%</td></tr></tfoot></table></div>';
 
-  return section("", "Business unit weighting",
+  return section("", L1("unitword") + " weighting",
       res.entered ? null
         : "No factor values have been entered yet, so every business unit counts " +
           "equally in the group compile. Press Edit and fill the table to weight them.",
       '<div class="cfgwrap open">' +
         '<div class="cfg-bar">' +
-          '<span class="cfg-lab">' + liveRows.length + ' business units' +
+          '<span class="cfg-lab">' + plural(liveRows.length, L1("unitword"), L("unitword")) +
             (retired ? ' &middot; ' + retired + ' retired, excluded' : '') + '</span>' +
           (grant("g_weight") === "edit"
             ? '<button class="editbtn" data-edit="weights">' + (EDITING.weights ? "Done" : "Edit") + '</button>'
@@ -1808,18 +1814,18 @@ function renderWeighting(){
 function unitCards(keys){
   return keys.map(function(k){
     var u = UNITS[k];
-    var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
+    var pd = miniTable([L1("keyobj"),"Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
         /* §264: the score, so the rows add up to the "Headline:" line below. */
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + pct(measureScore(m)) + '</td></tr>';
       }).join("")) +
-      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
+      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its ' + L("keyobj") + '. Contributes at <b>' +
       u.weight + '%</b> weight to the group.</p>' +
-      '<h4 class="mini">Pillars beneath</h4>' +
-      miniTable(SHOW_KIND ? ["Pillar","Kind","Theme","Performance","Of plan"]
-                          : ["Pillar","Theme","Performance","Of plan"],
+      '<h4 class="mini">' + L("pillar") + ' beneath</h4>' +
+      miniTable(SHOW_KIND ? [L1("pillar"),"Kind",L1("theme"),"Performance","Of plan"]
+                          : [L1("pillar"),L1("theme"),"Performance","Of plan"],
         u.items.map(function(it, i){
           return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
             (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
@@ -1827,13 +1833,13 @@ function unitCards(keys){
             '<td class="num">' + pillarPerf(it) + '%</td>' +
             '<td class="num">' + pillarRatio(it) + '%</td></tr>';
         }).join("")) +
-      '<p class="sub">The pillars explain the number rather than produce it &mdash; the headline above is the Key Objectives.</p>';
-    var ed = miniTable(["Pillar","Delivered","Planned","Variance"],
+      '<p class="sub">The ' + L("pillar") + ' explain the number rather than produce it &mdash; the headline above is the ' + L("keyobj") + '.</p>';
+    var ed = miniTable([L1("pillar"),"Delivered","Planned","Variance"],
       u.items.map(function(it, i){
         return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
           '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
-      '<p class="sub">Mean across the unit\'s pillars: <b>' + unitExec(u) + '%</b> against <b>' +
+      '<p class="sub">Mean across the unit\'s ' + L("pillar") + ': <b>' + unitExec(u) + '%</b> against <b>' +
       unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
     return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
       splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
@@ -1880,7 +1886,7 @@ function renderCompanyPerformance(coKey){
       pl = companyPlan(ck), r = companyRatio(ck);
   var share = companyWeight(ck);
 
-  var perfDrill = miniTable(["Business unit", "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
+  var perfDrill = miniTable([L1("unitword"), "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -1896,7 +1902,7 @@ function renderCompanyPerformance(coKey){
     'to 100%. Nothing is weighted twice and nothing is set here \u2014 the weights are composed ' +
     'on the group\u2019s <b>Weighting</b> tab.</p>';
 
-  var execDrill = miniTable(["Business unit", "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
+  var execDrill = miniTable([L1("unitword"), "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -1910,23 +1916,23 @@ function renderCompanyPerformance(coKey){
     '<td class="num"><b>' + pct(r) + '</b></td><td class="num">100%</td>' +
     '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
     '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
-    '<p class="sub">Tactic completion under every pillar in these units, weighted identically ' +
-    'to performance. The planned line is derived from each tactic\u2019s quarter span, never ' +
+    '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units, weighted identically ' +
+    'to performance. The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
     'entered.</p>';
 
   var head = '<div class="scores">' +
-    drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), perf, {
+    drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), perf, {
       primary: true,
       sub: "The " + plural(keys.length, "unit") + " in " + esc(co.name) +
-        ", each on its own " + L("keyobj","bu").toLowerCase() + ". " + esc(co.name) +
+        ", each on its own " + L("keyobj","bu") + ". " + esc(co.name) +
         " has no scorecard of its own \u2014 what it has is a reading of what it holds.",
       drill: perfDrill, modalTitle: esc(co.name) + " \u2014 performance",
       modalSub: "Weighted across the units in this company"
     }) +
-    drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), r, {
+    drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC()), r, {
       sub: deliveryLine(ex, pl, "in these units"),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
-      modalSub: "Weighted compile of tactic delivery, as a share of plan"
+      modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
     }) +
     drillCard("Share of the group" + tip("What these units together are worth at group level, " +
         "before this company's own figures are re-normalised. It is the one number that only " +
@@ -1943,7 +1949,7 @@ function renderCompanyPerformance(coKey){
     section("", L("unitword","bu"), null,
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF, viewToggle("units"));
+      TIP_PERF(), viewToggle("units"));
 }
 
 /* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§391) ───────────────────
@@ -1956,7 +1962,7 @@ function fnCompanyCard(fk, ck, share){
   var f = FUNCTIONS[fk], sc = fnMemberScores(fk), co = COMPANIES[ck];
   var w = Math.round(share.w * 10) / 10;
   var sub = w + "% of " + esc(co.name) + (share.set ? "" : " (weight left blank)") +
-    " &middot; supporting function";
+    " &middot; " + L1("fnword");
   var name = '<button class="linkbu" data-go="fn:' + esc(fk) + '">' + esc(f.name) + '</button>';
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
@@ -2004,22 +2010,22 @@ function renderCompanyWithFunctions(ck, co, keys, fks){
         : '') + '</p>';
   };
   var parts = plural(keys.length, "unit") + " and " +
-    plural(fks.length, "supporting function") + " in " + esc(co.name);
+    plural(fks.length, L1("fnword"), L("fnword")) + " in " + esc(co.name);
   var head = '<div class="scores">' +
-    drillCard("Performance" + tip(TIP_PERF), perf, {
+    drillCard("Performance" + tip(TIP_PERF()), perf, {
       primary: true,
-      sub: "The " + (keys.length ? parts : plural(fks.length, "supporting function") + " in " + esc(co.name)) +
-        ", each on its own key objectives, weighted.",
+      sub: "The " + (keys.length ? parts : plural(fks.length, L1("fnword"), L("fnword")) + " in " + esc(co.name)) +
+        ", each on its own " + L("keyobj") + ", weighted.",
       drill: drill("perf"), modalTitle: esc(co.name) + " — performance",
       modalSub: "Weighted across everything this company holds"
     }) +
-    drillCard("Execution" + tip(TIP_EXEC), r, {
+    drillCard("Execution" + tip(TIP_EXEC()), r, {
       sub: "Each part’s own execution figure, weighted as in performance.",
       drill: drill("exec"), modalTitle: esc(co.name) + " — execution",
       modalSub: "Weighted across everything this company holds"
     }) +
     (keys.length ? drillCard("Share of the group" + tip("What these units together are worth at group level. " +
-        "Supporting functions carry no group weight, so they are not in this number."), share, {
+        L("fnword") + " carry no group weight, so they are not in this number."), share, {
       plain: true, pill: "of the group",
       sub: plural(keys.length, "unit") + " of the group’s " + activeKeys().length +
         ", carrying <b>" + share + "%</b> of its weight between them. Functions carry no group " +
@@ -2034,7 +2040,7 @@ function renderCompanyWithFunctions(ck, co, keys, fks){
     (keys.length ? section("", L("unitword","bu"), null,
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF, viewToggle("units")) : '') +
+      TIP_PERF(), viewToggle("units")) : '') +
     section("", L("fnword"), null,
       '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck, byFn[k]); }).join("") + '</div>');
 }
@@ -2058,7 +2064,7 @@ function renderGroupPerformance(){
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
-  var perfDrill = miniTable(["Business unit","Objectives performance","Weight","Weighted contribution"],
+  var perfDrill = miniTable([L1("unitword"),"Objectives performance","Weight","Weighted contribution"],
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -2068,9 +2074,9 @@ function renderGroupPerformance(){
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>Group</b></td><td></td><td class="num">100%</td>' +
     '<td class="num"><b>' + groupUnitsObjectives() + '%</b></td></tr>') +
-    '<p class="sub">Each unit\'s own Key Objectives &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>';
+    '<p class="sub">Each unit\'s own ' + L("keyobj") + ' &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>';
 
-  var execDrill = miniTable(["Business unit","Of plan","Weight","Delivered","Planned","Variance"],
+  var execDrill = miniTable([L1("unitword"),"Of plan","Weight","Delivered","Planned","Variance"],
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -2085,21 +2091,21 @@ function renderGroupPerformance(){
     '<td class="num"><b>' + groupExec() + '%</b></td>' +
     '<td class="num"><b>' + groupPlan() + '%</b></td>' +
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
-    '<p class="sub">Tactic completion under every unit\'s pillars, weighted identically to performance. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
+    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var units = unitCards(keys);
 
 
   var themes = GROUP.themes.map(function(t, ti){
     var st = themeStats(t.ab);
-    var pd = miniTable(["Business unit", L("pillar","bu"), "Performance"],
+    var pd = miniTable([L1("unitword"), L("pillar","bu"), "Performance"],
       st.list.map(function(x){
         return '<tr><td>' + esc(x.unit) + '</td><td>' + x.code + ' ' + esc(x.it.name) + '</td>' +
           '<td class="num final" style="color:' + bandInk(pillarPerf(x.it)) + '">' + pillarPerf(x.it) + '%</td></tr>';
       }).join("")) +
-      '<p class="sub">Mean across <b>' + st.list.length + '</b> ' + L("pillar","bu").toLowerCase() +
-      ' carrying this theme, in <b>' + st.units.length + '</b> business units: <b>' + st.perf + '%</b>.</p>';
-    var ed = miniTable(["Business unit", L("pillar","bu"), "Delivered", "Planned", "Var."],
+      '<p class="sub">Mean across <b>' + st.list.length + '</b> ' + L("pillar","bu") +
+      ' carrying this ' + L1("theme") + ', in <b>' + st.units.length + '</b> ' + L("unitword") + ': <b>' + st.perf + '%</b>.</p>';
+    var ed = miniTable([L1("unitword"), L("pillar","bu"), "Delivered", "Planned", "Var."],
       st.list.map(function(x){
         return '<tr><td>' + esc(x.unit) + '</td><td>' + x.code + ' ' + esc(x.it.name) + '</td>' +
           '<td class="num">' + pillarExec(x.it) + '%</td><td class="num">' + pillarPlan(x.it) + '%</td>' +
@@ -2109,7 +2115,7 @@ function renderGroupPerformance(){
       '%</b> planned &mdash; <b>' + Math.round(st.exec / st.plan * 100) + '%</b> of plan.</p>';
     return '<div class="gwrap" data-oi="' + ti + '">' +
       splitCard('<span class="pill theme">' + t.ab + '</span> ' + esc(t.name),
-        st.list.length + " " + L("pillar","bu").toLowerCase() + " &middot; " + st.units.length + " units",
+        st.list.length + " " + L("pillar","bu") + " &middot; " + st.units.length + " units",
         st.perf, st.exec, st.plan, pd, ed, t.name,
         arranging("group") ? handle("Reorder " + t.name) : '') + '</div>';
   }).join("");
@@ -2127,8 +2133,8 @@ function renderGroupPerformance(){
     var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
       (ko == null
-        ? '<p class="sub">No key objectives of its own. This capability is judged by its projects.</p>'
-        : miniTable(["#","Key objective","Direction","Target","Actual","Progress"],
+        ? '<p class="sub">No ' + L("keyobj") + ' of its own. This ' + L1("capability") + ' is judged by its ' + L("project") + '.</p>'
+        : miniTable(["#",L1("keyobj"),"Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
               /* §264: the score, so the rows agree with the "Weighted across N
                  objectives" line below, which is capKO()'s own figure. */
@@ -2156,7 +2162,7 @@ function renderGroupPerformance(){
             '<td class="num">' + m.todo + '</td></tr>';
         }).join("")) +
       '<p class="sub"><b>' + ce.done + '</b> of <b>' + ce.total +
-      '</b> milestones completed across <b>' + c.projects.length + '</b> projects.</p>';
+      '</b> milestones completed across <b>' + c.projects.length + '</b> ' + L("project") + '.</p>';
     /* §16.6, settled by mock-capcard option 2: the same two-box card a business
        unit carries. The dial reads project performance; the right box holds the
        milestones that produce its execution — the workings behind the number,
@@ -2170,7 +2176,7 @@ function renderGroupPerformance(){
     var fnHeadName = fn && personName(fn.head);
     var sub = (fn ? esc(fn.name) +
         (fnHeadName && fnHeadName !== fn.name ? " &middot; " + esc(fnHeadName) : "") + " &middot; " : "") +
-      c.projects.length + " project" + (c.projects.length === 1 ? "" : "s");
+      plural(c.projects.length, L1("project"), L("project"));
     var msBody = !ce.total
       ? '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
         '<span class="ratio-l">no milestones</span>'
@@ -2238,32 +2244,32 @@ function whereNext(keys){
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
-        drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
+        drillCard("Group " + L("keyobj") + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the " + L("unitword") + "."), groupKeyObjectives(), {
           /* Was "The group's own scorecard. All 6 objectives have a target
              set." — a data-quality note where the reader wanted to know what
              the number IS (§156). The count stays, because it is the size of
              the thing being scored. */
           primary: true, sub: "The group\u2019s own <b>" + GROUP.keyObjectives.length +
             "</b> objectives, each scored against its target.",
-          drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
+          drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
-        drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
+        drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
              6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
              glance and which grows with the business. "How this is
              calculated →" is two lines below and opens exactly that. */
-          primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> business units\u2019 own " +
-            L("keyobj","bu").toLowerCase() + ", weighted by size.",
+          primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> " + L("unitword") + "\u2019 own " +
+            L("keyobj","bu") + ", weighted by size.",
           drill: perfDrill, modalTitle: L("unitword","bu") + " \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
-        drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
+        drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC()), groupRatio(), {
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
           sub: deliveryLine(groupExec(), groupPlan()),
-          drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
+          drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         }) +
       '</div>' + whereNext(UNIT_KEYS)) });
 
@@ -2277,22 +2283,22 @@ function whereNext(keys){
       null,
       GVIEW.units === "table"
         ? unitsTable(keys)
-        : arrangeBar("business units", UNIT_KEYS.length) +
+        : arrangeBar(L("unitword"), UNIT_KEYS.length) +
           '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="units">' + units + '</div>',
-      TIP_PERF, viewToggle("units")) });
+      TIP_PERF(), viewToggle("units")) });
 
-  SECS.push({ t: "Group themes", h: section("", "Group themes",
+  SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
       null,
       arrangeBar("themes", GROUP.themes.length) +
-      '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME) });
+      '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME()) });
 
-  SECS.push({ t: "Group capabilities", h: section("", "Group capabilities",
+  SECS.push({ t: "Group " + L("capability"), h: section("", "Group " + L("capability"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
         : arrangeBar("capabilities", GROUP.capabilities.length) +
           '<div class="gauges g4 sortable" data-item=".gwrap" data-kind="caps">' + caps + '</div>',
-      TIP_CAP, viewToggle("caps")) });
+      TIP_CAP(), viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
   return perfActs(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
@@ -2369,16 +2375,16 @@ function templeTables(){
 
     '<h4 class="mini">' + L("theme","group") + '</h4>' +
     '<div class="cfg"><table><thead><tr><th class="idx">#</th><th class="cc" style="width:9%">Code</th>' +
-      '<th style="width:24%">Name</th><th>Note</th><th class="cc">Pillars</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a theme") +
+      '<th style="width:24%">Name</th><th>Note</th><th class="cc">' + L("pillar") + '</th><th class="cc"></th>' +
+      '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a " + L1("theme")) +
 
     '<h4 class="mini">' + L("capability") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">Capability</th>' +
-      '<th>Definition</th><th class="cc">Measures</th><th class="cc">Tactics</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a capability") +
+    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">' + L1("capability") + '</th>' +
+      '<th>Definition</th><th class="cc">' + L("measure") + '</th><th class="cc">' + L("tactic") + '</th><th class="cc"></th>' +
+      '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a " + L1("capability")) +
 
-    '<div class="note"><b>A theme in use cannot be removed.</b> Its code is what every pillar points at; ' +
-    'renaming one carries its pillars with it, and deleting one would leave them pointing at nothing.</div>' +
+    '<div class="note"><b>A ' + L1("theme") + ' in use cannot be removed.</b> Its code is what every ' + L1("pillar") + ' points at; ' +
+    'renaming one carries its ' + L("pillar") + ' with it, and deleting one would leave them pointing at nothing.</div>' +
   '</div>';
 }
 
@@ -2414,11 +2420,11 @@ function renderTemple(){
     '<div class="pillars">' + GROUP.themes.map(function(p){
       return '<div class="pillar"><span>' + esc(p.ab) + '</span><b>' + esc(p.name) + '</b><em>' + esc(p.note || "") + '</em></div>';
     }).join("") + '</div>' +
-    '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no theme</div><div class="base-grid">' +
+    '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no ' + L1("theme") + '</div><div class="base-grid">' +
       GROUP.capabilities.map(function(c){
         return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
-          '<span>' + c.projects.length + ' project' + (c.projects.length === 1 ? '' : 's') +
-            (c.keyObjectives.length ? ' &middot; ' + c.keyObjectives.length + ' key objectives' : '') +
+          '<span>' + plural(c.projects.length, L1("project"), L("project")) +
+            (c.keyObjectives.length ? ' &middot; ' + c.keyObjectives.length + ' ' + L("keyobj") : '') +
             '</span></summary>' +
           '<div class="encard-body"><p>' + esc(c.def) + '</p><ul>' +
           c.projects.map(function(p){
@@ -2553,7 +2559,7 @@ function renderUnitPerformance(u){
      this page scores — so the breakdown opens from the headline rather than
      making someone go and find it. Same drill-down the group page offers. */
   var koDrill =
-    '<p class="sub" style="margin:0 0 14px">' + TIP_PERF + '</p>' +
+    '<p class="sub" style="margin:0 0 14px">' + TIP_PERF() + '</p>' +
     miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "H1 actual", "Progress"].concat(ws ? ["Weight","Contribution"] : []),
       u.keyObjectives.map(function(m, i){
         var w = ws ? Math.round(ws[i] * 10) / 10 : null;
@@ -2604,7 +2610,7 @@ function renderUnitPerformance(u){
   var plWord = L("pillar", "bu");
   var plDrill =
     '<p class="sub" style="margin:0 0 14px">' + tipPillars() + '</p>' +
-    miniTable(["#", plWord, "Measures", "Scored", "Performance"],
+    miniTable(["#", plWord, L("measure"), "Scored", "Performance"],
       u.items.map(function(it, i){
         var pp = pillarPerf(it), carrier = pillarCarrier(it);
         /* A pillar handed to a function is scored by ITS pillars, not by
@@ -2620,12 +2626,12 @@ function renderUnitPerformance(u){
           '<td class="num final" style="color:' + bandInk(pp) + '">' + pct(pp) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + u.items.length + '</b> ' +
-    plWord.toLowerCase() + ' with something scored: <b>' + pct(pl) + '</b>. ' +
-    'A ' + plWord.toLowerCase().replace(/s$/, "") + ' with no reported measure is left out ' +
+    plWord + ' with something scored: <b>' + pct(pl) + '</b>. ' +
+    'A ' + L1("pillar") + ' with no reported measure is left out ' +
     'rather than counted as zero: nothing reported is not the same as nothing achieved.</p>';
 
   var exDrill =
-    '<p class="sub" style="margin:0 0 14px">' + TIP_EXEC + '</p>' +
+    '<p class="sub" style="margin:0 0 14px">' + TIP_EXEC() + '</p>' +
     miniTable(["#", L("pillar","bu"), "Delivered", "Planned", "Of plan", "Var."],
       u.items.map(function(it, i){
         var pr = pillarRatio(it);
@@ -2635,13 +2641,13 @@ function renderUnitPerformance(u){
           '<td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Delivered <b>' + unitExec(u) + '%</b> against <b>' + unitPlan(u) +
-    '%</b> planned across <b>' + u.items.length + '</b> ' + L("pillar","bu").toLowerCase() +
-    ' &mdash; <b>' + r + '%</b> of plan. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
+    '%</b> planned across <b>' + u.items.length + '</b> ' + L("pillar","bu") +
+    ' &mdash; <b>' + r + '%</b> of plan. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var koId = modalFor(esc(u.name) + " &mdash; " + L("keyobj","bu"), "The unit's own scorecard, and how the headline is built", koDrill);
-  var plId = modalFor(esc(u.name) + " &mdash; " + plWord.toLowerCase() + " performance",
-    "What each " + plWord.toLowerCase().replace(/s$/, "") + "'s own measures average to", plDrill);
-  var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
+  var plId = modalFor(esc(u.name) + " &mdash; " + plWord + " performance",
+    "What each " + L1("pillar") + "'s own measures average to", plDrill);
+  var exId = modalFor(esc(u.name) + " &mdash; execution performance", L1("tactic") + " delivery across the unit's " + L("pillar"), exDrill);
 
   /* ── THE ACTIONS STAY IN THE LEGEND, AND THE LEGEND GETS QUIETER
      (§94.9, REVERSING §94.8's first half the same day) ───────────────
@@ -2669,7 +2675,7 @@ function renderUnitPerformance(u){
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span>' +
           deltaTag(u.ukey) +
-          '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu").toLowerCase() + ' &rarr;</button></div>' +
+          '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu") + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
           '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
             pct(koHi) + '</b></div>' +
@@ -2682,7 +2688,7 @@ function renderUnitPerformance(u){
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
           '<button class="drill" data-modal="' + plId + '">See the ' +
-            plWord.toLowerCase() + ' &rarr;</button></div>' +
+            plWord + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
           '<div><em>Highest</em><b style="color:' + bandInk(plHi) + '">' +
             pct(plHi) + '</b></div>' +
@@ -5095,12 +5101,12 @@ function drvBandLine(seasons, ch, sub, p, f){
 function drvAnswerables(u){
   var out = [];
   (u.keyObjectives || []).forEach(function(r){
-    if (r && r.name) out.push({ row:r, name:r.name, where:"a key objective" });
+    if (r && r.name) out.push({ row:r, name:r.name, where:"a " + L1("keyobj") });
   });
   (u.items || []).forEach(function(p, pi){
     (p.measures || []).forEach(function(m){
       if (m && m.name)
-        out.push({ row:m, name:m.name, where:esc(pillarCode(u, pi)) + " &middot; a pillar measure" });
+        out.push({ row:m, name:m.name, where:esc(pillarCode(u, pi)) + " &middot; a " + L1("pillar") + " " + L1("measure") });
     });
   });
   return out;
@@ -5174,7 +5180,7 @@ function drvSubTable(u, seasons, ch, sub, si, ed){
     '<th class="num" style="width:10%">Actual' +
       (ed ? '' : '<span class="subhd">what happened</span>') + '</th>' +
     '<th style="width:22%">Answers to' +
-      (ed ? '' : '<span class="subhd">the objective or measure this belongs to</span>') +
+      (ed ? '' : '<span class="subhd">the ' + L1("keyobj") + ' or ' + L1("measure") + ' this belongs to</span>') +
     '</th></tr></thead>';
   var body = (sub.periods || []).map(function(p, pi){
     var at = esc(u.ukey) + '|' + si + '|' + pi;
@@ -5577,7 +5583,7 @@ function renderFocusBoard(){
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
                       : '<span class="why" style="margin:3px 0 0">' +
                         (String(sub.key).indexOf("cap:") === 0
-                          ? 'capability' : 'supporting function') + '</span>') +
+                          ? L1("capability") : L1("fnword")) + '</span>') +
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
@@ -5898,7 +5904,7 @@ function renderReport(u){
 
     var mTable = ms.length
       ? '<h4 class="mini">' + L("measure","bu") + '</h4>' +
-        miniTable(["#", "Measure", "Dir.", REP_TGT_HEAD, "Reported", "Note"],
+        miniTable(["#", L1("measure"), "Dir.", REP_TGT_HEAD, "Reported", "Note"],
           ms.map(function(x, i){
             return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
               '<td class="idx">' + (i+1) + '</td>' +
@@ -5911,13 +5917,13 @@ function renderReport(u){
       : "";
 
     var tTable = ts.length
-      ? '<h4 class="mini">Tactics</h4>' +
+      ? '<h4 class="mini">' + L("tactic") + '</h4>' +
         /* §248: the Outcome takes a column here too, so somebody entering a
            figure can see what they are being measured against without leaving
            the page. It is a PLAN fact, so a row outside this cycle still shows
            its outcome — the cycle decides what is asked for, not what the plan
            says. */
-        miniTable(["#", "Tactic", "Outcome", "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
+        miniTable(["#", L1("tactic"), "Outcome", "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
           ts.map(function(x, i){
             var nameCell = '<td><b class="tacname">' + esc(x.obj.name) + '</b>' +
               (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
@@ -5992,10 +5998,10 @@ function renderReport(u){
        other surface honours it; this one printed "Direction" straight from the
        data and was the last place in the product still saying it. */
     return pillarBand(pillarCode(u, pi), p.name,
-        '<span class="pband-n">' + ms.length + ' measures &middot; ' +
+        '<span class="pband-n">' + plural(ms.length, L1("measure"), L("measure")) + ' &middot; ' +
         (bds.length ? bds.length + ' ' + esc(SMPRules.bdName(p).toLowerCase()) +
                       ' figures &middot; ' : '') +
-        askedT.length + ' tactics asked' +
+        plural(askedT.length, L1("tactic"), L("tactic")) + ' asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
@@ -6029,7 +6035,7 @@ function renderReport(u){
   var sel = unitRailPick(u);
   var pillars;
   if (!sel) {
-    pillars = '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() +
+    pillars = '<div class="note">This unit has no ' + L("pillar","bu") +
       ' yet, so there is nothing to report against.</div>';
   } else {
     /* §279: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
@@ -6082,7 +6088,7 @@ function renderReport(u){
       var t = pillarTally(p);
       return { id:p.id, code:pillarCode(u, pi), owner:p.owner,
                done:t.done, total:t.total };
-    }), L("pillar","bu").toLowerCase()));
+    }), L("pillar","bu")));
   var bar = "";
 
   var summary =
@@ -6126,7 +6132,7 @@ function renderReport(u){
   return waitingNote + reportBar(u.ukey) +
     bar +
     section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) +
-    section("", L("pillar","bu") + " &mdash; measures and tactics", null, pillars) +
+    section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
 
@@ -6143,9 +6149,9 @@ function capHead(c){
   return '<div class="caphdr">' +
     '<div><div class="capname">' + esc(c.name) + '</div>' +
       '<div class="why" style="margin:3px 0 0">' +
-        'Supporting function ' + esc(f ? f.name : "\u2014") +
+        L1("fnword") + ' ' + esc(f ? f.name : "\u2014") +
         (f ? ' &middot; ' + esc(functionPeople(c.fn).map(personName).join(", ")) : '') +
-        ' &middot; scored by the group, not by a business unit</div></div>' +
+        ' &middot; scored by the group, not by a ' + L1("unitword") + '</div></div>' +
     '<div class="capkpi"><div><i>Reported</i><b>' + r.done + ' / ' + r.total + '</b></div></div></div>';
 }
 
@@ -6459,7 +6465,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   return '<div class="rail' + (opts.arranging ? ' arranging' : '') + '">' +
     railHead(L("project"), list.length) + body +
     (opts.add ? '<div class="railadd"><button class="linkbu" data-rowadd="project|' +
-      esc(opts.capId) + '">+ Add a project</button>' +
+      esc(opts.capId) + '">+ Add a ' + L1("project") + '</button>' +
       /* §334: AND THE SECOND DOOR TO A CAPABILITY, where the projects are.
          Islam: *"the ability to turn functional projects to a capability."*
          Setup › Capabilities is the home he chose; this is the door beside the
@@ -6469,7 +6475,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
          promote. */
       (opts.promote
         ? '<button class="linkbu" data-cappromo="' + esc(opts.promote) +
-          '">Make a capability\u2026</button>' : '') +
+          '">Make a ' + L1("capability") + '\u2026</button>' : '') +
       '</div>' : '') +
     (footNote ? '<div class="rfoot">' + footNote + '</div>' : '') + '</div>';
 }
@@ -6779,7 +6785,7 @@ function capScoreCards(c){
   var cards = [];
   if (ko != null) {
     cards.push('<div class="card tight primary-card">' +
-      '<div class="score-h"><h4>Key objectives <span class="rank">primary</span></h4>' +
+      '<div class="score-h"><h4>' + L("keyobj") + ' <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span></div>' +
       '<div class="minirow"><div><em>Objectives</em><b>' + c.keyObjectives.length + '</b></div>' +
@@ -6788,7 +6794,7 @@ function capScoreCards(c){
           ' / ' + c.keyObjectives.length + '</b></div></div></div>');
   }
   cards.push('<div class="card tight' + (ko == null ? " primary-card" : "") + '">' +
-    '<div class="score-h"><h4>Project performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
+    '<div class="score-h"><h4>' + L1("project") + ' performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
@@ -6816,7 +6822,7 @@ function capScoreCards(c){
 
 function capKOTable(c){
   if (!c.keyObjectives.length) return "";
-  return '<h4 class="mini">Key objectives</h4>' +
+  return '<h4 class="mini">' + L("keyobj") + '</h4>' +
     miniTable(["#","Objective","Weight","Dir.","Target","Reported","Score"],
       c.keyObjectives.map(function(m, i){
         /* §264: the column is headed Score, and the score is the derived one —
@@ -6905,11 +6911,11 @@ function fnNothingBehind(subject){
   var t = holderTarget(subject);
   if (isCapTarget(t)) {
     var c = capById(capKeyOf(t));
-    return '<div class="note">' + esc(c ? c.name : "This capability") +
+    return '<div class="note">' + (c ? esc(c.name) : "This " + L1("capability")) +
       ' has nothing in it yet.' + (mayAuthor("k_found", t)
         ? ' <button class="linkbu" data-rowadd="project|' + esc(c ? c.id : "") +
-          '">Add its first project</button> &mdash; or make one of a function\u2019s ' +
-          'own projects a capability from that function\u2019s Projects page.'
+          '">Add its first ' + L1("project") + '</button> &mdash; or make one of a function\u2019s ' +
+          'own ' + L("project") + ' a ' + L1("capability") + ' from that function\u2019s ' + L("project") + ' page.'
         : '') + '</div>';
   }
   var fk = t.slice(3), f = FUNCTIONS[fk];
@@ -6927,19 +6933,19 @@ function fnNothingBehind(subject){
      on the click, because this note has no pen to gate it. */
   var held = capsOfFunction(fk);
   return '<div class="note">' + esc(f ? f.name : "This function") +
-    ' has no projects of its own yet. ' +
+    ' has no ' + L("project") + ' of its own yet. ' +
     (held.length
       ? 'Its work sits in ' + (held.length === 1
-          ? esc(held[0].name) + ', which has an entry of its own on <b>Capabilities</b>.'
-          : plural(held.length, "capability", "capabilities") +
-            ', each with an entry of its own on <b>Capabilities</b>.') + ' '
+          ? esc(held[0].name) + ', which has an entry of its own on <b>' + L("capability") + '</b>.'
+          : plural(held.length, L1("capability"), L("capability")) +
+            ', each with an entry of its own on <b>' + L("capability") + '</b>.') + ' '
       : '') +
     (mayAuthor("k_found", "fn:" + fk)
       ? '<button class="linkbu" data-rowadd="project|fn:' + esc(fk) +
-        '">Add its first project</button> &mdash; or set this function to plan in ' +
-        L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Supporting functions</b>.'
-      : 'Set this function to plan in ' + L("pillar", "bu").toLowerCase() +
-        ' on <b>Setup \u2192 Supporting functions</b>.') + '</div>';
+        '">Add its first ' + L1("project") + '</button> &mdash; or set this function to plan in ' +
+        L("pillar", "bu") + ' on <b>Setup \u2192 ' + L("fnword") + '</b>.'
+      : 'Set this function to plan in ' + L("pillar", "bu") +
+        ' on <b>Setup \u2192 ' + L("fnword") + '</b>.') + '</div>';
 }
 
 function renderFnPerformance(fnKey){
@@ -6986,7 +6992,7 @@ function renderFnPerformance(fnKey){
     caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
-      '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
+      '<div class="note">No ' + L("project") + ' yet. Nothing to report until there are.</div></div>';
     /* And the same rail a unit's Performance page carries: the score on the
        right, execution and the owner underneath, and a footer that STATES the
        summary rather than captioning the column ("83% across 4 · execution
@@ -7000,7 +7006,7 @@ function renderFnPerformance(fnKey){
       function(p){ var m = projMilestones(p);
         return 'execution ' + m.done + ' of ' + m.total +
           (p.owner ? ' &middot; ' + esc(p.owner) : ''); },
-      null, pct(capPerf(c)) + ' across ' + plural(c.projects.length, "project") +
+      null, pct(capPerf(c)) + ' across ' + plural(c.projects.length, L1("project"), L("project")) +
         ' &middot; execution ' + pct(ce.pct),
       function(p){ return projCode(holderCodeOwner(c), p); });
     return '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
@@ -7327,7 +7333,7 @@ function projPlanBody(p, subject){
            a unit and a function are the same product). The id alone is the
            address — holderOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
-          '">Remove this project</button>' +
+          '">Remove this ' + L1("project") + '</button>' +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
@@ -7336,7 +7342,7 @@ function projPlanBody(p, subject){
   return band +
     projFrontMatter(p, ed) +
     '<h4 class="mini">' + DX_HEADING +
-      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
+      ' <em>\u2014 what the ' + L1("project") + ' hands over, and what it is meant to change</em></h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
     /* NAME, THEN DESCRIPTION (§103). Islam: "we need the milestone name before
@@ -7574,7 +7580,7 @@ function renderFnProjects(fnKey){
        carries the Add button instead — an empty state that says what would
        fill it AND lets you fill it. */
     if (!sel) return '<div class="capbody"><div class="note">' +
-      'No projects yet.' + (ed
+      'No ' + L("project") + ' yet.' + (ed
         ? ' <button class="linkbu" data-rowadd="project|' + esc(c.id) +
           '">Add the first one</button>'
         : '') + '</div></div>';
@@ -7810,10 +7816,10 @@ function capReportBody(c){
   }).join("");
   var sel = railPick(c);
   var koBlock = c.keyObjectives.length
-    ? '<h4 class="mini">Key objectives</h4>' +
+    ? '<h4 class="mini">' + L("keyobj") + '</h4>' +
       miniTable(["#","Objective","Dir.",REP_TGT_HEAD,"Reported","Note"], kRows)
     : '';
-  if (!sel) return koBlock + '<div class="note">No projects to report on.</div>';
+  if (!sel) return koBlock + '<div class="note">No ' + L("project") + ' to report on.</div>';
   /* §279: the same mark the unit's rail carries, off the same map — this
      side's rail had exactly the unit's fault and no banner above it either. */
   var owedAt = {};
@@ -8009,8 +8015,8 @@ function unitRailFor(u, sel){
            of its own pages (§53.5). Guarded on the VALUE: a pillar nobody has
            marked yet says nothing rather than opening with a separator. */
         railSub((SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
-          plural(it.measures.length, "measure") +
-          ' &middot; ' + plural(it.tactics.length, "tactic") +
+          plural(it.measures.length, L1("measure"), L("measure")) +
+          ' &middot; ' + plural(it.tactics.length, L1("tactic"), L("tactic")) +
           (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
       '</button>';
   }).join("");
@@ -8026,7 +8032,7 @@ function unitRailFor(u, sel){
        (§53.5) and the two rails drifting is what that rule exists to stop. */
     (EDIT_PAGE.plan && mayEditPlan()
       ? '<div class="railadd"><button class="linkbu" data-rowadd="pillar|' +
-        esc(u.ukey) + '">+ Add a ' + L("pillar","bu").toLowerCase().replace(/s$/, "") +
+        esc(u.ukey) + '">+ Add a ' + L1("pillar") +
         '</button></div>'
       : '') + '</div>';
 }
@@ -8409,7 +8415,7 @@ function unitPlanBody(it, u, railed){
                dropping it leaves the control anonymous — visibly to anybody
                meeting an empty picker, and completely to a screen reader. The
                word moves onto the control rather than back onto the page. */
-            "Collaborators on this tactic"); } });
+            "Collaborators on this " + L1("tactic")); } });
     /* Quarters (§145): only a tactic naming NO quarter is a gap, and while
        its fill is pending the four stay the filler's — read mode carries
        the same chip and tick every other pending value wears. */
@@ -8430,7 +8436,7 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? bxkey("Tactic") : '') +
+      '<td>' + (ed ? bxkey(L1("tactic")) : '') +
         (ed ? textOr("plan", t.name, "", function(v){ t.name = v; })
             : '<b class="tacname">' + esc(t.name) + '</b>') +
         (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
@@ -8456,7 +8462,7 @@ function unitPlanBody(it, u, railed){
            control carries its own name (`aria-label`, above and in qsEdit). */
         (fold ? '<div class="tacfold">' +
                   '<span class="collabs">' + bxkey("Collabs.") + collabsHtml + '</span>' +
-                  '<span role="group" aria-label="Quarters this tactic runs in">' +
+                  '<span role="group" aria-label="Quarters this ' + L1("tactic") + ' runs in">' +
                   bxkey("Quarters") + quartersHtml + '</span></div>' : '') +
         '</td>' +
       /* WHAT IT SHOULD PRODUCE (§248), AND IT IS OWED (§249, reversing that
@@ -8567,7 +8573,7 @@ function unitPlanBody(it, u, railed){
            weight; these are quiet words (mockup, signed off 2026-09-01). */
         (ed ? '<button class="rmplan" data-rmrow="pillar|' + esc(u.ukey) +
               '|' + esc(it.id) + '">Remove this ' +
-              esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+              esc(L1("pillar")) +
               '</button>' : '') +
         /* §268: THE PEN IS ON THE SECTION LINE, WHICH PINS HIGHER THAN THIS
            HEAD DOES. §194 put it here so the way to save survived scrolling;
@@ -8672,15 +8678,15 @@ function unitPlanBody(it, u, railed){
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
-    '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
+    '<h4 class="mini">' + L("measure") + ' <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
     /* §199.5: the Unit heading appears only with the pen, because the column
        under it does — and `addRow`'s span has to follow, or the Add row stops
        reaching the end of the table the moment somebody opens the pen. */
-    miniTable((ed || unitCol) ? ["#","Measure","Dir.","Unit","Target","Compiled"]
-                 : ["#","Measure","Dir.","Target","Compiled"],
-      mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
+    miniTable((ed || unitCol) ? ["#",L1("measure"),"Dir.","Unit","Target","Compiled"]
+                 : ["#",L1("measure"),"Dir.","Target","Compiled"],
+      mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
-    '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
+    '<h4 class="mini">' + L("tactic") + ' <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under
@@ -8695,9 +8701,9 @@ function unitPlanBody(it, u, railed){
        haeders"*. `fold` is read here, where the row builder read it, so the
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
-    miniTable(["#","Tactic","Outcome",{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
+    miniTable(["#",L1("tactic"),"Outcome",{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
-      tRows + addRow(fold ? 4 : 6, "tactic", "Add a tactic"),
+      tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
       sortAttr("tactics"), "tactable");
 }
 function renderUnitPlan(u){
@@ -8733,12 +8739,12 @@ function renderUnitPlan(u){
     '<b>' + esc(u.name) + ' has no plan yet.</b>' +
     (typeof mayEditPlan === "function" && mayEditPlan()
       ? '<p>Build it here and the platform walks you through it section by section &mdash; ' +
-          'the foundation, the SWOT, then the ' + esc(L("pillar", "bu").toLowerCase()) +
-          ', their measures and their tactics.</p>' +
+          'the foundation, the SWOT, then the ' + esc(L("pillar", "bu")) +
+          ', their ' + L("measure") + ' and their ' + L("tactic") + '.</p>' +
         '<div class="row"><button class="bprim" data-buildplan="' + esc(u.ukey) + '">' +
           'Build the plan</button>' +
         '<span class="alt">or <button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
-          '">add the first ' + esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+          '">add the first ' + esc(L1("pillar")) +
           '</button> yourself, or upload a file on <b>Setup \u2192 Import &amp; archives</b>.</span>' +
         '</div>'
       : '<p>A plan arrives as a file: <b>Setup \u2192 Import &amp; archives</b>, the pillars ' +
@@ -8788,11 +8794,11 @@ function renderUnitPlan(u){
         return a + SMPRules.gapMissing("measure", m).length; }, 0) +
       (sel.tactics || []).reduce(function(a, t){
         return a + SMPRules.gapMissing("tactic", t).length; }, 0),
-      "this " + L("pillar","bu").toLowerCase().replace(/s$/, "")) +
+      "this " + L1("pillar")) +
     (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
+      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu") +
         ' &middot; drag by the handle to reorder, here and inside each ' +
-        L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
+        L1("pillar") + '</p>' : '') +
     (railWorthIt(u.items)
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
@@ -8866,8 +8872,8 @@ function holderOverview(subject){
      belong beside what the thing is when you are READING it. */
   var fl = filling("capfoundation", "k_found");
   var judged = isCap
-    ? (capPlansInPillars(c) ? esc(L("pillar","bu").toLowerCase()) : "projects")
-    : (fnPlansInPillars(f) ? esc(L("pillar","bu").toLowerCase()) : "projects");
+    ? (capPlansInPillars(c) ? esc(L("pillar","bu")) : L("project"))
+    : (fnPlansInPillars(f) ? esc(L("pillar","bu")) : L("project"));
   var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
       '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
       ((ed || fl)
@@ -8878,7 +8884,7 @@ function holderOverview(subject){
                capability rather than a function where it is one. One page,
                true sentences, never one that is wrong on half of it
                (§104.8). */
-            "None. This " + (isCap ? "capability" : "function") +
+            "None. This " + (isCap ? L1("capability") : L1("fnword")) +
             " is judged by its " + judged + "."));
   /* §268: THE EDIT BAR IS ON THE SECTION LINE. */
   return fillBarOr("capfoundation", "k_found",
@@ -8887,7 +8893,7 @@ function holderOverview(subject){
       "the overview") +
     '<div class="fgrid">' +
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
-        '<div class="clause"><dt>' + (isCap ? 'Capability' : 'Function') + '</dt><dd>' +
+        '<div class="clause"><dt>' + (isCap ? L1("capability") : L1("fnword")) + '</dt><dd>' +
           esc(isCap ? c.name : f.name) + '</dd></div>' +
         /* §226: LED BY OPENS, FOR THE OFFICE (Islam: "led by by office ok").
            The picker is Setup's own assignPicker writing the SAME head pointer
@@ -9244,7 +9250,7 @@ function capKoEdit(c){
    selects rather than drags, which is why the handle is separate. */
 function unitPerfRail(u){
   var sel = unitRailPick(u);
-  if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() + ' yet.</div>';
+  if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
   var rows = u.items.map(function(it, i){
     var perf = pillarPerf(it), r = pillarRatio(it);

@@ -250,7 +250,10 @@ with sync_playwright() as p:
     press(pg, ".csetup .wzadd", 300)
     press(pg, ".csetup [data-wznext]", 400)
     s = said(pg)
-    ck("Next with an empty row is refused in words", "Name a business unit" in s and "remove the empty row" in s, s[:120])
+    # §395: the sentence names the thing in the CLIENT's word, so it is asked
+    # as an agreement with the label and never as the platform's literal.
+    one = pg.evaluate("labelWord('unitword','group')")
+    ck("Next with an empty row is refused in words", ("Name a " + one) in s and "remove the empty row" in s, s[:120])
     ck("…and nothing is written", at(pg) == "units" and ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1)
     ck("taking the empty row off lets Next through", press(pg, ".csetup .wzrow >> nth=-1 >> .wzx", 300) and rows(pg) == r2
        and press(pg, ".csetup [data-wznext]", 500) and at(pg) == "cos", (rows(pg), at(pg), said(pg)[:60]))

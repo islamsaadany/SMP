@@ -153,7 +153,7 @@ function builderSections(target){
         var sw = u().swot || {}, n = ["s","w","o","t"].reduce(function(a,q){ return a + ((sw[q] || []).length); }, 0);
         return listChip(n);
       },
-      hint:function(){ return '<b>SWOT</b> \u2014 the analysis the ' + esc(L("pillar","bu").toLowerCase()) + ' are reasoned from. Empty is allowed; say what you know.'; } });
+      hint:function(){ return '<b>SWOT</b> \u2014 the analysis the ' + esc(L("pillar","bu")) + ' are reasoned from. Empty is allowed; say what you know.'; } });
     secs.push({ k:"plan", label:L("pillar", "bu"), tab:"strategy", sec:"plan", pen:"plan",
       chip:function(){ return listChip(u().items.length); },
       hint:function(){ return builderPillarHint(u()); } });
@@ -234,8 +234,8 @@ function builderSections(target){
 function builderPillarHint(x){
   var m = 0, t = 0;
   x.items.forEach(function(pi){ m += pi.measures.length; t += pi.tactics.length; });
-  return '<b>' + esc(L("pillar","bu")) + '</b> \u2014 the work the strategy commits to, each with its measures and tactics.' +
-    (x.items.length ? ' <b>' + x.items.length + ' \u00b7 ' + m + ' measures \u00b7 ' + t + ' tactics so far.</b>' : '');
+  return '<b>' + esc(L("pillar","bu")) + '</b> \u2014 the work the strategy commits to, each with its ' + L("measure") + ' and ' + L("tactic") + '.' +
+    (x.items.length ? ' <b>' + x.items.length + ' \u00b7 ' + m + ' ' + L("measure") + ' \u00b7 ' + t + ' ' + L("tactic") + ' so far.</b>' : '');
 }
 function builderReviewSection(){
   return { k:"review", label:"Review", tab:null, sec:null, pen:null,
@@ -294,7 +294,7 @@ function builderChooserHtml(){
                     rather than off a yes/no — which called an objectives
                     function "projects" on the one screen where you pick what
                     to build. */
-                 fmt:{ pillars:L("pillar","bu").toLowerCase(),
+                 fmt:{ pillars:L("pillar","bu"),
                        projects:"projects",
                        objectives:"objectives and actions" }[fnFormat(FUNCTIONS[k])] };
       })
@@ -324,8 +324,8 @@ function builderChooserHtml(){
   return seg + '<div class="blist">' + (rows ||
       '<div class="brow"><span class="bwhy">Nothing here yet — create one below.</span></div>') + '</div>' +
     '<div class="bnewrow">' +
-      '<button class="blink" data-bnew="unit">+ New business unit</button>' +
-      '<button class="blink" data-bnew="fn">+ New supporting function</button></div>' +
+      '<button class="blink" data-bnew="unit">+ New ' + L1("unitword") + '</button>' +
+      '<button class="blink" data-bnew="fn">+ New ' + L1("fnword") + '</button></div>' +
     '<p class="bfoot">Starting fresh archives the standing plan first — restorable from ' +
       '<b>Archived plans</b>. Nothing the builder does is a deletion.</p>';
 }
@@ -364,30 +364,30 @@ function bformDef(kind, ctx){
                      /* §276: the one list, in the pen's own order. */
                      opts:SMPRules.COMPILES.map(function(c){ return [c, c]; }) };
   var defs = {
-    pillar: { title:"Add a " + L("pillar","bu").toLowerCase().replace(/s$/, ""),
+    pillar: { title:"Add a " + L1("pillar"),
       fields:[
-        { k:"name", label:"Name", req:true, ph:"What this " + L("pillar","bu").toLowerCase().replace(/s$/, "") + " is called" },
+        { k:"name", label:"Name", req:true, ph:"What this " + L1("pillar") + " is called" },
         { k:"sub", label:"One line under the name", ph:"e.g. the end-state it reaches for" },
-        { k:"theme", label:"Theme", type:"select",
-          opts:[["","— cross-cutting, no theme —"]].concat(
+        { k:"theme", label:L1("theme"), type:"select",
+          opts:[["","— cross-cutting, no " + labelWord("theme","group") + " —"]].concat(
             GROUP.themes.map(function(t){ return [t.ab, t.ab + " · " + t.name]; })) },
         { k:"owner", label:"Owner", ph:"Who answers for it" }
       ] },
-    measure: { title:"Add a measure",
+    measure: { title:"Add a " + labelWord("measure","group"),
       fields:[
-        { k:"name", label:"Measure", req:true, ph:"What is measured" },
+        { k:"name", label:labelWord("measure","group"), req:true, ph:"What is measured" },
         dirSeg,
         { k:"target", label:"Target this year", mono:true, ph:"e.g. 90%" },
         { k:"target3y", label:horizonSet() ? "Target by " + esc(String(GROUP.horizon)) : "3-year target", mono:true, ph:"optional" },
         compileSeg
       ] },
-    tactic: { title:"Add a tactic",
+    tactic: { title:"Add a " + L1("tactic"),
       fields:[
-        { k:"name", label:"Tactic", req:true, ph:"The work itself, as a sentence" },
+        { k:"name", label:L1("tactic"), req:true, ph:"The work itself, as a sentence" },
         { k:"owner", label:"Owner", ph:"Who runs it" },
         { k:"q", label:"Quarters it is due in", type:"quarters" }
       ] },
-    objective: { title:"Add a key objective",
+    objective: { title:"Add a " + L1("keyobj"),
       fields:[
         { k:"name", label:"Objective", req:true, ph:"What the unit is judged on" },
         dirSeg,
@@ -395,7 +395,7 @@ function bformDef(kind, ctx){
         { k:"target3y", label:horizonSet() ? "Target by " + esc(String(GROUP.horizon)) : "3-year target", mono:true, ph:"optional" },
         compileSeg
       ] },
-    capko: { title:"Add a key objective",
+    capko: { title:"Add a " + L1("keyobj"),
       fields:[
         { k:"name", label:"Objective", req:true, ph:"What this function is judged on" },
         dirSeg,
@@ -403,29 +403,29 @@ function bformDef(kind, ctx){
         compileSeg,
         { k:"weight", label:"Weight %", mono:true, ph:"its share of the function’s score" }
       ] },
-    cap: { title:"Add a capability",
+    cap: { title:"Add a " + L1("capability"),
       fields:[
-        { k:"name", label:"Capability", req:true, ph:"What the function builds or runs" },
+        { k:"name", label:L1("capability"), req:true, ph:"What the function builds or runs" },
         { k:"def", label:"Definition", type:"long", ph:"What it is, in a sentence" }
       ] },
-    project: { title:"Add a project",
+    project: { title:"Add a " + L1("project"),
       fields:[
-        { k:"name", label:"Project", req:true, ph:"What the project is called" },
+        { k:"name", label:L1("project"), req:true, ph:"What the " + labelWord("project","group") + " is called" },
         { k:"owner", label:"Owner", ph:"Who answers for it" },
         { k:"start", label:"Start", mono:true, ph:"e.g. Q1 2026" },
         { k:"end", label:"End", mono:true, ph:"e.g. Q4 2026" },
-        { k:"brief", label:"Brief", type:"long", ph:"Why this project exists, in two sentences" }
+        { k:"brief", label:"Brief", type:"long", ph:"Why this " + labelWord("project","group") + " exists, in two sentences" }
       ] },
     deliverable: { title:"Add a deliverable",
       fields:[
-        { k:"name", label:"Deliverable", req:true, ph:"What the project hands over" },
+        { k:"name", label:"Deliverable", req:true, ph:"What the " + labelWord("project","group") + " hands over" },
         { k:"kind", label:"Measured as", type:"seg", def:"binary",
           opts:[["binary","Done or not"],["pct","% of progress"]] },
         { k:"due", label:"Due date", mono:true, ph:"e.g. Sep 2026" }
       ] },
     outcome: { title:"Add an outcome",
       fields:[
-        { k:"name", label:"Outcome", req:true, ph:"What the project is meant to change" },
+        { k:"name", label:"Outcome", req:true, ph:"What the " + labelWord("project","group") + " is meant to change" },
         dirSeg,
         { k:"target", label:"Target", mono:true },
         { k:"measureAt", label:"Measure date", mono:true, ph:"when it is read, e.g. Q4 2026" }
@@ -459,7 +459,7 @@ function bformDef(kind, ctx){
         { k:"text", label:{ s:"Strength", w:"Weakness", o:"Opportunity", t:"Threat" }[ctx && ctx.q] || "Line",
           req:true, type:"long" }
       ] },
-    newunit: { title:"New business unit", noAnother:true, verb:"Create",
+    newunit: { title:"New " + L1("unitword"), noAnother:true, verb:"Create",
       fields:[
         { k:"name", label:"Name", req:true },
         { k:"prefix", label:"Code prefix", mono:true, ph:"e.g. LE — minted from the name if left empty" },
@@ -468,7 +468,7 @@ function bformDef(kind, ctx){
             .map(function(ck){ return [ck, COMPANIES[ck].name]; })
             .concat([["","— its own company —"]]) }
       ] },
-    newfn: { title:"New supporting function", noAnother:true, verb:"Create",
+    newfn: { title:"New " + L1("fnword"), noAnother:true, verb:"Create",
       fields:[
         { k:"name", label:"Name", req:true },
         /* §381.2: THREE, because §342 made objectives-and-actions a real
@@ -478,7 +478,7 @@ function bformDef(kind, ctx){
         { k:"format", label:"Plans in", type:"seg", def:"projects",
           opts:FN_FORMATS.map(function(fm){
             return [fm, fm === "pillars" ? L("pillar","bu")
-                      : fm === "objectives" ? "Objectives and actions" : "Projects"];
+                      : fm === "objectives" ? "Objectives and actions" : L("project")];
           }) }
       ] }
   };
@@ -704,12 +704,14 @@ function builderGaps(target){
       pi.measures.forEach(function(m){ if (!m.target) noTarget++; });
       pi.tactics.forEach(function(t){ if (!t.q1 && !t.q2 && !t.q3 && !t.q4) idle++; });
     });
-    var pw = L("pillar","bu").toLowerCase().replace(/s$/, "");
-    say("plan", bare, pw + " holds no measures and no tactics yet", pw + "s hold no measures and no tactics yet");
-    say("plan", noTarget, "measure has no target \u2014 it will read as missing it",
-      "measures have no target \u2014 they will read as missing it");
-    say("plan", idle, "tactic is due in no quarter, so no cycle will ask for it",
-      "tactics are due in no quarter, so no cycle will ask for them");
+    /* §395: the two forms are the client's own two boxes, never a plural made
+       by adding an "s" (§107.8). */
+    say("plan", bare, L1("pillar") + " holds no " + L("measure") + " and no " + L("tactic") + " yet",
+      L("pillar") + " hold no " + L("measure") + " and no " + L("tactic") + " yet");
+    say("plan", noTarget, L1("measure") + " has no target \u2014 it will read as missing it",
+      L("measure") + " have no target \u2014 they will read as missing it");
+    say("plan", idle, L1("tactic") + " is due in no quarter, so no cycle will ask for it",
+      L("tactic") + " are due in no quarter, so no cycle will ask for them");
   };
   var noTargetIn = function(list){
     return (list || []).filter(function(m){ return !m.target; }).length;
@@ -743,8 +745,8 @@ function builderGaps(target){
           pr.milestones.forEach(function(m){ if (!m.finish) msNoDue++; });
         });
       });
-      say("proj", emptyP, "project holds neither deliverables nor outcomes",
-        "projects hold neither deliverables nor outcomes");
+      say("proj", emptyP, L1("project") + " holds neither deliverables nor outcomes",
+        L("project") + " hold neither deliverables nor outcomes");
       say("proj", oNoT, "outcome has no target", "outcomes have no target");
       say("proj", msNoDue, "milestone has no due date", "milestones have no due date");
     }

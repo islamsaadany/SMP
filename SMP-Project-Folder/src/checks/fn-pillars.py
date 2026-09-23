@@ -125,9 +125,12 @@ with sync_playwright() as p:
     # function, which is §213's decision finally true of both sides. Asserted
     # per format and not only as the agreement above, or a build that drifted
     # BOTH back to naming a capability would pass the whole section.
-    ok("...the pillars one naming the FUNCTION", a["labels"][:1] == ["Function"], a["labels"])
+    # §395: named in the client's word for a supporting function — an
+    # agreement with the label, never the platform's literal (§218).
+    fw = pg.evaluate("labelWord('fnword','group')")
+    ok("...the pillars one naming the FUNCTION", a["labels"][:1] == [fw], a["labels"])
     ok("...and the projects one naming the FUNCTION too (§326)",
-       c["labels"][:1] == ["Function"], c["labels"])
+       c["labels"][:1] == [fw], c["labels"])
     ok("...neither of them naming a capability (§333)",
        "Capability" not in a["labels"] and "Capability" not in c["labels"],
        {"pillars": a["labels"], "projects": c["labels"]})

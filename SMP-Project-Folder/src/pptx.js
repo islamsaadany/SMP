@@ -428,7 +428,7 @@ function pptxUnitSlides(u, kicker){
   slides.push(pptxSlideXml(fShapes));
 
   var kos = SMPRules.shown(u.keyObjectives);
-  if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
+  if (kos.length) slides = slides.concat(pptxTableSlides(kicker, labelWord("keyobj","bu"),
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
     kos.map(function(k){ return [k.name, orPend(k, "dir"), orPend(k, "target"), orPend(k, "target3y")]; })));
@@ -461,15 +461,15 @@ function pptxUnitSlides(u, kicker){
   (u.items || []).forEach(function(p, pi){
     var code = (u.codePrefix || "") + (p.code || (pi + 1));
     var pk = kicker + " · " + code;
-    slides = slides.concat(pptxTableSlides(pk, p.name + " — Key measures",
+    slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("measure","bu"),
       [5303520, 914400, 2346960, 2346960],
-      ["Measure", "Dir.", "Target", "Compiles"],
+      [labelWord("measure","group"), "Dir.", "Target", "Compiles"],
       SMPRules.shown(p.measures).map(function(m){
         return [m.name, orPend(m, "dir"), orPend(m, "target"), orPend(m, "compile")];
       })));
-    slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
+    slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("tactic","bu"),
       [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
-      ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
+      [labelWord("tactic","group"), "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       SMPRules.shown(p.tactics).map(function(t){
         return [t.name, orPend(t, "owner"),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
@@ -501,7 +501,7 @@ function pptxFnSlides(fk){
     if (kos.length) shapes.push(pptxTable(7,
       { x:PPTX_MX, y:2529840, cx:PPTX_CW },
       [5760720, 914400, 2118360, 2118360],
-      ["Key objective", "Dir.", "Target", "Weight"],
+      [labelWord("keyobj","group"), "Dir.", "Target", "Weight"],
       kos.slice(0, 8).map(function(k){
         return [k.name, orPend(k, "dir"), orPend(k, "target"),
                 k.weight != null
@@ -509,9 +509,9 @@ function pptxFnSlides(fk){
                   : PPTX_MISS];
       })));
     slides.push(pptxSlideXml(shapes));
-    slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, "Projects",
+    slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, labelWord("project","bu"),
       [3931920, 1737360, 1188720, 1188720, 2865120],
-      ["Project", "Owner", "Start", "End", "Carries"],
+      [labelWord("project","group"), "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
         return [p.name, orPend(p, "owner"), orPend(p, "start"), orPend(p, "end"),
           plural(SMPRules.shown(p.deliverables).length, "deliverable") + " · " +

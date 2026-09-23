@@ -111,7 +111,7 @@ with sync_playwright() as p:
     ck("the confirmation opens, naming the pillar",
        not dlg.get("none") and "MB01" in dlg["sub"], dlg)
     ck("...says what it holds", not dlg.get("none")
-       and "measure" in dlg["holds"] and "tactic" in dlg["holds"], dlg)
+       and "measure" in dlg["holds"].lower() and "tactic" in dlg["holds"].lower(), dlg)
     # Mobile's first pillar carries reported actuals in the demo, so the
     # amber line must be there and must carry a count.
     ck("...and warns what has been reported this cycle",
@@ -196,7 +196,7 @@ with sync_playwright() as p:
                hittable: hit === btn || btn.contains(hit) };
     }""")
     ck("the project band carries its own worded control, hittable",
-       not pb.get("none") and pb["word"] == "Remove this project"
+       not pb.get("none") and pb["word"] == "Remove this " + pg.evaluate("labelWord('project','group')")
        and pb["hittable"], pb)
     # §334: AND THE PRODUCT CAN SAY WHOSE PROJECT IT IS. The control addresses
     # the row by id alone and resolves the holder at press time, so a resolver

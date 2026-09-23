@@ -1041,7 +1041,7 @@ function vslideCtl(sl){
 /* The subject's own word, so the ceiling reads "This business unit already
    has…" rather than naming a key nobody uses (§93.12's vocabulary). */
 function deckSubjectWord(target){
-  return String(target || "").indexOf("fn:") === 0 ? "supporting function" : "business unit";
+  return String(target || "").indexOf("fn:") === 0 ? labelWord("fnword", "group") : labelWord("unitword", "group");
 }
 
 function slidesSlot(sl, p, i){

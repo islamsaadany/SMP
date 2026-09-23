@@ -2212,7 +2212,7 @@
             return '<button role="menuitem" data-u="' + esc(x.k) + '"' +
               (x.k === current ? ' aria-current="true"' : '') + '>' + esc(x.label) +
               (x.k === "group" ? '' : '<span class="dlsub">' +
-                plural(companyUnitKeys(x.k.slice(3)).length, "business unit") + '</span>') +
+                plural(companyUnitKeys(x.k.slice(3)).length, L1("unitword"), L("unitword")) + '</span>') +
               '</button>';
           }).join("") + '</div></details>';
       }
@@ -2314,8 +2314,11 @@
          which is §110.7's jump arriving sideways. */
       var lit = sc.querySelector('button[aria-selected="true"][data-u]');
       if (lit) {
-        var L = lit.offsetLeft, R = L + lit.offsetWidth;
-        if (L < sc.scrollLeft + 24) sc.scrollLeft = Math.max(0, L - 24);
+        /* Not `L`: a var hoists over the whole function, and L() is the
+           client's words — naming this L made every call to it inside
+           paintUnits() throw (§395, found by the rename probe). */
+        var lft = lit.offsetLeft, R = lft + lit.offsetWidth;
+        if (lft < sc.scrollLeft + 24) sc.scrollLeft = Math.max(0, lft - 24);
         else if (R > sc.scrollLeft + sc.clientWidth - 24) sc.scrollLeft = R - sc.clientWidth + 24;
       }
       fades();
@@ -4638,7 +4641,7 @@
        gives — two functions may genuinely share a name's letters. */
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", function(){
-      var name = prompt("Name of the supporting function");
+      var name = prompt("Name of the " + labelWord("fnword","group"));
       if (!name || !name.trim()) return;
       addFunction(name);
       paint();
@@ -5426,7 +5429,7 @@
            that answers it, shared with the Foundation's own editor. */
         if (k === "ko")    GROUP.keyObjectives.push(
                              Object.assign(koMint(GROUP.keyObjectives, "group"), { group:null }));
-        if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New theme", note:"" });
+        if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New " + labelWord("theme","group"), note:"" });
         /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
            `measures` and `tactics` — fields §15 removed — so the row had no
            id, no function and neither list, and the Capabilities page threw on
@@ -9521,8 +9524,8 @@
               var picked = readmePick(sheets);
               if (!picked) {
                 impFail(impIsCap()
-                  ? "no capability chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is."
-                  : "no business unit chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is.");
+                  ? "no " + labelWord("capability","group") + " chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is."
+                  : "no " + labelWord("unitword","group") + " chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is.");
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
@@ -9581,21 +9584,21 @@
                 return FUNCTIONS[k].name === picked;
               })[0];
               if (!uk && !fk && pfk && caps.length) {
-                impFail('"' + esc(picked) + '" is both a supporting function and a ' +
-                  'capability. Rename one on Setup \u2192 Capabilities, then upload again.');
+                impFail('"' + esc(picked) + '" is both a ' + L1("fnword") + ' and a ' +
+                  L1("capability") + '. Rename one on Setup \u2192 ' + L("capability") + ', then upload again.');
                 return;
               }
               var cp = pfk ? fnOwnHolderWritable(pfk) : caps[0];
               if (!uk && !fk && !pfk && caps.length > 1) {
-                impFail('two capabilities are called "' + esc(picked) + '" \u2014 under ' +
+                impFail('two ' + L("capability") + ' are called "' + esc(picked) + '" \u2014 under ' +
                   caps.map(function(x){
                     var f = FUNCTIONS[x.fn];
                     return f ? esc(f.name) : "no function";
-                  }).join(" and ") + '. Rename one on Setup \u2192 Capabilities, then upload again.');
+                  }).join(" and ") + '. Rename one on Setup \u2192 ' + L("capability") + ', then upload again.');
                 return;
               }
               if (!uk && !fk && !cp) {
-                impFail('no business unit, supporting function or capability called "' +
+                impFail('no ' + L1("unitword") + ', ' + L1("fnword") + ' or ' + L1("capability") + ' called "' +
                   esc(picked) +
                   '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
@@ -9679,7 +9682,7 @@
              and is not (§61). */
           var cc = impCapWritable();
           arch = applyCapPlanReplace(cc, sm.rows);
-          what = plural(inc.projects, "project") + ", " +
+          what = plural(inc.projects, L1("project"), L("project")) + ", " +
                  plural(inc.objectives, "objective") + " written.";
           IMP.done = { unit:cc.name, key:cc.id, fn:cc.fn, what:what, archived:arch };
         } else {
@@ -9691,9 +9694,9 @@
           if (wfk) fnWriteBack(wfk, uu);
           /* The tenant's own word for a pillar, which the label registry holds
              in the plural because that is how it is used in headings. */
-          what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
-                 plural(inc.measures, "measure") + ", " +
-                 plural(inc.tactics, "tactic") + " written.";
+          what = plural(inc.pillars, L1("pillar"), L("pillar")) + ", " +
+                 plural(inc.measures, L1("measure"), L("measure")) + ", " +
+                 plural(inc.tactics, L1("tactic"), L("tactic")) + " written.";
           /* THE HORIZON IS APPLIED WITH THE PLAN AND NAMED WHEN IT MOVES
              (§321). It is one year for the whole client, so a file that
              changes it changes every other unit's "by <year>" — which is
@@ -10569,7 +10572,7 @@
     var keepable = np > 0;
     var dest = dests.length === 1
       ? '<b>' + esc(dests[0].label) + '</b>'
-      : '<select class="fld" data-capdest="1" aria-label="Where the projects go">' +
+      : '<select class="fld" data-capdest="1" aria-label="Where the ' + L("project") + ' go">' +
           dests.map(function(x){
             return '<option value="' + esc(x.id) + '">' + esc(x.label) + '</option>';
           }).join("") + '</select>';
@@ -10582,19 +10585,19 @@
     var koNote = !nko ? ''
       : (dests.length === 1
           ? (fnHasKo
-              ? ' Its ' + plural(nko, "key objective") + ' stay in the archive \u2014 ' +
+              ? ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) + ' stay in the archive \u2014 ' +
                 esc(fname) + ' already has its own.'
-              : ' Its ' + plural(nko, "key objective") + (nko === 1 ? ' comes' : ' come') +
+              : ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) + (nko === 1 ? ' comes' : ' come') +
                 ' across too.')
-          : ' Its ' + plural(nko, "key objective") +
+          : ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) +
             (nko === 1 ? ' comes' : ' come') + ' across only to ' + esc(fname) +
-            '; a capability takes the projects alone.');
-    var whyNot = 'It holds no projects, so there is nothing to move.';
+            '; a ' + L1("capability") + ' takes the ' + L("project") + ' alone.');
+    var whyNot = 'It holds no ' + L("project") + ', so there is nothing to move.';
     var keepRow =
       '<div class="pick' + (keepable ? ' safe' : '') + '">' +
-        '<div class="txt"><p class="t">Keep the projects</p><p class="d">' +
+        '<div class="txt"><p class="t">Keep the ' + L("project") + '</p><p class="d">' +
           (keepable
-            ? plural(np, "project") + ' move to ' + dest + ' and keep their ids, ' +
+            ? plural(np, L1("project"), L("project")) + ' move to ' + dest + ' and keep their ids, ' +
               'their figures and their history. Only the grouping goes.' + koNote
             : whyNot) +
         '</p></div>' +
@@ -10605,19 +10608,19 @@
       '<div class="pick">' +
         '<div class="txt"><p class="t">Remove everything</p><p class="d">' +
           (np
-            ? plural(np, "project") + ' go too, with their deliverables, outcomes ' +
+            ? plural(np, L1("project"), L("project")) + ' go too, with their deliverables, outcomes ' +
               'and milestones.' + (rep ? ' The ' + rep + ' reported figures go with them.' : '')
-            : 'The capability' + (nko ? ' and its ' + plural(nko, "key objective") : '') +
+            : 'The ' + L1("capability") + (nko ? ' and its ' + plural(nko, L1("keyobj"), L("keyobj")) : '') +
               ' goes.') +
         '</p></div>' +
         '<button class="danger" data-caprmall="1">' +
           (np ? 'Remove all' : 'Remove it') + '</button>' +
       '</div>';
-    openModalHtml(esc("Remove this capability?"),
+    openModalHtml(esc("Remove this " + L1("capability") + "?"),
       esc((c.name || "Untitled") + (f ? " \u2014 " + f.name : "")),
       '<div class="rmconfirm">' +
-        '<p><b>' + esc(c.name || "This capability") + '</b> holds ' +
-          plural(nko, "key objective") + ' and ' + plural(np, "project") + '.' +
+        '<p><b>' + (c.name ? esc(c.name) : "This " + L1("capability")) + '</b> holds ' +
+          plural(nko, L1("keyobj"), L("keyobj")) + ' and ' + plural(np, L1("project"), L("project")) + '.' +
           (rep ? '' : ' Nothing has been reported against it this cycle.') + '</p>' +
         (rep ? '<div class="repline">' +
           plural(rep, "of its figures has been", "of its figures have been") +
@@ -10662,7 +10665,7 @@
     var f = FUNCTIONS[fk];
     if (!f || fnPlansInPillars(f) || !(f.projects || []).length) return;
     PROMO = { fk: fk, pick: {}, name: "" };
-    openModalHtml(esc("Make these projects a capability"),
+    openModalHtml(esc("Make these " + L("project") + " a " + L1("capability")),
       esc(f.name), '<div class="rmconfirm" id="promo-b"></div>');
     promoPaint();
   }
@@ -10676,7 +10679,7 @@
        letters and the ones left behind close up — and both halves are shown,
        because "their codes change" without saying to what is a warning nobody
        can check. The ids never move and the line says so. */
-    var made = { id:"", name:name || "New capability", codePrefix:null };
+    var made = { id:"", name:name || "New " + labelWord("capability","group"), codePrefix:null };
     var newCodes = picked.map(function(p, i){
       return esc(projCode(PROMO.fk, p)) + ' \u2192 ' +
         esc(capPrefix(made) + String(i + 1).padStart(2, "0")); });
@@ -10702,7 +10705,7 @@
       }).join("") +
       '<div class="mrow" style="margin-top:14px">' +
         '<input class="fld" id="promo-name" value="' + esc(PROMO.name) +
-          '" placeholder="Name the capability" aria-label="Name the capability">' +
+          '" placeholder="Name the ' + L1("capability") + '" aria-label="Name the ' + L1("capability") + '">' +
       '</div>' +
       '<div id="promo-cost">' + promoCost() + '</div>' +
       '<p class="archline">The plan as it stands is archived first. ' +
@@ -10710,7 +10713,7 @@
       '<div class="mrow"><button class="quiet" data-promono="1">Cancel</button>' +
         '<button class="keepbtn" data-promogo="1"' +
           (promoReady() ? '' : ' aria-disabled="true"') + '>' +
-          'Make it a capability</button></div>';
+          'Make it a ' + L1("capability") + '</button></div>';
   }
   function promoReady(){
     return !!(PROMO && Object.keys(PROMO.pick).length &&
@@ -10731,9 +10734,9 @@
     var f = FUNCTIONS[PROMO.fk], ps = f.projects || [];
     var picked = ps.filter(function(p){ return PROMO.pick[p.id]; });
     if (!picked.length)
-      return '<div class="repline">Choose at least one project. A capability ' +
+      return '<div class="repline">Choose at least one ' + L1("project") + '. A ' + L1("capability") + ' ' +
              'with nothing in it has nothing to be.</div>';
-    var made = { name: String(PROMO.name || "").trim() || "New capability" };
+    var made = { name: String(PROMO.name || "").trim() || "New " + labelWord("capability","group") };
     var newCodes = picked.map(function(p, i){
       return esc(projCode(PROMO.fk, p)) + ' \u2192 ' +
         esc(capPrefix(made) + String(i + 1).padStart(2, "0")); });
@@ -10743,12 +10746,12 @@
           now = (f.codePrefix || "") + String(i + 1).padStart(2, "0");
       return was === now ? null : esc(was) + ' \u2192 ' + esc(now);
     }).filter(Boolean);
-    return '<div class="repline"><b>' + esc(plural(picked.length, "project")) +
+    return '<div class="repline"><b>' + esc(plural(picked.length, L1("project"), L("project"))) +
       ' move, and their codes change.</b> ' + newCodes.join(', ') +
       (moved.length ? '; ' + esc(f.name) + '\u2019s remaining ' +
-        (moved.length === 1 ? 'project becomes ' : 'projects become ') +
+        (moved.length === 1 ? L1("project") + ' becomes ' : L("project") + ' become ') +
         moved.join(', ') : '') +
-      '. A code says where a project lives, so it follows the project. ' +
+      '. A code says where a ' + L1("project") + ' lives, so it follows the ' + L1("project") + '. ' +
       'Every figure, every milestone and every reported number stays exactly ' +
       'where it is \u2014 nothing is renumbered underneath.</div>';
   }
@@ -10810,15 +10813,15 @@
     var u = unitLikeWritable(ukey);
     var it = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
     if (!it) return;
-    var word = L("pillar", "bu").toLowerCase().replace(/s$/, "");
+    var word = L1("pillar");
     var code = pillarCode(u, u.items.indexOf(it));
     var scoresOf = String(ukey).indexOf("fn:") === 0
       ? "the function's scores" : "the unit's scores";
     rmConfirmOpen("Remove this " + word + "?",
       (code ? code + " — " : "") + (it.name || "Untitled"),
       '<b>' + esc(it.name || "This " + word) + '</b> holds ' +
-        plural((it.measures || []).length, "measure") + ' and ' +
-        plural((it.tactics  || []).length, "tactic") + '.',
+        plural((it.measures || []).length, L1("measure"), L("measure")) + ' and ' +
+        plural((it.tactics  || []).length, L1("tactic"), L("tactic")) + '.',
       rmReportedInPillar(it), scoresOf, "Remove the " + word,
       function(){
         var u2 = unitLikeWritable(ukey);
@@ -10897,17 +10900,17 @@
       else paint();
     };
     var held = was === "pillars"
-      ? plural(fnItems(f).length, L("pillar","bu").toLowerCase().replace(/s$/, ""))
+      ? plural(fnItems(f).length, L1("pillar"), L("pillar"))
       : was === "objectives"
       ? plural(fnActions(fk).length, "action")
-      : plural(fnOwnProjects(fk).length, "project");
+      : plural(fnOwnProjects(fk).length, L1("project"), L("project"));
     var empty = was === "pillars" ? !fnItems(f).length
       : was === "objectives" ? !fnActions(fk).length
       : !fnOwnProjects(fk).length;
     if (empty) { apply(); return; }
     var wordOf = function(k){
       return k === "pillars" ? L("pillar","bu")
-           : k === "objectives" ? "Objectives & actions" : "Projects";
+           : k === "objectives" ? "Objectives & actions" : L("project");
     };
     rmConfirmOpen("Change how " + (f.name || fk) + " plans?",
       wordOf(was) + " \u2192 " + wordOf(now),
@@ -10923,13 +10926,13 @@
     var c = holderOfProjectId(id), p = projById(id);
     if (!c || !p) return;
     var code = projCode(holderCodeOwner(c), p);
-    rmConfirmOpen("Remove this project?",
+    rmConfirmOpen("Remove this " + L1("project") + "?",
       (code ? code + " — " : "") + (p.name || "Untitled"),
-      '<b>' + esc(p.name || "This project") + '</b> holds ' +
+      '<b>' + (p.name ? esc(p.name) : "This " + L1("project")) + '</b> holds ' +
         plural((p.deliverables || []).length, "deliverable") + ', ' +
         plural((p.outcomes    || []).length, "outcome") + ' and ' +
         plural((p.milestones  || []).length, "milestone") + '.',
-      rmReportedInProject(p), "the function's scores", "Remove the project",
+      rmReportedInProject(p), "the function's scores", "Remove the " + L1("project"),
       function(){
         var c2 = holderOfProjectId(id);
         if (!c2 || !Array.isArray(c2.projects)) return;

@@ -317,10 +317,10 @@ function renderAccess(){
     /* The split halves collapse exactly as their whole did (§117): no unit
        means neither half of the unit pair can come up. */
     if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
-      return "A function head holds no business unit.";
+      return "A function head holds no " + L1("unitword") + ".";
     }
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
-      return "A company CEO holds no supporting function.";
+      return "A company CEO holds no " + L1("fnword") + ".";
     }
     /* ── TWO MORE THAT COULD NEVER COME UP (§174) ─────────────────────
        Islam: *"a project owner has options to edit or fill in a business
@@ -340,15 +340,15 @@ function renderAccess(){
        An option that cannot do anything is worse than an absent one: it reads
        as a decision somebody forgot to make. */
     if (roleKey === "powner" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
-      return "A project owner holds no business unit — projects belong to a " +
-             "supporting function's capabilities.";
+      return "A " + L1("project") + " owner holds no " + L1("unitword") + " — " + L("project") + " belong to a " +
+             L1("fnword") + "'s " + L("capability") + ".";
     }
     /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
        and `roleWheres()` offers only units, so "own supporting function" can
        never be theirs either — `fnhead`'s exclusion above with the sides
        swapped, missed when that one was written. */
     if (roleKey === "owner" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
-      return "A business unit owner holds no supporting function.";
+      return "A " + L1("unitword") + " owner holds no " + L1("fnword") + ".";
     }
     /* DELIBERATELY NOT plowner × own function. Islam expected the mirror
        ("same for pillar owner in the function") and the derivation disagrees:
@@ -999,7 +999,7 @@ function unitPanels(k, u){
   if (CLEARING === k + "|plan")
     return '<div class="kmenu kconfirm"><div class="cq">' +
       '<b>Clear ' + esc(u.name) + '’s whole plan?</b> ' +
-      'Pillars, measures, tactics, objectives, SWOT and the foundation text. ' +
+      L("pillar") + ', ' + L("measure") + ', ' + L("tactic") + ', ' + L("keyobj") + ', SWOT and the foundation text. ' +
       'Kept as an archive dated today and restorable from <b>Import &amp; archives</b>.' +
       '</div><div class="cbtns">' +
         '<button class="danger" data-clearyes="' + esc(k) + '|plan">Yes, clear the plan</button>' +
@@ -1104,7 +1104,7 @@ function renderUnits(){
         '<th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
+        '<th class="cc" style="width:7%">' + L("pillar") + '</th><th class="cc" style="width:9%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
@@ -1115,7 +1115,7 @@ function renderUnits(){
          because a row minted mid-drag lands at the end of a list somebody is in
          the middle of ordering. */
       (mayEdit && !arranging
-        ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>'
+        ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a ' + L1("unitword") + '</button></div>'
         : ''));
 }
 
@@ -1185,7 +1185,7 @@ var ROWDLG_SPECS = {
                  is the fault §107.8 wrote down, committed by somebody quoting
                  it. There is no singular anywhere to reach for. */
               esc(u.items.length + " " + String(L("pillar","bu")).toLowerCase()),
-              plural(u.keyObjectives.length, "key objective"),
+              plural(u.keyObjectives.length, L1("keyobj"), L("keyobj")),
               (u.weight != null ? u.weight + "% of the group" : "no weight set")].join(" · ");
     },
     body:  function(u, k){
@@ -1236,7 +1236,7 @@ var ROWDLG_SPECS = {
     title: function(f){ return f.name; },
     sub:   function(f, k){
       return [esc("Code " + (f.codePrefix || "—")),
-              plural(capsOfFunction(k).length, "capability", "capabilities"),
+              plural(capsOfFunction(k).length, L1("capability"), L("capability")),
               esc("key " + k)].join(" · ");
     },
     body:  function(f, k){
@@ -1258,7 +1258,7 @@ var ROWDLG_SPECS = {
            plans, because both answer "what is this function part of". */
         pdSect("Where it belongs") +
         pdField(L1("division"), fnCompanyCell(k, f, true)) +
-        pdField("Weight in its " + L1("division").toLowerCase(), fnCoWeightCell(k, f, true)) +
+        pdField("Weight in its " + L1("division"), fnCoWeightCell(k, f, true)) +
         (FNCOW_SAID && FNCOW_SAID.k === k
           ? pdField("", '<p class="why missing" style="margin:0">' + esc(FNCOW_SAID.msg) + '</p>', true) : '') +
         pdSect("Who runs it") +
@@ -1270,7 +1270,7 @@ var ROWDLG_SPECS = {
     find:  function(k){ return COMPANIES[k]; },
     title: function(c){ return c.name; },
     sub:   function(c, k){
-      return [plural(unitsOfCompany(k).length, "business unit"), esc("key " + k)].join(" · ");
+      return [plural(unitsOfCompany(k).length, L1("unitword"), L("unitword")), esc("key " + k)].join(" · ");
     },
     body:  function(c, k){
       var flag = function(field, val){
@@ -1505,7 +1505,7 @@ function brandingBody(){
   var gm = groupLogo();
   var markBlock = section("", "The group’s mark", null,
     '<p class="why" style="margin:0 0 14px">Shown on any deck that has no mark of its own — ' +
-      'a business unit whose own mark has not been uploaded, and every supporting function, ' +
+      'a ' + L1("unitword") + ' whose own mark has not been uploaded, and every ' + L1("fnword") + ', ' +
       'which never has one. Large on the cover, small in the footer of every other slide. ' +
       '<b>PNG only</b>, and keep the background transparent: a mark with white behind it paints ' +
       'a box around itself on a dark slide.</p>' +
@@ -4033,7 +4033,7 @@ function renderMainbus(){
      instance of the same shape in one change). */
   var addRow = mayEdit
     ? '<tr class="newrow"><td class="idx">+</td><td colspan="3">' +
-        '<input class="fld" id="newMainbu" placeholder="Business unit name, as your own records spell it" ' +
+        '<input class="fld" id="newMainbu" placeholder="' + L1("unitword") + ' name, as your own records spell it" ' +
         'value="' + esc(NEWMAINBU) + '">' +
       '</td><td class="cc"><button class="linkbu" data-mbadd="1">Add</button></td></tr>'
     : '';
@@ -4119,7 +4119,7 @@ function coPanels(ck, co, on){
       /* §391: a function it holds is in the list too, so the sentence names
          both kinds rather than calling a function a business unit. */
       'Move its ' + (blockers.length === unitsOfCompany(ck).length
-        ? plural(blockers.length, "business unit")
+        ? plural(blockers.length, L1("unitword"), L("unitword"))
         : plural(blockers.length, "business unit or function", "business units and functions")) +
       ' to another company, or ' + (blockers.length === unitsOfCompany(ck).length
         ? 'make each of them its own' : 'back to the group') + ', and this becomes possible. ' +
@@ -4194,9 +4194,9 @@ function renderCompanies(){
           coKebab(ck, co, on, mayEdit) + '</tr>';
       }).join("") + '</tbody></table></div>' +
       (mayEdit ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
-      '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
+      '<div class="note"><b>A ' + L1("division") + ' groups ' + L("unitword") + ' so its CEO sees their own.</b> ' +
       'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
-      'more. Supporting functions belong to no company: they serve all of them. ' +
+      'more. ' + L("fnword") + ' belong to no ' + L1("division") + ': they serve all of them. ' +
       'A company is <b>retired, never deleted</b>, and only once no unit belongs to it. ' +
       (soloUnits().length
         ? soloUnits().length + ' unit' + (soloUnits().length === 1 ? ' stands' : 's stand') +
@@ -4602,7 +4602,7 @@ function kbRecipes(){
 }
 
 function renderKB(){
-  var L1 = L("pillar","bu");
+  var plW = L1("pillar");  /* never named L1: that would hide L1() (§395) */
   var secs = [
     kbSection("scoring", "Scoring — how every figure is judged", [
       { p: 'One scale for every figure scored against a benchmark. <b>Performance is ' +
@@ -4644,13 +4644,13 @@ function renderKB(){
            'row, <i>Everyone else</i>, is not a role anybody holds: it is the floor somebody ' +
            'with no role at all stands on.' },
       { h: "Three of the roles are read off the plan",
-        p: '<b>Project owner</b>, <b>' + L1 + ' owner</b> and <b>Contributor</b> are never ' +
+        p: '<b>Project owner</b>, <b>Pillar owner</b> and <b>Contributor</b> are never ' +
            'granted by hand — being named on the plan is the role. Whoever is named a ' +
-           'project\u2019s Owner is its project owner; whoever is named a ' + L1.toLowerCase() +
-           '\u2019s is its ' + L1.toLowerCase() + ' owner; everybody else a plan names — a ' +
+           'project\u2019s Owner is its project owner; whoever is named a ' + plW +
+           '\u2019s is its ' + plW + ' owner; everybody else a plan names — a ' +
            'collaborator, a stakeholder, a milestone\u2019s owner — is a contributor. Each ' +
            'still needs its <b>Reporting</b> cell opened before it reports anything, and then ' +
-           'it reaches only its own lines: the project, the ' + L1.toLowerCase() + ', or the ' +
+           'it reaches only its own lines: the project, the ' + plW + ', or the ' +
            'rows that name the person. None of the three ever submits, because submitting ' +
            'speaks for the whole subject.' },
       { h: "Own is not a setting",
@@ -4746,7 +4746,7 @@ function renderKB(){
            'label collision reaching a screen.' },
       { h: "One label, two places",
         p: 'A level can read differently at group and at business unit — what the group ' +
-           'calls a ' + L1.toLowerCase() + ' a unit may call something else — and both ' +
+           'calls a ' + plW + ' a unit may call something else — and both ' +
            'are set on the Labels page.' },
       { h: "No collisions",
         p: 'Every display label at each level is unique, so no two entities can render ' +
@@ -4760,15 +4760,15 @@ function renderKB(){
         p: 'They are three display labels for the same statement, which is why a unit ' +
            'holds exactly one of them and never two.' }
     ]),
-    kbSection("units", "Business units and supporting functions", [
+    kbSection("units", L("unitword") + " and " + L("fnword"), [
       { h: "The short name is for the navigation only",
         p: 'Leave it blank and the full name is used. Page titles and every export keep ' +
            'the full name.' },
       { h: "A function is not a small unit",
-        p: 'A function carries <b>no plan, no weight and no ' + L1.toLowerCase() + '</b> — ' +
+        p: 'A function carries <b>no plan, no weight and no ' + plW + '</b> — ' +
            'it improves a cross-cutting capability the whole group depends on. The ' +
            '<b>code prefix</b> numbers the work it owns, the way a unit’s prefix numbers ' +
-           'its ' + L1.toLowerCase() + '.' },
+           'its ' + plW + '.' },
       { h: "Retired, never deleted",
         p: 'A unit or a function is <b>retired</b>, not removed: it carries reported ' +
            'history, and deleting it would rewrite what was already said. ' +
@@ -4876,7 +4876,7 @@ function renderKB(){
         ? '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
           '">Start the tour</button></p>'
         : '<p class="kb-p missing">There is nothing to walk through yet — the tour ' +
-          'points at pillars and key objectives, and this plan has none. It becomes ' +
+          'points at ' + L("pillar") + ' and ' + L("keyobj") + ', and this plan has none. It becomes ' +
           'available as soon as the plan has been built or imported.</p>') +
       '</div>'
     : '';
@@ -5334,7 +5334,7 @@ function renderFocusSetup(){
 
   return focusSwitch() + focusNav() +
     '<div class="cfg ftable"><table><thead><tr>' +
-      '<th style="width:56%">Measure</th>' +
+      '<th style="width:56%">' + L1("measure") + '</th>' +
       '<th class="cc" style="width:22%">Target</th>' +
       '<th class="cc" style="width:22%">Focus</th>' +
     '</tr></thead><tbody>' + body + '</tbody></table></div>';
@@ -5461,7 +5461,7 @@ function lineOwnersSwitch(mayEdit, editing){
     });
   } finally { VIEWER = was; }
   return '<div class="imp-row" style="margin:16px 0 0">' +
-    '<span class="cfg-lab">Tactic owners enter their own lines</span>' +
+    '<span class="cfg-lab">' + L1("tactic") + ' owners enter their own lines</span>' +
     (editing
       ? '<span class="minisw">' +
           '<button data-lineown="0" aria-pressed="' + (!on) + '">Off</button>' +
@@ -5469,7 +5469,7 @@ function lineOwnersSwitch(mayEdit, editing){
       : (on ? '<span class="pill attn">On</span>' : '<span class="pill none">Off</span>')) +
     '<span class="why" style="margin:0">' +
       (on
-        ? 'The person a tactic names as its <b>Owner</b> enters its figure, on their own ' +
+        ? 'The person a ' + L1("tactic") + ' names as its <b>Owner</b> enters its figure, on their own ' +
           '<b>My reporting</b> tab \u2014 and a collaborator enters none. ' +
           '<b>' + plural(owned, "line") + '</b> ' +
           (owned === 1 ? 'is' : 'are') + ' entered this way.'
@@ -5579,7 +5579,7 @@ function renderSetsSetup(){
       '<th class="cc" style="width:9%">Figures</th><th class="cc" style="width:9%"></th>' +
     '</tr></thead><tbody>' + (rows || (mayEdit ? "" :
       '<tr><td colspan="7" class="why">No sets yet. A set is how a number that ' +
-      'belongs to Finance stops being typed by ten business units.</td></tr>')) +
+      'belongs to Finance stops being typed by every ' + L1("unitword") + '.</td></tr>')) +
       addRow + '</tbody></table></div>' +
     namingSwitch(mayEdit, editing) +
     '<div class="note"><b>Who picks is a security setting, not a convenience.</b> ' +
@@ -5622,7 +5622,7 @@ function srcFigures(){
   activeKeys().forEach(function(k){
     var u = UNITS[k];
     (u.keyObjectives || []).forEach(function(m){
-      out.push({ unit:k, unitName:u.navName || u.name, inw:"ko", inLabel:"Key objective", row:m });
+      out.push({ unit:k, unitName:u.navName || u.name, inw:"ko", inLabel:L1("keyobj"), row:m });
     });
     (u.items || []).forEach(function(pl, pi){
       var code = pillarCode(u, pi);
@@ -5646,7 +5646,7 @@ function renderSourceSetup(){
   SRCSET.set = st.id;
 
   var figs = srcFigures();
-  if (!figs.length) return '<div class="note">No business unit has a plan yet.</div>';
+  if (!figs.length) return '<div class="note">No ' + L1("unitword") + ' has a plan yet.</div>';
 
   /* The dropdown filters, applied here; the SEARCH is applied in the browser
      without a repaint. So the tally has to be counted the same way search
@@ -5687,8 +5687,8 @@ function renderSourceSetup(){
   var unitOpts = [{ v:"", t:"All units" }].concat(activeKeys().map(function(k){
     return { v:k, t:UNITS[k].navName || UNITS[k].name };
   }));
-  var inOpts = [{ v:"", t:"Everything" }, { v:"ko", t:"Key objectives" },
-                { v:"pillar", t:"Pillar measures" }];
+  var inOpts = [{ v:"", t:"Everything" }, { v:"ko", t:L("keyobj") },
+                { v:"pillar", t:L1("pillar") + " " + L("measure") }];
   var stOpts = [{ v:"", t:"Any" }, { v:"free", t:"Unclaimed" },
                 { v:"mine", t:"In this set" }, { v:"other", t:"Another set" }];
 
@@ -5744,8 +5744,8 @@ function renderSourceSetup(){
         '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" ' +
           'aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4" ' +
           'stroke-linecap="round"/></svg>' +
-        '<input id="srcq" type="text" placeholder="Search measures and units…" ' +
-          'autocomplete="off" aria-label="Search measures and units" value="' +
+        '<input id="srcq" type="text" placeholder="Search ' + L("measure") + ' and ' + L("unitword") + '…" ' +
+          'autocomplete="off" aria-label="Search ' + L("measure") + ' and ' + L("unitword") + '" value="' +
           esc(SRCSET.q) + '"></span>' +
       sel("srcf-unit", "Unit", unitOpts, SRCSET.unit) +
       sel("srcf-in", "In", inOpts, SRCSET.inw) +
@@ -5756,7 +5756,7 @@ function renderSourceSetup(){
       '<th class="idx" style="width:40px">#</th>' +
       '<th style="width:128px">Unit</th>' +
       '<th style="width:108px">In</th>' +
-      '<th>Measure</th>' +
+      '<th>' + L1("measure") + '</th>' +
       '<th class="cc" style="width:52px">Dir.</th>' +
       '<th class="cc" style="width:104px">Target</th>' +
       '<th style="width:194px">Status</th>' +
@@ -5798,7 +5798,7 @@ var MYLINEF = "";   /* which band is being shown; "" is all of them */
 function renderMyLines(){
   var rows = myLineRows();
   if (!rows.length) {
-    return '<div class="note">No line is yours to report. A tactic is yours when the plan ' +
+    return '<div class="note">No line is yours to report. A ' + L1("tactic") + ' is yours when the plan ' +
       'names you as its <b>Owner</b> \u2014 the SMO sets that on the unit\u2019s plan.</div>';
   }
   var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
@@ -5824,7 +5824,7 @@ function renderMyLines(){
     var list = byT[t], n = list.filter(lineAnswered).length;
     var shut = lineLockShut(t);
     var body = '<table class="cfg"><thead><tr>' +
-        '<th style="width:34%">Tactic</th><th style="width:26%">What it produced</th>' +
+        '<th style="width:34%">' + L1("tactic") + '</th><th style="width:26%">What it produced</th>' +
         '<th class="num" style="width:16%">' + REP_TGT_HEAD + '</th>' +
         '<th class="cc" style="width:16%">YTD actual</th>' +
         '<th class="cc" style="width:10%">Progress</th>' +
@@ -6007,7 +6007,7 @@ function renderUnitNaming(u){
   var editable = canName(u.ukey);
   var figs = figuresOf(u);
   if (!figs.length) {
-    return '<div class="note">This unit has no directions or key measures yet. A plan ' +
+    return '<div class="note">This unit has no ' + L("pillar") + ' or ' + L("measure") + ' yet. A plan ' +
       'arrives by upload (§22), and this page follows it.</div>';
   }
 
@@ -6281,8 +6281,8 @@ function renderImportDownload(){
       'subject is chosen on its Read me sheet, and the platform mints every code on ' +
       'arrival.</p></div>' +
     '<div class="ffoot"><span class="why">One per way of planning. A unit always plans in ' +
-      'pillars; a function plans whichever way Setup says.</span><span class="fbtns">' +
-      '<button class="editbtn" data-dlblank="pillars">Pillars</button>' +
+      L("pillar") + '; a function plans whichever way Setup says.</span><span class="fbtns">' +
+      '<button class="editbtn" data-dlblank="pillars">' + L("pillar") + '</button>' +
       '<button class="editbtn" data-dlblank="projects">' + L("project") + '</button>' +
       '<button class="editbtn" data-dlblank="objectives">Objectives &amp; actions</button>' +
       '</span></div></div>';
@@ -6446,18 +6446,18 @@ function renderImportUpload(){
   if (isPlan && IMP.summary && u) {
     var sm = IMP.summary, inc = sm.incoming, cur = sm.current;
     var line = isCap
-      ? inc.objectives + " objectives &middot; " + inc.projects + " projects &middot; " +
+      ? plural(inc.objectives, L1("keyobj"), L("keyobj")) + " &middot; " + plural(inc.projects, L1("project"), L("project")) + " &middot; " +
         inc.deliverables + " deliverables &middot; " + inc.outcomes + " outcomes &middot; " +
         inc.milestones + " milestones"
-      : inc.clauses + " clauses &middot; " + inc.objectives + " objectives &middot; " +
-        inc.pillars + " pillars &middot; " + inc.measures + " measures &middot; " +
-        inc.tactics + " tactics" + (inc.swot ? " &middot; " + inc.swot + " SWOT points" : "");
+      : inc.clauses + " clauses &middot; " + plural(inc.objectives, L1("keyobj"), L("keyobj")) + " &middot; " +
+        plural(inc.pillars, L1("pillar"), L("pillar")) + " &middot; " + plural(inc.measures, L1("measure"), L("measure")) + " &middot; " +
+        plural(inc.tactics, L1("tactic"), L("tactic")) + (inc.swot ? " &middot; " + inc.swot + " SWOT points" : "");
     var had = isCap
-      ? cur.objectives + " objectives &middot; " + cur.projects + " projects &middot; " +
+      ? plural(cur.objectives, L1("keyobj"), L("keyobj")) + " &middot; " + plural(cur.projects, L1("project"), L("project")) + " &middot; " +
         cur.deliverables + " deliverables &middot; " + cur.outcomes + " outcomes &middot; " +
         cur.milestones + " milestones"
-      : cur.objectives + " objectives &middot; " + cur.pillars + " pillars &middot; " +
-        cur.measures + " measures &middot; " + cur.tactics + " tactics";
+      : plural(cur.objectives, L1("keyobj"), L("keyobj")) + " &middot; " + plural(cur.pillars, L1("pillar"), L("pillar")) + " &middot; " +
+        plural(cur.measures, L1("measure"), L("measure")) + " &middot; " + plural(cur.tactics, L1("tactic"), L("tactic"));
     var hasPlan = !planIsEmpty(cur);
 
     body =
@@ -6486,7 +6486,7 @@ function renderImportUpload(){
           (horizonSet() ? esc(String(GROUP.horizon)) + ' &rarr; ' : 'to ') +
           esc(String(IMP.horizon).trim()) + '.</b> ' +
           'There is one horizon for the whole client, so every &ldquo;by &lt;year&gt;&rdquo; ' +
-          'on every other ' + esc(L("pillar", "bu").toLowerCase()) + ' page moves with it. ' +
+          'on every other ' + esc(L("pillar", "bu")) + ' page moves with it. ' +
           'Leave the Horizon cell on the Aspiration sheet empty and the stored year is kept.</div>'
         : '') +
       (hasPlan
@@ -6560,9 +6560,9 @@ function renderArchives(){
       ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
          plural(c.units || 0, "submitted unit")].join(" &middot; ")
       : a.kind === "unit"
-      ? [c.pillars + " pillars", c.measures + " measures", c.tactics + " tactics",
-         c.objectives + " objectives"].join(" &middot; ")
-      : [c.projects + " projects", c.deliverables + " deliverables",
+      ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")), plural(c.tactics, L1("tactic"), L("tactic")),
+         plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+      : [plural(c.projects, L1("project"), L("project")), c.deliverables + " deliverables",
          c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
@@ -7045,7 +7045,7 @@ function renderCycle(){
       '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
         '<i style="width:' + pctD + '%"></i></span>' +
         '<span class="mono why" style="margin:0">' + c.done + '/' + c.total + '</span></div></td>' +
-      '<td class="num" title="Key objectives">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
+      '<td class="num" title="' + L("keyobj") + '">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
       '<td class="num" title="Outcomes asked this cycle">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
       '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
@@ -7078,7 +7078,7 @@ function renderCycle(){
      (§53.5). Drawn only when there is one, like the functions band. */
   if (capRows) {
     capRows = '<tr class="dxband"><th colspan="8">' + L("capability") +
-        '<em>' + plural(capTargets.length, "capability", "capabilities") +
+        '<em>' + plural(capTargets.length, L1("capability"), L("capability")) +
         ' reporting</em></th></tr>' + capRows;
   }
 
@@ -7366,9 +7366,9 @@ function renderCycle(){
       : '') +
     section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
     section("", "Who has reported", null,
-      '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
-        '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
-        '<th class="cc">Tactics</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
+      '<div class="cfg"><table><thead><tr><th style="width:17%">' + L1("unitword") + '</th><th>Reporting</th>' +
+        '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
+        '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
         '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +
       (open
         ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
@@ -7451,7 +7451,7 @@ function planFormatCell(fk, f, editable){
        from the control it is about (§163, §221). Measured rather than judged:
        one line in an 810px cell at 1500, 1280 and 1100, nothing over. */
     (caps ? '<span class="why">holds ' +
-       esc(caps + (caps === 1 ? " capability" : " capabilities")) +
+       plural(caps, L1("capability"), L("capability")) +
        ' \u2014 the form cannot change while it does</span>' : '');
 }
 /* ── AND A CAPABILITY CARRIES ITS OWN FORM (§334, spec 048 §3) ─────────────
@@ -7473,7 +7473,7 @@ function capFormatCell(c, editable){
   var blocked = pillars
     ? (capItems(c).length ? "its plan" : "")
     : ((c.projects || []).length
-        ? plural((c.projects || []).length, "project") : "");
+        ? plural((c.projects || []).length, L1("project"), L("project")) : "");
   return '<select class="fld" data-capformat="' + esc(c.id) + '"' +
       (blocked ? ' disabled title="Clear the plan on this row first"' : '') +
       ' aria-label="How ' + esc(c.name) + ' is planned">' +
@@ -7641,7 +7641,7 @@ function fnPanels(fk, f){
   var caps = n + " " + (n === 1 ? "capability" : "capabilities");
   if (CLEARING === "fn|" + fk + "|plan")
     return '<div class="kmenu kconfirm"><div class="cq"><b>Clear the whole plan?</b> ' +
-      'Key objectives and projects across ' + caps + '. The definitions stand, and each ' +
+      L("keyobj") + ' and ' + L("project") + ' across ' + caps + '. The definitions stand, and each ' +
       'plan is archived first.</div><div class="cbtns">' +
       '<button data-clearno="1">Cancel</button>' +
       '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Yes, clear the plan</button>' +
@@ -7815,7 +7815,7 @@ function renderFunctions(){
          explained, and three paragraphs of prose under every table is how a
          configuration screen stops being scannable. */
       (mayEdit && !arranging
-        ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a supporting function</button></div>'
+        ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a ' + L1("fnword") + '</button></div>'
         : ''));
 }
 
@@ -7840,7 +7840,7 @@ function renderCaps(){
          with no way on this page to say what it actually is. */
       '<td>' + (editable
         ? '<input class="fld tk-firstfield" value="' + esc(c.name) + '" data-capname="' + i +
-          '" aria-label="Name of capability ' + (i+1) + '">'
+          '" aria-label="Name of ' + L1("capability") + ' ' + (i+1) + '">'
         : '<b>' + esc(c.name) + '</b>') + '</td>' +
       '<td>' + (editable
         /* NAMED. Eight of these on one page announced as eight identical
@@ -7882,26 +7882,26 @@ function renderCaps(){
       /* §84. Eight rows and it grows with the practice; *Unassigned* is the
          filter because an unassigned capability is the one thing this page
          exists to fix, and the header has counted them since §15. */
-      tkBar("caps", { placeholder:"Search the capabilities\u2026" }) +
+      tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h("Capability") + h("Held by") + h("Head") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Head") +
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (mayEdit
-        ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a capability</button>' +
+        ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it, choose the function that ' +
-          'carries it, then upload its projects on Import.</span></div>'
+          'carries it, then upload its ' + L("project") + ' on Import.</span></div>'
         : '') +
-      '<div class="note"><b>One function each.</b> A function may hold several capabilities \u2014 ' +
+      '<div class="note"><b>One function each.</b> A function may hold several ' + L("capability") + ' \u2014 ' +
         'Marketing carries two \u2014 which is why a custodian is named after the function and never ' +
-        'after a capability: naming someone after one breaks the moment a second is assigned.</div>' +
-      '<div class="note"><b>A capability carries projects, and optionally key objectives.</b> ' +
-        'Key objectives are optional because some capabilities hold interrelated projects serving ' +
+        'after a ' + L1("capability") + ': naming someone after one breaks the moment a second is assigned.</div>' +
+      '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
+        L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
         'one number at the top and others are a portfolio of unrelated work: where there are none ' +
-        'the card is hidden rather than shown at zero. Each project carries a brief, its ' +
+        'the card is hidden rather than shown at zero. Each ' + L1("project") + ' carries a brief, its ' +
         'deliverables and outcomes \u2014 half its performance each \u2014 and its milestones, which are ' +
         'its execution.</div>');
 }

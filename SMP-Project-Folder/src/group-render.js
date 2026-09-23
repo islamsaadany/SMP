@@ -7824,7 +7824,7 @@ function renderFnReport(fnKey){
    they group by kind \u2014 a Direction and a Capability are different things and
    the rail says so. */
 function unitRailKey(u){ return "unit:" + u.ukey; }
-/* §391 WHICH PILLAR THE RAIL MEANS IS ITS ROW ID, NEVER ITS CODE. A pillar
+/* §393 WHICH PILLAR THE RAIL MEANS IS ITS ROW ID, NEVER ITS CODE. A pillar
    added with the pen is minted `code: ""` (addPillar) and nothing fills it in
    on a tenant's saved plan, so every hand-added pillar shared ONE rail key:
    all of them lit at once and pressing any opened the first. The code is
@@ -7863,7 +7863,7 @@ function unitRailFor(u, sel){
        pillar 01 and the next called it MB01.
 
        So the DISPLAY moves to pillarCode() and the data attribute does NOT:
-       `data-urail` is the rail's selection key. Since §391 that key is the
+       `data-urail` is the rail's selection key. Since §393 that key is the
        pillar's ROW ID (pillarRailId), not its stored code: a code can be empty
        or shared, and a shared key lights every row that has it. */
     /* §145.12: which pillar owes what, for the people who can act on it —

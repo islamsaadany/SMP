@@ -23,7 +23,7 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE
   office → a bar.
 
 · THE PLACE IS ADDRESSED BY THE PILLAR'S ROW ID, NOT THE DRAWN CODE. `pillarCode()`
-  renders the tenant's prefix (BE03) and the rail matches the row id (§391 —
+  renders the tenant's prefix (BE03) and the rail matches the row id (§393 —
   it matched the stored code until that code proved empty or shared) —
   keying the chip on the label made Next set the rail to a code no pillar has,
   so the press repainted the same pane and looked like a dead button. Found by
@@ -191,7 +191,7 @@ with sync_playwright() as p:
        at(r.get("chips"), 0).get("txt", "").startswith(at(places, 0).get("label", "\u0000")), r)
 
     # 3 ── ADDRESSED BY THE STORED CODE, LABELLED WITH THE DRAWN ONE
-    print("\n3 · the chip is addressed by the pillar's row id (§48, §391)")
+    print("\n3 · the chip is addressed by the pillar's row id (§48, §393)")
     ck("the chip's rail code is the pillar's row id",
        at(r.get("chips") if isinstance(r, dict) else [], 0).get("code") ==
        (made.get("code") if isinstance(made, dict) else None), (r, made))

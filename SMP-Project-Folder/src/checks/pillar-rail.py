@@ -1,4 +1,4 @@
-"""The pillar rail selects by the pillar's row id, never its code (§391).
+"""The pillar rail selects by the pillar's row id, never its code (§393).
 
 Islam, from a client's plan: "when I click on the E5 I can't click E3 and E2
 only E1". Four of five pillars there carried an EMPTY stored code (a pillar

@@ -56752,7 +56752,7 @@ REVERSED, not left beside the new rule** (Principle II).
   and `qa.py`'s old-"BU"-header row was a brand-new person with no title and
   no email, now correctly refused, so it carries both. Full `qa.py` ERRORS none.
 
-## §391 — the pillar rail selects by row id, never by stored code (2026-09-23)
+## §393 — the pillar rail selects by row id, never by stored code (2026-09-23)
 
 Islam, from a client's plan with five pillars: *"THE PILLARS clikcing are not
 behaving right … when I click on the E5 I can't click e3 and e 2 only e1."*

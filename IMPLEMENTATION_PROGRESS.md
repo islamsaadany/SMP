@@ -7939,7 +7939,7 @@ still be updated with blank cells, which keep what is recorded. Your own HR
 export works as it is: if there's no sheet called "People", the first sheet is
 read, and headings like *Title*, *E-mail* or *Employee Name* are understood.
 
-## §391 — clicking a pillar opens that pillar (2026-09-23)
+## §393 — clicking a pillar opens that pillar (2026-09-23)
 
 **Built, on the branch.** On a client with pillars added by hand, the side
 list lit several pillars at once and clicking some of them opened a different

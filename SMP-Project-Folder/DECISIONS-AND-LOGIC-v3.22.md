@@ -57164,3 +57164,26 @@ updates?"* — then *"yes build it"*.
 - **The first release carrying it is itself announced**, because its worker
   differs from the one every browser holds. Nothing stored moves, nothing is
   migrated, no server rule changes.
+
+## §398 — the set-up flow's sentences read the client's word in lower case (2026-09-23)
+
+Islam, of §396: *"make the setup questions lower case."* §396 put the
+client's word in the flow's questions exactly as typed, so they read "Are
+the Business units grouped into Divisions?" — a heading dropped into prose.
+
+- **A NARROWING OF §160.6 FOR THIS FLOW'S SENTENCES ONLY**: `w()` lowers the
+  word wherever it sits mid-sentence (questions, the Divisions answers, the
+  empty-row refusal, the Add buttons, the empty states and the summary
+  counts); `wc()` gives the same word at the start of a sentence. Step
+  headings, the rail and every other screen keep the word as typed.
+- **AN ACRONYM IS LEFT ALONE**: a word is lowered only where everything
+  after its first letter is already lower case, so "BUs" and "IT" stay as
+  typed — proved with the unit word renamed to *BUs*.
+- **AND FIVE LITERALS ON THE DIVISIONS STEP WERE STILL "COMPANY"**, found by
+  the probe rather than by reading: the Add button, the name placeholder, the
+  "which … each unit belongs to" label, the "no company" option and the
+  empty-row refusal. All take the client's word now — the rest of §396.
+- `checks/client-setup.py`'s refusal assertion expected the word as typed
+  and is REWRITTEN to the lowered form, never loosened (§218) — worked out in
+  the check rather than read back from the product. Both set-up checks
+  green. Screen only; nothing stored, nothing migrated.

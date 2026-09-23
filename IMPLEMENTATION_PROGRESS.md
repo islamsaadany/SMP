@@ -8003,6 +8003,15 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §398 — the set-up flow's sentences use lower case (2026-09-23)
+
+**Built on the branch; not merged.** The set-up questions now read "Are the
+business units grouped into divisions?" rather than capitalising the words
+mid-sentence. Short forms like "BUs" are left as typed, and headings keep
+their capitals. Five places on the Divisions step still said "company"; they
+now use the client's word too.
+
+
 ## §397 — every release offers the reload (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built; merged to `main` 2026-09-23 on Islam's word.** The platform already has a banner that

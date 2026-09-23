@@ -7998,3 +7998,6 @@ many).
 
 **Merged to `main` 2026-09-23** on Islam's word, renumbered from §382/§383 before
 the merge because main had taken those numbers.
+On the merged build: whole-platform sweep clean, 188 checks walked. One check
+(`yn-in-progress`) is red, and it is red on main's own build too, from the
+tactic-owner rounds — recorded, not fixed in this merge.

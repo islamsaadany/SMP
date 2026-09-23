@@ -56910,3 +56910,30 @@ their own word once they change it. `multi-client.py` and `platform-look.py`
 need a rehearsal database this session does not have (§328.3); `welcome.py`
 failed only when run beside three others and passes alone; everything else
 green, `qa.py` ERRORS none.
+
+**§392.2 — THE MERGE.** Islam: *"merge to main."* `main` had moved to §390
+(§382–§390 from other sessions: My reporting, the tactic owner row, revenue
+drivers, the people file), so this branch's §382/§383 became **§391/§392
+BEFORE the merge**, when the merge base held neither number in either
+spelling and every one of the 69 substitutions was provably this branch's
+own (§264.3, §336.1). The three record files were COMBINED, never picked
+(§318.7); the built file, the seed and every served copy REBUILT rather than
+merged (§91). **§94.12 AGAIN**: both sides had independently written
+`smp-shell-v5.30-…`, so `sw.js` was rebuilt from main's copy and bumped to a
+name the history has never held, `v5.31-one-word-per-thing`, one `const
+SHELL`, `node --check` clean (§146.2). The duplicate scan over build.py's own
+concatenation reads the six §281.1 leaves and nothing else, and main's new
+code asks no label at all, so `L()` answering the plural reaches none of it.
+**ONE HARNESS NEEDED A STAND-IN**: main's `scripts/test-nav-row.js` runs the
+shell's inline block in a vm and supplies everything declared elsewhere, and
+`navWord()` is this branch's — so on the merged build it threw; the word is
+not what that test measures, so the platform's short word stands in (18/0,
+and `--break=everywhere` still red). **ON THE MERGED TREE**: `qa.py` ERRORS
+none; 188 checks walked; authoriser 739/0, change list 140/0, platform rules
+69/0, my-reporting 65/0; `built-in-step` and `generated-in-step` clear.
+**RECORDED, NOT FIXED** (§303): `checks/yn-in-progress.py` is **23 red on
+`main`'s own build and green on this branch before the merge** — it is main's,
+from the tactic-owner rounds, and not ridden in here (rule 1b).
+`multi-client.py` and `platform-look.py` need a rehearsal database (§328.3).
+No forced sign-out is owed: nothing about how a save is judged moved, and
+migrations 045/016 only rewrite the labels rows.

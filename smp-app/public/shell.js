@@ -8992,6 +8992,16 @@ function planPeopleFile(rows){
     peopleRowPicks(row, conflict ? null : existing, dnames);
     plan.rows.push(row);
   });
+  /* A MISSING JOB TITLE IS SAID, NEVER A REFUSAL (§389). Islam: "job title
+     easy to fix yes" — so the row is added and named here, ONE notice for
+     the lot, because a file with no title column would otherwise put a line
+     per person between the SMO and the Apply button. */
+  var noTitle = plan.rows.filter(function(x){ return x.action === "add" && !x.title; });
+  if (noTitle.length) {
+    plan.notices.push({ at:noTitle.map(function(x){ return x.at; }).join(", "),
+      msg:plural(noTitle.length, "person") + " will be added with no job title. " +
+        "Fill it on the register afterwards." });
+  }
   return plan;
 }
 
@@ -20337,7 +20347,7 @@ function peopleReadme(){
     ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
-    ["Adding somebody", "Fill Name, and Emp ID or Email. Everything else is optional — but a row with neither identifier cannot be matched by the next upload, so it gets added a second time."],
+    ["Adding somebody", "The minimum is Name, Job title and Email. Everything else is optional. A missing Job title does not stop the row — it is added and listed on the review so you can fill it on the register. A row with no Email and no Emp ID is skipped, because the next upload could not recognise it. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
@@ -20467,8 +20477,51 @@ function peopleWorkbook(){
 /* The sheet is named People and read by its header row, so a column moved or
    a column added later costs nothing — sheetObjects() keys on the heading, not
    on the position. */
+/* ── A CLIENT'S OWN FILE, NOT ONLY OURS (§389) ───────────────────────────
+   Islam: "accept the minimum of the name and the title and email for the
+   essentials." The planner already accepted those three alone; what turned
+   such a file away was the READER — it asked for a sheet called "People" and
+   for three headings spelled exactly as our download spells them, so a
+   client's own export ("Sheet1", "Title", "E-mail") read as NOTHING, with no
+   word said.
+
+   So: the "People" sheet when there is one, else the FIRST sheet, and the
+   sheet actually read is carried back so the page can say which. Headings are
+   matched ignoring case, spaces and punctuation, plus a short list of the
+   spellings an HR export uses. A heading it does not know is kept as it is,
+   which is what keeps "Main BU" and "BU" readable (§58, §65). */
+var PEOPLE_HEAD_ALIASES = {
+  title:"Job title", position:"Job title", designation:"Job title", jobtitle:"Job title",
+  mail:"Email", emailaddress:"Email", email:"Email", workemail:"Email",
+  employeename:"Name", employee:"Name",
+  employeeid:"Emp ID", employeenumber:"Emp ID", empno:"Emp ID", staffid:"Emp ID",
+  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
+};
+var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
+function peopleHeadKey(h){ return String(h || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function peopleCanonHead(h){
+  var k = peopleHeadKey(h);
+  var known = PEOPLE_FILE_COLS.concat(["Main BU", "BU", PEOPLE_FILE_EXTRA]);
+  for (var i = 0; i < known.length; i++) if (peopleHeadKey(known[i]) === k) return known[i];
+  return PEOPLE_HEAD_ALIASES[k] || String(h || "").trim();
+}
 function peopleFromWorkbook(sheets){
-  return sheetObjects(sheets["People"] || []);
+  var names = Object.keys(sheets || {});
+  var sheet = sheets && sheets["People"] ? "People"
+    : names.filter(function(n){ return n !== "Read me" && n !== "Lists"; })[0] || null;
+  var raw = sheet ? sheets[sheet] : [];
+  if (raw && raw.length) {
+    raw = [raw[0].map(peopleCanonHead)].concat(raw.slice(1));
+  }
+  var rows = sheetObjects(raw || []);
+  var head = raw && raw.length ? raw[0] : [];
+  rows.sheet = sheet;
+  rows.hasEmpId = head.indexOf("Emp ID") > -1;
+  /* "Full Name" answers for Name (fileFullName() reads either). */
+  rows.missing = PEOPLE_ESSENTIALS.filter(function(c){
+    return head.indexOf(c) < 0 && !(c === "Name" && head.indexOf("Full Name") > -1);
+  });
+  return rows;
 }
 
 /* ── THE QUESTIONS FILE (§161) ─────────────────────────────────────────────
@@ -60854,23 +60907,34 @@ var SYNC = (function () {
       var rx = new FileReader();
       rx.onload = function(){
         readXlsx(rx.result).then(function(sheets){
-          if (!sheets["People"]) {
-            /* §48.8's rule: a file that cannot be read has to SAY so, where
-               the upload is. A plan workbook dropped here is the likely
-               mistake, and naming the sheet it is missing is what tells
-               somebody which of the two files they picked up. */
+          var rows = peopleFromWorkbook(sheets);
+          /* §48.8's rule: a file that cannot be read has to SAY so, where the
+             upload is. Since §389 a client's own sheet is read (the first one
+             when there is no People sheet), so what is refused is a file
+             missing the headings a person CANNOT be added without: Name and
+             Email. A plan workbook dropped here is the likely mistake, and
+             naming the sheet read and the headings missing tells somebody which
+             file they picked up. A missing Job title is NOT refused: the
+             planner lists those rows instead (Islam: "job title easy to fix"). */
+          var lacks = rows.missing.filter(function(c){
+            /* An Emp ID column answers for Email as the identifier (§87). */
+            return c === "Name" || (c === "Email" && !rows.hasEmpId);
+          });
+          if (!rows.sheet || lacks.length || !rows.length) {
             PPLF.plan = { rows:[], notices:[], newBus:[],
-                          problems:[{ at:file.name, msg:"has no sheet called People. This is " +
-                            "the people workbook's own sheet \u2014 download the template from " +
-                            "Register file " +
-                            "and fill that." }] };
+                          problems:[{ at:file.name, msg:(!rows.sheet
+                            ? "has no sheet to read."
+                            : lacks.length
+                              ? "sheet “" + rows.sheet + "” has no " + lacks.join(" or ") +
+                                " heading. The minimum is Name, Job title and Email in the first row."
+                              : "sheet “" + rows.sheet + "” has headings but nobody under them.") }] };
             PPLF.read = ""; PPLF.done = null;
             paint();
             return;
           }
-          var rows = peopleFromWorkbook(sheets);
           PPLF.plan = planPeopleFile(rows);
-          PPLF.read = file.name + " \u00b7 " + plural(rows.length, "row");
+          PPLF.read = file.name + " · " + (rows.sheet !== "People"
+            ? "sheet “" + rows.sheet + "” · " : "") + plural(rows.length, "row");
           PPLF.done = null;
           paint();
         }).catch(function(e){

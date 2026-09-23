@@ -3269,6 +3269,16 @@ function planPeopleFile(rows){
     peopleRowPicks(row, conflict ? null : existing, dnames);
     plan.rows.push(row);
   });
+  /* A MISSING JOB TITLE IS SAID, NEVER A REFUSAL (§389). Islam: "job title
+     easy to fix yes" — so the row is added and named here, ONE notice for
+     the lot, because a file with no title column would otherwise put a line
+     per person between the SMO and the Apply button. */
+  var noTitle = plan.rows.filter(function(x){ return x.action === "add" && !x.title; });
+  if (noTitle.length) {
+    plan.notices.push({ at:noTitle.map(function(x){ return x.at; }).join(", "),
+      msg:plural(noTitle.length, "person") + " will be added with no job title. " +
+        "Fill it on the register afterwards." });
+  }
   return plan;
 }
 

@@ -56617,3 +56617,48 @@ platform rules 69/0, `test-my-reporting` 65/0, the frozen browser suite and
 (§332) state 92/0, modules **160/0**, door **144/0**, insights 137/0,
 frameworks 90/0, tracker 229/0, notes 170/0, portfolio 121/0, upload 9/0, demo
 7/0, standing 7/0, room 10/0, deploy 5/0.
+
+---
+
+## §389 — THE PEOPLE FILE TAKES A CLIENT'S OWN SHEET, AND NAME · JOB TITLE · EMAIL IS ENOUGH (2026-09-23)
+
+Islam: *"In the upload of the excel with the people names accept the minimum of
+the name and the title and email for the essentials"* — and, of the one open
+question, *"JOB TITLE EASY TO FIX YES"*.
+
+**THE PLANNER ALREADY ACCEPTED THOSE THREE ALONE, AND SAYING SO CAME FIRST.**
+A row with a Name and an Email and nothing else was already added
+(`planPeopleFile`'s only refusal of a new row is no Emp ID *and* no Email,
+§87.5). What turned such a file away was the READER in front of it: the upload
+refused any workbook without a sheet called **People**, and `sheetObjects()`
+keys on the header text exactly, so a client's own export — `Sheet1`, `Title`,
+`E-mail`, `Employee Name` — was either refused outright or read as rows with no
+title and no address. Nothing on the screen said which.
+
+**WHAT CHANGED.**
+- `peopleFromWorkbook()` reads **People** when there is one and otherwise the
+  first sheet that is not the template's own *Read me* / *Lists*, and carries
+  the sheet it read back so the page can name it.
+- Headings are matched **ignoring case, spaces and punctuation**, plus a short
+  list of HR spellings (`Title`, `Position`, `Designation` → Job title;
+  `E-mail`, `Email address`, `Work email` → Email; `Employee name` → Name;
+  `Employee ID/Number` → Emp ID; `Phone` → Mobile). A heading it does not know
+  is kept verbatim, which is what keeps `Main BU` and `BU` readable (§58, §65).
+- The upload refuses only a file missing a **Name** heading, or missing
+  **Email** where there is no **Emp ID** column either (an Emp ID still answers
+  as the identifier, §87) — and the sentence names the sheet and the heading.
+- **A missing Job title is never a refusal** (Islam's answer): the row is added
+  and ONE notice lists every such row, because a file with no title column
+  would otherwise put a line per person between the SMO and Apply.
+- The *Read me* sheet says the minimum is Name, Job title and Email.
+
+**NOTHING ELSE MOVES**: matching on Emp ID then Email, the review before
+Apply, adds-and-amends-never-removes, and the export's own headers are
+byte-identical; the export round-trips exactly as before (its headings are the
+canonical ones, so the matcher leaves them alone).
+
+**VERIFIED**: driven through the real Register file control over `file://` —
+a `Sheet1` with `Employee Name / Title / E-mail` adds both people with the
+missing-title notice; a sheet with no Email heading is refused naming the sheet
+and heading; no page errors. `identity-merge`, `duplicates`, `people-dialog`,
+`import-page` green; `built-in-step` all good; full `qa.py` ERRORS none (its people round trip included).

@@ -1934,7 +1934,6 @@ function peopleFromWorkbook(sheets){
   var rows = sheetObjects(raw || []);
   var head = raw && raw.length ? raw[0] : [];
   rows.sheet = sheet;
-  rows.hasEmpId = head.indexOf("Emp ID") > -1;
   /* "Full Name" answers for Name (fileFullName() reads either). */
   rows.missing = PEOPLE_ESSENTIALS.filter(function(c){
     return head.indexOf(c) < 0 && !(c === "Name" && head.indexOf("Full Name") > -1);

@@ -5925,34 +5925,23 @@
       var rx = new FileReader();
       rx.onload = function(){
         readXlsx(rx.result).then(function(sheets){
-          var rows = peopleFromWorkbook(sheets);
-          /* §48.8's rule: a file that cannot be read has to SAY so, where the
-             upload is. Since §389 a client's own sheet is read (the first one
-             when there is no People sheet), so what is refused is a file
-             missing the headings a person CANNOT be added without: Name and
-             Email. A plan workbook dropped here is the likely mistake, and
-             naming the sheet read and the headings missing tells somebody which
-             file they picked up. A missing Job title is NOT refused: the
-             planner lists those rows instead (Islam: "job title easy to fix"). */
-          var lacks = rows.missing.filter(function(c){
-            /* An Emp ID column answers for Email as the identifier (§87). */
-            return c === "Name" || (c === "Email" && !rows.hasEmpId);
-          });
-          if (!rows.sheet || lacks.length || !rows.length) {
+          if (!sheets["People"]) {
+            /* §48.8's rule: a file that cannot be read has to SAY so, where
+               the upload is. A plan workbook dropped here is the likely
+               mistake, and naming the sheet it is missing is what tells
+               somebody which of the two files they picked up. */
             PPLF.plan = { rows:[], notices:[], newBus:[],
-                          problems:[{ at:file.name, msg:(!rows.sheet
-                            ? "has no sheet to read."
-                            : lacks.length
-                              ? "sheet “" + rows.sheet + "” has no " + lacks.join(" or ") +
-                                " heading. The minimum is Name, Job title and Email in the first row."
-                              : "sheet “" + rows.sheet + "” has headings but nobody under them.") }] };
+                          problems:[{ at:file.name, msg:"has no sheet called People. This is " +
+                            "the people workbook's own sheet \u2014 download the template from " +
+                            "Register file " +
+                            "and fill that." }] };
             PPLF.read = ""; PPLF.done = null;
             paint();
             return;
           }
+          var rows = peopleFromWorkbook(sheets);
           PPLF.plan = planPeopleFile(rows);
-          PPLF.read = file.name + " · " + (rows.sheet !== "People"
-            ? "sheet “" + rows.sheet + "” · " : "") + plural(rows.length, "row");
+          PPLF.read = file.name + " \u00b7 " + plural(rows.length, "row");
           PPLF.done = null;
           paint();
         }).catch(function(e){

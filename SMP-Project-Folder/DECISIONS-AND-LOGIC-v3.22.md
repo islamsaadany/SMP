@@ -57125,3 +57125,40 @@ and Islam chose the recommendation: *"go with your recommendation"*.
   `client-setup.py` all passed; a probe with the word renamed to *Sectors*
   reads "Are the Business units grouped into Sectors?" and both answers
   follow it, with no page errors.
+
+## §397 — every release offers the reload (2026-09-23)
+
+Islam, after §396's merge note told people to reload an open tab: *"don't we
+have a rule that makes the user have a button to refresh … at the top with the
+updates that require refresh? … why don't we have it as a rule of such
+updates?"* — then *"yes build it"*.
+
+- **THE BANNER EXISTS AND COULD NOT FIRE.** §258's *"A newer version of the
+  platform is ready"* (with **Reload & keep mine**, which saves first) hears of
+  a release only through the browser seeing `/sw.js` change. The served worker
+  is generated from the frozen one with the caching half — where `SHELL` lives —
+  dropped (§316.10), so it was byte-identical in every release from spec 054
+  on. §365, §367 and §379.4 each recorded that as residue and left it; no rule
+  asserted the banner could fire, so nothing noticed when it stopped.
+- **THE STAMP IS CONTENT, NEVER THE COMMIT.** `scripts/release-stamp.mjs`
+  hashes every file a tab holds — `public/` except the worker (or it would
+  depend on itself), `shell/`, and `lib/shell.ts`, which writes the document
+  around them — and `build-sw.mjs` writes it into the worker's first lines. A
+  commit id would change on every commit and `generated-in-step` would call
+  each one stale; a content hash comes out the same from the same sources.
+  **Server code a tab does not hold is left out on purpose**: a reload offered
+  for an endpoint change teaches people to dismiss the banner.
+- **PROVED IN A REAL BROWSER**: a page controlled by the generated worker,
+  `update()` against the same release fires `controllerchange` **0** times and
+  against a new stamp **1** — which is exactly what `safety.js` listens for
+  (its own check, `safety-banners.py`, all green). `checks/release-stamp.mjs`
+  9/0: the served stamp is current, **every** held file moves it (asked of each
+  in a scratch copy, never one sample), the worker does not, the same sources
+  give the same stamp, and no other server module is in it. Red both ways: the
+  stamp left out (2 red), and a held file changed after the build (1 red).
+- **THE RULE**: CLAUDE.md's merge rules now say every release is announced by
+  this banner, and the post-merge live read confirms the served `/sw.js`
+  carries a new stamp.
+- **The first release carrying it is itself announced**, because its worker
+  differs from the one every browser holds. Nothing stored moves, nothing is
+  migrated, no server rule changes.

@@ -411,6 +411,21 @@ A drift between specs and code is a documentation bug — report it before silen
   window between reading main and pushing is as long as running the checks, and
   a name chosen at the start of it is chosen from stale information. The
   confirmation is the LAST step of a merge, not the first.
+- **EVERY RELEASE IS ANNOUNCED BY THE RELOAD BANNER, AND THE LIVE READ PROVES
+  IT (§397).** §258's *"A newer version of the platform is ready"* hears of a
+  release only when the browser sees `/sw.js` CHANGE. The served worker is
+  generated with the frozen `SHELL` name dropped (§316.10), so from spec 054 to
+  §396 it was byte-identical in every release and **the banner never fired for
+  anybody** &mdash; the `SHELL` bump reaches only the offline copy. Since §397
+  `scripts/build-sw.mjs` stamps it with `releaseStamp()`, a hash of every file a
+  tab holds (`public/` less the worker, `shell/`, `lib/shell.ts`), so a release
+  that changes any of them changes `/sw.js` and one that changes none offers no
+  reload. **After every merge the served `/sw.js` must carry a stamp different
+  from the one it served before the push** &mdash; read off the live site with
+  the other witnesses (&sect;91.5); a release that touched only server code is
+  the one case where the same stamp is correct, and the note says so.
+  `npm run check:release` asserts the stamp is current and that every held file
+  moves it; `check:release:red` must go red.
 - **BUMP `SHELL` IN `sw.js` ON EVERY MERGE THAT CHANGES THE BUILT FILE (§91).**
   Not on a version bump — on a CONTENT change. It sat at `v3.22` through §80 to
   §90 because the built file kept the same filename the whole time, and the

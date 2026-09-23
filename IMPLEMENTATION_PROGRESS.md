@@ -8003,6 +8003,18 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §397 — every release offers the reload (2026-09-23)
+
+**Built on the branch; not merged.** The platform already has a banner that
+says "A newer version of the platform is ready" with a button to reload and keep
+your work, but it had stopped appearing: it only shows when a small background
+file changes, and that file had been identical in every release since the
+rebuild. Each release now stamps that file with a fingerprint of the pages it
+serves, so any release that changes what people see brings the banner up in
+every open tab. A check fails if the fingerprint is missing or out of date, and
+the merge rules now require confirming it changed on the live site.
+
+
 ## §396 — the set-up flow's questions use the client's words (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built; merged to `main` 2026-09-23 on Islam's word.** On Client set-up, the Divisions step's

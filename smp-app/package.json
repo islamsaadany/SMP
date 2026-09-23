@@ -63,7 +63,9 @@
     "check:assistant": "node checks/assistant-defaults.mjs",
     "check:assistant:red": "node checks/assistant-defaults.mjs --break=loose-defaults >/dev/null 2>&1 && { echo \"NOT RED: loose-defaults\"; exit 1; }; echo \"red: loose-defaults\"",
     "check:memory": "node checks/memory-split.mjs && node checks/memory-boundary.mjs && node checks/memory-api.mjs && node checks/memory-page.mjs && node --experimental-strip-types checks/memory-ask.mjs",
-    "check:memory:red": "for b in 'memory-split.mjs --break=drop-unread' 'memory-split.mjs --break=empty-on-noise' 'memory-boundary.mjs --break=policy' 'memory-boundary.mjs --break=in-shell' 'memory-api.mjs --break=client-reads' 'memory-api.mjs --break=anyone-edits' 'memory-api.mjs --break=partial-save' 'memory-page.mjs --break=no-split' 'memory-ask.mjs --break=trust-source' 'memory-ask.mjs --break=no-corpus'; do node --experimental-strip-types checks/$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
+    "check:memory:red": "for b in 'memory-split.mjs --break=drop-unread' 'memory-split.mjs --break=empty-on-noise' 'memory-boundary.mjs --break=policy' 'memory-boundary.mjs --break=in-shell' 'memory-api.mjs --break=client-reads' 'memory-api.mjs --break=anyone-edits' 'memory-api.mjs --break=partial-save' 'memory-page.mjs --break=no-split' 'memory-ask.mjs --break=trust-source' 'memory-ask.mjs --break=no-corpus'; do node --experimental-strip-types checks/$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:release": "node checks/release-stamp.mjs",
+    "check:release:red": "SMP_BREAK=no-stamp node scripts/build-sw.mjs && (node checks/release-stamp.mjs; r=$?; node scripts/build-sw.mjs >/dev/null; test $r -ne 0)"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

@@ -7630,6 +7630,16 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   border-top:1px solid var(--line); display:flex; align-items:center; gap:12px;
   flex-wrap:wrap; border-radius:0 0 10px 10px; }
 .fcard .ffoot .why { color:var(--ink-3); font-size:12.5px; margin-right:auto; max-width:56ch; }
+/* THE BUTTONS ARE A GROUP, AND THE GROUP IS WHAT WRAPS (§380). `.ffoot` wraps
+   and `.why` eats the free space, so three loose buttons split 2+1 below
+   ~1100px with the third stranded at the FAR LEFT under the sentence — the
+   flex line starting where the row starts, not where the buttons were.
+   Measured: grouped, the row breaks as a block and stays right-aligned at
+   1440 / 1280 / 1100 / 1000. The `auto` margin has to move onto the group,
+   because the first auto margin in a flex row takes every free pixel (§304's
+   own fault, on this same card). */
+.fcard .ffoot .fbtns { display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin-left:auto; }
 .fcard .pickrow { display:flex; align-items:center; gap:14px; padding:15px 18px;
   flex-wrap:wrap; }
 .fcard .pickrow .lab { font-size:13px; color:var(--ink-2); }

@@ -425,7 +425,29 @@ try {
   check("...by Due date as exact dates it is the day, soonest first, and the undated read 'No date', last",
     heads(byDue).join("|") === [realThu, "2026-09-20", "2026-10-01"].sort().map((d) => readableDay(d, TODAY)).join("|") + "|No date", heads(byDue).join("|"));
   check("...and as weeks it is the WEEK, its word and its days, one heading for every day in it (§356.14, §356.15)",
-    heads(byWeek).join("|") === [...new Set([realThu, "2026-09-20", "2026-10-01"].map(thursdayOf))].sort().map((t) => weekWord(t, todayIn()) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
+    /* ONE NOTION OF TODAY, NOT TWO. The page above is rendered with
+       `today: TODAY` (a fixed 2026-09-15) and this asked `weekWord(t,
+       todayIn())` — the REAL clock — so the two sides answered about
+       different days. It passed for as long as the real date stayed outside
+       the weeks this fixture uses and went red on the CALENDAR rather than on
+       any commit, which is why it read as a stale literal: measured on
+       2026-09-21 the page drew "Next week · 20 – 24 Sep" (right, relative to
+       the 15th) and this demanded "This week". The days beside it were
+       already asking TODAY, which is what made the pair disagree with itself
+       (§100.3: a probe measuring something other than what it rendered). */
+    heads(byWeek).join("|") === [...new Set([realThu, "2026-09-20", "2026-10-01"].map(thursdayOf))].sort().map((t) => weekWord(t, TODAY) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
+  /* AND THE WORDS THEMSELVES, WHICH THE LINE ABOVE CANNOT SAY (§113.8). That
+     one is an AGREEMENT with `weekWord`, which is right for §53.5 — one
+     wording, two surfaces — and it is computed with the function the breaks
+     REPLACE, so both sides move together and it stays green on exactly the
+     build it is there to catch. These two headings are fixed by the fixture's
+     fixed today and by §356.16's decision: two weeks have a WORD and every
+     week after is its place in its MONTH, never its number in the year. They
+     are the only literals here, and they are what goes red under
+     `week-numbers` and `week-of-year`. (`realThu` is the real clock's, so the
+     THIRD heading is deliberately not named — it moves with the week.) */
+  check("...and those words are the product's own decision — a week has a word, then its place in its month (§356.16)",
+    heads(byWeek).includes("Next week · 20 – 24 Sep") && heads(byWeek).includes("W1 Oct · 27 Sep – 1 Oct"), heads(byWeek).join("|"));
   check("...and by None there is no heading at all while the rows are all still there", heads(byNone).length === 0 && /class="row/.test(byNone) && /data-act="set-group" data-value="none" class="on"/.test(byNone));
   const cookied = await serve({ req: new Request("https://smp.example/x/tracker", { headers: { cookie: "a=b; smp.tracker.group=status" } }), slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], rest: [], personKey: "noran", seat: "smoteam" }).then((r) => r.text());
   check("the grouping this browser last chose is read off its cookie, so the page opens grouped that way", /data-value="status" class="on"/.test(cookied) && /data-group="status"/.test(cookied));

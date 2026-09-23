@@ -11,14 +11,30 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MODULE_DEF, isModule } from "./modules.ts";
-import { CATEGORIES } from "./library.ts";
 
 let body: string | null = null;
 export function shellBody(): string {
   if (body === null) body = readFileSync(join(process.cwd(), "shell", "body.html"), "utf8");
   return body;
 }
-function esc(s: string): string { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+/* ONE ESCAPER, SAFE IN AN ATTRIBUTE (§235, one file over). Every stamp
+   below is a SINGLE-quoted attribute, and this escaped `& < > "` and not
+   `'` — a text-node escaper being used inside an attribute, which is the
+   fault §235 found in the frozen product and fixed there. The served app
+   kept its own copy and never learned it.
+
+   IT IS LIVE, NOT HYPOTHETICAL, AND IT WAS FOUND BY A FIXTURE RATHER THAN BY
+   READING: `MODULE_DEF.tracker.note` is "The office's weekly actions about
+   this client", so a client holding the Internal Tracker was served a root
+   element whose `data-modules` ENDED at that apostrophe — the rest parsed as
+   stray attributes, `JSON.parse` threw, and the module switcher was silently
+   not drawn (§96's family: the page renders perfectly and a control is
+   missing). And `data-landing` carries a published report's TITLE
+   (lib/modules.ts, the `latest` line), which is typed by a person — so the
+   same break could forge `data-*` attributes the shell reads to decide what
+   chrome to draw. No script: the policy is `script-src 'self'` with nothing
+   inline (§238), so an injected attribute cannot run. */
+function esc(s: string): string { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
 
 /* `module` is the module word this document's addresses are written with.
    It is stamped on the root element so the browser is TOLD its module rather
@@ -42,7 +58,19 @@ export function shellDocument(tenantName: string, module: string | null = null, 
                                  because the module switcher is built at load, before placeOf
                                  has run, and the client's own settings are not a module's
                                  pages for it to offer a way out of. */
-                              scope: string | null = null): string {
+                              scope: string | null = null,
+                              /* WHICH CATEGORIES THE LIBRARY ACTUALLY HAS FOR THIS PERSON
+                                 (§385). Worked out by the CALLER, because this file is a
+                                 pure function of its arguments and the answer needs the
+                                 tenant and the viewer — `lib/library.ts` categoriesPresent,
+                                 which asks the same two clauses the list itself is read
+                                 through, so the row can never offer a category the list
+                                 would refuse. `null` is *no library behind this tab* and is
+                                 the honest answer for file://, for a client without the
+                                 module and for somebody it is shut to; `[]` is a library
+                                 with nothing filed under any category yet, which draws the
+                                 tab and no filters. */
+                              libraryCats: readonly string[] | null = null): string {
   /* THE CHECK'S BREAKS (constitution XVI, checks/shell.mjs): `no-route`
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
@@ -84,13 +112,27 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        rather than written out in the frozen shell, which would be a second
        copy of lib/library.ts's own CATEGORIES (§53.5).
 
-       ONLY WHERE THE TAB IS DRAWN. `modules` is already the list this person
-       may open, so an absent attribute is the honest answer for somebody the
-       library is shut to — and over file://, where there is no server to ask
-       for the rows at all, there is no attribute and therefore no tab (§61,
-       the switcher's own rule). */
-    (modules.some((m) => m.key === "insights") && brk !== "no-library-cats"
-      ? " data-library-cats='" + esc(JSON.stringify(CATEGORIES)) + "'" : "") +
+       ONLY WHERE THE TAB IS DRAWN, and an absent attribute is the honest
+       answer for somebody the library is shut to — and over file://, where
+       there is no server to ask for the rows at all, there is no attribute
+       and therefore no tab (§61, the switcher's own rule).
+
+       AND IT IS WHAT THE CLIENT HAS, NOT WHAT THE MODULE OFFERS (§385).
+       It was `CATEGORIES` whole, so a client with nothing published opened on
+       a row of six sections, five of which could only ever return nothing —
+       measured before it was changed. The caller works the list out through
+       `categoriesPresent`, which reads the shelf through the same two clauses
+       the list itself is read through; this file stamps whatever it is
+       handed, so there is one answer and this is not the second place it is
+       decided (§53.5).
+
+       THE CHECK'S BREAK: `no-library-cats` drops the stamp, so the tab is
+       not drawn at all — checks/shell.mjs §3d, which is the one place the
+       SEAM is measured (the rule is checks/insights.mjs §14 and the row is
+       checks/insights-tab.mjs §2, and neither can see this attribute).
+       Never set on a deployment. */
+    (libraryCats && brk !== "no-library-cats"
+      ? " data-library-cats='" + esc(JSON.stringify(libraryCats)) + "'" : "") +
     /* THE LANDING LINE PAGE'S DECLARATION (§359.4): what this module can
        say, its texts right now and the client's pick — stamped on a SETUP
        document only, where the page that draws it lives (lib/landing.ts

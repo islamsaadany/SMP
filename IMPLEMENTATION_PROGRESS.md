@@ -54,7 +54,7 @@ merge). **Approved 2026-09-09 (A0)** — Phases A→J run without stopping excep
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** **Revenue drivers (spec 063) — built, on the branch, not merged.**
+**Latest version:** **Revenue drivers (spec 063, §389) — built and merged to `main` 2026-09-23.**
 
 A new part of the Strategy module for units whose revenue is argued from its
 parts (stores &times; basket &times; visits, and so on). Three screens, all
@@ -75,7 +75,13 @@ Off**; the demo shows it On.
 pressed in a real browser both ways, the Setup checks, and a full sweep of
 every page as every viewer with no errors.
 
-**Still yours:** the merge to `main`, on your word.
+**Merged 2026-09-23 on your word**, with main's My reporting (§380–§388)
+brought in first. My reporting had taken the number *spec 062*, so this is
+**spec 063** now. Everything was re-run on the combined version, not on the
+branch alone.
+
+**Still yours:** turning it On for any client that should use it — every
+existing client starts Off.
 
 ### Earlier: **§356.16 — the week by its month, fixed cards, and a line that asks later (spec 054).**
 
@@ -6919,3 +6925,1006 @@ refuse a backup for a missing picture.
 takes a few seconds longer and the file is about 6 MB rather than 1.6. Open it
 with no connection: it should come up on your own tenant, fully styled, with
 the navigation and the decks in it.
+
+---
+
+## §380 — One blank template per way of planning (2026-09-22, spec 059) · **merged to `main`**
+
+Islam: *"in the template download we need to have the different types of
+functions plans templates."*
+
+### What was wrong
+
+The blank-template card on **Setup → Import & storage → Download** offered
+**two** buttons where a supporting function plans **three** ways, and its
+sentence had been wrong for some time — *"a capability plans in projects and
+everything else in pillars"* stopped being true when a function was given its
+own projects, and it never mentioned objectives and actions at all.
+
+Worse than a missing button: the card's own words send you to the **wrong**
+one. Pressing *Pillars* for a function that plans in objectives and actions
+gives a unit's workbook; pressing *Projects* gives a file with **no Actions
+sheet**, whose dropdown does not even offer that function.
+
+### What was built
+
+Three buttons — **Pillars · Projects · Objectives & actions** — under a
+sentence that is true: *"One per way of planning. A unit always plans in
+pillars; a function plans whichever way Setup says."*
+
+- **Each blank file carries only the sheets its format uses.** Projects drops
+  Actions; Objectives & actions carries Read me, Objectives and Actions and
+  none of the four project sheets.
+- **Each file's Read me lists only the subjects that format fits**, and says
+  *Supporting function* rather than *Capability* where only a function can plan
+  that way.
+- **A subject downloading its own plan is untouched** and still gets all seven
+  sheets — the earlier decision, not reversed.
+
+Two costs, both stated before they were taken and both accepted: a subject's
+own download keeps every sheet, and a function whose format changes after a
+download has to download again.
+
+### A live defect found while building it
+
+**A function that plans in objectives and actions was offered a template the
+upload could not take back.** The file's dropdown offered it; the upload
+answered *"no business unit, supporting function or capability called
+\"HR\""*. Measured on the shipped build. A plan that downloads and cannot come
+back — one question with two answers, written out in two places, drifting the
+moment one gained a format the other had not heard of. Both sides ask one
+function now.
+
+The check that should have caught it asserted the half that worked: it asserted
+the function is **offered**, then read the file through the reader **directly**,
+never through the door a person actually meets. It drives the real control now.
+
+**And a template nobody can fill in**: before a tenant has a single function
+planning that way, the narrowed list is empty — and an empty dropdown refuses
+every value there is, so the cell can be neither picked from nor typed into. No
+validation is written for an empty list.
+
+### Proof
+
+- `checks/import-page.py` §2 rewritten, `checks/objectives-actions.py` §8b
+  added — 47 → **52 passed, 0 failed**; `import-page` all green.
+- Proved able to fail **six ways from the sources**, one break per decision:
+  2 / 3 / 7 / 2 / 3 / 1 red, each reddening its own assertions. The stranded
+  button prints `{'rows': 2, 'lead': 592}`; the door prints the reported
+  refusal verbatim.
+- Neighbours green: `template-round-trip`, `functional-projects` 45/0,
+  `project-tables`, `fn-pillars`. `qa.py` over `file://` **ERRORS none**.
+- The built file is in step with its sources, the served copies regenerated,
+  and `sw.js` bumped.
+
+### §380.2 — Merged to `main` (2026-09-22) · **done**
+
+**`main` had not moved** — measured, not assumed. It stood at §379.5, this
+branch's own ancestor, so the merge is a clean fast-forward and the tree pushed
+is byte-for-byte the tree that was verified: nothing resolved, nothing rebuilt,
+nothing recombined.
+
+- **§380 was free on `main`**, checked in both spellings rather than assumed, so
+  no renumber was owed.
+- **`sw.js` confirmed immediately before the push**:
+  `v5.24-three-blank-templates` against main's `v5.23`, a name the history has
+  never held — measured across every commit that has ever touched that file,
+  not only against main — one live declaration, and the file parses.
+- **The merge carries its own record commit**, because the branch tip was
+  already pushed: Vercel gives one deployment per commit, so putting the same
+  commit on `main` and on the branch is a race for which one gets built. The
+  record owed the line anyway, since all three files still said *"on the
+  branch"* over a merge that had happened.
+- **The witness for "production has this" was measured, not carried over from
+  last time.** The served `sw.js` is 4,104 bytes on both builds, so it can
+  prove nothing; `shell.js` (3,852,494 → 3,861,361) and `platform.css`
+  (674,285 → 674,961) both moved, so this round has two witnesses where the
+  last had one — because this round changed a stylesheet and that one did not.
+- **Nobody is signed out** — read off the diff: not one `api/`, `lib/` or `db/`
+  file is in it, so nothing about how a save is judged moves, nothing stored
+  moves and nothing is migrated.
+- Both in-step guards clear before the push.
+- **Production has served this commit** — the live read was made rather than
+  written ahead of itself, and it landed in about **60 seconds**. The read
+  taken minutes earlier is what makes it mean something: the site was serving
+  §379's build to the hash, so the two readings tell a landed deploy from one
+  that has not. Both witnesses came back byte-identical to what the generators
+  produce — `shell.js` 3,861,361 and `platform.css` 674,961.
+- **The file that could not be a witness was measured, not quoted**: the served
+  `sw.js` is 4,104 bytes and holds the cache-name string nought times, which is
+  the generator dropping that half, shown on the live site rather than cited.
+- **The branch was held behind and then brought up, in that order**, so `main`'s
+  tip was the only ref carrying the commit for the whole window that mattered.
+- **One thing to expect rather than report**: because the served worker's bytes
+  did not move, a tab left open on the old build is *not* offered *"A newer
+  version of the platform is ready"* — it keeps its old shell until somebody
+  reloads it.
+
+### Waiting on Islam
+
+- Four things flagged on the mockup and deliberately not folded in: the
+  projects file's Read me still says *Capability* over a list of functions; the
+  Pillars button spells the word as a literal where the page beside it uses the
+  tenant's own word; a capability plans two ways where a function plans three;
+  and an archived plan's workbook carries no format.
+
+---
+
+## §381 — the plan builder, on a supporting function (2026-09-22, spec 020)
+
+Islam: *"we need to have build a plan for the functions like what we did with
+the units."*
+
+**The builder already opens on functions and was largely blind there.** Driven
+on **Finance** — which holds three projects, a definition and two key
+objectives — its band read **○ ○ ○ ○**, every box empty, and the same on
+**six of the seven functions that plan in projects**. It counted a function's
+work inside the function's **capabilities**, and that work moved onto the
+function itself earlier this month, so it was counting an empty box. The map
+is the whole point of the builder, and it said the plan was empty when it was
+not.
+
+**Built and verified: the repair.** The count now reads where a function's
+work actually lives — the same list its own pages read, so the band cannot
+disagree with the page it points at. Finance now reads **✓ Definition · 2
+Objectives · 3 Projects**, exactly what it holds; all seven functions agree
+with their own plans. Nothing visual moved, so no drawing was owed for this
+part.
+
+**The shape for the rest, confirmed by Islam before building** (*"yes the
+shape is right"*): a function's builder is **Definition · Objectives · its
+work · Review** — four boxes where a unit has five, because a supporting
+function does not write its own aspiration or its own SWOT; it takes both from
+the unit it plans under.
+
+**Waiting on Islam — the drawing.** Two pieces change what the band shows and
+are drawn first: a function that plans in **pillars** gaining its Definition
+and Objectives boxes (it has two today where a unit has five), and the third
+way of planning — **objectives and actions** — getting a route at all; today
+it falls through to the projects one and would be offered a *Projects* box its
+pages do not have. The chip label *Definitions* becoming *Definition* is in
+that drawing too, since a label is a visual element.
+
+`plan-builder` all green with seven new assertions, proved able to fail twice
+from the sources (4 red and 1 red, each break reddening only its own);
+`functional-projects` 45/0, `objectives-actions` 47/0, `fn-pillars`,
+`fn-ko-edit`, `capability-entry` 43/0, `capability-remove` all green; full
+`qa.py` sweep ERRORS none. Screen only — nothing stored moves, nothing is
+migrated, nobody's rights move. **Merged to `main` 2026-09-22**, with the
+round below it.
+
+## §381.2 — one shape, three formats (2026-09-22, spec 020)
+
+Islam, of the shape drawn before anything was built: *"yes the shape is right,
+go ahead"*, then *"proceed."*
+
+**Built and verified: the other two pieces.** A supporting function's builder
+now shows the same four boxes whichever of the three ways it plans —
+**Definition · Objectives · its work · Review** — and only the work box
+differs: *Pillars*, *Projects* or *Actions*, each counting the thing that page
+actually holds. A function that plans in pillars had two boxes where it should
+have four; a function that plans in objectives and actions had no route of its
+own at all and was being offered a *Projects* box its pages do not have.
+
+**The two boxes a unit has and a function does not are missing on purpose** —
+a supporting function does not write its own aspiration and does not write its
+own SWOT: it takes both from the unit it plans under. So *"like the units"*
+cannot mean identical, and which two are absent is part of what was agreed.
+
+**Two things were broken underneath and neither had been reported.** Adding an
+action while building wrote a **blank row** — every other kind of row is asked
+for on a small form first, and the action was the one the builder did not know
+about, on exactly the way of planning this piece is for. And a function
+**could not be created** as objectives-and-actions at all: the question on the
+form offered two answers, and the part that makes the function was written for
+two as well — so widening the question alone would have created a function
+that says it plans one way and plans another, silently, on the one screen that
+asks. Both ends are fixed and both are checked.
+
+**The chip label is *Definition*, singular**, as drawn.
+
+`plan-builder` all green with 27 new assertions, proved able to fail five ways
+from the sources (3 / 9 / 8 / 8 / 1 red, each break reddening its own);
+`objectives-actions` 47/0, `functional-projects` 45/0, `capability-entry`
+43/0, `fn-pillars`, `fn-ko-edit`, `capability-remove` and `import-page` all
+green; full `qa.py` sweep ERRORS none; the shipped file and the four served
+copies back in step.
+
+**Two faults in the check itself, both recorded rather than tidied away.** Its
+first falsification run **died rather than reporting** on three of the five
+breaks, so it reported four failures where there are twenty-nine — the counts
+above are the second run, after every probe was made to carry on. And its own
+press of the pen **closed** a pen the builder had just opened, which read for a
+while as a product fault until it was measured.
+
+Screen only — nothing stored moves, nothing is migrated, nobody's rights move.
+**Merged to `main` 2026-09-22 on Islam's word.**
+
+`main` had moved four commits while this was being built, and had used the
+same section numbers for a different piece of work — the blank plan
+templates. This round's numbers were moved up **first, before the merge**,
+which is the only moment it can be shown that only this branch's own lines
+were touched.
+
+The two sides met in one file and **fitted together rather than fighting**:
+the other piece taught the plan page to add an action, this one taught the
+builder to ask for it on a form first, and the merged page tries the form and
+falls back to the plain add — which is what both were written to do. The two
+records were combined rather than one being chosen, with every heading from
+both sides checked present afterwards.
+
+**The offline copy's cache name had been written by both sides in the same
+week**, differing only in its last few words — so the two collided, which is
+the good outcome: the same words on both sides would have gone through in
+silence with different files behind them, and a browser that had opened the
+platform before would have gone on serving itself the old one. Moved past
+both, to a name nothing has ever served.
+
+Everything was re-run on the **merged** result rather than on the branch: the
+nine checks either piece touches — including the workbook round trip, which
+is the other piece's — the full sweep with **no errors**, the plan rules and
+the change list unmoved, and the two guards that the shipped file and the
+served copies are in step.
+
+## §383 — the tab that filled the row, and the mirror that showed your own face (2026-09-20, spec 061)
+
+**Built on the branch, not merged.** Islam, with three screenshots the morning
+after §376 reached main: *"when viewing as Mahdy he started seeing the other
+units and functions while he should only see his unit karim from mobile is
+seeing the report while the report is made only for the retail and online
+team."*
+
+**Two faults, both §376's, and neither is the narrowing itself.**
+
+**The row.** The Insights tab was keyed on `c_kb`, the one access key the
+matrix holds at `area:"always"` — so the question the navigation asks (*is
+there a tab here this person holds*) came back yes at every unit, every
+function and the group, for everybody. Measured on the worked example against
+the shipped build: **31 of 33 people** got a bigger row, **29 of 33** met the
+Units | Functions switch that is meant for the SMO and the CEO, a unit's
+custodian went from one unit to ten. **No plan and no figure was exposed** —
+the tabs that draw those still refused, which is why his own screenshot of
+Mahdy on Mobile shows a tab row holding one tab; what filled up is the row of
+names. Established as §376's by measuring the build before `ac94f9db`.
+
+The fix is `everywhere:true` on the tab and `ownTabs()` beside `allowed()`,
+asked by the six gates that decide what the row offers — marked on the tab so
+a second client-wide tab says so about itself. The tab is still drawn once you
+are somewhere you reach for another reason; it stops being the reason.
+`anyDestination()` keeps the module switcher listing Insights for somebody who
+reaches nowhere, which is the hole §376.3's own comment promises never opens —
+and that forced the switcher to be built on the first paint rather than at
+load, because the question is viewer-dependent and at load the shell has not
+hydrated (§362's wall, from the other side).
+
+**The mirror.** The Insights module resolves who is asking from the seat the
+DOOR established, which is the sign-in — so the office's own seat answered and
+every narrowed report was returned whoever the switcher pointed at. The
+narrowing works for a person signing in themselves; what was broken is the
+mirror the office checks it IN. Now narrowed once at the seam
+(`lib/view-as.ts`, called by the route before anything of the module is
+asked), so every module is right by construction. It can only narrow: the gate
+is the session's seat, the result is the simulated person's, and an unknown
+key is refused rather than read as nobody.
+
+**What ran.** `scripts/test-nav-row.js` 15/0 (red 6 from the source, its first
+failure printing Islam's report); `check:viewas` 20/0 (red 3 ways, the last
+printing the fault itself); the **access baseline UNMOVED** — 33 people ×
+every page key × every target, so nobody's access changed and only what the
+navigation offers narrowed back; authoriser 683/0, change list 140/0, platform
+rules 69/0, built-in-step all good, setup-shape 33/0, deploy-context 5/0,
+session-state and db-url-choice clear.
+
+**What could not.** No `smp-app/node_modules` and no python Playwright here,
+so `qa.py`, every frozen browser check, `check:insights` and `check:modules`
+could not launch (`check:modules` established as already unrunnable by
+stashing the change and getting the identical error). The view-as fix is
+proved as a rule and at both ends of its seam and is **not** yet driven
+through a browser against a client — that run is owed before it is called
+finished.
+
+**Nobody is signed out and nothing stored moves**: no frozen `api/`, `lib/` or
+`db/` file is touched, nothing is migrated, no rule about who may save what
+changes. `sw.js` is bumped because the built file's bytes changed — to
+`v5.21-nav-and-viewas` at the time, and past main's own `v5.22` when §384
+landed on the same branch (§94.12: a name nobody else has served, confirmed
+again immediately before a push to `main`).
+
+## §384 — a tactic's owner is a row on the table (2026-09-20)
+
+**Built on the branch, not merged.** Islam, after §383 established that Mahdy
+reached a whole supporting function because a project there named him as
+Owner: *"what we need to follow is the accessablity matrix. we don't have a
+tactic or measure owner in the roles to set accessability for so until then
+they are defaulted to see nothing and edit nothing"*, then *"don't chagne the
+settings of the accessablity. I believe we need to add measures & tactics
+owners as roles so I can set their accessability."* **And he closed the
+original complaint himself** — *"mahdy is a project owner then it ok to see
+the project and report it ofcourse my bad"* — so nothing about Project owner
+moves; what was missing is a row for the level below it.
+
+**The fault, and it is the one he is pointing at.** A pillar has an Owner and
+every tactic under it has one, and being named the Owner IS the role — the
+derivation `powner` and `plowner` have had since §147.7. **A tactic's Owner
+derived nothing.** The only thing that ever reached such a person was the
+Contributor floor, which fires on *holding no other role at all* — so a unit
+head who also owns a tactic somewhere else reached it through no row anybody
+could see on the table, and could be switched off by nobody.
+
+**It ships at `none` in every column**, which is his instruction rather than a
+cautious default, and **it takes nothing away**: the floor is now asked of the
+roles that grant something, so a role granting nothing cannot displace the
+view somebody already stands on. `powner` and `plowner` are deliberately left
+exactly as they are.
+
+**A handle of its own, never the row's owner.** A measure's reporting context
+sets `row.owner` from the **pillar's** owner (§55), so the obvious branch
+would have made opening this row quietly open every key measure to pillar
+owners. `ctx.tacticOwner` is set only where a tactic is the subject — six call
+sites, one meaning.
+
+**The measure half is drawn and not built**, because a key measure has **no
+Owner field anywhere in the product** — a role over a field that does not
+exist is a row that can never match anybody (§61). The mockup is published
+and awaiting sign-off; measured on the real table, the column fits at
+1600/1440/1280/1100/1000 in both read and pen mode with no row growing.
+
+**What ran.** `scripts/test-tactic-owner.js` **29/0**, red five ways from the
+source (8/1/1/1/7); the **access baseline UNMOVED** — 33 people × every page
+key × every target — so nobody's access changes; authoriser 683/0, change list
+140/0, platform rules 69/0, `built-in-step` all good, `access-header` clear
+after its rewrite, `role-picker` · `seat-grant` · `project-custodian` ·
+`project-done` green, and the full `qa.py` sweep **ERRORS none**. The matrix
+draws twelve rows with **Tactic owner · 18 people**, nothing overflowing at
+1600/1280/1000.
+
+**One check was rewritten, never loosened.** `access-header.py` kept a
+hand-written list of which roles are derived and went red on a correct build
+the moment a fourth existed (§214.3, §218); it derives the list from
+`isOwnLinesRole` now, which is the question the register's picker actually
+asks.
+
+**Nothing stored moves and nothing is migrated.** The seed gains one access
+row, all `none` — the same answer the default already gives — so a tenant that
+has never touched the matrix and one seeded today behave alike. `sw.js` is
+bumped to `v5.23-tactic-owner` — past main's own `v5.22`, because the built
+file's bytes changed and a worker caches by name (§91, §94.12).
+
+**Recorded, not done**: the Measure owner row and the field under it; and the
+Insights category filters are still drawn whether or not a report of that type
+exists, which is the other half of the report §383 answered.
+
+## §385 — the filters are the reports that exist (2026-09-21)
+
+Islam, of the reports tab: *"the filters of the reports should appear only if
+there is this type of report."* The other half of that message was the
+view-as fault §383 answered; this is the first half.
+
+**Measured before anything was proposed.** The row under the tab drew the
+module's whole list — `All · Analysis · Macro · Market · Sector · Governance` —
+for everybody, whatever the library holds. So a client with nothing published
+was shown **six filters, five of which could only ever return nothing**, on a
+tab a new client is likely to press first. Not a wrong list: the honest answer
+to *what kinds of report exist in the product* and the wrong answer to *what can
+I filter this library by*.
+
+**It had to be the server's answer.** That section row is built synchronously
+inside `paint()`, so nothing fetched can be in it — and §376's own rule for the
+tab is that it never repaints from a fetch, because the search box is in that
+row and a hand may be in it. So the categories are stamped on the document, as
+they already were; what changed is *what they are stamped with*.
+
+**Asked of the library, through the same two clauses the list is read
+through** — published only, and the per-place narrowing — so the row can never
+offer a category the list itself would refuse. A draft's category is not a
+filter; a report narrowed away from somebody is not a filter for them. The
+console is not a caller: publishing is CHOOSING a category, which is a different
+question.
+
+**Three answers, not two.** No library behind the tab (no module, not open to
+this person, or no server) draws no tab at all; a library with nothing filed
+draws the tab, no filter row and *0 reports* — hiding it would say Forefront has
+no library rather than that it is empty; a list draws those filters.
+
+**One reader where there were nearly four.** The same six lines that resolve who
+is looking sat in the Insights module and in the landing's facts, the second
+under a comment naming the first, and this needed it again — one answer now, in
+its own file beside the library's, so `lib/library.ts` stays free of a database
+driver and its check can still run with no database at all.
+
+**And the Setup document had to carry it too**, because the shell walks from
+Setup to a unit without asking for the document again.
+
+**A real fault found on the way, and not this round's.** `lib/shell.ts` has an
+escaper of its own and it escaped `& < > "` and not `'` — a text-node escaper
+used inside **single-quoted** attributes, which is §235's fault in the served
+app's own copy. Live: the Internal Tracker's note is *"The office's weekly
+actions about this client"*, so a client holding it was served a root element
+whose module list **ended at that apostrophe** — the browser mis-parsed the
+rest and the module switcher was silently not drawn. The landing stamp carries a
+published report's title, which a person types, so the same break could forge
+attributes the shell reads. No script can run either way (the policy is
+`script-src 'self'` with nothing inline). One line, matching the frozen escaper.
+
+**Two checks were stale and both were my own unmerged rounds.** Established by
+stashing this work, rebuilding, restarting the served app and re-running —
+identical failures (the first attempt measured a server still running the old
+build). §384 made a tactic's owner a role, so the Mobile head derives two rows
+and shutting one no longer shuts them: the product is right and the fixture had
+stopped making the state. Both checks shut **every row the person holds, asked
+of the product's own rule**, with the custodian beside them asserted untouched.
+And §383 drops a module the tab row already reaches, so on a client holding
+Strategy and the reports there is genuinely nowhere to switch to — the fixture
+makes a third module, and the two-module case is now asserted in its own right,
+so that decision is guarded rather than worked around.
+
+**What ran.** `check:insights` **137/0** with a new section whose state is made,
+red under three breaks (6 / 7 / 9); `check:insights:tab` 24/0; the escaping fix
+falsified from the source at **11 red**, its first failure printing the
+truncated attribute verbatim. `check:shell` 116/2 → **120/0**, `check:door`
+140/3 → **144/0**, `check:modules` three failures → **159/0**, `check:state`
+92/0, `check:viewas` 20/0, `check:setup` 33/0. Driven in a real browser against
+the served app: a Mobile head reads `All · Macro`, a Finance head
+`All · Macro · Sector`, and a client with nothing published gets the tab, no
+filter row and *0 reports*.
+
+**Nothing stored moves and nothing is migrated.** No frozen source changed, so
+the built file does not move and `sw.js` is **not** bumped — that trigger is the
+built file's bytes changing, and they did not.
+
+**Recorded, not done**: the Measure owner row and the field under it, still
+awaiting sign-off on the mockup; and `lib/chat-api.cjs`'s escaper, which has the
+same gap and is a carried file whose twin a check asserts byte-identical.
+
+**§385.10 — and the tracker's one red was two notions of today.** Run after
+the push. The record has carried `tracker` 227/1 for two rounds as *"a
+date-relative literal gone stale"*; it is not a literal. That section renders
+the page with a **fixed** today (2026-09-15) and the expectation worked its
+answer out from the **real clock**, so on 2026-09-21 the page said *Next week ·
+20 – 24 Sep* — right, relative to the 15th — and the check demanded *This
+week*. The days beside the word were already asking the fixed date, which is
+what made the pair disagree with itself. It went red on the **calendar** rather
+than on any commit, which is exactly why it looked like a stale literal. One
+argument, and it stops depending on the calendar at all.
+
+**And it could not fail under either of its own breaks**: both sides call the
+same wording function, so breaking it moves the expectation with the product
+and the assertion goes green on the very build it is there to catch. That was
+true before the repair too. A second assertion names the two headings the fixed
+today produces — a week has a word, then its place in its month — which is the
+one claim that can fail: 1 red under each break, where the agreement is green.
+227/1 → **229/0**.
+
+**§385.11 — and the seam between the two halves was measured by nobody.**
+Found running the falsification suites for the checks this round edited: the
+`:red` list for the shell check held five breaks and `no-library-cats` — which
+`lib/shell.ts` declares — was not one of them.
+
+Pulling that thread found the larger thing. §385 has two halves and each is
+asserted where it has what it needs: the **rule** (which categories this person
+has) against a database in `checks/insights.mjs`, the **row** (what the tab
+draws with them) with no database in `checks/insights-tab.mjs`. Between them is
+the attribute the server writes on the document, **and nothing read it** — so a
+build whose stamp was still the module's whole list satisfies both files
+perfectly and draws Islam's six filters. §316.7's own finding one feature over.
+
+The shell check already starts the served app, so the seam goes there: read off
+the **raw HTML** rather than the DOM (the tab row is built before any answer
+could arrive, which is the whole reason the list is stamped), asserted as an
+**agreement** with the rule rather than against a typed list, with the state
+**made** — the dev tenant publishes nothing, so every assertion would pass on a
+build that stamped an empty list always, which is the other way to get this
+wrong — and **both ends**, a client without the module carrying no stamp at all.
+
+**And the check that claimed to run it said so in its own docstring.** The
+insights-tab check named that break as reddening its §5, and §5 prints that it
+is *"run by the served-app sweep"* — and nothing runs it. A file saying a thing
+is covered elsewhere is read as a file that has covered it. Corrected in words,
+the two halves named with their breaks, and what is asserted nowhere said
+plainly: the tab on all four destination kinds, the address it writes, and
+typing never repainting.
+
+5 green; **red 5** under the break — four of the new section's own, **plus one
+of §3b's**, which is a true consequence rather than a stray: dropping the stamp
+drops the tab, and §383's switcher rule reads the tab, so the four-square mark
+correctly comes back where that section asserts it does not. The new section's
+fifth is correctly green under it, absent being absent either way — which is
+what a both-ends control looks like when the break lands. Shell 120/0 →
+**125/0**, its falsification list five breaks → **six**.
+
+The whole-platform sweep was run again at the end of it and reads **33 people,
+242 pages walked, no errors** — the same figure the last two rounds recorded.
+That sameness is the point rather than a formality: the sweep walks the offline
+file on built-in data, so it gives the same answer every time unless something
+in that file changed. This round changed nothing in it, so a different number
+would have meant the opposite of what this entry says. The number was added up
+from the run's own lines instead of copied from the record, or it would only be
+repeating itself.
+
+**Recorded, not done**: §5 is still unrun. It needs the served app, which the
+shell check now starts, so the honest next move is for its remaining subjects to
+go there rather than a second file starting a second server.
+
+---
+
+## 2026-09-21 — The screen check runs at last (§382.5)
+
+**On the branch, not merged.** The merge is Islam's word, on that merge.
+
+**What was outstanding.** The round below shipped with one thing openly
+unfinished: the check that drives the screen had never been run, because that
+session had the browser and not the driver that steers it. It has been run now.
+
+**Nothing in the product was wrong.** Every one of the four failures was in
+the check itself — it asked for a control by a name the platform has never
+used, it asked in a way that stops the whole file dead instead of reporting,
+it forgot to dismiss the welcome screen so every press landed on that instead,
+and its last test stood on a page the person it was testing is not allowed to
+open, so it was reading the wrong screen and calling a healthy build broken.
+All four are corrected, and the last one is now a stronger test than it was:
+it walks every page that person can actually reach rather than sampling one.
+
+**Then it was proved it can still catch a real fault** — three deliberate
+breaks in the product, each one making the right part of the check go red, and
+the code put back afterwards and checked byte for byte against what it was.
+
+**Where it stands.** The screen check passes 24 of 24, the whole-platform
+sweep walks 33 people across 242 pages with no errors, and every other check
+around it is green. One file changed, and it is a test file.
+
+## 2026-09-20 — My reporting: the lines a tactic's owner enters (§382, spec 062)
+
+**On the branch, not merged.** The merge is Islam's word, on that merge.
+**Its one open item — the unrun screen check — is closed above (§382.5).**
+
+**What he asked.** Whether a tactic's owner can report their own tactic. They
+could not — and the honest answer came with the number: every one of the
+worked example's 83 tactics names an owner, and the machinery that lets
+somebody enter a figure they are named on walks a subject's objectives and its
+measures and **never its tactics**.
+
+**What is built.** A **My reporting** tab beside Reporting, holding the lines
+the plan names this person on, grouped by unit with a filter when there is more
+than one. They enter figures; the note and the submission stay the unit's. On
+the unit's own Reporting page those same rows are read-only, so there is one
+way in. Save draft locks their own lines and Reopen opens them — per person and
+per subject, so one owner's draft never touches another's. And the welcome
+screen tells somebody their lines are waiting.
+
+**What does not move, which was the constraint he set.** Nothing on Roles &
+access. One tenant switch, shipping **off**, stored as an absence — so an
+untouched tenant behaves byte for byte as it does today, and both checks assert
+that end as hard as the other. No migration and no schema change.
+
+**Two things I got wrong and corrected in front of him.** The first drawing put
+two foreign units in somebody's navigation; measuring says a bounded role can
+never see one, so the harder-looking case cost nothing. And I told him *My
+reporting* was a name already taken; it renders on no screen, and the stale
+label is brought into step in the same edit.
+
+**The thing worth keeping from the building.** A narrowing I had written turned
+out to be reached by nothing — both checks stayed green with it removed — and
+what it *would* have done is reverse an earlier decision of his, that being
+named a collaborator on a milestone is a reporting right. He asked about
+tactics. It is deleted, and the decisions document records why rather than
+leaving an absence.
+
+**Checked.** The rules and the page: 53 assertions, proved able to fail six
+ways. The server: 704 assertions, proved able to fail eight ways, including the
+direction that matters — a stranger being allowed. Everything rebuilt and the
+served copies regenerated.
+
+**What could not be checked here, said plainly.** This machine has the browser
+but not the driver that steers it, so no screen check could be run at all —
+including the new one, which is written and waiting for somebody with a
+browser. Nothing on a screen has been driven by a machine in this round; the
+claims about what is drawn come from calling the product's own renderer.
+
+**Waiting on Islam**: the merge.
+
+---
+
+## 2026-09-21 — The two branches merged into one (§385.1)
+
+Islam asked for the other branch to be brought into ours and the overlaps
+sorted out before anything goes to main. There were **two** overlaps, and only
+one of them was the branch he named.
+
+**The one he knew about.** That branch and ours both built something about a
+**tactic's owner**, two minutes apart, in two sessions that could not see each
+other. Ours adds a **row** on the roles table — *Tactic owner*, switched off,
+so the office can decide — and theirs adds a **switch** and a page of the
+owner's own called **My reporting**, where the unit's ordinary reporting page
+becomes read-only for them. Both quote him. Neither came first in any
+meaningful sense.
+
+**Both are kept**, and the order between them is now written into the code
+rather than left to be found out: with the switch **off**, an owner's tactic
+behaves exactly as our row says; with it **on**, the unit's page steps aside
+and they type on their own page.
+
+**One combination still says two different things, and that one is his.** A
+client that switches the row on *and* turns the switch on will read "can
+report" on the roles table and meet a page that will not take the number.
+Nothing is broken and nothing is lost — but two ways of saying yes to one
+thing is how they come to disagree later, so it is flagged rather than decided
+here.
+
+**The one he did not know about.** Main has moved since our last round and has
+taken two of the section numbers we were using, from a third session. So our
+three unmerged sections were renumbered first, before anything was merged —
+which is the only moment that can be done safely, because at that point every
+one of those numbers in our copy is provably ours. Every count was declared in
+advance and the whole pass refused itself on a mismatch; three different ways
+of writing a section number had to be swept, not two.
+
+**What the merge itself turned up.** A comment in the incoming work describes
+something that code no longer does — corrected rather than carried across. The
+two branches had independently given the service worker **the same version
+name**, which is the fault that has bitten this project before and which git
+only caught this time by luck. And two checks went red for opposite reasons:
+one was doing its job (it noticed a new file of ours needing a browser), and
+one was reporting a fault that is not there, because its stand-in answered a
+question it should have refused — the product was checked directly rather than
+believed broken.
+
+**What was run, on the merged result rather than on either branch**: every
+rule suite, the frozen product's own checks, the served app rebuilt from
+scratch against a real database, and the whole-platform sweep. All green, no
+errors — **and the sweep's numbers did not move, which is the point**: the
+merge adds a new tab, and a new tab must not add new places in the navigation.
+That is the exact fault an earlier round of ours existed to fix, so a changed
+number would have meant it had come back.
+
+**Main is untouched.** This is the rehearsal he asked for. Merging to main is
+his word, and main's own two sections are still to come across.
+
+---
+
+## 2026-09-21 — main's two sections brought in (§385.2)
+
+**Done on the branch. Main is untouched.**
+
+This is the second half of what you asked for. You said: *"there are
+intresections and we need it resolved before merging. so better merge that
+branch with ours first."* The other branch was merged last time. This brings in
+the two rounds `main` had taken meanwhile — a third session's work on the
+People register, where the email and the phone number stopped being buttons you
+click to copy and became ordinary text you can select.
+
+**Nothing new was built.** Every line of this round is either a conflict being
+resolved or a file being rebuilt from its sources.
+
+### What the two sides each did
+
+- **Ours** (already on the branch): the reports tab's filters, a tactic owner's
+  own reporting tab, and the row on Roles & access.
+- **Main's** (brought in now): the one-click copy removed from the register's
+  Email and Mobile cells, and then a right-click or a drag taking the whole
+  value rather than one word of it.
+
+They do not overlap in what they do. They overlapped in five files, and each
+one had a rule already written down for it:
+
+- **The three record files** — both sides kept, never one picked. A script
+  checked that every line of each side survived.
+- **The built platform file** — rebuilt from the merged sources rather than
+  merged, which is the standing rule, and then checked byte-for-byte against
+  what the builder produces.
+- **`sw.js`** — rebuilt from main's copy with our one line put back, and the
+  version name moved past both sides so no browser is served the wrong shell.
+
+And the rebuilt file was checked to carry **both** sides' work, not one of
+them.
+
+### What went wrong, and it was all mine
+
+Three things, none of them in the product:
+
+1. I set two environment variables in one line in a way that left the second
+   one empty, so the first round of database checks all ran against the wrong
+   kind of connection — **and the platform printed a warning about it on every
+   single run**, which I read past nine times. Everything was re-run properly.
+2. I started the big sweep in a way that killed it immediately, and it came
+   back reporting success with an empty log. The rule that catches this is one
+   we already had: read the last line, and an empty last line is a failure.
+3. Two checks needed a Python library this container did not have, and two
+   needed a rehearsal database set up in three steps. All four were set up, and
+   all four are green.
+4. Two of those checks then said *"the server never came up"*, and I guessed at
+   the cause instead of asking. The real one: a leftover server from the
+   newer stack was still sitting on the exact port they use. I found it by
+   starting the server by hand and reading the error it prints — and the first
+   tool I asked told me the port was free when it was not.
+5. Running one of the database checks left three test accounts behind, which
+   made the next one report a real rule as broken. Rebuilt clean, it passes.
+   The order these are run in matters, and that is now written down.
+
+### Three things are still red, and none of them is this merge's
+
+Each was established by measurement, not by assumption — for two of them by
+running them on the tree as it was *before* the merge and getting the identical
+failure, and for the third by showing that not one file the check looks at
+changed:
+
+- **`test-clean-parity`** — already recorded as red on main, from a difference
+  between the clean-slate migration and the cleared-graph function.
+- **One of the nine database spike proofs** — its seeder cannot handle a table
+  that points at itself, which the Portfolio tables do.
+- **`frameworks-page`** — the console's tab row comes up empty in this
+  container. Every file that check looks at is byte-for-byte what it was before
+  the merge, so it is not this round's; what it is, I could not close from here,
+  and that is said rather than left out.
+
+### What to go and check, if this is merged
+
+- **Setup › People register** — right-click an email, then a phone number: the
+  whole value should highlight and Copy should be live. A double-click should
+  still open the cell for editing. That is main's round, not ours.
+- **Setup › Roles & access** — the Tactic owner row is still there and still
+  starts shut.
+- **The Insights tab** — the filters above the list are still only the kinds of
+  report that actually exist.
+
+Nothing is stored differently, nothing is migrated, and nobody is signed out.
+
+### One thing to know before the next round
+
+While this was being finished, `main` moved on again — three more commits, from
+the same third session. They are **not** in this merge.
+
+They matter for one reason: that session has used the number **§379** for its
+own work, and this branch already used §379 for the reporting tab that came in
+last time. Two different pieces of work wearing one number. Nothing was wrong
+today — their §379 is not in our copy — but whoever does the next merge has to
+renumber ours first, before merging, or the two become impossible to tell
+apart.
+
+**That renumber is now done — it is the round below.**
+
+## 2026-09-22 — The numbers moved, so the next merge can happen (§385.3)
+
+**Nothing was built.** No screen changed, no rule changed, nothing is stored
+differently, nothing is migrated, and nobody is signed out. The whole of this
+round is section numbers, the two files that are generated from them, and the
+record.
+
+### Why it had to happen first
+
+The other session on `main` used **§379** for its work. This branch used §379
+for the reporting tab. Two pieces of work, one number — and once the two trees
+are merged there is no way left to tell whose line is whose.
+
+So the numbers are moved **before** the merge, not during it. That is the only
+moment it can be proved that every §379 in this tree belongs to this branch: the
+point the two trees last agreed carries none of these numbers at all, so there
+is nothing of anybody else's for the change to sweep up by accident.
+
+### What moved
+
+This branch's four sections each went up by one, so they keep their order and
+sit above main's:
+
+    My reporting      §379 → §380
+    The nav row       §380 → §381
+    The tactic owner  §381 → §382
+    The reports tab   §382 → §383
+
+§379 is handed back to `main`. **346 references** were rewritten across 37
+files. The spec folder numbers needed nothing — ours is 062 and main's highest
+is 061, checked rather than assumed.
+
+### What the round found
+
+**A change like this quietly rewrites the sentences that are about it.** Nine
+sentences in the two record files had become false — including the paragraph
+whose whole subject is *"main has taken a number"*, which ended up naming the
+wrong number, and the table recording what the **previous** renumber did, which
+ended up describing a move that never happened.
+
+The rule that comes out of it, and it is now written down: a number in these
+records is one of two things. If it **points at a section in this tree**, it
+should move. If it is a **record of what happened** — what an earlier renumber
+did, or what `main` was measured to hold at some moment — it must not, or the
+record calmly states something untrue. All nine were put right by hand.
+
+**And the check that was meant to prove only numbers moved was wrong first.**
+It looked for the new numbers only, so every line where a §379 had been removed
+looked like an unrelated change, and it reported a clean run as 108 faults.
+Corrected, it reports none — and a second reading proves the same thing the
+other way round: hide the numbers on both sides and the two are identical.
+
+### What is still owed before this can be merged
+
+1. Run the whole suite on the **merged** tree — not on this branch. Nothing here
+   has been checked against main's three new commits.
+2. Bump the version name in `sw.js` at the merge itself, checked against `main`
+   in the same breath as the push.
+3. Three checks are red and none of them is ours — they were reproduced on
+   main's own build first. They are listed in the previous round.
+
+**`main` is untouched. The merge is yours to say.**
+
+---
+
+## 2026-09-22 — the switch decides, and the Tactic owner row comes off
+
+**What you said.** *"We need not to confuse the custodian with the tactic
+owner. The custodian should have always access to their unit or function
+entry, except in one case when we set figure sets. My reporting appears for
+tactics for units or functions she is not the custodian or the owner."* And
+then, of the two drawings: **"A"**.
+
+### What is built
+
+**One question is asked per subject: do I run this one?** Its answer decides
+both things at once.
+
+- **I run it** — I enter everything on that unit's own Reporting page, tactics
+  included. There is **no My reporting tab** for it, because a second page
+  holding rows that are already on the first is a second place to look for one
+  number.
+- **I don't run it, but I own tactics there** — those lines are on My
+  reporting, and that is where I type them.
+- **A line somebody else owns, inside a unit I run** — I see the figure, I do
+  not type it. That part is unchanged.
+- **Figure sets are untouched**, which is the one exception you named.
+
+**The Tactic owner row is off Roles & access**, with the whole role and
+everything that plumbed it. The switch on Setup › Reporting cycle is the only
+control, and it still ships off.
+
+### What it actually moves, on the worked example
+
+| | |
+|---|---|
+| tactics naming an owner | **83** |
+| ...that name somebody on the register | **51** |
+| ...owned by the person who also runs that subject | **49** — they lose a second screen |
+| **...that reach My reporting** | **2**, one person |
+| tactics naming somebody the register does not hold | **32** |
+
+**Those 32 are the finding.** A plan is typed by a custodian and a register is
+filled from HR, so a third of the owner names reach nobody. Before today, a
+line like that was treated as belonging to a person who does not exist — so
+**one of your 33 people could enter it, the SMO**, and nothing on any screen
+said why. It goes back to the unit, exactly as it was before the switch was
+turned on.
+
+**And removing the row moves nobody's access.** 33 people × 36 pages × 21
+places = 24,948 answers, measured both ways: **0 changed.** Somebody who owns a
+tactic and nothing else is a Contributor again, which is what they were before
+that row existed.
+
+### What the switch now says
+
+It read **"83 83 lines"** — the word printed twice, and the wrong number. Both
+are fixed: it says the number it actually moves, which on your tenant is **2**.
+
+### What went wrong while building it
+
+**My own new check reported "all good" over two real failures.** The section I
+added to measure this used a variable name the file already uses for its
+failure count, so it wiped it. Found by deliberately breaking the product and
+watching the check fail to notice. Two more of that section's mistakes were the
+same shape — it measured a row nothing asks for this cycle, and it switched
+viewer in a way that silently does nothing over a real server, so a sweep of 33
+people was really a sweep of one.
+
+None of the three was in the product. All three are fixed and written down.
+
+### Checked
+
+The four states driven in a browser and proved able to fail three ways; 709
+server assertions, 65 rule assertions, the full page sweep with no errors, and
+both in-step guards clear. The seed is regenerated and the offline file matches
+the build.
+
+**`main` is untouched. The merge is yours to say.**
+
+---
+
+## §388 — the second renumber, the merge, and two guards a decision had already invalidated (2026-09-22)
+
+**Islam: *"merge to main."***
+
+**Fetching `main` before going near a merge found the collision again.** It had
+moved **nine commits** and taken **§380 and §381** for another session's work on
+the plan builder (spec 020), while this tree held §380–§385 for My reporting and
+the two rounds beside it. Two numbers, two meanings, for the second round
+running — so the renumber ran **first**, which is the only moment it is provably
+scoped (§264.3): the merge base holds §380–§387 **nought** times in every
+spelling, so every one of them here is a line this branch wrote.
+
+**The renumber.** Descending by source, or each pass eats the next (§365.5):
+
+| was | is |
+| --- | --- |
+| My reporting | §380 → §382 |
+| The nav row | §381 → §383 |
+| The tactic owner | §382 → §384 |
+| The reports tab | §383 → §385 |
+| — | §384 → §386 |
+| Do I run this one? | §385 → §387 |
+
+Three spellings (§336.1) — `§NNN`, the `&sect;NNN` entity, and the `§NNN`
+JavaScript escape, **nine of the last across three check files**, which a
+two-spelling sweep would have left naming somebody else's section. Every count
+declared in advance and the pass refused on a mismatch (§344.1): **89 / 2 / 115
+/ 113 / 91 / 185, 595 in all**, each step also asserting its target was free
+before it wrote and its source 0 after, and applied to the file on disk each
+pass rather than from a planning-time snapshot (§376.1).
+
+**§388a — and the sweep takes the sentences that describe the numbering.**
+§385.3a arriving for the second time, and the finding of the round. *A number in
+these records is one of two things and only one of them may move*: a **label**
+naming a section in this tree is rightly swept, so it still points at the thing
+it names; a **historical fact** — the arrows of a past renumber, or a
+measurement of `main` made at that moment — must not be, or the record calmly
+states something that never happened. **Forty-one lines** across all three
+record files had become false, the table above among them. Put back by hand,
+each guarded on the line it was aimed at and refusing rather than writing
+nothing (§353.4), the labels beside them left swept, and every region re-read
+afterwards to confirm only labels remain changed. **And the first keyword filter
+missed lines** — *"before our own §380 and about the same subject"* carries no
+renumber word — so what is read is **every** changed line in the numbering
+regions rather than the ones a filter volunteers.
+
+**§388b — the merge's five conflicts, each with a named rule.** The three record
+files **combined, never picked** (§318.7, §356.17), with every non-blank line of
+each side asserted present in the result — 0 lost from ours, 0 from main —
+because either side taken whole drops the other session's round and there is no
+`generated-in-step` for prose. The built file **rebuilt from the merged sources,
+never merged** (§91) and byte-identical to `build.py`'s output, with
+`smp-app/public/` regenerated from its four generators (§329). `sw.js` rebuilt
+from main's copy with this branch's one line re-applied (§146.2) at a name
+**past both** rather than picking either — main v5.25, ours v5.27, merged
+**v5.28** — proved never held anywhere in the history, one live `const SHELL`,
+`node --check` clean. The merged result is **read, not believed** (§313.37):
+every name this branch deleted grepped for, and the duplicate top-level
+declaration scan over build.py's own script list reads 1534 names with exactly
+the six §281.1 leaves deliberately.
+
+**§388.1 — two checks held a guard §387.1 had already invalidated.** Both read
+*"the head holds more than one row"*, written at §385.8 while §384's Tactic
+owner row existed; §387.1 removed that row on Islam's word, so both began
+**reporting a correct build broken** (`check:modules` 158/1, `check:door`
+143/1). **Invisible on the branch** — §387's own session held no `node_modules`
+and records `check:modules` as unrun — which is §365's argument for re-running
+on the merged tree rather than the branch, paid a second time. Rewritten, never
+loosened (§218), to the claims that survive either decision: the rows are the
+product's own answer (`personRoles` over `worldOf`, §42) and one of them is the
+BU owner's. **What the count was standing in for is driven where it can be**, in
+`checks/modules.mjs` §4c over the custodian, who does hold two — one row shut
+and `decideOpen` asked, so §33's most-generous rule is measured rather than
+assumed.
+
+**§388.2 — and the first falsification was a no-op that looked exactly like a
+working guard** (§54.5). Inverting `mayOpenModuleArea` as
+`if (best === "none" || RANK[g] < RANK[best])` fires on every iteration while
+`best` is none, so it takes the last non-none grant and is still generous. It
+matched exactly once, the check reported **160 ok, 0 failed**, and that is
+indistinguishable from a rule that holds. A faithful inverse needs a sentinel
+(`best === null`); only measuring `frozen.mayOpen` directly with the break in
+place told the two apart. With the sentinel the same break is **1 red and it is
+exactly the §33 assertion**. Restored from the saved copy rather than with
+`git checkout` (§343.9), and the rebuild asserted byte-identical.
+
+**§388.3 — spec 029 answered by measurement.** `lib/authorize.js`,
+`lib/rules.js` and `lib/graph-diff.js` all changed, which is the trigger for a
+forced sign-out — so `origin/main`'s **own** authoriser and change-list suites
+were run against the **merged** rule modules in a worktree: **683/0 and 140/0**.
+No rule an old tab relies on has moved (§382's new kinds sit behind a switch
+that ships off, and off is byte-identical), so **no forced sign-out is owed**.
+
+**And one red was a run that died rather than a fault** (§298.3): `check:door`
+first read *97 ok, 21 failed* — 118 assertions against the complete run's 144 —
+under contention with the build finishing beside it; re-run it is 143/1, and the
+one is §388.1's.
+
+**Verified on the merged tree** (§365): `built-in-step` all good,
+`generated-in-step` all clear, authoriser 709/0, change list 140/0, platform
+rules 69/0, `test-my-reporting` 65/0, and on the stack production serves state
+92/0, modules 160/0, door 144/0, insights 137/0, frameworks 90/0, tracker 229/0,
+notes 170/0, portfolio 121/0, upload 9/0, demo 7/0, standing 7/0, room 10/0,
+deploy 5/0.

@@ -261,10 +261,38 @@
      question and is answered by the module's OWN area on the server, so a
      second grant here would be a cell that could refuse what the door
      allowed — two answers to one question (§37, §53.5). The key is here
-     because `allowed()` asks every tab for one. */
-  var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights",
+     because `allowed()` asks every tab for one.
+
+     AND `everywhere` IS WHAT STOPS IT FILLING THE ROW (§383). Every other
+     tab in SUBS is ABOUT the destination it is drawn on — a unit's plan, a
+     function's projects — so the navigation can ask *is there a tab here
+     this person holds* and get an honest answer. The library is the
+     CLIENT's: pressing Retail Stores shows the same reports (§376, Islam's
+     own decision), and with `c_kb` at view for everyone that question came
+     back YES at every unit, every function and the group, for everybody —
+     31 of the worked example's 33 people, the Units | Functions switch with
+     them. Marked on the TAB rather than tested by its key in the gate, so a
+     second client-wide tab says so about itself and `ownTabs()` is never
+     edited (§104.7). It is still DRAWN wherever you are; what it stops
+     being is the REASON to be there. */
+  var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights", everywhere:true,
                   when: function(){ return LIBRARY.shown(); },
                   sections: function(){ return LIBRARY.sections(); } };
+
+  /* §382: MY REPORTING — the lines the plan names this person on. Drawn only
+     on the person's own place and only for somebody who owns a line somewhere,
+     so nobody else meets it; gated by `when` alone, because being named IS the
+     permission and there is no cell for it to sit in (§16.7's model, one
+     column over).
+
+     DECLARED ONCE AND REFERENCED FOUR TIMES, at the merge (2026-09-21). It
+     arrived written out in all four lists, and §383 had put `LIB_TAB` two
+     lines above it for the reason §211 and §213 each cost a day to learn:
+     one tab spelt four times is four places to forget the fifth. Nothing about
+     it changes — same key, same gate, same renderer, same position — and it
+     is the file's own idiom rather than a decision made here. */
+  var MY_TAB = { k:"mylines", ac:"c_mylines", label:"My reporting",
+                 when: myLinesHere, render: function(){ return renderMyLines(); } };
 
   var SUBS = {
     /* A supporting function is the destination; the capabilities it carries are
@@ -368,6 +396,7 @@
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
         render: function(k){ return renderFnReport(k); } },
+      MY_TAB,
       LIB_TAB
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
@@ -380,6 +409,7 @@
     co: [
       { k:"performance", ac:"g_perf", label:"Performance", primary:true,
         render:renderCompanyPerformance },
+      MY_TAB,
       LIB_TAB
     ],
     group: [
@@ -388,6 +418,7 @@
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
+      MY_TAB,
       LIB_TAB
     ],
     unit: [
@@ -470,6 +501,7 @@
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState(); },
         render: function(u){ return renderReport(u); } },
+      MY_TAB,
       LIB_TAB
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
@@ -1145,7 +1177,13 @@
      currently-open unit's answer for every unit in the navigation. */
   function allowed(defs, target){
     return defs.filter(function(d){
-      if (d.when && !d.when()) return false;
+      /* §382 HANDS `when` THE TARGET. Every existing one ignores it, which is
+         why this is safe — and My reporting cannot be written without it: the
+         tab belongs on the person's own place and on no other destination, so
+         a `when` that can only see the currently-open one would draw it
+         everywhere or nowhere (§37's own reason for `allowed` taking a target
+         at all). */
+      if (d.when && !d.when(target || TARGET)) return false;
       return grantAt(d.ac, target || TARGET) !== "none";
     });
   }
@@ -1166,6 +1204,31 @@
     return allowed(defs, target).filter(function(d){
       return !d.sections || allowed(d.sections(arg), target).length;
     });
+  }
+
+  /* ── WHAT MAKES A DESTINATION WORTH OFFERING (§383) ──────────────────
+     `allowed()` answers which tabs this person holds HERE, and the navigation
+     asks a narrower question: is there anything AT this destination for them.
+     A tab that draws the same thing wherever it is drawn is not an answer to
+     it — so the destination row, the Group button, the companies and the
+     Units | Functions switch all ask THIS, and the tab row itself goes on
+     asking `allowed()`, because once you are here it is a tab like any other.
+
+     ISLAM, OF THE BUILD THAT DID NOT: *"when viewing as Mahdy he started
+     seeing the other units and functions while he should only see his
+     unit."* Measured against the platform's own rule, §376's Insights tab
+     took 31 of the worked example's 33 people from one unit, or two, or
+     none, to all ten and all eight — and 29 of them met the Units |
+     Functions switch, which is meant for the SMO and the CEO. No plan and no
+     figure was exposed by it (the tabs that draw those still refuse, which is
+     why his own screenshot shows a row of one tab on somebody else's unit);
+     what filled up is the row of names.
+
+     THE NAME IS `ownTabs`, NEVER `here`: `here` is taken (§231's chat
+     reads `t.here_at`) and one-word names in this scope have collided before
+     (§56.7, §65.9). */
+  function ownTabs(defs, target){
+    return allowed(defs, target).filter(function(d){ return !d.everywhere; });
   }
 
   /* A unit tab appears only if the viewer reaches that unit AND holds at least
@@ -1196,21 +1259,21 @@
   var NAVFOLD = "units";
 
   function myUnits(){
-    return activeKeys().filter(function(k){ return allowed(SUBS.unit, k).length; });
+    return activeKeys().filter(function(k){ return ownTabs(SUBS.unit, k).length; });
   }
   /* Which capabilities this viewer reaches, asked of the RULE (§42): a
      capability resolves to the function that holds it, so the office and the
      CEO see every one and a function head sees theirs. */
   function myCaps(){
     return capsReachable().filter(function(c){
-      return allowed(SUBS.fn, "cap:" + c.id).length;
+      return ownTabs(SUBS.fn, "cap:" + c.id).length;
     }).map(function(c){ return c.id; });
   }
   function myFns(){
     return FUNCTION_KEYS.filter(function(k){
       /* fnShows(), not `capsOfFunction(k).length` and not fnHasWork() either
          — the same question fnsReachable() asks, asked once (§59, §61). */
-      return fnShows(k) && allowed(SUBS.fn, "fn:" + k).length;
+      return fnShows(k) && ownTabs(SUBS.fn, "fn:" + k).length;
     });
   }
   /* The folds appear only for someone who reaches more than one unit AND more
@@ -1242,6 +1305,19 @@
      already use 1424px of a 1485px row — 61px left — so a third kind of thing
      sharing that line overflows on an ordinary laptop the day a second
      capability is created. */
+  /* IS THERE ANYWHERE FOR THIS VIEWER TO STAND (§383). Asked by the module
+     switcher (shell/route.js) and by nothing else: with the library drawn as
+     a tab wherever there is a tab row, somebody who reaches NO destination
+     has no row to be offered it on — so the switcher must go on listing
+     Insights for them, or the reports are reachable from nowhere (§61).
+     Built from the same four answers the row itself is, never a fifth list
+     (§53.5). */
+  function anyDestination(){
+    return !!(navSides().length || ownTabs(SUBS.group, "group").length ||
+      companiesReachable().filter(function(ck){
+        return ownTabs(SUBS.co, "co:" + ck).length; }).length);
+  }
+
   function foldsNeeded(){
     var sides = navSides();
     if (sides.length < 2) return false;
@@ -1275,9 +1351,9 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (allowed(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
     companiesReachable().forEach(function(ck){
-      if (allowed(SUBS.co, "co:" + ck).length)
+      if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
     });
     if (tops.length === 1) out.push({ k:tops[0].k, label:tops[0].label });
@@ -2043,7 +2119,7 @@
     var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }))
       .concat(myCaps().map(function(id){ return "cap:" + id; }))
       .concat(companiesReachable().map(function(ck){ return "co:" + ck; }));
-    if (allowed(SUBS.group, "group").length) everything.push("group");
+    if (ownTabs(SUBS.group, "group").length) everything.push("group");
     if (allowed(SUBS.setup, "group").length) everything.push("setup");
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
@@ -4809,6 +4885,34 @@
       NEWCYCLE = null;
       paint();
     });
+    /* ── §382: MY REPORTING'S THREE CONTROLS ──────────────────────────
+       The FIGURE needs none of its own — the boxes are `repEntry`'s, so they
+       are the unit's own `[data-rep]` fields carrying `data-repu`, and the one
+       handler below resolves each against its own subject exactly as it has
+       for "Figures I report" since that page existed (§53.5).
+
+       The band filter is a SCREEN state and nothing else: it is not stored, it
+       is not in the graph, and it never leaves the page (§25, §47.1). */
+    document.querySelectorAll("[data-linesf]").forEach(function(el){
+      el.addEventListener("click", function(){
+        MYLINEF = el.dataset.linesf || ""; paint();
+      });
+    });
+    /* SAVE DRAFT AND REOPEN, per subject. Islam: *"the sense of saving that we
+       do in the reporting already gives the feel of saving that locks the
+       reporting with ability to open again"* — so it is §263's own pair rather
+       than a control of this page's, and it locks THIS person's lines in THIS
+       subject, leaving the unit's report open (§309). */
+    document.querySelectorAll("[data-lineslock]").forEach(function(el){
+      el.addEventListener("click", function(){
+        setLineLock(el.dataset.lineslock, true); paint();
+      });
+    });
+    document.querySelectorAll("[data-linesopen]").forEach(function(el){
+      el.addEventListener("click", function(){
+        setLineLock(el.dataset.linesopen, false); paint();
+      });
+    });
     document.querySelectorAll("[data-rep]").forEach(function(el){
       el.addEventListener("change", function(){
         /* `current` is the open destination, which is the unit on its own
@@ -5183,6 +5287,17 @@
        a switch that destroys data is not a switch, and turning it back on must
        find the page as it was left. The namings simply stop being reachable,
        which is what "hidden" means. */
+    /* §382: the one switch that moves who enters a figure. Stored as an
+       ABSENCE — off is what an untouched tenant already is, so turning it back
+       off must leave the graph byte-identical to one that never heard of it
+       (§50.6), or every save afterwards carries a phantom change for ever. */
+    document.querySelectorAll("[data-lineown]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (b.dataset.lineown === "1") GROUP.lineOwners = true;
+        else delete GROUP.lineOwners;
+        paint();
+      });
+    });
     document.querySelectorAll("[data-naming]").forEach(function(b){
       b.addEventListener("click", function(){
         GROUP.naming = b.dataset.naming === "1";
@@ -9194,13 +9309,23 @@
     var cs = document.getElementById("imp-cycle");
     if (cs) cs.addEventListener("change", function(){ IMP.cycle = cs.value; impCounts(); });
 
-    /* THE BLANK TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
-       an empty shape rather than a chosen subject's content, with the subject
-       named on the Read me sheet. */
+    /* THE BLANK TEMPLATE IS GENERIC, IN ALL THREE FORMATS (§22, §61, §380):
+       built against an empty shape rather than a chosen subject's content,
+       with the subject named on the Read me sheet.
+
+       `only:true` is what drops the sheets the format does not use, and it is
+       passed HERE and nowhere else: a subject downloading its own plan keeps
+       all seven (§342's decision, not reversed). The two project formats share
+       one builder, because they are one model with one sheet's difference —
+       which is also why the drop-list lives with the builder rather than being
+       spelt out at these two call sites (§53.5). */
     document.querySelectorAll("[data-dlblank]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (this.dataset.dlblank === "projects")
-          sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - projects plan template.xlsx");
+        var k = this.dataset.dlblank;
+        if (k === "projects" || k === "objectives")
+          sendXlsx(capPlanWorkbook(blankCapShape(), { fmt:k, only:true }),
+                   k === "objectives" ? "SMP - objectives and actions plan template.xlsx"
+                                      : "SMP - projects plan template.xlsx");
         else
           sendXlsx(planWorkbook(blankUnitShape()), "SMP - pillars plan template.xlsx");
       });
@@ -9373,11 +9498,24 @@
                  searched BESIDE the capabilities rather than before them, so a name
                  on both is caught by the refusal below instead of being resolved by
                  whichever list was looked at first (§51.19's silent wrong-plan). */
+              /* §380: AND IT ASKS THE LIST'S OWN QUESTION RATHER THAN A COPY
+                 OF IT. This predicate was written out here and asked
+                 `fnOwnsProjects`, which §342 makes FALSE for a function that
+                 plans in objectives and actions — so the template offered such
+                 a function in B2 and the upload answered "no business unit,
+                 supporting function or capability called …". Measured on the
+                 shipped build: offered true, resolves false. A plan that
+                 downloads and cannot come back (§22), and §53.5 exactly — two
+                 answers to one question, drifting the moment one gained a
+                 format the other had not heard of.
+
+                 `projectSubjectFns()` is asked with NO format, because by now
+                 the file exists and the only question left is whose name this
+                 is; narrowing is the blank template's job, where somebody is
+                 still choosing. */
               var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
-              var pfk = FUNCTION_KEYS.filter(function(k){
-                var f = FUNCTIONS[k];
-                return f && f.active !== false && !fnPlansInPillars(f) &&
-                       f.name === picked && fnOwnsProjects(k);
+              var pfk = projectSubjectFns().filter(function(k){
+                return FUNCTIONS[k].name === picked;
               })[0];
               if (!uk && !fk && pfk && caps.length) {
                 impFail('"' + esc(picked) + '" is both a supporting function and a ' +
@@ -10255,6 +10393,12 @@
       return true;
     }
     if (what === "project") { openBuilderForm("project", { capId:a[1] }); return true; }
+    /* §381.2: an ACTION carries its FUNCTION's key rather than a row id —
+       §342 hangs actions off the function itself, with no pillar and no
+       project between (`data-rowadd="action|<fk>"`). Without this line the
+       press fell through to the pen's own minter, so §129's "a row is added
+       whole" broke on exactly the format the builder's third route is for. */
+    if (what === "action") { openBuilderForm("action", { fnKey:a[1] }); return true; }
     if (what === "deliverable" || what === "outcome" || what === "milestone") {
       openBuilderForm(what, { projId:a[1] });
       return true;

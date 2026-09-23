@@ -5591,29 +5591,17 @@ function reportBar(target){
 
    Only this unit's items, only what this cycle asks for, and no plan editing:
    a target cannot be moved from the screen where it is being reported against. */
-function renderReport(u){
-  var may = canReport(u.ukey);
-  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
-     contributor limited to their own lines does neither — the server refuses
-     both, so the screen does not offer them (spec 006 §7.2). */
-  var mayAll = canSpeakFor(u.ukey);
-  var c = reportedCount(u);
-  var subd = !!REVIEW.submitted[u.ukey];
-  var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
-
-  if (REVIEW.state !== "open") {
-    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
-      'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
-  }
-
-  /* One cell shape for every reportable row, so a measure and a tactic are
-     entered the same way even though they mean different things. */
-  /* The box carries the measure's own unit as a fixed suffix, so a tactic is
-     plainly a percentage and a revenue measure is plainly billions of EGP. The
-     number alone goes in the field \u2014 actuals are stored with their unit, and
-     showing "28%" beside a "%" suffix reads as 28% %. The unit is rejoined on
-     save so nothing downstream sees a bare number. */
-  var entry = function(x){
+/* ── ONE CELL FOR EVERY REPORTABLE ROW, ON BOTH PAGES (§345) ───────────
+   Lifted out of `renderReport` unchanged when My reporting gained the same
+   rows: a tactic entered by its owner and a tactic entered by its unit must
+   be the SAME control, or the two pages drift the way §211 and §213 each
+   cost a day to undo (§53.5). `subj` is the subject the row belongs to —
+   written into the field as `data-repu`, which the shell's one handler has
+   read since "Figures I report" existed, so a row from another unit resolves
+   against its OWN plan rather than the page you are standing on. `where`
+   says which page is asking, which is the only thing the two answer
+   differently (§345: one door). */
+function repEntry(subj, x, where){
     var isT = x.kind === "tactic";
     /* §248: a tactic measured by its OUTCOME is asked for the outcome's
        figure, in the outcome's own unit, and stores it in `outActual` — never
@@ -5646,7 +5634,7 @@ function renderReport(u){
        named on (spec 006 §7.2); a figure with a SOURCE is entered by that
        source and by nobody in the unit (§16.7). Both are refused by the
        server, so neither is offered here. */
-    if (!canEnterFigure(u.ukey, x)) {
+    if (!canEnterFigure(subj, x, where)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
       /* §300: a yes/no figure is READ through `ynShown`, so a row holding a
          tenant's old `Yes` reads in the words the control now offers without
@@ -5659,13 +5647,38 @@ function renderReport(u){
     /* §300: the status picker and its per-cent box, which are §104's own pair
        (`ynBoxes`) rather than a control of this table's — Islam: *"for the
        inprogress and the % we used ot have them 2 stached boxes not one"*. */
-    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld);
+    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld, subj);
     return '<span class="entry' + (has ? " filled" : "") + '">' +
-      '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
+      '<input class="field" data-rep="' + x.id + '" data-repu="' + esc(subj) +
+      '" data-fld="' + fld +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
-  };
+  }
+
+function renderReport(u){
+  var may = canReport(u.ukey);
+  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
+     contributor limited to their own lines does neither — the server refuses
+     both, so the screen does not offer them (spec 006 §7.2). */
+  var mayAll = canSpeakFor(u.ukey);
+  var c = reportedCount(u);
+  var subd = !!REVIEW.submitted[u.ukey];
+  var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
+
+  if (REVIEW.state !== "open") {
+    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
+      'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
+  }
+
+  /* One cell shape for every reportable row, so a measure and a tactic are
+     entered the same way even though they mean different things. */
+  /* The box carries the measure's own unit as a fixed suffix, so a tactic is
+     plainly a percentage and a revenue measure is plainly billions of EGP. The
+     number alone goes in the field \u2014 actuals are stored with their unit, and
+     showing "28%" beside a "%" suffix reads as 28% %. The unit is rejoined on
+     save so nothing downstream sees a bare number. */
+  var entry = function(x){ return repEntry(u.ukey, x, "unit"); };
   /* §343: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
      than `entry` itself, because every branch in that function is about a
      field on the row (`actual` / `outActual`, the yes/no pair, a sourced
@@ -7546,9 +7559,15 @@ function capEntryBox(x, unit, may, label){
    AND THE NUMBER IS ASKED FOR WHERE IT IS OWED: an In progress with no
    per-cent is not an answer (§104.10), so the box carries `needsPct()`, the
    same mark the projects page puts on a milestone in that state. */
-function ynBoxes(id, hook, cur, label, fld){
+function ynBoxes(id, hook, cur, label, fld, subj){
   var st = SMPRules.ynState(cur), keys = ["todo", "wip", "done"];
+  /* §345: the subject rides with the row, for the same reason it does on the
+     box beside it — a yes/no line drawn on My reporting belongs to another
+     unit, and without it the shell's handler resolves the row against the page
+     you are standing on and writes nothing (§183's silent discard). Absent on
+     the unit's own page, where the handler falls back to `current`. */
   var at = ' data-' + hook + '="' + esc(id) + '"' +
+    (subj ? ' data-repu="' + esc(subj) + '"' : '') +
     (fld ? ' data-fld="' + esc(fld) + '"' : '') + ' data-unit=""';
   var pick = '<select class="fld selbox ynpick"' + at +
     ' data-ynpart="status" aria-label="Report ' + esc(label) + '">' +
@@ -8140,6 +8159,11 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  /* §384: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
+     nothing here — `row` is the real object — so reading `ctx.row.owner`
+     would have worked today and stopped working the day a key measure gains
+     an Owner of its own, which is the next thing drawn. Named, so the reach
+     cannot be read off a field two row kinds share (see boundedReach). */
   /* §201.2: does this table carry a Unit column right now? The office's pen
      always; a filler's only while some row has a missing unit to offer. */
   var unitCol = !ed && it.measures.some(function(m){

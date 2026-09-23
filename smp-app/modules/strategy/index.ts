@@ -17,9 +17,17 @@
    being drawn inside this document. */
 import { shellDocument, shellHeaders } from "../../lib/shell.ts";
 import { moduleMenu } from "../../lib/modules.ts";
+import { libraryStampFor } from "../../lib/library-viewer.ts";
 import type { ServeArgs } from "../registry.ts";
 
+/* THE REPORTS TAB'S FILTERS ARE STAMPED HERE (§385), and this module asking
+   the library is not it reaching into another's folder: `lib/library-*` is
+   the SPINE's (§354 — one machine, two names, written from the console too),
+   and the tab is drawn in THIS document. What Strategy must not do is decide
+   the rule, and it does not: `libraryStampFor` is the one answer, read
+   through the same clauses the list itself is read through. */
 export async function serve(a: ServeArgs): Promise<Response> {
-  return new Response(shellDocument(a.tenantName, a.module, moduleMenu(a.have)),
+  return new Response(shellDocument(a.tenantName, a.module, moduleMenu(a.have),
+      null, null, null, await libraryStampFor(a.tenantId, a.seat, a.personKey, a.have)),
     { status: 200, headers: shellHeaders() });
 }

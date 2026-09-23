@@ -126,7 +126,7 @@ with sync_playwright() as p:
        "%s / %s" % (dl_sw, up_sw))
     ck("Build a plan is off this page (§304.2)", not pg.query_selector("[data-buildplan]"))
 
-    print("\n§2  the blank template, both formats, as files")
+    print("\n§2  the blank template, one per way of planning, as files")
     n1, d1 = grab(pg, '[data-dlblank="pillars"]', "pillars template")
     if d1:
         names, first = sheets_of(d1)
@@ -137,6 +137,112 @@ with sync_playwright() as p:
     if d2:
         names2, _ = sheets_of(d2)
         ck("the projects template carries a Projects sheet", "Projects" in names2, names2)
+
+    # ── §380: A TEMPLATE PER WAY OF PLANNING, AND THE LIST IS THE NARROWING ──
+    # ASSERTED AS THE AGREEMENT WITH `FN_FORMATS` (§94.8, §214.3), never as the
+    # number three: a fourth way of planning added tomorrow should turn this red
+    # rather than leave the card quietly a format short, which is exactly how the
+    # card came to be two decisions stale.
+    fmts = pg.evaluate("() => FN_FORMATS")
+    btns = pg.eval_on_selector_all("[data-dlblank]", "e => e.map(x => x.dataset.dlblank)")
+    ck("one blank template per way a plan is written (§380)",
+       sorted(btns) == sorted(fmts), "%s vs %s" % (btns, fmts))
+    # THE STATE IS MADE (§255): the worked example has no objectives-and-actions
+    # function at all, so every assertion below about what that file offers would
+    # pass on a build that offers nothing. Put back at the end of the section.
+    made = pg.evaluate("""() => {
+      const k = FUNCTION_KEYS.filter(x => !fnPlansInPillars(FUNCTIONS[x]))[0];
+      const was = { fmt: FUNCTIONS[k].format, acts: FUNCTIONS[k].actions };
+      FUNCTIONS[k].format = "objectives";
+      FUNCTIONS[k].actions = [{ id:k+"-A1", name:"Sign the framework agreement",
+                                owner:"Hala Nabil", due:"Jul 2026" }];
+      window.__impWas = was; window.__impK = k;
+      paint();
+      return { k, name: FUNCTIONS[k].name };
+    }""")
+    pg.wait_for_timeout(300)
+    n3, d3 = grab(pg, '[data-dlblank="objectives"]', "objectives & actions template")
+    # THE PROJECTS FILE IS TAKEN AGAIN, FROM THE SAME TENANT. `d2` above was
+    # built before the state was made, so comparing the two lists compared two
+    # different tenants and reported the narrowing broken on a build that does
+    # it perfectly — a measurement whose two halves are of different worlds
+    # (§105.6's family, in a fixture rather than in a file on disk).
+    n2b, d2b = grab(pg, '[data-dlblank="projects"]', "projects template, same tenant")
+    if d3:
+        names3, first3 = sheets_of(d3)
+        # WHAT EACH FORMAT DROPS IS THE WHOLE DECISION, and both halves are
+        # asserted (§94.2): a build that shipped one file with every sheet in it
+        # satisfies "it carries Actions" perfectly.
+        ck("the objectives template carries Objectives and Actions",
+           "Objectives" in names3 and "Actions" in names3, names3)
+        ck("…and none of the project sheets",
+           not ({"Projects", "Deliverables", "Outcomes", "Milestones"} & set(names3)), names3)
+        ck("…and the projects template drops Actions instead",
+           d2b is not None and "Actions" not in sheets_of(d2b)[0]
+           and "Milestones" in sheets_of(d2b)[0],
+           sheets_of(d2b)[0] if d2b else None)
+        # THE READ ME'S OWN DROPDOWN IS WHAT SOMEBODY IS STANDING IN FRONT OF.
+        # Read out of the FILE (§96) — the list lives in the sheet's one inline
+        # dataValidation, so this measures the bytes and not a function's return.
+        def b2list(xml):
+            import re
+            m = re.search(r'<dataValidation [^>]*sqref="B2:B2"[^>]*>'
+                          r'<formula1>"?([^"<]*)"?</formula1>', xml)
+            return [x for x in (m.group(1).split(",") if m else []) if x]
+        l3 = b2list(first3)
+        l2 = b2list(sheets_of(d2b)[1]) if d2b else []
+        ck("the objectives file offers only the functions that plan that way",
+           l3 == [made["name"]], l3)
+        ck("…and the projects file does not offer it", made["name"] not in l2, l2)
+        ck("…while still offering everything else", len(l2) > 0, l2)
+        # THE ROW ABOVE THE NAME, and the prose under it — a file with no
+        # Projects sheet must not tell somebody to fill Projects first.
+        ck("the objectives file says Supporting function over its name",
+           "Supporting function" in first3 and "Capability" not in first3)
+        ck("…and its instructions do not name a sheet it does not carry",
+           "Fill Projects FIRST" not in first3)
+        ck("…while the projects file still says Capability",
+           d2b is not None and "Capability" in sheets_of(d2b)[1])
+    # AND A TEMPLATE NOBODY CAN FILL IN IS §61's TRAP WEARING A DROPDOWN: with
+    # the tenant put back, nothing plans that way, so the list is EMPTY — and an
+    # empty inline list refuses every value there is. The guard is that no
+    # validation is written at all, asserted on the bytes.
+    pg.evaluate("""() => {
+      const k = window.__impK, was = window.__impWas;
+      FUNCTIONS[k].format = was.fmt;
+      if (was.acts === undefined) delete FUNCTIONS[k].actions; else FUNCTIONS[k].actions = was.acts;
+      paint();
+    }""")
+    pg.wait_for_timeout(300)
+    n4, d4 = grab(pg, '[data-dlblank="objectives"]', "objectives template, nobody planning that way")
+    if d4:
+        _, first4 = sheets_of(d4)
+        ck("with nobody planning that way the file still opens and B2 is typeable",
+           "dataValidation" not in first4, first4[-300:])
+
+    # THE THIRD BUTTON HAD TO BE GROUPED, AND NOTHING MEASURED THE ROW. `.ffoot`
+    # wraps and `.why` takes the free space, so three loose buttons split 2+1
+    # below ~1100px with the odd one stranded at the FAR LEFT under the
+    # sentence — the new flex line starting where the ROW starts, not where the
+    # buttons were. Asserted as the property (one run, ending where the row
+    # ends), never as a coordinate (§94.8), and at four widths because the
+    # fault does not exist at the one this file otherwise runs at (§27.1).
+    for w in (1440, 1280, 1100, 1000):
+        pg.set_viewport_size({"width": w, "height": 1000})
+        pg.wait_for_timeout(150)
+        setup(pg, "dl")
+        row = pg.eval_on_selector(".fcard .ffoot", """e => {
+          const bs = [...e.querySelectorAll('button')], f = e.getBoundingClientRect();
+          return { n: bs.length,
+                   rows: new Set(bs.map(b => Math.round(b.getBoundingClientRect().top))).size,
+                   gap: Math.round(f.right - bs[bs.length-1].getBoundingClientRect().right),
+                   lead: Math.round(bs[0].getBoundingClientRect().left - f.left) };
+        }""")
+        ck("at %dpx the three buttons are one run, ending where the row does" % w,
+           row["n"] == 3 and row["rows"] == 1 and row["gap"] < 30 and row["lead"] > 60, row)
+    pg.set_viewport_size({"width": 1600, "height": 1000})
+    pg.wait_for_timeout(150)
+    setup(pg, "dl")
 
     print("\n§3  the picker — a count, ticks, and Select all / none")
     lab = pg.eval_on_selector(".pickrow .ssbtn .sslabel", "e => e.textContent.trim()")

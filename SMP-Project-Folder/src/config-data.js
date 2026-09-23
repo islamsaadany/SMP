@@ -105,7 +105,12 @@ function world(){
   return SMPRules.worldOf({
     unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
     functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
-    companies:COMPANIES, access:ACCESS, group:GROUP
+    companies:COMPANIES, access:ACCESS, group:GROUP,
+    /* §387: the register, so a rule can ask whether a plan's Owner column
+       names anybody the tenant actually holds. Named here AND in W() AND in
+       worldOf() (§102.4) — forget any one and the reader sees an empty list
+       and answers as though nobody exists. */
+    people:PEOPLE
   });
 }
 function personRoles(p){ return SMPRules.personRoles(world(), p); }
@@ -4935,11 +4940,77 @@ function figureAssignee(x){
 }
 /* May THIS viewer type THIS figure? One function, because a screen that asks
    it in two places will eventually answer differently from the server. */
-function canEnterFigure(unitKey, x){
+function canEnterFigure(unitKey, x, where){
   var who = figureAssignee(x);
-  if (!who) return canReportRow(unitKey, x);
+  if (!who) return canEnterLine(unitKey, x, where);
   if (inOffice()) return canReport(unitKey);
   return who === viewer().key && REVIEW.state === "open" && !CYCLE.locked;
+}
+/* ── §382: A TACTIC WHOSE OWNER ENTERS IT ──────────────────────────────
+   The figure-master rule above, asked of the plan's Owner column instead of a
+   figure's `src` — being named is the whole permission, so no grant, no role
+   and no attachment is consulted at all.
+
+   ONE DOOR, NOT TWO. Islam: *"the figures on the reporting tab that belongs to
+   him should be read only as well."* So `where` is what separates the unit's
+   own Reporting page from My reporting, and on the unit's page an owned line
+   is read-only for EVERYBODY but the office — which is not a new idea on that
+   table: a figure with a source has read that way since §16.7, and the column
+   already says who enters it. It REVERSES §301.5 for a bounded owner, which
+   existed to stop exactly the opposite fault — an owner able to type on one
+   page and not on the page named after the act — so the reversal is recorded
+   rather than quietly made, and its whole argument is that there is now a
+   better page for them to type on.
+
+   AND THE LOCK IS ASKED HERE, so every control on the row closes together
+   (§220's rule: a screen that shuts the figure and leaves the picker open has
+   shut nothing).
+
+   ── §387: ONE QUESTION, AND IT IS "DO I RUN THIS ONE?" ─────────────────
+   Islam, correcting §382: *"we need not to confuse the custodian with the
+   tactic owner … the custodian should have always access to their unit or
+   function entry except in one case when we set figure sets … my reporting
+   appears for tactics for units or functions she is not the custodian or the
+   owner."* So the person is asked ONE thing per subject and the answer decides
+   both halves at once — where they type, and whether they get a second screen
+   for it at all.
+
+   RUN IT and everything is on that unit's own Reporting page, tactics
+   included; My reporting is not drawn for it, because a second page holding
+   rows already on the first is a second place to look for one number (§87's
+   twins, at the level of a screen). DON'T RUN IT and the lines you own are on
+   My reporting and nowhere else. A line SOMEBODY ELSE owns, inside a unit you
+   run, you read and do not type — which is §382's own decision, kept, and the
+   one place the two rules still agree.
+
+   "DO I RUN IT" IS THE GRANT, NEVER A LIST OF ROLE NAMES, and that is the
+   judgement inside this: `canReport()` is *may I enter figures for this unit
+   at all*, so a custodian whose Reporting cell the office has set to `view`
+   falls to the other branch and types their own lines on My reporting, rather
+   than being told they run a unit they have no way to report on (§61). On the
+   worked example the two readings answer identically, so nothing on screen
+   moves either way; what differs is a tenant that has narrowed a cell, where
+   only this reading leaves somebody a door.
+
+   AND A NAME THAT REACHES NOBODY IS NOT AN OWNER (§387's own predicate): 32
+   of the demo's 83 tactics name somebody the register does not hold, and
+   read-only-for-everybody-but-the-owner on such a row means nobody at all —
+   so the line falls back to the unit exactly as it was before the switch was
+   turned on. The server is asked the same question through the same function
+   (§42). */
+function canEnterLine(unitKey, x, where){
+  var o = x && (x.obj || x);
+  if (!(x && x.kind === "tactic" && SMPRules.lineOwned(world(), o)))
+    return canReportRow(unitKey, x);
+  if (inOffice()) return canReport(unitKey);
+  var runsIt = canReport(unitKey);
+  var mine   = SMPRules.ownedBy(o, viewer());
+  if (where === "mine")
+    return mine && !runsIt &&
+           REVIEW.state === "open" && !CYCLE.locked && !lineLockShut(unitKey);
+  if (!runsIt) return false;
+  if (mine) return canReportRow(unitKey, x);
+  return !SMPRules.lineOwnerIsHere(world(), o) && canReportRow(unitKey, x);
 }
 /* The note stays with the unit whatever the figure does. */
 function canEnterNote(unitKey, x){
@@ -4949,6 +5020,15 @@ function canEnterNote(unitKey, x){
      a capability it refused the note to somebody the right column allows. */
   if (who && !inOffice() && who === viewer().key &&
       grantAt(SMPRules.reportPageOf(unitKey), unitKey) !== "edit") return false;
+  /* §382: AND THE SAME IS TRUE OF A LINE'S OWNER. Islam: *"You enter the
+     figure; the unit writes the note."* Somebody whose only way onto this row
+     is the Owner column gets the number and not the explanation — where an
+     owner who ALSO holds edit here (a custodian who owns a tactic) keeps the
+     note they already had, because being named took nothing away. */
+  var lo = x && (x.obj || x);
+  if (x && x.kind === "tactic" && SMPRules.lineOwned(world(), lo) && !inOffice() &&
+      SMPRules.ownedBy(lo, viewer()) &&
+      grantAt(SMPRules.reportPageOf(unitKey), unitKey) !== "edit") return false;
   return canReportRow(unitKey, x);
 }
 /* Every figure this person enters, across every unit — resolved through the
@@ -4956,6 +5036,116 @@ function canEnterNote(unitKey, x){
    the answer to "does this person have one at all". */
 function mySourceRows(){ return SMPRules.sourcesFor(world(), viewer()); }
 function ownsAnySource(){ return mySourceRows().length > 0; }
+
+/* ── MY REPORTING: THE LINES THIS PERSON OWNS (§382, spec 062) ──────────
+   Islam: *"it's only for owners of tactics to report progress either on the
+   units they belong to but they are not the bu owner or the custodian or
+   report progress for other units that he doesn't belong to at all."*
+
+   THE SUBJECTS ARE THE ONES WHOSE PLAN HAS TACTICS IN IT — every business
+   unit, and every supporting function that plans in pillars (§59: the two are
+   the same shape and `unitLike` is what says so). A capability's plan holds
+   projects, deliverables and milestones and no tactics at all, so it is not
+   walked; that is a fact about the model rather than an omission, and a
+   project's own owner already has §301's mark on the page that draws it.
+
+   NOTHING IS STORED. The list is the plan read through one predicate, so a
+   row that changes hands changes hands everywhere at once and there is no
+   second copy to keep in step (§42). */
+function myLineTargets(){
+  return boardUnitTargets().concat(boardFunctionTargets());
+}
+/* THE ROWS ARE `reportItems()`'S OWN, FILTERED — never a second walk (§53.5).
+   The first build of this wrote its own `{target, pillar, id, kind, obj}` and
+   that is not what a reporting row is: the real one carries `owner`,
+   `collaborators`, `pown`, `cid`, `group`, `sub`, `asked` and `place`, and
+   `canReportRow()` reads three of them, `ownDraftShut()` a fourth and the
+   shared entry cell the rest. So the fallback gate answered about undefined
+   fields and the drawn row lost its span label — found by the check rather
+   than by reading, which is what a shape invented beside an existing one
+   costs. Asking the builder the Reporting page asks means a column added to
+   a row tomorrow arrives here the same day (§96).
+
+   A PROJECTS-FORMAT FUNCTION CONTRIBUTES NOTHING AND THAT IS CORRECT, not an
+   omission: tactics live on pillars, `unitLike()` answers null for such a
+   function, and My reporting is about tactics. Seven of the demo's eight
+   functions are in that state. */
+function myLineRows(){
+  var w = world(), me = viewer(), out = [];
+  if (!SMPRules.lineOwnersOn(w) || !me) return out;
+  myLineTargets().forEach(function(t){
+    var subj = unitLike(t);
+    if (!subj) return;
+    /* §387: A SUBJECT I RUN DRAWS NO ROW HERE. Its tactics are on its own
+       Reporting page, where I enter them beside everything else the unit
+       owes — so listing them again would be the same number in two places
+       with two controls able to disagree about it. This is the whole of what
+       keeps My reporting to Islam's own sentence: *"units or functions she is
+       not the custodian or the owner"*. */
+    if (canReport(t)) return;
+    reportItems(subj).forEach(function(x){
+      if (x.kind !== "tactic" || !SMPRules.ownedBy(x.obj, me)) return;
+      var row = {};
+      for (var k in x) if (Object.prototype.hasOwnProperty.call(x, k)) row[k] = x[k];
+      row.target = t;
+      out.push(row);
+    });
+  });
+  return out;
+}
+function ownsAnyLine(){ return myLineRows().length > 0; }
+/* WHERE THE TAB SITS, and it is the answer to both of Islam's cases at once:
+   *"case 2 no units appear in navigation"*. The tab goes on the person's OWN
+   place — the unit, the function, the company or the group they are attached
+   to — so the units they own lines in are BANDS on that page and never
+   destinations in the bar. A person the register has not placed falls to the
+   group, which every viewer can reach (§94.6's own fallback). */
+function myLinesHome(){
+  var at = personAt(viewer());
+  if (!at) return "group";
+  if (at === "group") return "group";
+  if (UNITS[at]) return at;
+  if (String(at).indexOf("fn:") === 0 || String(at).indexOf("co:") === 0) return at;
+  return "group";
+}
+function myLinesHere(target){
+  return ownsAnyLine() && myLinesHome() === String(target || "");
+}
+/* Has this line been answered? A tactic measured by its outcome reports into
+   `outActual` and every other one into `actual` — `rowAnswered` is the one
+   reader of that (§252) rather than a second test written here. */
+function lineAnswered(r){ return rowAnswered(r.obj); }
+
+/* ── AND THE LOCK IS §309's, ONE ROW KIND OVER ─────────────────────────
+   Islam: *"the sense of saving that we do in the reporting already gives the
+   feel of saving that locks the reporting with ability to open again."*
+
+   PER SUBJECT, because each unit submits its own report: locking everything
+   an owner holds with one press would freeze them out of a unit still working
+   on its figures. The key carries the PERSON as well as the subject, so two
+   owners on one unit cannot lock each other (§234's rule, and §301's own
+   finding one map along). */
+function lineLockKey(target){
+  return String(target) + "|" + ((viewer() || {}).key || "");
+}
+function lineLock(target){
+  return (REVIEW.lines || {})[lineLockKey(target)] || null;
+}
+function lineLockShut(target){ return !!lineLock(target); }
+function setLineLock(target, on){
+  var k = lineLockKey(target);
+  if (on) {
+    if (!REVIEW.lines) REVIEW.lines = {};
+    REVIEW.lines[k] = { by: (viewer() || {}).key || null,
+                        at: new Date().toISOString().slice(0, 10) };
+  } else if (REVIEW.lines) {
+    /* EMPTIED, THE KEY GOES, and the map with its last entry (§50.6): a
+       subject never locked and one reopened must be byte-identical, or every
+       save after the first carries a phantom change for ever. */
+    delete REVIEW.lines[k];
+    if (!Object.keys(REVIEW.lines).length) delete REVIEW.lines;
+  }
+}
 /* The sets this viewer may open a picking page for. Empty for almost everyone,
    and the page is then not offered — "the owner picks" IS the grant of sight
    over the whole group's figures, so there is no half-view to draw. */
@@ -6997,6 +7187,7 @@ function gapMap(target, all, fillable){
     }
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
+      /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
       entry("p:" + (p.code || i), pillarCode(u, i), n,

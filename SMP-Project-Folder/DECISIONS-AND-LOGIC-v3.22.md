@@ -56987,3 +56987,12 @@ His screenshot showed four of the five rail rows lit at once.
   `measure-score-spread`, `monthly-plan`, `reporting-ytd-target`,
   `pillar-breakdown`, `project-done`, `unit-before-number` (the last one had
   been writing `RAIL['mobile']`, a key nothing reads).
+- **Merged to `main` 2026-09-23 on Islam's word.** `main` had taken §391 and
+  §392 while this was built, so it was renumbered §391 → §393 BEFORE the merge
+  (the merge base held no §391 in either spelling, so every citation was this
+  branch's — §264.3). Record files combined, the built file rebuilt, `sw.js`
+  from main's copy at `v5.32-pillar-rail-by-id` (main held v5.31). Re-run on
+  the merged tree: pillar-rail, report-blockers, gap-walk, terminology 26/0,
+  division-functions 25/0 and seven neighbours green; `qa.py` ERRORS none;
+  built-in-step and generated-in-step clear. Screen only: no `api/`, `lib/` or
+  `db/` file, so no forced sign-out is owed (spec 029).

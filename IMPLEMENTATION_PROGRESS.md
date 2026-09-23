@@ -8003,7 +8003,7 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
-## §393 — clicking a pillar opens that pillar (2026-09-23)
+## §393 — clicking a pillar opens that pillar (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built, on the branch.** On a client with pillars added by hand, the side
 list lit several pillars at once and clicking some of them opened a different
@@ -8013,4 +8013,4 @@ tells pillars apart by their row number, which is always unique, on the Plan,
 Performance and Reporting pages, and the missing-items chips follow it.
 Nothing saved changes. Checked: a new check that clicks every pillar in three
 awkward states (it fails 18 ways on the old build), six neighbouring checks
-updated, the full sweep. **Waiting on Islam**: the merge.
+updated, the full sweep. Merged to `main` on Islam's word, after bringing in §391–§392.

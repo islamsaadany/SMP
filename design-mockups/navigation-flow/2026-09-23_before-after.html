@@ -126,6 +126,9 @@ section{background:var(--card);border:1px solid var(--rule);border-radius:10px;p
 .rail .g{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--pi3);padding:7px 9px 2px}
 .rail .back{padding:6px 9px;color:var(--navy);font-weight:600;border-bottom:1px solid var(--line)}
 .rail .fwd{margin-top:auto;padding:6px 9px;color:var(--navy);font-weight:600;border-top:1px solid var(--line)}
+.nav .hm{padding:0;line-height:normal;display:inline-grid;place-items:center;width:26px;height:26px;margin:0 2px;border-radius:5px;color:#DDE6F3}
+.nav .hm svg{width:16px;height:16px}
+.nav .hm.on{box-shadow:none;background:var(--gold);color:var(--navy)}
 .hl{outline:2px dashed #C0392B;outline-offset:1px;border-radius:5px}
 .new{outline:2px solid #1F7A4A;outline-offset:1px;border-radius:5px}
 
@@ -177,7 +180,7 @@ section{background:var(--card);border:1px solid var(--rule);border-radius:10px;p
         <div class="lvl">
           <div class="node"><b>Console</b>: opens on <b>My work</b>, your open actions across all clients. Then Clients, Consultants, Who sees what.</div>
           <div class="arrow">↓ press an action, or a module on a card</div>
-          <div class="node"><b>Strategy Home</b>: a normal page with the top bar showing</div>
+          <div class="node"><b>Strategy Home</b> (the house mark): a normal page with the top bar showing</div>
           <div class="arrow"><strong>✓ the trail is visible from the first second</strong></div>
           <div class="node"><b>One trail on every page</b>: Forefront › Raya Trade ▾ › Strategy ▾</div>
           <div class="arrow"><strong>Forefront</strong> → console · <strong>Raya Trade ▾</strong> → other modules and client settings · <strong>Strategy ▾</strong> → this module's pages and settings</div>
@@ -261,7 +264,7 @@ section{background:var(--card);border:1px solid var(--rule);border-radius:10px;p
             <div class="trail new"><a class="home">Forefront</a><span class="chev">›</span><span class="logo">RT</span><a class="dd">Raya Trade</a><span class="chev">›</span><a class="dd cur">Strategy</a></div>
             <span class="spacer"></span><span class="ico" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>
           </div>
-          <div class="nav"><span class="on new">Home</span><span class="sep"></span><span>Group ▾</span><span>Mobile</span><span>Retail Stores</span><span>Care</span></div>
+          <div class="nav"><span class="hm on new" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span><span class="sep"></span><span>Group ▾</span><span>Mobile</span><span>Retail Stores</span><span>Care</span></div>
           <div class="body">
             <div class="h" style="font-size:15px">Good morning, Islam</div>
             <div class="row">
@@ -270,7 +273,7 @@ section{background:var(--card);border:1px solid var(--rule);border-radius:10px;p
             </div>
           </div>
         </div></div>
-        <ul><li>Home is the first entry in the destination row. The house mark disappears into it.</li><li>No Continue button needed: press any unit, or anything in the trail.</li></ul>
+        <ul><li>The house mark you already have leads the destination row and opens this Home page. Lit gold while you are on it.</li><li>No Continue button needed: press any unit, or anything in the trail.</li></ul>
       </div>
     </div>
   </section>
@@ -300,7 +303,7 @@ section{background:var(--card);border:1px solid var(--rule);border-radius:10px;p
             <div class="trail new"><a class="home">Forefront</a><span class="chev">›</span><span class="logo">RT</span><a class="dd hot">Raya Trade</a><span class="chev">›</span><a class="dd cur">Strategy</a></div>
             <span class="spacer"></span><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>
           </div>
-          <div class="nav"><span>Home</span><span class="sep"></span><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span></div>
+          <div class="nav"><span class="hm" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span><span class="sep"></span><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span></div>
           <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
           <div class="body"><div class="box"><div class="h">Plan · MB01 Digital &amp; data-driven operations</div><div class="muted">…</div></div></div>
           <div class="menu" style="top:36px;left:96px">
@@ -355,7 +358,7 @@ section{background:var(--card);border:1px solid var(--rule);border-radius:10px;p
   <!-- ===== 5 CLIENT STAFF ===== -->
   <section>
     <h2>5 · What a client's own person sees</h2>
-    <p class="sub">A client's staff never see the console. They sign in and go straight to their first module. The trail is the same minus the Forefront step, so both groups learn one pattern.</p>
+    <p class="sub">A client's staff never see the console. They sign in straight into Strategy, and everything they need is brought into that one place. The trail is for Forefront's team only.</p>
     <div class="pair">
       <div class="side before"><span class="tag">Today</span>
         <div class="scroll"><div class="screen">
@@ -368,23 +371,24 @@ section{background:var(--card);border:1px solid var(--rule);border-radius:10px;p
       </div>
       <div class="side after"><span class="tag">Proposed</span>
         <div class="scroll"><div class="screen">
-          <div class="bar"><div class="trail new"><span class="logo">RT</span><a class="dd">Raya Trade</a><span class="chev">›</span><a class="dd cur">Strategy</a></div><span class="spacer"></span></div>
-          <div class="nav"><span>Home</span><span class="sep"></span><span class="on">Mobile</span></div>
-          <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+          <div class="bar"><span class="logo">RT</span><span class="brandtxt">Raya Trade<small>Strategy Management Platform</small></span><span class="spacer"></span></div>
+          <div class="nav"><span class="hm" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span><span class="sep"></span><span class="on">Mobile</span></div>
+          <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span><span class="new" style="padding:0 4px">Insights</span></div>
           <div class="body"><div class="box"><div class="muted">Karim · BU owner, Mobile</div></div></div>
         </div></div>
-        <ul><li>"Raya Trade ▾" lists only the modules they may open. If there's only one, it's plain text, not a menu.</li><li>Who may open what is unchanged: the same Roles &amp; access table decides.</li></ul>
+        <ul><li>No trail and no module switcher: they don't move between modules.</li><li>Anything else the client has (the reports, for example) comes to them as a tab inside Strategy.</li><li>The top bar just names their company. Who may open what is unchanged.</li></ul>
       </div>
     </div>
   </section>
 
   <section>
-    <h2>Four things to decide</h2>
+    <h2>Agreed</h2>
     <ol class="q">
-      <li><div><b>The trail replaces the client-name pill, the four squares and the house.</b> Or should it sit beside them? <span class="rec">Recommended: replace them.</span></div></li>
-      <li><div><b>Home opens by itself once per sign-in</b>, as the first page of Strategy. Or only when you press Home? <span class="rec">Recommended: once per sign-in, as a normal page.</span></div></li>
-      <li><div><b>My work is grouped by week</b> (late, this week, later) and shows only your own actions, with a colleague picker for admins. Or group it by client? <span class="rec">Recommended: by week.</span></div></li>
-      <li><div><b>Meeting Notes' action items stay out of My work</b> for now, since Notes and the Tracker are separate on purpose. <span class="rec">Recommended: leave them out.</span></div></li>
+      <li><div><b>The trail replaces</b> the client-name pill and the four squares, for Forefront's team.</div></li>
+      <li><div><b>Home is the house mark</b> you already have, opening Strategy's Home page. It opens by itself once per sign-in, as a normal page.</div></li>
+      <li><div><b>My work is grouped by week</b> (late, this week, later): your own actions, with a colleague picker for admins.</div></li>
+      <li><div><b>Meeting Notes' actions stay out</b> of My work for now.</div></li>
+      <li><div><b>A client's own person gets no trail.</b> They stay inside Strategy, and other modules reach them as tabs.</div></li>
     </ol>
   </section>
 </div>

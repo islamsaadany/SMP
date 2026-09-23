@@ -99,6 +99,11 @@ A drift between specs and code is a documentation bug — report it before silen
   it — under the weaker "describe it in words" rule, and that is why the reversal exists.
   `SMP-Project-Folder/mockups/` remains the historical record of what was settled and what was
   rejected; `design-mockups/` is produced again from today.)*
+- **CONTENT IS ALIGNED IN CHAT, NOT IN A MOCKUP (2026-09-23).** Islam:
+  *"content fix doesn't need a mockup it needs alignment here first mockup is
+  for visual after we agree on content."* Words, descriptions, defaults, which
+  rows exist and what each means are agreed here, in plain words, first. The
+  mockup comes after, and only for how it looks.
 - **After ANY UI change, save a snapshot of the changed file to `ui-versions/` (see UI Version Tracking below).**
 
 ### 2. Think Before Acting

@@ -1,0 +1,390 @@
+<title>Moving Around SMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Page chrome follows the viewer's theme. The SCREENS inside the frames are
+   drawn in the platform's own light Forefront palette on purpose — they are
+   pictures of the product, which is what is being judged. */
+:root{
+  --bg:#F7F8FA; --card:#FFFFFF; --ink:#16233A; --ink2:#46546B; --ink3:#5E6B80;
+  --rule:#DDE2EA; --accent:#16325C; --gold:#8A6B22; --beforeTag:#8C3B2A; --afterTag:#1F6B45;
+  --beforeBg:#FBEFEC; --afterBg:#EAF5EE;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1422; --card:#151D2E; --ink:#E6EBF3; --ink2:#BCC6D6; --ink3:#95A1B5;
+    --rule:#2A354A; --accent:#9FB6DC; --gold:#D8B865; --beforeTag:#F0A493; --afterTag:#8FD7AE;
+    --beforeBg:#2A1A17; --afterBg:#15291E;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1422; --card:#151D2E; --ink:#E6EBF3; --ink2:#BCC6D6; --ink3:#95A1B5;
+  --rule:#2A354A; --accent:#9FB6DC; --gold:#D8B865; --beforeTag:#F0A493; --afterTag:#8FD7AE;
+  --beforeBg:#2A1A17; --afterBg:#15291E;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:28px 60px}
+h1{font-size:28px;margin:0 0 4px;color:var(--accent);text-wrap:balance}
+.lede{color:var(--ink2);max-width:70ch;margin:0 0 22px}
+h2{font-size:20px;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--ink2);margin:0 0 14px;max-width:80ch}
+section{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:20px;margin-top:22px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
+.side .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-bottom:6px}
+.side.before .tag{color:var(--beforeTag);background:var(--beforeBg)}
+.side.after .tag{color:var(--afterTag);background:var(--afterBg)}
+.side ul{margin:10px 0 0;padding-left:18px;color:var(--ink2);font-size:14px}
+.side li{margin:3px 0}
+.scroll{overflow-x:auto}
+
+/* ---------- the product, drawn ---------- */
+.screen{--navy:#16325C;--gold:#C9A24D;--gold-deep:#8A6B22;--ground:#F7F8FA;--surf:#FFF;--surf2:#EFF2F6;--line:#D6DCE5;--pink:#0F172A;--pi2:#334155;--pi3:#5E6E85;--cta:#A4512C;--bad:#B42318;--good:#1F7A4A;
+  color-scheme:light;background:var(--ground);color:var(--pink);border:1px solid #C7CFDB;border-radius:8px;overflow:hidden;font-size:12px;line-height:1.4;min-width:520px;position:relative}
+.bar{display:flex;align-items:center;gap:8px;background:#fff;border-bottom:1px solid var(--line);padding:7px 10px;min-height:38px}
+.brandtxt{font-weight:700;color:var(--navy);font-size:12.5px;white-space:nowrap}
+.brandtxt small{display:block;font-weight:600;color:var(--pi3);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.pill{border:1px solid var(--line);border-radius:14px;padding:2px 9px;font-size:11px;color:var(--navy);background:var(--surf2);white-space:nowrap}
+.pill i{font-style:normal;color:var(--pi3);margin-left:5px;font-size:10px}
+.sq{width:22px;height:22px;display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4px;border:1px solid var(--line);border-radius:5px;flex:none}
+.sq b{background:var(--navy);border-radius:1px}
+.spacer{flex:1}
+.ico{width:24px;height:24px;border-radius:5px;display:grid;place-items:center;border:1px solid var(--line);color:var(--navy);font-size:12px;flex:none;background:#fff}
+.ico svg{width:14px;height:14px}
+.nav{display:flex;align-items:center;gap:2px;background:var(--navy);color:#DDE6F3;padding:0 8px;height:32px;font-size:11.5px;white-space:nowrap;overflow:hidden}
+.nav span{padding:0 8px;line-height:32px}
+.nav .on{color:#fff;box-shadow:inset 0 -2px 0 var(--gold)}
+.nav .sep{width:1px;height:16px;background:rgba(255,255,255,.25);padding:0;margin:0 4px}
+.tabs{display:flex;gap:14px;padding:0 12px;border-bottom:1px solid var(--line);background:#fff;height:30px;align-items:center;font-size:11.5px;color:var(--pi2)}
+.tabs .on{color:var(--navy);font-weight:700;box-shadow:inset 0 -2px 0 var(--navy);line-height:28px}
+.tabs .rep{color:#fff;background:var(--cta);border-radius:4px;padding:1px 8px}
+.body{padding:12px;min-height:170px}
+.box{background:#fff;border:1px solid var(--line);border-radius:6px;padding:9px 10px}
+.muted{color:var(--pi3)}
+.h{font-weight:700;color:var(--navy);font-size:12.5px;margin-bottom:5px}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+
+/* trail — the proposal */
+.trail{display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap}
+.trail a{color:var(--navy);text-decoration:none;padding:3px 6px;border-radius:4px;font-weight:600}
+.trail a.home{color:var(--pi2);font-weight:600}
+.trail a.cur{color:var(--pink);font-weight:700}
+.trail a.dd::after{content:"";display:inline-block;margin-left:5px;border:4px solid transparent;border-top-color:currentColor;transform:translateY(2px)}
+.trail .chev{color:var(--pi3)}
+.trail a.hot{background:var(--surf2);outline:1px solid var(--line)}
+.logo{width:20px;height:20px;border-radius:4px;background:var(--navy);color:var(--gold);display:grid;place-items:center;font-size:9px;font-weight:700;flex:none}
+.menu{position:absolute;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 24px rgba(15,23,42,.18);font-size:12px;min-width:190px;z-index:3;padding:4px}
+.menu div{padding:6px 10px;border-radius:4px;display:flex;justify-content:space-between;gap:10px}
+.menu .k{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--pi3);padding:6px 10px 2px}
+.menu .on{background:var(--surf2);font-weight:700;color:var(--navy)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.menu .n{color:var(--pi3);font-size:11px}
+
+/* welcome overlay (before) */
+.cover{position:absolute;inset:0;background:rgba(247,248,250,.97);padding:16px;display:flex;flex-direction:column;gap:10px}
+.cover .hello{font-size:17px;font-weight:700;color:var(--navy)}
+.cover .cont{margin-top:auto;background:var(--navy);color:#fff;border-radius:6px;text-align:center;padding:8px;font-weight:600}
+.dim{opacity:.35}
+
+/* console */
+.fbar{background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:0 12px;height:38px}
+.fbar .mk{color:var(--gold);font-weight:700;letter-spacing:.04em}
+.fbar .tb{display:flex;gap:2px;margin-left:10px;font-size:11.5px}
+.fbar .tb span{padding:0 9px;line-height:38px;color:#C6D2E5}
+.fbar .tb .on{color:#fff;box-shadow:inset 0 -2px 0 var(--gold)}
+.fbar .me{margin-left:auto;font-size:11px;color:#C6D2E5}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cc{background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 9px;display:flex;flex-direction:column;gap:5px}
+.cc .t{font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px}
+.cc .m{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:4px;font-size:11px}
+.cc .m b{font-weight:600;color:var(--navy)}
+.cc .set{font-size:10.5px;color:var(--pi3);border:1px solid var(--line);border-radius:10px;padding:0 7px;align-self:flex-start}
+.mark{font-size:10px;font-weight:700;border-radius:9px;padding:0 6px;background:#FBEDE3;color:#8F4423}
+.mark.late{background:#FCE8E6;color:var(--bad)}
+.work table{width:100%;border-collapse:collapse;font-size:11.5px}
+.work th{text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--pi3);font-weight:600;padding:4px 6px;border-bottom:1px solid var(--line)}
+.work td{padding:5px 6px;border-bottom:1px solid var(--surf2);white-space:nowrap}
+.work .grp td{background:var(--surf2);font-weight:700;color:var(--navy);font-size:11px}
+.late{color:var(--bad);font-weight:600}
+.cl{display:inline-flex;align-items:center;gap:5px}
+.cl i{width:14px;height:14px;border-radius:3px;background:var(--navy);display:inline-block}
+.stat{display:flex;gap:8px;margin-bottom:8px}
+.stat div{flex:1;background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.stat b{display:block;font-size:17px;color:var(--navy)}
+.stat .bad b{color:var(--bad)}
+
+/* setup rail */
+.split{display:flex;gap:10px}
+.rail{width:150px;flex:none;background:#fff;border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;font-size:11.5px}
+.rail .rh{background:var(--navy);color:#fff;padding:6px 9px;border-radius:5px 5px 0 0;font-weight:700;font-size:11px;letter-spacing:.05em}
+.rail .ri{padding:5px 9px}
+.rail .ri.on{background:var(--surf2);font-weight:700;color:var(--navy);box-shadow:inset 3px 0 0 var(--gold)}
+.rail .g{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--pi3);padding:7px 9px 2px}
+.rail .back{padding:6px 9px;color:var(--navy);font-weight:600;border-bottom:1px solid var(--line)}
+.rail .fwd{margin-top:auto;padding:6px 9px;color:var(--navy);font-weight:600;border-top:1px solid var(--line)}
+.hl{outline:2px dashed #C0392B;outline-offset:1px;border-radius:5px}
+.new{outline:2px solid #1F7A4A;outline-offset:1px;border-radius:5px}
+
+/* flow map */
+.map{font-size:13.5px}
+.lanes{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.lanes{grid-template-columns:1fr}}
+.lane{border:1px solid var(--rule);border-radius:8px;padding:12px}
+.lvl{display:flex;flex-direction:column;gap:6px}
+.node{border:1px solid var(--rule);border-radius:6px;padding:6px 10px;background:var(--bg)}
+.node b{color:var(--accent)}
+.arrow{color:var(--ink3);font-size:12.5px;padding-left:12px}
+.arrow em{color:var(--beforeTag);font-style:normal}
+.arrow strong{color:var(--afterTag);font-weight:600}
+
+.q{counter-reset:q;margin:0;padding:0;list-style:none}
+.q li{counter-increment:q;padding:10px 0;border-top:1px solid var(--rule);display:grid;grid-template-columns:28px 1fr;gap:8px}
+.q li::before{content:counter(q);font-weight:700;color:var(--accent)}
+.q .rec{color:var(--afterTag);font-weight:600}
+.legend{font-size:13px;color:var(--ink2);display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:middle;border-radius:3px}
+.legend .l1::before{outline:2px dashed #C0392B}
+.legend .l2::before{outline:2px solid #1F7A4A}
+</style>
+
+<div class="wrap">
+  <h1>Moving around SMP: before and after</h1>
+  <p class="lede">Each pair shows the platform as it is today and as proposed. Red dashes mark what is hard to find or missing today. Green outlines mark what the proposal adds. The client's name, units and people in the drawings are the worked example.</p>
+  <div class="legend"><span class="l1">hard to find / a dead end today</span><span class="l2">what the proposal adds</span></div>
+
+  <!-- ===== MAP ===== -->
+  <section class="map">
+    <h2>The whole walk, in one picture</h2>
+    <p class="sub">Three levels: Forefront's console, a client, and a module inside that client.</p>
+    <div class="lanes">
+      <div class="lane">
+        <div class="side before"><span class="tag">Today</span></div>
+        <div class="lvl">
+          <div class="node"><b>Console</b>: client cards only. No list of your own work.</div>
+          <div class="arrow">↓ press a module row on a card</div>
+          <div class="node"><b>Strategy</b> opens under the welcome screen, which covers everything</div>
+          <div class="arrow"><em>✕ no way back to the console or to other modules until you press Continue</em></div>
+          <div class="node"><b>Inside Strategy</b>: five different controls for moving</div>
+          <div class="arrow">client-name pill (top left) → console · four squares → other modules · house → welcome · gear → settings · "Save &amp; close" / rail rows in settings</div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="side after"><span class="tag">Proposed</span></div>
+        <div class="lvl">
+          <div class="node"><b>Console</b>: opens on <b>My work</b>, your open actions across all clients. Then Clients, Consultants, Who sees what.</div>
+          <div class="arrow">↓ press an action, or a module on a card</div>
+          <div class="node"><b>Strategy Home</b>: a normal page with the top bar showing</div>
+          <div class="arrow"><strong>✓ the trail is visible from the first second</strong></div>
+          <div class="node"><b>One trail on every page</b>: Forefront › Raya Trade ▾ › Strategy ▾</div>
+          <div class="arrow"><strong>Forefront</strong> → console · <strong>Raya Trade ▾</strong> → other modules and client settings · <strong>Strategy ▾</strong> → this module's pages and settings</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 1 CONSOLE ===== -->
+  <section>
+    <h2>1 · The console: your work across clients</h2>
+    <p class="sub">Today the console only lists clients. Proposed: a new first tab, <b>My work</b>, that lists every open Tracker action you own, across all your clients, and adds a count to each client card.</p>
+    <div class="pair">
+      <div class="side before"><span class="tag">Today</span>
+        <div class="scroll"><div class="screen">
+          <div class="fbar"><span class="mk">FOREFRONT</span><div class="tb"><span class="on">Clients</span><span>Consultants</span><span>Who sees what</span></div><span class="me">Islam · Sign out</span></div>
+          <div class="body">
+            <div class="h">Clients</div>
+            <div class="cards">
+              <div class="cc"><div class="t"><span class="logo">RT</span>Raya Trade</div><div class="m"><b>Strategy</b><span class="mark">3 to submit</span></div><div class="m"><b>Internal Tracker</b><span></span></div><div class="m"><b>Meeting Notes</b><span></span></div><span class="set">Settings</span></div>
+              <div class="cc"><div class="t"><span class="logo">RH</span>RHI</div><div class="m"><b>Strategy</b><span class="mark">No plan yet</span></div><div class="m"><b>Internal Tracker</b><span></span></div><span class="set">Settings</span></div>
+              <div class="cc"><div class="t"><span class="logo">EA</span>El Abd</div><div class="m"><b>Strategy</b><span></span></div><div class="m"><b>Internal Tracker</b><span></span></div><span class="set">Settings</span></div>
+            </div>
+            <div class="box hl" style="margin-top:10px"><span class="muted">What do I owe this week? You have to open each client's Tracker one by one to find out.</span></div>
+          </div>
+        </div></div>
+        <ul><li>Your actions are spread across each client's Tracker.</li><li>Nothing shows what is late until you open that client.</li></ul>
+      </div>
+      <div class="side after"><span class="tag">Proposed</span>
+        <div class="scroll"><div class="screen">
+          <div class="fbar"><span class="mk">FOREFRONT</span><div class="tb"><span class="on new">My work</span><span>Clients</span><span>Consultants</span><span>Who sees what</span></div><span class="me">Islam · Sign out</span></div>
+          <div class="body work">
+            <div class="stat"><div><b>9</b>open actions</div><div class="bad"><b>2</b>late</div><div><b>4</b>due this week</div><div><b>3</b>clients</div></div>
+            <div class="box" style="padding:0">
+            <table>
+              <tr><th>Action</th><th>Client</th><th>Due</th><th>Status</th></tr>
+              <tr class="grp"><td colspan="4">Late</td></tr>
+              <tr><td>Send pillar review pack to Mobile</td><td><span class="cl"><i></i>Raya Trade</span></td><td class="late">Late 1 w</td><td>In progress</td></tr>
+              <tr><td>Chase Finance for Q3 figures</td><td><span class="cl"><i></i>RHI</span></td><td class="late">Late 2 w</td><td>Not started</td></tr>
+              <tr class="grp"><td colspan="4">This week</td></tr>
+              <tr><td>Book the cycle review meeting</td><td><span class="cl"><i></i>Raya Trade</span></td><td>This week</td><td>Not started</td></tr>
+              <tr><td>Draft El Abd's SWOT workshop</td><td><span class="cl"><i></i>El Abd</span></td><td>This week</td><td>In progress</td></tr>
+              <tr class="grp"><td colspan="4">Next week and later</td></tr>
+              <tr><td>Upload the progress template</td><td><span class="cl"><i></i>RHI</span></td><td>Next week</td><td>Not started</td></tr>
+            </table>
+            </div>
+            <div class="muted" style="margin-top:6px">Pressing a row opens that action in the client's Tracker. Admins get a "Show: Me ▾" picker to look at a colleague's list.</div>
+          </div>
+        </div></div>
+        <ul><li>Grouped by week: late first, then this week, then later.</li><li>Your own actions only. Admins can switch to a colleague.</li><li>Client cards also show "3 open · 1 late" on the Tracker row.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 2 LANDING ===== -->
+  <section>
+    <h2>2 · Opening a client: the Strategy overview</h2>
+    <p class="sub">Today the welcome screen lies over the whole page, top bar included, and Continue is its only way out. Proposed: it becomes Strategy's <b>Home</b> page, sitting inside the platform, so the top bar and the trail stay visible.</p>
+    <div class="pair">
+      <div class="side before"><span class="tag">Today</span>
+        <div class="scroll"><div class="screen" style="min-height:300px">
+          <div class="dim">
+            <div class="bar"><span class="brandtxt">Strategy Management Platform</span><span class="pill">Raya Trade<i>change</i></span><span class="spacer"></span></div>
+            <div class="nav"><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span></div>
+          </div>
+          <div class="cover hl">
+            <div class="hello">Good morning, Islam</div>
+            <div class="muted">Raya Trade · Strategy Management Office</div>
+            <div class="row">
+              <div class="box"><div class="h">Waiting on you</div><div>3 units still to submit</div><div>1 conversation waiting</div></div>
+              <div class="box"><div class="h">Your pages</div><div>Setup · Reporting cycle</div><div>Knowledge base</div></div>
+            </div>
+            <div class="cont">Continue to Mobile</div>
+          </div>
+        </div></div>
+        <ul><li>Nothing leads back to the console or to other modules.</li><li>The client-name pill is under the cover, where you can't press it.</li></ul>
+      </div>
+      <div class="side after"><span class="tag">Proposed</span>
+        <div class="scroll"><div class="screen" style="min-height:300px">
+          <div class="bar">
+            <div class="trail new"><a class="home">Forefront</a><span class="chev">›</span><span class="logo">RT</span><a class="dd">Raya Trade</a><span class="chev">›</span><a class="dd cur">Strategy</a></div>
+            <span class="spacer"></span><span class="ico" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>
+          </div>
+          <div class="nav"><span class="on new">Home</span><span class="sep"></span><span>Group ▾</span><span>Mobile</span><span>Retail Stores</span><span>Care</span></div>
+          <div class="body">
+            <div class="h" style="font-size:15px">Good morning, Islam</div>
+            <div class="row">
+              <div class="box"><div class="h">Waiting on you</div><div>3 units still to submit</div><div>1 conversation waiting</div></div>
+              <div class="box"><div class="h">This cycle</div><div>Q3 · reports due 30 Sep</div><div>7 of 10 submitted</div></div>
+            </div>
+          </div>
+        </div></div>
+        <ul><li>Home is the first entry in the destination row. The house mark disappears into it.</li><li>No Continue button needed: press any unit, or anything in the trail.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3 INSIDE A MODULE ===== -->
+  <section>
+    <h2>3 · Inside a module: one trail instead of five controls</h2>
+    <p class="sub">Today, moving around is split between the client-name pill, the four squares, the house and the gear. Proposed: one trail. Each word is a link, and the client's name opens a short menu.</p>
+    <div class="pair">
+      <div class="side before"><span class="tag">Today</span>
+        <div class="scroll"><div class="screen">
+          <div class="bar">
+            <span class="sq hl"><b></b><b></b><b></b><b></b></span>
+            <span class="brandtxt">Strategy Management Platform</span>
+            <span class="pill hl">Raya Trade<i>change</i></span>
+            <span class="spacer"></span>
+          </div>
+          <div class="nav"><span class="hl" style="padding:0 6px">⌂</span><span class="sep"></span><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span><span class="sep"></span><span class="hl" style="padding:0 6px">⚙</span></div>
+          <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+          <div class="body"><div class="box"><div class="h">Plan · MB01 Digital &amp; data-driven operations</div><div class="muted">…</div></div></div>
+        </div></div>
+        <ul><li>Four squares: other modules (only with more than one).</li><li>"Raya Trade · change": back to the console. Nothing says so.</li><li>House: the welcome screen. Gear: settings.</li></ul>
+      </div>
+      <div class="side after"><span class="tag">Proposed</span>
+        <div class="scroll"><div class="screen" style="min-height:268px">
+          <div class="bar">
+            <div class="trail new"><a class="home">Forefront</a><span class="chev">›</span><span class="logo">RT</span><a class="dd hot">Raya Trade</a><span class="chev">›</span><a class="dd cur">Strategy</a></div>
+            <span class="spacer"></span><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span>
+          </div>
+          <div class="nav"><span>Home</span><span class="sep"></span><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span></div>
+          <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+          <div class="body"><div class="box"><div class="h">Plan · MB01 Digital &amp; data-driven operations</div><div class="muted">…</div></div></div>
+          <div class="menu" style="top:36px;left:96px">
+            <div class="k">Raya Trade</div>
+            <div class="on">Strategy <span class="n">here</span></div>
+            <div>Internal Tracker <span class="n">3 open</span></div>
+            <div>Meeting Notes</div>
+            <div>Insights</div>
+            <hr>
+            <div>Client settings</div>
+            <hr>
+            <div class="n">Switch client…</div>
+          </div>
+        </div></div>
+        <ul><li><b>Forefront</b> returns to the console. Client staff don't see this word.</li><li><b>Raya Trade ▾</b> lists the other modules, client settings and switching client, all in one menu.</li><li>The gear stays: it opens this module's own settings.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 4 SETTINGS ===== -->
+  <section>
+    <h2>4 · Settings: the same trail, no special buttons</h2>
+    <p class="sub">Today the client's settings leave by "Save &amp; close", and each rail carries a row pointing to the other rail. Proposed: the trail carries the settings too. Everything already saves as you type, so "Save" has nothing left to do.</p>
+    <div class="pair">
+      <div class="side before"><span class="tag">Today</span>
+        <div class="scroll"><div class="screen">
+          <div class="bar"><span class="brandtxt">Raya Trade<small>· Client settings</small></span><span class="pill hl">Save &amp; close</span><span class="spacer"></span></div>
+          <div class="body">
+            <div class="split">
+              <div class="rail"><div class="rh">SETUP</div><div class="back hl">‹ Back to the console</div><div class="g">Who</div><div class="ri">Forefront team</div><div class="ri on">People register</div><div class="g">The client</div><div class="ri">Business units</div><div class="ri">Functions</div><div class="fwd hl">Strategy settings ›</div></div>
+              <div class="box" style="flex:1"><div class="h">People register</div><div class="muted">33 people …</div></div>
+            </div>
+          </div>
+        </div></div>
+        <ul><li>Three ways out, in three places: the pill, the top row and the bottom row.</li><li>A module's rail has the reverse row, "Client settings ›", at its foot.</li></ul>
+      </div>
+      <div class="side after"><span class="tag">Proposed</span>
+        <div class="scroll"><div class="screen">
+          <div class="bar"><div class="trail new"><a class="home">Forefront</a><span class="chev">›</span><span class="logo">RT</span><a class="dd">Raya Trade</a><span class="chev">›</span><a class="cur">Client settings</a></div><span class="spacer"></span></div>
+          <div class="body">
+            <div class="split">
+              <div class="rail"><div class="rh">CLIENT SETTINGS</div><div class="g">Who</div><div class="ri">Forefront team</div><div class="ri on">People register</div><div class="g">The client</div><div class="ri">Business units</div><div class="ri">Functions</div></div>
+              <div class="box" style="flex:1"><div class="h">People register</div><div class="muted">33 people …</div></div>
+            </div>
+          </div>
+        </div></div>
+        <ul><li>Back to the console: <b>Forefront</b>. To Strategy's settings: <b>Raya Trade ▾ › Strategy</b>, then the gear.</li><li>The rail only lists settings; the rows that moved you between rails go.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 5 CLIENT STAFF ===== -->
+  <section>
+    <h2>5 · What a client's own person sees</h2>
+    <p class="sub">A client's staff never see the console. They sign in and go straight to their first module. The trail is the same minus the Forefront step, so both groups learn one pattern.</p>
+    <div class="pair">
+      <div class="side before"><span class="tag">Today</span>
+        <div class="scroll"><div class="screen">
+          <div class="bar"><span class="sq"><b></b><b></b><b></b><b></b></span><span class="brandtxt">Strategy Management Platform</span><span class="spacer"></span></div>
+          <div class="nav"><span>⌂</span><span class="sep"></span><span class="on">Mobile</span></div>
+          <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+          <div class="body"><div class="box"><div class="muted">Karim · BU owner, Mobile</div></div></div>
+        </div></div>
+        <ul><li>The four squares show only if the client has Insights too, with no word beside them.</li></ul>
+      </div>
+      <div class="side after"><span class="tag">Proposed</span>
+        <div class="scroll"><div class="screen">
+          <div class="bar"><div class="trail new"><span class="logo">RT</span><a class="dd">Raya Trade</a><span class="chev">›</span><a class="dd cur">Strategy</a></div><span class="spacer"></span></div>
+          <div class="nav"><span>Home</span><span class="sep"></span><span class="on">Mobile</span></div>
+          <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+          <div class="body"><div class="box"><div class="muted">Karim · BU owner, Mobile</div></div></div>
+        </div></div>
+        <ul><li>"Raya Trade ▾" lists only the modules they may open. If there's only one, it's plain text, not a menu.</li><li>Who may open what is unchanged: the same Roles &amp; access table decides.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Four things to decide</h2>
+    <ol class="q">
+      <li><div><b>The trail replaces the client-name pill, the four squares and the house.</b> Or should it sit beside them? <span class="rec">Recommended: replace them.</span></div></li>
+      <li><div><b>Home opens by itself once per sign-in</b>, as the first page of Strategy. Or only when you press Home? <span class="rec">Recommended: once per sign-in, as a normal page.</span></div></li>
+      <li><div><b>My work is grouped by week</b> (late, this week, later) and shows only your own actions, with a colleague picker for admins. Or group it by client? <span class="rec">Recommended: by week.</span></div></li>
+      <li><div><b>Meeting Notes' action items stay out of My work</b> for now, since Notes and the Tracker are separate on purpose. <span class="rec">Recommended: leave them out.</span></div></li>
+    </ol>
+  </section>
+</div>

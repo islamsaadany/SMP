@@ -14024,6 +14024,23 @@ function fnWriteBack(fk, u){
   f.aspiration = u.aspiration || "";
   f.endInMind = u.endInMind || "";
 }
+/* THE SWOT A WRITER MAY PUSH INTO (§399). A unit's and a pillars function's
+   through unitLikeWritable(), as before; any OTHER function's S&W is minted on
+   the function itself here, in the writing half, never by a reader (§50.6).
+   A projects or objectives function holds no unit-shaped view, which is why
+   the Add and Remove handlers could not reach one through unitLikeWritable(). */
+function swotWritable(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[t.slice(3)];
+    if (!f) return null;
+    if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
+    ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(f.swot[q])) f.swot[q] = []; });
+    return f.swot;
+  }
+  var u = unitLikeWritable(t);
+  return u && u.swot ? u.swot : null;
+}
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){
   var t = String(target || "");
@@ -18589,7 +18606,14 @@ function capReplaceSummary(c, rows){
 function applyPlanReplace(u, rows){
   /* clearUnitPlan archives on the way out (§49.2), so this is ONE archive,
      not two — the import used to take its own and then take a second. */
+  /* §399: a pillars FUNCTION's S&W is kept when the file carries none — a
+     workbook downloaded before the S&W sheet existed must not wipe what the
+     office has written since (§58). A unit's SWOT is authored by the file
+     exactly as before. */
+  var keepSW = u.fnKey && !rows.some(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; })
+    ? { s:(u.swot.s || []).slice(), w:(u.swot.w || []).slice() } : null;
   var archived = clearUnitPlan(u);
+  if (keepSW) { u.swot.s = keepSW.s; u.swot.w = keepSW.w; }
   /* The foundation's LABELS are a skeleton the unit keeps when a file does not
      carry one. A file that does carry clauses re-authors both label and text,
      so the old ones are cleared out of the way first. */
@@ -18607,6 +18631,18 @@ function applyPlanReplace(u, rows){
 }
 function applyCapPlanReplace(c, rows){
   var archived = clearCapability(c, "plan");
+  /* §399: a function's S&W is written onto the function itself, and only when
+     the file carries some — a file downloaded before the S&W sheet existed
+     must not wipe what the office has since written (§58). */
+  var swRows = rows.filter(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; });
+  rows = rows.filter(function(r){ return r.type !== "STRENGTH" && r.type !== "WEAKNESS"; });
+  if (c && c.own && swRows.length) {
+    var sw = swotWritable("fn:" + c.fn);
+    if (sw) {
+      sw.s = swRows.filter(function(r){ return r.type === "STRENGTH"; }).map(function(r){ return r.name; });
+      sw.w = swRows.filter(function(r){ return r.type === "WEAKNESS"; }).map(function(r){ return r.name; });
+    }
+  }
   createFromCapPlan(c, { rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });
@@ -18924,7 +18960,8 @@ function checkCapFileShape(c, rows, kind){
   return problems;
 }
 
-var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE"];
+var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE",
+                 /* §399: a function's S&W rows */ "STRENGTH","WEAKNESS"];
 
 /* The capability twin of mintPlanIds. */
 function mintCapPlanIds(c, rows){
@@ -19881,6 +19918,15 @@ function planWorkbook(u){
       ] }
   ])
   .concat(isFn ? [
+    /* §399: a function's S&W — strengths and weaknesses only, read back by
+       the reader below under the SWOT sheet's own Type/Point shape. */
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:[["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+        (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+        return acc;
+      }, []) },
     /* A function's objectives, in its Overview's own columns. `numCols` and
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
@@ -20368,7 +20414,8 @@ function planFromWorkbook(u, sheets){
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
-  sheetObjects(sheets["SWOT"]).forEach(function(r){
+  /* §399: a function's file calls the sheet S&W; the rows are the same. */
+  sheetObjects(sheets["SWOT"] || sheets["S&W"]).forEach(function(r){
     var t = r["Type"];
     if (!swotN.hasOwnProperty(t) || !r["Point"]) return;
     swotN[t]++;
@@ -20739,6 +20786,23 @@ function capPlanWorkbook(c, opts){
                 SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
+    /* §399: A FUNCTION'S S&W TRAVELS, or a download and an untouched
+       re-upload would drop it (§22). Only for a function's own file or a
+       blank one — a capability has no S&W. Strength and Weakness only; the
+       market's two stay the business's. */
+  ].concat((c.own || !c.id) ? [
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:(function(){
+        var sw = (c.own && FUNCTIONS[c.fn] && FUNCTIONS[c.fn].swot) || {};
+        return [["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+          (sw[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+          return acc;
+        }, []);
+      })() }
+  ] : []).concat([
+
     /* §303: THE REPEAT MARK TRAVELS. §115 made "does this project run again"
        an editable fact in the front matter and the file never carried it, so
        a download and an untouched re-upload turned every repeating project
@@ -20835,7 +20899,7 @@ function capPlanWorkbook(c, opts){
         });
         return acc;
       }, []) }
-  ];
+  ]);
   if (!o.only) return sheets;
   /* Every sheet a dropped one is referenced BY goes with it: the three project
      sheets each validate their first column against the Projects sheet's own
@@ -20961,6 +21025,16 @@ function capPlanFromWorkbook(c, sheets){
       name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
       weight:r["Weight"], compile:r["Compile"],
       hidden:yes(r["Hidden"]) ? "1" : "" });
+  });
+
+  /* §399: a function's S&W, read by the same Type/Point shape as a unit's
+     SWOT sheet so one spelling serves both files. */
+  var swN = { Strength:0, Weakness:0 };
+  sheetObjects(sheets["S&W"]).forEach(function(r){
+    var t = r["Type"];
+    if (!swN.hasOwnProperty(t) || !r["Point"]) return;
+    swN[t]++;
+    rows.push({ id:c.id + "-" + t[0] + swN[t], type:t.toUpperCase(), name:r["Point"] });
   });
 
   /* §342: the actions, addressed to the HOLDER rather than to a project —
@@ -25803,7 +25877,7 @@ function paneActs(page, acKey){
    which is exactly what this table exists to stop). */
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
-  swot:    { unit: "analysis",                        ac: "u_anal"  },
+  swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
@@ -27929,18 +28003,43 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
+  return swotBoxes(u, ["s","w","o","t"], "analysis", "u_anal");
+}
+/* ── A SUPPORTING FUNCTION'S S&W (§399) ────────────────────────────
+   Islam: *"We need to add Strengths and weakness for the supporting
+   functions"*, then *"like the tabs of the BUs"* and *"make it S&W"*. It
+   REVERSES half of §213 for these two lists: opportunities and threats are
+   about the market and stay the business's, while what a function is good and
+   bad at is the function's own. Every format (pillars, projects, objectives),
+   because it is a fact about the function and not about how it plans.
+
+   THE UNIT'S OWN BOXES, TWO OF FOUR (§53.5) — one builder, so a function's
+   S&W and a unit's SWOT cannot drift into two looks. The page is the
+   Overview's (`capfoundation`, `k_found`): the same grant, so one Edit opens
+   both and nobody's rights move. Stored on `FUNCTIONS[k].swot`, the field a
+   pillars function already carries, so a pillars function's uploaded s/w
+   show here at once and its o/t are kept untouched (§96.2). No migration:
+   a function's unmapped keys ride `functions.extra`. */
+function renderFnSW(t){
+  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
+  var f = FUNCTIONS[fk];
+  if (!f) return "";
+  var sw = f.swot || FN_NO_SWOT;
+  return swotBoxes({ ukey:"fn:" + fk, swot:sw }, ["s","w"], "capfoundation", "k_found");
+}
+function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
      had put here and an empty quadrant offered nothing at all — so a SWOT
      could only ever ARRIVE, never start. Add per quadrant, remove per line,
      both re-asked on the click (§48.2). */
   var box = function(cls, key, title){
     var list = u.swot[key] || [];
-    var ed = authoring("analysis", "u_anal");
+    var ed = authoring(page, ac);
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
           (ed
-            ? fieldOr("analysis", x, "", function(v){ list[i] = v; }) +
+            ? fieldOr(page, x, "", function(v){ list[i] = v; }) +
               '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
               '" title="Remove this line" aria-label="Remove this line">&times;</button>'
             : '<span>' + esc(x) + '</span>') + '</li>';
@@ -27952,9 +28051,9 @@ function renderUnitAnalysis(u){
      tablet meant `visibility:hidden` until the box itself happened to be
      tapped — §70's own finding, fixed for the plan PANE in August and left on
      the cards. */
+  var titles = { s:"Strengths", w:"Weaknesses", o:"Opportunities", t:"Threats" };
   return '<div class="swot">' +
-    box("s","s","Strengths") + box("w","w","Weaknesses") +
-    box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
+    quads.map(function(q){ return box(q, q, titles[q]); }).join("") + '</div>';
 }
 
 /* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────
@@ -42844,6 +42943,10 @@ function deckSlides(u){
      MAIN'S §236.3 IS KEPT WHOLE INSIDE THE GATE: every fixed slide carries an
      anchor, so every gap between two originals is a place a picture can live.
      A function simply has no such gaps here, because it has no such slides. */
+  /* §399: A FUNCTION HAS ITS OWN S&W NOW — strengths and weaknesses, never
+     the market's two, which stay the business's. One slide, and only when it
+     has something on it (§253: a table with no rows is not a slide). */
+  if (u.fnKey) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
   if (!u.fnKey) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
@@ -43210,6 +43313,27 @@ function deckPillarHead(u, p, pi, which){
    tactics. One system — a function's review must read as the same product as
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
+/* ── A SUPPORTING FUNCTION'S S&W ON ONE SLIDE (§399) ─────────────────
+   Two columns, the unit SWOT's own list and its own two hues, so a function's
+   slide reads as the same thing a unit's does (§53.5). Blank lines are not
+   items (§246's whitespace rule). No slide at all when both lists are empty. */
+function fnSWSlide(f){
+  if (!f) return "";
+  var sw = f.swot || {};
+  var col = function(key, title, hue){
+    var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
+    return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
+      (items.length ? '<ol class="dswot">' + items.map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
+  };
+  var any = ["s","w"].some(function(k){
+    return (sw[k] || []).some(function(t){ return String(t || "").trim(); }); });
+  if (!any) return "";
+  return '<section class="dslide d-fnsw"' + anch("fnsw", "After Strengths & Weaknesses") + '>' +
+    '<h2>Strengths &amp; Weaknesses</h2><div class="dswgrid">' +
+    col("s", "Strengths", "good") + col("w", "Weaknesses", "bad") + '</div></section>';
+}
 function deckSlidesFn(subject){
   /* §326: the function's OWN work — the same list its four pages draw, so the
      projector cannot show a deck the screen does not (§53.5).
@@ -43254,6 +43378,10 @@ function deckSlidesFn(subject){
               return a2.concat(c.actions || []); }, [])).length, "action")
           : plural(caps.reduce(function(n, c){
               return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
+
+  /* §399: the function's S&W, right after its cover, where a unit's SWOT
+     sits after its foundation. Never on a capability's own deck. */
+  if (!isCap) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -57009,7 +57137,12 @@ var SYNC = (function () {
              fill rather than a dead end (§61) — and nothing about the
              navigation depends on the data, so a tab cannot appear and
              disappear as rows arrive (§45.2). */
+          /* §399: S&W sits between the Overview and the plan, where a unit's
+             SWOT sits between its Foundation and its Plan — Islam: *"like the
+             tabs of the BUs"*. Every format, and always drawn: an empty one is
+             a page you can fill, never a tab that comes and goes (§45.2). */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
+                  { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -65471,9 +65604,9 @@ var SYNC = (function () {
         var a = b.dataset.swadd.split("|"), t = a[0], q = a[1];
         if (!mayAuthor("u_anal", t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("swot", { target:t, q:q }); return; }
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q])) return;
-        u.swot[q].push("");
+        var sw = swotWritable(t);
+        if (!sw || !Array.isArray(sw[q])) return;
+        sw[q].push("");
         fieldSaved(); paint();
       });
     });
@@ -65481,11 +65614,11 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var a = b.dataset.swrm.split("|"), t = a[0], q = a[1], i = +a[2];
         if (!mayAuthor("u_anal", t)) return;
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q]) || u.swot[q][i] == null) return;
-        if (String(u.swot[q][i]).trim() &&
+        var sw = swotWritable(t);
+        if (!sw || !Array.isArray(sw[q]) || sw[q][i] == null) return;
+        if (String(sw[q][i]).trim() &&
             !confirm("Remove this line? This cannot be undone here.")) return;
-        u.swot[q].splice(i, 1);
+        sw[q].splice(i, 1);
         fieldSaved(); paint();
       });
     });

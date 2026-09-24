@@ -2863,7 +2863,7 @@ function paneActs(page, acKey){
    which is exactly what this table exists to stop). */
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
-  swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
+  swot:    { unit: "analysis",                        ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
@@ -4989,43 +4989,18 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
-  return swotBoxes(u, ["s","w","o","t"], "analysis", "u_anal");
-}
-/* ── A SUPPORTING FUNCTION'S S&W (§399) ────────────────────────────
-   Islam: *"We need to add Strengths and weakness for the supporting
-   functions"*, then *"like the tabs of the BUs"* and *"make it S&W"*. It
-   REVERSES half of §213 for these two lists: opportunities and threats are
-   about the market and stay the business's, while what a function is good and
-   bad at is the function's own. Every format (pillars, projects, objectives),
-   because it is a fact about the function and not about how it plans.
-
-   THE UNIT'S OWN BOXES, TWO OF FOUR (§53.5) — one builder, so a function's
-   S&W and a unit's SWOT cannot drift into two looks. The page is the
-   Overview's (`capfoundation`, `k_found`): the same grant, so one Edit opens
-   both and nobody's rights move. Stored on `FUNCTIONS[k].swot`, the field a
-   pillars function already carries, so a pillars function's uploaded s/w
-   show here at once and its o/t are kept untouched (§96.2). No migration:
-   a function's unmapped keys ride `functions.extra`. */
-function renderFnSW(t){
-  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
-  var f = FUNCTIONS[fk];
-  if (!f) return "";
-  var sw = f.swot || FN_NO_SWOT;
-  return swotBoxes({ ukey:"fn:" + fk, swot:sw }, ["s","w"], "capfoundation", "k_found");
-}
-function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
      had put here and an empty quadrant offered nothing at all — so a SWOT
      could only ever ARRIVE, never start. Add per quadrant, remove per line,
      both re-asked on the click (§48.2). */
   var box = function(cls, key, title){
     var list = u.swot[key] || [];
-    var ed = authoring(page, ac);
+    var ed = authoring("analysis", "u_anal");
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
           (ed
-            ? fieldOr(page, x, "", function(v){ list[i] = v; }) +
+            ? fieldOr("analysis", x, "", function(v){ list[i] = v; }) +
               '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
               '" title="Remove this line" aria-label="Remove this line">&times;</button>'
             : '<span>' + esc(x) + '</span>') + '</li>';
@@ -5037,9 +5012,9 @@ function swotBoxes(u, quads, page, ac){
      tablet meant `visibility:hidden` until the box itself happened to be
      tapped — §70's own finding, fixed for the plan PANE in August and left on
      the cards. */
-  var titles = { s:"Strengths", w:"Weaknesses", o:"Opportunities", t:"Threats" };
   return '<div class="swot">' +
-    quads.map(function(q){ return box(q, q, titles[q]); }).join("") + '</div>';
+    box("s","s","Strengths") + box("w","w","Weaknesses") +
+    box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
 }
 
 /* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────

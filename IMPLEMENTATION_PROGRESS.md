@@ -8031,6 +8031,21 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §399 — supporting functions get Strengths and Weaknesses (2026-09-24) · **merged to `main` 2026-09-24**
+
+**Built; merged to `main` 2026-09-24 on Islam's word.** Every supporting function now has an
+**S&W** tab on its Strategy row, between Overview and its plan, like a
+business unit's SWOT but with only the two boxes about the function itself.
+Opportunities and threats stay with the business. The office writes it with
+the same Edit button as the Overview; an empty one is not counted as missing.
+It shows as one slide in the function's review deck when there is something on
+it, and it travels in the function's plan template (an older file without it
+leaves it untouched). Checked: a new check that presses every control (red 16
+and 8 ways when broken), the server rules (755 passing), the neighbouring
+checks and the full sweep. One neighbour (`functional-projects`) was already
+red before this, from the wording round — left as it was.
+
+
 ## §398 — the set-up flow's sentences use lower case (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built; merged to `main` 2026-09-23 on Islam's word.** The set-up questions now read "Are the

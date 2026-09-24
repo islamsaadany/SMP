@@ -4854,5 +4854,27 @@ console.log("\n44 · revenue drivers (spec 063)");
         k2.indexOf("setup") > -1 && k2.indexOf("unknown") < 0, k2.join(","));
 })();
 
+/* ── §399: A FUNCTION'S S&W ───────────────────────────────────────────────
+   Written by the office on every format, classified as the SWOT it is rather
+   than swept up as "a supporting function's settings" — both ends, or a build
+   that allowed everybody passes the first half. */
+(function () {
+  const fks = Object.keys(SEED.functions);
+  const proj = fks.filter(function (k) { return String(SEED.functions[k].format) !== "pillars" && SEED.functions[k].head; })[0];
+  const pil = fks.filter(function (k) { return String(SEED.functions[k].format) === "pillars"; })[0];
+  [proj, pil].forEach(function (fk) {
+    const put = function (inc) { inc.functions[fk].swot = { s: ["A strength"], w: ["A weakness"] }; };
+    allows("smo", put, "§399: the office writes " + fk + "'s S&W");
+    const head = SEED.functions[fk].head;
+    if (head && head !== "smo") refuses(head, put, "§399 REFUSED: " + fk + "'s own head may not (the Strategy half is the office's)");
+    refuses("own_mob", put, "§399 REFUSED: a business unit's owner may not write a function's S&W");
+    const inc = clone(SEED); put(inc);
+    const kinds = (A.collect(SEED, inc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+    check("§399: " + fk + "'s S&W is classified as its SWOT",
+          kinds.indexOf("unitAnalysis") > -1 && kinds.indexOf("unknown") < 0 && kinds.indexOf("setup") < 0,
+          kinds.join(",") || "(nothing)");
+  });
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

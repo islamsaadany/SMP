@@ -136,13 +136,6 @@
   .d-swot.t-bad h2 { border-left:5px solid var(--bad); }
   .d-swot.t-stone h2 { border-left:5px solid var(--panel); }
   .d-swot.t-warn h2 { border-left:5px solid var(--warn); }
-  /* §399: a function's S&W — two columns on one slide, the SWOT's own hues. */
-  .d-fnsw .dswgrid { display:grid; grid-template-columns:1fr 1fr; gap:56px; margin-top:6px; }
-  .d-fnsw .dswcol h3 { padding-left:14px; margin:0 0 6px; font-size:26px; }
-  .d-fnsw .dswcol.t-good h3 { border-left:5px solid var(--good); }
-  .d-fnsw .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
-  .d-fnsw ol.dswot { columns:1; }
-  .d-fnsw .dswnone { color:var(--none); font-size:22px; }
 
 /* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────
    Islam: *"make the wining aspiration filing the width of the presentaion

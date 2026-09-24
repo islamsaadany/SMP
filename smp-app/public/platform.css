@@ -70,6 +70,27 @@
     --shadow-sm:0 1px 3px rgb(15 23 42/.06);
     --shadow-md:0 4px 6px -1px rgb(15 23 42/.10), 0 2px 4px -2px rgb(15 23 42/.10);
     --shadow-accent:0 4px 6px -1px var(--accent-glow);
+
+    /* ── THE DESIGN STANDARD (§411) ──────────────────────────────────
+       Signed off 2026-09-24. Every page moves onto THESE names, one page at
+       a time with its own mockup; the names above stay until nothing reads
+       them. Adding them moves nothing on screen. checks/design-standard.py
+       counts every typed-in value that is not one of these, and the count
+       may only fall. */
+    --t-key:11px;       /* uppercase keys, column headings, pills   */
+    --t-small:13px;     /* table cells, secondary lines, buttons    */
+    --t-body:14px;      /* body                                     */
+    --t-head:17px;      /* section and card headings                */
+    --t-title:22px;     /* the page title                           */
+    --t-figure:32px;    /* the headline figure                      */
+    --s1:4px; --s2:8px; --s3:16px; --s4:24px;
+    --r-ctl:6px; --r-card:10px;             /* --r-pill above is the third */
+    --sh-card:0 1px 2px rgb(22 50 92/.06);
+    --sh-over:0 12px 32px -8px rgb(22 50 92/.28);
+  }
+  :root[data-theme="dark"] {
+    --sh-card:0 1px 2px rgb(0 0 0/.3);
+    --sh-over:0 12px 32px -8px rgb(0 0 0/.6);
   }
 
   /* THE FONT AXIS (§38.8, §157) IS GONE (§402): Source Sans 3 is --sans

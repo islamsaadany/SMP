@@ -10615,7 +10615,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-24 — **§406.3: the section switch is squared.** Islam picked A of three drawn: the Foundation · SWOT · Drivers · Plan box takes Reporting's 6px corner and each segment a 4px one; nothing else moves. Asserted in `checks/tab-row.py` as the box agreeing with Reporting. On the branch, not merged.*
+*Last Updated: 2026-09-24 — **§407: the plan page restyled, a quieter top bar, and the typeface switch gone.** Islam: *"drop the system button and build both"*, from the signed-off round-12 mockup. The top bar is 40px on the platform's own sizes with the viewer moved right; the per-screen typeface switch is removed and a remembered face forgotten (§41.6's reasoning), the face now the tenant's `BRAND.font`. On the Plan page the pillar rail is equal-size rounded cards above 1200px (a floor, not a height), the kind rides beside the code in detail mode, the owner leaves the plan rail, the pillar band loses its gold edge and carries the kind as a tag on the right, and Key measures/Tactics show counts with a rule between. `typeface.py` and `pillar-kind.py` rewritten, never loosened. On the branch, not merged.*
+
+*Earlier: 2026-09-24 — **§406.3: the section switch is squared.** Islam picked A of three drawn: the Foundation · SWOT · Drivers · Plan box takes Reporting's 6px corner and each segment a 4px one; nothing else moves. Asserted in `checks/tab-row.py` as the box agreeing with Reporting. On the branch, not merged.*
 
 *Earlier: 2026-09-24 — **§406.2: Reporting is a filled button again, and no tab draws a box.** Islam picked option C from three drawn: Reporting back on `--cta` with `--cta-ink` (deeper when selected, the dot white on it), every tab centred on the row so the words share one baseline, and 7/5 padding with the box riding up 1px so the word's INK is centred in its box (§302). No tab on the row draws a focus outline, mouse or keyboard; Performance stays grey. `checks/tab-row.py`, red four ways from the sources. On the branch, not merged.*
 

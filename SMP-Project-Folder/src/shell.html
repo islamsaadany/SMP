@@ -106,10 +106,10 @@
            decision, set once on Setup › Branding, not a per-screen preference
            that leaves two people looking at different products. Light and dark
            stay each viewer's own — those are about the room they sit in. -->
-      <!-- The typeface, while the four are being compared (§38.8). It renders
-           its own name in the face it names, so you can see one without
-           pressing it. It goes when the choice is settled. -->
-      <button class="infobtn fontbtn" id="fontbtn" type="button" hidden></button>
+      <!-- The typeface switch was here (§38.8, §157). It is gone at Islam's
+           direction (§407): "drop the system button". It was the comparison's
+           control, never a setting anybody needed, and it read as a second
+           light/dark choice beside the real one. -->
     </div>
   </div>
 </header>
@@ -2780,9 +2780,10 @@
     /* Repainted rather than set once: Labels can rename the tenant while you
        are looking at it. The
        separator lives with the name so an unnamed tenant shows nothing at all
-       rather than a stranded middot. */
-    document.getElementById("orgname").textContent =
-      GROUP.org ? "\u00b7 " + GROUP.org : "";
+       rather than a stranded middot — and since §407 there is no middot at
+       all: a hairline drawn by the stylesheet separates the two names, and a
+       hairline beside an empty span is not drawn. */
+    document.getElementById("orgname").textContent = GROUP.org || "";
     /* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ──
        Islam: *"theclient settings shouldn't open the strategy banner in the
        top this is a client settings separate than any module."* He is right

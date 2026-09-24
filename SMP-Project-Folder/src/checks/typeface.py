@@ -4,8 +4,15 @@ Islam, closing §38.7's open comparison: *"let's make the 2 fonts available are
 the system font and the source san3."* Four faces had ridden in every build so
 they could be judged in the real product; three now leave the file.
 
+§407 TOOK THE SWITCH AWAY (Islam: *"drop the system button"*). The face is
+the tenant's to set (BRAND.font) and nobody's per screen, exactly as §41.6 did
+for the palette. REWRITTEN, NEVER LOOSENED (§218): section 1 and section 5
+used to press the switch; they now assert it is GONE and that a face a browser
+remembers is FORGOTTEN, while the tenant's own choice still paints — both
+ends, or a build that dropped the face altogether passes the absence half.
+
 WHAT THIS ASSERTS — the promise, not the implementation:
-  1. The switch offers exactly two, and cycles between them.
+  1. There is no per-screen switch, and the tenant's setting still chooses.
   2. Both actually WORK: choosing Source Sans 3 really changes the face the
      page renders in (measured by the width of a real string, since a font
      that failed to decode would leave the metrics of the system stack).
@@ -16,9 +23,10 @@ WHAT THIS ASSERTS — the promise, not the implementation:
      from the file's bytes (§24: a rule for a face the product no longer
      carries is worse than no rule, because nothing tells the next reader it
      is dead).
-  5. A BROWSER THAT REMEMBERS A REMOVED FACE IS NOT STRANDED: a stored
-     "manrope" lands on the system stack and the switch still works, rather
-     than leaving an attribute no stylesheet answers (§30.2's shape).
+  5. A BROWSER THAT REMEMBERS A FACE IS NOT PINNED TO IT: a stored choice —
+     a removed one or a live one — lands on the tenant's face and the key is
+     cleared, rather than holding somebody to a face with no control left to
+     change it back (§41.6's shape).
 
 Run: SMP_CHROME=... python3 qa-run.py checks/typeface.py
 """
@@ -69,21 +77,22 @@ with sync_playwright() as p:
     offered = pg.evaluate("() => (typeof THEME !== 'undefined' && THEME.font) ? true : false")
     ck("the theme module is there", offered)
 
-    # The switch itself: two names, and pressing it returns to where it began.
-    seen = pg.evaluate("""() => {
-      var b = document.getElementById('fontbtn');
-      if (!b) return {none:true};
-      var out = [], guard = 0;
-      var first = b.textContent.trim();
-      do { out.push(b.textContent.trim()); b.click(); guard++; }
-      while (b.textContent.trim() !== first && guard < 8);
-      return {names: out};
+    # §407: the switch is gone, and the tenant's setting is what chooses.
+    sw = pg.evaluate("""() => {
+      var had = !!document.getElementById('fontbtn');
+      THEME.setBrand({font:'source'});
+      var tenant = document.documentElement.getAttribute('data-font');
+      THEME.setBrand({font:'manrope'});
+      var bogus = document.documentElement.getAttribute('data-font');
+      THEME.setBrand(null);
+      var none = document.documentElement.getAttribute('data-font');
+      return {had:had, tenant:tenant, bogus:bogus, none:none};
     }""")
-    ck("the switch exists", not seen.get("none"), seen)
-    names = seen.get("names", [])
-    ck("it offers exactly two faces", len(names) == 2, names)
-    ck("and they are the two agreed",
-       sorted(n.lower() for n in names) == ["source sans", "system"], names)
+    ck("there is no per-screen typeface switch", not sw.get("had"), sw)
+    ck("the tenant's face still paints (both ends)", sw.get("tenant") == "source", sw)
+    ck("a face the product no longer carries falls to the system stack",
+       sw.get("bogus") in (None, ""), sw)
+    ck("and no tenant choice is the system stack", sw.get("none") in (None, ""), sw)
 
     # Both are real: the rendered metrics must differ, or the embedded face
     # never decoded and the switch is decoration.
@@ -122,19 +131,19 @@ with sync_playwright() as p:
     ck("...and it is the family the page asks for",
        "Source Sans 3" in (widths.get("family") or ""), widths.get("family"))
 
-    # A remembered face that no longer exists must not strand anybody.
-    pg.evaluate("localStorage.setItem('smp.font','manrope')")
-    pg.reload()
-    pg.wait_for_timeout(900)
-    after = pg.evaluate("""() => ({
-      attr: document.documentElement.getAttribute('data-font'),
-      label: (document.getElementById('fontbtn')||{}).textContent,
-      family: getComputedStyle(document.body).fontFamily
-    })""")
-    ck("a remembered Manrope falls back to the system stack",
-       after.get("attr") in (None, ""), after)
-    ck("...and the switch still names a face it has",
-       (after.get("label") or "").strip().lower() in ("system", "source sans"), after)
+    # A remembered face must not pin anybody: removed or live, it is forgotten.
+    for stored in ("manrope", "source"):
+        pg.evaluate("localStorage.setItem('smp.font','%s')" % stored)
+        pg.reload()
+        pg.wait_for_timeout(900)
+        after = pg.evaluate("""() => ({
+          attr: document.documentElement.getAttribute('data-font'),
+          key: localStorage.getItem('smp.font'),
+          family: getComputedStyle(document.body).fontFamily
+        })""")
+        ck("a remembered %s does not choose the face" % stored,
+           after.get("attr") in (None, ""), after)
+        ck("...and the remembered %s is cleared" % stored, after.get("key") is None, after)
     ck("...and nothing asks for Manrope",
        "Manrope" not in (after.get("family") or ""), after)
 

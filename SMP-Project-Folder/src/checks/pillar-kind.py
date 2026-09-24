@@ -6,8 +6,9 @@ internal thing as well"*, and of three of his own functions, *"they are
 planning somehow in a capability format"*. That is the mark §29 hid — his own
 *"it will be brought later not now"* — coming back.
 
-  1 · IT IS DRAWN on the Plan page: the rail's sub-line and the pill beside
-      the pillar's name.
+  1 · IT IS DRAWN on the Plan page: beside the code on the rail's card (§407
+      moved it there from the head of the counts — REWRITTEN, never loosened,
+      §218) and the pill at the end of the pillar's band.
 
   2 · IT CAN BE SET, which is the half that makes showing it safe. The field
       was writable on NO screen at all, so the mark alone would have been
@@ -55,12 +56,13 @@ with sync_playwright() as p:
     pg.evaluate("()=>{ current='mobile'; paint(); }"); pg.wait_for_timeout(300)
     click(pg, "[data-s='strategy']"); click(pg, "[data-sub2='plan']")
     click(pg, '.rail .railterse')   # §119.3 ships the rail's detail FOLDED
-    rail = pg.evaluate("()=>[...document.querySelectorAll('.rail .ritem .rsub')].map(x=>x.textContent.trim())")
+    rail = pg.evaluate("()=>[...document.querySelectorAll('.rail .ritem')].map(r=>{var k=r.querySelector('.rkind');return k?k.textContent.replace(/^\\s*\u00b7\\s*/,'').trim():null})")
+    subs = pg.evaluate("()=>[...document.querySelectorAll('.rail .ritem .rsub')].map(x=>x.textContent.trim())")
     ok("the rail has rows to read at all", len(rail) >= 3, rail)
-    ok("the rail's sub-line names the kind",
-       bool(rail) and all(r.startswith(("Direction", "Capability")) for r in rail), rail[:2])
-    ok("and no row starts with a stray separator",
-       bool(rail) and not any(r.startswith("\u00b7") for r in rail), rail[:2])
+    ok("every card names its kind beside the code (§407)",
+       bool(rail) and all(r in ("Direction", "Capability") for r in rail), rail[:2])
+    ok("and the counts no longer repeat it, nor start with a stray separator",
+       bool(subs) and not any(x.startswith(("Direction", "Capability", "\u00b7")) for x in subs), subs[:2])
 
     pill = pg.evaluate("()=>{var x=document.querySelector('.pane .pband .pill.kind'); return x?x.textContent.trim():None_}"
                        .replace("None_", "null"))
@@ -132,10 +134,13 @@ with sync_playwright() as p:
     pg.evaluate("()=>{ UNITS.mobile.items[0].kind=''; paint(); }"); pg.wait_for_timeout(400)
     st = pg.evaluate("""()=>{
       var sub = document.querySelector('.rail .ritem .rsub');
+      var kind = document.querySelector('.rail .ritem').querySelector('.rkind');
       var pill = document.querySelector('.pane .pband .pill.kind');
       return { sub: sub ? sub.textContent.trim() : null,
+               kind: kind ? kind.textContent.trim() : null,
                pill: pill ? pill.textContent.trim() : null }; }""")
     ok("no empty pill", st["pill"] is None or st["pill"] != "", st)
+    ok("no kind drawn beside the code", st["kind"] is None, st)
     ok("no leading separator on the rail", not (st["sub"] or "").startswith("·"), st)
 
     pg.evaluate("k=>{ UNITS.mobile.items[0].kind=k; paint(); }", before); pg.wait_for_timeout(300)
@@ -160,11 +165,11 @@ with sync_playwright() as p:
     click(pg, "[data-sub2='proj']")
     fn = pg.evaluate('''()=>{
       var band = document.querySelector('.pane .pband .pill.kind');
-      var subs = [...document.querySelectorAll('.rail .ritem .rsub')].map(x=>x.textContent.trim());
+      var subs = [...document.querySelectorAll('.rail .ritem')].map(r=>{var k=r.querySelector('.rkind');return k?k.textContent.replace(/^\s*\u00b7\s*/,'').trim():''});
       return { band: band ? band.textContent.trim() : null, subs: subs.slice(0,2) }; }''')
     ok("a function's band carries the mark", fn["band"] == "Capability", fn)
     ok("its rail has rows to read", len(fn["subs"]) >= 2, fn["subs"])
-    ok("and its rail line leads with it",
+    ok("and its card names it beside the code",
        bool(fn["subs"]) and fn["subs"][0].startswith("Capability"), fn["subs"])
     ok("while a pillar marked the other way says the other word",
        any(x.startswith("Direction") for x in fn["subs"]), fn["subs"])

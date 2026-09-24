@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-09-24 — the plan page restyled and the top bar tidied (§407), on the branch, not merged.** Built from the mockup Islam signed off. The white bar at the top is taller and calmer, with the client's name after a thin line and the "viewing as" part on the right; the typeface button ("System") is gone. On a unit's Plan page the pillars list is a column of rounded cards of equal size, the detail button still shows or hides each pillar's type and counts, the owner is gone from that list, the pillar heading shows its type as a small tag on the right, and "Key measures" and "Tactics" show their count instead of a grey sentence, with a line between them.
+
 **2026-09-24 — the section switch squared (§406.3), on the branch, not merged.** Foundation · SWOT · Drivers · Plan is no longer a pill: its box has the same small rounded corners as the Reporting button (option A). Nothing else about it changed.
 
 **2026-09-24 — the tab row, second pass (§406.2), built on the branch, not merged.** No tab draws a box any more when you press it or move to it with the keyboard. Reporting is a solid orange button again (option C from the mockup), with its word on the same line as Strategy and Performance and centred in its box, measured. Performance stays plain grey like the other tabs. Waiting on your word to merge.

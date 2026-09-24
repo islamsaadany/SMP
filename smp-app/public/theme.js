@@ -67,7 +67,6 @@ var THEME = (function () {
      comparison lands on the system stack rather than on an attribute no
      stylesheet answers any more. Nothing to migrate, and nobody stuck. */
   var FONTS = ["system", "source"];
-  var FNAMES = { system: "System", source: "Source Sans" };
 
   /* Where the switch starts when nobody has chosen: whatever the device says.
      matchMedia is absent in very old engines and returns a stub in some test
@@ -127,17 +126,17 @@ var THEME = (function () {
     try { localStorage.removeItem(PKEY); } catch (e) {}
   }
 
-  function chosenFont() {
-    try {
-      var v = localStorage.getItem(FKEY);
-      return FONTS.indexOf(v) === -1 ? null : v;
-    } catch (e) { return null; }
+  /* THE SWITCH IS GONE (§407), so a choice left in a browser would pin that
+     person to a face with no control left to change it back — §41.6's own
+     reason for forgetting a palette. Forgotten once, on the way past; the
+     face is the tenant's (BRAND.font, sanitised by FONTS) or the system's. */
+  function forgetFont() {
+    try { localStorage.removeItem(FKEY); } catch (e) {}
   }
+  forgetFont();
   function readFont() {
-    return chosenFont() || (BRAND && BRAND.font) || FONTS[0];
-  }
-  function writeFont(v) {
-    try { localStorage.setItem(FKEY, v); } catch (e) {}
+    var b = BRAND && BRAND.font;
+    return FONTS.indexOf(b) === -1 ? FONTS[0] : b;
   }
 
   var mode = read();
@@ -212,21 +211,6 @@ var THEME = (function () {
   }
 
 
-  /* The control renders its own name IN the face it names, so the press is not
-     the only way to find out what it looks like. */
-  function paintFont(btn) {
-    btn.textContent = FNAMES[font];
-    btn.style.fontFamily = "var(--sans)";
-    var next = FONTS[(FONTS.indexOf(font) + 1) % FONTS.length];
-    btn.title = "Typeface: " + FNAMES[font] + " — click for " + FNAMES[next];
-    btn.setAttribute("aria-label", btn.title);
-  }
-  function setFont(v, btn) {
-    font = v;
-    writeFont(font);
-    apply();
-    if (btn) paintFont(btn);
-  }
 
   return {
     apply: apply,
@@ -238,8 +222,6 @@ var THEME = (function () {
       palette = readPalette();
       font = readFont();
       apply();
-      var fb = document.getElementById("fontbtn");
-      if (fb && !fb.hidden) paintFont(fb);
     },
     mode: function () { return mode; },
     palette: function () { return palette; },
@@ -252,14 +234,6 @@ var THEME = (function () {
         paintBtn(btn);
         btn.addEventListener("click", function () {
           set(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length], btn);
-        });
-      }
-      var fb = document.getElementById("fontbtn");
-      if (fb) {
-        fb.hidden = false;
-        paintFont(fb);
-        fb.addEventListener("click", function () {
-          setFont(FONTS[(FONTS.indexOf(font) + 1) % FONTS.length], fb);
         });
       }
     }

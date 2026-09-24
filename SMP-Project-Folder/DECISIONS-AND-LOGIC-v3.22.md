@@ -57317,3 +57317,25 @@ client changes it on Setup › Terminology if it wants to.
 `structure.py` 52/0, falsified from the SOURCES (§276): the old never-list put
 back **3 red**, *Missions* put back **1 red**. The seed and `db/kb.json` were
 regenerated (the corpus had been stale since §395, now in step).
+
+### §404.3 — existing clients move to the singular words too, where the word was the platform's (2026-09-24)
+
+Islam, of an existing client's set-up step still reading *Missions* and
+*Winning Aspirations*: *"still there is the word missions, and aspirations"* —
+and, asked, *"yes build it"*.
+
+§404.2 left existing clients alone on his word ("any old client should keep
+their words"), and **those two words were never theirs**: migration 045 (016 on
+the new stack) wrote *Missions* and *Winning Aspirations* into every client
+whose word still sat on the old default, **on the stated grounds that nobody
+had chosen it**. The same reasoning moves them back, so his rule stands whole:
+a row holding EXACTLY that default takes the new one; any word a client typed
+is untouched (§96.2). Migration **047** on the frozen stack and **018** on the
+new one, runs once at deploy, and a second run changes nothing.
+
+**Proved on a real Postgres 16**, the new stack's path run as a deployment runs
+it: two clients through 016 (one left on the default, one with its own word for
+Purpose), then 018 twice — the first reads *Mission* and *Winning Aspiration*,
+the second keeps *Our Reason* and gets *Winning Aspiration*, Themes untouched
+on both, and the second run a no-op. The frozen 047 run against a labels table
+in the old shape with the same result. No screen, rule or built file changes.

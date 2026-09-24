@@ -57241,3 +57241,64 @@ he doesn't need the rail at the top"* — then *"proceed"*.
 - **Nothing stored moves, nothing is migrated, no save rule changes**, so no
   forced sign-out is owed (spec 029). The built file's bytes changed, so
   `sw.js` is bumped (§91).
+
+## §400 — the trail's two menus (2026-09-24)
+
+Islam, using §399's trail: *"when I click outside them the menue should close
+… te logo of the client shouldn't appear in the top navigation bar … when I
+click on the name of the client drop down I should get the other lcients …
+when I click on the module name like strategy I should get the other modules
+and then the separator and the client settings."* Four instructions, taken as
+given; screen and menu contents only, no stored state.
+
+**THE TWO MENUS SWAP JOBS.** §399 put the modules under the CLIENT and Home and
+the module's settings under the MODULE. The client step now lists the OTHER
+clients this person may open, then a rule, then *All clients* (the console's
+grid); the module step lists the OTHER modules, a rule, then *Client settings*.
+The module you are in is the step's own name, so it is not listed again (§87).
+**On the client's settings** the third step reads *Client settings* (with
+`aria-current`) and opens the same menu, where each module goes to THAT
+module's settings — the next place from a settings page, and §362.1's one
+press kept. *Home* left the menu: the house mark is Home (§399), and two
+controls for one act is one too many (§94.15); the dead `go === "home"` branch
+is deleted with it (§24).
+
+**THE CLIENT LIST IS THE SERVER'S, WITH THE CARDS' OWN TWO RULES** —
+`visibleClients` then `mayOpenClient` — through a new light action
+(`/api/platform {action:"clients"}`: key, name, kind), because the cards action
+reads every tenant's facts and tracker tally, which a menu of names should not
+cost. Asked once per page; until it answers the menu says *Reading your
+clients…*, and an empty answer says *No other clients* — lines, never buttons
+that go nowhere (`.trquiet`). *All clients* is always there, so the menu is
+never a dead end (§61). A client's own person is refused the action by the
+endpoint's existing gate (403), asserted.
+
+**A PRESS ELSEWHERE CLOSES THE MENU**, on `pointerdown` in the capture phase
+as the chat corner does (§100.4) — a menu that lingers until the mouse comes
+up reads as having missed the press. A press inside one menu shuts the other;
+Escape shuts either. Wired once, beside the trail's one click listener, so a
+repaint of the trail cannot multiply it (§24, §47.2).
+
+**NO CLIENT MARK ON THE BAR.** The `.trmark` image and its rule are deleted; the
+client is named once, in words. §399's assertion *"one that has uploaded a mark
+wears it on its own bar"* is REVERSED and REWRITTEN, never deleted (§218): the
+mark is MADE and asserted absent, with the client's name asserted present
+beside it (§113.8). The client platform's own bar for a client's staff is
+untouched.
+
+**Checks.** `checks/modules.mjs` §7 rewritten for the swap — other modules in
+order with the server's lines, the current one absent, rule then Client
+settings last, the other clients asserted against the stub's answer, one menu
+shutting the other, a real mouse press outside closing it, Escape, and a
+one-module client offering only Client settings: **166/0**, and each new
+behaviour proved able to fail by breaking it in the source (the outside-click
+listener 2 red, the current-client filter 1, the current-module filter 4, a
+mark put back 1). `checks/shell.mjs` on the served app **136/0** — its trail
+reads moved to the module step, the mark assertion reversed, and two new: the
+trail's list equals the clients the cards say may be opened, and a client's
+own person is refused it. `setup-per-module.py` served half green after its
+`.trhere` read moved to the module step's summary; `door-landing` 145/0,
+`check:modules:red` all red, `qa.py` ERRORS none, `built-in-step` and
+`generated-in-step` clear once committed. `sw.js` SHELL bumped (the built
+file's bytes changed, `arrange.css`).
+

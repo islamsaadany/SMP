@@ -5697,7 +5697,7 @@ html[data-client-settings] .viewer { display:none; }
   /* ══ THE TRAIL (§399) ═══════════════════════════════════════════════
      Replaces the four-square switcher (deleted with its markup, §24) and the
      client-name pill, for Forefront's own people only — `data-console`,
-     written by sync.js. One line: Forefront › [mark] client ▾ › module ▾.
+     written by sync.js. One line: Forefront › client ▾ › module ▾ (no client mark since §400).
      The menus are `details.dlmenu > .menu`'s own, unchanged (§53.5); what is
      here is the line. The step you are ON is the ink colour and weight, the
      steps above it the quieter ink, which is how a trail reads everywhere. */
@@ -5715,9 +5715,10 @@ html[data-client-settings] .viewer { display:none; }
   nav.trail details.trstep[open] > summary { background:var(--surface-2); color:var(--ink); }
   nav.trail details.trstep > summary > span { overflow:hidden; text-overflow:ellipsis; max-width:220px; }
   nav.trail details.trstep > summary > svg { width:10px; height:10px; flex:none; color:var(--ink-3); }
-  nav.trail .trmark { height:20px; width:auto; max-width:72px; object-fit:contain; display:block; }
-  nav.trail .trhere { color:var(--ink); font-weight:600; padding:3px 7px; }
   nav.trail .menu button[aria-current="true"] { font-weight:700; }
+  /* a line in a menu that is not a door ("Reading your clients…", "No other
+     clients"), §400 — said, never a button that goes nowhere (§94.15) */
+  nav.trail .trquiet { padding:9px 14px; font-size:13.5px; color:var(--ink-2); font-style:italic; }
   nav.trail .trrule { height:1px; background:var(--line); margin:4px 0; }
   /* THE TRAIL IS THE BRAND LINE FOR FOREFRONT'S PEOPLE, so the product's own
      name, the client's mark and the old pill stand down under it — the

@@ -7943,6 +7943,20 @@ thing added beyond the drawing: on Client settings the client menu also lists
 each module's settings, so the one-press way across is not lost. All checks
 green; nothing stored or migrated.
 
+## §400 — the trail's two menus (2026-09-24)
+
+**Built on the branch, not merged.** Four things you asked for on the trail at
+the top: an open menu now closes when you click anywhere else (or press
+Escape), and opening one closes the other; the client's logo is gone from the
+bar — the trail names the client in words; the client name's menu lists your
+**other clients** (the ones you may open) and then *All clients*; and the
+module's menu lists the **other modules**, a separator, then *Client settings*.
+On Client settings itself, the last step reads *Client settings* and opens the
+same menu, where each module takes you to that module's settings. *Home* left
+the module menu — the house mark does that job. Nothing stored or migrated; a
+client's own staff still see no trail, and the server refuses them the client
+list too.
+
 ## §390 — the people upload takes a client's own sheet (2026-09-23)
 
 **Built, on the branch.** A new person needs three things: Name, Job title

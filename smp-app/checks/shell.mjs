@@ -261,8 +261,10 @@ await section("3 · the office's addresses, and a change that reaches the server
   const back = async () => await page.evaluate(() => {
     const t = document.querySelector("nav.trail"), b = document.getElementById("clientback");
     return { trail: t ? t.innerText.replace(/\s+/g, " ").trim() : null,
-      here: t && t.querySelector(".trhere") ? t.querySelector(".trhere").textContent.trim() : null,
-      mod: t && t.querySelector("details.trstep:not(.trclient) > summary") ? t.querySelector("details.trstep:not(.trclient) > summary").textContent.trim() : null,
+      /* §400: the third step is always a menu; on the client's settings its
+         summary reads "Client settings" and carries aria-current */
+      here: t && t.querySelector(".trmod > summary[aria-current]") ? t.querySelector(".trmod > summary").textContent.trim() : null,
+      mod: t && t.querySelector(".trmod > summary:not([aria-current])") ? t.querySelector(".trmod > summary").textContent.trim() : null,
       ff: !!(t && t.querySelector("a.trff[href='/platform']")), pill: !!(b && !b.hidden && b.offsetParent) };
   });
   let bk = await back();
@@ -347,12 +349,14 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
       switcher: seen(document.querySelector(".top-in .topmark")),
       trail: seen(document.querySelector("nav.trail")),
       client: ((document.querySelector("nav.trail .trclient > summary span") || {}).textContent || "").trim(),
-      where: (() => { const h = document.querySelector("nav.trail .trhere"), m = document.querySelector("nav.trail details.trstep:not(.trclient) > summary span");
-        return ((h || m || {}).textContent || "").trim(); })(),
-      mods: Array.from(document.querySelectorAll("nav.trail .trclient [data-trgo]")).map((e) => e.dataset.trgo).filter((g) => /^\/raya-trade\/[a-z]+$/.test(g)),
-      sets: Array.from(document.querySelectorAll("nav.trail .trclient [data-trgo]")).map((e) => e.dataset.trgo).filter((g) => /^cross:(?!client$)/.test(g)),
+      /* §400: the modules moved from the client step to the MODULE step, and
+         the client step lists the other clients */
+      where: ((document.querySelector("nav.trail .trmod > summary span") || {}).textContent || "").trim(),
+      mods: Array.from(document.querySelectorAll("nav.trail .trmod [data-trgo]")).map((e) => e.dataset.trgo).filter((g) => /^\/raya-trade\/[a-z]+$/.test(g)),
+      sets: Array.from(document.querySelectorAll("nav.trail .trmod [data-trgo]")).map((e) => e.dataset.trgo).filter((g) => /^cross:(?!client$)/.test(g)),
+      clientGo: Array.from(document.querySelectorAll("nav.trail .trclient [data-trgo]")).map((e) => e.dataset.trgo),
       h1: seen(document.querySelector(".brand")) ? ((document.querySelector(".brand h1") || {}).textContent || "") : "",
-      mark: seen(document.querySelector("nav.trail .trmark")) || seen(document.getElementById("clientlogo")),
+      mark: seen(document.querySelector("nav.trail img")) || seen(document.getElementById("clientlogo")),
     };
   });
   await open("/raya-trade/setup/people");
@@ -399,8 +403,14 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   b = await bar();
   check(b.scope === "strategy" && b.row === true && b.dests > 0, "a module's own Setup keeps its navigation", JSON.stringify(b));
   check(b.viewer === true, "\u2026and its viewer strip", JSON.stringify(b));
-  check(clMods.every((m) => b.mods.includes("/raya-trade/" + m.key)) && b.mods.length === clMods.length,
-        "\u2026and the trail's client step offers every module this person may open, because there a module IS what you are in", JSON.stringify(b.mods));
+  /* §400: the MODULE step offers the OTHER modules — never the one you are
+     in, which is the step's own name — then a rule, then Client settings */
+  check(clMods.filter((m) => m.key !== "strategy").every((m) => b.mods.includes("/raya-trade/" + m.key)) &&
+        b.mods.length === clMods.length - 1 && !b.mods.includes("/raya-trade/strategy"),
+        "\u2026and the trail's module step offers every OTHER module this person may open (\u00a7400)", JSON.stringify(b.mods));
+  check(b.clientGo.length > 0 && b.clientGo[b.clientGo.length - 1] === "/platform#clients" &&
+        !b.clientGo.some((g) => /^\/raya-trade(\/|$)/.test(g)) && b.clientGo.every((g) => /^\/[a-z0-9-]+$|^\/platform#clients$/.test(g)),
+        "\u2026and the client step offers the OTHER clients and all of them, never this one or its modules (\u00a7400)", JSON.stringify(b.clientGo));
   check(b.where === "Strategy" && b.client === "Raya Trade", "\u2026and the trail ends in the module, not in Client settings", b.client + " / " + b.where);
 
   /* AND THE OTHER END OF \u00a7383'S OWN RULE, MADE (\u00a794.2, \u00a7255). Take the
@@ -422,8 +432,8 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      never a menu of one \u2014 it always carries Client settings and Switch
      client \u2014 so what survives is that it offers EXACTLY the modules this
      client has, no more: with two, two. */
-  check(two.mods.length === 2 && two.row === true && two.switcher === false,
-        "\u2026and with two modules the trail offers exactly two, and no retired switcher comes back (\u00a7383, \u00a7399)", JSON.stringify(two));
+  check(two.mods.length === 1 && two.row === true && two.switcher === false,
+        "\u2026and with two modules the trail offers exactly the other one, and no retired switcher comes back (\u00a7383, \u00a7399, \u00a7400)", JSON.stringify(two));
   await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights", "tracker"]), tenantId]);
   await open("/raya-trade/strategy/setup/cycle");
 
@@ -470,7 +480,12 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   await page.evaluate((src) => { GROUP.logo = src; paint(); }, PNG);
   await page.waitForTimeout(200);
   b = await bar();
-  check(b.mark === true, "\u2026and one that has uploaded a mark wears it on its own bar", JSON.stringify(b));
+  /* §400, REVERSED AND REWRITTEN (§218): Islam — "the logo of the client
+     shouldn't appear in the top navigation bar". The office's bar is the
+     trail and it names the client in words; the made state is what makes
+     this absence mean anything (§113.8). */
+  check(b.mark === false && b.client === "Raya Trade",
+        "\u2026and one that HAS uploaded a mark still does not wear it on the office's bar \u2014 the trail names it in words (\u00a7400)", JSON.stringify(b));
   await page.evaluate(() => { delete GROUP.logo; paint(); });
   /* AND THE CLIENT'S OWN COLOUR STILL REACHES THE PAGE. The bar these pages
      wear is the product's own surface \u2014 `header.top` is
@@ -542,10 +557,11 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
         "\u2026and pressing it lands on the module's Setup, the trail ending in the module", path() + " / " + JSON.stringify(b));
   check(reached.includes("access"), "\u2026which is the rail Roles & access is on \u2014 the page he could not reach (\u00a761)", reached.join(","));
   check(await page.evaluate(() => window.__stay === 1), "\u2026and it crossed WITHOUT reloading the platform (\u00a7367)", "the page was rebuilt");
-  check(b.sets.length === 0 && b.mods.length === clMods.length,
-        "\u2026and on a module's page the client step lists the modules, not their settings twice (\u00a787)", JSON.stringify(b));
-  const third = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail details.trstep:not(.trclient) [data-trgo]")).map((e) => e.dataset.trgo));
-  check(third.includes("home") && third.includes("cross:strategy"), "\u2026and the module's own step offers Home and its settings", JSON.stringify(third));
+  check(b.sets.length === 0 && b.mods.length === clMods.length - 1,
+        "\u2026and on a module's page the module step lists the other modules, not their settings (\u00a787, \u00a7400)", JSON.stringify(b));
+  const third = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.dataset && e.dataset.trgo ? e.dataset.trgo : (e.className === "trrule" ? "|" : "?")));
+  check(third[third.length - 1] === "cross:client" && third[third.length - 2] === "|" && !third.includes("cross:strategy"),
+        "\u2026and it ends in a rule and Client settings (\u00a7400)", JSON.stringify(third));
 
   /* AND THE OTHER DIRECTION CROSSES IN PLACE TOO (\u00a7367). BOTH ENDS
      (\u00a794.2): the way back is the half Islam presses most. */
@@ -775,10 +791,21 @@ await section("4 · Forefront's own pages", async () => {
   }));
   check(!staff.trail && !staff.switcher && staff.h1 === "Raya Trade" && /Strategy Management Platform/.test(staff.sub),
     "a client's own person gets no trail and no switcher; their bar names their company", JSON.stringify(staff));
+  /* §400 — AND THE TRAIL'S CLIENT LIST IS REFUSED TO THEM ON THE SERVER, not
+     only undrawn: the list names every client, which is the office's. */
+  const staffList = await page.evaluate(async () => (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clients" }) })).status);
+  check(staffList === 403, "…and the trail's client list is refused to them by the server (§400)", staffList);
   /* Back to the office for the rest of this section, on the page it expects. */
   await fresh(); await signIn("office@forefront.example");
   await page.goto(BASE + "/platform#clients", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });
   const post = (body) => page.evaluate(async (b) => (await (await fetch("/api/platform", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) })).json()), body);
+  /* §400: the office's list for the trail is the cards' own two rules — every
+     client it names is one the cards say may be OPENED, and none it omits is */
+  { const [cl, cd] = [await post({ action: "clients" }), await post({ action: "cards" })];
+    const openable = (cd.cards || []).filter((c) => c.canOpen).map((c) => c.key).sort();
+    const listed = (cl.clients || []).map((c) => c.key).sort();
+    check(listed.length > 0 && JSON.stringify(listed) === JSON.stringify(openable),
+      "the trail's client list is exactly the clients the cards say may be opened (§400)", JSON.stringify({ listed, openable })); }
   let j = await post({ action: "consultants" });
   check(j.ok && j.people.some((x) => x.email === "office@forefront.example" && x.seats.some((s) => s.key === "raya-trade" && s.seat === "super")), "the consultants list carries the seats", JSON.stringify(j).slice(0, 160));
   j = await post({ action: "access" }); check(j.ok && j.canEdit === true && j.areas.length === 4, "the table is the admin's", JSON.stringify(j).slice(0, 120));

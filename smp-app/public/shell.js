@@ -68065,13 +68065,14 @@ var SYNC = (function () {
      reading "‹ Back to the console" and "Client settings ›". Replaced, for
      Forefront's own people, by ONE line reading where you are:
 
-         Forefront  ›  [mark] Raya Trade ▾  ›  Strategy ▾
+         Forefront  ›  Raya Trade ▾  ›  Strategy ▾
 
-     Each step is a place. Forefront is the console. The client opens a menu
-     of this client's modules, its own settings, and "Switch client…". The
-     module opens its Home and its settings; on the client's own settings the
-     third step is "Client settings" and not a menu, because there is no
-     module to be in there.
+     Each step is a place. Forefront is the console. Since §400 the client
+     opens a menu of the OTHER clients this person may open (and "All
+     clients"); the module opens the other modules, a rule, and "Client
+     settings"; on the client's own settings the third step reads "Client
+     settings" and opens the same menu with each module's settings. No
+     client mark on the bar (§400).
 
      ONLY FOR SOMEBODY WITH A CONSOLE (`data-console`, written by sync.js
      off `person.cards`, which only the server can answer). A client's own
@@ -68103,6 +68104,7 @@ var SYNC = (function () {
   function menuHTML(items) {
     return '<div class="menu" role="menu">' + items.map(function (it) {
       if (it.rule) return '<div class="trrule" role="separator"></div>';
+      if (it.quiet) return '<div class="trquiet">' + esc(it.label) + "</div>";
       return '<button type="button" role="menuitem" data-trgo="' + esc(it.go) + '"' +
         (it.here ? ' aria-current="true"' : "") + ">" + esc(it.label) +
         (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</button>";
@@ -68116,12 +68118,12 @@ var SYNC = (function () {
     var bar = document.querySelector(".top .top-in");
     if (!bar) return;
     var client = root.getAttribute("data-console-client") || SLUG;
-    var logo = (typeof groupLogo === "function" && groupLogo()) || "";
     var mods = modulesOn();
     var here = mods.filter(function (x) { return x.key === MODULE; })[0];
     var modLabel = here ? here.label : (root.getAttribute("data-module-label") || "");
     var cs = onClientSettings();
-    var said = [client, logo.length, cs, MODULE, mods.map(function (x) { return x.key; }).join(",")].join("|");
+    var said = [client, cs, MODULE, mods.map(function (x) { return x.key; }).join(","),
+                trailClients ? trailClients.map(function (x) { return x.key; }).join(",") : "?"].join("|");
     var nav = bar.querySelector("nav.trail");
     if (nav && said === trailSaid) return;
     trailSaid = said;
@@ -68137,12 +68139,6 @@ var SYNC = (function () {
         if (!b) return;
         var go = b.dataset.trgo;
         Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; });
-        if (go === "home") {
-          if (typeof WELCOME !== "undefined" && WELCOME.open) {
-            try { WELCOME.open(typeof viewer === "function" ? viewer() : undefined); } catch (e) {}
-          }
-          return;
-        }
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
         var cross = /^cross:/.test(go) ? go.slice(6) : null;
@@ -68161,34 +68157,73 @@ var SYNC = (function () {
         if (href === location.pathname) return;
         location.assign(href);
       });
+      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§400, Islam: "when I click
+         outside them the menue should close"). `<details>` has no such
+         behaviour of its own. On pointerdown, as the chat corner does
+         (§100.4): a menu that lingers until the mouse comes up reads as
+         having missed the press. Opening one menu shuts the other, and
+         Escape shuts either. Wired once, beside the one listener above. */
+      var shutAll = function (keep) {
+        Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { if (d !== keep) d.open = false; });
+      };
+      document.addEventListener("pointerdown", function (ev) {
+        var inside = ev.target && ev.target.closest ? ev.target.closest("nav.trail details") : null;
+        shutAll(inside);
+      }, true);
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape" && nav.querySelector("details[open]")) shutAll(null);
+      });
     }
-    var sep = '<span class="trsep" aria-hidden="true">\u203a</span>';
-    var clientItems = mods.map(function (x) {
-      return { label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key, here: !cs && x.key === MODULE };
-    });
+    var sep = '<span class="trsep" aria-hidden="true">›</span>';
+    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§400, Islam: "when I click on
+       the name of the client drop down I should get the other clients"). The
+       list is the server's (`clients`: visible AND openable, the cards' own
+       two rules, §42), asked once per page. Until it answers the menu says
+       so, and if it cannot answer the console is still the way (§61). No
+       mark: the client's logo is not on this bar any more (Islam: "the logo
+       of the client shouldn't appear in the top navigation bar"). */
+    var clientItems = [];
+    var others = (trailClients || []).filter(function (x) { return x.key !== SLUG; });
+    if (trailClients === null) clientItems.push({ label: "Reading your clients…", quiet: true });
+    others.forEach(function (x) { clientItems.push({ label: x.name, go: "/" + x.key }); });
+    if (trailClients && !others.length) clientItems.push({ label: "No other clients", quiet: true });
     clientItems.push({ rule: true });
-    clientItems.push({ label: "Client settings", go: "cross:client", here: cs });
-    /* AND FROM THE CLIENT'S SETTINGS, EVERY MODULE'S SETTINGS IS ONE PRESS
-       AWAY (§362.1, kept): the rail rows that were the way across are the
-       trail's now, and Islam's "I can't find the access page" was exactly a
-       door that took two hops. On a module's own page its settings are the
-       third step's, so they are not listed twice (§87). */
-    if (cs) mods.forEach(function (x) { clientItems.push({ label: x.label + " settings", go: "cross:" + x.key }); });
-    clientItems.push({ label: "Switch client\u2026", go: "/platform#clients" });
-    var third;
-    if (cs) {
-      third = '<span class="trhere" aria-current="page">Client settings</span>';
-    } else {
-      third = '<details class="dlmenu trstep"><summary><span>' + esc(modLabel || "Module") + "</span>" + ICO_DOWN + "</summary>" +
-        menuHTML([{ label: "Home", go: "home" },
-                  { label: (modLabel || "Module") + " settings", go: "cross:" + MODULE }]) + "</details>";
-    }
+    clientItems.push({ label: "All clients", go: "/platform#clients" });
+    /* THE MODULE STEP LISTS THE OTHER MODULES, THEN THE CLIENT'S SETTINGS
+       (§400, his words: "the other modules and then the separator and the
+       client settings"). On the client's own settings the step reads "Client
+       settings" and opens the same menu, where each module goes to THAT
+       module's settings — from a settings page that is the next place, and
+       it keeps §362.1's one press. */
+    var modItems = [];
+    mods.forEach(function (x) {
+      if (!cs && x.key === MODULE) return;
+      modItems.push(cs ? { label: x.label + " settings", go: "cross:" + x.key }
+                       : { label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
+    });
+    if (modItems.length) modItems.push({ rule: true });
+    modItems.push({ label: "Client settings", go: "cross:client", here: cs });
+    var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
+      esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";
     nav.innerHTML =
       '<a class="trff" href="/platform">Forefront</a>' + sep +
       '<details class="dlmenu trstep trclient"><summary>' +
-        (logo ? '<img class="trmark" alt="" src="' + esc(logo) + '">' : "") +
         "<span>" + esc(client) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(clientItems) + "</details>" +
       sep + third;
+    if (trailClients === null && !trailAsked) askClients();
+  }
+  /* the clients this person may open, asked once per page (§400) */
+  var trailClients = null, trailAsked = false;
+  function askClients() {
+    trailAsked = true;
+    try {
+      fetch("/api/platform", { method: "POST", credentials: "same-origin",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clients" }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { trailClients = (j && j.ok !== false && Array.isArray(j.clients)) ? j.clients : []; })
+        .catch(function () { trailClients = []; })
+        .then(function () { try { mountTrail(); } catch (e) {} });
+    } catch (e) { trailClients = []; }
   }
 
   /* ── on arrival: the address is the place ── */

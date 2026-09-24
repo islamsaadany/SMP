@@ -116,6 +116,19 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
 
   if (action === "me") return ok({ account: { email: account.email, name: account.name, isAdmin: !!account.is_admin }, access: world.access, mine: FF.myClientKeys(world) });
 
+  /* THE TRAIL'S CLIENT MENU (§400): the clients this person may OPEN, name
+     and address and nothing else. Its own action rather than "cards", which
+     reads every client's facts and tracker tally — a menu of names does not
+     cost a walk of every tenant. The same two rules the cards ask
+     (visibleClients, then mayOpenClient), so the menu cannot offer a door
+     the card would refuse (§42). */
+  if (action === "clients") {
+    const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
+    const shown: ClientRow[] = FF.visibleClients(world, account, all);
+    return ok({ clients: shown.filter((row) => FF.mayOpenClient(world, account, row))
+      .map((row) => ({ key: row.key, name: row.name, kind: row.kind })) });
+  }
+
   if (action === "cards") {
     const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
     const shown: ClientRow[] = FF.visibleClients(world, account, all);

@@ -57438,3 +57438,8 @@ tab to the place. Proved able to fail from the SOURCES (§276): the rule
 removed, **2 red**, exactly the two new assertions. `qa.py` ERRORS none;
 `built-in-step` all good; served copies regenerated; `sw.js` SHELL bumped.
 Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
+
+### §400.1 — the trail's first word is Platform (2026-09-24)
+
+Islam: *"for the word on the top left named forefront, let's change it to Platform."* The first step of the trail (§400), the link back to the console, now reads **Platform**. Only the word changes: the address (`/platform`), the class the checks press (`a.trff`) and the console's own top bar (FOREFRONT · Platform) are untouched, so the console does not read "Platform Platform". `checks/modules.mjs` asserts the word now as well as the address, case-insensitively because the trail draws it in capitals; 166/0, and 1 red with the old word put back. Screen only: nothing stored, nothing migrated, no sign-out owed.
+

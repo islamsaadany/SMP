@@ -8139,3 +8139,5 @@ still closes Home and brings every row back. Signed off from the mockup in
 `design-mockups/home-rows/`. Checked: `welcome.py` rewritten for the new rule
 and proved to fail twice when the rule is removed; the whole-platform sweep is
 clean. Nothing stored changes.
+
+- **2026-09-24 — §400.1:** the trail’s first step now reads *Platform* instead of *Forefront*. On the branch, not merged.

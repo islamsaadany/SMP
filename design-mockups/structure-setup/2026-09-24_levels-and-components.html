@@ -1,0 +1,297 @@
+<title>Client Structure Set-up</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#F6EFDD;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2F7D4F;
+  --r:8px;
+  font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#2E2818;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --good:#6FC28F;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+  --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#2E2818;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --good:#6FC28F;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-size:14.5px;line-height:1.45;margin:0}
+.top{background:var(--panel);color:var(--panel-ink);padding:12px 20px;display:flex;align-items:center;gap:14px}
+.top b{font-size:15px;letter-spacing:.02em}
+.top span{color:var(--panel-quiet);font-size:13px}
+.wrap{padding:20px 16px 60px;max-width:1240px;margin:0 auto}
+.note{background:var(--surface);border:1px dashed var(--gold);border-radius:var(--r);padding:10px 14px;color:var(--ink-2);font-size:13.5px;margin-bottom:18px}
+.note b{color:var(--ink)}
+.split{display:grid;grid-template-columns:210px 1fr;gap:18px;align-items:start}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.rail h3{margin:0;background:var(--panel);color:var(--panel-ink);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:10px 12px}
+.rail ol{list-style:none;margin:0;padding:6px}
+.rail li{padding:7px 9px;border-radius:6px;font-size:13.5px;color:var(--ink-2);display:flex;gap:8px;align-items:center}
+.rail li i{font-style:normal;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);display:inline-grid;place-items:center;font-size:10px;flex:none}
+.rail li.done i{background:var(--good);border-color:var(--good);color:#fff}
+.rail li.on{background:var(--gold-wash);color:var(--ink);font-weight:600}
+.rail li.on i{border-color:var(--gold-deep)}
+.rail li.new::after{content:"new";margin-left:auto;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-deep);font-weight:700}
+h1{font-size:22px;margin:0 0 4px;text-wrap:balance}
+.lede{margin:0 0 16px;color:var(--ink-3);font-size:13.5px}
+/* structure preview */
+.tree{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:16px}
+.tree .lvl{border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:6px 10px;font-weight:600;font-size:13.5px}
+.tree .lvl small{display:block;font-weight:400;color:var(--ink-3);font-size:11.5px}
+.tree .lvl.off{opacity:.45;border-style:dashed}
+.tree .arr{color:var(--ink-3)}
+.tree .pair{display:flex;gap:6px;flex-wrap:wrap}
+/* level cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.card>header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:10px 14px;border-bottom:1px solid var(--line-soft);background:var(--surface-2)}
+.card>header .tag{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:700;min-width:84px}
+.card.off>header{border-bottom:0}
+.card.off .body{display:none}
+label.lab{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600;display:block;margin-bottom:3px}
+select,input[type=text]{font:inherit;font-size:13.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px;min-width:0}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.namepick{display:flex;gap:6px;align-items:end;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:var(--surface);color:var(--ink-2);padding:5px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--panel);color:var(--panel-ink);font-weight:600}
+.body{padding:12px 14px;display:grid;gap:12px}
+.pickrow{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:4px 11px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip .tk{width:13px;height:13px;border:1.5px solid var(--line);border-radius:3px;display:inline-block;position:relative;flex:none}
+.chip.on{border-color:var(--gold);background:var(--gold-wash);color:var(--ink);font-weight:600}
+.chip.on .tk{background:var(--gold-deep);border-color:var(--gold-deep)}
+.chip.on .tk::after{content:"";position:absolute;left:3px;top:0px;width:3px;height:7px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px 14px}
+.nm{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line-soft);padding:4px 0}
+.nm span{font-size:12.5px;color:var(--ink-3);width:92px;flex:none}
+.nm input{flex:1}
+.sub{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 4px}
+.temple{display:flex;flex-wrap:wrap;align-items:center;gap:10px;border-top:1px solid var(--line-soft);padding-top:10px}
+.sw{position:relative;width:34px;height:19px;border-radius:999px;background:var(--line);border:0;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:var(--gold-deep)}
+.sw.on::after{left:17px}
+.sw:disabled{opacity:.4;cursor:not-allowed}
+.temple .why{font-size:12.5px;color:var(--ink-3)}
+.plan{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.btn{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:6px 14px;cursor:pointer}
+.btn.pri{background:var(--panel);color:var(--panel-ink);border-color:var(--panel);font-weight:600}
+/* per-unit adjustment panel */
+h2.part{font-size:17px;margin:34px 0 4px}
+.adj{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.adj table{border-collapse:collapse;width:100%;min-width:720px;font-size:13.5px}
+.adj th{background:var(--panel);color:var(--panel-ink);font-size:11px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;padding:8px 10px;text-align:center;white-space:nowrap}
+.adj th:first-child{text-align:left}
+.adj td{border-top:1px solid var(--line-soft);padding:7px 10px;text-align:center}
+.adj td:first-child{text-align:left;font-weight:600;white-space:nowrap}
+.adj tr.lvl td{background:var(--surface-2);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;text-align:left}
+.dot{font:inherit;width:22px;height:22px;border-radius:5px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;display:inline-grid;place-items:center;color:transparent;font-size:12px;font-weight:700}
+.dot.on{background:var(--gold-deep);border-color:var(--gold-deep);color:#fff}
+.dot.diff{box-shadow:0 0 0 2px var(--gold-wash),0 0 0 3.5px var(--gold)}
+.na{color:var(--ink-3)}
+.legend{font-size:12.5px;color:var(--ink-3);padding:8px 10px;border-top:1px solid var(--line-soft);display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.legend .dot{cursor:default;width:16px;height:16px}
+</style>
+
+<div class="top"><b>Nile Holding</b><span>Client set-up · mockup · example data</span></div>
+
+<div class="wrap">
+  <div class="note"><b>Mockup for sign-off.</b> Part 1 is the new step in Client set-up. Part 2 is where the SMO adjusts one unit or function later. The chips and switches here work so you can try them, and nothing is saved.</div>
+
+  <div class="split">
+    <aside class="rail" aria-label="Set-up steps">
+      <h3>Getting started</h3>
+      <ol>
+        <li class="done"><i>✓</i>Client details</li>
+        <li class="on new"><i></i>Structure</li>
+        <li><i></i>Business units</li>
+        <li><i></i>Supporting functions</li>
+        <li><i></i>The office</li>
+        <li><i></i>Summary</li>
+      </ol>
+    </aside>
+
+    <main>
+      <h1>Structure</h1>
+      <p class="lede">How many levels sit above the business units, what each level is called, and what each level carries.</p>
+
+      <div class="tree" id="tree" aria-label="Structure preview"></div>
+
+      <!-- TOP LEVEL -->
+      <section class="card" id="c-top">
+        <header>
+          <span class="tag">Top level</span>
+          <div class="namepick">
+            <div><label class="lab" for="top-name">Called</label>
+              <select id="top-name"><option>Group</option><option selected>Company</option><option>Holding</option><option value="__">Another name…</option></select></div>
+            <input type="text" id="top-other" placeholder="Type the name" hidden>
+          </div>
+        </header>
+        <div class="body" data-level="top"></div>
+      </section>
+
+      <!-- SECOND LAYER -->
+      <section class="card" id="c-mid">
+        <header>
+          <span class="tag">Second layer</span>
+          <div><label class="lab">Exists</label>
+            <div class="seg" id="mid-seg"><button type="button" data-v="1" class="on">Yes</button><button type="button" data-v="0">No</button></div></div>
+          <div class="namepick" id="mid-namebox">
+            <div><label class="lab" for="mid-name">Called</label>
+              <select id="mid-name"><option>Companies</option><option selected>Divisions</option><option>Sectors</option><option value="__">Another name…</option></select></div>
+            <input type="text" id="mid-other" placeholder="Type the name" hidden>
+          </div>
+        </header>
+        <div class="body" data-level="mid"></div>
+      </section>
+
+      <!-- BUs -->
+      <section class="card" id="c-bu">
+        <header>
+          <span class="tag">Business units</span>
+          <div class="namepick"><div><label class="lab" for="bu-name">Called</label><input type="text" id="bu-name" value="Business units"></div></div>
+          <div><label class="lab">Plan in</label><span style="font-size:13.5px;color:var(--ink-2)">Pillars</span></div>
+        </header>
+        <div class="body" data-level="bu"></div>
+      </section>
+
+      <!-- Functions -->
+      <section class="card" id="c-fn">
+        <header>
+          <span class="tag">Supporting functions</span>
+          <div class="namepick"><div><label class="lab" for="fn-name">Called</label><input type="text" id="fn-name" value="Supporting functions"></div></div>
+          <div><label class="lab">Plan in, by default</label>
+            <div class="seg" id="fn-plan"><button type="button" class="on">Pillars</button><button type="button">Projects</button><button type="button">Objectives &amp; actions</button></div></div>
+        </header>
+        <div class="body" data-level="fn"></div>
+      </section>
+
+      <div class="foot">
+        <span class="lede" style="margin:0">These ticks apply to every item at a level. Each unit and function can be adjusted later.</span>
+        <span style="display:flex;gap:8px"><button class="btn" type="button">Back</button><button class="btn pri" type="button">Next</button></span>
+      </div>
+
+      <h2 class="part">Part 2 · Later: adjusting one unit or function</h2>
+      <p class="lede">Setup › Structure. One row per item, one column per component. Switching a component off hides it and keeps what was written.</p>
+      <div class="adj" id="adj"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+var COMPONENTS = ["Brief","Purpose","Aspiration","North Star","Themes","Pillars","Capabilities","Values","SWOT"];
+var state = {
+  top:{on:["Brief","Purpose","Aspiration","North Star","Themes","Values"], temple:true},
+  mid:{exists:true, on:["Brief","Aspiration","North Star"], temple:false},
+  bu:{on:["Brief","Aspiration","North Star","Pillars","SWOT"]},
+  fn:{on:["Brief","North Star"]}
+};
+var names = {}; COMPONENTS.forEach(function(c){ names[c] = c; });
+var TEMPLE_NEEDS = ["Aspiration","North Star","Themes"];
+
+function levelName(k){
+  if (k==="top"){ var s=document.getElementById("top-name"); return s.value==="__" ? (document.getElementById("top-other").value||"Top level") : s.value; }
+  if (k==="mid"){ var s2=document.getElementById("mid-name"); return s2.value==="__" ? (document.getElementById("mid-other").value||"Second layer") : s2.value; }
+  if (k==="bu") return document.getElementById("bu-name").value || "Business units";
+  return document.getElementById("fn-name").value || "Supporting functions";
+}
+
+function drawBody(k){
+  var box = document.querySelector('[data-level="'+k+'"]'), L = state[k];
+  var h = '<div><p class="sub">Components</p><div class="pickrow">' +
+    COMPONENTS.map(function(c){
+      var on = L.on.indexOf(c) >= 0;
+      return '<button type="button" class="chip'+(on?' on':'')+'" data-c="'+c+'" aria-pressed="'+on+'"><span class="tk"></span>'+c+'</button>';
+    }).join("") + '</div></div>';
+  if (L.on.length){
+    h += '<div><p class="sub">What this client calls them <span style="text-transform:none;letter-spacing:0;font-weight:400">· one word per component, the same on every level</span></p><div class="names">' +
+      L.on.map(function(c){ return '<label class="nm"><span>'+c+'</span><input type="text" data-n="'+c+'" value="'+names[c].replace(/"/g,"&quot;")+'"></label>'; }).join("") +
+      '</div></div>';
+  }
+  if (k==="top" || k==="mid"){
+    var ok = TEMPLE_NEEDS.every(function(c){ return L.on.indexOf(c) >= 0; });
+    if (!ok) L.temple = false;
+    h += '<div class="temple"><button type="button" class="sw'+(L.temple?' on':'')+'" data-temple aria-pressed="'+L.temple+'" aria-label="Temple view"'+(ok?'':' disabled')+'></button>' +
+      '<b style="font-size:13.5px">Temple view</b><span class="why">' +
+      (ok ? 'Draws the picture from '+names["Aspiration"]+' (roof), '+names["North Star"]+', '+names["Themes"]+' (columns)'+(L.on.indexOf("Capabilities")>=0?' and '+names["Capabilities"]+' (base)':'')+'.'
+          : 'Needs '+TEMPLE_NEEDS.filter(function(c){return L.on.indexOf(c)<0;}).join(", ")+' ticked.') +
+      '</span></div>';
+  }
+  box.innerHTML = h;
+}
+
+function drawTree(){
+  var comp = function(k){ return state[k].on.length + ' component' + (state[k].on.length===1?'':'s'); };
+  var h = '<div class="lvl">'+levelName("top")+'<small>'+comp("top")+'</small></div><span class="arr">→</span>';
+  h += '<div class="lvl'+(state.mid.exists?'':' off')+'">'+(state.mid.exists?levelName("mid"):'No second layer')+'<small>'+(state.mid.exists?comp("mid"):'—')+'</small></div><span class="arr">→</span>';
+  h += '<div class="pair"><div class="lvl">'+levelName("bu")+'<small>'+comp("bu")+'</small></div><div class="lvl">'+levelName("fn")+'<small>'+comp("fn")+'</small></div></div>';
+  document.getElementById("tree").innerHTML = h;
+}
+
+var UNITS = [["top","Nile Holding"],["mid","Consumer"],["mid","Industrial"],["bu","Retail Stores"],["bu","E-commerce"],["bu","Manufacturing"],["fn","Finance"],["fn","HR"]];
+var over = {}; // "i|c" -> bool
+function drawAdj(){
+  var cols = COMPONENTS;
+  var h = '<table><thead><tr><th>Item</th>'+cols.map(function(c){return '<th>'+names[c]+'</th>';}).join("")+'</tr></thead><tbody>';
+  var last = "";
+  UNITS.forEach(function(u,i){
+    if (u[0]==="mid" && !state.mid.exists) return;
+    if (u[0]!==last){ last=u[0]; h += '<tr class="lvl"><td colspan="'+(cols.length+1)+'">'+levelName(u[0])+'</td></tr>'; }
+    h += '<tr><td>'+u[1]+'</td>' + cols.map(function(c){
+      var def = state[u[0]].on.indexOf(c) >= 0, key = i+'|'+c;
+      var on = key in over ? over[key] : def;
+      return '<td><button type="button" class="dot'+(on?' on':'')+((key in over && over[key]!==def)?' diff':'')+'" data-o="'+key+'" data-d="'+def+'" aria-pressed="'+on+'" aria-label="'+names[c]+' for '+u[1]+'">✓</button></td>';
+    }).join("") + '</tr>';
+  });
+  h += '</tbody></table><div class="legend"><span><button class="dot on" tabindex="-1" aria-hidden="true">✓</button> shown</span><span><button class="dot" tabindex="-1" aria-hidden="true"></button> hidden, kept</span><span><button class="dot on diff" tabindex="-1" aria-hidden="true">✓</button> differs from its level</span></div>';
+  document.getElementById("adj").innerHTML = h;
+}
+
+function drawAll(){ ["top","mid","bu","fn"].forEach(drawBody); drawTree(); drawAdj();
+  document.getElementById("c-mid").classList.toggle("off", !state.mid.exists);
+  document.getElementById("mid-namebox").hidden = !state.mid.exists; }
+
+document.addEventListener("click", function(e){
+  var chip = e.target.closest(".chip"); if (chip && chip.closest("[data-level]")){
+    var L = state[chip.closest("[data-level]").dataset.level], c = chip.dataset.c, i = L.on.indexOf(c);
+    if (i>=0) L.on.splice(i,1); else L.on.push(c);
+    L.on.sort(function(a,b){ return COMPONENTS.indexOf(a)-COMPONENTS.indexOf(b); });
+    drawAll(); return; }
+  var t = e.target.closest("[data-temple]"); if (t){ var LL = state[t.closest("[data-level]").dataset.level]; LL.temple = !LL.temple; drawAll(); return; }
+  var s = e.target.closest("#mid-seg button"); if (s){ state.mid.exists = s.dataset.v==="1";
+    document.querySelectorAll("#mid-seg button").forEach(function(b){ b.classList.toggle("on", b===s); }); drawAll(); return; }
+  var p = e.target.closest("#fn-plan button"); if (p){ document.querySelectorAll("#fn-plan button").forEach(function(b){ b.classList.toggle("on", b===p); }); return; }
+  var d = e.target.closest("[data-o]"); if (d){ var key = d.dataset.o, def = d.dataset.d==="true", cur = key in over ? over[key] : def;
+    if (!cur === def) delete over[key]; else over[key] = !cur; drawAdj(); }
+});
+document.addEventListener("input", function(e){
+  if (e.target.dataset.n){ names[e.target.dataset.n] = e.target.value || e.target.dataset.n;
+    document.querySelectorAll('[data-n="'+e.target.dataset.n+'"]').forEach(function(x){ if (x!==e.target) x.value = e.target.value; });
+    drawTree(); drawAdj(); return; }
+  if (["bu-name","fn-name","top-other","mid-other"].indexOf(e.target.id)>=0){ drawTree(); drawAdj(); }
+});
+document.addEventListener("change", function(e){
+  if (e.target.id==="top-name" || e.target.id==="mid-name"){
+    var other = document.getElementById(e.target.id.replace("name","other")); other.hidden = e.target.value!=="__";
+    if (!other.hidden) other.focus(); drawTree(); drawAdj(); }
+});
+drawAll();
+</script>

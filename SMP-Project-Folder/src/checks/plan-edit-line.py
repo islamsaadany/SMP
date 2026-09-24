@@ -56,6 +56,7 @@ STATE = """() => ({
   fdone: document.querySelectorAll('#secrow-in .fdone').length,
   edit:  Object.keys(EDIT_PAGE).filter(k => EDIT_PAGE[k]),
   flds:  document.querySelectorAll('#panel .fld, #panel [data-fld]').length,
+  adds:  document.querySelectorAll('#panel .addrow button').length,
   sec:   (typeof CURSEC !== 'undefined') ? (CURSEC[currentSub] || '') : '',
   fill:  (document.querySelector('#secrow-in [data-fillcta]')||{dataset:{}}).dataset.fillcta
 })"""
@@ -187,8 +188,14 @@ with sync_playwright() as pw:
             # mode THIS page reads is among what opened — §1b asserts the set.
             ck("%s/%s · pressing it opens the mode the page reads" % (key, s),
                a["rowPage"] in o["edit"], (a["rowPage"], o["edit"]))
-            ck("%s/%s · ...and the page gains editable fields" % (key, s),
-               o["flds"] > 0, o["flds"])
+            # A WAY TO WRITE, NOT NECESSARILY A FIELD (§404.1). A pillars
+            # function's Overview carries no "What it is" card any more, so on
+            # one holding no objectives yet the only thing the pen opens is the
+            # table's Add — which is a way in, and the one §61 requires. Both
+            # ends: read mode offers neither, or "gains" proves nothing.
+            ck("%s/%s · ...and the page gains a way to write into it" % (key, s),
+               a["flds"] + a["adds"] == 0 and o["flds"] + o["adds"] > 0,
+               {"before": (a["flds"], a["adds"]), "after": (o["flds"], o["adds"])})
             ck("%s/%s · one way out, not two (§268)" % (key, s), o["fdone"] == 0, o)
             press(pg)
             c = pg.evaluate(STATE)

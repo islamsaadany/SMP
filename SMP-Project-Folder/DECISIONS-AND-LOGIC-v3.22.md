@@ -57383,3 +57383,31 @@ gains §9 (21 assertions, both ends each) and its step list and total are
 REWRITTEN, never loosened (§218): all passed, falsified from the SOURCES —
 divisions never offered **5 red**, capabilities always asked **1 red**.
 Neighbours green; the built file and served copies regenerated, `sw.js` bumped.
+
+### §404.5 — a new client's default components (2026-09-24)
+
+Islam: *"let's make some defaults for the division/company it can have brief,
+purpose, Aspiration, north star, pillars, and swot / for a bu / Brief,
+aspiration, north star, pillars, swot"*.
+
+**WRITTEN INTO A CLIENT AS IT IS BORN, NEVER READ AS THE FALLBACK.** The
+reader's fallback for an unsaid level stays EVERYTHING ON, because §404's fifth
+answer is that a client set up before it opens exactly as it does today — so
+changing the fallback would have taken Themes, Capabilities and Values off every
+existing client's units without anybody pressing anything. The defaults live
+once in `SMPRules.STRUCT_NEW_CLIENT` (§42), and frozen.cjs's `__smpBare` — the
+graph a new client is born as (§322) — stores them, so the Structure step opens
+already showing them and a client that never touches it gets them too. The top
+level and the functions are left unsaid and read everything on (a function's
+own exclusions, §404.1–§404.2, still apply). No Temple default moves: it needs
+Themes, which neither level carries now. Recorded as a decision to take
+separately: whether existing clients should move to these defaults too (§404.3's
+precedent was new clients first).
+
+`smp-app/checks/setup-shape.mjs` §9: eight assertions, both ends (the defaults
+on a new client, and an unsaid existing structure still everything on), red 4
+with the write removed. And that file's §1 had been red since §404.4 deleted
+the Words step — it read `var WORDS`; re-pointed at where the words are asked
+now (the component keys, the pillar's two sub-words, `namePick` and
+`callBoxes`), never loosened (§218). 43/0.
+

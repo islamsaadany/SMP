@@ -6301,14 +6301,14 @@
    "key": "aspiration",
    "internal": "Winning Aspiration",
    "group": "Winning Aspiration",
-   "bu": "Winning Aspirations",
+   "bu": "Winning Aspiration",
    "note": "A description of what success looks like"
   },
   {
    "key": "purpose",
    "internal": "Mission",
    "group": "Mission",
-   "bu": "Missions",
+   "bu": "Mission",
    "note": "Answering the question: why do we exist"
   },
   {
@@ -6359,6 +6359,27 @@
    "group": "Project",
    "bu": "Projects",
    "note": "The group of activities with correlated timelines and outcomes"
+  },
+  {
+   "key": "topword",
+   "internal": "Group",
+   "group": "Group",
+   "bu": "Group",
+   "note": "The level at the top: the group, the company, or the client's own word"
+  },
+  {
+   "key": "brief",
+   "internal": "Brief",
+   "group": "Who we are",
+   "bu": "Who we are",
+   "note": "A short description of who this part of the business is"
+  },
+  {
+   "key": "swot",
+   "internal": "SWOT",
+   "group": "SWOT",
+   "bu": "SWOT",
+   "note": "Strengths, weaknesses, opportunities and threats"
   }
  ],
  "bands": [

@@ -57286,3 +57286,34 @@ the two formats), `fn-ko-edit.py` §5 (no Led by row for the office or for an
 opened custodian; the head still a stored fact) and §7 (reading is one card).
 `functional-projects.py` also held `"project" in x` against §395's capitalised
 *Projects* — asked case-blind now. `qa.py` ERRORS none; authoriser 755/0.
+
+### §404.2 — the functions level asks only what a function carries, and the default words are singular (2026-09-24)
+
+Islam, of the set-up step: *"the functions still have the option of planning
+and still have the pillars capabilities and values. it shouldnt"*, then, asked,
+*"plan in should go too yes, it's selected in the supporting functions tabs
+later"*; and *"for the default wording written it should be singular, plural
+for only Objectives, Pillars, Capabilities, values"* — *"themes keep it plural,
+any old client should keep their words."*
+
+**THE FUNCTIONS LEVEL CARRIES FOUR**: Purpose, Aspiration, North Star, SWOT.
+`STRUCT_NEVER_FN` gains `pillar`, `capability` and `values`. None of the three
+gates anything on a function's pages (grepped, not assumed — `pillar` and
+`capability` are read only for the group's Temple and `values` only on the
+group/unit/company Foundation), so this changes what the set-up offers and
+nothing a client sees. **The "Plan in, by default" row goes** and the structure
+stores no functions' `format`: a function's way of planning is asked once, per
+function, on the Supporting functions step, where a new row starts on pillars.
+A value already stored under `structure.fn.format` is left in place and read
+by nothing (§96.2: nothing written is rewritten).
+
+**THE DEFAULT WORDS**: Purpose's many form *Missions* → **Mission**, Aspiration's
+*Winning Aspirations* → **Winning Aspiration**; Themes, Key Objectives, Pillars,
+Capabilities and Core Values stay plural. **A DEFAULT, NOT A MIGRATION** — his
+instruction: a client's stored words are theirs (hydration replaces the list,
+§346.3), so this reaches a NEW client and the worked example only, and an old
+client changes it on Setup › Terminology if it wants to.
+
+`structure.py` 52/0, falsified from the SOURCES (§276): the old never-list put
+back **3 red**, *Missions* put back **1 red**. The seed and `db/kb.json` were
+regenerated (the corpus had been stale since §395, now in step).

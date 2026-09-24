@@ -82,8 +82,8 @@ with sync_playwright() as p:
     dots = safe(pg, "()=>document.querySelectorAll('[data-stover]').length", 0)
     ck("it draws a pressable box per item and component", (dots or 0) >= 9 * 3, dots)
     hdr = safe(pg, "()=>[...document.querySelectorAll('table.stadj thead th')].map(t=>t.textContent)", [])
-    ck("a function's row offers no box for the brief or the themes",
-       safe(pg, "()=>!document.querySelector('[data-stover=\"fn:%s|brief\"],[data-stover=\"fn:%s|theme\"]')" % (fk, fk)) is True)
+    ck("a function's row offers no box for the brief, themes, pillars, capabilities or values",
+       safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stover=\"fn:%s|'+c+'\"]'))" % fk) is True)
     ck("…while it offers one for its North Star, and a unit's row offers both",
        safe(pg, "()=>!!document.querySelector('[data-stover=\"fn:%s|keyobj\"]') && !!document.querySelector('[data-stover=\"%s|brief\"]') && !!document.querySelector('[data-stover=\"%s|theme\"]')" % (fk, unit, unit)) is True)
     ck("its columns are headed with the client's own words",
@@ -146,10 +146,17 @@ with sync_playwright() as p:
        safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step)[1]") == "structure")
     ck("pressing it", press(pg, '.wzstep[data-step="structure"]'))
     chips = safe(pg, "()=>document.querySelectorAll('[data-stcomp]').length", 0)
-    ck("nine components on three levels, seven on the functions' (no brief, no themes)",
-       chips == 9 * 3 + 7, chips)
-    ck("…the functions' level offers no Brief chip and no Themes chip",
-       safe(pg, "()=>!document.querySelector('[data-stcomp=\"fn|brief\"],[data-stcomp=\"fn|theme\"]')") is True)
+    ck("nine components on three levels, four on the functions' (§404.1, §404.2)",
+       chips == 9 * 3 + 4, chips)
+    ck("…the functions' level offers no Brief, Themes, Pillars, Capabilities or Values chip",
+       safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
+    ck("…and keeps Purpose, Aspiration, North Star and SWOT",
+       safe(pg, "()=>['purpose','aspiration','keyobj','swot'].every(c=>!!document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
+    ck("…and draws no 'Plan in, by default' row (§404.2: chosen per function later)",
+       safe(pg, "()=>![...document.querySelectorAll('.stcard .lab')].some(x=>/Plan in/.test(x.textContent))") is True)
+    ck("the default words are singular but for Objectives, Pillars, Capabilities, Values (and Themes)",
+       safe(pg, "()=>['purpose','aspiration'].map(k=>labelDefault(k).many).join('|')") == "Mission|Winning Aspiration",
+       safe(pg, "()=>['purpose','aspiration','theme','keyobj'].map(k=>labelDefault(k).many).join('|')"))
     ck("…while the business units' level offers both",
        safe(pg, "()=>!!document.querySelector('[data-stcomp=\"bu|brief\"]')&&!!document.querySelector('[data-stcomp=\"bu|theme\"]')") is True)
     ck("nothing is stored until something is pressed", safe(pg, "()=>!('structure' in GROUP)") is True)
@@ -157,9 +164,8 @@ with sync_playwright() as p:
     st = safe(pg, "()=>JSON.stringify(GROUP.structure)", "") or ""
     ck("…materialises the structure with SWOT off at that level only",
        safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.length===9 && GROUP.structure.top.temple===true") is True, st)
-    ck("the functions' default plan type is pressed and stored",
-       press(pg, '.stcard:last-of-type .wzband button:nth-child(2)') and
-       safe(pg, "()=>GROUP.structure.fn.format") == "projects")
+    ck("the structure stores no functions' plan type (§404.2)",
+       safe(pg, "()=>!('format' in (GROUP.structure.fn||{}))") is True)
 
     ck("no page errors", not errs, errs[:3])
     b.close()

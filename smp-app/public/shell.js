@@ -3857,7 +3857,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      an `fn:` target, whatever is stored, and neither screen offers it.
      A CAPABILITY is deliberately not reached: it shares the level
      (structLevelOf) and keeps its own definition (§334). */
-  var STRUCT_NEVER_FN = ["brief", "theme"];
+  /* §404.2 (Islam, the same day): *"the functions still have the option of
+     planning and still have the pillars capabilities and values. it
+     shouldnt"* — a function's way of planning is chosen per function on the
+     Supporting functions step, so the structure's Pillars and Capabilities
+     components say nothing about one, and it carries no Values. None of the
+     three gates anything on a function's pages today (asked, not assumed),
+     so this changes what the set-up offers and nothing a client sees. */
+  var STRUCT_NEVER_FN = ["brief", "theme", "pillar", "capability", "values"];
   function compOffered(target, comp) {
     return !(String(target || "").indexOf("fn:") === 0 && STRUCT_NEVER_FN.indexOf(comp) >= 0);
   }
@@ -6417,9 +6424,9 @@ var LABELS = {
       note:"The internal abilities built to achieve the strategic choices" },
     { key:"keyobj",      internal:"Key Objective",       group:"Key Objective",       bu:"Key Objectives",
       note:"The targets set for a business unit, a company or the group" },
-    { key:"aspiration",  internal:"Winning Aspiration",  group:"Winning Aspiration",  bu:"Winning Aspirations",
+    { key:"aspiration",  internal:"Winning Aspiration",  group:"Winning Aspiration",  bu:"Winning Aspiration",
       note:"A description of what success looks like" },
-    { key:"purpose",     internal:"Mission",             group:"Mission",             bu:"Missions",
+    { key:"purpose",     internal:"Mission",             group:"Mission",             bu:"Mission",
       note:"Answering the question: why do we exist" },
     { key:"values",      internal:"Core Values",         group:"Core Values",         bu:"Core Values",
       note:"The company culture elements" },
@@ -55275,7 +55282,7 @@ var CLIENTSETUP = (function () {
       mid: { exists: SMPRules.midExists(GROUP, COMPANIES), on: lv("mid"),
              temple: !!(st && st.mid && st.mid.temple === true) },
       bu:  { on: lv("bu") },
-      fn:  { on: lv("fn"), format: (st && st.fn && st.fn.format) || "pillars" },
+      fn:  { on: lv("fn") },
       over: (st && st.over) || {}
     };
   }
@@ -55283,11 +55290,10 @@ var CLIENTSETUP = (function () {
     GROUP[SMPRules.STRUCTURE] = next;
     redraw();
   }
-  function fnDefault(){
-    var st = typeof SMPRules !== "undefined" && typeof GROUP !== "undefined" && SMPRules.structureOf(GROUP);
-    var f = st && st.fn && st.fn.format;
-    return f === "projects" || f === "objectives" ? f : "pillars";
-  }
+  /* §404.2: a new function row starts on pillars; the structure no longer
+     holds a default (the Supporting functions step is where it is chosen). */
+  function fnDefault(){ return "pillars"; }
+
   function wordOf(key){ var v = S.shape.words[key]; return v && typeof v === "object" ? v : { one: W(key, "one", ""), many: W(key, "many", "") }; }
   function setWord(key, form, val){
     var cur = wordOf(key); cur = { one: cur.one, many: cur.many };
@@ -55416,10 +55422,8 @@ var CLIENTSETUP = (function () {
     structLevel(bu, lv, "bu", ro);
 
     var fn = card(W("fnword", "many", "Supporting functions"));
-    fn.appendChild(el("p", "lab", "Plan in, by default"));
-    fn.appendChild(segButtons(FORMATS, lv.fn.format, function (v) {
-      var nx = structNow(); nx.fn.format = v; structWrite(nx);
-    }));
+    /* §404.2: no "Plan in, by default" row — Islam: each function picks its
+       own way on the Supporting functions step, which is where it is asked. */
     structLevel(fn, lv, "fn", ro);
 
     box.appendChild(el("p", "wzwhy",

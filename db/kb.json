@@ -41,7 +41,7 @@
     },
     {
      "h": "Three of the roles are read off the plan",
-     "p": "<b>Project owner</b>, <b>Pillars owner</b> and <b>Contributor</b> are never granted by hand — being named on the plan is the role. Whoever is named a project’s Owner is its project owner; whoever is named a pillars’s is its pillars owner; everybody else a plan names — a collaborator, a stakeholder, a milestone’s owner — is a contributor. Each still needs its <b>Reporting</b> cell opened before it reports anything, and then it reaches only its own lines: the project, the pillars, or the rows that name the person. None of the three ever submits, because submitting speaks for the whole subject."
+     "p": "<b>Project owner</b>, <b>Pillar owner</b> and <b>Contributor</b> are never granted by hand — being named on the plan is the role. Whoever is named a project’s Owner is its project owner; whoever is named a Pillar’s is its Pillar owner; everybody else a plan names — a collaborator, a stakeholder, a milestone’s owner — is a contributor. Each still needs its <b>Reporting</b> cell opened before it reports anything, and then it reaches only its own lines: the project, the Pillar, or the rows that name the person. None of the three ever submits, because submitting speaks for the whole subject."
     },
     {
      "h": "Own is not a setting",
@@ -113,7 +113,7 @@
     },
     {
      "h": "One label, two places",
-     "p": "A level can read differently at group and at business unit — what the group calls a pillars a unit may call something else — and both are set on the Labels page."
+     "p": "A level can read differently at group and at business unit — what the group calls a Pillar a unit may call something else — and both are set on the Labels page."
     },
     {
      "h": "No collisions",
@@ -131,7 +131,7 @@
   },
   {
    "id": "kb:units",
-   "title": "Business units and supporting functions",
+   "title": "Business units and Supporting Functions",
    "blocks": [
     {
      "h": "The short name is for the navigation only",
@@ -139,7 +139,7 @@
     },
     {
      "h": "A function is not a small unit",
-     "p": "A function carries <b>no plan, no weight and no pillars</b> — it improves a cross-cutting capability the whole group depends on. The <b>code prefix</b> numbers the work it owns, the way a unit’s prefix numbers its pillars."
+     "p": "A function carries <b>no plan, no weight and no Pillar</b> — it improves a cross-cutting capability the whole group depends on. The <b>code prefix</b> numbers the work it owns, the way a unit’s prefix numbers its Pillar."
     },
     {
      "h": "Retired, never deleted",

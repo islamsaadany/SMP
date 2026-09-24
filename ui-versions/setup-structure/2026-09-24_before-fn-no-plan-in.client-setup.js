@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -1268,7 +1267,7 @@ var CLIENTSETUP = (function () {
       mid: { exists: SMPRules.midExists(GROUP, COMPANIES), on: lv("mid"),
              temple: !!(st && st.mid && st.mid.temple === true) },
       bu:  { on: lv("bu") },
-      fn:  { on: lv("fn") },
+      fn:  { on: lv("fn"), format: (st && st.fn && st.fn.format) || "pillars" },
       over: (st && st.over) || {}
     };
   }
@@ -1276,10 +1275,11 @@ var CLIENTSETUP = (function () {
     GROUP[SMPRules.STRUCTURE] = next;
     redraw();
   }
-  /* §404.2: a new function row starts on pillars; the structure no longer
-     holds a default (the Supporting functions step is where it is chosen). */
-  function fnDefault(){ return "pillars"; }
-
+  function fnDefault(){
+    var st = typeof SMPRules !== "undefined" && typeof GROUP !== "undefined" && SMPRules.structureOf(GROUP);
+    var f = st && st.fn && st.fn.format;
+    return f === "projects" || f === "objectives" ? f : "pillars";
+  }
   function wordOf(key){ var v = S.shape.words[key]; return v && typeof v === "object" ? v : { one: W(key, "one", ""), many: W(key, "many", "") }; }
   function setWord(key, form, val){
     var cur = wordOf(key); cur = { one: cur.one, many: cur.many };
@@ -1408,8 +1408,10 @@ var CLIENTSETUP = (function () {
     structLevel(bu, lv, "bu", ro);
 
     var fn = card(W("fnword", "many", "Supporting functions"));
-    /* §404.2: no "Plan in, by default" row — Islam: each function picks its
-       own way on the Supporting functions step, which is where it is asked. */
+    fn.appendChild(el("p", "lab", "Plan in, by default"));
+    fn.appendChild(segButtons(FORMATS, lv.fn.format, function (v) {
+      var nx = structNow(); nx.fn.format = v; structWrite(nx);
+    }));
     structLevel(fn, lv, "fn", ro);
 
     box.appendChild(el("p", "wzwhy",

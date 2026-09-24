@@ -364,7 +364,9 @@ def run():
         # then throws a stack trace with nothing reported — which reads as a
         # broken check rather than a missing feature.
         def open_room():
-            pg.goto(BASE + "/platform")
+            # §400: the console opens on My work now, and a same-page hash change is
+            # not a navigation — leave the page first so the goto really reloads.
+            pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
             # A REAL card, never a bare `.ccard` (§371): the console draws three
             # PLACEHOLDER cards while it waits for the answer, and they carry no
             # client, no name and no module rows — so waiting on `.ccard` is

@@ -32,10 +32,12 @@
        directly: no webfont, a small type scale, and shape carried by radius
        rather than by shadow. */
     /* The fallback stack, and what every embedded face falls back TO. Never
-       read directly by a rule — rules read --sans, which is set on the font
-       axis below. */
+       read directly by a rule — rules read --sans. */
     --sys-sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
-    --sans:var(--sys-sans);
+    /* ONE FACE, EVERYWHERE (§402). Islam: *"remove the font button and keep
+       the font source sans across the platform."* The system stack stays as
+       what a face that fails to decode falls back to, never as a choice. */
+    --sans:'Source Sans 3',var(--sys-sans);
     /* The mono stack stays a system stack. It carries person keys and unit
        codes — a dozen short strings — and a second embedded family to style
        those would be 40 KB for nothing. */
@@ -67,22 +69,8 @@
     --shadow-accent:0 4px 6px -1px var(--accent-glow);
   }
 
-  /* ── THE FONT AXIS (§38.8) ───────────────────────────────────────
-     Its own axis for now, independent of the palette, so the four faces can be
-     compared IN the real product rather than from a specimen sheet. Islam:
-     *"B first"* — try them all, then settle which face belongs to which
-     palette and collapse the axis into it, at which point the faces nobody
-     picked come out of the file.
-
-     Each face names the system stack after it, so a face that fails to decode
-     degrades to the system font rather than to a default serif. Absence of the
-     attribute is the system stack, which is why there is no [data-font="system"]
-     block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§157). The other three
-     went with their .woff2 files rather than being left here unreachable — a
-     rule for a face the product no longer carries is exactly what §24 is
-     about, and the next reader would have no way to tell it was dead. */
-  :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
+  /* THE FONT AXIS (§38.8, §157) IS GONE (§402): Source Sans 3 is --sans
+     above, for everybody, and there is no switch to answer. */
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
      A colour that is legible as a FILL is usually not legible as TYPE. Every
@@ -827,19 +815,6 @@
    heading, one element out). */
 html[data-client-settings] nav.units,
 html[data-client-settings] .viewer { display:none; }
-/* AND THE MODULE SWITCHER, WHICH IS NAMED RATHER THAN CONTAINED (§367).
-   The two above are CONTAINERS, and standing a container down is what
-   covers a control added to it later — but the switcher's container is
-   `.top-in`, which also holds the client's own heading and mark, and those are
-   exactly what these pages DO want. So this one is named.
-
-   IT USED TO BE STRUCTURAL AND STOPPED BEING ABLE TO BE. shell/route.js built
-   the switcher once at load and returned early on the client's scope, which
-   answered while the only way between the two rails was a page load; §367 made
-   that crossing a press, so the switcher has to follow the SCOPE rather than
-   the navigation, and this is the rule the rest of the chrome already
-   follows. */
-html[data-client-settings] .top .topmark { display:none; }
 /* The way back says what it does first. `change` is the word for a control
    that NAMES the client you are in; here it names the act, so the second half
    would be saying something the first half already did (§87). */

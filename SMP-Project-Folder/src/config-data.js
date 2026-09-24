@@ -7795,6 +7795,23 @@ function fnWriteBack(fk, u){
   f.aspiration = u.aspiration || "";
   f.endInMind = u.endInMind || "";
 }
+/* THE SWOT A WRITER MAY PUSH INTO (§399). A unit's and a pillars function's
+   through unitLikeWritable(), as before; any OTHER function's S&W is minted on
+   the function itself here, in the writing half, never by a reader (§50.6).
+   A projects or objectives function holds no unit-shaped view, which is why
+   the Add and Remove handlers could not reach one through unitLikeWritable(). */
+function swotWritable(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[t.slice(3)];
+    if (!f) return null;
+    if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
+    ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(f.swot[q])) f.swot[q] = []; });
+    return f.swot;
+  }
+  var u = unitLikeWritable(t);
+  return u && u.swot ? u.swot : null;
+}
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){
   var t = String(target || "");

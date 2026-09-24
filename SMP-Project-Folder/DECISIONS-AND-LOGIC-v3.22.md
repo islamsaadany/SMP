@@ -57188,6 +57188,283 @@ the Business units grouped into Divisions?" — a heading dropped into prose.
   the check rather than read back from the product. Both set-up checks
   green. Screen only; nothing stored, nothing migrated.
 
+
+## §399 — a supporting function has its own Strengths and Weaknesses (2026-09-24)
+
+Islam: *"We need to add Strengths and weakness for the supporting functions"*,
+then of the five points put to him: every format, strengths and weaknesses
+only, written by the office, not counted as missing, a slide and a sheet — and
+of where it sits, *"it should be like the tabs of the BUs"*, and *"make it S&W
+not stengths and weaknesses."* Drawn first out of the running platform and
+published (`design-mockups/function-strengths-weaknesses/`, rule 1c).
+
+- **REVERSES HALF OF §213.** That section said a supporting function inherits
+  its aspiration and SWOT from the unit it plans under and never authors them.
+  The aspiration stays inherited, and so do OPPORTUNITIES and THREATS — they
+  are about the market, which is the business's. What a function knows about
+  ITSELF — what it does well, where it falls short — is its own now. Recorded
+  as a reversal, never overwritten (Principle II).
+- **A SECTION OF ITS OWN, BETWEEN OVERVIEW AND THE PLAN, ON EVERY FORMAT**
+  (pillars, projects, objectives & actions), labelled **S&W**. It is
+  `swotBoxes()` — the unit's own SWOT builder, lifted out and handed two
+  quadrants instead of four (§53.5) — so a line is added, typed and removed
+  exactly as a unit's SWOT is. A unit's SWOT is byte-for-byte what it was.
+- **ON THE OVERVIEW'S KEY (`k_found`, edit page `capfoundation`)**, so the
+  one Edit on the section row opens it with the Overview (§269) and nobody's
+  access moves: the office writes it, and a function's own head reads it.
+- **`swotWritable()` IS THE WRITING HALF** (§61, `fnWritable`'s shape): a
+  projects or objectives function has no unit-shaped writable view, so
+  `unitLikeWritable()` answered null and + Add would have written nowhere. It
+  mints `FUNCTIONS[k].swot` on first write and never on read (§42, §50.6).
+  No migration: the key rides `functions.extra` like `def` and `format`.
+- **THE SERVER HAD TO LEARN IT FOR THE NON-PILLARS FORMATS**: a pillars
+  function already went through `collectUnit()`, which classifies swot as
+  `unitAnalysis`; the others go through `fnOwnWork()`, where the key would
+  have been swept into Setup. Both land on `unitAnalysis` now, judged by
+  `strategyPageOf()` — the office alone. Falsified: with the new branch
+  removed the change is classified `setup`, 1 red; the refusals stay green
+  either way because Setup is also the office's, which is why the
+  classification is asserted by name.
+- **NOT A GAP.** An empty S&W draws the platform's empty line and counts
+  nowhere (§214.4, §223).
+- **ONE SLIDE, ONLY WHEN SOMETHING IS ON IT** (§253, §246 — whitespace is not
+  a line). A pillars function's deck still draws no four-slide SWOT section.
+- **THE WORKBOOK CARRIES IT** (§22): an **S&W** sheet (Type · Point) on a
+  pillars function's file, a projects/objectives function's own file and the
+  blank projects/objectives template; never on a capability's. The readers
+  take it back, and **a file without the sheet leaves the stored S&W alone**,
+  on both formats, so an older download cannot erase it. A replace does not
+  archive the previous S&W (the plan archive holds the plan).
+- **CHECKS.** `checks/function-sw.py` (new) — red 16 with the section removed
+  and 8 with the writer and the slide broken, from the SOURCES (§276).
+  `scripts/test-authorize.js` §399 — 755/0. `checks/fn-pillars.py` held the
+  section list and the sheet difference as a literal; both REWRITTEN, never
+  loosened (§218, §214.3). **`checks/functional-projects.py` is red 3 on the
+  build before this change too** (§303) — wording from §395 — recorded, not
+  fixed here.
+
+- **§399.1 — MERGED TO `main` 2026-09-24 on Islam's word.** `main` had not
+  moved, so a clean fast-forward: the tree pushed is the tree verified (full
+  `qa.py` ERRORS none, 755/0, `built-in-step` and `generated-in-step` clear).
+  `sw.js` bumped to `smp-shell-v5.36-function-sw`, a name the history never
+  held, in a commit `main` holds before the branch does (§91). No `api/`
+  change beyond classifying a new key; nothing an old tab saves is refused,
+  so no forced sign-out is owed (spec 029).
+
+## §400 — moving between the console, a client and its modules (2026-09-23)
+
+Islam: *"review the different pages and suggest different flow of going forward
+and back … I don't like the overview page of the strategy because it has no
+navigation … and for the main console we can have the person tasks across the
+different clients … derived from the internal tracker."* Before/after mockups
+first (rule 1c); he took every recommendation with two changes — *"replace the
+home word with the Home icon that we already have"*, and *"for the client user
+he doesn't need the rail at the top"* — then *"proceed"*.
+
+- **ONE TRAIL FOR THE OFFICE**: `Forefront › [mark] Client ▾ › Module ▾`
+  replaces the client pill and the four-square switcher. The client menu lists
+  its modules, Client settings and *Switch client…* (`/platform#clients`); on
+  Client settings the last step reads **Client settings** and replaces *Save &
+  close* and the two crossing rows on the rail. Drawn only where the document
+  carries `data-console` (the server's answer that this is somebody Forefront
+  sent in) — a client's own staff get **no trail and no switcher**, and their
+  bar says the company's name with the product's small beneath it.
+- **ONE PRESS FROM CLIENT SETTINGS TO A MODULE'S SETTINGS SURVIVES** (§362.1's
+  promise): hiding the rail rows took it away, so on Client settings the
+  client menu also lists *<Module> settings*, crossing without a reload
+  (§367). Not drawn in the mockup; added so nothing that worked is lost.
+- **HOME IS THE HOUSE AND A PAGE INSIDE THE CHROME**: the welcome is no longer
+  an overlay with a Continue button. It sits under the navigation, the house
+  is lit gold while it is open, any tab or destination press takes it down, and
+  it opens once per sign-in as before. A theme press leaves it standing.
+- **MY WORK, THE CONSOLE'S FIRST TAB**: every open Internal Tracker action the
+  person owns, across the clients they may open, grouped *Late · This week ·
+  Next week and later*, each row opening that client's Tracker. Read through
+  `withTenant` per client with the tracker's own words (§53.5); nothing
+  stored; Meeting Notes' actions deliberately NOT read (his word); a client
+  that will not answer is named, never taken for nothing (§93). Admins get a
+  colleague picker, drawn only when there is somebody else to pick. The client
+  card's Tracker row reads *"3 open · 1 late"* — a mark, never a sentence
+  (§368). `who` is refused for anybody who is not an admin, on the server.
+- **§65.9 AGAIN**: the rows were first classed `.row`, which is the page's
+  global flex row, so every cell floated as its own box — renamed `wrow`.
+  And one font shorthand ending in `inherit` was invalid CSS (§356.14's fault);
+  mine is fixed, four older ones in the console stylesheet are untouched and
+  recorded.
+- **CHECKS**: `shell.mjs` 133/0 (new §4b seeds five actions — two not his or
+  done, asserted absent; §4c signs in as a client's own head and asserts no
+  trail), `modules.mjs` 160/0, `door-landing.mjs` 145/0, `welcome.py` OK, and
+  every break red, two new: `mywork-everyone` (the owner filter dropped) and
+  `trail-for-staff`. Stale assertions REWRITTEN, never loosened (§218): the
+  Continue button, *Save & close*, the switcher, and six console checks that
+  assumed the console opens on Clients now go to `/platform#clients` — via
+  `about:blank` first, because a same-page hash change is not a navigation.
+  Full `qa.py` ERRORS none; `built-in-step` and `generated-in-step` clear;
+  `tsc` clean.
+- **Nothing stored moves, nothing is migrated, no save rule changes**, so no
+  forced sign-out is owed (spec 029). The built file's bytes changed, so
+  `sw.js` is bumped (§91).
+
+## §401 — the trail's two menus (2026-09-24)
+
+Islam, using §400's trail: *"when I click outside them the menue should close
+… te logo of the client shouldn't appear in the top navigation bar … when I
+click on the name of the client drop down I should get the other lcients …
+when I click on the module name like strategy I should get the other modules
+and then the separator and the client settings."* Four instructions, taken as
+given; screen and menu contents only, no stored state.
+
+**THE TWO MENUS SWAP JOBS.** §400 put the modules under the CLIENT and Home and
+the module's settings under the MODULE. The client step now lists the OTHER
+clients this person may open, then a rule, then *All clients* (the console's
+grid); the module step lists the OTHER modules, a rule, then *Client settings*.
+The module you are in is the step's own name, so it is not listed again (§87).
+**On the client's settings** the third step reads *Client settings* (with
+`aria-current`) and opens the same menu, where each module goes to THAT
+module's settings — the next place from a settings page, and §362.1's one
+press kept. *Home* left the menu: the house mark is Home (§400), and two
+controls for one act is one too many (§94.15); the dead `go === "home"` branch
+is deleted with it (§24).
+
+**THE CLIENT LIST IS THE SERVER'S, WITH THE CARDS' OWN TWO RULES** —
+`visibleClients` then `mayOpenClient` — through a new light action
+(`/api/platform {action:"clients"}`: key, name, kind), because the cards action
+reads every tenant's facts and tracker tally, which a menu of names should not
+cost. Asked once per page; until it answers the menu says *Reading your
+clients…*, and an empty answer says *No other clients* — lines, never buttons
+that go nowhere (`.trquiet`). *All clients* is always there, so the menu is
+never a dead end (§61). A client's own person is refused the action by the
+endpoint's existing gate (403), asserted.
+
+**A PRESS ELSEWHERE CLOSES THE MENU**, on `pointerdown` in the capture phase
+as the chat corner does (§100.4) — a menu that lingers until the mouse comes
+up reads as having missed the press. A press inside one menu shuts the other;
+Escape shuts either. Wired once, beside the trail's one click listener, so a
+repaint of the trail cannot multiply it (§24, §47.2).
+
+**NO CLIENT MARK ON THE BAR.** The `.trmark` image and its rule are deleted; the
+client is named once, in words. §400's assertion *"one that has uploaded a mark
+wears it on its own bar"* is REVERSED and REWRITTEN, never deleted (§218): the
+mark is MADE and asserted absent, with the client's name asserted present
+beside it (§113.8). The client platform's own bar for a client's staff is
+untouched.
+
+**Checks.** `checks/modules.mjs` §7 rewritten for the swap — other modules in
+order with the server's lines, the current one absent, rule then Client
+settings last, the other clients asserted against the stub's answer, one menu
+shutting the other, a real mouse press outside closing it, Escape, and a
+one-module client offering only Client settings: **166/0**, and each new
+behaviour proved able to fail by breaking it in the source (the outside-click
+listener 2 red, the current-client filter 1, the current-module filter 4, a
+mark put back 1). `checks/shell.mjs` on the served app **136/0** — its trail
+reads moved to the module step, the mark assertion reversed, and two new: the
+trail's list equals the clients the cards say may be opened, and a client's
+own person is refused it. `setup-per-module.py` served half green after its
+`.trhere` read moved to the module step's summary; `door-landing` 145/0,
+`check:modules:red` all red, `qa.py` ERRORS none, `built-in-step` and
+`generated-in-step` clear once committed. `sw.js` SHELL bumped (the built
+file's bytes changed, `arrange.css`).
+
+
+## §402 — one typeface, and one Viewing as (2026-09-24)
+
+Islam: *"1. remove the font button and keep the font source sans across the
+platform 2. in the home page there is a viewing as while we already have a
+viewing as at the top, let's remove the page redundant one and keep the master
+one at the top."*
+
+**THE TYPEFACE SWITCH GOES, AND SOURCE SANS 3 IS THE FACE FOR EVERYBODY.**
+§38.7 carried four faces so they could be compared in the product; §157 cut
+that to two; this settles it at one. `--sans` is `'Source Sans 3'` with the
+system stack behind it on bare `:root`, so it holds with no script, no
+attribute and no choice — the system stack is now only what a face that fails
+to decode falls back to. The `[data-font]` block, the button, `paintFont`,
+`setFont`, `FONTS`, `FNAMES` and `THEME.font` are **deleted, not hidden**
+(§24). **A choice left in a browser is cleared on load** (`smp.font` removed,
+`data-font` removed), §41.6's rule for the palette switch: a stored value with
+no control left to change it would pin somebody for ever. The face was
+already embedded in both builds (data URI in the file, `/fonts/…` served), so
+nothing new is fetched. `b.font` stops being handed to `setBrand`; a stored
+branding `font` is read by nothing.
+
+**THE HOME PAGE'S VIEWING AS GOES; THE BAR'S IS THE ONE.** §179 drew a second
+switcher above the greeting because the welcome screen then **covered** the
+viewport and the bar's control was behind it. §400 put Home **inside** the
+chrome, so the bar's switcher is on screen the whole time and the page copy
+said one thing twice (§87). `viewerBar()`, its CSS and the now-dead
+`SEARCHSEL.wire()` on Home are deleted. **What the copy did is kept**: a
+change on the bar's `#asWho` while Home is open redraws Home for the person
+now being looked at (one document-level `change` listener, asked by id after
+the shell's own handler has switched the platform) — without it Home would go
+on greeting the previous viewer.
+
+**Checks, REWRITTEN never loosened (§218):** `checks/typeface.py` — no switch,
+the page's own family is Source Sans 3 with no attribute, it decodes and its
+metrics differ from the system stack, and a stored `system`/`manrope` is
+cleared with the page still in Source Sans; **4 red** with `--sans` put back
+on the system stack, from the sources. `checks/welcome.py` §8 — Home draws no
+switcher, the bar's is present, visible and hit-testable (both ends, §94.2),
+and a switch from the bar moves the viewer and redraws Home without marking
+it seen; **1 red** (the greeting still *Mohamed*) with the redraw listener
+removed. `qa.py` ERRORS none; home-mark, viewer-line, boot-skeleton,
+page-width green; `check:modules` 166/0; `built-in-step` all good; served
+copies regenerated; `sw.js` SHELL bumped (the built file's bytes changed).
+Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
+The served app's DB-backed checks were not run (no database in this session).
+
+## §403 — Home says only where you are (2026-09-24)
+
+Islam: *"why on the welcome page I have strategy and overview & projects?"*
+§400 put Home INSIDE the chrome, beneath it, and nothing told the chrome: the
+tab row and section row went on describing the page behind Home, and the
+destination row kept its gold underline on that page's name — two answers to
+*where am I* beside the lit house (§87's twins, in navigation). Reproduced as
+Finance's head (`fn:finance`, `fnstrat`, Overview · Projects) before anything
+was proposed; drawn before and after from the running platform and signed off
+(`design-mockups/home-rows/`), with Islam adding the underline: *"yes and
+remove the finance underline too."*
+
+Four rules in `arrange.css`, keyed on the `data-home-open` attribute §400
+already writes: `#tabrow` and `#secrow` `display:none` (never opacity — a
+hidden row must not take clicks, §3.2), and the lit place's underline made
+transparent, its weight and colour kept so no name on the row moves (§41.8).
+The places stay pressable, because pressing one is how you leave Home (§61).
+
+`welcome.py` §3 asserted a TAB was reachable under Home — true of §400 and
+false by this decision — so it is REWRITTEN, never loosened (§218): both rows
+asserted not drawn, the underline asserted transparent, and the PLACE asserted
+reachable as the way out; two later "leave Home" presses re-pointed from the
+tab to the place. Proved able to fail from the SOURCES (§276): the rule
+removed, **2 red**, exactly the two new assertions. `qa.py` ERRORS none;
+`built-in-step` all good; served copies regenerated; `sw.js` SHELL bumped.
+Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
+
+### §400.1 — the trail's first word is Platform (2026-09-24)
+
+Islam: *"for the word on the top left named forefront, let's change it to Platform."* The first step of the trail (§400), the link back to the console, now reads **Platform**. Only the word changes: the address (`/platform`), the class the checks press (`a.trff`) and the console's own top bar (FOREFRONT · Platform) are untouched, so the console does not read "Platform Platform". `checks/modules.mjs` asserts the word now as well as the address, case-insensitively because the trail draws it in capitals; 166/0, and 1 red with the old word put back. Screen only: nothing stored, nothing migrated, no sign-out owed.
+
+### §400.2 — a console tab shows what it last showed, then catches up (2026-09-24)
+
+Islam: *"when I switch between the tabs of the platform like my work and clients everytime it loads. saying it's loading. shouldn't it be saved as a cookie or cashed or something until a refresh happens?"* Two answers were put to him — keep each tab until a refresh, or show the kept copy at once and re-read behind it — and he chose **the second**, which is always current at the cost of the page changing a moment after it appears when something has moved.
+
+**Measured first:** every press of My work, Clients, Consultants, Access, Memory or Frameworks cleared the page, printed *Reading…* and asked the server from scratch, with nothing kept between presses.
+
+**How:** the tab being left keeps its own NODES, moved rather than cloned so every control on it still works. Coming back through the tab row puts them back at once, and the tab's ordinary draw runs into a detached box. Every draw writes into `page`, including the parts that arrive later (`settle()`, the archived band, the library), so `page` IS that box for the whole of the re-read. The requests made during it are counted in `send()`, and the fresh copy is swapped in, scroll kept, when the last one has landed.
+
+**Five rules:**
+- Only the tab row uses a kept copy. The six other ways to `go()` follow a change (adding or archiving a client, changing whose work you look at) and read fresh, as §369 and §48.2 require.
+- A press or a key inside the kept copy abandons the re-read, so nothing is swapped out from under somebody typing (§35, §71.2).
+- Any request that is not a read drops every kept copy.
+- Only a tab's own list is kept, never a form or a reading view opened inside it.
+- Memory only; a refresh starts clean. It is not a cookie, because a cookie travels to the server with every request and this is the page's own business.
+
+**Verification:**
+- `checks/tab-keep.py` covers kept-at-once-then-fresh (the stub numbers its answers, so the two are different words on screen), the hand winning, other ways in reading fresh, no leak across tabs, and a reload starting clean. All good on both copies of the page, and 4 / 3 / 2 red under its three breaks.
+- `checks/console-boot.py` §3 held a timing assumption this moves: it waited for the cards, which are now on screen before the request is answered. It was **rewritten, never loosened** (§218) to wait for the request itself; 13/0 on both copies, and its `handed-twice` break is still red.
+- `client-setup-outside.py` (29) and `client-archive.py` (15) are red identically **without this change** (§303) and are recorded, not fixed here.
+
+Screen only: nothing stored, nothing migrated, no sign-out owed.
+
 ## §404 — the client's structure: its levels, and what each level carries (2026-09-24)
 
 Islam: *"when I start the setup of the company we need to set the structure,

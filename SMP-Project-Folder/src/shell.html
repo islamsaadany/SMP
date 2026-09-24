@@ -65,7 +65,7 @@
          Drawn nowhere else: on a module's pages the bar below already says
          which client this is, and a second copy of that fact on one line is
          what §120 took off the register's header. `.clientlogo` rather than
-         `.topmark`, which is the module switcher's (§65.9) — one word, two
+         `.topmark`, which was the module switcher's (§65.9, removed §400) — one word, two
          controls, is how a rule comes to style the wrong thing. Written by
          paint() from the group's own mark and hidden when there is none:
          a client that has not uploaded one gets no empty box (§15.1). -->
@@ -106,10 +106,6 @@
            decision, set once on Setup › Branding, not a per-screen preference
            that leaves two people looking at different products. Light and dark
            stay each viewer's own — those are about the room they sit in. -->
-      <!-- The typeface, while the four are being compared (§38.8). It renders
-           its own name in the face it names, so you can see one without
-           pressing it. It goes when the choice is settled. -->
-      <button class="infobtn fontbtn" id="fontbtn" type="button" hidden></button>
     </div>
   </div>
 </header>
@@ -385,10 +381,19 @@
              fill rather than a dead end (§61) — and nothing about the
              navigation depends on the data, so a tab cannot appear and
              disappear as rows arrive (§45.2). */
-          /* §404: THE OVERVIEW IS THE BRIEF AND THE NORTH STAR, so it is
-             offered while either is switched on for this function. */
+          /* §399: S&W sits between the Overview and the plan, where a unit's
+             SWOT sits between its Foundation and its Plan — Islam: *"like the
+             tabs of the BUs"*. Every format, and always drawn: an empty one is
+             a page you can fill, never a tab that comes and goes (§45.2).
+             §404: THE OVERVIEW IS THE BRIEF AND THE NORTH STAR, so it is
+             offered while either is switched on for this function — and the
+             S&W while the structure carries a SWOT. Switching it off hides the
+             tab and forgets nothing, which is a decision rather than the data
+             coming and going. */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
                     when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
+                  { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW,
+                    when: function(t){ return compOn(t, "swot"); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -2588,7 +2593,7 @@
      page's own preview cannot drift apart (§39). */
   function applyBrand(){
     var b = branding();
-    THEME.setBrand({ palette: b.palette, font: b.font, tokens: brandTokens() });
+    THEME.setBrand({ palette: b.palette, tokens: brandTokens() });
   }
 
   /* ══ A REPAINT MUST NOT MOVE THE PAGE (§75) ═══════════════════════
@@ -2850,7 +2855,22 @@
                                   : "Strategy Management Platform";
       var org = document.getElementById("orgname");
       var back = document.getElementById("clientback");
-      if (org) {
+      /* ── A CLIENT'S OWN PERSON: THEIR COMPANY, NOT OURS (§400) ─────────
+         Islam: "for the client user he doesn't need the rail at the top with
+         raya trade and strategy as he doesn't really navigate." They get no
+         trail and no switcher, so the line says whose platform this is: the
+         company's mark and name, with the product's name after it, small.
+         Served pages only — the offline copy (§306) has no server to say who
+         is looking, so it keeps the line it has always had — and never for
+         somebody with a console, whose line is the trail (route.js). */
+      var staff = !on && location.protocol !== "file:" &&
+                  !document.documentElement.hasAttribute("data-console") &&
+                  document.documentElement.hasAttribute("data-module");
+      if (staff) {
+        if (h1) h1.textContent = GROUP.org || "Strategy Management Platform";
+        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org ? "Strategy Management Platform" : ""; }
+      }
+      if (org && !staff) {
         if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
         /* AND HIDDEN AGAIN ON THE WAY OUT, which the check found by walking
            rather than by reloading: `sync.js` hides this span wherever the way
@@ -2863,7 +2883,7 @@
       }
       var mark = document.getElementById("clientlogo");
       if (mark) {
-        var src = on ? groupLogo() : "";
+        var src = (on || staff) ? groupLogo() : "";
         /* Setting `src` to "" asks the page for its own address, so the
            attribute is REMOVED rather than emptied — an empty src is a
            second request for this document, not an absent picture. */
@@ -8860,9 +8880,9 @@
         var a = b.dataset.swadd.split("|"), t = a[0], q = a[1];
         if (!mayAuthor("u_anal", t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("swot", { target:t, q:q }); return; }
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q])) return;
-        u.swot[q].push("");
+        var sw = swotWritable(t);
+        if (!sw || !Array.isArray(sw[q])) return;
+        sw[q].push("");
         fieldSaved(); paint();
       });
     });
@@ -8870,11 +8890,11 @@
       b.addEventListener("click", function(){
         var a = b.dataset.swrm.split("|"), t = a[0], q = a[1], i = +a[2];
         if (!mayAuthor("u_anal", t)) return;
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q]) || u.swot[q][i] == null) return;
-        if (String(u.swot[q][i]).trim() &&
+        var sw = swotWritable(t);
+        if (!sw || !Array.isArray(sw[q]) || sw[q][i] == null) return;
+        if (String(sw[q][i]).trim() &&
             !confirm("Remove this line? This cannot be undone here.")) return;
-        u.swot[q].splice(i, 1);
+        sw[q].splice(i, 1);
         fieldSaved(); paint();
       });
     });

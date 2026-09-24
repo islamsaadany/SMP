@@ -156,164 +156,174 @@
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
-  /* ── THE MODULE SWITCHER (spec 046, E1 — signed off 2026-09-11) ──────
-     The four-square mark at the far left of the top bar, opening the list of
-     modules this client has with the one you are in marked.
+  /* ── THE TRAIL (§400) ─────────────────────────────────────────────
+     Islam, of moving between the console, a client and its modules: every
+     way out was a different control in a different place — a client-name
+     pill reading "change", a four-square mark with no word beside it, the
+     house, the gear, a "Save & close", and rows at the foot of a Setup rail
+     reading "‹ Back to the console" and "Client settings ›". Replaced, for
+     Forefront's own people, by ONE line reading where you are:
 
-     IT IS BUILT HERE AND NOT IN THE FROZEN SHELL, for the reason that decides
-     whether it is drawn at all: a module list only exists where there is a
-     server to say which ones a client has. The offline copy (§306) is the
-     built file with one tenant's graph baked in and no server behind it, so a
-     switcher in the frozen shell would be a control that could never open
-     anything (§61). Its SHAPE is in arrange.css beside the family it belongs
-     to (`details.dlmenu`), because a stylesheet is inert either way.
+         Platform  ›  Raya Trade ▾  ›  Strategy ▾
 
-     DRAWN ONLY WHERE THERE IS A CHOICE. `data-modules` is written by the
-     server only for a client holding more than one (lib/shell.ts), so a menu
-     of one is never built — that is a door behind a door (§32) — and the
-     ABSENT attribute is what says so, rather than a flag beside it (§50.6).
+     Each step is a place. Platform is the console (Islam, 2026-09-24:
+     the first word reads Platform, not Forefront). Since §401 the client
+     opens a menu of the OTHER clients this person may open (and "All
+     clients"); the module opens the other modules, a rule, and "Client
+     settings"; on the client's own settings the third step reads "Client
+     settings" and opens the same menu with each module's settings. No
+     client mark on the bar (§401).
 
-     THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
-     one answer to what the switcher lists, read by this and by a module's
-     own bar (modules/insights/page.ts, §53.5): a label worked out here by
-     capitalising a key is how two screens come to spell one module
-     differently.
+     ONLY FOR SOMEBODY WITH A CONSOLE (`data-console`, written by sync.js
+     off `person.cards`, which only the server can answer). A client's own
+     person gets NO trail and NO module switcher — his word: "he doesn't
+     really navigate, we bring everything to his view in the strategy
+     platform" — so their bar names their company and nothing else, and the
+     reports reach them as a tab (§376).
 
-     IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
-     inside, and that drawing's `.brand` was a flex ROW while the product's is
-     a COLUMN — copying the markup would have stranded the mark on a line of
-     its own above the product's name. `.top-in` is already a row and
-     `.brand` carries `margin-right:auto`, so first-in-the-row is the top left
-     (§296.1: measure the paint, never the cascade).
-
-     NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
-     BELOW this one and nothing rewrites `.top-in`, so the markup is built and
-     wired exactly ONCE — no second handler on a repaint (§24, §47.2), which
-     is what the `.topmark` guard below is for now that a paint is what calls
-     this. A press navigates, so the menu never has to be closed afterwards.
-
-     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§383). It has to ask
-     whether the tab row already reaches the library, and at load the answer
-     is about the BAKED viewer: over HTTP the shell hydrates from /api/state
-     after this file has been parsed, so anything viewer-dependent answered
-     here is answered about somebody else. §362 hit the same wall from the
-     other side and moved that question to paint time; this is the same move
-     for the same reason. Nothing flashes, because the boot skeleton hides
-     `.chrome` until the first paint anyway (§94.10), and the `.topmark`
-     guard below makes a second call a no-op. */
-  function mountSwitcher() {
-    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
-       CSS RULE RATHER THAN AN EARLY RETURN HERE (§367). Those pages
-       belong to no module, so a switcher there offers a way out of somewhere
-       you are not; what changed is that crossing between the two rails stopped
-       being a page load, so "built once at load" stopped being able to answer
-       the question at all. It was wrong in BOTH directions the moment it
-       could: crossing to a module's settings left the switcher never built,
-       and crossing back left it standing.
-
-       So it is built wherever there is a choice, and `data-client-settings` —
-       the one answer paint() writes for the destination row, the Group
-       dropdown, the Units | Functions switch, the gear and the viewer strip —
-       stands it down with the rest of the chrome (_shared.css). Same
-       mechanism, one rule, and it follows the scope on every paint instead of
-       on every navigation. `display:none`, so it does not take the keyboard
-       either (§3.2); and the whole bar is inside `.chrome`, which the boot
-       skeleton hides (§94.10), so nothing flashes before the first paint. */
-    var raw = document.documentElement.getAttribute("data-modules");
-    if (!raw) return;                               /* one module: no choice to offer */
-    var list;
-    try { list = JSON.parse(raw); } catch (e) { return; }
-    /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
-       rather than on the attribute (§362.1): `data-modules` is the list of
-       modules this person may open, read by this and by the client's own
-       Setup rail, which draws a row per module whatever the count. The
-       check's break forces the switcher on for a client holding one. */
-    var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
-    if (!Array.isArray(list)) return;
-    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§376,
-       decision 3) ───────────────────────────────────────────────────
-       The switcher exists to reach a module the navigation cannot. Since
-       the library reads as a tab beside Strategy and Performance, offering
-       it here as well is the same door twice on one screen (§87's twins,
-       §94.15) — and for a client's own person, who has Strategy and the
-       reports and nothing else, it leaves a mark whose menu holds only the
-       page they are already on.
-
-       DROPPED FROM THE LIST RATHER THAN HIDDEN, so the count below decides
-       on what is actually on offer: with one left there is no choice, and
-       §32's rule takes the mark off the bar entirely.
-
-       WHICH MODULES THE TABS REACH IS ASKED OF THE TAB ITSELF, never
-       listed here — `LIBRARY.shown()` is the one answer to whether the
-       library is on the tab row (it reads the served stamp), so a build
-       that stopped drawing the tab puts it back in this menu on its own
-       rather than leaving it reachable from nowhere (§61, §53.5).
-
-       AND THE `typeof` GUARD FIXES NOTHING TODAY, said rather than left for
-       the next reader to take as load-bearing (§298.2): build-shell.mjs
-       concatenates this file LAST, after every frozen script, so LIBRARY is
-       always there. It is here because this file is the one piece of browser
-       code that is also written as a file of its own.
-
-       AND "REACHED" MEANS REACHED BY THIS PERSON (§383). `LIBRARY.shown()`
-       says the library is on the tab row; `anyDestination()` says there is a
-       row — somebody who reaches no unit, no function, no company and not
-       the group has no tab to be offered it on, and dropping it here would
-       leave them the reports nowhere, which is the hole §376's own comment
-       promises this filter never opens (§61). */
-    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown() &&
-                   typeof anyDestination === "function" && anyDestination())
-      ? [LIB_TAB_KEY] : [];
-    list = list.filter(function (mm) { return !mm || reached.indexOf(mm.key) < 0; });
-    if (!forceSwitch && list.length < 2) return;
+     DRAWN ON PAINT, REBUILT ONLY WHEN WHAT IT SAYS CHANGES — the client's
+     settings and a module's are one document (§367), so crossing between
+     them is a paint and the third step has to follow it; rebuilding on
+     every paint would shut a menu somebody has open. */
+  var ICO_DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.6 5 6.6 8 3.6" ' +
+    'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function modulesOn() {
+    try { var l = JSON.parse(document.documentElement.getAttribute("data-modules") || "[]");
+      return Array.isArray(l) ? l.filter(function (x) { return x && x.key; }) : []; }
+    catch (e) { return []; }
+  }
+  function onClientSettings() {
+    return document.documentElement.hasAttribute("data-client-settings");
+  }
+  var trailSaid = null;
+  function menuHTML(items) {
+    return '<div class="menu" role="menu">' + items.map(function (it) {
+      if (it.rule) return '<div class="trrule" role="separator"></div>';
+      if (it.quiet) return '<div class="trquiet">' + esc(it.label) + "</div>";
+      return '<button type="button" role="menuitem" data-trgo="' + esc(it.go) + '"' +
+        (it.here ? ' aria-current="true"' : "") + ">" + esc(it.label) +
+        (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</button>";
+    }).join("") + "</div>";
+  }
+  function mountTrail() {
+    var root = document.documentElement;
+    /* data-break="trail-for-staff" is checks/modules.mjs's falsification: a
+       client's own person drawn the trail they must never get. */
+    if (!root.hasAttribute("data-console") && root.getAttribute("data-break") !== "trail-for-staff") return;
     var bar = document.querySelector(".top .top-in");
-    if (!bar || bar.querySelector(".topmark")) return;
-
-    var d = document.createElement("details");
-    d.className = "dlmenu topmark";
-    var here = list.filter(function (m) { return m && m.key === MODULE; })[0];
-    var sum = document.createElement("summary");
-    sum.setAttribute("title", here ? "Modules — you are in " + here.label : "Modules");
-    sum.setAttribute("aria-label", sum.getAttribute("title"));
-    /* DRAWN, NEVER A FONT CHARACTER (§52): a glyph the subset does not carry
-       ships as a blank box, and this mark has no word beside it to recover
-       from that. */
-    sum.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-      '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
-      '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
-      '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
-      "</g></svg>";
-    d.appendChild(sum);
-
-    var menu = document.createElement("div");
-    menu.className = "menu";
-    menu.setAttribute("role", "menu");
-    list.forEach(function (m) {
-      if (!m || !m.key) return;
-      var b = document.createElement("button");
-      b.type = "button";
-      b.setAttribute("role", "menuitem");
-      b.dataset.module = m.key;
-      if (m.key === MODULE) b.setAttribute("aria-current", "true");
-      b.appendChild(document.createTextNode(m.label || m.key));
-      if (m.note) {
-        var sub = document.createElement("span");
-        sub.className = "dlsub";
-        sub.appendChild(document.createTextNode(m.note));
-        b.appendChild(sub);
-      }
-      menu.appendChild(b);
+    if (!bar) return;
+    var client = root.getAttribute("data-console-client") || SLUG;
+    var mods = modulesOn();
+    var here = mods.filter(function (x) { return x.key === MODULE; })[0];
+    var modLabel = here ? here.label : (root.getAttribute("data-module-label") || "");
+    var cs = onClientSettings();
+    var said = [client, cs, MODULE, mods.map(function (x) { return x.key; }).join(","),
+                trailClients ? trailClients.map(function (x) { return x.key; }).join(",") : "?"].join("|");
+    var nav = bar.querySelector("nav.trail");
+    if (nav && said === trailSaid) return;
+    trailSaid = said;
+    if (!nav) {
+      nav = document.createElement("nav");
+      nav.className = "trail";
+      nav.setAttribute("aria-label", "Where you are");
+      bar.insertBefore(nav, bar.firstChild);
+      /* ONE LISTENER FOR THE WHOLE TRAIL, wired once: the markup below is
+         rewritten when the place changes and this survives it (§24, §47.2). */
+      nav.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
+        if (!b) return;
+        var go = b.dataset.trgo;
+        Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; });
+        /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
+           same one the rail rows made: one document, one attribute. */
+        var cross = /^cross:/.test(go) ? go.slice(6) : null;
+        if (cross && typeof current !== "undefined" && current === "setup" &&
+            typeof setupLandingKey === "function") {
+          var k = setupLandingKey(cross);
+          if (k) {
+            if (currentSub !== k && typeof leaveModes === "function") leaveModes();
+            setScope(cross);
+            current = "setup"; currentSub = k;
+            paint(); window.scrollTo(0, 0);
+            return;
+          }
+        }
+        var href = cross ? (cross === "client" ? "/" + SLUG + "/setup" : "/" + SLUG + "/" + cross + "/setup") : go;
+        if (href === location.pathname) return;
+        location.assign(href);
+      });
+      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§401, Islam: "when I click
+         outside them the menue should close"). `<details>` has no such
+         behaviour of its own. On pointerdown, as the chat corner does
+         (§100.4): a menu that lingers until the mouse comes up reads as
+         having missed the press. Opening one menu shuts the other, and
+         Escape shuts either. Wired once, beside the one listener above. */
+      var shutAll = function (keep) {
+        Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { if (d !== keep) d.open = false; });
+      };
+      document.addEventListener("pointerdown", function (ev) {
+        var inside = ev.target && ev.target.closest ? ev.target.closest("nav.trail details") : null;
+        shutAll(inside);
+      }, true);
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape" && nav.querySelector("details[open]")) shutAll(null);
+      });
+    }
+    var sep = '<span class="trsep" aria-hidden="true">›</span>';
+    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§401, Islam: "when I click on
+       the name of the client drop down I should get the other clients"). The
+       list is the server's (`clients`: visible AND openable, the cards' own
+       two rules, §42), asked once per page. Until it answers the menu says
+       so, and if it cannot answer the console is still the way (§61). No
+       mark: the client's logo is not on this bar any more (Islam: "the logo
+       of the client shouldn't appear in the top navigation bar"). */
+    var clientItems = [];
+    var others = (trailClients || []).filter(function (x) { return x.key !== SLUG; });
+    if (trailClients === null) clientItems.push({ label: "Reading your clients…", quiet: true });
+    others.forEach(function (x) { clientItems.push({ label: x.name, go: "/" + x.key }); });
+    if (trailClients && !others.length) clientItems.push({ label: "No other clients", quiet: true });
+    clientItems.push({ rule: true });
+    clientItems.push({ label: "All clients", go: "/platform#clients" });
+    /* THE MODULE STEP LISTS THE OTHER MODULES, THEN THE CLIENT'S SETTINGS
+       (§401, his words: "the other modules and then the separator and the
+       client settings"). On the client's own settings the step reads "Client
+       settings" and opens the same menu, where each module goes to THAT
+       module's settings — from a settings page that is the next place, and
+       it keeps §362.1's one press. */
+    var modItems = [];
+    mods.forEach(function (x) {
+      if (!cs && x.key === MODULE) return;
+      modItems.push(cs ? { label: x.label + " settings", go: "cross:" + x.key }
+                       : { label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
     });
-    /* ONE LISTENER ON THE MENU, not one per item — and the module you are
-       ALREADY in does nothing rather than reloading the page under somebody
-       (§61's other half: a control that appears to act and does not). */
-    menu.addEventListener("click", function (ev) {
-      var b = ev.target.closest ? ev.target.closest("[data-module]") : null;
-      if (!b || b.dataset.module === MODULE) return;
-      location.assign("/" + SLUG + "/" + b.dataset.module);
-    });
-    d.appendChild(menu);
-    bar.insertBefore(d, bar.firstChild);
+    if (modItems.length) modItems.push({ rule: true });
+    modItems.push({ label: "Client settings", go: "cross:client", here: cs });
+    var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
+      esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";
+    nav.innerHTML =
+      '<a class="trff" href="/platform">Platform</a>' + sep +
+      '<details class="dlmenu trstep trclient"><summary>' +
+        "<span>" + esc(client) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(clientItems) + "</details>" +
+      sep + third;
+    if (trailClients === null && !trailAsked) askClients();
+  }
+  /* the clients this person may open, asked once per page (§401) */
+  var trailClients = null, trailAsked = false;
+  function askClients() {
+    trailAsked = true;
+    try {
+      fetch("/api/platform", { method: "POST", credentials: "same-origin",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clients" }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { trailClients = (j && j.ok !== false && Array.isArray(j.clients)) ? j.clients : []; })
+        .catch(function () { trailClients = []; })
+        .then(function () { try { mountTrail(); } catch (e) {} });
+    } catch (e) { trailClients = []; }
   }
 
   /* ── on arrival: the address is the place ── */
@@ -400,7 +410,7 @@
   if (typeof paint === "function") {
     var painted = paint;
     paint = function () { var r = painted.apply(this, arguments);
-      try { mountSwitcher(); } catch (e) {}
+      try { mountTrail(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {

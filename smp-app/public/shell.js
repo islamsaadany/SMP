@@ -14204,6 +14204,23 @@ function fnWriteBack(fk, u){
   f.aspiration = u.aspiration || "";
   f.endInMind = u.endInMind || "";
 }
+/* THE SWOT A WRITER MAY PUSH INTO (§399). A unit's and a pillars function's
+   through unitLikeWritable(), as before; any OTHER function's S&W is minted on
+   the function itself here, in the writing half, never by a reader (§50.6).
+   A projects or objectives function holds no unit-shaped view, which is why
+   the Add and Remove handlers could not reach one through unitLikeWritable(). */
+function swotWritable(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[t.slice(3)];
+    if (!f) return null;
+    if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
+    ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(f.swot[q])) f.swot[q] = []; });
+    return f.swot;
+  }
+  var u = unitLikeWritable(t);
+  return u && u.swot ? u.swot : null;
+}
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){
   var t = String(target || "");
@@ -18769,7 +18786,14 @@ function capReplaceSummary(c, rows){
 function applyPlanReplace(u, rows){
   /* clearUnitPlan archives on the way out (§49.2), so this is ONE archive,
      not two — the import used to take its own and then take a second. */
+  /* §399: a pillars FUNCTION's S&W is kept when the file carries none — a
+     workbook downloaded before the S&W sheet existed must not wipe what the
+     office has written since (§58). A unit's SWOT is authored by the file
+     exactly as before. */
+  var keepSW = u.fnKey && !rows.some(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; })
+    ? { s:(u.swot.s || []).slice(), w:(u.swot.w || []).slice() } : null;
   var archived = clearUnitPlan(u);
+  if (keepSW) { u.swot.s = keepSW.s; u.swot.w = keepSW.w; }
   /* The foundation's LABELS are a skeleton the unit keeps when a file does not
      carry one. A file that does carry clauses re-authors both label and text,
      so the old ones are cleared out of the way first. */
@@ -18787,6 +18811,18 @@ function applyPlanReplace(u, rows){
 }
 function applyCapPlanReplace(c, rows){
   var archived = clearCapability(c, "plan");
+  /* §399: a function's S&W is written onto the function itself, and only when
+     the file carries some — a file downloaded before the S&W sheet existed
+     must not wipe what the office has since written (§58). */
+  var swRows = rows.filter(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; });
+  rows = rows.filter(function(r){ return r.type !== "STRENGTH" && r.type !== "WEAKNESS"; });
+  if (c && c.own && swRows.length) {
+    var sw = swotWritable("fn:" + c.fn);
+    if (sw) {
+      sw.s = swRows.filter(function(r){ return r.type === "STRENGTH"; }).map(function(r){ return r.name; });
+      sw.w = swRows.filter(function(r){ return r.type === "WEAKNESS"; }).map(function(r){ return r.name; });
+    }
+  }
   createFromCapPlan(c, { rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });
@@ -19104,7 +19140,8 @@ function checkCapFileShape(c, rows, kind){
   return problems;
 }
 
-var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE"];
+var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE",
+                 /* §399: a function's S&W rows */ "STRENGTH","WEAKNESS"];
 
 /* The capability twin of mintPlanIds. */
 function mintCapPlanIds(c, rows){
@@ -20061,6 +20098,15 @@ function planWorkbook(u){
       ] }
   ])
   .concat(isFn ? [
+    /* §399: a function's S&W — strengths and weaknesses only, read back by
+       the reader below under the SWOT sheet's own Type/Point shape. */
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:[["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+        (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+        return acc;
+      }, []) },
     /* A function's objectives, in its Overview's own columns. `numCols` and
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
@@ -20548,7 +20594,8 @@ function planFromWorkbook(u, sheets){
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
-  sheetObjects(sheets["SWOT"]).forEach(function(r){
+  /* §399: a function's file calls the sheet S&W; the rows are the same. */
+  sheetObjects(sheets["SWOT"] || sheets["S&W"]).forEach(function(r){
     var t = r["Type"];
     if (!swotN.hasOwnProperty(t) || !r["Point"]) return;
     swotN[t]++;
@@ -20919,6 +20966,23 @@ function capPlanWorkbook(c, opts){
                 SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
+    /* §399: A FUNCTION'S S&W TRAVELS, or a download and an untouched
+       re-upload would drop it (§22). Only for a function's own file or a
+       blank one — a capability has no S&W. Strength and Weakness only; the
+       market's two stay the business's. */
+  ].concat((c.own || !c.id) ? [
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:(function(){
+        var sw = (c.own && FUNCTIONS[c.fn] && FUNCTIONS[c.fn].swot) || {};
+        return [["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+          (sw[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+          return acc;
+        }, []);
+      })() }
+  ] : []).concat([
+
     /* §303: THE REPEAT MARK TRAVELS. §115 made "does this project run again"
        an editable fact in the front matter and the file never carried it, so
        a download and an untouched re-upload turned every repeating project
@@ -21015,7 +21079,7 @@ function capPlanWorkbook(c, opts){
         });
         return acc;
       }, []) }
-  ];
+  ]);
   if (!o.only) return sheets;
   /* Every sheet a dropped one is referenced BY goes with it: the three project
      sheets each validate their first column against the Projects sheet's own
@@ -21141,6 +21205,16 @@ function capPlanFromWorkbook(c, sheets){
       name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
       weight:r["Weight"], compile:r["Compile"],
       hidden:yes(r["Hidden"]) ? "1" : "" });
+  });
+
+  /* §399: a function's S&W, read by the same Type/Point shape as a unit's
+     SWOT sheet so one spelling serves both files. */
+  var swN = { Strength:0, Weakness:0 };
+  sheetObjects(sheets["S&W"]).forEach(function(r){
+    var t = r["Type"];
+    if (!swN.hasOwnProperty(t) || !r["Point"]) return;
+    swN[t]++;
+    rows.push({ id:c.id + "-" + t[0] + swN[t], type:t.toUpperCase(), name:r["Point"] });
   });
 
   /* §342: the actions, addressed to the HOLDER rather than to a project —
@@ -26006,7 +26080,7 @@ function paneActs(page, acKey){
    which is exactly what this table exists to stop). */
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
-  swot:    { unit: "analysis",                        ac: "u_anal"  },
+  swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
@@ -28151,18 +28225,43 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
+  return swotBoxes(u, ["s","w","o","t"], "analysis", "u_anal");
+}
+/* ── A SUPPORTING FUNCTION'S S&W (§399) ────────────────────────────
+   Islam: *"We need to add Strengths and weakness for the supporting
+   functions"*, then *"like the tabs of the BUs"* and *"make it S&W"*. It
+   REVERSES half of §213 for these two lists: opportunities and threats are
+   about the market and stay the business's, while what a function is good and
+   bad at is the function's own. Every format (pillars, projects, objectives),
+   because it is a fact about the function and not about how it plans.
+
+   THE UNIT'S OWN BOXES, TWO OF FOUR (§53.5) — one builder, so a function's
+   S&W and a unit's SWOT cannot drift into two looks. The page is the
+   Overview's (`capfoundation`, `k_found`): the same grant, so one Edit opens
+   both and nobody's rights move. Stored on `FUNCTIONS[k].swot`, the field a
+   pillars function already carries, so a pillars function's uploaded s/w
+   show here at once and its o/t are kept untouched (§96.2). No migration:
+   a function's unmapped keys ride `functions.extra`. */
+function renderFnSW(t){
+  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
+  var f = FUNCTIONS[fk];
+  if (!f) return "";
+  var sw = f.swot || FN_NO_SWOT;
+  return swotBoxes({ ukey:"fn:" + fk, swot:sw }, ["s","w"], "capfoundation", "k_found");
+}
+function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
      had put here and an empty quadrant offered nothing at all — so a SWOT
      could only ever ARRIVE, never start. Add per quadrant, remove per line,
      both re-asked on the click (§48.2). */
   var box = function(cls, key, title){
     var list = u.swot[key] || [];
-    var ed = authoring("analysis", "u_anal");
+    var ed = authoring(page, ac);
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
           (ed
-            ? fieldOr("analysis", x, "", function(v){ list[i] = v; }) +
+            ? fieldOr(page, x, "", function(v){ list[i] = v; }) +
               '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
               '" title="Remove this line" aria-label="Remove this line">&times;</button>'
             : '<span>' + esc(x) + '</span>') + '</li>';
@@ -28174,9 +28273,9 @@ function renderUnitAnalysis(u){
      tablet meant `visibility:hidden` until the box itself happened to be
      tapped — §70's own finding, fixed for the plan PANE in August and left on
      the cards. */
+  var titles = { s:"Strengths", w:"Weaknesses", o:"Opportunities", t:"Threats" };
   return '<div class="swot">' +
-    box("s","s","Strengths") + box("w","w","Weaknesses") +
-    box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
+    quads.map(function(q){ return box(q, q, titles[q]); }).join("") + '</div>';
 }
 
 /* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────
@@ -43122,7 +43221,12 @@ function deckSlides(u){
      MAIN'S §236.3 IS KEPT WHOLE INSIDE THE GATE: every fixed slide carries an
      anchor, so every gap between two originals is a place a picture can live.
      A function simply has no such gaps here, because it has no such slides. */
-  /* §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE. */
+  /* §399: A FUNCTION HAS ITS OWN S&W NOW — strengths and weaknesses, never
+     the market's two, which stay the business's. One slide, and only when it
+     has something on it (§253: a table with no rows is not a slide).
+     §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
+     side of the switch. */
+  if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
   if (!u.fnKey && compOn(u.ukey, "swot")) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
@@ -43489,6 +43593,27 @@ function deckPillarHead(u, p, pi, which){
    tactics. One system — a function's review must read as the same product as
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
+/* ── A SUPPORTING FUNCTION'S S&W ON ONE SLIDE (§399) ─────────────────
+   Two columns, the unit SWOT's own list and its own two hues, so a function's
+   slide reads as the same thing a unit's does (§53.5). Blank lines are not
+   items (§246's whitespace rule). No slide at all when both lists are empty. */
+function fnSWSlide(f){
+  if (!f) return "";
+  var sw = f.swot || {};
+  var col = function(key, title, hue){
+    var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
+    return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
+      (items.length ? '<ol class="dswot">' + items.map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
+  };
+  var any = ["s","w"].some(function(k){
+    return (sw[k] || []).some(function(t){ return String(t || "").trim(); }); });
+  if (!any) return "";
+  return '<section class="dslide d-fnsw"' + anch("fnsw", "After Strengths & Weaknesses") + '>' +
+    '<h2>Strengths &amp; Weaknesses</h2><div class="dswgrid">' +
+    col("s", "Strengths", "good") + col("w", "Weaknesses", "bad") + '</div></section>';
+}
 function deckSlidesFn(subject){
   /* §326: the function's OWN work — the same list its four pages draw, so the
      projector cannot show a deck the screen does not (§53.5).
@@ -43533,6 +43658,10 @@ function deckSlidesFn(subject){
               return a2.concat(c.actions || []); }, [])).length, "action")
           : plural(caps.reduce(function(n, c){
               return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
+
+  /* §399: the function's S&W, right after its cover, where a unit's SWOT
+     sits after its foundation. Never on a capability's own deck. */
+  if (!isCap) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -52109,10 +52238,6 @@ var WELCOME = (function(){
   function unEmpty(list){
     var e = list.querySelector(".wempty");
     if (e) e.remove();
-    /* A row arriving late means the exit is no longer the only act on the
-       screen, so it gives the fill back (§41). */
-    var x = box && box.querySelector("[data-wcontinue]");
-    if (x) x.classList.remove("wloud");
   }
   function watchReplies(list){
     /* The corner's first poll is in flight while this screen is built, so
@@ -52226,8 +52351,10 @@ var WELCOME = (function(){
 
     box = document.createElement("div");
     box.className = "welcomeover";
-    box.setAttribute("role", "dialog");
-    box.setAttribute("aria-label", "Welcome");
+    /* A page, not a dialog (§400): nothing is behind it but the page it
+       stands in for, and the navigation above it is live. */
+    box.setAttribute("role", "region");
+    box.setAttribute("aria-label", "Home");
     box.innerHTML =
       '<div class="wwrap">' +
         '<div class="whero">' +
@@ -52282,14 +52409,12 @@ var WELCOME = (function(){
             "</div>" +
           "</div>" +
         "</div>" +
-        /* THE WAY OUT SPANS BOTH COLUMNS (§159): inside .wwrap and AFTER
-           .wcols, so its scope is the screen rather than the list it used to
-           end — and so it is last at every width, including the stacked
-           layout below 960px, where the side column falls beneath the left
-           one and a control living in that column is stranded mid-screen. */
-        '<button type="button" class="wexit" data-wcontinue>' +
-          '<span class="wexlab"></span><span class="wgo">\u203a</span>' +
-        "</button>" +
+        /* NO WAY OUT OF ITS OWN (§400). Home is a page inside the chrome
+           now, not a screen over it, so the way on is the navigation already
+           above it — every destination, tab and section is on screen and
+           pressing one leaves Home. The Continue bar (§159) was the only
+           exit of a screen that covered everything; with nothing covered it
+           would be a second way to do what the row does (§87, §94.15). */
       "</div>";
 
     var list = box.querySelector(".wacts");
@@ -52315,7 +52440,6 @@ var WELCOME = (function(){
       empty.className = "wact wempty";
       empty.innerHTML = '<div class="wwhat"><b>Nothing is waiting on you</b></div>';
       list.appendChild(empty);
-      box.querySelector("[data-wcontinue]").classList.add("wloud");
     }
     acts.forEach(function(a){ list.appendChild(a); });
     if (!office && isSelf(person)) watchReplies(list);
@@ -52385,99 +52509,31 @@ var WELCOME = (function(){
       });
     }
 
-    /* ── Continue ───────────────────────────────────────────────────────
-       The platform under this screen is already on the page §94.6 chose, so
-       Continue only steps aside — and names where that is. The drawing
-       carried a grey "Strategy · Plan" under the name and it is deliberately
-       not built: the label already names the destination, and the second
-       line would mean re-adding the navigation-word reader §99 deleted. */
-    /* AND SETUP IS A PLACE TOO (§202). Islam: *"the continue button should
-       show continue to the function or BU name."* It already did for a unit,
-       a function, a company and the group — and read a bare "Continue" from
-       Setup, which is where the house button now sits beside the gear
-       (§193.2), so it is a common way in rather than an edge. Measured
-       before it was changed: `mobile` → "Continue to Mobile", `fn:finance` →
-       "Continue to Finance", `setup` → "Continue". The word is the
-       navigation's own; `placeLabel` does not answer for Setup because Setup
-       is not a place a ROLE is held, which is what that function is for. */
-    var here = null;
-    try { here = typeof current !== "undefined" ? current : null; } catch(e){}
-    var word = "Continue";
-    if (here === "setup" || here === "manage") word = "Continue to Setup";
-    else if (here) {
-      try { word = "Continue to " + subjectName(here); } catch(e){}
-    }
-    var cont = box.querySelector("[data-wcontinue]");
-    cont.querySelector(".wexlab").textContent = word;
-    cont.addEventListener("click", function(ev){ ev.preventDefault(); dismiss(); });
 
-    viewerBar(box);
+
     document.body.appendChild(box);
-    /* AFTER the box is in the document, or there is nothing to enhance: the
-       switcher is 33 people and searchsel takes over any select past five
-       (§45.5). Its popup is `.sspop` at z-index 120, above this overlay's 60,
-       so it opens over the screen rather than under it — checked, not assumed. */
-    try { SEARCHSEL.wire(); } catch(e){}
+    /* THE HOUSE IS LIT WHILE YOU ARE HOME (§400) — the destination row's
+       own meaning of gold (§197.2): this is where you are. */
+    document.documentElement.setAttribute("data-home-open", "1");
   }
 
-  /* ── VIEWING AS, ABOVE THE GREETING (§179) ───────────────────────────────
-     Islam: "the viewing as should be available from the welcome screen." It
-     could not be reached at all — this overlay covers the viewport, so the
-     control in the bar underneath is behind it (§167.2 recorded the same
-     screen swallowing clicks meant for the page).
+  /* ── VIEWING AS LIVES IN THE BAR, AND ONLY THERE (§402) ───────────────
+     Islam: *"in the home page there is a viewing as while we already have a
+     viewing as at the top, let's remove the page redundant one and keep the
+     master one at the top."* §179 drew a second switcher above the greeting
+     because the screen then COVERED the viewport and the bar's control was
+     behind it. §400 put Home INSIDE the chrome, so the bar's switcher is on
+     screen the whole time and the second copy says one thing twice (§87).
+     Deleted, not hidden (§24).
 
-     ABOVE THE HERO, NOT INSIDE IT — Islam's pick from two drawn placements.
-
-     WHO GETS IT IS ASKED, NEVER RE-TESTED: `SYNC.isSMOSession()` is the same
-     function the chrome's own switcher asks, so the two can never disagree
-     about who the SMO is, and it FAILS CLOSED — no SYNC, no answer, no
-     control. A switcher shown to somebody who is not the SMO would serve them
-     another person's screen wearing their own name, which is the worst reading
-     available (sync.js says so at length; this does not restate the rule, it
-     asks it).
-
-     THE OPTIONS ARE THE CHROME'S OWN, cloned rather than rebuilt: fillViewers()
-     already settles what a person is called here (`knownName` through
-     `displayNames`, so a colliding pair reads apart) and where they sit
-     (`placeLabel`, the navigation's word). Building a second list would be a
-     second vocabulary for one question (§53.5, §142).
-
-     NEVER A CLONE OF THE SELECT ITSELF — that would put `id="asWho"` in the
-     document twice, and `getElementById` then answers with whichever came
-     first. This is its own element with its own id, and it DRIVES the chrome's
-     one instead of repeating what it does: setting the value and firing
-     `change` runs the shell's single handler (leaveModes, VIEWER, repaint),
-     so a change made to that handler tomorrow reaches this control for free. */
-  function viewerBar(over){
-    var smo = false;
-    try { smo = !!(typeof SYNC !== "undefined" && SYNC.isSMOSession && SYNC.isSMOSession()); }
-    catch(e){ smo = false; }
-    if (!smo) return;
-    var src = document.getElementById("asWho");
-    if (!src || !src.options.length) return;
-
-    var bar = document.createElement("div");
-    bar.className = "wviewbar";
-    var lab = document.createElement("label");
-    lab.setAttribute("for", "wAsWho");
-    lab.textContent = "Viewing as";
-    var sel = document.createElement("select");
-    sel.id = "wAsWho";
-    for (var i = 0; i < src.options.length; i++)
-      sel.appendChild(src.options[i].cloneNode(true));
-    sel.value = src.value;
-    sel.addEventListener("change", function(){
-      var key = sel.value;
-      /* The chrome's handler is the one that switches the platform. Fire it
-         rather than repeating it — and only then redraw this screen, so the
-         doors it builds are the ones the new viewer can actually reach. */
-      src.value = key;
-      src.dispatchEvent(new Event("change"));
-      redraw(key);
-    });
-    bar.appendChild(lab); bar.appendChild(sel);
-    over.querySelector(".wwrap").insertBefore(bar, over.querySelector(".whero"));
-  }
+     WHAT IT DID IS NOT LOST: switching from the bar redraws Home for the
+     person now being looked at, which the page's own copy used to do. Asked
+     on the bar's one control by id, after its handler has switched the
+     platform, so the doors drawn are the ones the new viewer can reach. */
+  document.addEventListener("change", function(ev){
+    if (!box || !ev.target || ev.target.id !== "asWho") return;
+    redraw(ev.target.value);
+  });
 
   /* Rebuild this screen for whoever is being viewed as. NEVER markDone(): a
      switch is not a dismissal, and marking it would leave the screen unable to
@@ -52495,7 +52551,27 @@ var WELCOME = (function(){
   function dismiss(){
     markDone();
     if (box) { box.remove(); box = null; }
+    document.documentElement.removeAttribute("data-home-open");
   }
+
+  /* ── LEAVING HOME IS PRESSING WHERE YOU WANT TO GO (§400) ──────────────
+     Home sits under the chrome, so a press on the destination row, the tabs,
+     the sections or the trail is somebody going somewhere — the page under
+     Home is repainted by that same press, and Home steps aside for it.
+     CAPTURE PHASE, so it is gone before the press's own handler paints.
+     What does NOT leave: the house itself (it is Home), the viewer strip
+     (it changes whose Home this is), a menu being OPENED (a summary), the
+     trail's own "Home" entry, and the bar's theme button, which
+     changes how the page looks rather than where you are. */
+  document.addEventListener("click", function(ev){
+    if (!box) return;
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    if (!t.closest(".chrome")) return;
+    if (t.closest("[data-welcomego], .viewer, summary, [data-trgo='home'], .themebtn")) return;
+    if (!t.closest("button, a, [role=menuitem], [role=tab]")) return;
+    dismiss();
+  }, true);
 
   /* ── THE OFFER ──────────────────────────────────────────────────────────
      Called from land() beside TOUR.offer, with the same silences: no
@@ -56654,39 +56730,19 @@ var SYNC = (function () {
        only side that knows — and a client's own person never sees it, because
        for them there is nothing behind it (§32: a door to one place is not a
        choice, and a door to none is a dead end). */
-    var back = document.getElementById("clientback");
-    if (back && person && person.cards) {
-      var nameEl = document.getElementById("clientbackname");
-      /* textContent, never innerHTML: a client's name is typed by a person. */
-      if (nameEl) nameEl.textContent = person.clientName || clientSlug();
-      /* AND KEPT WHERE IT IS DRAWN (§362). This function runs once, at
-         hydration; the client's own settings reword this control to *Save &
-         close* on every paint they are open (shell.html clientBar), so the
-         name has to survive being written over — and it is remembered on the
-         control rather than in a global, because a second copy of a value is
-         a second thing to keep in step (§53.5). */
-      back.dataset.client = person.clientName || clientSlug();
-      back.hidden = false;
-      back.title = "Back to your clients";
-      /* AND THE ORG NAME BESIDE IT GOES. Both say "Raya Trade" — one as a
-         label, one as a door — and two copies of a fact on one line is what
-         §120 took off the register's header. The control is the one that also
-         does something, so it is the one that stays. Where there is no way
-         back (a client's own person) the label is untouched. */
-      var org = document.getElementById("orgname");
-      if (org) org.hidden = true;
-      /* STRAIGHT TO THE PLATFORM, NOT THROUGH THE DOOR (§313.23). It went to
-         "/", and the door hands somebody over to what they can OPEN — so on a
-         deployment where this person has exactly one client, the way back to
-         the cards walked out of the client and straight back into it. A loop,
-         and the only route to Forefront's own pages, so the platform's super
-         user could not reach Consultants or Who sees what at all.
-
-         §32 is not in tension with this: "one destination is not a question"
-         is about where a SIGN-IN lands, and this control is somebody asking
-         for the list on purpose. The two answers differ because the questions
-         do. */
-      back.addEventListener("click", function () { location.assign("/platform"); });
+    /* ── THE WAY BACK IS THE TRAIL NOW (§400) ─────────────────────
+       This drew a client-name pill reading "change" that went to the
+       console. It is replaced by the trail route.js draws — "Forefront ›
+       [client] ▾ › Strategy ▾" — for exactly the same people: those the
+       server says HAVE a console (`person.cards`). This writes the one fact
+       the trail needs and nothing else; `#clientback` stays in the markup,
+       hidden, for the offline copy that has no server to ask. */
+    if (person && person.cards) {
+      document.documentElement.setAttribute("data-console", "1");
+      document.documentElement.setAttribute("data-console-client", person.clientName || clientSlug());
+    } else {
+      document.documentElement.removeAttribute("data-console");
+      document.documentElement.removeAttribute("data-console-client");
     }
     /* DRAWN BEFORE ANYTHING CAN RETURN. The branch below stops the whole
        chrome when the signed-in person is not on this client's register — and
@@ -57570,10 +57626,19 @@ var SYNC = (function () {
              fill rather than a dead end (§61) — and nothing about the
              navigation depends on the data, so a tab cannot appear and
              disappear as rows arrive (§45.2). */
-          /* §404: THE OVERVIEW IS THE BRIEF AND THE NORTH STAR, so it is
-             offered while either is switched on for this function. */
+          /* §399: S&W sits between the Overview and the plan, where a unit's
+             SWOT sits between its Foundation and its Plan — Islam: *"like the
+             tabs of the BUs"*. Every format, and always drawn: an empty one is
+             a page you can fill, never a tab that comes and goes (§45.2).
+             §404: THE OVERVIEW IS THE BRIEF AND THE NORTH STAR, so it is
+             offered while either is switched on for this function — and the
+             S&W while the structure carries a SWOT. Switching it off hides the
+             tab and forgets nothing, which is a decision rather than the data
+             coming and going. */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
                     when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
+                  { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW,
+                    when: function(t){ return compOn(t, "swot"); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -59773,7 +59838,7 @@ var SYNC = (function () {
      page's own preview cannot drift apart (§39). */
   function applyBrand(){
     var b = branding();
-    THEME.setBrand({ palette: b.palette, font: b.font, tokens: brandTokens() });
+    THEME.setBrand({ palette: b.palette, tokens: brandTokens() });
   }
 
   /* ══ A REPAINT MUST NOT MOVE THE PAGE (§75) ═══════════════════════
@@ -60035,7 +60100,22 @@ var SYNC = (function () {
                                   : "Strategy Management Platform";
       var org = document.getElementById("orgname");
       var back = document.getElementById("clientback");
-      if (org) {
+      /* ── A CLIENT'S OWN PERSON: THEIR COMPANY, NOT OURS (§400) ─────────
+         Islam: "for the client user he doesn't need the rail at the top with
+         raya trade and strategy as he doesn't really navigate." They get no
+         trail and no switcher, so the line says whose platform this is: the
+         company's mark and name, with the product's name after it, small.
+         Served pages only — the offline copy (§306) has no server to say who
+         is looking, so it keeps the line it has always had — and never for
+         somebody with a console, whose line is the trail (route.js). */
+      var staff = !on && location.protocol !== "file:" &&
+                  !document.documentElement.hasAttribute("data-console") &&
+                  document.documentElement.hasAttribute("data-module");
+      if (staff) {
+        if (h1) h1.textContent = GROUP.org || "Strategy Management Platform";
+        if (org) { org.hidden = !GROUP.org; org.textContent = GROUP.org ? "Strategy Management Platform" : ""; }
+      }
+      if (org && !staff) {
         if (on) { org.hidden = !GROUP.org; org.textContent = "\u00b7 Client settings"; }
         /* AND HIDDEN AGAIN ON THE WAY OUT, which the check found by walking
            rather than by reloading: `sync.js` hides this span wherever the way
@@ -60048,7 +60128,7 @@ var SYNC = (function () {
       }
       var mark = document.getElementById("clientlogo");
       if (mark) {
-        var src = on ? groupLogo() : "";
+        var src = (on || staff) ? groupLogo() : "";
         /* Setting `src` to "" asks the page for its own address, so the
            attribute is REMOVED rather than emptied — an empty src is a
            second request for this document, not an absent picture. */
@@ -66045,9 +66125,9 @@ var SYNC = (function () {
         var a = b.dataset.swadd.split("|"), t = a[0], q = a[1];
         if (!mayAuthor("u_anal", t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("swot", { target:t, q:q }); return; }
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q])) return;
-        u.swot[q].push("");
+        var sw = swotWritable(t);
+        if (!sw || !Array.isArray(sw[q])) return;
+        sw[q].push("");
         fieldSaved(); paint();
       });
     });
@@ -66055,11 +66135,11 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var a = b.dataset.swrm.split("|"), t = a[0], q = a[1], i = +a[2];
         if (!mayAuthor("u_anal", t)) return;
-        var u = unitLikeWritable(t);
-        if (!u || !u.swot || !Array.isArray(u.swot[q]) || u.swot[q][i] == null) return;
-        if (String(u.swot[q][i]).trim() &&
+        var sw = swotWritable(t);
+        if (!sw || !Array.isArray(sw[q]) || sw[q][i] == null) return;
+        if (String(sw[q][i]).trim() &&
             !confirm("Remove this line? This cannot be undone here.")) return;
-        u.swot[q].splice(i, 1);
+        sw[q].splice(i, 1);
         fieldSaved(); paint();
       });
     });
@@ -68595,164 +68675,174 @@ var SYNC = (function () {
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
-  /* ── THE MODULE SWITCHER (spec 046, E1 — signed off 2026-09-11) ──────
-     The four-square mark at the far left of the top bar, opening the list of
-     modules this client has with the one you are in marked.
+  /* ── THE TRAIL (§400) ─────────────────────────────────────────────
+     Islam, of moving between the console, a client and its modules: every
+     way out was a different control in a different place — a client-name
+     pill reading "change", a four-square mark with no word beside it, the
+     house, the gear, a "Save & close", and rows at the foot of a Setup rail
+     reading "‹ Back to the console" and "Client settings ›". Replaced, for
+     Forefront's own people, by ONE line reading where you are:
 
-     IT IS BUILT HERE AND NOT IN THE FROZEN SHELL, for the reason that decides
-     whether it is drawn at all: a module list only exists where there is a
-     server to say which ones a client has. The offline copy (§306) is the
-     built file with one tenant's graph baked in and no server behind it, so a
-     switcher in the frozen shell would be a control that could never open
-     anything (§61). Its SHAPE is in arrange.css beside the family it belongs
-     to (`details.dlmenu`), because a stylesheet is inert either way.
+         Platform  ›  Raya Trade ▾  ›  Strategy ▾
 
-     DRAWN ONLY WHERE THERE IS A CHOICE. `data-modules` is written by the
-     server only for a client holding more than one (lib/shell.ts), so a menu
-     of one is never built — that is a door behind a door (§32) — and the
-     ABSENT attribute is what says so, rather than a flag beside it (§50.6).
+     Each step is a place. Platform is the console (Islam, 2026-09-24:
+     the first word reads Platform, not Forefront). Since §401 the client
+     opens a menu of the OTHER clients this person may open (and "All
+     clients"); the module opens the other modules, a rule, and "Client
+     settings"; on the client's own settings the third step reads "Client
+     settings" and opens the same menu with each module's settings. No
+     client mark on the bar (§401).
 
-     THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
-     one answer to what the switcher lists, read by this and by a module's
-     own bar (modules/insights/page.ts, §53.5): a label worked out here by
-     capitalising a key is how two screens come to spell one module
-     differently.
+     ONLY FOR SOMEBODY WITH A CONSOLE (`data-console`, written by sync.js
+     off `person.cards`, which only the server can answer). A client's own
+     person gets NO trail and NO module switcher — his word: "he doesn't
+     really navigate, we bring everything to his view in the strategy
+     platform" — so their bar names their company and nothing else, and the
+     reports reach them as a tab (§376).
 
-     IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
-     inside, and that drawing's `.brand` was a flex ROW while the product's is
-     a COLUMN — copying the markup would have stranded the mark on a line of
-     its own above the product's name. `.top-in` is already a row and
-     `.brand` carries `margin-right:auto`, so first-in-the-row is the top left
-     (§296.1: measure the paint, never the cascade).
-
-     NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
-     BELOW this one and nothing rewrites `.top-in`, so the markup is built and
-     wired exactly ONCE — no second handler on a repaint (§24, §47.2), which
-     is what the `.topmark` guard below is for now that a paint is what calls
-     this. A press navigates, so the menu never has to be closed afterwards.
-
-     AND IT IS BUILT ON THE FIRST PAINT, NEVER AT LOAD (§383). It has to ask
-     whether the tab row already reaches the library, and at load the answer
-     is about the BAKED viewer: over HTTP the shell hydrates from /api/state
-     after this file has been parsed, so anything viewer-dependent answered
-     here is answered about somebody else. §362 hit the same wall from the
-     other side and moved that question to paint time; this is the same move
-     for the same reason. Nothing flashes, because the boot skeleton hides
-     `.chrome` until the first paint anyway (§94.10), and the `.topmark`
-     guard below makes a second call a no-op. */
-  function mountSwitcher() {
-    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058) — AND THAT IS NOW A
-       CSS RULE RATHER THAN AN EARLY RETURN HERE (§367). Those pages
-       belong to no module, so a switcher there offers a way out of somewhere
-       you are not; what changed is that crossing between the two rails stopped
-       being a page load, so "built once at load" stopped being able to answer
-       the question at all. It was wrong in BOTH directions the moment it
-       could: crossing to a module's settings left the switcher never built,
-       and crossing back left it standing.
-
-       So it is built wherever there is a choice, and `data-client-settings` —
-       the one answer paint() writes for the destination row, the Group
-       dropdown, the Units | Functions switch, the gear and the viewer strip —
-       stands it down with the rest of the chrome (_shared.css). Same
-       mechanism, one rule, and it follows the scope on every paint instead of
-       on every navigation. `display:none`, so it does not take the keyboard
-       either (§3.2); and the whole bar is inside `.chrome`, which the boot
-       skeleton hides (§94.10), so nothing flashes before the first paint. */
-    var raw = document.documentElement.getAttribute("data-modules");
-    if (!raw) return;                               /* one module: no choice to offer */
-    var list;
-    try { list = JSON.parse(raw); } catch (e) { return; }
-    /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
-       rather than on the attribute (§362.1): `data-modules` is the list of
-       modules this person may open, read by this and by the client's own
-       Setup rail, which draws a row per module whatever the count. The
-       check's break forces the switcher on for a client holding one. */
-    var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
-    if (!Array.isArray(list)) return;
-    /* ── A MODULE THE TABS REACH IS NOT A PLACE TO SWITCH TO (§376,
-       decision 3) ───────────────────────────────────────────────────
-       The switcher exists to reach a module the navigation cannot. Since
-       the library reads as a tab beside Strategy and Performance, offering
-       it here as well is the same door twice on one screen (§87's twins,
-       §94.15) — and for a client's own person, who has Strategy and the
-       reports and nothing else, it leaves a mark whose menu holds only the
-       page they are already on.
-
-       DROPPED FROM THE LIST RATHER THAN HIDDEN, so the count below decides
-       on what is actually on offer: with one left there is no choice, and
-       §32's rule takes the mark off the bar entirely.
-
-       WHICH MODULES THE TABS REACH IS ASKED OF THE TAB ITSELF, never
-       listed here — `LIBRARY.shown()` is the one answer to whether the
-       library is on the tab row (it reads the served stamp), so a build
-       that stopped drawing the tab puts it back in this menu on its own
-       rather than leaving it reachable from nowhere (§61, §53.5).
-
-       AND THE `typeof` GUARD FIXES NOTHING TODAY, said rather than left for
-       the next reader to take as load-bearing (§298.2): build-shell.mjs
-       concatenates this file LAST, after every frozen script, so LIBRARY is
-       always there. It is here because this file is the one piece of browser
-       code that is also written as a file of its own.
-
-       AND "REACHED" MEANS REACHED BY THIS PERSON (§383). `LIBRARY.shown()`
-       says the library is on the tab row; `anyDestination()` says there is a
-       row — somebody who reaches no unit, no function, no company and not
-       the group has no tab to be offered it on, and dropping it here would
-       leave them the reports nowhere, which is the hole §376's own comment
-       promises this filter never opens (§61). */
-    var reached = (typeof LIBRARY !== "undefined" && LIBRARY.shown() &&
-                   typeof anyDestination === "function" && anyDestination())
-      ? [LIB_TAB_KEY] : [];
-    list = list.filter(function (mm) { return !mm || reached.indexOf(mm.key) < 0; });
-    if (!forceSwitch && list.length < 2) return;
+     DRAWN ON PAINT, REBUILT ONLY WHEN WHAT IT SAYS CHANGES — the client's
+     settings and a module's are one document (§367), so crossing between
+     them is a paint and the third step has to follow it; rebuilding on
+     every paint would shut a menu somebody has open. */
+  var ICO_DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.6 5 6.6 8 3.6" ' +
+    'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function modulesOn() {
+    try { var l = JSON.parse(document.documentElement.getAttribute("data-modules") || "[]");
+      return Array.isArray(l) ? l.filter(function (x) { return x && x.key; }) : []; }
+    catch (e) { return []; }
+  }
+  function onClientSettings() {
+    return document.documentElement.hasAttribute("data-client-settings");
+  }
+  var trailSaid = null;
+  function menuHTML(items) {
+    return '<div class="menu" role="menu">' + items.map(function (it) {
+      if (it.rule) return '<div class="trrule" role="separator"></div>';
+      if (it.quiet) return '<div class="trquiet">' + esc(it.label) + "</div>";
+      return '<button type="button" role="menuitem" data-trgo="' + esc(it.go) + '"' +
+        (it.here ? ' aria-current="true"' : "") + ">" + esc(it.label) +
+        (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</button>";
+    }).join("") + "</div>";
+  }
+  function mountTrail() {
+    var root = document.documentElement;
+    /* data-break="trail-for-staff" is checks/modules.mjs's falsification: a
+       client's own person drawn the trail they must never get. */
+    if (!root.hasAttribute("data-console") && root.getAttribute("data-break") !== "trail-for-staff") return;
     var bar = document.querySelector(".top .top-in");
-    if (!bar || bar.querySelector(".topmark")) return;
-
-    var d = document.createElement("details");
-    d.className = "dlmenu topmark";
-    var here = list.filter(function (m) { return m && m.key === MODULE; })[0];
-    var sum = document.createElement("summary");
-    sum.setAttribute("title", here ? "Modules — you are in " + here.label : "Modules");
-    sum.setAttribute("aria-label", sum.getAttribute("title"));
-    /* DRAWN, NEVER A FONT CHARACTER (§52): a glyph the subset does not carry
-       ships as a blank box, and this mark has no word beside it to recover
-       from that. */
-    sum.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-      '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
-      '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
-      '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
-      "</g></svg>";
-    d.appendChild(sum);
-
-    var menu = document.createElement("div");
-    menu.className = "menu";
-    menu.setAttribute("role", "menu");
-    list.forEach(function (m) {
-      if (!m || !m.key) return;
-      var b = document.createElement("button");
-      b.type = "button";
-      b.setAttribute("role", "menuitem");
-      b.dataset.module = m.key;
-      if (m.key === MODULE) b.setAttribute("aria-current", "true");
-      b.appendChild(document.createTextNode(m.label || m.key));
-      if (m.note) {
-        var sub = document.createElement("span");
-        sub.className = "dlsub";
-        sub.appendChild(document.createTextNode(m.note));
-        b.appendChild(sub);
-      }
-      menu.appendChild(b);
+    if (!bar) return;
+    var client = root.getAttribute("data-console-client") || SLUG;
+    var mods = modulesOn();
+    var here = mods.filter(function (x) { return x.key === MODULE; })[0];
+    var modLabel = here ? here.label : (root.getAttribute("data-module-label") || "");
+    var cs = onClientSettings();
+    var said = [client, cs, MODULE, mods.map(function (x) { return x.key; }).join(","),
+                trailClients ? trailClients.map(function (x) { return x.key; }).join(",") : "?"].join("|");
+    var nav = bar.querySelector("nav.trail");
+    if (nav && said === trailSaid) return;
+    trailSaid = said;
+    if (!nav) {
+      nav = document.createElement("nav");
+      nav.className = "trail";
+      nav.setAttribute("aria-label", "Where you are");
+      bar.insertBefore(nav, bar.firstChild);
+      /* ONE LISTENER FOR THE WHOLE TRAIL, wired once: the markup below is
+         rewritten when the place changes and this survives it (§24, §47.2). */
+      nav.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
+        if (!b) return;
+        var go = b.dataset.trgo;
+        Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; });
+        /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
+           same one the rail rows made: one document, one attribute. */
+        var cross = /^cross:/.test(go) ? go.slice(6) : null;
+        if (cross && typeof current !== "undefined" && current === "setup" &&
+            typeof setupLandingKey === "function") {
+          var k = setupLandingKey(cross);
+          if (k) {
+            if (currentSub !== k && typeof leaveModes === "function") leaveModes();
+            setScope(cross);
+            current = "setup"; currentSub = k;
+            paint(); window.scrollTo(0, 0);
+            return;
+          }
+        }
+        var href = cross ? (cross === "client" ? "/" + SLUG + "/setup" : "/" + SLUG + "/" + cross + "/setup") : go;
+        if (href === location.pathname) return;
+        location.assign(href);
+      });
+      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§401, Islam: "when I click
+         outside them the menue should close"). `<details>` has no such
+         behaviour of its own. On pointerdown, as the chat corner does
+         (§100.4): a menu that lingers until the mouse comes up reads as
+         having missed the press. Opening one menu shuts the other, and
+         Escape shuts either. Wired once, beside the one listener above. */
+      var shutAll = function (keep) {
+        Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { if (d !== keep) d.open = false; });
+      };
+      document.addEventListener("pointerdown", function (ev) {
+        var inside = ev.target && ev.target.closest ? ev.target.closest("nav.trail details") : null;
+        shutAll(inside);
+      }, true);
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape" && nav.querySelector("details[open]")) shutAll(null);
+      });
+    }
+    var sep = '<span class="trsep" aria-hidden="true">›</span>';
+    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§401, Islam: "when I click on
+       the name of the client drop down I should get the other clients"). The
+       list is the server's (`clients`: visible AND openable, the cards' own
+       two rules, §42), asked once per page. Until it answers the menu says
+       so, and if it cannot answer the console is still the way (§61). No
+       mark: the client's logo is not on this bar any more (Islam: "the logo
+       of the client shouldn't appear in the top navigation bar"). */
+    var clientItems = [];
+    var others = (trailClients || []).filter(function (x) { return x.key !== SLUG; });
+    if (trailClients === null) clientItems.push({ label: "Reading your clients…", quiet: true });
+    others.forEach(function (x) { clientItems.push({ label: x.name, go: "/" + x.key }); });
+    if (trailClients && !others.length) clientItems.push({ label: "No other clients", quiet: true });
+    clientItems.push({ rule: true });
+    clientItems.push({ label: "All clients", go: "/platform#clients" });
+    /* THE MODULE STEP LISTS THE OTHER MODULES, THEN THE CLIENT'S SETTINGS
+       (§401, his words: "the other modules and then the separator and the
+       client settings"). On the client's own settings the step reads "Client
+       settings" and opens the same menu, where each module goes to THAT
+       module's settings — from a settings page that is the next place, and
+       it keeps §362.1's one press. */
+    var modItems = [];
+    mods.forEach(function (x) {
+      if (!cs && x.key === MODULE) return;
+      modItems.push(cs ? { label: x.label + " settings", go: "cross:" + x.key }
+                       : { label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
     });
-    /* ONE LISTENER ON THE MENU, not one per item — and the module you are
-       ALREADY in does nothing rather than reloading the page under somebody
-       (§61's other half: a control that appears to act and does not). */
-    menu.addEventListener("click", function (ev) {
-      var b = ev.target.closest ? ev.target.closest("[data-module]") : null;
-      if (!b || b.dataset.module === MODULE) return;
-      location.assign("/" + SLUG + "/" + b.dataset.module);
-    });
-    d.appendChild(menu);
-    bar.insertBefore(d, bar.firstChild);
+    if (modItems.length) modItems.push({ rule: true });
+    modItems.push({ label: "Client settings", go: "cross:client", here: cs });
+    var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
+      esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";
+    nav.innerHTML =
+      '<a class="trff" href="/platform">Platform</a>' + sep +
+      '<details class="dlmenu trstep trclient"><summary>' +
+        "<span>" + esc(client) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(clientItems) + "</details>" +
+      sep + third;
+    if (trailClients === null && !trailAsked) askClients();
+  }
+  /* the clients this person may open, asked once per page (§401) */
+  var trailClients = null, trailAsked = false;
+  function askClients() {
+    trailAsked = true;
+    try {
+      fetch("/api/platform", { method: "POST", credentials: "same-origin",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clients" }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { trailClients = (j && j.ok !== false && Array.isArray(j.clients)) ? j.clients : []; })
+        .catch(function () { trailClients = []; })
+        .then(function () { try { mountTrail(); } catch (e) {} });
+    } catch (e) { trailClients = []; }
   }
 
   /* ── on arrival: the address is the place ── */
@@ -68839,7 +68929,7 @@ var SYNC = (function () {
   if (typeof paint === "function") {
     var painted = paint;
     paint = function () { var r = painted.apply(this, arguments);
-      try { mountSwitcher(); } catch (e) {}
+      try { mountTrail(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {

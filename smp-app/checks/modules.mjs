@@ -32,7 +32,7 @@
      SMP_BREAK=any-module    node checks/modules.mjs   # must go red
      SMP_BREAK=open-address  node checks/modules.mjs   # must go red
      SMP_BREAK=static-hello  node checks/modules.mjs   # must go red
-     SMP_BREAK=switch-always node checks/modules.mjs   # must go red
+     SMP_BREAK=trail-for-staff node checks/modules.mjs # must go red
      SMP_BREAK=gate-open     node checks/modules.mjs   # must go red (§4c)      */
 import { readFileSync, existsSync } from "node:fs";
 import { createServer } from "node:http";
@@ -713,6 +713,7 @@ const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
    from — so what is driven below is the list a real client would be sent,
    and a module added or removed changes this file nowhere. */
 const MENU = moduleMenu(offerable());
+const CLIENTS = [{ key: "raya-trade", name: "Raya Trade", kind: "client" }, { key: "rhi", name: "RHI", kind: "client" }, { key: "el-abd", name: "El Abd", kind: "client" }];
 const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 /* AND THE STUB HAS TO CARRY A `paint`, BECAUSE THE SWITCHER IS A PAINT-TIME
    CONTROL NOW (§383). It was an IIFE built at load, and the comment above
@@ -724,9 +725,10 @@ const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").repla
    (§100.3: a stand-in that models less than the thing it stands in for). It
    is declared BEFORE route.js is parsed — that is when the wrap happens —
    and called after, which is the one paint the real platform makes on boot. */
-const doc = (menu) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
+const doc = (menu, staff) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
+  (staff ? "" : " data-console='1' data-console-client='Raya Trade'") +
   (menu ? " data-modules='" + attr(JSON.stringify(menu)) + "'" : "") +
-  (BREAK === "switch-always" ? " data-break='switch-always'" : "") +
+  (BREAK === "trail-for-staff" ? " data-break='trail-for-staff'" : "") +
   "><head><meta charset='utf-8'><link rel='stylesheet' href='/platform.css'></head><body class='ready'>" +
   BODY + "<script>window.paint = function () {};</script>" +
   "<script src='/route.js'></script><script>paint();</script></body></html>";
@@ -734,6 +736,8 @@ const srv = createServer((req, res) => {
   const p = String(req.url).split("?")[0];
   if (p === "/platform.css") { res.writeHead(200, { "Content-Type": "text/css" }); return res.end(CSS); }
   if (p === "/route.js") { res.writeHead(200, { "Content-Type": "application/javascript" }); return res.end(ROUTE); }
+  /* the trail's client list (§401): the stub answers what the server would */
+  if (p === "/api/platform") { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ ok: true, clients: CLIENTS })); }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   /* THE STUB HONOURS THE SAME BREAK AS THE SERVER: this section serves the
      shell's body itself rather than going through shellDocument(), so
@@ -747,7 +751,7 @@ const srv = createServer((req, res) => {
      across — and the "a menu of one is a door behind a door" test (§32)
      lives in route.js, which is what this section drives. A stub still
      omitting it would be testing a server that no longer exists. */
-  res.end(doc(p.startsWith("/one/") ? [MENU[0]] : MENU));
+  res.end(doc(p.startsWith("/one/") ? [MENU[0]] : MENU, p.startsWith("/staff/")));
 });
 await new Promise((r) => srv.listen(0, "127.0.0.1", r));
 const base = "http://127.0.0.1:" + srv.address().port;
@@ -763,45 +767,79 @@ if (browser) {
   page.on("pageerror", (e) => errs.push(String(e)));
   await page.goto(base + "/raya-trade/strategy/mobile/plan");
   await page.waitForTimeout(250);
-  check("the switcher is drawn in the top bar", (await page.locator(".topmark").count()) === 1);
-  /* FIRST IN THE ROW IS THE TOP LEFT (the mockup put it inside `.brand`, which
-     is a COLUMN in the product — copied, it would have stranded the mark on a
-     line of its own above the name). */
-  check("it is the first thing in the row, not inside the brand block",
-    (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("topmark"));
-  const geo = await page.evaluate(`(() => { const a = document.querySelector('.topmark').getBoundingClientRect(),
-      b = document.querySelector('.brand h1').getBoundingClientRect();
-      return { w: Math.round(a.width), h: Math.round(a.height), left: Math.round(a.left), titleLeft: Math.round(b.left),
-               sameRow: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 10 }; })()`);
-  check("on the same line as the product's name, and before it", geo.sameRow && geo.left < geo.titleLeft, JSON.stringify(geo));
-  check("and it is a square", geo.w === geo.h, geo.w + "x" + geo.h);
-  /* MEASURED AS PAINT, never as a class (§94.8): a mark styled by nothing
-     renders as a bare button and satisfies every assertion about its markup. */
-  check("its shape is painted, not merely marked up",
-    await page.evaluate("(() => { const s = getComputedStyle(document.querySelector('.topmark > summary')); return s.borderTopWidth === '1px' && s.borderTopStyle === 'solid'; })()"));
-  check("the mark is DRAWN and not a font character (§52)", (await page.locator(".topmark > summary svg rect").count()) === 4);
-  await page.locator(".topmark > summary").click();
+  /* §400: THE FOUR-SQUARE SWITCHER IS GONE; THE OFFICE'S TRAIL OFFERS THE
+     MODULES. REWRITTEN, NEVER LOOSENED (§218): every claim this section made
+     about the switcher is made again about the trail's client step — drawn
+     first in the row, a real shape, a DRAWN chevron (§52), every module with
+     the server's own line, the one you are in marked, the menu on the page —
+     and the other end moves from "one module, no menu" to the decision §400
+     actually made: a client's OWN person gets no trail at all. */
+  check("the trail is drawn in the top bar", (await page.locator("nav.trail").count()) === 1);
+  check("it is the first thing in the row",
+    (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("trail"));
+  const tr = await page.evaluate(`(() => { const n = document.querySelector('nav.trail');
+      return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: (n.querySelector('a.trff') || {}).getAttribute ? n.querySelector('a.trff').getAttribute('href') : '',
+               where: ((n.querySelector('details.trstep:not(.trclient) > summary span') || {}).textContent || '').trim() }; })()`);
+  check("it reads Platform › the client › the module you are in",
+    tr.ff === "/platform" && /^platform\b/i.test(tr.text) && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
+  check("the chevrons are DRAWN and not a font character (§52)", (await page.locator("nav.trail summary svg").count()) >= 2);
+  /* §401: THE TWO MENUS SWAP JOBS. Islam — the client step lists "the other
+     clients", the module step "the other modules and then the separator and
+     the client settings", and no client mark on the bar. Every claim the
+     §400 version made about the modules is made again of the MODULE step;
+     the client step is asserted against what the SERVER said (the stub's
+     `clients` answer), never a list typed here (§94.8). */
+  check("no client mark on the bar (§401)", (await page.locator("nav.trail img").count()) === 0);
+  await page.locator("nav.trail .trmod > summary").click();
   await page.waitForTimeout(200);
-  const items = await page.locator(".topmark .menu button").allInnerTexts();
-  check("the menu lists every module this client has",
-    items.length === MENU.length && MENU.every((m, i) => items[i].startsWith(m.label)),
-    items.map((t) => t.split("\n")[0]).join(", "));
-  check("each carries the line the server gave it, never one worked out from the key",
-    MENU.every((m, i) => items[i].includes(m.note)), items.map((t) => t.replace(/\n/g, " · ")).join(" | "));
-  check("the module you are IN is marked",
-    (await page.locator('.topmark .menu button[aria-current="true"]').innerText()).startsWith(MODULE_DEF[DEFAULT_MODULE].label));
-  /* THE MENU IS OPEN AND ON SCREEN — a panel positioned off its own edge
-     renders perfectly and cannot be read (§90: a control below the fold is a
-     control that does nothing). */
-  const box = await page.locator(".topmark .menu").boundingBox();
+  const items = await page.locator("nav.trail .trmod .menu button").allInnerTexts();
+  const OTHERS = MENU.filter((m) => m.key !== DEFAULT_MODULE);
+  const modItems = items.slice(0, OTHERS.length);
+  check("the module step lists every OTHER module this client has, in order",
+    OTHERS.length > 0 && OTHERS.every((m, i) => (modItems[i] || "").startsWith(m.label)), items.map((t) => t.split("\n")[0]).join(", "));
+  check("…each with the line the server gave it, never one worked out from the key",
+    OTHERS.every((m, i) => (modItems[i] || "").includes(m.note)), modItems.map((t) => t.replace(/\n/g, " · ")).join(" | "));
+  check("…and NOT the module you are in — it is the step's own name (§401)",
+    !items.some((t) => t.split("\n")[0] === MODULE_DEF[DEFAULT_MODULE].label), items.join(" | "));
+  const tail = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.className === "trrule" ? "|" : e.textContent.trim()));
+  check("…then a rule, then Client settings, last",
+    tail.length >= 2 && tail[tail.length - 2] === "|" && tail[tail.length - 1] === "Client settings", JSON.stringify(tail));
+  const box = await page.locator("nav.trail .trmod .menu").boundingBox();
   check("and the open menu is on the page", box && box.x >= 0 && box.y >= 0 && box.width > 200, JSON.stringify(box));
-  /* BOTH ENDS (§94.2, §32): a client with one module is offered no menu at
-     all — a build that always drew it would pass everything above. */
+  /* the client step is the server's list less the client you are on (§401) */
+  await page.locator("nav.trail .trclient > summary").click();
+  await page.waitForTimeout(200);
+  const cl = await page.locator("nav.trail .trclient .menu button").allInnerTexts();
+  const wantCl = CLIENTS.filter((c) => c.key !== "raya-trade").map((c) => c.name);
+  check("the client step lists the OTHER clients the server says this person may open",
+    wantCl.length > 0 && wantCl.every((n, i) => cl[i] === n) && !cl.includes("Raya Trade"), cl.join(" | "));
+  check("…and a way to all of them, so it is never a dead end (§61)", cl[cl.length - 1] === "All clients", cl.join(" | "));
+  check("opening one menu shuts the other",
+    (await page.locator("nav.trail details[open]").count()) === 1 && (await page.locator("nav.trail .trclient[open]").count()) === 1);
+  /* A PRESS ANYWHERE ELSE CLOSES IT (§401) — a real mouse press on the page,
+     never a programmatic close, or the listener is not what is measured. */
+  await page.mouse.click(700, 420);
+  await page.waitForTimeout(100);
+  check("a press outside the menu closes it (§401)", (await page.locator("nav.trail details[open]").count()) === 0);
+  await page.locator("nav.trail .trclient > summary").click();
+  await page.waitForTimeout(100);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(100);
+  check("…and so does Escape", (await page.locator("nav.trail details[open]").count()) === 0);
   const one = await browser.newPage({ viewport: { width: 1400, height: 400 } });
   await one.goto(base + "/one/strategy/mobile");
   await one.waitForTimeout(250);
-  check("a client with ONE module gets no switcher — a menu of one is a door behind a door",
-    (await one.locator(".topmark").count()) === 0);
+  await one.locator("nav.trail .trmod > summary").click().catch(() => {});
+  const oneItems = await one.locator("nav.trail .trmod .menu > *").allInnerTexts();
+  check("a client with ONE module offers no other module and no rule — only Client settings",
+    oneItems.length === 1 && oneItems[0].trim() === "Client settings", JSON.stringify(oneItems));
+  /* BOTH ENDS (§94.2): a build that drew the trail for everybody passes
+     everything above. */
+  const staff = await browser.newPage({ viewport: { width: 1400, height: 400 } });
+  await staff.goto(base + "/staff/strategy/mobile");
+  await staff.waitForTimeout(250);
+  check("a client's own person gets no trail — they do not travel between clients (§400)",
+    (await staff.locator("nav.trail").count()) === 0);
   check("no page error from any of it", errs.length === 0, errs.join(" | "));
   await browser.close();
 }

@@ -105,8 +105,11 @@ with sync_playwright() as p:
         secs = pg.evaluate("""(t)=>{
           const d=(SUBS.fn||[]).filter(x=>x.k==='fnstrat')[0];
           return d.sections(t.slice(3)).map(s=>s.k+'/'+s.ac); }""", t)
-        ok("the " + what + " function has Overview + plan, both on the function's keys",
-           secs == ["found/k_found", "proj/k_proj"], secs)
+        # §399 put S&W between them, on the Overview's own key — REWRITTEN,
+        # never loosened (§218): still both on the function's keys, still
+        # Overview first and the plan last.
+        ok("the " + what + " function has Overview, S&W and plan, all on the function's keys",
+           secs == ["found/k_found", "swot/k_found", "proj/k_proj"], secs)
 
     print("\n── 2 · and they draw the SAME two cards (§53.5, asserted as agreement)")
     open_at(pg, T);  a = cards(pg)
@@ -407,9 +410,14 @@ with sync_playwright() as p:
     # literal to remember; a sheet that reaches only one half goes red, which
     # is the fault worth catching. The three are read from the loop above
     # rather than typed again, or this line and that one can disagree.
+    # §399: a function's file now carries ONE sheet a unit's does not — its
+    # strengths and weaknesses — at the place the unit's SWOT sits. Still the
+    # difference, never a list: every other sheet the two share must agree.
     ok("...and a unit's file is a function's plus the three it does not author",
-       [s for s in wb["unit"] if s not in FN_GONE] == wb["fn"],
+       [s for s in wb["unit"] if s not in FN_GONE] == [s for s in wb["fn"] if s != "S&W"],
        (wb["unit"], wb["fn"], FN_GONE))
+    ok("...and a function's file carries its S&W sheet where a unit carries none",
+       "S&W" in wb["fn"] and "S&W" not in wb["unit"], (wb["unit"], wb["fn"]))
 
     print("\n── 7 · a weight survives the round trip")
     trip = pg.evaluate("""(t)=>{

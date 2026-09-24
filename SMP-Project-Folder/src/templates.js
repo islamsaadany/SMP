@@ -776,7 +776,14 @@ function capReplaceSummary(c, rows){
 function applyPlanReplace(u, rows){
   /* clearUnitPlan archives on the way out (§49.2), so this is ONE archive,
      not two — the import used to take its own and then take a second. */
+  /* §399: a pillars FUNCTION's S&W is kept when the file carries none — a
+     workbook downloaded before the S&W sheet existed must not wipe what the
+     office has written since (§58). A unit's SWOT is authored by the file
+     exactly as before. */
+  var keepSW = u.fnKey && !rows.some(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; })
+    ? { s:(u.swot.s || []).slice(), w:(u.swot.w || []).slice() } : null;
   var archived = clearUnitPlan(u);
+  if (keepSW) { u.swot.s = keepSW.s; u.swot.w = keepSW.w; }
   /* The foundation's LABELS are a skeleton the unit keeps when a file does not
      carry one. A file that does carry clauses re-authors both label and text,
      so the old ones are cleared out of the way first. */
@@ -794,6 +801,18 @@ function applyPlanReplace(u, rows){
 }
 function applyCapPlanReplace(c, rows){
   var archived = clearCapability(c, "plan");
+  /* §399: a function's S&W is written onto the function itself, and only when
+     the file carries some — a file downloaded before the S&W sheet existed
+     must not wipe what the office has since written (§58). */
+  var swRows = rows.filter(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; });
+  rows = rows.filter(function(r){ return r.type !== "STRENGTH" && r.type !== "WEAKNESS"; });
+  if (c && c.own && swRows.length) {
+    var sw = swotWritable("fn:" + c.fn);
+    if (sw) {
+      sw.s = swRows.filter(function(r){ return r.type === "STRENGTH"; }).map(function(r){ return r.name; });
+      sw.w = swRows.filter(function(r){ return r.type === "WEAKNESS"; }).map(function(r){ return r.name; });
+    }
+  }
   createFromCapPlan(c, { rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });
@@ -1111,7 +1130,8 @@ function checkCapFileShape(c, rows, kind){
   return problems;
 }
 
-var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE"];
+var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE",
+                 /* §399: a function's S&W rows */ "STRENGTH","WEAKNESS"];
 
 /* The capability twin of mintPlanIds. */
 function mintCapPlanIds(c, rows){

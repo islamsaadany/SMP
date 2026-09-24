@@ -405,7 +405,12 @@ function deckSlides(u){
      MAIN'S §236.3 IS KEPT WHOLE INSIDE THE GATE: every fixed slide carries an
      anchor, so every gap between two originals is a place a picture can live.
      A function simply has no such gaps here, because it has no such slides. */
-  /* §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE. */
+  /* §399: A FUNCTION HAS ITS OWN S&W NOW — strengths and weaknesses, never
+     the market's two, which stay the business's. One slide, and only when it
+     has something on it (§253: a table with no rows is not a slide).
+     §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
+     side of the switch. */
+  if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
   if (!u.fnKey && compOn(u.ukey, "swot")) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
@@ -772,6 +777,27 @@ function deckPillarHead(u, p, pi, which){
    tactics. One system — a function's review must read as the same product as
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
+/* ── A SUPPORTING FUNCTION'S S&W ON ONE SLIDE (§399) ─────────────────
+   Two columns, the unit SWOT's own list and its own two hues, so a function's
+   slide reads as the same thing a unit's does (§53.5). Blank lines are not
+   items (§246's whitespace rule). No slide at all when both lists are empty. */
+function fnSWSlide(f){
+  if (!f) return "";
+  var sw = f.swot || {};
+  var col = function(key, title, hue){
+    var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
+    return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
+      (items.length ? '<ol class="dswot">' + items.map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
+  };
+  var any = ["s","w"].some(function(k){
+    return (sw[k] || []).some(function(t){ return String(t || "").trim(); }); });
+  if (!any) return "";
+  return '<section class="dslide d-fnsw"' + anch("fnsw", "After Strengths & Weaknesses") + '>' +
+    '<h2>Strengths &amp; Weaknesses</h2><div class="dswgrid">' +
+    col("s", "Strengths", "good") + col("w", "Weaknesses", "bad") + '</div></section>';
+}
 function deckSlidesFn(subject){
   /* §326: the function's OWN work — the same list its four pages draw, so the
      projector cannot show a deck the screen does not (§53.5).
@@ -816,6 +842,10 @@ function deckSlidesFn(subject){
               return a2.concat(c.actions || []); }, [])).length, "action")
           : plural(caps.reduce(function(n, c){
               return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
+
+  /* §399: the function's S&W, right after its cover, where a unit's SWOT
+     sits after its foundation. Never on a capability's own deck. */
+  if (!isCap) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);

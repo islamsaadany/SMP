@@ -57871,3 +57871,14 @@ working with our clients like raya trade this is very critical."*
 - **NOTHING A LIVE CLIENT HOLDS MOVES**: no server rule, no schema, no
   migration; the access baseline UNMOVED for all 33 people at every target;
   authoriser 763/0, change list 140/0.
+
+**§405 and §405.1 MERGED TO `main` 2026-09-24 on Islam's word** ("merge to
+main"), a clean fast-forward: `main` had not moved, so the tree pushed is the
+tree that was checked. **No forced sign-out is owed, measured rather than
+assumed** (spec 029): `origin/main`'s own authoriser and change-list suites run
+against the merged `lib/authorize.js`, `lib/rules.js` and `lib/graph-diff.js`
+read 763/0 and 140/0, so no save an open tab could make is refused now.
+`sw.js` is `v5.48-unit-plans-finished` against main's `v5.46`, confirmed
+before the push (§94.16). This record is its own commit so `main`'s tip is on
+no other ref until production has served it (§91).
+

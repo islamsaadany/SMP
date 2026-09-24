@@ -2704,14 +2704,9 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
     border-bottom:0; background:var(--cta-hover); }
   #subtabs .tabacts { margin-block:6px; }
 
-  /* SQUARED, NOT A PILL (§400.3): Islam picked A of three drawn shapes —
-     the outer box takes the Reporting button's own 6px corner, so the two
-     controls stacked one above the other share one shape, and a segment keeps
-     its 3px of air inside the box with a 4px corner (6 less the 3px inset,
-     rounded up so the inner corner does not read sharp against the outer). */
   .tabs .secseg { display:inline-flex; flex:none; background:var(--surface);
-    border:1px solid var(--line); border-radius:6px; padding:3px; gap:2px; }
-  .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;
+    border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
+  .tabs .secseg button { border:0; border-radius:999px; padding:5px 14px; background:none;
     color:var(--ink-2); font-weight:500; }
   .tabs .secseg button:hover { background:var(--surface-2); color:var(--ink); }
   .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);

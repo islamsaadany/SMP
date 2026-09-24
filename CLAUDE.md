@@ -10615,7 +10615,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-24 — **§400.2: Reporting is a filled button again, and no tab draws a box.** Islam picked option C from three drawn: Reporting back on `--cta` with `--cta-ink` (deeper when selected, the dot white on it), every tab centred on the row so the words share one baseline, and 7/5 padding with the box riding up 1px so the word's INK is centred in its box (§302). No tab on the row draws a focus outline, mouse or keyboard; Performance stays grey. `checks/tab-row.py`, red four ways from the sources. On the branch, not merged.*
+*Last Updated: 2026-09-24 — **§400.3: the section switch is squared.** Islam picked A of three drawn: the Foundation · SWOT · Drivers · Plan box takes Reporting's 6px corner and each segment a 4px one; nothing else moves. Asserted in `checks/tab-row.py` as the box agreeing with Reporting. On the branch, not merged.*
+
+*Earlier: 2026-09-24 — **§400.2: Reporting is a filled button again, and no tab draws a box.** Islam picked option C from three drawn: Reporting back on `--cta` with `--cta-ink` (deeper when selected, the dot white on it), every tab centred on the row so the words share one baseline, and 7/5 padding with the box riding up 1px so the word's INK is centred in its box (§302). No tab on the row draws a focus outline, mouse or keyboard; Performance stays grey. `checks/tab-row.py`, red four ways from the sources. On the branch, not merged.*
 
 *Earlier: 2026-09-24 — **§400: the tab banner.** Round 9 built at Islam's word: three bands — the navy navigation unchanged, the main tabs on a grey row as underlined words (Reporting as orange text, reversing §222.2's solid fill), and the sections below as one rounded switch (`.secseg`). No new tokens, screen only, `qa.py` ERRORS none. On the branch, not merged.*
 

@@ -5,6 +5,8 @@
    person's page served to the next. This worker STORES NOTHING and has no
    fetch handler at all — the browser goes to the network for everything. */
 
+/* release 7cb43a38899f5d65 — changes whenever a file a tab holds changes (§397) */
+
 self.addEventListener("install", () => self.skipWaiting());
 
 /* EVERY cache, not the ones this file knows the names of: what has to go is

@@ -57126,6 +57126,588 @@ and Islam chose the recommendation: *"go with your recommendation"*.
   reads "Are the Business units grouped into Sectors?" and both answers
   follow it, with no page errors.
 
+## §397 — every release offers the reload (2026-09-23)
+
+**Merged to `main` 2026-09-23 on Islam's word**, as a fast-forward — `main` had not moved since §396. The live `/sw.js` carried no stamp before the push.
+
+Islam, after §396's merge note told people to reload an open tab: *"don't we
+have a rule that makes the user have a button to refresh … at the top with the
+updates that require refresh? … why don't we have it as a rule of such
+updates?"* — then *"yes build it"*.
+
+- **THE BANNER EXISTS AND COULD NOT FIRE.** §258's *"A newer version of the
+  platform is ready"* (with **Reload & keep mine**, which saves first) hears of
+  a release only through the browser seeing `/sw.js` change. The served worker
+  is generated from the frozen one with the caching half — where `SHELL` lives —
+  dropped (§316.10), so it was byte-identical in every release from spec 054
+  on. §365, §367 and §379.4 each recorded that as residue and left it; no rule
+  asserted the banner could fire, so nothing noticed when it stopped.
+- **THE STAMP IS CONTENT, NEVER THE COMMIT.** `scripts/release-stamp.mjs`
+  hashes every file a tab holds — `public/` except the worker (or it would
+  depend on itself), `shell/`, and `lib/shell.ts`, which writes the document
+  around them — and `build-sw.mjs` writes it into the worker's first lines. A
+  commit id would change on every commit and `generated-in-step` would call
+  each one stale; a content hash comes out the same from the same sources.
+  **Server code a tab does not hold is left out on purpose**: a reload offered
+  for an endpoint change teaches people to dismiss the banner.
+- **PROVED IN A REAL BROWSER**: a page controlled by the generated worker,
+  `update()` against the same release fires `controllerchange` **0** times and
+  against a new stamp **1** — which is exactly what `safety.js` listens for
+  (its own check, `safety-banners.py`, all green). `checks/release-stamp.mjs`
+  9/0: the served stamp is current, **every** held file moves it (asked of each
+  in a scratch copy, never one sample), the worker does not, the same sources
+  give the same stamp, and no other server module is in it. Red both ways: the
+  stamp left out (2 red), and a held file changed after the build (1 red).
+- **THE RULE**: CLAUDE.md's merge rules now say every release is announced by
+  this banner, and the post-merge live read confirms the served `/sw.js`
+  carries a new stamp.
+- **The first release carrying it is itself announced**, because its worker
+  differs from the one every browser holds. Nothing stored moves, nothing is
+  migrated, no server rule changes.
+
+## §398 — the set-up flow's sentences read the client's word in lower case (2026-09-23)
+
+Islam, of §396: *"make the setup questions lower case."* §396 put the
+client's word in the flow's questions exactly as typed, so they read "Are
+the Business units grouped into Divisions?" — a heading dropped into prose.
+
+- **A NARROWING OF §160.6 FOR THIS FLOW'S SENTENCES ONLY**: `w()` lowers the
+  word wherever it sits mid-sentence (questions, the Divisions answers, the
+  empty-row refusal, the Add buttons, the empty states and the summary
+  counts); `wc()` gives the same word at the start of a sentence. Step
+  headings, the rail and every other screen keep the word as typed.
+- **AN ACRONYM IS LEFT ALONE**: a word is lowered only where everything
+  after its first letter is already lower case, so "BUs" and "IT" stay as
+  typed — proved with the unit word renamed to *BUs*.
+- **AND FIVE LITERALS ON THE DIVISIONS STEP WERE STILL "COMPANY"**, found by
+  the probe rather than by reading: the Add button, the name placeholder, the
+  "which … each unit belongs to" label, the "no company" option and the
+  empty-row refusal. All take the client's word now — the rest of §396.
+- `checks/client-setup.py`'s refusal assertion expected the word as typed
+  and is REWRITTEN to the lowered form, never loosened (§218) — worked out in
+  the check rather than read back from the product. Both set-up checks
+  green. Screen only; nothing stored, nothing migrated.
+
+
+## §399 — a supporting function has its own Strengths and Weaknesses (2026-09-24)
+
+Islam: *"We need to add Strengths and weakness for the supporting functions"*,
+then of the five points put to him: every format, strengths and weaknesses
+only, written by the office, not counted as missing, a slide and a sheet — and
+of where it sits, *"it should be like the tabs of the BUs"*, and *"make it S&W
+not stengths and weaknesses."* Drawn first out of the running platform and
+published (`design-mockups/function-strengths-weaknesses/`, rule 1c).
+
+- **REVERSES HALF OF §213.** That section said a supporting function inherits
+  its aspiration and SWOT from the unit it plans under and never authors them.
+  The aspiration stays inherited, and so do OPPORTUNITIES and THREATS — they
+  are about the market, which is the business's. What a function knows about
+  ITSELF — what it does well, where it falls short — is its own now. Recorded
+  as a reversal, never overwritten (Principle II).
+- **A SECTION OF ITS OWN, BETWEEN OVERVIEW AND THE PLAN, ON EVERY FORMAT**
+  (pillars, projects, objectives & actions), labelled **S&W**. It is
+  `swotBoxes()` — the unit's own SWOT builder, lifted out and handed two
+  quadrants instead of four (§53.5) — so a line is added, typed and removed
+  exactly as a unit's SWOT is. A unit's SWOT is byte-for-byte what it was.
+- **ON THE OVERVIEW'S KEY (`k_found`, edit page `capfoundation`)**, so the
+  one Edit on the section row opens it with the Overview (§269) and nobody's
+  access moves: the office writes it, and a function's own head reads it.
+- **`swotWritable()` IS THE WRITING HALF** (§61, `fnWritable`'s shape): a
+  projects or objectives function has no unit-shaped writable view, so
+  `unitLikeWritable()` answered null and + Add would have written nowhere. It
+  mints `FUNCTIONS[k].swot` on first write and never on read (§42, §50.6).
+  No migration: the key rides `functions.extra` like `def` and `format`.
+- **THE SERVER HAD TO LEARN IT FOR THE NON-PILLARS FORMATS**: a pillars
+  function already went through `collectUnit()`, which classifies swot as
+  `unitAnalysis`; the others go through `fnOwnWork()`, where the key would
+  have been swept into Setup. Both land on `unitAnalysis` now, judged by
+  `strategyPageOf()` — the office alone. Falsified: with the new branch
+  removed the change is classified `setup`, 1 red; the refusals stay green
+  either way because Setup is also the office's, which is why the
+  classification is asserted by name.
+- **NOT A GAP.** An empty S&W draws the platform's empty line and counts
+  nowhere (§214.4, §223).
+- **ONE SLIDE, ONLY WHEN SOMETHING IS ON IT** (§253, §246 — whitespace is not
+  a line). A pillars function's deck still draws no four-slide SWOT section.
+- **THE WORKBOOK CARRIES IT** (§22): an **S&W** sheet (Type · Point) on a
+  pillars function's file, a projects/objectives function's own file and the
+  blank projects/objectives template; never on a capability's. The readers
+  take it back, and **a file without the sheet leaves the stored S&W alone**,
+  on both formats, so an older download cannot erase it. A replace does not
+  archive the previous S&W (the plan archive holds the plan).
+- **CHECKS.** `checks/function-sw.py` (new) — red 16 with the section removed
+  and 8 with the writer and the slide broken, from the SOURCES (§276).
+  `scripts/test-authorize.js` §399 — 755/0. `checks/fn-pillars.py` held the
+  section list and the sheet difference as a literal; both REWRITTEN, never
+  loosened (§218, §214.3). **`checks/functional-projects.py` is red 3 on the
+  build before this change too** (§303) — wording from §395 — recorded, not
+  fixed here.
+
+- **§399.1 — MERGED TO `main` 2026-09-24 on Islam's word.** `main` had not
+  moved, so a clean fast-forward: the tree pushed is the tree verified (full
+  `qa.py` ERRORS none, 755/0, `built-in-step` and `generated-in-step` clear).
+  `sw.js` bumped to `smp-shell-v5.36-function-sw`, a name the history never
+  held, in a commit `main` holds before the branch does (§91). No `api/`
+  change beyond classifying a new key; nothing an old tab saves is refused,
+  so no forced sign-out is owed (spec 029).
+
+## §400 — moving between the console, a client and its modules (2026-09-23)
+
+Islam: *"review the different pages and suggest different flow of going forward
+and back … I don't like the overview page of the strategy because it has no
+navigation … and for the main console we can have the person tasks across the
+different clients … derived from the internal tracker."* Before/after mockups
+first (rule 1c); he took every recommendation with two changes — *"replace the
+home word with the Home icon that we already have"*, and *"for the client user
+he doesn't need the rail at the top"* — then *"proceed"*.
+
+- **ONE TRAIL FOR THE OFFICE**: `Forefront › [mark] Client ▾ › Module ▾`
+  replaces the client pill and the four-square switcher. The client menu lists
+  its modules, Client settings and *Switch client…* (`/platform#clients`); on
+  Client settings the last step reads **Client settings** and replaces *Save &
+  close* and the two crossing rows on the rail. Drawn only where the document
+  carries `data-console` (the server's answer that this is somebody Forefront
+  sent in) — a client's own staff get **no trail and no switcher**, and their
+  bar says the company's name with the product's small beneath it.
+- **ONE PRESS FROM CLIENT SETTINGS TO A MODULE'S SETTINGS SURVIVES** (§362.1's
+  promise): hiding the rail rows took it away, so on Client settings the
+  client menu also lists *<Module> settings*, crossing without a reload
+  (§367). Not drawn in the mockup; added so nothing that worked is lost.
+- **HOME IS THE HOUSE AND A PAGE INSIDE THE CHROME**: the welcome is no longer
+  an overlay with a Continue button. It sits under the navigation, the house
+  is lit gold while it is open, any tab or destination press takes it down, and
+  it opens once per sign-in as before. A theme press leaves it standing.
+- **MY WORK, THE CONSOLE'S FIRST TAB**: every open Internal Tracker action the
+  person owns, across the clients they may open, grouped *Late · This week ·
+  Next week and later*, each row opening that client's Tracker. Read through
+  `withTenant` per client with the tracker's own words (§53.5); nothing
+  stored; Meeting Notes' actions deliberately NOT read (his word); a client
+  that will not answer is named, never taken for nothing (§93). Admins get a
+  colleague picker, drawn only when there is somebody else to pick. The client
+  card's Tracker row reads *"3 open · 1 late"* — a mark, never a sentence
+  (§368). `who` is refused for anybody who is not an admin, on the server.
+- **§65.9 AGAIN**: the rows were first classed `.row`, which is the page's
+  global flex row, so every cell floated as its own box — renamed `wrow`.
+  And one font shorthand ending in `inherit` was invalid CSS (§356.14's fault);
+  mine is fixed, four older ones in the console stylesheet are untouched and
+  recorded.
+- **CHECKS**: `shell.mjs` 133/0 (new §4b seeds five actions — two not his or
+  done, asserted absent; §4c signs in as a client's own head and asserts no
+  trail), `modules.mjs` 160/0, `door-landing.mjs` 145/0, `welcome.py` OK, and
+  every break red, two new: `mywork-everyone` (the owner filter dropped) and
+  `trail-for-staff`. Stale assertions REWRITTEN, never loosened (§218): the
+  Continue button, *Save & close*, the switcher, and six console checks that
+  assumed the console opens on Clients now go to `/platform#clients` — via
+  `about:blank` first, because a same-page hash change is not a navigation.
+  Full `qa.py` ERRORS none; `built-in-step` and `generated-in-step` clear;
+  `tsc` clean.
+- **Nothing stored moves, nothing is migrated, no save rule changes**, so no
+  forced sign-out is owed (spec 029). The built file's bytes changed, so
+  `sw.js` is bumped (§91).
+
+## §401 — the trail's two menus (2026-09-24)
+
+Islam, using §400's trail: *"when I click outside them the menue should close
+… te logo of the client shouldn't appear in the top navigation bar … when I
+click on the name of the client drop down I should get the other lcients …
+when I click on the module name like strategy I should get the other modules
+and then the separator and the client settings."* Four instructions, taken as
+given; screen and menu contents only, no stored state.
+
+**THE TWO MENUS SWAP JOBS.** §400 put the modules under the CLIENT and Home and
+the module's settings under the MODULE. The client step now lists the OTHER
+clients this person may open, then a rule, then *All clients* (the console's
+grid); the module step lists the OTHER modules, a rule, then *Client settings*.
+The module you are in is the step's own name, so it is not listed again (§87).
+**On the client's settings** the third step reads *Client settings* (with
+`aria-current`) and opens the same menu, where each module goes to THAT
+module's settings — the next place from a settings page, and §362.1's one
+press kept. *Home* left the menu: the house mark is Home (§400), and two
+controls for one act is one too many (§94.15); the dead `go === "home"` branch
+is deleted with it (§24).
+
+**THE CLIENT LIST IS THE SERVER'S, WITH THE CARDS' OWN TWO RULES** —
+`visibleClients` then `mayOpenClient` — through a new light action
+(`/api/platform {action:"clients"}`: key, name, kind), because the cards action
+reads every tenant's facts and tracker tally, which a menu of names should not
+cost. Asked once per page; until it answers the menu says *Reading your
+clients…*, and an empty answer says *No other clients* — lines, never buttons
+that go nowhere (`.trquiet`). *All clients* is always there, so the menu is
+never a dead end (§61). A client's own person is refused the action by the
+endpoint's existing gate (403), asserted.
+
+**A PRESS ELSEWHERE CLOSES THE MENU**, on `pointerdown` in the capture phase
+as the chat corner does (§100.4) — a menu that lingers until the mouse comes
+up reads as having missed the press. A press inside one menu shuts the other;
+Escape shuts either. Wired once, beside the trail's one click listener, so a
+repaint of the trail cannot multiply it (§24, §47.2).
+
+**NO CLIENT MARK ON THE BAR.** The `.trmark` image and its rule are deleted; the
+client is named once, in words. §400's assertion *"one that has uploaded a mark
+wears it on its own bar"* is REVERSED and REWRITTEN, never deleted (§218): the
+mark is MADE and asserted absent, with the client's name asserted present
+beside it (§113.8). The client platform's own bar for a client's staff is
+untouched.
+
+**Checks.** `checks/modules.mjs` §7 rewritten for the swap — other modules in
+order with the server's lines, the current one absent, rule then Client
+settings last, the other clients asserted against the stub's answer, one menu
+shutting the other, a real mouse press outside closing it, Escape, and a
+one-module client offering only Client settings: **166/0**, and each new
+behaviour proved able to fail by breaking it in the source (the outside-click
+listener 2 red, the current-client filter 1, the current-module filter 4, a
+mark put back 1). `checks/shell.mjs` on the served app **136/0** — its trail
+reads moved to the module step, the mark assertion reversed, and two new: the
+trail's list equals the clients the cards say may be opened, and a client's
+own person is refused it. `setup-per-module.py` served half green after its
+`.trhere` read moved to the module step's summary; `door-landing` 145/0,
+`check:modules:red` all red, `qa.py` ERRORS none, `built-in-step` and
+`generated-in-step` clear once committed. `sw.js` SHELL bumped (the built
+file's bytes changed, `arrange.css`).
+
+
+## §402 — one typeface, and one Viewing as (2026-09-24)
+
+Islam: *"1. remove the font button and keep the font source sans across the
+platform 2. in the home page there is a viewing as while we already have a
+viewing as at the top, let's remove the page redundant one and keep the master
+one at the top."*
+
+**THE TYPEFACE SWITCH GOES, AND SOURCE SANS 3 IS THE FACE FOR EVERYBODY.**
+§38.7 carried four faces so they could be compared in the product; §157 cut
+that to two; this settles it at one. `--sans` is `'Source Sans 3'` with the
+system stack behind it on bare `:root`, so it holds with no script, no
+attribute and no choice — the system stack is now only what a face that fails
+to decode falls back to. The `[data-font]` block, the button, `paintFont`,
+`setFont`, `FONTS`, `FNAMES` and `THEME.font` are **deleted, not hidden**
+(§24). **A choice left in a browser is cleared on load** (`smp.font` removed,
+`data-font` removed), §41.6's rule for the palette switch: a stored value with
+no control left to change it would pin somebody for ever. The face was
+already embedded in both builds (data URI in the file, `/fonts/…` served), so
+nothing new is fetched. `b.font` stops being handed to `setBrand`; a stored
+branding `font` is read by nothing.
+
+**THE HOME PAGE'S VIEWING AS GOES; THE BAR'S IS THE ONE.** §179 drew a second
+switcher above the greeting because the welcome screen then **covered** the
+viewport and the bar's control was behind it. §400 put Home **inside** the
+chrome, so the bar's switcher is on screen the whole time and the page copy
+said one thing twice (§87). `viewerBar()`, its CSS and the now-dead
+`SEARCHSEL.wire()` on Home are deleted. **What the copy did is kept**: a
+change on the bar's `#asWho` while Home is open redraws Home for the person
+now being looked at (one document-level `change` listener, asked by id after
+the shell's own handler has switched the platform) — without it Home would go
+on greeting the previous viewer.
+
+**Checks, REWRITTEN never loosened (§218):** `checks/typeface.py` — no switch,
+the page's own family is Source Sans 3 with no attribute, it decodes and its
+metrics differ from the system stack, and a stored `system`/`manrope` is
+cleared with the page still in Source Sans; **4 red** with `--sans` put back
+on the system stack, from the sources. `checks/welcome.py` §8 — Home draws no
+switcher, the bar's is present, visible and hit-testable (both ends, §94.2),
+and a switch from the bar moves the viewer and redraws Home without marking
+it seen; **1 red** (the greeting still *Mohamed*) with the redraw listener
+removed. `qa.py` ERRORS none; home-mark, viewer-line, boot-skeleton,
+page-width green; `check:modules` 166/0; `built-in-step` all good; served
+copies regenerated; `sw.js` SHELL bumped (the built file's bytes changed).
+Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
+The served app's DB-backed checks were not run (no database in this session).
+
+## §403 — Home says only where you are (2026-09-24)
+
+Islam: *"why on the welcome page I have strategy and overview & projects?"*
+§400 put Home INSIDE the chrome, beneath it, and nothing told the chrome: the
+tab row and section row went on describing the page behind Home, and the
+destination row kept its gold underline on that page's name — two answers to
+*where am I* beside the lit house (§87's twins, in navigation). Reproduced as
+Finance's head (`fn:finance`, `fnstrat`, Overview · Projects) before anything
+was proposed; drawn before and after from the running platform and signed off
+(`design-mockups/home-rows/`), with Islam adding the underline: *"yes and
+remove the finance underline too."*
+
+Four rules in `arrange.css`, keyed on the `data-home-open` attribute §400
+already writes: `#tabrow` and `#secrow` `display:none` (never opacity — a
+hidden row must not take clicks, §3.2), and the lit place's underline made
+transparent, its weight and colour kept so no name on the row moves (§41.8).
+The places stay pressable, because pressing one is how you leave Home (§61).
+
+`welcome.py` §3 asserted a TAB was reachable under Home — true of §400 and
+false by this decision — so it is REWRITTEN, never loosened (§218): both rows
+asserted not drawn, the underline asserted transparent, and the PLACE asserted
+reachable as the way out; two later "leave Home" presses re-pointed from the
+tab to the place. Proved able to fail from the SOURCES (§276): the rule
+removed, **2 red**, exactly the two new assertions. `qa.py` ERRORS none;
+`built-in-step` all good; served copies regenerated; `sw.js` SHELL bumped.
+Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
+
+### §400.1 — the trail's first word is Platform (2026-09-24)
+
+Islam: *"for the word on the top left named forefront, let's change it to Platform."* The first step of the trail (§400), the link back to the console, now reads **Platform**. Only the word changes: the address (`/platform`), the class the checks press (`a.trff`) and the console's own top bar (FOREFRONT · Platform) are untouched, so the console does not read "Platform Platform". `checks/modules.mjs` asserts the word now as well as the address, case-insensitively because the trail draws it in capitals; 166/0, and 1 red with the old word put back. Screen only: nothing stored, nothing migrated, no sign-out owed.
+
+### §400.2 — a console tab shows what it last showed, then catches up (2026-09-24)
+
+Islam: *"when I switch between the tabs of the platform like my work and clients everytime it loads. saying it's loading. shouldn't it be saved as a cookie or cashed or something until a refresh happens?"* Two answers were put to him — keep each tab until a refresh, or show the kept copy at once and re-read behind it — and he chose **the second**, which is always current at the cost of the page changing a moment after it appears when something has moved.
+
+**Measured first:** every press of My work, Clients, Consultants, Access, Memory or Frameworks cleared the page, printed *Reading…* and asked the server from scratch, with nothing kept between presses.
+
+**How:** the tab being left keeps its own NODES, moved rather than cloned so every control on it still works. Coming back through the tab row puts them back at once, and the tab's ordinary draw runs into a detached box. Every draw writes into `page`, including the parts that arrive later (`settle()`, the archived band, the library), so `page` IS that box for the whole of the re-read. The requests made during it are counted in `send()`, and the fresh copy is swapped in, scroll kept, when the last one has landed.
+
+**Five rules:**
+- Only the tab row uses a kept copy. The six other ways to `go()` follow a change (adding or archiving a client, changing whose work you look at) and read fresh, as §369 and §48.2 require.
+- A press or a key inside the kept copy abandons the re-read, so nothing is swapped out from under somebody typing (§35, §71.2).
+- Any request that is not a read drops every kept copy.
+- Only a tab's own list is kept, never a form or a reading view opened inside it.
+- Memory only; a refresh starts clean. It is not a cookie, because a cookie travels to the server with every request and this is the page's own business.
+
+**Verification:**
+- `checks/tab-keep.py` covers kept-at-once-then-fresh (the stub numbers its answers, so the two are different words on screen), the hand winning, other ways in reading fresh, no leak across tabs, and a reload starting clean. All good on both copies of the page, and 4 / 3 / 2 red under its three breaks.
+- `checks/console-boot.py` §3 held a timing assumption this moves: it waited for the cards, which are now on screen before the request is answered. It was **rewritten, never loosened** (§218) to wait for the request itself; 13/0 on both copies, and its `handed-twice` break is still red.
+- `client-setup-outside.py` (29) and `client-archive.py` (15) are red identically **without this change** (§303) and are recorded, not fixed here.
+
+Screen only: nothing stored, nothing migrated, no sign-out owed.
+
+## §404 — the client's structure: its levels, and what each level carries (2026-09-24)
+
+Islam: *"when I start the setup of the company we need to set the structure,
+the levels and the components in each level from the start"* — some clients
+are a group with companies and units, some a company with divisions and
+units, some a company with units directly, and the top level carries its own
+foundation in each. Aligned over four messages and a mockup
+(`design-mockups/client-structure/2026-09-24_levels-and-components.html`),
+signed off with *"1. yes one word 2. ok 3. yes build it"*.
+
+- **A STRUCTURE STEP, SECOND IN THE SET-UP FLOW**, right after the client's
+  details: name the top level (Group, Company, Holding or the client's own
+  word), say whether a second layer exists and name it (Companies, Divisions,
+  Sectors or another), and tick the components each level carries — Brief,
+  Purpose, Aspiration, North Star, Themes, Pillars, Capabilities, Values, SWOT.
+  Supporting functions also get a **default** way to plan (pillars, projects
+  or objectives); it is only what a new function starts with.
+- **HIS WORDS FOR THE COMPONENTS**: Brief is *Who we are*, North Star is the
+  key objectives, and the Temple is not a component but a **visual option**
+  drawn from the Aspiration, the North Star and the Themes, with Capabilities
+  as its base — so the Temple button is held while any of those is off.
+  Themes and Pillars are different things. One word per component, the same
+  on every level (three new label rows: `topword`, `brief`, `swot`, migration
+  046 / smp-app 017, written LAST and never over a client's own row).
+- **PER LEVEL AT FIRST, PER ITEM LATER**: the step sets what every unit,
+  function or company carries; **Setup › Structure** (office only, client
+  rail) is the adjustment table — one row per item, one box per component, a
+  ring where an item differs from its level. Pressing a box back to the
+  level's answer DELETES the adjustment (§50.6), and the last one leaving
+  deletes the structure.
+- **OFF HIDES AND NEVER DELETES** (his *"yes hide not delete"*): the tab,
+  section, deck slide or card goes; what was written stays stored and comes
+  back when the component is turned on. **A level with its North Star off is
+  judged on its plan alone.**
+- **A CLIENT THAT NEVER TOUCHED THIS OPENS EXACTLY AS BEFORE**: nothing is
+  stored until something is pressed (`GROUP.structure` is an absence), every
+  component reads ON while absent, and a company only gains a **Foundation
+  tab** once the structure says the second layer carries something. That page
+  is the group's own Foundation drawn over the company's record
+  (`GROUP.coFound[k]`, riding `org.extra`, no migration); its objectives are
+  minted `co-<key>-KO<n>` so two layers never share an id (§96.2). Reading
+  it creates nothing (§42).
+- **THE SERVER'S TWO EDITS GO TOGETHER** (§259.2): `structure` classifies as
+  `setup`, `coFound` as the group's strategy, and both are in `gExtra`;
+  compared canonically, because jsonb reorders keys (§145).
+  `test-authorize.js` §46, 755/0, 4 red with the classification out.
+- `checks/structure.py` (37 assertions) presses the Setup table and the
+  set-up step and reads the stored graph back, both ends every time, red 8 /
+  2 / 1 / 6 from the SOURCES. `client-setup.py` and `terminology.py` held the
+  old step and word counts (§214.3) and are REWRITTEN, never loosened (§218):
+  eight steps read from the flow's own list, sixteen words read from `ORDER`.
+- **FIRST WRITTEN AS §396 AND RENUMBERED BEFORE COMMIT**: this branch already
+  had a §396 and `main` has taken up to §403, so the citations this work
+  wrote were moved line by line and the existing §396 left alone (§264.3).
+- **RECORDED, NOT DONE**: a business unit's plan is not hidden by turning
+  Pillars off (pillars are how a unit plans); the second layer has no Temple
+  drawing of its own yet; the planning horizon shown on a company's
+  Foundation is the client's one shared value; and this branch is 13 commits
+  behind `main`, so a merge owes a rebuild and a fresh `SHELL` name.
+
+### §404.1 — a supporting function carries no brief and no themes (2026-09-24)
+
+Islam, of §404's components: *"supporting function shouldn't have themes, the
+function has no brief and even the function owner is set in the registry so a
+function here has no description needed."*
+
+**NOT A DEFAULT, A RULE.** The brief on a function's Overview is the "What it
+is" card, and its three facts were the function's name (already the page's
+heading), Led by (a head the register already holds, §33 — one fact, one door)
+and a Definition he has now ruled a function does not need. So
+`SMPRules.compOffered()` answers **no** for `brief` and `theme` on any `fn:`
+target, and `compOn()` asks it FIRST — before the stored structure, before a
+per-item override — so no stored "on" can bring either back (a toggle the rule
+refuses would be decoration, §42). Neither screen offers it: the set-up step's
+functions level draws seven chips, not nine, and Setup › Structure draws a dash
+in those two cells of a function's row.
+
+**A CAPABILITY IS DELIBERATELY NOT REACHED.** It shares the functions' level in
+`structLevelOf()`, and it keeps its definition (§334) — the rule is keyed on the
+`fn:` prefix, not on the level, and it is asserted at both ends.
+
+**THIS ONE DOES MOVE AN EXISTING CLIENT**, unlike the rest of §404 (which is an
+absence read as everything on): every function's Overview loses its "What it is"
+card the moment this ships, whatever the client has stored. That is the ask, and
+nothing is deleted — `def` and `head` stay stored; the head is still set on the
+register and on Setup › Supporting functions. The §226 Led-by picker on the
+Overview goes with the card.
+
+**CHECKS**: `structure.py` 37 → 49 assertions, falsified from the SOURCES
+(§276): the rule's line removed **5 red**, the two screens' guards removed
+**3 red**. Three neighbours held the card and were REWRITTEN, never deleted
+(§218, §214.3): `fn-pillars.py` (one card, no labelled facts, no definition
+field or fill control — with a capability keeping its brief as the other end),
+`functional-projects.py` (the Overview names no box; its facts agree across
+the two formats), `fn-ko-edit.py` §5 (no Led by row for the office or for an
+opened custodian; the head still a stored fact) and §7 (reading is one card).
+`functional-projects.py` also held `"project" in x` against §395's capitalised
+*Projects* — asked case-blind now. `qa.py` ERRORS none; authoriser 755/0.
+
+### §404.2 — the functions level asks only what a function carries, and the default words are singular (2026-09-24)
+
+Islam, of the set-up step: *"the functions still have the option of planning
+and still have the pillars capabilities and values. it shouldnt"*, then, asked,
+*"plan in should go too yes, it's selected in the supporting functions tabs
+later"*; and *"for the default wording written it should be singular, plural
+for only Objectives, Pillars, Capabilities, values"* — *"themes keep it plural,
+any old client should keep their words."*
+
+**THE FUNCTIONS LEVEL CARRIES FOUR**: Purpose, Aspiration, North Star, SWOT.
+`STRUCT_NEVER_FN` gains `pillar`, `capability` and `values`. None of the three
+gates anything on a function's pages (grepped, not assumed — `pillar` and
+`capability` are read only for the group's Temple and `values` only on the
+group/unit/company Foundation), so this changes what the set-up offers and
+nothing a client sees. **The "Plan in, by default" row goes** and the structure
+stores no functions' `format`: a function's way of planning is asked once, per
+function, on the Supporting functions step, where a new row starts on pillars.
+A value already stored under `structure.fn.format` is left in place and read
+by nothing (§96.2: nothing written is rewritten).
+
+**THE DEFAULT WORDS**: Purpose's many form *Missions* → **Mission**, Aspiration's
+*Winning Aspirations* → **Winning Aspiration**; Themes, Key Objectives, Pillars,
+Capabilities and Core Values stay plural. **A DEFAULT, NOT A MIGRATION** — his
+instruction: a client's stored words are theirs (hydration replaces the list,
+§346.3), so this reaches a NEW client and the worked example only, and an old
+client changes it on Setup › Terminology if it wants to.
+
+`structure.py` 52/0, falsified from the SOURCES (§276): the old never-list put
+back **3 red**, *Missions* put back **1 red**. The seed and `db/kb.json` were
+regenerated (the corpus had been stale since §395, now in step).
+
+### §404.3 — existing clients move to the singular words too, where the word was the platform's (2026-09-24)
+
+Islam, of an existing client's set-up step still reading *Missions* and
+*Winning Aspirations*: *"still there is the word missions, and aspirations"* —
+and, asked, *"yes build it"*.
+
+§404.2 left existing clients alone on his word ("any old client should keep
+their words"), and **those two words were never theirs**: migration 045 (016 on
+the new stack) wrote *Missions* and *Winning Aspirations* into every client
+whose word still sat on the old default, **on the stated grounds that nobody
+had chosen it**. The same reasoning moves them back, so his rule stands whole:
+a row holding EXACTLY that default takes the new one; any word a client typed
+is untouched (§96.2). Migration **047** on the frozen stack and **018** on the
+new one, runs once at deploy, and a second run changes nothing.
+
+**Proved on a real Postgres 16**, the new stack's path run as a deployment runs
+it: two clients through 016 (one left on the default, one with its own word for
+Purpose), then 018 twice — the first reads *Mission* and *Winning Aspiration*,
+the second keeps *Our Reason* and gets *Winning Aspiration*, Themes untouched
+on both, and the second run a no-op. The frozen 047 run against a labels table
+in the old shape with the same result. No screen, rule or built file changes.
+
+
+### §404.4 — the set-up flow, reviewed end to end (2026-09-24)
+
+Islam, of the Divisions step asking *"Are the business units grouped into
+divisions?"* after the Structure step had already answered it: *"it shouldn't
+ask about is there or not as this is answered in the structure tab it should
+ask about the names like we do in the BUs. I want you to review the rest of the
+setup flow to make sure that there is no redundancy or conflicts."* The review
+found five, put to him in plain words; his answers are the design.
+
+1. **The Divisions step names them and asks nothing else.** Whether there is a
+   second layer is Structure's question (`SMPRules.midExists`); where there is
+   none, the step says so in one line and points back to Structure (§61,
+   §45.2). The Yes/No choice and the mapping list under it are deleted (§24).
+2. **The order is client, Structure, Divisions, Business units, Supporting
+   functions, Capabilities, The office** — the divisions are named before the
+   units so a unit can be put in one as it is named. **A unit AND a function
+   each optionally belong to a division**, a picker on the row, drawn only
+   where divisions exist. A function's division is §391's own field
+   (`FUNCTIONS[k].company`), carried by `__smpShape` as the division's NAME and
+   applied only when the answer SAYS something, so a tab on an older build
+   cannot clear a division set on Setup › Supporting functions; choosing none
+   deletes the key and its weight (§50.6). Both Setup pages already offered the
+   same choice, checked rather than assumed.
+3. **The Words step goes.** Structure already named every component; what it
+   did not name — the business units and the supporting functions themselves —
+   gets a *Called* pair (one and many) on each of those two cards, and the key
+   measures and tactics are named beside Pillars wherever Pillars is ticked.
+   `S.shape.words` still carries them and `__smpShape` still writes them, so
+   nothing about how a word is stored moved.
+4. **Capabilities are asked only where some level carries them**; otherwise one
+   line says the client does not use them and points to Structure.
+5. **One sentence, not two**: the Supporting functions step's heading line
+   repeated the list's own line underneath; the heading's goes. The units'
+   *"A unit plans in pillars…"* line is drawn only while units carry Pillars,
+   or it describes a plan this client does not make.
+
+The server's own read of the shape (`lib/platform-api.ts`) carries a function's
+division by name as it already did a unit's (§53.5). `checks/client-setup.py`
+gains §9 (21 assertions, both ends each) and its step list and total are
+REWRITTEN, never loosened (§218): all passed, falsified from the SOURCES —
+divisions never offered **5 red**, capabilities always asked **1 red**.
+Neighbours green; the built file and served copies regenerated, `sw.js` bumped.
+
+### §404.5 — a new client's default components (2026-09-24)
+
+Islam: *"let's make some defaults for the division/company it can have brief,
+purpose, Aspiration, north star, pillars, and swot / for a bu / Brief,
+aspiration, north star, pillars, swot"*.
+
+**WRITTEN INTO A CLIENT AS IT IS BORN, NEVER READ AS THE FALLBACK.** The
+reader's fallback for an unsaid level stays EVERYTHING ON, because §404's fifth
+answer is that a client set up before it opens exactly as it does today — so
+changing the fallback would have taken Themes, Capabilities and Values off every
+existing client's units without anybody pressing anything. The defaults live
+once in `SMPRules.STRUCT_NEW_CLIENT` (§42), and frozen.cjs's `__smpBare` — the
+graph a new client is born as (§322) — stores them, so the Structure step opens
+already showing them and a client that never touches it gets them too. The top
+level and the functions are left unsaid and read everything on (a function's
+own exclusions, §404.1–§404.2, still apply). No Temple default moves: it needs
+Themes, which neither level carries now. Recorded as a decision to take
+separately: whether existing clients should move to these defaults too (§404.3's
+precedent was new clients first).
+
+`smp-app/checks/setup-shape.mjs` §9: eight assertions, both ends (the defaults
+on a new client, and an unsaid existing structure still everything on), red 4
+with the write removed. And that file's §1 had been red since §404.4 deleted
+the Words step — it read `var WORDS`; re-pointed at where the words are asked
+now (the component keys, the pillar's two sub-words, `namePick` and
+`callBoxes`), never loosened (§218). 43/0.
+
+### §404.6 — merged to `main` (2026-09-24)
+
+Islam: *"merge to main."* `main` had moved eighteen commits (§399–§403, the
+navigation round) and took no §404 number, checked in the records, so no
+renumber was owed. Two source conflicts, both kept whole rather than picked:
+§399's function S&W tab and slide now carry the structure's `swot` switch
+(off hides, never deletes, §404's own rule), and the authoriser suite runs
+§399's and §404's sections side by side (763/0). The three records were
+combined with every line of each side asserted present; the built file and
+`smp-app/public/` were rebuilt, never merged (§91, §329); `sw.js` rebuilt from
+main's copy at `v5.46-structure-merged` (§146.2). The duplicate-declaration
+scan reads only §281.1's six. On the merged tree: `qa.py` ERRORS none,
+structure, client-setup, terminology, welcome, fn-pillars, function-sw,
+tab-keep, console-boot, terminology-reach green; setup-shape 43/0, graph-diff
+140/0, platform rules 69/0, built-in-step and generated-in-step clear.
+`client-setup-outside` and `client-archive` are red with the SAME counts on
+`origin/main`'s own build (§303), which main's §400.2 already records.
+Forced sign-out: not owed — the authoriser only gained kinds for fields an
+old tab never sends, so no save that worked before is refused.
+
 ## §405 — the navigation chrome: a light row for the office, a navy bar for the unit (2026-09-24)
 
 **Built on the branch, not merged.** Islam, over seven rounds of mockups in
@@ -57277,3 +57859,9 @@ Islam, after mockup rounds 10b–12 (`design-mockups/plan-page-redesign/2026-09-
 - Tables and the platform's typography are unchanged.
 
 Screen only: no `api/`, `lib/` or `db/` file, nothing stored, nothing migrated, nobody signed out. Recorded, not done: the `ui-versions/` snapshots for this round were removed from the branch earlier at Islam's word and live in git history.
+
+### §407.1 — merged to `main`, and §402 decides the face (2026-09-24)
+
+**Merged to `main` on Islam's word** (*"merge to main"*), with main's §399–§404 brought in first (31 commits). No renumber was owed: main cites §405–§407 nought times, measured.
+
+**The two sessions removed the same button with two different answers about the face**, and main's is the one that stands: §402 is Islam's own sentence — *"remove the font button and keep the font source sans across the platform"* — so `--sans` is Source Sans 3 on bare `:root` for everybody and §407's `BRAND.font` reader is dropped rather than carried beside it (two answers to one question, §53.5). `theme.js`, `shell.html` and `checks/typeface.py` are main's whole; what survives of §407's font half is the part both agreed on — the switch gone and a remembered `smp.font` cleared on load. The rest of §407 (the top bar, the rail cards, the plan band, the counts) is unchanged by the merge. The built file was rebuilt from the merged sources, `smp-app/public/` regenerated, and `sw.js` rebuilt from main's copy with one line changed: `SHELL` → `smp-shell-v5.47-plan-restyle`, a name the history has never held.

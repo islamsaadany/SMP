@@ -1,21 +1,15 @@
-"""TWO FACES, AND ONLY TWO (§157).
+"""ONE FACE, AND NO SWITCH (§402; was TWO FACES, §157).
 
 Islam, closing §38.7's open comparison: *"let's make the 2 fonts available are
 the system font and the source san3."* Four faces had ridden in every build so
 they could be judged in the real product; three now leave the file.
 
-§407 TOOK THE SWITCH AWAY (Islam: *"drop the system button"*). The face is
-the tenant's to set (BRAND.font) and nobody's per screen, exactly as §41.6 did
-for the palette. REWRITTEN, NEVER LOOSENED (§218): section 1 and section 5
-used to press the switch; they now assert it is GONE and that a face a browser
-remembers is FORGOTTEN, while the tenant's own choice still paints — both
-ends, or a build that dropped the face altogether passes the absence half.
-
 WHAT THIS ASSERTS — the promise, not the implementation:
-  1. There is no per-screen switch, and the tenant's setting still chooses.
-  2. Both actually WORK: choosing Source Sans 3 really changes the face the
-     page renders in (measured by the width of a real string, since a font
-     that failed to decode would leave the metrics of the system stack).
+  1. There is no switch (§402: "remove the font button and keep the font
+     source sans across the platform").
+  2. Source Sans 3 is what the page renders in with nobody having chosen,
+     measured by the width of a real string, since a font that failed to
+     decode would leave the metrics of the system stack.
   3. THE FACE IS IN THE FILE, not fetched: the built platform opens from a
      memory stick with no network, so an embedded face must be a data: URI
      and there must be no external font request at all.
@@ -23,10 +17,9 @@ WHAT THIS ASSERTS — the promise, not the implementation:
      from the file's bytes (§24: a rule for a face the product no longer
      carries is worse than no rule, because nothing tells the next reader it
      is dead).
-  5. A BROWSER THAT REMEMBERS A FACE IS NOT PINNED TO IT: a stored choice —
-     a removed one or a live one — lands on the tenant's face and the key is
-     cleared, rather than holding somebody to a face with no control left to
-     change it back (§41.6's shape).
+  5. A BROWSER THAT REMEMBERS A CHOICE IS NOT STRANDED: whatever is stored
+     under the old key is cleared on load and the page is in Source Sans
+     (§41.6's shape).
 
 Run: SMP_CHROME=... python3 qa-run.py checks/typeface.py
 """
@@ -74,78 +67,55 @@ with sync_playwright() as p:
     pg.goto(url)
     pg.wait_for_timeout(900)
 
-    offered = pg.evaluate("() => (typeof THEME !== 'undefined' && THEME.font) ? true : false")
-    ck("the theme module is there", offered)
+    # ── ONE FACE, NO SWITCH (§402) ─────────────────────────────────────
+    # Islam: "remove the font button and keep the font source sans across the
+    # platform." REWRITTEN, NEVER LOOSENED (§218): the switch assertions of
+    # §157 invert into its absence, and the face is asserted as what the page
+    # renders WITH NOBODY HAVING CHOSEN — BOTH ENDS (§94.2): the control gone
+    # AND the face in force, or a build that dropped the button and left the
+    # system stack passes the first half.
+    ck("there is no typeface switch in the bar",
+       pg.locator("#fontbtn, .fontbtn").count() == 0)
 
-    # §407: the switch is gone, and the tenant's setting is what chooses.
-    sw = pg.evaluate("""() => {
-      var had = !!document.getElementById('fontbtn');
-      THEME.setBrand({font:'source'});
-      var tenant = document.documentElement.getAttribute('data-font');
-      THEME.setBrand({font:'manrope'});
-      var bogus = document.documentElement.getAttribute('data-font');
-      THEME.setBrand(null);
-      var none = document.documentElement.getAttribute('data-font');
-      return {had:had, tenant:tenant, bogus:bogus, none:none};
-    }""")
-    ck("there is no per-screen typeface switch", not sw.get("had"), sw)
-    ck("the tenant's face still paints (both ends)", sw.get("tenant") == "source", sw)
-    ck("a face the product no longer carries falls to the system stack",
-       sw.get("bogus") in (None, ""), sw)
-    ck("and no tenant choice is the system stack", sw.get("none") in (None, ""), sw)
+    # AN EMBEDDED FACE IS STILL LOADED LAZILY (a data: URI removes the network,
+    # not the asynchrony), so it is loaded and asked for first, and the
+    # decoding asserted as its own fact.
+    def measure():
+        return pg.evaluate("""async () => {
+          var out = {};
+          try { await document.fonts.load('32px "Source Sans 3"'); } catch (e) {}
+          await document.fonts.ready;
+          out.decoded = document.fonts.check('32px "Source Sans 3"');
+          out.attr = document.documentElement.getAttribute('data-font');
+          out.body = getComputedStyle(document.body).fontFamily;
+          var s = document.createElement('span');
+          s.style.cssText = 'position:absolute;visibility:hidden;font-size:32px;font-family:var(--sans)';
+          s.textContent = 'Handgloves 0123';
+          document.body.appendChild(s);
+          out.page = Math.round(s.getBoundingClientRect().width * 100) / 100;
+          s.style.fontFamily = 'var(--sys-sans)';
+          out.system = Math.round(s.getBoundingClientRect().width * 100) / 100;
+          s.remove();
+          return out;
+        }""")
+    w = measure()
+    ck("the embedded face decodes (it is in the file, not merely named)", w.get("decoded"), w)
+    ck("the page's own family is Source Sans 3, with no attribute set",
+       w.get("body", "").startswith('"Source Sans 3"') and not w.get("attr"), w)
+    ck("...and it actually renders (its metrics differ from the system stack)",
+       w.get("page") != w.get("system"), w)
 
-    # Both are real: the rendered metrics must differ, or the embedded face
-    # never decoded and the switch is decoration.
-    #
-    # AN EMBEDDED FACE IS STILL LOADED LAZILY, AND THE FIRST VERSION OF THIS
-    # ASSERTION REPORTED A CORRECT BUILD BROKEN. A data: URI removes the
-    # network and not the asynchrony: the face sits `unloaded` until something
-    # asks for it, `font-display:swap` paints the fallback meanwhile, and a
-    # width measured in the same frame as the attribute is set is therefore
-    # the SYSTEM stack's width under the right family name — identical
-    # numbers, correct `font-family`, and a green-looking product called
-    # broken. `await document.fonts.load()` first, and assert the load
-    # SUCCEEDED as its own fact, or a face that never decodes would leave two
-    # equal widths and no explanation of why.
-    widths = pg.evaluate("""async () => {
-      var out = {};
-      document.documentElement.setAttribute('data-font', 'source');
-      try { await document.fonts.load('32px "Source Sans 3"'); } catch (e) {}
-      await document.fonts.ready;
-      out.decoded = document.fonts.check('32px "Source Sans 3"');
-      var s = document.createElement('span');
-      s.style.cssText = 'position:absolute;visibility:hidden;font-size:32px;font-family:var(--sans)';
-      s.textContent = 'Handgloves 0123';
-      document.body.appendChild(s);
-      out.source = Math.round(s.getBoundingClientRect().width * 100) / 100;
-      out.family = getComputedStyle(s).fontFamily;
-      document.documentElement.removeAttribute('data-font');
-      out.system = Math.round(s.getBoundingClientRect().width * 100) / 100;
-      s.remove();
-      return out;
-    }""")
-    ck("the embedded face decodes (it is in the file, not merely named)",
-       widths.get("decoded"), widths)
-    ck("Source Sans 3 actually renders (its metrics differ from the system stack)",
-       widths.get("system") != widths.get("source"), widths)
-    ck("...and it is the family the page asks for",
-       "Source Sans 3" in (widths.get("family") or ""), widths.get("family"))
-
-    # A remembered face must not pin anybody: removed or live, it is forgotten.
-    for stored in ("manrope", "source"):
-        pg.evaluate("localStorage.setItem('smp.font','%s')" % stored)
+    # A CHOICE LEFT IN A BROWSER FROM THE SWITCH'S DAYS strands nobody: the key
+    # is cleared and the face is Source Sans whatever was stored (§41.6).
+    for stored in ("system", "manrope"):
+        pg.evaluate("localStorage.setItem('smp.font', %r)" % stored)
         pg.reload()
         pg.wait_for_timeout(900)
-        after = pg.evaluate("""() => ({
-          attr: document.documentElement.getAttribute('data-font'),
-          key: localStorage.getItem('smp.font'),
-          family: getComputedStyle(document.body).fontFamily
-        })""")
-        ck("a remembered %s does not choose the face" % stored,
-           after.get("attr") in (None, ""), after)
-        ck("...and the remembered %s is cleared" % stored, after.get("key") is None, after)
-    ck("...and nothing asks for Manrope",
-       "Manrope" not in (after.get("family") or ""), after)
+        w = measure()
+        key = pg.evaluate("localStorage.getItem('smp.font')")
+        ck("a remembered %r is cleared on load" % stored, key is None, key)
+        ck("...and the page is still in Source Sans 3",
+           w.get("body", "").startswith('"Source Sans 3"') and not w.get("attr"), w)
 
     ck("no page errors while driving", not errs, errs[:2])
     b.close()

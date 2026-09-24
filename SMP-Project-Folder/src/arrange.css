@@ -684,17 +684,44 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      is a server to say which ones a client has. The offline copy (§306) has
      no modules, so a switcher baked into the frozen shell would be a control
      that could never open anything (§61). */
-  details.dlmenu.topmark { align-self:center; margin-right:2px; }
-  details.dlmenu.topmark > summary { list-style:none; display:grid; place-items:center;
-             width:28px; height:28px; border:1px solid var(--line); border-radius:8px;
-             color:var(--ink-3); background:none; cursor:pointer; }
-  details.dlmenu.topmark > summary::-webkit-details-marker { display:none; }
-  details.dlmenu.topmark > summary:hover { border-color:var(--stone-soft); color:var(--ink); }
-  details.dlmenu.topmark > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  details.dlmenu.topmark[open] > summary { border-color:var(--stone-soft); color:var(--ink); }
-  details.dlmenu.topmark > summary svg { width:17px; height:17px; display:block; }
-  details.dlmenu.topmark > .menu { min-width:290px; top:calc(100% + 6px); left:0; }
-  details.dlmenu.topmark > .menu button[aria-current="true"] { font-weight:700; }
+  /* ══ THE TRAIL (§400) ═══════════════════════════════════════════════
+     Replaces the four-square switcher (deleted with its markup, §24) and the
+     client-name pill, for Forefront's own people only — `data-console`,
+     written by sync.js. One line: Forefront › client ▾ › module ▾ (no client mark since §401).
+     The menus are `details.dlmenu > .menu`'s own, unchanged (§53.5); what is
+     here is the line. The step you are ON is the ink colour and weight, the
+     steps above it the quieter ink, which is how a trail reads everywhere. */
+  nav.trail { display:flex; align-items:center; gap:6px; min-width:0; margin-right:auto;
+              font-size:13.5px; white-space:nowrap; }
+  nav.trail .trff { color:var(--ink-2); text-decoration:none; font-weight:600;
+                    letter-spacing:.04em; font-size:12px; text-transform:uppercase; }
+  nav.trail .trff:hover { color:var(--ink); text-decoration:underline; }
+  nav.trail .trff:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:3px; }
+  nav.trail .trsep { color:var(--ink-3); font-size:15px; line-height:1; }
+  nav.trail details.trstep > summary { cursor:pointer; gap:6px; padding:3px 7px; border-radius:7px;
+                                       color:var(--ink); font-weight:600; min-width:0; }
+  nav.trail details.trclient > summary { color:var(--ink-2); }
+  nav.trail details.trstep > summary:hover,
+  nav.trail details.trstep[open] > summary { background:var(--surface-2); color:var(--ink); }
+  nav.trail details.trstep > summary > span { overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+  nav.trail details.trstep > summary > svg { width:10px; height:10px; flex:none; color:var(--ink-3); }
+  nav.trail .menu button[aria-current="true"] { font-weight:700; }
+  /* a line in a menu that is not a door ("Reading your clients…", "No other
+     clients"), §401 — said, never a button that goes nowhere (§94.15) */
+  nav.trail .trquiet { padding:9px 14px; font-size:13.5px; color:var(--ink-2); font-style:italic; }
+  nav.trail .trrule { height:1px; background:var(--line); margin:4px 0; }
+  /* THE TRAIL IS THE BRAND LINE FOR FOREFRONT'S PEOPLE, so the product's own
+     name, the client's mark and the old pill stand down under it — the
+     client is named once, in the trail (§120). */
+  html[data-console] .top .brand,
+  html[data-console] .top .clientlogo,
+  html[data-console] .top .clientback { display:none; }
+  /* The rail's own "‹ Back to the console" and "… settings ›" rows answered
+     the same question the trail now answers on every page; with the trail
+     drawn they are a second way to say it (§87), so they stand down. Kept
+     for the one reader with no trail: a client's own office on the client's
+     settings. */
+  html[data-console] .setuprail .railback-row { display:none; }
 
   details.dlmenu.topsel { position:relative; display:flex; }
   details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
@@ -1392,6 +1419,26 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  /* AND GOLD WHILE YOU ARE HOME (§400): Home is a page now, and on the
+     destination row gold is where you are (§197.2) — so the house wears it
+     while Home is open, whether or not anything is waiting. */
+  html[data-home-open] .units .navmenu-btn.homemark{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); }
+  /* AND NOTHING ELSE SAYS WHERE YOU ARE WHILE YOU ARE HOME (§403). Islam:
+     *"why on the welcome page I have strategy and overview & projects?"* —
+     Home sits under the chrome (§400), so the tab row and the section row
+     kept describing the page BEHIND it, and the destination row kept its
+     gold underline on that page's name: two answers to "where am I" beside
+     the lit house. Both rows are hidden and the underline dropped while Home
+     is open; the places themselves stay pressable, since pressing one is how
+     you leave Home, and every row comes back the moment Home steps aside.
+     `display:none`, never opacity (§3.2 — a hidden row must not take
+     clicks). Signed off from design-mockups/home-rows/. */
+  html[data-home-open] #tabrow,
+  html[data-home-open] #secrow { display:none !important; }
+  html[data-home-open] .units button[aria-selected="true"],
+  html[data-home-open] details.dlmenu.topsel > summary[aria-selected="true"] {
+    border-bottom-color:transparent; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
      the two-door split (§47.7): the gear is one destination now, so there is

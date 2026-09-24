@@ -733,39 +733,19 @@ var SYNC = (function () {
        only side that knows — and a client's own person never sees it, because
        for them there is nothing behind it (§32: a door to one place is not a
        choice, and a door to none is a dead end). */
-    var back = document.getElementById("clientback");
-    if (back && person && person.cards) {
-      var nameEl = document.getElementById("clientbackname");
-      /* textContent, never innerHTML: a client's name is typed by a person. */
-      if (nameEl) nameEl.textContent = person.clientName || clientSlug();
-      /* AND KEPT WHERE IT IS DRAWN (§362). This function runs once, at
-         hydration; the client's own settings reword this control to *Save &
-         close* on every paint they are open (shell.html clientBar), so the
-         name has to survive being written over — and it is remembered on the
-         control rather than in a global, because a second copy of a value is
-         a second thing to keep in step (§53.5). */
-      back.dataset.client = person.clientName || clientSlug();
-      back.hidden = false;
-      back.title = "Back to your clients";
-      /* AND THE ORG NAME BESIDE IT GOES. Both say "Raya Trade" — one as a
-         label, one as a door — and two copies of a fact on one line is what
-         §120 took off the register's header. The control is the one that also
-         does something, so it is the one that stays. Where there is no way
-         back (a client's own person) the label is untouched. */
-      var org = document.getElementById("orgname");
-      if (org) org.hidden = true;
-      /* STRAIGHT TO THE PLATFORM, NOT THROUGH THE DOOR (§313.23). It went to
-         "/", and the door hands somebody over to what they can OPEN — so on a
-         deployment where this person has exactly one client, the way back to
-         the cards walked out of the client and straight back into it. A loop,
-         and the only route to Forefront's own pages, so the platform's super
-         user could not reach Consultants or Who sees what at all.
-
-         §32 is not in tension with this: "one destination is not a question"
-         is about where a SIGN-IN lands, and this control is somebody asking
-         for the list on purpose. The two answers differ because the questions
-         do. */
-      back.addEventListener("click", function () { location.assign("/platform"); });
+    /* ── THE WAY BACK IS THE TRAIL NOW (§400) ─────────────────────
+       This drew a client-name pill reading "change" that went to the
+       console. It is replaced by the trail route.js draws — "Forefront ›
+       [client] ▾ › Strategy ▾" — for exactly the same people: those the
+       server says HAVE a console (`person.cards`). This writes the one fact
+       the trail needs and nothing else; `#clientback` stays in the markup,
+       hidden, for the offline copy that has no server to ask. */
+    if (person && person.cards) {
+      document.documentElement.setAttribute("data-console", "1");
+      document.documentElement.setAttribute("data-console-client", person.clientName || clientSlug());
+    } else {
+      document.documentElement.removeAttribute("data-console");
+      document.documentElement.removeAttribute("data-console-client");
     }
     /* DRAWN BEFORE ANYTHING CAN RETURN. The branch below stops the whole
        chrome when the signed-in person is not on this client's register — and

@@ -7951,6 +7951,34 @@ rules 69/0, `test-my-reporting` 65/0, and on the stack production serves state
 notes 170/0, portfolio 121/0, upload 9/0, demo 7/0, standing 7/0, room 10/0,
 deploy 5/0.
 
+## §400 — moving between the console, a client and its modules (2026-09-23)
+
+**Built on the branch, not merged.** Four things, from the before/after mockups
+Islam approved: a trail at the top for Forefront's own people (Forefront ›
+client › module, with the client menu holding the modules, Client settings and
+Switch client); Home is the house mark and a page under the navigation rather
+than a cover with a Continue button; the console opens on **My work** — your
+open Internal Tracker actions across every client, late first, each row opening
+that client's Tracker, and each client card saying how many are open; and a
+client's own staff see no trail or switcher, just their company's name. One
+thing added beyond the drawing: on Client settings the client menu also lists
+each module's settings, so the one-press way across is not lost. All checks
+green; nothing stored or migrated.
+
+## §401 — the trail's two menus (2026-09-24)
+
+**Built on the branch, not merged.** Four things you asked for on the trail at
+the top: an open menu now closes when you click anywhere else (or press
+Escape), and opening one closes the other; the client's logo is gone from the
+bar — the trail names the client in words; the client name's menu lists your
+**other clients** (the ones you may open) and then *All clients*; and the
+module's menu lists the **other modules**, a separator, then *Client settings*.
+On Client settings itself, the last step reads *Client settings* and opens the
+same menu, where each module takes you to that module's settings. *Home* left
+the module menu — the house mark does that job. Nothing stored or migrated; a
+client's own staff still see no trail, and the server refuses them the client
+list too.
+
 ## §390 — the people upload takes a client's own sheet (2026-09-23)
 
 **Built, on the branch.** A new person needs three things: Name, Job title
@@ -8025,6 +8053,42 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
+## §399 — supporting functions get Strengths and Weaknesses (2026-09-24) · **merged to `main` 2026-09-24**
+
+**Built; merged to `main` 2026-09-24 on Islam's word.** Every supporting function now has an
+**S&W** tab on its Strategy row, between Overview and its plan, like a
+business unit's SWOT but with only the two boxes about the function itself.
+Opportunities and threats stay with the business. The office writes it with
+the same Edit button as the Overview; an empty one is not counted as missing.
+It shows as one slide in the function's review deck when there is something on
+it, and it travels in the function's plan template (an older file without it
+leaves it untouched). Checked: a new check that presses every control (red 16
+and 8 ways when broken), the server rules (755 passing), the neighbouring
+checks and the full sweep. One neighbour (`functional-projects`) was already
+red before this, from the wording round — left as it was.
+
+
+## §398 — the set-up flow's sentences use lower case (2026-09-23) · **merged to `main` 2026-09-23**
+
+**Built; merged to `main` 2026-09-23 on Islam's word.** The set-up questions now read "Are the
+business units grouped into divisions?" rather than capitalising the words
+mid-sentence. Short forms like "BUs" are left as typed, and headings keep
+their capitals. Five places on the Divisions step still said "company"; they
+now use the client's word too.
+
+
+## §397 — every release offers the reload (2026-09-23) · **merged to `main` 2026-09-23**
+
+**Built; merged to `main` 2026-09-23 on Islam's word.** The platform already has a banner that
+says "A newer version of the platform is ready" with a button to reload and keep
+your work, but it had stopped appearing: it only shows when a small background
+file changes, and that file had been identical in every release since the
+rebuild. Each release now stamps that file with a fingerprint of the pages it
+serves, so any release that changes what people see brings the banner up in
+every open tab. A check fails if the fingerprint is missing or out of date, and
+the merge rules now require confirming it changed on the live site.
+
+
 ## §396 — the set-up flow's questions use the client's words (2026-09-23) · **merged to `main` 2026-09-23**
 
 **Built; merged to `main` 2026-09-23 on Islam's word.** On Client set-up, the Divisions step's
@@ -8075,3 +8139,56 @@ Performance and Reporting pages, and the missing-items chips follow it.
 Nothing saved changes. Checked: a new check that clicks every pillar in three
 awkward states (it fails 18 ways on the old build), six neighbouring checks
 updated, the full sweep. Merged to `main` on Islam's word, after bringing in §391–§392.
+
+## §402 — one typeface, and one Viewing as (2026-09-24)
+
+**Built, on the branch, not merged.** The font button is gone from the top bar
+and the whole platform is in Source Sans 3 for everybody; a choice somebody's
+browser remembered from the old button is cleared the next time they open it.
+The Home page's own "Viewing as" row is gone — the one in the top bar is the
+only one, and switching there now redraws Home for the person you are looking
+at, which is what the page's copy used to do. Checked: the two checks that
+covered these were rewritten and proved to fail when the old behaviour is put
+back; the whole-platform sweep is clean. Nothing stored changes.
+
+## §403 — Home says only where you are (2026-09-24)
+
+**Built, on the branch, not merged.** While Home is open, the tab row and the
+section row of the page behind it (for a function head: Strategy · Performance
+· Reporting and Overview · Projects) are no longer drawn, and that place loses
+its gold underline in the navy bar — only the house is lit. Pressing a place
+still closes Home and brings every row back. Signed off from the mockup in
+`design-mockups/home-rows/`. Checked: `welcome.py` rewritten for the new rule
+and proved to fail twice when the rule is removed; the whole-platform sweep is
+clean. Nothing stored changes.
+
+- **2026-09-24 — §400.1:** the trail’s first step now reads *Platform* instead of *Forefront*. On the branch, not merged.
+- **2026-09-24 — §400.2:** switching console tabs shows the tab straight away and refreshes it quietly behind. Merged to `main` 2026-09-24 with §400.1 (the trail says Platform), as a clean fast-forward carrying this line so the merge commit is held by `main` alone (§91). Found red and not caused by this: the checks for adding and archiving a client from the console.
+
+## §404 — the client's structure (2026-09-24, on the branch)
+
+Built from the approved mockup. Setting up a client now asks, second: what the
+top level is called, whether there is a second layer (companies, divisions or
+another word), and which parts each level carries — who we are, purpose,
+aspiration, North Star, themes, pillars, capabilities, values, SWOT — plus how a
+supporting function plans by default. The Temple is a picture you can turn on
+when its parts are there. Setup › Structure lets the office switch a part off
+or on for one unit, function or company. Switching off hides and never deletes.
+Clients that never use it look exactly as before. A company gets its own
+Foundation page once its layer carries something.
+
+**Merged to `main` 2026-09-24 on Islam's word**, after bringing in main's navigation work (§399–§403). One place where the two met: a supporting function's Strengths & Weaknesses tab and slide now disappear when the office switches SWOT off for that function, like a unit's SWOT does.
+**Not done yet**: turning Pillars off does not hide a unit's plan; the second
+layer has no Temple drawing of its own.
+
+
+**§404.1 — a supporting function carries no brief and no themes.** Islam: *"supporting function shouldn't have themes, the function has no brief and even the function owner is set in the registry so a function here has no description needed."* A function's Overview no longer draws the "What it is" card (name, Led by, Definition) — who leads it is set on the register — and Themes is never shown for a function. The set-up step and Setup › Structure no longer offer either for functions. Capabilities keep their definition. This one changes existing clients' function Overviews (nothing is deleted). Checks rewritten to match; all green.
+
+**§404.2 — the functions level asks only what a function carries.** Setting up a client, the supporting functions now offer only Purpose, Aspiration, North Star and SWOT, and the "Plan in, by default" row is gone — each function picks how it plans on the Supporting functions step. The default words for new clients are singular except Key Objectives, Pillars, Capabilities, Core Values and Themes (so *Mission* and *Winning Aspiration*); existing clients keep their words and can change them on Setup › Terminology.
+
+**§404.3 — existing clients get the singular words too.** Existing clients still read *Missions* and *Winning Aspirations* because the platform itself put those words there two days earlier. A one-time change at the next deploy turns them into *Mission* and *Winning Aspiration* wherever the stored word is exactly that old default; a word a client typed is untouched. Tested on a real database.
+
+
+**§404.4 — the set-up flow, tidied.** The Divisions step no longer asks whether there are divisions (Structure already did); it just names them, or says the client has none and points back. The steps now run: the client, Structure, Divisions, Business units, Supporting functions, Capabilities, The office. Each business unit and each supporting function can be put in a division as it is named (optional, and still changeable on their own Setup pages). The Words step is gone: the business units' and functions' own names are asked on their Structure cards, and key measures and tactics are named beside Pillars. The Capabilities step says the client doesn't use them when no level carries them. A repeated sentence on the functions step is gone, and the "a unit plans in pillars" line shows only when units do. Checked in the browser, including proving the new checks fail when the feature is broken.
+
+**§404.5 — sensible starting components for a new client.** A client created from now on starts with its divisions carrying Brief, Purpose, Aspiration, North Star, Pillars and SWOT, and its business units carrying Brief, Aspiration, North Star, Pillars and SWOT. The top level and the supporting functions start as before. Existing clients are not changed. Everything stays adjustable on the Structure step and Setup › Structure. Checked, including proving the check fails when the defaults are removed.

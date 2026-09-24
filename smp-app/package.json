@@ -25,7 +25,7 @@
     "build:sw": "node scripts/build-sw.mjs",
     "deploy:db": "node scripts/deploy.mjs",
     "check:shell": "node checks/shell.mjs",
-    "check:shell:red": "for b in no-route open-csp keep-caches serve-from-disk no-setup-scope no-library-cats; do SMP_BREAK=$b node checks/shell.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:shell:red": "for b in no-route open-csp keep-caches serve-from-disk no-setup-scope no-library-cats mywork-everyone; do SMP_BREAK=$b node checks/shell.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:blob": "node checks/blob-api.mjs",
     "check:blob:red": "for b in store-first watch-truthy; do node checks/blob-api.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:comms": "node checks/comms-api.mjs",
@@ -37,7 +37,7 @@
     "check:deploy": "node checks/deploy-context.mjs",
     "check:deploy:red": "for b in ignore-app unanchored ignore-scripts; do node checks/deploy-context.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:modules": "node checks/modules.mjs",
-    "check:modules:red": "for b in any-module open-address static-hello switch-always no-server wrong-server module-own-colour gate-open mark-always; do SMP_BREAK=$b node checks/modules.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:modules:red": "for b in any-module open-address static-hello trail-for-staff no-server wrong-server module-own-colour gate-open mark-always; do SMP_BREAK=$b node checks/modules.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:store": "node --experimental-strip-types checks/store-seam.mjs",
     "check:viewas": "node --experimental-strip-types checks/view-as.mjs",
     "check:viewas:red": "for b in viewas-any-seat viewas-unknown-ok viewas-keeps-seat; do SMP_BREAK=$b node --experimental-strip-types checks/view-as.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
@@ -63,7 +63,9 @@
     "check:assistant": "node checks/assistant-defaults.mjs",
     "check:assistant:red": "node checks/assistant-defaults.mjs --break=loose-defaults >/dev/null 2>&1 && { echo \"NOT RED: loose-defaults\"; exit 1; }; echo \"red: loose-defaults\"",
     "check:memory": "node checks/memory-split.mjs && node checks/memory-boundary.mjs && node checks/memory-api.mjs && node checks/memory-page.mjs && node --experimental-strip-types checks/memory-ask.mjs",
-    "check:memory:red": "for b in 'memory-split.mjs --break=drop-unread' 'memory-split.mjs --break=empty-on-noise' 'memory-boundary.mjs --break=policy' 'memory-boundary.mjs --break=in-shell' 'memory-api.mjs --break=client-reads' 'memory-api.mjs --break=anyone-edits' 'memory-api.mjs --break=partial-save' 'memory-page.mjs --break=no-split' 'memory-ask.mjs --break=trust-source' 'memory-ask.mjs --break=no-corpus'; do node --experimental-strip-types checks/$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done"
+    "check:memory:red": "for b in 'memory-split.mjs --break=drop-unread' 'memory-split.mjs --break=empty-on-noise' 'memory-boundary.mjs --break=policy' 'memory-boundary.mjs --break=in-shell' 'memory-api.mjs --break=client-reads' 'memory-api.mjs --break=anyone-edits' 'memory-api.mjs --break=partial-save' 'memory-page.mjs --break=no-split' 'memory-ask.mjs --break=trust-source' 'memory-ask.mjs --break=no-corpus'; do node --experimental-strip-types checks/$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:release": "node checks/release-stamp.mjs",
+    "check:release:red": "SMP_BREAK=no-stamp node scripts/build-sw.mjs && (node checks/release-stamp.mjs; r=$?; node scripts/build-sw.mjs >/dev/null; test $r -ne 0)"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

@@ -125,10 +125,17 @@ let asked = [];
      unchanged, because it is about the FLOW and never about which file holds
      it. Re-pointed, never loosened; `asked.length > 0` is what caught the
      move and is why it stays. */
+  /* §404.4 DELETED THE WORDS STEP and moved every word it asked onto the
+     Structure step, beside the level or component it names — so this reads
+     the words where they are asked NOW: the component keys, the two
+     sub-words under a pillar, the level names (namePick) and the two cards'
+     "Called" boxes (callBoxes). Re-pointed, never loosened (§218). */
   const page = read("SMP-Project-Folder/src/client-setup.js");
-  const blk = page.slice(page.indexOf("var WORDS = ["));
-  const arr = blk.slice(0, blk.indexOf("];"));
-  asked = [...arr.matchAll(/\[\s*"([A-Za-z0-9_]+)"/g)].map((m) => m[1]);
+  const comps = page.slice(page.indexOf("var COMPONENTS = ["));
+  asked = [...comps.slice(0, comps.indexOf("];")).matchAll(/\[\s*"([A-Za-z0-9_]+)"/g)].map((m) => m[1]);
+  for (const m of page.matchAll(/(?:namePick|callBoxes)\([a-z]+,\s*"([A-Za-z0-9_]+)"/g)) asked.push(m[1]);
+  const subs = page.match(/key === "pillar"\) \[(.*?)\]\.forEach/);
+  if (subs) for (const m of subs[1].matchAll(/\[\s*"([A-Za-z0-9_]+)"/g)) asked.push(m[1]);
   if (BREAK === "extra-word") asked.push("howevertheyspellit");
 }
 const held = (seed.labels || []).map((e) => e.key);
@@ -327,6 +334,35 @@ console.log("\n8 · an empty capability is not authored work");
   check("…and one planned in pillars does", withCap({ items: [{ name: "x" }] }) === 1);
   check("and the worked example's own capability still counts",
     frozen.holds(clone(seed)).capabilities === 1, frozen.holds(clone(seed)).capabilities);
+}
+
+/* §404.5 — A NEW CLIENT IS BORN WITH THE DIVISION AND BUSINESS-UNIT DEFAULTS
+   ISLAM NAMED, and nothing else moves. Asserted as AGREEMENT with the rule's
+   own list (§94.8), both ends (§94.2): the top level and the functions stay
+   unsaid, so they read everything-on as before, and a client whose structure
+   is unsaid — every client set up before this — still reads everything on. */
+{
+  const R = require_(join(APP, "lib", "rules.cjs"));
+  const st = bare.group && bare.group[R.STRUCTURE];
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  check("a new client's divisions start on the named defaults",
+    !!st && same(st.mid && st.mid.on, R.STRUCT_NEW_CLIENT.mid), st && st.mid);
+  check("…and its business units on theirs",
+    !!st && same(st.bu && st.bu.on, R.STRUCT_NEW_CLIENT.bu), st && st.bu);
+  check("the defaults are the ones asked for, word for word",
+    same(R.STRUCT_NEW_CLIENT.mid, ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"]) &&
+    same(R.STRUCT_NEW_CLIENT.bu, ["brief", "aspiration", "keyobj", "pillar", "swot"]));
+  check("the top level and the functions are left unsaid (everything on)",
+    !!st && !st.top && !st.fn, st);
+  check("a unit on a new client shows no Themes, Capabilities or Values",
+    ["theme", "capability", "values"].every((c) => !R.compOn(bare.group, "mobile", c)) &&
+    ["brief", "pillar", "swot"].every((c) => R.compOn(bare.group, "mobile", c)));
+  check("the top level of a new client still carries everything",
+    R.STRUCT_COMPONENTS.every((c) => R.compOn(bare.group, "group", c)));
+  check("a client whose structure is unsaid still reads everything on (existing clients unchanged)",
+    R.STRUCT_COMPONENTS.every((c) => R.compOn(seed.group, "mobile", c)));
+  check("a shape pass keeps the defaults it was born with",
+    same((frozen.shape(clone(bare), ANSWERS).state.group || {})[R.STRUCTURE], st));
 }
 
 console.log("\n" + ok + " ok, " + bad.length + " failed");

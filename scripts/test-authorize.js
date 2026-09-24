@@ -4854,5 +4854,71 @@ console.log("\n44 · revenue drivers (spec 063)");
         k2.indexOf("setup") > -1 && k2.indexOf("unknown") < 0, k2.join(","));
 })();
 
+/* ── 46 · the client's structure, and a company's own Foundation (§404) ──
+   The structure is SETUP (the office's); a company's Foundation is the
+   group's own strategy drawn over the company's record, so it is judged as
+   the group's is. Both ride the group's extra and both are compared
+   CANONICALLY, because jsonb hands object keys back in its own order (§145):
+   a save carrying either unchanged, with its keys reordered, classifies
+   nothing. BOTH ENDS: the office may, a custodian may not, neither is unknown. */
+console.log("\n46 · the client's structure (§404)");
+(function () {
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  const KEY = R.STRUCTURE;
+  check("§404: the key is the shared rule's", typeof KEY === "string" && KEY.length > 0, String(KEY));
+  const base = clone(SEED); delete base.group[KEY]; delete base.group.coFound;
+  const ST = { bu: { on: ["brief", "aspiration", "keyobj", "pillar"] }, over: { x: { swot: false } } };
+  const inc = clone(base); inc.group[KEY] = ST;
+  const ks = (A.collect(base, inc, W(base)) || []);
+  check("§404: storing a structure classifies as SETUP",
+        ks.length > 0 && ks.every(function (c) { return c.kind === "setup"; }),
+        ks.map(function (c) { return c.kind; }).join(",") || "(nothing classified — INVISIBLE)");
+  const office = A.authorize(base, inc, personOf(base, "smo"));
+  check("§404: the office sets the structure", office.ok, (office.refusals || []).join(" / "));
+  if (custKey) {
+    const cust = A.authorize(base, inc, personOf(base, custKey));
+    check("§404 REFUSED: a custodian may not", !cust.ok, "was ALLOWED");
+  }
+  const stored = clone(base); stored.group[KEY] = ST;
+  const reordered = clone(base);
+  reordered.group[KEY] = { over: { x: { swot: false } }, bu: { on: ["brief", "aspiration", "keyobj", "pillar"] } };
+  const same = (A.collect(stored, reordered, W(stored)) || []);
+  check("§404: the same structure with its keys reordered is no change (jsonb, §145)", same.length === 0,
+        same.map(function (c) { return c.kind + ":" + (c.what || ""); }).join(","));
+  const coInc = clone(base); coInc.group.coFound = { dist: { aspiration: "Lead the region", keyObjectives: [] } };
+  const kc = (A.collect(base, coInc, W(base)) || []);
+  check("§404: a company's Foundation classifies as the group's own strategy",
+        kc.length > 0 && kc.every(function (c) { return c.kind === "group"; }),
+        kc.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  const offCo = A.authorize(base, coInc, personOf(base, "smo"));
+  check("§404: the office writes a company's Foundation", offCo.ok, (offCo.refusals || []).join(" / "));
+  if (custKey) {
+    const cc = A.authorize(base, coInc, personOf(base, custKey));
+    check("§404 REFUSED: a custodian may not", !cc.ok, "was ALLOWED");
+  }
+})();
+
+/* ── §399: A FUNCTION'S S&W ───────────────────────────────────────────────
+   Written by the office on every format, classified as the SWOT it is rather
+   than swept up as "a supporting function's settings" — both ends, or a build
+   that allowed everybody passes the first half. */
+(function () {
+  const fks = Object.keys(SEED.functions);
+  const proj = fks.filter(function (k) { return String(SEED.functions[k].format) !== "pillars" && SEED.functions[k].head; })[0];
+  const pil = fks.filter(function (k) { return String(SEED.functions[k].format) === "pillars"; })[0];
+  [proj, pil].forEach(function (fk) {
+    const put = function (inc) { inc.functions[fk].swot = { s: ["A strength"], w: ["A weakness"] }; };
+    allows("smo", put, "§399: the office writes " + fk + "'s S&W");
+    const head = SEED.functions[fk].head;
+    if (head && head !== "smo") refuses(head, put, "§399 REFUSED: " + fk + "'s own head may not (the Strategy half is the office's)");
+    refuses("own_mob", put, "§399 REFUSED: a business unit's owner may not write a function's S&W");
+    const inc = clone(SEED); put(inc);
+    const kinds = (A.collect(SEED, inc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+    check("§399: " + fk + "'s S&W is classified as its SWOT",
+          kinds.indexOf("unitAnalysis") > -1 && kinds.indexOf("unknown") < 0 && kinds.indexOf("setup") < 0,
+          kinds.join(",") || "(nothing)");
+  });
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -105,35 +105,30 @@ with sync_playwright() as p:
         secs = pg.evaluate("""(t)=>{
           const d=(SUBS.fn||[]).filter(x=>x.k==='fnstrat')[0];
           return d.sections(t.slice(3)).map(s=>s.k+'/'+s.ac); }""", t)
-        ok("the " + what + " function has Overview + plan, both on the function's keys",
-           secs == ["found/k_found", "proj/k_proj"], secs)
+        # §399 put S&W between them, on the Overview's own key — REWRITTEN,
+        # never loosened (§218): still both on the function's keys, still
+        # Overview first and the plan last.
+        ok("the " + what + " function has Overview, S&W and plan, all on the function's keys",
+           secs == ["found/k_found", "swot/k_found", "proj/k_proj"], secs)
 
     print("\n── 2 · and they draw the SAME two cards (§53.5, asserted as agreement)")
     open_at(pg, T);  a = cards(pg)
     open_at(pg, TC); c = cards(pg)
     ok("the same card headings", a["headings"] == c["headings"], {"pillars": a, "projects": c})
-    ok("...two of them", len(a["headings"]) == 2, a["headings"])
-    ok("the same NUMBER of labelled facts", len(a["labels"]) and
-       len(a["labels"]) == len(c["labels"]), {"pillars": a["labels"], "projects": c["labels"]})
-    ok("...and both end on the Definition",
-       bool(a["labels"]) and a["labels"][-1] == c["labels"][-1] == "Definition",
-       {"pillars": a["labels"], "projects": c["labels"]})
-    # REVERSED AND REWRITTEN, NEVER DELETED (§218). This pair asserted that the
-    # two formats named DIFFERENT things — the pillars one a Function and the
-    # projects one a Capability — which was true while a function's projects
-    # had to live in a box. §326 gives them to the function, so BOTH name the
-    # function, which is §213's decision finally true of both sides. Asserted
-    # per format and not only as the agreement above, or a build that drifted
-    # BOTH back to naming a capability would pass the whole section.
-    # §395: named in the client's word for a supporting function — an
-    # agreement with the label, never the platform's literal (§218).
-    fw = pg.evaluate("labelWord('fnword','group')")
-    ok("...the pillars one naming the FUNCTION", a["labels"][:1] == [fw], a["labels"])
-    ok("...and the projects one naming the FUNCTION too (§326)",
-       c["labels"][:1] == [fw], c["labels"])
-    ok("...neither of them naming a capability (§333)",
-       "Capability" not in a["labels"] and "Capability" not in c["labels"],
-       {"pillars": a["labels"], "projects": c["labels"]})
+    # REWRITTEN, NEVER DELETED (§218, §404.1): Islam, 2026-09-24 — "the
+    # function has no brief and even the function owner is set in the
+    # registry so a function here has no description needed". The "What it
+    # is" card (the name, Led by, the Definition) is the BRIEF, and a
+    # function never carries one now, so the Overview is ONE card on both
+    # formats — still asserted as their AGREEMENT above, never a literal.
+    ok("...ONE of them: the North Star alone (§404.1)", len(a["headings"]) == 1, a["headings"])
+    ok("no 'What it is' card on either format",
+       not any("what it is" in h.lower() for h in a["headings"] + c["headings"]),
+       {"pillars": a["headings"], "projects": c["headings"]})
+    ok("...and no labelled facts (no Led by, no Definition) on either",
+       a["labels"] == [] and c["labels"] == [], {"pillars": a["labels"], "projects": c["labels"]})
+    ok("...while a CAPABILITY keeps its brief (§334), the other end",
+       pg.evaluate("()=>SMPRules.compOn(GROUP,'cap:x','brief')") is True)
 
     print("\n── 2b · and no explanatory line above either (§214.3)")
     # Islam: "remove the line that's talking about the Retail aspiration … I
@@ -173,7 +168,7 @@ with sync_playwright() as p:
     open_at(pg, T, pen=True)
     ok("the pen opens it", pg.evaluate("()=>!!authoring('capfoundation','k_found')"))
     d = pg.query_selector_all("#panel dd textarea, #panel dd input")
-    ok("the definition is a field", len(d) >= 1, len(d))
+    ok("no definition field behind the pen either (§404.1)", len(d) == 0, len(d))
     if d:
         d[-1].click(); d[-1].fill("Runs the range.")
         pg.evaluate("()=>document.activeElement.blur()"); pg.wait_for_timeout(400)
@@ -321,8 +316,8 @@ with sync_playwright() as p:
               return { has: !!cell,
                        controls: cell ? cell.querySelectorAll('input,textarea,select,button').length : -1,
                        text: cell ? (cell.textContent||'').trim().slice(0,40) : null };}""")
-            ok("...and fill mode opens no control over the definition to a FILLER (§224.2)",
-               defc.get("controls") == 0, defc)
+            ok("...and fill mode draws no Definition at all (§224.2, §404.1)",
+               defc.get("noRow") is True or defc.get("controls") == 0, defc)
             pg.evaluate("""()=>{const d=document.querySelector('.fdone'); if(d) d.click();}""")
             pg.evaluate("""(v)=>{ if (v == null) delete ACCESS.custodian.a_fn_own_strat;
                 else ACCESS.custodian.a_fn_own_strat = v; }""", had)
@@ -338,7 +333,7 @@ with sync_playwright() as p:
        pg.evaluate("()=>SMPRules.GAP_FILLABLE.cap"))
     open_at(pg, T, pen=True)
     d = pg.query_selector_all("#panel dd textarea, #panel dd input")
-    ok("...and the box opens behind the pen", len(d) >= 1, len(d))
+    ok("...and no box opens behind the pen (§404.1)", len(d) == 0, len(d))
     if d:
         d[-1].click(); d[-1].fill("What this function is.")
         pg.evaluate("()=>document.activeElement.blur()"); pg.wait_for_timeout(420)
@@ -415,9 +410,14 @@ with sync_playwright() as p:
     # literal to remember; a sheet that reaches only one half goes red, which
     # is the fault worth catching. The three are read from the loop above
     # rather than typed again, or this line and that one can disagree.
+    # §399: a function's file now carries ONE sheet a unit's does not — its
+    # strengths and weaknesses — at the place the unit's SWOT sits. Still the
+    # difference, never a list: every other sheet the two share must agree.
     ok("...and a unit's file is a function's plus the three it does not author",
-       [s for s in wb["unit"] if s not in FN_GONE] == wb["fn"],
+       [s for s in wb["unit"] if s not in FN_GONE] == [s for s in wb["fn"] if s != "S&W"],
        (wb["unit"], wb["fn"], FN_GONE))
+    ok("...and a function's file carries its S&W sheet where a unit carries none",
+       "S&W" in wb["fn"] and "S&W" not in wb["unit"], (wb["unit"], wb["fn"]))
 
     print("\n── 7 · a weight survives the round trip")
     trip = pg.evaluate("""(t)=>{

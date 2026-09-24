@@ -166,8 +166,8 @@ with sync_playwright() as p:
     ck("…and the strip is lit as the page you are on",
        ev(pg, "()=>{const s=document.querySelector('.railstart');return !!s && s.classList.contains('on') && s.getAttribute('aria-current')==='page';}", False))
     steps = ev(pg, "()=>Array.from(document.querySelectorAll('.csetup .wzstep')).map(e=>e.dataset.step)", [])
-    ck("seven steps, in order — client, units, cos, fns, caps, words, office",
-       steps == ["client", "units", "cos", "fns", "caps", "words", "office"], steps)
+    ck("seven steps, in order — client, structure, divisions, units, functions, capabilities, office (§404.4)",
+       steps == ["client", "structure", "cos", "units", "fns", "caps", "office"], steps)
     ck("…the same seven the flow declares (§53.5)", steps == ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k)", None), steps)
     ck("standing on the first", at(pg) == "client" and ev(pg, "()=>(document.querySelector('.csetup .wzstep[aria-current=step]')||{}).dataset.step", None) == "client")
     ck("Done with set-up is offered", bool(q(pg, ".csetup [data-wzdone]")))
@@ -215,7 +215,7 @@ with sync_playwright() as p:
        ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1 and
        ev(pg, "()=>UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name", None) == "Test Unit X",
        ev(pg, "()=>[UNIT_KEYS.length, UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name]"))
-    ck("…and moves on to the next step", at(pg) == "cos", at(pg))
+    ck("…and moves on to the next step — the functions, since the divisions come first now", at(pg) == "fns", at(pg))
     ck("the heads survive the pass (§346): who runs Mobile before is who runs it after",
        ev(pg, "()=>(UNIT_ROLES.mobile||{}).head", None) == head0.get("mob") and bool(head0.get("mob")),
        (head0.get("mob"), ev(pg, "()=>(UNIT_ROLES.mobile||{}).head")))
@@ -223,7 +223,7 @@ with sync_playwright() as p:
        ev(pg, "()=>GROUP.weighting.units.length===UNIT_KEYS.length && new Set(GROUP.weighting.units.map(r=>r.key)).size===UNIT_KEYS.length", False),
        ev(pg, "()=>[GROUP.weighting.units.length, UNIT_KEYS.length]"))
     ck("…and the strip's count moved with the data", ev(pg, "()=>(document.querySelector('.railstart .rsprog')||{}).textContent||''", "")
-       .startswith("%s of %s done" % (ev(pg, "()=>CLIENTSETUP.progress().done"), 7)))
+       .startswith("%s of %s done" % (ev(pg, "()=>CLIENTSETUP.progress().done"), ev(pg, "()=>CLIENTSETUP.progress().total"))))
 
     # ── 5 · REMOVING A HEADED UNIT IS REFUSED BY NAME, AND THE ROW IS BACK ─
     print("\n§5 · a headed unit cannot be removed here")
@@ -241,7 +241,7 @@ with sync_playwright() as p:
     ck("…and the stored graph is untouched", ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1 and
        ev(pg, "()=>(UNIT_ROLES[UNIT_KEYS[0]]||{}).head", None) == head0.get("head"))
     ck("the very next Next then proceeds (§360.3 — the person is not held on the step)",
-       press(pg, ".csetup [data-wznext]", 500) and at(pg) == "cos" and ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1, (at(pg), said(pg)[:80]))
+       press(pg, ".csetup [data-wznext]", 500) and at(pg) == "fns" and ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1, (at(pg), said(pg)[:80]))
 
     # ── 6 · A ROW WITH NO NAME ─────────────────────────────────────────────
     print("\n§6 · a row with no name")
@@ -253,10 +253,14 @@ with sync_playwright() as p:
     # §395: the sentence names the thing in the CLIENT's word, so it is asked
     # as an agreement with the label and never as the platform's literal.
     one = pg.evaluate("labelWord('unitword','group')")
+    # §398: inside the flow's sentences the word is lowered, every part of it
+    # whose rest is already lower case (so an acronym is left alone) — the
+    # same rule, worked out here rather than read back from the product.
+    one = " ".join(x if x[1:] != x[1:].lower() else x[:1].lower() + x[1:] for x in one.split())
     ck("Next with an empty row is refused in words", ("Name a " + one) in s and "remove the empty row" in s, s[:120])
     ck("…and nothing is written", at(pg) == "units" and ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1)
     ck("taking the empty row off lets Next through", press(pg, ".csetup .wzrow >> nth=-1 >> .wzx", 300) and rows(pg) == r2
-       and press(pg, ".csetup [data-wznext]", 500) and at(pg) == "cos", (rows(pg), at(pg), said(pg)[:60]))
+       and press(pg, ".csetup [data-wznext]", 500) and at(pg) == "fns", (rows(pg), at(pg), said(pg)[:60]))
 
     # ── 7 · DONE WITH SET-UP ───────────────────────────────────────────────
     print("\n§7 · Done with set-up")
@@ -275,7 +279,7 @@ with sync_playwright() as p:
          return !!it && !!g && /Client set-up/.test(it.textContent) && groups[groups.length-1]===g &&
            !!(g.compareDocumentPosition(it) & Node.DOCUMENT_POSITION_FOLLOWING);}""", False))
     ck("…the page's head reads Client set-up too", ev(pg, "()=>(document.querySelector('#panel .setupttl')||{}).textContent", "") == "Client set-up")
-    ck("…and every answer stays editable — the steps are still there", ev(pg, "()=>document.querySelectorAll('.csetup .wzstep').length", -1) == 7)
+    ck("…and every answer stays editable — the steps are still there", ev(pg, "()=>document.querySelectorAll('.csetup .wzstep').length", -1) == ev(pg, "()=>CLIENTSETUP.STEPS.length"))
 
     # ── 8 · THE SHAPE FREEZES WITH A PLAN ──────────────────────────────────
     print("\n§8 · a client with a plan in it")
@@ -291,7 +295,81 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     ck("…and back again with the line gone (§94.2)", bool(q(pg, ".csetup .wzadd")))
 
-    print("\n§9 · the console")
+    # ── 9 · §404.4: DIVISIONS NAMED, A ROW PUT IN ONE, NO WORDS STEP ───────
+    print("\n§9 · divisions, the division pickers, and the words on Structure")
+    fixture = ev(pg, "()=>JSON.stringify({st:GROUP[SMPRules.STRUCTURE]||null})", "{}")
+    ck("(fixture) this client has divisions", ev(pg, "()=>COMPANY_KEYS.length", 0) > 0)
+    press(pg, ".csetup .wzstep[data-step=cos]")
+    ck("the divisions step asks no Yes/No — Structure answers that (both ends: its rows ARE drawn)",
+       q(pg, ".csetup .wzchoice") is None and rows(pg) == ev(pg, "()=>COMPANY_KEYS.length", -1), rows(pg))
+    ck("…and asks the question in the client's word for them",
+       ev(pg, "()=>{const w=labelWord('division','bu').toLowerCase();return (document.querySelector('.csetup .wzq')||{}).textContent.toLowerCase().indexOf(w)>=0;}", False))
+    ck("…and no mapping list sits under it any more (it moved onto the rows)",
+       not ev(pg, "()=>/each .* belongs to$/i.test(Array.from(document.querySelectorAll('.csetup .lab')).map(e=>e.textContent).join('|'))", True))
+    press(pg, ".csetup .wzstep[data-step=units]")
+    nd = ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv=unit]').length", -1)
+    ck("every unit row offers its division", nd == rows(pg) and nd > 0, (nd, rows(pg)))
+    coname = ev(pg, "()=>COMPANIES[COMPANY_KEYS[0]].name", "")
+    lastk = ev(pg, "()=>UNIT_KEYS[UNIT_KEYS.length-1]", None)
+    try:
+        pg.select_option(".csetup [data-wzdiv=unit] >> nth=-1", coname); pg.wait_for_timeout(100)
+    except Exception as e:
+        errs.append("SELECT: " + str(e)[:90])
+    press(pg, ".csetup [data-wznext]", 500)
+    ck("…and picking one WRITES the unit's division (§96)",
+       ev(pg, "()=>UNITS[%s] && UNITS[%s].company" % (json.dumps(lastk), json.dumps(lastk)), None) == ev(pg, "()=>COMPANY_KEYS[0]"),
+       ev(pg, "()=>UNITS[%s] && UNITS[%s].company" % (json.dumps(lastk), json.dumps(lastk))))
+    ck("…landing on the functions step", at(pg) == "fns", at(pg))
+    fk = ev(pg, "()=>FUNCTION_KEYS[0]", None)
+    other = ev(pg, "()=>JSON.stringify(FUNCTION_KEYS.slice(1).map(k=>[k,FUNCTIONS[k].company||null]))", "")
+    ck("every function row offers its division too", ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv=fn]').length", -1) == rows(pg))
+    try:
+        pg.select_option(".csetup [data-wzdiv=fn] >> nth=0", coname); pg.wait_for_timeout(100)
+    except Exception as e:
+        errs.append("SELECT: " + str(e)[:90])
+    press(pg, ".csetup .wzstep[data-step=units]", 500)
+    ck("…and picking one WRITES the function's division (§391's field)",
+       ev(pg, "()=>FUNCTIONS[%s].company" % json.dumps(fk), None) == ev(pg, "()=>COMPANY_KEYS[0]"),
+       ev(pg, "()=>FUNCTIONS[%s].company" % json.dumps(fk)))
+    ck("…and every other function's division is exactly what it was",
+       ev(pg, "()=>JSON.stringify(FUNCTION_KEYS.slice(1).map(k=>[k,FUNCTIONS[k].company||null]))", None) == other)
+    press(pg, ".csetup .wzstep[data-step=fns]")
+    try:
+        pg.select_option(".csetup [data-wzdiv=fn] >> nth=0", ""); pg.wait_for_timeout(100)
+    except Exception as e:
+        errs.append("SELECT: " + str(e)[:90])
+    press(pg, ".csetup .wzstep[data-step=units]", 500)
+    ck("…and choosing none takes it off again (the key DELETED, §50.6)",
+       ev(pg, "()=>!('company' in FUNCTIONS[%s])" % json.dumps(fk), False))
+    press(pg, ".csetup .wzstep[data-step=structure]")
+    ck("Structure names the units and the functions, one and many, where the Words step used to",
+       all(q(pg, '.csetup [data-stword="%s"]' % k) for k in ("unitword|one", "unitword|many", "fnword|one", "fnword|many")))
+    ck("…and the key measures and tactics beside the pillars",
+       bool(q(pg, '.csetup [data-stword="measure|many"]')) and bool(q(pg, '.csetup [data-stword="tactic|many"]')))
+    ck("there is no Words step", q(pg, ".csetup .wzstep[data-step=words]") is None)
+    # no second layer: the divisions step says so and no row offers a division
+    ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));st.mid=Object.assign({},st.mid||{},{exists:false});GROUP[SMPRules.STRUCTURE]=st;paint();}")
+    press(pg, ".csetup .wzstep[data-step=cos]")
+    ck("with no second layer the divisions step says so and points to Structure",
+       rows(pg) == 0 and ev(pg, "()=>/no second layer/.test(document.querySelector('.csetup').textContent) && /Structure step/.test(document.querySelector('.csetup').textContent)", False))
+    press(pg, ".csetup .wzstep[data-step=units]")
+    ck("…and no unit offers a division", ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv]').length", -1) == 0)
+    ck("…and the units' pillar line is drawn while units carry pillars",
+       ev(pg, "()=>/plans in pillars/.test(document.querySelector('.csetup').textContent)", False))
+    ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));['top','mid','bu'].forEach(k=>{st[k]=Object.assign({},st[k]||{});st[k].on=SMPRules.STRUCT_COMPONENTS.filter(c=>c!=='capability'&&c!=='pillar');});GROUP[SMPRules.STRUCTURE]=st;paint();}")
+    press(pg, ".csetup .wzstep[data-step=fns]"); press(pg, ".csetup .wzstep[data-step=units]")
+    ck("…and NOT drawn once units carry no pillars", not ev(pg, "()=>/plans in pillars/.test(document.querySelector('.csetup').textContent)", True))
+    press(pg, ".csetup .wzstep[data-step=caps]")
+    ck("with no level carrying capabilities the step says so in one line, and offers no Add",
+       q(pg, ".csetup .wzadd") is None and ev(pg, "()=>/does not use/.test(document.querySelector('.csetup').textContent)", False))
+    ev(pg, "()=>{const f=JSON.parse(%s); if(f.st) GROUP[SMPRules.STRUCTURE]=f.st; else delete GROUP[SMPRules.STRUCTURE]; paint();}" % json.dumps(fixture))
+    press(pg, ".csetup .wzstep[data-step=caps]")
+    ck("…and with them carried again the step is a list (§94.2)", bool(q(pg, ".csetup .wzadd")))
+    press(pg, ".csetup .wzstep[data-step=fns]")
+    ck("the functions step says its plan-type line exactly once",
+       ev(pg, "()=>(document.querySelector('.csetup').textContent.match(/plan type decides/g)||[]).length", -1) == 1)
+
+    print("\n§10 · the console")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

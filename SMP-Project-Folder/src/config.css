@@ -2983,3 +2983,14 @@
 .cfg.landing .lk{ font-weight:600; min-width:110px }
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
+
+/* §404: Setup › Structure's ticks. A box, not a glyph (§52): filled is
+   shown, empty is hidden, a ring differs from its level. */
+.cfg table.stadj tr.stlvl td { background:var(--surface-2); color:var(--ink-3); font-size:var(--fs-micro);
+  letter-spacing:.07em; text-transform:uppercase; font-weight:700; }
+.cfg table.stadj td.stitem { font-weight:600; }
+.stdot { display:inline-block; width:20px; height:20px; border-radius:5px; border:1.5px solid var(--line);
+  background:var(--surface); padding:0; cursor:pointer; vertical-align:middle; }
+span.stdot { cursor:default; }
+.stdot.on { background:var(--gold-deep); border-color:var(--gold-deep); }
+.stdot.diff { box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--gold); }

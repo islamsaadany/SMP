@@ -361,10 +361,6 @@ var WELCOME = (function(){
   function unEmpty(list){
     var e = list.querySelector(".wempty");
     if (e) e.remove();
-    /* A row arriving late means the exit is no longer the only act on the
-       screen, so it gives the fill back (§41). */
-    var x = box && box.querySelector("[data-wcontinue]");
-    if (x) x.classList.remove("wloud");
   }
   function watchReplies(list){
     /* The corner's first poll is in flight while this screen is built, so
@@ -478,8 +474,10 @@ var WELCOME = (function(){
 
     box = document.createElement("div");
     box.className = "welcomeover";
-    box.setAttribute("role", "dialog");
-    box.setAttribute("aria-label", "Welcome");
+    /* A page, not a dialog (§400): nothing is behind it but the page it
+       stands in for, and the navigation above it is live. */
+    box.setAttribute("role", "region");
+    box.setAttribute("aria-label", "Home");
     box.innerHTML =
       '<div class="wwrap">' +
         '<div class="whero">' +
@@ -534,14 +532,12 @@ var WELCOME = (function(){
             "</div>" +
           "</div>" +
         "</div>" +
-        /* THE WAY OUT SPANS BOTH COLUMNS (§159): inside .wwrap and AFTER
-           .wcols, so its scope is the screen rather than the list it used to
-           end — and so it is last at every width, including the stacked
-           layout below 960px, where the side column falls beneath the left
-           one and a control living in that column is stranded mid-screen. */
-        '<button type="button" class="wexit" data-wcontinue>' +
-          '<span class="wexlab"></span><span class="wgo">\u203a</span>' +
-        "</button>" +
+        /* NO WAY OUT OF ITS OWN (§400). Home is a page inside the chrome
+           now, not a screen over it, so the way on is the navigation already
+           above it — every destination, tab and section is on screen and
+           pressing one leaves Home. The Continue bar (§159) was the only
+           exit of a screen that covered everything; with nothing covered it
+           would be a second way to do what the row does (§87, §94.15). */
       "</div>";
 
     var list = box.querySelector(".wacts");
@@ -567,7 +563,6 @@ var WELCOME = (function(){
       empty.className = "wact wempty";
       empty.innerHTML = '<div class="wwhat"><b>Nothing is waiting on you</b></div>';
       list.appendChild(empty);
-      box.querySelector("[data-wcontinue]").classList.add("wloud");
     }
     acts.forEach(function(a){ list.appendChild(a); });
     if (!office && isSelf(person)) watchReplies(list);
@@ -637,99 +632,31 @@ var WELCOME = (function(){
       });
     }
 
-    /* ── Continue ───────────────────────────────────────────────────────
-       The platform under this screen is already on the page §94.6 chose, so
-       Continue only steps aside — and names where that is. The drawing
-       carried a grey "Strategy · Plan" under the name and it is deliberately
-       not built: the label already names the destination, and the second
-       line would mean re-adding the navigation-word reader §99 deleted. */
-    /* AND SETUP IS A PLACE TOO (§202). Islam: *"the continue button should
-       show continue to the function or BU name."* It already did for a unit,
-       a function, a company and the group — and read a bare "Continue" from
-       Setup, which is where the house button now sits beside the gear
-       (§193.2), so it is a common way in rather than an edge. Measured
-       before it was changed: `mobile` → "Continue to Mobile", `fn:finance` →
-       "Continue to Finance", `setup` → "Continue". The word is the
-       navigation's own; `placeLabel` does not answer for Setup because Setup
-       is not a place a ROLE is held, which is what that function is for. */
-    var here = null;
-    try { here = typeof current !== "undefined" ? current : null; } catch(e){}
-    var word = "Continue";
-    if (here === "setup" || here === "manage") word = "Continue to Setup";
-    else if (here) {
-      try { word = "Continue to " + subjectName(here); } catch(e){}
-    }
-    var cont = box.querySelector("[data-wcontinue]");
-    cont.querySelector(".wexlab").textContent = word;
-    cont.addEventListener("click", function(ev){ ev.preventDefault(); dismiss(); });
 
-    viewerBar(box);
+
     document.body.appendChild(box);
-    /* AFTER the box is in the document, or there is nothing to enhance: the
-       switcher is 33 people and searchsel takes over any select past five
-       (§45.5). Its popup is `.sspop` at z-index 120, above this overlay's 60,
-       so it opens over the screen rather than under it — checked, not assumed. */
-    try { SEARCHSEL.wire(); } catch(e){}
+    /* THE HOUSE IS LIT WHILE YOU ARE HOME (§400) — the destination row's
+       own meaning of gold (§197.2): this is where you are. */
+    document.documentElement.setAttribute("data-home-open", "1");
   }
 
-  /* ── VIEWING AS, ABOVE THE GREETING (§179) ───────────────────────────────
-     Islam: "the viewing as should be available from the welcome screen." It
-     could not be reached at all — this overlay covers the viewport, so the
-     control in the bar underneath is behind it (§167.2 recorded the same
-     screen swallowing clicks meant for the page).
+  /* ── VIEWING AS LIVES IN THE BAR, AND ONLY THERE (§402) ───────────────
+     Islam: *"in the home page there is a viewing as while we already have a
+     viewing as at the top, let's remove the page redundant one and keep the
+     master one at the top."* §179 drew a second switcher above the greeting
+     because the screen then COVERED the viewport and the bar's control was
+     behind it. §400 put Home INSIDE the chrome, so the bar's switcher is on
+     screen the whole time and the second copy says one thing twice (§87).
+     Deleted, not hidden (§24).
 
-     ABOVE THE HERO, NOT INSIDE IT — Islam's pick from two drawn placements.
-
-     WHO GETS IT IS ASKED, NEVER RE-TESTED: `SYNC.isSMOSession()` is the same
-     function the chrome's own switcher asks, so the two can never disagree
-     about who the SMO is, and it FAILS CLOSED — no SYNC, no answer, no
-     control. A switcher shown to somebody who is not the SMO would serve them
-     another person's screen wearing their own name, which is the worst reading
-     available (sync.js says so at length; this does not restate the rule, it
-     asks it).
-
-     THE OPTIONS ARE THE CHROME'S OWN, cloned rather than rebuilt: fillViewers()
-     already settles what a person is called here (`knownName` through
-     `displayNames`, so a colliding pair reads apart) and where they sit
-     (`placeLabel`, the navigation's word). Building a second list would be a
-     second vocabulary for one question (§53.5, §142).
-
-     NEVER A CLONE OF THE SELECT ITSELF — that would put `id="asWho"` in the
-     document twice, and `getElementById` then answers with whichever came
-     first. This is its own element with its own id, and it DRIVES the chrome's
-     one instead of repeating what it does: setting the value and firing
-     `change` runs the shell's single handler (leaveModes, VIEWER, repaint),
-     so a change made to that handler tomorrow reaches this control for free. */
-  function viewerBar(over){
-    var smo = false;
-    try { smo = !!(typeof SYNC !== "undefined" && SYNC.isSMOSession && SYNC.isSMOSession()); }
-    catch(e){ smo = false; }
-    if (!smo) return;
-    var src = document.getElementById("asWho");
-    if (!src || !src.options.length) return;
-
-    var bar = document.createElement("div");
-    bar.className = "wviewbar";
-    var lab = document.createElement("label");
-    lab.setAttribute("for", "wAsWho");
-    lab.textContent = "Viewing as";
-    var sel = document.createElement("select");
-    sel.id = "wAsWho";
-    for (var i = 0; i < src.options.length; i++)
-      sel.appendChild(src.options[i].cloneNode(true));
-    sel.value = src.value;
-    sel.addEventListener("change", function(){
-      var key = sel.value;
-      /* The chrome's handler is the one that switches the platform. Fire it
-         rather than repeating it — and only then redraw this screen, so the
-         doors it builds are the ones the new viewer can actually reach. */
-      src.value = key;
-      src.dispatchEvent(new Event("change"));
-      redraw(key);
-    });
-    bar.appendChild(lab); bar.appendChild(sel);
-    over.querySelector(".wwrap").insertBefore(bar, over.querySelector(".whero"));
-  }
+     WHAT IT DID IS NOT LOST: switching from the bar redraws Home for the
+     person now being looked at, which the page's own copy used to do. Asked
+     on the bar's one control by id, after its handler has switched the
+     platform, so the doors drawn are the ones the new viewer can reach. */
+  document.addEventListener("change", function(ev){
+    if (!box || !ev.target || ev.target.id !== "asWho") return;
+    redraw(ev.target.value);
+  });
 
   /* Rebuild this screen for whoever is being viewed as. NEVER markDone(): a
      switch is not a dismissal, and marking it would leave the screen unable to
@@ -747,7 +674,27 @@ var WELCOME = (function(){
   function dismiss(){
     markDone();
     if (box) { box.remove(); box = null; }
+    document.documentElement.removeAttribute("data-home-open");
   }
+
+  /* ── LEAVING HOME IS PRESSING WHERE YOU WANT TO GO (§400) ──────────────
+     Home sits under the chrome, so a press on the destination row, the tabs,
+     the sections or the trail is somebody going somewhere — the page under
+     Home is repainted by that same press, and Home steps aside for it.
+     CAPTURE PHASE, so it is gone before the press's own handler paints.
+     What does NOT leave: the house itself (it is Home), the viewer strip
+     (it changes whose Home this is), a menu being OPENED (a summary), the
+     trail's own "Home" entry, and the bar's theme button, which
+     changes how the page looks rather than where you are. */
+  document.addEventListener("click", function(ev){
+    if (!box) return;
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    if (!t.closest(".chrome")) return;
+    if (t.closest("[data-welcomego], .viewer, summary, [data-trgo='home'], .themebtn")) return;
+    if (!t.closest("button, a, [role=menuitem], [role=tab]")) return;
+    dismiss();
+  }, true);
 
   /* ── THE OFFER ──────────────────────────────────────────────────────────
      Called from land() beside TOUR.offer, with the same silences: no

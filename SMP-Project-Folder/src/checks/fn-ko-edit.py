@@ -222,42 +222,20 @@ with sync_playwright() as p:
     }""", w["fk"])
     ck("typing into it writes the DATA (§96)", wrote == "A renamed objective", wrote)
 
-    print("\n-- 5 · Led by opens for the office, and for nobody else")
+    print("\n-- 5 · Led by is not on the Overview: the register holds it (§404.1)")
+    # REWRITTEN, NEVER DELETED (§218). Islam, 2026-09-24: "the function owner
+    # is set in the registry so a function here has no description needed" —
+    # the brief card that carried Led by is never drawn for a function, so
+    # the one door for the head is the register's (§33: one fact, one door).
+    # BOTH ENDS (§94.2): absent for the office AND for a custodian holding an
+    # opened cell, while the head itself is still a stored, settable fact.
     pg.evaluate("() => paint()"); pg.wait_for_timeout(400)
-    led = pg.evaluate("""() => {
-      const dt = [...document.querySelectorAll('#panel .clause dt')]
-        .filter(d=>d.textContent.trim()==='Led by')[0];
-      const dd = dt && dt.parentElement.querySelector('dd');
-      return { btn: !!(dd && dd.querySelector('.pickbtn')) };
-    }""")
-    ck("the office's pen draws the picker on the row", led["btn"], led)
-    pg.click('#panel [data-pick-open]'); pg.wait_for_timeout(400)
-    head = pg.evaluate("""(k) => {
-      const row = document.querySelector('#panel .picker .pickrow');
-      if (!row) return { noRows: true };
-      const key = row.dataset.pickSet.split('|')[2];
-      row.click();
-      return { key };
-    }""", w["fk"])
-    pg.wait_for_timeout(500)
-    after = pg.evaluate("""(a) => {
-      const f = FUNCTIONS[a.fk];
-      const p = PEOPLE.filter(p=>p.key===a.key)[0];
-      const dt = [...document.querySelectorAll('#panel .clause dt')]
-        .filter(d=>d.textContent.trim()==='Led by')[0];
-      return { head: f.head, fn: p && p.fn,
-               shown: dt.parentElement.querySelector('dd').textContent.trim() };
-    }""", {"fk": w["fk"], "key": head.get("key")})
-    ck("picking somebody writes the function's head — the register's own fact",
-       after["head"] == head.get("key"), {"picked": head, "after": after})
-    ck("...and attaches them to the function, as the register would",
-       after["fn"] == w["fk"], after)
-    ck("...and the row now says their name",
-       bool(after["shown"]) and after["shown"] != "—", after)
-
-    # THE OTHER END (§94.2): a non-office viewer whose strategy cell was
-    # OPENED (§117: the SMO can hand the pen over) gets the fields and never
-    # the Led by control — the server would refuse the head change as Setup.
+    led = pg.evaluate("""() => ({ rows: [...document.querySelectorAll('#panel .clause dt')]
+        .filter(d=>d.textContent.trim()==='Led by').length,
+        pick: !!document.querySelector('#panel [data-pick-open]') })""")
+    ck("the office's Overview draws no Led by row and no picker", led == {"rows": 0, "pick": False}, led)
+    ck("...while the head is still the function's stored fact (set on the register)",
+       pg.evaluate("(k)=>'head' in FUNCTIONS[k]", w["fk"]) is True)
     other = pg.evaluate("""(a) => {
       const f = FUNCTIONS[a.fk];
       ACCESS.custodian = ACCESS.custodian || {};
@@ -271,17 +249,12 @@ with sync_playwright() as p:
       return p.key;
     }""", {"fk": w["fk"]})
     pg.wait_for_timeout(500)
-    nono = pg.evaluate("""() => {
-      const dt = [...document.querySelectorAll('#panel .clause dt')]
-        .filter(d=>d.textContent.trim()==='Led by')[0];
-      if (!dt) return { noRow: true };
-      return { authoring: authoring('capfoundation','k_found'),
-               btn: !!dt.parentElement.querySelector('dd .pickbtn'),
-               fields: document.querySelectorAll('.koband .fld').length };
-    }""")
+    nono = pg.evaluate("""() => ({ authoring: authoring('capfoundation','k_found'),
+        led: [...document.querySelectorAll('#panel .clause dt')].filter(d=>d.textContent.trim()==='Led by').length,
+        fields: document.querySelectorAll('.koband .fld').length })""")
     ck("a custodian holding the opened strategy cell is authoring", nono.get("authoring") is True, nono)
     ck("...their table is open", (nono.get("fields") or 0) > 0, nono)
-    ck("...and Led by is NOT offered to them", nono.get("btn") is False, nono)
+    ck("...and no Led by is drawn for them either", nono.get("led") == 0, nono)
 
     print("\n-- 6 · the capability format takes the same band (§53.5)")
     at_overview(w["ck"], True)
@@ -301,8 +274,10 @@ with sync_playwright() as p:
         r = pg.evaluate("""() => ({
           band: !!document.querySelector('#panel .koband'),
           cards: document.querySelectorAll('#panel .fgrid > .card').length })""")
-        ck("no band and two cards while reading (" + fk + ")",
-           not r["band"] and r["cards"] >= 2, r)
+        # §404.1: a function has no brief, so reading is ONE card (the North
+        # Star) — rewritten from "two", never loosened to ">= 1" (§218).
+        ck("no band and the one card while reading (" + fk + ")",
+           not r["band"] and r["cards"] == 1, r)
 
     # §243 REVERSES HALF OF THIS, AT ISLAM'S OWN INSTRUCTION: *"there is no
     # weighting on the objectives in units it needs to be added."* The

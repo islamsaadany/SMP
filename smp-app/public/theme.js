@@ -49,24 +49,9 @@ var THEME = (function () {
   var PALETTES = ["forefront", "slate"];
   var PNAMES = { forefront: "Forefront", slate: "Slate" };
 
-  /* ── The FONT axis (§38.8) ───────────────────────────────────────
-     Independent of the palette for now, deliberately: four faces are embedded
-     so they can be judged IN the product rather than from a specimen sheet.
-     Once it is settled which face belongs to which palette this collapses into
-     the palette and the unpicked faces leave the file.
-
-     "system" first, because it is what the platform shipped with and a
-     comparison needs its own starting point in it. */
+  /* The key the retired typeface switch stored its choice under (§38.8,
+     §157). Read by nothing now; kept only so forgetFont() can clear it. */
   var FKEY = "smp.font";
-  /* TWO, NOT FIVE (§157, Islam: "let's make the 2 fonts available are the
-     system font and the source san3"). §38.7 carried four embedded faces so
-     they could be compared in the real product; the comparison is over.
-
-     THIS LIST IS ALSO THE SANITISER — `chosenFont()` returns null for anything
-     not in it — so somebody whose browser remembers "manrope" from the
-     comparison lands on the system stack rather than on an attribute no
-     stylesheet answers any more. Nothing to migrate, and nobody stuck. */
-  var FONTS = ["system", "source"];
 
   /* Where the switch starts when nobody has chosen: whatever the device says.
      matchMedia is absent in very old engines and returns a stub in some test
@@ -126,22 +111,17 @@ var THEME = (function () {
     try { localStorage.removeItem(PKEY); } catch (e) {}
   }
 
-  /* THE SWITCH IS GONE (§407), so a choice left in a browser would pin that
-     person to a face with no control left to change it back — §41.6's own
-     reason for forgetting a palette. Forgotten once, on the way past; the
-     face is the tenant's (BRAND.font, sanitised by FONTS) or the system's. */
+  /* THE TYPEFACE SWITCH IS GONE (§402): Source Sans 3 is the one face, set in
+     the stylesheet for everybody. A choice left in a browser from before would
+     be an attribute nothing answers, so it is cleared on the way past, as the
+     palette's was (§41.6). */
   function forgetFont() {
     try { localStorage.removeItem(FKEY); } catch (e) {}
-  }
-  forgetFont();
-  function readFont() {
-    var b = BRAND && BRAND.font;
-    return FONTS.indexOf(b) === -1 ? FONTS[0] : b;
+    document.documentElement.removeAttribute("data-font");
   }
 
   var mode = read();
   var palette = readPalette();
-  var font = readFont();
 
   function apply() {
     /* Always an explicit attribute now, even when the value came from the
@@ -157,12 +137,7 @@ var THEME = (function () {
        attribute is what the four blocks are actually keyed on. */
     document.documentElement.setAttribute("data-palette", palette);
     forgetPalette();
-    /* REMOVED rather than set for the system stack — absence is what hands the
-       decision back to --sys-sans, the same reasoning §25.2 used for the theme
-       before Auto was retired. There is no [data-font="system"] block to write
-       because there is nothing for it to say. */
-    if (font === "system") document.documentElement.removeAttribute("data-font");
-    else document.documentElement.setAttribute("data-font", font);
+    forgetFont();
 
     /* The tenant's own colours, written as inline custom properties on the
        root so they outrank the stylesheet's palette blocks without any of them
@@ -211,21 +186,17 @@ var THEME = (function () {
   }
 
 
-
   return {
     apply: apply,
     /* Called by the shell once the data exists, and again after the Branding
-       page changes anything. Re-reads the two axes because a tenant default
-       only takes effect where the person has not chosen for themselves. */
+       page changes anything. Re-reads the palette, which is the tenant's. */
     setBrand: function (b) {
       BRAND = b || null;
       palette = readPalette();
-      font = readFont();
       apply();
     },
     mode: function () { return mode; },
     palette: function () { return palette; },
-    font: function () { return font; },
     /* Called once, after the chrome exists. */
     wire: function () {
       var btn = document.getElementById("themebtn");

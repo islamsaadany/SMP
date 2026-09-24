@@ -137,11 +137,6 @@ function deckHtmlFor(target){
   if (t.indexOf("cap:") === 0 || t.indexOf("fn:") === 0)
     return plansInPillars(t) ? (unitLike(t) ? deckSlides(unitLike(t)) : "")
                              : deckSlidesFn(t);
-  /* §405: a unit that plans in projects or in objectives and actions gets the
-     function's deck, over its own holder — Islam's fourth answer, *"use the
-     existing function versions"*. */
-  var ou = UNITS[subjKey(t)];
-  if (ou && unitWayOf(ou)) return deckSlidesFn("u:" + subjKey(t));
   var u = unitLike(t);
   return u ? deckSlides(u) : "";
 }
@@ -812,14 +807,11 @@ function deckSlidesFn(subject){
      the holder from it; a second deck builder for the second kind is what
      §296 and §305 each measured the cost of and refused. */
   var target = holderTarget(subject), isCap = isCapTarget(target);
-  /* §405: a unit that is not planned in pillars reads this deck too. */
-  var isUnit = isUnitHolderId(target);
   var cap = isCap ? capById(capKeyOf(target)) : null;
-  var fk = isCap ? (cap && cap.fn) : isUnit ? null : fnKeyOf(target);
-  var f = isCap ? cap : isUnit ? UNITS[subjKey(target)] : FUNCTIONS[fk];
-  var noteKey = isUnit ? subjKey(target) : "fn:" + fk;
+  var fk = isCap ? (cap && cap.fn) : fnKeyOf(target);
+  var f = isCap ? cap : FUNCTIONS[fk];
   var caps = capsShown(target);
-  var realCaps = (isCap || isUnit) ? [] : capsOfFunction(fk);
+  var realCaps = isCap ? [] : capsOfFunction(fk);
   /* §342: a function that plans in objectives and actions. The deck is the
      same deck — one builder, because a second one is what §296 and §305 each
      measured the cost of and refused — and what changes is the ONE slide that
@@ -853,7 +845,7 @@ function deckSlidesFn(subject){
 
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
-  if (!isCap && !isUnit) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
+  if (!isCap) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -1045,10 +1037,10 @@ function deckSlidesFn(subject){
 
   /* §243: the same rule as a unit's deck — drawn only when a note is written.
      One question, one answer on both decks (§53.5). */
-  var fnote = cycleNote(noteKey);
+  var fnote = cycleNote("fn:" + fk);
   if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
-    '<div class="dnotebox" contenteditable="true" data-deckunote="' + esc(noteKey) + '">' +
+    '<div class="dnotebox" contenteditable="true" data-deckunote="fn:' + fk + '">' +
       esc(fnote) + '</div>' +
     '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
     'platform, not in a deck that is already wrong.</p></section>');

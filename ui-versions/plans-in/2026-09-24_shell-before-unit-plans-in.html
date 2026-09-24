@@ -8234,11 +8234,6 @@
           fieldSaved();                       /* §71.2 — write, do not rebuild */
         });
       });
-      root.querySelectorAll("select[data-uformat]").forEach(function(sel){
-        sel.addEventListener("change", function(){
-          switchPlanWay("unit", this.dataset.uformat, this.value, this);
-        });
-      });
       root.querySelectorAll("input[data-upx]").forEach(function(inp){
         inp.addEventListener("change", function(){
           UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
@@ -9661,17 +9656,13 @@
                   }).join(" and ") + '. Rename one on Setup \u2192 ' + L("capability") + ', then upload again.');
                 return;
               }
-              /* §405: a unit that plans in projects or in objectives and
-                 actions is filled through the function's file, so its name
-                 resolves to its own holder rather than the pillars reader. */
-              if (uk && unitOwnWay(UNITS[uk])) { cp = unitOwnHolderWritable(uk); uk = null; IMP.unit = cp.unit; }
               if (!uk && !fk && !cp) {
                 impFail('no ' + L1("unitword") + ', ' + L1("fnword") + ' or ' + L1("capability") + ' called "' +
                   esc(picked) +
                   '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
-              IMP.unit = uk ? uk : fk ? "fn:" + fk : cp.unit ? cp.unit : (pfk ? "fn:" + pfk : "cap:" + cp.id);
+              IMP.unit = uk ? uk : fk ? "fn:" + fk : (pfk ? "fn:" + pfk : "cap:" + cp.id);
               if (!uk && !fk && cp) {
                 var cRows = capPlanFromWorkbook(cp, sheets);
                 readPlanRows(cRows, cp.name + " \u00b7 " + cRows.length + " rows");
@@ -10917,79 +10908,78 @@
      A CAPABILITY IS THE ONE THING IT REFUSES TO CARRY. That is somebody
      else's strategic entry (§334) and archiving it as a side effect of a
      dropdown is exactly the destruction this confirmation exists to stop. */
-  function switchPlanFormat(fk, value, sel){ switchPlanWay("fn", fk, value, sel); }
-  /* ── CHANGING HOW A UNIT OR A FUNCTION PLANS: HIDE AND KEEP (§405) ─────
-     Islam, of a business unit: *"hidden, kept"* — and then *"for functions
-     hide and keep yes"*. So this REVERSES §342's archive-and-clear, for
-     functions as well as units, and is recorded as a reversal rather than
-     written over (Principle II): what the page stops drawing is not deleted
-     and not archived. It stays where it is, and switching back brings it back
-     exactly as it was. Only the FORMAT changes, and every reader already asks
-     the format before it draws or counts anything (`unitFormat`, `fnFormat`).
-
-     WARNS FIRST (his *"yes"* to the drawn sentence), because the page is
-     about to look very different and a person should know nothing is lost.
-     No warning where the old way holds nothing — there is nothing to keep.
-
-     THE SELECT IS PUT BACK ON CANCEL (§110): a select still showing the
-     refused value fires no `change` at all, so the same choice could not be
-     made twice.
-
-     A FUNCTION CARRYING A CAPABILITY IS STILL REFUSED, for §342's reason —
-     that is somebody else's strategic entry, and a dropdown here is not where
-     it is decided (§334). */
-  function switchPlanWay(kind, key, value, sel){
-    var isUnit = kind === "unit";
-    var rec = isUnit ? UNITS[key] : FUNCTIONS[key];
-    if (!rec) return;
-    var was = isUnit ? unitFormat(rec) : fnFormat(rec);
-    var now = FN_FORMATS.indexOf(String(value)) > -1 ? String(value) : was;
+  function switchPlanFormat(fk, value, sel){
+    var f = FUNCTIONS[fk];
+    if (!f) return;
+    /* THE SAME READER THE PAGE USES (§53.5): a second spelling of "which
+       forms are there" is how the control and the store come to disagree. */
+    var was = fnFormat(f), now = fnFormatOr(value);
     var back = function(){ if (sel) sel.value = was; };
     if (now === was) return;
-    if (!isUnit && capsOfFunction(key).length) { back(); return; }
+    if (capsOfFunction(fk).length) { back(); return; }
     var apply = function(){
-      /* STORED AS AN ABSENCE (§50.6): a unit's absent is pillars, a
-         function's absent is projects, so each default deletes the key. */
-      var dflt = isUnit ? "pillars" : "projects";
-      if (now === dflt) delete rec.format; else rec.format = now;
+      /* ARCHIVE FIRST, ALWAYS (§49.2's rule, third caller): what the page is
+         about to stop drawing is filed before it is cleared, so the switch is
+         reversible from Setup › Import & storage. */
+      var why = "before the form changed to " +
+        (now === "pillars" ? L("pillar","bu")
+         : now === "objectives" ? "objectives and actions" : "projects");
+      if (was === "pillars") {
+        var u = unitLikeWritable("fn:" + fk);
+        if (u) archiveUnitPlan(u, why);
+      } else {
+        var h = fnOwnHolderWritable(fk);
+        if (h) archiveCapPlan(h, why);
+      }
+      if (now === "projects") delete f.format; else f.format = now;
+      /* A function that does not plan in pillars sits under nothing: the
+         field would be stored and never read (§53.4). */
+      if (now !== "pillars") delete f.under;
+      /* THE OLD PLAN'S ARRAYS GO, because what the page stops drawing must
+         also stop being in the save — that was §59's whole objection, and it
+         is answered by the archive above rather than by leaving it there. */
+      if (was === "pillars") f.items = [];
+      else if (was === "objectives") f.actions = [];
+      else f.projects = [];
       fieldSaved();
-      /* The row dialog's snapshot must not outlive the switch (§342.1):
-         `leaveModes()` would put the old format back on the next walk. */
+      /* AND THE DIALOG THE SWITCH WAS MADE IN HAS TO GO, WHICH IS NOT TIDINESS
+         (§342.1). `rowEditOpen` takes a deep copy of the whole row so Cancel
+         can undo a field edit, and `leaveModes()` runs that same undo on every
+         destination change — so with the dialog left standing, walking to the
+         function PUT THE OLD PLAN BACK on top of an archive already filed, and
+         deleted the new form's rows with it, silently and with nothing pressed.
+         Harmless before today, because §59 refused this switch whenever there
+         was anything to lose; it is a real act now, so the snapshot must not
+         outlive it. CLOSED, NEVER CANCELLED — `rowEditClose()` drops the
+         snapshot and keeps every field already written, which is what Save
+         does (§35: a field is committed when the cursor leaves it). The cost is
+         stated rather than discovered: you come back to the page rather than
+         staying in the dialog, and anything else you had typed in it stands. */
       if (typeof ROWDLG !== "undefined" && ROWDLG) closeRowDialog(false);
       else paint();
     };
-    var n = was === "pillars" ? (Array.isArray(rec.items) ? rec.items.length : 0)
-          : was === "objectives" ? (Array.isArray(rec.actions) ? rec.actions.length : 0)
-          : (Array.isArray(rec.projects) ? rec.projects.length : 0);
-    if (!n) { apply(); return; }
+    var held = was === "pillars"
+      ? plural(fnItems(f).length, L1("pillar"), L("pillar"))
+      : was === "objectives"
+      ? plural(fnActions(fk).length, "action")
+      : plural(fnOwnProjects(fk).length, L1("project"), L("project"));
+    var empty = was === "pillars" ? !fnItems(f).length
+      : was === "objectives" ? !fnActions(fk).length
+      : !fnOwnProjects(fk).length;
+    if (empty) { apply(); return; }
     var wordOf = function(k){
       return k === "pillars" ? L("pillar","bu")
            : k === "objectives" ? "Objectives & actions" : L("project");
     };
-    var held = was === "pillars" ? plural(n, L1("pillar"), L("pillar"))
-      : was === "objectives" ? plural(n, "action")
-      : plural(n, L1("project"), L("project"));
-    openModalHtml(esc("Change how " + (rec.name || key) + " plans?"),
-      esc(wordOf(was) + " \u2192 " + wordOf(now)),
-      '<div class="rmconfirm">' +
-        '<p><b>' + esc(rec.name || key) + '</b>\u2019s ' + esc(held) +
-          ' will be hidden and kept. Switching back brings them back.</p>' +
-        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
-        '<button class="go" data-rmyes="1">Change how it plans</button></div>' +
-      '</div>');
+    rmConfirmOpen("Change how " + (f.name || fk) + " plans?",
+      wordOf(was) + " \u2192 " + wordOf(now),
+      '<b>' + esc(f.name || fk) + '</b> holds ' + held +
+        '. Changing the form starts the new one empty.',
+      0, "", "Change the form",
+      apply);
     var box = document.getElementById("modal-b");
-    if (!box) return;
-    var no = box.querySelector("[data-rmno]");
-    /* The confirmation took the row dialog's place in the one overlay, so a
-       Cancel closes that dialog too, keeping what was already typed in it
-       (`closeRowDialog(false)` is Save's own path, §35). */
-    var shut = function(){
-      if (typeof ROWDLG !== "undefined" && ROWDLG) closeRowDialog(false); else closeModal(); };
-    if (no) no.addEventListener("click", function(){ back(); shut(); });
-    var yes = box.querySelector("[data-rmyes]");
-    if (yes) yes.addEventListener("click", function(){
-      if (!(typeof ROWDLG !== "undefined" && ROWDLG)) closeModal();
-      apply(); });
+    var no = box && box.querySelector("[data-rmno]");
+    if (no) no.addEventListener("click", back);
   }
   function confirmRemoveProject(id){
     var c = holderOfProjectId(id), p = projById(id);

@@ -1443,7 +1443,8 @@ function unitsTable(keys){
     return '<tr><td><button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>' +
       (u.real ? '' : '<span class="why">illustrative</span>') + '</td>' +
       '<td class="num">' + u.weight + '%</td>' +
-      '<td class="num">' + u.items.length + '</td>' +
+      /* §405: a unit that plans otherwise counts no pillars. */
+      '<td class="num">' + (unitOwnWay(u) ? '&mdash;' : u.items.length) + '</td>' +
       '<td class="num">' + pct(r) + '</td>' +
       '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td>' +
       '<td class="num final" style="color:' + bandInk(ko) + '">' + pct(ko) + '</td></tr>';
@@ -1823,7 +1824,12 @@ function unitCards(keys){
       }).join("")) +
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its ' + L("keyobj") + '. Contributes at <b>' +
       u.weight + '%</b> weight to the group.</p>' +
-      '<h4 class="mini">' + L("pillar") + ' beneath</h4>' +
+      (unitOwnWay(u)
+        /* §405: its pillars are hidden and kept; what explains its number is
+           the way it plans, said in one line rather than an empty table. */
+        ? '<p class="sub">Plans in <b>' + esc(unitPlanWord(unitFormat(u))) + '</b> (' +
+            unitPlanCount(k) + '), not ' + L("pillar") + '.</p>'
+        : '<h4 class="mini">' + L("pillar") + ' beneath</h4>' +
       miniTable(SHOW_KIND ? [L1("pillar"),"Kind",L1("theme"),"Performance","Of plan"]
                           : [L1("pillar"),L1("theme"),"Performance","Of plan"],
         u.items.map(function(it, i){
@@ -1833,8 +1839,11 @@ function unitCards(keys){
             '<td class="num">' + pillarPerf(it) + '%</td>' +
             '<td class="num">' + pillarRatio(it) + '%</td></tr>';
         }).join("")) +
-      '<p class="sub">The ' + L("pillar") + ' explain the number rather than produce it &mdash; the headline above is the ' + L("keyobj") + '.</p>';
-    var ed = miniTable([L1("pillar"),"Delivered","Planned","Variance"],
+      '<p class="sub">The ' + L("pillar") + ' explain the number rather than produce it &mdash; the headline above is the ' + L("keyobj") + '.</p>');
+    var ed = unitOwnWay(u)
+      ? '<p class="sub">Execution <b>' + pct(unitExec(u)) + '</b> across its ' +
+          esc(unitPlanWord(unitFormat(u)).toLowerCase()) + '.</p>'
+      : miniTable([L1("pillar"),"Delivered","Planned","Variance"],
       u.items.map(function(it, i){
         return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
           '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
@@ -1843,9 +1852,15 @@ function unitCards(keys){
       unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
     return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
       splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
-        u.weight + "% weight &middot; " + u.items.length + " pillars" + (u.real ? "" : " &middot; illustrative"),
+        u.weight + "% weight &middot; " + unitPlanCountWord(k) + (u.real ? "" : " &middot; illustrative"),
         unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
-        arranging("group") ? handle("Reorder " + u.name) : '') + '</div>';
+        arranging("group") ? handle("Reorder " + u.name) : '',
+        /* §405: its execution is already a reading against what was due, so
+           a "Planned 100%" beside it would be a number nobody planned. */
+        unitOwnWay(u) ? (unitExec(u) == null
+          ? '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div><span class="ratio-l">nothing reported</span>'
+          : '<div class="ratio">' + unitExec(u) + '<small>%</small></div><span class="ratio-l">of its ' +
+            (unitFormat(u) === "objectives" ? "actions" : "milestones") + '</span>') : null) + '</div>';
   }).join("");
 }
 
@@ -2562,6 +2577,11 @@ function focusStrip(u){
 }
 
 function renderUnitPerformance(u){
+  /* §405: A UNIT THAT DOES NOT PLAN IN PILLARS IS DRAWN BY THE FUNCTION
+     PAGES — the same one branch spec 010 put at the top of every function page
+     the other way round. Its holder is `u:<key>`. */
+  var uw = unitWayOf(u);
+  if (uw) return uw === "objectives" ? fnObjPerformance("u:" + u.ukey) : renderFnPerformance("u:" + u.ukey);
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
   /* §264: the same two questions the pillar card had. The membership comes from
@@ -5834,6 +5854,8 @@ function repEntry(subj, x, where){
   }
 
 function renderReport(u){
+  var uw = unitWayOf(u);
+  if (uw) return uw === "objectives" ? renderFnObjReport("u:" + u.ukey) : renderFnReport("u:" + u.ukey);
   var may = canReport(u.ukey);
   /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
      contributor limited to their own lines does neither — the server refuses
@@ -6381,6 +6403,9 @@ function capsShown(subject) {
      the sort is dead code (§24). What §310 was for is answered where the
      answer now belongs — in `entryDest`, which opens the capability holding
      their project rather than a function page with nothing of theirs on it. */
+  /* §405: a business unit that does not plan in pillars holds its own work
+     exactly as a function does — one holder, addressed `u:<key>`. */
+  if (isUnitHolderId(target)) return unitHolders(subjKey(target));
   return fnHolders(target.slice(3));
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
@@ -6848,7 +6873,7 @@ function overrunNote(p){
    Three readings, side by side, never folded into one. Key objectives is
    optional: where a capability has none the card is absent, not zero. */
 function capScoreCards(c){
-  var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
+  var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
   var cards = [];
   if (ko != null) {
     cards.push('<div class="card tight primary-card">' +
@@ -6985,6 +7010,10 @@ function fnNothingBehind(subject){
           'own ' + L("project") + ' a ' + L1("capability") + ' from that function\u2019s ' + L("project") + ' page.'
         : '') + '</div>';
   }
+  /* §405: a unit's own holder is never empty in this sense — its page draws
+     the empty state of the format it plans in — so this is only reached if
+     the unit itself has gone. Say nothing wrong rather than name a function. */
+  if (isUnitHolderId(t)) return '<div class="note">Nothing here yet.</div>';
   var fk = t.slice(3), f = FUNCTIONS[fk];
   /* §334: WHAT THIS STATE MEANS CHANGED, SO THE SENTENCE DID. It used to be
      "this function improves no capability yet", which was the only way a
@@ -7054,8 +7083,9 @@ function renderFnPerformance(fnKey){
      1372 — a unit's pixels exactly, which is the assertion the check makes
      (AGREEMENT, never a coordinate — §94.8, §53.5). */
   if (!caps.length) return fnNothingBehind(target);
-  return perfActs(presentMenu(isCapTarget(target) ? "cap" : "fn",
-                              isCapTarget(target) ? capKeyOf(target) : fk)) +
+  return perfActs(isUnitHolderId(target) ? presentMenu("unit", subjKey(target))
+    : presentMenu(isCapTarget(target) ? "cap" : "fn",
+                  isCapTarget(target) ? capKeyOf(target) : fk)) +
     caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
@@ -7561,7 +7591,8 @@ function fnObjPerfTables(fk){
     miniTable(["#","Action","Owner","Due",  "Status", MS_PCT], aRows);
 }
 function fnObjPerformance(fk){
-  return perfActs(presentMenu("fn", fk)) +
+  /* §405: a unit planning this way presents as the UNIT it is. */
+  return perfActs(isUnitHolderId(fk) ? presentMenu("unit", subjKey(fk)) : presentMenu("fn", fk)) +
     '<div class="capbody">' + fnObjCards(fk) + fnObjPerfTables(fk) + '</div>';
 }
 /* REPORTING: the figures, and nothing about the plan. The objectives are
@@ -7569,7 +7600,9 @@ function fnObjPerformance(fk){
    way a milestone already is — the same three controls, so one row shape and
    one set of handlers (§53.5, §104.10). */
 function fnObjReportBody(fk){
-  var target = "fn:" + fk;
+  /* §405: the holder's own target — `u:<key>` for a unit — so the row gate
+     asks the unit's column, never a function's. */
+  var target = holderTarget(fk);
   var h = fnOwnHolder(fk) || { keyObjectives: [] };
   var mayRow = function(o){ return canReportFnRow(target, null, o); };
   var kRows = SMPRules.shown(h.keyObjectives).map(function(m, i){
@@ -7602,7 +7635,9 @@ function fnObjReportBody(fk){
 }
 
 function renderFnObjReport(fk){
-  var target = "fn:" + fk;
+  /* §405: REVIEW, the chrome and Submit are keyed by the SUBJECT — the bare
+     unit key for a unit, `fn:<key>` for a function (§48). */
+  var target = subjKey(holderTarget(fk));
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
@@ -7947,7 +7982,7 @@ function renderFnReport(fnKey){
      sent, the tab still saying *not submitted yet*, and the board still
      asking (§48, §53.5 — the comment above is right that a second key shape
      means a second answer everywhere, which is what this was). */
-  var fnKeyTarget = target;
+  var fnKeyTarget = subjKey(target);
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
@@ -8773,7 +8808,17 @@ function unitPlanBody(it, u, railed){
       tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
       sortAttr("tactics"), "tactable");
 }
+/* §405: the way a real business unit plans when it is not pillars, or null.
+   Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
+   function and must keep reaching the pillars pages. */
+function unitWayOf(u){
+  if (!u || !u.ukey || UNITS[u.ukey] !== u) return null;
+  var f = unitFormat(u);
+  return f === "pillars" ? null : f;
+}
 function renderUnitPlan(u){
+  var uw = unitWayOf(u);
+  if (uw) return uw === "objectives" ? fnObjPlan("u:" + u.ukey) : renderFnProjects("u:" + u.ukey);
   var sel = unitRailPick(u);
   /* AN EMPTY PAGE HAS TO SAY WHAT WOULD FILL IT (§61). This said "This unit"
      on a supporting function's own page — and only ever appeared there,

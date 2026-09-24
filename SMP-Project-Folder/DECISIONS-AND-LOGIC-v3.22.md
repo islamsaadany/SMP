@@ -57708,3 +57708,76 @@ tab-keep, console-boot, terminology-reach green; setup-shape 43/0, graph-diff
 Forced sign-out: not owed — the authoriser only gained kinds for fields an
 old tab never sends, so no save that worked before is refused.
 
+
+## §405 — a business unit chooses how it plans (2026-09-24)
+
+Islam, after §404's Structure step: *"build pillars off for a business unit
+first, mockup first"* — then, of the three questions put to him, *Unit
+chooses* / *Hidden, kept* / *Yes, stop counting*, and of the four decisions
+the signed-off mockup
+(`design-mockups/unit-plans-in/2026-09-24_unit-plans-in.html`) carried:
+*"yes to all four, build it"*, *"for functions hide and keep yes"*.
+
+- **EACH BUSINESS UNIT PICKS "PLANS IN"** — Pillars, Projects, or Objectives
+  &amp; actions — on its row in Setup › Business units (a column and a field in
+  the row's dialog). `UNITS[k].format` rides `units.extra`: **no migration,
+  and an absent value is Pillars**, so every existing unit reads exactly as
+  before. The Structure step's business-unit Pillars tick is only what a NEW
+  unit starts with; it never moves a unit that already has a plan.
+- **SWITCHING HIDES AND KEEPS, AND THAT REVERSES §342'S ARCHIVE FOR
+  FUNCTIONS TOO** (his *"for functions hide and keep yes"*): the switch changes
+  the format and nothing else, and every reader asks the format, so the other
+  plan is not drawn, not asked for, not scored and not counted — and is still
+  stored. Switching back brings it back untouched. One rule for both kinds of
+  subject (§53.5). **The switch warns first** in the platform's own dialog
+  (`.rmconfirm`, never a browser `confirm()`, §95), naming what will be hidden
+  (*"Mobile's 4 Pillars will be hidden and kept. Switching back brings them
+  back."*); a switch that hides nothing does not ask.
+- **THE UNIT'S OWN HOLDER IS THE FUNCTION'S SHAPE** — `u:<key>`, `{id, unit,
+  own, keyObjectives, projects, actions}` — so the function's pages, reporting,
+  deck and workbooks draw it with no second copy (his fourth answer: *"use the
+  existing function versions"*). `holderById`, `holderByIdWritable`,
+  `holderWriteBack`, `eachHolder`, `capsShown` and `strategyPageOf` learned
+  `u:` and answer the UNIT's columns (`u_found`, `u_plan`, `u_report`), so
+  nobody's access moves — measured, the access baseline is UNMOVED.
+- **A NON-PILLARS UNIT STOPS COUNTING PILLARS** (his *"Yes, stop counting"*):
+  `unitPillars()` is null for one, and its Execution is its actions' or its
+  milestones' delivery (`unitOwnExec()`), with Planned 100 so the ratio IS the
+  execution. **The group and company roll-ups read the same functions**, so a
+  unit's hidden pillars never reach a headline while its objectives and its
+  delivery still count. The unit cards say *"Plans in Projects (n), not
+  pillars"* where the pillars table would be.
+- **REPORTING, SUBMIT, THE BOARD AND THE GAPS** walk the holder: the asked
+  rows are the unit's key objectives plus its actions or milestones
+  (`holderSubject()`), the missing bar lists the holder's own places on the
+  Plan section, and the cycle board counts an outcome in the measures column.
+- **THE SERVER**: `format` is a unit SETUP field (the office's, and the
+  refusal names Setup, §16.7); a unit's own `projects` and `actions` are
+  judged by exactly the rules a function's own work gets (`collectProjects` and
+  the action split) against the unit's target, with `ctxOfUnitOwn()` handing
+  the per-row context over. **A project owner on such a unit derives Project
+  owner** (`lib/rules.js`), which is why the matrix's own-unit columns stop
+  being "not applicable" for that row. The change list sends a unit's projects
+  and actions with the unit entry whole (a fallback the differ already has,
+  never a new path). **No forced sign-out is owed**: an old tab never sends
+  those fields, so no save that worked before is refused.
+- **THE DECK AND THE WORKBOOKS** (step 4): `deckHtmlFor()` hands such a unit
+  to `deckSlidesFn("u:<key>")` — the unit's own name on the cover, its note
+  under its own key, no S&amp;W slide and no capability cover. The projects
+  and objectives templates offer these units in their B2 list and the pillars
+  template stops offering them, so each unit is offered exactly once; the
+  upload resolves the name to the unit's own holder; the progress file is the
+  function's. Round-tripped for a projects unit and an objectives unit: every
+  row comes back. **One difference is recorded and is not new**: a target
+  typed `4.5B EGP` comes back `4.5 B EGP` through the capability reader, and a
+  function's round trip does the same on `origin/main`'s code.
+- **§56.7 AGAIN, FOUND BY A PROBE**: my own `unitOfTarget` was shadowed by a
+  later declaration of the same name in `group-render.js`, so a projects
+  unit's asked rows came back empty with nothing thrown; renamed `subjUnit`,
+  and a scan of the built file for duplicate top-level function names is
+  empty.
+- **RECORDED, NOT DONE**: a unit's SWOT and foundation are not on the
+  function-shaped deck; the plan builder does not offer the two new ways for a
+  unit yet; `scripts/test-nav-row.js` dies on `compOn is not a function` and
+  `test-my-reporting.js` has one failure — both reproduce with this work
+  stashed, so both are §404's, not this section's.

@@ -6412,6 +6412,21 @@ html[data-client-settings] .viewer { display:none; }
      while Home is open, whether or not anything is waiting. */
   html[data-home-open] .units .navmenu-btn.homemark{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); }
+  /* AND NOTHING ELSE SAYS WHERE YOU ARE WHILE YOU ARE HOME (§402). Islam:
+     *"why on the welcome page I have strategy and overview & projects?"* —
+     Home sits under the chrome (§399), so the tab row and the section row
+     kept describing the page BEHIND it, and the destination row kept its
+     gold underline on that page's name: two answers to "where am I" beside
+     the lit house. Both rows are hidden and the underline dropped while Home
+     is open; the places themselves stay pressable, since pressing one is how
+     you leave Home, and every row comes back the moment Home steps aside.
+     `display:none`, never opacity (§3.2 — a hidden row must not take
+     clicks). Signed off from design-mockups/home-rows/. */
+  html[data-home-open] #tabrow,
+  html[data-home-open] #secrow { display:none !important; }
+  html[data-home-open] .units button[aria-selected="true"],
+  html[data-home-open] details.dlmenu.topsel > summary[aria-selected="true"] {
+    border-bottom-color:transparent; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
      the two-door split (§47.7): the gear is one destination now, so there is

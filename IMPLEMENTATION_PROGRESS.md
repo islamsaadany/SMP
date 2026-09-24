@@ -8113,3 +8113,14 @@ only one, and switching there now redraws Home for the person you are looking
 at, which is what the page's copy used to do. Checked: the two checks that
 covered these were rewritten and proved to fail when the old behaviour is put
 back; the whole-platform sweep is clean. Nothing stored changes.
+
+## §402 — Home says only where you are (2026-09-24)
+
+**Built, on the branch, not merged.** While Home is open, the tab row and the
+section row of the page behind it (for a function head: Strategy · Performance
+· Reporting and Overview · Projects) are no longer drawn, and that place loses
+its gold underline in the navy bar — only the house is lit. Pressing a place
+still closes Home and brings every row back. Signed off from the mockup in
+`design-mockups/home-rows/`. Checked: `welcome.py` rewritten for the new rule
+and proved to fail twice when the rule is removed; the whole-platform sweep is
+clean. Nothing stored changes.

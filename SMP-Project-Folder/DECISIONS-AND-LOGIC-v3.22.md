@@ -57348,3 +57348,30 @@ page-width green; `check:modules` 166/0; `built-in-step` all good; served
 copies regenerated; `sw.js` SHELL bumped (the built file's bytes changed).
 Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
 The served app's DB-backed checks were not run (no database in this session).
+
+## §402 — Home says only where you are (2026-09-24)
+
+Islam: *"why on the welcome page I have strategy and overview & projects?"*
+§399 put Home INSIDE the chrome, beneath it, and nothing told the chrome: the
+tab row and section row went on describing the page behind Home, and the
+destination row kept its gold underline on that page's name — two answers to
+*where am I* beside the lit house (§87's twins, in navigation). Reproduced as
+Finance's head (`fn:finance`, `fnstrat`, Overview · Projects) before anything
+was proposed; drawn before and after from the running platform and signed off
+(`design-mockups/home-rows/`), with Islam adding the underline: *"yes and
+remove the finance underline too."*
+
+Four rules in `arrange.css`, keyed on the `data-home-open` attribute §399
+already writes: `#tabrow` and `#secrow` `display:none` (never opacity — a
+hidden row must not take clicks, §3.2), and the lit place's underline made
+transparent, its weight and colour kept so no name on the row moves (§41.8).
+The places stay pressable, because pressing one is how you leave Home (§61).
+
+`welcome.py` §3 asserted a TAB was reachable under Home — true of §399 and
+false by this decision — so it is REWRITTEN, never loosened (§218): both rows
+asserted not drawn, the underline asserted transparent, and the PLACE asserted
+reachable as the way out; two later "leave Home" presses re-pointed from the
+tab to the place. Proved able to fail from the SOURCES (§276): the rule
+removed, **2 red**, exactly the two new assertions. `qa.py` ERRORS none;
+`built-in-step` all good; served copies regenerated; `sw.js` SHELL bumped.
+Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.

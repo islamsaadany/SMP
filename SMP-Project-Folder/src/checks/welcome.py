@@ -313,16 +313,28 @@ def main():
            pg.locator("[data-wcontinue], .welcomeover .wexit").count() == 0)
         ck("…and the house says Home is open",
            pg.evaluate("document.documentElement.getAttribute('data-home-open')") == "1")
+        # §402 REWROTE the reachable half: the tab row and the section row
+        # describe the page BEHIND Home, so while Home is open they are not
+        # drawn and the lit place loses its underline — only the house says
+        # where you are. The way out is the PLACE on the destination row,
+        # which must still be reachable, or Home is a trap (§61).
         geo = pg.evaluate("""(function(){
           var o=document.querySelector('.welcomeover'), c=document.querySelector('.chrome'),
-              t=document.querySelector('#tabrow button');
+              t=document.querySelector('.units button[aria-selected="true"][data-u]');
           if(!o||!c||!t) return null;
           var r=t.getBoundingClientRect(), hit=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
+          var tr=document.querySelector('#tabrow'), sr=document.querySelector('#secrow');
           return {top:Math.round(o.getBoundingClientRect().top), chrome:Math.round(c.getBoundingClientRect().bottom),
-                  tabReached: !!(hit && (hit===t || t.contains(hit)))};})()""")
+                  tabs:tr?tr.getClientRects().length:0, secs:sr?sr.getClientRects().length:0,
+                  under:getComputedStyle(t).borderBottomColor,
+                  placeReached: !!(hit && (hit===t || t.contains(hit)))};})()""")
         ck("Home starts under the chrome rather than over it", geo and geo["top"] >= geo["chrome"] - 1, geo)
-        ck("…so a tab is reachable while Home is open", geo and geo["tabReached"], geo)
-        pg.locator("#tabrow button").first.click()
+        ck("…the page's tab row and section row are not drawn under it (§402)",
+           geo and geo["tabs"] == 0 and geo["secs"] == 0, geo)
+        ck("…the place carries no gold underline while Home is open (§402)",
+           geo and geo["under"] in ("rgba(0, 0, 0, 0)", "transparent"), geo)
+        ck("…and the place is still reachable, which is the way out", geo and geo["placeReached"], geo)
+        pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
         ck("pressing it takes Home down and the house goes quiet",
            pg.evaluate("document.documentElement.getAttribute('data-home-open')") is None)
@@ -505,7 +517,9 @@ def main():
         # run — and walking it is the honest reproduction anyway.
         pg.goto("http://127.0.0.1:%d/raya-trade" % port)
         pg.wait_for_selector(".welcomeover", timeout=15000)
-        pg.locator("#tabrow button").first.click()
+        # Leaving Home is pressing the place (§402: the tab row is not drawn
+        # under Home, so it cannot be the way out).
+        pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
         pg.goto("http://127.0.0.1:%d/" % port)
         pg.wait_for_timeout(2500)
@@ -535,7 +549,9 @@ def main():
         PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
         STATE = BASE
         ctx, pg = fresh(browser, port)
-        pg.locator("#tabrow button").first.click()
+        # Leaving Home is pressing the place (§402: the tab row is not drawn
+        # under Home, so it cannot be the way out).
+        pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
         ck("a projector is never greeted",
            pg.evaluate("(function(){try{sessionStorage.removeItem('smp.welcome.done');}catch(e){}"

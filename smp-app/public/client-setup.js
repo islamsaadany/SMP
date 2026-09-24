@@ -198,6 +198,24 @@ function __smpShape(state, a, hydrate) {
     }
     FUNCTIONS[k] = __smpCarry(wasFns[k], FUNCTIONS[k], ["name", "format"]);
   });
+  /* A FUNCTION MAY BELONG TO A DIVISION (§391, §404.4), answered here as the
+     division's NAME, the one thing the flow carries about a company. Only an
+     answer that SAYS something is applied: a row from a tab on an older build
+     carries no `company` at all, and reading that as "none" would take away a
+     division somebody set on Setup › Supporting functions. The weight
+     (`coWeight`) is that page's alone and is kept as it stands. */
+  (a.functions || []).forEach(function (f) {
+    if (!f || !Object.prototype.hasOwnProperty.call(f, "company")) return;
+    var nm = String(f.name || "").trim().toLowerCase();
+    var k = null;
+    (FUNCTION_KEYS || []).forEach(function (fk) {
+      if (!k && String((FUNCTIONS[fk] && FUNCTIONS[fk].name) || "").trim().toLowerCase() === nm) k = fk;
+    });
+    if (!k) return;
+    var co = byName[String(f.company || "").trim().toLowerCase()] || null;
+    if (co) FUNCTIONS[k].company = co;
+    else { delete FUNCTIONS[k].company; delete FUNCTIONS[k].coWeight; }
+  });
   var fnByName = {};
   (FUNCTION_KEYS || []).forEach(function (k) {
     var nm = String((FUNCTIONS[k] && FUNCTIONS[k].name) || "").trim().toLowerCase();
@@ -283,18 +301,22 @@ var CLIENTSETUP = (function () {
     /* The questions speak the client's words too (§396): a step headed
        "Divisions" asking about "companies" is two names for one thing on one
        screen. Each word is taken as typed, never inflected (§107.8). */
+    /* §404.4, his order: the divisions are named BEFORE the units, so a
+       unit can be put in one as it is named. Whether there is a second layer
+       at all is the Structure step's question and is not asked again here. */
+    { k:"cos",    key:"The organisation", get label(){ return W("division", "many", "Companies"); },
+      get q(){ return "What are the " + w("division", "many", "companies") + "?"; } },
     { k:"units",  key:"The organisation", get label(){ return W("unitword", "many", "Business units"); },
       get q(){ return "What are the " + w("unitword", "many", "business units") + "?"; } },
-    { k:"cos",    key:"The organisation", get label(){ return W("division", "many", "Companies"); },
-      get q(){ return "Are the " + w("unitword", "many", "business units") + " grouped into " + w("division", "many", "companies") + "?"; } },
     { k:"fns",    key:"Strategy",         get label(){ return W("fnword", "many", "Functions"); },
       get q(){ return "What " + w("fnword", "many", "supporting functions") + " are there?"; } },
     { k:"caps",   key:"Strategy",         get label(){ return W("capability", "many", "Capabilities"); },
       get q(){ return "Are there " + w("capability", "many", "capabilities") + " beside the " + w("unitword", "many", "business units") + "?"; } },
-    { k:"words",  key:"Language",         label:"The words",      q:"What does this client call these things?" },
+    /* §404.4: no Words step. Every word it asked for is asked on the
+       Structure step now, beside the level or component it names. */
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
   ];
-  var SHAPE_STEPS = ["units", "cos", "fns", "caps", "words"];
+  var SHAPE_STEPS = ["cos", "units", "fns", "caps"];
   /* §404: the components a level may carry, in the mockup's order, each with
      its fixed title (what it IS) — the client's word goes in the box beside
      it. The keys are SMPRules.STRUCT_COMPONENTS and the label keys both. */
@@ -411,7 +433,8 @@ var CLIENTSETUP = (function () {
     (FUNCTION_KEYS || []).forEach(function (k) {
       var f = FUNCTIONS[k];
       g.functions.push({ name: f.name,
-        format: f.format === "pillars" ? "pillars" : f.format === "objectives" ? "objectives" : "projects" });
+        format: f.format === "pillars" ? "pillars" : f.format === "objectives" ? "objectives" : "projects",
+        company: f.company && COMPANIES[f.company] ? COMPANIES[f.company].name : "" });
     });
     ((GROUP && GROUP.capabilities) || []).forEach(function (c) {
       g.capabilities.push({ name: c.name,
@@ -436,10 +459,9 @@ var CLIENTSETUP = (function () {
       client: true,
       structure: true,
       units:  (UNIT_KEYS || []).length > 0,
-      cos:    (COMPANY_KEYS || []).length > 0 || (UNIT_KEYS || []).length > 0,
+      cos:    (COMPANY_KEYS || []).length > 0 || !SMPRules.midExists(GROUP, COMPANIES),
       fns:    (FUNCTION_KEYS || []).length > 0,
-      caps:   ((GROUP && GROUP.capabilities) || []).length > 0,
-      words:  true,
+      caps:   ((GROUP && GROUP.capabilities) || []).length > 0 || !capsCarried(),
       office: ff
     };
     var done = 0, todo = [];
@@ -574,8 +596,6 @@ var CLIENTSETUP = (function () {
     col.appendChild(el("h2", "wzq", s.q));
     var why = s.k === "units"
         ? "Add as many as this client has. Leave it empty and the platform opens blank — nothing is put here that nobody asked for."
-      : s.k === "fns"
-        ? "Each function can plan its own way, and that decides what its pages hold. It stays changeable until the function has a plan in it."
       : "";
     if (why) col.appendChild(el("p", "wzwhy", why));
     col.appendChild(stepBody(s.k));
@@ -691,7 +711,6 @@ var CLIENTSETUP = (function () {
     if (k === "cos") return companiesStep(box);
     if (k === "caps") return capsStep(box);
     if (k === "fns") return listStep(box, S.shape.functions, "fn");
-    if (k === "words") return wordsStep(box);
     return officeStep(box);
   }
 
@@ -1042,6 +1061,29 @@ var CLIENTSETUP = (function () {
           tail.appendChild(sel);
           r.appendChild(tail);
         }
+        /* §404.4: which division it belongs to, optional, on a unit and on a
+           function alike (§391) — offered only where there are divisions to
+           name. The same choice lives on Setup › Business units and
+           Supporting functions, which read and write the same field. */
+        var divs = divisionNames();
+        if (divs.length) {
+          var dt = el("span", "wzrt");
+          dt.appendChild(el("span", "wzsub", "in"));
+          var ds = el("select", "fld");
+          ds.dataset.wzdiv = kind;
+          ds.setAttribute("aria-label", "Which " + w("division", "one", "company") + " " + (row.name || "this row") + " belongs to");
+          var none = el("option", null, "No " + w("division", "one", "company")); none.value = "";
+          ds.appendChild(none);
+          divs.forEach(function (d) {
+            var o = el("option", null, d); o.value = d;
+            if ((row.company || "") === d) o.selected = true;
+            ds.appendChild(o);
+          });
+          if (!shape) ds.disabled = true;
+          ds.addEventListener("change", function () { row.company = ds.value; S.shapeDirty = true; });
+          dt.appendChild(ds);
+          r.appendChild(dt);
+        }
         if (shape) {
           var x = el("button", "wzx", "×");
           x.type = "button";
@@ -1065,7 +1107,7 @@ var CLIENTSETUP = (function () {
           cb.appendChild(el("span", "p", "+"));
           cb.appendChild(document.createTextNode(nm));
           cb.addEventListener("click", function () {
-            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:fnDefault() }, nm));
+            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:fnDefault(), company:"" }, nm));
             addThenFocus();
           });
           crow.appendChild(cb);
@@ -1075,105 +1117,90 @@ var CLIENTSETUP = (function () {
       var add = el("button", "wzadd", kind === "unit" ? "+ Add a " + w("unitword", "one", "business unit") : "+ Add a " + w("fnword", "one", "supporting function"));
       add.type = "button";
       add.addEventListener("click", function () {
-        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:fnDefault() });
+        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:fnDefault(), company:"" });
         addThenFocus();
       });
       box.appendChild(add);
     }
-    box.appendChild(el("p", "wzwhy", kind === "unit"
-      ? "A unit plans in pillars, with key measures and tactics under each. Its code is made from the name and prefixes every pillar on it."
-      : "A function's plan type decides what its pages hold, and it stays changeable until the function has a plan in it."));
+    /* §404.4: said once, under the list — the step's own heading line said
+       the functions' half again — and the units' line only where units DO
+       carry pillars, or it describes a plan this client does not make. */
+    var line = kind === "unit"
+      ? (structNow().bu.on.indexOf("pillar") >= 0
+          ? "A unit plans in pillars, with key measures and tactics under each. Its code is made from the name and prefixes every pillar on it."
+          : "")
+      : "A function's plan type decides what its pages hold, and it stays changeable until the function has a plan in it.";
+    if (line) box.appendChild(el("p", "wzwhy", line));
     return box;
+  }
+  /* The divisions a row can be put in: the ones named on the Divisions step,
+     and none at all where the Structure step says there is no second layer. */
+  function divisionNames(){
+    if (!SMPRules.midExists(GROUP, COMPANIES)) return [];
+    return S.shape.companies.map(function (c) { return String(c.name || "").trim(); }).filter(Boolean);
+  }
+  /* Whether any level carries capabilities (§404.4): the step asks for
+     capabilities only where the Structure step ticked them somewhere. */
+  function capsCarried(){
+    var lv = structNow();
+    return ["top", "mid", "bu"].some(function (k) {
+      if (k === "mid" && !lv.mid.exists) return false;
+      return lv[k].on.indexOf("capability") >= 0;
+    });
   }
 
   function companiesStep(box){
-    /* §404: the Structure step said there is no second layer, so this step
-       has nothing to ask — said in words rather than drawn as an empty list
-       nobody should fill (§61, §45.2). */
-    var st = typeof SMPRules !== "undefined" && typeof GROUP !== "undefined" && SMPRules.structureOf(GROUP);
-    if (st && st.mid && st.mid.exists === false) {
+    /* §404.4: whether there IS a second layer is the Structure step's
+       question, so it is not asked again here — where there is none this
+       step says so and points back (§61, §45.2); where there is one, it names
+       them, as the units are named, in the client's own word (§396). Which
+       one a unit or a function belongs to is chosen on those two steps. */
+    if (!SMPRules.midExists(GROUP, COMPANIES)) {
       box.appendChild(el("p", "wzwhy", "This client has no second layer — the " + w("unitword", "many", "business units") +
         " sit straight under the top level. Change that on the Structure step."));
       return box;
     }
     var shape = canShape();
-    var has = S.shape.companies.length > 0;
-    var ch = el("div", "wzchoices");
-    /* The client's words (§396), and a division can hold supporting
-       functions as well since §391, so the Yes line says so. */
-    var bus = w("unitword", "many", "business units"), divs = w("division", "many", "companies"),
-        div = w("division", "one", "company"), fns = w("fnword", "many", "supporting functions");
-    [[false, "No — the " + bus + " sit directly under " + ((GROUP && GROUP.org) || "this client"),
-      "One less layer to explain. " + wc("division", "many", "companies") + " can be added later without touching the plans."],
-     [true, "Yes — group them into " + divs,
-      "A " + div + " holds several " + bus + ", and can hold " + fns + " too. It decides who sees across them and carries no plan of its own."]]
-      .forEach(function (c) {
-        var b = el("button", "wzchoice");
-        b.type = "button";
-        b.disabled = !shape;
-        b.setAttribute("aria-pressed", c[0] === has ? "true" : "false");
-        b.appendChild(el("span", "cname", c[1]));
-        b.appendChild(el("span", "cwhy", c[2]));
-        b.addEventListener("click", function () {
-          if (!shape) return;
-          if (!c[0]) { S.shape.companies = []; S.shape.units.forEach(function (u) { u.company = ""; }); }
-          else if (!S.shape.companies.length) S.shape.companies.push({ name:"" });
-          S.shapeDirty = true; redraw();
-        });
-        ch.appendChild(b);
-      });
-    box.appendChild(ch);
-    if (!has) return box;
-    var rows = el("div", "wzrows");
-    S.shape.companies.forEach(function (co, n) {
-      var r = el("div", "wzrow");
-      var nm = el("input", "fld");
-      nm.type = "text"; nm.value = co.name;
-      nm.setAttribute("placeholder", "The " + w("division", "one", "company") + "'s name");
-      if (!shape) nm.readOnly = true;
-      nm.addEventListener("input", function () { co.name = nm.value; S.shapeDirty = true; });
-      r.appendChild(nm);
-      var x = el("button", "wzx", "×");
-      x.disabled = !shape;
-      x.type = "button"; x.setAttribute("aria-label", "Remove");
-      x.addEventListener("click", function () {
-        var gone = co.name;
-        S.shape.companies.splice(n, 1);
-        S.shape.units.forEach(function (u) { if (u.company === gone) u.company = ""; });
-        S.shapeDirty = true; redraw();
-      });
-      r.appendChild(x);
-      rows.appendChild(r);
-    });
-    box.appendChild(rows);
-    var add = el("button", "wzadd", "+ Add a " + w("division", "one", "company"));
-    add.type = "button"; add.disabled = !shape;
-    add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); S.shapeDirty = true; redraw(); });
-    box.appendChild(add);
-    if (S.shape.units.length) {
-      box.appendChild(el("div", "lab", "Which " + w("division", "one", "company") + " each " + w("unitword", "one", "unit") + " belongs to"));
-      var ur = el("div", "wzrows");
-      S.shape.units.forEach(function (u) {
+    if (!S.shape.companies.length) {
+      box.appendChild(el("p", "wzempty", "No " + w("division", "many", "companies") + " yet."));
+    } else {
+      var rows = el("div", "wzrows");
+      S.shape.companies.forEach(function (co, n) {
         var r = el("div", "wzrow");
-        r.appendChild(el("span", "wzname", u.name || "(unnamed)"));
-        var tail = el("span", "wzrt");
-        var sel = el("select", "fld");
-        var none = el("option", null, "Its own — no " + w("division", "one", "company")); none.value = "";
-        sel.appendChild(none);
-        S.shape.companies.forEach(function (co) {
-          if (!co.name) return;
-          var o = el("option", null, co.name); o.value = co.name;
-          if (u.company === co.name) o.selected = true;
-          sel.appendChild(o);
+        var nm = el("input", "fld");
+        nm.type = "text"; nm.value = co.name;
+        nm.setAttribute("placeholder", "The " + w("division", "one", "company") + "'s name");
+        if (!shape) nm.readOnly = true;
+        nm.addEventListener("input", function () {
+          /* a unit or function put in this one follows the rename */
+          var was = co.name; co.name = nm.value;
+          S.shape.units.concat(S.shape.functions).forEach(function (x) { if (was && x.company === was) x.company = nm.value; });
+          S.shapeDirty = true;
         });
-        sel.disabled = !shape;
-        sel.addEventListener("change", function () { u.company = sel.value; S.shapeDirty = true; });
-        tail.appendChild(sel);
-        r.appendChild(tail);
-        ur.appendChild(r);
+        r.appendChild(nm);
+        if (shape) {
+          var x = el("button", "wzx", "×");
+          x.type = "button"; x.setAttribute("aria-label", "Remove " + co.name);
+          x.addEventListener("click", function () {
+            var gone = co.name;
+            S.shape.companies.splice(n, 1);
+            S.shape.units.concat(S.shape.functions).forEach(function (u) { if (u.company === gone) u.company = ""; });
+            S.shapeDirty = true; redraw();
+          });
+          r.appendChild(x);
+        }
+        rows.appendChild(r);
       });
-      box.appendChild(ur);
+      box.appendChild(rows);
     }
+    if (shape) {
+      var add = el("button", "wzadd", "+ Add a " + w("division", "one", "company"));
+      add.type = "button";
+      add.addEventListener("click", function () { S.shape.companies.push({ name:"" }); addThenFocus(); });
+      box.appendChild(add);
+    }
+    box.appendChild(el("p", "wzwhy", "A " + w("division", "one", "company") + " holds several " + w("unitword", "many", "business units") +
+      ", and can hold " + w("fnword", "many", "supporting functions") + " too. Which one each belongs to is chosen as they are named, on the next steps."));
     return box;
   }
 
@@ -1181,6 +1208,13 @@ var CLIENTSETUP = (function () {
      function carries it, and how it is planned — Setup › Capabilities' own
      three questions. */
   function capsStep(box){
+    /* §404.4: only where some level carries capabilities (the Structure
+       step's ticks); otherwise one line says so and points back. */
+    if (!capsCarried()) {
+      box.appendChild(el("p", "wzwhy", "This client does not use " + w("capability", "many", "capabilities") +
+        " — no level carries them. Tick them on the Structure step to add some."));
+      return box;
+    }
     var shape = canShape();
     if (!S.shape.capabilities.length) {
       box.appendChild(el("p", "wzempty", "No " + w("capability", "many", "capabilities") + " yet."));
@@ -1247,7 +1281,6 @@ var CLIENTSETUP = (function () {
     return box;
   }
 
-  /* The words the client uses, only the ones it has (§346.3). */
   /* ── STRUCTURE (§404) ────────────────────────────────────────────
      Written straight into the live graph as `GROUP.structure`, one object,
      on the first change and not before: a client that never touches this
@@ -1327,6 +1360,23 @@ var CLIENTSETUP = (function () {
       box.appendChild(row);
     }
   }
+  /* A level's own name, both forms (§404.4): what the Words step asked for
+     the business units and the functions, asked on the card it names. */
+  function callBoxes(box, key, ro){
+    box.appendChild(el("p", "lab", "Called"));
+    var cur = wordOf(key);
+    var row = el("div", "strow");
+    [["one", "One"], ["many", "Many"]].forEach(function (f) {
+      var i = el("input", "fld"); i.type = "text"; i.value = cur[f[0]] || "";
+      i.setAttribute("aria-label", "The word for " + f[1].toLowerCase());
+      i.setAttribute("data-stword", key + "|" + f[0]);
+      if (ro) i.readOnly = true;
+      i.addEventListener("input", function () { setWord(key, f[0], i.value); });
+      var w2 = el("label", "stnm"); w2.appendChild(el("span", "lab", f[1]));
+      w2.appendChild(i); row.appendChild(w2);
+    });
+    box.appendChild(row);
+  }
   function structLevel(box, lv, k, ro){
     var L = lv[k];
     box.appendChild(el("p", "lab", "Components"));
@@ -1364,6 +1414,16 @@ var CLIENTSETUP = (function () {
         if (ro) i.readOnly = true;
         i.addEventListener("input", function () { setWord(key, "many", i.value); });
         w2.appendChild(i); names.appendChild(w2);
+        /* What sits under a pillar is named where the pillar is (§404.4). */
+        if (key === "pillar") [["measure", "Key measures"], ["tactic", "Tactics"]].forEach(function (sub) {
+          var w3 = el("label", "stnm");
+          w3.appendChild(el("span", "lab", sub[1]));
+          var j = el("input", "fld"); j.type = "text"; j.value = wordOf(sub[0]).many;
+          j.setAttribute("data-stword", sub[0] + "|many");
+          if (ro) j.readOnly = true;
+          j.addEventListener("input", function () { setWord(sub[0], "many", j.value); });
+          w3.appendChild(j); names.appendChild(w3);
+        });
       });
       box.appendChild(names);
     }
@@ -1405,65 +1465,19 @@ var CLIENTSETUP = (function () {
     }
 
     var bu = card(W("unitword", "many", "Business units"));
+    callBoxes(bu, "unitword", ro);
     structLevel(bu, lv, "bu", ro);
 
     var fn = card(W("fnword", "many", "Supporting functions"));
     /* §404.2: no "Plan in, by default" row — Islam: each function picks its
        own way on the Supporting functions step, which is where it is asked. */
+    callBoxes(fn, "fnword", ro);
     structLevel(fn, lv, "fn", ro);
 
     box.appendChild(el("p", "wzwhy",
       "These ticks apply to every item at a level; each one can be adjusted later on Setup › Structure. " +
       "Switching a component off hides it and keeps what was written."));
     if (ro) box.appendChild(el("p", "wzwhy", "The names are changed on Setup › Terminology now that this client has a plan in it."));
-    return box;
-  }
-
-  function wordsStep(box){
-    var shape = canShape();
-    /* Both forms, as Setup › Terminology asks them (§395): the word for
-       ONE is a column heading and "Add a …", the word for MANY is a page
-       heading and the navigation. The platform's own pair is the default. */
-    var DEF = {};
-    (typeof LABEL_DEFAULTS !== "undefined" ? LABEL_DEFAULTS : []).forEach(function (d) { DEF[d.key] = d; });
-    var WORDS = [
-      ["unitword", "Business unit", "Every client has these"],
-      ["pillar", "Pillar", "Units plan in pillars"],
-      ["measure", "Key measure", "Under a pillar"],
-      ["tactic", "Tactic", "Under a pillar"],
-      ["keyobj", "Key objective", "A subject's own scorecard"]
-    ];
-    var wrap = el("div", "wztbl");
-    var t = el("table");
-    var thead = el("thead"), hr = el("tr");
-    ["What it is", "One", "Many", "Why we ask"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
-    thead.appendChild(hr); t.appendChild(thead);
-    var tb = el("tbody");
-    WORDS.forEach(function (w) {
-      var tr = el("tr");
-      var c1 = el("td"); c1.appendChild(el("b", null, w[1])); tr.appendChild(c1);
-      var had = S.shape.words[w[0]];
-      var d = DEF[w[0]] || {};
-      var cur = { one: (had && typeof had === "object" && had.one) || d.one || w[1],
-                  many: (had && typeof had === "object") ? (had.many || d.many || "") : (had != null ? had : (d.many || "")) };
-      S.shape.words[w[0]] = cur;
-      ["one", "many"].forEach(function (form) {
-        var c = el("td");
-        var i = el("input", "fld");
-        i.type = "text";
-        i.value = cur[form];
-        i.setAttribute("aria-label", w[1] + " — the word for " + form);
-        i.setAttribute("data-word", w[0] + "|" + form);
-        if (!shape) i.readOnly = true;
-        i.addEventListener("input", function () { cur[form] = i.value; S.shapeDirty = true; });
-        c.appendChild(i); tr.appendChild(c);
-      });
-      tr.appendChild(el("td", "muted", w[2]));
-      tb.appendChild(tr);
-    });
-    t.appendChild(tb); wrap.appendChild(t);
-    box.appendChild(wrap);
-    box.appendChild(el("p", "wzwhy", "Only the words this client actually has. A box left as it is keeps the platform's own word."));
     return box;
   }
 

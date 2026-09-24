@@ -57339,3 +57339,47 @@ Purpose), then 018 twice — the first reads *Mission* and *Winning Aspiration*,
 the second keeps *Our Reason* and gets *Winning Aspiration*, Themes untouched
 on both, and the second run a no-op. The frozen 047 run against a labels table
 in the old shape with the same result. No screen, rule or built file changes.
+
+
+### §404.4 — the set-up flow, reviewed end to end (2026-09-24)
+
+Islam, of the Divisions step asking *"Are the business units grouped into
+divisions?"* after the Structure step had already answered it: *"it shouldn't
+ask about is there or not as this is answered in the structure tab it should
+ask about the names like we do in the BUs. I want you to review the rest of the
+setup flow to make sure that there is no redundancy or conflicts."* The review
+found five, put to him in plain words; his answers are the design.
+
+1. **The Divisions step names them and asks nothing else.** Whether there is a
+   second layer is Structure's question (`SMPRules.midExists`); where there is
+   none, the step says so in one line and points back to Structure (§61,
+   §45.2). The Yes/No choice and the mapping list under it are deleted (§24).
+2. **The order is client, Structure, Divisions, Business units, Supporting
+   functions, Capabilities, The office** — the divisions are named before the
+   units so a unit can be put in one as it is named. **A unit AND a function
+   each optionally belong to a division**, a picker on the row, drawn only
+   where divisions exist. A function's division is §391's own field
+   (`FUNCTIONS[k].company`), carried by `__smpShape` as the division's NAME and
+   applied only when the answer SAYS something, so a tab on an older build
+   cannot clear a division set on Setup › Supporting functions; choosing none
+   deletes the key and its weight (§50.6). Both Setup pages already offered the
+   same choice, checked rather than assumed.
+3. **The Words step goes.** Structure already named every component; what it
+   did not name — the business units and the supporting functions themselves —
+   gets a *Called* pair (one and many) on each of those two cards, and the key
+   measures and tactics are named beside Pillars wherever Pillars is ticked.
+   `S.shape.words` still carries them and `__smpShape` still writes them, so
+   nothing about how a word is stored moved.
+4. **Capabilities are asked only where some level carries them**; otherwise one
+   line says the client does not use them and points to Structure.
+5. **One sentence, not two**: the Supporting functions step's heading line
+   repeated the list's own line underneath; the heading's goes. The units'
+   *"A unit plans in pillars…"* line is drawn only while units carry Pillars,
+   or it describes a plan this client does not make.
+
+The server's own read of the shape (`lib/platform-api.ts`) carries a function's
+division by name as it already did a unit's (§53.5). `checks/client-setup.py`
+gains §9 (21 assertions, both ends each) and its step list and total are
+REWRITTEN, never loosened (§218): all passed, falsified from the SOURCES —
+divisions never offered **5 red**, capabilities always asked **1 red**.
+Neighbours green; the built file and served copies regenerated, `sw.js` bumped.

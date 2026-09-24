@@ -298,7 +298,10 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
              the one somebody chose. */
           name: g.functions[k].name,
           format: g.functions[k].format === "pillars" ? "pillars"
-                : g.functions[k].format === "objectives" ? "objectives" : "projects" })),
+                : g.functions[k].format === "objectives" ? "objectives" : "projects",
+          /* §404.4: and the division it belongs to, by name, as a unit's is. */
+          company: g.functions[k].company && g.companies[g.functions[k].company]
+            ? g.companies[g.functions[k].company].name : "" })),
         /* §347: and the capabilities, each with the NAME of the function that
            carries it rather than its key — the flow's rows carry no keys, and
            its holder dropdown is a list of the names one step away. An

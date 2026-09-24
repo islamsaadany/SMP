@@ -6465,9 +6465,18 @@ function railWorthIt(list){ return (list || []).length >= 1; }
    the capability's Projects rail each built this string themselves — the shape
    §59.3 was bitten by, where the same question answered in two places meant
    fixing one of them changed nothing. */
-function railName(code, name){
-  return (code ? '<span class="rcode">' + esc(code) + '</span>' : '') +
-    '<b>' + esc(name) + '</b>';
+function railName(code, name, kind){
+  /* §410: THE KIND RIDES BESIDE THE CODE, in the detail state only. Islam,
+     of the rail: "keep the button of showing and removing the details …
+     that hides the measure and tactic and the type is it capability or
+     direction." Terse is the code and the name; detail puts the kind on the
+     code's own line rather than at the head of the counts, so a card reads
+     top to bottom: what it is, what it is called, what it holds. Guarded on
+     the VALUE (§324): a pillar nobody has marked says nothing. */
+  var k = (kind && SHOW_KIND && !RAIL_TERSE)
+    ? ' <span class="rkind">&middot; ' + esc(kind) + '</span>' : '';
+  return (code ? '<span class="rcode">' + esc(code) + k + '</span>' : '') +
+    '<b title="' + esc(name) + '">' + esc(name) + '</b>';
 }
 /* The header, and the control that drops every row's small line. A SCREEN
    PREFERENCE, so it lives in localStorage beside the theme and the People
@@ -8101,7 +8110,7 @@ function unitRailFor(u, sel){
     return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
-        railName(pillarCode(u, i), it.name) +
+        railName(pillarCode(u, i), it.name, it.kind) +
         (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.id || String(i)) +
           '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
           gaps + ' Missing</span>'
@@ -8118,10 +8127,11 @@ function unitRailFor(u, sel){
            one of them only is how a unit comes to be fine differently on two
            of its own pages (§53.5). Guarded on the VALUE: a pillar nobody has
            marked yet says nothing rather than opening with a separator. */
-        railSub((SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
-          plural(it.measures.length, L1("measure"), L("measure")) +
-          ' &middot; ' + plural(it.tactics.length, L1("tactic"), L("tactic")) +
-          (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
+        /* §410: the kind moved beside the code, and the OWNER left the plan
+           rail (Islam: "remove the owner not needed here") — it is on the
+           pillar's own page, one press away. */
+        railSub(plural(it.measures.length, L1("measure"), L("measure")) +
+          ' &middot; ' + plural(it.tactics.length, L1("tactic"), L("tactic"))) +
       '</button>';
   }).join("");
   /* No footer. It said "Figure shown is key measures", explaining a number
@@ -8334,8 +8344,11 @@ function ownStateChip(target, list, word){
    tallies and the finished mark — things about how the pillar is GOING — and
    the kind is a fact about what the pillar IS, which is the same kind of fact
    as the code two inches to its left. */
-function pillarBand(code, name, right, kind){
-  return '<div class="pband"><span class="pband-code">' + esc(code) + '</span>' +
+function pillarBand(code, name, right, kind, cls){
+  /* `cls` (§410) marks the PLAN pane's band, the one the approved restyle
+     reaches: no gold edge, and the kind as a tag at the far end. Every other
+     band is untouched until it is asked about (rule 1c). */
+  return '<div class="pband' + (cls ? ' ' + cls : '') + '"><span class="pband-code">' + esc(code) + '</span>' +
     '<span class="pband-name">' + esc(name) + '</span>' +
     (kind ? kindPill({ kind: kind }) : '') +
     (right ? '<span class="pband-r">' + right + '</span>' : '') + '</div>';
@@ -8685,7 +8698,7 @@ function unitPlanBody(it, u, railed){
            section changes and there is only ever one of it. The head keeps
            what is the PILLAR'S — its code, its name field and Remove. */
         '</div>'
-    : pillarBand(code, it.name, "", it.kind) + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name, "", it.kind, "planband") + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
@@ -8782,7 +8795,10 @@ function unitPlanBody(it, u, railed){
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
-    '<h4 class="mini">' + L("measure") + ' <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
+    /* §410: THE COUNT, NOT A SENTENCE (1b-ii, and Islam's approved restyle).
+       The grey clause said what the columns already say; the number beside the
+       heading is the one fact the heading did not. */
+    '<h4 class="mini">' + L("measure") + ' <span class="hn">' + it.measures.length + '</span></h4>' +
     /* §199.5: the Unit heading appears only with the pen, because the column
        under it does — and `addRow`'s span has to follow, or the Add row stops
        reaching the end of the table the moment somebody opens the pen. */
@@ -8790,7 +8806,8 @@ function unitPlanBody(it, u, railed){
                  : ["#",L1("measure"),"Dir.","Target","Compiled"],
       mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
-    '<h4 class="mini">' + L("tactic") + ' <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
+    /* …and a rule above it, so the two blocks read as two blocks of one card. */
+    '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under

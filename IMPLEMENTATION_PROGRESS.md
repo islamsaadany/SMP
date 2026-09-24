@@ -4,6 +4,30 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-09-24 — the four checks that were red on main (§410.2), on the branch.** Three were the checks being out of date, and are rewritten so they still catch real faults (each proved by breaking the product on purpose): the Merchandising Overview now has only an "Add an objective" button when it holds no objectives, the Figure sets mark is drawn by a fallback font and only looked missing to a width test, and a new figure's unit is written without a space. The fourth was a real fault, fixed on Islam's word: in the register's edit dialog the grey Sign-in name box was 10px taller than the boxes beside it, which made the dialog scroll on a 1280×700 window; it is the same height as its neighbours now.
+
+**2026-09-24 — the plan page restyled and the top bar tidied (§410), on the branch, not merged.** Built from the mockup Islam signed off. The white bar at the top is taller and calmer, with the client's name after a thin line and the "viewing as" part on the right; the typeface button ("System") is gone. On a unit's Plan page the pillars list is a column of rounded cards of equal size, the detail button still shows or hides each pillar's type and counts, the owner is gone from that list, the pillar heading shows its type as a small tag on the right, and "Key measures" and "Tactics" show their count instead of a grey sentence, with a line between them.
+
+**2026-09-24 — the section switch squared (§409.3), on the branch, not merged.** Foundation · SWOT · Drivers · Plan is no longer a pill: its box has the same small rounded corners as the Reporting button (option A). Nothing else about it changed.
+
+**2026-09-24 — the tab row, second pass (§409.2), built on the branch, not merged.** No tab draws a box any more when you press it or move to it with the keyboard. Reporting is a solid orange button again (option C from the mockup), with its word on the same line as Strategy and Performance and centred in its box, measured. Performance stays plain grey like the other tabs. Waiting on your word to merge.
+
+**2026-09-24 — the tab banner (§409), built on the branch, not merged.** The navy row of units stays as it is. Under it, the main tabs (Strategy, Performance, Reporting) now sit on a grey row as words with an underline, Reporting in orange text instead of a solid orange button. Under that, the sections (Foundation, SWOT, Drivers, Plan) are one rounded switch with the one you are on filled navy. This is round 9 of the mockup, which you approved. Waiting on your word to merge.
+
+**2026-09-24 — the new navigation (§408) is reverted.** You asked for the old look back: the navy row of units in the brand colour, visible for everyone, with the unit's name in it. The platform is back to exactly how it was before §408. The restyling of the page underneath is a mockup only (round 8), drawn under today's navigation and waiting for your word before anything is built. On the branch, not merged.
+
+**2026-09-24 — the new navigation (§408), built on the branch, not merged.**
+The Plan page redesign's chrome, as signed off in round 7: the row of units
+stays for the office (light grey now, and it can be folded away with a pin);
+everybody whose work is one unit or function gets a navy bar instead, with
+the unit's name, a divider at a fixed place, and the Strategy, Performance and
+Reporting tabs, and the sections underneath. The group and the companies stay
+one press away in a small switcher on the top line. Checked: the full page
+sweep is clean and reaches the same pages for every person as before, and a
+new check proves the bar holds its shape and can fail. Waiting on Islam: a
+look at it, whether to go on to the page-body restyle from round 2, and the
+merge.
+
 **Direction, 2026-09-09 — the rebuild is the work now (spec 043, §314).**
 Islam's decision record, verified against the code and aligned question by
 question: SMP moves to **Next.js with one shared Postgres schema and row-level

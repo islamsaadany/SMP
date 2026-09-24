@@ -518,36 +518,8 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* ── THE REPORTING TAB WEARS THE REPORT ORANGE (§222) ──────────────────
-     Islam picked the solid fill of three drawn options: the volume the Report
-     button had, moved onto the tab that replaces it. Unmistakable while you
-     are in it, which is the point — everything typed there is going to the
-     office.
-
-     `--cta`/`--cta-ink` are the pair §94.8 declared TOGETHER: the fill and
-     the ink that survives on it. Never `--cta` as type on a light ground and
-     never white on the bright half, which is §38.4's trap in both
-     directions.
-
-     `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
-     wins without an !important — the mistake §40 recorded, where an enforced
-     rule went on winning after the argument had changed. */
-  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
-     *"the reporting button should always become orange even if it's not open,
-     and it's appearing as long as the cycle is open."* The first build gave
-     the orange to the word when unselected and the fill only on selection,
-     which made it quiet exactly when somebody needs to notice it — the old
-     Report button was solid at all times, and that is the volume being moved
-     rather than a new one being added (§41's budget: the tab is drawn only
-     while a cycle is open, for somebody who may report).
-
-     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
-     never changes when you are standing on it stops answering "where am I".
-     `--cta-hover` is that half and is declared for every palette beside
-     `--cta`, so this needs no new token and no literal (§25). */
-  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
-  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
-  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
+  /* The main tab row, Reporting's orange fill included, lives in
+     arrange.css with §409. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }

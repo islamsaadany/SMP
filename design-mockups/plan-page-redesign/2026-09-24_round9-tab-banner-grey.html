@@ -1,0 +1,91 @@
+<title>Grey Tab Banner</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;
+  --ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;
+  --panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;
+  --gold:#C9A24D;--cta-tx:#A4512C;--cta-dot:#C2622F;
+  --seg-on:#16325C;--seg-on-ink:#FFFFFF;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;
+  --ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;
+  --panel:#0E1014;--panel-ink:#EAF0FA;--panel-quiet:#8E9AAE;
+  --gold:#D9B665;--cta-tx:#E1935F;--cta-dot:#E1935F;
+  --seg-on:#7FA3D8;--seg-on-ink:#14161A;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;
+  --ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;
+  --panel:#0E1014;--panel-ink:#EAF0FA;--panel-quiet:#8E9AAE;
+  --gold:#D9B665;--cta-tx:#E1935F;--cta-dot:#E1935F;
+  --seg-on:#7FA3D8;--seg-on-ink:#14161A;}
+body{background:var(--ground);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;font-size:15px;padding-inline:16px;padding-block:28px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+h1{font-size:22px;margin:0 0 4px;text-wrap:balance}
+p.lede{margin:0;color:var(--ink-2);max-width:65ch}
+.lab{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+/* real brand nav row, unchanged */
+.nav{background:var(--panel);color:var(--panel-ink);display:flex;gap:4px;padding:0 12px;overflow-x:auto;white-space:nowrap}
+.nav span{padding:12px 12px;font-size:14px;color:var(--panel-quiet);border-bottom:3px solid transparent}
+.nav span.on{color:var(--panel-ink);font-weight:600;border-bottom-color:var(--gold)}
+/* today */
+.t-tabs{background:var(--surface-2);display:flex;gap:4px;padding:0 16px;border-bottom:1px solid var(--line)}
+.t-tabs span{padding:11px 12px;font-size:14px;color:var(--ink-2)}
+.t-tabs span.on{color:var(--ink);font-weight:600;background:var(--surface);border:1px solid var(--line);border-bottom:none;border-radius:6px 6px 0 0}
+.t-tabs span.rep{color:var(--cta-tx)}
+.t-secs{display:flex;gap:18px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
+.t-secs span.on{color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:6px;text-decoration-thickness:2px}
+/* proposal */
+.band{background:var(--surface-2);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:28px;padding:0 20px;flex-wrap:wrap}
+.tabs{display:flex;gap:22px}
+.tabs span{padding:14px 0 11px;font-size:15px;color:var(--ink-2);border-bottom:3px solid transparent;display:flex;align-items:center;gap:6px}
+.tabs span.on{color:var(--ink);font-weight:700;border-bottom-color:var(--gold)}
+.tabs span.rep{color:var(--cta-tx);font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cta-dot)}
+.subband{background:var(--surface);border-bottom:1px solid var(--line);padding:0 20px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;margin:8px 0}
+.seg span{padding:5px 14px;border-radius:999px;font-size:13.5px;color:var(--ink-2)}
+.seg span.on{background:var(--seg-on);color:var(--seg-on-ink);font-weight:600}
+.page{padding:18px 20px;color:var(--ink-3);font-size:13.5px;min-height:70px}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.notes div{border-top:2px solid var(--line);padding-top:10px;font-size:14px;color:var(--ink-2)}
+.notes b{color:var(--ink);display:block;margin-bottom:2px}
+</style>
+<div class="wrap">
+<div>
+  <h1>The tab banner, grey, with no unit name</h1>
+  <p class="lede">Three bands: the brand navigation row, the grey row with the main tabs, and the sub-tabs row below it as one rounded switch. The unit's name is gone because the brand row above already shows it. The band stays grey like today. Nothing else on the page changes.</p>
+</div>
+
+<section>
+  <div class="lab">Today</div>
+  <div class="frame">
+    <div class="nav"><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span><span>B2B Ecomm</span><span>Consumer Finance</span></div>
+    <div class="t-tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+    <div class="t-secs"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span class="on">Plan</span></div>
+    <div class="page">The plan page starts here.</div>
+  </div>
+</section>
+
+<section>
+  <div class="lab">Proposed</div>
+  <div class="frame">
+    <div class="nav"><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span><span>B2B Ecomm</span><span>Consumer Finance</span></div>
+    <div class="band">
+      <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting <i class="dot"></i></span></div>
+    </div>
+    <div class="subband">
+      <div class="seg"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span class="on">Plan</span></div>
+    </div>
+    <div class="page">The plan page starts here.</div>
+  </div>
+</section>
+
+<div class="notes">
+  <div><b>Three bands</b>Navigation, then the main tabs on grey, then the sub-tabs on their own row under the tab you picked.</div>
+  <div><b>Colours on grey</b>Active tab in dark text with the gold underline. Reporting in the deep orange (5.2:1 on the grey). Active section filled navy with white text.</div>
+  <div><b>Dark mode</b>Same shape. The switch's lit section turns light blue with dark text so it stays readable on the dark grey.</div>
+</div>
+</div>

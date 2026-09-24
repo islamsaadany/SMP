@@ -1,6 +1,5 @@
-  /* Sub-nav: Performance is the regular view and is marked as such */
-  .tabs button.primary { color:var(--gold-deep); font-weight:700; }
-  .tabs button.primary[aria-selected="true"] { color:var(--ink); }
+  /* `.primary` on a tab is a MARKER only (the landing tab, read by the
+     welcome screen); §409 took its colour and weight away. */
   /* ── THE DOT MEANS SOMETHING NOW (§69.9) ─────────────────────────
      It used to be `.tabs button.primary::before` — painted on whichever tab is
      the landing page, on every destination, always. So it said "this is the

@@ -57882,6 +57882,181 @@ read 763/0 and 140/0, so no save an open tab could make is refused now.
 before the push (§94.16). This record is its own commit so `main`'s tip is on
 no other ref until production has served it (§91).
 
+## §408 — the navigation chrome: a light row for the office, a navy bar for the unit (2026-09-24)
+
+**Built on the branch, not merged.** Islam, over seven rounds of mockups in
+`design-mockups/plan-page-redesign/` (v1–v7, published as one artifact), of the
+design he had compared against HR ERP and the client-plus product, and then:
+*"go build it"*. What was signed off, in his words where he gave them:
+
+- **The row of units is for somebody who works across units** — *"the blue
+  banner at the top is only usable for the SMO, other units see only their
+  units"* — and the office can fold it away (**A + B**). Folded, or for
+  somebody who never had it, the house, the Setup door and a small switcher
+  sit on the white top line instead.
+- **The unit's own bar is navy** — *"the line of mobile … needs to be a navy
+  line to show distinction for people who are not the smo"* — with the name,
+  a separator and the three tabs. No period label (*"h1 2026 is not
+  relevant"*). **The separator stands at one distance from the left** and the
+  name is centred in that space (*"the separator space from the left side of
+  the page should be stable"*).
+- **The sections sit under the tabs** (*"keeping the subtabs below the tabs"*).
+- **The office's row turns light** (round 5, option A): a grey strip with dark
+  words and the gold underline, above the navy bar.
+- **The title face is Source Serif 4**, his pick of the recommendation.
+
+**WHAT "SOMEWHERE ELSE" MEANS HAD TO BE MEASURED, AND THE LITERAL READING WAS
+WRONG.** The first build hid the row for somebody who can open one place, and
+on the worked example that is **nobody but the CFO**: every unit head also
+opens the group and the two companies, because the group's Performance ships
+at view for them. So the row counts **units, functions and capabilities** — the
+places of business — and the group and the companies stay one press away in
+the switcher, which lists *every* place the person may open (§61). Measured:
+the office keeps the row; every unit head, custodian and function head whose
+business is one place gets the navy bar and the switcher.
+
+**THE ROW'S BUTTONS STAY IN THE DOCUMENT WHILE IT IS HIDDEN.** The tour, the
+welcome screen and the checks press `#units [data-u]`, and a click on an
+element that is not displayed still fires — so the row is hidden, never
+emptied. What moves is the house and the gear, which are controls rather than
+places. The wiring asks `.navhost`, which both homes carry, so a control is
+bound wherever it is drawn (§29.5). The fold is a screen preference in
+`localStorage` (`smp.nav.folded`), stored as an absence, and a throwing store
+reads as NOT folded — the failure that matters is a row the office cannot get
+back.
+
+**THE RULE'S POSITION IS THE PILLARS RAIL'S OWN WIDTH**, 196px, so the tabs
+start above the plan card and the sections line (indented 236px, rail plus the
+split's gap) starts under them. A name too wide for the column is set at 16px
+rather than clipped — measured after insertion, never guessed by a character
+count. **Every non-Setup destination gets the bar**, the group and a company
+included, so the places read one way (§53.5).
+
+**THE LIGHT STRIP IS A TOKEN SWAP, NOT A RESTYLE.** `nav.units` re-points its
+own `--panel` family to the page's neutrals, so every rule already reading
+those tokens follows; the literal white washes the row carried (the switch,
+the gear, the house) are restated beside it, because a literal does not follow
+a token (§25). **Reporting keeps its orange as type** (#F0A878, 6.43:1 on the
+house navy) with its dot, rather than a solid fill on a navy bar.
+
+**THE TOUR'S "YOU ARE HERE" MOVED** from the row to the navy bar's name,
+because the row is hidden for exactly the people the tour is for — its
+sentence rewritten to say so. The welcome screen's Setup door asks `.navhost`.
+
+**CHECKS.** `checks/nav-chrome.py` is new and asserts the property, never the
+pixel (§94.8): the row at both ends, the switcher agreeing with the person's
+reach, the pin's fold surviving a reload, the rule at one x across a short
+name, a long name and two widths, the rule agreeing with the pillars rail's
+right edge, the sections under the tabs, the tabs' contrast on navy, and the
+tour's target on screen. **17 red** on the build before, **14 red** with the
+fixed column and the business-place count broken from the sources (§276) —
+and its own first run reported a correct build broken, its start-up script
+clearing the saved fold on every load including the reload it was testing
+(§100.3). **`qa.py` was taught the switcher rather than loosened** (§218): it
+walked visible row buttons, which is nothing for a unit head, so it reaches
+each destination through the control a person would press (`press_dest`), and
+its §362.8 guard now asks whether the page is the client's settings rather
+than whether the row is visible. **33 viewers, 243 destinations, ERRORS none —
+viewer for viewer identical to the build before**, measured on a worktree of
+that build. `my-reporting.py`'s walk learned the same door.
+
+**NOT BUILT, AND SAID** (rule 1b): the page body from round 2 — rail cards with
+counts and kind, the pillar head with its owner, the table's lighter lines —
+was drawn and not re-confirmed after the chrome rounds, so it is a next step to
+ask about rather than something ridden in here. The house and the gear moving
+to the top line, the tour's new wording and Reporting as orange text rather
+than an orange fill are each visible changes and named in the handover.
+
+
+## §408.1 — REVERSED: the navigation goes back to the navy row, visible for everyone (2026-09-24)
+
+Islam, with a screenshot of the chrome as it stood before §408: *"let's revert back to this style the name took space with no need the navigator stays with the brand color and the name of the unit stays in the navigation and the navigation stays visible. so revert all of this and show me the restyling mockup only."*
+
+**Recorded as a reversal, not overwritten (Principle II).** §408 above describes what was built and why; none of it is live now. The sources, the built file, `smp-app/public/` and the checks are restored to commit `b194576`, which is the build before §408 and is byte-identical to it. `checks/nav-chrome.py` and the Source Serif 4 face that only the unit bar used are removed. `sw.js` moves on to a new name, `v5.37-nav-restored`, so that a browser holding the §408 shell does not keep it.
+
+**What his sentence settles:**
+- The row of units is the brand-coloured navy row.
+- It is visible to everybody.
+- The unit's name lives in that row.
+- A separate name column costs space and says nothing the row does not already say.
+
+This is §87's twins at the level of the chrome: two places naming the unit you are in.
+
+**Next:** the page-body restyle from the earlier rounds is drawn **under today's navigation, unchanged**, in `design-mockups/plan-page-redesign/2026-09-24_v8-restyle-under-todays-nav.html`. The top of that mockup is a picture of the real platform rather than a redrawing, so it cannot drift from what ships (§41.9). Nothing from it is built until Islam signs it off (rule 1c).
+
+## §409 — the two rows under the navigation: main tabs on grey, sub-tabs as a switch (2026-09-24)
+
+Islam, after §408.1 put the navigation back: *"try again for the banner just remove the name of the unit part and make this banner grey like now … keep your design"*, then *"the banner of the details of the strategy should be below the strategy banner. so we have now 3 banners"*, then, of round 9 (`design-mockups/plan-page-redesign/2026-09-24_round9-tab-banner-grey.html`), *"build it"*.
+
+- **Three bands.** The brand navigation row is untouched (§408.1). Under it the MAIN TABS row (`#tabrow`) is grey (`--surface-2`) with the tabs as words over an underline — the selected one in `--ink`, bold, gold underline. Under that the SUB-TABS row (`#secrow`) is white and draws its sections as ONE rounded switch (`.secseg`), the selected section filled `--stone` with `--surface` ink. No unit name on either: the navigation above already says it.
+- **A tab is a place, a section is a choice inside it**, which is why they take two shapes rather than one.
+- **REPORTING LOSES ITS SOLID FILL — a reversal of §222.2**, recorded as one: the signed drawing shows it as orange WORDS with its dot. It keeps the orange as type in `--cta-hover`, the deeper half of the pair §94.8 declared, which reads on the grey in every palette; still the only coloured tab on the row.
+- **No new tokens** (§25): the switch uses `--stone`/`--surface`, which invert correctly in dark (a light-blue segment with dark ink), and the orange uses `--cta-hover`.
+- **Specificity, named**: `#subtabs > button[role="tab"]` is (1,0,1), beating `.tabs button` and `.tabs button.cta[aria-selected]` without an !important (§40), and reaching the TABS only — the report controls in `.tabacts` keep their own dress. The sections are wrapped in `.secseg` in `shell.html`, both the strategy sections and the group's Performance sections, so the missing bar and the pen in `.secttail` are untouched.
+- **Measured**: every tab and section ≥ 6.19:1 light and ≥ 6.33:1 dark on its own ground. `qa.py` ERRORS none; `report-chrome`, `perf-line`, `plan-edit-line`, `plan-edit-head`, `band-corner`, `gap-fill`, `fn-perf-controls`, `empty-not-missing`, `table-fit`, `setup-pages`, `nav-scroll`, `welcome`, `report-blockers`, `submit-gate` green. Screen only: no `api/`, `lib/` or `db/` file, nothing stored, nothing migrated, nobody signed out.
+
+## §409.1 — only the selected tab is bold, and the dead rules go (2026-09-24)
+
+Islam, of the first build: *"the main tabs the performance, bold and underlined are for only selcted tabs, and the performance should have a different colour as we agreed in the mockup"*, and *"review the code to remove any additional code"*. Performance still wore `.tabs button.primary` — the old landing-tab emphasis (`--gold-deep`, 700) from before the dot replaced it (§69.9) — and the new row never set a weight, so the bold leaked through. Every unselected tab is now the mockup's quiet word (`--ink-2`, 400), Reporting apart in its orange.
+
+Removed, because §409 made them match nothing or be overridden everywhere (§24): `.tabs button.primary` and its selected twin (`.primary` stays as a MARKER, read by the welcome screen); `.tabs button.cta` and its hover and selected rules with §222's comment block (`.cta` appears on no tab outside `#subtabs`, and the setup page's `editbtn cta` is not in `.tabs`); the section row's selected `border-bottom-color` (the switch draws no border); the row's second background declaration, folded into the first; and §409's own two `.primary` lines and duplicated `.cta` hover. A grep for everything §408 added (the unit bar, the serif face, the folded-row key) finds nothing left. `qa.py` ERRORS none; ten neighbouring checks green; contrast unchanged.
+
+## §409.2 — Reporting is a filled button again, and no tab draws a box (2026-09-24)
+
+Islam, on the built row: *"the selected tab got a strange box (a glitch) because it disappeared after moving across"*, and of the colours, after one misreading on my side (I proposed Performance in navy; *"the reporting is what needs the color the performance shouldn't get a color"*). Three options for Reporting were drawn out of the running platform in both palettes and both selection states (`design-mockups/tab-banner-followup/`, rule 1c); he picked **C**, *"but make sure of the alignment of the word reporting with the other words and that it's centered in the box"*.
+
+**The box was the keyboard focus outline**, drawn on a tab and gone once focus moved. It could not be reproduced by a mouse press in headless Chromium, so the cause in his browser is not claimed; what is decided is that **no tab on this row draws an outline, for mouse or keyboard** — focus is said in the row's own vocabulary (the word at full ink and a light underline; the selected tab keeps its gold one). The same goes for Reporting: focus deepens its fill rather than ringing it.
+
+**Reporting takes `--cta` as a fill with `--cta-ink`** and `--cta-hover` when selected — §222.2's pair, reversed by §409 and reinstated by his pick, recorded as a reversal (Principle II). 5.54:1 light, 7.37:1 dark; selected deeper and still above 4.5. **The dot goes to `--cta-ink`** on the fill, because gold on this orange is a mark nobody can see. **Performance is untouched**: the same quiet grey as every unselected tab.
+
+**Alignment and centring were measured, not assumed.** Baseline alignment (`align-self:baseline`) was tried first and measured worse: it hung the tabs from the top of the row that the report controls make taller, leaving the underline floating 11px above the row's edge. Every tab is centred on the row instead; an underlined tab is 12px over its text and 9px + 3px under it, so its text is centred in its own box, and the three centres share one line. **On the INK (§302), a symmetric 6/6 padding put "Reporting" 1.3px high** (8.75 over, 11.44 under — the g hangs below the line), so the padding is 7/5 and the box rides up 1px (`top:-1px`) to keep the word on the others' baseline: ink 9.75 over, 10.44 under, 15.25 left, 15.31 right with the dot removed.
+
+`checks/tab-row.py` asserts each claim as paint or geometry in both palettes — no outline after a real press or a real Tab, Performance's colour the same as the other quiet tabs, Reporting's fill `--cta` and readable, one baseline in both states, the word centred within 1px from the painted pixels. Proved able to fail from the SOURCES four ways (§276): outline back **2 red**, symmetric padding **4 red**, the 1px ride removed **4 red** (the baseline off by 1.0), the fill removed **5 red**. Screen only: no `api/`, `lib/` or `db/` file; nothing stored, nothing migrated.
+
+## §409.3 — the section switch is squared (2026-09-24)
+
+Islam: *"for the sub tabs can you give me options if we make it rectangular rather than rounded?"* Three shapes drawn out of the running platform in both palettes (`design-mockups/tab-banner-followup/2026-09-24_section-switch-shape.html`, rule 1c) — softly squared, sharp, and one joined bar — and he picked **A**, over the joined bar I had recommended. The outer box takes the Reporting button's own 6px corner, so the two controls stacked on top of each other share one shape; a segment keeps its 3px of air inside the box with a 4px corner. Colours, words, sizes and spacing are unchanged. `checks/tab-row.py` gains the assertion as an AGREEMENT (the box's corner equals Reporting's, the segment's is smaller), red 2 with the pill put back from the sources. Screen only.
+
+## §410 — the plan page restyled, a quieter top bar, and the typeface switch gone (2026-09-24)
+
+Islam, after mockup rounds 10b–12 (`design-mockups/plan-page-redesign/2026-09-24_v10-restyle-under-new-tabs.html`, published and signed off): *"drop the system button and build both."*
+
+**The white top bar.** It was 27px with text touching both edges and five sizes on it (8.5px to 12px), none the platform's own. It is 40px now and every size is one the page already uses: the product name at the body size, the client's name in the quiet ink after a hairline, the *Viewing as* key in table-heading capitals, the role line as ordinary grey text rather than gold capitals (it says who you are, which is not an alarm). The viewer moves right beside the light/dark button with a hairline between; where no viewer is drawn the buttons take the push. **The names never give way on a narrower window** — measured at 1100 the first build read *"Strategy Management Platf…"*; the role line is what shrinks, with the whole line on its hover.
+
+**The typeface switch is gone**, on §41.6's own reasoning for the palette: which face the product wears is the tenant's (`BRAND.font`), not a per-screen preference. A face a browser remembers — a removed one or a live one — is forgotten on load, or it would pin that person to a face with no control left to change it back. **Cost, stated**: nothing on Setup › Branding sets `BRAND.font` today, so Source Sans 3 stays embedded and is reachable only through that key; the system stack is what everybody sees. `checks/typeface.py` REWRITTEN, never loosened (§218): the switch asserted absent AND the tenant key asserted still to paint, both ends.
+
+**The plan page.**
+- **The rail as cards** (above 1200px, never Setup's rail): each pillar a card with its own border and 8px corners and a gap between, the selected one on the quiet ground with the gold edge as an inset shadow. *Same size* is a FLOOR, not a height — a fixed height clips a gap count, a grip or a tally — so each state has a minimum the ordinary card fills (104px detail, 78px terse) and the name is held to two lines with the whole name on its hover. One rule for every pillar and project rail, on both sides of the switch (§53.5); below 1200 the rail still reads across (§267.2).
+- **The detail switch is kept** (Islam: *"we need to keep the button"*). Terse is the code and the name; detail puts the kind **beside the code** and the counts under the name. **The owner leaves the plan rail** (*"remove the owner not needed here"*) — it is on the pillar's own page one press away. `checks/pillar-kind.py` REWRITTEN (§218) to read the kind off the card, with the unsaid-kind case scoped to the first card.
+- **The pillar heading** keeps today's grey band (Islam, round 11: the white was not seen), code and name on one line, no gold edge — the rail's selected card already says which — and the kind as a white tag at the far end. Scoped to the PLAN pane's band (`planband`); Performance and Reporting bands are untouched until asked (rule 1c).
+- **Key measures and Tactics as two blocks of one card**: the grey clause after each heading (*"— as planned: this year's target…"*) becomes the count beside it (1b-ii), and a rule runs edge to edge above Tactics. The count took a class of its own (`.hn`), because `.hcount` already exists as a filled pill and the first build drew one.
+- Tables and the platform's typography are unchanged.
+
+Screen only: no `api/`, `lib/` or `db/` file, nothing stored, nothing migrated, nobody signed out. Recorded, not done: the `ui-versions/` snapshots for this round were removed from the branch earlier at Islam's word and live in git history.
+
+### §410.1 — merged to `main`, and §402 decides the face (2026-09-24)
+
+**Merged to `main` on Islam's word** (*"merge to main"*), with main's §399–§404 brought in first (31 commits). No renumber was owed: main cites §408–§410 nought times, measured.
+
+**The two sessions removed the same button with two different answers about the face**, and main's is the one that stands: §402 is Islam's own sentence — *"remove the font button and keep the font source sans across the platform"* — so `--sans` is Source Sans 3 on bare `:root` for everybody and §410's `BRAND.font` reader is dropped rather than carried beside it (two answers to one question, §53.5). `theme.js`, `shell.html` and `checks/typeface.py` are main's whole; what survives of §410's font half is the part both agreed on — the switch gone and a remembered `smp.font` cleared on load. The rest of §410 (the top bar, the rail cards, the plan band, the counts) is unchanged by the merge. The built file was rebuilt from the merged sources, `smp-app/public/` regenerated, and `sw.js` rebuilt from main's copy with one line changed: `SHELL` → `smp-shell-v5.49-plan-restyle`, past main's v5.48.
+
+**And `main` moved again while the checks ran**: another session merged a business unit's plan format as **§405** and **§405.1** — the numbers this branch was using. This branch's §405–§407 were renumbered to **§408–§410** before that merge (the merge base held none of them, so every citation was this branch's own), in all three spellings, and then main's §405–§405.1 were merged in; the sources merged with no conflict.
+
+**And two things the merge found by running the checks on the merged tree, not by reading it.** Taking main's whole `shell.html` to settle one comment conflict dropped this branch's own §409 section switch and §410 top-bar lines from that file — caught by `tab-row.py` going 6 red; the file was re-merged hunk by hunk. And §409.2's tab padding was measured in the SYSTEM face: in Source Sans 3 (§402) the Reporting word sat 0.65px low regular and 1px high bold, so the two weights now take different padding (regular 6/6, bold 7/5 riding up 1px — both on one line) with half a pixel moved left to right. `tab-row.py` all good.
+
+### §410.2 — the four checks that were red on `main` (2026-09-24)
+
+Islam: *"fix the four red checks from main."* Each was established as red on `origin/main`'s own build before anything here was touched (§303). **Three of the four were the CHECK, and one is a real fault.**
+
+**`plan-edit-line.py` held a claim §404.1 moved (§214.3).** It asserted that opening the pen on every Strategy section adds editable fields. Since §404.1 a supporting function's Overview draws no "What it is" card, so on Merchandising — a pillars function holding no key objectives — the pen opens an empty table whose one control is **+ Add an objective**. That is a way in, and the only one §61 requires. REWRITTEN, never loosened (§218): *the page gains a way to write into it* — fields or an Add — asserted at BOTH ENDS, since read mode must offer neither. Proved able to fail from the SOURCES (§276): with the objectives' Add removed, Merchandising's Overview goes red at `(0, 0) → (0, 0)`. **And the falsification first went green for the wrong reason**: this file resolves the build against the WORKING DIRECTORY, so run from the real tree it measured the real build (§334.13's family). Run from the broken tree, 1 red.
+
+**`setup-rail.py`'s empty-box test measured a WIDTH and called a drawn glyph tofu.** Source Sans 3 (§402) carries no Greek, so the browser's fallback draws Σ for Figure sets at **7.59px** against the missing box's **7.84** — inside the old 0.5px tolerance. Photographed at 3×, the Σ is plainly drawn. A width is a proxy for "drawn"; the pixels are "drawn": each mark and a guaranteed-missing character are now painted on a canvas in the rail's own font, and identical pixels (or none) are the failure. Proved able to fail: a private-use character in the Figure sets glyph goes red naming it.
+
+**`deck-and-weights.py` held a literal §405.1 moved (§214.3).** It expected `joinTarget("", "8", "M EGP")` to read `8 M EGP`; since §405.1 a figure with nothing stored to copy the spacing from takes the unit's own convention, and a scaled currency is one token — `8M EGP` (§199.4). The rule under test — the unit is never written twice, however it was typed — is untouched. REWRITTEN as AGREEMENT with `TIGHT_UNITS` rather than a literal (§94.8), with the unit asserted to appear once. Proved able to fail: with the already-typed-unit guard removed, 2 red, printing `8 M EGP` and `8 m egp` verbatim.
+
+**`register-header.py` is right, and the fault is the dialog's.** At 1280×700 the person's edit dialog scrolls by 6px. Measured: the read-only *Sign-in name* box is **46px tall beside inputs of 36**, because `.pdlg .pdro` pads 11px where `.fld` pads 6px — so its row is 10px taller than every other row, against the rule's own comment (*"it sits on the baseline its neighbouring inputs sit on, so the row does not go ragged"*). The ragged row is older than §402; Source Sans's metrics are what pushed the total over the window. Matching the box to its neighbours takes the row back 10px and the dialog fits. **Put to Islam first (rule 1c)** with the dialog shot both ways (`design-mockups/register-dialog/`), and on his word (*"yes make the change"*) `.pdlg .pdro` takes `.fld`'s own padding, 6px 9px: the box 46 → 36px, the dialog's content 526 → 516px in a 520px box. `register-header.py` green, and it was red on the build before, which is its falsification; the nine neighbouring register checks green.
+
+**Merged to `main` 2026-09-24 on Islam's word** (*"merge to main"*), a clean fast-forward — `main` had not moved — carried by this record line so `main` holds a commit the branch does not (§91). Verified before: `qa.py` ERRORS none, `built-in-step` all good, `generated-in-step` all clear, and the thirteen register and rewritten checks green. `sw.js` SHELL `v5.50-register-dialog`, confirmed unique against `origin/main` immediately before the push (§94.16). Screen and checks only — no `api/`, `lib/` or `db/` file — so no forced sign-out is owed (spec 029).
 
 ## §411 — a tactic's status is RHI's words, and the platform picks them (2026-09-24)
 

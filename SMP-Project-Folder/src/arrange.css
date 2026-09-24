@@ -78,8 +78,7 @@
   .drill:hover { color:var(--gold-deep); }
   .drill:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  nav.tabs.sectionrow { background:var(--surface-2); border-bottom:1px solid var(--line); }
-  nav.tabs.sectionrow button[aria-selected="true"] { border-bottom-color:var(--stone-soft); }
+  nav.tabs.sectionrow { background:var(--surface); border-bottom:1px solid var(--line); }
   .gwrap { display:block; }
   .gwrap .card-head { position:relative; }
   .gwrap .card-head .grip { position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:.75; }
@@ -439,6 +438,104 @@
               display:inline-flex; align-items:center; justify-content:center;
               flex-shrink:0; }
   .themesvg { width:12px; height:12px; display:block; }
+
+  /* ── THE WHITE TOP BAR, ON THE PLATFORM'S OWN SCALE (§410) ──────────────
+     Islam, of the plan-page restyle: *"can you suggest a neat design for the
+     top bar white one as well"*, then of the mockup, *"drop the system button
+     and build both"*. The bar was 27px with the text touching both edges and
+     five sizes on it, 8.5px to 12px, none of them the platform's own. It is
+     40px now and every size is one the page already uses: the product name at
+     the body size, the client's name in the quiet ink after a hairline, the
+     "Viewing as" key in the same small capitals as a table heading, and the
+     role line as ordinary grey text rather than gold capitals — it says who
+     you are, which is not an alarm. Written AFTER the rules above on purpose:
+     they are the history of how the line got to one line, and this is only
+     what it measures now (§29.2: the later rule is the one the browser uses).
+
+     THE VIEWER MOVES RIGHT. It sat wherever the free space left it; it goes
+     beside the light/dark button with a hairline between, and the gap that
+     used to float it goes to the left of it instead. A viewer that is not
+     drawn (anybody but the office, and the client's own settings) hands the
+     push back to the buttons, or they would sit against the brand. */
+  .top-in { gap:16px; padding:0 24px; min-height:40px; align-items:center; }
+  .brand { align-items:center; gap:12px; margin-right:0; }
+  /* The product's and the client's names are never the thing that gives way
+     on a narrower window (measured at 1100: "Strategy Management Platf…").
+     The role line beside the viewer is, and it keeps the whole line on its
+     hover. */
+  .brand, .brand h1, .orgname { flex:none; }
+  .viewer { flex:0 1 auto; }
+  .brand h1 { font-family:var(--sans); font-size:var(--fs-body); font-weight:600;
+              color:var(--ink); line-height:1.2; }
+  .orgname { font-size:var(--fs-note); font-weight:400; color:var(--ink-3);
+             letter-spacing:0; line-height:16px; }
+  .orgname:not(:empty) { border-left:1px solid var(--line); padding-left:12px; }
+  .viewer { margin-left:auto; gap:8px; padding-right:16px; min-height:22px;
+            border-right:1px solid var(--line); justify-content:flex-end; }
+  .viewer label { font-size:10.5px; letter-spacing:.09em; }
+  .viewer .ssbtn { font-size:var(--fs-small); height:26px; padding:0 8px;
+                   border-radius:6px; line-height:24px; max-width:300px;
+                   flex:0 1 auto; min-width:120px; }
+  .viewer-note { font-size:var(--fs-small); font-weight:400; color:var(--ink-3);
+                 letter-spacing:0; text-transform:none; }
+  .topacts { margin-left:0; gap:8px; }
+  .viewer[hidden] + .topacts,
+  html[data-client-settings] .viewer + .topacts { margin-left:auto; }
+  .infobtn { font-size:10.5px; padding:4px 10px; letter-spacing:.09em; }
+  .themebtn { width:26px; height:26px; padding:0; }
+  .themesvg { width:14px; height:14px; }
+
+/* ── §410, THE PLAN PAGE: THE RAIL AS CARDS, THE BAND WITHOUT ITS EDGE ──────
+   Islam, from the signed-off mockup (design-mockups/plan-page-redesign/,
+   round 12): the rail "looks well with the cards under each other … we just
+   need to keep them the same size and the rail in general to be soft cornered
+   like the rest." Each row becomes a card with its own border and corners and
+   a gap between; the selected one keeps §41's quiet ground and gold edge, as
+   an inset shadow now so the card's own border is not replaced by it.
+
+   SAME SIZE IS A FLOOR, NOT A HEIGHT. A fixed height clips whatever a card
+   carries beyond the mockup's rows — a gap count, the arranging grip, a
+   reporting tally — so each state gets a minimum the ordinary card fills
+   exactly, and the name is held to two lines with the whole name on its hover.
+   Two floors because the detail switch (§119) is kept: terse is the code and
+   the name, detail adds the kind beside the code and the counts under it.
+
+   ABOVE 1200px ONLY, and never the Setup rail. Below that the pillar rail
+   reads ACROSS (§267.2), where a card of two lines would be the wrong shape;
+   Setup's rail is a list of pages and not a list of things (§296). One rule
+   for every pillar and project rail, on both sides of the switch (§53.5). */
+@media (min-width:1201px){
+  .rail:not(.setuprail) button.ritem {
+    width:calc(100% - 16px); margin:8px 8px 0; min-height:104px;
+    align-content:start; border:1px solid var(--line); border-radius:var(--r);
+    padding:10px 12px; }
+  .rail:not(.setuprail):has(.railterse.on) button.ritem { min-height:78px; }
+  .rail:not(.setuprail) button.ritem:last-of-type { margin-bottom:8px; border-bottom:1px solid var(--line); }
+  .rail:not(.setuprail) button.ritem:hover { border-color:var(--stone-soft); background:var(--surface); }
+  .rail:not(.setuprail) button.ritem.on,
+  .rail:not(.setuprail) button.ritem.on:hover {
+    background:var(--surface-2); border-color:var(--line);
+    box-shadow:inset 3px 0 0 var(--gold); }
+  .rail:not(.setuprail) .ritem b {
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; }
+}
+/* The kind beside the code (detail only, drawn by railName). The code's own
+   size, in the sans rather than the mono: it is a word, not an identifier. */
+.rail .ritem .rkind { font-family:var(--sans); font-weight:600; letter-spacing:.02em;
+  color:var(--ink-3); }
+/* The plan pane's band: no gold edge (the rail's selected card already says
+   which), and the kind as a white tag at the far end. */
+.pband.planband { box-shadow:none; }
+.pane > .pband.planband { box-shadow:0 1px 0 var(--line); }
+.pband.planband .pill.kind { margin-left:auto; background:var(--surface); flex:none; }
+/* THE COUNT BESIDE THE HEADING (§410, replacing the grey clause, 1b-ii), and
+   the rule that makes Key measures and Tactics two blocks of one card —
+   pulled out through the pane's side padding so it runs edge to edge. */
+h4.mini .hn { font-size:var(--fs-small); font-weight:400; letter-spacing:0;
+  text-transform:none; color:var(--ink-3); margin-left:4px; }
+h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
+  padding:22px 18px 0; }
 
   /* 5. The rule above a section heading and the gap it sat in. A section is
      already announced by its heading; the line was doing the job twice. */
@@ -2684,3 +2781,60 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      multiplication and part of why the period reads as it does — leaving it
      out would make the column stop adding up to the gap above it (§99.7). */
   .drvtbl tr.drvquiet td:first-child .dname { color:var(--ink-3); font-weight:500; }
+
+  /* ── THE TWO ROWS UNDER THE NAVIGATION (§409) ───────────────────────
+     Round 9 of design-mockups/plan-page-redesign, signed off: the main tabs
+     on grey as words with an underline, the sections below as one switch.
+     Only the selected tab is bold and underlined (§409.1). `#subtabs > button`
+     is (1,0,1), so it outranks `.tabs button` (0,1,1) with no !important (§40)
+     and reaches the tabs only — the report controls in `.tabacts` keep theirs.
+
+     REPORTING IS A FILLED BUTTON (§409.2, Islam's option C): `--cta` with
+     `--cta-ink` (5.54 light, 7.37 dark), `--cta-hover` when selected, its dot
+     in the ink because gold on this orange cannot be seen.
+
+     ONE LINE, AND CENTRED IN ITS BOX: every tab is centred on the row, and an
+     underlined tab's text is centred in its own box (12px over, 9+3 under), so
+     the words share a baseline. Measured on the ink (§302). In the system face
+     a symmetric 6/6 left "Reporting" 1.3px high, so it was 7/5; §402 made
+     Source Sans 3 the one face and there it sat 0.65px LOW and 0.55px right
+     at 7/5 while the BOLD selected word sat 1px high at 6/6 — the two
+     weights want different padding. So the regular word is 6/6 and the bold
+     one keeps 7/5 riding up 1px, which puts both words on the same line and
+     each box's ink centred (§410.1); half a pixel moves from the left to the
+     right for Source Sans's side bearing.
+
+     NO TAB DRAWS A BOX (§409.2): focus is the row's own vocabulary — the word
+     at full ink with a light underline, the selected tab keeping its gold one,
+     Reporting going to its deeper fill. */
+  nav.tabs#tabrow { background:var(--surface-2); }
+  #tabrow .tabs-in { padding:0 24px; gap:22px; min-height:46px; }
+  #subtabs .tabacts { margin-block:6px; }
+  #subtabs > button[role="tab"] { align-self:center; background:none; border-radius:0;
+    padding:12px 1px 9px; border-bottom:3px solid transparent; color:var(--ink-2);
+    font-weight:400; font-size:var(--fs-body); }
+  #subtabs > button[role="tab"]:hover { background:none; color:var(--ink); }
+  #subtabs > button[role="tab"][aria-selected="true"] { color:var(--ink); font-weight:700;
+    border-bottom-color:var(--gold); }
+  #subtabs > button[role="tab"]:focus-visible { outline:none; color:var(--ink);
+    border-bottom-color:var(--line); }
+  #subtabs > button[role="tab"][aria-selected="true"]:focus-visible { border-bottom-color:var(--gold); }
+  #subtabs > button.cta[role="tab"] { color:var(--cta-ink); background:var(--cta);
+    border-bottom:0; border-radius:6px; padding:6px 14.5px 6px 13.5px; position:relative; }
+  #subtabs > button.cta[role="tab"]:hover,
+  #subtabs > button.cta[role="tab"]:focus-visible,
+  #subtabs > button.cta[role="tab"][aria-selected="true"] { color:var(--cta-ink); background:var(--cta-hover); }
+  #subtabs > button.cta[role="tab"][aria-selected="true"] { font-weight:700;
+    padding-top:7px; padding-bottom:5px; top:-1px; }
+  #subtabs > button.cta[role="tab"] .tabdot { background:var(--cta-ink); }
+
+  /* The sections as one switch, squared (§409.3, Islam's option A): the box
+     takes Reporting's 6px corner, a segment 4px inside its 3px of air. */
+  .tabs .secseg { display:inline-flex; flex:none; background:var(--surface);
+    border:1px solid var(--line); border-radius:6px; padding:3px; gap:2px; }
+  .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;
+    color:var(--ink-2); font-weight:500; }
+  .tabs .secseg button:hover { background:var(--surface-2); color:var(--ink); }
+  .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);
+    font-weight:600; }
+  .tabs .secseg button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }

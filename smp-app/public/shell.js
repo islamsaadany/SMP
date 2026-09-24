@@ -59937,10 +59937,10 @@ var SYNC = (function () {
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
       document.getElementById("secrow-in").innerHTML =
-        (secs.length > 1 ? secs.map(function(s){
+        (secs.length > 1 ? '<span class="secseg">' + secs.map(function(s){
           return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
             ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
-        }).join("") : "") + tailHTML;
+        }).join("") + '</span>' : "") + tailHTML;
     } else {
       secrow.hidden = !onSecPage;
       /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the
@@ -59954,9 +59954,9 @@ var SYNC = (function () {
          hidden control is still a tab stop, which is §48's `opacity:0` lesson
          arriving in a third tree. Emptied whenever it is hidden. */
       document.getElementById("secrow-in").innerHTML = onSecPage
-        ? GROUP_SECTIONS.map(function(t, i){
+        ? '<span class="secseg">' + GROUP_SECTIONS.map(function(t, i){
             return '<button role="tab" data-sec="' + i + '" aria-selected="' + (i === GSEC) + '">' + t + '</button>';
-          }).join("")
+          }).join("") + '</span>'
         : "";
     }
     /* The builder's band, once the navigation above has settled (§129). */

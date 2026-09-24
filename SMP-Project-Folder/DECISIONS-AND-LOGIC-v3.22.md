@@ -57227,3 +57227,14 @@ Islam, with a screenshot of the chrome as it stood before §399: *"let's revert 
 This is §87's twins at the level of the chrome: two places naming the unit you are in.
 
 **Next:** the page-body restyle from the earlier rounds is drawn **under today's navigation, unchanged**, in `design-mockups/plan-page-redesign/2026-09-24_v8-restyle-under-todays-nav.html`. The top of that mockup is a picture of the real platform rather than a redrawing, so it cannot drift from what ships (§41.9). Nothing from it is built until Islam signs it off (rule 1c).
+
+## §400 — the two rows under the navigation: main tabs on grey, sub-tabs as a switch (2026-09-24)
+
+Islam, after §399.1 put the navigation back: *"try again for the banner just remove the name of the unit part and make this banner grey like now … keep your design"*, then *"the banner of the details of the strategy should be below the strategy banner. so we have now 3 banners"*, then, of round 9 (`design-mockups/plan-page-redesign/2026-09-24_round9-tab-banner-grey.html`), *"build it"*.
+
+- **Three bands.** The brand navigation row is untouched (§399.1). Under it the MAIN TABS row (`#tabrow`) is grey (`--surface-2`) with the tabs as words over an underline — the selected one in `--ink`, bold, gold underline. Under that the SUB-TABS row (`#secrow`) is white and draws its sections as ONE rounded switch (`.secseg`), the selected section filled `--stone` with `--surface` ink. No unit name on either: the navigation above already says it.
+- **A tab is a place, a section is a choice inside it**, which is why they take two shapes rather than one.
+- **REPORTING LOSES ITS SOLID FILL — a reversal of §222.2**, recorded as one: the signed drawing shows it as orange WORDS with its dot. It keeps the orange as type in `--cta-hover`, the deeper half of the pair §94.8 declared, which reads on the grey in every palette; still the only coloured tab on the row.
+- **No new tokens** (§25): the switch uses `--stone`/`--surface`, which invert correctly in dark (a light-blue segment with dark ink), and the orange uses `--cta-hover`.
+- **Specificity, named**: `#subtabs > button[role="tab"]` is (1,0,1), beating `.tabs button` and `.tabs button.cta[aria-selected]` without an !important (§40), and reaching the TABS only — the report controls in `.tabacts` keep their own dress. The sections are wrapped in `.secseg` in `shell.html`, both the strategy sections and the group's Performance sections, so the missing bar and the pen in `.secttail` are untouched.
+- **Measured**: every tab and section ≥ 6.19:1 light and ≥ 6.33:1 dark on its own ground. `qa.py` ERRORS none; `report-chrome`, `perf-line`, `plan-edit-line`, `plan-edit-head`, `band-corner`, `gap-fill`, `fn-perf-controls`, `empty-not-missing`, `table-fit`, `setup-pages`, `nav-scroll`, `welcome`, `report-blockers`, `submit-gate` green. Screen only: no `api/`, `lib/` or `db/` file, nothing stored, nothing migrated, nobody signed out.

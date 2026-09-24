@@ -142,7 +142,9 @@ with sync_playwright() as p:
         pagePen: document.querySelectorAll('[data-edit="units"]').length,
         eraser: document.querySelectorAll('[data-clearmenu]').length,
         arrange: document.querySelectorAll('[data-setarrange="units"]').length,
-        pills: t.querySelectorAll('tbody .pill').length,
+        /* §405: the Plans in column wears a pill of its own, so the STATUS
+           pill is the one in the status cell (good or none). */
+        pills: t.querySelectorAll('tbody .pill.good, tbody .pill.none').length,
         tables: document.querySelectorAll('.setuppane table').length,
         marks: (document.querySelector('.setuppane') || {}).innerHTML &&
                /Unit marks/.test(document.querySelector('.setuppane').innerHTML),

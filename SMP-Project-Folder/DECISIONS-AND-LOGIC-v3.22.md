@@ -57781,3 +57781,14 @@ the signed-off mockup
   unit yet; `scripts/test-nav-row.js` dies on `compOn is not a function` and
   `test-my-reporting.js` has one failure — both reproduce with this work
   stashed, so both are §404's, not this section's.
+- **THREE CHECKS HELD WHAT THIS DECIDES, REWRITTEN NEVER LOOSENED** (§218,
+  §214.3): `objectives-actions.py` asserted §342's archive (it asserts hide
+  and keep now, 52/0); `access-header.py` asserted a project owner is offered
+  no own-unit column (it now MAKES a unit that plans in projects, asserts the
+  derivation, and asserts the columns are offered); `setup-arrange.py` counted
+  every pill as a status pill (it counts the status cell's). Two reds are not
+  this section's, each reproduced on the build before it (§303):
+  `capability-entry` 1 and `setup-arrange`'s Retire wording 1. Full `qa.py`
+  ERRORS none; structure, functional-projects, cycle-board, template round
+  trip, import page, deck strip, Submit gate, gap fill, fn-pillars, role
+  picker and hide-slide green.

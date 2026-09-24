@@ -57688,3 +57688,23 @@ the Words step — it read `var WORDS`; re-pointed at where the words are asked
 now (the component keys, the pillar's two sub-words, `namePick` and
 `callBoxes`), never loosened (§218). 43/0.
 
+### §404.6 — merged to `main` (2026-09-24)
+
+Islam: *"merge to main."* `main` had moved eighteen commits (§399–§403, the
+navigation round) and took no §404 number, checked in the records, so no
+renumber was owed. Two source conflicts, both kept whole rather than picked:
+§399's function S&W tab and slide now carry the structure's `swot` switch
+(off hides, never deletes, §404's own rule), and the authoriser suite runs
+§399's and §404's sections side by side (763/0). The three records were
+combined with every line of each side asserted present; the built file and
+`smp-app/public/` were rebuilt, never merged (§91, §329); `sw.js` rebuilt from
+main's copy at `v5.46-structure-merged` (§146.2). The duplicate-declaration
+scan reads only §281.1's six. On the merged tree: `qa.py` ERRORS none,
+structure, client-setup, terminology, welcome, fn-pillars, function-sw,
+tab-keep, console-boot, terminology-reach green; setup-shape 43/0, graph-diff
+140/0, platform rules 69/0, built-in-step and generated-in-step clear.
+`client-setup-outside` and `client-archive` are red with the SAME counts on
+`origin/main`'s own build (§303), which main's §400.2 already records.
+Forced sign-out: not owed — the authoriser only gained kinds for fields an
+old tab never sends, so no save that worked before is refused.
+

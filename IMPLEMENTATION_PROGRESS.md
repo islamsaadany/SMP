@@ -8155,7 +8155,7 @@ or on for one unit, function or company. Switching off hides and never deletes.
 Clients that never use it look exactly as before. A company gets its own
 Foundation page once its layer carries something.
 
-**Waiting on Islam**: whether to merge (the branch is 13 commits behind main).
+**Merged to `main` 2026-09-24 on Islam's word**, after bringing in main's navigation work (§399–§403). One place where the two met: a supporting function's Strengths & Weaknesses tab and slide now disappear when the office switches SWOT off for that function, like a unit's SWOT does.
 **Not done yet**: turning Pillars off does not hide a unit's plan; the second
 layer has no Temple drawing of its own.
 

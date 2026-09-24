@@ -57242,3 +57242,11 @@ published (`design-mockups/function-strengths-weaknesses/`, rule 1c).
   loosened (§218, §214.3). **`checks/functional-projects.py` is red 3 on the
   build before this change too** (§303) — wording from §395 — recorded, not
   fixed here.
+
+- **§399.1 — MERGED TO `main` 2026-09-24 on Islam's word.** `main` had not
+  moved, so a clean fast-forward: the tree pushed is the tree verified (full
+  `qa.py` ERRORS none, 755/0, `built-in-step` and `generated-in-step` clear).
+  `sw.js` bumped to `smp-shell-v5.36-function-sw`, a name the history never
+  held, in a commit `main` holds before the branch does (§91). No `api/`
+  change beyond classifying a new key; nothing an old tab saves is refused,
+  so no forced sign-out is owed (spec 029).

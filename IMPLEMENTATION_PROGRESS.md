@@ -8003,9 +8003,9 @@ On the merged build: whole-platform sweep clean, 188 checks walked. One check
 tactic-owner rounds — recorded, not fixed in this merge.
 
 
-## §399 — supporting functions get Strengths and Weaknesses (2026-09-24) · on the branch, not merged
+## §399 — supporting functions get Strengths and Weaknesses (2026-09-24) · **merged to `main` 2026-09-24**
 
-**Built on the branch, not merged.** Every supporting function now has an
+**Built; merged to `main` 2026-09-24 on Islam's word.** Every supporting function now has an
 **S&W** tab on its Strategy row, between Overview and its plan, like a
 business unit's SWOT but with only the two boxes about the function itself.
 Opportunities and threats stay with the business. The office writes it with

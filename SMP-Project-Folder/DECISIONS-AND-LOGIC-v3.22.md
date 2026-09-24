@@ -57302,3 +57302,49 @@ own person is refused it. `setup-per-module.py` served half green after its
 `generated-in-step` clear once committed. `sw.js` SHELL bumped (the built
 file's bytes changed, `arrange.css`).
 
+
+## §401 — one typeface, and one Viewing as (2026-09-24)
+
+Islam: *"1. remove the font button and keep the font source sans across the
+platform 2. in the home page there is a viewing as while we already have a
+viewing as at the top, let's remove the page redundant one and keep the master
+one at the top."*
+
+**THE TYPEFACE SWITCH GOES, AND SOURCE SANS 3 IS THE FACE FOR EVERYBODY.**
+§38.7 carried four faces so they could be compared in the product; §157 cut
+that to two; this settles it at one. `--sans` is `'Source Sans 3'` with the
+system stack behind it on bare `:root`, so it holds with no script, no
+attribute and no choice — the system stack is now only what a face that fails
+to decode falls back to. The `[data-font]` block, the button, `paintFont`,
+`setFont`, `FONTS`, `FNAMES` and `THEME.font` are **deleted, not hidden**
+(§24). **A choice left in a browser is cleared on load** (`smp.font` removed,
+`data-font` removed), §41.6's rule for the palette switch: a stored value with
+no control left to change it would pin somebody for ever. The face was
+already embedded in both builds (data URI in the file, `/fonts/…` served), so
+nothing new is fetched. `b.font` stops being handed to `setBrand`; a stored
+branding `font` is read by nothing.
+
+**THE HOME PAGE'S VIEWING AS GOES; THE BAR'S IS THE ONE.** §179 drew a second
+switcher above the greeting because the welcome screen then **covered** the
+viewport and the bar's control was behind it. §399 put Home **inside** the
+chrome, so the bar's switcher is on screen the whole time and the page copy
+said one thing twice (§87). `viewerBar()`, its CSS and the now-dead
+`SEARCHSEL.wire()` on Home are deleted. **What the copy did is kept**: a
+change on the bar's `#asWho` while Home is open redraws Home for the person
+now being looked at (one document-level `change` listener, asked by id after
+the shell's own handler has switched the platform) — without it Home would go
+on greeting the previous viewer.
+
+**Checks, REWRITTEN never loosened (§218):** `checks/typeface.py` — no switch,
+the page's own family is Source Sans 3 with no attribute, it decodes and its
+metrics differ from the system stack, and a stored `system`/`manrope` is
+cleared with the page still in Source Sans; **4 red** with `--sans` put back
+on the system stack, from the sources. `checks/welcome.py` §8 — Home draws no
+switcher, the bar's is present, visible and hit-testable (both ends, §94.2),
+and a switch from the bar moves the viewer and redraws Home without marking
+it seen; **1 red** (the greeting still *Mohamed*) with the redraw listener
+removed. `qa.py` ERRORS none; home-mark, viewer-line, boot-skeleton,
+page-width green; `check:modules` 166/0; `built-in-step` all good; served
+copies regenerated; `sw.js` SHELL bumped (the built file's bytes changed).
+Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
+The served app's DB-backed checks were not run (no database in this session).

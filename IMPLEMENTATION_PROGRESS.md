@@ -8102,3 +8102,14 @@ Performance and Reporting pages, and the missing-items chips follow it.
 Nothing saved changes. Checked: a new check that clicks every pillar in three
 awkward states (it fails 18 ways on the old build), six neighbouring checks
 updated, the full sweep. Merged to `main` on Islam's word, after bringing in §391–§392.
+
+## §401 — one typeface, and one Viewing as (2026-09-24)
+
+**Built, on the branch, not merged.** The font button is gone from the top bar
+and the whole platform is in Source Sans 3 for everybody; a choice somebody's
+browser remembered from the old button is cleared the next time they open it.
+The Home page's own "Viewing as" row is gone — the one in the top bar is the
+only one, and switching there now redraws Home for the person you are looking
+at, which is what the page's copy used to do. Checked: the two checks that
+covered these were rewritten and proved to fail when the old behaviour is put
+back; the whole-platform sweep is clean. Nothing stored changes.

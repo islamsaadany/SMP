@@ -35,10 +35,12 @@
        directly: no webfont, a small type scale, and shape carried by radius
        rather than by shadow. */
     /* The fallback stack, and what every embedded face falls back TO. Never
-       read directly by a rule — rules read --sans, which is set on the font
-       axis below. */
+       read directly by a rule — rules read --sans. */
     --sys-sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
-    --sans:var(--sys-sans);
+    /* ONE FACE, EVERYWHERE (§401). Islam: *"remove the font button and keep
+       the font source sans across the platform."* The system stack stays as
+       what a face that fails to decode falls back to, never as a choice. */
+    --sans:'Source Sans 3',var(--sys-sans);
     /* The mono stack stays a system stack. It carries person keys and unit
        codes — a dozen short strings — and a second embedded family to style
        those would be 40 KB for nothing. */
@@ -70,22 +72,8 @@
     --shadow-accent:0 4px 6px -1px var(--accent-glow);
   }
 
-  /* ── THE FONT AXIS (§38.8) ───────────────────────────────────────
-     Its own axis for now, independent of the palette, so the four faces can be
-     compared IN the real product rather than from a specimen sheet. Islam:
-     *"B first"* — try them all, then settle which face belongs to which
-     palette and collapse the axis into it, at which point the faces nobody
-     picked come out of the file.
-
-     Each face names the system stack after it, so a face that fails to decode
-     degrades to the system font rather than to a default serif. Absence of the
-     attribute is the system stack, which is why there is no [data-font="system"]
-     block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§157). The other three
-     went with their .woff2 files rather than being left here unreachable — a
-     rule for a face the product no longer carries is exactly what §24 is
-     about, and the next reader would have no way to tell it was dead. */
-  :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
+  /* THE FONT AXIS (§38.8, §157) IS GONE (§401): Source Sans 3 is --sans
+     above, for everybody, and there is no switch to answer. */
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
      A colour that is legible as a FILL is usually not legible as TYPE. Every
@@ -9807,24 +9795,6 @@ body.presenting .tourdock { display:none; }
                background:var(--ground); color:var(--ink);
                -webkit-font-smoothing:antialiased; }
 .welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
-
-/* ── VIEWING AS, ABOVE THE GREETING (§179) ──────────────────────────────
-   Islam's pick of two drawn placements. It sits on the PAGE's ground, not on
-   the hero's navy, so it takes the page's own ink — the drawing that put it
-   here first wore `--panel-ink` inherited from the hero and measured as a
-   pale label on a pale ground, which is §38.5's fault in a mockup rather than
-   in the product. Right-aligned: it is the one thing on this screen that is
-   about the screen rather than about the person being greeted, so it keeps
-   out of the greeting's reading line. */
-.welcomeover .wviewbar { display:flex; justify-content:flex-end;
-  align-items:center; gap:9px; margin:0 0 12px; }
-.welcomeover .wviewbar label { font-size:var(--fs-micro); letter-spacing:.14em;
-  text-transform:uppercase; font-weight:700; color:var(--ink-3); }
-/* searchsel replaces the select with a `.ssbtn` past five options (§45.5) and
-   hides the native one in place, so both are sized here — never the button
-   alone, or a tenant with five people gets an unstyled dropdown. */
-.welcomeover .wviewbar select, .welcomeover .wviewbar .ssbtn {
-  font-size:var(--fs-small); max-width:min(340px, 60vw); }
 
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
 /* ── THE ROLES STACK; THE TENANT HOLDS ITS PLACE (§187) ─────────────────

@@ -561,6 +561,15 @@ function planWorkbook(u){
       ] }
   ])
   .concat(isFn ? [
+    /* §399: a function's S&W — strengths and weaknesses only, read back by
+       the reader below under the SWOT sheet's own Type/Point shape. */
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:[["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+        (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+        return acc;
+      }, []) },
     /* A function's objectives, in its Overview's own columns. `numCols` and
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
@@ -1048,7 +1057,8 @@ function planFromWorkbook(u, sheets){
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
-  sheetObjects(sheets["SWOT"]).forEach(function(r){
+  /* §399: a function's file calls the sheet S&W; the rows are the same. */
+  sheetObjects(sheets["SWOT"] || sheets["S&W"]).forEach(function(r){
     var t = r["Type"];
     if (!swotN.hasOwnProperty(t) || !r["Point"]) return;
     swotN[t]++;
@@ -1419,6 +1429,23 @@ function capPlanWorkbook(c, opts){
                 SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
 
+    /* §399: A FUNCTION'S S&W TRAVELS, or a download and an untouched
+       re-upload would drop it (§22). Only for a function's own file or a
+       blank one — a capability has no S&W. Strength and Weakness only; the
+       market's two stay the business's. */
+  ].concat((c.own || !c.id) ? [
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:(function(){
+        var sw = (c.own && FUNCTIONS[c.fn] && FUNCTIONS[c.fn].swot) || {};
+        return [["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+          (sw[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+          return acc;
+        }, []);
+      })() }
+  ] : []).concat([
+
     /* §303: THE REPEAT MARK TRAVELS. §115 made "does this project run again"
        an editable fact in the front matter and the file never carried it, so
        a download and an untouched re-upload turned every repeating project
@@ -1515,7 +1542,7 @@ function capPlanWorkbook(c, opts){
         });
         return acc;
       }, []) }
-  ];
+  ]);
   if (!o.only) return sheets;
   /* Every sheet a dropped one is referenced BY goes with it: the three project
      sheets each validate their first column against the Projects sheet's own
@@ -1641,6 +1668,16 @@ function capPlanFromWorkbook(c, sheets){
       name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
       weight:r["Weight"], compile:r["Compile"],
       hidden:yes(r["Hidden"]) ? "1" : "" });
+  });
+
+  /* §399: a function's S&W, read by the same Type/Point shape as a unit's
+     SWOT sheet so one spelling serves both files. */
+  var swN = { Strength:0, Weakness:0 };
+  sheetObjects(sheets["S&W"]).forEach(function(r){
+    var t = r["Type"];
+    if (!swN.hasOwnProperty(t) || !r["Point"]) return;
+    swN[t]++;
+    rows.push({ id:c.id + "-" + t[0] + swN[t], type:t.toUpperCase(), name:r["Point"] });
   });
 
   /* §342: the actions, addressed to the HOLDER rather than to a project —

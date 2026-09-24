@@ -385,12 +385,7 @@
              fill rather than a dead end (§61) — and nothing about the
              navigation depends on the data, so a tab cannot appear and
              disappear as rows arrive (§45.2). */
-          /* §399: S&W sits between the Overview and the plan, where a unit's
-             SWOT sits between its Foundation and its Plan — Islam: *"like the
-             tabs of the BUs"*. Every format, and always drawn: an empty one is
-             a page you can fill, never a tab that comes and goes (§45.2). */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
-                  { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -8837,9 +8832,9 @@
         var a = b.dataset.swadd.split("|"), t = a[0], q = a[1];
         if (!mayAuthor("u_anal", t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("swot", { target:t, q:q }); return; }
-        var sw = swotWritable(t);
-        if (!sw || !Array.isArray(sw[q])) return;
-        sw[q].push("");
+        var u = unitLikeWritable(t);
+        if (!u || !u.swot || !Array.isArray(u.swot[q])) return;
+        u.swot[q].push("");
         fieldSaved(); paint();
       });
     });
@@ -8847,11 +8842,11 @@
       b.addEventListener("click", function(){
         var a = b.dataset.swrm.split("|"), t = a[0], q = a[1], i = +a[2];
         if (!mayAuthor("u_anal", t)) return;
-        var sw = swotWritable(t);
-        if (!sw || !Array.isArray(sw[q]) || sw[q][i] == null) return;
-        if (String(sw[q][i]).trim() &&
+        var u = unitLikeWritable(t);
+        if (!u || !u.swot || !Array.isArray(u.swot[q]) || u.swot[q][i] == null) return;
+        if (String(u.swot[q][i]).trim() &&
             !confirm("Remove this line? This cannot be undone here.")) return;
-        sw[q].splice(i, 1);
+        u.swot[q].splice(i, 1);
         fieldSaved(); paint();
       });
     });

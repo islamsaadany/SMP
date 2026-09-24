@@ -57187,3 +57187,58 @@ the Business units grouped into Divisions?" — a heading dropped into prose.
   and is REWRITTEN to the lowered form, never loosened (§218) — worked out in
   the check rather than read back from the product. Both set-up checks
   green. Screen only; nothing stored, nothing migrated.
+
+
+## §399 — a supporting function has its own Strengths and Weaknesses (2026-09-24)
+
+Islam: *"We need to add Strengths and weakness for the supporting functions"*,
+then of the five points put to him: every format, strengths and weaknesses
+only, written by the office, not counted as missing, a slide and a sheet — and
+of where it sits, *"it should be like the tabs of the BUs"*, and *"make it S&W
+not stengths and weaknesses."* Drawn first out of the running platform and
+published (`design-mockups/function-strengths-weaknesses/`, rule 1c).
+
+- **REVERSES HALF OF §213.** That section said a supporting function inherits
+  its aspiration and SWOT from the unit it plans under and never authors them.
+  The aspiration stays inherited, and so do OPPORTUNITIES and THREATS — they
+  are about the market, which is the business's. What a function knows about
+  ITSELF — what it does well, where it falls short — is its own now. Recorded
+  as a reversal, never overwritten (Principle II).
+- **A SECTION OF ITS OWN, BETWEEN OVERVIEW AND THE PLAN, ON EVERY FORMAT**
+  (pillars, projects, objectives & actions), labelled **S&W**. It is
+  `swotBoxes()` — the unit's own SWOT builder, lifted out and handed two
+  quadrants instead of four (§53.5) — so a line is added, typed and removed
+  exactly as a unit's SWOT is. A unit's SWOT is byte-for-byte what it was.
+- **ON THE OVERVIEW'S KEY (`k_found`, edit page `capfoundation`)**, so the
+  one Edit on the section row opens it with the Overview (§269) and nobody's
+  access moves: the office writes it, and a function's own head reads it.
+- **`swotWritable()` IS THE WRITING HALF** (§61, `fnWritable`'s shape): a
+  projects or objectives function has no unit-shaped writable view, so
+  `unitLikeWritable()` answered null and + Add would have written nowhere. It
+  mints `FUNCTIONS[k].swot` on first write and never on read (§42, §50.6).
+  No migration: the key rides `functions.extra` like `def` and `format`.
+- **THE SERVER HAD TO LEARN IT FOR THE NON-PILLARS FORMATS**: a pillars
+  function already went through `collectUnit()`, which classifies swot as
+  `unitAnalysis`; the others go through `fnOwnWork()`, where the key would
+  have been swept into Setup. Both land on `unitAnalysis` now, judged by
+  `strategyPageOf()` — the office alone. Falsified: with the new branch
+  removed the change is classified `setup`, 1 red; the refusals stay green
+  either way because Setup is also the office's, which is why the
+  classification is asserted by name.
+- **NOT A GAP.** An empty S&W draws the platform's empty line and counts
+  nowhere (§214.4, §223).
+- **ONE SLIDE, ONLY WHEN SOMETHING IS ON IT** (§253, §246 — whitespace is not
+  a line). A pillars function's deck still draws no four-slide SWOT section.
+- **THE WORKBOOK CARRIES IT** (§22): an **S&W** sheet (Type · Point) on a
+  pillars function's file, a projects/objectives function's own file and the
+  blank projects/objectives template; never on a capability's. The readers
+  take it back, and **a file without the sheet leaves the stored S&W alone**,
+  on both formats, so an older download cannot erase it. A replace does not
+  archive the previous S&W (the plan archive holds the plan).
+- **CHECKS.** `checks/function-sw.py` (new) — red 16 with the section removed
+  and 8 with the writer and the slide broken, from the SOURCES (§276).
+  `scripts/test-authorize.js` §399 — 755/0. `checks/fn-pillars.py` held the
+  section list and the sheet difference as a literal; both REWRITTEN, never
+  loosened (§218, §214.3). **`checks/functional-projects.py` is red 3 on the
+  build before this change too** (§303) — wording from §395 — recorded, not
+  fixed here.

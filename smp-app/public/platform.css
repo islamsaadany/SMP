@@ -4933,8 +4933,12 @@ html[data-client-settings] .viewer { display:none; }
      baseline its neighbouring inputs sit on, so the row does not go ragged,
      and the dashed edge and quiet ink are what the removed sentence used to
      say. `cursor:help` is the sign there is something on the hover. */
+  /* §410.2: the SAME padding as `.fld` (6px 9px, arrange.css), or the box
+     stands 10px taller than the inputs beside it — which is what this rule's
+     own comment above says must not happen, and what made the dialog scroll
+     at 1280×700. */
   .pdlg .pdro { display:block; border:1px dashed var(--line); border-radius:var(--r-sm);
-    padding:11px 12px; color:var(--ink-3); background:var(--surface-2);
+    padding:6px 9px; color:var(--ink-3); background:var(--surface-2);
     cursor:help; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pdlg .pdsect { grid-column:1 / -1; font-size:10.5px; letter-spacing:.07em;
     text-transform:uppercase; font-weight:700; color:var(--gold-deep);

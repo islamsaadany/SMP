@@ -736,7 +736,7 @@ const srv = createServer((req, res) => {
   const p = String(req.url).split("?")[0];
   if (p === "/platform.css") { res.writeHead(200, { "Content-Type": "text/css" }); return res.end(CSS); }
   if (p === "/route.js") { res.writeHead(200, { "Content-Type": "application/javascript" }); return res.end(ROUTE); }
-  /* the trail's client list (§400): the stub answers what the server would */
+  /* the trail's client list (§401): the stub answers what the server would */
   if (p === "/api/platform") { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ ok: true, clients: CLIENTS })); }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   /* THE STUB HONOURS THE SAME BREAK AS THE SERVER: this section serves the
@@ -767,12 +767,12 @@ if (browser) {
   page.on("pageerror", (e) => errs.push(String(e)));
   await page.goto(base + "/raya-trade/strategy/mobile/plan");
   await page.waitForTimeout(250);
-  /* §399: THE FOUR-SQUARE SWITCHER IS GONE; THE OFFICE'S TRAIL OFFERS THE
+  /* §400: THE FOUR-SQUARE SWITCHER IS GONE; THE OFFICE'S TRAIL OFFERS THE
      MODULES. REWRITTEN, NEVER LOOSENED (§218): every claim this section made
      about the switcher is made again about the trail's client step — drawn
      first in the row, a real shape, a DRAWN chevron (§52), every module with
      the server's own line, the one you are in marked, the menu on the page —
-     and the other end moves from "one module, no menu" to the decision §399
+     and the other end moves from "one module, no menu" to the decision §400
      actually made: a client's OWN person gets no trail at all. */
   check("the trail is drawn in the top bar", (await page.locator("nav.trail").count()) === 1);
   check("it is the first thing in the row",
@@ -783,13 +783,13 @@ if (browser) {
   check("it reads Forefront › the client › the module you are in",
     tr.ff === "/platform" && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
   check("the chevrons are DRAWN and not a font character (§52)", (await page.locator("nav.trail summary svg").count()) >= 2);
-  /* §400: THE TWO MENUS SWAP JOBS. Islam — the client step lists "the other
+  /* §401: THE TWO MENUS SWAP JOBS. Islam — the client step lists "the other
      clients", the module step "the other modules and then the separator and
      the client settings", and no client mark on the bar. Every claim the
-     §399 version made about the modules is made again of the MODULE step;
+     §400 version made about the modules is made again of the MODULE step;
      the client step is asserted against what the SERVER said (the stub's
      `clients` answer), never a list typed here (§94.8). */
-  check("no client mark on the bar (§400)", (await page.locator("nav.trail img").count()) === 0);
+  check("no client mark on the bar (§401)", (await page.locator("nav.trail img").count()) === 0);
   await page.locator("nav.trail .trmod > summary").click();
   await page.waitForTimeout(200);
   const items = await page.locator("nav.trail .trmod .menu button").allInnerTexts();
@@ -799,14 +799,14 @@ if (browser) {
     OTHERS.length > 0 && OTHERS.every((m, i) => (modItems[i] || "").startsWith(m.label)), items.map((t) => t.split("\n")[0]).join(", "));
   check("…each with the line the server gave it, never one worked out from the key",
     OTHERS.every((m, i) => (modItems[i] || "").includes(m.note)), modItems.map((t) => t.replace(/\n/g, " · ")).join(" | "));
-  check("…and NOT the module you are in — it is the step's own name (§400)",
+  check("…and NOT the module you are in — it is the step's own name (§401)",
     !items.some((t) => t.split("\n")[0] === MODULE_DEF[DEFAULT_MODULE].label), items.join(" | "));
   const tail = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.className === "trrule" ? "|" : e.textContent.trim()));
   check("…then a rule, then Client settings, last",
     tail.length >= 2 && tail[tail.length - 2] === "|" && tail[tail.length - 1] === "Client settings", JSON.stringify(tail));
   const box = await page.locator("nav.trail .trmod .menu").boundingBox();
   check("and the open menu is on the page", box && box.x >= 0 && box.y >= 0 && box.width > 200, JSON.stringify(box));
-  /* the client step is the server's list less the client you are on (§400) */
+  /* the client step is the server's list less the client you are on (§401) */
   await page.locator("nav.trail .trclient > summary").click();
   await page.waitForTimeout(200);
   const cl = await page.locator("nav.trail .trclient .menu button").allInnerTexts();
@@ -816,11 +816,11 @@ if (browser) {
   check("…and a way to all of them, so it is never a dead end (§61)", cl[cl.length - 1] === "All clients", cl.join(" | "));
   check("opening one menu shuts the other",
     (await page.locator("nav.trail details[open]").count()) === 1 && (await page.locator("nav.trail .trclient[open]").count()) === 1);
-  /* A PRESS ANYWHERE ELSE CLOSES IT (§400) — a real mouse press on the page,
+  /* A PRESS ANYWHERE ELSE CLOSES IT (§401) — a real mouse press on the page,
      never a programmatic close, or the listener is not what is measured. */
   await page.mouse.click(700, 420);
   await page.waitForTimeout(100);
-  check("a press outside the menu closes it (§400)", (await page.locator("nav.trail details[open]").count()) === 0);
+  check("a press outside the menu closes it (§401)", (await page.locator("nav.trail details[open]").count()) === 0);
   await page.locator("nav.trail .trclient > summary").click();
   await page.waitForTimeout(100);
   await page.keyboard.press("Escape");
@@ -838,7 +838,7 @@ if (browser) {
   const staff = await browser.newPage({ viewport: { width: 1400, height: 400 } });
   await staff.goto(base + "/staff/strategy/mobile");
   await staff.waitForTimeout(250);
-  check("a client's own person gets no trail — they do not travel between clients (§399)",
+  check("a client's own person gets no trail — they do not travel between clients (§400)",
     (await staff.locator("nav.trail").count()) === 0);
   check("no page error from any of it", errs.length === 0, errs.join(" | "));
   await browser.close();

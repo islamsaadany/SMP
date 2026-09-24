@@ -27,7 +27,7 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
-  /* THE CONSOLE OPENS ON MY WORK (§399), and the tab you are on is the
+  /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
      address's hash, so a reload keeps it and a link can name one
      ("Switch client…" from a client is /platform#clients). */
   var TABS_KNOWN = ["mywork", "clients", "consultants", "access", "memory", "frameworks"];
@@ -916,7 +916,7 @@
      after another is noise, and what a screen reader gets here is what it
      gets today: the page, and then the cards when they land. */
   function drawWaiting() {
-    /* Opening on another tab (§399), the waiting page is that tab's title
+    /* Opening on another tab (§400), the waiting page is that tab's title
        and nothing it would have to take back (§94.10). */
     if (TAB !== "clients") { title(TAB === "mywork" ? "My work" : ""); document.body.classList.add("ready"); return; }
     title("Clients");
@@ -938,7 +938,7 @@
     document.body.classList.add("ready");
   }
 
-  /* ── MY WORK (§399) ───────────────────────────────────────────────
+  /* ── MY WORK (§400) ───────────────────────────────────────────────
      Islam: "for the main console we can have the person tasks across the
      different clients outside on the main platform derived from the internal
      tracker of the different clients work." Every row is read from that

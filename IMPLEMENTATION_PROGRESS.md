@@ -7929,7 +7929,7 @@ rules 69/0, `test-my-reporting` 65/0, and on the stack production serves state
 notes 170/0, portfolio 121/0, upload 9/0, demo 7/0, standing 7/0, room 10/0,
 deploy 5/0.
 
-## §399 — moving between the console, a client and its modules (2026-09-23)
+## §400 — moving between the console, a client and its modules (2026-09-23)
 
 **Built on the branch, not merged.** Four things, from the before/after mockups
 Islam approved: a trail at the top for Forefront's own people (Forefront ›
@@ -7943,7 +7943,7 @@ thing added beyond the drawing: on Client settings the client menu also lists
 each module's settings, so the one-press way across is not lost. All checks
 green; nothing stored or migrated.
 
-## §400 — the trail's two menus (2026-09-24)
+## §401 — the trail's two menus (2026-09-24)
 
 **Built on the branch, not merged.** Four things you asked for on the trail at
 the top: an open menu now closes when you click anywhere else (or press
@@ -8103,7 +8103,7 @@ Nothing saved changes. Checked: a new check that clicks every pillar in three
 awkward states (it fails 18 ways on the old build), six neighbouring checks
 updated, the full sweep. Merged to `main` on Islam's word, after bringing in §391–§392.
 
-## §401 — one typeface, and one Viewing as (2026-09-24)
+## §402 — one typeface, and one Viewing as (2026-09-24)
 
 **Built, on the branch, not merged.** The font button is gone from the top bar
 and the whole platform is in Source Sans 3 for everybody; a choice somebody's
@@ -8114,7 +8114,7 @@ at, which is what the page's copy used to do. Checked: the two checks that
 covered these were rewritten and proved to fail when the old behaviour is put
 back; the whole-platform sweep is clean. Nothing stored changes.
 
-## §402 — Home says only where you are (2026-09-24)
+## §403 — Home says only where you are (2026-09-24)
 
 **Built, on the branch, not merged.** While Home is open, the tab row and the
 section row of the page behind it (for a function head: Strategy · Performance

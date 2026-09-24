@@ -733,7 +733,7 @@ var SYNC = (function () {
        only side that knows — and a client's own person never sees it, because
        for them there is nothing behind it (§32: a door to one place is not a
        choice, and a door to none is a dead end). */
-    /* ── THE WAY BACK IS THE TRAIL NOW (§399) ─────────────────────
+    /* ── THE WAY BACK IS THE TRAIL NOW (§400) ─────────────────────
        This drew a client-name pill reading "change" that went to the
        console. It is replaced by the trail route.js draws — "Forefront ›
        [client] ▾ › Strategy ▾" — for exactly the same people: those the

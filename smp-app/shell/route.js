@@ -156,7 +156,7 @@
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
-  /* ── THE TRAIL (§399) ─────────────────────────────────────────────
+  /* ── THE TRAIL (§400) ─────────────────────────────────────────────
      Islam, of moving between the console, a client and its modules: every
      way out was a different control in a different place — a client-name
      pill reading "change", a four-square mark with no word beside it, the
@@ -166,12 +166,12 @@
 
          Forefront  ›  Raya Trade ▾  ›  Strategy ▾
 
-     Each step is a place. Forefront is the console. Since §400 the client
+     Each step is a place. Forefront is the console. Since §401 the client
      opens a menu of the OTHER clients this person may open (and "All
      clients"); the module opens the other modules, a rule, and "Client
      settings"; on the client's own settings the third step reads "Client
      settings" and opens the same menu with each module's settings. No
-     client mark on the bar (§400).
+     client mark on the bar (§401).
 
      ONLY FOR SOMEBODY WITH A CONSOLE (`data-console`, written by sync.js
      off `person.cards`, which only the server can answer). A client's own
@@ -256,7 +256,7 @@
         if (href === location.pathname) return;
         location.assign(href);
       });
-      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§400, Islam: "when I click
+      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§401, Islam: "when I click
          outside them the menue should close"). `<details>` has no such
          behaviour of its own. On pointerdown, as the chat corner does
          (§100.4): a menu that lingers until the mouse comes up reads as
@@ -274,7 +274,7 @@
       });
     }
     var sep = '<span class="trsep" aria-hidden="true">›</span>';
-    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§400, Islam: "when I click on
+    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§401, Islam: "when I click on
        the name of the client drop down I should get the other clients"). The
        list is the server's (`clients`: visible AND openable, the cards' own
        two rules, §42), asked once per page. Until it answers the menu says
@@ -289,7 +289,7 @@
     clientItems.push({ rule: true });
     clientItems.push({ label: "All clients", go: "/platform#clients" });
     /* THE MODULE STEP LISTS THE OTHER MODULES, THEN THE CLIENT'S SETTINGS
-       (§400, his words: "the other modules and then the separator and the
+       (§401, his words: "the other modules and then the separator and the
        client settings"). On the client's own settings the step reads "Client
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
@@ -311,7 +311,7 @@
       sep + third;
     if (trailClients === null && !trailAsked) askClients();
   }
-  /* the clients this person may open, asked once per page (§400) */
+  /* the clients this person may open, asked once per page (§401) */
   var trailClients = null, trailAsked = false;
   function askClients() {
     trailAsked = true;

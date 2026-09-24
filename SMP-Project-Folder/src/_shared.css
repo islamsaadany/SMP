@@ -34,7 +34,7 @@
     /* The fallback stack, and what every embedded face falls back TO. Never
        read directly by a rule — rules read --sans. */
     --sys-sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
-    /* ONE FACE, EVERYWHERE (§401). Islam: *"remove the font button and keep
+    /* ONE FACE, EVERYWHERE (§402). Islam: *"remove the font button and keep
        the font source sans across the platform."* The system stack stays as
        what a face that fails to decode falls back to, never as a choice. */
     --sans:'Source Sans 3',var(--sys-sans);
@@ -69,7 +69,7 @@
     --shadow-accent:0 4px 6px -1px var(--accent-glow);
   }
 
-  /* THE FONT AXIS (§38.8, §157) IS GONE (§401): Source Sans 3 is --sans
+  /* THE FONT AXIS (§38.8, §157) IS GONE (§402): Source Sans 3 is --sans
      above, for everybody, and there is no switch to answer. */
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────

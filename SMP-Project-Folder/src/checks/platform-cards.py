@@ -174,7 +174,7 @@ def run():
         # ══ 1 · three clients and the demo ══════════════════════════════
         print("\n1 · the clients, and the worked example beneath them")
         SCENE["cards"] = CLIENTS + [DEMO]
-        # §399: the console opens on My work now, and a same-page hash change is
+        # §400: the console opens on My work now, and a same-page hash change is
         # not a navigation — leave the page first so the goto really reloads.
         pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
         pg.wait_for_selector(".ccard", timeout=9000)
@@ -254,7 +254,7 @@ def run():
         # ══ 3 · the state a real deployment cannot show (§255) ══════════
         print("\n3 · the worked example seeded, and no clients yet")
         SCENE["cards"] = [DEMO]
-        # §399: the console opens on My work now, and a same-page hash change is
+        # §400: the console opens on My work now, and a same-page hash change is
         # not a navigation — leave the page first so the goto really reloads.
         pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
         pg.wait_for_selector(".ccard", timeout=9000)
@@ -300,7 +300,7 @@ def run():
         SCENE["cards"] = CLIENTS + [DEMO]
         for theme in ("light", "dark"):
             pg.emulate_media(color_scheme=theme)
-            # §399: the console opens on My work now, and a same-page hash change is
+            # §400: the console opens on My work now, and a same-page hash change is
             # not a navigation — leave the page first so the goto really reloads.
             pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
             pg.wait_for_selector(".apart .akey", timeout=9000)
@@ -329,7 +329,7 @@ def run():
         # (§113.8 — its first run did exactly that).
         SCENE["archived"] = [{"key": "old-co", "name": "Old Co", "industry": None, "canConfig": True,
                               "mark": None, "at": "2026-08-01T00:00:00Z", "by": "Islam Saadany"}]
-        # §399: the console opens on My work now, and a same-page hash change is
+        # §400: the console opens on My work now, and a same-page hash change is
         # not a navigation — leave the page first so the goto really reloads.
         pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
         pg.wait_for_selector("[data-grid='archived'] .ccard", timeout=9000)

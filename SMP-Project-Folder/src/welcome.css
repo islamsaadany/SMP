@@ -7,7 +7,7 @@
 
    LAYERING: above the chat dock (45) — its row on this screen IS the door —
    and below the tour (70), which the intro-round card hands the screen to. */
-/* HOME IS A PAGE INSIDE THE CHROME (§399), not a screen over it: it starts
+/* HOME IS A PAGE INSIDE THE CHROME (§400), not a screen over it: it starts
    under the sticky chrome, so the navigation above stays on screen and is
    the way on — and it sits BELOW the chrome's own layer (9), or a menu
    opened from the trail would drop behind it. */

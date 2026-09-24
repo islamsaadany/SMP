@@ -110,7 +110,7 @@ var THEME = (function () {
     try { localStorage.removeItem(PKEY); } catch (e) {}
   }
 
-  /* THE TYPEFACE SWITCH IS GONE (§401): Source Sans 3 is the one face, set in
+  /* THE TYPEFACE SWITCH IS GONE (§402): Source Sans 3 is the one face, set in
      the stylesheet for everybody. A choice left in a browser from before would
      be an attribute nothing answers, so it is cleared on the way past, as the
      palette's was (§41.6). */

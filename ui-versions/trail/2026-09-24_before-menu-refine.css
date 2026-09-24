@@ -587,7 +587,7 @@
      is a server to say which ones a client has. The offline copy (§306) has
      no modules, so a switcher baked into the frozen shell would be a control
      that could never open anything (§61). */
-  /* ══ THE TRAIL (§399) ═══════════════════════════════════════════════
+  /* ══ THE TRAIL (§400) ═══════════════════════════════════════════════
      Replaces the four-square switcher (deleted with its markup, §24) and the
      client-name pill, for Forefront's own people only — `data-console`,
      written by sync.js. One line: Forefront › [mark] client ▾ › module ▾.
@@ -1321,7 +1321,7 @@
   .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
-  /* AND GOLD WHILE YOU ARE HOME (§399): Home is a page now, and on the
+  /* AND GOLD WHILE YOU ARE HOME (§400): Home is a page now, and on the
      destination row gold is where you are (§197.2) — so the house wears it
      while Home is open, whether or not anything is waiting. */
   html[data-home-open] .units .navmenu-btn.homemark{ background:var(--gold);

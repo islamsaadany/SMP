@@ -116,7 +116,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
 
   if (action === "me") return ok({ account: { email: account.email, name: account.name, isAdmin: !!account.is_admin }, access: world.access, mine: FF.myClientKeys(world) });
 
-  /* THE TRAIL'S CLIENT MENU (§400): the clients this person may OPEN, name
+  /* THE TRAIL'S CLIENT MENU (§401): the clients this person may OPEN, name
      and address and nothing else. Its own action rather than "cards", which
      reads every client's facts and tracker tally — a menu of names does not
      cost a walk of every tenant. The same two rules the cards ask
@@ -133,7 +133,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants ORDER BY kind, name")).rows;
     const shown: ClientRow[] = FF.visibleClients(world, account, all);
     const cards = [];
-    /* the Tracker row's mark is YOUR open actions there (§399) — read once
+    /* the Tracker row's mark is YOUR open actions there (§400) — read once
        for every client through the same reader My work uses */
     const work = await myWork(shown, world.mine, account.email);
     for (const row of shown) {
@@ -171,7 +171,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return ok({ cards, archived, canAdd: FF.mayCreateClient(world, account), canConsultants: FF.mayReadConsultants(world, account), canAccess: FF.mayEditAccess(world, account) });
   }
 
-  /* ── MY WORK (§399): the console's first tab ──────────────────────
+  /* ── MY WORK (§400): the console's first tab ──────────────────────
      Your own open Tracker actions across every client you may see. An
      admin may look at a colleague's (`who`, an office address) — the list
      is then read as THEIR world, so it can never show a client that person

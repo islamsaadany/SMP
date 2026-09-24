@@ -51943,7 +51943,7 @@ var WELCOME = (function(){
 
     box = document.createElement("div");
     box.className = "welcomeover";
-    /* A page, not a dialog (§399): nothing is behind it but the page it
+    /* A page, not a dialog (§400): nothing is behind it but the page it
        stands in for, and the navigation above it is live. */
     box.setAttribute("role", "region");
     box.setAttribute("aria-label", "Home");
@@ -52001,7 +52001,7 @@ var WELCOME = (function(){
             "</div>" +
           "</div>" +
         "</div>" +
-        /* NO WAY OUT OF ITS OWN (§399). Home is a page inside the chrome
+        /* NO WAY OUT OF ITS OWN (§400). Home is a page inside the chrome
            now, not a screen over it, so the way on is the navigation already
            above it — every destination, tab and section is on screen and
            pressing one leaves Home. The Continue bar (§159) was the only
@@ -52104,17 +52104,17 @@ var WELCOME = (function(){
 
 
     document.body.appendChild(box);
-    /* THE HOUSE IS LIT WHILE YOU ARE HOME (§399) — the destination row's
+    /* THE HOUSE IS LIT WHILE YOU ARE HOME (§400) — the destination row's
        own meaning of gold (§197.2): this is where you are. */
     document.documentElement.setAttribute("data-home-open", "1");
   }
 
-  /* ── VIEWING AS LIVES IN THE BAR, AND ONLY THERE (§401) ───────────────
+  /* ── VIEWING AS LIVES IN THE BAR, AND ONLY THERE (§402) ───────────────
      Islam: *"in the home page there is a viewing as while we already have a
      viewing as at the top, let's remove the page redundant one and keep the
      master one at the top."* §179 drew a second switcher above the greeting
      because the screen then COVERED the viewport and the bar's control was
-     behind it. §399 put Home INSIDE the chrome, so the bar's switcher is on
+     behind it. §400 put Home INSIDE the chrome, so the bar's switcher is on
      screen the whole time and the second copy says one thing twice (§87).
      Deleted, not hidden (§24).
 
@@ -52146,7 +52146,7 @@ var WELCOME = (function(){
     document.documentElement.removeAttribute("data-home-open");
   }
 
-  /* ── LEAVING HOME IS PRESSING WHERE YOU WANT TO GO (§399) ──────────────
+  /* ── LEAVING HOME IS PRESSING WHERE YOU WANT TO GO (§400) ──────────────
      Home sits under the chrome, so a press on the destination row, the tabs,
      the sections or the trail is somebody going somewhere — the page under
      Home is repainted by that same press, and Home steps aside for it.
@@ -56113,7 +56113,7 @@ var SYNC = (function () {
        only side that knows — and a client's own person never sees it, because
        for them there is nothing behind it (§32: a door to one place is not a
        choice, and a door to none is a dead end). */
-    /* ── THE WAY BACK IS THE TRAIL NOW (§399) ─────────────────────
+    /* ── THE WAY BACK IS THE TRAIL NOW (§400) ─────────────────────
        This drew a client-name pill reading "change" that went to the
        console. It is replaced by the trail route.js draws — "Forefront ›
        [client] ▾ › Strategy ▾" — for exactly the same people: those the
@@ -59446,7 +59446,7 @@ var SYNC = (function () {
                                   : "Strategy Management Platform";
       var org = document.getElementById("orgname");
       var back = document.getElementById("clientback");
-      /* ── A CLIENT'S OWN PERSON: THEIR COMPANY, NOT OURS (§399) ─────────
+      /* ── A CLIENT'S OWN PERSON: THEIR COMPANY, NOT OURS (§400) ─────────
          Islam: "for the client user he doesn't need the rail at the top with
          raya trade and strategy as he doesn't really navigate." They get no
          trail and no switcher, so the line says whose platform this is: the
@@ -68010,7 +68010,7 @@ var SYNC = (function () {
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
-  /* ── THE TRAIL (§399) ─────────────────────────────────────────────
+  /* ── THE TRAIL (§400) ─────────────────────────────────────────────
      Islam, of moving between the console, a client and its modules: every
      way out was a different control in a different place — a client-name
      pill reading "change", a four-square mark with no word beside it, the
@@ -68020,12 +68020,12 @@ var SYNC = (function () {
 
          Forefront  ›  Raya Trade ▾  ›  Strategy ▾
 
-     Each step is a place. Forefront is the console. Since §400 the client
+     Each step is a place. Forefront is the console. Since §401 the client
      opens a menu of the OTHER clients this person may open (and "All
      clients"); the module opens the other modules, a rule, and "Client
      settings"; on the client's own settings the third step reads "Client
      settings" and opens the same menu with each module's settings. No
-     client mark on the bar (§400).
+     client mark on the bar (§401).
 
      ONLY FOR SOMEBODY WITH A CONSOLE (`data-console`, written by sync.js
      off `person.cards`, which only the server can answer). A client's own
@@ -68110,7 +68110,7 @@ var SYNC = (function () {
         if (href === location.pathname) return;
         location.assign(href);
       });
-      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§400, Islam: "when I click
+      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§401, Islam: "when I click
          outside them the menue should close"). `<details>` has no such
          behaviour of its own. On pointerdown, as the chat corner does
          (§100.4): a menu that lingers until the mouse comes up reads as
@@ -68128,7 +68128,7 @@ var SYNC = (function () {
       });
     }
     var sep = '<span class="trsep" aria-hidden="true">›</span>';
-    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§400, Islam: "when I click on
+    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§401, Islam: "when I click on
        the name of the client drop down I should get the other clients"). The
        list is the server's (`clients`: visible AND openable, the cards' own
        two rules, §42), asked once per page. Until it answers the menu says
@@ -68143,7 +68143,7 @@ var SYNC = (function () {
     clientItems.push({ rule: true });
     clientItems.push({ label: "All clients", go: "/platform#clients" });
     /* THE MODULE STEP LISTS THE OTHER MODULES, THEN THE CLIENT'S SETTINGS
-       (§400, his words: "the other modules and then the separator and the
+       (§401, his words: "the other modules and then the separator and the
        client settings"). On the client's own settings the step reads "Client
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
@@ -68165,7 +68165,7 @@ var SYNC = (function () {
       sep + third;
     if (trailClients === null && !trailAsked) askClients();
   }
-  /* the clients this person may open, asked once per page (§400) */
+  /* the clients this person may open, asked once per page (§401) */
   var trailClients = null, trailAsked = false;
   function askClients() {
     trailAsked = true;

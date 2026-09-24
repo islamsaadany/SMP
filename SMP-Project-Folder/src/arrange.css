@@ -587,10 +587,10 @@
      is a server to say which ones a client has. The offline copy (§306) has
      no modules, so a switcher baked into the frozen shell would be a control
      that could never open anything (§61). */
-  /* ══ THE TRAIL (§399) ═══════════════════════════════════════════════
+  /* ══ THE TRAIL (§400) ═══════════════════════════════════════════════
      Replaces the four-square switcher (deleted with its markup, §24) and the
      client-name pill, for Forefront's own people only — `data-console`,
-     written by sync.js. One line: Forefront › client ▾ › module ▾ (no client mark since §400).
+     written by sync.js. One line: Forefront › client ▾ › module ▾ (no client mark since §401).
      The menus are `details.dlmenu > .menu`'s own, unchanged (§53.5); what is
      here is the line. The step you are ON is the ink colour and weight, the
      steps above it the quieter ink, which is how a trail reads everywhere. */
@@ -610,7 +610,7 @@
   nav.trail details.trstep > summary > svg { width:10px; height:10px; flex:none; color:var(--ink-3); }
   nav.trail .menu button[aria-current="true"] { font-weight:700; }
   /* a line in a menu that is not a door ("Reading your clients…", "No other
-     clients"), §400 — said, never a button that goes nowhere (§94.15) */
+     clients"), §401 — said, never a button that goes nowhere (§94.15) */
   nav.trail .trquiet { padding:9px 14px; font-size:13.5px; color:var(--ink-2); font-style:italic; }
   nav.trail .trrule { height:1px; background:var(--line); margin:4px 0; }
   /* THE TRAIL IS THE BRAND LINE FOR FOREFRONT'S PEOPLE, so the product's own
@@ -1322,14 +1322,14 @@
   .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
-  /* AND GOLD WHILE YOU ARE HOME (§399): Home is a page now, and on the
+  /* AND GOLD WHILE YOU ARE HOME (§400): Home is a page now, and on the
      destination row gold is where you are (§197.2) — so the house wears it
      while Home is open, whether or not anything is waiting. */
   html[data-home-open] .units .navmenu-btn.homemark{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); }
-  /* AND NOTHING ELSE SAYS WHERE YOU ARE WHILE YOU ARE HOME (§402). Islam:
+  /* AND NOTHING ELSE SAYS WHERE YOU ARE WHILE YOU ARE HOME (§403). Islam:
      *"why on the welcome page I have strategy and overview & projects?"* —
-     Home sits under the chrome (§399), so the tab row and the section row
+     Home sits under the chrome (§400), so the tab row and the section row
      kept describing the page BEHIND it, and the destination row kept its
      gold underline on that page's name: two answers to "where am I" beside
      the lit house. Both rows are hidden and the underline dropped while Home

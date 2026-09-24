@@ -75,7 +75,7 @@ export function shellDocument(tenantName: string, module: string | null = null, 
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
   const brk = process.env.SMP_BREAK || "";
-  /* `trail-for-staff` is route.js's, not this file's (§399): who is drawn
+  /* `trail-for-staff` is route.js's, not this file's (§400): who is drawn
      the trail is that file's rule, so its break has to reach it. */
   const routeBrk = (brk === "no-route" || brk === "trail-for-staff") ? brk : "";
   return "<!doctype html>\n<html lang='en'" + (routeBrk ? " data-break='" + routeBrk + "'" : "") +

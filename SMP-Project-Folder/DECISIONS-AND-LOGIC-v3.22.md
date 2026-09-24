@@ -57188,7 +57188,7 @@ the Business units grouped into Divisions?" — a heading dropped into prose.
   the check rather than read back from the product. Both set-up checks
   green. Screen only; nothing stored, nothing migrated.
 
-## §399 — moving between the console, a client and its modules (2026-09-23)
+## §400 — moving between the console, a client and its modules (2026-09-23)
 
 Islam: *"review the different pages and suggest different flow of going forward
 and back … I don't like the overview page of the strategy because it has no
@@ -57242,16 +57242,16 @@ he doesn't need the rail at the top"* — then *"proceed"*.
   forced sign-out is owed (spec 029). The built file's bytes changed, so
   `sw.js` is bumped (§91).
 
-## §400 — the trail's two menus (2026-09-24)
+## §401 — the trail's two menus (2026-09-24)
 
-Islam, using §399's trail: *"when I click outside them the menue should close
+Islam, using §400's trail: *"when I click outside them the menue should close
 … te logo of the client shouldn't appear in the top navigation bar … when I
 click on the name of the client drop down I should get the other lcients …
 when I click on the module name like strategy I should get the other modules
 and then the separator and the client settings."* Four instructions, taken as
 given; screen and menu contents only, no stored state.
 
-**THE TWO MENUS SWAP JOBS.** §399 put the modules under the CLIENT and Home and
+**THE TWO MENUS SWAP JOBS.** §400 put the modules under the CLIENT and Home and
 the module's settings under the MODULE. The client step now lists the OTHER
 clients this person may open, then a rule, then *All clients* (the console's
 grid); the module step lists the OTHER modules, a rule, then *Client settings*.
@@ -57259,7 +57259,7 @@ The module you are in is the step's own name, so it is not listed again (§87).
 **On the client's settings** the third step reads *Client settings* (with
 `aria-current`) and opens the same menu, where each module goes to THAT
 module's settings — the next place from a settings page, and §362.1's one
-press kept. *Home* left the menu: the house mark is Home (§399), and two
+press kept. *Home* left the menu: the house mark is Home (§400), and two
 controls for one act is one too many (§94.15); the dead `go === "home"` branch
 is deleted with it (§24).
 
@@ -57280,7 +57280,7 @@ Escape shuts either. Wired once, beside the trail's one click listener, so a
 repaint of the trail cannot multiply it (§24, §47.2).
 
 **NO CLIENT MARK ON THE BAR.** The `.trmark` image and its rule are deleted; the
-client is named once, in words. §399's assertion *"one that has uploaded a mark
+client is named once, in words. §400's assertion *"one that has uploaded a mark
 wears it on its own bar"* is REVERSED and REWRITTEN, never deleted (§218): the
 mark is MADE and asserted absent, with the client's name asserted present
 beside it (§113.8). The client platform's own bar for a client's staff is
@@ -57303,7 +57303,7 @@ own person is refused it. `setup-per-module.py` served half green after its
 file's bytes changed, `arrange.css`).
 
 
-## §401 — one typeface, and one Viewing as (2026-09-24)
+## §402 — one typeface, and one Viewing as (2026-09-24)
 
 Islam: *"1. remove the font button and keep the font source sans across the
 platform 2. in the home page there is a viewing as while we already have a
@@ -57326,7 +57326,7 @@ branding `font` is read by nothing.
 
 **THE HOME PAGE'S VIEWING AS GOES; THE BAR'S IS THE ONE.** §179 drew a second
 switcher above the greeting because the welcome screen then **covered** the
-viewport and the bar's control was behind it. §399 put Home **inside** the
+viewport and the bar's control was behind it. §400 put Home **inside** the
 chrome, so the bar's switcher is on screen the whole time and the page copy
 said one thing twice (§87). `viewerBar()`, its CSS and the now-dead
 `SEARCHSEL.wire()` on Home are deleted. **What the copy did is kept**: a
@@ -57349,10 +57349,10 @@ copies regenerated; `sw.js` SHELL bumped (the built file's bytes changed).
 Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
 The served app's DB-backed checks were not run (no database in this session).
 
-## §402 — Home says only where you are (2026-09-24)
+## §403 — Home says only where you are (2026-09-24)
 
 Islam: *"why on the welcome page I have strategy and overview & projects?"*
-§399 put Home INSIDE the chrome, beneath it, and nothing told the chrome: the
+§400 put Home INSIDE the chrome, beneath it, and nothing told the chrome: the
 tab row and section row went on describing the page behind Home, and the
 destination row kept its gold underline on that page's name — two answers to
 *where am I* beside the lit house (§87's twins, in navigation). Reproduced as
@@ -57361,13 +57361,13 @@ was proposed; drawn before and after from the running platform and signed off
 (`design-mockups/home-rows/`), with Islam adding the underline: *"yes and
 remove the finance underline too."*
 
-Four rules in `arrange.css`, keyed on the `data-home-open` attribute §399
+Four rules in `arrange.css`, keyed on the `data-home-open` attribute §400
 already writes: `#tabrow` and `#secrow` `display:none` (never opacity — a
 hidden row must not take clicks, §3.2), and the lit place's underline made
 transparent, its weight and colour kept so no name on the row moves (§41.8).
 The places stay pressable, because pressing one is how you leave Home (§61).
 
-`welcome.py` §3 asserted a TAB was reachable under Home — true of §399 and
+`welcome.py` §3 asserted a TAB was reachable under Home — true of §400 and
 false by this decision — so it is REWRITTEN, never loosened (§218): both rows
 asserted not drawn, the underline asserted transparent, and the PLACE asserted
 reachable as the way out; two later "leave Home" presses re-pointed from the

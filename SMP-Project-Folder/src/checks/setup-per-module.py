@@ -504,10 +504,10 @@ with sync_playwright() as p:
                    ".filter(function(e){return e.checkVisibility&&e.checkVisibility()}).length", 1) == 0,
            ev(pg2, "()=>Array.from(document.querySelectorAll('[data-md=\"setup\"]'))"
                    ".filter(function(e){return e.checkVisibility&&e.checkVisibility()}).length", 1))
-        # REWRITTEN AGAIN (§399, §218): Save & close is gone — the trail took
+        # REWRITTEN AGAIN (§400, §218): Save & close is gone — the trail took
         # its place. The way out is the trail's own Forefront step, and the
         # trail says where you are: its last step reads Client settings (a menu
-        # since §400, its summary carrying aria-current).
+        # since §401, its summary carrying aria-current).
         way = ev(pg2, "()=>{var a=document.querySelector('a.trff');var h=document.querySelector('.trmod > summary[aria-current]');"
                       "return {href:a&&a.checkVisibility()?a.getAttribute('href'):'', here:h?h.textContent.trim():''};}", {})
         ck("…and the way out is the trail's Forefront step, with the trail naming Client settings",

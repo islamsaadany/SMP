@@ -1,11 +1,11 @@
-"""ONE FACE, AND NO SWITCH (§401; was TWO FACES, §157).
+"""ONE FACE, AND NO SWITCH (§402; was TWO FACES, §157).
 
 Islam, closing §38.7's open comparison: *"let's make the 2 fonts available are
 the system font and the source san3."* Four faces had ridden in every build so
 they could be judged in the real product; three now leave the file.
 
 WHAT THIS ASSERTS — the promise, not the implementation:
-  1. There is no switch (§401: "remove the font button and keep the font
+  1. There is no switch (§402: "remove the font button and keep the font
      source sans across the platform").
   2. Source Sans 3 is what the page renders in with nobody having chosen,
      measured by the width of a real string, since a font that failed to
@@ -67,7 +67,7 @@ with sync_playwright() as p:
     pg.goto(url)
     pg.wait_for_timeout(900)
 
-    # ── ONE FACE, NO SWITCH (§401) ─────────────────────────────────────
+    # ── ONE FACE, NO SWITCH (§402) ─────────────────────────────────────
     # Islam: "remove the font button and keep the font source sans across the
     # platform." REWRITTEN, NEVER LOOSENED (§218): the switch assertions of
     # §157 invert into its absence, and the face is asserted as what the page

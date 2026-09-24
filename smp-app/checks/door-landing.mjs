@@ -237,8 +237,8 @@ await section("3 · sign in and land", async () => {
   check(alerts.join("|") === wantAlerts.join("|"), "…with the same alerts under them", alerts.join("|"));
   const pages = await text(page, ".wpages a");
   check(pages.length === want.pages.length && want.pages.every((p, i) => pages[i].startsWith(p.label)), "Your pages are the reader's pages", pages.join(" | "));
-  /* REWRITTEN, NEVER LOOSENED (§218, §399). The way out was a Continue bar
-     naming where it goes (§202); §399 made Home a page inside the chrome
+  /* REWRITTEN, NEVER LOOSENED (§218, §400). The way out was a Continue bar
+     naming where it goes (§202); §400 made Home a page inside the chrome
      whose way out is the navigation itself, so there is no Continue to name
      anything. What the line was FOR — that the screen says it is Home and
      does not trap anybody — is asserted as the house lit while Home is open
@@ -246,7 +246,7 @@ await section("3 · sign in and land", async () => {
   check((await page.locator(".welcomeover .wexit").count()) === 0 &&
         (await page.evaluate(() => document.documentElement.getAttribute("data-home-open"))) === "1" &&
         (await page.locator("nav.units").isVisible()),
-    "Home has no Continue: the house is lit and the navigation beside it is the way on (§399)");
+    "Home has no Continue: the house is lit and the navigation beside it is the way on (§400)");
   check((await page.locator(".wcycle").count()) === (want.review.open && !want.cycle ? 1 : 0), "the cycle chip is drawn exactly when the block is not (§200)");
   /* the overlay always builds the card and HIDES it for somebody no story
      fits, so what is asserted is the visible card, folded (§202) */
@@ -339,11 +339,11 @@ await section("5 · the office", async () => {
      round trip won — it is the REAL card that is waited on now
      (`[data-client]`, the mark the skeleton does not carry), which is what
      `.ccard` meant when the line was written. */
-  /* §399: THE CONSOLE OPENS ON *MY WORK*; the cards are its second tab.
+  /* §400: THE CONSOLE OPENS ON *MY WORK*; the cards are its second tab.
      REWRITTEN, NEVER LOOSENED (§218): the landing is asserted, and the cards
      are still asserted, one press away. */
   await page.waitForSelector("#nav button", { timeout: 15000 }).catch(() => {});
-  check((await text(page, "#nav button"))[0] === "My work", "…which opens on My work (§399)", (await text(page, "#nav button")).join("|"));
+  check((await text(page, "#nav button"))[0] === "My work", "…which opens on My work (§400)", (await text(page, "#nav button")).join("|"));
   await page.locator("#nav button", { hasText: "Clients" }).click();
   await page.waitForSelector(".ccard[data-client]", { timeout: 15000 }).catch(() => {});
   check((await text(page, ".ccard[data-client] h2")).includes("Raya Trade"), "…and one press away lists the clients they may open");
@@ -353,7 +353,7 @@ await section("5 · the office", async () => {
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + officeWant.name, "the office's welcome on a client is theirs", await page.locator(".welcomeover h2").textContent().catch(() => ""));
   const trailText = ((await page.locator("nav.trail").textContent().catch(() => "")) || "").replace(/\s+/g, " ");
   check((await page.locator(".welcomeover .wexit").count()) === 0 && /Forefront/.test(trailText) && /Raya Trade/.test(trailText),
-    "…with no Continue, and the office's trail naming Forefront and the client above it (§399)", trailText);
+    "…with no Continue, and the office's trail naming Forefront and the client above it (§400)", trailText);
   check(((await text(page, ".wpages a"))[0] || "").startsWith("Setup"), "…with Setup first among their pages");
   const r404 = await page.goto(BASE + "/no-such-client", { waitUntil: "networkidle" });
   const s1 = r404.status(), t1 = (await page.locator(".holder h1").textContent()).trim();

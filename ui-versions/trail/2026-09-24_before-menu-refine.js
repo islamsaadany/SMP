@@ -156,7 +156,7 @@
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
-  /* ── THE TRAIL (§399) ─────────────────────────────────────────────
+  /* ── THE TRAIL (§400) ─────────────────────────────────────────────
      Islam, of moving between the console, a client and its modules: every
      way out was a different control in a different place — a client-name
      pill reading "change", a four-square mark with no word beside it, the

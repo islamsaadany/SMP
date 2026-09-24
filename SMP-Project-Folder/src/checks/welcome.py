@@ -298,10 +298,10 @@ def main():
            pg.locator(".welcomeover").count() == 0)
         ctx.close()
 
-        print("§3 Home sits under the chrome, and the navigation is the way on (§399)")
+        print("§3 Home sits under the chrome, and the navigation is the way on (§400)")
         # REWRITTEN, NEVER LOOSENED (§218). This section asserted the Continue
         # bar — that it named the landing place, spanned both columns and
-        # stepped aside onto it. §399 DELETED that bar at Islam's word: Home
+        # stepped aside onto it. §400 DELETED that bar at Islam's word: Home
         # is a page inside the chrome whose way out is pressing where you want
         # to go. What the section was FOR survives whole: the screen does not
         # trap anybody, it says it is Home, and leaving it lands on the place
@@ -309,11 +309,11 @@ def main():
         # as a class (§94.8) — an overlay covering the chrome satisfies every
         # "the tabs exist" assertion and takes every press.
         ctx, pg = fresh(browser, port)
-        ck("there is no Continue bar any more (§399)",
+        ck("there is no Continue bar any more (§400)",
            pg.locator("[data-wcontinue], .welcomeover .wexit").count() == 0)
         ck("…and the house says Home is open",
            pg.evaluate("document.documentElement.getAttribute('data-home-open')") == "1")
-        # §402 REWROTE the reachable half: the tab row and the section row
+        # §403 REWROTE the reachable half: the tab row and the section row
         # describe the page BEHIND Home, so while Home is open they are not
         # drawn and the lit place loses its underline — only the house says
         # where you are. The way out is the PLACE on the destination row,
@@ -329,9 +329,9 @@ def main():
                   under:getComputedStyle(t).borderBottomColor,
                   placeReached: !!(hit && (hit===t || t.contains(hit)))};})()""")
         ck("Home starts under the chrome rather than over it", geo and geo["top"] >= geo["chrome"] - 1, geo)
-        ck("…the page's tab row and section row are not drawn under it (§402)",
+        ck("…the page's tab row and section row are not drawn under it (§403)",
            geo and geo["tabs"] == 0 and geo["secs"] == 0, geo)
-        ck("…the place carries no gold underline while Home is open (§402)",
+        ck("…the place carries no gold underline while Home is open (§403)",
            geo and geo["under"] in ("rgba(0, 0, 0, 0)", "transparent"), geo)
         ck("…and the place is still reachable, which is the way out", geo and geo["placeReached"], geo)
         pg.locator('.units button[aria-selected="true"][data-u]').first.click()
@@ -414,23 +414,23 @@ def main():
            pg.inner_text(".wacts")[:200])
         ck("…and no action row wears the fill",
            pg.locator(".welcomeover .wcta").count() == 0)
-        # §159's loud Continue went with the bar (§399): with nothing waiting
+        # §159's loud Continue went with the bar (§400): with nothing waiting
         # the navigation is the way on, and the screen promotes nothing to a
         # fill. REWRITTEN, NEVER LOOSENED (§218) into the absence that is now
         # the decision.
-        ck("…and there is no Continue to promote (§399)",
+        ck("…and there is no Continue to promote (§400)",
            pg.locator("[data-wcontinue], .welcomeover .wloud").count() == 0)
         ctx.close()
 
-        # ── 8 · VIEWING AS IS THE BAR'S, AND ONLY THE BAR'S (§401) ─────────
+        # ── 8 · VIEWING AS IS THE BAR'S, AND ONLY THE BAR'S (§402) ─────────
         # Islam: "in the home page there is a viewing as while we already have
         # a viewing as at the top, let's remove the page redundant one and keep
         # the master one at the top." REWRITTEN, NEVER LOOSENED (§218): §179's
         # second switcher existed because the screen then covered the bar;
-        # §399 put Home inside the chrome, so the bar's is on screen. What the
+        # §400 put Home inside the chrome, so the bar's is on screen. What the
         # page's copy DID survives and is asserted: switching from the bar
         # redraws Home for the person now being looked at.
-        print("§8 viewing as, from the bar (§401)")
+        print("§8 viewing as, from the bar (§402)")
         PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
         STATE = BASE
         CHATANS = {"unread": 0, "queue": None}
@@ -517,7 +517,7 @@ def main():
         # run — and walking it is the honest reproduction anyway.
         pg.goto("http://127.0.0.1:%d/raya-trade" % port)
         pg.wait_for_selector(".welcomeover", timeout=15000)
-        # Leaving Home is pressing the place (§402: the tab row is not drawn
+        # Leaving Home is pressing the place (§403: the tab row is not drawn
         # under Home, so it cannot be the way out).
         pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
@@ -549,7 +549,7 @@ def main():
         PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
         STATE = BASE
         ctx, pg = fresh(browser, port)
-        # Leaving Home is pressing the place (§402: the tab row is not drawn
+        # Leaving Home is pressing the place (§403: the tab row is not drawn
         # under Home, so it cannot be the way out).
         pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)

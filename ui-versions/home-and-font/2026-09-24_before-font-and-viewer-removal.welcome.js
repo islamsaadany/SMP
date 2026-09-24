@@ -474,7 +474,7 @@ var WELCOME = (function(){
 
     box = document.createElement("div");
     box.className = "welcomeover";
-    /* A page, not a dialog (§399): nothing is behind it but the page it
+    /* A page, not a dialog (§400): nothing is behind it but the page it
        stands in for, and the navigation above it is live. */
     box.setAttribute("role", "region");
     box.setAttribute("aria-label", "Home");
@@ -532,7 +532,7 @@ var WELCOME = (function(){
             "</div>" +
           "</div>" +
         "</div>" +
-        /* NO WAY OUT OF ITS OWN (§399). Home is a page inside the chrome
+        /* NO WAY OUT OF ITS OWN (§400). Home is a page inside the chrome
            now, not a screen over it, so the way on is the navigation already
            above it — every destination, tab and section is on screen and
            pressing one leaves Home. The Continue bar (§159) was the only
@@ -636,7 +636,7 @@ var WELCOME = (function(){
 
     viewerBar(box);
     document.body.appendChild(box);
-    /* THE HOUSE IS LIT WHILE YOU ARE HOME (§399) — the destination row's
+    /* THE HOUSE IS LIT WHILE YOU ARE HOME (§400) — the destination row's
        own meaning of gold (§197.2): this is where you are. */
     document.documentElement.setAttribute("data-home-open", "1");
     /* AFTER the box is in the document, or there is nothing to enhance: the
@@ -724,7 +724,7 @@ var WELCOME = (function(){
     document.documentElement.removeAttribute("data-home-open");
   }
 
-  /* ── LEAVING HOME IS PRESSING WHERE YOU WANT TO GO (§399) ──────────────
+  /* ── LEAVING HOME IS PRESSING WHERE YOU WANT TO GO (§400) ──────────────
      Home sits under the chrome, so a press on the destination row, the tabs,
      the sections or the trail is somebody going somewhere — the page under
      Home is repainted by that same press, and Home steps aside for it.

@@ -522,7 +522,7 @@
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   /* The main tab row, Reporting's orange fill included, lives in
-     arrange.css with §406. */
+     arrange.css with §409. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -803,7 +803,7 @@ html[data-client-settings] .viewer { display:none; }
              flex-shrink:0; align-self:center; display:block }
 
   /* `.primary` on a tab is a MARKER only (the landing tab, read by the
-     welcome screen); §406 took its colour and weight away. */
+     welcome screen); §409 took its colour and weight away. */
   /* ── THE DOT MEANS SOMETHING NOW (§69.9) ─────────────────────────
      It used to be `.tabs button.primary::before` — painted on whichever tab is
      the landing page, on every destination, always. So it said "this is the
@@ -5506,7 +5506,7 @@ span.stdot { cursor:default; }
               flex-shrink:0; }
   .themesvg { width:12px; height:12px; display:block; }
 
-  /* ── THE WHITE TOP BAR, ON THE PLATFORM'S OWN SCALE (§407) ──────────────
+  /* ── THE WHITE TOP BAR, ON THE PLATFORM'S OWN SCALE (§410) ──────────────
      Islam, of the plan-page restyle: *"can you suggest a neat design for the
      top bar white one as well"*, then of the mockup, *"drop the system button
      and build both"*. The bar was 27px with the text touching both edges and
@@ -5552,7 +5552,7 @@ span.stdot { cursor:default; }
   .themebtn { width:26px; height:26px; padding:0; }
   .themesvg { width:14px; height:14px; }
 
-/* ── §407, THE PLAN PAGE: THE RAIL AS CARDS, THE BAND WITHOUT ITS EDGE ──────
+/* ── §410, THE PLAN PAGE: THE RAIL AS CARDS, THE BAND WITHOUT ITS EDGE ──────
    Islam, from the signed-off mockup (design-mockups/plan-page-redesign/,
    round 12): the rail "looks well with the cards under each other … we just
    need to keep them the same size and the rail in general to be soft cornered
@@ -5596,7 +5596,7 @@ span.stdot { cursor:default; }
 .pband.planband { box-shadow:none; }
 .pane > .pband.planband { box-shadow:0 1px 0 var(--line); }
 .pband.planband .pill.kind { margin-left:auto; background:var(--surface); flex:none; }
-/* THE COUNT BESIDE THE HEADING (§407, replacing the grey clause, 1b-ii), and
+/* THE COUNT BESIDE THE HEADING (§410, replacing the grey clause, 1b-ii), and
    the rule that makes Key measures and Tactics two blocks of one card —
    pulled out through the pane's side padding so it runs edge to edge. */
 h4.mini .hn { font-size:var(--fs-small); font-weight:400; letter-spacing:0;
@@ -7849,14 +7849,14 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      out would make the column stop adding up to the gap above it (§99.7). */
   .drvtbl tr.drvquiet td:first-child .dname { color:var(--ink-3); font-weight:500; }
 
-  /* ── THE TWO ROWS UNDER THE NAVIGATION (§406) ───────────────────────
+  /* ── THE TWO ROWS UNDER THE NAVIGATION (§409) ───────────────────────
      Round 9 of design-mockups/plan-page-redesign, signed off: the main tabs
      on grey as words with an underline, the sections below as one switch.
-     Only the selected tab is bold and underlined (§406.1). `#subtabs > button`
+     Only the selected tab is bold and underlined (§409.1). `#subtabs > button`
      is (1,0,1), so it outranks `.tabs button` (0,1,1) with no !important (§40)
      and reaches the tabs only — the report controls in `.tabacts` keep theirs.
 
-     REPORTING IS A FILLED BUTTON (§406.2, Islam's option C): `--cta` with
+     REPORTING IS A FILLED BUTTON (§409.2, Islam's option C): `--cta` with
      `--cta-ink` (5.54 light, 7.37 dark), `--cta-hover` when selected, its dot
      in the ink because gold on this orange cannot be seen.
 
@@ -7868,10 +7868,10 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      at 7/5 while the BOLD selected word sat 1px high at 6/6 — the two
      weights want different padding. So the regular word is 6/6 and the bold
      one keeps 7/5 riding up 1px, which puts both words on the same line and
-     each box's ink centred (§407.1); half a pixel moves from the left to the
+     each box's ink centred (§410.1); half a pixel moves from the left to the
      right for Source Sans's side bearing.
 
-     NO TAB DRAWS A BOX (§406.2): focus is the row's own vocabulary — the word
+     NO TAB DRAWS A BOX (§409.2): focus is the row's own vocabulary — the word
      at full ink with a light underline, the selected tab keeping its gold one,
      Reporting going to its deeper fill. */
   nav.tabs#tabrow { background:var(--surface-2); }
@@ -7895,7 +7895,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
     padding-top:7px; padding-bottom:5px; top:-1px; }
   #subtabs > button.cta[role="tab"] .tabdot { background:var(--cta-ink); }
 
-  /* The sections as one switch, squared (§406.3, Islam's option A): the box
+  /* The sections as one switch, squared (§409.3, Islam's option A): the box
      takes Reporting's 6px corner, a segment 4px inside its 3px of air. */
   .tabs .secseg { display:inline-flex; flex:none; background:var(--surface);
     border:1px solid var(--line); border-radius:6px; padding:3px; gap:2px; }

@@ -519,7 +519,7 @@
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   /* The main tab row, Reporting's orange fill included, lives in
-     arrange.css with §406. */
+     arrange.css with §409. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }

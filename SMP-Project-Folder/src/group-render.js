@@ -6439,7 +6439,7 @@ function railWorthIt(list){ return (list || []).length >= 1; }
    §59.3 was bitten by, where the same question answered in two places meant
    fixing one of them changed nothing. */
 function railName(code, name, kind){
-  /* §407: THE KIND RIDES BESIDE THE CODE, in the detail state only. Islam,
+  /* §410: THE KIND RIDES BESIDE THE CODE, in the detail state only. Islam,
      of the rail: "keep the button of showing and removing the details …
      that hides the measure and tactic and the type is it capability or
      direction." Terse is the code and the name; detail puts the kind on the
@@ -8090,7 +8090,7 @@ function unitRailFor(u, sel){
            one of them only is how a unit comes to be fine differently on two
            of its own pages (§53.5). Guarded on the VALUE: a pillar nobody has
            marked yet says nothing rather than opening with a separator. */
-        /* §407: the kind moved beside the code, and the OWNER left the plan
+        /* §410: the kind moved beside the code, and the OWNER left the plan
            rail (Islam: "remove the owner not needed here") — it is on the
            pillar's own page, one press away. */
         railSub(plural(it.measures.length, L1("measure"), L("measure")) +
@@ -8308,7 +8308,7 @@ function ownStateChip(target, list, word){
    the kind is a fact about what the pillar IS, which is the same kind of fact
    as the code two inches to its left. */
 function pillarBand(code, name, right, kind, cls){
-  /* `cls` (§407) marks the PLAN pane's band, the one the approved restyle
+  /* `cls` (§410) marks the PLAN pane's band, the one the approved restyle
      reaches: no gold edge, and the kind as a tag at the far end. Every other
      band is untouched until it is asked about (rule 1c). */
   return '<div class="pband' + (cls ? ' ' + cls : '') + '"><span class="pband-code">' + esc(code) + '</span>' +
@@ -8758,7 +8758,7 @@ function unitPlanBody(it, u, railed){
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
-    /* §407: THE COUNT, NOT A SENTENCE (1b-ii, and Islam's approved restyle).
+    /* §410: THE COUNT, NOT A SENTENCE (1b-ii, and Islam's approved restyle).
        The grey clause said what the columns already say; the number beside the
        heading is the one fact the heading did not. */
     '<h4 class="mini">' + L("measure") + ' <span class="hn">' + it.measures.length + '</span></h4>' +

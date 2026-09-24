@@ -6,7 +6,7 @@ internal thing as well"*, and of three of his own functions, *"they are
 planning somehow in a capability format"*. That is the mark §29 hid — his own
 *"it will be brought later not now"* — coming back.
 
-  1 · IT IS DRAWN on the Plan page: beside the code on the rail's card (§407
+  1 · IT IS DRAWN on the Plan page: beside the code on the rail's card (§410
       moved it there from the head of the counts — REWRITTEN, never loosened,
       §218) and the pill at the end of the pillar's band.
 
@@ -59,7 +59,7 @@ with sync_playwright() as p:
     rail = pg.evaluate("()=>[...document.querySelectorAll('.rail .ritem')].map(r=>{var k=r.querySelector('.rkind');return k?k.textContent.replace(/^\\s*\u00b7\\s*/,'').trim():null})")
     subs = pg.evaluate("()=>[...document.querySelectorAll('.rail .ritem .rsub')].map(x=>x.textContent.trim())")
     ok("the rail has rows to read at all", len(rail) >= 3, rail)
-    ok("every card names its kind beside the code (§407)",
+    ok("every card names its kind beside the code (§410)",
        bool(rail) and all(r in ("Direction", "Capability") for r in rail), rail[:2])
     ok("and the counts no longer repeat it, nor start with a stray separator",
        bool(subs) and not any(x.startswith(("Direction", "Capability", "\u00b7")) for x in subs), subs[:2])

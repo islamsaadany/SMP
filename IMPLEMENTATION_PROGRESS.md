@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-09-24 — the new navigation (§399) is reverted.** You asked for the old look back: the navy row of units in the brand colour, visible for everyone, with the unit's name in it. The platform is back to exactly how it was before §399. The restyling of the page underneath is a mockup only (round 8), drawn under today's navigation and waiting for your word before anything is built. On the branch, not merged.
+
 **2026-09-24 — the new navigation (§399), built on the branch, not merged.**
 The Plan page redesign's chrome, as signed off in round 7: the row of units
 stays for the office (light grey now, and it can be folded away with a pin);

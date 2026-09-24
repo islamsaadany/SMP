@@ -34,9 +34,7 @@ const ORDER = ["_shared.css", "group-extra.css", "config.css", "arrange.css", "p
    two numbers for one file, on two lines of one terminal, with nothing saying
    which is wrong (§124, §298.3). Measured off the file that was just
    written, so it cannot drift from it. */
-const FACE = "@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}\n" +
-  /* the title face (Plan page redesign, round 7), beside it for the same reason */
-  "@font-face{font-family:'Source Serif 4';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Serif_4.woff2) format('woff2')}\n";
+const FACE = "@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}\n";
 const css = FACE + ORDER.map((f) => readFileSync(join(SRC, f), "utf8")).join("\n");
 mkdirSync(join(here, "..", "public"), { recursive: true });
 const out = join(here, "..", "public", "platform.css");

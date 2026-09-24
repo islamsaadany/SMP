@@ -143,7 +143,7 @@ var WELCOME = (function(){
   function goSetup(page){
     dismiss();
     setTimeout(function(){
-      press('.navhost [data-md="setup"]');
+      press('#units [data-md="setup"]');
       /* The rail is painted by the press above; its rows are the one
          [data-setupgo] wiring (§108), pressed on the next task for the same
          reason the whole walk is deferred. */

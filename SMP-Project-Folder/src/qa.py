@@ -37,18 +37,6 @@ def walk_destinations(pg):
     # group at all, which is 50.6's fault in the one place it costs most.
     def vis():
         return [e for e in pg.query_selector_all("#units button[data-u]") if e.is_visible()]
-    # THE ROW IS OFF FOR SOMEBODY WHO WORKS IN ONE PLACE (Plan page redesign,
-    # round 7): the destinations are then behind the top line's switcher, and
-    # every one of them is walked through it — the same places, a different
-    # door. Filtering to visible buttons alone would walk NOTHING for them and
-    # print "ok" (50.6), so the switcher is the walk, not a fallback to it.
-    if row_off(pg):
-        keys = pg.eval_on_selector_all("#topnav .navswitcher [data-u]",
-                                       "els=>els.map(e=>e.dataset.u)")
-        for k in keys:
-            press_dest(pg, k)
-            walk_subtabs(pg)
-        return len(keys)
     n = len(vis())
     for ui in range(n):
         us = vis()
@@ -68,27 +56,6 @@ def walk_destinations(pg):
         n += 1
     return n
 
-def row_off(pg):
-    """The row of units is stood down (round 7) — for somebody with one place
-    of business, or the office with it folded away."""
-    return bool(pg.eval_on_selector("nav.units", "e=>e.classList.contains('navoff')"))
-
-def press_dest(pg, key):
-    """Go to a destination by the control a PERSON would press: the row's own
-    button where the row is drawn, the top line's switcher where it is not.
-    One helper, so a section written tomorrow cannot pick the wrong door."""
-    el = pg.query_selector('#units [data-u="%s"]' % key)
-    if el and el.is_visible():
-        el.click(); pg.wait_for_timeout(250); return True
-    sm = pg.query_selector("#topnav .navswitcher > summary")
-    if sm and sm.is_visible():
-        sm.click(); pg.wait_for_timeout(120)
-        it = pg.query_selector('#topnav .navswitcher [data-u="%s"]' % key)
-        if it and it.is_visible():
-            it.click(); pg.wait_for_timeout(250); return True
-        sm.click()
-    return go_top_only(pg, key)
-
 def go_top(pg, key):
     """Open the group or a company, wherever the first control has put them.
     They moved inside a <details> in 68, so a direct click resolves the button
@@ -100,12 +67,8 @@ def go_top(pg, key):
     el = pg.query_selector('#units [data-u="%s"]' % key)
     if el and el.is_visible():
         el.click(); pg.wait_for_timeout(200); return True
-    if row_off(pg): return press_dest(pg, key)
-    return go_top_only(pg, key)
-
-def go_top_only(pg, key):
     sm = pg.query_selector("#topsel > summary")
-    if not sm or not sm.is_visible(): return False
+    if not sm: return False
     sm.click(); pg.wait_for_timeout(150)
     el = pg.query_selector('#topsel [data-u="%s"]' % key)
     if not el or not el.is_visible():
@@ -129,7 +92,8 @@ def module_page(pg):
     run that never leaves a module's page is byte-identical to what it was."""
     if not BASE: return
     row = pg.query_selector("nav.units")
-    if row and pg.evaluate("()=>document.documentElement.hasAttribute('data-client-settings')"):
+    if row and not pg.eval_on_selector("nav.units",
+                                       "e=>!!(e.checkVisibility&&e.checkVisibility())"):
         pg.goto(BASE+"/raya-trade/strategy")
         pg.wait_for_function("!document.documentElement.classList.contains('booting')",
                              timeout=20000)
@@ -141,7 +105,6 @@ def show_units(pg):
     is exactly how the 66 assertions came to sit in the file without ever
     running. Pressing the switch is cheap; assuming the side is not."""
     module_page(pg)
-    if row_off(pg): return
     el = pg.query_selector('#units [data-u="mobile"]')
     if el and el.is_visible(): return
     show_side(pg, "units")
@@ -271,8 +234,8 @@ with sync_playwright() as p:
         # into one page whose rail carries all sixteen entries, so the sweep
         # walks the rail — and unfolds every group first, because a folded one
         # hides its rows and a page nothing clicks is a page nothing tests.
-        if pg.query_selector('.navhost [data-md="setup"]:visible'):
-            pg.click('.navhost [data-md="setup"]:visible'); pg.wait_for_timeout(200)
+        if pg.query_selector('#units [data-md="setup"]'):
+            pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
             for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
                                              "els=>els.map(e=>e.dataset.railgrp)"):
                 pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(120)
@@ -494,7 +457,7 @@ with sync_playwright() as p:
         pg.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=20000)
         pg.wait_for_timeout(400)
     else:
-        pg.click('.navhost [data-md="setup"]:visible'); pg.wait_for_timeout(200)
+        pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
     for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
                                      "els=>els.map(e=>e.dataset.railgrp)"):
         pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(100)
@@ -560,7 +523,7 @@ with sync_playwright() as p:
             show_side(pg, "fns")
         else:
             show_units(pg)
-        press_dest(pg, dest); pg.wait_for_timeout(250)
+        pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(250)
         # Performance is ONE page now: no section row, and a Report button.
         pg.click('#subtabs button:has-text("Performance")'); pg.wait_for_timeout(300)
         perf = pg.evaluate("""() => ({
@@ -731,7 +694,7 @@ with sync_playwright() as p:
 
     def goto(pg, key, tab, sec):
         show_side(pg, "fns" if key.startswith("fn:") else "units")
-        press_dest(pg, key); pg.wait_for_timeout(250)
+        pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(250)
         pg.evaluate("""(t)=>{const b=[...document.querySelectorAll('#subtabs button')]
             .find(x=>x.textContent.trim()===t); if(b)b.click()}""", tab)
         pg.wait_for_timeout(200)
@@ -817,7 +780,7 @@ with sync_playwright() as p:
     for key, want in (("mobile", "Strategy / Plan"), ("fn:finance", "Strategy / Projects")):
         show_side(pg, "fns" if key.startswith("fn:") else "units")
         go_top(pg, "group")
-        press_dest(pg, key); pg.wait_for_timeout(350)
+        pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(350)
         # THE NAME, NOT ITS ANNOTATIONS (132.12, 51.11's drill): the tab
         # carries a gap-count badge and screen-reader text now, so a bare
         # textContent read "Strategy22 - 22 to fill" and two checks went red
@@ -1242,7 +1205,7 @@ with sync_playwright() as p:
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(200)
     pg.evaluate("() => { try { localStorage.removeItem('smp.ko.year2'); } catch (e) {} }")
     show_units(pg)
-    press_dest(pg, "mobile"); pg.wait_for_timeout(200)
+    pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(200)
     pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
     fnd = pg.query_selector('#secrow-in [data-sub2="found"]')
     if fnd: fnd.click(); pg.wait_for_timeout(300)
@@ -1405,7 +1368,7 @@ with sync_playwright() as p:
             show_side(pg, "fns")
         else:
             show_units(pg)
-        press_dest(pg, dest); pg.wait_for_timeout(300)
+        pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(300)
         pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
         pg.click('#secrow button:has-text("%s")' % sec); pg.wait_for_timeout(350)
         pen = pg.query_selector('#secrow-in .secpen[data-page="plan"]')
@@ -1452,7 +1415,7 @@ with sync_playwright() as p:
     # And somebody who may NOT correct a plan is still not offered one.
     pg.select_option("#asWho", "mobhead"); pg.wait_for_timeout(300)
     show_units(pg)
-    press_dest(pg, "mobile"); pg.wait_for_timeout(300)
+    pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(300)
     pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
     pg.click('#secrow button:has-text("Plan")'); pg.wait_for_timeout(350)
     if pg.query_selector('[data-page="plan"]'):

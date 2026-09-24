@@ -57210,3 +57210,20 @@ was drawn and not re-confirmed after the chrome rounds, so it is a next step to
 ask about rather than something ridden in here. The house and the gear moving
 to the top line, the tour's new wording and Reporting as orange text rather
 than an orange fill are each visible changes and named in the handover.
+
+
+## §399.1 — REVERSED: the navigation goes back to the navy row, visible for everyone (2026-09-24)
+
+Islam, with a screenshot of the chrome as it stood before §399: *"let's revert back to this style the name took space with no need the navigator stays with the brand color and the name of the unit stays in the navigation and the navigation stays visible. so revert all of this and show me the restyling mockup only."*
+
+**Recorded as a reversal, not overwritten (Principle II).** §399 above describes what was built and why; none of it is live now. The sources, the built file, `smp-app/public/` and the checks are restored to commit `b194576`, which is the build before §399 and is byte-identical to it. `checks/nav-chrome.py` and the Source Serif 4 face that only the unit bar used are removed. `sw.js` moves on to a new name, `v5.37-nav-restored`, so that a browser holding the §399 shell does not keep it.
+
+**What his sentence settles:**
+- The row of units is the brand-coloured navy row.
+- It is visible to everybody.
+- The unit's name lives in that row.
+- A separate name column costs space and says nothing the row does not already say.
+
+This is §87's twins at the level of the chrome: two places naming the unit you are in.
+
+**Next:** the page-body restyle from the earlier rounds is drawn **under today's navigation, unchanged**, in `design-mockups/plan-page-redesign/2026-09-24_v8-restyle-under-todays-nav.html`. The top of that mockup is a picture of the real platform rather than a redrawing, so it cannot drift from what ships (§41.9). Nothing from it is built until Islam signs it off (rule 1c).

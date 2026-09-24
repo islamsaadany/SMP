@@ -13,7 +13,6 @@ would.
 | file | family | woff2 |
 |---|---|---|
 | `Source_Sans_3.woff2` | Source Sans 3 | 28 KB |
-| `Source_Serif_4.woff2` | Source Serif 4 (titles only, `--title`) | 50 KB |
 
 Fetched from Google Fonts' `css2` API with a modern user-agent — that is what
 selects woff2 and the variable axis — taking only the `/* latin */` block.
@@ -25,8 +24,3 @@ IBM Plex Sans came out, with 116 KB of every handover. Adding a face back means
 adding it in three places that must agree: this folder, `FACES` in `build.py`,
 and `FONTS` in `theme.js` (which is also the sanitiser for a remembered
 choice).
-
-
-Source Serif 4 (SIL OFL 1.1) came in with the Plan page redesign: the latin
-variable subset from Fontsource (`@fontsource-variable/source-serif-4`). It is a
-**title** face only, read through `--title`, so it is not on the sans switch.

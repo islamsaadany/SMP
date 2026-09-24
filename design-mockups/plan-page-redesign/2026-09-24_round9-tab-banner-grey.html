@@ -44,6 +44,7 @@ p.lede{margin:0;color:var(--ink-2);max-width:65ch}
 .tabs span.on{color:var(--ink);font-weight:700;border-bottom-color:var(--gold)}
 .tabs span.rep{color:var(--cta-tx);font-weight:600}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--cta-dot)}
+.subband{background:var(--surface);border-bottom:1px solid var(--line);padding:0 20px}
 .seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;margin:8px 0}
 .seg span{padding:5px 14px;border-radius:999px;font-size:13.5px;color:var(--ink-2)}
 .seg span.on{background:var(--seg-on);color:var(--seg-on-ink);font-weight:600}
@@ -55,7 +56,7 @@ p.lede{margin:0;color:var(--ink-2);max-width:65ch}
 <div class="wrap">
 <div>
   <h1>The tab banner, grey, with no unit name</h1>
-  <p class="lede">Same structure as the picture you sent: the three tabs on the left, the sections as one rounded switch beside them. The unit's name is gone because the brand row above already shows it. The band stays grey like today. Nothing else on the page changes.</p>
+  <p class="lede">Three bands: the brand navigation row, the grey row with the main tabs, and the sub-tabs row below it as one rounded switch. The unit's name is gone because the brand row above already shows it. The band stays grey like today. Nothing else on the page changes.</p>
 </div>
 
 <section>
@@ -74,14 +75,16 @@ p.lede{margin:0;color:var(--ink-2);max-width:65ch}
     <div class="nav"><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>Care</span><span>B2B Ecomm</span><span>Consumer Finance</span></div>
     <div class="band">
       <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting <i class="dot"></i></span></div>
+    </div>
+    <div class="subband">
       <div class="seg"><span>Foundation</span><span>SWOT</span><span>Drivers</span><span class="on">Plan</span></div>
     </div>
-    <div class="page">The plan page starts here, one line higher than today.</div>
+    <div class="page">The plan page starts here.</div>
   </div>
 </section>
 
 <div class="notes">
-  <div><b>One line instead of two</b>Tabs and sections share the grey band, so the page starts about 40px higher.</div>
+  <div><b>Three bands</b>Navigation, then the main tabs on grey, then the sub-tabs on their own row under the tab you picked.</div>
   <div><b>Colours on grey</b>Active tab in dark text with the gold underline. Reporting in the deep orange (5.2:1 on the grey). Active section filled navy with white text.</div>
   <div><b>Dark mode</b>Same shape. The switch's lit section turns light blue with dark text so it stays readable on the dark grey.</div>
 </div>

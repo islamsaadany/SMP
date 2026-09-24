@@ -533,36 +533,8 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* ── THE REPORTING TAB WEARS THE REPORT ORANGE (§222) ──────────────────
-     Islam picked the solid fill of three drawn options: the volume the Report
-     button had, moved onto the tab that replaces it. Unmistakable while you
-     are in it, which is the point — everything typed there is going to the
-     office.
-
-     `--cta`/`--cta-ink` are the pair §94.8 declared TOGETHER: the fill and
-     the ink that survives on it. Never `--cta` as type on a light ground and
-     never white on the bright half, which is §38.4's trap in both
-     directions.
-
-     `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
-     wins without an !important — the mistake §40 recorded, where an enforced
-     rule went on winning after the argument had changed. */
-  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
-     *"the reporting button should always become orange even if it's not open,
-     and it's appearing as long as the cycle is open."* The first build gave
-     the orange to the word when unselected and the fill only on selection,
-     which made it quiet exactly when somebody needs to notice it — the old
-     Report button was solid at all times, and that is the volume being moved
-     rather than a new one being added (§41's budget: the tab is drawn only
-     while a cycle is open, for somebody who may report).
-
-     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
-     never changes when you are standing on it stops answering "where am I".
-     `--cta-hover` is that half and is declared for every palette beside
-     `--cta`, so this needs no new token and no literal (§25). */
-  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
-  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
-  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
+  /* The Reporting tab's orange and the tab row's underline live in
+     arrange.css with §400; §222/§222.2's solid fill was removed there. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -855,9 +827,8 @@ html[data-client-settings] .top .topmark { display:none; }
 .clientlogo{ height:26px; width:auto; max-width:120px; object-fit:contain;
              flex-shrink:0; align-self:center; display:block }
 
-  /* Sub-nav: Performance is the regular view and is marked as such */
-  .tabs button.primary { color:var(--gold-deep); font-weight:700; }
-  .tabs button.primary[aria-selected="true"] { color:var(--ink); }
+  /* `.primary` on a tab is a MARKER only (the landing tab, read by the
+     welcome screen); §400 took its colour and weight away. */
   /* ── THE DOT MEANS SOMETHING NOW (§69.9) ─────────────────────────
      It used to be `.tabs button.primary::before` — painted on whichever tab is
      the landing page, on every destination, always. So it said "this is the
@@ -5188,8 +5159,7 @@ html[data-client-settings] .top .topmark { display:none; }
   .drill:hover { color:var(--gold-deep); }
   .drill:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  nav.tabs.sectionrow { background:var(--surface-2); border-bottom:1px solid var(--line); }
-  nav.tabs.sectionrow button[aria-selected="true"] { border-bottom-color:var(--stone-soft); }
+  nav.tabs.sectionrow { background:var(--surface); border-bottom:1px solid var(--line); }
   .gwrap { display:block; }
   .gwrap .card-head { position:relative; }
   .gwrap .card-head .grip { position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:.75; }
@@ -7760,27 +7730,26 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      `--cta-hover`, the deeper half of that pair, which reads as type on the grey in every palette, and is
      still the only coloured tab on the row.
 
+     ONLY THE SELECTED TAB IS BOLD AND UNDERLINED; every other tab is the
+     same quiet word, Reporting apart, which is its orange (Islam, of the
+     first build, where Performance still wore `.primary`'s bold).
+
      `#subtabs > button` is (1,0,1), so it outranks `.tabs button` (0,1,1)
-     and `.tabs button.cta[aria-selected]` (0,3,1) without an !important
-     (§40), and it reaches the TABS only — the report controls ride in
+     without an !important (§40), and it reaches the TABS only — the report controls ride in
      `.tabacts` beside them and keep their own dress. */
   nav.tabs#tabrow { background:var(--surface-2); }
   #tabrow .tabs-in { padding:0 24px; gap:22px; min-height:46px; }
   #subtabs > button[role="tab"] { background:none; border-radius:0; padding:12px 1px 9px;
-    border-bottom:3px solid transparent; color:var(--ink-2); font-size:var(--fs-body); }
+    border-bottom:3px solid transparent; color:var(--ink-2); font-weight:400; font-size:var(--fs-body); }
   #subtabs > button[role="tab"]:hover { background:none; color:var(--ink); }
   #subtabs > button[role="tab"][aria-selected="true"] { background:none; color:var(--ink);
     font-weight:700; border-bottom-color:var(--gold); }
-  #subtabs > button.primary[role="tab"] { color:var(--ink-2); }
-  #subtabs > button.primary[role="tab"][aria-selected="true"] { color:var(--ink); }
-  #subtabs > button.cta[role="tab"],
-  #subtabs > button.cta[role="tab"]:hover { background:none; color:var(--cta-hover); font-weight:600; }
+  #subtabs > button.cta[role="tab"] { color:var(--cta-hover); }
   #subtabs > button.cta[role="tab"][aria-selected="true"] { color:var(--cta-hover);
     font-weight:700; border-bottom-color:var(--cta-hover); }
   #subtabs > button[role="tab"]:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   #subtabs .tabacts { margin-block:6px; }
 
-  nav.tabs.sectionrow { background:var(--surface); }
   .tabs .secseg { display:inline-flex; flex:none; background:var(--surface);
     border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
   .tabs .secseg button { border:0; border-radius:999px; padding:5px 14px; background:none;

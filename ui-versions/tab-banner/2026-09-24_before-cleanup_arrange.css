@@ -78,7 +78,8 @@
   .drill:hover { color:var(--gold-deep); }
   .drill:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  nav.tabs.sectionrow { background:var(--surface); border-bottom:1px solid var(--line); }
+  nav.tabs.sectionrow { background:var(--surface-2); border-bottom:1px solid var(--line); }
+  nav.tabs.sectionrow button[aria-selected="true"] { border-bottom-color:var(--stone-soft); }
   .gwrap { display:block; }
   .gwrap .card-head { position:relative; }
   .gwrap .card-head .grip { position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:.75; }
@@ -2649,26 +2650,27 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      `--cta-hover`, the deeper half of that pair, which reads as type on the grey in every palette, and is
      still the only coloured tab on the row.
 
-     ONLY THE SELECTED TAB IS BOLD AND UNDERLINED; every other tab is the
-     same quiet word, Reporting apart, which is its orange (Islam, of the
-     first build, where Performance still wore `.primary`'s bold).
-
      `#subtabs > button` is (1,0,1), so it outranks `.tabs button` (0,1,1)
-     without an !important (§40), and it reaches the TABS only — the report controls ride in
+     and `.tabs button.cta[aria-selected]` (0,3,1) without an !important
+     (§40), and it reaches the TABS only — the report controls ride in
      `.tabacts` beside them and keep their own dress. */
   nav.tabs#tabrow { background:var(--surface-2); }
   #tabrow .tabs-in { padding:0 24px; gap:22px; min-height:46px; }
   #subtabs > button[role="tab"] { background:none; border-radius:0; padding:12px 1px 9px;
-    border-bottom:3px solid transparent; color:var(--ink-2); font-weight:400; font-size:var(--fs-body); }
+    border-bottom:3px solid transparent; color:var(--ink-2); font-size:var(--fs-body); }
   #subtabs > button[role="tab"]:hover { background:none; color:var(--ink); }
   #subtabs > button[role="tab"][aria-selected="true"] { background:none; color:var(--ink);
     font-weight:700; border-bottom-color:var(--gold); }
-  #subtabs > button.cta[role="tab"] { color:var(--cta-hover); }
+  #subtabs > button.primary[role="tab"] { color:var(--ink-2); }
+  #subtabs > button.primary[role="tab"][aria-selected="true"] { color:var(--ink); }
+  #subtabs > button.cta[role="tab"],
+  #subtabs > button.cta[role="tab"]:hover { background:none; color:var(--cta-hover); font-weight:600; }
   #subtabs > button.cta[role="tab"][aria-selected="true"] { color:var(--cta-hover);
     font-weight:700; border-bottom-color:var(--cta-hover); }
   #subtabs > button[role="tab"]:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   #subtabs .tabacts { margin-block:6px; }
 
+  nav.tabs.sectionrow { background:var(--surface); }
   .tabs .secseg { display:inline-flex; flex:none; background:var(--surface);
     border:1px solid var(--line); border-radius:999px; padding:3px; gap:2px; }
   .tabs .secseg button { border:0; border-radius:999px; padding:5px 14px; background:none;

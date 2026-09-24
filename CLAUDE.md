@@ -10615,7 +10615,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-24 — **§400: the tab banner.** Round 9 built at Islam's word: three bands — the navy navigation unchanged, the main tabs on a grey row as underlined words (Reporting as orange text, reversing §222.2's solid fill), and the sections below as one rounded switch (`.secseg`). No new tokens, screen only, `qa.py` ERRORS none. On the branch, not merged.*
+*Last Updated: 2026-09-24 — **§400.2: Reporting is a filled button again, and no tab draws a box.** Islam picked option C from three drawn: Reporting back on `--cta` with `--cta-ink` (deeper when selected, the dot white on it), every tab centred on the row so the words share one baseline, and 7/5 padding with the box riding up 1px so the word's INK is centred in its box (§302). No tab on the row draws a focus outline, mouse or keyboard; Performance stays grey. `checks/tab-row.py`, red four ways from the sources. On the branch, not merged.*
+
+*Earlier: 2026-09-24 — **§400: the tab banner.** Round 9 built at Islam's word: three bands — the navy navigation unchanged, the main tabs on a grey row as underlined words (Reporting as orange text, reversing §222.2's solid fill), and the sections below as one rounded switch (`.secseg`). No new tokens, screen only, `qa.py` ERRORS none. On the branch, not merged.*
 
 *Earlier: 2026-09-24 — **§399.1: §399 is reverted.** Islam: *"revert back to this style … the navigator stays with the brand color and the name of the unit stays in the navigation and the navigation stays visible … show me the restyling mockup only."* The sources are restored to the build before §399 (byte-identical), `checks/nav-chrome.py` and the serif face are removed, and `sw.js` is bumped to `v5.37-nav-restored`. The page-body restyle is mockup round 8, drawn under a picture of today's real navigation, and it is not built. On the branch, not merged.*
 

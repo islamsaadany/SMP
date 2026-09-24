@@ -318,6 +318,14 @@ with sync_playwright() as pw:
         }""")
         pg.wait_for_timeout(200)
     pg.wait_for_selector(".ccard[data-name]", timeout=15000)
+    # SINCE §400.2 the tab row redraws a tab from its KEPT copy at once and
+    # re-reads behind it, so the cards are on screen BEFORE the request is
+    # answered — and HITS records a request when it is answered. Waiting for
+    # the cards alone would now measure before the question landed; wait for
+    # the question itself. The claim is unchanged (§218): a later draw asks.
+    for _ in range(100):
+        if any(h["act"] == "cards" for h in HITS[before:]): break
+        time.sleep(0.05)
     again = [h["act"] for h in HITS[before:]]
     check("a later draw reads the list again", again.count("cards") >= 1, again)
     check("and the cards are still drawn after it",

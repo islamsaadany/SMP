@@ -57443,3 +57443,25 @@ Screen only: nothing stored, nothing migrated, no rule moved, no sign-out owed.
 
 Islam: *"for the word on the top left named forefront, let's change it to Platform."* The first step of the trail (§400), the link back to the console, now reads **Platform**. Only the word changes: the address (`/platform`), the class the checks press (`a.trff`) and the console's own top bar (FOREFRONT · Platform) are untouched, so the console does not read "Platform Platform". `checks/modules.mjs` asserts the word now as well as the address, case-insensitively because the trail draws it in capitals; 166/0, and 1 red with the old word put back. Screen only: nothing stored, nothing migrated, no sign-out owed.
 
+### §400.2 — a console tab shows what it last showed, then catches up (2026-09-24)
+
+Islam: *"when I switch between the tabs of the platform like my work and clients everytime it loads. saying it's loading. shouldn't it be saved as a cookie or cashed or something until a refresh happens?"* Two answers were put to him — keep each tab until a refresh, or show the kept copy at once and re-read behind it — and he chose **the second**, which is always current at the cost of the page changing a moment after it appears when something has moved.
+
+**Measured first:** every press of My work, Clients, Consultants, Access, Memory or Frameworks cleared the page, printed *Reading…* and asked the server from scratch, with nothing kept between presses.
+
+**How:** the tab being left keeps its own NODES, moved rather than cloned so every control on it still works. Coming back through the tab row puts them back at once, and the tab's ordinary draw runs into a detached box. Every draw writes into `page`, including the parts that arrive later (`settle()`, the archived band, the library), so `page` IS that box for the whole of the re-read. The requests made during it are counted in `send()`, and the fresh copy is swapped in, scroll kept, when the last one has landed.
+
+**Five rules:**
+- Only the tab row uses a kept copy. The six other ways to `go()` follow a change (adding or archiving a client, changing whose work you look at) and read fresh, as §369 and §48.2 require.
+- A press or a key inside the kept copy abandons the re-read, so nothing is swapped out from under somebody typing (§35, §71.2).
+- Any request that is not a read drops every kept copy.
+- Only a tab's own list is kept, never a form or a reading view opened inside it.
+- Memory only; a refresh starts clean. It is not a cookie, because a cookie travels to the server with every request and this is the page's own business.
+
+**Verification:**
+- `checks/tab-keep.py` covers kept-at-once-then-fresh (the stub numbers its answers, so the two are different words on screen), the hand winning, other ways in reading fresh, no leak across tabs, and a reload starting clean. All good on both copies of the page, and 4 / 3 / 2 red under its three breaks.
+- `checks/console-boot.py` §3 held a timing assumption this moves: it waited for the cards, which are now on screen before the request is answered. It was **rewritten, never loosened** (§218) to wait for the request itself; 13/0 on both copies, and its `handed-twice` break is still red.
+- `client-setup-outside.py` (29) and `client-archive.py` (15) are red identically **without this change** (§303) and are recorded, not fixed here.
+
+Screen only: nothing stored, nothing migrated, no sign-out owed.
+

@@ -10630,7 +10630,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-24 &mdash; **&sect;400.1: the trail's first word reads Platform** (Islam: *"let's change it to Platform"*); only the word, the address and the console's own bar untouched; `modules.mjs` asserts it, 1 red with the old word. **On the branch, not merged.***
+*Last Updated: 2026-09-24 &mdash; **&sect;400.2: a console tab shows what it last showed, then catches up** (Islam chose it over keep-until-refresh). The tab row puts the kept copy back at once and re-reads behind it, swapping the fresh copy in when the answers land. Other ways in read fresh, a hand on the page stops the swap, and a change drops every kept copy. `checks/tab-keep.py` all good on both copies, red 3 ways; `console-boot.py` §3 rewritten to wait for the request, not the cards. `client-setup-outside` and `client-archive` are red without this change too, and recorded. **On the branch, not merged.***
+
+*Earlier: 2026-09-24 &mdash; **&sect;400.1: the trail's first word reads Platform** (Islam: *"let's change it to Platform"*); only the word, the address and the console's own bar untouched; `modules.mjs` asserts it, 1 red with the old word. **On the branch, not merged.***
 
 *Earlier: 2026-09-24 &mdash; **&sect;403: Home says only where you are.** Islam: *"why on the welcome page I have strategy and overview & projects?"* Home sits under the chrome since &sect;400, so the page behind it kept its tab row, section row and gold underline. While Home is open those two rows are hidden and the place's underline removed (his addition); the places stay pressable as the way out. Four CSS rules on `data-home-open`; `welcome.py` &sect;3 rewritten (2 red with the rule removed), `qa.py` ERRORS none. **On the branch, not merged.***
 

@@ -8141,3 +8141,4 @@ and proved to fail twice when the rule is removed; the whole-platform sweep is
 clean. Nothing stored changes.
 
 - **2026-09-24 — §400.1:** the trail’s first step now reads *Platform* instead of *Forefront*. On the branch, not merged.
+- **2026-09-24 — §400.2:** switching console tabs shows the tab straight away and refreshes it quietly behind. On the branch, not merged. Found red and not caused by this: the checks for adding and archiving a client from the console.

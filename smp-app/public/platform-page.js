@@ -5,6 +5,15 @@
   /* ── One shape for every request (§71's rule: three callers with the same
      six lines is where a typo lives in exactly one of them). ───────── */
   function send(path, body) {
+    /* A TAB KEEPS WHAT IT LAST SHOWED (§400.2). A request made while a tab is
+       re-reading behind its kept copy is counted, so the fresh copy is swapped
+       in when the last answer has landed; and anything that CHANGES something
+       drops every kept copy, so the next look at a tab never shows a state
+       this page has just altered. */
+    var rv = REVAL;
+    if (rv) rv.pending++;
+    if (!body || READS.indexOf(body.action) < 0) KEPT = {};
+    var landed = function () { if (rv) { rv.pending--; setTimeout(function () { revalSettle(rv); }, 0); } };
     return fetch(path, { method: "POST", cache: "no-store",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body) })
@@ -17,7 +26,8 @@
           });
         }
         return r.json();
-      });
+      })
+      .then(function (v) { landed(); return v; }, function (e) { landed(); throw e; });
   }
   /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 045) and the
      401-is-the-door rule above is not written twice for it. */
@@ -49,7 +59,7 @@
     if (text != null) e.textContent = text;
     return e;
   }
-  function clear() { page.textContent = ""; }
+  function clear() { page.textContent = ""; if (page === SHOWN) ONLIST = null; }
   function say(msg, bad) {
     var p = el("p", bad ? "err" : "said", msg);
     page.appendChild(p);
@@ -101,19 +111,79 @@
       var b = el("button", TAB === t[0] ? "on" : null, t[1]);
       b.type = "button";
       b.setAttribute("data-tab", t[0]);
-      b.addEventListener("click", function () { go(t[0]); });
+      b.addEventListener("click", function () { go(t[0], true); });
       nav.appendChild(b);
     });
   }
 
-  function go(tab) {
+  /* ── A TAB SHOWS WHAT IT LAST SHOWED, THEN CATCHES UP (§400.2) ─────
+     Islam: "when I switch between the tabs of the platform like my work and
+     clients everytime it loads" — and, of the two answers put to him, the one
+     that is always current: the kept copy is drawn at once and the tab reads
+     again BEHIND it, the fresh copy swapped in when the answers land.
+     HOW: every draw writes into `page`, including the parts that arrive
+     later (settle(), the archived band, the library), so during a re-read
+     `page` IS a detached box for the whole of it, and the kept copy sits in
+     the real one. Kept as the tab's own NODES, moved rather than cloned, so
+     every control on it still works.
+     ONLY THE TAB ROW USES A KEPT COPY. The six other ways here to `go()` —
+     after adding a client, archiving one, changing whose work you are
+     looking at — follow a change and read fresh, as they did (§369, §48.2).
+     A HAND ON THE PAGE WINS: a press or a key inside the kept copy abandons
+     the re-read, so nothing is swapped out from under somebody typing into a
+     search box (§35, §71.2). Kept in memory only: a refresh starts clean. */
+  var SHOWN = page;
+  var KEPT = {};
+  var ONLIST = null;
+  var REVAL = null;
+  var READS = ["me", "cards", "mywork", "consultants", "access", "list", "one", "library", "client"];
+  function revalStop() {
+    if (!REVAL) return;
+    REVAL = null;
+    page = SHOWN;
+  }
+  function revalSettle(rv) {
+    if (REVAL !== rv || rv.pending > 0) return;
+    REVAL = null;
+    page = SHOWN;
+    var y = window.scrollY;
+    SHOWN.textContent = "";
+    while (rv.next.firstChild) SHOWN.appendChild(rv.next.firstChild);
+    window.scrollTo(0, y);
+  }
+  ["pointerdown", "keydown"].forEach(function (ev) {
+    SHOWN.addEventListener(ev, revalStop, true);
+  });
+  function go(tab, fromTabRow) {
+    revalStop();
+    /* Only the tab's own list is kept, never a form or a reading view
+       opened inside it — go() below puts the tab back on its list. */
+    if (ONLIST && ONLIST === TAB && SHOWN.firstChild && MEM.view === "list" && FW.view === "list") {
+      var f = document.createDocumentFragment();
+      while (SHOWN.firstChild) f.appendChild(SHOWN.firstChild);
+      KEPT[TAB] = f;
+    }
+    ONLIST = null;
     TAB = tab;
     try { history.replaceState(null, "", tab === "mywork" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
     MEM.view = "list";
     FW.view = "list";
     drawNav();
     clear();
-    return redraw();
+    var kept = fromTabRow ? KEPT[tab] : null;
+    delete KEPT[tab];
+    if (!kept) {
+      var r = redraw();
+      ONLIST = tab;
+      return r;
+    }
+    SHOWN.appendChild(kept);
+    var rv = { pending: 0, next: document.createElement("div") };
+    REVAL = rv;
+    page = rv.next;
+    redraw();
+    ONLIST = tab;
+    setTimeout(function () { revalSettle(rv); }, 0);
   }
 
   /* ── A SILENT REFRESH (§313.28) ───────────────────────────────────

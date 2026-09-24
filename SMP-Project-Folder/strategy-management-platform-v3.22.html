@@ -7872,9 +7872,14 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 
      ONE LINE, AND CENTRED IN ITS BOX: every tab is centred on the row, and an
      underlined tab's text is centred in its own box (12px over, 9+3 under), so
-     the words share a baseline. Measured on the ink (§302), a symmetric 6/6
-     left "Reporting" 1.3px high — the g hangs below the line — so the padding
-     is 7/5 and the box rides up 1px to stay on that baseline.
+     the words share a baseline. Measured on the ink (§302). In the system face
+     a symmetric 6/6 left "Reporting" 1.3px high, so it was 7/5; §402 made
+     Source Sans 3 the one face and there it sat 0.65px LOW and 0.55px right
+     at 7/5 while the BOLD selected word sat 1px high at 6/6 — the two
+     weights want different padding. So the regular word is 6/6 and the bold
+     one keeps 7/5 riding up 1px, which puts both words on the same line and
+     each box's ink centred (§407.1); half a pixel moves from the left to the
+     right for Source Sans's side bearing.
 
      NO TAB DRAWS A BOX (§406.2): focus is the row's own vocabulary — the word
      at full ink with a light underline, the selected tab keeping its gold one,
@@ -7892,11 +7897,12 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
     border-bottom-color:var(--line); }
   #subtabs > button[role="tab"][aria-selected="true"]:focus-visible { border-bottom-color:var(--gold); }
   #subtabs > button.cta[role="tab"] { color:var(--cta-ink); background:var(--cta);
-    border-bottom:0; border-radius:6px; padding:7px 14px 5px; position:relative; top:-1px; }
+    border-bottom:0; border-radius:6px; padding:6px 14.5px 6px 13.5px; position:relative; }
   #subtabs > button.cta[role="tab"]:hover,
   #subtabs > button.cta[role="tab"]:focus-visible,
   #subtabs > button.cta[role="tab"][aria-selected="true"] { color:var(--cta-ink); background:var(--cta-hover); }
-  #subtabs > button.cta[role="tab"][aria-selected="true"] { font-weight:700; }
+  #subtabs > button.cta[role="tab"][aria-selected="true"] { font-weight:700;
+    padding-top:7px; padding-bottom:5px; top:-1px; }
   #subtabs > button.cta[role="tab"] .tabdot { background:var(--cta-ink); }
 
   /* The sections as one switch, squared (§406.3, Islam's option A): the box

@@ -530,8 +530,8 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* The Reporting tab's orange and the tab row's underline live in
-     arrange.css with §406; §222/§222.2's solid fill was removed there. */
+  /* The main tab row, Reporting's orange fill included, lives in
+     arrange.css with §406. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }

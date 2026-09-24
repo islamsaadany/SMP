@@ -533,8 +533,8 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* The Reporting tab's orange and the tab row's underline live in
-     arrange.css with §406; §222/§222.2's solid fill was removed there. */
+  /* The main tab row, Reporting's orange fill included, lives in
+     arrange.css with §406. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -7719,77 +7719,47 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .drvtbl tr.drvquiet td:first-child .dname { color:var(--ink-3); font-weight:500; }
 
   /* ── THE TWO ROWS UNDER THE NAVIGATION (§406) ───────────────────────
-     Islam signed off round 9 of design-mockups/plan-page-redesign: three
-     bands — the brand navigation, the MAIN TABS on grey, the SUB-TABS below
-     them as one rounded switch — with no unit name on either, because the
-     navigation above already says it. A tab reads as a place (an underline),
-     a section as a choice inside it (a segment).
+     Round 9 of design-mockups/plan-page-redesign, signed off: the main tabs
+     on grey as words with an underline, the sections below as one switch.
+     Only the selected tab is bold and underlined (§406.1). `#subtabs > button`
+     is (1,0,1), so it outranks `.tabs button` (0,1,1) with no !important (§40)
+     and reaches the tabs only — the report controls in `.tabacts` keep theirs.
 
-     REPORTING LOSES ITS SOLID FILL, reversing §222.2's always-on orange at
-     his sign-off of the drawing: it keeps the orange as its WORD, which is
-     `--cta-hover`, the deeper half of that pair, which reads as type on the grey in every palette, and is
-     still the only coloured tab on the row.
+     REPORTING IS A FILLED BUTTON (§406.2, Islam's option C): `--cta` with
+     `--cta-ink` (5.54 light, 7.37 dark), `--cta-hover` when selected, its dot
+     in the ink because gold on this orange cannot be seen.
 
-     ONLY THE SELECTED TAB IS BOLD AND UNDERLINED; every other tab is the
-     same quiet word, Reporting apart, which is its orange (Islam, of the
-     first build, where Performance still wore `.primary`'s bold).
+     ONE LINE, AND CENTRED IN ITS BOX: every tab is centred on the row, and an
+     underlined tab's text is centred in its own box (12px over, 9+3 under), so
+     the words share a baseline. Measured on the ink (§302), a symmetric 6/6
+     left "Reporting" 1.3px high — the g hangs below the line — so the padding
+     is 7/5 and the box rides up 1px to stay on that baseline.
 
-     `#subtabs > button` is (1,0,1), so it outranks `.tabs button` (0,1,1)
-     without an !important (§40), and it reaches the TABS only — the report controls ride in
-     `.tabacts` beside them and keep their own dress. */
+     NO TAB DRAWS A BOX (§406.2): focus is the row's own vocabulary — the word
+     at full ink with a light underline, the selected tab keeping its gold one,
+     Reporting going to its deeper fill. */
   nav.tabs#tabrow { background:var(--surface-2); }
   #tabrow .tabs-in { padding:0 24px; gap:22px; min-height:46px; }
-  #subtabs > button[role="tab"] { background:none; border-radius:0; padding:12px 1px 9px;
-    border-bottom:3px solid transparent; color:var(--ink-2); font-weight:400; font-size:var(--fs-body); }
+  #subtabs .tabacts { margin-block:6px; }
+  #subtabs > button[role="tab"] { align-self:center; background:none; border-radius:0;
+    padding:12px 1px 9px; border-bottom:3px solid transparent; color:var(--ink-2);
+    font-weight:400; font-size:var(--fs-body); }
   #subtabs > button[role="tab"]:hover { background:none; color:var(--ink); }
-  #subtabs > button[role="tab"][aria-selected="true"] { background:none; color:var(--ink);
-    font-weight:700; border-bottom-color:var(--gold); }
-  /* ── REPORTING IS A FILLED BUTTON AGAIN, AND NO TAB DRAWS A BOX (§406.2) ──
-     Islam, on the built row: the selected tab "got a strange box" that went
-     away once focus moved — the keyboard focus outline, drawn after a press —
-     and then, of three drawn options for Reporting, "C but make sure of the
-     alignment of the word reporting with the other words and that it's
-     centered in the box". So:
-     · FOCUS on a tab is the tab's own vocabulary, never a frame: the word goes
-       to the full ink and a light underline appears (the selected tab keeps
-       its gold one). Nothing on this row draws an outline.
-     · REPORTING takes `--cta` as a FILL with `--cta-ink` on it (§38.4: the
-       pair declared together; 5.54 light, 7.37 dark) and `--cta-hover` when
-       selected — §222.2's own pair, reinstated by his pick.
-     · THE WORD SITS ON THE SAME LINE AS THE OTHERS, AND IN THE MIDDLE OF ITS
-       BOX: an underlined tab is 12px over its text and 9px + the 3px rule
-       under it, so its text is already centred in its own box; Reporting's
-       box is centred on the same line. Measured on the INK (§302), a
-       symmetric 6/6 put "Reporting" 1.3px high in its box (8.75 over, 11.44 under) — the word's
-       weight is above the line and its g hangs below — so the padding is
-       7/5 (ink 9.75 over, 10.44 under) and the box rides up 1px
-       (`top:-1px`), which puts the text back on the others' baseline. Centre every tab on
-       the row (`align-self:center`) and the three centres are one line — the
-       same size and face, so the same baseline. Baseline alignment was tried
-       first and measured worse: it hung the tabs from the top of a row the
-       report controls make taller, leaving the underline floating 11px above
-       the row's edge.
-     · THE DOT GOES WHITE on the fill: gold on this orange is a mark nobody
-       can see. */
-  #subtabs > button[role="tab"] { align-self:center; }
-  #subtabs > button.cta[role="tab"] { color:var(--cta-ink); background:var(--cta);
-    border-bottom:0; border-radius:6px; padding:7px 14px 5px; position:relative; top:-1px; }
-  #subtabs > button.cta[role="tab"]:hover { color:var(--cta-ink); background:var(--cta-hover); }
-  #subtabs > button.cta[role="tab"][aria-selected="true"] { color:var(--cta-ink);
-    background:var(--cta-hover); font-weight:700; }
-  #subtabs > button.cta[role="tab"] .tabdot { background:var(--cta-ink); }
+  #subtabs > button[role="tab"][aria-selected="true"] { color:var(--ink); font-weight:700;
+    border-bottom-color:var(--gold); }
   #subtabs > button[role="tab"]:focus-visible { outline:none; color:var(--ink);
     border-bottom-color:var(--line); }
   #subtabs > button[role="tab"][aria-selected="true"]:focus-visible { border-bottom-color:var(--gold); }
-  #subtabs > button.cta[role="tab"]:focus-visible { color:var(--cta-ink);
-    border-bottom:0; background:var(--cta-hover); }
-  #subtabs .tabacts { margin-block:6px; }
+  #subtabs > button.cta[role="tab"] { color:var(--cta-ink); background:var(--cta);
+    border-bottom:0; border-radius:6px; padding:7px 14px 5px; position:relative; top:-1px; }
+  #subtabs > button.cta[role="tab"]:hover,
+  #subtabs > button.cta[role="tab"]:focus-visible,
+  #subtabs > button.cta[role="tab"][aria-selected="true"] { color:var(--cta-ink); background:var(--cta-hover); }
+  #subtabs > button.cta[role="tab"][aria-selected="true"] { font-weight:700; }
+  #subtabs > button.cta[role="tab"] .tabdot { background:var(--cta-ink); }
 
-  /* SQUARED, NOT A PILL (§406.3): Islam picked A of three drawn shapes —
-     the outer box takes the Reporting button's own 6px corner, so the two
-     controls stacked one above the other share one shape, and a segment keeps
-     its 3px of air inside the box with a 4px corner (6 less the 3px inset,
-     rounded up so the inner corner does not read sharp against the outer). */
+  /* The sections as one switch, squared (§406.3, Islam's option A): the box
+     takes Reporting's 6px corner, a segment 4px inside its 3px of air. */
   .tabs .secseg { display:inline-flex; flex:none; background:var(--surface);
     border:1px solid var(--line); border-radius:6px; padding:3px; gap:2px; }
   .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;

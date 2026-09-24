@@ -59,12 +59,33 @@ with sync_playwright() as p:
     c0 = tabs("co", "co:" + str(co))
     ck("unstored: a company offers NO Foundation tab (existing clients unchanged)", "foundation" not in c0, c0)
 
+    # ── 1b. A function carries no brief and no themes, ever ───────────
+    # Islam, 2026-09-24. BOTH ENDS (§94.2): a function refuses them, a unit
+    # and a capability beside it keep them, and a stored "on" cannot bring
+    # them back (a toggle the rule refuses would be decoration, §42).
+    fk = safe(pg, "()=>FUNCTION_KEYS[0]")
+    ck("unstored: a function carries no brief", safe(pg, "()=>compOn('fn:%s','brief')" % fk) is False)
+    ck("…and no themes", safe(pg, "()=>compOn('fn:%s','theme')" % fk) is False)
+    ck("…but keeps its North Star", safe(pg, "()=>compOn('fn:%s','keyobj')" % fk) is True)
+    ck("a unit keeps its brief and themes",
+       safe(pg, "()=>compOn('%s','brief')&&compOn('%s','theme')" % (unit, unit)) is True)
+    ck("a capability keeps its brief (§334's definition)",
+       safe(pg, "()=>compOn('cap:x','brief')") is True)
+    ck("a stored per-function 'on' cannot bring the brief back",
+       safe(pg, "()=>{GROUP.structure={over:{'fn:%s':{brief:true}}}; var r=compOn('fn:%s','brief'); delete GROUP.structure; return r}" % (fk, fk)) is False)
+    ck("the function's Overview draws no 'What it is' card",
+       safe(pg, "()=>{var h=holderOverview('fn:%s'); return typeof h==='string' && !/What it is/.test(h)}" % fk) is True)
+
     # ── 2. Setup › Structure: one item's SWOT, pressed ────────────────
     ok = press(pg, '[data-md="setup"]') and press(pg, '.ritem[data-setupgo="structure"]')
     ck("Setup › Structure opens from the rail", ok)
     dots = safe(pg, "()=>document.querySelectorAll('[data-stover]').length", 0)
     ck("it draws a pressable box per item and component", (dots or 0) >= 9 * 3, dots)
     hdr = safe(pg, "()=>[...document.querySelectorAll('table.stadj thead th')].map(t=>t.textContent)", [])
+    ck("a function's row offers no box for the brief or the themes",
+       safe(pg, "()=>!document.querySelector('[data-stover=\"fn:%s|brief\"],[data-stover=\"fn:%s|theme\"]')" % (fk, fk)) is True)
+    ck("…while it offers one for its North Star, and a unit's row offers both",
+       safe(pg, "()=>!!document.querySelector('[data-stover=\"fn:%s|keyobj\"]') && !!document.querySelector('[data-stover=\"%s|brief\"]') && !!document.querySelector('[data-stover=\"%s|theme\"]')" % (fk, unit, unit)) is True)
     ck("its columns are headed with the client's own words",
        safe(pg, "()=>labelWord('keyobj','bu')") in (hdr or []), hdr)
     ck("pressing the unit's SWOT box", press(pg, '[data-stover="%s|swot"]' % unit))
@@ -89,15 +110,17 @@ with sync_playwright() as p:
     # ── 3. A level's components, as the set-up step writes them ───────
     safe(pg, """()=>{GROUP.structure={top:{on:['brief','purpose','aspiration','keyobj','values'],temple:true},
         mid:{exists:true,on:['brief','aspiration','keyobj'],temple:false},
-        bu:{on:['brief','aspiration','keyobj','pillar']},fn:{on:['brief']}};}""")
+        bu:{on:['brief','aspiration','keyobj','pillar']},fn:{on:['brief','aspiration']}};}""")
     g1 = tabs("group", "group")
     ck("Temple needs the themes: with them off there is no Temple tab", "temple" not in g1, g1)
     ck("…the Foundation stays", "foundation" in g1, g1)
     ck("a level without SWOT: no unit offers a SWOT section", "swot" not in (secs(other) or []))
     c1 = tabs("co", "co:" + str(co))
     ck("the second layer SAID its components: a company offers a Foundation tab", "foundation" in c1, c1)
-    ck("a function with its North Star off offers its Overview on the brief alone",
+    ck("a function with its North Star off (and the brief never on) has it off",
        safe(pg, "()=>compOn('fn:'+FUNCTION_KEYS[0],'keyobj')") is False)
+    ck("…even with the brief stored on its level, a function's brief stays off",
+       safe(pg, "()=>compOn('fn:'+FUNCTION_KEYS[0],'brief')") is False)
 
     # ── 4. The company's own Foundation, drawn and written ────────────
     try:
@@ -123,7 +146,12 @@ with sync_playwright() as p:
        safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step)[1]") == "structure")
     ck("pressing it", press(pg, '.wzstep[data-step="structure"]'))
     chips = safe(pg, "()=>document.querySelectorAll('[data-stcomp]').length", 0)
-    ck("four levels of nine components are drawn", chips == 36, chips)
+    ck("nine components on three levels, seven on the functions' (no brief, no themes)",
+       chips == 9 * 3 + 7, chips)
+    ck("…the functions' level offers no Brief chip and no Themes chip",
+       safe(pg, "()=>!document.querySelector('[data-stcomp=\"fn|brief\"],[data-stcomp=\"fn|theme\"]')") is True)
+    ck("…while the business units' level offers both",
+       safe(pg, "()=>!!document.querySelector('[data-stcomp=\"bu|brief\"]')&&!!document.querySelector('[data-stcomp=\"bu|theme\"]')") is True)
     ck("nothing is stored until something is pressed", safe(pg, "()=>!('structure' in GROUP)") is True)
     ck("pressing the business units' SWOT", press(pg, '[data-stcomp="bu|swot"]'))
     st = safe(pg, "()=>JSON.stringify(GROUP.structure)", "") or ""

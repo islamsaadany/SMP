@@ -3847,7 +3847,22 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* The one question every page asks. A per-item answer wins over the
      level's; a component the platform does not know is ON, so a key added
      tomorrow is never hidden by a list written before it existed (§30.2). */
+  /* A SUPPORTING FUNCTION CARRIES NO BRIEF AND NO THEMES (Islam, 2026-09-24:
+     *"supporting function shouldn't have themes, the function has no brief
+     and even the function owner is set in the registry so a function here
+     has no description needed"*). Not a default somebody may tick back on:
+     the brief is the "What it is" card, whose only facts are the name the
+     page already carries, a head the register already holds (§33) and a
+     definition he has ruled a function does not need. So it is NEVER on for
+     an `fn:` target, whatever is stored, and neither screen offers it.
+     A CAPABILITY is deliberately not reached: it shares the level
+     (structLevelOf) and keeps its own definition (§334). */
+  var STRUCT_NEVER_FN = ["brief", "theme"];
+  function compOffered(target, comp) {
+    return !(String(target || "").indexOf("fn:") === 0 && STRUCT_NEVER_FN.indexOf(comp) >= 0);
+  }
   function compOn(group, target, comp) {
+    if (!compOffered(target, comp)) return false;
     if (STRUCT_COMPONENTS.indexOf(comp) < 0) return true;
     var s = structureOf(group);
     if (!s) return true;
@@ -4386,6 +4401,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     SETUP_DONE: SETUP_DONE, setupDone: setupDone,
     STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
     STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
+    STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
     structureOf: structureOf, structLevelOf: structLevelOf,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
@@ -32524,6 +32540,10 @@ function renderStructure(){
       r[1].map(function(it){
         var t = it[0];
         return '<tr><td class="stitem">' + esc(it[1]) + '</td>' + STRUCT_COLS.map(function(c){
+          /* A function carries no brief and no themes, ever (SMPRules.compOffered):
+             a dash, not a toggle, or the table offers what the rule refuses. */
+          if (!SMPRules.compOffered(t, c)) return '<td class="cc" title="' + esc(labelWord(c, "bu")) +
+            ' is never shown for a ' + esc(labelWord("fnword","group")) + '">&mdash;</td>';
           var on = compOn(t, c);
           var def = SMPRules.levelComponents(GROUP, SMPRules.structLevelOf(t)).indexOf(c) >= 0;
           var lab = esc(labelWord(c, "bu")) + ' for ' + esc(it[1]) + (on ? ': shown' : ': hidden');
@@ -55320,6 +55340,9 @@ var CLIENTSETUP = (function () {
     box.appendChild(el("p", "lab", "Components"));
     var band = el("div", "wzband stchips");
     COMPONENTS.forEach(function (c) {
+      /* A function never carries a brief or themes (SMPRules.compOffered), so
+         its level offers no chip for either rather than one that does nothing. */
+      if (k === "fn" && !SMPRules.compOffered("fn:", c[0])) return;
       var on = L.on.indexOf(c[0]) >= 0;
       var b = el("button", null, c[1]); b.type = "button";
       b.dataset.stcomp = k + "|" + c[0];
@@ -55340,6 +55363,7 @@ var CLIENTSETUP = (function () {
       box.appendChild(el("p", "lab", "What this client calls them — one word each, the same on every level"));
       var names = el("div", "stnames");
       L.on.forEach(function (key) {
+        if (k === "fn" && !SMPRules.compOffered("fn:", key)) return;
         var title = COMPONENTS.filter(function (c) { return c[0] === key; })[0][1];
         var w2 = el("label", "stnm");
         w2.appendChild(el("span", "lab", title));

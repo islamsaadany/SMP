@@ -8091,3 +8091,5 @@ Foundation page once its layer carries something.
 **Not done yet**: turning Pillars off does not hide a unit's plan; the second
 layer has no Temple drawing of its own.
 
+
+**§404.1 — a supporting function carries no brief and no themes.** Islam: *"supporting function shouldn't have themes, the function has no brief and even the function owner is set in the registry so a function here has no description needed."* A function's Overview no longer draws the "What it is" card (name, Led by, Definition) — who leads it is set on the register — and Themes is never shown for a function. The set-up step and Setup › Structure no longer offer either for functions. Capabilities keep their definition. This one changes existing clients' function Overviews (nothing is deleted). Checks rewritten to match; all green.

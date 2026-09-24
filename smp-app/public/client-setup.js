@@ -1333,6 +1333,9 @@ var CLIENTSETUP = (function () {
     box.appendChild(el("p", "lab", "Components"));
     var band = el("div", "wzband stchips");
     COMPONENTS.forEach(function (c) {
+      /* A function never carries a brief or themes (SMPRules.compOffered), so
+         its level offers no chip for either rather than one that does nothing. */
+      if (k === "fn" && !SMPRules.compOffered("fn:", c[0])) return;
       var on = L.on.indexOf(c[0]) >= 0;
       var b = el("button", null, c[1]); b.type = "button";
       b.dataset.stcomp = k + "|" + c[0];
@@ -1353,6 +1356,7 @@ var CLIENTSETUP = (function () {
       box.appendChild(el("p", "lab", "What this client calls them — one word each, the same on every level"));
       var names = el("div", "stnames");
       L.on.forEach(function (key) {
+        if (k === "fn" && !SMPRules.compOffered("fn:", key)) return;
         var title = COMPONENTS.filter(function (c) { return c[0] === key; })[0][1];
         var w2 = el("label", "stnm");
         w2.appendChild(el("span", "lab", title));

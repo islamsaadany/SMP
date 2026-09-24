@@ -191,8 +191,11 @@ def main():
         for k, v in before.items():
             ok(v.get("bands") == 0, "no band on " + k + " — the box is a page "
                "of its own now", v.get("bands"))
-        ok(before.get("fnstrat/found", {}).get("keys", [])[:2] == ["Function", "Led by"],
-           "and the Overview still names the FUNCTION, not the box",
+        # §404.1 (Islam, 2026-09-24): a function carries no brief, so the
+        # Overview draws no "Function · Led by" facts at all — REWRITTEN, not
+        # deleted (§218): what survives is that it names no BOX either.
+        ok(not any(k in ("Capability", "Held by") for k in before.get("fnstrat/found", {}).get("keys", [])),
+           "and the Overview names no box (and, since §404.1, no brief facts)",
            before.get("fnstrat/found", {}).get("keys"))
         own_now = ids_now = ev(pg, "()=>fnProjects('finance').map(p=>p.id)")
         ok(own_now == [i for i in (start.get("fin") or []) if i not in BOXED],
@@ -253,8 +256,9 @@ def main():
         page(pg, "fnstrat", "found")
         pillars_ov = ev(pg, SHAPE)
         ok(pillars_ov.get("bands") == 0, "it draws no band", pillars_ov.get("bands"))
-        ok(pillars_ov.get("keys", [])[:2] == ["Function", "Led by"],
-           "and its Overview names the FUNCTION", pillars_ov.get("keys"))
+        ok(pillars_ov.get("keys", []) == before.get("fnstrat/found", {}).get("keys", []),
+           "and its Overview's facts AGREE with the projects function's (§213, §404.1)",
+           [pillars_ov.get("keys"), before.get("fnstrat/found", {}).get("keys")])
 
         # ── 4 · the dissolve, through the product's own control ───────────────
         print("\n4 · the dissolve — the product's own, never a hand-moved graph")
@@ -378,7 +382,9 @@ def main():
           FUNCTION_KEYS.pop(); delete FUNCTIONS.qaspare330;
           return { own, shorts, longs, spare };
         }""")
-        ok(any("project" in x for x in (blk.get("shorts") or [])),
+        # §395 made the word the client's (Projects, capitalised): asked
+        # case-blind, or the tenant's own label reads as a missing blocker.
+        ok(any("project" in x.lower() for x in (blk.get("shorts") or [])),
            "its own projects block the delete", blk.get("shorts"))
         ok(all(n in (blk.get("longs") or "") for n in (blk.get("own") or []))
            and blk.get("own"),

@@ -68,10 +68,6 @@ function renderStructure(){
       r[1].map(function(it){
         var t = it[0];
         return '<tr><td class="stitem">' + esc(it[1]) + '</td>' + STRUCT_COLS.map(function(c){
-          /* A function carries no brief and no themes, ever (SMPRules.compOffered):
-             a dash, not a toggle, or the table offers what the rule refuses. */
-          if (!SMPRules.compOffered(t, c)) return '<td class="cc" title="' + esc(labelWord(c, "bu")) +
-            ' is never shown for a ' + esc(labelWord("fnword","group")) + '">&mdash;</td>';
           var on = compOn(t, c);
           var def = SMPRules.levelComponents(GROUP, SMPRules.structLevelOf(t)).indexOf(c) >= 0;
           var lab = esc(labelWord(c, "bu")) + ' for ' + esc(it[1]) + (on ? ': shown' : ': hidden');

@@ -57247,3 +57247,42 @@ signed off with *"1. yes one word 2. ok 3. yes build it"*.
   drawing of its own yet; the planning horizon shown on a company's
   Foundation is the client's one shared value; and this branch is 13 commits
   behind `main`, so a merge owes a rebuild and a fresh `SHELL` name.
+
+### §404.1 — a supporting function carries no brief and no themes (2026-09-24)
+
+Islam, of §404's components: *"supporting function shouldn't have themes, the
+function has no brief and even the function owner is set in the registry so a
+function here has no description needed."*
+
+**NOT A DEFAULT, A RULE.** The brief on a function's Overview is the "What it
+is" card, and its three facts were the function's name (already the page's
+heading), Led by (a head the register already holds, §33 — one fact, one door)
+and a Definition he has now ruled a function does not need. So
+`SMPRules.compOffered()` answers **no** for `brief` and `theme` on any `fn:`
+target, and `compOn()` asks it FIRST — before the stored structure, before a
+per-item override — so no stored "on" can bring either back (a toggle the rule
+refuses would be decoration, §42). Neither screen offers it: the set-up step's
+functions level draws seven chips, not nine, and Setup › Structure draws a dash
+in those two cells of a function's row.
+
+**A CAPABILITY IS DELIBERATELY NOT REACHED.** It shares the functions' level in
+`structLevelOf()`, and it keeps its definition (§334) — the rule is keyed on the
+`fn:` prefix, not on the level, and it is asserted at both ends.
+
+**THIS ONE DOES MOVE AN EXISTING CLIENT**, unlike the rest of §404 (which is an
+absence read as everything on): every function's Overview loses its "What it is"
+card the moment this ships, whatever the client has stored. That is the ask, and
+nothing is deleted — `def` and `head` stay stored; the head is still set on the
+register and on Setup › Supporting functions. The §226 Led-by picker on the
+Overview goes with the card.
+
+**CHECKS**: `structure.py` 37 → 49 assertions, falsified from the SOURCES
+(§276): the rule's line removed **5 red**, the two screens' guards removed
+**3 red**. Three neighbours held the card and were REWRITTEN, never deleted
+(§218, §214.3): `fn-pillars.py` (one card, no labelled facts, no definition
+field or fill control — with a capability keeping its brief as the other end),
+`functional-projects.py` (the Overview names no box; its facts agree across
+the two formats), `fn-ko-edit.py` §5 (no Led by row for the office or for an
+opened custodian; the head still a stored fact) and §7 (reading is one card).
+`functional-projects.py` also held `"project" in x` against §395's capitalised
+*Projects* — asked case-blind now. `qa.py` ERRORS none; authoriser 755/0.

@@ -3802,6 +3802,75 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      own: nothing renumbers `extra`, so an id minted here survives a row
      being deleted above it. */
 
+  /* ── THE CLIENT'S STRUCTURE (§404) ────────────────────────────────────
+     Islam, of a client set up from nothing: *"when I start the setup of the
+     company we need to set the structure, the levels and the components in
+     each level from the start"*, and of the drawing, *"yes build it"*.
+
+     FOUR LEVELS AND NO MORE: the top (a group, a company, the client's own
+     word), an optional second layer (companies, divisions), then the business
+     units and the supporting functions. Each level carries a set of
+     COMPONENTS, ticked from one list, and each unit or function may be
+     adjusted afterwards (`over`, keyed by the platform's own target spelling:
+     "group", "co:<key>", a unit key, "fn:<key>").
+
+     STORED AS AN ABSENCE (§50.6) and read as EVERYTHING ON, which is Islam's
+     fifth answer: an existing client opens exactly as it does today. Switching
+     a component off HIDES it and never deletes what was written (his fourth),
+     so this is a view over the plan and never a change to it.
+
+     A READER THAT CREATES NOTHING (§42): every answer comes off a frozen
+     default, so asking cannot put a phantom change into a save. */
+  var STRUCTURE = "structure";
+  var STRUCT_COMPONENTS = ["brief", "purpose", "aspiration", "keyobj", "theme",
+                           "pillar", "capability", "values", "swot"];
+  var STRUCT_LEVELS = ["top", "mid", "bu", "fn"];
+  /* The TEMPLE is not a component (his first answer): it is a way of DRAWING
+     three that are, so it can only be on where all three are. Capabilities
+     join the drawing as its base when they are ticked, and do not block it. */
+  var TEMPLE_NEEDS = ["aspiration", "keyobj", "theme"];
+  function structureOf(group) {
+    var s = group && group[STRUCTURE];
+    return s && typeof s === "object" ? s : null;
+  }
+  function structLevelOf(target) {
+    var t = String(target || "");
+    if (!t || t === "group") return "top";
+    if (t.indexOf("co:") === 0) return "mid";
+    if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) return "fn";
+    return "bu";
+  }
+  function levelComponents(group, level) {
+    var s = structureOf(group), l = s && s[level];
+    return l && Array.isArray(l.on) ? l.on : STRUCT_COMPONENTS;
+  }
+  /* The one question every page asks. A per-item answer wins over the
+     level's; a component the platform does not know is ON, so a key added
+     tomorrow is never hidden by a list written before it existed (§30.2). */
+  function compOn(group, target, comp) {
+    if (STRUCT_COMPONENTS.indexOf(comp) < 0) return true;
+    var s = structureOf(group);
+    if (!s) return true;
+    var o = s.over && s.over[String(target || "group")];
+    if (o && typeof o[comp] === "boolean") return o[comp];
+    return levelComponents(group, structLevelOf(target)).indexOf(comp) >= 0;
+  }
+  function templeOn(group, target) {
+    var level = structLevelOf(target);
+    if (level !== "top" && level !== "mid") return false;
+    var s = structureOf(group), l = s && s[level];
+    var want = l ? l.temple === true : level === "top";
+    return want && TEMPLE_NEEDS.every(function (c) { return compOn(group, target, c); });
+  }
+  /* Whether the second layer exists. Unsaid, it exists exactly when the
+     client holds a company, which is what every client set up before §404
+     already shows. Said, it is what the office said. */
+  function midExists(group, companies) {
+    var s = structureOf(group), m = s && s.mid;
+    if (m && typeof m.exists === "boolean") return m.exists;
+    return Object.keys(companies || {}).length > 0;
+  }
+
   var DRIVERS = "drivers";          /* on a unit's extra   */
   var SEASONS = "seasons";          /* on the group's extra */
   /* WHETHER THE CLIENT USES REVENUE DRIVERS AT ALL (Islam, 2026-09-23: *"this
@@ -4315,6 +4384,11 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     PRESENT_MINS: PRESENT_MINS, presentMinsMap: presentMinsMap,
     LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
     SETUP_DONE: SETUP_DONE, setupDone: setupDone,
+    STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
+    STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
+    structureOf: structureOf, structLevelOf: structLevelOf,
+    levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
+    midExists: midExists,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,
@@ -6348,7 +6422,17 @@ var LABELS = {
     { key:"fnword",      internal:"Supporting Function", group:"Supporting Function", bu:"Supporting Functions",
       note:"The supporting functions that enable the strategy" },
     { key:"project",     internal:"Project",             group:"Project",             bu:"Projects",
-      note:"The group of activities with correlated timelines and outcomes" }
+      note:"The group of activities with correlated timelines and outcomes" },
+    /* §404: the structure's own three words. The DEFAULTS are what the screen
+       already says ("Group" on the navigation, "Who we are" over the brief, the
+       SWOT section's own heading), so a client that never opens the structure
+       step reads exactly what it read before (Islam's fifth answer). */
+    { key:"topword",     internal:"Group",               group:"Group",               bu:"Group",
+      note:"The level at the top: the group, the company, or the client's own word" },
+    { key:"brief",       internal:"Brief",               group:"Who we are",          bu:"Who we are",
+      note:"A short description of who this part of the business is" },
+    { key:"swot",        internal:"SWOT",                group:"SWOT",                bu:"SWOT",
+      note:"Strengths, weaknesses, opportunities and threats" }
   ]
 };
 /* What the platform would say, kept BEFORE hydration replaces the list with
@@ -6422,6 +6506,59 @@ function world(){
   });
 }
 function personRoles(p){ return SMPRules.personRoles(world(), p); }
+
+/* ── THE CLIENT'S STRUCTURE (§404) — the browser's two halves ──────────────
+   READING asks the shared rule (one answer for the page and the server,
+   §42); WRITING mints the stored object only when something is being
+   changed, and gives the key back the moment nothing differs from the
+   level's default, so an untouched client keeps no structure at all
+   (§50.6). */
+function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+function templeOn(target){ return SMPRules.templeOn(GROUP, target); }
+function midExists(){ return SMPRules.midExists(GROUP, COMPANIES); }
+function structWritable(){
+  var s = GROUP[SMPRules.STRUCTURE];
+  if (!s || typeof s !== "object") s = GROUP[SMPRules.STRUCTURE] = {};
+  return s;
+}
+/* §404: A COMPANY'S OWN FOUNDATION, riding the group's extra as
+   `GROUP.coFound[<key>]`. Two halves (§50.6): the reader hands out a shared
+   frozen empty and creates nothing (§42), the writer mints the record. */
+var CO_FOUND_EMPTY = Object.freeze({ clauses: Object.freeze([]), mission: "",
+  aspiration: "", endInMind: "", keyObjectives: Object.freeze([]), values: Object.freeze([]) });
+function coFoundOf(k){
+  var m = GROUP.coFound;
+  return (m && typeof m === "object" && m[k]) || CO_FOUND_EMPTY;
+}
+function coFoundWritable(k){
+  if (!GROUP.coFound || typeof GROUP.coFound !== "object") GROUP.coFound = {};
+  var o = GROUP.coFound[k];
+  if (!o || typeof o !== "object") o = GROUP.coFound[k] = {};
+  ["clauses", "keyObjectives", "values"].forEach(function(f){ if (!Array.isArray(o[f])) o[f] = []; });
+  ["mission", "aspiration", "endInMind"].forEach(function(f){ if (typeof o[f] !== "string") o[f] = ""; });
+  return o;
+}
+/* Which prefix an objective's id takes: a unit's key, "co-<key>" for a
+   company, "group" otherwise — read off the owner (§96.2's rule). */
+function koPrefixOf(owner){
+  if (!owner) return "group";
+  if (owner.ukey) return owner.ukey;
+  var m = GROUP.coFound || {};
+  for (var k in m) if (m[k] === owner) return "co-" + k;
+  return "group";
+}
+/* One unit's or function's adjustment. An answer equal to its level's is not
+   an adjustment and is deleted, and an emptied map goes with it. */
+function setCompOver(target, comp, on){
+  var s = structWritable(), lvl = SMPRules.structLevelOf(target);
+  var def = SMPRules.levelComponents(GROUP, lvl).indexOf(comp) >= 0;
+  s.over = s.over || {};
+  var o = s.over[target] = s.over[target] || {};
+  if (on === def) delete o[comp]; else o[comp] = !!on;
+  if (!Object.keys(o).length) delete s.over[target];
+  if (!Object.keys(s.over).length) delete s.over;
+  if (!Object.keys(s).length) delete GROUP[SMPRules.STRUCTURE];
+}
 function personRoleKeys(p){ return SMPRules.personRoleKeys(world(), p); }
 
 /* Does the person currently being viewed as hold this role at all? The
@@ -10230,7 +10367,9 @@ function functionOf(key){ return FUNCTIONS[key] || null; }
    argument for running the whole suite rather than the file you edited. */
 function foundKeyFor(target){
   var t = String(target || "");
-  if (t === "group") return "g_found";
+  /* §404: a company's Foundation is the group's own strategy, drawn over the
+     company's record, so it is asked the group's key. */
+  if (t === "group" || t.indexOf("co:") === 0) return "g_found";
   return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
 }
 function koHolderById(id){
@@ -25360,6 +25499,10 @@ function renderTemple(){
     '<div class="pillars">' + GROUP.themes.map(function(p){
       return '<div class="pillar"><span>' + esc(p.ab) + '</span><b>' + esc(p.name) + '</b><em>' + esc(p.note || "") + '</em></div>';
     }).join("") + '</div>' +
+    /* §404: THE BASE IS THE CAPABILITY COMPONENT. The Temple draws from what
+       the top level carries, and a client that switched capabilities off at
+       the top is not shown a base with nothing it chose to put there. */
+    (!compOn("group", "capability") ? '</div>' :
     '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no ' + L1("theme") + '</div><div class="base-grid">' +
       GROUP.capabilities.map(function(c){
         return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
@@ -25372,7 +25515,7 @@ function renderTemple(){
               ' deliverables, ' + p.outcomes.length + ' outcomes, ' + p.milestones.length + ' milestones</span></li>';
           }).join("") + '</ul></div></details>';
       }).join("") +
-    '</div></div></div>';
+    '</div></div></div>');
 }
 
 function renderGroupFoundation(){
@@ -25390,37 +25533,56 @@ function renderGroupFoundation(){
      clauses, purpose, aspiration or values for anyone including the SMO. */
   /* Same first-line fix as the unit's (§129's audit): the lead opens with
      the pen, a line can be removed, and the first one can be written. */
-  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  return foundationBody(GROUP, "group", gpg);
+}
+
+/* §404: THE SECOND LAYER HAS A FOUNDATION OF ITS OWN (Islam: *"they can have
+   their own components as well like the company or the group if needed"*).
+   It is the GROUP's page drawn over a company's own record, never a second
+   builder (§53.5) — one page, two owners. The record rides the group's extra
+   (`GROUP.coFound[<company key>]`, no migration) and is judged exactly as the
+   group's own strategy is, so the office authors it and nobody else. */
+function renderCompanyFoundation(){
+  var k = String(TARGET || "").slice(3);
+  var gpg = authoring("foundation", "g_found") ? "foundation" : null;
+  var o = gpg ? coFoundWritable(k) : coFoundOf(k);
+  return foundationBody(o, "co:" + k, gpg);
+}
+
+function foundationBody(o, tgt, gpg){
+  /* §404: every block is a component the office may switch off. */
+  var on = function(c){ return compOn(tgt, c); };
+  return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
-      GROUP.clauses.map(function(c, ci){
+      (o.clauses || []).map(function(c, ci){
         return '<div class="clause"><dt>' +
           (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
           fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="group|' + ci +
+          (gpg ? '<button class="xbtn" data-clauserm="' + esc(tgt) + '|' + ci +
             '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
           '</dd></div>';
       }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
-      '</div>' +
+      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
+      '</div>' : '') +
       '<div class="fcol">' +
-        '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
-        '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
-          function(v){ GROUP.mission = v; }) + '</p></div>' +
-        aspirationCard(L1("aspiration"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
-          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
-          true, GROUP) +
+        (on("purpose") ? '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
+        '<p class="statement">' + fieldOr(gpg, o.mission, "big-field",
+          function(v){ o.mission = v; }) + '</p></div>' : '') +
+        aspirationCard(L1("aspiration"), o.aspiration, o.endInMind, o.keyObjectives || [], "foundation",
+          function(v){ o.aspiration = v; }, function(v){ o.endInMind = v; }, "g_found",
+          true, o, tgt) +
       '</div>' +
     '</div>' +
-    koBand(GROUP.keyObjectives, "foundation", "g_found", GROUP, true) +
+    koBand(o.keyObjectives || [], "foundation", "g_found", o, true, tgt) +
 
-    '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
+    (!on("values") ? '' : '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
-      (GROUP.values || []).map(function(v){
+      (o.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
-    '</div></div>';
+    '</div></div>');
 }
 
 /* ── UNIT · Performance (pillars live here) ──────────────────────── */
@@ -27793,7 +27955,8 @@ function koSettle(entry){
     var n = /-KO(\d+)$/.exec(String(m && m.id || ""));
     if (n && +n[1] > top) top = +n[1];
   });
-  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = "group-KO" + (++top); });
+  var pre = koPrefixOf(o);
+  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = pre + "-KO" + (++top); });
 }
 
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
@@ -27813,8 +27976,23 @@ function koSettle(entry){
    this is. It is passed rather than inferred from `isGroup`, because a unit
    also has to be renumbered afterwards and a boolean cannot say which unit
    (§96). */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner){
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner, target){
   var editing = authoring(page, acKey), pg = editing ? page : null;
+  /* §404: THE CARD CARRIES TWO COMPONENTS, the aspiration and the North Star
+     (the key objectives), and either may be switched off on its own. Off is a
+     VIEW, never a deletion — the fields stay stored and come back when the
+     component does. With the aspiration off the card still carries the
+     objectives in reading mode, headed by their own word; with both off, or
+     the aspiration off while the objectives are being written in the band,
+     there is nothing left to draw. */
+  var tgt = target || (isGroup ? "group" : (owner && owner.ukey)) || "group";
+  var aspOn = compOn(tgt, "aspiration"), koOn = compOn(tgt, "keyobj");
+  if (!aspOn) {
+    if (!koOn || editing) return '';
+    return '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+      '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+      koBlock(objectives, page, acKey, owner, isGroup, false) + '</div>';
+  }
   /* §268: THE PEN STAYS FOR THE GROUP AND GOES FOR A UNIT, and `isGroup` says
      exactly why rather than merely which: the group's Foundation is a TAB of
      its own with no section line to move onto, and a unit's is a SECTION of
@@ -27864,7 +28042,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
        was asked about: "Who we are" and the aspiration statement are short
        prose and read BETTER side by side. Stacking everything would push the
        table further down the page to solve a problem it does not have. */
-    (editing ? '' : '<div class="divide"></div>' +
+    (editing || !koOn ? '' : '<div class="divide"></div>' +
       koBlock(objectives, page, acKey, owner, isGroup, false)) +
   '</div>';
 }
@@ -27886,7 +28064,9 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
    leaving modes, so the band has to be able to decide for itself that this page
    is no longer open to whoever is now looking at it. Nothing is drawn at all
    when it is not — the band exists only while the pen is on. */
-function koBand(objectives, page, acKey, owner, isGroup){
+function koBand(objectives, page, acKey, owner, isGroup, target){
+  /* §404: the North Star switched off draws no band either. */
+  if (!compOn(target || (isGroup ? "group" : ((owner && owner.ukey) || "group")), "keyobj")) return '';
   /* §145: the band also opens for the fill grant — koEdit's gap cells then
      draw only the blanks, and Add/Remove stay gated on authoring alone. */
   if (!authoring(page, acKey) && !filling(page, acKey)) return '';
@@ -27906,7 +28086,8 @@ function renderUnitFoundation(u){
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
       "the Foundation") +
-    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+    '<div class="fgrid">' + (compOn(u.ukey, "brief")
+      ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
         return '<div class="clause"><dt>' +
@@ -27917,10 +28098,10 @@ function renderUnitFoundation(u){
           '</dd></div>';
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' +
+        '">+ Add a line</button></div>' : '') + '</div>' : '') +
       aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-        false, u) +
+        false, u, u.ukey) +
     '</div>' +
     koBand(u.keyObjectives, "foundation", "u_found", u, false);
 }
@@ -31811,6 +31992,10 @@ function holderOverview(subject){
      value cannot be seen. Reading mode keeps the card, because the objectives
      belong beside what the thing is when you are READING it. */
   var fl = filling("capfoundation", "k_found");
+  /* §404: THE TWO CARDS ARE TWO COMPONENTS — the brief ("What it is") and the
+     North Star (key objectives). Off hides the card and forgets nothing. */
+  var briefOn = compOn(t, "brief"), koOn = compOn(t, "keyobj");
+  if (!briefOn && !koOn) return "";
   var judged = isCap
     ? (capPlansInPillars(c) ? esc(L("pillar","bu")) : L("project"))
     : (fnPlansInPillars(f) ? esc(L("pillar","bu")) : L("project"));
@@ -31828,10 +32013,11 @@ function holderOverview(subject){
             " is judged by its " + judged + "."));
   /* §268: THE EDIT BAR IS ON THE SECTION LINE. */
   return fillBarOr("capfoundation", "k_found",
-      list.reduce(function(a, m){
+      (koOn ? list : []).reduce(function(a, m){
         return a + SMPRules.gapMissing("capko", m).length; }, 0),
       "the overview") +
     '<div class="fgrid">' +
+      (!briefOn ? '' :
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>' + (isCap ? L1("capability") : L1("fnword")) + '</dt><dd>' +
           esc(isCap ? c.name : f.name) + '</dd></div>' +
@@ -31866,10 +32052,10 @@ function holderOverview(subject){
           gapCell("capfoundation", "k_found", (isCap ? c : f), "def",
                   { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) +
         '</dd></div>' +
-      '</dl></div>' +
-      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
+      '</dl></div>') +
+      ((ed || fl || !koOn) ? '' : '<div class="card">' + koCard + '</div>') +
     '</div>' +
-    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '');
+    ((ed || fl) && koOn ? '<div class="card koband">' + koCard + '</div>' : '');
 }
 /* §334: AND THE TRANSITIONAL BRANCH IS GONE. §326's own comment named it —
    *"a function still CARRYING a capability keeps today's rendering underneath,
@@ -32313,6 +32499,50 @@ function navWord(key, short){
 }
 
 /* ── Terminology ─────────────────────────────────────────────────────── */
+/* ── SETUP › STRUCTURE (§404) ──────────────────────────────────────
+   Islam: *"components can be applied for all as a start and later the smo
+   can adjust the components of each unit or function."* One row per item,
+   one column per component, headed with the client's own word for it. A
+   tick is what that item SHOWS; one that differs from its level wears a
+   ring, and pressing it back to the level's answer deletes the adjustment
+   (setCompOver) rather than storing a copy of the default (§50.6). Off hides
+   and keeps what was written, which the page says once. */
+var STRUCT_COLS = ["brief","purpose","aspiration","keyobj","theme","pillar","capability","values","swot"];
+function renderStructure(){
+  var editable = grant("c_units") === "edit" && inOffice();
+  var rows = [["top", [["group", labelWord("topword","group")]]]];
+  if (midExists()) rows.push(["mid", (COMPANY_KEYS || []).filter(function(k){
+    return COMPANIES[k] && COMPANIES[k].active !== false; }).map(function(k){ return ["co:" + k, COMPANIES[k].name]; })]);
+  rows.push(["bu", activeKeys().map(function(k){ return [k, UNITS[k].name]; })]);
+  rows.push(["fn", (FUNCTION_KEYS || []).filter(function(k){
+    return FUNCTIONS[k] && FUNCTIONS[k].active !== false; }).map(function(k){ return ["fn:" + k, FUNCTIONS[k].name]; })]);
+  var lvName = { top: labelWord("topword","group"), mid: labelWord("division","bu"),
+                 bu: labelWord("unitword","bu"), fn: labelWord("fnword","bu") };
+  var body = rows.map(function(r){
+    if (!r[1].length) return "";
+    return '<tr class="stlvl"><td colspan="' + (STRUCT_COLS.length + 1) + '">' + esc(lvName[r[0]]) + '</td></tr>' +
+      r[1].map(function(it){
+        var t = it[0];
+        return '<tr><td class="stitem">' + esc(it[1]) + '</td>' + STRUCT_COLS.map(function(c){
+          var on = compOn(t, c);
+          var def = SMPRules.levelComponents(GROUP, SMPRules.structLevelOf(t)).indexOf(c) >= 0;
+          var lab = esc(labelWord(c, "bu")) + ' for ' + esc(it[1]) + (on ? ': shown' : ': hidden');
+          return '<td class="cc">' + (editable
+            ? '<button type="button" class="stdot' + (on ? ' on' : '') + (on !== def ? ' diff' : '') +
+              '" data-stover="' + esc(t) + '|' + c + '" aria-pressed="' + on + '" aria-label="' + lab + '" title="' + lab +
+              (on !== def ? ' — differs from its level' : '') + '"></button>'
+            : '<span class="stdot' + (on ? ' on' : '') + (on !== def ? ' diff' : '') + '" role="img" aria-label="' + lab + '"></span>') +
+            '</td>';
+        }).join("") + '</tr>';
+      }).join("");
+  }).join("");
+  /* The legend is a hover (1b-ii): a filled box is shown, an empty one is
+     hidden and keeps what was written, a ring differs from its level. */
+  return '<div class="cfg"><table class="unitcfg stadj"><thead><tr><th title="A filled box is shown; an empty one is hidden and keeps what was written; a ring means the item differs from its level, set in Getting started › Structure.">Item</th>' +
+    STRUCT_COLS.map(function(c){ return '<th class="cc">' + esc(labelWord(c, "bu")) + '</th>'; }).join("") +
+    '</tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
 function renderLabels(){
   var editable = grant("c_labels") === "edit";
 
@@ -42691,7 +42921,9 @@ function deckSlides(u){
      number being worked towards this cycle before the horizon it heads for —
      and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
      shifts and the slide still renders perfectly (§243's own note). */
-  var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
+  /* §404: the aspiration and the North Star are components; off draws nothing. */
+  var aimAsp = !fnAim && compOn(u.ukey, "aspiration"), aimKo = compOn(u.ukey, "keyobj");
+  var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       (aimNear
@@ -42710,14 +42942,14 @@ function deckSlides(u){
      one thing rather than printing a horizon that appears nowhere after it. */
   var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
   if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
-  if (aimRows || !fnAim)
+  if (aimRows || aimAsp)
     S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
       "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
       foundCells));
 
-  if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
+  if (aimRows || aimAsp) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
-    (fnAim ? '' :
+    (!aimAsp ? '' :
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
       (u.endInMind
@@ -42822,7 +43054,8 @@ function deckSlides(u){
       '<td class="num">' + figVsDue(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
-  if (oRows) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
+  /* §404: a switched-off North Star draws no slide. */
+  if (oRows && compOn(u.ukey, "keyobj")) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
     '<th class="num">Annual target</th><th class="num">Actual</th>' +
@@ -42844,7 +43077,8 @@ function deckSlides(u){
      MAIN'S §236.3 IS KEPT WHOLE INSIDE THE GATE: every fixed slide carries an
      anchor, so every gap between two originals is a place a picture can live.
      A function simply has no such gaps here, because it has no such slides. */
-  if (!u.fnKey) {
+  /* §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE. */
+  if (!u.fnKey && compOn(u.ukey, "swot")) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
     /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
@@ -42857,7 +43091,7 @@ function deckSlides(u){
        own hues untouched. `.seccell.t-*` had no other user and is deleted
        with them (§24). It is also what §254.5 settled for the pillar cards:
        one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page", "SWOT",
+    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
       "Where this unit is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
@@ -54028,6 +54262,11 @@ var CLIENTSETUP = (function () {
   function wc(k, form, fb){ var v = w(k, form, fb); return v.charAt(0).toUpperCase() + v.slice(1); }
   var STEPS = [
     { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
+    /* §404: THE STRUCTURE COMES SECOND, before anything is named inside it
+       (his order, from the signed-off mockup): how many levels sit above the
+       business units, what each is called, and what each carries. */
+    { k:"structure", key:"The organisation", label:"Structure",
+      q:"How is this client built, and what does each level carry?" },
     /* The questions speak the client's words too (§396): a step headed
        "Divisions" asking about "companies" is two names for one thing on one
        screen. Each word is taken as typed, never inflected (§107.8). */
@@ -54043,6 +54282,14 @@ var CLIENTSETUP = (function () {
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
   ];
   var SHAPE_STEPS = ["units", "cos", "fns", "caps", "words"];
+  /* §404: the components a level may carry, in the mockup's order, each with
+     its fixed title (what it IS) — the client's word goes in the box beside
+     it. The keys are SMPRules.STRUCT_COMPONENTS and the label keys both. */
+  var COMPONENTS = [["brief","Brief"], ["purpose","Purpose"], ["aspiration","Aspiration"],
+                    ["keyobj","North Star"], ["theme","Themes"], ["pillar","Pillars"],
+                    ["capability","Capabilities"], ["values","Values"], ["swot","SWOT"]];
+  var TOP_NAMES = [["Group","Group"], ["Company","Company"], ["Holding","Holding"]];
+  var MID_NAMES = [["Company","Companies"], ["Division","Divisions"], ["Sector","Sectors"]];
   function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
 
   /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own, so a client
@@ -54174,6 +54421,7 @@ var CLIENTSETUP = (function () {
     var ff = (PEOPLE || []).some(function (p) { return p && (p.forefront || (p.extra && p.extra.forefront)); });
     var tests = {
       client: true,
+      structure: true,
       units:  (UNIT_KEYS || []).length > 0,
       cos:    (COMPANY_KEYS || []).length > 0 || (UNIT_KEYS || []).length > 0,
       fns:    (FUNCTION_KEYS || []).length > 0,
@@ -54425,6 +54673,7 @@ var CLIENTSETUP = (function () {
   function stepBody(k){
     var box = el("div");
     if (k === "client") return clientStep(box);
+    if (k === "structure") return structureStep(box);
     if (k === "units") return listStep(box, S.shape.units, "unit");
     if (k === "cos") return companiesStep(box);
     if (k === "caps") return capsStep(box);
@@ -54803,7 +55052,7 @@ var CLIENTSETUP = (function () {
           cb.appendChild(el("span", "p", "+"));
           cb.appendChild(document.createTextNode(nm));
           cb.addEventListener("click", function () {
-            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:"pillars" }, nm));
+            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:fnDefault() }, nm));
             addThenFocus();
           });
           crow.appendChild(cb);
@@ -54813,7 +55062,7 @@ var CLIENTSETUP = (function () {
       var add = el("button", "wzadd", kind === "unit" ? "+ Add a " + w("unitword", "one", "business unit") : "+ Add a " + w("fnword", "one", "supporting function"));
       add.type = "button";
       add.addEventListener("click", function () {
-        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:"pillars" });
+        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:fnDefault() });
         addThenFocus();
       });
       box.appendChild(add);
@@ -54825,6 +55074,15 @@ var CLIENTSETUP = (function () {
   }
 
   function companiesStep(box){
+    /* §404: the Structure step said there is no second layer, so this step
+       has nothing to ask — said in words rather than drawn as an empty list
+       nobody should fill (§61, §45.2). */
+    var st = typeof SMPRules !== "undefined" && typeof GROUP !== "undefined" && SMPRules.structureOf(GROUP);
+    if (st && st.mid && st.mid.exists === false) {
+      box.appendChild(el("p", "wzwhy", "This client has no second layer — the " + w("unitword", "many", "business units") +
+        " sit straight under the top level. Change that on the Structure step."));
+      return box;
+    }
     var shape = canShape();
     var has = S.shape.companies.length > 0;
     var ch = el("div", "wzchoices");
@@ -54977,6 +55235,176 @@ var CLIENTSETUP = (function () {
   }
 
   /* The words the client uses, only the ones it has (§346.3). */
+  /* ── STRUCTURE (§404) ────────────────────────────────────────────
+     Written straight into the live graph as `GROUP.structure`, one object,
+     on the first change and not before: a client that never touches this
+     step stores nothing, and every page reads everything as on (his
+     "existing clients open with everything on, unchanged"). The first
+     change MATERIALISES what the pages already show — every component on,
+     the Temple on at the top — so nothing moves until somebody moves it.
+     The level names and the component words are LABELS and travel with the
+     shape like the words step's do, so they wait for Next like every other
+     row here. The functions' plan type is only the default a new row is
+     minted with; each function still picks its own on the next step. */
+  function structNow(){
+    var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
+    var all = COMPONENTS.map(function (c) { return c[0]; });
+    var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
+    return {
+      top: { on: lv("top"), temple: st && st.top ? st.top.temple === true : true },
+      mid: { exists: SMPRules.midExists(GROUP, COMPANIES), on: lv("mid"),
+             temple: !!(st && st.mid && st.mid.temple === true) },
+      bu:  { on: lv("bu") },
+      fn:  { on: lv("fn"), format: (st && st.fn && st.fn.format) || "pillars" },
+      over: (st && st.over) || {}
+    };
+  }
+  function structWrite(next){
+    GROUP[SMPRules.STRUCTURE] = next;
+    redraw();
+  }
+  function fnDefault(){
+    var st = typeof SMPRules !== "undefined" && typeof GROUP !== "undefined" && SMPRules.structureOf(GROUP);
+    var f = st && st.fn && st.fn.format;
+    return f === "projects" || f === "objectives" ? f : "pillars";
+  }
+  function wordOf(key){ var v = S.shape.words[key]; return v && typeof v === "object" ? v : { one: W(key, "one", ""), many: W(key, "many", "") }; }
+  function setWord(key, form, val){
+    var cur = wordOf(key); cur = { one: cur.one, many: cur.many };
+    cur[form] = val; S.shape.words[key] = cur; S.shapeDirty = true;
+  }
+  function segButtons(opts, cur, pick, ro){
+    var band = el("div", "wzband");
+    opts.forEach(function (o) {
+      var b = el("button", null, o[1]); b.type = "button";
+      b.setAttribute("aria-pressed", String(cur === o[0]));
+      if (ro) b.disabled = true;
+      b.addEventListener("click", function () { pick(o[0]); });
+      band.appendChild(b);
+    });
+    return band;
+  }
+  function namePick(box, key, pairs, freeLabel, ro){
+    var cur = wordOf(key);
+    var known = pairs.filter(function (p) { return p[1] === cur.many; })[0];
+    var opts = pairs.map(function (p) { return [p[1], p[1]]; }).concat([["__", "Another name…"]]);
+    var st = S.stOther && S.stOther[key];
+    var sel = known && !st ? known[1] : "__";
+    box.appendChild(segButtons(opts, sel, function (v) {
+      S.stOther = S.stOther || {};
+      if (v === "__") { S.stOther[key] = true; redraw(); return; }
+      S.stOther[key] = false;
+      var p = pairs.filter(function (x) { return x[1] === v; })[0];
+      setWord(key, "one", p[0]); setWord(key, "many", p[1]); redraw();
+    }, ro));
+    if (sel === "__") {
+      var row = el("div", "strow");
+      [["one", "One"], ["many", "Many"]].forEach(function (f) {
+        if (freeLabel === "one" && f[0] === "many") return;
+        var i = el("input", "fld"); i.type = "text"; i.value = cur[f[0]] || "";
+        i.setAttribute("aria-label", "The word for " + f[1].toLowerCase());
+        i.setAttribute("data-stword", key + "|" + f[0]);
+        if (ro) i.readOnly = true;
+        i.addEventListener("input", function () {
+          setWord(key, f[0], i.value);
+          if (freeLabel === "one") setWord(key, "many", i.value);
+        });
+        var w2 = el("label", "stnm"); w2.appendChild(el("span", "lab", freeLabel === "one" ? "Called" : f[1]));
+        w2.appendChild(i); row.appendChild(w2);
+      });
+      box.appendChild(row);
+    }
+  }
+  function structLevel(box, lv, k, ro){
+    var L = lv[k];
+    box.appendChild(el("p", "lab", "Components"));
+    var band = el("div", "wzband stchips");
+    COMPONENTS.forEach(function (c) {
+      var on = L.on.indexOf(c[0]) >= 0;
+      var b = el("button", null, c[1]); b.type = "button";
+      b.dataset.stcomp = k + "|" + c[0];
+      b.setAttribute("aria-pressed", String(on));
+      b.addEventListener("click", function () {
+        var nx = structNow(), l = nx[k], i = l.on.indexOf(c[0]);
+        if (i >= 0) l.on.splice(i, 1); else l.on.push(c[0]);
+        l.on.sort(function (a, b2) {
+          var ix = function (x) { for (var j = 0; j < COMPONENTS.length; j++) if (COMPONENTS[j][0] === x) return j; return 99; };
+          return ix(a) - ix(b2);
+        });
+        structWrite(nx);
+      });
+      band.appendChild(b);
+    });
+    box.appendChild(band);
+    if (L.on.length) {
+      box.appendChild(el("p", "lab", "What this client calls them — one word each, the same on every level"));
+      var names = el("div", "stnames");
+      L.on.forEach(function (key) {
+        var title = COMPONENTS.filter(function (c) { return c[0] === key; })[0][1];
+        var w2 = el("label", "stnm");
+        w2.appendChild(el("span", "lab", title));
+        var i = el("input", "fld"); i.type = "text"; i.value = wordOf(key).many;
+        i.setAttribute("data-stword", key + "|many");
+        if (ro) i.readOnly = true;
+        i.addEventListener("input", function () { setWord(key, "many", i.value); });
+        w2.appendChild(i); names.appendChild(w2);
+      });
+      box.appendChild(names);
+    }
+    if (k === "top" || k === "mid") {
+      var need = SMPRules.TEMPLE_NEEDS.filter(function (c) { return L.on.indexOf(c) < 0; });
+      var tp = el("div", "sttemple");
+      var sw = el("button", null, L.temple && !need.length ? "Temple view: on" : "Temple view: off");
+      sw.type = "button"; sw.dataset.sttemple = k;
+      sw.setAttribute("aria-pressed", String(!!(L.temple && !need.length)));
+      if (need.length) sw.disabled = true;
+      sw.addEventListener("click", function () { var nx = structNow(); nx[k].temple = !nx[k].temple; structWrite(nx); });
+      var band2 = el("div", "wzband"); band2.appendChild(sw); tp.appendChild(band2);
+      tp.appendChild(el("span", "wzwhy", need.length
+        ? "Needs " + need.map(function (c) { return COMPONENTS.filter(function (x) { return x[0] === c; })[0][1]; }).join(", ") + " ticked."
+        : "Draws the picture from the aspiration (roof), the North Star and the themes (columns)" +
+          (L.on.indexOf("capability") >= 0 ? ", and the capabilities (base)." : ".")));
+      box.appendChild(tp);
+    }
+  }
+  function structureStep(box){
+    var ro = !canShape();
+    var lv = structNow();
+    var card = function (tag) { var c = el("section", "stcard"); c.appendChild(el("span", "tag", tag)); box.appendChild(c); return c; };
+
+    var top = card("Top level");
+    top.appendChild(el("p", "lab", "Called"));
+    namePick(top, "topword", TOP_NAMES, "one", ro);
+    structLevel(top, lv, "top", ro);
+
+    var mid = card("Second layer");
+    mid.appendChild(el("p", "lab", "Exists"));
+    mid.appendChild(segButtons([[true, "Yes"], [false, "No"]], lv.mid.exists, function (v) {
+      var nx = structNow(); nx.mid.exists = v; structWrite(nx);
+    }));
+    if (lv.mid.exists) {
+      mid.appendChild(el("p", "lab", "Called"));
+      namePick(mid, "division", MID_NAMES, "both", ro);
+      structLevel(mid, lv, "mid", ro);
+    }
+
+    var bu = card(W("unitword", "many", "Business units"));
+    structLevel(bu, lv, "bu", ro);
+
+    var fn = card(W("fnword", "many", "Supporting functions"));
+    fn.appendChild(el("p", "lab", "Plan in, by default"));
+    fn.appendChild(segButtons(FORMATS, lv.fn.format, function (v) {
+      var nx = structNow(); nx.fn.format = v; structWrite(nx);
+    }));
+    structLevel(fn, lv, "fn", ro);
+
+    box.appendChild(el("p", "wzwhy",
+      "These ticks apply to every item at a level; each one can be adjusted later on Setup › Structure. " +
+      "Switching a component off hides it and keeps what was written."));
+    if (ro) box.appendChild(el("p", "wzwhy", "The names are changed on Setup › Terminology now that this client has a plan in it."));
+    return box;
+  }
+
   function wordsStep(box){
     var shape = canShape();
     /* Both forms, as Setup › Terminology asks them (§395): the word for
@@ -57082,7 +57510,10 @@ var SYNC = (function () {
              fill rather than a dead end (§61) — and nothing about the
              navigation depends on the data, so a tab cannot appear and
              disappear as rows arrive (§45.2). */
-          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
+          /* §404: THE OVERVIEW IS THE BRIEF AND THE NORTH STAR, so it is
+             offered while either is switched on for this function. */
+          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
+                    when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -57106,14 +57537,29 @@ var SYNC = (function () {
     co: [
       { k:"performance", ac:"g_perf", label:"Performance", primary:true,
         render:renderCompanyPerformance },
+      /* §404: THE SECOND LAYER'S OWN FOUNDATION, offered only once the office
+         has SAID which components that layer carries — a client set up before
+         the structure step opens exactly as it did (his "existing clients open
+         with everything on, unchanged" means no new tab either). */
+      { k:"foundation", ac:"g_found", label:"Foundation", render:renderCompanyFoundation,
+        when: function(t){
+          var st = SMPRules.structureOf(GROUP), m = st && st.mid;
+          return !!(m && Array.isArray(m.on)) &&
+            ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
+        } },
       MY_TAB,
       LIB_TAB
     ],
     group: [
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
-      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
+      /* §404: A TAB IS OFFERED WHILE SOMETHING ON IT IS SWITCHED ON. The
+         Foundation holds five components; the Temple is a picture drawn from
+         three of them and is a switch of its own (templeOn). */
+      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation,
+        when: function(){ return ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
-      { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
+      { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
+        when: function(){ return templeOn("group"); } },
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
       MY_TAB,
       LIB_TAB
@@ -57135,8 +57581,11 @@ var SYNC = (function () {
              moves and no column appears on Roles & access — the tree is part
              of the plan's authorship and is refused to everybody else by the
              rule that already refuses the plan (§42). */
-          return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
-                  { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
+          /* §404: each section is offered while its components are on. */
+          return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation,
+                    when: function(t){ return ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
+                  { k:"swot",  ac:"u_anal",  label:L("swot"),    render:renderUnitAnalysis,
+                    when: function(t){ return compOn(t, "swot"); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
@@ -57289,6 +57738,13 @@ var SYNC = (function () {
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
+      /* §404: Setup › Structure — which component each item shows. The
+         office's (the server classifies it `setup`); the level answers are
+         set on Getting started's Structure step, this is the per-item half. */
+      { k:"structure", ac:"c_units", grp:"run", mod:"client", label:"Structure", glyph:"⊞",
+        when: function(){ return inOffice(); },
+        find:"structure levels components brief purpose aspiration north star key objectives themes pillars capabilities values swot hide show temple",
+        render:renderStructure },
       { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
@@ -58048,7 +58504,7 @@ var SYNC = (function () {
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:labelWord("topword","group") });  /* §404: the client's own word */
     companiesReachable().forEach(function(ck){
       if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
@@ -58915,7 +59371,7 @@ var SYNC = (function () {
       }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
-        '>' + t.label + '</button>';
+        '>' + esc(t.label) + '</button>';   /* §404: a typed word, so escaped (esc is idempotent, §395) */
     });
     /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136, Islam: "Decision 1: B") ──
        The destinations go into their own scroll region; everything that is a
@@ -62244,7 +62700,7 @@ var SYNC = (function () {
         /* The prefix a unit's ids already use, and "group" for the group's —
            read off the owner rather than passed in, so the two cannot be given
            different answers at two call sites. */
-        e.list.push(koMint(e.list, (e.owner && e.owner.ukey) || "group"));
+        e.list.push(koMint(e.list, koPrefixOf(e.owner)));
         koSettle(e);
         fieldSaved();
         paint();
@@ -65718,15 +66174,25 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* §404: one item's component, from Setup › Structure. */
+    document.querySelectorAll("[data-stover]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice()) return;
+        var a = b.dataset.stover, i = a.lastIndexOf("|"), t = a.slice(0, i), c = a.slice(i + 1);
+        setCompOver(t, c, !compOn(t, c));
+        fieldSaved(); paint();
+      });
+    });
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.clauseadd;
         /* §212: a function's page is gated on the FUNCTION's key. Gating an
            `fn:` target on `u_found` is §211's fault exactly, and here it fails
            CLOSED — the button renders and the click returns silently. */
-        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
+        var isCo = t.indexOf("co:") === 0;
+        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
@@ -65736,8 +66202,9 @@ var SYNC = (function () {
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
-        var o = t === "group" ? GROUP : unitLikeWritable(t);
+        var isCo = t.indexOf("co:") === 0;
+        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
             !confirm("Remove this line? This cannot be undone here.")) return;

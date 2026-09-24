@@ -54,7 +54,17 @@ var LABELS = {
     { key:"fnword",      internal:"Supporting Function", group:"Supporting Function", bu:"Supporting Functions",
       note:"The supporting functions that enable the strategy" },
     { key:"project",     internal:"Project",             group:"Project",             bu:"Projects",
-      note:"The group of activities with correlated timelines and outcomes" }
+      note:"The group of activities with correlated timelines and outcomes" },
+    /* §404: the structure's own three words. The DEFAULTS are what the screen
+       already says ("Group" on the navigation, "Who we are" over the brief, the
+       SWOT section's own heading), so a client that never opens the structure
+       step reads exactly what it read before (Islam's fifth answer). */
+    { key:"topword",     internal:"Group",               group:"Group",               bu:"Group",
+      note:"The level at the top: the group, the company, or the client's own word" },
+    { key:"brief",       internal:"Brief",               group:"Who we are",          bu:"Who we are",
+      note:"A short description of who this part of the business is" },
+    { key:"swot",        internal:"SWOT",                group:"SWOT",                bu:"SWOT",
+      note:"Strengths, weaknesses, opportunities and threats" }
   ]
 };
 /* What the platform would say, kept BEFORE hydration replaces the list with
@@ -128,6 +138,59 @@ function world(){
   });
 }
 function personRoles(p){ return SMPRules.personRoles(world(), p); }
+
+/* ── THE CLIENT'S STRUCTURE (§404) — the browser's two halves ──────────────
+   READING asks the shared rule (one answer for the page and the server,
+   §42); WRITING mints the stored object only when something is being
+   changed, and gives the key back the moment nothing differs from the
+   level's default, so an untouched client keeps no structure at all
+   (§50.6). */
+function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+function templeOn(target){ return SMPRules.templeOn(GROUP, target); }
+function midExists(){ return SMPRules.midExists(GROUP, COMPANIES); }
+function structWritable(){
+  var s = GROUP[SMPRules.STRUCTURE];
+  if (!s || typeof s !== "object") s = GROUP[SMPRules.STRUCTURE] = {};
+  return s;
+}
+/* §404: A COMPANY'S OWN FOUNDATION, riding the group's extra as
+   `GROUP.coFound[<key>]`. Two halves (§50.6): the reader hands out a shared
+   frozen empty and creates nothing (§42), the writer mints the record. */
+var CO_FOUND_EMPTY = Object.freeze({ clauses: Object.freeze([]), mission: "",
+  aspiration: "", endInMind: "", keyObjectives: Object.freeze([]), values: Object.freeze([]) });
+function coFoundOf(k){
+  var m = GROUP.coFound;
+  return (m && typeof m === "object" && m[k]) || CO_FOUND_EMPTY;
+}
+function coFoundWritable(k){
+  if (!GROUP.coFound || typeof GROUP.coFound !== "object") GROUP.coFound = {};
+  var o = GROUP.coFound[k];
+  if (!o || typeof o !== "object") o = GROUP.coFound[k] = {};
+  ["clauses", "keyObjectives", "values"].forEach(function(f){ if (!Array.isArray(o[f])) o[f] = []; });
+  ["mission", "aspiration", "endInMind"].forEach(function(f){ if (typeof o[f] !== "string") o[f] = ""; });
+  return o;
+}
+/* Which prefix an objective's id takes: a unit's key, "co-<key>" for a
+   company, "group" otherwise — read off the owner (§96.2's rule). */
+function koPrefixOf(owner){
+  if (!owner) return "group";
+  if (owner.ukey) return owner.ukey;
+  var m = GROUP.coFound || {};
+  for (var k in m) if (m[k] === owner) return "co-" + k;
+  return "group";
+}
+/* One unit's or function's adjustment. An answer equal to its level's is not
+   an adjustment and is deleted, and an emptied map goes with it. */
+function setCompOver(target, comp, on){
+  var s = structWritable(), lvl = SMPRules.structLevelOf(target);
+  var def = SMPRules.levelComponents(GROUP, lvl).indexOf(comp) >= 0;
+  s.over = s.over || {};
+  var o = s.over[target] = s.over[target] || {};
+  if (on === def) delete o[comp]; else o[comp] = !!on;
+  if (!Object.keys(o).length) delete s.over[target];
+  if (!Object.keys(s.over).length) delete s.over;
+  if (!Object.keys(s).length) delete GROUP[SMPRules.STRUCTURE];
+}
 function personRoleKeys(p){ return SMPRules.personRoleKeys(world(), p); }
 
 /* Does the person currently being viewed as hold this role at all? The
@@ -3936,7 +3999,9 @@ function functionOf(key){ return FUNCTIONS[key] || null; }
    argument for running the whole suite rather than the file you edited. */
 function foundKeyFor(target){
   var t = String(target || "");
-  if (t === "group") return "g_found";
+  /* §404: a company's Foundation is the group's own strategy, drawn over the
+     company's record, so it is asked the group's key. */
+  if (t === "group" || t.indexOf("co:") === 0) return "g_found";
   return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
 }
 function koHolderById(id){

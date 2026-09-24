@@ -225,15 +225,3 @@
    "…as who on this client's registe" — a control asking a question it cannot
    finish. */
 .csetup .row.tmadd .fld { flex:0 1 auto; max-width:340px; }
-
-/* §404: the Structure step. Its pills are the flow's own .wzband (§53.5);
-   what is new is the card each level sits in, the row of name boxes, and
-   the Temple line — each the smallest shape that holds it. */
-.csetup .stcard { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface);
-  padding:12px 14px 14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
-.csetup .stcard > .tag { align-self:flex-start; }
-.csetup .stcard > .lab { margin:4px 0 0; }
-.csetup .stnames, .csetup .strow { display:flex; flex-wrap:wrap; gap:8px 12px; }
-.csetup .stnm { display:flex; flex-direction:column; gap:3px; min-width:150px; flex:1 1 150px; max-width:240px; }
-.csetup .sttemple { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.csetup .sttemple .wzwhy { margin:0; }

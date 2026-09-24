@@ -2420,6 +2420,10 @@ function renderTemple(){
     '<div class="pillars">' + GROUP.themes.map(function(p){
       return '<div class="pillar"><span>' + esc(p.ab) + '</span><b>' + esc(p.name) + '</b><em>' + esc(p.note || "") + '</em></div>';
     }).join("") + '</div>' +
+    /* §404: THE BASE IS THE CAPABILITY COMPONENT. The Temple draws from what
+       the top level carries, and a client that switched capabilities off at
+       the top is not shown a base with nothing it chose to put there. */
+    (!compOn("group", "capability") ? '</div>' :
     '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no ' + L1("theme") + '</div><div class="base-grid">' +
       GROUP.capabilities.map(function(c){
         return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
@@ -2432,7 +2436,7 @@ function renderTemple(){
               ' deliverables, ' + p.outcomes.length + ' outcomes, ' + p.milestones.length + ' milestones</span></li>';
           }).join("") + '</ul></div></details>';
       }).join("") +
-    '</div></div></div>';
+    '</div></div></div>');
 }
 
 function renderGroupFoundation(){
@@ -2450,37 +2454,56 @@ function renderGroupFoundation(){
      clauses, purpose, aspiration or values for anyone including the SMO. */
   /* Same first-line fix as the unit's (§129's audit): the lead opens with
      the pen, a line can be removed, and the first one can be written. */
-  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  return foundationBody(GROUP, "group", gpg);
+}
+
+/* §404: THE SECOND LAYER HAS A FOUNDATION OF ITS OWN (Islam: *"they can have
+   their own components as well like the company or the group if needed"*).
+   It is the GROUP's page drawn over a company's own record, never a second
+   builder (§53.5) — one page, two owners. The record rides the group's extra
+   (`GROUP.coFound[<company key>]`, no migration) and is judged exactly as the
+   group's own strategy is, so the office authors it and nobody else. */
+function renderCompanyFoundation(){
+  var k = String(TARGET || "").slice(3);
+  var gpg = authoring("foundation", "g_found") ? "foundation" : null;
+  var o = gpg ? coFoundWritable(k) : coFoundOf(k);
+  return foundationBody(o, "co:" + k, gpg);
+}
+
+function foundationBody(o, tgt, gpg){
+  /* §404: every block is a component the office may switch off. */
+  var on = function(c){ return compOn(tgt, c); };
+  return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
-      GROUP.clauses.map(function(c, ci){
+      (o.clauses || []).map(function(c, ci){
         return '<div class="clause"><dt>' +
           (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
           fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="group|' + ci +
+          (gpg ? '<button class="xbtn" data-clauserm="' + esc(tgt) + '|' + ci +
             '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
           '</dd></div>';
       }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
-      '</div>' +
+      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
+      '</div>' : '') +
       '<div class="fcol">' +
-        '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
-        '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
-          function(v){ GROUP.mission = v; }) + '</p></div>' +
-        aspirationCard(L1("aspiration"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
-          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
-          true, GROUP) +
+        (on("purpose") ? '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
+        '<p class="statement">' + fieldOr(gpg, o.mission, "big-field",
+          function(v){ o.mission = v; }) + '</p></div>' : '') +
+        aspirationCard(L1("aspiration"), o.aspiration, o.endInMind, o.keyObjectives || [], "foundation",
+          function(v){ o.aspiration = v; }, function(v){ o.endInMind = v; }, "g_found",
+          true, o, tgt) +
       '</div>' +
     '</div>' +
-    koBand(GROUP.keyObjectives, "foundation", "g_found", GROUP, true) +
+    koBand(o.keyObjectives || [], "foundation", "g_found", o, true, tgt) +
 
-    '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
+    (!on("values") ? '' : '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
-      (GROUP.values || []).map(function(v){
+      (o.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
-    '</div></div>';
+    '</div></div>');
 }
 
 /* ── UNIT · Performance (pillars live here) ──────────────────────── */
@@ -4853,7 +4876,8 @@ function koSettle(entry){
     var n = /-KO(\d+)$/.exec(String(m && m.id || ""));
     if (n && +n[1] > top) top = +n[1];
   });
-  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = "group-KO" + (++top); });
+  var pre = koPrefixOf(o);
+  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = pre + "-KO" + (++top); });
 }
 
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
@@ -4873,8 +4897,23 @@ function koSettle(entry){
    this is. It is passed rather than inferred from `isGroup`, because a unit
    also has to be renumbered afterwards and a boolean cannot say which unit
    (§96). */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner){
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner, target){
   var editing = authoring(page, acKey), pg = editing ? page : null;
+  /* §404: THE CARD CARRIES TWO COMPONENTS, the aspiration and the North Star
+     (the key objectives), and either may be switched off on its own. Off is a
+     VIEW, never a deletion — the fields stay stored and come back when the
+     component does. With the aspiration off the card still carries the
+     objectives in reading mode, headed by their own word; with both off, or
+     the aspiration off while the objectives are being written in the band,
+     there is nothing left to draw. */
+  var tgt = target || (isGroup ? "group" : (owner && owner.ukey)) || "group";
+  var aspOn = compOn(tgt, "aspiration"), koOn = compOn(tgt, "keyobj");
+  if (!aspOn) {
+    if (!koOn || editing) return '';
+    return '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+      '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+      koBlock(objectives, page, acKey, owner, isGroup, false) + '</div>';
+  }
   /* §268: THE PEN STAYS FOR THE GROUP AND GOES FOR A UNIT, and `isGroup` says
      exactly why rather than merely which: the group's Foundation is a TAB of
      its own with no section line to move onto, and a unit's is a SECTION of
@@ -4924,7 +4963,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
        was asked about: "Who we are" and the aspiration statement are short
        prose and read BETTER side by side. Stacking everything would push the
        table further down the page to solve a problem it does not have. */
-    (editing ? '' : '<div class="divide"></div>' +
+    (editing || !koOn ? '' : '<div class="divide"></div>' +
       koBlock(objectives, page, acKey, owner, isGroup, false)) +
   '</div>';
 }
@@ -4946,7 +4985,9 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
    leaving modes, so the band has to be able to decide for itself that this page
    is no longer open to whoever is now looking at it. Nothing is drawn at all
    when it is not — the band exists only while the pen is on. */
-function koBand(objectives, page, acKey, owner, isGroup){
+function koBand(objectives, page, acKey, owner, isGroup, target){
+  /* §404: the North Star switched off draws no band either. */
+  if (!compOn(target || (isGroup ? "group" : ((owner && owner.ukey) || "group")), "keyobj")) return '';
   /* §145: the band also opens for the fill grant — koEdit's gap cells then
      draw only the blanks, and Add/Remove stay gated on authoring alone. */
   if (!authoring(page, acKey) && !filling(page, acKey)) return '';
@@ -4966,7 +5007,8 @@ function renderUnitFoundation(u){
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
       "the Foundation") +
-    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+    '<div class="fgrid">' + (compOn(u.ukey, "brief")
+      ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
         return '<div class="clause"><dt>' +
@@ -4977,10 +5019,10 @@ function renderUnitFoundation(u){
           '</dd></div>';
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' +
+        '">+ Add a line</button></div>' : '') + '</div>' : '') +
       aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-        false, u) +
+        false, u, u.ukey) +
     '</div>' +
     koBand(u.keyObjectives, "foundation", "u_found", u, false);
 }
@@ -8871,6 +8913,10 @@ function holderOverview(subject){
      value cannot be seen. Reading mode keeps the card, because the objectives
      belong beside what the thing is when you are READING it. */
   var fl = filling("capfoundation", "k_found");
+  /* §404: THE TWO CARDS ARE TWO COMPONENTS — the brief ("What it is") and the
+     North Star (key objectives). Off hides the card and forgets nothing. */
+  var briefOn = compOn(t, "brief"), koOn = compOn(t, "keyobj");
+  if (!briefOn && !koOn) return "";
   var judged = isCap
     ? (capPlansInPillars(c) ? esc(L("pillar","bu")) : L("project"))
     : (fnPlansInPillars(f) ? esc(L("pillar","bu")) : L("project"));
@@ -8888,10 +8934,11 @@ function holderOverview(subject){
             " is judged by its " + judged + "."));
   /* §268: THE EDIT BAR IS ON THE SECTION LINE. */
   return fillBarOr("capfoundation", "k_found",
-      list.reduce(function(a, m){
+      (koOn ? list : []).reduce(function(a, m){
         return a + SMPRules.gapMissing("capko", m).length; }, 0),
       "the overview") +
     '<div class="fgrid">' +
+      (!briefOn ? '' :
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
         '<div class="clause"><dt>' + (isCap ? L1("capability") : L1("fnword")) + '</dt><dd>' +
           esc(isCap ? c.name : f.name) + '</dd></div>' +
@@ -8926,10 +8973,10 @@ function holderOverview(subject){
           gapCell("capfoundation", "k_found", (isCap ? c : f), "def",
                   { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) +
         '</dd></div>' +
-      '</dl></div>' +
-      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
+      '</dl></div>') +
+      ((ed || fl || !koOn) ? '' : '<div class="card">' + koCard + '</div>') +
     '</div>' +
-    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '');
+    ((ed || fl) && koOn ? '<div class="card koband">' + koCard + '</div>' : '');
 }
 /* §334: AND THE TRANSITIONAL BRANCH IS GONE. §326's own comment named it —
    *"a function still CARRYING a capability keeps today's rendering underneath,

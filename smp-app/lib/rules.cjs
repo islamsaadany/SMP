@@ -3800,6 +3800,75 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      own: nothing renumbers `extra`, so an id minted here survives a row
      being deleted above it. */
 
+  /* ── THE CLIENT'S STRUCTURE (§404) ────────────────────────────────────
+     Islam, of a client set up from nothing: *"when I start the setup of the
+     company we need to set the structure, the levels and the components in
+     each level from the start"*, and of the drawing, *"yes build it"*.
+
+     FOUR LEVELS AND NO MORE: the top (a group, a company, the client's own
+     word), an optional second layer (companies, divisions), then the business
+     units and the supporting functions. Each level carries a set of
+     COMPONENTS, ticked from one list, and each unit or function may be
+     adjusted afterwards (`over`, keyed by the platform's own target spelling:
+     "group", "co:<key>", a unit key, "fn:<key>").
+
+     STORED AS AN ABSENCE (§50.6) and read as EVERYTHING ON, which is Islam's
+     fifth answer: an existing client opens exactly as it does today. Switching
+     a component off HIDES it and never deletes what was written (his fourth),
+     so this is a view over the plan and never a change to it.
+
+     A READER THAT CREATES NOTHING (§42): every answer comes off a frozen
+     default, so asking cannot put a phantom change into a save. */
+  var STRUCTURE = "structure";
+  var STRUCT_COMPONENTS = ["brief", "purpose", "aspiration", "keyobj", "theme",
+                           "pillar", "capability", "values", "swot"];
+  var STRUCT_LEVELS = ["top", "mid", "bu", "fn"];
+  /* The TEMPLE is not a component (his first answer): it is a way of DRAWING
+     three that are, so it can only be on where all three are. Capabilities
+     join the drawing as its base when they are ticked, and do not block it. */
+  var TEMPLE_NEEDS = ["aspiration", "keyobj", "theme"];
+  function structureOf(group) {
+    var s = group && group[STRUCTURE];
+    return s && typeof s === "object" ? s : null;
+  }
+  function structLevelOf(target) {
+    var t = String(target || "");
+    if (!t || t === "group") return "top";
+    if (t.indexOf("co:") === 0) return "mid";
+    if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) return "fn";
+    return "bu";
+  }
+  function levelComponents(group, level) {
+    var s = structureOf(group), l = s && s[level];
+    return l && Array.isArray(l.on) ? l.on : STRUCT_COMPONENTS;
+  }
+  /* The one question every page asks. A per-item answer wins over the
+     level's; a component the platform does not know is ON, so a key added
+     tomorrow is never hidden by a list written before it existed (§30.2). */
+  function compOn(group, target, comp) {
+    if (STRUCT_COMPONENTS.indexOf(comp) < 0) return true;
+    var s = structureOf(group);
+    if (!s) return true;
+    var o = s.over && s.over[String(target || "group")];
+    if (o && typeof o[comp] === "boolean") return o[comp];
+    return levelComponents(group, structLevelOf(target)).indexOf(comp) >= 0;
+  }
+  function templeOn(group, target) {
+    var level = structLevelOf(target);
+    if (level !== "top" && level !== "mid") return false;
+    var s = structureOf(group), l = s && s[level];
+    var want = l ? l.temple === true : level === "top";
+    return want && TEMPLE_NEEDS.every(function (c) { return compOn(group, target, c); });
+  }
+  /* Whether the second layer exists. Unsaid, it exists exactly when the
+     client holds a company, which is what every client set up before §404
+     already shows. Said, it is what the office said. */
+  function midExists(group, companies) {
+    var s = structureOf(group), m = s && s.mid;
+    if (m && typeof m.exists === "boolean") return m.exists;
+    return Object.keys(companies || {}).length > 0;
+  }
+
   var DRIVERS = "drivers";          /* on a unit's extra   */
   var SEASONS = "seasons";          /* on the group's extra */
   /* WHETHER THE CLIENT USES REVENUE DRIVERS AT ALL (Islam, 2026-09-23: *"this
@@ -4313,6 +4382,11 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     PRESENT_MINS: PRESENT_MINS, presentMinsMap: presentMinsMap,
     LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
     SETUP_DONE: SETUP_DONE, setupDone: setupDone,
+    STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
+    STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
+    structureOf: structureOf, structLevelOf: structLevelOf,
+    levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
+    midExists: midExists,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,

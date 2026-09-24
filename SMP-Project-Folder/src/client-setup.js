@@ -274,6 +274,11 @@ var CLIENTSETUP = (function () {
   function wc(k, form, fb){ var v = w(k, form, fb); return v.charAt(0).toUpperCase() + v.slice(1); }
   var STEPS = [
     { k:"client", key:"The client",       label:"The client",     q:"Which client is this?" },
+    /* §404: THE STRUCTURE COMES SECOND, before anything is named inside it
+       (his order, from the signed-off mockup): how many levels sit above the
+       business units, what each is called, and what each carries. */
+    { k:"structure", key:"The organisation", label:"Structure",
+      q:"How is this client built, and what does each level carry?" },
     /* The questions speak the client's words too (§396): a step headed
        "Divisions" asking about "companies" is two names for one thing on one
        screen. Each word is taken as typed, never inflected (§107.8). */
@@ -289,6 +294,14 @@ var CLIENTSETUP = (function () {
     { k:"office", key:"People",           label:"The office",     q:"Who runs the strategy office?" }
   ];
   var SHAPE_STEPS = ["units", "cos", "fns", "caps", "words"];
+  /* §404: the components a level may carry, in the mockup's order, each with
+     its fixed title (what it IS) — the client's word goes in the box beside
+     it. The keys are SMPRules.STRUCT_COMPONENTS and the label keys both. */
+  var COMPONENTS = [["brief","Brief"], ["purpose","Purpose"], ["aspiration","Aspiration"],
+                    ["keyobj","North Star"], ["theme","Themes"], ["pillar","Pillars"],
+                    ["capability","Capabilities"], ["values","Values"], ["swot","SWOT"]];
+  var TOP_NAMES = [["Group","Group"], ["Company","Company"], ["Holding","Holding"]];
+  var MID_NAMES = [["Company","Companies"], ["Division","Divisions"], ["Sector","Sectors"]];
   function stepIdx(k){ for (var i = 0; i < STEPS.length; i++) if (STEPS[i].k === k) return i; return 0; }
 
   /* THE STANDARD INDUSTRY LIST — Strategy-Formulation's own, so a client
@@ -420,6 +433,7 @@ var CLIENTSETUP = (function () {
     var ff = (PEOPLE || []).some(function (p) { return p && (p.forefront || (p.extra && p.extra.forefront)); });
     var tests = {
       client: true,
+      structure: true,
       units:  (UNIT_KEYS || []).length > 0,
       cos:    (COMPANY_KEYS || []).length > 0 || (UNIT_KEYS || []).length > 0,
       fns:    (FUNCTION_KEYS || []).length > 0,
@@ -671,6 +685,7 @@ var CLIENTSETUP = (function () {
   function stepBody(k){
     var box = el("div");
     if (k === "client") return clientStep(box);
+    if (k === "structure") return structureStep(box);
     if (k === "units") return listStep(box, S.shape.units, "unit");
     if (k === "cos") return companiesStep(box);
     if (k === "caps") return capsStep(box);
@@ -1049,7 +1064,7 @@ var CLIENTSETUP = (function () {
           cb.appendChild(el("span", "p", "+"));
           cb.appendChild(document.createTextNode(nm));
           cb.addEventListener("click", function () {
-            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:"pillars" }, nm));
+            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:fnDefault() }, nm));
             addThenFocus();
           });
           crow.appendChild(cb);
@@ -1059,7 +1074,7 @@ var CLIENTSETUP = (function () {
       var add = el("button", "wzadd", kind === "unit" ? "+ Add a " + w("unitword", "one", "business unit") : "+ Add a " + w("fnword", "one", "supporting function"));
       add.type = "button";
       add.addEventListener("click", function () {
-        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:"pillars" });
+        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:fnDefault() });
         addThenFocus();
       });
       box.appendChild(add);
@@ -1071,6 +1086,15 @@ var CLIENTSETUP = (function () {
   }
 
   function companiesStep(box){
+    /* §404: the Structure step said there is no second layer, so this step
+       has nothing to ask — said in words rather than drawn as an empty list
+       nobody should fill (§61, §45.2). */
+    var st = typeof SMPRules !== "undefined" && typeof GROUP !== "undefined" && SMPRules.structureOf(GROUP);
+    if (st && st.mid && st.mid.exists === false) {
+      box.appendChild(el("p", "wzwhy", "This client has no second layer — the " + w("unitword", "many", "business units") +
+        " sit straight under the top level. Change that on the Structure step."));
+      return box;
+    }
     var shape = canShape();
     var has = S.shape.companies.length > 0;
     var ch = el("div", "wzchoices");
@@ -1223,6 +1247,176 @@ var CLIENTSETUP = (function () {
   }
 
   /* The words the client uses, only the ones it has (§346.3). */
+  /* ── STRUCTURE (§404) ────────────────────────────────────────────
+     Written straight into the live graph as `GROUP.structure`, one object,
+     on the first change and not before: a client that never touches this
+     step stores nothing, and every page reads everything as on (his
+     "existing clients open with everything on, unchanged"). The first
+     change MATERIALISES what the pages already show — every component on,
+     the Temple on at the top — so nothing moves until somebody moves it.
+     The level names and the component words are LABELS and travel with the
+     shape like the words step's do, so they wait for Next like every other
+     row here. The functions' plan type is only the default a new row is
+     minted with; each function still picks its own on the next step. */
+  function structNow(){
+    var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
+    var all = COMPONENTS.map(function (c) { return c[0]; });
+    var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
+    return {
+      top: { on: lv("top"), temple: st && st.top ? st.top.temple === true : true },
+      mid: { exists: SMPRules.midExists(GROUP, COMPANIES), on: lv("mid"),
+             temple: !!(st && st.mid && st.mid.temple === true) },
+      bu:  { on: lv("bu") },
+      fn:  { on: lv("fn"), format: (st && st.fn && st.fn.format) || "pillars" },
+      over: (st && st.over) || {}
+    };
+  }
+  function structWrite(next){
+    GROUP[SMPRules.STRUCTURE] = next;
+    redraw();
+  }
+  function fnDefault(){
+    var st = typeof SMPRules !== "undefined" && typeof GROUP !== "undefined" && SMPRules.structureOf(GROUP);
+    var f = st && st.fn && st.fn.format;
+    return f === "projects" || f === "objectives" ? f : "pillars";
+  }
+  function wordOf(key){ var v = S.shape.words[key]; return v && typeof v === "object" ? v : { one: W(key, "one", ""), many: W(key, "many", "") }; }
+  function setWord(key, form, val){
+    var cur = wordOf(key); cur = { one: cur.one, many: cur.many };
+    cur[form] = val; S.shape.words[key] = cur; S.shapeDirty = true;
+  }
+  function segButtons(opts, cur, pick, ro){
+    var band = el("div", "wzband");
+    opts.forEach(function (o) {
+      var b = el("button", null, o[1]); b.type = "button";
+      b.setAttribute("aria-pressed", String(cur === o[0]));
+      if (ro) b.disabled = true;
+      b.addEventListener("click", function () { pick(o[0]); });
+      band.appendChild(b);
+    });
+    return band;
+  }
+  function namePick(box, key, pairs, freeLabel, ro){
+    var cur = wordOf(key);
+    var known = pairs.filter(function (p) { return p[1] === cur.many; })[0];
+    var opts = pairs.map(function (p) { return [p[1], p[1]]; }).concat([["__", "Another name…"]]);
+    var st = S.stOther && S.stOther[key];
+    var sel = known && !st ? known[1] : "__";
+    box.appendChild(segButtons(opts, sel, function (v) {
+      S.stOther = S.stOther || {};
+      if (v === "__") { S.stOther[key] = true; redraw(); return; }
+      S.stOther[key] = false;
+      var p = pairs.filter(function (x) { return x[1] === v; })[0];
+      setWord(key, "one", p[0]); setWord(key, "many", p[1]); redraw();
+    }, ro));
+    if (sel === "__") {
+      var row = el("div", "strow");
+      [["one", "One"], ["many", "Many"]].forEach(function (f) {
+        if (freeLabel === "one" && f[0] === "many") return;
+        var i = el("input", "fld"); i.type = "text"; i.value = cur[f[0]] || "";
+        i.setAttribute("aria-label", "The word for " + f[1].toLowerCase());
+        i.setAttribute("data-stword", key + "|" + f[0]);
+        if (ro) i.readOnly = true;
+        i.addEventListener("input", function () {
+          setWord(key, f[0], i.value);
+          if (freeLabel === "one") setWord(key, "many", i.value);
+        });
+        var w2 = el("label", "stnm"); w2.appendChild(el("span", "lab", freeLabel === "one" ? "Called" : f[1]));
+        w2.appendChild(i); row.appendChild(w2);
+      });
+      box.appendChild(row);
+    }
+  }
+  function structLevel(box, lv, k, ro){
+    var L = lv[k];
+    box.appendChild(el("p", "lab", "Components"));
+    var band = el("div", "wzband stchips");
+    COMPONENTS.forEach(function (c) {
+      var on = L.on.indexOf(c[0]) >= 0;
+      var b = el("button", null, c[1]); b.type = "button";
+      b.dataset.stcomp = k + "|" + c[0];
+      b.setAttribute("aria-pressed", String(on));
+      b.addEventListener("click", function () {
+        var nx = structNow(), l = nx[k], i = l.on.indexOf(c[0]);
+        if (i >= 0) l.on.splice(i, 1); else l.on.push(c[0]);
+        l.on.sort(function (a, b2) {
+          var ix = function (x) { for (var j = 0; j < COMPONENTS.length; j++) if (COMPONENTS[j][0] === x) return j; return 99; };
+          return ix(a) - ix(b2);
+        });
+        structWrite(nx);
+      });
+      band.appendChild(b);
+    });
+    box.appendChild(band);
+    if (L.on.length) {
+      box.appendChild(el("p", "lab", "What this client calls them — one word each, the same on every level"));
+      var names = el("div", "stnames");
+      L.on.forEach(function (key) {
+        var title = COMPONENTS.filter(function (c) { return c[0] === key; })[0][1];
+        var w2 = el("label", "stnm");
+        w2.appendChild(el("span", "lab", title));
+        var i = el("input", "fld"); i.type = "text"; i.value = wordOf(key).many;
+        i.setAttribute("data-stword", key + "|many");
+        if (ro) i.readOnly = true;
+        i.addEventListener("input", function () { setWord(key, "many", i.value); });
+        w2.appendChild(i); names.appendChild(w2);
+      });
+      box.appendChild(names);
+    }
+    if (k === "top" || k === "mid") {
+      var need = SMPRules.TEMPLE_NEEDS.filter(function (c) { return L.on.indexOf(c) < 0; });
+      var tp = el("div", "sttemple");
+      var sw = el("button", null, L.temple && !need.length ? "Temple view: on" : "Temple view: off");
+      sw.type = "button"; sw.dataset.sttemple = k;
+      sw.setAttribute("aria-pressed", String(!!(L.temple && !need.length)));
+      if (need.length) sw.disabled = true;
+      sw.addEventListener("click", function () { var nx = structNow(); nx[k].temple = !nx[k].temple; structWrite(nx); });
+      var band2 = el("div", "wzband"); band2.appendChild(sw); tp.appendChild(band2);
+      tp.appendChild(el("span", "wzwhy", need.length
+        ? "Needs " + need.map(function (c) { return COMPONENTS.filter(function (x) { return x[0] === c; })[0][1]; }).join(", ") + " ticked."
+        : "Draws the picture from the aspiration (roof), the North Star and the themes (columns)" +
+          (L.on.indexOf("capability") >= 0 ? ", and the capabilities (base)." : ".")));
+      box.appendChild(tp);
+    }
+  }
+  function structureStep(box){
+    var ro = !canShape();
+    var lv = structNow();
+    var card = function (tag) { var c = el("section", "stcard"); c.appendChild(el("span", "tag", tag)); box.appendChild(c); return c; };
+
+    var top = card("Top level");
+    top.appendChild(el("p", "lab", "Called"));
+    namePick(top, "topword", TOP_NAMES, "one", ro);
+    structLevel(top, lv, "top", ro);
+
+    var mid = card("Second layer");
+    mid.appendChild(el("p", "lab", "Exists"));
+    mid.appendChild(segButtons([[true, "Yes"], [false, "No"]], lv.mid.exists, function (v) {
+      var nx = structNow(); nx.mid.exists = v; structWrite(nx);
+    }));
+    if (lv.mid.exists) {
+      mid.appendChild(el("p", "lab", "Called"));
+      namePick(mid, "division", MID_NAMES, "both", ro);
+      structLevel(mid, lv, "mid", ro);
+    }
+
+    var bu = card(W("unitword", "many", "Business units"));
+    structLevel(bu, lv, "bu", ro);
+
+    var fn = card(W("fnword", "many", "Supporting functions"));
+    fn.appendChild(el("p", "lab", "Plan in, by default"));
+    fn.appendChild(segButtons(FORMATS, lv.fn.format, function (v) {
+      var nx = structNow(); nx.fn.format = v; structWrite(nx);
+    }));
+    structLevel(fn, lv, "fn", ro);
+
+    box.appendChild(el("p", "wzwhy",
+      "These ticks apply to every item at a level; each one can be adjusted later on Setup › Structure. " +
+      "Switching a component off hides it and keeps what was written."));
+    if (ro) box.appendChild(el("p", "wzwhy", "The names are changed on Setup › Terminology now that this client has a plan in it."));
+    return box;
+  }
+
   function wordsStep(box){
     var shape = canShape();
     /* Both forms, as Setup › Terminology asks them (§395): the word for

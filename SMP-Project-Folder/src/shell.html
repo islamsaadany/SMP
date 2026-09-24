@@ -385,7 +385,10 @@
              fill rather than a dead end (§61) — and nothing about the
              navigation depends on the data, so a tab cannot appear and
              disappear as rows arrive (§45.2). */
-          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
+          /* §404: THE OVERVIEW IS THE BRIEF AND THE NORTH STAR, so it is
+             offered while either is switched on for this function. */
+          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
+                    when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
                   plan];
         } },
       { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
@@ -409,14 +412,29 @@
     co: [
       { k:"performance", ac:"g_perf", label:"Performance", primary:true,
         render:renderCompanyPerformance },
+      /* §404: THE SECOND LAYER'S OWN FOUNDATION, offered only once the office
+         has SAID which components that layer carries — a client set up before
+         the structure step opens exactly as it did (his "existing clients open
+         with everything on, unchanged" means no new tab either). */
+      { k:"foundation", ac:"g_found", label:"Foundation", render:renderCompanyFoundation,
+        when: function(t){
+          var st = SMPRules.structureOf(GROUP), m = st && st.mid;
+          return !!(m && Array.isArray(m.on)) &&
+            ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
+        } },
       MY_TAB,
       LIB_TAB
     ],
     group: [
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
-      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
+      /* §404: A TAB IS OFFERED WHILE SOMETHING ON IT IS SWITCHED ON. The
+         Foundation holds five components; the Temple is a picture drawn from
+         three of them and is a switch of its own (templeOn). */
+      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation,
+        when: function(){ return ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
-      { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
+      { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
+        when: function(){ return templeOn("group"); } },
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
       MY_TAB,
       LIB_TAB
@@ -438,8 +456,11 @@
              moves and no column appears on Roles & access — the tree is part
              of the plan's authorship and is refused to everybody else by the
              rule that already refuses the plan (§42). */
-          return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
-                  { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
+          /* §404: each section is offered while its components are on. */
+          return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation,
+                    when: function(t){ return ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
+                  { k:"swot",  ac:"u_anal",  label:L("swot"),    render:renderUnitAnalysis,
+                    when: function(t){ return compOn(t, "swot"); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
@@ -592,6 +613,13 @@
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
+      /* §404: Setup › Structure — which component each item shows. The
+         office's (the server classifies it `setup`); the level answers are
+         set on Getting started's Structure step, this is the per-item half. */
+      { k:"structure", ac:"c_units", grp:"run", mod:"client", label:"Structure", glyph:"⊞",
+        when: function(){ return inOffice(); },
+        find:"structure levels components brief purpose aspiration north star key objectives themes pillars capabilities values swot hide show temple",
+        render:renderStructure },
       { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
@@ -1351,7 +1379,7 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:labelWord("topword","group") });  /* §404: the client's own word */
     companiesReachable().forEach(function(ck){
       if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
@@ -2218,7 +2246,7 @@
       }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
-        '>' + t.label + '</button>';
+        '>' + esc(t.label) + '</button>';   /* §404: a typed word, so escaped (esc is idempotent, §395) */
     });
     /* ── ONE LINE THAT SCROLLS, ENDS PINNED (§136, Islam: "Decision 1: B") ──
        The destinations go into their own scroll region; everything that is a
@@ -5547,7 +5575,7 @@
         /* The prefix a unit's ids already use, and "group" for the group's —
            read off the owner rather than passed in, so the two cannot be given
            different answers at two call sites. */
-        e.list.push(koMint(e.list, (e.owner && e.owner.ukey) || "group"));
+        e.list.push(koMint(e.list, koPrefixOf(e.owner)));
         koSettle(e);
         fieldSaved();
         paint();
@@ -9021,15 +9049,25 @@
         paint();
       });
     });
+    /* §404: one item's component, from Setup › Structure. */
+    document.querySelectorAll("[data-stover]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice()) return;
+        var a = b.dataset.stover, i = a.lastIndexOf("|"), t = a.slice(0, i), c = a.slice(i + 1);
+        setCompOver(t, c, !compOn(t, c));
+        fieldSaved(); paint();
+      });
+    });
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.clauseadd;
         /* §212: a function's page is gated on the FUNCTION's key. Gating an
            `fn:` target on `u_found` is §211's fault exactly, and here it fails
            CLOSED — the button renders and the click returns silently. */
-        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
+        var isCo = t.indexOf("co:") === 0;
+        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
@@ -9039,8 +9077,9 @@
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(foundKeyFor(t), t === "group" ? null : t)) return;
-        var o = t === "group" ? GROUP : unitLikeWritable(t);
+        var isCo = t.indexOf("co:") === 0;
+        if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
             !confirm("Remove this line? This cannot be undone here.")) return;

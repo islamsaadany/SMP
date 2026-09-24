@@ -5108,6 +5108,17 @@ html[data-client-settings] .top .topmark { display:none; }
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
+/* §404: Setup › Structure's ticks. A box, not a glyph (§52): filled is
+   shown, empty is hidden, a ring differs from its level. */
+.cfg table.stadj tr.stlvl td { background:var(--surface-2); color:var(--ink-3); font-size:var(--fs-micro);
+  letter-spacing:.07em; text-transform:uppercase; font-weight:700; }
+.cfg table.stadj td.stitem { font-weight:600; }
+.stdot { display:inline-block; width:20px; height:20px; border-radius:5px; border:1.5px solid var(--line);
+  background:var(--surface); padding:0; cursor:pointer; vertical-align:middle; }
+span.stdot { cursor:default; }
+.stdot.on { background:var(--gold-deep); border-color:var(--gold-deep); }
+.stdot.diff { box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--gold); }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -10336,3 +10347,15 @@ body.presenting #buildband { display:none; }
    "…as who on this client's registe" — a control asking a question it cannot
    finish. */
 .csetup .row.tmadd .fld { flex:0 1 auto; max-width:340px; }
+
+/* §404: the Structure step. Its pills are the flow's own .wzband (§53.5);
+   what is new is the card each level sits in, the row of name boxes, and
+   the Temple line — each the smallest shape that holds it. */
+.csetup .stcard { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface);
+  padding:12px 14px 14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
+.csetup .stcard > .tag { align-self:flex-start; }
+.csetup .stcard > .lab { margin:4px 0 0; }
+.csetup .stnames, .csetup .strow { display:flex; flex-wrap:wrap; gap:8px 12px; }
+.csetup .stnm { display:flex; flex-direction:column; gap:3px; min-width:150px; flex:1 1 150px; max-width:240px; }
+.csetup .sttemple { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.csetup .sttemple .wzwhy { margin:0; }

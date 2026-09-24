@@ -49,7 +49,9 @@ def js(pg, expr, default=None):
         return default
 
 ORDER = ["theme", "pillar", "capability", "keyobj", "aspiration", "purpose", "values",
-         "measure", "tactic", "unitword", "division", "fnword", "project"]
+         "measure", "tactic", "unitword", "division", "fnword", "project",
+         # §404: the structure step names the top level, and two components gained a word
+         "topword", "brief", "swot"]
 
 def setup_labels(pg):
     js(pg, "current='setup'; currentSub='labels'; paint()"); pg.wait_for_timeout(250)
@@ -70,7 +72,7 @@ with sync_playwright() as p:
 
     print("\n§1  thirteen rows, in the agreed order")
     keys = js(pg, "LABELS.entries.map(function(e){return e.key})", [])
-    ck("the rows are the thirteen, in order", keys == ORDER, keys)
+    ck("the rows are the sixteen, in order", keys == ORDER, keys)
     miss = js(pg, """LABELS.entries.filter(function(e){ return !e.note || !e.group || !e.bu || e.bu==='\\u2014' }).map(function(e){return e.key})""", ["?"])
     ck("every row has a description, a word for one and a word for many", miss == [], miss)
     d = js(pg, "LABEL_DEFAULTS.filter(function(x){return x.key==='division'})[0]", {})
@@ -79,7 +81,7 @@ with sync_playwright() as p:
     print("\n§2  the page")
     setup_labels(pg)
     rows = js(pg, "document.querySelectorAll('table.lbltable tbody tr').length", 0)
-    ck("the page draws one row per word", rows == 13, rows)
+    ck("the page draws one row per word", rows == len(ORDER), rows)
     boxes = js(pg, "[...document.querySelectorAll('table.lbltable tbody tr')].map(function(r){return r.querySelectorAll('input.lbl').length})", [])
     ck("each row has two boxes", boxes and all(n == 2 for n in boxes), boxes)
     resets = js(pg, "document.querySelectorAll('[data-lblreset]').length", -1)

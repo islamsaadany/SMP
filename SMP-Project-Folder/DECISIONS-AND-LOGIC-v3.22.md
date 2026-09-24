@@ -57187,3 +57187,63 @@ the Business units grouped into Divisions?" — a heading dropped into prose.
   and is REWRITTEN to the lowered form, never loosened (§218) — worked out in
   the check rather than read back from the product. Both set-up checks
   green. Screen only; nothing stored, nothing migrated.
+
+## §404 — the client's structure: its levels, and what each level carries (2026-09-24)
+
+Islam: *"when I start the setup of the company we need to set the structure,
+the levels and the components in each level from the start"* — some clients
+are a group with companies and units, some a company with divisions and
+units, some a company with units directly, and the top level carries its own
+foundation in each. Aligned over four messages and a mockup
+(`design-mockups/client-structure/2026-09-24_levels-and-components.html`),
+signed off with *"1. yes one word 2. ok 3. yes build it"*.
+
+- **A STRUCTURE STEP, SECOND IN THE SET-UP FLOW**, right after the client's
+  details: name the top level (Group, Company, Holding or the client's own
+  word), say whether a second layer exists and name it (Companies, Divisions,
+  Sectors or another), and tick the components each level carries — Brief,
+  Purpose, Aspiration, North Star, Themes, Pillars, Capabilities, Values, SWOT.
+  Supporting functions also get a **default** way to plan (pillars, projects
+  or objectives); it is only what a new function starts with.
+- **HIS WORDS FOR THE COMPONENTS**: Brief is *Who we are*, North Star is the
+  key objectives, and the Temple is not a component but a **visual option**
+  drawn from the Aspiration, the North Star and the Themes, with Capabilities
+  as its base — so the Temple button is held while any of those is off.
+  Themes and Pillars are different things. One word per component, the same
+  on every level (three new label rows: `topword`, `brief`, `swot`, migration
+  046 / smp-app 017, written LAST and never over a client's own row).
+- **PER LEVEL AT FIRST, PER ITEM LATER**: the step sets what every unit,
+  function or company carries; **Setup › Structure** (office only, client
+  rail) is the adjustment table — one row per item, one box per component, a
+  ring where an item differs from its level. Pressing a box back to the
+  level's answer DELETES the adjustment (§50.6), and the last one leaving
+  deletes the structure.
+- **OFF HIDES AND NEVER DELETES** (his *"yes hide not delete"*): the tab,
+  section, deck slide or card goes; what was written stays stored and comes
+  back when the component is turned on. **A level with its North Star off is
+  judged on its plan alone.**
+- **A CLIENT THAT NEVER TOUCHED THIS OPENS EXACTLY AS BEFORE**: nothing is
+  stored until something is pressed (`GROUP.structure` is an absence), every
+  component reads ON while absent, and a company only gains a **Foundation
+  tab** once the structure says the second layer carries something. That page
+  is the group's own Foundation drawn over the company's record
+  (`GROUP.coFound[k]`, riding `org.extra`, no migration); its objectives are
+  minted `co-<key>-KO<n>` so two layers never share an id (§96.2). Reading
+  it creates nothing (§42).
+- **THE SERVER'S TWO EDITS GO TOGETHER** (§259.2): `structure` classifies as
+  `setup`, `coFound` as the group's strategy, and both are in `gExtra`;
+  compared canonically, because jsonb reorders keys (§145).
+  `test-authorize.js` §46, 755/0, 4 red with the classification out.
+- `checks/structure.py` (37 assertions) presses the Setup table and the
+  set-up step and reads the stored graph back, both ends every time, red 8 /
+  2 / 1 / 6 from the SOURCES. `client-setup.py` and `terminology.py` held the
+  old step and word counts (§214.3) and are REWRITTEN, never loosened (§218):
+  eight steps read from the flow's own list, sixteen words read from `ORDER`.
+- **FIRST WRITTEN AS §396 AND RENUMBERED BEFORE COMMIT**: this branch already
+  had a §396 and `main` has taken up to §403, so the citations this work
+  wrote were moved line by line and the existing §396 left alone (§264.3).
+- **RECORDED, NOT DONE**: a business unit's plan is not hidden by turning
+  Pillars off (pillars are how a unit plans); the second layer has no Temple
+  drawing of its own yet; the planning horizon shown on a company's
+  Foundation is the client's one shared value; and this branch is 13 commits
+  behind `main`, so a merge owes a rebuild and a fresh `SHELL` name.

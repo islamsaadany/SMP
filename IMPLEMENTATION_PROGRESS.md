@@ -8074,3 +8074,20 @@ Performance and Reporting pages, and the missing-items chips follow it.
 Nothing saved changes. Checked: a new check that clicks every pillar in three
 awkward states (it fails 18 ways on the old build), six neighbouring checks
 updated, the full sweep. Merged to `main` on Islam's word, after bringing in §391–§392.
+
+## §404 — the client's structure (2026-09-24, on the branch)
+
+Built from the approved mockup. Setting up a client now asks, second: what the
+top level is called, whether there is a second layer (companies, divisions or
+another word), and which parts each level carries — who we are, purpose,
+aspiration, North Star, themes, pillars, capabilities, values, SWOT — plus how a
+supporting function plans by default. The Temple is a picture you can turn on
+when its parts are there. Setup › Structure lets the office switch a part off
+or on for one unit, function or company. Switching off hides and never deletes.
+Clients that never use it look exactly as before. A company gets its own
+Foundation page once its layer carries something.
+
+**Waiting on Islam**: whether to merge (the branch is 13 commits behind main).
+**Not done yet**: turning Pillars off does not hide a unit's plan; the second
+layer has no Temple drawing of its own.
+

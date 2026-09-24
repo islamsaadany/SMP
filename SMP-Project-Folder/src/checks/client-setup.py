@@ -151,7 +151,7 @@ with sync_playwright() as p:
     ck("…its count AGREES with CLIENTSETUP.progress() (never a literal)",
        isinstance(pr, dict) and pr.get("total") and prog.startswith("%s of %s done" % (pr.get("done"), pr.get("total"))), (prog, pr))
     ck("…the total is the number of steps the flow draws",
-       isinstance(pr, dict) and pr.get("total") == ev(pg, "()=>CLIENTSETUP.STEPS.length", -1) == 7, pr)
+       isinstance(pr, dict) and pr.get("total") == ev(pg, "()=>CLIENTSETUP.STEPS.length", -1) == 8, pr)
     ck("…and it names what is left", isinstance(pr, dict) and bool(pr.get("todo")) and all(t in prog for t in pr["todo"][:2]), (prog, pr))
     ck("…and the def is NOT a row in any group while the strip stands",
        q(pg, '.setuprail .ritem[data-setupgo="start"]') is None and q(pg, '.setuprail .rgroup[data-railgrp="client"]') is None)
@@ -166,9 +166,9 @@ with sync_playwright() as p:
     ck("…and the strip is lit as the page you are on",
        ev(pg, "()=>{const s=document.querySelector('.railstart');return !!s && s.classList.contains('on') && s.getAttribute('aria-current')==='page';}", False))
     steps = ev(pg, "()=>Array.from(document.querySelectorAll('.csetup .wzstep')).map(e=>e.dataset.step)", [])
-    ck("seven steps, in order — client, units, cos, fns, caps, words, office",
-       steps == ["client", "units", "cos", "fns", "caps", "words", "office"], steps)
-    ck("…the same seven the flow declares (§53.5)", steps == ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k)", None), steps)
+    ck("eight steps, in order — client, structure (§404), units, cos, fns, caps, words, office",
+       steps == ["client", "structure", "units", "cos", "fns", "caps", "words", "office"], steps)
+    ck("…the same eight the flow declares (§53.5)", steps == ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k)", None), steps)
     ck("standing on the first", at(pg) == "client" and ev(pg, "()=>(document.querySelector('.csetup .wzstep[aria-current=step]')||{}).dataset.step", None) == "client")
     ck("Done with set-up is offered", bool(q(pg, ".csetup [data-wzdone]")))
     ck("…Next too, and Back is shut on the first step", bool(q(pg, ".csetup [data-wznext]")) and
@@ -223,7 +223,7 @@ with sync_playwright() as p:
        ev(pg, "()=>GROUP.weighting.units.length===UNIT_KEYS.length && new Set(GROUP.weighting.units.map(r=>r.key)).size===UNIT_KEYS.length", False),
        ev(pg, "()=>[GROUP.weighting.units.length, UNIT_KEYS.length]"))
     ck("…and the strip's count moved with the data", ev(pg, "()=>(document.querySelector('.railstart .rsprog')||{}).textContent||''", "")
-       .startswith("%s of %s done" % (ev(pg, "()=>CLIENTSETUP.progress().done"), 7)))
+       .startswith("%s of %s done" % (ev(pg, "()=>CLIENTSETUP.progress().done"), ev(pg, "()=>CLIENTSETUP.progress().total"))))
 
     # ── 5 · REMOVING A HEADED UNIT IS REFUSED BY NAME, AND THE ROW IS BACK ─
     print("\n§5 · a headed unit cannot be removed here")
@@ -279,7 +279,7 @@ with sync_playwright() as p:
          return !!it && !!g && /Client set-up/.test(it.textContent) && groups[groups.length-1]===g &&
            !!(g.compareDocumentPosition(it) & Node.DOCUMENT_POSITION_FOLLOWING);}""", False))
     ck("…the page's head reads Client set-up too", ev(pg, "()=>(document.querySelector('#panel .setupttl')||{}).textContent", "") == "Client set-up")
-    ck("…and every answer stays editable — the steps are still there", ev(pg, "()=>document.querySelectorAll('.csetup .wzstep').length", -1) == 7)
+    ck("…and every answer stays editable — the steps are still there", ev(pg, "()=>document.querySelectorAll('.csetup .wzstep').length", -1) == ev(pg, "()=>CLIENTSETUP.STEPS.length"))
 
     # ── 8 · THE SHAPE FREEZES WITH A PLAN ──────────────────────────────────
     print("\n§8 · a client with a plan in it")

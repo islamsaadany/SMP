@@ -249,7 +249,9 @@ function deckSlides(u){
      number being worked towards this cycle before the horizon it heads for —
      and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
      shifts and the slide still renders perfectly (§243's own note). */
-  var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
+  /* §404: the aspiration and the North Star are components; off draws nothing. */
+  var aimAsp = !fnAim && compOn(u.ukey, "aspiration"), aimKo = compOn(u.ukey, "keyobj");
+  var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       (aimNear
@@ -268,14 +270,14 @@ function deckSlides(u){
      one thing rather than printing a horizon that appears nowhere after it. */
   var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
   if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
-  if (aimRows || !fnAim)
+  if (aimRows || aimAsp)
     S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
       "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
       foundCells));
 
-  if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
+  if (aimRows || aimAsp) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
-    (fnAim ? '' :
+    (!aimAsp ? '' :
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
       (u.endInMind
@@ -380,7 +382,8 @@ function deckSlides(u){
       '<td class="num">' + figVsDue(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
-  if (oRows) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
+  /* §404: a switched-off North Star draws no slide. */
+  if (oRows && compOn(u.ukey, "keyobj")) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
     '<th class="num">Annual target</th><th class="num">Actual</th>' +
@@ -402,7 +405,8 @@ function deckSlides(u){
      MAIN'S §236.3 IS KEPT WHOLE INSIDE THE GATE: every fixed slide carries an
      anchor, so every gap between two originals is a place a picture can live.
      A function simply has no such gaps here, because it has no such slides. */
-  if (!u.fnKey) {
+  /* §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE. */
+  if (!u.fnKey && compOn(u.ukey, "swot")) {
     var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
               ["o","Opportunities","stone"],["t","Threats","warn"]];
     /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
@@ -415,7 +419,7 @@ function deckSlides(u){
        own hues untouched. `.seccell.t-*` had no other user and is deleted
        with them (§24). It is also what §254.5 settled for the pillar cards:
        one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page", "SWOT",
+    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
       "Where this unit is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){

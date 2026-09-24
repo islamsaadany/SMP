@@ -10470,7 +10470,7 @@
     if (kind === "newunit" || kind === "newfn") {
       var stay = !!BFORM.ctx.stay;
       var made = kind === "newunit"
-        ? addBusinessUnit(d.name, d.prefix, d.company)
+        ? addBusinessUnit(d.name, d.prefix, d.company, d.format)
         : addFunction(d.name, d.format);
       if (!made) return;
       fieldSaved();

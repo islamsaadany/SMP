@@ -387,8 +387,12 @@ with sync_playwright() as p:
            all("Delivered / planned" not in c for cov in late["cover"] for c in cov),
            late["cover"][:3])
         ok("...and every pillar head reads Measures and Execution, and nothing else",
+           # REWRITTEN, never loosened (§218, §214.3): since §395 the first
+           # word is the client's own label for a measure, so it is asked of
+           # the page rather than held as a literal — a head carrying a third
+           # figure, or the wrong word, still fails.
            len(late["stats"]) > 0
-           and all(x == ["Measures", "Execution"] for x in late["stats"]),
+           and all(x == [js(pg, "() => L('measure')"), "Execution"] for x in late["stats"]),
            late["stats"][:3])
     else:
         ok("the §254.8-.10 fixture ran", False, late)

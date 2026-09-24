@@ -152,7 +152,15 @@ function joinTarget(original, value, unit){
     else if (got.unit) return value;
   }
   var m = String(original == null ? "" : original).match(/^(-?[\d.,]+)(\s*)(.*)$/);
-  var sep = m ? m[2] : (unit && unit.length > 1 && /^[A-Za-z]/.test(unit) ? " " : "");
+  /* §405.1: WITH NOTHING STORED TO COPY THE SPACING FROM — a row an upload
+     has just made, or a first figure — the unit's own convention decides:
+     a scaled currency is ONE TOKEN (`4.5B EGP`, §199.4's TIGHT_UNITS), so it
+     no longer comes back from a download-and-upload as `4.5 B EGP`. Every
+     other unit keeps the rule it had. A stored value is never rewritten, and
+     the screen reads both spellings the same (`unitTight`), so this changes
+     only how a NEW string is spelt. */
+  var tight = unit && typeof TIGHT_UNITS !== "undefined" && TIGHT_UNITS[unit];
+  var sep = m ? m[2] : tight ? "" : (unit && unit.length > 1 && /^[A-Za-z]/.test(unit) ? " " : "");
   return unit ? value + sep + unit : value;
 }
 /* Compared part by part, so a difference in spacing is never reported as a
@@ -593,7 +601,11 @@ function createFromPlan(u, d){
   var made = 0;
   news.forEach(function(r){
     var x = r.raw; if (!x) return;
-    var t3 = targetFromPair("", x.value_3y, x.unit), t1 = targetFromPair("", x.value, x.unit);
+    /* §405.1: a row the file carries back keeps the spacing its stored target
+       had ("11 M EGP" stays spaced, "4.5B EGP" stays tight); only a row that is
+       genuinely new takes the tight convention for a scaled currency. */
+    var pri = (d.prior || {})[x.type + "|" + (x.name || "")] || {};
+    var t3 = targetFromPair(pri.t3 || "", x.value_3y, x.unit), t1 = targetFromPair(pri.t1 || "", x.value, x.unit);
     if (x.type === "PILLAR") {
       u.items.push({ id:x.id, name:x.name, sub:"", kind:x.kind || kindFromNotes(x.notes) || "Direction",
         theme:x.theme || "", owner:x.owner || "", slide:x.source_slide, notes:x.notes,
@@ -782,13 +794,23 @@ function applyPlanReplace(u, rows){
      exactly as before. */
   var keepSW = u.fnKey && !rows.some(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; })
     ? { s:(u.swot.s || []).slice(), w:(u.swot.w || []).slice() } : null;
+  /* §405.1: the stored targets, by row type and name, read BEFORE the clear —
+     so an untouched download-and-upload gives every target back spelled
+     exactly as it was. */
+  var prior = {};
+  var rem = function(type, row){
+    if (!row || !row.name) return;
+    prior[type + "|" + row.name] = { t1: row.target || "", t3: row.target3y || "" };
+  };
+  (u.keyObjectives || []).forEach(function(k){ rem("NORTHSTAR", k); });
+  (u.items || []).forEach(function(p){ (p.measures || []).forEach(function(m){ rem("MEASURE", m); }); });
   var archived = clearUnitPlan(u);
   if (keepSW) { u.swot.s = keepSW.s; u.swot.w = keepSW.w; }
   /* The foundation's LABELS are a skeleton the unit keeps when a file does not
      carry one. A file that does carry clauses re-authors both label and text,
      so the old ones are cleared out of the way first. */
   if (rows.some(function(r){ return r.type === "FOUNDATION"; })) u.clauses.length = 0;
-  createFromPlan(u, { rows: rows.map(function(r){
+  createFromPlan(u, { prior: prior, rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });
   rows.forEach(function(r){
@@ -800,6 +822,10 @@ function applyPlanReplace(u, rows){
   return archived;
 }
 function applyCapPlanReplace(c, rows){
+  /* §405.1: as for a unit — the stored spelling of every target, by name. */
+  var prior = {};
+  ((c && c.keyObjectives) || []).forEach(function(k){ if (k.name) prior["CAPOBJECTIVE|" + k.name] = k.target || ""; });
+  ((c && c.projects) || []).forEach(function(p){ (p.outcomes || []).forEach(function(o){ if (o.name) prior["OUTCOME|" + o.name] = o.target || ""; }); });
   var archived = clearCapability(c, "plan");
   /* §399: a function's S&W is written onto the function itself, and only when
      the file carries some — a file downloaded before the S&W sheet existed
@@ -813,7 +839,7 @@ function applyCapPlanReplace(c, rows){
       sw.w = swRows.filter(function(r){ return r.type === "WEAKNESS"; }).map(function(r){ return r.name; });
     }
   }
-  createFromCapPlan(c, { rows: rows.map(function(r){
+  createFromCapPlan(c, { prior: prior, rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });
   renumberCapability(c);
@@ -1355,7 +1381,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "CAPOBJECTIVE") {
       var w = parseFloat(x.weight);
       var cko = { id:x.id, name:x.name, dir:x.direction || "≥",
-        target:targetFromPair("", x.value, x.unit), compile:x.compile || "Latest",
+        target:targetFromPair((d.prior || {})["CAPOBJECTIVE|" + (x.name || "")] || "", x.value, x.unit), compile:x.compile || "Latest",
         weight:isNaN(w) ? null : w, actual:null, progress:null };
       if (+x.hidden) cko.hide = true;
       c.keyObjectives.push(cko);
@@ -1379,7 +1405,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "OUTCOME") {
       var p2 = projectById(x.parent_id); if (!p2) return;
       var oRow = { id:x.id, name:x.name, dir:x.direction || "≥",
-        target:targetFromPair("", x.value, x.unit), measureAt:x.measure_at || "",
+        target:targetFromPair((d.prior || {})["OUTCOME|" + (x.name || "")] || "", x.value, x.unit), measureAt:x.measure_at || "",
         actual:null, progress:null };
       if (+x.hidden) oRow.hide = true;
       p2.outcomes.push(oRow);

@@ -79,6 +79,13 @@ const supplied = {
      harness does not evaluate; the WORD is not what is measured here — only how
      many sides there are — so the platform's own short word stands in. */
   navWord: (k, short) => short,
+  /* §404's structure switches gate the group's own tabs, and `compOn` /
+     `templeOn` live in config-data.js, which this harness does not evaluate.
+     They are ASKED OF THE SHARED RULE over the seed's own group rather than
+     stubbed true (§42, §100.3): a stub that always says yes would hide a tab
+     the real structure switches off. */
+  compOn: (t, c) => R.compOn(GRAPH.group || {}, t, c),
+  templeOn: (t) => R.templeOn(GRAPH.group || {}, t),
   TARGET: "group",
   /* the two `when` helpers a unit's and a function's tab lists ask; both OFF,
      which is the ordinary state and the one where the library would be the

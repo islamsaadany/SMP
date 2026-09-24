@@ -196,57 +196,10 @@ function deckAnchors(kind, key){
    rather than a new cost: a picture placed after a slide that is no longer
    drawn lands at the end of the deck instead of being dropped. */
 
-function deckSlides(u){
+/* §405: the aim slides, lifted out of deckSlides so a unit that plans in
+   projects or objectives presents its aspiration too (§53.5: one builder). */
+function unitAimSlides(u){
   var S = [];
-  var ko = unitObjectives(u), ex = unitRatio(u);
-  var dl = deltaFor(u.ukey);
-  var dtag = (!dl || !dl.d) ? "" :
-    '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
-    (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
-
-  /* 1 — the cover carries the unit and the cycle, and nothing else. */
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", u.name, true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
-
-  /* 2 — what we are aiming at: statement above, targets below, no actuals. */
-  /* The near horizon is hidden on a unit's objectives (§51.16). This is the
-     deck's other side-by-side view of the two, so it drops the same column the
-     Foundation page does — and the scoring slide further on keeps it, because
-     that is where an actual is read against a target. */
-/* ── A SUPPORTING FUNCTION AIMS AT ITS OBJECTIVES, AND NOTHING ELSE (§243)
-     Islam, of a pillars function's deck: *"it has a title of winning
-     aspiration but it shouldn't show this as they don't have it, and what we
-     are aiming at should be the key objectives only — remove the by 2027 and
-     the direction."*
-
-     A supporting function INHERITS its aspiration and its SWOT from the unit
-     it plans under and never authors either (§213), so the label was standing
-     over an empty paragraph; and its objectives carry a WEIGHT and no 3-year
-     target, so the horizon column held nothing but em-dashes.
-
-     THE THIS-YEAR COLUMN IS UNCONDITIONAL HERE: `SHOW_KO_THIS_YEAR` is a
-     per-viewer setting (§66), so on a function — whose only target this is —
-     a viewer who had turned it off would get objectives with no target at all.
-     Islam settled the reason himself: *"the functions has no 3 years
-     objectives."*
-
-     AND `Dir.` IS OFF EVERY DECK, not only a function's — §239, from the same
-     week and the other half of the same conversation: *"for direction and
-     compile remove them from slides but keep in the reporting as they are
-     obvious for the audience."* A projector audience reads the number rather
-     than auditing how it is defined. The two instructions compose: Direction
-     gone for everyone, the horizon column and the aspiration gone on a
-     function. THE HEADER AND THE ROW COME OFF TOGETHER — dropping a `<th>`
-     and leaving its `<td>` shifts every cell after it and the slide still
-     renders perfectly.
-
-     A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
-     asserted, because a unit authors both. */
   var fnAim = !!u.fnKey;
   var aimNear = fnAim || SHOW_KO_THIS_YEAR;
   /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
@@ -298,6 +251,96 @@ function deckSlides(u){
         '</div>'
       : '') +
     '</section>');
+
+  return S;
+}
+/* §405: the SWOT section, lifted out of deckSlides for the same reason. */
+function unitSwotSlides(u){
+  var S = [];
+  if (!u.fnKey && compOn(u.ukey, "swot")) {
+    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
+              ["o","Opportunities","stone"],["t","Threats","warn"]];
+    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
+       measurement rather than taste. On the blue the four scoring colours
+       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
+       Opportunities, which was drawn in `--panel` itself and would be
+       invisible against its own ground. Keeping them would mean inventing
+       four colours for one slide; the words under the counts already say
+       which is which, and the four category slides that follow keep their
+       own hues untouched. `.seccell.t-*` had no other user and is deleted
+       with them (§24). It is also what §254.5 settled for the pillar cards:
+       one accent across a row, never one per card (§41's budget). */
+    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
+      "Where this unit is strong, exposed, and what the market is offering it.",
+      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
+    sw.forEach(function(x, xi){
+      var items = (u.swot[x[0]] || []).map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("");
+      /* The LAST category keeps the old key "swot", which stored slides
+         already name (§236.3). */
+      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
+        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
+                              : anch("swot" + x[0], "After " + x[1])) +
+        '><h2>' + x[1] + '</h2>' +
+        '<ol class="dswot">' + items + '</ol></section>');
+    });
+  }
+
+  return S;
+}
+function deckSlides(u){
+  var S = [];
+  var ko = unitObjectives(u), ex = unitRatio(u);
+  var dl = deltaFor(u.ukey);
+  var dtag = (!dl || !dl.d) ? "" :
+    '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
+    (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
+
+  /* 1 — the cover carries the unit and the cycle, and nothing else. */
+  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", u.name, true) + '>' +
+    (deckMark(u)
+        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
+
+  /* 2 — what we are aiming at: statement above, targets below, no actuals. */
+  /* The near horizon is hidden on a unit's objectives (§51.16). This is the
+     deck's other side-by-side view of the two, so it drops the same column the
+     Foundation page does — and the scoring slide further on keeps it, because
+     that is where an actual is read against a target. */
+/* ── A SUPPORTING FUNCTION AIMS AT ITS OBJECTIVES, AND NOTHING ELSE (§243)
+     Islam, of a pillars function's deck: *"it has a title of winning
+     aspiration but it shouldn't show this as they don't have it, and what we
+     are aiming at should be the key objectives only — remove the by 2027 and
+     the direction."*
+
+     A supporting function INHERITS its aspiration and its SWOT from the unit
+     it plans under and never authors either (§213), so the label was standing
+     over an empty paragraph; and its objectives carry a WEIGHT and no 3-year
+     target, so the horizon column held nothing but em-dashes.
+
+     THE THIS-YEAR COLUMN IS UNCONDITIONAL HERE: `SHOW_KO_THIS_YEAR` is a
+     per-viewer setting (§66), so on a function — whose only target this is —
+     a viewer who had turned it off would get objectives with no target at all.
+     Islam settled the reason himself: *"the functions has no 3 years
+     objectives."*
+
+     AND `Dir.` IS OFF EVERY DECK, not only a function's — §239, from the same
+     week and the other half of the same conversation: *"for direction and
+     compile remove them from slides but keep in the reporting as they are
+     obvious for the audience."* A projector audience reads the number rather
+     than auditing how it is defined. The two instructions compose: Direction
+     gone for everyone, the horizon column and the aspiration gone on a
+     function. THE HEADER AND THE ROW COME OFF TOGETHER — dropping a `<th>`
+     and leaving its `<td>` shifts every cell after it and the slide still
+     renders perfectly.
+
+     A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
+     asserted, because a unit authors both. */
+  S = S.concat(unitAimSlides(u));
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -416,35 +459,7 @@ function deckSlides(u){
      §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
      side of the switch. */
   if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
-  if (!u.fnKey && compOn(u.ukey, "swot")) {
-    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
-              ["o","Opportunities","stone"],["t","Threats","warn"]];
-    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
-       measurement rather than taste. On the blue the four scoring colours
-       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
-       Opportunities, which was drawn in `--panel` itself and would be
-       invisible against its own ground. Keeping them would mean inventing
-       four colours for one slide; the words under the counts already say
-       which is which, and the four category slides that follow keep their
-       own hues untouched. `.seccell.t-*` had no other user and is deleted
-       with them (§24). It is also what §254.5 settled for the pillar cards:
-       one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
-      "Where this unit is strong, exposed, and what the market is offering it.",
-      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
-    sw.forEach(function(x, xi){
-      var items = (u.swot[x[0]] || []).map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
-      }).join("");
-      /* The LAST category keeps the old key "swot", which stored slides
-         already name (§236.3). */
-      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
-        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
-                              : anch("swot" + x[0], "After " + x[1])) +
-        '><h2>' + x[1] + '</h2>' +
-        '<ol class="dswot">' + items + '</ol></section>');
-    });
-  }
+  S = S.concat(unitSwotSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -854,6 +869,8 @@ function deckSlidesFn(subject){
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
   if (!isCap && !isUnit) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
+  /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
+  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);

@@ -57792,3 +57792,82 @@ the signed-off mockup
   ERRORS none; structure, functional-projects, cycle-board, template round
   trip, import page, deck strip, Submit gate, gap fill, fn-pillars, role
   picker and hide-slide green.
+
+## §405.1 — the four things §405 left, and four checks that had stopped checking (2026-09-24)
+
+Islam, of the list of what was still missing: *"proceed with the 5 items. go
+build till the end … make sure you don't damage or distrubt anything currently
+working with our clients like raya trade this is very critical."*
+
+- **A UNIT THAT PLANS OTHERWISE PRESENTS ITS ASPIRATION AND ITS SWOT.** The
+  function-shaped deck (`deckSlidesFn`) drew a unit's objectives and its work
+  and nothing it authors above them. The aim slides and the SWOT section are
+  LIFTED OUT of `deckSlides` as `unitAimSlides(u)` / `unitSwotSlides(u)` and
+  called by both builders (§53.5: one builder per slide kind), so a pillars
+  unit's deck is **byte-identical**, measured across every unit and every
+  function before and after. §404's structure switches still decide both.
+- **THE BUILDER BUILDS THE WAY THE UNIT PLANS.** Its map's fourth box is the
+  unit's Projects or Actions, counting what the unit's Plan section draws; its
+  Review names that work's gaps and never the hidden pillars'; the chooser says
+  *plans in projects*; and **New unit asks how it plans** in the three words a
+  function's control uses, defaulting to the structure's own tick (§405), with
+  "pillars" stored as an ABSENCE (§50.6). The project and action gap rules are
+  written ONCE and asked of a function's work and a unit's alike. A pillars
+  unit's map and gaps are measured identical.
+- **CLEAR PLAN CLEARED THE WRONG THING — found while wiring Start fresh, and
+  it would have shipped.** `clearUnitPlan` emptied `items` — the hidden pillars
+  — and left the projects or actions on screen untouched, so on a unit that
+  plans otherwise Setup's Clear plan and the builder's Start fresh destroyed
+  the one thing nobody could see and kept the thing being cleared. It clears
+  what the unit SHOWS now and keeps what it hid, archiving both halves first
+  (§49.2), and the archive restores. Pillars units take the path they always
+  took.
+- **`4.5B EGP` NO LONGER COMES BACK AS `4.5 B EGP`, AND `11 M EGP` STILL
+  COMES BACK SPACED.** A row an upload makes had no stored value to copy the
+  spacing from, so `joinTarget` guessed a space for any word-like unit. The
+  first fix asked §199.4's `TIGHT_UNITS` whenever there was nothing to copy —
+  and `template-round-trip.py` went **6 red**, correctly: its fixture's spaced
+  `11 M EGP` now came back `11M EGP`. *Fixing one spelling broke the other,
+  and a round trip must be a fixed point for both.* So the replace path reads
+  every stored target BY ROW TYPE AND NAME before it clears (`prior`), and a
+  row the file carries back takes its spacing from its own stored value; only
+  a genuinely new row takes the tight convention. **A stored value is never
+  rewritten**, and the screen reads both spellings alike (`unitTight`).
+  `nextTargetUnit` (a tactic outcome's unit picker) now writes `6M EGP`,
+  which is what the measures pen's `setTargetUnit` has always written — the
+  two pickers agree (§53.5), and `unit-before-number.py`'s literal was
+  REWRITTEN to that rule (§218, §231's *"the product was right"*).
+- **`checks/unit-plans-in.py` IS THE PERMANENT CHECK §405 DID NOT HAVE** —
+  §405 was proved by one-off probes. 45 assertions, the state MADE (§255), a
+  pillars unit measured beside the two new ones every time (§113.8), proved
+  able to fail four ways from the SOURCES (§276): deck **4 red**, clear **3**,
+  tight **2**, builder **2**, each on its own lines.
+- **FOUR CHECKS HAD STOPPED CHECKING, NONE OF THEM A PRODUCT FAULT** (§214.3,
+  rewritten never loosened, §218): `capability-entry.py` asserted a capability
+  has TWO sections, and §399's S&W made it three — it asserts the agreement
+  with a function and the Overview-first, work-last shape now;
+  `setup-arrange.py` looked for the lower-case words *business unit* where
+  §395 put the client's own word — it asks the page for that word;
+  `test-nav-row.js` supplied no stand-in for §404's `compOn`/`templeOn`, so it
+  died — it asks the SHARED rule over the seed's own group, never a stub that
+  always says yes (§42), and its `--break` still reds 7; `test-my-reporting.js`
+  had not been told §403 made `welcome.js` touch the page at load — named with
+  its reason, as `insights.js` was. **And three more of the same kind, found
+  by the wider sweep and established as not this round's on the build before
+  it** (§303): `deck-figures.py`, `deck-dividers.py` and `monthly-plan.py`
+  held the words *Measures*, *Strategic pillars* and a capital *Measure* where
+  §395 now draws the client's own words (*Key measures*, *Strategic Pillars*,
+  the singular *Key measure* in a table head) — each asks the page for its
+  word now, with every other claim in the assertion unchanged. **Five more,
+  established RED ON `origin/main`'s OWN BUILD before they were touched**
+  (§303 — a worktree of main, built and swept): `objective-unit.py`,
+  `ytd-proration.py`, `reporting-ytd-target.py` and `reported-note.py` found
+  the measures table by the word *Measure*, which §395 made the client's own
+  singular *Key measure* — so each found NO table and several assertions read
+  nothing at all (§113.8); and `yn-in-progress.py`'s fixture set `CURSEC =
+  null` where §269 made it a MAP keyed by page, so every paint in its fixture
+  threw and 23 assertions reported a feature that works. All five ask the page
+  now; nothing in the product moved for any of them.
+- **NOTHING A LIVE CLIENT HOLDS MOVES**: no server rule, no schema, no
+  migration; the access baseline UNMOVED for all 33 people at every target;
+  authoriser 763/0, change list 140/0.

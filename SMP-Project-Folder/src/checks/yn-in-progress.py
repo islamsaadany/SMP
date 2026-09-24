@@ -104,7 +104,7 @@ def ev(pg, js):
 # every assertion below would pass on a build that lost the feature entirely
 # if it waited for the demo to provide one (§94.2, §255).
 MAKE = """() => {
-  current = 'mobile'; CURSEC = null; REPORTING = null;
+  current = 'mobile'; CURSEC = {}; REPORTING = null;   /* CURSEC is a MAP keyed by page (§269) — null made every paint throw */
   const u = UNITS['mobile'], p = u.items[0];
   const t = p.tactics[0], m = p.measures[0];
   /* the action runs Q2 and Q3, and the cycle is reported at the end of Q2 —

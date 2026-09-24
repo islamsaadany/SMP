@@ -434,7 +434,11 @@ with sync_playwright() as pw:
       return { u: u, joined: joined, kept: kept };
     }""")
     ck("an outcome holding only a unit still reads it", oc["u"] == "%", oc)
-    ck("...a number joins it the plan's way", oc["joined"] == "6 M EGP", oc)
+    # §405.1: REWRITTEN, never loosened (§218). "The plan's way" is what the
+    # pen's own unit picker writes (setTargetUnit, TIGHT_UNITS): a scaled
+    # currency is ONE token, "6M EGP" — the outcome picker now agrees with it
+    # instead of guessing a space (§53.5, §231's "the product was right").
+    ck("...a number joins it the plan's way", oc["joined"] == "6M EGP", oc)
     # §251 UNIFIED THE TWO READERS, and this is the behaviour that moved: the
     # outcome used to drop prose on the floor when a unit was picked. It now
     # keeps it, which is what the measures column has always done.

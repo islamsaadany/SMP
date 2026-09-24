@@ -9076,7 +9076,7 @@ function pillarsUsingTheme(ab){
      the composite could not read (§104.7's list-of-exceptions fault);
    · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
      a unit the SMO just created is the client's own. */
-function addBusinessUnit(name, prefix, company){
+function addBusinessUnit(name, prefix, company, format){
   var nm = String(name || "").trim(), key;
   if (nm) {
     var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
@@ -9105,6 +9105,12 @@ function addBusinessUnit(name, prefix, company){
   if (typeof SMPRules !== "undefined" && SMPRules.levelComponents &&
       SMPRules.levelComponents(GROUP, "bu").indexOf("pillar") < 0)
     UNITS[key].format = "objectives";
+  /* §405: and a way asked for by name (the builder's New unit form) wins over
+     that default — "pillars" is stored as an absence (§50.6). */
+  if (format && FN_FORMATS.indexOf(String(format)) > -1) {
+    if (format === "pillars") delete UNITS[key].format;
+    else UNITS[key].format = String(format);
+  }
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
   var wrow = { key: key, unit: nm, why: "" };
@@ -9127,6 +9133,28 @@ function clearAllPlans(why){ UNIT_KEYS.forEach(function(k){ clearUnitPlan(UNITS[
    undo. Two routes to the same outcome, one of them reversible. They are the
    same act now, through the same function, and the confirmation says so. */
 function clearUnitPlan(u, why){
+  /* §405: A UNIT THAT PLANS IN PROJECTS OR IN OBJECTIVES AND ACTIONS clears
+     the work it SHOWS and keeps the pillars it hid (Islam: *"hidden, kept"*).
+     Found while wiring the builder's Start fresh: this emptied `items` — the
+     hidden pillars — and left the projects or actions on screen untouched, so
+     Clear plan cleared the one thing nobody could see. The holder's work is
+     archived first through its own path (§49.2), the unit's foundation through
+     the unit's, and both archives restore. */
+  if (u && u.ukey && UNITS[u.ukey] === u && unitOwnWay(u)) {
+    var h = unitOwnHolderWritable(u.ukey);
+    archiveCapPlan(h, why);
+    var kept = u.items;
+    var archivedU = archiveUnitPlan(u, why);
+    if (h.projects) h.projects.length = 0;
+    if (h.actions) h.actions.length = 0;
+    u.items = kept;
+    u.keyObjectives = [];
+    u.swot = { s:[], w:[], o:[], t:[] };
+    u.clauses.forEach(function(c){ c[1] = ""; });
+    u.aspiration = "";
+    u.endInMind = "";
+    return archivedU;
+  }
   var archived = archiveUnitPlan(u, why);
   u.items = [];
   u.keyObjectives = [];

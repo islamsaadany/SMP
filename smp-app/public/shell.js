@@ -15505,7 +15505,7 @@ function pillarsUsingTheme(ab){
      the composite could not read (§104.7's list-of-exceptions fault);
    · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
      a unit the SMO just created is the client's own. */
-function addBusinessUnit(name, prefix, company){
+function addBusinessUnit(name, prefix, company, format){
   var nm = String(name || "").trim(), key;
   if (nm) {
     var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
@@ -15534,6 +15534,12 @@ function addBusinessUnit(name, prefix, company){
   if (typeof SMPRules !== "undefined" && SMPRules.levelComponents &&
       SMPRules.levelComponents(GROUP, "bu").indexOf("pillar") < 0)
     UNITS[key].format = "objectives";
+  /* §405: and a way asked for by name (the builder's New unit form) wins over
+     that default — "pillars" is stored as an absence (§50.6). */
+  if (format && FN_FORMATS.indexOf(String(format)) > -1) {
+    if (format === "pillars") delete UNITS[key].format;
+    else UNITS[key].format = String(format);
+  }
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
   var wrow = { key: key, unit: nm, why: "" };
@@ -15556,6 +15562,28 @@ function clearAllPlans(why){ UNIT_KEYS.forEach(function(k){ clearUnitPlan(UNITS[
    undo. Two routes to the same outcome, one of them reversible. They are the
    same act now, through the same function, and the confirmation says so. */
 function clearUnitPlan(u, why){
+  /* §405: A UNIT THAT PLANS IN PROJECTS OR IN OBJECTIVES AND ACTIONS clears
+     the work it SHOWS and keeps the pillars it hid (Islam: *"hidden, kept"*).
+     Found while wiring the builder's Start fresh: this emptied `items` — the
+     hidden pillars — and left the projects or actions on screen untouched, so
+     Clear plan cleared the one thing nobody could see. The holder's work is
+     archived first through its own path (§49.2), the unit's foundation through
+     the unit's, and both archives restore. */
+  if (u && u.ukey && UNITS[u.ukey] === u && unitOwnWay(u)) {
+    var h = unitOwnHolderWritable(u.ukey);
+    archiveCapPlan(h, why);
+    var kept = u.items;
+    var archivedU = archiveUnitPlan(u, why);
+    if (h.projects) h.projects.length = 0;
+    if (h.actions) h.actions.length = 0;
+    u.items = kept;
+    u.keyObjectives = [];
+    u.swot = { s:[], w:[], o:[], t:[] };
+    u.clauses.forEach(function(c){ c[1] = ""; });
+    u.aspiration = "";
+    u.endInMind = "";
+    return archivedU;
+  }
   var archived = archiveUnitPlan(u, why);
   u.items = [];
   u.keyObjectives = [];
@@ -18341,7 +18369,15 @@ function joinTarget(original, value, unit){
     else if (got.unit) return value;
   }
   var m = String(original == null ? "" : original).match(/^(-?[\d.,]+)(\s*)(.*)$/);
-  var sep = m ? m[2] : (unit && unit.length > 1 && /^[A-Za-z]/.test(unit) ? " " : "");
+  /* §405.1: WITH NOTHING STORED TO COPY THE SPACING FROM — a row an upload
+     has just made, or a first figure — the unit's own convention decides:
+     a scaled currency is ONE TOKEN (`4.5B EGP`, §199.4's TIGHT_UNITS), so it
+     no longer comes back from a download-and-upload as `4.5 B EGP`. Every
+     other unit keeps the rule it had. A stored value is never rewritten, and
+     the screen reads both spellings the same (`unitTight`), so this changes
+     only how a NEW string is spelt. */
+  var tight = unit && typeof TIGHT_UNITS !== "undefined" && TIGHT_UNITS[unit];
+  var sep = m ? m[2] : tight ? "" : (unit && unit.length > 1 && /^[A-Za-z]/.test(unit) ? " " : "");
   return unit ? value + sep + unit : value;
 }
 /* Compared part by part, so a difference in spacing is never reported as a
@@ -18782,7 +18818,11 @@ function createFromPlan(u, d){
   var made = 0;
   news.forEach(function(r){
     var x = r.raw; if (!x) return;
-    var t3 = targetFromPair("", x.value_3y, x.unit), t1 = targetFromPair("", x.value, x.unit);
+    /* §405.1: a row the file carries back keeps the spacing its stored target
+       had ("11 M EGP" stays spaced, "4.5B EGP" stays tight); only a row that is
+       genuinely new takes the tight convention for a scaled currency. */
+    var pri = (d.prior || {})[x.type + "|" + (x.name || "")] || {};
+    var t3 = targetFromPair(pri.t3 || "", x.value_3y, x.unit), t1 = targetFromPair(pri.t1 || "", x.value, x.unit);
     if (x.type === "PILLAR") {
       u.items.push({ id:x.id, name:x.name, sub:"", kind:x.kind || kindFromNotes(x.notes) || "Direction",
         theme:x.theme || "", owner:x.owner || "", slide:x.source_slide, notes:x.notes,
@@ -18971,13 +19011,23 @@ function applyPlanReplace(u, rows){
      exactly as before. */
   var keepSW = u.fnKey && !rows.some(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; })
     ? { s:(u.swot.s || []).slice(), w:(u.swot.w || []).slice() } : null;
+  /* §405.1: the stored targets, by row type and name, read BEFORE the clear —
+     so an untouched download-and-upload gives every target back spelled
+     exactly as it was. */
+  var prior = {};
+  var rem = function(type, row){
+    if (!row || !row.name) return;
+    prior[type + "|" + row.name] = { t1: row.target || "", t3: row.target3y || "" };
+  };
+  (u.keyObjectives || []).forEach(function(k){ rem("NORTHSTAR", k); });
+  (u.items || []).forEach(function(p){ (p.measures || []).forEach(function(m){ rem("MEASURE", m); }); });
   var archived = clearUnitPlan(u);
   if (keepSW) { u.swot.s = keepSW.s; u.swot.w = keepSW.w; }
   /* The foundation's LABELS are a skeleton the unit keeps when a file does not
      carry one. A file that does carry clauses re-authors both label and text,
      so the old ones are cleared out of the way first. */
   if (rows.some(function(r){ return r.type === "FOUNDATION"; })) u.clauses.length = 0;
-  createFromPlan(u, { rows: rows.map(function(r){
+  createFromPlan(u, { prior: prior, rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });
   rows.forEach(function(r){
@@ -18989,6 +19039,10 @@ function applyPlanReplace(u, rows){
   return archived;
 }
 function applyCapPlanReplace(c, rows){
+  /* §405.1: as for a unit — the stored spelling of every target, by name. */
+  var prior = {};
+  ((c && c.keyObjectives) || []).forEach(function(k){ if (k.name) prior["CAPOBJECTIVE|" + k.name] = k.target || ""; });
+  ((c && c.projects) || []).forEach(function(p){ (p.outcomes || []).forEach(function(o){ if (o.name) prior["OUTCOME|" + o.name] = o.target || ""; }); });
   var archived = clearCapability(c, "plan");
   /* §399: a function's S&W is written onto the function itself, and only when
      the file carries some — a file downloaded before the S&W sheet existed
@@ -19002,7 +19056,7 @@ function applyCapPlanReplace(c, rows){
       sw.w = swRows.filter(function(r){ return r.type === "WEAKNESS"; }).map(function(r){ return r.name; });
     }
   }
-  createFromCapPlan(c, { rows: rows.map(function(r){
+  createFromCapPlan(c, { prior: prior, rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });
   renumberCapability(c);
@@ -19544,7 +19598,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "CAPOBJECTIVE") {
       var w = parseFloat(x.weight);
       var cko = { id:x.id, name:x.name, dir:x.direction || "≥",
-        target:targetFromPair("", x.value, x.unit), compile:x.compile || "Latest",
+        target:targetFromPair((d.prior || {})["CAPOBJECTIVE|" + (x.name || "")] || "", x.value, x.unit), compile:x.compile || "Latest",
         weight:isNaN(w) ? null : w, actual:null, progress:null };
       if (+x.hidden) cko.hide = true;
       c.keyObjectives.push(cko);
@@ -19568,7 +19622,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "OUTCOME") {
       var p2 = projectById(x.parent_id); if (!p2) return;
       var oRow = { id:x.id, name:x.name, dir:x.direction || "≥",
-        target:targetFromPair("", x.value, x.unit), measureAt:x.measure_at || "",
+        target:targetFromPair((d.prior || {})["OUTCOME|" + (x.name || "")] || "", x.value, x.unit), measureAt:x.measure_at || "",
         actual:null, progress:null };
       if (+x.hidden) oRow.hide = true;
       p2.outcomes.push(oRow);
@@ -42375,7 +42429,7 @@ function builderHere(){
    than a fall-through. */
 function builderRoute(target){
   var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;
+  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
   var f = FUNCTIONS[t.slice(3)];
   if (!f) return null;
   var fmt = fnFormat(f);
@@ -42399,6 +42453,13 @@ function builderSubjectName(target){
 }
 function builderHasPlan(target){
   var r = builderRoute(target);
+  /* §405: a unit that plans otherwise has a plan when its holder or its
+     foundation holds something — the pillars it hid do not count. */
+  if (r === "unit" && unitOwnWay(UNITS[target])) {
+    var uu = UNITS[target];
+    return !!(unitOwnProjects(target).length || unitActions(target).length ||
+              (uu.keyObjectives || []).length || uu.aspiration);
+  }
   if (r === "unit" || r === "fnpillars")
     return !planIsEmpty(unitSnapshotCounts(unitPlanSnapshot(unitLike(target))));
   if (r === "fnprojects") return fnHasWork(String(target).slice(3));
@@ -42469,7 +42530,28 @@ function builderSections(target){
         return listChip(n);
       },
       hint:function(){ return '<b>SWOT</b> \u2014 the analysis the ' + esc(L("pillar","bu")) + ' are reasoned from. Empty is allowed; say what you know.'; } });
-    secs.push({ k:"plan", label:L("pillar", "bu"), tab:"strategy", sec:"plan", pen:"plan",
+    /* §405: A UNIT THAT PLANS IN PROJECTS OR IN OBJECTIVES AND ACTIONS builds
+       that work in the same box — the unit's Plan section draws its holder
+       (`u:<key>`), so the chip counts what that section draws and says the
+       word the unit's own row says (§53.5). Its Foundation, Objectives and
+       SWOT are a unit's whichever way it plans. */
+    var uway = unitFormat(UNITS[target]);
+    if (uway === "projects") secs.push({ k:"plan", label:L("project"), tab:"strategy", sec:"plan", pen:"plan",
+      chip:function(){ return listChip(unitOwnProjects(target).length); },
+      hint:function(){
+        var ps = unitOwnProjects(target), d = 0, o = 0, ms = 0;
+        ps.forEach(function(pr){ d += (pr.deliverables || []).length; o += (pr.outcomes || []).length; ms += (pr.milestones || []).length; });
+        return '<b>' + L("project") + '</b> \u2014 the work itself: front matter, deliverables, outcomes, milestones.' +
+          (ps.length ? ' <b>' + ps.length + ' \u00b7 ' + d + ' deliverables \u00b7 ' + o + ' outcomes \u00b7 ' + ms + ' milestones.</b>' : '');
+      } });
+    else if (uway === "objectives") secs.push({ k:"plan", label:"Actions", tab:"strategy", sec:"plan", pen:"plan",
+      chip:function(){ return listChip(unitActions(target).length); },
+      hint:function(){
+        var n = unitActions(target).length;
+        return '<b>Actions</b> \u2014 the work itself, each with an owner and a date it is due.' +
+          (n ? ' <b>' + n + ' added.</b>' : '');
+      } });
+    else secs.push({ k:"plan", label:L("pillar", "bu"), tab:"strategy", sec:"plan", pen:"plan",
       chip:function(){ return listChip(u().items.length); },
       hint:function(){ return builderPillarHint(u()); } });
     secs.push(builderReviewSection());
@@ -42602,7 +42684,11 @@ function builderChooserHtml(){
     '<button data-bside="fns" aria-pressed="' + (side === "fns") + '">' + L("fnword") + '</button></div>';
 
   var rows = (side === "units"
-    ? activeKeys().map(function(k){ return { t:k, name:UNITS[k].name }; })
+    ? activeKeys().map(function(k){
+        /* §405: a unit that plans otherwise says so, in the words its own
+           Setup row uses; a pillars unit's row is as it was. */
+        var uw = unitOwnWay(UNITS[k]);
+        return { t:k, name:UNITS[k].name, fmt:uw ? unitPlanWord(uw).toLowerCase() : "" }; })
     : activeFunctionKeys().map(function(k){
         return { t:"fn:" + k, name:FUNCTIONS[k].name,
                  /* §381.2: three ways now, so the word is read off the format
@@ -42781,7 +42867,13 @@ function bformDef(kind, ctx){
         { k:"company", label:L1("division"), type:"select",
           opts:COMPANY_KEYS.filter(function(ck){ return companyActive(ck); })
             .map(function(ck){ return [ck, COMPANIES[ck].name]; })
-            .concat([["","— its own company —"]]) }
+            .concat([["","— its own company —"]]) },
+        /* §405: a unit chooses how it plans, the same three words a function's
+           control offers (§53.5); the default is the structure's own tick. */
+        { k:"format", label:"Plans in", type:"seg",
+          def:(typeof SMPRules !== "undefined" && SMPRules.levelComponents &&
+               SMPRules.levelComponents(GROUP, "bu").indexOf("pillar") < 0) ? "objectives" : "pillars",
+          opts:FN_FORMATS.map(function(fm){ return [fm, unitPlanWord(fm)]; }) }
       ] },
     newfn: { title:"New " + L1("fnword"), noAnother:true, verb:"Create",
       fields:[
@@ -43028,6 +43120,29 @@ function builderGaps(target){
     say("plan", idle, L1("tactic") + " is due in no quarter, so no cycle will ask for it",
       L("tactic") + " are due in no quarter, so no cycle will ask for them");
   };
+  /* A project's three plan-time gaps and an action's two, written once and
+     asked of a function's work and a unit's alike (§405, §53.5). */
+  var projGaps = function(list, key){
+    var emptyP = 0, oNoT = 0, msNoDue = 0;
+    (list || []).forEach(function(pr){
+      if (!(pr.deliverables || []).length && !(pr.outcomes || []).length) emptyP++;
+      (pr.outcomes || []).forEach(function(o){ if (!o.target) oNoT++; });
+      (pr.milestones || []).forEach(function(m){ if (!m.finish) msNoDue++; });
+    });
+    say(key, emptyP, L1("project") + " holds neither deliverables nor outcomes",
+      L("project") + " hold neither deliverables nor outcomes");
+    say(key, oNoT, "outcome has no target", "outcomes have no target");
+    say(key, msNoDue, "milestone has no due date", "milestones have no due date");
+  };
+  var actGaps = function(list, key){
+    var aNoOwner = 0, aNoDue = 0;
+    (list || []).forEach(function(a){
+      if (!a.owner) aNoOwner++;
+      if (!a.due) aNoDue++;
+    });
+    say(key, aNoOwner, "action has no owner", "actions have no owner");
+    say(key, aNoDue, "action has no date it is due", "actions have no date they are due");
+  };
   var noTargetIn = function(list){
     return (list || []).filter(function(m){ return !m.target; }).length;
   };
@@ -43036,7 +43151,13 @@ function builderGaps(target){
     var u = unitLike(target);
     say("obj", noTargetIn(u.keyObjectives),
       "objective has no target this year", "objectives have no target this year");
-    pillarGaps(u);
+    /* §405: a unit names the gaps of the work it SHOWS — its hidden pillars
+       owe nothing (Islam: *"hidden, kept"*) — and in the same words a
+       function's projects and actions are named in (§53.5). */
+    var uway = unitFormat(UNITS[target]);
+    if (uway === "projects") projGaps(unitOwnProjects(target), "plan");
+    else if (uway === "objectives") actGaps(unitActions(target), "plan");
+    else pillarGaps(u);
   }
 
   /* \u00a7381.2: ONE BRANCH FOR ALL THREE FORMATS, so what the Review names cannot
@@ -43051,33 +43172,15 @@ function builderGaps(target){
 
     if (route === "fnpillars") pillarGaps(unitLike(target));
 
-    if (route === "fnprojects") {
-      var emptyP = 0, oNoT = 0, msNoDue = 0;
-      fnHolders(fk).forEach(function(c){
-        (c.projects || []).forEach(function(pr){
-          if (!pr.deliverables.length && !pr.outcomes.length) emptyP++;
-          pr.outcomes.forEach(function(o){ if (!o.target) oNoT++; });
-          pr.milestones.forEach(function(m){ if (!m.finish) msNoDue++; });
-        });
-      });
-      say("proj", emptyP, L1("project") + " holds neither deliverables nor outcomes",
-        L("project") + " hold neither deliverables nor outcomes");
-      say("proj", oNoT, "outcome has no target", "outcomes have no target");
-      say("proj", msNoDue, "milestone has no due date", "milestones have no due date");
-    }
+    if (route === "fnprojects")
+      projGaps(fnHolders(fk).reduce(function(a, c){ return a.concat(c.projects || []); }, []), "proj");
 
     if (route === "fnobjectives") {
       /* An action's two plan-time facts (\u00a7342): who runs it and when it is
          due. Its STATUS is a reporting field, so a plan cannot owe one \u2014 a
          gap list that asked for it would name something no cycle has yet
          asked anybody for. */
-      var aNoOwner = 0, aNoDue = 0;
-      fnActions(fk).forEach(function(a){
-        if (!a.owner) aNoOwner++;
-        if (!a.due) aNoDue++;
-      });
-      say("act", aNoOwner, "action has no owner", "actions have no owner");
-      say("act", aNoDue, "action has no date it is due", "actions have no date they are due");
+      actGaps(fnActions(fk), "act");
     }
   }
   return gaps;
@@ -43302,57 +43405,10 @@ function deckAnchors(kind, key){
    rather than a new cost: a picture placed after a slide that is no longer
    drawn lands at the end of the deck instead of being dropped. */
 
-function deckSlides(u){
+/* §405: the aim slides, lifted out of deckSlides so a unit that plans in
+   projects or objectives presents its aspiration too (§53.5: one builder). */
+function unitAimSlides(u){
   var S = [];
-  var ko = unitObjectives(u), ex = unitRatio(u);
-  var dl = deltaFor(u.ukey);
-  var dtag = (!dl || !dl.d) ? "" :
-    '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
-    (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
-
-  /* 1 — the cover carries the unit and the cycle, and nothing else. */
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
-    sec("COVER", u.name, true) + '>' +
-    (deckMark(u)
-        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
-    '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
-    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
-
-  /* 2 — what we are aiming at: statement above, targets below, no actuals. */
-  /* The near horizon is hidden on a unit's objectives (§51.16). This is the
-     deck's other side-by-side view of the two, so it drops the same column the
-     Foundation page does — and the scoring slide further on keeps it, because
-     that is where an actual is read against a target. */
-/* ── A SUPPORTING FUNCTION AIMS AT ITS OBJECTIVES, AND NOTHING ELSE (§243)
-     Islam, of a pillars function's deck: *"it has a title of winning
-     aspiration but it shouldn't show this as they don't have it, and what we
-     are aiming at should be the key objectives only — remove the by 2027 and
-     the direction."*
-
-     A supporting function INHERITS its aspiration and its SWOT from the unit
-     it plans under and never authors either (§213), so the label was standing
-     over an empty paragraph; and its objectives carry a WEIGHT and no 3-year
-     target, so the horizon column held nothing but em-dashes.
-
-     THE THIS-YEAR COLUMN IS UNCONDITIONAL HERE: `SHOW_KO_THIS_YEAR` is a
-     per-viewer setting (§66), so on a function — whose only target this is —
-     a viewer who had turned it off would get objectives with no target at all.
-     Islam settled the reason himself: *"the functions has no 3 years
-     objectives."*
-
-     AND `Dir.` IS OFF EVERY DECK, not only a function's — §239, from the same
-     week and the other half of the same conversation: *"for direction and
-     compile remove them from slides but keep in the reporting as they are
-     obvious for the audience."* A projector audience reads the number rather
-     than auditing how it is defined. The two instructions compose: Direction
-     gone for everyone, the horizon column and the aspiration gone on a
-     function. THE HEADER AND THE ROW COME OFF TOGETHER — dropping a `<th>`
-     and leaving its `<td>` shifts every cell after it and the slide still
-     renders perfectly.
-
-     A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
-     asserted, because a unit authors both. */
   var fnAim = !!u.fnKey;
   var aimNear = fnAim || SHOW_KO_THIS_YEAR;
   /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
@@ -43404,6 +43460,96 @@ function deckSlides(u){
         '</div>'
       : '') +
     '</section>');
+
+  return S;
+}
+/* §405: the SWOT section, lifted out of deckSlides for the same reason. */
+function unitSwotSlides(u){
+  var S = [];
+  if (!u.fnKey && compOn(u.ukey, "swot")) {
+    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
+              ["o","Opportunities","stone"],["t","Threats","warn"]];
+    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
+       measurement rather than taste. On the blue the four scoring colours
+       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
+       Opportunities, which was drawn in `--panel` itself and would be
+       invisible against its own ground. Keeping them would mean inventing
+       four colours for one slide; the words under the counts already say
+       which is which, and the four category slides that follow keep their
+       own hues untouched. `.seccell.t-*` had no other user and is deleted
+       with them (§24). It is also what §254.5 settled for the pillar cards:
+       one accent across a row, never one per card (§41's budget). */
+    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
+      "Where this unit is strong, exposed, and what the market is offering it.",
+      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
+    sw.forEach(function(x, xi){
+      var items = (u.swot[x[0]] || []).map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("");
+      /* The LAST category keeps the old key "swot", which stored slides
+         already name (§236.3). */
+      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
+        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
+                              : anch("swot" + x[0], "After " + x[1])) +
+        '><h2>' + x[1] + '</h2>' +
+        '<ol class="dswot">' + items + '</ol></section>');
+    });
+  }
+
+  return S;
+}
+function deckSlides(u){
+  var S = [];
+  var ko = unitObjectives(u), ex = unitRatio(u);
+  var dl = deltaFor(u.ukey);
+  var dtag = (!dl || !dl.d) ? "" :
+    '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
+    (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
+
+  /* 1 — the cover carries the unit and the cycle, and nothing else. */
+  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", u.name, true) + '>' +
+    (deckMark(u)
+        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
+
+  /* 2 — what we are aiming at: statement above, targets below, no actuals. */
+  /* The near horizon is hidden on a unit's objectives (§51.16). This is the
+     deck's other side-by-side view of the two, so it drops the same column the
+     Foundation page does — and the scoring slide further on keeps it, because
+     that is where an actual is read against a target. */
+/* ── A SUPPORTING FUNCTION AIMS AT ITS OBJECTIVES, AND NOTHING ELSE (§243)
+     Islam, of a pillars function's deck: *"it has a title of winning
+     aspiration but it shouldn't show this as they don't have it, and what we
+     are aiming at should be the key objectives only — remove the by 2027 and
+     the direction."*
+
+     A supporting function INHERITS its aspiration and its SWOT from the unit
+     it plans under and never authors either (§213), so the label was standing
+     over an empty paragraph; and its objectives carry a WEIGHT and no 3-year
+     target, so the horizon column held nothing but em-dashes.
+
+     THE THIS-YEAR COLUMN IS UNCONDITIONAL HERE: `SHOW_KO_THIS_YEAR` is a
+     per-viewer setting (§66), so on a function — whose only target this is —
+     a viewer who had turned it off would get objectives with no target at all.
+     Islam settled the reason himself: *"the functions has no 3 years
+     objectives."*
+
+     AND `Dir.` IS OFF EVERY DECK, not only a function's — §239, from the same
+     week and the other half of the same conversation: *"for direction and
+     compile remove them from slides but keep in the reporting as they are
+     obvious for the audience."* A projector audience reads the number rather
+     than auditing how it is defined. The two instructions compose: Direction
+     gone for everyone, the horizon column and the aspiration gone on a
+     function. THE HEADER AND THE ROW COME OFF TOGETHER — dropping a `<th>`
+     and leaving its `<td>` shifts every cell after it and the slide still
+     renders perfectly.
+
+     A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
+     asserted, because a unit authors both. */
+  S = S.concat(unitAimSlides(u));
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -43522,35 +43668,7 @@ function deckSlides(u){
      §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
      side of the switch. */
   if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
-  if (!u.fnKey && compOn(u.ukey, "swot")) {
-    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
-              ["o","Opportunities","stone"],["t","Threats","warn"]];
-    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
-       measurement rather than taste. On the blue the four scoring colours
-       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
-       Opportunities, which was drawn in `--panel` itself and would be
-       invisible against its own ground. Keeping them would mean inventing
-       four colours for one slide; the words under the counts already say
-       which is which, and the four category slides that follow keep their
-       own hues untouched. `.seccell.t-*` had no other user and is deleted
-       with them (§24). It is also what §254.5 settled for the pillar cards:
-       one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
-      "Where this unit is strong, exposed, and what the market is offering it.",
-      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
-    sw.forEach(function(x, xi){
-      var items = (u.swot[x[0]] || []).map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
-      }).join("");
-      /* The LAST category keeps the old key "swot", which stored slides
-         already name (§236.3). */
-      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
-        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
-                              : anch("swot" + x[0], "After " + x[1])) +
-        '><h2>' + x[1] + '</h2>' +
-        '<ol class="dswot">' + items + '</ol></section>');
-    });
-  }
+  S = S.concat(unitSwotSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -43960,6 +44078,8 @@ function deckSlidesFn(subject){
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
   if (!isCap && !isUnit) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
+  /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
+  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -68013,7 +68133,7 @@ var SYNC = (function () {
     if (kind === "newunit" || kind === "newfn") {
       var stay = !!BFORM.ctx.stay;
       var made = kind === "newunit"
-        ? addBusinessUnit(d.name, d.prefix, d.company)
+        ? addBusinessUnit(d.name, d.prefix, d.company, d.format)
         : addFunction(d.name, d.format);
       if (!made) return;
       fieldSaved();

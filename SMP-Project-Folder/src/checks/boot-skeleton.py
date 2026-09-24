@@ -130,7 +130,12 @@ SKELETON = """() => {
     bars: bars.length,
     skBg: bg(sk),
     panelToken: getComputedStyle(root).getPropertyValue("--panel").trim(),
-    navBg: bg(document.querySelector("nav.units")),
+    /* THE TENANT'S BAR IS THE UNIT'S NAVY BAR SINCE §399 — the row of units
+       turned light and re-points `--panel` to the page's neutrals, so asking
+       it for the tenant's colour would ask the one bar that no longer wears
+       it. Rewritten, never loosened (§218): the claim is still "the bar in
+       the tenant's colour arrived", read off the bar that carries it. */
+    navBg: bg(document.querySelector("#tabrow.unitbar") || document.querySelector("nav.units")),
     /* ── WHAT IS PAINTED, NOT WHAT IS COMPUTED ──
        `getComputedStyle` on a `display:none` element still returns its
        background, so reading `nav.units` reported the navy bar as being on

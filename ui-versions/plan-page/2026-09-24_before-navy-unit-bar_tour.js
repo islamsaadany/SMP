@@ -249,10 +249,11 @@ var TOUR = (function(){
           next:"Start the tour" },
 
         { dest:"$own", tab:"strategy", sec:"plan",
-          targets:["#tabrow .unitname"],
+          targets:["#units [data-u=\"$own\"]"],
           title:"You are here",
-          body:"The name at the start of this navy bar is where you are — your unit or your " +
-               "function. The tabs beside it are the three things you do here." },
+          body:"This row is the business — every button a unit or a supporting function, " +
+               "and the lit one is where you are. You will only see the ones you are " +
+               "responsible for." },
 
         { dest:"$own", tab:"strategy", sec:"plan",
           targets:["$tab"],
@@ -376,10 +377,10 @@ var TOUR = (function(){
           next:"Start the tour" },
 
         { dest:"$own", tab:"strategy", sec:"plan",
-          targets:["#tabrow .unitname"],
+          targets:["#units [data-u=\"$own\"]"],
           title:"You are here",
-          body:"The name at the start of this navy bar is what you are accountable for. " +
-               "The tabs beside it are the three things you do here." },
+          body:"This row is the business. The lit one is what you are accountable for — you " +
+               "will only see the parts you have a seat in." },
 
         { dest:"$own", tab:"strategy", sec:"plan",
           targets:["$tab"],

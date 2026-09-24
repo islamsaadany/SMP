@@ -4,6 +4,18 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-09-24 — the new navigation (§399), built on the branch, not merged.**
+The Plan page redesign's chrome, as signed off in round 7: the row of units
+stays for the office (light grey now, and it can be folded away with a pin);
+everybody whose work is one unit or function gets a navy bar instead, with
+the unit's name, a divider at a fixed place, and the Strategy, Performance and
+Reporting tabs, and the sections underneath. The group and the companies stay
+one press away in a small switcher on the top line. Checked: the full page
+sweep is clean and reaches the same pages for every person as before, and a
+new check proves the bar holds its shape and can fail. Waiting on Islam: a
+look at it, whether to go on to the page-body restyle from round 2, and the
+merge.
+
 **Direction, 2026-09-09 — the rebuild is the work now (spec 043, §314).**
 Islam's decision record, verified against the code and aligned question by
 question: SMP moves to **Next.js with one shared Postgres schema and row-level

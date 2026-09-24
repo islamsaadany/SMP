@@ -80,6 +80,13 @@
            never innerHTML - the org name is typed in Labels. -->
       <span class="orgname" id="orgname"></span>
     </div>
+    <!-- THE NAVIGATION'S OTHER HOME (Plan page redesign, rounds 3–7). The row of
+         units is drawn only for somebody who can open more than one place, and
+         the office can fold it away with the pin. Whenever the row is not shown,
+         the house, the Setup door and — folded — a small switcher move up here,
+         so nothing that lived on the row is lost with it. Written by
+         paintUnits(), which owns the row; hidden while it holds nothing. -->
+    <div class="topnav navhost" id="topnav" hidden></div>
     <!-- THE WAY BACK TO THE CARDS (spec 042). The client's name, pressed,
          returns to the door — Islam's own choice over a dropdown, and the
          reason is worth keeping: a list of every client on every page of a
@@ -116,7 +123,7 @@
 </header>
 
 <nav class="units">
-  <div class="units-in" role="tablist" id="units"></div>
+  <div class="units-in navhost" role="tablist" id="units"></div>
 </nav>
 
 <nav class="tabs" id="tabrow">

@@ -57125,3 +57125,88 @@ and Islam chose the recommendation: *"go with your recommendation"*.
   `client-setup.py` all passed; a probe with the word renamed to *Sectors*
   reads "Are the Business units grouped into Sectors?" and both answers
   follow it, with no page errors.
+
+## §399 — the navigation chrome: a light row for the office, a navy bar for the unit (2026-09-24)
+
+**Built on the branch, not merged.** Islam, over seven rounds of mockups in
+`design-mockups/plan-page-redesign/` (v1–v7, published as one artifact), of the
+design he had compared against HR ERP and the client-plus product, and then:
+*"go build it"*. What was signed off, in his words where he gave them:
+
+- **The row of units is for somebody who works across units** — *"the blue
+  banner at the top is only usable for the SMO, other units see only their
+  units"* — and the office can fold it away (**A + B**). Folded, or for
+  somebody who never had it, the house, the Setup door and a small switcher
+  sit on the white top line instead.
+- **The unit's own bar is navy** — *"the line of mobile … needs to be a navy
+  line to show distinction for people who are not the smo"* — with the name,
+  a separator and the three tabs. No period label (*"h1 2026 is not
+  relevant"*). **The separator stands at one distance from the left** and the
+  name is centred in that space (*"the separator space from the left side of
+  the page should be stable"*).
+- **The sections sit under the tabs** (*"keeping the subtabs below the tabs"*).
+- **The office's row turns light** (round 5, option A): a grey strip with dark
+  words and the gold underline, above the navy bar.
+- **The title face is Source Serif 4**, his pick of the recommendation.
+
+**WHAT "SOMEWHERE ELSE" MEANS HAD TO BE MEASURED, AND THE LITERAL READING WAS
+WRONG.** The first build hid the row for somebody who can open one place, and
+on the worked example that is **nobody but the CFO**: every unit head also
+opens the group and the two companies, because the group's Performance ships
+at view for them. So the row counts **units, functions and capabilities** — the
+places of business — and the group and the companies stay one press away in
+the switcher, which lists *every* place the person may open (§61). Measured:
+the office keeps the row; every unit head, custodian and function head whose
+business is one place gets the navy bar and the switcher.
+
+**THE ROW'S BUTTONS STAY IN THE DOCUMENT WHILE IT IS HIDDEN.** The tour, the
+welcome screen and the checks press `#units [data-u]`, and a click on an
+element that is not displayed still fires — so the row is hidden, never
+emptied. What moves is the house and the gear, which are controls rather than
+places. The wiring asks `.navhost`, which both homes carry, so a control is
+bound wherever it is drawn (§29.5). The fold is a screen preference in
+`localStorage` (`smp.nav.folded`), stored as an absence, and a throwing store
+reads as NOT folded — the failure that matters is a row the office cannot get
+back.
+
+**THE RULE'S POSITION IS THE PILLARS RAIL'S OWN WIDTH**, 196px, so the tabs
+start above the plan card and the sections line (indented 236px, rail plus the
+split's gap) starts under them. A name too wide for the column is set at 16px
+rather than clipped — measured after insertion, never guessed by a character
+count. **Every non-Setup destination gets the bar**, the group and a company
+included, so the places read one way (§53.5).
+
+**THE LIGHT STRIP IS A TOKEN SWAP, NOT A RESTYLE.** `nav.units` re-points its
+own `--panel` family to the page's neutrals, so every rule already reading
+those tokens follows; the literal white washes the row carried (the switch,
+the gear, the house) are restated beside it, because a literal does not follow
+a token (§25). **Reporting keeps its orange as type** (#F0A878, 6.43:1 on the
+house navy) with its dot, rather than a solid fill on a navy bar.
+
+**THE TOUR'S "YOU ARE HERE" MOVED** from the row to the navy bar's name,
+because the row is hidden for exactly the people the tour is for — its
+sentence rewritten to say so. The welcome screen's Setup door asks `.navhost`.
+
+**CHECKS.** `checks/nav-chrome.py` is new and asserts the property, never the
+pixel (§94.8): the row at both ends, the switcher agreeing with the person's
+reach, the pin's fold surviving a reload, the rule at one x across a short
+name, a long name and two widths, the rule agreeing with the pillars rail's
+right edge, the sections under the tabs, the tabs' contrast on navy, and the
+tour's target on screen. **17 red** on the build before, **14 red** with the
+fixed column and the business-place count broken from the sources (§276) —
+and its own first run reported a correct build broken, its start-up script
+clearing the saved fold on every load including the reload it was testing
+(§100.3). **`qa.py` was taught the switcher rather than loosened** (§218): it
+walked visible row buttons, which is nothing for a unit head, so it reaches
+each destination through the control a person would press (`press_dest`), and
+its §362.8 guard now asks whether the page is the client's settings rather
+than whether the row is visible. **33 viewers, 243 destinations, ERRORS none —
+viewer for viewer identical to the build before**, measured on a worktree of
+that build. `my-reporting.py`'s walk learned the same door.
+
+**NOT BUILT, AND SAID** (rule 1b): the page body from round 2 — rail cards with
+counts and kind, the pillar head with its owner, the table's lighter lines —
+was drawn and not re-confirmed after the chrome rounds, so it is a next step to
+ask about rather than something ridden in here. The house and the gear moving
+to the top line, the tour's new wording and Reporting as orange text rather
+than an orange fill are each visible changes and named in the handover.

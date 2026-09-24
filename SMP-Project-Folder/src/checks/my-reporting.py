@@ -215,10 +215,17 @@ def go(pg, key):
             # vacuous — the whole reason that guard is there (S113.8).
             # measure-score-spread.py's `go_top()` is the route, followed
             # rather than invented.
-            sm = pg.query_selector("#topsel > summary")
-            if not sm: return False
+            # AND THE ROW ITSELF IS STOOD DOWN for somebody with one place of
+            # business (Plan page redesign, round 7): every destination is
+            # then behind the top line's switcher, which is the door a person
+            # uses — so it is the door this walk uses, not a hidden button.
+            sm = pg.query_selector("#topnav .navswitcher > summary")
+            box = "#topnav .navswitcher"
+            if not sm or not sm.is_visible():
+                sm = pg.query_selector("#topsel > summary"); box = "#topsel"
+            if not sm or not sm.is_visible(): return False
             sm.click(); pg.wait_for_timeout(160)
-            el = pg.query_selector('#topsel [data-u="%s"]' % key)
+            el = pg.query_selector('%s [data-u="%s"]' % (box, key))
             if not el or not el.is_visible():
                 sm.click(); return False
         el.click(timeout=4000)
@@ -285,7 +292,7 @@ with sync_playwright() as p:
 
     print("1 · the tab is on his own place and nowhere else")
     viewer(pg, HIM)
-    press(pg, '#units button[data-u="%s"]' % UNIT)
+    go(pg, UNIT)
     ck("he has a My reporting tab on his own unit", "mylines" in tabs(pg), tabs(pg))
     # NOT A RENAME, which is the one thing a presence assertion cannot see:
     # Islam asked for a tab BESIDE Reporting, so both have to be there and the
@@ -320,12 +327,12 @@ with sync_playwright() as p:
     viewer(pg, ELSEWHERE)
     ck("the unit he owns a line in is not a destination",
        UNIT not in dests(pg), dests(pg))
-    press(pg, '#units button[data-u="%s"]' % OTHER)
+    go(pg, OTHER)
     ck("...and his tab is on HIS OWN place", "mylines" in tabs(pg), tabs(pg))
 
     print("\n3 · the page holds his lines and nobody else's")
     viewer(pg, HIM)
-    press(pg, '#units button[data-u="%s"]' % UNIT)
+    go(pg, UNIT)
     ck("the tab opens", press(pg, '#subtabs [data-s="mylines"]'))
     body = pg.eval_on_selector("#panel", "e=>e.textContent") or ""
     ck("it names his line", MINE_NAME[:24] in body, body[:120])
@@ -384,7 +391,7 @@ with sync_playwright() as p:
     # all (S94.2).
     print("\n8 · S385 — the four states, as the person who RUNS the unit")
     viewer(pg, RUNNER)
-    press(pg, '#units button[data-u="%s"]' % UNIT)
+    go(pg, UNIT)
     ck("the Reporting tab opens", press(pg, '#subtabs [data-s="report"]'))
 
     def live(rid):

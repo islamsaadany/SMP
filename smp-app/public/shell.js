@@ -50870,11 +50870,10 @@ var TOUR = (function(){
           next:"Start the tour" },
 
         { dest:"$own", tab:"strategy", sec:"plan",
-          targets:["#units [data-u=\"$own\"]"],
+          targets:["#tabrow .unitname"],
           title:"You are here",
-          body:"This row is the business — every button a unit or a supporting function, " +
-               "and the lit one is where you are. You will only see the ones you are " +
-               "responsible for." },
+          body:"The name at the start of this navy bar is where you are — your unit or your " +
+               "function. The tabs beside it are the three things you do here." },
 
         { dest:"$own", tab:"strategy", sec:"plan",
           targets:["$tab"],
@@ -50998,10 +50997,10 @@ var TOUR = (function(){
           next:"Start the tour" },
 
         { dest:"$own", tab:"strategy", sec:"plan",
-          targets:["#units [data-u=\"$own\"]"],
+          targets:["#tabrow .unitname"],
           title:"You are here",
-          body:"This row is the business. The lit one is what you are accountable for — you " +
-               "will only see the parts you have a seat in." },
+          body:"The name at the start of this navy bar is what you are accountable for. " +
+               "The tabs beside it are the three things you do here." },
 
         { dest:"$own", tab:"strategy", sec:"plan",
           targets:["$tab"],
@@ -51612,7 +51611,7 @@ var WELCOME = (function(){
   function goSetup(page){
     dismiss();
     setTimeout(function(){
-      press('#units [data-md="setup"]');
+      press('.navhost [data-md="setup"]');
       /* The rail is painted by the press above; its rows are the one
          [data-setupgo] wiring (§108), pressed on the next task for the same
          reason the whole walk is deferred. */
@@ -58912,14 +58911,62 @@ var SYNC = (function () {
        below. */
     var isDest = tabs.map(function(t){ return !!t.k; });
     var d0 = isDest.indexOf(true), d1 = isDest.lastIndexOf(true);
-    document.getElementById("units").innerHTML = chromeHomeHTML() + (d0 === -1
+    /* ── THE ROW IS SHOWN ONLY WHERE THERE IS SOMEWHERE ELSE TO GO
+          (Plan page redesign, round 3 option A + B, signed off round 7) ──
+       Islam: *"the blue banner at the top is only usable for the SMO, other
+       units see only their units"*. Somebody who can open one place has a
+       row with one button on it, which says nothing the navy unit bar below
+       does not; the office, who can open every place, may fold it away with
+       the pin and keeps a small switcher in the top line instead.
+
+       THE BUTTONS STAY IN THE DOCUMENT WHILE THE ROW IS OFF. The tour, the
+       welcome screen and the checks press `#units [data-u]` to go somewhere,
+       and a click on an element that is not displayed still fires — so the
+       row is hidden, never emptied of its destinations. What does MOVE is the
+       house and the Setup door, which are controls rather than places and
+       would otherwise be lost with the row (§61). */
+    /* WHAT COUNTS AS "SOMEWHERE ELSE" IS THE BUSINESS, NOT THE GROUP. Measured
+       on the worked example, every unit head also opens the group and the two
+       companies — the group's Performance ships at view for them — so counting
+       every destination left the row standing for 32 of 33 people, which is
+       not what was asked ("other units see only their units"). The row is for
+       somebody who works across UNITS, FUNCTIONS or CAPABILITIES; the group and
+       the companies stay one press away in the top line's switcher, so nobody
+       loses a place they could open (§61). */
+    var placesHere = everything.filter(function(k){ return k !== "setup" && k !== "manage"; });
+    var bizPlaces = placesHere.filter(function(k){
+      return k !== "group" && String(k).indexOf("co:") !== 0;
+    });
+    var multi = bizPlaces.length > 1;
+    var folded = multi && navFolded();
+    var rowOff = !multi || folded;
+    var switchable = rowOff && placesHere.length > 1;
+    var homeHTML = chromeHomeHTML(), actsHTML = chromeActsHTML();
+    document.getElementById("units").innerHTML = (rowOff ? "" : homeHTML) + (d0 === -1
       ? parts.join("")
       : parts.slice(0, d0).join("") +
         '<div class="navclip">' +
           '<div class="navscroll" id="navscroll">' + parts.slice(d0, d1 + 1).join("") + '</div>' +
           '<div class="navfade l" hidden></div><div class="navfade r" hidden></div>' +
         '</div>' +
-        parts.slice(d1 + 1).join("")) + chromeActsHTML();
+        parts.slice(d1 + 1).join("")) + (rowOff ? "" : actsHTML);
+    var unitsNav = document.querySelector("nav.units");
+    if (unitsNav) unitsNav.classList.toggle("navoff", rowOff);
+    var topnav = document.getElementById("topnav");
+    if (topnav) {
+      topnav.innerHTML = rowOff
+        ? homeHTML + (switchable ? navSwitcherHTML(placesHere) : "") + (multi ? navPinHTML(true) : "") + actsHTML
+        : navPinHTML(false);
+      if (!multi && !rowOff) topnav.innerHTML = "";
+      topnav.hidden = !topnav.innerHTML;
+      topnav.querySelectorAll("[data-navpin]").forEach(function(b){
+        b.addEventListener("click", function(e){
+          e.stopPropagation();
+          setNavFolded(!navFolded());
+          paintUnits();
+        });
+      });
+    }
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -58936,7 +58983,7 @@ var SYNC = (function () {
        the row destroys its handlers - and then the menu was added and broke it
        from the other side. So: whoever rewrites the DOM re-wires it, and there
        is only one place that does. */
-    document.querySelectorAll("#units [data-fold]").forEach(function(b){
+    document.querySelectorAll(".navhost [data-fold]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Browsing, not going: `current` is untouched, so the page and its tabs
            stay exactly as they are. A SWITCH, not a toggle — pressing the lit
@@ -58945,7 +58992,7 @@ var SYNC = (function () {
         paintUnits();
       });
     });
-    document.querySelectorAll("#units [data-u]").forEach(function(b){
+    document.querySelectorAll(".navhost [data-u]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Edit is a decision about the thing being edited, not a lamp that
            stays on while you walk around. Leaving edit modes on across a unit
@@ -59136,6 +59183,48 @@ var SYNC = (function () {
      in a hairline attached to nothing (§24). `pinsep` keeps both out of the
      scrolling region: a separator that scrolls away leaves the control it
      divides looking like a destination (§136). */
+  /* ── THE PIN AND THE FOLDED SWITCHER (round 3 option B) ────────────
+     A screen preference, so localStorage and never the state graph (§25,
+     §47.1); a throwing store reads as NOT folded, because the failure that
+     matters is a row the office cannot get back. Stored as an ABSENCE: the
+     key exists only while folded (§50.6). */
+  var NAVFOLD_KEY = "smp.nav.folded";
+  function navFolded(){
+    try { return localStorage.getItem(NAVFOLD_KEY) === "1"; } catch(e){ return false; }
+  }
+  function setNavFolded(on){
+    try { if (on) localStorage.setItem(NAVFOLD_KEY, "1"); else localStorage.removeItem(NAVFOLD_KEY); } catch(e){}
+  }
+  var ICON_PIN =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" ' +
+    'stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">' +
+    '<path d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></g></svg>';
+  function navPinHTML(folded){
+    var say = folded ? "Show the row of units" : "Fold the row of units away";
+    return '<button type="button" class="navpin' + (folded ? "" : " on") + '" data-navpin="1"' +
+      ' aria-pressed="' + (folded ? "false" : "true") + '" title="' + say + '" aria-label="' + say + '">' +
+      ICON_PIN + '</button>';
+  }
+  /* The same places the row offers, in one list — `data-u`, so the row's own
+     handler takes a press and nothing about going somewhere is written twice
+     (§53.5). A <details>, like every menu here (§47.2). */
+  function navKindWord(k){
+    if (k === "group" || String(k).indexOf("co:") === 0) return "";
+    if (String(k).indexOf("fn:") === 0) return L("fnword");
+    if (String(k).indexOf("cap:") === 0) return L("capability");
+    return L("unitword");
+  }
+  function navPlaceName(k){ return k === "group" ? "Group" : placeLabel(k); }
+  function navSwitcherHTML(places){
+    var kind = navKindWord(current);
+    return '<details class="dlmenu navswitcher">' +
+      '<summary>' + (kind ? '<small>' + kind + ' \u203a</small> ' : '') +
+      '<b>' + esc(navPlaceName(current)) + '</b><span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
+      '<div class="menu" role="menu">' + places.map(function(k){
+        return '<button role="menuitem" data-u="' + esc(k) + '"' +
+          (k === current ? ' aria-current="true"' : '') + '>' + esc(navPlaceName(k)) + '</button>';
+      }).join("") + '</div></details>';
+  }
   function chromeHomeHTML(){
     var home = welcomeBtnHTML();
     return home ? home + '<span class="sep pinsep"></span>' : "";
@@ -59165,7 +59254,7 @@ var SYNC = (function () {
   function wireMenu(){
     /* No toggle any more — the gear IS a [data-md] destination, so it is wired
        by the same loop as everything else the row can go to. */
-    document.querySelectorAll("#units [data-md]").forEach(function(b){
+    document.querySelectorAll(".navhost [data-md]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
         /* Same rule as a unit tab: going somewhere else drops every edit mode,
@@ -59189,7 +59278,7 @@ var SYNC = (function () {
        you are already on, so there is no destination to leave modes for and
        nothing to scroll — pressing it while editing leaves the edit exactly
        where it was, which is what a person who only wants to look expects. */
-    document.querySelectorAll("#units [data-welcomego]").forEach(function(b){
+    document.querySelectorAll(".navhost [data-welcomego]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
         if (typeof WELCOME === "undefined" || !WELCOME.open) return;
@@ -59642,6 +59731,29 @@ var SYNC = (function () {
             '<span class="vh"> \u2014 not submitted yet</span>'
           : '') + '</button>';
     }).join("");
+
+    /* ── THE NAVY UNIT BAR (Plan page redesign, signed off round 7) ──────
+       The name of the place leads the tab row, then a rule, then the tabs.
+       The name's column is the pillars rail's own width (196px), so the rule
+       stands at ONE distance from the left on every page and the tabs start
+       above the plan card; the name is centred in that fixed space, and a
+       name too long for it is set a step smaller rather than clipped
+       (Islam: "the separator space from the left side of the page should be
+       stable and the name of the unit to be centered within this space").
+       Every non-Setup destination gets it, so a unit, a function, a
+       capability, a company and the group read the same way (§53.5). */
+    var tabrowEl = document.getElementById("tabrow");
+    var unitbar = !railed && !!current;
+    tabrowEl.classList.toggle("unitbar", unitbar);
+    document.getElementById("secrow").classList.toggle("unitbar", unitbar);
+    if (unitbar) {
+      var ubName = current === "group" ? "Group" : placeLabel(current);
+      document.getElementById("subtabs").insertAdjacentHTML("afterbegin",
+        '<div class="unitname" title="' + esc(ubName) + '"><span>' + esc(ubName) + '</span></div>');
+      var ubEl = tabrowEl.querySelector(".unitname");
+      var ubSpan = ubEl && ubEl.firstChild;
+      if (ubSpan && ubSpan.scrollWidth > ubEl.clientWidth - 16) ubEl.classList.add("long");
+    }
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
     /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty

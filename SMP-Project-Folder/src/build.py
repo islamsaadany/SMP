@@ -53,7 +53,11 @@ ICON = (
 # decodes almost instantly, but swap is what makes the failure mode "the system
 # font" instead of "nothing", which is also the other option on the switch.
 import base64, glob, os
-FACES = [("Source Sans 3", "fonts/Source_Sans_3.woff2")]
+# SOURCE SERIF 4, FOR TITLES ONLY (Plan page redesign, round 7). Islam chose it
+# from three drawn in the mockup; it is a title face and never the body face,
+# so it does not join the sans switch in theme.js — `--title` names it.
+FACES = [("Source Sans 3", "fonts/Source_Sans_3.woff2"),
+         ("Source Serif 4", "fonts/Source_Serif_4.woff2")]
 faces_css = []
 for family, path in FACES:
     if not os.path.exists(path):

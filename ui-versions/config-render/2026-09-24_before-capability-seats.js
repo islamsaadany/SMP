@@ -371,9 +371,8 @@ function renderAccess(){
     }
     /* The split halves collapse exactly as their whole did (§117): no unit
        means neither half of the unit pair can come up. */
-    if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
-      return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
-        " holds no " + L1("unitword") + ".";
+    if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+      return "A function head holds no " + L1("unitword") + ".";
     }
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no " + L1("fnword") + ".";
@@ -869,7 +868,7 @@ function assignPicker(where, roleKey, current, editable){
       /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
          is a caption on something the reader has already scrolled past. */
       '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
-      group((String(where).indexOf("fn:") === 0 || String(where).indexOf("cap:") === 0) ? "In this function" : "In this unit", pool.here) +
+      group(String(where).indexOf("fn:") === 0 ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
@@ -4865,10 +4864,10 @@ function renderKB(){
            'history, and deleting it would rewrite what was already said. ' +
            '<b>The custodian slot is optional</b> — where the head does the work ' +
            'themselves they already have access as head.' },
-      { h: "A capability's owner",
-        p: 'A capability has an <b>owner</b> and a <b>custodian</b> of its own, named on ' +
-           'Setup › Capabilities, like a business unit. The function that holds it is ' +
-           'optional; where one does, that function\'s head and custodian reach it too.' }
+      { h: "One function each",
+        p: 'A function may hold several capabilities, which is why a custodian is named ' +
+           'after the function and never after a capability: naming someone after one ' +
+           'breaks the moment a second is assigned.' }
     ]),
     kbSection("plans", "Plans — how one arrives", [
       { h: "An upload authors, it does not amend",
@@ -7946,47 +7945,32 @@ function renderCaps(){
            inherits the name from here (§48.5). */
         ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
           esc(c.name) + '">' +
-            '<option value="">\u2014 none \u2014</option>' +
+            '<option value="">\u2014 unassigned \u2014</option>' +
             FUNCTION_KEYS.map(function(k){
               return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
                 esc(FUNCTIONS[k].name) + '</option>';
             }).join("") + '</select>'
         : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
-      /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
-         used to borrow the holding function's head, which is right while a
-         capability is only ever held by a function and wrong for a
-         company-wide one held by nobody (Islam: "it has owner and custodian
-         like business unit, and the function is an option"). The seats are
-         the register's own picker writing the capability's own row, so the
-         People page and this column read one fact (§33). */
-      '<td class="nowrapcell">' + assignPicker("cap:" + c.id, "capowner", c.head, editable) + '</td>' +
-      '<td class="nowrapcell">' + assignPicker("cap:" + c.id, "custodian", c.custodian, editable) + '</td>' +
+      '<td class="nowrapcell">' + esc(f ? (personName(f.head) || "\u2014") : "\u2014") + '</td>' +
       '<td>' + capFormatCell(c, editable) + '</td>' +
       /* Defensive on purpose: a capability minted by an older build carries
          neither list, and a Setup page that throws takes the whole screen with
          it. The minting is fixed (§51.11); this is so a graph saved before the
          fix still opens. */
       '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
-      /* A capability planned in pillars counts its pillars here (§412,
-         Islam: "yes show pillars count"); the heading says both. */
-      '<td class="num">' + (capFormat(c) === "pillars"
-        ? (c.items || []).length + ' <span class="why" style="margin:0">' + esc(L("pillar","bu")) + '</span>'
-        : String((c.projects || []).length)) + '</td>' +
+      '<td class="num">' + (c.projects || []).length + '</td>' +
       rowActions("caps", String(i), editable,
         mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + esc(c.id) + '">Remove</button>' : '') +
       '</tr>';
   }).join("");
 
-  /* A capability with no function is a real answer now (§412) — a
-     company-wide one is held by nobody. What is still outstanding is one
-     that nobody is accountable for: no owner and no holding function. */
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
      mark. What is left is drawn only when there IS an orphan. */
   return cfgHead(L("capability"),
-      orphan ? ['<span class="pill none">' + orphan + ' with no owner</span>'] : [],
+      orphan ? ['<span class="pill none">' + orphan + ' unassigned</span>'] : [],
       null, false) +
     section("", L("capability"), null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
@@ -7998,16 +7982,19 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Head") +
                  h("Plans in") +
-                 h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
+                 h(L("keyobj"), "cc") + h(L("project"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
-          '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
-          'a function to hold it is optional.</span></div>'
+          '<span class="picsub" style="margin-left:10px">Name it, choose the function that ' +
+          'carries it, then upload its ' + L("project") + ' on Import.</span></div>'
         : '') +
+      '<div class="note"><b>One function each.</b> A function may hold several ' + L("capability") + ' \u2014 ' +
+        'Marketing carries two \u2014 which is why a custodian is named after the function and never ' +
+        'after a ' + L1("capability") + ': naming someone after one breaks the moment a second is assigned.</div>' +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
         'one number at the top and others are a portfolio of unrelated work: where there are none ' +

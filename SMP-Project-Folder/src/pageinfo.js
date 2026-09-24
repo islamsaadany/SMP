@@ -420,7 +420,7 @@ var PAGE_INFO = {
       ["The function is the destination, not the capability",
        "The navigation offers <b>supporting functions</b> \u2014 Finance, HR, Marketing \u2014 and the " +
        "capabilities each one carries are named inside its pages. A function may carry more than " +
-       "one (Marketing carries two), the Strategy custodian is named after the function, and the " +
+       "one (Marketing carries two), each capability names its own owner and custodian, and the " +
        "capabilities themselves already appear in the temple. Listing capabilities in the row " +
        "would name the work where the organisation belongs."],
       ["What a capability is",
@@ -486,9 +486,9 @@ var PAGE_INFO = {
        "Cross-cutting work the whole group depends on, improved by a supporting function through " +
        "enhancement projects. It is <b>not</b> a pillar one level up: it belongs to no business unit " +
        "and no unit is accountable for it."],
-      ["One function each",
-       "A capability is allocated to exactly one function. A function may hold several \u2014 which is " +
-       "why custodians are named after the function."],
+      ["An owner of its own",
+       "A capability has its own owner and custodian. It may be held by one function, or by none " +
+       "\u2014 a company-wide capability. A function may hold several."],
       ["Capability delivery reads separately",
        "The group's execution figure is about business units. Capability delivery is cross-cutting " +
        "and is its own reading, shown beside the group figure rather than folded into it \u2014 folding " +

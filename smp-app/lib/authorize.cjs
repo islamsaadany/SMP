@@ -1310,7 +1310,9 @@ function asUnit(f, ukey) {
    what a capability IS, its key objectives and its projects belong to the
    function that carries it (k_found, k_proj); the figures are its reporting
    (k_report). */
-const CAP_SETUP = ["id", "name", "fn"];
+/* §412: the capability's own Owner and Custodian are Setup, beside who holds
+   it -- the office names them, as it names a unit's head (§33). */
+const CAP_SETUP = ["id", "name", "fn", "head", "custodian"];
 const CAP_KNOWN = CAP_SETUP.concat(["def", "keyObjectives", "projects", "perf", "exec"]);
 /* §394: what the pillars form adds. Kept as a second list so CAP_KNOWN keeps
    meaning what it meant to every other reader. */
@@ -1408,7 +1410,7 @@ function collectCapabilities(sList, iList, add, w) {
     let a = sm[id];
     const b = im[id];
     if (same(a, b)) return;
-    if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name or function");
+    if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name, function or owners");
     /* §334: THE CAPABILITY'S OWN TARGET. It is a destination now, with its own
        pages, its own submission and its own row on the cycle board — so a fill
        inside it is judged against the capability rather than against the

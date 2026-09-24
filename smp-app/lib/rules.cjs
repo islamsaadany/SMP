@@ -57,6 +57,18 @@
       note:"Accountable for one unit's strategy. Named on the unit itself." },
     { key:"custodian", name:"Strategy custodian", scope:"unitfn",
       note:"Carries the strategy work for a unit or a supporting function, alongside its head." },
+    /* ── A CAPABILITY HAS SEATS OF ITS OWN (§412, RHI) ──────────────────
+       Islam: *"the capability has owner and custodian like business unit, and
+       the function is an option."* This REVERSES the 13 September decision
+       (§336) that a capability is owned through the function that holds it:
+       RHI's company-wide directions live in a capability no function holds,
+       and a capability nobody can be named on is one only the office can run.
+       The custodian is the Strategy custodian row, held AT the capability; the
+       owner is a row of its own because "Function head · Company Wide" names a
+       seat that does not exist. It ships with the Function head's grants, so a
+       capability owner starts exactly where a function head does. */
+    { key:"capowner", name:"Capability owner", scope:"cap",
+      note:"Accountable for one capability's strategy. Named on the capability itself, on Setup › Capabilities." },
     { key:"fnhead", name:"Function head", scope:"fn",
       note:"Runs a supporting function and the capabilities it owns." },
     /* ── TWO NAMED ROLES, READ OFF THE PLAN (§147.7, Islam 2026-08-28) ──
@@ -252,6 +264,10 @@
     custodian: { a_group:"view", a_unit_own:"edit", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     fnhead:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* §412: a capability is judged in the FUNCTION columns (§334), so its
+       owner starts on the Function head's row, cell for cell. */
+    capowner:  { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW ON THE REPORTING CELLS, DELIBERATELY (§147.7): Islam's first
        condition is that the grant is MADE on this table — "1- is to be
@@ -517,6 +533,13 @@
       if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
       if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
     });
+    /* §412: a capability's own seats, read off the capability exactly as a
+       unit's are read off the unit (§33) -- one fact, one place. */
+    (w.capabilities || []).forEach(function (c) {
+      if (!c || !c.id) return;
+      if (c.head === p.key)      out.push({ role:"capowner",  at:"cap:" + c.id });
+      if (c.custodian === p.key) out.push({ role:"custodian", at:"cap:" + c.id });
+    });
 
     /* ── PROJECT OWNER AND PILLAR OWNER (§147.7) ──────────────────────
        Read off the plan's own Owner rows, exactly as a unit's head is read
@@ -674,9 +697,15 @@
   }
 
   function roleOwns(w, r, target) {
+    /* §412: a seat held AT the capability owns it and nothing else. Asked
+       before the capability resolves to its holder, or the seat would be
+       compared against the function and never match. The holder's own seats
+       still reach it below, because the function stays an option. */
+    if (String(r.at || "") === String(target || "") && String(target || "").indexOf("cap:") === 0) return true;
     target = capHolderTarget(w, target);
     if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
+    if (at.indexOf("cap:") === 0) return false;
     if (String(target).indexOf("fn:") === 0) return at === target;
     if (at.indexOf("fn:") === 0) return false;
     if (r.role === "cceo") {
@@ -1940,7 +1969,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return (w.units || {})[target] || null;
   }
 
-  var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
+  var ARRANGE_ROLES = ["owner", "custodian", "fnhead", "capowner"];
 
   function mayArrange(w, person, target) {
     if (!person || !target) return false;

@@ -4920,5 +4920,43 @@ console.log("\n46 · the client's structure (§404)");
   });
 })();
 
+/* ── §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN ──────────────────
+   Held by no function (company-wide), with `head` and `custodian` named on the
+   capability itself. BOTH ENDS (§94.2): the two seats report, somebody else
+   does not, the owner still may not rewrite the plan, and naming the seats is
+   the SMO's (Setup). */
+console.log("\n§412 · a capability's own owner and custodian");
+(function () {
+  const B = clone(SEED);
+  const cap = (B.group.capabilities || []).filter(function (c) { return (c.projects || []).length; })[0];
+  check("§412: the seed holds a capability with projects", !!cap);
+  if (!cap) return;
+  delete cap.fn; cap.head = "cfo"; cap.custodian = "rethead";
+  const T = "cap:" + cap.id, WB = R.worldOf(B);
+  const rolesOf = function (k) { return R.personRoles(WB, personOf(B, k)).map(function (r) { return r.role + "@" + r.at; }); };
+  check("§412: the owner derives Capability owner at the capability", rolesOf("cfo").indexOf("capowner@" + T) > -1, rolesOf("cfo").join(","));
+  check("§412: the custodian derives Custodian at the capability", rolesOf("rethead").indexOf("custodian@" + T) > -1, rolesOf("rethead").join(","));
+  let PI = -1, MI = -1;
+  cap.projects.forEach(function (pr, pi) { (pr.milestones || []).forEach(function (m, mi) {
+    if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; } }); });
+  check("§412: a milestone the fixture moves", PI > -1);
+  if (PI < 0) return;
+  function as(who, mutate) {
+    const inc = clone(B);
+    mutate(inc.group.capabilities.filter(function (c) { return c.id === cap.id; })[0]);
+    return A.authorize(B, inc, personOf(B, who));
+  }
+  const fig = function (c) { c.projects[PI].milestones[MI].status = "todo"; };
+  const brief = function (c) { c.projects[PI].brief = "rewritten by the fixture"; };
+  const seat = function (c) { c.head = "fn_hr"; };
+  let v = as("cfo", fig);      check("§412: the owner reports on their capability", v.ok, v.refusals.join(" / "));
+  v = as("rethead", fig);      check("§412: the custodian reports on it", v.ok, v.refusals.join(" / "));
+  v = as("fn_hr", fig);        check("§412 REFUSED: another function's head does not", !v.ok, "was ALLOWED");
+  v = as("own_b2b", fig);      check("§412 REFUSED: a unit custodian does not", !v.ok, "was ALLOWED");
+  v = as("cfo", brief);        check("§412 REFUSED: the owner cannot rewrite the plan (the office's, §94)", !v.ok, "was ALLOWED");
+  v = as("smo", seat);         check("§412: the office names the owner", v.ok, v.refusals.join(" / "));
+  v = as("cfo", seat);         check("§412 REFUSED: the owner cannot hand the seat on", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -59,6 +59,18 @@
       note:"Accountable for one unit's strategy. Named on the unit itself." },
     { key:"custodian", name:"Strategy custodian", scope:"unitfn",
       note:"Carries the strategy work for a unit or a supporting function, alongside its head." },
+    /* ── A CAPABILITY HAS SEATS OF ITS OWN (§412, RHI) ──────────────────
+       Islam: *"the capability has owner and custodian like business unit, and
+       the function is an option."* This REVERSES the 13 September decision
+       (§336) that a capability is owned through the function that holds it:
+       RHI's company-wide directions live in a capability no function holds,
+       and a capability nobody can be named on is one only the office can run.
+       The custodian is the Strategy custodian row, held AT the capability; the
+       owner is a row of its own because "Function head · Company Wide" names a
+       seat that does not exist. It ships with the Function head's grants, so a
+       capability owner starts exactly where a function head does. */
+    { key:"capowner", name:"Capability owner", scope:"cap",
+      note:"Accountable for one capability's strategy. Named on the capability itself, on Setup › Capabilities." },
     { key:"fnhead", name:"Function head", scope:"fn",
       note:"Runs a supporting function and the capabilities it owns." },
     /* ── TWO NAMED ROLES, READ OFF THE PLAN (§147.7, Islam 2026-08-28) ──
@@ -254,6 +266,10 @@
     custodian: { a_group:"view", a_unit_own:"edit", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     fnhead:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* §412: a capability is judged in the FUNCTION columns (§334), so its
+       owner starts on the Function head's row, cell for cell. */
+    capowner:  { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW ON THE REPORTING CELLS, DELIBERATELY (§147.7): Islam's first
        condition is that the grant is MADE on this table — "1- is to be
@@ -519,6 +535,13 @@
       if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
       if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
     });
+    /* §412: a capability's own seats, read off the capability exactly as a
+       unit's are read off the unit (§33) -- one fact, one place. */
+    (w.capabilities || []).forEach(function (c) {
+      if (!c || !c.id) return;
+      if (c.head === p.key)      out.push({ role:"capowner",  at:"cap:" + c.id });
+      if (c.custodian === p.key) out.push({ role:"custodian", at:"cap:" + c.id });
+    });
 
     /* ── PROJECT OWNER AND PILLAR OWNER (§147.7) ──────────────────────
        Read off the plan's own Owner rows, exactly as a unit's head is read
@@ -676,9 +699,15 @@
   }
 
   function roleOwns(w, r, target) {
+    /* §412: a seat held AT the capability owns it and nothing else. Asked
+       before the capability resolves to its holder, or the seat would be
+       compared against the function and never match. The holder's own seats
+       still reach it below, because the function stays an option. */
+    if (String(r.at || "") === String(target || "") && String(target || "").indexOf("cap:") === 0) return true;
     target = capHolderTarget(w, target);
     if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
+    if (at.indexOf("cap:") === 0) return false;
     if (String(target).indexOf("fn:") === 0) return at === target;
     if (at.indexOf("fn:") === 0) return false;
     if (r.role === "cceo") {
@@ -1942,7 +1971,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return (w.units || {})[target] || null;
   }
 
-  var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
+  var ARRANGE_ROLES = ["owner", "custodian", "fnhead", "capowner"];
 
   function mayArrange(w, person, target) {
     if (!person || !target) return false;
@@ -8104,6 +8133,10 @@ function personIdentified(p){
 function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
   if (!at || at === "group") return "the group";
+  if (String(at).indexOf("cap:") === 0) {
+    var cw = capById(String(at).slice(4));
+    return (cw ? cw.name : String(at).slice(4)) + " (" + L1("capability").toLowerCase() + ")";
+  }
   if (String(at).indexOf("fn:") === 0) {
     var f = FUNCTIONS[String(at).slice(3)];
     return (f ? f.name : String(at).slice(3)) + " (function)";
@@ -8248,6 +8281,12 @@ function grantPersonRole(personKey, roleKey, where){
     p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
   } else if (roleKey === "owner") {
     unitRolesFor(at).head = personKey; p.unit = at;
+  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
+    /* §412: a capability's seats sit on the capability. The person is not
+       ATTACHED to it -- a capability is not somewhere somebody works -- so
+       their unit or function stays what it was. */
+    var cg = capById(at.slice(4));
+    if (cg) cg[roleKey === "capowner" ? "head" : "custodian"] = personKey;
   } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
     FUNCTIONS[at.slice(3)].custodian = personKey; p.fn = at.slice(3);
   } else if (roleKey === "custodian") {
@@ -8268,6 +8307,9 @@ function revokePersonRole(personKey, roleKey, where){
     if (p) { delete p.role; delete p.company; }
   } else if (roleKey === "owner") {
     if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
+  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
+    var cr = capById(at.slice(4)), fk2 = roleKey === "capowner" ? "head" : "custodian";
+    if (cr && cr[fk2] === personKey) delete cr[fk2];
   } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
     var f = FUNCTIONS[at.slice(3)];
     if (f && f.custodian === personKey) f.custodian = null;
@@ -8319,6 +8361,10 @@ function personHeldRoles(key){
   });
 }
 function roleHolderAt(roleKey, at){
+  if (String(at).indexOf("cap:") === 0) {
+    var ch = capById(String(at).slice(4)) || {};
+    return (roleKey === "capowner" ? ch.head : roleKey === "custodian" ? ch.custodian : null) || null;
+  }
   if (roleKey === "owner")  return (UNIT_ROLES[at] || {}).head || null;
   if (roleKey === "fnhead") return (FUNCTIONS[String(at).replace(/^fn:/, "")] || {}).head || null;
   if (roleKey === "custodian") {
@@ -8627,11 +8673,15 @@ function roleWheres(roleKey){
   if (roleKey === "fnhead") {
     return FUNCTION_KEYS.map(function(f){ return { v:"fn:" + f, label: FUNCTIONS[f].name }; });
   }
+  /* §412: a capability owner is held AT a capability, and a custodian may be. */
+  var capsW = (GROUP.capabilities || []).filter(function(c){ return c && c.id; }).map(function(c){
+    return { v:"cap:" + c.id, label: c.name + " (" + L1("capability").toLowerCase() + ")" }; });
+  if (roleKey === "capowner") return capsW;
   var units = UNIT_KEYS.map(function(k){ return { v:k, label: UNITS[k].name }; });
   if (roleKey === "custodian") {
     return units.concat(FUNCTION_KEYS.map(function(f){
       return { v:"fn:" + f, label: FUNCTIONS[f].name + " (function)" };
-    }));
+    })).concat(capsW);
   }
   return units;
 }
@@ -10001,8 +10051,10 @@ function peopleFor(where){
   var here = [], rest = [];
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
-    var mine = String(where || "").indexOf("fn:") === 0
-      ? p.fn === String(where).slice(3)
+    var w = String(where || ""), cap = w.indexOf("cap:") === 0 ? capById(w.slice(4)) : null;
+    /* §412: a capability's nearest people are its holding function's. */
+    var mine = cap ? !!(cap.fn && p.fn === cap.fn)
+      : w.indexOf("fn:") === 0 ? p.fn === w.slice(3)
       : p.unit === where;
     (mine ? here : rest).push(p);
   });
@@ -17449,7 +17501,7 @@ var PAGE_INFO = {
       ["The function is the destination, not the capability",
        "The navigation offers <b>supporting functions</b> \u2014 Finance, HR, Marketing \u2014 and the " +
        "capabilities each one carries are named inside its pages. A function may carry more than " +
-       "one (Marketing carries two), the Strategy custodian is named after the function, and the " +
+       "one (Marketing carries two), each capability names its own owner and custodian, and the " +
        "capabilities themselves already appear in the temple. Listing capabilities in the row " +
        "would name the work where the organisation belongs."],
       ["What a capability is",
@@ -17515,9 +17567,9 @@ var PAGE_INFO = {
        "Cross-cutting work the whole group depends on, improved by a supporting function through " +
        "enhancement projects. It is <b>not</b> a pillar one level up: it belongs to no business unit " +
        "and no unit is accountable for it."],
-      ["One function each",
-       "A capability is allocated to exactly one function. A function may hold several \u2014 which is " +
-       "why custodians are named after the function."],
+      ["An owner of its own",
+       "A capability has its own owner and custodian. It may be held by one function, or by none " +
+       "\u2014 a company-wide capability. A function may hold several."],
       ["Capability delivery reads separately",
        "The group's execution figure is about business units. Capability delivery is cross-cutting " +
        "and is its own reading, shown beside the group figure rather than folded into it \u2014 folding " +
@@ -33331,8 +33383,9 @@ function renderAccess(){
     }
     /* The split halves collapse exactly as their whole did (§117): no unit
        means neither half of the unit pair can come up. */
-    if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
-      return "A function head holds no " + L1("unitword") + ".";
+    if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+      return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
+        " holds no " + L1("unitword") + ".";
     }
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no " + L1("fnword") + ".";
@@ -33828,7 +33881,7 @@ function assignPicker(where, roleKey, current, editable){
       /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
          is a caption on something the reader has already scrolled past. */
       '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
-      group(String(where).indexOf("fn:") === 0 ? "In this function" : "In this unit", pool.here) +
+      group((String(where).indexOf("fn:") === 0 || String(where).indexOf("cap:") === 0) ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
@@ -37824,10 +37877,10 @@ function renderKB(){
            'history, and deleting it would rewrite what was already said. ' +
            '<b>The custodian slot is optional</b> — where the head does the work ' +
            'themselves they already have access as head.' },
-      { h: "One function each",
-        p: 'A function may hold several capabilities, which is why a custodian is named ' +
-           'after the function and never after a capability: naming someone after one ' +
-           'breaks the moment a second is assigned.' }
+      { h: "A capability's owner",
+        p: 'A capability has an <b>owner</b> and a <b>custodian</b> of its own, named on ' +
+           'Setup › Capabilities, like a business unit. The function that holds it is ' +
+           'optional; where one does, that function\'s head and custodian reach it too.' }
     ]),
     kbSection("plans", "Plans — how one arrives", [
       { h: "An upload authors, it does not amend",
@@ -40905,32 +40958,47 @@ function renderCaps(){
            inherits the name from here (§48.5). */
         ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
           esc(c.name) + '">' +
-            '<option value="">\u2014 unassigned \u2014</option>' +
+            '<option value="">\u2014 none \u2014</option>' +
             FUNCTION_KEYS.map(function(k){
               return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
                 esc(FUNCTIONS[k].name) + '</option>';
             }).join("") + '</select>'
         : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
-      '<td class="nowrapcell">' + esc(f ? (personName(f.head) || "\u2014") : "\u2014") + '</td>' +
+      /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
+         used to borrow the holding function's head, which is right while a
+         capability is only ever held by a function and wrong for a
+         company-wide one held by nobody (Islam: "it has owner and custodian
+         like business unit, and the function is an option"). The seats are
+         the register's own picker writing the capability's own row, so the
+         People page and this column read one fact (§33). */
+      '<td class="nowrapcell">' + assignPicker("cap:" + c.id, "capowner", c.head, editable) + '</td>' +
+      '<td class="nowrapcell">' + assignPicker("cap:" + c.id, "custodian", c.custodian, editable) + '</td>' +
       '<td>' + capFormatCell(c, editable) + '</td>' +
       /* Defensive on purpose: a capability minted by an older build carries
          neither list, and a Setup page that throws takes the whole screen with
          it. The minting is fixed (§51.11); this is so a graph saved before the
          fix still opens. */
       '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
-      '<td class="num">' + (c.projects || []).length + '</td>' +
+      /* A capability planned in pillars counts its pillars here (§412,
+         Islam: "yes show pillars count"); the heading says both. */
+      '<td class="num">' + (capFormat(c) === "pillars"
+        ? (c.items || []).length + ' <span class="why" style="margin:0">' + esc(L("pillar","bu")) + '</span>'
+        : String((c.projects || []).length)) + '</td>' +
       rowActions("caps", String(i), editable,
         mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + esc(c.id) + '">Remove</button>' : '') +
       '</tr>';
   }).join("");
 
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
+  /* A capability with no function is a real answer now (§412) — a
+     company-wide one is held by nobody. What is still outstanding is one
+     that nobody is accountable for: no owner and no holding function. */
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
      mark. What is left is drawn only when there IS an orphan. */
   return cfgHead(L("capability"),
-      orphan ? ['<span class="pill none">' + orphan + ' unassigned</span>'] : [],
+      orphan ? ['<span class="pill none">' + orphan + ' with no owner</span>'] : [],
       null, false) +
     section("", L("capability"), null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
@@ -40942,19 +41010,16 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Head") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
                  h("Plans in") +
-                 h(L("keyobj"), "cc") + h(L("project"), "cc") + h("", "cc", false); })() +
+                 h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
-          '<span class="picsub" style="margin-left:10px">Name it, choose the function that ' +
-          'carries it, then upload its ' + L("project") + ' on Import.</span></div>'
+          '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
+          'a function to hold it is optional.</span></div>'
         : '') +
-      '<div class="note"><b>One function each.</b> A function may hold several ' + L("capability") + ' \u2014 ' +
-        'Marketing carries two \u2014 which is why a custodian is named after the function and never ' +
-        'after a ' + L1("capability") + ': naming someone after one breaks the moment a second is assigned.</div>' +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
         'one number at the top and others are a portfolio of unrelated work: where there are none ' +

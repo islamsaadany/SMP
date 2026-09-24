@@ -58111,3 +58111,39 @@ drawn word in three assertions and was REWRITTEN to Completed, never loosened
 "Not yet due" in the next column — the same fact twice (§87's twins); which one
 goes is Islam's. Deliverables keep "Delivered" and milestones already read
 "Completed".
+
+## §412 — a capability has its own owner and custodian, like a unit (2026-09-24)
+
+Islam, fitting the platform to RHI: *"for the capability, it has owner and
+custodian like business unit, and the function is an option"*; of the mockup,
+*"approved, yes show pillars count, proceed"*. **This REVERSES §336**, which
+found the capability's seats already built as the HOLDING FUNCTION's and
+concluded two new columns would be a second place to say who owns it. That was
+right while every capability was held by a function; RHI's company-wide
+directions live in a capability held by nobody, and a capability held by nobody
+had no seat at all. Recorded as a reversal, not overwritten (Principle II).
+
+**THE SEAT IS ON THE THING (§33)**: `capabilities[].head` and `.custodian`,
+riding `extra` jsonb — no migration. `personRoles` derives **Capability owner**
+(`capowner`, a new row on Roles & access, shipped with the function head's
+grants) and **Custodian** at `cap:<id>` from them, so the register's picker and
+the Setup column read one fact. **`roleOwns` asks the capability itself first**
+and then its holder, so a holding function's head still reaches every
+capability it holds (§334 intact, and why the access baseline is UNMOVED on the
+worked example). `grantPersonRole`/`revokePersonRole`/`roleHolderAt`/
+`roleWheres` learn `cap:`; `CAP_SETUP` in the authoriser names `head` and
+`custodian`, so naming the seats is Setup (the office's) and the owner cannot
+hand the seat on.
+
+**Setup › Capabilities**: Owner and Custodian pickers replace the borrowed Head
+column; Held by offers "— none —"; a pillars capability counts its pillars in
+the count column (heading *Projects / Pillars*); the "One function each" note
+goes, because it is no longer true; the header pill counts capabilities with
+**no owner and no holder**, since a capability held by nobody but owned by
+somebody is now a complete answer.
+
+`test-authorize.js` §412: 11 new, both ends; **4 red** with the derivation
+removed. `checks/capability-seats.py`: every control pressed and the graph read
+back, **12 red** on the build before. Access baseline UNMOVED. Raya: its
+capabilities are held by functions and carry no seat of their own, so nothing
+moves until the office names one.

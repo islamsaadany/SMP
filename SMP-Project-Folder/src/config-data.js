@@ -1669,6 +1669,10 @@ function personIdentified(p){
 function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
   if (!at || at === "group") return "the group";
+  if (String(at).indexOf("cap:") === 0) {
+    var cw = capById(String(at).slice(4));
+    return (cw ? cw.name : String(at).slice(4)) + " (" + L1("capability").toLowerCase() + ")";
+  }
   if (String(at).indexOf("fn:") === 0) {
     var f = FUNCTIONS[String(at).slice(3)];
     return (f ? f.name : String(at).slice(3)) + " (function)";
@@ -1813,6 +1817,12 @@ function grantPersonRole(personKey, roleKey, where){
     p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
   } else if (roleKey === "owner") {
     unitRolesFor(at).head = personKey; p.unit = at;
+  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
+    /* §412: a capability's seats sit on the capability. The person is not
+       ATTACHED to it -- a capability is not somewhere somebody works -- so
+       their unit or function stays what it was. */
+    var cg = capById(at.slice(4));
+    if (cg) cg[roleKey === "capowner" ? "head" : "custodian"] = personKey;
   } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
     FUNCTIONS[at.slice(3)].custodian = personKey; p.fn = at.slice(3);
   } else if (roleKey === "custodian") {
@@ -1833,6 +1843,9 @@ function revokePersonRole(personKey, roleKey, where){
     if (p) { delete p.role; delete p.company; }
   } else if (roleKey === "owner") {
     if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
+  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
+    var cr = capById(at.slice(4)), fk2 = roleKey === "capowner" ? "head" : "custodian";
+    if (cr && cr[fk2] === personKey) delete cr[fk2];
   } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
     var f = FUNCTIONS[at.slice(3)];
     if (f && f.custodian === personKey) f.custodian = null;
@@ -1884,6 +1897,10 @@ function personHeldRoles(key){
   });
 }
 function roleHolderAt(roleKey, at){
+  if (String(at).indexOf("cap:") === 0) {
+    var ch = capById(String(at).slice(4)) || {};
+    return (roleKey === "capowner" ? ch.head : roleKey === "custodian" ? ch.custodian : null) || null;
+  }
   if (roleKey === "owner")  return (UNIT_ROLES[at] || {}).head || null;
   if (roleKey === "fnhead") return (FUNCTIONS[String(at).replace(/^fn:/, "")] || {}).head || null;
   if (roleKey === "custodian") {
@@ -2192,11 +2209,15 @@ function roleWheres(roleKey){
   if (roleKey === "fnhead") {
     return FUNCTION_KEYS.map(function(f){ return { v:"fn:" + f, label: FUNCTIONS[f].name }; });
   }
+  /* §412: a capability owner is held AT a capability, and a custodian may be. */
+  var capsW = (GROUP.capabilities || []).filter(function(c){ return c && c.id; }).map(function(c){
+    return { v:"cap:" + c.id, label: c.name + " (" + L1("capability").toLowerCase() + ")" }; });
+  if (roleKey === "capowner") return capsW;
   var units = UNIT_KEYS.map(function(k){ return { v:k, label: UNITS[k].name }; });
   if (roleKey === "custodian") {
     return units.concat(FUNCTION_KEYS.map(function(f){
       return { v:"fn:" + f, label: FUNCTIONS[f].name + " (function)" };
-    }));
+    })).concat(capsW);
   }
   return units;
 }
@@ -3566,8 +3587,10 @@ function peopleFor(where){
   var here = [], rest = [];
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
-    var mine = String(where || "").indexOf("fn:") === 0
-      ? p.fn === String(where).slice(3)
+    var w = String(where || ""), cap = w.indexOf("cap:") === 0 ? capById(w.slice(4)) : null;
+    /* §412: a capability's nearest people are its holding function's. */
+    var mine = cap ? !!(cap.fn && p.fn === cap.fn)
+      : w.indexOf("fn:") === 0 ? p.fn === w.slice(3)
       : p.unit === where;
     (mine ? here : rest).push(p);
   });

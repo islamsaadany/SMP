@@ -1561,8 +1561,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      nothing for a partial to be measured against, so it is not scored — the
      same answer §276 gives a Count that owes nothing yet, and the reason a
      December agreement sitting at 10% in Q2 does not mark its unit down. */
+  /* §411: WHAT IS STORED AND WHAT IS SAID PART HERE. RHI's word for a
+     finished row is "Completed", platform-wide, and it is the SHOWN word
+     only -- `ynJoin` still writes "Done", so a tab on the previous build, a
+     workbook downloaded last month and every closed cycle read exactly as
+     before (§96.2), and `ynState` reads either spelling. */
   var YN_TODO = "Not started", YN_WIP = "In progress", YN_DONE = "Done";
-  var YN_WORDS = [YN_TODO, YN_WIP, YN_DONE];
+  var YN_DONE_SHOWN = "Completed";
+  var YN_WORDS = [YN_TODO, YN_WIP, YN_DONE_SHOWN];
   function ynPct(n) {
     var p = parseFloat(String(n == null ? "" : n).replace(/[^0-9.\-]/g, ""));
     return isNaN(p) ? null : Math.max(0, Math.min(100, Math.round(p)));
@@ -1571,7 +1577,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = String(v == null ? "" : v).trim();
     if (!s) return { status: "", pct: null };
     var low = s.toLowerCase();
-    if (low === "yes" || low === "y" || low === "done") return { status: "done", pct: null };
+    if (low === "yes" || low === "y" || low === "done" || low === "completed") return { status: "done", pct: null };
     if (low === "no" || low === "n" || low === "not started")
       return { status: "todo", pct: null };
     /* "In progress" alone is a row halfway through a sentence: said, and not
@@ -1603,7 +1609,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      being rewritten (§96.2: what is stored is not touched). */
   function ynShown(v) {
     var st = ynState(v);
-    if (st.status === "done") return YN_DONE;
+    if (st.status === "done") return YN_DONE_SHOWN;
     if (st.status === "todo") return YN_TODO;
     if (st.status === "wip") return st.pct == null ? YN_WIP : YN_WIP + " \u00b7 " + st.pct + "%";
     return "";
@@ -4409,7 +4415,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     bdAsked: bdAsked, bdAnswered: bdAnswered, bdReportFields: bdReportFields,
     YN_UNIT: YN_UNIT, isYesNo: isYesNo, ynUnitOf: ynUnitOf,
     ynAnswer: ynAnswer, ynScore: ynScore,
-    YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_WORDS: YN_WORDS,
+    YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_DONE_SHOWN: YN_DONE_SHOWN, YN_WORDS: YN_WORDS,
     ynState: ynState, ynJoin: ynJoin, ynAnswered: ynAnswered,
     ynShown: ynShown, ynPct: ynPct,
     MONTH_NAMES: MONTH_NAMES, monthSet: monthSet, monthlySet: monthlySet,
@@ -13642,6 +13648,50 @@ function tacticPlanned(t){
 /* A tactic whose quarters have not begun is not behind — it is not yet due,
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
+
+/* ── THE WORD A TACTIC'S STATUS SAYS (§411, RHI) ──────────────────────
+   Islam, fitting the platform to RHI: their words, platform-wide --
+   Completed · In progress · Delayed · Not due, and Not started at 0%.
+   Delayed and Not due are the platform's to say, never somebody's to pick.
+
+   DERIVED, NEVER STORED. `t.status` goes on holding what it always held
+   ("Done" · "WIP" · "Not started"), so a workbook downloaded last month and
+   every closed cycle read exactly as they did (§96.2); only what is DRAWN
+   changes. One reader, so the page and the deck cannot say two things.
+
+   DELAYED is a window that has fully passed with the work not finished --
+   the tactic's own quarters, all of them behind the review month. A tactic
+   halfway through its window and behind its benchmark is In progress; the
+   score beside it already says it is behind, and a second word for that
+   would be a second, looser judgement of the same number. */
+var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
+                     notdue: "Not due", todo: "Not started" };
+function tacticComplete(t){
+  if (!t) return false;
+  if (t.status === "Done") return true;
+  var o = outcomeOf(t);
+  if (o) return SMPRules.isYesNo(o.target) ? SMPRules.ynState(o.actual).status === "done" : false;
+  return t.actual != null && t.actual >= 100;
+}
+function tacticAtNought(t){
+  var o = outcomeOf(t);
+  if (o) {
+    if (o.actual == null || o.actual === "") return true;
+    if (SMPRules.isYesNo(o.target)) return SMPRules.ynState(o.actual).status !== "wip" &&
+                                           SMPRules.ynState(o.actual).status !== "done";
+    var n = parseFloat(String(o.actual).replace(/[^0-9.\-]/g, ""));
+    return !(n > 0);
+  }
+  return !(t.actual > 0);
+}
+function tacticStatusKey(t){
+  if (!t) return "todo";
+  if (tacticComplete(t)) return "done";
+  if (!tacticDue(t)) return "notdue";
+  if (tacticShare(t) === 1) return "late";
+  return tacticAtNought(t) ? "todo" : "wip";
+}
+function tacticStatusWord(t){ return TACTIC_WORDS[tacticStatusKey(t)]; }
 
 
 /* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
@@ -24240,8 +24290,10 @@ function tacticRows(ts, unitKey){
     var benchPair = oc && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
-    var status = t.status === "Done" ? '<span class="pill good">Done</span>'
-                                     : '<span class="pill warn">' + esc(t.status) + '</span>';
+    /* §411: the word is derived, never read off `t.status` (RHI's words). */
+    var sk = tacticStatusKey(t);
+    var status = '<span class="pill ' + ({done:"good", wip:"warn", late:"bad", notdue:"kind", todo:"none"})[sk] +
+                 '">' + esc(TACTIC_WORDS[sk]) + '</span>';
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
     /* §239: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign

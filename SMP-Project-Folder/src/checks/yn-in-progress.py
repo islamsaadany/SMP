@@ -139,19 +139,26 @@ with sync_playwright() as pw:
       shown: [SMPRules.ynShown('In progress 60'), SMPRules.ynShown('Yes'),
               SMPRules.ynShown('No'), SMPRules.ynShown('')]
     })""")
-    ck("the three answers are Not started · In progress · Done",
-       w["words"] == ["Not started", "In progress", "Done"], w)
-    ck("...and the tactic's own Status column already said two of them",
-       ev(pg, """() => { const t = {status:'Done'};
-         return SMPRules.YN_WORDS.indexOf('Done') > -1 &&
-                SMPRules.YN_WORDS.indexOf('Not started') > -1; }""") is True)
+    # §411: REWRITTEN, never loosened (§218). RHI's words replaced §300's
+    # "Done" on the SCREEN with "Completed"; what is STORED is still "Done"
+    # (asserted in §6 below), so this asserts the drawn words and that the
+    # tactic's own Status column speaks the same vocabulary -- one set of
+    # words, two places (§53.5).
+    ck("the three answers are Not started · In progress · Completed",
+       w["words"] == ["Not started", "In progress", "Completed"], w)
+    ck("...and the tactic's own Status column says the same words",
+       ev(pg, """() => { const v = Object.keys(TACTIC_WORDS).map(k => TACTIC_WORDS[k]);
+         return SMPRules.YN_WORDS.every(x => v.indexOf(x) > -1); }""") is True)
+    ck("...and the new word is read back as done, the old one still is",
+       ev(pg, """() => SMPRules.ynState('Completed').status === 'done' &&
+                      SMPRules.ynState('Done').status === 'done'""") is True)
     ck("a stored answer reads back as itself, and an old Yes/No still reads",
        w["state"] == ["todo:null", "wip:null", "wip:60", "done:null",
                       "done:null", "todo:null", ":null", ":null"], w["state"])
     ck("...and is written by ONE joiner",
        w["join"] == ["Not started", "In progress", "In progress 60", "Done", ""], w["join"])
     ck("what is DRAWN is the words, never the stored spelling",
-       w["shown"] == ["In progress · 60%", "Done", "Not started", ""], w["shown"])
+       w["shown"] == ["In progress · 60%", "Completed", "Not started", ""], w["shown"])
 
     print("\n── 2 · the partial is judged against the row's own window")
     sc = ev(pg, """() => ({
@@ -194,7 +201,7 @@ with sync_playwright() as pw:
                plain: !!document.querySelector('input[data-rep="' + s.dataset.rep + '"]:not([data-ynpart])') }; }""")
     ck("the answer is picked, in the three words plus a blank",
        not c0.get("none") and c0.get("opts") == ["", "todo", "wip", "done"] and
-       c0.get("words") == ["—", "Not started", "In progress", "Done"], c0)
+       c0.get("words") == ["—", "Not started", "In progress", "Completed"], c0)
     ck("...and there is no free text box for that row beside it",
        not c0.get("none") and c0.get("plain") is False, c0)
     ck("the per-cent box is NOT drawn until the answer asks for one",

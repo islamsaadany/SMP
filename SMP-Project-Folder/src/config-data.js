@@ -7214,6 +7214,50 @@ function tacticPlanned(t){
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
 
+/* ── THE WORD A TACTIC'S STATUS SAYS (§411, RHI) ──────────────────────
+   Islam, fitting the platform to RHI: their words, platform-wide --
+   Completed · In progress · Delayed · Not due, and Not started at 0%.
+   Delayed and Not due are the platform's to say, never somebody's to pick.
+
+   DERIVED, NEVER STORED. `t.status` goes on holding what it always held
+   ("Done" · "WIP" · "Not started"), so a workbook downloaded last month and
+   every closed cycle read exactly as they did (§96.2); only what is DRAWN
+   changes. One reader, so the page and the deck cannot say two things.
+
+   DELAYED is a window that has fully passed with the work not finished --
+   the tactic's own quarters, all of them behind the review month. A tactic
+   halfway through its window and behind its benchmark is In progress; the
+   score beside it already says it is behind, and a second word for that
+   would be a second, looser judgement of the same number. */
+var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
+                     notdue: "Not due", todo: "Not started" };
+function tacticComplete(t){
+  if (!t) return false;
+  if (t.status === "Done") return true;
+  var o = outcomeOf(t);
+  if (o) return SMPRules.isYesNo(o.target) ? SMPRules.ynState(o.actual).status === "done" : false;
+  return t.actual != null && t.actual >= 100;
+}
+function tacticAtNought(t){
+  var o = outcomeOf(t);
+  if (o) {
+    if (o.actual == null || o.actual === "") return true;
+    if (SMPRules.isYesNo(o.target)) return SMPRules.ynState(o.actual).status !== "wip" &&
+                                           SMPRules.ynState(o.actual).status !== "done";
+    var n = parseFloat(String(o.actual).replace(/[^0-9.\-]/g, ""));
+    return !(n > 0);
+  }
+  return !(t.actual > 0);
+}
+function tacticStatusKey(t){
+  if (!t) return "todo";
+  if (tacticComplete(t)) return "done";
+  if (!tacticDue(t)) return "notdue";
+  if (tacticShare(t) === 1) return "late";
+  return tacticAtNought(t) ? "todo" : "wip";
+}
+function tacticStatusWord(t){ return TACTIC_WORDS[tacticStatusKey(t)]; }
+
 
 /* ── WHERE THE MISSING THINGS ARE (§145.12) ─────────────────────────────
    One map of every place holding gaps, counted through the shared

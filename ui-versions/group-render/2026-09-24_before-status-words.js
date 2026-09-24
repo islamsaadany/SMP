@@ -796,10 +796,8 @@ function tacticRows(ts, unitKey){
     var benchPair = oc && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
-    /* §411: the word is derived, never read off `t.status` (RHI's words). */
-    var sk = tacticStatusKey(t);
-    var status = '<span class="pill ' + ({done:"good", wip:"warn", late:"bad", notdue:"kind", todo:"none"})[sk] +
-                 '">' + esc(TACTIC_WORDS[sk]) + '</span>';
+    var status = t.status === "Done" ? '<span class="pill good">Done</span>'
+                                     : '<span class="pill warn">' + esc(t.status) + '</span>';
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
     /* §239: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign

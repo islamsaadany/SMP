@@ -57882,3 +57882,57 @@ read 763/0 and 140/0, so no save an open tab could make is refused now.
 before the push (§94.16). This record is its own commit so `main`'s tip is on
 no other ref until production has served it (§91).
 
+
+## §411 — a tactic's status is RHI's words, and the platform picks them (2026-09-24)
+
+Islam, fitting SMP to RHI, whose status words are *Completed · In progress ·
+Delayed · Not due*: *"let's use their words and yes the platform does it
+automatically for delayed like the not due"*, and *"Not started if the progress
+is 0% — we can use this logic and words across the platform"*. Asked whether it
+breaks Raya: *"it's fine to change it, the cycle is closed now, if we do it
+right … check before and after."*
+
+**DERIVED, NEVER STORED.** `t.status` goes on holding "Done" · "WIP" ·
+"Not started", because a downloaded workbook, the upload's own mapping
+(templates.js) and every closed cycle read it (§96.2). What changes is the word
+DRAWN, through one reader — `tacticStatusKey()` / `tacticStatusWord()` in
+config-data.js, beside `tacticDue()` — so no two surfaces can say two things
+(§53.5). Measured: the Performance tactics table is the only surface that has
+ever printed a tactic's status; the deck and the .pptx do not.
+
+**THE ORDER IS THE RULE.** Completed first (stored Done, a yes/no answered
+done, or a plain figure at 100 or more), so finishing early is never "Not due";
+then Not due (`tacticDue` false — the window has not begun); then **Delayed**
+when `tacticShare(t) === 1` — every month of the tactic's own quarters is behind
+the review month and it is not finished; then Not started at nought; otherwise
+In progress. **Delayed is not "behind"**: a tactic halfway through and short of
+its benchmark reads In progress, because the score beside it already says it is
+behind, and a second word for that would be a second, looser judgement of the
+same number.
+
+**A YES/NO "DONE" READS "COMPLETED" AND IS STILL STORED "Done".** `YN_WORDS`
+and `ynShown()` say Completed; `ynJoin()` still writes "Done", so a tab on the
+previous build reads what this one writes, and `ynState()` reads "completed" as
+well, for a workbook somebody types it into. The picker's values are keys, so
+nothing about what is posted changes. The server needed nothing (763/0, 140/0).
+
+**Pill colours from the platform's own set**: Completed good, In progress warn,
+Delayed bad, Not due kind (the grey "Not yet due" beside it already wears),
+Not started none.
+
+**Raya before and after**, the worked example's 78 unit tactics: stored WIP
+reads In progress 59, Not due 10, Delayed 2; stored Not started reads Not
+started 5, Delayed 1; stored Done reads Completed 1. No score, count or gap
+moves — the reader decides a word and nothing else.
+
+`checks/tactic-status-words.py`: all five states made on one tactic, the page's
+pills asserted as agreement with the rule, the stored spelling asserted
+untouched; **7 red on the build before**, and **1 red with the Delayed line
+removed from the source** (§276). `yn-in-progress.py` held §300's "Done" as the
+drawn word in three assertions and was REWRITTEN to Completed, never loosened
+(§218), with the stored "Done" assertions in its §6 left exactly as they were.
+
+**RECORDED, NOT DONE**: a not-due tactic now reads "Not due" in Status and
+"Not yet due" in the next column — the same fact twice (§87's twins); which one
+goes is Islam's. Deliverables keep "Delivered" and milestones already read
+"Completed".

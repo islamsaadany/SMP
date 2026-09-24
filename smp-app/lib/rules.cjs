@@ -73,7 +73,7 @@
        role without the grant reads; the grant without the naming reaches
        nothing. */
     { key:"powner", name:"Project owner", scope:"fn",
-      note:"Named as a project's Owner on a supporting function. With Reporting opened on this row, they report that project — whole, and only it." },
+      note:"Named as a project's Owner on a supporting function, or on a business unit that plans in projects. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
     /* ── AND THE ROW UNDER THE PILLAR WAS HERE, AND IS GONE (§384 → §387) ──
@@ -551,8 +551,16 @@
       if (String(f.format) === "pillars") return;
       if ((f.projects || []).some(owns)) once("powner", "fn:" + k);
     });
+    /* §405: A BUSINESS UNIT CAN PLAN IN PROJECTS NOW, so its own projects'
+       owners are Project owners AT THE UNIT — and a unit that does, owes
+       nothing on its hidden pillars, so their owners derive nothing there.
+       The unit's own Reporting cell for this row ships at none, so nobody's
+       access moves until the office opens it. */
     w.unitKeys.forEach(function (k) {
-      if ((((w.units || {})[k] || {}).items || []).some(owns)) once("plowner", k);
+      var u = (w.units || {})[k] || {}, fm = String(u.format || "pillars");
+      if (fm === "projects") { if ((u.projects || []).some(owns)) once("powner", k); return; }
+      if (fm !== "pillars") return;
+      if ((u.items || []).some(owns)) once("plowner", k);
     });
     w.functionKeys.forEach(function (k) {
       var f = w.functions[k] || {};
@@ -1985,7 +1993,19 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        capability would be refused by the wrong column entirely. */
     var t = String(target);
     return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
-      ? (STRATEGY_PAIR[unitPage] || unitPage) : unitPage;
+      ? (STRATEGY_PAIR[unitPage] || unitPage)
+      /* §405: AND THE OTHER WAY. A business unit that plans in projects or
+         actions is drawn by the function's own pages, which ask `k_proj`,
+         `k_found` and `k_report` — asked of a unit those would consult the
+         FUNCTION columns, which a unit's head owns none of. So on a unit the
+         function's keys resolve to the unit's own, and nobody's access moves:
+         a unit's plan is judged by the unit's column whichever way it plans. */
+      : (UNIT_TARGET(t) ? (UNIT_PAIR[unitPage] || unitPage) : unitPage);
+  }
+  var UNIT_PAIR = { k_found: "u_found", k_proj: "u_plan", k_report: "u_report" };
+  function UNIT_TARGET(t) {
+    return !!t && t !== "group" && t !== "undefined" && t !== "null" &&
+      t.indexOf("co:") !== 0 && t.indexOf("fn:") !== 0 && t.indexOf("cap:") !== 0;
   }
   /* A unit arranges its Plan; a supporting function arranges its Projects.
      One place, so the two panes cannot be asked different questions (§53.5). */

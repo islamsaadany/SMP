@@ -142,7 +142,9 @@ with sync_playwright() as p:
         pagePen: document.querySelectorAll('[data-edit="units"]').length,
         eraser: document.querySelectorAll('[data-clearmenu]').length,
         arrange: document.querySelectorAll('[data-setarrange="units"]').length,
-        pills: t.querySelectorAll('tbody .pill').length,
+        /* §405: the Plans in column wears a pill of its own, so the STATUS
+           pill is the one in the status cell (good or none). */
+        pills: t.querySelectorAll('tbody .pill.good, tbody .pill.none').length,
         tables: document.querySelectorAll('.setuppane table').length,
         marks: (document.querySelector('.setuppane') || {}).innerHTML &&
                /Unit marks/.test(document.querySelector('.setuppane').innerHTML),
@@ -446,7 +448,10 @@ with sync_playwright() as p:
     # §62: the entry stays LIVE and the press names what is in the way, which
     # a dotted chip in the row could never do.
     ck("pressing Retire names the units in the way",
-       isinstance(ref, str) and "cannot be retired" in ref and "business unit" in ref, ref[:120])
+       # §395 put the client's own word in that sentence ("Business units"),
+       # so the unit word is asked of the page rather than typed (§214.3, §218).
+       isinstance(ref, str) and "cannot be retired" in ref and
+       str(ev(pg, "() => L('unitword','bu')") or "\x00").lower() in ref.lower(), ref[:120])
     pg.close()
     b.close()
 

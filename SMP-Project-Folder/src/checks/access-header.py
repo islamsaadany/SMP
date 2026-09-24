@@ -142,6 +142,19 @@ with sync_playwright() as p:
     # function page", which nothing in the product ever does — and it made a
     # function head look as though they reached `a_unit_own`.
     print("\n4 · every cell offered is a cell that can be reached")
+    # §405: A BUSINESS UNIT MAY PLAN IN PROJECTS, so a project owner can hold
+    # the role ON A UNIT and the own-unit columns are live for that row. The
+    # worked example has no such unit, so the state is MADE (§255) and put
+    # back after, or this section measures a register that cannot show it.
+    made = pg.evaluate("""()=>{
+      const k = UNIT_KEYS[0], u = UNITS[k], p = PEOPLE.find(x => x.name);
+      window.__ahWas = { k: k, format: u.format, projects: u.projects };
+      u.format = "projects";
+      u.projects = [{ id: "u:" + k + "-P1", name: "Probe project", owner: p.name,
+                      deliverables: [], outcomes: [], milestones: [] }];
+      return (SMPRules.personRoles(world(), p) || [])
+        .some(r => r.role === "powner" && r.at === k); }""")
+    ck("a unit that plans in projects makes its project owner a Project owner there", made)
     reach = pg.evaluate("""()=>{
       const R = SMPRules, w = world();
       const pairs = [['unit', UNIT_KEYS], ['unit_strat', UNIT_KEYS],
@@ -231,10 +244,17 @@ with sync_playwright() as p:
     # The general assertion above covers these, and they are written out as
     # well because the report they came from is worth keeping legible — and
     # because the third is one where the derivation disagreed with him.
+    pg.evaluate("""()=>{ const w = window.__ahWas; if (!w) return;
+      const u = UNITS[w.k];
+      if (w.format === undefined) delete u.format; else u.format = w.format;
+      if (w.projects === undefined) delete u.projects; else u.projects = w.projects; }""")
     print("\n5 · the pairs that were reported")
-    ck("a project owner is offered no OWN business unit column",
-       not offered["Project owner"]["a_unit_own"]
-       and not offered["Project owner"]["a_unit_own_strat"])
+    # §405 REVERSES THIS PAIR, REWRITTEN RATHER THAN DELETED (§218): a project
+    # owner used to be unable to hold anything on a unit, so the own-unit
+    # columns were dashed; since a unit may plan in projects they are offered.
+    ck("a project owner IS offered the OWN business unit columns (§405)",
+       offered["Project owner"]["a_unit_own"]
+       and offered["Project owner"]["a_unit_own_strat"])
     ck("a BU owner is offered no OWN supporting function column",
        not offered["BU owner"]["a_fn_own"]
        and not offered["BU owner"]["a_fn_own_strat"])

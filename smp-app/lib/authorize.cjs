@@ -85,7 +85,10 @@ const SRC = ["src"];
    left to the unknown fall-through. Both land on the SMO, so this changes
    no permission — it changes the REFUSAL, which then says Setup is the
    SMO's and sends the person to the page that holds it (§16.7). */
-const UNIT_CONFIG     = ["name", "navName", "codePrefix", "active", "real", "company", "logo"];
+const UNIT_CONFIG     = ["name", "navName", "codePrefix", "active", "real", "company", "logo",
+                         /* §405: how a unit plans is a setting, set on its row
+                            in Setup — the office's, like a function's format. */
+                         "format"];
 /* §256: which slides a review does not show. Its own kind rather than a
    setting, and the reason is §16.7's: both land on the office, so this
    changes no permission — it changes the REFUSAL, which must not send
@@ -121,7 +124,10 @@ const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
    `unknown`, which would be true but would name the wrong screen. */
 const UNIT_KNOWN      = UNIT_CONFIG.concat(UNIT_FOUNDATION,
   ["ukey", "weight", "perf", "keyObjectives", "swot", "items", "pend",
-   HIDE_SLIDES, DRIVERS]);
+   HIDE_SLIDES, DRIVERS,
+   /* §405: a unit that plans in projects or actions holds them itself, and
+      they are classified below by the rules a function's own work gets. */
+   "projects", "actions"]);
 
 const GROUP_OWN = ["org", "horizon", "asOfQuarter", "aspiration", "endInMind",
                    "mission", "values", "clauses", "keyObjectives", "themes",
@@ -1123,6 +1129,25 @@ function collectUnit(key, su, iu, add, w) {
     if (planMoved) add("unitPlan", key, "the unit's plan", planRows.length ? planRows : null);
   }
 
+  /* ── §405: A UNIT'S OWN PROJECTS AND ACTIONS ────────────────────────────
+     Judged by exactly the rules a function's own work gets (`collectProjects`
+     and the action split `fnOwnWork` uses), against the UNIT's target — so the
+     verdicts below read the unit's columns (`planPageOf`, the unit area), and
+     a unit's reporter entering an action's figure means here what it means on
+     a function. One set of rules, never a copy (§53.5). */
+  (function () {
+    const spr = su.projects || [], ipr = iu.projects || [];
+    if (!same(spr, ipr)) collectProjects(spr, ipr, key, add);
+    const sac = su.actions || [], iac = iu.actions || [];
+    if (!same(sac, iac)) {
+      gapRows("action", sac, iac, key, add, "an action");
+      splitRows(sac, iac, REPORT.action,
+        function (rows) { add("capReporting", key, "action figures", rows); },
+        function (rows) { add("capPlan", key, "the unit's actions", rows); },
+        function () { add("arrange", key, "the order of the unit's actions"); });
+    }
+  })();
+
   const uUnknown = uniq(Object.keys(omit(su, UNIT_KNOWN)).concat(Object.keys(omit(iu, UNIT_KNOWN))))
     .filter(function (k) { return !same(su[k], iu[k]); });
   if (uUnknown.length) add("unknown", key, "the unit's " + uUnknown.join(", "));
@@ -1480,6 +1505,19 @@ function ctxOfUnit(u) {
     (p.tactics || []).forEach(function (t) {
       out[t.id] = { row: t, pillarOwner: p.owner };
     });
+  });
+  return out;
+}
+/* §405: the rows a unit that plans in projects or actions holds itself, with
+   the project each sits inside — `ctxOfFn`'s shape for the unit's own holder. */
+function ctxOfUnitOwn(u) {
+  const out = {};
+  (u && u.keyObjectives || []).forEach(function (x) { out[x.id] = { row: x }; });
+  (u && u.actions || []).forEach(function (x) {
+    if (x && x.id !== undefined) out[x.id] = { row: x }; });
+  (u && u.projects || []).forEach(function (pr) {
+    (pr.deliverables || []).concat(pr.outcomes || [], pr.milestones || [])
+      .forEach(function (x) { if (x && x.id !== undefined) out[x.id] = { row: x, project: pr }; });
   });
   return out;
 }
@@ -2118,12 +2156,18 @@ function authorize(stored, incoming, person) {
          supporting function is exactly these. The pen has been the office's
          since §69.13; this side had never been told. */
       case "capPlan":
-        if (!R.mayAuthorPage(w, person, "k_proj", ch.target))
+        /* §405: `planPageOf`, never the literal — a business unit's own
+           projects and actions are judged by the unit's Plan column. */
+        if (!R.mayAuthorPage(w, person, R.planPageOf(ch.target), ch.target))
           no("A plan is corrected by the SMO — " + ch.what + where + " cannot be changed here.");
         return;
 
       case "capReporting": {
-        if (!edits(w, person, "fn", ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
+        /* §405: a business unit's own projects and actions report in the
+           UNIT area, where its access comes from. */
+        const capT = String(ch.target || "");
+        const capArea = (capT.indexOf("fn:") === 0 || capT.indexOf("cap:") === 0) ? "fn" : "unit";
+        if (!edits(w, person, capArea, ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
         if (locked && !office) {
           no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
           return;
@@ -2136,17 +2180,19 @@ function authorize(stored, incoming, person) {
            for anybody bounded they are refused. Resolved against the STORED
            capabilities (§42.2), through the same reach rule the screen asks
            (mayReportRow, §147.7). */
-        if (!R.onlyOwnLines(w, person, "fn", ch.target)) return;
+        if (!R.onlyOwnLines(w, person, capArea, ch.target)) return;
         if (!ch.ids) {
           no("Your role reports its own rows — " + ch.what + where +
              " is the " + (String(ch.target || "").indexOf("cap:") === 0
                             ? "capability's." : "function's."));
           return;
         }
-        const ctxs = ctxOfFn(w, ch.target);
+        const ctxs = capArea === "unit"
+          ? ctxOfUnitOwn((stored.units || {})[capT])
+          : ctxOfFn(w, ch.target);
         const notMine = ch.ids.filter(function (id) {
           const ctx = ctxs[id];
-          return !ctx || !R.mayReportRow(w, person, "fn", ch.target, ctx);
+          return !ctx || !R.mayReportRow(w, person, capArea, ch.target, ctx);
         });
         if (notMine.length)
           no("Your role reports only its own rows — " + notMine.length +

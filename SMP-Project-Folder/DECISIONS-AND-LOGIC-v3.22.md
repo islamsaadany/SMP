@@ -57708,6 +57708,180 @@ tab-keep, console-boot, terminology-reach green; setup-shape 43/0, graph-diff
 Forced sign-out: not owed — the authoriser only gained kinds for fields an
 old tab never sends, so no save that worked before is refused.
 
+
+## §405 — a business unit chooses how it plans (2026-09-24)
+
+Islam, after §404's Structure step: *"build pillars off for a business unit
+first, mockup first"* — then, of the three questions put to him, *Unit
+chooses* / *Hidden, kept* / *Yes, stop counting*, and of the four decisions
+the signed-off mockup
+(`design-mockups/unit-plans-in/2026-09-24_unit-plans-in.html`) carried:
+*"yes to all four, build it"*, *"for functions hide and keep yes"*.
+
+- **EACH BUSINESS UNIT PICKS "PLANS IN"** — Pillars, Projects, or Objectives
+  &amp; actions — on its row in Setup › Business units (a column and a field in
+  the row's dialog). `UNITS[k].format` rides `units.extra`: **no migration,
+  and an absent value is Pillars**, so every existing unit reads exactly as
+  before. The Structure step's business-unit Pillars tick is only what a NEW
+  unit starts with; it never moves a unit that already has a plan.
+- **SWITCHING HIDES AND KEEPS, AND THAT REVERSES §342'S ARCHIVE FOR
+  FUNCTIONS TOO** (his *"for functions hide and keep yes"*): the switch changes
+  the format and nothing else, and every reader asks the format, so the other
+  plan is not drawn, not asked for, not scored and not counted — and is still
+  stored. Switching back brings it back untouched. One rule for both kinds of
+  subject (§53.5). **The switch warns first** in the platform's own dialog
+  (`.rmconfirm`, never a browser `confirm()`, §95), naming what will be hidden
+  (*"Mobile's 4 Pillars will be hidden and kept. Switching back brings them
+  back."*); a switch that hides nothing does not ask.
+- **THE UNIT'S OWN HOLDER IS THE FUNCTION'S SHAPE** — `u:<key>`, `{id, unit,
+  own, keyObjectives, projects, actions}` — so the function's pages, reporting,
+  deck and workbooks draw it with no second copy (his fourth answer: *"use the
+  existing function versions"*). `holderById`, `holderByIdWritable`,
+  `holderWriteBack`, `eachHolder`, `capsShown` and `strategyPageOf` learned
+  `u:` and answer the UNIT's columns (`u_found`, `u_plan`, `u_report`), so
+  nobody's access moves — measured, the access baseline is UNMOVED.
+- **A NON-PILLARS UNIT STOPS COUNTING PILLARS** (his *"Yes, stop counting"*):
+  `unitPillars()` is null for one, and its Execution is its actions' or its
+  milestones' delivery (`unitOwnExec()`), with Planned 100 so the ratio IS the
+  execution. **The group and company roll-ups read the same functions**, so a
+  unit's hidden pillars never reach a headline while its objectives and its
+  delivery still count. The unit cards say *"Plans in Projects (n), not
+  pillars"* where the pillars table would be.
+- **REPORTING, SUBMIT, THE BOARD AND THE GAPS** walk the holder: the asked
+  rows are the unit's key objectives plus its actions or milestones
+  (`holderSubject()`), the missing bar lists the holder's own places on the
+  Plan section, and the cycle board counts an outcome in the measures column.
+- **THE SERVER**: `format` is a unit SETUP field (the office's, and the
+  refusal names Setup, §16.7); a unit's own `projects` and `actions` are
+  judged by exactly the rules a function's own work gets (`collectProjects` and
+  the action split) against the unit's target, with `ctxOfUnitOwn()` handing
+  the per-row context over. **A project owner on such a unit derives Project
+  owner** (`lib/rules.js`), which is why the matrix's own-unit columns stop
+  being "not applicable" for that row. The change list sends a unit's projects
+  and actions with the unit entry whole (a fallback the differ already has,
+  never a new path). **No forced sign-out is owed**: an old tab never sends
+  those fields, so no save that worked before is refused.
+- **THE DECK AND THE WORKBOOKS** (step 4): `deckHtmlFor()` hands such a unit
+  to `deckSlidesFn("u:<key>")` — the unit's own name on the cover, its note
+  under its own key, no S&amp;W slide and no capability cover. The projects
+  and objectives templates offer these units in their B2 list and the pillars
+  template stops offering them, so each unit is offered exactly once; the
+  upload resolves the name to the unit's own holder; the progress file is the
+  function's. Round-tripped for a projects unit and an objectives unit: every
+  row comes back. **One difference is recorded and is not new**: a target
+  typed `4.5B EGP` comes back `4.5 B EGP` through the capability reader, and a
+  function's round trip does the same on `origin/main`'s code.
+- **§56.7 AGAIN, FOUND BY A PROBE**: my own `unitOfTarget` was shadowed by a
+  later declaration of the same name in `group-render.js`, so a projects
+  unit's asked rows came back empty with nothing thrown; renamed `subjUnit`,
+  and a scan of the built file for duplicate top-level function names is
+  empty.
+- **RECORDED, NOT DONE**: a unit's SWOT and foundation are not on the
+  function-shaped deck; the plan builder does not offer the two new ways for a
+  unit yet; `scripts/test-nav-row.js` dies on `compOn is not a function` and
+  `test-my-reporting.js` has one failure — both reproduce with this work
+  stashed, so both are §404's, not this section's.
+- **THREE CHECKS HELD WHAT THIS DECIDES, REWRITTEN NEVER LOOSENED** (§218,
+  §214.3): `objectives-actions.py` asserted §342's archive (it asserts hide
+  and keep now, 52/0); `access-header.py` asserted a project owner is offered
+  no own-unit column (it now MAKES a unit that plans in projects, asserts the
+  derivation, and asserts the columns are offered); `setup-arrange.py` counted
+  every pill as a status pill (it counts the status cell's). Two reds are not
+  this section's, each reproduced on the build before it (§303):
+  `capability-entry` 1 and `setup-arrange`'s Retire wording 1. Full `qa.py`
+  ERRORS none; structure, functional-projects, cycle-board, template round
+  trip, import page, deck strip, Submit gate, gap fill, fn-pillars, role
+  picker and hide-slide green.
+
+## §405.1 — the four things §405 left, and four checks that had stopped checking (2026-09-24)
+
+Islam, of the list of what was still missing: *"proceed with the 5 items. go
+build till the end … make sure you don't damage or distrubt anything currently
+working with our clients like raya trade this is very critical."*
+
+- **A UNIT THAT PLANS OTHERWISE PRESENTS ITS ASPIRATION AND ITS SWOT.** The
+  function-shaped deck (`deckSlidesFn`) drew a unit's objectives and its work
+  and nothing it authors above them. The aim slides and the SWOT section are
+  LIFTED OUT of `deckSlides` as `unitAimSlides(u)` / `unitSwotSlides(u)` and
+  called by both builders (§53.5: one builder per slide kind), so a pillars
+  unit's deck is **byte-identical**, measured across every unit and every
+  function before and after. §404's structure switches still decide both.
+- **THE BUILDER BUILDS THE WAY THE UNIT PLANS.** Its map's fourth box is the
+  unit's Projects or Actions, counting what the unit's Plan section draws; its
+  Review names that work's gaps and never the hidden pillars'; the chooser says
+  *plans in projects*; and **New unit asks how it plans** in the three words a
+  function's control uses, defaulting to the structure's own tick (§405), with
+  "pillars" stored as an ABSENCE (§50.6). The project and action gap rules are
+  written ONCE and asked of a function's work and a unit's alike. A pillars
+  unit's map and gaps are measured identical.
+- **CLEAR PLAN CLEARED THE WRONG THING — found while wiring Start fresh, and
+  it would have shipped.** `clearUnitPlan` emptied `items` — the hidden pillars
+  — and left the projects or actions on screen untouched, so on a unit that
+  plans otherwise Setup's Clear plan and the builder's Start fresh destroyed
+  the one thing nobody could see and kept the thing being cleared. It clears
+  what the unit SHOWS now and keeps what it hid, archiving both halves first
+  (§49.2), and the archive restores. Pillars units take the path they always
+  took.
+- **`4.5B EGP` NO LONGER COMES BACK AS `4.5 B EGP`, AND `11 M EGP` STILL
+  COMES BACK SPACED.** A row an upload makes had no stored value to copy the
+  spacing from, so `joinTarget` guessed a space for any word-like unit. The
+  first fix asked §199.4's `TIGHT_UNITS` whenever there was nothing to copy —
+  and `template-round-trip.py` went **6 red**, correctly: its fixture's spaced
+  `11 M EGP` now came back `11M EGP`. *Fixing one spelling broke the other,
+  and a round trip must be a fixed point for both.* So the replace path reads
+  every stored target BY ROW TYPE AND NAME before it clears (`prior`), and a
+  row the file carries back takes its spacing from its own stored value; only
+  a genuinely new row takes the tight convention. **A stored value is never
+  rewritten**, and the screen reads both spellings alike (`unitTight`).
+  `nextTargetUnit` (a tactic outcome's unit picker) now writes `6M EGP`,
+  which is what the measures pen's `setTargetUnit` has always written — the
+  two pickers agree (§53.5), and `unit-before-number.py`'s literal was
+  REWRITTEN to that rule (§218, §231's *"the product was right"*).
+- **`checks/unit-plans-in.py` IS THE PERMANENT CHECK §405 DID NOT HAVE** —
+  §405 was proved by one-off probes. 45 assertions, the state MADE (§255), a
+  pillars unit measured beside the two new ones every time (§113.8), proved
+  able to fail four ways from the SOURCES (§276): deck **4 red**, clear **3**,
+  tight **2**, builder **2**, each on its own lines.
+- **FOUR CHECKS HAD STOPPED CHECKING, NONE OF THEM A PRODUCT FAULT** (§214.3,
+  rewritten never loosened, §218): `capability-entry.py` asserted a capability
+  has TWO sections, and §399's S&W made it three — it asserts the agreement
+  with a function and the Overview-first, work-last shape now;
+  `setup-arrange.py` looked for the lower-case words *business unit* where
+  §395 put the client's own word — it asks the page for that word;
+  `test-nav-row.js` supplied no stand-in for §404's `compOn`/`templeOn`, so it
+  died — it asks the SHARED rule over the seed's own group, never a stub that
+  always says yes (§42), and its `--break` still reds 7; `test-my-reporting.js`
+  had not been told §403 made `welcome.js` touch the page at load — named with
+  its reason, as `insights.js` was. **And three more of the same kind, found
+  by the wider sweep and established as not this round's on the build before
+  it** (§303): `deck-figures.py`, `deck-dividers.py` and `monthly-plan.py`
+  held the words *Measures*, *Strategic pillars* and a capital *Measure* where
+  §395 now draws the client's own words (*Key measures*, *Strategic Pillars*,
+  the singular *Key measure* in a table head) — each asks the page for its
+  word now, with every other claim in the assertion unchanged. **Five more,
+  established RED ON `origin/main`'s OWN BUILD before they were touched**
+  (§303 — a worktree of main, built and swept): `objective-unit.py`,
+  `ytd-proration.py`, `reporting-ytd-target.py` and `reported-note.py` found
+  the measures table by the word *Measure*, which §395 made the client's own
+  singular *Key measure* — so each found NO table and several assertions read
+  nothing at all (§113.8); and `yn-in-progress.py`'s fixture set `CURSEC =
+  null` where §269 made it a MAP keyed by page, so every paint in its fixture
+  threw and 23 assertions reported a feature that works. All five ask the page
+  now; nothing in the product moved for any of them.
+- **NOTHING A LIVE CLIENT HOLDS MOVES**: no server rule, no schema, no
+  migration; the access baseline UNMOVED for all 33 people at every target;
+  authoriser 763/0, change list 140/0.
+
+**§405 and §405.1 MERGED TO `main` 2026-09-24 on Islam's word** ("merge to
+main"), a clean fast-forward: `main` had not moved, so the tree pushed is the
+tree that was checked. **No forced sign-out is owed, measured rather than
+assumed** (spec 029): `origin/main`'s own authoriser and change-list suites run
+against the merged `lib/authorize.js`, `lib/rules.js` and `lib/graph-diff.js`
+read 763/0 and 140/0, so no save an open tab could make is refused now.
+`sw.js` is `v5.48-unit-plans-finished` against main's `v5.46`, confirmed
+before the push (§94.16). This record is its own commit so `main`'s tip is on
+no other ref until production has served it (§91).
+
 ## §408 — the navigation chrome: a light row for the office, a navy bar for the unit (2026-09-24)
 
 **Built on the branch, not merged.** Islam, over seven rounds of mockups in
@@ -57864,6 +58038,8 @@ Screen only: no `api/`, `lib/` or `db/` file, nothing stored, nothing migrated, 
 
 **Merged to `main` on Islam's word** (*"merge to main"*), with main's §399–§404 brought in first (31 commits). No renumber was owed: main cites §408–§410 nought times, measured.
 
-**The two sessions removed the same button with two different answers about the face**, and main's is the one that stands: §402 is Islam's own sentence — *"remove the font button and keep the font source sans across the platform"* — so `--sans` is Source Sans 3 on bare `:root` for everybody and §410's `BRAND.font` reader is dropped rather than carried beside it (two answers to one question, §53.5). `theme.js`, `shell.html` and `checks/typeface.py` are main's whole; what survives of §410's font half is the part both agreed on — the switch gone and a remembered `smp.font` cleared on load. The rest of §410 (the top bar, the rail cards, the plan band, the counts) is unchanged by the merge. The built file was rebuilt from the merged sources, `smp-app/public/` regenerated, and `sw.js` rebuilt from main's copy with one line changed: `SHELL` → `smp-shell-v5.47-plan-restyle`, a name the history has never held.
+**The two sessions removed the same button with two different answers about the face**, and main's is the one that stands: §402 is Islam's own sentence — *"remove the font button and keep the font source sans across the platform"* — so `--sans` is Source Sans 3 on bare `:root` for everybody and §410's `BRAND.font` reader is dropped rather than carried beside it (two answers to one question, §53.5). `theme.js`, `shell.html` and `checks/typeface.py` are main's whole; what survives of §410's font half is the part both agreed on — the switch gone and a remembered `smp.font` cleared on load. The rest of §410 (the top bar, the rail cards, the plan band, the counts) is unchanged by the merge. The built file was rebuilt from the merged sources, `smp-app/public/` regenerated, and `sw.js` rebuilt from main's copy with one line changed: `SHELL` → `smp-shell-v5.49-plan-restyle`, past main's v5.48.
+
+**And `main` moved again while the checks ran**: another session merged a business unit's plan format as **§405** and **§405.1** — the numbers this branch was using. This branch's §405–§407 were renumbered to **§408–§410** before that merge (the merge base held none of them, so every citation was this branch's own), in all three spellings, and then main's §405–§405.1 were merged in; the sources merged with no conflict.
 
 **And two things the merge found by running the checks on the merged tree, not by reading it.** Taking main's whole `shell.html` to settle one comment conflict dropped this branch's own §409 section switch and §410 top-bar lines from that file — caught by `tab-row.py` going 6 red; the file was re-merged hunk by hunk. And §409.2's tab padding was measured in the SYSTEM face: in Source Sans 3 (§402) the Reporting word sat 0.65px low regular and 1px high bold, so the two weights now take different padding (regular 6/6, bold 7/5 riding up 1px — both on one line) with half a pixel moved left to right. `tab-row.py` all good.

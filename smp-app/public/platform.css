@@ -1238,6 +1238,11 @@ html[data-client-settings] .viewer { display:none; }
   .rmconfirm .danger { background:var(--bad); border:1px solid var(--bad);
     color:var(--surface); }
   .rmconfirm .danger:hover { filter:brightness(1.08); }
+  /* §405: a change that hides and keeps is not destructive, so its button
+     wears the navigation bar's own ground, never the alarm. */
+  .rmconfirm .go { background:var(--panel); border:1px solid var(--panel);
+    color:var(--panel-ink); }
+  .rmconfirm .go:hover { filter:brightness(1.12); }
 
   /* ── TWO ANSWERS, EACH SAYING WHAT IT DOES (§325) ──────────────────────
      Keeping the projects and destroying them are not two flavours of one act,

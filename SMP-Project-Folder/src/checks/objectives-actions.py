@@ -22,7 +22,7 @@ What is asserted, and why each end matters (§94.2):
   - THE SWITCH ARCHIVES WHAT STOOD (§318 §6.2, Islam's *"archvied when type
     changes and create the new apprach"*). This REPLACES §59's refusal for
     this one transition, so both ends are asserted: the archive is taken with
-    the outgoing plan's counts in it, AND the new form starts empty;
+    (since §405) no archive: what stood is hidden and kept, AND the new form starts empty;
 
   - THE THREE PAGES DRAW THE NEW WORK AND NOT THE OLD. The Plan holds actions
     and no project rail; Performance holds the two cards and both tables;
@@ -162,15 +162,20 @@ def main():
         ev(pg, "()=>closeRowDialog(true)"); pg.wait_for_timeout(300)
         ev(pg, "(k)=>openRowDialog('fns', k)", None, FK); pg.wait_for_timeout(420)
 
-        print("\n§2 the switch ARCHIVES what stood, and starts the new form empty")
+        # §405 REVERSES §342's ARCHIVE AT ISLAM'S WORD ("for functions hide and
+        # keep yes"): the switch changes the form and nothing else, so what
+        # stood is still stored and comes back on switching back. REWRITTEN,
+        # never deleted (§218) — each claim below is the one that survives.
+        print("\n§2 the switch HIDES and KEEPS what stood, and the new form starts empty")
         ev(pg, """(k)=>{const s=document.querySelector('[data-fnformat="'+k+'"]');
           s.value='objectives'; s.dispatchEvent(new Event('change',{bubbles:true}));}""",
            None, FK)
         pg.wait_for_timeout(560)
         said = ev(pg, "()=>{const m=document.getElementById('modal-b');"
                       " return m ? m.innerText.replace(/\\n/g,' ') : '';}", "")
-        ck("it asks first, and says what is held", "holds" in said and "archiv" in said.lower(), said[:120])
-        ck("and says where the way back is", "Import" in said, said[:160])
+        ck("it asks first, and says what is hidden and kept",
+           "hidden and kept" in said and "Projects" in said, said[:120])
+        ck("and says where the way back is", "Switching back brings them back" in said, said[:160])
         ev(pg, "()=>{const y=document.querySelector('[data-rmyes]'); if(y)y.click();}")
         pg.wait_for_timeout(700)
         now = ev(pg, "(k)=>({ fmt: fnFormat(FUNCTIONS[k]),"
@@ -178,11 +183,10 @@ def main():
                      " actions: (FUNCTIONS[k].actions||[]).length,"
                      " arch: ARCHIVES.length, counts: (ARCHIVES[0]||{}).counts })", {}, FK)
         ck("the form is stored as the third value", now.get("fmt") == "objectives", now)
-        ck("an archive was taken, carrying what stood",
-           now.get("arch") == was.get("arch", 0) + 1 and
-           (now.get("counts") or {}).get("projects") == was.get("projects"), now)
-        ck("and the new form starts empty",
-           now.get("projects") == 0 and now.get("actions") == 0, now)
+        ck("no archive is taken, and what stood is still stored",
+           now.get("arch") == was.get("arch", 0) and
+           now.get("projects") == was.get("projects"), now)
+        ck("and the new form starts empty", now.get("actions") == 0, now)
 
         # §255/§100.3: the rows are the product's own shapes, minted through the
         # product's own minter where there is one.

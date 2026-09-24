@@ -112,7 +112,10 @@ with sync_playwright() as p:
             ok(nxt is not None and not nxt["sect"],
                "%s is followed by content, not by another divider" % u["slides"][i]["anchor"])
         heads = [u["slides"][i]["head"].strip() for i in sect]
-        ok(heads == ["Foundation", "SWOT", "Strategic pillars", "Overall performance"],
+        # REWRITTEN, never loosened (§218): since §395 the third divider is
+        # "Strategic " + the client's own word for its pillars, asked of the page.
+        pw = pg.evaluate("() => 'Strategic ' + L('pillar','bu')")
+        ok(heads == ["Foundation", "SWOT", pw, "Overall performance"],
            "the four headings — %s" % heads)
 
         print("\n3 · the SWOT divider drops its four hues; the category slides keep theirs")

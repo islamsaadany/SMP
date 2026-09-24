@@ -4029,6 +4029,8 @@ function capById(id){
 function holderById(id){
   var s = String(id || "");
   if (s.indexOf("fn:") === 0) return fnOwnHolder(s.slice(3));
+  /* §405: a business unit's own holder. */
+  if (s.indexOf("u:") === 0) return unitOwnHolder(s.slice(2));
   /* A capability answers to its bare id AND to its destination spelling, so a
      caller holding either asks one function (§53.5). */
   return capById(s.indexOf("cap:") === 0 ? s.slice(4) : s);
@@ -4230,7 +4232,12 @@ function fnActionsTally(fk){
 }
 function fnObjScore(fk){
   var h = fnOwnHolder(fk);
-  return h ? capKOScore(h) : null;
+  return h ? holderKOScore(h) : null;
+}
+/* §405: a unit's objectives score the way the unit's own headline scores them
+   (koScore with its weights), so its page and the group's roll-up agree. */
+function holderKOScore(c){
+  return c && c.unit && UNITS[c.unit] ? unitObjectives(UNITS[c.unit]) : capKOScore(c);
 }
 /* What an objectives function is asked for this cycle: every objective, and
    every action whose time has come — the same test a milestone's date gets
@@ -4926,15 +4933,26 @@ function canReportRow(unitKey, x){
    function that holds it (§334). */
 function holderTarget(x){
   var t = String(x || "");
-  return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? t : "fn:" + t;
+  return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("u:") === 0)
+    ? t : "fn:" + t;
 }
 function canReportFn(target){
+  /* §405: a unit's own holder reports on the UNIT's column, through the gate
+     a unit's own page already asks — never the function's. */
+  if (isUnitHolderId(target)) return canReport(subjKey(target));
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
   return grantAt("k_report", holderTarget(target)) === "edit";
 }
 function canReportFnRow(target, project, rowObj){
   var t = holderTarget(target);
+  if (isUnitHolderId(t)) {
+    var uk = subjKey(t);
+    if (!canReport(uk)) return false;
+    if (ownDraftShut(uk, project && project.id)) return false;
+    return SMPRules.mayReportRow(world(), viewer(), "unit", uk,
+                                 { row: rowObj, project: project });
+  }
   if (!canReportFn(t)) return false;
   /* §309: the project's own saved draft, asked here because this gate is
      already handed the project — every deliverable, outcome, milestone and
@@ -4948,6 +4966,10 @@ function canReportFnRow(target, project, rowObj){
    itself (its owner; its stakeholders once the Contributor row is opened). */
 function canReportFnProject(target, p){
   var t = holderTarget(target);
+  if (isUnitHolderId(t)) {
+    var uk2 = subjKey(t);
+    return canReport(uk2) && SMPRules.mayReportRow(world(), viewer(), "unit", uk2, { project: p });
+  }
   if (!canReportFn(t)) return false;
   return SMPRules.mayReportRow(world(), viewer(), "fn", t, { project: p });
 }
@@ -4955,6 +4977,8 @@ function canReportFnProject(target, p){
    bounded they are read, never entered. */
 function canReportFnWhole(target){
   var t = holderTarget(target);
+  if (isUnitHolderId(t)) return canReport(subjKey(t)) &&
+    !SMPRules.onlyOwnLines(world(), viewer(), "unit", subjKey(t));
   return canReportFn(t) &&
          !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
 }
@@ -4976,7 +5000,7 @@ function canReportFnWhole(target){
    ("a function has no contributors to exclude") described the code truly and
    stopped being true the day the floor reached the projects. */
 function canSpeakFor(target){
-  var t = String(target || "");
+  var t = subjKey(target);
   if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
     return canReportFn(t) &&
            !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
@@ -5335,6 +5359,9 @@ function outstandingSources(u){
    target, and the tactics whose quarters fall inside the window. A tactic
    outside it is not an empty box somebody forgot \u2014 it is not asked. */
 function reportItems(u){
+  /* §405: a unit that plans otherwise is asked what its holder holds — the
+     function's own list, over `u:<key>` (§53.5: one walk, never a second). */
+  if (unitOwnWay(u)) return fnReportItems("u:" + u.ukey);
   var out = [];
   /* §233: a hidden row is not asked — not counted means not owed, so it
      leaves the ask list, the note rule and the submit gate in one skip. */
@@ -5401,6 +5428,7 @@ function reportItems(u){
   return out;
 }
 function askedItems(u){
+  if (unitOwnWay(u)) return fnAskedItems("u:" + u.ukey);
   return reportItems(u).filter(function(x){ return x.kind !== "tactic" || x.asked; });
 }
 /* ── HAS THIS ROW BEEN ANSWERED? (§252) ────────────────────────────
@@ -5728,17 +5756,23 @@ function boundedReporter(target){
    asked). */
 function drawnAsHolder(target){
   var t = String(target || "");
+  if (isUnitHolderId(t)) return !!subjUnit(t);
   if (isCapTarget(t)) return !!capOfTarget(t);
   var fk = fnKeyOfTarget(t);
   return !!(fk && FUNCTIONS[fk]);
 }
+/* §405: a unit that plans otherwise is asked through its holder `u:<key>`. */
+function holderSubject(t){
+  var u = UNITS[t];
+  return u && unitOwnWay(u) ? "u:" + t : t;
+}
 function subjectAsked(target){
-  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  var t = holderSubject(String(target || "")), u = plansInPillars(t) ? unitLike(t) : null;
   if (u) return askedItems(u);
   return drawnAsHolder(t) ? fnAskedItems(t) : [];
 }
 function subjectReported(target){
-  var t = String(target || ""), u = plansInPillars(t) ? unitLike(t) : null;
+  var t = holderSubject(String(target || "")), u = plansInPillars(t) ? unitLike(t) : null;
   if (u) return reportedCount(u);
   return drawnAsHolder(t) ? fnReportedCount(t) : { done:0, total:0 };
 }
@@ -7294,7 +7328,7 @@ function gapMap(target, all, fillable){
      counted below as the Overview. Nothing is counted that no page shows
      (§61), and nothing is shown that the subject does not own. */
   var FN_WORDS   = { found: null, plan: "k_proj", sec: "proj" };
-  var unitHalf = function(u, w){
+  var unitHalf = function(u, w, noPillars){
     if (!u) return;
     w = w || UNIT_WORDS;
     if (w.found) {
@@ -7304,6 +7338,8 @@ function gapMap(target, all, fillable){
       (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });
       entry("ko", "Objectives", ko, { sec: "found", page: "foundation" });
     }
+    /* §405: a unit that plans otherwise owes nothing on its hidden pillars. */
+    if (noPillars) return;
     (u.items || []).forEach(function(p, i){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
@@ -7318,13 +7354,20 @@ function gapMap(target, all, fillable){
      projects with their outcomes and milestones — so they are counted by one
      body over a list, and the code and the rail are asked of the holder
      (§310, §53.5) rather than of whichever subject the caller came from. */
-  var holderHalf = function(list){
+  var holderHalf = function(list, o){
+    /* §405: a UNIT's own holder is counted without an Overview — its
+       foundation and objectives are the unit's own, counted by unitHalf — and
+       its plan lives on the unit's `plan` section, not a function's `proj`. */
+    o = o || {};
+    var hsec = o.sec || "proj";
+    if (!o.noOverview) {
     var ov = 0;
     list.forEach(function(c){
       ov += G("k_found", {}, "cap", c);           /* §214: its definition */
       (c.keyObjectives || []).forEach(function(m){ ov += G("k_found", {}, "capko", m); });
     });
     entry("ov", "Overview", ov, { sec: "found", page: "capfoundation" });
+    }
     /* §342: THE ACTIONS ARE ONE PLACE AND ONE CHIP, on the Plan section where
        they are drawn and filled. Without this the page prints the red word on
        a row nobody owns and the band above it counts nought, which is §223's
@@ -7335,7 +7378,7 @@ function gapMap(target, all, fillable){
       (c.actions || []).forEach(function(a){
         acts += G("k_proj", { row: a }, "action", a); });
     });
-    if (acts) entry("act", "Actions", acts, { sec: "proj", page: "plan" });
+    if (acts) entry("act", "Actions", acts, { sec: hsec, page: "plan" });
     list.forEach(function(c){
       (c.projects || []).forEach(function(p){
         /* The projects rail is per HOLDER (railKeyFor), and it selects by
@@ -7349,7 +7392,7 @@ function gapMap(target, all, fillable){
         (p.outcomes   || []).forEach(function(o){ n += G("k_proj", pctx(o), "outcome", o); });
         (p.milestones || []).forEach(function(m){ n += G("k_proj", pctx(m), "milestone", m); });
         entry("pr:" + p.id, projCode(holderCodeOwner(c), p), n,
-              { sec: "proj", page: "plan", rail: railKeyFor(c), code: p.id });
+              { sec: hsec, page: "plan", rail: railKeyFor(c), code: p.id });
       });
     });
   };
@@ -7382,7 +7425,11 @@ function gapMap(target, all, fillable){
     var cc = capOfTarget(t);
     if (cc) holderHalf([cc]);
   } else {
-    unitHalf(UNITS[t]);
+    var tu = UNITS[t];
+    if (tu && unitOwnWay(tu)) {
+      unitHalf(tu, null, true);
+      holderHalf(unitHolders(t), { noOverview: true, sec: "plan" });
+    } else unitHalf(tu);
   }
   return out;
 }
@@ -7574,13 +7621,22 @@ function fnProjects(fk){
    function, a capability's off the capability. `c.own` is the mark
    `fnOwnHolder` sets, so nothing has to guess from the shape of an id. */
 function holderCodeOwner(c){
-  return !c ? "" : (c.own ? c.fn : "cap:" + c.id);
+  return !c ? "" : (c.unit ? "u:" + c.unit : c.own ? c.fn : "cap:" + c.id);
 }
 function projCode(owner, p){
   if (!p) return "";
   var t = String(owner || ""), c = isCapTarget(t) ? capById(capKeyOf(t)) : null;
   var list, pre;
   if (t.indexOf("fn:") === 0) t = t.slice(3);
+  /* §405: a unit's own projects are coded in the unit's letters (RS01), the
+     way its pillars are. */
+  if (t.indexOf("u:") === 0) {
+    var uo = UNITS[t.slice(2)];
+    if (!uo) return "";
+    list = unitOwnProjects(t.slice(2)); pre = uo.codePrefix || "";
+    var ui = list.map(function(x){ return x.id; }).indexOf(p.id);
+    return ui < 0 ? "" : pre + String(ui + 1).padStart(2, "0");
+  }
   if (c) { list = c.projects || []; pre = capPrefix(c); }
   else {
     var f = FUNCTIONS[t];
@@ -7665,11 +7721,13 @@ function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
    container (§50.6): a reader must never create the field it was looking for,
    or every save carries a phantom change. */
 function fnActions(fk){
+  if (isUnitHolderId(fk)) return unitActions(subjKey(fk));
   var f = FUNCTIONS[fk];
   return (f && fnPlansInObjectives(f) && Array.isArray(f.actions))
     ? f.actions : FN_NO_ROWS;
 }
 function fnActionsWritable(fk){
+  if (isUnitHolderId(fk)) { var uh = unitOwnHolderWritable(subjKey(fk)); return uh && unitFormat(UNITS[subjKey(fk)]) === "objectives" ? UNITS[subjKey(fk)].actions : null; }
   var f = FUNCTIONS[fk];
   if (!f || !fnPlansInObjectives(f)) return null;
   if (!Array.isArray(f.actions)) f.actions = [];
@@ -7828,7 +7886,8 @@ function fnKeyOfTarget(target){
 function plansInPillars(target){
   var t = String(target || "");
   if (t.indexOf("cap:") === 0) return capPlansInPillars(capOfTarget(t));
-  if (t.indexOf("fn:") !== 0) return !!UNITS[t];
+  /* §405: a unit plans in pillars unless it has chosen otherwise. */
+  if (t.indexOf("fn:") !== 0) { var pu = subjUnit(t); return !!pu && unitFormat(pu) === "pillars"; }
   return fnPlansInPillars(FUNCTIONS[t.slice(3)]);
 }
 /* And whether it is drawn by the objectives-and-actions pages (§342). A
@@ -7839,7 +7898,8 @@ function plansInPillars(target){
    stored value nothing can set. */
 function plansInObjectives(target){
   var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return false;
+  if (t.indexOf("cap:") === 0) return false;
+  if (t.indexOf("fn:") !== 0) { var ou = subjUnit(t); return !!ou && unitFormat(ou) === "objectives"; }
   return fnPlansInObjectives(FUNCTIONS[t.slice(3)]);
 }
 
@@ -8023,9 +8083,23 @@ function pillarPlan(p){
 }
 function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }
 
-function unitPillars(u){ return avg(u.items.map(pillarPerf)); }
-function unitExec(u){ return avg(u.items.map(pillarExec)); }
-function unitPlan(u){ return avg(u.items.map(pillarPlan)); }
+/* §405: A UNIT THAT DOES NOT PLAN IN PILLARS HAS NO PILLAR FIGURE (Islam:
+   "stop counting"), and its execution is the one its own page shows — the
+   actions' or the projects' milestones, read exactly as a function's are
+   (`fnMemberScores`, §391) — with its plan at 100, because that figure is
+   already a ratio against what was due (`tacticPlanShare`'s own reason). Its
+   pillars are hidden and kept, never counted. */
+function unitOwnWay(u){
+  return (u && u.ukey && UNITS[u.ukey] === u && unitFormat(u) !== "pillars") ? unitFormat(u) : null;
+}
+function unitOwnExec(u){
+  var h = unitOwnHolder(u.ukey);
+  if (!h) return null;
+  return unitOwnWay(u) === "objectives" ? fnActionsTally("u:" + u.ukey).pct : capExec(h).pct;
+}
+function unitPillars(u){ return unitOwnWay(u) ? null : avg(u.items.map(pillarPerf)); }
+function unitExec(u){ return unitOwnWay(u) ? unitOwnExec(u) : avg(u.items.map(pillarExec)); }
+function unitPlan(u){ return unitOwnWay(u) ? (unitOwnExec(u) == null ? null : 100) : avg(u.items.map(pillarPlan)); }
 function unitRatio(u){ var pl = unitPlan(u); return pl ? Math.round(unitExec(u)/pl*100) : null; }
 
 var UNIT_KEYS = ["mobile","retailstores","b2becomm","consumerelectronics","onlineshop",
@@ -8340,7 +8414,8 @@ function dxSwitchKind(p, id, want){
 function addAction(fk){
   var list = fnActionsWritable(fk);
   if (!list) return null;
-  var a = { id: mintRowId(list, "fn:" + fk + "-A"), name: "", owner: "",
+  /* §405: a unit's action is minted `u:<key>-A<n>`, never `fn:u:…`. */
+  var a = { id: mintRowId(list, (isUnitHolderId(fk) ? fk : "fn:" + fk) + "-A"), name: "", owner: "",
             due: "", status: "" };
   list.push(a);
   return a;
@@ -8385,6 +8460,10 @@ function eachHolder(fn){
      row. */
   FUNCTION_KEYS.forEach(function(k){ fnHolders(k).forEach(fn); });
   (GROUP.capabilities || []).forEach(function(c){ fn(c); });
+  /* §405: and a business unit that plans in projects or actions. Last, so
+     every walk that existed before this reads the same order it always did. */
+  (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function(k){
+    unitHolders(k).forEach(fn); });
 }
 function projById(id){
   var hit = null;
@@ -8997,7 +9076,7 @@ function pillarsUsingTheme(ab){
      the composite could not read (§104.7's list-of-exceptions fault);
    · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
      a unit the SMO just created is the client's own. */
-function addBusinessUnit(name, prefix, company){
+function addBusinessUnit(name, prefix, company, format){
   var nm = String(name || "").trim(), key;
   if (nm) {
     var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
@@ -9018,6 +9097,20 @@ function addBusinessUnit(name, prefix, company){
     aspiration: "", endInMind: "",
     keyObjectives: [], swot: { s: [], w: [], o: [], t: [] }, items: []
   };
+  /* §405: THE STRUCTURE'S TICK IS THE DEFAULT FOR A NEW UNIT. Where the
+     business-unit level carries no pillars, a new unit starts in objectives
+     and actions — the one other way the level can mean, since a unit keeps
+     its key objectives on the Foundation whichever way it plans. The unit's
+     own choice wins from then on. */
+  if (typeof SMPRules !== "undefined" && SMPRules.levelComponents &&
+      SMPRules.levelComponents(GROUP, "bu").indexOf("pillar") < 0)
+    UNITS[key].format = "objectives";
+  /* §405: and a way asked for by name (the builder's New unit form) wins over
+     that default — "pillars" is stored as an absence (§50.6). */
+  if (format && FN_FORMATS.indexOf(String(format)) > -1) {
+    if (format === "pillars") delete UNITS[key].format;
+    else UNITS[key].format = String(format);
+  }
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
   var wrow = { key: key, unit: nm, why: "" };
@@ -9040,6 +9133,28 @@ function clearAllPlans(why){ UNIT_KEYS.forEach(function(k){ clearUnitPlan(UNITS[
    undo. Two routes to the same outcome, one of them reversible. They are the
    same act now, through the same function, and the confirmation says so. */
 function clearUnitPlan(u, why){
+  /* §405: A UNIT THAT PLANS IN PROJECTS OR IN OBJECTIVES AND ACTIONS clears
+     the work it SHOWS and keeps the pillars it hid (Islam: *"hidden, kept"*).
+     Found while wiring the builder's Start fresh: this emptied `items` — the
+     hidden pillars — and left the projects or actions on screen untouched, so
+     Clear plan cleared the one thing nobody could see. The holder's work is
+     archived first through its own path (§49.2), the unit's foundation through
+     the unit's, and both archives restore. */
+  if (u && u.ukey && UNITS[u.ukey] === u && unitOwnWay(u)) {
+    var h = unitOwnHolderWritable(u.ukey);
+    archiveCapPlan(h, why);
+    var kept = u.items;
+    var archivedU = archiveUnitPlan(u, why);
+    if (h.projects) h.projects.length = 0;
+    if (h.actions) h.actions.length = 0;
+    u.items = kept;
+    u.keyObjectives = [];
+    u.swot = { s:[], w:[], o:[], t:[] };
+    u.clauses.forEach(function(c){ c[1] = ""; });
+    u.aspiration = "";
+    u.endInMind = "";
+    return archivedU;
+  }
   var archived = archiveUnitPlan(u, why);
   u.items = [];
   u.keyObjectives = [];
@@ -9531,6 +9646,7 @@ function removeCapability(id, moveToId){
    The holder's `projects` is the FUNCTION'S OWN ARRAY, never a copy, or an add
    would report the row it wrote and the function would still be empty. */
 function fnOwnHolder(fk){
+  if (isUnitHolderId(fk)) return unitOwnHolder(subjKey(fk));
   var f = FUNCTIONS[fk];
   if (!f || fnPlansInPillars(f)) return null;
   return { id: "fn:" + fk, fn: fk, own: true, name: f.name, def: f.def || "",
@@ -9547,12 +9663,14 @@ function fnOwnHolder(fk){
    put the first one; two questions, and collapsing them made a function with
    nothing at all read as a function with work (§61 from the other side). */
 function fnOwnProjects(fk){
+  if (isUnitHolderId(fk)) return unitOwnProjects(subjKey(fk));
   var f = FUNCTIONS[fk];
   /* §342: `fnPlansInProjects`, never `!fnPlansInPillars` — an objectives
      function is neither, and the old spelling handed it a project list. */
   return (f && fnPlansInProjects(f) && Array.isArray(f.projects)) ? f.projects : FN_NO_ROWS;
 }
 function fnOwnHolderWritable(fk){
+  if (isUnitHolderId(fk)) return unitOwnHolderWritable(subjKey(fk));
   var f = FUNCTIONS[fk];
   if (!f || fnPlansInPillars(f)) return null;
   if (fnPlansInObjectives(f)) { if (!Array.isArray(f.actions)) f.actions = []; }
@@ -9570,6 +9688,7 @@ function fnOwnHolderWritable(fk){
    function with nothing at all and no box would otherwise be readable and
    unstartable, which is §61's trap and what §129's audit found five times. */
 function fnOwnsProjects(fk){
+  if (isUnitHolderId(fk)) { var ou = UNITS[subjKey(fk)]; return !!ou && unitFormat(ou) === "projects"; }
   var f = FUNCTIONS[fk];
   /* §342: and an objectives function owns none — the page would otherwise
      offer it somewhere to put its first project, which is a control with
@@ -9594,6 +9713,7 @@ function fnOwnsProjects(fk){
    value because every caller maps over it and a projects function with nothing
    at all legitimately has none (§61). */
 function fnHolders(fk){
+  if (isUnitHolderId(fk)) return unitHolders(subjKey(fk));
   /* §342: AND A FUNCTION THAT PLANS IN OBJECTIVES IS A HOLDER, of its own key
      objectives and its own actions. `fnOwnsProjects` is about PROJECTS and
      rightly answers false for it — so without this line its rows are drawn,
@@ -9603,6 +9723,63 @@ function fnHolders(fk){
   if (f && fnPlansInObjectives(f)) return [fnOwnHolder(fk)];
   return fnOwnsProjects(fk) ? [fnOwnHolder(fk)] : [];
 }
+
+/* ── A BUSINESS UNIT CHOOSES HOW IT PLANS (§405) ───────────────────────────
+   Islam: *"build pillars off for a business unit"* — then, of the mockup,
+   *"yes to all four"*. A unit plans in the three ways a supporting function
+   already can (FN_FORMATS), and the pages, the scores, the reporting, the deck
+   and the workbooks are the FUNCTION'S OWN for that way of planning, driven
+   through a holder rather than written a second time (§53.5).
+
+   ABSENT IS PILLARS, where a function's absent is projects — every unit that
+   exists today plans in pillars and must go on reading exactly as it did
+   (§30.2, §96.2). `format` rides `units.extra`, like a function's, so there is
+   no schema change and no migration; "pillars" is stored as an ABSENCE (§50.6).
+
+   A UNIT'S HOLDER ID IS "u:<key>". A bare key already means a FUNCTION to
+   `holderTarget()` (§334's legacy signature), and this tenant has a unit and a
+   function both called Care — so the prefix is what stops one of them being
+   read as the other. `subjKey()` turns it back into the key everything that
+   files by subject already uses (REVIEW.submitted, the cycle board, the deck).
+
+   HIDDEN, NEVER DELETED (Islam: *"hidden, kept"*, and for functions too): a
+   unit that stops planning in pillars keeps `items`; its projects or actions
+   are kept when it moves back. Only the FORMAT decides which is drawn and
+   which is counted. */
+function unitFormat(u){
+  var v = u && u.format;
+  return FN_FORMATS.indexOf(String(v)) > -1 ? String(v) : "pillars";
+}
+function isUnitHolderId(x){ return String(x || "").indexOf("u:") === 0; }
+function subjKey(t){ var s = String(t || ""); return s.indexOf("u:") === 0 ? s.slice(2) : s; }
+function subjUnit(t){
+  var s = subjKey(t);
+  return (s.indexOf("fn:") === 0 || s.indexOf("cap:") === 0) ? null : (UNITS[s] || null);
+}
+function unitActions(k){
+  var u = UNITS[k];
+  return (u && unitFormat(u) === "objectives" && Array.isArray(u.actions)) ? u.actions : FN_NO_ROWS;
+}
+function unitOwnProjects(k){
+  var u = UNITS[k];
+  return (u && unitFormat(u) === "projects" && Array.isArray(u.projects)) ? u.projects : FN_NO_ROWS;
+}
+function unitOwnHolder(k){
+  var u = UNITS[k];
+  if (!u || unitFormat(u) === "pillars") return null;
+  return { id: "u:" + k, unit: k, own: true, name: u.name, def: "",
+           keyObjectives: Array.isArray(u.keyObjectives) ? u.keyObjectives : FN_NO_ROWS,
+           actions: unitActions(k), projects: unitOwnProjects(k) };
+}
+function unitOwnHolderWritable(k){
+  var u = UNITS[k];
+  if (!u || unitFormat(u) === "pillars") return null;
+  if (unitFormat(u) === "objectives") { if (!Array.isArray(u.actions)) u.actions = []; }
+  else if (!Array.isArray(u.projects)) u.projects = [];
+  if (!Array.isArray(u.keyObjectives)) u.keyObjectives = [];
+  return unitOwnHolder(k);
+}
+function unitHolders(k){ var h = unitOwnHolder(k); return h ? [h] : []; }
 
 /* ── A CAPABILITY IS A DESTINATION OF ITS OWN (§334, spec 048 stage 2) ─────
    Islam: *"capability is something Strategic … the capability is either
@@ -9719,6 +9896,7 @@ function fnKoHolderWritable(fk){
 function holderByIdWritable(id){
   var s = String(id || "");
   if (s.indexOf("fn:") === 0) return fnOwnHolderWritable(s.slice(3));
+  if (s.indexOf("u:") === 0) return unitOwnHolderWritable(s.slice(2));
   return capById(s.indexOf("cap:") === 0 ? s.slice(4) : s);
 }
 /* The other half of that pair, and a no-op for a capability, which IS the
@@ -9727,6 +9905,15 @@ function holderByIdWritable(id){
    `fnWriteBack` is the same rule for the pillars format (§129, §61). */
 function holderWriteBack(id, h){
   var s = String(id || "");
+  /* §405: a unit's holder is a wrapper too, so the same rule. */
+  if (h && s.indexOf("u:") === 0) {
+    var uu = UNITS[s.slice(2)];
+    if (!uu) return;
+    if (unitFormat(uu) === "objectives") uu.actions = h.actions;
+    else if (unitFormat(uu) === "projects") uu.projects = h.projects;
+    uu.keyObjectives = h.keyObjectives;
+    return;
+  }
   if (!h || s.indexOf("fn:") !== 0) return;
   var f = FUNCTIONS[s.slice(3)];
   if (!f) return;

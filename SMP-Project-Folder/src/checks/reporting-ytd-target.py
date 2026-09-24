@@ -119,7 +119,7 @@ READ = """(nm) => {
     const col = th.findIndex(h => /Target/.test(h));
     if (col < 0) return;
     const kind = th[1] === 'Tactic' ? 'tactic'
-               : th[1] === 'Measure' ? 'measure'
+               : th[1] === L1('measure') ? 'measure'   /* §395: the client's word (§218) */
                : /objective/i.test(th[1] || '') ? 'objective' : null;
     if (!kind) return;
     const rows = {};
@@ -346,7 +346,7 @@ with sync_playwright() as p:
         pg.wait_for_timeout(500)
         fits[w] = ev(pg, """() => {
           const t=[...document.querySelectorAll('#panel table')]
-            .find(x=>x.querySelector('thead') && /Measure/.test(x.querySelector('thead').textContent));
+            .find(x=>x.querySelector('thead') && x.querySelector('thead').textContent.indexOf(L1('measure')) > -1 /* §395: the client's word (§218) */);
           if(!t) return {gone:true};
           const box = t.closest('.scroll') || t.parentElement;
           return { over: t.scrollWidth - box.clientWidth,

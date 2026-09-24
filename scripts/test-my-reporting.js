@@ -42,7 +42,10 @@ const FILES = [...BUILD.match(/for tag, f in \[([\s\S]*?)\]:/)[1]
    its reason, and the sentence below no longer says "the three", which was
    the literal that moved. Both ends still hold, so a source that quietly
    stops loading is still a failure. */
-const NEEDS_A_DOCUMENT = ["history.js", "insights.js", "safety.js", "sync.js"];
+/* AND AGAIN AT §403 (2026-09-24): Home moved under the chrome, so
+   `welcome.js` wires its own listeners at load now — named here with that
+   reason, the same rewrite as insights.js above (§218). */
+const NEEDS_A_DOCUMENT = ["history.js", "insights.js", "safety.js", "sync.js", "welcome.js"];
 const threw = [];
 
 const ctx = vm.createContext({ console, JSON, Math, Date, Intl, setTimeout });

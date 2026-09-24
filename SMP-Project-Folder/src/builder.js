@@ -60,7 +60,7 @@ function builderHere(){
    than a fall-through. */
 function builderRoute(target){
   var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;
+  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
   var f = FUNCTIONS[t.slice(3)];
   if (!f) return null;
   var fmt = fnFormat(f);
@@ -84,6 +84,13 @@ function builderSubjectName(target){
 }
 function builderHasPlan(target){
   var r = builderRoute(target);
+  /* §405: a unit that plans otherwise has a plan when its holder or its
+     foundation holds something — the pillars it hid do not count. */
+  if (r === "unit" && unitOwnWay(UNITS[target])) {
+    var uu = UNITS[target];
+    return !!(unitOwnProjects(target).length || unitActions(target).length ||
+              (uu.keyObjectives || []).length || uu.aspiration);
+  }
   if (r === "unit" || r === "fnpillars")
     return !planIsEmpty(unitSnapshotCounts(unitPlanSnapshot(unitLike(target))));
   if (r === "fnprojects") return fnHasWork(String(target).slice(3));
@@ -154,7 +161,28 @@ function builderSections(target){
         return listChip(n);
       },
       hint:function(){ return '<b>SWOT</b> \u2014 the analysis the ' + esc(L("pillar","bu")) + ' are reasoned from. Empty is allowed; say what you know.'; } });
-    secs.push({ k:"plan", label:L("pillar", "bu"), tab:"strategy", sec:"plan", pen:"plan",
+    /* §405: A UNIT THAT PLANS IN PROJECTS OR IN OBJECTIVES AND ACTIONS builds
+       that work in the same box — the unit's Plan section draws its holder
+       (`u:<key>`), so the chip counts what that section draws and says the
+       word the unit's own row says (§53.5). Its Foundation, Objectives and
+       SWOT are a unit's whichever way it plans. */
+    var uway = unitFormat(UNITS[target]);
+    if (uway === "projects") secs.push({ k:"plan", label:L("project"), tab:"strategy", sec:"plan", pen:"plan",
+      chip:function(){ return listChip(unitOwnProjects(target).length); },
+      hint:function(){
+        var ps = unitOwnProjects(target), d = 0, o = 0, ms = 0;
+        ps.forEach(function(pr){ d += (pr.deliverables || []).length; o += (pr.outcomes || []).length; ms += (pr.milestones || []).length; });
+        return '<b>' + L("project") + '</b> \u2014 the work itself: front matter, deliverables, outcomes, milestones.' +
+          (ps.length ? ' <b>' + ps.length + ' \u00b7 ' + d + ' deliverables \u00b7 ' + o + ' outcomes \u00b7 ' + ms + ' milestones.</b>' : '');
+      } });
+    else if (uway === "objectives") secs.push({ k:"plan", label:"Actions", tab:"strategy", sec:"plan", pen:"plan",
+      chip:function(){ return listChip(unitActions(target).length); },
+      hint:function(){
+        var n = unitActions(target).length;
+        return '<b>Actions</b> \u2014 the work itself, each with an owner and a date it is due.' +
+          (n ? ' <b>' + n + ' added.</b>' : '');
+      } });
+    else secs.push({ k:"plan", label:L("pillar", "bu"), tab:"strategy", sec:"plan", pen:"plan",
       chip:function(){ return listChip(u().items.length); },
       hint:function(){ return builderPillarHint(u()); } });
     secs.push(builderReviewSection());
@@ -287,7 +315,11 @@ function builderChooserHtml(){
     '<button data-bside="fns" aria-pressed="' + (side === "fns") + '">' + L("fnword") + '</button></div>';
 
   var rows = (side === "units"
-    ? activeKeys().map(function(k){ return { t:k, name:UNITS[k].name }; })
+    ? activeKeys().map(function(k){
+        /* §405: a unit that plans otherwise says so, in the words its own
+           Setup row uses; a pillars unit's row is as it was. */
+        var uw = unitOwnWay(UNITS[k]);
+        return { t:k, name:UNITS[k].name, fmt:uw ? unitPlanWord(uw).toLowerCase() : "" }; })
     : activeFunctionKeys().map(function(k){
         return { t:"fn:" + k, name:FUNCTIONS[k].name,
                  /* §381.2: three ways now, so the word is read off the format
@@ -466,7 +498,13 @@ function bformDef(kind, ctx){
         { k:"company", label:L1("division"), type:"select",
           opts:COMPANY_KEYS.filter(function(ck){ return companyActive(ck); })
             .map(function(ck){ return [ck, COMPANIES[ck].name]; })
-            .concat([["","— its own company —"]]) }
+            .concat([["","— its own company —"]]) },
+        /* §405: a unit chooses how it plans, the same three words a function's
+           control offers (§53.5); the default is the structure's own tick. */
+        { k:"format", label:"Plans in", type:"seg",
+          def:(typeof SMPRules !== "undefined" && SMPRules.levelComponents &&
+               SMPRules.levelComponents(GROUP, "bu").indexOf("pillar") < 0) ? "objectives" : "pillars",
+          opts:FN_FORMATS.map(function(fm){ return [fm, unitPlanWord(fm)]; }) }
       ] },
     newfn: { title:"New " + L1("fnword"), noAnother:true, verb:"Create",
       fields:[
@@ -713,6 +751,29 @@ function builderGaps(target){
     say("plan", idle, L1("tactic") + " is due in no quarter, so no cycle will ask for it",
       L("tactic") + " are due in no quarter, so no cycle will ask for them");
   };
+  /* A project's three plan-time gaps and an action's two, written once and
+     asked of a function's work and a unit's alike (§405, §53.5). */
+  var projGaps = function(list, key){
+    var emptyP = 0, oNoT = 0, msNoDue = 0;
+    (list || []).forEach(function(pr){
+      if (!(pr.deliverables || []).length && !(pr.outcomes || []).length) emptyP++;
+      (pr.outcomes || []).forEach(function(o){ if (!o.target) oNoT++; });
+      (pr.milestones || []).forEach(function(m){ if (!m.finish) msNoDue++; });
+    });
+    say(key, emptyP, L1("project") + " holds neither deliverables nor outcomes",
+      L("project") + " hold neither deliverables nor outcomes");
+    say(key, oNoT, "outcome has no target", "outcomes have no target");
+    say(key, msNoDue, "milestone has no due date", "milestones have no due date");
+  };
+  var actGaps = function(list, key){
+    var aNoOwner = 0, aNoDue = 0;
+    (list || []).forEach(function(a){
+      if (!a.owner) aNoOwner++;
+      if (!a.due) aNoDue++;
+    });
+    say(key, aNoOwner, "action has no owner", "actions have no owner");
+    say(key, aNoDue, "action has no date it is due", "actions have no date they are due");
+  };
   var noTargetIn = function(list){
     return (list || []).filter(function(m){ return !m.target; }).length;
   };
@@ -721,7 +782,13 @@ function builderGaps(target){
     var u = unitLike(target);
     say("obj", noTargetIn(u.keyObjectives),
       "objective has no target this year", "objectives have no target this year");
-    pillarGaps(u);
+    /* §405: a unit names the gaps of the work it SHOWS — its hidden pillars
+       owe nothing (Islam: *"hidden, kept"*) — and in the same words a
+       function's projects and actions are named in (§53.5). */
+    var uway = unitFormat(UNITS[target]);
+    if (uway === "projects") projGaps(unitOwnProjects(target), "plan");
+    else if (uway === "objectives") actGaps(unitActions(target), "plan");
+    else pillarGaps(u);
   }
 
   /* \u00a7381.2: ONE BRANCH FOR ALL THREE FORMATS, so what the Review names cannot
@@ -736,33 +803,15 @@ function builderGaps(target){
 
     if (route === "fnpillars") pillarGaps(unitLike(target));
 
-    if (route === "fnprojects") {
-      var emptyP = 0, oNoT = 0, msNoDue = 0;
-      fnHolders(fk).forEach(function(c){
-        (c.projects || []).forEach(function(pr){
-          if (!pr.deliverables.length && !pr.outcomes.length) emptyP++;
-          pr.outcomes.forEach(function(o){ if (!o.target) oNoT++; });
-          pr.milestones.forEach(function(m){ if (!m.finish) msNoDue++; });
-        });
-      });
-      say("proj", emptyP, L1("project") + " holds neither deliverables nor outcomes",
-        L("project") + " hold neither deliverables nor outcomes");
-      say("proj", oNoT, "outcome has no target", "outcomes have no target");
-      say("proj", msNoDue, "milestone has no due date", "milestones have no due date");
-    }
+    if (route === "fnprojects")
+      projGaps(fnHolders(fk).reduce(function(a, c){ return a.concat(c.projects || []); }, []), "proj");
 
     if (route === "fnobjectives") {
       /* An action's two plan-time facts (\u00a7342): who runs it and when it is
          due. Its STATUS is a reporting field, so a plan cannot owe one \u2014 a
          gap list that asked for it would name something no cycle has yet
          asked anybody for. */
-      var aNoOwner = 0, aNoDue = 0;
-      fnActions(fk).forEach(function(a){
-        if (!a.owner) aNoOwner++;
-        if (!a.due) aNoDue++;
-      });
-      say("act", aNoOwner, "action has no owner", "actions have no owner");
-      say("act", aNoDue, "action has no date it is due", "actions have no date they are due");
+      actGaps(fnActions(fk), "act");
     }
   }
   return gaps;

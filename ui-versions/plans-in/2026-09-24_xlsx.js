@@ -500,9 +500,7 @@ function readmePick(sheets){
 /* Everything a pillars plan may be written for, in the order the dropdown
    offers it. Named once because the Import page shows the same count. */
 function planSubjectNames(){
-  /* §405: only a unit that still plans in pillars — the others are offered
-     by the projects file, so each unit is offered exactly once. */
-  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false && !unitOwnWay(UNITS[k]); })
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
            .map(function(k){ return UNITS[k].name; })
     .concat(FUNCTION_KEYS.filter(function(k){
       return FUNCTIONS[k].active !== false && fnPlansInPillars(FUNCTIONS[k]);
@@ -1283,9 +1281,6 @@ function impPlanWorkbookFor(v){
    question only ever has a third answer for a supporting function. */
 function impSubjectFormat(v){
   var t = String(v || "");
-  /* §405: a business unit that plans in projects or in objectives and
-     actions downloads the function's file for that way. */
-  if (UNITS[t] && unitOwnWay(UNITS[t])) return unitFormat(UNITS[t]);
   if (t.indexOf("fn:") === 0) {
     var f = FUNCTIONS[t.slice(3)];
     if (f && fnPlansInObjectives(f)) return "objectives";
@@ -1298,8 +1293,6 @@ function impSubjectFormat(v){
 function impHolderFor(v){
   var t = String(v || "");
   if (t.indexOf("cap:") === 0) return capById(t.slice(4));
-  /* §405: a unit that is not planned in pillars is its own holder. */
-  if (UNITS[t]) return unitOwnWay(UNITS[t]) ? unitOwnHolder(t) : null;
   var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? fnOwnHolder(fk) : null;
 }
@@ -1402,18 +1395,8 @@ function projectSubjectFns(fmt){
                                   : fmt !== "objectives" && fnOwnsProjects(k);
   });
 }
-/* §405: the business units that plan the same way, offered in the same
-   file's dropdown — the pillars file offers every unit that still plans in
-   pillars, so between the two every unit is offered exactly once. */
-function projectSubjectUnits(fmt){
-  return UNIT_KEYS.filter(function(k){
-    var w = unitOwnWay(UNITS[k]);
-    return !!w && (w === "objectives" ? fmt !== "projects" : fmt !== "objectives");
-  });
-}
 function projectSubjectNames(fmt){
-  return projectSubjectUnits(fmt).map(function(k){ return UNITS[k].name; })
-    .concat(projectSubjectFns(fmt).map(function(k){ return FUNCTIONS[k].name; }))
+  return projectSubjectFns(fmt).map(function(k){ return FUNCTIONS[k].name; })
     .concat(fmt === "objectives" ? []
             : GROUP.capabilities.map(function(x){ return x.name; }));
 }

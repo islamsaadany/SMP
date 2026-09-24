@@ -137,11 +137,6 @@ function deckHtmlFor(target){
   if (t.indexOf("cap:") === 0 || t.indexOf("fn:") === 0)
     return plansInPillars(t) ? (unitLike(t) ? deckSlides(unitLike(t)) : "")
                              : deckSlidesFn(t);
-  /* §405: a unit that plans in projects or in objectives and actions gets the
-     function's deck, over its own holder — Islam's fourth answer, *"use the
-     existing function versions"*. */
-  var ou = UNITS[subjKey(t)];
-  if (ou && unitWayOf(ou)) return deckSlidesFn("u:" + subjKey(t));
   var u = unitLike(t);
   return u ? deckSlides(u) : "";
 }
@@ -196,99 +191,6 @@ function deckAnchors(kind, key){
    rather than a new cost: a picture placed after a slide that is no longer
    drawn lands at the end of the deck instead of being dropped. */
 
-/* §405: the aim slides, lifted out of deckSlides so a unit that plans in
-   projects or objectives presents its aspiration too (§53.5: one builder). */
-function unitAimSlides(u){
-  var S = [];
-  var fnAim = !!u.fnKey;
-  var aimNear = fnAim || SHOW_KO_THIS_YEAR;
-  /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
-     so the this year column to come after the obcejtives."* The eye meets the
-     number being worked towards this cycle before the horizon it heads for —
-     and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
-     shifts and the slide still renders perfectly (§243's own note). */
-  /* §404: the aspiration and the North Star are components; off draws nothing. */
-  var aimAsp = !fnAim && compOn(u.ukey, "aspiration"), aimKo = compOn(u.ukey, "keyobj");
-  var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-      (aimNear
-        ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
-        : '') +
-      (fnAim ? '' : '<td class="num big3">' +
-        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') + '</tr>';
-  }).join("");
-  /* THE DIVIDER IS DRAWN ONLY IF THE SECTION IS (§253). It opens the aim
-     slide and the objectives reading, so its test is the aim slide's own —
-     a divider standing over nothing is the blank page that section removed,
-     with a heading on it.
-
-     THE HORIZON CELL IS A UNIT'S. A supporting function's objectives carry a
-     weight and no 3-year target (§243), so on a function the divider names
-     one thing rather than printing a horizon that appears nowhere after it. */
-  var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
-  if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
-  if (aimRows || aimAsp)
-    S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
-      "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
-      foundCells));
-
-  if (aimRows || aimAsp) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
-    '><h2>What we are aiming at</h2>' +
-    (!aimAsp ? '' :
-      '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
-      '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
-      (u.endInMind
-        ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
-        : '') + '</div>') +
-    (aimRows
-      ? '<div class="aimbottom">' +
-          (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
-          '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-          (aimNear ? '<th class="num">This year</th>' : '') +
-          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
-          '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
-        '</div>'
-      : '') +
-    '</section>');
-
-  return S;
-}
-/* §405: the SWOT section, lifted out of deckSlides for the same reason. */
-function unitSwotSlides(u){
-  var S = [];
-  if (!u.fnKey && compOn(u.ukey, "swot")) {
-    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
-              ["o","Opportunities","stone"],["t","Threats","warn"]];
-    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
-       measurement rather than taste. On the blue the four scoring colours
-       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
-       Opportunities, which was drawn in `--panel` itself and would be
-       invisible against its own ground. Keeping them would mean inventing
-       four colours for one slide; the words under the counts already say
-       which is which, and the four category slides that follow keep their
-       own hues untouched. `.seccell.t-*` had no other user and is deleted
-       with them (§24). It is also what §254.5 settled for the pillar cards:
-       one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
-      "Where this unit is strong, exposed, and what the market is offering it.",
-      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
-    sw.forEach(function(x, xi){
-      var items = (u.swot[x[0]] || []).map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
-      }).join("");
-      /* The LAST category keeps the old key "swot", which stored slides
-         already name (§236.3). */
-      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
-        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
-                              : anch("swot" + x[0], "After " + x[1])) +
-        '><h2>' + x[1] + '</h2>' +
-        '<ol class="dswot">' + items + '</ol></section>');
-    });
-  }
-
-  return S;
-}
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -340,7 +242,57 @@ function deckSlides(u){
 
      A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
      asserted, because a unit authors both. */
-  S = S.concat(unitAimSlides(u));
+  var fnAim = !!u.fnKey;
+  var aimNear = fnAim || SHOW_KO_THIS_YEAR;
+  /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
+     so the this year column to come after the obcejtives."* The eye meets the
+     number being worked towards this cycle before the horizon it heads for —
+     and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
+     shifts and the slide still renders perfectly (§243's own note). */
+  /* §404: the aspiration and the North Star are components; off draws nothing. */
+  var aimAsp = !fnAim && compOn(u.ukey, "aspiration"), aimKo = compOn(u.ukey, "keyobj");
+  var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      (aimNear
+        ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
+        : '') +
+      (fnAim ? '' : '<td class="num big3">' +
+        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') + '</tr>';
+  }).join("");
+  /* THE DIVIDER IS DRAWN ONLY IF THE SECTION IS (§253). It opens the aim
+     slide and the objectives reading, so its test is the aim slide's own —
+     a divider standing over nothing is the blank page that section removed,
+     with a heading on it.
+
+     THE HORIZON CELL IS A UNIT'S. A supporting function's objectives carry a
+     weight and no 3-year target (§243), so on a function the divider names
+     one thing rather than printing a horizon that appears nowhere after it. */
+  var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
+  if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
+  if (aimRows || aimAsp)
+    S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
+      "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
+      foundCells));
+
+  if (aimRows || aimAsp) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
+    '><h2>What we are aiming at</h2>' +
+    (!aimAsp ? '' :
+      '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
+      '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
+      (u.endInMind
+        ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
+        : '') + '</div>') +
+    (aimRows
+      ? '<div class="aimbottom">' +
+          (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
+          '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+          (aimNear ? '<th class="num">This year</th>' : '') +
+          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
+          '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
+        '</div>'
+      : '') +
+    '</section>');
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -459,7 +411,35 @@ function deckSlides(u){
      §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
      side of the switch. */
   if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
-  S = S.concat(unitSwotSlides(u));
+  if (!u.fnKey && compOn(u.ukey, "swot")) {
+    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
+              ["o","Opportunities","stone"],["t","Threats","warn"]];
+    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
+       measurement rather than taste. On the blue the four scoring colours
+       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
+       Opportunities, which was drawn in `--panel` itself and would be
+       invisible against its own ground. Keeping them would mean inventing
+       four colours for one slide; the words under the counts already say
+       which is which, and the four category slides that follow keep their
+       own hues untouched. `.seccell.t-*` had no other user and is deleted
+       with them (§24). It is also what §254.5 settled for the pillar cards:
+       one accent across a row, never one per card (§41's budget). */
+    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
+      "Where this unit is strong, exposed, and what the market is offering it.",
+      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
+    sw.forEach(function(x, xi){
+      var items = (u.swot[x[0]] || []).map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("");
+      /* The LAST category keeps the old key "swot", which stored slides
+         already name (§236.3). */
+      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
+        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
+                              : anch("swot" + x[0], "After " + x[1])) +
+        '><h2>' + x[1] + '</h2>' +
+        '<ol class="dswot">' + items + '</ol></section>');
+    });
+  }
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -827,14 +807,11 @@ function deckSlidesFn(subject){
      the holder from it; a second deck builder for the second kind is what
      §296 and §305 each measured the cost of and refused. */
   var target = holderTarget(subject), isCap = isCapTarget(target);
-  /* §405: a unit that is not planned in pillars reads this deck too. */
-  var isUnit = isUnitHolderId(target);
   var cap = isCap ? capById(capKeyOf(target)) : null;
-  var fk = isCap ? (cap && cap.fn) : isUnit ? null : fnKeyOf(target);
-  var f = isCap ? cap : isUnit ? UNITS[subjKey(target)] : FUNCTIONS[fk];
-  var noteKey = isUnit ? subjKey(target) : "fn:" + fk;
+  var fk = isCap ? (cap && cap.fn) : fnKeyOf(target);
+  var f = isCap ? cap : FUNCTIONS[fk];
   var caps = capsShown(target);
-  var realCaps = (isCap || isUnit) ? [] : capsOfFunction(fk);
+  var realCaps = isCap ? [] : capsOfFunction(fk);
   /* §342: a function that plans in objectives and actions. The deck is the
      same deck — one builder, because a second one is what §296 and §305 each
      measured the cost of and refused — and what changes is the ONE slide that
@@ -868,9 +845,7 @@ function deckSlidesFn(subject){
 
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
-  if (!isCap && !isUnit) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
-  /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
-  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
+  if (!isCap) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -1062,10 +1037,10 @@ function deckSlidesFn(subject){
 
   /* §243: the same rule as a unit's deck — drawn only when a note is written.
      One question, one answer on both decks (§53.5). */
-  var fnote = cycleNote(noteKey);
+  var fnote = cycleNote("fn:" + fk);
   if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
-    '<div class="dnotebox" contenteditable="true" data-deckunote="' + esc(noteKey) + '">' +
+    '<div class="dnotebox" contenteditable="true" data-deckunote="fn:' + fk + '">' +
       esc(fnote) + '</div>' +
     '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
     'platform, not in a deck that is already wrong.</p></section>');

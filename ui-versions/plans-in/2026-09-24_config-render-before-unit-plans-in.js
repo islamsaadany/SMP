@@ -72,13 +72,6 @@ function renderStructure(){
              a dash, not a toggle, or the table offers what the rule refuses. */
           if (!SMPRules.compOffered(t, c)) return '<td class="cc" title="' + esc(labelWord(c, "bu")) +
             ' is never shown for a ' + esc(labelWord("fnword","group")) + '">&mdash;</td>';
-          /* §405: A UNIT'S PILLARS ARE ITS OWN CHOICE, set on its row in
-             Setup › Business units — so here they are a word saying which way
-             it plans, never a second switch for one fact (his *"yes"* to the
-             drawing). The level's tick above stays the default for new units. */
-          if (c === "pillar" && r[0] === "bu" && UNITS[t])
-            return '<td class="cc"><span class="pill kind" title="Set on its row in ' +
-              esc(L("unitword","bu")) + '">' + esc(unitPlanWord(unitFormat(UNITS[t]))) + '</span></td>';
           var on = compOn(t, c);
           var def = SMPRules.levelComponents(GROUP, SMPRules.structLevelOf(t)).indexOf(c) >= 0;
           var lab = esc(labelWord(c, "bu")) + ' for ' + esc(it[1]) + (on ? ': shown' : ': hidden');
@@ -394,10 +387,10 @@ function renderAccess(){
        changing — what goes is being OFFERED a choice with nothing behind it.
        An option that cannot do anything is worse than an absent one: it reads
        as a decision somebody forgot to make. */
-    /* §405 REVERSES THIS ONE: a business unit may now plan in projects, and
-       `personRoles()` mints `powner` at the unit for one that does, so the
-       own-unit columns can be theirs — offered exactly as the own-function
-       ones are, and shipped at none so nobody's access moves. */
+    if (roleKey === "powner" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+      return "A " + L1("project") + " owner holds no " + L1("unitword") + " — " + L("project") + " belong to a " +
+             L1("fnword") + "'s " + L("capability") + ".";
+    }
     /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
        and `roleWheres()` offers only units, so "own supporting function" can
        never be theirs either — `fnhead`'s exclusion above with the sides
@@ -1091,36 +1084,6 @@ function unitKebab(k, u, mayEdit){
                    String(CLEARING || "").indexOf(k + "|") === 0);
 }
 
-/* §405: the three ways a unit can plan, in the platform's own words — the
-   same words a supporting function's control uses (§53.5). */
-function unitPlanWord(f){
-  return f === "pillars" ? L("pillar","bu")
-       : f === "objectives" ? "Objectives & actions" : L("project");
-}
-function unitPlanCount(k){
-  var u = UNITS[k], f = unitFormat(u);
-  return f === "pillars" ? u.items.length
-       : f === "objectives" ? unitActions(k).length : unitOwnProjects(k).length;
-}
-/* "4 pillars", "1 project", "3 actions" — the count and its own noun. */
-function unitPlanCountWord(k){
-  var f = unitFormat(UNITS[k]), n = unitPlanCount(k);
-  return f === "pillars" ? n + " " + L("pillar","bu").toLowerCase()
-       : f === "objectives" ? plural(n, "action", "actions")
-       : plural(n, L1("project").toLowerCase(), L("project").toLowerCase());
-}
-function unitPlansInCell(k, u){
-  return '<span class="pill kind">' + esc(unitPlanWord(unitFormat(u))) + '</span> ' +
-    '<span class="mono">' + unitPlanCount(k) + '</span>';
-}
-function unitFormatSelect(k, u){
-  var f = unitFormat(u);
-  return '<select class="fld" data-uformat="' + esc(k) + '"' +
-      ' aria-label="How ' + esc(u.name) + ' plans">' +
-    ["pillars", "projects", "objectives"].map(function(v){
-      return '<option value="' + v + '"' + (f === v ? " selected" : "") + '>' +
-        esc(unitPlanWord(v)) + '</option>'; }).join("") + '</select>';
-}
 function renderUnits(){
   /* `mayEdit` is whether this viewer may change anything on the page at all.
      There is no longer a second question — a row is opened from its own menu
@@ -1143,10 +1106,7 @@ function renderUnits(){
       '<td>' + (u.navName ? '<span class="val">' + esc(u.navName) + '</span>'
                           : '<span class="why" style="margin:0">' + esc(u.name) + '</span>') + '</td>' +
       '<td class="cc"><span class="mono">' + esc(u.codePrefix) + '</span></td>' +
-      /* §405: WHAT THE UNIT PLANS IN, AND HOW MANY OF THEM — the column that
-         counted pillars now says which way the unit plans (his *"Plans in"*),
-         with the count of that way's rows beside it. Chosen in the dialog. */
-      '<td class="cc">' + unitPlansInCell(k, u) + '</td>' +
+      '<td class="cc"><span class="mono">' + u.items.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
       /* A unit belongs to a company or is its own — never neither. "Its own"
@@ -1192,7 +1152,7 @@ function renderUnits(){
         '<th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:11%">Plans in</th><th class="cc" style="width:9%">' + L("keyobj") + '</th>' +
+        '<th class="cc" style="width:7%">' + L("pillar") + '</th><th class="cc" style="width:9%">' + L("keyobj") + '</th>' +
         '<th class="cc" style="width:7%">Weight</th>' +
         '<th style="width:12%">' + L1("division") + '</th>' +
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
@@ -1272,8 +1232,7 @@ var ROWDLG_SPECS = {
                  "Pillars" — so this read "3 pillarss" in the first build, which
                  is the fault §107.8 wrote down, committed by somebody quoting
                  it. There is no singular anywhere to reach for. */
-              /* §405: the rows of the way it plans, not always its pillars. */
-              esc(unitPlanCount(k) + " " + String(unitPlanWord(unitFormat(u))).toLowerCase()),
+              esc(u.items.length + " " + String(L("pillar","bu")).toLowerCase()),
               plural(u.keyObjectives.length, L1("keyobj"), L("keyobj")),
               (u.weight != null ? u.weight + "% of the group" : "no weight set")].join(" · ");
     },
@@ -1286,7 +1245,6 @@ var ROWDLG_SPECS = {
                         '" data-unav="' + esc(k) + '" placeholder="' + esc(u.name) + '">') +
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
-        pdField("Plans in", unitFormatSelect(k, u)) +
         pdSect("Where it sits, and who runs it") +
         pdField(L1("division"),
           '<select class="fld" data-ucomp="' + esc(k) + '">' +
@@ -6158,9 +6116,6 @@ function renderUnitNaming(u){
 function impHolderTarget(){
   var t = String(IMP.unit || "");
   if (t.indexOf("cap:") === 0) return t.slice(4);
-  /* §405: a unit that is not planned in pillars imports through its own
-     holder, exactly as a projects or objectives function does. */
-  if (UNITS[t] && unitOwnWay(UNITS[t])) return "u:" + t;
   var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? t : "";
 }
@@ -7048,11 +7003,7 @@ function renderCycle(){
     var miss = missingNotes(u).length;
     var by = { obj:[0,0], mea:[0,0], tac:[0,0] };
     askedItems(u).forEach(function(x){
-      /* §405: a unit that plans in projects has OUTCOMES where a pillar has
-         measures, and its deliverables, milestones and actions are the work —
-         the three layers §105.2 names for the function half. */
-      var slot = x.kind === "objective" ? "obj"
-               : (x.kind === "measure" || x.kind === "outcome") ? "mea" : "tac";
+      var slot = x.kind === "objective" ? "obj" : x.kind === "measure" ? "mea" : "tac";
       by[slot][1]++;
       /* §252: through `rowAnswered`, or the board's tactics column disagrees
          with the progress bar beside it, which counts the same rows. */

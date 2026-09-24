@@ -1,4 +1,4 @@
-"""The main tab row after §400.2/§400.3: no tab draws a box, Reporting is a filled
+"""The main tab row after §406.2/§406.3: no tab draws a box, Reporting is a filled
 orange button whose word sits on the other tabs' baseline and in the middle of
 its own box, and Performance is the same quiet grey as the other tabs.
 
@@ -78,7 +78,7 @@ for scheme in ["light", "dark"]:
         if state.startswith("Strategy"): press(pg, TABS + ":not(.cta)")
         bl = js(pg, "[...document.querySelectorAll('#subtabs > button[role=tab]')].map(b=>{var r=document.createRange();r.selectNodeContents(b.firstChild);return +r.getBoundingClientRect().bottom.toFixed(1)})", [])
         ck(len(bl) >= 3 and max(bl) - min(bl) <= 0.5, f"{state}: every tab word on one baseline", bl)
-    # 5b. the section switch is squared, sharing Reporting's corner (§400.3)
+    # 5b. the section switch is squared, sharing Reporting's corner (§406.3)
     rad = js(pg, "(()=>{var g=document.querySelector('.tabs .secseg'),s=g&&g.querySelector('button[aria-selected=true]'),c=document.querySelector('#subtabs > button.cta');return g&&s&&c?[getComputedStyle(g).borderTopLeftRadius,getComputedStyle(s).borderTopLeftRadius,getComputedStyle(c).borderTopLeftRadius]:null})()")
     ck(bool(rad) and rad[0] == rad[2] and rad[0] != rad[1] and float(rad[1].rstrip('px') or 0) < float(rad[0].rstrip('px') or 0) <= 8,
        "section switch squared: box corner = Reporting's, segment corner smaller", rad)

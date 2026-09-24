@@ -534,7 +534,7 @@
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   /* The Reporting tab's orange and the tab row's underline live in
-     arrange.css with §400; §222/§222.2's solid fill was removed there. */
+     arrange.css with §406; §222/§222.2's solid fill was removed there. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -828,7 +828,7 @@ html[data-client-settings] .top .topmark { display:none; }
              flex-shrink:0; align-self:center; display:block }
 
   /* `.primary` on a tab is a MARKER only (the landing tab, read by the
-     welcome screen); §400 took its colour and weight away. */
+     welcome screen); §406 took its colour and weight away. */
   /* ── THE DOT MEANS SOMETHING NOW (§69.9) ─────────────────────────
      It used to be `.tabs button.primary::before` — painted on whichever tab is
      the landing page, on every destination, always. So it said "this is the
@@ -7718,7 +7718,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
      out would make the column stop adding up to the gap above it (§99.7). */
   .drvtbl tr.drvquiet td:first-child .dname { color:var(--ink-3); font-weight:500; }
 
-  /* ── THE TWO ROWS UNDER THE NAVIGATION (§400) ───────────────────────
+  /* ── THE TWO ROWS UNDER THE NAVIGATION (§406) ───────────────────────
      Islam signed off round 9 of design-mockups/plan-page-redesign: three
      bands — the brand navigation, the MAIN TABS on grey, the SUB-TABS below
      them as one rounded switch — with no unit name on either, because the
@@ -7744,7 +7744,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   #subtabs > button[role="tab"]:hover { background:none; color:var(--ink); }
   #subtabs > button[role="tab"][aria-selected="true"] { background:none; color:var(--ink);
     font-weight:700; border-bottom-color:var(--gold); }
-  /* ── REPORTING IS A FILLED BUTTON AGAIN, AND NO TAB DRAWS A BOX (§400.2) ──
+  /* ── REPORTING IS A FILLED BUTTON AGAIN, AND NO TAB DRAWS A BOX (§406.2) ──
      Islam, on the built row: the selected tab "got a strange box" that went
      away once focus moved — the keyboard focus outline, drawn after a press —
      and then, of three drawn options for Reporting, "C but make sure of the
@@ -7785,7 +7785,7 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
     border-bottom:0; background:var(--cta-hover); }
   #subtabs .tabacts { margin-block:6px; }
 
-  /* SQUARED, NOT A PILL (§400.3): Islam picked A of three drawn shapes —
+  /* SQUARED, NOT A PILL (§406.3): Islam picked A of three drawn shapes —
      the outer box takes the Reporting button's own 6px corner, so the two
      controls stacked one above the other share one shape, and a segment keeps
      its 3px of air inside the box with a 4px corner (6 less the 3px inset,

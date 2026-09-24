@@ -4,15 +4,15 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-09-24 — the section switch squared (§400.3), on the branch, not merged.** Foundation · SWOT · Drivers · Plan is no longer a pill: its box has the same small rounded corners as the Reporting button (option A). Nothing else about it changed.
+**2026-09-24 — the section switch squared (§406.3), on the branch, not merged.** Foundation · SWOT · Drivers · Plan is no longer a pill: its box has the same small rounded corners as the Reporting button (option A). Nothing else about it changed.
 
-**2026-09-24 — the tab row, second pass (§400.2), built on the branch, not merged.** No tab draws a box any more when you press it or move to it with the keyboard. Reporting is a solid orange button again (option C from the mockup), with its word on the same line as Strategy and Performance and centred in its box, measured. Performance stays plain grey like the other tabs. Waiting on your word to merge.
+**2026-09-24 — the tab row, second pass (§406.2), built on the branch, not merged.** No tab draws a box any more when you press it or move to it with the keyboard. Reporting is a solid orange button again (option C from the mockup), with its word on the same line as Strategy and Performance and centred in its box, measured. Performance stays plain grey like the other tabs. Waiting on your word to merge.
 
-**2026-09-24 — the tab banner (§400), built on the branch, not merged.** The navy row of units stays as it is. Under it, the main tabs (Strategy, Performance, Reporting) now sit on a grey row as words with an underline, Reporting in orange text instead of a solid orange button. Under that, the sections (Foundation, SWOT, Drivers, Plan) are one rounded switch with the one you are on filled navy. This is round 9 of the mockup, which you approved. Waiting on your word to merge.
+**2026-09-24 — the tab banner (§406), built on the branch, not merged.** The navy row of units stays as it is. Under it, the main tabs (Strategy, Performance, Reporting) now sit on a grey row as words with an underline, Reporting in orange text instead of a solid orange button. Under that, the sections (Foundation, SWOT, Drivers, Plan) are one rounded switch with the one you are on filled navy. This is round 9 of the mockup, which you approved. Waiting on your word to merge.
 
-**2026-09-24 — the new navigation (§399) is reverted.** You asked for the old look back: the navy row of units in the brand colour, visible for everyone, with the unit's name in it. The platform is back to exactly how it was before §399. The restyling of the page underneath is a mockup only (round 8), drawn under today's navigation and waiting for your word before anything is built. On the branch, not merged.
+**2026-09-24 — the new navigation (§405) is reverted.** You asked for the old look back: the navy row of units in the brand colour, visible for everyone, with the unit's name in it. The platform is back to exactly how it was before §405. The restyling of the page underneath is a mockup only (round 8), drawn under today's navigation and waiting for your word before anything is built. On the branch, not merged.
 
-**2026-09-24 — the new navigation (§399), built on the branch, not merged.**
+**2026-09-24 — the new navigation (§405), built on the branch, not merged.**
 The Plan page redesign's chrome, as signed off in round 7: the row of units
 stays for the office (light grey now, and it can be folded away with a pin);
 everybody whose work is one unit or function gets a navy bar instead, with

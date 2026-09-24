@@ -1,5 +1,5 @@
   /* `.primary` on a tab is a MARKER only (the landing tab, read by the
-     welcome screen); §400 took its colour and weight away. */
+     welcome screen); §406 took its colour and weight away. */
   /* ── THE DOT MEANS SOMETHING NOW (§69.9) ─────────────────────────
      It used to be `.tabs button.primary::before` — painted on whichever tab is
      the landing page, on every destination, always. So it said "this is the

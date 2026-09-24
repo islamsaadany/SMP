@@ -57126,7 +57126,7 @@ and Islam chose the recommendation: *"go with your recommendation"*.
   reads "Are the Business units grouped into Sectors?" and both answers
   follow it, with no page errors.
 
-## §399 — the navigation chrome: a light row for the office, a navy bar for the unit (2026-09-24)
+## §405 — the navigation chrome: a light row for the office, a navy bar for the unit (2026-09-24)
 
 **Built on the branch, not merged.** Islam, over seven rounds of mockups in
 `design-mockups/plan-page-redesign/` (v1–v7, published as one artifact), of the
@@ -57212,11 +57212,11 @@ to the top line, the tour's new wording and Reporting as orange text rather
 than an orange fill are each visible changes and named in the handover.
 
 
-## §399.1 — REVERSED: the navigation goes back to the navy row, visible for everyone (2026-09-24)
+## §405.1 — REVERSED: the navigation goes back to the navy row, visible for everyone (2026-09-24)
 
-Islam, with a screenshot of the chrome as it stood before §399: *"let's revert back to this style the name took space with no need the navigator stays with the brand color and the name of the unit stays in the navigation and the navigation stays visible. so revert all of this and show me the restyling mockup only."*
+Islam, with a screenshot of the chrome as it stood before §405: *"let's revert back to this style the name took space with no need the navigator stays with the brand color and the name of the unit stays in the navigation and the navigation stays visible. so revert all of this and show me the restyling mockup only."*
 
-**Recorded as a reversal, not overwritten (Principle II).** §399 above describes what was built and why; none of it is live now. The sources, the built file, `smp-app/public/` and the checks are restored to commit `b194576`, which is the build before §399 and is byte-identical to it. `checks/nav-chrome.py` and the Source Serif 4 face that only the unit bar used are removed. `sw.js` moves on to a new name, `v5.37-nav-restored`, so that a browser holding the §399 shell does not keep it.
+**Recorded as a reversal, not overwritten (Principle II).** §405 above describes what was built and why; none of it is live now. The sources, the built file, `smp-app/public/` and the checks are restored to commit `b194576`, which is the build before §405 and is byte-identical to it. `checks/nav-chrome.py` and the Source Serif 4 face that only the unit bar used are removed. `sw.js` moves on to a new name, `v5.37-nav-restored`, so that a browser holding the §405 shell does not keep it.
 
 **What his sentence settles:**
 - The row of units is the brand-coloured navy row.
@@ -57228,35 +57228,35 @@ This is §87's twins at the level of the chrome: two places naming the unit you 
 
 **Next:** the page-body restyle from the earlier rounds is drawn **under today's navigation, unchanged**, in `design-mockups/plan-page-redesign/2026-09-24_v8-restyle-under-todays-nav.html`. The top of that mockup is a picture of the real platform rather than a redrawing, so it cannot drift from what ships (§41.9). Nothing from it is built until Islam signs it off (rule 1c).
 
-## §400 — the two rows under the navigation: main tabs on grey, sub-tabs as a switch (2026-09-24)
+## §406 — the two rows under the navigation: main tabs on grey, sub-tabs as a switch (2026-09-24)
 
-Islam, after §399.1 put the navigation back: *"try again for the banner just remove the name of the unit part and make this banner grey like now … keep your design"*, then *"the banner of the details of the strategy should be below the strategy banner. so we have now 3 banners"*, then, of round 9 (`design-mockups/plan-page-redesign/2026-09-24_round9-tab-banner-grey.html`), *"build it"*.
+Islam, after §405.1 put the navigation back: *"try again for the banner just remove the name of the unit part and make this banner grey like now … keep your design"*, then *"the banner of the details of the strategy should be below the strategy banner. so we have now 3 banners"*, then, of round 9 (`design-mockups/plan-page-redesign/2026-09-24_round9-tab-banner-grey.html`), *"build it"*.
 
-- **Three bands.** The brand navigation row is untouched (§399.1). Under it the MAIN TABS row (`#tabrow`) is grey (`--surface-2`) with the tabs as words over an underline — the selected one in `--ink`, bold, gold underline. Under that the SUB-TABS row (`#secrow`) is white and draws its sections as ONE rounded switch (`.secseg`), the selected section filled `--stone` with `--surface` ink. No unit name on either: the navigation above already says it.
+- **Three bands.** The brand navigation row is untouched (§405.1). Under it the MAIN TABS row (`#tabrow`) is grey (`--surface-2`) with the tabs as words over an underline — the selected one in `--ink`, bold, gold underline. Under that the SUB-TABS row (`#secrow`) is white and draws its sections as ONE rounded switch (`.secseg`), the selected section filled `--stone` with `--surface` ink. No unit name on either: the navigation above already says it.
 - **A tab is a place, a section is a choice inside it**, which is why they take two shapes rather than one.
 - **REPORTING LOSES ITS SOLID FILL — a reversal of §222.2**, recorded as one: the signed drawing shows it as orange WORDS with its dot. It keeps the orange as type in `--cta-hover`, the deeper half of the pair §94.8 declared, which reads on the grey in every palette; still the only coloured tab on the row.
 - **No new tokens** (§25): the switch uses `--stone`/`--surface`, which invert correctly in dark (a light-blue segment with dark ink), and the orange uses `--cta-hover`.
 - **Specificity, named**: `#subtabs > button[role="tab"]` is (1,0,1), beating `.tabs button` and `.tabs button.cta[aria-selected]` without an !important (§40), and reaching the TABS only — the report controls in `.tabacts` keep their own dress. The sections are wrapped in `.secseg` in `shell.html`, both the strategy sections and the group's Performance sections, so the missing bar and the pen in `.secttail` are untouched.
 - **Measured**: every tab and section ≥ 6.19:1 light and ≥ 6.33:1 dark on its own ground. `qa.py` ERRORS none; `report-chrome`, `perf-line`, `plan-edit-line`, `plan-edit-head`, `band-corner`, `gap-fill`, `fn-perf-controls`, `empty-not-missing`, `table-fit`, `setup-pages`, `nav-scroll`, `welcome`, `report-blockers`, `submit-gate` green. Screen only: no `api/`, `lib/` or `db/` file, nothing stored, nothing migrated, nobody signed out.
 
-## §400.1 — only the selected tab is bold, and the dead rules go (2026-09-24)
+## §406.1 — only the selected tab is bold, and the dead rules go (2026-09-24)
 
 Islam, of the first build: *"the main tabs the performance, bold and underlined are for only selcted tabs, and the performance should have a different colour as we agreed in the mockup"*, and *"review the code to remove any additional code"*. Performance still wore `.tabs button.primary` — the old landing-tab emphasis (`--gold-deep`, 700) from before the dot replaced it (§69.9) — and the new row never set a weight, so the bold leaked through. Every unselected tab is now the mockup's quiet word (`--ink-2`, 400), Reporting apart in its orange.
 
-Removed, because §400 made them match nothing or be overridden everywhere (§24): `.tabs button.primary` and its selected twin (`.primary` stays as a MARKER, read by the welcome screen); `.tabs button.cta` and its hover and selected rules with §222's comment block (`.cta` appears on no tab outside `#subtabs`, and the setup page's `editbtn cta` is not in `.tabs`); the section row's selected `border-bottom-color` (the switch draws no border); the row's second background declaration, folded into the first; and §400's own two `.primary` lines and duplicated `.cta` hover. A grep for everything §399 added (the unit bar, the serif face, the folded-row key) finds nothing left. `qa.py` ERRORS none; ten neighbouring checks green; contrast unchanged.
+Removed, because §406 made them match nothing or be overridden everywhere (§24): `.tabs button.primary` and its selected twin (`.primary` stays as a MARKER, read by the welcome screen); `.tabs button.cta` and its hover and selected rules with §222's comment block (`.cta` appears on no tab outside `#subtabs`, and the setup page's `editbtn cta` is not in `.tabs`); the section row's selected `border-bottom-color` (the switch draws no border); the row's second background declaration, folded into the first; and §406's own two `.primary` lines and duplicated `.cta` hover. A grep for everything §405 added (the unit bar, the serif face, the folded-row key) finds nothing left. `qa.py` ERRORS none; ten neighbouring checks green; contrast unchanged.
 
-## §400.2 — Reporting is a filled button again, and no tab draws a box (2026-09-24)
+## §406.2 — Reporting is a filled button again, and no tab draws a box (2026-09-24)
 
 Islam, on the built row: *"the selected tab got a strange box (a glitch) because it disappeared after moving across"*, and of the colours, after one misreading on my side (I proposed Performance in navy; *"the reporting is what needs the color the performance shouldn't get a color"*). Three options for Reporting were drawn out of the running platform in both palettes and both selection states (`design-mockups/tab-banner-followup/`, rule 1c); he picked **C**, *"but make sure of the alignment of the word reporting with the other words and that it's centered in the box"*.
 
 **The box was the keyboard focus outline**, drawn on a tab and gone once focus moved. It could not be reproduced by a mouse press in headless Chromium, so the cause in his browser is not claimed; what is decided is that **no tab on this row draws an outline, for mouse or keyboard** — focus is said in the row's own vocabulary (the word at full ink and a light underline; the selected tab keeps its gold one). The same goes for Reporting: focus deepens its fill rather than ringing it.
 
-**Reporting takes `--cta` as a fill with `--cta-ink`** and `--cta-hover` when selected — §222.2's pair, reversed by §400 and reinstated by his pick, recorded as a reversal (Principle II). 5.54:1 light, 7.37:1 dark; selected deeper and still above 4.5. **The dot goes to `--cta-ink`** on the fill, because gold on this orange is a mark nobody can see. **Performance is untouched**: the same quiet grey as every unselected tab.
+**Reporting takes `--cta` as a fill with `--cta-ink`** and `--cta-hover` when selected — §222.2's pair, reversed by §406 and reinstated by his pick, recorded as a reversal (Principle II). 5.54:1 light, 7.37:1 dark; selected deeper and still above 4.5. **The dot goes to `--cta-ink`** on the fill, because gold on this orange is a mark nobody can see. **Performance is untouched**: the same quiet grey as every unselected tab.
 
 **Alignment and centring were measured, not assumed.** Baseline alignment (`align-self:baseline`) was tried first and measured worse: it hung the tabs from the top of the row that the report controls make taller, leaving the underline floating 11px above the row's edge. Every tab is centred on the row instead; an underlined tab is 12px over its text and 9px + 3px under it, so its text is centred in its own box, and the three centres share one line. **On the INK (§302), a symmetric 6/6 padding put "Reporting" 1.3px high** (8.75 over, 11.44 under — the g hangs below the line), so the padding is 7/5 and the box rides up 1px (`top:-1px`) to keep the word on the others' baseline: ink 9.75 over, 10.44 under, 15.25 left, 15.31 right with the dot removed.
 
 `checks/tab-row.py` asserts each claim as paint or geometry in both palettes — no outline after a real press or a real Tab, Performance's colour the same as the other quiet tabs, Reporting's fill `--cta` and readable, one baseline in both states, the word centred within 1px from the painted pixels. Proved able to fail from the SOURCES four ways (§276): outline back **2 red**, symmetric padding **4 red**, the 1px ride removed **4 red** (the baseline off by 1.0), the fill removed **5 red**. Screen only: no `api/`, `lib/` or `db/` file; nothing stored, nothing migrated.
 
-## §400.3 — the section switch is squared (2026-09-24)
+## §406.3 — the section switch is squared (2026-09-24)
 
 Islam: *"for the sub tabs can you give me options if we make it rectangular rather than rounded?"* Three shapes drawn out of the running platform in both palettes (`design-mockups/tab-banner-followup/2026-09-24_section-switch-shape.html`, rule 1c) — softly squared, sharp, and one joined bar — and he picked **A**, over the joined bar I had recommended. The outer box takes the Reporting button's own 6px corner, so the two controls stacked on top of each other share one shape; a segment keeps its 3px of air inside the box with a 4px corner. Colours, words, sizes and spacing are unchanged. `checks/tab-row.py` gains the assertion as an AGREEMENT (the box's corner equals Reporting's, the segment's is smaller), red 2 with the pill put back from the sources. Screen only.

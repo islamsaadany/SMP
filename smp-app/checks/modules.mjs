@@ -780,8 +780,8 @@ if (browser) {
   const tr = await page.evaluate(`(() => { const n = document.querySelector('nav.trail');
       return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: (n.querySelector('a.trff') || {}).getAttribute ? n.querySelector('a.trff').getAttribute('href') : '',
                where: ((n.querySelector('details.trstep:not(.trclient) > summary span') || {}).textContent || '').trim() }; })()`);
-  check("it reads Forefront › the client › the module you are in",
-    tr.ff === "/platform" && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
+  check("it reads Platform › the client › the module you are in",
+    tr.ff === "/platform" && /^platform\b/i.test(tr.text) && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
   check("the chevrons are DRAWN and not a font character (§52)", (await page.locator("nav.trail summary svg").count()) >= 2);
   /* §401: THE TWO MENUS SWAP JOBS. Islam — the client step lists "the other
      clients", the module step "the other modules and then the separator and

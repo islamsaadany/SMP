@@ -164,10 +164,9 @@
      reading "‹ Back to the console" and "Client settings ›". Replaced, for
      Forefront's own people, by ONE line reading where you are:
 
-         Platform  ›  Raya Trade ▾  ›  Strategy ▾
+         Forefront  ›  Raya Trade ▾  ›  Strategy ▾
 
-     Each step is a place. Platform is the console (Islam, 2026-09-24:
-     the first word reads Platform, not Forefront). Since §401 the client
+     Each step is a place. Forefront is the console. Since §401 the client
      opens a menu of the OTHER clients this person may open (and "All
      clients"); the module opens the other modules, a rule, and "Client
      settings"; on the client's own settings the third step reads "Client
@@ -306,7 +305,7 @@
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
       esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";
     nav.innerHTML =
-      '<a class="trff" href="/platform">Platform</a>' + sep +
+      '<a class="trff" href="/platform">Forefront</a>' + sep +
       '<details class="dlmenu trstep trclient"><summary>' +
         "<span>" + esc(client) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(clientItems) + "</details>" +
       sep + third;

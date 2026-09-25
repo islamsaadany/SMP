@@ -2838,3 +2838,22 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);
     font-weight:600; }
   .tabs .secseg button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+/* ── A DIRECTION'S OVERVIEW, FOLDED UNDER ITS NAME (§413) ───────────────
+   Islam's own ask: expandable and collapsable, not always visible, with the
+   Objective's first line showing while it is shut. A real details element,
+   so no repaint can lose the state and no handler is needed to open it. */
+details.dov{margin:0 0 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+details.dov>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px}
+details.dov>summary::-webkit-details-marker{display:none}
+.dovt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-2);flex:none}
+.dovcar{flex:none;width:0;height:0;border-left:5px solid var(--ink-3);border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .15s}
+details.dov[open]>summary .dovcar{transform:rotate(90deg)}
+.dovpeek{font-size:13px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+details.dov[open]>summary .dovpeek{display:none}
+.dovw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:2px 14px 14px}
+.dovk{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+.dovv{font-size:13.5px;line-height:1.45;color:var(--ink);white-space:pre-line}
+.dovv.dovnone{color:var(--ink-3)}
+.dovc textarea.dovta{width:100%;min-height:84px;resize:vertical}
+@media (max-width:900px){ .dovw{grid-template-columns:1fr} }

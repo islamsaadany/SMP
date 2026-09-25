@@ -3949,6 +3949,17 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (o && typeof o[comp] === "boolean") return o[comp];
     return levelComponents(group, structLevelOf(target)).indexOf(comp) >= 0;
   }
+  /* §413 — PLAN DETAILS (Islam, for RHI: a "Plan details" card on the
+     Structure step, four switches, OFF for every client until somebody turns
+     one on, so Raya is untouched). Stored as `structure.details`, and ONLY AN
+     EXPLICIT `true` TURNS ONE ON (§104's rule, not §102's): absent is off,
+     and a stale value cannot switch one on by accident. Off HIDES and never
+     forgets — a direction's overview text is kept whatever the switch says. */
+  var PLAN_DETAILS = ["overview"];
+  function planDetailOn(group, key) {
+    var s = structureOf(group), d = s && s.details;
+    return !!(d && d[key] === true);
+  }
   function templeOn(group, target) {
     var level = structLevelOf(target);
     if (level !== "top" && level !== "mid") return false;
@@ -4479,6 +4490,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
     SETUP_DONE: SETUP_DONE, setupDone: setupDone,
     STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
+    PLAN_DETAILS: PLAN_DETAILS, planDetailOn: planDetailOn,
     STRUCT_NEW_CLIENT: STRUCT_NEW_CLIENT, newClientStructure: newClientStructure,
     STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
@@ -6610,6 +6622,8 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §413: one of the Plan details switches (off unless explicitly on). */
+function planDetailOn(key){ return SMPRules.planDetailOn(GROUP, key); }
 function templeOn(target){ return SMPRules.templeOn(GROUP, target); }
 function midExists(){ return SMPRules.midExists(GROUP, COMPANIES); }
 function structWritable(){
@@ -18929,6 +18943,12 @@ function createFromPlan(u, d){
       u.items.push({ id:x.id, name:x.name, sub:"", kind:x.kind || kindFromNotes(x.notes) || "Direction",
         theme:x.theme || "", owner:x.owner || "", slide:x.source_slide, notes:x.notes,
         measures:[], tactics:[] });
+      /* §413: set only where the file carried words, so a direction with none
+         is byte-identical to one that never had the fields (§50.6). */
+      ["ovObj","ovWhy","ovRisk"].forEach(function(k){
+        var v = String(x[k] == null ? "" : x[k]);
+        if (v.trim()) u.items[u.items.length - 1][k] = v;
+      });
       made++;
     } else if (x.type === "MEASURE") {
       var p = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
@@ -20505,12 +20525,21 @@ function planWorkbook(u){
         }, []) }
   ])
   .concat([
-    { name:"Pillars", widths:[40, 14, 22, 22],
-      head:["Pillar", "Kind", "Theme", "Owner"],
+    /* §413: the direction's overview rides at the END of the sheet (a
+       validation range is a POSITION, §65), and only where it means something
+       — the client's Structure carries it, or a direction already holds some —
+       so every other client's file is byte-for-byte what it was. */
+    (function(){
+      var ov = (typeof planDetailOn === "function" && planDetailOn("overview")) ||
+        u.items.some(function(p){ return ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); }); });
+      return { name:"Pillars", widths:[40, 14, 22, 22].concat(ov ? [50, 40, 40] : []),
+      head:["Pillar", "Kind", "Theme", "Owner"].concat(ov ? ["Objective", "Why now", "Risks & mitigations"] : []),
       validations:[{ range:"B2:B60", list:KINDS },
                    { range:"C2:C60", list:themes,
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
-      rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
+      rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]
+        .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : []); }) };
+    })(),
 
     { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(monthWidths(8)),
       head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"]
@@ -20896,7 +20925,8 @@ function planFromWorkbook(u, sheets){
                 theme:themeAbOf(r["Theme"]), owner:r["Owner"], notes:"", parent_id:"",
                 description:"", outcome:"", collaborators:"", direction:"",
                 value:"", value_3y:"", unit:"", horizon:"", compile:"",
-                q1:"", q2:"", q3:"", q4:"", source_slide:"" });
+                q1:"", q2:"", q3:"", q4:"", source_slide:"",
+                ovObj:r["Objective"] || "", ovWhy:r["Why now"] || "", ovRisk:r["Risks & mitigations"] || "" });
   });
 
   var fN = 0;
@@ -31900,6 +31930,56 @@ function pillarBand(code, name, right, kind, cls){
     (kind ? kindPill({ kind: kind }) : '') +
     (right ? '<span class="pband-r">' + right + '</span>' : '') + '</div>';
 }
+/* ── THE DIRECTION OVERVIEW (§413) ───────────────────────────────────
+   Islam, for RHI: a direction carries its Objective, Why now, and Risks &
+   mitigations as plain text; its key measures and tactics are the tables
+   below it, so they are not typed a second time. Drawn only while the Plan
+   details switch is on (Setup › Structure), so a client that never turns it
+   on sees nothing change.
+
+   FOLDED UNTIL PRESSED (his: *"it needs to be expandable and collapsable not
+   always visible"*), with the start of the Objective on the folded line so
+   what is inside can be told without opening it (*"keep the objective
+   preview"*). A real `<details>`, never a flag and a handler (§296): the
+   browser keeps the state while the page stands, and DOV_OPEN carries it
+   across a repaint, keyed by the pillar's ID (§48).
+
+   NOT A GAP (his *"No"*): empty boxes are optional text, like a
+   description, so nothing here joins a count. Reading with all three empty
+   draws nothing at all; with the pen open the block is always there, or the
+   first word could never be written (§61). Written by the office alone,
+   because these are plan fields and the plan's pen is the office's (§94). */
+var DOV_OPEN = {};
+var DOV_FIELDS = [["ovObj", "Objective"], ["ovWhy", "Why now"], ["ovRisk", "Risks &amp; mitigations"]];
+function dirOverview(it, ed){
+  if (!planDetailOn("overview")) return "";
+  var any = DOV_FIELDS.some(function(f){ return String(it[f[0]] || "").trim(); });
+  if (!ed && !any) return "";
+  var peek = String(it.ovObj || "").trim();
+  return '<details class="dov" data-dov="' + esc(it.id) + '"' + (DOV_OPEN[it.id] ? ' open' : '') + '>' +
+    '<summary><span class="dovcar" aria-hidden="true"></span><span class="dovt">Overview</span>' +
+    (peek ? '<span class="dovpeek">' + esc(SMPRules.oneLine(peek)) + '</span>' : '') + '</summary>' +
+    '<div class="dovw">' + DOV_FIELDS.map(function(f){
+      var v = it[f[0]] || "";
+      return '<div class="dovc"><div class="dovk">' + f[1] + '</div>' +
+        (ed ? fieldOr("plan", v, "dovta", function(x){
+                var t = String(x == null ? "" : x);
+                if (t.trim()) it[f[0]] = t; else delete it[f[0]];
+              })
+            : (String(v).trim() ? '<div class="dovv">' + esc(v) + '</div>' : '<div class="dovv dovnone">&mdash;</div>')) +
+        '</div>';
+    }).join("") + '</div></details>';
+}
+/* The fold's state survives a repaint. `toggle` does not bubble, so it is
+   heard in the capture phase, armed once at load (§24, §47.2). */
+if (typeof document !== "undefined") document.addEventListener("toggle", function(e){
+  var d = e.target;
+  if (d && d.matches && d.matches("details.dov")) {
+    if (d.open) DOV_OPEN[d.getAttribute("data-dov")] = true;
+    else delete DOV_OPEN[d.getAttribute("data-dov")];
+  }
+}, true);
+
 function unitPlanBody(it, u, railed){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var showHead = !railed || ed;
@@ -32309,6 +32389,9 @@ function unitPlanBody(it, u, railed){
           '</div></div>' +
         '</div></div>'
       : '') +
+    /* §413: the direction overview, under the name (reading) or under the
+       owner and kind (the pen) — above Key measures either way. */
+    dirOverview(it, ed) +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
        there is no notes under the pillars"). Mobile's first pillar carried
@@ -43886,6 +43969,38 @@ function deckSlides(u){
           dPct(pillarPerf(p)) + '</b></div>' +
         '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
       '</div></section>');
+
+    /* ── THE DIRECTION'S OVERVIEW, ONE SLIDE AFTER ITS TITLE (§413) ────
+       Islam, of the mockup: "approved, keep the objective preview, build it".
+       Drawn only while the client's Structure carries the Direction overview
+       AND this direction has something in it: an empty slide on a projector
+       says the plan owes an answer nobody asked it for (§253, §45.2). The
+       right-hand panel is READ from the direction's own tables, never typed a
+       second time (§53.5). */
+    if (planDetailOn("overview") && ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); })) {
+      var ovMs = SMPRules.shown(p.measures || []).slice(0, 5).map(function(m){
+        return '<div class="row"><span>' + esc(m.name) + '</span><b>' + (m.target ? tgtShown(m.target) : '&mdash;') + '</b></div>';
+      }).join("");
+      var ovTs = SMPRules.shown(p.tactics || []).slice(0, 5).map(function(t){
+        return '<div class="row"><span>' + esc(t.name) + '</span><i>' + esc(t.owner || "") + '</i></div>';
+      }).join("");
+      var ovRisks = String(p.ovRisk || "").split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+      S.push('<section class="dslide dovs"' +
+        anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — Overview") + '>' +
+        deckPillarHead(u, p, pi, "Overview") +
+        '<div class="obody"><div>' +
+          (String(p.ovObj || "").trim() ? '<div class="ok">Objective</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
+          '<div class="two">' +
+            (String(p.ovWhy || "").trim() ? '<div><div class="ok">Why now</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
+            (ovRisks.length ? '<div><div class="ok">Risks &amp; mitigations</div><ul>' +
+              ovRisks.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : '<div></div>') +
+          '</div></div>' +
+          ((ovMs || ovTs) ? '<div class="side">' +
+            (ovMs ? '<div><div class="ok">' + L("measure") + '</div>' + ovMs + '</div>' : '') +
+            (ovTs ? '<div><div class="ok">' + L("tactic") + '</div>' + ovTs + '</div>' : '') +
+          '</div>' : '') +
+        '</div></section>');
+    }
 
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
@@ -55957,7 +56072,7 @@ var CLIENTSETUP = (function () {
     var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
     var all = COMPONENTS.map(function (c) { return c[0]; });
     var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
-    return {
+    var out = {
       top: { on: lv("top"), temple: st && st.top ? st.top.temple === true : true },
       mid: { exists: SMPRules.midExists(GROUP, COMPANIES), on: lv("mid"),
              temple: !!(st && st.mid && st.mid.temple === true) },
@@ -55965,6 +56080,10 @@ var CLIENTSETUP = (function () {
       fn:  { on: lv("fn") },
       over: (st && st.over) || {}
     };
+    /* §413: the Plan details switches ride the same object, so a press on a
+       component chip must carry them across or it switches them all off. */
+    if (st && st.details && typeof st.details === "object") out.details = st.details;
+    return out;
   }
   function structWrite(next){
     GROUP[SMPRules.STRUCTURE] = next;
@@ -56134,6 +56253,38 @@ var CLIENTSETUP = (function () {
        own way on the Supporting functions step, which is where it is asked. */
     callBoxes(fn, "fnword", ro);
     structLevel(fn, lv, "fn", ro);
+
+    /* §413: PLAN DETAILS — what a direction and its tactics carry, off for
+       every client until pressed. Only the switches that are BUILT are drawn
+       (§61: a chip that changes nothing is worse than no chip); the other
+       three agreed for RHI join this row as each is built. */
+    var pd = card("Plan details");
+    pd.appendChild(el("p", "lab", "What a direction and its tactics carry"));
+    var pband = el("div", "wzband stchips");
+    [["overview", "Direction overview"]].forEach(function (c) {
+      var on = !!(lv.details && lv.details[c[0]] === true);
+      var b = el("button", null, c[1]); b.type = "button";
+      b.dataset.stdetail = c[0];
+      b.setAttribute("aria-pressed", String(on));
+      /* Never frozen under a plan: a switch that hides and forgets nothing is
+         not the client's shape, and RHI turns this on over a live plan. */
+      b.addEventListener("click", function () {
+        /* Writes ONLY the switch. structNow() is the whole effective shape,
+           so writing it would store every level's components for a client
+           that never said one — equivalent today, and a second answer
+           sitting in the data for ever. A structure holding only `details`
+           reads every level as unsaid (structureOf's own fallbacks), and the
+           last switch off DELETES it (§50.6). */
+        var st0 = SMPRules.structureOf(GROUP), nx = st0 ? JSON.parse(JSON.stringify(st0)) : {};
+        var d = Object.assign({}, nx.details || {});
+        if (d[c[0]] === true) delete d[c[0]]; else d[c[0]] = true;
+        if (Object.keys(d).length) nx.details = d; else delete nx.details;
+        if (Object.keys(nx).length) structWrite(nx);
+        else { delete GROUP[SMPRules.STRUCTURE]; redraw(); }
+      });
+      pband.appendChild(b);
+    });
+    pd.appendChild(pband);
 
     box.appendChild(el("p", "wzwhy",
       "These ticks apply to every item at a level; each one can be adjusted later on Setup › Structure. " +

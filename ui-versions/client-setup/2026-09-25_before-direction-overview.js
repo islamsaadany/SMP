@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -1296,7 +1295,7 @@ var CLIENTSETUP = (function () {
     var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
     var all = COMPONENTS.map(function (c) { return c[0]; });
     var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
-    var out = {
+    return {
       top: { on: lv("top"), temple: st && st.top ? st.top.temple === true : true },
       mid: { exists: SMPRules.midExists(GROUP, COMPANIES), on: lv("mid"),
              temple: !!(st && st.mid && st.mid.temple === true) },
@@ -1304,10 +1303,6 @@ var CLIENTSETUP = (function () {
       fn:  { on: lv("fn") },
       over: (st && st.over) || {}
     };
-    /* §413: the Plan details switches ride the same object, so a press on a
-       component chip must carry them across or it switches them all off. */
-    if (st && st.details && typeof st.details === "object") out.details = st.details;
-    return out;
   }
   function structWrite(next){
     GROUP[SMPRules.STRUCTURE] = next;
@@ -1477,38 +1472,6 @@ var CLIENTSETUP = (function () {
        own way on the Supporting functions step, which is where it is asked. */
     callBoxes(fn, "fnword", ro);
     structLevel(fn, lv, "fn", ro);
-
-    /* §413: PLAN DETAILS — what a direction and its tactics carry, off for
-       every client until pressed. Only the switches that are BUILT are drawn
-       (§61: a chip that changes nothing is worse than no chip); the other
-       three agreed for RHI join this row as each is built. */
-    var pd = card("Plan details");
-    pd.appendChild(el("p", "lab", "What a direction and its tactics carry"));
-    var pband = el("div", "wzband stchips");
-    [["overview", "Direction overview"]].forEach(function (c) {
-      var on = !!(lv.details && lv.details[c[0]] === true);
-      var b = el("button", null, c[1]); b.type = "button";
-      b.dataset.stdetail = c[0];
-      b.setAttribute("aria-pressed", String(on));
-      /* Never frozen under a plan: a switch that hides and forgets nothing is
-         not the client's shape, and RHI turns this on over a live plan. */
-      b.addEventListener("click", function () {
-        /* Writes ONLY the switch. structNow() is the whole effective shape,
-           so writing it would store every level's components for a client
-           that never said one — equivalent today, and a second answer
-           sitting in the data for ever. A structure holding only `details`
-           reads every level as unsaid (structureOf's own fallbacks), and the
-           last switch off DELETES it (§50.6). */
-        var st0 = SMPRules.structureOf(GROUP), nx = st0 ? JSON.parse(JSON.stringify(st0)) : {};
-        var d = Object.assign({}, nx.details || {});
-        if (d[c[0]] === true) delete d[c[0]]; else d[c[0]] = true;
-        if (Object.keys(d).length) nx.details = d; else delete nx.details;
-        if (Object.keys(nx).length) structWrite(nx);
-        else { delete GROUP[SMPRules.STRUCTURE]; redraw(); }
-      });
-      pband.appendChild(b);
-    });
-    pd.appendChild(pband);
 
     box.appendChild(el("p", "wzwhy",
       "These ticks apply to every item at a level; each one can be adjusted later on Setup › Structure. " +

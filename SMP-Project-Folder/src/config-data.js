@@ -146,6 +146,8 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §413: one of the Plan details switches (off unless explicitly on). */
+function planDetailOn(key){ return SMPRules.planDetailOn(GROUP, key); }
 function templeOn(target){ return SMPRules.templeOn(GROUP, target); }
 function midExists(){ return SMPRules.midExists(GROUP, COMPANIES); }
 function structWritable(){

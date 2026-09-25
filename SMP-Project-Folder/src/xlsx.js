@@ -633,12 +633,21 @@ function planWorkbook(u){
         }, []) }
   ])
   .concat([
-    { name:"Pillars", widths:[40, 14, 22, 22],
-      head:["Pillar", "Kind", "Theme", "Owner"],
+    /* §413: the direction's overview rides at the END of the sheet (a
+       validation range is a POSITION, §65), and only where it means something
+       — the client's Structure carries it, or a direction already holds some —
+       so every other client's file is byte-for-byte what it was. */
+    (function(){
+      var ov = (typeof planDetailOn === "function" && planDetailOn("overview")) ||
+        u.items.some(function(p){ return ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); }); });
+      return { name:"Pillars", widths:[40, 14, 22, 22].concat(ov ? [50, 40, 40] : []),
+      head:["Pillar", "Kind", "Theme", "Owner"].concat(ov ? ["Objective", "Why now", "Risks & mitigations"] : []),
       validations:[{ range:"B2:B60", list:KINDS },
                    { range:"C2:C60", list:themes,
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
-      rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
+      rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]
+        .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : []); }) };
+    })(),
 
     { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(monthWidths(8)),
       head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"]
@@ -1024,7 +1033,8 @@ function planFromWorkbook(u, sheets){
                 theme:themeAbOf(r["Theme"]), owner:r["Owner"], notes:"", parent_id:"",
                 description:"", outcome:"", collaborators:"", direction:"",
                 value:"", value_3y:"", unit:"", horizon:"", compile:"",
-                q1:"", q2:"", q3:"", q4:"", source_slide:"" });
+                q1:"", q2:"", q3:"", q4:"", source_slide:"",
+                ovObj:r["Objective"] || "", ovWhy:r["Why now"] || "", ovRisk:r["Risks & mitigations"] || "" });
   });
 
   var fN = 0;

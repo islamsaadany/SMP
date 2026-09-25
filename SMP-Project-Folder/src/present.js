@@ -543,6 +543,38 @@ function deckSlides(u){
         '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
       '</div></section>');
 
+    /* ── THE DIRECTION'S OVERVIEW, ONE SLIDE AFTER ITS TITLE (§413) ────
+       Islam, of the mockup: "approved, keep the objective preview, build it".
+       Drawn only while the client's Structure carries the Direction overview
+       AND this direction has something in it: an empty slide on a projector
+       says the plan owes an answer nobody asked it for (§253, §45.2). The
+       right-hand panel is READ from the direction's own tables, never typed a
+       second time (§53.5). */
+    if (planDetailOn("overview") && ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); })) {
+      var ovMs = SMPRules.shown(p.measures || []).slice(0, 5).map(function(m){
+        return '<div class="row"><span>' + esc(m.name) + '</span><b>' + (m.target ? tgtShown(m.target) : '&mdash;') + '</b></div>';
+      }).join("");
+      var ovTs = SMPRules.shown(p.tactics || []).slice(0, 5).map(function(t){
+        return '<div class="row"><span>' + esc(t.name) + '</span><i>' + esc(t.owner || "") + '</i></div>';
+      }).join("");
+      var ovRisks = String(p.ovRisk || "").split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+      S.push('<section class="dslide dovs"' +
+        anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — Overview") + '>' +
+        deckPillarHead(u, p, pi, "Overview") +
+        '<div class="obody"><div>' +
+          (String(p.ovObj || "").trim() ? '<div class="ok">Objective</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
+          '<div class="two">' +
+            (String(p.ovWhy || "").trim() ? '<div><div class="ok">Why now</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
+            (ovRisks.length ? '<div><div class="ok">Risks &amp; mitigations</div><ul>' +
+              ovRisks.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : '<div></div>') +
+          '</div></div>' +
+          ((ovMs || ovTs) ? '<div class="side">' +
+            (ovMs ? '<div><div class="ok">' + L("measure") + '</div>' + ovMs + '</div>' : '') +
+            (ovTs ? '<div><div class="ok">' + L("tactic") + '</div>' + ovTs + '</div>' : '') +
+          '</div>' : '') +
+        '</div></section>');
+    }
+
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
         '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +

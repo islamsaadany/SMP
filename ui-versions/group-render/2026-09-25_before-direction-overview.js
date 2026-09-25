@@ -8354,56 +8354,6 @@ function pillarBand(code, name, right, kind, cls){
     (kind ? kindPill({ kind: kind }) : '') +
     (right ? '<span class="pband-r">' + right + '</span>' : '') + '</div>';
 }
-/* ── THE DIRECTION OVERVIEW (§413) ───────────────────────────────────
-   Islam, for RHI: a direction carries its Objective, Why now, and Risks &
-   mitigations as plain text; its key measures and tactics are the tables
-   below it, so they are not typed a second time. Drawn only while the Plan
-   details switch is on (Setup › Structure), so a client that never turns it
-   on sees nothing change.
-
-   FOLDED UNTIL PRESSED (his: *"it needs to be expandable and collapsable not
-   always visible"*), with the start of the Objective on the folded line so
-   what is inside can be told without opening it (*"keep the objective
-   preview"*). A real `<details>`, never a flag and a handler (§296): the
-   browser keeps the state while the page stands, and DOV_OPEN carries it
-   across a repaint, keyed by the pillar's ID (§48).
-
-   NOT A GAP (his *"No"*): empty boxes are optional text, like a
-   description, so nothing here joins a count. Reading with all three empty
-   draws nothing at all; with the pen open the block is always there, or the
-   first word could never be written (§61). Written by the office alone,
-   because these are plan fields and the plan's pen is the office's (§94). */
-var DOV_OPEN = {};
-var DOV_FIELDS = [["ovObj", "Objective"], ["ovWhy", "Why now"], ["ovRisk", "Risks &amp; mitigations"]];
-function dirOverview(it, ed){
-  if (!planDetailOn("overview")) return "";
-  var any = DOV_FIELDS.some(function(f){ return String(it[f[0]] || "").trim(); });
-  if (!ed && !any) return "";
-  var peek = String(it.ovObj || "").trim();
-  return '<details class="dov" data-dov="' + esc(it.id) + '"' + (DOV_OPEN[it.id] ? ' open' : '') + '>' +
-    '<summary><span class="dovcar" aria-hidden="true"></span><span class="dovt">Overview</span>' +
-    (peek ? '<span class="dovpeek">' + esc(SMPRules.oneLine(peek)) + '</span>' : '') + '</summary>' +
-    '<div class="dovw">' + DOV_FIELDS.map(function(f){
-      var v = it[f[0]] || "";
-      return '<div class="dovc"><div class="dovk">' + f[1] + '</div>' +
-        (ed ? fieldOr("plan", v, "dovta", function(x){
-                var t = String(x == null ? "" : x);
-                if (t.trim()) it[f[0]] = t; else delete it[f[0]];
-              })
-            : (String(v).trim() ? '<div class="dovv">' + esc(v) + '</div>' : '<div class="dovv dovnone">&mdash;</div>')) +
-        '</div>';
-    }).join("") + '</div></details>';
-}
-/* The fold's state survives a repaint. `toggle` does not bubble, so it is
-   heard in the capture phase, armed once at load (§24, §47.2). */
-if (typeof document !== "undefined") document.addEventListener("toggle", function(e){
-  var d = e.target;
-  if (d && d.matches && d.matches("details.dov")) {
-    if (d.open) DOV_OPEN[d.getAttribute("data-dov")] = true;
-    else delete DOV_OPEN[d.getAttribute("data-dov")];
-  }
-}, true);
-
 function unitPlanBody(it, u, railed){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var showHead = !railed || ed;
@@ -8813,9 +8763,6 @@ function unitPlanBody(it, u, railed){
           '</div></div>' +
         '</div></div>'
       : '') +
-    /* §413: the direction overview, under the name (reading) or under the
-       owner and kind (the pen) — above Key measures either way. */
-    dirOverview(it, ed) +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
        there is no notes under the pillars"). Mobile's first pillar carried

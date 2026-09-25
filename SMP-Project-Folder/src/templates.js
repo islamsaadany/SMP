@@ -610,6 +610,12 @@ function createFromPlan(u, d){
       u.items.push({ id:x.id, name:x.name, sub:"", kind:x.kind || kindFromNotes(x.notes) || "Direction",
         theme:x.theme || "", owner:x.owner || "", slide:x.source_slide, notes:x.notes,
         measures:[], tactics:[] });
+      /* §413: set only where the file carried words, so a direction with none
+         is byte-identical to one that never had the fields (§50.6). */
+      ["ovObj","ovWhy","ovRisk"].forEach(function(k){
+        var v = String(x[k] == null ? "" : x[k]);
+        if (v.trim()) u.items[u.items.length - 1][k] = v;
+      });
       made++;
     } else if (x.type === "MEASURE") {
       var p = u.items.filter(function(y){ return y.id === x.parent_id; })[0];

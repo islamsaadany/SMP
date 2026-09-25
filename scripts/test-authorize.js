@@ -4958,5 +4958,22 @@ console.log("\n§412 · a capability's own owner and custodian");
   v = as("cfo", seat);         check("§412 REFUSED: the owner cannot hand the seat on", !v.ok, "was ALLOWED");
 })();
 
+/* ── §413: A DIRECTION'S OVERVIEW IS THE OFFICE'S PLAN, AND ITS SWITCH SETUP ──
+   The three texts ride a pillar's `extra` like every other unknown key, so
+   they are PLAN (unitPlan) and nobody but the office writes them; the switch
+   on the group's structure is Setup. Both ends each (§94.2). */
+console.log("\n§413 · a direction's overview");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) { return (B.units[k].items || []).length; })[0];
+  const text = function (inc) { inc.units[K].items[0].ovObj = "fixture objective"; };
+  const sw = function (inc) { inc.group.structure = { details: { overview: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  let v = as("smo", text);     check("§413: the office writes a direction's overview", v.ok, v.refusals.join(" / "));
+  v = as("own_mob", text);     check("§413 REFUSED: a unit custodian does not (the plan is the office's)", !v.ok, "was ALLOWED");
+  v = as("smo", sw);           check("§413: the office turns the overview on", v.ok, v.refusals.join(" / "));
+  v = as("own_mob", sw);       check("§413 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -8214,4 +8214,20 @@ First of the RHI changes. A tactic's Status now reads **Completed**, **In progre
 Second RHI change. Setup › Capabilities now has **Owner** and **Custodian** columns, picked from the register like a business unit's. The function that holds a capability is now optional, so a company-wide capability can be held by nobody and still have somebody accountable. A capability planned in pillars shows how many pillars it has. The owner and custodian can report on their capability; they cannot rewrite its plan, and only the office can name them. Where a function holds a capability, that function's head and custodian still reach it as before. Nobody's access changed on Raya today, because none of Raya's capabilities has an owner of its own yet. New check passes and fails on the old build; authoriser 774/0.
 
 
-- **§411.1 (2026-09-25):** a tactic that is not due now says "Not due" once, in Status. The duplicate "Not yet due" next to it is gone. Built on the branch, not merged. **Next, step 3 (Direction overview): mockup published and awaiting sign-off.**
+- **§411.1 (2026-09-25):** a tactic that is not due now says "Not due" once, in Status. The duplicate "Not yet due" next to it is gone. Built on the branch, not merged.
+
+## §413 — a direction's overview (2026-09-25, on the branch)
+
+Third RHI change, built from the mockup Islam approved ("approved, keep the objective preview, build it"). A pillar can now carry three short texts: **Objective**, **Why now** and **Risks & mitigations**. It is switched on per client from Getting started › Structure, in a new **Plan details** card (only *Direction overview* is there for now; the other three plan details join as they are built). It is off by default, so Raya Trade and every other client look exactly as before.
+
+- **On the Plan page** it sits under the pillar's name, folded, with the start of the Objective on the folded line. Opened, it shows the three texts side by side. Only the office writes them (the plan pen). A direction with nothing written shows nothing when reading.
+- **On the deck** a new slide follows each direction's title slide: the Objective large, Why now and the risks (one line each) beside it, and the direction's key measures and tactics read straight from its tables. No slide for a direction with nothing written.
+- **In the plan workbook** the three ride at the end of the Pillars sheet, only when the switch is on or a direction has text, so every other client's file is unchanged. Uploading brings them back.
+- **Not counted as missing**: an empty box owes nothing.
+- Nothing is migrated; the texts ride with the pillar like its other fields. Turning the switch off hides them and keeps them.
+
+Checked: `checks/direction-overview.py` (red on the build before, and red when the switch is ignored), the server test (only the office writes the texts or sets the switch), the neighbouring checks and the full page sweep.
+
+**Next, step 4: several outcomes per tactic** — mockup first.
+
+Not this change's: `checks/objectives-table.py` fails one pixel test (the row number sits 0.94px off its drag handle). It fails the same way on the build before §413, so it is recorded and not fixed here.

@@ -58160,3 +58160,57 @@ change. This is screen only: nothing is stored or migrated. `checks/tactic-statu
 It is red on the build before and green after. `tactic-proration.py` now honours
 `SMP_BUILT`, and its assertion accepts either spelling of "outside the cycle". `qa.py`
 reports ERRORS none.
+
+## §413 — a direction's overview (2026-09-25)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-25_direction-overview.html`,
+second round): *"approved, keep the objective preview, build it"*; of the first round,
+*"it needs to be expandable and collapsable not always visible"*, *"the slide is good but
+it's poorly designed"*, and no to counting the boxes as missing.
+
+**What a direction carries.** Three short texts on a pillar — Objective, Why now, Risks &
+mitigations — stored as `ovObj`, `ovWhy`, `ovRisk`. They ride the pillar's `extra` jsonb like
+every other key the row table does not name, so nothing is migrated.
+
+**Switched per client, off by default.** Getting started › Structure gains a **Plan details**
+card; *Direction overview* is its only chip until the other three details are built (a chip
+for a thing that does not exist would be §61's control with nothing behind it). Stored as
+`structure.details.overview`, and **only an explicit `true` turns it on** (§104's rule, not
+§102's), so every client that never touched it — Raya Trade among them — is byte-for-byte what
+it was. **The chip writes only that key.** Its first build wrote `structNow()`, the whole
+effective shape, which stored every level's components for a client that never said one:
+equivalent today, and a second answer left in the data for ever. A structure holding only
+`details` reads every level as unsaid (`structureOf`'s own fallbacks, checked rather than
+assumed), and the last detail off deletes the structure (§50.6). Off hides and forgets nothing.
+
+**On the Plan page** it is a real `<details>` under the name (reading) or under the Owner and
+Kind rows (edit), folded, with the Objective's first line on the folded line and hidden once
+open. Open state is kept per pillar across repaints through a capture-phase `toggle` listener
+— never an inline handler, which §238's hashed policy would silence. Reading mode draws nothing
+for a direction with nothing written (§45.2); the pen always draws it, or the first words could
+never be written (§61). The boxes are `fieldOr` — bound through `FIELDS`, no `.grow`, so Enter
+is a newline — and an emptied box deletes its key.
+
+**The deck** gains one slide after each direction's title slide, only where something is
+written: the Objective large behind a gold rule, Why now and the risks (one line each) beside
+it, and on the right the direction's key measures with targets and its tactics with owners,
+**read from the tables** rather than typed again (§53.5). Its anchor is `p<code>o`, a new key,
+so every picture already placed keeps its position.
+
+**The workbook** appends Objective / Why now / Risks & mitigations to the Pillars sheet, at the
+END (§65), and only when the switch is on or a direction already has text, so every other
+client's file is unchanged. The reader takes the three by header name and the replace path sets
+only non-empty ones.
+
+**Not a gap.** An empty box owes nothing, at Islam's word.
+
+**The server**: the texts classify as `unitPlan` (the office's, §94) and the switch as `setup`,
+both ends asserted in `test-authorize.js` (778/0).
+
+**Checked**: `checks/direction-overview.py` — off is unchanged with texts stored (§113.8), the
+chip pressed and read back and deleted on the second press, folded with the preview, opened,
+kept open across a repaint, the pen writing and deleting, the slide after the title with its
+parts, the workbook round trip, and the file unchanged when off. 15 red on the build before
+§413, 2 red with the switch gate removed from the source (§276). Neighbours and `qa.py` green.
+**Recorded, not fixed**: `checks/objectives-table.py`'s *centred by their MARKS* reads
+-0.94px, identical on the build before §413 (§303), so it is not this change's.

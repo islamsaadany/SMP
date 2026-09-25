@@ -24353,7 +24353,8 @@ function tacticRows(ts, unitKey){
        cell has always printed "due at 50%" WITH the sign in its unreported
        state, so one cell spelt one unit two ways. */
     var tail = !due
-      ? '<td class="cc" colspan="2"><span class="pill kind">Not yet due</span></td>'
+      /* §411.1: Status already says "Not due"; the second pill said it twice. */
+      ? '<td class="cc" colspan="2"></td>'
       : !tacticAnswered(t)
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
         (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'

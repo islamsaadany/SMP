@@ -92,12 +92,27 @@ with sync_playwright() as pw:
     pills = rows.get("pills", []) if isinstance(rows, dict) else []
     drawn = [p for p in pills if p in WORDS]
     ck("the page draws Status pills", len(drawn) > 0, rows)
-    ck("every drawn status is one of the five words", all(p in WORDS for p in pills if p not in ("Not yet due", "Not reported")), pills)
+    ck("every drawn status is one of the five words", all(p in WORDS for p in pills if p != "Not reported"), pills)
     wants = set(w["want"] for w in rows.get("want", [])) if isinstance(rows, dict) else set()
     ck("...and the set drawn is the set the rule answers for the shown pillar", set(drawn) <= wants, (drawn, wants))
     ck("nothing drawn still says Done or WIP", "Done" not in pills and "WIP" not in pills, pills)
     stored = [w["stored"] for w in rows.get("want", [])] if isinstance(rows, dict) else []
     ck("what is STORED is the old spelling, untouched", set(stored) <= {"WIP", "Done", "Not started", "Blocked"} and "WIP" in stored, set(stored))
+
+    print("── 3 · a tactic that is not due says so once (§411.1)")
+    nd = ev(pg, """() => {
+      const p = UNITS['mobile'].items.find(x => (x.tactics||[]).length) , t = p.tactics[0];
+      window.__k = JSON.stringify(t);
+      t.q1 = false; t.q2 = false; t.q3 = false; t.q4 = true; t.actual = null;
+      paint();
+      const rows = [...document.querySelectorAll('#panel tr[data-oi]')].filter(r => r.textContent.includes(t.name));
+      const txt = rows.map(r => r.textContent.replace(/\\s+/g, ' ')).join(' | ');
+      p.tactics[0] = JSON.parse(window.__k); paint();
+      return { word: tacticStatusWord(Object.assign({}, t, {q1:false,q2:false,q3:false,q4:true,actual:null})), n: rows.length, txt };
+    }""")
+    ck("the made tactic is not due and its row is on the page", isinstance(nd, dict) and nd.get("word") == "Not due" and nd.get("n", 0) > 0, nd)
+    ck("...Status says Not due", isinstance(nd, dict) and "Not due" in nd.get("txt", ""), nd)
+    ck("...and nothing beside it says Not yet due", isinstance(nd, dict) and "Not yet due" not in nd.get("txt", ""), nd)
 
     ck("no page error", not errs, errs)
     b.close()

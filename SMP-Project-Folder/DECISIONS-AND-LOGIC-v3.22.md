@@ -58147,3 +58147,16 @@ removed. `checks/capability-seats.py`: every control pressed and the graph read
 back, **12 red** on the build before. Access baseline UNMOVED. Raya: its
 capabilities are held by functions and carry no seat of their own, so nothing
 moves until the office names one.
+
+
+### §411.1 — "Not due" is said once
+
+Islam: *"remove the not yet due."* A tactic that is not due said **Not due** in its
+Status column (§411) and **Not yet due** in the two cells beside it, so one fact was
+drawn twice on one row (§87's twins). The Status column keeps the word, and the two
+cells are left empty. The workbook's legend line is a different surface and does not
+change. This is screen only: nothing is stored or migrated. `checks/tactic-status-words.py`
+§3 creates a not-due tactic on the Performance page and asserts the word is drawn once.
+It is red on the build before and green after. `tactic-proration.py` now honours
+`SMP_BUILT`, and its assertion accepts either spelling of "outside the cycle". `qa.py`
+reports ERRORS none.

@@ -8212,3 +8212,6 @@ First of the RHI changes. A tactic's Status now reads **Completed**, **In progre
 ## §412 — a capability has its own owner and custodian (2026-09-24, on the branch)
 
 Second RHI change. Setup › Capabilities now has **Owner** and **Custodian** columns, picked from the register like a business unit's. The function that holds a capability is now optional, so a company-wide capability can be held by nobody and still have somebody accountable. A capability planned in pillars shows how many pillars it has. The owner and custodian can report on their capability; they cannot rewrite its plan, and only the office can name them. Where a function holds a capability, that function's head and custodian still reach it as before. Nobody's access changed on Raya today, because none of Raya's capabilities has an owner of its own yet. New check passes and fails on the old build; authoriser 774/0.
+
+
+- **§411.1 (2026-09-25):** a tactic that is not due now says "Not due" once, in Status. The duplicate "Not yet due" next to it is gone. Built on the branch, not merged. **Next, step 3 (Direction overview): mockup published and awaiting sign-off.**

@@ -55,7 +55,7 @@ Run:  SMP_CHROME=… python3 qa-run.py checks/tactic-proration.py
 import os, sys, pathlib
 from playwright.sync_api import sync_playwright
 
-SRC = str(pathlib.Path(__file__).resolve().parent.parent / "strategy-management-platform.html")
+SRC = os.environ.get("SMP_BUILT") or str(pathlib.Path(__file__).resolve().parent.parent / "strategy-management-platform.html")
 FAILS = []
 
 
@@ -356,7 +356,7 @@ def main():
         }""")
         ck("a Q4 tactic is not due at August", nd["due"] is False, nd)
         ck("...and the page never offers it a target of nothing", not nd["zero"], nd)
-        ck("...it says it is outside this cycle", "Not asked" in nd["txt"] or "Not yet due" in nd["txt"], nd)
+        ck("...it says it is outside this cycle", "Not asked" in nd["txt"] or "Not due" in nd["txt"], nd)
 
         pg.evaluate("""()=>{ var p=UNITS.mobile.items[0];
           p.tactics[0] = JSON.parse(window.__keep); paint(); }""")

@@ -222,7 +222,8 @@
     var here = mods.filter(function (x) { return x.key === MODULE; })[0];
     var modLabel = here ? here.label : (root.getAttribute("data-module-label") || "");
     var cs = onClientSettings();
-    var said = [client, cs, MODULE, mods.map(function (x) { return x.key; }).join(","),
+    var onSetup = typeof current !== "undefined" && current === "setup";
+    var said = [client, cs, onSetup, MODULE, mods.map(function (x) { return x.key; }).join(","),
                 trailClients ? trailClients.map(function (x) { return x.key; }).join(",") : "?"].join("|");
     var nav = bar.querySelector("nav.trail");
     if (nav && said === trailSaid) return;
@@ -295,13 +296,21 @@
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
        it keeps §362.1's one press. */
+    /* §411: THE MODULES THEMSELVES LEAD EVERY MENU (Islam: "I need to
+       reverse back to the modules from the drop down of the last part").
+       On the client's settings the menu held only the modules' SETTINGS, and
+       on a module's own settings it left out the module you are in — so
+       neither had a way back into a module. Now: the modules, a rule, then
+       the settings pages. The module you are in is left out only on its own
+       normal page, where it is the step's own name and there is nowhere to go
+       back to (§401). */
     var modItems = [];
     mods.forEach(function (x) {
-      if (!cs && x.key === MODULE) return;
-      modItems.push(cs ? { label: x.label + " settings", go: "cross:" + x.key }
-                       : { label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
+      if (!cs && !onSetup && x.key === MODULE) return;
+      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
     });
     if (modItems.length) modItems.push({ rule: true });
+    if (cs) mods.forEach(function (x) { modItems.push({ label: x.label + " settings", go: "cross:" + x.key }); });
     modItems.push({ label: "Client settings", go: "cross:client", here: cs });
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
       esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";

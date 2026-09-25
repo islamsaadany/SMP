@@ -405,9 +405,11 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(b.viewer === true, "\u2026and its viewer strip", JSON.stringify(b));
   /* §401: the MODULE step offers the OTHER modules — never the one you are
      in, which is the step's own name — then a rule, then Client settings */
-  check(clMods.filter((m) => m.key !== "strategy").every((m) => b.mods.includes("/raya-trade/" + m.key)) &&
-        b.mods.length === clMods.length - 1 && !b.mods.includes("/raya-trade/strategy"),
-        "\u2026and the trail's module step offers every OTHER module this person may open (\u00a7401)", JSON.stringify(b.mods));
+  /* \u00a7411 REWRITTEN, NEVER LOOSENED (\u00a7218): on a module's own SETTINGS the
+     step offers every module INCLUDING the one you are in, because that is
+     the way back into it (Islam: "reverse back to the modules"). */
+  check(clMods.every((m) => b.mods.includes("/raya-trade/" + m.key)) && b.mods.length === clMods.length,
+        "\u2026and the trail's module step offers every module, the one you are in included \u2014 the way back into it (\u00a7411)", JSON.stringify(b.mods));
   check(b.clientGo.length > 0 && b.clientGo[b.clientGo.length - 1] === "/platform#clients" &&
         !b.clientGo.some((g) => /^\/raya-trade(\/|$)/.test(g)) && b.clientGo.every((g) => /^\/[a-z0-9-]+$|^\/platform#clients$/.test(g)),
         "\u2026and the client step offers the OTHER clients and all of them, never this one or its modules (\u00a7401)", JSON.stringify(b.clientGo));
@@ -432,8 +434,11 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      never a menu of one \u2014 it always carries Client settings and Switch
      client \u2014 so what survives is that it offers EXACTLY the modules this
      client has, no more: with two, two. */
-  check(two.mods.length === 1 && two.row === true && two.switcher === false,
-        "\u2026and with two modules the trail offers exactly the other one, and no retired switcher comes back (\u00a7383, \u00a7400, \u00a7401)", JSON.stringify(two));
+  /* \u00a7411: on a module's SETTINGS the step lists every module, the one you are
+     in included (the way back into it), so with two it is exactly those two. */
+  check(two.mods.length === 2 && two.mods.includes("/raya-trade/strategy") && two.mods.includes("/raya-trade/insights") &&
+        two.row === true && two.switcher === false,
+        "\u2026and with two modules the trail offers exactly those two, and no retired switcher comes back (\u00a7383, \u00a7400, \u00a7411)", JSON.stringify(two));
   await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights", "tracker"]), tenantId]);
   await open("/raya-trade/strategy/setup/cycle");
 
@@ -540,6 +545,12 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   b = await bar();
   check(b.sets.length === clMods.length && clMods.every((m) => b.sets.includes("cross:" + m.key)),
         "the client step carries one way across per module this person may open (\u00a7362.1, kept)", JSON.stringify(b.sets));
+  /* \u00a7411: and the modules THEMSELVES lead that menu, before the rule and the
+     settings \u2014 the way back into a module from the client's settings */
+  const csMenu = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.dataset && e.dataset.trgo ? e.dataset.trgo : (e.className === "trrule" ? "|" : "?")));
+  check(clMods.every((m, i) => csMenu[i] === "/raya-trade/" + m.key) && csMenu[clMods.length] === "|" &&
+        csMenu[csMenu.length - 1] === "cross:client",
+        "\u2026led by the modules themselves, then a rule, then the settings pages (\u00a7411)", JSON.stringify(csMenu));
   await page.evaluate(() => { window.__stay = 1; });
   const pressTrail = async (go) => {
     if (!(await page.locator("nav.trail [data-trgo='" + go + "']").count())) { fail("a trail entry to press", go); return false; }
@@ -557,8 +568,8 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
         "\u2026and pressing it lands on the module's Setup, the trail ending in the module", path() + " / " + JSON.stringify(b));
   check(reached.includes("access"), "\u2026which is the rail Roles & access is on \u2014 the page he could not reach (\u00a761)", reached.join(","));
   check(await page.evaluate(() => window.__stay === 1), "\u2026and it crossed WITHOUT reloading the platform (\u00a7367)", "the page was rebuilt");
-  check(b.sets.length === 0 && b.mods.length === clMods.length - 1,
-        "\u2026and on a module's page the module step lists the other modules, not their settings (\u00a787, \u00a7401)", JSON.stringify(b));
+  check(b.sets.length === 0 && b.mods.length === clMods.length && b.mods.includes("/raya-trade/strategy"),
+        "\u2026and on a module's settings the module step lists every module, its own included, not their settings (\u00a787, \u00a7411)", JSON.stringify(b));
   const third = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.dataset && e.dataset.trgo ? e.dataset.trgo : (e.className === "trrule" ? "|" : "?")));
   check(third[third.length - 1] === "cross:client" && third[third.length - 2] === "|" && !third.includes("cross:strategy"),
         "\u2026and it ends in a rule and Client settings (\u00a7401)", JSON.stringify(third));

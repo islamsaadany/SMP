@@ -167,6 +167,35 @@ with sync_playwright() as p:
     ck("the structure stores no functions' plan type (§404.2)",
        safe(pg, "()=>!('format' in (GROUP.structure.fn||{}))") is True)
 
+    # ── 6. A client WITH A PLAN can still rename (§411) ──────────────
+    # Islam, on El Abd: the name boxes were read-only once a plan existed, so
+    # "Strategic Directions" could not be changed here. The worked example
+    # holds plans — the state he was in — asserted first, or the rest passes
+    # on a client whose shape is still open (§113.8).
+    ck("the worked example holds a plan, so its shape is frozen",
+       safe(pg, "()=>{var h=__smpHoldsNow(); return !!(h.plans||h.capabilities)}") is True)
+    was = safe(pg, "()=>labelWord('unitword','bu')", "")
+    wasP = safe(pg, "()=>labelWord('pillar','bu')", "")
+    ro = safe(pg, "()=>[...document.querySelectorAll('input[data-stword]')].filter(i=>i.readOnly).length", -1)
+    ck("no word box on the step is read-only", ro == 0, ro)
+    for sel, val in (('input[data-stword="unitword|many"]', "Strategic Directions"),
+                     ('input[data-stword="pillar|many"]', "Themes of work")):
+        try:
+            pg.fill(sel, val); pg.press(sel, "Tab"); pg.wait_for_timeout(250)
+        except Exception as e:
+            ck("typing into " + sel, False, str(e)[:120])
+    ck("the business units' word is stored on the client's own labels",
+       safe(pg, "()=>labelWord('unitword','bu')") == "Strategic Directions",
+       safe(pg, "()=>labelWord('unitword','bu')"))
+    ck("…and the pillars' word too",
+       safe(pg, "()=>labelWord('pillar','bu')") == "Themes of work",
+       safe(pg, "()=>labelWord('pillar','bu')"))
+    ck("…without the shape being rewritten (no unit lost, nothing refused)",
+       safe(pg, "()=>UNIT_KEYS.length>0 && !/has a plan in it/.test(document.body.innerText)") is True)
+    ck("the old 'changed on Terminology' line is gone",
+       safe(pg, "()=>!/changed on Setup › Terminology/.test(document.body.innerText)") is True)
+    safe(pg, "()=>{var f=function(k,v){var e=LABELS.entries.filter(x=>x.key===k)[0]; e.bu=v;}; f('unitword',%r); f('pillar',%r); paint();}" % (was, wasP))
+
     ck("no page errors", not errs, errs[:3])
     b.close()
 

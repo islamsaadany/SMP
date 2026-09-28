@@ -55270,7 +55270,7 @@ var CLIENTSETUP = (function () {
     w.appendChild(el("span", "lab", label));
     var i = el("input", "fld");
     i.type = "text"; i.value = value || "";
-    if (ro) i.readOnly = true;
+    wordCommit(i);
     if (onChange) i.addEventListener("change", function () { onChange(i.value); });
     w.appendChild(i);
     if (note) w.appendChild(el("p", "note", note));
@@ -55858,8 +55858,27 @@ var CLIENTSETUP = (function () {
 
   function wordOf(key){ var v = S.shape.words[key]; return v && typeof v === "object" ? v : { one: W(key, "one", ""), many: W(key, "many", "") }; }
   function setWord(key, form, val){
+    /* §411: A WORD IS NOT THE SHAPE. Once a client holds a plan the shape is
+       frozen (§346.5) and commitShape() refuses, which used to lock every
+       name box on this step — Islam could not rename "Strategic Directions"
+       on El Abd. Renaming moves nothing, and Setup › Terminology already
+       writes these same entries on such a client, so here the word goes
+       straight onto LABELS, the one store both screens read (§53.5). An
+       emptied box keeps the word that was there, as the shape path does. */
+    if (!canShape()) {
+      var e = (LABELS.entries || []).filter(function (x) { return x.key === key; })[0];
+      var v = String(val == null ? "" : val).trim();
+      if (e && v) { if (form === "one") e.group = v; else e.bu = v; }
+      return;
+    }
     var cur = wordOf(key); cur = { one: cur.one, many: cur.many };
     cur[form] = val; S.shape.words[key] = cur; S.shapeDirty = true;
+  }
+  /* The live write needs a paint to reach the autosave; on LEAVING the box,
+     never per keystroke, or the repaint takes the caret (§35, Terminology's
+     own rule). With the shape still open the step's Next commits as before. */
+  function wordCommit(i){
+    i.addEventListener("change", function () { if (!canShape()) redraw(); });
   }
   function segButtons(opts, cur, pick, ro){
     var band = el("div", "wzband");
@@ -55884,7 +55903,7 @@ var CLIENTSETUP = (function () {
       S.stOther[key] = false;
       var p = pairs.filter(function (x) { return x[1] === v; })[0];
       setWord(key, "one", p[0]); setWord(key, "many", p[1]); redraw();
-    }, ro));
+    }));
     if (sel === "__") {
       var row = el("div", "strow");
       [["one", "One"], ["many", "Many"]].forEach(function (f) {
@@ -55892,7 +55911,7 @@ var CLIENTSETUP = (function () {
         var i = el("input", "fld"); i.type = "text"; i.value = cur[f[0]] || "";
         i.setAttribute("aria-label", "The word for " + f[1].toLowerCase());
         i.setAttribute("data-stword", key + "|" + f[0]);
-        if (ro) i.readOnly = true;
+        wordCommit(i);
         i.addEventListener("input", function () {
           setWord(key, f[0], i.value);
           if (freeLabel === "one") setWord(key, "many", i.value);
@@ -55913,7 +55932,7 @@ var CLIENTSETUP = (function () {
       var i = el("input", "fld"); i.type = "text"; i.value = cur[f[0]] || "";
       i.setAttribute("aria-label", "The word for " + f[1].toLowerCase());
       i.setAttribute("data-stword", key + "|" + f[0]);
-      if (ro) i.readOnly = true;
+      wordCommit(i);
       i.addEventListener("input", function () { setWord(key, f[0], i.value); });
       var w2 = el("label", "stnm"); w2.appendChild(el("span", "lab", f[1]));
       w2.appendChild(i); row.appendChild(w2);
@@ -55954,7 +55973,7 @@ var CLIENTSETUP = (function () {
         w2.appendChild(el("span", "lab", title));
         var i = el("input", "fld"); i.type = "text"; i.value = wordOf(key).many;
         i.setAttribute("data-stword", key + "|many");
-        if (ro) i.readOnly = true;
+        wordCommit(i);
         i.addEventListener("input", function () { setWord(key, "many", i.value); });
         w2.appendChild(i); names.appendChild(w2);
         /* What sits under a pillar is named where the pillar is (§404.4). */
@@ -55963,7 +55982,7 @@ var CLIENTSETUP = (function () {
           w3.appendChild(el("span", "lab", sub[1]));
           var j = el("input", "fld"); j.type = "text"; j.value = wordOf(sub[0]).many;
           j.setAttribute("data-stword", sub[0] + "|many");
-          if (ro) j.readOnly = true;
+          wordCommit(j);
           j.addEventListener("input", function () { setWord(sub[0], "many", j.value); });
           w3.appendChild(j); names.appendChild(w3);
         });
@@ -56020,7 +56039,6 @@ var CLIENTSETUP = (function () {
     box.appendChild(el("p", "wzwhy",
       "These ticks apply to every item at a level; each one can be adjusted later on Setup › Structure. " +
       "Switching a component off hides it and keeps what was written."));
-    if (ro) box.appendChild(el("p", "wzwhy", "The names are changed on Setup › Terminology now that this client has a plan in it."));
     return box;
   }
 
@@ -69260,13 +69278,20 @@ var SYNC = (function () {
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
        it keeps §362.1's one press. */
+    /* §411, Islam: "we agreed I see the modules on top and then the
+       separator then the settings." ONE ORDER ON EVERY PAGE: the modules
+       (the one you are in left out, unless you are on settings, where none
+       is "here"), a rule, then every settings page — each module's and the
+       client's — with the one you are standing on marked. */
     var modItems = [];
     mods.forEach(function (x) {
       if (!cs && x.key === MODULE) return;
-      modItems.push(cs ? { label: x.label + " settings", go: "cross:" + x.key }
-                       : { label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
+      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
     });
     if (modItems.length) modItems.push({ rule: true });
+    mods.forEach(function (x) {
+      modItems.push({ label: x.label + " settings", go: "cross:" + x.key });
+    });
     modItems.push({ label: "Client settings", go: "cross:client", here: cs });
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
       esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";

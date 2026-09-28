@@ -540,6 +540,11 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   b = await bar();
   check(b.sets.length === clMods.length && clMods.every((m) => b.sets.includes("cross:" + m.key)),
         "the client step carries one way across per module this person may open (\u00a7362.1, kept)", JSON.stringify(b.sets));
+  /* §411, the page Islam photographed: on Client settings the modules come
+     FIRST, then the rule, then every settings page with Client settings last. */
+  const csMenu = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.dataset && e.dataset.trgo ? e.dataset.trgo : (e.className === "trrule" ? "|" : "?")));
+  check(JSON.stringify(csMenu) === JSON.stringify(clMods.map((m) => "/raya-trade/" + m.key).concat(["|"], clMods.map((m) => "cross:" + m.key), ["cross:client"])),
+        "on Client settings the menu reads the modules, a rule, then the settings pages (\u00a7411)", JSON.stringify(csMenu));
   await page.evaluate(() => { window.__stay = 1; });
   const pressTrail = async (go) => {
     if (!(await page.locator("nav.trail [data-trgo='" + go + "']").count())) { fail("a trail entry to press", go); return false; }
@@ -557,11 +562,16 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
         "\u2026and pressing it lands on the module's Setup, the trail ending in the module", path() + " / " + JSON.stringify(b));
   check(reached.includes("access"), "\u2026which is the rail Roles & access is on \u2014 the page he could not reach (\u00a761)", reached.join(","));
   check(await page.evaluate(() => window.__stay === 1), "\u2026and it crossed WITHOUT reloading the platform (\u00a7367)", "the page was rebuilt");
-  check(b.sets.length === 0 && b.mods.length === clMods.length - 1,
-        "\u2026and on a module's page the module step lists the other modules, not their settings (\u00a787, \u00a7401)", JSON.stringify(b));
+  /* §411 — REWRITTEN, NEVER LOOSENED (§218): Islam, "the modules on top and
+     then the separator then the settings", one order on every page. The
+     module step lists the OTHER modules, a rule, then every module's
+     settings and Client settings last. */
   const third = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.dataset && e.dataset.trgo ? e.dataset.trgo : (e.className === "trrule" ? "|" : "?")));
-  check(third[third.length - 1] === "cross:client" && third[third.length - 2] === "|" && !third.includes("cross:strategy"),
-        "\u2026and it ends in a rule and Client settings (\u00a7401)", JSON.stringify(third));
+  const rule = third.indexOf("|");
+  check(b.mods.length === clMods.length - 1 && rule === b.mods.length &&
+        third.slice(0, rule).every((g) => /^\/raya-trade\/[a-z]+$/.test(g)) &&
+        JSON.stringify(third.slice(rule + 1)) === JSON.stringify(clMods.map((m) => "cross:" + m.key).concat(["cross:client"])),
+        "\u2026and on a module's page: the other modules, a rule, then every settings page, Client settings last (\u00a7411)", JSON.stringify(third));
 
   /* AND THE OTHER DIRECTION CROSSES IN PLACE TOO (\u00a7367). BOTH ENDS
      (\u00a794.2): the way back is the half Islam presses most. */

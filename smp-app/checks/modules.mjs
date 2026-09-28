@@ -802,8 +802,13 @@ if (browser) {
   check("…and NOT the module you are in — it is the step's own name (§401)",
     !items.some((t) => t.split("\n")[0] === MODULE_DEF[DEFAULT_MODULE].label), items.join(" | "));
   const tail = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.className === "trrule" ? "|" : e.textContent.trim()));
-  check("…then a rule, then Client settings, last",
-    tail.length >= 2 && tail[tail.length - 2] === "|" && tail[tail.length - 1] === "Client settings", JSON.stringify(tail));
+  /* §411, Islam: "the modules on top and then the separator then the
+     settings" — REWRITTEN, NEVER LOOSENED (§218): after the rule comes EVERY
+     module's settings, in the client's order, then Client settings, last. */
+  const afterRule = tail.slice(tail.indexOf("|") + 1);
+  check("…then a rule, then every module's settings, then Client settings, last",
+    tail.indexOf("|") === OTHERS.length &&
+    JSON.stringify(afterRule) === JSON.stringify(MENU.map((m) => m.label + " settings").concat(["Client settings"])), JSON.stringify(tail));
   const box = await page.locator("nav.trail .trmod .menu").boundingBox();
   check("and the open menu is on the page", box && box.x >= 0 && box.y >= 0 && box.width > 200, JSON.stringify(box));
   /* the client step is the server's list less the client you are on (§401) */
@@ -831,8 +836,9 @@ if (browser) {
   await one.waitForTimeout(250);
   await one.locator("nav.trail .trmod > summary").click().catch(() => {});
   const oneItems = await one.locator("nav.trail .trmod .menu > *").allInnerTexts();
-  check("a client with ONE module offers no other module and no rule — only Client settings",
-    oneItems.length === 1 && oneItems[0].trim() === "Client settings", JSON.stringify(oneItems));
+  check("a client with ONE module offers no other module and no rule — only the settings pages",
+    oneItems.length === 2 && /settings$/.test(oneItems[0].trim()) && oneItems[0].trim() !== "Client settings" &&
+    oneItems[1].trim() === "Client settings", JSON.stringify(oneItems));
   /* BOTH ENDS (§94.2): a build that drew the trail for everybody passes
      everything above. */
   const staff = await browser.newPage({ viewport: { width: 1400, height: 400 } });

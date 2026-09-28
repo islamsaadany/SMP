@@ -295,13 +295,20 @@
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
        it keeps §362.1's one press. */
+    /* §411, Islam: "we agreed I see the modules on top and then the
+       separator then the settings." ONE ORDER ON EVERY PAGE: the modules
+       (the one you are in left out, unless you are on settings, where none
+       is "here"), a rule, then every settings page — each module's and the
+       client's — with the one you are standing on marked. */
     var modItems = [];
     mods.forEach(function (x) {
       if (!cs && x.key === MODULE) return;
-      modItems.push(cs ? { label: x.label + " settings", go: "cross:" + x.key }
-                       : { label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
+      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
     });
     if (modItems.length) modItems.push({ rule: true });
+    mods.forEach(function (x) {
+      modItems.push({ label: x.label + " settings", go: "cross:" + x.key });
+    });
     modItems.push({ label: "Client settings", go: "cross:client", here: cs });
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
       esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";

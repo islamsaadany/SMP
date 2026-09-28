@@ -258,10 +258,8 @@ function unitAimSlides(u){
 function unitSwotSlides(u){
   var S = [];
   if (!u.fnKey && compOn(u.ukey, "swot")) {
-    /* §412: the boxes this layer carries, under the layer's own names. */
-    var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
-    var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
-      return [q, LTraw(u.ukey, SMPRules.QUAD_KEYS[q]), hues[q]]; });
+    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
+              ["o","Opportunities","stone"],["t","Threats","warn"]];
     /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
        measurement rather than taste. On the blue the four scoring colours
        read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
@@ -272,8 +270,7 @@ function unitSwotSlides(u){
        own hues untouched. `.seccell.t-*` had no other user and is deleted
        with them (§24). It is also what §254.5 settled for the pillar cards:
        one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page",
-      SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
+    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
       "Where this unit is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
@@ -285,7 +282,7 @@ function unitSwotSlides(u){
       S.push('<section class="dslide d-swot t-' + x[2] + '"' +
         (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
                               : anch("swot" + x[0], "After " + x[1])) +
-        '><h2>' + esc(x[1]) + '</h2>' +
+        '><h2>' + x[1] + '</h2>' +
         '<ol class="dswot">' + items + '</ol></section>');
     });
   }
@@ -807,12 +804,6 @@ function deckPillarHead(u, p, pi, which){
 function fnSWSlide(f){
   if (!f) return "";
   var sw = f.swot || {};
-  /* §412: which boxes, what they are called and what the slide is called are
-     the functions layer's (Structure); unset, it is today's two. */
-  var fk = Object.keys(FUNCTIONS).filter(function(k){ return FUNCTIONS[k] === f; })[0] || "";
-  var tg = "fn:" + fk, hues = { s:"good", w:"bad", o:"stone", t:"warn" };
-  var quads = SMPRules.swotQuads(GROUP, tg);
-  var title = esc(SMPRules.swotTitle(GROUP, tg)) || "Strengths &amp; Weaknesses";
   var col = function(key, title, hue){
     var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
     return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
@@ -820,13 +811,12 @@ function fnSWSlide(f){
         return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
       }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
   };
-  var any = quads.some(function(k){
+  var any = ["s","w"].some(function(k){
     return (sw[k] || []).some(function(t){ return String(t || "").trim(); }); });
   if (!any) return "";
   return '<section class="dslide d-fnsw"' + anch("fnsw", "After Strengths & Weaknesses") + '>' +
-    '<h2>' + title + '</h2><div class="dswgrid">' +
-    quads.map(function(q){ return col(q, LT(tg, SMPRules.QUAD_KEYS[q]), hues[q]); }).join("") +
-    '</div></section>';
+    '<h2>Strengths &amp; Weaknesses</h2><div class="dswgrid">' +
+    col("s", "Strengths", "good") + col("w", "Weaknesses", "bad") + '</div></section>';
 }
 function deckSlidesFn(subject){
   /* §326: the function's OWN work — the same list its four pages draw, so the

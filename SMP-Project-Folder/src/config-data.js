@@ -4534,6 +4534,10 @@ function fnCanFill(k){
    already been paid for asking the same question in two places. */
 function fnShows(k){
   var f = FUNCTIONS[k];
+  /* §412: a client with no supporting-functions layer (Structure) shows
+     none; every function and all it holds is kept, and switching the layer
+     back on brings them back. */
+  if (!SMPRules.fnExists(GROUP)) return false;
   return !!f && f.active !== false && (fnHasWork(k) || fnCanFill(k));
 }
 function fnsReachable(){
@@ -6285,6 +6289,9 @@ function grantAt(pageKey, target){
    is set once at the top of paint() rather than threaded through forty call
    sites that would all pass the same value. Same shape as VIEWER. */
 var TARGET = "group";
+/* §412: whether the page being drawn is the client's own Setup, where no
+   layer's own names apply. Written beside TARGET in paint(). */
+var TARGET_SETUP = false;
 function grant(pageKey){ return grantAt(pageKey, TARGET); }
 
 /* A person attached to the group reaches every unit; a person attached to a

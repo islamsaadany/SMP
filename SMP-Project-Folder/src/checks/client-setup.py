@@ -344,8 +344,11 @@ with sync_playwright() as p:
     press(pg, ".csetup .wzstep[data-step=structure]")
     ck("Structure names the units and the functions, one and many, where the Words step used to",
        all(q(pg, '.csetup [data-stword="%s"]' % k) for k in ("unitword|one", "unitword|many", "fnword|one", "fnword|many")))
-    ck("…and the key measures and tactics beside the pillars",
-       bool(q(pg, '.csetup [data-stword="measure|many"]')) and bool(q(pg, '.csetup [data-stword="tactic|many"]')))
+    # §412: a part is named per LAYER, inside the plan section's pillars way
+    # (rewritten, never loosened, §218 — every layer, both forms).
+    ck("…and the key measures and tactics beside the pillars, on every layer",
+       all(q(pg, '.csetup [data-stway="%s|pillars"] [data-stlw="%s|%s|%s"]' % (k, k, part, form))
+           for k in ("top", "bu", "fn") for part in ("pillar", "measure", "tactic") for form in ("one", "many")))
     ck("there is no Words step", q(pg, ".csetup .wzstep[data-step=words]") is None)
     # no second layer: the divisions step says so and no row offers a division
     ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));st.mid=Object.assign({},st.mid||{},{exists:false});GROUP[SMPRules.STRUCTURE]=st;paint();}")

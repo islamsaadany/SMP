@@ -19,40 +19,16 @@ function labelDefault(key){
    L1() the word for ONE. An empty box, or the retired "—" (a row that used to
    be "not held" at one level), falls back to the platform's default and then
    to the internal name, so a word is never blank on screen. */
-/* §412: A LAYER MAY NAME A THING ITS OWN WAY. What the page being drawn
-   belongs to (TARGET) is asked first — the business units' "Pillars" and the
-   functions' "Themes of work" can differ — and only an unnamed part falls
-   back to the client's one word. Setup is the client's own ground and never
-   a layer's, so it always reads the client's word (Terminology is edited
-   there, and a layer's name showing in its boxes would be a second copy). */
-function layerOverride(key, which){
-  if (typeof SMPRules === "undefined" || !SMPRules.layerWord) return null;
-  if (typeof TARGET_SETUP !== "undefined" && TARGET_SETUP) return null;
-  var t = typeof TARGET !== "undefined" ? TARGET : "group";
-  return SMPRules.layerWord(GROUP, t, key, which === "group" ? "one" : "many");
-}
 function labelWord(key, which){
-  var o = layerOverride(key, which);
-  if (o) return o;
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
   var v = e && e[which];
   if (!v || v === "\u2014") {
     var d = labelDefault(key);
-    var pd = !d && typeof SMPRules !== "undefined" && SMPRules.PART_DEFAULTS && SMPRules.PART_DEFAULTS[key];
-    v = d ? (which === "group" ? d.one : d.many)
-          : pd ? (which === "group" ? pd[0] : pd[1])
-          : (e ? e.internal : key);
+    v = d ? (which === "group" ? d.one : d.many) : (e ? e.internal : key);
   }
   return v;
 }
 function L(key, scope){ return esc(labelWord(key, "bu")); }
-/* §412: a word for a NAMED layer rather than the page being drawn — the deck
-   and anything else built for a subject that is not TARGET ask this. */
-function LTraw(target, key, which){
-  var o = SMPRules.layerWord(GROUP, target, key, which === "one" ? "one" : "many");
-  return o || labelWord(key, which === "one" ? "group" : "bu");
-}
-function LT(target, key, which){ return esc(LTraw(target, key, which)); }
 function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one

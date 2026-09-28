@@ -2161,7 +2161,7 @@ function renderGroupPerformance(){
                 '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
-      miniTable(["#",L1("project"),L("deliverable"),L("outcome"),"Performance"],
+      miniTable(["#",L1("project"),"Deliverables","Outcomes","Performance"],
         c.projects.map(function(p, i){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
             '<td class="num">' + pct(projDeliverySide(p)) + '</td>' +
@@ -2210,8 +2210,8 @@ function renderGroupPerformance(){
         '<div class="box-obj"><div class="boxlabel"><span>Performance</span>' +
           plus(pid, "Performance breakdown for " + c.name) + '</div>' +
           gauge(perf, "") + '</div>' +
-        '<div class="box-exec"><div class="boxlabel"><span>' + L("milestone") + '</span>' +
-          plus(eid, labelWord("milestone", "bu") + " behind " + c.name) + '</div>' +
+        '<div class="box-exec"><div class="boxlabel"><span>Milestones</span>' +
+          plus(eid, "Milestones behind " + c.name) + '</div>' +
           msBody + '</div>' +
       '</div></div></div>';
   }).join("");
@@ -5051,7 +5051,7 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
-  return swotBoxes(u, SMPRules.swotQuads(GROUP, u.ukey), "analysis", "u_anal");
+  return swotBoxes(u, ["s","w","o","t"], "analysis", "u_anal");
 }
 /* ── A SUPPORTING FUNCTION'S S&W (§399) ────────────────────────────
    Islam: *"We need to add Strengths and weakness for the supporting
@@ -5073,7 +5073,7 @@ function renderFnSW(t){
   var f = FUNCTIONS[fk];
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
-  return swotBoxes({ ukey:"fn:" + fk, swot:sw }, SMPRules.swotQuads(GROUP, "fn:" + fk), "capfoundation", "k_found");
+  return swotBoxes({ ukey:"fn:" + fk, swot:sw }, ["s","w"], "capfoundation", "k_found");
 }
 function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
@@ -5099,10 +5099,9 @@ function swotBoxes(u, quads, page, ac){
      tablet meant `visibility:hidden` until the box itself happened to be
      tapped — §70's own finding, fixed for the plan PANE in August and left on
      the cards. */
-  /* §412: each box is named by its layer (Structure), the platform's word
-     otherwise; which boxes are drawn is the layer's too (swotQuads). */
+  var titles = { s:"Strengths", w:"Weaknesses", o:"Opportunities", t:"Threats" };
   return '<div class="swot">' +
-    quads.map(function(q){ return box(q, q, L(SMPRules.QUAD_KEYS[q])); }).join("") + '</div>';
+    quads.map(function(q){ return box(q, q, titles[q]); }).join("") + '</div>';
 }
 
 /* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────
@@ -6612,9 +6611,7 @@ function splitOrPane(list, sel, rail, pane){
    THE DIRECTION IS "=", NOT ">=". With a target of Y/N there is nothing to be
    greater than, and a blank cell would put back the one thing this merge
    removed. "= Y/N" is what the row actually says. */
-/* §412: named by the layer being drawn (Structure's plan section), so it
-   is asked when the pane is built rather than fixed at load. */
-function dxHeading(){ return L("deliverable") + " and " + L("outcome").toLowerCase(); }
+var DX_HEADING = "Deliverables and outcomes";
 /* ── WHAT THE SCORE COLUMN IS CALLED (§104.9) ─────────────────────────
    The two tables read their last column from two different numbers, so they
    say two different words. A deliverable or an outcome answers "how well" --
@@ -6901,8 +6898,8 @@ function capScoreCards(c){
     '<div class="score-h"><h4>' + L1("project") + ' performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
-    '<div class="minirow"><div><em>' + L("deliverable") + '</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
-      '<div><em>' + L("outcome") + '</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
+    '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
+      '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
       '<div><em>' + L("project") + '</em><b>' + c.projects.length + '</b></div></div></div>');
   /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§106). An In
      progress milestone with no per-cent LEAVES the average rather than
@@ -6994,9 +6991,9 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    '<h4 class="mini">' + dxHeading() + '</h4>' +
-    miniTable(["#",L("deliverable") + " &amp; " + L("outcome").toLowerCase(),"Type","Target","Status",DX_PCT], dxr) +
-    '<h4 class="mini">' + L("milestone") + ' <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT], dxr) +
+    '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
     miniTable(["#","Milestone","Owner","Collabs.","Due date","Status",MS_PCT], mRows);
 }
 
@@ -7450,10 +7447,10 @@ function projPlanBody(p, subject){
     : pillarBand(projCode(fk, p), p.name) + acts;
   return band +
     projFrontMatter(p, ed) +
-    '<h4 class="mini">' + dxHeading() +
+    '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the ' + L1("project") + ' hands over, and what it is meant to change</em></h4>' +
-    miniTable(["#",L("deliverable") + " &amp; " + L("outcome").toLowerCase(),"Type","Direction","Target"], dxr) +
-    '<h4 class="mini">' + L("milestone") + ' <em>\u2014 the timeline as planned</em></h4>' +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
+    '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
     /* NAME, THEN DESCRIPTION (§103). Islam: "we need the milestone name before
        the description." So the pair stays -- a milestone is identified by a
        short name and explained by a line under it -- and only the LABEL
@@ -7536,7 +7533,7 @@ function fnObjPlanBody(fk, ed){
   (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="3">' +
       '<button class="linkbu" data-rowadd="action|' + esc(fk) + '">Add an action</button>' +
     '</td></tr>' : '');
-  return '<h4 class="mini">' + L("action") + ' <em>— the work, and when it is due</em></h4>' +
+  return '<h4 class="mini">Actions <em>— the work, and when it is due</em></h4>' +
     miniTable(["#","Action","Owner","Due"], rows);
 }
 function fnObjPlan(fk){
@@ -7567,13 +7564,13 @@ function fnObjCards(fk){
         '<div><em>Highest</em><b>' + objSpread(objs).hi + '</b></div>' +
         '<div><em>Lowest</em><b>' + objSpread(objs).lo + '</b></div></div></div>' +
     '<div class="card tight">' +
-      '<div class="score-h"><h4>' + L("action") + '</h4>' +
+      '<div class="score-h"><h4>Actions</h4>' +
         '<span class="pill ' + band(ac.pct) + '">' + bandWord(ac.pct) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ac.pct) + '">' + pctBig(ac.pct) + '</span>' +
         '<span class="ofplan">' + ac.done + ' of ' + ac.total + ' done' +
           (ac.pending ? ' &middot; <span class="missing">' + ac.pending +
             ' not counted yet</span>' : '') + '</span></div>' +
-      '<div class="minirow"><div><em>' + L("action") + '</em><b>' + ac.total + '</b></div>' +
+      '<div class="minirow"><div><em>Actions</em><b>' + ac.total + '</b></div>' +
         '<div><em>Done</em><b>' + ac.done + '</b></div>' +
         '<div><em>In progress</em><b>' + ac.wip + '</b></div></div></div></div>';
 }
@@ -7599,7 +7596,7 @@ function fnObjPerfTables(fk){
         : quiet ? notDueCell() : (v == null ? "&mdash;" : v + "%")) + '</td></tr>';
   }).join("");
   return capKOTable(h) +
-    '<h4 class="mini">' + L("action") + '</h4>' +
+    '<h4 class="mini">Actions</h4>' +
     miniTable(["#","Action","Owner","Due",  "Status", MS_PCT], aRows);
 }
 function fnObjPerformance(fk){
@@ -7642,7 +7639,7 @@ function fnObjReportBody(fk){
   }).join("");
   return (kRows ? '<h4 class="mini">Objectives</h4>' +
       miniTable(["#","Objective","Dir.","Target","Reported","Progress","Note"], kRows) : "") +
-    (aRows ? '<h4 class="mini">' + L("action") + '</h4>' +
+    (aRows ? '<h4 class="mini">Actions</h4>' +
       miniTable(["#","Action","Due","Status",MS_PCT,"Note"], aRows) : "");
 }
 
@@ -7901,9 +7898,9 @@ function projReportBody(p, subject){
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
       /* §301: the finished mark, on the project it is about. */
       doneCtl(fk, p.id, p.owner, projCode(fk, p))) +
-    '<h4 class="mini">' + dxHeading() + '</h4>' +
-    miniTable(["#",L("deliverable") + " &amp; " + L("outcome").toLowerCase(),"Type","Target","Status",DX_PCT,"Note"], dxr) +
-    '<h4 class="mini">' + L("milestone") + '</h4>' +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
+    '<h4 class="mini">Milestones</h4>' +
     miniTable(["#","Milestone","Due date","Status",MS_PCT,"Note"], mRows);
 }
 

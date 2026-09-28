@@ -145,13 +145,18 @@ with sync_playwright() as p:
     ck("its second step is Structure",
        safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step)[1]") == "structure")
     ck("pressing it", press(pg, '.wzstep[data-step="structure"]'))
-    chips = safe(pg, "()=>document.querySelectorAll('[data-stcomp]').length", 0)
-    ck("nine components on three levels, four on the functions' (§404.1, §404.2)",
-       chips == 9 * 3 + 4, chips)
+    # §412 REWROTE THIS STEP INTO THREE SECTIONS PER LAYER, so the chips are
+    # asserted as the sections' own rows now (§218: rewritten, never
+    # loosened). The first section's parts are the rule's own list, filtered
+    # for a function by the same compOffered the pages ask (§42, §94.8).
+    want = safe(pg, "()=>({top:SMPRules.SEC_FOUND_PARTS.length, fn:SMPRules.SEC_FOUND_PARTS.filter(c=>SMPRules.compOffered('fn:',c)).length})", {})
+    got = safe(pg, "()=>['top','mid','bu','fn'].map(k=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"'+k+'|'+c+'\"]')).length)", [])
+    ck("every layer's first section offers its parts, the functions' fewer (§404.1)",
+       bool(want) and got == [want.get("top")] * 3 + [want.get("fn")], [got, want])
     ck("…the functions' level offers no Brief, Themes, Pillars, Capabilities or Values chip",
        safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
-    ck("…and keeps Purpose, Aspiration, North Star and SWOT",
-       safe(pg, "()=>['purpose','aspiration','keyobj','swot'].every(c=>!!document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
+    ck("…and keeps Purpose, Aspiration and North Star, with its SWOT a section switch",
+       safe(pg, "()=>['purpose','aspiration','keyobj'].every(c=>!!document.querySelector('[data-stcomp=\"fn|'+c+'\"]')) && !!document.querySelector('[data-stsec=\"fn|swot\"]')") is True)
     ck("…and draws no 'Plan in, by default' row (§404.2: chosen per function later)",
        safe(pg, "()=>![...document.querySelectorAll('.stcard .lab')].some(x=>/Plan in/.test(x.textContent))") is True)
     ck("the default words are singular but for Objectives, Pillars, Capabilities, Values (and Themes)",
@@ -159,11 +164,21 @@ with sync_playwright() as p:
        safe(pg, "()=>['purpose','aspiration','theme','keyobj'].map(k=>labelDefault(k).many).join('|')"))
     ck("…while the business units' level offers both",
        safe(pg, "()=>!!document.querySelector('[data-stcomp=\"bu|brief\"]')&&!!document.querySelector('[data-stcomp=\"bu|theme\"]')") is True)
+    ck("each layer draws three sections",
+       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')") == "3,3,3,3",
+       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')"))
+    ck("the plan section names all three ways on units and functions, pillars alone above them",
+       safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')") == "1,1,3,3",
+       safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')"))
+    ck("the sections sit side by side on a wide window",
+       safe(pg, "()=>{var s=[...document.querySelector('.stsecs').children].map(x=>Math.round(x.getBoundingClientRect().top)); return new Set(s).size===1}") is True)
     ck("nothing is stored until something is pressed", safe(pg, "()=>!('structure' in GROUP)") is True)
-    ck("pressing the business units' SWOT", press(pg, '[data-stcomp="bu|swot"]'))
+    ck("pressing the business units' SWOT off", press(pg, '[data-stsec="bu|swot"] button:nth-child(2)'))
     st = safe(pg, "()=>JSON.stringify(GROUP.structure)", "") or ""
     ck("…materialises the structure with SWOT off at that level only",
        safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.length===9 && GROUP.structure.top.temple===true") is True, st)
+    ck("…and the section says it is hidden rather than drawing its boxes",
+       safe(pg, "()=>{var s=document.querySelectorAll('.stcard')[2].querySelectorAll('.stsec')[1]; return !!s.querySelector('.sthid') && !s.querySelector('.stquad')}") is True)
     ck("the structure stores no functions' plan type (§404.2)",
        safe(pg, "()=>!('format' in (GROUP.structure.fn||{}))") is True)
 
@@ -176,10 +191,10 @@ with sync_playwright() as p:
        safe(pg, "()=>{var h=__smpHoldsNow(); return !!(h.plans||h.capabilities)}") is True)
     was = safe(pg, "()=>labelWord('unitword','bu')", "")
     wasP = safe(pg, "()=>labelWord('pillar','bu')", "")
-    ro = safe(pg, "()=>[...document.querySelectorAll('input[data-stword]')].filter(i=>i.readOnly).length", -1)
+    ro = safe(pg, "()=>[...document.querySelectorAll('input[data-stword],input[data-stlw],input[data-sttitle]')].filter(i=>i.readOnly).length", -1)
     ck("no word box on the step is read-only", ro == 0, ro)
     for sel, val in (('input[data-stword="unitword|many"]', "Strategic Directions"),
-                     ('input[data-stword="pillar|many"]', "Themes of work")):
+                     ('input[data-stlw="bu|pillar|many"]', "Themes of work")):
         try:
             pg.fill(sel, val); pg.press(sel, "Tab"); pg.wait_for_timeout(250)
         except Exception as e:
@@ -187,9 +202,16 @@ with sync_playwright() as p:
     ck("the business units' word is stored on the client's own labels",
        safe(pg, "()=>labelWord('unitword','bu')") == "Strategic Directions",
        safe(pg, "()=>labelWord('unitword','bu')"))
-    ck("…and the pillars' word too",
-       safe(pg, "()=>labelWord('pillar','bu')") == "Themes of work",
-       safe(pg, "()=>labelWord('pillar','bu')"))
+    # §412: a part's name is the LAYER's, so it lands on the structure and
+    # is read on a unit's page, never on the client's labels — asserted at
+    # both ends, or a build writing it everywhere passes (§94.2).
+    ck("…and the pillars' word is the business units' layer's own",
+       safe(pg, "()=>SMPRules.layerWord(GROUP,'%s','pillar','many')" % unit) == "Themes of work",
+       safe(pg, "()=>JSON.stringify(GROUP.structure&&GROUP.structure.bu)"))
+    ck("…read on a unit's pages",
+       safe(pg, "()=>{var t=TARGET,s=TARGET_SETUP; TARGET='%s'; TARGET_SETUP=false; var w=L('pillar'); TARGET=t; TARGET_SETUP=s; return w}" % unit) == "Themes of work")
+    ck("…while a function's page keeps the client's word",
+       safe(pg, "()=>{var t=TARGET,s=TARGET_SETUP; TARGET='fn:%s'; TARGET_SETUP=false; var w=L('pillar'); TARGET=t; TARGET_SETUP=s; return w}" % fk) == wasP)
     ck("…without the shape being rewritten (no unit lost, nothing refused)",
        safe(pg, "()=>UNIT_KEYS.length>0 && !/has a plan in it/.test(document.body.innerText)") is True)
     ck("the old 'changed on Terminology' line is gone",

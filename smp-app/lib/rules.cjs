@@ -3927,6 +3927,89 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (m && typeof m.exists === "boolean") return m.exists;
     return Object.keys(companies || {}).length > 0;
   }
+  /* ── A LAYER'S THREE SECTIONS (§412) ───────────────────────────────
+     Islam: *"we structure things the way we already build them … 3 sections
+     and under each section he has components and for every section he can
+     choose the title of the section and the components and their names"*,
+     then *"the layer itself can be turned on or off as sometimes we don't have
+     the second layer"*, and, of the mockup, *"signed off, build it"*.
+
+     EVERY LAYER IS SET ON ITS OWN (his *"specially we are building it for
+     each layer on their own"*), so a title and a name are stored per level,
+     beside the component switches §404 already keeps there:
+       structure[level].found  = { on, title }   the first section
+       structure[level].swot   = { title, quads } the second; ON/OFF IS THE
+                                  `swot` COMPONENT §404 already stores, never
+                                  a second switch for one fact (§110's pair)
+       structure[level].plan   = { pillars, projects, objectives } titles,
+                                  one per way of planning
+       structure[level].words  = { key: { one, many } } this layer's names
+     ALL STORED AS AN ABSENCE (§50.6) and read as TODAY'S PRODUCT, so a client
+     nobody touches opens exactly as it did. The plan section has no switch:
+     it is what the layer is measured on. */
+  function fnExists(group) {
+    var s = structureOf(group), f = s && s.fn;
+    return !(f && f.exists === false);
+  }
+  var SEC_FOUND_DEFAULT = { top: "Foundation", mid: "Foundation", bu: "Foundation", fn: "Overview" };
+  function levelBlock(group, level, part) {
+    var s = structureOf(group), l = s && s[level], b = l && l[part];
+    return b && typeof b === "object" ? b : null;
+  }
+  function foundOn(group, target) {
+    var b = levelBlock(group, structLevelOf(target), "found");
+    return !(b && b.on === false);
+  }
+  function foundTitle(group, target) {
+    var lv = structLevelOf(target), b = levelBlock(group, lv, "found");
+    var t = b && typeof b.title === "string" ? b.title.trim() : "";
+    return t || SEC_FOUND_DEFAULT[lv];
+  }
+  /* The empty string means "the platform's own word", which is the client's
+     SWOT label for a business unit and S&W for a function (§399). */
+  function swotTitle(group, target) {
+    var b = levelBlock(group, structLevelOf(target), "swot");
+    return b && typeof b.title === "string" ? b.title.trim() : "";
+  }
+  var SWOT_QUADS = ["s", "w", "o", "t"];
+  function swotQuads(group, target) {
+    var lv = structLevelOf(target), b = levelBlock(group, lv, "swot");
+    if (b && Array.isArray(b.quads)) {
+      var q = SWOT_QUADS.filter(function (x) { return b.quads.indexOf(x) >= 0; });
+      if (q.length) return q;
+    }
+    return lv === "fn" ? ["s", "w"] : SWOT_QUADS.slice();
+  }
+  var PLAN_WAYS = ["pillars", "projects", "objectives"];
+  function planTitle(group, target, way) {
+    var b = levelBlock(group, structLevelOf(target), "plan");
+    var t = b && typeof b[way] === "string" ? b[way].trim() : "";
+    return t;
+  }
+  /* A name for THIS layer, or null for "use the client's own word" (LABELS,
+     Setup › Terminology), which is what every layer answered before §412. */
+  function layerWord(group, target, key, form) {
+    var b = levelBlock(group, structLevelOf(target), "words");
+    var w = b && b[key];
+    var v = w && typeof w[form] === "string" ? w[form].trim() : "";
+    return v || null;
+  }
+  /* What each part of a section is called when nobody has named it. Only the
+     parts that have no row on Setup › Terminology are here; the rest fall
+     back to LABELS, the client's own word, as they always have. */
+  var PART_DEFAULTS = {
+    strengths: ["Strength", "Strengths"], weaknesses: ["Weakness", "Weaknesses"],
+    opportunities: ["Opportunity", "Opportunities"], threats: ["Threat", "Threats"],
+    deliverable: ["Deliverable", "Deliverables"], outcome: ["Outcome", "Outcomes"],
+    milestone: ["Milestone", "Milestones"], action: ["Action", "Actions"]
+  };
+  var QUAD_KEYS = { s: "strengths", w: "weaknesses", o: "opportunities", t: "threats" };
+  var SEC_FOUND_PARTS = ["brief", "purpose", "aspiration", "keyobj", "theme", "values"];
+  var PLAN_PARTS = {
+    pillars: ["pillar", "measure", "tactic"],
+    projects: ["project", "deliverable", "outcome", "milestone"],
+    objectives: ["keyobj", "action"]
+  };
 
   var DRIVERS = "drivers";          /* on a unit's extra   */
   var SEASONS = "seasons";          /* on the group's extra */
@@ -4448,6 +4531,11 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     structureOf: structureOf, structLevelOf: structLevelOf,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
+    fnExists: fnExists, foundOn: foundOn, foundTitle: foundTitle,
+    swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
+    PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord,
+    PART_DEFAULTS: PART_DEFAULTS, QUAD_KEYS: QUAD_KEYS,
+    SEC_FOUND_PARTS: SEC_FOUND_PARTS, PLAN_PARTS: PLAN_PARTS,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,

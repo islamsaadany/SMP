@@ -359,10 +359,7 @@
              saying one thing and the page another (§124). */
           var fmt = fnFormat(FUNCTIONS[fnKeyOf(k)]);
           var plan = { k:"proj", ac:"k_proj",
-                       /* §412: the layer names the plan section per way of
-                          planning; unnamed, it is what it always was. */
-                       label: SMPRules.planTitle(GROUP, k, fmt) ||
-                              (fmt === "projects" ? L("project") : "Plan"),
+                       label: fmt === "projects" ? L("project") : "Plan",
                        render:renderFnProjects };
           /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
              FORMAT. §211.2 removed the Overview here on a premise measured
@@ -393,9 +390,9 @@
              S&W while the structure carries a SWOT. Switching it off hides the
              tab and forgets nothing, which is a decision rather than the data
              coming and going. */
-          return [{ k:"found", ac:"k_found", label:SMPRules.foundTitle(GROUP, k), render:renderFnFoundation,
-                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, "brief") || compOn(t, "keyobj")); } },
-                  { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
+          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
+                    when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
+                  { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
                   plan];
         } },
@@ -424,10 +421,10 @@
          has SAID which components that layer carries — a client set up before
          the structure step opens exactly as it did (his "existing clients open
          with everything on, unchanged" means no new tab either). */
-      { k:"foundation", ac:"g_found", label:SMPRules.foundTitle(GROUP, "co:"), render:renderCompanyFoundation,
+      { k:"foundation", ac:"g_found", label:"Foundation", render:renderCompanyFoundation,
         when: function(t){
           var st = SMPRules.structureOf(GROUP), m = st && st.mid;
-          return !!(m && Array.isArray(m.on)) && SMPRules.foundOn(GROUP, t) &&
+          return !!(m && Array.isArray(m.on)) &&
             ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
         } },
       MY_TAB,
@@ -438,8 +435,8 @@
       /* §404: A TAB IS OFFERED WHILE SOMETHING ON IT IS SWITCHED ON. The
          Foundation holds five components; the Temple is a picture drawn from
          three of them and is a switch of its own (templeOn). */
-      { k:"foundation",  ac:"g_found",  label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
-        when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
+      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation,
+        when: function(){ return ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
@@ -465,14 +462,14 @@
              of the plan's authorship and is refused to everybody else by the
              rule that already refuses the plan (§42). */
           /* §404: each section is offered while its components are on. */
-          return [{ k:"found", ac:"u_found", label:SMPRules.foundTitle(GROUP, (u && u.ukey) || "u:"), render:renderUnitFoundation,
-                    when: function(t){ return SMPRules.foundOn(GROUP, t) && ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
-                  { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
+          return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation,
+                    when: function(t){ return ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
+                  { k:"swot",  ac:"u_anal",  label:L("swot"),    render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan },
+                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -2813,7 +2810,6 @@
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
     TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
-    TARGET_SETUP = current === "setup" || current === "manage";
     /* Repainted rather than set once: Labels can rename the tenant while you
        are looking at it. The
        separator lives with the name so an unnamed tenant shows nothing at all

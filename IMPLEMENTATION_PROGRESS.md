@@ -8230,6 +8230,8 @@ Fifth RHI change, built from the mockup Islam answered ("B, plan download only, 
 
 Checked: `checks/tactic-requirements.py` (all good; red four ways when a piece is broken on purpose — 6 / 1 / 1 / 1), the server test (the office writes them, a reporter cannot, and they count as the plan; red 2 when requirements are made a reporting field), the neighbouring checks and the full page sweep.
 
+Not this change's: `checks/enter-commits.py` fails its last two lines (a paragraph box keeping Enter as a new line). It fails the same way on the build before this change: the page it opens no longer draws the box it looks for, so it finds nothing to press. Recorded, not fixed here. The full page sweep: no errors.
+
 **Next, step 6** — the last plan detail agreed for RHI, mockup first.
 
 ## §414 — several outcomes per tactic (2026-09-28, on the branch)

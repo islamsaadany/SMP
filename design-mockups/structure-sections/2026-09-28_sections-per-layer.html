@@ -40,6 +40,10 @@ input.title{font-weight:700;font-size:15px}
 .sw span{font-size:12px;font-weight:600;padding:2px 9px;color:var(--ink3)}
 .sw span.lit{background:var(--panel);color:var(--panelink)}
 .fixed{font-size:12px;color:var(--ink3);font-style:italic}
+.fixedh{font-size:12px;opacity:.8;font-style:italic}
+.lsw{border-color:rgba(255,255,255,.4)}.lsw span{color:rgba(255,255,255,.75)}.lsw span.lit{background:var(--gold);color:#16325C}
+.loff{padding:16px 18px;color:var(--ink2);font-size:14px}
+.way{display:grid;gap:8px;padding:10px;border-radius:6px;background:var(--surface2)}
 .comps{display:grid;gap:6px}
 .crow{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center}
 .crow.off input{opacity:.45}
@@ -71,7 +75,8 @@ input.title{font-weight:700;font-size:15px}
     <ul>
       <li>A section switched off is hidden from that layer's pages, its slides and its missing-items count. What was entered is kept, and switching it back on brings it back.</li>
       <li>A layer with its first section off opens on the next section that is on.</li>
-      <li>The plan section cannot be switched off. What it holds follows how that unit or function plans (pillars, projects, or objectives and actions); you name those parts, you do not mix them.</li>
+      <li>The second layer and the supporting functions can be switched off as a whole, for a client that has none. The top level and the business units are always there.</li>
+      <li>The plan section cannot be switched off. Business units and functions each pick pillars, projects, or objectives and actions on their own row, so the plan section names all three ways; each unit or function shows the names of the way it uses. Parts are named, not mixed across ways.</li>
       <li>Every name has a "one" and a "many" form, because the platform says "1 pillar" and "3 pillars".</li>
       <li>Names are per layer, so a unit's "Pillars" and a function's "Themes of work" can differ. Menus, slides and workbooks read the name of the layer they are showing.</li>
       <li>Capabilities stay their own item and are not part of these three sections.</li>
@@ -86,22 +91,22 @@ const PLAN = {
   objectives:["Objectives and actions",[["Objective","Objectives"],["Action","Actions"]]]
 };
 const LAYERS = [
-  {name:"Top level", word:"Group",
+  {name:"Top level", word:"Group", fixed:"Always on",
    s1:{on:true,title:"Foundation",comps:[[1,"Brief","Briefs"],[1,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[1,"Theme","Themes"],[1,"Core Value","Core Values"]]},
    s2:{on:true,title:"SWOT",q:[[1,"Strengths"],[1,"Weaknesses"],[1,"Opportunities"],[1,"Threats"]]},
    s3:{title:"Plan",plan:"pillars",how:"Pillars",names:[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]}},
-  {name:"Second layer", word:"Division",
+  {name:"Second layer", word:"Division", layer:false,
    s1:{on:false,title:"Overview",comps:[[1,"Brief","Briefs"],[0,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[0,"Theme","Themes"],[0,"Core Value","Core Values"]]},
    s2:{on:false,title:"SWOT",q:[[1,"Strengths"],[1,"Weaknesses"],[1,"Opportunities"],[1,"Threats"]]},
    s3:{title:"Performance",plan:"pillars",how:"Pillars",names:[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]}},
-  {name:"Business units", word:"Strategic Direction",
+  {name:"Business units", word:"Strategic Direction", fixed:"Always on",
    s1:{on:true,title:"Overview",comps:[[1,"Brief","Briefs"],[0,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[0,"Theme","Themes"],[0,"Core Value","Core Values"]]},
    s2:{on:true,title:"SWOT",q:[[1,"Strengths"],[1,"Weaknesses"],[1,"Opportunities"],[1,"Threats"]]},
-   s3:{title:"Plan",plan:"pillars",how:"Pillars (set on each unit)",names:[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]}},
-  {name:"Supporting functions", word:"Supporting Function",
+   s3:{ways:[["Pillars","Plan",[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]],["Projects","Projects",[["Project","Projects"],["Deliverable","Deliverables"],["Outcome","Outcomes"],["Milestone","Milestones"]]],["Objectives and actions","Objectives",[["Objective","Objectives"],["Action","Actions"]]]]}},
+  {name:"Supporting functions", word:"Supporting Function", layer:true,
    s1:{on:true,title:"Overview",comps:[[0,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[0,"Core Value","Core Values"]]},
    s2:{on:true,title:"S&W",q:[[1,"Strengths"],[1,"Weaknesses"],[0,"Opportunities"],[0,"Threats"]]},
-   s3:{title:"Projects",plan:"projects",how:"Projects (set on each function)",names:[["Workstream","Workstreams"],["Deliverable","Deliverables"],["Outcome","Outcomes"],["Milestone","Milestones"]]}}
+   s3:{ways:[["Pillars","Plan",[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]],["Projects","Projects",[["Workstream","Workstreams"],["Deliverable","Deliverables"],["Outcome","Outcomes"],["Milestone","Milestones"]]],["Objectives and actions","Objectives & actions",[["Objective","Objectives"],["Action","Actions"]]]]}}
 ];
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
 const sw = on => `<span class="sw new"><span class="${on?"lit":""}">On</span><span class="${on?"":"lit"}">Off</span></span>`;
@@ -124,7 +129,15 @@ function s2(L){ const s=L.s2; return `<div class="sec ${s.on?"":"off"}">
     <div class="comps"><div class="lab">Boxes</div>
     ${s.q.map(q=>`<div class="crow ${q[0]?"":"off"}" style="grid-template-columns:auto 1fr">${`<span class="tick ${q[0]?"on":""} new"></span>`}${inp(q[1],"new")}</div>`).join("")}</div>
   </div></div>`;}
-function s3(L){ const s=L.s3; return `<div class="sec">
+function s3(L){ const s=L.s3; if (s.ways) return `<div class="sec">
+  <div class="shead"><span class="kind">Plan section</span><span class="fixed">Always on</span></div>
+  <div class="via">Each one picks how it plans on its own row. Name all three ways here; each shows the names of the way it uses.</div>
+  ${s.ways.map(w=>`<div class="way new"><div class="kind">If planned in ${esc(w[0])}</div>
+    <div><div class="lab">Section title</div>${inp(w[1],"title")}</div>
+    <div class="comps">${colhead("One","Many")}
+    ${w[2].map(n=>`<div class="crow" style="grid-template-columns:18px 1fr 1fr"><span></span>${inp(n[0])}${inp(n[1])}</div>`).join("")}</div></div>`).join("")}
+  </div>`;
+  return `<div class="sec">
   <div class="shead"><span class="kind">Plan section</span><span class="fixed">Always on</span></div>
   <div class="body" style="display:grid;gap:10px">
     <div><div class="lab">Section title</div>${inp(s.title,"title new")}</div>
@@ -133,6 +146,6 @@ function s3(L){ const s=L.s3; return `<div class="sec">
     ${s.names.map(n=>`<div class="crow" style="grid-template-columns:18px 1fr 1fr"><span></span>${inp(n[0],"new")}${inp(n[1],"new")}</div>`).join("")}</div>
   </div></div>`;}
 document.getElementById("layers").innerHTML = LAYERS.map(L=>`<section class="layer" style="margin-bottom:22px">
-  <header><h2>${esc(L.name)}</h2><span class="ln">Called ${inp(L.word)}</span></header>
-  <div class="secs">${s1(L)}${s2(L)}${s3(L)}</div></section>`).join("");
+  <header><h2>${esc(L.name)}</h2>${L.fixed?`<span class="fixedh">${L.fixed}</span>`:`<span class="sw lsw new"><span class="${L.layer?"lit":""}">On</span><span class="${L.layer?"":"lit"}">Off</span></span>`}<span class="ln">Called ${inp(L.word)}</span></header>
+  ${L.layer===false?`<div class="loff">This client has no ${esc(L.name.toLowerCase())}. It is not asked about in set-up, not drawn in the navigation, and nothing entered for it is lost.</div>`:`<div class="secs">${s1(L)}${s2(L)}${s3(L)}</div>`}</section>`).join("");
 </script>

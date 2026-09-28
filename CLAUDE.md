@@ -9882,6 +9882,12 @@ python3 checks/structure.py     # the client's structure (&sect;404): Setup &rsa
                                 # while the items stay stored, the Temple held without its
                                 # parts, a company's Foundation drawn and written, and the
                                 # set-up step's chips storing nothing until pressed
+python3 checks/structure-sections.py # each layer's three sections as the pages read
+                                # them (&sect;412): the first section off, titles,
+                                # S&amp;W boxes, names per layer (unit and function
+                                # side by side, Setup never reading a layer's word)
+                                # and the functions' layer off &mdash; both ends, the
+                                # state made. Red 1/1/2/3 from the sources
 python3 checks/pillar-rail.py   # clicking a pillar opens THAT pillar (§393): the rail
                                 # keys on the row id, never the stored code, which a
                                 # pen-added pillar leaves empty. MAKES three states

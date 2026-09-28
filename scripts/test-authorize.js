@@ -4975,5 +4975,41 @@ console.log("\n§413 · a direction's overview");
   v = as("own_mob", sw);       check("§413 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
 })();
 
+/* ── §414: SEVERAL OUTCOMES PER TACTIC ──────────────────────────────────
+   The list of extras is PLAN (the office's, like the first outcome's target),
+   its switch is Setup, and a figure on an extra is REPORTING — so a
+   custodian may enter one and may not add, rename or re-target an outcome.
+   Both ends each (§94.2), and the figure is asserted to classify as
+   reporting and NOTHING else, or a widening would pass unseen. */
+console.log("\n§414 · several outcomes per tactic");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) {
+    return (B.units[k].items || []).some(function (p) { return (p.tactics || []).length; }); })[0];
+  const tOf = function (st) {
+    for (const p of st.units[K].items) if ((p.tactics || [])[0]) return p.tactics[0];
+  };
+  tOf(B).outs = [{ id: "O2", outDir: "\u2265", outcome: "fixture outcome", outTarget: "90%" }];
+  const plan = function (inc) { tOf(inc).outs[0].outTarget = "80%"; };
+  const addOne = function (inc) { tOf(inc).outs.push({ id: "O3", outcome: "another" }); };
+  const fig = function (inc) { tOf(inc).outActs = { O2: "70%" }; };
+  const sw = function (inc) { inc.group.structure = { details: { outcomes: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  check("§414: the seed names somebody who reports for " + K, !!(rep && personOf(B, rep)), String(rep));
+  let v = as("smo", plan);   check("§414: the office re-targets an extra outcome", v.ok, v.refusals.join(" / "));
+  v = as("smo", addOne);     check("§414: the office adds one", v.ok, v.refusals.join(" / "));
+  v = as(rep, plan);         check("§414 REFUSED: the reporter cannot re-target it (plan)", !v.ok, "was ALLOWED");
+  v = as(rep, addOne);       check("§414 REFUSED: the reporter cannot add one", !v.ok, "was ALLOWED");
+  v = as(rep, fig);          check("§414: the reporter enters an extra outcome's figure", v.ok, v.refusals.join(" / "));
+  const inc = clone(B); fig(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§414: that figure classifies as reporting and nothing else",
+        kinds.length > 0 && kinds.every(function (x) { return x === "unitReporting"; }), kinds.join(","));
+  v = as("smo", sw);         check("§414: the office turns several outcomes on", v.ok, v.refusals.join(" / "));
+  v = as(rep, sw);           check("§414 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

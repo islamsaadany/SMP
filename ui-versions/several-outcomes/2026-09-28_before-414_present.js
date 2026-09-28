@@ -669,18 +669,14 @@ function deckSlides(u){
        unmeasurable row, so a review could not tell "nobody has entered this"
        from "there is nothing to enter" (§35). */
     var tRows = SMPRules.shown(p.tactics).map(function(t, i){
-      /* §414: SEVERAL OUTCOMES. The shared cells span the tactic's lines and
-         each outcome takes a line of its own, as on the page behind it. */
-      var xs = scoredExtras(t), rs = outRowspan(xs.length);
-      var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-        '<td class="lead"' + rs + '>' + esc(t.name) + '</td>' +
-        '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-        '<td' + rs + '>' + esc(t.owner) + '</td>' +
-        '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
-        '<td class="cc"' + rs + '>' + qs(t) + '</td>';
-      var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
-                        : '<td class="dnote empty"' + rs + '>&mdash;</td>';
-      if (xs.length) return deckOutRows(t, lead, note, xs, rs);
+      var lead = '<td class="idx">' + (i+1) + '</td>' +
+        '<td class="lead">' + esc(t.name) + '</td>' +
+        '<td>' + outcomeCell(t) + '</td>' +
+        '<td>' + esc(t.owner) + '</td>' +
+        '<td class="collabs">' + collabCell(t) + '</td>' +
+        '<td class="cc">' + qs(t) + '</td>';
+      var note = t.note ? '<td class="dnote">' + esc(t.note) + '</td>'
+                        : '<td class="dnote empty">&mdash;</td>';
       /* §254.3: NOT DIMMED. Islam: *"for a non due tactic don't dim it show it
          normally it has the comment of not due this cycle anyway."* The cell
          already says it in words, and dimming says it a second time in a way
@@ -715,42 +711,6 @@ function deckSlides(u){
       '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
       '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
   });
-
-  /* §414: a tactic with several outcomes on the review deck — one line per
-     outcome with its own figure against its own benchmark, and the tactic's
-     Progress as their average, spanning the lines. `deckFitPass()` moves a
-     tactic's lines as one group, so a continuation never splits them. */
-  function deckOutFig(t, x){
-    var o = outcomeOf(x);
-    if (!o) return '<td class="cc"><span class="missing">Missing</span></td>';
-    var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
-    if (shown == null)
-      return '<td class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
-  }
-  function deckOutRows(t, lead, note, xs, rs){
-    var due = tacticDue(t), sub = outSubCls(t), out;
-    if (!due) {
-      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
-      xs.forEach(function(x){
-        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
-      });
-      return out + outPad(xs.length);
-    }
-    var r = tacticProgress(t);
-    var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
-                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
-    prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
-    out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
-    xs.forEach(function(x){
-      var e = exAsT(t, x);
-      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
-        deckOutFig(t, e) + '</tr>';
-    });
-    return out + outPad(xs.length);
-  }
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
      Islam: *"make the notes and achievements slide optional and they can add
@@ -2050,12 +2010,7 @@ function deckFitPass(deck){
         s.parentNode.insertBefore(next, s.nextSibling);
       }
       var ntb = next.querySelector("tbody");
-      /* §414: a tactic's outcome lines (and the hidden row that keeps the
-         stripe) travel WITH the row whose cells span them, never alone. */
-      var n = 1;
-      while (n < tb.rows.length && /\b(osub|opad)\b/.test(tb.rows[tb.rows.length - n].className)) n++;
-      if (n >= tb.rows.length) { s.classList.remove("on"); return; }
-      for (var k = 0; k < n; k++) ntb.insertBefore(tb.rows[tb.rows.length - 1], ntb.firstChild);
+      ntb.insertBefore(tb.rows[tb.rows.length - 1], ntb.firstChild);
       changed = true;
       s.classList.remove("on");
     });

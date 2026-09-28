@@ -47,7 +47,10 @@ const REPORT = {
      exact fault §147 records for a milestone's `pct`. Its target, direction
      and compile rule are NOT here: those are the plan, and the plan is the
      office's (§94). */
-  tactic:    ["status", "actual", "note", "outActual"],
+  /* §414: and `outActs`, the figures for a tactic's SECOND and later
+     outcomes (keyed by the outcome's id), for the same reason — a figure is
+     reporting and the outcomes themselves (`outs`) are the plan. */
+  tactic:    ["status", "actual", "note", "outActual", "outActs"],
   capKO:     ["actual", "progress", "note"],
   outcome:   ["actual", "progress", "note"],
   /* `pct` on both since §147 — it arrived with migration 024 (§104.10: an In

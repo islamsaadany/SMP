@@ -8216,6 +8216,24 @@ Second RHI change. Setup › Capabilities now has **Owner** and **Custodian** co
 
 - **§411.1 (2026-09-25):** a tactic that is not due now says "Not due" once, in Status. The duplicate "Not yet due" next to it is gone. Built on the branch, not merged.
 
+## §414 — several outcomes per tactic (2026-09-28, on the branch)
+
+Fourth RHI change, built from the mockup Islam approved ("approved, build it"). A tactic can now have more than one outcome. Each outcome has its own target and is scored on its own, and the tactic reads as the average of them. It is switched on per client from Getting started › Structure, as a second chip on the Plan details card (*Several outcomes per tactic*). It is off by default, so Raya Trade and every other client look exactly as before.
+
+- **Plan page**: extra outcomes sit on their own lines under the tactic, tagged O1, O2…; the tactic's name, owner, collaborators and quarters are shared across the lines. In the pen each extra has an × and there is "+ Add an outcome" under the last one. A tactic with one outcome looks exactly as today.
+- **Reporting**: a box per outcome, one note for the tactic. The tactic is not scored until every outcome has a figure.
+- **Performance**: each line shows its figure against what is due and its own score; Progress shows the average with "average of N".
+- **The deck and My reporting** show the same lines. A long table that splits across slides keeps a tactic's lines together.
+- **The plan workbook** gets an Outcomes sheet for the extras (only when the switch is on or extras exist). Uploading brings them back; a line naming a tactic that does not exist is refused.
+- **Missing**: an extra's empty name or target counts as missing for the office and holds Submit, but is not added to a filler's missing bar (they could not fill it).
+- Nothing is migrated. Turning the switch off hides the extras and keeps them.
+
+Checked: `checks/several-outcomes.py` (all good; red five ways when a piece is broken on purpose), the server test (only the office changes the outcome list; a reporter may enter an extra's figure), the neighbouring checks and the full page sweep.
+
+**Not done, recorded**: the progress workbook does not carry extra outcomes' figures yet; changing an extra's unit does not rewrite a figure already entered for it.
+
+**Next, step 5: the Requirements column** — mockup first.
+
 ## §413 — a direction's overview (2026-09-25, on the branch)
 
 Third RHI change, built from the mockup Islam approved ("approved, keep the objective preview, build it"). A pillar can now carry three short texts: **Objective**, **Why now** and **Risks & mitigations**. It is switched on per client from Getting started › Structure, in a new **Plan details** card (only *Direction overview* is there for now; the other three plan details join as they are built). It is off by default, so Raya Trade and every other client look exactly as before.

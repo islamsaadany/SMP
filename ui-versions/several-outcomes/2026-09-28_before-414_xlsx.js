@@ -746,34 +746,7 @@ function planWorkbook(u){
         });
         return acc;
       }, []) }
-  ]).concat((function(){
-    /* §414: A TACTIC'S EXTRA OUTCOMES, one line each. The first outcome stays
-       on the Tactics sheet where it has always been, so a file written before
-       this existed reads exactly as it did; the sheet is drawn only where it
-       means something — the client carries the switch, or a tactic already
-       holds extras — so every other client's file is byte-for-byte what it
-       was (§413's rule). The tactic is named by its pillar AND its name,
-       which is how the Tactics sheet itself is read (§22: no ids in a file). */
-    var hasEx = u.items.some(function(p){ return (p.tactics || []).some(function(t){
-      return (t.outs || []).length; }); });
-    if (!hasEx && !(typeof outcomesOn === "function" && outcomesOn())) return [];
-    return [{ name:"Outcomes", widths:[30, 40, 40, 8, 14, 12],
-      head:["Pillar", "Tactic", "Outcome", "Outcome direction", "Outcome target",
-            "Outcome compiled"],
-      validations:[{ range:"A2:A400", from:PILLAR_RANGE,
-                     error:"Choose a pillar from the Pillars sheet." },
-                   { range:"D2:D400", list:["\u2265", "\u2264"], soft:true },
-                   { range:"F2:F400", list:COMPILES, soft:true }],
-      rows:u.items.reduce(function(acc, p){
-        (p.tactics || []).forEach(function(t){
-          (t.outs || []).forEach(function(x){
-            acc.push([p.name, t.name, x.outcome || "", x.outDir || "",
-                      x.outTarget || "", x.outCompile || ""]);
-          });
-        });
-        return acc;
-      }, []) }];
-  })());
+  ]);
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -1134,25 +1107,6 @@ function planFromWorkbook(u, sheets){
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",
       q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0",
       hidden:yes(r["Hidden"]) ? "1" : "" });
-  });
-
-  /* §414: a tactic's extra outcomes ride ON the tactic's row, minted O2,
-     O3… in the order the file lists them — never as rows of their own, so
-     nothing about how a plan's rows are numbered or placed changes. A line
-     whose tactic cannot be matched is said, never dropped (§96.2). */
-  sheetObjects(sheets["Outcomes"]).forEach(function(r){
-    if (!r["Outcome"] && !r["Outcome target"]) return;
-    var pid = pillarId[r["Pillar"]] || "";
-    var t = rows.filter(function(x){ return x.type === "TACTIC" && pid &&
-      x.parent_id === pid && x.name === r["Tactic"]; })[0];
-    if (!t) { rows.push({ type:"OUTORPHAN", name:r["Tactic"] || r["Outcome"] || "" }); return; }
-    t.outs = t.outs || [];
-    var x = { id:"O" + (t.outs.length + 2) };
-    if (r["Outcome direction"]) x.outDir = r["Outcome direction"];
-    if (r["Outcome"]) x.outcome = r["Outcome"];
-    if (r["Outcome target"]) x.outTarget = r["Outcome target"];
-    if (r["Outcome compiled"]) x.outCompile = r["Outcome compiled"];
-    t.outs.push(x);
   });
 
   /* §343: the breakdown's cells, long form — a line per cell, and the table

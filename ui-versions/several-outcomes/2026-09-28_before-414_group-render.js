@@ -776,85 +776,6 @@ function outcomeTargetShown(t){
   return SMPRules.isYesNo(t.outTarget) ? "Yes / No" : String(t.outTarget);
 }
 
-/* ── SEVERAL OUTCOMES PER TACTIC, DRAWN (§414) ─────────────────────────
-   Each extra outcome is a sub-line under its tactic holding only what differs
-   per outcome — its name and its target (and, on Reporting and Performance,
-   its figure). Everything the outcomes SHARE — the tactic, its owner, its
-   collaborators, its quarters — spans the lines with `rowspan`, so a tactic
-   still reads as one thing (the signed-off mockup). A tactic with ONE outcome
-   carries no tag and no sub-line: byte-for-byte what it was.
-
-   THE STRIPE: the tables stripe by `nth-child`, so a sub-line would shift the
-   parity of every row below it. An odd number of sub-lines is followed by an
-   empty hidden row (`tr.opad`) so the next tactic keeps its stripe, and the
-   sub-lines take their tactic's ground through the sibling rules in
-   arrange.css. */
-function otag(id){ return '<span class="otag">' + esc(id) + '</span>'; }
-/* An extra outcome in the shape the first one's readers take — so
-   `outcomeShown`, `outcomeCell` and `outcomeOf` serve it unchanged (§53.5). */
-function exAsT(t, x){
-  return { outcome: x.outcome, outTarget: x.outTarget, outDir: x.outDir,
-           outCompile: x.outCompile, outActual: (t.outActs || {})[x.id] };
-}
-/* One outcome's YTD cell on Performance: its figure against what is due so
-   far, and its own score beside it, quieter than the average. */
-function outFigCell(t, x){
-  var o = outcomeOf(x), share = tacticShare(t);
-  if (!o) return '<td class="cc"><span class="missing">Missing</span></td>';
-  var shown = outcomeShown(x);
-  if (shown == null) {
-    var b = measureDueLabel(o, share);
-    return '<td class="cc"><span class="pill none">Not reported</span>' +
-      (b ? '<span class="why" style="margin:2px 0 0">due at ' + esc(b) + '</span>' : '') + '</td>';
-  }
-  var bp = benchBeside(o, share), sc = oneOutcomeScore(t, o);
-  return '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
-    (bp ? ' <i>/ ' + esc(bp) + '</i>' : '') +
-    (sc != null ? '<span class="oscore">&middot; ' + pct(sc) + '</span>' : '') + '</span></td>';
-}
-function outRowspan(n){ return n ? ' rowspan="' + (n + 1) + '"' : ''; }
-function outPad(n){ return n % 2 ? '<tr class="opad" hidden></tr>' : ''; }
-function outSubCls(t){ return SMPRules.isHidden(t) ? 'osub hiddenrow' : 'osub'; }
-/* Offered in the pen only, only with the switch on, and only under a tactic
-   whose FIRST outcome has a target — the first outcome decides whether the
-   tactic is measured by outcomes at all, so an extra added under one that is
-   not would be stored and read by nothing (§61). */
-function outAddBtn(t){
-  if (!outcomesOn() || !outcomeOf(t)) return '';
-  return '<button class="linkbu outadd" data-outadd="' + esc(t.id) + '">+ Add an outcome</button>';
-}
-function outOffBtn(t, id){
-  return '<button class="xbtn" data-outoff="' + esc(t.id) + '|' + esc(id) +
-    '" title="Remove this outcome" aria-label="Remove this outcome">&times;</button>';
-}
-/* The plan's sub-lines. `tdCls` is the class the tactic's own target cell
-   wears, so the column folds and centres exactly as the first line does. */
-function planOutRows(t, ed, tdCls){
-  var ex = tacticExtras(t);
-  if (!ex.length) return '';
-  return ex.map(function(x, k){
-    var last = k === ex.length - 1;
-    var emptyName = !x.outcome || !String(x.outcome).trim();
-    var emptyTgt = SMPRules.gapEmpty("outTarget", x);
-    var name = ed
-      ? bxkey("Outcome") + otag(x.id) + outOffBtn(t, x.id) +
-        textOr("plan", x.outcome || "", emptyName ? "gapwalk" : "",
-               function(v){ setOr(x, "outcome", v); }) +
-        (last ? outAddBtn(t) : '')
-      : otag(x.id) + (emptyName ? '<span class="missing">Missing</span>'
-                                : '<b>' + esc(x.outcome) + '</b>') +
-        /* the same fold the first line has below 880 (§249) */
-        '<span class="subhd narrowtgt">' + (emptyTgt ? '<span class="missing">Missing</span>'
-          : SMPRules.isYesNo(x.outTarget) ? tgtShown(x.outTarget)
-          : esc(x.outDir || "\u2265") + ' ' + esc(x.outTarget)) + '</span>';
-    var tgt = ed
-      ? outcomeEdit(x, null, emptyTgt ? "gapwalk" : "", false)
-      : (emptyTgt ? '<span class="missing">Missing</span>' : tgtShown(x.outTarget));
-    return '<tr class="' + outSubCls(t) + '"><td>' + name + '</td>' +
-      '<td class="' + (ed ? 'tgtcell' : tdCls) + '">' + tgt + '</td></tr>';
-  }).join('') + outPad(ex.length);
-}
-
 /* Tactic, owner and quarters read left; the rest centres. A tactic whose
    quarters have not begun is not behind \u2014 it is not yet due, and scoring it
    would say otherwise. */
@@ -894,45 +815,28 @@ function tacticRows(ts, unitKey){
       : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
         (benchPair ? ' <i>/ ' + esc(benchPair) + '</i>' : '') + '</span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
-    /* §414: SEVERAL OUTCOMES. Each outcome's figure, its benchmark and its
-       own score sit on its own line; Progress spans them and is the AVERAGE,
-       saying so, because a number that is an average of two others and does
-       not say so reads as a third measurement. */
-    var nEx = scoredExtras(t).length, rs = outRowspan(nEx), subs = '';
-    if (nEx) {
-      var lines = [t].concat(scoredExtras(t).map(function(x){ return exAsT(t, x); }));
-      var figs = lines.map(function(x){ return outFigCell(t, x); });
-      tail = !due ? '<td class="cc" colspan="2"' + rs + '></td>'
-        : figs[0] + '<td class="num final"' + rs + ' style="color:' + bandInk(r) + '">' +
-          (r == null ? '<span class="why">&mdash;</span>'
-                     : pct(r) + '<span class="oavg">average of ' + lines.length + '</span>') + '</td>';
-      subs = scoredExtras(t).map(function(x, k){
-        return '<tr class="' + outSubCls(t) + '"><td>' + otag(x.id) + outcomeCell(x) + '</td>' +
-          (due ? figs[k + 1] : '') + '</tr>';
-      }).join('') + outPad(nEx);
-    }
     return '<tr data-oi="' + i + '"' +
       /* §252: `tacticAnswered`, or a row answered through its outcome is
          dimmed as though nobody had reported it -- while the two cells at the
          end of that same row print the figure and its score. */
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
-        : due && tacticAnswered(t) ? '' : ' class="notdue"') + '><td class="idx"' + rs + '>' +
+        : due && tacticAnswered(t) ? '' : ' class="notdue"') + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       /* §248: the NAME carries the weight now, because the description sits
          under it — two greys at one weight run together as a single block.
          And the outcome leaves this cell for a column of its own: it is what
          the figure beside it is measured against, so it belongs on the line,
          not tucked under a name where it cannot be scanned. */
-      '<span class="idx-n">' + (i+1) + '</span></td><td' + rs + '><b class="tacname">' +
+      '<span class="idx-n">' + (i+1) + '</span></td><td><b class="tacname">' +
       esc(t.name) + '</b>' + hidChip(t) +
       (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
       /* §255: the description stays a plain grey — it is the plan's, and the
          name above it is what it belongs to. The NOTE is the one line in this
          cell that was written this cycle, so it is the one that says so. */
       repNote(t) + '</td>' +
-      '<td>' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-      '<td' + rs + '>' + esc(t.owner) + '</td><td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
-      '<td' + rs + '>' + qs(t) + '</td><td class="cc"' + rs + '>' + status + '</td>' + tail + '</tr>' + subs;
+      '<td>' + outcomeCell(t) + '</td>' +
+      '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
+      '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
   }).join("");
 }
 function tacticHead(){
@@ -5952,39 +5856,6 @@ function repEntry(subj, x, where){
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
   }
 
-/* §414: THE BOX FOR A SECOND OR LATER OUTCOME. The same box `repEntry` draws
-   for the first, in the outcome's own unit, writing `outActs[<id>]` through
-   the same handler — the field is named `outActs:<id>` so the handler knows
-   which outcome it is for. A yes/no outcome gets §300's two halves. */
-function repEntryExtra(subj, x, ex, where){
-  var t = x.obj, o = extraOutcomeOf(t, ex);
-  if (!o) return '<span class="missing">Missing</span>';
-  var cur = (t.outActs || {})[ex.id], has = cur != null && cur !== "";
-  var fld = "outActs:" + ex.id, yn = SMPRules.isYesNo(o.target);
-  var unit = splitTarget(o.target).unit;
-  var label = t.name + " \u2014 " + (ex.outcome || ex.id);
-  if (!canEnterFigure(subj, x, where))
-    return '<span class="mono">' + (has ? esc(yn ? SMPRules.ynShown(cur) : unitTight(cur))
-                                        : "\u2014") + '</span>';
-  if (yn) return ynBoxes(x.id, "rep", cur, label, fld, subj);
-  var shown = has ? (splitTarget(unitTight(cur)).value || String(cur)) : "";
-  return '<span class="entry' + (has ? " filled" : "") + '">' +
-    '<input class="field" data-rep="' + x.id + '" data-repu="' + esc(subj) +
-    '" data-fld="' + esc(fld) + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
-    '" placeholder="\u2014" aria-label="Report ' + esc(label) + '">' +
-    (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
-}
-/* §414: an outcome's target cell on Reporting — what it is measured against
-   now, and the whole it is a part of. */
-function repOutTarget(t, x){
-  var o = outcomeOf(x);
-  if (!o) return '<span class="nobody">&mdash;</span>';
-  var bench = measureDueLabel(o, tacticShare(t)), whole = outcomeTargetShown(x);
-  return (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
-    (whole && whole !== bench && !SMPRules.isYesNo(x.outTarget)
-      ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
-}
-
 function renderReport(u){
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? renderFnObjReport("u:" + u.ukey) : renderFnReport("u:" + u.ukey);
@@ -6146,29 +6017,14 @@ function renderReport(u){
            says. */
         miniTable(["#", L1("tactic"), "Outcome", "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
           ts.map(function(x, i){
-            /* §414: one line per outcome; the tactic, its owner, its
-               quarters and its ONE note span them (the note is the tactic's,
-               as it always was). */
-            var xs = scoredExtras(x.obj), nEx = xs.length, rs = outRowspan(nEx);
-            var nameCell = '<td' + rs + '><b class="tacname">' + esc(x.obj.name) + '</b>' +
+            var nameCell = '<td><b class="tacname">' + esc(x.obj.name) + '</b>' +
               (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
-              '</td><td>' + (nEx ? otag("O1") : '') + outcomeCell(x.obj) + '</td>';
-            var subs = function(asked){
-              return xs.map(function(ex){
-                var pt = exAsT(x.obj, ex);
-                return '<tr class="' + outSubCls(x.obj) + (asked ? '' : ' notdue') + '">' +
-                  '<td>' + otag(ex.id) + outcomeCell(pt) + '</td>' +
-                  (asked ? '<td class="num">' + repOutTarget(x.obj, pt) + '</td>' +
-                           '<td class="cc">' + repEntryExtra(u.ukey, x, ex, "unit") + '</td>' : '') +
-                  '</tr>';
-              }).join('') + outPad(nEx);
-            };
+              '</td><td>' + outcomeCell(x.obj) + '</td>';
             if (!x.asked) {
-              return '<tr class="notdue"><td class="idx"' + rs + '>' + (i+1) + '</td>' +
-                nameCell + '<td' + rs + '>' + esc(x.obj.owner) + '</td>' +
-                '<td' + rs + '>' + qs(x.obj) + '</td>' +
-                '<td colspan="3" class="cc"' + rs + '><span class="pill kind">Not asked \u2014 outside this cycle</span></td></tr>' +
-                subs(false);
+              return '<tr class="notdue"><td class="idx">' + (i+1) + '</td>' +
+                nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
+                '<td>' + qs(x.obj) + '</td>' +
+                '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 outside this cycle</span></td></tr>';
             }
             /* WHAT THIS ROW IS MEASURED AGAINST RIGHT NOW. An outcome answers
                with its own target — prorated where it compiles by Sum, whole
@@ -6179,9 +6035,9 @@ function renderReport(u){
             var whole = onOutcome(x.obj) || outcomeOf(x.obj)
               ? outcomeTargetShown(x.obj) : null;
             return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
-              '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-              nameCell + '<td' + rs + '>' + esc(x.obj.owner) + '</td>' +
-              '<td' + rs + '>' + qs(x.obj) + '</td>' +
+              '<td class="idx">' + (i+1) + '</td>' +
+              nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
+              '<td>' + qs(x.obj) + '</td>' +
               /* §300: a yes/no row's benchmark is a per cent of its own window,
                  and the whole it is a part of is the word "Yes / No" — "50% of
                  Yes / No" is not a sentence anybody reads, so the second line
@@ -6191,7 +6047,7 @@ function renderReport(u){
                   ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
                 '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
-              '<td class="notecol"' + rs + '>' + noteCell(x) + '</td></tr>' + subs(true);
+              '<td class="notecol">' + noteCell(x) + '</td></tr>';
           }).join(""))
       : "";
 
@@ -8745,12 +8601,10 @@ function unitPlanBody(it, u, railed){
         tgtOpen = true;
         return outcomeEdit(t, set, pendCls, !ed);
       } });
-    /* §414: the shared cells span the extra outcomes' sub-lines. */
-    var nEx = tacticExtras(t).length, rs = outRowspan(nEx);
-    return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx"' + rs + '>' +
+    return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td' + rs + '>' + (ed ? bxkey(L1("tactic")) : '') +
+      '<td>' + (ed ? bxkey(L1("tactic")) : '') +
         (ed ? textOr("plan", t.name, "", function(v){ t.name = v; })
             : '<b class="tacname">' + esc(t.name) + '</b>') +
         (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
@@ -8788,8 +8642,7 @@ function unitPlanBody(it, u, railed){
          definition and runs off the end — and it is a counted gap now, so the
          CONTROL is the hook's while the lifecycle, the red word and the walk
          mark stay gapCell's. §130.1's shape exactly, for its reason. */
-      '<td>' + (ed ? bxkey("Outcome") : '') + (nEx ? otag("O1") : '') +
-        gapCell("plan", "u_plan", t, "outcome", {
+      '<td>' + (ed ? bxkey("Outcome") : '') + gapCell("plan", "u_plan", t, "outcome", {
         /* §228.2: NAMING THE KIND IS WHAT KEEPS THE TWO LISTS ONE. Without
            it the cell opens to a filler whatever the shared list says, so a
            later decision to stop counting these would leave the box open and
@@ -8799,8 +8652,6 @@ function unitPlanBody(it, u, railed){
         control: function(set, pendCls){
           return textOr("plan", t.outcome || "", pendCls || "", set);
         } }) +
-        /* §414: the way to a second outcome, under the last one. */
-        (ed && !nEx ? outAddBtn(t) : '') +
         /* The same double-render as the description one column left: below
            880 the Target column goes and its value appears here instead,
            because seven columns still run 44px past a 515px pane and §158
@@ -8834,7 +8685,7 @@ function unitPlanBody(it, u, railed){
          the read-mode Missing word; the control hook renders the register-
          fed picker — an owner is PICKED, not typed, in the pen and in fill
          mode alike. */
-      '<td' + rs + '>' + gapCell("plan", "u_plan", t, "owner", {
+      '<td>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
         control: function(set, pendCls){
@@ -8843,9 +8694,8 @@ function unitPlanBody(it, u, railed){
         } }) + '</td>' +
       /* §267: and the tail's own two columns, wherever the window still has
          room for them. Folded, they are already drawn above. */
-      (fold ? '' : '<td class="collabs"' + rs + '>' + collabsHtml + '</td>' +
-                   '<td' + rs + '>' + quartersHtml + '</td>') + '</tr>' +
-      planOutRows(t, ed, tgtOpen ? 'tgtcell' : 'tgtcol num') +
+      (fold ? '' : '<td class="collabs">' + collabsHtml + '</td>' +
+                   '<td>' + quartersHtml + '</td>') + '</tr>' +
       /* §278 MERGED WITH §267: the drawer spans whatever the table currently
          IS. `fold` decides how many columns this row has, so the full-width
          row under it has to read the same answer or it runs two cells past the

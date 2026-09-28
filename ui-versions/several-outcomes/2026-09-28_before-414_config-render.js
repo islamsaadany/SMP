@@ -5928,34 +5928,19 @@ function renderMyLines(){
         var bench = tacticBenchmark(r.obj);
         var whole = onOutcome(r.obj) || oc ? outcomeTargetShown(r.obj) : null;
         var pr = tacticProgress(r.obj);
-        /* §414: the same lines Reporting draws, one per outcome — an owner
-           who can enter the first outcome here and not the second could
-           never finish, since the unit waits for all of them. */
-        var xs = scoredExtras(r.obj), rs = outRowspan(xs.length);
-        var subs = xs.map(function(ex){
-          var pt = exAsT(r.obj, ex);
-          return '<tr class="' + outSubCls(r.obj) + '"><td>' + otag(ex.id) +
-            (ex.outcome ? esc(ex.outcome) : '<span class="missing">Missing</span>') + '</td>' +
-            '<td class="num">' + repOutTarget(r.obj, pt) + '</td>' +
-            '<td class="cc">' + repEntryExtra(r.target, r, ex, "mine") + '</td></tr>';
-        }).join("") + outPad(xs.length);
-        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td' + rs + '>' +
+        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td>' +
             esc(r.obj.name || "\u2014") +
             (r.pillar && r.pillar.name
               ? ' <span class="why" style="margin:0">' + esc(r.pillar.name) + '</span>' : '') + '</td>' +
-          '<td>' + (xs.length ? otag("O1") + (r.obj.outcome ? esc(r.obj.outcome)
-                                  : '<span class="missing">Missing</span>')
-                              : '') + (xs.length ? '' : oc && oc.name ? esc(oc.name)
+          '<td>' + (oc && oc.name ? esc(oc.name)
                                   : '<span class="why" style="margin:0">how far it got</span>') + '</td>' +
           '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
             (whole && whole !== bench && !SMPRules.isYesNo(r.obj.outTarget)
               ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') + '</td>' +
           '<td class="cc">' + repEntry(r.target, r, "mine") + '</td>' +
-          '<td class="cc"' + rs + '>' + (pr == null
+          '<td class="cc">' + (pr == null
               ? '<span class="pill kind">Not reported</span>'
-              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>' +
-                (xs.length ? '<span class="oavg">average of ' + (xs.length + 1) + '</span>' : '')) +
-            '</td></tr>' + subs;
+              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>') + '</td></tr>';
       }).join("") + '</tbody></table>';
     return section("", esc(placeLabel(t)) +
       ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +

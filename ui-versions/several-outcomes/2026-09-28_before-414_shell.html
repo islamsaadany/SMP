@@ -5049,24 +5049,6 @@
           else hit.obj[bk] = joinTarget(hit.obj[bk], v, el.dataset.unit || "");
           paint(); return;
         }
-        /* ── §414: A SECOND OR LATER OUTCOME'S FIGURE ─────────────────
-           `data-fld` is `outActs:<id>`, so the figure lands in that outcome's
-           slot and nowhere else — joined with its unit as the first outcome's
-           is, or answered in §300's two halves where it is a yes or a no.
-           Emptied, the key goes (§50.6). The tactic's status follows all its
-           outcomes together. */
-        if (/^outActs:/.test(el.dataset.fld || "")) {
-          var oid = el.dataset.fld.slice(8), ocur = (hit.obj.outActs || {})[oid], nv;
-          if (el.dataset.ynpart) {
-            var ow = SMPRules.ynState(ocur);
-            nv = el.dataset.ynpart === "status"
-              ? SMPRules.ynJoin(v, v === "wip" ? ow.pct : null)
-              : SMPRules.ynJoin(ow.status || "wip", v);
-          } else nv = (v !== "" && unit) ? joinTarget(unitTight(ocur || ""), v, unit) : v;
-          setExtraFigure(hit.obj, oid, nv);
-          hit.obj.status = statusFromOutcomes(hit.obj);
-          paint(); return;
-        }
         if (el.dataset.ynpart) {
           var ynFld = el.dataset.fld === "outActual" ? "outActual" : "actual";
           var was = SMPRules.ynState(hit.obj[ynFld]);
@@ -5074,9 +5056,7 @@
             ? SMPRules.ynJoin(v, v === "wip" ? was.pct : null)
             : SMPRules.ynJoin(was.status || "wip", v);
           if (next === "") delete hit.obj[ynFld]; else hit.obj[ynFld] = next;
-          if (ynFld === "outActual" && scoredExtras(hit.obj).length) {
-            hit.obj.status = statusFromOutcomes(hit.obj);
-          } else if (ynFld === "outActual") {
+          if (ynFld === "outActual") {
             var yst = SMPRules.ynState(hit.obj.outActual);
             if (yst.status === "done") hit.obj.status = "Done";
             else if (yst.status === "wip" && hit.obj.status !== "Blocked") hit.obj.status = "WIP";
@@ -5098,8 +5078,6 @@
           /* The status still follows the work, and an outcome that has reached
              its target is done. `tacticOutcomeScore` is the one reader of that
              (§53.5) rather than a second comparison written here. */
-          /* §414: with several outcomes the status follows all of them. */
-          if (scoredExtras(hit.obj).length) { hit.obj.status = statusFromOutcomes(hit.obj); paint(); return; }
           var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
           if (sc == null) hit.obj.status = "Not started";
           else if (sc >= 100) hit.obj.status = "Done";
@@ -8840,40 +8818,6 @@
            removed must be byte-identical, or every save carries a change
            nobody made. */
         if (list === "breakdown") bdTidyById(id);
-        paint();
-      });
-    });
-    /* §414: A SECOND OUTCOME, AND TAKING ONE AWAY. Behind the same gate as
-       every other row the pen adds or removes (§31, §94). A new outcome is
-       minted from the MAXIMUM id (§96.2) with its keys in the order Postgres
-       hands them back, so a round trip cannot read as a change (§249.3).
-       Removing one takes its figure with it, and the last one leaving
-       deletes both lists (§50.6) — a tactic that had extras and a tactic
-       that never did must be byte-identical. */
-    document.querySelectorAll("[data-outadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayEditPlan() || !outcomesOn()) return;
-        var t = hideableById(this.dataset.outadd);
-        if (!t) return;
-        var id = nextOutcomeId(t);
-        t.outs = (t.outs || []).concat([{ id: id }]);
-        paint();
-        setTimeout(function(){
-          var f = document.querySelector('[data-outoff="' + t.id + '|' + id + '"]');
-          var box = f && f.parentNode.querySelector("textarea, input");
-          if (box) box.focus();
-        }, 0);
-      });
-    });
-    document.querySelectorAll("[data-outoff]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayEditPlan()) return;
-        var a = this.dataset.outoff.split("|");
-        var t = hideableById(a[0]);
-        if (!t || !Array.isArray(t.outs)) return;
-        t.outs = t.outs.filter(function(x){ return x.id !== a[1]; });
-        if (!t.outs.length) delete t.outs;
-        setExtraFigure(t, a[1], "");
         paint();
       });
     });

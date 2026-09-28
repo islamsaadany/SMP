@@ -3953,7 +3953,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      EXPLICIT `true` TURNS ONE ON (§104's rule, not §102's): absent is off,
      and a stale value cannot switch one on by accident. Off HIDES and never
      forgets — a direction's overview text is kept whatever the switch says. */
-  var PLAN_DETAILS = ["overview"];
+  /* §414 — "outcomes": several outcomes per tactic (RHI step 4), off for
+     every client until the office turns it on, so a tactic reads exactly as
+     it did everywhere else. */
+  var PLAN_DETAILS = ["overview", "outcomes"];
   function planDetailOn(group, key) {
     var s = structureOf(group), d = s && s.details;
     return !!(d && d[key] === true);

@@ -405,8 +405,6 @@ function validatePlan(u, rows){
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not \u2265 or \u2264' });
     if (r.compile && !compileKnown(r.compile))
       problems.push({ at:at, msg:compileProblem(r.compile) });
-    if (r.type === "OUTORPHAN")
-      problems.push({ at:at, msg:"an outcome on the Outcomes sheet whose tactic could not be matched \u2014 name a tactic from the Tactics sheet, under its pillar" });
     if (r.type === "TACTIC") {
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
@@ -654,9 +652,6 @@ function createFromPlan(u, d){
       var tMon = monthsFromText(x.monthly);
       if (tMon) tRow.outMonthly = tMon;
       if (+x.hidden) tRow.hide = true;
-      /* §414: the extras the Outcomes sheet carried, set only where there are
-         any so a tactic with one outcome is byte-identical (§50.6). */
-      if (x.outs && x.outs.length) tRow.outs = x.outs.map(function(o){ return Object.assign({}, o); });
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {

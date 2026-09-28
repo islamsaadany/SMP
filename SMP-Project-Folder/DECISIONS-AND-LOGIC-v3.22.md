@@ -58214,3 +58214,72 @@ parts, the workbook round trip, and the file unchanged when off. 15 red on the b
 §413, 2 red with the switch gate removed from the source (§276). Neighbours and `qa.py` green.
 **Recorded, not fixed**: `checks/objectives-table.py`'s *centred by their MARKS* reads
 -0.94px, identical on the build before §413 (§303), so it is not this change's.
+
+## §414 — several outcomes per tactic (2026-09-28)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-28_several-outcomes.html`): *"approved,
+build it"*. What was agreed before it was drawn: several outcomes per tactic, each scored on
+its own and the tactic their average; no typed per-cent — figure, proration, score; an outcome
+with no number takes a Y/N target with In progress %; a range gets one target the SMO sets;
+off by default behind a Plan details switch so Raya Trade is untouched.
+
+**The first outcome does not move.** It stays in `outcome`/`outTarget`/`outDir`/`outCompile`/
+`outActual`/`outMonthly`, so every reader, every workbook and every closed cycle reads it as
+before, and it still decides whether a tactic is measured by outcomes at all (`outcomeOf`).
+**Extras** are `t.outs = [{id, outDir, outcome, outTarget, outCompile}]`, ids minted from the
+MAXIMUM (§96.2), and their figures `t.outActs = {O2: "88%"}` — keys sorted, an emptied figure
+deleted, the map deleted when it empties (§50.6). Both ride `tactics.extra`; nothing migrated.
+**Two fields, not one**, because the list of extras is PLAN (the office's, §94) and a figure is
+REPORTING: `outActs` joins `REPORT.tactic` so a reporter may enter one, while any change to
+`outs` still classifies as plan — asserted at both ends in `test-authorize.js` (787/0; 2 red
+with `outActs` taken back out of the list).
+
+**Switched per client** by `structure.details.outcomes`, a second chip on the Plan details card
+(§413's card, the same write-only-that-key rule). Only an explicit `true` turns it on. Off, a
+stored extra is not drawn and not scored — `tacticExtras()` is the one gate every reader asks.
+
+**The arithmetic.** Each outcome is scored by `measureScore` against the tactic's own window
+(§250). The tactic is **not scored until every outcome has a figure** — the rule a single
+outcome already has (§254.2), applied to each, or a tactic would read 100% on its easy outcome
+while its hard one was never reported — and is then the **rounded average**. A single outcome
+is byte-identical to before. The status after a figure lands is Done once the average reaches
+100, In progress once any outcome has a figure, Blocked kept.
+
+**On screen** each extra is a line of its own (`tr.osub`) under the tactic, O1/O2 tags, the
+shared cells (number, name, owner, collaborators, quarters, note) spanning the lines. **The
+stripe**: a line wears its tactic's ground, never its own position's, and an odd run of lines
+is followed by a hidden `tr.opad` so every tactic below keeps the parity it would have had —
+sibling rules in `arrange.css`, and a deck-scoped twin in `present.css` because the deck's own
+stripe rule outranks the page's. Plan: × per extra and *+ Add an outcome* under the last (under
+O1 when there are none), in the pen only. Reporting and My reporting: a box per outcome, one
+note per tactic. Performance: each line its figure against what is due and its own score, and
+Progress *average of N*. **The deck** draws the same lines; `deckFitPass()` now moves a
+tactic's lines as one group, because it moves the LAST row, and a sub-line moved alone onto a
+continuation slide would leave its tactic's spanning cells behind.
+
+**The workbook** gains an **Outcomes** sheet — Pillar, Tactic, Outcome, direction, target,
+compile — drawn only when the switch is on or a tactic already holds extras, so every other
+client's file is unchanged; a stored extra is never lost on a download-and-upload (§22). The
+reader attaches each line to its tactic by pillar and name and mints O2, O3… in file order; a
+line whose tactic cannot be matched is a problem named in the preview, never dropped (§96.2).
+
+**Missing.** An extra's empty name or target is counted for somebody who authors the plan and
+for the Submit gate. It is deliberately **not** counted in fill mode: a filler has no control
+for an extra (the list is plan), and a count with no control behind it is §223's trap.
+
+**Checked**: `checks/several-outcomes.py` — off unchanged with an extra stored (§113.8), the
+chip pressed, read back and deleted, the Plan lines with their spans and their stripe on a white
+AND a striped row, the pen's add, name and × read back off the stored tactic (§96), a figure
+typed on Reporting reaching `outActs`, the average asserted as AGREEMENT with the two outcome
+scores (§94.8), Performance's *average of 2*, the deck's lines, a real fit pass over a long
+table, the missing count, the workbook round trip and the refused orphan. Proved able to fail
+five ways from the SOURCES (§276): stripe 1, average 1, fit group 1, sheet reader 1, switch
+ignored 7. **Its first stripe assertion could not fail** — the tactic it looked at sat on a
+white row, where no stripe rule is needed (§113.8); it measures a white row and a striped row
+now.
+
+**Recorded, not done**: the progress workbook carries no column for an extra's figure; a unit
+change on an extra does not rewrite a figure already stored for it (`actualFollowsUnit`, §277,
+reaches `outActual` only); and — found while building, not this change's — My reporting's
+outcome cell for a tactic WITHOUT extras reads `oc.name`, which `outcomeOf()` never sets, so it
+always says *how far it got* rather than the outcome's name.

@@ -7089,132 +7089,10 @@ function outcomeOf(t){
    nothing -- not the question on the reporting page, not the unit's execution
    -- until somebody actually enters the new number. The switch happens per
    tactic, when a human types, never as a side effect of an edit. */
-/* ── SEVERAL OUTCOMES PER TACTIC (§414, RHI step 4) ─────────────────────
-   Islam, for RHI: a tactic can produce more than one thing worth measuring,
-   and each is scored on its own — the tactic reads as their AVERAGE, the way
-   every other roll-up in the platform reads.
-
-   THE FIRST OUTCOME STAYS EXACTLY WHERE IT WAS. `outcome`, `outTarget`,
-   `outDir`, `outCompile` and `outActual` are untouched, so a tactic with one
-   outcome is byte-for-byte what it was, every closed cycle reads as before,
-   and nothing is migrated. The SECOND and later ride `t.outs` — a list of
-   `{id, outDir, outcome, outTarget, outCompile}` using the first outcome's
-   own field names, so `outcomeOf()` and the pen's `outcomeEdit()` serve an
-   extra unchanged (§53.5) — and their FIGURES ride `t.outActs`, keyed by the
-   outcome's id. The figures are kept apart from the list on purpose: a
-   figure is reporting and the list is the plan (§31, §94), so the authoriser
-   can tell a reporter's number from somebody rewriting what is measured by
-   FIELD NAME, which is how it tells every other pair apart (`outActs` joins
-   REPORT.tactic).
-
-   OFF MEANS NONE (§102's shape: off hides and never forgets). With the Plan
-   details switch off, `tacticExtras()` answers an empty list, so every
-   reader below falls through to the first outcome alone — the extras are
-   still stored and come back the moment the switch does.
-
-   THE FIRST OUTCOME DECIDES WHETHER THE TACTIC IS ON OUTCOMES AT ALL. Every
-   surface already asks `outcomeOf(t)` for that, and an extra is only ever
-   added under a tactic that has one; an extra whose own target is still
-   empty is owed (counted missing, below) and scores nothing yet. */
-function outcomesOn(){ return SMPRules.planDetailOn(GROUP, "outcomes"); }
-function tacticExtras(t){
-  if (!t || !Array.isArray(t.outs) || !t.outs.length || !outcomesOn()) return [];
-  return t.outs;
-}
-/* The extra as the measure-shaped thing `outcomeOf` reads — its figure taken
-   from `outActs`. Null where its target holds no number yet (§249's rule). */
-function extraOutcomeOf(t, ex){
-  return outcomeOf({ outTarget: ex.outTarget, outDir: ex.outDir,
-                     outCompile: ex.outCompile,
-                     outActual: (t.outActs || {})[ex.id] });
-}
-/* What one extra shows as its figure, in the target's own unit — the same
-   formatter the first outcome uses. */
-function extraFigure(t, ex){
-  return (t.outActs || {})[ex.id];
-}
-/* Every outcome this tactic is measured by, first one included, each with
-   its measure shape. What averages and what Submit waits for both read THIS
-   list, so the two cannot disagree about which outcomes count. */
-function tacticOutcomes(t){
-  var out = [], o = outcomeOf(t);
-  if (!o) return out;
-  out.push({ id: "O1", o: o });
-  tacticExtras(t).forEach(function(ex){
-    var e = extraOutcomeOf(t, ex);
-    if (e) out.push({ id: ex.id, o: e, ex: ex });
-  });
-  return out;
-}
-/* Minted from the MAXIMUM, never from the count (§96.2): remove O2 of three
-   and add another, and a count says O3 while O3 is still there. */
-function nextOutcomeId(t){
-  var max = 1;
-  (t.outs || []).forEach(function(ex){
-    var n = parseInt(String(ex.id || "").replace(/\D/g, ""), 10);
-    if (n > max) max = n;
-  });
-  return "O" + (max + 1);
-}
-/* Figures stored in the key order Postgres hands back (length, then bytes),
-   so a round trip cannot make an untouched map read as a change (§145,
-   §249.3). An emptied figure DELETES its key and the last one deletes the
-   map (§50.6). */
-function setExtraFigure(t, id, v){
-  var m = Object.assign({}, t.outActs || {});
-  var val = v == null ? "" : String(v).trim();
-  if (val === "") delete m[id]; else m[id] = val;
-  var keys = Object.keys(m).sort(function(a, b){
-    return a.length - b.length || (a < b ? -1 : a > b ? 1 : 0); });
-  if (!keys.length) { delete t.outActs; return; }
-  var o = {}; keys.forEach(function(k){ o[k] = m[k]; });
-  t.outActs = o;
-}
-/* The extras that COUNT: only under a tactic whose first outcome is scored,
-   because the first outcome decides whether the tactic is on outcomes at all.
-   The pen still draws every extra (so one can be corrected or removed); the
-   reading surfaces draw these. */
-function scoredExtras(t){ return outcomeOf(t) ? tacticExtras(t) : []; }
-/* The word a tactic's status takes after a figure lands, with several
-   outcomes: Done once the average reaches the target, In progress once any
-   outcome has a figure. A single outcome keeps its own rule unchanged. */
-function statusFromOutcomes(t){
-  var sc = tacticOutcomeScore(t), keep = t.status === "Blocked";
-  if (sc != null) return sc >= 100 ? "Done" : (keep ? "Blocked" : "WIP");
-  var any = tacticOutcomes(t).some(function(x){
-    return x.o.actual != null && x.o.actual !== ""; });
-  return any ? (keep ? "Blocked" : "WIP") : "Not started";
-}
-function oneOutcomeScore(t, o){
+function tacticOutcomeScore(t){
+  var o = outcomeOf(t);
   if (!o || o.actual == null || o.actual === "") return null;
   return measureScore(o, tacticShare(t));
-}
-/* §414: THE TACTIC IS THE AVERAGE OF ITS OUTCOMES, and it is not scored until
-   EVERY scored outcome has a figure — the same rule a single outcome has
-   always had (a row owed a figure is not scored, §254.2), applied to each.
-   Averaging only the ones reported would let a tactic read 100% on its easy
-   outcome while its hard one was never reported. */
-function tacticOutcomeScore(t){
-  var list = tacticOutcomes(t);
-  if (!list.length) return null;
-  var sum = 0;
-  for (var i = 0; i < list.length; i++) {
-    var s = oneOutcomeScore(t, list[i].o);
-    if (s == null) return null;
-    sum += s;
-  }
-  return list.length === 1 ? sum : Math.round(sum / list.length);
-}
-/* What the plan still owes on a tactic's extra outcomes: a name and a target
-   with something in it, counted per field like every other gap. Zero with
-   the switch off, because an outcome nobody can see is not owed. */
-function extraOutcomeGaps(t){
-  var n = 0;
-  tacticExtras(t).forEach(function(ex){
-    if (!ex.outcome || !String(ex.outcome).trim()) n++;
-    if (SMPRules.gapEmpty("outTarget", ex)) n++;
-  });
-  return n;
 }
 function tacticReads(t){
   var s = tacticOutcomeScore(t);
@@ -7381,20 +7259,12 @@ var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
 function tacticComplete(t){
   if (!t) return false;
   if (t.status === "Done") return true;
-  var list = tacticOutcomes(t);
-  /* §414: complete only when EVERY outcome is a yes/no that is done. */
-  if (list.length) return list.every(function(x){
-    return SMPRules.isYesNo(x.o.target) && SMPRules.ynState(x.o.actual).status === "done"; });
+  var o = outcomeOf(t);
+  if (o) return SMPRules.isYesNo(o.target) ? SMPRules.ynState(o.actual).status === "done" : false;
   return t.actual != null && t.actual >= 100;
 }
 function tacticAtNought(t){
-  /* §414: at nought only when every outcome is. */
-  var list = tacticOutcomes(t);
-  if (list.length > 1) return list.every(function(x){
-    return outcomeAtNought(x.o); });
-  return outcomeAtNought(outcomeOf(t), t);
-}
-function outcomeAtNought(o, t){
+  var o = outcomeOf(t);
   if (o) {
     if (o.actual == null || o.actual === "") return true;
     if (SMPRules.isYesNo(o.target)) return SMPRules.ynState(o.actual).status !== "wip" &&
@@ -7543,17 +7413,7 @@ function gapMap(target, all, fillable){
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
-      (p.tactics  || []).forEach(function(x){
-        n += G(w.plan, pctx(x), "tactic", x);
-        /* §414: an extra outcome's empty name or target is owed too — and
-           counted only where somebody may AUTHOR it (or for the Submit gate,
-           which ignores the viewer), because a filler cannot add to or fill
-           the list, and a count with no control behind it is §223's trap. */
-        if (!fillable && !SMPRules.isHidden(x) &&
-            (all || (w.plan in canAuthor ? canAuthor[w.plan]
-                     : (canAuthor[w.plan] = mayAuthor(w.plan, target)))))
-          n += extraOutcomeGaps(x);
-      });
+      (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
       entry("p:" + (p.id || i), pillarCode(u, i), n,
             { sec: w.sec, page: "plan", rail: unitRailKey(u), code: pillarRailId(p) });
     });

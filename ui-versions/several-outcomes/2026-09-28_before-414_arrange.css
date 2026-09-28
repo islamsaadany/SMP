@@ -1166,33 +1166,6 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
   tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
 
-  /* §414: SEVERAL OUTCOMES PER TACTIC. A sub-line wears its tactic's stripe
-     rather than its own position's — the tactic's shared cells span it, so a
-     stripe of its own would cut the tactic in two. An odd run of sub-lines is
-     followed by a hidden `tr.opad` (group-render.js) so every row below keeps
-     its parity. Chained to five sub-lines, which is more than any tactic
-     needs. */
-  tbody tr:not(.osub):nth-child(even) + tr.osub > td,
-  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub > td,
-  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub > td,
-  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub + tr.osub > td,
-  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub > td
-    { background:var(--zebra); }
-  tbody tr:not(.osub):nth-child(odd) + tr.osub > td,
-  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub > td,
-  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub > td,
-  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub > td,
-  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub > td
-    { background:none; }
-  tr.osub > td { border-top:1px dashed var(--line); }
-  .otag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;
-    color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;
-    margin-right:7px;vertical-align:1px;background:var(--surface)}
-  .outadd{display:block;margin-top:8px;font-size:12.5px;font-weight:600}
-  .oavg{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--ink-3);font-weight:600;margin-top:2px}
-  .oscore{font-size:11.5px;color:var(--ink-3);margin-left:6px}
-
   /* Each obligation announces whose it is: a unit's plan counts toward that
      unit, a group capability never does. */
   .oblband{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 18px;

@@ -657,6 +657,8 @@ function createFromPlan(u, d){
       /* §414: the extras the Outcomes sheet carried, set only where there are
          any so a tactic with one outcome is byte-identical (§50.6). */
       if (x.outs && x.outs.length) tRow.outs = x.outs.map(function(o){ return Object.assign({}, o); });
+      /* §415: requirements only where the file carried some (§50.6). */
+      if (x.reqs && reqsParse(x.reqs).length) tRow.reqs = reqsParse(x.reqs);
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {

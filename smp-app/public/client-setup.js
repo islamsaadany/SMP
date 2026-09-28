@@ -1485,7 +1485,8 @@ var CLIENTSETUP = (function () {
     var pd = card("Plan details");
     pd.appendChild(el("p", "lab", "What a direction and its tactics carry"));
     var pband = el("div", "wzband stchips");
-    [["overview", "Direction overview"], ["outcomes", "Several outcomes per tactic"]].forEach(function (c) {
+    [["overview", "Direction overview"], ["outcomes", "Several outcomes per tactic"],
+     ["requirements", "Tactic requirements"]].forEach(function (c) {
       var on = !!(lv.details && lv.details[c[0]] === true);
       var b = el("button", null, c[1]); b.type = "button";
       b.dataset.stdetail = c[0];

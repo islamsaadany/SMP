@@ -7117,6 +7117,22 @@ function outcomeOf(t){
    added under a tactic that has one; an extra whose own target is still
    empty is owed (counted missing, below) and scores nothing yet. */
 function outcomesOn(){ return SMPRules.planDetailOn(GROUP, "outcomes"); }
+/* §415 — A TACTIC'S REQUIREMENTS (RHI step 5): what it needs to happen —
+   people, budget, a sign-off. Stored on the tactic as `reqs`, a list of short
+   lines riding `tactics.extra` (no migration), DELETED when emptied (§50.6).
+   Never scored, never asked for, never counted as missing: it is a note on
+   the plan, not an obligation. Off HIDES and forgets nothing (§44). */
+function requirementsOn(){ return SMPRules.planDetailOn(GROUP, "requirements"); }
+function reqsParse(v){
+  return (Array.isArray(v) ? v : String(v == null ? "" : v).split(/\r?\n/))
+    .map(function(x){ return String(x == null ? "" : x).trim(); })
+    .filter(Boolean);
+}
+function reqsOf(t){ return t && Array.isArray(t.reqs) ? reqsParse(t.reqs) : []; }
+function setReqs(t, v){
+  var a = reqsParse(v);
+  if (a.length) t.reqs = a; else delete t.reqs;
+}
 function tacticExtras(t){
   if (!t || !Array.isArray(t.outs) || !t.outs.length || !outcomesOn()) return [];
   return t.outs;

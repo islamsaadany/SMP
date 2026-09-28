@@ -7494,6 +7494,12 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     font-weight:700; color:var(--ink-3); margin-right:6px;
     white-space:nowrap;
   }
+/* §415: a tactic's requirements — the reported note's shape, holding a list. */
+td .reqnote ul.reqs { margin:3px 0 0; padding-left:16px; color:var(--ink-2); line-height:1.35; }
+td .reqnote ul.reqs li { margin:1px 0; }
+td .reqbox { display:block; margin-top:8px; }
+td .reqbox .repkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; font-size:12.5px; resize:none; }
 
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should

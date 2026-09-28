@@ -5011,5 +5011,33 @@ console.log("\n§414 · several outcomes per tactic");
   v = as(rep, sw);           check("§414 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
 })();
 
+/* ── §415: A TACTIC'S REQUIREMENTS ─────────────────────────────────────
+   A note on the PLAN: the office writes it and a reporter cannot, and it
+   needed no server change — `reqs` is not a reporting field, so it falls to
+   the plan (§42's fall-through). Asserted rather than assumed (§172), both
+   ends (§94.2). */
+console.log("\n§415 · a tactic's requirements");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) {
+    return (B.units[k].items || []).some(function (p) { return (p.tactics || []).length; }); })[0];
+  const tOf = function (st) {
+    for (const p of st.units[K].items) if ((p.tactics || [])[0]) return p.tactics[0];
+  };
+  const write = function (inc) { tOf(inc).reqs = ["Two analysts", "Budget sign-off"]; };
+  const sw = function (inc) { inc.group.structure = { details: { requirements: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  let v = as("smo", write);  check("§415: the office writes a tactic's requirements", v.ok, v.refusals.join(" / "));
+  v = as(rep, write);        check("§415 REFUSED: the reporter cannot (it is the plan)", !v.ok, "was ALLOWED");
+  const inc = clone(B); write(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§415: it classifies as the plan and nothing else",
+        kinds.length > 0 && kinds.every(function (x) { return x === "unitPlan"; }), kinds.join(","));
+  v = as("smo", sw);         check("§415: the office turns requirements on", v.ok, v.refusals.join(" / "));
+  v = as(rep, sw);           check("§415 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -308,10 +308,13 @@ var PPTX_ROWS_PER_SLIDE = 11;
 /* A long table continues on its own next slide rather than shrinking to fit —
    the deck's own fit-pass argument (§51.10), decided by counting rather than
    measuring because a table row here has a fixed height by construction. */
-function pptxTableSlides(kicker, title, widths, head, rows){
-  var out = [];
-  for (var i = 0; i < rows.length || i === 0; i += PPTX_ROWS_PER_SLIDE) {
-    var part = rows.slice(i, i + PPTX_ROWS_PER_SLIDE);
+/* `per` is how many rows a slide holds when a caller knows its rows are
+   taller than one line (§415: a tactic carrying its requirements); absent,
+   it is the fixed count every table has always used. */
+function pptxTableSlides(kicker, title, widths, head, rows, per){
+  var out = [], n = per || PPTX_ROWS_PER_SLIDE;
+  for (var i = 0; i < rows.length || i === 0; i += n) {
+    var part = rows.slice(i, i + n);
     var t = i ? title + " (continued)" : title;
     out.push(pptxSlideXml(pptxHead(kicker, t).concat(part.length
       ? [pptxTable(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW }, widths, head, part)]
@@ -471,9 +474,18 @@ function pptxUnitSlides(u, kicker){
       [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
       [labelWord("tactic","group"), "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       SMPRules.shown(p.tactics).map(function(t){
-        return [t.name, orPend(t, "owner"),
+        /* §415: what the tactic needs rides UNDER its name, as it does on
+           the Plan page (Islam: "B, plan download only") — the review deck
+           is about how the figures went and does not carry it. */
+        var rq = requirementsOn() ? reqsOf(t) : [];
+        return [rq.length ? { t:t.name, sub:"Requirements: " + rq.join("  \u00b7  ") } : t.name,
+                orPend(t, "owner"),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
-      })));
+      }),
+      /* A slide with requirements on it holds fewer rows, or the taller
+         rows run off the bottom of the slide. */
+      requirementsOn() && SMPRules.shown(p.tactics).some(function(t){ return reqsOf(t).length; })
+        ? 7 : undefined));
   });
   slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;

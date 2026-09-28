@@ -3958,7 +3958,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* §414 — "outcomes": several outcomes per tactic (RHI step 4), off for
      every client until the office turns it on, so a tactic reads exactly as
      it did everywhere else. */
-  var PLAN_DETAILS = ["overview", "outcomes"];
+  /* §415 — "requirements": what each tactic needs (RHI step 5), a list of
+     short lines on the tactic, drawn under its name and in the plan
+     download; never scored, never counted as missing. Off hides and keeps. */
+  var PLAN_DETAILS = ["overview", "outcomes", "requirements"];
   function planDetailOn(group, key) {
     var s = structureOf(group), d = s && s.details;
     return !!(d && d[key] === true);
@@ -13596,6 +13599,22 @@ function outcomeOf(t){
    added under a tactic that has one; an extra whose own target is still
    empty is owed (counted missing, below) and scores nothing yet. */
 function outcomesOn(){ return SMPRules.planDetailOn(GROUP, "outcomes"); }
+/* §415 — A TACTIC'S REQUIREMENTS (RHI step 5): what it needs to happen —
+   people, budget, a sign-off. Stored on the tactic as `reqs`, a list of short
+   lines riding `tactics.extra` (no migration), DELETED when emptied (§50.6).
+   Never scored, never asked for, never counted as missing: it is a note on
+   the plan, not an obligation. Off HIDES and forgets nothing (§44). */
+function requirementsOn(){ return SMPRules.planDetailOn(GROUP, "requirements"); }
+function reqsParse(v){
+  return (Array.isArray(v) ? v : String(v == null ? "" : v).split(/\r?\n/))
+    .map(function(x){ return String(x == null ? "" : x).trim(); })
+    .filter(Boolean);
+}
+function reqsOf(t){ return t && Array.isArray(t.reqs) ? reqsParse(t.reqs) : []; }
+function setReqs(t, v){
+  var a = reqsParse(v);
+  if (a.length) t.reqs = a; else delete t.reqs;
+}
 function tacticExtras(t){
   if (!t || !Array.isArray(t.outs) || !t.outs.length || !outcomesOn()) return [];
   return t.outs;
@@ -19133,6 +19152,8 @@ function createFromPlan(u, d){
       /* §414: the extras the Outcomes sheet carried, set only where there are
          any so a tactic with one outcome is byte-identical (§50.6). */
       if (x.outs && x.outs.length) tRow.outs = x.outs.map(function(o){ return Object.assign({}, o); });
+      /* §415: requirements only where the file carried some (§50.6). */
+      if (x.reqs && reqsParse(x.reqs).length) tRow.reqs = reqsParse(x.reqs);
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {
@@ -20717,16 +20738,23 @@ function planWorkbook(u){
        Q1–Q4 from G:J to J:M and Hidden from K to N. Getting that wrong
        validates the wrong cells in silence, which is why the ranges move in
        the same edit as the head. */
-    { name:"Tactics",
+    (function(){
+    /* §415: the tactic's requirements ride at the very END (§65), one cell
+       with a line per item, and only where they mean something — the client
+       carries the switch, or a tactic already holds some — so every other
+       client's file is byte-for-byte what it was. */
+    var rq = (typeof requirementsOn === "function" && requirementsOn()) ||
+      u.items.some(function(p){ return (p.tactics || []).some(function(t){ return reqsOf(t).length; }); });
+    return { name:"Tactics",
       widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
-        .concat(monthWidths(9)),
+        .concat(monthWidths(9)).concat(rq ? [40] : []),
       /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
          already says so of the outcome's other three columns — a bare "Jan"
          beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
             "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
-        .concat(monthHead("Outcome ")),
+        .concat(monthHead("Outcome ")).concat(rq ? ["Requirements"] : []),
       numCols:monthNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
@@ -20740,10 +20768,12 @@ function planWorkbook(u){
             t.outDir || "", t.outTarget || "", t.outCompile || "",
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
-            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly")));
+            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly"))
+            .concat(rq ? [reqsOf(t).join("\n")] : []));
         });
         return acc;
-      }, []) },
+      }, []) };
+    })(),
 
     /* ── §343: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
        §22's contract again: an upload AUTHORS, so a column the file does not
@@ -21173,7 +21203,10 @@ function planFromWorkbook(u, sheets){
         .filter(Boolean).join("|"),
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",
       q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0",
-      hidden:yes(r["Hidden"]) ? "1" : "" });
+      hidden:yes(r["Hidden"]) ? "1" : "",
+      /* §415: a line per item; blank says nothing (a file written before
+         this existed carries no such column). */
+      reqs:r["Requirements"] || "" });
   });
 
   /* §414: a tactic's extra outcomes ride ON the tactic's row, minted O2,
@@ -22588,10 +22621,13 @@ var PPTX_ROWS_PER_SLIDE = 11;
 /* A long table continues on its own next slide rather than shrinking to fit —
    the deck's own fit-pass argument (§51.10), decided by counting rather than
    measuring because a table row here has a fixed height by construction. */
-function pptxTableSlides(kicker, title, widths, head, rows){
-  var out = [];
-  for (var i = 0; i < rows.length || i === 0; i += PPTX_ROWS_PER_SLIDE) {
-    var part = rows.slice(i, i + PPTX_ROWS_PER_SLIDE);
+/* `per` is how many rows a slide holds when a caller knows its rows are
+   taller than one line (§415: a tactic carrying its requirements); absent,
+   it is the fixed count every table has always used. */
+function pptxTableSlides(kicker, title, widths, head, rows, per){
+  var out = [], n = per || PPTX_ROWS_PER_SLIDE;
+  for (var i = 0; i < rows.length || i === 0; i += n) {
+    var part = rows.slice(i, i + n);
     var t = i ? title + " (continued)" : title;
     out.push(pptxSlideXml(pptxHead(kicker, t).concat(part.length
       ? [pptxTable(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW }, widths, head, part)]
@@ -22751,9 +22787,18 @@ function pptxUnitSlides(u, kicker){
       [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
       [labelWord("tactic","group"), "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       SMPRules.shown(p.tactics).map(function(t){
-        return [t.name, orPend(t, "owner"),
+        /* §415: what the tactic needs rides UNDER its name, as it does on
+           the Plan page (Islam: "B, plan download only") — the review deck
+           is about how the figures went and does not carry it. */
+        var rq = requirementsOn() ? reqsOf(t) : [];
+        return [rq.length ? { t:t.name, sub:"Requirements: " + rq.join("  \u00b7  ") } : t.name,
+                orPend(t, "owner"),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
-      })));
+      }),
+      /* A slide with requirements on it holds fewer rows, or the taller
+         rows run off the bottom of the slide. */
+      requirementsOn() && SMPRules.shown(p.tactics).some(function(t){ return reqsOf(t).length; })
+        ? 7 : undefined));
   });
   slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
@@ -24251,6 +24296,33 @@ function compileCell(c){
    on Report and the scoring colours (§41's budget). And the key carries NO
    opacity — the mockup's `.85` took `--ink-3` from 5.1:1 to about 4.4 at
    10px, which is §38.5 walked into while quoting it. */
+/* §415 — WHAT A TACTIC NEEDS, UNDER ITS NAME (Islam, of two drawn: "B").
+   Under the name rather than a column of its own because a column cost the
+   Tactic and Outcome columns a fifth of their width on every row, while this
+   costs nothing and makes only the tactics that have requirements taller.
+   The reported note's own shape (§255) — a small key over a rule — so a
+   second kind of aside does not bring a second vocabulary (§53.5).
+
+   WITH THE PEN OPEN IT IS A BOX, ONE LINE PER ITEM, AND ENTER IS A NEWLINE:
+   it is a list, not a title, so it carries no `.grow` and §229's Enter-commits
+   never reaches it; the shell's textarea branch still sizes it to what is in
+   it. Drawn with the pen open whether or not it holds anything (§61 — the box
+   is the only way to write the first one); read mode draws nothing when there
+   is nothing (§15.1). */
+function reqsCell(t, ed){
+  if (!requirementsOn()) return "";
+  var a = reqsOf(t);
+  if (ed) {
+    var i = FIELDS.push(function(v){ setReqs(t, v); }) - 1;
+    return '<label class="reqbox"><span class="repkey">Requirements</span>' +
+      '<textarea class="fld reqfld" data-fld="' + i + '" rows="1" placeholder="One per line">' +
+      esc(a.join("\n")) + '</textarea></label>';
+  }
+  if (!a.length) return "";
+  return '<span class="repnote reqnote"><span class="repkey">Requirements</span>' +
+    '<ul class="reqs">' + a.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") +
+    '</ul></span>';
+}
 function repNote(row){
   /* `notetext` is the break rule and nothing else (§271): a note may be
      several lines now, and this shape prints one under a row's name while
@@ -32538,6 +32610,8 @@ function unitPlanBody(it, u, railed){
         (ed ? bxkey("Description") + textOr("plan", t.description || "", "tacdesc",
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
+        /* §415: what the tactic needs, under the description. */
+        reqsCell(t, ed) +
         /* §267: AND THE TAIL, when the window is too narrow for it to be two
            columns. The same two controls, in a strip on their own line — the
            width that buys goes straight to the two prose columns above it,
@@ -56665,7 +56739,8 @@ var CLIENTSETUP = (function () {
     var pd = card("Plan details");
     pd.appendChild(el("p", "lab", "What a direction and its tactics carry"));
     var pband = el("div", "wzband stchips");
-    [["overview", "Direction overview"], ["outcomes", "Several outcomes per tactic"]].forEach(function (c) {
+    [["overview", "Direction overview"], ["outcomes", "Several outcomes per tactic"],
+     ["requirements", "Tactic requirements"]].forEach(function (c) {
       var on = !!(lv.details && lv.details[c[0]] === true);
       var b = el("button", null, c[1]); b.type = "button";
       b.dataset.stdetail = c[0];

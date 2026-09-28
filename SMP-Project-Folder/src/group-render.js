@@ -481,6 +481,33 @@ function compileCell(c){
    on Report and the scoring colours (§41's budget). And the key carries NO
    opacity — the mockup's `.85` took `--ink-3` from 5.1:1 to about 4.4 at
    10px, which is §38.5 walked into while quoting it. */
+/* §415 — WHAT A TACTIC NEEDS, UNDER ITS NAME (Islam, of two drawn: "B").
+   Under the name rather than a column of its own because a column cost the
+   Tactic and Outcome columns a fifth of their width on every row, while this
+   costs nothing and makes only the tactics that have requirements taller.
+   The reported note's own shape (§255) — a small key over a rule — so a
+   second kind of aside does not bring a second vocabulary (§53.5).
+
+   WITH THE PEN OPEN IT IS A BOX, ONE LINE PER ITEM, AND ENTER IS A NEWLINE:
+   it is a list, not a title, so it carries no `.grow` and §229's Enter-commits
+   never reaches it; the shell's textarea branch still sizes it to what is in
+   it. Drawn with the pen open whether or not it holds anything (§61 — the box
+   is the only way to write the first one); read mode draws nothing when there
+   is nothing (§15.1). */
+function reqsCell(t, ed){
+  if (!requirementsOn()) return "";
+  var a = reqsOf(t);
+  if (ed) {
+    var i = FIELDS.push(function(v){ setReqs(t, v); }) - 1;
+    return '<label class="reqbox"><span class="repkey">Requirements</span>' +
+      '<textarea class="fld reqfld" data-fld="' + i + '" rows="1" placeholder="One per line">' +
+      esc(a.join("\n")) + '</textarea></label>';
+  }
+  if (!a.length) return "";
+  return '<span class="repnote reqnote"><span class="repkey">Requirements</span>' +
+    '<ul class="reqs">' + a.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") +
+    '</ul></span>';
+}
 function repNote(row){
   /* `notetext` is the break rule and nothing else (§271): a note may be
      several lines now, and this shape prints one under a row's name while
@@ -8768,6 +8795,8 @@ function unitPlanBody(it, u, railed){
         (ed ? bxkey("Description") + textOr("plan", t.description || "", "tacdesc",
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
+        /* §415: what the tactic needs, under the description. */
+        reqsCell(t, ed) +
         /* §267: AND THE TAIL, when the window is too narrow for it to be two
            columns. The same two controls, in a strip on their own line — the
            width that buys goes straight to the two prose columns above it,

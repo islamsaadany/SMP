@@ -677,16 +677,23 @@ function planWorkbook(u){
        Q1–Q4 from G:J to J:M and Hidden from K to N. Getting that wrong
        validates the wrong cells in silence, which is why the ranges move in
        the same edit as the head. */
-    { name:"Tactics",
+    (function(){
+    /* §415: the tactic's requirements ride at the very END (§65), one cell
+       with a line per item, and only where they mean something — the client
+       carries the switch, or a tactic already holds some — so every other
+       client's file is byte-for-byte what it was. */
+    var rq = (typeof requirementsOn === "function" && requirementsOn()) ||
+      u.items.some(function(p){ return (p.tactics || []).some(function(t){ return reqsOf(t).length; }); });
+    return { name:"Tactics",
       widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
-        .concat(monthWidths(9)),
+        .concat(monthWidths(9)).concat(rq ? [40] : []),
       /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
          already says so of the outcome's other three columns — a bare "Jan"
          beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
             "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
-        .concat(monthHead("Outcome ")),
+        .concat(monthHead("Outcome ")).concat(rq ? ["Requirements"] : []),
       numCols:monthNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
@@ -700,10 +707,12 @@ function planWorkbook(u){
             t.outDir || "", t.outTarget || "", t.outCompile || "",
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
-            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly")));
+            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly"))
+            .concat(rq ? [reqsOf(t).join("\n")] : []));
         });
         return acc;
-      }, []) },
+      }, []) };
+    })(),
 
     /* ── §343: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
        §22's contract again: an upload AUTHORS, so a column the file does not
@@ -1133,7 +1142,10 @@ function planFromWorkbook(u, sheets){
         .filter(Boolean).join("|"),
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",
       q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0",
-      hidden:yes(r["Hidden"]) ? "1" : "" });
+      hidden:yes(r["Hidden"]) ? "1" : "",
+      /* §415: a line per item; blank says nothing (a file written before
+         this existed carries no such column). */
+      reqs:r["Requirements"] || "" });
   });
 
   /* §414: a tactic's extra outcomes ride ON the tactic's row, minted O2,

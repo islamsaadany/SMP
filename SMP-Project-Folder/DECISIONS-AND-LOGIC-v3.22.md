@@ -58283,3 +58283,52 @@ change on an extra does not rewrite a figure already stored for it (`actualFollo
 reaches `outActual` only); and — found while building, not this change's — My reporting's
 outcome cell for a tactic WITHOUT extras reads `oc.name`, which `outcomeOf()` never sets, so it
 always says *how far it got* rather than the outcome's name.
+
+## §415 — a tactic's requirements (2026-09-28)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-28_requirements.html`), which
+drew placement A (a column of its own) against B (under the tactic's name) and asked whether
+the review deck should carry it too: **"B, plan download only, build it"**. RHI's fifth step.
+
+**B, because it costs no width.** Measured in the mockup at 1440: a column took the Tactic and
+Outcome columns from 328px to 258px and made EVERY row taller, those with nothing in it
+included; under the name, no column moves and only a tactic that has requirements grows. With
+the pen open at 1280 a column took Tactic 305 → 230px and Outcome 214 → 155px. The shape is the
+reported note's (§255) — a small key over a rule — so a second kind of aside brings no second
+vocabulary (§53.5).
+
+**Stored as `reqs`, a list of trimmed lines on the tactic**, riding `tactics.extra` (no
+migration), DELETED when emptied (§50.6). One reader (`reqsOf`), one parser (`reqsParse`), one
+writer (`setReqs`) in `config-data.js`, asked by the Plan cell, the workbook, the reader and the
+plan download. **Switched per client** as a third Plan details chip (`structure.details.
+requirements`, §413's rule: only an explicit `true` turns it on); off hides and forgets nothing.
+
+**The box is a list, not a title**, so it carries no `.grow` and §229's Enter-commits never
+reaches it — Enter is a newline — while the shell's textarea branch still sizes it to what is
+in it. It is drawn behind the pen on every tactic, the empty ones included (§61); read mode
+draws nothing where there is nothing (§15.1).
+
+**The plan download carries it and the review deck does not** (his choice, and the mockup's
+reason: the review deck is about how the figures went). In the .pptx the list rides under the
+tactic's name as the cell's second paragraph (`sub`, §311); a pillar whose tactics carry
+requirements holds 7 rows a slide rather than 11, or the taller rows run off the slide —
+`pptxTableSlides` gains an optional per-slide count, absent everywhere else.
+
+**Not an obligation**: never scored, never counted as missing, never asked for on Reporting.
+**The server needed nothing and it is asserted** (§172): `reqs` is not in `REPORT.tactic`, so it
+falls to the plan and is the office's — `test-authorize.js` §415, both ends, red 2 with `reqs`
+made a reporting field. **The workbook** appends a Requirements column at the END of the Tactics
+sheet (§65), items separated by line breaks in the cell, drawn only when the switch is on or a
+tactic holds some, so every other client's file is unchanged; the reader brings them back.
+
+**Checked**: `checks/tactic-requirements.py` — off unchanged with requirements stored (§113.8),
+the chip pressed, read back and deleted, the list under the name with the table's column widths
+asserted unchanged, a box on every tactic behind the pen, real Enter presses making lines that
+reach the STORED tactic trimmed (§96), emptied deleted, the gap count and score unmoved, the
+review deck carrying nothing, the plan download carrying both items, a 12-tactic pillar
+splitting 7 + 5, and the workbook round trip. **Its first slide-count assertion could not
+fail** — the fixture's pillar held 5 tactics, which fit any slide (§113.8); it builds a pillar of
+12 now. Proved able to fail four ways from the SOURCES (§276): the cell not drawn 6, the plan
+download dropping it 1, the per-slide count ignored 1, an emptied list kept 1 — the tree
+rebuilt byte-identical after.
+

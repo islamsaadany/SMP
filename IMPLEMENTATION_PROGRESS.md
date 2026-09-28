@@ -8216,6 +8216,22 @@ Second RHI change. Setup › Capabilities now has **Owner** and **Custodian** co
 
 - **§411.1 (2026-09-25):** a tactic that is not due now says "Not due" once, in Status. The duplicate "Not yet due" next to it is gone. Built on the branch, not merged.
 
+## §415 — a tactic's requirements (2026-09-28, on the branch)
+
+Fifth RHI change, built from the mockup Islam answered ("B, plan download only, build it"). A tactic can now list what it needs (people, budget, a sign-off), one short line per item. It is switched on per client from Getting started › Structure, as a third chip on the Plan details card (*Tactic requirements*). It is off by default, so Raya Trade and every other client look exactly as before.
+
+- **Plan page**: the list sits under the tactic's name and description, under a small *Requirements* heading, the same shape as the reported note. No column gets narrower; only tactics that have requirements get taller. A tactic with none shows nothing.
+- **With the pen open**: every tactic has a *Requirements* box, one item per line. Enter starts a new line. Blank lines and stray spaces are dropped when it is saved.
+- **Plan download** (the editable slides of the plan): the list rides under the tactic's name. A slide with requirements on it holds 7 tactics instead of 11, so the taller rows do not run off the slide.
+- **The review deck does not show them** (Islam's choice), and neither do Reporting or Performance.
+- **Not scored and not counted as missing.** Only the office writes them (they are part of the plan).
+- **The plan workbook** gets a *Requirements* column at the end of the Tactics sheet, items on separate lines in the cell, only when the switch is on or requirements exist. Uploading brings them back.
+- Nothing is migrated. Turning the switch off hides them and keeps them.
+
+Checked: `checks/tactic-requirements.py` (all good; red four ways when a piece is broken on purpose — 6 / 1 / 1 / 1), the server test (the office writes them, a reporter cannot, and they count as the plan; red 2 when requirements are made a reporting field), the neighbouring checks and the full page sweep.
+
+**Next, step 6** — the last plan detail agreed for RHI, mockup first.
+
 ## §414 — several outcomes per tactic (2026-09-28, on the branch)
 
 Fourth RHI change, built from the mockup Islam approved ("approved, build it"). A tactic can now have more than one outcome. Each outcome has its own target and is scored on its own, and the tactic reads as the average of them. It is switched on per client from Getting started › Structure, as a second chip on the Plan details card (*Several outcomes per tactic*). It is off by default, so Raya Trade and every other client look exactly as before.

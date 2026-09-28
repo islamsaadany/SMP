@@ -2890,3 +2890,26 @@ details.dov[open]>summary .dovpeek{display:none}
 .dovv.dovnone{color:var(--ink-3)}
 .dovc textarea.dovta{width:100%;min-height:84px;resize:vertical}
 @media (max-width:900px){ .dovw{grid-template-columns:1fr} }
+
+/* ── YEARS 1 · 2 · 3 (§416) ─────────────────────────────────────────
+   From the signed-off mockup (design-mockups/rhi-directions/
+   2026-09-28_years.html). The marks are the quarter marks' own shape one
+   scale up; the year the plan stands in is RINGED, never filled, so "runs"
+   and "now" stay two facts. A direction that does not run this year is
+   greyed in its rail row and says when it runs under its name. */
+.yrtag { display:inline-block; margin-left:6px; font:600 10.5px/1 var(--mono, monospace);
+  color:var(--ink-3); border:1px solid var(--line); border-radius:4px; padding:2px 4px;
+  vertical-align:1px; }
+.ritem.later b, .ritem.later .rcode, .ritem.later .rnum { color:var(--ink-3); }
+.ritem.later { background:var(--surface-2); }
+.yrbox { display:inline-flex; align-items:center; gap:6px; }
+.yrbox .yk { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+.yrbox .qs i, .qs-edit.yrs .qtog { min-width:22px; }
+.yrbox .qs i.now, .qs-edit.yrs .qtog.now { outline:2px solid var(--gold); outline-offset:1px; }
+.yrline { margin:10px 18px 0; padding:9px 12px; border:1px dashed var(--line); border-radius:7px;
+  font-size:13px; color:var(--ink-2); }
+.planyears .yrchips { margin:6px 0 10px; display:flex; gap:8px; flex-wrap:wrap; }
+.planyears .yrchip { border:1px solid var(--line); border-radius:6px; padding:5px 9px; font-size:12.5px;
+  color:var(--ink-2); background:var(--surface); }
+.planyears .yrchip.now { border-color:var(--gold); color:var(--ink); font-weight:600; }
+.pcard-y { display:block; margin-top:6px; font-size:.7em; color:var(--ink-3); }

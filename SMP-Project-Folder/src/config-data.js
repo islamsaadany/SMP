@@ -5399,6 +5399,9 @@ function reportItems(u){
                place:koPlace });
   });
   u.items.forEach(function(p, pi){
+    /* §416: a direction not running this year is not asked — skipped here,
+       with its index kept, so every code still reads what the Plan shows. */
+    if (!runsNow(p)) return;
     var code = pillarCode(u, pi), head = code + " " + p.name;
     /* The rail key is the rail's own, asked of the function that owns it
        (§53.5) -- a literal "unit:" + key here is a second spelling of one
@@ -7133,6 +7136,91 @@ function setReqs(t, v){
   var a = reqsParse(v);
   if (a.length) t.reqs = a; else delete t.reqs;
 }
+/* §416 — YEARS 1 · 2 · 3 (RHI step 6). A direction marks the years it runs
+   in (`p.years`, riding `pillars.extra`, no migration; absent or all three is
+   every year and is stored as an ABSENCE, §50.6). The plan stands in one year
+   at a time, `GROUP.planYear` (absent = Year 1), moved on ONLY by the office's
+   yearly revision — never by the calendar, so the year shown and the plan in
+   use cannot disagree. A direction not running this year stays on the Plan
+   page, greyed, and is not asked, not owed and not scored: every reader that
+   counts or averages walks `itemsNow(u)` rather than `u.items`. Off HIDES and
+   forgets nothing (§44): with the switch off every direction runs. */
+function yearsOn(){ return SMPRules.planDetailOn(GROUP, "years"); }
+function planYear(){ return SMPRules.planYearOf(GROUP); }
+function pillarYears(p){ return SMPRules.pillarYears(p); }
+function runsNow(p){ return SMPRules.runsNow(GROUP, p); }
+function itemsNow(u){
+  var it = (u && u.items) || [];
+  return yearsOn() ? it.filter(runsNow) : it;
+}
+/* The calendar year a plan year stands for. The planning period is the
+   CURRENT year's (§308, targets are this year's only), so Year k sits k minus
+   the current year away from it; with no period set, the cycle's own year. */
+function planYearCal(k){
+  var f = planFrom(), base = f != null ? Math.floor(f / 12) : cycleYear();
+  return base == null ? null : base + (k - planYear());
+}
+/* "Year 1.2026" — Islam's own spelling. The calendar year is dropped rather
+   than guessed where nothing says it. */
+function planYearLabel(k){
+  var c = planYearCal(k);
+  return "Year " + k + (c ? "." + c : "");
+}
+/* "Y1–3", "Y1", "Y2–3" — the short tag the rail wears. The years are only
+   ever a run (1, 1-2, 1-3, 2-3 ...) or 1 and 3; the gap case is spelled out. */
+function yearsTag(p){
+  var ys = pillarYears(p);
+  if (ys.length === 1) return "Y" + ys[0];
+  if (ys[ys.length - 1] - ys[0] === ys.length - 1) return "Y" + ys[0] + "\u2013" + ys[ys.length - 1];
+  return "Y" + ys.join(", ");
+}
+/* Why a direction is greyed, in words, or "" where it runs this year. */
+function yearsLater(p){
+  if (runsNow(p)) return "";
+  var ys = pillarYears(p), now = planYear();
+  var next = ys.filter(function(y){ return y > now; })[0];
+  return next ? "Starts in Year " + next : "Ended in Year " + ys[ys.length - 1];
+}
+/* Turning a year on or off. The last year lit cannot be turned off — a
+   direction that runs in no year is not a direction, and a key holding
+   nothing would read as every year. All three lit deletes the key. */
+function togglePillarYear(p, y){
+  var ys = pillarYears(p).slice(), i = ys.indexOf(y);
+  if (i >= 0) { if (ys.length === 1) return false; ys.splice(i, 1); }
+  else ys.push(y);
+  ys.sort();
+  if (ys.length === 3) delete p.years; else p.years = ys;
+  return true;
+}
+/* THE YEARLY REVISION. Every plan that has one is archived as it stood (the
+   same `archiveUnitPlan()` the import and Clear plan take, §49.2, so the way
+   back is Restore), then the plan moves to the next year and CARRIES OVER
+   whole — Islam: tactics carry over to be edited, not started empty. The
+   planning period, where set, moves a year with it, because it is the
+   current year's (§308). Returns the number of plans archived, or -1 when
+   the plan is already in Year 3. */
+function startYearRevision(){
+  var now = planYear();
+  if (now >= 3) return -1;
+  var why = "the Year " + (now + 1) + " revision", n = 0;
+  (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : Object.keys(UNITS)).forEach(function(k){
+    if (UNITS[k] && archiveUnitPlan(UNITS[k], why)) n++;
+  });
+  /* A function that plans in pillars carries directions too, so its plan is
+     filed the same way (§59: one shape, one path). */
+  (typeof FUNCTION_KEYS !== "undefined" ? FUNCTION_KEYS : Object.keys(FUNCTIONS)).forEach(function(k){
+    if (plansInPillars("fn:" + k)) {
+      var w = unitLikeWritable("fn:" + k);
+      if (w && archiveUnitPlan(w, why)) n++;
+    }
+  });
+  GROUP[SMPRules.PLAN_YEAR] = now + 1;
+  if (planSet()) {
+    GROUP[SMPRules.PLAN_FROM] = SMPRules.monthLabel(planFrom() + 12);
+    GROUP[SMPRules.PLAN_TO] = SMPRules.monthLabel(planTo() + 12);
+  }
+  return n;
+}
 function tacticExtras(t){
   if (!t || !Array.isArray(t.outs) || !t.outs.length || !outcomesOn()) return [];
   return t.outs;
@@ -7556,6 +7644,8 @@ function gapMap(target, all, fillable){
     /* §405: a unit that plans otherwise owes nothing on its hidden pillars. */
     if (noPillars) return;
     (u.items || []).forEach(function(p, i){
+      /* §416: a direction not running this year owes nothing yet. */
+      if (!runsNow(p)) return;
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
@@ -8322,9 +8412,9 @@ function unitOwnExec(u){
   if (!h) return null;
   return unitOwnWay(u) === "objectives" ? fnActionsTally("u:" + u.ukey).pct : capExec(h).pct;
 }
-function unitPillars(u){ return unitOwnWay(u) ? null : avg(u.items.map(pillarPerf)); }
-function unitExec(u){ return unitOwnWay(u) ? unitOwnExec(u) : avg(u.items.map(pillarExec)); }
-function unitPlan(u){ return unitOwnWay(u) ? (unitOwnExec(u) == null ? null : 100) : avg(u.items.map(pillarPlan)); }
+function unitPillars(u){ return unitOwnWay(u) ? null : avg(itemsNow(u).map(pillarPerf)); }
+function unitExec(u){ return unitOwnWay(u) ? unitOwnExec(u) : avg(itemsNow(u).map(pillarExec)); }
+function unitPlan(u){ return unitOwnWay(u) ? (unitOwnExec(u) == null ? null : 100) : avg(itemsNow(u).map(pillarPlan)); }
 function unitRatio(u){ var pl = unitPlan(u); return pl ? Math.round(unitExec(u)/pl*100) : null; }
 
 var UNIT_KEYS = ["mobile","retailstores","b2becomm","consumerelectronics","onlineshop",
@@ -10322,7 +10412,7 @@ function themePillars(ab){
   var out = [];
   UNIT_KEYS.forEach(function(k){
     UNITS[k].items.forEach(function(it, i){
-      if (it.theme === ab) out.push({ unit: UNITS[k].name, ukey: k, code: pillarCode(UNITS[k], i), it: it });
+      if (it.theme === ab && runsNow(it)) out.push({ unit: UNITS[k].name, ukey: k, code: pillarCode(UNITS[k], i), it: it });
     });
   });
   return out;

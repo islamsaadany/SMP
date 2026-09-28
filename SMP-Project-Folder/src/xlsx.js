@@ -640,13 +640,20 @@ function planWorkbook(u){
     (function(){
       var ov = (typeof planDetailOn === "function" && planDetailOn("overview")) ||
         u.items.some(function(p){ return ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); }); });
-      return { name:"Pillars", widths:[40, 14, 22, 22].concat(ov ? [50, 40, 40] : []),
-      head:["Pillar", "Kind", "Theme", "Owner"].concat(ov ? ["Objective", "Why now", "Risks & mitigations"] : []),
+      /* §416: the years a direction runs in ride at the very END (§65), and
+         only where the client carries the switch or a direction already holds
+         some — every other client's file is byte-for-byte what it was. */
+      var yr = (typeof yearsOn === "function" && yearsOn()) ||
+        u.items.some(function(p){ return Array.isArray(p.years); });
+      return { name:"Pillars", widths:[40, 14, 22, 22].concat(ov ? [50, 40, 40] : []).concat(yr ? [12] : []),
+      head:["Pillar", "Kind", "Theme", "Owner"].concat(ov ? ["Objective", "Why now", "Risks & mitigations"] : [])
+        .concat(yr ? ["Years"] : []),
       validations:[{ range:"B2:B60", list:KINDS },
                    { range:"C2:C60", list:themes,
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]
-        .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : []); }) };
+        .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : [])
+        .concat(yr ? [SMPRules.pillarYears(p).join(", ")] : []); }) };
     })(),
 
     { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(monthWidths(8)),
@@ -1070,7 +1077,8 @@ function planFromWorkbook(u, sheets){
                 description:"", outcome:"", collaborators:"", direction:"",
                 value:"", value_3y:"", unit:"", horizon:"", compile:"",
                 q1:"", q2:"", q3:"", q4:"", source_slide:"",
-                ovObj:r["Objective"] || "", ovWhy:r["Why now"] || "", ovRisk:r["Risks & mitigations"] || "" });
+                ovObj:r["Objective"] || "", ovWhy:r["Why now"] || "", ovRisk:r["Risks & mitigations"] || "",
+                years:r["Years"] == null ? "" : String(r["Years"]) });
   });
 
   var fN = 0;

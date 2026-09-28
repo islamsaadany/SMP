@@ -618,6 +618,12 @@ function createFromPlan(u, d){
         var v = String(x[k] == null ? "" : x[k]);
         if (v.trim()) u.items[u.items.length - 1][k] = v;
       });
+      /* §416: the years, read as the digits 1–3 the cell names. All three,
+         or none, is every year, which is stored as an ABSENCE (§50.6). */
+      var yrs = [];
+      String(x.years || "").replace(/[1-3]/g, function(d){ if (yrs.indexOf(+d) < 0) yrs.push(+d); return d; });
+      yrs.sort();
+      if (yrs.length && yrs.length < 3) u.items[u.items.length - 1].years = yrs;
       made++;
     } else if (x.type === "MEASURE") {
       var p = u.items.filter(function(y){ return y.id === x.parent_id; })[0];

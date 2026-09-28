@@ -5039,5 +5039,28 @@ console.log("\n§415 · a tactic's requirements");
   v = as(rep, sw);           check("§415 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
 })();
 
+/* ── §416: YEARS 1 · 2 · 3 ──────────────────────────────────────────────
+   A direction's years are the plan (the pen's, not a reporter's), and the
+   year the plan stands in is the CYCLE — the office moves it at the yearly
+   revision and nobody else can. Both ends (§94.2), and the change must
+   classify ONCE as "cycle" rather than beside an unknown (§259.2). */
+console.log("\n§416 · years 1 · 2 · 3");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) { return (B.units[k].items || []).length; })[0];
+  const years = function (inc) { inc.units[K].items[0].years = [2, 3]; };
+  const move = function (inc) { inc.group.planYear = 2; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  let v = as("smo", years);  check("§416: the office sets a direction's years", v.ok, v.refusals.join(" / "));
+  v = as(rep, years);        check("§416 REFUSED: a reporter cannot (it is the plan)", !v.ok, "was ALLOWED");
+  v = as("smo", move);       check("§416: the office moves the plan's year", v.ok, v.refusals.join(" / "));
+  v = as(rep, move);         check("§416 REFUSED: nobody else moves the plan's year", !v.ok, "was ALLOWED");
+  const inc = clone(B); move(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§416: the plan's year classifies once, as the cycle", kinds.length === 1 && kinds[0] === "cycle", kinds.join(","));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

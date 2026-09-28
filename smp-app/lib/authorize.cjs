@@ -563,6 +563,10 @@ function collect(stored, incoming, w) {
      moved, because half a period is not a second decision. */
   if (!same(sg[PLAN_FROM], ig[PLAN_FROM]) || !same(sg[PLAN_TO], ig[PLAN_TO]))
     add("cycle", null, "the planning period");
+  /* §416: the year the plan stands in. `cycle`, beside the planning period
+     it belongs to — the yearly revision is pressed in the same pen. The two
+     edits go together (§259.2): classified here AND in gExtra. */
+  if (!same(sg.planYear, ig.planYear)) add("cycle", null, "the plan's year");
   if (!same(sg.mainbus, ig.mainbus)) add("setup", null, "the BU list");
   /* Communication (§72): the display name on outgoing mail, the reply-to and
      the footer. SETUP for the same reason branding is - it is what the
@@ -593,7 +597,7 @@ function collect(stored, incoming, w) {
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
-                                   SEASONS, DRIVERS_ON]);
+                                   SEASONS, DRIVERS_ON, "planYear"]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */

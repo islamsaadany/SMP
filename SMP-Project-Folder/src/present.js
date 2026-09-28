@@ -391,7 +391,7 @@ function deckSlides(u){
         : '') +
       '<div class="headcell"><span class="dlab">' + L("pillar","bu") + ' performance</span>' +
         '<b class="' + dBand(pl) + '">' + dPct(pl) + '</b>' +
-        '<span class="headsub">' + u.items.length + ' ' + esc(L("pillar","bu")) +
+        '<span class="headsub">' + itemsNow(u).length + ' ' + esc(L("pillar","bu")) +
           ', by their measures</span></div>' +
       '<div class="headcell"><span class="dlab">Execution performance</span>' +
         '<b class="' + dBand(ex) + '">' + dPct(ex) + '</b>' +
@@ -484,7 +484,10 @@ function deckSlides(u){
   var pNames = u.items.map(function(p, i){
     return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') + '</div>';
+      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') +
+      /* §416: the years each direction runs in, and a later one says when. */
+      (yearsOn() ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
+      '</div>';
   }).join("");
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
@@ -508,6 +511,11 @@ function deckSlides(u){
 
   /* The score table, built here and pushed at the END (§254.4). */
   var pRows = u.items.map(function(p, i){
+    /* §416: a direction that does not run this year is listed, not scored. */
+    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+      '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
+      '<span class="dsub">' + esc(yearsLater(p)) + '</span></td>' +
+      '<td class="num">&mdash;</td><td class="num">&mdash;</td></tr>';
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
@@ -528,6 +536,8 @@ function deckSlides(u){
     '<tbody>' + pRows + '</tbody></table></section>';
 
   u.items.forEach(function(p, pi){
+    /* §416: and it gets no slides of its own until its year comes. */
+    if (!runsNow(p)) return;
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     S.push('<section class="dslide d-cover"' +
       anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +

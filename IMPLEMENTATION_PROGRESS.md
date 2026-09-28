@@ -8216,6 +8216,19 @@ Second RHI change. Setup › Capabilities now has **Owner** and **Custodian** co
 
 - **§411.1 (2026-09-25):** a tactic that is not due now says "Not due" once, in Status. The duplicate "Not yet due" next to it is gone. Built on the branch, not merged.
 
+## §416 — years 1 · 2 · 3, and the yearly revision (2026-09-28, on the branch)
+
+Sixth RHI change, the last plan detail agreed, built from Islam's five answers on the mockup ("1. keep 2. carry over 3. Year 1.2026 4. this year only 5. ok"). Switched on per client as a fourth chip on the Plan details card (*Years 1 · 2 · 3*). Off by default, so Raya Trade and every other client look exactly as before.
+
+- **Each direction marks the years it runs in** (1, 2, 3), set with three buttons behind the pen. All three is the default.
+- **A direction that does not run this year stays on the Plan, greyed**, saying when it runs ("Starts in Year 2"). It is not asked for in Reporting, not counted as missing and not scored, so the unit's numbers are made of the directions running this year.
+- **The yearly revision**: in Setup › Reporting cycle (with the pen open) the three years are named, e.g. "Year 1.2026 · now", with a button *Start the Year 2 revision…*. It asks first, archives every plan as it stood, and moves the plan into the next year. Everything carries over and is refined in the pen. The year never changes by itself.
+- **Targets stay this year's only**, so the planning period stays one year (the drawing showed three; this is deliberate). The revision moves a set period on by twelve months.
+- **The deck** lists a not-running direction but gives it no slides; **the plan download** shows every direction with its years; **the plan workbook** gets a Years column at the end of the Pillars sheet.
+- Nothing is migrated. Turning the switch off hides the years and keeps them.
+
+Checked: `checks/years.py` (all good; red when a piece is broken on purpose), the server test (only the office moves the plan's year; red 2 when that rule is removed), the neighbouring checks and the full page sweep.
+
 ## §415 — a tactic's requirements (2026-09-28, on the branch)
 
 Fifth RHI change, built from the mockup Islam answered ("B, plan download only, build it"). A tactic can now list what it needs (people, budget, a sign-off), one short line per item. It is switched on per client from Getting started › Structure, as a third chip on the Plan details card (*Tactic requirements*). It is off by default, so Raya Trade and every other client look exactly as before.

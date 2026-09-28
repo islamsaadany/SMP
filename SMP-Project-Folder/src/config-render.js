@@ -7023,6 +7023,33 @@ function planPeriodBlock(){
       'where a plan started mid-year. <b>Set once for the whole business</b>, and it does ' +
       'not change when a cycle closes. Every figure is measured against the share of it ' +
       'that has passed by the month the cycle covers to.</div>' +
+  '</div>' + planYearsBlock();
+}
+
+/* ── YEARS 1 · 2 · 3, AND THE YEARLY REVISION (§416) ─────────────────
+   Drawn only while the Plan details switch is on. The three years are
+   NAMED, never typed: the plan stands in one of them and only this button
+   moves it (Islam's "carry over": the plan as it stood is archived, the
+   tactics carry over, and the new year's refinement is done in the pen).
+   The planning period above stays one year — targets are this year only,
+   his answer — so the revision moves that period on by twelve months if it
+   was set. Nothing reads the calendar to decide which year it is. */
+function planYearsBlock(){
+  if (!yearsOn()) return "";
+  var now = planYear(), chips = "";
+  for (var y = 1; y <= 3; y++)
+    chips += '<span class="yrchip' + (y === now ? " now" : y < now ? " past" : "") + '">' +
+      esc(planYearLabel(y)) + (y === now ? " \u00b7 now" : "") + '</span>';
+  return '<div class="cyc2-r planyears">' +
+    '<div class="nc-h">The three years</div>' +
+    '<div class="yrchips">' + chips + '</div>' +
+    (now < 3
+      ? '<div class="nc-h">The yearly revision</div>' +
+        '<p class="cyc2-p">Moves the plan into ' + esc(planYearLabel(now + 1)) +
+          '. The plan as it stands is archived first; directions and tactics carry over ' +
+          'and are refined in the pen.</p>' +
+        '<button class="editbtn" data-yearrev="1">Start the Year ' + (now + 1) + ' revision\u2026</button>'
+      : '<p class="cyc2-p">The plan is in its last year.</p>') +
   '</div>';
 }
 

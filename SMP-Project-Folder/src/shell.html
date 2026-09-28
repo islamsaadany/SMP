@@ -4737,6 +4737,33 @@
         paint();
       });
     });
+    /* THE YEARLY REVISION (§416). The platform's own dialog, never the
+       browser's (§95, §273.3): it names what moves and what is archived.
+       Office only, like the pen it sits in; startYearRevision() asks again. */
+    var yr = document.querySelector("[data-yearrev]");
+    if (yr) yr.addEventListener("click", function(){
+      if (!inOffice()) return;
+      var next = planYear() + 1;
+      if (next > 3) return;
+      openModalHtml("Start the Year " + next + " revision?", esc(planYearLabel(next)),
+        '<div class="rmconfirm">' +
+          '<p>The plan moves from <b>' + esc(planYearLabel(next - 1)) + '</b> into <b>' +
+            esc(planYearLabel(next)) + '</b>. Directions that do not run in Year ' + next +
+            ' stop being asked for and scored; those that start in it begin.</p>' +
+          '<p class="archline">Every unit\u2019s plan as it stands is archived first. ' +
+            '<b>Setup \u203a Import &amp; storage</b> holds the way back.</p>' +
+          '<div class="mrow"><button class="quiet" data-yrno="1">Cancel</button>' +
+          '<button class="danger" data-yryes="1">Start the revision</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var no = box.querySelector("[data-yrno]");
+      if (no) no.addEventListener("click", function(){ closeModal(); });
+      var yes = box.querySelector("[data-yryes]");
+      if (yes) yes.addEventListener("click", function(){
+        closeModal(); startYearRevision(); paint();
+      });
+    });
     var cc = document.querySelector("[data-closecycle]");
     if (cc) cc.addEventListener("click", function(){
       /* §273.4: THE GUARD WENT WITH THE DRAFT. §273 held this button back while
@@ -8729,6 +8756,21 @@
         /* §145: an office write settles — a pending quarters fill loses its
            mark the moment the office touches the row. Correcting confirms. */
         gapLift(t, "quarters");
+        paint();
+      });
+    });
+    /* THE YEAR TOGGLES (§416). A direction's years are part of what was
+       agreed, so they are the pen's (`mayEditPlan`), resolved by the
+       pillar's id through the writable view (§48.2) — the same resolver
+       Remove uses — and togglePillarYear refuses to take the last one. */
+    document.querySelectorAll("[data-pyear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.pyear.split("|"), uk = a[0], id = a[1], y = +a[2];
+        var u = unitLikeWritable(uk);
+        var p = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
+        if (!p || !togglePillarYear(p, y)) return;
+        if (/^fn:/.test(uk)) fnWriteBack(uk.slice(3), u);
         paint();
       });
     });

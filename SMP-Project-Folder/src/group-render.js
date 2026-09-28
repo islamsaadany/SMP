@@ -1958,7 +1958,7 @@ function unitCards(keys){
         : '<h4 class="mini">' + L("pillar") + ' beneath</h4>' +
       miniTable(SHOW_KIND ? [L1("pillar"),"Kind",L1("theme"),"Performance","Of plan"]
                           : [L1("pillar"),L1("theme"),"Performance","Of plan"],
-        u.items.map(function(it, i){
+        itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
           return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
             (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
             '<td><span class="pill theme">' + it.theme + '</span></td>' +
@@ -1970,7 +1970,7 @@ function unitCards(keys){
       ? '<p class="sub">Execution <b>' + pct(unitExec(u)) + '</b> across its ' +
           esc(unitPlanWord(unitFormat(u)).toLowerCase()) + '.</p>'
       : miniTable([L1("pillar"),"Delivered","Planned","Variance"],
-      u.items.map(function(it, i){
+      itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
         return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
           '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
@@ -2772,7 +2772,7 @@ function renderUnitPerformance(u){
      Nothing new is computed. unitPillars() has existed since the scoring model
      did; only the highest and lowest are worked out here, exactly as the key
      objectives card does. */
-  var pps = u.items.map(pillarPerf).filter(function(v){ return v != null && !isNaN(v); });
+  var pps = itemsNow(u).map(pillarPerf).filter(function(v){ return v != null && !isNaN(v); });
   var pl = unitPillars(u);
   var plHi = pps.length ? Math.max.apply(null, pps) : null;
   var plLo = pps.length ? Math.min.apply(null, pps) : null;
@@ -2780,7 +2780,7 @@ function renderUnitPerformance(u){
   var plDrill =
     '<p class="sub" style="margin:0 0 14px">' + tipPillars() + '</p>' +
     miniTable(["#", plWord, L("measure"), "Scored", "Performance"],
-      u.items.map(function(it, i){
+      itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
         var pp = pillarPerf(it), carrier = pillarCarrier(it);
         /* A pillar handed to a function is scored by ITS pillars, not by
            measures of its own (§59) — so the count would read 0 beside a real
@@ -2794,7 +2794,7 @@ function renderUnitPerformance(u){
           '<td class="num">' + ms + '</td><td class="num">' + sc + '</td>' +
           '<td class="num final" style="color:' + bandInk(pp) + '">' + pct(pp) + '</td></tr>';
       }).join("")) +
-    '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + u.items.length + '</b> ' +
+    '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + itemsNow(u).length + '</b> ' +
     plWord + ' with something scored: <b>' + pct(pl) + '</b>. ' +
     'A ' + L1("pillar") + ' with no reported measure is left out ' +
     'rather than counted as zero: nothing reported is not the same as nothing achieved.</p>';
@@ -2802,7 +2802,7 @@ function renderUnitPerformance(u){
   var exDrill =
     '<p class="sub" style="margin:0 0 14px">' + TIP_EXEC() + '</p>' +
     miniTable(["#", L("pillar","bu"), "Delivered", "Planned", "Of plan", "Var."],
-      u.items.map(function(it, i){
+      itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
         var pr = pillarRatio(it);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
           '<td class="num">' + pillarExec(it) + '%</td><td class="num">' + pillarPlan(it) + '%</td>' +
@@ -2810,7 +2810,7 @@ function renderUnitPerformance(u){
           '<td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Delivered <b>' + unitExec(u) + '%</b> against <b>' + unitPlan(u) +
-    '%</b> planned across <b>' + u.items.length + '</b> ' + L("pillar","bu") +
+    '%</b> planned across <b>' + itemsNow(u).length + '</b> ' + L("pillar","bu") +
     ' &mdash; <b>' + r + '%</b> of plan. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var koId = modalFor(esc(u.name) + " &mdash; " + L("keyobj","bu"), "The unit's own scorecard, and how the headline is built", koDrill);
@@ -6296,6 +6296,13 @@ function renderReport(u){
   };
 
   var sel = unitRailPick(u);
+  /* §416: a direction that does not run this year is not asked for, so the
+     page does not OPEN on one — unless somebody pressed it, in which case
+     it says why there is nothing to enter (§35). */
+  if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
+    var firstNow = u.items.filter(runsNow)[0];
+    if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
+  }
   var pillars;
   if (!sel) {
     pillars = '<div class="note">This unit has no ' + L("pillar","bu") +
@@ -6315,25 +6322,30 @@ function renderReport(u){
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
       var e = owedAt["p:" + (p.id || pi)], owes = e && e.count > 0;
-      var sub = t.total === 0 ? 'Not asked this cycle'
+      var now = runsNow(p);
+      var sub = !now ? yearsLater(p)
+              : t.total === 0 ? 'Not asked this cycle'
               : t.done >= t.total ? 'Complete'
               : (t.total - t.done) + ' still to enter';
-      return '<button class="ritem' + (pillarRailId(p) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
+      return '<button class="ritem' + (pillarRailId(p) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
           esc(u.ukey) + '|' + esc(pillarRailId(p)) + '">' +
-        railName(code, p.name) +
+        railName(code, p.name) + yearsTagHtml(p) +
         /* AND THE TALLY STOPS READING AS FINISHED. Green is the platform's
            word for "nothing left here", and on a pillar owing a note it was
            saying it over the one row holding the whole report up. */
+        (!now ? '<span class="rnum">&mdash;</span>' :
         '<span class="rnum"><span class="rtally' +
           (t.total && t.done >= t.total && !owes ? " full" : "") + '">' +
-          t.done + '/' + t.total + '</span></span>' +
-        railSub(owes ? "" : sub,
-                owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>' : "") +
+          t.done + '/' + t.total + '</span></span>') +
+        railSub(owes || !now ? "" : sub,
+                owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>'
+                : !now ? esc(sub) : "") +
         '</button>';
     }).join("");
     var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
-    var pane = reportPillarPane(sel, u.items.indexOf(sel));
+    var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
+      : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
     pillars = railWorthIt(u.items)
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
@@ -8279,10 +8291,10 @@ function unitRailFor(u, sel){
       (it.measures || []).forEach(function(m){ empt += SMPRules.gapEmptyFields("measure", m).length; });
       (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
     }
-    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
+    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (runsNow(it) ? "" : " later") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
-        railName(pillarCode(u, i), it.name, it.kind) +
+        railName(pillarCode(u, i), it.name, it.kind) + yearsTagHtml(it) +
         (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.id || String(i)) +
           '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
           gaps + ' Missing</span>'
@@ -8302,8 +8314,11 @@ function unitRailFor(u, sel){
         /* §410: the kind moved beside the code, and the OWNER left the plan
            rail (Islam: "remove the owner not needed here") — it is on the
            pillar's own page, one press away. */
-        railSub(plural(it.measures.length, L1("measure"), L("measure")) +
-          ' &middot; ' + plural(it.tactics.length, L1("tactic"), L("tactic"))) +
+        /* §416: when it runs is not detail — it is why the row is grey — so
+           it rides as the half of the line a collapsed rail keeps (§119). */
+        railSub(runsNow(it) ? plural(it.measures.length, L1("measure"), L("measure")) +
+          ' &middot; ' + plural(it.tactics.length, L1("tactic"), L("tactic")) : "",
+          runsNow(it) ? "" : esc(yearsLater(it))) +
       '</button>';
   }).join("");
   /* No footer. It said "Figure shown is key measures", explaining a number
@@ -8516,6 +8531,44 @@ function ownStateChip(target, list, word){
    tallies and the finished mark — things about how the pillar is GOING — and
    the kind is a fact about what the pillar IS, which is the same kind of fact
    as the code two inches to its left. */
+/* ── YEARS 1 · 2 · 3 (§416) ─────────────────────────────────────────
+   The three marks a direction wears once the Plan details switch is on: the
+   years it runs in lit, the year the plan stands in ringed. The quarter
+   marks' own shape (`qs`), because a year is the same kind of fact one scale
+   up (§53.5). Nothing is drawn with the switch off. */
+function yearsMarks(it){
+  if (!yearsOn()) return "";
+  var ys = pillarYears(it), now = planYear(), out = "";
+  for (var y = 1; y <= 3; y++)
+    out += '<i class="' + (ys.indexOf(y) >= 0 ? "on" : "") + (y === now ? " now" : "") +
+      '" title="' + esc(planYearLabel(y)) + (ys.indexOf(y) >= 0 ? " — runs" : " — does not run") +
+      (y === now ? " · the plan is here" : "") + '">' + y + '</i>';
+  return '<span class="yrbox"><span class="yk">Years</span><span class="qs yrs">' + out + '</span></span>';
+}
+/* The same three, pressable behind the pen. By the pillar's id through
+   `unitLikeWritable()` (§48.2) — the resolver Remove already uses. */
+function yearsEdit(ukey, it){
+  var ys = pillarYears(it), now = planYear(), out = "";
+  for (var y = 1; y <= 3; y++) {
+    var on = ys.indexOf(y) >= 0;
+    out += '<button class="qtog' + (on ? " on" : "") + (y === now ? " now" : "") +
+      '" data-pyear="' + esc(ukey) + '|' + esc(it.id) + '|' + y + '" title="' +
+      esc(planYearLabel(y)) + (on ? (ys.length === 1 ? " — the only year it runs" : " — runs; press to take it out")
+                                   : " — press to add") + '">' + y + '</button>';
+  }
+  return '<span class="qs qs-edit yrs">' + out + '</span>';
+}
+/* Why a direction is greyed, on its own pane, in words (§35). */
+function yearsLine(it){
+  if (!yearsOn() || runsNow(it)) return "";
+  var ys = pillarYears(it);
+  return '<div class="yrline">Runs in Year ' + ys.join(" and Year ") +
+    '. It is not asked for in reporting and not scored until then.</div>';
+}
+/* The short tag in a rail row, and the greyed row's reason under it. */
+function yearsTagHtml(it){
+  return yearsOn() ? '<span class="yrtag">' + esc(yearsTag(it)) + '</span>' : "";
+}
 function pillarBand(code, name, right, kind, cls){
   /* `cls` (§410) marks the PLAN pane's band, the one the approved restyle
      reaches: no gold edge, and the kind as a tag at the far end. Every other
@@ -8928,7 +8981,7 @@ function unitPlanBody(it, u, railed){
            section changes and there is only ever one of it. The head keeps
            what is the PILLAR'S — its code, its name field and Remove. */
         '</div>'
-    : pillarBand(code, it.name, "", it.kind, "planband") + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name, yearsMarks(it), it.kind, "planband") + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
@@ -8990,8 +9043,12 @@ function unitPlanBody(it, u, railed){
             selectOr("plan", it.kind || "", kindChoices(), "kindsel",
                      function(v){ it.kind = v; }) +
           '</div></div>' +
+          /* §416: the years it runs in, beside the owner and the kind. */
+          (yearsOn() ? '<div class="pfrow"><em>Runs in</em><div class="pfval">' +
+            yearsEdit(u.ukey, it) + '</div></div>' : '') +
         '</div></div>'
       : '') +
+    yearsLine(it) +
     /* §413: the direction overview, under the name (reading) or under the
        owner and kind (the pen) — above Key measures either way. */
     dirOverview(it, ed) +
@@ -9622,19 +9679,23 @@ function unitPerfRail(u){
   if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
   var rows = u.items.map(function(it, i){
-    var perf = pillarPerf(it), r = pillarRatio(it);
-    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + '" data-urail="' +
+    /* §416: a direction that does not run this year is not scored, so its
+       rail row reads a dash and says when it runs rather than a figure. */
+    var now = runsNow(it);
+    var perf = now ? pillarPerf(it) : null, r = pillarRatio(it);
+    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
       esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
-      railName(pillarCode(u, i), it.name) +
+      railName(pillarCode(u, i), it.name) + yearsTagHtml(it) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
       /* §324: guarded on the VALUE and not only on the flag. A pillar added
          on the platform has no kind until somebody picks one, and the bare
          flag test printed " &middot; execution 45%" — a separator pointing at
          nothing, which is the fault `pillarMeta` was already written to avoid
          one screen over. */
-      railSub((SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
-        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
+      railSub(now ? (SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
+        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '') : "",
+        now ? "" : esc(yearsLater(it))) +
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
@@ -9647,7 +9708,7 @@ function unitPerfRail(u){
        items. A handle that renders is a feature that looks built (§51.11). The
        CONTAINER says what it holds now, so the two cannot disagree. */
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
-    '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
+    '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
   return railWorthIt(u.items)
     ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
@@ -9678,8 +9739,9 @@ function unitPerfPane(it, u, railed){
     /* §343: a scored breakdown column is one of the numbers this pillar is
        judged on, so it is counted here too — "Measures 4" over an average of
        five is the card disagreeing with itself. */
-    scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) +
+    yearsLine(it) +
+    (runsNow(it) ? scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
+              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) : '') +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +

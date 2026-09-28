@@ -463,7 +463,9 @@ function pptxUnitSlides(u, kicker){
      Plan pane reads them in. */
   (u.items || []).forEach(function(p, pi){
     var code = (u.codePrefix || "") + (p.code || (pi + 1));
-    var pk = kicker + " · " + code;
+    /* §416: the plan download carries every direction — it is the plan —
+       and names the years each runs in beside its code. */
+    var pk = kicker + " · " + code + (yearsOn() ? " · " + yearsTag(p) : "");
     slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("measure","bu"),
       [5303520, 914400, 2346960, 2346960],
       [labelWord("measure","group"), "Dir.", "Target", "Compiles"],

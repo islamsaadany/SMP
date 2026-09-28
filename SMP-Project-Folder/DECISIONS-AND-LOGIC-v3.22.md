@@ -58332,3 +58332,58 @@ fail** — the fixture's pillar held 5 tactics, which fit any slide (§113.8); i
 download dropping it 1, the per-slide count ignored 1, an emptied list kept 1 — the tree
 rebuilt byte-identical after.
 
+## §416 — years 1 · 2 · 3, and the yearly revision (2026-09-28)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-28_years.html`), answering its
+five questions: **"1. keep 2. carry over 3. Year 1.2026 4. this year only 5. ok"**. RHI's sixth
+step and the last plan detail agreed: a direction holds the three years (*"it holds the 3 years
+as it's the logic of it but each year we can have another yearly revision to refine if
+something changes, and any way the tactics work yearly"*).
+
+**A direction marks the years it runs in**, stored as `p.years` on the pillar (`pillars.extra`,
+no migration), ABSENT meaning every year and all three written back as an absence (§50.6); one
+reader (`SMPRules.pillarYears`). **The year the plan stands in is `GROUP.planYear`**, absent
+meaning Year 1, and **nothing reads the calendar to decide it** — only the revision moves it,
+because a plan that changed year by itself on 1 January would change what every figure is
+measured against with nobody having said so. Switched per client as the fourth Plan details
+chip (`structure.details.years`, §413's rule); off hides and forgets nothing, and off the unit's
+scores and asks are asserted byte-identical.
+
+**1 · keep.** A direction that does not run this year stays on the Plan, greyed in the rail and
+saying when it runs (*Starts in Year 2*), its band wearing the three marks with this year
+RINGED rather than filled — *runs* and *now* are two facts — and its pane saying why in words
+(§35). The reason survives a collapsed rail as the half of the line §119 keeps, because it is
+why the row is grey. **It is not asked for, not owed and not scored**: one predicate
+(`runsNow`) gates `reportItems`, the gap map, the unit's three readings (`itemsNow`) and the
+theme's pillars, so the asking, the owing and the scoring cannot disagree (§53.5); the
+breakdowns under the group's unit cards read the same list, or a card names a row its headline
+left out (§264). The Reporting rail reads a dash for it, and the page does not OPEN on it unless
+somebody pressed it.
+
+**2 · carry over.** *Start the Year N revision* sits in the Reporting cycle pen under the three
+named years, the office's alone, in the platform's own dialog (§95, §273.3). Yes archives every
+unit's and every pillars function's plan as it stood (`archiveUnitPlan`, §49.2's path, the way
+back at Setup › Import & storage), moves `planYear` on, and changes nothing else: directions and
+tactics carry over and are refined in the pen. There is no revision after Year 3.
+
+**3 · the years are named "Year 1.2026"**, the calendar year counted from the planning period's
+start where one is set (§308) and the cycle's own year otherwise.
+
+**4 · targets stay this year's only.** So the planning period (§308) stays ONE year — the drawing
+showed a three-year period, and this is where the build differs from it on purpose: a three-year
+period would prorate a one-year target across three. The revision moves a set period on by
+twelve months, so Year 2's targets are measured against Year 2's months.
+
+**5 · one overview per direction**, edited in place; last year's is in the archive.
+
+**The deck** gives a not-running direction a row in the roll-call and the score table (a dash,
+and when it runs) and no slides of its own; **the plan download** carries every direction, since
+it is the plan, with its years beside the code; **the workbook** appends a Years column at the
+END of the Pillars sheet (§65), only when the switch is on or a direction holds some, and the
+reader brings it back.
+
+**The server**: a direction's years are the plan (the office's); `planYear` is classified as the
+cycle and joins `gExtra`, so it classifies ONCE rather than beside an unknown (§259.2) —
+`test-authorize.js` §416, both ends, red 2 with the classification removed. **Checked**:
+`checks/years.py` all good, red 2 with the unit's readings ignoring the years and red 1 with the
+reason dropped from a collapsed rail, from the SOURCES (§276).

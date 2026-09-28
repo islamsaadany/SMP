@@ -3959,7 +3959,32 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* §415 — "requirements": what each tactic needs (RHI step 5), a list of
      short lines on the tactic, drawn under its name and in the plan
      download; never scored, never counted as missing. Off hides and keeps. */
-  var PLAN_DETAILS = ["overview", "outcomes", "requirements"];
+  /* §416 — "years": Years 1 · 2 · 3 (RHI step 6). A direction marks the
+     years it runs in (`p.years`, absent = every year) and the plan stands in
+     one year at a time (`GROUP.planYear`, absent = Year 1), moved on only by
+     the office's yearly revision. A direction not running this year stays on
+     the Plan page, greyed, and is not asked, not owed and not scored. */
+  var PLAN_DETAILS = ["overview", "outcomes", "requirements", "years"];
+  var PLAN_YEAR = "planYear";
+  /* The year the plan stands in, 1-3. Absent, or anything outside 1-3, is
+     Year 1: a stored value nobody could have meant never moves the plan. */
+  function planYearOf(group) {
+    var n = group && group[PLAN_YEAR];
+    return (n === 2 || n === 3) ? n : 1;
+  }
+  /* The years a direction runs in, sorted and distinct; absent or empty is
+     all three, so a direction nobody marked runs every year. */
+  function pillarYears(p) {
+    var ys = p && Array.isArray(p.years) ? p.years.filter(function (y) { return y === 1 || y === 2 || y === 3; }) : [];
+    ys = ys.filter(function (y, i) { return ys.indexOf(y) === i; }).sort();
+    return ys.length ? ys : [1, 2, 3];
+  }
+  /* Whether a direction runs in the year the plan stands in. With the switch
+     off, every direction runs, whatever was stored (off hides and keeps). */
+  function runsNow(group, p) {
+    if (!planDetailOn(group, "years")) return true;
+    return pillarYears(p).indexOf(planYearOf(group)) >= 0;
+  }
   function planDetailOn(group, key) {
     var s = structureOf(group), d = s && s.details;
     return !!(d && d[key] === true);
@@ -4495,6 +4520,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     SETUP_DONE: SETUP_DONE, setupDone: setupDone,
     STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
     PLAN_DETAILS: PLAN_DETAILS, planDetailOn: planDetailOn,
+    PLAN_YEAR: PLAN_YEAR, planYearOf: planYearOf, pillarYears: pillarYears, runsNow: runsNow,
     STRUCT_NEW_CLIENT: STRUCT_NEW_CLIENT, newClientStructure: newClientStructure,
     STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,

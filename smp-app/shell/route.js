@@ -222,7 +222,8 @@
     var here = mods.filter(function (x) { return x.key === MODULE; })[0];
     var modLabel = here ? here.label : (root.getAttribute("data-module-label") || "");
     var cs = onClientSettings();
-    var said = [client, cs, MODULE, mods.map(function (x) { return x.key; }).join(","),
+    var onSetup = typeof current !== "undefined" && current === "setup";
+    var said = [client, cs, onSetup, MODULE, mods.map(function (x) { return x.key; }).join(","),
                 trailClients ? trailClients.map(function (x) { return x.key; }).join(",") : "?"].join("|");
     var nav = bar.querySelector("nav.trail");
     if (nav && said === trailSaid) return;
@@ -238,6 +239,7 @@
         var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
         if (!b) return;
         var go = b.dataset.trgo;
+        if (b.getAttribute("aria-current") === "true") { Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; }); return; }
         Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; });
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
@@ -295,19 +297,27 @@
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
        it keeps §362.1's one press. */
-    /* §417, Islam: "we agreed I see the modules on top and then the
-       separator then the settings." ONE ORDER ON EVERY PAGE: the modules
-       (the one you are in left out, unless you are on settings, where none
-       is "here"), a rule, then every settings page — each module's and the
-       client's — with the one you are standing on marked. */
+    /* §424: THE MODULES THEMSELVES LEAD EVERY MENU (Islam: "I need to
+       reverse back to the modules from the drop down of the last part").
+       On the client's settings the menu held only the modules' SETTINGS, and
+       on a module's own settings it left out the module you are in — so
+       neither had a way back into a module. Now: the modules, a rule, then
+       the settings pages. (Its leaving out the module you are on, on that
+       module's normal page, is reversed by §425 below.) */
+    /* §425: ONE FULL LIST IN EVERY CASE (Islam: "why don't I see the 2nd
+       full list in all cases?"). Every module, a rule, every module's
+       settings, then Client settings — on a module's page, on its settings
+       and on the client's settings alike. The page you are on is the bold
+       entry (aria-current) and pressing it does nothing. */
     var modItems = [];
     mods.forEach(function (x) {
-      if (!cs && x.key === MODULE) return;
-      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
+      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key,
+                      here: !cs && !onSetup && x.key === MODULE });
     });
     if (modItems.length) modItems.push({ rule: true });
     mods.forEach(function (x) {
-      modItems.push({ label: x.label + " settings", go: "cross:" + x.key });
+      modItems.push({ label: x.label + " settings", go: "cross:" + x.key,
+                      here: !cs && onSetup && x.key === MODULE });
     });
     modItems.push({ label: "Client settings", go: "cross:client", here: cs });
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +

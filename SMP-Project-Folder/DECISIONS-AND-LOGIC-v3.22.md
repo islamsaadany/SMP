@@ -58632,3 +58632,59 @@ fallback **4 red**, the step materialising everything **2 red**.
 `checks/function-sw.py` REWRITTEN, never loosened (§218): it ticks the
 functions' SWOT first, the way the step does, and then asserts everything it
 did before.
+
+## §424 — the trail's last menu leads with the modules themselves (2026-09-25)
+
+Islam, on Client settings with the trail's last menu open (*Strategy settings · Insights settings · Client settings*): *"I need to reverse back to the modules from the drop down of the last part."* **Measured, and it was right**: §401 made that menu, on the client's settings, list each module's SETTINGS and nothing else, and on a module's own settings it left out the module you are in (it is the step's own name) — so from either settings page there was no way back into a module from the trail. Aligned in plain words first (rule 1b, a content change, so no mockup); *"yes to both"*.
+
+**Every menu now leads with the modules, then a rule, then the settings pages.** On Client settings: *Strategy · Insights* | *Strategy settings · Insights settings · Client settings*. On a module's own settings: every module, **the one you are in included**, | *Client settings*. On a module's normal page nothing changes — the module you are in is still left out, because there it is the page under you (§401, §32). Pressing a module opens its own page (`/<client>/<module>`); the settings crossings keep §367's one press. `onSetup` joins the trail's cache key, or a module's page and its settings would share one drawn menu.
+
+`checks/shell.mjs` — three assertions REWRITTEN, never loosened (§218), and one added (the Client settings menu is the modules, a rule, then the settings): **136 ok**, and with the previous menu put back **5 red**, each naming the old list. The one remaining red, *"pressing a tab takes it down"*, reproduces identically on the build before this change (§303) — §403 hides the tab row while Home is open, so the check has nothing to press; recorded, not fixed here. `checks/modules.mjs` 166/0. Screen only (one browser file; `public/shell.js` and `public/sw.js` regenerated, the worker's release stamp moving with it, §397); nothing stored, nothing migrated, no forced sign-out owed (spec 029).
+
+**Merged to `main` 2026-09-29 on Islam's word** (*"merge to main"*). Built as §411 and renumbered §412 before the merge (and again to §424 at the Structure branch's merge, which had taken §412 and §413 for RHI's rounds; the next section became §425), because `main` took §411 for the capability-quarters work while this waited (§264.3 — the merge base held no §411/§424 in any spelling, so the renumber was this branch's own lines, in both the `§` and `§` spellings). `main` merged into the branch: the two record files COMBINED (§318.7), `public/shell.js` and `public/sw.js` regenerated rather than merged (§329), the built file byte-identical to `build.py`'s output. Re-run on the merged tree: `shell.mjs` 136 ok with the one pre-existing red (§424's own note), `modules.mjs` 166/0, `capability-pillar-edit.py` all good, `built-in-step` all good, `generated-in-step` all clear. No frozen source changed here, so the root `sw.js` SHELL is `main`'s and unbumped; the served worker's release stamp moves with `shell.js` (§397). Screen only — no forced sign-out owed (spec 029).
+
+## §425 — the trail's last menu is one full list everywhere (2026-09-29)
+
+Islam, with two screenshots — a Strategy page's menu (*Insights · Client settings*) beside Client settings' (*Strategy · Insights | Strategy settings · Insights settings · Client settings*): *"why don't I see the 2nd full list in all cases?"* **No reason worth keeping**: §424 left out the module you are on from its own page, and the module settings from everywhere but the client's settings — both my calls, and a menu that changes shape by where you stand is harder to learn than one that does not. Aligned in plain words first (rule 1b); *"yes go ahead and merge to main"*.
+
+**One list in every case**: every module, a rule, every module's settings, Client settings. **The page you are on is the one bold entry** (`aria-current`, the rule `arrange.css` already carries for the trail), and **pressing it only closes the menu** — the module's entry names `/<client>/<module>`, which from a unit page would otherwise reload the module's home. A settings crossing pressed from a module's normal page is an ordinary page load (§367's in-place press needs the Setup page to be up). This reverses §424's one remaining exception and §401's *"never the module you are in"* (Principle II: recorded, not overwritten).
+
+`checks/shell.mjs` and `checks/modules.mjs` REWRITTEN, never loosened (§218): each asserts the SAME full list as an AGREEMENT with the client's modules (§94.8) and exactly one bold entry — the module on its page, its settings on its settings, Client settings on the client's — and a one-module client now reads *Strategy | Strategy settings · Client settings*. With the §424 menu put back: **3 red** and **5 red**. With the change: shell 136 ok with the one pre-existing red (§424's note), modules 166/0. Screen only; nothing stored, nothing migrated, no forced sign-out (spec 029).
+
+**Merged to `main` 2026-09-29 on Islam's word**, a fast-forward — `main` had not moved since §424.
+
+## §423.1 — Raya keeps what it sees, and the Structure branch merges (2026-09-29)
+
+Islam, of §423: *"what do you mean it changes what raya sees? raya employees
+shouldn't see any changes"* — then, of two ways to honour that, *"keep what raya
+sees today with the ticks and I will fix anything problematic when I check"*.
+
+**THE TICKS ARE WRITTEN FOR RAYA ALONE.** §423 hides a supporting function's own
+S&W on a client that never saved a Structure; Raya never had, and has seen that
+tab and slide since §399 went live. `smp-app/db/migrations/019-raya-keeps-function-sw.sql`
+writes Raya Trade's functions' level as it reads today — every component on, S&W
+included — and nothing else: every other level stays unsaid (still read as
+everything on), and only where the functions' level has never been saved, so a
+choice the office makes later is never overwritten and a second run changes
+nothing. **Nothing else reacts to Raya now holding a Structure**, checked rather
+than assumed: every reader asks a LEVEL Raya still has not set (`templeOn`,
+`midExists`, `planDetailOn`, `foundOn` all read `structure[level]`, and
+`planDetailOn`'s one `!s` short-circuit answers false either way because no
+detail is true). Proved on a throwaway Postgres 16 in four states — Raya with
+nothing saved, Raya with another level saved, a client whose functions' level is
+already saved, and a client that is not Raya — each answering as intended, and a
+second run writing nothing. **The frozen stack is not given a twin**, because it
+serves nobody since the cutover (§332).
+
+**THE MERGE BRINGS §412–§423 WITH IT**, which was said before Islam chose it:
+thirty-four changes built on this branch since `main`'s §411. **`main` had taken
+§412 and §413 for the trail's last menu while this branch held them for RHI's
+rounds**, so `main`'s two became **§424 and §425** — renumbered BEFORE anything
+else, scoped to the lines `main` added (§264.3): the three smp-app files taken
+whole from `main` and the two record entries, never RHI's. **And `main`'s §425
+REPLACES this branch's §417 menu rather than joining it**: both answered one ask
+(one order in the trail's last menu), `main`'s is a superset — every module, a
+rule, every module's settings, Client settings, with the page you are on bold —
+and the only files §417 touched were `route.js` and the two checks, so those are
+`main`'s whole. The built platform, `public/shell.js` and `public/sw.js` were
+REBUILT from the merged sources, never merged (§91).

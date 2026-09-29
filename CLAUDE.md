@@ -9876,6 +9876,11 @@ python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a 
 # which reads like a failure in a summary and is not one — `pip install pillow`.
 # band-corner.py argues the other way in its own docstring and unfilters the PNG
 # by hand; not reconciled, and said rather than left to be rediscovered.
+python3 checks/capability-pillar-edit.py # a capability planned in pillars can be
+                                # EDITED (§411): the quarter buttons, the hide eye and
+                                # removing a tactic PRESSED and the stored plan read back,
+                                # the state MADE (§255), Mobile asserted beside it. 3 red
+                                # on the build before
 python3 checks/structure.py     # the client's structure (&sect;404): Setup &rsaquo; Structure's
                                 # boxes pressed and read back, one adjustment stored and
                                 # deleted again, off HIDING a SWOT section and its slides
@@ -10647,6 +10652,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 *Earlier: 2026-09-28 — **§418: each layer's three sections, set on Structure.** From the mockup Islam signed off: every layer (top, second, units, functions) shows its first section (Foundation/Overview), SWOT and plan on Setup › Client set-up › Structure, each with an on/off (the plan always on), a title, and its parts ticked and named one/many — per layer, stored on `GROUP.structure` as absences, read through `labelWord` by the page's layer (never on Setup). The SWOT can be S&W only; the plan names all three ways for units and functions; the functions' layer can be switched off like the second layer. `structure.py` and `client-setup.py` rewritten, never loosened; new `checks/structure-sections.py` red 1/1/2/3 from the sources. On the branch, not merged.*
 
 *Earlier: 2026-09-28 — **§417: a word is not the shape, and one order for the module menu.** On a client holding a plan the Structure step's name boxes were all read-only (the shape freeze reached the words), so El Abd's *Strategic Directions* could not be renamed there; a word now writes straight to LABELS, Terminology's own store, on leaving the box, while the unit and function lists stay frozen. The trail's module menu reads modules · rule · every settings page (Client settings last) on every page, reversing §401's module-page half at Islam's word. `structure.py` §6 red 7 on the old build; `modules.mjs` red 2; `shell.mjs` rewritten, never loosened. On the branch, not merged.*
+
+*Earlier: 2026-09-29 — **§411: a capability planned in pillars can be edited like a unit's plan.** The quarter buttons, the hide eye and removing a tactic, a measure or a breakdown row did nothing there for anybody, because `listById()` and two siblings walked units and functions only; one `pillarHolderTargets()` answers all four now. Merged to `main` 2026-09-29 on Islam's word, a clean fast-forward; screen only, no sign-out owed.*
 
 *Earlier: 2026-09-24 — **§410: the plan page restyled, a quieter top bar, and the typeface switch gone.** Islam: *"drop the system button and build both"*, from the signed-off round-12 mockup. The top bar is 40px on the platform's own sizes with the viewer moved right; the per-screen typeface switch is removed and a remembered face forgotten (§41.6's reasoning) — and at the merge main's §402 decides the face: Source Sans 3 for everybody (§410.1). On the Plan page the pillar rail is equal-size rounded cards above 1200px (a floor, not a height), the kind rides beside the code in detail mode, the owner leaves the plan rail, the pillar band loses its gold edge and carries the kind as a tag on the right, and Key measures/Tactics show counts with a rule between. `pillar-kind.py` rewritten, never loosened. **Merged to `main` 2026-09-24 on Islam's word**, with main's §399–§404 and §405–§405.1 brought in first; built as §405–§407 and renumbered §408–§410 because main took §405.*
 

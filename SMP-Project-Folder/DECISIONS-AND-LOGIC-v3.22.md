@@ -58058,6 +58058,18 @@ Islam: *"fix the four red checks from main."* Each was established as red on `or
 
 **Merged to `main` 2026-09-24 on Islam's word** (*"merge to main"*), a clean fast-forward — `main` had not moved — carried by this record line so `main` holds a commit the branch does not (§91). Verified before: `qa.py` ERRORS none, `built-in-step` all good, `generated-in-step` all clear, and the thirteen register and rewritten checks green. `sw.js` SHELL `v5.50-register-dialog`, confirmed unique against `origin/main` immediately before the push (§94.16). Screen and checks only — no `api/`, `lib/` or `db/` file — so no forced sign-out is owed (spec 029).
 
+
+## §411 — a capability planned in pillars can be edited like a unit's plan (2026-09-29)
+
+Islam, with a screenshot of a tactics table: *"the smo team is not able to set the quarters for the tactics."* **Measured before anything was proposed, and it is not about the SMO team**: as an SMO team member the quarters toggle and save on a unit (Mobile) and on a pillars supporting function (Merchandising), and `lib/authorize.js` accepts both saves. What fails is the page of a **capability planned in pillars** (§334, §394): the quarter button finds its tactic through `listById()`, which walked `UNIT_KEYS` and `FUNCTION_KEYS` and never a `cap:` target, so the lookup answered null and the handler returned without a word — for everybody (§96's family: drawn, pressable, wired to nothing). Bound fields (name, owner, collaborators) write through `FIELDS` directly, which is why only the quarters looked broken.
+
+**The same walk sat behind three more controls on that page**: removing a tactic or a measure (`data-rowoff` → `listById`), removing a breakdown row and its tidy (`bdTidyById`), and the hide eye (`hideableById`, §233). **One answer now, `pillarHolderTargets()`** — units, functions, and every capability that plans in pillars — asked by all four, because four copies of "every subject holding pillars" is how three of them came to forget the third kind (§53.5). Nothing stored moves, no rule moves, no server file is touched.
+
+**Recorded, not done**: four register-side walks in `config-data.js` (figure-set ownership in a person's blockers, `personNamedLines`, and the merge plan and its apply) still walk units and functions only, so a person named on a capability's pillar is not counted there. A different question about people rather than a plan control, and left for its own round (rule 1b).
+
+`checks/capability-pillar-edit.py` MAKES the state (§255: the demo's one capability plans in projects), reaches the page through the navigation and the pen, presses the quarter, the eye and the remove, and reads the stored plan back (§96), with Mobile's quarters asserted beside it (§94.2). **3 red on the build before**, each printing the unchanged row; all good after. Neighbours green: hide-element, pillar-breakdown, capability-entry, plan-fields, pillar-project-remove, plan-edit-line, gap-fill, owner-picker; `qa.py` ERRORS none; authoriser 763/0. `sw.js` bumped to `smp-shell-v5.51-capability-quarters` (§91). **On the branch, not merged.**
+
+**§411.1 — merged to `main` 2026-09-29 on Islam's word.** `main` had not moved (still §410.2), so the merge is a fast-forward and the tree pushed is the tree verified. The branch tip was already pushed, so this record commit is `main`'s alone (§91). `sw.js` `v5.51-capability-quarters`, never held before, one declaration, `node --check` clean. No `api/`, `lib/` or `db/` file changed, so no forced sign-out is owed (spec 029). The witness is the served `shell.js`, read off the live site before and after the push.
 ## §417 — a word is not the shape, and one order for the module menu (2026-09-28)
 
 Islam, on El Abd: *"I'm not able to change the structure"*, *"I see strategic directions for the name on the navigation but I can't change it form the strcuture"*, and of the trail's menu on Client settings, *"we agreed I see the modules on top and then the separator then the settings."*
@@ -58112,7 +58124,7 @@ every value kept both ways. Their new screen words go through the client's
 words (`L()`), so §395 and §418's per-layer names reach them. `checks/structure.py`
 gains the assertion both ends; **1 red** with the old start put back, from the
 sources (§276). **Recorded, not decided (Islam's)**: their *Plan details* card
-is client-wide while §418 made everything per layer; and **§417 is claimed three
-times** (main, this branch, theirs) and §418 twice — the renumber is owed at each
-merge, scoped to that branch's own lines (§264.3).
+is client-wide while §418 made everything per layer; and **§411 was claimed three times** (main, this branch, theirs) and §412 twice — so
+before the merge that followed, this branch's own §411/§412 became §417/§418, scoped
+to its own lines (§264.3; the merge base held none of them).
 

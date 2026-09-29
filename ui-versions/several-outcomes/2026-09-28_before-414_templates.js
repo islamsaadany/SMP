@@ -405,8 +405,6 @@ function validatePlan(u, rows){
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not \u2265 or \u2264' });
     if (r.compile && !compileKnown(r.compile))
       problems.push({ at:at, msg:compileProblem(r.compile) });
-    if (r.type === "OUTORPHAN")
-      problems.push({ at:at, msg:"an outcome on the Outcomes sheet whose tactic could not be matched \u2014 name a tactic from the Tactics sheet, under its pillar" });
     if (r.type === "TACTIC") {
       ["q1","q2","q3","q4"].forEach(function(q){
         if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
@@ -618,12 +616,6 @@ function createFromPlan(u, d){
         var v = String(x[k] == null ? "" : x[k]);
         if (v.trim()) u.items[u.items.length - 1][k] = v;
       });
-      /* §416: the years, read as the digits 1–3 the cell names. All three,
-         or none, is every year, which is stored as an ABSENCE (§50.6). */
-      var yrs = [];
-      String(x.years || "").replace(/[1-3]/g, function(d){ if (yrs.indexOf(+d) < 0) yrs.push(+d); return d; });
-      yrs.sort();
-      if (yrs.length && yrs.length < 3) u.items[u.items.length - 1].years = yrs;
       made++;
     } else if (x.type === "MEASURE") {
       var p = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
@@ -660,11 +652,6 @@ function createFromPlan(u, d){
       var tMon = monthsFromText(x.monthly);
       if (tMon) tRow.outMonthly = tMon;
       if (+x.hidden) tRow.hide = true;
-      /* §414: the extras the Outcomes sheet carried, set only where there are
-         any so a tactic with one outcome is byte-identical (§50.6). */
-      if (x.outs && x.outs.length) tRow.outs = x.outs.map(function(o){ return Object.assign({}, o); });
-      /* §415: requirements only where the file carried some (§50.6). */
-      if (x.reqs && reqsParse(x.reqs).length) tRow.reqs = reqsParse(x.reqs);
       p2.tactics.push(tRow);
       made++;
     } else if (x.type === "BDCELL") {

@@ -258,10 +258,8 @@ function unitAimSlides(u){
 function unitSwotSlides(u){
   var S = [];
   if (!u.fnKey && compOn(u.ukey, "swot")) {
-    /* §418: the boxes this layer carries, under the layer's own names. */
-    var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
-    var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
-      return [q, LTraw(u.ukey, SMPRules.QUAD_KEYS[q]), hues[q]]; });
+    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
+              ["o","Opportunities","stone"],["t","Threats","warn"]];
     /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
        measurement rather than taste. On the blue the four scoring colours
        read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
@@ -272,8 +270,7 @@ function unitSwotSlides(u){
        own hues untouched. `.seccell.t-*` had no other user and is deleted
        with them (§24). It is also what §254.5 settled for the pillar cards:
        one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page",
-      SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
+    S.push(sectSlide("swothead", "After the SWOT title page", L("swot"),
       "Where this unit is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
@@ -285,7 +282,7 @@ function unitSwotSlides(u){
       S.push('<section class="dslide d-swot t-' + x[2] + '"' +
         (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
                               : anch("swot" + x[0], "After " + x[1])) +
-        '><h2>' + esc(x[1]) + '</h2>' +
+        '><h2>' + x[1] + '</h2>' +
         '<ol class="dswot">' + items + '</ol></section>');
     });
   }
@@ -394,7 +391,7 @@ function deckSlides(u){
         : '') +
       '<div class="headcell"><span class="dlab">' + L("pillar","bu") + ' performance</span>' +
         '<b class="' + dBand(pl) + '">' + dPct(pl) + '</b>' +
-        '<span class="headsub">' + itemsNow(u).length + ' ' + esc(L("pillar","bu")) +
+        '<span class="headsub">' + u.items.length + ' ' + esc(L("pillar","bu")) +
           ', by their measures</span></div>' +
       '<div class="headcell"><span class="dlab">Execution performance</span>' +
         '<b class="' + dBand(ex) + '">' + dPct(ex) + '</b>' +
@@ -487,10 +484,7 @@ function deckSlides(u){
   var pNames = u.items.map(function(p, i){
     return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') +
-      /* §416: the years each direction runs in, and a later one says when. */
-      (yearsOn() ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
-      '</div>';
+      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') + '</div>';
   }).join("");
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
@@ -514,11 +508,6 @@ function deckSlides(u){
 
   /* The score table, built here and pushed at the END (§254.4). */
   var pRows = u.items.map(function(p, i){
-    /* §416: a direction that does not run this year is listed, not scored. */
-    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + (i+1) + '</td><td class="dirname">' +
-      '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
-      '<span class="dsub">' + esc(yearsLater(p)) + '</span></td>' +
-      '<td class="num">&mdash;</td><td class="num">&mdash;</td></tr>';
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
@@ -539,8 +528,6 @@ function deckSlides(u){
     '<tbody>' + pRows + '</tbody></table></section>';
 
   u.items.forEach(function(p, pi){
-    /* §416: and it gets no slides of its own until its year comes. */
-    if (!runsNow(p)) return;
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     S.push('<section class="dslide d-cover"' +
       anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
@@ -682,18 +669,14 @@ function deckSlides(u){
        unmeasurable row, so a review could not tell "nobody has entered this"
        from "there is nothing to enter" (§35). */
     var tRows = SMPRules.shown(p.tactics).map(function(t, i){
-      /* §414: SEVERAL OUTCOMES. The shared cells span the tactic's lines and
-         each outcome takes a line of its own, as on the page behind it. */
-      var xs = scoredExtras(t), rs = outRowspan(xs.length);
-      var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-        '<td class="lead"' + rs + '>' + esc(t.name) + '</td>' +
-        '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-        '<td' + rs + '>' + esc(t.owner) + '</td>' +
-        '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
-        '<td class="cc"' + rs + '>' + qs(t) + '</td>';
-      var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
-                        : '<td class="dnote empty"' + rs + '>&mdash;</td>';
-      if (xs.length) return deckOutRows(t, lead, note, xs, rs);
+      var lead = '<td class="idx">' + (i+1) + '</td>' +
+        '<td class="lead">' + esc(t.name) + '</td>' +
+        '<td>' + outcomeCell(t) + '</td>' +
+        '<td>' + esc(t.owner) + '</td>' +
+        '<td class="collabs">' + collabCell(t) + '</td>' +
+        '<td class="cc">' + qs(t) + '</td>';
+      var note = t.note ? '<td class="dnote">' + esc(t.note) + '</td>'
+                        : '<td class="dnote empty">&mdash;</td>';
       /* §254.3: NOT DIMMED. Islam: *"for a non due tactic don't dim it show it
          normally it has the comment of not due this cycle anyway."* The cell
          already says it in words, and dimming says it a second time in a way
@@ -728,42 +711,6 @@ function deckSlides(u){
       '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
       '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
   });
-
-  /* §414: a tactic with several outcomes on the review deck — one line per
-     outcome with its own figure against its own benchmark, and the tactic's
-     Progress as their average, spanning the lines. `deckFitPass()` moves a
-     tactic's lines as one group, so a continuation never splits them. */
-  function deckOutFig(t, x){
-    var o = outcomeOf(x);
-    if (!o) return '<td class="cc"><span class="missing">Missing</span></td>';
-    var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
-    if (shown == null)
-      return '<td class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
-  }
-  function deckOutRows(t, lead, note, xs, rs){
-    var due = tacticDue(t), sub = outSubCls(t), out;
-    if (!due) {
-      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
-      xs.forEach(function(x){
-        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
-      });
-      return out + outPad(xs.length);
-    }
-    var r = tacticProgress(t);
-    var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
-                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
-    prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
-    out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
-    xs.forEach(function(x){
-      var e = exAsT(t, x);
-      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
-        deckOutFig(t, e) + '</tr>';
-    });
-    return out + outPad(xs.length);
-  }
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
      Islam: *"make the notes and achievements slide optional and they can add
@@ -889,12 +836,6 @@ function deckPillarHead(u, p, pi, which){
 function fnSWSlide(f){
   if (!f) return "";
   var sw = f.swot || {};
-  /* §418: which boxes, what they are called and what the slide is called are
-     the functions layer's (Structure); unset, it is today's two. */
-  var fk = Object.keys(FUNCTIONS).filter(function(k){ return FUNCTIONS[k] === f; })[0] || "";
-  var tg = "fn:" + fk, hues = { s:"good", w:"bad", o:"stone", t:"warn" };
-  var quads = SMPRules.swotQuads(GROUP, tg);
-  var title = esc(SMPRules.swotTitle(GROUP, tg)) || "Strengths &amp; Weaknesses";
   var col = function(key, title, hue){
     var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
     return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
@@ -902,13 +843,12 @@ function fnSWSlide(f){
         return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
       }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
   };
-  var any = quads.some(function(k){
+  var any = ["s","w"].some(function(k){
     return (sw[k] || []).some(function(t){ return String(t || "").trim(); }); });
   if (!any) return "";
   return '<section class="dslide d-fnsw"' + anch("fnsw", "After Strengths & Weaknesses") + '>' +
-    '<h2>' + title + '</h2><div class="dswgrid">' +
-    quads.map(function(q){ return col(q, LT(tg, SMPRules.QUAD_KEYS[q]), hues[q]); }).join("") +
-    '</div></section>';
+    '<h2>Strengths &amp; Weaknesses</h2><div class="dswgrid">' +
+    col("s", "Strengths", "good") + col("w", "Weaknesses", "bad") + '</div></section>';
 }
 function deckSlidesFn(subject){
   /* §326: the function's OWN work — the same list its four pages draw, so the
@@ -2070,12 +2010,7 @@ function deckFitPass(deck){
         s.parentNode.insertBefore(next, s.nextSibling);
       }
       var ntb = next.querySelector("tbody");
-      /* §414: a tactic's outcome lines (and the hidden row that keeps the
-         stripe) travel WITH the row whose cells span them, never alone. */
-      var n = 1;
-      while (n < tb.rows.length && /\b(osub|opad)\b/.test(tb.rows[tb.rows.length - n].className)) n++;
-      if (n >= tb.rows.length) { s.classList.remove("on"); return; }
-      for (var k = 0; k < n; k++) ntb.insertBefore(tb.rows[tb.rows.length - 1], ntb.firstChild);
+      ntb.insertBefore(tb.rows[tb.rows.length - 1], ntb.firstChild);
       changed = true;
       s.classList.remove("on");
     });

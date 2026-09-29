@@ -19,40 +19,16 @@ function labelDefault(key){
    L1() the word for ONE. An empty box, or the retired "—" (a row that used to
    be "not held" at one level), falls back to the platform's default and then
    to the internal name, so a word is never blank on screen. */
-/* §418: A LAYER MAY NAME A THING ITS OWN WAY. What the page being drawn
-   belongs to (TARGET) is asked first — the business units' "Pillars" and the
-   functions' "Themes of work" can differ — and only an unnamed part falls
-   back to the client's one word. Setup is the client's own ground and never
-   a layer's, so it always reads the client's word (Terminology is edited
-   there, and a layer's name showing in its boxes would be a second copy). */
-function layerOverride(key, which){
-  if (typeof SMPRules === "undefined" || !SMPRules.layerWord) return null;
-  if (typeof TARGET_SETUP !== "undefined" && TARGET_SETUP) return null;
-  var t = typeof TARGET !== "undefined" ? TARGET : "group";
-  return SMPRules.layerWord(GROUP, t, key, which === "group" ? "one" : "many");
-}
 function labelWord(key, which){
-  var o = layerOverride(key, which);
-  if (o) return o;
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
   var v = e && e[which];
   if (!v || v === "\u2014") {
     var d = labelDefault(key);
-    var pd = !d && typeof SMPRules !== "undefined" && SMPRules.PART_DEFAULTS && SMPRules.PART_DEFAULTS[key];
-    v = d ? (which === "group" ? d.one : d.many)
-          : pd ? (which === "group" ? pd[0] : pd[1])
-          : (e ? e.internal : key);
+    v = d ? (which === "group" ? d.one : d.many) : (e ? e.internal : key);
   }
   return v;
 }
 function L(key, scope){ return esc(labelWord(key, "bu")); }
-/* §418: a word for a NAMED layer rather than the page being drawn — the deck
-   and anything else built for a subject that is not TARGET ask this. */
-function LTraw(target, key, which){
-  var o = SMPRules.layerWord(GROUP, target, key, which === "one" ? "one" : "many");
-  return o || labelWord(key, which === "one" ? "group" : "bu");
-}
-function LT(target, key, which){ return esc(LTraw(target, key, which)); }
 function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one
@@ -5952,34 +5928,19 @@ function renderMyLines(){
         var bench = tacticBenchmark(r.obj);
         var whole = onOutcome(r.obj) || oc ? outcomeTargetShown(r.obj) : null;
         var pr = tacticProgress(r.obj);
-        /* §414: the same lines Reporting draws, one per outcome — an owner
-           who can enter the first outcome here and not the second could
-           never finish, since the unit waits for all of them. */
-        var xs = scoredExtras(r.obj), rs = outRowspan(xs.length);
-        var subs = xs.map(function(ex){
-          var pt = exAsT(r.obj, ex);
-          return '<tr class="' + outSubCls(r.obj) + '"><td>' + otag(ex.id) +
-            (ex.outcome ? esc(ex.outcome) : '<span class="missing">Missing</span>') + '</td>' +
-            '<td class="num">' + repOutTarget(r.obj, pt) + '</td>' +
-            '<td class="cc">' + repEntryExtra(r.target, r, ex, "mine") + '</td></tr>';
-        }).join("") + outPad(xs.length);
-        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td' + rs + '>' +
+        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td>' +
             esc(r.obj.name || "\u2014") +
             (r.pillar && r.pillar.name
               ? ' <span class="why" style="margin:0">' + esc(r.pillar.name) + '</span>' : '') + '</td>' +
-          '<td>' + (xs.length ? otag("O1") + (r.obj.outcome ? esc(r.obj.outcome)
-                                  : '<span class="missing">Missing</span>')
-                              : '') + (xs.length ? '' : oc && oc.name ? esc(oc.name)
+          '<td>' + (oc && oc.name ? esc(oc.name)
                                   : '<span class="why" style="margin:0">how far it got</span>') + '</td>' +
           '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
             (whole && whole !== bench && !SMPRules.isYesNo(r.obj.outTarget)
               ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') + '</td>' +
           '<td class="cc">' + repEntry(r.target, r, "mine") + '</td>' +
-          '<td class="cc"' + rs + '>' + (pr == null
+          '<td class="cc">' + (pr == null
               ? '<span class="pill kind">Not reported</span>'
-              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>' +
-                (xs.length ? '<span class="oavg">average of ' + (xs.length + 1) + '</span>' : '')) +
-            '</td></tr>' + subs;
+              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>') + '</td></tr>';
       }).join("") + '</tbody></table>';
     return section("", esc(placeLabel(t)) +
       ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +
@@ -7047,33 +7008,6 @@ function planPeriodBlock(){
       'where a plan started mid-year. <b>Set once for the whole business</b>, and it does ' +
       'not change when a cycle closes. Every figure is measured against the share of it ' +
       'that has passed by the month the cycle covers to.</div>' +
-  '</div>' + planYearsBlock();
-}
-
-/* ── YEARS 1 · 2 · 3, AND THE YEARLY REVISION (§416) ─────────────────
-   Drawn only while the Plan details switch is on. The three years are
-   NAMED, never typed: the plan stands in one of them and only this button
-   moves it (Islam's "carry over": the plan as it stood is archived, the
-   tactics carry over, and the new year's refinement is done in the pen).
-   The planning period above stays one year — targets are this year only,
-   his answer — so the revision moves that period on by twelve months if it
-   was set. Nothing reads the calendar to decide which year it is. */
-function planYearsBlock(){
-  if (!yearsOn()) return "";
-  var now = planYear(), chips = "";
-  for (var y = 1; y <= 3; y++)
-    chips += '<span class="yrchip' + (y === now ? " now" : y < now ? " past" : "") + '">' +
-      esc(planYearLabel(y)) + (y === now ? " \u00b7 now" : "") + '</span>';
-  return '<div class="cyc2-r planyears">' +
-    '<div class="nc-h">The three years</div>' +
-    '<div class="yrchips">' + chips + '</div>' +
-    (now < 3
-      ? '<div class="nc-h">The yearly revision</div>' +
-        '<p class="cyc2-p">Moves the plan into ' + esc(planYearLabel(now + 1)) +
-          '. The plan as it stands is archived first; directions and tactics carry over ' +
-          'and are refined in the pen.</p>' +
-        '<button class="editbtn" data-yearrev="1">Start the Year ' + (now + 1) + ' revision\u2026</button>'
-      : '<p class="cyc2-p">The plan is in its last year.</p>') +
   '</div>';
 }
 

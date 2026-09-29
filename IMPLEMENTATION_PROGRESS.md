@@ -8216,3 +8216,88 @@ its own would wipe the other's settings. Fixed here so any extra setting stored
 beside the layers survives a press. All checks from both branches pass on a
 trial merge. On the branch, not merged.
 
+
+## §419 — a tactic's status in RHI's words, picked by the platform (2026-09-24, on the branch)
+
+First of the RHI changes. A tactic's Status now reads **Completed**, **In progress**, **Delayed**, **Not due** or **Not started**, everywhere, and nobody picks it: the platform works it out. **Not due** means the tactic's quarters have not started yet. **Delayed** means all of its quarters are over and it is not finished. **Not started** means nothing, or nought, has been reported. A yes/no answer that is finished now reads **Completed** instead of Done. Only the words shown changed. What is saved still says Done or WIP, so downloaded workbooks and closed cycles read exactly as before, and old files still upload. On Raya's figures today: 59 tactics read In progress, 10 Not due, 5 Not started, 3 Delayed and 1 Completed; no score moved. A new check covers the five words and fails if Delayed is removed; one older check that held "Done" was rewritten to the new word. Whole-platform sweep clean, authoriser 763/0, change list 140/0.
+**Still open**: a tactic that is not due now says "Not due" in the Status column and "Not yet due" in the next one — the same thing twice. Deliverables still say "Delivered".
+
+## §412 — a capability has its own owner and custodian (2026-09-24, on the branch)
+
+Second RHI change. Setup › Capabilities now has **Owner** and **Custodian** columns, picked from the register like a business unit's. The function that holds a capability is now optional, so a company-wide capability can be held by nobody and still have somebody accountable. A capability planned in pillars shows how many pillars it has. The owner and custodian can report on their capability; they cannot rewrite its plan, and only the office can name them. Where a function holds a capability, that function's head and custodian still reach it as before. Nobody's access changed on Raya today, because none of Raya's capabilities has an owner of its own yet. New check passes and fails on the old build; authoriser 774/0.
+
+
+- **§419.1 (2026-09-25):** a tactic that is not due now says "Not due" once, in Status. The duplicate "Not yet due" next to it is gone. Built on the branch, not merged.
+
+## §416 — years 1 · 2 · 3, and the yearly revision (2026-09-28, on the branch)
+
+Sixth RHI change, the last plan detail agreed, built from Islam's five answers on the mockup ("1. keep 2. carry over 3. Year 1.2026 4. this year only 5. ok"). Switched on per client as a fourth chip on the Plan details card (*Years 1 · 2 · 3*). Off by default, so Raya Trade and every other client look exactly as before.
+
+- **Each direction marks the years it runs in** (1, 2, 3), set with three buttons behind the pen. All three is the default.
+- **A direction that does not run this year stays on the Plan, greyed**, saying when it runs ("Starts in Year 2"). It is not asked for in Reporting, not counted as missing and not scored, so the unit's numbers are made of the directions running this year.
+- **The yearly revision**: in Setup › Reporting cycle (with the pen open) the three years are named, e.g. "Year 1.2026 · now", with a button *Start the Year 2 revision…*. It asks first, archives every plan as it stood, and moves the plan into the next year. Everything carries over and is refined in the pen. The year never changes by itself.
+- **Targets stay this year's only**, so the planning period stays one year (the drawing showed three; this is deliberate). The revision moves a set period on by twelve months.
+- **The deck** lists a not-running direction but gives it no slides; **the plan download** shows every direction with its years; **the plan workbook** gets a Years column at the end of the Pillars sheet.
+- Nothing is migrated. Turning the switch off hides the years and keeps them.
+
+Checked: `checks/years.py` (all good; red when a piece is broken on purpose), the server test (only the office moves the plan's year; red 2 when that rule is removed), the neighbouring checks and the full page sweep.
+
+## §415 — a tactic's requirements (2026-09-28, on the branch)
+
+Fifth RHI change, built from the mockup Islam answered ("B, plan download only, build it"). A tactic can now list what it needs (people, budget, a sign-off), one short line per item. It is switched on per client from Getting started › Structure, as a third chip on the Plan details card (*Tactic requirements*). It is off by default, so Raya Trade and every other client look exactly as before.
+
+- **Plan page**: the list sits under the tactic's name and description, under a small *Requirements* heading, the same shape as the reported note. No column gets narrower; only tactics that have requirements get taller. A tactic with none shows nothing.
+- **With the pen open**: every tactic has a *Requirements* box, one item per line. Enter starts a new line. Blank lines and stray spaces are dropped when it is saved.
+- **Plan download** (the editable slides of the plan): the list rides under the tactic's name. A slide with requirements on it holds 7 tactics instead of 11, so the taller rows do not run off the slide.
+- **The review deck does not show them** (Islam's choice), and neither do Reporting or Performance.
+- **Not scored and not counted as missing.** Only the office writes them (they are part of the plan).
+- **The plan workbook** gets a *Requirements* column at the end of the Tactics sheet, items on separate lines in the cell, only when the switch is on or requirements exist. Uploading brings them back.
+- Nothing is migrated. Turning the switch off hides them and keeps them.
+
+Checked: `checks/tactic-requirements.py` (all good; red four ways when a piece is broken on purpose — 6 / 1 / 1 / 1), the server test (the office writes them, a reporter cannot, and they count as the plan; red 2 when requirements are made a reporting field), the neighbouring checks and the full page sweep.
+
+Not this change's: `checks/enter-commits.py` fails its last two lines (a paragraph box keeping Enter as a new line). It fails the same way on the build before this change: the page it opens no longer draws the box it looks for, so it finds nothing to press. Recorded, not fixed here. The full page sweep: no errors.
+
+**Next, step 6** — the last plan detail agreed for RHI, mockup first.
+
+## §414 — several outcomes per tactic (2026-09-28, on the branch)
+
+Fourth RHI change, built from the mockup Islam approved ("approved, build it"). A tactic can now have more than one outcome. Each outcome has its own target and is scored on its own, and the tactic reads as the average of them. It is switched on per client from Getting started › Structure, as a second chip on the Plan details card (*Several outcomes per tactic*). It is off by default, so Raya Trade and every other client look exactly as before.
+
+- **Plan page**: extra outcomes sit on their own lines under the tactic, tagged O1, O2…; the tactic's name, owner, collaborators and quarters are shared across the lines. In the pen each extra has an × and there is "+ Add an outcome" under the last one. A tactic with one outcome looks exactly as today.
+- **Reporting**: a box per outcome, one note for the tactic. The tactic is not scored until every outcome has a figure.
+- **Performance**: each line shows its figure against what is due and its own score; Progress shows the average with "average of N".
+- **The deck and My reporting** show the same lines. A long table that splits across slides keeps a tactic's lines together.
+- **The plan workbook** gets an Outcomes sheet for the extras (only when the switch is on or extras exist). Uploading brings them back; a line naming a tactic that does not exist is refused.
+- **Missing**: an extra's empty name or target counts as missing for the office and holds Submit, but is not added to a filler's missing bar (they could not fill it).
+- Nothing is migrated. Turning the switch off hides the extras and keeps them.
+
+Checked: `checks/several-outcomes.py` (all good; red five ways when a piece is broken on purpose), the server test (only the office changes the outcome list; a reporter may enter an extra's figure), the neighbouring checks and the full page sweep.
+
+**Not done, recorded**: the progress workbook does not carry extra outcomes' figures yet; changing an extra's unit does not rewrite a figure already entered for it.
+
+**Next, step 5: the Requirements column** — mockup first.
+
+## §413 — a direction's overview (2026-09-25, on the branch)
+
+Third RHI change, built from the mockup Islam approved ("approved, keep the objective preview, build it"). A pillar can now carry three short texts: **Objective**, **Why now** and **Risks & mitigations**. It is switched on per client from Getting started › Structure, in a new **Plan details** card (only *Direction overview* is there for now; the other three plan details join as they are built). It is off by default, so Raya Trade and every other client look exactly as before.
+
+- **On the Plan page** it sits under the pillar's name, folded, with the start of the Objective on the folded line. Opened, it shows the three texts side by side. Only the office writes them (the plan pen). A direction with nothing written shows nothing when reading.
+- **On the deck** a new slide follows each direction's title slide: the Objective large, Why now and the risks (one line each) beside it, and the direction's key measures and tactics read straight from its tables. No slide for a direction with nothing written.
+- **In the plan workbook** the three ride at the end of the Pillars sheet, only when the switch is on or a direction has text, so every other client's file is unchanged. Uploading brings them back.
+- **Not counted as missing**: an empty box owes nothing.
+- Nothing is migrated; the texts ride with the pillar like its other fields. Turning the switch off hides them and keeps them.
+
+Checked: `checks/direction-overview.py` (red on the build before, and red when the switch is ignored), the server test (only the office writes the texts or sets the switch), the neighbouring checks and the full page sweep.
+
+**Next, step 4: several outcomes per tactic** — mockup first.
+
+Not this change's: `checks/objectives-table.py` fails one pixel test (the row number sits 0.94px off its drag handle). It fails the same way on the build before §413, so it is recorded and not fixed here.
+
+## §418.2 — the Structure branch and the RHI branch brought together (2026-09-29)
+Our branch now holds main's latest and the RHI branch (direction overview,
+several outcomes, requirements, years, capability owner and custodian, status
+words). Numbers were tidied so nothing is claimed twice: ours are §417/§418, the
+RHI status-words section is §419. Everything checked passes. Not on main; merge
+this branch rather than the RHI one.
+

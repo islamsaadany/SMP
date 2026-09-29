@@ -4920,5 +4920,147 @@ console.log("\n46 · the client's structure (§404)");
   });
 })();
 
+/* ── §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN ──────────────────
+   Held by no function (company-wide), with `head` and `custodian` named on the
+   capability itself. BOTH ENDS (§94.2): the two seats report, somebody else
+   does not, the owner still may not rewrite the plan, and naming the seats is
+   the SMO's (Setup). */
+console.log("\n§412 · a capability's own owner and custodian");
+(function () {
+  const B = clone(SEED);
+  const cap = (B.group.capabilities || []).filter(function (c) { return (c.projects || []).length; })[0];
+  check("§412: the seed holds a capability with projects", !!cap);
+  if (!cap) return;
+  delete cap.fn; cap.head = "cfo"; cap.custodian = "rethead";
+  const T = "cap:" + cap.id, WB = R.worldOf(B);
+  const rolesOf = function (k) { return R.personRoles(WB, personOf(B, k)).map(function (r) { return r.role + "@" + r.at; }); };
+  check("§412: the owner derives Capability owner at the capability", rolesOf("cfo").indexOf("capowner@" + T) > -1, rolesOf("cfo").join(","));
+  check("§412: the custodian derives Custodian at the capability", rolesOf("rethead").indexOf("custodian@" + T) > -1, rolesOf("rethead").join(","));
+  let PI = -1, MI = -1;
+  cap.projects.forEach(function (pr, pi) { (pr.milestones || []).forEach(function (m, mi) {
+    if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; } }); });
+  check("§412: a milestone the fixture moves", PI > -1);
+  if (PI < 0) return;
+  function as(who, mutate) {
+    const inc = clone(B);
+    mutate(inc.group.capabilities.filter(function (c) { return c.id === cap.id; })[0]);
+    return A.authorize(B, inc, personOf(B, who));
+  }
+  const fig = function (c) { c.projects[PI].milestones[MI].status = "todo"; };
+  const brief = function (c) { c.projects[PI].brief = "rewritten by the fixture"; };
+  const seat = function (c) { c.head = "fn_hr"; };
+  let v = as("cfo", fig);      check("§412: the owner reports on their capability", v.ok, v.refusals.join(" / "));
+  v = as("rethead", fig);      check("§412: the custodian reports on it", v.ok, v.refusals.join(" / "));
+  v = as("fn_hr", fig);        check("§412 REFUSED: another function's head does not", !v.ok, "was ALLOWED");
+  v = as("own_b2b", fig);      check("§412 REFUSED: a unit custodian does not", !v.ok, "was ALLOWED");
+  v = as("cfo", brief);        check("§412 REFUSED: the owner cannot rewrite the plan (the office's, §94)", !v.ok, "was ALLOWED");
+  v = as("smo", seat);         check("§412: the office names the owner", v.ok, v.refusals.join(" / "));
+  v = as("cfo", seat);         check("§412 REFUSED: the owner cannot hand the seat on", !v.ok, "was ALLOWED");
+})();
+
+/* ── §413: A DIRECTION'S OVERVIEW IS THE OFFICE'S PLAN, AND ITS SWITCH SETUP ──
+   The three texts ride a pillar's `extra` like every other unknown key, so
+   they are PLAN (unitPlan) and nobody but the office writes them; the switch
+   on the group's structure is Setup. Both ends each (§94.2). */
+console.log("\n§413 · a direction's overview");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) { return (B.units[k].items || []).length; })[0];
+  const text = function (inc) { inc.units[K].items[0].ovObj = "fixture objective"; };
+  const sw = function (inc) { inc.group.structure = { details: { overview: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  let v = as("smo", text);     check("§413: the office writes a direction's overview", v.ok, v.refusals.join(" / "));
+  v = as("own_mob", text);     check("§413 REFUSED: a unit custodian does not (the plan is the office's)", !v.ok, "was ALLOWED");
+  v = as("smo", sw);           check("§413: the office turns the overview on", v.ok, v.refusals.join(" / "));
+  v = as("own_mob", sw);       check("§413 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
+/* ── §414: SEVERAL OUTCOMES PER TACTIC ──────────────────────────────────
+   The list of extras is PLAN (the office's, like the first outcome's target),
+   its switch is Setup, and a figure on an extra is REPORTING — so a
+   custodian may enter one and may not add, rename or re-target an outcome.
+   Both ends each (§94.2), and the figure is asserted to classify as
+   reporting and NOTHING else, or a widening would pass unseen. */
+console.log("\n§414 · several outcomes per tactic");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) {
+    return (B.units[k].items || []).some(function (p) { return (p.tactics || []).length; }); })[0];
+  const tOf = function (st) {
+    for (const p of st.units[K].items) if ((p.tactics || [])[0]) return p.tactics[0];
+  };
+  tOf(B).outs = [{ id: "O2", outDir: "\u2265", outcome: "fixture outcome", outTarget: "90%" }];
+  const plan = function (inc) { tOf(inc).outs[0].outTarget = "80%"; };
+  const addOne = function (inc) { tOf(inc).outs.push({ id: "O3", outcome: "another" }); };
+  const fig = function (inc) { tOf(inc).outActs = { O2: "70%" }; };
+  const sw = function (inc) { inc.group.structure = { details: { outcomes: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  check("§414: the seed names somebody who reports for " + K, !!(rep && personOf(B, rep)), String(rep));
+  let v = as("smo", plan);   check("§414: the office re-targets an extra outcome", v.ok, v.refusals.join(" / "));
+  v = as("smo", addOne);     check("§414: the office adds one", v.ok, v.refusals.join(" / "));
+  v = as(rep, plan);         check("§414 REFUSED: the reporter cannot re-target it (plan)", !v.ok, "was ALLOWED");
+  v = as(rep, addOne);       check("§414 REFUSED: the reporter cannot add one", !v.ok, "was ALLOWED");
+  v = as(rep, fig);          check("§414: the reporter enters an extra outcome's figure", v.ok, v.refusals.join(" / "));
+  const inc = clone(B); fig(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§414: that figure classifies as reporting and nothing else",
+        kinds.length > 0 && kinds.every(function (x) { return x === "unitReporting"; }), kinds.join(","));
+  v = as("smo", sw);         check("§414: the office turns several outcomes on", v.ok, v.refusals.join(" / "));
+  v = as(rep, sw);           check("§414 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
+/* ── §415: A TACTIC'S REQUIREMENTS ─────────────────────────────────────
+   A note on the PLAN: the office writes it and a reporter cannot, and it
+   needed no server change — `reqs` is not a reporting field, so it falls to
+   the plan (§42's fall-through). Asserted rather than assumed (§172), both
+   ends (§94.2). */
+console.log("\n§415 · a tactic's requirements");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) {
+    return (B.units[k].items || []).some(function (p) { return (p.tactics || []).length; }); })[0];
+  const tOf = function (st) {
+    for (const p of st.units[K].items) if ((p.tactics || [])[0]) return p.tactics[0];
+  };
+  const write = function (inc) { tOf(inc).reqs = ["Two analysts", "Budget sign-off"]; };
+  const sw = function (inc) { inc.group.structure = { details: { requirements: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  let v = as("smo", write);  check("§415: the office writes a tactic's requirements", v.ok, v.refusals.join(" / "));
+  v = as(rep, write);        check("§415 REFUSED: the reporter cannot (it is the plan)", !v.ok, "was ALLOWED");
+  const inc = clone(B); write(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§415: it classifies as the plan and nothing else",
+        kinds.length > 0 && kinds.every(function (x) { return x === "unitPlan"; }), kinds.join(","));
+  v = as("smo", sw);         check("§415: the office turns requirements on", v.ok, v.refusals.join(" / "));
+  v = as(rep, sw);           check("§415 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
+/* ── §416: YEARS 1 · 2 · 3 ──────────────────────────────────────────────
+   A direction's years are the plan (the pen's, not a reporter's), and the
+   year the plan stands in is the CYCLE — the office moves it at the yearly
+   revision and nobody else can. Both ends (§94.2), and the change must
+   classify ONCE as "cycle" rather than beside an unknown (§259.2). */
+console.log("\n§416 · years 1 · 2 · 3");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) { return (B.units[k].items || []).length; })[0];
+  const years = function (inc) { inc.units[K].items[0].years = [2, 3]; };
+  const move = function (inc) { inc.group.planYear = 2; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  let v = as("smo", years);  check("§416: the office sets a direction's years", v.ok, v.refusals.join(" / "));
+  v = as(rep, years);        check("§416 REFUSED: a reporter cannot (it is the plan)", !v.ok, "was ALLOWED");
+  v = as("smo", move);       check("§416: the office moves the plan's year", v.ok, v.refusals.join(" / "));
+  v = as(rep, move);         check("§416 REFUSED: nobody else moves the plan's year", !v.ok, "was ALLOWED");
+  const inc = clone(B); move(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§416: the plan's year classifies once, as the cycle", kinds.length === 1 && kinds[0] === "cycle", kinds.join(","));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

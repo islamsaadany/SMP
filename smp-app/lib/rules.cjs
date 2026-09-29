@@ -57,6 +57,18 @@
       note:"Accountable for one unit's strategy. Named on the unit itself." },
     { key:"custodian", name:"Strategy custodian", scope:"unitfn",
       note:"Carries the strategy work for a unit or a supporting function, alongside its head." },
+    /* ── A CAPABILITY HAS SEATS OF ITS OWN (§412, RHI) ──────────────────
+       Islam: *"the capability has owner and custodian like business unit, and
+       the function is an option."* This REVERSES the 13 September decision
+       (§336) that a capability is owned through the function that holds it:
+       RHI's company-wide directions live in a capability no function holds,
+       and a capability nobody can be named on is one only the office can run.
+       The custodian is the Strategy custodian row, held AT the capability; the
+       owner is a row of its own because "Function head · Company Wide" names a
+       seat that does not exist. It ships with the Function head's grants, so a
+       capability owner starts exactly where a function head does. */
+    { key:"capowner", name:"Capability owner", scope:"cap",
+      note:"Accountable for one capability's strategy. Named on the capability itself, on Setup › Capabilities." },
     { key:"fnhead", name:"Function head", scope:"fn",
       note:"Runs a supporting function and the capabilities it owns." },
     /* ── TWO NAMED ROLES, READ OFF THE PLAN (§147.7, Islam 2026-08-28) ──
@@ -252,6 +264,10 @@
     custodian: { a_group:"view", a_unit_own:"edit", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     fnhead:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* §412: a capability is judged in the FUNCTION columns (§334), so its
+       owner starts on the Function head's row, cell for cell. */
+    capowner:  { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW ON THE REPORTING CELLS, DELIBERATELY (§147.7): Islam's first
        condition is that the grant is MADE on this table — "1- is to be
@@ -517,6 +533,13 @@
       if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
       if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
     });
+    /* §412: a capability's own seats, read off the capability exactly as a
+       unit's are read off the unit (§33) -- one fact, one place. */
+    (w.capabilities || []).forEach(function (c) {
+      if (!c || !c.id) return;
+      if (c.head === p.key)      out.push({ role:"capowner",  at:"cap:" + c.id });
+      if (c.custodian === p.key) out.push({ role:"custodian", at:"cap:" + c.id });
+    });
 
     /* ── PROJECT OWNER AND PILLAR OWNER (§147.7) ──────────────────────
        Read off the plan's own Owner rows, exactly as a unit's head is read
@@ -674,9 +697,15 @@
   }
 
   function roleOwns(w, r, target) {
+    /* §412: a seat held AT the capability owns it and nothing else. Asked
+       before the capability resolves to its holder, or the seat would be
+       compared against the function and never match. The holder's own seats
+       still reach it below, because the function stays an option. */
+    if (String(r.at || "") === String(target || "") && String(target || "").indexOf("cap:") === 0) return true;
     target = capHolderTarget(w, target);
     if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
+    if (at.indexOf("cap:") === 0) return false;
     if (String(target).indexOf("fn:") === 0) return at === target;
     if (at.indexOf("fn:") === 0) return false;
     if (r.role === "cceo") {
@@ -1559,8 +1588,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      nothing for a partial to be measured against, so it is not scored — the
      same answer §276 gives a Count that owes nothing yet, and the reason a
      December agreement sitting at 10% in Q2 does not mark its unit down. */
+  /* §419: WHAT IS STORED AND WHAT IS SAID PART HERE. RHI's word for a
+     finished row is "Completed", platform-wide, and it is the SHOWN word
+     only -- `ynJoin` still writes "Done", so a tab on the previous build, a
+     workbook downloaded last month and every closed cycle read exactly as
+     before (§96.2), and `ynState` reads either spelling. */
   var YN_TODO = "Not started", YN_WIP = "In progress", YN_DONE = "Done";
-  var YN_WORDS = [YN_TODO, YN_WIP, YN_DONE];
+  var YN_DONE_SHOWN = "Completed";
+  var YN_WORDS = [YN_TODO, YN_WIP, YN_DONE_SHOWN];
   function ynPct(n) {
     var p = parseFloat(String(n == null ? "" : n).replace(/[^0-9.\-]/g, ""));
     return isNaN(p) ? null : Math.max(0, Math.min(100, Math.round(p)));
@@ -1569,7 +1604,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = String(v == null ? "" : v).trim();
     if (!s) return { status: "", pct: null };
     var low = s.toLowerCase();
-    if (low === "yes" || low === "y" || low === "done") return { status: "done", pct: null };
+    if (low === "yes" || low === "y" || low === "done" || low === "completed") return { status: "done", pct: null };
     if (low === "no" || low === "n" || low === "not started")
       return { status: "todo", pct: null };
     /* "In progress" alone is a row halfway through a sentence: said, and not
@@ -1601,7 +1636,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      being rewritten (§96.2: what is stored is not touched). */
   function ynShown(v) {
     var st = ynState(v);
-    if (st.status === "done") return YN_DONE;
+    if (st.status === "done") return YN_DONE_SHOWN;
     if (st.status === "todo") return YN_TODO;
     if (st.status === "wip") return st.pct == null ? YN_WIP : YN_WIP + " \u00b7 " + st.pct + "%";
     return "";
@@ -1934,7 +1969,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return (w.units || {})[target] || null;
   }
 
-  var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
+  var ARRANGE_ROLES = ["owner", "custodian", "fnhead", "capowner"];
 
   function mayArrange(w, person, target) {
     if (!person || !target) return false;
@@ -3912,6 +3947,48 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (o && typeof o[comp] === "boolean") return o[comp];
     return levelComponents(group, structLevelOf(target)).indexOf(comp) >= 0;
   }
+  /* §413 — PLAN DETAILS (Islam, for RHI: a "Plan details" card on the
+     Structure step, four switches, OFF for every client until somebody turns
+     one on, so Raya is untouched). Stored as `structure.details`, and ONLY AN
+     EXPLICIT `true` TURNS ONE ON (§104's rule, not §102's): absent is off,
+     and a stale value cannot switch one on by accident. Off HIDES and never
+     forgets — a direction's overview text is kept whatever the switch says. */
+  /* §414 — "outcomes": several outcomes per tactic (RHI step 4), off for
+     every client until the office turns it on, so a tactic reads exactly as
+     it did everywhere else. */
+  /* §415 — "requirements": what each tactic needs (RHI step 5), a list of
+     short lines on the tactic, drawn under its name and in the plan
+     download; never scored, never counted as missing. Off hides and keeps. */
+  /* §416 — "years": Years 1 · 2 · 3 (RHI step 6). A direction marks the
+     years it runs in (`p.years`, absent = every year) and the plan stands in
+     one year at a time (`GROUP.planYear`, absent = Year 1), moved on only by
+     the office's yearly revision. A direction not running this year stays on
+     the Plan page, greyed, and is not asked, not owed and not scored. */
+  var PLAN_DETAILS = ["overview", "outcomes", "requirements", "years"];
+  var PLAN_YEAR = "planYear";
+  /* The year the plan stands in, 1-3. Absent, or anything outside 1-3, is
+     Year 1: a stored value nobody could have meant never moves the plan. */
+  function planYearOf(group) {
+    var n = group && group[PLAN_YEAR];
+    return (n === 2 || n === 3) ? n : 1;
+  }
+  /* The years a direction runs in, sorted and distinct; absent or empty is
+     all three, so a direction nobody marked runs every year. */
+  function pillarYears(p) {
+    var ys = p && Array.isArray(p.years) ? p.years.filter(function (y) { return y === 1 || y === 2 || y === 3; }) : [];
+    ys = ys.filter(function (y, i) { return ys.indexOf(y) === i; }).sort();
+    return ys.length ? ys : [1, 2, 3];
+  }
+  /* Whether a direction runs in the year the plan stands in. With the switch
+     off, every direction runs, whatever was stored (off hides and keeps). */
+  function runsNow(group, p) {
+    if (!planDetailOn(group, "years")) return true;
+    return pillarYears(p).indexOf(planYearOf(group)) >= 0;
+  }
+  function planDetailOn(group, key) {
+    var s = structureOf(group), d = s && s.details;
+    return !!(d && d[key] === true);
+  }
   function templeOn(group, target) {
     var level = structLevelOf(target);
     if (level !== "top" && level !== "mid") return false;
@@ -4490,7 +4567,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     bdAsked: bdAsked, bdAnswered: bdAnswered, bdReportFields: bdReportFields,
     YN_UNIT: YN_UNIT, isYesNo: isYesNo, ynUnitOf: ynUnitOf,
     ynAnswer: ynAnswer, ynScore: ynScore,
-    YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_WORDS: YN_WORDS,
+    YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_DONE_SHOWN: YN_DONE_SHOWN, YN_WORDS: YN_WORDS,
     ynState: ynState, ynJoin: ynJoin, ynAnswered: ynAnswered,
     ynShown: ynShown, ynPct: ynPct,
     MONTH_NAMES: MONTH_NAMES, monthSet: monthSet, monthlySet: monthlySet,
@@ -4525,6 +4602,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
     SETUP_DONE: SETUP_DONE, setupDone: setupDone,
     STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
+    PLAN_DETAILS: PLAN_DETAILS, planDetailOn: planDetailOn,
+    PLAN_YEAR: PLAN_YEAR, planYearOf: planYearOf, pillarYears: pillarYears, runsNow: runsNow,
     STRUCT_NEW_CLIENT: STRUCT_NEW_CLIENT, newClientStructure: newClientStructure,
     STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,

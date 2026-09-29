@@ -157,9 +157,14 @@ with sync_playwright() as p:
     ck("a unit that plans in projects makes its project owner a Project owner there", made)
     reach = pg.evaluate("""()=>{
       const R = SMPRules, w = world();
+      /* §334 MADE A CAPABILITY A DESTINATION, judged in the FUNCTION columns,
+         and §412 gave it a seat of its own — so a capability is a target this
+         sweep has to ask about too, or a role held AT a capability reads as
+         reaching none of the columns it plainly reaches (§214.3). */
+      const CAPS = (GROUP.capabilities || []).map(c => 'cap:' + c.id);
       const pairs = [['unit', UNIT_KEYS], ['unit_strat', UNIT_KEYS],
-                     ['fn', FUNCTION_KEYS.map(k=>'fn:'+k)],
-                     ['fn_strat', FUNCTION_KEYS.map(k=>'fn:'+k)]];
+                     ['fn', FUNCTION_KEYS.map(k=>'fn:'+k).concat(CAPS)],
+                     ['fn_strat', FUNCTION_KEYS.map(k=>'fn:'+k).concat(CAPS)]];
       /* Granted roles say where they may sit; the derived ones never can —
          `roleWheres()` falls through to "every unit" for them, which is simply
          untrue — so their places come from what `personRoles()` actually

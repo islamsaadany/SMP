@@ -19,40 +19,16 @@ function labelDefault(key){
    L1() the word for ONE. An empty box, or the retired "—" (a row that used to
    be "not held" at one level), falls back to the platform's default and then
    to the internal name, so a word is never blank on screen. */
-/* §418: A LAYER MAY NAME A THING ITS OWN WAY. What the page being drawn
-   belongs to (TARGET) is asked first — the business units' "Pillars" and the
-   functions' "Themes of work" can differ — and only an unnamed part falls
-   back to the client's one word. Setup is the client's own ground and never
-   a layer's, so it always reads the client's word (Terminology is edited
-   there, and a layer's name showing in its boxes would be a second copy). */
-function layerOverride(key, which){
-  if (typeof SMPRules === "undefined" || !SMPRules.layerWord) return null;
-  if (typeof TARGET_SETUP !== "undefined" && TARGET_SETUP) return null;
-  var t = typeof TARGET !== "undefined" ? TARGET : "group";
-  return SMPRules.layerWord(GROUP, t, key, which === "group" ? "one" : "many");
-}
 function labelWord(key, which){
-  var o = layerOverride(key, which);
-  if (o) return o;
   var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
   var v = e && e[which];
   if (!v || v === "\u2014") {
     var d = labelDefault(key);
-    var pd = !d && typeof SMPRules !== "undefined" && SMPRules.PART_DEFAULTS && SMPRules.PART_DEFAULTS[key];
-    v = d ? (which === "group" ? d.one : d.many)
-          : pd ? (which === "group" ? pd[0] : pd[1])
-          : (e ? e.internal : key);
+    v = d ? (which === "group" ? d.one : d.many) : (e ? e.internal : key);
   }
   return v;
 }
 function L(key, scope){ return esc(labelWord(key, "bu")); }
-/* §418: a word for a NAMED layer rather than the page being drawn — the deck
-   and anything else built for a subject that is not TARGET ask this. */
-function LTraw(target, key, which){
-  var o = SMPRules.layerWord(GROUP, target, key, which === "one" ? "one" : "many");
-  return o || labelWord(key, which === "one" ? "group" : "bu");
-}
-function LT(target, key, which){ return esc(LTraw(target, key, which)); }
 function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one
@@ -395,9 +371,8 @@ function renderAccess(){
     }
     /* The split halves collapse exactly as their whole did (§117): no unit
        means neither half of the unit pair can come up. */
-    if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
-      return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
-        " holds no " + L1("unitword") + ".";
+    if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+      return "A function head holds no " + L1("unitword") + ".";
     }
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no " + L1("fnword") + ".";
@@ -893,7 +868,7 @@ function assignPicker(where, roleKey, current, editable){
       /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
          is a caption on something the reader has already scrolled past. */
       '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
-      group((String(where).indexOf("fn:") === 0 || String(where).indexOf("cap:") === 0) ? "In this function" : "In this unit", pool.here) +
+      group(String(where).indexOf("fn:") === 0 ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
@@ -4889,10 +4864,10 @@ function renderKB(){
            'history, and deleting it would rewrite what was already said. ' +
            '<b>The custodian slot is optional</b> — where the head does the work ' +
            'themselves they already have access as head.' },
-      { h: "A capability's owner",
-        p: 'A capability has an <b>owner</b> and a <b>custodian</b> of its own, named on ' +
-           'Setup › Capabilities, like a business unit. The function that holds it is ' +
-           'optional; where one does, that function\'s head and custodian reach it too.' }
+      { h: "One function each",
+        p: 'A function may hold several capabilities, which is why a custodian is named ' +
+           'after the function and never after a capability: naming someone after one ' +
+           'breaks the moment a second is assigned.' }
     ]),
     kbSection("plans", "Plans — how one arrives", [
       { h: "An upload authors, it does not amend",
@@ -5952,34 +5927,19 @@ function renderMyLines(){
         var bench = tacticBenchmark(r.obj);
         var whole = onOutcome(r.obj) || oc ? outcomeTargetShown(r.obj) : null;
         var pr = tacticProgress(r.obj);
-        /* §414: the same lines Reporting draws, one per outcome — an owner
-           who can enter the first outcome here and not the second could
-           never finish, since the unit waits for all of them. */
-        var xs = scoredExtras(r.obj), rs = outRowspan(xs.length);
-        var subs = xs.map(function(ex){
-          var pt = exAsT(r.obj, ex);
-          return '<tr class="' + outSubCls(r.obj) + '"><td>' + otag(ex.id) +
-            (ex.outcome ? esc(ex.outcome) : '<span class="missing">Missing</span>') + '</td>' +
-            '<td class="num">' + repOutTarget(r.obj, pt) + '</td>' +
-            '<td class="cc">' + repEntryExtra(r.target, r, ex, "mine") + '</td></tr>';
-        }).join("") + outPad(xs.length);
-        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td' + rs + '>' +
+        return '<tr' + (needsNote(r) ? ' class="wantnote"' : '') + '><td>' +
             esc(r.obj.name || "\u2014") +
             (r.pillar && r.pillar.name
               ? ' <span class="why" style="margin:0">' + esc(r.pillar.name) + '</span>' : '') + '</td>' +
-          '<td>' + (xs.length ? otag("O1") + (r.obj.outcome ? esc(r.obj.outcome)
-                                  : '<span class="missing">Missing</span>')
-                              : '') + (xs.length ? '' : oc && oc.name ? esc(oc.name)
+          '<td>' + (oc && oc.name ? esc(oc.name)
                                   : '<span class="why" style="margin:0">how far it got</span>') + '</td>' +
           '<td class="num">' + (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
             (whole && whole !== bench && !SMPRules.isYesNo(r.obj.outTarget)
               ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') + '</td>' +
           '<td class="cc">' + repEntry(r.target, r, "mine") + '</td>' +
-          '<td class="cc"' + rs + '>' + (pr == null
+          '<td class="cc">' + (pr == null
               ? '<span class="pill kind">Not reported</span>'
-              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>' +
-                (xs.length ? '<span class="oavg">average of ' + (xs.length + 1) + '</span>' : '')) +
-            '</td></tr>' + subs;
+              : '<span class="pill ' + band(pr) + '">' + pr + '%</span>') + '</td></tr>';
       }).join("") + '</tbody></table>';
     return section("", esc(placeLabel(t)) +
       ' <span class="rtally' + (n === list.length ? " full" : "") + '">' +
@@ -7047,33 +7007,6 @@ function planPeriodBlock(){
       'where a plan started mid-year. <b>Set once for the whole business</b>, and it does ' +
       'not change when a cycle closes. Every figure is measured against the share of it ' +
       'that has passed by the month the cycle covers to.</div>' +
-  '</div>' + planYearsBlock();
-}
-
-/* ── YEARS 1 · 2 · 3, AND THE YEARLY REVISION (§416) ─────────────────
-   Drawn only while the Plan details switch is on. The three years are
-   NAMED, never typed: the plan stands in one of them and only this button
-   moves it (Islam's "carry over": the plan as it stood is archived, the
-   tactics carry over, and the new year's refinement is done in the pen).
-   The planning period above stays one year — targets are this year only,
-   his answer — so the revision moves that period on by twelve months if it
-   was set. Nothing reads the calendar to decide which year it is. */
-function planYearsBlock(){
-  if (!yearsOn()) return "";
-  var now = planYear(), chips = "";
-  for (var y = 1; y <= 3; y++)
-    chips += '<span class="yrchip' + (y === now ? " now" : y < now ? " past" : "") + '">' +
-      esc(planYearLabel(y)) + (y === now ? " \u00b7 now" : "") + '</span>';
-  return '<div class="cyc2-r planyears">' +
-    '<div class="nc-h">The three years</div>' +
-    '<div class="yrchips">' + chips + '</div>' +
-    (now < 3
-      ? '<div class="nc-h">The yearly revision</div>' +
-        '<p class="cyc2-p">Moves the plan into ' + esc(planYearLabel(now + 1)) +
-          '. The plan as it stands is archived first; directions and tactics carry over ' +
-          'and are refined in the pen.</p>' +
-        '<button class="editbtn" data-yearrev="1">Start the Year ' + (now + 1) + ' revision\u2026</button>'
-      : '<p class="cyc2-p">The plan is in its last year.</p>') +
   '</div>';
 }
 
@@ -8012,47 +7945,32 @@ function renderCaps(){
            inherits the name from here (§48.5). */
         ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
           esc(c.name) + '">' +
-            '<option value="">\u2014 none \u2014</option>' +
+            '<option value="">\u2014 unassigned \u2014</option>' +
             FUNCTION_KEYS.map(function(k){
               return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
                 esc(FUNCTIONS[k].name) + '</option>';
             }).join("") + '</select>'
         : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
-      /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
-         used to borrow the holding function's head, which is right while a
-         capability is only ever held by a function and wrong for a
-         company-wide one held by nobody (Islam: "it has owner and custodian
-         like business unit, and the function is an option"). The seats are
-         the register's own picker writing the capability's own row, so the
-         People page and this column read one fact (§33). */
-      '<td class="nowrapcell">' + assignPicker("cap:" + c.id, "capowner", c.head, editable) + '</td>' +
-      '<td class="nowrapcell">' + assignPicker("cap:" + c.id, "custodian", c.custodian, editable) + '</td>' +
+      '<td class="nowrapcell">' + esc(f ? (personName(f.head) || "\u2014") : "\u2014") + '</td>' +
       '<td>' + capFormatCell(c, editable) + '</td>' +
       /* Defensive on purpose: a capability minted by an older build carries
          neither list, and a Setup page that throws takes the whole screen with
          it. The minting is fixed (§51.11); this is so a graph saved before the
          fix still opens. */
       '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
-      /* A capability planned in pillars counts its pillars here (§412,
-         Islam: "yes show pillars count"); the heading says both. */
-      '<td class="num">' + (capFormat(c) === "pillars"
-        ? (c.items || []).length + ' <span class="why" style="margin:0">' + esc(L("pillar","bu")) + '</span>'
-        : String((c.projects || []).length)) + '</td>' +
+      '<td class="num">' + (c.projects || []).length + '</td>' +
       rowActions("caps", String(i), editable,
         mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + esc(c.id) + '">Remove</button>' : '') +
       '</tr>';
   }).join("");
 
-  /* A capability with no function is a real answer now (§412) — a
-     company-wide one is held by nobody. What is still outstanding is one
-     that nobody is accountable for: no owner and no holding function. */
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
      mark. What is left is drawn only when there IS an orphan. */
   return cfgHead(L("capability"),
-      orphan ? ['<span class="pill none">' + orphan + ' with no owner</span>'] : [],
+      orphan ? ['<span class="pill none">' + orphan + ' unassigned</span>'] : [],
       null, false) +
     section("", L("capability"), null,
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
@@ -8064,16 +7982,19 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Head") +
                  h("Plans in") +
-                 h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
+                 h(L("keyobj"), "cc") + h(L("project"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
-          '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
-          'a function to hold it is optional.</span></div>'
+          '<span class="picsub" style="margin-left:10px">Name it, choose the function that ' +
+          'carries it, then upload its ' + L("project") + ' on Import.</span></div>'
         : '') +
+      '<div class="note"><b>One function each.</b> A function may hold several ' + L("capability") + ' \u2014 ' +
+        'Marketing carries two \u2014 which is why a custodian is named after the function and never ' +
+        'after a ' + L1("capability") + ': naming someone after one breaks the moment a second is assigned.</div>' +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +
         'one number at the top and others are a portfolio of unrelated work: where there are none ' +

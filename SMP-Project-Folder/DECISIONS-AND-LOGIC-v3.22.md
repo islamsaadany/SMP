@@ -58128,3 +58128,357 @@ is client-wide while §418 made everything per layer; and **§411 was claimed th
 before the merge that followed, this branch's own §411/§412 became §417/§418, scoped
 to its own lines (§264.3; the merge base held none of them).
 
+## §419 — a tactic's status is RHI's words, and the platform picks them (2026-09-24)
+
+Islam, fitting SMP to RHI, whose status words are *Completed · In progress ·
+Delayed · Not due*: *"let's use their words and yes the platform does it
+automatically for delayed like the not due"*, and *"Not started if the progress
+is 0% — we can use this logic and words across the platform"*. Asked whether it
+breaks Raya: *"it's fine to change it, the cycle is closed now, if we do it
+right … check before and after."*
+
+**DERIVED, NEVER STORED.** `t.status` goes on holding "Done" · "WIP" ·
+"Not started", because a downloaded workbook, the upload's own mapping
+(templates.js) and every closed cycle read it (§96.2). What changes is the word
+DRAWN, through one reader — `tacticStatusKey()` / `tacticStatusWord()` in
+config-data.js, beside `tacticDue()` — so no two surfaces can say two things
+(§53.5). Measured: the Performance tactics table is the only surface that has
+ever printed a tactic's status; the deck and the .pptx do not.
+
+**THE ORDER IS THE RULE.** Completed first (stored Done, a yes/no answered
+done, or a plain figure at 100 or more), so finishing early is never "Not due";
+then Not due (`tacticDue` false — the window has not begun); then **Delayed**
+when `tacticShare(t) === 1` — every month of the tactic's own quarters is behind
+the review month and it is not finished; then Not started at nought; otherwise
+In progress. **Delayed is not "behind"**: a tactic halfway through and short of
+its benchmark reads In progress, because the score beside it already says it is
+behind, and a second word for that would be a second, looser judgement of the
+same number.
+
+**A YES/NO "DONE" READS "COMPLETED" AND IS STILL STORED "Done".** `YN_WORDS`
+and `ynShown()` say Completed; `ynJoin()` still writes "Done", so a tab on the
+previous build reads what this one writes, and `ynState()` reads "completed" as
+well, for a workbook somebody types it into. The picker's values are keys, so
+nothing about what is posted changes. The server needed nothing (763/0, 140/0).
+
+**Pill colours from the platform's own set**: Completed good, In progress warn,
+Delayed bad, Not due kind (the grey "Not yet due" beside it already wears),
+Not started none.
+
+**Raya before and after**, the worked example's 78 unit tactics: stored WIP
+reads In progress 59, Not due 10, Delayed 2; stored Not started reads Not
+started 5, Delayed 1; stored Done reads Completed 1. No score, count or gap
+moves — the reader decides a word and nothing else.
+
+`checks/tactic-status-words.py`: all five states made on one tactic, the page's
+pills asserted as agreement with the rule, the stored spelling asserted
+untouched; **7 red on the build before**, and **1 red with the Delayed line
+removed from the source** (§276). `yn-in-progress.py` held §300's "Done" as the
+drawn word in three assertions and was REWRITTEN to Completed, never loosened
+(§218), with the stored "Done" assertions in its §6 left exactly as they were.
+
+**RECORDED, NOT DONE**: a not-due tactic now reads "Not due" in Status and
+"Not yet due" in the next column — the same fact twice (§87's twins); which one
+goes is Islam's. Deliverables keep "Delivered" and milestones already read
+"Completed".
+
+## §412 — a capability has its own owner and custodian, like a unit (2026-09-24)
+
+Islam, fitting the platform to RHI: *"for the capability, it has owner and
+custodian like business unit, and the function is an option"*; of the mockup,
+*"approved, yes show pillars count, proceed"*. **This REVERSES §336**, which
+found the capability's seats already built as the HOLDING FUNCTION's and
+concluded two new columns would be a second place to say who owns it. That was
+right while every capability was held by a function; RHI's company-wide
+directions live in a capability held by nobody, and a capability held by nobody
+had no seat at all. Recorded as a reversal, not overwritten (Principle II).
+
+**THE SEAT IS ON THE THING (§33)**: `capabilities[].head` and `.custodian`,
+riding `extra` jsonb — no migration. `personRoles` derives **Capability owner**
+(`capowner`, a new row on Roles & access, shipped with the function head's
+grants) and **Custodian** at `cap:<id>` from them, so the register's picker and
+the Setup column read one fact. **`roleOwns` asks the capability itself first**
+and then its holder, so a holding function's head still reaches every
+capability it holds (§334 intact, and why the access baseline is UNMOVED on the
+worked example). `grantPersonRole`/`revokePersonRole`/`roleHolderAt`/
+`roleWheres` learn `cap:`; `CAP_SETUP` in the authoriser names `head` and
+`custodian`, so naming the seats is Setup (the office's) and the owner cannot
+hand the seat on.
+
+**Setup › Capabilities**: Owner and Custodian pickers replace the borrowed Head
+column; Held by offers "— none —"; a pillars capability counts its pillars in
+the count column (heading *Projects / Pillars*); the "One function each" note
+goes, because it is no longer true; the header pill counts capabilities with
+**no owner and no holder**, since a capability held by nobody but owned by
+somebody is now a complete answer.
+
+`test-authorize.js` §412: 11 new, both ends; **4 red** with the derivation
+removed. `checks/capability-seats.py`: every control pressed and the graph read
+back, **12 red** on the build before. Access baseline UNMOVED. Raya: its
+capabilities are held by functions and carry no seat of their own, so nothing
+moves until the office names one.
+
+
+### §419.1 — "Not due" is said once
+
+Islam: *"remove the not yet due."* A tactic that is not due said **Not due** in its
+Status column (§419) and **Not yet due** in the two cells beside it, so one fact was
+drawn twice on one row (§87's twins). The Status column keeps the word, and the two
+cells are left empty. The workbook's legend line is a different surface and does not
+change. This is screen only: nothing is stored or migrated. `checks/tactic-status-words.py`
+§3 creates a not-due tactic on the Performance page and asserts the word is drawn once.
+It is red on the build before and green after. `tactic-proration.py` now honours
+`SMP_BUILT`, and its assertion accepts either spelling of "outside the cycle". `qa.py`
+reports ERRORS none.
+
+## §413 — a direction's overview (2026-09-25)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-25_direction-overview.html`,
+second round): *"approved, keep the objective preview, build it"*; of the first round,
+*"it needs to be expandable and collapsable not always visible"*, *"the slide is good but
+it's poorly designed"*, and no to counting the boxes as missing.
+
+**What a direction carries.** Three short texts on a pillar — Objective, Why now, Risks &
+mitigations — stored as `ovObj`, `ovWhy`, `ovRisk`. They ride the pillar's `extra` jsonb like
+every other key the row table does not name, so nothing is migrated.
+
+**Switched per client, off by default.** Getting started › Structure gains a **Plan details**
+card; *Direction overview* is its only chip until the other three details are built (a chip
+for a thing that does not exist would be §61's control with nothing behind it). Stored as
+`structure.details.overview`, and **only an explicit `true` turns it on** (§104's rule, not
+§102's), so every client that never touched it — Raya Trade among them — is byte-for-byte what
+it was. **The chip writes only that key.** Its first build wrote `structNow()`, the whole
+effective shape, which stored every level's components for a client that never said one:
+equivalent today, and a second answer left in the data for ever. A structure holding only
+`details` reads every level as unsaid (`structureOf`'s own fallbacks, checked rather than
+assumed), and the last detail off deletes the structure (§50.6). Off hides and forgets nothing.
+
+**On the Plan page** it is a real `<details>` under the name (reading) or under the Owner and
+Kind rows (edit), folded, with the Objective's first line on the folded line and hidden once
+open. Open state is kept per pillar across repaints through a capture-phase `toggle` listener
+— never an inline handler, which §238's hashed policy would silence. Reading mode draws nothing
+for a direction with nothing written (§45.2); the pen always draws it, or the first words could
+never be written (§61). The boxes are `fieldOr` — bound through `FIELDS`, no `.grow`, so Enter
+is a newline — and an emptied box deletes its key.
+
+**The deck** gains one slide after each direction's title slide, only where something is
+written: the Objective large behind a gold rule, Why now and the risks (one line each) beside
+it, and on the right the direction's key measures with targets and its tactics with owners,
+**read from the tables** rather than typed again (§53.5). Its anchor is `p<code>o`, a new key,
+so every picture already placed keeps its position.
+
+**The workbook** appends Objective / Why now / Risks & mitigations to the Pillars sheet, at the
+END (§65), and only when the switch is on or a direction already has text, so every other
+client's file is unchanged. The reader takes the three by header name and the replace path sets
+only non-empty ones.
+
+**Not a gap.** An empty box owes nothing, at Islam's word.
+
+**The server**: the texts classify as `unitPlan` (the office's, §94) and the switch as `setup`,
+both ends asserted in `test-authorize.js` (778/0).
+
+**Checked**: `checks/direction-overview.py` — off is unchanged with texts stored (§113.8), the
+chip pressed and read back and deleted on the second press, folded with the preview, opened,
+kept open across a repaint, the pen writing and deleting, the slide after the title with its
+parts, the workbook round trip, and the file unchanged when off. 15 red on the build before
+§413, 2 red with the switch gate removed from the source (§276). Neighbours and `qa.py` green.
+**Recorded, not fixed**: `checks/objectives-table.py`'s *centred by their MARKS* reads
+-0.94px, identical on the build before §413 (§303), so it is not this change's.
+
+## §414 — several outcomes per tactic (2026-09-28)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-28_several-outcomes.html`): *"approved,
+build it"*. What was agreed before it was drawn: several outcomes per tactic, each scored on
+its own and the tactic their average; no typed per-cent — figure, proration, score; an outcome
+with no number takes a Y/N target with In progress %; a range gets one target the SMO sets;
+off by default behind a Plan details switch so Raya Trade is untouched.
+
+**The first outcome does not move.** It stays in `outcome`/`outTarget`/`outDir`/`outCompile`/
+`outActual`/`outMonthly`, so every reader, every workbook and every closed cycle reads it as
+before, and it still decides whether a tactic is measured by outcomes at all (`outcomeOf`).
+**Extras** are `t.outs = [{id, outDir, outcome, outTarget, outCompile}]`, ids minted from the
+MAXIMUM (§96.2), and their figures `t.outActs = {O2: "88%"}` — keys sorted, an emptied figure
+deleted, the map deleted when it empties (§50.6). Both ride `tactics.extra`; nothing migrated.
+**Two fields, not one**, because the list of extras is PLAN (the office's, §94) and a figure is
+REPORTING: `outActs` joins `REPORT.tactic` so a reporter may enter one, while any change to
+`outs` still classifies as plan — asserted at both ends in `test-authorize.js` (787/0; 2 red
+with `outActs` taken back out of the list).
+
+**Switched per client** by `structure.details.outcomes`, a second chip on the Plan details card
+(§413's card, the same write-only-that-key rule). Only an explicit `true` turns it on. Off, a
+stored extra is not drawn and not scored — `tacticExtras()` is the one gate every reader asks.
+
+**The arithmetic.** Each outcome is scored by `measureScore` against the tactic's own window
+(§250). The tactic is **not scored until every outcome has a figure** — the rule a single
+outcome already has (§254.2), applied to each, or a tactic would read 100% on its easy outcome
+while its hard one was never reported — and is then the **rounded average**. A single outcome
+is byte-identical to before. The status after a figure lands is Done once the average reaches
+100, In progress once any outcome has a figure, Blocked kept.
+
+**On screen** each extra is a line of its own (`tr.osub`) under the tactic, O1/O2 tags, the
+shared cells (number, name, owner, collaborators, quarters, note) spanning the lines. **The
+stripe**: a line wears its tactic's ground, never its own position's, and an odd run of lines
+is followed by a hidden `tr.opad` so every tactic below keeps the parity it would have had —
+sibling rules in `arrange.css`, and a deck-scoped twin in `present.css` because the deck's own
+stripe rule outranks the page's. Plan: × per extra and *+ Add an outcome* under the last (under
+O1 when there are none), in the pen only. Reporting and My reporting: a box per outcome, one
+note per tactic. Performance: each line its figure against what is due and its own score, and
+Progress *average of N*. **The deck** draws the same lines; `deckFitPass()` now moves a
+tactic's lines as one group, because it moves the LAST row, and a sub-line moved alone onto a
+continuation slide would leave its tactic's spanning cells behind.
+
+**The workbook** gains an **Outcomes** sheet — Pillar, Tactic, Outcome, direction, target,
+compile — drawn only when the switch is on or a tactic already holds extras, so every other
+client's file is unchanged; a stored extra is never lost on a download-and-upload (§22). The
+reader attaches each line to its tactic by pillar and name and mints O2, O3… in file order; a
+line whose tactic cannot be matched is a problem named in the preview, never dropped (§96.2).
+
+**Missing.** An extra's empty name or target is counted for somebody who authors the plan and
+for the Submit gate. It is deliberately **not** counted in fill mode: a filler has no control
+for an extra (the list is plan), and a count with no control behind it is §223's trap.
+
+**Checked**: `checks/several-outcomes.py` — off unchanged with an extra stored (§113.8), the
+chip pressed, read back and deleted, the Plan lines with their spans and their stripe on a white
+AND a striped row, the pen's add, name and × read back off the stored tactic (§96), a figure
+typed on Reporting reaching `outActs`, the average asserted as AGREEMENT with the two outcome
+scores (§94.8), Performance's *average of 2*, the deck's lines, a real fit pass over a long
+table, the missing count, the workbook round trip and the refused orphan. Proved able to fail
+five ways from the SOURCES (§276): stripe 1, average 1, fit group 1, sheet reader 1, switch
+ignored 7. **Its first stripe assertion could not fail** — the tactic it looked at sat on a
+white row, where no stripe rule is needed (§113.8); it measures a white row and a striped row
+now.
+
+**Recorded, not done**: the progress workbook carries no column for an extra's figure; a unit
+change on an extra does not rewrite a figure already stored for it (`actualFollowsUnit`, §277,
+reaches `outActual` only); and — found while building, not this change's — My reporting's
+outcome cell for a tactic WITHOUT extras reads `oc.name`, which `outcomeOf()` never sets, so it
+always says *how far it got* rather than the outcome's name.
+
+## §415 — a tactic's requirements (2026-09-28)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-28_requirements.html`), which
+drew placement A (a column of its own) against B (under the tactic's name) and asked whether
+the review deck should carry it too: **"B, plan download only, build it"**. RHI's fifth step.
+
+**B, because it costs no width.** Measured in the mockup at 1440: a column took the Tactic and
+Outcome columns from 328px to 258px and made EVERY row taller, those with nothing in it
+included; under the name, no column moves and only a tactic that has requirements grows. With
+the pen open at 1280 a column took Tactic 305 → 230px and Outcome 214 → 155px. The shape is the
+reported note's (§255) — a small key over a rule — so a second kind of aside brings no second
+vocabulary (§53.5).
+
+**Stored as `reqs`, a list of trimmed lines on the tactic**, riding `tactics.extra` (no
+migration), DELETED when emptied (§50.6). One reader (`reqsOf`), one parser (`reqsParse`), one
+writer (`setReqs`) in `config-data.js`, asked by the Plan cell, the workbook, the reader and the
+plan download. **Switched per client** as a third Plan details chip (`structure.details.
+requirements`, §413's rule: only an explicit `true` turns it on); off hides and forgets nothing.
+
+**The box is a list, not a title**, so it carries no `.grow` and §229's Enter-commits never
+reaches it — Enter is a newline — while the shell's textarea branch still sizes it to what is
+in it. It is drawn behind the pen on every tactic, the empty ones included (§61); read mode
+draws nothing where there is nothing (§15.1).
+
+**The plan download carries it and the review deck does not** (his choice, and the mockup's
+reason: the review deck is about how the figures went). In the .pptx the list rides under the
+tactic's name as the cell's second paragraph (`sub`, §311); a pillar whose tactics carry
+requirements holds 7 rows a slide rather than 11, or the taller rows run off the slide —
+`pptxTableSlides` gains an optional per-slide count, absent everywhere else.
+
+**Not an obligation**: never scored, never counted as missing, never asked for on Reporting.
+**The server needed nothing and it is asserted** (§172): `reqs` is not in `REPORT.tactic`, so it
+falls to the plan and is the office's — `test-authorize.js` §415, both ends, red 2 with `reqs`
+made a reporting field. **The workbook** appends a Requirements column at the END of the Tactics
+sheet (§65), items separated by line breaks in the cell, drawn only when the switch is on or a
+tactic holds some, so every other client's file is unchanged; the reader brings them back.
+
+**Checked**: `checks/tactic-requirements.py` — off unchanged with requirements stored (§113.8),
+the chip pressed, read back and deleted, the list under the name with the table's column widths
+asserted unchanged, a box on every tactic behind the pen, real Enter presses making lines that
+reach the STORED tactic trimmed (§96), emptied deleted, the gap count and score unmoved, the
+review deck carrying nothing, the plan download carrying both items, a 12-tactic pillar
+splitting 7 + 5, and the workbook round trip. **Its first slide-count assertion could not
+fail** — the fixture's pillar held 5 tactics, which fit any slide (§113.8); it builds a pillar of
+12 now. Proved able to fail four ways from the SOURCES (§276): the cell not drawn 6, the plan
+download dropping it 1, the per-slide count ignored 1, an emptied list kept 1 — the tree
+rebuilt byte-identical after.
+
+## §416 — years 1 · 2 · 3, and the yearly revision (2026-09-28)
+
+Islam, of the mockup (`design-mockups/rhi-directions/2026-09-28_years.html`), answering its
+five questions: **"1. keep 2. carry over 3. Year 1.2026 4. this year only 5. ok"**. RHI's sixth
+step and the last plan detail agreed: a direction holds the three years (*"it holds the 3 years
+as it's the logic of it but each year we can have another yearly revision to refine if
+something changes, and any way the tactics work yearly"*).
+
+**A direction marks the years it runs in**, stored as `p.years` on the pillar (`pillars.extra`,
+no migration), ABSENT meaning every year and all three written back as an absence (§50.6); one
+reader (`SMPRules.pillarYears`). **The year the plan stands in is `GROUP.planYear`**, absent
+meaning Year 1, and **nothing reads the calendar to decide it** — only the revision moves it,
+because a plan that changed year by itself on 1 January would change what every figure is
+measured against with nobody having said so. Switched per client as the fourth Plan details
+chip (`structure.details.years`, §413's rule); off hides and forgets nothing, and off the unit's
+scores and asks are asserted byte-identical.
+
+**1 · keep.** A direction that does not run this year stays on the Plan, greyed in the rail and
+saying when it runs (*Starts in Year 2*), its band wearing the three marks with this year
+RINGED rather than filled — *runs* and *now* are two facts — and its pane saying why in words
+(§35). The reason survives a collapsed rail as the half of the line §119 keeps, because it is
+why the row is grey. **It is not asked for, not owed and not scored**: one predicate
+(`runsNow`) gates `reportItems`, the gap map, the unit's three readings (`itemsNow`) and the
+theme's pillars, so the asking, the owing and the scoring cannot disagree (§53.5); the
+breakdowns under the group's unit cards read the same list, or a card names a row its headline
+left out (§264). The Reporting rail reads a dash for it, and the page does not OPEN on it unless
+somebody pressed it.
+
+**2 · carry over.** *Start the Year N revision* sits in the Reporting cycle pen under the three
+named years, the office's alone, in the platform's own dialog (§95, §273.3). Yes archives every
+unit's and every pillars function's plan as it stood (`archiveUnitPlan`, §49.2's path, the way
+back at Setup › Import & storage), moves `planYear` on, and changes nothing else: directions and
+tactics carry over and are refined in the pen. There is no revision after Year 3.
+
+**3 · the years are named "Year 1.2026"**, the calendar year counted from the planning period's
+start where one is set (§308) and the cycle's own year otherwise.
+
+**4 · targets stay this year's only.** So the planning period (§308) stays ONE year — the drawing
+showed a three-year period, and this is where the build differs from it on purpose: a three-year
+period would prorate a one-year target across three. The revision moves a set period on by
+twelve months, so Year 2's targets are measured against Year 2's months.
+
+**5 · one overview per direction**, edited in place; last year's is in the archive.
+
+**The deck** gives a not-running direction a row in the roll-call and the score table (a dash,
+and when it runs) and no slides of its own; **the plan download** carries every direction, since
+it is the plan, with its years beside the code; **the workbook** appends a Years column at the
+END of the Pillars sheet (§65), only when the switch is on or a direction holds some, and the
+reader brings it back.
+
+**The server**: a direction's years are the plan (the office's); `planYear` is classified as the
+cycle and joins `gExtra`, so it classifies ONCE rather than beside an unknown (§259.2) —
+`test-authorize.js` §416, both ends, red 2 with the classification removed. **Checked**:
+`checks/years.py` all good, red 2 with the unit's readings ignoring the years and red 1 with the
+reason dropped from a collapsed rail, from the SOURCES (§276).
+
+### §418.2 — the three branches brought together (2026-09-29)
+
+Islam: *"merge this branch with this branch so we can have a proper outcome and
+in coherence."* On `claude/loving-tesla-vr98f5`, never on `main`. **Numbers
+first, before either merge, which is the only moment a renumber is provably
+scoped** (§264.3): `main` took §411 (capability pillar editing), this branch had
+§411/§412 and `claude/exciting-bardeen-szm6n3` had §411–§416. This branch's
+became §417/§418 (108 citations); theirs' §411 (a tactic's status in RHI's
+words) became **§419** on a copy of their branch (26 citations); the merge base
+held none of §411–§419 in any spelling. Their §412–§416 keep their numbers. The
+records were COMBINED, never picked (§318.7); `structNow()` is this branch's
+§418.1 version, which already carries their Plan details; the built file and
+the served copies were REBUILT (§91); `sw.js` → `v5.59`, one `SHELL`, parsed.
+**A stray built copy their branch committed inside `src/`** (81k lines) is
+removed — the shipped file lives one folder up and `build.py` writes its own.
+**Plan details stays client-wide**, Islam's confirmation: the four switches
+answer what a direction and its tactics carry, which is a question about the
+client's way of planning rather than about one layer. **Verified on the
+merged tree**: authoriser 797/0, differ 140/0, KB in step, `built-in-step`
+all good, twenty-two browser checks green including all of both branches' own
+and main's, `welcome.py` green on a rerun after one mid-run navigation race in
+the check, and `qa.py` ERRORS none. **From here their branch should not be
+merged separately** — this one carries it.
+

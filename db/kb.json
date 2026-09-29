@@ -146,8 +146,8 @@
      "p": "A unit or a function is <b>retired</b>, not removed: it carries reported history, and deleting it would rewrite what was already said. <b>The custodian slot is optional</b> — where the head does the work themselves they already have access as head."
     },
     {
-     "h": "One function each",
-     "p": "A function may hold several capabilities, which is why a custodian is named after the function and never after a capability: naming someone after one breaks the moment a second is assigned."
+     "h": "A capability's owner",
+     "p": "A capability has an <b>owner</b> and a <b>custodian</b> of its own, named on Setup › Capabilities, like a business unit. The function that holds it is optional; where one does, that function's head and custodian reach it too."
     }
    ]
   },
@@ -627,7 +627,7 @@
    "blocks": [
     {
      "h": "The function is the destination, not the capability",
-     "p": "The navigation offers <b>supporting functions</b> — Finance, HR, Marketing — and the capabilities each one carries are named inside its pages. A function may carry more than one (Marketing carries two), the Strategy custodian is named after the function, and the capabilities themselves already appear in the temple. Listing capabilities in the row would name the work where the organisation belongs."
+     "p": "The navigation offers <b>supporting functions</b> — Finance, HR, Marketing — and the capabilities each one carries are named inside its pages. A function may carry more than one (Marketing carries two), each capability names its own owner and custodian, and the capabilities themselves already appear in the temple. Listing capabilities in the row would name the work where the organisation belongs."
     },
     {
      "h": "What a capability is",
@@ -692,8 +692,8 @@
      "p": "Cross-cutting work the whole group depends on, improved by a supporting function through enhancement projects. It is <b>not</b> a pillar one level up: it belongs to no business unit and no unit is accountable for it."
     },
     {
-     "h": "One function each",
-     "p": "A capability is allocated to exactly one function. A function may hold several — which is why custodians are named after the function."
+     "h": "An owner of its own",
+     "p": "A capability has its own owner and custodian. It may be held by one function, or by none — a company-wide capability. A function may hold several."
     },
     {
      "h": "Capability delivery reads separately",

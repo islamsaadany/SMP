@@ -47,7 +47,10 @@ const REPORT = {
      exact fault §147 records for a milestone's `pct`. Its target, direction
      and compile rule are NOT here: those are the plan, and the plan is the
      office's (§94). */
-  tactic:    ["status", "actual", "note", "outActual"],
+  /* §414: and `outActs`, the figures for a tactic's SECOND and later
+     outcomes (keyed by the outcome's id), for the same reason — a figure is
+     reporting and the outcomes themselves (`outs`) are the plan. */
+  tactic:    ["status", "actual", "note", "outActual", "outActs"],
   capKO:     ["actual", "progress", "note"],
   outcome:   ["actual", "progress", "note"],
   /* `pct` on both since §147 — it arrived with migration 024 (§104.10: an In
@@ -560,6 +563,10 @@ function collect(stored, incoming, w) {
      moved, because half a period is not a second decision. */
   if (!same(sg[PLAN_FROM], ig[PLAN_FROM]) || !same(sg[PLAN_TO], ig[PLAN_TO]))
     add("cycle", null, "the planning period");
+  /* §416: the year the plan stands in. `cycle`, beside the planning period
+     it belongs to — the yearly revision is pressed in the same pen. The two
+     edits go together (§259.2): classified here AND in gExtra. */
+  if (!same(sg.planYear, ig.planYear)) add("cycle", null, "the plan's year");
   if (!same(sg.mainbus, ig.mainbus)) add("setup", null, "the BU list");
   /* Communication (§72): the display name on outgoing mail, the reply-to and
      the footer. SETUP for the same reason branding is - it is what the
@@ -590,7 +597,7 @@ function collect(stored, incoming, w) {
   const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
-                                   SEASONS, DRIVERS_ON]);
+                                   SEASONS, DRIVERS_ON, "planYear"]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -1310,7 +1317,9 @@ function asUnit(f, ukey) {
    what a capability IS, its key objectives and its projects belong to the
    function that carries it (k_found, k_proj); the figures are its reporting
    (k_report). */
-const CAP_SETUP = ["id", "name", "fn"];
+/* §412: the capability's own Owner and Custodian are Setup, beside who holds
+   it -- the office names them, as it names a unit's head (§33). */
+const CAP_SETUP = ["id", "name", "fn", "head", "custodian"];
 const CAP_KNOWN = CAP_SETUP.concat(["def", "keyObjectives", "projects", "perf", "exec"]);
 /* §394: what the pillars form adds. Kept as a second list so CAP_KNOWN keeps
    meaning what it meant to every other reader. */
@@ -1408,7 +1417,7 @@ function collectCapabilities(sList, iList, add, w) {
     let a = sm[id];
     const b = im[id];
     if (same(a, b)) return;
-    if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name or function");
+    if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name, function or owners");
     /* §334: THE CAPABILITY'S OWN TARGET. It is a destination now, with its own
        pages, its own submission and its own row on the cycle board — so a fill
        inside it is judged against the capability rather than against the

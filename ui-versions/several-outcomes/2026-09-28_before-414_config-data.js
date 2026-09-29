@@ -4559,10 +4559,6 @@ function fnCanFill(k){
    already been paid for asking the same question in two places. */
 function fnShows(k){
   var f = FUNCTIONS[k];
-  /* §418: a client with no supporting-functions layer (Structure) shows
-     none; every function and all it holds is kept, and switching the layer
-     back on brings them back. */
-  if (!SMPRules.fnExists(GROUP)) return false;
   return !!f && f.active !== false && (fnHasWork(k) || fnCanFill(k));
 }
 function fnsReachable(){
@@ -5403,9 +5399,6 @@ function reportItems(u){
                place:koPlace });
   });
   u.items.forEach(function(p, pi){
-    /* §416: a direction not running this year is not asked — skipped here,
-       with its index kept, so every code still reads what the Plan shows. */
-    if (!runsNow(p)) return;
     var code = pillarCode(u, pi), head = code + " " + p.name;
     /* The rail key is the rail's own, asked of the function that owns it
        (§53.5) -- a literal "unit:" + key here is a second spelling of one
@@ -6317,9 +6310,6 @@ function grantAt(pageKey, target){
    is set once at the top of paint() rather than threaded through forty call
    sites that would all pass the same value. Same shape as VIEWER. */
 var TARGET = "group";
-/* §418: whether the page being drawn is the client's own Setup, where no
-   layer's own names apply. Written beside TARGET in paint(). */
-var TARGET_SETUP = false;
 function grant(pageKey){ return grantAt(pageKey, TARGET); }
 
 /* A person attached to the group reaches every unit; a person attached to a
@@ -7099,233 +7089,10 @@ function outcomeOf(t){
    nothing -- not the question on the reporting page, not the unit's execution
    -- until somebody actually enters the new number. The switch happens per
    tactic, when a human types, never as a side effect of an edit. */
-/* ── SEVERAL OUTCOMES PER TACTIC (§414, RHI step 4) ─────────────────────
-   Islam, for RHI: a tactic can produce more than one thing worth measuring,
-   and each is scored on its own — the tactic reads as their AVERAGE, the way
-   every other roll-up in the platform reads.
-
-   THE FIRST OUTCOME STAYS EXACTLY WHERE IT WAS. `outcome`, `outTarget`,
-   `outDir`, `outCompile` and `outActual` are untouched, so a tactic with one
-   outcome is byte-for-byte what it was, every closed cycle reads as before,
-   and nothing is migrated. The SECOND and later ride `t.outs` — a list of
-   `{id, outDir, outcome, outTarget, outCompile}` using the first outcome's
-   own field names, so `outcomeOf()` and the pen's `outcomeEdit()` serve an
-   extra unchanged (§53.5) — and their FIGURES ride `t.outActs`, keyed by the
-   outcome's id. The figures are kept apart from the list on purpose: a
-   figure is reporting and the list is the plan (§31, §94), so the authoriser
-   can tell a reporter's number from somebody rewriting what is measured by
-   FIELD NAME, which is how it tells every other pair apart (`outActs` joins
-   REPORT.tactic).
-
-   OFF MEANS NONE (§102's shape: off hides and never forgets). With the Plan
-   details switch off, `tacticExtras()` answers an empty list, so every
-   reader below falls through to the first outcome alone — the extras are
-   still stored and come back the moment the switch does.
-
-   THE FIRST OUTCOME DECIDES WHETHER THE TACTIC IS ON OUTCOMES AT ALL. Every
-   surface already asks `outcomeOf(t)` for that, and an extra is only ever
-   added under a tactic that has one; an extra whose own target is still
-   empty is owed (counted missing, below) and scores nothing yet. */
-function outcomesOn(){ return SMPRules.planDetailOn(GROUP, "outcomes"); }
-/* §415 — A TACTIC'S REQUIREMENTS (RHI step 5): what it needs to happen —
-   people, budget, a sign-off. Stored on the tactic as `reqs`, a list of short
-   lines riding `tactics.extra` (no migration), DELETED when emptied (§50.6).
-   Never scored, never asked for, never counted as missing: it is a note on
-   the plan, not an obligation. Off HIDES and forgets nothing (§44). */
-function requirementsOn(){ return SMPRules.planDetailOn(GROUP, "requirements"); }
-function reqsParse(v){
-  return (Array.isArray(v) ? v : String(v == null ? "" : v).split(/\r?\n/))
-    .map(function(x){ return String(x == null ? "" : x).trim(); })
-    .filter(Boolean);
-}
-function reqsOf(t){ return t && Array.isArray(t.reqs) ? reqsParse(t.reqs) : []; }
-function setReqs(t, v){
-  var a = reqsParse(v);
-  if (a.length) t.reqs = a; else delete t.reqs;
-}
-/* §416 — YEARS 1 · 2 · 3 (RHI step 6). A direction marks the years it runs
-   in (`p.years`, riding `pillars.extra`, no migration; absent or all three is
-   every year and is stored as an ABSENCE, §50.6). The plan stands in one year
-   at a time, `GROUP.planYear` (absent = Year 1), moved on ONLY by the office's
-   yearly revision — never by the calendar, so the year shown and the plan in
-   use cannot disagree. A direction not running this year stays on the Plan
-   page, greyed, and is not asked, not owed and not scored: every reader that
-   counts or averages walks `itemsNow(u)` rather than `u.items`. Off HIDES and
-   forgets nothing (§44): with the switch off every direction runs. */
-function yearsOn(){ return SMPRules.planDetailOn(GROUP, "years"); }
-function planYear(){ return SMPRules.planYearOf(GROUP); }
-function pillarYears(p){ return SMPRules.pillarYears(p); }
-function runsNow(p){ return SMPRules.runsNow(GROUP, p); }
-function itemsNow(u){
-  var it = (u && u.items) || [];
-  return yearsOn() ? it.filter(runsNow) : it;
-}
-/* The calendar year a plan year stands for. The planning period is the
-   CURRENT year's (§308, targets are this year's only), so Year k sits k minus
-   the current year away from it; with no period set, the cycle's own year. */
-function planYearCal(k){
-  var f = planFrom(), base = f != null ? Math.floor(f / 12) : cycleYear();
-  return base == null ? null : base + (k - planYear());
-}
-/* "Year 1.2026" — Islam's own spelling. The calendar year is dropped rather
-   than guessed where nothing says it. */
-function planYearLabel(k){
-  var c = planYearCal(k);
-  return "Year " + k + (c ? "." + c : "");
-}
-/* "Y1–3", "Y1", "Y2–3" — the short tag the rail wears. The years are only
-   ever a run (1, 1-2, 1-3, 2-3 ...) or 1 and 3; the gap case is spelled out. */
-function yearsTag(p){
-  var ys = pillarYears(p);
-  if (ys.length === 1) return "Y" + ys[0];
-  if (ys[ys.length - 1] - ys[0] === ys.length - 1) return "Y" + ys[0] + "\u2013" + ys[ys.length - 1];
-  return "Y" + ys.join(", ");
-}
-/* Why a direction is greyed, in words, or "" where it runs this year. */
-function yearsLater(p){
-  if (runsNow(p)) return "";
-  var ys = pillarYears(p), now = planYear();
-  var next = ys.filter(function(y){ return y > now; })[0];
-  return next ? "Starts in Year " + next : "Ended in Year " + ys[ys.length - 1];
-}
-/* Turning a year on or off. The last year lit cannot be turned off — a
-   direction that runs in no year is not a direction, and a key holding
-   nothing would read as every year. All three lit deletes the key. */
-function togglePillarYear(p, y){
-  var ys = pillarYears(p).slice(), i = ys.indexOf(y);
-  if (i >= 0) { if (ys.length === 1) return false; ys.splice(i, 1); }
-  else ys.push(y);
-  ys.sort();
-  if (ys.length === 3) delete p.years; else p.years = ys;
-  return true;
-}
-/* THE YEARLY REVISION. Every plan that has one is archived as it stood (the
-   same `archiveUnitPlan()` the import and Clear plan take, §49.2, so the way
-   back is Restore), then the plan moves to the next year and CARRIES OVER
-   whole — Islam: tactics carry over to be edited, not started empty. The
-   planning period, where set, moves a year with it, because it is the
-   current year's (§308). Returns the number of plans archived, or -1 when
-   the plan is already in Year 3. */
-function startYearRevision(){
-  var now = planYear();
-  if (now >= 3) return -1;
-  var why = "the Year " + (now + 1) + " revision", n = 0;
-  (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : Object.keys(UNITS)).forEach(function(k){
-    if (UNITS[k] && archiveUnitPlan(UNITS[k], why)) n++;
-  });
-  /* A function that plans in pillars carries directions too, so its plan is
-     filed the same way (§59: one shape, one path). */
-  (typeof FUNCTION_KEYS !== "undefined" ? FUNCTION_KEYS : Object.keys(FUNCTIONS)).forEach(function(k){
-    if (plansInPillars("fn:" + k)) {
-      var w = unitLikeWritable("fn:" + k);
-      if (w && archiveUnitPlan(w, why)) n++;
-    }
-  });
-  GROUP[SMPRules.PLAN_YEAR] = now + 1;
-  if (planSet()) {
-    GROUP[SMPRules.PLAN_FROM] = SMPRules.monthLabel(planFrom() + 12);
-    GROUP[SMPRules.PLAN_TO] = SMPRules.monthLabel(planTo() + 12);
-  }
-  return n;
-}
-function tacticExtras(t){
-  if (!t || !Array.isArray(t.outs) || !t.outs.length || !outcomesOn()) return [];
-  return t.outs;
-}
-/* The extra as the measure-shaped thing `outcomeOf` reads — its figure taken
-   from `outActs`. Null where its target holds no number yet (§249's rule). */
-function extraOutcomeOf(t, ex){
-  return outcomeOf({ outTarget: ex.outTarget, outDir: ex.outDir,
-                     outCompile: ex.outCompile,
-                     outActual: (t.outActs || {})[ex.id] });
-}
-/* What one extra shows as its figure, in the target's own unit — the same
-   formatter the first outcome uses. */
-function extraFigure(t, ex){
-  return (t.outActs || {})[ex.id];
-}
-/* Every outcome this tactic is measured by, first one included, each with
-   its measure shape. What averages and what Submit waits for both read THIS
-   list, so the two cannot disagree about which outcomes count. */
-function tacticOutcomes(t){
-  var out = [], o = outcomeOf(t);
-  if (!o) return out;
-  out.push({ id: "O1", o: o });
-  tacticExtras(t).forEach(function(ex){
-    var e = extraOutcomeOf(t, ex);
-    if (e) out.push({ id: ex.id, o: e, ex: ex });
-  });
-  return out;
-}
-/* Minted from the MAXIMUM, never from the count (§96.2): remove O2 of three
-   and add another, and a count says O3 while O3 is still there. */
-function nextOutcomeId(t){
-  var max = 1;
-  (t.outs || []).forEach(function(ex){
-    var n = parseInt(String(ex.id || "").replace(/\D/g, ""), 10);
-    if (n > max) max = n;
-  });
-  return "O" + (max + 1);
-}
-/* Figures stored in the key order Postgres hands back (length, then bytes),
-   so a round trip cannot make an untouched map read as a change (§145,
-   §249.3). An emptied figure DELETES its key and the last one deletes the
-   map (§50.6). */
-function setExtraFigure(t, id, v){
-  var m = Object.assign({}, t.outActs || {});
-  var val = v == null ? "" : String(v).trim();
-  if (val === "") delete m[id]; else m[id] = val;
-  var keys = Object.keys(m).sort(function(a, b){
-    return a.length - b.length || (a < b ? -1 : a > b ? 1 : 0); });
-  if (!keys.length) { delete t.outActs; return; }
-  var o = {}; keys.forEach(function(k){ o[k] = m[k]; });
-  t.outActs = o;
-}
-/* The extras that COUNT: only under a tactic whose first outcome is scored,
-   because the first outcome decides whether the tactic is on outcomes at all.
-   The pen still draws every extra (so one can be corrected or removed); the
-   reading surfaces draw these. */
-function scoredExtras(t){ return outcomeOf(t) ? tacticExtras(t) : []; }
-/* The word a tactic's status takes after a figure lands, with several
-   outcomes: Done once the average reaches the target, In progress once any
-   outcome has a figure. A single outcome keeps its own rule unchanged. */
-function statusFromOutcomes(t){
-  var sc = tacticOutcomeScore(t), keep = t.status === "Blocked";
-  if (sc != null) return sc >= 100 ? "Done" : (keep ? "Blocked" : "WIP");
-  var any = tacticOutcomes(t).some(function(x){
-    return x.o.actual != null && x.o.actual !== ""; });
-  return any ? (keep ? "Blocked" : "WIP") : "Not started";
-}
-function oneOutcomeScore(t, o){
+function tacticOutcomeScore(t){
+  var o = outcomeOf(t);
   if (!o || o.actual == null || o.actual === "") return null;
   return measureScore(o, tacticShare(t));
-}
-/* §414: THE TACTIC IS THE AVERAGE OF ITS OUTCOMES, and it is not scored until
-   EVERY scored outcome has a figure — the same rule a single outcome has
-   always had (a row owed a figure is not scored, §254.2), applied to each.
-   Averaging only the ones reported would let a tactic read 100% on its easy
-   outcome while its hard one was never reported. */
-function tacticOutcomeScore(t){
-  var list = tacticOutcomes(t);
-  if (!list.length) return null;
-  var sum = 0;
-  for (var i = 0; i < list.length; i++) {
-    var s = oneOutcomeScore(t, list[i].o);
-    if (s == null) return null;
-    sum += s;
-  }
-  return list.length === 1 ? sum : Math.round(sum / list.length);
-}
-/* What the plan still owes on a tactic's extra outcomes: a name and a target
-   with something in it, counted per field like every other gap. Zero with
-   the switch off, because an outcome nobody can see is not owed. */
-function extraOutcomeGaps(t){
-  var n = 0;
-  tacticExtras(t).forEach(function(ex){
-    if (!ex.outcome || !String(ex.outcome).trim()) n++;
-    if (SMPRules.gapEmpty("outTarget", ex)) n++;
-  });
-  return n;
 }
 function tacticReads(t){
   var s = tacticOutcomeScore(t);
@@ -7472,7 +7239,7 @@ function tacticPlanned(t){
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
 
-/* ── THE WORD A TACTIC'S STATUS SAYS (§419, RHI) ──────────────────────
+/* ── THE WORD A TACTIC'S STATUS SAYS (§411, RHI) ──────────────────────
    Islam, fitting the platform to RHI: their words, platform-wide --
    Completed · In progress · Delayed · Not due, and Not started at 0%.
    Delayed and Not due are the platform's to say, never somebody's to pick.
@@ -7492,20 +7259,12 @@ var TACTIC_WORDS = { done: "Completed", wip: "In progress", late: "Delayed",
 function tacticComplete(t){
   if (!t) return false;
   if (t.status === "Done") return true;
-  var list = tacticOutcomes(t);
-  /* §414: complete only when EVERY outcome is a yes/no that is done. */
-  if (list.length) return list.every(function(x){
-    return SMPRules.isYesNo(x.o.target) && SMPRules.ynState(x.o.actual).status === "done"; });
+  var o = outcomeOf(t);
+  if (o) return SMPRules.isYesNo(o.target) ? SMPRules.ynState(o.actual).status === "done" : false;
   return t.actual != null && t.actual >= 100;
 }
 function tacticAtNought(t){
-  /* §414: at nought only when every outcome is. */
-  var list = tacticOutcomes(t);
-  if (list.length > 1) return list.every(function(x){
-    return outcomeAtNought(x.o); });
-  return outcomeAtNought(outcomeOf(t), t);
-}
-function outcomeAtNought(o, t){
+  var o = outcomeOf(t);
   if (o) {
     if (o.actual == null || o.actual === "") return true;
     if (SMPRules.isYesNo(o.target)) return SMPRules.ynState(o.actual).status !== "wip" &&
@@ -7651,22 +7410,10 @@ function gapMap(target, all, fillable){
     /* §405: a unit that plans otherwise owes nothing on its hidden pillars. */
     if (noPillars) return;
     (u.items || []).forEach(function(p, i){
-      /* §416: a direction not running this year owes nothing yet. */
-      if (!runsNow(p)) return;
       var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
-      (p.tactics  || []).forEach(function(x){
-        n += G(w.plan, pctx(x), "tactic", x);
-        /* §414: an extra outcome's empty name or target is owed too — and
-           counted only where somebody may AUTHOR it (or for the Submit gate,
-           which ignores the viewer), because a filler cannot add to or fill
-           the list, and a count with no control behind it is §223's trap. */
-        if (!fillable && !SMPRules.isHidden(x) &&
-            (all || (w.plan in canAuthor ? canAuthor[w.plan]
-                     : (canAuthor[w.plan] = mayAuthor(w.plan, target)))))
-          n += extraOutcomeGaps(x);
-      });
+      (p.tactics  || []).forEach(function(x){ n += G(w.plan, pctx(x), "tactic", x); });
       entry("p:" + (p.id || i), pillarCode(u, i), n,
             { sec: w.sec, page: "plan", rail: unitRailKey(u), code: pillarRailId(p) });
     });
@@ -8419,9 +8166,9 @@ function unitOwnExec(u){
   if (!h) return null;
   return unitOwnWay(u) === "objectives" ? fnActionsTally("u:" + u.ukey).pct : capExec(h).pct;
 }
-function unitPillars(u){ return unitOwnWay(u) ? null : avg(itemsNow(u).map(pillarPerf)); }
-function unitExec(u){ return unitOwnWay(u) ? unitOwnExec(u) : avg(itemsNow(u).map(pillarExec)); }
-function unitPlan(u){ return unitOwnWay(u) ? (unitOwnExec(u) == null ? null : 100) : avg(itemsNow(u).map(pillarPlan)); }
+function unitPillars(u){ return unitOwnWay(u) ? null : avg(u.items.map(pillarPerf)); }
+function unitExec(u){ return unitOwnWay(u) ? unitOwnExec(u) : avg(u.items.map(pillarExec)); }
+function unitPlan(u){ return unitOwnWay(u) ? (unitOwnExec(u) == null ? null : 100) : avg(u.items.map(pillarPlan)); }
 function unitRatio(u){ var pl = unitPlan(u); return pl ? Math.round(unitExec(u)/pl*100) : null; }
 
 var UNIT_KEYS = ["mobile","retailstores","b2becomm","consumerelectronics","onlineshop",
@@ -8603,7 +8350,7 @@ function addBdRow(p){
    the press carries a row id and nothing else, and an address the caller
    assembles is a second copy of where the row lives (§48). */
 function bdTidyById(id){
-  pillarHolderTargets().forEach(function(t){
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
     var u = unitLike(t);
     ((u && u.items) || []).forEach(function(it){
       if (String(id).indexOf(it.id + "-B") === 0) bdTidy(it);
@@ -8815,7 +8562,7 @@ function hideableById(id){
      — a row that cannot be found by id is a figure typed and silently lost,
      which is the fault this scanner exists to prevent. */
   eachHolder(function(h){ scan(h.keyObjectives); });
-  pillarHolderTargets().forEach(function(t){
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
     var u = unitLike(t);
     if (!u) return;
     scan(u.keyObjectives);
@@ -8825,25 +8572,13 @@ function hideableById(id){
   return hit;
 }
 
-/* §411: EVERY SUBJECT THAT HOLDS PILLARS, NOT TWO KINDS OF IT. §334 gave a
-   capability planned in pillars the unit's own pages, and this walk went on
-   asking units and functions alone — so on such a capability a quarter
-   pressed, a tactic or measure removed, or a breakdown row removed found no
-   list and did nothing, for everybody (§96's family, one resolver short). */
-function pillarHolderTargets(){
-  return UNIT_KEYS
-    .concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; }))
-    .concat((GROUP.capabilities || []).filter(function(c){
-      return c && capPlansInPillars(c);
-    }).map(function(c){ return "cap:" + c.id; }));
-}
 function listById(kind, id){
   var out = null;
   var look = function(list){
     if (!out && list && list.some(function(x){ return x && x.id === id; })) out = list;
   };
   if (kind === "measures" || kind === "tactics") {
-    pillarHolderTargets().forEach(function(t){
+    UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
       var u = unitLike(t);
       ((u && u.items) || []).forEach(function(it){ look(it[kind]); });
     });
@@ -8857,7 +8592,7 @@ function listById(kind, id){
      would answer null and `removeRowById(null, id)` is a press that does
      nothing (§96's family, §342's own note one list over). */
   if (kind === "breakdown") {
-    pillarHolderTargets().forEach(function(t){
+    UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
       var u = unitLike(t);
       ((u && u.items) || []).forEach(function(it){ look(SMPRules.bdRows(it)); });
     });
@@ -10431,7 +10166,7 @@ function themePillars(ab){
   var out = [];
   UNIT_KEYS.forEach(function(k){
     UNITS[k].items.forEach(function(it, i){
-      if (it.theme === ab && runsNow(it)) out.push({ unit: UNITS[k].name, ukey: k, code: pillarCode(UNITS[k], i), it: it });
+      if (it.theme === ab) out.push({ unit: UNITS[k].name, ukey: k, code: pillarCode(UNITS[k], i), it: it });
     });
   });
   return out;

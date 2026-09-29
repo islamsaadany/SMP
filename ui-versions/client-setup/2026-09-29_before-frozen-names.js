@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -589,17 +588,6 @@ var CLIENTSETUP = (function () {
         ". Set-up rewrites these lists, which would lose that work, so they are read-only here — " +
         "rename or retire a row on its own Setup page instead, where the row keeps who runs it."));
       HOST.appendChild(hb);
-    }
-
-    /* §421: the Structure step on a client with a plan says what is still
-       changeable, because the list steps' notice is not drawn here and a
-       step that says nothing about being frozen reads as freely editable. */
-    if (!canShape() && s.k === "structure") {
-      var sb = el("div", "wzarched");
-      sb.appendChild(document.createTextNode("This client has a plan in it, so its lists of " +
-        w("unitword", "many", "business units") + " and " + w("fnword", "many", "supporting functions") +
-        " are set. Every name and switch on this step can still be changed, and saves as you change it."));
-      HOST.appendChild(sb);
     }
 
     /* §418: the Structure step lays three sections side by side, which a
@@ -1359,10 +1347,6 @@ var CLIENTSETUP = (function () {
       var e = (LABELS.entries || []).filter(function (x) { return x.key === key; })[0];
       var v = String(val == null ? "" : val).trim();
       if (e && v) { if (form === "one") e.group = v; else e.bu = v; }
-      /* §421: and the step's own copy follows, or the button just pressed
-         stays unlit and the press reads as one that did nothing. Not marked
-         dirty: nothing here waits for Next. */
-      if (e && v) S.shape.words[key] = { one: e.group, many: e.bu };
       return;
     }
     var cur = wordOf(key); cur = { one: cur.one, many: cur.many };
@@ -1391,10 +1375,6 @@ var CLIENTSETUP = (function () {
     var opts = pairs.map(function (p) { return [p[1], p[1]]; }).concat([["__", "Another name…"]]);
     var st = S.stOther && S.stOther[key];
     var sel = known && !st ? known[1] : "__";
-    /* §421: NOT read-only on a client with a plan. The top level's and the
-       second layer's word is a word like any other, and §417 freed the
-       others; these two were left greyed, with nothing saying why. `ro` is
-       kept in the signature for the callers and deliberately unused. */
     box.appendChild(segButtons(opts, sel, function (v) {
       S.stOther = S.stOther || {};
       if (v === "__") { S.stOther[key] = true; redraw(); return; }

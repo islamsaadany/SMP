@@ -224,10 +224,31 @@ with sync_playwright() as p:
     ck("…while a function's page keeps the client's word",
        safe(pg, "()=>{var t=TARGET,s=TARGET_SETUP; TARGET='fn:%s'; TARGET_SETUP=false; var w=L('pillar'); TARGET=t; TARGET_SETUP=s; return w}" % fk) == wasP)
     ck("…without the shape being rewritten (no unit lost, nothing refused)",
-       safe(pg, "()=>UNIT_KEYS.length>0 && !/has a plan in it/.test(document.body.innerText)") is True)
+       safe(pg, "()=>UNIT_KEYS.length>0 && !/shape is not rewritten from here/.test(document.body.innerText)") is True)
     ck("the old 'changed on Terminology' line is gone",
        safe(pg, "()=>!/changed on Setup › Terminology/.test(document.body.innerText)") is True)
     safe(pg, "()=>{var f=function(k,v){var e=LABELS.entries.filter(x=>x.key===k)[0]; e.bu=v;}; f('unitword',%r); f('pillar',%r); paint();}" % (was, wasP))
+
+    # ── 6b. …and the top level's and second layer's word too (§421) ──
+    # Islam: "I'm trying to adjust the top level type to company but I
+    # can't". Both sets of name buttons were greyed on a client with a
+    # plan, with nothing saying why. PRESSED and read back (§70, §96), and
+    # the lit button asserted to FOLLOW, or a press that stored the word
+    # still reads as a press that did nothing.
+    wasT = safe(pg, "()=>labelWord('topword','group')", "")
+    dis = safe(pg, "()=>[...document.querySelectorAll('.stcard .wzband button')].filter(b=>b.disabled && /^(Group|Company|Holding|Division|Sector|Another name…)$/.test(b.textContent)).length", -1)
+    ck("no name button on the step is greyed", dis == 0, dis)
+    try:
+        pg.click('.stcard .wzband button:has-text("Company")', timeout=4000); pg.wait_for_timeout(250)
+    except Exception as e:
+        ck("pressing Company", False, str(e)[:120])
+    ck("the top level's word is now Company, on the client's own labels",
+       safe(pg, "()=>labelWord('topword','group')") == "Company", safe(pg, "()=>labelWord('topword','group')"))
+    ck("…and Company is the button lit",
+       safe(pg, "()=>{var b=[...document.querySelectorAll('.stcard')][0].querySelector('.wzband button[aria-pressed=true]'); return b&&b.textContent}") == "Company")
+    ck("the step says what is still changeable on a client with a plan",
+       safe(pg, "()=>/Every name and switch on this step can still be changed/.test(document.body.innerText)") is True)
+    safe(pg, "()=>{var e=LABELS.entries.filter(x=>x.key==='topword')[0]; e.group=e.bu=%r; paint();}" % wasT)
 
     ck("no page errors", not errs, errs[:3])
     b.close()

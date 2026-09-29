@@ -296,7 +296,7 @@
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
        it keeps §362.1's one press. */
-    /* §411: THE MODULES THEMSELVES LEAD EVERY MENU (Islam: "I need to
+    /* §412: THE MODULES THEMSELVES LEAD EVERY MENU (Islam: "I need to
        reverse back to the modules from the drop down of the last part").
        On the client's settings the menu held only the modules' SETTINGS, and
        on a module's own settings it left out the module you are in — so

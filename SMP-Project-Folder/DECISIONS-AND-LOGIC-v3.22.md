@@ -58058,7 +58058,7 @@ Islam: *"fix the four red checks from main."* Each was established as red on `or
 
 **Merged to `main` 2026-09-24 on Islam's word** (*"merge to main"*), a clean fast-forward — `main` had not moved — carried by this record line so `main` holds a commit the branch does not (§91). Verified before: `qa.py` ERRORS none, `built-in-step` all good, `generated-in-step` all clear, and the thirteen register and rewritten checks green. `sw.js` SHELL `v5.50-register-dialog`, confirmed unique against `origin/main` immediately before the push (§94.16). Screen and checks only — no `api/`, `lib/` or `db/` file — so no forced sign-out is owed (spec 029).
 
-## §411 — the trail's last menu leads with the modules themselves (2026-09-25)
+## §412 — the trail's last menu leads with the modules themselves (2026-09-25)
 
 Islam, on Client settings with the trail's last menu open (*Strategy settings · Insights settings · Client settings*): *"I need to reverse back to the modules from the drop down of the last part."* **Measured, and it was right**: §401 made that menu, on the client's settings, list each module's SETTINGS and nothing else, and on a module's own settings it left out the module you are in (it is the step's own name) — so from either settings page there was no way back into a module from the trail. Aligned in plain words first (rule 1b, a content change, so no mockup); *"yes to both"*.
 

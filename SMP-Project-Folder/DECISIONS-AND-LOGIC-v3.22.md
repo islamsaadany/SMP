@@ -58584,3 +58584,51 @@ nothing written lost; the Structure step's switch, groups, area name boxes and
 year chips pressed and read back), red three ways from the sources (1 / 3 / 1:
 `itemsNow` ungated, the two groups merged, the area labels fixed). The structure
 family, the detail checks and the full sweep green.
+
+## §423 — a supporting function's S&W waits for the office (2026-09-29, on the branch)
+
+Islam, told that Raya Trade's functions show an S&W tab nobody there chose:
+*"yes build it, and check the other parts too."*
+
+**THE CAUSE IS THE FALLBACK, NOT THE FEATURE.** §404's fifth answer reads an
+unsaid Structure as EVERYTHING ON, so a client set up before §404 opens exactly
+as it did. That is right for every component that existed before §404 and wrong
+for the one that did not: §399 gave a supporting function its own S&W the same
+day, so on a client that never saved a Structure the fallback switched on a
+section, a tab, a deck slide and a workbook sheet that client had never had.
+
+**ONE LEVEL, ONE COMPONENT, IN THE ONE READER.** `STRUCT_UNSAID` in
+`lib/rules.js` names what a level carries when nobody has said: everything,
+except the functions' `swot`. `levelComponents()` answers it and `compOn()`
+stops short-circuiting to true on a null structure, so the pages, the deck and
+the Structure step read one answer (§53.5). **The step had to change too**:
+`structNow()` materialised an unsaid level as every component, so the first
+press anywhere on the step would have switched the functions' S&W on as a side
+effect; it reads `levelComponents()` now. **And one slide had no gate at all**:
+a projects or objectives function's deck drew its S&W slide whatever the
+structure said (present.js); it asks `compOn` now, as the pillars path already
+did. **New clients are unchanged in effect**: `STRUCT_NEW_CLIENT` never carried
+the functions' level, so they already fell to the fallback and now get it off,
+which matches their written defaults.
+
+**HIDDEN, NEVER DELETED.** Nothing stored is touched; ticking the functions'
+SWOT on the Structure step brings every line back. The workbook's S&W sheet
+still travels, so a download and upload cannot wipe what is hidden (§22).
+
+**THE OTHER PARTS, CHECKED RATHER THAN ASSUMED.** Every `compOn` and
+`levelComponents` reader was listed and compared with the build before §404:
+the group's and units' Foundation, a unit's SWOT, the Temple and its
+capability base, the group's purpose and values all existed before §404, so
+"on" is what those clients had. The company's own Foundation (§404) already
+waits for the office (it needs a saved second layer). The plan details (§413 on)
+are off unless explicitly true. **So the functions' S&W was the only one**, and
+nothing else moves.
+
+`checks/fn-sw-default.py`, both ends: nothing saved hides it on every function
+and keeps a unit's SWOT, the lines are still stored, the step reads Off, a
+press on another switch leaves it off, and pressing On brings the section and
+the slide back with their lines. Falsified from the SOURCES (§276): the old
+fallback **4 red**, the step materialising everything **2 red**.
+`checks/function-sw.py` REWRITTEN, never loosened (§218): it ticks the
+functions' SWOT first, the way the step does, and then asserts everything it
+did before.

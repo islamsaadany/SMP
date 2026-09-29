@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -1317,14 +1316,12 @@ var CLIENTSETUP = (function () {
      minted with; each function still picks its own on the next step. */
   function structNow(){
     var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
+    var all = COMPONENTS.map(function (c) { return c[0]; });
     /* §418: a level also carries its sections, titles and names, so the
        write starts from a COPY of what is stored and never from nothing —
        or pressing one tick would throw every name on the step away. */
     var copy = function (k) { var l = st && st[k]; return l && typeof l === "object" ? JSON.parse(JSON.stringify(l)) : {}; };
-    /* §423: an unsaid level reads the SHARED default, not "everything", or
-       the first press anywhere on this step would switch the functions' S&W
-       on as a side effect. */
-    var lv = function (k) { return SMPRules.levelComponents(GROUP, k).slice(); };
+    var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
     /* §418.1: AND EVERY OTHER KEY THE STRUCTURE HOLDS RIDES ACROSS TOO. A
        press here writes the whole object back, so a key this step does not
        draw -- another session's switches beside the levels -- would be

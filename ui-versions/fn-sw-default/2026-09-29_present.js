@@ -962,7 +962,7 @@ function deckSlidesFn(subject){
 
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
-  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
+  if (!isCap && !isUnit) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
   /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
   if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
 

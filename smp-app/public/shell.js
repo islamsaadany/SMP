@@ -3912,9 +3912,20 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) return "fn";
     return "bu";
   }
+  /* §423 — WHAT A LEVEL NOBODY HAS SET CARRIES. Everything, as §404's
+     fifth answer says, with ONE exception: a supporting function's own S&W
+     (§399). That section is newer than the clients it would appear on, so
+     reading it as on for a client that never saved a Structure put a tab,
+     a slide and a sheet on Raya's functions that nobody there had chosen.
+     Islam, 2026-09-29: *"yes build it"* — off until the office ticks the
+     functions' SWOT on the Structure step. Hidden, never deleted: whatever
+     was written there is still stored and comes back when it is ticked.
+     The same list is what the Structure step shows and materialises on its
+     first press, so the step and the pages cannot disagree (§53.5). */
+  var STRUCT_UNSAID = { fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; }) };
   function levelComponents(group, level) {
     var s = structureOf(group), l = s && s[level];
-    return l && Array.isArray(l.on) ? l.on : STRUCT_COMPONENTS;
+    return l && Array.isArray(l.on) ? l.on : (STRUCT_UNSAID[level] || STRUCT_COMPONENTS);
   }
   /* The one question every page asks. A per-item answer wins over the
      level's; a component the platform does not know is ON, so a key added
@@ -3944,8 +3955,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (!compOffered(target, comp)) return false;
     if (STRUCT_COMPONENTS.indexOf(comp) < 0) return true;
     var s = structureOf(group);
-    if (!s) return true;
-    var o = s.over && s.over[String(target || "group")];
+    var o = s && s.over && s.over[String(target || "group")];
     if (o && typeof o[comp] === "boolean") return o[comp];
     return levelComponents(group, structLevelOf(target)).indexOf(comp) >= 0;
   }
@@ -45299,7 +45309,7 @@ function deckSlidesFn(subject){
 
   /* §399: the function's S&W, right after its cover, where a unit's SWOT
      sits after its foundation. Never on a capability's own deck. */
-  if (!isCap && !isUnit) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
+  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
   /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
   if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
 
@@ -57072,12 +57082,14 @@ var CLIENTSETUP = (function () {
      minted with; each function still picks its own on the next step. */
   function structNow(){
     var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
-    var all = COMPONENTS.map(function (c) { return c[0]; });
     /* §418: a level also carries its sections, titles and names, so the
        write starts from a COPY of what is stored and never from nothing —
        or pressing one tick would throw every name on the step away. */
     var copy = function (k) { var l = st && st[k]; return l && typeof l === "object" ? JSON.parse(JSON.stringify(l)) : {}; };
-    var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
+    /* §423: an unsaid level reads the SHARED default, not "everything", or
+       the first press anywhere on this step would switch the functions' S&W
+       on as a side effect. */
+    var lv = function (k) { return SMPRules.levelComponents(GROUP, k).slice(); };
     /* §418.1: AND EVERY OTHER KEY THE STRUCTURE HOLDS RIDES ACROSS TOO. A
        press here writes the whole object back, so a key this step does not
        draw -- another session's switches beside the levels -- would be

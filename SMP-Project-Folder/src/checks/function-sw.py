@@ -44,6 +44,10 @@ with sync_playwright() as p:
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.goto(URL); pg.wait_for_timeout(1200)
 
+    # §423: an unsaid Structure keeps the functions' S&W OFF (that half is
+    # checks/fn-sw-default.py). Everything below is about the section once
+    # the office has ticked it, so tick it the way the Structure step does.
+    js(pg, "()=>{ GROUP.structure = {fn:{on:SMPRules.levelComponents(GROUP,'fn').concat(['swot'])}}; paint(); }")
     print("1. every function has S&W between Overview and its plan")
     secs = js(pg, """()=>FUNCTION_KEYS.map(k=>[k, (SUBS.fn.filter(x=>x.k==='fnstrat')[0].sections('fn:'+k)||[]).map(s=>s.k+'/'+s.label)])""")
     ck(isinstance(secs, list) and len(secs) > 1, "functions found", secs)

@@ -257,6 +257,10 @@ function demoGraph() {
     if (!p.email) p.email = mailFor(p.name, p.key);
   });
   seed.group.org = "Meridian Group";
+  /* 5 · and the demo's own content, written in the invented world, AFTER the
+     rename so nothing here is swept and BEFORE the refusal so all of it is
+     scanned (scripts/demo-content.js). */
+  require("./demo-content.js").enrich(seed);
   return seed;
 }
 
@@ -347,7 +351,11 @@ async function main() {
 /* REQUIRABLE, SO IT CAN BE ASKED WHAT IT WOULD WRITE without a database:
    checks/multi-client.py and the eye both need the renamed graph, and a
    script that can only be run cannot be inspected. */
-module.exports = { demoGraph, refuseIfAnySurvives, realNames, CLIENT_KEY };
+/* The Tracker's and Meeting Notes' rows (scripts/demo-content.js) travel with
+   the graph so the one seeder that owns the tenant writes both. */
+const { moduleContent } = require("./demo-content.js");
+
+module.exports = { demoGraph, refuseIfAnySurvives, realNames, moduleContent, CLIENT_KEY };
 
 if (require.main === module) {
   main().catch(function (e) { console.error(e.message); process.exit(1); });

@@ -23,7 +23,11 @@
        address — and it cannot be turned into a guard.
 
    3 · The demo seeded — only when `SMP_SEED_DEMO=1`. Refuses to overwrite a
-       demo somebody has practised in unless `--replace` is passed by hand.
+       demo somebody has practised in unless `--replace` is passed by hand,
+       or the switch says `SMP_SEED_DEMO=replace`: the demo's CONTENT is
+       swapped and the tenant, and everybody given it, stays (seed-demo.mjs).
+       Like `1`, it is a switch to turn off again — left on, every production
+       deploy resets the demo.
 
    NEITHER SWITCH RUNS ON A PREVIEW. A preview build gets production's
    environment unless somebody has scoped it, and a preview that carried a
@@ -94,13 +98,15 @@ if (asked("SMP_CARRY_RAYA")) {
   }
 }
 
-if (asked("SMP_SEED_DEMO")) {
+const demoReplace = process.env.SMP_SEED_DEMO === "replace";
+if (asked("SMP_SEED_DEMO") || demoReplace) {
   if (!production) console.log("deploy: SMP_SEED_DEMO is set but this is a preview — the demo is not seeded here");
   else {
     const { seedDemo } = await import("./seed-demo.mjs");
     try {
-      await seedDemo({ url });
-      console.log("deploy: the demo is seeded — turn SMP_SEED_DEMO off");
+      await seedDemo({ url, replace: demoReplace });
+      if (demoReplace) console.log("deploy: the demo's content is replaced — turn SMP_SEED_DEMO off, or every deploy resets it");
+      else console.log("deploy: the demo is seeded — turn SMP_SEED_DEMO off");
     } catch (e) {
       if (!/already|practised|--replace/.test(String(e.message))) throw e;
       console.log("deploy: SMP_SEED_DEMO is still on and the demo is already seeded — nothing done; turn it off");

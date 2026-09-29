@@ -3947,7 +3947,13 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      components say nothing about one, and it carries no Values. None of the
      three gates anything on a function's pages today (asked, not assumed),
      so this changes what the set-up offers and nothing a client sees. */
-  var STRUCT_NEVER_FN = ["brief", "theme", "pillar", "capability", "values"];
+  /* §426 (Islam, 2026-09-29, of the Structure step beside a function's
+     Overview: *"A"*): PURPOSE AND ASPIRATION GO TOO. The step offered them
+     on the functions' row and nothing on a function's page ever drew either
+     — a function takes its purpose and aspiration from the business it
+     supports (§213) — so the two ticks did nothing. The row now offers what
+     a function's page can show: its objectives and its S&W. */
+  var STRUCT_NEVER_FN = ["brief", "purpose", "aspiration", "theme", "pillar", "capability", "values"];
   function compOffered(target, comp) {
     return !(String(target || "").indexOf("fn:") === 0 && STRUCT_NEVER_FN.indexOf(comp) >= 0);
   }

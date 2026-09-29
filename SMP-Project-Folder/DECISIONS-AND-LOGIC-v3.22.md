@@ -58688,3 +58688,26 @@ rule, every module's settings, Client settings, with the page you are on bold �
 and the only files §417 touched were `route.js` and the two checks, so those are
 `main`'s whole. The built platform, `public/shell.js` and `public/sw.js` were
 REBUILT from the merged sources, never merged (§91).
+
+## §426 — A function's row offers what a function's page can show (2026-09-29)
+
+Islam, with the Structure step beside a function's Overview: *"how is the
+structure like this and the function overview like this?"* — then, of two
+answers, **"A"**. The functions' row on the Structure step offered **Purpose,
+Aspiration, North Star and S&W**, and a function's Overview draws exactly one
+of them: the key objectives (the "North Star" tick). Nothing on any page of a
+function ever drew a Purpose or an Aspiration — a function takes both from the
+business it supports (§213) — so two of the four ticks did nothing, measured by
+grepping every reader of `compOn(…, "purpose"|"aspiration")`: the unit's
+aspiration card and the deck's aim slide, neither reached by an `fn:` target.
+Both join `STRUCT_NEVER_FN`, so the step and the pages ask one list
+(`compOffered`, §42) and the row now offers the objectives and S&W. **Nothing
+stored moves**: a list already saved with them on is filtered, never rewritten
+(§96.2), including migration 019's Raya list. B — giving functions their own
+Purpose and Aspiration cards — was the other answer and was not taken.
+`checks/structure.py` asserts both ends (no chip on the functions' row, both
+still on a unit's row): 1 red with the rule reverted, from the sources (§276).
+**Recorded, not done**: the step's fixed title for that part still reads
+*North Star* where the page heads the card with the client's word; the name
+boxes beside it carry the client's word, and renaming the fixed title reaches
+every layer, so it was left rather than widened.

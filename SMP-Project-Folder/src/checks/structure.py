@@ -155,15 +155,20 @@ with sync_playwright() as p:
        bool(want) and got == [want.get("top")] * 3 + [want.get("fn")], [got, want])
     ck("…the functions' level offers no Brief, Themes, Pillars, Capabilities or Values chip",
        safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
-    ck("…and keeps Purpose, Aspiration and North Star, with its SWOT a section switch",
-       safe(pg, "()=>['purpose','aspiration','keyobj'].every(c=>!!document.querySelector('[data-stcomp=\"fn|'+c+'\"]')) && !!document.querySelector('[data-stsec=\"fn|swot\"]')") is True)
+    ck("…and keeps its North Star, with its SWOT a section switch",
+       safe(pg, "()=>!!document.querySelector('[data-stcomp=\"fn|keyobj\"]') && !!document.querySelector('[data-stsec=\"fn|swot\"]')") is True)
+    # §426: Purpose and Aspiration are never offered to a function — no page of
+    # a function draws either, so a tick there would do nothing. Both ends: a
+    # unit's row still offers them (asserted just below).
+    ck("…and no Purpose or Aspiration chip on the functions' row (§426)",
+       safe(pg, "()=>!['purpose','aspiration'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
     ck("…and draws no 'Plan in, by default' row (§404.2: chosen per function later)",
        safe(pg, "()=>![...document.querySelectorAll('.stcard .lab')].some(x=>/Plan in/.test(x.textContent))") is True)
     ck("the default words are singular but for Objectives, Pillars, Capabilities, Values (and Themes)",
        safe(pg, "()=>['purpose','aspiration'].map(k=>labelDefault(k).many).join('|')") == "Mission|Winning Aspiration",
        safe(pg, "()=>['purpose','aspiration','theme','keyobj'].map(k=>labelDefault(k).many).join('|')"))
     ck("…while the business units' level offers both",
-       safe(pg, "()=>!!document.querySelector('[data-stcomp=\"bu|brief\"]')&&!!document.querySelector('[data-stcomp=\"bu|theme\"]')") is True)
+       safe(pg, "()=>['brief','theme','purpose','aspiration'].every(c=>!!document.querySelector('[data-stcomp=\"bu|'+c+'\"]'))") is True)
     ck("each layer draws three sections",
        safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')") == "3,3,3,3",
        safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')"))

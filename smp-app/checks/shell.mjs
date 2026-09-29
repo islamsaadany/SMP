@@ -143,10 +143,12 @@ await section("2 · the address names the page, and the page names the address",
      never drew Home passes the last one (§113.8). */
   check(await page.evaluate(() => !document.querySelector(".welcomeover .wexit") && document.documentElement.getAttribute("data-home-open") === "1"),
     "…with no Continue bar, and the house marks Home as open (§400)");
-  await page.locator("#tabrow button").first().click({ timeout: 5000 }).catch(() => {});
+  /* §403 hides the tab row while Home is open, so the way out is a PLACE in
+     the navigation (§403: "the places stay pressable as the way out"). */
+  await page.locator(".units button[data-u]:visible").first().click({ timeout: 5000 }).catch(() => {});
   await page.waitForFunction(() => !document.querySelector(".welcomeover")).catch(() => {});
   check(await page.evaluate(() => !document.querySelector(".welcomeover") && !document.documentElement.hasAttribute("data-home-open")),
-    "…and pressing a tab takes it down, the house going quiet with it");
+    "…and pressing a place takes it down, the house going quiet with it (§403)");
   await open("/raya-trade/strategy/mobile/strategy");
   let p = await place();
   check(p[0] === "mobile" && p[1] === "strategy", "/raya-trade/strategy/mobile/strategy opens Mobile's Strategy", JSON.stringify(p));

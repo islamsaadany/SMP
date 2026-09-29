@@ -352,8 +352,10 @@ await section("5 · the office", async () => {
   const officeWant = frozen.landing(graph, "smo");
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + officeWant.name, "the office's welcome on a client is theirs", await page.locator(".welcomeover h2").textContent().catch(() => ""));
   const trailText = ((await page.locator("nav.trail").textContent().catch(() => "")) || "").replace(/\s+/g, " ");
-  check((await page.locator(".welcomeover .wexit").count()) === 0 && /Forefront/.test(trailText) && /Raya Trade/.test(trailText),
-    "…with no Continue, and the office's trail naming Forefront and the client above it (§400)", trailText);
+  check((await page.locator(".welcomeover .wexit").count()) === 0 && /^\s*Platform\b/.test(trailText) && /Raya Trade/.test(trailText),
+    /* REWRITTEN, NEVER LOOSENED (§218): §400.1 renamed the trail's first
+       word from Forefront to Platform (Islam: "let's change it to Platform"). */
+    "…with no Continue, and the office's trail naming the platform and the client above it (§400, §400.1)", trailText);
   check(((await text(page, ".wpages a"))[0] || "").startsWith("Setup"), "…with Setup first among their pages");
   const r404 = await page.goto(BASE + "/no-such-client", { waitUntil: "networkidle" });
   const s1 = r404.status(), t1 = (await page.locator(".holder h1").textContent()).trim();
@@ -615,7 +617,11 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   else fail("pressing the strip", "no strip to press");
   r = await readRail();
   check(r.s === "start" && r.csetup && r.path === "/raya-trade/setup/start", "pressing it opens the flow at the client's own address", JSON.stringify([r.s, r.csetup, r.path]));
-  check(r.steps.join(",") === "client,units,cos,fns,caps,words,office" && r.step === "client", "…on step 1 of seven, the client itself", JSON.stringify([r.steps, r.step]));
+  check(r.steps.join(",") === "client,structure,cos,units,fns,caps,office" && r.step === "client",
+    /* REWRITTEN, NEVER LOOSENED (§218): §404.4 put Structure second, the
+       divisions before the units, and asked the words on Structure's cards
+       rather than a Words step of their own. Still seven, still client first. */
+    "…on step 1 of seven, the client itself (§404.4's order)", JSON.stringify([r.steps, r.step]));
   check(r.name === nameBefore, "step 1 shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
   check(r.brand > 0 && r.glogo > 0, "Branding's colour and mark controls are inside the flow (the brand def is gone)", JSON.stringify([r.brand, r.glogo]));
   check(r.band === "Modules this client has", "…and so is the modules band, on step 1", r.band);

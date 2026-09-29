@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-09-29 — moving between Strategy and the settings pages no longer reloads (§415), on the branch.** Pressing *Strategy* from Client settings, or *Client settings* from a Strategy page, used to reload the whole platform. They are the same page underneath, so the switch is now instant, and Back still works. Moving to the other modules still loads, because those really are different pages.
+
 **2026-09-29 — the platform opens straight away on your last view (§414), on the branch.** A new tab used to show a grey placeholder until all of the client's data arrived. It now shows what you last saw at once, marked "Updating…" and locked so nothing can be typed or saved, and swaps in the fresh data as soon as it arrives. The saved copy belongs to one person, is never shown to anyone else on that computer, and is deleted on sign-in and sign-out. Which page a tab opens on has not changed.
 
 **2026-09-29 — the trail's last menu is the same full list everywhere (§413), merged to `main`.** The last menu in the top trail now always shows every module, a line, every module's settings, then Client settings. The page you are on is shown in bold, and pressing it does nothing.

@@ -601,6 +601,26 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,
         "\u2026and Back returns to the module's Setup, wearing its bar again", path() + " / " + JSON.stringify(b));
 
+  /* §415: AND THE MODULE ITSELF IS A PRESS FROM ITS SETTINGS, BOTH WAYS
+     (Islam: "when moving between client settings and strategy the strategy
+     page loads"). Same marker as above (§367): it survives a repaint and
+     cannot survive a document. Both ends (§94.2). */
+  await open("/raya-trade/setup/people");
+  await page.evaluate(() => { window.__stay = 3; });
+  if (await pressTrail("/raya-trade/strategy")) await page.waitForURL((u) => /^\/raya-trade\/strategy\/(?!setup)/.test(u.pathname), { timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(400);
+  b = await bar();
+  check(await page.evaluate(() => window.__stay === 3), "Client settings → Strategy is a press, not a page load (§415)", "the page was rebuilt");
+  check(/^\/raya-trade\/strategy\/(?!setup)/.test(path()) && !b.scope && b.row === true && b.where === "Strategy",
+        "…landing on Strategy's own pages, wearing its navigation", path() + " / " + JSON.stringify(b));
+  await page.evaluate(() => { window.__stay = 4; });
+  if (await pressTrail("cross:client")) await page.waitForURL(/\/raya-trade\/setup\//, { timeout: 8000 }).catch(() => {});
+  await page.waitForTimeout(400);
+  b = await bar();
+  check(await page.evaluate(() => window.__stay === 4), "…and Strategy → Client settings is a press too (§415)", "the page was rebuilt");
+  check(/^\/raya-trade\/setup\/[\w-]+$/.test(path()) && b.scope === "client" && b.where === "Client settings",
+        "…landing on the client's settings", path() + " / " + JSON.stringify(b));
+
   await open("/raya-trade/setup/people");
   /* AND THE WAY OUT GOES WHERE IT SAYS. *Save & close* was \u00a7362's word for
      the pill \u00a7400 retired; the trail's first step is that way out now,

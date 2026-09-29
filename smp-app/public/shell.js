@@ -56478,6 +56478,65 @@ var SYNC = (function () {
      taken is what matters. */
   var OFFLINE = false;
   function bootNow() { return Date.now(); }
+  /* ── OPEN ON WHAT YOU SAW LAST TIME (§414) ──────────────────────────
+     Islam: *"why everytime I open the tab it opens from the start? why don't
+     we cash the pages and refresh silently and adjust if something new
+     comes"* — and, asked, *"yes"* to the three conditions put to him: one
+     copy PER PERSON, WIPED on sign-in and sign-out, an "Updating…" mark
+     while it is only the saved copy, and NOTHING SAVED until the fresh copy
+     has landed.
+
+     The program files were already kept by the browser (etag, 304); what
+     cost the time is the whole client graph asked for from a database that
+     may be asleep, with the grey skeleton (§94.10) standing until it came.
+     So the last graph this browser was handed is kept, drawn at once, and
+     replaced the moment the server answers.
+
+     §26 said the platform must never show stale figures AS CURRENT — this
+     does not: the mark says so, the page body is inert (nothing can be typed
+     into a copy about to be replaced, which would be lost), and `live` stays
+     false so no save leaves until the real graph is in (save() already
+     refuses while !live). Keyed by CLIENT, so two clients never cross; the
+     person it belongs to is stored with it and a different answer from the
+     server reloads rather than repaints (§185: a view is judged as somebody).
+     What it does not protect, stated: a laptop left signed in holds that
+     client's graph in its storage, exactly as it holds the open page. */
+  var CACHE_PREFIX = "smp.cache.";
+  function cacheKey() { return CACHE_PREFIX + (clientSlug() || "-"); }
+  function cacheRead() {
+    try {
+      var c = JSON.parse(localStorage.getItem(cacheKey()) || "null");
+      return c && c.state && c.person && c.person.key ? c : null;
+    } catch (e) { return null; }
+  }
+  function cacheWrite(state, who) {
+    if (!who || !who.key) return;
+    try { localStorage.setItem(cacheKey(), JSON.stringify({ at: Date.now(), person: who, state: state })); }
+    catch (e) { try { localStorage.removeItem(cacheKey()); } catch (e2) {} }
+  }
+  function cacheWipe() {
+    try {
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(CACHE_PREFIX) === 0) localStorage.removeItem(k);
+      }
+    } catch (e) {}
+  }
+  /* The mark and the lock go on and off together, in one place. */
+  function markStale(on) {
+    var root = document.documentElement, panel = document.getElementById("panel");
+    if (on) root.setAttribute("data-stale", "1"); else root.removeAttribute("data-stale");
+    if (panel) { if (on) panel.setAttribute("inert", ""); else panel.removeAttribute("inert"); }
+    var f = document.getElementById("staleflag");
+    if (on && !f) {
+      f = document.createElement("span");
+      f.id = "staleflag"; f.className = "staleflag"; f.setAttribute("role", "status");
+      f.title = "Showing what you saw last time while the latest copy loads. Nothing can be changed until it has.";
+      f.textContent = "Updating\u2026";
+      var host = document.getElementById("topacts");
+      if (host) host.insertBefore(f, host.firstChild); else document.body.appendChild(f);
+    } else if (!on && f) f.parentNode.removeChild(f);
+  }
   /* Takes the skeleton down. Idempotent, and the ONLY thing that does it —
      theme.js puts the class on and never removes it, so there is one place to
      look when a page is stuck grey. */
@@ -56548,6 +56607,7 @@ var SYNC = (function () {
   var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
+  var stale = false;       /* §414: the saved copy is on screen and the fresh one has not landed */
   var timer = null;
   var saving = false;
   /* When the last save actually LEFT, so the leading edge below can tell a
@@ -57272,6 +57332,7 @@ var SYNC = (function () {
     out.className = "infobtn";
     out.textContent = "Sign out";
     out.addEventListener("click", function () {
+      cacheWipe();
       fetch("/api/auth", { method: "POST",
         headers: { "Content-Type": "application/json" },
         body: '{"action":"logout"}'
@@ -57487,7 +57548,7 @@ var SYNC = (function () {
     if (!live || saving) return done(false);
     fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
-        if (r.status === 401 || r.status === 403) { location.replace(doorUrl()); throw new Error("sign in"); }
+        if (r.status === 401 || r.status === 403) { cacheWipe(); location.replace(doorUrl()); throw new Error("sign in"); }
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
@@ -57501,7 +57562,15 @@ var SYNC = (function () {
   }
 
   return {
-    isLive: function () { return live; },
+    /* THE SAVED COPY IS THE SERVER'S, ONLY OLDER (§414), so the page is told
+       it is served while it is on screen — or its first paint judges access
+       and pages as the offline file would, and the router, which decides
+       where to land once, keeps that answer (measured: a unit head asking
+       for the client's People page stayed there instead of being sent to
+       their own unit). Saving is NOT widened by this: save(), afterPaint()
+       and flushLeave() read `live` itself and still refuse until the fresh
+       copy has landed. */
+    isLive: function () { return live || stale; },
     /* An address with this client's name on it (spec 042, §313.35). The play
        address for a clip is built in slides.js, outside this module, and a
        GET has no body to carry the slug in — so the one helper that knows the
@@ -57778,7 +57847,7 @@ var SYNC = (function () {
              §230.2 removed the "look at the example anyway" way past, at
              Islam's direction — the wall now stands until the server
              answers, and the words on it are the user's (see noServerWall). */
-          if (enabled && !live) noServerWall();
+          if (enabled && !live && !stale) noServerWall();
         }, wait);
       }
       /* NOBODY IS LEFT LOOKING AT GREY. If the answer has not come, the baked
@@ -57789,6 +57858,40 @@ var SYNC = (function () {
                      (BOOT_GIVEUP / 1000) + "s — showing the baked-in data");
         land();
       }, BOOT_GIVEUP);
+      /* §414: THE SAVED COPY LANDS FIRST, if there is one. It paints through
+         the same chromeFor the live answer uses, with the person it was
+         saved for, and the fresh answer below repaints over it. If the saved
+         copy will not hydrate (an older shape), it is dropped and this is an
+         ordinary boot. */
+      stale = false;
+      /* ── THE CHROME IS DRAWN ONCE, BY WHICHEVER LANDING RUNS FIRST (§414) ──
+         The saved copy lands after the 180ms floor; a fast server's answer can
+         land INSIDE that floor and run its callback first. The chrome
+         (sign-out, the viewer, `VIEWER` itself) must be drawn by that first
+         paint and never twice: measured, a fresh copy that painted without it
+         left `VIEWER` at the file's default — the office — and the router,
+         which decides where to land ONCE, placed a unit head on the client's
+         People page as the office would be placed. */
+      var chromed = false;
+      function chromeOnce() {
+        if (chromed) return paint();
+        chromed = true;
+        chromeFor(paint);
+      }
+      var cached = enabled ? cacheRead() : null;
+      if (cached) {
+        try {
+          hydrate(cached.state);
+          person = cached.person;
+          stale = true;
+          /* markStale only while still stale: a fast answer can land between
+             this call and its delayed paint (BOOT_FLOOR). */
+          land(function () { chromeOnce(); if (stale) markStale(true); });
+          /* A server that never answers still gets the wall, over the saved
+             copy rather than over the example (§201). */
+          setTimeout(function () { if (!live && stale) noServerWall(); }, BOOT_GIVEUP);
+        } catch (e) { cacheWipe(); stale = false; }
+      }
       fetch(withClient("/api/state"), { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. A TEMPORARY
@@ -57838,11 +57941,25 @@ var SYNC = (function () {
              the skeleton stays up until it does — which is right: the gate
              is where this person is going. */
           if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace(doorUrl()); return; }
+          /* §414: the saved copy belonged to somebody else — start again
+             rather than repaint another person's chrome under this one. */
+          if (stale && (!data.person || data.person.key !== cached.person.key)) {
+            cacheWipe(); cacheWrite(data.state, data.person); location.reload(); return;
+          }
           hydrate(data.state);
           live = true;
           person = data.person || null;
+          cacheWrite(data.state, person);
+          /* THE BASELINE BEFORE THE LANDING, NEVER AFTER (§414). With a saved
+             copy on screen the page has already landed, so `land()` runs its
+             callback AT ONCE rather than after the floor — and that paint ends
+             in afterPaint(), which with no baseline would post the whole graph
+             as a change nobody made (the server refuses it, 400, and the retry
+             every 5s keeps the page busy for ever). */
+          lastSaved = serialize();
           land(function () {
-            if (person) chromeFor(paint); else paint();
+            if (person) chromeOnce(); else paint();
+            if (stale) { stale = false; markStale(false); }
             /* ── AND ONLY NOW IS THERE ANYTHING TO SHOW SOMEBODY ──────
                The welcome screen and the onboarding tour offer themselves
                here and nowhere else: this is after the one paint that puts
@@ -57861,7 +57978,6 @@ var SYNC = (function () {
             try { greeted = WELCOME.offer(person); } catch (e) {}
             if (!greeted) TOUR.offer(person);
           });
-          lastSaved = serialize();
           setInterval(save, 5000);
         })
         .catch(function (e) {

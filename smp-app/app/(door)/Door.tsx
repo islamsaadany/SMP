@@ -173,6 +173,9 @@ export default function Door({ slug, dress, initial }: { slug: string | null; dr
   function signIn() {
     setError(null); setBusy(true);
     try { sessionStorage.setItem(EMAIL_BACK, emailRef.current?.value.trim() || ""); } catch {}
+    /* §414: a sign-in is a new person on this browser, so any saved copy of a
+       client's page (the platform's quick open) goes with the old one. */
+    try { for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.indexOf("smp.cache.") === 0) localStorage.removeItem(k); } } catch {}
     /* no preventDefault: the browser posts the form and follows the 303 */
   }
 

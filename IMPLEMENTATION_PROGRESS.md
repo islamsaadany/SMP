@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-09-29 — the platform opens straight away on your last view (§414), on the branch.** A new tab used to show a grey placeholder until all of the client's data arrived. It now shows what you last saw at once, marked "Updating…" and locked so nothing can be typed or saved, and swaps in the fresh data as soon as it arrives. The saved copy belongs to one person, is never shown to anyone else on that computer, and is deleted on sign-in and sign-out. Which page a tab opens on has not changed.
+
 **2026-09-29 — the trail's last menu is the same full list everywhere (§413), merged to `main`.** The last menu in the top trail now always shows every module, a line, every module's settings, then Client settings. The page you are on is shown in bold, and pressing it does nothing.
 
 **2026-09-25 — back into a module from the trail's last menu (§412), merged to `main` 2026-09-29.** On Client settings the last menu in the top trail only offered each module's settings, and on a module's settings it left out that module, so there was no way back into a module from it. Every such menu now starts with the modules themselves (Strategy, Insights), then a line, then the settings pages. On a module's normal page it is unchanged.

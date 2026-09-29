@@ -11879,6 +11879,13 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
+  /* §414: AND AN ACTION (§342), which is a milestone row with a date and was
+     left out of this list when it arrived. It fell through to `o.actual`, which
+     an action never carries, so the Reporting cycle board read Nigeria's four
+     answered actions as 0/4 while Nigeria's own page — `fnObjReported`, the
+     same test as `statusGiven` — said 8 of 8. Two counters over one row is
+     §53.5's fault; this is the one the board and the Submit walk share. */
+  if (x.kind === "action") return statusGiven(o);
   /* §343: a breakdown cell is answered by its own column's box. */
   if (x.kind === "bdcell") return SMPRules.bdAnswered(o, x.col);
   /* §300: a yes/no row is answered by one of the two ends, or by In progress
@@ -12424,6 +12431,14 @@ function boardWho(target){
 function boardFunctionKeys(){
   return Object.keys(FUNCTIONS).filter(function(fk){
     if (!fnShows(fk)) return false;
+    /* §414: a function planning in OBJECTIVES AND ACTIONS (§342) is asked for
+       a report like the other two — its own Reporting page has always asked
+       it — but it has no projects and usually no capability, so the test
+       below dropped it from the board: in the demo, Finance and Treasury were
+       missing from "Who has reported" while the rest of the page counted them
+       nowhere either. It is read by `holderRow`, whose counters
+       (`fnReportItems`) already walk a holder's objectives and actions. */
+    if (fnPlansInObjectives(FUNCTIONS[fk])) return true;
     return fnPlansInPillars(FUNCTIONS[fk])
       ? true
       : !!(fnOwnProjects(fk).length || capsOfFunction(fk).length);

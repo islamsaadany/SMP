@@ -496,6 +496,23 @@ function noteRows(g) {
   })([g.units, g.functions, g.group.capabilities]);
 }
 
+/* ── 12 · no brand that points at the real client ──────────────────
+   Islam, 2026-09-29, of "Samsung market share": a client in the same market
+   could work out whose plan this was from the brands Devices is measured by.
+   So the three measures that named a principal are renamed by ID, and the
+   words themselves are on the refusal's list in seed-demo-client.js, so a
+   brand that comes back through the example is refused, not shipped. */
+const BRAND_RENAMES = {
+  "mobile-P3-M1": "Revenue outside the lead brand",
+  "mobile-P3-M2": "Lead brand market share",
+  "mobile-P3-M3": "Challenger brand market share",
+};
+function renameBrands(g) {
+  (g.units.mobile.items || []).forEach((p) => (p.measures || []).forEach((m) => {
+    if (BRAND_RENAMES[m.id]) m.name = BRAND_RENAMES[m.id];
+  }));
+}
+
 /* ── the pass ───────────────────────────────────────────────────── */
 function eachRow(g, fn) {
   const walkUnit = (u) => {
@@ -551,6 +568,7 @@ function enrich(g) {
   const bp = g.units.retailstores.items.find((p) => p.id === BREAKDOWN.pillar);
   if (bp) bp.breakdown = BREAKDOWN.value;
   noteRows(g);
+  renameBrands(g);
   return g;
 }
 

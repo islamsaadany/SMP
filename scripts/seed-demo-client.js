@@ -45,6 +45,9 @@ const PLACES = [
   ["IT Dist.", "IT Distribution"],
   ["Mobile", "Devices"],
   ["Care", "Customer Care"],
+  /* A real B2B ordering app the example's Devices plan is built around
+     (2026-09-29): read beside the brands, it points at the client. */
+  ["Sary", "TradeLink"],
 ];
 
 /* THE UNIT NAMES ARE THE SAME TABLE READ BY KEY, so a unit cannot end up
@@ -96,7 +99,11 @@ const MAIL_DOMAIN = "meridian.example";
    case-insensitively against every string in the finished graph INCLUDING the
    ones this file wrote — a rename table with a typo in it would otherwise pass
    its own guard. */
-const FORBIDDEN = ["raya", "mazaya", "rayatrade", "i2"];
+const FORBIDDEN = ["raya", "mazaya", "rayatrade", "i2",
+  /* The principals Devices was measured by, and the B2B app it sells
+     through (2026-09-29): none is a person, but read together they point at
+     the real client. */
+  "samsung", "vivo", "sary"];
 
 /* ── Reading the real names out of the example ────────────────────
    Never typed out again here: a copy would drift the day somebody edits the

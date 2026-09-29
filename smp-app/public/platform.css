@@ -10601,6 +10601,12 @@ body.presenting #buildband { display:none; }
 .csetup .stpart.stquad { grid-template-columns:22px minmax(0,1fr); }
 .csetup .stpart .fld { width:100%; min-width:0; }
 .csetup .stpart.off .fld { opacity:.55; }
+/* §420: an extra-detail row carries its own caption, because its boxes are
+   absent while it is off and a placeholder cannot name a row with no box. */
+.csetup .stpart.stdet { grid-template-columns:22px 128px minmax(0,1fr) minmax(0,1fr); }
+.csetup .stdetn { font-size:12.5px; color:var(--ink); }
+.csetup .stpart.stdet.off .stdetn { color:var(--ink-3); }
+.csetup .stdetw { grid-column:3 / 5; font-size:12px; font-style:italic; color:var(--ink-3); }
 .csetup .stway { display:grid; gap:6px; padding:10px; border-radius:6px; background:var(--surface-2); }
 .csetup .sttick { width:18px; height:18px; border-radius:4px; border:1.5px solid var(--line); background:var(--surface);
   display:grid; place-items:center; padding:0; cursor:pointer; flex:none; }

@@ -1586,6 +1586,7 @@ var CLIENTSETUP = (function () {
         if (c === "keyobj") { a.title = b.title = "The same name as the North Star above: in this way of planning they are one list."; }
         r.appendChild(a); r.appendChild(b); wb.appendChild(r);
       });
+      if (way === "pillars") detailRows(wb, k, tgt);
       s3.appendChild(wb);
     });
     secs.appendChild(s3);
@@ -1616,6 +1617,42 @@ var CLIENTSETUP = (function () {
           (L.on.indexOf("capability") >= 0 ? ", and the capabilities (base)." : ".")));
       box.appendChild(tp);
     }
+  }
+  /* §420: A LAYER'S OWN EXTRA DETAILS (Islam, 2026-09-29: *"every layer or
+     area like units and functions should have their separate options and
+     switches"*). The four RHI details (§413–§416) sit in the plan section of
+     the way they belong to — pillars — each with its own tick for THIS
+     layer, and the three that add a part carry its one/many names like every
+     other part. The tick stores a real true or false on the layer, so a
+     layer set on its own stops following the client-wide answer (§413's
+     `structure.details`, the fallback). Off HIDES and keeps (§44); an off
+     row draws no name boxes, because nothing on this layer would read them. */
+  var DETAIL_ROWS = [["overview", "Overview"], ["outcomes", "Several outcomes"],
+                     ["requirements", "Requirements"], ["years", "Years 1 \u00b7 2 \u00b7 3"]];
+  function detailRows(wb, k, tgt){
+    var layer = { top: "the top level", mid: "the second layer",
+                  bu: W("unitword", "many", "Business units").toLowerCase(),
+                  fn: W("fnword", "many", "Supporting functions").toLowerCase() }[k];
+    wb.appendChild(el("p", "lab", "Extra details"));
+    DETAIL_ROWS.forEach(function (d) {
+      var on = SMPRules.planDetailOn(GROUP, d[0], tgt), nk = SMPRules.DETAIL_NAMES[d[0]];
+      var r = el("div", "stpart stdet" + (on ? "" : " off"));
+      r.setAttribute("data-stdetrow", k + "|" + d[0]);
+      var t = tickBtn(on, d[1] + " for " + layer, null, function () {
+        var nx = structNow(), l = nx[k];
+        l.details = Object.assign({}, l.details || {});
+        l.details[d[0]] = !on;
+        structWrite(nx);
+      });
+      t.setAttribute("data-stdetail", k + "|" + d[0]);
+      r.appendChild(t);
+      r.appendChild(el("span", "stdetn", d[1]));
+      if (on && nk) {
+        r.appendChild(nameBox(k, nk, "one", d[1] + ", one"));
+        r.appendChild(nameBox(k, nk, "many", d[1] + ", many"));
+      } else r.appendChild(el("span", "stdetw", on ? "No names needed" : "Off for " + layer));
+      wb.appendChild(r);
+    });
   }
   function structureStep(box){
     var ro = !canShape();
@@ -1654,38 +1691,6 @@ var CLIENTSETUP = (function () {
       structLevel(fn, lv, "fn");
     } else fn.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
-    /* §413: PLAN DETAILS — what a direction and its tactics carry, off for
-       every client until pressed. Only the switches that are BUILT are drawn
-       (§61: a chip that changes nothing is worse than no chip); the other
-       three agreed for RHI join this row as each is built. */
-    var pd = card("Plan details");
-    pd.appendChild(el("p", "lab", "What a direction and its tactics carry"));
-    var pband = el("div", "wzband stchips");
-    [["overview", "Direction overview"], ["outcomes", "Several outcomes per tactic"],
-     ["requirements", "Tactic requirements"], ["years", "Years 1 \u00b7 2 \u00b7 3"]].forEach(function (c) {
-      var on = !!(lv.details && lv.details[c[0]] === true);
-      var b = el("button", null, c[1]); b.type = "button";
-      b.dataset.stdetail = c[0];
-      b.setAttribute("aria-pressed", String(on));
-      /* Never frozen under a plan: a switch that hides and forgets nothing is
-         not the client's shape, and RHI turns this on over a live plan. */
-      b.addEventListener("click", function () {
-        /* Writes ONLY the switch. structNow() is the whole effective shape,
-           so writing it would store every level's components for a client
-           that never said one — equivalent today, and a second answer
-           sitting in the data for ever. A structure holding only `details`
-           reads every level as unsaid (structureOf's own fallbacks), and the
-           last switch off DELETES it (§50.6). */
-        var st0 = SMPRules.structureOf(GROUP), nx = st0 ? JSON.parse(JSON.stringify(st0)) : {};
-        var d = Object.assign({}, nx.details || {});
-        if (d[c[0]] === true) delete d[c[0]]; else d[c[0]] = true;
-        if (Object.keys(d).length) nx.details = d; else delete nx.details;
-        if (Object.keys(nx).length) structWrite(nx);
-        else { delete GROUP[SMPRules.STRUCTURE]; redraw(); }
-      });
-      pband.appendChild(b);
-    });
-    pd.appendChild(pband);
 
     box.appendChild(el("p", "wzwhy",
       "These apply to every item at a layer; each one can be adjusted later on Setup › Structure. " +

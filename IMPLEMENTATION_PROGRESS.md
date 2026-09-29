@@ -8301,3 +8301,12 @@ words). Numbers were tidied so nothing is claimed twice: ours are §417/§418, t
 RHI status-words section is §419. Everything checked passes. Not on main; merge
 this branch rather than the RHI one.
 
+
+## §420 — each layer has its own switches for the plan details (2026-09-29, on the branch)
+The four extra details (direction overview, several outcomes, requirements,
+years 1·2·3) are now switched on and named per layer on the set-up flow's
+Structure step, under each layer's Plan section, as Islam asked. A client that
+had turned one on for everybody keeps it on everywhere until a layer is changed.
+The yearly revision stays one for the whole client. Checked with the new
+`checks/detail-layers.py` and the four detail checks rewritten to the new ticks.
+Not on main.

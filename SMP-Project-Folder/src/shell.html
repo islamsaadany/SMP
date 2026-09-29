@@ -8898,9 +8898,9 @@
        that never did must be byte-identical. */
     document.querySelectorAll("[data-outadd]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (!mayEditPlan() || !outcomesOn()) return;
+        if (!mayEditPlan()) return;
         var t = hideableById(this.dataset.outadd);
-        if (!t) return;
+        if (!t || !outcomesOn(t)) return;
         var id = nextOutcomeId(t);
         t.outs = (t.outs || []).concat([{ id: id }]);
         paint();

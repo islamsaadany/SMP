@@ -53,6 +53,16 @@ function LTraw(target, key, which){
   return o || labelWord(key, which === "one" ? "group" : "bu");
 }
 function LT(target, key, which){ return esc(LTraw(target, key, which)); }
+/* §420: what a plan detail's part is called on the subject `x` holds — the
+   layer's own name for it (Setup › Structure), else the platform's word. A
+   tactic's outcome existed before its switch did, so its column keeps
+   "Outcome" wherever the several-outcomes switch is off for that layer. */
+function detailWord(det, form, x){
+  var t = planSubjectOf(x), nk = SMPRules.DETAIL_NAMES[det];
+  if (det === "outcomes" && !planDetailOn("outcomes", t)) return form === "one" ? "Outcome" : "Outcomes";
+  return LTraw(t, nk, form);
+}
+function DW(det, form, x){ return esc(detailWord(det, form, x)); }
 function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one
@@ -7059,7 +7069,7 @@ function planPeriodBlock(){
    his answer — so the revision moves that period on by twelve months if it
    was set. Nothing reads the calendar to decide which year it is. */
 function planYearsBlock(){
-  if (!yearsOn()) return "";
+  if (!yearsAnyOn()) return "";
   var now = planYear(), chips = "";
   for (var y = 1; y <= 3; y++)
     chips += '<span class="yrchip' + (y === now ? " now" : y < now ? " past" : "") + '">' +

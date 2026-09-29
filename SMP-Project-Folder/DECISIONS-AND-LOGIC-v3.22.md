@@ -58482,3 +58482,45 @@ and main's, `welcome.py` green on a rerun after one mid-run navigation race in
 the check, and `qa.py` ERRORS none. **From here their branch should not be
 merged separately** — this one carries it.
 
+
+## §420 — each layer has its own switches for the plan details (2026-09-29)
+
+Islam, of the four plan details the RHI branch added (a direction's overview,
+several outcomes per tactic, a tactic's requirements, years 1·2·3), asked first
+whether they can be switched off and then: *"every layer or area like units and
+functions should have their separate options and switches."* Drawn first
+(`design-mockups/structure-plan-details/2026-09-29_client-words-and-names.html`,
+round 2) and then *"ok build it"*.
+
+- **The switch moves from the client onto the layer.** Each layer of the
+  Structure step (top, second, business units, supporting functions) carries
+  its own four ticks as rows under its Plan section's parts, stored on
+  `structure[level].details[key]` as a boolean. **A layer that has not answered
+  falls back to the old client-wide `structure.details[key]`**, so a client that
+  turned a detail on under §413–§416 keeps it everywhere until a layer is
+  changed: nothing moves for anybody on upgrade. The separate Plan details card
+  is gone (§24).
+- **One rule, asked with the page's target**: `SMPRules.planDetailOn(group, key,
+  target)`, the layer read through `structLevelOf` — `co:` the second layer,
+  `fn:`/`cap:` the functions layer (a capability follows the function that
+  holds it), anything else a unit. Screen, server, deck and workbook ask the
+  same function (§42). Where a call site holds an object rather than a target,
+  `planSubjectOf()` finds its subject through an index rebuilt once per task,
+  never a walk per call.
+- **Names per layer.** Overview, outcome and requirement take the client's own
+  one/many words on each layer (`structure[level].words`, read by `layerWord`,
+  §418's machinery); years needs none. **A tactic's single outcome keeps the
+  word "Outcome" wherever that layer's several-outcomes switch is off** — the
+  name belongs to the extra feature, not to the column every tactic has.
+- **Years stays one plan year for the whole client.** The switch decides whether
+  a layer's directions are marked Year 1·2·3; the yearly revision (§416) is
+  offered while any layer has years on, because it moves everybody's year at
+  once.
+- Off hides and never deletes. No migration, no schema change.
+
+Checked: `checks/detail-layers.py` (the rule per layer, the fallback, the names
+reaching the page, the Structure rows pressed and read back), red two ways from
+the sources; the four detail checks rewritten to press the per-layer ticks
+(storing `structure.bu.details.KEY`, touching no other layer), never loosened;
+the structure family, the deck/workbook/plan-builder neighbours, 797/0 server
+rules, 140/0 change list and the full page sweep.

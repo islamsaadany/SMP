@@ -91,14 +91,20 @@ with sync_playwright() as p:
         okp = True
     except Exception as e: okp = str(e)[:120]
     ok("the Structure step opens", okp is True, okp)
-    chip = safe(pg, "()=>{var c=document.querySelector('[data-stdetail=\"years\"]'); return c?[c.getAttribute('aria-pressed'), c.textContent]:null}")
-    ok("it carries a 'Years 1 · 2 · 3' chip, not pressed", chip and chip[0] == "false" and "Years" in chip[1], chip)
-    click(pg, '[data-stdetail="years"]')
-    ok("pressing it stores the switch",
-       safe(pg, "()=>!!(GROUP.structure&&GROUP.structure.details&&GROUP.structure.details.years===true)") is True)
-    click(pg, '[data-stdetail="years"]')
-    ok("pressed again it is DELETED (§50.6)", safe(pg, "()=>!('structure' in GROUP)") is True,
-       safe(pg, "()=>JSON.stringify(GROUP.structure)"))
+    # §420: each layer has its own switch, in its plan section; the old
+    # client-wide card is gone. Ticked on the business units' layer here.
+    chip = safe(pg, "()=>{var c=document.querySelector('[data-stdetail=\"bu|years\"]'); var r=c&&c.closest('[data-stdetrow]'); return c?[c.getAttribute('aria-pressed'), r?r.textContent:'']:null}")
+    ok("the business units' plan section carries a 'Years' row, not ticked", chip and chip[0] == "false" and "Years" in chip[1], chip)
+    ok("the old client-wide Plan details card is gone", safe(pg, "()=>document.querySelector('[data-stdetail=\"years\"]')") is None)
+    click(pg, '[data-stdetail="bu|years"]')
+    ok("ticking it stores the switch on THAT layer (§420)",
+       safe(pg, "()=>!!(GROUP.structure&&GROUP.structure.bu&&GROUP.structure.bu.details&&GROUP.structure.bu.details.years===true)") is True, safe(pg, "()=>JSON.stringify(GROUP.structure)"))
+    ok("…on no other layer, and not client-wide",
+       safe(pg, "()=>['top','mid','fn'].every(function(x){var l=GROUP.structure[x];return !(l&&l.details&&('years' in l.details))}) && !(GROUP.structure.details&&('years' in GROUP.structure.details))") is True, safe(pg, "()=>JSON.stringify(GROUP.structure)"))
+    click(pg, '[data-stdetail="bu|years"]')
+    ok("unticked it is stored OFF on that layer, so it stops following the client-wide switch",
+       safe(pg, "()=>GROUP.structure.bu.details.years===false") is True, safe(pg, "()=>JSON.stringify(GROUP.structure)"))
+    safe(pg, "()=>{delete GROUP.structure}")
     safe(pg, ON)
 
     print("\n3 · on: greyed, marked, and said")

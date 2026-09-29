@@ -465,7 +465,7 @@ function pptxUnitSlides(u, kicker){
     var code = (u.codePrefix || "") + (p.code || (pi + 1));
     /* §416: the plan download carries every direction — it is the plan —
        and names the years each runs in beside its code. */
-    var pk = kicker + " · " + code + (yearsOn() ? " · " + yearsTag(p) : "");
+    var pk = kicker + " · " + code + (yearsOn(p) ? " · " + yearsTag(p) : "");
     slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("measure","bu"),
       [5303520, 914400, 2346960, 2346960],
       [labelWord("measure","group"), "Dir.", "Target", "Compiles"],
@@ -479,14 +479,14 @@ function pptxUnitSlides(u, kicker){
         /* §415: what the tactic needs rides UNDER its name, as it does on
            the Plan page (Islam: "B, plan download only") — the review deck
            is about how the figures went and does not carry it. */
-        var rq = requirementsOn() ? reqsOf(t) : [];
-        return [rq.length ? { t:t.name, sub:"Requirements: " + rq.join("  \u00b7  ") } : t.name,
+        var rq = requirementsOn(t) ? reqsOf(t) : [];
+        return [rq.length ? { t:t.name, sub:detailWord("requirements", "many", t) + ": " + rq.join("  \u00b7  ") } : t.name,
                 orPend(t, "owner"),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       }),
       /* A slide with requirements on it holds fewer rows, or the taller
          rows run off the bottom of the slide. */
-      requirementsOn() && SMPRules.shown(p.tactics).some(function(t){ return reqsOf(t).length; })
+      requirementsOn(p) && SMPRules.shown(p.tactics).some(function(t){ return reqsOf(t).length; })
         ? 7 : undefined));
   });
   slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));

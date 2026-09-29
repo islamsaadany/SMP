@@ -146,8 +146,47 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
-/* §413: one of the Plan details switches (off unless explicitly on). */
-function planDetailOn(key){ return SMPRules.planDetailOn(GROUP, key); }
+/* §413: one of the Plan details switches (off unless explicitly on).
+   §420: asked about a SUBJECT, because each layer has its own switches —
+   `x` may be a target string, a unit or a unit-like view, or a pillar or
+   tactic, which is resolved to the subject that holds it. With nothing
+   given, the page being drawn (TARGET) is the subject. */
+function planDetailOn(key, x){ return SMPRules.planDetailOn(GROUP, key, planSubjectOf(x)); }
+/* §420: which subject a plan row belongs to. The pillars and tactics of every
+   unit, pillars function and pillars capability are indexed once per
+   synchronous task (a render walks thousands of rows and must not walk the
+   graph for each); the next task builds afresh, so a row added or moved is
+   never answered from a stale index. */
+var PLAN_IDX = null;
+function planIdx(){
+  if (PLAN_IDX) return PLAN_IDX;
+  var m = new Map();
+  var put = function(items, t){
+    (Array.isArray(items) ? items : []).forEach(function(p){
+      if (!p || typeof p !== "object") return;
+      m.set(p, t);
+      (Array.isArray(p.tactics) ? p.tactics : []).forEach(function(x){ if (x && typeof x === "object") m.set(x, t); });
+    });
+  };
+  try {
+    Object.keys(UNITS || {}).forEach(function(k){ if (UNITS[k]) { m.set(UNITS[k], k); put(UNITS[k].items, k); } });
+    Object.keys(FUNCTIONS || {}).forEach(function(k){ var f = FUNCTIONS[k]; if (f) { m.set(f, "fn:" + k); put(f.items, "fn:" + k); } });
+    ((GROUP && GROUP.capabilities) || []).forEach(function(c){ if (c) { m.set(c, "cap:" + c.id); put(c.items, "cap:" + c.id); } });
+  } catch (e) {}
+  PLAN_IDX = m;
+  (typeof queueMicrotask === "function" ? queueMicrotask : function(f){ Promise.resolve().then(f); })(function(){ PLAN_IDX = null; });
+  return m;
+}
+function planSubjectOf(x){
+  if (typeof x === "string") return x;
+  if (x && typeof x === "object") {
+    if (typeof x.ukey === "string") return x.ukey;
+    var t = planIdx().get(x);
+    if (t) return t;
+    if (Array.isArray(x.items) && x.items.length) { t = planIdx().get(x.items[0]); if (t) return t; }
+  }
+  return typeof TARGET !== "undefined" && TARGET ? TARGET : "group";
+}
 function templeOn(target){ return SMPRules.templeOn(GROUP, target); }
 function midExists(){ return SMPRules.midExists(GROUP, COMPANIES); }
 function structWritable(){
@@ -7126,13 +7165,13 @@ function outcomeOf(t){
    surface already asks `outcomeOf(t)` for that, and an extra is only ever
    added under a tactic that has one; an extra whose own target is still
    empty is owed (counted missing, below) and scores nothing yet. */
-function outcomesOn(){ return SMPRules.planDetailOn(GROUP, "outcomes"); }
+function outcomesOn(x){ return planDetailOn("outcomes", x); }
 /* §415 — A TACTIC'S REQUIREMENTS (RHI step 5): what it needs to happen —
    people, budget, a sign-off. Stored on the tactic as `reqs`, a list of short
    lines riding `tactics.extra` (no migration), DELETED when emptied (§50.6).
    Never scored, never asked for, never counted as missing: it is a note on
    the plan, not an obligation. Off HIDES and forgets nothing (§44). */
-function requirementsOn(){ return SMPRules.planDetailOn(GROUP, "requirements"); }
+function requirementsOn(x){ return planDetailOn("requirements", x); }
 function reqsParse(v){
   return (Array.isArray(v) ? v : String(v == null ? "" : v).split(/\r?\n/))
     .map(function(x){ return String(x == null ? "" : x).trim(); })
@@ -7152,13 +7191,16 @@ function setReqs(t, v){
    page, greyed, and is not asked, not owed and not scored: every reader that
    counts or averages walks `itemsNow(u)` rather than `u.items`. Off HIDES and
    forgets nothing (§44): with the switch off every direction runs. */
-function yearsOn(){ return SMPRules.planDetailOn(GROUP, "years"); }
+function yearsOn(x){ return planDetailOn("years", x); }
+/* §420: the yearly revision stays one for the whole client (the plan's year
+   is one number), so its control is drawn wherever ANY layer marks years. */
+function yearsAnyOn(){ return ["group", "co:", "u:", "fn:"].some(function(t){ return planDetailOn("years", t); }); }
 function planYear(){ return SMPRules.planYearOf(GROUP); }
 function pillarYears(p){ return SMPRules.pillarYears(p); }
-function runsNow(p){ return SMPRules.runsNow(GROUP, p); }
+function runsNow(p){ return SMPRules.runsNow(GROUP, p, planSubjectOf(p)); }
 function itemsNow(u){
   var it = (u && u.items) || [];
-  return yearsOn() ? it.filter(runsNow) : it;
+  return yearsOn(u) ? it.filter(runsNow) : it;
 }
 /* The calendar year a plan year stands for. The planning period is the
    CURRENT year's (§308, targets are this year's only), so Year k sits k minus
@@ -7229,7 +7271,7 @@ function startYearRevision(){
   return n;
 }
 function tacticExtras(t){
-  if (!t || !Array.isArray(t.outs) || !t.outs.length || !outcomesOn()) return [];
+  if (!t || !Array.isArray(t.outs) || !t.outs.length || !outcomesOn(t)) return [];
   return t.outs;
 }
 /* The extra as the measure-shaped thing `outcomeOf` reads — its figure taken

@@ -489,7 +489,7 @@ function deckSlides(u){
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
       (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') +
       /* §416: the years each direction runs in, and a later one says when. */
-      (yearsOn() ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
+      (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
       '</div>';
   }).join("");
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
@@ -563,7 +563,7 @@ function deckSlides(u){
        says the plan owes an answer nobody asked it for (§253, §45.2). The
        right-hand panel is READ from the direction's own tables, never typed a
        second time (§53.5). */
-    if (planDetailOn("overview") && ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); })) {
+    if (planDetailOn("overview", p) && ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); })) {
       var ovMs = SMPRules.shown(p.measures || []).slice(0, 5).map(function(m){
         return '<div class="row"><span>' + esc(m.name) + '</span><b>' + (m.target ? tgtShown(m.target) : '&mdash;') + '</b></div>';
       }).join("");
@@ -572,8 +572,8 @@ function deckSlides(u){
       }).join("");
       var ovRisks = String(p.ovRisk || "").split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
       S.push('<section class="dslide dovs"' +
-        anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — Overview") + '>' +
-        deckPillarHead(u, p, pi, "Overview") +
+        anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — " + detailWord("overview", "one", p)) + '>' +
+        deckPillarHead(u, p, pi, DW("overview", "one", p)) +
         '<div class="obody"><div>' +
           (String(p.ovObj || "").trim() ? '<div class="ok">Objective</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
           '<div class="two">' +
@@ -723,7 +723,7 @@ function deckSlides(u){
       anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
       deckPillarHead(u, p, pi, L("tactic")) +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
-      '<th>Outcome</th><th>Owner</th>' +
+      '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
       '<th>Collabs.</th>' +
       '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
       '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');

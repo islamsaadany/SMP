@@ -3981,14 +3981,30 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   /* Whether a direction runs in the year the plan stands in. With the switch
      off, every direction runs, whatever was stored (off hides and keeps). */
-  function runsNow(group, p) {
-    if (!planDetailOn(group, "years")) return true;
+  function runsNow(group, p, target) {
+    if (!planDetailOn(group, "years", target)) return true;
     return pillarYears(p).indexOf(planYearOf(group)) >= 0;
   }
-  function planDetailOn(group, key) {
-    var s = structureOf(group), d = s && s.details;
+  /* §420 — EACH LAYER HAS ITS OWN SWITCHES (Islam, 2026-09-29: *"every
+     layer or area like units and functions should have their separate
+     options and switches"*). A layer's own answer is `structure[level]
+     .details[key]`, a real true or false; a layer that has not been set on
+     its own takes the client-wide `structure.details` (§413), so a client
+     who turned a detail on before this keeps it on everywhere until a layer
+     says otherwise — nothing moves by upgrading. Only an explicit `true`
+     turns one on either way (§104's rule). The layer is the subject's
+     (structLevelOf): a capability follows its holding function's layer. */
+  function planDetailOn(group, key, target) {
+    var s = structureOf(group);
+    if (!s) return false;
+    var l = s[structLevelOf(target)], ld = l && l.details;
+    if (ld && typeof ld[key] === "boolean") return ld[key];
+    var d = s.details;
     return !!(d && d[key] === true);
   }
+  /* What each switch adds is a part with a name of its own, named per layer
+     like every other part (§418); years needs none. */
+  var DETAIL_NAMES = { overview: "overview", outcomes: "tacoutcome", requirements: "requirement" };
   function templeOn(group, target) {
     var level = structLevelOf(target);
     if (level !== "top" && level !== "mid") return false;
@@ -4078,7 +4094,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     strengths: ["Strength", "Strengths"], weaknesses: ["Weakness", "Weaknesses"],
     opportunities: ["Opportunity", "Opportunities"], threats: ["Threat", "Threats"],
     deliverable: ["Deliverable", "Deliverables"], outcome: ["Outcome", "Outcomes"],
-    milestone: ["Milestone", "Milestones"], action: ["Action", "Actions"]
+    milestone: ["Milestone", "Milestones"], action: ["Action", "Actions"],
+    overview: ["Overview", "Overviews"], tacoutcome: ["Outcome", "Outcomes"],
+    requirement: ["Requirement", "Requirements"]
   };
   var QUAD_KEYS = { s: "strengths", w: "weaknesses", o: "opportunities", t: "threats" };
   var SEC_FOUND_PARTS = ["brief", "purpose", "aspiration", "keyobj", "theme", "values"];
@@ -4602,7 +4620,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
     SETUP_DONE: SETUP_DONE, setupDone: setupDone,
     STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
-    PLAN_DETAILS: PLAN_DETAILS, planDetailOn: planDetailOn,
+    PLAN_DETAILS: PLAN_DETAILS, planDetailOn: planDetailOn, DETAIL_NAMES: DETAIL_NAMES,
     PLAN_YEAR: PLAN_YEAR, planYearOf: planYearOf, pillarYears: pillarYears, runsNow: runsNow,
     STRUCT_NEW_CLIENT: STRUCT_NEW_CLIENT, newClientStructure: newClientStructure,
     STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,

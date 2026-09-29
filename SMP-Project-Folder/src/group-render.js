@@ -495,16 +495,16 @@ function compileCell(c){
    is the only way to write the first one); read mode draws nothing when there
    is nothing (§15.1). */
 function reqsCell(t, ed){
-  if (!requirementsOn()) return "";
+  if (!requirementsOn(t)) return "";
   var a = reqsOf(t);
   if (ed) {
     var i = FIELDS.push(function(v){ setReqs(t, v); }) - 1;
-    return '<label class="reqbox"><span class="repkey">Requirements</span>' +
+    return '<label class="reqbox"><span class="repkey">' + DW("requirements", "many", t) + '</span>' +
       '<textarea class="fld reqfld" data-fld="' + i + '" rows="1" placeholder="One per line">' +
       esc(a.join("\n")) + '</textarea></label>';
   }
   if (!a.length) return "";
-  return '<span class="repnote reqnote"><span class="repkey">Requirements</span>' +
+  return '<span class="repnote reqnote"><span class="repkey">' + DW("requirements", "many", t) + '</span>' +
     '<ul class="reqs">' + a.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") +
     '</ul></span>';
 }
@@ -847,7 +847,7 @@ function outSubCls(t){ return SMPRules.isHidden(t) ? 'osub hiddenrow' : 'osub'; 
    tactic is measured by outcomes at all, so an extra added under one that is
    not would be stored and read by nothing (§61). */
 function outAddBtn(t){
-  if (!outcomesOn() || !outcomeOf(t)) return '';
+  if (!outcomesOn(t) || !outcomeOf(t)) return '';
   return '<button class="linkbu outadd" data-outadd="' + esc(t.id) + '">+ Add an outcome</button>';
 }
 function outOffBtn(t, id){
@@ -864,7 +864,7 @@ function planOutRows(t, ed, tdCls){
     var emptyName = !x.outcome || !String(x.outcome).trim();
     var emptyTgt = SMPRules.gapEmpty("outTarget", x);
     var name = ed
-      ? bxkey("Outcome") + otag(x.id) + outOffBtn(t, x.id) +
+      ? bxkey(detailWord("outcomes", "one", t)) + otag(x.id) + outOffBtn(t, x.id) +
         textOr("plan", x.outcome || "", emptyName ? "gapwalk" : "",
                function(v){ setOr(x, "outcome", v); }) +
         (last ? outAddBtn(t) : '')
@@ -963,7 +963,7 @@ function tacticRows(ts, unitKey){
   }).join("");
 }
 function tacticHead(){
-  return '<thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th><th>Outcome</th>' +
+  return '<thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th><th>' + DW("outcomes", "one") + '</th>' +
     '<th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
     /* §239: VARIANCE GOES -- the pair beside it already shows it, and the
        column was spending width to restate a subtraction. "Of plan" becomes
@@ -6172,7 +6172,7 @@ function renderReport(u){
            the page. It is a PLAN fact, so a row outside this cycle still shows
            its outcome — the cycle decides what is asked for, not what the plan
            says. */
-        miniTable(["#", L1("tactic"), "Outcome", "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
+        miniTable(["#", L1("tactic"), DW("outcomes", "one"), "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
           ts.map(function(x, i){
             /* §414: one line per outcome; the tactic, its owner, its
                quarters and its ONE note span them (the note is the tactic's,
@@ -8540,7 +8540,7 @@ function ownStateChip(target, list, word){
    marks' own shape (`qs`), because a year is the same kind of fact one scale
    up (§53.5). Nothing is drawn with the switch off. */
 function yearsMarks(it){
-  if (!yearsOn()) return "";
+  if (!yearsOn(it)) return "";
   var ys = pillarYears(it), now = planYear(), out = "";
   for (var y = 1; y <= 3; y++)
     out += '<i class="' + (ys.indexOf(y) >= 0 ? "on" : "") + (y === now ? " now" : "") +
@@ -8563,14 +8563,14 @@ function yearsEdit(ukey, it){
 }
 /* Why a direction is greyed, on its own pane, in words (§35). */
 function yearsLine(it){
-  if (!yearsOn() || runsNow(it)) return "";
+  if (!yearsOn(it) || runsNow(it)) return "";
   var ys = pillarYears(it);
   return '<div class="yrline">Runs in Year ' + ys.join(" and Year ") +
     '. It is not asked for in reporting and not scored until then.</div>';
 }
 /* The short tag in a rail row, and the greyed row's reason under it. */
 function yearsTagHtml(it){
-  return yearsOn() ? '<span class="yrtag">' + esc(yearsTag(it)) + '</span>' : "";
+  return yearsOn(it) ? '<span class="yrtag">' + esc(yearsTag(it)) + '</span>' : "";
 }
 function pillarBand(code, name, right, kind, cls){
   /* `cls` (§410) marks the PLAN pane's band, the one the approved restyle
@@ -8603,12 +8603,12 @@ function pillarBand(code, name, right, kind, cls){
 var DOV_OPEN = {};
 var DOV_FIELDS = [["ovObj", "Objective"], ["ovWhy", "Why now"], ["ovRisk", "Risks &amp; mitigations"]];
 function dirOverview(it, ed){
-  if (!planDetailOn("overview")) return "";
+  if (!planDetailOn("overview", it)) return "";
   var any = DOV_FIELDS.some(function(f){ return String(it[f[0]] || "").trim(); });
   if (!ed && !any) return "";
   var peek = String(it.ovObj || "").trim();
   return '<details class="dov" data-dov="' + esc(it.id) + '"' + (DOV_OPEN[it.id] ? ' open' : '') + '>' +
-    '<summary><span class="dovcar" aria-hidden="true"></span><span class="dovt">Overview</span>' +
+    '<summary><span class="dovcar" aria-hidden="true"></span><span class="dovt">' + DW("overview", "one", it) + '</span>' +
     (peek ? '<span class="dovpeek">' + esc(SMPRules.oneLine(peek)) + '</span>' : '') + '</summary>' +
     '<div class="dovw">' + DOV_FIELDS.map(function(f){
       var v = it[f[0]] || "";
@@ -8873,7 +8873,7 @@ function unitPlanBody(it, u, railed){
          definition and runs off the end — and it is a counted gap now, so the
          CONTROL is the hook's while the lifecycle, the red word and the walk
          mark stay gapCell's. §130.1's shape exactly, for its reason. */
-      '<td>' + (ed ? bxkey("Outcome") : '') + (nEx ? otag("O1") : '') +
+      '<td>' + (ed ? bxkey(detailWord("outcomes", "one", t)) : '') + (nEx ? otag("O1") : '') +
         gapCell("plan", "u_plan", t, "outcome", {
         /* §228.2: NAMING THE KIND IS WHAT KEEPS THE TWO LISTS ONE. Without
            it the cell opens to a filler whatever the shared list says, so a
@@ -9047,7 +9047,7 @@ function unitPlanBody(it, u, railed){
                      function(v){ it.kind = v; }) +
           '</div></div>' +
           /* §416: the years it runs in, beside the owner and the kind. */
-          (yearsOn() ? '<div class="pfrow"><em>Runs in</em><div class="pfval">' +
+          (yearsOn(it) ? '<div class="pfrow"><em>Runs in</em><div class="pfval">' +
             yearsEdit(u.ukey, it) + '</div></div>' : '') +
         '</div></div>'
       : '') +
@@ -9115,7 +9115,7 @@ function unitPlanBody(it, u, railed){
        haeders"*. `fold` is read here, where the row builder read it, so the
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
-    miniTable(["#",L1("tactic"),"Outcome",{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
+    miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
       tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
       sortAttr("tactics"), "tactable");

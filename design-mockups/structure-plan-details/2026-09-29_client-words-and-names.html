@@ -24,6 +24,7 @@ main{max-width:1400px;margin:0 auto;padding:16px}
 .fld{width:100%;border:1px solid var(--line);border-radius:4px;padding:4px 7px;background:var(--surface);color:var(--ink);font:inherit;font-size:12.5px}
 .new{background:var(--new);outline:1px dashed var(--newline);border-radius:4px;padding:4px 6px;margin:2px -6px}
 .why{font-size:11.5px;color:var(--ink-3);grid-column:1/-1;margin-top:-2px}
+.phead3,.part3{display:grid;grid-template-columns:24px 130px 1fr 1fr;gap:8px;align-items:center}.phead3 span{font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}.part3{padding:4px 0}.part3 .nm{font-size:13px}.part3.off .nm{color:var(--ink-3)}.tk{width:20px;height:20px;border:1.5px solid var(--line);border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;background:var(--surface)}.tk.on{background:var(--navy);border-color:var(--navy);color:#fff}.offw{font-size:12px;color:var(--ink-3);font-style:italic}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12.5px;background:var(--surface);color:var(--ink)}
 .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -35,7 +36,7 @@ main{max-width:1400px;margin:0 auto;padding:16px}
 <header><h1>Structure page — the other branch's parts, in the client's words</h1>
 <p>Setup › Client set-up › Structure · example client calls pillars <b>Themes</b> and tactics <b>Actions</b></p></header>
 <main>
-<div class="q"><b>Two changes, both on the Structure step.</b> 1) The Plan details switches say the client's own words. 2) When a switch is on, the part it adds appears in each layer's Plan section with its own one/many name boxes, like every other part. Yellow dashed = new.</div>
+<div class="q"><b>Round 2, from your answer: every layer has its own switches.</b> The four extra details (overview, several outcomes, requirements, years) move into each layer's Plan section as ticked rows with name boxes, like every other part. Business units and functions can differ. Yellow dashed = new.</div>
 
 <div class="pair">
  <div class="col"><h2>Today</h2>
@@ -55,33 +56,40 @@ main{max-width:1400px;margin:0 auto;padding:16px}
   </div>
  </div>
 
- <div class="col"><h2>Proposed</h2>
+ <div class="col"><h2>Proposed — each layer has its own switches</h2>
   <div class="card"><span class="tag">Business units</span>
    <div class="sec"><div class="sech"><span class="kind">Plan section</span><span class="fixed">Always on</span></div>
     <p class="lab">Parts · Pillars</p>
-    <div class="phead"><span>Part</span><span>One</span><span>Many</span></div>
-    <div class="part"><span class="nm">Pillar</span><input class="fld" value="Theme"><input class="fld" value="Themes"></div>
-    <div class="part new"><span class="nm">Overview</span><input class="fld" value="Theme overview"><input class="fld" value="Theme overviews"><span class="why">Shown because Plan details › Theme overview is on</span></div>
-    <div class="part"><span class="nm">Key measure</span><input class="fld" value="Key measure"><input class="fld" value="Key measures"></div>
-    <div class="part"><span class="nm">Tactic</span><input class="fld" value="Action"><input class="fld" value="Actions"></div>
-    <div class="part new"><span class="nm">Outcome</span><input class="fld" value="Outcome"><input class="fld" value="Outcomes"><span class="why">Shown because Plan details › Several outcomes per Action is on</span></div>
-    <div class="part new"><span class="nm">Requirement</span><input class="fld" value="Requirement"><input class="fld" value="Requirements"><span class="why">Shown because Plan details › Action requirements is on</span></div>
+    <div class="phead3"><span></span><span>Part</span><span>One</span><span>Many</span></div>
+    <div class="part3"><span class="tk on">&#10003;</span><span class="nm">Pillar</span><input class="fld" value="Theme"><input class="fld" value="Themes"></div>
+    <div class="part3"><span class="tk on">&#10003;</span><span class="nm">Key measure</span><input class="fld" value="Key measure"><input class="fld" value="Key measures"></div>
+    <div class="part3"><span class="tk on">&#10003;</span><span class="nm">Tactic</span><input class="fld" value="Action"><input class="fld" value="Actions"></div>
+    <p class="lab">Extra details</p>
+    <div class="part3 new"><span class="tk on">&#10003;</span><span class="nm">Overview</span><input class="fld" value="Theme overview"><input class="fld" value="Theme overviews"></div>
+    <div class="part3 new"><span class="tk on">&#10003;</span><span class="nm">Several outcomes</span><input class="fld" value="Outcome"><input class="fld" value="Outcomes"></div>
+    <div class="part3 new off"><span class="tk"></span><span class="nm">Requirements</span><span class="offw">Off for business units</span><span></span></div>
+    <div class="part3 new"><span class="tk on">&#10003;</span><span class="nm">Years 1 · 2 · 3</span><span class="offw" style="grid-column:3/5">No names needed</span></div>
    </div>
   </div>
-  <div class="card"><span class="tag">Plan details</span>
-   <p class="lab">What a <span>Theme</span> and its <span>Actions</span> carry</p>
-   <div class="chips"><span class="chip on"><span class="w">Theme</span> overview</span><span class="chip on">Several outcomes per <span class="w">Action</span></span><span class="chip on"><span class="w">Action</span> requirements</span><span class="chip">Years 1 · 2 · 3</span></div>
-   <p class="note">Underlined words come from the business units' names above; change "Theme" there and these change with it.</p>
+  <div class="card"><span class="tag">Supporting functions</span>
+   <div class="sec"><div class="sech"><span class="kind">Plan section</span><span class="fixed">Always on</span></div>
+    <p class="lab">Extra details</p>
+    <div class="part3 new off"><span class="tk"></span><span class="nm">Overview</span><span class="offw">Off for functions</span><span></span></div>
+    <div class="part3 new off"><span class="tk"></span><span class="nm">Several outcomes</span><span class="offw">Off for functions</span><span></span></div>
+    <div class="part3 new"><span class="tk on">&#10003;</span><span class="nm">Requirements</span><input class="fld" value="Requirement"><input class="fld" value="Requirements"></div>
+    <div class="part3 new off"><span class="tk"></span><span class="nm">Years 1 · 2 · 3</span><span class="offw">Off for functions</span><span></span></div>
+   </div>
   </div>
+  <p class="note">The same four switches sit in the Plan section of the top level and the second layer too. The separate <b>Plan details</b> card at the bottom goes away.</p>
  </div>
 </div>
 
 <div class="cost"><b>What it costs and what it touches</b>
 <ul>
-<li>The switches stay client-wide; the names are per layer, like every other part. The chip words follow the <b>business units</b> layer, because that is where most plans live.</li>
-<li>The same three new rows appear on the top level, second layer and functions cards too, each with its own names.</li>
-<li>With a switch off, its row is not drawn here and nothing typed is lost.</li>
-<li>The names then reach the plan page, reporting, the deck and the workbook headings through the same word reader as every other part.</li>
-<li>No database change: the names sit in the same place as the other part names.</li>
+<li><b>Nothing a client has switched on today moves.</b> A layer that has not been set on its own takes the client-wide choice made before, so the client who turned these on keeps them on everywhere until you change a layer.</li>
+<li><b>Years:</b> the switch decides whether a layer's directions are marked Year 1 · 2 · 3. The plan's current year and the yearly revision stay one for the whole client, because the revision moves everybody's year at once.</li>
+<li><b>A capability follows the layer of the function that holds it.</b></li>
+<li>Off hides and never deletes; turning it back on brings what was written back.</li>
+<li>Every page that shows these (the plan page, reporting, the deck, the plan download, the workbook) has to ask about the layer it is on, so this is a real piece of building rather than a relabel. No database change.</li>
 </ul></div>
 </main></body></html>

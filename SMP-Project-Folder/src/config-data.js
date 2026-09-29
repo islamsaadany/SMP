@@ -8281,7 +8281,7 @@ function addBdRow(p){
    the press carries a row id and nothing else, and an address the caller
    assembles is a second copy of where the row lives (§48). */
 function bdTidyById(id){
-  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+  pillarHolderTargets().forEach(function(t){
     var u = unitLike(t);
     ((u && u.items) || []).forEach(function(it){
       if (String(id).indexOf(it.id + "-B") === 0) bdTidy(it);
@@ -8493,7 +8493,7 @@ function hideableById(id){
      — a row that cannot be found by id is a figure typed and silently lost,
      which is the fault this scanner exists to prevent. */
   eachHolder(function(h){ scan(h.keyObjectives); });
-  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+  pillarHolderTargets().forEach(function(t){
     var u = unitLike(t);
     if (!u) return;
     scan(u.keyObjectives);
@@ -8503,13 +8503,25 @@ function hideableById(id){
   return hit;
 }
 
+/* §411: EVERY SUBJECT THAT HOLDS PILLARS, NOT TWO KINDS OF IT. §334 gave a
+   capability planned in pillars the unit's own pages, and this walk went on
+   asking units and functions alone — so on such a capability a quarter
+   pressed, a tactic or measure removed, or a breakdown row removed found no
+   list and did nothing, for everybody (§96's family, one resolver short). */
+function pillarHolderTargets(){
+  return UNIT_KEYS
+    .concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; }))
+    .concat((GROUP.capabilities || []).filter(function(c){
+      return c && capPlansInPillars(c);
+    }).map(function(c){ return "cap:" + c.id; }));
+}
 function listById(kind, id){
   var out = null;
   var look = function(list){
     if (!out && list && list.some(function(x){ return x && x.id === id; })) out = list;
   };
   if (kind === "measures" || kind === "tactics") {
-    UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    pillarHolderTargets().forEach(function(t){
       var u = unitLike(t);
       ((u && u.items) || []).forEach(function(it){ look(it[kind]); });
     });
@@ -8523,7 +8535,7 @@ function listById(kind, id){
      would answer null and `removeRowById(null, id)` is a press that does
      nothing (§96's family, §342's own note one list over). */
   if (kind === "breakdown") {
-    UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    pillarHolderTargets().forEach(function(t){
       var u = unitLike(t);
       ((u && u.items) || []).forEach(function(it){ look(SMPRules.bdRows(it)); });
     });

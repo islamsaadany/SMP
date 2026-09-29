@@ -9876,6 +9876,11 @@ python3 checks/rail-standard.py # one item still gets the rail, on a unit AND a 
 # which reads like a failure in a summary and is not one — `pip install pillow`.
 # band-corner.py argues the other way in its own docstring and unfilters the PNG
 # by hand; not reconciled, and said rather than left to be rediscovered.
+python3 checks/capability-pillar-edit.py # a capability planned in pillars can be
+                                # EDITED (§411): the quarter buttons, the hide eye and
+                                # removing a tactic PRESSED and the stored plan read back,
+                                # the state MADE (§255), Mobile asserted beside it. 3 red
+                                # on the build before
 python3 checks/structure.py     # the client's structure (&sect;404): Setup &rsaquo; Structure's
                                 # boxes pressed and read back, one adjustment stored and
                                 # deleted again, off HIDING a SWOT section and its slides
@@ -10636,7 +10641,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-24 — **§410: the plan page restyled, a quieter top bar, and the typeface switch gone.** Islam: *"drop the system button and build both"*, from the signed-off round-12 mockup. The top bar is 40px on the platform's own sizes with the viewer moved right; the per-screen typeface switch is removed and a remembered face forgotten (§41.6's reasoning) — and at the merge main's §402 decides the face: Source Sans 3 for everybody (§410.1). On the Plan page the pillar rail is equal-size rounded cards above 1200px (a floor, not a height), the kind rides beside the code in detail mode, the owner leaves the plan rail, the pillar band loses its gold edge and carries the kind as a tag on the right, and Key measures/Tactics show counts with a rule between. `pillar-kind.py` rewritten, never loosened. **Merged to `main` 2026-09-24 on Islam's word**, with main's §399–§404 and §405–§405.1 brought in first; built as §405–§407 and renumbered §408–§410 because main took §405.*
+*Last Updated: 2026-09-29 — **§411: a capability planned in pillars can be edited like a unit's plan.** The quarter buttons, the hide eye and removing a tactic, a measure or a breakdown row did nothing there for anybody, because `listById()` and two siblings walked units and functions only; one `pillarHolderTargets()` answers all four now. On the branch, not merged.*
+
+*Earlier: 2026-09-24 — **§410: the plan page restyled, a quieter top bar, and the typeface switch gone.** Islam: *"drop the system button and build both"*, from the signed-off round-12 mockup. The top bar is 40px on the platform's own sizes with the viewer moved right; the per-screen typeface switch is removed and a remembered face forgotten (§41.6's reasoning) — and at the merge main's §402 decides the face: Source Sans 3 for everybody (§410.1). On the Plan page the pillar rail is equal-size rounded cards above 1200px (a floor, not a height), the kind rides beside the code in detail mode, the owner leaves the plan rail, the pillar band loses its gold edge and carries the kind as a tag on the right, and Key measures/Tactics show counts with a rule between. `pillar-kind.py` rewritten, never loosened. **Merged to `main` 2026-09-24 on Islam's word**, with main's §399–§404 and §405–§405.1 brought in first; built as §405–§407 and renumbered §408–§410 because main took §405.*
 
 *Earlier: 2026-09-24 — **§409.3: the section switch is squared.** Islam picked A of three drawn: the Foundation · SWOT · Drivers · Plan box takes Reporting's 6px corner and each segment a 4px one; nothing else moves. Asserted in `checks/tab-row.py` as the box agreeing with Reporting. On the branch, not merged.*
 

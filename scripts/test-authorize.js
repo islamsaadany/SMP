@@ -5062,5 +5062,46 @@ console.log("\n§416 · years 1 · 2 · 3");
   check("§416: the plan's year classifies once, as the cycle", kinds.length === 1 && kinds[0] === "cycle", kinds.join(","));
 })();
 
+/* ── §418–§422: EVERY STRUCTURE SWITCH IS THE OFFICE'S ────────────────────
+   Islam, 2026-09-29: *"make sure … the turning on and off of options is the
+   smo role not to confuse the clients with extra data later."* Every switch
+   and name built on the Structure step this week, one at a time: the Super
+   user and the SMO team may set it; a unit's owner, its custodian, a
+   function's head and the group CEO may not. BOTH ENDS each (§94.2), and each
+   asserted to classify as Setup and nothing else, so a widening shows. */
+console.log("\n§418–§422 · every structure switch is the office's");
+(function () {
+  const B = clone(SEED); delete B.group[R.STRUCTURE];
+  B.people = B.people.concat([{ key: "t422_team", name: "Testcase Office Two", role: "smoteam", unit: "group" }]);
+  const FK = Object.keys(B.functions).filter(function (k) { return B.functions[k].head; })[0];
+  const outsiders = ["mobhead", "own_mob", B.functions[FK].head, "ceo"];
+  const SW = {
+    "the plan section off (§422)":            { bu: { plan: { on: false } } },
+    "the first section off (§418)":           { fn: { found: { on: false } } },
+    "a section's title (§418)":               { bu: { plan: { pillars: "Roadmap" } } },
+    "the SWOT's boxes (§418)":                { fn: { swot: { quads: ["s"] } } },
+    "a layer's own name for a part (§418)":   { bu: { words: { pillar: { one: "Theme", many: "Themes" } } } },
+    "an overview area's name (§422)":         { bu: { words: { ovwhy: { one: "Why this matters" } } } },
+    "a layer's extra detail (§420)":          { fn: { details: { requirements: true } } },
+    "the functions' layer off (§418)":        { fn: { exists: false } },
+    "a component off (§404)":                 { fn: { on: ["purpose", "keyobj"] } }
+  };
+  Object.keys(SW).forEach(function (what) {
+    const inc = clone(B); inc.group[R.STRUCTURE] = SW[what];
+    const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+    check("§422: " + what + " classifies as Setup and nothing else",
+          kinds.length > 0 && kinds.every(function (k) { return k === "setup"; }), kinds.join(",") || "(INVISIBLE)");
+    ["smo", "t422_team"].forEach(function (who) {
+      const v = A.authorize(B, inc, personOf(B, who));
+      check("§422: the office (" + who + ") may set " + what, v.ok, (v.refusals || []).join(" / "));
+    });
+    outsiders.forEach(function (who) {
+      if (!personOf(B, who)) { check("§422: fixture person " + who + " exists", false, "missing"); return; }
+      const v = A.authorize(B, inc, personOf(B, who));
+      check("§422 REFUSED: " + who + " may not set " + what, !v.ok, "was ALLOWED");
+    });
+  });
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

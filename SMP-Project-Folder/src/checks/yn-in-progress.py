@@ -139,7 +139,7 @@ with sync_playwright() as pw:
       shown: [SMPRules.ynShown('In progress 60'), SMPRules.ynShown('Yes'),
               SMPRules.ynShown('No'), SMPRules.ynShown('')]
     })""")
-    # §411: REWRITTEN, never loosened (§218). RHI's words replaced §300's
+    # §419: REWRITTEN, never loosened (§218). RHI's words replaced §300's
     # "Done" on the SCREEN with "Completed"; what is STORED is still "Done"
     # (asserted in §6 below), so this asserts the drawn words and that the
     # tactic's own Status column speaks the same vocabulary -- one set of

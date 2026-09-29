@@ -1588,7 +1588,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      nothing for a partial to be measured against, so it is not scored — the
      same answer §276 gives a Count that owes nothing yet, and the reason a
      December agreement sitting at 10% in Q2 does not mark its unit down. */
-  /* §411: WHAT IS STORED AND WHAT IS SAID PART HERE. RHI's word for a
+  /* §419: WHAT IS STORED AND WHAT IS SAID PART HERE. RHI's word for a
      finished row is "Completed", platform-wide, and it is the SHOWN word
      only -- `ynJoin` still writes "Done", so a tab on the previous build, a
      workbook downloaded last month and every closed cycle read exactly as

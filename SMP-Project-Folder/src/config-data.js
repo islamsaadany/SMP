@@ -7465,7 +7465,7 @@ function tacticPlanned(t){
    and averaging a zero into execution would say otherwise. */
 function tacticDue(t){ return tacticPlanned(t) > 0; }
 
-/* ── THE WORD A TACTIC'S STATUS SAYS (§411, RHI) ──────────────────────
+/* ── THE WORD A TACTIC'S STATUS SAYS (§419, RHI) ──────────────────────
    Islam, fitting the platform to RHI: their words, platform-wide --
    Completed · In progress · Delayed · Not due, and Not started at 0%.
    Delayed and Not due are the platform's to say, never somebody's to pick.

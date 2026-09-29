@@ -58058,7 +58058,7 @@ Islam: *"fix the four red checks from main."* Each was established as red on `or
 
 **Merged to `main` 2026-09-24 on Islam's word** (*"merge to main"*), a clean fast-forward — `main` had not moved — carried by this record line so `main` holds a commit the branch does not (§91). Verified before: `qa.py` ERRORS none, `built-in-step` all good, `generated-in-step` all clear, and the thirteen register and rewritten checks green. `sw.js` SHELL `v5.50-register-dialog`, confirmed unique against `origin/main` immediately before the push (§94.16). Screen and checks only — no `api/`, `lib/` or `db/` file — so no forced sign-out is owed (spec 029).
 
-## §411 — a tactic's status is RHI's words, and the platform picks them (2026-09-24)
+## §419 — a tactic's status is RHI's words, and the platform picks them (2026-09-24)
 
 Islam, fitting SMP to RHI, whose status words are *Completed · In progress ·
 Delayed · Not due*: *"let's use their words and yes the platform does it
@@ -58149,10 +58149,10 @@ capabilities are held by functions and carry no seat of their own, so nothing
 moves until the office names one.
 
 
-### §411.1 — "Not due" is said once
+### §419.1 — "Not due" is said once
 
 Islam: *"remove the not yet due."* A tactic that is not due said **Not due** in its
-Status column (§411) and **Not yet due** in the two cells beside it, so one fact was
+Status column (§419) and **Not yet due** in the two cells beside it, so one fact was
 drawn twice on one row (§87's twins). The Status column keeps the word, and the two
 cells are left empty. The workbook's legend line is a different surface and does not
 change. This is screen only: nothing is stored or migrated. `checks/tactic-status-words.py`

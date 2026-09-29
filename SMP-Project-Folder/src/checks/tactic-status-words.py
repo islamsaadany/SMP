@@ -1,4 +1,4 @@
-"""§411: a tactic's status is RHI's words, and the platform picks them.
+"""§419: a tactic's status is RHI's words, and the platform picks them.
 
 Islam, fitting the platform to RHI: Completed · In progress · Delayed ·
 Not due, and Not started at 0% -- with Delayed and Not due set by the
@@ -99,7 +99,7 @@ with sync_playwright() as pw:
     stored = [w["stored"] for w in rows.get("want", [])] if isinstance(rows, dict) else []
     ck("what is STORED is the old spelling, untouched", set(stored) <= {"WIP", "Done", "Not started", "Blocked"} and "WIP" in stored, set(stored))
 
-    print("── 3 · a tactic that is not due says so once (§411.1)")
+    print("── 3 · a tactic that is not due says so once (§419.1)")
     nd = ev(pg, """() => {
       const p = UNITS['mobile'].items.find(x => (x.tactics||[]).length) , t = p.tactics[0];
       window.__k = JSON.stringify(t);

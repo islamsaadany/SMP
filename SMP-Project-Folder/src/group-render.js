@@ -902,7 +902,7 @@ function tacticRows(ts, unitKey){
     var benchPair = oc && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
-    /* §411: the word is derived, never read off `t.status` (RHI's words). */
+    /* §419: the word is derived, never read off `t.status` (RHI's words). */
     var sk = tacticStatusKey(t);
     var status = '<span class="pill ' + ({done:"good", wip:"warn", late:"bad", notdue:"kind", todo:"none"})[sk] +
                  '">' + esc(TACTIC_WORDS[sk]) + '</span>';
@@ -913,7 +913,7 @@ function tacticRows(ts, unitKey){
        cell has always printed "due at 50%" WITH the sign in its unreported
        state, so one cell spelt one unit two ways. */
     var tail = !due
-      /* §411.1: Status already says "Not due"; the second pill said it twice. */
+      /* §419.1: Status already says "Not due"; the second pill said it twice. */
       ? '<td class="cc" colspan="2"></td>'
       : !tacticAnswered(t)
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +

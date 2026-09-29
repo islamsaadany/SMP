@@ -8207,3 +8207,10 @@ Each business unit now picks how it plans — **Pillars**, **Projects**, or **Ob
 
 A unit that plans in projects or in objectives and actions now shows its aspiration and its SWOT in its presentation. The guided plan builder builds that unit's projects or actions, names their gaps rather than the hidden pillars', and asks how a new unit plans. Clear plan on such a unit was clearing the hidden pillars and leaving the projects standing; it clears what the unit shows now, keeps what it hid, and can be restored. An amount comes back from a download and upload spelled exactly as it went, whether it was written 4.5B EGP or 11 M EGP; only a brand-new row takes the tight spelling. A new permanent check covers all of it, and twelve checks that had been failing for other rounds' reasons (mostly the client's own words replacing old fixed ones) are repaired. Every pillars unit's presentation, builder and gaps are measured unchanged, and nobody's access moved.
 
+## §412.1 — the Structure step keeps what it does not draw (2026-09-29)
+Checked the branch about to merge (`claude/exciting-bardeen-szm6n3`) against the
+Structure work. One clash: both change the same save routine, and each side on
+its own would wipe the other's settings. Fixed here so any extra setting stored
+beside the layers survives a press. All checks from both branches pass on a
+trial merge. On the branch, not merged.
+

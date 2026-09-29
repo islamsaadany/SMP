@@ -179,6 +179,17 @@ with sync_playwright() as p:
        safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.length===9 && GROUP.structure.top.temple===true") is True, st)
     ck("…and the section says it is hidden rather than drawing its boxes",
        safe(pg, "()=>{var s=document.querySelectorAll('.stcard')[2].querySelectorAll('.stsec')[1]; return !!s.querySelector('.sthid') && !s.querySelector('.stquad')}") is True)
+    # §412.1: a key this step does not draw survives a press (another
+    # session's Plan details switches ride the same object). BOTH ENDS: it
+    # is there before the press and still there after.
+    safe(pg, "()=>{GROUP.structure.details={overview:true}}")
+    ck("a key the step does not draw is there before a press", safe(pg, "()=>GROUP.structure.details.overview") is True)
+    press(pg, '[data-stsec="bu|swot"] button:nth-child(1)')
+    ck("…and survives the press (§412.1)", safe(pg, "()=>!!(GROUP.structure.details&&GROUP.structure.details.overview===true)") is True,
+       safe(pg, "()=>JSON.stringify(GROUP.structure.details)"))
+    ck("…while the press itself landed", safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')>=0") is True)
+    safe(pg, "()=>{delete GROUP.structure.details}")
+    press(pg, '[data-stsec="bu|swot"] button:nth-child(2)')
     ck("the structure stores no functions' plan type (§404.2)",
        safe(pg, "()=>!('format' in (GROUP.structure.fn||{}))") is True)
 

@@ -1311,14 +1311,8 @@ var CLIENTSETUP = (function () {
        or pressing one tick would throw every name on the step away. */
     var copy = function (k) { var l = st && st[k]; return l && typeof l === "object" ? JSON.parse(JSON.stringify(l)) : {}; };
     var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
-    /* §412.1: AND EVERY OTHER KEY THE STRUCTURE HOLDS RIDES ACROSS TOO. A
-       press here writes the whole object back, so a key this step does not
-       draw -- another session's switches beside the levels -- would be
-       dropped by the first tick. Start from the stored whole, then overwrite
-       what this step owns, so there is no list of keys to keep (§104.7). */
-    var out = st && typeof st === "object" ? JSON.parse(JSON.stringify(st)) : {};
-    out.top = copy("top"); out.mid = copy("mid"); out.bu = copy("bu"); out.fn = copy("fn");
-    out.over = (st && st.over) || {};
+    var out = { top: copy("top"), mid: copy("mid"), bu: copy("bu"), fn: copy("fn"),
+                over: (st && st.over) || {} };
     out.top.on = lv("top"); out.top.temple = st && st.top ? st.top.temple === true : true;
     out.mid.exists = SMPRules.midExists(GROUP, COMPANIES); out.mid.on = lv("mid");
     out.mid.temple = !!(st && st.mid && st.mid.temple === true);

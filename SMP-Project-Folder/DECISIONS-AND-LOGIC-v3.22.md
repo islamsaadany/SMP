@@ -58086,3 +58086,33 @@ Islam, answering §411.4: *"structure things the way we already build them … 3
 **§412.5 — WHAT IS NOT CHANGED, STATED.** Workbook column headings keep the platform's words (they are a contract, §22, §65). A page that lists another layer's items (the group listing units) uses the page's own layer. The deck's project, deliverable and milestone headings keep the client's word. The old `pillar` component has no tick on this step any more (the plan section is always on); a stored value is kept and still read where §405 used it.
 
 **§412.6 — CHECKS.** `checks/structure.py` §5–§6 REWRITTEN for the three-section shape, never loosened (§218): every layer's parts asserted as agreement with the rule's list, three sections per layer, three ways on units and functions and one above them, a pillar name landing on the units' layer and read on a unit's page while a function's page keeps the client's word. New `checks/structure-sections.py` (29 assertions) measures the pages at both ends, unit and function side by side: first section off, titles, S&W boxes, names per layer, Setup unaffected, the functions' layer off. Falsified from the sources: `foundOn` always on **1 red**, `fnExists` always true **1 red**, a unit's SWOT forced to four **2 red**, layer words ignored **3 red**; rebuilt byte-identical after. `checks/client-setup.py` REWRITTEN for the per-layer part names. `qa.py` ERRORS none; nineteen neighbouring checks green; authoriser 763/0, differ 140/0.
+
+### §412.1 — The Structure step keeps every key it does not draw (2026-09-29)
+
+Islam asked for a check of `claude/exciting-bardeen-szm6n3` before it merges,
+for what it does to the Structure work. **One real clash, found by a trial
+merge in a scratch copy** (nothing pushed): that branch stores four *Plan
+details* switches (Direction overview, several outcomes per tactic, tactic
+requirements, Years 1·2·3) on the SAME object as §412 — `GROUP.structure.details`
+— and both sides rewrote `structNow()`, the function every press on the step
+writes back through. Taken either way alone the merge loses something: ours
+drops the switches on the first tick, theirs drops every section title,
+name and on/off §412 stores. **The fix is on this branch and is general, not a
+line for their key**: `structNow()` starts from a copy of the whole stored
+structure and overwrites only what the step owns, so any key another feature
+puts beside the levels rides across a press — no list to keep (§104.7). When
+the two meet, the resolution is simply this branch's version.
+
+**Measured on the merged copy**: `structure`, `structure-sections`,
+`client-setup` and all six of that branch's new checks (`direction-overview`,
+`several-outcomes`, `tactic-requirements`, `years`, `capability-seats`,
+`tactic-status-words`) and main's `capability-pillar-edit` green; driven in the
+browser, a switch then a SWOT press then a renamed word then a second switch —
+every value kept both ways. Their new screen words go through the client's
+words (`L()`), so §395 and §412's per-layer names reach them. `checks/structure.py`
+gains the assertion both ends; **1 red** with the old start put back, from the
+sources (§276). **Recorded, not decided (Islam's)**: their *Plan details* card
+is client-wide while §412 made everything per layer; and **§411 is claimed three
+times** (main, this branch, theirs) and §412 twice — the renumber is owed at each
+merge, scoped to that branch's own lines (§264.3).
+

@@ -10481,7 +10481,7 @@ body.presenting #buildband { display:none; }
 .csetup .sttemple { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .csetup .sttemple .wzwhy { margin:0; }
 
-/* §412: a layer's three sections, from the signed-off mockup
+/* §418: a layer's three sections, from the signed-off mockup
    (design-mockups/structure-sections/). Side by side, stacked below 980px. */
 .csetup .wzcol.wzwide { max-width:1240px; }
 .csetup .stsecs { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line);

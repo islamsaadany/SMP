@@ -258,7 +258,7 @@ function unitAimSlides(u){
 function unitSwotSlides(u){
   var S = [];
   if (!u.fnKey && compOn(u.ukey, "swot")) {
-    /* §412: the boxes this layer carries, under the layer's own names. */
+    /* §418: the boxes this layer carries, under the layer's own names. */
     var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
     var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
       return [q, LTraw(u.ukey, SMPRules.QUAD_KEYS[q]), hues[q]]; });
@@ -807,7 +807,7 @@ function deckPillarHead(u, p, pi, which){
 function fnSWSlide(f){
   if (!f) return "";
   var sw = f.swot || {};
-  /* §412: which boxes, what they are called and what the slide is called are
+  /* §418: which boxes, what they are called and what the slide is called are
      the functions layer's (Structure); unset, it is today's two. */
   var fk = Object.keys(FUNCTIONS).filter(function(k){ return FUNCTIONS[k] === f; })[0] || "";
   var tg = "fn:" + fk, hues = { s:"good", w:"bad", o:"stone", t:"warn" };

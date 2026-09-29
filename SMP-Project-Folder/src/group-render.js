@@ -5099,7 +5099,7 @@ function swotBoxes(u, quads, page, ac){
      tablet meant `visibility:hidden` until the box itself happened to be
      tapped — §70's own finding, fixed for the plan PANE in August and left on
      the cards. */
-  /* §412: each box is named by its layer (Structure), the platform's word
+  /* §418: each box is named by its layer (Structure), the platform's word
      otherwise; which boxes are drawn is the layer's too (swotQuads). */
   return '<div class="swot">' +
     quads.map(function(q){ return box(q, q, L(SMPRules.QUAD_KEYS[q])); }).join("") + '</div>';
@@ -6612,7 +6612,7 @@ function splitOrPane(list, sel, rail, pane){
    THE DIRECTION IS "=", NOT ">=". With a target of Y/N there is nothing to be
    greater than, and a blank cell would put back the one thing this merge
    removed. "= Y/N" is what the row actually says. */
-/* §412: named by the layer being drawn (Structure's plan section), so it
+/* §418: named by the layer being drawn (Structure's plan section), so it
    is asked when the pane is built rather than fixed at load. */
 function dxHeading(){ return L("deliverable") + " and " + L("outcome").toLowerCase(); }
 /* ── WHAT THE SCORE COLUMN IS CALLED (§104.9) ─────────────────────────

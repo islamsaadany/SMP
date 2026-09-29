@@ -3927,7 +3927,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (m && typeof m.exists === "boolean") return m.exists;
     return Object.keys(companies || {}).length > 0;
   }
-  /* ── A LAYER'S THREE SECTIONS (§412) ───────────────────────────────
+  /* ── A LAYER'S THREE SECTIONS (§418) ───────────────────────────────
      Islam: *"we structure things the way we already build them … 3 sections
      and under each section he has components and for every section he can
      choose the title of the section and the components and their names"*,
@@ -3987,7 +3987,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return t;
   }
   /* A name for THIS layer, or null for "use the client's own word" (LABELS,
-     Setup › Terminology), which is what every layer answered before §412. */
+     Setup › Terminology), which is what every layer answered before §418. */
   function layerWord(group, target, key, form) {
     var b = levelBlock(group, structLevelOf(target), "words");
     var w = b && b[key];

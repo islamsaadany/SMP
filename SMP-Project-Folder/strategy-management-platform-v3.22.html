@@ -10491,7 +10491,7 @@ body.presenting #buildband { display:none; }
 .csetup .sttemple { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .csetup .sttemple .wzwhy { margin:0; }
 
-/* §412: a layer's three sections, from the signed-off mockup
+/* §418: a layer's three sections, from the signed-off mockup
    (design-mockups/structure-sections/). Side by side, stacked below 980px. */
 .csetup .wzcol.wzwide { max-width:1240px; }
 .csetup .stsecs { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line);
@@ -14906,7 +14906,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (m && typeof m.exists === "boolean") return m.exists;
     return Object.keys(companies || {}).length > 0;
   }
-  /* ── A LAYER'S THREE SECTIONS (§412) ───────────────────────────────
+  /* ── A LAYER'S THREE SECTIONS (§418) ───────────────────────────────
      Islam: *"we structure things the way we already build them … 3 sections
      and under each section he has components and for every section he can
      choose the title of the section and the components and their names"*,
@@ -14966,7 +14966,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return t;
   }
   /* A name for THIS layer, or null for "use the client's own word" (LABELS,
-     Setup › Terminology), which is what every layer answered before §412. */
+     Setup › Terminology), which is what every layer answered before §418. */
   function layerWord(group, target, key, form) {
     var b = levelBlock(group, structLevelOf(target), "words");
     var w = b && b[key];
@@ -22032,7 +22032,7 @@ function fnCanFill(k){
    already been paid for asking the same question in two places. */
 function fnShows(k){
   var f = FUNCTIONS[k];
-  /* §412: a client with no supporting-functions layer (Structure) shows
+  /* §418: a client with no supporting-functions layer (Structure) shows
      none; every function and all it holds is kept, and switching the layer
      back on brings them back. */
   if (!SMPRules.fnExists(GROUP)) return false;
@@ -23787,7 +23787,7 @@ function grantAt(pageKey, target){
    is set once at the top of paint() rather than threaded through forty call
    sites that would all pass the same value. Same shape as VIEWER. */
 var TARGET = "group";
-/* §412: whether the page being drawn is the client's own Setup, where no
+/* §418: whether the page being drawn is the client's own Setup, where no
    layer's own names apply. Written beside TARGET in paint(). */
 var TARGET_SETUP = false;
 function grant(pageKey){ return grantAt(pageKey, TARGET); }
@@ -39627,7 +39627,7 @@ function swotBoxes(u, quads, page, ac){
      tablet meant `visibility:hidden` until the box itself happened to be
      tapped — §70's own finding, fixed for the plan PANE in August and left on
      the cards. */
-  /* §412: each box is named by its layer (Structure), the platform's word
+  /* §418: each box is named by its layer (Structure), the platform's word
      otherwise; which boxes are drawn is the layer's too (swotQuads). */
   return '<div class="swot">' +
     quads.map(function(q){ return box(q, q, L(SMPRules.QUAD_KEYS[q])); }).join("") + '</div>';
@@ -41140,7 +41140,7 @@ function splitOrPane(list, sel, rail, pane){
    THE DIRECTION IS "=", NOT ">=". With a target of Y/N there is nothing to be
    greater than, and a blank cell would put back the one thing this merge
    removed. "= Y/N" is what the row actually says. */
-/* §412: named by the layer being drawn (Structure's plan section), so it
+/* §418: named by the layer being drawn (Structure's plan section), so it
    is asked when the pane is built rather than fixed at load. */
 function dxHeading(){ return L("deliverable") + " and " + L("outcome").toLowerCase(); }
 /* ── WHAT THE SCORE COLUMN IS CALLED (§104.9) ─────────────────────────
@@ -44015,7 +44015,7 @@ function labelDefault(key){
    L1() the word for ONE. An empty box, or the retired "—" (a row that used to
    be "not held" at one level), falls back to the platform's default and then
    to the internal name, so a word is never blank on screen. */
-/* §412: A LAYER MAY NAME A THING ITS OWN WAY. What the page being drawn
+/* §418: A LAYER MAY NAME A THING ITS OWN WAY. What the page being drawn
    belongs to (TARGET) is asked first — the business units' "Pillars" and the
    functions' "Themes of work" can differ — and only an unnamed part falls
    back to the client's one word. Setup is the client's own ground and never
@@ -44042,7 +44042,7 @@ function labelWord(key, which){
   return v;
 }
 function L(key, scope){ return esc(labelWord(key, "bu")); }
-/* §412: a word for a NAMED layer rather than the page being drawn — the deck
+/* §418: a word for a NAMED layer rather than the page being drawn — the deck
    and anything else built for a subject that is not TARGET ask this. */
 function LTraw(target, key, which){
   var o = SMPRules.layerWord(GROUP, target, key, which === "one" ? "one" : "many");
@@ -54598,7 +54598,7 @@ function unitAimSlides(u){
 function unitSwotSlides(u){
   var S = [];
   if (!u.fnKey && compOn(u.ukey, "swot")) {
-    /* §412: the boxes this layer carries, under the layer's own names. */
+    /* §418: the boxes this layer carries, under the layer's own names. */
     var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
     var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
       return [q, LTraw(u.ukey, SMPRules.QUAD_KEYS[q]), hues[q]]; });
@@ -55147,7 +55147,7 @@ function deckPillarHead(u, p, pi, which){
 function fnSWSlide(f){
   if (!f) return "";
   var sw = f.swot || {};
-  /* §412: which boxes, what they are called and what the slide is called are
+  /* §418: which boxes, what they are called and what the slide is called are
      the functions layer's (Structure); unset, it is today's two. */
   var fk = Object.keys(FUNCTIONS).filter(function(k){ return FUNCTIONS[k] === f; })[0] || "";
   var tg = "fn:" + fk, hues = { s:"good", w:"bad", o:"stone", t:"warn" };
@@ -66268,7 +66268,7 @@ var CLIENTSETUP = (function () {
       HOST.appendChild(hb);
     }
 
-    /* §412: the Structure step lays three sections side by side, which a
+    /* §418: the Structure step lays three sections side by side, which a
        760px column cannot hold; that one step takes the page's width. */
     var col = el("div", "wzcol" + (s.k === "structure" ? " wzwide" : ""));
     col.appendChild(el("span", "lab", s.key));
@@ -66390,7 +66390,7 @@ var CLIENTSETUP = (function () {
     if (k === "cos") return companiesStep(box);
     if (k === "caps") return capsStep(box);
     if (k === "fns") {
-      /* §412: with the supporting-functions layer switched off on the
+      /* §418: with the supporting-functions layer switched off on the
          Structure step there is nothing to name here; it says so and points
          back, as the second layer's step does (§61). Nothing is removed. */
       if (!SMPRules.fnExists(GROUP)) {
@@ -66984,12 +66984,12 @@ var CLIENTSETUP = (function () {
   function structNow(){
     var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
     var all = COMPONENTS.map(function (c) { return c[0]; });
-    /* §412: a level also carries its sections, titles and names, so the
+    /* §418: a level also carries its sections, titles and names, so the
        write starts from a COPY of what is stored and never from nothing —
        or pressing one tick would throw every name on the step away. */
     var copy = function (k) { var l = st && st[k]; return l && typeof l === "object" ? JSON.parse(JSON.stringify(l)) : {}; };
     var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
-    /* §412.1: AND EVERY OTHER KEY THE STRUCTURE HOLDS RIDES ACROSS TOO. A
+    /* §418.1: AND EVERY OTHER KEY THE STRUCTURE HOLDS RIDES ACROSS TOO. A
        press here writes the whole object back, so a key this step does not
        draw -- another session's switches beside the levels -- would be
        dropped by the first tick. Start from the stored whole, then overwrite
@@ -67014,7 +67014,7 @@ var CLIENTSETUP = (function () {
 
   function wordOf(key){ var v = S.shape.words[key]; return v && typeof v === "object" ? v : { one: W(key, "one", ""), many: W(key, "many", "") }; }
   function setWord(key, form, val){
-    /* §411: A WORD IS NOT THE SHAPE. Once a client holds a plan the shape is
+    /* §417: A WORD IS NOT THE SHAPE. Once a client holds a plan the shape is
        frozen (§346.5) and commitShape() refuses, which used to lock every
        name box on this step — Islam could not rename "Strategic Directions"
        on El Abd. Renaming moves nothing, and Setup › Terminology already
@@ -67095,7 +67095,7 @@ var CLIENTSETUP = (function () {
     });
     box.appendChild(row);
   }
-  /* ── THE THREE SECTIONS OF A LAYER (§412) ─────────────────────────
+  /* ── THE THREE SECTIONS OF A LAYER (§418) ─────────────────────────
      Islam's own shape, signed off from the mockup: each layer shows the
      three sections its pages already have — the first section, the SWOT and
      the plan — and for each one whether it is there, what it is called,
@@ -67304,7 +67304,7 @@ var CLIENTSETUP = (function () {
     namePick(top, "topword", TOP_NAMES, "one", ro);
     structLevel(top, lv, "top");
 
-    /* §412: a layer the client does not have is switched off as a whole —
+    /* §418: a layer the client does not have is switched off as a whole —
        the second layer as before, the supporting functions now too. */
     var mid = card("Second layer");
     var mh = el("div", "stsech"); mh.appendChild(el("span", "lab", "This client has one"));
@@ -69354,7 +69354,7 @@ var SYNC = (function () {
              saying one thing and the page another (§124). */
           var fmt = fnFormat(FUNCTIONS[fnKeyOf(k)]);
           var plan = { k:"proj", ac:"k_proj",
-                       /* §412: the layer names the plan section per way of
+                       /* §418: the layer names the plan section per way of
                           planning; unnamed, it is what it always was. */
                        label: SMPRules.planTitle(GROUP, k, fmt) ||
                               (fmt === "projects" ? L("project") : "Plan"),

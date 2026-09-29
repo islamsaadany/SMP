@@ -1,4 +1,4 @@
-"""Each layer's three sections, as the pages read them (§412).
+"""Each layer's three sections, as the pages read them (§418).
 
 Islam, of the Structure step: every layer has three sections — the first
 (Foundation or Overview), the SWOT and the plan — and for each one the client

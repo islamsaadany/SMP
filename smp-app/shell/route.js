@@ -295,7 +295,7 @@
        settings" and opens the same menu, where each module goes to THAT
        module's settings — from a settings page that is the next place, and
        it keeps §362.1's one press. */
-    /* §411, Islam: "we agreed I see the modules on top and then the
+    /* §417, Islam: "we agreed I see the modules on top and then the
        separator then the settings." ONE ORDER ON EVERY PAGE: the modules
        (the one you are in left out, unless you are on settings, where none
        is "here"), a rule, then every settings page — each module's and the

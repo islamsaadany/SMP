@@ -802,7 +802,7 @@ if (browser) {
   check("…and NOT the module you are in — it is the step's own name (§401)",
     !items.some((t) => t.split("\n")[0] === MODULE_DEF[DEFAULT_MODULE].label), items.join(" | "));
   const tail = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.className === "trrule" ? "|" : e.textContent.trim()));
-  /* §411, Islam: "the modules on top and then the separator then the
+  /* §417, Islam: "the modules on top and then the separator then the
      settings" — REWRITTEN, NEVER LOOSENED (§218): after the rule comes EVERY
      module's settings, in the client's order, then Client settings, last. */
   const afterRule = tail.slice(tail.indexOf("|") + 1);

@@ -19,7 +19,7 @@ function labelDefault(key){
    L1() the word for ONE. An empty box, or the retired "—" (a row that used to
    be "not held" at one level), falls back to the platform's default and then
    to the internal name, so a word is never blank on screen. */
-/* §412: A LAYER MAY NAME A THING ITS OWN WAY. What the page being drawn
+/* §418: A LAYER MAY NAME A THING ITS OWN WAY. What the page being drawn
    belongs to (TARGET) is asked first — the business units' "Pillars" and the
    functions' "Themes of work" can differ — and only an unnamed part falls
    back to the client's one word. Setup is the client's own ground and never
@@ -46,7 +46,7 @@ function labelWord(key, which){
   return v;
 }
 function L(key, scope){ return esc(labelWord(key, "bu")); }
-/* §412: a word for a NAMED layer rather than the page being drawn — the deck
+/* §418: a word for a NAMED layer rather than the page being drawn — the deck
    and anything else built for a subject that is not TARGET ask this. */
 function LTraw(target, key, which){
   var o = SMPRules.layerWord(GROUP, target, key, which === "one" ? "one" : "many");

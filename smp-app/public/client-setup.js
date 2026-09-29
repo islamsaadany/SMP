@@ -591,7 +591,7 @@ var CLIENTSETUP = (function () {
       HOST.appendChild(hb);
     }
 
-    /* §412: the Structure step lays three sections side by side, which a
+    /* §418: the Structure step lays three sections side by side, which a
        760px column cannot hold; that one step takes the page's width. */
     var col = el("div", "wzcol" + (s.k === "structure" ? " wzwide" : ""));
     col.appendChild(el("span", "lab", s.key));
@@ -713,7 +713,7 @@ var CLIENTSETUP = (function () {
     if (k === "cos") return companiesStep(box);
     if (k === "caps") return capsStep(box);
     if (k === "fns") {
-      /* §412: with the supporting-functions layer switched off on the
+      /* §418: with the supporting-functions layer switched off on the
          Structure step there is nothing to name here; it says so and points
          back, as the second layer's step does (§61). Nothing is removed. */
       if (!SMPRules.fnExists(GROUP)) {
@@ -1307,12 +1307,12 @@ var CLIENTSETUP = (function () {
   function structNow(){
     var st = typeof SMPRules !== "undefined" && SMPRules.structureOf(GROUP);
     var all = COMPONENTS.map(function (c) { return c[0]; });
-    /* §412: a level also carries its sections, titles and names, so the
+    /* §418: a level also carries its sections, titles and names, so the
        write starts from a COPY of what is stored and never from nothing —
        or pressing one tick would throw every name on the step away. */
     var copy = function (k) { var l = st && st[k]; return l && typeof l === "object" ? JSON.parse(JSON.stringify(l)) : {}; };
     var lv = function (k) { var l = st && st[k]; return l && Array.isArray(l.on) ? l.on.slice() : all.slice(); };
-    /* §412.1: AND EVERY OTHER KEY THE STRUCTURE HOLDS RIDES ACROSS TOO. A
+    /* §418.1: AND EVERY OTHER KEY THE STRUCTURE HOLDS RIDES ACROSS TOO. A
        press here writes the whole object back, so a key this step does not
        draw -- another session's switches beside the levels -- would be
        dropped by the first tick. Start from the stored whole, then overwrite
@@ -1337,7 +1337,7 @@ var CLIENTSETUP = (function () {
 
   function wordOf(key){ var v = S.shape.words[key]; return v && typeof v === "object" ? v : { one: W(key, "one", ""), many: W(key, "many", "") }; }
   function setWord(key, form, val){
-    /* §411: A WORD IS NOT THE SHAPE. Once a client holds a plan the shape is
+    /* §417: A WORD IS NOT THE SHAPE. Once a client holds a plan the shape is
        frozen (§346.5) and commitShape() refuses, which used to lock every
        name box on this step — Islam could not rename "Strategic Directions"
        on El Abd. Renaming moves nothing, and Setup › Terminology already
@@ -1418,7 +1418,7 @@ var CLIENTSETUP = (function () {
     });
     box.appendChild(row);
   }
-  /* ── THE THREE SECTIONS OF A LAYER (§412) ─────────────────────────
+  /* ── THE THREE SECTIONS OF A LAYER (§418) ─────────────────────────
      Islam's own shape, signed off from the mockup: each layer shows the
      three sections its pages already have — the first section, the SWOT and
      the plan — and for each one whether it is there, what it is called,
@@ -1627,7 +1627,7 @@ var CLIENTSETUP = (function () {
     namePick(top, "topword", TOP_NAMES, "one", ro);
     structLevel(top, lv, "top");
 
-    /* §412: a layer the client does not have is switched off as a whole —
+    /* §418: a layer the client does not have is switched off as a whole —
        the second layer as before, the supporting functions now too. */
     var mid = card("Second layer");
     var mh = el("div", "stsech"); mh.appendChild(el("span", "lab", "This client has one"));

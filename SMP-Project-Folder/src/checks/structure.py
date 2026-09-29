@@ -145,7 +145,7 @@ with sync_playwright() as p:
     ck("its second step is Structure",
        safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step)[1]") == "structure")
     ck("pressing it", press(pg, '.wzstep[data-step="structure"]'))
-    # §412 REWROTE THIS STEP INTO THREE SECTIONS PER LAYER, so the chips are
+    # §418 REWROTE THIS STEP INTO THREE SECTIONS PER LAYER, so the chips are
     # asserted as the sections' own rows now (§218: rewritten, never
     # loosened). The first section's parts are the rule's own list, filtered
     # for a function by the same compOffered the pages ask (§42, §94.8).
@@ -179,13 +179,13 @@ with sync_playwright() as p:
        safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.length===9 && GROUP.structure.top.temple===true") is True, st)
     ck("…and the section says it is hidden rather than drawing its boxes",
        safe(pg, "()=>{var s=document.querySelectorAll('.stcard')[2].querySelectorAll('.stsec')[1]; return !!s.querySelector('.sthid') && !s.querySelector('.stquad')}") is True)
-    # §412.1: a key this step does not draw survives a press (another
+    # §418.1: a key this step does not draw survives a press (another
     # session's Plan details switches ride the same object). BOTH ENDS: it
     # is there before the press and still there after.
     safe(pg, "()=>{GROUP.structure.details={overview:true}}")
     ck("a key the step does not draw is there before a press", safe(pg, "()=>GROUP.structure.details.overview") is True)
     press(pg, '[data-stsec="bu|swot"] button:nth-child(1)')
-    ck("…and survives the press (§412.1)", safe(pg, "()=>!!(GROUP.structure.details&&GROUP.structure.details.overview===true)") is True,
+    ck("…and survives the press (§418.1)", safe(pg, "()=>!!(GROUP.structure.details&&GROUP.structure.details.overview===true)") is True,
        safe(pg, "()=>JSON.stringify(GROUP.structure.details)"))
     ck("…while the press itself landed", safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')>=0") is True)
     safe(pg, "()=>{delete GROUP.structure.details}")
@@ -193,7 +193,7 @@ with sync_playwright() as p:
     ck("the structure stores no functions' plan type (§404.2)",
        safe(pg, "()=>!('format' in (GROUP.structure.fn||{}))") is True)
 
-    # ── 6. A client WITH A PLAN can still rename (§411) ──────────────
+    # ── 6. A client WITH A PLAN can still rename (§417) ──────────────
     # Islam, on El Abd: the name boxes were read-only once a plan existed, so
     # "Strategic Directions" could not be changed here. The worked example
     # holds plans — the state he was in — asserted first, or the rest passes
@@ -213,7 +213,7 @@ with sync_playwright() as p:
     ck("the business units' word is stored on the client's own labels",
        safe(pg, "()=>labelWord('unitword','bu')") == "Strategic Directions",
        safe(pg, "()=>labelWord('unitword','bu')"))
-    # §412: a part's name is the LAYER's, so it lands on the structure and
+    # §418: a part's name is the LAYER's, so it lands on the structure and
     # is read on a unit's page, never on the client's labels — asserted at
     # both ends, or a build writing it everywhere passes (§94.2).
     ck("…and the pillars' word is the business units' layer's own",
